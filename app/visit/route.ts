@@ -113,12 +113,14 @@ h1 { font: 700 46px/.95 var(--display); letter-spacing: -0.035em; margin: 12px 0
 
 h2 { color: var(--muted); margin: 0 0 14px; font-weight: 500; }
 ol.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; counter-reset: s; }
-ol.steps li { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 8px; counter-increment: s; cursor: pointer; }
+ol.steps li { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 8px; counter-increment: s; }
 ol.steps li::before { content: counter(s, decimal-leading-zero); font: 500 11px/1 var(--mono); letter-spacing: .08em; color: var(--muted); padding-top: 5px; }
-ol.steps li:hover p strong, ol.steps li:focus-visible p strong { color: var(--accent); }
-ol.steps li:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: var(--radius); }
-ol.steps p { margin: 0; color: var(--muted); font-size: 14px; }
-ol.steps p strong { color: var(--ink); font-weight: 700; letter-spacing: -0.015em; display: block; font-size: 16px; margin-bottom: 2px; transition: color 200ms var(--ease); }
+/* Each step is a button that flies the map to it, so it is announced and
+   pressed like one; it keeps the look of a line of text. */
+ol.steps button { all: unset; display: block; cursor: pointer; color: var(--muted); font-size: 14px; line-height: 1.5; }
+ol.steps button:hover strong, ol.steps button:focus-visible strong { color: var(--accent); }
+ol.steps button:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: var(--radius); }
+ol.steps button strong { color: var(--ink); font-weight: 700; letter-spacing: -0.015em; display: block; font-size: 16px; margin-bottom: 2px; transition: color 200ms var(--ease); }
 .dist { font: 500 12px var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
 
 .key { display: grid; gap: 11px; margin: 0; padding: 0; list-style: none; }
@@ -156,9 +158,9 @@ a.eyebrow:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px;
 </style>
 </head>
 <body>
-<div class="app">
+<main class="app">
   <div class="stage" id="stage">
-    <canvas id="gl" aria-label="3D map of the route from Masonic Drive to the studio entrance at Latitude 37"></canvas>
+    <canvas id="gl" role="img" aria-label="3D map of the route from Masonic Drive to the studio entrance at Latitude 37"></canvas>
     <div class="labels" id="labels"></div>
     <div class="compass" aria-hidden="true"><span id="needle"><i></i>N</span></div>
     <div class="hud" role="group" aria-label="Map view">
@@ -191,11 +193,11 @@ a.eyebrow:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px;
     <section>
       <h2 class="label">The way in</h2>
       <ol class="steps">
-        <li tabindex="0" data-view="curtner"><p><strong>Turn onto Canoas Garden Ave from Curtner Ave</strong>The corner is just west of the Curtner light rail station and Hwy 87.</p></li>
-        <li tabindex="0" data-view="masonic"><p><strong>Turn right onto Masonic Dr</strong>After about <span class="dist">280 m</span>, at the Cathedral of Faith campus.</p></li>
-        <li tabindex="0" data-view="turn"><p><strong>Turn right onto Babb Ct</strong>After about <span class="dist">160 m</span>, Babb Ct is the private drive into Latitude 37.</p></li>
-        <li tabindex="0" data-view="park"><p><strong>Park in a P spot</strong>Any unmarked spot with no number is fine too. Numbered spots belong to residents, and the red spots are off limits.</p></li>
-        <li tabindex="0" data-view="door"><p><strong>Walk to the entrance</strong>It's on the right side of the drive, near the far end. Then head up to #520 on the 5th floor.</p></li>
+        <li><button type="button" data-view="curtner"><strong>Turn onto Canoas Garden Ave from Curtner Ave</strong><span>The corner is just west of the Curtner light rail station and Hwy 87.</span></button></li>
+        <li><button type="button" data-view="masonic"><strong>Turn right onto Masonic Dr</strong><span>After about <span class="dist">280 m</span>, at the Cathedral of Faith campus.</span></button></li>
+        <li><button type="button" data-view="turn"><strong>Turn right onto Babb Ct</strong><span>After about <span class="dist">160 m</span>, Babb Ct is the private drive into Latitude 37.</span></button></li>
+        <li><button type="button" data-view="park"><strong>Park in a P spot</strong><span>Any unmarked spot with no number is fine too. Numbered spots belong to residents, and the red spots are off limits.</span></button></li>
+        <li><button type="button" data-view="door"><strong>Walk to the entrance</strong><span>It's on the right side of the drive, near the far end. Then head up to #520 on the 5th floor.</span></button></li>
       </ol>
     </section>
 
@@ -216,7 +218,7 @@ a.eyebrow:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px;
 
     <footer>Building outlines and streets © OpenStreetMap contributors. Walking distances are approximate.</footer>
   </aside>
-</div>
+</main>
 <script src="/visit/vendor/three.min.js"></script>
 <script src="/visit/vendor/OrbitControls.js"></script>
 <script src="/visit/map.js"></script>

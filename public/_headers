@@ -72,3 +72,13 @@
 
 /og.jpg
   Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+# The /visit map's library (three.js and its orbit controls, a pinned copy)
+# and its fonts never change in place, so they get the same day and week as
+# the photographs. `map.js` is left out: it is still being tuned, and a
+# change to it should reach the next visitor at once.
+/visit/vendor/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+/visit/fonts/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
