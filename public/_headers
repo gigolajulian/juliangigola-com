@@ -26,6 +26,11 @@
   TDM-Reservation: 1
   TDM-Policy: https://juliangigola.com/legal#terms
 
+# /visit is unlisted: Julian sends the link to clients, search engines leave it
+# out. Cloudflare joins this with the `/*` X-Robots-Tag above.
+/visit
+  X-Robots-Tag: noindex, nofollow
+
 # Caching, for the same responses.
 #
 # Workers Static Assets serves every file with `max-age=0, must-revalidate`

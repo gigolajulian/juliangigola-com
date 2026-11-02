@@ -400,6 +400,9 @@ const nextConfig: NextConfig = {
         has: [{ type: "host", value: ADMIN_HOST }],
         headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
       },
+      // /visit is unlisted: the directions page Julian sends to booked
+      // clients. `public/_headers` says the same for the prerendered copy.
+      { source: "/visit", headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }] },
     ];
   },
 
