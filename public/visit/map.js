@@ -330,14 +330,13 @@ const DATA = {"buildings":[{"p":[[52.7,-62.8],[44.7,-53.3],[35.3,-61.0],[2.7,-21
   function capZoom() { const r = viewFor('route'), b = viewFor('intro'); controls.maxDistance = Math.max(r.pos.distanceTo(r.target), b.pos.distanceTo(b.target)) * 1.1; }
   new ResizeObserver(() => { resize(); capZoom(); }).observe(stage);
   resize(); capZoom();
-  // on load, about 5 s: wide on the whole approach from Curtner (B), in close on Latitude 37 (A), then settle top-down (C)
+  // on load: one glide, about 5 s, from wide on the whole approach from Curtner down to the top-down view
   let intro = !reduce;
   function endIntro() { intro = false; }
   { const v = viewFor(intro ? 'intro' : 'top'); camera.position.copy(v.pos); controls.target.copy(v.target); }
   if (intro) {
     press(null);
-    setTimeout(() => intro && flyTo(viewFor('overview'), 2400, 1, null,
-      () => intro && (endIntro(), press('top'), flyTo(viewFor('top'), 2300, 0.85, () => { highlight(); if (arrive0 === null) arrive(); }))), 300);
+    setTimeout(() => intro && (endIntro(), press('top'), flyTo(viewFor('top'), 4800, 0.85, () => { highlight(); if (arrive0 === null) arrive(); })), 200);
   } else { highlight(); arrive(); }
 
   // keep panning near the route, parking and entrance
