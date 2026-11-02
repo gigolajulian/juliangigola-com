@@ -231,15 +231,6 @@ const DATA = {"buildings":[{"p":[[52.7,-62.8],[44.7,-53.3],[35.3,-61.0],[2.7,-21
       const t = i / n, mx = s.a[0] + dx * t, my = s.a[1] + dy * t;
       pts.push(V([mx + nx, my + ny], 0.5), V([mx - nx, my - ny], 0.5));
     }
-    if (s.no) {
-      // no parking: a cross through each stall instead of the dividers
-      pts.length = 0;
-      for (let i = 0; i < Math.max(1, n); i++) {
-        const t0 = i / Math.max(1, n), t1 = (i + 1) / Math.max(1, n);
-        const p0 = [s.a[0] + dx * t0, s.a[1] + dy * t0], p1 = [s.a[0] + dx * t1, s.a[1] + dy * t1];
-        pts.push(V([p0[0] + nx, p0[1] + ny], 0.5), V([p1[0] - nx, p1[1] - ny], 0.5), V([p0[0] - nx, p0[1] - ny], 0.5), V([p1[0] + nx, p1[1] + ny], 0.5));
-      }
-    }
     if (pts.length) scene.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(pts), s.no ? noEdge : pStall));
     spotCenters.push({ c: [(s.a[0] + s.b[0]) / 2, (s.a[1] + s.b[1]) / 2], no: !!s.no });
   });
@@ -270,7 +261,8 @@ const DATA = {"buildings":[{"p":[[52.7,-62.8],[44.7,-53.3],[35.3,-61.0],[2.7,-21
     const onRoute = l.t === 'Masonic Dr' || l.t === 'Babb Ct';
     addLabel(l.t, l.k + (onRoute ? ' route' : ''), l.p, l.k === 'place' ? 24 : 2);
   });
-  spotCenters.forEach(s => addLabel('P', s.no ? 'p no' : 'p', s.c, 3));
+  // no-parking stalls are just red, with no marker
+  spotCenters.forEach(s => { if (!s.no) addLabel('P', 'p', s.c, 3); });
   const doorLbl = addLabel('Entrance <b>#520</b>', 'door', DATA.door, 33, 'bottom');
 
   // the entrance arrives when the camera does: the pin rises, the head pops, rings burst, the walk draws in, the tag lands

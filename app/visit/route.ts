@@ -122,9 +122,8 @@ ol.steps p strong { color: var(--ink); font-weight: 700; letter-spacing: -0.015e
 .sw { width: 22px; height: 22px; display: grid; place-items: center; }
 .sw.route { height: 4px; background: var(--gl-accent); }
 .sw.p { border: 1.5px solid var(--ink); border-radius: var(--radius); font: 700 13px/1 var(--display); }
-/* no parking: the P struck through in the site's red */
-.lbl.p.no, .sw.p.no { position: relative; border-color: var(--danger); color: var(--danger); }
-.lbl.p.no::after, .sw.p.no::after { content: ""; position: absolute; left: 50%; top: -2px; bottom: -2px; width: 2px; background: var(--danger); transform: translateX(-50%) rotate(45deg); }
+/* no parking: a plain red stall, in the site's red */
+.sw.no { width: 18px; height: 14px; margin-left: 2px; border: 1.5px solid var(--danger); background: color-mix(in oklab, var(--danger) 30%, transparent); }
 .sw.rail { height: 8px; border-top: 2px solid var(--muted); border-bottom: 2px solid var(--muted); }
 .sw.door { background: var(--gl-accent); width: 12px; height: 12px; transform: rotate(45deg); margin-left: 5px; }
 .note { font-size: 13.5px; color: var(--muted); background: var(--secondary); border-radius: var(--radius); padding: 12px 14px; margin: 0; }
@@ -203,7 +202,7 @@ a.eyebrow:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px;
         <li><span class="sw p">P</span>East bend, as you enter<span class="dist">~130 m walk</span></li>
         <li><span class="sw p">P</span>Inner drive, by the entrance<span class="dist">~60 m walk</span></li>
         <li><span class="sw p">P</span>West curb, end of the drive<span class="dist">~130 m walk</span></li>
-        <li><span class="sw p no">P</span>No parking for visitors<span></span></li>
+        <li><span class="sw no"></span>No parking for visitors<span></span></li>
         <li><span class="sw door"></span>Studio entrance<span></span></li>
         <li><span class="sw rail"></span>Curtner light rail station<span></span></li>
       </ul>
