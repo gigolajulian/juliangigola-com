@@ -5,6 +5,7 @@ import { BlinkingMark } from "@/components/not-found-scene";
 import loader from "@/image-loader";
 import { sand } from "@/components/sand-splash";
 import { burst } from "@/components/burst-splash";
+import { vantage } from "@/components/vantage-splash";
 import { HERO } from "@/lib/v3";
 import { keepNames } from "@/lib/keep-names";
 
@@ -19,6 +20,12 @@ const HERO_FIRST = { d: loader({ src: HERO[0].d.src, width: 640 }), l: loader({ 
    will (`home.tsx`): one download, where 1080 against 1280 was two. */
 const sized = (run: string[]) => run.map((src) => [loader({ src, width: 640 }), loader({ src, width: 1080 })]);
 const LADDER = [640, 1280, 1920, 2500];
+/* `?splash=vantage`: the two frames either side of the cut, a high
+   vantage and a low one, on the same ladder as the hero. */
+const VANTAGE = {
+  hi: LADDER.map((width): [number, string] => [width, loader({ src: "/work/prowess-unleashed/01.jpg", width })]),
+  lo: LADDER.map((width): [number, string] => [width, loader({ src: "/work/aegis/01.jpg", width })]),
+};
 const HERO_FULL = {
   d: LADDER.map((width): [number, string] => [width, loader({ src: HERO[0].d.src, width })]),
   l: LADDER.map((width): [number, string] => [width, loader({ src: HERO[0].l.src, width })]),
@@ -80,7 +87,7 @@ function run(picks: string[]) {
     sessionStorage.setItem("jg-intro", "1");
   } catch {}
   if (root.dataset.splash === "basic") return;
-  if (root.dataset.splash === "burst" || root.dataset.splash === "name") return; // `burst-splash.ts` plays instead of the sheet
+  if (root.dataset.splash === "burst" || root.dataset.splash === "name" || root.dataset.splash === "vantage") return; // `burst-splash.ts` or `vantage-splash.ts` plays instead of the sheet
   /* `?splash=sand` (`sand-splash.ts`): the sheet waits for the sand. */
   if (root.dataset.splash === "sand") {
     addEventListener("jg-sand-done", () => {
@@ -198,7 +205,7 @@ function run(picks: string[]) {
    only from the server's HTML, never again on a client render. */
 const sheet = (frames: string[]) =>
   '<div class="jg-sheet-ground"></div><div class="jg-sheet-plane"></div>' +
-  `<script>${keepNames(`(${run.toString()})(${JSON.stringify(PICKS)});(${sand.toString()})(${JSON.stringify(HERO_FIRST)});(${burst.toString()})(${JSON.stringify(sized(frames))},${JSON.stringify(HERO_FULL)})`)}</script>`;
+  `<script>${keepNames(`(${run.toString()})(${JSON.stringify(PICKS)});(${sand.toString()})(${JSON.stringify(HERO_FIRST)});(${burst.toString()})(${JSON.stringify(sized(frames))},${JSON.stringify(HERO_FULL)});(${vantage.toString()})(${JSON.stringify(VANTAGE)})`)}</script>`;
 
 export function Intro({ run: frames }: { run: string[] }) {
   return (
