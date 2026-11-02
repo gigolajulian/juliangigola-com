@@ -372,10 +372,8 @@ const DATA = {"buildings":[{"p":[[52.7,-62.8],[44.7,-53.3],[35.3,-61.0],[2.7,-21
   document.getElementById('v-overview').onclick = () => { press('overview'); flyTo(viewFor('overview')); };
   document.getElementById('v-top').onclick = () => { press('top'); flyTo(viewFor('top'), 1100, 1, highlight); };
   document.getElementById('v-drive').onclick = () => { press('drive'); startDrive(); };
-  document.querySelectorAll('ol.steps li').forEach(li => {
-    const go = () => { press(null); flyTo(viewFor(li.dataset.view), 1100, 0.6, li.dataset.view === 'door' ? arrive : null); if (innerWidth <= 820) stage.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' }); };
-    li.addEventListener('click', go);
-    li.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+  document.querySelectorAll('ol.steps button').forEach(step => {
+    step.addEventListener('click', () => { press(null); flyTo(viewFor(step.dataset.view), 1100, 0.6, step.dataset.view === 'door' ? arrive : null); if (innerWidth <= 820) stage.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' }); });
   });
   let userMoved = false;
   controls.addEventListener('start', () => { tween = null; drive = null; userMoved = true; if (arrive0 === null) arrive(); });
