@@ -123,55 +123,6 @@ const DATA = {"buildings":[{"p":[[52.7,-62.8],[44.7,-53.3],[35.3,-61.0],[2.7,-21
     canopy.rotation.x = -Math.PI / 2; canopy.position.y = 4.5; canopy.scale.set(1, 1, 1); canopy.castShadow = true; scene.add(canopy);
   }
 
-  // the light rail train: two cars running down the southbound track, stopping at Curtner
-  const trackPts = DATA.track.slice();
-  { const a = trackPts[trackPts.length - 2], b = trackPts[trackPts.length - 1], L = Math.hypot(b[0] - a[0], b[1] - a[1]);
-    trackPts.push([b[0] + (b[0] - a[0]) / L * 600, b[1] + (b[1] - a[1]) / L * 600]); }
-  const trackCum = [0];
-  for (let i = 1; i < trackPts.length; i++) trackCum.push(trackCum[i - 1] + Math.hypot(trackPts[i][0] - trackPts[i - 1][0], trackPts[i][1] - trackPts[i - 1][1]));
-  function trackAt(s) {
-    s = Math.max(0, Math.min(trackCum[trackCum.length - 1], s));
-    let i = 1; while (i < trackCum.length - 1 && trackCum[i] < s) i++;
-    const a = trackPts[i - 1], b = trackPts[i], t = (s - trackCum[i - 1]) / ((trackCum[i] - trackCum[i - 1]) || 1);
-    return { p: [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t], h: Math.atan2(b[0] - a[0], b[1] - a[1]) };
-  }
-  const CAR = 27, GAP = 1.2;
-  const bodyMat = new THREE.MeshLambertMaterial({ color: 0xd9d5ce });
-  const bandMat = new THREE.MeshBasicMaterial({ color: 0x1b1a19 });
-  const cars = [0, 1].map(() => {
-    const g = new THREE.Group();
-    const body = new THREE.Mesh(new THREE.BoxGeometry(2.8, 3.4, CAR - 1.5), bodyMat);
-    body.position.y = 2.3; body.castShadow = true; g.add(body);
-    const band = new THREE.Mesh(new THREE.BoxGeometry(2.86, 1.0, CAR - 3), bandMat);
-    band.position.y = 2.9; g.add(band);
-    const nose = new THREE.Mesh(new THREE.BoxGeometry(2.4, 2.6, 1.6), bodyMat);
-    nose.position.y = 2.0; g.add(nose);
-    g.userData.nose = nose;
-    scene.add(g);
-    return g;
-  });
-  const STOP = DATA.trackStop, ENTER = STOP - 240, LEAVE = trackCum[trackCum.length - 1];
-  const T_IN = 2.8, T_DWELL = 1.1;                 // seconds: roll in, wait at the platform
-  const TRAIN_DEPART_MS = (T_IN + T_DWELL) * 1000;
-  const train0 = performance.now();
-  function placeTrain(s) {
-    cars.forEach((g, i) => {
-      const c = trackAt(s - i * (CAR + GAP) - CAR / 2);
-      g.position.set(c.p[0], 0.9, -c.p[1]);
-      g.rotation.y = Math.PI - c.h;              // local +z faces the direction of travel
-      g.userData.nose.position.z = (i === 0 ? 1 : -1) * (CAR / 2 - 0.4);
-      g.visible = s - i * (CAR + GAP) < LEAVE - 5;
-    });
-  }
-  function trainS(now) {
-    if (reduce) return STOP;
-    const t = (now - train0) / 1000;
-    if (t < T_IN) { const k = t / T_IN; return ENTER + (STOP - ENTER) * (1 - (1 - k) * (1 - k)); }   // decelerate into the stop
-    if (t < T_IN + T_DWELL) return STOP;
-    const d = t - T_IN - T_DWELL;
-    return STOP + 18 * d * d + 6 * d;                // pull away and keep accelerating
-  }
-  placeTrain(trainS(train0));
 
   // buildings
   const mats = {
@@ -312,8 +263,10 @@ const DATA = {"buildings":[{"p":[[52.7,-62.8],[44.7,-53.3],[35.3,-61.0],[2.7,-21
   }
   function viewFor(name) {
     const portrait = camera.aspect < 0.9;
-    // C: straight down over Latitude 37, every parking spot and the entrance in frame, the drive kept at A's angle
-    if (name === 'top') return sph([8, 40], 0.72, 0.02, fitDist(100) * (portrait ? 1.45 : 1.1));
+    // the one view: nearly straight down over Latitude 37, Babb Ct coming in at the top right, every spot and the entrance in frame
+    // the opening: the same angle pulled well back, so the load is a straight zoom in
+    if (name === 'far') return sph([5, 45], -0.85, 0.3, fitDist(100) * (portrait ? 3.4 : 4.2));
+    if (name === 'top') return sph([5, 45], -0.85, 0.3, fitDist(100) * (portrait ? 1.0 : 1.45));
     if (name === 'curtner' || name === 'masonic' || name === 'turn') {
       const p = name === 'curtner' ? [150, 330] : name === 'masonic' ? DATA.meta.p_masonic : DATA.meta.p_babb;
       const t = V(p);
@@ -342,12 +295,11 @@ const DATA = {"buildings":[{"p":[[52.7,-62.8],[44.7,-53.3],[35.3,-61.0],[2.7,-21
     return { target: t, pos: t.clone().add(new THREE.Vector3(Math.sin(polar) * Math.sin(az), Math.cos(polar), Math.sin(polar) * Math.cos(az)).multiplyScalar(d)) };
   }
 
-  let tween = null, drive = null;
+  let tween = null;
   // the parking highlight, eased toward its target each frame; on only while the camera sits at C
   let hl = 0, hlTarget = 0;
   const highlight = () => { hlTarget = 1; };
   function flyTo(v, ms = 1100, at = 1, cb = null, then = null) {
-    drive = null;
     hlTarget = 0;
     if (reduce) { camera.position.copy(v.pos); controls.target.copy(v.target); return; }
     // orbit around the moving target (angle, tilt and distance eased together) rather than cutting straight through
@@ -360,25 +312,16 @@ const DATA = {"buildings":[{"p":[[52.7,-62.8],[44.7,-53.3],[35.3,-61.0],[2.7,-21
   const tmpS = new THREE.Spherical();
   const ease = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
-  // drive-along camera path
-  const curve = new THREE.CatmullRomCurve3(DATA.route.map(p => V(p, 0)), false, 'centripetal', 0.3);
-  function startDrive() {
-    tween = null;
-    drive = { t0: performance.now(), ms: reduce ? 1 : 17000 };
-  }
 
-  const btns = { overview: 'v-overview', drive: 'v-drive', top: 'v-top' };
+  const btns = { top: 'v-top' };
   function press(which) { Object.entries(btns).forEach(([k, id]) => document.getElementById(id).setAttribute('aria-pressed', String(k === which))); }
-  document.getElementById('v-overview').onclick = () => { press('overview'); flyTo(viewFor('overview')); };
-  document.getElementById('v-top').onclick = () => { press('top'); flyTo(viewFor('top'), 1100, 1, highlight); };
-  document.getElementById('v-drive').onclick = () => { press('drive'); startDrive(); };
+  document.getElementById('v-top').onclick = () => { endIntro(); press('top'); flyTo(viewFor('top'), 1100, 1, highlight); };
   document.querySelectorAll('ol.steps li').forEach(li => {
-    const go = () => { press(null); flyTo(viewFor(li.dataset.view), 1100, 0.6, li.dataset.view === 'door' ? arrive : null); if (innerWidth <= 820) stage.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' }); };
+    const go = () => { endIntro(); press(null); flyTo(viewFor(li.dataset.view), 1100, 0.6, li.dataset.view === 'door' ? arrive : null); if (innerWidth <= 820) stage.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' }); };
     li.addEventListener('click', go);
     li.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
   });
-  let userMoved = false;
-  controls.addEventListener('start', () => { tween = null; drive = null; userMoved = true; if (arrive0 === null) arrive(); });
+  controls.addEventListener('start', () => { tween = null; endIntro(); if (arrive0 === null) arrive(); });
 
   function resize() {
     const w = stage.clientWidth, h = stage.clientHeight;
@@ -386,15 +329,17 @@ const DATA = {"buildings":[{"p":[[52.7,-62.8],[44.7,-53.3],[35.3,-61.0],[2.7,-21
     camera.aspect = w / h; camera.updateProjectionMatrix();
   }
   // zoom out only as far as the whole route from Curtner Ave
-  function capZoom() { const r = viewFor('route'), b = viewFor('intro'); controls.maxDistance = Math.max(r.pos.distanceTo(r.target), b.pos.distanceTo(b.target)) * 1.1; }
+  function capZoom() { const r = viewFor('route'), b = viewFor('intro'), f = viewFor('far'); controls.maxDistance = Math.max(r.pos.distanceTo(r.target), b.pos.distanceTo(b.target), f.pos.distanceTo(f.target)) * 1.02; }
   new ResizeObserver(() => { resize(); capZoom(); }).observe(stage);
   resize(); capZoom();
-  // open wide on the approach (B), hold a beat, then glide in to Latitude 37 (A)
-  { const v = viewFor(reduce ? 'overview' : 'intro'); camera.position.copy(v.pos); controls.target.copy(v.target); }
-  // the glide in starts as the train pulls out of Curtner
-  // then, once the entrance has landed at A, rise to C over the parking
-  const toC = () => setTimeout(() => { if (!tween && !drive && !userMoved) { press('top'); flyTo(viewFor('top'), 2800, 1, highlight); } }, 1900);
-  if (!reduce) setTimeout(() => { if (!tween && !drive && !userMoved) flyTo(viewFor('overview'), 5200, 0.84, arrive, toC); else if (arrive0 === null) arrive(); }, TRAIN_DEPART_MS);
+  // on load: one slow zoom in, about 7.5 s, from far out down to the top-down view
+  let intro = !reduce;
+  function endIntro() { intro = false; }
+  { const v = viewFor(intro ? 'far' : 'top'); camera.position.copy(v.pos); controls.target.copy(v.target); }
+  if (intro) {
+    press(null);
+    setTimeout(() => intro && (endIntro(), press('top'), flyTo(viewFor('top'), 7500, 0.85, () => { highlight(); if (arrive0 === null) arrive(); })), 200);
+  } else { highlight(); arrive(); }
 
   // keep panning near the route, parking and entrance
   const panBox = box.clone().expandByVector(new THREE.Vector3(70, 0, 70));
@@ -429,16 +374,9 @@ const DATA = {"buildings":[{"p":[[52.7,-62.8],[44.7,-53.3],[35.3,-61.0],[2.7,-21
       camera.position.setFromSpherical(tmpS).add(controls.target);
       if (tween.cb && k >= tween.at) { const cb = tween.cb; tween.cb = null; cb(); }
       if (k >= 1) { const then = tween.then; tween = null; if (then) then(); }
-    } else if (drive) {
-      const k = Math.min(1, (now - drive.t0) / drive.ms), e = ease(k) * 0.985;
-      const p = curve.getPointAt(e), ahead = curve.getPointAt(Math.min(1, e + 0.04));
-      const dir = ahead.clone().sub(p).setY(0).normalize();
-      camera.position.copy(p).addScaledVector(dir, -38).setY(26);
-      controls.target.copy(ahead).setY(4);
-      if (k >= 1) { drive = null; flyTo(viewFor('door'), 1400, 0.6, arrive); }
     }
     controls.update();
-    if (!tween && !drive) clampTarget();
+    if (!tween) clampTarget();
     if (!reduce) {
       tex.offset.y -= dt * 0.55;
       pinHead.rotation.y += dt * 0.8;
@@ -449,7 +387,6 @@ const DATA = {"buildings":[{"p":[[52.7,-62.8],[44.7,-53.3],[35.3,-61.0],[2.7,-21
     pFill.opacity = 0.08 + hl * (0.14 + breathe);
     pStall.opacity = 0.22 + hl * 0.25;
     pEdge.opacity = 0.5 + hl * 0.25;
-    placeTrain(trainS(now));
     renderer.render(scene, camera);
 
     const w = stage.clientWidth, h = stage.clientHeight;

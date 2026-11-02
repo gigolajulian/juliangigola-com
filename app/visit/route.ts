@@ -162,9 +162,7 @@ a.eyebrow:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px;
     <div class="labels" id="labels"></div>
     <div class="compass" aria-hidden="true"><span id="needle"><i></i>N</span></div>
     <div class="hud" role="group" aria-label="Map view">
-      <button id="v-overview" aria-pressed="true">Overview</button>
-      <button id="v-drive" aria-pressed="false">Drive the route</button>
-      <button id="v-top" aria-pressed="false">From above</button>
+      <button id="v-top" aria-pressed="true">From above</button>
     </div>
     <div class="hint">Drag to turn<br>Scroll or pinch to zoom</div>
   </div>
@@ -194,7 +192,7 @@ a.eyebrow:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px;
         <li tabindex="0" data-view="curtner"><p><strong>Turn onto Canoas Garden Ave from Curtner Ave</strong>The corner is just west of the Curtner light rail station and Hwy 87.</p></li>
         <li tabindex="0" data-view="masonic"><p><strong>Turn right onto Masonic Dr</strong>After about <span class="dist">280 m</span>, at the Cathedral of Faith campus.</p></li>
         <li tabindex="0" data-view="turn"><p><strong>Turn right onto Babb Ct</strong>After about <span class="dist">160 m</span>, Babb Ct is the private drive into Latitude 37.</p></li>
-        <li tabindex="0" data-view="park"><p><strong>Park in a P spot</strong>Any unmarked spot with no number is fine too. Numbered spots belong to residents, and the red spots are off limits.</p></li>
+        <li tabindex="0" data-view="park"><p><strong>Park in any unmarked spot</strong>Spots with no number are fine. Numbered spots belong to residents, and the red spots are off limits.</p></li>
         <li tabindex="0" data-view="door"><p><strong>Walk to the entrance</strong>It's on the right side of the drive, near the far end. Then head up to #520 on the 5th floor.</p></li>
       </ol>
     </section>
