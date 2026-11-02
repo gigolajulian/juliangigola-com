@@ -278,11 +278,13 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .wt .ph{aspect-ratio:4/5;overflow:hidden;background:var(--card);border-radius:4px}
 .v3 .wt img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .6s cubic-bezier(.2,.7,.2,1),opacity .4s}
 @media (hover:hover){.v3 .wt:hover img{transform:scale(1.03)}}
-.v3 .wt figcaption{display:flex;justify-content:space-between;gap:8px;padding-top:10px}
+/* Name over discipline at every width: side by side, a tile's discipline
+   sat flush right, 12px from the next tile's name, and the row read as
+   one line ("BRAND CAMPAIGNS I WANNA BE A HUMAN", iPad, 2026-11-02). */
+.v3 .wt figcaption{display:flex;flex-direction:column;gap:2px;padding-top:10px}
 .v3 .wt figcaption>:first-child{text-wrap:pretty} /* no lone word ("VOL. 1") on a last line */
 @media (max-width:1000px){.v3 .wgrid{grid-template-columns:repeat(3,minmax(0,1fr))}}
-@media (max-width:700px){.v3 .wgrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 10px}
-.v3 .wt figcaption{flex-direction:column;gap:2px}}
+@media (max-width:700px){.v3 .wgrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 10px}}
 /* A gallery chip's frames (Automotive, Places…): every cell one height, a
    horizontal frame two columns wide at that height, so the rows stay even. */
 .v3 .wframes{container-type:inline-size;grid-auto-flow:dense}
@@ -298,7 +300,7 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .ab-photo{margin:0;position:sticky;top:88px}
 .v3 .ab-photo img{width:100%;aspect-ratio:4/5;object-fit:cover;object-position:58% 50%;border-radius:8px;display:block;background:var(--card)}
 .v3 .ab-photo figcaption{padding-top:10px;display:flex;justify-content:space-between;align-items:center;gap:12px}
-.v3 .ab-frame{position:relative;aspect-ratio:4/5;border-radius:8px;overflow:hidden;background:var(--card);cursor:pointer}
+.v3 .ab-frame{position:relative;aspect-ratio:4/5;border-radius:8px;overflow:hidden;background:var(--card);cursor:pointer;touch-action:pan-y}
 .v3 .ab-frame img{position:absolute;inset:0;height:100%;aspect-ratio:auto;border-radius:0;opacity:0;transition:opacity 1.2s ease}
 .v3 .ab-frame img.on{opacity:1}
 .v3 .ab-text{display:flex;flex-direction:column;gap:56px;max-width:720px}
