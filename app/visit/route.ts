@@ -71,7 +71,13 @@ body { background: var(--bg); color: var(--ink); font-family: var(--display); fo
 .lbl.transit { display: grid; gap: 4px; padding: 7px 10px; border-radius: var(--radius); background: var(--card); color: var(--ink); box-shadow: 0 6px 24px oklch(0 0 0 / 45%); }
 .lbl.transit b { font: 700 15px/1 var(--display); letter-spacing: -0.02em; }
 .lbl.transit span { font: 500 10px/1 var(--mono); color: var(--muted); letter-spacing: .14em; text-transform: uppercase; }
-.lbl.door { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: var(--radius); background: var(--ink); color: var(--bg); font: 700 11px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; }
+.lbl.door { display: flex; align-items: center; gap: 8px; padding: 7px 11px; border-radius: var(--radius); color: var(--ink); font: 700 11px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase;
+  /* the site's liquid glass (app/styles/glass.css): the map blurs and saturates through it, light on the top edge, shade on the bottom */
+  background: color-mix(in oklab, var(--bg) 52%, transparent);
+  -webkit-backdrop-filter: blur(24px) saturate(1.9) brightness(1.06); backdrop-filter: blur(24px) saturate(1.9) brightness(1.06);
+  border: 1px solid color-mix(in oklab, var(--ink) 18%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in oklab, white 42%, transparent), inset 0 -1px 0 color-mix(in oklab, black 26%, transparent), 0 12px 32px -14px color-mix(in oklab, black 55%, transparent); }
+@media (prefers-reduced-transparency: reduce) { .lbl.door { background: var(--card); -webkit-backdrop-filter: none; backdrop-filter: none; } }
 .lbl.door b { font: 700 14px/1 var(--display); letter-spacing: -0.02em; text-transform: none; }
 
 .hud { position: absolute; left: max(14px, env(safe-area-inset-left, 0px)); bottom: 14px; display: flex; gap: 6px; flex-wrap: wrap; }
