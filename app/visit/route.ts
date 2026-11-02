@@ -69,7 +69,11 @@ body { background: var(--bg); color: var(--ink); font-family: var(--display); fo
 .lbl.street.route { color: var(--ink); }
 .lbl.dim { opacity: .6; }
 .lbl.place { font: 700 19px/1 var(--display); letter-spacing: -0.035em; color: var(--ink); }
-.lbl.p { width: 22px; height: 22px; display: grid; place-items: center; border: 1.5px solid var(--ink); border-radius: var(--radius); background: var(--bg); font: 700 13px/1 var(--display); color: var(--ink); }
+/* the P markers in the same thin glass as the entrance tag, so they sit in the scene instead of on top of it */
+.lbl.p { width: 20px; height: 20px; display: grid; place-items: center; border-radius: var(--radius); font: 700 12px/1 var(--display); color: var(--ink);
+  background: color-mix(in oklab, var(--bg) 26%, transparent); -webkit-backdrop-filter: blur(24px) saturate(1.9) brightness(1.06); backdrop-filter: blur(24px) saturate(1.9) brightness(1.06);
+  box-shadow: 0 8px 22px -12px color-mix(in oklab, black 55%, transparent); }
+@media (prefers-reduced-transparency: reduce) { .lbl.p { background: var(--card); -webkit-backdrop-filter: none; backdrop-filter: none; } }
 .lbl.transit { display: grid; gap: 4px; padding: 7px 10px; border-radius: var(--radius); background: var(--card); color: var(--ink); box-shadow: 0 6px 24px oklch(0 0 0 / 45%); }
 .lbl.transit b { font: 700 15px/1 var(--display); letter-spacing: -0.02em; }
 .lbl.transit span { font: 500 10px/1 var(--mono); color: var(--muted); letter-spacing: .14em; text-transform: uppercase; }

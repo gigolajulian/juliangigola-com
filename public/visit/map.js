@@ -212,10 +212,11 @@ const DATA = {"buildings":[{"p":[[52.7,-62.8],[44.7,-53.3],[35.3,-61.0],[2.7,-21
 
   // parking spots
   const pFill = new THREE.MeshBasicMaterial({ color: INK, transparent: true, opacity: 0.12, depthWrite: false });
-  const pEdge = new THREE.LineBasicMaterial({ color: INK });
-  const pStall = new THREE.LineBasicMaterial({ color: INK, transparent: true, opacity: 0.4 });
-  const noFill = new THREE.MeshBasicMaterial({ color: new THREE.Color(css.getPropertyValue('--gl-danger').trim()), transparent: true, opacity: 0.2, depthWrite: false });
-  const noEdge = new THREE.LineBasicMaterial({ color: new THREE.Color(css.getPropertyValue('--gl-danger').trim()) });
+  // soft edges: the stalls read as paint on the ground, not as cut-outs
+  const pEdge = new THREE.LineBasicMaterial({ color: INK, transparent: true, opacity: 0.5 });
+  const pStall = new THREE.LineBasicMaterial({ color: INK, transparent: true, opacity: 0.22 });
+  const noFill = new THREE.MeshBasicMaterial({ color: new THREE.Color(css.getPropertyValue('--gl-danger').trim()), transparent: true, opacity: 0.16, depthWrite: false });
+  const noEdge = new THREE.LineBasicMaterial({ color: new THREE.Color(css.getPropertyValue('--gl-danger').trim()), transparent: true, opacity: 0.55 });
   const spotCenters = [];
   DATA.spots.forEach(s => {
     const dx = s.b[0] - s.a[0], dy = s.b[1] - s.a[1], L = Math.hypot(dx, dy);
@@ -445,8 +446,9 @@ const DATA = {"buildings":[{"p":[[52.7,-62.8],[44.7,-53.3],[35.3,-61.0],[2.7,-21
     animateEntrance(now);
     hl += (hlTarget - hl) * Math.min(1, dt * 4);
     const breathe = reduce ? 0 : (Math.sin(now / 700) + 1) * 0.04;
-    pFill.opacity = 0.12 + hl * (0.2 + breathe);
-    pStall.opacity = 0.4 + hl * 0.35;
+    pFill.opacity = 0.08 + hl * (0.14 + breathe);
+    pStall.opacity = 0.22 + hl * 0.25;
+    pEdge.opacity = 0.5 + hl * 0.25;
     placeTrain(trainS(now));
     renderer.render(scene, camera);
 
