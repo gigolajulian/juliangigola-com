@@ -5,6 +5,7 @@ import { BlinkingMark } from "@/components/not-found-scene";
 import loader from "@/image-loader";
 import { sand } from "@/components/sand-splash";
 import { burst } from "@/components/burst-splash";
+import { slate } from "@/components/slate-splash";
 import { HERO } from "@/lib/v3";
 import { keepNames } from "@/lib/keep-names";
 
@@ -80,7 +81,7 @@ function run(picks: string[]) {
     sessionStorage.setItem("jg-intro", "1");
   } catch {}
   if (root.dataset.splash === "basic") return;
-  if (root.dataset.splash === "burst" || root.dataset.splash === "name") return; // `burst-splash.ts` plays instead of the sheet
+  if (root.dataset.splash === "burst" || root.dataset.splash === "name" || root.dataset.splash === "slate") return; // `burst-splash.ts` or `slate-splash.ts` plays instead of the sheet
   /* `?splash=sand` (`sand-splash.ts`): the sheet waits for the sand. */
   if (root.dataset.splash === "sand") {
     addEventListener("jg-sand-done", () => {
@@ -198,7 +199,7 @@ function run(picks: string[]) {
    only from the server's HTML, never again on a client render. */
 const sheet = (frames: string[]) =>
   '<div class="jg-sheet-ground"></div><div class="jg-sheet-plane"></div>' +
-  `<script>${keepNames(`(${run.toString()})(${JSON.stringify(PICKS)});(${sand.toString()})(${JSON.stringify(HERO_FIRST)});(${burst.toString()})(${JSON.stringify(sized(frames))},${JSON.stringify(HERO_FULL)})`)}</script>`;
+  `<script>${keepNames(`(${run.toString()})(${JSON.stringify(PICKS)});(${sand.toString()})(${JSON.stringify(HERO_FIRST)});(${burst.toString()})(${JSON.stringify(sized(frames))},${JSON.stringify(HERO_FULL)});(${slate.toString()})(${JSON.stringify(HERO_FULL)})`)}</script>`;
 
 export function Intro({ run: frames }: { run: string[] }) {
   return (
