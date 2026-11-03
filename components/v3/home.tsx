@@ -297,7 +297,7 @@ function Recent() {
         <div>
           <h2>Recent work</h2>
           <p className="lbl mute" style={{ margin: "14px 0 0" }}>
-            From concept to final frame. <span className="m-line">Six disciplines, one eye.</span>
+            From concept to final frame.
           </p>
         </div>
         <Link className="btn" href="/portfolio">See the work</Link>
