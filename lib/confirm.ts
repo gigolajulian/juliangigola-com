@@ -14,6 +14,8 @@
  * one accent, hairlines), table layout because mail clients need it.
  * ─────────────────────────────────────────────────────────────── */
 
+import { NAME_INK, NAME_W } from "@/lib/email-logo";
+
 const FROM = { name: "Julian Gigola", email: "book@juliangigola.com" };
 const REPLY_TO = "hello@juliangigola.com";
 const SITE = "https://juliangigola.com";
@@ -92,7 +94,7 @@ ${paid.rows.map(([k, v]) => `<tr><td class="muted" style="${muted};padding:3px 0
 <div style="display:none;max-height:0;overflow:hidden">${esc(preheader)}</div>
 <table role="presentation" class="page" width="100%" cellpadding="0" cellspacing="0" style="background:#0b0a09"><tr><td align="center" style="padding:40px 16px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px" class="mono">
-<tr><td style="padding-bottom:36px"><img class="ink-d" src="${SITE}/email-name-w.png" width="189" height="34" alt="Julian Gigola" style="display:block;border:0"><img class="ink-l" src="${SITE}/email-name-ink.png" width="189" height="34" alt="Julian Gigola" style="border:0"></td></tr>
+<tr><td style="padding-bottom:36px"><img class="ink-d" src="cid:name-w" width="189" height="34" alt="Julian Gigola" style="display:block;border:0"><img class="ink-l" src="cid:name-ink" width="189" height="34" alt="Julian Gigola" style="border:0"></td></tr>
 <tr><td class="mono accent" style="${label};padding-bottom:10px">Booked</td></tr>
 <tr><td class="mono fg" style="font-size:22px;line-height:1.3;${fg};padding-bottom:16px">You're in.</td></tr>
 <tr><td class="mono muted" style="font-size:13px;line-height:1.65;${muted};padding-bottom:32px">${esc(lead)}</td></tr>
@@ -117,7 +119,8 @@ ${receipt}
     SITE,
   ].join("\n");
 
-  return { subject: `Booked: ${c.session}, ${at}`, html, text };
+  const logo = (contentId: string, content: string) => ({ content, filename: `${contentId}.png`, type: "image/png", disposition: "inline" as const, contentId });
+  return { subject: `Booked: ${c.session}, ${at}`, html, text, attachments: [logo("name-w", NAME_W), logo("name-ink", NAME_INK)] };
 }
 
 export async function sendConfirm(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefined, c: Confirm) {

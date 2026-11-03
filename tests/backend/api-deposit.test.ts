@@ -216,7 +216,9 @@ describe("the client's confirmation", () => {
     expect((await deliver(paid())).status).toBe(200);
     expect(kv().json(`deposit:${PI}`).status).toBe("booked");
     const { confirmMail } = await import("@/lib/confirm");
-    const { html } = confirmMail({ name: "<b>x</b>", email: "x@example.com", session: "Portraits", start: START, where: "<script>", uid: "u" });
+    const { html, attachments } = confirmMail({ name: "<b>x</b>", email: "x@example.com", session: "Portraits", start: START, where: "<script>", uid: "u" });
+    // The name rides inline: a remote logo showed broken in Gmail.
+    for (const { contentId } of attachments) expect(html).toContain(`src="cid:${contentId}"`);
     expect(html).not.toContain("<script>");
     expect(html).not.toContain("<b>x</b>");
     expect(confirmMail({ name: "A", email: "a@example.com", session: "Graduation photos", start: START, uid: "u" }).text).toContain("Your graduation session is booked.");
