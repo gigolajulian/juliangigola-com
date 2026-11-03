@@ -125,9 +125,17 @@ ${receipt}
 
 export async function sendConfirm(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefined, c: Confirm) {
   if (!mailer || !c.email) return;
+  const head = { to: { email: c.email, name: c.name }, from: FROM, replyTo: REPLY_TO };
+  const { attachments, ...mail } = confirmMail(c);
   try {
-    await mailer.send({ to: { email: c.email, name: c.name }, from: FROM, replyTo: REPLY_TO, ...confirmMail(c) });
+    await mailer.send({ ...head, ...mail, attachments });
   } catch (e) {
     console.error("confirm mail", String(e));
+    // Inline parts refused: the client still gets the mail, with the logo linked as before.
+    try {
+      await mailer.send({ ...head, ...mail, html: mail.html.replace(/cid:(name-w|name-ink)/g, `${SITE}/email-$1.png`) });
+    } catch (e2) {
+      console.error("confirm mail, no logo", String(e2));
+    }
   }
 }
