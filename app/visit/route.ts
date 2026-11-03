@@ -164,9 +164,7 @@ a.eyebrow:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px;
     <div class="labels" id="labels"></div>
     <div class="compass" aria-hidden="true"><span id="needle"><i></i>N</span></div>
     <div class="hud" role="group" aria-label="Map view">
-      <button id="v-overview" aria-pressed="true">Overview</button>
-      <button id="v-drive" aria-pressed="false">Drive the route</button>
-      <button id="v-top" aria-pressed="false">From above</button>
+      <button id="v-top" aria-pressed="true">From above</button>
     </div>
     <div class="hint">Drag to turn<br>Scroll or pinch to zoom</div>
   </div>
@@ -196,7 +194,7 @@ a.eyebrow:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px;
         <li><button type="button" data-view="curtner"><strong>Turn onto Canoas Garden Ave from Curtner Ave</strong><span>The corner is just west of the Curtner light rail station and Hwy 87.</span></button></li>
         <li><button type="button" data-view="masonic"><strong>Turn right onto Masonic Dr</strong><span>After about <span class="dist">280 m</span>, at the Cathedral of Faith campus.</span></button></li>
         <li><button type="button" data-view="turn"><strong>Turn right onto Babb Ct</strong><span>After about <span class="dist">160 m</span>, Babb Ct is the private drive into Latitude 37.</span></button></li>
-        <li><button type="button" data-view="park"><strong>Park in a P spot</strong><span>Any unmarked spot with no number is fine too. Numbered spots belong to residents, and the red spots are off limits.</span></button></li>
+        <li><button type="button" data-view="park"><strong>Park in any unmarked spot</strong><span>Spots with no number are fine. Numbered spots belong to residents, and the red spots are off limits.</span></button></li>
         <li><button type="button" data-view="door"><strong>Walk to the entrance</strong><span>It's on the right side of the drive, near the far end. Then head up to #520 on the 5th floor.</span></button></li>
       </ol>
     </section>
