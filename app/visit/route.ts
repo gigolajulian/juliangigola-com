@@ -24,9 +24,9 @@ const HTML = `<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<title>Getting to the studio | Julian Gigola</title>
+<title>Getting to the Studio | Julian Gigola</title>
 <meta name="description" content="Directions, parking and the entrance for the studio at Latitude 37, San Jose.">
-<meta property="og:title" content="Getting to the studio">
+<meta property="og:title" content="Getting to the Studio">
 <meta property="og:description" content="Directions, parking and the entrance at Latitude 37, San Jose.">
 <meta name="theme-color" content="#0b0a09">
 <link rel="icon" href="/favicon.ico">
@@ -102,8 +102,8 @@ h1 { font: 700 46px/.95 var(--display); letter-spacing: -0.035em; margin: 12px 0
 .addr { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
 .addr p { margin: 0; font-size: 17px; line-height: 1.35; letter-spacing: -0.01em; }
 .addr small { display: block; color: var(--muted); font: 500 11px/1.2 var(--mono); letter-spacing: .14em; text-transform: uppercase; margin-top: 8px; }
-.copy { flex: none; font: 500 11px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--ink); background: var(--secondary); border: 0; border-radius: var(--radius); padding: 9px 11px; cursor: pointer; transition: color 200ms var(--ease); }
-.copy:hover { color: var(--accent); }
+.copy { flex: none; min-width: 6.5em; text-align: center; font: 500 11px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--ink); background: var(--secondary); border: 0; border-radius: var(--radius); padding: 9px 11px; cursor: pointer; transition: color 200ms var(--ease); }
+.copy:hover, .copy[data-done] { color: var(--accent); }
 .dirs { display: grid; gap: 10px; }
 .dirs > .label { color: var(--muted); }
 .go-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
@@ -120,7 +120,11 @@ ol.steps li::before { content: counter(s, decimal-leading-zero); font: 500 11px/
 ol.steps button { all: unset; display: block; cursor: pointer; color: var(--muted); font-size: 14px; line-height: 1.5; }
 ol.steps button:hover strong, ol.steps button:focus-visible strong { color: var(--accent); }
 ol.steps button:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: var(--radius); }
-ol.steps button strong { color: var(--ink); font-weight: 700; letter-spacing: -0.015em; display: block; font-size: 16px; margin-bottom: 2px; transition: color 200ms var(--ease); }
+ol.steps button strong { color: var(--ink); font-weight: 700; letter-spacing: -0.015em; display: block; text-wrap: pretty; font-size: 16px; margin-bottom: 2px; transition: color 200ms var(--ease); }
+/* the step on the map stays lit, number and title, after the pointer leaves */
+ol.steps button[aria-pressed="true"] strong, ol.steps li:has(> button[aria-pressed="true"])::before { color: var(--accent); }
+ol.steps li::before { transition: color 200ms var(--ease); }
+ol.steps button > span { display: block; text-wrap: pretty; }
 .dist { font: 500 12px var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
 
 .key { display: grid; gap: 11px; margin: 0; padding: 0; list-style: none; }
@@ -132,7 +136,7 @@ ol.steps button strong { color: var(--ink); font-weight: 700; letter-spacing: -0
 .sw.no { width: 18px; height: 14px; margin-left: 2px; border: 1.5px solid var(--danger); background: color-mix(in oklab, var(--danger) 30%, transparent); }
 .sw.rail { height: 8px; border-top: 2px solid var(--muted); border-bottom: 2px solid var(--muted); }
 .sw.door { background: var(--gl-accent); width: 12px; height: 12px; transform: rotate(45deg); margin-left: 5px; }
-.note { font-size: 13.5px; color: var(--muted); background: var(--secondary); border-radius: var(--radius); padding: 12px 14px; margin: 0; }
+.note { font-size: 14px; color: var(--muted); background: var(--secondary); border-radius: var(--radius); padding: 12px 14px; margin: 0; }
 .note b { color: var(--ink); font-weight: 700; }
 footer { margin-top: auto; font: 500 10px/1.6 var(--mono); letter-spacing: .06em; color: var(--muted); }
 
@@ -155,6 +159,10 @@ a.eyebrow { color: var(--muted); text-decoration: none; transition: color 200ms 
 a.eyebrow:hover { color: var(--accent); }
 a.eyebrow:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 [hidden] { display: none !important; }
+/* a press answers under the finger */
+:is(.hud button, .copy, .go) { transition-property: color, background, transform; }
+:is(.hud button, .copy, .go):active { transform: scale(0.97); transition-duration: 100ms; }
+@media (prefers-reduced-motion: reduce) { :is(.hud button, .copy, .go):active { transform: none; } }
 /* 44px to the finger, nothing drawn moves: an invisible layer grows each short control */
 :is(.hud button, a.eyebrow, .copy, .go) { position: relative; }
 :is(.hud button, a.eyebrow, .copy, .go)::after { content: ""; position: absolute; inset: min(0px, calc(50% - 22px)); }
@@ -175,12 +183,12 @@ a.eyebrow:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px;
   <aside>
     <header>
       <a class="eyebrow label" href="/">Julian Gigola Studio</a>
-      <h1>Getting to the studio</h1>
+      <h1>Getting to the Studio</h1>
     </header>
 
     <div class="addr">
       <p id="addr-text">1277 Babb Ct, #520<br>San Jose, CA 95125<small>Latitude 37, 5th floor</small></p>
-      <button class="copy" id="copy" type="button">Copy</button>
+      <button class="copy" id="copy" type="button" aria-live="polite">Copy</button>
     </div>
 
     <div class="dirs">
