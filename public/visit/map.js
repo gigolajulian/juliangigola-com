@@ -21,7 +21,7 @@ const DATA = {"buildings":[{"p":[[52.7,-62.8],[44.7,-53.3],[35.3,-61.0],[2.7,-21
   function copyBtn(id, text, sel) {
     document.getElementById(id).addEventListener('click', e => {
       const b = e.currentTarget;
-      const done = ok => { b.textContent = ok ? 'Copied' : 'Select it'; setTimeout(() => (b.textContent = 'Copy'), 1600); };
+      const done = ok => { b.textContent = ok ? 'Copied' : 'Select it'; b.toggleAttribute('data-done', ok); clearTimeout(b.t); b.t = setTimeout(() => { b.textContent = 'Copy'; b.removeAttribute('data-done'); }, 1600); };
       const fallback = () => { const r = document.createRange(); r.selectNodeContents(document.getElementById(sel)); const s = getSelection(); s.removeAllRanges(); s.addRange(r); done(false); };
       try { navigator.clipboard.writeText(text).then(() => done(true), fallback); } catch { fallback(); }
     });
