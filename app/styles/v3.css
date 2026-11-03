@@ -198,7 +198,6 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .seq-head+.a-seq{padding-top:64px;padding-bottom:0}
 .v3 .b-head{padding-top:48px}
 .v3 .sheet-gap{height:0!important}
-.v3 .m-line{display:block}
 .v3 #book{padding-top:48px!important;padding-bottom:48px!important}}
 .v3 .a-seq .col{display:grid;gap:48px;align-content:start;will-change:transform}
 .v3 .a-seq figure.m-only{display:none}
