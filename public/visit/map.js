@@ -219,7 +219,7 @@ const DATA = {"buildings":[{"p":[[52.7,-62.8],[44.7,-53.3],[35.3,-61.0],[2.7,-21
 
   // the entrance arrives when the camera does: the pin rises, the head pops, rings burst, the walk draws in, the tag lands
   let arrive0 = reduce ? -1e9 : null;
-  function arrive() { arrive0 = performance.now(); }
+  function arrive() { arrive0 = performance.now(); wake(); }
   const clamp01 = x => Math.max(0, Math.min(1, x));
   const backOut = x => { const c = 1.70158; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
   const walkGeo = walkLine.geometry, walkA = V(DATA.walkFrom, 0.6), walkB = V(DATA.door, 0.6), walkTip = new THREE.Vector3();
@@ -298,9 +298,12 @@ const DATA = {"buildings":[{"p":[[52.7,-62.8],[44.7,-53.3],[35.3,-61.0],[2.7,-21
   let tween = null;
   // the parking highlight, eased toward its target each frame; on only while the camera sits at C
   let hl = 0, hlTarget = 0;
-  const highlight = () => { hlTarget = 1; };
+  const highlight = () => { hlTarget = 1; wake(); };
+  // the loop sleeps while the map is off screen, and under reduced motion once nothing moves; any change wakes it
+  let raf = 0, onScreen = true, last = 0;
+  function wake() { if (!raf && onScreen) { last = performance.now(); raf = requestAnimationFrame(frame); } }
   function flyTo(v, ms = 1100, at = 1, cb = null, then = null) {
-    hlTarget = 0;
+    hlTarget = 0; wake();
     if (reduce) { camera.position.copy(v.pos); controls.target.copy(v.target); return; }
     // orbit around the moving target (angle, tilt and distance eased together) rather than cutting straight through
     const s0 = new THREE.Spherical().setFromVector3(camera.position.clone().sub(controls.target));
@@ -313,13 +316,17 @@ const DATA = {"buildings":[{"p":[[52.7,-62.8],[44.7,-53.3],[35.3,-61.0],[2.7,-21
   const ease = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
 
-  const btns = { top: 'v-top' };
-  function press(which) { Object.entries(btns).forEach(([k, id]) => document.getElementById(id).setAttribute('aria-pressed', String(k === which))); }
+  // From above and the route steps are one set of toggles: the view on screen is the pressed one
+  const views = [document.getElementById('v-top'), ...document.querySelectorAll('ol.steps button')];
+  function press(which) { views.forEach(b => b.setAttribute('aria-pressed', String((b.dataset.view || 'top') === which))); }
   document.getElementById('v-top').onclick = () => { endIntro(); press('top'); flyTo(viewFor('top'), 1100, 1, highlight); };
   document.querySelectorAll('ol.steps button').forEach(step => {
-    step.addEventListener('click', () => { endIntro(); press(null); flyTo(viewFor(step.dataset.view), 1100, 0.6, step.dataset.view === 'door' ? arrive : null); if (innerWidth <= 820) stage.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' }); });
+    step.addEventListener('click', () => { endIntro(); press(step.dataset.view); flyTo(viewFor(step.dataset.view), 1100, 0.6, step.dataset.view === 'door' ? arrive : null); if (innerWidth <= 820) stage.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' }); });
   });
-  controls.addEventListener('start', () => { tween = null; endIntro(); if (arrive0 === null) arrive(); });
+  controls.addEventListener('start', () => { tween = null; endIntro(); if (arrive0 === null) arrive(); wake(); });
+  controls.addEventListener('change', wake);
+  new IntersectionObserver(([e]) => { onScreen = e.isIntersecting; wake(); }).observe(stage);
+  document.fonts?.ready.then(() => { placed = ''; wake(); });
 
   function resize() {
     const w = stage.clientWidth, h = stage.clientHeight;
@@ -328,7 +335,7 @@ const DATA = {"buildings":[{"p":[[52.7,-62.8],[44.7,-53.3],[35.3,-61.0],[2.7,-21
   }
   // zoom out only as far as the whole route from Curtner Ave
   function capZoom() { const r = viewFor('route'), b = viewFor('intro'), f = viewFor('far'); controls.maxDistance = Math.max(r.pos.distanceTo(r.target), b.pos.distanceTo(b.target), f.pos.distanceTo(f.target)) * 1.02; }
-  new ResizeObserver(() => { resize(); capZoom(); }).observe(stage);
+  new ResizeObserver(() => { resize(); capZoom(); wake(); }).observe(stage);
   resize(); capZoom();
   // on load: one slow zoom in, about 7.5 s, from far out down to the top-down view
   let intro = !reduce;
@@ -362,8 +369,9 @@ const DATA = {"buildings":[{"p":[[52.7,-62.8],[44.7,-53.3],[35.3,-61.0],[2.7,-21
 
   const needle = document.getElementById('needle');
   const tmp = new THREE.Vector3();
-  let last = performance.now();
+  let placed = '';
   function frame(now) {
+    raf = 0;
     const dt = Math.min(0.05, (now - last) / 1000); last = now;
     if (tween) {
       const k = Math.min(1, (now - tween.t0) / tween.ms), e = ease(k);
@@ -373,7 +381,7 @@ const DATA = {"buildings":[{"p":[[52.7,-62.8],[44.7,-53.3],[35.3,-61.0],[2.7,-21
       if (tween.cb && k >= tween.at) { const cb = tween.cb; tween.cb = null; cb(); }
       if (k >= 1) { const then = tween.then; tween = null; if (then) then(); }
     }
-    controls.update();
+    const moved = controls.update();
     if (!tween) clampTarget();
     if (!reduce) {
       tex.offset.y -= dt * 0.55;
@@ -388,6 +396,13 @@ const DATA = {"buildings":[{"p":[[52.7,-62.8],[44.7,-53.3],[35.3,-61.0],[2.7,-21
     renderer.render(scene, camera);
 
     const w = stage.clientWidth, h = stage.clientHeight;
+    // the labels and needle only follow the camera: with it still, skip their layout reads
+    const at = [camera.position.toArray(), controls.target.toArray(), w, h, doorLbl.op, doorLbl.dy].join();
+    if (at !== placed) { placed = at; place(w, h); }
+    const busy = onScreen && (!reduce || tween || moved || Math.abs(hlTarget - hl) > 0.002 || (arrive0 !== null && now - arrive0 < 1000));
+    if (busy && !raf) raf = requestAnimationFrame(frame);
+  }
+  function place(w, h) {
     labels.forEach(l => {
       tmp.copy(l.v).project(camera);
       const vis = tmp.z < 1 && Math.abs(tmp.x) < 1.1 && Math.abs(tmp.y) < 1.1;
@@ -402,7 +417,6 @@ const DATA = {"buildings":[{"p":[[52.7,-62.8],[44.7,-53.3],[35.3,-61.0],[2.7,-21
     });
     const az = Math.atan2(camera.position.x - controls.target.x, camera.position.z - controls.target.z);
     needle.style.transform = 'rotate(' + (az * 180 / Math.PI).toFixed(1) + 'deg)';
-    requestAnimationFrame(frame);
   }
-  requestAnimationFrame(frame);
+  wake();
 })();

@@ -155,6 +155,9 @@ a.eyebrow { color: var(--muted); text-decoration: none; transition: color 200ms 
 a.eyebrow:hover { color: var(--accent); }
 a.eyebrow:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 [hidden] { display: none !important; }
+/* 44px to the finger, nothing drawn moves: an invisible layer grows each short control */
+:is(.hud button, a.eyebrow, .copy, .go) { position: relative; }
+:is(.hud button, a.eyebrow, .copy, .go)::after { content: ""; position: absolute; inset: min(0px, calc(50% - 22px)); }
 </style>
 </head>
 <body>
@@ -191,11 +194,11 @@ a.eyebrow:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px;
     <section>
       <h2 class="label">The way in</h2>
       <ol class="steps">
-        <li><button type="button" data-view="curtner"><strong>Turn onto Canoas Garden Ave from Curtner Ave</strong><span>The corner is just west of the Curtner light rail station and Hwy 87.</span></button></li>
-        <li><button type="button" data-view="masonic"><strong>Turn right onto Masonic Dr</strong><span>After about <span class="dist">280 m</span>, at the Cathedral of Faith campus.</span></button></li>
-        <li><button type="button" data-view="turn"><strong>Turn right onto Babb Ct</strong><span>After about <span class="dist">160 m</span>, Babb Ct is the private drive into Latitude 37.</span></button></li>
-        <li><button type="button" data-view="park"><strong>Park in any unmarked spot</strong><span>Spots with no number are fine. Numbered spots belong to residents, and the red spots are off limits.</span></button></li>
-        <li><button type="button" data-view="door"><strong>Walk to the entrance</strong><span>It's on the right side of the drive, near the far end. Then head up to #520 on the 5th floor.</span></button></li>
+        <li><button type="button" aria-pressed="false" data-view="curtner"><strong>Turn onto Canoas Garden Ave from Curtner Ave</strong><span>The corner is just west of the Curtner light rail station and Hwy 87.</span></button></li>
+        <li><button type="button" aria-pressed="false" data-view="masonic"><strong>Turn right onto Masonic Dr</strong><span>After about <span class="dist">280 m</span>, at the Cathedral of Faith campus.</span></button></li>
+        <li><button type="button" aria-pressed="false" data-view="turn"><strong>Turn right onto Babb Ct</strong><span>After about <span class="dist">160 m</span>, Babb Ct is the private drive into Latitude 37.</span></button></li>
+        <li><button type="button" aria-pressed="false" data-view="park"><strong>Park in any unmarked spot</strong><span>Spots with no number are fine. Numbered spots belong to residents, and the red spots are off limits.</span></button></li>
+        <li><button type="button" aria-pressed="false" data-view="door"><strong>Walk to the entrance</strong><span>It's on the right side of the drive, near the far end. Then head up to #520 on the 5th floor.</span></button></li>
       </ol>
     </section>
 
