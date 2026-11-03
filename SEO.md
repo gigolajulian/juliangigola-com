@@ -26,10 +26,11 @@ blocked. The terms name Google as the text-only exception.
 - Live check 2026-10-02: 119 sitemap URLs all 200; www and http 301 to apex; real 404s; one h1, canonical and description on every checked page; no empty alts on home, booking pages or /portfolio
 - Footer's hidden city text gone; cities live in the description and JSON-LD `areaServed` (checked 2026-10-05)
 - Search numbers in /admin Traffic (Google) and the Agentic OS dashboard (Google and Bing), 2026-10-05
+- Campus guide: "Best spots for SJSU grad photos" at /graduation-photos/sjsu, linked from /graduation-photos, in the sitemap, FAQ and breadcrumb data; copy signed off by Julian 2026-11-03. Uses only the SJSU frames (01-04, 13-15); 05-11 are USF and Sac State
 
 ## Next (code)
 
-1. Campus guides: "Best spots for SJSU grad photos", then SCU and SF State. Live before January for spring commencement. Copy needs Julian's sign-off.
+1. Campus guides: SCU and SF State, as data in `lib/campus-guides.ts` (SJSU is done). Live before January for spring commencement. Copy needs Julian's sign-off. No photos of mine at either yet.
 2. After the Google Business Profile is verified: add it (and Yelp) to `sameAs` in the structured data, and a "Leave a review" link.
 3. Session links wrap under "Book a session" at 1280px wide (layout, not ranking).
 

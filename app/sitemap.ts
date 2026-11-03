@@ -14,6 +14,7 @@ import type { Frame } from "@/lib/work-types";
 import { COVER_RELEASES } from "@/lib/cover-art-data";
 import DATES from "@/lib/sitemap-dates.json";
 import { BOOKING_PAGES, bookingHref } from "@/lib/booking";
+import { CAMPUS_GUIDES, campusHref } from "@/lib/campus-guides";
 
 const SITE = "https://juliangigola.com";
 
@@ -146,5 +147,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.9,
   }));
 
-  return [...pages, ...booking, ...categories, ...projects];
+  /* The campus guides, under graduation: their pictures are the spots'. */
+  const grad = projectsIn("graduation").flatMap((p) => p.images);
+  const guides = CAMPUS_GUIDES.map((c) => ({
+    url: `${SITE}${campusHref(c)}`,
+    ...showing(grad.filter((f) => c.spots.some((s) => s.frames.includes(f.src)))),
+    changeFrequency: "monthly" as const,
+    priority: 0.8,
+  }));
+
+  return [...pages, ...booking, ...guides, ...categories, ...projects];
 }

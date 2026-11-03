@@ -5,6 +5,7 @@ import { V3BookFlow } from "@/components/v3/book";
 import { Run } from "@/components/v3/flow";
 import { Doors } from "@/components/v3/home";
 import { BOOKING_PAGES, bookingHref, type BookingPage } from "@/lib/booking";
+import { CAMPUS_GUIDES, campusHref } from "@/lib/campus-guides";
 import { SESSIONS, type SessionSlug } from "@/lib/v3";
 import type { Frame } from "@/lib/work-types";
 
@@ -66,6 +67,16 @@ export function V3Service({ page, frames }: { page: BookingPage; frames: Frame[]
               )}
             </section>
           ))}
+          {page.slug === "graduation-photos" ? (
+            <section className="sv-row">
+              <h2 className="lbl mute">Campus guides</h2>
+              <ul>
+                {CAMPUS_GUIDES.map((c) => (
+                  <li key={c.slug}><Link href={campusHref(c)}>{c.h1}<span aria-hidden>→</span></Link></li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
           <section className="sv-row">
             <h2 className="lbl mute">Where</h2>
             <ul>
