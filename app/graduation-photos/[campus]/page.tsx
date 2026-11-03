@@ -40,10 +40,12 @@ export default async function CampusPage(props: PageProps<"/graduation-photos/[c
   if (!c) notFound();
 
   const images = getProject("graduation")?.images ?? [];
-  /* The spots' photographs in spot order, captioned with the spot; six, as on the booking pages. */
-  const shown = c.spots
-    .flatMap((s) => s.frames.flatMap((src) => images.filter((x) => x.src === src).map((f) => ({ spot: s.name, f }))))
-    .slice(0, 6);
+  /* The guide's photo row, each captioned with its spot. */
+  const shown = c.photos.flatMap((src) => {
+    const f = images.find((x) => x.src === src);
+    const spot = c.spots.find((s) => s.frames.includes(src));
+    return f && spot ? [{ spot: spot.name, f }] : [];
+  });
   const url = `${SITE}${campusHref(c)}`;
 
   return (

@@ -22,6 +22,8 @@ export type CampusGuide = {
   kicker: string;
   lead: string;
   spots: Spot[];
+  /** The photo row at the top, in order: six of the spots' frames. */
+  photos: string[];
   plan: string;
   faqs: { q: string; a: string }[];
 };
@@ -71,6 +73,8 @@ export const CAMPUS_GUIDES: CampusGuide[] = [
         frames: [],
       },
     ],
+    // His four lead the row (Julian).
+    photos: ["01", "02", "03", "04", "14", "15"].map(g),
     plan: "I start at the glass walkways, where the light works at any hour, then the sign, the statue and the brick steps, and finish at Tower Hall and the palms when the light is low. Two outfit changes fit between stops in 90 minutes.",
     faqs: [
       {
