@@ -265,6 +265,7 @@ const NEXT = {
 };
 
 /** A plain mail to hello@ saying how a deposit ended. A failed send is logged, never a failed webhook. */
+// Bytes, never a base64 string: `send()` mails a string as-is, so the picture arrives as text.
 type Attachment = { content: ArrayBuffer; filename: string; type: string; disposition: "attachment" };
 
 async function mail(email: Env["EMAIL"], subject: string, lines: string[], who?: { name: string; email: string }, attachments: Attachment[] = []) {
