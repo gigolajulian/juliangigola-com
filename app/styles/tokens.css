@@ -77,6 +77,11 @@
   --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out-strong: cubic-bezier(0.77, 0, 0.175, 1);
   --ease-in-strong: cubic-bezier(0.4, 0, 1, 1);
+  /* MOTION-PLAN.md: the site moves on three curves only. `out` is
+     --ease-out-strong (enter, leave, answer a click), `move` is
+     --ease-in-out-strong (something on screen travelling somewhere), and
+     `drawer` is this one (page and sheet slides). No ease-in. */
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
 
   /* ── springs ──────────────────────────────────────────────────
    * A bezier cannot overshoot and come back — it is bounded by its own end
@@ -225,6 +230,15 @@
   --dur-xl: 500ms;
   --dur-2xl: 700ms;
   --dur-3xl: 1000ms;
+  /* MOTION-PLAN.md: six steps, each with one job. They replace the scale
+     above as each plan item touches a file; an exit takes about two thirds
+     of its entrance, and nothing hit often goes past --dur-small. */
+  --dur-press: 100ms; /* button and slot press */
+  --dur-hover: 150ms; /* color and opacity on hover or focus */
+  --dur-small: 250ms; /* menus, notices, chips, every exit */
+  --dur-page: 400ms; /* page slide, sheets, drawer */
+  --dur-photo: 600ms; /* a photo travelling: tile to hero, open, lightbox step */
+  --dur-show: 1000ms; /* splash and hero crossfade only */
 
   --background: oklch(0.145 0.003 70);
   --foreground: oklch(0.955 0.004 80);

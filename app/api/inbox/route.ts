@@ -1,5 +1,5 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { bearer, canPush } from "@/lib/vouch";
+import { authorised, bearer, canPush } from "@/lib/vouch";
 import { SAFE_IMAGE, summary, type Enquiry, type Summary } from "@/lib/inbox";
 import { backfillLead, fold, readLead, STAGES, trashDaysLeft, writeLead, type InboxRow, type Lead, type LeadSummary, type Stage } from "@/lib/leads";
 import { sealer } from "@/lib/lead-crypto";
@@ -61,34 +61,6 @@ async function parsed(
   } catch {
     return null;
   }
-}
-
-/**
- * Whether the request carries the right key.
- *
- * Constant-time, so the comparison cannot be used to learn the key one
- * character at a time. Both sides are hashed first, which fixes the length —
- * otherwise the loop below would return early on a shorter guess and the
- * key's own length would leak.
- *
- * Written out rather than calling the runtime's `timingSafeEqual`: this is
- * thirty-two fixed iterations of XOR, it is the same guarantee, and it runs
- * in a test under Node without a Workers shim.
- */
-async function authorised(request: Request, expected?: string) {
-  if (!expected) return false;
-  const given = request.headers.get("x-inbox-key");
-  if (!given) return false;
-
-  const digest = async (s: string) =>
-    new Uint8Array(
-      await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s)),
-    );
-  const [a, b] = await Promise.all([digest(given), digest(expected)]);
-
-  let diff = a.length ^ b.length;
-  for (let i = 0; i < a.length; i++) diff |= a[i] ^ b[i];
-  return diff === 0;
 }
 
 /**
@@ -354,7 +326,7 @@ export async function POST(request: Request) {
 
 /**
  * A lead changed by hand: its stage, a snooze (an ISO time, or "" to wake
- * it), or opened (`seen`). Stage and snooze go through `fold`, so they land
+ * it), opened (`seen`) or marked unread (`seen: false`). Stage and snooze go through `fold`, so they land
  * on the timeline like everything else.
  */
 async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: Awaited<ReturnType<typeof sealer>>, given: Record<string, unknown>, notion?: string) {
@@ -375,7 +347,8 @@ async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: Await
   if (snoozeUntil !== undefined) lead = fold(lead, lead.email, { event: { at, kind: "snooze", note: snoozeUntil || "woken" }, snoozeUntil });
   if (typeof archive === "boolean") lead = fold(lead, lead.email, { event: { at, kind: "archive", note: archive ? "in" : "out" }, on: archive });
   if (typeof trash === "boolean") lead = fold(lead, lead.email, { event: { at, kind: "trash", note: trash ? "in" : "out" }, on: trash });
-  if (seen) lead = { ...lead, unread: false };
+  // Opened (true), or marked unread again by hand (false).
+  if (typeof seen === "boolean") lead = { ...lead, unread: !seen };
   await writeLead(inbox, seal, id, lead);
   return json({ lead });
 }

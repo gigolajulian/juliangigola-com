@@ -30,7 +30,8 @@ export type Stage = (typeof STAGES)[number];
 /** What happened, as it reached the site. `stage` is Julian's own move. */
 export type LeadEvent = {
   at: string;
-  kind: "inquiry" | "call" | "booking" | "no-deposit" | "deposit-stuck" | "stage" | "snooze" | "mail" | "archive" | "trash";
+  kind: "inquiry" | "call" | "booking" | "no-deposit" | "deposit-stuck" | "stage" | "snooze" | "mail" | "replied" | "wrote" | "archive" | "trash";
+  /* "replied" / "wrote": mail between hello@ and them in Gmail, ref = the Gmail message id (`lib/gmail-sync.ts`). */
   /** The raw row (`msg:` key), Cal.com uid or Stripe intent, so a retry folds in once. */
   ref?: string;
   /** Booking time, session, new stage, a mail's subject: a short line for the timeline. */
@@ -69,6 +70,10 @@ export type Lead = {
   notion?: string;
   /** Something new since he last opened it. */
   unread: boolean;
+  /** The start of their latest message, for the list row. */
+  snippet?: string;
+  /** Pictures they attached to it. */
+  refs?: number;
   events: LeadEvent[];
 };
 
@@ -104,6 +109,9 @@ export type Change = {
   snoozeUntil?: string;
   /** Kind "archive" / "trash": in (true) or back out (false). */
   on?: boolean;
+  /** An inquiry's message and how many pictures came with it. */
+  snippet?: string;
+  refs?: number;
 };
 
 /** One event folded into a lead. Returns the lead unchanged when the event
@@ -132,6 +140,11 @@ export function fold(lead: Lead | null, email: string, c: Change): Lead {
   }
   // A mail the site sent is a line on the timeline, not news.
   if (event.kind === "mail") return tidy(next);
+  // His own reply from Gmail answers the inquiry: Replied, and off Needs me.
+  if (event.kind === "replied") {
+    if (next.stage === "Inquiry") Object.assign(next, { stage: "Replied", stageAt: event.at });
+    return tidy({ ...next, unread: false });
+  }
   if (event.kind === "snooze") {
     next.snoozeUntil = c.snoozeUntil || undefined;
     // Unsnoozed by hand: back under Needs me.
@@ -150,6 +163,7 @@ export function fold(lead: Lead | null, email: string, c: Change): Lead {
   if (c.when) next.when = c.when;
   if (c.deposit) next.deposit = c.deposit;
   if (c.flag && !next.flags?.includes(c.flag)) next.flags = [...(next.flags ?? []), c.flag];
+  if (c.snippet !== undefined) Object.assign(next, { snippet: c.snippet.replace(/\s+/g, " ").trim().slice(0, 140), refs: c.refs });
 
   const want = asks[event.kind];
   if (want && (rank(want) > rank(next.stage) || (want === "Inquiry" && closed(next.stage)) || !lead)) {
@@ -163,6 +177,8 @@ const tidy = (l: Lead): Lead => {
   if (!l.snoozeUntil) delete l.snoozeUntil;
   if (!l.archivedAt) delete l.archivedAt;
   if (!l.trashedAt) delete l.trashedAt;
+  if (!l.snippet) delete l.snippet;
+  if (!l.refs) delete l.refs;
   return l;
 };
 
@@ -191,6 +207,7 @@ export const leadSummary = ({ events: _e, notion: _n, deposit, ...rest }: Lead):
   ...rest,
   name: rest.name?.slice(0, 80),
   email: rest.email.slice(0, 120),
+  ...(rest.snippet ? { snippet: rest.snippet.slice(0, 90) } : {}),
   ...(deposit ? { paid: true as const } : {}),
 });
 
@@ -204,9 +221,28 @@ export async function readLead(kv: KV, s: Sealer, id: string): Promise<Lead | nu
   return raw ? s.open<Lead>(raw) : null;
 }
 
-/** One lead, sealed, with its sealed summary as the metadata the list reads. */
+/** Bytes the sealed summary may take: KV metadata holds 1024, as JSON. */
+const META_MAX = 1000;
+/** What a summary gives up, in order, when non-Latin text makes it too big:
+    the message, then most of the name, then most of the address. */
+const SHRINK: ((m: LeadSummary) => LeadSummary)[] = [
+  ({ snippet: _s, ...m }) => m,
+  (m) => ({ ...m, name: m.name.slice(0, 24) }),
+  (m) => ({ ...m, name: m.name.slice(0, 8), email: m.email.slice(0, 40) }),
+];
+
+/** One lead, sealed, with its sealed summary as the metadata the list reads.
+    The summary shrinks until it fits, so a long CJK name and message never
+    make the put throw and the lead go unrecorded. */
 export async function writeLead(kv: KV, s: Sealer, id: string, lead: Lead): Promise<void> {
-  await kv.put(leadKey(id), await s.seal(lead), { metadata: { s: await s.seal(leadSummary(lead)) } });
+  let summary = leadSummary(lead);
+  let meta = await s.seal(summary);
+  for (const cut of SHRINK) {
+    if (JSON.stringify({ s: meta }).length <= META_MAX) break;
+    summary = cut(summary);
+    meta = await s.seal(summary);
+  }
+  await kv.put(leadKey(id), await s.seal(lead), { metadata: { s: meta } });
 }
 
 /** Logs a mail the site sent against the person it was about. Never throws. */
