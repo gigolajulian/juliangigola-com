@@ -83,13 +83,13 @@ function Tile({ p, swatch, first }: { p: WorkItem; swatch?: string[]; first?: bo
               ))}
             </span>
           ) : null}
+          <b className="wt-n">{p.n}</b>
         </div>
       </Link>
-      {/* Set like the strip's caption (Julian, 2026-11-04): discipline, then the name in the display face. */}
-      <figcaption>
-        {p.d.join(", ").toLowerCase() !== p.n.toLowerCase() ? <span className="lbl mute">{p.d.join(", ")}</span> : null}
-        <b>{p.n}</b>
-      </figcaption>
+      {/* The name sits on the cover like the strip's, the discipline stays under it (Julian, 2026-11-04). */}
+      {p.d.join(", ").toLowerCase() !== p.n.toLowerCase() ? (
+        <figcaption className="lbl mute">{p.d.join(", ")}</figcaption>
+      ) : null}
     </figure>
   );
 }
