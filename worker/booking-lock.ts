@@ -1,4 +1,5 @@
-import { bookOwn, cancelOwn, dueReminders, findBooking, markReminded, rescheduleOwn, type BookInput, type Store } from "../lib/booking-engine";
+import { bookOwn, cancelOwn, dueReminders, findBooking, markReminded, readHours, rescheduleOwn, writeHours, type BookInput, type Store } from "../lib/booking-engine";
+import type { Hours } from "../lib/booking-rules";
 
 /* ── the booking lock: one Durable Object for hello@'s calendar ─────
  * Every booking passes through `serial`, so a recheck and its insert
@@ -35,6 +36,9 @@ export class BookingLock {
       }
       if (op === "due") return Response.json({ records: await dueReminders(store) });
       if (op === "reminded") return Response.json({ ok: await markReminded(store, String(arg)) ?? true });
+      if (op === "hours") return Response.json({ hours: await readHours(store) });
+      // Checked by the route (`cleanHours`); queued so no booking reads half of it.
+      if (op === "setHours") return Response.json({ hours: await this.serial(async () => (await writeHours(store, arg as Hours), arg)) });
       if (op === "get") return Response.json({ record: (await findBooking(store, String(arg))) ?? null });
       return Response.json({ error: "unknown op" }, { status: 400 });
     } catch (e) {

@@ -1,22 +1,50 @@
 /* ── when Julian can be booked, for the site's own engine ──────────
  * Copied from Cal.com on 2026-11-03 (its public event types and the
- * slots it offered): Wednesday to Sunday, 10 AM to 6 PM Pacific, nothing
- * Monday or Tuesday. Edit here; the calendar on hello@ does the rest.
+ * slots it offered): Wednesday to Sunday from 10 AM Pacific, nothing
+ * Monday or Tuesday. Julian (2026-11-04): the last start is 7 PM. These are the defaults: Julian changes the week and
+ * single dates from the lead desk (Hours), kept in the booking lock.
  * Client-safe: no server imports.
  * ─────────────────────────────────────────────────────────────── */
 
 export const TZ = "America/Los_Angeles";
 
+/** Minutes after midnight Pacific: the first start, the last start. */
+export type Window = readonly [number, number];
+
 /** Open hours per weekday (0 Sunday), minutes after midnight Pacific; null is closed. */
-export const HOURS: (readonly [number, number] | null)[] = [
-  [600, 1080],
+export const HOURS: (Window | null)[] = [
+  [600, 1140],
   null,
   null,
-  [600, 1080],
-  [600, 1080],
-  [600, 1080],
-  [600, 1080],
+  [600, 1140],
+  [600, 1140],
+  [600, 1140],
+  [600, 1140],
 ];
+
+/** The week, plus dates ("2026-11-10") that differ from it: a window, or null for closed. */
+export type Hours = { week: (Window | null)[]; days?: Record<string, Window | null> };
+export const DEFAULT_HOURS: Hours = { week: HOURS };
+
+/** The window open on `ymd`, a `weekday` (0 Sunday), or null. */
+export const windowOn = (h: Hours, ymd: string, weekday: number): Window | null =>
+  (h.days && ymd in h.days ? h.days[ymd] : h.week[weekday]) ?? null;
+
+const isWindow = (w: unknown): w is Window =>
+  Array.isArray(w) && w.length === 2 && w.every((m) => Number.isInteger(m) && m >= 0 && m <= 1440 && m % 15 === 0) && w[0] <= w[1];
+
+/** `x` as Hours when it is well formed, dates before `today` dropped; else null. */
+export function cleanHours(x: unknown, today: string): Hours | null {
+  const h = x as Hours;
+  if (!h || !Array.isArray(h.week) || h.week.length !== 7 || !h.week.every((w) => w === null || isWindow(w))) return null;
+  const days: Record<string, Window | null> = {};
+  for (const [d, w] of Object.entries(h.days ?? {})) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(d) || (w !== null && !isWindow(w))) return null;
+    if (d >= today) days[d] = w;
+  }
+  if (Object.keys(days).length > 400) return null;
+  return { week: h.week.map((w) => (w ? [w[0], w[1]] : null)), days };
+}
 
 export type Rule = {
   title: string;
@@ -26,6 +54,8 @@ export type Rule = {
   notice: number;
   /** Minutes kept free after the session. */
   after: number;
+  /** Minutes kept free before it, after whatever is already booked. */
+  before?: number;
   /** Minutes between offered starts; the length when unset, as Cal.com does. */
   interval?: number;
   /** How many days ahead may be booked; unset, the picker's own reach. */
@@ -34,7 +64,8 @@ export type Rule = {
   call?: boolean;
 };
 
-const SHOOT = { notice: 2880, after: 30, ahead: 180 };
+/* Julian (2026-11-04): an hour each side of a shoot, to travel between locations on the same day. */
+const SHOOT = { notice: 2880, before: 60, after: 60, ahead: 180 };
 const CALL = { length: 15, after: 0, interval: 30, call: true };
 
 /** Every bookable event, by its Cal.com slug. */

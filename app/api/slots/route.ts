@@ -1,4 +1,5 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
+import { liveHours } from "@/lib/booking-engine";
 import { EVENTS } from "@/lib/booking-rules";
 import { localIso, openStarts } from "@/lib/slots";
 
@@ -37,7 +38,7 @@ export async function GET(request: Request) {
 
   let starts: number[];
   try {
-    starts = await openStarts(env.GCAL_OAUTH, slug, from, to, Date.now(), undefined, env.INBOX);
+    starts = await openStarts(env.GCAL_OAUTH, slug, from, to, Date.now(), undefined, env.INBOX, await liveHours(env));
   } catch (e) {
     console.error("slots", String(e));
     return json({ status: "error", error: "Could not reach the calendar." }, 502);
