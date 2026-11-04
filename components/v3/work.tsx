@@ -66,7 +66,8 @@ function Cap({ p, cls }: { p: WorkItem; cls: string }) {
   const d = p.d.join(", ");
   return (
     <span className={cls}>
-      <b>{p.n}</b>
+      {/* --n: a long name sets smaller to stay near two lines (Julian, 2026-11-04). */}
+      <b style={{ "--n": p.n.length } as React.CSSProperties}>{p.n}</b>
       {d.toLowerCase() !== p.n.toLowerCase() ? <span className="lbl">{d}</span> : null}
     </span>
   );
