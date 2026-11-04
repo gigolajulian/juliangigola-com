@@ -301,6 +301,8 @@ const ADMIN_HOST = "admin.juliangigola.com";
 const LEADS_HOST = "leads.juliangigola.com";
 
 const nextConfig: NextConfig = {
+  // `next dev` refuses its scripts to other hosts; these two are the same app.
+  allowedDevOrigins: [ADMIN_HOST, LEADS_HOST],
   // The build stamp `/api/build` reports (Workers Builds sets the sha).
   env: { BUILD_SHA: process.env.WORKERS_CI_COMMIT_SHA ?? "local" },
   // Hides the floating dev badge that sits over the bottom-left corner of
