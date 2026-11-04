@@ -234,6 +234,20 @@ describe("leads", () => {
     expect([...kv.data.keys()].some((k) => k.startsWith("msg:"))).toBe(true);
   });
 
+  it("does not bring an emptied lead back on Import from Inbox", async () => {
+    await seed(Date.UTC(2026, 9, 1), "spam");
+    await seed(Date.UTC(2026, 9, 2), "keep");
+    const post = async () => (await POST(req("POST", { body: JSON.stringify({ backfill: true }) }))).json();
+    expect(await post()).toMatchObject({ added: 2 });
+    const spam = `lead:${await idOf("spam@example.com")}`;
+    await PATCH(req("PATCH", { body: JSON.stringify({ key: spam, trash: true }) }));
+    await DELETE(req("DELETE", { body: JSON.stringify({ emptyTrash: true }) }));
+    expect(kv.data.has(spam)).toBe(false);
+    expect(await post()).toMatchObject({ added: 0, updated: 0 });
+    expect(kv.data.has(spam)).toBe(false);
+    expect([...kv.data.keys()].some((k) => k.startsWith("gone:") && k.includes("@"))).toBe(false);
+  });
+
   it("deletes a lead 30 days after it went in the trash, when the list is read, keeping Inbox rows", async () => {
     await seed(Date.UTC(2026, 9, 1), "row");
     await lead("a@example.com", "2026-11-01T10:00:00Z");

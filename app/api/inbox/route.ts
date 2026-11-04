@@ -89,6 +89,15 @@ async function authorised(request: Request, expected?: string) {
   return diff === 0;
 }
 
+/**
+ * A lead deleted for good (Empty trash, or 30 days in it) leaves `gone:<id>`
+ * behind, so "Import from Inbox" does not bring it back from the person's
+ * old rows. The id is the HMAC, never the address. A new message still
+ * starts a fresh lead.
+ */
+const bury = (inbox: NonNullable<CloudflareEnv["INBOX"]>, key: string) =>
+  Promise.all([inbox.delete(key), inbox.put(`gone:${key.slice(5)}`, "")]);
+
 /** The binding and the secret, or `null` when this build has neither. */
 async function wired() {
   const { env } = await getCloudflareContext({ async: true });
@@ -178,7 +187,7 @@ export async function GET(request: Request) {
         // Trash empties itself: 30 days after it went in, the lead goes for good.
         // The list is the only reader, so it is the one place that checks.
         if (one.trashedAt && trashDaysLeft(one.trashedAt, Date.now()) <= 0) {
-          await gate.inbox.delete(k.name);
+          await bury(gate.inbox, k.name);
           continue;
         }
         leads.push({ ...one, id: k.name.slice(5) });
@@ -266,7 +275,7 @@ export async function DELETE(request: Request) {
       if (listed.list_complete) break;
       after = listed.cursor;
     }
-    await Promise.all(gone.map((k) => gate.inbox.delete(k)));
+    await Promise.all(gone.map((k) => bury(gate.inbox, k)));
     return json({ ok: true, deleted: gone.length });
   }
   if (!key?.startsWith("msg:")) return json({ error: "Unknown." }, 400);
@@ -311,6 +320,7 @@ export async function POST(request: Request) {
   let updated = 0;
   for (const [email, rows] of people) {
     const id = await seal.id(email);
+    if ((await gate.inbox.get(`gone:${id}`)) !== null) continue;
     const before = await readLead(gate.inbox, seal, id);
     const after: Lead | null = backfillLead(before, email, rows);
     if (!after) continue;
