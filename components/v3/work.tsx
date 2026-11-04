@@ -66,8 +66,8 @@ function Cap({ p, cls }: { p: WorkItem; cls: string }) {
   const d = p.d.join(", ");
   return (
     <span className={cls}>
-      {/* --n: a long name sets smaller to stay near two lines (Julian, 2026-11-04). */}
-      <b style={{ "--n": p.n.length } as React.CSSProperties}>{p.n}</b>
+      {/* --n: a long name sets smaller to stay near two lines (Julian, 2026-11-04); --w: its longest word still fits the cover's width. */}
+      <b style={{ "--n": p.n.length, "--w": Math.max(...p.n.split(/\s+/).map((x) => x.length)) } as React.CSSProperties}>{p.n}</b>
       {d.toLowerCase() !== p.n.toLowerCase() ? <span className="lbl">{d}</span> : null}
     </span>
   );
