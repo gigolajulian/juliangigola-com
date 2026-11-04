@@ -180,12 +180,9 @@
 }
 
 /* ── Item 12, `layout`: no layout properties in motion ─────────────────
-   The phone search bar's tuck travels by transform (chrome.tsx), so its
-   `top` changes in one step. A credit's avatar keeps its box and only
+   The portfolio's header tools travel to the corner by transform when the
+   header tucks (chrome.tsx). A credit's avatar keeps its box and only
    fades in on hover (150 on `out`), so the handle never shifts. */
-:root[data-mplan~="layout"] .v3 #p-work .wtools {
-  transition: none;
-}
 @media (hover: hover) {
   :root[data-mplan~="layout"] .v3 .cr-av {
     width: 28px;

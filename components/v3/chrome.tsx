@@ -329,7 +329,7 @@ export function V3Header() {
   const scrub = useScrub(dock && flag, hdr, setLanded);
   useDock(dock && !scrub, past, hdr, setLanded);
   /* Portfolio: the header steps away while you scroll down into the work and
-     comes back, joined to the pinned search bar, when you scroll up (Julian,
+     comes back when you scroll up; the view buttons stay pinned in the corner (Julian,
      2026-10-27). The root attributes drive the search bar's ride in v3.css. */
   const tucks = path.startsWith("/portfolio");
   const [tuck, setTuck] = React.useState(false);
@@ -353,16 +353,18 @@ export function V3Header() {
       setTuck(false);
     };
   }, [tucks, path]);
-  React.useEffect(() => {
-    /* MOTION-PLAN.md item 12 (`?mplan=layout`): the search bar's sticky top
-       still jumps with the header, but it travels there by transform (250 on
-       `out`) instead of animating `top`. */
-    const bar = mplan("layout") && !matchMedia("(prefers-reduced-motion: reduce)").matches ? document.querySelector<HTMLElement>(".v3 #p-work .wtools") : null;
-    const was = bar?.getBoundingClientRect().top;
+  React.useLayoutEffect(() => {
+    /* MOTION-PLAN.md item 12 (`?mplan=layout`): the header tools (work.tsx
+       portals them into #hdr-tools) jump to the corner when the header tucks,
+       and travel there by transform (250 on `out`). Layout effect: measured
+       before a paint. */
+    const bar = mplan("layout") && !matchMedia("(prefers-reduced-motion: reduce)").matches ? document.querySelector<HTMLElement>(".v3 .htools") : null;
+    const was = bar?.getBoundingClientRect();
     document.documentElement.toggleAttribute("data-tuck", tuck);
-    if (!bar || was === undefined) return;
-    const dy = was - bar.getBoundingClientRect().top;
-    if (dy) bar.animate({ transform: [`translateY(${dy}px)`, "none"] }, { duration: 250, easing: "cubic-bezier(.23,1,.32,1)" });
+    if (!bar || !was) return;
+    const now = bar.getBoundingClientRect();
+    const dx = was.right - now.right, dy = was.top - now.top;
+    if (dx || dy) bar.animate({ transform: [`translate(${dx}px,${dy}px)`, "none"] }, { duration: 250, easing: "cubic-bezier(.23,1,.32,1)" });
   }, [tuck]);
   const show = (!home || past) && !tuck;
   const [menu, setMenu] = React.useState(false);
@@ -381,9 +383,11 @@ export function V3Header() {
   }, [menu]);
   return (
     <div className="v3 contents">
-      <header ref={hdr} className={`site-hdr${show || menu ? " show" : ""}${dock ? " dock" : ""}${landed || menu ? " landed" : ""}`} inert={!(show || menu)}>
-        <Link className="wm site-wm" href="/">Julian Gigola</Link>
-        <nav className="links lbl burger" aria-label="Main">
+      {/* Inert per part, not the whole bar: the portfolio's tools stay live in it while it tucks. */}
+      <header ref={hdr} className={`site-hdr${show || menu ? " show" : ""}${dock ? " dock" : ""}${landed || menu ? " landed" : ""}`}>
+        <Link className="wm site-wm" href="/" inert={!(show || menu)}>Julian Gigola</Link>
+        <div id="hdr-tools" className="hslot" />
+        <nav className="links lbl burger" aria-label="Main" inert={!(show || menu)}>
           {NAV.map((n) => (
             <Link key={n.href} href={n.href} aria-current={current(path, n.href) ? "page" : undefined}>{n.label}</Link>
           ))}
