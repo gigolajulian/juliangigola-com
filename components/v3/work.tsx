@@ -410,6 +410,21 @@ export function V3Work({
     io.observe(tools);
     return () => io.disconnect();
   }, [tools]);
+  // iOS pans the visual viewport as the keyboard rises, carrying a top:0 fixed bar off screen: follow the pan (QA, 2026-11-04).
+  React.useEffect(() => {
+    const vv = window.visualViewport;
+    const el = document.querySelector<HTMLElement>(".htools");
+    if (!hs || !pin || !vv || !el) return;
+    const set = () => el.style.setProperty("translate", `0 ${vv.offsetTop}px`);
+    set();
+    vv.addEventListener("scroll", set);
+    vv.addEventListener("resize", set);
+    return () => {
+      vv.removeEventListener("scroll", set);
+      vv.removeEventListener("resize", set);
+      el.style.removeProperty("translate");
+    };
+  }, [hs, pin]);
   React.useEffect(() => {
     const root = document.documentElement;
     root.toggleAttribute("data-pft", pin);
@@ -983,7 +998,7 @@ export function V3Work({
                     {LOUPE}
                     <input
                       type="search"
-                      autoFocus
+                      ref={(el) => el?.focus({ preventScroll: true })}
                       placeholder="Search the work"
                       aria-label="Search the work by name, discipline or credit"
                       autoComplete="off"
