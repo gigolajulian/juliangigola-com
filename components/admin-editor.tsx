@@ -16,6 +16,7 @@ import { AdminPage } from "@/components/admin-page";
 import { AdminPicker, type PickerItem } from "@/components/admin-picker";
 import { AdminTrash } from "@/components/admin-trash";
 import { AdminInbox, unreadCount } from "@/components/admin-inbox";
+import { AdminLeads } from "@/components/admin-leads";
 import { AdminTraffic } from "@/components/admin-traffic";
 import { AdminSeo } from "@/components/admin-seo";
 import { AdminVideos } from "@/components/admin-videos";
@@ -125,6 +126,8 @@ const TABS = [
    * and what you do afterwards happens in your mail. It also has nothing to
    * publish, which is the one thing every other tab has in common. */
   [
+    // One row per person, with a stage (`admin-leads.tsx`). The Inbox stays the raw log.
+    { id: "leads", label: "Leads" },
     { id: "inbox", label: "Inbox" },
     // Read-only too: who came to the site and from where.
     { id: "traffic", label: "Traffic" },
@@ -1159,6 +1162,7 @@ export function AdminEditor({
   what the fields need before the ratio takes over, and the preview stays
   fixed because it is a picture of a page at a plausible width rather than a
   panel to fill. */
+  const leadsWide = !page && view === "leads";
   return (
     <CreditDesk value={desk}>
       <div
@@ -1171,7 +1175,9 @@ export function AdminEditor({
               // across as fit. Over the whole window, the site's bar and the
               // page margins included (Julian: see everything).
               "xl:fixed xl:inset-0 xl:z-50 xl:m-0 xl:grid-rows-[minmax(0,1fr)] xl:bg-background xl:px-10 xl:pt-6 xl:grid-cols-1 2xl:grid-cols-1 [&_[data-map-grid]]:grid-cols-[repeat(auto-fill,minmax(7rem,1fr))] [&_[data-preview-grid]]:grid-cols-[repeat(auto-fill,minmax(9rem,1fr))]"
-            : page
+            : leadsWide
+              ? "xl:grid-cols-1 2xl:grid-cols-1"
+              : page
               ? "xl:grid-cols-[17rem_1fr] 2xl:grid-cols-[1fr_5fr]"
               : "xl:grid-cols-[17rem_1fr_23rem] 2xl:grid-cols-[1fr_minmax(34rem,1.6fr)_26rem]",
         )}
@@ -1191,6 +1197,8 @@ export function AdminEditor({
           className={cn(
             "min-w-0 xl:min-h-0 xl:overflow-y-auto xl:pb-10",
             full && full !== "map" && "xl:hidden",
+            // The lead desk wants the whole width, and the site map is no context for it.
+            leadsWide && "hidden",
           )}
         >
           {whole("map")}
@@ -1514,6 +1522,7 @@ export function AdminEditor({
                 );
               })()
             : null}
+          {!page && view === "leads" ? <AdminLeads /> : null}
           {!page && view === "inbox" ? <AdminInbox onUnread={setUnread} /> : null}
           {!page && view === "traffic" ? <AdminTraffic /> : null}
           {!page && view === "seo" ? <AdminSeo /> : null}
@@ -1676,7 +1685,9 @@ export function AdminEditor({
 
           {/* The token and the status line, under every tab. Publish itself is
             up in the app bar; what stays down here is the thing you set once
-            and the thing you read after pressing it. */}
+            and the thing you read after pressing it. Not on the lead desk:
+            nothing there is published, and pinned it covered the open lead. */}
+          {leadsWide ? null : (
           <div className="sticky bottom-0 mt-12 flex flex-wrap items-center gap-4 border-t border-border bg-background py-6">
             {sha ? (
               <>
@@ -1701,11 +1712,12 @@ export function AdminEditor({
               </p>
             )}
           </div>
+          )}
         </div>
 
         {/* Sticky, so it stays beside the field being edited on a long form.
           Below `xl` it drops under the form rather than squeezing both. */}
-        {page ? null : (
+        {page || leadsWide ? null : (
           <aside
             aria-label="Preview"
             className={cn(

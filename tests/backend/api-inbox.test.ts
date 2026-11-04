@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { summary, enquiry, enquiryKey } from "@/lib/inbox";
+import { recordLead } from "@/lib/leads";
 import { FakeKV, SCOPED, githubToken, reply } from "./fakes";
 
 /* /admin's inbox (`app/api/inbox/route.ts`): somebody's name, email and
@@ -176,5 +177,39 @@ describe("DELETE", () => {
     expect((await DELETE(req("DELETE", { body: JSON.stringify({ key: "count:2026-10-11" }) }))).status).toBe(400);
     expect((await DELETE(req("DELETE", { key: null, body: JSON.stringify({ key: k }) }))).status).toBe(401);
     expect(kv.data.has(k)).toBe(true);
+  });
+});
+
+describe("leads", () => {
+  const lead = async (email: string, at: string, stage = "Inquiry") => {
+    const l = await recordLead(kv as never, email, { event: { at, kind: "inquiry", ref: `msg:${email}` }, name: email.split("@")[0] });
+    if (stage !== "Inquiry") await PATCH(req("PATCH", { body: JSON.stringify({ key: `lead:${email}`, stage }) }));
+    return l!;
+  };
+
+  it("lists people newest first from metadata alone, behind the same gate", async () => {
+    await lead("a@example.com", "2026-11-01T10:00:00Z");
+    await lead("b@example.com", "2026-11-02T10:00:00Z");
+    expect((await GET(req("GET", { key: null, query: "?leads" }))).status).toBe(401);
+    const { leads } = await (await GET(req("GET", { query: "?leads" }))).json();
+    expect(leads.map((l: { email: string }) => l.email)).toEqual(["b@example.com", "a@example.com"]);
+    expect(leads[0].events).toBeUndefined();
+  });
+
+  it("opens one with its timeline, and moves its stage, snooze and seen by hand", async () => {
+    await lead("a@example.com", "2026-11-01T10:00:00Z");
+    const one = await (await GET(req("GET", { query: "?key=lead:a@example.com" }))).json();
+    expect(one.lead.events).toHaveLength(1);
+    const res = await PATCH(req("PATCH", { body: JSON.stringify({ key: "lead:a@example.com", stage: "Quoted", snoozeUntil: "2026-12-01T00:00:00Z", seen: true }) }));
+    expect((await res.json()).lead).toMatchObject({ stage: "Quoted", snoozeUntil: "2026-12-01T00:00:00Z", unread: false });
+    expect(kv.data.get("lead:a@example.com")!.metadata).toMatchObject({ stage: "Quoted", unread: false });
+  });
+
+  it("refuses an unknown stage, a bad time and a missing lead", async () => {
+    await lead("a@example.com", "2026-11-01T10:00:00Z");
+    const patch = (b: object) => PATCH(req("PATCH", { body: JSON.stringify({ key: "lead:a@example.com", ...b }) }));
+    expect((await patch({ stage: "Won" })).status).toBe(400);
+    expect((await patch({ snoozeUntil: "soon" })).status).toBe(400);
+    expect((await PATCH(req("PATCH", { body: JSON.stringify({ key: "lead:nobody@example.com", seen: true }) }))).status).toBe(404);
   });
 });
