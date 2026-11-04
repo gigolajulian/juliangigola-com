@@ -238,9 +238,12 @@ function Clients() {
     const focusin = (e: FocusEvent) => {
       const a = e.target as HTMLElement;
       paused = true;
-      x = a.offsetLeft - (box.clientWidth - a.offsetWidth) / 2;
-      v = 0;
-      paint();
+      // Keyboard only: a mouse press focuses too, and moving the logo under it would send the click elsewhere.
+      if (a.matches(":focus-visible")) {
+        x = a.offsetLeft - (box.clientWidth - a.offsetWidth) / 2;
+        v = 0;
+        paint();
+      }
       pause(true);
     };
     const focusout = (e: FocusEvent) => !box.contains(e.relatedTarget as Node) && !box.matches(":hover") && pause(false);
