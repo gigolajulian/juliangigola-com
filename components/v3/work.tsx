@@ -61,6 +61,17 @@ const seen = () =>
     return r.bottom > 0 && r.top < innerHeight && r.right > 0 && r.left < innerWidth;
   });
 
+/** A cover's caption, on the photo: the name, then its discipline. A gallery is named for its discipline, so the label would say it twice. */
+function Cap({ p, cls }: { p: WorkItem; cls: string }) {
+  const d = p.d.join(", ");
+  return (
+    <span className={cls}>
+      <b>{p.n}</b>
+      {d.toLowerCase() !== p.n.toLowerCase() ? <span className="lbl">{d}</span> : null}
+    </span>
+  );
+}
+
 function Tile({ p, swatch, first }: { p: WorkItem; swatch?: string[]; first?: boolean }) {
   return (
     <figure className="wt">
@@ -83,13 +94,9 @@ function Tile({ p, swatch, first }: { p: WorkItem; swatch?: string[]; first?: bo
               ))}
             </span>
           ) : null}
-          <b className="wt-n">{p.n}</b>
+          <Cap p={p} cls="wt-n" />
         </div>
       </Link>
-      {/* The name sits on the cover like the strip's, the discipline stays under it (Julian, 2026-11-04). */}
-      {p.d.join(", ").toLowerCase() !== p.n.toLowerCase() ? (
-        <figcaption className="lbl mute">{p.d.join(", ")}</figcaption>
-      ) : null}
     </figure>
   );
 }
@@ -855,11 +862,8 @@ export function V3Work({
             {/* A new chip starts its own strip at the start: the frames it shares with All kept the old scroll. */}
             <div className="wstrip" key={filter} ref={strip} onScroll={stripBar}>
               {cells.map(({ f, p }, n) => {
-                /* Name on the photo, discipline under it, as in the grid (Julian, 2026-11-04). */
-                const cap = p ? <b className="sc-n">{p.n}</b> : null;
-                /* A gallery is named for its discipline: the label would say it twice. */
-                const disc =
-                  p && p.d.join(", ").toLowerCase() !== p.n.toLowerCase() ? <figcaption className="sc-d lbl mute">{p.d.join(", ")}</figcaption> : null;
+                /* Name, then discipline, both on the photo, as in the grid (Julian, 2026-11-04). */
+                const cap = p ? <Cap p={p} cls="sc-n" /> : null;
                 if (!f)
                   return (
                     <figure key={p!.s} className="sc" data-flip-id={p!.s}>
@@ -867,7 +871,6 @@ export function V3Work({
                         <Image src={p!.cover} alt={p!.n} fill sizes={STRIP_SIZES} decoding="sync" loading={n < 4 ? "eager" : "lazy"} />
                         {cap}
                       </Link>
-                      {disc}
                     </figure>
                   );
                 const i = stripFrames.indexOf(f);
@@ -884,7 +887,6 @@ export function V3Work({
                       <Image src={f.src} alt={f.alt} fill sizes={STRIP_SIZES} loading={n < 4 ? "eager" : "lazy"} />
                       {cap}
                     </a>
-                    {disc}
                   </figure>
                 );
               })}
