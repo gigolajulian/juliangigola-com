@@ -181,6 +181,7 @@ export function AdminLeads() {
             <FilterButton key={f} on={filter === f} n={count(f)} onClick={() => setFilter(f)}>{f === "snoozed" ? "Snoozed" : f}</FilterButton>
           ))}
         </div>
+        <ImportInbox call={call} done={load} />
       </nav>
 
       <section aria-label="Leads" className={cn("min-w-0 border-border lg:min-h-0 lg:overflow-y-auto lg:border-r", open && "max-lg:hidden")}>
@@ -238,6 +239,51 @@ export function AdminLeads() {
 /** The inbox key, pasted once per device. On the iPhone the installed app keeps
     its own storage apart from Safari, so it asks once there too. A password
     field, so a password manager can fill it. */
+type Count = { people: number; added: number; updated: number; stages: Partial<Record<Stage, number>> };
+
+/** Julian: "add the stuff i have in my juliangigola admin inbox to my leads".
+ * Counts first (a dry run), imports only on his second press. */
+function ImportInbox({ call, done }: { call: Call; done: () => void }) {
+  const [count, setCount] = React.useState<Count | null>(null);
+  const [busy, setBusy] = React.useState(false);
+  const [note, setNote] = React.useState<string | null>(null);
+  const run = (dry: boolean) => {
+    setBusy(true);
+    setNote(null);
+    call({ method: "POST", body: JSON.stringify({ backfill: true, dry }) })
+      .then((o) => {
+        const c = o as unknown as Count;
+        if (dry) return c.added + c.updated ? setCount(c) : setNote("Everything in the Inbox is already here.");
+        setCount(null);
+        setNote(`Imported: ${c.added} new, ${c.updated} updated.`);
+        done();
+      })
+      .catch((e: unknown) => setNote(e instanceof Error ? e.message : String(e)))
+      .finally(() => setBusy(false));
+  };
+  const by = count ? Object.entries(count.stages).map(([s, n]) => `${s} ${n}`).join(", ") : "";
+  return (
+    <div className="grid gap-2 px-3 pt-4 font-mono text-[12.5px] text-muted-foreground">
+      {count ? (
+        <>
+          <p>
+            {count.added} new{by ? ` (${by})` : ""}, {count.updated} updated, from {count.people} {count.people === 1 ? "person" : "people"} in the Inbox.
+          </p>
+          <p className="flex gap-4">
+            <button type="button" disabled={busy} onClick={() => run(false)} className="min-h-11 text-accent">Import</button>
+            <button type="button" disabled={busy} onClick={() => setCount(null)} className="min-h-11">Cancel</button>
+          </p>
+        </>
+      ) : (
+        <button type="button" disabled={busy} onClick={() => run(true)} className="min-h-11 w-fit text-left hoverable:hover:text-foreground">
+          {busy ? "Counting" : "Import from Inbox"}
+        </button>
+      )}
+      {note ? <p>{note}</p> : null}
+    </div>
+  );
+}
+
 function SignIn({ onKey, wrong }: { onKey: (k: string) => void; wrong: boolean }) {
   const [k, setK] = React.useState("");
   return (

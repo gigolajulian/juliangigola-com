@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fold, isLate, leadKey, leadSummary, recordLead, type Lead } from "./leads";
+import { backfillLead, fold, isLate, leadKey, leadSummary, recordLead, type InboxRow, type Lead } from "./leads";
 import { sealer } from "./lead-crypto";
 
 const at = (h: number) => new Date(Date.UTC(2026, 10, 2, h)).toISOString();
@@ -140,5 +140,35 @@ describe("leadSummary", () => {
     const s = await sealer(btoa(String.fromCharCode(...new Uint8Array(32).fill(7))))!;
     const l = fold(null, `${"a".repeat(300)}@example.com`, { event: { at: "2026-11-03T00:00:00Z", kind: "call" }, name: "N".repeat(600), kind: "intro-call" });
     expect(JSON.stringify({ s: await s.seal(leadSummary(l)) }).length).toBeLessThan(1024);
+  });
+});
+
+describe("backfillLead", () => {
+  const row = (h: number, extra: Partial<InboxRow> = {}): InboxRow => ({ key: `msg:${h}`, at: at(h), type: "portrait", name: "Maya", email: "maya@example.com", read: true, ...extra });
+
+  it("builds a new lead in time order at the rows' own times, unread only if a row was", () => {
+    const l = backfillLead(null, "maya@example.com", [row(5, { type: "booking", detail: "Headshots · Sat" }), row(1)])!;
+    expect(l).toMatchObject({ stage: "Confirmed", firstAt: at(1), lastAt: at(5), unread: false });
+    expect(l.events.map((e) => e.kind)).toEqual(["inquiry", "booking"]);
+    expect(backfillLead(null, "maya@example.com", [row(1, { read: false })])!.unread).toBe(true);
+  });
+
+  it("tells a call and a stuck deposit from a booking", () => {
+    const l = backfillLead(null, "maya@example.com", [row(1, { type: "booking", detail: "Intro call · Mon" }), row(2, { key: "msg:x", type: "booking", detail: "Deposit paid, not booked, not refunded" })])!;
+    expect(l.events.map((e) => e.kind)).toEqual(["call", "deposit-stuck"]);
+  });
+
+  it("adds old rows to an existing lead without touching its stage, snooze or unread, and changes nothing the second time", () => {
+    let l = fold(null, "maya@example.com", { event: { at: at(10), kind: "inquiry", ref: "msg:10" } });
+    l = { ...fold(l, "maya@example.com", { event: { at: at(11), kind: "stage" }, stage: "Quoted" }), unread: false, snoozeUntil: at(40) };
+    const once = backfillLead(l, "maya@example.com", [row(1), row(10)])!;
+    expect(once).toMatchObject({ stage: "Quoted", unread: false, snoozeUntil: at(40), firstAt: at(1) });
+    expect(once.events.map((e) => e.at)).toEqual([at(1), at(10), at(11)]);
+    expect(backfillLead(once, "maya@example.com", [row(1), row(10)])).toBeNull();
+  });
+
+  it("skips a booking already recorded live under its Cal.com uid", () => {
+    const l = fold(null, "maya@example.com", { event: { at: at(3), kind: "booking", ref: "cal-uid" } });
+    expect(backfillLead(l, "maya@example.com", [row(3, { type: "booking", detail: "Headshots" })])).toBeNull();
   });
 });

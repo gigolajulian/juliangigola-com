@@ -222,3 +222,52 @@ export async function recordLead(env: LeadStore, email: string, c: Change): Prom
     return null;
   }
 }
+
+/* ── the Inbox, backfilled ────────────────────────────────────────
+ * Julian (2026-11-04): "add the stuff i have in my juliangigola admin inbox
+ * to my leads". The `msg:` rows from before the desk, folded into leads at
+ * their own times. Nothing is mailed, Notion is not touched, no row deleted.
+ * ─────────────────────────────────────────────────────────────── */
+
+/** One Inbox row as its KV key plus the summary its metadata carries. */
+export type InboxRow = { key: string; at: string; type: string; name: string; email: string; read: boolean; detail?: string };
+
+/** What an old row was: the form, a call, a booking, or a deposit gone wrong. */
+export function rowEvent(r: InboxRow): Change {
+  const booked = r.type === "booking";
+  const kind: LeadEvent["kind"] = !booked
+    ? "inquiry"
+    : r.detail?.startsWith("Deposit paid, not booked")
+      ? "deposit-stuck"
+      : /\bcall\b/i.test(r.detail ?? "")
+        ? "call"
+        : "booking";
+  return { event: { at: r.at, kind, ref: r.key, note: booked ? r.detail : r.type }, name: r.name, ...(booked ? {} : { kind: r.type }) };
+}
+
+const ARRIVED: LeadEvent["kind"][] = ["inquiry", "call", "booking", "deposit-stuck"];
+
+/**
+ * A person's old rows folded into their lead, or null when every row is
+ * already there (run twice, changes nothing). Already there: the same row
+ * (`ref`), or something that arrived within two minutes of it, which is
+ * the same booking recorded live under its Cal.com uid.
+ * A new lead is built in time order and is unread only if a row was.
+ * An existing lead only gains the events and an earlier First seen: its
+ * stage, snooze and unread are Julian's and stay.
+ */
+export function backfillLead(lead: Lead | null, email: string, rows: InboxRow[]): Lead | null {
+  const sorted = [...rows].sort((a, b) => a.at.localeCompare(b.at));
+  const near = (a: string, b: string) => Math.abs(Date.parse(a) - Date.parse(b)) < 120e3;
+  const add = sorted
+    .map(rowEvent)
+    .filter(({ event }) => !lead?.events.some((x) => x.ref === event.ref || (ARRIVED.includes(x.kind) && near(x.at, event.at))));
+  if (!add.length) return null;
+  if (!lead) {
+    let built: Lead | null = null;
+    for (const c of add) built = fold(built, email, c);
+    return { ...built!, unread: sorted.some((r) => !r.read) };
+  }
+  const events = [...lead.events, ...add.map((c) => c.event)].sort((a, b) => a.at.localeCompare(b.at)).slice(-KEEP);
+  return { ...lead, events, firstAt: add[0].event.at < lead.firstAt ? add[0].event.at : lead.firstAt };
+}
