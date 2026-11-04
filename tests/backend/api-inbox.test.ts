@@ -212,6 +212,9 @@ describe("leads", () => {
     expect((await res.json()).lead).toMatchObject({ stage: "Quoted", snoozeUntil: "2026-12-01T00:00:00Z", unread: false });
     const { leads } = await (await GET(req("GET", { query: "?leads" }))).json();
     expect(leads[0]).toMatchObject({ stage: "Quoted", unread: false });
+    // Marked unread again by hand.
+    const again = await PATCH(req("PATCH", { body: JSON.stringify({ key, seen: false }) }));
+    expect((await again.json()).lead).toMatchObject({ unread: true });
   });
 
   it("archives, trashes and recovers by hand, and empties only the trash, keeping Inbox rows", async () => {

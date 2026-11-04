@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils";
  * open lead side by side. Narrow: the list, then the lead with Back.
  * ─────────────────────────────────────────────────────────────── */
 
-type Filter = "needs" | "open" | Stage | "snoozed" | "archived" | "trash";
+type Filter = "needs" | "open" | "upcoming" | Stage | "snoozed" | "archived" | "trash" | "more";
 
 const DAY = 864e5;
 const now = () => Date.now();
@@ -119,6 +119,7 @@ export function AdminLeads() {
   const [filter, setFilter] = React.useState<Filter>("needs");
   const [open, setOpen] = React.useState<string | null>(null);
   const [error, setError] = React.useState<string | null>(null);
+  const [query, setQuery] = React.useState("");
 
   const call = React.useCallback(async (init: RequestInit & { query?: string } = {}) => {
     const res = await fetch(`/api/inbox${init.query ?? ""}`, {
@@ -189,8 +190,29 @@ export function AdminLeads() {
   if (!leads) return <p className="py-8 font-mono text-[13px] text-muted-foreground">Loading leads</p>;
 
   const count = (f: Filter) => leads.filter((l) => pass(l, f)).length;
-  const shown = leads.filter((l) => pass(l, filter));
+  const words = query.trim().toLowerCase();
+  const shown = leads
+    .filter((l) => pass(l, filter))
+    .filter((l) => !words || [l.name, l.email, l.kind, l.snippet].some((v) => v?.toLowerCase().includes(words)))
+    .sort(filter === "upcoming" ? (a, b) => a.when!.localeCompare(b.when!) : (a, b) => b.lastAt.localeCompare(a.lastAt));
   const current = leads.find((l) => l.id === open);
+  const tab = tabOf(filter);
+  const needs = count("needs");
+  const pick = (f: Filter) => { setFilter(f); setOpen(null); scrollTo(0, 0); };
+  const signOut = () => {
+    try { localStorage.removeItem(KEY_STORE); localStorage.removeItem(TOKEN_STORE); } catch {}
+    setLeads(null);
+    setError("Not authorized.");
+  };
+  const device = (
+    <>
+      <PushSwitch call={call} />
+      <ImportInbox call={call} done={load} />
+      <button type="button" onClick={signOut} className="min-h-11 w-fit px-3 text-left font-mono text-[12.5px] text-muted-foreground hoverable:hover:text-foreground">
+        Sign out on this device
+      </button>
+    </>
+  );
 
   return (
     // Sentence case and a text face, as in the approved mock: the site sets
@@ -198,87 +220,223 @@ export function AdminLeads() {
     <div
       style={{ fontFamily: 'var(--font-v2-text, "Helvetica Neue", Helvetica, Arial, sans-serif)', letterSpacing: 0 }}
       ref={fit}
-      className="grid overflow-hidden rounded-[14px] lg:grid-rows-[minmax(0,1fr)] border border-border bg-background text-foreground normal-case lg:grid-cols-[200px_minmax(0,440px)_minmax(0,1fr)] [&_button]:normal-case [&_h2]:normal-case [&_h3]:normal-case"
+      className="normal-case text-foreground max-lg:pb-[calc(84px+env(safe-area-inset-bottom))] lg:grid lg:grid-cols-[220px_minmax(0,420px)_minmax(0,1fr)] lg:grid-rows-[minmax(0,1fr)] lg:overflow-hidden lg:rounded-[14px] lg:border lg:border-border lg:bg-background [&_button]:normal-case [&_h2]:normal-case [&_h3]:normal-case"
     >
-      <nav aria-label="Lead filters" className={cn("min-w-0 border-border p-3 lg:min-h-0 lg:overflow-y-auto lg:border-r", open && "max-lg:hidden")}>
-        <div className="flex gap-2 overflow-x-auto lg:grid lg:gap-0.5">
-          {(["needs", "open"] as const).map((f) => (
-            <FilterButton key={f} on={filter === f} n={count(f)} onClick={() => setFilter(f)}>{f === "needs" ? "Needs me" : "All open"}</FilterButton>
-          ))}
-          <p className="px-3 pb-2 pt-4 font-mono text-[12.5px] text-muted-foreground max-lg:hidden">By stage</p>
-          {STAGES.filter((s) => !closed(s)).map((s) => (
-            <FilterButton key={s} on={filter === s} n={count(s)} onClick={() => setFilter(s)}>{s}</FilterButton>
-          ))}
-          <p className="px-3 pb-2 pt-4 font-mono text-[12.5px] text-muted-foreground max-lg:hidden">Closed</p>
-          {(["Delivered", "Lost", "snoozed", "archived", "trash"] as const).map((f) => (
-            <FilterButton key={f} on={filter === f} n={count(f)} onClick={() => setFilter(f)}>{label(f)}</FilterButton>
-          ))}
-        </div>
-        <PushSwitch call={call} />
-        <ImportInbox call={call} done={load} />
+      {/* Desktop: the sidebar. Every list, then this device's switches. */}
+      <nav aria-label="Lead lists" className="hidden min-h-0 flex-col overflow-y-auto border-r border-border p-2.5 lg:flex">
+        {(["needs", "open", "upcoming"] as const).map((f) => (
+          <SideLink key={f} on={filter === f} n={count(f)} onClick={() => pick(f)}>{label(f)}</SideLink>
+        ))}
+        <SideGroup>Stage</SideGroup>
+        {OPEN_STAGES.map((s) => <SideLink key={s} on={filter === s} n={count(s)} onClick={() => pick(s)}>{s}</SideLink>)}
+        <SideGroup>Closed</SideGroup>
+        {(["Delivered", "Lost"] as const).map((s) => <SideLink key={s} on={filter === s} n={count(s)} onClick={() => pick(s)}>{s}</SideLink>)}
+        <SideGroup>Put aside</SideGroup>
+        {(["snoozed", "archived", "trash"] as const).map((f) => <SideLink key={f} on={filter === f} n={count(f)} onClick={() => pick(f)}>{label(f)}</SideLink>)}
+        <div className="mt-auto grid border-t border-border pt-2">{device}</div>
       </nav>
 
-      <section aria-label="Leads" className={cn("min-w-0 border-border lg:min-h-0 lg:overflow-y-auto lg:border-r", open && "max-lg:hidden")}>
-        <header className="flex items-center justify-between border-b border-border px-5 py-4">
-          <h2 style={HEAD} className="text-lg">{label(filter)}</h2>
-          <span className="font-mono text-[13px] text-muted-foreground">{shown.length} {shown.length === 1 ? "lead" : "leads"}</span>
+      <section aria-label="Leads" className={cn("min-w-0 lg:min-h-0 lg:overflow-y-auto lg:border-r lg:border-border", open && "max-lg:hidden")}>
+        <header className="grid gap-3 border-b border-border px-1 pb-3 pt-2 lg:px-5 lg:pt-4">
+          <p className="font-mono text-[11.5px] uppercase tracking-[0.08em] text-muted-foreground lg:hidden">
+            {needs ? `${needs} waiting on you` : "Nothing waiting on you"}
+          </p>
+          <div className="flex items-baseline justify-between gap-3">
+            <h2 style={HEAD} className="text-[32px] leading-none lg:text-xl">{filter === "more" ? "More" : label(filter)}</h2>
+            {filter === "more" ? null : (
+              <span className="font-mono text-[12.5px] text-muted-foreground">{shown.length} {shown.length === 1 ? "lead" : "leads"}</span>
+            )}
+          </div>
+          {filter === "more" ? null : (
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search name, email or message"
+              aria-label="Search leads"
+              className="min-h-11 w-full rounded-[10px] border border-border bg-transparent px-3.5 text-base normal-case placeholder:normal-case placeholder:text-muted-foreground focus-visible:outline-2 focus-visible:outline-accent lg:text-[14.5px]"
+            />
+          )}
+          {/* Phone: the stages ride in the Open tab as one row of chips. */}
+          {tab === "open" ? (
+            <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-0.5 lg:hidden">
+              {(["open", ...OPEN_STAGES] as const).map((f) => (
+                <Pill key={f} on={filter === f} n={count(f)} onClick={() => pick(f)}>{f === "open" ? "All" : f}</Pill>
+              ))}
+            </div>
+          ) : null}
+          {MORE.includes(filter) ? (
+            <button type="button" onClick={() => pick("more")} className="inline-flex min-h-11 w-fit items-center gap-1 text-[16px] text-accent lg:hidden">
+              <span aria-hidden="true">‹</span> More
+            </button>
+          ) : null}
         </header>
-        {filter === "trash" && shown.length ? <EmptyTrash n={shown.length} call={call} done={() => { setOpen(null); load(); }} /> : null}
-        {shown.length ? (
-          <ul>
-            {shown.map((l) => (
-              <li key={l.id}>
-                <button
-                  type="button"
-                  onClick={() => setOpen(l.id ?? null)}
-                  aria-current={open === l.id ? "true" : undefined}
-                  className={cn(
-                    "grid w-full grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1.5 border-b border-border px-5 py-4 text-left transition-colors duration-200 hoverable:hover:bg-card",
-                    open === l.id && "bg-card shadow-[inset_3px_0_0_var(--accent)]",
-                  )}
-                >
-                  <span className="flex min-w-0 items-center gap-2 text-base font-semibold">
-                    {l.unread ? <span className="size-2 shrink-0 rounded-full bg-accent" aria-label="New" /> : null}
-                    <span className="truncate">{l.name}</span>
-                  </span>
-                  <span className="text-right font-mono text-[13px] text-muted-foreground">{day(l.lastAt)}</span>
-                  <span className="truncate text-[14.5px] text-muted-foreground">
-                    {[kindOf(l.kind), l.when ? at(l.when) : null].filter(Boolean).join(", ") || l.email}
-                  </span>
-                  <span className="flex justify-end"><Chip l={l} /></span>
-                  {nextStep(l) ? (
-                    <span className="font-mono text-[13px] text-muted-foreground">
-                      Next: <b className="font-semibold text-accent">{nextStep(l)}</b>
-                    </span>
-                  ) : null}
-                </button>
-              </li>
-            ))}
-          </ul>
+
+        {filter === "more" ? (
+          <div className="grid gap-6 py-4 lg:hidden">
+            <ul className="grid">
+              {MORE.map((f) => (
+                <li key={f}>
+                  <button type="button" onClick={() => pick(f)} className="flex min-h-[52px] w-full items-center justify-between border-b border-border px-1 text-left text-[17px]">
+                    {label(f)}
+                    <span className="flex items-center gap-3 font-mono text-[13px] text-muted-foreground">{count(f)} <span aria-hidden="true">›</span></span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+            <div className="grid">
+              <p className="px-1 pb-1 font-mono text-[11.5px] uppercase tracking-[0.08em] text-muted-foreground">This device</p>
+              {device}
+            </div>
+          </div>
         ) : (
-          <p className="px-5 py-10 text-[15px] text-muted-foreground">{filter === "needs" ? "Nothing waiting on you." : "No leads here."}</p>
+          <>
+            {filter === "trash" && shown.length ? <EmptyTrash n={shown.length} call={call} done={() => { setOpen(null); load(); }} /> : null}
+            {shown.length ? (
+              <ul>
+                {shown.map((l) => (
+                  <li key={l.id}>
+                    <Row l={l} on={open === l.id} upcoming={filter === "upcoming"} onClick={() => setOpen(l.id ?? null)} />
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="px-1 py-10 text-[15px] text-muted-foreground lg:px-5">
+                {words ? "Nothing matches." : filter === "needs" ? "Nothing waiting on you." : filter === "upcoming" ? "No calls or sessions coming up." : "No leads here."}
+              </p>
+            )}
+          </>
         )}
       </section>
 
-      <section aria-label="Lead" className={cn("min-w-0 bg-card/40 lg:min-h-0 lg:overflow-y-auto", !open && "max-lg:hidden")}>
+      <section aria-label="Lead" className={cn("min-w-0 lg:min-h-0 lg:overflow-y-auto lg:bg-card/40", !open && "max-lg:hidden")}>
         {current ? (
           <Detail key={current.id} summary={current} call={call} onChange={changed} onBack={() => setOpen(null)} />
         ) : (
           <p className="px-8 py-10 text-[15px] text-muted-foreground max-lg:hidden">Pick a lead to see it here.</p>
         )}
       </section>
+
+      {/* Phone: the tab bar, in thumb reach, above the home indicator. */}
+      <nav
+        aria-label="Lead tabs"
+        className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-border bg-background/95 px-1.5 pb-[env(safe-area-inset-bottom)] pt-1.5 backdrop-blur-md lg:hidden"
+      >
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            onClick={() => pick(t.id)}
+            aria-current={tab === t.id ? "page" : undefined}
+            className={cn("relative flex min-h-[52px] flex-col items-center justify-center gap-1 font-mono text-[10.5px] tracking-[0.02em]", tab === t.id ? "text-accent" : "text-muted-foreground")}
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true" className="size-[23px] fill-none stroke-current stroke-[1.6] [stroke-linecap:round] [stroke-linejoin:round]">{t.icon}</svg>
+            {t.label}
+            {t.id === "needs" && needs ? (
+              <span className="absolute left-[calc(50%+5px)] top-0.5 grid h-[17px] min-w-[17px] place-items-center rounded-full bg-accent px-1 text-[10.5px] font-semibold text-accent-foreground">{needs}</span>
+            ) : null}
+          </button>
+        ))}
+      </nav>
     </div>
+  );
+}
+
+type Tab = "needs" | "open" | "upcoming" | "more";
+const OPEN_STAGES = STAGES.filter((s) => !closed(s));
+/** The lists under More on the phone (the sidebar's lower groups on desktop). */
+const MORE: Filter[] = ["snoozed", "archived", "trash", "Delivered", "Lost"];
+const tabOf = (f: Filter): Tab => (f === "needs" || f === "upcoming" ? f : f === "more" || MORE.includes(f) ? "more" : "open");
+const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
+  { id: "needs", label: "Needs me", icon: <><path d="M4 13l3-8h10l3 8v6H4z" /><path d="M4 13h5l1 2h4l1-2h5" /></> },
+  { id: "open", label: "Open", icon: <path d="M5 6h14M5 12h14M5 18h9" /> },
+  { id: "upcoming", label: "Upcoming", icon: <><rect x="4" y="5" width="16" height="15" rx="2" /><path d="M4 10h16M9 3v4M15 3v4" /></> },
+  { id: "more", label: "More", icon: <><circle cx="6" cy="12" r="1.2" /><circle cx="12" cy="12" r="1.2" /><circle cx="18" cy="12" r="1.2" /></> },
+];
+
+const initials = (l: LeadSummary) =>
+  (l.name.includes("@") ? l.name.slice(0, 2) : l.name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join("")).toUpperCase();
+
+/** One lead in a list: who, what and when, the start of their message, where it stands and what is next. */
+function Row({ l, on, upcoming, onClick }: { l: LeadSummary; on: boolean; upcoming: boolean; onClick: () => void }) {
+  const next = nextStep(l);
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-current={on ? "true" : undefined}
+      className={cn(
+        "flex w-full gap-3 border-b border-border px-1 py-3.5 text-left transition-colors duration-200 hoverable:hover:bg-card lg:px-5",
+        on && "bg-card shadow-[inset_3px_0_0_var(--accent)]",
+      )}
+    >
+      <span
+        aria-hidden="true"
+        className={cn("grid size-10 shrink-0 place-items-center rounded-full border bg-card font-mono text-[13px] font-medium", l.unread ? "border-accent text-accent" : "border-border")}
+      >
+        {initials(l)}
+      </span>
+      <span className="grid min-w-0 flex-1 gap-0.5">
+        <span className="flex items-baseline justify-between gap-3">
+          <span className="flex min-w-0 items-center gap-2 text-[16px] font-semibold">
+            {l.unread ? <span className="size-2 shrink-0 rounded-full bg-accent" aria-label="New" /> : null}
+            <span className="truncate">{l.name}</span>
+          </span>
+          <span className="shrink-0 font-mono text-[12px] text-muted-foreground">{upcoming && l.when ? day(l.when) : ago(l.lastAt)}</span>
+        </span>
+        <span className="truncate text-[14px] text-muted-foreground">{[kindOf(l.kind), l.when ? at(l.when) : null].filter(Boolean).join(" · ") || l.email}</span>
+        {l.snippet ? <span className="truncate text-[13.5px] text-muted-foreground/80">{l.snippet}</span> : null}
+        <span className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1.5">
+          <Chip l={l} />
+          {next ? <span className="font-mono text-[12.5px] font-medium text-accent">→ {next}</span> : null}
+          {l.refs ? <span className="font-mono text-[12px] text-muted-foreground">{l.refs} {l.refs === 1 ? "picture" : "pictures"}</span> : null}
+        </span>
+      </span>
+    </button>
+  );
+}
+
+function SideGroup({ children }: { children: React.ReactNode }) {
+  return <p className="px-3 pb-1.5 pt-4 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">{children}</p>;
+}
+
+function SideLink({ on, n, onClick, children }: { on: boolean; n: number; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={on}
+      className={cn(
+        "flex min-h-10 items-center justify-between gap-4 rounded-lg px-3 text-[14.5px] transition-colors duration-200",
+        on ? "bg-card font-semibold text-foreground shadow-[inset_2px_0_0_var(--accent)]" : "text-muted-foreground hoverable:hover:bg-card hoverable:hover:text-foreground",
+      )}
+    >
+      <span>{children}</span>
+      <span className={cn("font-mono text-[12.5px]", on ? "text-accent" : "text-muted-foreground")}>{n}</span>
+    </button>
+  );
+}
+
+function Pill({ on, n, onClick, children }: { on: boolean; n: number; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={on}
+      className={cn(
+        "inline-flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-full border px-3.5 font-mono text-[12.5px]",
+        on ? "border-accent text-accent" : "border-border text-muted-foreground",
+      )}
+    >
+      {children} <span className={on ? "text-accent" : "text-muted-foreground/70"}>{n}</span>
+    </button>
   );
 }
 
 /** The inbox key, pasted once per device. On the iPhone the installed app keeps
     its own storage apart from Safari, so it asks once there too. A password
     field, so a password manager can fill it. */
-/**
- * Notifications for this device: a new lead pings the installed app.
- * Behind a switch until Julian has tried it on his iPhone: the line shows
- * only with ?push in the address, or once this device has turned it on.
- */
+/** Notifications for this device: a new lead pings the installed app. */
 const PUSH_FLAG = "jg-leads-push";
 const SW_URL = "/admin/leads/sw.js";
 /** The app is the whole origin on leads.juliangigola.com, /admin/leads on the main site. */
@@ -295,21 +453,15 @@ function badge(n: number) {
 }
 function PushSwitch({ call }: { call: Call }) {
   // The desk renders only in the browser (after its list loads), so these read the page directly.
-  const [shown] = React.useState(() => {
-    let flag = false;
-    try { flag = localStorage.getItem(PUSH_FLAG) === "1"; } catch {}
-    return flag || new URLSearchParams(location.search).has("push");
-  });
   const able = typeof navigator !== "undefined" && "serviceWorker" in navigator && "PushManager" in window;
   const [on, setOn] = React.useState<boolean | null>(null);
   const [note, setNote] = React.useState<string | null>(() =>
     able ? null : /iPhone|iPad/.test(navigator.userAgent) ? "Open the installed Leads app to turn these on." : "This browser cannot do notifications.",
   );
   React.useEffect(() => {
-    if (!shown || !able) return;
+    if (!able) return;
     navigator.serviceWorker.getRegistration(swScope()).then((r) => r?.pushManager.getSubscription()).then((s) => setOn(!!s)).catch(() => setOn(false));
-  }, [shown, able]);
-  if (!shown) return null;
+  }, [able]);
 
   const turnOn = async () => {
     setNote(null);
@@ -437,11 +589,13 @@ function pass(l: LeadSummary, f: Filter) {
   if (f === "archived") return !!l.archivedAt && !l.trashedAt;
   if (aside(l)) return false;
   if (f === "needs") return needsMe(l);
+  if (f === "upcoming") return !!l.when && Date.parse(l.when) > now() - 2 * 3600e3 && !closed(l.stage);
+  if (f === "more") return false;
   if (f === "snoozed") return snoozed(l);
   if (f === "open") return !closed(l.stage);
   return l.stage === f && !snoozed(l);
 }
-const LABEL: Partial<Record<Filter, string>> = { needs: "Needs me", open: "All open", snoozed: "Snoozed", archived: "Archived", trash: "Trash" };
+const LABEL: Partial<Record<Filter, string>> = { needs: "Needs me", open: "All open", upcoming: "Upcoming", snoozed: "Snoozed", archived: "Archived", trash: "Trash" };
 const label = (f: Filter) => LABEL[f] ?? f;
 
 /** Deletes every lead in the trash for good, after a second press. */
@@ -464,23 +618,6 @@ function EmptyTrash({ n, call, done }: { n: number; call: Call; done: () => void
         <button type="button" onClick={() => setSure(true)} className={btn}>Empty trash</button>
       )}
     </p>
-  );
-}
-
-function FilterButton({ on, n, onClick, children }: { on: boolean; n: number; onClick: () => void; children: React.ReactNode }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={on}
-      className={cn(
-        "flex min-h-11 shrink-0 items-center justify-between gap-4 rounded-lg px-3 text-[15px] transition-colors duration-200",
-        on ? "bg-accent/12 font-semibold text-accent" : "hoverable:hover:bg-card",
-      )}
-    >
-      <span>{children}</span>
-      <span className={cn("font-mono text-[13.5px]", on ? "text-accent" : "text-muted-foreground")}>{n}</span>
-    </button>
   );
 }
 
@@ -576,6 +713,7 @@ function Detail({ summary, call, onChange, onBack }: { summary: LeadSummary; cal
         {snoozed(l) ? <button type="button" className={btn} onClick={() => patch({ snoozeUntil: "" }).then(() => setSnoozing(false))}>Unsnooze</button> : null}
         {l.trashedAt ? null : <button type="button" className={btn} onClick={() => patch({ archive: !l.archivedAt })}>{l.archivedAt ? "Unarchive" : "Archive"}</button>}
         <button type="button" className={btn} onClick={() => patch({ trash: !l.trashedAt })}>{l.trashedAt ? "Recover" : "Move to trash"}</button>
+        <button type="button" className={btn} onClick={() => patch({ seen: false }).then(onBack)}>Mark unread</button>
         <span className="flex-1" />
         {lead?.notion ? <a href={`https://www.notion.so/${lead.notion.replace(/-/g, "")}`} target="_blank" rel="noreferrer" className={btn}>Notion</a> : null}
         {lead?.deposit ? <a href={lead.deposit} target="_blank" rel="noreferrer" className={cn(btn, "text-destructive")}>Deposit in Stripe</a> : null}
@@ -592,6 +730,15 @@ function Detail({ summary, call, onChange, onBack }: { summary: LeadSummary; cal
           {[["1 day", 1], ["3 days", 3], ["1 week", 7]].map(([t, d]) => (
             <button key={t} type="button" className={btn} onClick={() => patch({ snoozeUntil: new Date(now() + Number(d) * DAY).toISOString() }).then(() => setSnoozing(false))}>{t}</button>
           ))}
+          <label className={cn(btn, "gap-2")}>
+            Until
+            <input
+              type="date"
+              min={new Date(now() + DAY).toISOString().slice(0, 10)}
+              onChange={(e) => e.target.value && patch({ snoozeUntil: new Date(`${e.target.value}T09:00:00`).toISOString() }).then(() => setSnoozing(false))}
+              className="bg-transparent font-mono text-[14px]"
+            />
+          </label>
         </div>
       ) : null}
 
