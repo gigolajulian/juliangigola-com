@@ -85,7 +85,7 @@ export function confirmMail(c: Confirm) {
           ? `The balance is due after the shoot. The deposit moved with the new date. It is refunded only if you cancel 48 hours or more before the time you first booked, ${when(c.firstStart)}.`
           : `The balance is due after the shoot. The deposit moved with the new date. It is no longer refundable: the time you first booked, ${when(c.firstStart)}, was under 48 hours away.`
         : "The balance is due after the shoot. The deposit moves with a new date, or is refunded if you cancel 48 hours or more before."
-      : "The balance is due after the shoot. The deposit moves with a new date, or is refunded up to 2 business days before.",
+      : "The balance is due after the shoot. The deposit moves with a new date, or is refunded up to 48 hours before.",
   };
   const { reschedule, cancel } = c.manage ?? { reschedule: `https://cal.com/reschedule/${encodeURIComponent(c.uid)}`, cancel: `https://cal.com/booking/${encodeURIComponent(c.uid)}?cancel=true` };
   const links = c.manage !== null;
