@@ -1,4 +1,5 @@
 import { sealer, type Sealer } from "./lead-crypto";
+import { notify, pushFor } from "./lead-push";
 
 /* ── leads: one record per person ─────────────────────────────────
  * Julian (2026-11-03, PLAN-lead-desk.md): every inquiry, call and booking
@@ -193,9 +194,9 @@ export const leadSummary = ({ events: _e, notion: _n, deposit, ...rest }: Lead):
   ...(deposit ? { paid: true as const } : {}),
 });
 
-type KV = Pick<NonNullable<CloudflareEnv["INBOX"]>, "get" | "put">;
+type KV = Pick<NonNullable<CloudflareEnv["INBOX"]>, "get" | "put" | "list" | "delete">;
 /** Where leads live: the INBOX namespace, sealed with LEADS_KEY. */
-export type LeadStore = { INBOX?: KV; LEADS_KEY?: string };
+export type LeadStore = { INBOX?: KV; LEADS_KEY?: string; VAPID_KEY?: string };
 
 /** One lead, opened. Null when it is not there. */
 export async function readLead(kv: KV, s: Sealer, id: string): Promise<Lead | null> {
@@ -211,6 +212,21 @@ export async function writeLead(kv: KV, s: Sealer, id: string, lead: Lead): Prom
 /** Logs a mail the site sent against the person it was about. Never throws. */
 export const logMail = (env: LeadStore, email: string | undefined, subject: string, mail: Sent) =>
   recordLead(env, email ?? "", { event: { at: new Date().toISOString(), kind: "mail", note: subject, mail } });
+
+/**
+ * Work that may run after the response: a push service can take seconds,
+ * and the form, Cal.com and Stripe all wait on recordLead. In the Worker it
+ * goes to waitUntil; with no request around it (tests, scripts) it runs
+ * inline. Imported lazily so the desk's client bundle never loads it.
+ */
+async function later(p: Promise<void>) {
+  try {
+    const { getCloudflareContext } = await import("@opennextjs/cloudflare");
+    getCloudflareContext().ctx.waitUntil(p);
+  } catch {
+    await p;
+  }
+}
 
 /**
  * Folds one event into the person's record and stores it, sealed. Without
@@ -233,6 +249,9 @@ export async function recordLead(env: LeadStore, email: string, c: Change): Prom
     const after = fold(before, email, c);
     if (after === before) return after;
     await writeLead(env.INBOX, s, id, after);
+    // Something reached the site: ping his devices (`lib/lead-push.ts`).
+    const push = pushFor(after, c.event);
+    if (push && env.VAPID_KEY) await later(notify(env.INBOX, env.VAPID_KEY, push));
     return after;
   } catch (e) {
     console.error("lead", String(e));
