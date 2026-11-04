@@ -248,6 +248,20 @@ describe("leads", () => {
     expect([...kv.data.keys()].some((k) => k.startsWith("gone:") && k.includes("@"))).toBe(false);
   });
 
+  it("does not bring a lead the 30-day sweep removed back on Import from Inbox", async () => {
+    await seed(Date.UTC(2026, 9, 1), "old");
+    const post = async () => (await POST(req("POST", { body: JSON.stringify({ backfill: true }) }))).json();
+    expect(await post()).toMatchObject({ added: 1 });
+    const key = `lead:${await idOf("old@example.com")}`;
+    await PATCH(req("PATCH", { body: JSON.stringify({ key, trash: true }) }));
+    vi.useFakeTimers({ now: Date.now() + 31 * 864e5, toFake: ["Date"] });
+    expect((await (await GET(req("GET", { query: "?leads" }))).json()).leads).toHaveLength(0);
+    vi.useRealTimers();
+    expect(kv.data.has(key)).toBe(false);
+    expect(await post()).toMatchObject({ added: 0, updated: 0 });
+    expect(kv.data.has(key)).toBe(false);
+  });
+
   it("deletes a lead 30 days after it went in the trash, when the list is read, keeping Inbox rows", async () => {
     await seed(Date.UTC(2026, 9, 1), "row");
     await lead("a@example.com", "2026-11-01T10:00:00Z");
