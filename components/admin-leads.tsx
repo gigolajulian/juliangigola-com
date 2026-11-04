@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { credentials, KEY_STORE } from "@/components/admin-inbox";
+import { TOKEN_STORE } from "@/lib/admin-github";
 import type { Enquiry } from "@/lib/inbox";
 import { isLate, STAGES, type Lead, type LeadEvent, type LeadSummary, type Stage } from "@/lib/leads";
 import { cn } from "@/lib/utils";
@@ -139,11 +140,16 @@ export function AdminLeads() {
     return (
       <SignIn
         onKey={(k) => {
-          window.localStorage.setItem(KEY_STORE, k);
+          // A GitHub token goes where /admin keeps it, so it is sent as Bearer;
+          // the inbox key would win over it, so that one is dropped.
+          if (/^(ghp_|github_pat_)/.test(k)) {
+            window.localStorage.setItem(TOKEN_STORE, k);
+            window.localStorage.removeItem(KEY_STORE);
+          } else window.localStorage.setItem(KEY_STORE, k);
           setError(null);
           load();
         }}
-        wrong={!!window.localStorage.getItem(KEY_STORE)}
+        wrong={!!(window.localStorage.getItem(KEY_STORE) || window.localStorage.getItem(TOKEN_STORE))}
       />
     );
   if (error) return <p className="py-8 text-[15px] text-muted-foreground">{error}</p>;
@@ -242,7 +248,7 @@ function SignIn({ onKey, wrong }: { onKey: (k: string) => void; wrong: boolean }
       }}
       className="grid max-w-md gap-4 py-10 normal-case"
     >
-      <label htmlFor="lead-key" className="text-[15px]">Inbox key</label>
+      <label htmlFor="lead-key" className="text-[15px]">Inbox key or GitHub token</label>
       <input
         id="lead-key"
         type="password"
@@ -251,7 +257,18 @@ function SignIn({ onKey, wrong }: { onKey: (k: string) => void; wrong: boolean }
         onChange={(e) => setK(e.target.value)}
         className="min-h-12 rounded-[10px] border border-border bg-background px-4 text-base normal-case"
       />
-      {wrong ? <p className="text-[15px] text-destructive">That key was not accepted. Paste it again.</p> : null}
+      {wrong ? <p className="text-[15px] text-destructive">That was not accepted. Paste it again.</p> : null}
+      <details className="text-[15px] text-muted-foreground">
+        <summary className="flex size-11 cursor-pointer list-none items-center font-mono text-[15px]" aria-label="How to get one">?</summary>
+        <div className="grid gap-2 pt-2 leading-[1.55]">
+          <p>Easiest: paste the same GitHub token I use for /admin on desktop.</p>
+          <p>
+            To make one on this phone: github.com, Settings, Developer settings, Fine-grained tokens, Generate new token.
+            Repository access: only gigolajulian/juliangigola-com. Permissions: Contents, Read and write.
+          </p>
+          <p>It stays on this device only.</p>
+        </div>
+      </details>
       <button type="submit" className={cn(btn, primary, "justify-self-start")}>Open leads</button>
     </form>
   );
