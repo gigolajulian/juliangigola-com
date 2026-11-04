@@ -8,6 +8,7 @@ import { gsap } from "gsap";
 import { OMEGA } from "@/lib/motion/spring";
 import type { WallTile } from "@/lib/wall-tile";
 import type { MenuItem } from "@/lib/booking";
+import { mplan, GSAP_OUT } from "@/lib/mplan";
 
 /* ── the booking sheet ─────────────────────────────────────────────
  * Julian, 2026-10-14: a session pressed, its card grows out of the row,
@@ -123,10 +124,12 @@ export function BookSheet({
     const s = sheet.current;
     if (calm.current || !s) return done();
     gsap.killTweensOf([s, back.current, body.current]);
-    gsap.to(body.current, { opacity: 0, duration: 0.14, ease: "power1.in" });
-    gsap.to(back.current, { opacity: 0, duration: 0.3, ease: "power1.in" });
-    if (lift()) gsap.to(s, { y: 16, filter: "blur(6px)", duration: 0.24, ease: "power2.in" });
-    gsap.to(s, { opacity: 0, duration: lift() ? 0.24 : 0.2, ease: "power2.in", onComplete: done });
+    // MOTION-PLAN.md item 4 (`?mplan=exits`): an exit starts fast, on `out`, never ease-in.
+    const out = mplan("exits");
+    gsap.to(body.current, { opacity: 0, duration: 0.14, ease: out ? GSAP_OUT : "power1.in" });
+    gsap.to(back.current, { opacity: 0, duration: 0.3, ease: out ? GSAP_OUT : "power1.in" });
+    if (lift()) gsap.to(s, { y: 16, filter: "blur(6px)", duration: 0.24, ease: out ? GSAP_OUT : "power2.in" });
+    gsap.to(s, { opacity: 0, duration: lift() ? 0.24 : 0.2, ease: out ? GSAP_OUT : "power2.in", onComplete: done });
   }, [onClosed, origin]);
 
   React.useEffect(() => {

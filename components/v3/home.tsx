@@ -9,6 +9,7 @@ import { Duo, Marks, Pick } from "@/components/v3/duo";
 import { shiftScroll } from "@/components/v3/smooth-scroll";
 import { useSiteTheme } from "@/lib/site-theme";
 import { COMMISSIONS, COMMISSION_TABS, DOORS, HERO, HERO_ALT, INDEX_ORDER, RECENT, SESSIONS, rate, type SessionSlug } from "@/lib/v3";
+import { mplan } from "@/lib/mplan";
 
 /* JG V3 homepage (master v39, section A): hero crossfade, logo strip,
    Recent work, Commissions sheet, Sessions index, the two doors. */
@@ -261,12 +262,14 @@ function Recent() {
     const cur = cols.map(() => 0);
     let running = false;
     let raf = 0;
+    // MOTION-PLAN.md item 6 (`?mplan=scroll`): the same drift, scaled to plus or minus 32px.
+    const k = mplan("scroll") ? 32 / 56 : 1;
     const draw = () => {
       const r = el.getBoundingClientRect();
       const mid = r.top + r.height / 2 - innerHeight / 2;
       let moving = false;
       cols.forEach((c, i) => {
-        const t = Math.max(-56, Math.min(56, mid * +c.dataset.speed!));
+        const t = Math.max(-56 * k, Math.min(56 * k, mid * +c.dataset.speed! * k));
         // Lenis already smooths the page; this only steadies a native touch scroll, so it keeps up.
         cur[i] += (t - cur[i]) * 0.2;
         if (Math.abs(t - cur[i]) > 0.05) moving = true;

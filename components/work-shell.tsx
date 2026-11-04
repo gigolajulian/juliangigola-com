@@ -22,6 +22,7 @@ import {
   type WorkView,
 } from "@/lib/work-view";
 import { matches, media } from "@/lib/device";
+import { mplan } from "@/lib/mplan";
 
 /* JellyRadio's figures, as Julian's example set them, with the bounce
    taken down by a third (from 0.4) and the swell of the lit chip halved
@@ -546,6 +547,8 @@ export function WorkShell({
         /* Seated still, the transform is written, not animated: motion's
            zero-length animate read each chip's computed transform first,
            32ms of style on the frame the page arrives. */
+        // MOTION-PLAN.md item 5 (`?mplan=hover`): the chips change color only, no jelly.
+        if (mplan("hover")) return void c.style.removeProperty("transform");
         if (still || calm) {
           c.style.transform =
             x === 0 && s === 1 ? "" : `translateX(${x}px) scale(${s})`;
