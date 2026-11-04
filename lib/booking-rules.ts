@@ -45,6 +45,7 @@ export const EVENTS: Record<string, Rule> = {
   digitals: { title: "Studio digitals", length: 45, ...SHOOT },
   editorial: { title: "Editorial call", notice: 1440, ahead: 180, ...CALL },
   campaign: { title: "Brand & Campaign Call", notice: 1440, ahead: 180, ...CALL },
+  consultation: { title: "Consultation", notice: 120, ...CALL },
   "music-call": { title: "Music call", notice: 120, ...CALL },
   "wedding-call": { title: "Wedding call", notice: 120, ...CALL },
 };
