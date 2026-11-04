@@ -3,6 +3,7 @@ import { enquiry, enquiryKey, summary, whenPT } from "@/lib/inbox";
 import { openNow } from "@/lib/slots";
 import { EVENTS } from "@/lib/booking-rules";
 import { lock, recordLead, type BookResult } from "@/lib/booking-engine";
+import { manageLinks } from "@/lib/booking-token";
 
 /* ── the $100 deposit ─────────────────────────────────────────────
  * Julian (2026-10-16): the four paid sessions take a $100 deposit on the
@@ -254,6 +255,7 @@ type Env = {
   GCAL_OAUTH?: string;
   BOOKING_LOCK?: CloudflareEnv["BOOKING_LOCK"];
   NOTION_TOKEN?: string;
+  BOOKING_SECRET?: string;
 };
 
 /** "Visa ending 4242", from the charge; nothing if Stripe will not say. */
@@ -277,7 +279,7 @@ const NEXT = {
 /** A plain mail to hello@ saying how a deposit ended. A failed send is logged, never a failed webhook. */
 type Attachment = { content: string; filename: string; type: string; disposition: "attachment" };
 
-async function mail(email: Env["EMAIL"], subject: string, lines: string[], who?: { name: string; email: string }, attachments: Attachment[] = []) {
+export async function mail(email: Env["EMAIL"], subject: string, lines: string[], who?: { name: string; email: string }, attachments: Attachment[] = []) {
   try {
     await email?.send({
       to: MAIL_TO,
@@ -404,7 +406,7 @@ export async function settle(env: Env, intent: string, metadata: { [k: string]: 
           end: booking.end,
           uid: booking.uid,
           deposit: { ref: intent, at: new Date().toISOString(), card: await cardOf(env.STRIPE_SECRET_KEY, intent) },
-          ...(own ? { manage: null } : {}),
+          ...(own?.ok ? { manage: await manageLinks(env.BOOKING_SECRET, own.record) } : {}),
         });
         return "booked";
       }

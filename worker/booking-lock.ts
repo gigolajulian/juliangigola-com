@@ -1,4 +1,4 @@
-import { bookOwn, findBooking, type BookInput, type Store } from "../lib/booking-engine";
+import { bookOwn, cancelOwn, findBooking, rescheduleOwn, type BookInput, type Store } from "../lib/booking-engine";
 
 /* ── the booking lock: one Durable Object for hello@'s calendar ─────
  * Every booking passes through `serial`, so a recheck and its insert
@@ -28,6 +28,11 @@ export class BookingLock {
     const store = this.state.storage;
     try {
       if (op === "book") return Response.json(await this.serial(() => bookOwn(store, this.env.GCAL_OAUTH, arg as BookInput)));
+      if (op === "cancel") return Response.json(await this.serial(() => cancelOwn(store, this.env.GCAL_OAUTH, String(arg))));
+      if (op === "reschedule") {
+        const { id, start } = arg as { id: string; start: string };
+        return Response.json(await this.serial(() => rescheduleOwn(store, this.env.GCAL_OAUTH, id, start)));
+      }
       if (op === "get") return Response.json({ record: (await findBooking(store, String(arg))) ?? null });
       return Response.json({ error: "unknown op" }, { status: 400 });
     } catch (e) {

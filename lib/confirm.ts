@@ -64,7 +64,10 @@ export function confirmMail(c: Confirm) {
   const rows: [string, string][] = [["Session", c.session], ["When", at], ...(c.where ? [["Where", c.where] as [string, string]] : []), ["Booking", c.uid.slice(0, 8)]];
   const paid = c.deposit && {
     rows: [["Paid", fmt({ month: "short", day: "numeric", year: "numeric" }).format(new Date(c.deposit.at))], ...(c.deposit.card ? [["Card", c.deposit.card]] : []), ["Ref", c.deposit.ref.slice(0, 11)]] as [string, string][],
-    note: "The balance is due after the shoot. The deposit moves with a new date, or is refunded up to 2 business days before.",
+    // The site's own engine refunds by Julian's 48-hour rule (`lib/booking-rules.ts`).
+    note: c.manage !== undefined
+      ? "The balance is due after the shoot. The deposit moves with a new date, or is refunded if you cancel 48 hours or more before."
+      : "The balance is due after the shoot. The deposit moves with a new date, or is refunded up to 2 business days before.",
   };
   const { reschedule, cancel } = c.manage ?? { reschedule: `https://cal.com/reschedule/${encodeURIComponent(c.uid)}`, cancel: `https://cal.com/booking/${encodeURIComponent(c.uid)}?cancel=true` };
   const links = c.manage !== null;
@@ -137,5 +140,22 @@ export async function sendConfirm(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefi
     } catch (e2) {
       console.error("confirm mail, no logo", String(e2));
     }
+  }
+}
+
+/** The client's note that a booking is cancelled, plain, from book@. A failed send is logged, never a failed cancel. */
+export async function sendCancelled(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefined, c: { name: string; email: string; session: string; start: string; end?: string }, refund: "refunded" | "kept" | "none" | "late") {
+  if (!mailer || !c.email) return;
+  const money = {
+    refunded: "Your $100 deposit is refunded to your card. Banks take 5 to 10 days to show it.",
+    late: "The refund did not go through on its own. I'll send it by hand and email you.",
+    kept: "It was under 48 hours before the session, so the $100 deposit is not refunded.",
+    none: "",
+  }[refund];
+  const text = [`Hi ${first(c.name)},`, "", `Your ${c.session.toLowerCase()} on ${when(c.start, c.end)} is cancelled.`, money, "", `Book another time: ${SITE}/book`, "", "Questions? Reply to this email."].filter((l, i, a) => l || a[i - 1]).join("\n");
+  try {
+    await mailer.send({ to: { email: c.email, name: c.name }, from: FROM, replyTo: REPLY_TO, subject: `Cancelled: ${c.session}, ${when(c.start, c.end)}`, text });
+  } catch (e) {
+    console.error("cancel mail", String(e));
   }
 }

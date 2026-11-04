@@ -58,6 +58,9 @@ const recKey = (id: string) => `b:${id}`;
 const intentKey = (intent: string) => `i:${intent}`;
 const newId = () => crypto.randomUUID().replace(/-/g, "").slice(0, 16);
 
+/** What the client's page may show: no email, no phone, no deposit id. */
+export const managed = (r: BookingRecord) => ({ id: r.id, slug: r.slug, session: r.session, start: r.start, end: r.end, where: r.where, paid: !!r.intent, cancelled: !!r.cancelled });
+
 /** The record by its id. */
 export const findBooking = (store: Store, id: string) => store.get<BookingRecord>(recKey(id));
 export const saveBooking = (store: Store, r: BookingRecord) => store.put(recKey(r.id), r);
@@ -161,6 +164,46 @@ export async function recordLead(env: { INBOX?: CloudflareEnv["INBOX"]; NOTION_T
     console.error("booking inbox", String(e));
   }
   await toNotion(env.NOTION_TOKEN, { stored, status: r.call ? "Call booked" : "Confirmed", kind: r.slug, calUid: r.id, shootDate: r.call ? undefined : r.start });
+}
+
+export type ChangeResult = { ok: true; record: BookingRecord; was: BookingRecord } | { ok: false; reason: "missing" | "past" | "cancelled" | "taken" };
+
+/** Cancels booking `id`: the event leaves hello@'s calendar, the record is marked. Call it only through the lock. */
+export async function cancelOwn(store: Store, secret: string | undefined, id: string): Promise<ChangeResult> {
+  const was = await findBooking(store, id);
+  if (!was) return { ok: false, reason: "missing" };
+  if (was.cancelled) return { ok: false, reason: "cancelled" };
+  if (Date.parse(was.start) <= Date.now()) return { ok: false, reason: "past" };
+  try {
+    await gcal(secret, `/calendars/primary/events/${encodeURIComponent(was.eventId)}?sendUpdates=none`, { method: "DELETE" });
+  } catch (e) {
+    // Deleted by hand on the calendar already: the cancel still stands.
+    if (!/ (404|410)/.test(String(e))) throw e;
+  }
+  const record = { ...was, cancelled: new Date().toISOString() };
+  await saveBooking(store, record);
+  return { ok: true, record, was };
+}
+
+/** Moves booking `id` to `start` if that time is open. Call it only through the lock. */
+export async function rescheduleOwn(store: Store, secret: string | undefined, id: string, start: string): Promise<ChangeResult> {
+  const was = await findBooking(store, id);
+  if (!was) return { ok: false, reason: "missing" };
+  if (was.cancelled) return { ok: false, reason: "cancelled" };
+  if (Date.parse(was.start) <= Date.now()) return { ok: false, reason: "past" };
+  const rule = EVENTS[was.slug];
+  const t = Date.parse(start);
+  if (!rule || isNaN(t) || !(await openNow(secret, was.slug, start, was))) return { ok: false, reason: "taken" };
+  const end = new Date(t + rule.length * 6e4).toISOString();
+  await gcal(secret, `/calendars/primary/events/${encodeURIComponent(was.eventId)}?sendUpdates=none`, {
+    method: "PATCH",
+    body: { start: { dateTime: new Date(t).toISOString(), timeZone: TZ }, end: { dateTime: end, timeZone: TZ } },
+  });
+  // A moved booking is reminded again before its new time.
+  const record: BookingRecord = { ...was, start: new Date(t).toISOString(), end };
+  delete record.reminded;
+  await saveBooking(store, record);
+  return { ok: true, record, was };
 }
 
 /* ── reaching the lock from a route ───────────────────────────── */

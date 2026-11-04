@@ -49,6 +49,10 @@ export const EVENTS: Record<string, Rule> = {
   "wedding-call": { title: "Wedding call", notice: 120, ...CALL },
 };
 
+/** Julian (2026-11-03): a cancel this many hours or more before the start refunds the $100; under it, none. */
+export const REFUND_HOURS = 48;
+export const refundable = (r: { intent?: string; start: string }, now = Date.now()) => !!r.intent && Date.parse(r.start) - now >= REFUND_HOURS * 36e5;
+
 /* Julian (2026-11-03): the engine stays Cal.com until he cuts over. `?ownbook`
    on the address tries the site's own in the browser; the build's
    NEXT_PUBLIC_BOOKING_ENGINE (.env.production) and the Worker's
