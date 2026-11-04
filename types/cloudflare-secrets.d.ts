@@ -72,4 +72,12 @@ interface CloudflareEnv {
    *   wrangler versions secret put NOTION_TOKEN
    */
   NOTION_TOKEN?: string;
+
+  /**
+   * hello@'s Google Calendar for the site's own booking engine
+   * (`lib/gcal.ts`): JSON `{client_id, client_secret, refresh_token}` of an
+   * Internal OAuth client, scopes calendar.events and calendar.freebusy.
+   * Made and set by `node scripts/gsc-auth.mjs <client.json> cal`.
+   */
+  GCAL_OAUTH?: string;
 }
