@@ -288,8 +288,14 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 /* Name over discipline at every width: side by side, a tile's discipline
    sat flush right, 12px from the next tile's name, and the row read as
    one line ("BRAND CAMPAIGNS I WANNA BE A HUMAN", iPad, 2026-11-02). */
-.v3 .wt figcaption{display:flex;flex-direction:column;gap:2px;padding-top:10px}
-.v3 .wt figcaption>:first-child{text-wrap:pretty} /* no lone word ("VOL. 1") on a last line */
+/* Cover captions, grid and strip: name, then discipline, over a scrim. pretty: no lone word ("VOL. 1") on a last line. */
+.v3 :is(.wt-n,.sc-n){position:absolute;inset:auto 0 0;display:flex;flex-direction:column;pointer-events:none;color:rgb(var(--on-photo));background:linear-gradient(to top,rgb(var(--scrim) / .78),rgb(var(--scrim) / 0))}
+.v3 :is(.wt-n,.sc-n) b{font-family:var(--display);font-weight:900;line-height:.88;letter-spacing:-.05em;text-transform:uppercase;text-wrap:pretty}
+/* A name fits about two lines of its cover (width x 2.6 / letters) and its longest word fits one
+   line (width x 1.4 / letters, a 900 cap is about .7em wide), never above the base size. */
+.v3 :is(.wt .ph,.sc>a){container-type:inline-size}
+.v3 .wt-n{gap:6px;padding:40px 14px 12px}.v3 .wt-n b{font-size:min(clamp(1.25rem,calc(1.6*var(--v3u)),1.75rem),calc((100cqi - 28px) * 2.6 / var(--n)),calc((100cqi - 28px) * 1.4 / var(--w)))}
+.v3 .sc-n{gap:10px;padding:64px 24px 22px}.v3 .sc-n b{font-size:min(clamp(2.5rem,calc(4.6*var(--v3u)),5rem),calc((100cqi - 48px) * 2.6 / var(--n)),calc((100cqi - 48px) * 1.4 / var(--w)))}
 @media (max-width:1000px){.v3 .wgrid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (max-width:700px){.v3 .wgrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 10px}}
 /* A gallery chip's frames (Automotive, Places…): every cell one height, a
@@ -500,8 +506,6 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .sc{flex:none;position:relative;margin:0;height:100%;aspect-ratio:4/5;border-radius:4px;overflow:hidden;background:var(--card)}
 .v3 .sc.wide{aspect-ratio:3/2}
 .v3 .sc img{width:100%;height:100%;object-fit:cover;display:block}
-.v3 .sc figcaption{position:absolute;inset:auto 0 0;display:flex;flex-direction:column;gap:8px;padding:64px 24px 22px;color:rgb(var(--on-photo));background:linear-gradient(to top,rgb(var(--scrim) / .78),rgb(var(--scrim) / 0))}
-.v3 .sc b{font:900 clamp(2rem,calc(3.4*var(--v3u)),3.5rem)/.9 var(--display);letter-spacing:-.05em;text-transform:uppercase}
 .v3 .wbar{height:2px;margin:14px var(--gr) 16px var(--g);background:var(--line)}
 .v3 .wbar i{display:block;height:100%;width:0;background:var(--ink)}
 .v3 #p-work.strip-on{height:100svh;min-height:0;overflow:hidden}
