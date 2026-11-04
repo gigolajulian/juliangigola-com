@@ -36,6 +36,7 @@ export async function POST(request: Request) {
   } catch {
     return json({ status: "error", error: { message: "Could not reach the calendar." } }, 502);
   }
+  if (!out.ok && out.reason === "unknown") return json({ status: "error", error: { message: "Unknown session." } }, 400);
   if (!out.ok) return json({ status: "error", error: { message: "That time is already booked." } }, 409);
 
   const r = out.record;
