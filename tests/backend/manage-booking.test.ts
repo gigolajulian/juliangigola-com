@@ -90,7 +90,8 @@ describe("the link", () => {
     expect(await tokenOpens(SECRET, "abd", t)).toBe(false);
     expect(await tokenOpens("other", "abc", t)).toBe(false);
     expect(await tokenOpens(undefined, "abc", t)).toBe(false);
-    expect(await tokenOpens(SECRET, "abc", t.replace(/.$/, (c) => (c === "A" ? "B" : "A")))).toBe(false);
+    // The first signature character: all 6 bits count (the last one carries 2 padding bits, so A to D decode alike).
+    expect(await tokenOpens(SECRET, "abc", t.replace(/\.(.)/, (_, c) => "." + (c === "A" ? "B" : "A")))).toBe(false);
     expect(await tokenOpens(SECRET, "abc", await bookingToken(SECRET, "abc", Date.now() - 1000))).toBe(false);
     expect(await manageLinks(undefined, { id: "abc", start: new Date().toISOString() })).toBeNull();
   });

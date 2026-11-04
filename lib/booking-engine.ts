@@ -143,7 +143,7 @@ export async function bookOwn(store: Store, secret: string | undefined, b: BookI
  * `app/api/cal` files Cal.com's. `deposit` is the Stripe link. Never
  * throws: the booking is made, a failed copy must not undo it.
  */
-export async function recordLead(env: { INBOX?: CloudflareEnv["INBOX"]; NOTION_TOKEN?: string }, r: BookingRecord, deposit?: string) {
+export async function recordBooking(env: { INBOX?: CloudflareEnv["INBOX"]; NOTION_TOKEN?: string }, r: BookingRecord, deposit?: string) {
   const now = Date.now();
   const id = crypto.randomUUID();
   const stored = bookingEnquiry(
