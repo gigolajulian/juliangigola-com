@@ -46,6 +46,16 @@ describe("fold", () => {
     expect(l.snoozeUntil).toBeUndefined();
   });
 
+  it("unsnoozing by hand keeps the stage and puts it back under Needs me", () => {
+    let l = fold(null, email, { event: { at: at(1), kind: "inquiry" } });
+    l = fold(l, email, { event: { at: at(2), kind: "stage" }, stage: "Quoted" });
+    l = { ...l, unread: false };
+    l = fold(l, email, { event: { at: at(3), kind: "snooze" }, snoozeUntil: at(50) });
+    l = fold(l, email, { event: { at: at(4), kind: "snooze", note: "woken" }, snoozeUntil: "" });
+    expect(l).toMatchObject({ stage: "Quoted", unread: true });
+    expect(l.snoozeUntil).toBeUndefined();
+  });
+
   it("logs a mail on the timeline without making it news or moving the stage", () => {
     let l = fold(null, email, { event: { at: at(1), kind: "call", ref: "c1" } });
     l = { ...l, unread: false };

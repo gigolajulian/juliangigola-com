@@ -132,7 +132,8 @@ export function AdminLeads() {
   }, []);
 
   /** A change from the open lead, reflected in its row at once. */
-  const changed = (l: Lead) => setLeads((rows) => rows?.map((r) => (r.email === l.email ? { ...r, ...l, id: r.id } : r)) ?? null);
+  // A cleared snooze comes back without the key, so set it outright.
+  const changed = (l: Lead) => setLeads((rows) => rows?.map((r) => (r.email === l.email ? { ...r, ...l, snoozeUntil: l.snoozeUntil, id: r.id } : r)) ?? null);
 
   if (error === "Not authorized." || error?.startsWith("GitHub did not accept"))
     return (
@@ -353,6 +354,7 @@ function Detail({ summary, call, onChange, onBack }: { summary: LeadSummary; cal
         </a>
         <a href={book} target="_blank" rel="noreferrer" className={btn}>Send booking link</a>
         <button type="button" onClick={() => setSnoozing((v) => !v)} aria-expanded={snoozing} className={btn}>Snooze</button>
+        {snoozed(l) ? <button type="button" className={btn} onClick={() => patch({ snoozeUntil: "" }).then(() => setSnoozing(false))}>Unsnooze</button> : null}
         <span className="flex-1" />
         {lead?.notion ? <a href={`https://www.notion.so/${lead.notion.replace(/-/g, "")}`} target="_blank" rel="noreferrer" className={btn}>Notion</a> : null}
         {lead?.deposit ? <a href={lead.deposit} target="_blank" rel="noreferrer" className={cn(btn, "text-destructive")}>Deposit in Stripe</a> : null}
@@ -369,7 +371,6 @@ function Detail({ summary, call, onChange, onBack }: { summary: LeadSummary; cal
           {[["1 day", 1], ["3 days", 3], ["1 week", 7]].map(([t, d]) => (
             <button key={t} type="button" className={btn} onClick={() => patch({ snoozeUntil: new Date(now() + Number(d) * DAY).toISOString() }).then(() => setSnoozing(false))}>{t}</button>
           ))}
-          {l.snoozeUntil ? <button type="button" className={btn} onClick={() => patch({ snoozeUntil: "" }).then(() => setSnoozing(false))}>Wake now</button> : null}
         </div>
       ) : null}
 
@@ -441,7 +442,7 @@ function line(e: LeadEvent): string {
     case "no-deposit": return "Booked without a deposit";
     case "deposit-stuck": return `Deposit stuck${e.note ? `: ${e.note}` : ""}`;
     case "stage": return `Moved to ${e.note}`;
-    case "snooze": return e.note === "woken" ? "Woken" : `Snoozed until ${day(e.note ?? "")}`;
+    case "snooze": return e.note === "woken" ? "Unsnoozed" : `Snoozed until ${day(e.note ?? "")}`;
     case "mail": return `Mail to ${e.mail?.to === "client" ? "them" : "hello@"}: ${e.note ?? ""}`;
   }
 }
