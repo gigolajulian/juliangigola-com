@@ -161,18 +161,18 @@ export function AdminLeads() {
       ref={fit}
       className="grid overflow-hidden rounded-[14px] lg:grid-rows-[minmax(0,1fr)] border border-border bg-background text-foreground normal-case lg:grid-cols-[200px_minmax(0,440px)_minmax(0,1fr)] [&_button]:normal-case [&_h2]:normal-case [&_h3]:normal-case"
     >
-      <nav aria-label="Lead filters" className={cn("border-border p-3 lg:min-h-0 lg:overflow-y-auto lg:border-r", open && "max-lg:hidden")}>
+      <nav aria-label="Lead filters" className={cn("min-w-0 border-border p-3 lg:min-h-0 lg:overflow-y-auto lg:border-r", open && "max-lg:hidden")}>
         <div className="flex gap-2 overflow-x-auto lg:grid lg:gap-0.5">
           {(["needs", "open"] as const).map((f) => (
             <FilterButton key={f} on={filter === f} n={count(f)} onClick={() => setFilter(f)}>{f === "needs" ? "Needs me" : "All open"}</FilterButton>
           ))}
           <p className="px-3 pb-2 pt-4 font-mono text-[12.5px] text-muted-foreground max-lg:hidden">By stage</p>
           {STAGES.filter((s) => !closed(s)).map((s) => (
-            <FilterButton key={s} on={filter === s} n={count(s)} onClick={() => setFilter(s)} wide>{s}</FilterButton>
+            <FilterButton key={s} on={filter === s} n={count(s)} onClick={() => setFilter(s)}>{s}</FilterButton>
           ))}
           <p className="px-3 pb-2 pt-4 font-mono text-[12.5px] text-muted-foreground max-lg:hidden">Closed</p>
           {(["Delivered", "Lost", "snoozed"] as const).map((f) => (
-            <FilterButton key={f} on={filter === f} n={count(f)} onClick={() => setFilter(f)} wide>{f === "snoozed" ? "Snoozed" : f}</FilterButton>
+            <FilterButton key={f} on={filter === f} n={count(f)} onClick={() => setFilter(f)}>{f === "snoozed" ? "Snoozed" : f}</FilterButton>
           ))}
         </div>
       </nav>
@@ -265,7 +265,7 @@ function pass(l: LeadSummary, f: Filter) {
 }
 const label = (f: Filter) => (f === "needs" ? "Needs me" : f === "open" ? "All open" : f === "snoozed" ? "Snoozed" : f);
 
-function FilterButton({ on, n, wide, onClick, children }: { on: boolean; n: number; wide?: boolean; onClick: () => void; children: React.ReactNode }) {
+function FilterButton({ on, n, onClick, children }: { on: boolean; n: number; onClick: () => void; children: React.ReactNode }) {
   return (
     <button
       type="button"
@@ -274,7 +274,6 @@ function FilterButton({ on, n, wide, onClick, children }: { on: boolean; n: numb
       className={cn(
         "flex min-h-11 shrink-0 items-center justify-between gap-4 rounded-lg px-3 text-[15px] transition-colors duration-200",
         on ? "bg-accent/12 font-semibold text-accent" : "hoverable:hover:bg-card",
-        wide && !on && "max-lg:hidden",
       )}
     >
       <span>{children}</span>
