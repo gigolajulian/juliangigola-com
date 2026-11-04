@@ -26,7 +26,10 @@ export function burst(sizes: string[][], heroes: { d: [number, string][]; l: [nu
   if ((root.dataset.splash !== "burst" && !alone) || root.dataset.intro !== "1") return;
   // the hero at the width the page's srcset picks: the window in device pixels, rounded up the ladder
   const px = innerWidth * devicePixelRatio, rung = (l: [number, string][]) => (l.find(([w]) => w >= px) ?? l[l.length - 1])[1];
-  const frames = alone ? [] : sizes.map((f) => f[big]), hero = { d: rung(heroes.d), l: rung(heroes.l) };
+  /* MOTION-PLAN.md item 11 (`?mplan=splash`, phase 3 pick b): 4 covers held 350ms each on an
+     even beat, drop 600, glide 1000 on `move`. Replay with ?intro=1. */
+  const SPL = !!root.dataset.mplan?.split(" ").includes("splash");
+  const frames = alone ? [] : sizes.slice(0, SPL ? 4 : sizes.length).map((f) => f[big]), hero = { d: rung(heroes.d), l: rung(heroes.l) };
   // inside the sheet's HTML block, which React leaves alone when it hydrates
   const layer = document.querySelector("#jg-intro .jg-sheet-wrap");
   if (!layer) return;
@@ -36,13 +39,13 @@ export function burst(sizes: string[][], heroes: { d: [number, string][]; l: [nu
   const STAGGER = 18; // between letters of the wordmark rising
   const RISE = 460; // one letter rising out of its line
   const HOLD = 80; // the wordmark whole, once everything has loaded
-  const DROP = 520; // the first frame tipping in and settling flat over the wordmark
-  const BEAT = [140, 60]; // the run's cuts, first and last: it quickens as it goes
-  const LAND = 780; // the hero gliding from the frame into its place, the page coming up round it
+  const DROP = SPL ? 600 : 520; // the first frame tipping in and settling flat over the wordmark
+  const BEAT = SPL ? [350, 350] : [140, 60]; // the run's cuts, first and last: it quickens as it goes
+  const LAND = SPL ? 1000 : 780; // the hero gliding from the frame into its place, the page coming up round it
   const CLEAR = 220; // the splash's copy of the hero giving way to the page's own
   const LOAD = 3500; // the longest the wordmark waits for the loader to fill
-  const MAX = 6000; // the whole splash, whatever has not arrived by then is skipped
-  const EASE = "cubic-bezier(0.65, 0, 0.35, 1)";
+  const MAX = SPL ? 8000 : 6000; // the whole splash, whatever has not arrived by then is skipped
+  const EASE = SPL ? "cubic-bezier(0.77, 0, 0.175, 1)" : "cubic-bezier(0.65, 0, 0.35, 1)";
   const OUT_EASE = "cubic-bezier(0.2, 0.7, 0.2, 1)"; // the page's own rise (`--land`, splash.css)
   const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
