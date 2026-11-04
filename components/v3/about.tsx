@@ -6,9 +6,10 @@ import { AboutGallery } from "@/components/v3/about-gallery";
 /* JG V3 About (master v50, /about): portrait gallery, the justified bio, facts,
    What I do, the two CTAs, and the client marks as a grid. */
 
-/* Locked copy (DESIGN.md, Bio). No soft hyphens: words stay whole (Julian, 2026-11-04). */
+/* Locked copy (DESIGN.md, Bio). No soft hyphens: words stay whole, and the place names carry
+   no-break spaces so they never split (Julian, 2026-11-04). */
 const BIO =
-  "I photograph people, mostly for fashion, music and brands. I shoot editorials and campaigns, and help labels and musicians shape how they’re seen. I also cover the moments people want to keep: headshots, portraits, graduations and weddings across San Francisco, San Jose and the Bay Area. Growing up Assyrian American, between cultures, taught me to watch from slightly outside the frame.";
+  "I photograph people, mostly for fashion, music and brands. I shoot editorials and campaigns, and help labels and musicians shape how they’re seen. I also cover the moments people want to keep: headshots, portraits, graduations and weddings across San Francisco, San Jose and the Bay Area. Growing up Assyrian American, between cultures, taught me to watch from slightly outside the frame.";
 
 const DOES = ["Editorials", "Still photography", "Camera operation", "Brand imagery", "Post-production", "Creative direction"];
 
