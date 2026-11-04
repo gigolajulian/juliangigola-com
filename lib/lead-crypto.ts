@@ -20,6 +20,9 @@ const unb64 = (s: string) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
 export type Sealer = {
   /** The person's id: an HMAC of their address, 32 hex characters. */
   id(email: string): Promise<string>;
+  /** The id, then the one from before Gmail dots were ignored when it differs:
+      `gone:` tombstones carry no address, so they keep the old id. */
+  ids(email: string): Promise<string[]>;
   /** "<iv>.<ciphertext>", base64. A fresh IV every time. */
   seal(value: unknown): Promise<string>;
   open<T>(sealed: string): Promise<T>;
@@ -56,10 +59,15 @@ async function make(raw: Uint8Array): Promise<Sealer> {
   const derive = async (label: string) => new Uint8Array(await crypto.subtle.digest("SHA-256", new Uint8Array([...enc.encode(label), ...raw])));
   const aes = await crypto.subtle.importKey("raw", await derive("jg-leads:seal"), "AES-GCM", false, ["encrypt", "decrypt"]);
   const mac = await crypto.subtle.importKey("raw", await derive("jg-leads:id"), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const hmac = async (text: string) => {
+    const sig = new Uint8Array(await crypto.subtle.sign("HMAC", mac, enc.encode(text)));
+    return [...sig.slice(0, 16)].map((b) => b.toString(16).padStart(2, "0")).join("");
+  };
   return {
-    async id(email) {
-      const sig = new Uint8Array(await crypto.subtle.sign("HMAC", mac, enc.encode(canonical(email))));
-      return [...sig.slice(0, 16)].map((b) => b.toString(16).padStart(2, "0")).join("");
+    id: (email) => hmac(canonical(email)),
+    async ids(email) {
+      const [now, before] = await Promise.all([hmac(canonical(email)), hmac(email.trim().toLowerCase())]);
+      return now === before ? [now] : [now, before];
     },
     async seal(value) {
       const iv = crypto.getRandomValues(new Uint8Array(12));

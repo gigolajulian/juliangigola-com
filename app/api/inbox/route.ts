@@ -337,7 +337,7 @@ export async function POST(request: Request) {
     if ("error" in lead) return json(lead, 400);
     const id = await seal.id(lead.email);
     if (await readLead(gate.inbox, seal, id)) return json({ error: "That person is already a lead.", id }, 409);
-    await gate.inbox.delete(`gone:${id}`);
+    await Promise.all((await seal.ids(lead.email)).map((i) => gate.inbox.delete(`gone:${i}`)));
     await writeLead(gate.inbox, seal, id, lead);
     return json({ lead, id });
   }
@@ -364,7 +364,8 @@ export async function POST(request: Request) {
   let updated = 0;
   for (const [email, rows] of people) {
     const id = await seal.id(email);
-    if ((await gate.inbox.get(`gone:${id}`)) !== null) continue;
+    const gone = await Promise.all((await seal.ids(email)).map((i) => gate.inbox.get(`gone:${i}`)));
+    if (gone.some((g: string | null) => g !== null)) continue;
     const before = await readLead(gate.inbox, seal, id);
     const after: Lead | null = backfillLead(before, email, rows);
     if (!after) continue;
