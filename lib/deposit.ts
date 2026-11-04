@@ -3,7 +3,7 @@ import { enquiry, enquiryKey, summary, whenPT } from "@/lib/inbox";
 import { recordLead } from "@/lib/leads";
 import { openNow } from "@/lib/slots";
 import { EVENTS } from "@/lib/booking-rules";
-import { lock, recordLead, type BookResult } from "@/lib/booking-engine";
+import { lock, recordBooking, type BookResult } from "@/lib/booking-engine";
 import { manageLinks } from "@/lib/booking-token";
 
 /* ── the $100 deposit ─────────────────────────────────────────────
@@ -400,7 +400,7 @@ export async function settle(env: Env, intent: string, metadata: { [k: string]: 
         await put({ status: "booked", booking: { uid: booking.uid, start: booking.start } });
         await tell(env, "booked", b, link, intent);
         // Cal.com's webhook files its own bookings; the site files its own here.
-        if (own?.ok) await recordLead(env, own.record, dashboardLink(intent, env.STRIPE_SECRET_KEY));
+        if (own?.ok) await recordBooking(env, own.record, dashboardLink(intent, env.STRIPE_SECRET_KEY));
         await sendConfirm(env.CLIENT_EMAIL, {
           ...b,
           session: SESSION[b.slug] ?? b.slug,
