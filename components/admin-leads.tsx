@@ -670,6 +670,8 @@ function line(e: LeadEvent): string {
     case "snooze": return e.note === "woken" ? "Unsnoozed" : `Snoozed until ${day(e.note ?? "")}`;
     case "archive": return e.note === "in" ? "Archived" : "Unarchived";
     case "trash": return e.note === "in" ? "Moved to trash" : "Recovered from trash";
+    case "replied": return `You replied${e.note ? `: ${e.note}` : ""}`;
+    case "wrote": return `They wrote${e.note ? `: ${e.note}` : ""}`;
     case "mail": return `Mail to ${e.mail?.to === "client" ? "them" : "hello@"}: ${e.note ?? ""}`;
   }
 }

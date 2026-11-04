@@ -30,7 +30,8 @@ export type Stage = (typeof STAGES)[number];
 /** What happened, as it reached the site. `stage` is Julian's own move. */
 export type LeadEvent = {
   at: string;
-  kind: "inquiry" | "call" | "booking" | "no-deposit" | "deposit-stuck" | "stage" | "snooze" | "mail" | "archive" | "trash";
+  kind: "inquiry" | "call" | "booking" | "no-deposit" | "deposit-stuck" | "stage" | "snooze" | "mail" | "replied" | "wrote" | "archive" | "trash";
+  /* "replied" / "wrote": mail between hello@ and them in Gmail, ref = the Gmail message id (`lib/gmail-sync.ts`). */
   /** The raw row (`msg:` key), Cal.com uid or Stripe intent, so a retry folds in once. */
   ref?: string;
   /** Booking time, session, new stage, a mail's subject: a short line for the timeline. */
@@ -132,6 +133,11 @@ export function fold(lead: Lead | null, email: string, c: Change): Lead {
   }
   // A mail the site sent is a line on the timeline, not news.
   if (event.kind === "mail") return tidy(next);
+  // His own reply from Gmail answers the inquiry: Replied, and off Needs me.
+  if (event.kind === "replied") {
+    if (next.stage === "Inquiry") Object.assign(next, { stage: "Replied", stageAt: event.at });
+    return tidy({ ...next, unread: false });
+  }
   if (event.kind === "snooze") {
     next.snoozeUntil = c.snoozeUntil || undefined;
     // Unsnoozed by hand: back under Needs me.

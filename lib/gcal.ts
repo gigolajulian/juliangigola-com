@@ -40,10 +40,10 @@ export async function gcalToken(secret: string | undefined, now = Date.now()): P
   return tok.access_token;
 }
 
-/** A Calendar API call as hello@. JSON in, JSON out; a non-2xx throws with Google's status. */
+/** A Google API call as hello@: a Calendar path, or a full URL (Gmail). JSON in, JSON out; a non-2xx throws with Google's status. */
 export async function gcal<T = { [k: string]: unknown }>(secret: string | undefined, path: string, init: { method?: string; body?: unknown } = {}): Promise<T> {
   const call = async () =>
-    fetch(`${CALENDAR}${path}`, {
+    fetch(path.startsWith("https:") ? path : `${CALENDAR}${path}`, {
       method: init.method ?? (init.body ? "POST" : "GET"),
       headers: { authorization: `Bearer ${await gcalToken(secret)}`, "content-type": "application/json" },
       body: init.body ? JSON.stringify(init.body) : undefined,
@@ -57,6 +57,6 @@ export async function gcal<T = { [k: string]: unknown }>(secret: string | undefi
   }
   if (res.status === 204) return {} as T;
   const out = (await res.json().catch(() => ({}))) as T & { error?: { message?: string } };
-  if (!res.ok) throw new Error(`Google Calendar ${path.split("?")[0]} ${res.status}: ${out.error?.message ?? ""}`.trim());
+  if (!res.ok) throw new Error(`Google ${path.split("?")[0]} ${res.status}: ${out.error?.message ?? ""}`.trim());
   return out;
 }

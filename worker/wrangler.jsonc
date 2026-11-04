@@ -22,7 +22,9 @@
   "migrations": [{ "tag": "v1", "new_sqlite_classes": ["BookingLock"] }],
 
   // The day-before reminders (`index.ts` `remind`): bookings 23 to 24 hours out.
-  "triggers": { "crons": ["0 * * * *"] },
+  // Every ten minutes: hello@'s Gmail into leads (`syncMail`, through SITE).
+  "triggers": { "crons": ["0 * * * *", "*/10 * * * *"] },
+  "services": [{ "binding": "SITE", "service": "juliangigola" }],
   "send_email": [{ "name": "CLIENT_EMAIL", "allowed_sender_addresses": ["book@juliangigola.com"] }],
 
   "observability": { "enabled": true }
