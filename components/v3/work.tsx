@@ -373,6 +373,21 @@ export function V3Work({
   );
   /* A gallery chip with no search shows its frames, not its one cover. */
   const shown = !q ? frames[filter] : undefined;
+  /* The strip runs a gallery out too: its chip shows every frame, and under
+     All a gallery's project opens into its frames where it sits, its caption
+     on the first. Cover Art stays one cell under All. */
+  const cells = React.useMemo(
+    (): { f?: FrameItem; p?: WorkItem }[] =>
+      shown
+        ? shown.map((f) => ({ f }))
+        : list.flatMap((p): { f?: FrameItem; p?: WorkItem }[] => {
+            const g = p.d.find((d) => d !== "Cover Art" && frames[d]);
+            const own = g ? frames[g].filter((f) => f.s === p.s) : [];
+            return own.length ? own.map((f, i) => ({ f, p: i ? undefined : p })) : [{ p }];
+          }),
+    [shown, list, frames],
+  );
+  const stripFrames = React.useMemo(() => cells.flatMap((c) => (c.f ? [c.f] : [])), [cells]);
   /* The strip asks for larger files than the grid, so on a phone its covers
      flew in empty and the photos popped in after (Julian, iPhone and iPad).
      The other view's first frames are fetched and decoded while this one is
@@ -755,7 +770,11 @@ export function V3Work({
             ))}
           </div>
         ) : null}
-        {shown ? <FrameView list={shown} at={at} onGo={setAt} onClose={closeView} /> : null}
+        {view === "strip" ? (
+          <FrameView list={stripFrames} at={at} onGo={setAt} onClose={closeView} />
+        ) : shown ? (
+          <FrameView list={shown} at={at} onGo={setAt} onClose={closeView} />
+        ) : null}
         {view === "grid" && !shown ? (
           <div className="wgrid">
             {list.map((p, n) => (
@@ -766,24 +785,39 @@ export function V3Work({
         {view === "strip" ? (
           <>
             <div className="wstrip" ref={strip} onScroll={stripBar}>
-              {list.map((p, n) => (
-                <figure key={p.s} className="sc" data-flip-id={p.s}>
-                  <Link href={`/portfolio/${p.s}`} aria-label={p.n}>
-                    <Image
-                      src={p.cover}
-                      alt={p.n}
-                      fill
-                      sizes={STRIP_SIZES}
-                      decoding="sync"
-                      loading={n < 4 ? "eager" : "lazy"}
-                    />
-                    <figcaption>
-                      <span className="lbl">{p.d.join(", ")}</span>
-                      <b>{p.n}</b>
-                    </figcaption>
-                  </Link>
-                </figure>
-              ))}
+              {cells.map(({ f, p }, n) => {
+                const cap = p ? (
+                  <figcaption>
+                    <span className="lbl">{p.d.join(", ")}</span>
+                    <b>{p.n}</b>
+                  </figcaption>
+                ) : null;
+                if (!f)
+                  return (
+                    <figure key={p!.s} className="sc" data-flip-id={p!.s}>
+                      <Link href={`/portfolio/${p!.s}`} aria-label={p!.n}>
+                        <Image src={p!.cover} alt={p!.n} fill sizes={STRIP_SIZES} decoding="sync" loading={n < 4 ? "eager" : "lazy"} />
+                        {cap}
+                      </Link>
+                    </figure>
+                  );
+                const i = stripFrames.indexOf(f);
+                return (
+                  <figure key={f.src} className={f.wide ? "sc wide" : "sc"} data-flip-id={f.src}>
+                    {/* Opens full size, as in the grid. */}
+                    <a
+                      href={f.src}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setAt(i);
+                      }}
+                    >
+                      <Image src={f.src} alt={f.alt} fill sizes={STRIP_SIZES} loading={n < 4 ? "eager" : "lazy"} />
+                      {cap}
+                    </a>
+                  </figure>
+                );
+              })}
             </div>
             <div className="wbar" ref={bar}>
               <i />
