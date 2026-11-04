@@ -48,6 +48,7 @@ jobs:
     # only where the build has one (time-picker.tsx), as live does.
     env:
       NEXT_PUBLIC_STRIPE_PK: pk_test_ci_placeholder
+      UI: ${{ github.event_name != 'push' && github.base_ref != 'main' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -55,14 +56,20 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      # The browsers and the browser half run on pull requests only: a push
-      # to main is code its pull request already ran them on (Julian, 2026-11-04).
+      # The browsers and the browser half run once per change, on its pull
+      # request into next. The next-to-main pull request and the push to main
+      # are code that already passed them (Julian, 2026-11-04). Hand runs keep them.
+      - uses: actions/cache@v4
+        if: env.UI == 'true'
+        with:
+          path: ~/.cache/ms-playwright
+          key: pw-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
       - run: npx playwright install --with-deps chromium firefox
-        if: github.event_name != 'push'
+        if: env.UI == 'true'
       - run: node scripts/test/gate.mjs --frontend
       # The browser half, which the commit hook leaves to CI.
       - run: node scripts/perf/run.mjs --ui --rebuild
-        if: github.event_name != 'push'
+        if: env.UI == 'true'
       - name: Frontend results
         if: always()
         uses: actions/upload-artifact@v4
