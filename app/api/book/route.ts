@@ -1,5 +1,5 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { lock, recordLead, type BookResult } from "@/lib/booking-engine";
+import { lock, recordBooking, type BookResult } from "@/lib/booking-engine";
 import { manageLinks } from "@/lib/booking-token";
 import { sendConfirm } from "@/lib/confirm";
 import { parseBooking } from "@/lib/deposit";
@@ -38,7 +38,7 @@ export async function POST(request: Request) {
   if (!out.ok) return json({ status: "error", error: { message: "That time is already booked." } }, 409);
 
   const r = out.record;
-  ctx.waitUntil(recordLead(env, r));
+  ctx.waitUntil(recordBooking(env, r));
   await sendConfirm(env.CLIENT_EMAIL, { name: r.name, email: r.email, session: r.session, call: true, start: r.start, end: r.end, where: r.where, uid: r.id, manage: await manageLinks(env.BOOKING_SECRET, r) });
   return json({ status: "success", data: { uid: r.id, start: r.start, end: r.end, where: r.where } });
 }
