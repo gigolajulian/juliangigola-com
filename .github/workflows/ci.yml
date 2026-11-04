@@ -55,10 +55,14 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      # The browsers and the browser half run on pull requests only: a push
+      # to main is code its pull request already ran them on (Julian, 2026-11-04).
       - run: npx playwright install --with-deps chromium firefox
+        if: github.event_name != 'push'
       - run: node scripts/test/gate.mjs --frontend
       # The browser half, which the commit hook leaves to CI.
       - run: node scripts/perf/run.mjs --ui --rebuild
+        if: github.event_name != 'push'
       - name: Frontend results
         if: always()
         uses: actions/upload-artifact@v4
