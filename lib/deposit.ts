@@ -125,8 +125,8 @@ const dayIn = (iso: string, tz: string, plus = 0) =>
   new Intl.DateTimeFormat("en-CA", { timeZone: tz }).format(new Date(Date.parse(iso) + plus * 864e5));
 
 /** Whether the start is still offered: by hello@'s calendar for the site's engine, else by Cal.com. */
-export async function isOpen(b: Booking, gcalSecret?: string): Promise<boolean> {
-  if (b.engine === "own") return openNow(gcalSecret, b.slug, b.start);
+export async function isOpen(b: Booking, gcalSecret?: string, kv?: Parameters<typeof openNow>[4]): Promise<boolean> {
+  if (b.engine === "own") return openNow(gcalSecret, b.slug, b.start, undefined, kv);
   const q = new URLSearchParams({
     username: USER,
     eventTypeSlug: b.slug,
@@ -405,7 +405,7 @@ export async function settle(env: Env, intent: string, metadata: { [k: string]: 
     try {
       // The site's engine rechecks and books in one step, inside its lock.
       const own = b.engine === "own" ? await lock<BookResult>(env, "book", { ...b, intent }) : null;
-      const booking = own ? (own.ok ? { uid: own.record.id, start: own.record.start, end: own.record.end } : null) : (await isOpen(b, env.GCAL_OAUTH)) ? await bookCal(b, intent) : null;
+      const booking = own ? (own.ok ? { uid: own.record.id, start: own.record.start, end: own.record.end } : null) : (await isOpen(b, env.GCAL_OAUTH, env.INBOX)) ? await bookCal(b, intent) : null;
       if (booking) {
         await put({ status: "booked", booking: { uid: booking.uid, start: booking.start } });
         await tell(env, "booked", b, link, intent);

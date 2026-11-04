@@ -14,7 +14,7 @@ export const CALENDARS = ["primary"];
 /* shortcut: freeBusy refuses long ranges, so it is asked in 60-day pieces. */
 const PIECE = 60 * 864e5;
 
-type Busy = { start: number; end: number };
+type Busy = { start: number; end: number; label?: string };
 
 /** How far `tz` is ahead of UTC at `ms`, in ms. */
 function offset(ms: number, tz: string) {
@@ -66,39 +66,130 @@ export function startsFor(rule: Rule, busy: Busy[], from: number, to: number, no
   return out;
 }
 
-/** What is busy on hello@'s calendars between `from` and `to`. */
-export async function busyBetween(secret: string | undefined, from: number, to: number): Promise<Busy[]> {
+/* ── calendars read, never written ─────────────────────────────────
+ * Julian (2026-11-04): "add other calendars to read off of". Each is a
+ * Google calendar id shared to hello@ (free/busy is enough) or an ICS link,
+ * kept in INBOX under `cal:extra` and edited from the Leads app's Calendar.
+ * One that cannot be read is skipped and shown red there: a dead feed must
+ * not close every booking. hello@'s own calendar still fails closed.
+ * ─────────────────────────────────────────────────────────────── */
+
+export type Extra = { label: string; src: string };
+export const EXTRA_KEY = "cal:extra";
+type KV = { get(key: string, type: "json"): Promise<unknown> };
+export const readExtras = async (kv?: KV) => ((await kv?.get(EXTRA_KEY, "json")) as Extra[] | null) ?? [];
+export const isIcs = (src: string) => /^(https|webcal):\/\//i.test(src);
+
+/** An ICS time: UTC with Z, else in its TZID (Pacific when none or unknown). */
+function icsTime(v: string, params: string) {
+  const m = /^(\d{4})(\d{2})(\d{2})(?:T(\d{2})(\d{2})\d{0,2}(Z?))?$/.exec(v.trim());
+  if (!m) return NaN;
+  const [y, mo, d, h, mi] = m.slice(1, 6).map((x) => +(x ?? 0));
+  if (m[6]) return Date.UTC(y, mo - 1, d, h, mi);
+  try {
+    return zoned(y, mo, d, h * 60 + mi, /TZID="?([^;":]+)/.exec(params)?.[1] ?? TZ);
+  } catch {
+    // Outlook writes Windows zone names Intl does not know.
+    return zoned(y, mo, d, h * 60 + mi);
+  }
+}
+
+/* shortcut: an RRULE is read as its first time only; shift feeds list each
+   shift. Expand RRULE if a recurring feed is ever added. */
+/** The busy spans in an ICS feed: not cancelled, not marked free. Pure. */
+export function icsBusy(text: string): Busy[] {
+  const out: Busy[] = [];
+  let ev: { [k: string]: [string, string] } | null = null;
+  for (const line of text.replace(/\r?\n[ \t]/g, "").split(/\r?\n/)) {
+    if (line === "BEGIN:VEVENT") ev = {};
+    else if (line === "END:VEVENT" && ev) {
+      const [sp, sv] = ev.DTSTART ?? ["", ""];
+      const start = icsTime(sv, sp);
+      const d = /^P(?:(\d+)W)?(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?)?$/.exec(ev.DURATION?.[1].trim() ?? "");
+      const end = ev.DTEND
+        ? icsTime(ev.DTEND[1], ev.DTEND[0])
+        : d
+          ? start + (((+(d[1] ?? 0) * 7 + +(d[2] ?? 0)) * 24 + +(d[3] ?? 0)) * 60 + +(d[4] ?? 0)) * 6e4
+          : /^\d{8}$/.test(sv.trim())
+            ? start + 864e5
+            : start;
+      if (ev.STATUS?.[1] !== "CANCELLED" && ev.TRANSP?.[1] !== "TRANSPARENT" && end > start) out.push({ start, end });
+      ev = null;
+    } else if (ev) {
+      const i = line.indexOf(":");
+      const [name, ...params] = line.slice(0, i).split(";");
+      if (i > 0) ev[name] ??= [params.join(";"), line.slice(i + 1)];
+    }
+  }
+  return out;
+}
+
+const feeds = new Map<string, { at: number; busy: Busy[] }>();
+/** A feed's busy spans, kept five minutes in this isolate. Throws with the status only: the link is private. */
+async function icsFeed(src: string) {
+  const hit = feeds.get(src);
+  if (hit && Date.now() - hit.at < 3e5) return hit.busy;
+  const res = await fetch(src.replace(/^webcal:/i, "https:"), { signal: AbortSignal.timeout(8000) });
+  if (!res.ok) throw new Error(`ICS ${res.status}`);
+  const busy = icsBusy(await res.text());
+  feeds.set(src, { at: Date.now(), busy });
+  return busy;
+}
+
+/** What is busy between `from` and `to` on hello@ and every extra calendar, each span tagged with its calendar's label; `failed` lists extras that could not be read. */
+export async function busyAll(secret: string | undefined, from: number, to: number, extras: Extra[] = []) {
+  const failed = new Set<string>();
+  const google = extras.filter((x) => !isIcs(x.src));
+  const label = new Map(google.map((x) => [x.src, x.label]));
   const pieces: Promise<Busy[]>[] = [];
   for (let a = from; a < to; a += PIECE) {
     const b = Math.min(to, a + PIECE);
     pieces.push(
       gcal<{ calendars?: { [id: string]: { busy?: { start: string; end: string }[]; errors?: unknown[] } } }>(secret, "/freeBusy", {
-        body: { timeMin: new Date(a).toISOString(), timeMax: new Date(b).toISOString(), items: CALENDARS.map((id) => ({ id })) },
+        body: { timeMin: new Date(a).toISOString(), timeMax: new Date(b).toISOString(), items: [...CALENDARS, ...label.keys()].map((id) => ({ id })) },
       }).then((r) =>
-        Object.values(r.calendars ?? {}).flatMap((c) => {
-          // A calendar Google could not read is not a free one.
-          if (c.errors?.length) throw new Error("freeBusy: a calendar could not be read");
-          return (c.busy ?? []).map((x) => ({ start: Date.parse(x.start), end: Date.parse(x.end) }));
+        Object.entries(r.calendars ?? {}).flatMap(([id, c]) => {
+          if (c.errors?.length) {
+            // A calendar Google could not read is not a free one; an extra is skipped and flagged.
+            if (!label.has(id)) throw new Error("freeBusy: a calendar could not be read");
+            failed.add(label.get(id)!);
+            return [];
+          }
+          return (c.busy ?? []).map((x) => ({ start: Date.parse(x.start), end: Date.parse(x.end), label: label.get(id) }));
         }),
       ),
     );
   }
-  return (await Promise.all(pieces)).flat();
+  for (const x of extras.filter((x) => isIcs(x.src)))
+    pieces.push(
+      icsFeed(x.src).then(
+        (busy) => busy.filter((b) => b.start < to && b.end > from).map((b) => ({ ...b, label: x.label })),
+        () => (failed.add(x.label), []),
+      ),
+    );
+  return { busy: (await Promise.all(pieces)).flat(), failed: [...failed] };
 }
 
-/** Open starts of `slug` between `from` and `to`, as UTC ms. `mine`: a booking being moved, whose own time is not in the way. */
-export async function openStarts(secret: string | undefined, slug: string, from: number, to: number, now = Date.now(), mine?: { start: string; end: string }) {
+/** What is busy between `from` and `to`, on hello@ and the extras in `kv`. */
+export async function busyBetween(secret: string | undefined, from: number, to: number, kv?: KV): Promise<Busy[]> {
+  const { busy, failed } = await busyAll(secret, from, to, await readExtras(kv));
+  if (failed.length) console.error("calendars skipped", failed.length);
+  return busy;
+}
+
+/** Open starts of `slug` between `from` and `to`, as UTC ms. `mine`: a booking being moved, whose own time is not in the way. `kv`: where the extra calendars are listed. */
+export async function openStarts(secret: string | undefined, slug: string, from: number, to: number, now = Date.now(), mine?: { start: string; end: string }, kv?: KV) {
   const rule = EVENTS[slug];
   if (!rule) return [];
   // The buffer after a session reaches past `to`.
-  const busy = (await busyBetween(secret, Math.max(from, now), to + (rule.length + rule.after) * 6e4)).filter(
+  const busy = (await busyBetween(secret, Math.max(from, now), to + (rule.length + rule.after) * 6e4, kv)).filter(
     (b) => !mine || b.start !== Date.parse(mine.start) || b.end !== Date.parse(mine.end),
   );
   return startsFor(rule, busy, from, to, now);
 }
 
 /** Whether `start` (ISO) is still open for `slug`, asking Google now. */
-export async function openNow(secret: string | undefined, slug: string, start: string, mine?: { start: string; end: string }) {
+export async function openNow(secret: string | undefined, slug: string, start: string, mine?: { start: string; end: string }, kv?: KV) {
   const t = Date.parse(start);
-  return (await openStarts(secret, slug, t - 864e5, t + 864e5, Date.now(), mine)).includes(t);
+  return (await openStarts(secret, slug, t - 864e5, t + 864e5, Date.now(), mine, kv)).includes(t);
 }

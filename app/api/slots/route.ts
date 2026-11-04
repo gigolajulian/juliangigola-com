@@ -37,7 +37,7 @@ export async function GET(request: Request) {
 
   let starts: number[];
   try {
-    starts = await openStarts(env.GCAL_OAUTH, slug, from, to);
+    starts = await openStarts(env.GCAL_OAUTH, slug, from, to, Date.now(), undefined, env.INBOX);
   } catch (e) {
     console.error("slots", String(e));
     return json({ status: "error", error: "Could not reach the calendar." }, 502);

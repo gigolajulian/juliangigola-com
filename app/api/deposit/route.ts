@@ -27,7 +27,7 @@ export async function POST(request: Request) {
   if (ownOnServer(env, b.engine)) b.engine = "own";
 
   try {
-    if (!(await isOpen(b, env.GCAL_OAUTH))) return json({ error: "taken" }, 409);
+    if (!(await isOpen(b, env.GCAL_OAUTH, env.INBOX))) return json({ error: "taken" }, 409);
   } catch {
     return json({ error: "Could not reach the calendar. Try again." }, 502);
   }
