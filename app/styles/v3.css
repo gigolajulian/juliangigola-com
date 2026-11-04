@@ -500,8 +500,11 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .sc{flex:none;position:relative;margin:0;height:100%;aspect-ratio:4/5;border-radius:4px;overflow:hidden;background:var(--card)}
 .v3 .sc.wide{aspect-ratio:3/2}
 .v3 .sc img{width:100%;height:100%;object-fit:cover;display:block}
-.v3 .sc figcaption{position:absolute;inset:auto 0 0;display:flex;flex-direction:column;gap:8px;padding:64px 24px 22px;color:rgb(var(--on-photo));background:linear-gradient(to top,rgb(var(--scrim) / .78),rgb(var(--scrim) / 0))}
-.v3 .sc b{font:900 clamp(2rem,calc(3.4*var(--v3u)),3.5rem)/.9 var(--display);letter-spacing:-.05em;text-transform:uppercase}
+.v3 .sc-n{position:absolute;inset:auto 0 0;padding:72px 24px 22px;color:rgb(var(--on-photo));background:linear-gradient(to top,rgb(var(--scrim) / .78),rgb(var(--scrim) / 0));font:900 clamp(2.5rem,calc(4.6*var(--v3u)),5rem)/.88 var(--display);letter-spacing:-.05em;text-transform:uppercase;text-wrap:pretty}
+/* The discipline hangs under the cover; the strip keeps room for it below. */
+.v3 .sc{overflow:visible}.v3 .sc>a{overflow:hidden;border-radius:4px}
+.v3 .sc-d{position:absolute;top:100%;left:0;padding-top:10px;white-space:nowrap}
+.v3 .wstrip{padding-bottom:32px}
 .v3 .wbar{height:2px;margin:14px var(--gr) 16px var(--g);background:var(--line)}
 .v3 .wbar i{display:block;height:100%;width:0;background:var(--ink)}
 .v3 #p-work.strip-on{height:100svh;min-height:0;overflow:hidden}
@@ -761,7 +764,7 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 @media (max-width:767px){.v3 #p-work.strip-on .sc{aspect-ratio:auto;height:calc(100svh - 270px);min-height:360px}}
 /* iPhone: the strip runs down the page, one cover a row at full width,
    and the page scrolls it (Julian). The sideways bar goes. */
-@media (max-width:700px){.v3 #p-work.strip-on .wstrip{flex-direction:column;overflow:visible;scroll-snap-type:none;gap:16px;padding-bottom:48px}
+@media (max-width:700px){.v3 #p-work.strip-on .wstrip{flex-direction:column;overflow:visible;scroll-snap-type:none;gap:48px;padding-bottom:48px}
 .v3 #p-work.strip-on .sc{width:100%;height:auto;min-height:0;aspect-ratio:4/5;scroll-snap-align:none}
 .v3 #p-work.strip-on .wbar{display:none}}
 /* Color: a mode set apart from Grid and Strip by a hairline. */

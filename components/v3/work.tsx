@@ -855,13 +855,11 @@ export function V3Work({
             {/* A new chip starts its own strip at the start: the frames it shares with All kept the old scroll. */}
             <div className="wstrip" key={filter} ref={strip} onScroll={stripBar}>
               {cells.map(({ f, p }, n) => {
-                const cap = p ? (
-                  <figcaption>
-                    {/* A gallery is named for its discipline: the label would say it twice. */}
-                    {p.d.join(", ").toLowerCase() !== p.n.toLowerCase() ? <span className="lbl">{p.d.join(", ")}</span> : null}
-                    <b>{p.n}</b>
-                  </figcaption>
-                ) : null;
+                /* Name on the photo, discipline under it, as in the grid (Julian, 2026-11-04). */
+                const cap = p ? <b className="sc-n">{p.n}</b> : null;
+                /* A gallery is named for its discipline: the label would say it twice. */
+                const disc =
+                  p && p.d.join(", ").toLowerCase() !== p.n.toLowerCase() ? <figcaption className="sc-d lbl mute">{p.d.join(", ")}</figcaption> : null;
                 if (!f)
                   return (
                     <figure key={p!.s} className="sc" data-flip-id={p!.s}>
@@ -869,6 +867,7 @@ export function V3Work({
                         <Image src={p!.cover} alt={p!.n} fill sizes={STRIP_SIZES} decoding="sync" loading={n < 4 ? "eager" : "lazy"} />
                         {cap}
                       </Link>
+                      {disc}
                     </figure>
                   );
                 const i = stripFrames.indexOf(f);
@@ -885,6 +884,7 @@ export function V3Work({
                       <Image src={f.src} alt={f.alt} fill sizes={STRIP_SIZES} loading={n < 4 ? "eager" : "lazy"} />
                       {cap}
                     </a>
+                    {disc}
                   </figure>
                 );
               })}
