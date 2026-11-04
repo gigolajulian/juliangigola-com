@@ -1,6 +1,10 @@
 import { sendConfirm } from "@/lib/confirm";
 import { enquiry, enquiryKey, summary, whenPT } from "@/lib/inbox";
+import { recordLead } from "@/lib/leads";
 import { openNow } from "@/lib/slots";
+import { EVENTS } from "@/lib/booking-rules";
+import { lock, recordBooking, type BookResult } from "@/lib/booking-engine";
+import { manageLinks } from "@/lib/booking-token";
 
 /* ── the $100 deposit ─────────────────────────────────────────────
  * Julian (2026-10-16): the four paid sessions take a $100 deposit on the
@@ -86,11 +90,11 @@ const looksLikeEmail = (s: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
 // Stripe caps a metadata value at 500 characters.
 const cap = (s: unknown, n = 500) => (typeof s === "string" ? s.trim().slice(0, n) : "");
 
-/** The visitor's booking, checked, or the reason it is not one. */
-export function parseBooking(raw: unknown): Booking | string {
+/** The visitor's booking, checked, or the reason it is not one. `call`: a free call (`app/api/book`), not a paid session. */
+export function parseBooking(raw: unknown, call = false): Booking | string {
   const b = (raw ?? {}) as { [k: string]: unknown };
   const slug = cap(b.slug);
-  if (!(PAID as readonly string[]).includes(slug)) return "Not a paid session.";
+  if (call ? !EVENTS[slug]?.call : !(PAID as readonly string[]).includes(slug)) return call ? "Not a call." : "Not a paid session.";
   const start = cap(b.start);
   const t = Date.parse(start);
   if (!start || isNaN(t) || t < Date.now()) return "Pick a time.";
@@ -244,7 +248,16 @@ export async function verifyStripe(body: string, header: string, secret: string,
   return sigs.some((s) => s.length === want.length && [...s].reduce((d, c, i) => d | (c.charCodeAt(0) ^ want.charCodeAt(i)), 0) === 0);
 }
 
-type Env = { INBOX: NonNullable<CloudflareEnv["INBOX"]>; STRIPE_SECRET_KEY: string; EMAIL?: CloudflareEnv["EMAIL"]; CLIENT_EMAIL?: CloudflareEnv["CLIENT_EMAIL"]; GCAL_OAUTH?: string };
+type Env = {
+  INBOX: NonNullable<CloudflareEnv["INBOX"]>;
+  STRIPE_SECRET_KEY: string;
+  EMAIL?: CloudflareEnv["EMAIL"];
+  CLIENT_EMAIL?: CloudflareEnv["CLIENT_EMAIL"];
+  GCAL_OAUTH?: string;
+  BOOKING_LOCK?: CloudflareEnv["BOOKING_LOCK"];
+  NOTION_TOKEN?: string;
+  BOOKING_SECRET?: string;
+};
 
 /** "Visa ending 4242", from the charge; nothing if Stripe will not say. */
 async function cardOf(key: string, intent: string) {
@@ -259,7 +272,7 @@ async function cardOf(key: string, intent: string) {
 
 const SAID = { booked: "Deposit paid", refunded: "Deposit refunded", failed: "Deposit paid, not booked, not refunded" } as const;
 const NEXT = {
-  booked: "Booked on Cal.com.",
+  booked: "Booked.",
   refunded: "The time was gone or Cal.com refused the booking, so Stripe refunded them. Nothing is booked.",
   failed: "Cal.com did not take the booking and the automatic refund failed. Refund it by hand in Stripe and email them.",
 };
@@ -268,7 +281,7 @@ const NEXT = {
 // Bytes, never a base64 string: `send()` mails a string as-is, so the picture arrives as text.
 type Attachment = { content: ArrayBuffer; filename: string; type: string; disposition: "attachment" };
 
-async function mail(email: Env["EMAIL"], subject: string, lines: string[], who?: { name: string; email: string }, attachments: Attachment[] = []) {
+export async function mail(email: Env["EMAIL"], subject: string, lines: string[], who?: { name: string; email: string }, attachments: Attachment[] = []) {
   try {
     await email?.send({
       to: MAIL_TO,
@@ -351,6 +364,7 @@ export async function settle(env: Env, intent: string, metadata: { [k: string]: 
       const who = typeof b === "string" ? undefined : b;
       const what = who ? [SESSION[who.slug] ?? who.slug, whenPT(who.start), who.name, "$100"].join(", ") : "$100";
       await env.INBOX.put(key, JSON.stringify({ ...r, warned: true }), { expirationTtl: 90 * 864e2 }).catch((e: unknown) => console.error("deposit record", "warned", String(e)));
+      if (who) await recordLead(env.INBOX, who.email, { event: { at: new Date().toISOString(), kind: "deposit-stuck", ref: intent, note: what }, name: who.name, kind: who.slug, flag: "stuck" });
       await mail(env.EMAIL, `Deposit stuck: check Stripe and Cal.com: ${what}`, [
         who ? `${who.name} <${who.email}>` : "Unknown client",
         `Paid, and the booking was started at ${r.at} but never finished. Check Cal.com for the booking, then book or refund in Stripe by hand.`,
@@ -380,10 +394,14 @@ export async function settle(env: Env, intent: string, metadata: { [k: string]: 
   const link = dashboardLink(intent, env.STRIPE_SECRET_KEY);
   if (typeof b !== "string") {
     try {
-      if (await isOpen(b, env.GCAL_OAUTH)) {
-        const booking = await bookCal(b, intent);
+      // The site's engine rechecks and books in one step, inside its lock.
+      const own = b.engine === "own" ? await lock<BookResult>(env, "book", { ...b, intent }) : null;
+      const booking = own ? (own.ok ? { uid: own.record.id, start: own.record.start, end: own.record.end } : null) : (await isOpen(b, env.GCAL_OAUTH)) ? await bookCal(b, intent) : null;
+      if (booking) {
         await put({ status: "booked", booking: { uid: booking.uid, start: booking.start } });
         await tell(env, "booked", b, link, intent);
+        // Cal.com's webhook files its own bookings; the site files its own here.
+        if (own?.ok) await recordBooking(env, own.record, dashboardLink(intent, env.STRIPE_SECRET_KEY));
         await sendConfirm(env.CLIENT_EMAIL, {
           ...b,
           session: SESSION[b.slug] ?? b.slug,
@@ -391,6 +409,7 @@ export async function settle(env: Env, intent: string, metadata: { [k: string]: 
           end: booking.end,
           uid: booking.uid,
           deposit: { ref: intent, at: new Date().toISOString(), card: await cardOf(env.STRIPE_SECRET_KEY, intent) },
+          ...(own?.ok ? { manage: await manageLinks(env.BOOKING_SECRET, own.record) } : {}),
         });
         return "booked";
       }
@@ -424,6 +443,7 @@ export async function settle(env: Env, intent: string, metadata: { [k: string]: 
       type: "booking",
     };
     await env.INBOX.put(enquiryKey(now, id.slice(0, 8)), JSON.stringify(row), { metadata: summary(row) });
+    await recordLead(env.INBOX, who.email, { event: { at: row.at, kind: "deposit-stuck", ref: intent, note: row.detail }, name: who.name, kind: typeof b === "string" ? undefined : b.slug, flag: "stuck" });
     await tell(env, "failed", b, link, intent);
     return "failed";
   }
