@@ -97,3 +97,36 @@
 @keyframes mp-rise { from { transform: translateY(2.5vh); } }
 @keyframes mp-drop { from { transform: translateY(-2.5vh); } }
 @keyframes mp-recede { to { opacity: 0; transform: scale(0.97); } }
+
+/* ── Item 5, `hover`: the hover and press table ─────────────────────────
+   On hover only color and opacity change, except the grid photo zoom
+   (1.02 at 250 on `out`, phase 3 pick b). Every press is .97 at 100.
+   Hover motion is for a mouse or trackpad, never a finger. */
+:root[data-mplan~="hover"] .v3 .a-index .row:hover .t,
+:root[data-mplan~="hover"] .v3 .nf-list a:hover b {
+  translate: none;
+}
+:root[data-mplan~="hover"][data-v3motion] .v3 .btn:not(.cn-light),
+:root[data-mplan~="hover"][data-v3motion] .v3 .btn:not(.cn-light):hover {
+  transition-duration: var(--dur-hover), var(--dur-hover), var(--dur-press);
+  transition-timing-function: var(--ease-out-strong);
+}
+/* Book it and Pay press like every other button. */
+:root[data-mplan~="hover"] .ed-btn {
+  transition: scale var(--dur-press) var(--ease-out-strong), opacity var(--dur-hover) var(--ease-out-strong);
+}
+:root[data-mplan~="hover"] .ed-btn:active {
+  scale: 0.97;
+}
+/* Grid photos: one zoom, the same everywhere, mouse only. */
+:root[data-mplan~="hover"] .v3 :is(.wt, .bts-f, .cn-frame, .a-seq a.fig .ph) img {
+  transition: transform var(--dur-small) var(--ease-out-strong), opacity 0.4s;
+}
+:root[data-mplan~="hover"] .v3 :is(.wt:hover, .bts-f:hover, .cn-frame button:hover, .a-seq a.fig:hover .ph) img {
+  transform: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  :root[data-mplan~="hover"] .v3 :is(.wt:hover, .bts-f:hover, .cn-frame button:hover, .a-seq a.fig:hover .ph) img {
+    transform: scale(1.02);
+  }
+}
