@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { credentials, KEY_STORE } from "@/components/admin-inbox";
+import { TOKEN_STORE } from "@/lib/admin-github";
 import type { Enquiry } from "@/lib/inbox";
 import { isLate, STAGES, type Lead, type LeadEvent, type LeadSummary, type Stage } from "@/lib/leads";
 import { cn } from "@/lib/utils";
@@ -132,17 +133,23 @@ export function AdminLeads() {
   }, []);
 
   /** A change from the open lead, reflected in its row at once. */
-  const changed = (l: Lead) => setLeads((rows) => rows?.map((r) => (r.email === l.email ? { ...r, ...l, id: r.id } : r)) ?? null);
+  // A cleared snooze comes back without the key, so set it outright.
+  const changed = (l: Lead) => setLeads((rows) => rows?.map((r) => (r.email === l.email ? { ...r, ...l, snoozeUntil: l.snoozeUntil, id: r.id } : r)) ?? null);
 
   if (error === "Not authorized." || error?.startsWith("GitHub did not accept"))
     return (
       <SignIn
         onKey={(k) => {
-          window.localStorage.setItem(KEY_STORE, k);
+          // A GitHub token goes where /admin keeps it, so it is sent as Bearer;
+          // the inbox key would win over it, so that one is dropped.
+          if (/^(ghp_|github_pat_)/.test(k)) {
+            window.localStorage.setItem(TOKEN_STORE, k);
+            window.localStorage.removeItem(KEY_STORE);
+          } else window.localStorage.setItem(KEY_STORE, k);
           setError(null);
           load();
         }}
-        wrong={!!window.localStorage.getItem(KEY_STORE)}
+        wrong={!!(window.localStorage.getItem(KEY_STORE) || window.localStorage.getItem(TOKEN_STORE))}
       />
     );
   if (error) return <p className="py-8 text-[15px] text-muted-foreground">{error}</p>;
@@ -160,18 +167,18 @@ export function AdminLeads() {
       ref={fit}
       className="grid overflow-hidden rounded-[14px] lg:grid-rows-[minmax(0,1fr)] border border-border bg-background text-foreground normal-case lg:grid-cols-[200px_minmax(0,440px)_minmax(0,1fr)] [&_button]:normal-case [&_h2]:normal-case [&_h3]:normal-case"
     >
-      <nav aria-label="Lead filters" className={cn("border-border p-3 lg:min-h-0 lg:overflow-y-auto lg:border-r", open && "max-lg:hidden")}>
+      <nav aria-label="Lead filters" className={cn("min-w-0 border-border p-3 lg:min-h-0 lg:overflow-y-auto lg:border-r", open && "max-lg:hidden")}>
         <div className="flex gap-2 overflow-x-auto lg:grid lg:gap-0.5">
           {(["needs", "open"] as const).map((f) => (
             <FilterButton key={f} on={filter === f} n={count(f)} onClick={() => setFilter(f)}>{f === "needs" ? "Needs me" : "All open"}</FilterButton>
           ))}
           <p className="px-3 pb-2 pt-4 font-mono text-[12.5px] text-muted-foreground max-lg:hidden">By stage</p>
           {STAGES.filter((s) => !closed(s)).map((s) => (
-            <FilterButton key={s} on={filter === s} n={count(s)} onClick={() => setFilter(s)} wide>{s}</FilterButton>
+            <FilterButton key={s} on={filter === s} n={count(s)} onClick={() => setFilter(s)}>{s}</FilterButton>
           ))}
           <p className="px-3 pb-2 pt-4 font-mono text-[12.5px] text-muted-foreground max-lg:hidden">Closed</p>
           {(["Delivered", "Lost", "snoozed"] as const).map((f) => (
-            <FilterButton key={f} on={filter === f} n={count(f)} onClick={() => setFilter(f)} wide>{f === "snoozed" ? "Snoozed" : f}</FilterButton>
+            <FilterButton key={f} on={filter === f} n={count(f)} onClick={() => setFilter(f)}>{f === "snoozed" ? "Snoozed" : f}</FilterButton>
           ))}
         </div>
       </nav>
@@ -241,7 +248,7 @@ function SignIn({ onKey, wrong }: { onKey: (k: string) => void; wrong: boolean }
       }}
       className="grid max-w-md gap-4 py-10 normal-case"
     >
-      <label htmlFor="lead-key" className="text-[15px]">Inbox key</label>
+      <label htmlFor="lead-key" className="text-[15px]">Inbox key or GitHub token</label>
       <input
         id="lead-key"
         type="password"
@@ -250,7 +257,18 @@ function SignIn({ onKey, wrong }: { onKey: (k: string) => void; wrong: boolean }
         onChange={(e) => setK(e.target.value)}
         className="min-h-12 rounded-[10px] border border-border bg-background px-4 text-base normal-case"
       />
-      {wrong ? <p className="text-[15px] text-destructive">That key was not accepted. Paste it again.</p> : null}
+      {wrong ? <p className="text-[15px] text-destructive">That was not accepted. Paste it again.</p> : null}
+      <details className="text-[15px] text-muted-foreground">
+        <summary className="flex size-11 cursor-pointer list-none items-center font-mono text-[15px]" aria-label="How to get one">?</summary>
+        <div className="grid gap-2 pt-2 leading-[1.55]">
+          <p>Easiest: paste the same GitHub token I use for /admin on desktop.</p>
+          <p>
+            To make one on this phone: github.com, Settings, Developer settings, Fine-grained tokens, Generate new token.
+            Repository access: only gigolajulian/juliangigola-com. Permissions: Contents, Read and write.
+          </p>
+          <p>It stays on this device only.</p>
+        </div>
+      </details>
       <button type="submit" className={cn(btn, primary, "justify-self-start")}>Open leads</button>
     </form>
   );
@@ -264,7 +282,7 @@ function pass(l: LeadSummary, f: Filter) {
 }
 const label = (f: Filter) => (f === "needs" ? "Needs me" : f === "open" ? "All open" : f === "snoozed" ? "Snoozed" : f);
 
-function FilterButton({ on, n, wide, onClick, children }: { on: boolean; n: number; wide?: boolean; onClick: () => void; children: React.ReactNode }) {
+function FilterButton({ on, n, onClick, children }: { on: boolean; n: number; onClick: () => void; children: React.ReactNode }) {
   return (
     <button
       type="button"
@@ -273,7 +291,6 @@ function FilterButton({ on, n, wide, onClick, children }: { on: boolean; n: numb
       className={cn(
         "flex min-h-11 shrink-0 items-center justify-between gap-4 rounded-lg px-3 text-[15px] transition-colors duration-200",
         on ? "bg-accent/12 font-semibold text-accent" : "hoverable:hover:bg-card",
-        wide && !on && "max-lg:hidden",
       )}
     >
       <span>{children}</span>
@@ -353,6 +370,7 @@ function Detail({ summary, call, onChange, onBack }: { summary: LeadSummary; cal
         </a>
         <a href={book} target="_blank" rel="noreferrer" className={btn}>Send booking link</a>
         <button type="button" onClick={() => setSnoozing((v) => !v)} aria-expanded={snoozing} className={btn}>Snooze</button>
+        {snoozed(l) ? <button type="button" className={btn} onClick={() => patch({ snoozeUntil: "" }).then(() => setSnoozing(false))}>Unsnooze</button> : null}
         <span className="flex-1" />
         {lead?.notion ? <a href={`https://www.notion.so/${lead.notion.replace(/-/g, "")}`} target="_blank" rel="noreferrer" className={btn}>Notion</a> : null}
         {lead?.deposit ? <a href={lead.deposit} target="_blank" rel="noreferrer" className={cn(btn, "text-destructive")}>Deposit in Stripe</a> : null}
@@ -369,7 +387,6 @@ function Detail({ summary, call, onChange, onBack }: { summary: LeadSummary; cal
           {[["1 day", 1], ["3 days", 3], ["1 week", 7]].map(([t, d]) => (
             <button key={t} type="button" className={btn} onClick={() => patch({ snoozeUntil: new Date(now() + Number(d) * DAY).toISOString() }).then(() => setSnoozing(false))}>{t}</button>
           ))}
-          {l.snoozeUntil ? <button type="button" className={btn} onClick={() => patch({ snoozeUntil: "" }).then(() => setSnoozing(false))}>Wake now</button> : null}
         </div>
       ) : null}
 
@@ -441,7 +458,7 @@ function line(e: LeadEvent): string {
     case "no-deposit": return "Booked without a deposit";
     case "deposit-stuck": return `Deposit stuck${e.note ? `: ${e.note}` : ""}`;
     case "stage": return `Moved to ${e.note}`;
-    case "snooze": return e.note === "woken" ? "Woken" : `Snoozed until ${day(e.note ?? "")}`;
+    case "snooze": return e.note === "woken" ? "Unsnoozed" : `Snoozed until ${day(e.note ?? "")}`;
     case "mail": return `Mail to ${e.mail?.to === "client" ? "them" : "hello@"}: ${e.note ?? ""}`;
   }
 }
