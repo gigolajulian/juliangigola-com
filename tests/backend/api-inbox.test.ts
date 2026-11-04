@@ -11,7 +11,7 @@ import { sealer } from "@/lib/lead-crypto";
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
 vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
 
-const { GET, PATCH, DELETE } = await import("@/app/api/inbox/route");
+const { GET, PATCH, POST, DELETE } = await import("@/app/api/inbox/route");
 
 const KEY = "inbox-key-for-tests";
 const URL_ = "https://juliangigola.com/api/inbox";
@@ -212,6 +212,93 @@ describe("leads", () => {
     expect((await res.json()).lead).toMatchObject({ stage: "Quoted", snoozeUntil: "2026-12-01T00:00:00Z", unread: false });
     const { leads } = await (await GET(req("GET", { query: "?leads" }))).json();
     expect(leads[0]).toMatchObject({ stage: "Quoted", unread: false });
+  });
+
+  it("archives, trashes and recovers by hand, and empties only the trash, keeping Inbox rows", async () => {
+    await seed(Date.UTC(2026, 9, 1), "row");
+    await lead("a@example.com", "2026-11-01T10:00:00Z");
+    await lead("b@example.com", "2026-11-02T10:00:00Z");
+    const [a, b] = [`lead:${await idOf("a@example.com")}`, `lead:${await idOf("b@example.com")}`];
+    const patch = async (key: string, body: object) => (await (await PATCH(req("PATCH", { body: JSON.stringify({ key, ...body }) }))).json()).lead;
+    expect(await patch(a, { archive: true })).toHaveProperty("archivedAt");
+    expect(await patch(a, { archive: false })).not.toHaveProperty("archivedAt");
+    expect(await patch(a, { trash: true })).toHaveProperty("trashedAt");
+    const back = await patch(a, { trash: false });
+    expect(back).not.toHaveProperty("trashedAt");
+    expect(back.events.map((e: { kind: string; note: string }) => `${e.kind} ${e.note}`).slice(-4)).toEqual(["archive in", "archive out", "trash in", "trash out"]);
+    await patch(b, { trash: true });
+    expect((await DELETE(req("DELETE", { key: null, body: JSON.stringify({ emptyTrash: true }) }))).status).toBe(401);
+    expect(await (await DELETE(req("DELETE", { body: JSON.stringify({ emptyTrash: true }) }))).json()).toEqual({ ok: true, deleted: 1 });
+    expect(kv.data.has(a)).toBe(true);
+    expect(kv.data.has(b)).toBe(false);
+    expect([...kv.data.keys()].some((k) => k.startsWith("msg:"))).toBe(true);
+  });
+
+  it("does not bring an emptied lead back on Import from Inbox", async () => {
+    await seed(Date.UTC(2026, 9, 1), "spam");
+    await seed(Date.UTC(2026, 9, 2), "keep");
+    const post = async () => (await POST(req("POST", { body: JSON.stringify({ backfill: true }) }))).json();
+    expect(await post()).toMatchObject({ added: 2 });
+    const spam = `lead:${await idOf("spam@example.com")}`;
+    await PATCH(req("PATCH", { body: JSON.stringify({ key: spam, trash: true }) }));
+    await DELETE(req("DELETE", { body: JSON.stringify({ emptyTrash: true }) }));
+    expect(kv.data.has(spam)).toBe(false);
+    expect(await post()).toMatchObject({ added: 0, updated: 0 });
+    expect(kv.data.has(spam)).toBe(false);
+    expect([...kv.data.keys()].some((k) => k.startsWith("gone:") && k.includes("@"))).toBe(false);
+  });
+
+  it("does not bring a lead the 30-day sweep removed back on Import from Inbox", async () => {
+    await seed(Date.UTC(2026, 9, 1), "old");
+    const post = async () => (await POST(req("POST", { body: JSON.stringify({ backfill: true }) }))).json();
+    expect(await post()).toMatchObject({ added: 1 });
+    const key = `lead:${await idOf("old@example.com")}`;
+    await PATCH(req("PATCH", { body: JSON.stringify({ key, trash: true }) }));
+    vi.useFakeTimers({ now: Date.now() + 31 * 864e5, toFake: ["Date"] });
+    expect((await (await GET(req("GET", { query: "?leads" }))).json()).leads).toHaveLength(0);
+    vi.useRealTimers();
+    expect(kv.data.has(key)).toBe(false);
+    expect(await post()).toMatchObject({ added: 0, updated: 0 });
+    expect(kv.data.has(key)).toBe(false);
+  });
+
+  it("deletes a lead 30 days after it went in the trash, when the list is read, keeping Inbox rows", async () => {
+    await seed(Date.UTC(2026, 9, 1), "row");
+    await lead("a@example.com", "2026-11-01T10:00:00Z");
+    await lead("b@example.com", "2026-11-02T10:00:00Z");
+    const [a, b] = [`lead:${await idOf("a@example.com")}`, `lead:${await idOf("b@example.com")}`];
+    for (const k of [a, b]) await PATCH(req("PATCH", { body: JSON.stringify({ key: k, trash: true }) }));
+    vi.useFakeTimers({ now: Date.now() + 29 * 864e5, toFake: ["Date"] });
+    expect((await (await GET(req("GET", { query: "?leads" }))).json()).leads).toHaveLength(2);
+    await PATCH(req("PATCH", { body: JSON.stringify({ key: b, trash: false }) }));
+    vi.setSystemTime(Date.now() + 2 * 864e5);
+    const { leads } = await (await GET(req("GET", { query: "?leads" }))).json();
+    vi.useRealTimers();
+    expect(leads.map((l: { email: string }) => l.email)).toEqual(["b@example.com"]);
+    expect(kv.data.has(a)).toBe(false);
+    expect([...kv.data.keys()].some((k) => k.startsWith("msg:"))).toBe(true);
+  });
+
+  it("backfills the Inbox: counts dry, then writes once, keeps every row, calls nothing outside", async () => {
+    const fetched = vi.fn();
+    vi.stubGlobal("fetch", fetched);
+    await seed(Date.UTC(2026, 9, 1), "old");
+    await seed(Date.UTC(2026, 9, 2), "old", { message: "Again" });
+    await seed(Date.UTC(2026, 9, 3), "two");
+    await lead("old@example.com", "2026-11-01T10:00:00Z");
+    const msgs = [...kv.data.keys()].filter((k) => k.startsWith("msg:")).length;
+    const post = async (b: object, key: string | null = KEY) => (await POST(req("POST", { key, body: JSON.stringify(b) }))).json();
+
+    expect((await POST(req("POST", { key: null, body: JSON.stringify({ backfill: true }) }))).status).toBe(401);
+    expect(await post({ backfill: true, dry: true })).toEqual({ dry: true, people: 2, added: 1, updated: 1, stages: { Inquiry: 1 } });
+    expect([...kv.data.keys()].filter((k) => k.startsWith("lead:"))).toHaveLength(1);
+    expect(await post({ backfill: true })).toMatchObject({ added: 1, updated: 1 });
+    expect(await post({ backfill: true })).toMatchObject({ added: 0, updated: 0 });
+    const old = (await (await GET(req("GET", { query: `?key=lead:${await idOf("old@example.com")}` }))).json()).lead;
+    expect(old.firstAt).toBe(new Date(Date.UTC(2026, 9, 1)).toISOString());
+    expect(old.events).toHaveLength(3);
+    expect([...kv.data.keys()].filter((k) => k.startsWith("msg:"))).toHaveLength(msgs);
+    expect(fetched).not.toHaveBeenCalled();
   });
 
   it("mirrors a stage to the person's Notion row, then reuses that row", async () => {

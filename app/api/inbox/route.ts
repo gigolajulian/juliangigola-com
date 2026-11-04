@@ -1,7 +1,7 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { bearer, canPush } from "@/lib/vouch";
 import { SAFE_IMAGE, summary, type Enquiry, type Summary } from "@/lib/inbox";
-import { fold, readLead, STAGES, writeLead, type LeadSummary, type Stage } from "@/lib/leads";
+import { backfillLead, fold, readLead, STAGES, trashDaysLeft, writeLead, type InboxRow, type Lead, type LeadSummary, type Stage } from "@/lib/leads";
 import { sealer } from "@/lib/lead-crypto";
 import { subscribe, unsubscribe } from "@/lib/lead-push";
 import { publicKey } from "@/lib/web-push";
@@ -90,6 +90,15 @@ async function authorised(request: Request, expected?: string) {
   for (let i = 0; i < a.length; i++) diff |= a[i] ^ b[i];
   return diff === 0;
 }
+
+/**
+ * A lead deleted for good (Empty trash, or 30 days in it) leaves `gone:<id>`
+ * behind, so "Import from Inbox" does not bring it back from the person's
+ * old rows. The id is the HMAC, never the address. A new message still
+ * starts a fresh lead.
+ */
+const bury = (inbox: NonNullable<CloudflareEnv["INBOX"]>, key: string) =>
+  Promise.all([inbox.delete(key), inbox.put(`gone:${key.slice(5)}`, "")]);
 
 /** The binding and the secret, or `null` when this build has neither. */
 async function wired() {
@@ -181,7 +190,15 @@ export async function GET(request: Request) {
     for (;;) {
       const listed = await gate.inbox.list<{ s?: string }>({ prefix: "lead:", cursor: after });
       for (const k of listed.keys as { name: string; metadata?: { s?: string } }[]) {
-        if (k.metadata?.s) leads.push({ ...(await seal.open<LeadSummary>(k.metadata.s)), id: k.name.slice(5) });
+        if (!k.metadata?.s) continue;
+        const one = await seal.open<LeadSummary>(k.metadata.s);
+        // Trash empties itself: 30 days after it went in, the lead goes for good.
+        // The list is the only reader, so it is the one place that checks.
+        if (one.trashedAt && trashDaysLeft(one.trashedAt, Date.now()) <= 0) {
+          await bury(gate.inbox, k.name);
+          continue;
+        }
+        leads.push({ ...one, id: k.name.slice(5) });
       }
       if (listed.list_complete) break;
       after = listed.cursor;
@@ -260,7 +277,25 @@ export async function DELETE(request: Request) {
 
   const given = await parsed(request);
   if (!given) return json({ error: "Not JSON." }, 400);
-  const { key } = given as { key?: string };
+  const { key, emptyTrash } = given as { key?: string; emptyTrash?: boolean };
+  // The lead desk's "Empty trash": every lead in the trash, deleted for good.
+  // Their Inbox rows stay; the Inbox has its own trash.
+  if (emptyTrash === true) {
+    const seal = await gate.seal;
+    if (!seal) return json({ error: "Leads need LEADS_KEY on the Worker." }, 503);
+    const gone: string[] = [];
+    let after: string | undefined;
+    for (;;) {
+      const listed = await gate.inbox.list<{ s?: string }>({ prefix: "lead:", cursor: after });
+      for (const k of listed.keys as { name: string; metadata?: { s?: string } }[]) {
+        if (k.metadata?.s && (await seal.open<LeadSummary>(k.metadata.s)).trashedAt) gone.push(k.name);
+      }
+      if (listed.list_complete) break;
+      after = listed.cursor;
+    }
+    await Promise.all(gone.map((k) => bury(gate.inbox, k)));
+    return json({ ok: true, deleted: gone.length });
+  }
   if (!key?.startsWith("msg:")) return json({ error: "Unknown." }, 400);
 
   await gate.inbox.delete(key);
@@ -271,13 +306,60 @@ export async function DELETE(request: Request) {
 }
 
 /**
+ * POST {backfill: true, dry?: true}: the Inbox's `msg:` rows folded into
+ * leads (`backfillLead`). Dry, it only counts: how many people, how many
+ * new, and the stage each would end on. Rows stay, nothing is mailed,
+ * Notion is not touched. A second run finds nothing to add.
+ */
+export async function POST(request: Request) {
+  const gate = await guard(request);
+  if (gate.error) return gate.error;
+  const given = await parsed(request);
+  if (given?.backfill !== true) return json({ error: "Unknown." }, 400);
+  const seal = await gate.seal;
+  if (!seal) return json({ error: "Leads need LEADS_KEY on the Worker." }, 503);
+
+  const people = new Map<string, InboxRow[]>();
+  let cursor: string | undefined;
+  for (;;) {
+    const listed = await gate.inbox.list<Summary>({ prefix: "msg:", cursor });
+    for (const k of listed.keys) {
+      const m = k.metadata;
+      const email = m?.email?.trim().toLowerCase();
+      if (!m || !email?.includes("@")) continue;
+      people.set(email, [...(people.get(email) ?? []), { key: k.name, at: m.at, type: m.type, name: m.name, email, read: m.read, detail: m.detail }]);
+    }
+    if (listed.list_complete) break;
+    cursor = listed.cursor;
+  }
+
+  const stages: Partial<Record<Stage, number>> = {};
+  let added = 0;
+  let updated = 0;
+  for (const [email, rows] of people) {
+    const id = await seal.id(email);
+    if ((await gate.inbox.get(`gone:${id}`)) !== null) continue;
+    const before = await readLead(gate.inbox, seal, id);
+    const after: Lead | null = backfillLead(before, email, rows);
+    if (!after) continue;
+    if (before) updated++;
+    else {
+      added++;
+      stages[after.stage] = (stages[after.stage] ?? 0) + 1;
+    }
+    if (given.dry !== true) await writeLead(gate.inbox, seal, id, after);
+  }
+  return json({ dry: given.dry === true, people: people.size, added, updated, stages });
+}
+
+/**
  * A lead changed by hand: its stage, a snooze (an ISO time, or "" to wake
  * it), or opened (`seen`). Stage and snooze go through `fold`, so they land
  * on the timeline like everything else.
  */
 async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: Awaited<ReturnType<typeof sealer>>, given: Record<string, unknown>, notion?: string) {
   if (!seal) return json({ error: "Leads need LEADS_KEY on the Worker." }, 503);
-  const { key, stage, snoozeUntil, seen } = given as { key: string; stage?: string; snoozeUntil?: string; seen?: boolean };
+  const { key, stage, snoozeUntil, seen, archive, trash } = given as { key: string; stage?: string; snoozeUntil?: string; seen?: boolean; archive?: boolean; trash?: boolean };
   if (stage !== undefined && !(STAGES as readonly string[]).includes(stage)) return json({ error: "Unknown stage." }, 400);
   if (snoozeUntil !== undefined && snoozeUntil !== "" && isNaN(Date.parse(snoozeUntil))) return json({ error: "Bad time." }, 400);
   const id = key.slice(5);
@@ -291,6 +373,8 @@ async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: Await
     if (page) lead.notion = page;
   }
   if (snoozeUntil !== undefined) lead = fold(lead, lead.email, { event: { at, kind: "snooze", note: snoozeUntil || "woken" }, snoozeUntil });
+  if (typeof archive === "boolean") lead = fold(lead, lead.email, { event: { at, kind: "archive", note: archive ? "in" : "out" }, on: archive });
+  if (typeof trash === "boolean") lead = fold(lead, lead.email, { event: { at, kind: "trash", note: trash ? "in" : "out" }, on: trash });
   if (seen) lead = { ...lead, unread: false };
   await writeLead(inbox, seal, id, lead);
   return json({ lead });

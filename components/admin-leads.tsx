@@ -4,7 +4,7 @@ import * as React from "react";
 import { credentials, KEY_STORE, References } from "@/components/admin-inbox";
 import { TOKEN_STORE } from "@/lib/admin-github";
 import type { Enquiry } from "@/lib/inbox";
-import { isLate, STAGES, type Lead, type LeadEvent, type LeadSummary, type Stage } from "@/lib/leads";
+import { isLate, STAGES, trashDaysLeft, type Lead, type LeadEvent, type LeadSummary, type Stage } from "@/lib/leads";
 import { cn } from "@/lib/utils";
 
 /* ── the lead desk ────────────────────────────────────────────────
@@ -18,13 +18,15 @@ import { cn } from "@/lib/utils";
  * open lead side by side. Narrow: the list, then the lead with Back.
  * ─────────────────────────────────────────────────────────────── */
 
-type Filter = "needs" | "open" | Stage | "snoozed";
+type Filter = "needs" | "open" | Stage | "snoozed" | "archived" | "trash";
 
 const DAY = 864e5;
 const now = () => Date.now();
 const snoozed = (l: LeadSummary) => !!l.snoozeUntil && Date.parse(l.snoozeUntil) > now();
 const closed = (s: Stage) => s === "Delivered" || s === "Lost";
-const needsMe = (l: LeadSummary) => !snoozed(l) && !closed(l.stage) && (l.unread || isLate(l, now()) || !!l.flags?.length);
+/** Archived or in the trash: out of every list but its own. */
+const aside = (l: LeadSummary) => !!(l.archivedAt || l.trashedAt);
+const needsMe = (l: LeadSummary) => !aside(l) && !snoozed(l) && !closed(l.stage) && (l.unread || isLate(l, now()) || !!l.flags?.length);
 
 /** What to do next, in a word or two, and whether it is late. */
 function nextStep(l: LeadSummary): string | null {
@@ -56,6 +58,7 @@ const at = (iso: string) =>
 function Chip({ l }: { l: LeadSummary }) {
   if (l.flags?.includes("stuck")) return <Tag tone="bad" mark="!">Deposit stuck</Tag>;
   if (l.flags?.includes("no-deposit")) return <Tag tone="bad" mark="!">No deposit</Tag>;
+  if (l.trashedAt) return <Tag tone="quiet" mark="×">Deletes in {Math.max(1, trashDaysLeft(l.trashedAt, now()))} d</Tag>;
   if (snoozed(l)) return <Tag tone="quiet" mark="z">Until {day(l.snoozeUntil!)}</Tag>;
   if (isLate(l, now())) return <Tag tone="needs" mark="◷">{l.stage === "Quoted" ? `Quoted ${ago(l.stageAt)} ago` : `Late, ${ago(l.stageAt)}`}</Tag>;
   return <Tag tone={closed(l.stage) ? "quiet" : "plain"} mark={MARK[l.stage]}>{l.stage}</Tag>;
@@ -151,7 +154,7 @@ export function AdminLeads() {
 
   /** A change from the open lead, reflected in its row at once. */
   // A cleared snooze comes back without the key, so set it outright.
-  const changed = (l: Lead) => setLeads((rows) => rows?.map((r) => (r.email === l.email ? { ...r, ...l, snoozeUntil: l.snoozeUntil, id: r.id } : r)) ?? null);
+  const changed = (l: Lead) => setLeads((rows) => rows?.map((r) => (r.email === l.email ? { ...r, ...l, snoozeUntil: l.snoozeUntil, archivedAt: l.archivedAt, trashedAt: l.trashedAt, id: r.id } : r)) ?? null);
 
   if (error === "Not authorized." || error?.startsWith("GitHub did not accept"))
     return (
@@ -194,11 +197,12 @@ export function AdminLeads() {
             <FilterButton key={s} on={filter === s} n={count(s)} onClick={() => setFilter(s)}>{s}</FilterButton>
           ))}
           <p className="px-3 pb-2 pt-4 font-mono text-[12.5px] text-muted-foreground max-lg:hidden">Closed</p>
-          {(["Delivered", "Lost", "snoozed"] as const).map((f) => (
-            <FilterButton key={f} on={filter === f} n={count(f)} onClick={() => setFilter(f)}>{f === "snoozed" ? "Snoozed" : f}</FilterButton>
+          {(["Delivered", "Lost", "snoozed", "archived", "trash"] as const).map((f) => (
+            <FilterButton key={f} on={filter === f} n={count(f)} onClick={() => setFilter(f)}>{label(f)}</FilterButton>
           ))}
         </div>
         <PushSwitch call={call} />
+        <ImportInbox call={call} done={load} />
       </nav>
 
       <section aria-label="Leads" className={cn("min-w-0 border-border lg:min-h-0 lg:overflow-y-auto lg:border-r", open && "max-lg:hidden")}>
@@ -206,6 +210,7 @@ export function AdminLeads() {
           <h2 style={HEAD} className="text-lg">{label(filter)}</h2>
           <span className="font-mono text-[13px] text-muted-foreground">{shown.length} {shown.length === 1 ? "lead" : "leads"}</span>
         </header>
+        {filter === "trash" && shown.length ? <EmptyTrash n={shown.length} call={call} done={() => { setOpen(null); load(); }} /> : null}
         {shown.length ? (
           <ul>
             {shown.map((l) => (
@@ -321,6 +326,51 @@ function PushSwitch({ call }: { call: Call }) {
   );
 }
 
+type Count = { people: number; added: number; updated: number; stages: Partial<Record<Stage, number>> };
+
+/** Julian: "add the stuff i have in my juliangigola admin inbox to my leads".
+ * Counts first (a dry run), imports only on his second press. */
+function ImportInbox({ call, done }: { call: Call; done: () => void }) {
+  const [count, setCount] = React.useState<Count | null>(null);
+  const [busy, setBusy] = React.useState(false);
+  const [note, setNote] = React.useState<string | null>(null);
+  const run = (dry: boolean) => {
+    setBusy(true);
+    setNote(null);
+    call({ method: "POST", body: JSON.stringify({ backfill: true, dry }) })
+      .then((o) => {
+        const c = o as unknown as Count;
+        if (dry) return c.added + c.updated ? setCount(c) : setNote("Everything in the Inbox is already here.");
+        setCount(null);
+        setNote(`Imported: ${c.added} new, ${c.updated} updated.`);
+        done();
+      })
+      .catch((e: unknown) => setNote(e instanceof Error ? e.message : String(e)))
+      .finally(() => setBusy(false));
+  };
+  const by = count ? Object.entries(count.stages).map(([s, n]) => `${s} ${n}`).join(", ") : "";
+  return (
+    <div className="grid gap-2 px-3 pt-4 font-mono text-[12.5px] text-muted-foreground">
+      {count ? (
+        <>
+          <p>
+            {count.added} new{by ? ` (${by})` : ""}, {count.updated} updated, from {count.people} {count.people === 1 ? "person" : "people"} in the Inbox.
+          </p>
+          <p className="flex gap-4">
+            <button type="button" disabled={busy} onClick={() => run(false)} className="min-h-11 text-accent">Import</button>
+            <button type="button" disabled={busy} onClick={() => setCount(null)} className="min-h-11">Cancel</button>
+          </p>
+        </>
+      ) : (
+        <button type="button" disabled={busy} onClick={() => run(true)} className="min-h-11 w-fit text-left hoverable:hover:text-foreground">
+          {busy ? "Counting" : "Import from Inbox"}
+        </button>
+      )}
+      {note ? <p>{note}</p> : null}
+    </div>
+  );
+}
+
 function SignIn({ onKey, wrong }: { onKey: (k: string) => void; wrong: boolean }) {
   const [k, setK] = React.useState("");
   return (
@@ -358,12 +408,39 @@ function SignIn({ onKey, wrong }: { onKey: (k: string) => void; wrong: boolean }
 }
 
 function pass(l: LeadSummary, f: Filter) {
+  if (f === "trash") return !!l.trashedAt;
+  if (f === "archived") return !!l.archivedAt && !l.trashedAt;
+  if (aside(l)) return false;
   if (f === "needs") return needsMe(l);
   if (f === "snoozed") return snoozed(l);
   if (f === "open") return !closed(l.stage);
   return l.stage === f && !snoozed(l);
 }
-const label = (f: Filter) => (f === "needs" ? "Needs me" : f === "open" ? "All open" : f === "snoozed" ? "Snoozed" : f);
+const LABEL: Partial<Record<Filter, string>> = { needs: "Needs me", open: "All open", snoozed: "Snoozed", archived: "Archived", trash: "Trash" };
+const label = (f: Filter) => LABEL[f] ?? f;
+
+/** Deletes every lead in the trash for good, after a second press. */
+function EmptyTrash({ n, call, done }: { n: number; call: Call; done: () => void }) {
+  const [sure, setSure] = React.useState(false);
+  const [busy, setBusy] = React.useState(false);
+  const empty = () => {
+    setBusy(true);
+    call({ method: "DELETE", body: JSON.stringify({ emptyTrash: true }) }).then(done).catch(() => {}).finally(() => { setBusy(false); setSure(false); });
+  };
+  return (
+    <p className="flex flex-wrap items-center gap-3 border-b border-border px-5 py-3 text-[15px]">
+      {sure ? (
+        <>
+          <span>Delete {n} for good? This cannot be undone.</span>
+          <button type="button" disabled={busy} onClick={empty} className={cn(btn, "text-destructive")}>Delete for good</button>
+          <button type="button" disabled={busy} onClick={() => setSure(false)} className={btn}>Cancel</button>
+        </>
+      ) : (
+        <button type="button" onClick={() => setSure(true)} className={btn}>Empty trash</button>
+      )}
+    </p>
+  );
+}
 
 function FilterButton({ on, n, onClick, children }: { on: boolean; n: number; onClick: () => void; children: React.ReactNode }) {
   return (
@@ -445,6 +522,11 @@ function Detail({ summary, call, onChange, onBack }: { summary: LeadSummary; cal
           <span><b className="font-semibold text-accent">{ago(l.stageAt)} waiting.</b> {l.stage === "Quoted" ? "The quote has had no answer." : "The site promises a reply within a day."}</span>
         </p>
       ) : null}
+      {l.trashedAt ? (
+        <p role="status" className="font-mono text-[13px] text-muted-foreground">
+          In the trash. Deleted for good in {Math.max(1, trashDaysLeft(l.trashedAt, now()))} days unless recovered.
+        </p>
+      ) : null}
       {l.flags?.includes("stuck") ? (
         <p role="status" className="rounded-xl bg-destructive/10 px-4 py-3.5 text-[15px] text-destructive">
           A deposit was paid but not booked. Refund or rebook it in Stripe.
@@ -467,6 +549,8 @@ function Detail({ summary, call, onChange, onBack }: { summary: LeadSummary; cal
         <a href={book} target="_blank" rel="noreferrer" className={btn}>Send booking link</a>
         <button type="button" onClick={() => setSnoozing((v) => !v)} aria-expanded={snoozing} className={btn}>Snooze</button>
         {snoozed(l) ? <button type="button" className={btn} onClick={() => patch({ snoozeUntil: "" }).then(() => setSnoozing(false))}>Unsnooze</button> : null}
+        {l.trashedAt ? null : <button type="button" className={btn} onClick={() => patch({ archive: !l.archivedAt })}>{l.archivedAt ? "Unarchive" : "Archive"}</button>}
+        <button type="button" className={btn} onClick={() => patch({ trash: !l.trashedAt })}>{l.trashedAt ? "Recover" : "Move to trash"}</button>
         <span className="flex-1" />
         {lead?.notion ? <a href={`https://www.notion.so/${lead.notion.replace(/-/g, "")}`} target="_blank" rel="noreferrer" className={btn}>Notion</a> : null}
         {lead?.deposit ? <a href={lead.deposit} target="_blank" rel="noreferrer" className={cn(btn, "text-destructive")}>Deposit in Stripe</a> : null}
@@ -559,6 +643,8 @@ function line(e: LeadEvent): string {
     case "deposit-stuck": return `Deposit stuck${e.note ? `: ${e.note}` : ""}`;
     case "stage": return `Moved to ${e.note}`;
     case "snooze": return e.note === "woken" ? "Unsnoozed" : `Snoozed until ${day(e.note ?? "")}`;
+    case "archive": return e.note === "in" ? "Archived" : "Unarchived";
+    case "trash": return e.note === "in" ? "Moved to trash" : "Recovered from trash";
     case "mail": return `Mail to ${e.mail?.to === "client" ? "them" : "hello@"}: ${e.note ?? ""}`;
   }
 }

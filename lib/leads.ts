@@ -30,7 +30,7 @@ export type Stage = (typeof STAGES)[number];
 /** What happened, as it reached the site. `stage` is Julian's own move. */
 export type LeadEvent = {
   at: string;
-  kind: "inquiry" | "call" | "booking" | "no-deposit" | "deposit-stuck" | "stage" | "snooze" | "mail";
+  kind: "inquiry" | "call" | "booking" | "no-deposit" | "deposit-stuck" | "stage" | "snooze" | "mail" | "archive" | "trash";
   /** The raw row (`msg:` key), Cal.com uid or Stripe intent, so a retry folds in once. */
   ref?: string;
   /** Booking time, session, new stage, a mail's subject: a short line for the timeline. */
@@ -61,6 +61,10 @@ export type Lead = {
   deposit?: string;
   flags?: Flag[];
   snoozeUntil?: string;
+  /** Set aside by Julian: out of every list but Archived. A new message brings it back. */
+  archivedAt?: string;
+  /** In the trash: out of every list but Trash, until he recovers it or empties the trash. */
+  trashedAt?: string;
   /** Notion page this lead is mirrored to. */
   notion?: string;
   /** Something new since he last opened it. */
@@ -98,6 +102,8 @@ export type Change = {
   stage?: Stage;
   /** Kind "snooze": ISO time, or "" to wake it. */
   snoozeUntil?: string;
+  /** Kind "archive" / "trash": in (true) or back out (false). */
+  on?: boolean;
 };
 
 /** One event folded into a lead. Returns the lead unchanged when the event
@@ -133,8 +139,12 @@ export function fold(lead: Lead | null, email: string, c: Change): Lead {
     return tidy(next);
   }
 
-  // Something arrived from outside: it is news.
-  Object.assign(next, { lastAt: event.at, unread: true, snoozeUntil: undefined });
+  if (event.kind === "archive") return tidy({ ...next, archivedAt: c.on ? event.at : undefined });
+  if (event.kind === "trash") return tidy({ ...next, trashedAt: c.on ? event.at : undefined });
+
+  // Something arrived from outside: it is news, and out of Archived. The
+  // trash keeps it: what he threw out (spam, mostly) stays there.
+  Object.assign(next, { lastAt: event.at, unread: true, snoozeUntil: undefined, archivedAt: undefined });
   if (c.name && (!lead || next.name === next.email)) next.name = c.name;
   if (c.kind) next.kind = c.kind;
   if (c.when) next.when = c.when;
@@ -151,8 +161,15 @@ export function fold(lead: Lead | null, email: string, c: Change): Lead {
 const tidy = (l: Lead): Lead => {
   if (!l.flags?.length) delete l.flags;
   if (!l.snoozeUntil) delete l.snoozeUntil;
+  if (!l.archivedAt) delete l.archivedAt;
+  if (!l.trashedAt) delete l.trashedAt;
   return l;
 };
+
+/** Julian: "yes, empty trash after 30 days". Days a lead keeps in the trash. */
+export const TRASH_DAYS = 30;
+/** Whole days before a trashed lead is deleted for good; 0 or less means due. */
+export const trashDaysLeft = (trashedAt: string, now: number) => Math.ceil((Date.parse(trashedAt) + TRASH_DAYS * 864e5 - now) / 864e5);
 
 /** Hours Julian promises to answer in; the site says "within a day". */
 export const REPLY_HOURS = 24;
@@ -240,4 +257,56 @@ export async function recordLead(env: LeadStore, email: string, c: Change): Prom
     console.error("lead", String(e));
     return null;
   }
+}
+
+/* ── the Inbox, backfilled ────────────────────────────────────────
+ * Julian (2026-11-04): "add the stuff i have in my juliangigola admin inbox
+ * to my leads". The `msg:` rows from before the desk, folded into leads at
+ * their own times. Nothing is mailed, Notion is not touched, no row deleted.
+ * ─────────────────────────────────────────────────────────────── */
+
+/** One Inbox row as its KV key plus the summary its metadata carries. */
+export type InboxRow = { key: string; at: string; type: string; name: string; email: string; read: boolean; detail?: string };
+
+/** What an old row was: the form, a call, a booking, or a deposit gone wrong. */
+export function rowEvent(r: InboxRow): Change {
+  const booked = r.type === "booking";
+  const kind: LeadEvent["kind"] = !booked
+    ? "inquiry"
+    : r.detail?.startsWith("Deposit paid, not booked")
+      ? "deposit-stuck"
+      : /\bcall\b/i.test(r.detail ?? "")
+        ? "call"
+        : "booking";
+  return { event: { at: r.at, kind, ref: r.key, note: booked ? r.detail : r.type }, name: r.name, ...(booked ? {} : { kind: r.type }) };
+}
+
+const ARRIVED: LeadEvent["kind"][] = ["inquiry", "call", "booking", "deposit-stuck"];
+
+/**
+ * A person's old rows folded into their lead, or null when every row is
+ * already there (run twice, changes nothing). Already there: the same row
+ * (`ref`), or something that arrived within two minutes of it, which is
+ * the same booking recorded live under its Cal.com uid.
+ * A new lead is built in time order and is unread only if a row was;
+ * one whose rows were all read, still at Inquiry, lands at Replied.
+ * An existing lead only gains the events and an earlier First seen: its
+ * stage, snooze and unread are Julian's and stay.
+ */
+export function backfillLead(lead: Lead | null, email: string, rows: InboxRow[]): Lead | null {
+  const sorted = [...rows].sort((a, b) => a.at.localeCompare(b.at));
+  const near = (a: string, b: string) => Math.abs(Date.parse(a) - Date.parse(b)) < 120e3;
+  const add = sorted
+    .map(rowEvent)
+    .filter(({ event }) => !lead?.events.some((x) => x.ref === event.ref || (ARRIVED.includes(x.kind) && near(x.at, event.at))));
+  if (!add.length) return null;
+  if (!lead) {
+    let built: Lead | null = null;
+    for (const c of add) built = fold(built, email, c);
+    const unread = sorted.some((r) => !r.read);
+    // Julian: "import read ones as replied". All read means he dealt with it.
+    return { ...built!, unread, ...(!unread && built!.stage === "Inquiry" ? { stage: "Replied" as const } : {}) };
+  }
+  const events = [...lead.events, ...add.map((c) => c.event)].sort((a, b) => a.at.localeCompare(b.at)).slice(-KEEP);
+  return { ...lead, events, firstAt: add[0].event.at < lead.firstAt ? add[0].event.at : lead.firstAt };
 }
