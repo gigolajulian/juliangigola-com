@@ -214,6 +214,26 @@ describe("leads", () => {
     expect(leads[0]).toMatchObject({ stage: "Quoted", unread: false });
   });
 
+  it("archives, trashes and recovers by hand, and empties only the trash, keeping Inbox rows", async () => {
+    await seed(Date.UTC(2026, 9, 1), "row");
+    await lead("a@example.com", "2026-11-01T10:00:00Z");
+    await lead("b@example.com", "2026-11-02T10:00:00Z");
+    const [a, b] = [`lead:${await idOf("a@example.com")}`, `lead:${await idOf("b@example.com")}`];
+    const patch = async (key: string, body: object) => (await (await PATCH(req("PATCH", { body: JSON.stringify({ key, ...body }) }))).json()).lead;
+    expect(await patch(a, { archive: true })).toHaveProperty("archivedAt");
+    expect(await patch(a, { archive: false })).not.toHaveProperty("archivedAt");
+    expect(await patch(a, { trash: true })).toHaveProperty("trashedAt");
+    const back = await patch(a, { trash: false });
+    expect(back).not.toHaveProperty("trashedAt");
+    expect(back.events.map((e: { kind: string; note: string }) => `${e.kind} ${e.note}`).slice(-4)).toEqual(["archive in", "archive out", "trash in", "trash out"]);
+    await patch(b, { trash: true });
+    expect((await DELETE(req("DELETE", { key: null, body: JSON.stringify({ emptyTrash: true }) }))).status).toBe(401);
+    expect(await (await DELETE(req("DELETE", { body: JSON.stringify({ emptyTrash: true }) }))).json()).toEqual({ ok: true, deleted: 1 });
+    expect(kv.data.has(a)).toBe(true);
+    expect(kv.data.has(b)).toBe(false);
+    expect([...kv.data.keys()].some((k) => k.startsWith("msg:"))).toBe(true);
+  });
+
   it("refuses an unknown stage, a bad time and a missing lead, and says when LEADS_KEY is unset", async () => {
     await lead("a@example.com", "2026-11-01T10:00:00Z");
     const key = `lead:${await idOf("a@example.com")}`;

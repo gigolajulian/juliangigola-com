@@ -241,7 +241,25 @@ export async function DELETE(request: Request) {
 
   const given = await parsed(request);
   if (!given) return json({ error: "Not JSON." }, 400);
-  const { key } = given as { key?: string };
+  const { key, emptyTrash } = given as { key?: string; emptyTrash?: boolean };
+  // The lead desk's "Empty trash": every lead in the trash, deleted for good.
+  // Their Inbox rows stay; the Inbox has its own trash.
+  if (emptyTrash === true) {
+    const seal = await gate.seal;
+    if (!seal) return json({ error: "Leads need LEADS_KEY on the Worker." }, 503);
+    const gone: string[] = [];
+    let after: string | undefined;
+    for (;;) {
+      const listed = await gate.inbox.list<{ s?: string }>({ prefix: "lead:", cursor: after });
+      for (const k of listed.keys as { name: string; metadata?: { s?: string } }[]) {
+        if (k.metadata?.s && (await seal.open<LeadSummary>(k.metadata.s)).trashedAt) gone.push(k.name);
+      }
+      if (listed.list_complete) break;
+      after = listed.cursor;
+    }
+    await Promise.all(gone.map((k) => gate.inbox.delete(k)));
+    return json({ ok: true, deleted: gone.length });
+  }
   if (!key?.startsWith("msg:")) return json({ error: "Unknown." }, 400);
 
   await gate.inbox.delete(key);
@@ -258,7 +276,7 @@ export async function DELETE(request: Request) {
  */
 async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: Awaited<ReturnType<typeof sealer>>, given: Record<string, unknown>) {
   if (!seal) return json({ error: "Leads need LEADS_KEY on the Worker." }, 503);
-  const { key, stage, snoozeUntil, seen } = given as { key: string; stage?: string; snoozeUntil?: string; seen?: boolean };
+  const { key, stage, snoozeUntil, seen, archive, trash } = given as { key: string; stage?: string; snoozeUntil?: string; seen?: boolean; archive?: boolean; trash?: boolean };
   if (stage !== undefined && !(STAGES as readonly string[]).includes(stage)) return json({ error: "Unknown stage." }, 400);
   if (snoozeUntil !== undefined && snoozeUntil !== "" && isNaN(Date.parse(snoozeUntil))) return json({ error: "Bad time." }, 400);
   const id = key.slice(5);
@@ -267,6 +285,8 @@ async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: Await
   const at = new Date().toISOString();
   if (stage) lead = fold(lead, lead.email, { event: { at, kind: "stage", note: stage }, stage: stage as Stage });
   if (snoozeUntil !== undefined) lead = fold(lead, lead.email, { event: { at, kind: "snooze", note: snoozeUntil || "woken" }, snoozeUntil });
+  if (typeof archive === "boolean") lead = fold(lead, lead.email, { event: { at, kind: "archive", note: archive ? "in" : "out" }, on: archive });
+  if (typeof trash === "boolean") lead = fold(lead, lead.email, { event: { at, kind: "trash", note: trash ? "in" : "out" }, on: trash });
   if (seen) lead = { ...lead, unread: false };
   await writeLead(inbox, seal, id, lead);
   return json({ lead });

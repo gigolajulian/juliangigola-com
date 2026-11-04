@@ -142,3 +142,20 @@ describe("leadSummary", () => {
     expect(JSON.stringify({ s: await s.seal(leadSummary(l)) }).length).toBeLessThan(1024);
   });
 });
+
+describe("archive and trash", () => {
+  it("sets aside without touching the stage, a new message unarchives, the trash keeps it", () => {
+    let l = fold(null, email, { event: { at: at(1), kind: "inquiry" } });
+    l = fold(l, email, { event: { at: at(2), kind: "stage" }, stage: "Quoted" });
+    l = fold(l, email, { event: { at: at(3), kind: "archive", note: "in" }, on: true });
+    expect(l).toMatchObject({ stage: "Quoted", archivedAt: at(3) });
+    l = fold(l, email, { event: { at: at(4), kind: "inquiry" } });
+    expect(l.archivedAt).toBeUndefined();
+    l = fold(l, email, { event: { at: at(5), kind: "trash", note: "in" }, on: true });
+    l = fold(l, email, { event: { at: at(6), kind: "inquiry" } });
+    expect(l.trashedAt).toBe(at(5));
+    l = fold(l, email, { event: { at: at(7), kind: "trash", note: "out" }, on: false });
+    expect(l.trashedAt).toBeUndefined();
+    expect(l.stage).toBe("Quoted");
+  });
+});

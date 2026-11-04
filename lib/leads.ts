@@ -29,7 +29,7 @@ export type Stage = (typeof STAGES)[number];
 /** What happened, as it reached the site. `stage` is Julian's own move. */
 export type LeadEvent = {
   at: string;
-  kind: "inquiry" | "call" | "booking" | "no-deposit" | "deposit-stuck" | "stage" | "snooze" | "mail";
+  kind: "inquiry" | "call" | "booking" | "no-deposit" | "deposit-stuck" | "stage" | "snooze" | "mail" | "archive" | "trash";
   /** The raw row (`msg:` key), Cal.com uid or Stripe intent, so a retry folds in once. */
   ref?: string;
   /** Booking time, session, new stage, a mail's subject: a short line for the timeline. */
@@ -60,6 +60,10 @@ export type Lead = {
   deposit?: string;
   flags?: Flag[];
   snoozeUntil?: string;
+  /** Set aside by Julian: out of every list but Archived. A new message brings it back. */
+  archivedAt?: string;
+  /** In the trash: out of every list but Trash, until he recovers it or empties the trash. */
+  trashedAt?: string;
   /** Notion page this lead is mirrored to. */
   notion?: string;
   /** Something new since he last opened it. */
@@ -97,6 +101,8 @@ export type Change = {
   stage?: Stage;
   /** Kind "snooze": ISO time, or "" to wake it. */
   snoozeUntil?: string;
+  /** Kind "archive" / "trash": in (true) or back out (false). */
+  on?: boolean;
 };
 
 /** One event folded into a lead. Returns the lead unchanged when the event
@@ -132,8 +138,12 @@ export function fold(lead: Lead | null, email: string, c: Change): Lead {
     return tidy(next);
   }
 
-  // Something arrived from outside: it is news.
-  Object.assign(next, { lastAt: event.at, unread: true, snoozeUntil: undefined });
+  if (event.kind === "archive") return tidy({ ...next, archivedAt: c.on ? event.at : undefined });
+  if (event.kind === "trash") return tidy({ ...next, trashedAt: c.on ? event.at : undefined });
+
+  // Something arrived from outside: it is news, and out of Archived. The
+  // trash keeps it: what he threw out (spam, mostly) stays there.
+  Object.assign(next, { lastAt: event.at, unread: true, snoozeUntil: undefined, archivedAt: undefined });
   if (c.name && (!lead || next.name === next.email)) next.name = c.name;
   if (c.kind) next.kind = c.kind;
   if (c.when) next.when = c.when;
@@ -150,6 +160,8 @@ export function fold(lead: Lead | null, email: string, c: Change): Lead {
 const tidy = (l: Lead): Lead => {
   if (!l.flags?.length) delete l.flags;
   if (!l.snoozeUntil) delete l.snoozeUntil;
+  if (!l.archivedAt) delete l.archivedAt;
+  if (!l.trashedAt) delete l.trashedAt;
   return l;
 };
 
