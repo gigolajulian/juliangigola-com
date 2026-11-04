@@ -319,6 +319,38 @@ describe("leads", () => {
     ]);
   });
 
+  it("subscribes a device, pings it when a lead arrives, and forgets it when the push service says it is gone", async () => {
+    const pair = (await crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, true, ["sign"])) as CryptoKeyPair;
+    const VAPID_KEY = JSON.stringify(await crypto.subtle.exportKey("jwk", pair.privateKey));
+    expect((await GET(req("GET", { query: "?vapid" }))).status).toBe(503);
+    ctx.env = { ...ctx.env, VAPID_KEY };
+    expect((await (await GET(req("GET", { query: "?vapid" }))).json()).key).toMatch(/^[A-Za-z0-9_-]{87}$/);
+    expect((await GET(req("GET", { key: null, query: "?vapid" }))).status).toBe(401);
+
+    const ua = (await crypto.subtle.generateKey({ name: "ECDH", namedCurve: "P-256" }, true, ["deriveBits"])) as CryptoKeyPair;
+    const b64 = (u: ArrayBuffer | Uint8Array) => Buffer.from(u as ArrayBuffer).toString("base64url");
+    const sub = { endpoint: "https://web.push.apple.com/dev-1", keys: { p256dh: b64(await crypto.subtle.exportKey("raw", ua.publicKey)), auth: b64(crypto.getRandomValues(new Uint8Array(16))) } };
+    const patch = (body: object) => PATCH(req("PATCH", { body: JSON.stringify(body) }));
+    expect((await patch({ push: { endpoint: "http://nope" } })).status).toBe(400);
+    expect((await patch({ push: sub })).status).toBe(200);
+    expect([...kv.data.keys()].filter((k) => k.startsWith("push:"))).toHaveLength(1);
+
+    const sent: { url: string; init: RequestInit }[] = [];
+    vi.stubGlobal("fetch", async (url: string, init: RequestInit) => (sent.push({ url, init }), new Response(null, { status: 201 })));
+    await recordLead({ INBOX: kv as never, LEADS_KEY, VAPID_KEY }, "maya@example.com", { event: { at: "2026-11-04T10:00:00Z", kind: "inquiry", ref: "msg:p1" }, name: "Maya" });
+    await recordLead({ INBOX: kv as never, LEADS_KEY, VAPID_KEY }, "maya@example.com", { event: { at: "2026-11-04T10:01:00Z", kind: "mail", note: "x" } });
+    expect(sent.map((x) => x.url)).toEqual(["https://web.push.apple.com/dev-1"]);
+    expect(sent[0].init.headers).toMatchObject({ "content-encoding": "aes128gcm" });
+
+    vi.stubGlobal("fetch", async () => new Response(null, { status: 410 }));
+    await recordLead({ INBOX: kv as never, LEADS_KEY, VAPID_KEY }, "noor@example.com", { event: { at: "2026-11-04T11:00:00Z", kind: "booking", ref: "cal-9" }, name: "Noor" });
+    expect([...kv.data.keys()].filter((k) => k.startsWith("push:"))).toHaveLength(0);
+
+    await patch({ push: sub });
+    expect((await patch({ push: { endpoint: sub.endpoint }, off: true })).status).toBe(200);
+    expect([...kv.data.keys()].filter((k) => k.startsWith("push:"))).toHaveLength(0);
+  });
+
   it("refuses an unknown stage, a bad time and a missing lead, and says when LEADS_KEY is unset", async () => {
     await lead("a@example.com", "2026-11-01T10:00:00Z");
     const key = `lead:${await idOf("a@example.com")}`;

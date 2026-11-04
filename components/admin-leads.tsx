@@ -201,6 +201,7 @@ export function AdminLeads() {
             <FilterButton key={f} on={filter === f} n={count(f)} onClick={() => setFilter(f)}>{label(f)}</FilterButton>
           ))}
         </div>
+        <PushSwitch call={call} />
         <ImportInbox call={call} done={load} />
       </nav>
 
@@ -260,6 +261,71 @@ export function AdminLeads() {
 /** The inbox key, pasted once per device. On the iPhone the installed app keeps
     its own storage apart from Safari, so it asks once there too. A password
     field, so a password manager can fill it. */
+/**
+ * Notifications for this device: a new lead pings the installed app.
+ * Behind a switch until Julian has tried it on his iPhone: the line shows
+ * only with ?push in the address, or once this device has turned it on.
+ */
+const PUSH_FLAG = "jg-leads-push";
+const SW_URL = "/admin/leads/sw.js";
+function PushSwitch({ call }: { call: Call }) {
+  // The desk renders only in the browser (after its list loads), so these read the page directly.
+  const [shown] = React.useState(() => {
+    let flag = false;
+    try { flag = localStorage.getItem(PUSH_FLAG) === "1"; } catch {}
+    return flag || new URLSearchParams(location.search).has("push");
+  });
+  const able = typeof navigator !== "undefined" && "serviceWorker" in navigator && "PushManager" in window;
+  const [on, setOn] = React.useState<boolean | null>(null);
+  const [note, setNote] = React.useState<string | null>(() =>
+    able ? null : /iPhone|iPad/.test(navigator.userAgent) ? "Open the installed Leads app to turn these on." : "This browser cannot do notifications.",
+  );
+  React.useEffect(() => {
+    if (!shown || !able) return;
+    navigator.serviceWorker.getRegistration("/admin/leads").then((r) => r?.pushManager.getSubscription()).then((s) => setOn(!!s)).catch(() => setOn(false));
+  }, [shown, able]);
+  if (!shown) return null;
+
+  const turnOn = async () => {
+    setNote(null);
+    try {
+      if ((await Notification.requestPermission()) !== "granted") return setNote("Notifications are blocked for this app in Settings.");
+      const reg = await navigator.serviceWorker.register(SW_URL, { scope: "/admin/leads" });
+      await navigator.serviceWorker.ready;
+      const { key } = (await call({ query: "?vapid" })) as { key: string };
+      const raw = Uint8Array.from(atob(key.replace(/-/g, "+").replace(/_/g, "/")), (c) => c.charCodeAt(0));
+      const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: raw });
+      await call({ method: "PATCH", body: JSON.stringify({ push: sub.toJSON() }) });
+      try { localStorage.setItem(PUSH_FLAG, "1"); } catch {}
+      setOn(true);
+    } catch (e) {
+      setNote(e instanceof Error ? e.message : String(e));
+    }
+  };
+  const turnOff = async () => {
+    try {
+      const sub = await (await navigator.serviceWorker.getRegistration("/admin/leads"))?.pushManager.getSubscription();
+      if (sub) {
+        await call({ method: "PATCH", body: JSON.stringify({ push: { endpoint: sub.endpoint }, off: true }) });
+        await sub.unsubscribe();
+      }
+      setOn(false);
+    } catch (e) {
+      setNote(e instanceof Error ? e.message : String(e));
+    }
+  };
+  return (
+    <div className="grid gap-1 px-3 pt-4 font-mono text-[12.5px] text-muted-foreground">
+      {on === null ? null : (
+        <button type="button" onClick={on ? turnOff : turnOn} className="min-h-11 w-fit text-left hoverable:hover:text-foreground">
+          Notifications: <span className={on ? "text-accent" : undefined}>{on ? "on" : "off"}</span>
+        </button>
+      )}
+      {note ? <p>{note}</p> : null}
+    </div>
+  );
+}
+
 type Count = { people: number; added: number; updated: number; stages: Partial<Record<Stage, number>> };
 
 /** Julian: "add the stuff i have in my juliangigola admin inbox to my leads".
