@@ -789,7 +789,8 @@ export function V3Work({
               {cells.map(({ f, p }, n) => {
                 const cap = p ? (
                   <figcaption>
-                    <span className="lbl">{p.d.join(", ")}</span>
+                    {/* A gallery is named for its discipline: the label would say it twice. */}
+                    {p.d.join(", ").toLowerCase() !== p.n.toLowerCase() ? <span className="lbl">{p.d.join(", ")}</span> : null}
                     <b>{p.n}</b>
                   </figcaption>
                 ) : null;
