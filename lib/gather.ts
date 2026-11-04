@@ -1,4 +1,9 @@
-import { gsap } from "gsap";
+import type { gsap as GSAP } from "gsap";
+
+/* GSAP loads with the first gather (`gatherWhenSeen`), never up front: the
+   root 404 draws a wall, so anything it imports statically ships with every
+   page (audit 2026-11-04: 71KB on each first visit). */
+type G = typeof GSAP;
 
 /* ── the gather ───────────────────────────────────────────────────
  * Julian (2026-10-14): photographs come in from outside the page and
@@ -53,7 +58,7 @@ export const builds: Path = (f, r) => {
 export const slides: Path = (f, r, rank) => ({ x: innerWidth - r.left + 40, y: 0, delay: rank * 0.08 });
 
 /** Puts each frame outside the page and returns the flight home. */
-export function gather(frames: HTMLElement[], path: Path = radial) {
+export function gather(frames: HTMLElement[], path: Path = radial, gsap: G) {
   const order = (f: HTMLElement) => parseFloat(getComputedStyle(f).getPropertyValue("--order")) || 0;
   const rank = new Map([...frames].sort((a, b) => order(a) - order(b)).map((f, i) => [f, i]));
   const how = new Map<HTMLElement, ReturnType<Path>>();
@@ -117,7 +122,15 @@ export function gatherWhenSeen(box: HTMLElement, pick: (box: HTMLElement) => Ite
     // it (QA, /book/headshots with slow images, 2026-10-15).
     const imgs = frames.flatMap((f) => [...f.querySelectorAll("img")]);
     for (const i of imgs) i.loading = "eager";
-    const go = gather(frames, path);
+    // The box stays hidden (no `data-gathered`) until GSAP is in and the frames are parked.
+    void import("gsap").then(({ gsap }) => {
+      if (gone) return;
+      tweens = gsap;
+      run(gather(frames, path, gsap));
+    });
+  });
+  let tweens: G | null = null;
+  const run = (go: () => void) => {
     done();
     let started = false;
     const start = () => {
@@ -134,15 +147,16 @@ export function gatherWhenSeen(box: HTMLElement, pick: (box: HTMLElement) => Ite
             i.addEventListener("load", () => ok(), { once: true });
             i.addEventListener("error", () => ok(), { once: true });
           });
+    const imgs = frames.flatMap((f) => [...f.querySelectorAll("img")]);
     Promise.all(imgs.map(loaded)).then(start);
     cap = window.setTimeout(start, LOAD_CAP_MS);
-  });
+  };
   io.observe(box);
   return () => {
     gone = true;
     clearTimeout(cap);
     io.disconnect();
-    gsap.killTweensOf(frames);
+    tweens?.killTweensOf(frames);
     frames.forEach((f) => {
       f.style.removeProperty("transform");
       f.style.removeProperty("transition");
