@@ -140,7 +140,7 @@ ${links ? `<tr><td class="rule" style="${rule};padding:22px 0 0"><a href="${resc
     SITE,
   ].join("\n");
 
-  const logo = (contentId: string, content: string) => ({ content, filename: `${contentId}.png`, type: "image/png", disposition: "inline" as const, contentId });
+  const logo = (contentId: string, b64: string) => ({ content: Uint8Array.from(atob(b64), (c) => c.charCodeAt(0)), filename: `${contentId}.png`, type: "image/png", disposition: "inline" as const, contentId });
   return { subject: remind ? `Tomorrow: ${c.session}, ${hour}` : `Booked: ${c.session}, ${at}`, html, text, attachments: [logo("name-w", NAME_W), logo("name-ink", NAME_INK)] };
 }
 

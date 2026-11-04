@@ -278,7 +278,8 @@ const NEXT = {
 };
 
 /** A plain mail to hello@ saying how a deposit ended. A failed send is logged, never a failed webhook. */
-type Attachment = { content: string; filename: string; type: string; disposition: "attachment" };
+// Bytes, never a base64 string: `send()` mails a string as-is, so the picture arrives as text.
+type Attachment = { content: ArrayBuffer; filename: string; type: string; disposition: "attachment" };
 
 /** True once hello@ has it. */
 export async function mail(email: Env["EMAIL"], subject: string, lines: string[], who?: { name: string; email: string }, attachments: Attachment[] = []): Promise<boolean> {
@@ -311,7 +312,7 @@ async function refsOf(inbox: Env["INBOX"], intent: string): Promise<{ files: Att
         .filter((k: Key) => k.metadata?.type)
         .map(async (k: Key) => {
           const buf = (await inbox.get(k.name, "arrayBuffer")) as ArrayBuffer | null;
-          return buf ? { content: Buffer.from(buf).toString("base64"), filename: k.metadata!.name, type: k.metadata!.type, disposition: "attachment" as const } : null;
+          return buf ? { content: buf, filename: k.metadata!.name, type: k.metadata!.type, disposition: "attachment" as const } : null;
         }),
     );
     const picks = (((await inbox.get(refKey(intent, "picks"))) as string | null) ?? "").split("\n").filter(Boolean);
