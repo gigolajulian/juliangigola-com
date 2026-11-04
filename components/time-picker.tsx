@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { DepositStep, type DepositBody } from "@/components/deposit-step";
 import { ReferencePicks } from "@/components/reference-picks";
 import { isPaid } from "@/lib/paid";
+import { ownEngine } from "@/lib/booking-rules";
 import { Orb, ORB_ROUND } from "@/components/orb";
 import { Calendar, dlabel, duration, fmt, type Shell } from "@/components/v3/flow";
 
@@ -260,6 +261,7 @@ export function TimePicker({
   }, [ok]);
 
   const load = React.useCallback(async (fresh = false) => {
+    const own = ownEngine();
     const key = `${username}/${slug}/${tz}`;
     try {
       const from = new Date();
@@ -268,7 +270,10 @@ export function TimePicker({
       // 8 seconds its own calendar takes over, as for any other failure.
       const signal = AbortSignal.timeout?.(8000);
       const hit = recent.get(key);
-      const got = !fresh && hit && Date.now() - hit.at < KEEP ? hit.got : Promise.all([
+      // The site's own engine answers both in one (`app/api/slots`), in Cal.com's shape.
+      const got = !fresh && hit && Date.now() - hit.at < KEEP ? hit.got : own ? fetch(`/api/slots?slug=${slug}&start=${iso(from)}&end=${iso(to)}&timeZone=${encodeURIComponent(tz)}`, { signal })
+        .then((r) => r.json())
+        .then((j) => [{ data: j.event }, j] as [unknown, unknown]) : Promise.all([
         fetch(`${API}/event-types?username=${username}&eventSlug=${slug}`, { headers: { "cal-api-version": "2024-06-14" }, signal }).then((r) => r.json()),
         fetch(`${API}/slots?username=${username}&eventTypeSlug=${slug}&start=${iso(from)}&end=${iso(to)}&timeZone=${encodeURIComponent(tz)}&format=range`, {
           headers: { "cal-api-version": "2024-09-04" },
@@ -725,7 +730,7 @@ export function TimePicker({
     const firstName = name.split(/\s+/)[0];
     if (paid) {
       setBooked({ name: firstName, email: String(form.get("email")).trim(), where, phone, via: "" });
-      setDeposit({ slug, start: new Date(pick.start).toISOString(), timeZone: tz, name, email: String(form.get("email")), phone, ...(notes ? { notes } : {}), ...(needsWhere ? { where } : {}), session });
+      setDeposit({ ...(ownEngine() ? { engine: "own" as const } : {}), slug, start: new Date(pick.start).toISOString(), timeZone: tz, name, email: String(form.get("email")), phone, ...(notes ? { notes } : {}), ...(needsWhere ? { where } : {}), session });
       const sent = new FormData();
       form.getAll("refs").forEach((f) => f instanceof File && f.size && sent.append("refs", f));
       if (form.get("picks")) sent.append("picks", String(form.get("picks")));
