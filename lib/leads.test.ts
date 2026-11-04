@@ -46,6 +46,14 @@ describe("fold", () => {
     expect(l.snoozeUntil).toBeUndefined();
   });
 
+  it("logs a mail on the timeline without making it news or moving the stage", () => {
+    let l = fold(null, email, { event: { at: at(1), kind: "call", ref: "c1" } });
+    l = { ...l, unread: false };
+    l = fold(l, email, { event: { at: at(2), kind: "mail", note: "Booked: Call", mail: { to: "client", kind: "confirm", booking: "c1" } } });
+    expect(l).toMatchObject({ stage: "Call booked", unread: false, lastAt: at(1) });
+    expect(l.events.at(-1)).toMatchObject({ kind: "mail", note: "Booked: Call", mail: { to: "client" } });
+  });
+
   it("keeps a flag once", () => {
     let l = fold(null, email, { event: { at: at(1), kind: "deposit-stuck", ref: "pi_1" }, flag: "stuck" });
     l = fold(l, email, { event: { at: at(2), kind: "deposit-stuck", ref: "pi_2" }, flag: "stuck" });
