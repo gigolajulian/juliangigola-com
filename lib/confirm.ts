@@ -149,7 +149,7 @@ export async function sendCancelled(mailer: CloudflareEnv["CLIENT_EMAIL"] | unde
   const money = {
     refunded: "Your $100 deposit is refunded to your card. Banks take 5 to 10 days to show it.",
     late: "The refund did not go through on its own. I'll send it by hand and email you.",
-    kept: "It was under 48 hours before the session, so the $100 deposit is not refunded.",
+    kept: "It was under 48 hours before the session as first booked, so the $100 deposit is not refunded.",
     none: "",
   }[refund];
   const text = [`Hi ${first(c.name)},`, "", `Your ${c.session.toLowerCase()} on ${when(c.start, c.end)} is cancelled.`, money, "", `Book another time: ${SITE}/book`, "", "Questions? Reply to this email."].filter((l, i, a) => l || a[i - 1]).join("\n");

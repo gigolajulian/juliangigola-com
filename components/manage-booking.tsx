@@ -12,7 +12,7 @@ import { REFUND_HOURS, refundable } from "@/lib/booking-rules";
  * start, Julian 2026-11-03), then asks to confirm.
  * ─────────────────────────────────────────────────────────────── */
 
-export type Managed = { id: string; slug: string; session: string; start: string; end: string; where?: string; paid: boolean; cancelled: boolean };
+export type Managed = { id: string; slug: string; session: string; start: string; end: string; firstStart?: string; where?: string; paid: boolean; cancelled: boolean };
 
 const when = (iso: string, timeZone?: string) =>
   new Intl.DateTimeFormat("en-US", { timeZone, weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZoneName: "short" }).format(new Date(iso));
@@ -25,7 +25,7 @@ export function ManageBooking({ booking, token, open }: { booking: Managed; toke
   const [refunded, setRefunded] = React.useState<boolean | null>(null);
   const [now] = React.useState(() => Date.now());
   const past = Date.parse(b.start) <= now;
-  const refund = refundable({ intent: b.paid ? "x" : undefined, start: b.start }, now);
+  const refund = refundable({ intent: b.paid ? "x" : undefined, start: b.start, firstStart: b.firstStart }, now);
 
   const act = async (body: { action: "cancel" } | { action: "reschedule"; start: string }) => {
     setState("busy");
@@ -72,7 +72,7 @@ export function ManageBooking({ booking, token, open }: { booking: Managed; toke
               ? "Cancel this call?"
               : refund
                 ? `It's ${REFUND_HOURS} hours or more before your session, so your $100 deposit is refunded to your card.`
-                : `It's under ${REFUND_HOURS} hours before your session, so the $100 deposit is not refunded. Moving to another date keeps it.`}
+                : `It's under ${REFUND_HOURS} hours before ${b.firstStart && b.firstStart !== b.start ? "the time you first booked" : "your session"}, so the $100 deposit is not refunded. Moving to another date keeps it.`}
           </p>
           <div className="flex gap-3">
             <button type="button" className="btn fill" disabled={state === "busy"} onClick={() => act({ action: "cancel" })}>

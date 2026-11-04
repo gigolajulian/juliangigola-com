@@ -131,6 +131,19 @@ describe("cancel", () => {
     expect(String(client.sent.at(-1)!.text)).toContain("not refunded");
   });
 
+  it("judges the refund by the time first booked: moved out, then cancelled, keeps the deposit", async () => {
+    const start = wednesday(7);
+    const { id, t } = await paid(start);
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(Date.parse(start) - 24 * 36e5);
+    expect((await post(id, { t, action: "reschedule", start: plus(start, 7 * 24) })).status).toBe(200);
+    const res = await post(id, { t, action: "cancel" });
+    vi.useRealTimers();
+    expect(await res.json()).toMatchObject({ refunded: null, record: { cancelled: true, firstStart: start } });
+    expect(calls.some((c) => c.url.endsWith("/refunds"))).toBe(false);
+    expect(String(client.sent.at(-1)!.text)).toContain("not refunded");
+  });
+
   it("tells hello@ when the refund fails", async () => {
     const { id, t } = await paid(wednesday(7));
     refundOk = false;

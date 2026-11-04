@@ -51,7 +51,11 @@ export const EVENTS: Record<string, Rule> = {
 
 /** Julian (2026-11-03): a cancel this many hours or more before the start refunds the $100; under it, none. */
 export const REFUND_HOURS = 48;
-export const refundable = (r: { intent?: string; start: string }, now = Date.now()) => !!r.intent && Date.parse(r.start) - now >= REFUND_HOURS * 36e5;
+/* Julian (2026-11-03, "refund by first time"): judged against the time first
+   booked, so moving a session out and then cancelling keeps the deposit. A
+   session moved earlier is judged by its new, earlier time. */
+export const refundable = (r: { intent?: string; start: string; firstStart?: string }, now = Date.now()) =>
+  !!r.intent && Math.min(Date.parse(r.start), Date.parse(r.firstStart ?? r.start)) - now >= REFUND_HOURS * 36e5;
 
 /* Julian (2026-11-03): the engine stays Cal.com until he cuts over. `?ownbook`
    on the address tries the site's own in the browser; the build's

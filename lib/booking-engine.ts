@@ -28,6 +28,8 @@ export type BookingRecord = {
   /** ISO, UTC. */
   start: string;
   end: string;
+  /** The start first booked; a reschedule never changes it (the refund rule reads it). */
+  firstStart?: string;
   timeZone: string;
   name: string;
   email: string;
@@ -59,7 +61,7 @@ const intentKey = (intent: string) => `i:${intent}`;
 const newId = () => crypto.randomUUID().replace(/-/g, "").slice(0, 16);
 
 /** What the client's page may show: no email, no phone, no deposit id. */
-export const managed = (r: BookingRecord) => ({ id: r.id, slug: r.slug, session: r.session, start: r.start, end: r.end, where: r.where, paid: !!r.intent, cancelled: !!r.cancelled });
+export const managed = (r: BookingRecord) => ({ id: r.id, slug: r.slug, session: r.session, start: r.start, end: r.end, firstStart: r.firstStart, where: r.where, paid: !!r.intent, cancelled: !!r.cancelled });
 
 /** The record by its id. */
 export const findBooking = (store: Store, id: string) => store.get<BookingRecord>(recKey(id));
@@ -120,6 +122,7 @@ export async function bookOwn(store: Store, secret: string | undefined, b: BookI
     ...(rule.call ? { call: true } : {}),
     start: new Date(b.start).toISOString(),
     end,
+    firstStart: new Date(b.start).toISOString(),
     timeZone: b.timeZone,
     name: b.name,
     email: b.email,
