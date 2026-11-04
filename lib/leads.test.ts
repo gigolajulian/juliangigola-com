@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { backfillLead, fold, isLate, leadKey, leadSummary, recordLead, trashDaysLeft, type InboxRow, type Lead } from "./leads";
+import { backfillLead, fold, isLate, leadKey, leadSummary, recordLead, trashDaysLeft, writeLead, type InboxRow, type Lead, type LeadSummary } from "./leads";
 import { sealer } from "./lead-crypto";
 
 const at = (h: number) => new Date(Date.UTC(2026, 10, 2, h)).toISOString();
@@ -118,6 +118,26 @@ describe("recordLead", () => {
     const m = row.m as { s: string };
     expect(await s.open(m.s)).toEqual(leadSummary(lead));
     expect(JSON.stringify(m).length).toBeLessThan(1024);
+  });
+
+  it("shrinks the summary to fit KV's 1024 bytes for a long CJK name and message, and keeps a short one whole", async () => {
+    const s = await sealer(LEADS_KEY)!;
+    const meta = async (name: string, snippet: string) => {
+      const store = kv();
+      const who = `${name.length}@example.com`;
+      await recordLead({ INBOX: store as never, LEADS_KEY }, who, { event: { at: at(1), kind: "inquiry", ref: "msg:1" }, name, snippet, refs: 3, when: at(40), flag: "stuck" });
+      const id = leadKey(await s.id(who));
+      // Snoozed and trashed too: every optional field set.
+      const lead = await s.open<Lead>(store.data.get(id)!.v);
+      await writeLead(store as never, s, id.slice(5), { ...lead, snoozeUntil: at(50), trashedAt: at(2) });
+      const m = store.data.get(id)!.m as { s: string };
+      return { size: JSON.stringify(m).length, summary: await s.open<LeadSummary>(m.s) };
+    };
+    const big = await meta("山田花子".repeat(20), "写真の撮影についてお問い合わせします。".repeat(10));
+    expect(big.size).toBeLessThanOrEqual(1024);
+    expect(big.summary.snippet).toBeUndefined();
+    const small = await meta("Maya Okafor", "Hi Julian, I saw the Portraits set.");
+    expect(small.summary).toMatchObject({ name: "Maya Okafor", snippet: "Hi Julian, I saw the Portraits set." });
   });
 
   it("never throws, skips a booking with no address, and records nothing without LEADS_KEY", async () => {

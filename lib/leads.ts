@@ -215,9 +215,28 @@ export async function readLead(kv: KV, s: Sealer, id: string): Promise<Lead | nu
   return raw ? s.open<Lead>(raw) : null;
 }
 
-/** One lead, sealed, with its sealed summary as the metadata the list reads. */
+/** Bytes the sealed summary may take: KV metadata holds 1024, as JSON. */
+const META_MAX = 1000;
+/** What a summary gives up, in order, when non-Latin text makes it too big:
+    the message, then most of the name, then most of the address. */
+const SHRINK: ((m: LeadSummary) => LeadSummary)[] = [
+  ({ snippet: _s, ...m }) => m,
+  (m) => ({ ...m, name: m.name.slice(0, 24) }),
+  (m) => ({ ...m, name: m.name.slice(0, 8), email: m.email.slice(0, 40) }),
+];
+
+/** One lead, sealed, with its sealed summary as the metadata the list reads.
+    The summary shrinks until it fits, so a long CJK name and message never
+    make the put throw and the lead go unrecorded. */
 export async function writeLead(kv: KV, s: Sealer, id: string, lead: Lead): Promise<void> {
-  await kv.put(leadKey(id), await s.seal(lead), { metadata: { s: await s.seal(leadSummary(lead)) } });
+  let summary = leadSummary(lead);
+  let meta = await s.seal(summary);
+  for (const cut of SHRINK) {
+    if (JSON.stringify({ s: meta }).length <= META_MAX) break;
+    summary = cut(summary);
+    meta = await s.seal(summary);
+  }
+  await kv.put(leadKey(id), await s.seal(lead), { metadata: { s: meta } });
 }
 
 /** Logs a mail the site sent against the person it was about. Never throws. */
