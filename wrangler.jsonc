@@ -84,6 +84,15 @@
      .env.production. */
   "vars": { "BOOKING_ENGINE": "cal" },
 
+  /* The booking lock (`worker/booking-lock.ts`): one instance, every
+     booking through it, its storage the booking records. It lives in its
+     own Worker, `juliangigola-booking` (`worker/wrangler.jsonc`), so this
+     one never carries a Durable Object migration: Workers Builds' branch
+     previews upload versions, and a version upload cannot add a class. */
+  "durable_objects": {
+    "bindings": [{ "name": "BOOKING_LOCK", "class_name": "BookingLock", "script_name": "juliangigola-booking" }]
+  },
+
   "observability": {
     "enabled": true
   }

@@ -10,6 +10,7 @@ interface __BaseEnv_CloudflareEnv {
 	INBOX_KEY: string;
 	LEADS_KEY: string;
 	BOOKING_ENGINE: "cal" | "own";
+	BOOKING_LOCK: DurableObjectNamespace;
 }
 declare namespace Cloudflare {
 	interface GlobalProps {
