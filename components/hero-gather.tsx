@@ -32,7 +32,7 @@ export function HeroGather() {
       return;
     }
 
-    const go = gather(frames);
+    const go = gather(frames, undefined, gsap);
     show();
 
     const held = () => root.dataset.intro === "1" || root.dataset.intro === "lift";
