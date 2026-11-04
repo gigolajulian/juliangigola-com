@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { credentials, KEY_STORE, References } from "@/components/admin-inbox";
+import { LeadHours } from "@/components/lead-hours";
 import { TOKEN_STORE } from "@/lib/admin-github";
 import type { Enquiry } from "@/lib/inbox";
 import { isLate, STAGES, trashDaysLeft, type Lead, type LeadEvent, type LeadSummary, type Stage } from "@/lib/leads";
@@ -18,7 +19,7 @@ import { cn } from "@/lib/utils";
  * open lead side by side. Narrow: the list, then the lead with Back.
  * ─────────────────────────────────────────────────────────────── */
 
-type Filter = "needs" | "open" | "upcoming" | Stage | "snoozed" | "archived" | "trash" | "more";
+type Filter = "needs" | "open" | "upcoming" | Stage | "snoozed" | "archived" | "trash" | "more" | "hours";
 
 const DAY = 864e5;
 const now = () => Date.now();
@@ -233,6 +234,8 @@ export function AdminLeads() {
         {(["Delivered", "Lost"] as const).map((s) => <SideLink key={s} on={filter === s} n={count(s)} onClick={() => pick(s)}>{s}</SideLink>)}
         <SideGroup>Put aside</SideGroup>
         {(["snoozed", "archived", "trash"] as const).map((f) => <SideLink key={f} on={filter === f} n={count(f)} onClick={() => pick(f)}>{label(f)}</SideLink>)}
+        <SideGroup>Booking</SideGroup>
+        <SideLink on={filter === "hours"} n={-1} onClick={() => pick("hours")}>Hours</SideLink>
         <div className="mt-auto grid border-t border-border pt-2">{device}</div>
       </nav>
 
@@ -243,11 +246,11 @@ export function AdminLeads() {
           </p>
           <div className="flex items-baseline justify-between gap-3">
             <h2 style={HEAD} className="text-[32px] leading-none lg:text-xl">{filter === "more" ? "More" : label(filter)}</h2>
-            {filter === "more" ? null : (
+            {filter === "more" || filter === "hours" ? null : (
               <span className="font-mono text-[12.5px] text-muted-foreground">{shown.length} {shown.length === 1 ? "lead" : "leads"}</span>
             )}
           </div>
-          {filter === "more" ? null : (
+          {filter === "more" || filter === "hours" ? null : (
             <input
               type="search"
               value={query}
@@ -265,7 +268,7 @@ export function AdminLeads() {
               ))}
             </div>
           ) : null}
-          {MORE.includes(filter) ? (
+          {MORE.includes(filter) || filter === "hours" ? (
             <button type="button" onClick={() => pick("more")} className="inline-flex min-h-11 w-fit items-center gap-1 text-[16px] text-accent lg:hidden">
               <span aria-hidden="true">‹</span> More
             </button>
@@ -283,12 +286,19 @@ export function AdminLeads() {
                   </button>
                 </li>
               ))}
+              <li>
+                <button type="button" onClick={() => pick("hours")} className="flex min-h-[52px] w-full items-center justify-between border-b border-border px-1 text-left text-[17px]">
+                  Hours <span aria-hidden="true" className="font-mono text-[13px] text-muted-foreground">›</span>
+                </button>
+              </li>
             </ul>
             <div className="grid">
               <p className="px-1 pb-1 font-mono text-[11.5px] uppercase tracking-[0.08em] text-muted-foreground">This device</p>
               {device}
             </div>
           </div>
+        ) : filter === "hours" ? (
+          <LeadHours />
         ) : (
           <>
             {filter === "trash" && shown.length ? <EmptyTrash n={shown.length} call={call} done={() => { setOpen(null); load(); }} /> : null}
@@ -346,7 +356,7 @@ type Tab = "needs" | "open" | "upcoming" | "more";
 const OPEN_STAGES = STAGES.filter((s) => !closed(s));
 /** The lists under More on the phone (the sidebar's lower groups on desktop). */
 const MORE: Filter[] = ["snoozed", "archived", "trash", "Delivered", "Lost"];
-const tabOf = (f: Filter): Tab => (f === "needs" || f === "upcoming" ? f : f === "more" || MORE.includes(f) ? "more" : "open");
+const tabOf = (f: Filter): Tab => (f === "needs" || f === "upcoming" ? f : f === "more" || f === "hours" || MORE.includes(f) ? "more" : "open");
 const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: "needs", label: "Needs me", icon: <><path d="M4 13l3-8h10l3 8v6H4z" /><path d="M4 13h5l1 2h4l1-2h5" /></> },
   { id: "open", label: "Open", icon: <path d="M5 6h14M5 12h14M5 18h9" /> },
@@ -400,7 +410,7 @@ function SideGroup({ children }: { children: React.ReactNode }) {
   return <p className="px-3 pb-1.5 pt-4 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">{children}</p>;
 }
 
-function SideLink({ on, n, onClick, children }: { on: boolean; n: number; onClick: () => void; children: React.ReactNode }) {
+function SideLink({ on, n, onClick, children }: { on: boolean; /** -1: no count. */ n: number; onClick: () => void; children: React.ReactNode }) {
   return (
     <button
       type="button"
@@ -412,7 +422,7 @@ function SideLink({ on, n, onClick, children }: { on: boolean; n: number; onClic
       )}
     >
       <span>{children}</span>
-      <span className={cn("font-mono text-[12.5px]", on ? "text-accent" : "text-muted-foreground")}>{n}</span>
+      {n < 0 ? null : <span className={cn("font-mono text-[12.5px]", on ? "text-accent" : "text-muted-foreground")}>{n}</span>}
     </button>
   );
 }
@@ -590,12 +600,12 @@ function pass(l: LeadSummary, f: Filter) {
   if (aside(l)) return false;
   if (f === "needs") return needsMe(l);
   if (f === "upcoming") return !!l.when && Date.parse(l.when) > now() - 2 * 3600e3 && !closed(l.stage);
-  if (f === "more") return false;
+  if (f === "more" || f === "hours") return false;
   if (f === "snoozed") return snoozed(l);
   if (f === "open") return !closed(l.stage);
   return l.stage === f && !snoozed(l);
 }
-const LABEL: Partial<Record<Filter, string>> = { needs: "Needs me", open: "All open", upcoming: "Upcoming", snoozed: "Snoozed", archived: "Archived", trash: "Trash" };
+const LABEL: Partial<Record<Filter, string>> = { needs: "Needs me", open: "All open", upcoming: "Upcoming", snoozed: "Snoozed", archived: "Archived", trash: "Trash", hours: "Hours" };
 const label = (f: Filter) => LABEL[f] ?? f;
 
 /** Deletes every lead in the trash for good, after a second press. */
