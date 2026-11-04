@@ -38,6 +38,7 @@ describe("gcal", () => {
 
   it("says when the secret is missing or refused, never the token", async () => {
     await expect(gcalToken(undefined)).rejects.toThrow("GCAL_OAUTH is not set");
+    await expect(gcalToken("rt-secret-not-json")).rejects.toThrow(/^GCAL_OAUTH is not valid JSON$/);
     vi.stubGlobal("fetch", async () => Response.json({ error: "invalid_grant" }, { status: 400 }));
     const e = await gcalToken(SECRET).catch((x: Error) => x.message);
     expect(e).toBe("Google token refused: invalid_grant");

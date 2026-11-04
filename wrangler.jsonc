@@ -6,8 +6,7 @@
   // moved by hand — it is effectively permanent.
   "name": "juliangigola",
 
-  // OpenNext's worker, wrapped to export the booking lock (`worker.ts`).
-  "main": "worker.ts",
+  "main": ".open-next/worker.js",
 
   // Must be 2024-09-23 or later for the adapter. `nodejs_compat` is not
   // optional: Next's server code reaches for Node built-ins, and without the
@@ -86,12 +85,13 @@
   "vars": { "BOOKING_ENGINE": "cal" },
 
   /* The booking lock (`worker/booking-lock.ts`): one instance, every
-     booking through it, its storage the booking records. SQLite-backed,
-     which the Workers Free plan allows. */
+     booking through it, its storage the booking records. It lives in its
+     own Worker, `juliangigola-booking` (`worker/wrangler.jsonc`), so this
+     one never carries a Durable Object migration: Workers Builds' branch
+     previews upload versions, and a version upload cannot add a class. */
   "durable_objects": {
-    "bindings": [{ "name": "BOOKING_LOCK", "class_name": "BookingLock" }]
+    "bindings": [{ "name": "BOOKING_LOCK", "class_name": "BookingLock", "script_name": "juliangigola-booking" }]
   },
-  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["BookingLock"] }],
 
   "observability": {
     "enabled": true
