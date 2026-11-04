@@ -40,7 +40,7 @@ export async function GET(request: Request) {
   try {
     // Julian's hours from the lock; the defaults when it cannot be reached (booking rechecks there anyway).
     const hours = await lock<{ hours: Hours }>(env, "hours", null).then((x) => x.hours, () => DEFAULT_HOURS);
-    starts = await openStarts(env.GCAL_OAUTH, slug, from, to, Date.now(), undefined, hours);
+    starts = await openStarts(env.GCAL_OAUTH, slug, from, to, Date.now(), undefined, env.INBOX, hours);
   } catch (e) {
     console.error("slots", String(e));
     return json({ status: "error", error: "Could not reach the calendar." }, 502);

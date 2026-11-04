@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { usePathname } from "next/navigation";
+import { mplan } from "@/lib/mplan";
 
 export function ScrollReveal() {
   const pathname = usePathname();
@@ -25,7 +26,9 @@ export function ScrollReveal() {
 
     const observeTargets = () => {
       const targets = document.querySelectorAll(
-        ".v3 .a-seq figure, .v3 .sheet figure, .v3 .door, .v3 .wgrid .wt, .v3 .a-index .frame, .v3 .wstrip .sc, .v3 .sc-res .wt"
+        ".v3 .a-seq figure, .v3 .sheet figure, .v3 .door, .v3 .wgrid .wt, .v3 .a-index .frame, .v3 .wstrip .sc, .v3 .sc-res .wt" +
+          // MOTION-PLAN.md item 7 (`?mplan=reveal`): project figures reveal once on entry.
+          (mplan("reveal") ? ", .v3 .pj-r" : "")
       );
       targets.forEach((el) => observer.observe(el));
     };
