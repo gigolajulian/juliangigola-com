@@ -85,9 +85,10 @@ function Tile({ p, swatch, first }: { p: WorkItem; swatch?: string[]; first?: bo
           ) : null}
         </div>
       </Link>
-      <figcaption className="lbl">
-        <span>{p.n.toUpperCase()}</span>
-        <span className="mute">{p.d.join(", ")}</span>
+      {/* Set like the strip's caption (Julian, 2026-11-04): discipline, then the name in the display face. */}
+      <figcaption>
+        {p.d.join(", ").toLowerCase() !== p.n.toLowerCase() ? <span className="lbl mute">{p.d.join(", ")}</span> : null}
+        <b>{p.n}</b>
       </figcaption>
     </figure>
   );
