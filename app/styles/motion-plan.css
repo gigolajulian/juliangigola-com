@@ -130,3 +130,20 @@
     transform: scale(1.02);
   }
 }
+
+/* ── Item 6, `scroll`: grids hold still ────────────────────────────────
+   No tile scale and no image parallax tied to scroll, on any grid, and no
+   fallback reveal where scroll timelines are missing: once a photo is on
+   screen it stays put. The header comes and goes on `out` in 250. The
+   homepage column drift is scaled to 32px in home.tsx. */
+:root[data-mplan~="scroll"] .v3 :is(.a-seq figure .ph, .sheet figure, .door, .wgrid .wt .ph, .sc-res .wt .ph),
+:root[data-mplan~="scroll"] .v3 :is(.a-seq figure .ph img, .sheet figure img, .door > img, .wgrid .wt img, .sc-res .wt img) {
+  animation: none !important;
+}
+:root[data-mplan~="scroll"] .v3 :is(.a-seq figure, .sheet figure, .door, .wgrid .wt, .sc-res .wt) {
+  opacity: 1 !important;
+  transform: none !important;
+}
+:root[data-mplan~="scroll"] .v3 .site-hdr {
+  transition: transform var(--dur-small) var(--ease-out-strong), opacity var(--dur-small) var(--ease-out-strong);
+}
