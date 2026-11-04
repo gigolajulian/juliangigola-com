@@ -471,7 +471,7 @@ function Unlock({
    own frames they picked, which are public. Each opens full size in a
    new tab. Only what actually loads is shown: a broken tile, or a
    heading over none, says nothing. */
-function References({
+export function References({
   msgKey,
   enquiry,
   auth,

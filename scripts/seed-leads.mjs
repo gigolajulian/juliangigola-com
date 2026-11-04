@@ -61,7 +61,13 @@ const maya = {
   detail: "A weekend before Dec 14, studio or East Bay",
   message: "Hi Julian, I saw the Portraits set and want something like the red-lit frames. Two of us, before mid December if you have a weekend. Happy to come to the studio.",
   context: { referrer: "instagram.com", landing: "/portfolio/portraits" },
+  files: ["mood-1.jpg", "mood-2.jpg"],
+  picks: ["/work/abril/02.jpg"],
 };
+// Two uploads, as the form stores them beside the row (stand-ins from public/work).
+const { readFile } = await import("node:fs/promises");
+for (const [n, src] of ["public/work/aegis/01.jpg", "public/work/accomplice/01.jpg"].entries())
+  await env.INBOX.put(`ref:${mayaKey}:${n}`, await readFile(src), { metadata: { type: "image/jpeg", name: maya.files[n] } });
 await env.INBOX.put(mayaKey, JSON.stringify(maya), { metadata: { id: maya.id, at: maya.at, type: maya.type, name: maya.name, email: maya.email, read: false } });
 console.log(`seeded ${leads.length} leads`);
 await dispose();
