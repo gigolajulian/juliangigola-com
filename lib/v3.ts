@@ -101,7 +101,7 @@ export const SESSIONS: Record<SessionSlug, Session> = {
     turnaround: "1 week",
     cal: "juliangigola/portraits",
     paid: true,
-    photo: { d: w("lustro", "03"), l: w("aether", "02") },
+    photo: { d: w("zoe", "16"), l: w("zoe", "16"), at: { d: "50% 30%", l: "50% 30%" } },
   },
   graduation: {
     slug: "graduation",
