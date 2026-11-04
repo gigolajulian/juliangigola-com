@@ -129,6 +129,10 @@ function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: number 
   const drag = React.useRef<{ x: number; y: number; ox: number; axis: "x" | "y" | null; lx: number; lt: number; v: number } | null>(null);
   const swiped = React.useRef(false); // a drag's click must not close
   const queued = React.useRef(0); // a step pressed while the track was still moving
+  /* MOTION-PLAN.md item 8 (`?mplan=keys`): a second press mid-glide takes the
+     track on from where it is, never waits for the first to finish. */
+  const going = React.useRef(0); // the frame the glide in flight is heading to, as a step
+  const carry = React.useRef<number | null>(null); // the track's x, read against the new frame
   const open = at !== null;
   React.useEffect(() => {
     const d = ref.current;
@@ -159,7 +163,9 @@ function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: number 
       return done();
     }
     g.killTweensOf(el);
-    g.to(el, { x: -by * el.offsetWidth, y: 0, duration: dur, ease: "expo.out", onComplete: done });
+    going.current = by;
+    const keys = mplan("keys");
+    g.to(el, { x: -by * el.offsetWidth, y: 0, duration: keys ? 0.6 : dur, ease: keys ? "power3.inOut" : "expo.out", onComplete: done });
   };
   /* A new frame: the photos keep their elements (keyed by photo), so the
      track goes back to 0 in the same paint and nothing reloads or jumps.
@@ -167,8 +173,9 @@ function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: number 
   React.useLayoutEffect(() => {
     const el = track.current;
     if (at === null || !el) return;
-    if (G.current) G.current.set(el, { x: 0, y: 0 });
+    if (G.current) G.current.set(el, { x: carry.current ?? 0, y: 0 });
     else el.style.transform = "";
+    carry.current = null;
     const by = queued.current;
     queued.current = 0;
     if (by) glide(at, by);
@@ -181,6 +188,13 @@ function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: number 
     const g = G.current;
     if (g && track.current && g.isTweening(track.current)) {
       queued.current = by;
+      if (mplan("keys") && going.current) {
+        // Land the frame now, keep the pose: the next layout puts the track where it is and glides on.
+        const el = track.current;
+        g.killTweensOf(el);
+        carry.current = Number(g.getProperty(el, "x")) + going.current * el.offsetWidth;
+        onGo(wrap(at + going.current));
+      }
       return;
     }
     settle(by);
