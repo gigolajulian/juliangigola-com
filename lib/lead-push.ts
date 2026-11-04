@@ -23,6 +23,7 @@ const TITLE: Partial<Record<LeadEvent["kind"], string>> = {
   call: "Call booked",
   booking: "New booking",
   "deposit-stuck": "Deposit stuck",
+  wrote: "New reply",
 };
 
 export function pushFor(lead: Lead, event: LeadEvent): Push | null {

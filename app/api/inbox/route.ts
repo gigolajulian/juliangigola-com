@@ -354,7 +354,7 @@ export async function POST(request: Request) {
 
 /**
  * A lead changed by hand: its stage, a snooze (an ISO time, or "" to wake
- * it), or opened (`seen`). Stage and snooze go through `fold`, so they land
+ * it), opened (`seen`) or marked unread (`seen: false`). Stage and snooze go through `fold`, so they land
  * on the timeline like everything else.
  */
 async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: Awaited<ReturnType<typeof sealer>>, given: Record<string, unknown>, notion?: string) {
@@ -375,7 +375,8 @@ async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: Await
   if (snoozeUntil !== undefined) lead = fold(lead, lead.email, { event: { at, kind: "snooze", note: snoozeUntil || "woken" }, snoozeUntil });
   if (typeof archive === "boolean") lead = fold(lead, lead.email, { event: { at, kind: "archive", note: archive ? "in" : "out" }, on: archive });
   if (typeof trash === "boolean") lead = fold(lead, lead.email, { event: { at, kind: "trash", note: trash ? "in" : "out" }, on: trash });
-  if (seen) lead = { ...lead, unread: false };
+  // Opened (true), or marked unread again by hand (false).
+  if (typeof seen === "boolean") lead = { ...lead, unread: !seen };
   await writeLead(inbox, seal, id, lead);
   return json({ lead });
 }
