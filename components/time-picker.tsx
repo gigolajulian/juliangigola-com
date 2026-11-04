@@ -1007,7 +1007,7 @@ export function TimePicker({
     if (step === "done") {
       const studio = !booked.where || /studio/i.test(booked.where);
       const lines = paid
-        ? [`${dlabel(date)}, ${range}.`, studio ? "San Jose studio. I send the address the day before." : `${booked.where}.`, "Need to move it? Reply to the confirmation up to 2 business days before."]
+        ? [`${dlabel(date)}, ${range}.`, studio ? "San Jose studio. I send the address the day before." : `${booked.where}.`, "Need to move it? Reply to the confirmation up to 48 hours before."]
         : [`${dlabel(date)}, ${range}.`, "I call the number you gave, or send a video link the day before.", "Need to move it? Reply to the confirmation."];
       const stamp = (ms: number) => new Date(ms).toISOString().replace(/[-:]|\.\d{3}/g, "");
       const s0 = +new Date(pick.start);
@@ -1059,6 +1059,8 @@ export function TimePicker({
             sub: "Your confirmation goes to this email.",
             body: (
               <>
+                {/* The photo's summary hides on phones: the day and time stay in view here (booking critique, 2026-11-04). */}
+                <p className="f-when lbl mute">{dlabel(date)} | {fmt(pick.min)} | {v3.name}</p>
                 {f("name", "Name", "text", "", "name", false, true)}
                 {f("email", "Email", "email", "", "email", false, true)}
                 {f("phone", "Phone", "tel", "", "tel")}
@@ -1078,12 +1080,14 @@ export function TimePicker({
                 {f("notes", "Anything I should know")}
                 {paid ? <ReferencePicks resync={null} v3 /> : null}
                 {error ? <p className="err" role="alert">{error}</p> : null}
+                {/* The deposit terms before the commit, in deposit-step's wording. */}
+                {paid ? <p className="lbl mute">Refundable or transferable up to 48 hours before the shoot. The balance is due after the shoot.</p> : null}
               </>
             ),
             bar: (
               <>
                 {back("pick")}
-                <button type="submit" className="btn fill" disabled={step === "sending" || step === "check"}>{paid ? "Continue to deposit" : "Book the call"}</button>
+                <button type="submit" className="btn fill" disabled={step === "sending" || step === "check"}>{paid ? "Continue to $100 deposit" : "Book the call"}</button>
               </>
             ),
           })}

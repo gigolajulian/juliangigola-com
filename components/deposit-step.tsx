@@ -387,7 +387,7 @@ export function DepositStep({
             <label className="fld"><span className="lbl mute">CVC</span><div ref={cvc} className="f-card" /></label>
           </div>
           <div ref={wallet} className={cn(!wallets && "hidden")} />
-          <p className="lbl mute">Refundable or transferable up to 2 business days before the shoot. Card payment through Stripe.</p>
+          <p className="lbl mute">Refundable or transferable up to 48 hours before the shoot. Card payment through Stripe.</p>
           {error ? <p className="err" role="alert">{error}</p> : null}
         </div>
       ),
@@ -451,7 +451,7 @@ export function DepositStep({
                   <label className="ed-row"><span className="label">CVC</span><div ref={cvc} className="ed-field" /></label>
                 </div>
                 <div ref={wallet} className={cn("ed-wallet", !wallets && "hidden")} />
-                <p className="ed-copy">$100 holds your date. Refundable or transferable up to 2 business days before booking. Balance due after the shoot.</p>
+                <p className="ed-copy">$100 holds your date. Refundable or transferable up to 48 hours before the shoot. Balance due after the shoot.</p>
                 {error && !bad ? <p role="alert" className="ed-err">{error}</p> : null}
               </div>
             </div>
@@ -507,7 +507,7 @@ export function DepositStep({
           <div ref={wallet} className={cn(!wallets && "hidden")} />
           {/* What the $100 does, under the card it comes off (Julian, 2026-10-16). */}
           <p className="text-sm normal-case leading-relaxed text-muted-foreground text-pretty">
-            $100 holds your date. Refundable or transferable up to 2 business days before booking. Balance due after the shoot.
+            $100 holds your date. Refundable or transferable up to 48 hours before the shoot. Balance due after the shoot.
           </p>
           {error ? <p role="alert" className="text-sm normal-case text-foreground">{error}</p> : null}
           <div className="flex flex-col gap-4 border-t border-border pt-5 sm:flex-row sm:items-center sm:justify-between">

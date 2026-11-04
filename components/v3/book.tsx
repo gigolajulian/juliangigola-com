@@ -27,7 +27,11 @@ function Tabs({ at }: { at: SessionSlug }) {
           </button>
         ))}
       </div>
-      <button type="button" className="stabs-call lbl" aria-pressed={at === "consultation"} onClick={() => go("consultation")}>Not sure what you need? Book a 15 min call</button>
+      <div className="stabs-more">
+        <button type="button" className="stabs-call lbl" aria-pressed={at === "consultation"} onClick={() => go("consultation")}>Not sure what you need? Book a 15 min call</button>
+        {/* The art director's way out of the session flow (booking critique, 2026-11-04). */}
+        <Link href="/contact/form" prefetch={false} className="stabs-call lbl">Commission or campaign? Inquire</Link>
+      </div>
     </>
   );
 }

@@ -368,6 +368,8 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .f-photo dl div{display:flex;justify-content:space-between;gap:16px;padding:9px 0;border-bottom:1px solid var(--line)}
 .v3 .f-photo dt{color:var(--mute)}
 .v3 .f-photo dd{margin:0;text-align:right}
+/* Step 2's day and time line: only where the photo's summary is hidden. */
+.v3 .f-when{display:none;margin:0}
 /* Run (`flow.tsx`): items whole, dots at item ends, no lone last item (Julian, 2026-10-23).
    Under 360px an item may break, so nothing runs past the column. */
 .v3 .run{margin:0;text-wrap:pretty}
@@ -414,6 +416,7 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .f-photo .cap{padding:0 var(--gr) 0 var(--g)}
 .v3 .f-photo .cap b{font-size:2.25rem}
 .v3 .f-photo dl{display:none}
+.v3 .f-when{display:block}
 .v3 .f-main{padding:18px var(--gr) 0 var(--g);gap:20px;flex:1}
 .v3 .rail li:not(.cur) .nm{display:none}
 .v3 .f-bar{position:sticky;bottom:0;margin:auto calc(-1 * var(--gr)) 0 calc(-1 * var(--g));padding:12px var(--gr) 16px var(--g);background:var(--bg);border-top:1px solid var(--line)}
@@ -737,6 +740,7 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 .v3 .f-photo{order:-1;position:static;height:auto;aspect-ratio:16/9;width:100%;min-width:0;max-width:100%;padding:24px var(--gr) 0 var(--g)}
 .v3 .f-photo img{object-position:var(--at,50% 30%)}
 .v3 .f-photo dl{display:none}
+.v3 .f-when{display:block}
 .v3 .f-main{padding:28px var(--gr) 40px var(--g)}
 .v3 .f-body{max-width:none}
 .v3 .kind b{font-size:1.75rem}}
@@ -821,7 +825,8 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 @media (min-width:801px){.v3 .f-photo.over{padding-bottom:0}
 .v3 .f-photo.over .in{position:relative}
 .v3 .f-photo.over .ph{border-radius:4px 4px 0 0}
-.v3 .f-photo.over .ph::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,oklch(0 0 0 / 82%) 0%,oklch(0 0 0 / 45%) 32%,transparent 58%)}
+/* The mid stop sits behind the name: 60% keeps white over the pale studio wall above 3:1 (booking critique, 2026-11-04). */
+.v3 .f-photo.over .ph::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,oklch(0 0 0 / 82%) 0%,oklch(0 0 0 / 60%) 34%,transparent 62%)}
 .v3 .f-photo.over .cap{position:absolute;left:0;right:0;bottom:0;padding:0 28px 32px;color:oklch(0.955 0.004 80);--line:oklch(1 0 0 / 22%);--mute:oklch(1 0 0 / 66%)}
 .v3 .f-photo.over .sub{margin:0;max-width:52ch;font-size:14px;line-height:1.5;color:oklch(1 0 0 / 82%);text-wrap:pretty}}
 .v3 .f-photo .sub{margin:0}
@@ -1504,7 +1509,8 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 /* Phone: the Next name keeps each word whole, shrinking to fit its longest word (Julian). */
 @media (max-width:700px){.v3 .pj-next b{overflow-wrap:normal;font-size:min(2.5rem,calc((100vw - 2 * var(--g) - 88px) / (var(--lw,8) * .6)))}}
 /* /book: the call as a quiet link under the session grid (critique, 2026-10-29). */
-.v3 .stabs-call{align-self:flex-start;margin:-4px 0 0;padding:12px 0;background:none;border:0;color:var(--mute);font:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.v3 .stabs-more{display:flex;flex-direction:column;align-items:flex-start;margin-top:-4px}
+.v3 .stabs-call{align-self:flex-start;margin:0;padding:12px 0;text-align:left;background:none;border:0;color:var(--mute);font:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 .v3 .stabs-call[aria-pressed="true"]{color:var(--accent)}
 @media (hover:hover){.v3 .stabs-call:hover{color:var(--ink)}}
 /* The frames under the title at their own shape (P3, 2026-10-29): no crop, and no side bars
