@@ -1,0 +1,184 @@
+/* ── leads: one record per person ─────────────────────────────────
+ * Julian (2026-11-03, PLAN-lead-desk.md): every inquiry, call and booking
+ * in one list, with a stage on each person. Until now one person who
+ * wrote, then booked a call, then paid was two or three unrelated rows.
+ *
+ * So beside the raw rows (`msg:`, still written first and kept as the
+ * log) the INBOX namespace holds one `lead:<email>` per person. Each event
+ * that reaches the site (the form, a Cal.com booking, a deposit in
+ * trouble) is folded into it here. KV is the source of truth; Notion is a
+ * mirror of it, never the other way.
+ *
+ * Automatic events only move a lead forward: a second inquiry from a
+ * client already Confirmed must not drop them back to Inquiry. A new
+ * inquiry from someone Delivered or Lost opens them again. Julian moves
+ * the rest by hand (Replied, Quoted, Shot, Delivered, Lost).
+ *
+ * The record's summary rides as KV metadata, like the inbox's, so the list
+ * costs one request. Pure functions here; `recordLead` is the one place
+ * that touches the binding, and it never throws: the raw row is already
+ * stored, and a lead that failed to update must not fail the form.
+ * ─────────────────────────────────────────────────────────────── */
+
+export const STAGES = ["Inquiry", "Replied", "Call booked", "Quoted", "Confirmed", "Shot", "Delivered", "Lost"] as const;
+export type Stage = (typeof STAGES)[number];
+
+/** What happened, as it reached the site. `stage` is Julian's own move. */
+export type LeadEvent = {
+  at: string;
+  kind: "inquiry" | "call" | "booking" | "no-deposit" | "deposit-stuck" | "stage" | "snooze";
+  /** The raw row (`msg:` key), Cal.com uid or Stripe intent, so a retry folds in once. */
+  ref?: string;
+  /** Booking time, session, new stage: a short line for the timeline. */
+  note?: string;
+};
+
+/** Something on the lead that needs him, beyond its stage. */
+export type Flag = "stuck" | "no-deposit";
+
+export type Lead = {
+  email: string;
+  name: string;
+  stage: Stage;
+  /** When the stage last changed: the late check counts from here. */
+  stageAt: string;
+  firstAt: string;
+  lastAt: string;
+  /** Form type or Cal.com slug of the latest event that had one. */
+  kind?: string;
+  /** Next session or call, ISO. */
+  when?: string;
+  /** Stripe dashboard link of a deposit paid for this person. */
+  deposit?: string;
+  flags?: Flag[];
+  snoozeUntil?: string;
+  /** Notion page this lead is mirrored to. */
+  notion?: string;
+  /** Something new since he last opened it. */
+  unread: boolean;
+  events: LeadEvent[];
+};
+
+/** What the list shows, kept as KV metadata (under its 1024-byte cap). */
+export type LeadSummary = Omit<Lead, "events" | "notion" | "deposit"> & { paid?: true };
+
+/** Events kept per lead: the timeline needs the recent ones, KV values stay small. */
+const KEEP = 50;
+
+export const leadKey = (email: string) => `lead:${email.trim().toLowerCase()}`;
+
+const rank = (s: Stage) => STAGES.indexOf(s);
+const closed = (s: Stage) => s === "Delivered" || s === "Lost";
+
+/** The stage an automatic event asks for, or none. */
+const asks: Partial<Record<LeadEvent["kind"], Stage>> = {
+  inquiry: "Inquiry",
+  call: "Call booked",
+  booking: "Confirmed",
+};
+
+export type Change = {
+  event: LeadEvent;
+  name?: string;
+  kind?: string;
+  when?: string;
+  deposit?: string;
+  flag?: Flag;
+  /** Julian's own stage move (kind "stage"): any direction. */
+  stage?: Stage;
+  /** Kind "snooze": ISO time, or "" to wake it. */
+  snoozeUntil?: string;
+};
+
+/** One event folded into a lead. Returns the lead unchanged when the event
+    was already folded in (a webhook retry carries the same ref). */
+export function fold(lead: Lead | null, email: string, c: Change): Lead {
+  const { event } = c;
+  if (lead && event.ref && lead.events.some((e) => e.kind === event.kind && e.ref === event.ref)) return lead;
+
+  const base: Lead = lead ?? {
+    email: email.trim().toLowerCase(),
+    name: c.name || email,
+    stage: "Inquiry",
+    stageAt: event.at,
+    firstAt: event.at,
+    lastAt: event.at,
+    unread: true,
+    events: [],
+  };
+  const next: Lead = { ...base, events: [...base.events, event].slice(-KEEP) };
+
+  if (event.kind === "stage" && c.stage) {
+    if (c.stage !== next.stage) Object.assign(next, { stage: c.stage, stageAt: event.at });
+    // A stage he set clears what it answers.
+    if (c.stage !== "Confirmed") next.flags = next.flags?.filter((f) => f !== "no-deposit");
+    return tidy(next);
+  }
+  if (event.kind === "snooze") {
+    next.snoozeUntil = c.snoozeUntil || undefined;
+    return tidy(next);
+  }
+
+  // Something arrived from outside: it is news.
+  Object.assign(next, { lastAt: event.at, unread: true, snoozeUntil: undefined });
+  if (c.name && (!lead || next.name === next.email)) next.name = c.name;
+  if (c.kind) next.kind = c.kind;
+  if (c.when) next.when = c.when;
+  if (c.deposit) next.deposit = c.deposit;
+  if (c.flag && !next.flags?.includes(c.flag)) next.flags = [...(next.flags ?? []), c.flag];
+
+  const want = asks[event.kind];
+  if (want && (rank(want) > rank(next.stage) || (want === "Inquiry" && closed(next.stage)) || !lead)) {
+    Object.assign(next, { stage: want, stageAt: event.at });
+  }
+  return tidy(next);
+}
+
+const tidy = (l: Lead): Lead => {
+  if (!l.flags?.length) delete l.flags;
+  if (!l.snoozeUntil) delete l.snoozeUntil;
+  return l;
+};
+
+/** Hours Julian promises to answer in; the site says "within a day". */
+export const REPLY_HOURS = 24;
+/** A quote with no answer this long is worth a nudge. */
+export const QUOTE_DAYS = 5;
+
+/** Whether a lead has waited past what was promised. Snoozed leads never are. */
+export function isLate(l: Pick<Lead, "stage" | "stageAt" | "snoozeUntil">, now: number, replyHours = REPLY_HOURS): boolean {
+  if (l.snoozeUntil && Date.parse(l.snoozeUntil) > now) return false;
+  const waited = now - Date.parse(l.stageAt);
+  if (l.stage === "Inquiry") return waited > replyHours * 3600e3;
+  if (l.stage === "Quoted") return waited > QUOTE_DAYS * 864e5;
+  return false;
+}
+
+export const leadSummary = ({ events: _e, notion: _n, deposit, ...rest }: Lead): LeadSummary => ({
+  ...rest,
+  ...(deposit ? { paid: true as const } : {}),
+});
+
+type KV = Pick<NonNullable<CloudflareEnv["INBOX"]>, "get" | "put">;
+
+/**
+ * Folds one event into the person's record and stores it.
+ * shortcut: read, fold, write is not atomic, so two events for the same
+ * person in the same second can lose one. Webhooks and the form for one
+ * person are minutes apart; a Durable Object if that ever changes.
+ */
+export async function recordLead(kv: KV | undefined, email: string, c: Change): Promise<Lead | null> {
+  if (!kv || !email.includes("@")) return null;
+  try {
+    const key = leadKey(email);
+    const raw = await kv.get(key);
+    const before = raw ? (JSON.parse(raw) as Lead) : null;
+    const after = fold(before, email, c);
+    if (after === before) return after;
+    await kv.put(key, JSON.stringify(after), { metadata: leadSummary(after) });
+    return after;
+  } catch (e) {
+    console.error("lead", String(e));
+    return null;
+  }
+}
