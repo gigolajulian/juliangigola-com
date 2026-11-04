@@ -87,11 +87,28 @@ const btn = "inline-flex min-h-11 items-center justify-center gap-2 rounded-[10p
 const primary = "border-accent bg-accent font-semibold text-accent-foreground hoverable:hover:bg-accent/90";
 
 /** A Gmail draft from hello@ (the second account in his Chrome, the Gmail app on the phone). */
+const q = (o: Record<string, string>) => new URLSearchParams(o).toString().replace(/\+/g, "%20");
+/** iPhone, or an iPad asking for the desktop site (it says Macintosh, with touch). */
+const ios = () => /iPhone|iPad/.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
+
 function compose(to: string, subject: string, body: string) {
-  const q = (o: Record<string, string>) => new URLSearchParams(o).toString().replace(/\+/g, "%20");
-  return /iPhone|iPad/.test(navigator.userAgent)
+  return ios()
     ? `googlegmail://co?${q({ to, subject, body })}`
     : `https://mail.google.com/mail/u/1/?${q({ view: "cm", fs: "1", to, su: subject, body })}`;
+}
+
+/**
+ * Julian: "allow replying in native mail app ios". The same reply for
+ * iOS Mail, with their message quoted. iOS Mail sends from its default
+ * account, so hello@ has to be that. The quote is cut so the link stays
+ * well under what Mail takes in.
+ */
+function mailto(to: string, subject: string, body: string, quote?: { name: string; at: string; text: string }) {
+  const cut = (t: string) => (t.length > 1500 ? `${t.slice(0, 1500).trimEnd()}…` : t);
+  const quoted = quote
+    ? `\n\nOn ${new Date(quote.at).toDateString()}, ${quote.name} wrote:\n${cut(quote.text).split("\n").map((line) => `> ${line}`).join("\n")}`
+    : "";
+  return `mailto:${to}?${q({ subject, body: body + quoted })}`;
 }
 
 export function AdminLeads() {
@@ -368,6 +385,15 @@ function Detail({ summary, call, onChange, onBack }: { summary: LeadSummary; cal
         <a href={reply} target="_blank" rel="noreferrer" onClick={() => setAsked(true)} className={cn(btn, primary, "min-h-[52px] px-5 text-base")}>
           Reply in Gmail
         </a>
+        {ios() ? (
+          <a
+            href={mailto(l.email, `Re: your ${l.kind ?? "shoot"} inquiry`, `Hi ${first},\n\n`, message ? { name: message.name, at: message.at, text: message.message } : undefined)}
+            onClick={() => setAsked(true)}
+            className={btn}
+          >
+            Reply in Mail
+          </a>
+        ) : null}
         <a href={book} target="_blank" rel="noreferrer" className={btn}>Send booking link</a>
         <button type="button" onClick={() => setSnoozing((v) => !v)} aria-expanded={snoozing} className={btn}>Snooze</button>
         {snoozed(l) ? <button type="button" className={btn} onClick={() => patch({ snoozeUntil: "" }).then(() => setSnoozing(false))}>Unsnooze</button> : null}
