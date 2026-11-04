@@ -251,6 +251,17 @@ describe("leads", () => {
     expect([...kv.data.keys()].some((k) => k.startsWith("gone:") && k.includes("@"))).toBe(false);
   });
 
+  it("does not bring back a Gmail lead emptied before ids ignored dots", async () => {
+    await seed(Date.UTC(2026, 9, 1), "dot", { email: "Ma.Ya+site@gmail.com" });
+    const ids = await (await sealer(LEADS_KEY)!).ids("ma.ya+site@gmail.com");
+    expect(ids).toHaveLength(2);
+    // The tombstone a purge wrote under the old id.
+    await kv.put(`gone:${ids[1]}`, "");
+    const post = async () => (await POST(req("POST", { body: JSON.stringify({ backfill: true }) }))).json();
+    expect(await post()).toMatchObject({ added: 0, updated: 0 });
+    expect(kv.data.has(`lead:${ids[0]}`)).toBe(false);
+  });
+
   it("does not bring a lead the 30-day sweep removed back on Import from Inbox", async () => {
     await seed(Date.UTC(2026, 9, 1), "old");
     const post = async () => (await POST(req("POST", { body: JSON.stringify({ backfill: true }) }))).json();
