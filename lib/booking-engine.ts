@@ -1,4 +1,4 @@
-import { EVENTS, TZ } from "@/lib/booking-rules";
+import { DEFAULT_HOURS, EVENTS, TZ, type Hours } from "@/lib/booking-rules";
 import type { Booking } from "@/lib/deposit";
 import { gcal } from "@/lib/gcal";
 import { bookingEnquiry, enquiryKey, summary } from "@/lib/inbox";
@@ -66,6 +66,9 @@ export const managed = (r: BookingRecord) => ({ id: r.id, slug: r.slug, session:
 /** The record by its id. */
 export const findBooking = (store: Store, id: string) => store.get<BookingRecord>(recKey(id));
 export const saveBooking = (store: Store, r: BookingRecord) => store.put(recKey(r.id), r);
+/** Julian's hours as set from the lead desk, or the defaults. */
+export const readHours = async (store: Store) => (await store.get<Hours>("hours")) ?? DEFAULT_HOURS;
+export const writeHours = (store: Store, h: Hours) => store.put("hours", h);
 export const allBookings = async (store: Store) => [...(await store.list<BookingRecord>({ prefix: "b:" })).values()];
 
 /** The event's text on hello@'s calendar: everything Julian needs at a glance. */
@@ -93,7 +96,7 @@ export async function bookOwn(store: Store, secret: string | undefined, b: BookI
     const r = had && (await findBooking(store, had));
     if (r) return { ok: true, record: r };
   }
-  if (!(await openNow(secret, b.slug, b.start))) return { ok: false, reason: "taken" };
+  if (!(await openNow(secret, b.slug, b.start, undefined, await readHours(store)))) return { ok: false, reason: "taken" };
 
   const id = newId();
   const end = new Date(Date.parse(b.start) + rule.length * 6e4).toISOString();
@@ -196,7 +199,7 @@ export async function rescheduleOwn(store: Store, secret: string | undefined, id
   if (Date.parse(was.start) <= Date.now()) return { ok: false, reason: "past" };
   const rule = EVENTS[was.slug];
   const t = Date.parse(start);
-  if (!rule || isNaN(t) || !(await openNow(secret, was.slug, start, was))) return { ok: false, reason: "taken" };
+  if (!rule || isNaN(t) || !(await openNow(secret, was.slug, start, was, await readHours(store)))) return { ok: false, reason: "taken" };
   const end = new Date(t + rule.length * 6e4).toISOString();
   await gcal(secret, `/calendars/primary/events/${encodeURIComponent(was.eventId)}?sendUpdates=none`, {
     method: "PATCH",
