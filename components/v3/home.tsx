@@ -117,13 +117,18 @@ function Clients() {
     let x = 0;
     let v = drift; // px/s, positive moves the logos left
     let held = false;
+    /* Paused while a mouse rests on the strip or focus is inside it (WCAG
+       2.2.2): the drift settles to a stop the way a throw does, and resumes. */
+    let paused = false;
+    const rest = () => (paused ? 0 : drift);
     let last = 0;
     let raf = 0;
     // The loop's width, measured when it changes rather than every frame.
     let half = 1;
     let seen = false;
     const paint = () => {
-      x = ((x % half) + half) % half;
+      // Paused on a focused logo near the start, the strip may sit short of 0 so the real link shows, not its copy.
+      if (!(paused && x < 0)) x = ((x % half) + half) % half;
       tr.style.transform = `translate3d(${(-x).toFixed(2)}px,0,0)`;
     };
     // Runs only while on screen and moving: drifting, held, or a throw settling.
@@ -132,11 +137,11 @@ function Clients() {
       last = t;
       if (!held) {
         x += v * dt;
-        // A throw settles back to the drift, about a second.
-        v = drift + (v - drift) * Math.exp(-dt * 3);
+        // A throw settles back to the drift (or to a stop), about a second.
+        v = rest() + (v - rest()) * Math.exp(-dt * 3);
       }
       paint();
-      raf = seen && (held || Math.abs(v) > 0.5) ? requestAnimationFrame(tick) : 0;
+      raf = seen && (held || Math.abs(v) > 0.5 || Math.abs(rest() - v) > 0.5) ? requestAnimationFrame(tick) : 0;
     };
     const wake = () => {
       if (raf || !seen) return;
@@ -203,7 +208,7 @@ function Clients() {
       id = -1;
       held = false;
       // A finger that stopped before lifting throws nothing.
-      if (e.timeStamp - pt > 80) v = drift;
+      if (e.timeStamp - pt > 80) v = rest();
       v = Math.max(-3000, Math.min(3000, v));
       wake();
     };
@@ -223,7 +228,31 @@ function Clients() {
       if (dragged) e.preventDefault();
     };
     box.addEventListener("click", click, true);
+    const pause = (on: boolean) => {
+      paused = on;
+      wake();
+    };
+    const enter = (e: PointerEvent) => e.pointerType === "mouse" && pause(true);
+    const leave = (e: PointerEvent) => e.pointerType === "mouse" && !box.contains(document.activeElement) && pause(false);
+    // A logo reached by Tab slides to the middle of the strip, never left half under the fade.
+    const focusin = (e: FocusEvent) => {
+      const a = e.target as HTMLElement;
+      paused = true;
+      x = a.offsetLeft - (box.clientWidth - a.offsetWidth) / 2;
+      v = 0;
+      paint();
+      pause(true);
+    };
+    const focusout = (e: FocusEvent) => !box.contains(e.relatedTarget as Node) && !box.matches(":hover") && pause(false);
+    box.addEventListener("pointerenter", enter);
+    box.addEventListener("pointerleave", leave);
+    box.addEventListener("focusin", focusin);
+    box.addEventListener("focusout", focusout);
     return () => {
+      box.removeEventListener("pointerenter", enter);
+      box.removeEventListener("pointerleave", leave);
+      box.removeEventListener("focusin", focusin);
+      box.removeEventListener("focusout", focusout);
       cancelAnimationFrame(raf);
       ro.disconnect();
       io.disconnect();
