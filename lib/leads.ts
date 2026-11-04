@@ -69,6 +69,10 @@ export type Lead = {
   notion?: string;
   /** Something new since he last opened it. */
   unread: boolean;
+  /** The start of their latest message, for the list row. */
+  snippet?: string;
+  /** Pictures they attached to it. */
+  refs?: number;
   events: LeadEvent[];
 };
 
@@ -104,6 +108,9 @@ export type Change = {
   snoozeUntil?: string;
   /** Kind "archive" / "trash": in (true) or back out (false). */
   on?: boolean;
+  /** An inquiry's message and how many pictures came with it. */
+  snippet?: string;
+  refs?: number;
 };
 
 /** One event folded into a lead. Returns the lead unchanged when the event
@@ -150,6 +157,7 @@ export function fold(lead: Lead | null, email: string, c: Change): Lead {
   if (c.when) next.when = c.when;
   if (c.deposit) next.deposit = c.deposit;
   if (c.flag && !next.flags?.includes(c.flag)) next.flags = [...(next.flags ?? []), c.flag];
+  if (c.snippet !== undefined) Object.assign(next, { snippet: c.snippet.replace(/\s+/g, " ").trim().slice(0, 140), refs: c.refs });
 
   const want = asks[event.kind];
   if (want && (rank(want) > rank(next.stage) || (want === "Inquiry" && closed(next.stage)) || !lead)) {
@@ -163,6 +171,8 @@ const tidy = (l: Lead): Lead => {
   if (!l.snoozeUntil) delete l.snoozeUntil;
   if (!l.archivedAt) delete l.archivedAt;
   if (!l.trashedAt) delete l.trashedAt;
+  if (!l.snippet) delete l.snippet;
+  if (!l.refs) delete l.refs;
   return l;
 };
 
@@ -191,6 +201,7 @@ export const leadSummary = ({ events: _e, notion: _n, deposit, ...rest }: Lead):
   ...rest,
   name: rest.name?.slice(0, 80),
   email: rest.email.slice(0, 120),
+  ...(rest.snippet ? { snippet: rest.snippet.slice(0, 90) } : {}),
   ...(deposit ? { paid: true as const } : {}),
 });
 

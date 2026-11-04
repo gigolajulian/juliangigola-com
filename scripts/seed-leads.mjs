@@ -34,11 +34,11 @@ const summary = ({ events, notion, deposit, ...rest }) => ({ ...rest, ...(deposi
 
 const mayaKey = `msg:${String(Date.now() - 26 * H).padStart(15, "0")}:seed0001`;
 const leads = [
-  lead({ email: "maya.okafor@example.com", name: "Maya Okafor", stage: "Inquiry", stageAt: ago(26), kind: "portrait", unread: true,
+  lead({ email: "maya.okafor@example.com", name: "Maya Okafor", stage: "Inquiry", stageAt: ago(26), kind: "portrait", unread: true, refs: 2, snippet: "Hi Julian, I saw the Portraits set and want something like the red-lit frames. Two of us,",
     events: [{ at: ago(26), kind: "inquiry", ref: mayaKey, note: "portrait" }, { at: ago(26), kind: "mail", note: "Portrait inquiry · Maya Okafor · A weekend before Dec 14", mail: { to: "hello@", kind: "inquiry" } }] }),
   lead({ email: "priya.shah@example.com", name: "Priya Shah", stage: "Inquiry", stageAt: ago(3), kind: "headshots", flags: ["stuck"],
     events: [{ at: ago(3), kind: "deposit-stuck", ref: "pi_seed1", note: "Headshots, Sat 10:00 AM, $100" }, { at: ago(3), kind: "mail", note: "Deposit stuck: check Stripe and Cal.com", mail: { to: "hello@", kind: "deposit-stuck" } }] }),
-  lead({ email: "lena.park@example.com", name: "Lena Park", stage: "Quoted", stageAt: ago(6 * 24), firstAt: ago(9 * 24), kind: "campaign",
+  lead({ email: "lena.park@example.com", name: "Lena Park", stage: "Quoted", stageAt: ago(6 * 24), firstAt: ago(9 * 24), kind: "campaign", snippet: "Thanks, sharing the quote with the brand team this week.",
     events: [{ at: ago(9 * 24), kind: "inquiry", note: "campaign" }, { at: ago(8 * 24), kind: "stage", note: "Replied" }, { at: ago(6 * 24), kind: "stage", note: "Quoted" }] }),
   lead({ email: "daniel.reyes@example.com", name: "Daniel Reyes", stage: "Call booked", stageAt: ago(5), kind: "intro-call", when: ahead(44), unread: true,
     events: [{ at: ago(5), kind: "call", ref: "cal-seed1", note: "Intro call" }, { at: ago(5), kind: "mail", note: "Booked: Intro call", mail: { to: "client", kind: "confirm" } }] }),
@@ -46,7 +46,7 @@ const leads = [
     events: [{ at: ago(30), kind: "booking", ref: "cal-seed2", note: "Headshots" }, { at: ago(30), kind: "mail", note: "Booked: Headshots", mail: { to: "client", kind: "confirm" } }] }),
   lead({ email: "noor.haddad@example.com", name: "Noor Haddad", stage: "Shot", stageAt: ago(50), firstAt: ago(20 * 24), kind: "graduation",
     events: [{ at: ago(20 * 24), kind: "booking", note: "Graduation" }, { at: ago(50), kind: "stage", note: "Shot" }] }),
-  lead({ email: "camille.roy@example.com", name: "Camille Roy", stage: "Replied", stageAt: ago(7 * 24), kind: "editorial", snoozeUntil: ahead(60),
+  lead({ email: "camille.roy@example.com", name: "Camille Roy", stage: "Replied", stageAt: ago(7 * 24), kind: "editorial", snoozeUntil: ahead(60), refs: 3, snippet: "Moodboard attached, open to a night shoot downtown.",
     events: [{ at: ago(8 * 24), kind: "inquiry", note: "editorial" }, { at: ago(7 * 24), kind: "stage", note: "Replied" }] }),
   lead({ email: "theo.brandt@example.com", name: "Theo Brandt", stage: "Lost", stageAt: ago(12 * 24), kind: "event",
     events: [{ at: ago(14 * 24), kind: "inquiry", note: "event" }, { at: ago(12 * 24), kind: "stage", note: "Lost" }] }),

@@ -6,6 +6,18 @@ const at = (h: number) => new Date(Date.UTC(2026, 10, 2, h)).toISOString();
 const email = "Maya@Example.com";
 
 describe("fold", () => {
+  it("keeps the start of their message and the picture count for the list, capped in the summary", () => {
+    const long = "Hi Julian,\n\n  I saw the Portraits set " + "x".repeat(300);
+    const l = fold(null, email, { event: { at: at(1), kind: "inquiry", ref: "msg:1" }, name: "Maya", snippet: long, refs: 2 });
+    expect(l.snippet).toBe(("Hi Julian, I saw the Portraits set " + "x".repeat(300)).slice(0, 140));
+    expect(l.refs).toBe(2);
+    expect(leadSummary(l).snippet).toHaveLength(90);
+    // A later event without a message keeps them; a message with no pictures drops the count.
+    const call = fold(l, email, { event: { at: at(2), kind: "call", ref: "cal:1" } });
+    expect(call).toMatchObject({ refs: 2 });
+    expect(fold(call, email, { event: { at: at(3), kind: "inquiry", ref: "msg:2" }, snippet: "Again", refs: 0 })).not.toHaveProperty("refs");
+  });
+
   it("starts a lead at Inquiry from a form, keyed by the lowercased address", () => {
     const l = fold(null, email, { event: { at: at(1), kind: "inquiry", ref: "msg:1" }, name: "Maya", kind: "portrait" });
     expect(l).toMatchObject({ email: "maya@example.com", name: "Maya", stage: "Inquiry", unread: true, kind: "portrait" });
