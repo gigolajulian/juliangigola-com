@@ -81,6 +81,19 @@ describe("busyAll", () => {
     expect(out.failed).toEqual([]);
   });
 
+  it("gives up on a feed that never answers in under 3 seconds, and flags it", async () => {
+    const fake = globalThis.fetch;
+    vi.stubGlobal("fetch", (url: string, init?: RequestInit) =>
+      url.includes("hang.example.com")
+        ? new Promise((_, no) => init?.signal?.addEventListener("abort", () => no(new Error("aborted"))))
+        : fake(url, init),
+    );
+    const t = Date.now();
+    const out = await busyAll(SECRET, A, B, [{ label: "Slow", src: "https://hang.example.com/c.ics" }]);
+    expect(Date.now() - t).toBeLessThan(3000);
+    expect(out.failed).toEqual(["Slow"]);
+  });
+
   it("skips an extra it cannot read, but never hello@ itself", async () => {
     freebusy = { calendars: { primary: { busy: [] }, "x@gmail.com": { errors: [{ reason: "notFound" }] } } };
     const out = await busyAll(SECRET, A, B, [{ label: "X", src: "x@gmail.com" }, { label: "Dead", src: "https://gone.example.com/b.ics" }]);

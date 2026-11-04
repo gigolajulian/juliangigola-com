@@ -125,14 +125,32 @@ export function icsBusy(text: string): Busy[] {
 }
 
 const feeds = new Map<string, { at: number; busy: Busy[] }>();
-/** A feed's busy spans, kept five minutes in this isolate. Throws with the status only: the link is private. */
+/* QA (#562): /api/slots is public and waits on every feed, so a feed gets
+   2.5 seconds and its spans are kept five minutes, in this isolate and in
+   the colo's cache (keyed by a hash: the link is private). */
+const FEED_MS = 2500;
+const edge = () => (globalThis as { caches?: { default?: Cache } }).caches?.default;
+async function feedKey(src: string) {
+  const h = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(src)));
+  return new Request(`https://ics-cache.invalid/${[...h].map((b) => b.toString(16).padStart(2, "0")).join("")}`);
+}
+/** A feed's busy spans. Throws with the status only: the link is private. */
 async function icsFeed(src: string) {
   const hit = feeds.get(src);
   if (hit && Date.now() - hit.at < 3e5) return hit.busy;
-  const res = await fetch(src.replace(/^webcal:/i, "https:"), { signal: AbortSignal.timeout(8000) });
+  const cache = edge();
+  const key = cache && (await feedKey(src));
+  const kept = key && (await cache.match(key));
+  if (kept) {
+    const busy = (await kept.json()) as Busy[];
+    feeds.set(src, { at: Date.now(), busy });
+    return busy;
+  }
+  const res = await fetch(src.replace(/^webcal:/i, "https:"), { signal: AbortSignal.timeout(FEED_MS) });
   if (!res.ok) throw new Error(`ICS ${res.status}`);
   const busy = icsBusy(await res.text());
   feeds.set(src, { at: Date.now(), busy });
+  if (key) await cache.put(key, Response.json(busy, { headers: { "cache-control": "max-age=300" } })).catch(() => {});
   return busy;
 }
 
