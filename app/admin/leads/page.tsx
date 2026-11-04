@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { AdminLeads } from "@/components/admin-leads";
+import { startupImages } from "@/lib/leads-startup";
 
 /* ── the lead desk, on its own ────────────────────────────────────
  * Julian (2026-11-03): "a different section, hidden from all seo". The
@@ -17,7 +18,7 @@ export const metadata: Metadata = {
   referrer: "no-referrer",
   manifest: "/leads-app/manifest.webmanifest",
   icons: { apple: "/leads-app/apple-touch-icon.png" },
-  appleWebApp: { capable: true, title: "Leads", statusBarStyle: "black-translucent" },
+  appleWebApp: { capable: true, title: "Leads", statusBarStyle: "black-translucent", startupImage: startupImages },
   // Next writes only `mobile-web-app-capable`; older iOS reads the Apple name.
   other: { "apple-mobile-web-app-capable": "yes" },
 };
