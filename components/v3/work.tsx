@@ -7,6 +7,7 @@ import type { Flip as FlipT } from "gsap/Flip";
 import { V3Foot } from "@/components/v3/chrome";
 import DISC from "@/lib/discipline-order.json";
 import { mplan, GSAP_OUT } from "@/lib/mplan";
+import { launchSpeed, stepSpring, springSettled, frameDt } from "@/lib/motion/spring";
 
 /* JG V3 Portfolio (master v39, /work): search, discipline chips, and the
    Grid, Strip and Color views. Best first (lib's order: the vectorscope's
@@ -126,7 +127,26 @@ function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: number 
   const track = React.useRef<HTMLDivElement>(null);
   const G = React.useRef<typeof import("gsap").gsap | null>(null);
   // The touch in progress: where it went down, the track's x then, its axis once locked, and its speed.
-  const drag = React.useRef<{ x: number; y: number; ox: number; axis: "x" | "y" | null; lx: number; lt: number; v: number } | null>(null);
+  const drag = React.useRef<{ x: number; y: number; ox: number; axis: "x" | "y" | null; lx: number; lt: number; v: number; ly: number; vy: number } | null>(null);
+  /* MOTION-PLAN.md item 10 (`?mplan=touch`): a lift hands the finger's speed
+     to the strip's own spring (lib/motion/spring.ts), critically damped. */
+  const run = React.useRef(0);
+  const stop = () => void (cancelAnimationFrame(run.current), (run.current = 0));
+  const spring = (axis: "x" | "y", to: number, fv: number, done: () => void) => {
+    const el = track.current!, g = G.current!;
+    stop();
+    let s = { x: Number(g.getProperty(el, axis)), v: 0 };
+    s.v = launchSpeed(fv, to - s.x, 1);
+    let prev = 0;
+    const tick = (now: number) => {
+      s = stepSpring(s, to, 1, frameDt(now, prev));
+      prev = now;
+      if (springSettled(s, to)) return void (g.set(el, { [axis]: to }), (run.current = 0), done());
+      g.set(el, { [axis]: s.x });
+      run.current = requestAnimationFrame(tick);
+    };
+    run.current = requestAnimationFrame(tick);
+  };
   const swiped = React.useRef(false); // a drag's click must not close
   const queued = React.useRef(0); // a step pressed while the track was still moving
   /* MOTION-PLAN.md item 8 (`?mplan=keys`): a second press mid-glide takes the
@@ -163,6 +183,7 @@ function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: number 
       return done();
     }
     g.killTweensOf(el);
+    stop();
     going.current = by;
     const keys = mplan("keys");
     g.to(el, { x: -by * el.offsetWidth, y: 0, duration: keys ? 0.6 : dur, ease: keys ? "power3.inOut" : "expo.out", onComplete: done });
@@ -218,8 +239,9 @@ function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: number 
         if (e.pointerType === "mouse" || (e.target as Element).closest("button")) return void (drag.current = null);
         const el = track.current!;
         G.current?.killTweensOf(el);
+        stop();
         const ox = G.current ? Number(G.current.getProperty(el, "x")) : 0;
-        drag.current = { x: e.clientX, y: e.clientY, ox, axis: null, lx: e.clientX, lt: e.timeStamp, v: 0 };
+        drag.current = { x: e.clientX, y: e.clientY, ox, axis: null, lx: e.clientX, lt: e.timeStamp, v: 0, ly: e.clientY, vy: 0 };
       }}
       onPointerMove={(e) => {
         const d = drag.current;
@@ -229,7 +251,9 @@ function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: number 
         if (!d.axis && Math.max(Math.abs(dx), Math.abs(dy)) > 10) d.axis = Math.abs(dx) > Math.abs(dy) && n > 1 ? "x" : "y";
         const dt = e.timeStamp - d.lt;
         if (dt > 0) d.v = 0.8 * ((e.clientX - d.lx) / dt) + 0.2 * d.v;
+        if (dt > 0) d.vy = 0.8 * ((e.clientY - d.ly) / dt) + 0.2 * d.vy;
         d.lx = e.clientX;
+        d.ly = e.clientY;
         d.lt = e.timeStamp;
         const g = G.current;
         if (still() || !g) return;
@@ -251,6 +275,25 @@ function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: number 
         }
         swiped.current = true;
         const g = G.current;
+        /* Item 10: a flick past 0.11px per ms pages or closes whatever the
+           distance; a slow drag still needs half a frame, or 90px down. The
+           frame leaves at the finger's speed on `out`, never easing in. */
+        if (mplan("touch") && g && !still()) {
+          const FLING = 0.11;
+          if (d.axis === "y") {
+            const dy = e.clientY - d.y;
+            const back = () => delete ref.current!.dataset.drop;
+            if (Math.abs(dy) < 90 && !(Math.abs(d.vy) > FLING && Math.sign(d.vy) === Math.sign(dy))) return spring("y", 0, d.vy, back);
+            const left = innerHeight - Math.abs(dy);
+            // power4.out sets off at 4x its average speed: match that to the finger.
+            const dur = Math.min(0.4, Math.max(0.2, (4 * left) / Math.max(1, Math.abs(d.vy) * 1000)));
+            return void g.to(el, { y: Math.sign(dy || d.vy) * innerHeight, duration: dur, ease: "power4.out", onComplete: onClose });
+          }
+          const W = el.offsetWidth;
+          const x = d.ox + e.clientX - d.x;
+          const by = Math.abs(d.v) > FLING ? -Math.sign(d.v) : Math.max(-1, Math.min(1, Math.round(-x / W)));
+          return spring("x", -by * W, d.v, () => (by ? onGo(wrap(at + by)) : undefined));
+        }
         if (d.axis === "y") {
           const dy = e.clientY - d.y;
           const back = () => delete ref.current!.dataset.drop;
