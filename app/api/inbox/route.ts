@@ -3,6 +3,7 @@ import { bearer, canPush } from "@/lib/vouch";
 import { SAFE_IMAGE, summary, type Enquiry, type Summary } from "@/lib/inbox";
 import { fold, readLead, STAGES, trashDaysLeft, writeLead, type LeadSummary, type Stage } from "@/lib/leads";
 import { sealer } from "@/lib/lead-crypto";
+import { notionStage } from "@/lib/notion-lead";
 
 /* ── reading the inbox ────────────────────────────────────────────
  * The one endpoint /admin's Inbox tab talks to. Lists enquiries, opens one,
@@ -91,7 +92,7 @@ async function authorised(request: Request, expected?: string) {
 /** The binding and the secret, or `null` when this build has neither. */
 async function wired() {
   const { env } = await getCloudflareContext({ async: true });
-  return env.INBOX ? { inbox: env.INBOX, key: env.INBOX_KEY, seal: sealer(env.LEADS_KEY) } : null;
+  return env.INBOX ? { inbox: env.INBOX, key: env.INBOX_KEY, seal: sealer(env.LEADS_KEY), notion: env.NOTION_TOKEN } : null;
 }
 
 async function guard(request: Request) {
@@ -111,11 +112,11 @@ async function guard(request: Request) {
   // push to the repository. The messages differ so a wrong one can be told
   // from a missing one — but never which characters were wrong.
   if (rig.key && (await authorised(request, rig.key)))
-    return { inbox: rig.inbox, seal: rig.seal };
+    return { inbox: rig.inbox, seal: rig.seal, notion: rig.notion };
 
   const token = bearer(request);
   if (token) {
-    if (await canPush(token)) return { inbox: rig.inbox, seal: rig.seal };
+    if (await canPush(token)) return { inbox: rig.inbox, seal: rig.seal, notion: rig.notion };
     return {
       error: json(
         { error: "GitHub did not accept that token for this repository." },
@@ -218,7 +219,7 @@ export async function PATCH(request: Request) {
 
   const given = await parsed(request);
   if (!given) return json({ error: "Not JSON." }, 400);
-  if (typeof given.key === "string" && given.key.startsWith("lead:")) return patchLead(gate.inbox, await gate.seal, given);
+  if (typeof given.key === "string" && given.key.startsWith("lead:")) return patchLead(gate.inbox, await gate.seal, given, gate.notion);
   const { key, read } = given as { key?: string; read?: boolean };
   if (!key?.startsWith("msg:") || typeof read !== "boolean")
     return json({ error: "Unknown." }, 400);
@@ -282,7 +283,7 @@ export async function DELETE(request: Request) {
  * it), or opened (`seen`). Stage and snooze go through `fold`, so they land
  * on the timeline like everything else.
  */
-async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: Awaited<ReturnType<typeof sealer>>, given: Record<string, unknown>) {
+async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: Awaited<ReturnType<typeof sealer>>, given: Record<string, unknown>, notion?: string) {
   if (!seal) return json({ error: "Leads need LEADS_KEY on the Worker." }, 503);
   const { key, stage, snoozeUntil, seen, archive, trash } = given as { key: string; stage?: string; snoozeUntil?: string; seen?: boolean; archive?: boolean; trash?: boolean };
   if (stage !== undefined && !(STAGES as readonly string[]).includes(stage)) return json({ error: "Unknown stage." }, 400);
@@ -291,7 +292,12 @@ async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: Await
   let lead = await readLead(inbox, seal, id);
   if (!lead) return json({ error: "Gone." }, 404);
   const at = new Date().toISOString();
-  if (stage) lead = fold(lead, lead.email, { event: { at, kind: "stage", note: stage }, stage: stage as Stage });
+  if (stage) {
+    lead = fold(lead, lead.email, { event: { at, kind: "stage", note: stage }, stage: stage as Stage });
+    // Mirrored to the Notion board; a Notion failure never blocks the desk.
+    const page = await notionStage(notion, lead.email, stage as Stage, lead.notion);
+    if (page) lead.notion = page;
+  }
   if (snoozeUntil !== undefined) lead = fold(lead, lead.email, { event: { at, kind: "snooze", note: snoozeUntil || "woken" }, snoozeUntil });
   if (typeof archive === "boolean") lead = fold(lead, lead.email, { event: { at, kind: "archive", note: archive ? "in" : "out" }, on: archive });
   if (typeof trash === "boolean") lead = fold(lead, lead.email, { event: { at, kind: "trash", note: trash ? "in" : "out" }, on: trash });
