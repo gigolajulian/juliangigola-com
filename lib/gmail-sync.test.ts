@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CURSOR, mailChanges, syncGmail, type Msg } from "./gmail-sync";
 import { forgetToken } from "./gcal";
-import { fold, leadKey, recordLead, type Lead } from "./leads";
-import { sealer } from "./lead-crypto";
+import { fold, leadKey, recordLead, writeLead, type Lead } from "./leads";
+import { canonical, sealer } from "./lead-crypto";
 
 const at = (h: number) => new Date(Date.UTC(2026, 10, 2, h)).toISOString();
 const email = "maya@example.com";
@@ -56,6 +56,13 @@ describe("mailChanges", () => {
   });
 });
 
+describe("canonical", () => {
+  it("drops Gmail dots and +tags, leaves other domains as typed", () => {
+    expect(canonical(" Gigola.Julian+site@GoogleMail.com ")).toBe("gigolajulian@gmail.com");
+    expect(canonical("a.b+c@example.com")).toBe("a.b+c@example.com");
+  });
+});
+
 describe("syncGmail", () => {
   const LEADS_KEY = btoa("k".repeat(32));
   const GCAL_OAUTH = JSON.stringify({ client_id: "id", client_secret: "shh", refresh_token: "rt" });
@@ -65,7 +72,7 @@ describe("syncGmail", () => {
   const kv = () => ({
     get: async (k: string) => data.get(k) ?? null,
     put: async (k: string, v: string) => void data.set(k, v),
-    list: async () => ({ keys: [] }),
+    list: async ({ prefix }: { prefix: string }) => ({ keys: [...data.keys()].filter((k) => k.startsWith(prefix)).map((name) => ({ name })), list_complete: true }),
     delete: async (k: string) => void data.delete(k),
   });
   const env = () => ({ INBOX: kv() as never, LEADS_KEY, GCAL_OAUTH });
@@ -118,6 +125,26 @@ describe("syncGmail", () => {
     expect(data.has(leadKey(await s.id("news@shop.com")))).toBe(false);
     expect(calls.some((u) => u.includes("messages/x"))).toBe(false);
     expect(data.get(CURSOR)).toBe("120");
+  });
+
+  it("matches Gmail however the dots fall, and moves a lead stored before that", async () => {
+    const e = env();
+    const s = (await sealer(LEADS_KEY))!;
+    // A lead from the form, stored under an id from before dots were ignored.
+    await writeLead(kv() as never, s, "old", fold(null, "gigola.julian@gmail.com", { event: { at: at(1), kind: "inquiry", ref: "msg:1" }, name: "Test" }));
+    const [a, b] = [MAIL.a, MAIL.b];
+    MAIL.a = msg("a", ["SENT"], "hello@juliangigola.com", "gigolajulian@gmail.com");
+    MAIL.b = msg("b", ["INBOX"], "Test <GigolaJulian+x@googlemail.com>", "hello@juliangigola.com");
+    try {
+      data.set(CURSOR, "100");
+      expect(await syncGmail(e)).toBe(2);
+    } finally {
+      [MAIL.a, MAIL.b] = [a, b];
+    }
+    expect(data.has(leadKey("old"))).toBe(false);
+    const lead = await s.open<Lead>(data.get(leadKey(await s.id("gigolajulian@gmail.com")))!);
+    expect(lead.email).toBe("gigola.julian@gmail.com");
+    expect(lead.events.map((x) => x.kind)).toEqual(["inquiry", "replied", "wrote"]);
   });
 
   it("starts again from now when Gmail no longer has the cursor", async () => {
