@@ -571,7 +571,7 @@ export function V3Work({
       s.removeEventListener("touchstart", start);
       s.removeEventListener("touchmove", move);
     };
-  }, [view, list, stripBar]);
+  }, [view, cells, stripBar]);
 
   /* Chips: one row at every width, a fade on the cut chip, and a progress
      line up to tablets. */
@@ -784,7 +784,8 @@ export function V3Work({
         ) : null}
         {view === "strip" ? (
           <>
-            <div className="wstrip" ref={strip} onScroll={stripBar}>
+            {/* A new chip starts its own strip at the start: the frames it shares with All kept the old scroll. */}
+            <div className="wstrip" key={filter} ref={strip} onScroll={stripBar}>
               {cells.map(({ f, p }, n) => {
                 const cap = p ? (
                   <figcaption>
