@@ -1,7 +1,7 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { bearer, canPush } from "@/lib/vouch";
 import { SAFE_IMAGE, summary, type Enquiry, type Summary } from "@/lib/inbox";
-import { fold, readLead, STAGES, writeLead, type LeadSummary, type Stage } from "@/lib/leads";
+import { fold, readLead, STAGES, trashDaysLeft, writeLead, type LeadSummary, type Stage } from "@/lib/leads";
 import { sealer } from "@/lib/lead-crypto";
 
 /* ── reading the inbox ────────────────────────────────────────────
@@ -172,7 +172,15 @@ export async function GET(request: Request) {
     for (;;) {
       const listed = await gate.inbox.list<{ s?: string }>({ prefix: "lead:", cursor: after });
       for (const k of listed.keys as { name: string; metadata?: { s?: string } }[]) {
-        if (k.metadata?.s) leads.push({ ...(await seal.open<LeadSummary>(k.metadata.s)), id: k.name.slice(5) });
+        if (!k.metadata?.s) continue;
+        const one = await seal.open<LeadSummary>(k.metadata.s);
+        // Trash empties itself: 30 days after it went in, the lead goes for good.
+        // The list is the only reader, so it is the one place that checks.
+        if (one.trashedAt && trashDaysLeft(one.trashedAt, Date.now()) <= 0) {
+          await gate.inbox.delete(k.name);
+          continue;
+        }
+        leads.push({ ...one, id: k.name.slice(5) });
       }
       if (listed.list_complete) break;
       after = listed.cursor;

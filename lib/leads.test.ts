@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fold, isLate, leadKey, leadSummary, recordLead, type Lead } from "./leads";
+import { trashDaysLeft, fold, isLate, leadKey, leadSummary, recordLead, type Lead } from "./leads";
 import { sealer } from "./lead-crypto";
 
 const at = (h: number) => new Date(Date.UTC(2026, 10, 2, h)).toISOString();
@@ -157,5 +157,14 @@ describe("archive and trash", () => {
     l = fold(l, email, { event: { at: at(7), kind: "trash", note: "out" }, on: false });
     expect(l.trashedAt).toBeUndefined();
     expect(l.stage).toBe("Quoted");
+  });
+});
+
+describe("trashDaysLeft", () => {
+  it("counts down from 30 and is due after", () => {
+    const t = Date.parse(at(0));
+    expect(trashDaysLeft(at(0), t)).toBe(30);
+    expect(trashDaysLeft(at(0), t + 29.5 * 864e5)).toBe(1);
+    expect(trashDaysLeft(at(0), t + 30 * 864e5)).toBe(0);
   });
 });

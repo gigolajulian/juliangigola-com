@@ -234,6 +234,23 @@ describe("leads", () => {
     expect([...kv.data.keys()].some((k) => k.startsWith("msg:"))).toBe(true);
   });
 
+  it("deletes a lead 30 days after it went in the trash, when the list is read, keeping Inbox rows", async () => {
+    await seed(Date.UTC(2026, 9, 1), "row");
+    await lead("a@example.com", "2026-11-01T10:00:00Z");
+    await lead("b@example.com", "2026-11-02T10:00:00Z");
+    const [a, b] = [`lead:${await idOf("a@example.com")}`, `lead:${await idOf("b@example.com")}`];
+    for (const k of [a, b]) await PATCH(req("PATCH", { body: JSON.stringify({ key: k, trash: true }) }));
+    vi.useFakeTimers({ now: Date.now() + 29 * 864e5, toFake: ["Date"] });
+    expect((await (await GET(req("GET", { query: "?leads" }))).json()).leads).toHaveLength(2);
+    await PATCH(req("PATCH", { body: JSON.stringify({ key: b, trash: false }) }));
+    vi.setSystemTime(Date.now() + 2 * 864e5);
+    const { leads } = await (await GET(req("GET", { query: "?leads" }))).json();
+    vi.useRealTimers();
+    expect(leads.map((l: { email: string }) => l.email)).toEqual(["b@example.com"]);
+    expect(kv.data.has(a)).toBe(false);
+    expect([...kv.data.keys()].some((k) => k.startsWith("msg:"))).toBe(true);
+  });
+
   it("refuses an unknown stage, a bad time and a missing lead, and says when LEADS_KEY is unset", async () => {
     await lead("a@example.com", "2026-11-01T10:00:00Z");
     const key = `lead:${await idOf("a@example.com")}`;

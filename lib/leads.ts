@@ -165,6 +165,11 @@ const tidy = (l: Lead): Lead => {
   return l;
 };
 
+/** Julian: "yes, empty trash after 30 days". Days a lead keeps in the trash. */
+export const TRASH_DAYS = 30;
+/** Whole days before a trashed lead is deleted for good; 0 or less means due. */
+export const trashDaysLeft = (trashedAt: string, now: number) => Math.ceil((Date.parse(trashedAt) + TRASH_DAYS * 864e5 - now) / 864e5);
+
 /** Hours Julian promises to answer in; the site says "within a day". */
 export const REPLY_HOURS = 24;
 /** A quote with no answer this long is worth a nudge. */

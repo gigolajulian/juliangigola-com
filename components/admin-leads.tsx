@@ -4,7 +4,7 @@ import * as React from "react";
 import { credentials, KEY_STORE } from "@/components/admin-inbox";
 import { TOKEN_STORE } from "@/lib/admin-github";
 import type { Enquiry } from "@/lib/inbox";
-import { isLate, STAGES, type Lead, type LeadEvent, type LeadSummary, type Stage } from "@/lib/leads";
+import { isLate, STAGES, trashDaysLeft, type Lead, type LeadEvent, type LeadSummary, type Stage } from "@/lib/leads";
 import { cn } from "@/lib/utils";
 
 /* ── the lead desk ────────────────────────────────────────────────
@@ -58,6 +58,7 @@ const at = (iso: string) =>
 function Chip({ l }: { l: LeadSummary }) {
   if (l.flags?.includes("stuck")) return <Tag tone="bad" mark="!">Deposit stuck</Tag>;
   if (l.flags?.includes("no-deposit")) return <Tag tone="bad" mark="!">No deposit</Tag>;
+  if (l.trashedAt) return <Tag tone="quiet" mark="×">Deletes in {Math.max(1, trashDaysLeft(l.trashedAt, now()))} d</Tag>;
   if (snoozed(l)) return <Tag tone="quiet" mark="z">Until {day(l.snoozeUntil!)}</Tag>;
   if (isLate(l, now())) return <Tag tone="needs" mark="◷">{l.stage === "Quoted" ? `Quoted ${ago(l.stageAt)} ago` : `Late, ${ago(l.stageAt)}`}</Tag>;
   return <Tag tone={closed(l.stage) ? "quiet" : "plain"} mark={MARK[l.stage]}>{l.stage}</Tag>;
@@ -386,6 +387,11 @@ function Detail({ summary, call, onChange, onBack }: { summary: LeadSummary; cal
         <p role="status" className="flex items-center gap-3 rounded-xl bg-accent/12 px-4 py-3.5 text-[15px]">
           <span aria-hidden="true" className="text-accent">◷</span>
           <span><b className="font-semibold text-accent">{ago(l.stageAt)} waiting.</b> {l.stage === "Quoted" ? "The quote has had no answer." : "The site promises a reply within a day."}</span>
+        </p>
+      ) : null}
+      {l.trashedAt ? (
+        <p role="status" className="font-mono text-[13px] text-muted-foreground">
+          In the trash. Deleted for good in {Math.max(1, trashDaysLeft(l.trashedAt, now()))} days unless recovered.
         </p>
       ) : null}
       {l.flags?.includes("stuck") ? (
