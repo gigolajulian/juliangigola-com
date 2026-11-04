@@ -147,3 +147,21 @@
 :root[data-mplan~="scroll"] .v3 .site-hdr {
   transition: transform var(--dur-small) var(--ease-out-strong), opacity var(--dur-small) var(--ease-out-strong);
 }
+
+/* ── Item 7, `reveal`: project figures reveal once ─────────────────────
+   Pick c: a fade plus a 16px rise, 600 on `out`, the first time a frame
+   enters the screen (ScrollReveal sets `data-in-view`), then it holds
+   still. It replaces the scroll-tied unmask. Under Reduce Motion frames
+   are simply there. */
+@media (prefers-reduced-motion: no-preference) {
+  :root[data-mplan~="reveal"] .v3 :is(.pj-r, .pj-r img) {
+    animation: none !important;
+  }
+  :root[data-mplan~="reveal"] .v3 .pj-r {
+    transition: opacity var(--dur-photo) var(--ease-out-strong), transform var(--dur-photo) var(--ease-out-strong);
+  }
+  :root[data-mplan~="reveal"] .v3 .pj-r:not([data-in-view]) {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
