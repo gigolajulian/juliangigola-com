@@ -191,7 +191,7 @@ describe("the four paid sessions", () => {
     ctx.env = { ...ctx.env, NOTION_TOKEN: "test" };
     const body = JSON.stringify({ ...BOOKING, payload: { ...BOOKING.payload, type: "headshots", uid: "cal-1" } });
     expect((await post(body, await sign(body))).status).toBe(200);
-    expect(kv.puts).toHaveLength(1);
+    expect(kv.puts.filter((k) => k.startsWith("msg:"))).toHaveLength(1);
     await Promise.all(ctx.waits);
     const p = calls.find((c) => c.url.includes("api.notion.com"))!.body.properties;
     expect(p).toMatchObject({
@@ -201,5 +201,21 @@ describe("the four paid sessions", () => {
       "Contact Email": { email: "qa@example.com" },
     });
     vi.unstubAllGlobals();
+  });
+});
+
+describe("POST /api/cal: the lead", () => {
+  it("folds a call and then a paid booking into one record for the person", async () => {
+    const send = async (payload: Record<string, unknown>) => {
+      const body = JSON.stringify({ ...BOOKING, payload: { ...BOOKING.payload, ...payload } });
+      expect((await post(body, await sign(body))).status).toBe(200);
+      await Promise.all(ctx.waits);
+    };
+    await send({ type: "intro-call", uid: "c1" });
+    expect(kv.json("lead:qa@example.com")).toMatchObject({ stage: "Call booked", name: "QA Test" });
+    await send({ type: "intro-call", uid: "c1" });
+    expect(kv.json("lead:qa@example.com").events).toHaveLength(1);
+    await send({ type: "headshots", uid: "c2" });
+    expect(kv.json("lead:qa@example.com")).toMatchObject({ stage: "Confirmed", kind: "headshots" });
   });
 });

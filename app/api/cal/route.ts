@@ -2,6 +2,7 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { sendConfirm } from "@/lib/confirm";
 import { PAID, paidFor, tellNoDeposit } from "@/lib/deposit";
 import { toNotion } from "@/lib/notion-lead";
+import { recordLead } from "@/lib/leads";
 import { bookingEnquiry, enquiryKey, summary, type CalBooking } from "@/lib/inbox";
 
 /* ── Cal.com's booking webhook ─────────────────────────────────────
@@ -69,6 +70,14 @@ export async function POST(request: Request) {
     metadata: summary(stored),
   });
   const paid = (PAID as readonly string[]).includes(hook.payload?.type ?? "");
+  ctx.waitUntil(recordLead(env.INBOX, stored.email, {
+    event: { at: stored.at, kind: paid ? "booking" : "call", ref: hook.payload?.uid, note: stored.detail },
+    name: stored.name,
+    kind: hook.payload?.type,
+    when: hook.payload?.startTime,
+    deposit: stored.deposit,
+    flag: stored.noDeposit ? "no-deposit" : undefined,
+  }));
   ctx.waitUntil(toNotion(env.NOTION_TOKEN, {
     stored,
     status: paid ? "Confirmed" : "Call booked",

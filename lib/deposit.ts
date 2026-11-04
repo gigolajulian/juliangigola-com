@@ -1,5 +1,6 @@
 import { sendConfirm } from "@/lib/confirm";
 import { enquiry, enquiryKey, summary, whenPT } from "@/lib/inbox";
+import { recordLead } from "@/lib/leads";
 import { openNow } from "@/lib/slots";
 import { EVENTS } from "@/lib/booking-rules";
 import { lock, recordLead, type BookResult } from "@/lib/booking-engine";
@@ -362,6 +363,7 @@ export async function settle(env: Env, intent: string, metadata: { [k: string]: 
       const who = typeof b === "string" ? undefined : b;
       const what = who ? [SESSION[who.slug] ?? who.slug, whenPT(who.start), who.name, "$100"].join(", ") : "$100";
       await env.INBOX.put(key, JSON.stringify({ ...r, warned: true }), { expirationTtl: 90 * 864e2 }).catch((e: unknown) => console.error("deposit record", "warned", String(e)));
+      if (who) await recordLead(env.INBOX, who.email, { event: { at: new Date().toISOString(), kind: "deposit-stuck", ref: intent, note: what }, name: who.name, kind: who.slug, flag: "stuck" });
       await mail(env.EMAIL, `Deposit stuck: check Stripe and Cal.com: ${what}`, [
         who ? `${who.name} <${who.email}>` : "Unknown client",
         `Paid, and the booking was started at ${r.at} but never finished. Check Cal.com for the booking, then book or refund in Stripe by hand.`,
@@ -440,6 +442,7 @@ export async function settle(env: Env, intent: string, metadata: { [k: string]: 
       type: "booking",
     };
     await env.INBOX.put(enquiryKey(now, id.slice(0, 8)), JSON.stringify(row), { metadata: summary(row) });
+    await recordLead(env.INBOX, who.email, { event: { at: row.at, kind: "deposit-stuck", ref: intent, note: row.detail }, name: who.name, kind: typeof b === "string" ? undefined : b.slug, flag: "stuck" });
     await tell(env, "failed", b, link, intent);
     return "failed";
   }
