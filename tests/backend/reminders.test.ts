@@ -44,7 +44,11 @@ describe("reminders", () => {
     await saveBooking(store, rec("gone", 23.5, { cancelled: new Date().toISOString() }));
     await saveBooking(store, rec("fresh", 23.5, { at: new Date().toISOString() }));
 
+    const logged: unknown[] = [];
+    env.SITE = { fetch: async (_: string, init: RequestInit) => (logged.push(JSON.parse(String(init.body))), Response.json({ logged: true })) } as never;
     expect(await remind(env)).toBe(2);
+    // Each one is logged on the person's lead, through the site.
+    expect(logged).toEqual([expect.objectContaining({ email: "due@example.com", kind: "reminder", booking: "due" }), expect.objectContaining({ email: "missed@example.com" })]);
     expect(client.sent.map((x) => x.to)).toEqual([expect.objectContaining({ email: "due@example.com" }), expect.objectContaining({ email: "missed@example.com" })]);
     const m = client.sent[0];
     expect(m.subject).toMatch(/^Tomorrow: Portraits, /);

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { FakeEmail, FakeKV, FakeStore, fakeLock } from "./fakes";
+import { FakeEmail, FakeKV, FakeStore, fakeLock, LEADS_KEY, leadOf } from "./fakes";
 import { forgetToken } from "@/lib/gcal";
 import { bookingToken, manageLinks, tokenOpens } from "@/lib/booking-token";
 import { BookingLock } from "@/worker/booking-lock";
@@ -43,6 +43,7 @@ beforeEach(() => {
     BOOKING_SECRET: SECRET,
     BOOKING_LOCK: fakeLock(new BookingLock({ storage: new FakeStore() }, { GCAL_OAUTH: OAUTH })),
     INBOX: new FakeKV(),
+    LEADS_KEY,
     CLIENT_EMAIL: client,
     EMAIL: mail,
     STRIPE_SECRET_KEY: "sk_test_x",
@@ -160,6 +161,19 @@ describe("cancel", () => {
     const { data } = await res.json();
     const t = String(client.sent[0].text).match(/t=([\w.-]+)&do=cancel/)![1];
     expect(await (await post(data.uid, { t, action: "cancel" })).json()).toMatchObject({ refunded: null, record: { paid: false } });
+  });
+});
+
+describe("the lead desk", () => {
+  it("files the booking on the person's lead, and logs every mail the move and the cancel send", async () => {
+    const start = wednesday(7);
+    const { id, t } = await paid(start);
+    expect((await post(id, { t, action: "reschedule", start: plus(start, 2) })).status).toBe(200);
+    expect((await post(id, { t, action: "cancel" })).status).toBe(200);
+    const lead = (await leadOf(ctx.env.INBOX as FakeKV, "qa@example.com"))!;
+    expect(lead.events.find((e) => e.kind === "booking")).toMatchObject({ ref: id, note: "Portraits" });
+    const mails = lead.events.filter((e) => e.kind === "mail").map((e) => `${e.mail?.to} ${e.mail?.kind}`);
+    expect(mails).toEqual(expect.arrayContaining(["client confirm", "hello@ reschedule", "client reschedule", "hello@ cancelled", "client cancelled"]));
   });
 });
 

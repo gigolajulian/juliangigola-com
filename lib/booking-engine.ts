@@ -2,6 +2,7 @@ import { EVENTS, TZ } from "@/lib/booking-rules";
 import type { Booking } from "@/lib/deposit";
 import { gcal } from "@/lib/gcal";
 import { bookingEnquiry, enquiryKey, summary } from "@/lib/inbox";
+import { recordLead, type LeadStore } from "@/lib/leads";
 import { toNotion } from "@/lib/notion-lead";
 import { openNow } from "@/lib/slots";
 
@@ -143,7 +144,7 @@ export async function bookOwn(store: Store, secret: string | undefined, b: BookI
  * `app/api/cal` files Cal.com's. `deposit` is the Stripe link. Never
  * throws: the booking is made, a failed copy must not undo it.
  */
-export async function recordBooking(env: { INBOX?: CloudflareEnv["INBOX"]; NOTION_TOKEN?: string }, r: BookingRecord, deposit?: string) {
+export async function recordBooking(env: LeadStore & { INBOX?: CloudflareEnv["INBOX"]; NOTION_TOKEN?: string }, r: BookingRecord, deposit?: string) {
   const now = Date.now();
   const id = crypto.randomUUID();
   const stored = bookingEnquiry(
@@ -166,6 +167,8 @@ export async function recordBooking(env: { INBOX?: CloudflareEnv["INBOX"]; NOTIO
   } catch (e) {
     console.error("booking inbox", String(e));
   }
+  // The lead desk: the person's row moves to Call booked or Confirmed.
+  await recordLead(env, r.email, { event: { at: r.at, kind: r.call ? "call" : "booking", ref: r.id, note: r.session }, name: r.name, kind: r.slug, when: r.start });
   await toNotion(env.NOTION_TOKEN, { stored, status: r.call ? "Call booked" : "Confirmed", kind: r.slug, calUid: r.id, shootDate: r.call ? undefined : r.start });
 }
 
