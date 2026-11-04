@@ -3,7 +3,7 @@ import { enquiry, enquiryKey, summary, whenPT } from "@/lib/inbox";
 import { logMail, recordLead } from "@/lib/leads";
 import { openNow } from "@/lib/slots";
 import { EVENTS } from "@/lib/booking-rules";
-import { lock, recordLead as recordBooking, type BookResult } from "@/lib/booking-engine";
+import { lock, recordBooking, type BookResult } from "@/lib/booking-engine";
 import { manageLinks } from "@/lib/booking-token";
 
 /* ── the $100 deposit ─────────────────────────────────────────────
