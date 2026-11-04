@@ -72,7 +72,7 @@ export function ManageBooking({ booking, token, open }: { booking: Managed; toke
               ? "Cancel this call?"
               : refund
                 ? `It's ${REFUND_HOURS} hours or more before your session, so your $100 deposit is refunded to your card.`
-                : `It's under ${REFUND_HOURS} hours before ${b.firstStart && b.firstStart !== b.start ? "the time you first booked" : "your session"}, so the $100 deposit is not refunded. Moving to another date keeps it.`}
+                : `It's under ${REFUND_HOURS} hours before ${b.firstStart && b.firstStart !== b.start ? "the time you first booked" : "your session"}, so the $100 deposit is not refunded. Moving to another date carries it over.`}
           </p>
           <div className="flex gap-3">
             <button type="button" className="btn fill" disabled={state === "busy"} onClick={() => act({ action: "cancel" })}>
@@ -90,6 +90,13 @@ export function ManageBooking({ booking, token, open }: { booking: Managed; toke
             onPicked={(start) => act({ action: "reschedule", start })}
             fallback={<p>Times did not load. Reply to your confirmation email and I&apos;ll move it.</p>}
           />
+          {b.paid ? (
+            <p className="mute">
+              {refund
+                ? `Your $100 deposit moves with it. It is refunded only if you cancel ${REFUND_HOURS} hours or more before the time you first booked, ${when(b.firstStart ?? b.start, "America/Los_Angeles")}.`
+                : `Your $100 deposit moves with it. It is no longer refundable: the time you first booked, ${when(b.firstStart ?? b.start, "America/Los_Angeles")}, is under ${REFUND_HOURS} hours away.`}
+            </p>
+          ) : null}
           <button type="button" className="btn self-start" onClick={() => setMode("")}>Back</button>
         </div>
       ) : (

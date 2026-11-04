@@ -42,8 +42,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const key = env.STRIPE_SECRET_KEY;
 
   if (body.action === "reschedule") {
-    await mail(env.EMAIL, `Rescheduled: ${what}`, [`${r.name} <${r.email}>`, `Moved to ${whenPT(r.start)} by the client. The calendar is updated.`], who);
-    await sendConfirm(env.CLIENT_EMAIL, { ...who, session: r.session, call: r.call, start: r.start, end: r.end, where: r.where, uid: r.id, manage: await manageLinks(env.BOOKING_SECRET, r) });
+    await mail(env.EMAIL, `Rescheduled: ${what}`, [`${r.name} <${r.email}>`, `Moved to ${whenPT(r.start)} by the client. The calendar is updated.`, ...(r.intent && !refundable(r) ? [`The deposit is no longer refundable: first booked for ${whenPT(r.firstStart ?? r.start)}, under 48 hours away.`] : [])], who);
+    await sendConfirm(env.CLIENT_EMAIL, { ...who, session: r.session, call: r.call, start: r.start, end: r.end, where: r.where, uid: r.id, manage: await manageLinks(env.BOOKING_SECRET, r), firstStart: r.firstStart, ...(r.intent ? { deposit: { ref: r.intent, at: r.at } } : {}) });
     return json({ record: managed(r) });
   }
 

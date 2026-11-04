@@ -1,3 +1,4 @@
+import { refundable } from "@/lib/booking-rules";
 /* ── the client's confirmation email ──────────────────────────────
  * Julian (2026-10-16): every booking gets a branded "You're in." mail from
  * the site, on top of Cal.com's stock one (Cal stays on the free plan).
@@ -36,6 +37,8 @@ export type Confirm = {
   deposit?: { ref: string; at: string; card?: string };
   /** The site's own reschedule and cancel links; null: none yet. Unset: Cal.com's. */
   manage?: { reschedule: string; cancel: string } | null;
+  /** The time first booked, when it was moved since: the refund is judged by it. */
+  firstStart?: string;
 };
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
@@ -66,7 +69,11 @@ export function confirmMail(c: Confirm) {
     rows: [["Paid", fmt({ month: "short", day: "numeric", year: "numeric" }).format(new Date(c.deposit.at))], ...(c.deposit.card ? [["Card", c.deposit.card]] : []), ["Ref", c.deposit.ref.slice(0, 11)]] as [string, string][],
     // The site's own engine refunds by Julian's 48-hour rule (`lib/booking-rules.ts`).
     note: c.manage !== undefined
-      ? "The balance is due after the shoot. The deposit moves with a new date, or is refunded if you cancel 48 hours or more before."
+      ? c.firstStart && c.firstStart !== c.start
+        ? refundable({ intent: "x", start: c.start, firstStart: c.firstStart })
+          ? `The balance is due after the shoot. The deposit moved with the new date. It is refunded only if you cancel 48 hours or more before the time you first booked, ${when(c.firstStart)}.`
+          : `The balance is due after the shoot. The deposit moved with the new date. It is no longer refundable: the time you first booked, ${when(c.firstStart)}, was under 48 hours away.`
+        : "The balance is due after the shoot. The deposit moves with a new date, or is refunded if you cancel 48 hours or more before."
       : "The balance is due after the shoot. The deposit moves with a new date, or is refunded up to 2 business days before.",
   };
   const { reschedule, cancel } = c.manage ?? { reschedule: `https://cal.com/reschedule/${encodeURIComponent(c.uid)}`, cancel: `https://cal.com/booking/${encodeURIComponent(c.uid)}?cancel=true` };

@@ -137,6 +137,9 @@ describe("cancel", () => {
     vi.useFakeTimers({ toFake: ["Date"] });
     vi.setSystemTime(Date.parse(start) - 24 * 36e5);
     expect((await post(id, { t, action: "reschedule", start: plus(start, 7 * 24) })).status).toBe(200);
+    // The move says so: to the client and to hello@.
+    expect(String(client.sent.at(-1)!.text)).toContain("no longer refundable");
+    expect(String(mail.sent.at(-1)!.text)).toContain("no longer refundable");
     const res = await post(id, { t, action: "cancel" });
     vi.useRealTimers();
     expect(await res.json()).toMatchObject({ refunded: null, record: { cancelled: true, firstStart: start } });
@@ -170,6 +173,8 @@ describe("reschedule", () => {
     expect(calls.some((c) => c.url.endsWith("/refunds"))).toBe(false);
     expect(mail.sent.at(-1)!.subject).toMatch(/^Rescheduled: /);
     expect(client.sent).toHaveLength(2);
+    // Moved a week ahead of the first date: still refundable, by the first date.
+    expect(String(client.sent[1].text)).toContain("before the time you first booked");
   });
 
   it("is not blocked by its own old time, only by another booking", async () => {
