@@ -23,13 +23,13 @@ import { TOKEN_STORE } from "@/lib/admin-github";
  * ─────────────────────────────────────────────────────────────── */
 
 /** Where the key is kept between visits. Beside the GitHub token. */
-const KEY_STORE = "jg-inbox-key";
+export const KEY_STORE = "jg-inbox-key";
 
 /**
  * What to send: the inbox key if one was pasted, else the GitHub token the
  * editor signed in with. The API takes either — see `canPush` in the route.
  */
-const credentials = (key: string): Record<string, string> => {
+export const credentials = (key: string): Record<string, string> => {
   if (key) return { "x-inbox-key": key };
   const token = window.localStorage.getItem(TOKEN_STORE);
   return token ? { authorization: `Bearer ${token}` } : {};

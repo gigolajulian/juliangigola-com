@@ -1,0 +1,393 @@
+"use client";
+
+import * as React from "react";
+import { credentials, KEY_STORE } from "@/components/admin-inbox";
+import type { Enquiry } from "@/lib/inbox";
+import { isLate, STAGES, type Lead, type LeadEvent, type LeadSummary, type Stage } from "@/lib/leads";
+import { cn } from "@/lib/utils";
+
+/* ── the lead desk ────────────────────────────────────────────────
+ * Julian (2026-11-03, PLAN-lead-desk.md, mock v3): every inquiry, call
+ * and booking as one row per person, with where it stands and the one
+ * thing to do next. Reads `lead:` records through `/api/inbox`, with the
+ * same key or GitHub token as the Inbox tab.
+ *
+ * One filled accent button per lead (the next step), the rest outlined.
+ * Every state is a word as well as a color. Wide: filters, list and the
+ * open lead side by side. Narrow: the list, then the lead with Back.
+ * ─────────────────────────────────────────────────────────────── */
+
+type Filter = "needs" | "open" | Stage | "snoozed";
+
+const DAY = 864e5;
+const now = () => Date.now();
+const snoozed = (l: LeadSummary) => !!l.snoozeUntil && Date.parse(l.snoozeUntil) > now();
+const closed = (s: Stage) => s === "Delivered" || s === "Lost";
+const needsMe = (l: LeadSummary) => !snoozed(l) && !closed(l.stage) && (l.unread || isLate(l, now()) || !!l.flags?.length);
+
+/** What to do next, in a word or two, and whether it is late. */
+function nextStep(l: LeadSummary): string | null {
+  if (l.flags?.includes("stuck")) return "Refund or rebook";
+  if (l.flags?.includes("no-deposit")) return "Ask for the deposit";
+  if (l.stage === "Inquiry") return "Reply";
+  if (l.stage === "Quoted" && isLate(l, now())) return "Follow up";
+  if (l.stage === "Shot") return "Deliver";
+  return null;
+}
+
+/** The site's headings are Black capitals; the desk's are the wordmark face at 600, as written. */
+const HEAD: React.CSSProperties = { fontFamily: "var(--font-display)", textTransform: "none", fontWeight: 600, letterSpacing: "-0.02em", wordSpacing: 0 };
+/** "intro-call" as "Intro call". */
+const kindOf = (k?: string) => (k ? k.charAt(0).toUpperCase() + k.slice(1).replace(/-/g, " ") : undefined);
+
+const ago = (iso: string) => {
+  const mins = Math.round((now() - Date.parse(iso)) / 60000);
+  if (mins < 60) return `${Math.max(1, mins)} min`;
+  if (mins < 48 * 60) return `${Math.round(mins / 60)} h`;
+  return `${Math.round(mins / 1440)} d`;
+};
+const day = (iso: string) =>
+  new Intl.DateTimeFormat("en-US", { timeZone: "America/Los_Angeles", month: "short", day: "numeric" }).format(new Date(iso));
+const at = (iso: string) =>
+  new Intl.DateTimeFormat("en-US", { timeZone: "America/Los_Angeles", weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(iso));
+
+/** The chip a row shows: trouble first, then late, then the stage. */
+function Chip({ l }: { l: LeadSummary }) {
+  if (l.flags?.includes("stuck")) return <Tag tone="bad" mark="!">Deposit stuck</Tag>;
+  if (l.flags?.includes("no-deposit")) return <Tag tone="bad" mark="!">No deposit</Tag>;
+  if (snoozed(l)) return <Tag tone="quiet" mark="z">Until {day(l.snoozeUntil!)}</Tag>;
+  if (isLate(l, now())) return <Tag tone="needs" mark="◷">{l.stage === "Quoted" ? `Quoted ${ago(l.stageAt)} ago` : `Late, ${ago(l.stageAt)}`}</Tag>;
+  return <Tag tone={closed(l.stage) ? "quiet" : "plain"} mark={MARK[l.stage]}>{l.stage}</Tag>;
+}
+
+/** A shape per stage, so the chip never relies on color alone. */
+const MARK: Record<Stage, string> = {
+  Inquiry: "○", Replied: "◐", "Call booked": "◐", Quoted: "◐", Confirmed: "●", Shot: "●", Delivered: "✓", Lost: "×",
+};
+
+function Tag({ tone, mark, children }: { tone: "plain" | "needs" | "bad" | "quiet"; mark: string; children: React.ReactNode }) {
+  return (
+    <span
+      className={cn(
+        "inline-flex h-7 shrink-0 items-center gap-2 whitespace-nowrap rounded-[4px] px-3 font-mono text-[12.5px]",
+        tone === "plain" && "bg-card text-foreground",
+        tone === "needs" && "bg-accent/12 text-accent ring-1 ring-inset ring-accent/40",
+        tone === "bad" && "bg-destructive/10 text-destructive ring-1 ring-inset ring-destructive/40",
+        tone === "quiet" && "text-muted-foreground ring-1 ring-inset ring-border",
+      )}
+    >
+      <span aria-hidden="true">{mark}</span>
+      {children}
+    </span>
+  );
+}
+
+const btn = "inline-flex min-h-11 items-center justify-center gap-2 rounded-[10px] border border-border px-4 text-[15px] font-medium transition-colors duration-200 hoverable:hover:bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
+const primary = "border-accent bg-accent font-semibold text-accent-foreground hoverable:hover:bg-accent/90";
+
+/** A Gmail draft from hello@ (the second account in his Chrome, the Gmail app on the phone). */
+function compose(to: string, subject: string, body: string) {
+  const q = (o: Record<string, string>) => new URLSearchParams(o).toString().replace(/\+/g, "%20");
+  return /iPhone|iPad/.test(navigator.userAgent)
+    ? `googlegmail://co?${q({ to, subject, body })}`
+    : `https://mail.google.com/mail/u/1/?${q({ view: "cm", fs: "1", to, su: subject, body })}`;
+}
+
+export function AdminLeads() {
+  const [leads, setLeads] = React.useState<LeadSummary[] | null>(null);
+  const [filter, setFilter] = React.useState<Filter>("needs");
+  const [open, setOpen] = React.useState<string | null>(null);
+  const [error, setError] = React.useState<string | null>(null);
+
+  const call = React.useCallback(async (init: RequestInit & { query?: string } = {}) => {
+    const res = await fetch(`/api/inbox${init.query ?? ""}`, {
+      ...init,
+      headers: { ...credentials(window.localStorage.getItem(KEY_STORE) ?? ""), "content-type": "application/json" },
+      cache: "no-store",
+    });
+    const out = (await res.json()) as Record<string, unknown> & { error?: string };
+    if (!res.ok) throw new Error(out.error ?? `Request failed (${res.status})`);
+    return out;
+  }, []);
+
+  const load = React.useCallback(() => {
+    call({ query: "?leads" })
+      .then((o) => setLeads(o.leads as LeadSummary[]))
+      .catch((e: unknown) => setError(e instanceof Error ? e.message : String(e)));
+  }, [call]);
+  React.useEffect(load, [load]);
+
+  /** A change from the open lead, reflected in its row at once. */
+  const changed = (l: Lead) => setLeads((rows) => rows?.map((r) => (r.email === l.email ? { ...r, ...l } : r)) ?? null);
+
+  if (error) return <p className="py-8 text-[15px] text-muted-foreground">{error === "Not authorized." ? "Open the Inbox tab and sign in there first. Leads use the same key." : error}</p>;
+  if (!leads) return <p className="py-8 font-mono text-[13px] text-muted-foreground">Loading leads</p>;
+
+  const count = (f: Filter) => leads.filter((l) => pass(l, f)).length;
+  const shown = leads.filter((l) => pass(l, filter));
+  const current = leads.find((l) => l.email === open);
+
+  return (
+    // Sentence case and a text face, as in the approved mock: the site sets
+    // everything else in mono capitals, buttons included.
+    <div
+      style={{ fontFamily: 'var(--font-v2-text, "Helvetica Neue", Helvetica, Arial, sans-serif)', letterSpacing: 0 }}
+      className="grid min-h-[640px] overflow-hidden rounded-[14px] border border-border bg-background text-foreground normal-case lg:grid-cols-[200px_minmax(0,440px)_minmax(0,1fr)] [&_button]:normal-case [&_h2]:normal-case [&_h3]:normal-case"
+    >
+      <nav aria-label="Lead filters" className={cn("border-border p-3 lg:border-r", open && "max-lg:hidden")}>
+        <div className="flex gap-2 overflow-x-auto lg:grid lg:gap-0.5">
+          {(["needs", "open"] as const).map((f) => (
+            <FilterButton key={f} on={filter === f} n={count(f)} onClick={() => setFilter(f)}>{f === "needs" ? "Needs me" : "All open"}</FilterButton>
+          ))}
+          <p className="px-3 pb-2 pt-4 font-mono text-[12.5px] text-muted-foreground max-lg:hidden">By stage</p>
+          {STAGES.filter((s) => !closed(s)).map((s) => (
+            <FilterButton key={s} on={filter === s} n={count(s)} onClick={() => setFilter(s)} wide>{s}</FilterButton>
+          ))}
+          <p className="px-3 pb-2 pt-4 font-mono text-[12.5px] text-muted-foreground max-lg:hidden">Closed</p>
+          {(["Delivered", "Lost", "snoozed"] as const).map((f) => (
+            <FilterButton key={f} on={filter === f} n={count(f)} onClick={() => setFilter(f)} wide>{f === "snoozed" ? "Snoozed" : f}</FilterButton>
+          ))}
+        </div>
+      </nav>
+
+      <section aria-label="Leads" className={cn("min-w-0 border-border lg:border-r", open && "max-lg:hidden")}>
+        <header className="flex items-center justify-between border-b border-border px-5 py-4">
+          <h2 style={HEAD} className="text-lg">{label(filter)}</h2>
+          <span className="font-mono text-[13px] text-muted-foreground">{shown.length} {shown.length === 1 ? "lead" : "leads"}</span>
+        </header>
+        {shown.length ? (
+          <ul>
+            {shown.map((l) => (
+              <li key={l.email}>
+                <button
+                  type="button"
+                  onClick={() => setOpen(l.email)}
+                  aria-current={open === l.email ? "true" : undefined}
+                  className={cn(
+                    "grid w-full grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1.5 border-b border-border px-5 py-4 text-left transition-colors duration-200 hoverable:hover:bg-card",
+                    open === l.email && "bg-card shadow-[inset_3px_0_0_var(--accent)]",
+                  )}
+                >
+                  <span className="flex min-w-0 items-center gap-2 text-base font-semibold">
+                    {l.unread ? <span className="size-2 shrink-0 rounded-full bg-accent" aria-label="New" /> : null}
+                    <span className="truncate">{l.name}</span>
+                  </span>
+                  <span className="text-right font-mono text-[13px] text-muted-foreground">{day(l.lastAt)}</span>
+                  <span className="truncate text-[14.5px] text-muted-foreground">
+                    {[kindOf(l.kind), l.when ? at(l.when) : null].filter(Boolean).join(", ") || l.email}
+                  </span>
+                  <span className="flex justify-end"><Chip l={l} /></span>
+                  {nextStep(l) ? (
+                    <span className="font-mono text-[13px] text-muted-foreground">
+                      Next: <b className="font-semibold text-accent">{nextStep(l)}</b>
+                    </span>
+                  ) : null}
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="px-5 py-10 text-[15px] text-muted-foreground">{filter === "needs" ? "Nothing waiting on you." : "No leads here."}</p>
+        )}
+      </section>
+
+      <section aria-label="Lead" className={cn("min-w-0 bg-card/40", !open && "max-lg:hidden")}>
+        {current ? (
+          <Detail key={current.email} summary={current} call={call} onChange={changed} onBack={() => setOpen(null)} />
+        ) : (
+          <p className="px-8 py-10 text-[15px] text-muted-foreground max-lg:hidden">Pick a lead to see it here.</p>
+        )}
+      </section>
+    </div>
+  );
+}
+
+function pass(l: LeadSummary, f: Filter) {
+  if (f === "needs") return needsMe(l);
+  if (f === "snoozed") return snoozed(l);
+  if (f === "open") return !closed(l.stage);
+  return l.stage === f && !snoozed(l);
+}
+const label = (f: Filter) => (f === "needs" ? "Needs me" : f === "open" ? "All open" : f === "snoozed" ? "Snoozed" : f);
+
+function FilterButton({ on, n, wide, onClick, children }: { on: boolean; n: number; wide?: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={on}
+      className={cn(
+        "flex min-h-11 shrink-0 items-center justify-between gap-4 rounded-lg px-3 text-[15px] transition-colors duration-200",
+        on ? "bg-accent/12 font-semibold text-accent" : "hoverable:hover:bg-card",
+        wide && !on && "max-lg:hidden",
+      )}
+    >
+      <span>{children}</span>
+      <span className={cn("font-mono text-[13.5px]", on ? "text-accent" : "text-muted-foreground")}>{n}</span>
+    </button>
+  );
+}
+
+type Call = (init?: RequestInit & { query?: string }) => Promise<Record<string, unknown>>;
+
+function Detail({ summary, call, onChange, onBack }: { summary: LeadSummary; call: Call; onChange: (l: Lead) => void; onBack: () => void }) {
+  const [lead, setLead] = React.useState<Lead | null>(null);
+  const [message, setMessage] = React.useState<Enquiry | null>(null);
+  const [asked, setAsked] = React.useState(false);
+  const [snoozing, setSnoozing] = React.useState(false);
+  const key = `lead:${summary.email}`;
+
+  const patch = React.useCallback(
+    async (body: Record<string, unknown>) => {
+      const o = await call({ method: "PATCH", body: JSON.stringify({ key, ...body }) });
+      setLead(o.lead as Lead);
+      onChange(o.lead as Lead);
+    },
+    [call, key, onChange],
+  );
+
+  React.useEffect(() => {
+    let live = true;
+    call({ query: `?key=${encodeURIComponent(key)}` }).then(async (o) => {
+      if (!live) return;
+      const l = o.lead as Lead;
+      setLead(l);
+      // Their latest words, from the raw row the form stored.
+      const ref = [...l.events].reverse().find((e) => e.kind === "inquiry" && e.ref)?.ref;
+      if (ref) call({ query: `?key=${encodeURIComponent(ref)}` }).then((m) => live && setMessage(m.enquiry as Enquiry)).catch(() => {});
+      if (l.unread) patch({ seen: true }).catch(() => {});
+    }).catch(() => {});
+    return () => void (live = false);
+    // Once per lead: `patch` is stable for the same key.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]);
+
+  const l = lead ?? summary;
+  const first = l.name.split(" ")[0];
+  const late = isLate(l, now());
+  const reply = compose(l.email, `Re: your ${l.kind ?? "shoot"} inquiry`, `Hi ${first},\n\n`);
+  const book = compose(l.email, "Booking a time", `Hi ${first},\n\nYou can pick a time here: https://juliangigola.com/book\n\n`);
+
+  return (
+    <div className="grid gap-6 px-5 py-6 lg:px-8 lg:py-7">
+      <button type="button" onClick={onBack} className="inline-flex min-h-11 items-center gap-1 justify-self-start text-[16px] text-accent lg:hidden">
+        <span aria-hidden="true">‹</span> Leads
+      </button>
+      <header className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <h2 style={HEAD} className="text-[28px] leading-tight">{l.name}</h2>
+          <p className="mt-1 break-words text-[15px] text-muted-foreground">{[kindOf(l.kind), l.email].filter(Boolean).join(" · ")}</p>
+        </div>
+        <Tag tone={closed(l.stage) ? "quiet" : "plain"} mark={MARK[l.stage]}>{l.stage}</Tag>
+      </header>
+
+      {late ? (
+        <p role="status" className="flex items-center gap-3 rounded-xl bg-accent/12 px-4 py-3.5 text-[15px]">
+          <span aria-hidden="true" className="text-accent">◷</span>
+          <span><b className="font-semibold text-accent">{ago(l.stageAt)} waiting.</b> {l.stage === "Quoted" ? "The quote has had no answer." : "The site promises a reply within a day."}</span>
+        </p>
+      ) : null}
+      {l.flags?.includes("stuck") ? (
+        <p role="status" className="rounded-xl bg-destructive/10 px-4 py-3.5 text-[15px] text-destructive">
+          A deposit was paid but not booked. Refund or rebook it in Stripe.
+        </p>
+      ) : null}
+
+      <div className="flex flex-wrap items-center gap-2.5">
+        <a href={reply} target="_blank" rel="noreferrer" onClick={() => setAsked(true)} className={cn(btn, primary, "min-h-[52px] px-5 text-base")}>
+          Reply in Gmail
+        </a>
+        <a href={book} target="_blank" rel="noreferrer" className={btn}>Send booking link</a>
+        <button type="button" onClick={() => setSnoozing((v) => !v)} aria-expanded={snoozing} className={btn}>Snooze</button>
+        <span className="flex-1" />
+        {lead?.notion ? <a href={`https://www.notion.so/${lead.notion.replace(/-/g, "")}`} target="_blank" rel="noreferrer" className={btn}>Notion</a> : null}
+        {lead?.deposit ? <a href={lead.deposit} target="_blank" rel="noreferrer" className={cn(btn, "text-destructive")}>Deposit in Stripe</a> : null}
+      </div>
+
+      {asked && l.stage === "Inquiry" ? (
+        <p className="flex flex-wrap items-center gap-3 text-[15px]">
+          Sent it?
+          <button type="button" className={btn} onClick={() => patch({ stage: "Replied" }).then(() => setAsked(false))}>Mark as Replied</button>
+        </p>
+      ) : null}
+      {snoozing ? (
+        <div className="flex flex-wrap gap-2">
+          {[["1 day", 1], ["3 days", 3], ["1 week", 7]].map(([t, d]) => (
+            <button key={t} type="button" className={btn} onClick={() => patch({ snoozeUntil: new Date(now() + Number(d) * DAY).toISOString() }).then(() => setSnoozing(false))}>{t}</button>
+          ))}
+          {l.snoozeUntil ? <button type="button" className={btn} onClick={() => patch({ snoozeUntil: "" }).then(() => setSnoozing(false))}>Wake now</button> : null}
+        </div>
+      ) : null}
+
+      <fieldset className="grid gap-2.5">
+        <legend className="mb-2.5 font-mono text-[13px] text-muted-foreground">Stage</legend>
+        <div className="flex flex-wrap gap-2">
+          {STAGES.map((s) => (
+            <button
+              key={s}
+              type="button"
+              aria-pressed={l.stage === s}
+              onClick={() => l.stage !== s && patch({ stage: s })}
+              className={cn(
+                "min-h-11 rounded-[4px] border px-3 font-mono text-[12.5px] transition-colors duration-200",
+                l.stage === s
+                  ? "border-accent bg-accent font-semibold text-accent-foreground"
+                  : STAGES.indexOf(s) < STAGES.indexOf(l.stage) && s !== "Lost"
+                    ? "border-border text-foreground hoverable:hover:bg-card"
+                    : "border-dashed border-border text-muted-foreground hoverable:hover:bg-card",
+              )}
+            >
+              {s}
+            </button>
+          ))}
+        </div>
+      </fieldset>
+
+      {message ? (
+        <div className="grid gap-2">
+          {message.detail ? <p className="text-[15px] text-muted-foreground">{message.detail}</p> : null}
+          <p className="max-w-[64ch] whitespace-pre-line rounded-xl bg-background px-4 py-4 text-[15px] leading-relaxed">{message.message}</p>
+        </div>
+      ) : null}
+
+      <dl className="grid grid-cols-[120px_minmax(0,1fr)] gap-x-4 gap-y-2.5 text-[15px]">
+        <dt className="font-mono text-[13px] leading-6 text-muted-foreground">First seen</dt>
+        <dd>{at(l.firstAt)}</dd>
+        {l.when ? (<><dt className="font-mono text-[13px] leading-6 text-muted-foreground">Booked for</dt><dd>{at(l.when)}</dd></>) : null}
+        {message?.context?.referrer || message?.context?.landing ? (
+          <><dt className="font-mono text-[13px] leading-6 text-muted-foreground">Came from</dt><dd className="break-words">{[message.context.referrer, message.context.landing].filter(Boolean).join(", ")}</dd></>
+        ) : null}
+        <dt className="font-mono text-[13px] leading-6 text-muted-foreground">Deposit</dt>
+        <dd className={lead?.deposit ? "" : "text-muted-foreground"}>{lead?.deposit ? "$100 paid" : "None"}</dd>
+      </dl>
+
+      {lead ? (
+        <section aria-label="Timeline" className="grid gap-2.5">
+          <h3 style={{ ...HEAD, fontFamily: "var(--font-mono)", fontWeight: 400, letterSpacing: 0 }} className="text-[13px] text-muted-foreground">Timeline</h3>
+          <ol className="grid gap-2">
+            {[...lead.events].reverse().map((e, i) => (
+              <li key={i} className="grid grid-cols-[120px_minmax(0,1fr)] gap-4 text-[14.5px]">
+                <span className="font-mono text-[13px] leading-6 text-muted-foreground">{day(e.at)}</span>
+                <span className="break-words">{line(e)}</span>
+              </li>
+            ))}
+          </ol>
+        </section>
+      ) : null}
+    </div>
+  );
+}
+
+/** One timeline line, in words. */
+function line(e: LeadEvent): string {
+  switch (e.kind) {
+    case "inquiry": return `Inquiry from the form${e.note ? `, ${e.note}` : ""}`;
+    case "call": return `Call booked${e.note ? `: ${e.note}` : ""}`;
+    case "booking": return `Session booked${e.note ? `: ${e.note}` : ""}`;
+    case "no-deposit": return "Booked without a deposit";
+    case "deposit-stuck": return `Deposit stuck${e.note ? `: ${e.note}` : ""}`;
+    case "stage": return `Moved to ${e.note}`;
+    case "snooze": return e.note === "woken" ? "Woken" : `Snoozed until ${day(e.note ?? "")}`;
+    case "mail": return `Mail to ${e.mail?.to === "client" ? "them" : "hello@"}: ${e.note ?? ""}`;
+  }
+}

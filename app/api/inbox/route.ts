@@ -1,6 +1,7 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { bearer, canPush } from "@/lib/vouch";
 import { SAFE_IMAGE, summary, type Enquiry, type Summary } from "@/lib/inbox";
+import { fold, leadSummary, STAGES, type Lead, type LeadSummary, type Stage } from "@/lib/leads";
 
 /* ── reading the inbox ────────────────────────────────────────────
  * The one endpoint /admin's Inbox tab talks to. Lists enquiries, opens one,
@@ -155,6 +156,24 @@ export async function GET(request: Request) {
     });
   }
 
+  // The lead desk (`components/admin-leads.tsx`): one record per person.
+  if (wanted?.startsWith("lead:")) {
+    const body = await gate.inbox.get(wanted);
+    if (body === null) return json({ error: "Gone." }, 404);
+    return json({ lead: JSON.parse(body) as Lead });
+  }
+  if (url.searchParams.has("leads")) {
+    const leads: LeadSummary[] = [];
+    let after: string | undefined;
+    for (;;) {
+      const listed = await gate.inbox.list<LeadSummary>({ prefix: "lead:", cursor: after });
+      leads.push(...listed.keys.flatMap((k: { metadata?: LeadSummary }) => (k.metadata ? [k.metadata] : [])));
+      if (listed.list_complete) break;
+      after = listed.cursor;
+    }
+    return json({ leads: leads.sort((a, b) => b.lastAt.localeCompare(a.lastAt)) });
+  }
+
   if (wanted) {
     if (!wanted.startsWith("msg:")) return json({ error: "Unknown." }, 400);
     const body = await gate.inbox.get(wanted);
@@ -185,6 +204,7 @@ export async function PATCH(request: Request) {
 
   const given = await parsed(request);
   if (!given) return json({ error: "Not JSON." }, 400);
+  if (typeof given.key === "string" && given.key.startsWith("lead:")) return patchLead(gate.inbox, given);
   const { key, read } = given as { key?: string; read?: boolean };
   if (!key?.startsWith("msg:") || typeof read !== "boolean")
     return json({ error: "Unknown." }, 400);
@@ -223,4 +243,24 @@ export async function DELETE(request: Request) {
   const refs = await gate.inbox.list({ prefix: `ref:${key}:` });
   await Promise.all(refs.keys.map((k: { name: string }) => gate.inbox.delete(k.name)));
   return json({ ok: true });
+}
+
+/**
+ * A lead changed by hand: its stage, a snooze (an ISO time, or "" to wake
+ * it), or opened (`seen`). Stage and snooze go through `fold`, so they land
+ * on the timeline like everything else.
+ */
+async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, given: Record<string, unknown>) {
+  const { key, stage, snoozeUntil, seen } = given as { key: string; stage?: string; snoozeUntil?: string; seen?: boolean };
+  if (stage !== undefined && !(STAGES as readonly string[]).includes(stage)) return json({ error: "Unknown stage." }, 400);
+  if (snoozeUntil !== undefined && snoozeUntil !== "" && isNaN(Date.parse(snoozeUntil))) return json({ error: "Bad time." }, 400);
+  const body = await inbox.get(key);
+  if (body === null) return json({ error: "Gone." }, 404);
+  let lead = JSON.parse(body) as Lead;
+  const at = new Date().toISOString();
+  if (stage) lead = fold(lead, lead.email, { event: { at, kind: "stage", note: stage }, stage: stage as Stage });
+  if (snoozeUntil !== undefined) lead = fold(lead, lead.email, { event: { at, kind: "snooze", note: snoozeUntil || "woken" }, snoozeUntil });
+  if (seen) lead = { ...lead, unread: false };
+  await inbox.put(key, JSON.stringify(lead), { metadata: leadSummary(lead) });
+  return json({ lead });
 }
