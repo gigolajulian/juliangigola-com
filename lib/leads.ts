@@ -127,6 +127,8 @@ export function fold(lead: Lead | null, email: string, c: Change): Lead {
   if (event.kind === "mail") return tidy(next);
   if (event.kind === "snooze") {
     next.snoozeUntil = c.snoozeUntil || undefined;
+    // Unsnoozed by hand: back under Needs me.
+    if (!c.snoozeUntil) next.unread = true;
     return tidy(next);
   }
 
