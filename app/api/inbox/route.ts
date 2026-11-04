@@ -1,7 +1,7 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { bearer, canPush } from "@/lib/vouch";
 import { SAFE_IMAGE, summary, type Enquiry, type Summary } from "@/lib/inbox";
-import { fold, readLead, STAGES, writeLead, type LeadSummary, type Stage } from "@/lib/leads";
+import { backfillLead, fold, readLead, STAGES, writeLead, type InboxRow, type Lead, type LeadSummary, type Stage } from "@/lib/leads";
 import { sealer } from "@/lib/lead-crypto";
 import { notionStage } from "@/lib/notion-lead";
 
@@ -250,6 +250,52 @@ export async function DELETE(request: Request) {
   const refs = await gate.inbox.list({ prefix: `ref:${key}:` });
   await Promise.all(refs.keys.map((k: { name: string }) => gate.inbox.delete(k.name)));
   return json({ ok: true });
+}
+
+/**
+ * POST {backfill: true, dry?: true}: the Inbox's `msg:` rows folded into
+ * leads (`backfillLead`). Dry, it only counts: how many people, how many
+ * new, and the stage each would end on. Rows stay, nothing is mailed,
+ * Notion is not touched. A second run finds nothing to add.
+ */
+export async function POST(request: Request) {
+  const gate = await guard(request);
+  if (gate.error) return gate.error;
+  const given = await parsed(request);
+  if (given?.backfill !== true) return json({ error: "Unknown." }, 400);
+  const seal = await gate.seal;
+  if (!seal) return json({ error: "Leads need LEADS_KEY on the Worker." }, 503);
+
+  const people = new Map<string, InboxRow[]>();
+  let cursor: string | undefined;
+  for (;;) {
+    const listed = await gate.inbox.list<Summary>({ prefix: "msg:", cursor });
+    for (const k of listed.keys) {
+      const m = k.metadata;
+      const email = m?.email?.trim().toLowerCase();
+      if (!m || !email?.includes("@")) continue;
+      people.set(email, [...(people.get(email) ?? []), { key: k.name, at: m.at, type: m.type, name: m.name, email, read: m.read, detail: m.detail }]);
+    }
+    if (listed.list_complete) break;
+    cursor = listed.cursor;
+  }
+
+  const stages: Partial<Record<Stage, number>> = {};
+  let added = 0;
+  let updated = 0;
+  for (const [email, rows] of people) {
+    const id = await seal.id(email);
+    const before = await readLead(gate.inbox, seal, id);
+    const after: Lead | null = backfillLead(before, email, rows);
+    if (!after) continue;
+    if (before) updated++;
+    else {
+      added++;
+      stages[after.stage] = (stages[after.stage] ?? 0) + 1;
+    }
+    if (given.dry !== true) await writeLead(gate.inbox, seal, id, after);
+  }
+  return json({ dry: given.dry === true, people: people.size, added, updated, stages });
 }
 
 /**

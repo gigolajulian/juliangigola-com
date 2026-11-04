@@ -11,7 +11,7 @@ import { sealer } from "@/lib/lead-crypto";
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
 vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
 
-const { GET, PATCH, DELETE } = await import("@/app/api/inbox/route");
+const { GET, PATCH, POST, DELETE } = await import("@/app/api/inbox/route");
 
 const KEY = "inbox-key-for-tests";
 const URL_ = "https://juliangigola.com/api/inbox";
@@ -212,6 +212,28 @@ describe("leads", () => {
     expect((await res.json()).lead).toMatchObject({ stage: "Quoted", snoozeUntil: "2026-12-01T00:00:00Z", unread: false });
     const { leads } = await (await GET(req("GET", { query: "?leads" }))).json();
     expect(leads[0]).toMatchObject({ stage: "Quoted", unread: false });
+  });
+
+  it("backfills the Inbox: counts dry, then writes once, keeps every row, calls nothing outside", async () => {
+    const fetched = vi.fn();
+    vi.stubGlobal("fetch", fetched);
+    await seed(Date.UTC(2026, 9, 1), "old");
+    await seed(Date.UTC(2026, 9, 2), "old", { message: "Again" });
+    await seed(Date.UTC(2026, 9, 3), "two");
+    await lead("old@example.com", "2026-11-01T10:00:00Z");
+    const msgs = [...kv.data.keys()].filter((k) => k.startsWith("msg:")).length;
+    const post = async (b: object, key: string | null = KEY) => (await POST(req("POST", { key, body: JSON.stringify(b) }))).json();
+
+    expect((await POST(req("POST", { key: null, body: JSON.stringify({ backfill: true }) }))).status).toBe(401);
+    expect(await post({ backfill: true, dry: true })).toEqual({ dry: true, people: 2, added: 1, updated: 1, stages: { Inquiry: 1 } });
+    expect([...kv.data.keys()].filter((k) => k.startsWith("lead:"))).toHaveLength(1);
+    expect(await post({ backfill: true })).toMatchObject({ added: 1, updated: 1 });
+    expect(await post({ backfill: true })).toMatchObject({ added: 0, updated: 0 });
+    const old = (await (await GET(req("GET", { query: `?key=lead:${await idOf("old@example.com")}` }))).json()).lead;
+    expect(old.firstAt).toBe(new Date(Date.UTC(2026, 9, 1)).toISOString());
+    expect(old.events).toHaveLength(3);
+    expect([...kv.data.keys()].filter((k) => k.startsWith("msg:"))).toHaveLength(msgs);
+    expect(fetched).not.toHaveBeenCalled();
   });
 
   it("mirrors a stage to the person's Notion row, then reuses that row", async () => {
