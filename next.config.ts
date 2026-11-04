@@ -297,6 +297,8 @@ const securityHeaders = [
 ];
 
 const ADMIN_HOST = "admin.juliangigola.com";
+// The installed Leads app: its own origin, so its own sign-in and storage.
+const LEADS_HOST = "leads.juliangigola.com";
 
 const nextConfig: NextConfig = {
   // The build stamp `/api/build` reports (Workers Builds sets the sha).
@@ -400,6 +402,11 @@ const nextConfig: NextConfig = {
         has: [{ type: "host", value: ADMIN_HOST }],
         headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
       },
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: LEADS_HOST }],
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+      },
       // /visit is unlisted: the directions page Julian sends to booked
       // clients. `public/_headers` says the same for the prerendered copy.
       { source: "/visit", headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }] },
@@ -425,6 +432,8 @@ const nextConfig: NextConfig = {
     // or the homepage answers `/` first.
     const beforeFiles = [
       { source: "/", has: [{ type: "host" as const, value: ADMIN_HOST }], destination: "/admin" },
+      // leads.juliangigola.com is the Leads app, opening on Needs me.
+      { source: "/", has: [{ type: "host" as const, value: LEADS_HOST }], destination: "/admin/leads" },
     ];
     if (!LOCAL && process.env.NODE_ENV !== "development") return { beforeFiles, afterFiles: listings };
     return {
