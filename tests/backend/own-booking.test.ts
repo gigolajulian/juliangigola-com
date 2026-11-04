@@ -50,6 +50,7 @@ beforeEach(() => {
     if (url.includes("oauth2")) return Response.json({ access_token: "t", expires_in: 3600 });
     // Google is slow, so without the lock a second booking would recheck before the first inserts.
     await new Promise((go) => setTimeout(go, 5));
+    if (url.includes("/events?q=")) return Response.json({ items: [] });
     if (url.includes("/freeBusy")) return Response.json({ calendars: { primary: { busy } } });
     if (url.includes("/events")) {
       const body = JSON.parse(String(init?.body));

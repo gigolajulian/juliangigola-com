@@ -53,6 +53,7 @@ beforeEach(() => {
     const method = init?.method ?? "GET";
     const body = init?.body && !url.startsWith("https://api.stripe.com") ? JSON.parse(String(init.body)) : undefined;
     calls.push({ method, url, body });
+    if (url.includes("/events?q=")) return Response.json({ items: [] });
     if (url.includes("/freeBusy")) return Response.json({ calendars: { primary: { busy } } });
     const ev = /\/events\/([^?]+)/.exec(url)?.[1];
     if (method === "POST" && url.includes("/events")) {
