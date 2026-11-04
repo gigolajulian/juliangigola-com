@@ -26,8 +26,9 @@ export const viewport: Viewport = { width: "device-width", initialScale: 1, view
 
 export default function LeadsPage() {
   return (
-    // `data-workbench`: no site footer here (`app/styles/admin.css`).
-    <div data-workbench className="w-full px-4 pb-6 pt-20 sm:px-10">
+    // `data-workbench`: no site footer; `data-lead-app`: no site header either,
+    // and the top clears the iPhone's status bar (`app/styles/admin.css`).
+    <div data-workbench data-lead-app className="w-full px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] sm:px-10">
       <AdminLeads />
     </div>
   );
