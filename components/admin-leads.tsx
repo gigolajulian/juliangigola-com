@@ -117,6 +117,20 @@ export function AdminLeads() {
   }, [call]);
   React.useEffect(load, [load]);
 
+  /** Julian: "make it one page and scrollable columns". Wide, the desk fills
+   * the screen from where it starts and each column scrolls on its own. */
+  const fit = React.useCallback((el: HTMLDivElement | null) => {
+    if (!el) return;
+    const size = () => {
+      el.style.height = matchMedia("(min-width: 1024px)").matches
+        ? `${Math.max(480, innerHeight - (el.getBoundingClientRect().top + scrollY) - 24)}px`
+        : "";
+    };
+    size();
+    addEventListener("resize", size);
+    return () => removeEventListener("resize", size);
+  }, []);
+
   /** A change from the open lead, reflected in its row at once. */
   const changed = (l: Lead) => setLeads((rows) => rows?.map((r) => (r.email === l.email ? { ...r, ...l, id: r.id } : r)) ?? null);
 
@@ -143,9 +157,10 @@ export function AdminLeads() {
     // everything else in mono capitals, buttons included.
     <div
       style={{ fontFamily: 'var(--font-v2-text, "Helvetica Neue", Helvetica, Arial, sans-serif)', letterSpacing: 0 }}
-      className="grid min-h-[640px] overflow-hidden rounded-[14px] border border-border bg-background text-foreground normal-case lg:grid-cols-[200px_minmax(0,440px)_minmax(0,1fr)] [&_button]:normal-case [&_h2]:normal-case [&_h3]:normal-case"
+      ref={fit}
+      className="grid overflow-hidden rounded-[14px] lg:grid-rows-[minmax(0,1fr)] border border-border bg-background text-foreground normal-case lg:grid-cols-[200px_minmax(0,440px)_minmax(0,1fr)] [&_button]:normal-case [&_h2]:normal-case [&_h3]:normal-case"
     >
-      <nav aria-label="Lead filters" className={cn("border-border p-3 lg:border-r", open && "max-lg:hidden")}>
+      <nav aria-label="Lead filters" className={cn("border-border p-3 lg:min-h-0 lg:overflow-y-auto lg:border-r", open && "max-lg:hidden")}>
         <div className="flex gap-2 overflow-x-auto lg:grid lg:gap-0.5">
           {(["needs", "open"] as const).map((f) => (
             <FilterButton key={f} on={filter === f} n={count(f)} onClick={() => setFilter(f)}>{f === "needs" ? "Needs me" : "All open"}</FilterButton>
@@ -161,7 +176,7 @@ export function AdminLeads() {
         </div>
       </nav>
 
-      <section aria-label="Leads" className={cn("min-w-0 border-border lg:border-r", open && "max-lg:hidden")}>
+      <section aria-label="Leads" className={cn("min-w-0 border-border lg:min-h-0 lg:overflow-y-auto lg:border-r", open && "max-lg:hidden")}>
         <header className="flex items-center justify-between border-b border-border px-5 py-4">
           <h2 style={HEAD} className="text-lg">{label(filter)}</h2>
           <span className="font-mono text-[13px] text-muted-foreground">{shown.length} {shown.length === 1 ? "lead" : "leads"}</span>
@@ -202,7 +217,7 @@ export function AdminLeads() {
         )}
       </section>
 
-      <section aria-label="Lead" className={cn("min-w-0 bg-card/40", !open && "max-lg:hidden")}>
+      <section aria-label="Lead" className={cn("min-w-0 bg-card/40 lg:min-h-0 lg:overflow-y-auto", !open && "max-lg:hidden")}>
         {current ? (
           <Detail key={current.id} summary={current} call={call} onChange={changed} onBack={() => setOpen(null)} />
         ) : (

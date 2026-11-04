@@ -124,3 +124,11 @@ describe("sealer", () => {
     await expect((await sealer(btoa("j".repeat(32)))!).open(sealed)).rejects.toThrow();
   });
 });
+
+describe("leadSummary", () => {
+  it("keeps a sealed summary under KV's 1024-byte metadata cap, however long the name", async () => {
+    const s = await sealer(btoa(String.fromCharCode(...new Uint8Array(32).fill(7))))!;
+    const l = fold(null, `${"a".repeat(300)}@example.com`, { event: { at: "2026-11-03T00:00:00Z", kind: "call" }, name: "N".repeat(600), kind: "intro-call" });
+    expect(JSON.stringify({ s: await s.seal(leadSummary(l)) }).length).toBeLessThan(1024);
+  });
+});

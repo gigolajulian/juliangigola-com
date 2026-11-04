@@ -20,7 +20,7 @@ export const viewport: Viewport = { width: "device-width", initialScale: 1, view
 export default function LeadsPage() {
   return (
     // `data-workbench`: no site footer here (`app/styles/admin.css`).
-    <div data-workbench className="w-full px-4 pb-16 pt-20 sm:px-10">
+    <div data-workbench className="w-full px-4 pb-6 pt-20 sm:px-10">
       <AdminLeads />
     </div>
   );

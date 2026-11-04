@@ -165,8 +165,12 @@ export function isLate(l: Pick<Lead, "stage" | "stageAt" | "snoozeUntil">, now: 
   return false;
 }
 
+// Name and email capped: KV metadata holds 1024 bytes, and the sealed summary
+// grows by a third, so one long Cal.com name must not cost the whole lead.
 export const leadSummary = ({ events: _e, notion: _n, deposit, ...rest }: Lead): LeadSummary => ({
   ...rest,
+  name: rest.name?.slice(0, 80),
+  email: rest.email.slice(0, 120),
   ...(deposit ? { paid: true as const } : {}),
 });
 
