@@ -77,6 +77,7 @@ export async function POST(request: Request) {
     kind: hook.payload?.type,
     when: hook.payload?.startTime,
     deposit: stored.deposit,
+    source: "Booking page",
     flag: stored.noDeposit ? "no-deposit" : undefined,
   });
   ctx.waitUntil(lead);
