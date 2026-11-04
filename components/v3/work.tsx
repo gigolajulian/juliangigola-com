@@ -399,6 +399,12 @@ export function V3Work({
   const [tools, setTools] = React.useState<HTMLDivElement | null>(null);
   const [pin, setPin] = React.useState(false);
   const [hs, setHs] = React.useState(false);
+  // Esc or the X hands focus back to the magnifier it opened from (audit 2, WCAG 2.4.3).
+  const refocus = React.useRef(false);
+  const close = () => {
+    refocus.current = true;
+    setHs(false);
+  };
   React.useEffect(() => {
     if (!tools) return;
     const io = new IntersectionObserver(
@@ -1008,10 +1014,10 @@ export function V3Work({
                       autoComplete="off"
                       value={q}
                       onChange={(e) => setQ(e.target.value.trim().toLowerCase())}
-                      onKeyDown={(e) => e.key === "Escape" && setHs(false)}
+                      onKeyDown={(e) => e.key === "Escape" && close()}
                     />
                   </label>
-                  <button type="button" className="hbtn" aria-label="Close search" onClick={() => setHs(false)}>
+                  <button type="button" className="hbtn" aria-label="Close search" onClick={close}>
                     <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
                       <path d="M2 2l10 10M12 2L2 12" stroke="currentColor" strokeWidth="1.3" />
                     </svg>
@@ -1021,8 +1027,15 @@ export function V3Work({
                 <button
                   type="button"
                   className="hbtn"
-                  aria-pressed={!!q}
-                  aria-label="Search the work"
+                  ref={(el) => {
+                    if (el && refocus.current) {
+                      refocus.current = false;
+                      el.focus();
+                    }
+                  }}
+                  aria-expanded={false}
+                  data-on={q ? "" : undefined}
+                  aria-label={q ? `Search the work, showing matches for ${q}` : "Search the work"}
                   title="Search the work"
                   onClick={() => setHs(true)}
                 >

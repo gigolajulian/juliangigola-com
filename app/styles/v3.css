@@ -1048,6 +1048,8 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 .v3 .mo-stage::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgb(var(--scrim) / .8),rgb(var(--scrim) / .66) 16%,rgb(var(--scrim) / .4) 30%,rgb(var(--scrim) / .16) 44%,rgb(var(--scrim) / .04) 54%,rgb(var(--scrim) / 0) 62%),linear-gradient(20deg,rgb(var(--scrim) / .5) 0%,rgb(var(--scrim) / 0) 42%);pointer-events:none;z-index:1}
 .v3 .mo-stage::before{content:"";position:absolute;inset:0 0 auto;height:300px;background:linear-gradient(to bottom,rgb(var(--scrim) / .72),rgb(var(--scrim) / .36) 55%,rgb(var(--scrim) / 0));pointer-events:none;z-index:1}
 .v3 .mo-hit{all:unset;position:absolute;inset:0;z-index:2;cursor:pointer}
+/* all:unset drops the global ring: put it back for keyboard focus (MAC audit, 2026-11-04). */
+.v3 .mo-hit:focus-visible{outline:1px solid var(--accent);outline-offset:-4px}
 .v3 .mo-h,.v3 .mo-cap,.v3 .mo-index,.v3 .mo-play{position:absolute;z-index:3}
 .v3 .mo-h{top:24px;left:var(--g);margin:0;color:rgb(var(--on-photo) / .9)}
 .v3 .mo-cap{left:var(--g);bottom:32px;display:flex;flex-direction:column;gap:14px;max-width:min(70vw,1000px);pointer-events:none;animation:mo-in .5s cubic-bezier(.2,.7,.2,1)}
@@ -1340,7 +1342,7 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .v3 .htools .wviews .wcolor::after{display:none}
 .v3 .htools::after{content:"";width:1px;height:20px;background:var(--line);margin:0 8px 0 4px}
 .v3 .hbtn{display:grid;place-items:center;width:44px;height:44px;padding:0;background:none;border:0;color:var(--mute);cursor:pointer}
-.v3 .hbtn[aria-pressed="true"]{color:var(--accent)}
+.v3 .hbtn:is([aria-pressed="true"],[data-on]){color:var(--accent)}
 @media (hover:hover){.v3 .hbtn:hover{color:var(--ink)}}
 .v3 .hbtn:focus-visible{outline:1px solid var(--accent);outline-offset:-4px}
 .v3 .hsearch{display:flex;align-items:center;gap:10px;flex:1;min-width:0;height:44px;border-bottom:1px solid var(--accent);color:var(--accent)}
