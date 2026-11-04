@@ -134,6 +134,8 @@ export function TimePicker({
   className,
   fallback,
   v3,
+  own: forceOwn,
+  onPicked,
 }: {
   /** "username/event-slug" */
   path: string;
@@ -142,6 +144,10 @@ export function TimePicker({
   fallback: React.ReactNode;
   /** JG V3: the booking as the master's stepper, inside the page's shell. */
   v3?: V3Book;
+  /** The site's own engine whatever the address says (a reschedule, `components/manage-booking.tsx`). */
+  own?: boolean;
+  /** A time picked and confirmed: handed here instead of opening the form (a reschedule). */
+  onPicked?: (start: string) => void;
 }) {
   const [username, slug] = path.split("/");
   const [tz] = React.useState(() => Intl.DateTimeFormat().resolvedOptions().timeZone || "America/Los_Angeles");
@@ -248,6 +254,11 @@ export function TimePicker({
   /* Julian: Confirm's words turn into the orbs, then a check, before the
      form opens. */
   const [ok, setOk] = React.useState<"" | "spin" | "tick">("");
+  /* A reschedule takes the time here; read at the tick, so a parent drawn again never restarts it. */
+  const handOff = React.useRef<(() => void) | null>(null);
+  React.useEffect(() => {
+    handOff.current = onPicked && pick ? () => onPicked(new Date(pick.start).toISOString()) : null;
+  });
   /* Nothing is waited on here, so the orbs and the check in 1.05s
      (Julian, 2026-10-14: 1.4s was slow, 0.7s too fast). */
   React.useEffect(() => {
@@ -255,13 +266,14 @@ export function TimePicker({
     const t = window.setTimeout(() => {
       if (ok === "spin") return setOk("tick");
       setOk("");
-      setStep("form");
+      if (handOff.current) handOff.current();
+      else setStep("form");
     }, ok === "spin" ? 450 : 600);
     return () => window.clearTimeout(t);
   }, [ok]);
 
   const load = React.useCallback(async (fresh = false) => {
-    const own = ownEngine();
+    const own = forceOwn || ownEngine();
     const key = `${username}/${slug}/${tz}`;
     try {
       const from = new Date();
@@ -306,7 +318,7 @@ export function TimePicker({
       // keeps the times it had, and the form with what was typed in it.
       setState((s) => (s === "ready" ? s : "fallback"));
     }
-  }, [username, slug, tz]);
+  }, [username, slug, tz, forceOwn]);
 
   React.useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -745,7 +757,12 @@ export function TimePicker({
     const sim = process.env.NODE_ENV !== "production" && new URLSearchParams(location.search).get("sim") === "ok";
     try {
       if (!sim) {
-      const res = await fetch(`${API}/bookings`, {
+      // The site's own engine (`app/api/book`) answers in Cal.com's shape.
+      const res = ownEngine() ? await fetch("/api/book", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ engine: "own", slug, start: new Date(pick.start).toISOString(), timeZone: tz, name, email: String(form.get("email")), phone, via, ...(notes ? { notes } : {}), ...(needsWhere ? { where } : {}) }),
+      }) : await fetch(`${API}/bookings`, {
         method: "POST",
         headers: { "cal-api-version": "2024-08-13", "Content-Type": "application/json" },
         body: JSON.stringify({

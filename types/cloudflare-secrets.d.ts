@@ -80,4 +80,12 @@ interface CloudflareEnv {
    * Made and set by `node scripts/gsc-auth.mjs <client.json> cal`.
    */
   GCAL_OAUTH?: string;
+
+  /**
+   * Signs the client's reschedule and cancel links (`lib/booking-token.ts`).
+   * Any long random string. Unset, the mail carries no links. Set with:
+   *
+   *   wrangler versions secret put BOOKING_SECRET
+   */
+  BOOKING_SECRET?: string;
 }

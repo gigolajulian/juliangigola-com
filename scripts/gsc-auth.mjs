@@ -14,7 +14,8 @@
 // events and free/busy only, into `GCAL_OAUTH`. The client must be an
 // Internal one, or Google expires the refresh token after 7 days. It asks
 // hello@'s free/busy once before saving, so a token that cannot read the
-// calendar is never stored.
+// calendar is never stored. With `cal` it saves the secret on both Workers,
+// the site and `juliangigola-booking` (deploy that one first).
 import { spawn } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { createServer } from "node:http";
@@ -75,8 +76,14 @@ if (cal) {
   console.log("Calendar reachable.");
 }
 
-const wrangler = spawn("cmd", ["/c", "npx", "wrangler", "versions", "secret", "put", SECRET, "--name", "juliangigola"], {
-  stdio: ["pipe", "inherit", "inherit"],
-});
-wrangler.stdin.end(JSON.stringify({ client_id, client_secret, refresh_token: tok.refresh_token }));
-wrangler.on("exit", (c) => console.log(c === 0 ? `Saved ${SECRET}. Tell Claude: done.` : "wrangler failed, see above."));
+const value = JSON.stringify({ client_id, client_secret, refresh_token: tok.refresh_token });
+const put = (args) =>
+  new Promise((done) => {
+    const w = spawn("cmd", ["/c", "npx", "wrangler", ...args], { stdio: ["pipe", "inherit", "inherit"] });
+    w.stdin.end(value);
+    w.on("exit", (c) => done(c === 0));
+  });
+let ok = await put(["versions", "secret", "put", SECRET, "--name", "juliangigola"]);
+// The booking lock's own Worker (`worker/wrangler.jsonc`) reads the calendar too.
+if (ok && cal) ok = await put(["secret", "put", SECRET, "--name", "juliangigola-booking"]);
+console.log(ok ? `Saved ${SECRET}. Tell Claude: done.` : "wrangler failed, see above.");

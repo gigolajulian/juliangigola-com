@@ -1,0 +1,29 @@
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+
+  // The booking lock (`booking-lock.ts`), apart from the site's Worker so
+  // the site's version uploads never carry a Durable Object migration.
+  // Deploy by hand, only on Julian's OK:
+  //
+  //   npx wrangler deploy -c worker/wrangler.jsonc
+  //
+  // Secrets, set once each (the same values as on `juliangigola`):
+  //   npx wrangler secret put GCAL_OAUTH -c worker/wrangler.jsonc
+  //   npx wrangler secret put BOOKING_SECRET -c worker/wrangler.jsonc
+  "name": "juliangigola-booking",
+  "main": "index.ts",
+  "compatibility_date": "2026-09-11",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": false,
+
+  "durable_objects": {
+    "bindings": [{ "name": "BOOKING_LOCK", "class_name": "BookingLock" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["BookingLock"] }],
+
+  // The day-before reminders (`index.ts` `remind`): bookings 23 to 24 hours out.
+  "triggers": { "crons": ["0 * * * *"] },
+  "send_email": [{ "name": "CLIENT_EMAIL", "allowed_sender_addresses": ["book@juliangigola.com"] }],
+
+  "observability": { "enabled": true }
+}
