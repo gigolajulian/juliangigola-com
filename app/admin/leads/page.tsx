@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   title: "Leads",
   robots: { index: false, follow: false, nocache: true, googleBot: { index: false, follow: false } },
   referrer: "no-referrer",
-  manifest: "/leads-app/manifest.webmanifest",
+  manifest: "/admin/leads/manifest.webmanifest",
   icons: { apple: "/leads-app/apple-touch-icon.png" },
   appleWebApp: { capable: true, title: "Leads", statusBarStyle: "black-translucent" },
   // Next writes only `mobile-web-app-capable`; older iOS reads the Apple name.
