@@ -193,7 +193,7 @@ describe("the four paid sessions", () => {
     expect((await post(body, await sign(body))).status).toBe(200);
     expect(kv.puts.filter((k) => k.startsWith("msg:"))).toHaveLength(1);
     await Promise.all(ctx.waits);
-    const p = calls.find((c) => c.url.includes("api.notion.com"))!.body.properties;
+    const p = calls.find((c) => c.url.endsWith("/v1/pages"))!.body.properties;
     expect(p).toMatchObject({
       Status: { select: { name: "Confirmed" } },
       "Shoot Type": { select: { name: "Headshots" } },
