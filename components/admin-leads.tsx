@@ -712,7 +712,7 @@ function Detail({ summary, call, onChange, onBack, reload, templates, others }: 
   const book = compose(l.email, "Booking a time", `Hi ${first},\n\nYou can pick a time here: https://juliangigola.com/book\n\n`);
 
   return (
-    <div className="grid gap-6 px-5 py-6 lg:px-8 lg:py-7">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-6 px-5 py-6 lg:px-8 lg:py-7">
       <button type="button" onClick={onBack} className="inline-flex min-h-11 items-center gap-1 justify-self-start text-[16px] text-accent lg:hidden">
         <span aria-hidden="true">‹</span> Leads
       </button>
@@ -1068,7 +1068,7 @@ function LeadCrm({ l, full, patch, others, templates }: { l: LeadSummary; full: 
   const h3 = "font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground";
 
   return (
-    <div className="grid gap-7">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-7">
       {mail && templates.length ? (
         <section className="grid gap-2.5">
           <h3 className={h3}>Reply with a template</h3>
@@ -1195,10 +1195,10 @@ function LeadCrm({ l, full, patch, others, templates }: { l: LeadSummary; full: 
       </section>
 
       {others.length ? (
-        <section className="grid gap-2.5">
+        <section className="grid grid-cols-[minmax(0,1fr)] gap-2.5">
           <h3 className={h3}>Same person, another record</h3>
           <div className="flex flex-wrap items-end gap-2.5">
-            <select value={into} onChange={(e) => { setInto(e.target.value); setSure(false); }} className={cn(field, "w-auto max-w-full")} aria-label="Record to merge in">
+            <select value={into} onChange={(e) => { setInto(e.target.value); setSure(false); }} className={cn(field, "w-auto min-w-0 max-w-full")} aria-label="Record to merge in">
               <option value="">Pick the other record</option>
               {others.map((o) => <option key={o.id} value={o.id}>{o.name} · {mailable(o.email) ? o.email : o.email.slice(o.email.indexOf(":") + 1)}</option>)}
             </select>
