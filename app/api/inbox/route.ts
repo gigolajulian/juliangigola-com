@@ -3,6 +3,8 @@ import { bearer, canPush } from "@/lib/vouch";
 import { SAFE_IMAGE, summary, type Enquiry, type Summary } from "@/lib/inbox";
 import { backfillLead, fold, readLead, STAGES, trashDaysLeft, writeLead, type InboxRow, type Lead, type LeadSummary, type Stage } from "@/lib/leads";
 import { sealer } from "@/lib/lead-crypto";
+import { subscribe, unsubscribe } from "@/lib/lead-push";
+import { publicKey } from "@/lib/web-push";
 import { notionStage } from "@/lib/notion-lead";
 
 /* ── reading the inbox ────────────────────────────────────────────
@@ -101,7 +103,7 @@ const bury = (inbox: NonNullable<CloudflareEnv["INBOX"]>, key: string) =>
 /** The binding and the secret, or `null` when this build has neither. */
 async function wired() {
   const { env } = await getCloudflareContext({ async: true });
-  return env.INBOX ? { inbox: env.INBOX, key: env.INBOX_KEY, seal: sealer(env.LEADS_KEY), notion: env.NOTION_TOKEN } : null;
+  return env.INBOX ? { inbox: env.INBOX, key: env.INBOX_KEY, seal: sealer(env.LEADS_KEY), notion: env.NOTION_TOKEN, vapid: env.VAPID_KEY } : null;
 }
 
 async function guard(request: Request) {
@@ -121,11 +123,11 @@ async function guard(request: Request) {
   // push to the repository. The messages differ so a wrong one can be told
   // from a missing one — but never which characters were wrong.
   if (rig.key && (await authorised(request, rig.key)))
-    return { inbox: rig.inbox, seal: rig.seal, notion: rig.notion };
+    return { inbox: rig.inbox, seal: rig.seal, notion: rig.notion, vapid: rig.vapid };
 
   const token = bearer(request);
   if (token) {
-    if (await canPush(token)) return { inbox: rig.inbox, seal: rig.seal, notion: rig.notion };
+    if (await canPush(token)) return { inbox: rig.inbox, seal: rig.seal, notion: rig.notion, vapid: rig.vapid };
     return {
       error: json(
         { error: "GitHub did not accept that token for this repository." },
@@ -166,6 +168,12 @@ export async function GET(request: Request) {
         ...(safe ? {} : { "content-disposition": "attachment" }),
       },
     });
+  }
+
+  // The key a device subscribes to pushes with. Public by nature, still gated.
+  if (url.searchParams.has("vapid")) {
+    if (!gate.vapid) return json({ error: "Push needs VAPID_KEY on the Worker." }, 503);
+    return json({ key: publicKey(JSON.parse(gate.vapid) as JsonWebKey) });
   }
 
   // The lead desk (`components/admin-leads.tsx`): one record per person.
@@ -228,6 +236,16 @@ export async function PATCH(request: Request) {
 
   const given = await parsed(request);
   if (!given) return json({ error: "Not JSON." }, 400);
+  // The desk's notification switch: a device subscribing, or turning off.
+  if (given.push !== undefined) {
+    const sub = given.push as { endpoint?: unknown; keys?: { p256dh?: unknown; auth?: unknown } };
+    if (typeof sub?.endpoint !== "string" || !sub.endpoint.startsWith("https://")) return json({ error: "Bad subscription." }, 400);
+    if (given.off === true) await unsubscribe(gate.inbox, sub.endpoint);
+    else if (typeof sub.keys?.p256dh === "string" && typeof sub.keys.auth === "string")
+      await subscribe(gate.inbox, { endpoint: sub.endpoint, keys: { p256dh: sub.keys.p256dh, auth: sub.keys.auth } });
+    else return json({ error: "Bad subscription." }, 400);
+    return json({ ok: true });
+  }
   if (typeof given.key === "string" && given.key.startsWith("lead:")) return patchLead(gate.inbox, await gate.seal, given, gate.notion);
   const { key, read } = given as { key?: string; read?: boolean };
   if (!key?.startsWith("msg:") || typeof read !== "boolean")
