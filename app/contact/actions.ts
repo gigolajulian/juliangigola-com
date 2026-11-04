@@ -280,7 +280,7 @@ export async function submitEnquiry(
         attachments: [
           ...(await Promise.all(
             uploads.map(async (f) => ({
-              content: Buffer.from(await f.arrayBuffer()).toString("base64"),
+              content: await f.arrayBuffer(),
               filename: f.name.slice(0, 80),
               type: f.type,
               disposition: "attachment" as const,
@@ -344,7 +344,7 @@ async function pickAttachments(picks: string[], assets?: { fetch: typeof fetch }
         return {
           src,
           file: {
-            content: Buffer.from(await res.arrayBuffer()).toString("base64"),
+            content: await res.arrayBuffer(),
             filename: src.split("/").slice(-2).join("-"),
             type: res.headers.get("content-type") ?? "image/jpeg",
             disposition: "inline" as const,
