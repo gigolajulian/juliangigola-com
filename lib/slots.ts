@@ -86,17 +86,19 @@ export async function busyBetween(secret: string | undefined, from: number, to: 
   return (await Promise.all(pieces)).flat();
 }
 
-/** Open starts of `slug` between `from` and `to`, as UTC ms. */
-export async function openStarts(secret: string | undefined, slug: string, from: number, to: number, now = Date.now()) {
+/** Open starts of `slug` between `from` and `to`, as UTC ms. `mine`: a booking being moved, whose own time is not in the way. */
+export async function openStarts(secret: string | undefined, slug: string, from: number, to: number, now = Date.now(), mine?: { start: string; end: string }) {
   const rule = EVENTS[slug];
   if (!rule) return [];
   // The buffer after a session reaches past `to`.
-  const busy = await busyBetween(secret, Math.max(from, now), to + (rule.length + rule.after) * 6e4);
+  const busy = (await busyBetween(secret, Math.max(from, now), to + (rule.length + rule.after) * 6e4)).filter(
+    (b) => !mine || b.start !== Date.parse(mine.start) || b.end !== Date.parse(mine.end),
+  );
   return startsFor(rule, busy, from, to, now);
 }
 
 /** Whether `start` (ISO) is still open for `slug`, asking Google now. */
-export async function openNow(secret: string | undefined, slug: string, start: string) {
+export async function openNow(secret: string | undefined, slug: string, start: string, mine?: { start: string; end: string }) {
   const t = Date.parse(start);
-  return (await openStarts(secret, slug, t - 864e5, t + 864e5)).includes(t);
+  return (await openStarts(secret, slug, t - 864e5, t + 864e5, Date.now(), mine)).includes(t);
 }

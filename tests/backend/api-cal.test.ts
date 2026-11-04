@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { FakeKV } from "./fakes";
+import { FakeEmail, FakeKV, LEADS_KEY, leadOf } from "./fakes";
 
 /* Cal.com's booking webhook (`app/api/cal/route.ts`): only a body signed
    with CAL_WEBHOOK_SECRET gets into the inbox, and a new booking lands
@@ -35,7 +35,7 @@ const BOOKING = {
 let kv: FakeKV;
 beforeEach(() => {
   kv = new FakeKV();
-  ctx.env = { CAL_WEBHOOK_SECRET: SECRET, INBOX: kv };
+  ctx.env = { CAL_WEBHOOK_SECRET: SECRET, INBOX: kv, LEADS_KEY };
 });
 
 describe("POST /api/cal", () => {
@@ -191,7 +191,7 @@ describe("the four paid sessions", () => {
     ctx.env = { ...ctx.env, NOTION_TOKEN: "test" };
     const body = JSON.stringify({ ...BOOKING, payload: { ...BOOKING.payload, type: "headshots", uid: "cal-1" } });
     expect((await post(body, await sign(body))).status).toBe(200);
-    expect(kv.puts).toHaveLength(1);
+    expect(kv.puts.filter((k) => k.startsWith("msg:"))).toHaveLength(1);
     await Promise.all(ctx.waits);
     const p = calls.find((c) => c.url.includes("api.notion.com"))!.body.properties;
     expect(p).toMatchObject({
@@ -201,5 +201,32 @@ describe("the four paid sessions", () => {
       "Contact Email": { email: "qa@example.com" },
     });
     vi.unstubAllGlobals();
+  });
+});
+
+describe("POST /api/cal: the lead", () => {
+  it("folds a call and then a paid booking into one record for the person", async () => {
+    const send = async (payload: Record<string, unknown>) => {
+      const body = JSON.stringify({ ...BOOKING, payload: { ...BOOKING.payload, ...payload } });
+      expect((await post(body, await sign(body))).status).toBe(200);
+      await Promise.all(ctx.waits);
+    };
+    await send({ type: "intro-call", uid: "c1" });
+    expect((await leadOf(kv, "qa@example.com"))!).toMatchObject({ stage: "Call booked", name: "QA Test" });
+    await send({ type: "intro-call", uid: "c1" });
+    expect((await leadOf(kv, "qa@example.com"))!.events).toHaveLength(1);
+    await send({ type: "headshots", uid: "c2" });
+    expect((await leadOf(kv, "qa@example.com"))!).toMatchObject({ stage: "Confirmed", kind: "headshots" });
+  });
+
+  it("logs the client's confirmation on the lead, after the booking", async () => {
+    ctx.env = { ...ctx.env, CLIENT_EMAIL: new FakeEmail() };
+    const body = JSON.stringify({ ...BOOKING, payload: { ...BOOKING.payload, type: "intro-call", uid: "c9", eventTitle: "Intro call" } });
+    expect((await post(body, await sign(body))).status).toBe(200);
+    await Promise.all(ctx.waits);
+    const events = (await leadOf(kv, "qa@example.com"))!.events;
+    expect(events.map((e: { kind: string }) => e.kind)).toEqual(["call", "mail"]);
+    expect(events[1]).toMatchObject({ mail: { to: "client", kind: "confirm", booking: "c9" } });
+    expect(events[1].note).toMatch(/^Booked: Intro call/);
   });
 });

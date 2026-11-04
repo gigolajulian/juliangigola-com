@@ -85,3 +85,6 @@ next-env.d.ts
 # Thread handoffs stay local (THREADS.md)
 HANDOFF*.md
 THREADS.md
+
+# Lead desk screenshots from local dev.
+/.shots/

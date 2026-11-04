@@ -3,6 +3,7 @@
 import { headers } from "next/headers";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { toNotion } from "@/lib/notion-lead";
+import { logMail, recordLead } from "@/lib/leads";
 import imageLoader from "@/image-loader";
 import LOOKS from "@/lib/picker-looks.json";
 import {
@@ -226,6 +227,9 @@ export async function submitEnquiry(
     });
     // After the response, so a slow Notion never holds up the visitor or the email.
     ctx.waitUntil(toNotion(env.NOTION_TOKEN, { stored, status: "Inquiry", kind: stored.type }));
+    // Held, so the mail logged below folds in after it, not over it.
+    const lead = recordLead(env, stored.email, { event: { at: stored.at, kind: "inquiry", ref: key, note: stored.type }, name: stored.name, kind: stored.type });
+    ctx.waitUntil(lead);
     /* Their images beside it, for /admin's Inbox (`ref:<key>:<n>`, read
        and deleted with the message by `app/api/inbox/route.ts`). Best
        effort like the email: the enquiry is already stored. */
@@ -280,7 +284,7 @@ export async function submitEnquiry(
         attachments: [
           ...(await Promise.all(
             uploads.map(async (f) => ({
-              content: Buffer.from(await f.arrayBuffer()).toString("base64"),
+              content: await f.arrayBuffer(),
               filename: f.name.slice(0, 80),
               type: f.type,
               disposition: "attachment" as const,
@@ -289,6 +293,7 @@ export async function submitEnquiry(
           ...inline.map((a) => a.file),
         ],
       });
+      if (env.EMAIL) await lead.then(() => logMail(env, stored.email, subject, { to: "hello@", kind: "inquiry" }));
     } catch (err) {
       console.error(
         "contact: stored the enquiry but could not mail a copy",
@@ -344,7 +349,7 @@ async function pickAttachments(picks: string[], assets?: { fetch: typeof fetch }
         return {
           src,
           file: {
-            content: Buffer.from(await res.arrayBuffer()).toString("base64"),
+            content: await res.arrayBuffer(),
             filename: src.split("/").slice(-2).join("-"),
             type: res.headers.get("content-type") ?? "image/jpeg",
             disposition: "inline" as const,
