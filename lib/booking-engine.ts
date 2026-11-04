@@ -235,6 +235,9 @@ export async function markReminded(store: Store, id: string, now = Date.now()) {
 type LockEnv = { BOOKING_LOCK?: { idFromName(name: string): unknown; get(id: unknown): { fetch(url: string, init: RequestInit): Promise<Response> } } };
 
 /** One call to the one lock (`worker/booking-lock.ts`). Throws when it is missing or fails. */
+/** Julian's hours from the lock, or the defaults when it cannot answer (the lock rechecks every booking anyway). */
+export const liveHours = (env: LockEnv) => lock<{ hours: Hours }>(env, "hours", null).then((x) => x.hours, () => DEFAULT_HOURS);
+
 export async function lock<T>(env: LockEnv, op: string, arg: unknown): Promise<T> {
   const ns = env.BOOKING_LOCK;
   if (!ns) throw new Error("BOOKING_LOCK is not bound");

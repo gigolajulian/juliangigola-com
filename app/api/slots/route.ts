@@ -1,6 +1,6 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { lock } from "@/lib/booking-engine";
-import { DEFAULT_HOURS, EVENTS, type Hours } from "@/lib/booking-rules";
+import { liveHours } from "@/lib/booking-engine";
+import { EVENTS } from "@/lib/booking-rules";
 import { localIso, openStarts } from "@/lib/slots";
 
 /* ── open times for the picker, from the site's own engine ────────
@@ -38,9 +38,7 @@ export async function GET(request: Request) {
 
   let starts: number[];
   try {
-    // Julian's hours from the lock; the defaults when it cannot be reached (booking rechecks there anyway).
-    const hours = await lock<{ hours: Hours }>(env, "hours", null).then((x) => x.hours, () => DEFAULT_HOURS);
-    starts = await openStarts(env.GCAL_OAUTH, slug, from, to, Date.now(), undefined, env.INBOX, hours);
+    starts = await openStarts(env.GCAL_OAUTH, slug, from, to, Date.now(), undefined, env.INBOX, await liveHours(env));
   } catch (e) {
     console.error("slots", String(e));
     return json({ status: "error", error: "Could not reach the calendar." }, 502);

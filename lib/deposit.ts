@@ -2,7 +2,7 @@ import { confirmMail, sendConfirm } from "@/lib/confirm";
 import { enquiry, enquiryKey, summary, whenPT } from "@/lib/inbox";
 import { logMail, recordLead } from "@/lib/leads";
 import { openNow } from "@/lib/slots";
-import { EVENTS } from "@/lib/booking-rules";
+import { EVENTS, type Hours } from "@/lib/booking-rules";
 import { lock, recordBooking, type BookResult } from "@/lib/booking-engine";
 import { manageLinks } from "@/lib/booking-token";
 
@@ -125,8 +125,9 @@ const dayIn = (iso: string, tz: string, plus = 0) =>
   new Intl.DateTimeFormat("en-CA", { timeZone: tz }).format(new Date(Date.parse(iso) + plus * 864e5));
 
 /** Whether the start is still offered: by hello@'s calendar for the site's engine, else by Cal.com. */
-export async function isOpen(b: Booking, gcalSecret?: string, kv?: Parameters<typeof openNow>[4]): Promise<boolean> {
-  if (b.engine === "own") return openNow(gcalSecret, b.slug, b.start, undefined, kv);
+/** `hours`: Julian's, from the lock (`liveHours`); the defaults when unset. */
+export async function isOpen(b: Booking, gcalSecret?: string, kv?: Parameters<typeof openNow>[4], hours?: Hours): Promise<boolean> {
+  if (b.engine === "own") return openNow(gcalSecret, b.slug, b.start, undefined, kv, hours);
   const q = new URLSearchParams({
     username: USER,
     eventTypeSlug: b.slug,
