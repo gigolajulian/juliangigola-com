@@ -134,9 +134,22 @@ export function AdminLeads() {
   const load = React.useCallback(() => {
     call({ query: "?leads" })
       .then((o) => setLeads(o.leads as LeadSummary[]))
-      .catch((e: unknown) => setError(e instanceof Error ? e.message : String(e)));
+      .catch((e: unknown) => setError(navigator.onLine === false || e instanceof TypeError ? OFFLINE : e instanceof Error ? e.message : String(e)));
   }, [call]);
   React.useEffect(load, [load]);
+  // Back online: load again on its own.
+  React.useEffect(() => {
+    const back = () => { setError(null); load(); };
+    addEventListener("online", back);
+    return () => removeEventListener("online", back);
+  }, [load]);
+  // The installed app: offline shell (production only) and the unread count on its icon.
+  React.useEffect(() => {
+    if (process.env.NODE_ENV !== "development") navigator.serviceWorker?.register(SW_URL, { scope: swScope() }).catch(() => {});
+  }, []);
+  React.useEffect(() => {
+    if (leads) badge(leads.filter((l) => l.unread && !aside(l)).length);
+  }, [leads]);
 
   /** Julian: "make it one page and scrollable columns". Wide, the desk fills
    * the screen from where it starts and each column scrolls on its own. */
@@ -268,6 +281,18 @@ export function AdminLeads() {
  */
 const PUSH_FLAG = "jg-leads-push";
 const SW_URL = "/admin/leads/sw.js";
+/** The app is the whole origin on leads.juliangigola.com, /admin/leads on the main site. */
+const swScope = () => (location.hostname.startsWith("leads.") ? "/" : "/admin/leads");
+const OFFLINE = "Offline. The desk loads again when you are back online.";
+/** The unread count on the app icon (iPhone home screen, desktop dock), and
+ * where the service worker reads it to add one per push. */
+function badge(n: number) {
+  try {
+    const nav = navigator as Navigator & { setAppBadge?: (n?: number) => Promise<void>; clearAppBadge?: () => Promise<void> };
+    (n ? nav.setAppBadge?.(n) : nav.clearAppBadge?.())?.catch(() => {});
+    caches?.open("leads-badge").then((c) => c.put("n", new Response(String(n)))).catch(() => {});
+  } catch {}
+}
 function PushSwitch({ call }: { call: Call }) {
   // The desk renders only in the browser (after its list loads), so these read the page directly.
   const [shown] = React.useState(() => {
@@ -282,7 +307,7 @@ function PushSwitch({ call }: { call: Call }) {
   );
   React.useEffect(() => {
     if (!shown || !able) return;
-    navigator.serviceWorker.getRegistration("/admin/leads").then((r) => r?.pushManager.getSubscription()).then((s) => setOn(!!s)).catch(() => setOn(false));
+    navigator.serviceWorker.getRegistration(swScope()).then((r) => r?.pushManager.getSubscription()).then((s) => setOn(!!s)).catch(() => setOn(false));
   }, [shown, able]);
   if (!shown) return null;
 
@@ -290,7 +315,7 @@ function PushSwitch({ call }: { call: Call }) {
     setNote(null);
     try {
       if ((await Notification.requestPermission()) !== "granted") return setNote("Notifications are blocked for this app in Settings.");
-      const reg = await navigator.serviceWorker.register(SW_URL, { scope: "/admin/leads" });
+      const reg = await navigator.serviceWorker.register(SW_URL, { scope: swScope() });
       await navigator.serviceWorker.ready;
       const { key } = (await call({ query: "?vapid" })) as { key: string };
       const raw = Uint8Array.from(atob(key.replace(/-/g, "+").replace(/_/g, "/")), (c) => c.charCodeAt(0));
@@ -304,7 +329,7 @@ function PushSwitch({ call }: { call: Call }) {
   };
   const turnOff = async () => {
     try {
-      const sub = await (await navigator.serviceWorker.getRegistration("/admin/leads"))?.pushManager.getSubscription();
+      const sub = await (await navigator.serviceWorker.getRegistration(swScope()))?.pushManager.getSubscription();
       if (sub) {
         await call({ method: "PATCH", body: JSON.stringify({ push: { endpoint: sub.endpoint }, off: true }) });
         await sub.unsubscribe();
