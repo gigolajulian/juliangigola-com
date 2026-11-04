@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { credentials, KEY_STORE } from "@/components/admin-inbox";
+import { credentials, KEY_STORE, References } from "@/components/admin-inbox";
 import { TOKEN_STORE } from "@/lib/admin-github";
 import type { Enquiry } from "@/lib/inbox";
 import { isLate, STAGES, type Lead, type LeadEvent, type LeadSummary, type Stage } from "@/lib/leads";
@@ -304,6 +304,7 @@ type Call = (init?: RequestInit & { query?: string }) => Promise<Record<string, 
 function Detail({ summary, call, onChange, onBack }: { summary: LeadSummary; call: Call; onChange: (l: Lead) => void; onBack: () => void }) {
   const [lead, setLead] = React.useState<Lead | null>(null);
   const [message, setMessage] = React.useState<Enquiry | null>(null);
+  const [msgKey, setMsgKey] = React.useState<string | null>(null);
   const [asked, setAsked] = React.useState(false);
   const [snoozing, setSnoozing] = React.useState(false);
   const key = `lead:${summary.id}`;
@@ -325,7 +326,10 @@ function Detail({ summary, call, onChange, onBack }: { summary: LeadSummary; cal
       setLead(l);
       // Their latest words, from the raw row the form stored.
       const ref = [...l.events].reverse().find((e) => e.kind === "inquiry" && e.ref)?.ref;
-      if (ref) call({ query: `?key=${encodeURIComponent(ref)}` }).then((m) => live && setMessage(m.enquiry as Enquiry)).catch(() => {});
+      if (ref)
+        call({ query: `?key=${encodeURIComponent(ref)}` })
+          .then((m) => live && (setMessage(m.enquiry as Enquiry), setMsgKey(ref)))
+          .catch(() => {});
       if (l.unread) patch({ seen: true }).catch(() => {});
     }).catch(() => {});
     return () => void (live = false);
@@ -418,6 +422,10 @@ function Detail({ summary, call, onChange, onBack }: { summary: LeadSummary; cal
         <div className="grid gap-2">
           {message.detail ? <p className="text-[15px] text-muted-foreground">{message.detail}</p> : null}
           <p className="max-w-[64ch] whitespace-pre-line rounded-xl bg-background px-4 py-4 text-[15px] leading-relaxed">{message.message}</p>
+          {/* Their uploads come through /api/inbox with the same key as everything here; never a public URL. */}
+          {msgKey && (message.files?.length || message.picks?.length) ? (
+            <References msgKey={msgKey} enquiry={message} auth={credentials(window.localStorage.getItem(KEY_STORE) ?? "")} />
+          ) : null}
         </div>
       ) : null}
 
