@@ -1333,7 +1333,8 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .v3 .hbtn:focus-visible{outline:1px solid var(--accent);outline-offset:-4px}
 .v3 .hsearch{display:flex;align-items:center;gap:10px;flex:1;min-width:0;height:44px;border-bottom:1px solid var(--accent);color:var(--accent)}
 .v3 .hsearch input{flex:1;min-width:0;align-self:stretch;background:none;border:0;outline:0;color:var(--ink);font:inherit;letter-spacing:.04em;text-transform:none}
-@media (pointer:coarse){.v3 .hsearch input{font-size:16px}}
+/* 16px on touch: iOS zooms into any smaller field on focus. */
+@media (pointer:coarse){.v3 :is(.hsearch,.wsearch) input{font-size:16px}}
 @media (max-width:700px){
 .v3 .htools.open{position:absolute;inset:0;z-index:1;padding:max(14px,env(safe-area-inset-top,0px)) var(--gr) 14px var(--g);background:var(--bg)}
 .v3 .htools.open .wviews,.v3 .htools.open::after{display:none}}

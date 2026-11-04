@@ -395,6 +395,9 @@ export function V3Work({
     const io = new IntersectionObserver(
       ([e]) => {
         const on = !e.isIntersecting && e.boundingClientRect.top < (e.rootBounds?.top ?? 60);
+        // iOS scrolls the page as the keyboard rises: with nothing typed yet, the open header bar stays (QA, 2026-11-04).
+        const f = document.activeElement as HTMLInputElement | null;
+        if (!on && f?.closest(".htools") && !f.value) return;
         setPin(on);
         if (on) return;
         // A short result list brings the row back: typing carries on in its field.
