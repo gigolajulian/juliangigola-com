@@ -38,8 +38,7 @@ export async function open(browser: Browser, browserName: string, r: Ratio): Pro
     const title = slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
     return route.fulfill({ json: { status: "success", data: [{ slug, title, lengthInMinutes: 30, price: 0, locations: [{ type: "attendeeDefined" }] }] } });
   });
-  await ctx.route("https://api.cal.com/v2/slots?**", (route) => {
-    const q = new URL(route.request().url()).searchParams;
+  const slots = (q: URLSearchParams) => {
     const data: Record<string, { start: string; end: string }[]> = {};
     const day = new Date(`${q.get("start")!.slice(0, 10)}T12:00:00Z`);
     const end = new Date(`${q.get("end")!.slice(0, 10)}T12:00:00Z`);
@@ -49,7 +48,14 @@ export async function open(browser: Browser, browserName: string, r: Ratio): Pro
       const at = (m: number) => `${date}T${String(m / 60 | 0).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}:00.000-07:00`;
       data[date] = Array.from({ length: 16 }, (_, i) => ({ start: at(600 + i * 30), end: at(630 + i * 30) }));
     }
-    return route.fulfill({ json: { status: "success", data } });
+    return data;
+  };
+  await ctx.route("https://api.cal.com/v2/slots?**", (route) => route.fulfill({ json: { status: "success", data: slots(new URL(route.request().url()).searchParams) } }));
+  /* The site's own engine (`app/api/slots`, NEXT_PUBLIC_BOOKING_ENGINE=own) in the same shape: CI has no GCAL_OAUTH, so it would 503. */
+  await ctx.route("**/api/slots?**", (route) => {
+    const q = new URL(route.request().url()).searchParams;
+    const title = (q.get("slug") ?? "session").replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+    return route.fulfill({ json: { status: "success", event: { title, lengthInMinutes: 30, price: 0, locations: [{ type: "attendeeDefined" }] }, data: slots(q) } });
   });
   await ctx.addInitScript(() => {
     try {

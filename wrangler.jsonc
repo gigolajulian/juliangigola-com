@@ -82,7 +82,7 @@
   /* Which engine books (`lib/booking-rules.ts`): "cal" until Julian cuts
      over, then "own". Flips together with NEXT_PUBLIC_BOOKING_ENGINE in
      .env.production. */
-  "vars": { "BOOKING_ENGINE": "cal" },
+  "vars": { "BOOKING_ENGINE": "own" },
 
   /* The booking lock (`worker/booking-lock.ts`): one instance, every
      booking through it, its storage the booking records. It lives in its
