@@ -1685,7 +1685,9 @@ export function AdminEditor({
 
           {/* The token and the status line, under every tab. Publish itself is
             up in the app bar; what stays down here is the thing you set once
-            and the thing you read after pressing it. */}
+            and the thing you read after pressing it. Not on the lead desk:
+            nothing there is published, and pinned it covered the open lead. */}
+          {leadsWide ? null : (
           <div className="sticky bottom-0 mt-12 flex flex-wrap items-center gap-4 border-t border-border bg-background py-6">
             {sha ? (
               <>
@@ -1710,6 +1712,7 @@ export function AdminEditor({
               </p>
             )}
           </div>
+          )}
         </div>
 
         {/* Sticky, so it stays beside the field being edited on a long form.
