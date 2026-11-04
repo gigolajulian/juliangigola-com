@@ -6,6 +6,7 @@ import { TOKEN_STORE } from "@/lib/admin-github";
 import type { Enquiry } from "@/lib/inbox";
 import { isLate, STAGES, trashDaysLeft, type Lead, type LeadEvent, type LeadSummary, type Stage } from "@/lib/leads";
 import { cn } from "@/lib/utils";
+import { fill, mailable } from "@/lib/lead-crm";
 
 /* ── the lead desk ────────────────────────────────────────────────
  * Julian (2026-11-03, PLAN-lead-desk.md, mock v3): every inquiry, call
@@ -18,7 +19,9 @@ import { cn } from "@/lib/utils";
  * open lead side by side. Narrow: the list, then the lead with Back.
  * ─────────────────────────────────────────────────────────────── */
 
-type Filter = "needs" | "open" | "upcoming" | Stage | "snoozed" | "archived" | "trash" | "more";
+type Filter = "needs" | "open" | "upcoming" | Stage | "snoozed" | "archived" | "trash" | "more" | "new" | "stats" | "templates";
+/** Views that are not a list of leads. */
+const TOOLS: Filter[] = ["more", "new", "stats", "templates"];
 
 const DAY = 864e5;
 const now = () => Date.now();
@@ -26,10 +29,13 @@ const snoozed = (l: LeadSummary) => !!l.snoozeUntil && Date.parse(l.snoozeUntil)
 const closed = (s: Stage) => s === "Delivered" || s === "Lost";
 /** Archived or in the trash: out of every list but its own. */
 const aside = (l: LeadSummary) => !!(l.archivedAt || l.trashedAt);
-const needsMe = (l: LeadSummary) => !aside(l) && !snoozed(l) && !closed(l.stage) && (l.unread || isLate(l, now()) || !!l.flags?.length);
+/** His reminder has come round: it beats a snooze. */
+const due = (l: LeadSummary) => !!l.due && Date.parse(l.due) <= now();
+const needsMe = (l: LeadSummary) => !aside(l) && !closed(l.stage) && (due(l) || (!snoozed(l) && (l.unread || isLate(l, now()) || !!l.flags?.length)));
 
 /** What to do next, in a word or two, and whether it is late. */
 function nextStep(l: LeadSummary): string | null {
+  if (due(l)) return l.dueText || "Your reminder";
   if (l.flags?.includes("stuck")) return "Refund or rebook";
   if (l.flags?.includes("no-deposit")) return "Ask for the deposit";
   if (l.stage === "Inquiry") return "Reply";
@@ -58,6 +64,7 @@ const at = (iso: string) =>
 function Chip({ l }: { l: LeadSummary }) {
   if (l.flags?.includes("stuck")) return <Tag tone="bad" mark="!">Deposit stuck</Tag>;
   if (l.flags?.includes("no-deposit")) return <Tag tone="bad" mark="!">No deposit</Tag>;
+  if (due(l) && !l.trashedAt) return <Tag tone="needs" mark="◔">Reminder due</Tag>;
   if (l.trashedAt) return <Tag tone="quiet" mark="×">Deletes in {Math.max(1, trashDaysLeft(l.trashedAt, now()))} d</Tag>;
   if (snoozed(l)) return <Tag tone="quiet" mark="z">Until {day(l.snoozeUntil!)}</Tag>;
   if (isLate(l, now())) return <Tag tone="needs" mark="◷">{l.stage === "Quoted" ? `Quoted ${ago(l.stageAt)} ago` : `Late, ${ago(l.stageAt)}`}</Tag>;
@@ -120,6 +127,7 @@ export function AdminLeads() {
   const [open, setOpen] = React.useState<string | null>(null);
   const [error, setError] = React.useState<string | null>(null);
   const [query, setQuery] = React.useState("");
+  const [templates, setTemplates] = React.useState<Template[]>([]);
 
   const call = React.useCallback(async (init: RequestInit & { query?: string } = {}) => {
     const res = await fetch(`/api/inbox${init.query ?? ""}`, {
@@ -138,6 +146,9 @@ export function AdminLeads() {
       .catch((e: unknown) => setError(navigator.onLine === false || e instanceof TypeError ? OFFLINE : e instanceof Error ? e.message : String(e)));
   }, [call]);
   React.useEffect(load, [load]);
+  React.useEffect(() => {
+    call({ query: "?templates" }).then((o) => setTemplates(o.templates as Template[])).catch(() => {});
+  }, [call]);
   // Back online: load again on its own.
   React.useEffect(() => {
     const back = () => { setError(null); load(); };
@@ -168,7 +179,7 @@ export function AdminLeads() {
 
   /** A change from the open lead, reflected in its row at once. */
   // A cleared snooze comes back without the key, so set it outright.
-  const changed = (l: Lead) => setLeads((rows) => rows?.map((r) => (r.email === l.email ? { ...r, ...l, snoozeUntil: l.snoozeUntil, archivedAt: l.archivedAt, trashedAt: l.trashedAt, id: r.id } : r)) ?? null);
+  const changed = (l: Lead) => setLeads((rows) => rows?.map((r) => (r.email === l.email ? { ...r, ...l, snoozeUntil: l.snoozeUntil, archivedAt: l.archivedAt, trashedAt: l.trashedAt, due: l.remind?.at, dueText: l.remind?.text.slice(0, 40), quote: l.quote, id: r.id } : r)) ?? null);
 
   if (error === "Not authorized." || error?.startsWith("GitHub did not accept"))
     return (
@@ -197,6 +208,7 @@ export function AdminLeads() {
     .sort(filter === "upcoming" ? (a, b) => a.when!.localeCompare(b.when!) : (a, b) => b.lastAt.localeCompare(a.lastAt));
   const current = leads.find((l) => l.id === open);
   const tab = tabOf(filter);
+  const tool = TOOLS.includes(filter);
   const needs = count("needs");
   const pick = (f: Filter) => { setFilter(f); setOpen(null); scrollTo(0, 0); };
   const signOut = () => {
@@ -204,6 +216,8 @@ export function AdminLeads() {
     setLeads(null);
     setError("Not authorized.");
   };
+  const doExport = () => exportCsv().catch((e: unknown) => alert(e instanceof Error ? e.message : String(e)));
+  const added = (id: string) => { load(); setFilter("open"); setOpen(id); };
   const device = (
     <>
       <PushSwitch call={call} />
@@ -224,6 +238,7 @@ export function AdminLeads() {
     >
       {/* Desktop: the sidebar. Every list, then this device's switches. */}
       <nav aria-label="Lead lists" className="hidden min-h-0 flex-col overflow-y-auto border-r border-border p-2.5 lg:flex">
+        <button type="button" onClick={() => pick("new")} className={cn(btn, primary, "mb-2 min-h-10 text-[14.5px]")}>New lead</button>
         {(["needs", "open", "upcoming"] as const).map((f) => (
           <SideLink key={f} on={filter === f} n={count(f)} onClick={() => pick(f)}>{label(f)}</SideLink>
         ))}
@@ -233,6 +248,10 @@ export function AdminLeads() {
         {(["Delivered", "Lost"] as const).map((s) => <SideLink key={s} on={filter === s} n={count(s)} onClick={() => pick(s)}>{s}</SideLink>)}
         <SideGroup>Put aside</SideGroup>
         {(["snoozed", "archived", "trash"] as const).map((f) => <SideLink key={f} on={filter === f} n={count(f)} onClick={() => pick(f)}>{label(f)}</SideLink>)}
+        <SideGroup>Tools</SideGroup>
+        <SideLink on={filter === "stats"} onClick={() => pick("stats")}>Stats</SideLink>
+        <SideLink on={filter === "templates"} onClick={() => pick("templates")}>Templates</SideLink>
+        <SideLink on={false} onClick={doExport}>Export CSV</SideLink>
         <div className="mt-auto grid border-t border-border pt-2">{device}</div>
       </nav>
 
@@ -242,12 +261,15 @@ export function AdminLeads() {
             {needs ? `${needs} waiting on you` : "Nothing waiting on you"}
           </p>
           <div className="flex items-baseline justify-between gap-3">
-            <h2 style={HEAD} className="text-[32px] leading-none lg:text-xl">{filter === "more" ? "More" : label(filter)}</h2>
-            {filter === "more" ? null : (
-              <span className="font-mono text-[12.5px] text-muted-foreground">{shown.length} {shown.length === 1 ? "lead" : "leads"}</span>
+            <h2 style={HEAD} className="text-[32px] leading-none lg:text-xl">{label(filter)}</h2>
+            {tool ? null : (
+              <span className="flex items-center gap-3">
+                <span className="font-mono text-[12.5px] text-muted-foreground">{shown.length} {shown.length === 1 ? "lead" : "leads"}</span>
+                <button type="button" onClick={() => pick("new")} aria-label="New lead" className="grid size-11 place-items-center rounded-[10px] border border-border text-[22px] leading-none text-accent lg:hidden">+</button>
+              </span>
             )}
           </div>
-          {filter === "more" ? null : (
+          {tool ? null : (
             <input
               type="search"
               value={query}
@@ -265,7 +287,7 @@ export function AdminLeads() {
               ))}
             </div>
           ) : null}
-          {MORE.includes(filter) ? (
+          {MORE.includes(filter) || (tool && filter !== "more") ? (
             <button type="button" onClick={() => pick("more")} className="inline-flex min-h-11 w-fit items-center gap-1 text-[16px] text-accent lg:hidden">
               <span aria-hidden="true">‹</span> More
             </button>
@@ -284,11 +306,32 @@ export function AdminLeads() {
                 </li>
               ))}
             </ul>
+            <ul className="grid">
+              <li><p className="px-1 pb-1 font-mono text-[11.5px] uppercase tracking-[0.08em] text-muted-foreground">Tools</p></li>
+              {([["new", "New lead"], ["stats", "Stats"], ["templates", "Templates"]] as const).map(([f, t]) => (
+                <li key={f}>
+                  <button type="button" onClick={() => pick(f)} className="flex min-h-[52px] w-full items-center justify-between border-b border-border px-1 text-left text-[17px]">
+                    {t}<span aria-hidden="true" className="font-mono text-[13px] text-muted-foreground">›</span>
+                  </button>
+                </li>
+              ))}
+              <li>
+                <button type="button" onClick={doExport} className="flex min-h-[52px] w-full items-center justify-between border-b border-border px-1 text-left text-[17px]">
+                  Export CSV<span aria-hidden="true" className="font-mono text-[13px] text-muted-foreground">↓</span>
+                </button>
+              </li>
+            </ul>
             <div className="grid">
               <p className="px-1 pb-1 font-mono text-[11.5px] uppercase tracking-[0.08em] text-muted-foreground">This device</p>
               {device}
             </div>
           </div>
+        ) : filter === "new" ? (
+          <NewLeadForm call={call} done={added} />
+        ) : filter === "stats" ? (
+          <StatsView call={call} />
+        ) : filter === "templates" ? (
+          <TemplatesEditor call={call} templates={templates} saved={setTemplates} />
         ) : (
           <>
             {filter === "trash" && shown.length ? <EmptyTrash n={shown.length} call={call} done={() => { setOpen(null); load(); }} /> : null}
@@ -311,7 +354,7 @@ export function AdminLeads() {
 
       <section aria-label="Lead" className={cn("min-w-0 lg:min-h-0 lg:overflow-y-auto lg:bg-card/40", !open && "max-lg:hidden")}>
         {current ? (
-          <Detail key={current.id} summary={current} call={call} onChange={changed} onBack={() => setOpen(null)} />
+          <Detail key={current.id} summary={current} call={call} onChange={changed} onBack={() => setOpen(null)} reload={load} templates={templates} others={leads.filter((o) => o.id !== current.id && !o.trashedAt)} />
         ) : (
           <p className="px-8 py-10 text-[15px] text-muted-foreground max-lg:hidden">Pick a lead to see it here.</p>
         )}
@@ -346,7 +389,7 @@ type Tab = "needs" | "open" | "upcoming" | "more";
 const OPEN_STAGES = STAGES.filter((s) => !closed(s));
 /** The lists under More on the phone (the sidebar's lower groups on desktop). */
 const MORE: Filter[] = ["snoozed", "archived", "trash", "Delivered", "Lost"];
-const tabOf = (f: Filter): Tab => (f === "needs" || f === "upcoming" ? f : f === "more" || MORE.includes(f) ? "more" : "open");
+const tabOf = (f: Filter): Tab => (f === "needs" || f === "upcoming" ? f : TOOLS.includes(f) || MORE.includes(f) ? "more" : "open");
 const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: "needs", label: "Needs me", icon: <><path d="M4 13l3-8h10l3 8v6H4z" /><path d="M4 13h5l1 2h4l1-2h5" /></> },
   { id: "open", label: "Open", icon: <path d="M5 6h14M5 12h14M5 18h9" /> },
@@ -400,7 +443,7 @@ function SideGroup({ children }: { children: React.ReactNode }) {
   return <p className="px-3 pb-1.5 pt-4 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">{children}</p>;
 }
 
-function SideLink({ on, n, onClick, children }: { on: boolean; n: number; onClick: () => void; children: React.ReactNode }) {
+function SideLink({ on, n, onClick, children }: { on: boolean; n?: number; onClick: () => void; children: React.ReactNode }) {
   return (
     <button
       type="button"
@@ -595,7 +638,7 @@ function pass(l: LeadSummary, f: Filter) {
   if (f === "open") return !closed(l.stage);
   return l.stage === f && !snoozed(l);
 }
-const LABEL: Partial<Record<Filter, string>> = { needs: "Needs me", open: "All open", upcoming: "Upcoming", snoozed: "Snoozed", archived: "Archived", trash: "Trash" };
+const LABEL: Partial<Record<Filter, string>> = { needs: "Needs me", open: "All open", upcoming: "Upcoming", snoozed: "Snoozed", archived: "Archived", trash: "Trash", more: "More", new: "New lead", stats: "Stats", templates: "Templates" };
 const label = (f: Filter) => LABEL[f] ?? f;
 
 /** Deletes every lead in the trash for good, after a second press. */
@@ -623,7 +666,7 @@ function EmptyTrash({ n, call, done }: { n: number; call: Call; done: () => void
 
 type Call = (init?: RequestInit & { query?: string }) => Promise<Record<string, unknown>>;
 
-function Detail({ summary, call, onChange, onBack }: { summary: LeadSummary; call: Call; onChange: (l: Lead) => void; onBack: () => void }) {
+function Detail({ summary, call, onChange, onBack, reload, templates, others }: { summary: LeadSummary; call: Call; onChange: (l: Lead) => void; onBack: () => void; reload: () => void; templates: Template[]; others: LeadSummary[] }) {
   const [lead, setLead] = React.useState<Lead | null>(null);
   const [message, setMessage] = React.useState<Enquiry | null>(null);
   const [msgKey, setMsgKey] = React.useState<string | null>(null);
@@ -634,10 +677,13 @@ function Detail({ summary, call, onChange, onBack }: { summary: LeadSummary; cal
   const patch = React.useCallback(
     async (body: Record<string, unknown>) => {
       const o = await call({ method: "PATCH", body: JSON.stringify({ key, ...body }) });
-      setLead(o.lead as Lead);
-      onChange(o.lead as Lead);
+      const next = o.lead as Lead;
+      setLead(next);
+      onChange(next);
+      // A merge deletes the other record; the list has to drop it.
+      if (body.mergeFrom) reload();
     },
-    [call, key, onChange],
+    [call, key, onChange, reload],
   );
 
   React.useEffect(() => {
@@ -696,6 +742,7 @@ function Detail({ summary, call, onChange, onBack }: { summary: LeadSummary; cal
       ) : null}
 
       <div className="flex flex-wrap items-center gap-2.5">
+        {mailable(l.email) ? (<>
         <a href={reply} target="_blank" rel="noreferrer" onClick={() => setAsked(true)} className={cn(btn, primary, "min-h-[52px] px-5 text-base")}>
           Reply in Gmail
         </a>
@@ -709,6 +756,7 @@ function Detail({ summary, call, onChange, onBack }: { summary: LeadSummary; cal
           </a>
         ) : null}
         <a href={book} target="_blank" rel="noreferrer" className={btn}>Send booking link</a>
+        </>) : null}
         <button type="button" onClick={() => setSnoozing((v) => !v)} aria-expanded={snoozing} className={btn}>Snooze</button>
         {snoozed(l) ? <button type="button" className={btn} onClick={() => patch({ snoozeUntil: "" }).then(() => setSnoozing(false))}>Unsnooze</button> : null}
         {l.trashedAt ? null : <button type="button" className={btn} onClick={() => patch({ archive: !l.archivedAt })}>{l.archivedAt ? "Unarchive" : "Archive"}</button>}
@@ -766,6 +814,8 @@ function Detail({ summary, call, onChange, onBack }: { summary: LeadSummary; cal
         </div>
       </fieldset>
 
+      <LeadCrm l={l} full={lead} patch={patch} others={others} templates={templates} />
+
       {message ? (
         <div className="grid gap-2">
           {message.detail ? <p className="text-[15px] text-muted-foreground">{message.detail}</p> : null}
@@ -818,5 +868,355 @@ function line(e: LeadEvent): string {
     case "archive": return e.note === "in" ? "Archived" : "Unarchived";
     case "trash": return e.note === "in" ? "Moved to trash" : "Recovered from trash";
     case "mail": return `Mail to ${e.mail?.to === "client" ? "them" : "hello@"}: ${e.note ?? ""}`;
+    case "added": return `Added by hand${e.note ? `, from ${e.note}` : ""}`;
+    case "edit": return "Details changed";
+    case "merge": return `Merged with another record${e.note ? ` (${e.note})` : ""}`;
+    case "remind": return e.note ? `Reminder set for ${at(e.note)}` : "Reminder cleared";
+    case "quote": return e.note ? `Quote: $${Number(e.note).toLocaleString("en-US")}` : "Quote cleared";
   }
+}
+
+/* ── the CRM tools: a lead by hand, the numbers, templates, the export ── */
+
+const field = "min-h-11 w-full rounded-[10px] border border-border bg-transparent px-3.5 text-base normal-case placeholder:normal-case placeholder:text-muted-foreground focus-visible:outline-2 focus-visible:outline-accent";
+const fieldLabel = "grid gap-1.5 text-[14px] text-muted-foreground";
+const SOURCES = ["Instagram DM", "Referral", "Text", "Phone call", "Email", "In person", "Other"];
+const LOST_REASONS = ["Price", "Dates", "No reply", "Went elsewhere", "Not a fit", "Other"];
+
+/** A lead he adds himself: someone who wrote on Instagram, texted, or was referred. */
+function NewLeadForm({ call, done }: { call: Call; done: (id: string) => void }) {
+  const [f, setF] = React.useState({ name: "", email: "", ig: "", phone: "", company: "", kind: "", stage: "Inquiry" as Stage, source: "Instagram DM", notes: "" });
+  const [note, setNote] = React.useState<string | null>(null);
+  const [busy, setBusy] = React.useState(false);
+  const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => setF({ ...f, [k]: e.target.value });
+  return (
+    <form
+      className="grid gap-4 px-1 py-5 lg:px-5"
+      onSubmit={(e) => {
+        e.preventDefault();
+        setBusy(true);
+        setNote(null);
+        call({ method: "POST", body: JSON.stringify({ add: f }) })
+          .then((o) => done(o.id as string))
+          .catch((err: unknown) => setNote(err instanceof Error ? err.message : String(err)))
+          .finally(() => setBusy(false));
+      }}
+    >
+      <label className={fieldLabel}>Name<input required value={f.name} onChange={set("name")} className={field} autoComplete="off" /></label>
+      <p className="font-mono text-[12px] text-muted-foreground">One of these three, so the lead has a way back to them.</p>
+      <label className={fieldLabel}>Email<input type="email" value={f.email} onChange={set("email")} className={field} autoComplete="off" /></label>
+      <label className={fieldLabel}>Instagram<input value={f.ig} onChange={set("ig")} placeholder="@handle" className={field} autoComplete="off" /></label>
+      <label className={fieldLabel}>Phone<input type="tel" value={f.phone} onChange={set("phone")} className={field} autoComplete="off" /></label>
+      <label className={fieldLabel}>Brand or company<input value={f.company} onChange={set("company")} className={field} autoComplete="off" /></label>
+      <label className={fieldLabel}>What they want<input value={f.kind} onChange={set("kind")} placeholder="Portrait, campaign, wedding" className={field} /></label>
+      <div className="grid grid-cols-2 gap-3">
+        <label className={fieldLabel}>Stage
+          <select value={f.stage} onChange={set("stage")} className={field}>{STAGES.map((s) => <option key={s}>{s}</option>)}</select>
+        </label>
+        <label className={fieldLabel}>Came from
+          <select value={f.source} onChange={set("source")} className={field}>{SOURCES.map((s) => <option key={s}>{s}</option>)}</select>
+        </label>
+      </div>
+      <label className={fieldLabel}>Notes<textarea value={f.notes} onChange={set("notes")} rows={4} className={cn(field, "py-3 leading-relaxed")} /></label>
+      {note ? <p role="alert" className="text-[15px] text-destructive">{note}</p> : null}
+      <button type="submit" disabled={busy} className={cn(btn, primary, "justify-self-start")}>{busy ? "Adding" : "Add lead"}</button>
+    </form>
+  );
+}
+
+type Stats = {
+  total: number;
+  weeks: { start: string; inquiries: number; booked: number }[];
+  replyHours: number | null;
+  bookedRate: number | null;
+  sources: { source: string; leads: number; booked: number }[];
+  lost: { reason: string; n: number }[];
+  pipeline: number;
+  won: number;
+  stages: Partial<Record<Stage, number>>;
+};
+const money = (n: number) => `$${Math.round(n).toLocaleString("en-US")}`;
+const hours = (h: number | null) => (h === null ? "None yet" : h < 1 ? `${Math.round(h * 60)} min` : h < 48 ? `${Math.round(h)} h` : `${Math.round(h / 24)} d`);
+
+/** The numbers: is the site turning inquiries into bookings, and how fast does he answer. */
+function StatsView({ call }: { call: Call }) {
+  const [s, setS] = React.useState<Stats | null>(null);
+  const [err, setErr] = React.useState<string | null>(null);
+  React.useEffect(() => {
+    call({ query: "?stats" }).then((o) => setS(o.stats as Stats)).catch((e: unknown) => setErr(e instanceof Error ? e.message : String(e)));
+  }, [call]);
+  if (err) return <p className="px-1 py-8 text-[15px] text-muted-foreground lg:px-5">{err}</p>;
+  if (!s) return <p className="px-1 py-8 font-mono text-[13px] text-muted-foreground lg:px-5">Counting</p>;
+  const top = Math.max(1, ...s.weeks.map((w) => w.inquiries));
+  const tile = (k: string, v: string, hint: string) => (
+    <div className="grid gap-1 rounded-xl border border-border p-3.5">
+      <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">{k}</span>
+      <span style={HEAD} className="text-[26px] leading-none">{v}</span>
+      <span className="text-[12.5px] text-muted-foreground">{hint}</span>
+    </div>
+  );
+  return (
+    <div className="grid gap-6 px-1 py-5 lg:px-5">
+      <div className="grid grid-cols-2 gap-2.5">
+        {tile("Booked", s.bookedRate === null ? "None yet" : `${Math.round(s.bookedRate * 100)}%`, "of leads over a week old")}
+        {tile("First reply", hours(s.replyHours), "median, inquiry to answer")}
+        {tile("Quoted, open", money(s.pipeline), "waiting on an answer")}
+        {tile("Booked value", money(s.won), "from the quotes you entered")}
+      </div>
+      <section className="grid gap-2.5">
+        <h3 className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">Last 12 weeks</h3>
+        <div className="flex h-32 items-end gap-1.5" role="img" aria-label={s.weeks.map((w) => `Week of ${w.start}: ${w.inquiries} inquiries, ${w.booked} booked`).join(". ")}>
+          {s.weeks.map((w) => (
+            <div key={w.start} className="relative flex h-full flex-1 items-end" title={`Week of ${w.start}: ${w.inquiries} in, ${w.booked} booked`}>
+              <div className="w-full rounded-t-[3px] bg-border" style={{ height: `${(w.inquiries / top) * 100}%` }} />
+              <div className="absolute bottom-0 w-full rounded-t-[3px] bg-accent" style={{ height: `${(Math.min(w.booked, w.inquiries || w.booked) / top) * 100}%` }} />
+            </div>
+          ))}
+        </div>
+        <p className="flex gap-4 font-mono text-[12px] text-muted-foreground">
+          <span><span className="mr-1.5 inline-block size-2.5 rounded-[2px] bg-border align-middle" />Inquiries</span>
+          <span><span className="mr-1.5 inline-block size-2.5 rounded-[2px] bg-accent align-middle" />Booked</span>
+        </p>
+      </section>
+      <section className="grid gap-1">
+        <h3 className="pb-1 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">Where they came from</h3>
+        {s.sources.length ? s.sources.map((r) => (
+          <p key={r.source} className="flex justify-between gap-3 border-b border-border py-2.5 text-[15px]">
+            <span className="truncate">{r.source}</span>
+            <span className="shrink-0 font-mono text-[13px] text-muted-foreground">{r.leads} in · <b className="font-medium text-accent">{r.booked} booked</b></span>
+          </p>
+        )) : <p className="text-[15px] text-muted-foreground">Nothing yet.</p>}
+      </section>
+      <section className="grid gap-1">
+        <h3 className="pb-1 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">Why they were lost</h3>
+        {s.lost.length ? s.lost.map((r) => (
+          <p key={r.reason} className="flex justify-between border-b border-border py-2.5 text-[15px]"><span>{r.reason}</span><span className="font-mono text-[13px] text-muted-foreground">{r.n}</span></p>
+        )) : <p className="text-[15px] text-muted-foreground">None lost.</p>}
+      </section>
+      <section className="grid gap-1">
+        <h3 className="pb-1 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">By stage · {s.total} leads</h3>
+        {STAGES.map((st) => (
+          <p key={st} className="flex justify-between border-b border-border py-2.5 text-[15px]"><span>{st}</span><span className="font-mono text-[13px] text-muted-foreground">{s.stages[st] ?? 0}</span></p>
+        ))}
+      </section>
+    </div>
+  );
+}
+
+type Template = { id: string; name: string; subject: string; body: string };
+
+/** His saved replies. {first}, {name}, {kind} and {when} are filled per lead. */
+function TemplatesEditor({ call, templates, saved }: { call: Call; templates: Template[]; saved: (t: Template[]) => void }) {
+  const [list, setList] = React.useState(templates);
+  const [note, setNote] = React.useState<string | null>(null);
+  const edit = (i: number, k: keyof Template) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+    setList(list.map((t, j) => (j === i ? { ...t, [k]: e.target.value } : t)));
+  const save = () =>
+    call({ method: "PATCH", body: JSON.stringify({ templates: list }) })
+      .then((o) => { saved(o.templates as Template[]); setList(o.templates as Template[]); setNote("Saved."); })
+      .catch((e: unknown) => setNote(e instanceof Error ? e.message : String(e)));
+  return (
+    <div className="grid gap-5 px-1 py-5 lg:px-5">
+      <p className="text-[14px] text-muted-foreground">
+        <code className="font-mono text-[13px] text-foreground">{"{first}"}</code>, <code className="font-mono text-[13px] text-foreground">{"{name}"}</code>,{" "}
+        <code className="font-mono text-[13px] text-foreground">{"{kind}"}</code> and <code className="font-mono text-[13px] text-foreground">{"{when}"}</code> fill in for each lead.
+      </p>
+      {list.map((t, i) => (
+        <fieldset key={t.id + i} className="grid gap-2.5 rounded-xl border border-border p-3.5">
+          <label className={fieldLabel}>Name<input value={t.name} onChange={edit(i, "name")} className={field} /></label>
+          <label className={fieldLabel}>Subject<input value={t.subject} onChange={edit(i, "subject")} className={field} /></label>
+          <label className={fieldLabel}>Message<textarea value={t.body} onChange={edit(i, "body")} rows={6} className={cn(field, "py-3 leading-relaxed")} /></label>
+          <button type="button" onClick={() => setList(list.filter((_, j) => j !== i))} className={cn(btn, "justify-self-start text-destructive")}>Remove</button>
+        </fieldset>
+      ))}
+      <div className="flex flex-wrap gap-2.5">
+        <button type="button" onClick={() => setList([...list, { id: `t${Date.now()}`, name: "New template", subject: "", body: "Hi {first},\n\n\n\nJulian" }])} className={btn}>Add a template</button>
+        <button type="button" onClick={save} className={cn(btn, primary)}>Save templates</button>
+      </div>
+      {note ? <p role="status" className="font-mono text-[13px] text-muted-foreground">{note}</p> : null}
+    </div>
+  );
+}
+
+/** Every lead as a CSV file, through the same key as the rest of the desk. */
+async function exportCsv() {
+  const res = await fetch("/api/inbox?csv", { headers: credentials(window.localStorage.getItem(KEY_STORE) ?? ""), cache: "no-store" });
+  if (!res.ok) throw new Error(`Export failed (${res.status})`);
+  const url = URL.createObjectURL(await res.blob());
+  const a = Object.assign(document.createElement("a"), { href: url, download: `leads-${new Date().toISOString().slice(0, 10)}.csv` });
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+}
+
+
+/** The CRM half of a lead: how to reach them, saved replies, a reminder, the quote, notes, merge. */
+function LeadCrm({ l, full, patch, others, templates }: { l: LeadSummary; full: Lead | null; patch: (b: Record<string, unknown>) => Promise<void>; others: LeadSummary[]; templates: Template[] }) {
+  const [editing, setEditing] = React.useState(false);
+  const [d, setD] = React.useState({ name: "", phone: "", ig: "", company: "", source: "", kind: "" });
+  const [notes, setNotes] = React.useState<string | null>(null);
+  const [rAt, setRAt] = React.useState("");
+  const [rText, setRText] = React.useState("");
+  const [quote, setQuote] = React.useState<string | null>(null);
+  const [into, setInto] = React.useState("");
+  const [sure, setSure] = React.useState(false);
+  const [note, setNote] = React.useState<string | null>(null);
+  const run = (p: Promise<void>, ok?: string) => p.then(() => setNote(ok ?? null)).catch((e: unknown) => setNote(e instanceof Error ? e.message : String(e)));
+  const mail = mailable(l.email);
+  const ig = full?.ig ?? (l.email.startsWith("ig:") ? l.email.slice(3) : undefined);
+  const phone = full?.phone ?? (l.email.startsWith("tel:") ? l.email.slice(4) : undefined);
+  const local = (iso: string) => new Date(Date.parse(iso) - new Date().getTimezoneOffset() * 60e3).toISOString().slice(0, 16);
+  const h3 = "font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground";
+
+  return (
+    <div className="grid gap-7">
+      {mail && templates.length ? (
+        <section className="grid gap-2.5">
+          <h3 className={h3}>Reply with a template</h3>
+          <div className="flex flex-wrap gap-2">
+            {templates.map((t) => {
+              const subject = fill(t.subject, l);
+              const body = fill(t.body, l);
+              return (
+                <a key={t.id} href={ios() ? mailto(l.email, subject, body) : compose(l.email, subject, body)} target="_blank" rel="noreferrer" className={btn}>
+                  {t.name}
+                </a>
+              );
+            })}
+          </div>
+        </section>
+      ) : null}
+
+      <section className="grid gap-2.5">
+        <h3 className={h3}>Contact</h3>
+        {editing ? (
+          <form
+            className="grid gap-3"
+            onSubmit={(e) => {
+              e.preventDefault();
+              run(patch({ details: d }).then(() => setEditing(false)), "Saved.");
+            }}
+          >
+            {(["name", "phone", "ig", "company", "kind", "source"] as const).map((k) => (
+              <label key={k} className={fieldLabel}>
+                {{ name: "Name", phone: "Phone", ig: "Instagram", company: "Brand or company", kind: "What they want", source: "Came from" }[k]}
+                <input value={d[k]} onChange={(e) => setD({ ...d, [k]: e.target.value })} className={field} autoComplete="off" />
+              </label>
+            ))}
+            <div className="flex gap-2.5">
+              <button type="submit" className={cn(btn, primary)}>Save</button>
+              <button type="button" onClick={() => setEditing(false)} className={btn}>Cancel</button>
+            </div>
+          </form>
+        ) : (
+          <>
+            <dl className="grid grid-cols-[120px_minmax(0,1fr)] gap-x-4 gap-y-2 text-[15px]">
+              {mail ? (<><dt className="font-mono text-[13px] leading-6 text-muted-foreground">Email</dt><dd className="break-words">{l.email}</dd></>) : null}
+              {phone ? (<><dt className="font-mono text-[13px] leading-6 text-muted-foreground">Phone</dt><dd><a href={`tel:${phone.replace(/[^\d+]/g, "")}`} className="text-accent">{phone}</a></dd></>) : null}
+              {ig ? (<><dt className="font-mono text-[13px] leading-6 text-muted-foreground">Instagram</dt><dd><a href={`https://instagram.com/${ig.replace(/^@/, "")}`} target="_blank" rel="noreferrer" className="text-accent">{ig}</a></dd></>) : null}
+              {full?.company ? (<><dt className="font-mono text-[13px] leading-6 text-muted-foreground">Company</dt><dd>{full.company}</dd></>) : null}
+              {full?.source ? (<><dt className="font-mono text-[13px] leading-6 text-muted-foreground">Came from</dt><dd>{full.source}</dd></>) : null}
+            </dl>
+            <button
+              type="button"
+              className={cn(btn, "justify-self-start")}
+              onClick={() => {
+                setD({ name: l.name, phone: full?.phone ?? "", ig: full?.ig ?? "", company: full?.company ?? "", kind: l.kind ?? "", source: full?.source ?? "" });
+                setEditing(true);
+              }}
+            >
+              Edit details
+            </button>
+          </>
+        )}
+      </section>
+
+      <section className="grid gap-2.5">
+        <h3 className={h3}>Reminder</h3>
+        {full?.remind ? (
+          <p className="flex flex-wrap items-center gap-3 text-[15px]">
+            <span><b className="font-semibold">{at(full.remind.at)}</b>{full.remind.text ? `: ${full.remind.text}` : ""}</span>
+            <button type="button" className={btn} onClick={() => run(patch({ remind: null }), "Reminder cleared.")}>Clear</button>
+          </p>
+        ) : (
+          <form
+            className="flex flex-wrap items-end gap-2.5"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (rAt) run(patch({ remind: { at: new Date(rAt).toISOString(), text: rText } }).then(() => { setRAt(""); setRText(""); }), "Reminder set.");
+            }}
+          >
+            <label className={fieldLabel}>When<input type="datetime-local" required value={rAt} min={local(new Date().toISOString())} onChange={(e) => setRAt(e.target.value)} className={cn(field, "w-auto font-mono text-[14px]")} /></label>
+            <label className={cn(fieldLabel, "min-w-[12rem] flex-1")}>What for<input value={rText} onChange={(e) => setRText(e.target.value)} placeholder="Send the quote" className={field} /></label>
+            <button type="submit" className={btn}>Remind me</button>
+          </form>
+        )}
+      </section>
+
+      <section className="grid gap-2.5">
+        <h3 className={h3}>Quote</h3>
+        <div className="flex flex-wrap items-end gap-2.5">
+          <label className={fieldLabel}>
+            Amount in dollars
+            <input
+              inputMode="decimal"
+              value={quote ?? (full?.quote !== undefined ? String(full.quote) : "")}
+              onChange={(e) => setQuote(e.target.value.replace(/[^\d.]/g, ""))}
+              onBlur={() => {
+                if (quote === null) return;
+                const n = quote === "" ? null : Number(quote);
+                if (n === null || Number.isFinite(n)) run(patch({ quote: n }), "Quote saved.");
+              }}
+              placeholder="0"
+              className={cn(field, "w-40 font-mono")}
+            />
+          </label>
+          {l.stage === "Lost" ? (
+            <label className={fieldLabel}>
+              Why it was lost
+              <select value={full?.lostReason ?? ""} onChange={(e) => run(patch({ lostReason: e.target.value }), "Saved.")} className={cn(field, "w-auto")}>
+                <option value="">Pick one</option>
+                {LOST_REASONS.map((r) => <option key={r}>{r}</option>)}
+              </select>
+            </label>
+          ) : null}
+        </div>
+      </section>
+
+      <section className="grid gap-2.5">
+        <h3 className={h3}>Notes</h3>
+        <textarea
+          value={notes ?? full?.notes ?? ""}
+          onChange={(e) => setNotes(e.target.value)}
+          onBlur={() => notes !== null && notes !== (full?.notes ?? "") && run(patch({ notes }), "Notes saved.")}
+          rows={5}
+          placeholder="Only you see these."
+          className={cn(field, "py-3 leading-relaxed")}
+        />
+      </section>
+
+      {others.length ? (
+        <section className="grid gap-2.5">
+          <h3 className={h3}>Same person, another record</h3>
+          <div className="flex flex-wrap items-end gap-2.5">
+            <select value={into} onChange={(e) => { setInto(e.target.value); setSure(false); }} className={cn(field, "w-auto max-w-full")} aria-label="Record to merge in">
+              <option value="">Pick the other record</option>
+              {others.map((o) => <option key={o.id} value={o.id}>{o.name} · {mailable(o.email) ? o.email : o.email.slice(o.email.indexOf(":") + 1)}</option>)}
+            </select>
+            {into ? (
+              sure ? (
+                <button type="button" className={cn(btn, primary)} onClick={() => run(patch({ mergeFrom: `lead:${into}` }).then(() => { setInto(""); setSure(false); }), "Merged.")}>
+                  Merge into this one
+                </button>
+              ) : (
+                <button type="button" className={btn} onClick={() => setSure(true)}>Merge</button>
+              )
+            ) : null}
+          </div>
+          {sure ? <p className="text-[14px] text-muted-foreground">The timeline and notes of the other record move here, and it is deleted.</p> : null}
+        </section>
+      ) : null}
+
+      {note ? <p role="status" className="font-mono text-[13px] text-muted-foreground">{note}</p> : null}
+    </div>
+  );
 }

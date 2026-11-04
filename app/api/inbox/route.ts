@@ -6,6 +6,26 @@ import { sealer } from "@/lib/lead-crypto";
 import { subscribe, unsubscribe } from "@/lib/lead-push";
 import { publicKey } from "@/lib/web-push";
 import { notionStage } from "@/lib/notion-lead";
+import { cleanTemplates, csv, manualLead, merge, stats, type NewLead } from "@/lib/lead-crm";
+
+/** Where his reply templates live: not personal data, so plain JSON. */
+const TEMPLATES_KEY = "leads:templates";
+
+/** Every lead, opened in full: for the numbers and the export, never the list. */
+async function everyLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: NonNullable<Awaited<ReturnType<typeof sealer>>>) {
+  const out: Lead[] = [];
+  let after: string | undefined;
+  for (;;) {
+    const listed = await inbox.list({ prefix: "lead:", cursor: after });
+    for (const k of listed.keys) {
+      const l = await readLead(inbox, seal, k.name.slice(5));
+      if (l) out.push(l);
+    }
+    if (listed.list_complete) break;
+    after = listed.cursor;
+  }
+  return out;
+}
 
 /* ── reading the inbox ────────────────────────────────────────────
  * The one endpoint /admin's Inbox tab talks to. Lists enquiries, opens one,
@@ -176,6 +196,22 @@ export async function GET(request: Request) {
     return json({ key: publicKey(JSON.parse(gate.vapid) as JsonWebKey) });
   }
 
+  // His reply templates, or the defaults.
+  if (url.searchParams.has("templates")) {
+    const saved = await gate.inbox.get(TEMPLATES_KEY);
+    return json({ templates: cleanTemplates(saved ? JSON.parse(saved) : undefined) });
+  }
+  // The numbers, and every lead as CSV (`lib/lead-crm.ts`).
+  if (url.searchParams.has("stats") || url.searchParams.has("csv")) {
+    const seal = await gate.seal;
+    if (!seal) return json({ error: "Leads need LEADS_KEY on the Worker." }, 503);
+    const all = await everyLead(gate.inbox, seal);
+    if (url.searchParams.has("stats")) return json({ stats: stats(all, Date.now()) });
+    return new Response(csv(all), {
+      headers: { ...NO_STORE, "content-type": "text/csv; charset=utf-8", "content-disposition": `attachment; filename="leads-${new Date().toISOString().slice(0, 10)}.csv"` },
+    });
+  }
+
   // The lead desk (`components/admin-leads.tsx`): one record per person.
   // Sealed with LEADS_KEY (`lib/lead-crypto.ts`), opened here and only here.
   if (wanted?.startsWith("lead:") || url.searchParams.has("leads")) {
@@ -247,6 +283,12 @@ export async function PATCH(request: Request) {
     return json({ ok: true });
   }
   if (typeof given.key === "string" && given.key.startsWith("lead:")) return patchLead(gate.inbox, await gate.seal, given, gate.notion);
+  // His reply templates, saved whole.
+  if (given.templates !== undefined) {
+    const templates = cleanTemplates(given.templates);
+    await gate.inbox.put(TEMPLATES_KEY, JSON.stringify(templates));
+    return json({ templates });
+  }
   const { key, read } = given as { key?: string; read?: boolean };
   if (!key?.startsWith("msg:") || typeof read !== "boolean")
     return json({ error: "Unknown." }, 400);
@@ -315,6 +357,18 @@ export async function POST(request: Request) {
   const gate = await guard(request);
   if (gate.error) return gate.error;
   const given = await parsed(request);
+  // A lead he adds by hand: a DM, a text, a referral.
+  if (given?.add && typeof given.add === "object") {
+    const seal = await gate.seal;
+    if (!seal) return json({ error: "Leads need LEADS_KEY on the Worker." }, 503);
+    const lead = manualLead(given.add as NewLead, new Date().toISOString());
+    if ("error" in lead) return json(lead, 400);
+    const id = await seal.id(lead.email);
+    if (await readLead(gate.inbox, seal, id)) return json({ error: "That person is already a lead.", id }, 409);
+    await gate.inbox.delete(`gone:${id}`);
+    await writeLead(gate.inbox, seal, id, lead);
+    return json({ lead, id });
+  }
   if (given?.backfill !== true) return json({ error: "Unknown." }, 400);
   const seal = await gate.seal;
   if (!seal) return json({ error: "Leads need LEADS_KEY on the Worker." }, 503);
@@ -360,6 +414,16 @@ export async function POST(request: Request) {
 async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: Awaited<ReturnType<typeof sealer>>, given: Record<string, unknown>, notion?: string) {
   if (!seal) return json({ error: "Leads need LEADS_KEY on the Worker." }, 503);
   const { key, stage, snoozeUntil, seen, archive, trash } = given as { key: string; stage?: string; snoozeUntil?: string; seen?: boolean; archive?: boolean; trash?: boolean };
+  const { notes, remind, details, quote, lostReason, mergeFrom } = given as {
+    notes?: string;
+    remind?: { at?: string; text?: string } | null;
+    details?: { name?: string; phone?: string; ig?: string; company?: string; source?: string; kind?: string };
+    quote?: number | null;
+    lostReason?: string;
+    mergeFrom?: string;
+  };
+  if (remind && (typeof remind.at !== "string" || isNaN(Date.parse(remind.at)))) return json({ error: "Bad time." }, 400);
+  if (quote !== undefined && quote !== null && !(typeof quote === "number" && quote >= 0 && quote < 1e7)) return json({ error: "Bad amount." }, 400);
   if (stage !== undefined && !(STAGES as readonly string[]).includes(stage)) return json({ error: "Unknown stage." }, 400);
   if (snoozeUntil !== undefined && snoozeUntil !== "" && isNaN(Date.parse(snoozeUntil))) return json({ error: "Bad time." }, 400);
   const id = key.slice(5);
@@ -377,6 +441,34 @@ async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: Await
   if (typeof trash === "boolean") lead = fold(lead, lead.email, { event: { at, kind: "trash", note: trash ? "in" : "out" }, on: trash });
   // Opened (true), or marked unread again by hand (false).
   if (typeof seen === "boolean") lead = { ...lead, unread: !seen };
+  // His own words and numbers (`lib/lead-crm.ts`).
+  const cut = (v: unknown, n: number) => (typeof v === "string" && v.trim() ? v.trim().slice(0, n) : undefined);
+  if (typeof notes === "string") lead = { ...lead, notes: cut(notes, 5000) };
+  if (remind !== undefined) {
+    const r = remind ? { at: new Date(remind.at!).toISOString(), text: cut(remind.text, 200) ?? "" } : undefined;
+    lead = { ...lead, remind: r, events: [...lead.events, { at, kind: "remind" as const, note: r ? r.at : "" }].slice(-50) };
+  }
+  if (details) {
+    const d = {
+      name: cut(details.name, 80) ?? lead.name,
+      phone: cut(details.phone, 40),
+      ig: cut(details.ig, 31)?.replace(/^@?/, "@"),
+      company: cut(details.company, 80),
+      source: cut(details.source, 40),
+      kind: cut(details.kind, 40)?.toLowerCase() ?? lead.kind,
+    };
+    lead = { ...lead, ...d, events: [...lead.events, { at, kind: "edit" as const }].slice(-50) };
+  }
+  if (quote !== undefined) lead = { ...lead, quote: quote ?? undefined, events: [...lead.events, { at, kind: "quote" as const, note: quote === null ? "" : String(quote) }].slice(-50) };
+  if (typeof lostReason === "string") lead = { ...lead, lostReason: cut(lostReason, 80) };
+  // Another record of the same person folded into this one; the other goes for good.
+  if (typeof mergeFrom === "string" && mergeFrom.startsWith("lead:") && mergeFrom !== key) {
+    const other = await readLead(inbox, seal, mergeFrom.slice(5));
+    if (!other) return json({ error: "Gone." }, 404);
+    lead = merge(lead, other, at);
+    await bury(inbox, mergeFrom);
+  }
+  for (const k of Object.keys(lead) as (keyof Lead)[]) if (lead[k] === undefined) delete lead[k];
   await writeLead(inbox, seal, id, lead);
   return json({ lead });
 }

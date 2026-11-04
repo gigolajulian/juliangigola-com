@@ -30,7 +30,9 @@ export type Stage = (typeof STAGES)[number];
 /** What happened, as it reached the site. `stage` is Julian's own move. */
 export type LeadEvent = {
   at: string;
-  kind: "inquiry" | "call" | "booking" | "no-deposit" | "deposit-stuck" | "stage" | "snooze" | "mail" | "archive" | "trash";
+  kind: "inquiry" | "call" | "booking" | "no-deposit" | "deposit-stuck" | "stage" | "snooze" | "mail" | "archive" | "trash"
+    // Julian's own hand (`lib/lead-crm.ts`): added, details changed, merged, a reminder, a quote.
+    | "added" | "edit" | "merge" | "remind" | "quote";
   /** The raw row (`msg:` key), Cal.com uid or Stripe intent, so a retry folds in once. */
   ref?: string;
   /** Booking time, session, new stage, a mail's subject: a short line for the timeline. */
@@ -73,11 +75,28 @@ export type Lead = {
   snippet?: string;
   /** Pictures they attached to it. */
   refs?: number;
+  /** Where they first came from: the referring site, "Booking page", or what he typed. */
+  source?: string;
+  /** His own: private notes, a reminder, contact details, the quote and why it was lost. */
+  notes?: string;
+  remind?: { at: string; text: string };
+  phone?: string;
+  ig?: string;
+  company?: string;
+  /** Quoted price in dollars. */
+  quote?: number;
+  lostReason?: string;
   events: LeadEvent[];
 };
 
 /** What the list shows, sealed into KV metadata (under its 1024-byte cap). `id` is added when listed. */
-export type LeadSummary = Omit<Lead, "events" | "notion" | "deposit"> & { paid?: true; id?: string };
+export type LeadSummary = Omit<Lead, "events" | "notion" | "deposit" | "notes" | "remind" | "phone" | "ig" | "company" | "lostReason" | "source"> & {
+  paid?: true;
+  id?: string;
+  /** When his reminder is due, and its words, cut short. */
+  due?: string;
+  dueText?: string;
+};
 
 /** Events kept per lead: the timeline needs the recent ones, KV values stay small. */
 const KEEP = 50;
@@ -111,6 +130,8 @@ export type Change = {
   /** An inquiry's message and how many pictures came with it. */
   snippet?: string;
   refs?: number;
+  /** Where they came from; only the first one sticks. */
+  source?: string;
 };
 
 /** One event folded into a lead. Returns the lead unchanged when the event
@@ -158,6 +179,7 @@ export function fold(lead: Lead | null, email: string, c: Change): Lead {
   if (c.deposit) next.deposit = c.deposit;
   if (c.flag && !next.flags?.includes(c.flag)) next.flags = [...(next.flags ?? []), c.flag];
   if (c.snippet !== undefined) Object.assign(next, { snippet: c.snippet.replace(/\s+/g, " ").trim().slice(0, 140), refs: c.refs });
+  if (c.source && !next.source) next.source = c.source.slice(0, 40);
 
   const want = asks[event.kind];
   if (want && (rank(want) > rank(next.stage) || (want === "Inquiry" && closed(next.stage)) || !lead)) {
@@ -197,8 +219,10 @@ export function isLate(l: Pick<Lead, "stage" | "stageAt" | "snoozeUntil">, now: 
 
 // Name and email capped: KV metadata holds 1024 bytes, and the sealed summary
 // grows by a third, so one long Cal.com name must not cost the whole lead.
-export const leadSummary = ({ events: _e, notion: _n, deposit, ...rest }: Lead): LeadSummary => ({
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const leadSummary = ({ events, notion, deposit, notes, remind, phone, ig, company, lostReason, source, ...rest }: Lead): LeadSummary => ({
   ...rest,
+  ...(remind ? { due: remind.at, dueText: remind.text.slice(0, 40) } : {}),
   name: rest.name?.slice(0, 80),
   email: rest.email.slice(0, 120),
   ...(rest.snippet ? { snippet: rest.snippet.slice(0, 90) } : {}),
@@ -220,7 +244,8 @@ const META_MAX = 1000;
 /** What a summary gives up, in order, when non-Latin text makes it too big:
     the message, then most of the name, then most of the address. */
 const SHRINK: ((m: LeadSummary) => LeadSummary)[] = [
-  ({ snippet: _s, ...m }) => m,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  ({ snippet, dueText, ...m }) => m,
   (m) => ({ ...m, name: m.name.slice(0, 24) }),
   (m) => ({ ...m, name: m.name.slice(0, 8), email: m.email.slice(0, 40) }),
 ];
