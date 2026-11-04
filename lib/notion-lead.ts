@@ -67,10 +67,18 @@ const notion = (token: string, path: string, method: string, body: unknown) =>
     signal: AbortSignal.timeout(4000),
   });
 
-/** The newest Bookings row for this address, or null when there is none. */
+/** Finished projects keep their row as it was; a past client starts a new one. */
+const CLOSED = ["Delivered", "Complete", "Lost"];
+
+/** The newest open Bookings row for this address, or null when there is none. */
 export async function findRow(token: string, email: string): Promise<string | null> {
   const res = await notion(token, `/databases/${DATABASE}/query`, "POST", {
-    filter: { property: "Contact Email", email: { equals: email } },
+    filter: {
+      and: [
+        { property: "Contact Email", email: { equals: email } },
+        ...CLOSED.map((name) => ({ property: "Status", select: { does_not_equal: name } })),
+      ],
+    },
     sorts: [{ timestamp: "created_time", direction: "descending" }],
     page_size: 1,
   });
@@ -79,8 +87,8 @@ export async function findRow(token: string, email: string): Promise<string | nu
 }
 
 /**
- * One row per person: the same address again updates the row it already
- * has instead of adding another. An inquiry never pulls a row back to
+ * One open row per person: the same address again updates its open row
+ * instead of adding another (Julian: "Reuse open rows only"). An inquiry never pulls a row back to
  * Inquiry, and the title and Source stay as first set. When the lookup
  * fails it adds a row, so nothing is lost. Returns the row's page id.
  */

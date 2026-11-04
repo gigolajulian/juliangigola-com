@@ -34,6 +34,21 @@ describe("toNotion", () => {
     expect(w.body.properties).toHaveProperty("Last Contact");
   });
 
+  it("gives a past client whose row is Delivered a new row, not a PATCH", async () => {
+    // Their only row is Delivered; answer the query by its own filter, as Notion would.
+    const calls: Call[] = [];
+    vi.stubGlobal("fetch", async (url: string, init: RequestInit) => {
+      const body = JSON.parse(init.body as string);
+      calls.push({ url, method: init.method!, body });
+      if (!url.endsWith("/query")) return Response.json({ id: "new-page" });
+      const shut = (body.filter.and as { select?: { does_not_equal: string } }[]).some((f) => f.select?.does_not_equal === "Delivered");
+      return Response.json({ results: shut ? [] : [{ id: "old-row" }] });
+    });
+    expect(await toNotion("t", { stored, status: "Inquiry" })).toBe("new-page");
+    expect(calls.map((c) => c.method)).toEqual(["POST", "POST"]);
+    expect(calls[1].url).toBe("https://api.notion.com/v1/pages");
+  });
+
   it("moves a known row forward on a booking", async () => {
     const calls = fake("row-1");
     await toNotion("t", { stored, status: "Confirmed", kind: "headshots" });
