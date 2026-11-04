@@ -41,3 +41,59 @@
 @keyframes mp-rm-in {
   from { opacity: 0; }
 }
+
+/* ── Item 3, `pages`: page transitions, two rules and back ──────────────
+   The page travels as one snapshot of the screen (root): cheap on a tall
+   page, where #main is already kept out of the trip for iPhone memory
+   (`data-page-tall`, transitions.css). The header holds still. No delay
+   from the bar or a drawer. A link: the old page fades out in 250 on
+   `out` over the new one, which rises 2.5vh in 400 on `drawer`. A photo
+   (`data-mp-fly`, page-fly.tsx): the new page also fades in, the covers
+   left behind recede, the photo flies in its own layer. Back
+   (`data-nav="out"`): the new page comes down instead of up, and fades. */
+@media (prefers-reduced-motion: no-preference) {
+  :root[data-mplan~="pages"] :is(#main, #main > *, [data-morph]) {
+    view-transition-name: none !important;
+  }
+  :root[data-mplan~="pages"] .v3 .site-hdr {
+    view-transition-name: mp-hdr;
+  }
+  :root[data-mplan~="pages"]::view-transition-group(mp-hdr),
+  :root[data-mplan~="pages"]::view-transition-new(mp-hdr),
+  :root[data-mplan~="pages"]::view-transition-group(root) {
+    animation: none !important;
+  }
+  :root[data-mplan~="pages"]::view-transition-group(mp-hdr) {
+    z-index: 3;
+  }
+  :root[data-mplan~="pages"]::view-transition-old(mp-hdr) {
+    display: none;
+  }
+  :root[data-mplan~="pages"]::view-transition-old(root) {
+    z-index: 1;
+    mix-blend-mode: normal;
+    animation: mp-out var(--dur-small) var(--ease-out-strong) both !important;
+  }
+  :root[data-mplan~="pages"]::view-transition-new(root) {
+    mix-blend-mode: normal;
+    animation: mp-rise var(--dur-page) var(--ease-drawer) both !important;
+  }
+  :root[data-mplan~="pages"][data-mp-fly]::view-transition-new(root) {
+    animation: mp-rise var(--dur-page) var(--ease-drawer) both, mp-in var(--dur-page) var(--ease-out-strong) both !important;
+  }
+  :root[data-mplan~="pages"][data-nav="out"]::view-transition-new(root) {
+    animation: mp-drop var(--dur-page) var(--ease-drawer) both, mp-in var(--dur-page) var(--ease-out-strong) both !important;
+  }
+  :root[data-mplan~="pages"]::view-transition-group(.mp-out) {
+    z-index: 2;
+    animation: none;
+  }
+  :root[data-mplan~="pages"]::view-transition-old(.mp-out) {
+    animation: mp-recede var(--dur-small) var(--ease-out-strong) both;
+  }
+}
+@keyframes mp-out { to { opacity: 0; } }
+@keyframes mp-in { from { opacity: 0; } }
+@keyframes mp-rise { from { transform: translateY(2.5vh); } }
+@keyframes mp-drop { from { transform: translateY(-2.5vh); } }
+@keyframes mp-recede { to { opacity: 0; transform: scale(0.97); } }
