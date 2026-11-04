@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { AdminLeads } from "@/components/admin-leads";
+import { LeadCalendar } from "@/components/lead-calendar";
 import { startupImages } from "@/lib/leads-startup";
 
 /* ── the lead desk, on its own ────────────────────────────────────
@@ -25,12 +26,14 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover" };
 
-export default function LeadsPage() {
+// `?calendar`: the Calendar on its own, until the desk's navigation (leads-nav) mounts it.
+export default async function LeadsPage({ searchParams }: { searchParams: Promise<{ calendar?: string }> }) {
+  const calendar = (await searchParams).calendar !== undefined;
   return (
     // `data-workbench`: no site footer; `data-lead-app`: no site header either,
     // and the top clears the iPhone's status bar (`app/styles/admin.css`).
     <div data-workbench data-lead-app className="w-full px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] sm:px-10">
-      <AdminLeads />
+      {calendar ? <LeadCalendar /> : <AdminLeads />}
     </div>
   );
 }

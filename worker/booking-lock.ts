@@ -12,7 +12,7 @@ export class BookingLock {
 
   constructor(
     private state: { storage: Store },
-    private env: { GCAL_OAUTH?: string },
+    private env: { GCAL_OAUTH?: string; INBOX?: Parameters<typeof bookOwn>[3] },
   ) {}
 
   /* An await inside a DO lets the next request in (fetch to Google opens
@@ -27,11 +27,11 @@ export class BookingLock {
     const { op, arg } = (await request.json()) as { op: string; arg: unknown };
     const store = this.state.storage;
     try {
-      if (op === "book") return Response.json(await this.serial(() => bookOwn(store, this.env.GCAL_OAUTH, arg as BookInput)));
+      if (op === "book") return Response.json(await this.serial(() => bookOwn(store, this.env.GCAL_OAUTH, arg as BookInput, this.env.INBOX)));
       if (op === "cancel") return Response.json(await this.serial(() => cancelOwn(store, this.env.GCAL_OAUTH, String(arg))));
       if (op === "reschedule") {
         const { id, start } = arg as { id: string; start: string };
-        return Response.json(await this.serial(() => rescheduleOwn(store, this.env.GCAL_OAUTH, id, start)));
+        return Response.json(await this.serial(() => rescheduleOwn(store, this.env.GCAL_OAUTH, id, start, this.env.INBOX)));
       }
       if (op === "due") return Response.json({ records: await dueReminders(store) });
       if (op === "reminded") return Response.json({ ok: await markReminded(store, String(arg)) ?? true });

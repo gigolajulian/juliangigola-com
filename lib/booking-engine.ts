@@ -84,7 +84,7 @@ function description(b: BookInput, id: string) {
 }
 
 /** Books `b` if its time is still open. Call it only through the lock. Throws when Google fails. */
-export async function bookOwn(store: Store, secret: string | undefined, b: BookInput): Promise<BookResult> {
+export async function bookOwn(store: Store, secret: string | undefined, b: BookInput, kv?: Parameters<typeof openNow>[4]): Promise<BookResult> {
   const rule = EVENTS[b.slug];
   if (!rule) return { ok: false, reason: "unknown" };
   // A deposit books once, however often Stripe delivers it.
@@ -93,7 +93,7 @@ export async function bookOwn(store: Store, secret: string | undefined, b: BookI
     const r = had && (await findBooking(store, had));
     if (r) return { ok: true, record: r };
   }
-  if (!(await openNow(secret, b.slug, b.start))) return { ok: false, reason: "taken" };
+  if (!(await openNow(secret, b.slug, b.start, undefined, kv))) return { ok: false, reason: "taken" };
 
   const id = newId();
   const end = new Date(Date.parse(b.start) + rule.length * 6e4).toISOString();
@@ -189,14 +189,14 @@ export async function cancelOwn(store: Store, secret: string | undefined, id: st
 }
 
 /** Moves booking `id` to `start` if that time is open. Call it only through the lock. */
-export async function rescheduleOwn(store: Store, secret: string | undefined, id: string, start: string): Promise<ChangeResult> {
+export async function rescheduleOwn(store: Store, secret: string | undefined, id: string, start: string, kv?: Parameters<typeof openNow>[4]): Promise<ChangeResult> {
   const was = await findBooking(store, id);
   if (!was) return { ok: false, reason: "missing" };
   if (was.cancelled) return { ok: false, reason: "cancelled" };
   if (Date.parse(was.start) <= Date.now()) return { ok: false, reason: "past" };
   const rule = EVENTS[was.slug];
   const t = Date.parse(start);
-  if (!rule || isNaN(t) || !(await openNow(secret, was.slug, start, was))) return { ok: false, reason: "taken" };
+  if (!rule || isNaN(t) || !(await openNow(secret, was.slug, start, was, kv))) return { ok: false, reason: "taken" };
   const end = new Date(t + rule.length * 6e4).toISOString();
   await gcal(secret, `/calendars/primary/events/${encodeURIComponent(was.eventId)}?sendUpdates=none`, {
     method: "PATCH",
