@@ -1,6 +1,6 @@
 import { gcal } from "./gcal";
 import { sealer } from "./lead-crypto";
-import { readLead, recordLead, type Change, type LeadStore } from "./leads";
+import { canonLeads, readLead, recordLead, type Change, type LeadStore } from "./leads";
 
 /* ── hello@'s Gmail on the lead timeline ─────────────────────────
  * Julian (2026-11-04): "your own Gmail replies on the timeline". Every ten
@@ -42,6 +42,7 @@ export async function syncGmail(env: LeadStore & { GCAL_OAUTH?: string }): Promi
   const kv = env.INBOX;
   const s = await sealer(env.LEADS_KEY);
   if (!kv || !s) return 0;
+  await canonLeads(kv, s);
   const restart = async () => {
     const { historyId } = await gcal<{ historyId: string }>(env.GCAL_OAUTH, `${GMAIL}/profile`);
     await kv.put(CURSOR, historyId);

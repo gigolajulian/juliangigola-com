@@ -25,6 +25,17 @@ export type Sealer = {
   open<T>(sealed: string): Promise<T>;
 };
 
+/** One person's address, however they spell it. Julian (2026-11-04): a lead
+    typed gigola.julian@gmail.com whose mail came from gigolajulian@gmail.com
+    never met. Gmail ignores dots and anything after "+", so the id does too. */
+export function canonical(email: string): string {
+  const e = email.trim().toLowerCase();
+  const at = e.lastIndexOf("@");
+  const [user, domain] = [e.slice(0, at), e.slice(at + 1)];
+  if (at < 1 || (domain !== "gmail.com" && domain !== "googlemail.com")) return e;
+  return `${user.split("+")[0].replaceAll(".", "")}@gmail.com`;
+}
+
 const cache = new Map<string, Promise<Sealer>>();
 
 /** The sealer for a secret, or null when LEADS_KEY is unset or not 32 bytes. */
@@ -47,7 +58,7 @@ async function make(raw: Uint8Array): Promise<Sealer> {
   const mac = await crypto.subtle.importKey("raw", await derive("jg-leads:id"), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
   return {
     async id(email) {
-      const sig = new Uint8Array(await crypto.subtle.sign("HMAC", mac, enc.encode(email.trim().toLowerCase())));
+      const sig = new Uint8Array(await crypto.subtle.sign("HMAC", mac, enc.encode(canonical(email))));
       return [...sig.slice(0, 16)].map((b) => b.toString(16).padStart(2, "0")).join("");
     },
     async seal(value) {

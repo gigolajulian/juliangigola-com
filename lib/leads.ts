@@ -270,6 +270,34 @@ export async function writeLead(kv: KV, s: Sealer, id: string, lead: Lead): Prom
   await kv.put(leadKey(id), await s.seal(lead), { metadata: { s: meta } });
 }
 
+const CANON = "leads:canon";
+/**
+ * Once: moves each lead stored before ids ignored Gmail dots and "+tags"
+ * (`canonical` in lib/lead-crypto.ts, 2026-11-04) to its new id. A lead whose
+ * new id is already taken stays put, for Merge on the desk. Returns how many moved.
+ */
+export async function canonLeads(kv: KV, s: Sealer): Promise<number> {
+  if ((await kv.get(CANON)) !== null) return 0;
+  let moved = 0;
+  let cursor: string | undefined;
+  for (;;) {
+    const listed = await kv.list({ prefix: "lead:", cursor });
+    for (const k of listed.keys) {
+      const lead = await readLead(kv, s, k.name.slice(5));
+      if (!lead?.email.includes("@")) continue;
+      const id = await s.id(lead.email);
+      if (leadKey(id) === k.name || (await kv.get(leadKey(id))) !== null) continue;
+      await writeLead(kv, s, id, lead);
+      await kv.delete(k.name);
+      moved++;
+    }
+    if (listed.list_complete || !listed.cursor) break;
+    cursor = listed.cursor;
+  }
+  await kv.put(CANON, new Date().toISOString());
+  return moved;
+}
+
 /** Logs a mail the site sent against the person it was about. Never throws. */
 export const logMail = (env: LeadStore, email: string | undefined, subject: string, mail: Sent) =>
   recordLead(env, email ?? "", { event: { at: new Date().toISOString(), kind: "mail", note: subject, mail } });
