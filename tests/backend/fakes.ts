@@ -82,3 +82,14 @@ export const githubToken = () => `ghp_${"t".repeat(30)}${String(++n).padStart(6,
 
 /** The scope header GitHub sends back for a classic token that may push. */
 export const SCOPED = { "x-oauth-scopes": "repo" };
+
+/** A LEADS_KEY for tests: 32 bytes, base64. */
+export const LEADS_KEY = btoa("k".repeat(32));
+
+/** A person's lead as the desk would open it (sealed in KV, `lib/lead-crypto.ts`). */
+export async function leadOf(kv: FakeKV, email: string) {
+  const { sealer } = await import("@/lib/lead-crypto");
+  const s = await sealer(LEADS_KEY)!;
+  const raw = await kv.get(`lead:${await s.id(email)}`);
+  return typeof raw === "string" ? s.open<import("@/lib/leads").Lead>(raw) : undefined;
+}

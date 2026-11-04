@@ -403,6 +403,11 @@ const nextConfig: NextConfig = {
       // /visit is unlisted: the directions page Julian sends to booked
       // clients. `public/_headers` says the same for the prerendered copy.
       { source: "/visit", headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }] },
+      // /admin and the lead desk (Julian: "hidden from all seo"). robots.txt
+      // disallows /admin and the sitemap leaves it out; this covers a crawler
+      // that reaches a URL anyway. `/api/inbox` says the same on its own responses.
+      { source: "/admin", headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }] },
+      { source: "/admin/:path*", headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }] },
     ];
   },
 

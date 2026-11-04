@@ -1,7 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { summary, enquiry, enquiryKey } from "@/lib/inbox";
 import { recordLead } from "@/lib/leads";
-import { FakeKV, SCOPED, githubToken, reply } from "./fakes";
+import { FakeKV, LEADS_KEY, SCOPED, githubToken, reply } from "./fakes";
+import { sealer } from "@/lib/lead-crypto";
 
 /* /admin's inbox (`app/api/inbox/route.ts`): somebody's name, email and
    message, so the gate is the point. Either the INBOX_KEY or a GitHub
@@ -31,7 +32,7 @@ const seed = async (at: number, id: string, extra: Partial<Parameters<typeof enq
 
 beforeEach(() => {
   kv = new FakeKV();
-  ctx.env = { INBOX: kv, INBOX_KEY: KEY };
+  ctx.env = { INBOX: kv, INBOX_KEY: KEY, LEADS_KEY };
 });
 afterEach(() => vi.unstubAllGlobals());
 
@@ -181,35 +182,46 @@ describe("DELETE", () => {
 });
 
 describe("leads", () => {
-  const lead = async (email: string, at: string, stage = "Inquiry") => {
-    const l = await recordLead(kv as never, email, { event: { at, kind: "inquiry", ref: `msg:${email}` }, name: email.split("@")[0] });
-    if (stage !== "Inquiry") await PATCH(req("PATCH", { body: JSON.stringify({ key: `lead:${email}`, stage }) }));
-    return l!;
-  };
+  const idOf = async (email: string) => (await sealer(LEADS_KEY)!).id(email);
+  const lead = async (email: string, at: string) =>
+    (await recordLead({ INBOX: kv as never, LEADS_KEY }, email, { event: { at, kind: "inquiry", ref: `msg:${email}` }, name: email.split("@")[0] }))!;
 
-  it("lists people newest first from metadata alone, behind the same gate", async () => {
+  it("lists people newest first, opened from sealed metadata, behind the same gate", async () => {
     await lead("a@example.com", "2026-11-01T10:00:00Z");
     await lead("b@example.com", "2026-11-02T10:00:00Z");
     expect((await GET(req("GET", { key: null, query: "?leads" }))).status).toBe(401);
     const { leads } = await (await GET(req("GET", { query: "?leads" }))).json();
     expect(leads.map((l: { email: string }) => l.email)).toEqual(["b@example.com", "a@example.com"]);
+    expect(leads[0].id).toBe(await idOf("b@example.com"));
     expect(leads[0].events).toBeUndefined();
+  });
+
+  it("stores nothing readable: no address in the key, value or metadata", async () => {
+    await lead("a@example.com", "2026-11-01T10:00:00Z");
+    const [[key, entry]] = [...kv.data.entries()].filter(([k]) => k.startsWith("lead:"));
+    expect(key).toBe(`lead:${await idOf("a@example.com")}`);
+    expect(JSON.stringify(entry)).not.toContain("example.com");
   });
 
   it("opens one with its timeline, and moves its stage, snooze and seen by hand", async () => {
     await lead("a@example.com", "2026-11-01T10:00:00Z");
-    const one = await (await GET(req("GET", { query: "?key=lead:a@example.com" }))).json();
+    const key = `lead:${await idOf("a@example.com")}`;
+    const one = await (await GET(req("GET", { query: `?key=${key}` }))).json();
     expect(one.lead.events).toHaveLength(1);
-    const res = await PATCH(req("PATCH", { body: JSON.stringify({ key: "lead:a@example.com", stage: "Quoted", snoozeUntil: "2026-12-01T00:00:00Z", seen: true }) }));
+    const res = await PATCH(req("PATCH", { body: JSON.stringify({ key, stage: "Quoted", snoozeUntil: "2026-12-01T00:00:00Z", seen: true }) }));
     expect((await res.json()).lead).toMatchObject({ stage: "Quoted", snoozeUntil: "2026-12-01T00:00:00Z", unread: false });
-    expect(kv.data.get("lead:a@example.com")!.metadata).toMatchObject({ stage: "Quoted", unread: false });
+    const { leads } = await (await GET(req("GET", { query: "?leads" }))).json();
+    expect(leads[0]).toMatchObject({ stage: "Quoted", unread: false });
   });
 
-  it("refuses an unknown stage, a bad time and a missing lead", async () => {
+  it("refuses an unknown stage, a bad time and a missing lead, and says when LEADS_KEY is unset", async () => {
     await lead("a@example.com", "2026-11-01T10:00:00Z");
-    const patch = (b: object) => PATCH(req("PATCH", { body: JSON.stringify({ key: "lead:a@example.com", ...b }) }));
+    const key = `lead:${await idOf("a@example.com")}`;
+    const patch = (b: object) => PATCH(req("PATCH", { body: JSON.stringify({ key, ...b }) }));
     expect((await patch({ stage: "Won" })).status).toBe(400);
     expect((await patch({ snoozeUntil: "soon" })).status).toBe(400);
-    expect((await PATCH(req("PATCH", { body: JSON.stringify({ key: "lead:nobody@example.com", seen: true }) }))).status).toBe(404);
+    expect((await PATCH(req("PATCH", { body: JSON.stringify({ key: "lead:0000", seen: true }) }))).status).toBe(404);
+    ctx.env = { INBOX: kv, INBOX_KEY: KEY };
+    expect((await GET(req("GET", { query: "?leads" }))).status).toBe(503);
   });
 });

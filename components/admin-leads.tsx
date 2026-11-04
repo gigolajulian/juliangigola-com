@@ -118,14 +118,25 @@ export function AdminLeads() {
   React.useEffect(load, [load]);
 
   /** A change from the open lead, reflected in its row at once. */
-  const changed = (l: Lead) => setLeads((rows) => rows?.map((r) => (r.email === l.email ? { ...r, ...l } : r)) ?? null);
+  const changed = (l: Lead) => setLeads((rows) => rows?.map((r) => (r.email === l.email ? { ...r, ...l, id: r.id } : r)) ?? null);
 
-  if (error) return <p className="py-8 text-[15px] text-muted-foreground">{error === "Not authorized." ? "Open the Inbox tab and sign in there first. Leads use the same key." : error}</p>;
+  if (error === "Not authorized." || error?.startsWith("GitHub did not accept"))
+    return (
+      <SignIn
+        onKey={(k) => {
+          window.localStorage.setItem(KEY_STORE, k);
+          setError(null);
+          load();
+        }}
+        wrong={!!window.localStorage.getItem(KEY_STORE)}
+      />
+    );
+  if (error) return <p className="py-8 text-[15px] text-muted-foreground">{error}</p>;
   if (!leads) return <p className="py-8 font-mono text-[13px] text-muted-foreground">Loading leads</p>;
 
   const count = (f: Filter) => leads.filter((l) => pass(l, f)).length;
   const shown = leads.filter((l) => pass(l, filter));
-  const current = leads.find((l) => l.email === open);
+  const current = leads.find((l) => l.id === open);
 
   return (
     // Sentence case and a text face, as in the approved mock: the site sets
@@ -158,14 +169,14 @@ export function AdminLeads() {
         {shown.length ? (
           <ul>
             {shown.map((l) => (
-              <li key={l.email}>
+              <li key={l.id}>
                 <button
                   type="button"
-                  onClick={() => setOpen(l.email)}
-                  aria-current={open === l.email ? "true" : undefined}
+                  onClick={() => setOpen(l.id ?? null)}
+                  aria-current={open === l.id ? "true" : undefined}
                   className={cn(
                     "grid w-full grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1.5 border-b border-border px-5 py-4 text-left transition-colors duration-200 hoverable:hover:bg-card",
-                    open === l.email && "bg-card shadow-[inset_3px_0_0_var(--accent)]",
+                    open === l.id && "bg-card shadow-[inset_3px_0_0_var(--accent)]",
                   )}
                 >
                   <span className="flex min-w-0 items-center gap-2 text-base font-semibold">
@@ -193,12 +204,40 @@ export function AdminLeads() {
 
       <section aria-label="Lead" className={cn("min-w-0 bg-card/40", !open && "max-lg:hidden")}>
         {current ? (
-          <Detail key={current.email} summary={current} call={call} onChange={changed} onBack={() => setOpen(null)} />
+          <Detail key={current.id} summary={current} call={call} onChange={changed} onBack={() => setOpen(null)} />
         ) : (
           <p className="px-8 py-10 text-[15px] text-muted-foreground max-lg:hidden">Pick a lead to see it here.</p>
         )}
       </section>
     </div>
+  );
+}
+
+/** The inbox key, pasted once per device. On the iPhone the installed app keeps
+    its own storage apart from Safari, so it asks once there too. A password
+    field, so a password manager can fill it. */
+function SignIn({ onKey, wrong }: { onKey: (k: string) => void; wrong: boolean }) {
+  const [k, setK] = React.useState("");
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (k.trim()) onKey(k.trim());
+      }}
+      className="grid max-w-md gap-4 py-10 normal-case"
+    >
+      <label htmlFor="lead-key" className="text-[15px]">Inbox key</label>
+      <input
+        id="lead-key"
+        type="password"
+        autoComplete="current-password"
+        value={k}
+        onChange={(e) => setK(e.target.value)}
+        className="min-h-12 rounded-[10px] border border-border bg-background px-4 text-base normal-case"
+      />
+      {wrong ? <p className="text-[15px] text-destructive">That key was not accepted. Paste it again.</p> : null}
+      <button type="submit" className={cn(btn, primary, "justify-self-start")}>Open leads</button>
+    </form>
   );
 }
 
@@ -235,7 +274,7 @@ function Detail({ summary, call, onChange, onBack }: { summary: LeadSummary; cal
   const [message, setMessage] = React.useState<Enquiry | null>(null);
   const [asked, setAsked] = React.useState(false);
   const [snoozing, setSnoozing] = React.useState(false);
-  const key = `lead:${summary.email}`;
+  const key = `lead:${summary.id}`;
 
   const patch = React.useCallback(
     async (body: Record<string, unknown>) => {

@@ -1,17 +1,35 @@
 /* Example leads in the local INBOX, for working on the lead desk in
- * `next dev` (Leads tab in /admin). Writes only to wrangler's local
- * state (.wrangler/), never to the real namespace. Names are made up.
+ * `next dev` (/admin/leads). Writes only to wrangler's local state
+ * (.wrangler/), never to the real namespace. Names are made up. Sealed
+ * like the real ones (`lib/lead-crypto.ts`), with LEADS_KEY from .dev.vars.
  *
  *   node scripts/seed-leads.mjs
  */
 import { getPlatformProxy } from "wrangler";
 
 const { env, dispose } = await getPlatformProxy();
+if (!env.LEADS_KEY) throw new Error("Put a LEADS_KEY (32 random bytes, base64) in .dev.vars first.");
+
+// The same two derived keys as lib/lead-crypto.ts.
+const enc = new TextEncoder();
+const raw = Uint8Array.from(atob(env.LEADS_KEY.trim()), (c) => c.charCodeAt(0));
+const derive = async (label) => new Uint8Array(await crypto.subtle.digest("SHA-256", new Uint8Array([...enc.encode(label), ...raw])));
+const aes = await crypto.subtle.importKey("raw", await derive("jg-leads:seal"), "AES-GCM", false, ["encrypt"]);
+const mac = await crypto.subtle.importKey("raw", await derive("jg-leads:id"), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+const b64 = (u) => btoa(String.fromCharCode(...u));
+const seal = async (v) => {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  return `${b64(iv)}.${b64(new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv }, aes, enc.encode(JSON.stringify(v)))))}`;
+};
+const idOf = async (email) => [...new Uint8Array(await crypto.subtle.sign("HMAC", mac, enc.encode(email))).slice(0, 16)].map((b) => b.toString(16).padStart(2, "0")).join("");
+
+for (const { name } of (await env.INBOX.list({ prefix: "lead:" })).keys) await env.INBOX.delete(name);
 const H = 3600e3;
 const ago = (h) => new Date(Date.now() - h * H).toISOString();
 const ahead = (h) => new Date(Date.now() + h * H).toISOString();
 
 const lead = (o) => ({ unread: false, flags: undefined, ...o, firstAt: o.firstAt ?? o.stageAt, lastAt: o.lastAt ?? o.stageAt });
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const summary = ({ events, notion, deposit, ...rest }) => ({ ...rest, ...(deposit ? { paid: true } : {}) });
 
 const mayaKey = `msg:${String(Date.now() - 26 * H).padStart(15, "0")}:seed0001`;
@@ -36,7 +54,7 @@ const leads = [
 
 for (const l of leads) {
   for (const k of Object.keys(l)) if (l[k] === undefined) delete l[k];
-  await env.INBOX.put(`lead:${l.email}`, JSON.stringify(l), { metadata: summary(l) });
+  await env.INBOX.put(`lead:${await idOf(l.email)}`, await seal(l), { metadata: { s: await seal(summary(l)) } });
 }
 const maya = {
   id: "seed0001", at: ago(26), type: "portrait", name: "Maya Okafor", email: "maya.okafor@example.com", read: false,
