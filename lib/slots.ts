@@ -1,4 +1,4 @@
-import { EVENTS, HOURS, TZ, type Rule } from "@/lib/booking-rules";
+import { DEFAULT_HOURS, EVENTS, TZ, windowOn, type Hours, type Rule } from "@/lib/booking-rules";
 import { gcal } from "@/lib/gcal";
 
 /* ── open times, from hello@'s free/busy ──────────────────────────
@@ -43,7 +43,7 @@ export function localIso(ms: number, tz: string) {
 }
 
 /** Every open start of `rule` between `from` and `to`, given what is busy. Pure. */
-export function startsFor(rule: Rule, busy: Busy[], from: number, to: number, now = Date.now()): number[] {
+export function startsFor(rule: Rule, busy: Busy[], from: number, to: number, now = Date.now(), hours: Hours = DEFAULT_HOURS): number[] {
   const out: number[] = [];
   const earliest = Math.max(from, now + rule.notice * 6e4);
   const latest = Math.min(to, rule.ahead ? now + rule.ahead * 864e5 : Infinity);
@@ -52,15 +52,16 @@ export function startsFor(rule: Rule, busy: Busy[], from: number, to: number, no
   const [y, m, d] = new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(earliest).split("-").map(Number);
   for (let i = 0; ; i++) {
     const day = new Date(Date.UTC(y, m - 1, d + i));
-    const open = HOURS[day.getUTCDay()];
+    const open = windowOn(hours, day.toISOString().slice(0, 10), day.getUTCDay());
     const midnight = zoned(day.getUTCFullYear(), day.getUTCMonth() + 1, day.getUTCDate(), 0);
     if (midnight > latest) break;
     if (!open) continue;
+    // The window's end is the last start, not the session's end.
     const close = zoned(day.getUTCFullYear(), day.getUTCMonth() + 1, day.getUTCDate(), open[1]);
-    for (let s = zoned(day.getUTCFullYear(), day.getUTCMonth() + 1, day.getUTCDate(), open[0]); s + rule.length * 6e4 <= close; s += step) {
+    for (let s = zoned(day.getUTCFullYear(), day.getUTCMonth() + 1, day.getUTCDate(), open[0]); s <= close; s += step) {
       if (s < earliest || s >= latest) continue;
       const end = s + (rule.length + rule.after) * 6e4;
-      if (!busy.some((b) => b.start < end && b.end > s)) out.push(s);
+      if (!busy.some((b) => b.start < end && b.end > s - (rule.before ?? 0) * 6e4)) out.push(s);
     }
   }
   return out;
@@ -185,7 +186,23 @@ export async function busyAll(secret: string | undefined, from: number, to: numb
         () => (failed.add(x.label), []),
       ),
     );
+  pieces.push(shiftDays(secret, from, to));
   return { busy: (await Promise.all(pieces)).flat(), failed: [...failed] };
+}
+
+/** Julian (2026-11-04): "when i work sgh, dont let them book me at all". Any day with an SGH event on it is busy from midnight to midnight Pacific, even when the shift itself is only the afternoon. */
+async function shiftDays(secret: string | undefined, from: number, to: number): Promise<Busy[]> {
+  type When = { date?: string; dateTime?: string };
+  const q = new URLSearchParams({ q: "SGH", singleEvents: "true", maxResults: "2500", timeMin: new Date(from - 864e5).toISOString(), timeMax: new Date(to + 864e5).toISOString() });
+  const r = await gcal<{ items?: { summary?: string; status?: string; start?: When; end?: When }[] }>(secret, `/calendars/primary/events?${q}`);
+  // The Pacific midnight of the day `w` falls on; an all-day end date is already the day after.
+  const midnight = (w: When, after: boolean) => {
+    const [y, m, d] = (w.date ?? new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(Date.parse(w.dateTime!))).split("-").map(Number);
+    return zoned(y, m, d + (after && !w.date ? 1 : 0), 0);
+  };
+  return (r.items ?? [])
+    .filter((e) => e.status !== "cancelled" && /\bSGH\b/i.test(e.summary ?? "") && e.start && e.end)
+    .map((e) => ({ start: midnight(e.start!, false), end: midnight(e.end!, true) }));
 }
 
 /** What is busy between `from` and `to`, on hello@ and the extras in `kv`. */
@@ -196,18 +213,18 @@ export async function busyBetween(secret: string | undefined, from: number, to: 
 }
 
 /** Open starts of `slug` between `from` and `to`, as UTC ms. `mine`: a booking being moved, whose own time is not in the way. `kv`: where the extra calendars are listed. */
-export async function openStarts(secret: string | undefined, slug: string, from: number, to: number, now = Date.now(), mine?: { start: string; end: string }, kv?: KV) {
+export async function openStarts(secret: string | undefined, slug: string, from: number, to: number, now = Date.now(), mine?: { start: string; end: string }, kv?: KV, hours?: Hours) {
   const rule = EVENTS[slug];
   if (!rule) return [];
   // The buffer after a session reaches past `to`.
-  const busy = (await busyBetween(secret, Math.max(from, now), to + (rule.length + rule.after) * 6e4, kv)).filter(
+  const busy = (await busyBetween(secret, Math.max(from, now) - (rule.before ?? 0) * 6e4, to + (rule.length + rule.after) * 6e4, kv)).filter(
     (b) => !mine || b.start !== Date.parse(mine.start) || b.end !== Date.parse(mine.end),
   );
-  return startsFor(rule, busy, from, to, now);
+  return startsFor(rule, busy, from, to, now, hours);
 }
 
 /** Whether `start` (ISO) is still open for `slug`, asking Google now. */
-export async function openNow(secret: string | undefined, slug: string, start: string, mine?: { start: string; end: string }, kv?: KV) {
+export async function openNow(secret: string | undefined, slug: string, start: string, mine?: { start: string; end: string }, kv?: KV, hours?: Hours) {
   const t = Date.parse(start);
-  return (await openStarts(secret, slug, t - 864e5, t + 864e5, Date.now(), mine, kv)).includes(t);
+  return (await openStarts(secret, slug, t - 864e5, t + 864e5, Date.now(), mine, kv, hours)).includes(t);
 }

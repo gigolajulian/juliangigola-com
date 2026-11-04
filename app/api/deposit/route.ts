@@ -1,5 +1,6 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { ownOnServer } from "@/lib/booking-rules";
+import { liveHours } from "@/lib/booking-engine";
 import { AMOUNT, CURRENCY, intentForm, isOpen, parseBooking, stripe } from "@/lib/deposit";
 
 /* ── a deposit starts ──────────────────────────────────────────────
@@ -27,7 +28,7 @@ export async function POST(request: Request) {
   if (ownOnServer(env, b.engine)) b.engine = "own";
 
   try {
-    if (!(await isOpen(b, env.GCAL_OAUTH, env.INBOX))) return json({ error: "taken" }, 409);
+    if (!(await isOpen(b, env.GCAL_OAUTH, env.INBOX, b.engine === "own" ? await liveHours(env) : undefined))) return json({ error: "taken" }, 409);
   } catch {
     return json({ error: "Could not reach the calendar. Try again." }, 502);
   }
