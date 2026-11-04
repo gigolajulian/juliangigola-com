@@ -20,7 +20,14 @@ export const forgetToken = () => void (cached = undefined);
 export async function gcalToken(secret: string | undefined, now = Date.now()): Promise<string> {
   if (cached && now < cached.until) return cached.token;
   if (!secret) throw new Error("GCAL_OAUTH is not set");
-  const { client_id, client_secret, refresh_token } = JSON.parse(secret) as { [k: string]: string };
+  let parsed: { [k: string]: string };
+  try {
+    parsed = JSON.parse(secret);
+  } catch {
+    // JSON.parse quotes the text it chokes on: never let a secret reach a log.
+    throw new Error("GCAL_OAUTH is not valid JSON");
+  }
+  const { client_id, client_secret, refresh_token } = parsed;
   const res = await fetch(TOKEN, {
     method: "POST",
     body: new URLSearchParams({ client_id, client_secret, refresh_token, grant_type: "refresh_token" }),
