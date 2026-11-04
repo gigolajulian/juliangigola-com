@@ -197,6 +197,21 @@ export const logMail = (env: LeadStore, email: string | undefined, subject: stri
   recordLead(env, email ?? "", { event: { at: new Date().toISOString(), kind: "mail", note: subject, mail } });
 
 /**
+ * Work that may run after the response: a push service can take seconds,
+ * and the form, Cal.com and Stripe all wait on recordLead. In the Worker it
+ * goes to waitUntil; with no request around it (tests, scripts) it runs
+ * inline. Imported lazily so the desk's client bundle never loads it.
+ */
+async function later(p: Promise<void>) {
+  try {
+    const { getCloudflareContext } = await import("@opennextjs/cloudflare");
+    getCloudflareContext().ctx.waitUntil(p);
+  } catch {
+    await p;
+  }
+}
+
+/**
  * Folds one event into the person's record and stores it, sealed. Without
  * LEADS_KEY nothing is recorded: never a lead in the clear.
  * shortcut: read, fold, write is not atomic, so two events for the same
@@ -219,7 +234,7 @@ export async function recordLead(env: LeadStore, email: string, c: Change): Prom
     await writeLead(env.INBOX, s, id, after);
     // Something reached the site: ping his devices (`lib/lead-push.ts`).
     const push = pushFor(after, c.event);
-    if (push) await notify(env.INBOX, env.VAPID_KEY, push);
+    if (push && env.VAPID_KEY) await later(notify(env.INBOX, env.VAPID_KEY, push));
     return after;
   } catch (e) {
     console.error("lead", String(e));
