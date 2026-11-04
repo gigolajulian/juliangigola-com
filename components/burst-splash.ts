@@ -44,7 +44,7 @@ export function burst(sizes: string[][], heroes: { d: [number, string][]; l: [nu
   const LAND = SPL ? 1000 : 780; // the hero gliding from the frame into its place, the page coming up round it
   const CLEAR = 220; // the splash's copy of the hero giving way to the page's own
   const LOAD = 3500; // the longest the wordmark waits for the loader to fill
-  const MAX = SPL ? 8000 : 6000; // the whole splash, whatever has not arrived by then is skipped
+  const MAX = SPL ? 6900 : 6000; // the whole splash, whatever has not arrived by then is skipped (pick b adds about 0.9s)
   const EASE = SPL ? "cubic-bezier(0.77, 0, 0.175, 1)" : "cubic-bezier(0.65, 0, 0.35, 1)";
   const OUT_EASE = "cubic-bezier(0.2, 0.7, 0.2, 1)"; // the page's own rise (`--land`, splash.css)
   const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
