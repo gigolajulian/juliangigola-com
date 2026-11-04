@@ -144,26 +144,30 @@ ${links ? `<tr><td class="rule" style="${rule};padding:22px 0 0"><a href="${resc
   return { subject: remind ? `Tomorrow: ${c.session}, ${hour}` : `Booked: ${c.session}, ${at}`, html, text, attachments: [logo("name-w", NAME_W), logo("name-ink", NAME_INK)] };
 }
 
-export async function sendConfirm(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefined, c: Confirm) {
-  if (!mailer || !c.email) return;
+/** Whether the mail went out. */
+export async function sendConfirm(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefined, c: Confirm): Promise<boolean> {
+  if (!mailer || !c.email) return false;
   const head = { to: { email: c.email, name: c.name }, from: FROM, replyTo: REPLY_TO };
   const { attachments, ...mail } = confirmMail(c);
   try {
     await mailer.send({ ...head, ...mail, attachments });
+    return true;
   } catch (e) {
     console.error("confirm mail", String(e));
     // Inline parts refused: the client still gets the mail, with the logo linked as before.
     try {
       await mailer.send({ ...head, ...mail, html: mail.html.replace(/cid:(name-w|name-ink)/g, `${SITE}/email-$1.png`) });
+      return true;
     } catch (e2) {
       console.error("confirm mail, no logo", String(e2));
+      return false;
     }
   }
 }
 
-/** The client's note that a booking is cancelled, plain, from book@. A failed send is logged, never a failed cancel. */
-export async function sendCancelled(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefined, c: { name: string; email: string; session: string; start: string; end?: string }, refund: "refunded" | "kept" | "none" | "late") {
-  if (!mailer || !c.email) return;
+/** The client's note that a booking is cancelled, plain, from book@. A failed send is logged, never a failed cancel. Whether it went out. */
+export async function sendCancelled(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefined, c: { name: string; email: string; session: string; start: string; end?: string }, refund: "refunded" | "kept" | "none" | "late"): Promise<boolean> {
+  if (!mailer || !c.email) return false;
   const money = {
     refunded: "Your $100 deposit is refunded to your card. Banks take 5 to 10 days to show it.",
     late: "The refund did not go through on its own. I'll send it by hand and email you.",
@@ -173,7 +177,9 @@ export async function sendCancelled(mailer: CloudflareEnv["CLIENT_EMAIL"] | unde
   const text = [`Hi ${first(c.name)},`, "", `Your ${c.session.toLowerCase()} on ${when(c.start, c.end)} is cancelled.`, money, "", `Book another time: ${SITE}/book`, "", "Questions? Reply to this email."].filter((l, i, a) => l || a[i - 1]).join("\n");
   try {
     await mailer.send({ to: { email: c.email, name: c.name }, from: FROM, replyTo: REPLY_TO, subject: `Cancelled: ${c.session}, ${when(c.start, c.end)}`, text });
+    return true;
   } catch (e) {
     console.error("cancel mail", String(e));
+    return false;
   }
 }
