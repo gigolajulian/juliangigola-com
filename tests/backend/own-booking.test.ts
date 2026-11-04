@@ -109,7 +109,7 @@ describe("settle (a paid session on the site's engine)", () => {
     expect(await settle(env(), "pi_TEST1234567890", META)).toBe("booked");
     expect(inserts).toHaveLength(1);
     expect(inserts[0].body.description).toContain("pi_TEST1234567890");
-    expect(kv.json(kv.puts.find((k) => !k.startsWith("deposit:"))!)).toMatchObject({ type: "booking", deposit: expect.stringContaining("pi_TEST1234567890") });
+    expect(kv.json(kv.puts.find((k) => k.startsWith("msg:"))!)).toMatchObject({ type: "booking", deposit: expect.stringContaining("pi_TEST1234567890") });
     expect(client.sent).toHaveLength(1);
     // A second delivery whose KV record was lost: the lock still knows the intent.
     await settle({ ...env(), INBOX: new FakeKV() as never }, "pi_TEST1234567890", META);

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { FakeKV } from "./fakes";
+import { FakeEmail, FakeKV } from "./fakes";
 
 /* Cal.com's booking webhook (`app/api/cal/route.ts`): only a body signed
    with CAL_WEBHOOK_SECRET gets into the inbox, and a new booking lands
@@ -217,5 +217,16 @@ describe("POST /api/cal: the lead", () => {
     expect(kv.json("lead:qa@example.com").events).toHaveLength(1);
     await send({ type: "headshots", uid: "c2" });
     expect(kv.json("lead:qa@example.com")).toMatchObject({ stage: "Confirmed", kind: "headshots" });
+  });
+
+  it("logs the client's confirmation on the lead, after the booking", async () => {
+    ctx.env = { ...ctx.env, CLIENT_EMAIL: new FakeEmail() };
+    const body = JSON.stringify({ ...BOOKING, payload: { ...BOOKING.payload, type: "intro-call", uid: "c9", eventTitle: "Intro call" } });
+    expect((await post(body, await sign(body))).status).toBe(200);
+    await Promise.all(ctx.waits);
+    const events = kv.json("lead:qa@example.com").events;
+    expect(events.map((e: { kind: string }) => e.kind)).toEqual(["call", "mail"]);
+    expect(events[1]).toMatchObject({ mail: { to: "client", kind: "confirm", booking: "c9" } });
+    expect(events[1].note).toMatch(/^Booked: Intro call/);
   });
 });

@@ -26,12 +26,17 @@ export type Stage = (typeof STAGES)[number];
 /** What happened, as it reached the site. `stage` is Julian's own move. */
 export type LeadEvent = {
   at: string;
-  kind: "inquiry" | "call" | "booking" | "no-deposit" | "deposit-stuck" | "stage" | "snooze";
+  kind: "inquiry" | "call" | "booking" | "no-deposit" | "deposit-stuck" | "stage" | "snooze" | "mail";
   /** The raw row (`msg:` key), Cal.com uid or Stripe intent, so a retry folds in once. */
   ref?: string;
-  /** Booking time, session, new stage: a short line for the timeline. */
+  /** Booking time, session, new stage, a mail's subject: a short line for the timeline. */
   note?: string;
+  /** Kind "mail": who it went to, which mail, and the booking it was about. */
+  mail?: Sent;
 };
+
+/** A mail the site sent about this person: to them (book@), or about them to hello@. */
+export type Sent = { to: "client" | "hello@"; kind: string; booking?: string };
 
 /** Something on the lead that needs him, beyond its stage. */
 export type Flag = "stuck" | "no-deposit";
@@ -114,6 +119,8 @@ export function fold(lead: Lead | null, email: string, c: Change): Lead {
     if (c.stage !== "Confirmed") next.flags = next.flags?.filter((f) => f !== "no-deposit");
     return tidy(next);
   }
+  // A mail the site sent is a line on the timeline, not news.
+  if (event.kind === "mail") return tidy(next);
   if (event.kind === "snooze") {
     next.snoozeUntil = c.snoozeUntil || undefined;
     return tidy(next);
@@ -160,6 +167,10 @@ export const leadSummary = ({ events: _e, notion: _n, deposit, ...rest }: Lead):
 });
 
 type KV = Pick<NonNullable<CloudflareEnv["INBOX"]>, "get" | "put">;
+
+/** Logs a mail the site sent against the person it was about. Never throws. */
+export const logMail = (kv: KV | undefined, email: string | undefined, subject: string, mail: Sent) =>
+  recordLead(kv, email ?? "", { event: { at: new Date().toISOString(), kind: "mail", note: subject, mail } });
 
 /**
  * Folds one event into the person's record and stores it.

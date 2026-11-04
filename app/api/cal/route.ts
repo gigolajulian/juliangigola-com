@@ -1,8 +1,8 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { sendConfirm } from "@/lib/confirm";
+import { confirmMail, sendConfirm } from "@/lib/confirm";
 import { PAID, paidFor, tellNoDeposit } from "@/lib/deposit";
 import { toNotion } from "@/lib/notion-lead";
-import { recordLead } from "@/lib/leads";
+import { logMail, recordLead } from "@/lib/leads";
 import { bookingEnquiry, enquiryKey, summary, type CalBooking } from "@/lib/inbox";
 
 /* ── Cal.com's booking webhook ─────────────────────────────────────
@@ -70,14 +70,16 @@ export async function POST(request: Request) {
     metadata: summary(stored),
   });
   const paid = (PAID as readonly string[]).includes(hook.payload?.type ?? "");
-  ctx.waitUntil(recordLead(env.INBOX, stored.email, {
+  // Held, so a mail logged below folds in after it, not over it.
+  const lead = recordLead(env.INBOX, stored.email, {
     event: { at: stored.at, kind: paid ? "booking" : "call", ref: hook.payload?.uid, note: stored.detail },
     name: stored.name,
     kind: hook.payload?.type,
     when: hook.payload?.startTime,
     deposit: stored.deposit,
     flag: stored.noDeposit ? "no-deposit" : undefined,
-  }));
+  });
+  ctx.waitUntil(lead);
   ctx.waitUntil(toNotion(env.NOTION_TOKEN, {
     stored,
     status: paid ? "Confirmed" : "Call booked",
@@ -86,12 +88,15 @@ export async function POST(request: Request) {
     shootDate: paid ? hook.payload?.startTime : undefined,
   }));
   // After the write, so a failed write's retry does not mail twice.
-  if (stored.noDeposit) await tellNoDeposit(env.EMAIL, hook.payload!.type!, hook.payload?.startTime, { name: stored.name, email: stored.email });
+  if (stored.noDeposit) {
+    const sent = await tellNoDeposit(env.EMAIL, hook.payload!.type!, hook.payload?.startTime, { name: stored.name, email: stored.email });
+    if (sent) await lead.then(() => logMail(env.INBOX, stored.email, sent, { to: "hello@", kind: "no-deposit", booking: hook.payload?.uid }));
+  }
   // Free calls only: a paid session's confirmation comes from the deposit
   // webhook, and one booked on cal.com without paying gets none.
   const p = hook.payload ?? {};
-  if (p.uid && p.startTime && !(PAID as readonly string[]).includes(p.type ?? ""))
-    await sendConfirm(env.CLIENT_EMAIL, {
+  if (p.uid && p.startTime && !(PAID as readonly string[]).includes(p.type ?? "")) {
+    const confirm = {
       name: stored.name,
       email: stored.email,
       session: p.eventTitle || p.title || "Call",
@@ -100,6 +105,10 @@ export async function POST(request: Request) {
       end: p.endTime,
       where: p.location && !p.location.startsWith("integrations:") ? p.location : undefined,
       uid: p.uid,
-    });
+    };
+    await sendConfirm(env.CLIENT_EMAIL, confirm);
+    // shortcut: sendConfirm does not say whether the send failed, so this logs every attempt.
+    if (env.CLIENT_EMAIL) await lead.then(() => logMail(env.INBOX, stored.email, confirmMail(confirm).subject, { to: "client", kind: "confirm", booking: p.uid }));
+  }
   return text("ok", 200);
 }

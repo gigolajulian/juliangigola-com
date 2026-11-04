@@ -1,6 +1,6 @@
-import { sendConfirm } from "@/lib/confirm";
+import { confirmMail, sendConfirm } from "@/lib/confirm";
 import { enquiry, enquiryKey, summary, whenPT } from "@/lib/inbox";
-import { recordLead } from "@/lib/leads";
+import { logMail, recordLead } from "@/lib/leads";
 import { openNow } from "@/lib/slots";
 import { EVENTS } from "@/lib/booking-rules";
 import { lock, recordBooking, type BookResult } from "@/lib/booking-engine";
@@ -280,9 +280,11 @@ const NEXT = {
 /** A plain mail to hello@ saying how a deposit ended. A failed send is logged, never a failed webhook. */
 type Attachment = { content: string; filename: string; type: string; disposition: "attachment" };
 
-export async function mail(email: Env["EMAIL"], subject: string, lines: string[], who?: { name: string; email: string }, attachments: Attachment[] = []) {
+/** True once hello@ has it. */
+export async function mail(email: Env["EMAIL"], subject: string, lines: string[], who?: { name: string; email: string }, attachments: Attachment[] = []): Promise<boolean> {
+  if (!email) return false;
   try {
-    await email?.send({
+    await email.send({
       to: MAIL_TO,
       from: { name: "Julian Gigola website", email: MAIL_FROM },
       subject,
@@ -290,10 +292,12 @@ export async function mail(email: Env["EMAIL"], subject: string, lines: string[]
       ...(who?.email ? { replyTo: who } : {}),
       ...(attachments.length ? { attachments } : {}),
     });
+    return true;
   } catch (e) {
     console.error("deposit mail", subject.split(":")[0], String(e));
     // Images can push a mail past the size limit: the mail matters more, so it goes again without them.
-    if (attachments.length) await mail(email, subject, [...lines, "", `${attachments.length} reference image(s) were too large to attach. Ask the client to email them.`], who);
+    if (attachments.length) return mail(email, subject, [...lines, "", `${attachments.length} reference image(s) were too large to attach. Ask the client to email them.`], who);
+    return false;
   }
 }
 
@@ -325,7 +329,8 @@ async function tell(env: Env, status: keyof typeof SAID, b: Booking | string, li
   const lines = [who ? `${who.name} <${who.email}>` : "Unknown client", NEXT[status], `Stripe: ${link}`];
   if (refs.files.length) lines.push("", `References attached: ${refs.files.length}`);
   if (refs.picks.length) lines.push("", "Picked from my work:", ...refs.picks.map((src) => `https://juliangigola.com${src}`));
-  await mail(env.EMAIL, `${SAID[status]}: ${what}`, lines, who, refs.files);
+  const subject = `${SAID[status]}: ${what}`;
+  if (await mail(env.EMAIL, subject, lines, who, refs.files)) await logMail(env.INBOX, who?.email, subject, { to: "hello@", kind: `deposit-${status}`, booking: intent });
 }
 
 /**
@@ -333,11 +338,13 @@ async function tell(env: Env, status: keyof typeof SAID, b: Booking | string, li
  * session with no deposit. Such a booking is flagged, not stopped: a mail
  * to hello@ so he can cancel it or ask for the $100.
  */
-export async function tellNoDeposit(email: Env["EMAIL"], slug: string, start: string | undefined, who: { name: string; email: string }) {
-  await mail(email, `Booked without a deposit: ${[SESSION[slug] ?? slug, whenPT(start), who.name].join(", ")}`, [
+/** The subject, once hello@ has it, so the caller can log it on the lead. */
+export async function tellNoDeposit(email: Env["EMAIL"], slug: string, start: string | undefined, who: { name: string; email: string }): Promise<string | null> {
+  const subject = `Booked without a deposit: ${[SESSION[slug] ?? slug, whenPT(start), who.name].join(", ")}`;
+  return (await mail(email, subject, [
     `${who.name} <${who.email}>`,
     "Stripe confirms no deposit for this booking, so it most likely came through cal.com directly. Cancel it in Cal.com or ask them for the $100.",
-  ], who);
+  ], who)) ? subject : null;
 }
 
 /**
@@ -364,11 +371,12 @@ export async function settle(env: Env, intent: string, metadata: { [k: string]: 
       const what = who ? [SESSION[who.slug] ?? who.slug, whenPT(who.start), who.name, "$100"].join(", ") : "$100";
       await env.INBOX.put(key, JSON.stringify({ ...r, warned: true }), { expirationTtl: 90 * 864e2 }).catch((e: unknown) => console.error("deposit record", "warned", String(e)));
       if (who) await recordLead(env.INBOX, who.email, { event: { at: new Date().toISOString(), kind: "deposit-stuck", ref: intent, note: what }, name: who.name, kind: who.slug, flag: "stuck" });
-      await mail(env.EMAIL, `Deposit stuck: check Stripe and Cal.com: ${what}`, [
+      const subject = `Deposit stuck: check Stripe and Cal.com: ${what}`;
+      if (await mail(env.EMAIL, subject, [
         who ? `${who.name} <${who.email}>` : "Unknown client",
         `Paid, and the booking was started at ${r.at} but never finished. Check Cal.com for the booking, then book or refund in Stripe by hand.`,
         `Stripe: ${dashboardLink(intent, env.STRIPE_SECRET_KEY)}`,
-      ], who);
+      ], who)) await logMail(env.INBOX, who?.email, subject, { to: "hello@", kind: "deposit-stuck", booking: intent });
       return "failed";
     }
     return r.status;
@@ -401,7 +409,7 @@ export async function settle(env: Env, intent: string, metadata: { [k: string]: 
         await tell(env, "booked", b, link, intent);
         // Cal.com's webhook files its own bookings; the site files its own here.
         if (own?.ok) await recordBooking(env, own.record, dashboardLink(intent, env.STRIPE_SECRET_KEY));
-        await sendConfirm(env.CLIENT_EMAIL, {
+        const confirm = {
           ...b,
           session: SESSION[b.slug] ?? b.slug,
           start: booking.start,
@@ -409,7 +417,8 @@ export async function settle(env: Env, intent: string, metadata: { [k: string]: 
           uid: booking.uid,
           deposit: { ref: intent, at: new Date().toISOString(), card: await cardOf(env.STRIPE_SECRET_KEY, intent) },
           ...(own?.ok ? { manage: await manageLinks(env.BOOKING_SECRET, own.record) } : {}),
-        });
+        };
+        if (await sendConfirm(env.CLIENT_EMAIL, confirm)) await logMail(env.INBOX, b.email, confirmMail(confirm).subject, { to: "client", kind: "confirm", booking: booking.uid });
         return "booked";
       }
     } catch {
