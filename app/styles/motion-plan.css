@@ -1,0 +1,43 @@
+/* MOTION-PLAN.md items on trial. Each block is keyed on a word in
+   `data-mplan`, set only by `?mplan=` (head script, layout.tsx), so the
+   default site is unchanged until Julian says yes and the gate comes off. */
+
+/* ── Item 2, `rm`: one Reduce Motion rule for the whole site ──────────
+   Nothing travels, scales, rotates or blurs; fades stay, at 250 or under.
+   `.v3 *` already drops moving transitions (v3.css); this covers what that
+   rule cannot reach: view transitions, keyframes, and transforms that are
+   set rather than transitioned. */
+@media (prefers-reduced-motion: reduce) {
+  /* Page slide and photo travel become a 150ms crossfade in place. The
+     group snaps to the new page's box, so a photo never flies, and the
+     pair loses the 3px mid-flight blur. */
+  :root[data-mplan~="rm"]::view-transition-group(*),
+  :root[data-mplan~="rm"]::view-transition-image-pair(*) {
+    animation: none !important;
+  }
+  :root[data-mplan~="rm"]::view-transition-old(*) {
+    animation: mp-rm-out 150ms var(--ease-out-strong) both !important;
+  }
+  :root[data-mplan~="rm"]::view-transition-new(*) {
+    animation: mp-rm-in 150ms var(--ease-out-strong) both !important;
+  }
+
+  /* The header comes and goes by fading only (v3.css slides it up 100%). */
+  :root[data-mplan~="rm"] .v3 .site-hdr {
+    transform: none;
+  }
+  /* Booking time slots lift 2px on hover; still, under Reduce Motion. */
+  :root[data-mplan~="rm"] .tp-open:hover {
+    translate: none !important;
+  }
+  /* The lightbox side photo's tilt follows the mouse; it holds still. */
+  :root[data-mplan~="rm"] :is(.tilted-card-inner, .tilted-card-img) {
+    transform: none !important;
+  }
+}
+@keyframes mp-rm-out {
+  to { opacity: 0; }
+}
+@keyframes mp-rm-in {
+  from { opacity: 0; }
+}
