@@ -6,9 +6,9 @@ import { AboutGallery } from "@/components/v3/about-gallery";
 /* JG V3 About (master v50, /about): portrait gallery, the justified bio, facts,
    What I do, the two CTAs, and the client marks as a grid. */
 
-/* Locked copy (DESIGN.md, Bio), with the master's soft hyphens. */
-const S = "­";
-const BIO = `I photo${S}graph people, mostly for fash${S}ion, music and brands. I shoot edi${S}to${S}ri${S}als and cam${S}paigns, and help la${S}bels and mu${S}si${S}cians shape how they're seen. I also cover the mo${S}ments people want to keep: head${S}shots, por${S}traits, grad${S}u${S}a${S}tions and wed${S}dings across San Fran${S}cis${S}co, San Jose and the Bay Area. Grow${S}ing up As${S}syr${S}i${S}an Amer${S}i${S}can, be${S}tween cul${S}tures, taught me to watch from slight${S}ly out${S}side the frame.`;
+/* Locked copy (DESIGN.md, Bio). No soft hyphens: words stay whole (Julian, 2026-11-04). */
+const BIO =
+  "I photograph people, mostly for fashion, music and brands. I shoot editorials and campaigns, and help labels and musicians shape how they’re seen. I also cover the moments people want to keep: headshots, portraits, graduations and weddings across San Francisco, San Jose and the Bay Area. Growing up Assyrian American, between cultures, taught me to watch from slightly outside the frame.";
 
 const DOES = ["Editorials", "Still photography", "Camera operation", "Brand imagery", "Post-production", "Creative direction"];
 
