@@ -1007,7 +1007,7 @@ export function TimePicker({
     if (step === "done") {
       const studio = !booked.where || /studio/i.test(booked.where);
       const lines = paid
-        ? [`${dlabel(date)}, ${range}.`, studio ? "San Jose studio. I send the address the day before." : `${booked.where}.`, "Need to move it? Reply to the confirmation up to 2 business days before."]
+        ? [`${dlabel(date)}, ${range}.`, studio ? "San Jose studio. I send the address the day before." : `${booked.where}.`, "Need to move it? Reply to the confirmation up to 48 hours before."]
         : [`${dlabel(date)}, ${range}.`, "I call the number you gave, or send a video link the day before.", "Need to move it? Reply to the confirmation."];
       const stamp = (ms: number) => new Date(ms).toISOString().replace(/[-:]|\.\d{3}/g, "");
       const s0 = +new Date(pick.start);
@@ -1081,7 +1081,7 @@ export function TimePicker({
                 {paid ? <ReferencePicks resync={null} v3 /> : null}
                 {error ? <p className="err" role="alert">{error}</p> : null}
                 {/* The deposit terms before the commit, in deposit-step's wording. */}
-                {paid ? <p className="lbl mute">Refundable or transferable up to 2 business days before the shoot. The balance is due after the shoot.</p> : null}
+                {paid ? <p className="lbl mute">Refundable or transferable up to 48 hours before the shoot. The balance is due after the shoot.</p> : null}
               </>
             ),
             bar: (
