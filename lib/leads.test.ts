@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { backfillLead, fold, isLate, leadKey, leadSummary, recordLead, type InboxRow, type Lead } from "./leads";
+import { backfillLead, fold, isLate, leadKey, leadSummary, recordLead, trashDaysLeft, type InboxRow, type Lead } from "./leads";
 import { sealer } from "./lead-crypto";
 
 const at = (h: number) => new Date(Date.UTC(2026, 10, 2, h)).toISOString();
@@ -140,6 +140,32 @@ describe("leadSummary", () => {
     const s = await sealer(btoa(String.fromCharCode(...new Uint8Array(32).fill(7))))!;
     const l = fold(null, `${"a".repeat(300)}@example.com`, { event: { at: "2026-11-03T00:00:00Z", kind: "call" }, name: "N".repeat(600), kind: "intro-call" });
     expect(JSON.stringify({ s: await s.seal(leadSummary(l)) }).length).toBeLessThan(1024);
+  });
+});
+
+describe("archive and trash", () => {
+  it("sets aside without touching the stage, a new message unarchives, the trash keeps it", () => {
+    let l = fold(null, email, { event: { at: at(1), kind: "inquiry" } });
+    l = fold(l, email, { event: { at: at(2), kind: "stage" }, stage: "Quoted" });
+    l = fold(l, email, { event: { at: at(3), kind: "archive", note: "in" }, on: true });
+    expect(l).toMatchObject({ stage: "Quoted", archivedAt: at(3) });
+    l = fold(l, email, { event: { at: at(4), kind: "inquiry" } });
+    expect(l.archivedAt).toBeUndefined();
+    l = fold(l, email, { event: { at: at(5), kind: "trash", note: "in" }, on: true });
+    l = fold(l, email, { event: { at: at(6), kind: "inquiry" } });
+    expect(l.trashedAt).toBe(at(5));
+    l = fold(l, email, { event: { at: at(7), kind: "trash", note: "out" }, on: false });
+    expect(l.trashedAt).toBeUndefined();
+    expect(l.stage).toBe("Quoted");
+  });
+});
+
+describe("trashDaysLeft", () => {
+  it("counts down from 30 and is due after", () => {
+    const t = Date.parse(at(0));
+    expect(trashDaysLeft(at(0), t)).toBe(30);
+    expect(trashDaysLeft(at(0), t + 29.5 * 864e5)).toBe(1);
+    expect(trashDaysLeft(at(0), t + 30 * 864e5)).toBe(0);
   });
 });
 
