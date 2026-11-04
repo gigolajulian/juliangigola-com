@@ -6,6 +6,8 @@ import Link from "next/link";
 import type { Flip as FlipT } from "gsap/Flip";
 import { V3Foot } from "@/components/v3/chrome";
 import DISC from "@/lib/discipline-order.json";
+import { mplan, GSAP_OUT } from "@/lib/mplan";
+import { launchSpeed, stepSpring, springSettled, frameDt } from "@/lib/motion/spring";
 
 /* JG V3 Portfolio (master v39, /work): search, discipline chips, and the
    Grid, Strip and Color views. Best first (lib's order: the vectorscope's
@@ -125,9 +127,32 @@ function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: number 
   const track = React.useRef<HTMLDivElement>(null);
   const G = React.useRef<typeof import("gsap").gsap | null>(null);
   // The touch in progress: where it went down, the track's x then, its axis once locked, and its speed.
-  const drag = React.useRef<{ x: number; y: number; ox: number; axis: "x" | "y" | null; lx: number; lt: number; v: number } | null>(null);
+  const drag = React.useRef<{ x: number; y: number; ox: number; axis: "x" | "y" | null; lx: number; lt: number; v: number; ly: number; vy: number } | null>(null);
+  /* MOTION-PLAN.md item 10 (`?mplan=touch`): a lift hands the finger's speed
+     to the strip's own spring (lib/motion/spring.ts), critically damped. */
+  const run = React.useRef(0);
+  const stop = () => void (cancelAnimationFrame(run.current), (run.current = 0));
+  const spring = (axis: "x" | "y", to: number, fv: number, done: () => void) => {
+    const el = track.current!, g = G.current!;
+    stop();
+    let s = { x: Number(g.getProperty(el, axis)), v: 0 };
+    s.v = launchSpeed(fv, to - s.x, 1);
+    let prev = 0;
+    const tick = (now: number) => {
+      s = stepSpring(s, to, 1, frameDt(now, prev));
+      prev = now;
+      if (springSettled(s, to)) return void (g.set(el, { [axis]: to }), (run.current = 0), done());
+      g.set(el, { [axis]: s.x });
+      run.current = requestAnimationFrame(tick);
+    };
+    run.current = requestAnimationFrame(tick);
+  };
   const swiped = React.useRef(false); // a drag's click must not close
   const queued = React.useRef(0); // a step pressed while the track was still moving
+  /* MOTION-PLAN.md item 8 (`?mplan=keys`): a second press mid-glide takes the
+     track on from where it is, never waits for the first to finish. */
+  const going = React.useRef(0); // the frame the glide in flight is heading to, as a step
+  const carry = React.useRef<number | null>(null); // the track's x, read against the new frame
   const open = at !== null;
   React.useEffect(() => {
     const d = ref.current;
@@ -158,7 +183,10 @@ function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: number 
       return done();
     }
     g.killTweensOf(el);
-    g.to(el, { x: -by * el.offsetWidth, y: 0, duration: dur, ease: "expo.out", onComplete: done });
+    stop();
+    going.current = by;
+    const keys = mplan("keys");
+    g.to(el, { x: -by * el.offsetWidth, y: 0, duration: keys ? 0.6 : dur, ease: keys ? "power3.inOut" : "expo.out", onComplete: done });
   };
   /* A new frame: the photos keep their elements (keyed by photo), so the
      track goes back to 0 in the same paint and nothing reloads or jumps.
@@ -166,8 +194,9 @@ function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: number 
   React.useLayoutEffect(() => {
     const el = track.current;
     if (at === null || !el) return;
-    if (G.current) G.current.set(el, { x: 0, y: 0 });
+    if (G.current) G.current.set(el, { x: carry.current ?? 0, y: 0 });
     else el.style.transform = "";
+    carry.current = null;
     const by = queued.current;
     queued.current = 0;
     if (by) glide(at, by);
@@ -180,6 +209,13 @@ function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: number 
     const g = G.current;
     if (g && track.current && g.isTweening(track.current)) {
       queued.current = by;
+      if (mplan("keys") && going.current) {
+        // Land the frame now, keep the pose: the next layout puts the track where it is and glides on.
+        const el = track.current;
+        g.killTweensOf(el);
+        carry.current = Number(g.getProperty(el, "x")) + going.current * el.offsetWidth;
+        onGo(wrap(at + going.current));
+      }
       return;
     }
     settle(by);
@@ -203,8 +239,9 @@ function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: number 
         if (e.pointerType === "mouse" || (e.target as Element).closest("button")) return void (drag.current = null);
         const el = track.current!;
         G.current?.killTweensOf(el);
+        stop();
         const ox = G.current ? Number(G.current.getProperty(el, "x")) : 0;
-        drag.current = { x: e.clientX, y: e.clientY, ox, axis: null, lx: e.clientX, lt: e.timeStamp, v: 0 };
+        drag.current = { x: e.clientX, y: e.clientY, ox, axis: null, lx: e.clientX, lt: e.timeStamp, v: 0, ly: e.clientY, vy: 0 };
       }}
       onPointerMove={(e) => {
         const d = drag.current;
@@ -214,7 +251,9 @@ function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: number 
         if (!d.axis && Math.max(Math.abs(dx), Math.abs(dy)) > 10) d.axis = Math.abs(dx) > Math.abs(dy) && n > 1 ? "x" : "y";
         const dt = e.timeStamp - d.lt;
         if (dt > 0) d.v = 0.8 * ((e.clientX - d.lx) / dt) + 0.2 * d.v;
+        if (dt > 0) d.vy = 0.8 * ((e.clientY - d.ly) / dt) + 0.2 * d.vy;
         d.lx = e.clientX;
+        d.ly = e.clientY;
         d.lt = e.timeStamp;
         const g = G.current;
         if (still() || !g) return;
@@ -236,12 +275,31 @@ function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: number 
         }
         swiped.current = true;
         const g = G.current;
+        /* Item 10: a flick past 0.11px per ms pages or closes whatever the
+           distance; a slow drag still needs half a frame, or 90px down. The
+           frame leaves at the finger's speed on `out`, never easing in. */
+        if (mplan("touch") && g && !still()) {
+          const FLING = 0.11;
+          if (d.axis === "y") {
+            const dy = e.clientY - d.y;
+            const back = () => delete ref.current!.dataset.drop;
+            if (Math.abs(dy) < 90 && !(Math.abs(d.vy) > FLING && Math.sign(d.vy) === Math.sign(dy))) return spring("y", 0, d.vy, back);
+            const left = innerHeight - Math.abs(dy);
+            // power4.out sets off at 4x its average speed: match that to the finger.
+            const dur = Math.min(0.4, Math.max(0.2, (4 * left) / Math.max(1, Math.abs(d.vy) * 1000)));
+            return void g.to(el, { y: Math.sign(dy || d.vy) * innerHeight, duration: dur, ease: "power4.out", onComplete: onClose });
+          }
+          const W = el.offsetWidth;
+          const x = d.ox + e.clientX - d.x;
+          const by = Math.abs(d.v) > FLING ? -Math.sign(d.v) : Math.max(-1, Math.min(1, Math.round(-x / W)));
+          return spring("x", -by * W, d.v, () => (by ? onGo(wrap(at + by)) : undefined));
+        }
         if (d.axis === "y") {
           const dy = e.clientY - d.y;
           const back = () => delete ref.current!.dataset.drop;
           if (Math.abs(dy) < 90) return void (g ? g.to(el, { y: 0, duration: 0.45, ease: "expo.out", onComplete: back }) : back());
           if (still() || !g) return onClose();
-          return void g.to(el, { y: Math.sign(dy) * innerHeight, duration: 0.3, ease: "power2.in", onComplete: onClose });
+          return void g.to(el, { y: Math.sign(dy) * innerHeight, duration: 0.3, ease: mplan("exits") ? GSAP_OUT : "power2.in", onComplete: onClose }); // item 4, `?mplan=exits`
         }
         // Where the throw would carry the track a fifth of a second on; the nearest frame there wins.
         const x = d.ox + e.clientX - d.x + d.v * 200;
@@ -327,19 +385,28 @@ export function V3Work({
   const [scope, setScope] = React.useState<Scope | null>(null);
   const page = React.useRef<HTMLElement>(null);
   const strip = React.useRef<HTMLDivElement>(null);
+  const lastView = React.useRef(view);
   React.useLayoutEffect(() => {
     const st = flip.current, F = Flip.current;
+    const swap = lastView.current !== view;
+    lastView.current = view;
     if (!st || !F) return;
     flip.current = null;
     const w = strip.current;
     if (w) w.style.overflow = "visible"; // the strip would clip covers flying up into it
+    /* MOTION-PLAN.md item 9 (`?mplan=still`): grid and strip trade places as
+       one move, photo 600 on `move`, no stagger, new covers fade in 250, in
+       both directions; a chip slides the tiles to their new places, page 400
+       on `move`. */
+    const plan = mplan("still");
     const tl = F.from(st, {
       targets: seen(),
-      duration: 0.6,
-      ease: "expo.out",
+      duration: plan ? (swap ? 0.6 : 0.4) : 0.6,
+      ease: plan ? "power3.inOut" : "expo.out",
       scale: true,
-      stagger: 0.015,
-      onEnter: (els) => els.forEach((e) => e.animate({ opacity: [0, 1] }, 300)),
+      // The vectorscope (Color view) opens 40ms apart, the seventh on together.
+      stagger: plan ? (swap && view === "color" ? (i: number) => Math.min(i, 5) * 0.04 : 0) : 0.015,
+      onEnter: (els) => els.forEach((e) => e.animate({ opacity: [0, 1] }, plan ? { duration: 250, easing: "cubic-bezier(.23,1,.32,1)" } : 300)),
       onComplete: () => void (w && (w.style.overflow = "")),
     });
     return () => void tl.progress(1);
@@ -373,6 +440,21 @@ export function V3Work({
   );
   /* A gallery chip with no search shows its frames, not its one cover. */
   const shown = !q ? frames[filter] : undefined;
+  /* The strip runs a gallery out too: its chip shows every frame, and under
+     All a gallery's project opens into its frames where it sits, its caption
+     on the first. Cover Art stays one cell under All. */
+  const cells = React.useMemo(
+    (): { f?: FrameItem; p?: WorkItem }[] =>
+      shown
+        ? shown.map((f) => ({ f }))
+        : list.flatMap((p): { f?: FrameItem; p?: WorkItem }[] => {
+            const g = p.d.find((d) => d !== "Cover Art" && frames[d]);
+            const own = g ? frames[g].filter((f) => f.s === p.s) : [];
+            return own.length ? own.map((f, i) => ({ f, p: i ? undefined : p })) : [{ p }];
+          }),
+    [shown, list, frames],
+  );
+  const stripFrames = React.useMemo(() => cells.flatMap((c) => (c.f ? [c.f] : [])), [cells]);
   /* The strip asks for larger files than the grid, so on a phone its covers
      flew in empty and the photos popped in after (Julian, iPhone and iPad).
      The other view's first frames are fetched and decoded while this one is
@@ -556,7 +638,7 @@ export function V3Work({
       s.removeEventListener("touchstart", start);
       s.removeEventListener("touchmove", move);
     };
-  }, [view, list, stripBar]);
+  }, [view, cells, stripBar]);
 
   /* Chips: one row at every width, a fade on the cut chip, and a progress
      line up to tablets. */
@@ -755,7 +837,11 @@ export function V3Work({
             ))}
           </div>
         ) : null}
-        {shown ? <FrameView list={shown} at={at} onGo={setAt} onClose={closeView} /> : null}
+        {view === "strip" ? (
+          <FrameView list={stripFrames} at={at} onGo={setAt} onClose={closeView} />
+        ) : shown ? (
+          <FrameView list={shown} at={at} onGo={setAt} onClose={closeView} />
+        ) : null}
         {view === "grid" && !shown ? (
           <div className="wgrid">
             {list.map((p, n) => (
@@ -765,25 +851,42 @@ export function V3Work({
         ) : null}
         {view === "strip" ? (
           <>
-            <div className="wstrip" ref={strip} onScroll={stripBar}>
-              {list.map((p, n) => (
-                <figure key={p.s} className="sc" data-flip-id={p.s}>
-                  <Link href={`/portfolio/${p.s}`} aria-label={p.n}>
-                    <Image
-                      src={p.cover}
-                      alt={p.n}
-                      fill
-                      sizes={STRIP_SIZES}
-                      decoding="sync"
-                      loading={n < 4 ? "eager" : "lazy"}
-                    />
-                    <figcaption>
-                      <span className="lbl">{p.d.join(", ")}</span>
-                      <b>{p.n}</b>
-                    </figcaption>
-                  </Link>
-                </figure>
-              ))}
+            {/* A new chip starts its own strip at the start: the frames it shares with All kept the old scroll. */}
+            <div className="wstrip" key={filter} ref={strip} onScroll={stripBar}>
+              {cells.map(({ f, p }, n) => {
+                const cap = p ? (
+                  <figcaption>
+                    {/* A gallery is named for its discipline: the label would say it twice. */}
+                    {p.d.join(", ").toLowerCase() !== p.n.toLowerCase() ? <span className="lbl">{p.d.join(", ")}</span> : null}
+                    <b>{p.n}</b>
+                  </figcaption>
+                ) : null;
+                if (!f)
+                  return (
+                    <figure key={p!.s} className="sc" data-flip-id={p!.s}>
+                      <Link href={`/portfolio/${p!.s}`} aria-label={p!.n}>
+                        <Image src={p!.cover} alt={p!.n} fill sizes={STRIP_SIZES} decoding="sync" loading={n < 4 ? "eager" : "lazy"} />
+                        {cap}
+                      </Link>
+                    </figure>
+                  );
+                const i = stripFrames.indexOf(f);
+                return (
+                  <figure key={f.src} className={f.wide ? "sc wide" : "sc"} data-flip-id={f.src}>
+                    {/* Opens full size, as in the grid. */}
+                    <a
+                      href={f.src}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setAt(i);
+                      }}
+                    >
+                      <Image src={f.src} alt={f.alt} fill sizes={STRIP_SIZES} loading={n < 4 ? "eager" : "lazy"} />
+                      {cap}
+                    </a>
+                  </figure>
+                );
+              })}
             </div>
             <div className="wbar" ref={bar}>
               <i />

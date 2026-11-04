@@ -892,6 +892,16 @@ export function TimePicker({
         // Where the flick was going: Apple's projection (0.998), damped to 40%.
         const ahead = dx + (s.v ?? 0) * 499 * 0.4;
         const dir = ahead < -w / 3 ? 1 : ahead > w / 3 && !atStart ? -1 : 0;
+        /* MOTION-PLAN.md item 2 (`?mplan=rm`): under Reduce Motion the row
+           followed the finger, and on release it snaps; a turned week fades in. */
+        if (document.documentElement.dataset.mplan?.split(" ").includes("rm") && matchMedia("(prefers-reduced-motion: reduce)").matches) {
+          gsap.set(row, { clearProps: "transform" });
+          if (dir) {
+            shift(dir);
+            row.animate({ opacity: [0, 1] }, { duration: 150, easing: "cubic-bezier(0.23, 1, 0.32, 1)" });
+          }
+          return;
+        }
         if (!dir) return void gsap.to(row, { x: 0, duration: 0.5, ease: "expo.out" });
         gsap.to(row, {
           x: -dir * w,

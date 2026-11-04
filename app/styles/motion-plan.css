@@ -1,0 +1,195 @@
+/* MOTION-PLAN.md items on trial. Each block is keyed on a word in
+   `data-mplan`, set only by `?mplan=` (head script, layout.tsx), so the
+   default site is unchanged until Julian says yes and the gate comes off. */
+
+/* ── Item 2, `rm`: one Reduce Motion rule for the whole site ──────────
+   Nothing travels, scales, rotates or blurs; fades stay, at 250 or under.
+   `.v3 *` already drops moving transitions (v3.css); this covers what that
+   rule cannot reach: view transitions, keyframes, and transforms that are
+   set rather than transitioned. */
+@media (prefers-reduced-motion: reduce) {
+  /* Page slide and photo travel become a 150ms crossfade in place. The
+     group snaps to the new page's box, so a photo never flies, and the
+     pair loses the 3px mid-flight blur. */
+  :root[data-mplan~="rm"]::view-transition-group(*),
+  :root[data-mplan~="rm"]::view-transition-image-pair(*) {
+    animation: none !important;
+  }
+  :root[data-mplan~="rm"]::view-transition-old(*) {
+    animation: mp-rm-out 150ms var(--ease-out-strong) both !important;
+  }
+  :root[data-mplan~="rm"]::view-transition-new(*) {
+    animation: mp-rm-in 150ms var(--ease-out-strong) both !important;
+  }
+
+  /* The header comes and goes by fading only (v3.css slides it up 100%). */
+  :root[data-mplan~="rm"] .v3 .site-hdr {
+    transform: none;
+  }
+  /* Booking time slots lift 2px on hover; still, under Reduce Motion. */
+  :root[data-mplan~="rm"] .tp-open:hover {
+    translate: none !important;
+  }
+  /* The lightbox side photo's tilt follows the mouse; it holds still. */
+  :root[data-mplan~="rm"] :is(.tilted-card-inner, .tilted-card-img) {
+    transform: none !important;
+  }
+}
+@keyframes mp-rm-out {
+  to { opacity: 0; }
+}
+@keyframes mp-rm-in {
+  from { opacity: 0; }
+}
+
+/* ── Item 3, `pages`: page transitions, two rules and back ──────────────
+   The page travels as one snapshot of the screen (root): cheap on a tall
+   page, where #main is already kept out of the trip for iPhone memory
+   (`data-page-tall`, transitions.css). The header holds still. No delay
+   from the bar or a drawer. A link: the old page fades out in 250 on
+   `out` over the new one, which rises 2.5vh in 400 on `drawer`. A photo
+   (`data-mp-fly`, page-fly.tsx): the new page also fades in, the covers
+   left behind recede, the photo flies in its own layer. Back
+   (`data-nav="out"`): the new page comes down instead of up, and fades. */
+@media (prefers-reduced-motion: no-preference) {
+  :root[data-mplan~="pages"] :is(#main, #main > *, [data-morph]) {
+    view-transition-name: none !important;
+  }
+  :root[data-mplan~="pages"] .v3 .site-hdr {
+    view-transition-name: mp-hdr;
+  }
+  :root[data-mplan~="pages"]::view-transition-group(mp-hdr),
+  :root[data-mplan~="pages"]::view-transition-new(mp-hdr),
+  :root[data-mplan~="pages"]::view-transition-group(root) {
+    animation: none !important;
+  }
+  :root[data-mplan~="pages"]::view-transition-group(mp-hdr) {
+    z-index: 3;
+  }
+  :root[data-mplan~="pages"]::view-transition-old(mp-hdr) {
+    display: none;
+  }
+  :root[data-mplan~="pages"]::view-transition-old(root) {
+    z-index: 1;
+    mix-blend-mode: normal;
+    animation: mp-out var(--dur-small) var(--ease-out-strong) both !important;
+  }
+  :root[data-mplan~="pages"]::view-transition-new(root) {
+    mix-blend-mode: normal;
+    animation: mp-rise var(--dur-page) var(--ease-drawer) both !important;
+  }
+  :root[data-mplan~="pages"][data-mp-fly]::view-transition-new(root) {
+    animation: mp-rise var(--dur-page) var(--ease-drawer) both, mp-in var(--dur-page) var(--ease-out-strong) both !important;
+  }
+  :root[data-mplan~="pages"][data-nav="out"]::view-transition-new(root) {
+    animation: mp-drop var(--dur-page) var(--ease-drawer) both, mp-in var(--dur-page) var(--ease-out-strong) both !important;
+  }
+  :root[data-mplan~="pages"]::view-transition-group(.mp-out) {
+    z-index: 2;
+    animation: none;
+  }
+  :root[data-mplan~="pages"]::view-transition-old(.mp-out) {
+    animation: mp-recede var(--dur-small) var(--ease-out-strong) both;
+  }
+}
+@keyframes mp-out { to { opacity: 0; } }
+@keyframes mp-in { from { opacity: 0; } }
+@keyframes mp-rise { from { transform: translateY(2.5vh); } }
+@keyframes mp-drop { from { transform: translateY(-2.5vh); } }
+@keyframes mp-recede { to { opacity: 0; transform: scale(0.97); } }
+
+/* ── Item 5, `hover`: the hover and press table ─────────────────────────
+   On hover only color and opacity change, except the grid photo zoom
+   (1.02 at 250 on `out`, phase 3 pick b). Every press is .97 at 100.
+   Hover motion is for a mouse or trackpad, never a finger. */
+:root[data-mplan~="hover"] .v3 .a-index .row:hover .t,
+:root[data-mplan~="hover"] .v3 .nf-list a:hover b {
+  translate: none;
+}
+:root[data-mplan~="hover"][data-v3motion] .v3 .btn:not(.cn-light),
+:root[data-mplan~="hover"][data-v3motion] .v3 .btn:not(.cn-light):hover {
+  transition-duration: var(--dur-hover), var(--dur-hover), var(--dur-press);
+  transition-timing-function: var(--ease-out-strong);
+}
+/* Book it and Pay press like every other button. */
+:root[data-mplan~="hover"] .ed-btn {
+  transition: scale var(--dur-press) var(--ease-out-strong), opacity var(--dur-hover) var(--ease-out-strong);
+}
+:root[data-mplan~="hover"] .ed-btn:active {
+  scale: 0.97;
+}
+/* Grid photos: one zoom, the same everywhere, mouse only. */
+:root[data-mplan~="hover"] .v3 :is(.wt, .bts-f, .cn-frame, .a-seq a.fig .ph) img {
+  transition: transform var(--dur-small) var(--ease-out-strong), opacity 0.4s;
+}
+:root[data-mplan~="hover"] .v3 :is(.wt:hover, .bts-f:hover, .cn-frame button:hover, .a-seq a.fig:hover .ph) img {
+  transform: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  :root[data-mplan~="hover"] .v3 :is(.wt:hover, .bts-f:hover, .cn-frame button:hover, .a-seq a.fig:hover .ph) img {
+    transform: scale(1.02);
+  }
+}
+
+/* ── Item 6, `scroll`: grids hold still ────────────────────────────────
+   No tile scale and no image parallax tied to scroll, on any grid, and no
+   fallback reveal where scroll timelines are missing: once a photo is on
+   screen it stays put. The header comes and goes on `out` in 250. The
+   homepage column drift is scaled to 32px in home.tsx. */
+:root[data-mplan~="scroll"] .v3 :is(.a-seq figure .ph, .sheet figure, .door, .wgrid .wt .ph, .sc-res .wt .ph),
+:root[data-mplan~="scroll"] .v3 :is(.a-seq figure .ph img, .sheet figure img, .door > img, .wgrid .wt img, .sc-res .wt img) {
+  animation: none !important;
+}
+:root[data-mplan~="scroll"] .v3 :is(.a-seq figure, .sheet figure, .door, .wgrid .wt, .sc-res .wt) {
+  opacity: 1 !important;
+  transform: none !important;
+}
+:root[data-mplan~="scroll"] .v3 .site-hdr {
+  transition: transform var(--dur-small) var(--ease-out-strong), opacity var(--dur-small) var(--ease-out-strong);
+}
+
+/* ── Item 7, `reveal`: project figures reveal once ─────────────────────
+   Pick c: a fade plus a 16px rise, 600 on `out`, the first time a frame
+   enters the screen (ScrollReveal sets `data-in-view`), then it holds
+   still. It replaces the scroll-tied unmask. Under Reduce Motion frames
+   are simply there. */
+@media (prefers-reduced-motion: no-preference) {
+  :root[data-mplan~="reveal"] .v3 :is(.pj-r, .pj-r img) {
+    animation: none !important;
+  }
+  :root[data-mplan~="reveal"] .v3 .pj-r {
+    transition: opacity var(--dur-photo) var(--ease-out-strong), transform var(--dur-photo) var(--ease-out-strong);
+  }
+  :root[data-mplan~="reveal"] .v3 .pj-r:not([data-in-view]) {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+
+/* ── Item 9, `still`: what stays still ─────────────────────────────────
+   Search results appear as they are typed, no rise. The rest of item 9
+   lives in work.tsx (grid and strip, chips), time-picker.tsx (day pick,
+   Earlier / Later) and vectorscope.tsx (opening stagger). */
+:root[data-mplan~="still"] .v3 .sc-res .wt,
+:root[data-mplan~="still"] .v3 :is(.sc-res .wt .ph, .sc-res .wt img) {
+  animation: none !important;
+}
+:root[data-mplan~="still"] .v3 .sc-res .wt {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+/* ── Item 12, `layout`: no layout properties in motion ─────────────────
+   The phone search bar's tuck travels by transform (chrome.tsx), so its
+   `top` changes in one step. A credit's avatar keeps its box and only
+   fades in on hover (150 on `out`), so the handle never shifts. */
+:root[data-mplan~="layout"] .v3 #p-work .wtools {
+  transition: none;
+}
+@media (hover: hover) {
+  :root[data-mplan~="layout"] .v3 .cr-av {
+    width: 28px;
+    margin-right: 10px;
+    transition: opacity var(--dur-hover) var(--ease-out-strong);
+  }
+}

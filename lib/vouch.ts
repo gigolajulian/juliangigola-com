@@ -94,3 +94,31 @@ export async function canPush(token: string): Promise<boolean> {
 /** The bearer token on a request, when it carries one. */
 export const bearer = (request: Request): string | undefined =>
   /^Bearer\s+(\S+)$/i.exec(request.headers.get("authorization") ?? "")?.[1];
+
+/**
+ * Whether the request carries the right key.
+ *
+ * Constant-time, so the comparison cannot be used to learn the key one
+ * character at a time. Both sides are hashed first, which fixes the length —
+ * otherwise the loop below would return early on a shorter guess and the
+ * key's own length would leak.
+ *
+ * Written out rather than calling the runtime's `timingSafeEqual`: this is
+ * thirty-two fixed iterations of XOR, it is the same guarantee, and it runs
+ * in a test under Node without a Workers shim.
+ */
+export async function authorised(request: Request, expected?: string) {
+  if (!expected) return false;
+  const given = request.headers.get("x-inbox-key");
+  if (!given) return false;
+
+  const digest = async (s: string) =>
+    new Uint8Array(
+      await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s)),
+    );
+  const [a, b] = await Promise.all([digest(given), digest(expected)]);
+
+  let diff = a.length ^ b.length;
+  for (let i = 0; i < a.length; i++) diff |= a[i] ^ b[i];
+  return diff === 0;
+}
