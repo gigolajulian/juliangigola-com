@@ -16,14 +16,17 @@ const WED10 = Date.parse("2026-11-18T18:00:00Z");
 const NOW = WED10 - 7 * 864e5;
 let busy: { start: string; end: string }[];
 let asked: { timeMin: string; timeMax: string }[];
+let shifts: { summary: string; status?: string; start: { date?: string; dateTime?: string }; end: { date?: string; dateTime?: string } }[];
 
 beforeEach(() => {
   forgetToken();
   busy = [];
+  shifts = [];
   asked = [];
   ctx.env = { GCAL_OAUTH: JSON.stringify({ client_id: "a", client_secret: "b", refresh_token: "c" }) };
   vi.stubGlobal("fetch", async (url: string, init?: RequestInit) => {
     if (url.includes("oauth2")) return Response.json({ access_token: "t", expires_in: 3600 });
+    if (url.includes("/events?")) return Response.json({ items: shifts });
     asked.push(JSON.parse(String(init?.body)));
     return Response.json({ calendars: { primary: { busy } } });
   });
@@ -69,6 +72,20 @@ describe("GET /api/slots", () => {
     expect(r.event).toMatchObject({ title: "Portraits", lengthInMinutes: 60, locations: [{ type: "attendeeDefined" }] });
     expect(r.data["2026-11-18"][0]).toEqual({ start: "2026-11-18T14:00:00-05:00", end: "2026-11-18T15:00:00-05:00" });
     expect(Object.keys(r.data)).toEqual(["2026-11-18"]);
+    vi.useRealTimers();
+  });
+
+  it("closes the whole day of an SGH shift, timed or all day", async () => {
+    vi.setSystemTime(NOW);
+    shifts = [
+      // An afternoon shift still closes the morning.
+      { summary: "Work - SGH", start: { dateTime: "2026-11-18T14:30:00-08:00" }, end: { dateTime: "2026-11-18T22:15:00-08:00" } },
+      { summary: "Work - SGH", start: { date: "2026-11-20" }, end: { date: "2026-11-21" } },
+      { summary: "Work - SGH", status: "cancelled", start: { date: "2026-11-21" }, end: { date: "2026-11-22" } },
+      { summary: "Dinner, not a shift", start: { date: "2026-11-22" }, end: { date: "2026-11-23" } },
+    ];
+    const r = await (await get("slug=portraits&start=2026-11-18&end=2026-11-22&timeZone=America/Los_Angeles")).json();
+    expect(Object.keys(r.data)).toEqual(["2026-11-19", "2026-11-21", "2026-11-22"]);
     vi.useRealTimers();
   });
 

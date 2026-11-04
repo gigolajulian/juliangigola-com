@@ -83,7 +83,22 @@ export async function busyBetween(secret: string | undefined, from: number, to: 
       ),
     );
   }
-  return (await Promise.all(pieces)).flat();
+  return [...(await Promise.all(pieces)).flat(), ...(await shiftDays(secret, from, to))];
+}
+
+/** Julian (2026-11-04): "when i work sgh, dont let them book me at all". Any day with an SGH event on it is busy from midnight to midnight Pacific, even when the shift itself is only the afternoon. */
+async function shiftDays(secret: string | undefined, from: number, to: number): Promise<Busy[]> {
+  type When = { date?: string; dateTime?: string };
+  const q = new URLSearchParams({ q: "SGH", singleEvents: "true", maxResults: "2500", timeMin: new Date(from - 864e5).toISOString(), timeMax: new Date(to + 864e5).toISOString() });
+  const r = await gcal<{ items?: { summary?: string; status?: string; start?: When; end?: When }[] }>(secret, `/calendars/primary/events?${q}`);
+  // The Pacific midnight of the day `w` falls on; an all-day end date is already the day after.
+  const midnight = (w: When, after: boolean) => {
+    const [y, m, d] = (w.date ?? new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(Date.parse(w.dateTime!))).split("-").map(Number);
+    return zoned(y, m, d + (after && !w.date ? 1 : 0), 0);
+  };
+  return (r.items ?? [])
+    .filter((e) => e.status !== "cancelled" && /\bSGH\b/i.test(e.summary ?? "") && e.start && e.end)
+    .map((e) => ({ start: midnight(e.start!, false), end: midnight(e.end!, true) }));
 }
 
 /** Open starts of `slug` between `from` and `to`, as UTC ms. `mine`: a booking being moved, whose own time is not in the way. */
