@@ -39,6 +39,8 @@ export type Confirm = {
   manage?: { reschedule: string; cancel: string } | null;
   /** The time first booked, when it was moved since: the refund is judged by it. */
   firstStart?: string;
+  /** "reminder": the day-before mail from the lock Worker's cron. */
+  kind?: "reminder";
 };
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
@@ -61,14 +63,23 @@ const first = (name: string) => name.trim().split(/\s+/)[0] || "there";
 
 export function confirmMail(c: Confirm) {
   const at = when(c.start, c.end);
-  const lead = c.call
+  const remind = c.kind === "reminder";
+  const hour = fmt({ hour: "numeric", minute: "2-digit" }).format(new Date(c.start));
+  const head = remind ? (c.call ? "Talk tomorrow." : "See you tomorrow.") : "You're in.";
+  const lead = remind
+    ? c.call
+      ? `${first(c.name)}, your ${c.session.toLowerCase()} is tomorrow at ${hour}.${c.where?.startsWith("http") ? " The Meet link is below." : ""}`
+      : `${first(c.name)}, your ${c.session.toLowerCase().replace(/ photos$/, "")} session is tomorrow at ${hour}. Give yourself time to get there.`
+    : c.call
     ? `Thanks, ${first(c.name)}. Your ${c.session.toLowerCase()} is booked. I'll call you then.`
     : `Thanks, ${first(c.name)}. Your ${c.session.toLowerCase().replace(/ photos$/, "")} session is booked. I'll call you before the day to go over the concept, rate and schedule.`;
   const rows: [string, string][] = [["Session", c.session], ["When", at], ...(c.where ? [["Where", c.where] as [string, string]] : []), ["Booking", c.uid.slice(0, 8)]];
   const paid = c.deposit && {
     rows: [["Paid", fmt({ month: "short", day: "numeric", year: "numeric" }).format(new Date(c.deposit.at))], ...(c.deposit.card ? [["Card", c.deposit.card]] : []), ["Ref", c.deposit.ref.slice(0, 11)]] as [string, string][],
     // The site's own engine refunds by Julian's 48-hour rule (`lib/booking-rules.ts`).
-    note: c.manage !== undefined
+    note: remind
+      ? "It is under 48 hours now, so a cancel keeps the deposit. Moving to another date carries it over."
+      : c.manage !== undefined
       ? c.firstStart && c.firstStart !== c.start
         ? refundable({ intent: "x", start: c.start, firstStart: c.firstStart })
           ? `The balance is due after the shoot. The deposit moved with the new date. It is refunded only if you cancel 48 hours or more before the time you first booked, ${when(c.firstStart)}.`
@@ -107,8 +118,8 @@ ${paid.rows.map(([k, v]) => `<tr><td class="muted" style="${muted};padding:3px 0
 <table role="presentation" class="page" width="100%" cellpadding="0" cellspacing="0" style="background:#0b0a09"><tr><td align="center" style="padding:40px 16px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px" class="mono">
 <tr><td style="padding-bottom:36px"><img class="ink-d" src="cid:name-w" width="189" height="34" alt="Julian Gigola" style="display:block;border:0"><img class="ink-l" src="cid:name-ink" width="189" height="34" alt="Julian Gigola" style="border:0"></td></tr>
-<tr><td class="mono accent" style="${label};padding-bottom:10px">Booked</td></tr>
-<tr><td class="mono fg" style="font-size:22px;line-height:1.3;${fg};padding-bottom:16px">You're in.</td></tr>
+<tr><td class="mono accent" style="${label};padding-bottom:10px">${remind ? "Tomorrow" : "Booked"}</td></tr>
+<tr><td class="mono fg" style="font-size:22px;line-height:1.3;${fg};padding-bottom:16px">${head}</td></tr>
 <tr><td class="mono muted" style="font-size:13px;line-height:1.65;${muted};padding-bottom:32px">${esc(lead)}</td></tr>
 <tr><td class="rule" style="${rule}"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="mono" style="font-size:13px;line-height:1.5">${detail}</table></td></tr>
 ${receipt}
@@ -117,7 +128,7 @@ ${links ? `<tr><td class="rule" style="${rule};padding:22px 0 0"><a href="${resc
 </table></td></tr></table></body></html>`;
 
   const text = [
-    "You're in.",
+    head,
     "",
     lead,
     "",
@@ -130,7 +141,7 @@ ${links ? `<tr><td class="rule" style="${rule};padding:22px 0 0"><a href="${resc
   ].join("\n");
 
   const logo = (contentId: string, content: string) => ({ content, filename: `${contentId}.png`, type: "image/png", disposition: "inline" as const, contentId });
-  return { subject: `Booked: ${c.session}, ${at}`, html, text, attachments: [logo("name-w", NAME_W), logo("name-ink", NAME_INK)] };
+  return { subject: remind ? `Tomorrow: ${c.session}, ${hour}` : `Booked: ${c.session}, ${at}`, html, text, attachments: [logo("name-w", NAME_W), logo("name-ink", NAME_INK)] };
 }
 
 export async function sendConfirm(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefined, c: Confirm) {

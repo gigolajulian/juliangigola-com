@@ -209,6 +209,25 @@ export async function rescheduleOwn(store: Store, secret: string | undefined, id
   return { ok: true, record, was };
 }
 
+/* Julian's plan (piece 5): a reminder 23 to 24 hours ahead, from an hourly
+   cron. A booking made inside that last day already has its fresh "You're
+   in." mail, so it gets none. */
+const DAY = 864e5;
+const HOUR = 36e5;
+
+/** Bookings whose reminder is due at `now`: live, not reminded, starting 23 to 24 hours out, booked before that. */
+export const dueReminders = async (store: Store, now = Date.now()) =>
+  (await allBookings(store)).filter((r) => {
+    const t = Date.parse(r.start);
+    return !r.cancelled && !r.reminded && t - now > DAY - HOUR && t - now <= DAY && Date.parse(r.at) <= t - DAY;
+  });
+
+/** Marks booking `id` reminded. */
+export async function markReminded(store: Store, id: string, now = Date.now()) {
+  const r = await findBooking(store, id);
+  if (r) await saveBooking(store, { ...r, reminded: new Date(now).toISOString() });
+}
+
 /* ── reaching the lock from a route ───────────────────────────── */
 
 type LockEnv = { BOOKING_LOCK?: { idFromName(name: string): unknown; get(id: unknown): { fetch(url: string, init: RequestInit): Promise<Response> } } };
