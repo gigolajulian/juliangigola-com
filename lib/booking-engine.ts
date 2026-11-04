@@ -213,13 +213,12 @@ export async function rescheduleOwn(store: Store, secret: string | undefined, id
    cron. A booking made inside that last day already has its fresh "You're
    in." mail, so it gets none. */
 const DAY = 864e5;
-const HOUR = 36e5;
 
-/** Bookings whose reminder is due at `now`: live, not reminded, starting 23 to 24 hours out, booked before that. */
+/** Bookings whose reminder is due at `now`: live, not reminded, starting within 24 hours, booked before that last day. A late or skipped run still catches them. */
 export const dueReminders = async (store: Store, now = Date.now()) =>
   (await allBookings(store)).filter((r) => {
     const t = Date.parse(r.start);
-    return !r.cancelled && !r.reminded && t - now > DAY - HOUR && t - now <= DAY && Date.parse(r.at) <= t - DAY;
+    return !r.cancelled && !r.reminded && t > now && t - now <= DAY && Date.parse(r.at) <= t - DAY;
   });
 
 /** Marks booking `id` reminded. */

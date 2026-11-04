@@ -6,7 +6,8 @@ import { remind } from "@/worker/index";
 
 /* The hourly cron in the lock Worker (`worker/index.ts`): a reminder goes
    to each live booking 23 to 24 hours out, once; a booking made inside its
-   last day, a cancelled one and one already reminded get none. */
+   last day, a cancelled one and one already reminded get none. A run that
+   was skipped is made up by the next. */
 
 const H = 36e5;
 let store: FakeStore;
@@ -34,15 +35,17 @@ beforeEach(() => {
 });
 
 describe("reminders", () => {
-  it("mails each booking 23 to 24 hours out once, and no other", async () => {
+  it("mails each live booking once in its last day, and no other", async () => {
     await saveBooking(store, rec("due", 23.5, { intent: "pi_TEST1234567890" }));
     await saveBooking(store, rec("early", 25));
-    await saveBooking(store, rec("late", 22));
+    await saveBooking(store, rec("started", -1));
+    // An hour was skipped: 22 hours out and never reminded still gets one.
+    await saveBooking(store, rec("missed", 22));
     await saveBooking(store, rec("gone", 23.5, { cancelled: new Date().toISOString() }));
     await saveBooking(store, rec("fresh", 23.5, { at: new Date().toISOString() }));
 
-    expect(await remind(env)).toBe(1);
-    expect(client.sent).toHaveLength(1);
+    expect(await remind(env)).toBe(2);
+    expect(client.sent.map((x) => x.to)).toEqual([expect.objectContaining({ email: "due@example.com" }), expect.objectContaining({ email: "missed@example.com" })]);
     const m = client.sent[0];
     expect(m.subject).toMatch(/^Tomorrow: Portraits, /);
     expect(String(m.text)).toContain("See you tomorrow.");
@@ -51,7 +54,7 @@ describe("reminders", () => {
 
     // The next hour does not send it again.
     expect(await remind(env)).toBe(0);
-    expect(client.sent).toHaveLength(1);
+    expect(client.sent).toHaveLength(2);
   });
 
   it("a call reads as a call", async () => {
