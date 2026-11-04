@@ -22,7 +22,8 @@ export class FakeKV {
     const e = this.data.get(key);
     if (!e) return null;
     if (type === "arrayBuffer") return e.value;
-    return typeof e.value === "string" ? e.value : new TextDecoder().decode(e.value);
+    const text = typeof e.value === "string" ? e.value : new TextDecoder().decode(e.value);
+    return type === "json" ? JSON.parse(text) : text;
   }
 
   async getWithMetadata(key: string, type?: string) {

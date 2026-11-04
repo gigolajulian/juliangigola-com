@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { mplan } from "@/lib/mplan";
 import Link from "next/link";
 import { THEME_COLOR } from "@/lib/theme-color";
 import { usePathname } from "next/navigation";
@@ -353,7 +354,15 @@ export function V3Header() {
     };
   }, [tucks, path]);
   React.useEffect(() => {
+    /* MOTION-PLAN.md item 12 (`?mplan=layout`): the search bar's sticky top
+       still jumps with the header, but it travels there by transform (250 on
+       `out`) instead of animating `top`. */
+    const bar = mplan("layout") && !matchMedia("(prefers-reduced-motion: reduce)").matches ? document.querySelector<HTMLElement>(".v3 #p-work .wtools") : null;
+    const was = bar?.getBoundingClientRect().top;
     document.documentElement.toggleAttribute("data-tuck", tuck);
+    if (!bar || was === undefined) return;
+    const dy = was - bar.getBoundingClientRect().top;
+    if (dy) bar.animate({ transform: [`translateY(${dy}px)`, "none"] }, { duration: 250, easing: "cubic-bezier(.23,1,.32,1)" });
   }, [tuck]);
   const show = (!home || past) && !tuck;
   const [menu, setMenu] = React.useState(false);
