@@ -745,7 +745,12 @@ export function TimePicker({
     const sim = process.env.NODE_ENV !== "production" && new URLSearchParams(location.search).get("sim") === "ok";
     try {
       if (!sim) {
-      const res = await fetch(`${API}/bookings`, {
+      // The site's own engine (`app/api/book`) answers in Cal.com's shape.
+      const res = ownEngine() ? await fetch("/api/book", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ engine: "own", slug, start: new Date(pick.start).toISOString(), timeZone: tz, name, email: String(form.get("email")), phone, via, ...(notes ? { notes } : {}), ...(needsWhere ? { where } : {}) }),
+      }) : await fetch(`${API}/bookings`, {
         method: "POST",
         headers: { "cal-api-version": "2024-08-13", "Content-Type": "application/json" },
         body: JSON.stringify({

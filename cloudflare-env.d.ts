@@ -9,6 +9,7 @@ interface __BaseEnv_CloudflareEnv {
 	ASSETS: Fetcher;
 	INBOX_KEY: string;
 	BOOKING_ENGINE: "cal" | "own";
+	BOOKING_LOCK: DurableObjectNamespace;
 }
 declare namespace Cloudflare {
 	interface GlobalProps {

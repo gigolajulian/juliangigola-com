@@ -34,6 +34,8 @@ export type Confirm = {
   /** Cal.com's booking uid, for the reschedule and cancel links. */
   uid: string;
   deposit?: { ref: string; at: string; card?: string };
+  /** The site's own reschedule and cancel links; null: none yet. Unset: Cal.com's. */
+  manage?: { reschedule: string; cancel: string } | null;
 };
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
@@ -64,8 +66,8 @@ export function confirmMail(c: Confirm) {
     rows: [["Paid", fmt({ month: "short", day: "numeric", year: "numeric" }).format(new Date(c.deposit.at))], ...(c.deposit.card ? [["Card", c.deposit.card]] : []), ["Ref", c.deposit.ref.slice(0, 11)]] as [string, string][],
     note: "The balance is due after the shoot. The deposit moves with a new date, or is refunded up to 2 business days before.",
   };
-  const reschedule = `https://cal.com/reschedule/${encodeURIComponent(c.uid)}`;
-  const cancel = `https://cal.com/booking/${encodeURIComponent(c.uid)}?cancel=true`;
+  const { reschedule, cancel } = c.manage ?? { reschedule: `https://cal.com/reschedule/${encodeURIComponent(c.uid)}`, cancel: `https://cal.com/booking/${encodeURIComponent(c.uid)}?cancel=true` };
+  const links = c.manage !== null;
   const preheader = `${c.session}, ${fmt({ weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZoneName: "short" }).format(new Date(c.start)).replace(/ /g, " ")}.${c.deposit ? " Deposit of $100 received." : ""}`;
 
   const rule = "border-top:1px solid rgba(255,255,255,0.11)";
@@ -100,7 +102,7 @@ ${paid.rows.map(([k, v]) => `<tr><td class="muted" style="${muted};padding:3px 0
 <tr><td class="mono muted" style="font-size:13px;line-height:1.65;${muted};padding-bottom:32px">${esc(lead)}</td></tr>
 <tr><td class="rule" style="${rule}"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="mono" style="font-size:13px;line-height:1.5">${detail}</table></td></tr>
 ${receipt}
-<tr><td class="rule" style="${rule};padding:22px 0 0"><a href="${reschedule}" class="mono accent" style="${accent};font-size:13px;text-decoration:none">Reschedule</a><span class="muted" style="${muted};font-size:13px">&nbsp;|&nbsp;</span><a href="${cancel}" class="mono accent" style="${accent};font-size:13px;text-decoration:none">Cancel</a></td></tr>
+${links ? `<tr><td class="rule" style="${rule};padding:22px 0 0"><a href="${reschedule}" class="mono accent" style="${accent};font-size:13px;text-decoration:none">Reschedule</a><span class="muted" style="${muted};font-size:13px">&nbsp;|&nbsp;</span><a href="${cancel}" class="mono accent" style="${accent};font-size:13px;text-decoration:none">Cancel</a></td></tr>` : ""}
 <tr><td class="mono muted" style="font-size:12px;line-height:1.65;${muted};padding-top:40px">Questions? Reply to this email.<br><a href="${SITE}" class="muted" style="${muted};text-decoration:none">juliangigola.com</a></td></tr>
 </table></td></tr></table></body></html>`;
 
@@ -111,9 +113,7 @@ ${receipt}
     "",
     ...rows.map(([k, v]) => `${k}: ${v}`),
     ...(paid ? ["", "Deposit paid: $100.00", ...paid.rows.map(([k, v]) => `${k}: ${v}`), paid.note] : []),
-    "",
-    `Reschedule: ${reschedule}`,
-    `Cancel: ${cancel}`,
+    ...(links ? ["", `Reschedule: ${reschedule}`, `Cancel: ${cancel}`] : []),
     "",
     "Questions? Reply to this email.",
     SITE,

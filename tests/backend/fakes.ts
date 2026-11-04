@@ -82,3 +82,23 @@ export const githubToken = () => `ghp_${"t".repeat(30)}${String(++n).padStart(6,
 
 /** The scope header GitHub sends back for a classic token that may push. */
 export const SCOPED = { "x-oauth-scopes": "repo" };
+
+/** A Durable Object's storage, as `lib/booking-engine.ts` uses it. */
+export class FakeStore {
+  data = new Map<string, unknown>();
+  async get<T>(key: string) {
+    return structuredClone(this.data.get(key)) as T | undefined;
+  }
+  async put(key: string, value: unknown) {
+    this.data.set(key, structuredClone(value));
+  }
+  async list<T>({ prefix }: { prefix: string }) {
+    return new Map([...this.data].filter(([k]) => k.startsWith(prefix)).map(([k, v]) => [k, structuredClone(v) as T]));
+  }
+}
+
+/** The `BOOKING_LOCK` binding: one object, reached by fetch as in the Worker. */
+export const fakeLock = (lock: { fetch(r: Request): Promise<Response> }) => ({
+  idFromName: (name: string) => name,
+  get: () => ({ fetch: (url: string, init: RequestInit) => lock.fetch(new Request(url, init)) }),
+});
