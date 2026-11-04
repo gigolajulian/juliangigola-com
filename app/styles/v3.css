@@ -1315,30 +1315,47 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .v3{--clients-h:88px}
 .v3 .a-cover{height:calc(100svh - var(--clients-h));min-height:520px}
 .v3 .a-cover+.clients{height:var(--clients-h);padding-block:0}}
-/* Portfolio: the search and view buttons stay pinned under the header while
-   you scroll the work (Julian, 2026-10-27). */
-.v3 #p-work .wtools{position:sticky;top:calc(max(14px,env(safe-area-inset-top,0px)) + 47px);z-index:5;background:var(--bg)}
-@media (max-width:700px){.v3 #p-work .wtools{top:calc(max(14px,env(safe-area-inset-top,0px)) + 59px)}}
-/* Scrolling down tucks the header and the search bar rides up to the top; scrolling up brings
-   the header back and the two read as one bar: the same solid ground edge to edge, one rule
-   between them (chrome.tsx sets data-pf and data-tuck). */
+/* Portfolio, option 2 (Julian, 2026-11-04): the search row scrolls away with the page; past it a
+   magnifier and the view buttons ride in the header (work.tsx portals them into #hdr-tools and
+   sets data-pft). The magnifier opens the field in the bar. Scrolling down on a touch screen
+   tucks the header (chrome.tsx data-tuck) and keeps the tools pinned in the top corner. */
 :root[data-pf] .v3 .site-hdr{background:var(--bg);-webkit-backdrop-filter:none;backdrop-filter:none;border-bottom-color:transparent}
-.v3 #p-work .wtools{transition:top .25s ease;box-shadow:0 0 0 100vmax var(--bg);clip-path:inset(0 -100vmax)}
-:root[data-tuck] .v3 #p-work .wtools{top:env(safe-area-inset-top,0px)}
-@media (prefers-reduced-motion:reduce){.v3 #p-work .wtools{transition:none}}
-/* iPad: strip and colour lock the page, which pushed the sticky bar down over the chips. */
-@media (min-width:701px){.v3 #p-work:is(.strip-on,.color-on) .wtools{position:static}}
+.v3 .hslot{display:flex;align-items:center;margin-left:auto}
+.v3 .htools{display:flex;align-items:center;gap:4px}
+.v3 .site-wm{white-space:nowrap}
+.v3 .htools .wviews{gap:0}
+.v3 .htools .wviews .wcolor{margin-right:0}
+.v3 .htools .wviews .wcolor::after{display:none}
+.v3 .htools::after{content:"";width:1px;height:20px;background:var(--line);margin:0 8px 0 4px}
+.v3 .hbtn{display:grid;place-items:center;width:44px;height:44px;padding:0;background:none;border:0;color:var(--mute);cursor:pointer}
+.v3 .hbtn[aria-pressed="true"]{color:var(--accent)}
+@media (hover:hover){.v3 .hbtn:hover{color:var(--ink)}}
+.v3 .hbtn:focus-visible{outline:1px solid var(--accent);outline-offset:-4px}
+.v3 .hsearch{display:flex;align-items:center;gap:10px;flex:1;min-width:0;height:44px;border-bottom:1px solid var(--accent);color:var(--accent)}
+.v3 .hsearch input{flex:1;min-width:0;align-self:stretch;background:none;border:0;outline:0;color:var(--ink);font:inherit;letter-spacing:.04em;text-transform:none}
+@media (pointer:coarse){.v3 .hsearch input{font-size:16px}}
+@media (max-width:700px){
+.v3 .htools.open{position:absolute;inset:0;z-index:1;padding:max(14px,env(safe-area-inset-top,0px)) var(--gr) 14px var(--g);background:var(--bg)}
+.v3 .htools.open .wviews,.v3 .htools.open::after{display:none}}
+@media (min-width:701px){
+.v3 .site-hdr .links{margin-left:auto}
+.v3 .hslot{order:1;margin-left:0}
+.v3 .htools::after{order:-1;margin:0 8px 0 20px}
+.v3 .hsearch{flex:none;width:240px;height:32px}}
+:root[data-pft][data-tuck] .v3 .site-hdr{transform:none;opacity:1;background:transparent;border-bottom-color:transparent}
+:root[data-pft][data-tuck] .v3 .site-hdr>:not(.hslot){opacity:0;visibility:hidden;transition:opacity .2s ease,visibility 0s .2s}
+:root[data-pft][data-tuck] .v3 .htools{position:fixed;top:env(safe-area-inset-top,0px);right:0;z-index:1;padding:0 4px;pointer-events:auto;background:var(--bg);border:solid var(--line);border-width:0 0 1px 1px}
+:root[data-pft][data-tuck] .v3 .htools::after{display:none}
+:root[data-pft][data-tuck] .v3 .htools.open{left:0;padding:env(safe-area-inset-top,0px) var(--gr) 0 var(--g);border-left:0}
 .v3 #p-work .whead{display:contents}
 /* Laptop and desktop (a mouse): the header stays on the portfolio, and it and the search,
    chips and view buttons read as one glass bar the work scrolls under (Julian, 2026-10-28).
    Phones and iPads keep the tuck above. */
 @media (min-width:701px) and (hover:hover) and (pointer:fine){
 :root[data-pf] .v3 .site-hdr{background:color-mix(in srgb,var(--bg) 52%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
-.v3 #p-work .whead{display:block;margin-top:32px;position:sticky;top:calc(max(14px,env(safe-area-inset-top,0px)) + 47px);z-index:5;padding-bottom:14px;background:color-mix(in srgb,var(--bg) 52%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.v3 #p-work .whead{display:block;margin-top:32px;padding-bottom:14px;border-bottom:1px solid var(--line)}
 .v3 #p-work:is(.strip-on,.color-on) .whead{margin-top:8px}
-/* Strip and colour don't scroll, and their overflow lock would offset a sticky bar by the page's padding. */
-.v3 #p-work:is(.strip-on,.color-on) .whead{position:static}
-.v3 #p-work .whead .wtools{margin-top:0;position:static;background:none;box-shadow:none;clip-path:none}
+.v3 #p-work .whead .wtools{margin-top:0}
 /* Project page: the hero sits on the sheet's three columns and gutters below it. */
 .v3 .pj-hero,.v3 .pj-hero.two{grid-template-columns:repeat(3,minmax(0,1fr));padding:0 var(--gr) 0 var(--g)}
 /* No crop on the hero frame (Julian, 2026-10-29): it keeps its own width, the title side takes the rest. */

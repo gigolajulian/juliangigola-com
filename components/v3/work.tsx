@@ -3,6 +3,7 @@
 import * as React from "react";
 import Image, { getImageProps } from "next/image";
 import Link from "next/link";
+import { createPortal } from "react-dom";
 import type { Flip as FlipT } from "gsap/Flip";
 import { V3Foot } from "@/components/v3/chrome";
 import DISC from "@/lib/discipline-order.json";
@@ -381,6 +382,36 @@ export function V3Work({
   };
   const go = (v: typeof view) => flipped(() => setView(v));
   const [q, setQ] = React.useState("");
+  /* Option 2 (Julian, 2026-11-04): once the search row scrolls under the
+     header, a magnifier and the view buttons ride in the header instead of a
+     second sticky bar. data-pft tells v3.css to keep them pinned when the
+     header tucks on touch screens. */
+  // State, not a ref: the row can remount (desktop did), and the observer must follow it.
+  const [tools, setTools] = React.useState<HTMLDivElement | null>(null);
+  const [pin, setPin] = React.useState(false);
+  const [hs, setHs] = React.useState(false);
+  React.useEffect(() => {
+    if (!tools) return;
+    const io = new IntersectionObserver(
+      ([e]) => {
+        const on = !e.isIntersecting && e.boundingClientRect.top < (e.rootBounds?.top ?? 60);
+        setPin(on);
+        if (on) return;
+        // A short result list brings the row back: typing carries on in its field.
+        if ((document.activeElement as HTMLElement | null)?.closest(".htools"))
+          tools.querySelector("input")?.focus({ preventScroll: true });
+        setHs(false);
+      },
+      { rootMargin: "-60px 0px 0px 0px" },
+    );
+    io.observe(tools);
+    return () => io.disconnect();
+  }, [tools]);
+  React.useEffect(() => {
+    const root = document.documentElement;
+    root.toggleAttribute("data-pft", pin);
+    return () => root.removeAttribute("data-pft");
+  }, [pin]);
   const [pick, setPick] = React.useState<PickAt | null>(null);
   const [scope, setScope] = React.useState<Scope | null>(null);
   const page = React.useRef<HTMLElement>(null);
@@ -724,6 +755,58 @@ export function V3Work({
     ],
   ] as const;
 
+  const LOUPE = (
+    <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
+      <circle
+        cx="6"
+        cy="6"
+        r="4.5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.3"
+      />
+      <path
+        d="M9.4 9.4L13 13"
+        stroke="currentColor"
+        strokeWidth="1.3"
+      />
+    </svg>
+  );
+  const views = (
+    <div className="wviews" role="group" aria-label="View">
+      {/* The vectorscope is a mode of its own: on, then off back to
+          the view it came from. Then Strip, and Grid in the corner. */}
+      <button
+        type="button"
+        className="wcolor"
+        aria-pressed={view === "color"}
+        aria-label={VIEWS[2][1]}
+        title={VIEWS[2][1]}
+        onClick={() => {
+          if (view === "color") go(back.current);
+          else {
+            back.current = view;
+            go("color");
+          }
+        }}
+      >
+        {VIEWS[2][2]}
+      </button>
+      {[VIEWS[1], VIEWS[0]].map(([v, label, icon]) => (
+        <button
+          key={v}
+          type="button"
+          aria-pressed={view === v}
+          aria-label={label}
+          title={label}
+          onClick={() => go(v)}
+        >
+          {icon}
+        </button>
+      ))}
+    </div>
+  );
+
   return (
     <div className="v3 contents">
       <section
@@ -742,23 +825,9 @@ export function V3Work({
         </div>
         {/* One sticky glass bar on desktop; display:contents elsewhere. */}
         <div className="whead">
-          <div className="wtools lbl">
+          <div className="wtools lbl" ref={setTools}>
             <label className="wsearch">
-              <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
-                <circle
-                  cx="6"
-                  cy="6"
-                  r="4.5"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.3"
-                />
-                <path
-                  d="M9.4 9.4L13 13"
-                  stroke="currentColor"
-                  strokeWidth="1.3"
-                />
-              </svg>
+              {LOUPE}
               <input
                 type="search"
                 placeholder="Search the work"
@@ -768,38 +837,7 @@ export function V3Work({
                 onChange={(e) => setQ(e.target.value.trim().toLowerCase())}
               />
             </label>
-            <div className="wviews" role="group" aria-label="View">
-              {/* The vectorscope is a mode of its own: on, then off back to
-                  the view it came from. Then Strip, and Grid in the corner. */}
-              <button
-                type="button"
-                className="wcolor"
-                aria-pressed={view === "color"}
-                aria-label={VIEWS[2][1]}
-                title={VIEWS[2][1]}
-                onClick={() => {
-                  if (view === "color") go(back.current);
-                  else {
-                    back.current = view;
-                    go("color");
-                  }
-                }}
-              >
-                {VIEWS[2][2]}
-              </button>
-              {[VIEWS[1], VIEWS[0]].map(([v, label, icon]) => (
-                <button
-                  key={v}
-                  type="button"
-                  aria-pressed={view === v}
-                  aria-label={label}
-                  title={label}
-                  onClick={() => go(v)}
-                >
-                  {icon}
-                </button>
-              ))}
-            </div>
+            {views}
           </div>
           <div
             className="chips lbl"
@@ -932,6 +970,47 @@ export function V3Work({
             </div>
           </div>
         ) : null}
+        {pin &&
+          document.getElementById("hdr-tools") &&
+          createPortal(
+            <div className={hs ? "htools lbl open" : "htools lbl"}>
+              {hs ? (
+                <>
+                  <label className="hsearch">
+                    {LOUPE}
+                    <input
+                      type="search"
+                      autoFocus
+                      placeholder="Search the work"
+                      aria-label="Search the work by name, discipline or credit"
+                      autoComplete="off"
+                      value={q}
+                      onChange={(e) => setQ(e.target.value.trim().toLowerCase())}
+                      onKeyDown={(e) => e.key === "Escape" && setHs(false)}
+                    />
+                  </label>
+                  <button type="button" className="hbtn" aria-label="Close search" onClick={() => setHs(false)}>
+                    <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
+                      <path d="M2 2l10 10M12 2L2 12" stroke="currentColor" strokeWidth="1.3" />
+                    </svg>
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  className="hbtn"
+                  aria-pressed={!!q}
+                  aria-label="Search the work"
+                  title="Search the work"
+                  onClick={() => setHs(true)}
+                >
+                  {LOUPE}
+                </button>
+              )}
+              {views}
+            </div>,
+            document.getElementById("hdr-tools")!,
+          )}
         <V3Foot />
       </section>
     </div>
