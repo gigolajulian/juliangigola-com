@@ -165,3 +165,16 @@
     transform: translateY(16px);
   }
 }
+
+/* ── Item 9, `still`: what stays still ─────────────────────────────────
+   Search results appear as they are typed, no rise. The rest of item 9
+   lives in work.tsx (grid and strip, chips), time-picker.tsx (day pick,
+   Earlier / Later) and vectorscope.tsx (opening stagger). */
+:root[data-mplan~="still"] .v3 .sc-res .wt,
+:root[data-mplan~="still"] .v3 :is(.sc-res .wt .ph, .sc-res .wt img) {
+  animation: none !important;
+}
+:root[data-mplan~="still"] .v3 .sc-res .wt {
+  opacity: 1 !important;
+  transform: none !important;
+}

@@ -342,19 +342,28 @@ export function V3Work({
   const [scope, setScope] = React.useState<Scope | null>(null);
   const page = React.useRef<HTMLElement>(null);
   const strip = React.useRef<HTMLDivElement>(null);
+  const lastView = React.useRef(view);
   React.useLayoutEffect(() => {
     const st = flip.current, F = Flip.current;
+    const swap = lastView.current !== view;
+    lastView.current = view;
     if (!st || !F) return;
     flip.current = null;
     const w = strip.current;
     if (w) w.style.overflow = "visible"; // the strip would clip covers flying up into it
+    /* MOTION-PLAN.md item 9 (`?mplan=still`): grid and strip trade places as
+       one move, photo 600 on `move`, no stagger, new covers fade in 250, in
+       both directions; a chip slides the tiles to their new places, page 400
+       on `move`. */
+    const plan = mplan("still");
     const tl = F.from(st, {
       targets: seen(),
-      duration: 0.6,
-      ease: "expo.out",
+      duration: plan ? (swap ? 0.6 : 0.4) : 0.6,
+      ease: plan ? "power3.inOut" : "expo.out",
       scale: true,
-      stagger: 0.015,
-      onEnter: (els) => els.forEach((e) => e.animate({ opacity: [0, 1] }, 300)),
+      // The vectorscope (Color view) opens 40ms apart, the seventh on together.
+      stagger: plan ? (swap && view === "color" ? (i: number) => Math.min(i, 5) * 0.04 : 0) : 0.015,
+      onEnter: (els) => els.forEach((e) => e.animate({ opacity: [0, 1] }, plan ? { duration: 250, easing: "cubic-bezier(.23,1,.32,1)" } : 300)),
       onComplete: () => void (w && (w.style.overflow = "")),
     });
     return () => void tl.progress(1);
