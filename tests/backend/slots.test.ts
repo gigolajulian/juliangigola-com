@@ -69,6 +69,8 @@ describe("startsFor", () => {
     expect(cleanHours({ week: week.slice(1) }, "2026-11-04")).toBeNull();
     expect(cleanHours({ week: [[700, 600], ...week.slice(1)] }, "2026-11-04")).toBeNull();
     expect(cleanHours({ week: [[600, 610], ...week.slice(1)] }, "2026-11-04")).toBeNull();
+    // One start only: the first is the last.
+    expect(cleanHours({ week: [[1140, 1140], ...week.slice(1)] }, "2026-11-04")?.week[0]).toEqual([1140, 1140]);
     expect(cleanHours({ week, days: { tomorrow: null } }, "2026-11-04")).toBeNull();
   });
 

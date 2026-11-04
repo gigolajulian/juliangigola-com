@@ -31,7 +31,7 @@ export const windowOn = (h: Hours, ymd: string, weekday: number): Window | null 
   (h.days && ymd in h.days ? h.days[ymd] : h.week[weekday]) ?? null;
 
 const isWindow = (w: unknown): w is Window =>
-  Array.isArray(w) && w.length === 2 && w.every((m) => Number.isInteger(m) && m >= 0 && m <= 1440 && m % 15 === 0) && w[0] < w[1];
+  Array.isArray(w) && w.length === 2 && w.every((m) => Number.isInteger(m) && m >= 0 && m <= 1440 && m % 15 === 0) && w[0] <= w[1];
 
 /** `x` as Hours when it is well formed, dates before `today` dropped; else null. */
 export function cleanHours(x: unknown, today: string): Hours | null {
