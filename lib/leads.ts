@@ -252,7 +252,8 @@ const ARRIVED: LeadEvent["kind"][] = ["inquiry", "call", "booking", "deposit-stu
  * already there (run twice, changes nothing). Already there: the same row
  * (`ref`), or something that arrived within two minutes of it, which is
  * the same booking recorded live under its Cal.com uid.
- * A new lead is built in time order and is unread only if a row was.
+ * A new lead is built in time order and is unread only if a row was;
+ * one whose rows were all read, still at Inquiry, lands at Replied.
  * An existing lead only gains the events and an earlier First seen: its
  * stage, snooze and unread are Julian's and stay.
  */
@@ -266,7 +267,9 @@ export function backfillLead(lead: Lead | null, email: string, rows: InboxRow[])
   if (!lead) {
     let built: Lead | null = null;
     for (const c of add) built = fold(built, email, c);
-    return { ...built!, unread: sorted.some((r) => !r.read) };
+    const unread = sorted.some((r) => !r.read);
+    // Julian: "import read ones as replied". All read means he dealt with it.
+    return { ...built!, unread, ...(!unread && built!.stage === "Inquiry" ? { stage: "Replied" as const } : {}) };
   }
   const events = [...lead.events, ...add.map((c) => c.event)].sort((a, b) => a.at.localeCompare(b.at)).slice(-KEEP);
   return { ...lead, events, firstAt: add[0].event.at < lead.firstAt ? add[0].event.at : lead.firstAt };

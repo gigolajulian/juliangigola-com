@@ -153,6 +153,12 @@ describe("backfillLead", () => {
     expect(backfillLead(null, "maya@example.com", [row(1, { read: false })])!.unread).toBe(true);
   });
 
+  it("imports an all-read inquiry as Replied, and leaves an unread one at Inquiry", () => {
+    expect(backfillLead(null, "maya@example.com", [row(1), row(2)])).toMatchObject({ stage: "Replied", unread: false });
+    expect(backfillLead(null, "maya@example.com", [row(1), row(2, { read: false })])).toMatchObject({ stage: "Inquiry", unread: true });
+    expect(backfillLead(null, "maya@example.com", [row(1, { type: "booking", detail: "Headshots" })])!.stage).toBe("Confirmed");
+  });
+
   it("tells a call and a stuck deposit from a booking", () => {
     const l = backfillLead(null, "maya@example.com", [row(1, { type: "booking", detail: "Intro call · Mon" }), row(2, { key: "msg:x", type: "booking", detail: "Deposit paid, not booked, not refunded" })])!;
     expect(l.events.map((e) => e.kind)).toEqual(["call", "deposit-stuck"]);
