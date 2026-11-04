@@ -2,7 +2,8 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { lock, managed, type ChangeResult } from "@/lib/booking-engine";
 import { refundable } from "@/lib/booking-rules";
 import { manageLinks, tokenOpens } from "@/lib/booking-token";
-import { sendCancelled, sendConfirm } from "@/lib/confirm";
+import { cancelledSubject, confirmMail, sendCancelled, sendConfirm } from "@/lib/confirm";
+import { logMail } from "@/lib/leads";
 import { dashboardLink, mail, stripe } from "@/lib/deposit";
 import { whenPT } from "@/lib/inbox";
 
@@ -42,8 +43,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const key = env.STRIPE_SECRET_KEY;
 
   if (body.action === "reschedule") {
-    await mail(env.EMAIL, `Rescheduled: ${what}`, [`${r.name} <${r.email}>`, `Moved to ${whenPT(r.start)} by the client. The calendar is updated.`, ...(r.intent && !refundable(r) ? [`The deposit is no longer refundable: first booked for ${whenPT(r.firstStart ?? r.start)}, under 48 hours away.`] : [])], who);
-    await sendConfirm(env.CLIENT_EMAIL, { ...who, session: r.session, call: r.call, start: r.start, end: r.end, where: r.where, uid: r.id, manage: await manageLinks(env.BOOKING_SECRET, r), firstStart: r.firstStart, ...(r.intent ? { deposit: { ref: r.intent, at: r.at } } : {}) });
+    if (await mail(env.EMAIL, `Rescheduled: ${what}`, [`${r.name} <${r.email}>`, `Moved to ${whenPT(r.start)} by the client. The calendar is updated.`, ...(r.intent && !refundable(r) ? [`The deposit is no longer refundable: first booked for ${whenPT(r.firstStart ?? r.start)}, under 48 hours away.`] : [])], who))
+      await logMail(env, r.email, `Rescheduled: ${what}`, { to: "hello@", kind: "reschedule", booking: r.id });
+    const confirm = { ...who, session: r.session, call: r.call, start: r.start, end: r.end, where: r.where, uid: r.id, manage: await manageLinks(env.BOOKING_SECRET, r), firstStart: r.firstStart, ...(r.intent ? { deposit: { ref: r.intent, at: r.at } } : {}) };
+    if (await sendConfirm(env.CLIENT_EMAIL, confirm)) await logMail(env, r.email, confirmMail(confirm).subject, { to: "client", kind: "reschedule", booking: r.id });
     return json({ record: managed(r) });
   }
 
@@ -56,7 +59,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     );
   }
   const money = !r.intent ? "No deposit." : refunded ? "Deposit refunded." : refunded === false ? "The refund FAILED: refund it by hand in Stripe." : "Under 48 hours: the deposit is kept.";
-  await mail(env.EMAIL, `Cancelled: ${what}`, [`${r.name} <${r.email}>`, "Cancelled by the client. The event is off the calendar.", money, ...(r.intent && key ? [`Stripe: ${dashboardLink(r.intent, key)}`] : [])], who);
-  await sendCancelled(env.CLIENT_EMAIL, { ...who, session: r.session, start: was.start, end: was.end }, !r.intent ? "none" : refunded ? "refunded" : refunded === false ? "late" : "kept");
+  if (await mail(env.EMAIL, `Cancelled: ${what}`, [`${r.name} <${r.email}>`, "Cancelled by the client. The event is off the calendar.", money, ...(r.intent && key ? [`Stripe: ${dashboardLink(r.intent, key)}`] : [])], who))
+    await logMail(env, r.email, `Cancelled: ${what}`, { to: "hello@", kind: "cancelled", booking: r.id });
+  const gone = { ...who, session: r.session, start: was.start, end: was.end };
+  if (await sendCancelled(env.CLIENT_EMAIL, gone, !r.intent ? "none" : refunded ? "refunded" : refunded === false ? "late" : "kept"))
+    await logMail(env, r.email, cancelledSubject(gone), { to: "client", kind: "cancelled", booking: r.id });
   return json({ record: managed(r), refunded: refunded ?? null });
 }

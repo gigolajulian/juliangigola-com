@@ -9,7 +9,7 @@
 
 import { lock, type BookingRecord } from "../lib/booking-engine";
 import { manageLinks } from "../lib/booking-token";
-import { sendConfirm } from "../lib/confirm";
+import { confirmMail, sendConfirm } from "../lib/confirm";
 
 export { BookingLock } from "./booking-lock";
 
@@ -19,7 +19,7 @@ type Env = Parameters<typeof lock>[0] & { CLIENT_EMAIL?: CloudflareEnv["CLIENT_E
 export async function remind(env: Env) {
   const { records } = await lock<{ records: BookingRecord[] }>(env, "due", null);
   for (const r of records) {
-    await sendConfirm(env.CLIENT_EMAIL, {
+    const c = {
       kind: "reminder",
       name: r.name,
       email: r.email,
@@ -31,10 +31,23 @@ export async function remind(env: Env) {
       uid: r.id,
       manage: await manageLinks(env.BOOKING_SECRET, r),
       ...(r.intent ? { deposit: { ref: r.intent, at: r.at } } : {}),
-    });
+    } as const;
+    const sent = await sendConfirm(env.CLIENT_EMAIL, c);
     await lock(env, "reminded", r.id);
+    if (sent) await logSent(env, r.email, confirmMail(c).subject, r.id);
   }
   return records.length;
+}
+
+/** Tells the site's lead desk a reminder went out (the lead key lives there). Never throws. */
+async function logSent(env: Env, email: string, subject: string, booking: string) {
+  if (!env.SITE || !env.BOOKING_SECRET) return;
+  const res = await env.SITE.fetch("https://juliangigola.com/api/leads/mail", {
+    method: "POST",
+    headers: { authorization: `Bearer ${env.BOOKING_SECRET}`, "content-type": "application/json" },
+    body: JSON.stringify({ email, subject, kind: "reminder", booking }),
+  }).catch((e: unknown) => (console.error("lead log", String(e)), null));
+  if (res && !res.ok) console.error("lead log", res.status);
 }
 
 /** Asks the site to read hello@'s new mail into leads. Logs Google's failure, never throws. */

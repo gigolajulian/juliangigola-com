@@ -165,6 +165,9 @@ export async function sendConfirm(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefi
   }
 }
 
+/** The cancel note's subject, for the lead desk's log too. */
+export const cancelledSubject = (c: { session: string; start: string; end?: string }) => `Cancelled: ${c.session}, ${when(c.start, c.end)}`;
+
 /** The client's note that a booking is cancelled, plain, from book@. A failed send is logged, never a failed cancel. Whether it went out. */
 export async function sendCancelled(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefined, c: { name: string; email: string; session: string; start: string; end?: string }, refund: "refunded" | "kept" | "none" | "late"): Promise<boolean> {
   if (!mailer || !c.email) return false;
@@ -176,7 +179,7 @@ export async function sendCancelled(mailer: CloudflareEnv["CLIENT_EMAIL"] | unde
   }[refund];
   const text = [`Hi ${first(c.name)},`, "", `Your ${c.session.toLowerCase()} on ${when(c.start, c.end)} is cancelled.`, money, "", `Book another time: ${SITE}/book`, "", "Questions? Reply to this email."].filter((l, i, a) => l || a[i - 1]).join("\n");
   try {
-    await mailer.send({ to: { email: c.email, name: c.name }, from: FROM, replyTo: REPLY_TO, subject: `Cancelled: ${c.session}, ${when(c.start, c.end)}`, text });
+    await mailer.send({ to: { email: c.email, name: c.name }, from: FROM, replyTo: REPLY_TO, subject: cancelledSubject(c), text });
     return true;
   } catch (e) {
     console.error("cancel mail", String(e));

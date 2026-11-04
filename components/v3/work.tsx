@@ -61,6 +61,18 @@ const seen = () =>
     return r.bottom > 0 && r.top < innerHeight && r.right > 0 && r.left < innerWidth;
   });
 
+/** A cover's caption, on the photo: the name, then its discipline. A gallery is named for its discipline, so the label would say it twice. */
+function Cap({ p, cls }: { p: WorkItem; cls: string }) {
+  const d = p.d.join(", ");
+  return (
+    <span className={cls}>
+      {/* --n: a long name sets smaller to stay near two lines (Julian, 2026-11-04); --w: its longest word still fits the cover's width. */}
+      <b style={{ "--n": p.n.length, "--w": Math.max(...p.n.split(/\s+/).map((x) => x.length)) } as React.CSSProperties}>{p.n}</b>
+      {d.toLowerCase() !== p.n.toLowerCase() ? <span className="lbl">{d}</span> : null}
+    </span>
+  );
+}
+
 function Tile({ p, swatch, first }: { p: WorkItem; swatch?: string[]; first?: boolean }) {
   return (
     <figure className="wt">
@@ -83,12 +95,9 @@ function Tile({ p, swatch, first }: { p: WorkItem; swatch?: string[]; first?: bo
               ))}
             </span>
           ) : null}
+          <Cap p={p} cls="wt-n" />
         </div>
       </Link>
-      <figcaption className="lbl">
-        <span>{p.n.toUpperCase()}</span>
-        <span className="mute">{p.d.join(", ")}</span>
-      </figcaption>
     </figure>
   );
 }
@@ -854,13 +863,8 @@ export function V3Work({
             {/* A new chip starts its own strip at the start: the frames it shares with All kept the old scroll. */}
             <div className="wstrip" key={filter} ref={strip} onScroll={stripBar}>
               {cells.map(({ f, p }, n) => {
-                const cap = p ? (
-                  <figcaption>
-                    {/* A gallery is named for its discipline: the label would say it twice. */}
-                    {p.d.join(", ").toLowerCase() !== p.n.toLowerCase() ? <span className="lbl">{p.d.join(", ")}</span> : null}
-                    <b>{p.n}</b>
-                  </figcaption>
-                ) : null;
+                /* Name, then discipline, both on the photo, as in the grid (Julian, 2026-11-04). */
+                const cap = p ? <Cap p={p} cls="sc-n" /> : null;
                 if (!f)
                   return (
                     <figure key={p!.s} className="sc" data-flip-id={p!.s}>
