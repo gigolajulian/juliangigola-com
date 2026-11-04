@@ -199,7 +199,8 @@ const fade = (
   el.animate([{ opacity: from }, { opacity: to }], {
     duration: ms,
     delay,
-    easing: to ? "ease-out" : "ease-in",
+    // MOTION-PLAN.md item 4 (`?mplan=exits`): the chrome leaves on `out` too, never ease-in.
+    easing: to ? "ease-out" : document.documentElement.dataset.mplan?.split(" ").includes("exits") ? "cubic-bezier(.23,1,.32,1)" : "ease-in",
     fill: "backwards",
   });
 };

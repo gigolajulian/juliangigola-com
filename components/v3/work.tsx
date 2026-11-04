@@ -6,6 +6,7 @@ import Link from "next/link";
 import type { Flip as FlipT } from "gsap/Flip";
 import { V3Foot } from "@/components/v3/chrome";
 import DISC from "@/lib/discipline-order.json";
+import { mplan, GSAP_OUT } from "@/lib/mplan";
 
 /* JG V3 Portfolio (master v39, /work): search, discipline chips, and the
    Grid, Strip and Color views. Best first (lib's order: the vectorscope's
@@ -241,7 +242,7 @@ function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: number 
           const back = () => delete ref.current!.dataset.drop;
           if (Math.abs(dy) < 90) return void (g ? g.to(el, { y: 0, duration: 0.45, ease: "expo.out", onComplete: back }) : back());
           if (still() || !g) return onClose();
-          return void g.to(el, { y: Math.sign(dy) * innerHeight, duration: 0.3, ease: "power2.in", onComplete: onClose });
+          return void g.to(el, { y: Math.sign(dy) * innerHeight, duration: 0.3, ease: mplan("exits") ? GSAP_OUT : "power2.in", onComplete: onClose }); // item 4, `?mplan=exits`
         }
         // Where the throw would carry the track a fifth of a second on; the nearest frame there wins.
         const x = d.ox + e.clientX - d.x + d.v * 200;
