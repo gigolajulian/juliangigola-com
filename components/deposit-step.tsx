@@ -110,6 +110,8 @@ export type DepositBody = {
   notes?: string;
   where?: string;
   session?: string;
+  /** The site's own engine books it, not Cal.com (`?ownbook`). */
+  engine?: "own";
 };
 
 type Stage = "loading" | "ready" | "paying" | "confirming" | "taken" | "refunded" | "failed" | "slow" | "broken" | "declined";

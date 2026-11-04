@@ -1,5 +1,6 @@
 import { sendConfirm } from "@/lib/confirm";
 import { enquiry, enquiryKey, summary, whenPT } from "@/lib/inbox";
+import { openNow } from "@/lib/slots";
 
 /* ── the $100 deposit ─────────────────────────────────────────────
  * Julian (2026-10-16): the four paid sessions take a $100 deposit on the
@@ -65,6 +66,8 @@ export type Booking = {
   phone?: string;
   where?: string;
   notes?: string;
+  /** "own": booked by the site's engine (`lib/booking-rules.ts`), not Cal.com. */
+  engine?: "own";
 };
 
 /** What GET /api/deposit/<id> reports. "booking" is internal: a webhook is on it. */
@@ -110,14 +113,16 @@ export function parseBooking(raw: unknown): Booking | string {
     phone: cap(b.phone, 20) || undefined,
     where: cap(b.where) || undefined,
     notes: cap(b.notes) || undefined,
+    engine: b.engine === "own" ? "own" : undefined,
   };
 }
 
 const dayIn = (iso: string, tz: string, plus = 0) =>
   new Intl.DateTimeFormat("en-CA", { timeZone: tz }).format(new Date(Date.parse(iso) + plus * 864e5));
 
-/** Whether Cal.com still offers this start. */
-export async function isOpen(b: Booking): Promise<boolean> {
+/** Whether the start is still offered: by hello@'s calendar for the site's engine, else by Cal.com. */
+export async function isOpen(b: Booking, gcalSecret?: string): Promise<boolean> {
+  if (b.engine === "own") return openNow(gcalSecret, b.slug, b.start);
   const q = new URLSearchParams({
     username: USER,
     eventTypeSlug: b.slug,
@@ -239,7 +244,7 @@ export async function verifyStripe(body: string, header: string, secret: string,
   return sigs.some((s) => s.length === want.length && [...s].reduce((d, c, i) => d | (c.charCodeAt(0) ^ want.charCodeAt(i)), 0) === 0);
 }
 
-type Env = { INBOX: NonNullable<CloudflareEnv["INBOX"]>; STRIPE_SECRET_KEY: string; EMAIL?: CloudflareEnv["EMAIL"]; CLIENT_EMAIL?: CloudflareEnv["CLIENT_EMAIL"] };
+type Env = { INBOX: NonNullable<CloudflareEnv["INBOX"]>; STRIPE_SECRET_KEY: string; EMAIL?: CloudflareEnv["EMAIL"]; CLIENT_EMAIL?: CloudflareEnv["CLIENT_EMAIL"]; GCAL_OAUTH?: string };
 
 /** "Visa ending 4242", from the charge; nothing if Stripe will not say. */
 async function cardOf(key: string, intent: string) {
@@ -374,7 +379,7 @@ export async function settle(env: Env, intent: string, metadata: { [k: string]: 
   const link = dashboardLink(intent, env.STRIPE_SECRET_KEY);
   if (typeof b !== "string") {
     try {
-      if (await isOpen(b)) {
+      if (await isOpen(b, env.GCAL_OAUTH)) {
         const booking = await bookCal(b, intent);
         await put({ status: "booked", booking: { uid: booking.uid, start: booking.start } });
         await tell(env, "booked", b, link, intent);

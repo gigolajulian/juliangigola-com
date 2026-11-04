@@ -8,6 +8,7 @@ interface __BaseEnv_CloudflareEnv {
 	DEPOSIT_LIMIT: RateLimit;
 	ASSETS: Fetcher;
 	INBOX_KEY: string;
+	BOOKING_ENGINE: "cal" | "own";
 }
 declare namespace Cloudflare {
 	interface GlobalProps {
