@@ -71,7 +71,7 @@ export async function POST(request: Request) {
   });
   const paid = (PAID as readonly string[]).includes(hook.payload?.type ?? "");
   // Held, so a mail logged below folds in after it, not over it.
-  const lead = recordLead(env.INBOX, stored.email, {
+  const lead = recordLead(env, stored.email, {
     event: { at: stored.at, kind: paid ? "booking" : "call", ref: hook.payload?.uid, note: stored.detail },
     name: stored.name,
     kind: hook.payload?.type,
@@ -90,7 +90,7 @@ export async function POST(request: Request) {
   // After the write, so a failed write's retry does not mail twice.
   if (stored.noDeposit) {
     const sent = await tellNoDeposit(env.EMAIL, hook.payload!.type!, hook.payload?.startTime, { name: stored.name, email: stored.email });
-    if (sent) await lead.then(() => logMail(env.INBOX, stored.email, sent, { to: "hello@", kind: "no-deposit", booking: hook.payload?.uid }));
+    if (sent) await lead.then(() => logMail(env, stored.email, sent, { to: "hello@", kind: "no-deposit", booking: hook.payload?.uid }));
   }
   // Free calls only: a paid session's confirmation comes from the deposit
   // webhook, and one booked on cal.com without paying gets none.
@@ -108,7 +108,7 @@ export async function POST(request: Request) {
     };
     await sendConfirm(env.CLIENT_EMAIL, confirm);
     // shortcut: sendConfirm does not say whether the send failed, so this logs every attempt.
-    if (env.CLIENT_EMAIL) await lead.then(() => logMail(env.INBOX, stored.email, confirmMail(confirm).subject, { to: "client", kind: "confirm", booking: p.uid }));
+    if (env.CLIENT_EMAIL) await lead.then(() => logMail(env, stored.email, confirmMail(confirm).subject, { to: "client", kind: "confirm", booking: p.uid }));
   }
   return text("ok", 200);
 }

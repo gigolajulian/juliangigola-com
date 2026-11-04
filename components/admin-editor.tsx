@@ -1220,7 +1220,8 @@ export function AdminEditor({
 
         <div
           className={cn(
-            "min-w-0 xl:min-h-0 xl:overflow-y-auto xl:pb-10",
+            "min-w-0 xl:min-h-0 xl:overflow-y-auto",
+            !leadsWide && "xl:pb-10",
             full && full !== "work" && "xl:hidden",
           )}
         >
@@ -1233,7 +1234,9 @@ export function AdminEditor({
             asked for at the point it is actually needed: the commit. The
             usual visit does not see this at all, because a stored token
             reconnects on mount. */}
-          {!sha ? (
+          {/* Not on the lead desk: it publishes nothing, and above it the box
+            pushed the desk off the screen. */}
+          {!sha && !leadsWide ? (
             <Connect
               token={token}
               setToken={setToken}

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { fold, isLate, leadKey, leadSummary, recordLead, type Lead } from "./leads";
+import { sealer } from "./lead-crypto";
 
 const at = (h: number) => new Date(Date.UTC(2026, 10, 2, h)).toISOString();
 const email = "Maya@Example.com";
@@ -7,7 +8,6 @@ const email = "Maya@Example.com";
 describe("fold", () => {
   it("starts a lead at Inquiry from a form, keyed by the lowercased address", () => {
     const l = fold(null, email, { event: { at: at(1), kind: "inquiry", ref: "msg:1" }, name: "Maya", kind: "portrait" });
-    expect(leadKey(email)).toBe("lead:maya@example.com");
     expect(l).toMatchObject({ email: "maya@example.com", name: "Maya", stage: "Inquiry", unread: true, kind: "portrait" });
   });
 
@@ -75,6 +75,7 @@ describe("isLate", () => {
 });
 
 describe("recordLead", () => {
+  const LEADS_KEY = btoa("k".repeat(32));
   const kv = () => {
     const data = new Map<string, { v: string; m: unknown }>();
     return {
@@ -84,18 +85,50 @@ describe("recordLead", () => {
     };
   };
 
-  it("stores the record with its summary as metadata, small enough for KV", async () => {
+  it("stores the record sealed, keyed by an id, with a sealed summary small enough for KV", async () => {
     const store = kv();
-    await recordLead(store as never, email, { event: { at: at(1), kind: "inquiry", ref: "msg:1" }, name: "Maya" });
-    const row = store.data.get("lead:maya@example.com")!;
-    expect((JSON.parse(row.v) as Lead).events).toHaveLength(1);
-    expect(row.m).toEqual(leadSummary(JSON.parse(row.v)));
-    expect(JSON.stringify(row.m).length).toBeLessThan(1024);
+    await recordLead({ INBOX: store as never, LEADS_KEY }, email, { event: { at: at(1), kind: "inquiry", ref: "msg:1" }, name: "Maya" });
+    const s = await sealer(LEADS_KEY)!;
+    const row = store.data.get(leadKey(await s.id(email)))!;
+    expect(row.v).not.toContain("Maya");
+    const lead = await s.open<Lead>(row.v);
+    expect(lead.events).toHaveLength(1);
+    const m = row.m as { s: string };
+    expect(await s.open(m.s)).toEqual(leadSummary(lead));
+    expect(JSON.stringify(m).length).toBeLessThan(1024);
   });
 
-  it("never throws, and skips a booking with no address", async () => {
+  it("never throws, skips a booking with no address, and records nothing without LEADS_KEY", async () => {
     const broken = { get: async () => { throw new Error("down"); }, put: async () => {} };
-    expect(await recordLead(broken as never, email, { event: { at: at(1), kind: "inquiry" } })).toBeNull();
-    expect(await recordLead(kv() as never, "", { event: { at: at(1), kind: "call" } })).toBeNull();
+    expect(await recordLead({ INBOX: broken as never, LEADS_KEY }, email, { event: { at: at(1), kind: "inquiry" } })).toBeNull();
+    expect(await recordLead({ INBOX: kv() as never, LEADS_KEY }, "", { event: { at: at(1), kind: "call" } })).toBeNull();
+    const plain = kv();
+    expect(await recordLead({ INBOX: plain as never }, email, { event: { at: at(1), kind: "inquiry" } })).toBeNull();
+    expect(plain.data.size).toBe(0);
+  });
+});
+
+describe("sealer", () => {
+  it("opens what it seals with a fresh IV each time, and ids ignore case", async () => {
+    const s = await sealer(btoa("k".repeat(32)))!;
+    const a = await s.seal({ x: 1 });
+    expect(a).not.toBe(await s.seal({ x: 1 }));
+    expect(await s.open(a)).toEqual({ x: 1 });
+    expect(await s.id("A@Example.com")).toBe(await s.id("a@example.com"));
+    expect(await s.id("a@example.com")).toMatch(/^[0-9a-f]{32}$/);
+  });
+  it("refuses a key that is not 32 bytes, and another key cannot open it", async () => {
+    expect(sealer("short")).toBeNull();
+    expect(sealer(undefined)).toBeNull();
+    const sealed = await (await sealer(btoa("k".repeat(32)))!).seal({ x: 1 });
+    await expect((await sealer(btoa("j".repeat(32)))!).open(sealed)).rejects.toThrow();
+  });
+});
+
+describe("leadSummary", () => {
+  it("keeps a sealed summary under KV's 1024-byte metadata cap, however long the name", async () => {
+    const s = await sealer(btoa(String.fromCharCode(...new Uint8Array(32).fill(7))))!;
+    const l = fold(null, `${"a".repeat(300)}@example.com`, { event: { at: "2026-11-03T00:00:00Z", kind: "call" }, name: "N".repeat(600), kind: "intro-call" });
+    expect(JSON.stringify({ s: await s.seal(leadSummary(l)) }).length).toBeLessThan(1024);
   });
 });

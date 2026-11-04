@@ -1,7 +1,8 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { bearer, canPush } from "@/lib/vouch";
 import { SAFE_IMAGE, summary, type Enquiry, type Summary } from "@/lib/inbox";
-import { fold, leadSummary, STAGES, type Lead, type LeadSummary, type Stage } from "@/lib/leads";
+import { fold, readLead, STAGES, writeLead, type LeadSummary, type Stage } from "@/lib/leads";
+import { sealer } from "@/lib/lead-crypto";
 
 /* ── reading the inbox ────────────────────────────────────────────
  * The one endpoint /admin's Inbox tab talks to. Lists enquiries, opens one,
@@ -31,6 +32,7 @@ export const dynamic = "force-dynamic";
 const NO_STORE = {
   "cache-control": "no-store, no-cache, must-revalidate",
   "content-type": "application/json",
+  "x-robots-tag": "noindex, nofollow",
 } as const;
 
 const json = (body: unknown, status = 200) =>
@@ -89,7 +91,7 @@ async function authorised(request: Request, expected?: string) {
 /** The binding and the secret, or `null` when this build has neither. */
 async function wired() {
   const { env } = await getCloudflareContext({ async: true });
-  return env.INBOX ? { inbox: env.INBOX, key: env.INBOX_KEY } : null;
+  return env.INBOX ? { inbox: env.INBOX, key: env.INBOX_KEY, seal: sealer(env.LEADS_KEY) } : null;
 }
 
 async function guard(request: Request) {
@@ -109,11 +111,11 @@ async function guard(request: Request) {
   // push to the repository. The messages differ so a wrong one can be told
   // from a missing one — but never which characters were wrong.
   if (rig.key && (await authorised(request, rig.key)))
-    return { inbox: rig.inbox };
+    return { inbox: rig.inbox, seal: rig.seal };
 
   const token = bearer(request);
   if (token) {
-    if (await canPush(token)) return { inbox: rig.inbox };
+    if (await canPush(token)) return { inbox: rig.inbox, seal: rig.seal };
     return {
       error: json(
         { error: "GitHub did not accept that token for this repository." },
@@ -157,17 +159,21 @@ export async function GET(request: Request) {
   }
 
   // The lead desk (`components/admin-leads.tsx`): one record per person.
-  if (wanted?.startsWith("lead:")) {
-    const body = await gate.inbox.get(wanted);
-    if (body === null) return json({ error: "Gone." }, 404);
-    return json({ lead: JSON.parse(body) as Lead });
-  }
-  if (url.searchParams.has("leads")) {
+  // Sealed with LEADS_KEY (`lib/lead-crypto.ts`), opened here and only here.
+  if (wanted?.startsWith("lead:") || url.searchParams.has("leads")) {
+    const seal = await gate.seal;
+    if (!seal) return json({ error: "Leads need LEADS_KEY on the Worker." }, 503);
+    if (wanted) {
+      const lead = await readLead(gate.inbox, seal, wanted.slice(5));
+      return lead ? json({ lead }) : json({ error: "Gone." }, 404);
+    }
     const leads: LeadSummary[] = [];
     let after: string | undefined;
     for (;;) {
-      const listed = await gate.inbox.list<LeadSummary>({ prefix: "lead:", cursor: after });
-      leads.push(...listed.keys.flatMap((k: { metadata?: LeadSummary }) => (k.metadata ? [k.metadata] : [])));
+      const listed = await gate.inbox.list<{ s?: string }>({ prefix: "lead:", cursor: after });
+      for (const k of listed.keys as { name: string; metadata?: { s?: string } }[]) {
+        if (k.metadata?.s) leads.push({ ...(await seal.open<LeadSummary>(k.metadata.s)), id: k.name.slice(5) });
+      }
       if (listed.list_complete) break;
       after = listed.cursor;
     }
@@ -204,7 +210,7 @@ export async function PATCH(request: Request) {
 
   const given = await parsed(request);
   if (!given) return json({ error: "Not JSON." }, 400);
-  if (typeof given.key === "string" && given.key.startsWith("lead:")) return patchLead(gate.inbox, given);
+  if (typeof given.key === "string" && given.key.startsWith("lead:")) return patchLead(gate.inbox, await gate.seal, given);
   const { key, read } = given as { key?: string; read?: boolean };
   if (!key?.startsWith("msg:") || typeof read !== "boolean")
     return json({ error: "Unknown." }, 400);
@@ -250,17 +256,18 @@ export async function DELETE(request: Request) {
  * it), or opened (`seen`). Stage and snooze go through `fold`, so they land
  * on the timeline like everything else.
  */
-async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, given: Record<string, unknown>) {
+async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: Awaited<ReturnType<typeof sealer>>, given: Record<string, unknown>) {
+  if (!seal) return json({ error: "Leads need LEADS_KEY on the Worker." }, 503);
   const { key, stage, snoozeUntil, seen } = given as { key: string; stage?: string; snoozeUntil?: string; seen?: boolean };
   if (stage !== undefined && !(STAGES as readonly string[]).includes(stage)) return json({ error: "Unknown stage." }, 400);
   if (snoozeUntil !== undefined && snoozeUntil !== "" && isNaN(Date.parse(snoozeUntil))) return json({ error: "Bad time." }, 400);
-  const body = await inbox.get(key);
-  if (body === null) return json({ error: "Gone." }, 404);
-  let lead = JSON.parse(body) as Lead;
+  const id = key.slice(5);
+  let lead = await readLead(inbox, seal, id);
+  if (!lead) return json({ error: "Gone." }, 404);
   const at = new Date().toISOString();
   if (stage) lead = fold(lead, lead.email, { event: { at, kind: "stage", note: stage }, stage: stage as Stage });
   if (snoozeUntil !== undefined) lead = fold(lead, lead.email, { event: { at, kind: "snooze", note: snoozeUntil || "woken" }, snoozeUntil });
   if (seen) lead = { ...lead, unread: false };
-  await inbox.put(key, JSON.stringify(lead), { metadata: leadSummary(lead) });
+  await writeLead(inbox, seal, id, lead);
   return json({ lead });
 }

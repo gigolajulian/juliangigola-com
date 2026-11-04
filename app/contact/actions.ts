@@ -228,7 +228,7 @@ export async function submitEnquiry(
     // After the response, so a slow Notion never holds up the visitor or the email.
     ctx.waitUntil(toNotion(env.NOTION_TOKEN, { stored, status: "Inquiry", kind: stored.type }));
     // Held, so the mail logged below folds in after it, not over it.
-    const lead = recordLead(inbox, stored.email, { event: { at: stored.at, kind: "inquiry", ref: key, note: stored.type }, name: stored.name, kind: stored.type });
+    const lead = recordLead(env, stored.email, { event: { at: stored.at, kind: "inquiry", ref: key, note: stored.type }, name: stored.name, kind: stored.type });
     ctx.waitUntil(lead);
     /* Their images beside it, for /admin's Inbox (`ref:<key>:<n>`, read
        and deleted with the message by `app/api/inbox/route.ts`). Best
@@ -293,7 +293,7 @@ export async function submitEnquiry(
           ...inline.map((a) => a.file),
         ],
       });
-      if (env.EMAIL) await lead.then(() => logMail(inbox, stored.email, subject, { to: "hello@", kind: "inquiry" }));
+      if (env.EMAIL) await lead.then(() => logMail(env, stored.email, subject, { to: "hello@", kind: "inquiry" }));
     } catch (err) {
       console.error(
         "contact: stored the enquiry but could not mail a copy",

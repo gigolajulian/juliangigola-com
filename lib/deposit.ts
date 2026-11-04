@@ -250,6 +250,7 @@ export async function verifyStripe(body: string, header: string, secret: string,
 
 type Env = {
   INBOX: NonNullable<CloudflareEnv["INBOX"]>;
+  LEADS_KEY?: string;
   STRIPE_SECRET_KEY: string;
   EMAIL?: CloudflareEnv["EMAIL"];
   CLIENT_EMAIL?: CloudflareEnv["CLIENT_EMAIL"];
@@ -331,7 +332,7 @@ async function tell(env: Env, status: keyof typeof SAID, b: Booking | string, li
   if (refs.files.length) lines.push("", `References attached: ${refs.files.length}`);
   if (refs.picks.length) lines.push("", "Picked from my work:", ...refs.picks.map((src) => `https://juliangigola.com${src}`));
   const subject = `${SAID[status]}: ${what}`;
-  if (await mail(env.EMAIL, subject, lines, who, refs.files)) await logMail(env.INBOX, who?.email, subject, { to: "hello@", kind: `deposit-${status}`, booking: intent });
+  if (await mail(env.EMAIL, subject, lines, who, refs.files)) await logMail(env, who?.email, subject, { to: "hello@", kind: `deposit-${status}`, booking: intent });
 }
 
 /**
@@ -371,13 +372,13 @@ export async function settle(env: Env, intent: string, metadata: { [k: string]: 
       const who = typeof b === "string" ? undefined : b;
       const what = who ? [SESSION[who.slug] ?? who.slug, whenPT(who.start), who.name, "$100"].join(", ") : "$100";
       await env.INBOX.put(key, JSON.stringify({ ...r, warned: true }), { expirationTtl: 90 * 864e2 }).catch((e: unknown) => console.error("deposit record", "warned", String(e)));
-      if (who) await recordLead(env.INBOX, who.email, { event: { at: new Date().toISOString(), kind: "deposit-stuck", ref: intent, note: what }, name: who.name, kind: who.slug, flag: "stuck" });
+      if (who) await recordLead(env, who.email, { event: { at: new Date().toISOString(), kind: "deposit-stuck", ref: intent, note: what }, name: who.name, kind: who.slug, flag: "stuck" });
       const subject = `Deposit stuck: check Stripe and Cal.com: ${what}`;
       if (await mail(env.EMAIL, subject, [
         who ? `${who.name} <${who.email}>` : "Unknown client",
         `Paid, and the booking was started at ${r.at} but never finished. Check Cal.com for the booking, then book or refund in Stripe by hand.`,
         `Stripe: ${dashboardLink(intent, env.STRIPE_SECRET_KEY)}`,
-      ], who)) await logMail(env.INBOX, who?.email, subject, { to: "hello@", kind: "deposit-stuck", booking: intent });
+      ], who)) await logMail(env, who?.email, subject, { to: "hello@", kind: "deposit-stuck", booking: intent });
       return "failed";
     }
     return r.status;
@@ -419,7 +420,7 @@ export async function settle(env: Env, intent: string, metadata: { [k: string]: 
           deposit: { ref: intent, at: new Date().toISOString(), card: await cardOf(env.STRIPE_SECRET_KEY, intent) },
           ...(own?.ok ? { manage: await manageLinks(env.BOOKING_SECRET, own.record) } : {}),
         };
-        if (await sendConfirm(env.CLIENT_EMAIL, confirm)) await logMail(env.INBOX, b.email, confirmMail(confirm).subject, { to: "client", kind: "confirm", booking: booking.uid });
+        if (await sendConfirm(env.CLIENT_EMAIL, confirm)) await logMail(env, b.email, confirmMail(confirm).subject, { to: "client", kind: "confirm", booking: booking.uid });
         return "booked";
       }
     } catch {
@@ -452,7 +453,7 @@ export async function settle(env: Env, intent: string, metadata: { [k: string]: 
       type: "booking",
     };
     await env.INBOX.put(enquiryKey(now, id.slice(0, 8)), JSON.stringify(row), { metadata: summary(row) });
-    await recordLead(env.INBOX, who.email, { event: { at: row.at, kind: "deposit-stuck", ref: intent, note: row.detail }, name: who.name, kind: typeof b === "string" ? undefined : b.slug, flag: "stuck" });
+    await recordLead(env, who.email, { event: { at: row.at, kind: "deposit-stuck", ref: intent, note: row.detail }, name: who.name, kind: typeof b === "string" ? undefined : b.slug, flag: "stuck" });
     await tell(env, "failed", b, link, intent);
     return "failed";
   }

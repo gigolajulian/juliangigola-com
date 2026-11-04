@@ -1,10 +1,13 @@
+import { sealer, type Sealer } from "./lead-crypto";
+
 /* ── leads: one record per person ─────────────────────────────────
  * Julian (2026-11-03, PLAN-lead-desk.md): every inquiry, call and booking
  * in one list, with a stage on each person. Until now one person who
  * wrote, then booked a call, then paid was two or three unrelated rows.
  *
  * So beside the raw rows (`msg:`, still written first and kept as the
- * log) the INBOX namespace holds one `lead:<email>` per person. Each event
+ * log) the INBOX namespace holds one `lead:<id>` per person, sealed with
+ * LEADS_KEY (`lib/lead-crypto.ts`). Each event
  * that reaches the site (the form, a Cal.com booking, a deposit in
  * trouble) is folded into it here. KV is the source of truth; Notion is a
  * mirror of it, never the other way.
@@ -14,8 +17,8 @@
  * inquiry from someone Delivered or Lost opens them again. Julian moves
  * the rest by hand (Replied, Quoted, Shot, Delivered, Lost).
  *
- * The record's summary rides as KV metadata, like the inbox's, so the list
- * costs one request. Pure functions here; `recordLead` is the one place
+ * The record's summary rides sealed in KV metadata, so the list costs one
+ * request. Pure functions here; `recordLead` is the one place
  * that touches the binding, and it never throws: the raw row is already
  * stored, and a lead that failed to update must not fail the form.
  * ─────────────────────────────────────────────────────────────── */
@@ -64,13 +67,14 @@ export type Lead = {
   events: LeadEvent[];
 };
 
-/** What the list shows, kept as KV metadata (under its 1024-byte cap). */
-export type LeadSummary = Omit<Lead, "events" | "notion" | "deposit"> & { paid?: true };
+/** What the list shows, sealed into KV metadata (under its 1024-byte cap). `id` is added when listed. */
+export type LeadSummary = Omit<Lead, "events" | "notion" | "deposit"> & { paid?: true; id?: string };
 
 /** Events kept per lead: the timeline needs the recent ones, KV values stay small. */
 const KEEP = 50;
 
-export const leadKey = (email: string) => `lead:${email.trim().toLowerCase()}`;
+/** A lead's KV key: its id (an HMAC of the address, `lib/lead-crypto.ts`), never the address. */
+export const leadKey = (id: string) => `lead:${id}`;
 
 const rank = (s: Stage) => STAGES.indexOf(s);
 const closed = (s: Stage) => s === "Delivered" || s === "Lost";
@@ -161,32 +165,55 @@ export function isLate(l: Pick<Lead, "stage" | "stageAt" | "snoozeUntil">, now: 
   return false;
 }
 
+// Name and email capped: KV metadata holds 1024 bytes, and the sealed summary
+// grows by a third, so one long Cal.com name must not cost the whole lead.
 export const leadSummary = ({ events: _e, notion: _n, deposit, ...rest }: Lead): LeadSummary => ({
   ...rest,
+  name: rest.name?.slice(0, 80),
+  email: rest.email.slice(0, 120),
   ...(deposit ? { paid: true as const } : {}),
 });
 
 type KV = Pick<NonNullable<CloudflareEnv["INBOX"]>, "get" | "put">;
+/** Where leads live: the INBOX namespace, sealed with LEADS_KEY. */
+export type LeadStore = { INBOX?: KV; LEADS_KEY?: string };
+
+/** One lead, opened. Null when it is not there. */
+export async function readLead(kv: KV, s: Sealer, id: string): Promise<Lead | null> {
+  const raw = await kv.get(leadKey(id));
+  return raw ? s.open<Lead>(raw) : null;
+}
+
+/** One lead, sealed, with its sealed summary as the metadata the list reads. */
+export async function writeLead(kv: KV, s: Sealer, id: string, lead: Lead): Promise<void> {
+  await kv.put(leadKey(id), await s.seal(lead), { metadata: { s: await s.seal(leadSummary(lead)) } });
+}
 
 /** Logs a mail the site sent against the person it was about. Never throws. */
-export const logMail = (kv: KV | undefined, email: string | undefined, subject: string, mail: Sent) =>
-  recordLead(kv, email ?? "", { event: { at: new Date().toISOString(), kind: "mail", note: subject, mail } });
+export const logMail = (env: LeadStore, email: string | undefined, subject: string, mail: Sent) =>
+  recordLead(env, email ?? "", { event: { at: new Date().toISOString(), kind: "mail", note: subject, mail } });
 
 /**
- * Folds one event into the person's record and stores it.
+ * Folds one event into the person's record and stores it, sealed. Without
+ * LEADS_KEY nothing is recorded: never a lead in the clear.
  * shortcut: read, fold, write is not atomic, so two events for the same
  * person in the same second can lose one. Webhooks and the form for one
  * person are minutes apart; a Durable Object if that ever changes.
  */
-export async function recordLead(kv: KV | undefined, email: string, c: Change): Promise<Lead | null> {
-  if (!kv || !email.includes("@")) return null;
+export async function recordLead(env: LeadStore, email: string, c: Change): Promise<Lead | null> {
+  const seal = sealer(env.LEADS_KEY);
+  if (!env.INBOX || !email.includes("@")) return null;
+  if (!seal) {
+    console.error("lead", "LEADS_KEY unset or malformed, not recorded");
+    return null;
+  }
   try {
-    const key = leadKey(email);
-    const raw = await kv.get(key);
-    const before = raw ? (JSON.parse(raw) as Lead) : null;
+    const s = await seal;
+    const id = await s.id(email);
+    const before = await readLead(env.INBOX, s, id);
     const after = fold(before, email, c);
     if (after === before) return after;
-    await kv.put(key, JSON.stringify(after), { metadata: leadSummary(after) });
+    await writeLead(env.INBOX, s, id, after);
     return after;
   } catch (e) {
     console.error("lead", String(e));
