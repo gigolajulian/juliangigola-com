@@ -391,6 +391,8 @@ export function V3Work({
     if (d) setFilter(d);
   }, [chip]);
   const [view, setView] = React.useState<"grid" | "strip" | "color">("grid");
+  // Strip cells showing a sleeve's back, by front src (the grid's tiles keep their own).
+  const [stripBacks, setStripBacks] = React.useState<Set<string>>(() => new Set());
   const back = React.useRef<"grid" | "strip">("grid");
   /* Grid, strip and color views, and the discipline chips: the covers on
      screen fly from where they were to where they land, new ones fade in
@@ -964,7 +966,7 @@ export function V3Work({
                   );
                 const i = stripFrames.indexOf(f);
                 return (
-                  <figure key={f.src} className={f.wide ? "sc wide" : f.sq ? "sc sq" : "sc"} data-flip-id={f.src}>
+                  <figure key={f.src} className={f.wide ? "sc wide" : f.sq ? "sc sq" : "sc"} data-flip-id={f.src} data-back={stripBacks.has(f.src) || undefined}>
                     {/* Opens full size, as in the grid. */}
                     <a
                       href={f.src}
@@ -974,8 +976,21 @@ export function V3Work({
                       }}
                     >
                       <Image src={f.src} alt={f.alt} fill sizes={STRIP_SIZES} loading={n < 4 ? "eager" : "lazy"} />
+                      {f.back ? <Image className="bk" src={f.back.src} alt={stripBacks.has(f.src) ? f.back.alt : ""} fill sizes={STRIP_SIZES} loading="lazy" /> : null}
                       {cap}
                     </a>
+                    {f.back ? (
+                      <Sides
+                        back={stripBacks.has(f.src)}
+                        onFlip={() =>
+                          setStripBacks((b) => {
+                            const x = new Set(b);
+                            if (!x.delete(f.src)) x.add(f.src);
+                            return x;
+                          })
+                        }
+                      />
+                    ) : null}
                   </figure>
                 );
               })}
