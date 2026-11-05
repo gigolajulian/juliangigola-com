@@ -931,7 +931,7 @@ export function TimePicker({
   const v3paid = paid || isPaid(slug);
   const v3steps = v3paid ? ["Time", "You", "Deposit", "Booked"] : ["Time", "You", "Booked"];
   // The same subtitle as the picker, so nothing below it jumps when the times arrive.
-  const v3sub = v3paid ? "My studio is in San Jose, and I travel across the Bay Area." : "15 minutes, phone or video. Bring your dates and references.";
+  const v3sub = v3paid ? "Studio in San Jose. I travel across the Bay Area." : "15 minutes, phone or video. Bring your dates and references.";
   const v3plain = (body: React.ReactNode) => v3!.shell({ steps: v3steps, at: 1, head: v3paid ? "Book a session" : v3!.name === "Consultation" ? "Book a consultation" : "Book a call", sub: v3sub, body, sum: [] });
   if (state === "fallback") return v3 ? v3plain(fallback) : <>{fallback}</>;
   const waiting = <p role="status" className="lbl mute">Loading availability</p>;
