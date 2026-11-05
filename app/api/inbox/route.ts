@@ -3,7 +3,7 @@ import { authorised, bearer, canPush } from "@/lib/vouch";
 import { SAFE_IMAGE, summary, type Enquiry, type Summary } from "@/lib/inbox";
 import { backfillLead, fold, readLead, STAGES, trashDaysLeft, writeLead, type InboxRow, type Lead, type LeadSummary, type Stage } from "@/lib/leads";
 import { sealer } from "@/lib/lead-crypto";
-import { subscribe, unsubscribe } from "@/lib/lead-push";
+import { notify, subscribe, unsubscribe } from "@/lib/lead-push";
 import { publicKey } from "@/lib/web-push";
 import { notionStage } from "@/lib/notion-lead";
 import { cleanTemplates, csv, manualLead, merge, stats, type NewLead } from "@/lib/lead-crm";
@@ -253,6 +253,13 @@ export async function PATCH(request: Request) {
       await subscribe(gate.inbox, { endpoint: sub.endpoint, keys: { p256dh: sub.keys.p256dh, auth: sub.keys.auth } });
     else return json({ error: "Bad subscription." }, 400);
     return json({ ok: true });
+  }
+  // The desk's "Send a test": one ping to every device that turned these on.
+  if (given.test === true) {
+    if (!gate.vapid) return json({ error: "Push needs VAPID_KEY on the Worker." }, 503);
+    const devices = (await gate.inbox.list({ prefix: "push:" })).keys.length;
+    if (devices) await notify(gate.inbox, gate.vapid, { title: "Test notification", body: "Leads can reach this device.", tag: "test", url: "/admin/leads" });
+    return json({ devices });
   }
   if (typeof given.key === "string" && given.key.startsWith("lead:")) return patchLead(gate.inbox, await gate.seal, given, gate.notion);
   // His reply templates, saved whole.
