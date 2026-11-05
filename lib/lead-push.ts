@@ -29,7 +29,8 @@ const TITLE: Partial<Record<LeadEvent["kind"], string>> = {
 export function pushFor(lead: Lead, event: LeadEvent): Push | null {
   const title = TITLE[event.kind];
   if (!title) return null;
-  return { title, body: [lead.name, lead.kind].filter(Boolean).join(", "), tag: lead.email, url: "/admin/leads" };
+  // No tag: on iOS a push with an earlier one's tag replaces it without a banner.
+  return { title, body: [lead.name, lead.kind].filter(Boolean).join(", "), url: "/admin/leads" };
 }
 
 /** Pings every device. Never throws: the lead is already stored. */

@@ -32,6 +32,16 @@ body:has([data-workbench]) > footer {
 body:has([data-lead-app]) .site-hdr {
   display: none;
 }
+/* The page's top padding clears the status bar only at the top: scrolled,
+   the list ran under the clock. A solid strip the bar's height stays over it. */
+body:has([data-lead-app])::before {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 50;
+  height: env(safe-area-inset-top);
+  background: var(--background);
+}
 /* Where it is one screen, the page itself does not scroll: the columns do.
    Anything poking past the screen (the intro's 0.75rem lift on `.rise`,
    held while the intro plays) otherwise scrolled the whole editor by that

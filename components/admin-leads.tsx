@@ -548,7 +548,7 @@ function PushSwitch({ call }: { call: Call }) {
     setNote("Sending.");
     try {
       const { devices } = (await call({ method: "PATCH", body: JSON.stringify({ test: true }) })) as { devices: number };
-      setNote(devices ? `Sent to ${devices} ${devices === 1 ? "device" : "devices"}. No banner? Check Settings > Notifications > Leads.` : "No device is subscribed. Turn notifications off and on again here.");
+      setNote(devices ? `Arrives in 10 seconds on ${devices} ${devices === 1 ? "device" : "devices"}. Lock the phone now: no banner shows while the app is open.` : "No device is subscribed. Turn notifications off and on again here.");
     } catch (e) {
       setNote(e instanceof Error ? e.message : String(e));
     }
