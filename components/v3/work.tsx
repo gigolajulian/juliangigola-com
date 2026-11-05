@@ -103,12 +103,22 @@ function Tile({ p, swatch, first }: { p: WorkItem; swatch?: string[]; first?: bo
   );
 }
 
-export type FrameItem = { s: string; src: string; alt: string; wide: boolean; sq: boolean };
+export type FrameItem = { s: string; src: string; alt: string; wide: boolean; sq: boolean; back?: { src: string; alt: string } };
+
+/* A two-sided sleeve's Front / Back switch, on the cell and in the viewer (Julian, 2026-11-05). */
+function Sides({ back, onFlip }: { back: boolean; onFlip: () => void }) {
+  return (
+    <button type="button" className="sides lbl" aria-pressed={back} aria-label={back ? "Show front" : "Show back"} onClick={onFlip}>
+      <span>Front</span> / <span>Back</span>
+    </button>
+  );
+}
 const WIDE_SIZES = "(max-width: 700px) 100vw, (max-width: 1000px) 66vw, 50vw";
 
 function FrameTile({ f, first, onOpen }: { f: FrameItem; first?: boolean; onOpen: () => void }) {
+  const [back, setBack] = React.useState(false);
   return (
-    <figure className={f.wide ? "wt wide" : "wt"}>
+    <figure className={f.wide ? "wt wide" : "wt"} data-back={back || undefined}>
       {/* A gallery's frame opens full size here, not its project: Graduation
           and Headshots have none, and their address leads to the booking page.
           Ctrl and cmd click open the viewer too (Julian); a middle click opens
@@ -122,8 +132,10 @@ function FrameTile({ f, first, onOpen }: { f: FrameItem; first?: boolean; onOpen
       >
         <div className="ph">
           <Image src={f.src} alt={f.alt} fill sizes={f.wide ? WIDE_SIZES : GRID_SIZES} loading={first ? "eager" : "lazy"} />
+          {f.back ? <Image className="bk" src={f.back.src} alt={back ? f.back.alt : ""} fill sizes={GRID_SIZES} loading="lazy" /> : null}
         </div>
       </a>
+      {f.back ? <Sides back={back} onFlip={() => setBack(!back)} /> : null}
     </figure>
   );
 }
@@ -182,6 +194,16 @@ function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: number 
   }, [open, onClose]);
   const n = list.length;
   const wrap = (i: number) => (i + n) % n;
+  // The frame showing its back, by src.
+  const [bk, setBk] = React.useState<string | null>(null);
+  // Any step lands on a front, a step back to a flipped sleeve included.
+  const [bkAt, setBkAt] = React.useState(at);
+  if (bkAt !== at) {
+    setBkAt(at);
+    setBk(null);
+  }
+  const cur = at === null ? undefined : list[at];
+  const showBack = !!cur?.back && bk === cur.src;
   const still = () => !G.current || matchMedia("(prefers-reduced-motion: reduce)").matches;
   /* From frame `from`, glide the track to the frame `by` away (0 = back to it), then make that the frame. */
   const glide = (from: number, by: number, dur = 0.55) => {
@@ -335,19 +357,20 @@ function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: number 
           const side = n === 2 && k === 1 ? (at === 0 ? 1 : -1) : k;
           return (
             <div className="fv-ph" key={g.src} style={{ translate: `${side * 100}% 0` }} aria-hidden={k !== 0}>
-              <Image src={g.src} alt={k ? "" : g.alt} fill sizes="100vw" loading="eager" fetchPriority={k ? "low" : "high"} />
+              <Image src={!k && showBack ? g.back!.src : g.src} alt={k ? "" : showBack ? g.back!.alt : g.alt} fill sizes="100vw" loading="eager" fetchPriority={k ? "low" : "high"} />
             </div>
           );
         })}
       </div>
       <div className="fv-bar lbl">
         <span>{String(at + 1).padStart(2, "0")} / {String(n).padStart(2, "0")}</span>
+        {cur?.back ? <Sides back={showBack} onFlip={() => setBk(showBack ? null : cur.src)} /> : null}
         <button type="button" onClick={onClose}>Close</button>
       </div>
       {n > 1 ? (
         <>
-          <button type="button" className="fv-step prev lbl" aria-label="Previous frame" onClick={() => step(-1)}>&larr;</button>
-          <button type="button" className="fv-step next lbl" aria-label="Next frame" onClick={() => step(1)}>&rarr;</button>
+          <button type="button" className="fv-step prev lbl" aria-label="Previous frame" onClick={() => step(-1)}><svg width="36" height="20" viewBox="0 0 36 20" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden><path d="M35 10H2M10 2L2 10l8 8" /></svg></button>
+          <button type="button" className="fv-step next lbl" aria-label="Next frame" onClick={() => step(1)}><svg width="36" height="20" viewBox="0 0 36 20" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden><path d="M1 10h33M26 2l8 8-8 8" /></svg></button>
         </>
       ) : null}
     </dialog>
@@ -374,6 +397,8 @@ export function V3Work({
     if (d) setFilter(d);
   }, [chip]);
   const [view, setView] = React.useState<"grid" | "strip" | "color">("grid");
+  // Strip cells showing a sleeve's back, by front src (the grid's tiles keep their own).
+  const [stripBacks, setStripBacks] = React.useState<Set<string>>(() => new Set());
   const back = React.useRef<"grid" | "strip">("grid");
   /* Grid, strip and color views, and the discipline chips: the covers on
      screen fly from where they were to where they land, new ones fade in
@@ -947,7 +972,7 @@ export function V3Work({
                   );
                 const i = stripFrames.indexOf(f);
                 return (
-                  <figure key={f.src} className={f.wide ? "sc wide" : "sc"} data-flip-id={f.src}>
+                  <figure key={f.src} className={f.wide ? "sc wide" : f.sq ? "sc sq" : "sc"} data-flip-id={f.src} data-back={stripBacks.has(f.src) || undefined}>
                     {/* Opens full size, as in the grid. */}
                     <a
                       href={f.src}
@@ -957,8 +982,21 @@ export function V3Work({
                       }}
                     >
                       <Image src={f.src} alt={f.alt} fill sizes={STRIP_SIZES} loading={n < 4 ? "eager" : "lazy"} />
+                      {f.back ? <Image className="bk" src={f.back.src} alt={stripBacks.has(f.src) ? f.back.alt : ""} fill sizes={STRIP_SIZES} loading="lazy" /> : null}
                       {cap}
                     </a>
+                    {f.back ? (
+                      <Sides
+                        back={stripBacks.has(f.src)}
+                        onFlip={() =>
+                          setStripBacks((b) => {
+                            const x = new Set(b);
+                            if (!x.delete(f.src)) x.add(f.src);
+                            return x;
+                          })
+                        }
+                      />
+                    ) : null}
                   </figure>
                 );
               })}
