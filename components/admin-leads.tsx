@@ -62,16 +62,6 @@ const at = (iso: string) =>
   new Intl.DateTimeFormat("en-US", { timeZone: "America/Los_Angeles", weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(iso));
 
 /** The chip a row shows: trouble first, then late, then the stage. */
-function Chip({ l }: { l: LeadSummary }) {
-  if (l.flags?.includes("stuck")) return <Tag tone="bad" mark="!">Deposit stuck</Tag>;
-  if (l.flags?.includes("no-deposit")) return <Tag tone="bad" mark="!">No deposit</Tag>;
-  if (due(l) && !l.trashedAt) return <Tag tone="needs" mark="◔">Reminder due</Tag>;
-  if (l.trashedAt) return <Tag tone="quiet" mark="×">Deletes in {Math.max(1, trashDaysLeft(l.trashedAt, now()))} d</Tag>;
-  if (snoozed(l)) return <Tag tone="quiet" mark="z">Until {day(l.snoozeUntil!)}</Tag>;
-  if (isLate(l, now())) return <Tag tone="needs" mark="◷">{l.stage === "Quoted" ? `Quoted ${ago(l.stageAt)} ago` : `Late, ${ago(l.stageAt)}`}</Tag>;
-  return <Tag tone={closed(l.stage) ? "quiet" : "plain"} mark={MARK[l.stage]}>{l.stage}</Tag>;
-}
-
 /** A shape per stage, so the chip never relies on color alone. */
 const MARK: Record<Stage, string> = {
   Inquiry: "○", Replied: "◐", "Call booked": "◐", Quoted: "◐", Confirmed: "●", Shot: "●", Delivered: "✓", Lost: "×",
@@ -264,7 +254,7 @@ export function AdminLeads() {
             {needs ? `${needs} waiting on you` : "Nothing waiting on you"}
           </p>
           <div className="flex items-baseline justify-between gap-3">
-            <h2 style={HEAD} className="text-[32px] leading-none lg:text-xl">{label(filter)}</h2>
+            <h2 style={HEAD} className="text-[40px] leading-none tracking-[-0.03em] lg:text-[28px]">{label(filter)}</h2>
             {tool ? null : (
               <span className="flex items-center gap-3">
                 <span className="font-mono text-[12.5px] text-muted-foreground">{shown.length} {shown.length === 1 ? "lead" : "leads"}</span>
@@ -407,6 +397,36 @@ const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: "more", label: "More", icon: <><circle cx="6" cy="12" r="1.2" /><circle cx="12" cy="12" r="1.2" /><circle cx="18" cy="12" r="1.2" /></> },
 ];
 
+/** The road a lead travels; Lost is off it. */
+const STEPS: readonly Stage[] = STAGES.filter((s) => s !== "Lost");
+
+/** How far a lead has come: a short segment per stage, then its name. */
+function StageLine({ l }: { l: LeadSummary }) {
+  const at = STEPS.indexOf(l.stage);
+  return (
+    <span className="flex min-w-0 items-center gap-2.5 font-mono text-[12px] text-muted-foreground">
+      {at >= 0 ? (
+        <span aria-hidden="true" className="flex shrink-0 gap-[3px]">
+          {STEPS.map((s, k) => <i key={s} className={cn("h-[3px] w-3 rounded-full", k < at ? "bg-foreground/55" : k === at ? "bg-foreground" : "bg-border")} />)}
+        </span>
+      ) : null}
+      <span className="truncate font-medium text-foreground">{l.stage}</span>
+      {isLate(l, now()) ? <span className="shrink-0 text-accent">{ago(l.stageAt)}</span> : null}
+    </span>
+  );
+}
+
+/** The one thing to do, in teal; money stuck in red; otherwise why it is put aside. */
+function RowAction({ l, next }: { l: LeadSummary; next: string | null }) {
+  const cls = "shrink-0 whitespace-nowrap font-mono text-[12.5px] font-medium";
+  if (l.trashedAt) return <span className={cn(cls, "text-muted-foreground")}>Deletes in {Math.max(1, trashDaysLeft(l.trashedAt, now()))} d</span>;
+  const bad = l.flags?.includes("stuck") ? "Deposit stuck" : l.flags?.includes("no-deposit") ? "No deposit" : null;
+  if (bad) return <span className={cn(cls, "text-destructive")}>! {bad} →</span>;
+  if (next) return <span className={cn(cls, "text-accent")}>{next} →</span>;
+  if (snoozed(l)) return <span className={cn(cls, "text-muted-foreground")}>Until {day(l.snoozeUntil!)}</span>;
+  return l.refs ? <span className={cn(cls, "text-muted-foreground")}>{l.refs} {l.refs === 1 ? "picture" : "pictures"}</span> : null;
+}
+
 /** One lead in a list: who, what and when, the start of their message, where it stands and what is next. */
 function Row({ l, on, upcoming, onClick }: { l: LeadSummary; on: boolean; upcoming: boolean; onClick: () => void }) {
   const next = nextStep(l);
@@ -422,18 +442,21 @@ function Row({ l, on, upcoming, onClick }: { l: LeadSummary; on: boolean; upcomi
     >
       <span className="grid min-w-0 flex-1 gap-0.5">
         <span className="flex items-baseline justify-between gap-3">
-          <span className="flex min-w-0 items-center gap-2 text-[16px] font-semibold">
-            {l.unread ? <span className="size-2 shrink-0 rounded-full bg-accent" aria-label="New" /> : null}
-            <span className="truncate">{l.name}</span>
+          <span className="truncate font-mono text-[11px] uppercase tracking-[0.09em] text-muted-foreground">
+            {kindOf(l.kind) ? <b className="font-medium text-foreground">{kindOf(l.kind)}</b> : null}
+            {kindOf(l.kind) && l.when ? " · " : null}
+            {l.when ? at(l.when) : null}
           </span>
           <span className="shrink-0 font-mono text-[12px] text-muted-foreground">{upcoming && l.when ? day(l.when) : ago(l.lastAt)}</span>
         </span>
-        <span className="truncate text-[14px] text-muted-foreground">{[kindOf(l.kind), l.when ? at(l.when) : null].filter(Boolean).join(" · ") || l.email}</span>
-        {l.snippet ? <span className="truncate text-[13.5px] text-muted-foreground/80">{l.snippet}</span> : null}
-        <span className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1.5">
-          <Chip l={l} />
-          {next ? <span className="font-mono text-[12.5px] font-medium text-accent">→ {next}</span> : null}
-          {l.refs ? <span className="font-mono text-[12px] text-muted-foreground">{l.refs} {l.refs === 1 ? "picture" : "pictures"}</span> : null}
+        <span className="flex min-w-0 items-center gap-2 text-[18px] font-semibold tracking-[-0.01em]">
+          {l.unread ? <span className="size-2 shrink-0 rounded-full bg-accent" aria-label="New" /> : null}
+          <span className="truncate">{l.name}</span>
+        </span>
+        {l.snippet ? <span className="line-clamp-2 text-[14.5px] leading-snug text-muted-foreground">{l.snippet}</span> : null}
+        <span className="mt-2 flex items-center justify-between gap-3">
+          <StageLine l={l} />
+          <RowAction l={l} next={next} />
         </span>
       </span>
     </button>
@@ -731,12 +754,24 @@ function Detail({ summary, call, onChange, onBack, reload, templates, others }: 
       <button type="button" onClick={onBack} className="inline-flex min-h-11 items-center gap-1 justify-self-start text-[16px] text-accent lg:hidden">
         <span aria-hidden="true">‹</span> Leads
       </button>
-      <header className="flex items-start justify-between gap-4">
-        <div className="min-w-0">
-          <h2 style={HEAD} className="text-[28px] leading-tight">{l.name}</h2>
-          <p className="mt-1 break-words text-[15px] text-muted-foreground">{[kindOf(l.kind), l.email].filter(Boolean).join(" · ")}</p>
-        </div>
-        <Tag tone={closed(l.stage) ? "quiet" : "plain"} mark={MARK[l.stage]}>{l.stage}</Tag>
+      <header className="min-w-0">
+        {kindOf(l.kind) ? <p className="font-mono text-[11px] font-medium uppercase tracking-[0.09em]">{kindOf(l.kind)}</p> : null}
+        <h2 style={HEAD} className="mt-1 text-[30px] leading-tight">{l.name}</h2>
+        <p className="mt-1 break-words text-[15px] text-muted-foreground">{l.email}</p>
+        {l.stage === "Lost" ? (
+          <p className="mt-5"><Tag tone="quiet" mark={MARK.Lost}>Lost</Tag></p>
+        ) : (
+          <ol aria-label={`Stage: ${l.stage}`} className="mt-5 grid grid-cols-7 gap-1">
+            {STEPS.map((s, k) => {
+              const at = STEPS.indexOf(l.stage);
+              return (
+                <li key={s} aria-current={k === at ? "step" : undefined} className={cn("truncate border-t-[3px] pt-2 font-mono text-[11px]", k < at ? "border-foreground/55 text-muted-foreground" : k === at ? "border-foreground font-medium text-foreground" : "border-border text-muted-foreground")}>
+                  {s === "Call booked" ? "Call" : s}
+                </li>
+              );
+            })}
+          </ol>
+        )}
       </header>
 
       {late ? (
