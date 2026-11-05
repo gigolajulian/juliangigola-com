@@ -431,8 +431,8 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 @media (max-width:700px){.v3 .stabs{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .v3 .stabs button{min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:12px 14px;background:none;border:1px solid var(--line);color:var(--mute);font:inherit;cursor:pointer;text-align:left}
 .v3 .stabs b{font:800 1.125rem/1 var(--display);letter-spacing:-.03em;text-transform:none}
-.v3 .stabs button[aria-pressed="true"]{border-color:var(--accent);color:var(--ink)}
-.v3 .stabs button[aria-pressed="true"] span{color:var(--accent)}
+.v3 .stabs button[aria-checked="true"]{border-color:var(--accent);color:var(--ink)}
+.v3 .stabs button[aria-checked="true"] span{color:var(--accent)}
 .v3 .cal-top{display:flex;align-items:center;gap:16px}
 .v3 .cal-top>span:first-child{flex:1}
 .v3 .seg{display:flex;border:1px solid var(--line)}

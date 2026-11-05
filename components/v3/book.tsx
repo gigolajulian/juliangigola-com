@@ -15,20 +15,27 @@ import { LENGTH, SESSIONS, TAB_ORDER, rate, type SessionSlug } from "@/lib/v3";
 
 function Tabs({ at }: { at: SessionSlug }) {
   const router = useRouter();
-  const go = (x: SessionSlug) => router.replace(`/book/${x}`, { scroll: false });
+  /* One session at a time: the tapped tile lights at once, so the old one never
+     stays lit beside it while the route loads on a slow tablet (Julian, 2026-11-04). */
+  const [tap, setTap] = React.useState<{ from: SessionSlug; x: SessionSlug } | null>(null);
+  const cur = tap?.from === at ? tap.x : at;
+  const go = (x: SessionSlug) => {
+    setTap({ from: at, x });
+    router.replace(`/book/${x}`, { scroll: false });
+  };
   /* The call is a way in, not a session: a quiet link under the grid (critique, 2026-10-29). */
   return (
     <>
-      <div className="stabs lbl" role="group" aria-label="Session">
+      <div className="stabs lbl" role="radiogroup" aria-label="Session">
         {TAB_ORDER.filter((x) => x !== "consultation").map((x) => (
-          <button key={x} type="button" aria-pressed={x === at} onClick={() => go(x)}>
+          <button key={x} type="button" role="radio" aria-checked={x === cur} onClick={() => go(x)}>
             <b>{SESSIONS[x].name}</b>
             <span>{rate(SESSIONS[x])}</span>
           </button>
         ))}
       </div>
       <div className="stabs-more">
-        <button type="button" className="stabs-call lbl" aria-pressed={at === "consultation"} onClick={() => go("consultation")}>Not sure what you need? Book a 15 min call</button>
+        <button type="button" className="stabs-call lbl" aria-pressed={cur === "consultation"} onClick={() => go("consultation")}>Not sure what you need? Book a 15 min call</button>
         {/* The art director's way out of the session flow (booking critique, 2026-11-04). */}
         <Link href="/contact/form" prefetch={false} className="stabs-call lbl">Commission or campaign? Inquire</Link>
       </div>
