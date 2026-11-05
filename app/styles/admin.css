@@ -48,6 +48,15 @@ body:has([data-lead-app])::before {
 html:has([data-lead-app]) #main {
   transform: none;
 }
+/* Julian's iPhone, v3.0.91: on lists too short to scroll the bar sat one
+   status-bar height (62pt) above the screen foot; on More, which scrolls,
+   it sat right. iOS places fixed boxes differently when the page cannot
+   scroll, so the page is always one pixel taller than the screen. */
+@media (max-width: 63.999rem) {
+  body:has([data-lead-app]) {
+    min-height: calc(100lvh + 1px);
+  }
+}
 /* Where it is one screen, the page itself does not scroll: the columns do.
    Anything poking past the screen (the intro's 0.75rem lift on `.rise`,
    held while the intro plays) otherwise scrolled the whole editor by that
