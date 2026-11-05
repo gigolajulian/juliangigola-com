@@ -31,8 +31,8 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
   const calendar = (await searchParams).calendar !== undefined;
   return (
     // `data-workbench`: no site footer; `data-lead-app`: no site header either,
-    // and the top clears the iPhone's status bar (`app/styles/admin.css`).
-    <div data-workbench data-lead-app className="w-full px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] sm:px-10">
+    // and the top clears the iPhone status bar plus the blur iOS lays under it.
+    <div data-workbench data-lead-app className="w-full px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] max-lg:pt-[calc(env(safe-area-inset-top)+1.5rem)] sm:px-10">
       {calendar ? <LeadCalendar /> : <AdminLeads />}
     </div>
   );
