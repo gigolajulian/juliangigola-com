@@ -232,6 +232,10 @@ describe("the client's confirmation", () => {
     expect(html).not.toContain("<script>");
     expect(html).not.toContain("<b>x</b>");
     expect(confirmMail({ name: "A", email: "a@example.com", session: "Graduation photos", start: START, uid: "u" }).text).toContain("Your graduation session is booked.");
+    // The length, in the card's words.
+    const end = (m: number) => new Date(+new Date(START) + m * 60000).toISOString();
+    expect(confirmMail({ name: "A", email: "a@example.com", session: "Portraits", start: START, end: end(60), uid: "u" }).text).toMatch(/^When: .+, 60 minutes$/m);
+    expect(confirmMail({ name: "A", email: "a@example.com", session: "Portraits", start: START, end: end(120), uid: "u" }).text).toMatch(/, 2 hours$/m);
   });
 
   it("reads the time in Pacific with no city", async () => {

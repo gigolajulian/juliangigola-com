@@ -1,4 +1,4 @@
-import { refundable } from "@/lib/booking-rules";
+import { duration, refundable } from "@/lib/booking-rules";
 /* ── the client's confirmation email ──────────────────────────────
  * Julian (2026-10-16): every booking gets a branded "You're in." mail from
  * the site, on top of Cal.com's stock one (Cal stays on the free plan).
@@ -73,7 +73,9 @@ export function confirmMail(c: Confirm) {
     : c.call
     ? `Thanks, ${first(c.name)}. Your ${c.session.toLowerCase()} is booked. I'll call you then.`
     : `Thanks, ${first(c.name)}. Your ${c.session.toLowerCase().replace(/ photos$/, "")} session is booked. I'll call you before the day to go over the concept, rate and schedule.`;
-  const rows: [string, string][] = [["Session", c.session], ["When", at], ...(c.where ? [["Where", c.where] as [string, string]] : []), ["Booking", c.uid.slice(0, 8)]];
+  // The length as the booking card says it: "Sat, Nov 8, 10:00 to 11:00 AM PST, 60 minutes".
+  const mins = c.end ? Math.round((+new Date(c.end) - +new Date(c.start)) / 60000) : 0;
+  const rows: [string, string][] = [["Session", c.session], ["When", mins > 0 ? `${at}, ${duration(mins)}` : at], ...(c.where ? [["Where", c.where] as [string, string]] : []), ["Booking", c.uid.slice(0, 8)]];
   const paid = c.deposit && {
     rows: [["Paid", fmt({ month: "short", day: "numeric", year: "numeric" }).format(new Date(c.deposit.at))], ...(c.deposit.card ? [["Card", c.deposit.card]] : []), ["Ref", c.deposit.ref.slice(0, 11)]] as [string, string][],
     // The site's own engine refunds by Julian's 48-hour rule (`lib/booking-rules.ts`).

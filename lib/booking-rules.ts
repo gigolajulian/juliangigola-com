@@ -8,6 +8,9 @@
 
 export const TZ = "America/Los_Angeles";
 
+/** "60 minutes", "2 hours": the card and the confirmation mail say it the same way. */
+export const duration = (min: number) => (min >= 120 ? `${min / 60} hours` : `${min} minutes`);
+
 /** Minutes after midnight Pacific: the first start, the last start. */
 export type Window = readonly [number, number];
 
