@@ -401,7 +401,7 @@ const OPEN_STAGES = STAGES.filter((s) => !closed(s));
 const MORE: Filter[] = ["snoozed", "archived", "trash", "Delivered", "Lost"];
 const tabOf = (f: Filter): Tab => (f === "needs" || f === "upcoming" ? f : TOOLS.includes(f) || MORE.includes(f) ? "more" : "open");
 const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
-  { id: "needs", label: "Needs me", icon: <><path d="M4 13l3-8h10l3 8v6H4z" /><path d="M4 13h5l1 2h4l1-2h5" /></> },
+  { id: "needs", label: "Your move", icon: <><path d="M4 13l3-8h10l3 8v6H4z" /><path d="M4 13h5l1 2h4l1-2h5" /></> },
   { id: "open", label: "Open", icon: <path d="M5 6h14M5 12h14M5 18h9" /> },
   { id: "upcoming", label: "Upcoming", icon: <><rect x="4" y="5" width="16" height="15" rx="2" /><path d="M4 10h16M9 3v4M15 3v4" /></> },
   { id: "more", label: "More", icon: <><circle cx="6" cy="12" r="1.2" /><circle cx="12" cy="12" r="1.2" /><circle cx="18" cy="12" r="1.2" /></> },
@@ -662,7 +662,7 @@ function pass(l: LeadSummary, f: Filter) {
   if (f === "open") return !closed(l.stage);
   return l.stage === f && !snoozed(l);
 }
-const LABEL: Partial<Record<Filter, string>> = { needs: "Needs me", open: "All open", upcoming: "Upcoming", snoozed: "Snoozed", archived: "Archived", trash: "Trash", more: "More", new: "New lead", stats: "Stats", templates: "Templates", hours: "Hours" };
+const LABEL: Partial<Record<Filter, string>> = { needs: "Your move", open: "All open", upcoming: "Upcoming", snoozed: "Snoozed", archived: "Archived", trash: "Trash", more: "More", new: "New lead", stats: "Stats", templates: "Templates", hours: "Hours" };
 const label = (f: Filter) => LABEL[f] ?? f;
 
 /** Deletes every lead in the trash for good, after a second press. */
