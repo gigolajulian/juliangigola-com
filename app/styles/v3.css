@@ -1498,7 +1498,7 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .fv-step.next{right:calc(var(--gr) + 8px)}
 @media (hover:hover){.fv button:hover{color:var(--accent)}}
 .fv button:focus-visible{outline:1px solid currentColor;outline-offset:2px}
-@media (max-width:700px){.fv-ph>img{padding:56px 0 24px}.fv-step{display:none}}
+@media (max-width:700px){.fv-ph>img{padding:56px 0 24px}.fv .fv-step{display:none}}
 /* 44px targets for a mouse too (touch has its own above): an invisible
    pseudo-element grows each hit area, so nothing is drawn or moved. */
 .v3 :is(.a-cover .nav,.site-hdr .links,.foot-line) a,.v3 .chips button,.v3 .wviews button,.v3 .wsearch{position:relative}

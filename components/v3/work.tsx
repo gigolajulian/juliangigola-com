@@ -194,8 +194,14 @@ function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: number 
   }, [open, onClose]);
   const n = list.length;
   const wrap = (i: number) => (i + n) % n;
-  // The frame showing its back, by src: stepping to another frame shows its front.
+  // The frame showing its back, by src.
   const [bk, setBk] = React.useState<string | null>(null);
+  // Any step lands on a front, a step back to a flipped sleeve included.
+  const [bkAt, setBkAt] = React.useState(at);
+  if (bkAt !== at) {
+    setBkAt(at);
+    setBk(null);
+  }
   const cur = at === null ? undefined : list[at];
   const showBack = !!cur?.back && bk === cur.src;
   const still = () => !G.current || matchMedia("(prefers-reduced-motion: reduce)").matches;
