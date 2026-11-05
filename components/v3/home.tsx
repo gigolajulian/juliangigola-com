@@ -207,6 +207,13 @@ function Clients() {
       if (e.pointerId !== id) return;
       id = -1;
       held = false;
+      // Touch has no hover to pause on (audit v3.0.92): a tap between logos toggles it.
+      if (e.type === "pointerup" && e.pointerType !== "mouse" && !dragged && !(e.target as Element).closest("a")) {
+        paused = !paused;
+        v = rest();
+        wake();
+        return;
+      }
       // A finger that stopped before lifting throws nothing.
       if (e.timeStamp - pt > 80) v = rest();
       v = Math.max(-3000, Math.min(3000, v));
