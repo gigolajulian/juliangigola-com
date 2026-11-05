@@ -67,7 +67,7 @@ for (const r of [...RATIOS, SHORT]) {
 
     // Another session starts over.
     await page.evaluate(() => scrollTo(0, 0));
-    await page.locator(".stabs button[aria-pressed=false]").first().click();
+    await page.locator(".stabs button[aria-checked=false]").first().click();
     await page.locator("[data-day]").first().waitFor({ timeout: 30_000 });
     await expect(confirm).toBeEnabled();
     expect(errors).toEqual([]);

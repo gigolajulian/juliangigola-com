@@ -41,6 +41,8 @@ export function FlowShell({
   name,
   sum,
   over,
+  get,
+  foot,
   h1,
 }: {
   /** Step names; `at` is 1-based. An empty list draws no rail. */
@@ -55,9 +57,12 @@ export function FlowShell({
   photo: { d: string; l: string; m?: string; at?: { d?: string; l?: string } };
   name: string;
   sum: [string, React.ReactNode][];
-  /** The caption over the photo with a line under the name, the photo
-      running to the foot of the screen (Julian, every booking). */
-  over?: string;
+  /** The caption over the photo, the photo running to the foot of the screen (Julian, every booking). */
+  over?: boolean;
+  /** What the session gets, listed on the photo in place of `sum`. */
+  get?: string[];
+  /** Under the photo, beside the calendar (the studio line and the ways out). */
+  foot?: React.ReactNode;
   /** The page's own heading (the booking page has no other). */
   h1?: boolean;
 }) {
@@ -88,25 +93,27 @@ export function FlowShell({
         <div className="f-body">{body}</div>
         {bar ? <div className="f-bar">{bar}</div> : null}
       </div>
-      <figure className={over != null ? "f-photo over" : "f-photo"}>
+      <figure className={over ? "f-photo over" : "f-photo"}>
         <div className="in">
-          <div className="ph">
-            <Image className="v3d" src={photo.d} alt={`${name} sample frame`} fill sizes="(max-width: 800px) 100vw, 44vw" loading="eager" fetchPriority="high" decoding="sync" style={photo.at?.d ? ({ "--at": photo.at.d } as React.CSSProperties) : undefined} />
-            <Image className="v3l" src={photo.l} alt={`${name} sample frame`} fill sizes="(max-width: 800px) 100vw, 44vw" loading="eager" decoding="sync" style={photo.at?.l ? ({ "--at": photo.at.l } as React.CSSProperties) : undefined} />
-            {photo.m ? <Image className="v3m" src={photo.m} alt={`${name} sample frame`} fill sizes="100vw" loading="eager" decoding="sync" /> : null}
+          <div className="fr">
+            <div className="ph">
+              <Image className="v3d" src={photo.d} alt={`${name} sample frame`} fill sizes="(max-width: 800px) 100vw, 44vw" loading="eager" fetchPriority="high" decoding="sync" style={photo.at?.d ? ({ "--at": photo.at.d } as React.CSSProperties) : undefined} />
+              <Image className="v3l" src={photo.l} alt={`${name} sample frame`} fill sizes="(max-width: 800px) 100vw, 44vw" loading="eager" decoding="sync" style={photo.at?.l ? ({ "--at": photo.at.l } as React.CSSProperties) : undefined} />
+              {photo.m ? <Image className="v3m" src={photo.m} alt={`${name} sample frame`} fill sizes="100vw" loading="eager" decoding="sync" /> : null}
+            </div>
+            <div className="cap">
+              <b>{name}</b>
+              <dl className={get ? "lbl get" : "lbl"}>
+                {(get ? get.map((x): [string, React.ReactNode] => [x, null]) : sum).map(([a, b]) => (
+                  <div key={a}>
+                    <dt>{a}</dt>
+                    <dd>{b}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
           </div>
-          <div className="cap">
-            <b>{name}</b>
-            {over ? <p className="sub">{over}</p> : null}
-            <dl className="lbl">
-              {sum.map(([a, b]) => (
-                <div key={a}>
-                  <dt>{a}</dt>
-                  <dd>{b}</dd>
-                </div>
-              ))}
-            </dl>
-          </div>
+          {foot ? <div className="f-foot">{foot}</div> : null}
         </div>
       </figure>
     </div>
@@ -255,10 +262,19 @@ export function Calendar({
           if (!t) return <span key={`b${k}`} />;
           const id = iso(t);
           const tg = tag(t);
+          /* Open times as up to three dots, so the tag never outgrows its square
+             (Julian, 2026-11-04); the count stays in the label. */
+          const open = tg && /open$/i.test(tg) ? Number(/^\d+/.exec(tg)?.[0] ?? 0) : -1;
           return (
             <button key={id} type="button" data-day={id} aria-pressed={id === picked} disabled={tg === null} aria-label={`${dlabel(t)}${tg ? `, ${tg}` : ""}`} onClick={() => onPick(t)}>
               <b>{t.getDate()}</b>
-              <span>{tg}</span>
+              {open >= 0 ? (
+                <span className={open && open <= 2 ? "dots few" : "dots"} aria-hidden="true">
+                  {Array.from({ length: open >= 7 ? 3 : open >= 3 ? 2 : 1 }, (_, i) => <i key={i} />)}
+                </span>
+              ) : (
+                <span>{tg}</span>
+              )}
             </button>
           );
         })}
