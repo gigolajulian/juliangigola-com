@@ -261,7 +261,8 @@ export async function PATCH(request: Request) {
     const send = () => notify(gate.inbox, gate.vapid!, { title: "Test notification", body: "Leads can reach this device.", url: "/admin/leads" });
     // 10 seconds later, so he can lock the phone: iOS shows no banner while the app is open.
     const { ctx } = (await getCloudflareContext({ async: true })) as { ctx?: { waitUntil(p: Promise<unknown>): void } };
-    if (devices) ctx?.waitUntil ? ctx.waitUntil(new Promise((r) => setTimeout(r, 10_000)).then(send)) : await send();
+    if (devices && ctx?.waitUntil) ctx.waitUntil(new Promise((r) => setTimeout(r, 10_000)).then(send));
+    else if (devices) await send();
     return json({ devices });
   }
   if (typeof given.key === "string" && given.key.startsWith("lead:")) return patchLead(gate.inbox, await gate.seal, given, gate.notion);
