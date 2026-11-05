@@ -103,12 +103,22 @@ function Tile({ p, swatch, first }: { p: WorkItem; swatch?: string[]; first?: bo
   );
 }
 
-export type FrameItem = { s: string; src: string; alt: string; wide: boolean; sq: boolean };
+export type FrameItem = { s: string; src: string; alt: string; wide: boolean; sq: boolean; back?: { src: string; alt: string } };
+
+/* A two-sided sleeve's Front / Back switch, on the cell and in the viewer (Julian, 2026-11-05). */
+function Sides({ back, onFlip }: { back: boolean; onFlip: () => void }) {
+  return (
+    <button type="button" className="sides lbl" aria-pressed={back} aria-label={back ? "Show front" : "Show back"} onClick={onFlip}>
+      <span>Front</span> / <span>Back</span>
+    </button>
+  );
+}
 const WIDE_SIZES = "(max-width: 700px) 100vw, (max-width: 1000px) 66vw, 50vw";
 
 function FrameTile({ f, first, onOpen }: { f: FrameItem; first?: boolean; onOpen: () => void }) {
+  const [back, setBack] = React.useState(false);
   return (
-    <figure className={f.wide ? "wt wide" : "wt"}>
+    <figure className={f.wide ? "wt wide" : "wt"} data-back={back || undefined}>
       {/* A gallery's frame opens full size here, not its project: Graduation
           and Headshots have none, and their address leads to the booking page.
           Ctrl and cmd click open the viewer too (Julian); a middle click opens
@@ -122,8 +132,10 @@ function FrameTile({ f, first, onOpen }: { f: FrameItem; first?: boolean; onOpen
       >
         <div className="ph">
           <Image src={f.src} alt={f.alt} fill sizes={f.wide ? WIDE_SIZES : GRID_SIZES} loading={first ? "eager" : "lazy"} />
+          {f.back ? <Image className="bk" src={f.back.src} alt={back ? f.back.alt : ""} fill sizes={GRID_SIZES} loading="lazy" /> : null}
         </div>
       </a>
+      {f.back ? <Sides back={back} onFlip={() => setBack(!back)} /> : null}
     </figure>
   );
 }
@@ -182,6 +194,10 @@ function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: number 
   }, [open, onClose]);
   const n = list.length;
   const wrap = (i: number) => (i + n) % n;
+  // The frame showing its back, by src: stepping to another frame shows its front.
+  const [bk, setBk] = React.useState<string | null>(null);
+  const cur = at === null ? undefined : list[at];
+  const showBack = !!cur?.back && bk === cur.src;
   const still = () => !G.current || matchMedia("(prefers-reduced-motion: reduce)").matches;
   /* From frame `from`, glide the track to the frame `by` away (0 = back to it), then make that the frame. */
   const glide = (from: number, by: number, dur = 0.55) => {
@@ -335,13 +351,14 @@ function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: number 
           const side = n === 2 && k === 1 ? (at === 0 ? 1 : -1) : k;
           return (
             <div className="fv-ph" key={g.src} style={{ translate: `${side * 100}% 0` }} aria-hidden={k !== 0}>
-              <Image src={g.src} alt={k ? "" : g.alt} fill sizes="100vw" loading="eager" fetchPriority={k ? "low" : "high"} />
+              <Image src={!k && showBack ? g.back!.src : g.src} alt={k ? "" : showBack ? g.back!.alt : g.alt} fill sizes="100vw" loading="eager" fetchPriority={k ? "low" : "high"} />
             </div>
           );
         })}
       </div>
       <div className="fv-bar lbl">
         <span>{String(at + 1).padStart(2, "0")} / {String(n).padStart(2, "0")}</span>
+        {cur?.back ? <Sides back={showBack} onFlip={() => setBk(showBack ? null : cur.src)} /> : null}
         <button type="button" onClick={onClose}>Close</button>
       </div>
       {n > 1 ? (

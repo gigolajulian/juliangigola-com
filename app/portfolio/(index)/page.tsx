@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { shareOg } from "@/lib/share";
-import { V3Work, type WorkItem } from "@/components/v3/work";
+import { V3Work, type FrameItem, type WorkItem } from "@/components/v3/work";
 import { CATEGORIES, PROJECTS, categoryLabel } from "@/lib/work";
 import ORDER from "@/lib/portfolio-order.json";
 
@@ -35,6 +35,15 @@ const WORK: WorkItem[] = WORK_PROJECTS
 /* `?d=<slug>` opens with that discipline's chip on (`categoryHref`). */
 const CHIP = Object.fromEntries(CATEGORIES.map((c) => [c.slug, categoryLabel(c)]));
 
+/* A sleeve's back (`name-b`) follows its front (`name-a`) in the gallery: one
+   cell with a Front / Back switch, not two squares (Julian, 2026-11-05). */
+function sleeves(out: FrameItem[], f: FrameItem) {
+  const prev = out[out.length - 1];
+  if (prev && !prev.back && /-b\.\w+$/.test(f.src) && prev.src === f.src.replace(/-b(\.\w+)$/, "-a$1")) prev.back = { src: f.src, alt: f.alt.trim() };
+  else out.push(f);
+  return out;
+}
+
 /* Julian (2026-10-27): these chips show their gallery's frames in the grid
    instead of its one cover. */
 const FRAME_CHIPS = ["automotive", "graduation", "coverart", "events", "headshots", "places", "weddings"];
@@ -43,7 +52,7 @@ const FRAMES = Object.fromEntries(
     categoryLabel(c),
     WORK_PROJECTS.filter((p) => p.categories.some((k) => k.slug === c.slug)).flatMap((p) =>
       p.images.map((f) => ({ s: p.slug, src: f.src, alt: f.alt ?? p.name, wide: f.width > f.height * 1.05, sq: Math.abs(f.width / f.height - 1) < 0.02 })),
-    ),
+    ).reduce(sleeves, [] as FrameItem[]),
   ]),
 );
 

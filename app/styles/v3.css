@@ -1566,3 +1566,15 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .v3 .a-cover .ctas .btn::after{content:"";position:absolute;inset:-8px 0 0}}
 /* Julian: the name larger on a phone, as wide as the gutters allow. */
 @media (max-width:480px){.v3 .a-cover h1{font-size:calc(15.2*var(--v3u))}}
+/* A two-sided sleeve: hover shows the back, the Front / Back switch holds it (touch too). */
+.v3 .wt{position:relative}
+.v3 .wt .ph .bk{opacity:0;transition:opacity .25s cubic-bezier(.23,1,.32,1)}
+.v3 .wt[data-back] .ph .bk{opacity:1}
+@media (hover:hover){.v3 .wt:hover .ph .bk{opacity:1}}
+.v3 .sides{display:inline-flex;align-items:center;gap:.5em;min-height:44px;padding:0 10px;background:none;border:0;color:inherit;font:inherit;letter-spacing:inherit;text-transform:uppercase;cursor:pointer}
+.v3 .sides span{opacity:.5;transition:opacity .15s ease}
+.v3 .sides[aria-pressed="false"] span:first-child,.v3 .sides[aria-pressed="true"] span:last-child{opacity:1}
+.v3 .wt .sides{position:absolute;left:4px;bottom:4px;color:rgb(var(--on-photo));text-shadow:0 1px 6px rgb(0 0 0 / .45)}
+@media (hover:hover){.v3 .wt:not([data-back]):hover .sides span:first-child{opacity:.5}.v3 .wt:hover .sides span:last-child{opacity:1}}
+@media (prefers-reduced-motion:reduce){.v3 .wt .ph .bk{transition:none}}
+.fv .sides{margin-left:auto;margin-right:16px}
