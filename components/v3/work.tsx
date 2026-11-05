@@ -115,10 +115,67 @@ function Sides({ back, onFlip }: { back: boolean; onFlip: () => void }) {
 }
 const WIDE_SIZES = "(max-width: 700px) 100vw, (max-width: 1000px) 66vw, 50vw";
 
+/* Julian (2026-11-05): the Front / Back label sits under the art, hidden until
+   a sideways swipe flips the sleeve, or a pointer or focus stays 8 seconds. */
+function useSleeve(flip: () => void) {
+  const [on, setOn] = React.useState(false);
+  const t = React.useRef(0);
+  const from = React.useRef<{ x: number; y: number } | null>(null);
+  const swiped = React.useRef(false);
+  React.useEffect(() => () => clearTimeout(t.current), []);
+  const wait = () => {
+    clearTimeout(t.current);
+    t.current = window.setTimeout(() => setOn(true), 8000);
+  };
+  const stop = () => {
+    clearTimeout(t.current);
+    setOn(false);
+  };
+  const end = () => {
+    from.current = null;
+  };
+  return {
+    on,
+    props: {
+      onPointerEnter: (e: React.PointerEvent) => e.pointerType === "mouse" && wait(),
+      onPointerLeave: (e: React.PointerEvent) => e.pointerType === "mouse" && stop(),
+      onFocus: wait,
+      onBlur: (e: React.FocusEvent) => !e.currentTarget.contains(e.relatedTarget) && stop(),
+      onPointerDown: (e: React.PointerEvent) => {
+        // A swipe fires no click, so the guard would eat the next real tap.
+        swiped.current = false;
+        if (e.pointerType !== "mouse") from.current = { x: e.clientX, y: e.clientY };
+      },
+      onPointerMove: (e: React.PointerEvent) => {
+        const s = from.current;
+        if (!s) return;
+        const dx = e.clientX - s.x;
+        if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(e.clientY - s.y) * 1.5) return;
+        from.current = null;
+        swiped.current = true;
+        flip();
+        clearTimeout(t.current);
+        setOn(true);
+        t.current = window.setTimeout(() => setOn(false), 2500);
+      },
+      onPointerUp: end,
+      onPointerCancel: end,
+      // A swipe that flipped the sleeve does not also open the viewer.
+      onClickCapture: (e: React.MouseEvent) => {
+        if (!swiped.current) return;
+        swiped.current = false;
+        e.preventDefault();
+        e.stopPropagation();
+      },
+    },
+  };
+}
+
 function FrameTile({ f, first, onOpen }: { f: FrameItem; first?: boolean; onOpen: () => void }) {
   const [back, setBack] = React.useState(false);
+  const sleeve = useSleeve(() => setBack((b) => !b));
   return (
-    <figure className={f.wide ? "wt wide" : "wt"} data-back={back || undefined}>
+    <figure className={f.wide ? "wt wide" : "wt"} data-back={back || undefined} data-sides={(f.back && sleeve.on) || undefined} {...(f.back ? sleeve.props : null)}>
       {/* A gallery's frame opens full size here, not its project: Graduation
           and Headshots have none, and their address leads to the booking page.
           Ctrl and cmd click open the viewer too (Julian); a middle click opens
@@ -397,8 +454,6 @@ export function V3Work({
     if (d) setFilter(d);
   }, [chip]);
   const [view, setView] = React.useState<"grid" | "strip" | "color">("grid");
-  // Strip cells showing a sleeve's back, by front src (the grid's tiles keep their own).
-  const [stripBacks, setStripBacks] = React.useState<Set<string>>(() => new Set());
   const back = React.useRef<"grid" | "strip">("grid");
   /* Grid, strip and color views, and the discipline chips: the covers on
      screen fly from where they were to where they land, new ones fade in
@@ -972,7 +1027,7 @@ export function V3Work({
                   );
                 const i = stripFrames.indexOf(f);
                 return (
-                  <figure key={f.src} className={f.wide ? "sc wide" : f.sq ? "sc sq" : "sc"} data-flip-id={f.src} data-back={stripBacks.has(f.src) || undefined}>
+                  <figure key={f.src} className={f.wide ? "sc wide" : f.sq ? "sc sq" : "sc"} data-flip-id={f.src}>
                     {/* Opens full size, as in the grid. */}
                     <a
                       href={f.src}
@@ -982,21 +1037,11 @@ export function V3Work({
                       }}
                     >
                       <Image src={f.src} alt={f.alt} fill sizes={STRIP_SIZES} loading={n < 4 ? "eager" : "lazy"} />
-                      {f.back ? <Image className="bk" src={f.back.src} alt={stripBacks.has(f.src) ? f.back.alt : ""} fill sizes={STRIP_SIZES} loading="lazy" /> : null}
+                      {/* Hover shows the back. The strip swipes sideways, so no label
+                          here: the viewer's bar has the switch (Julian, 2026-11-05). */}
+                      {f.back ? <Image className="bk" src={f.back.src} alt="" fill sizes={STRIP_SIZES} loading="lazy" /> : null}
                       {cap}
                     </a>
-                    {f.back ? (
-                      <Sides
-                        back={stripBacks.has(f.src)}
-                        onFlip={() =>
-                          setStripBacks((b) => {
-                            const x = new Set(b);
-                            if (!x.delete(f.src)) x.add(f.src);
-                            return x;
-                          })
-                        }
-                      />
-                    ) : null}
                   </figure>
                 );
               })}
