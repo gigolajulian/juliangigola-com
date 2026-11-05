@@ -544,6 +544,15 @@ function PushSwitch({ call }: { call: Call }) {
       setNote(e instanceof Error ? e.message : String(e));
     }
   };
+  const sendTest = async () => {
+    setNote("Sending.");
+    try {
+      const { devices } = (await call({ method: "PATCH", body: JSON.stringify({ test: true }) })) as { devices: number };
+      setNote(devices ? `Sent to ${devices} ${devices === 1 ? "device" : "devices"}. No banner? Check Settings > Notifications > Leads.` : "No device is subscribed. Turn notifications off and on again here.");
+    } catch (e) {
+      setNote(e instanceof Error ? e.message : String(e));
+    }
+  };
   return (
     <div className="grid gap-1 px-3 pt-4 font-mono text-[12.5px] text-muted-foreground">
       {on === null ? null : (
@@ -551,6 +560,11 @@ function PushSwitch({ call }: { call: Call }) {
           Notifications: <span className={on ? "text-accent" : undefined}>{on ? "on" : "off"}</span>
         </button>
       )}
+      {on ? (
+        <button type="button" onClick={sendTest} className="min-h-11 w-fit text-left hoverable:hover:text-foreground">
+          Send a test
+        </button>
+      ) : null}
       {note ? <p>{note}</p> : null}
     </div>
   );

@@ -355,6 +355,8 @@ describe("leads", () => {
     await recordLead({ INBOX: kv as never, LEADS_KEY, VAPID_KEY }, "maya@example.com", { event: { at: "2026-11-04T10:01:00Z", kind: "mail", note: "x" } });
     expect(sent.map((x) => x.url)).toEqual(["https://web.push.apple.com/dev-1"]);
     expect(sent[0].init.headers).toMatchObject({ "content-encoding": "aes128gcm" });
+    expect(await (await patch({ test: true })).json()).toEqual({ devices: 1 });
+    expect(sent).toHaveLength(2);
 
     vi.stubGlobal("fetch", async () => new Response(null, { status: 410 }));
     await recordLead({ INBOX: kv as never, LEADS_KEY, VAPID_KEY }, "noor@example.com", { event: { at: "2026-11-04T11:00:00Z", kind: "booking", ref: "cal-9" }, name: "Noor" });
@@ -363,6 +365,8 @@ describe("leads", () => {
     await patch({ push: sub });
     expect((await patch({ push: { endpoint: sub.endpoint }, off: true })).status).toBe(200);
     expect([...kv.data.keys()].filter((k) => k.startsWith("push:"))).toHaveLength(0);
+    expect(await (await patch({ test: true })).json()).toEqual({ devices: 0 });
+    expect((await PATCH(req("PATCH", { key: "wrong", body: JSON.stringify({ test: true }) }))).status).toBe(401);
   });
 
   it("refuses an unknown stage, a bad time and a missing lead, and says when LEADS_KEY is unset", async () => {
