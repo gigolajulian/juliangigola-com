@@ -492,6 +492,9 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .reach-call{border-left:0;padding-left:0;border-top:1px solid var(--line);padding-top:28px}}
 .v3 .fig .cn{margin:0 .09em 0 .03em}
 @media (max-width:800px){.v3 .f-photo{height:auto;aspect-ratio:4/3;min-width:0;max-width:100%}.v3 .f-photo img{object-position:var(--at,50% 50%)}}
+/* Short phones (iPhone SE, 549px of Safari): a shorter photo, so the first
+   session clears the sticky Continue bar at load (MAC, v3.0.93). */
+@media (max-width:800px) and (max-height:600px){.v3 .f-photo{aspect-ratio:auto;height:150px}}
 .v3 .in-steps{padding:32px var(--gr) 32px var(--g)}
 .v3 .in-steps li{align-content:start}
 .v3 .in-steps ol{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0 clamp(16px,2.5vw,40px)}
