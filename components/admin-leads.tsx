@@ -407,9 +407,6 @@ const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: "more", label: "More", icon: <><circle cx="6" cy="12" r="1.2" /><circle cx="12" cy="12" r="1.2" /><circle cx="18" cy="12" r="1.2" /></> },
 ];
 
-const initials = (l: LeadSummary) =>
-  (l.name.includes("@") ? l.name.slice(0, 2) : l.name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join("")).toUpperCase();
-
 /** One lead in a list: who, what and when, the start of their message, where it stands and what is next. */
 function Row({ l, on, upcoming, onClick }: { l: LeadSummary; on: boolean; upcoming: boolean; onClick: () => void }) {
   const next = nextStep(l);
@@ -423,12 +420,6 @@ function Row({ l, on, upcoming, onClick }: { l: LeadSummary; on: boolean; upcomi
         on && "bg-card shadow-[inset_3px_0_0_var(--accent)]",
       )}
     >
-      <span
-        aria-hidden="true"
-        className={cn("grid size-10 shrink-0 place-items-center rounded-full border bg-card font-mono text-[13px] font-medium", l.unread ? "border-accent text-accent" : "border-border")}
-      >
-        {initials(l)}
-      </span>
       <span className="grid min-w-0 flex-1 gap-0.5">
         <span className="flex items-baseline justify-between gap-3">
           <span className="flex min-w-0 items-center gap-2 text-[16px] font-semibold">
