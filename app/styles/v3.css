@@ -1555,3 +1555,6 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .v3 .site-hdr.menu-on{opacity:1!important;transform:none!important}
 /* Julian: two lines at 320, the role on one and the place under it. */
 @media (max-width:349.98px){.v3 .a-cover .foot .lbl{letter-spacing:.1em}}
+/* Julian: the cover's two buttons thinner on a phone, the tap area still 44px (grown upward: the cover clips below them). */
+@media (pointer:coarse) and (max-width:700px){.v3 .a-cover .ctas .btn{height:36px;min-height:36px;position:relative}
+.v3 .a-cover .ctas .btn::after{content:"";position:absolute;inset:-8px 0 0}}
