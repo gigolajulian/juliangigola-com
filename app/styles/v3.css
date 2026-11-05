@@ -494,8 +494,12 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 @media (max-width:800px){.v3 .f-photo{height:auto;aspect-ratio:4/3;min-width:0;max-width:100%}.v3 .f-photo img{object-position:var(--at,50% 50%)}}
 /* Short phones (iPhone SE, 549px of Safari): a shorter photo and no repeat of
    the session name under it (the tabs say it), so the first session clears
-   the sticky Continue bar at load (MAC, v3.0.93). */
-@media (max-width:800px) and (max-height:600px){.v3 .f-photo{aspect-ratio:auto;height:190px}.v3 .f-photo .cap{display:none}.v3 .f-main{gap:12px;padding-top:10px}}
+   the sticky Continue bar at load (MAC, v3.0.93). Smaller heading too, for
+   /contact/form's two-line one (Julian). */
+@media (max-width:800px) and (max-height:600px){.v3 .f-photo{aspect-ratio:auto;height:190px}.v3 .f-photo .cap{display:none}.v3 .f-main{gap:12px;padding-top:10px}
+.v3 .f-head{gap:8px}.v3 .f-head :is(h1,h2){font-size:1.9rem}.v3 .f-head p{line-height:1.4}
+/* The inquiry flow (no `over` photo: /contact/form) has a longer head. */
+.v3 .f-photo:not(.over){height:110px}}
 .v3 .in-steps{padding:32px var(--gr) 32px var(--g)}
 .v3 .in-steps li{align-content:start}
 .v3 .in-steps ol{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0 clamp(16px,2.5vw,40px)}
@@ -1578,7 +1582,12 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .v3 .sides{display:inline-flex;align-items:center;gap:.5em;min-height:44px;padding:0 10px;background:none;border:0;color:inherit;font:inherit;letter-spacing:inherit;text-transform:uppercase;cursor:pointer}
 .v3 .sides span{opacity:.5;transition:opacity .15s ease}
 .v3 .sides[aria-pressed="false"] span:first-child,.v3 .sides[aria-pressed="true"] span:last-child{opacity:1}
-.v3 :is(.wt,.sc) .sides{position:absolute;left:4px;bottom:4px;z-index:1;color:rgb(var(--on-photo));text-shadow:0 1px 6px rgb(0 0 0 / .45)}
-@media (hover:hover){.v3 :is(.wt,.sc):not([data-back]):hover .sides span:first-child{opacity:.5}.v3 :is(.wt,.sc):hover .sides span:last-child{opacity:1}}
+/* Off the art (Julian, 2026-11-05): under the cell in the row gap, hidden until
+   a swipe flips it or 8 seconds on the cover (`useSleeve`). */
+.v3 .wt:has(.bk) .ph{touch-action:pan-y}
+.v3 .wt .sides{position:absolute;left:0;top:100%;z-index:1;min-height:0;padding:4px 0 0;opacity:0;visibility:hidden;transition:opacity .25s cubic-bezier(.23,1,.32,1),visibility 0s .25s}
+.v3 .wt .sides::after{content:"";position:absolute;inset:-6px -10px -10px}
+.v3 .wt[data-sides] .sides{opacity:1;visibility:visible;transition-delay:0s}
+@media (hover:hover){.v3 .wt:not([data-back]):hover .sides span:first-child{opacity:.5}.v3 .wt:hover .sides span:last-child{opacity:1}}
 @media (prefers-reduced-motion:reduce){.v3 :is(.wt .ph,.sc) .bk{transition:none}}
 .fv .sides{margin-left:auto;margin-right:16px}
