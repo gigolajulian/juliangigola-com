@@ -116,6 +116,13 @@ export function AdminLeads() {
   const [leads, setLeads] = React.useState<LeadSummary[] | null>(null);
   const [filter, setFilter] = React.useState<Filter>("needs");
   const [open, setOpen] = React.useState<string | null>(null);
+  // The row a phone came back from: the list was hidden, so focus fell to the body.
+  const back = React.useRef<string | null>(null);
+  React.useEffect(() => {
+    if (open || !back.current) return;
+    document.querySelector<HTMLElement>(`[data-lead="${CSS.escape(back.current)}"]`)?.focus();
+    back.current = null;
+  }, [open]);
   const [error, setError] = React.useState<string | null>(null);
   const [query, setQuery] = React.useState("");
   const [templates, setTemplates] = React.useState<Template[]>([]);
@@ -225,7 +232,7 @@ export function AdminLeads() {
     <div
       style={{ fontFamily: 'var(--font-v2-text, "Helvetica Neue", Helvetica, Arial, sans-serif)', letterSpacing: 0 }}
       ref={fit}
-      className="normal-case text-foreground max-lg:pb-[calc(84px+env(safe-area-inset-bottom))] lg:grid lg:grid-cols-[220px_minmax(0,420px)_minmax(0,1fr)] lg:grid-rows-[minmax(0,1fr)] lg:overflow-hidden lg:rounded-[14px] lg:border lg:border-border lg:bg-background [&_button]:normal-case [&_h2]:normal-case [&_h3]:normal-case"
+      className="normal-case text-foreground max-lg:pb-[calc(84px+env(safe-area-inset-bottom))] lg:grid lg:grid-cols-[220px_minmax(0,420px)_minmax(0,1fr)] lg:grid-rows-[minmax(0,1fr)] lg:overflow-hidden lg:rounded-[14px] lg:border lg:border-border lg:bg-background [&_button]:normal-case [&_h1]:normal-case [&_h2]:normal-case [&_h3]:normal-case"
     >
       {/* Desktop: the sidebar. Every list, then this device's switches. */}
       <nav aria-label="Lead lists" className="hidden min-h-0 flex-col overflow-y-auto border-r border-border p-2.5 lg:flex">
@@ -254,7 +261,7 @@ export function AdminLeads() {
             {needs ? `${needs} waiting on you` : "Nothing waiting on you"}
           </p>
           <div className="flex items-baseline justify-between gap-3">
-            <h2 style={HEAD} className="text-[40px] leading-none tracking-[-0.03em] lg:text-[28px]">{label(filter)}</h2>
+            <h1 style={HEAD} className="text-[40px] leading-none tracking-[-0.03em] lg:text-[28px]">{label(filter)}</h1>
             {tool ? null : (
               <span className="flex items-center gap-3">
                 <span className="font-mono text-[12.5px] text-muted-foreground">{shown.length} {shown.length === 1 ? "lead" : "leads"}</span>
@@ -354,7 +361,7 @@ export function AdminLeads() {
 
       <section aria-label="Lead" className={cn("min-w-0 lg:min-h-0 lg:overflow-y-auto lg:bg-card/40", !open && "max-lg:hidden")}>
         {current ? (
-          <Detail key={current.id} summary={current} call={call} onChange={changed} onBack={() => setOpen(null)} reload={load} templates={templates} others={leads.filter((o) => o.id !== current.id && !o.trashedAt)} />
+          <Detail key={current.id} summary={current} call={call} onChange={changed} onBack={() => { back.current = current.id ?? null; setOpen(null); }} reload={load} templates={templates} others={leads.filter((o) => o.id !== current.id && !o.trashedAt)} />
         ) : (
           <p className="px-8 py-10 text-[15px] text-muted-foreground max-lg:hidden">Pick a lead to see it here.</p>
         )}
@@ -434,6 +441,7 @@ function Row({ l, on, upcoming, onClick }: { l: LeadSummary; on: boolean; upcomi
     <button
       type="button"
       onClick={onClick}
+      data-lead={l.id}
       aria-current={on ? "true" : undefined}
       className={cn(
         "flex w-full gap-3 border-b border-border px-1 py-3.5 text-left transition-colors duration-200 hoverable:hover:bg-card lg:px-5",
@@ -639,6 +647,7 @@ function SignIn({ onKey, wrong }: { onKey: (k: string) => void; wrong: boolean }
       }}
       className="grid max-w-md gap-4 py-10 normal-case"
     >
+      <h1 className="sr-only">Leads</h1>
       <label htmlFor="lead-key" className="text-[15px]">Inbox key or GitHub token</label>
       <input
         id="lead-key"
@@ -743,6 +752,12 @@ function Detail({ summary, call, onChange, onBack, reload, templates, others }: 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
 
+  // On a phone the tapped row is gone, so focus starts at the lead's name.
+  const title = React.useRef<HTMLHeadingElement>(null);
+  React.useEffect(() => {
+    if (matchMedia("(max-width: 1023px)").matches) title.current?.focus();
+  }, []);
+
   const l = lead ?? summary;
   const first = l.name.split(" ")[0];
   const late = isLate(l, now());
@@ -756,7 +771,7 @@ function Detail({ summary, call, onChange, onBack, reload, templates, others }: 
       </button>
       <header className="min-w-0">
         {kindOf(l.kind) ? <p className="font-mono text-[11px] font-medium uppercase tracking-[0.09em]">{kindOf(l.kind)}</p> : null}
-        <h2 style={HEAD} className="mt-1 text-[30px] leading-tight">{l.name}</h2>
+        <h1 ref={title} tabIndex={-1} style={HEAD} className="mt-1 text-[30px] leading-tight outline-none">{l.name}</h1>
         <p className="mt-1 break-words text-[15px] text-muted-foreground">{l.email}</p>
         {l.stage === "Lost" ? (
           <p className="mt-5"><Tag tone="quiet" mark={MARK.Lost}>Lost</Tag></p>
