@@ -34,18 +34,39 @@ function Tabs({ at }: { at: SessionSlug }) {
           </button>
         ))}
       </div>
-      <div className="stabs-more">
-        <button type="button" className="stabs-call lbl" aria-pressed={cur === "consultation"} onClick={() => go("consultation")}>Not sure what you need? Book a 15 min call</button>
-        {/* The art director's way out of the session flow (booking critique, 2026-11-04). */}
-        <Link href="/contact/form" prefetch={false} className="stabs-call lbl">Commission or campaign? Inquire</Link>
-      </div>
+      <More on={cur === "consultation"} go={go} />
     </>
   );
 }
 
+/** The two ways out of the session grid: under the tiles on phones and upright
+    tablets, as ruled rows under the photo beside the calendar (Julian, 2026-11-04). */
+function More({ on, go }: { on: boolean; go: (x: SessionSlug) => void }) {
+  return (
+    <div className="stabs-more">
+      <button type="button" className="stabs-call lbl" aria-pressed={on} onClick={() => go("consultation")}>
+        <span className="q">Not sure what you need?</span> <span className="a">Book a 15 min call <i aria-hidden="true">&rarr;</i></span>
+      </button>
+      {/* The art director's way out of the session flow (booking critique, 2026-11-04). */}
+      <Link href="/contact/form" prefetch={false} className="stabs-call lbl">
+        <span className="q">Commission or campaign?</span> <span className="a">Inquire <i aria-hidden="true">&rarr;</i></span>
+      </Link>
+    </div>
+  );
+}
+
+/* What the photo lists: the includes without the length line (the length is
+   on the confirmation), the turnaround, then the price (Julian, 2026-11-04). */
+const getList = (S: (typeof SESSIONS)[SessionSlug]) => {
+  const r = rate(S);
+  return [...S.includes.filter((x) => !/^(one hour|\d+ minutes)\b/i.test(x)), ...(S.turnaround ? [`Ready in ${S.turnaround}`] : []), /deposit$/.test(r) ? `${r} required` : r];
+};
+
 /** `tabs`: false where the page is already about one booking (the service pages). */
 export function V3BookFlow({ slug, tabs = true, h1 = false }: { slug: SessionSlug; tabs?: boolean; h1?: boolean }) {
   const S = SESSIONS[slug];
+  const router = useRouter();
+  const more = tabs && TAB_ORDER.includes(slug);
   const shell: Shell = (p) => (
     <FlowShell
       {...p}
@@ -53,7 +74,7 @@ export function V3BookFlow({ slug, tabs = true, h1 = false }: { slug: SessionSlu
       body={
         p.at === 1 ? (
           <>
-            {tabs && TAB_ORDER.includes(slug) ? <Tabs at={slug} /> : null}
+            {more ? <Tabs at={slug} /> : null}
             <Run className="inc lbl" items={[...S.includes, ...(S.turnaround ? [`Ready in ${S.turnaround}`] : [])]} />
             {p.body}
           </>
@@ -64,7 +85,16 @@ export function V3BookFlow({ slug, tabs = true, h1 = false }: { slug: SessionSlu
       sum={[["Session", rate(S)], ...p.sum]}
       photo={S.photo}
       name={S.name}
-      over={S.blurb ?? ""}
+      over
+      get={p.at === 1 ? getList(S) : undefined}
+      foot={
+        p.at === 1 ? (
+          <>
+            {p.sub ? <p className="f-where">{p.sub}</p> : null}
+            {more ? <More on={slug === "consultation"} go={(x) => router.replace(`/book/${x}`, { scroll: false })} /> : null}
+          </>
+        ) : undefined
+      }
     />
   );
   if (!S.cal) return <OnRequest key={slug} slug={slug} shell={shell} />;

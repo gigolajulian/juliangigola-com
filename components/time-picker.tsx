@@ -1007,8 +1007,8 @@ export function TimePicker({
     if (step === "done") {
       const studio = !booked.where || /studio/i.test(booked.where);
       const lines = paid
-        ? [`${dlabel(date)}, ${range}.`, studio ? "San Jose studio. I send the address the day before." : `${booked.where}.`, "Need to move it? Reply to the confirmation up to 48 hours before."]
-        : [`${dlabel(date)}, ${range}.`, "I call the number you gave, or send a video link the day before.", "Need to move it? Reply to the confirmation."];
+        ? [`${dlabel(date)}, ${range}, ${duration(length)}.`, studio ? "San Jose studio. I send the address the day before." : `${booked.where}.`, "Need to move it? Reply to the confirmation up to 48 hours before."]
+        : [`${dlabel(date)}, ${range}, ${duration(length)}.`, "I call the number you gave, or send a video link the day before.", "Need to move it? Reply to the confirmation."];
       const stamp = (ms: number) => new Date(ms).toISOString().replace(/[-:]|\.\d{3}/g, "");
       const s0 = +new Date(pick.start);
       const ics = ["BEGIN:VCALENDAR", "VERSION:2.0", "BEGIN:VEVENT", `UID:${s0}@juliangigola.com`, `DTSTAMP:${stamp(s0)}`, `DTSTART:${stamp(s0)}`, `DTEND:${stamp(s0 + length * 6e4)}`, `SUMMARY:${v3.name} with Julian Gigola`, "END:VEVENT", "END:VCALENDAR"].join("\r\n");

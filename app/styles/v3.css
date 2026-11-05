@@ -398,8 +398,10 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .kinds{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
 /* Seven tiles: Other takes the last row whole at three columns and at two. */
 .v3 .kinds .kind:last-child{grid-column:1/-1}
-.v3 .kind{display:flex;justify-content:space-between;align-items:flex-end;gap:8px;min-height:112px;padding:14px;background:none;border:1px solid var(--line);color:var(--ink);text-align:left;font:inherit;cursor:pointer}
+.v3 .kind{position:relative;display:flex;justify-content:space-between;align-items:flex-end;gap:8px;min-height:112px;padding:14px;background:none;border:1px solid var(--line);color:var(--ink);text-align:left;font:inherit;cursor:pointer}
 .v3 .kind b{font:800 1.75rem/.95 var(--display);letter-spacing:-.035em}
+/* PICKED in the top corner, so it never runs into the name (iPad, 2026-11-04). */
+.v3 .kind>.lbl{position:absolute;top:12px;right:12px}
 .v3 .wrapopts{display:flex;flex-wrap:wrap;gap:6px}
 .v3 .bill{border-top:1px solid var(--line)}
 .v3 .bill div{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid var(--line);color:var(--mute)}
@@ -447,6 +449,9 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .cal.week button{min-height:96px}
 .v3 .cal b{font:900 1.5rem/.9 var(--display);letter-spacing:-.04em}
 .v3 .cal button span{color:var(--mute);font-size:11px}
+.v3 .cal button .dots{display:flex;gap:3px}
+.v3 .cal button .dots i{width:5px;height:5px;border-radius:50%;background:var(--accent)}
+.v3 .cal button .dots.few i{background:var(--mute)}
 .v3 .cal button:disabled{border-color:transparent;color:var(--mute);opacity:.45;cursor:default}
 .v3 .cal button.full b{text-decoration:line-through}
 .v3 .cal button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:color-mix(in srgb,var(--accent) 9%,transparent)}
@@ -688,6 +693,8 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 /* Responsive pass: 44px targets on touch (the hit area grows, the drawing stays). */
 @media (pointer:coarse){
   .v3 .a-cover .nav{padding-top:6px}
+  /* The links' 44px hit area already pads the bar: 57px, not 73 (Julian's iPad, 2026-11-04). */
+  .v3 .site-hdr{padding-top:max(6px,env(safe-area-inset-top,0px));padding-bottom:6px}
   .v3 :is(.a-cover .nav,.site-hdr .links) a,.v3 .site-wm{display:inline-flex;align-items:center;justify-content:center;min-height:44px;min-width:44px}
   .v3 .btn{min-height:44px}
   .v3 .door li a{display:flex;align-items:center;min-height:44px}
@@ -822,15 +829,39 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 .v3 .sv-row li .mute{text-align:left}
 .v3 .sv-row li a{flex-direction:row}}
 /* Flow photo, overlaid (FlowShell `over`): caption on the photo, the photo to the screen's foot. */
+.v3 .f-photo .fr{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;gap:inherit}
+.v3 .f-foot{display:none}
 @media (min-width:801px){.v3 .f-photo.over{padding-bottom:0}
-.v3 .f-photo.over .in{position:relative}
 .v3 .f-photo.over .ph{border-radius:4px 4px 0 0}
 /* The mid stop sits behind the name: 60% keeps white over the pale studio wall above 3:1 (booking critique, 2026-11-04). */
 .v3 .f-photo.over .ph::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,oklch(0 0 0 / 82%) 0%,oklch(0 0 0 / 60%) 34%,transparent 62%)}
-.v3 .f-photo.over .cap{position:absolute;left:0;right:0;bottom:0;padding:0 28px 32px;color:oklch(0.955 0.004 80);--line:oklch(1 0 0 / 22%);--mute:oklch(1 0 0 / 66%)}
-.v3 .f-photo.over .sub{margin:0;max-width:52ch;font-size:14px;line-height:1.5;color:oklch(1 0 0 / 82%);text-wrap:pretty}}
-.v3 .f-photo .sub{margin:0}
-@media (max-width:800px){.v3 .f-photo .sub{display:none}}
+.v3 .f-photo.over .cap{position:absolute;left:0;right:0;bottom:0;padding:0 28px 32px;color:oklch(0.955 0.004 80);--line:oklch(1 0 0 / 22%);--mute:oklch(1 0 0 / 66%)}}
+/* Beside the calendar: the photo stops above the foot, what the session gets
+   sits on it in two columns, and the studio line and ways out go under it
+   (Julian, 2026-11-04). Upright tablets and phones keep them in the left column. */
+@media (min-width:801px) and (orientation:landscape),(min-width:1101px){
+.v3 .f-photo.over{padding-top:20px}
+.v3 .f-photo.over .in{gap:10px}
+.v3 .f-photo.over .ph{border-radius:4px}
+.v3 .f-photo.over .ph::after{background:linear-gradient(to top,oklch(0 0 0 / 84%) 0%,oklch(0 0 0 / 66%) 28%,oklch(0 0 0 / 20%) 48%,transparent 62%)}
+.v3 .f-photo.over .cap{z-index:1;gap:clamp(10px,1.4vw,18px);padding:0 clamp(18px,2vw,28px) clamp(14px,1.8vw,24px)}
+.v3 .f-photo.over dl.get{display:grid;grid-template-rows:repeat(3,auto);grid-auto-flow:column;grid-auto-columns:auto;column-gap:clamp(18px,2.4vw,36px);border:0;letter-spacing:.04em}
+.v3 .f-photo.over dl.get div{padding:5px 0;border:0;border-top:1px solid var(--line)}
+.v3 .f-photo.over dl.get dt{color:oklch(1 0 0 / 92%);white-space:nowrap}
+.v3 .f-photo.over dl.get dd{display:none}
+.v3 .flow:has(.f-foot) :is(.f-head>p,.f-body .inc,.f-body .stabs-more){display:none}
+.v3 .f-foot{display:flex;flex-direction:column;padding-bottom:18px}
+.v3 .f-foot .f-where{margin:0;padding:0 0 14px;font-size:13px;line-height:1.45;color:var(--mute);text-wrap:balance}
+.v3 .f-foot .stabs-call{display:flex;justify-content:space-between;align-items:center;gap:16px;width:100%;padding:9px 0;border-top:1px solid var(--line);text-decoration:none;white-space:nowrap;font-size:.6875rem;letter-spacing:.06em}
+.v3 .f-foot .stabs-call:last-child{border-bottom:1px solid var(--line)}
+.v3 .f-foot .stabs-call .a{color:var(--ink)}
+.v3 .f-foot .stabs-call[aria-pressed="true"] .a{color:var(--accent)}
+.v3 .f-foot .stabs-call i{display:inline-block;font-style:normal;transition:transform 150ms cubic-bezier(.23,1,.32,1)}
+@media (hover:hover){.v3 .f-foot .stabs-call:hover{color:var(--mute)}.v3 .f-foot .stabs-call:hover .a{color:var(--accent)}.v3 .f-foot .stabs-call:hover i{transform:translateX(3px)}}
+@media (pointer:coarse){.v3 .f-foot .stabs-call{min-height:44px;padding-block:0}}
+@media (prefers-reduced-motion:reduce){.v3 .f-foot .stabs-call i{transition:none}}}
+.v3 .stabs-call i{display:none}
+.v3 .f-foot .stabs-call i{display:inline-block}
 /* A flow photo's phone frame (`photo.m`): it stands in for both themes' frames on phones. */
 .v3 .f-photo .v3m{display:none}
 @media (max-width:800px){.v3 .f-photo .ph:has(.v3m) :is(.v3d,.v3l){display:none}.v3 .f-photo .v3m{display:block}}
