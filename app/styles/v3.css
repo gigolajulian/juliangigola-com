@@ -1494,8 +1494,8 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 /* Julian: the arrows were too small. */
 .fv-step{position:absolute;top:50%;translate:0 -50%}
 .fv .fv-step{min-width:64px;min-height:64px;display:grid;place-items:center}
-.fv-step.prev{left:calc(var(--g) - 20px)}
-.fv-step.next{right:calc(var(--gr) - 20px)}
+.fv-step.prev{left:calc(var(--g) + 8px)}
+.fv-step.next{right:calc(var(--gr) + 8px)}
 @media (hover:hover){.fv button:hover{color:var(--accent)}}
 .fv button:focus-visible{outline:1px solid currentColor;outline-offset:2px}
 @media (max-width:700px){.fv-ph>img{padding:56px 0 24px}.fv-step{display:none}}
