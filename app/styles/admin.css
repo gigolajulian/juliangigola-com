@@ -42,6 +42,12 @@ body:has([data-lead-app])::before {
   height: env(safe-area-inset-top);
   background: var(--background);
 }
+/* The phone tab bar is `position: fixed`, but `.rise` rests #main at
+   translateY(0), and any transform makes #main the bar's containing block:
+   the bar sat at the foot of #main, not the screen (MAC, iOS sim). */
+html:has([data-lead-app]) #main {
+  transform: none;
+}
 /* Where it is one screen, the page itself does not scroll: the columns do.
    Anything poking past the screen (the intro's 0.75rem lift on `.rise`,
    held while the intro plays) otherwise scrolled the whole editor by that

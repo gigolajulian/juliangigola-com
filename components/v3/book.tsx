@@ -13,6 +13,13 @@ import { LENGTH, SESSIONS, TAB_ORDER, rate, type SessionSlug } from "@/lib/v3";
    (`time-picker.tsx`, `deposit-step.tsx`); weddings are on request and post
    through the enquiry action. */
 
+const TILES: SessionSlug[] = TAB_ORDER.filter((x) => x !== "consultation");
+/* The route change remounts the tiles; the one picked by key takes focus back on mount. */
+let keyedAt = 0;
+const keepFocus = (el: HTMLButtonElement | null) => {
+  if (el && Date.now() - keyedAt < 3000) el.focus();
+};
+
 function Tabs({ at }: { at: SessionSlug }) {
   const router = useRouter();
   /* One session at a time: the tapped tile lights at once, so the old one never
@@ -26,9 +33,24 @@ function Tabs({ at }: { at: SessionSlug }) {
   /* The call is a way in, not a session: a quiet link under the grid (critique, 2026-10-29). */
   return (
     <>
-      <div className="stabs lbl" role="radiogroup" aria-label="Session">
-        {TAB_ORDER.filter((x) => x !== "consultation").map((x) => (
-          <button key={x} type="button" role="radio" aria-checked={x === cur} onClick={() => go(x)}>
+      {/* A radio group moves on the arrow keys, one Tab stop for the group (QA on #589). */}
+      <div
+        className="stabs lbl"
+        role="radiogroup"
+        aria-label="Session"
+        onKeyDown={(e) => {
+          const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
+          const i = TILES.indexOf(cur);
+          const n = e.key === "Home" ? 0 : e.key === "End" ? TILES.length - 1 : step ? (Math.max(i, 0) + step + TILES.length) % TILES.length : -1;
+          if (n < 0) return;
+          e.preventDefault();
+          (e.currentTarget.children[n] as HTMLElement).focus();
+          keyedAt = Date.now();
+          go(TILES[n]);
+        }}
+      >
+        {TILES.map((x, k) => (
+          <button key={x} type="button" role="radio" aria-checked={x === cur} ref={x === cur ? keepFocus : undefined} tabIndex={x === cur || (k === 0 && !TILES.includes(cur)) ? 0 : -1} onClick={() => go(x)}>
             <b>{SESSIONS[x].name}</b>
             <span>{rate(SESSIONS[x])}</span>
           </button>
