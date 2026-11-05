@@ -142,6 +142,8 @@ function useSleeve(flip: () => void) {
       onFocus: wait,
       onBlur: (e: React.FocusEvent) => !e.currentTarget.contains(e.relatedTarget) && stop(),
       onPointerDown: (e: React.PointerEvent) => {
+        // A swipe fires no click, so the guard would eat the next real tap.
+        swiped.current = false;
         if (e.pointerType !== "mouse") from.current = { x: e.clientX, y: e.clientY };
       },
       onPointerMove: (e: React.PointerEvent) => {
