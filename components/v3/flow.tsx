@@ -200,7 +200,7 @@ export const fmt = (m: number) => {
   const h = Math.floor(m / 60) % 24;
   return `${((h + 11) % 12) + 1}:${pad(m % 60)} ${h < 12 ? "AM" : "PM"}`;
 };
-export const duration = (min: number) => (min >= 120 ? `${min / 60} hours` : `${min} minutes`);
+export { duration } from "@/lib/booking-rules";
 export const WD = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 export const iso = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 /** The month's cells, Monday first, blanks before the 1st. */
