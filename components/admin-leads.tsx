@@ -766,12 +766,14 @@ function Detail({ summary, call, onChange, onBack, reload, templates, others }: 
               const at = STEPS.indexOf(l.stage);
               return (
                 <li key={s} aria-current={k === at ? "step" : undefined} className={cn("truncate border-t-[3px] pt-2 font-mono text-[11px]", k < at ? "border-foreground/55 text-muted-foreground" : k === at ? "border-foreground font-medium text-foreground" : "border-border text-muted-foreground")}>
-                  {s === "Call booked" ? "Call" : s}
+                  {/* A phone is too narrow for seven names: the line alone, the current one named below. */}
+                  <span className="max-sm:sr-only">{s === "Call booked" ? "Call" : s}</span>
                 </li>
               );
             })}
           </ol>
         )}
+        {l.stage !== "Lost" ? <p aria-hidden="true" className="mt-2 font-mono text-[12px] font-medium sm:hidden">{l.stage}</p> : null}
       </header>
 
       {late ? (
