@@ -892,7 +892,7 @@ function Detail({ summary, call, onChange, onBack, reload, templates, others }: 
 
       {lead ? (
         <section aria-label="Timeline" className="grid gap-2.5">
-          <h3 style={{ ...HEAD, fontFamily: "var(--font-mono)", fontWeight: 400, letterSpacing: 0 }} className="text-[13px] text-muted-foreground">Timeline</h3>
+          <h2 style={{ ...HEAD, fontFamily: "var(--font-mono)", fontWeight: 400, letterSpacing: 0 }} className="text-[13px] text-muted-foreground">Timeline</h2>
           <ol className="grid gap-2">
             {[...lead.events].reverse().map((e, i) => (
               <li key={i} className="grid grid-cols-[120px_minmax(0,1fr)] gap-4 text-[14.5px]">
@@ -1018,7 +1018,7 @@ function StatsView({ call }: { call: Call }) {
         {tile("Booked value", money(s.won), "from the quotes you entered")}
       </div>
       <section className="grid gap-2.5">
-        <h3 className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">Last 12 weeks</h3>
+        <h2 className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">Last 12 weeks</h2>
         <div className="flex h-32 items-end gap-1.5" role="img" aria-label={s.weeks.map((w) => `Week of ${w.start}: ${w.inquiries} inquiries, ${w.booked} booked`).join(". ")}>
           {s.weeks.map((w) => (
             <div key={w.start} className="relative flex h-full flex-1 items-end" title={`Week of ${w.start}: ${w.inquiries} in, ${w.booked} booked`}>
@@ -1033,7 +1033,7 @@ function StatsView({ call }: { call: Call }) {
         </p>
       </section>
       <section className="grid gap-1">
-        <h3 className="pb-1 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">Where they came from</h3>
+        <h2 className="pb-1 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">Where they came from</h2>
         {s.sources.length ? s.sources.map((r) => (
           <p key={r.source} className="flex justify-between gap-3 border-b border-border py-2.5 text-[15px]">
             <span className="truncate">{r.source}</span>
@@ -1042,13 +1042,13 @@ function StatsView({ call }: { call: Call }) {
         )) : <p className="text-[15px] text-muted-foreground">Nothing yet.</p>}
       </section>
       <section className="grid gap-1">
-        <h3 className="pb-1 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">Why they were lost</h3>
+        <h2 className="pb-1 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">Why they were lost</h2>
         {s.lost.length ? s.lost.map((r) => (
           <p key={r.reason} className="flex justify-between border-b border-border py-2.5 text-[15px]"><span>{r.reason}</span><span className="font-mono text-[13px] text-muted-foreground">{r.n}</span></p>
         )) : <p className="text-[15px] text-muted-foreground">None lost.</p>}
       </section>
       <section className="grid gap-1">
-        <h3 className="pb-1 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">By stage · {s.total} leads</h3>
+        <h2 className="pb-1 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">By stage · {s.total} leads</h2>
         {STAGES.map((st) => (
           <p key={st} className="flex justify-between border-b border-border py-2.5 text-[15px]"><span>{st}</span><span className="font-mono text-[13px] text-muted-foreground">{s.stages[st] ?? 0}</span></p>
         ))}
@@ -1125,7 +1125,7 @@ function LeadCrm({ l, full, patch, others, templates }: { l: LeadSummary; full: 
     <div className="grid grid-cols-[minmax(0,1fr)] gap-7">
       {mail && templates.length ? (
         <section className="grid gap-2.5">
-          <h3 className={h3}>Reply with a template</h3>
+          <h2 className={h3}>Reply with a template</h2>
           <div className="flex flex-wrap gap-2">
             {templates.map((t) => {
               const subject = fill(t.subject, l);
@@ -1141,7 +1141,7 @@ function LeadCrm({ l, full, patch, others, templates }: { l: LeadSummary; full: 
       ) : null}
 
       <section className="grid gap-2.5">
-        <h3 className={h3}>Contact</h3>
+        <h2 className={h3}>Contact</h2>
         {editing ? (
           <form
             className="grid gap-3"
@@ -1185,7 +1185,7 @@ function LeadCrm({ l, full, patch, others, templates }: { l: LeadSummary; full: 
       </section>
 
       <section className="grid gap-2.5">
-        <h3 className={h3}>Reminder</h3>
+        <h2 className={h3}>Reminder</h2>
         {full?.remind ? (
           <p className="flex flex-wrap items-center gap-3 text-[15px]">
             <span><b className="font-semibold">{at(full.remind.at)}</b>{full.remind.text ? `: ${full.remind.text}` : ""}</span>
@@ -1207,7 +1207,7 @@ function LeadCrm({ l, full, patch, others, templates }: { l: LeadSummary; full: 
       </section>
 
       <section className="grid gap-2.5">
-        <h3 className={h3}>Quote</h3>
+        <h2 className={h3}>Quote</h2>
         <div className="flex flex-wrap items-end gap-2.5">
           <label className={fieldLabel}>
             Amount in dollars
@@ -1237,7 +1237,7 @@ function LeadCrm({ l, full, patch, others, templates }: { l: LeadSummary; full: 
       </section>
 
       <section className="grid gap-2.5">
-        <h3 className={h3}>Notes</h3>
+        <h2 className={h3}>Notes</h2>
         <textarea
           value={notes ?? full?.notes ?? ""}
           onChange={(e) => setNotes(e.target.value)}
@@ -1250,7 +1250,7 @@ function LeadCrm({ l, full, patch, others, templates }: { l: LeadSummary; full: 
 
       {others.length ? (
         <section className="grid grid-cols-[minmax(0,1fr)] gap-2.5">
-          <h3 className={h3}>Same person, another record</h3>
+          <h2 className={h3}>Same person, another record</h2>
           <div className="flex flex-wrap items-end gap-2.5">
             <select value={into} onChange={(e) => { setInto(e.target.value); setSure(false); }} className={cn(field, "w-auto min-w-0 max-w-full")} aria-label="Record to merge in">
               <option value="">Pick the other record</option>
