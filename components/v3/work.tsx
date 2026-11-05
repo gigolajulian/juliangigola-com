@@ -346,8 +346,8 @@ function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: number 
       </div>
       {n > 1 ? (
         <>
-          <button type="button" className="fv-step prev lbl" aria-label="Previous frame" onClick={() => step(-1)}>&larr;</button>
-          <button type="button" className="fv-step next lbl" aria-label="Next frame" onClick={() => step(1)}>&rarr;</button>
+          <button type="button" className="fv-step prev lbl" aria-label="Previous frame" onClick={() => step(-1)}><svg width="36" height="20" viewBox="0 0 36 20" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden><path d="M35 10H2M10 2L2 10l8 8" /></svg></button>
+          <button type="button" className="fv-step next lbl" aria-label="Next frame" onClick={() => step(1)}><svg width="36" height="20" viewBox="0 0 36 20" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden><path d="M1 10h33M26 2l8 8-8 8" /></svg></button>
         </>
       ) : null}
     </dialog>
@@ -947,7 +947,7 @@ export function V3Work({
                   );
                 const i = stripFrames.indexOf(f);
                 return (
-                  <figure key={f.src} className={f.wide ? "sc wide" : "sc"} data-flip-id={f.src}>
+                  <figure key={f.src} className={f.wide ? "sc wide" : f.sq ? "sc sq" : "sc"} data-flip-id={f.src}>
                     {/* Opens full size, as in the grid. */}
                     <a
                       href={f.src}

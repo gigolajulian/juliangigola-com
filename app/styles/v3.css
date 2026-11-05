@@ -513,6 +513,8 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .wstrip::-webkit-scrollbar{display:none}
 .v3 .sc{flex:none;position:relative;margin:0;height:100%;aspect-ratio:4/5;border-radius:4px;overflow:hidden;background:var(--card)}
 .v3 .sc.wide{aspect-ratio:3/2}
+/* Julian: square frames (Cover Art) keep square crops in the strip too. */
+.v3 .sc.sq{aspect-ratio:1}
 .v3 .sc img{width:100%;height:100%;object-fit:cover;display:block}
 .v3 .wbar{height:2px;margin:14px var(--gr) 16px var(--g);background:var(--line)}
 .v3 .wbar i{display:block;height:100%;width:0;background:var(--ink)}
@@ -775,11 +777,13 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 .v3 #p-work:is(.strip-on,.color-on) .pg-head{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
 .v3 #p-work:is(.strip-on,.color-on) .wnote{display:none}
 .v3 #p-work.strip-on .wstrip{padding-top:20px}
-@media (max-width:767px){.v3 #p-work.strip-on .sc{aspect-ratio:auto;height:calc(100svh - 270px);min-height:360px}}
+@media (max-width:767px){.v3 #p-work.strip-on .sc{aspect-ratio:auto;height:calc(100svh - 270px);min-height:360px}
+.v3 #p-work.strip-on .sc.sq{aspect-ratio:1;width:auto}}
 /* iPhone: the strip runs down the page, one cover a row at full width,
    and the page scrolls it (Julian). The sideways bar goes. */
 @media (max-width:700px){.v3 #p-work.strip-on .wstrip{flex-direction:column;overflow:visible;scroll-snap-type:none;gap:16px;padding-bottom:48px}
 .v3 #p-work.strip-on .sc{width:100%;height:auto;min-height:0;aspect-ratio:4/5;scroll-snap-align:none}
+.v3 #p-work.strip-on .sc.sq{aspect-ratio:1;width:100%}
 .v3 #p-work.strip-on .wbar{display:none}}
 /* Color: a mode set apart from Grid and Strip by a hairline. */
 .v3 .wviews .wcolor{position:relative;display:inline-flex;align-items:center;gap:8px;width:auto;margin-right:12px;padding:0 12px}
@@ -1487,9 +1491,11 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .fv-ph>img{object-fit:contain;padding:64px var(--gr) 32px var(--g);pointer-events:none}
 .fv-bar{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:20px var(--gr) 0 var(--g)}
 .fv button{min-height:44px;min-width:44px;padding:0 4px;background:none;border:0;color:inherit;font:inherit;letter-spacing:inherit;text-transform:inherit;cursor:pointer}
-.fv-step{position:absolute;top:50%;translate:0 -50%;font-size:16px}
-.fv-step.prev{left:calc(var(--g) - 12px)}
-.fv-step.next{right:calc(var(--gr) - 12px)}
+/* Julian: the arrows were too small. */
+.fv-step{position:absolute;top:50%;translate:0 -50%}
+.fv .fv-step{min-width:64px;min-height:64px;display:grid;place-items:center}
+.fv-step.prev{left:calc(var(--g) - 20px)}
+.fv-step.next{right:calc(var(--gr) - 20px)}
 @media (hover:hover){.fv button:hover{color:var(--accent)}}
 .fv button:focus-visible{outline:1px solid currentColor;outline-offset:2px}
 @media (max-width:700px){.fv-ph>img{padding:56px 0 24px}.fv-step{display:none}}
