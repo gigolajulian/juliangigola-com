@@ -107,6 +107,12 @@ export function CoverNav() {
         <Link key={n.href} href={n.href}>{n.label}</Link>
       ))}
       <ThemeButton />
+      {/* Under 350px the four words ran off the left edge (audit v3.0.92):
+          there the cover shows the inner pages' Menu instead. */}
+      <button className="menu-btn burger-btn cover-burger" type="button" aria-controls="pmenu" aria-label="Menu" onClick={() => dispatchEvent(new Event("v3:menu"))}>
+        <i aria-hidden />
+        <i aria-hidden />
+      </button>
     </nav>
   );
 }
@@ -375,6 +381,11 @@ export function V3Header() {
     setMenu(false);
   }
   React.useEffect(() => {
+    const open = () => setMenu(true);
+    addEventListener("v3:menu", open);
+    return () => removeEventListener("v3:menu", open);
+  }, []);
+  React.useEffect(() => {
     document.body.style.overflow = menu ? "hidden" : "";
     if (!menu) return;
     const esc = (e: KeyboardEvent) => e.key === "Escape" && setMenu(false);
@@ -384,7 +395,7 @@ export function V3Header() {
   return (
     <div className="v3 contents">
       {/* Inert per part, not the whole bar: the portfolio's tools stay live in it while it tucks. */}
-      <header ref={hdr} className={`site-hdr${show || menu ? " show" : ""}${dock ? " dock" : ""}${landed || menu ? " landed" : ""}`}>
+      <header ref={hdr} className={`site-hdr${show || menu ? " show" : ""}${dock ? " dock" : ""}${landed || menu ? " landed" : ""}${menu ? " menu-on" : ""}`}>
         <Link className="wm site-wm" href="/" inert={!(show || menu)}>Julian Gigola</Link>
         <div id="hdr-tools" className="hslot" />
         <nav className="links lbl burger" aria-label="Main" inert={!(show || menu)}>
