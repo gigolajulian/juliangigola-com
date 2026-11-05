@@ -1547,3 +1547,16 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 /* The frames under the title at their own shape (P3, 2026-10-29): no crop, and no side bars
    from `contain` in a box of another shape. Capped by the cell on both sides. */
 @media (min-width:901px){.v3 .pj-hero:not(.two) .pj-lead .pj-r img{height:auto;max-height:100%;width:auto;max-width:100%;object-fit:contain}}
+
+/* Audit v3.0.92: under 350px the cover's words clipped; the Menu takes their place. */
+.v3 .a-cover .cover-burger{display:none}
+@media (max-width:349.98px){.v3 .a-cover .nav>a,.v3 .a-cover .nav>.tbtn{display:none}.v3 .a-cover .cover-burger{display:block}}
+/* Opened from the cover, the bar's close button shows over the scroll-tied fade, which writes inline opacity. */
+.v3 .site-hdr.menu-on{opacity:1!important;transform:none!important}
+/* Julian: two lines at 320, the role on one and the place under it. */
+@media (max-width:349.98px){.v3 .a-cover .foot .lbl{letter-spacing:.1em}}
+/* Julian: the cover's two buttons thinner on a phone, the tap area still 44px (grown upward: the cover clips below them). */
+@media (pointer:coarse) and (max-width:700px){.v3 .a-cover .ctas .btn{height:36px;min-height:36px;position:relative}
+.v3 .a-cover .ctas .btn::after{content:"";position:absolute;inset:-8px 0 0}}
+/* Julian: the name larger on a phone, as wide as the gutters allow. */
+@media (max-width:480px){.v3 .a-cover h1{font-size:calc(15.2*var(--v3u))}}

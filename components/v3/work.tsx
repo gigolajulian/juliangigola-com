@@ -523,10 +523,13 @@ export function V3Work({
      flew in empty and the photos popped in after (Julian, iPhone and iPad).
      The other view's first frames are fetched and decoded while this one is
      up, both ways: back to the grid showed one grey frame too. */
-  React.useEffect(() => {
-    if (view === "color") return;
-    const go = () => {
-      for (const p of list.slice(0, view === "strip" ? 12 : 8)) {
+  /* A phone at DPR 3 paid ~760 KB for eight strip covers it might never
+     open (audit v3.0.92): the timer now warms the first three, the rest
+     wait for a hand on the strip button, and Save-Data skips it all. */
+  const warm = React.useCallback(
+    (n: number) => {
+      if (view === "color" || (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData) return;
+      for (const p of list.slice(0, n)) {
         const { props } = getImageProps({ src: p.cover, alt: "", fill: true, sizes: view === "strip" ? GRID_SIZES : STRIP_SIZES });
         const im = new window.Image();
         if (props.sizes) im.sizes = props.sizes;
@@ -534,10 +537,13 @@ export function V3Work({
         im.src = props.src;
         im.decode().catch(() => {});
       }
-    };
-    const t = setTimeout(go, 1200);
+    },
+    [list, view],
+  );
+  React.useEffect(() => {
+    const t = setTimeout(() => warm(view === "strip" ? 12 : 3), 1200);
     return () => clearTimeout(t);
-  }, [list, view]);
+  }, [warm, view]);
 
   /* The scope's points arrive with the Color view, not with the page. */
   React.useEffect(() => {
@@ -832,6 +838,9 @@ export function V3Work({
           aria-pressed={view === v}
           aria-label={label}
           title={label}
+          onPointerDown={v === "strip" ? () => warm(8) : undefined}
+          onPointerEnter={v === "strip" ? () => warm(8) : undefined}
+          onFocus={v === "strip" ? () => warm(8) : undefined}
           onClick={() => go(v)}
         >
           {icon}
