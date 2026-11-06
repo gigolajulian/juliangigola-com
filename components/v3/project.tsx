@@ -123,7 +123,7 @@ export function V3Project({ project, next }: { project: Project; next?: { href: 
           {lead.length ? (
             <div className="pj-lead">
               {lead.map((f) => (
-                <figure key={f.src} className="pj-r">{pic(f, "(max-width: 900px) 100vw, 30vw", true)}</figure>
+                <figure key={f.src} className="pj-r" style={{ "--arn": f.width / f.height } as React.CSSProperties}>{pic(f, "(max-width: 900px) 100vw, 30vw", true)}</figure>
               ))}
             </div>
           ) : null}
