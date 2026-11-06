@@ -380,3 +380,41 @@ describe("leads", () => {
     expect((await GET(req("GET", { query: "?leads" }))).status).toBe(503);
   });
 });
+
+describe("invoices", () => {
+  const make = async (email: string) => {
+    await recordLead({ INBOX: kv as never, LEADS_KEY }, email, { event: { at: "2026-11-01T10:00:00Z", kind: "inquiry", ref: `msg:${email}` }, name: "Maya Ortiz" });
+    return `lead:${await (await sealer(LEADS_KEY)!).id(email)}`;
+  };
+  const bill = (key: string, date = "2026-11-06") =>
+    PATCH(req("PATCH", { body: JSON.stringify({ key, invoice: { date, lines: [{ desc: "Portraits, Nov 19", qty: 1, rate: 450 }], paid: 100 } }) }));
+
+  it("numbers MMYY, then 1126-2 for a second one that month on any lead, and logs it", async () => {
+    const a = await make("a@example.com"), b = await make("b@example.com");
+    expect((await (await GET(req("GET", { query: "?invoiceNo=2026-11-06" }))).json()).no).toBe("1126");
+    const one = (await (await bill(a)).json()).lead;
+    expect(one.invoices[0]).toMatchObject({ no: "1126", paid: 100, date: "2026-11-06" });
+    expect(one.events.at(-1)).toMatchObject({ kind: "invoice", note: "1126, $350.00 due" });
+    expect((await (await bill(b)).json()).lead.invoices[0].no).toBe("1126-2");
+    expect((await (await bill(b, "2026-12-01")).json()).lead.invoices[1].no).toBe("1226");
+    // The list's sealed summary stays small: no invoices in it.
+    const { leads } = await (await GET(req("GET", { query: "?leads" }))).json();
+    expect(leads[0].invoices).toBeUndefined();
+  });
+
+  it("refuses a bad invoice and stays behind the gate", async () => {
+    const a = await make("a@example.com");
+    const bad = await PATCH(req("PATCH", { body: JSON.stringify({ key: a, invoice: { date: "2026-11-06", lines: [] } }) }));
+    expect(bad.status).toBe(400);
+    expect((await PATCH(req("PATCH", { key: null, body: JSON.stringify({ key: a, invoice: {} }) }))).status).toBe(401);
+    expect([...kv.data.keys()].some((k) => k.startsWith("invoices:"))).toBe(false);
+  });
+
+  it("keeps his details sealed: nothing readable in KV", async () => {
+    const from = { name: "JULIAN GIGOLA", ein: "EIN 00-0000000", a3: "San Jose, CA" };
+    expect((await PATCH(req("PATCH", { body: JSON.stringify({ invoiceFrom: from }) }))).status).toBe(200);
+    expect(JSON.stringify([...kv.data.values()])).not.toContain("00-0000000");
+    const got = await (await GET(req("GET", { query: "?invoiceFrom" }))).json();
+    expect(got.from).toMatchObject(from);
+  });
+});
