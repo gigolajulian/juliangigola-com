@@ -62,6 +62,12 @@ const seen = () =>
     return r.bottom > 0 && r.top < innerHeight && r.right > 0 && r.left < innerWidth;
   });
 
+/** A cover link's name: the words its caption shows, so voice control and axe label-in-name match. */
+const named = (p: WorkItem) => {
+  const d = p.d.join(", ");
+  return d.toLowerCase() !== p.n.toLowerCase() ? `${p.n} ${d}` : p.n;
+};
+
 /** A cover's caption, on the photo: the name, then its discipline. A gallery is named for its discipline, so the label would say it twice. */
 function Cap({ p, cls }: { p: WorkItem; cls: string }) {
   const d = p.d.join(", ");
@@ -69,7 +75,8 @@ function Cap({ p, cls }: { p: WorkItem; cls: string }) {
     <span className={cls}>
       {/* --n: a long name sets smaller to stay near two lines (Julian, 2026-11-04); --w: its longest word still fits the cover's width. */}
       <b style={{ "--n": p.n.length, "--w": Math.max(...p.n.split(/\s+/).map((x) => x.length)) } as React.CSSProperties}>{p.n}</b>
-      {d.toLowerCase() !== p.n.toLowerCase() ? <span className="lbl">{d}</span> : null}
+      {/* The space keeps "THRESHOLD Editorial" two words for screen readers and label-in-name; between blocks it draws nothing. */}
+      {d.toLowerCase() !== p.n.toLowerCase() ? <>{" "}<span className="lbl">{d}</span></> : null}
     </span>
   );
 }
@@ -77,7 +84,7 @@ function Cap({ p, cls }: { p: WorkItem; cls: string }) {
 function Tile({ p, swatch, first }: { p: WorkItem; swatch?: string[]; first?: boolean }) {
   return (
     <figure className="wt">
-      <Link href={`/portfolio/${p.s}`} aria-label={p.n}>
+      <Link href={`/portfolio/${p.s}`} aria-label={named(p)}>
         <div className="ph" data-flip-id={p.s}>
           <Image
             src={p.cover}
@@ -1019,7 +1026,7 @@ export function V3Work({
                 if (!f)
                   return (
                     <figure key={p!.s} className="sc" data-flip-id={p!.s}>
-                      <Link href={`/portfolio/${p!.s}`} aria-label={p!.n}>
+                      <Link href={`/portfolio/${p!.s}`} aria-label={named(p!)}>
                         <Image src={p!.cover} alt={p!.n} fill sizes={STRIP_SIZES} decoding="sync" loading={n < 4 ? "eager" : "lazy"} />
                         {cap}
                       </Link>
