@@ -683,7 +683,7 @@ function Field({
             ? "mt-3 resize-none overflow-y-auto max-h-[calc(3lh+0.5rem+1px)] sm:mt-[1.125rem] sm:max-h-[calc(3lh+0.625rem+1px)]"
             : "mt-1 pt-2 sm:mt-2 sm:pt-2.5",
           // Placeholders fainter.
-          "transition-colors duration-200 placeholder:text-muted-foreground/35",
+          "transition-colors duration-200 placeholder:text-muted-foreground",
           // Focus is the rule under the field darkening, to 40% ink. No
           // accent ring as well: a text field shows focus whether the click
           // or the keyboard put it there, so the ring was on screen every

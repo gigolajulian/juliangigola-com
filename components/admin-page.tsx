@@ -211,7 +211,7 @@ export function AdminPage({
           rows={1}
           aria-label="Title"
           placeholder="Title"
-          className="title mt-4 block w-full max-w-[20ch] resize-none border-0 border-b border-transparent bg-transparent p-0 field-sizing-content text-foreground outline-none placeholder:text-muted-foreground/50 focus-visible:border-border"
+          className="title mt-4 block w-full max-w-[20ch] resize-none border-0 border-b border-transparent bg-transparent p-0 field-sizing-content text-foreground outline-none placeholder:text-muted-foreground focus-visible:border-border"
         />
 
         <dl className="mt-8 flex flex-wrap gap-x-12 gap-y-4 border-t border-border pt-6">
@@ -252,7 +252,7 @@ export function AdminPage({
           onChange={(e) => setWords({ intent: e.target.value || null })}
           aria-label="Intent"
           placeholder="A paragraph under the meta row, if the project wants one."
-          className="mt-10 block w-full max-w-prose resize-y border-0 border-b border-transparent bg-transparent p-0 field-sizing-content text-base leading-relaxed text-muted-foreground outline-none placeholder:text-muted-foreground/50 focus-visible:border-border"
+          className="mt-10 block w-full max-w-prose resize-y border-0 border-b border-transparent bg-transparent p-0 field-sizing-content text-base leading-relaxed text-muted-foreground outline-none placeholder:text-muted-foreground focus-visible:border-border"
         />
       </header>
 
@@ -518,7 +518,7 @@ function Passage({
           onChange={(e) => onChange({ heading: e.target.value || null })}
           placeholder="Heading (optional)"
           aria-label="Passage heading"
-          className="font-display w-full border-0 border-b border-transparent bg-transparent p-0 text-2xl uppercase tracking-[0] text-foreground outline-none placeholder:text-muted-foreground/50 focus-visible:border-border"
+          className="font-display w-full border-0 border-b border-transparent bg-transparent p-0 text-2xl uppercase tracking-[0] text-foreground outline-none placeholder:text-muted-foreground focus-visible:border-border"
         />
         <textarea
           value={block.body}
@@ -526,7 +526,7 @@ function Passage({
           rows={Math.max(3, lines + 1)}
           placeholder="The writing. Leave a blank line between paragraphs."
           aria-label="Passage text"
-          className="mt-6 w-full resize-y border-0 border-b border-transparent bg-transparent p-0 text-base leading-relaxed text-muted-foreground outline-none placeholder:text-muted-foreground/50 focus-visible:border-border"
+          className="mt-6 w-full resize-y border-0 border-b border-transparent bg-transparent p-0 text-base leading-relaxed text-muted-foreground outline-none placeholder:text-muted-foreground focus-visible:border-border"
         />
       </div>
     </div>
