@@ -4,9 +4,11 @@ import { balance, subtotal, type Invoice, type InvoiceFrom } from "./invoice";
  * Ported from Julian's JG INVOICE GENERATOR artifact (geometry measured
  * from his REF INVOICE.pdf): one draw list, written as a one-page vector
  * PDF with Inter embedded. Light paper only. New here: a Deposit paid line
- * and Balance due when a deposit is taken off. Runs in the browser only,
+ * and Balance due when a deposit is taken off, and his wordmark as the
+ * site header sets it (Inter Tight Black at -0.045em) in place of the
+ * stacked mark (Julian, 2026-11-06: "use my new wordmark instead"). Runs in the browser only,
  * loaded when he taps Make PDF, so the desk itself stays light. The fonts
- * and the mark come from /leads-app/invoice/ on that first tap.
+ * come from /leads-app/invoice/ on that first tap.
  * ─────────────────────────────────────────────────────────────── */
 
 export type InvoiceDoc = { from: InvoiceFrom; to: { name: string; email?: string; phone?: string }; inv: Invoice };
@@ -68,7 +70,11 @@ function parseTTF(buf: ArrayBuffer): Font {
   };
 }
 
-type Text = { x: number; y: number; size: number; fill: string; text: string; font: "sb" | "rg"; anchor: "start" | "end" };
+type Text = { x: number; y: number; size: number; fill: string; text: string; font: Face; anchor: "start" | "end" };
+type Face = "sb" | "rg" | "wm";
+/** The wordmark's tracking, as `site-header.tsx` sets the name. */
+const TRACK = -0.045;
+const WORDMARK = "Julian Gigola";
 const money = (n: number) => `${n < 0 ? "-" : ""}${Math.abs(n).toFixed(2)} USD`;
 const fmtDate = (iso: string) => { const [y, m, d] = iso.split("-").map(Number); return `${m}/${d}/${y}`; };
 
@@ -89,9 +95,12 @@ function wrap(text: string, maxW: number, SB: Font) {
 
 function layout({ from: s, to, inv }: InvoiceDoc, SB: Font, RG: Font) {
   const T: Text[] = [], rects: { x: number; y: number; w: number; h: number; fill: string }[] = [], lines: { x1: number; y: number; x2: number; c: string }[] = [];
-  const images = [{ x: 59, y: 51, w: 72, h: 72 }, { x: 471, y: 791, w: 42, h: 42 }];
-  const t = (x: number, y: number, size: number, fill: string, text: string, font: "sb" | "rg" = "sb", anchor: "start" | "end" = "start") => T.push({ x, y, size, fill, text, font, anchor });
+  const t = (x: number, y: number, size: number, fill: string, text: string, font: Face = "sb", anchor: "start" | "end" = "start") => T.push({ x, y, size, fill, text, font, anchor });
   const W = (str: string, size: number, font: "sb" | "rg") => (font === "rg" ? RG : SB).width(str, size);
+
+  // The wordmark where the stacked mark stood: top left, and small at the foot on the right.
+  t(58.0, 96.41, 26, P.DARK, WORDMARK, "wm");
+  t(RIGHT, 826.46, 12, P.DARK, WORDMARK, "wm", "end");
 
   rects.push({ x: 0, y: 0, w: PW, h: PH, fill: P.PAGE }, { x: 0, y: 0, w: PW, h: BAND_H, fill: P.BAND });
 
@@ -146,7 +155,9 @@ function layout({ from: s, to, inv }: InvoiceDoc, SB: Font, RG: Font) {
   let ny = 721.31;
   for (const ln of wrap(inv.notes ?? s.notes, 478, SB)) { t(58.0, ny, 8, P.GREY, ln); ny += 13; }
   ny = 760.31;
-  for (const ln of [s.signoff, s.name.replace(/\b(\w)(\w*)/g, (_, a: string, b: string) => a + b.toLowerCase())]) { t(58.0, ny, 8, P.GREY, ln); ny += 13; }
+  // The name as typed; only an all-caps one (as the header block wants it) is set in title case.
+  const signed = s.name === s.name.toUpperCase() ? s.name.replace(/\b(\w)(\w*)/g, (_, a: string, b: string) => a + b.toLowerCase()) : s.name;
+  for (const ln of [s.signoff, signed]) { t(58.0, ny, 8, P.GREY, ln); ny += 13; }
 
   lines.push({ x1: 58.5, y: 782.78, x2: 535.5, c: P.RULE });
   t(58.0, 806.46, 6, P.GREY, s.a1);
@@ -156,7 +167,7 @@ function layout({ from: s, to, inv }: InvoiceDoc, SB: Font, RG: Font) {
   t(234.0, 805.92, 6, P.GREY, s.email);
   t(220.0, 816.92, 6, P.BLUE, "m");
   t(232.0, 816.92, 6, P.GREY, s.phone);
-  return { T, rects, lines, images };
+  return { T, rects, lines };
 }
 
 /* ── the PDF itself ── */
@@ -175,23 +186,14 @@ const hex2rgb = (h: string) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 
 const f = (n: number) => (Math.round(n * 1000) / 1000).toString();
 const widths = (font: Font) => { const w: number[] = []; for (let c = 32; c <= 255; c++) w.push(Math.round((font.advUnits(WIN_HI[c] ?? c) * 1000) / font.upem)); return w; };
 
-type Assets = { sb: Uint8Array; rg: Uint8Array; SB: Font; RG: Font; logo: { W: number; H: number; gray: Uint8Array; alpha: Uint8Array } };
+type Assets = { sb: Uint8Array; rg: Uint8Array; wm: Uint8Array; SB: Font; RG: Font; WM: Font };
 let assets: Promise<Assets> | null = null;
 const BASE = "/leads-app/invoice";
 
 async function loadAssets(): Promise<Assets> {
   const bytes = (p: string) => fetch(`${BASE}/${p}`).then((r) => { if (!r.ok) throw new Error(`Could not load ${p}.`); return r.arrayBuffer(); });
-  const [sbBuf, rgBuf, png] = await Promise.all([bytes("inter-semibold.ttf"), bytes("inter-regular.ttf"), fetch(`${BASE}/mark.png`).then((r) => r.blob())]);
-  const bmp = await createImageBitmap(png);
-  const cv = document.createElement("canvas");
-  cv.width = bmp.width;
-  cv.height = bmp.height;
-  const ctx = cv.getContext("2d", { willReadFrequently: true })!;
-  ctx.drawImage(bmp, 0, 0);
-  const px = ctx.getImageData(0, 0, cv.width, cv.height).data;
-  const gray = new Uint8Array(cv.width * cv.height), alpha = new Uint8Array(cv.width * cv.height);
-  for (let i = 0, p = 0; i < px.length; i += 4, p++) { gray[p] = (px[i] * 77 + px[i + 1] * 150 + px[i + 2] * 29) >> 8; alpha[p] = px[i + 3]; }
-  return { sb: new Uint8Array(sbBuf), rg: new Uint8Array(rgBuf), SB: parseTTF(sbBuf), RG: parseTTF(rgBuf), logo: { W: cv.width, H: cv.height, gray, alpha } };
+  const [sb, rg, wm] = await Promise.all([bytes("inter-semibold.ttf"), bytes("inter-regular.ttf"), bytes("intertight-900.ttf")]);
+  return { sb: new Uint8Array(sb), rg: new Uint8Array(rg), wm: new Uint8Array(wm), SB: parseTTF(sb), RG: parseTTF(rg), WM: parseTTF(wm) };
 }
 
 export const fileName = (d: InvoiceDoc) => `INVOICE ${d.inv.no} - ${d.to.name.replace(/[\\/:*?"<>|]/g, "").trim()}.pdf`;
@@ -199,21 +201,22 @@ export const fileName = (d: InvoiceDoc) => `INVOICE ${d.inv.no} - ${d.to.name.re
 /** The invoice as a PDF file, ready for Share or a download. */
 export async function invoicePdf(d: InvoiceDoc): Promise<File> {
   assets ??= loadAssets().catch((e) => { assets = null; throw e; });
-  const { sb, rg, SB, RG, logo } = await assets;
+  const { sb, rg, wm, SB, RG, WM } = await assets;
   const L = layout(d, SB, RG);
 
   let s = "";
   for (const r of L.rects) { const [R, G, B] = hex2rgb(r.fill); s += `${f(R)} ${f(G)} ${f(B)} rg ${f(r.x)} ${f(PH - r.y - r.h)} ${f(r.w)} ${f(r.h)} re f\n`; }
-  for (const i of L.images) s += `q ${f(i.w)} 0 0 ${f(i.h)} ${f(i.x)} ${f(PH - i.y - i.h)} cm /Im0 Do Q\n`;
   for (const l of L.lines) { const [R, G, B] = hex2rgb(l.c); s += `${f(R)} ${f(G)} ${f(B)} RG 1 w ${f(l.x1)} ${f(PH - l.y)} m ${f(l.x2)} ${f(PH - l.y)} l S\n`; }
   for (const o of L.T) {
     if (!o.text) continue;
-    const font = o.font === "sb" ? SB : RG;
-    const x = o.anchor === "end" ? o.x - font.width(o.text, o.size) : o.x;
+    const font = { sb: SB, rg: RG, wm: WM }[o.font];
+    // Tc spaces every glyph, the last one too, so a right-aligned run is pulled back by all of it.
+    const tc = o.font === "wm" ? TRACK * o.size : 0;
+    const x = o.anchor === "end" ? o.x - font.width(o.text, o.size) - tc * [...o.text].length : o.x;
     const [R, G, B] = hex2rgb(o.fill);
-    s += `BT ${f(R)} ${f(G)} ${f(B)} rg /${o.font === "sb" ? "F1" : "F2"} ${o.size} Tf 1 0 0 1 ${f(x)} ${f(PH - o.y)} Tm (${pesc(o.text)}) Tj ET\n`;
+    s += `BT ${f(R)} ${f(G)} ${f(B)} rg /${{ sb: "F1", rg: "F2", wm: "F3" }[o.font]} ${o.size} Tf ${f(tc)} Tc 1 0 0 1 ${f(x)} ${f(PH - o.y)} Tm (${pesc(o.text)}) Tj ET\n`;
   }
-  const [content, grayZ, alphaZ, sbZ, rgZ] = await Promise.all([deflate(enc(s)), deflate(logo.gray), deflate(logo.alpha), deflate(sb), deflate(rg)]);
+  const [content, sbZ, rgZ, wmZ] = await Promise.all([deflate(enc(s)), deflate(sb), deflate(rg), deflate(wm)]);
   const desc = (font: Font, name: string, stemv: number, id: number) =>
     `<< /Type /FontDescriptor /FontName /${name} /Flags 32 /FontBBox [${font.bbox.map((v) => Math.round((v * 1000) / font.upem)).join(" ")}] /ItalicAngle 0 /Ascent 969 /Descent -241 /CapHeight 727 /StemV ${stemv} /FontFile2 ${id} 0 R >>`;
 
@@ -222,7 +225,7 @@ export async function invoicePdf(d: InvoiceDoc): Promise<File> {
   const stream = (dict: string, bytes: Uint8Array) => concat([enc(`${dict}\nstream\n`), bytes, enc("\nendstream")]);
   put("<< /Type /Catalog /Pages 2 0 R >>");
   put("<< /Type /Pages /Count 1 /Kids [3 0 R] >>");
-  put(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PW} ${PH}] /Resources << /Font << /F1 5 0 R /F2 8 0 R >> /XObject << /Im0 11 0 R >> >> /Contents 4 0 R >>`);
+  put(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PW} ${PH}] /Resources << /Font << /F1 5 0 R /F2 8 0 R /F3 11 0 R >> >> /Contents 4 0 R >>`);
   put(stream(`<< /Length ${content.length} /Filter /FlateDecode >>`, content));
   put(`<< /Type /Font /Subtype /TrueType /BaseFont /Inter-SemiBold /FirstChar 32 /LastChar 255 /Widths [${widths(SB).join(" ")}] /Encoding /WinAnsiEncoding /FontDescriptor 6 0 R >>`);
   put(desc(SB, "Inter-SemiBold", 80, 7));
@@ -230,8 +233,9 @@ export async function invoicePdf(d: InvoiceDoc): Promise<File> {
   put(`<< /Type /Font /Subtype /TrueType /BaseFont /Inter-Regular /FirstChar 32 /LastChar 255 /Widths [${widths(RG).join(" ")}] /Encoding /WinAnsiEncoding /FontDescriptor 9 0 R >>`);
   put(desc(RG, "Inter-Regular", 60, 10));
   put(stream(`<< /Length ${rgZ.length} /Length1 ${rg.length} /Filter /FlateDecode >>`, rgZ));
-  put(stream(`<< /Type /XObject /Subtype /Image /Width ${logo.W} /Height ${logo.H} /ColorSpace /DeviceGray /BitsPerComponent 8 /SMask 12 0 R /Filter /FlateDecode /Length ${grayZ.length} >>`, grayZ));
-  put(stream(`<< /Type /XObject /Subtype /Image /Width ${logo.W} /Height ${logo.H} /ColorSpace /DeviceGray /BitsPerComponent 8 /Filter /FlateDecode /Length ${alphaZ.length} >>`, alphaZ));
+  put(`<< /Type /Font /Subtype /TrueType /BaseFont /InterTight-Black /FirstChar 32 /LastChar 255 /Widths [${widths(WM).join(" ")}] /Encoding /WinAnsiEncoding /FontDescriptor 12 0 R >>`);
+  put(desc(WM, "InterTight-Black", 160, 13));
+  put(stream(`<< /Length ${wmZ.length} /Length1 ${wm.length} /Filter /FlateDecode >>`, wmZ));
 
   const chunks: Uint8Array[] = [enc("%PDF-1.4\n%\xE2\xE3\xCF\xD3\n")];
   let pos = chunks[0].length;
