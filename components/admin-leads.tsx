@@ -3,6 +3,7 @@
 import * as React from "react";
 import { credentials, KEY_STORE, References } from "@/components/admin-inbox";
 import { LeadHours } from "@/components/lead-hours";
+import { LeadUpcoming } from "@/components/lead-upcoming";
 import { TOKEN_STORE } from "@/lib/admin-github";
 import type { Enquiry } from "@/lib/inbox";
 import { isLate, STAGES, trashDaysLeft, type Lead, type LeadEvent, type LeadSummary, type Stage } from "@/lib/leads";
@@ -341,6 +342,11 @@ export function AdminLeads() {
           <TemplatesEditor call={call} templates={templates} saved={setTemplates} />
         ) : filter === "hours" ? (
           <LeadHours />
+        ) : filter === "upcoming" && !words ? (
+          <LeadUpcoming
+            leads={leads.filter((l) => l.when && !pass(l, "trash"))}
+            row={(l) => <Row l={l} on={open === l.id} upcoming onClick={() => setOpen(l.id ?? null)} />}
+          />
         ) : (
           <>
             {filter === "trash" && shown.length ? <EmptyTrash n={shown.length} call={call} done={() => { setOpen(null); load(); }} /> : null}
