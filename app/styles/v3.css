@@ -1616,3 +1616,12 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .v3 #p-project .pj-lead .pj-r{flex:0 0 auto;display:block;translate:none;aspect-ratio:var(--arn);width:auto;height:min(100cqh,calc(100cqw / var(--arn)))}
 .v3 #p-project .pj-lead:has(.pj-r + .pj-r) .pj-r{height:min(100cqh,calc((100cqw - var(--pj)) / 2 / var(--arn)))}
 .v3 #p-project .pj-lead .pj-r img{width:100%;height:100%;max-width:none;max-height:none;object-fit:cover}}
+/* 701 to 900 (iPad, a narrow window): one column, the same margin and gap. The
+   big frame no longer runs edge to edge over inset frames, and a mouse no longer
+   gets the desktop's three-column hero squeezed into half the screen. */
+@media (min-width:701px) and (max-width:900px){
+.v3 #p-project .pj-hero,.v3 #p-project .pj-hero.two{grid-template-columns:minmax(0,1fr);padding:var(--pj) var(--gr) 0 var(--g);row-gap:var(--pj);column-gap:0}
+.v3 #p-project .pj-top{grid-column:1;padding:24px 0 8px}
+.v3 #p-project .pj-big{grid-column:1;width:auto;max-width:none;height:auto;margin:0}
+.v3 #p-project .pj-lead{grid-column:1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--pj);padding:0}
+.v3 #p-project .pj-lead .pj-r:only-child{grid-column:1/-1}}
