@@ -27,9 +27,9 @@ const goo = typeof location === "undefined" || new URLSearchParams(location.sear
  * which already hold your working hours, both connected calendars and
  * the minimum notice.
  *
- * Behind `?picker` on the address while it is tried out
- * (`components/cal-embed.tsx`). Where an event takes a payment the
- * booking form is Cal.com's, so `fallback` (its own calendar) is shown.
+ * Live reads the site's own engine instead (`ownEngine()`, `/api/slots`,
+ * `/api/book`). If the times do not come, `fallback` is shown: Try again,
+ * Inquire and the address (`components/cal-embed.tsx`).
  * ─────────────────────────────────────────────────────────────── */
 
 const noop = () => () => {};
