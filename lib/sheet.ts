@@ -1,12 +1,12 @@
 import type { Frame } from "@/lib/work-types";
 
 /** Where the contact sheet's last row ends short: the sheet packs as CSS
-    `grid-auto-flow: dense` does in three columns (a horizontal takes two
-    cells), so the free cells at the end of its last row are known here. */
+    `grid-auto-flow: dense` does in three columns (a horizontal takes the
+    whole row), so the free cells at the end of its last row are known here. */
 export function tailHole(frames: Frame[]) {
   const rows: boolean[][] = [];
   for (const f of frames) {
-    const n = f.width > f.height ? 2 : 1;
+    const n = f.width > f.height ? 3 : 1;
     for (let r = 0; ; r++) {
       const row = (rows[r] ??= [false, false, false]);
       const c = [0, 1, 2].find((c) => c + n <= 3 && row.slice(c, c + n).every((x) => !x));

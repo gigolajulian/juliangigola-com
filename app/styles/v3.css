@@ -1594,3 +1594,36 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 @media (hover:hover){.v3 .wt:not([data-back]):hover .sides span:first-child{opacity:.5}.v3 .wt:hover .sides span:last-child{opacity:1}}
 @media (prefers-reduced-motion:reduce){.v3 :is(.wt .ph,.sc) .bk{transition:none}}
 .fv .sides{margin-left:auto;margin-right:16px}
+
+/* Project page, layout pass (Julian, 2026-11-05: "margins should be the same").
+   One gap, the page's own 16px margin, between every frame: under the bar, in the
+   hero, between the hero and the sheet, and inside the sheet. */
+.v3 #p-project{--pj:16px}
+.v3 .pj-flow{gap:var(--pj)}
+@media (min-width:701px){.v3 .pj-flow{padding-top:var(--pj)}
+/* A horizontal takes the whole row at its own shape: never a crop, never a hole
+   beside it (an all-horizontal set stacked down two thirds of the page). */
+.v3 .pj-flow .pj-r.w{grid-column:1/-1;aspect-ratio:var(--ar,3/2)}}
+@media (min-width:901px){
+.v3 #p-project .pj-hero{height:calc(100svh - 64px - var(--pj));min-height:604px;padding-top:var(--pj);column-gap:var(--pj)}
+.v3 .pj-big{height:calc(100svh - 64px - var(--pj));min-height:604px}
+.v3 .pj-top{padding-top:40px}
+/* The frames under the title: whole, each the size of its own picture, level
+   with each other and with the foot of the big frame, one gap apart. Sized from
+   the frame's own shape (--arn), not the loaded picture, so the box holds
+   before the photo arrives. */
+.v3 #p-project .pj-lead{display:flex;container-type:size;justify-content:flex-end;align-items:flex-end;gap:var(--pj);padding-right:0}
+.v3 #p-project .pj-lead .pj-r{flex:0 0 auto;display:block;translate:none;aspect-ratio:var(--arn);width:auto;height:min(100cqh,calc(100cqw / var(--arn)))}
+.v3 #p-project .pj-lead:has(.pj-r + .pj-r) .pj-r{height:min(100cqh,calc((100cqw - var(--pj)) / 2 / var(--arn)))}
+.v3 #p-project .pj-lead .pj-r img{width:100%;height:100%;max-width:none;max-height:none;object-fit:cover}}
+/* 701 to 900 (iPad, a narrow window): one column, the same margin and gap. The
+   big frame no longer runs edge to edge over inset frames, and a mouse no longer
+   gets the desktop's three-column hero squeezed into half the screen. */
+@media (min-width:701px) and (max-width:900px){
+.v3 #p-project .pj-hero,.v3 #p-project .pj-hero.two{grid-template-columns:minmax(0,1fr);padding:var(--pj) var(--gr) 0 var(--g);row-gap:var(--pj);column-gap:0}
+.v3 #p-project .pj-top{grid-column:1;padding:24px 0 8px}
+.v3 #p-project .pj-big{grid-column:1;width:auto;max-width:none;height:auto;margin:0}
+.v3 #p-project .pj-lead{grid-column:1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--pj);padding:0}
+.v3 #p-project .pj-lead .pj-r{aspect-ratio:var(--arn);height:auto}
+.v3 #p-project .pj-lead .pj-r img{width:100%;height:100%;object-fit:cover}
+.v3 #p-project .pj-lead .pj-r:only-child{grid-column:1/-1}}

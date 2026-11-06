@@ -123,15 +123,15 @@ export function V3Project({ project, next }: { project: Project; next?: { href: 
           {lead.length ? (
             <div className="pj-lead">
               {lead.map((f) => (
-                <figure key={f.src} className="pj-r">{pic(f, "(max-width: 900px) 100vw, 30vw", true)}</figure>
+                <figure key={f.src} className="pj-r" style={{ "--arn": f.width / f.height } as React.CSSProperties}>{pic(f, "(max-width: 900px) 100vw, 30vw", true)}</figure>
               ))}
             </div>
           ) : null}
         </div>
-        {/* The rest as a contact sheet (Julian, 2026-10-27): even rows of three, a horizontal takes two cells. */}
+        {/* The rest as a contact sheet: even rows of three verticals; a horizontal takes the whole row at its own shape (Julian, 2026-11-05). */}
         <div className="pj-flow">
           {rest.map((f) => (
-            <figure key={f.src} className={wide(f) ? "pj-r w" : "pj-r"}>
+            <figure key={f.src} className={wide(f) ? "pj-r w" : "pj-r"} style={wide(f) ? ({ "--ar": `${f.width} / ${f.height}` } as React.CSSProperties) : undefined}>
               {pic(f, wide(f) ? "(max-width: 700px) 100vw, 66vw" : "(max-width: 700px) 100vw, 33vw")}
             </figure>
           ))}
