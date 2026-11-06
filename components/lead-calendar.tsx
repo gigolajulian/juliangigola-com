@@ -146,7 +146,7 @@ export function LeadCalendar({ onBack }: { onBack?: () => void }) {
           </p>
         </header>
 
-        <div className="grid grid-cols-7" role="grid" aria-busy={!data}>
+        <div className="grid grid-cols-7" role="group" aria-label="Month" aria-busy={!data}>
           {DOW.map((d) => (
             <div key={d} className="border-b border-border px-2 pb-1.5 pt-2 font-mono text-[11px] uppercase tracking-[0.06em] text-muted-foreground">
               <span className="lg:hidden">{d[0]}</span>
@@ -165,7 +165,7 @@ export function LeadCalendar({ onBack }: { onBack?: () => void }) {
                 type="button"
                 onClick={() => setPick(d)}
                 aria-pressed={pick === d}
-                aria-label={d}
+                aria-label={new Date(`${d}T12:00:00Z`).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", timeZone: "UTC" })}
                 className={cn(
                   "relative flex min-h-[52px] flex-col items-center gap-1 overflow-hidden border-b border-r border-border px-1 py-1.5 text-left [&:nth-child(7n)]:border-r-0 lg:min-h-[92px] lg:items-stretch lg:px-[7px]",
                   closed && "bg-[repeating-linear-gradient(135deg,transparent_0_6px,var(--border)_6px_7px)]",
