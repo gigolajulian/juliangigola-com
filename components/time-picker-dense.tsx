@@ -72,7 +72,7 @@ function Row({ label, error, children, last, id }: { label: string; error?: stri
   );
 }
 
-const field = "w-full min-w-0 bg-transparent py-1 text-base @lg:text-sm normal-case text-foreground outline-none placeholder:text-muted-foreground/45";
+const field = "w-full min-w-0 bg-transparent py-1 text-base @lg:text-sm normal-case text-foreground outline-none focus-visible:shadow-[0_1px_0_var(--ring)] placeholder:text-muted-foreground/45";
 
 export function DenseTimePicker({ path, title, className, fallback }: { path: string; title: string; className?: string; fallback: React.ReactNode }) {
   const [username, slug] = path.split("/");
