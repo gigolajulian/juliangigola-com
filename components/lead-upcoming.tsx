@@ -125,7 +125,7 @@ export function LeadUpcoming({ leads, row }: { leads: LeadSummary[]; row: (l: Le
         {shown.map((m) => {
           const lead = (new Date(`${m}-01T12:00:00Z`).getUTCDay() + 6) % 7;
           return (
-            <div key={m} role="grid" aria-label={`${MONTH(m)} ${m.slice(0, 4)}`} className="grid w-full flex-none snap-start grid-cols-7 content-start px-1 lg:px-5">
+            <div key={m} role="group" aria-label={`${MONTH(m)} ${m.slice(0, 4)}`} className="grid w-full flex-none snap-start grid-cols-7 content-start px-1 lg:px-5">
               {Array.from({ length: lead }, (_, i) => <span key={`b${i}`} className="h-[58px] border-t border-border" />)}
               {Array.from({ length: days(m) }, (_, i) => {
                 const d = `${m}-${String(i + 1).padStart(2, "0")}`;
@@ -137,8 +137,8 @@ export function LeadUpcoming({ leads, row }: { leads: LeadSummary[]; row: (l: Le
                     type="button"
                     onClick={() => setPick(d)}
                     aria-pressed={d === pick}
-                    aria-label={`${d}${its.length ? `, ${its.length} on the calendar` : ""}`}
-                    className={cn("flex h-[58px] flex-col items-center gap-1 border-t border-border pt-1.5 text-[18px] font-medium", d < today ? "text-muted-foreground/50" : wk && "text-muted-foreground")}
+                    aria-label={`${new Date(`${d}T12:00:00Z`).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", timeZone: "UTC" })}${its.length ? `, ${its.length} on the calendar` : ""}`}
+                    className={cn("flex h-[58px] flex-col items-center gap-1 border-t border-border pt-1.5 text-[18px] font-medium", (d < today || wk) && "text-muted-foreground")}
                   >
                     <span className={cn("grid size-8 place-items-center rounded-full", d === today && "text-accent", d === pick && "bg-foreground text-background")}>{i + 1}</span>
                     <span className="flex h-[5px] gap-[3px]">
