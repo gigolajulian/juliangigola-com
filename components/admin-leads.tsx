@@ -257,9 +257,11 @@ export function AdminLeads() {
 
       <section aria-label="Leads" className={cn("min-w-0 lg:min-h-0 lg:overflow-y-auto lg:border-r lg:border-border", open && "max-lg:hidden")}>
         <header className="grid gap-3 border-b border-border px-1 pb-3 pt-2 lg:px-5 lg:pt-4">
-          <p className="font-mono text-[11.5px] uppercase tracking-[0.08em] text-muted-foreground lg:hidden">
-            {needs ? `${needs} waiting on you` : "Nothing waiting on you"}
-          </p>
+          {tabOf(filter) !== "more" && (
+            <p className="font-mono text-[11.5px] uppercase tracking-[0.08em] text-muted-foreground lg:hidden">
+              {needs ? `${needs} waiting on you` : "Nothing waiting on you"}
+            </p>
+          )}
           <div className="flex items-baseline justify-between gap-3">
             <h1 style={HEAD} className="text-[40px] leading-none tracking-[-0.03em] lg:text-[28px]">{label(filter)}</h1>
             {tool ? null : (
