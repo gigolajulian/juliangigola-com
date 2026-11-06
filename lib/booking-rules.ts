@@ -92,10 +92,10 @@ export const REFUND_HOURS = 48;
 export const refundable = (r: { intent?: string; start: string; firstStart?: string }, now = Date.now()) =>
   !!r.intent && Math.min(Date.parse(r.start), Date.parse(r.firstStart ?? r.start)) - now >= REFUND_HOURS * 36e5;
 
-/* Julian (2026-11-03): the engine stays Cal.com until he cuts over. `?ownbook`
-   on the address tries the site's own in the browser; the build's
-   NEXT_PUBLIC_BOOKING_ENGINE (.env.production) and the Worker's
-   BOOKING_ENGINE (wrangler.jsonc) flip together at cutover. */
+/* Cut over: live books through the site's own engine (Google Calendar
+   times, `/api/book`). NEXT_PUBLIC_BOOKING_ENGINE (.env.production) and
+   the Worker's BOOKING_ENGINE (wrangler.jsonc) are both "own"; "cal"
+   would put the picker back on Cal.com's API. */
 
 /** The browser's choice: the build's engine, or `?ownbook`. */
 export const ownEngine = () =>

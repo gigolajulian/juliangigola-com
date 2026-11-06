@@ -355,9 +355,9 @@
 .booking-embed {
   animation: jg-fade-in var(--dur-xl) var(--ease-out-strong) both;
 }
-/* Cal.com's calendar in its place (`cal-embed.tsx`, behind `?cal`) takes
-   the site's colours itself, so it is not turned over. */
-:root:not([data-theme="light"]) .booking-embed.cal-embed {
+/* The way round when the times do not load (`cal-embed.tsx`) is drawn in
+   the site's colours too. */
+:root:not([data-theme="light"]) .booking-embed.times-down {
   filter: none;
 }
 /* The site's own time picker (`time-picker.tsx`) is drawn in the site's
