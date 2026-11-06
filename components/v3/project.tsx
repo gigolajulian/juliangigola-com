@@ -57,7 +57,8 @@ export function V3Project({ project, next }: { project: Project; next?: { href: 
   const credits = (
     <section className="sv-row">
       <h2 className="lbl mute">Credits</h2>
-      <ul>
+      {/* Two columns on a large screen, read down then across (Julian, 2026-11-06); not in a one-cell hole. */}
+      <ul className={hole?.span === 1 ? undefined : "cr2"}>
         {project.credits.map((c) => {
           const h = handleOf(c);
           const label = creditLabel(c, h);

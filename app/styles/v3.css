@@ -854,6 +854,7 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 .v3 .sv-row li{flex-direction:column;gap:4px}
 .v3 .sv-row li .mute{text-align:left}
 .v3 .sv-row li a{flex-direction:row}}
+@media (min-width:1200px){.v3 .sv-row .cr2{columns:2;column-gap:48px}.v3 .sv-row .cr2 li{break-inside:avoid}}
 /* Flow photo, overlaid (FlowShell `over`): caption on the photo, the photo to the screen's foot. */
 .v3 .f-photo .fr{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;gap:inherit}
 .v3 .f-foot{display:none}
