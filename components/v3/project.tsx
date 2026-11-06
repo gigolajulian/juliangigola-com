@@ -54,16 +54,18 @@ export function V3Project({ project, next }: { project: Project; next?: { href: 
      (up to six names, one a line); else they keep their own row under it. */
   const tail = tailHole(rest);
   const hole = tail && project.credits.length && project.credits.length <= 6 ? tail : null;
+  const half = Math.floor(project.credits.length / 2);
   const credits = (
     <section className="sv-row">
       <h2 className="lbl mute">Credits</h2>
-      <ul>
-        {project.credits.map((c) => {
+      {/* Two columns on a large screen, read down then across; an odd count puts the extra name on the right (Julian, 2026-11-06). Not in a one-cell hole. */}
+      <ul className={hole?.span === 1 ? undefined : "cr2"}>
+        {project.credits.map((c, i) => {
           const h = handleOf(c);
           const label = creditLabel(c, h);
           const av = c.avatar ?? (h === "juliangigola" ? "/people/juliangigola.jpg" : null);
           return (
-            <li key={`${c.role}${c.name}`}>
+            <li key={`${c.role}${c.name}`} style={{ "--r": i < half ? i + 1 : i - half + 1, "--c": i < half ? 1 : 2 } as React.CSSProperties}>
               <span className="mute">{c.role}</span>
               <b>
                 {h ? (
