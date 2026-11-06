@@ -251,6 +251,8 @@ export function TimePicker({
   const [error, setError] = React.useState("");
   /* JG V3: a field's one sentence (master `check()`). */
   const [bad, setBad] = React.useState<Record<string, string>>({});
+  // Which errored fields were empty when checked: their error shows as the placeholder (v3 `Field`, flow.tsx).
+  const [blank, setBlank] = React.useState<Record<string, boolean>>({});
   /* Julian: Confirm's words turn into the orbs, then a check, before the
      form opens. */
   const [ok, setOk] = React.useState<"" | "spin" | "tick">("");
@@ -1032,9 +1034,9 @@ export function TimePicker({
         const id = `f-${k}`;
         return (
           <div className={bad[k] ? "fld bad" : "fld"}>
-            <label className="lbl mute" htmlFor={id}><span>{label}{req ? <span className="req" aria-hidden="true"> *</span> : null}</span><span>{hint}</span></label>
-            {area ? <textarea id={id} name={k} rows={3} aria-invalid={!!bad[k] || undefined} aria-describedby={bad[k] ? `${id}-err` : undefined} aria-required={req || undefined} /> : <input id={id} name={k} type={type} autoComplete={ac} aria-invalid={!!bad[k] || undefined} aria-describedby={bad[k] ? `${id}-err` : undefined} aria-required={req || undefined} />}
-            {bad[k] ? <p className="err" id={`${id}-err`} role="alert">{bad[k]}</p> : null}
+            <label className="lbl mute" htmlFor={id}><span>{label}{req ? <span className="req" aria-hidden="true"> *</span> : null}</span>{bad[k] && !blank[k] ? <span className="fe" aria-hidden="true">{bad[k]}</span> : <span>{hint}</span>}</label>
+            {area ? <textarea id={id} name={k} rows={3} placeholder={bad[k] && blank[k] ? bad[k] : undefined} aria-invalid={!!bad[k] || undefined} aria-describedby={bad[k] ? `${id}-err` : undefined} aria-required={req || undefined} /> : <input id={id} name={k} type={type} autoComplete={ac} placeholder={bad[k] && blank[k] ? bad[k] : undefined} aria-invalid={!!bad[k] || undefined} aria-describedby={bad[k] ? `${id}-err` : undefined} aria-required={req || undefined} />}
+            {bad[k] ? <p className="sr-only" id={`${id}-err`} role="alert">{bad[k]}</p> : null}
           </div>
         );
       };
@@ -1047,9 +1049,10 @@ export function TimePicker({
             const form = e.currentTarget;
             const data = new FormData(form);
             const no: Record<string, string> = {};
-            if (!String(data.get("name") || "").trim()) no.name = "Add your name so I know who to reply to.";
-            if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(data.get("email") || "").trim())) no.email = "That email looks incomplete. Check it and try again.";
+            if (!String(data.get("name") || "").trim()) no.name = "Add your name";
+            if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(data.get("email") || "").trim())) no.email = "Email looks incomplete";
             setBad(no);
+            setBlank({ name: !String(data.get("name") || "").trim(), email: !String(data.get("email") || "").trim() });
             if (Object.keys(no).length) return form.querySelector<HTMLElement>(`#f-${Object.keys(no)[0]}`)?.focus();
             void book(data);
           }}

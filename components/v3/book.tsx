@@ -263,8 +263,8 @@ function OnRequestFlow({ slug, shell, stamp }: { slug: SessionSlug; shell: Shell
       onSubmit={(e) => {
         e.preventDefault();
         const no: Record<string, string> = {};
-        if (!v.name.trim()) no.name = "Add your name so I know who to reply to.";
-        if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.email.trim())) no.email = "That email looks incomplete. Check it and try again.";
+        if (!v.name.trim()) no.name = "Add your name";
+        if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.email.trim())) no.email = "Email looks incomplete";
         setErr(no);
         if (Object.keys(no).length) return e.currentTarget.querySelector<HTMLElement>(`#f-${Object.keys(no)[0]}`)?.focus();
         send(e.currentTarget);
