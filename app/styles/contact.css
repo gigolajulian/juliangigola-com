@@ -740,6 +740,9 @@
 .tpd-msg {
   color: var(--destructive);
 }
+.tpd-row[data-err] input::placeholder {
+  color: var(--destructive);
+}
 .tpd-row {
   transition: opacity var(--dur-md);
 }

@@ -60,13 +60,14 @@ const arrow = (dir: 1 | -1) => (
 );
 
 /** A row of the details: the label to the left, the field, its error in the row. */
-function Row({ label, error, children, last, id }: { label: string; error?: string; children: React.ReactNode; last?: boolean; id?: string }) {
+function Row({ label, error, children, last, id, inField }: { label: string; error?: string; children: React.ReactNode; last?: boolean; id?: string; inField?: boolean }) {
   return (
     <div data-err={error ? "" : undefined} className={cn("tpd-row grid grid-cols-1 items-center gap-1.5 px-4 py-3 @lg:grid-cols-[7.5rem_minmax(0,1fr)] @lg:gap-4 @lg:px-5 @lg:py-0 @lg:min-h-[3.125rem]", !last && "border-b border-border")}>
       <span className="label text-muted-foreground">{label}</span>
       <div className="flex min-w-0 flex-col gap-1 @lg:flex-row @lg:items-center @lg:gap-4">
         {children}
-        {error ? <span id={id && `tpd-${id}-err`} className="tpd-msg text-[0.6875rem] tracking-[0.04em] @lg:ml-auto @lg:shrink-0">{error}</span> : null}
+        {/* Julian (2026-11-06): an empty field says its error inside, in red; the side note then stays for screen readers only. */}
+        {error ? <span id={id && `tpd-${id}-err`} className={inField ? "sr-only" : "tpd-msg text-[0.6875rem] tracking-[0.04em] @lg:ml-auto @lg:shrink-0"}>{error}</span> : null}
       </div>
     </div>
   );
@@ -93,6 +94,7 @@ export function DenseTimePicker({ path, title, className, fallback }: { path: st
   const [dir, setDir] = React.useState(1);
   const [opt, setOpt] = React.useState("");
   const [errors, setErrors] = React.useState<Record<string, string>>({});
+  const [blank, setBlank] = React.useState<Record<string, boolean>>({});
   const [fail, setFail] = React.useState("");
   const [booked, setBooked] = React.useState({ name: "", email: "", where: "" });
   const formRef = React.useRef<HTMLFormElement>(null);
@@ -211,6 +213,7 @@ export function DenseTimePicker({ path, title, className, fallback }: { path: st
     else if (needsWhere && asked && !val("detail")) bad.where = asked.replace(/\?$/, "") + ", please";
     else if (needsWhere && !opts && !val("where")) bad.where = "The studio, or an address";
     setErrors(bad);
+    setBlank({ email: !val("email"), phone: !val("phone") });
     setFail("");
     const first = Object.keys(bad)[0];
     if (first) {
@@ -529,11 +532,11 @@ export function DenseTimePicker({ path, title, className, fallback }: { path: st
             <input name="last" autoComplete="family-name" placeholder="Last" aria-label="Last name" aria-invalid={!!errors.name} aria-describedby={errors.name ? "tpd-name-err" : undefined} className={cn(field, "border-l border-border pl-4")} />
           </span>
         </Row>
-        <Row label="Email" id="email" error={errors.email}>
-          <span data-f="email" className="contents"><input name="email" type="email" autoComplete="email" aria-label="Email" aria-invalid={!!errors.email} aria-describedby={errors.email ? "tpd-email-err" : undefined} className={field} /></span>
+        <Row label="Email" id="email" error={errors.email} inField={!!errors.email && blank.email}>
+          <span data-f="email" className="contents"><input name="email" type="email" autoComplete="email" aria-label="Email" aria-invalid={!!errors.email} aria-describedby={errors.email ? "tpd-email-err" : undefined} placeholder={errors.email && blank.email ? errors.email : "you@email.com"} className={field} /></span>
         </Row>
-        <Row label="Phone" id="phone" error={errors.phone}>
-          <span data-f="phone" className="contents"><input name="phone" type="tel" inputMode="tel" autoComplete="tel" aria-label="Phone" aria-invalid={!!errors.phone} aria-describedby={errors.phone ? "tpd-phone-err" : undefined} placeholder="For the day itself" className={field} /></span>
+        <Row label="Phone" id="phone" error={errors.phone} inField={!!errors.phone && blank.phone}>
+          <span data-f="phone" className="contents"><input name="phone" type="tel" inputMode="tel" autoComplete="tel" aria-label="Phone" aria-invalid={!!errors.phone} aria-describedby={errors.phone ? "tpd-phone-err" : undefined} placeholder={errors.phone && blank.phone ? errors.phone : "For the day itself"} className={field} /></span>
         </Row>
         {needsWhere && opts && opts.length > 1 ? (
           <Row label="Where" id="where" error={errors.where}>
