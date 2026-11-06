@@ -38,7 +38,7 @@ export function cleanInvoice(v: unknown): Omit<Invoice, "no" | "at"> | { error: 
   if (!Array.isArray(o.lines) || !o.lines.length || o.lines.length > MAX_LINES) return { error: `One to ${MAX_LINES} lines.` };
   const lines: InvoiceLine[] = [];
   for (const raw of o.lines as Record<string, unknown>[]) {
-    const qty = amount(raw?.qty), rate = amount(raw?.rate), desc = text(raw?.desc, 60);
+    const qty = amount(raw?.qty), rate = amount(raw?.rate), desc = text(raw?.desc, 48);
     if (!desc || qty === null || rate === null) return { error: "Every line needs a description, a quantity and a rate." };
     lines.push({ desc, qty, rate });
   }

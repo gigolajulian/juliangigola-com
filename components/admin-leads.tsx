@@ -1449,7 +1449,7 @@ function InvoiceSheet({ l, full, patch, done }: { l: LeadSummary; full: Lead; pa
         <legend className="mb-1.5 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">Lines: description, quantity, rate</legend>
         {lines.map((x, i) => (
           <div key={i} className="grid grid-cols-[minmax(0,1fr)_52px_92px_44px] gap-2">
-            <input aria-label={`Line ${i + 1} description`} required value={x.desc} onChange={set(i, "desc")} className={cn(field, "px-3")} />
+            <input aria-label={`Line ${i + 1} description`} required maxLength={48} value={x.desc} onChange={set(i, "desc")} className={cn(field, "px-3")} />
             <input aria-label={`Line ${i + 1} quantity`} required inputMode="decimal" value={x.qty} onChange={set(i, "qty")} className={cn(field, "px-2 text-right font-mono text-[14px]")} />
             <input aria-label={`Line ${i + 1} rate`} required inputMode="decimal" value={x.rate} onChange={set(i, "rate")} placeholder="0.00" className={cn(field, "px-2 text-right font-mono text-[14px]")} />
             {lines.length > 1 ? (
