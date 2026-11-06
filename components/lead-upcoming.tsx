@@ -71,7 +71,11 @@ export function LeadUpcoming({ leads, row }: { leads: LeadSummary[]; row: (l: Le
     const el = box.current;
     if (!el) return;
     const i = Math.round(el.scrollLeft / el.clientWidth);
-    if (i !== 1 && Math.abs(el.scrollLeft - i * el.clientWidth) < 2) setCur((m) => shift(m, i - 1));
+    if (i === 1 || Math.abs(el.scrollLeft - i * el.clientWidth) >= 2) return;
+    // As on the iPhone: a new month picks its first day, or today in this month.
+    const m = shift(cur, i - 1);
+    setCur(m);
+    setPick(m === today.slice(0, 7) ? today : `${m}-01`);
   };
 
   const byDay = React.useMemo(() => {
