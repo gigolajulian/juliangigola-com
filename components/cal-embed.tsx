@@ -17,8 +17,9 @@ const EMAIL = "hello@juliangigola.com";
 
 function TimesDown({ title, className, retry }: { title: string; className?: string; retry: () => void }) {
   return (
-    <div role="region" aria-label={title} className={`times-down relative ${className ?? ""}`}>
-      <div className="absolute inset-0 flex flex-col items-center justify-center gap-5 p-6 text-center">
+    <div role="region" aria-label={title} className={`times-down flex flex-col ${className ?? ""}`}>
+      {/* In flow, so the v3 stepper (no fixed box) makes room for it. */}
+      <div className="flex flex-1 flex-col items-center justify-center gap-5 p-6 text-center">
         <p className="max-w-[24rem] text-balance text-center text-sm normal-case leading-relaxed text-muted-foreground">
           Times didn&rsquo;t load. Try again, or send me an inquiry and I&rsquo;ll find a time with you.
         </p>
