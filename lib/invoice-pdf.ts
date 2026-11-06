@@ -3,7 +3,9 @@ import { balance, subtotal, type Invoice, type InvoiceFrom } from "./invoice";
 /* ── the invoice as a PDF ─────────────────────────────────────────
  * Ported from Julian's JG INVOICE GENERATOR artifact (geometry measured
  * from his REF INVOICE.pdf): one draw list, written as a one-page vector
- * PDF with Inter embedded. Light paper only. New here: a Deposit paid line
+ * PDF in the site's faces (Julian, 2026-11-06: "update the fonts to match
+ * my website"): IBM Plex Mono for labels and figures, Inter Tight for
+ * names and notes, Inter Tight Black for the wordmark and INVOICE. Light paper only. New here: a Deposit paid line
  * and Balance due when a deposit is taken off, and his wordmark as the
  * site header sets it (Inter Tight Black at -0.045em) in place of the
  * stacked mark (Julian, 2026-11-06: "use my new wordmark instead"). Runs in the browser only,
@@ -71,6 +73,7 @@ function parseTTF(buf: ArrayBuffer): Font {
 }
 
 type Text = { x: number; y: number; size: number; fill: string; text: string; font: Face; anchor: "start" | "end" };
+/** sb: IBM Plex Mono 500, labels and figures. rg: Inter Tight 500, names and notes. wm: Inter Tight Black, the wordmark and the title. */
 type Face = "sb" | "rg" | "wm";
 /** The wordmark's tracking, as `site-header.tsx` sets the name. */
 const TRACK = -0.045;
@@ -78,7 +81,7 @@ const WORDMARK = "Julian Gigola";
 const money = (n: number) => `${n < 0 ? "-" : ""}${Math.abs(n).toFixed(2)} USD`;
 const fmtDate = (iso: string) => { const [y, m, d] = iso.split("-").map(Number); return `${m}/${d}/${y}`; };
 
-function wrap(text: string, maxW: number, SB: Font) {
+function wrap(text: string, maxW: number, font: Font) {
   const out: string[] = [];
   for (const para of text.split("\n")) {
     const words = para.split(/\s+/).filter(Boolean);
@@ -86,7 +89,7 @@ function wrap(text: string, maxW: number, SB: Font) {
     let line = words[0];
     for (let i = 1; i < words.length; i++) {
       const test = `${line} ${words[i]}`;
-      if (SB.width(test, 8) > maxW) { out.push(line); line = words[i]; } else line = test;
+      if (font.width(test, 8) > maxW) { out.push(line); line = words[i]; } else line = test;
     }
     out.push(line);
   }
@@ -104,7 +107,7 @@ function layout({ from: s, to, inv }: InvoiceDoc, SB: Font, RG: Font) {
 
   rects.push({ x: 0, y: 0, w: PW, h: PH, fill: P.PAGE }, { x: 0, y: 0, w: PW, h: BAND_H, fill: P.BAND });
 
-  t(445.0, 195.31, 22, P.DARK, "INVOICE");
+  t(RIGHT, 195.31, 22, P.DARK, "INVOICE", "wm", "end");
   t(58.44, 196.75, 8, P.DARK, "RECIPIENT");
   t(58.44, 224.58, 11, P.GREY, to.name, "rg");
   if (to.phone) { t(58.0, 299.85, 8, P.BLUE, "m"); t(72.2, 299.85, 8, P.GREY, to.phone); }
@@ -114,15 +117,15 @@ function layout({ from: s, to, inv }: InvoiceDoc, SB: Font, RG: Font) {
   t(480.0, 261.75, 8, P.DARK, "INVOICE DATE");
   t(RIGHT, 274.75, 8, P.GREY, fmtDate(inv.date), "sb", "end");
 
-  const emL = RIGHT - W(s.email, 8, "rg");
+  const emL = RIGHT - W(s.email, 8, "sb");
   t(emL - 8.01 - W("@", 8, "sb"), 134.75, 8, P.BLUE, "@");
-  t(emL, 135.75, 8, P.GREY, s.email, "rg");
+  t(emL, 135.75, 8, P.GREY, s.email);
   const phL = RIGHT - W(s.phone, 8, "sb");
   t(phL - 9.82 - W("m", 8, "sb"), 149.75, 8, P.BLUE, "m");
   t(phL, 149.75, 8, P.GREY, s.phone);
-  t(RIGHT, 70.41, 8, P.GREY, s.name, "sb", "end");
-  t(RIGHT, 83.41, 8, P.GREY, `${s.a1} ${s.a2}`.trim(), "sb", "end");
-  t(RIGHT, 96.41, 8, P.GREY, s.a3, "sb", "end");
+  t(RIGHT, 70.41, 8, P.GREY, s.name, "rg", "end");
+  t(RIGHT, 83.41, 8, P.GREY, `${s.a1} ${s.a2}`.trim(), "rg", "end");
+  t(RIGHT, 96.41, 8, P.GREY, s.a3, "rg", "end");
 
   t(58.03, 375.85, 8, P.SLATE, "TASK DESCRIPTION");
   t(300.0, 375.75, 8, P.SLATE, "ITEM");
@@ -130,7 +133,7 @@ function layout({ from: s, to, inv }: InvoiceDoc, SB: Font, RG: Font) {
   t(RIGHT, 375.75, 8, P.SLATE, "AMOUNT", "sb", "end");
   inv.lines.forEach((it, i) => {
     const y = ROW0 + i * PITCH;
-    t(58.0, y, 8, P.DARK, it.desc.toUpperCase());
+    t(58.0, y, 8, P.DARK, it.desc, "rg");
     t(307.0, y + 0.1, 8, P.DARK, String(it.qty));
     t(427.7, y + 1.1, 8, P.DARK, money(it.rate), "sb", "end");
     t(RIGHT, y, 8, P.DARK, money(it.qty * it.rate), "sb", "end");
@@ -153,16 +156,16 @@ function layout({ from: s, to, inv }: InvoiceDoc, SB: Font, RG: Font) {
 
   t(58.0, 695.65, 8, P.DARK, "NOTES");
   let ny = 721.31;
-  for (const ln of wrap(inv.notes ?? s.notes, 478, SB)) { t(58.0, ny, 8, P.GREY, ln); ny += 13; }
+  for (const ln of wrap(inv.notes ?? s.notes, 478, RG)) { t(58.0, ny, 8, P.GREY, ln, "rg"); ny += 13; }
   ny = 760.31;
   // The name as typed; only an all-caps one (as the header block wants it) is set in title case.
   const signed = s.name === s.name.toUpperCase() ? s.name.replace(/\b(\w)(\w*)/g, (_, a: string, b: string) => a + b.toLowerCase()) : s.name;
-  for (const ln of [s.signoff, signed]) { t(58.0, ny, 8, P.GREY, ln); ny += 13; }
+  for (const ln of [s.signoff, signed]) { t(58.0, ny, 8, P.GREY, ln, "rg"); ny += 13; }
 
   lines.push({ x1: 58.5, y: 782.78, x2: 535.5, c: P.RULE });
-  t(58.0, 806.46, 6, P.GREY, s.a1);
-  t(58.0, 816.46, 6, P.GREY, s.a2);
-  t(58.0, 826.46, 6, P.GREY, s.a3);
+  t(58.0, 806.46, 6, P.GREY, s.a1, "rg");
+  t(58.0, 816.46, 6, P.GREY, s.a2, "rg");
+  t(58.0, 826.46, 6, P.GREY, s.a3, "rg");
   t(220.0, 805.92, 6, P.BLUE, "@");
   t(234.0, 805.92, 6, P.GREY, s.email);
   t(220.0, 816.92, 6, P.BLUE, "m");
@@ -192,7 +195,7 @@ const BASE = "/leads-app/invoice";
 
 async function loadAssets(): Promise<Assets> {
   const bytes = (p: string) => fetch(`${BASE}/${p}`).then((r) => { if (!r.ok) throw new Error(`Could not load ${p}.`); return r.arrayBuffer(); });
-  const [sb, rg, wm] = await Promise.all([bytes("inter-semibold.ttf"), bytes("inter-regular.ttf"), bytes("intertight-900.ttf")]);
+  const [sb, rg, wm] = await Promise.all([bytes("plexmono-500.ttf"), bytes("intertight-500.ttf"), bytes("intertight-900.ttf")]);
   return { sb: new Uint8Array(sb), rg: new Uint8Array(rg), wm: new Uint8Array(wm), SB: parseTTF(sb), RG: parseTTF(rg), WM: parseTTF(wm) };
 }
 
@@ -227,11 +230,11 @@ export async function invoicePdf(d: InvoiceDoc): Promise<File> {
   put("<< /Type /Pages /Count 1 /Kids [3 0 R] >>");
   put(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PW} ${PH}] /Resources << /Font << /F1 5 0 R /F2 8 0 R /F3 11 0 R >> >> /Contents 4 0 R >>`);
   put(stream(`<< /Length ${content.length} /Filter /FlateDecode >>`, content));
-  put(`<< /Type /Font /Subtype /TrueType /BaseFont /Inter-SemiBold /FirstChar 32 /LastChar 255 /Widths [${widths(SB).join(" ")}] /Encoding /WinAnsiEncoding /FontDescriptor 6 0 R >>`);
-  put(desc(SB, "Inter-SemiBold", 80, 7));
+  put(`<< /Type /Font /Subtype /TrueType /BaseFont /IBMPlexMono-Medium /FirstChar 32 /LastChar 255 /Widths [${widths(SB).join(" ")}] /Encoding /WinAnsiEncoding /FontDescriptor 6 0 R >>`);
+  put(desc(SB, "IBMPlexMono-Medium", 80, 7));
   put(stream(`<< /Length ${sbZ.length} /Length1 ${sb.length} /Filter /FlateDecode >>`, sbZ));
-  put(`<< /Type /Font /Subtype /TrueType /BaseFont /Inter-Regular /FirstChar 32 /LastChar 255 /Widths [${widths(RG).join(" ")}] /Encoding /WinAnsiEncoding /FontDescriptor 9 0 R >>`);
-  put(desc(RG, "Inter-Regular", 60, 10));
+  put(`<< /Type /Font /Subtype /TrueType /BaseFont /InterTight-Medium /FirstChar 32 /LastChar 255 /Widths [${widths(RG).join(" ")}] /Encoding /WinAnsiEncoding /FontDescriptor 9 0 R >>`);
+  put(desc(RG, "InterTight-Medium", 80, 10));
   put(stream(`<< /Length ${rgZ.length} /Length1 ${rg.length} /Filter /FlateDecode >>`, rgZ));
   put(`<< /Type /Font /Subtype /TrueType /BaseFont /InterTight-Black /FirstChar 32 /LastChar 255 /Widths [${widths(WM).join(" ")}] /Encoding /WinAnsiEncoding /FontDescriptor 12 0 R >>`);
   put(desc(WM, "InterTight-Black", 160, 13));
