@@ -25,6 +25,7 @@ const shift = (m: string, n: number) => {
   d.setUTCMonth(d.getUTCMonth() + n);
   return d.toISOString().slice(0, 7);
 };
+const spoken = (d: string) => new Date(`${d}T12:00:00Z`).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", timeZone: "UTC" });
 const days = (m: string) => new Date(Date.UTC(+m.slice(0, 4), +m.slice(5, 7), 0)).getUTCDate();
 const lastDay = (m: string) => `${m}-${String(days(m)).padStart(2, "0")}`;
 
@@ -72,8 +73,11 @@ export function LeadUpcoming({ leads, row }: { leads: LeadSummary[]; row: (l: Le
     if (!el) return;
     const i = Math.round(el.scrollLeft / el.clientWidth);
     if (i === 1 || Math.abs(el.scrollLeft - i * el.clientWidth) >= 2) return;
-    // As on the iPhone: a new month picks its first day, or today in this month.
-    const m = shift(cur, i - 1);
+    go(i - 1);
+  };
+  // As on the iPhone: a new month picks its first day, or today in this month.
+  const go = (n: number) => {
+    const m = shift(cur, n);
     setCur(m);
     setPick(m === today.slice(0, 7) ? today : `${m}-01`);
   };
@@ -110,13 +114,22 @@ export function LeadUpcoming({ leads, row }: { leads: LeadSummary[]; row: (l: Le
         <p className="text-[22px] font-semibold tracking-[-0.02em]">
           {MONTH(cur)} <span className="font-mono text-[12px] font-normal text-muted-foreground">{cur.slice(0, 4)}</span>
         </p>
-        <button
-          type="button"
-          onClick={() => { setPick(today); setCur(today.slice(0, 7)); }}
-          className="min-h-11 rounded-full border border-border px-3.5 font-mono text-[11.5px] uppercase tracking-[0.08em] text-muted-foreground"
-        >
-          Today
-        </button>
+        {/* A mouse wheel cannot swipe the months, so the desk gets buttons too. */}
+        <div className="flex items-center gap-1.5">
+          <button type="button" onClick={() => go(-1)} aria-label="Previous month" className="grid size-11 place-items-center rounded-full border border-border font-mono text-[13px] text-muted-foreground">
+            ←
+          </button>
+          <button
+            type="button"
+            onClick={() => { setPick(today); setCur(today.slice(0, 7)); }}
+            className="min-h-11 rounded-full border border-border px-3.5 font-mono text-[11.5px] uppercase tracking-[0.08em] text-muted-foreground"
+          >
+            Today
+          </button>
+          <button type="button" onClick={() => go(1)} aria-label="Next month" className="grid size-11 place-items-center rounded-full border border-border font-mono text-[13px] text-muted-foreground">
+            →
+          </button>
+        </div>
       </div>
       <div className="grid grid-cols-7 border-b border-border px-1 pb-1.5 pt-2 text-center font-mono text-[10.5px] tracking-[0.08em] text-muted-foreground lg:px-5" aria-hidden="true">
         {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => <span key={i}>{d}</span>)}
@@ -125,7 +138,8 @@ export function LeadUpcoming({ leads, row }: { leads: LeadSummary[]; row: (l: Le
         {shown.map((m) => {
           const lead = (new Date(`${m}-01T12:00:00Z`).getUTCDay() + 6) % 7;
           return (
-            <div key={m} role="grid" aria-label={`${MONTH(m)} ${m.slice(0, 4)}`} className="grid w-full flex-none snap-start grid-cols-7 content-start px-1 lg:px-5">
+            // The side months are only there for the swipe: inert keeps Tab and screen readers on this month.
+            <div key={m} role="group" aria-label={`${MONTH(m)} ${m.slice(0, 4)}`} inert={m !== cur} className="grid w-full flex-none snap-start grid-cols-7 content-start px-1 lg:px-5">
               {Array.from({ length: lead }, (_, i) => <span key={`b${i}`} className="h-[58px] border-t border-border" />)}
               {Array.from({ length: days(m) }, (_, i) => {
                 const d = `${m}-${String(i + 1).padStart(2, "0")}`;
@@ -137,8 +151,9 @@ export function LeadUpcoming({ leads, row }: { leads: LeadSummary[]; row: (l: Le
                     type="button"
                     onClick={() => setPick(d)}
                     aria-pressed={d === pick}
-                    aria-label={`${d}${its.length ? `, ${its.length} on the calendar` : ""}`}
-                    className={cn("flex h-[58px] flex-col items-center gap-1 border-t border-border pt-1.5 text-[18px] font-medium", d < today ? "text-muted-foreground/50" : wk && "text-muted-foreground")}
+                    aria-label={`${spoken(d)}${its.length ? `, ${its.length} on the calendar` : ""}`}
+                    // Past days: full muted color (4.5:1), told apart by a lighter weight instead of opacity.
+                    className={cn("flex h-[58px] flex-col items-center gap-1 border-t border-border pt-1.5 text-[18px]", d < today ? "font-normal text-muted-foreground" : cn("font-medium", wk && "text-muted-foreground"))}
                   >
                     <span className={cn("grid size-8 place-items-center rounded-full", d === today && "text-accent", d === pick && "bg-foreground text-background")}>{i + 1}</span>
                     <span className="flex h-[5px] gap-[3px]">
