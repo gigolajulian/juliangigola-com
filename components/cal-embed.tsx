@@ -15,15 +15,17 @@ import { isPaid } from "@/lib/paid";
 
 const EMAIL = "hello@juliangigola.com";
 
-function TimesDown({ title, className, retry }: { title: string; className?: string; retry: () => void }) {
+function TimesDown({ title, className, retry, again }: { title: string; className?: string; retry: () => void; again: boolean }) {
   return (
     <div role="region" aria-label={title} className={`times-down flex flex-col ${className ?? ""}`}>
       {/* In flow, so the v3 stepper (no fixed box) makes room for it. */}
       <div className="flex flex-1 flex-col items-center justify-center gap-5 p-6 text-center">
-        <p className="max-w-[24rem] text-balance text-center text-sm normal-case leading-relaxed text-muted-foreground">
+        {/* role=alert: a screen reader hears that the times failed, not silence. */}
+        <p role="alert" className="max-w-[24rem] text-balance text-center text-sm normal-case leading-relaxed text-muted-foreground">
           Times didn&rsquo;t load. Try again, or send me an inquiry and I&rsquo;ll find a time with you.
         </p>
-        <button type="button" onClick={retry} className="label inline-block action px-6 py-4 press active:scale-[0.97]">
+        {/* After a Try again that failed too, focus comes back here, not to the page top. */}
+        <button type="button" onClick={retry} autoFocus={again} className="label inline-block action px-6 py-4 press active:scale-[0.97]">
           Try again
         </button>
         <Link
@@ -55,7 +57,7 @@ export function CalEmbed({ path, title, className, v3 }: { path: string; title: 
   const paid = isPaid(path.split("/")[1]);
   const wrap = (body: React.ReactNode) => (v3 ? v3.shell({ steps: [], at: 1, head: paid ? "Book a session" : v3.name === "Consultation" ? "Book a consultation" : "Book a call", body, sum: [] }) : body);
   if (dense === null) return wrap(<div aria-label={title} className={className} />);
-  const down = <TimesDown title={title} className={className} retry={() => setTries((n) => n + 1)} />;
+  const down = <TimesDown title={title} className={className} retry={() => setTries((n) => n + 1)} again={tries > 0} />;
   // `?dense` has no deposit step: a paid session keeps the main picker.
   return dense && !paid ? (
     wrap(<DenseTimePicker key={tries} path={path} title={title} className={className} fallback={down} />)
