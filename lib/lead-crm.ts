@@ -86,10 +86,12 @@ export function merge(into: Lead, from: Lead, at: string): Lead {
     when: [into.when, from.when].filter(Boolean).sort().pop(),
     flags: [...new Set([...(into.flags ?? []), ...(from.flags ?? [])])],
     notes: notes.slice(0, 5000),
+    invoices: [...(from.invoices ?? []), ...(into.invoices ?? [])].sort((a, b) => a.at.localeCompare(b.at)),
     events: [...events, { at, kind: "merge" as const, note: from.name }].slice(-50),
   };
   if (!out.flags?.length) delete out.flags;
   if (!out.when) delete out.when;
+  if (!out.invoices?.length) delete out.invoices;
   return out;
 }
 

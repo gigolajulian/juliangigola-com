@@ -1,5 +1,6 @@
 import { sealer, type Sealer } from "./lead-crypto";
 import { notify, pushFor } from "./lead-push";
+import type { Invoice } from "./invoice";
 
 /* ── leads: one record per person ─────────────────────────────────
  * Julian (2026-11-03, PLAN-lead-desk.md): every inquiry, call and booking
@@ -32,7 +33,7 @@ export type LeadEvent = {
   at: string;
   kind: "inquiry" | "call" | "booking" | "no-deposit" | "deposit-stuck" | "stage" | "snooze" | "mail" | "replied" | "wrote" | "archive" | "trash"
     // Julian's own hand (`lib/lead-crm.ts`): added, details changed, merged, a reminder, a quote.
-    | "added" | "edit" | "merge" | "remind" | "quote";
+    | "added" | "edit" | "merge" | "remind" | "quote" | "invoice";
   /* "replied" / "wrote": mail between hello@ and them in Gmail, ref = the Gmail message id (`lib/gmail-sync.ts`). */
   /** The raw row (`msg:` key), Cal.com uid or Stripe intent, so a retry folds in once. */
   ref?: string;
@@ -87,11 +88,13 @@ export type Lead = {
   /** Quoted price in dollars. */
   quote?: number;
   lostReason?: string;
+  /** Invoices made from this lead (`lib/invoice.ts`), oldest first. */
+  invoices?: Invoice[];
   events: LeadEvent[];
 };
 
 /** What the list shows, sealed into KV metadata (under its 1024-byte cap). `id` is added when listed. */
-export type LeadSummary = Omit<Lead, "events" | "notion" | "deposit" | "notes" | "remind" | "phone" | "ig" | "company" | "lostReason" | "source"> & {
+export type LeadSummary = Omit<Lead, "events" | "notion" | "deposit" | "notes" | "remind" | "phone" | "ig" | "company" | "lostReason" | "source" | "invoices"> & {
   paid?: true;
   id?: string;
   /** When his reminder is due, and its words, cut short. */
@@ -226,7 +229,7 @@ export function isLate(l: Pick<Lead, "stage" | "stageAt" | "snoozeUntil">, now: 
 // Name and email capped: KV metadata holds 1024 bytes, and the sealed summary
 // grows by a third, so one long Cal.com name must not cost the whole lead.
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const leadSummary = ({ events, notion, deposit, notes, remind, phone, ig, company, lostReason, source, ...rest }: Lead): LeadSummary => ({
+export const leadSummary = ({ events, notion, deposit, notes, remind, phone, ig, company, lostReason, source, invoices, ...rest }: Lead): LeadSummary => ({
   ...rest,
   ...(remind ? { due: remind.at, dueText: remind.text.slice(0, 40) } : {}),
   name: rest.name?.slice(0, 80),

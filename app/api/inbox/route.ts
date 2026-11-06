@@ -7,9 +7,15 @@ import { notify, subscribe, unsubscribe } from "@/lib/lead-push";
 import { publicKey } from "@/lib/web-push";
 import { notionStage } from "@/lib/notion-lead";
 import { cleanTemplates, csv, manualLead, merge, stats, type NewLead } from "@/lib/lead-crm";
+import { balance, cleanFrom, cleanInvoice, invoiceNo, mmyy, usd, type InvoiceFrom } from "@/lib/invoice";
 
 /** Where his reply templates live: not personal data, so plain JSON. */
 const TEMPLATES_KEY = "leads:templates";
+/** His name, address and EIN for invoices, sealed: the repo is public, so they live here and nowhere in the code. */
+const FROM_KEY = "leads:invoice-from";
+/** How many invoices carry a month's number (`invoices:1126`), so the next is 1126-2. */
+const countKey = (date: string) => `invoices:${mmyy(date)}`;
+const taken = async (inbox: NonNullable<CloudflareEnv["INBOX"]>, date: string) => Number((await inbox.get(countKey(date))) ?? 0) || 0;
 
 /** Every lead, opened in full: for the numbers and the export, never the list. */
 async function everyLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: NonNullable<Awaited<ReturnType<typeof sealer>>>) {
@@ -173,6 +179,15 @@ export async function GET(request: Request) {
     const saved = await gate.inbox.get(TEMPLATES_KEY);
     return json({ templates: cleanTemplates(saved ? JSON.parse(saved) : undefined) });
   }
+  // His details for invoices, and the number the next one on a date would get.
+  if (url.searchParams.has("invoiceFrom") || url.searchParams.has("invoiceNo")) {
+    const seal = await gate.seal;
+    if (!seal) return json({ error: "Leads need LEADS_KEY on the Worker." }, 503);
+    const raw = await gate.inbox.get(FROM_KEY);
+    const from = raw ? cleanFrom(await seal.open<InvoiceFrom>(raw)) : null;
+    const date = url.searchParams.get("invoiceNo") ?? "";
+    return json({ from, ...(/^\d{4}-\d{2}-\d{2}$/.test(date) ? { no: invoiceNo(date, await taken(gate.inbox, date)) } : {}) });
+  }
   // The numbers, and every lead as CSV (`lib/lead-crm.ts`).
   if (url.searchParams.has("stats") || url.searchParams.has("csv")) {
     const seal = await gate.seal;
@@ -264,6 +279,13 @@ export async function PATCH(request: Request) {
     if (devices && ctx?.waitUntil) ctx.waitUntil(new Promise((r) => setTimeout(r, 10_000)).then(send));
     else if (devices) await send();
     return json({ devices });
+  }
+  if (given.invoiceFrom !== undefined) {
+    const seal = await gate.seal;
+    if (!seal) return json({ error: "Leads need LEADS_KEY on the Worker." }, 503);
+    const from = cleanFrom(given.invoiceFrom);
+    await gate.inbox.put(FROM_KEY, await seal.seal(from));
+    return json({ from });
   }
   if (typeof given.key === "string" && given.key.startsWith("lead:")) return patchLead(gate.inbox, await gate.seal, given, gate.notion);
   // His reply templates, saved whole.
@@ -398,14 +420,17 @@ export async function POST(request: Request) {
 async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: Awaited<ReturnType<typeof sealer>>, given: Record<string, unknown>, notion?: string) {
   if (!seal) return json({ error: "Leads need LEADS_KEY on the Worker." }, 503);
   const { key, stage, snoozeUntil, seen, archive, trash } = given as { key: string; stage?: string; snoozeUntil?: string; seen?: boolean; archive?: boolean; trash?: boolean };
-  const { notes, remind, details, quote, lostReason, mergeFrom } = given as {
+  const { notes, remind, details, quote, lostReason, mergeFrom, invoice } = given as {
     notes?: string;
     remind?: { at?: string; text?: string } | null;
     details?: { name?: string; phone?: string; ig?: string; company?: string; source?: string; kind?: string };
     quote?: number | null;
     lostReason?: string;
     mergeFrom?: string;
+    invoice?: unknown;
   };
+  const bill = invoice === undefined ? undefined : cleanInvoice(invoice);
+  if (bill && "error" in bill) return json({ error: bill.error }, 400);
   if (remind && (typeof remind.at !== "string" || isNaN(Date.parse(remind.at)))) return json({ error: "Bad time." }, 400);
   if (quote !== undefined && quote !== null && !(typeof quote === "number" && quote >= 0 && quote < 1e7)) return json({ error: "Bad amount." }, 400);
   if (stage !== undefined && !(STAGES as readonly string[]).includes(stage)) return json({ error: "Unknown stage." }, 400);
@@ -451,6 +476,14 @@ async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: Await
     if (!other) return json({ error: "Gone." }, 404);
     lead = merge(lead, other, at);
     await bury(inbox, mergeFrom);
+  }
+  // A new invoice takes the month's next number: 1126, then 1126-2.
+  // shortcut: read then write the count is not atomic; one person makes these by hand, a Durable Object if that changes.
+  if (bill) {
+    const n = await taken(inbox, bill.date);
+    const made = { ...bill, no: invoiceNo(bill.date, n), at };
+    lead = { ...lead, invoices: [...(lead.invoices ?? []), made], events: [...lead.events, { at, kind: "invoice" as const, note: `${made.no}, ${usd(balance(made))} due` }].slice(-50) };
+    await inbox.put(countKey(bill.date), String(n + 1));
   }
   for (const k of Object.keys(lead) as (keyof Lead)[]) if (lead[k] === undefined) delete lead[k];
   await writeLead(inbox, seal, id, lead);

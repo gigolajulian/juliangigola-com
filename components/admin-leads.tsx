@@ -8,6 +8,7 @@ import type { Enquiry } from "@/lib/inbox";
 import { isLate, STAGES, trashDaysLeft, type Lead, type LeadEvent, type LeadSummary, type Stage } from "@/lib/leads";
 import { cn } from "@/lib/utils";
 import { fill, mailable } from "@/lib/lead-crm";
+import { balance, DEPOSIT, MAX_LINES, usd, type Invoice, type InvoiceFrom } from "@/lib/invoice";
 
 /* ── the lead desk ────────────────────────────────────────────────
  * Julian (2026-11-03, PLAN-lead-desk.md, mock v3): every inquiry, call
@@ -833,7 +834,6 @@ function Detail({ summary, call, onChange, onBack, reload, templates, others }: 
         <button type="button" className={btn} onClick={() => patch({ seen: false }).then(onBack)}>Mark unread</button>
         <span className="flex-1" />
         {lead?.notion ? <a href={`https://www.notion.so/${lead.notion.replace(/-/g, "")}`} target="_blank" rel="noreferrer" className={btn}>Notion</a> : null}
-        {lead?.deposit ? <a href={lead.deposit} target="_blank" rel="noreferrer" className={cn(btn, "text-destructive")}>Deposit in Stripe</a> : null}
       </div>
 
       {asked && l.stage === "Inquiry" ? (
@@ -903,8 +903,6 @@ function Detail({ summary, call, onChange, onBack, reload, templates, others }: 
         {message?.context?.referrer || message?.context?.landing ? (
           <><dt className="font-mono text-[13px] leading-6 text-muted-foreground">Came from</dt><dd className="break-words">{[message.context.referrer, message.context.landing].filter(Boolean).join(", ")}</dd></>
         ) : null}
-        <dt className="font-mono text-[13px] leading-6 text-muted-foreground">Deposit</dt>
-        <dd className={lead?.deposit ? "" : "text-muted-foreground"}>{lead?.deposit ? "$100 paid" : "None"}</dd>
       </dl>
 
       {lead ? (
@@ -944,6 +942,7 @@ function line(e: LeadEvent): string {
     case "merge": return `Merged with another record${e.note ? ` (${e.note})` : ""}`;
     case "remind": return e.note ? `Reminder set for ${at(e.note)}` : "Reminder cleared";
     case "quote": return e.note ? `Quote: $${Number(e.note).toLocaleString("en-US")}` : "Quote cleared";
+    case "invoice": return `Invoice ${e.note ?? ""}`;
   }
 }
 
@@ -1223,35 +1222,7 @@ function LeadCrm({ l, full, patch, others, templates }: { l: LeadSummary; full: 
         )}
       </section>
 
-      <section className="grid gap-2.5">
-        <h3 aria-level={2} className={h3}>Quote</h3>
-        <div className="flex flex-wrap items-end gap-2.5">
-          <label className={fieldLabel}>
-            Amount in dollars
-            <input
-              inputMode="decimal"
-              value={quote ?? (full?.quote !== undefined ? String(full.quote) : "")}
-              onChange={(e) => setQuote(e.target.value.replace(/[^\d.]/g, ""))}
-              onBlur={() => {
-                if (quote === null) return;
-                const n = quote === "" ? null : Number(quote);
-                if (n === null || Number.isFinite(n)) run(patch({ quote: n }), "Quote saved.");
-              }}
-              placeholder="0"
-              className={cn(field, "w-40 font-mono")}
-            />
-          </label>
-          {l.stage === "Lost" ? (
-            <label className={fieldLabel}>
-              Why it was lost
-              <select value={full?.lostReason ?? ""} onChange={(e) => run(patch({ lostReason: e.target.value }), "Saved.")} className={cn(field, "w-auto")}>
-                <option value="">Pick one</option>
-                {LOST_REASONS.map((r) => <option key={r}>{r}</option>)}
-              </select>
-            </label>
-          ) : null}
-        </div>
-      </section>
+      <Money l={l} full={full} patch={patch} run={run} quote={quote} setQuote={setQuote} />
 
       <section className="grid gap-2.5">
         <h3 aria-level={2} className={h3}>Notes</h3>
@@ -1289,5 +1260,249 @@ function LeadCrm({ l, full, patch, others, templates }: { l: LeadSummary; full: 
 
       {note ? <p role="status" className="font-mono text-[13px] text-muted-foreground">{note}</p> : null}
     </div>
+  );
+}
+
+/* ── money on a lead: the quote, the deposit, the balance, its invoices ──
+ * Julian (2026-11-06, Leads plan B1 and A1). One block in place of a bare
+ * quote field, a deposit row and a red Stripe button. */
+
+const ledger = "grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 gap-y-1.5 text-[15px] tabular-nums";
+const dt = "font-mono text-[13px] leading-6 text-muted-foreground";
+const dd = "text-right font-mono text-[14px] leading-6";
+
+function Money({ l, full, patch, run, quote, setQuote }: { l: LeadSummary; full: Lead | null; patch: (b: Record<string, unknown>) => Promise<void>; run: (p: Promise<void>, ok?: string) => void; quote: string | null; setQuote: (v: string | null) => void }) {
+  const [making, setMaking] = React.useState(false);
+  const paidAt = full?.deposit ? full.events.find((e) => e.kind === "booking")?.at : undefined;
+  const q = full?.quote;
+  const owed = q !== undefined ? q - (full?.deposit ? DEPOSIT : 0) : undefined;
+  return (
+    <section className="grid gap-3">
+      <h3 aria-level={2} className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">Money</h3>
+      <div className="flex flex-wrap items-end gap-2.5">
+        <label className={fieldLabel}>
+          Quote in dollars
+          <input
+            inputMode="decimal"
+            value={quote ?? (q !== undefined ? String(q) : "")}
+            onChange={(e) => setQuote(e.target.value.replace(/[^\d.]/g, ""))}
+            onBlur={() => {
+              if (quote === null) return;
+              const n = quote === "" ? null : Number(quote);
+              if (n === null || Number.isFinite(n)) run(patch({ quote: n }), "Quote saved.");
+            }}
+            placeholder="0"
+            className={cn(field, "w-40 font-mono")}
+          />
+        </label>
+        {l.stage === "Lost" ? (
+          <label className={fieldLabel}>
+            Why it was lost
+            <select value={full?.lostReason ?? ""} onChange={(e) => run(patch({ lostReason: e.target.value }), "Saved.")} className={cn(field, "w-auto")}>
+              <option value="">Pick one</option>
+              {LOST_REASONS.map((r) => <option key={r}>{r}</option>)}
+            </select>
+          </label>
+        ) : null}
+      </div>
+      <dl className={ledger}>
+        <dt className={dt}>{paidAt ? `Deposit, ${day(paidAt)}` : "Deposit"}</dt>
+        <dd className={dd}>
+          {full?.deposit ? <a href={full.deposit} target="_blank" rel="noreferrer" className="text-accent" aria-label={`${usd(DEPOSIT)} paid, open in Stripe`}>{usd(DEPOSIT)} paid</a> : <span className="text-muted-foreground">None</span>}
+        </dd>
+        {owed !== undefined ? (<><dt className={dt}>Balance</dt><dd className={cn(dd, "font-medium text-accent")}>{usd(owed)}</dd></>) : null}
+      </dl>
+      {full?.invoices?.length ? (
+        <ul className="grid">
+          {[...full.invoices].reverse().map((inv) => <InvoiceRow key={inv.no} inv={inv} l={l} full={full} />)}
+        </ul>
+      ) : null}
+      {making && full ? (
+        <InvoiceSheet l={l} full={full} patch={patch} done={() => setMaking(false)} />
+      ) : (
+        <button type="button" onClick={() => setMaking(true)} disabled={!full} className={cn(btn, primary, "justify-self-start")}>Make invoice</button>
+      )}
+    </section>
+  );
+}
+
+/** Pacific today, as the date input wants it. */
+const todayPT = () => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Los_Angeles" }).format(new Date());
+const authed = () => credentials(window.localStorage.getItem(KEY_STORE) ?? "");
+
+/** The PDF of one invoice. Loaded on the tap, fonts and all. */
+async function makePdf(inv: Invoice, l: LeadSummary, full: Lead) {
+  const res = await fetch("/api/inbox?invoiceFrom", { headers: authed(), cache: "no-store" });
+  const { from } = (await res.json()) as { from: InvoiceFrom | null };
+  if (!from?.name) throw new Error("Add your details for invoices first.");
+  const { invoicePdf } = await import("@/lib/invoice-pdf");
+  return invoicePdf({ from, inv, to: { name: l.name, email: mailable(l.email) ? l.email : undefined, phone: full.phone } });
+}
+
+/** What he can do with the PDF. Nothing here sends. */
+function Deliver({ file, inv, l }: { file: File; inv: Invoice; l: LeadSummary }) {
+  const url = React.useMemo(() => URL.createObjectURL(file), [file]);
+  React.useEffect(() => () => URL.revokeObjectURL(url), [url]);
+  const canShare = typeof navigator.canShare === "function" && navigator.canShare({ files: [file] });
+  const first = l.name.split(" ")[0];
+  const subject = `Invoice ${inv.no}${l.kind ? `, ${kindOf(l.kind)}` : ""}`;
+  const body = `Hi ${first},\n\nAttached is invoice ${inv.no}. The balance is ${usd(balance(inv))}.\n\nThank you,\nJulian`;
+  return (
+    <div className="grid gap-2">
+      <div className="flex flex-wrap gap-2.5">
+        {canShare ? (
+          <button type="button" className={cn(btn, primary)} onClick={() => navigator.share({ files: [file], title: subject }).catch(() => {})}>Share PDF</button>
+        ) : null}
+        <a href={url} download={file.name} className={cn(btn, !canShare && primary)}>Download PDF</a>
+        {mailable(l.email) ? <a href={compose(l.email, subject, body)} target="_blank" rel="noreferrer" className={btn}>Gmail draft</a> : null}
+      </div>
+      <p className="font-mono text-[12.5px] text-muted-foreground">Nothing is sent. The Gmail draft has no attachment: add the PDF before you send.</p>
+    </div>
+  );
+}
+
+function InvoiceRow({ inv, l, full }: { inv: Invoice; l: LeadSummary; full: Lead }) {
+  const [file, setFile] = React.useState<File | null>(null);
+  const [err, setErr] = React.useState<string | null>(null);
+  return (
+    <li className="grid gap-2 border-b border-border py-2.5">
+      <p className="flex flex-wrap items-center justify-between gap-3 text-[15px]">
+        <span><b className="font-mono font-medium">{inv.no}</b> <span className="text-muted-foreground">· {day(`${inv.date}T12:00:00`)} · {usd(balance(inv))} due</span></span>
+        {file ? null : (
+          <button type="button" className={cn(btn, "min-h-10")} onClick={() => { setErr(null); makePdf(inv, l, full).then(setFile, (e: unknown) => setErr(e instanceof Error ? e.message : String(e))); }}>PDF</button>
+        )}
+      </p>
+      {file ? <Deliver file={file} inv={inv} l={l} /> : null}
+      {err ? <p role="alert" className="text-[14px] text-destructive">{err}</p> : null}
+    </li>
+  );
+}
+
+type Line = { desc: string; qty: string; rate: string };
+
+/** A new invoice, filled from the lead. Saving numbers it; then the PDF. */
+function InvoiceSheet({ l, full, patch, done }: { l: LeadSummary; full: Lead; patch: (b: Record<string, unknown>) => Promise<void>; done: () => void }) {
+  const [from, setFrom] = React.useState<InvoiceFrom | null>(null);
+  const [editFrom, setEditFrom] = React.useState(false);
+  const [date, setDate] = React.useState(todayPT);
+  const [no, setNo] = React.useState("");
+  const session = [kindOf(l.kind) ?? "Session", l.when ? day(l.when) : ""].filter(Boolean).join(", ");
+  const [lines, setLines] = React.useState<Line[]>([{ desc: session, qty: "1", rate: full.quote !== undefined ? full.quote.toFixed(2) : "" }]);
+  const [paid, setPaid] = React.useState(full.deposit ? DEPOSIT.toFixed(2) : "0");
+  const [made, setMade] = React.useState<{ inv: Invoice; file: File } | null>(null);
+  const [busy, setBusy] = React.useState(false);
+  const [err, setErr] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    fetch(`/api/inbox?invoiceNo=${date}`, { headers: authed(), cache: "no-store" })
+      .then((r) => r.json() as Promise<{ from: InvoiceFrom | null; no?: string }>)
+      .then((o) => {
+        setNo(o.no ?? "");
+        setFrom((f) => f ?? o.from ?? EMPTY_FROM);
+        if (!o.from?.name) setEditFrom(true);
+      })
+      .catch(() => {});
+  }, [date]);
+
+  const parsed = lines.map((x) => ({ desc: x.desc.trim(), qty: Number(x.qty), rate: Number(x.rate) }));
+  const owed = balance({ lines: parsed.map((x) => ({ ...x, qty: x.qty || 0, rate: x.rate || 0 })), paid: Number(paid) || 0 });
+  const set = (i: number, k: keyof Line) => (e: React.ChangeEvent<HTMLInputElement>) => setLines(lines.map((x, j) => (j === i ? { ...x, [k]: e.target.value } : x)));
+
+  const save = async () => {
+    setBusy(true);
+    setErr(null);
+    try {
+      await patch({ invoice: { date, lines: parsed, paid: Number(paid) || 0 } });
+      // The saved lead carries the number the Worker gave it.
+      const got = await fetch(`/api/inbox?key=${encodeURIComponent(`lead:${l.id ?? ""}`)}`, { headers: authed(), cache: "no-store" });
+      const fresh = ((await got.json()) as { lead: Lead }).lead;
+      const inv = fresh.invoices!.at(-1)!;
+      setMade({ inv, file: await makePdf(inv, l, fresh) });
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : String(e));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (made)
+    return (
+      <div className="grid gap-3 rounded-xl border border-border p-3.5">
+        <p className="text-[15px]">Invoice <b className="font-mono font-medium">{made.inv.no}</b> made, {usd(balance(made.inv))} due.</p>
+        <Deliver file={made.file} inv={made.inv} l={l} />
+        <button type="button" onClick={done} className={cn(btn, "justify-self-start")}>Done</button>
+      </div>
+    );
+
+  return (
+    <form className="grid gap-3.5 rounded-xl border border-border p-3.5" onSubmit={(e) => { e.preventDefault(); save(); }}>
+      {from && editFrom ? <FromForm from={from} saved={(f) => { setFrom(f); setEditFrom(false); }} /> : null}
+      <div className="grid grid-cols-2 gap-2.5">
+        <div className={fieldLabel}>Invoice no.<span className="flex min-h-11 items-center font-mono text-[15px] text-foreground">{no || "…"}</span></div>
+        <label className={fieldLabel}>Date<input type="date" required value={date} onChange={(e) => e.target.value && setDate(e.target.value)} className={cn(field, "font-mono text-[14px]")} /></label>
+      </div>
+      <p className="text-[15px]">To {l.name}{mailable(l.email) ? <span className="text-muted-foreground"> · {l.email}</span> : null}</p>
+      <fieldset className="grid gap-2">
+        <legend className="mb-1.5 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">Lines: description, quantity, rate</legend>
+        {lines.map((x, i) => (
+          <div key={i} className="grid grid-cols-[minmax(0,1fr)_52px_92px_44px] gap-2">
+            <input aria-label={`Line ${i + 1} description`} required value={x.desc} onChange={set(i, "desc")} className={cn(field, "px-3")} />
+            <input aria-label={`Line ${i + 1} quantity`} required inputMode="decimal" value={x.qty} onChange={set(i, "qty")} className={cn(field, "px-2 text-right font-mono text-[14px]")} />
+            <input aria-label={`Line ${i + 1} rate`} required inputMode="decimal" value={x.rate} onChange={set(i, "rate")} placeholder="0.00" className={cn(field, "px-2 text-right font-mono text-[14px]")} />
+            {lines.length > 1 ? (
+              <button type="button" aria-label={`Remove line ${i + 1}`} onClick={() => setLines(lines.filter((_, j) => j !== i))} className="grid size-11 place-items-center text-muted-foreground hoverable:hover:text-foreground">×</button>
+            ) : <span aria-hidden="true" />}
+          </div>
+        ))}
+        {lines.length < MAX_LINES ? (
+          <button type="button" onClick={() => setLines([...lines, { desc: "", qty: "1", rate: "" }])} className={cn(btn, "min-h-10 justify-self-start")}>Add a line</button>
+        ) : null}
+      </fieldset>
+      <label className="flex items-center justify-between gap-3 text-[14px] text-muted-foreground">
+        Deposit paid
+        <input inputMode="decimal" value={paid} onChange={(e) => setPaid(e.target.value.replace(/[^\d.]/g, ""))} className={cn(field, "w-[92px] px-2 text-right font-mono text-[14px]")} />
+      </label>
+      <p className="flex justify-between font-mono text-[14px] text-muted-foreground">
+        {Number(paid) ? "Balance due" : "Total"}<b className="text-[16px] font-medium text-accent">{usd(owed)}</b>
+      </p>
+      {err ? <p role="alert" className="text-[15px] text-destructive">{err}</p> : null}
+      <div className="flex flex-wrap gap-2.5">
+        <button type="submit" disabled={busy || !no} className={cn(btn, primary)}>{busy ? "Making" : "Save and make PDF"}</button>
+        <button type="button" onClick={done} className={btn}>Cancel</button>
+        {from && !editFrom ? <button type="button" onClick={() => setEditFrom(true)} className="min-h-11 px-2 font-mono text-[12.5px] text-muted-foreground hoverable:hover:text-foreground">Your details</button> : null}
+      </div>
+    </form>
+  );
+}
+
+const EMPTY_FROM: InvoiceFrom = { name: "", a1: "", a2: "", a3: "", email: "hello@juliangigola.com", phone: "", ein: "", signoff: "Best,", notes: "" };
+const FROM_FIELDS: [keyof InvoiceFrom, string][] = [["name", "Name on the invoice"], ["a1", "Address, line 1"], ["a2", "Address, line 2"], ["a3", "City, state, zip"], ["email", "Email"], ["phone", "Phone"], ["ein", "EIN line"], ["signoff", "Sign-off"], ["notes", "Notes on every invoice"]];
+
+/** His details, once: sealed on the Worker, never in the code (the repo is public). */
+function FromForm({ from, saved }: { from: InvoiceFrom; saved: (f: InvoiceFrom) => void }) {
+  const [f, setF] = React.useState(from);
+  const [err, setErr] = React.useState<string | null>(null);
+  const save = () =>
+    fetch("/api/inbox", { method: "PATCH", headers: { ...authed(), "content-type": "application/json" }, body: JSON.stringify({ invoiceFrom: f }) })
+      .then(async (r) => {
+        const o = (await r.json()) as { from?: InvoiceFrom; error?: string };
+        if (!r.ok || !o.from) throw new Error(o.error ?? "Could not save.");
+        saved(o.from);
+      })
+      .catch((e: unknown) => setErr(e instanceof Error ? e.message : String(e)));
+  return (
+    <fieldset className="grid gap-2.5 border-b border-border pb-3.5">
+      <legend className="mb-1.5 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">Your details for invoices</legend>
+      {FROM_FIELDS.map(([k, t]) => (
+        <label key={k} className={fieldLabel}>
+          {t}
+          {k === "notes"
+            ? <textarea value={f[k]} onChange={(e) => setF({ ...f, [k]: e.target.value })} rows={3} className={cn(field, "py-3 leading-relaxed")} />
+            : <input value={f[k]} onChange={(e) => setF({ ...f, [k]: e.target.value })} className={field} autoComplete="off" />}
+        </label>
+      ))}
+      {err ? <p role="alert" className="text-[15px] text-destructive">{err}</p> : null}
+      <button type="button" onClick={save} className={cn(btn, "justify-self-start")}>Save details</button>
+    </fieldset>
   );
 }
