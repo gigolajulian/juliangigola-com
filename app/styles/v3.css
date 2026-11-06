@@ -431,6 +431,20 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 @media (max-width:800px){.v3 .rail li.cur{flex:2.4}}
 .v3 .stabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
 @media (max-width:700px){.v3 .stabs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+/* Wide screens (Julian, 2026-11-05: "take advantage of the extra space"): the
+   sessions in one row; Month puts the times beside the calendar, Week keeps
+   them under it, five across (Julian, "in week view, the times need to be under"). */
+@media (min-width:1700px){
+.v3 .f-body:has(>.f-in>.cal){max-width:none;display:grid;grid-template-columns:minmax(0,1fr);grid-template-areas:"tabs" "top" "cal" "times" "fig";align-items:start}
+.v3 .f-body:has(>.f-in>.cal)>.f-in>.times{grid-template-columns:repeat(5,minmax(0,1fr))}
+.v3 .f-body:has(>.f-in>.cal.month){grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);grid-template-areas:"tabs tabs" "top times" "cal times" "cal fig";grid-template-rows:auto auto auto 1fr;column-gap:48px}
+.v3 .f-body:has(>.f-in>.cal.month)>.f-in>.times{grid-template-columns:repeat(3,minmax(0,1fr))}
+.v3 .f-body:has(>.f-in>.cal)>:not(.f-in){grid-column:1/-1}
+.v3 .f-body:has(>.f-in>.cal)>.stabs{grid-area:tabs;grid-template-columns:repeat(5,minmax(0,1fr))}
+.v3 .f-in>.cal-top{grid-area:top}
+.v3 .f-in>.cal{grid-area:cal}
+.v3 .f-in>.times{grid-area:times}
+.v3 .f-in>.fig{grid-area:fig}}
 .v3 .stabs button{min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:12px 14px;background:none;border:1px solid var(--line);color:var(--mute);font:inherit;cursor:pointer;text-align:left}
 .v3 .stabs b{font:800 1.125rem/1 var(--display);letter-spacing:-.03em;text-transform:none}
 .v3 .stabs button[aria-checked="true"]{border-color:var(--accent);color:var(--ink)}
