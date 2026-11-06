@@ -1562,7 +1562,7 @@ function MoneyView() {
             {txns.map((t) => (
               <li key={t.id} className="flex items-baseline justify-between gap-3 border-b border-border py-2.5">
                 <span className="grid min-w-0">
-                  <span className="truncate text-[15px]">{t.what || KIND[t.type] || t.type}</span>
+                  <span className="truncate text-[15px]">{t.what || KIND[t.type] || t.type.replace(/_/g, " ")}</span>
                   <span className="font-mono text-[12px] text-muted-foreground">
                     {day(t.at)} · {KIND[t.type] ?? t.type.replace(/_/g, " ")}{t.status === "pending" ? " · on the way" : ""}{t.fee ? ` · fee ${cash(t.fee)}` : ""}
                   </span>
