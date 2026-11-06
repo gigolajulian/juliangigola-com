@@ -1594,3 +1594,23 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 @media (hover:hover){.v3 .wt:not([data-back]):hover .sides span:first-child{opacity:.5}.v3 .wt:hover .sides span:last-child{opacity:1}}
 @media (prefers-reduced-motion:reduce){.v3 :is(.wt .ph,.sc) .bk{transition:none}}
 .fv .sides{margin-left:auto;margin-right:16px}
+
+/* Project page, layout pass (Julian, 2026-11-05: "margins should be the same").
+   One gap, the page's own 16px margin, between every frame: under the bar, in the
+   hero, between the hero and the sheet, and inside the sheet. */
+.v3 #p-project{--pj:16px}
+.v3 .pj-flow{gap:var(--pj)}
+@media (min-width:701px){.v3 .pj-flow{padding-top:var(--pj)}
+/* A horizontal takes the whole row at its own shape: never a crop, never a hole
+   beside it (an all-horizontal set stacked down two thirds of the page). */
+.v3 .pj-flow .pj-r.w{grid-column:1/-1;aspect-ratio:var(--ar,3/2)}}
+@media (min-width:901px){
+.v3 #p-project .pj-hero{height:calc(100svh - 64px - var(--pj));min-height:604px;padding-top:var(--pj);column-gap:var(--pj)}
+.v3 .pj-big{height:calc(100svh - 64px - var(--pj));min-height:604px}
+.v3 .pj-top{padding-top:40px}
+/* The frames under the title: whole, each the size of its own picture, level
+   with each other and with the foot of the big frame, one gap apart. */
+.v3 #p-project .pj-lead{display:flex;container-type:size;justify-content:flex-end;align-items:flex-end;gap:var(--pj);padding-right:0}
+.v3 #p-project .pj-lead .pj-r,.v3 #p-project .pj-lead .pj-r:first-child:has(+ .pj-r){height:auto;flex:0 0 auto;display:block;translate:none}
+.v3 #p-project .pj-lead .pj-r img{width:auto;height:auto;max-height:100cqh;max-width:100cqw;object-fit:contain}
+.v3 #p-project .pj-lead:has(.pj-r + .pj-r) .pj-r img{max-width:calc((100cqw - var(--pj)) / 2)}}
