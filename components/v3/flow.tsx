@@ -170,15 +170,16 @@ export function Field({
           {label}
           {req ? <span className="req" aria-hidden="true"> *</span> : null}
         </span>
-        <span>{hint}</span>
+        {/* Julian (2026-11-06): the error lives in the field, no box. Empty: it is the placeholder; with text: it takes the hint's place. */}
+        {err && value ? <span className="fe" aria-hidden="true">{err}</span> : <span>{hint}</span>}
       </label>
       {area ? (
-        <textarea id={id} name={k} rows={3} value={value} onChange={(e) => onChange(e.target.value)} aria-invalid={!!err || undefined} aria-describedby={err ? `${id}-err` : undefined} aria-required={req || undefined} />
+        <textarea id={id} name={k} rows={3} placeholder={err && !value ? err : undefined} value={value} onChange={(e) => onChange(e.target.value)} aria-invalid={!!err || undefined} aria-describedby={err ? `${id}-err` : undefined} aria-required={req || undefined} />
       ) : (
-        <input id={id} name={k} type={type} autoComplete={ac} value={value} onChange={(e) => onChange(e.target.value)} aria-invalid={!!err || undefined} aria-describedby={err ? `${id}-err` : undefined} aria-required={req || undefined} />
+        <input id={id} name={k} type={type} autoComplete={ac} placeholder={err && !value ? err : undefined} value={value} onChange={(e) => onChange(e.target.value)} aria-invalid={!!err || undefined} aria-describedby={err ? `${id}-err` : undefined} aria-required={req || undefined} />
       )}
       {err ? (
-        <p className="err" id={`${id}-err`} role="alert">
+        <p className="sr-only" id={`${id}-err`} role="alert">
           {err}
         </p>
       ) : null}
@@ -189,8 +190,8 @@ export function Field({
 /** Name and a real email (master `check()`): field → the one sentence that fixes it. */
 export const checkYou = (name: string, email: string) => {
   const err: Record<string, string> = {};
-  if (!name.trim()) err.name = "Add your name so I know who to reply to.";
-  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim())) err.email = "That email looks incomplete. Check it and try again.";
+  if (!name.trim()) err.name = "Add your name";
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim())) err.email = "Email looks incomplete";
   return err;
 };
 
@@ -286,7 +287,7 @@ export function Calendar({
 /* ── the enquiry, shared by the note, the commission stepper and weddings ── */
 const simSent = () => process.env.NODE_ENV !== "production" && new URLSearchParams(location.search).get("sim") === "sent";
 export const first = (name: string) => name.trim().split(" ")[0] ?? "";
-export const NEED_MSG = "Tell me a little about what you have in mind.";
+export const NEED_MSG = "Tell me what you have in mind";
 
 /** What the server could not take, with the mail-app way round it. */
 export function Failed({ state }: { state: ContactState }) {

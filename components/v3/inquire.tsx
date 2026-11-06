@@ -27,9 +27,10 @@ function Note() {
           {label}
           <span className="req" aria-hidden="true"> *</span>
         </span>
+        {err[k] && v[k] ? <span className="fe" aria-hidden="true">{err[k]}</span> : null}
       </label>
-      {el}
-      {err[k] ? <p className="err" id={`r-${k}-err`} role="alert">{err[k]}</p> : null}
+      {err[k] && !v[k] && React.isValidElement<{ placeholder?: string }>(el) ? React.cloneElement(el, { placeholder: err[k] }) : el}
+      {err[k] ? <p className="sr-only" id={`r-${k}-err`} role="alert">{err[k]}</p> : null}
     </div>
   );
   return (

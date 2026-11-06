@@ -390,7 +390,11 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .fld label{display:flex;justify-content:space-between}
 .v3 .fld input,.v3 .fld textarea{background:transparent;border:0;border-bottom:1px solid color-mix(in srgb,var(--ink) 22%,transparent);color:var(--ink);font:inherit;padding:10px 0;border-radius:0;resize:none;color-scheme:inherit}
 .v3 .fld input:focus,.v3 .fld textarea:focus{outline:0;border-bottom-color:var(--accent)}
-.v3 .fld.bad input{border-bottom-color:var(--err)}
+.v3 .fld.bad :is(input,textarea){border-bottom-color:var(--err)}
+/* Julian (2026-11-06): errors in the field, no box. Empty, the error is the placeholder in red; with text, it sits at the right of the label. */
+.v3 .fld.bad :is(input,textarea)::placeholder{color:var(--err);opacity:1}
+.v3 .fld label>span:first-child{white-space:nowrap}
+.v3 .fld .fe{color:var(--err);text-align:right}
 /* Keyboard focus (audit, 2026-11-01): the 1px colour change alone was easy to miss, so the rule thickens to 2px. A shadow, so nothing shifts. */
 .v3 .fld input:focus-visible,.v3 .fld textarea:focus-visible{box-shadow:0 1px 0 var(--accent)}
 .v3 .fld.bad input:focus-visible{box-shadow:0 1px 0 var(--err)}
@@ -480,7 +484,7 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .reach-send{display:flex;justify-content:flex-end}
 .v3 .reach-row{display:grid;grid-template-columns:1fr 1fr;gap:24px}
 .v3 .reach .fld input,.v3 .reach .fld textarea{font-size:16px;padding:12px 0}
-.v3 .reach .fld ::placeholder{color:var(--mute);opacity:.6}
+.v3 .reach .fld ::placeholder{color:var(--mute)}
 .v3 .reach-out{display:flex;flex-direction:column;gap:12px}
 /* References (`reference-picks.tsx`): Upload references (pulled toward a dragged image) and Pick from my work. */
 .v3 .refs{gap:10px}
@@ -527,7 +531,7 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .wsearch{display:flex;align-items:center;gap:10px;height:36px;width:280px;flex:none;border-bottom:1px solid var(--line);color:var(--mute)}
 .v3 .wsearch:focus-within{border-bottom-color:var(--accent)}
 .v3 .wsearch input{flex:1;min-width:0;background:none;border:0;outline:0;color:var(--ink);font:inherit;letter-spacing:.04em;text-transform:none}
-.v3 .wsearch input::placeholder{color:var(--mute);opacity:.7}
+.v3 .wsearch input::placeholder{color:var(--mute)}
 .v3 .wnote{margin:0;padding:20px var(--gr) 0 var(--g)}
 .v3 .wnote+.wgrid{padding-top:16px}
 .v3 .wt .ph{position:relative}
