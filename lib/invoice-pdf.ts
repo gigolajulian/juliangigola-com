@@ -112,9 +112,9 @@ function layout({ from: s, to, inv }: InvoiceDoc, SB: Font, RG: Font) {
   t(58.44, 224.58, 11, P.GREY, to.name, "rg");
   if (to.phone) { t(58.0, 299.85, 8, P.BLUE, "m"); t(72.2, 299.85, 8, P.GREY, to.phone); }
   if (to.email) { t(59.4, 312.85, 8, P.BLUE, "e"); t(68.2, 312.85, 8, P.GREY, to.email); }
-  t(487.0, 222.75, 8, P.DARK, "INVOICE NO.");
+  t(RIGHT, 222.75, 8, P.DARK, "INVOICE NO.", "sb", "end");
   t(RIGHT, 235.75, 8, P.GREY, inv.no, "sb", "end");
-  t(480.0, 261.75, 8, P.DARK, "INVOICE DATE");
+  t(RIGHT, 261.75, 8, P.DARK, "INVOICE DATE", "sb", "end");
   t(RIGHT, 274.75, 8, P.GREY, fmtDate(inv.date), "sb", "end");
 
   const emL = RIGHT - W(s.email, 8, "sb");
@@ -133,7 +133,8 @@ function layout({ from: s, to, inv }: InvoiceDoc, SB: Font, RG: Font) {
   t(RIGHT, 375.75, 8, P.SLATE, "AMOUNT", "sb", "end");
   inv.lines.forEach((it, i) => {
     const y = ROW0 + i * PITCH;
-    t(58.0, y, 8, P.DARK, it.desc, "rg");
+    // A wide line shrinks to clear ITEM at x 300, measured, not counted.
+    t(58.0, y, Math.min(8, (8 * 236) / Math.max(1, RG.width(it.desc, 8))), P.DARK, it.desc, "rg");
     t(307.0, y + 0.1, 8, P.DARK, String(it.qty));
     t(427.7, y + 1.1, 8, P.DARK, money(it.rate), "sb", "end");
     t(RIGHT, y, 8, P.DARK, money(it.qty * it.rate), "sb", "end");
