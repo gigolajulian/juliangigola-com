@@ -360,6 +360,10 @@
 :root:not([data-theme="light"]) .booking-embed.times-down {
   filter: none;
 }
+/* Julian (2026-11-06): its Try again solid on desktop too, as on a phone. */
+.times-down .action:not(:disabled, [aria-disabled="true"]) {
+  background-color: var(--foreground);
+}
 /* The site's own time picker (`time-picker.tsx`) is drawn in the site's
    colours, so it is not turned over like the frames. */
 :root:not([data-theme="light"]) .booking-embed.tp {
