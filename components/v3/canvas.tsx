@@ -24,6 +24,8 @@ type Cell = { f: HTMLElement; img: HTMLImageElement; cap: HTMLElement; i: number
 type Opened = { i: number; from: DOMRect };
 type Frames = Record<string, [string, number, string, string][]>;
 
+/* Upright frames sit as 3:4 on the field, like the grid and strip (Julian, 2026-11-07); square and wide keep theirs. The opened frame shows the whole photo. */
+const shape = (r: number) => (r > 1.02 ? 4 / 3 : r);
 const mod = (a: number, b: number) => ((a % b) + b) % b;
 const plural = (n: number) => `${n} ${n === 1 ? "project" : "projects"}`;
 
@@ -46,7 +48,7 @@ export function V3Canvas({ list, onClose }: { list: WorkItem[]; onClose: () => v
       list.flatMap((w, p) =>
         all?.[w.s]?.length
           ? all[w.s].map(([src, r, alt, color]) => ({ p, src, r, alt, color }))
-          : [{ p, src: w.cover, r: 5 / 4, alt: w.n }],
+          : [{ p, src: w.cover, r: 4 / 3, alt: w.n }],
       ),
     [list, all],
   );
@@ -79,7 +81,7 @@ export function V3Canvas({ list, onClose }: { list: WorkItem[]; onClose: () => v
       cols = Array.from({ length: COLS }, (_, c) => {
         let y = 0;
         const items = Array.from({ length: per }, (_, k) => {
-          const i = (k * COLS + c) % frames.length, h = Math.round(W * frames[i].r);
+          const i = (k * COLS + c) % frames.length, h = Math.round(W * shape(frames[i].r));
           const it = { i, y, h };
           y += h + GAP + ((c * 7 + k * 3) % 5) * 14;
           return it;
@@ -388,7 +390,9 @@ export function V3Canvas({ list, onClose }: { list: WorkItem[]; onClose: () => v
           <div className="cv-meta">
             <div className="lbl mute">{p.d.join(", ")}</div>
             <h2>{p.n}</h2>
-            <Link className="lbl" href={`/portfolio/${p.s}`}>
+            {/* The canvas comes down before the page crossing: WebKit crashed snapshotting the
+                live field into the view transition (4 of 4, iPhone, iPad and desktop). */}
+            <Link className="lbl" href={`/portfolio/${p.s}`} onClick={onClose}>
               Open project
             </Link>
           </div>
