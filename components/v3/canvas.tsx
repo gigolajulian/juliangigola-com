@@ -7,51 +7,81 @@ import { DECEL } from "@/lib/motion/throw";
 import { isTrackpad } from "@/lib/motion/wheel";
 import type { WorkItem } from "@/components/v3/work";
 
-/* `?canvas=1` prototype (mock approved by Julian, 2026-11-07): the covers as
-   one endless field you pan by dragging, flicking or scrolling. Columns
-   loop on their own heights and starts, so the field repeats with no seam
-   and no straight rows. Click a cover: it grows to the centre with its name
-   and a link to the project. */
+/* `?canvas=1` prototype (mock approved by Julian, 2026-11-07): every frame
+   of every project as one endless field you pan by dragging, flicking or
+   scrolling. Columns loop on their own heights and starts, so the field
+   repeats with no seam and no straight rows. A scale slider sets the size.
+   Click a frame: it grows to the centre with its project's name and a link. */
 
-const COLS = 8;
+const COLS = 16; // enough that 0.5× never shows a column twice on a wide screen
 const GAP = 28;
-const R = 5 / 4; // the grid's crop (aspect-ratio 4/5)
+const SCALE = { min: 0.5, max: 2, step: 0.05 };
 
-type Col = { items: { i: number; y: number }[]; period: number; off: number };
+/** One frame on the field: its project (index into `list`), photo, height / width, alt, colour. */
+type Frame = { p: number; src: string; r: number; alt: string; color?: string };
+type Col = { items: { i: number; y: number; h: number }[]; period: number; off: number };
 type Cell = { f: HTMLElement; img: HTMLImageElement; cap: HTMLElement; i: number };
 type Opened = { i: number; from: DOMRect };
+type Frames = Record<string, [string, number, string, string][]>;
 
 const mod = (a: number, b: number) => ((a % b) + b) % b;
+const plural = (n: number) => `${n} ${n === 1 ? "project" : "projects"}`;
 
 export function V3Canvas({ list, onClose }: { list: WorkItem[]; onClose: () => void }) {
   const field = React.useRef<HTMLDivElement>(null);
+  /* Covers until `/canvas.json` lands, then every frame, projects in the page's order. */
+  const [all, setAll] = React.useState<Frames | null>(null);
+  React.useEffect(() => {
+    let live = true;
+    fetch("/canvas.json")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j: Frames | null) => live && j && setAll(j))
+      .catch(() => {});
+    return () => {
+      live = false;
+    };
+  }, []);
+  const frames = React.useMemo<Frame[]>(
+    () =>
+      list.flatMap((w, p) =>
+        all?.[w.s]?.length
+          ? all[w.s].map(([src, r, alt, color]) => ({ p, src, r, alt, color }))
+          : [{ p, src: w.cover, r: 5 / 4, alt: w.n }],
+      ),
+    [list, all],
+  );
+
   const [opened, setOpened] = React.useState<Opened | null>(null);
   const [grown, setGrown] = React.useState(false);
   const [hint, setHint] = React.useState(true);
   const [help, setHelp] = React.useState(false);
+  const [scale, setScale] = React.useState(1);
   const openedRef = React.useRef(opened);
   React.useEffect(() => {
     openedRef.current = opened;
   }, [opened]);
+  // The field's own handle on a new scale, so the camera survives a change.
+  const rescale = React.useRef<(s: number) => void>(() => {});
+  const scaleRef = React.useRef(scale);
 
   React.useEffect(() => {
     const el = field.current;
-    if (!el || !list.length) return;
+    if (!el || !frames.length) return;
     const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
     let W = 0;
-    let H = 0;
     let cols: Col[] = [];
     const srcs = new Map<number, { src: string; srcSet?: string }>();
     const layout = () => {
-      W = innerWidth < 700 ? Math.round(innerWidth * 0.42) : Math.round(Math.min(260, Math.max(200, innerWidth / 6.4)));
-      H = Math.round(W * R);
+      const base = innerWidth < 700 ? innerWidth * 0.42 : Math.min(260, Math.max(200, innerWidth / 6.4));
+      W = Math.round(base * scaleRef.current);
       srcs.clear();
-      const per = Math.max(3, Math.ceil(list.length / COLS));
+      const per = Math.max(3, Math.ceil(frames.length / COLS));
       cols = Array.from({ length: COLS }, (_, c) => {
         let y = 0;
         const items = Array.from({ length: per }, (_, k) => {
-          const it = { i: (k * COLS + c) % list.length, y };
-          y += H + GAP + ((c * 7 + k * 3) % 5) * 14;
+          const i = (k * COLS + c) % frames.length, h = Math.round(W * frames[i].r);
+          const it = { i, y, h };
+          y += h + GAP + ((c * 7 + k * 3) % 5) * 14;
           return it;
         });
         return { items, period: y, off: ((c * 137) % 260) - 130 };
@@ -60,7 +90,8 @@ export function V3Canvas({ list, onClose }: { list: WorkItem[]; onClose: () => v
     const props = (i: number) => {
       let p = srcs.get(i);
       if (!p) {
-        const { props: ip } = getImageProps({ src: list[i].cover, alt: "", width: W, height: H, sizes: `${W}px` });
+        const f = frames[i];
+        const { props: ip } = getImageProps({ src: f.src, alt: "", width: W, height: Math.round(W * f.r), sizes: `${W}px` });
         p = { src: ip.src, srcSet: ip.srcSet };
         srcs.set(i, p);
       }
@@ -92,19 +123,23 @@ export function V3Canvas({ list, onClose }: { list: WorkItem[]; onClose: () => v
         for (let r = r0; r <= r1; r++)
           for (const it of col.items) {
             const sy = r * col.period + it.y - base;
-            if (sy > innerHeight + 40 || sy + H < -40) continue;
+            if (sy > innerHeight + 40 || sy + it.h < -40) continue;
             const p = cell(n++);
             if (p.i !== it.i) {
               p.i = it.i;
-              const w = list[it.i], ip = props(it.i);
+              const fr = frames[it.i], w = list[fr.p], ip = props(it.i);
               if (ip.srcSet) p.img.srcset = ip.srcSet;
               else p.img.removeAttribute("srcset");
               p.img.src = ip.src;
-              p.img.alt = w.n;
+              p.img.alt = fr.alt;
+              p.f.style.backgroundColor = fr.color ?? "";
               p.cap.textContent = `${w.n} · ${w.d.join(", ")}`;
               p.f.dataset.i = String(it.i);
             }
-            p.f.style.cssText = `width:${W}px;height:${H}px;transform:translate3d(${sx}px,${sy}px,0)`;
+            p.f.style.width = `${W}px`;
+            p.f.style.height = `${it.h}px`;
+            p.f.style.transform = `translate3d(${sx}px,${sy}px,0)`;
+            p.f.style.display = "";
           }
       }
       for (let k = n; k < pool.length; k++)
@@ -220,6 +255,7 @@ export function V3Canvas({ list, onClose }: { list: WorkItem[]; onClose: () => v
         else onClose();
         return;
       }
+      if ((e.target as Element | null)?.closest?.("input")) return;
       const s = 240;
       const m = ({ ArrowLeft: [-s, 0], ArrowRight: [s, 0], ArrowUp: [0, -s], ArrowDown: [0, s] } as Record<string, number[]>)[e.key];
       if (!m || openedRef.current) return;
@@ -230,10 +266,20 @@ export function V3Canvas({ list, onClose }: { list: WorkItem[]; onClose: () => v
       ty = (ty ?? y) + m[1];
       kick();
     };
-    const onResize = () => {
+    const relayout = () => {
       for (const p of pool) p.i = -1;
       layout();
       draw();
+    };
+    // A new scale keeps the point at the screen's centre where it is.
+    rescale.current = (s: number) => {
+      const k = s / scaleRef.current, cx = innerWidth / 2, cy = innerHeight / 2;
+      scaleRef.current = s;
+      vx = vy = 0;
+      tx = ty = null;
+      x = (x + cx) * k - cx;
+      y = (y + cy) * k - cy;
+      relayout();
     };
 
     layout();
@@ -244,7 +290,7 @@ export function V3Canvas({ list, onClose }: { list: WorkItem[]; onClose: () => v
     el.addEventListener("pointercancel", onUp);
     el.addEventListener("wheel", onWheel, { passive: false });
     addEventListener("keydown", onKey);
-    addEventListener("resize", onResize);
+    addEventListener("resize", relayout);
     const html = document.documentElement, was = html.style.overflow;
     html.style.overflow = "hidden";
     return () => {
@@ -255,26 +301,27 @@ export function V3Canvas({ list, onClose }: { list: WorkItem[]; onClose: () => v
       el.removeEventListener("pointercancel", onUp);
       el.removeEventListener("wheel", onWheel);
       removeEventListener("keydown", onKey);
-      removeEventListener("resize", onResize);
+      removeEventListener("resize", relayout);
       html.style.overflow = was;
       for (const p of pool) p.f.remove();
     };
-  }, [list, onClose]);
+  }, [frames, list, onClose]);
 
-  // The opened cover starts on its cell, then grows to the centre on the next frame.
+  // The opened frame starts on its cell, then grows to the centre on the next frame.
   React.useEffect(() => {
     if (!opened) return;
     const id = requestAnimationFrame(() => requestAnimationFrame(() => setGrown(true)));
     return () => cancelAnimationFrame(id);
   }, [opened]);
 
-  const p = opened ? list[opened.i] : null;
+  const fr = opened ? frames[opened.i] : null;
+  const p = fr ? list[fr.p] : null;
   let box: React.CSSProperties | undefined;
-  if (opened) {
+  if (opened && fr) {
     const r = opened.from;
     if (!grown) box = { left: r.left, top: r.top, width: r.width, height: r.height, transition: "none" };
     else {
-      const h = Math.min(innerHeight * 0.78, (innerWidth * 0.86) * R), w = h / R;
+      const h = Math.min(innerHeight * 0.78, innerWidth * 0.86 * fr.r), w = h / fr.r;
       box = { left: (innerWidth - w) / 2, top: (innerHeight - h) / 2, width: w, height: h };
     }
   }
@@ -283,25 +330,49 @@ export function V3Canvas({ list, onClose }: { list: WorkItem[]; onClose: () => v
     <div className="cv" data-lenis-prevent role="dialog" aria-modal="true" aria-label="Portfolio canvas">
       <div className="cv-field" ref={field} />
       <div className="cv-top lbl">
-        <span className="mute">{plural(list.length)}</span>
+        <span className="mute">
+          {plural(list.length)}
+          {all ? ` · ${frames.length} frames` : ""}
+        </span>
         <button type="button" className="cv-q" onClick={onClose}>
           Close
         </button>
       </div>
       <div className="cv-foot lbl mute">
         <span className={hint ? "" : "gone"}>Drag to explore</span>
+        <label className="cv-scale">
+          Scale
+          <input
+            type="range"
+            min={SCALE.min}
+            max={SCALE.max}
+            step={SCALE.step}
+            value={scale}
+            onChange={(e) => {
+              const s = Number(e.target.value);
+              setScale(s);
+              rescale.current(s);
+            }}
+            onDoubleClick={() => {
+              setScale(1);
+              rescale.current(1);
+            }}
+          />
+          <output>{scale.toFixed(2)}×</output>
+        </label>
         <button type="button" className="cv-q" aria-expanded={help} onClick={() => setHelp((h) => !h)}>
           ?
         </button>
       </div>
       {help ? (
         <div className="cv-help">
-          <p>Drag, flick or scroll in any direction. The field never ends.</p>
-          <p>Click a photo to open the project.</p>
+          <p>Drag, flick or scroll in any direction. Every frame of every project, and the field never ends.</p>
+          <p>Scale sets the size. Double-click it for 1×.</p>
+          <p>Click a photo to open its project.</p>
           <p className="mute">Arrow keys pan. Esc closes.</p>
         </div>
       ) : null}
-      {p && opened ? (
+      {p && fr ? (
         <div
           className={grown ? "cv-open in" : "cv-open"}
           onClick={(e) => {
@@ -310,7 +381,7 @@ export function V3Canvas({ list, onClose }: { list: WorkItem[]; onClose: () => v
         >
           <figure style={box}>
             {/* eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text */}
-            <img {...getImageProps({ src: p.cover, alt: p.n, fill: true, sizes: "80vh" }).props} />
+            <img {...getImageProps({ src: fr.src, alt: fr.alt, fill: true, sizes: "80vh" }).props} />
           </figure>
           <div className="cv-meta">
             <div className="lbl mute">{p.d.join(", ")}</div>
@@ -327,5 +398,3 @@ export function V3Canvas({ list, onClose }: { list: WorkItem[]; onClose: () => v
     </div>
   );
 }
-
-const plural = (n: number) => `${n} ${n === 1 ? "project" : "projects"}`;
