@@ -37,6 +37,7 @@ local LABEL = "purple"
 local provider = {}
 
 provider.supportsIncrementalPublish = "only"
+provider.small_icon = "icon.png"
 provider.hideSections = { "exportLocation", "fileNaming", "video" }
 provider.allowFileFormats = { "JPEG" }
 provider.allowColorSpaces = { "sRGB" }
