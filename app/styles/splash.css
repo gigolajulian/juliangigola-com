@@ -111,6 +111,41 @@
   display: inline-block;
   transform: translateY(105%);
 }
+/* `?splash=split` (`split-splash.ts`): the name at the wordmark's size,
+   parting round a 4:5 window of frames, then growing to the screen. */
+.jg-split-name {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  display: flex;
+  gap: 0.22em;
+  font: 900 1rem / 0.86 var(--display, var(--font-display));
+  letter-spacing: -0.05em;
+  white-space: nowrap;
+  text-transform: none;
+  color: var(--foreground);
+  opacity: 0;
+}
+.jg-split-win {
+  position: fixed;
+  overflow: hidden;
+  clip-path: inset(0 50%);
+}
+.jg-split-hero {
+  position: fixed;
+  object-fit: cover;
+  opacity: 0;
+}
+.jg-split-win img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+}
+
 /* The loader, the page's scrollbar laid along the foot: a hairline track
    in `--line` 6px in from the edges, a 2px bar in `--ink` (`.sb-thumb`). */
 .jg-burst-bar {
@@ -173,7 +208,7 @@
    not held back for its own rise here: the ground thinning is its way in,
    and a held `main` (opacity and transform) would keep the name under
    the splash however high its z-index. */
-[data-splash="burst"][data-intro] :is(.rise, .emerge) {
+:is([data-splash="burst"], [data-splash="split"])[data-intro] :is(.rise, .emerge) {
   opacity: 1;
   transform: none;
 }
@@ -182,16 +217,16 @@
    Pattern for all of these: held while the splash is up and the hero has
    not started landing; the transition is on for as long as `data-landing`
    lasts, which is past the splash, so nothing is cut off midway. */
-[data-splash="burst"][data-intro] .v3 .a-cover::before,
-[data-splash="burst"][data-intro] .v3 .a-cover::after {
+:is([data-splash="burst"], [data-splash="split"])[data-intro] .v3 .a-cover::before,
+:is([data-splash="burst"], [data-splash="split"])[data-intro] .v3 .a-cover::after {
   z-index: 61;
 }
-[data-splash="burst"]:is([data-intro], [data-landing]) .v3 .a-cover::before,
-[data-splash="burst"]:is([data-intro], [data-landing]) .v3 .a-cover::after {
+:is([data-splash="burst"], [data-splash="split"]):is([data-intro], [data-landing]) .v3 .a-cover::before,
+:is([data-splash="burst"], [data-splash="split"]):is([data-intro], [data-landing]) .v3 .a-cover::after {
   transition: opacity 0.75s cubic-bezier(0.65, 0, 0.35, 1);
 }
-[data-splash="burst"][data-intro]:not([data-landing]) .v3 .a-cover::before,
-[data-splash="burst"][data-intro]:not([data-landing]) .v3 .a-cover::after {
+:is([data-splash="burst"], [data-splash="split"])[data-intro]:not([data-landing]) .v3 .a-cover::before,
+:is([data-splash="burst"], [data-splash="split"])[data-intro]:not([data-landing]) .v3 .a-cover::after {
   opacity: 0;
 }
 /* No fades on the type (Julian): once the photograph has landed
@@ -199,35 +234,46 @@
    clipped at their resting foot; the buttons and the frame count come in
    from the right edge; the nav drops in from the top. The cover's own
    overflow clips the last two. */
-[data-splash="burst"][data-intro] .v3 .a-cover :is(.nav, .foot) {
+:is([data-splash="burst"], [data-splash="split"])[data-intro] .v3 .a-cover :is(.nav, .foot) {
   z-index: 62;
 }
-[data-splash="burst"]:is([data-intro], [data-landed]) .v3 .a-cover {
+:is([data-splash="burst"], [data-splash="split"]):is([data-intro], [data-landed]) .v3 .a-cover {
   --land: cubic-bezier(0.2, 0.7, 0.2, 1);
 }
-[data-splash="burst"]:is([data-intro], [data-landed]) .v3 .a-cover .foot > div:first-child > * {
+:is([data-splash="burst"], [data-splash="split"]):is([data-intro], [data-landed]) .v3 .a-cover .foot > div:first-child > * {
   transition: transform 0.9s var(--land), clip-path 0.9s var(--land);
 }
-[data-splash="burst"]:is([data-intro], [data-landed]) .v3 .a-cover .foot > div:first-child > .lbl {
+:is([data-splash="burst"], [data-splash="split"]):is([data-intro], [data-landed]) .v3 .a-cover .foot > div:first-child > .lbl {
   transition-delay: 0.12s;
 }
-[data-splash="burst"]:is([data-intro], [data-landed]) .v3 .a-cover .foot > .right > * {
+:is([data-splash="burst"], [data-splash="split"]):is([data-intro], [data-landed]) .v3 .a-cover .foot > .right > * {
   transition: transform 0.9s var(--land) 0.18s;
 }
-[data-splash="burst"]:is([data-intro], [data-landed]) .v3 .a-cover .nav {
+:is([data-splash="burst"], [data-splash="split"]):is([data-intro], [data-landed]) .v3 .a-cover .nav {
   transition: transform 0.8s var(--land) 0.1s;
 }
-[data-splash="burst"][data-intro]:not([data-landed]) .v3 .a-cover .foot > div:first-child > * {
+:is([data-splash="burst"], [data-splash="split"])[data-intro]:not([data-landed]) .v3 .a-cover .foot > div:first-child > * {
   transform: translateY(100%);
   /* the mask sits where the line comes to rest, not on the moving line, so
      a two-line subtitle rises whole instead of opening a line at a time */
   clip-path: inset(-100% 0 100% 0);
 }
-[data-splash="burst"][data-intro]:not([data-landed]) .v3 .a-cover .foot > .right > * {
+:is([data-splash="burst"], [data-splash="split"])[data-intro]:not([data-landed]) .v3 .a-cover .foot > .right > * {
   transform: translateX(100vw);
 }
-[data-splash="burst"][data-intro]:not([data-landed]) .v3 .a-cover .nav {
+:is([data-splash="burst"], [data-splash="split"])[data-intro]:not([data-landed]) .v3 .a-cover .nav {
   transform: translateY(-100%);
+}
+
+/* `?splash=split`: the splash's own words land on the cover's name, so
+   the name itself is simply there at the hand-over, no rise. */
+[data-splash="split"][data-splash]:is([data-intro], [data-landed]) .v3 .a-cover .foot > div:first-child > h1 { /* outranks the shared rise rule above */
+  transition: none;
+  transform: none;
+  clip-path: none;
+}
+[data-splash="split"][data-intro]:not([data-landed]) .v3 .a-cover .foot > div:first-child > h1 {
+  visibility: hidden;
 }
 
 /* The page's scrollbar (`.sb-thumb`, v3.css) wakes as the page grows under
