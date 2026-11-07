@@ -282,7 +282,7 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .chips button span{margin-left:6px;color:var(--mute)}
 .v3 .wgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:28px 12px;padding:28px var(--gr) 48px var(--g)}
 .v3 .wt{margin:0}
-.v3 .wt .ph{aspect-ratio:4/5;overflow:hidden;background:var(--card);border-radius:4px}
+.v3 .wt .ph{aspect-ratio:3/4;overflow:hidden;background:var(--card);border-radius:4px}
 .v3 .wt img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .6s cubic-bezier(.2,.7,.2,1),opacity .4s}
 @media (hover:hover){.v3 .wt:hover img{transform:scale(1.03)}}
 /* Name over discipline at every width: side by side, a tile's discipline
@@ -302,7 +302,7 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
    horizontal frame two columns wide at that height, so the rows stay even. */
 .v3 .wframes{container-type:inline-size;grid-auto-flow:dense}
 .v3 .wframes>.wt{--cw:calc((100cqw - 36px)/4)}
-.v3 .wframes .ph{aspect-ratio:auto;height:calc(var(--cw)*1.25)}
+.v3 .wframes .ph{aspect-ratio:auto;height:calc(var(--cw)*4/3)}
 .v3 .wframes .wide{grid-column:span 2}
 .v3 .wframes.square .ph{height:var(--cw)}
 @media (max-width:1000px){.v3 .wframes>.wt{--cw:calc((100cqw - 24px)/3)}}
@@ -537,7 +537,7 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .wt .ph{position:relative}
 .v3 .wstrip{display:flex;gap:12px;overflow-x:auto;scrollbar-width:none;padding:16px var(--gr) 0 var(--g)}
 .v3 .wstrip::-webkit-scrollbar{display:none}
-.v3 .sc{flex:none;position:relative;margin:0;height:100%;aspect-ratio:4/5;border-radius:4px;overflow:hidden;background:var(--card)}
+.v3 .sc{flex:none;position:relative;margin:0;height:100%;aspect-ratio:3/4;border-radius:4px;overflow:hidden;background:var(--card)}
 .v3 .sc.wide{aspect-ratio:3/2}
 /* Julian: square frames (Cover Art) keep square crops in the strip too. */
 .v3 .sc.sq{aspect-ratio:1}
@@ -808,7 +808,7 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 /* iPhone: the strip runs down the page, one cover a row at full width,
    and the page scrolls it (Julian). The sideways bar goes. */
 @media (max-width:700px){.v3 #p-work.strip-on .wstrip{flex-direction:column;overflow:visible;scroll-snap-type:none;gap:16px;padding-bottom:48px}
-.v3 #p-work.strip-on .sc{width:100%;height:auto;min-height:0;aspect-ratio:4/5;scroll-snap-align:none}
+.v3 #p-work.strip-on .sc{width:100%;height:auto;min-height:0;aspect-ratio:3/4;scroll-snap-align:none}
 .v3 #p-work.strip-on .sc.sq{aspect-ratio:1;width:100%}
 .v3 #p-work.strip-on .wbar{display:none}}
 /* Color: a mode set apart from Grid and Strip by a hairline. */
