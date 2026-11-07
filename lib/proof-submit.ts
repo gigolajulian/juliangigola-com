@@ -55,10 +55,11 @@ export async function checkout(key: string, p: Proof): Promise<{ id: string; url
 
 /** A Checkout session that is paid, for this gallery, for at least what the selects cost now. */
 export async function paidFor(key: string, p: Proof, session: string): Promise<Proof["paid"] | null> {
-  if (!/^cs_(test|live)_[A-Za-z0-9]+$/.test(session)) return null;
+  // A session already counted in `paid` never pays again (QA 2026-11-07: replayed after a reopen).
+  if (!/^cs_(test|live)_[A-Za-z0-9]+$/.test(session) || session === p.paid?.session) return null;
   const s = await stripe(key, `/checkout/sessions/${session}`);
   const meta = s.metadata as Record<string, string> | undefined;
   if (s.payment_status !== "paid" || meta?.proof !== p.token || Number(s.amount_total) < owed(p).cents) return null;
   // Added to anything paid before the gallery was reopened.
-  return { session, amount: (p.paid?.session === session ? 0 : p.paid?.amount ?? 0) + Number(s.amount_total), at: new Date().toISOString() };
+  return { session, amount: (p.paid?.amount ?? 0) + Number(s.amount_total), at: new Date().toISOString() };
 }

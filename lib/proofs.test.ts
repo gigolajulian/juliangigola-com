@@ -1,4 +1,5 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+import { paidFor } from "@/lib/proof-submit";
 import { cleanNotes, cleanSelects, cleanSettings, extras, isOpen, isToken, newToken, owed, stage } from "@/lib/proofs";
 
 const frames = ["a", "b", "c"].map((id) => ({ id, file: `${id}.jpg`, w: 1, h: 1 }));
@@ -19,6 +20,13 @@ describe("proofs", () => {
     expect(stage({ sentAt: "x", submittedAt: "x" })).toBe("Selects in");
     expect(stage({ sentAt: "x", submittedAt: "x", paid: { session: "s", amount: 1500, at: "x" } })).toBe("Paid");
     expect(stage({ submittedAt: "x", pulledAt: "x" })).toBe("In Lightroom");
+  });
+  it("never takes a Checkout session that was already counted", async () => {
+    const fetch = vi.spyOn(globalThis, "fetch");
+    const p = { token: "t", name: "n", included: 10, price: 15, days: 14, createdAt: "", frames: [], selects: Array.from({ length: 12 }, (_, i) => String(i)), notes: {}, views: 0, paid: { session: "cs_test_A", amount: 1500, at: "" } };
+    expect(await paidFor("sk_test_x", p, "cs_test_A")).toBeNull();
+    expect(fetch).not.toHaveBeenCalled();
+    fetch.mockRestore();
   });
   it("makes 16-character base62 tokens", () => {
     const t = newToken();
