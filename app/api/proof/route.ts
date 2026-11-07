@@ -62,7 +62,7 @@ export async function GET(request: Request) {
     if (!p) return json({ error: "No such gallery." }, 404);
     const sent = p.sentAt ? p : { ...p, closesAt: closesAt(p.days) };
     let { html } = proofMail(sent, p.frames.slice(0, 4).map((f) => ({ id: f.id, bytes: new Uint8Array() })));
-    html = html.replace("cid:name-ink", "/email-name-ink.png").replace(/cid:f-([0-9A-Za-z_-]+)/g, (_, id) => `/proof/${p.token}/f/${id}`);
+    html = html.replace("cid:name-ink", "/email-name-ink.png").replace("cid:name-w", "/email-name-w.png").replace(/cid:f-([0-9A-Za-z_-]+)/g, (_, id) => `/proof/${p.token}/f/${id}`);
     return json({ html, subject: "Your proofs are ready", to: p.email ?? null });
   }
   const token = q.get("token");
