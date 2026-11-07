@@ -111,21 +111,19 @@
   display: inline-block;
   transform: translateY(105%);
 }
-/* `?splash=split` (`split-splash.ts`): the name at the wordmark's size,
-   parting round a 4:5 window of frames, then growing to the screen. */
-.jg-split-name {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  translate: -50% -50%;
-  display: flex;
-  gap: 0.22em;
-  font: 900 1rem / 0.86 var(--display, var(--font-display));
-  letter-spacing: -0.05em;
-  white-space: nowrap;
+/* `?splash=split` (`split-splash.ts`): each letter of the name in a mask
+   of its own box, set where the cover's name has it; a window of frames. */
+.jg-split-ch {
+  position: fixed;
+  left: 0;
+  top: 0;
   text-transform: none;
+  overflow: hidden;
+  white-space: pre;
   color: var(--foreground);
-  opacity: 0;
+}
+.jg-split-ch > span {
+  display: block;
 }
 .jg-split-win {
   position: fixed;
