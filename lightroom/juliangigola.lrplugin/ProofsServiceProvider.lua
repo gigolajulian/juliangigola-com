@@ -28,8 +28,7 @@ local Image = require "Image"
 local bind = LrView.bind
 local share = LrView.share
 
--- shortcut: JG_PROOF_BASE (a Windows env var) points it at a preview build for testing; drop it once proofs are live.
-local SITE = os.getenv("JG_PROOF_BASE") or "https://juliangigola.com"
+local SITE = "https://juliangigola.com"
 local API = SITE .. "/api/proof"
 -- The same GitHub token the website export saves; the site checks it can push to the repo.
 local TOKEN_KEY = "github-token"
