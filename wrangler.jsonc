@@ -72,6 +72,13 @@
 
   // Worker logs, so `wrangler tail` has something to show when a Server
   // Action fails in production.
+  /* Client proof frames (`lib/proofs.ts`): private, no public URL. The
+     Worker serves them at /proof/<token>/f/<id> only while the gallery is
+     open. Created 2026-11-06. */
+  "r2_buckets": [
+    { "binding": "PROOFS", "bucket_name": "jg-proofs" }
+  ],
+
   /* Caps how fast one address can start deposits (`app/api/deposit`), so a
      script cannot fill Stripe with PaymentIntents. Counted per Cloudflare
      location, nothing stored. */
