@@ -107,8 +107,9 @@ export function V3Canvas({ list, onClose }: { list: WorkItem[]; onClose: () => v
             p.f.style.cssText = `width:${W}px;height:${H}px;transform:translate3d(${sx}px,${sy}px,0)`;
           }
       }
+      // Every spare cell hides, also one a relayout already marked stale (i = -1).
       for (let k = n; k < pool.length; k++)
-        if (pool[k].i !== -1) {
+        if (pool[k].f.style.display !== "none") {
           pool[k].f.style.display = "none";
           pool[k].i = -1;
         }
@@ -282,7 +283,8 @@ export function V3Canvas({ list, onClose }: { list: WorkItem[]; onClose: () => v
   return (
     <div className="cv" data-lenis-prevent role="dialog" aria-modal="true" aria-label="Portfolio canvas">
       <div className="cv-field" ref={field} />
-      <div className="cv-top lbl">
+      {/* An open frame has its own Back; the bar would sit under it. */}
+      <div className="cv-top lbl" style={opened ? { visibility: "hidden" } : undefined}>
         <span className="mute">{plural(list.length)}</span>
         <button type="button" className="cv-q" onClick={onClose}>
           Close
