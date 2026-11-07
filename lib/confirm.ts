@@ -13,6 +13,8 @@ import { duration, refundable } from "@/lib/booking-rules";
  * hello@, and only from book@ (an alias of hello@). A failed send is logged, never a
  * failed booking. Look: the mock Julian approved (dark, IBM Plex Mono,
  * one accent, hairlines), table layout because mail clients need it.
+ * Julian (2026-11-06): light by default, dark where the mail app supports
+ * it (prefers-color-scheme). Gmail ignores the query and stays light.
  * ─────────────────────────────────────────────────────────────── */
 
 import { NAME_INK, NAME_W } from "@/lib/email-logo";
@@ -93,10 +95,10 @@ export function confirmMail(c: Confirm) {
   const links = c.manage !== null;
   const preheader = `${c.session}, ${fmt({ weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZoneName: "short" }).format(new Date(c.start)).replace(/ /g, " ")}.${c.deposit ? " Deposit of $100 received." : ""}`;
 
-  const rule = "border-top:1px solid rgba(255,255,255,0.11)";
-  const muted = "color:#92908d";
-  const fg = "color:#f1f0ed";
-  const accent = "color:#50b7b7";
+  const rule = "border-top:1px solid rgba(0,0,0,0.12)";
+  const muted = "color:#515354";
+  const fg = "color:#141211";
+  const accent = "color:#007a7b";
   const label = `font-size:11px;letter-spacing:0.14em;text-transform:uppercase;${accent}`;
   const detail = rows
     .map(([k, v], i) => `<tr><td class="muted${i ? " rule" : ""}" style="${muted};padding:12px 0;width:38%;vertical-align:top${i ? `;${rule}` : ""}">${k}</td><td class="fg${i ? " rule" : ""}" style="${fg};padding:12px 0${i ? `;${rule}` : ""}">${esc(v)}</td></tr>`)
@@ -110,16 +112,16 @@ ${paid.rows.map(([k, v]) => `<tr><td class="muted" style="${muted};padding:3px 0
 </table></td></tr>`
     : "";
 
-  const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="dark light"><meta name="supported-color-schemes" content="dark light">
+  const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark"><meta name="supported-color-schemes" content="light dark">
 <title>You're booked: ${esc(c.session)}</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>body{margin:0;padding:0;background:#0b0a09}.mono{font-family:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace}.ink-l{display:none}
-@media (prefers-color-scheme: light){body,.page{background:#ebedef!important}.fg{color:#141211!important}.muted{color:#515354!important}.accent{color:#007a7b!important}.rule{border-color:rgba(0,0,0,0.12)!important}.ink-d{display:none!important}.ink-l{display:block!important}}</style>
+<style>body{margin:0;padding:0;background:#ebedef}.mono{font-family:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace}.ink-d{display:none}
+@media (prefers-color-scheme: dark){body,.page{background:#0b0a09!important}.fg{color:#f1f0ed!important}.muted{color:#92908d!important}.accent{color:#50b7b7!important}.rule{border-color:rgba(255,255,255,0.11)!important}.ink-l{display:none!important}.ink-d{display:block!important}}</style>
 </head><body>
 <div style="display:none;max-height:0;overflow:hidden">${esc(preheader)}</div>
-<table role="presentation" class="page" width="100%" cellpadding="0" cellspacing="0" style="background:#0b0a09"><tr><td align="center" style="padding:40px 16px">
+<table role="presentation" class="page" width="100%" cellpadding="0" cellspacing="0" style="background:#ebedef"><tr><td align="center" style="padding:40px 16px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px" class="mono">
-<tr><td style="padding-bottom:36px"><img class="ink-d" src="cid:name-w" width="189" height="34" alt="Julian Gigola" style="display:block;border:0"><img class="ink-l" src="cid:name-ink" width="189" height="34" alt="Julian Gigola" style="border:0"></td></tr>
+<tr><td style="padding-bottom:36px"><img class="ink-l" src="cid:name-ink" width="189" height="34" alt="Julian Gigola" style="display:block;border:0"><img class="ink-d" src="cid:name-w" width="189" height="34" alt="Julian Gigola" style="border:0"></td></tr>
 <tr><td class="mono accent" style="${label};padding-bottom:10px">${remind ? "Tomorrow" : "Booked"}</td></tr>
 <tr><td class="mono fg" style="font-size:22px;line-height:1.3;${fg};padding-bottom:16px">${head}</td></tr>
 <tr><td class="mono muted" style="font-size:13px;line-height:1.65;${muted};padding-bottom:32px">${esc(lead)}</td></tr>
