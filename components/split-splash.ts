@@ -97,7 +97,10 @@ export function split(sizes: string[][], heroes: { d: [number, string][]; l: [nu
     }).filter((c) => c.l.textContent !== " ");
     const J = chars[0], G = chars[6];
     const rest = chars.filter((c) => c !== J && c !== G);
-    for (const c of rest) Object.assign(c.l.style, { transform: "translateY(105%)" }), (c.mask.style.visibility = "hidden");
+    for (const c of rest) {
+      c.l.style.transform = "translateY(105%)";
+      c.mask.style.visibility = "hidden";
+    }
     J.mask.style.overflow = G.mask.style.overflow = "visible";
     const jb = J.mask.getBoundingClientRect(), gb = G.mask.getBoundingClientRect();
 
