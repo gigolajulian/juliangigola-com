@@ -7,7 +7,7 @@
  * monogram, J and G as tall as the window; as the hero opens they glide
  * onto their places in the cover's name and the rest of the letters rise
  * in round them, each where the page has it. Nothing is swapped or faded
- * at the hand-over. Preview only, behind the flag.
+ * at the hand-over. The homepage's opening since 2026-11-07 (Julian: "deploy").
  *
  * Written into the page as source and run as the document is read, like
  * the burst (`intro.tsx`): it touches nothing but the browser and its
@@ -162,7 +162,12 @@ export function split(sizes: string[][], heroes: { d: [number, string][]; l: [nu
       Object.assign(c.mask.style, { left: `${b.left}px`, top: `${b.top}px`, width: `${b.width}px`, height: `${b.height}px`, visibility: "visible" });
       return b;
     };
-    for (const c of rest) place(c);
+    for (const c of rest) {
+      place(c);
+      c.mask.style.color = cs.color;
+    }
+    // the ground's ink to the cover name's own (white over the photograph in light, too)
+    for (const c of [J, G]) c.mask.animate([{ color: getComputedStyle(c.mask).color }, { color: cs.color }], { duration: OPEN * 0.35, delay: OPEN * 0.5, easing: "ease", fill: "forwards" }); // once the photograph is under them
     const jt = place(J), gt = place(G);
     J.mask.animate([{ transform: at(jOpen, jt.left, jt.top) }, { transform: "none" }], { duration: OPEN, easing: MOVE, fill: "forwards" });
     G.mask.animate([{ transform: at(gOpen, gt.left, gt.top) }, { transform: "none" }], { duration: OPEN, easing: MOVE, fill: "forwards" });
