@@ -3,6 +3,7 @@
 import * as React from "react";
 import { credentials, KEY_STORE, References } from "@/components/admin-inbox";
 import { LeadHours } from "@/components/lead-hours";
+import { LeadProofs, ProofsDesk } from "@/components/admin-proofs";
 import { LeadUpcoming } from "@/components/lead-upcoming";
 import { TOKEN_STORE } from "@/lib/admin-github";
 import type { Enquiry } from "@/lib/inbox";
@@ -22,9 +23,9 @@ import { balance, DEPOSIT, MAX_LINES, usd, type Invoice, type InvoiceFrom } from
  * open lead side by side. Narrow: the list, then the lead with Back.
  * ─────────────────────────────────────────────────────────────── */
 
-type Filter = "needs" | "open" | "upcoming" | Stage | "snoozed" | "archived" | "trash" | "more" | "new" | "stats" | "money" | "templates" | "hours";
+type Filter = "needs" | "open" | "upcoming" | Stage | "snoozed" | "archived" | "trash" | "more" | "new" | "stats" | "money" | "templates" | "hours" | "proofs";
 /** Views that are not a list of leads. */
-const TOOLS: Filter[] = ["more", "new", "stats", "money", "templates", "hours"];
+const TOOLS: Filter[] = ["more", "new", "stats", "money", "templates", "hours", "proofs"];
 
 const DAY = 864e5;
 const now = () => Date.now();
@@ -253,6 +254,8 @@ export function AdminLeads() {
         <SideLink on={filter === "money"} onClick={() => pick("money")}>Money</SideLink>
         <SideLink on={filter === "templates"} onClick={() => pick("templates")}>Templates</SideLink>
         <SideLink on={false} onClick={doExport}>Export CSV</SideLink>
+        <SideGroup>Proofs</SideGroup>
+        <SideLink on={filter === "proofs"} onClick={() => pick("proofs")}>Galleries</SideLink>
         <SideGroup>Booking</SideGroup>
         <SideLink on={filter === "hours"} onClick={() => pick("hours")}>Hours</SideLink>
         <div className="mt-auto grid border-t border-border pt-2">{device}</div>
@@ -318,7 +321,7 @@ export function AdminLeads() {
             </ul>
             <ul className="grid">
               <li><p className="px-1 pb-1 font-mono text-[11.5px] uppercase tracking-[0.08em] text-muted-foreground">Tools</p></li>
-              {([["new", "New lead"], ["stats", "Stats"], ["money", "Money"], ["templates", "Templates"]] as const).map(([f, t]) => (
+              {([["new", "New lead"], ["stats", "Stats"], ["money", "Money"], ["templates", "Templates"], ["proofs", "Proofs"]] as const).map(([f, t]) => (
                 <li key={f}>
                   <button type="button" onClick={() => pick(f)} className="flex min-h-[52px] w-full items-center justify-between border-b border-border px-1 text-left text-[17px]">
                     {t}<span aria-hidden="true" className="font-mono text-[13px] text-muted-foreground">›</span>
@@ -346,6 +349,8 @@ export function AdminLeads() {
           <TemplatesEditor call={call} templates={templates} saved={setTemplates} />
         ) : filter === "hours" ? (
           <LeadHours />
+        ) : filter === "proofs" ? (
+          <ProofsDesk />
         ) : filter === "upcoming" && !words ? (
           <LeadUpcoming
             leads={leads.filter((l) => l.when && !pass(l, "trash"))}
@@ -692,12 +697,12 @@ function pass(l: LeadSummary, f: Filter) {
   if (aside(l)) return false;
   if (f === "needs") return needsMe(l);
   if (f === "upcoming") return !!l.when && Date.parse(l.when) > now() - 2 * 3600e3 && !closed(l.stage);
-  if (f === "more" || f === "hours") return false;
+  if (f === "more" || f === "hours" || f === "proofs") return false;
   if (f === "snoozed") return snoozed(l);
   if (f === "open") return !closed(l.stage);
   return l.stage === f && !snoozed(l);
 }
-const LABEL: Partial<Record<Filter, string>> = { needs: "Your move", open: "All open", upcoming: "Upcoming", snoozed: "Snoozed", archived: "Archived", trash: "Trash", more: "More", new: "New lead", stats: "Stats", money: "Money", templates: "Templates", hours: "Hours" };
+const LABEL: Partial<Record<Filter, string>> = { needs: "Your move", open: "All open", upcoming: "Upcoming", snoozed: "Snoozed", archived: "Archived", trash: "Trash", more: "More", new: "New lead", stats: "Stats", money: "Money", templates: "Templates", hours: "Hours", proofs: "Proofs" };
 const label = (f: Filter) => LABEL[f] ?? f;
 
 /** Deletes every lead in the trash for good, after a second press. */
@@ -891,6 +896,8 @@ function Detail({ summary, call, onChange, onBack, reload, templates, others }: 
           ))}
         </div>
       </fieldset>
+
+      <LeadProofs email={l.email} />
 
       <LeadCrm l={l} full={lead} patch={patch} others={others} templates={templates} />
 
