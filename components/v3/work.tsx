@@ -8,6 +8,7 @@ import type { Flip as FlipT } from "gsap/Flip";
 import { V3Foot } from "@/components/v3/chrome";
 import DISC from "@/lib/discipline-order.json";
 import { mplan, GSAP_OUT } from "@/lib/mplan";
+import { V3Canvas } from "@/components/v3/canvas";
 import { launchSpeed, stepSpring, springSettled, frameDt } from "@/lib/motion/spring";
 
 /* JG V3 Portfolio (master v39, /work): search, discipline chips, and the
@@ -462,6 +463,14 @@ export function V3Work({
   }, [chip]);
   const [view, setView] = React.useState<"grid" | "strip" | "color">("grid");
   const back = React.useRef<"grid" | "strip">("grid");
+  /* `?canvas=1` prototype: a fourth view button opens the drag canvas. */
+  const [canvasOk, setCanvasOk] = React.useState(false);
+  const [canvas, setCanvas] = React.useState(false);
+  const closeCanvas = React.useCallback(() => setCanvas(false), []);
+  React.useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setCanvasOk(new URLSearchParams(location.search).get("canvas") === "1");
+  }, []);
   /* Grid, strip and color views, and the discipline chips: the covers on
      screen fly from where they were to where they land, new ones fade in
      (GSAP Flip). Only with ?v3motion. */
@@ -918,6 +927,18 @@ export function V3Work({
       >
         {VIEWS[2][2]}
       </button>
+      {canvasOk ? (
+        <button type="button" aria-pressed={canvas} aria-label="Canvas view" title="Canvas view" onClick={() => setCanvas(true)}>
+          <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+            <rect x="1.5" y="3" width="4" height="5" />
+            <rect x="6.5" y="1" width="4" height="5" />
+            <rect x="11.5" y="4" width="3" height="5" />
+            <rect x="1.5" y="9.5" width="4" height="5" />
+            <rect x="6.5" y="7.5" width="4" height="5" />
+            <rect x="11.5" y="10.5" width="3" height="4" />
+          </svg>
+        </button>
+      ) : null}
       {[VIEWS[1], VIEWS[0]].map(([v, label, icon]) => (
         <button
           key={v}
@@ -1145,6 +1166,7 @@ export function V3Work({
             </div>,
             document.getElementById("hdr-tools")!,
           )}
+        {canvas ? createPortal(<div className="v3"><V3Canvas list={list} onClose={closeCanvas} /></div>, document.body) : null}
         <V3Foot />
       </section>
     </div>
