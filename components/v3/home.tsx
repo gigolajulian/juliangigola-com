@@ -47,7 +47,7 @@ function Hero() {
     const root = document.documentElement;
     let t: ReturnType<typeof setInterval> | undefined;
     const go = () => (t = setInterval(() => setI((n) => (n + 1) % HERO.length), 6000));
-    if (!["sand", "burst"].includes(root.dataset.splash ?? "") || !root.hasAttribute("data-intro")) go();
+    if (!["sand", "burst", "split"].includes(root.dataset.splash ?? "") || !root.hasAttribute("data-intro")) go();
     const mo = new MutationObserver(() => {
       if (!t && !root.hasAttribute("data-intro")) go();
     });
