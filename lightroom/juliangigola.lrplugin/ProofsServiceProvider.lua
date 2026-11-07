@@ -248,10 +248,17 @@ local function gallery(remote)
   return p
 end
 
+-- LrPublishedPhoto has no way back to its collection, so find the
+-- gallery of this service that holds the first photo.
+-- shortcut: a frame in two proof galleries reads the first one; match on remoteId if that ever happens.
 local function remoteOf(arrayOfPhotoInfo)
   local first = arrayOfPhotoInfo[1]
-  local pc = first and first.publishedPhoto and first.publishedPhoto:getPublishedCollection()
-  return pc and pc:getRemoteId(), pc and pc:getName()
+  if not (first and first.photo) then return end
+  for _, pc in ipairs(first.photo:getContainedPublishedCollections()) do
+    if pc:getService():getPluginId() == _PLUGIN.id and pc:getRemoteId() then
+      return pc:getRemoteId(), pc:getName()
+    end
+  end
 end
 
 function provider.getCommentsFromPublishedCollection(publishSettings, arrayOfPhotoInfo, commentCallback)
