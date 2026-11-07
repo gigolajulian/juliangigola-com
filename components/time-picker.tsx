@@ -9,6 +9,7 @@ import { ReferencePicks } from "@/components/reference-picks";
 import { isPaid } from "@/lib/paid";
 import { ownEngine } from "@/lib/booking-rules";
 import { Orb, ORB_ROUND } from "@/components/orb";
+import { JgLoad } from "@/components/jg-load";
 import { Calendar, dlabel, duration, fmt, type Shell } from "@/components/v3/flow";
 
 /* Goo (Julian, 2026-10-20, OKd 10-21) on the card's buttons, times and
@@ -177,10 +178,19 @@ export function TimePicker({
   /* The picker is not drawn while held: the effects that measure it
      re-run on `held`, or they ran on nothing and the week never fitted. */
   const [held, setHeld] = React.useState(true);
+  /* J and G fill while the times load (jg-load.tsx) and let go of the
+     picker themselves; `?loader=orb` keeps the orb and its round. */
+  const [orb, setOrb] = React.useState(false);
   React.useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setOrb(new URLSearchParams(window.location.search).get("loader") === "orb");
+  }, []);
+  React.useEffect(() => {
+    if (!orb) return;
     const t = window.setTimeout(() => setHeld(false), ORB_ROUND.composing);
     return () => window.clearTimeout(t);
-  }, []);
+  }, [orb]);
+  const jg = <JgLoad done={state === "ready" && !!days} onDone={() => setHeld(false)} className="min-h-[16rem] w-full" />;
   // The editorial card opens on its month (2026-10-20); `?classic` keeps the week.
   const [view, setView] = React.useState<"week" | "month">(() => (typeof location !== "undefined" && new URLSearchParams(location.search).has("classic") ? "week" : "month"));
   const [anchor, setAnchor] = React.useState(() => new Date()); // the week or month on show
@@ -937,7 +947,7 @@ export function TimePicker({
   const v3plain = (body: React.ReactNode) => v3!.shell({ steps: v3steps, at: 1, head: v3paid ? "Book a session" : v3!.name === "Consultation" ? "Book a consultation" : "Book a call", sub: v3sub, body, sum: [] });
   if (state === "fallback") return v3 ? v3plain(fallback) : <>{fallback}</>;
   const waiting = <p role="status" className="lbl mute">Loading availability</p>;
-  if (v3 && (state === "loading" || !days)) return v3plain(waiting);
+  if (v3 && (state === "loading" || !days || (held && !orb))) return v3plain(orb ? waiting : jg);
   if (v3 && !pick) return v3plain(Object.values(days ?? {}).some((l) => l.length) ? waiting : <p className="lbl mute">No open times in the next few months. <a href="mailto:hello@juliangigola.com">hello@juliangigola.com</a></p>);
   if (state === "loading" || !days || (held && state === "ready" && !v3)) {
     return (
@@ -951,10 +961,14 @@ export function TimePicker({
             (QA on #143, Julian: the orb in the center of the card): lifted
             half that line (`--card-lift`, book-here.tsx). */}
         {/* Julian (2026-10-14): what it is waiting for, under the orb. */}
-        <p role="status" className="pointer-events-none absolute inset-0 flex -translate-y-[var(--card-lift,0px)] flex-col items-center justify-center gap-4 text-muted-foreground">
-          <Orb state="composing" size={64} />
-          <span className="label animate-[jg-fade-in_300ms_ease-out_300ms_both]">Loading availability</span>
-        </p>
+        {orb ? (
+          <p role="status" className="pointer-events-none absolute inset-0 flex -translate-y-[var(--card-lift,0px)] flex-col items-center justify-center gap-4 text-muted-foreground">
+            <Orb state="composing" size={64} />
+            <span className="label animate-[jg-fade-in_300ms_ease-out_300ms_both]">Loading availability</span>
+          </p>
+        ) : (
+          <div className="pointer-events-none absolute inset-0 flex -translate-y-[var(--card-lift,0px)] items-center justify-center">{jg}</div>
+        )}
       </div>
     );
   }
