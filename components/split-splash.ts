@@ -19,7 +19,7 @@ export function split(sizes: string[][], heroes: { d: [number, string][]; l: [nu
   const layer = document.querySelector<HTMLElement>("#jg-intro .jg-sheet-wrap");
   if (!layer) return;
 
-  const UP = 500; // the monogram coming up from dim
+  const UP = 800; // the monogram fading in from nothing (Julian, 2026-11-07)
   const PART = 520; // J and G parting, the window opening
   const BEAT = 120; // one frame in the window
   const HOLD = 260; // the hero in the window before it opens
@@ -121,7 +121,7 @@ export function split(sizes: string[][], heroes: { d: [number, string][]; l: [nu
     J.mask.style.transform = at(jClosed);
     G.mask.style.transform = at(gClosed);
 
-    for (const c of [J, G]) c.mask.animate([{ opacity: 0.2 }, { opacity: 1 }], { duration: UP, easing: OUT, fill: "forwards" });
+    for (const c of [J, G]) c.mask.animate([{ opacity: 0 }, { opacity: 1 }], { duration: UP, easing: "ease", fill: "both" });
     await sleep(UP);
     while (ready.size < pics.length + 1 && performance.now() - start < WAIT) await sleep(30);
     const run = pics.filter((p) => ready.has(p));
