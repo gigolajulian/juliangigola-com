@@ -388,7 +388,9 @@ export function V3Canvas({ list, onClose }: { list: WorkItem[]; onClose: () => v
           <div className="cv-meta">
             <div className="lbl mute">{p.d.join(", ")}</div>
             <h2>{p.n}</h2>
-            <Link className="lbl" href={`/portfolio/${p.s}`}>
+            {/* The canvas comes down before the page crossing: WebKit crashed snapshotting the
+                live field into the view transition (4 of 4, iPhone, iPad and desktop). */}
+            <Link className="lbl" href={`/portfolio/${p.s}`} onClick={onClose}>
               Open project
             </Link>
           </div>
