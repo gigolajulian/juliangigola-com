@@ -44,7 +44,8 @@ export default async function ProofPage({ params, searchParams }: { params: Prom
     const ok = await paidFor(env.STRIPE_SECRET_KEY, p, session).catch(() => null);
     if (ok) p = await finalize(env, env.INBOX, s, p, ok);
   }
-  if (!paid) await writeProof(env.INBOX, s, { ...p, views: p.views + 1 });
+  // Julian's own look before sending is not a client view.
+  if (!paid && p.sentAt) await writeProof(env.INBOX, s, { ...p, views: p.views + 1, firstViewAt: p.firstViewAt ?? new Date().toISOString() });
 
   return <ProofGallery token={token} initial={publicView(p)} />;
 }

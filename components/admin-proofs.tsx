@@ -3,7 +3,7 @@
 import * as React from "react";
 import { credentials, KEY_STORE } from "@/components/admin-inbox";
 import { canonical } from "@/lib/lead-crypto";
-import { extras, type Proof } from "@/lib/proofs";
+import { extras, stage, STAGES, type Proof } from "@/lib/proofs";
 import { cn } from "@/lib/utils";
 
 /* ── proofs in /admin Leads ───────────────────────────────────────
@@ -39,7 +39,44 @@ function useProofs() {
   return { list, error, load };
 }
 
-const status = (p: Proof) => (p.submittedAt ? "Selects in" : p.checkout ? "Paying" : p.sentAt ? "Waiting on client" : "Draft");
+/** Seven short bars, the current stage in the accent. */
+function Track({ p }: { p: Proof }) {
+  const at = STAGES.indexOf(stage(p));
+  return (
+    <span className="inline-flex gap-[3px] align-middle" aria-hidden="true">
+      {STAGES.map((s, i) => <span key={s} className={cn("h-1 w-3.5", i === at ? "bg-accent" : i < at ? "bg-muted-foreground" : "bg-border")} />)}
+    </span>
+  );
+}
+
+const closed = (p: Proof) => !!p.closesAt && Date.parse(p.closesAt) < Date.now();
+const status = (p: Proof) => `${stage(p)}${p.checkout && !p.submittedAt ? ", paying" : ""}${closed(p) ? " · closed" : ""}`;
+
+/** Every step with its time, for the card on a lead. */
+function Timeline({ p }: { p: Proof }) {
+  const x = extras(p.selects.length, p.included, p.price);
+  const notes = Object.keys(p.notes).length;
+  const steps: [string, string, string | undefined][] = [
+    ["Draft", `Published from Lightroom · ${p.frames.length} frames`, p.createdAt],
+    ["Sent", p.email ? `Proof mail to ${p.email}` : "Not sent", p.sentAt],
+    ["Opened", p.views ? `${p.views} ${p.views === 1 ? "view" : "views"}` : "Not opened", p.firstViewAt],
+    ["Selecting", `${p.selects.length} selected${notes ? `, ${notes} notes` : ""}`, p.firstSelectAt],
+    ["Selects in", x.n ? `Sent their selects · ${x.n} extra` : "Sent their selects", p.submittedAt],
+    ...(x.n || p.paid ? [["Paid", p.paid ? `$${(p.paid.amount / 100).toFixed(2)} · Stripe Checkout` : "Not paid", p.paid?.at] as [string, string, string | undefined]] : []),
+    ["In Lightroom", "Labels and Comments pulled on Publish", p.pulledAt],
+  ];
+  return (
+    <ol className="grid border-t border-border font-mono text-[12.5px]">
+      {steps.map(([k, v, at]) => (
+        <li key={k} className="grid grid-cols-[110px_1fr_auto] gap-3 border-b border-border py-2 max-sm:grid-cols-[1fr_auto]">
+          <b className={cn("font-medium", !at && "text-muted-foreground")}>{k}</b>
+          <span className="text-muted-foreground max-sm:hidden">{v}</span>
+          <i className="not-italic text-muted-foreground">{at ? when(at) : "waiting"}</i>
+        </li>
+      ))}
+    </ol>
+  );
+}
 
 /** The Proofs tool: every gallery, newest first. */
 export function ProofsDesk() {
@@ -47,8 +84,23 @@ export function ProofsDesk() {
   if (error) return <p className="px-1 py-10 text-[15px] text-muted-foreground lg:px-5">{error}</p>;
   if (!list) return <p className="px-1 py-10 text-[15px] text-muted-foreground lg:px-5">Loading.</p>;
   if (!list.length) return <p className="px-1 py-10 text-[15px] text-muted-foreground lg:px-5">No galleries yet. Publish a collection from Lightroom under Client proofs.</p>;
+  const open = list.filter((p) => !closed(p));
+  const waiting = open.filter((p) => p.sentAt && !p.submittedAt).length;
+  const toPull = list.filter((p) => p.submittedAt && !p.pulledAt).length;
   return (
     <div className="grid gap-4 px-1 py-4 lg:px-5">
+      <p className={mono}>{open.length} open · {list.length - open.length} closed · {waiting} waiting on client · {toPull} selects to pull in Lightroom</p>
+      <ul className="grid border-t border-border">
+        {list.map((p) => (
+          <li key={p.token} className="grid gap-1 border-b border-border py-3">
+            <span className="flex flex-wrap items-center justify-between gap-2">
+              <span className="text-[15px] font-medium">{p.name}</span>
+              <span className="flex items-center gap-2.5"><Track p={p} /><span className="font-mono text-[12px]">{status(p)}</span></span>
+            </span>
+            <span className={mono}>{p.email ?? "No client email"}{p.closesAt ? ` · closes ${when(p.closesAt)}` : ""}</span>
+          </li>
+        ))}
+      </ul>
       {list.map((p) => <ProofCard key={p.token} p={p} changed={load} />)}
     </div>
   );
@@ -112,7 +164,7 @@ function ProofCard({ p, changed }: { p: Row; changed: () => void }) {
     <article className="grid gap-3 rounded-[14px] border border-border p-4">
       <header className="flex flex-wrap items-baseline justify-between gap-2">
         <h3 className="text-[17px] font-medium">{p.name}</h3>
-        <span className={cn("font-mono text-[11.5px] uppercase tracking-[0.08em]", p.submittedAt ? "text-accent" : "text-muted-foreground")}>{status(p)}</span>
+        <span className="flex items-center gap-2.5"><Track p={p} /><span className={cn("font-mono text-[11.5px] uppercase tracking-[0.08em]", p.submittedAt ? "text-accent" : "text-muted-foreground")}>{status(p)}</span></span>
       </header>
       {thumbs.length ? (
         <div className="grid grid-cols-6 gap-1">
@@ -128,6 +180,8 @@ function ProofCard({ p, changed }: { p: Row; changed: () => void }) {
         {p.closesAt ? ` · closes ${when(p.closesAt)}` : ""}
         {p.sentAt && !p.submittedAt ? ` · opened ${p.views} ${p.views === 1 ? "time" : "times"} · ${p.selects.length} selected so far` : ""}
       </p>
+
+      <Timeline p={p} />
 
       {p.submittedAt ? (
         <>

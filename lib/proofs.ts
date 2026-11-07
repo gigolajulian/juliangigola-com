@@ -51,7 +51,23 @@ export type Proof = {
   /** When the client hit Send: selects are locked from here. */
   submittedAt?: string;
   views: number;
+  /** The pipeline in /admin: first client view after sending, first select, and when Lightroom pulled the selects. */
+  firstViewAt?: string;
+  firstSelectAt?: string;
+  pulledAt?: string;
 };
+
+export const STAGES = ["Draft", "Sent", "Opened", "Selecting", "Selects in", "Paid", "In Lightroom"] as const;
+export type ProofStage = (typeof STAGES)[number];
+
+/** How far a gallery has got. "Paid" only counts when there were extras to pay for. */
+export function stage(p: Pick<Proof, "sentAt" | "firstViewAt" | "firstSelectAt" | "submittedAt" | "paid" | "pulledAt">): ProofStage {
+  if (p.pulledAt) return "In Lightroom";
+  if (p.submittedAt) return p.paid ? "Paid" : "Selects in";
+  if (p.firstSelectAt) return "Selecting";
+  if (p.firstViewAt) return "Opened";
+  return p.sentAt ? "Sent" : "Draft";
+}
 
 export const DEFAULTS = { included: 10, price: 15, days: 14 } as const;
 

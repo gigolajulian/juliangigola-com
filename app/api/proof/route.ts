@@ -67,8 +67,14 @@ export async function GET(request: Request) {
   }
   const token = q.get("token");
   if (!isToken(token)) return json({ error: "Which gallery?" }, 400);
-  const p = await readProof(g.kv, g.s, token);
-  return p ? json({ proof: p, url: proofUrl(p.token) }) : json({ error: "No such gallery." }, 404);
+  let p = await readProof(g.kv, g.s, token);
+  if (!p) return json({ error: "No such gallery." }, 404);
+  // Only the Lightroom plugin reads one gallery: once it has the sent selects, they are back in Lightroom.
+  if (p.submittedAt && !p.pulledAt) {
+    p = { ...p, pulledAt: new Date().toISOString() };
+    await writeProof(g.kv, g.s, p);
+  }
+  return json({ proof: p, url: proofUrl(p.token) });
 }
 
 export async function POST(request: Request) {
@@ -107,7 +113,7 @@ export async function POST(request: Request) {
     return json({ proof: sent });
   }
   if (b.action === "reopen") {
-    const next: Proof = { ...p, submittedAt: undefined };
+    const next: Proof = { ...p, submittedAt: undefined, pulledAt: undefined };
     await writeProof(g.kv, g.s, next);
     return json({ proof: next });
   }

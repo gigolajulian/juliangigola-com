@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cleanNotes, cleanSelects, cleanSettings, extras, isOpen, isToken, newToken, owed } from "@/lib/proofs";
+import { cleanNotes, cleanSelects, cleanSettings, extras, isOpen, isToken, newToken, owed, stage } from "@/lib/proofs";
 
 const frames = ["a", "b", "c"].map((id) => ({ id, file: `${id}.jpg`, w: 1, h: 1 }));
 
@@ -12,6 +12,13 @@ describe("proofs", () => {
     const base = { included: 10, price: 15, selects: Array.from({ length: 13 }, (_, i) => String(i)) };
     expect(owed({ ...base, paid: undefined })).toEqual({ n: 3, cents: 4500 });
     expect(owed({ ...base, paid: { session: "s", amount: 3000, at: "" } })).toEqual({ n: 1, cents: 1500 });
+  });
+  it("reads the pipeline stage", () => {
+    expect(stage({})).toBe("Draft");
+    expect(stage({ sentAt: "x", firstViewAt: "x" })).toBe("Opened");
+    expect(stage({ sentAt: "x", submittedAt: "x" })).toBe("Selects in");
+    expect(stage({ sentAt: "x", submittedAt: "x", paid: { session: "s", amount: 1500, at: "x" } })).toBe("Paid");
+    expect(stage({ submittedAt: "x", pulledAt: "x" })).toBe("In Lightroom");
   });
   it("makes 16-character base62 tokens", () => {
     const t = newToken();

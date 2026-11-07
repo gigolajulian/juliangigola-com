@@ -39,7 +39,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ to
   if (g.p.submittedAt) return json({ error: "Selects are already in." }, 409);
   const b = await body(request);
   const selects = cleanSelects(b.selects, g.p.frames);
-  const next = { ...g.p, selects, notes: cleanNotes(b.notes, selects) };
+  const next = { ...g.p, selects, notes: cleanNotes(b.notes, selects), firstSelectAt: g.p.firstSelectAt ?? (selects.length && g.p.sentAt ? new Date().toISOString() : undefined) };
   await writeProof(g.kv, g.s, next);
   return json(publicView(next));
 }
