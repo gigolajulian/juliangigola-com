@@ -321,7 +321,8 @@ export function V3Canvas({ list, onClose }: { list: WorkItem[]; onClose: () => v
               Open project
             </Link>
           </div>
-          <button type="button" className="cv-q cv-x lbl" onClick={() => setOpened(null)}>
+          {/* `absolute` opts out of work-view.css's touch rule, which sets every dialog button relative. */}
+          <button type="button" className="cv-q cv-x lbl absolute" onClick={() => setOpened(null)}>
             Back
           </button>
         </div>
