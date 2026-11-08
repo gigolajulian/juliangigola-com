@@ -793,14 +793,23 @@ export function V3Work({
     let ty: [number, number] | null = null;
     let moves: { t: number; d: number }[] = [];
     let glide = 0;
+    // A tap that stopped a glide only stops it, as on iOS: no cover opens.
+    let caught = false;
     const halt = () => {
       cancelAnimationFrame(glide);
       glide = 0;
     };
     const start = (e: TouchEvent) => {
+      caught = glide !== 0;
       halt();
       moves = [];
       ty = [e.touches[0].clientX, e.touches[0].clientY];
+    };
+    const click = (e: MouseEvent) => {
+      if (!caught) return;
+      caught = false;
+      e.preventDefault();
+      e.stopPropagation();
     };
     const move = (e: TouchEvent) => {
       if (!wide.matches || !ty) return;
@@ -816,6 +825,8 @@ export function V3Work({
     };
     const end = (e: TouchEvent) => {
       ty = null;
+      // A swipe that began on a glide is not a tap; let the next click through.
+      if (moves.length > 1) caught = false;
       if (!wide.matches || e.touches.length || moves.length < 2) return;
       const last = moves[moves.length - 1];
       // Held still before lifting: no throw.
@@ -845,6 +856,7 @@ export function V3Work({
     s.addEventListener("touchmove", move, { passive: false });
     s.addEventListener("touchend", end, { passive: true });
     s.addEventListener("touchcancel", halt, { passive: true });
+    s.addEventListener("click", click, true);
     return () => {
       halt();
       removeEventListener("wheel", wheel);
@@ -852,6 +864,7 @@ export function V3Work({
       s.removeEventListener("touchmove", move);
       s.removeEventListener("touchend", end);
       s.removeEventListener("touchcancel", halt);
+      s.removeEventListener("click", click, true);
     };
   }, [view, cells, stripBar]);
 
