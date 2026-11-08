@@ -18,7 +18,9 @@ const HERO_FIRST = { d: loader({ src: HERO[0].d.src, width: 640 }), l: loader({ 
    goes as the page's whole ladder (`deviceSizes` in next.config.ts), so
    the splash asks for the very copy the hero's <Image> and its preload
    will (`home.tsx`): one download, where 1080 against 1280 was two. */
-const sized = (run: string[]) => run.map((src) => [loader({ src, width: 640 }), loader({ src, width: 1080 })]);
+/* At 85, not the site's 78: these are already the `-w1080` copies, so 78
+   was a second pass of loss on a frame the window holds up for a second. */
+const sized = (run: string[]) => run.map((src) => [loader({ src, width: 640, quality: 85 }), loader({ src, width: 1080, quality: 85 })]);
 const LADDER = [640, 1280, 1920, 2500];
 const HERO_FULL = {
   d: LADDER.map((width): [number, string] => [width, loader({ src: HERO[0].d.src, width })]),

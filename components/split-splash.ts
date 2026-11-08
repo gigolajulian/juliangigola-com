@@ -43,11 +43,17 @@ export function split(sizes: string[][], heroes: { d: [number, string][]; l: [nu
 
   const ready = new Set<HTMLImageElement>();
   hero.decode().then(() => ready.add(hero), () => {});
+  /* The window's own width in device pixels (the same sum as below), and
+     the copy that covers it with room: the 640 only while it holds 1.2
+     pixels to each one drawn. Always the 640 was soft on a laptop: a
+     window 302px wide on a 2x screen is 605 device pixels (Julian: the
+     photos look low quality on the splash). */
+  const winPx = (innerWidth < 700 ? innerWidth * 0.5 : innerHeight * 0.42) * 0.8 * devicePixelRatio;
   const pics = sizes.map((f) => {
     const i = document.createElement("img");
     i.alt = "";
     i.fetchPriority = "high";
-    i.src = f[0];
+    i.src = winPx * 1.2 <= 640 ? f[0] : f[1];
     i.decode().then(() => ready.add(i), () => {});
     win.append(i);
     return i;
