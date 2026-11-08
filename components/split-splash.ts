@@ -139,16 +139,32 @@ export function split(sizes: string[][], heroes: { d: [number, string][]; l: [nu
     await sleep(BEAT);
 
     /* The hero takes the window's place, then its box grows into the
-       cover's photograph, `cover` keeping it filled all the way. */
+       cover's photograph, cropped as `cover` would all the way. Drawn with
+       transform and clip-path on the photograph at its final size, never
+       its box: animating left/top/width/height left Safari painting it a
+       frame behind, a 1 to 2px sliver at the edge (JG - MAC, v3.0.111).
+       Sampled, and the one easing runs over the samples, as the burst. */
     const real = [...document.querySelectorAll<HTMLImageElement>(".a-cover .slides img.on")].find((i) => i.offsetWidth > 0);
     const r = (real ?? document.querySelector(".a-cover .slides"))?.getBoundingClientRect();
-    const rect = (x: number, y: number, bw: number, bh: number) => ({ left: `${x}px`, top: `${y}px`, width: `${bw}px`, height: `${bh}px` });
-    if (r && ready.has(hero)) {
-      Object.assign(hero.style, rect(wx, wy, w, h), { objectPosition: real ? getComputedStyle(real).objectPosition : "50% 50%", opacity: "1" });
+    if (r && ready.has(hero) && hero.naturalWidth > 0) {
+      const a = hero.naturalWidth / hero.naturalHeight;
+      const pos = (real ? getComputedStyle(real).objectPosition : "50% 50%").split(" ");
+      const off = (v = "50%", room: number) => (v.endsWith("%") ? (room * parseFloat(v)) / 100 : parseFloat(v));
+      // the photograph as the page draws it, `cover` in the cover's box
+      const dw = Math.max(r.width, r.height * a), dh = dw / a;
+      const fx = r.left + off(pos[0], r.width - dw), fy = r.top + off(pos[1], r.height - dh);
+      const lerp = (x: number, y: number, p: number) => x + (y - x) * p;
+      const frame = (p: number): Keyframe => {
+        const bl = lerp(wx, r.left, p), bt = lerp(wy, r.top, p), bw = lerp(w, r.width, p), bh = lerp(h, r.height, p);
+        const k = Math.max(bw, bh * a) / dw; // the drawn photograph's scale in this box
+        const ix = bl + off(pos[0], bw - dw * k), iy = bt + off(pos[1], bh - dh * k);
+        const L = (bl - ix) / k, T = (bt - iy) / k;
+        return { transform: `translate(${ix - fx}px, ${iy - fy}px) scale(${k})`, clipPath: `inset(${T}px ${dw - L - bw / k}px ${dh - T - bh / k}px ${L}px)` };
+      };
+      Object.assign(hero.style, { left: `${fx}px`, top: `${fy}px`, width: `${dw}px`, height: `${dh}px`, transformOrigin: "0 0", objectFit: "fill" }, frame(0), { opacity: "1" });
       for (const p of run) p.style.opacity = "0";
       await sleep(HOLD);
-      // shortcut: animates the box (layout) on one fixed element for 1s; move to transform + clip if a phone drops frames
-      hero.animate([rect(wx, wy, w, h), rect(r.left, r.top, r.width, r.height)], { duration: OPEN, easing: MOVE, fill: "forwards" });
+      hero.animate(Array.from({ length: 25 }, (_, i) => frame(i / 24)), { duration: OPEN, easing: MOVE, fill: "forwards" });
     } else {
       win.animate([{ opacity: 1 }, { opacity: 0 }], { duration: OPEN / 2, easing: OUT, fill: "forwards" });
     }
@@ -188,5 +204,6 @@ export function split(sizes: string[][], heroes: { d: [number, string][]; l: [nu
     await sleep(1500);
     delete root.dataset.landing;
     delete root.dataset.landed;
+    delete root.dataset.splash; // its rules all wait on data-intro or data-landing, both gone (JG - MAC)
   })();
 }
