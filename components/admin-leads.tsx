@@ -15,6 +15,12 @@ import { endDay, LicenceField, LicenceList } from "@/components/lead-licence";
 import { balance, DEPOSIT, MAX_LINES, usd, type Invoice, type InvoiceFrom } from "@/lib/invoice";
 import { LEAD_KEYS, leadKey, typingIn } from "@/lib/lead-keys";
 
+// The /admin tabs the One Desk folds in, loaded only when opened.
+const AdminTraffic = React.lazy(() => import("@/components/admin-traffic").then((m) => ({ default: m.AdminTraffic })));
+const AdminSeo = React.lazy(() => import("@/components/admin-seo").then((m) => ({ default: m.AdminSeo })));
+/** Site: the /admin editor's own tabs, opened there (`?view=`), since they need the server's project data. */
+const SITE: [string, string][] = [["Pages", "/admin?view=home"], ["Work", "/admin?view=projects"], ["Motion", "/admin?view=video"]];
+
 /* ── the lead desk ────────────────────────────────────────────────
  * Julian (2026-11-03, PLAN-lead-desk.md, mock v3): every inquiry, call
  * and booking as one row per person, with where it stands and the one
@@ -26,12 +32,12 @@ import { LEAD_KEYS, leadKey, typingIn } from "@/lib/lead-keys";
  * open lead side by side. Narrow: the list, then the lead with Back.
  * ─────────────────────────────────────────────────────────────── */
 
-type Filter = "needs" | "open" | "upcoming" | Stage | "snoozed" | "archived" | "trash" | "more" | "new" | "stats" | "money" | "templates" | "hours" | "proofs" | "licences";
+type Filter = "today" | "traffic" | "seo" | "needs" | "open" | "upcoming" | Stage | "snoozed" | "archived" | "trash" | "more" | "new" | "stats" | "money" | "templates" | "hours" | "proofs" | "licences";
 /** Views that are not a list of leads. */
 /** Pull-to-refresh: how far the finger travels (px) to commit, and the most the pull shows. iOS rubber-band already halves it at the top. */
 const PULL_AT = 56;
 const PULL_MAX = 80;
-const TOOLS: Filter[] = ["more", "new", "stats", "money", "templates", "hours", "proofs", "licences"];
+const TOOLS: Filter[] = ["today", "traffic", "seo", "more", "new", "stats", "money", "templates", "hours", "proofs", "licences"];
 
 const DAY = 864e5;
 const BOARD_STORE = "jg-leads-board";
@@ -132,7 +138,9 @@ function mailto(to: string, subject: string, body: string, quote?: { name: strin
 export function AdminLeads() {
   const [leads, setLeads] = React.useState<LeadSummary[] | null>(null);
   const [fresh, setFresh] = React.useState<Lead | null>(null);
-  const [filter, setFilter] = React.useState<Filter>("needs");
+  /** `?desk`: the One Desk (Today first, the /admin tabs folded in), opt-in until Julian says yes. */
+  const [desk] = React.useState(() => typeof window !== "undefined" && new URLSearchParams(location.search).has("desk"));
+  const [filter, setFilter] = React.useState<Filter>(desk ? "today" : "needs");
   const [open, setOpen] = React.useState<string | null>(null);
   // The row a phone came back from: the list was hidden, so focus fell to the body.
   const back = React.useRef<string | null>(null);
@@ -287,7 +295,7 @@ export function AdminLeads() {
     .filter((l) => matches(l, words))
     .sort(filter === "upcoming" ? (a, b) => a.when!.localeCompare(b.when!) : (a, b) => b.lastAt.localeCompare(a.lastAt));
   const current = leads.find((l) => l.id === open);
-  const tab = tabOf(filter);
+  const tab = desk && filter === "upcoming" ? "more" : tabOf(filter);
   const tool = TOOLS.includes(filter);
   const needs = count("needs");
   const pick = (f: Filter) => { setFilter(f); setOpen(null); scrollTo(0, 0); };
@@ -342,12 +350,34 @@ export function AdminLeads() {
       className={cn(
         "normal-case text-foreground max-lg:pb-[calc(84px+env(safe-area-inset-bottom))] lg:relative lg:grid lg:grid-rows-[minmax(0,1fr)] lg:overflow-hidden lg:rounded-[14px] lg:border lg:border-border lg:bg-background [&_button]:normal-case [&_h1]:normal-case [&_h2]:normal-case [&_h3]:normal-case",
         // Proofs runs its own list + card, so it takes the lead pane's width too.
-        filter === "proofs" ? "lg:grid-cols-[220px_minmax(0,1fr)]" : boarding ? "lg:grid-cols-[220px_minmax(0,1fr)_minmax(0,420px)]" : "lg:grid-cols-[220px_minmax(0,var(--list-w,420px))_minmax(0,1fr)]",
+        filter === "proofs" || filter === "today" ? "lg:grid-cols-[220px_minmax(0,1fr)]" : boarding ? "lg:grid-cols-[220px_minmax(0,1fr)_minmax(0,420px)]" : "lg:grid-cols-[220px_minmax(0,var(--list-w,420px))_minmax(0,1fr)]",
       )}
     >
       {/* Desktop: the sidebar. Every list, then this device's switches. */}
       <nav aria-label="Lead lists" className="hidden min-h-0 flex-col overflow-y-auto border-r border-border p-3.5 lg:flex">
         <button type="button" onClick={() => pick("new")} className={cn(btn, primary, "mb-2 min-h-10 text-[14.5px]")}>New lead</button>
+        {desk ? (
+          <>
+            <SideLink on={filter === "today"} n={needs} onClick={() => pick("today")}>Today</SideLink>
+            <SideGroup>Clients</SideGroup>
+            <SideLink on={filter === "needs"} n={needs} onClick={() => pick("needs")}>Your move</SideLink>
+            <SideLink on={filter === "open" || STAGES.includes(filter as Stage) || MORE.includes(filter)} n={count("open")} onClick={() => pick("open")}>Leads</SideLink>
+            <SideLink on={filter === "upcoming"} n={count("upcoming")} onClick={() => pick("upcoming")}>Calendar</SideLink>
+            <SideLink on={filter === "proofs"} onClick={() => pick("proofs")}>Proofs</SideLink>
+            <SideLink on={filter === "money"} onClick={() => pick("money")}>Money</SideLink>
+            <SideLink on={filter === "licences"} onClick={() => pick("licences")}>Licences</SideLink>
+            <SideGroup>Site</SideGroup>
+            {SITE.map(([t, href]) => <SideLink key={t} on={false} href={href}>{t}</SideLink>)}
+            <SideGroup>Numbers</SideGroup>
+            <SideLink on={filter === "traffic"} onClick={() => pick("traffic")}>Traffic</SideLink>
+            <SideLink on={filter === "seo"} onClick={() => pick("seo")}>SEO</SideLink>
+            <SideLink on={filter === "stats"} onClick={() => pick("stats")}>Stats</SideLink>
+            <SideGroup>Setup</SideGroup>
+            <SideLink on={filter === "hours"} onClick={() => pick("hours")}>Hours</SideLink>
+            <SideLink on={filter === "templates"} onClick={() => pick("templates")}>Templates</SideLink>
+            <SideLink on={false} onClick={doExport}>Export CSV</SideLink>
+          </>
+        ) : <>
         {(["needs", "open", "upcoming"] as const).map((f) => (
           <SideLink key={f} on={filter === f} n={count(f)} onClick={() => pick(f)}>{label(f)}</SideLink>
         ))}
@@ -367,6 +397,7 @@ export function AdminLeads() {
         <SideLink on={filter === "proofs"} onClick={() => pick("proofs")}>Galleries</SideLink>
         <SideGroup>Booking</SideGroup>
         <SideLink on={filter === "hours"} onClick={() => pick("hours")}>Hours</SideLink>
+        </>}
         <div className="mt-auto grid border-t border-border pt-2">{device}</div>
       </nav>
 
@@ -375,14 +406,14 @@ export function AdminLeads() {
         <div aria-hidden="true" className="grid place-items-center overflow-hidden text-muted-foreground lg:hidden" style={{ height: pull || (refreshing ? 40 : 0), transition: pull ? "none" : "height 200ms ease-out" }}>
           <svg viewBox="0 0 24 24" className={cn("size-[18px] fill-none stroke-current stroke-[1.8]", refreshing && "animate-spin", pull >= PULL_AT && "text-accent")} style={refreshing ? undefined : { transform: `rotate(${(pull / PULL_AT) * 270}deg)` }}><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5" /></svg>
         </div>
-        <header className="grid gap-3.5 border-b border-border px-3 pb-4 pt-3 lg:px-7 lg:pt-6">
+        {filter === "today" ? null : <header className="grid gap-3.5 border-b border-border px-3 pb-4 pt-3 lg:px-7 lg:pt-6">
           {tabOf(filter) !== "more" && (
             <p className="font-mono text-[11.5px] uppercase tracking-[0.08em] text-muted-foreground lg:hidden">
               {needs ? `${needs} waiting on you` : "Nothing waiting on you"}
             </p>
           )}
           <div className="flex items-baseline justify-between gap-3">
-            <h1 style={HEAD} className="min-w-0 whitespace-nowrap text-[40px] leading-none tracking-[-0.03em] lg:text-[28px]">{label(filter)}</h1>
+            <h1 style={HEAD} className="min-w-0 whitespace-nowrap text-[40px] leading-none tracking-[-0.03em] lg:text-[28px]">{desk && filter === "upcoming" ? "Calendar" : label(filter)}</h1>
             {tool ? null : (
               <span className="flex items-center gap-3">
                 {filter === "open" ? (
@@ -411,21 +442,61 @@ export function AdminLeads() {
             />
           )}
           {/* Phone: the stages ride in the Open tab as one row of chips. */}
-          {tab === "open" ? (
-            <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-0.5 lg:hidden">
-              {(["open", ...OPEN_STAGES] as const).map((f) => (
-                <Pill key={f} on={filter === f} n={count(f)} onClick={() => pick(f)}>{f === "open" ? "All" : f}</Pill>
+          {tab === "open" || (desk && MORE.includes(filter)) ? (
+            <div className={cn("-mx-1 flex gap-2 overflow-x-auto px-1 pb-0.5", desk ? "lg:flex-wrap" : "lg:hidden")}>
+              {(["open", ...OPEN_STAGES, ...(desk ? MORE : [])] as const).map((f) => (
+                <Pill key={f} on={filter === f} n={count(f)} onClick={() => pick(f)}>{f === "open" ? "All" : label(f)}</Pill>
               ))}
             </div>
           ) : null}
-          {MORE.includes(filter) || (tool && filter !== "more") ? (
+          {MORE.includes(filter) || (tool && filter !== "more") || (desk && filter === "upcoming") ? (
             <button type="button" onClick={() => pick("more")} className="inline-flex min-h-11 w-fit items-center gap-1 text-[16px] text-accent lg:hidden">
               <span aria-hidden="true">‹</span> More
             </button>
           ) : null}
-        </header>
+        </header>}
 
-        {filter === "more" ? (
+        {filter === "today" ? (
+          <DeskToday leads={leads} go={(l) => { setFilter(pass(l, "needs") ? "needs" : "open"); setOpen(l.id ?? null); }} pick={pick} />
+        ) : filter === "traffic" ? (
+          <div className="px-1 py-5 lg:px-7"><React.Suspense fallback={null}><AdminTraffic /></React.Suspense></div>
+        ) : filter === "seo" ? (
+          <div className="px-1 py-5 lg:px-7"><React.Suspense fallback={null}><AdminSeo /></React.Suspense></div>
+        ) : filter === "more" && desk ? (
+          <div className="grid gap-6 py-4 lg:hidden">
+            {([
+              ["Clients", [["Calendar", "upcoming", count("upcoming")], ["Proofs", "proofs"], ["Money", "money"], ["Licences", "licences"]]],
+              ["Site", SITE.map(([t, href]) => [t, href])],
+              ["Numbers", [["Traffic", "traffic"], ["SEO", "seo"], ["Stats", "stats"]]],
+              ["Setup", [["Hours", "hours"], ["Templates", "templates"], ["New lead", "new"]]],
+              ["Put aside", MORE.map((f) => [label(f), f, count(f)])],
+            ] as [string, [string, string, number?][]][]).map(([group, rows]) => (
+              <ul key={group} className="grid">
+                <li><p className="px-1 pb-1 font-mono text-[11.5px] uppercase tracking-[0.08em] text-muted-foreground">{group}</p></li>
+                {rows.map(([t, to, n]) => {
+                  const cls = "flex min-h-[52px] w-full items-center justify-between border-b border-border px-1 text-left text-[17px]";
+                  const end = <span className="flex items-center gap-3 font-mono text-[13px] text-muted-foreground">{n}<span aria-hidden="true">›</span></span>;
+                  return (
+                    <li key={t}>
+                      {to.startsWith("/") ? <a href={to} className={cls}>{t}{end}</a> : <button type="button" onClick={() => pick(to as Filter)} className={cls}>{t}{end}</button>}
+                    </li>
+                  );
+                })}
+              </ul>
+            ))}
+            <ul className="grid">
+              <li>
+                <button type="button" onClick={doExport} className="flex min-h-[52px] w-full items-center justify-between border-b border-border px-1 text-left text-[17px]">
+                  Export CSV<span aria-hidden="true" className="font-mono text-[13px] text-muted-foreground">↓</span>
+                </button>
+              </li>
+            </ul>
+            <div className="grid">
+              <p className="px-1 pb-1 font-mono text-[11.5px] uppercase tracking-[0.08em] text-muted-foreground">This device</p>
+              {device}
+            </div>
+          </div>
+        ) : filter === "more" ? (
           <div className="grid gap-6 py-4 lg:hidden">
             <ul className="grid">
               {MORE.map((f) => (
@@ -506,9 +577,9 @@ export function AdminLeads() {
         )}
       </section>
 
-      {boarding || filter === "proofs" ? null : <ListResizer w={listW ?? LIST_W} onChange={setListW} />}
+      {boarding || filter === "proofs" || filter === "today" ? null : <ListResizer w={listW ?? LIST_W} onChange={setListW} />}
 
-      <section aria-label="Lead" className={cn("min-w-0 lg:min-h-0 lg:overflow-y-auto lg:bg-card/40", !open && "max-lg:hidden", filter === "proofs" && "hidden")}>
+      <section aria-label="Lead" className={cn("min-w-0 lg:min-h-0 lg:overflow-y-auto lg:bg-card/40", !open && "max-lg:hidden", (filter === "proofs" || filter === "today") && "hidden")}>
         {current ? (
           <Detail key={`${current.id}-${moved}`} summary={current} initial={fresh?.email === current.email ? fresh : null} call={call} onChange={changed} onBack={() => { back.current = current.id ?? null; setOpen(null); }} reload={load} tick={tick} templates={templates} others={leads.filter((o) => o.id !== current.id && !o.trashedAt)} />
         ) : (
@@ -523,7 +594,7 @@ export function AdminLeads() {
         aria-label="Lead tabs"
         className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-border bg-background/95 px-1.5 pb-[env(safe-area-inset-bottom)] pt-1.5 backdrop-blur-md lg:hidden"
       >
-        {TABS.map((t) => (
+        {(desk ? DESK_TABS : TABS).map((t) => (
           <button
             key={t.id}
             type="button"
@@ -652,17 +723,19 @@ function Palette({ leads, close, go }: { leads: LeadSummary[]; close: () => void
   );
 }
 
-type Tab = "needs" | "open" | "upcoming" | "more";
+type Tab = "today" | "needs" | "open" | "upcoming" | "more";
 const OPEN_STAGES = STAGES.filter((s) => !closed(s));
 /** The lists under More on the phone (the sidebar's lower groups on desktop). */
 const MORE: Filter[] = ["snoozed", "archived", "trash", "Delivered", "Lost"];
-const tabOf = (f: Filter): Tab => (f === "needs" || f === "upcoming" ? f : TOOLS.includes(f) || MORE.includes(f) ? "more" : "open");
+const tabOf = (f: Filter): Tab => (f === "today" ? "today" : f === "needs" || f === "upcoming" ? f : TOOLS.includes(f) || MORE.includes(f) ? "more" : "open");
 const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: "needs", label: "Your move", icon: <><path d="M4 13l3-8h10l3 8v6H4z" /><path d="M4 13h5l1 2h4l1-2h5" /></> },
   { id: "open", label: "Open", icon: <path d="M5 6h14M5 12h14M5 18h9" /> },
   { id: "upcoming", label: "Upcoming", icon: <><rect x="4" y="5" width="16" height="15" rx="2" /><path d="M4 10h16M9 3v4M15 3v4" /></> },
   { id: "more", label: "More", icon: <><circle cx="6" cy="12" r="1.2" /><circle cx="12" cy="12" r="1.2" /><circle cx="18" cy="12" r="1.2" /></> },
 ];
+/** The One Desk's phone tabs: Today first; Upcoming folds into it, the Calendar under More. */
+const DESK_TABS = [{ id: "today" as Tab, label: "Today", icon: <><rect x="4" y="5" width="16" height="15" rx="2" /><path d="M4 10h16M9 3v4M15 3v4" /><circle cx="12" cy="15" r="1.6" /></> }, ...TABS.filter((t) => t.id !== "upcoming")];
 
 /** The road a lead travels; Lost is off it. */
 const STEPS: readonly Stage[] = STAGES.filter((s) => s !== "Lost");
@@ -809,12 +882,11 @@ function SideGroup({ children }: { children: React.ReactNode }) {
   return <p className="px-3 pb-1.5 pt-4 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">{children}</p>;
 }
 
-function SideLink({ on, n, onClick, children }: { on: boolean; n?: number; onClick: () => void; children: React.ReactNode }) {
+function SideLink({ on, n, onClick, href, children }: { on: boolean; n?: number; onClick?: () => void; href?: string; children: React.ReactNode }) {
+  const El = href ? "a" : "button";
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={on}
+    <El
+      {...(href ? { href } : { type: "button" as const, onClick, "aria-pressed": on })}
       className={cn(
         "flex min-h-10 items-center justify-between gap-4 rounded-lg px-3 text-[14.5px] transition-colors duration-200",
         on ? "bg-card font-semibold text-foreground shadow-[inset_2px_0_0_var(--accent)]" : "text-muted-foreground hoverable:hover:bg-card hoverable:hover:text-foreground",
@@ -822,7 +894,7 @@ function SideLink({ on, n, onClick, children }: { on: boolean; n?: number; onCli
     >
       <span>{children}</span>
       {n === undefined || n < 0 ? null : <span className={cn("font-mono text-[12.5px]", on ? "text-accent" : "text-muted-foreground")}>{n}</span>}
-    </button>
+    </El>
   );
 }
 
@@ -1019,7 +1091,7 @@ function pass(l: LeadSummary, f: Filter) {
   if (f === "open") return !closed(l.stage);
   return l.stage === f && !snoozed(l);
 }
-const LABEL: Partial<Record<Filter, string>> = { needs: "Your move", open: "All open", upcoming: "Upcoming", snoozed: "Snoozed", archived: "Archived", trash: "Trash", more: "More", new: "New lead", stats: "Stats", money: "Money", templates: "Templates", hours: "Hours", proofs: "Proofs", licences: "Licences" };
+const LABEL: Partial<Record<Filter, string>> = { today: "Today", traffic: "Traffic", seo: "SEO", needs: "Your move", open: "All open", upcoming: "Upcoming", snoozed: "Snoozed", archived: "Archived", trash: "Trash", more: "More", new: "New lead", stats: "Stats", money: "Money", templates: "Templates", hours: "Hours", proofs: "Proofs", licences: "Licences" };
 const label = (f: Filter) => LABEL[f] ?? f;
 
 /** Deletes every lead in the trash for good, after a second press. */
@@ -1980,6 +2052,181 @@ function MoneyView() {
         {err ? <p role="alert" className="pt-2 text-[14px] text-destructive">{err}</p> : null}
       </section>
       <p className="font-mono text-[12.5px] text-muted-foreground">Net is after the Stripe fee. Payouts show as money leaving the balance.</p>
+    </div>
+  );
+}
+
+/* ── Today, the One Desk's first page ─────────────────────────────
+ * Julian (2026-11-09, mock claude.ai/artifact/Y2PXE3dJZcj7oJw5TyihLF, hero
+ * C): the week as a row, Mon to Sun, with shoots, calls and what falls
+ * due, then Your move, Coming up, Money and the site's traffic. Every
+ * number is one the desk already has: lead summaries, `/api/money`,
+ * `/api/traffic`. What is owed on invoices is left out: summaries do not
+ * carry invoices and nothing marks one paid.
+ * ─────────────────────────────────────────────────────────────── */
+
+const PT = "America/Los_Angeles";
+const ymdOf = (ms: number) => new Intl.DateTimeFormat("en-CA", { timeZone: PT }).format(ms);
+const plus = (d: string, n: number) => new Date(Date.parse(`${d}T12:00:00Z`) + n * DAY).toISOString().slice(0, 10);
+const dayHead = (d: string) => `${new Date(`${d}T12:00:00Z`).toLocaleDateString("en-US", { weekday: "short", timeZone: "UTC" })} ${+d.slice(8)}`;
+const clock = (ms: number) => new Intl.DateTimeFormat("en-US", { timeZone: PT, hour: "numeric", minute: "2-digit" }).format(ms);
+/** Where a move comes from, as the mock tags it. */
+const source = (l: LeadSummary) => (renew(l) ? "Licence" : paperDue(l, now()) ? "Paperwork" : l.stage === "Invoiced" || l.stage === "Selecting" ? "Proofs" : "Leads");
+const callOrShoot = (l: LeadSummary) => (l.stage === "Call booked" ? "Call" : shootTag(l.kind) ?? "Shoot");
+
+type DayEv = { small: string; text: string; who?: string; due?: boolean; l: LeadSummary };
+
+/** Each Pacific day from `from` for `n` days, with what is on it. Moves with no date land today. */
+function daysOf(leads: LeadSummary[], from: string, n: number) {
+  const today = ymdOf(now());
+  const map = new Map<string, DayEv[]>();
+  const put = (d: string, e: DayEv) => map.set(d, [...(map.get(d) ?? []), e]);
+  for (const l of leads) {
+    if (aside(l)) continue;
+    const who = l.name || l.email;
+    if (l.when && !closed(l.stage)) {
+      const ms = Date.parse(l.when);
+      put(ymdOf(ms), { small: `${clock(ms)} ${callOrShoot(l)}`, text: who, l });
+    }
+    const step = needsMe(l) ? nextStep(l) : null;
+    if (step) put(today, { small: "Due", text: step, who, due: true, l });
+    else if (l.due && Date.parse(l.due) > now()) put(ymdOf(Date.parse(l.due)), { small: "Reminder", text: l.dueText || "Your reminder", who, l });
+  }
+  return Array.from({ length: n }, (_, i) => plus(from, i)).map((d) => ({ d, today: d === today, evs: map.get(d) ?? [] }));
+}
+
+function DayCol({ d, today, evs, go }: { d: string; today: boolean; evs: DayEv[]; go: (l: LeadSummary) => void }) {
+  const MAX = 4;
+  return (
+    <div className={cn("grid min-h-[110px] content-start gap-2 border-t-2 pt-2.5", today ? "border-accent" : "border-border")}>
+      <span className={cn("font-mono text-[11px] uppercase tracking-[0.08em]", today ? "text-accent" : "text-muted-foreground")}>{dayHead(d)}</span>
+      {evs.slice(0, MAX).map((e, i) => (
+        <button key={i} type="button" onClick={() => go(e.l)} title={e.who} className={cn("grid min-w-0 text-left text-[13px] leading-[1.3] hoverable:hover:underline", e.due && "text-accent")}>
+          <small className="font-mono text-[10.5px] uppercase tracking-[0.05em] text-muted-foreground">{e.small}</small>
+          <span className="truncate">{e.text}</span>
+          {e.who && e.who !== e.text ? <span className="truncate text-[12px] text-muted-foreground">{e.who}</span> : null}
+        </button>
+      ))}
+      {evs.length > MAX ? <span className="font-mono text-[11px] text-muted-foreground">+{evs.length - MAX} more</span> : null}
+    </div>
+  );
+}
+
+function Panel({ title, more, go, children }: { title: string; more: string; go: () => void; children: React.ReactNode }) {
+  return (
+    <section className="grid content-start">
+      <h2 className="label flex items-baseline justify-between border-b border-border pb-2 font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
+        {title}
+        <button type="button" onClick={go} className="min-h-8 tracking-normal text-accent hoverable:hover:underline">{more} →</button>
+      </h2>
+      {children}
+    </section>
+  );
+}
+
+function Item({ k, t, n, s, onClick, className }: { k: React.ReactNode; t?: string; n: string; s?: string | null; onClick?: () => void; className?: string }) {
+  const body = (
+    <>
+      <span className="truncate font-mono text-[11px] uppercase tracking-[0.09em] text-muted-foreground">{k}</span>
+      <span className="text-right font-mono text-[12px] text-muted-foreground">{t}</span>
+      <span className="truncate text-[16.5px] font-semibold">{n}</span>
+      <span className="self-end text-right font-mono text-[12.5px] font-medium text-accent">{s ? `${s} →` : null}</span>
+    </>
+  );
+  const cls = cn("grid w-full grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-0.5 border-b border-border py-3 text-left", className);
+  return onClick ? <button type="button" onClick={onClick} className={cn(cls, "transition-colors duration-200 hoverable:hover:bg-card")}>{body}</button> : <div className={cls}>{body}</div>;
+}
+
+type Spark = { visits: number; days: { key: string; n: number }[] };
+
+function DeskToday({ leads, go, pick }: { leads: LeadSummary[]; go: (l: LeadSummary) => void; pick: (f: Filter) => void }) {
+  const today = ymdOf(now());
+  const monday = plus(today, -((new Date(`${today}T12:00:00Z`).getUTCDay() + 6) % 7));
+  const week = daysOf(leads, monday, 7);
+  // Phone: the next three days that have something, today first.
+  const soon = daysOf(leads, today, 21).filter((x) => x.today || x.evs.length).slice(0, 3);
+  const moves = leads.filter(needsMe).sort((a, b) => b.lastAt.localeCompare(a.lastAt));
+  const coming = leads.filter((l) => pass(l, "upcoming")).sort((a, b) => a.when!.localeCompare(b.when!)).slice(0, 4);
+
+  const [money, setMoney] = React.useState<{ available?: number; pending?: number; txns: Txn[] } | string | null>(null);
+  React.useEffect(() => {
+    fetch("/api/money", { headers: authed(), cache: "no-store" })
+      .then(async (r) => { const o = await r.json(); if (!r.ok) throw new Error(o.error ?? `Request failed (${r.status})`); setMoney(o); })
+      .catch((e: unknown) => setMoney(e instanceof Error ? e.message : String(e)));
+  }, []);
+  // Traffic answers to the GitHub token only, as on /admin.
+  const [traffic, setTraffic] = React.useState<Spark | string | null>(null);
+  React.useEffect(() => {
+    const token = localStorage.getItem(TOKEN_STORE);
+    if (!token) return queueMicrotask(() => setTraffic("Sign in with the GitHub token to see traffic."));
+    fetch("/api/traffic", { headers: { authorization: `Bearer ${token}` }, cache: "no-store" })
+      .then(async (r) => { const o = await r.json(); if (!r.ok) throw new Error(o.error ?? "Cloudflare did not answer."); setTraffic(o); })
+      .catch((e: unknown) => setTraffic(e instanceof Error ? e.message : String(e)));
+  }, []);
+  const t = typeof traffic === "object" ? traffic : null;
+  const peak = t ? Math.max(1, ...t.days.map((d) => d.n)) : 1;
+  const spark = t ? t.days.map((d, i, a) => `${(i / Math.max(1, a.length - 1)) * 300},${44 - (d.n / peak) * 40}`).join(" ") : "";
+  const wait = (s: string) => <p className="py-3 font-mono text-[13px] text-muted-foreground">{s}</p>;
+  const note = (s: string) => <p className="py-3 text-[14px] text-muted-foreground">{s}</p>;
+
+  return (
+    <div className="grid content-start gap-8 px-1 py-5 lg:gap-[30px] lg:px-[34px] lg:py-[30px]">
+      <section>
+        <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
+          Week of {day(`${monday}T12:00:00Z`)} · <span className="text-accent">{moves.length} on you</span>
+        </p>
+        <h1 style={HEAD} className="mt-2 text-[30px] leading-tight max-lg:hidden">This week</h1>
+        <div className="mt-[18px] grid grid-cols-7 gap-2 max-lg:hidden">
+          {week.map((x) => <DayCol key={x.d} {...x} go={go} />)}
+        </div>
+        <div className="mt-3 grid grid-cols-3 gap-2 lg:hidden">
+          {soon.map((x) => <DayCol key={x.d} {...x} go={go} />)}
+        </div>
+      </section>
+      <div className="grid gap-[26px] lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+        <Panel title="Your move" more="All leads" go={() => pick("needs")}>
+          {moves.length ? moves.slice(0, 5).map((l, i) => (
+            <Item
+              key={l.id}
+              className={cn(i >= 3 && "max-lg:hidden")}
+              onClick={() => go(l)}
+              k={<>{l.kind ? <b className="font-medium text-foreground">{shootTag(l.kind)}</b> : null}{l.kind ? " · " : null}{ago(l.lastAt)}<span className="ml-1.5 rounded-[5px] bg-card px-1.5 py-px align-[1px] text-[10px] tracking-[0.06em]">{source(l)}</span></>}
+              t={l.stage}
+              n={l.name || l.email}
+              s={nextStep(l)}
+            />
+          )) : note("Nothing waiting on you.")}
+        </Panel>
+        <div className="grid content-start gap-[26px]">
+          <Panel title="Coming up" more="Calendar" go={() => pick("upcoming")}>
+            {coming.length ? coming.map((l) => (
+              <Item key={l.id} onClick={() => go(l)} k={<><b className="font-medium text-foreground">{callOrShoot(l)}</b> · {at(l.when!)}</>} t={l.paid ? "Deposit paid" : l.stage} n={l.name || l.email} s={nextStep(l)} />
+            )) : note("No calls or sessions coming up.")}
+          </Panel>
+          <div className="max-lg:hidden">
+            <Panel title="Money" more="Money" go={() => pick("money")}>
+              {typeof money === "string" ? note(money) : !money ? wait("Asking Stripe") : (
+                <>
+                  <Item k="Stripe" t="On the way" n={`${cash(money.available ?? 0)} available`} s={money.pending ? cash(money.pending) : null} />
+                  {money.txns.slice(0, 2).map((x) => <Item key={x.id} k={x.what || (KIND[x.type] ?? x.type.replace(/_/g, " "))} t={day(x.at)} n={cash(x.net)} />)}
+                </>
+              )}
+            </Panel>
+          </div>
+          <div className="max-lg:hidden">
+            <Panel title="Site" more="Traffic" go={() => pick("traffic")}>
+              {typeof traffic === "string" ? note(traffic) : !t ? wait("Asking Cloudflare") : (
+                <>
+                  <svg viewBox="0 0 300 46" preserveAspectRatio="none" className="mt-2.5 h-[46px] w-full" role="img" aria-label={`Visitors, last ${t.days.length} days`}>
+                    <polyline fill="none" stroke="var(--accent)" strokeWidth="2" vectorEffect="non-scaling-stroke" points={spark} />
+                  </svg>
+                  {note(`${t.visits.toLocaleString("en-US")} visits in the last ${t.days.length} days.`)}
+                </>
+              )}
+            </Panel>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

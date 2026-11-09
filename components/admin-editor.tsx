@@ -317,6 +317,11 @@ export function AdminEditor({
   const [sha, setSha] = React.useState<string | null>(null);
   const [status, setStatus] = React.useState<Status>({ kind: "idle" });
   const [view, setView] = React.useState<View>("home");
+  // `?view=projects`: the One Desk's Site links land on their tab. After hydration, so the first paint matches.
+  React.useEffect(() => {
+    const v = new URLSearchParams(location.search).get("view");
+    if (TABS.flat().some((x) => x.id === v)) queueMicrotask(() => setView(v as View));
+  }, []);
   /* Unread enquiries, on the Inbox tab, so a new one is seen from whatever
      tab is open. Asked when the page opens and again whenever the window
      comes back into focus; the Inbox itself keeps it current while open.
