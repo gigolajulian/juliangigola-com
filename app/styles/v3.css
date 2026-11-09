@@ -351,7 +351,7 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .ch-doors .door{min-height:440px}}
 .v3 .flow{display:grid;grid-template-columns:minmax(0,1fr) 44%;min-height:calc(100svh - 64px)}
 .v3 .f-main{display:flex;flex-direction:column;gap:30px;padding:28px 64px 40px var(--g);min-width:0}
-.v3 .rail{list-style:none;margin:0;padding:0;display:flex;gap:6px}
+.v3 .rail{list-style:none;margin:0;padding:0;display:flex;gap:6px;scroll-margin-top:84px}
 .v3 .rail li{flex:1;min-width:0;padding-top:10px;border-top:1px solid var(--line);color:var(--mute);white-space:nowrap;overflow:hidden}
 .v3 .rail li.done{border-top-color:var(--ink);color:var(--ink)}
 .v3 .rail li.cur{border-top:2px solid var(--accent);color:var(--ink)}

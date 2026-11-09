@@ -558,10 +558,13 @@ function Top({ view, setView, n, included, due, hideTabs }: { view: "all" | "sel
           </button>
         </nav>
       )}
-      <p className="proof-meta" data-over={due > 0 || undefined}>
-        <b>{n}</b> / {included}
-        {due ? ` · +$${due}` : ""}
-      </p>
+      {/* The count only while picking: "0 / 10" before the gate opens, or "12 / 10" after the send, says nothing. */}
+      {hideTabs ? null : (
+        <p className="proof-meta" data-over={due > 0 || undefined}>
+          <b>{n}</b> / {included}
+          {due ? ` · +$${due}` : ""}
+        </p>
+      )}
     </header>
   );
 }
