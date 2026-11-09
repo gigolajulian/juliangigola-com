@@ -31,6 +31,8 @@ export type Proof = {
   included: number;
   /** Dollars per frame past `included`. */
   price: number;
+  /** Dollars left on the shoot, paid with the extras at Send (Julian 2026-11-08: pay the balance to send selects). */
+  balance?: number;
   /** Days open, counted from when the email goes out (or the link is first copied). */
   days: number;
   createdAt: string;
@@ -47,7 +49,8 @@ export type Proof = {
   message?: string;
   /** Open Checkout session for the extras, while one is pending. */
   checkout?: string;
-  paid?: { session: string; amount: number; at: string };
+  /** `pending`: a bank (ACH) payment Stripe has accepted but not settled, about 4 business days; `failed`: it bounced, so `amount` no longer counts it. */
+  paid?: { session: string; amount: number; at: string; pending?: boolean; failed?: boolean };
   /** When the client hit Send: selects are locked from here. */
   submittedAt?: string;
   views: number;
@@ -55,7 +58,67 @@ export type Proof = {
   firstViewAt?: string;
   firstSelectAt?: string;
   pulledAt?: string;
+  /** Who sent the selects: the address typed at the gate. */
+  submittedBy?: string;
+  /** Everyone who opened the gallery, by lowercased email (Julian 2026-11-08: any email opens it, log everything). */
+  viewers?: Record<string, Viewer>;
 };
+
+export type ViewerEvent = { at: string; kind: "open" | "pick" | "unpick" | "review" | "pay" | "send"; id?: string; device?: string; place?: string };
+
+export type Viewer = {
+  first: string;
+  last: string;
+  visits: number;
+  /** Seconds with the gallery in front of them. */
+  seconds: number;
+  devices: string[];
+  places: string[];
+  /** This address's own picks, in pick order. */
+  picks: string[];
+  /** Milliseconds each frame was open in the lightbox or on screen, by frame id. */
+  looks: Record<string, number>;
+  events: ViewerEvent[];
+};
+
+/** Kept per address so a busy gallery stays well under KV's value size. */
+const MAX_EVENTS = 400;
+
+export const isEmail = (v: unknown): v is string => typeof v === "string" && v.length <= 200 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
+export const viewerKey = (email: string) => email.trim().toLowerCase();
+
+/** "iPhone · Safari" from a user agent. shortcut: the common devices and browsers only, "Other" for the rest. */
+export function device(ua: string): string {
+  const d = /iPad/.test(ua) ? "iPad" : /iPhone/.test(ua) ? "iPhone" : /Android/.test(ua) ? "Android" : /Macintosh/.test(ua) ? "Mac" : /Windows/.test(ua) ? "Windows" : /Linux/.test(ua) ? "Linux" : "Other";
+  const b = /Edg\//.test(ua) ? "Edge" : /Firefox\/|FxiOS/.test(ua) ? "Firefox" : /Chrome\/|CriOS/.test(ua) ? "Chrome" : /Safari\//.test(ua) ? "Safari" : "Other";
+  return `${d} · ${b}`;
+}
+
+/** One visitor's record with an event added; picks diffed into pick and unpick events. */
+export function track(
+  v: Viewer | undefined,
+  at: string,
+  e: { kind?: ViewerEvent["kind"]; picks?: string[]; looks?: Record<string, number>; seconds?: number; device?: string; place?: string },
+): Viewer {
+  const base: Viewer = v ?? { first: at, last: at, visits: 0, seconds: 0, devices: [], places: [], picks: [], looks: {}, events: [] };
+  const out: Viewer = { ...base, last: at, events: [...base.events], looks: { ...base.looks } };
+  if (e.kind === "open") {
+    out.visits += 1;
+    if (e.device && !out.devices.includes(e.device)) out.devices = [...out.devices, e.device];
+    if (e.place && !out.places.includes(e.place)) out.places = [...out.places, e.place];
+  }
+  if (e.kind) out.events.push({ at, kind: e.kind, ...(e.kind === "open" ? { device: e.device, place: e.place } : {}) });
+  if (e.picks) {
+    for (const id of e.picks) if (!base.picks.includes(id)) out.events.push({ at, kind: "pick", id });
+    for (const id of base.picks) if (!e.picks.includes(id)) out.events.push({ at, kind: "unpick", id });
+    out.picks = e.picks;
+  }
+  // Beacons are capped so a stuck tab cannot claim hours.
+  if (e.seconds) out.seconds += Math.min(120, Math.max(0, Math.round(e.seconds)));
+  for (const [id, ms] of Object.entries(e.looks ?? {})) if (typeof ms === "number" && ms > 0) out.looks[id] = (out.looks[id] ?? 0) + Math.min(120_000, Math.round(ms));
+  out.events = out.events.slice(-MAX_EVENTS);
+  return out;
+}
 
 export const STAGES = ["Draft", "Sent", "Opened", "Selecting", "Selects in", "Paid", "In Lightroom"] as const;
 export type ProofStage = (typeof STAGES)[number];
@@ -95,11 +158,14 @@ export function extras(selected: number, included: number, price: number) {
 }
 
 /** Whether the client can still see the gallery. Unsent galleries are open (Julian previews them). */
-/** Extra frames still to pay for: a reopened gallery keeps what was already paid. */
-export function owed(p: Pick<Proof, "selects" | "included" | "price" | "paid">) {
-  const already = p.price ? Math.floor((p.paid?.amount ?? 0) / (p.price * 100)) : 0;
+/** What is still to pay at Send: the shoot balance first, then extra frames. A reopened gallery keeps what was already paid. */
+export function owed(p: Pick<Proof, "selects" | "included" | "price" | "paid" | "balance">) {
+  let left = p.paid?.amount ?? 0;
+  const bal = Math.max(0, (p.balance ?? 0) * 100 - left);
+  left = Math.max(0, left - (p.balance ?? 0) * 100);
+  const already = p.price ? Math.floor(left / (p.price * 100)) : 0;
   const n = Math.max(0, extras(p.selects.length, p.included, p.price).n - already);
-  return { n, cents: n * p.price * 100 };
+  return { n, balance: bal, cents: bal + n * p.price * 100 };
 }
 
 export const isOpen = (p: Pick<Proof, "closesAt">, now = Date.now()) => !p.closesAt || Date.parse(p.closesAt) > now;
@@ -110,13 +176,15 @@ export const closesAt = (days: number, from = Date.now()) => new Date(from + day
 export function publicView(p: Proof) {
   return {
     frames: p.frames.map(({ id, file, w, h }) => ({ id, file, w, h })),
-    selects: p.selects,
-    notes: p.notes,
+    // Picks belong to whoever typed their email; only the sent ones are shared.
+    selects: p.submittedAt ? p.selects : [],
     included: p.included,
     price: p.price,
+    balance: p.balance ?? 0,
     closesAt: p.closesAt ?? null,
     submitted: !!p.submittedAt,
     paid: p.paid?.amount ?? 0,
+    paidPending: !!p.paid?.pending,
   };
 }
 export type PublicProof = ReturnType<typeof publicView>;
@@ -140,8 +208,8 @@ export function cleanNotes(given: unknown, selects: string[]): Record<string, st
 }
 
 /** Settings Lightroom or /admin may set. Numbers are clamped so a typo cannot price a frame at $15,000. */
-export function cleanSettings(given: Record<string, unknown>): Partial<Pick<Proof, "name" | "email" | "note" | "included" | "price" | "days">> {
-  const out: Partial<Pick<Proof, "name" | "email" | "note" | "included" | "price" | "days">> = {};
+export function cleanSettings(given: Record<string, unknown>): Partial<Pick<Proof, "name" | "email" | "note" | "included" | "price" | "days" | "balance">> {
+  const out: Partial<Pick<Proof, "name" | "email" | "note" | "included" | "price" | "days" | "balance">> = {};
   const int = (v: unknown, lo: number, hi: number) => (typeof v === "number" || typeof v === "string") && Number.isFinite(Number(v)) ? Math.min(hi, Math.max(lo, Math.round(Number(v)))) : undefined;
   if (typeof given.name === "string" && given.name.trim()) out.name = given.name.trim().slice(0, 120);
   if (typeof given.email === "string") out.email = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(given.email.trim()) ? given.email.trim().slice(0, 200) : undefined;
@@ -150,6 +218,8 @@ export function cleanSettings(given: Record<string, unknown>): Partial<Pick<Proo
   if (inc !== undefined) out.included = inc;
   if (pr !== undefined) out.price = pr;
   if (d !== undefined) out.days = d;
+  const bal = int(given.balance, 0, 20000);
+  if (bal !== undefined) out.balance = bal;
   return out;
 }
 
