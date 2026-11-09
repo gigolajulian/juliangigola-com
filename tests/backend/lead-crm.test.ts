@@ -103,6 +103,8 @@ describe("the API", () => {
     const key = `lead:${await idOf("m@x.com")}`;
     const patch = async (body: object) => (await PATCH(req("PATCH", { body: { key, ...body } }))).json();
     expect((await patch({ notes: "Wants red light" })).lead.notes).toBe("Wants red light");
+    // Capped like the field, so the row shows it whole.
+    expect((await patch({ remind: { at: "2026-11-06T17:00:00Z", text: "Send invoice, then send photos to select" } })).lead.remind.text).toHaveLength(28);
     expect((await patch({ remind: { at: "2026-11-06T17:00:00Z", text: "Send the quote" } })).lead.remind).toEqual({ at: "2026-11-06T17:00:00.000Z", text: "Send the quote" });
     expect((await patch({ details: { name: "Maya Okafor", phone: "408 555 0101", ig: "maya", company: "" } })).lead).toMatchObject({ name: "Maya Okafor", phone: "408 555 0101", ig: "@maya" });
     expect((await patch({ quote: 1200 })).lead.quote).toBe(1200);

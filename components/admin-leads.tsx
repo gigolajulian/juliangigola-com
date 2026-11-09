@@ -8,7 +8,7 @@ import { LeadProofs, ProofsDesk } from "@/components/admin-proofs";
 import { LeadUpcoming } from "@/components/lead-upcoming";
 import { TOKEN_STORE } from "@/lib/admin-github";
 import type { Enquiry } from "@/lib/inbox";
-import { isLate, leadSummary, myMove, NUDGES, PAPER, paperDue, quoteNudge, renewDue, STAGES, trashDaysLeft, type Lead, type LeadEvent, type LeadSummary, type Paper, type Stage } from "@/lib/leads";
+import { isLate, leadSummary, myMove, NUDGES, PAPER, paperDue, quoteNudge, REMIND_MAX, renewDue, shootTag, STAGES, trashDaysLeft, type Lead, type LeadEvent, type LeadSummary, type Paper, type Stage } from "@/lib/leads";
 import { cn } from "@/lib/utils";
 import { fill, mailable, TEMPLATES } from "@/lib/lead-crm";
 import { endDay, LicenceField, LicenceList } from "@/components/lead-licence";
@@ -47,7 +47,8 @@ const needsMe = (l: LeadSummary) => renew(l) || (!aside(l) && !closed(l.stage) &
 
 /** What to do next, in a word or two, and whether it is late. */
 function nextStep(l: LeadSummary): string | null {
-  if (due(l)) return l.dueText || "Your reminder";
+  // A due reminder on a stage that has its own short step shows the step; the reminder's text stays in the lead.
+  if (due(l)) return myMove(l, now()) ?? (l.dueText || "Your reminder");
   if (l.flags?.includes("stuck")) return "Refund or rebook";
   if (l.flags?.includes("no-deposit")) return "Ask for the deposit";
   const paper = paperDue(l, now());
@@ -622,11 +623,12 @@ function StageLine({ l }: { l: LeadSummary }) {
 
 /** The one thing to do, in teal; money stuck in red; otherwise why it is put aside. */
 function RowAction({ l, next }: { l: LeadSummary; next: string | null }) {
-  const cls = "min-w-0 truncate font-mono text-[12.5px] font-medium";
+  // Wraps instead of cutting: Julian wants the whole step on the row.
+  const cls = "min-w-0 text-right font-mono text-[12.5px] font-medium [text-wrap:balance]";
   if (l.trashedAt) return <span className={cn(cls, "text-muted-foreground")}>Deletes in {Math.max(1, trashDaysLeft(l.trashedAt, now()))} d</span>;
   const bad = l.flags?.includes("stuck") ? "Deposit stuck" : l.flags?.includes("no-deposit") ? "No deposit" : null;
   if (bad) return <span className={cn(cls, "text-destructive")}>! {bad} →</span>;
-  if (next) return <span title={next} className={cn(cls, "text-accent")}>{next} →</span>;
+  if (next) return <span title={next} className={cn(cls, "text-accent")}>{next}{" "}→</span>;
   if (snoozed(l)) return <span className={cn(cls, "text-muted-foreground")}>Until {day(l.snoozeUntil!)}</span>;
   return l.refs ? <span className={cn(cls, "text-muted-foreground")}>{l.refs} {l.refs === 1 ? "picture" : "pictures"}</span> : null;
 }
@@ -648,8 +650,8 @@ function Row({ l, on, upcoming, onClick }: { l: LeadSummary; on: boolean; upcomi
       <span className="grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)] gap-0.5">
         <span className="flex items-baseline justify-between gap-3">
           <span className="truncate font-mono text-[11px] uppercase tracking-[0.09em] text-muted-foreground">
-            {kindOf(l.kind) ? <b className="font-medium text-foreground">{kindOf(l.kind)}</b> : null}
-            {kindOf(l.kind) && l.when ? " · " : null}
+            {l.kind ? <b className="font-medium text-foreground" title={kindOf(l.kind)}>{shootTag(l.kind)}</b> : null}
+            {l.kind && l.when ? " · " : null}
             {l.when ? at(l.when) : null}
           </span>
           <span className="shrink-0 font-mono text-[12px] text-muted-foreground">{upcoming && l.when ? day(l.when) : ago(l.lastAt)}</span>
@@ -679,7 +681,7 @@ function Card({ l, on, onClick }: { l: LeadSummary; on: boolean; onClick: () => 
       className={cn("grid w-full gap-0.5 rounded-[10px] bg-card px-2.5 py-2 text-left transition-colors duration-200 hoverable:hover:bg-muted", on && "shadow-[inset_3px_0_0_var(--accent)]")}
     >
       <span className="flex justify-between gap-2 font-mono text-[10.5px] uppercase tracking-[0.09em] text-muted-foreground">
-        <span className="truncate">{kindOf(l.kind)}</span>
+        <span className="truncate" title={kindOf(l.kind)}>{shootTag(l.kind)}</span>
         <span className="shrink-0">{ago(l.lastAt)}</span>
       </span>
       <span className="flex min-w-0 items-center gap-1.5 text-[15px] font-semibold">
@@ -687,7 +689,7 @@ function Card({ l, on, onClick }: { l: LeadSummary; on: boolean; onClick: () => 
         <span className="truncate">{l.name}</span>
       </span>
       <span className="mt-1 flex items-center justify-between gap-2">
-        <span className="min-w-0 truncate"><RowAction l={l} next={nextStep(l)} /></span>
+        <span className="min-w-0 text-left"><RowAction l={l} next={nextStep(l)} /></span>
         {l.quote ? <span className="shrink-0 font-mono text-[11.5px] text-muted-foreground">{money(l.quote)}</span> : null}
       </span>
     </button>
@@ -1523,7 +1525,11 @@ function LeadCrm({ l, full, patch, others, templates }: { l: LeadSummary; full: 
             }}
           >
             <label className={fieldLabel}>When<input type="datetime-local" required value={rAt} min={local(new Date().toISOString())} onChange={(e) => setRAt(e.target.value)} className={cn(field, "w-auto font-mono text-[14px]")} /></label>
-            <label className={cn(fieldLabel, "min-w-[12rem] flex-1")}>What for<input value={rText} onChange={(e) => setRText(e.target.value)} placeholder="Send the quote" className={field} /></label>
+            {/* Short enough that the row always shows all of it. */}
+            <label className={cn(fieldLabel, "min-w-[12rem] flex-1")}>
+              <span className="flex justify-between">What for<span className="font-mono text-muted-foreground">{rText.length}/{REMIND_MAX}</span></span>
+              <input value={rText} maxLength={REMIND_MAX} onChange={(e) => setRText(e.target.value)} placeholder="Send the quote" className={field} />
+            </label>
             <button type="submit" className={btn}>Remind me</button>
           </form>
         )}

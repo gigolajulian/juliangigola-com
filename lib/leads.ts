@@ -471,3 +471,26 @@ export function backfillLead(lead: Lead | null, email: string, rows: InboxRow[])
   const events = [...lead.events, ...add.map((c) => c.event)].sort((a, b) => a.at.localeCompare(b.at)).slice(-KEEP);
   return { ...lead, events, firstAt: add[0].event.at < lead.firstAt ? add[0].event.at : lead.firstAt };
 }
+
+/** A reminder's "What for", and every step line: fits two lines of a row at 390px. */
+export const REMIND_MAX = 28;
+
+/** The row's one-word tag for the type of shoot; the full kind stays on the lead. */
+const TAGS: [RegExp, string][] = [
+  [/music|spotify|apple|album|single|artist|band|record|cover art/, "Music"],
+  [/digital|polaroid|comp card|agency|model test/, "Digitals"],
+  [/headshot/, "Headshots"],
+  [/portrait/, "Portraits"],
+  [/wedding|engagement|elopement/, "Wedding"],
+  [/editorial|magazine/, "Editorial"],
+  [/brand|product|campaign|commercial|lookbook/, "Brand"],
+  [/event/, "Event"],
+];
+export function shootTag(kind?: string): string | undefined {
+  const k = kind?.toLowerCase().trim();
+  if (!k) return undefined;
+  const hit = TAGS.find(([re]) => re.test(k));
+  if (hit) return hit[1];
+  const w = k.split(/[\s,/-]+/)[0];
+  return w.charAt(0).toUpperCase() + w.slice(1, 12);
+}
