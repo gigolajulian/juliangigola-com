@@ -239,6 +239,9 @@ export function TimePicker({
     // had been, Name and Email above the screen (JG - MAC, 2026-10-17).
     const card = el?.matches(".ed") ? el : el?.querySelector<HTMLElement>(".ed");
     if (editorial && dir && card && card.getBoundingClientRect().top < 0) card.scrollIntoView({ block: "start" });
+    // Back to the taller Time step keeps You's scroll too; FlowShell only sees forward steps.
+    const rail = el?.querySelector<HTMLElement>(".rail");
+    if (dir < 0 && rail && rail.getBoundingClientRect().top < 64) rail.scrollIntoView({ block: "start" });
     if (!(smooth || editorial) || !dir || !el || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     if (editorial) {
       // Booked rises in; any other step slides in from the side it comes from.
