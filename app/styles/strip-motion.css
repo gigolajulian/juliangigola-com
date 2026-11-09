@@ -627,9 +627,9 @@
    (contact.css), so they take their ground from here too. */
 :root[data-theme="light"][data-reel] {
   color-scheme: dark;
-  --background: oklch(0.145 0.003 70);
-  --foreground: oklch(0.955 0.004 80);
-  --card: oklch(0.185 0.003 70);
+  --background: var(--dark-bg);
+  --foreground: var(--dark-ink);
+  --card: var(--dark-card);
   --border: oklch(1 0 0 / 11%);
   --input: oklch(1 0 0 / 14%);
   /* And the ground with it: the light theme's glow stayed behind the

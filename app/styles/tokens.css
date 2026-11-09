@@ -240,8 +240,17 @@
   --dur-photo: 600ms; /* a photo travelling: tile to hero, open, lightbox step */
   --dur-show: 1000ms; /* splash and hero crossfade only */
 
-  --background: oklch(0.145 0.003 70);
-  --foreground: oklch(0.955 0.004 80);
+  /* The dark room's own values, defined once. The dark theme reads them, and
+     so does everything that stays dark in both themes: the cover, captions
+     over photographs, the reel (v3.css, strip-motion.css). */
+  --dark-bg: oklch(0.145 0.003 70);
+  --dark-ink: oklch(0.955 0.004 80);
+  --dark-card: oklch(0.185 0.003 70);
+  --dark-mute: oklch(0.655 0.005 80);
+  --dark-accent: oklch(0.72 0.095 195);
+
+  --background: var(--dark-bg);
+  --foreground: var(--dark-ink);
 
   /* The ground is not flat: a faint light from above, settling darker into
      the two bottom corners, all in the ground's own hue so it reads as the
@@ -275,25 +284,25 @@
 
   /* Cards and popovers lift off the ground rather than sitting in a box —
      a hair lighter, never outlined. */
-  --card: oklch(0.185 0.003 70);
+  --card: var(--dark-card);
   --card-foreground: var(--foreground);
   --popover: oklch(0.2 0.003 70);
   --popover-foreground: var(--foreground);
 
-  --primary: oklch(0.955 0.004 80);
-  --primary-foreground: oklch(0.145 0.003 70);
+  --primary: var(--dark-ink);
+  --primary-foreground: var(--dark-bg);
   --secondary: oklch(0.245 0.003 70);
   --secondary-foreground: var(--foreground);
 
   --muted: oklch(0.235 0.003 70);
   /* 7.4:1 on the ground — captions and credits are real text, not decoration. */
-  --muted-foreground: oklch(0.655 0.005 80);
+  --muted-foreground: var(--dark-mute);
 
   /* The one accent, sampled from the teal that recurs across his own work
      (Oakley, Own Brand, the studio portraits). Focus and hover only — never a
      fill. An accent taken from the work cannot date; a trend can. */
-  --accent: oklch(0.72 0.095 195);
-  --accent-foreground: oklch(0.145 0.003 70);
+  --accent: var(--dark-accent);
+  --accent-foreground: var(--dark-bg);
 
   --destructive: oklch(0.62 0.2 25);
 

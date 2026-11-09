@@ -718,12 +718,15 @@ export function V3Work({
     if (pick) {
       const px = m + Math.cos(pick.a) * pick.c * k,
         py = m - Math.sin(pick.a) * pick.c * k;
-      x.fillStyle = "rgba(255,255,255,.07)";
+      // The picked wedge in the theme's ink, faint: white on the dark ground, near black on the light one.
+      x.fillStyle = css.getPropertyValue("--ink");
+      x.globalAlpha = 0.07;
       x.beginPath();
       x.moveTo(m, m);
       x.arc(m, m, w / 2 - 6, -pick.a - 0.38, -pick.a + 0.38);
       x.closePath();
       x.fill();
+      x.globalAlpha = 1;
       const [r, g, b] = rgb(
         Math.cos(pick.a) * pick.c,
         Math.sin(pick.a) * pick.c,
