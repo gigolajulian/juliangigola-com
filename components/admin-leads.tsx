@@ -372,6 +372,7 @@ export function AdminLeads() {
     >
       {/* Desktop: the sidebar. Every list, then this device's switches. */}
       <nav aria-label="Lead lists" className="hidden min-h-0 flex-col overflow-y-auto border-r border-border p-3.5 lg:flex">
+        {desk ? null : <button type="button" onClick={() => pick("new")} className={cn(btn, primary, "mb-2 min-h-10 text-[14.5px]")}>New lead</button>}
         {desk ? (
           <>
             <div className="flex items-center gap-2.5 px-2 pb-4 pt-0.5">
@@ -2189,7 +2190,7 @@ function DeskToday({ leads, go, pick }: { leads: LeadSummary[]; go: (l: LeadSumm
     <div className={cn(card, "grid content-between gap-1 px-3.5 py-3", cls)}>
       <span className="font-mono text-[10.5px] uppercase tracking-[0.08em] text-muted-foreground">{k}</span>
       <span style={HEAD} className="text-[26px] leading-none tabular-nums">{v}</span>
-      <span className="truncate font-mono text-[12px] text-muted-foreground">{sub}</span>
+      <span className="font-mono text-[12px] leading-snug text-muted-foreground [overflow-wrap:anywhere]">{sub}</span>
     </div>
   );
   const head = (title: string, more: string, f: Filter) => (
