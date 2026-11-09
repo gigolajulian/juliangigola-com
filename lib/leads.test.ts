@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { backfillLead, fold, isLate, leadKey, leadSummary, recordLead, trashDaysLeft, writeLead, type InboxRow, type Lead, type LeadSummary } from "./leads";
+import { backfillLead, fold, isLate, quoteNudge, leadKey, leadSummary, recordLead, trashDaysLeft, writeLead, type InboxRow, type Lead, type LeadSummary } from "./leads";
 import { sealer } from "./lead-crypto";
 
 const at = (h: number) => new Date(Date.UTC(2026, 10, 2, h)).toISOString();
@@ -91,8 +91,41 @@ describe("isLate", () => {
     expect(isLate({ stage: "Inquiry", stageAt: at(0), snoozeUntil: at(40) }, now)).toBe(false);
     expect(isLate({ stage: "Confirmed", stageAt: at(0) }, now)).toBe(false);
   });
-  it("flags a quote unanswered for five days", () => {
-    expect(isLate({ stage: "Quoted", stageAt: at(0) }, Date.parse(at(0)) + 6 * 864e5)).toBe(true);
+});
+
+describe("quoteNudge", () => {
+  const t0 = Date.parse(at(0));
+  const d = (n: number) => t0 + n * 864e5;
+  const iso = (n: number) => new Date(d(n)).toISOString();
+  const quoted = (...sent: number[]) => ({
+    stage: "Quoted" as const,
+    stageAt: at(0),
+    events: [{ at: iso(0.01), kind: "replied" as const }, ...sent.map((n) => ({ at: iso(n), kind: "replied" as const }))],
+  });
+  it("nudges at 3, 7 and 14 days, counting his mails after the quote", () => {
+    expect(quoteNudge(quoted(), d(2.9))).toBe(null);
+    expect(quoteNudge(quoted(), d(3.1))).toBe("Nudge 1");
+    expect(quoteNudge(quoted(3.1), d(6.9))).toBe(null);
+    expect(quoteNudge(quoted(3.1), d(7.1))).toBe("Nudge 2");
+    expect(quoteNudge(quoted(3.1, 7.1), d(13.9))).toBe(null);
+    expect(quoteNudge(quoted(3.1, 7.1), d(14.1))).toBe("Last nudge");
+  });
+  it("asks about lost a week after the last nudge, never sooner", () => {
+    expect(quoteNudge(quoted(3.1, 7.1, 14.1), d(21))).toBe(null);
+    expect(quoteNudge(quoted(3.1, 7.1, 14.1), d(21.2))).toBe("Mark as lost?");
+  });
+  it("starts over when they write, waits after a late nudge, and rests while snoozed", () => {
+    const wrote = { ...quoted(3.1), events: [...quoted(3.1).events, { at: iso(5), kind: "wrote" as const }] };
+    expect(quoteNudge(wrote, d(7.5))).toBe(null);
+    expect(quoteNudge(wrote, d(8.1))).toBe("Nudge 1");
+    expect(quoteNudge(quoted(6), d(7.5))).toBe(null);
+    expect(quoteNudge(quoted(6), d(9.1))).toBe("Nudge 2");
+    expect(quoteNudge({ ...quoted(), snoozeUntil: iso(10) }, d(5))).toBe(null);
+    expect(isLate(quoted(), d(3.1))).toBe(true);
+  });
+  it("reads the same off a list summary", () => {
+    expect(quoteNudge({ stage: "Quoted", stageAt: at(0), quiet: { from: at(0), n: 1, last: iso(3.1) } }, d(7.1))).toBe("Nudge 2");
+    expect(quoteNudge({ stage: "Quoted", stageAt: at(0) }, d(3.1))).toBe("Nudge 1");
   });
 });
 
