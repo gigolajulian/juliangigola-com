@@ -11,7 +11,9 @@
   --on-photo:242 241 238; --scrim:10 10 9;
   /* The ground under photos and film, and the dark text on a light photo button: dark in both themes. */
   --night:#0b0a09;
-  --g:max(16px,env(safe-area-inset-left,0px)); --gr:max(16px,env(safe-area-inset-right,0px));
+  /* The side gutter grows with the window: 16px on a phone, about 33px at 1333, 40px from 1600
+     (Julian 2026-11-09, /book at a laptop width: "left text too close to the edge"). */
+  --g:max(clamp(16px,2.5vw,40px),env(safe-area-inset-left,0px)); --gr:max(clamp(16px,2.5vw,40px),env(safe-area-inset-right,0px));
   color-scheme:dark;}
 @media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:var(--l-bg);--ink:var(--l-ink);--mute:var(--l-mute);--line:var(--l-line);--card:var(--l-card);--accent:var(--l-accent);color-scheme:light}}
 :root[data-theme="light"]{--bg:var(--l-bg);--ink:var(--l-ink);--mute:var(--l-mute);--line:var(--l-line);color-scheme:light}
@@ -1260,11 +1262,7 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
    is past 100rem, the rule from `ultrawide.css` before V3, so the header,
    the heads and the text keep one column. */
 @media (min-aspect-ratio:2/1){:root{--v3u:2vh}}
-/* `?gutter=wide` (trial, Julian 2026-11-09: "left text too close to the edge" on /book at laptop widths):
-   the side gutter grows with the window, 16px on a phone, about 33px at 1333, 40px from 1600. */
-:root[data-gutter="wide"]{--g:max(clamp(16px,2.5vw,40px),env(safe-area-inset-left,0px));--gr:max(clamp(16px,2.5vw,40px),env(safe-area-inset-right,0px))}
-@media (min-aspect-ratio:2/1) and (min-width:110rem){:root[data-gutter="wide"]{--g:max(40px,calc((100vw - 100rem) / 4 + 16px));--gr:max(40px,calc((100vw - 100rem) / 4 + 16px))}}
-@media (min-aspect-ratio:2/1) and (min-width:110rem){:root{--g:calc((100vw - 100rem) / 4 + 16px);--gr:calc((100vw - 100rem) / 4 + 16px)}
+@media (min-aspect-ratio:2/1) and (min-width:110rem){:root{--g:max(40px,calc((100vw - 100rem) / 4 + 16px));--gr:max(40px,calc((100vw - 100rem) / 4 + 16px))}
 /* The homepage's photographs keep the column too: the sequence's three
    columns ran 1600px a frame at 5120. The sheet gains two columns, so
    its first frame and the eight others make two full rows. */
