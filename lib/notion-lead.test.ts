@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { notionStage, toNotion } from "@/lib/notion-lead";
+import { notionPaper, notionStage, paperProperties, toNotion } from "@/lib/notion-lead";
 import type { Enquiry } from "@/lib/inbox";
 
 type Call = { url: string; method: string; body: { properties?: Record<string, unknown>; filter?: unknown } };
@@ -80,5 +80,23 @@ describe("notionStage", () => {
     expect(calls).toHaveLength(1);
     fake("down");
     expect(await notionStage("t", "ana@example.com", "Lost")).toBeUndefined();
+  });
+});
+
+describe("paperwork", () => {
+  it("maps Not needed to the board's Not required, the rest as they are", () => {
+    expect(paperProperties({ contract: "Not needed", release: "Signed" })).toEqual({
+      Contract: { select: { name: "Not required" } },
+      Release: { select: { name: "Signed" } },
+    });
+    expect(paperProperties({ release: "Sent" })).toEqual({ Release: { select: { name: "Sent" } } });
+    expect(paperProperties({ contract: "Not sent" })).toEqual({ Contract: { select: { name: "Not sent" } } });
+  });
+
+  it("writes only the select that changed to the known row", async () => {
+    const calls = fake(null);
+    expect(await notionPaper("t", "ana@example.com", { contract: "Not needed" }, "row-9")).toBe("row-9");
+    expect(calls).toHaveLength(1);
+    expect(calls[0].body.properties).toEqual({ Contract: { select: { name: "Not required" } } });
   });
 });
