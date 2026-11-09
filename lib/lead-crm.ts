@@ -104,9 +104,10 @@ export const TEMPLATES: Template[] = [
   { id: "nudge1", name: "Nudge 1", subject: "Your {kind} quote", body: "Hi {first},\n\nChecking in on the quote I sent for the {kind} shoot. Any questions, just ask.\n\nJulian" },
   { id: "nudge2", name: "Nudge 2", subject: "Your {kind} quote", body: "Hi {first},\n\nI still have a few dates open this month if you want one held. Here is a recent shoot close to what you described:\n\n\n\nJulian" },
   { id: "nudge3", name: "Last nudge", subject: "Your {kind} quote", body: "Hi {first},\n\nI haven't heard back, so I'll close this out unless you want to keep going. If the timing changes, write any time.\n\nJulian" },
+  { id: "renew", name: "Renew licence", subject: "Renewing your licence", body: "Hi {first},\n\nThe licence on the photos ({licence}) ends on {ends}. If you still need them after that, I can renew it. Same terms, or tell me what changed and I will quote it.\n\nJulian" },
   { id: "decline", name: "Not a fit", subject: "Your {kind} inquiry", body: "Hi {first},\n\nThank you for thinking of me. This one is not a fit for my schedule right now, but I hope it goes well.\n\nJulian" },
 ];
-export function fill(text: string, l: Pick<Lead, "name" | "kind" | "when">): string {
+export function fill(text: string, l: Pick<Lead, "name" | "kind" | "when" | "licence">): string {
   const when = l.when
     ? new Intl.DateTimeFormat("en-US", { timeZone: "America/Los_Angeles", weekday: "long", month: "long", day: "numeric" }).format(new Date(l.when))
     : "";
@@ -114,7 +115,9 @@ export function fill(text: string, l: Pick<Lead, "name" | "kind" | "when">): str
     .replace(/\{first\}/g, l.name.split(/\s+/)[0] ?? "")
     .replace(/\{name\}/g, l.name)
     .replace(/\{kind\}/g, (l.kind ?? "shoot").replace(/-/g, " "))
-    .replace(/\{when\}/g, when);
+    .replace(/\{when\}/g, when)
+    .replace(/\{licence\}/g, l.licence?.use ?? "")
+    .replace(/\{ends\}/g, l.licence ? new Date(`${l.licence.end}T12:00:00Z`).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "UTC" }) : "");
 }
 /** Templates as he saved them, or the defaults; anything malformed is dropped. */
 export function cleanTemplates(v: unknown): Template[] {

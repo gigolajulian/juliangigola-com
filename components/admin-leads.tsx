@@ -7,9 +7,10 @@ import { LeadProofs, ProofsDesk } from "@/components/admin-proofs";
 import { LeadUpcoming } from "@/components/lead-upcoming";
 import { TOKEN_STORE } from "@/lib/admin-github";
 import type { Enquiry } from "@/lib/inbox";
-import { isLate, leadSummary, myMove, NUDGES, PAPER, paperDue, quoteNudge, STAGES, trashDaysLeft, type Lead, type LeadEvent, type LeadSummary, type Paper, type Stage } from "@/lib/leads";
+import { isLate, leadSummary, myMove, NUDGES, PAPER, paperDue, quoteNudge, renewDue, STAGES, trashDaysLeft, type Lead, type LeadEvent, type LeadSummary, type Paper, type Stage } from "@/lib/leads";
 import { cn } from "@/lib/utils";
-import { fill, mailable } from "@/lib/lead-crm";
+import { fill, mailable, TEMPLATES } from "@/lib/lead-crm";
+import { endDay, LicenceField, LicenceList } from "@/components/lead-licence";
 import { balance, DEPOSIT, MAX_LINES, usd, type Invoice, type InvoiceFrom } from "@/lib/invoice";
 import { LEAD_KEYS, leadKey, typingIn } from "@/lib/lead-keys";
 
@@ -24,9 +25,9 @@ import { LEAD_KEYS, leadKey, typingIn } from "@/lib/lead-keys";
  * open lead side by side. Narrow: the list, then the lead with Back.
  * ─────────────────────────────────────────────────────────────── */
 
-type Filter = "needs" | "open" | "upcoming" | Stage | "snoozed" | "archived" | "trash" | "more" | "new" | "stats" | "money" | "templates" | "hours" | "proofs";
+type Filter = "needs" | "open" | "upcoming" | Stage | "snoozed" | "archived" | "trash" | "more" | "new" | "stats" | "money" | "templates" | "hours" | "proofs" | "licences";
 /** Views that are not a list of leads. */
-const TOOLS: Filter[] = ["more", "new", "stats", "money", "templates", "hours", "proofs"];
+const TOOLS: Filter[] = ["more", "new", "stats", "money", "templates", "hours", "proofs", "licences"];
 
 const DAY = 864e5;
 const now = () => Date.now();
@@ -38,7 +39,10 @@ const aside = (l: LeadSummary) => !!(l.archivedAt || l.trashedAt);
 const due = (l: LeadSummary) => !!l.due && Date.parse(l.due) <= now();
 /** The desk's search: name, email, type of shoot or their message. */
 const matches = (l: LeadSummary, words: string) => !words || [l.name, l.email, l.kind, l.snippet].some((v) => v?.toLowerCase().includes(words));
-const needsMe = (l: LeadSummary) => !aside(l) && !closed(l.stage) && (due(l) || (!snoozed(l) && (l.unread || isLate(l, now()) || !!l.flags?.length || !!paperDue(l, now()) || !!myMove(l, now()))));
+/** A licence ending soon brings back even a Delivered lead; a snooze holds it off. */
+const renew = (l: LeadSummary) => !snoozed(l) && renewDue(l, now());
+// An ending licence brings back archived leads too, never trashed ones.
+const needsMe = (l: LeadSummary) => !l.trashedAt && (renew(l) || (!l.archivedAt && !closed(l.stage) && (due(l) || (!snoozed(l) && (l.unread || isLate(l, now()) || !!l.flags?.length || !!paperDue(l, now()) || !!myMove(l, now()))))));
 
 /** What to do next, in a word or two, and whether it is late. */
 function nextStep(l: LeadSummary): string | null {
@@ -47,6 +51,7 @@ function nextStep(l: LeadSummary): string | null {
   if (l.flags?.includes("no-deposit")) return "Ask for the deposit";
   const paper = paperDue(l, now());
   if (paper) return paper === "contract" ? "Get contract signed" : "Get release signed";
+  if (renew(l)) return "Renew licence";
   if (l.stage === "Inquiry") return "Reply";
   if (l.stage === "Quoted") return quoteNudge(l, now());
   return myMove(l, now());
@@ -185,7 +190,7 @@ export function AdminLeads() {
 
   /** A change from the open lead, reflected in its row at once. */
   // A cleared snooze comes back without the key, so set it outright.
-  const changed = (l: Lead) => setLeads((rows) => rows?.map((r) => (r.email === l.email ? { ...r, ...l, snoozeUntil: l.snoozeUntil, archivedAt: l.archivedAt, trashedAt: l.trashedAt, due: l.remind?.at, dueText: l.remind?.text.slice(0, 40), quote: l.quote, id: r.id } : r)) ?? null);
+  const changed = (l: Lead) => setLeads((rows) => rows?.map((r) => (r.email === l.email ? { ...r, ...l, snoozeUntil: l.snoozeUntil, archivedAt: l.archivedAt, trashedAt: l.trashedAt, due: l.remind?.at, dueText: l.remind?.text.slice(0, 40), quote: l.quote, licence: l.licence, id: r.id } : r)) ?? null);
 
   if (error === "Not authorized." || error?.startsWith("GitHub did not accept"))
     return (
@@ -273,6 +278,7 @@ export function AdminLeads() {
         <SideLink on={filter === "stats"} onClick={() => pick("stats")}>Stats</SideLink>
         <SideLink on={filter === "money"} onClick={() => pick("money")}>Money</SideLink>
         <SideLink on={filter === "templates"} onClick={() => pick("templates")}>Templates</SideLink>
+        <SideLink on={filter === "licences"} onClick={() => pick("licences")}>Licences</SideLink>
         <SideLink on={false} onClick={doExport}>Export CSV</SideLink>
         <SideGroup>Proofs</SideGroup>
         <SideLink on={filter === "proofs"} onClick={() => pick("proofs")}>Galleries</SideLink>
@@ -341,7 +347,7 @@ export function AdminLeads() {
             </ul>
             <ul className="grid">
               <li><p className="px-1 pb-1 font-mono text-[11.5px] uppercase tracking-[0.08em] text-muted-foreground">Tools</p></li>
-              {([["new", "New lead"], ["stats", "Stats"], ["money", "Money"], ["templates", "Templates"], ["proofs", "Proofs"]] as const).map(([f, t]) => (
+              {([["new", "New lead"], ["stats", "Stats"], ["money", "Money"], ["templates", "Templates"], ["licences", "Licences"], ["proofs", "Proofs"]] as const).map(([f, t]) => (
                 <li key={f}>
                   <button type="button" onClick={() => pick(f)} className="flex min-h-[52px] w-full items-center justify-between border-b border-border px-1 text-left text-[17px]">
                     {t}<span aria-hidden="true" className="font-mono text-[13px] text-muted-foreground">›</span>
@@ -367,6 +373,8 @@ export function AdminLeads() {
           <MoneyView />
         ) : filter === "templates" ? (
           <TemplatesEditor call={call} templates={templates} saved={setTemplates} />
+        ) : filter === "licences" ? (
+          <LicenceList leads={leads.filter((l) => !l.trashedAt)} row={(l) => <Row l={l} on={open === l.id} upcoming={false} onClick={() => setOpen(l.id ?? null)} />} />
         ) : filter === "hours" ? (
           <LeadHours />
         ) : filter === "proofs" ? (
@@ -824,15 +832,15 @@ function SignIn({ onKey, wrong }: { onKey: (k: string) => void; wrong: boolean }
 function pass(l: LeadSummary, f: Filter) {
   if (f === "trash") return !!l.trashedAt;
   if (f === "archived") return !!l.archivedAt && !l.trashedAt;
-  if (aside(l)) return false;
   if (f === "needs") return needsMe(l);
+  if (aside(l)) return false;
   if (f === "upcoming") return !!l.when && Date.parse(l.when) > now() - 2 * 3600e3 && !closed(l.stage);
-  if (f === "more" || f === "hours" || f === "proofs") return false;
+  if (f === "more" || f === "hours" || f === "proofs" || f === "licences") return false;
   if (f === "snoozed") return snoozed(l);
   if (f === "open") return !closed(l.stage);
   return l.stage === f && !snoozed(l);
 }
-const LABEL: Partial<Record<Filter, string>> = { needs: "Your move", open: "All open", upcoming: "Upcoming", snoozed: "Snoozed", archived: "Archived", trash: "Trash", more: "More", new: "New lead", stats: "Stats", money: "Money", templates: "Templates", hours: "Hours", proofs: "Proofs" };
+const LABEL: Partial<Record<Filter, string>> = { needs: "Your move", open: "All open", upcoming: "Upcoming", snoozed: "Snoozed", archived: "Archived", trash: "Trash", more: "More", new: "New lead", stats: "Stats", money: "Money", templates: "Templates", hours: "Hours", proofs: "Proofs", licences: "Licences" };
 const label = (f: Filter) => LABEL[f] ?? f;
 
 /** Deletes every lead in the trash for good, after a second press. */
@@ -969,6 +977,17 @@ function Detail({ summary, initial, call, onChange, onBack, reload, templates, o
           {nudge && mailable(l.email) ? <a href={ios() ? mailto(l.email, fill(nudge.subject, l), fill(nudge.body, l)) : compose(l.email, fill(nudge.subject, l), fill(nudge.body, l))} target="_blank" rel="noreferrer" className="ml-auto shrink-0 font-mono text-[12.5px] font-medium text-accent">{nudge.name} →</a> : null}
         </p>
       ) : null}
+      {renew(l) && mailable(l.email) ? (() => {
+        const t = templates.find((x) => x.id === "renew") ?? TEMPLATES.find((x) => x.id === "renew")!;
+        const subject = fill(t.subject, l);
+        const body = fill(t.body, l);
+        return (
+          <p role="status" className="flex flex-wrap items-center gap-3 rounded-xl bg-accent/12 px-4 py-3.5 text-[15px]">
+            <span className="flex-1"><b className="font-semibold text-accent">Licence ends {endDay(l.licence!.end)}.</b> {l.licence!.use}</span>
+            <a href={ios() ? mailto(l.email, subject, body) : compose(l.email, subject, body)} target="_blank" rel="noreferrer" className={cn(btn, primary)}>Renew licence</a>
+          </p>
+        );
+      })() : null}
       {l.trashedAt ? (
         <p role="status" className="font-mono text-[13px] text-muted-foreground">
           In the trash. Deleted for good in {Math.max(1, trashDaysLeft(l.trashedAt, now()))} days unless recovered.
@@ -982,7 +1001,7 @@ function Detail({ summary, initial, call, onChange, onBack, reload, templates, o
 
       <div className="flex flex-wrap items-center gap-2.5">
         {mailable(l.email) ? (<>
-        <a ref={replyLink} href={reply} target="_blank" rel="noreferrer" onClick={() => setAsked(true)} className={cn(btn, primary, "min-h-[52px] px-5 text-base")}>
+        <a ref={replyLink} href={reply} target="_blank" rel="noreferrer" onClick={() => setAsked(true)} className={cn(btn, !renew(l) && primary, "min-h-[52px] px-5 text-base")}>
           Reply in Gmail
         </a>
         {ios() ? (
@@ -1316,7 +1335,7 @@ function LeadCrm({ l, full, patch, others, templates }: { l: LeadSummary; full: 
         <section className="grid gap-2.5">
           <h3 aria-level={2} className={h3}>Reply with a template</h3>
           <div className="flex flex-wrap gap-2">
-            {templates.map((t) => {
+            {templates.filter((t) => t.id !== "renew" || l.licence).map((t) => {
               const subject = fill(t.subject, l);
               const body = fill(t.body, l);
               return (
@@ -1509,6 +1528,7 @@ function Money({ l, full, patch, run, quote, setQuote }: { l: LeadSummary; full:
           </label>
         ) : null}
       </div>
+      <LicenceField key={full?.licence?.end ?? ""} full={full} patch={patch} run={run} cls={{ btn, field, label: fieldLabel }} />
       <dl className={ledger}>
         <dt className={dt}>{paidAt ? `Deposit, ${day(paidAt)}` : "Deposit"}</dt>
         <dd className={dd}>
