@@ -68,12 +68,12 @@ export function FlowShell({
 }) {
   const last = at === steps.length && steps.length > 0;
   /* A shorter step keeps the scroll of a taller one, which left the rail
-     under the header on /book's You step at 1440x900. Bring it back. */
+     under the header on /book's You step at 1440x900. Bring it back. Each
+     step may mount its own shell, so this keys on the step, never step 1:
+     a fresh page (the homepage's Contact screen too) must not scroll. */
   const rail = React.useRef<HTMLOListElement>(null);
-  const first = React.useRef(true);
   React.useLayoutEffect(() => {
-    if (first.current) return void (first.current = false);
-    if (rail.current && rail.current.getBoundingClientRect().top < 64) rail.current.scrollIntoView({ block: "start" });
+    if (at > 1 && rail.current && rail.current.getBoundingClientRect().top < 64) rail.current.scrollIntoView({ block: "start" });
   }, [at]);
   return (
     <div className="flow">
