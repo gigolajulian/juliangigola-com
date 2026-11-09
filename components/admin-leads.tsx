@@ -8,7 +8,7 @@ import { LeadProofs, ProofsDesk } from "@/components/admin-proofs";
 import { LeadUpcoming } from "@/components/lead-upcoming";
 import { TOKEN_STORE } from "@/lib/admin-github";
 import type { Enquiry } from "@/lib/inbox";
-import { isLate, leadSummary, myMove, NUDGES, PAPER, paperDue, quoteNudge, renewDue, STAGES, trashDaysLeft, type Lead, type LeadEvent, type LeadSummary, type Paper, type Stage } from "@/lib/leads";
+import { isLate, leadSummary, myMove, NUDGES, PAPER, paperDue, quoteNudge, renewDue, shootTag, STAGES, trashDaysLeft, type Lead, type LeadEvent, type LeadSummary, type Paper, type Stage } from "@/lib/leads";
 import { cn } from "@/lib/utils";
 import { fill, mailable, TEMPLATES } from "@/lib/lead-crm";
 import { endDay, LicenceField, LicenceList } from "@/components/lead-licence";
@@ -47,7 +47,8 @@ const needsMe = (l: LeadSummary) => renew(l) || (!aside(l) && !closed(l.stage) &
 
 /** What to do next, in a word or two, and whether it is late. */
 function nextStep(l: LeadSummary): string | null {
-  if (due(l)) return l.dueText || "Your reminder";
+  // A due reminder on a stage that has its own short step shows the step; the reminder's text stays in the lead.
+  if (due(l)) return myMove(l, now()) ?? (l.dueText || "Your reminder");
   if (l.flags?.includes("stuck")) return "Refund or rebook";
   if (l.flags?.includes("no-deposit")) return "Ask for the deposit";
   const paper = paperDue(l, now());
@@ -648,8 +649,8 @@ function Row({ l, on, upcoming, onClick }: { l: LeadSummary; on: boolean; upcomi
       <span className="grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)] gap-0.5">
         <span className="flex items-baseline justify-between gap-3">
           <span className="truncate font-mono text-[11px] uppercase tracking-[0.09em] text-muted-foreground">
-            {kindOf(l.kind) ? <b className="font-medium text-foreground">{kindOf(l.kind)}</b> : null}
-            {kindOf(l.kind) && l.when ? " · " : null}
+            {l.kind ? <b className="font-medium text-foreground" title={kindOf(l.kind)}>{shootTag(l.kind)}</b> : null}
+            {l.kind && l.when ? " · " : null}
             {l.when ? at(l.when) : null}
           </span>
           <span className="shrink-0 font-mono text-[12px] text-muted-foreground">{upcoming && l.when ? day(l.when) : ago(l.lastAt)}</span>
@@ -679,7 +680,7 @@ function Card({ l, on, onClick }: { l: LeadSummary; on: boolean; onClick: () => 
       className={cn("grid w-full gap-0.5 rounded-[10px] bg-card px-2.5 py-2 text-left transition-colors duration-200 hoverable:hover:bg-muted", on && "shadow-[inset_3px_0_0_var(--accent)]")}
     >
       <span className="flex justify-between gap-2 font-mono text-[10.5px] uppercase tracking-[0.09em] text-muted-foreground">
-        <span className="truncate">{kindOf(l.kind)}</span>
+        <span className="truncate" title={kindOf(l.kind)}>{shootTag(l.kind)}</span>
         <span className="shrink-0">{ago(l.lastAt)}</span>
       </span>
       <span className="flex min-w-0 items-center gap-1.5 text-[15px] font-semibold">
