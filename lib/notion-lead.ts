@@ -114,8 +114,8 @@ export async function toNotion(token: string | undefined, lead: Lead): Promise<s
   }
 }
 
-/** The board has no "Shot"; after the shoot the row is in Editing. */
-const STATUS: Partial<Record<Stage, string>> = { Shot: "Editing" };
+/** The board has no "Shot", "Invoiced" or "Selecting"; from the shoot to delivery the row is in Editing. */
+const STATUS: Partial<Record<Stage, string>> = { Shot: "Editing", Invoiced: "Editing", Selecting: "Editing" };
 
 /** The board spells the last option "Not required". */
 export const paperOption = (p: Paper) => (p === "Not needed" ? "Not required" : p);

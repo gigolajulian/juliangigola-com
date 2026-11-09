@@ -130,7 +130,7 @@ export function cleanTemplates(v: unknown): Template[] {
   return [...saved, ...TEMPLATES.filter((t) => t.id.startsWith("nudge") && !saved.some((s) => s.id === t.id))];
 }
 
-const WON: Stage[] = ["Confirmed", "Shot", "Delivered"];
+const WON: Stage[] = ["Confirmed", "Shot", "Invoiced", "Selecting", "Delivered"];
 const median = (xs: number[]) => {
   if (!xs.length) return null;
   const s = [...xs].sort((a, b) => a - b);
