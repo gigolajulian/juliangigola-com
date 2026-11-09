@@ -295,7 +295,7 @@ export function AdminLeads() {
     .filter((l) => matches(l, words))
     .sort(filter === "upcoming" ? (a, b) => a.when!.localeCompare(b.when!) : (a, b) => b.lastAt.localeCompare(a.lastAt));
   const current = leads.find((l) => l.id === open);
-  const tab = tabOf(filter);
+  const tab = desk && filter === "upcoming" ? "more" : tabOf(filter);
   const tool = TOOLS.includes(filter);
   const needs = count("needs");
   const pick = (f: Filter) => { setFilter(f); setOpen(null); scrollTo(0, 0); };
@@ -449,7 +449,7 @@ export function AdminLeads() {
               ))}
             </div>
           ) : null}
-          {MORE.includes(filter) || (tool && filter !== "more") ? (
+          {MORE.includes(filter) || (tool && filter !== "more") || (desk && filter === "upcoming") ? (
             <button type="button" onClick={() => pick("more")} className="inline-flex min-h-11 w-fit items-center gap-1 text-[16px] text-accent lg:hidden">
               <span aria-hidden="true">‹</span> More
             </button>
@@ -462,6 +462,40 @@ export function AdminLeads() {
           <div className="px-1 py-5 lg:px-7"><React.Suspense fallback={null}><AdminTraffic /></React.Suspense></div>
         ) : filter === "seo" ? (
           <div className="px-1 py-5 lg:px-7"><React.Suspense fallback={null}><AdminSeo /></React.Suspense></div>
+        ) : filter === "more" && desk ? (
+          <div className="grid gap-6 py-4 lg:hidden">
+            {([
+              ["Clients", [["Calendar", "upcoming", count("upcoming")], ["Proofs", "proofs"], ["Money", "money"], ["Licences", "licences"]]],
+              ["Site", SITE.map(([t, href]) => [t, href])],
+              ["Numbers", [["Traffic", "traffic"], ["SEO", "seo"], ["Stats", "stats"]]],
+              ["Setup", [["Hours", "hours"], ["Templates", "templates"], ["New lead", "new"]]],
+              ["Put aside", MORE.map((f) => [label(f), f, count(f)])],
+            ] as [string, [string, string, number?][]][]).map(([group, rows]) => (
+              <ul key={group} className="grid">
+                <li><p className="px-1 pb-1 font-mono text-[11.5px] uppercase tracking-[0.08em] text-muted-foreground">{group}</p></li>
+                {rows.map(([t, to, n]) => {
+                  const cls = "flex min-h-[52px] w-full items-center justify-between border-b border-border px-1 text-left text-[17px]";
+                  const end = <span className="flex items-center gap-3 font-mono text-[13px] text-muted-foreground">{n}<span aria-hidden="true">›</span></span>;
+                  return (
+                    <li key={t}>
+                      {to.startsWith("/") ? <a href={to} className={cls}>{t}{end}</a> : <button type="button" onClick={() => pick(to as Filter)} className={cls}>{t}{end}</button>}
+                    </li>
+                  );
+                })}
+              </ul>
+            ))}
+            <ul className="grid">
+              <li>
+                <button type="button" onClick={doExport} className="flex min-h-[52px] w-full items-center justify-between border-b border-border px-1 text-left text-[17px]">
+                  Export CSV<span aria-hidden="true" className="font-mono text-[13px] text-muted-foreground">↓</span>
+                </button>
+              </li>
+            </ul>
+            <div className="grid">
+              <p className="px-1 pb-1 font-mono text-[11.5px] uppercase tracking-[0.08em] text-muted-foreground">This device</p>
+              {device}
+            </div>
+          </div>
         ) : filter === "more" ? (
           <div className="grid gap-6 py-4 lg:hidden">
             <ul className="grid">
@@ -560,7 +594,7 @@ export function AdminLeads() {
         aria-label="Lead tabs"
         className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-border bg-background/95 px-1.5 pb-[env(safe-area-inset-bottom)] pt-1.5 backdrop-blur-md lg:hidden"
       >
-        {TABS.map((t) => (
+        {(desk ? DESK_TABS : TABS).map((t) => (
           <button
             key={t.id}
             type="button"
@@ -689,17 +723,19 @@ function Palette({ leads, close, go }: { leads: LeadSummary[]; close: () => void
   );
 }
 
-type Tab = "needs" | "open" | "upcoming" | "more";
+type Tab = "today" | "needs" | "open" | "upcoming" | "more";
 const OPEN_STAGES = STAGES.filter((s) => !closed(s));
 /** The lists under More on the phone (the sidebar's lower groups on desktop). */
 const MORE: Filter[] = ["snoozed", "archived", "trash", "Delivered", "Lost"];
-const tabOf = (f: Filter): Tab => (f === "needs" || f === "upcoming" ? f : TOOLS.includes(f) || MORE.includes(f) ? "more" : "open");
+const tabOf = (f: Filter): Tab => (f === "today" ? "today" : f === "needs" || f === "upcoming" ? f : TOOLS.includes(f) || MORE.includes(f) ? "more" : "open");
 const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: "needs", label: "Your move", icon: <><path d="M4 13l3-8h10l3 8v6H4z" /><path d="M4 13h5l1 2h4l1-2h5" /></> },
   { id: "open", label: "Open", icon: <path d="M5 6h14M5 12h14M5 18h9" /> },
   { id: "upcoming", label: "Upcoming", icon: <><rect x="4" y="5" width="16" height="15" rx="2" /><path d="M4 10h16M9 3v4M15 3v4" /></> },
   { id: "more", label: "More", icon: <><circle cx="6" cy="12" r="1.2" /><circle cx="12" cy="12" r="1.2" /><circle cx="18" cy="12" r="1.2" /></> },
 ];
+/** The One Desk's phone tabs: Today first; Upcoming folds into it, the Calendar under More. */
+const DESK_TABS = [{ id: "today" as Tab, label: "Today", icon: <><rect x="4" y="5" width="16" height="15" rx="2" /><path d="M4 10h16M9 3v4M15 3v4" /><circle cx="12" cy="15" r="1.6" /></> }, ...TABS.filter((t) => t.id !== "upcoming")];
 
 /** The road a lead travels; Lost is off it. */
 const STEPS: readonly Stage[] = STAGES.filter((s) => s !== "Lost");
