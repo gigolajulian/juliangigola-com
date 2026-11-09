@@ -1,4 +1,5 @@
 import { duration, refundable } from "@/lib/booking-rules";
+import { SIG_DARK, SIG_HTML, SIG_TEXT } from "@/lib/email-signature";
 /* ── the client's confirmation email ──────────────────────────────
  * Julian (2026-10-16): every booking gets a branded "You're in." mail from
  * the site, on top of Cal.com's stock one (Cal stays on the free plan).
@@ -116,7 +117,7 @@ ${paid.rows.map(([k, v]) => `<tr><td class="muted" style="${muted};padding:3px 0
 <title>You're booked: ${esc(c.session)}</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>body{margin:0;padding:0;background:#ebedef}.mono{font-family:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace}.ink-d{display:none}
-@media (prefers-color-scheme: dark){body,.page{background:#0b0a09!important}.fg{color:#f1f0ed!important}.muted{color:#92908d!important}.accent{color:#50b7b7!important}.rule{border-color:rgba(255,255,255,0.11)!important}.ink-l{display:none!important}.ink-d{display:block!important}}</style>
+@media (prefers-color-scheme: dark){body,.page{background:#0b0a09!important}.fg{color:#f1f0ed!important}.muted{color:#92908d!important}.accent{color:#50b7b7!important}.rule{border-color:rgba(255,255,255,0.11)!important}.ink-l{display:none!important}.ink-d{display:block!important}${SIG_DARK}}</style>
 </head><body>
 <div style="display:none;max-height:0;overflow:hidden">${esc(preheader)}</div>
 <table role="presentation" class="page" width="100%" cellpadding="0" cellspacing="0" style="background:#ebedef"><tr><td align="center" style="padding:40px 16px">
@@ -128,7 +129,7 @@ ${paid.rows.map(([k, v]) => `<tr><td class="muted" style="${muted};padding:3px 0
 <tr><td class="rule" style="${rule}"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="mono" style="font-size:13px;line-height:1.5">${detail}</table></td></tr>
 ${receipt}
 ${links ? `<tr><td class="rule" style="${rule};padding:22px 0 0"><a href="${reschedule}" class="mono accent" style="${accent};font-size:13px;text-decoration:none">Reschedule</a><span class="muted" style="${muted};font-size:13px">&nbsp;|&nbsp;</span><a href="${cancel}" class="mono accent" style="${accent};font-size:13px;text-decoration:none">Cancel</a></td></tr>` : ""}
-<tr><td class="mono muted" style="font-size:12px;line-height:1.65;${muted};padding-top:40px">Questions? Reply to this email.<br><a href="${SITE}" class="muted" style="${muted};text-decoration:none">juliangigola.com</a></td></tr>
+<tr><td class="mono muted" style="font-size:12px;line-height:1.65;${muted};padding-top:40px">Questions? Reply to this email.<br>${SIG_HTML}</td></tr>
 </table></td></tr></table></body></html>`;
 
   const text = [
@@ -141,7 +142,7 @@ ${links ? `<tr><td class="rule" style="${rule};padding:22px 0 0"><a href="${resc
     ...(links ? ["", `Reschedule: ${reschedule}`, `Cancel: ${cancel}`] : []),
     "",
     "Questions? Reply to this email.",
-    SITE,
+    SIG_TEXT,
   ].join("\n");
 
   const logo = (contentId: string, b64: string) => ({ content: Uint8Array.from(atob(b64), (c) => c.charCodeAt(0)), filename: `${contentId}.png`, type: "image/png", disposition: "inline" as const, contentId });
@@ -181,7 +182,7 @@ export async function sendCancelled(mailer: CloudflareEnv["CLIENT_EMAIL"] | unde
     kept: "It was under 48 hours before the session as first booked, so the $100 deposit is not refunded.",
     none: "",
   }[refund];
-  const text = [`Hi ${first(c.name)},`, "", `Your ${c.session.toLowerCase()} on ${when(c.start, c.end)} is cancelled.`, money, "", `Book another time: ${SITE}/book`, "", "Questions? Reply to this email."].filter((l, i, a) => l || a[i - 1]).join("\n");
+  const text = [`Hi ${first(c.name)},`, "", `Your ${c.session.toLowerCase()} on ${when(c.start, c.end)} is cancelled.`, money, "", `Book another time: ${SITE}/book`, "", "Questions? Reply to this email.", SIG_TEXT].filter((l, i, a) => l || a[i - 1]).join("\n");
   try {
     await mailer.send({ to: { email: c.email, name: c.name }, from: FROM, replyTo: REPLY_TO, subject: cancelledSubject(c), text });
     return true;
