@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { sealer } from "@/lib/lead-crypto";
-import { finalize, paidFor } from "@/lib/proof-submit";
+import { finalize, paidFor, settle } from "@/lib/proof-submit";
 import { isOpen, isToken, publicView, readProof, writeProof } from "@/lib/proofs";
 import { ProofGallery } from "@/components/proof-gallery";
 
@@ -43,6 +43,10 @@ export default async function ProofPage({ params, searchParams }: { params: Prom
   if (!p.submittedAt && session && env.STRIPE_SECRET_KEY) {
     const ok = await paidFor(env.STRIPE_SECRET_KEY, p, session).catch(() => null);
     if (ok) p = await finalize(env, env.INBOX, s, p, ok);
+  }
+  if (p.paid?.pending && env.STRIPE_SECRET_KEY) {
+    const moved = await settle(env.STRIPE_SECRET_KEY, p).catch(() => null);
+    if (moved) await writeProof(env.INBOX, s, (p = moved));
   }
   // Julian's own look before sending is not a client view.
   if (!paid && p.sentAt) await writeProof(env.INBOX, s, { ...p, views: p.views + 1, firstViewAt: p.firstViewAt ?? new Date().toISOString() });
