@@ -3,12 +3,14 @@
 import * as React from "react";
 import Image, { getImageProps } from "next/image";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { createPortal } from "react-dom";
 import type { Flip as FlipT } from "gsap/Flip";
 import { V3Foot } from "@/components/v3/chrome";
 import DISC from "@/lib/discipline-order.json";
 import { mplan, GSAP_OUT } from "@/lib/mplan";
-import { V3Canvas } from "@/components/v3/canvas";
+// The `?canvas=1` prototype loads only when it opens, not with every /portfolio visit.
+const V3Canvas = dynamic(() => import("@/components/v3/canvas").then((m) => m.V3Canvas), { ssr: false });
 import { launchSpeed, stepSpring, springSettled, frameDt } from "@/lib/motion/spring";
 
 /* JG V3 Portfolio (master v39, /work): search, discipline chips, and the
