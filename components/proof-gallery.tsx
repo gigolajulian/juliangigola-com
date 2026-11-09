@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import type { PublicProof } from "@/lib/proofs";
+import { cardPrice, type PublicProof } from "@/lib/proofs";
 
 /* ── the client's gallery ─────────────────────────────────────────
  * The look Julian approved 2026-11-06 (mock https://claude.ai/artifact/Nn3EU21DEofuLLJyXJHtcG):
@@ -26,6 +26,36 @@ const isEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
 
 type Step = null | "review" | "done";
 
+/** A full-screen sheet: focus moves in, Tab stays inside, Escape closes, focus goes back to what opened it. */
+function useDialog(active: boolean, close: () => void) {
+  const ref = React.useRef<HTMLDivElement>(null);
+  const shut = React.useRef(close);
+  React.useEffect(() => {
+    shut.current = close;
+  });
+  React.useEffect(() => {
+    if (!active) return;
+    const back = document.activeElement as HTMLElement | null;
+    const items = () => [...(ref.current?.querySelectorAll<HTMLElement>("button:not([disabled]), a[href]") ?? [])];
+    items()[0]?.focus();
+    const k = (e: KeyboardEvent) => {
+      if (e.key === "Escape") return shut.current();
+      if (e.key !== "Tab") return;
+      const all = items();
+      if (!all.length) return;
+      const i = all.indexOf(document.activeElement as HTMLElement);
+      if (e.shiftKey && i <= 0) { e.preventDefault(); all[all.length - 1].focus(); }
+      else if (!e.shiftKey && (i === -1 || i === all.length - 1)) { e.preventDefault(); all[0].focus(); }
+    };
+    addEventListener("keydown", k);
+    return () => {
+      removeEventListener("keydown", k);
+      back?.focus?.();
+    };
+  }, [active]);
+  return ref;
+}
+
 export function ProofGallery({ token, initial }: { token: string; initial: PublicProof }) {
   const { frames, included, price, balance } = initial;
   const [selects, setSelects] = React.useState<string[]>(initial.selects);
@@ -35,7 +65,9 @@ export function ProofGallery({ token, initial }: { token: string; initial: Publi
   const [open, setOpen] = React.useState<number | null>(null);
   const [step, setStep] = React.useState<Step>(initial.submitted ? "done" : null);
   const [showAll, setShowAll] = React.useState(false);
+  const gridRef = useDialog(showAll, () => setShowAll(false));
   const [busy, setBusy] = React.useState(false);
+  const [via, setVia] = React.useState<"bank" | "card">("bank");
   const [error, setError] = React.useState<string | null>(null);
   const [paid, setPaid] = React.useState(initial.paid);
   const locked = step === "done";
@@ -194,6 +226,7 @@ export function ProofGallery({ token, initial }: { token: string; initial: Publi
 
   async function send(method: "bank" | "card" = "bank") {
     setBusy(true);
+    setVia(method);
     setError(null);
     try {
       const res = await fetch(`/api/proof/${token}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email, selects, method }) });
@@ -295,7 +328,7 @@ export function ProofGallery({ token, initial }: { token: string; initial: Publi
           </div>
         </div>
         {showAll ? (
-          <div className="proof-over" role="dialog" aria-modal="true" aria-label="Your selects">
+          <div ref={gridRef} className="proof-over" role="dialog" aria-modal="true" aria-label="Your selects">
             <div className="proof-rhead">
               <div>
                 <p className="proof-lab">Your selects</p>
@@ -451,14 +484,11 @@ export function ProofGallery({ token, initial }: { token: string; initial: Publi
               <button type="button" className="proof-btn ghost" onClick={() => setStep(null)}>
                 Back to frames
               </button>
-              {due ? (
-                <button type="button" className="proof-btn ghost" disabled={busy} onClick={() => send("card")}>
-                  Pay by card
+              {due ? null : (
+                <button type="button" className="proof-btn" disabled={busy} onClick={() => send()}>
+                  {busy ? "Sending" : `Send ${n} ${n === 1 ? "select" : "selects"}`}
                 </button>
-              ) : null}
-              <button type="button" className="proof-btn" disabled={busy} onClick={() => send()}>
-                {busy ? "Sending" : due ? `Pay $${due} by bank` : `Send ${n} ${n === 1 ? "select" : "selects"}`}
-              </button>
+              )}
             </div>
           </div>
           <p className="proof-rsum">
@@ -467,6 +497,38 @@ export function ProofGallery({ token, initial }: { token: string; initial: Publi
             {extra ? <span>{extra} extra × ${price}</span> : null}
             <b>{due ? `$${due}` : "Nothing to pay"}</b>
           </p>
+          {due ? (
+            <div className="proof-pay">
+              <button type="button" className="proof-opt" data-main disabled={busy} onClick={() => send("bank")}>
+                <span>
+                  <b>{busy && via === "bank" ? "Opening Stripe" : "Pay by bank"}</b>
+                  <small>Sign in to your bank on Stripe. Clears in about 4 business days.</small>
+                </span>
+                <span className="proof-amt">
+                  <s>${cardPrice(due * 100) / 100}</s> ${due}
+                  <i>Save ${cardPrice(due * 100) / 100 - due} · No card processing cost</i>
+                </span>
+              </button>
+              <button type="button" className="proof-opt" disabled={busy} onClick={() => send("card")}>
+                <span>
+                  <b>{busy && via === "card" ? "Opening Stripe" : "Pay by card"}</b>
+                  <small>Visa, Mastercard, Amex or Apple Pay.</small>
+                </span>
+                <span className="proof-amt">
+                  ${cardPrice(due * 100) / 100}
+                  <i data-mu>Includes card processing</i>
+                </span>
+              </button>
+              <p className="proof-secure">Prices are card prices. Paying by bank skips the processing cost, so you get it back.</p>
+              <p className="proof-secure">
+                <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true">
+                  <rect x="3" y="7" width="10" height="7.5" rx="1.5" fill="none" stroke="currentColor" strokeWidth="1.3" />
+                  <path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" fill="none" stroke="currentColor" strokeWidth="1.3" />
+                </svg>
+                Secure checkout on Stripe, encrypted and PCI certified. I never see your card or bank details.
+              </p>
+            </div>
+          ) : null}
           {error ? <p className="proof-err" role="alert">{error}</p> : null}
           <div className="proof-rgrid">
             {selects.map((id, k) => (
@@ -477,7 +539,7 @@ export function ProofGallery({ token, initial }: { token: string; initial: Publi
               </div>
             ))}
           </div>
-          {due ? <p className="proof-stripe">Pay by bank through Stripe: sign in to your bank, it clears in about 4 business days. Card works too. Selects lock once you send.</p> : <p className="proof-stripe">Selects lock once you send.</p>}
+          <p className="proof-stripe">Selects lock once you send.</p>
         </div>
       ) : null}
     </div>

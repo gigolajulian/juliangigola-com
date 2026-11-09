@@ -109,6 +109,19 @@ html:has(.proof) #main{transform:none}
 .proof-rhead h1{font:500 clamp(40px,7cqi,72px)/.98 var(--font-display);letter-spacing:-.04em;margin:12px 0 0}
 .proof-rsum{display:flex;justify-content:space-between;gap:12px;font:12px var(--p-mono);color:var(--muted-foreground);padding:12px 0;margin:24px 0 18px;border-top:1px solid var(--p-hl);border-bottom:1px solid var(--p-hl)}
 .proof-rsum b{font-weight:500;color:var(--foreground)}
+.proof-pay{display:grid;gap:8px;margin:0 0 24px}
+.proof .proof-opt{display:flex;justify-content:space-between;align-items:center;gap:16px;width:100%;text-align:left;padding:16px 18px;min-height:64px;border:1px solid var(--p-hl);background:none;color:var(--foreground);transition:border-color .15s,background-color .15s}
+.proof .proof-opt:hover{border-color:var(--muted-foreground)}
+.proof .proof-opt[data-main]{border-color:var(--foreground)}
+.proof .proof-opt:disabled{opacity:.5;cursor:default}
+.proof-opt b{display:block;font:500 12px var(--p-mono);letter-spacing:.12em;text-transform:uppercase}
+.proof-opt small{display:block;margin-top:5px;text-transform:none;letter-spacing:0;font:12px/1.5 var(--p-mono);color:var(--muted-foreground)}
+.proof-amt{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;justify-content:flex-end;font:500 20px var(--p-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.proof-amt s{font-size:13px;font-weight:400;color:var(--muted-foreground)}
+.proof-amt i{flex-basis:100%;text-align:right;font:normal 11px var(--p-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.proof-secure{display:flex;align-items:center;gap:8px;margin-top:6px;font:11px/1.5 var(--p-mono);color:var(--muted-foreground)}
+.proof-secure svg{flex:none}
+.proof-amt i[data-mu]{color:var(--muted-foreground)}
 .proof-rgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
 .proof-rgrid div{position:relative}
 .proof-rgrid img{width:100%;aspect-ratio:2/3;object-fit:cover;object-position:center 25%;display:block}
@@ -166,3 +179,6 @@ html:has(.proof) #main{transform:none}
   .proof-thumbs img{width:44px;height:58px}
 }
 @media (prefers-reduced-motion:reduce){.proof *{transition:none!important}}
+
+/* Admin proofs list: the picked row's accent edge (Tailwind mangled the arbitrary inset shadow). */
+.proof-desk-on{box-shadow:inset 3px 0 var(--accent)}
