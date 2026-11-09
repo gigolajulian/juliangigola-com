@@ -116,6 +116,7 @@ html:has(.proof) #main{transform:none}
 .proof-amt i{flex-basis:100%;text-align:right;font:normal 11px var(--p-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
 .proof-secure{display:flex;align-items:center;gap:8px;margin-top:6px;font:11px/1.5 var(--p-mono);color:var(--muted-foreground)}
 .proof-secure svg{flex:none}
+.proof-amt i[data-mu]{color:var(--muted-foreground)}
 .proof-rgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
 .proof-rgrid div{position:relative}
 .proof-rgrid img{width:100%;aspect-ratio:2/3;object-fit:cover;object-position:center 25%;display:block}

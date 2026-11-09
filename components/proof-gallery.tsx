@@ -501,7 +501,7 @@ export function ProofGallery({ token, initial }: { token: string; initial: Publi
                 </span>
                 <span className="proof-amt">
                   <s>${cardPrice(due * 100) / 100}</s> ${due}
-                  <i>Save ${cardPrice(due * 100) / 100 - due}</i>
+                  <i>Save ${cardPrice(due * 100) / 100 - due} · No card processing cost</i>
                 </span>
               </button>
               <button type="button" className="proof-opt" disabled={busy} onClick={() => send("card")}>
@@ -509,8 +509,12 @@ export function ProofGallery({ token, initial }: { token: string; initial: Publi
                   <b>{busy && via === "card" ? "Opening Stripe" : "Pay by card"}</b>
                   <small>Visa, Mastercard, Amex or Apple Pay.</small>
                 </span>
-                <span className="proof-amt">${cardPrice(due * 100) / 100}</span>
+                <span className="proof-amt">
+                  ${cardPrice(due * 100) / 100}
+                  <i data-mu>Includes card processing</i>
+                </span>
               </button>
+              <p className="proof-secure">Prices are card prices. Paying by bank skips the processing cost, so you get it back.</p>
               <p className="proof-secure">
                 <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true">
                   <rect x="3" y="7" width="10" height="7.5" rx="1.5" fill="none" stroke="currentColor" strokeWidth="1.3" />
