@@ -6,13 +6,6 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
       "port": 3000
-    },
-    {
-      "name": "admin-twins",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev", "--", "-p", "3017"],
-      "env": { "NEXT_PUBLIC_IMAGE_CDN": "0" },
-      "port": 3017
     }
   ]
 }
