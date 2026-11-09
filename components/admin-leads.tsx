@@ -51,7 +51,7 @@ function nextStep(l: LeadSummary): string | null {
   if (l.flags?.includes("stuck")) return "Refund or rebook";
   if (l.flags?.includes("no-deposit")) return "Ask for the deposit";
   const paper = paperDue(l, now());
-  if (paper) return paper === "contract" ? "Get contract signed" : "Get release signed";
+  if (paper) return paper === "contract" ? "Sign contract" : "Sign release";
   if (renew(l)) return "Renew licence";
   if (l.stage === "Inquiry") return "Reply";
   if (l.stage === "Quoted") return quoteNudge(l, now());
