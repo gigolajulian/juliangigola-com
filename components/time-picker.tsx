@@ -229,6 +229,7 @@ export function TimePicker({
     if (!editorial) document.documentElement.dataset.classic = "";
   }, [editorial]);
   const root = React.useRef<HTMLDivElement>(null);
+  const v3root = React.useRef<HTMLDivElement>(null); // the V3 stepper's own, so root's slide motion stays editorial-card only
   const was = React.useRef(step);
   React.useLayoutEffect(() => {
     const ORDER = { pick: 0, form: 1, sending: 1, check: 1, pay: 2, done: 3 };
@@ -240,7 +241,7 @@ export function TimePicker({
     const card = el?.matches(".ed") ? el : el?.querySelector<HTMLElement>(".ed");
     if (editorial && dir && card && card.getBoundingClientRect().top < 0) card.scrollIntoView({ block: "start" });
     // Back to the taller Time step keeps You's scroll too; FlowShell only sees forward steps.
-    const rail = el?.querySelector<HTMLElement>(".rail");
+    const rail = v3root.current?.querySelector<HTMLElement>(".rail");
     if (dir < 0 && rail && rail.getBoundingClientRect().top < 64) rail.scrollIntoView({ block: "start" });
     if (!(smooth || editorial) || !dir || !el || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     if (editorial) {
@@ -1001,7 +1002,7 @@ export function TimePicker({
     const range = `${fmt(pick.min)} to ${fmt(end)}`;
     const at = step === "pick" ? 1 : step === "pay" ? 3 : step === "done" ? v3steps.length : 2;
     const rows: [string, React.ReactNode][] = [["Day", dlabel(date)], ["Time", range], ["Length", duration(length)]];
-    const shell = (p: Omit<Parameters<Shell>[0], "steps" | "at" | "sum">) => v3.shell({ steps: v3steps, at, sum: rows, ...p });
+    const shell = (p: Omit<Parameters<Shell>[0], "steps" | "at" | "sum">) => <div ref={v3root} className="contents">{v3.shell({ steps: v3steps, at, sum: rows, ...p })}</div>;
     const back = (to: typeof step) => <button type="button" className="btn" onClick={() => { setBad({}); setStep(to); }}>Back</button>;
     if (step === "pay" && deposit) {
       const price = v3.from != null ? `$${v3.from}` : "Quoted";
