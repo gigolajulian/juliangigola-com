@@ -155,6 +155,12 @@ describe("renewDue", () => {
     expect(renewDue({ licence }, end + 30 * 864e5)).toBe(true);
     expect(renewDue({}, end)).toBe(false);
   });
+  it("brings back an archived lead, never a trashed one", () => {
+    const l = fold(null, "a@b.co", { event: { at: at(0), kind: "inquiry" } });
+    const archived: Lead = { ...l, licence, archivedAt: at(1) };
+    expect(renewDue(archived, end)).toBe(true);
+    expect(renewDue({ ...archived, trashedAt: at(2) }, end)).toBe(false);
+  });
   it("rides in the list summary", () => {
     const l = fold(null, "a@b.co", { event: { at: at(0), kind: "inquiry" } });
     expect(leadSummary({ ...l, licence }).licence).toEqual(licence);

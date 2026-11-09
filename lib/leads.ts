@@ -262,9 +262,9 @@ export function quoteNudge(l: Quoted, now: number): (typeof NUDGES)[number] | "M
 
 /** Days before a licence ends that the lead comes back to Your move. */
 export const LICENCE_DAYS = 60;
-/** Whether a licence is ending within LICENCE_DAYS (or has ended): time to offer a renewal. */
-export const renewDue = (l: Pick<Lead, "licence">, now: number) =>
-  !!l.licence && Date.parse(`${l.licence.end}T12:00:00Z`) - LICENCE_DAYS * 864e5 <= now;
+/** Whether a licence is ending within LICENCE_DAYS (or has ended): time to offer a renewal. Archived leads count, trashed ones never. */
+export const renewDue = (l: Pick<Lead, "licence" | "trashedAt">, now: number) =>
+  !!l.licence && !l.trashedAt && Date.parse(`${l.licence.end}T12:00:00Z`) - LICENCE_DAYS * 864e5 <= now;
 
 /** Whether a lead has waited past what was promised. Snoozed leads never are. */
 export function isLate(l: Quoted, now: number, replyHours = REPLY_HOURS): boolean {
