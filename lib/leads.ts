@@ -472,6 +472,9 @@ export function backfillLead(lead: Lead | null, email: string, rows: InboxRow[])
   return { ...lead, events, firstAt: add[0].event.at < lead.firstAt ? add[0].event.at : lead.firstAt };
 }
 
+/** A reminder's "What for", and every step line: fits two lines of a row at 390px. */
+export const REMIND_MAX = 28;
+
 /** The row's one-word tag for the type of shoot; the full kind stays on the lead. */
 const TAGS: [RegExp, string][] = [
   [/music|spotify|apple|album|single|artist|band|record|cover art/, "Music"],

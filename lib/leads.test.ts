@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { shootTag, backfillLead, fold, isLate, paperDue, quoteNudge, leadKey, myMove, leadSummary, recordLead, renewDue, trashDaysLeft, writeLead, type InboxRow, type Lead, type LeadSummary } from "./leads";
+import { NUDGES, REMIND_MAX, shootTag, backfillLead, fold, isLate, paperDue, quoteNudge, leadKey, myMove, leadSummary, recordLead, renewDue, trashDaysLeft, writeLead, type InboxRow, type Lead, type LeadSummary } from "./leads";
 import { sealer } from "./lead-crypto";
 
 const at = (h: number) => new Date(Date.UTC(2026, 10, 2, h)).toISOString();
@@ -328,6 +328,13 @@ describe("paperDue", () => {
     expect(paperDue({ ...base, when: new Date(now - 3600e3).toISOString() }, now)).toBeNull();
     expect(paperDue({ stage: "Confirmed" }, now)).toBeNull();
     expect(paperDue({ ...base, when: new Date(now + 7 * 864e5).toISOString() }, now)).toBe("contract");
+  });
+});
+
+describe("step lines", () => {
+  it("all fit a reminder's length, so a row never cuts one", () => {
+    const steps = [...NUDGES, "Mark as lost?", ...(["Shot", "Invoiced", "Call booked"] as const).map((stage) => myMove({ stage }, 0))];
+    for (const s of steps) expect(s!.length).toBeLessThanOrEqual(REMIND_MAX);
   });
 });
 

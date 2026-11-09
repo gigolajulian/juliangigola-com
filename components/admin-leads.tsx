@@ -8,7 +8,7 @@ import { LeadProofs, ProofsDesk } from "@/components/admin-proofs";
 import { LeadUpcoming } from "@/components/lead-upcoming";
 import { TOKEN_STORE } from "@/lib/admin-github";
 import type { Enquiry } from "@/lib/inbox";
-import { isLate, leadSummary, myMove, NUDGES, PAPER, paperDue, quoteNudge, renewDue, shootTag, STAGES, trashDaysLeft, type Lead, type LeadEvent, type LeadSummary, type Paper, type Stage } from "@/lib/leads";
+import { isLate, leadSummary, myMove, NUDGES, PAPER, paperDue, quoteNudge, REMIND_MAX, renewDue, shootTag, STAGES, trashDaysLeft, type Lead, type LeadEvent, type LeadSummary, type Paper, type Stage } from "@/lib/leads";
 import { cn } from "@/lib/utils";
 import { fill, mailable, TEMPLATES } from "@/lib/lead-crm";
 import { endDay, LicenceField, LicenceList } from "@/components/lead-licence";
@@ -1525,7 +1525,11 @@ function LeadCrm({ l, full, patch, others, templates }: { l: LeadSummary; full: 
             }}
           >
             <label className={fieldLabel}>When<input type="datetime-local" required value={rAt} min={local(new Date().toISOString())} onChange={(e) => setRAt(e.target.value)} className={cn(field, "w-auto font-mono text-[14px]")} /></label>
-            <label className={cn(fieldLabel, "min-w-[12rem] flex-1")}>What for<input value={rText} onChange={(e) => setRText(e.target.value)} placeholder="Send the quote" className={field} /></label>
+            {/* Short enough that the row always shows all of it. */}
+            <label className={cn(fieldLabel, "min-w-[12rem] flex-1")}>
+              <span className="flex justify-between">What for<span className="font-mono text-muted-foreground">{rText.length}/{REMIND_MAX}</span></span>
+              <input value={rText} maxLength={REMIND_MAX} onChange={(e) => setRText(e.target.value)} placeholder="Send the quote" className={field} />
+            </label>
             <button type="submit" className={btn}>Remind me</button>
           </form>
         )}
