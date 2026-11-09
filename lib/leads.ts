@@ -17,7 +17,7 @@ import type { Invoice } from "./invoice";
  * Automatic events only move a lead forward: a second inquiry from a
  * client already Confirmed must not drop them back to Inquiry. A new
  * inquiry from someone Delivered or Lost opens them again. Julian moves
- * the rest by hand (Replied, Quoted, Shot, Delivered, Lost).
+ * the rest by hand (Replied, Quoted, Shot, Invoiced, Selecting, Delivered, Lost).
  *
  * The record's summary rides sealed in KV metadata, so the list costs one
  * request. Pure functions here; `recordLead` is the one place
@@ -25,7 +25,7 @@ import type { Invoice } from "./invoice";
  * stored, and a lead that failed to update must not fail the form.
  * ─────────────────────────────────────────────────────────────── */
 
-export const STAGES = ["Inquiry", "Replied", "Call booked", "Quoted", "Confirmed", "Shot", "Delivered", "Lost"] as const;
+export const STAGES = ["Inquiry", "Replied", "Call booked", "Quoted", "Confirmed", "Shot", "Invoiced", "Selecting", "Delivered", "Lost"] as const;
 export type Stage = (typeof STAGES)[number];
 
 /** What happened, as it reached the site. `stage` is Julian's own move. */
@@ -45,6 +45,10 @@ export type LeadEvent = {
 
 /** A mail the site sent about this person: to them (book@), or about them to hello@. */
 export type Sent = { to: "client" | "hello@"; kind: string; booking?: string };
+
+/** Contract and model release, tracked from Confirmed on. */
+export const PAPER = ["Not sent", "Sent", "Signed", "Not needed"] as const;
+export type Paper = (typeof PAPER)[number];
 
 /** Something on the lead that needs him, beyond its stage. */
 export type Flag = "stuck" | "no-deposit";
@@ -88,10 +92,17 @@ export type Lead = {
   /** Quoted price in dollars. */
   quote?: number;
   lostReason?: string;
+  /** Paperwork for the shoot; unset reads as Not sent. */
+  contract?: Paper;
+  release?: Paper;
   /** Invoices made from this lead (`lib/invoice.ts`), oldest first. */
   invoices?: Invoice[];
+  /** Opt-in, for commercial work: what the photos may be used for, and the day that ends (YYYY-MM-DD). */
+  licence?: Licence;
   events: LeadEvent[];
 };
+
+export type Licence = { use: string; end: string };
 
 /** What the list shows, sealed into KV metadata (under its 1024-byte cap). `id` is added when listed. */
 export type LeadSummary = Omit<Lead, "events" | "notion" | "deposit" | "notes" | "remind" | "phone" | "ig" | "company" | "lostReason" | "source" | "invoices"> & {
@@ -100,6 +111,8 @@ export type LeadSummary = Omit<Lead, "events" | "notion" | "deposit" | "notes" |
   /** When his reminder is due, and its words, cut short. */
   due?: string;
   dueText?: string;
+  /** A quote's follow-ups, from the timeline: see `quoteTrail`. */
+  quiet?: QuoteTrail;
 };
 
 /** Events kept per lead: the timeline needs the recent ones, KV values stay small. */
@@ -214,23 +227,70 @@ export const trashDaysLeft = (trashedAt: string, now: number) => Math.ceil((Date
 
 /** Hours Julian promises to answer in; the site says "within a day". */
 export const REPLY_HOURS = 24;
-/** A quote with no answer this long is worth a nudge. */
-export const QUOTE_DAYS = 5;
+/** Days of silence after a quote before each nudge: a check-in, something useful, a polite close. */
+export const NUDGE_DAYS = [3, 7, 14];
+export const NUDGES = ["Nudge 1", "Nudge 2", "Last nudge"] as const;
+/** Quiet days after the last nudge before he is asked whether it is lost. Never automatic. */
+export const LOST_DAYS = 7;
+const DAY = 864e5;
 
-/** Whether a lead has waited past what was promised. Snoozed leads never are. */
-export function isLate(l: Pick<Lead, "stage" | "stageAt" | "snoozeUntil">, now: number, replyHours = REPLY_HOURS): boolean {
-  if (l.snoozeUntil && Date.parse(l.snoozeUntil) > now) return false;
-  const waited = now - Date.parse(l.stageAt);
-  if (l.stage === "Inquiry") return waited > replyHours * 3600e3;
-  if (l.stage === "Quoted") return waited > QUOTE_DAYS * 864e5;
-  return false;
+/** Since when a quote has been waiting, and the nudges he has sent since. */
+export type QuoteTrail = { from: string; n: number; last?: string };
+
+/** Counted from the timeline, not stored: silence starts at the quote or at their latest mail,
+    and his mails a day or more after that are nudges (sooner is the quote itself, or his answer). */
+export function quoteTrail(l: Pick<Lead, "stage" | "stageAt" | "events">): QuoteTrail | undefined {
+  if (l.stage !== "Quoted") return undefined;
+  const at = (e: LeadEvent) => Date.parse(e.at);
+  const wrote = Math.max(0, ...l.events.filter((e) => e.kind === "wrote").map(at));
+  const from = Math.max(Date.parse(l.stageAt), wrote);
+  const sent = l.events.filter((e) => e.kind === "replied" && at(e) >= from + DAY).map(at).sort((a, b) => a - b);
+  return { from: new Date(from).toISOString(), n: sent.length, ...(sent.length ? { last: new Date(sent[sent.length - 1]).toISOString() } : {}) };
 }
 
-/** The step that is Julian's with no reminder needed, or null: a shoot to deliver, a quote owed after the call. */
+type Quoted = Pick<Lead, "stage" | "stageAt" | "snoozeUntil"> & { events?: LeadEvent[]; quiet?: QuoteTrail };
+
+/** The follow-up a quote is due, or null: three nudges at 3, 7 and 14 days, then "Mark as lost?". */
+export function quoteNudge(l: Quoted, now: number): (typeof NUDGES)[number] | "Mark as lost?" | null {
+  if (l.stage !== "Quoted" || (l.snoozeUntil && Date.parse(l.snoozeUntil) > now)) return null;
+  const t = (l.events ? quoteTrail(l as Lead) : l.quiet) ?? { from: l.stageAt, n: 0 };
+  const last = t.last ? Date.parse(t.last) : 0;
+  if (t.n >= NUDGES.length) return now > last + LOST_DAYS * DAY ? "Mark as lost?" : null;
+  // Three days between nudges at least, so a late first one does not bring the second straight after.
+  return now > Math.max(Date.parse(t.from) + NUDGE_DAYS[t.n] * DAY, last + 3 * DAY) ? NUDGES[t.n] : null;
+}
+
+/** Days before a licence ends that the lead comes back to Your move. */
+export const LICENCE_DAYS = 60;
+/** Whether a licence is ending within LICENCE_DAYS (or has ended): time to offer a renewal. Archived leads count, trashed ones never. */
+export const renewDue = (l: Pick<Lead, "licence" | "trashedAt">, now: number) =>
+  !!l.licence && !l.trashedAt && Date.parse(`${l.licence.end}T12:00:00Z`) - LICENCE_DAYS * 864e5 <= now;
+
+/** Whether a lead has waited past what was promised. Snoozed leads never are. */
+export function isLate(l: Quoted, now: number, replyHours = REPLY_HOURS): boolean {
+  if (l.snoozeUntil && Date.parse(l.snoozeUntil) > now) return false;
+  if (l.stage === "Inquiry") return now - Date.parse(l.stageAt) > replyHours * 3600e3;
+  return quoteNudge(l, now) !== null;
+}
+
+/** The step that is Julian's with no reminder needed, or null: the invoice after a shoot, proofs after the invoice, a quote owed after the call. */
 export function myMove(l: Pick<Lead, "stage" | "when">, now: number): string | null {
-  if (l.stage === "Shot") return "Deliver photos + invoice";
+  if (l.stage === "Shot") return "Send invoice";
+  if (l.stage === "Invoiced") return "Send proofs";
   if (l.stage === "Call booked" && (!l.when || Date.parse(l.when) <= now)) return "Send the quote";
   return null;
+}
+
+/** How close the shoot has to be before unsigned paperwork needs him. */
+export const PAPER_DAYS = 7;
+
+/** The paper to chase: Confirmed, the shoot within a week, and it is not Signed or Not needed. */
+export function paperDue(l: Pick<Lead, "stage" | "when" | "contract" | "release">, now: number): "contract" | "release" | null {
+  if (l.stage !== "Confirmed" || !l.when) return null;
+  const left = Date.parse(l.when) - now;
+  if (!(left >= 0 && left <= PAPER_DAYS * 864e5)) return null;
+  const open = (p?: Paper) => p !== "Signed" && p !== "Not needed";
+  return open(l.contract) ? "contract" : open(l.release) ? "release" : null;
 }
 
 // Name and email capped: KV metadata holds 1024 bytes, and the sealed summary
@@ -238,10 +298,12 @@ export function myMove(l: Pick<Lead, "stage" | "when">, now: number): string | n
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const leadSummary = ({ events, notion, deposit, notes, remind, phone, ig, company, lostReason, source, invoices, ...rest }: Lead): LeadSummary => ({
   ...rest,
+  ...(rest.stage === "Quoted" ? { quiet: quoteTrail({ ...rest, events }) } : {}),
   ...(remind ? { due: remind.at, dueText: remind.text.slice(0, 40) } : {}),
   name: rest.name?.slice(0, 80),
   email: rest.email.slice(0, 120),
   ...(rest.snippet ? { snippet: rest.snippet.slice(0, 90) } : {}),
+  ...(rest.licence ? { licence: { use: rest.licence.use.slice(0, 40), end: rest.licence.end } } : {}),
   ...(deposit ? { paid: true as const } : {}),
 });
 
@@ -261,7 +323,7 @@ const META_MAX = 1000;
     the message, then most of the name, then most of the address. */
 const SHRINK: ((m: LeadSummary) => LeadSummary)[] = [
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  ({ snippet, dueText, ...m }) => m,
+  ({ snippet, dueText, ...m }) => ({ ...m, ...(m.licence ? { licence: { ...m.licence, use: "" } } : {}) }),
   (m) => ({ ...m, name: m.name.slice(0, 24) }),
   (m) => ({ ...m, name: m.name.slice(0, 8), email: m.email.slice(0, 40) }),
 ];

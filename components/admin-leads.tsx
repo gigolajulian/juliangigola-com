@@ -8,9 +8,10 @@ import { LeadProofs, ProofsDesk } from "@/components/admin-proofs";
 import { LeadUpcoming } from "@/components/lead-upcoming";
 import { TOKEN_STORE } from "@/lib/admin-github";
 import type { Enquiry } from "@/lib/inbox";
-import { isLate, leadSummary, myMove, STAGES, trashDaysLeft, type Lead, type LeadEvent, type LeadSummary, type Stage } from "@/lib/leads";
+import { isLate, leadSummary, myMove, NUDGES, PAPER, paperDue, quoteNudge, renewDue, STAGES, trashDaysLeft, type Lead, type LeadEvent, type LeadSummary, type Paper, type Stage } from "@/lib/leads";
 import { cn } from "@/lib/utils";
-import { fill, mailable } from "@/lib/lead-crm";
+import { fill, mailable, TEMPLATES } from "@/lib/lead-crm";
+import { endDay, LicenceField, LicenceList } from "@/components/lead-licence";
 import { balance, DEPOSIT, MAX_LINES, usd, type Invoice, type InvoiceFrom } from "@/lib/invoice";
 import { LEAD_KEYS, leadKey, typingIn } from "@/lib/lead-keys";
 
@@ -25,9 +26,9 @@ import { LEAD_KEYS, leadKey, typingIn } from "@/lib/lead-keys";
  * open lead side by side. Narrow: the list, then the lead with Back.
  * ─────────────────────────────────────────────────────────────── */
 
-type Filter = "needs" | "open" | "upcoming" | Stage | "snoozed" | "archived" | "trash" | "more" | "new" | "stats" | "money" | "templates" | "hours" | "proofs";
+type Filter = "needs" | "open" | "upcoming" | Stage | "snoozed" | "archived" | "trash" | "more" | "new" | "stats" | "money" | "templates" | "hours" | "proofs" | "licences";
 /** Views that are not a list of leads. */
-const TOOLS: Filter[] = ["more", "new", "stats", "money", "templates", "hours", "proofs"];
+const TOOLS: Filter[] = ["more", "new", "stats", "money", "templates", "hours", "proofs", "licences"];
 
 const DAY = 864e5;
 const BOARD_STORE = "jg-leads-board";
@@ -40,15 +41,20 @@ const aside = (l: LeadSummary) => !!(l.archivedAt || l.trashedAt);
 const due = (l: LeadSummary) => !!l.due && Date.parse(l.due) <= now();
 /** The desk's search: name, email, type of shoot or their message. */
 const matches = (l: LeadSummary, words: string) => !words || [l.name, l.email, l.kind, l.snippet].some((v) => v?.toLowerCase().includes(words));
-const needsMe = (l: LeadSummary) => !aside(l) && !closed(l.stage) && (due(l) || (!snoozed(l) && (l.unread || isLate(l, now()) || !!l.flags?.length || !!myMove(l, now()))));
+/** A licence ending soon brings back even a Delivered lead; a snooze holds it off. */
+const renew = (l: LeadSummary) => !snoozed(l) && renewDue(l, now());
+const needsMe = (l: LeadSummary) => renew(l) || (!aside(l) && !closed(l.stage) && (due(l) || (!snoozed(l) && (l.unread || isLate(l, now()) || !!l.flags?.length || !!paperDue(l, now()) || !!myMove(l, now())))));
 
 /** What to do next, in a word or two, and whether it is late. */
 function nextStep(l: LeadSummary): string | null {
   if (due(l)) return l.dueText || "Your reminder";
   if (l.flags?.includes("stuck")) return "Refund or rebook";
   if (l.flags?.includes("no-deposit")) return "Ask for the deposit";
+  const paper = paperDue(l, now());
+  if (paper) return paper === "contract" ? "Sign contract" : "Sign release";
+  if (renew(l)) return "Renew licence";
   if (l.stage === "Inquiry") return "Reply";
-  if (l.stage === "Quoted" && isLate(l, now())) return "Follow up";
+  if (l.stage === "Quoted") return quoteNudge(l, now());
   return myMove(l, now());
 }
 
@@ -71,7 +77,7 @@ const at = (iso: string) =>
 /** The chip a row shows: trouble first, then late, then the stage. */
 /** A shape per stage, so the chip never relies on color alone. */
 const MARK: Record<Stage, string> = {
-  Inquiry: "○", Replied: "◐", "Call booked": "◐", Quoted: "◐", Confirmed: "●", Shot: "●", Delivered: "✓", Lost: "×",
+  Inquiry: "○", Replied: "◐", "Call booked": "◐", Quoted: "◐", Confirmed: "●", Shot: "●", Invoiced: "●", Selecting: "●", Delivered: "✓", Lost: "×",
 };
 
 function Tag({ tone, mark, children }: { tone: "plain" | "needs" | "bad" | "quiet"; mark: string; children: React.ReactNode }) {
@@ -139,6 +145,14 @@ export function AdminLeads() {
   const setBoard = (on: boolean) => { setBoardState(on); try { localStorage.setItem(BOARD_STORE, on ? "1" : "0"); } catch {} };
   // A board move of the open lead: remount its pane so it shows the new stage.
   const [moved, setMoved] = React.useState(0);
+  const [listW, setListW] = React.useState<number | null>(() => {
+    try {
+      const w = Number(window.localStorage.getItem(LIST_W_STORE));
+      return w ? clampW(w) : null;
+    } catch {
+      return null;
+    }
+  });
 
   const call = React.useCallback(async (init: RequestInit & { query?: string } = {}) => {
     const res = await fetch(`/api/inbox${init.query ?? ""}`, {
@@ -190,7 +204,7 @@ export function AdminLeads() {
 
   /** A change from the open lead, reflected in its row at once. */
   // A cleared snooze comes back without the key, so set it outright.
-  const changed = (l: Lead) => setLeads((rows) => rows?.map((r) => (r.email === l.email ? { ...r, ...l, snoozeUntil: l.snoozeUntil, archivedAt: l.archivedAt, trashedAt: l.trashedAt, due: l.remind?.at, dueText: l.remind?.text.slice(0, 40), quote: l.quote, id: r.id } : r)) ?? null);
+  const changed = (l: Lead) => setLeads((rows) => rows?.map((r) => (r.email === l.email ? { ...r, ...l, snoozeUntil: l.snoozeUntil, archivedAt: l.archivedAt, trashedAt: l.trashedAt, due: l.remind?.at, dueText: l.remind?.text.slice(0, 40), quote: l.quote, licence: l.licence, id: r.id } : r)) ?? null);
 
   if (error === "Not authorized." || error?.startsWith("GitHub did not accept"))
     return (
@@ -268,11 +282,11 @@ export function AdminLeads() {
     <div
       // The global Lenis eats wheel events, so the panes and board columns would not scroll.
       data-lenis-prevent
-      style={{ fontFamily: 'var(--font-v2-text, "Helvetica Neue", Helvetica, Arial, sans-serif)', letterSpacing: 0 }}
+      style={{ fontFamily: 'var(--font-v2-text, "Helvetica Neue", Helvetica, Arial, sans-serif)', letterSpacing: 0, ...(listW ? { "--list-w": `${listW}px` } : {}) } as React.CSSProperties}
       ref={fit}
       className={cn(
-        "normal-case text-foreground max-lg:pb-[calc(84px+env(safe-area-inset-bottom))] lg:grid lg:grid-rows-[minmax(0,1fr)] lg:overflow-hidden lg:rounded-[14px] lg:border lg:border-border lg:bg-background [&_button]:normal-case [&_h1]:normal-case [&_h2]:normal-case [&_h3]:normal-case",
-        boarding ? "lg:grid-cols-[220px_minmax(0,1fr)_minmax(0,420px)]" : "lg:grid-cols-[220px_minmax(0,420px)_minmax(0,1fr)]",
+        "normal-case text-foreground max-lg:pb-[calc(84px+env(safe-area-inset-bottom))] lg:relative lg:grid lg:grid-rows-[minmax(0,1fr)] lg:overflow-hidden lg:rounded-[14px] lg:border lg:border-border lg:bg-background [&_button]:normal-case [&_h1]:normal-case [&_h2]:normal-case [&_h3]:normal-case",
+        boarding ? "lg:grid-cols-[220px_minmax(0,1fr)_minmax(0,420px)]" : "lg:grid-cols-[220px_minmax(0,var(--list-w,420px))_minmax(0,1fr)]",
       )}
     >
       {/* Desktop: the sidebar. Every list, then this device's switches. */}
@@ -291,6 +305,7 @@ export function AdminLeads() {
         <SideLink on={filter === "stats"} onClick={() => pick("stats")}>Stats</SideLink>
         <SideLink on={filter === "money"} onClick={() => pick("money")}>Money</SideLink>
         <SideLink on={filter === "templates"} onClick={() => pick("templates")}>Templates</SideLink>
+        <SideLink on={filter === "licences"} onClick={() => pick("licences")}>Licences</SideLink>
         <SideLink on={false} onClick={doExport}>Export CSV</SideLink>
         <SideGroup>Proofs</SideGroup>
         <SideLink on={filter === "proofs"} onClick={() => pick("proofs")}>Galleries</SideLink>
@@ -366,7 +381,7 @@ export function AdminLeads() {
             </ul>
             <ul className="grid">
               <li><p className="px-1 pb-1 font-mono text-[11.5px] uppercase tracking-[0.08em] text-muted-foreground">Tools</p></li>
-              {([["new", "New lead"], ["stats", "Stats"], ["money", "Money"], ["templates", "Templates"], ["proofs", "Proofs"]] as const).map(([f, t]) => (
+              {([["new", "New lead"], ["stats", "Stats"], ["money", "Money"], ["templates", "Templates"], ["licences", "Licences"], ["proofs", "Proofs"]] as const).map(([f, t]) => (
                 <li key={f}>
                   <button type="button" onClick={() => pick(f)} className="flex min-h-[52px] w-full items-center justify-between border-b border-border px-1 text-left text-[17px]">
                     {t}<span aria-hidden="true" className="font-mono text-[13px] text-muted-foreground">›</span>
@@ -392,6 +407,8 @@ export function AdminLeads() {
           <MoneyView />
         ) : filter === "templates" ? (
           <TemplatesEditor call={call} templates={templates} saved={setTemplates} />
+        ) : filter === "licences" ? (
+          <LicenceList leads={leads.filter((l) => !l.trashedAt)} row={(l) => <Row l={l} on={open === l.id} upcoming={false} onClick={() => setOpen(l.id ?? null)} />} />
         ) : filter === "hours" ? (
           <LeadHours />
         ) : filter === "proofs" ? (
@@ -425,6 +442,8 @@ export function AdminLeads() {
           </>
         )}
       </section>
+
+      {boarding ? null : <ListResizer w={listW ?? LIST_W} onChange={setListW} />}
 
       <section aria-label="Lead" className={cn("min-w-0 lg:min-h-0 lg:overflow-y-auto lg:bg-card/40", !open && "max-lg:hidden")}>
         {current ? (
@@ -588,7 +607,7 @@ const STEPS: readonly Stage[] = STAGES.filter((s) => s !== "Lost");
 function StageLine({ l }: { l: LeadSummary }) {
   const at = STEPS.indexOf(l.stage);
   return (
-    <span className="flex min-w-0 items-center gap-2.5 font-mono text-[12px] text-muted-foreground">
+    <span className="flex shrink-0 items-center gap-2.5 font-mono text-[12px] text-muted-foreground">
       {at >= 0 ? (
         <span aria-hidden="true" className="flex shrink-0 gap-[3px]">
           {STEPS.map((s, k) => <i key={s} className={cn("h-[3px] w-3 rounded-full", k < at ? "bg-foreground/55" : k === at ? "bg-foreground" : "bg-border")} />)}
@@ -602,11 +621,11 @@ function StageLine({ l }: { l: LeadSummary }) {
 
 /** The one thing to do, in teal; money stuck in red; otherwise why it is put aside. */
 function RowAction({ l, next }: { l: LeadSummary; next: string | null }) {
-  const cls = "shrink-0 whitespace-nowrap font-mono text-[12.5px] font-medium";
+  const cls = "min-w-0 truncate font-mono text-[12.5px] font-medium";
   if (l.trashedAt) return <span className={cn(cls, "text-muted-foreground")}>Deletes in {Math.max(1, trashDaysLeft(l.trashedAt, now()))} d</span>;
   const bad = l.flags?.includes("stuck") ? "Deposit stuck" : l.flags?.includes("no-deposit") ? "No deposit" : null;
   if (bad) return <span className={cn(cls, "text-destructive")}>! {bad} →</span>;
-  if (next) return <span className={cn(cls, "text-accent")}>{next} →</span>;
+  if (next) return <span title={next} className={cn(cls, "text-accent")}>{next} →</span>;
   if (snoozed(l)) return <span className={cn(cls, "text-muted-foreground")}>Until {day(l.snoozeUntil!)}</span>;
   return l.refs ? <span className={cn(cls, "text-muted-foreground")}>{l.refs} {l.refs === 1 ? "picture" : "pictures"}</span> : null;
 }
@@ -625,7 +644,7 @@ function Row({ l, on, upcoming, onClick }: { l: LeadSummary; on: boolean; upcomi
         on && "bg-card shadow-[inset_3px_0_0_var(--accent)]",
       )}
     >
-      <span className="grid min-w-0 flex-1 gap-0.5">
+      <span className="grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)] gap-0.5">
         <span className="flex items-baseline justify-between gap-3">
           <span className="truncate font-mono text-[11px] uppercase tracking-[0.09em] text-muted-foreground">
             {kindOf(l.kind) ? <b className="font-medium text-foreground">{kindOf(l.kind)}</b> : null}
@@ -671,6 +690,53 @@ function Card({ l, on, onClick }: { l: LeadSummary; on: boolean; onClick: () => 
         {l.quote ? <span className="shrink-0 font-mono text-[11.5px] text-muted-foreground">{money(l.quote)}</span> : null}
       </span>
     </button>
+  );
+}
+
+const LIST_W_STORE = "jg-leads-list-w";
+const LIST_W = 420;
+const clampW = (w: number) => Math.min(720, Math.max(300, Math.round(w)));
+
+/** Desktop: the line between the list and the open lead. Drag or arrow keys to move it, double-click to reset. */
+function ListResizer({ w, onChange }: { w: number; onChange: (w: number | null) => void }) {
+  const drag = React.useRef<{ x: number; w: number } | null>(null);
+  const save = (v: number | null) => {
+    onChange(v);
+    try {
+      if (v) window.localStorage.setItem(LIST_W_STORE, String(v));
+      else window.localStorage.removeItem(LIST_W_STORE);
+    } catch {}
+  };
+  return (
+    <div
+      role="separator"
+      aria-orientation="vertical"
+      aria-label="List width"
+      aria-valuenow={w}
+      aria-valuemin={300}
+      aria-valuemax={720}
+      tabIndex={0}
+      title="Drag to resize, double-click to reset"
+      style={{ left: `calc(220px + ${w}px - 3px)` }}
+      className="absolute inset-y-0 z-10 hidden w-1.5 cursor-col-resize touch-none outline-none hoverable:hover:bg-accent/40 focus-visible:bg-accent/60 lg:block"
+      onPointerDown={(e) => {
+        drag.current = { x: e.clientX, w };
+        e.currentTarget.setPointerCapture(e.pointerId);
+      }}
+      onPointerMove={(e) => drag.current && onChange(clampW(drag.current.w + e.clientX - drag.current.x))}
+      onPointerUp={(e) => {
+        if (!drag.current) return;
+        save(clampW(drag.current.w + e.clientX - drag.current.x));
+        drag.current = null;
+      }}
+      onDoubleClick={() => save(null)}
+      onKeyDown={(e) => {
+        if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+          e.preventDefault();
+          save(clampW(w + (e.key === "ArrowLeft" ? -16 : 16)));
+        }
+      }}
+    />
   );
 }
 
@@ -880,15 +946,15 @@ function SignIn({ onKey, wrong }: { onKey: (k: string) => void; wrong: boolean }
 function pass(l: LeadSummary, f: Filter) {
   if (f === "trash") return !!l.trashedAt;
   if (f === "archived") return !!l.archivedAt && !l.trashedAt;
-  if (aside(l)) return false;
   if (f === "needs") return needsMe(l);
+  if (aside(l)) return false;
   if (f === "upcoming") return !!l.when && Date.parse(l.when) > now() - 2 * 3600e3 && !closed(l.stage);
-  if (f === "more" || f === "hours" || f === "proofs") return false;
+  if (f === "more" || f === "hours" || f === "proofs" || f === "licences") return false;
   if (f === "snoozed") return snoozed(l);
   if (f === "open") return !closed(l.stage);
   return l.stage === f && !snoozed(l);
 }
-const LABEL: Partial<Record<Filter, string>> = { needs: "Your move", open: "All open", upcoming: "Upcoming", snoozed: "Snoozed", archived: "Archived", trash: "Trash", more: "More", new: "New lead", stats: "Stats", money: "Money", templates: "Templates", hours: "Hours", proofs: "Proofs" };
+const LABEL: Partial<Record<Filter, string>> = { needs: "Your move", open: "All open", upcoming: "Upcoming", snoozed: "Snoozed", archived: "Archived", trash: "Trash", more: "More", new: "New lead", stats: "Stats", money: "Money", templates: "Templates", hours: "Hours", proofs: "Proofs", licences: "Licences" };
 const label = (f: Filter) => LABEL[f] ?? f;
 
 /** Deletes every lead in the trash for good, after a second press. */
@@ -964,6 +1030,8 @@ function Detail({ summary, initial, call, onChange, onBack, reload, templates, o
   const l = lead ?? summary;
   const first = l.name.split(" ")[0];
   const late = isLate(l, now());
+  // The nudge that is due, as his matching template.
+  const nudge = templates.find((t) => t.id === `nudge${NUDGES.indexOf(quoteNudge(l, now()) as (typeof NUDGES)[number]) + 1}`);
   const reply = compose(l.email, `Re: your ${l.kind ?? "shoot"} inquiry`, `Hi ${first},\n\n`);
   const book = compose(l.email, "Booking a time", `Hi ${first},\n\nYou can pick a time here: https://juliangigola.com/book\n\n`);
   // The buttons and the keys share these.
@@ -1001,12 +1069,12 @@ function Detail({ summary, initial, call, onChange, onBack, reload, templates, o
         {l.stage === "Lost" ? (
           <p className="mt-5"><Tag tone="quiet" mark={MARK.Lost}>Lost</Tag></p>
         ) : (
-          <ol aria-label={`Stage: ${l.stage}`} className="mt-5 grid grid-cols-7 gap-1">
+          <ol aria-label={`Stage: ${l.stage}`} className="mt-5 grid grid-cols-9 gap-1">
             {STEPS.map((s, k) => {
               const at = STEPS.indexOf(l.stage);
               return (
                 <li key={s} aria-current={k === at ? "step" : undefined} className={cn("truncate border-t-[3px] pt-2 font-mono text-[11px]", k < at ? "border-foreground/55 text-muted-foreground" : k === at ? "border-foreground font-medium text-foreground" : "border-border text-muted-foreground")}>
-                  {/* A phone is too narrow for seven names: the line alone, the current one named below. */}
+                  {/* A phone is too narrow for nine names: the line alone, the current one named below. */}
                   <span className="max-sm:sr-only">{s === "Call booked" ? "Call" : s}</span>
                 </li>
               );
@@ -1019,9 +1087,21 @@ function Detail({ summary, initial, call, onChange, onBack, reload, templates, o
       {late ? (
         <p role="status" className="flex items-center gap-3 rounded-xl bg-accent/12 px-4 py-3.5 text-[15px]">
           <span aria-hidden="true" className="text-accent">◷</span>
-          <span><b className="font-semibold text-accent">{ago(l.stageAt)} waiting.</b> {l.stage === "Quoted" ? "The quote has had no answer." : "The site promises a reply within a day."}</span>
+          <span><b className="font-semibold text-accent">{ago(l.stageAt)} waiting.</b> {l.stage === "Quoted" ? (quoteNudge(l, now()) === "Mark as lost?" ? "Three nudges, no answer. Mark it lost?" : "The quote has had no answer.") : "The site promises a reply within a day."}</span>
+          {nudge && mailable(l.email) ? <a href={ios() ? mailto(l.email, fill(nudge.subject, l), fill(nudge.body, l)) : compose(l.email, fill(nudge.subject, l), fill(nudge.body, l))} target="_blank" rel="noreferrer" className="ml-auto shrink-0 font-mono text-[12.5px] font-medium text-accent">{nudge.name} →</a> : null}
         </p>
       ) : null}
+      {renew(l) && mailable(l.email) ? (() => {
+        const t = templates.find((x) => x.id === "renew") ?? TEMPLATES.find((x) => x.id === "renew")!;
+        const subject = fill(t.subject, l);
+        const body = fill(t.body, l);
+        return (
+          <p role="status" className="flex flex-wrap items-center gap-3 rounded-xl bg-accent/12 px-4 py-3.5 text-[15px]">
+            <span className="flex-1"><b className="font-semibold text-accent">Licence ends {endDay(l.licence!.end)}.</b> {l.licence!.use}</span>
+            <a href={ios() ? mailto(l.email, subject, body) : compose(l.email, subject, body)} target="_blank" rel="noreferrer" className={cn(btn, primary)}>Renew licence</a>
+          </p>
+        );
+      })() : null}
       {l.trashedAt ? (
         <p role="status" className="font-mono text-[13px] text-muted-foreground">
           In the trash. Deleted for good in {Math.max(1, trashDaysLeft(l.trashedAt, now()))} days unless recovered.
@@ -1035,7 +1115,7 @@ function Detail({ summary, initial, call, onChange, onBack, reload, templates, o
 
       <div className="flex flex-wrap items-center gap-2.5">
         {mailable(l.email) ? (<>
-        <a ref={replyLink} href={reply} target="_blank" rel="noreferrer" onClick={() => setAsked(true)} className={cn(btn, primary, "min-h-[52px] px-5 text-base")}>
+        <a ref={replyLink} href={reply} target="_blank" rel="noreferrer" onClick={() => setAsked(true)} className={cn(btn, !renew(l) && primary, "min-h-[52px] px-5 text-base")}>
           Reply in Gmail
         </a>
         {ios() ? (
@@ -1104,6 +1184,8 @@ function Detail({ summary, initial, call, onChange, onBack, reload, templates, o
           ))}
         </div>
       </fieldset>
+
+      {(["Confirmed", "Shot", "Delivered"] as Stage[]).includes(l.stage) ? <Paperwork l={l} patch={patch} /> : null}
 
       <LeadProofs email={l.email} />
 
@@ -1367,7 +1449,7 @@ function LeadCrm({ l, full, patch, others, templates }: { l: LeadSummary; full: 
         <section className="grid gap-2.5">
           <h3 aria-level={2} className={h3}>Reply with a template</h3>
           <div className="flex flex-wrap gap-2">
-            {templates.map((t) => {
+            {templates.filter((t) => t.id !== "renew" || l.licence).map((t) => {
               const subject = fill(t.subject, l);
               const body = fill(t.body, l);
               return (
@@ -1495,6 +1577,37 @@ const ledger = "grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 gap-y-1.5 text-[15px
 const dt = "font-mono text-[13px] leading-6 text-muted-foreground";
 const dd = "text-right font-mono text-[14px] leading-6";
 
+/** A shape per paperwork status, so it never relies on color alone. */
+const DOT: Record<Paper, string> = { "Not sent": "○", Sent: "◐", Signed: "●", "Not needed": "–" };
+
+/** "Paperwork: Contract ● · Release ●", from Confirmed on. A tap moves a dot to its next status. */
+function Paperwork({ l, patch }: { l: LeadSummary; patch: (b: Record<string, unknown>) => Promise<void> }) {
+  const due = paperDue(l, now());
+  return (
+    <p className="flex flex-wrap items-center gap-x-1 font-mono text-[13px] text-muted-foreground">
+      Paperwork:
+      {(["contract", "release"] as const).map((k, i) => {
+        const v = l[k] ?? "Not sent";
+        const name = k === "contract" ? "Contract" : "Release";
+        return (
+          <span key={k} className="inline-flex items-center whitespace-nowrap">
+            {i ? <span aria-hidden="true">·</span> : null}
+            <button
+              type="button"
+              title={v}
+              aria-label={`${name}: ${v}. Change`}
+              onClick={() => patch({ [k]: PAPER[(PAPER.indexOf(v) + 1) % PAPER.length] }).catch(() => {})}
+              className={cn("inline-flex min-h-11 items-center gap-1.5 px-1.5", due === k ? "text-accent" : v === "Signed" ? "text-foreground" : "")}
+            >
+              {name} <span aria-hidden="true">{DOT[v]}</span>
+            </button>
+          </span>
+        );
+      })}
+    </p>
+  );
+}
+
 function Money({ l, full, patch, run, quote, setQuote }: { l: LeadSummary; full: Lead | null; patch: (b: Record<string, unknown>) => Promise<void>; run: (p: Promise<void>, ok?: string) => void; quote: string | null; setQuote: (v: string | null) => void }) {
   const [making, setMaking] = React.useState(false);
   const paidAt = full?.deposit ? full.events.find((e) => e.kind === "booking")?.at : undefined;
@@ -1529,6 +1642,7 @@ function Money({ l, full, patch, run, quote, setQuote }: { l: LeadSummary; full:
           </label>
         ) : null}
       </div>
+      <LicenceField key={full?.licence?.end ?? ""} full={full} patch={patch} run={run} cls={{ btn, field, label: fieldLabel }} />
       <dl className={ledger}>
         <dt className={dt}>{paidAt ? `Deposit, ${day(paidAt)}` : "Deposit"}</dt>
         <dd className={dd}>

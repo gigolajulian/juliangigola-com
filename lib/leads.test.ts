@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { backfillLead, fold, isLate, leadKey, myMove, leadSummary, recordLead, trashDaysLeft, writeLead, type InboxRow, type Lead, type LeadSummary } from "./leads";
+import { backfillLead, fold, isLate, paperDue, quoteNudge, leadKey, myMove, leadSummary, recordLead, renewDue, trashDaysLeft, writeLead, type InboxRow, type Lead, type LeadSummary } from "./leads";
 import { sealer } from "./lead-crypto";
 
 const at = (h: number) => new Date(Date.UTC(2026, 10, 2, h)).toISOString();
@@ -91,20 +91,79 @@ describe("isLate", () => {
     expect(isLate({ stage: "Inquiry", stageAt: at(0), snoozeUntil: at(40) }, now)).toBe(false);
     expect(isLate({ stage: "Confirmed", stageAt: at(0) }, now)).toBe(false);
   });
-  it("flags a quote unanswered for five days", () => {
-    expect(isLate({ stage: "Quoted", stageAt: at(0) }, Date.parse(at(0)) + 6 * 864e5)).toBe(true);
+});
+
+describe("quoteNudge", () => {
+  const t0 = Date.parse(at(0));
+  const d = (n: number) => t0 + n * 864e5;
+  const iso = (n: number) => new Date(d(n)).toISOString();
+  const quoted = (...sent: number[]) => ({
+    stage: "Quoted" as const,
+    stageAt: at(0),
+    events: [{ at: iso(0.01), kind: "replied" as const }, ...sent.map((n) => ({ at: iso(n), kind: "replied" as const }))],
+  });
+  it("nudges at 3, 7 and 14 days, counting his mails after the quote", () => {
+    expect(quoteNudge(quoted(), d(2.9))).toBe(null);
+    expect(quoteNudge(quoted(), d(3.1))).toBe("Nudge 1");
+    expect(quoteNudge(quoted(3.1), d(6.9))).toBe(null);
+    expect(quoteNudge(quoted(3.1), d(7.1))).toBe("Nudge 2");
+    expect(quoteNudge(quoted(3.1, 7.1), d(13.9))).toBe(null);
+    expect(quoteNudge(quoted(3.1, 7.1), d(14.1))).toBe("Last nudge");
+  });
+  it("asks about lost a week after the last nudge, never sooner", () => {
+    expect(quoteNudge(quoted(3.1, 7.1, 14.1), d(21))).toBe(null);
+    expect(quoteNudge(quoted(3.1, 7.1, 14.1), d(21.2))).toBe("Mark as lost?");
+  });
+  it("starts over when they write, waits after a late nudge, and rests while snoozed", () => {
+    const wrote = { ...quoted(3.1), events: [...quoted(3.1).events, { at: iso(5), kind: "wrote" as const }] };
+    expect(quoteNudge(wrote, d(7.5))).toBe(null);
+    expect(quoteNudge(wrote, d(8.1))).toBe("Nudge 1");
+    expect(quoteNudge(quoted(6), d(7.5))).toBe(null);
+    expect(quoteNudge(quoted(6), d(9.1))).toBe("Nudge 2");
+    expect(quoteNudge({ ...quoted(), snoozeUntil: iso(10) }, d(5))).toBe(null);
+    expect(isLate(quoted(), d(3.1))).toBe(true);
+  });
+  it("reads the same off a list summary", () => {
+    expect(quoteNudge({ stage: "Quoted", stageAt: at(0), quiet: { from: at(0), n: 1, last: iso(3.1) } }, d(7.1))).toBe("Nudge 2");
+    expect(quoteNudge({ stage: "Quoted", stageAt: at(0) }, d(3.1))).toBe("Nudge 1");
   });
 });
 
 describe("myMove", () => {
   const now = Date.parse(at(10));
   it("puts a shot lead and a call that has happened on Julian, nothing else", () => {
-    expect(myMove({ stage: "Shot" }, now)).toBe("Deliver photos + invoice");
+    expect(myMove({ stage: "Shot" }, now)).toBe("Send invoice");
+    expect(myMove({ stage: "Invoiced" }, now)).toBe("Send proofs");
+    expect(myMove({ stage: "Selecting" }, now)).toBeNull();
     expect(myMove({ stage: "Call booked", when: at(5) }, now)).toBe("Send the quote");
     expect(myMove({ stage: "Call booked" }, now)).toBe("Send the quote");
     expect(myMove({ stage: "Call booked", when: at(20) }, now)).toBeNull();
     expect(myMove({ stage: "Replied" }, now)).toBeNull();
     expect(myMove({ stage: "Confirmed" }, now)).toBeNull();
+  });
+});
+
+describe("renewDue", () => {
+  const licence = { use: "Web + social, US", end: "2027-03-01" };
+  const end = Date.parse("2027-03-01T12:00:00Z");
+  it("comes due 60 days before the end, not a day sooner", () => {
+    expect(renewDue({ licence }, end - 61 * 864e5)).toBe(false);
+    expect(renewDue({ licence }, end - 60 * 864e5)).toBe(true);
+    expect(renewDue({ licence }, end - 10 * 864e5)).toBe(true);
+  });
+  it("stays due once ended, and never without a licence", () => {
+    expect(renewDue({ licence }, end + 30 * 864e5)).toBe(true);
+    expect(renewDue({}, end)).toBe(false);
+  });
+  it("brings back an archived lead, never a trashed one", () => {
+    const l = fold(null, "a@b.co", { event: { at: at(0), kind: "inquiry" } });
+    const archived: Lead = { ...l, licence, archivedAt: at(1) };
+    expect(renewDue(archived, end)).toBe(true);
+    expect(renewDue({ ...archived, trashedAt: at(2) }, end)).toBe(false);
+  });
+  it("rides in the list summary", () => {
+    const l = fold(null, "a@b.co", { event: { at: at(0), kind: "inquiry" } });
+    expect(leadSummary({ ...l, licence }).licence).toEqual(licence);
   });
 });
 
@@ -246,5 +305,28 @@ describe("backfillLead", () => {
   it("skips a booking already recorded live under its Cal.com uid", () => {
     const l = fold(null, "maya@example.com", { event: { at: at(3), kind: "booking", ref: "cal-uid" } });
     expect(backfillLead(l, "maya@example.com", [row(3, { type: "booking", detail: "Headshots" })])).toBeNull();
+  });
+});
+
+describe("paperDue", () => {
+  const now = Date.parse("2026-11-08T12:00:00Z");
+  const soon = new Date(now + 3 * 864e5).toISOString();
+  const base = { stage: "Confirmed" as const, when: soon };
+
+  it("asks for the contract first, then the release, when the shoot is within a week", () => {
+    expect(paperDue(base, now)).toBe("contract");
+    expect(paperDue({ ...base, contract: "Sent" }, now)).toBe("contract");
+    expect(paperDue({ ...base, contract: "Signed" }, now)).toBe("release");
+    expect(paperDue({ ...base, contract: "Not needed", release: "Sent" }, now)).toBe("release");
+    expect(paperDue({ ...base, contract: "Signed", release: "Not needed" }, now)).toBeNull();
+  });
+
+  it("stays quiet before Confirmed, after the shoot, more than 7 days out, or with no date", () => {
+    expect(paperDue({ ...base, stage: "Quoted" }, now)).toBeNull();
+    expect(paperDue({ ...base, stage: "Shot" }, now)).toBeNull();
+    expect(paperDue({ ...base, when: new Date(now + 8 * 864e5).toISOString() }, now)).toBeNull();
+    expect(paperDue({ ...base, when: new Date(now - 3600e3).toISOString() }, now)).toBeNull();
+    expect(paperDue({ stage: "Confirmed" }, now)).toBeNull();
+    expect(paperDue({ ...base, when: new Date(now + 7 * 864e5).toISOString() }, now)).toBe("contract");
   });
 });
