@@ -28,7 +28,7 @@ import { LEAD_KEYS, leadKey, typingIn } from "@/lib/lead-keys";
 
 type Filter = "needs" | "open" | "upcoming" | Stage | "snoozed" | "archived" | "trash" | "more" | "new" | "stats" | "money" | "templates" | "hours" | "proofs" | "licences";
 /** Views that are not a list of leads. */
-/** Pull-to-refresh: how far (px, after the 0.5 drag) commits, and the most it shows. */
+/** Pull-to-refresh: how far the finger travels (px) to commit, and the most the pull shows. iOS rubber-band already halves it at the top. */
 const PULL_AT = 56;
 const PULL_MAX = 80;
 const TOOLS: Filter[] = ["more", "new", "stats", "money", "templates", "hours", "proofs", "licences"];
@@ -206,7 +206,7 @@ export function AdminLeads() {
     const start = (e: TouchEvent) => { from = innerWidth < 1024 && scrollY <= 0 ? e.touches[0].clientY : null; by = 0; };
     const move = (e: TouchEvent) => {
       if (from === null) return;
-      by = scrollY <= 0 ? Math.min(PULL_MAX, Math.max(0, (e.touches[0].clientY - from) * 0.5)) : 0;
+      by = scrollY <= 0 ? Math.min(PULL_MAX, Math.max(0, e.touches[0].clientY - from)) : 0;
       setPull(by);
     };
     const end = () => {
@@ -382,7 +382,7 @@ export function AdminLeads() {
             </p>
           )}
           <div className="flex items-baseline justify-between gap-3">
-            <h1 style={HEAD} className="text-[40px] leading-none tracking-[-0.03em] lg:text-[28px]">{label(filter)}</h1>
+            <h1 style={HEAD} className="min-w-0 whitespace-nowrap text-[40px] leading-none tracking-[-0.03em] lg:text-[28px]">{label(filter)}</h1>
             {tool ? null : (
               <span className="flex items-center gap-3">
                 {filter === "open" ? (
@@ -392,7 +392,7 @@ export function AdminLeads() {
                     ))}
                   </span>
                 ) : null}
-                <span className="font-mono text-[12.5px] text-muted-foreground">{shown.length} {shown.length === 1 ? "lead" : "leads"}</span>
+                <span className="hidden font-mono text-[12.5px] text-muted-foreground lg:inline">{shown.length} {shown.length === 1 ? "lead" : "leads"}</span>
                 <button type="button" onClick={refresh} disabled={refreshing} aria-label="Refresh" title="Refresh (U)" className="grid size-11 place-items-center rounded-[10px] text-muted-foreground hoverable:hover:text-foreground disabled:opacity-60 lg:size-8">
                   <svg aria-hidden="true" viewBox="0 0 24 24" className={cn("size-[17px] fill-none stroke-current stroke-[1.8]", refreshing && "animate-spin")}><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5" /></svg>
                 </button>
