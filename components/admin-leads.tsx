@@ -438,6 +438,12 @@ export function AdminLeads() {
 function DeskKeys({ leads, shown, open, setOpen, jump, pick }: { leads: LeadSummary[]; shown: LeadSummary[]; open: string | null; setOpen: (id: string | null) => void; jump: (l: LeadSummary) => void; pick: (f: Filter) => void }) {
   const [palette, setPalette] = React.useState(false);
   const [help, setHelp] = React.useState(false);
+  // Where the open lead sat: once read, it can drop out of Your move, and J / K go on from its place.
+  const row = React.useRef(-1);
+  React.useEffect(() => {
+    const i = shown.findIndex((l) => l.id === open);
+    if (i >= 0 || !open) row.current = i;
+  });
   React.useEffect(() => {
     const on = (e: KeyboardEvent) => {
       const k = leadKey(e, typingIn(e.target), false);
@@ -458,7 +464,9 @@ function DeskKeys({ leads, shown, open, setOpen, jump, pick }: { leads: LeadSumm
       else if (k.do === "new") pick("new");
       else if (k.do === "move") {
         const i = shown.findIndex((l) => l.id === open);
-        const next = shown[i < 0 ? 0 : Math.min(shown.length - 1, Math.max(0, i + k.by))];
+        // Gone from the list: the row below has slid into its place, so J stays put.
+        const to = i >= 0 ? i + k.by : row.current < 0 ? 0 : row.current + (k.by < 0 ? -1 : 0);
+        const next = shown[Math.min(shown.length - 1, Math.max(0, to))];
         if (!next?.id) return;
         setOpen(next.id);
         document.querySelector(`[data-lead="${CSS.escape(next.id)}"]`)?.scrollIntoView({ block: "nearest" });
