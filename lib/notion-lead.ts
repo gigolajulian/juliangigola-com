@@ -114,8 +114,8 @@ export async function toNotion(token: string | undefined, lead: Lead): Promise<s
   }
 }
 
-/** The board has no "Shot"; after the shoot the row is in Editing. */
-const STATUS: Partial<Record<Stage, string>> = { Shot: "Editing" };
+/** The board has no "Shot" or "Selecting"; from the shoot to delivery the row is in Editing. */
+const STATUS: Partial<Record<Stage, string>> = { Shot: "Editing", Selecting: "Editing" };
 
 /**
  * A stage Julian set on the desk, mirrored to the person's Bookings row.

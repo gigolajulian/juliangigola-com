@@ -69,7 +69,7 @@ const at = (iso: string) =>
 /** The chip a row shows: trouble first, then late, then the stage. */
 /** A shape per stage, so the chip never relies on color alone. */
 const MARK: Record<Stage, string> = {
-  Inquiry: "○", Replied: "◐", "Call booked": "◐", Quoted: "◐", Confirmed: "●", Shot: "●", Delivered: "✓", Lost: "×",
+  Inquiry: "○", Replied: "◐", "Call booked": "◐", Quoted: "◐", Confirmed: "●", Shot: "●", Selecting: "●", Delivered: "✓", Lost: "×",
 };
 
 function Tag({ tone, mark, children }: { tone: "plain" | "needs" | "bad" | "quiet"; mark: string; children: React.ReactNode }) {
@@ -132,6 +132,14 @@ export function AdminLeads() {
   const [error, setError] = React.useState<string | null>(null);
   const [query, setQuery] = React.useState("");
   const [templates, setTemplates] = React.useState<Template[]>([]);
+  const [listW, setListW] = React.useState<number | null>(() => {
+    try {
+      const w = Number(window.localStorage.getItem(LIST_W_STORE));
+      return w ? clampW(w) : null;
+    } catch {
+      return null;
+    }
+  });
 
   const call = React.useCallback(async (init: RequestInit & { query?: string } = {}) => {
     const res = await fetch(`/api/inbox${init.query ?? ""}`, {
@@ -251,9 +259,9 @@ export function AdminLeads() {
     // Sentence case and a text face, as in the approved mock: the site sets
     // everything else in mono capitals, buttons included.
     <div
-      style={{ fontFamily: 'var(--font-v2-text, "Helvetica Neue", Helvetica, Arial, sans-serif)', letterSpacing: 0 }}
+      style={{ fontFamily: 'var(--font-v2-text, "Helvetica Neue", Helvetica, Arial, sans-serif)', letterSpacing: 0, ...(listW ? { "--list-w": `${listW}px` } : {}) } as React.CSSProperties}
       ref={fit}
-      className="normal-case text-foreground max-lg:pb-[calc(84px+env(safe-area-inset-bottom))] lg:grid lg:grid-cols-[220px_minmax(0,420px)_minmax(0,1fr)] lg:grid-rows-[minmax(0,1fr)] lg:overflow-hidden lg:rounded-[14px] lg:border lg:border-border lg:bg-background [&_button]:normal-case [&_h1]:normal-case [&_h2]:normal-case [&_h3]:normal-case"
+      className="normal-case text-foreground max-lg:pb-[calc(84px+env(safe-area-inset-bottom))] lg:relative lg:grid lg:grid-cols-[220px_minmax(0,var(--list-w,420px))_minmax(0,1fr)] lg:grid-rows-[minmax(0,1fr)] lg:overflow-hidden lg:rounded-[14px] lg:border lg:border-border lg:bg-background [&_button]:normal-case [&_h1]:normal-case [&_h2]:normal-case [&_h3]:normal-case"
     >
       {/* Desktop: the sidebar. Every list, then this device's switches. */}
       <nav aria-label="Lead lists" className="hidden min-h-0 flex-col overflow-y-auto border-r border-border p-2.5 lg:flex">
@@ -393,6 +401,8 @@ export function AdminLeads() {
           </>
         )}
       </section>
+
+      <ListResizer w={listW ?? LIST_W} onChange={setListW} />
 
       <section aria-label="Lead" className={cn("min-w-0 lg:min-h-0 lg:overflow-y-auto lg:bg-card/40", !open && "max-lg:hidden")}>
         {current ? (
@@ -570,11 +580,11 @@ function StageLine({ l }: { l: LeadSummary }) {
 
 /** The one thing to do, in teal; money stuck in red; otherwise why it is put aside. */
 function RowAction({ l, next }: { l: LeadSummary; next: string | null }) {
-  const cls = "shrink-0 whitespace-nowrap font-mono text-[12.5px] font-medium";
+  const cls = "min-w-0 truncate font-mono text-[12.5px] font-medium";
   if (l.trashedAt) return <span className={cn(cls, "text-muted-foreground")}>Deletes in {Math.max(1, trashDaysLeft(l.trashedAt, now()))} d</span>;
   const bad = l.flags?.includes("stuck") ? "Deposit stuck" : l.flags?.includes("no-deposit") ? "No deposit" : null;
   if (bad) return <span className={cn(cls, "text-destructive")}>! {bad} →</span>;
-  if (next) return <span className={cn(cls, "text-accent")}>{next} →</span>;
+  if (next) return <span title={next} className={cn(cls, "text-accent")}>{next} →</span>;
   if (snoozed(l)) return <span className={cn(cls, "text-muted-foreground")}>Until {day(l.snoozeUntil!)}</span>;
   return l.refs ? <span className={cn(cls, "text-muted-foreground")}>{l.refs} {l.refs === 1 ? "picture" : "pictures"}</span> : null;
 }
@@ -613,6 +623,53 @@ function Row({ l, on, upcoming, onClick }: { l: LeadSummary; on: boolean; upcomi
         </span>
       </span>
     </button>
+  );
+}
+
+const LIST_W_STORE = "jg-leads-list-w";
+const LIST_W = 420;
+const clampW = (w: number) => Math.min(720, Math.max(300, Math.round(w)));
+
+/** Desktop: the line between the list and the open lead. Drag or arrow keys to move it, double-click to reset. */
+function ListResizer({ w, onChange }: { w: number; onChange: (w: number | null) => void }) {
+  const drag = React.useRef<{ x: number; w: number } | null>(null);
+  const save = (v: number | null) => {
+    onChange(v);
+    try {
+      if (v) window.localStorage.setItem(LIST_W_STORE, String(v));
+      else window.localStorage.removeItem(LIST_W_STORE);
+    } catch {}
+  };
+  return (
+    <div
+      role="separator"
+      aria-orientation="vertical"
+      aria-label="List width"
+      aria-valuenow={w}
+      aria-valuemin={300}
+      aria-valuemax={720}
+      tabIndex={0}
+      title="Drag to resize, double-click to reset"
+      style={{ left: `calc(220px + ${w}px - 3px)` }}
+      className="absolute inset-y-0 z-10 hidden w-1.5 cursor-col-resize touch-none outline-none hoverable:hover:bg-accent/40 focus-visible:bg-accent/60 lg:block"
+      onPointerDown={(e) => {
+        drag.current = { x: e.clientX, w };
+        e.currentTarget.setPointerCapture(e.pointerId);
+      }}
+      onPointerMove={(e) => drag.current && onChange(clampW(drag.current.w + e.clientX - drag.current.x))}
+      onPointerUp={(e) => {
+        if (!drag.current) return;
+        save(clampW(drag.current.w + e.clientX - drag.current.x));
+        drag.current = null;
+      }}
+      onDoubleClick={() => save(null)}
+      onKeyDown={(e) => {
+        if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+          e.preventDefault();
+          save(clampW(w + (e.key === "ArrowLeft" ? -16 : 16)));
+        }
+      }}
+    />
   );
 }
 
@@ -943,12 +1000,12 @@ function Detail({ summary, initial, call, onChange, onBack, reload, templates, o
         {l.stage === "Lost" ? (
           <p className="mt-5"><Tag tone="quiet" mark={MARK.Lost}>Lost</Tag></p>
         ) : (
-          <ol aria-label={`Stage: ${l.stage}`} className="mt-5 grid grid-cols-7 gap-1">
+          <ol aria-label={`Stage: ${l.stage}`} className="mt-5 grid grid-cols-8 gap-1">
             {STEPS.map((s, k) => {
               const at = STEPS.indexOf(l.stage);
               return (
                 <li key={s} aria-current={k === at ? "step" : undefined} className={cn("truncate border-t-[3px] pt-2 font-mono text-[11px]", k < at ? "border-foreground/55 text-muted-foreground" : k === at ? "border-foreground font-medium text-foreground" : "border-border text-muted-foreground")}>
-                  {/* A phone is too narrow for seven names: the line alone, the current one named below. */}
+                  {/* A phone is too narrow for eight names: the line alone, the current one named below. */}
                   <span className="max-sm:sr-only">{s === "Call booked" ? "Call" : s}</span>
                 </li>
               );

@@ -17,7 +17,7 @@ import type { Invoice } from "./invoice";
  * Automatic events only move a lead forward: a second inquiry from a
  * client already Confirmed must not drop them back to Inquiry. A new
  * inquiry from someone Delivered or Lost opens them again. Julian moves
- * the rest by hand (Replied, Quoted, Shot, Delivered, Lost).
+ * the rest by hand (Replied, Quoted, Shot, Selecting, Delivered, Lost).
  *
  * The record's summary rides sealed in KV metadata, so the list costs one
  * request. Pure functions here; `recordLead` is the one place
@@ -25,7 +25,7 @@ import type { Invoice } from "./invoice";
  * stored, and a lead that failed to update must not fail the form.
  * ─────────────────────────────────────────────────────────────── */
 
-export const STAGES = ["Inquiry", "Replied", "Call booked", "Quoted", "Confirmed", "Shot", "Delivered", "Lost"] as const;
+export const STAGES = ["Inquiry", "Replied", "Call booked", "Quoted", "Confirmed", "Shot", "Selecting", "Delivered", "Lost"] as const;
 export type Stage = (typeof STAGES)[number];
 
 /** What happened, as it reached the site. `stage` is Julian's own move. */
@@ -226,9 +226,9 @@ export function isLate(l: Pick<Lead, "stage" | "stageAt" | "snoozeUntil">, now: 
   return false;
 }
 
-/** The step that is Julian's with no reminder needed, or null: a shoot to deliver, a quote owed after the call. */
+/** The step that is Julian's with no reminder needed, or null: invoice and proofs after a shoot, a quote owed after the call. */
 export function myMove(l: Pick<Lead, "stage" | "when">, now: number): string | null {
-  if (l.stage === "Shot") return "Deliver photos + invoice";
+  if (l.stage === "Shot") return "Invoice + proofs";
   if (l.stage === "Call booked" && (!l.when || Date.parse(l.when) <= now)) return "Send the quote";
   return null;
 }

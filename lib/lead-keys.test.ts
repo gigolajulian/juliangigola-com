@@ -26,10 +26,10 @@ describe("leadKey", () => {
     expect(leadKey(p("Escape"), false, false)).toEqual({ do: "close" });
     expect(leadKey(p("x"), false, false)).toBeNull();
   });
-  it("sets stages 1 to 8 only", () => {
+  it("sets stages 1 to 9 only", () => {
     expect(leadKey(p("1"), false, false)).toEqual({ do: "stage", at: 0 });
-    expect(leadKey(p("8"), false, false)).toEqual({ do: "stage", at: 7 });
-    expect(leadKey(p("9"), false, false)).toBeNull();
+    expect(leadKey(p("9"), false, false)).toEqual({ do: "stage", at: 8 });
+    expect(leadKey(p("0"), false, false)).toBeNull();
   });
   it("reads 1, 3 and W as snooze lengths once S is pressed", () => {
     expect(leadKey(p("1"), false, true)).toEqual({ do: "snoozeFor", days: 1 });
