@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { credentials, KEY_STORE, References } from "@/components/admin-inbox";
+import { LeadBoard } from "@/components/lead-board";
 import { LeadHours } from "@/components/lead-hours";
 import { LeadProofs, ProofsDesk } from "@/components/admin-proofs";
 import { LeadUpcoming } from "@/components/lead-upcoming";
@@ -29,6 +30,7 @@ type Filter = "needs" | "open" | "upcoming" | Stage | "snoozed" | "archived" | "
 const TOOLS: Filter[] = ["more", "new", "stats", "money", "templates", "hours", "proofs"];
 
 const DAY = 864e5;
+const BOARD_STORE = "jg-leads-board";
 const now = () => Date.now();
 const snoozed = (l: LeadSummary) => !!l.snoozeUntil && Date.parse(l.snoozeUntil) > now();
 const closed = (s: Stage) => s === "Delivered" || s === "Lost";
@@ -132,6 +134,11 @@ export function AdminLeads() {
   const [error, setError] = React.useState<string | null>(null);
   const [query, setQuery] = React.useState("");
   const [templates, setTemplates] = React.useState<Template[]>([]);
+  // List or Board, kept on this device. Leads load after hydration, so the first paint never differs.
+  const [board, setBoardState] = React.useState(() => typeof window !== "undefined" && (() => { try { return localStorage.getItem(BOARD_STORE) === "1"; } catch { return false; } })());
+  const setBoard = (on: boolean) => { setBoardState(on); try { localStorage.setItem(BOARD_STORE, on ? "1" : "0"); } catch {} };
+  // A board move of the open lead: remount its pane so it shows the new stage.
+  const [moved, setMoved] = React.useState(0);
 
   const call = React.useCallback(async (init: RequestInit & { query?: string } = {}) => {
     const res = await fetch(`/api/inbox${init.query ?? ""}`, {
@@ -220,6 +227,14 @@ export function AdminLeads() {
     setLeads(null);
     setError("Not authorized.");
   };
+  const boarding = board && filter === "open";
+  /** A card dropped on a column: the same PATCH the stage buttons send. */
+  const move = (l: LeadSummary, stage: Stage) => {
+    setLeads((rows) => rows?.map((r) => (r.id === l.id ? { ...r, stage } : r)) ?? null);
+    call({ method: "PATCH", body: JSON.stringify({ key: `lead:${l.id}`, stage }) })
+      .then((o) => { changed(o.lead as Lead); if (l.id === open) setMoved((n) => n + 1); })
+      .catch((e: unknown) => { alert(e instanceof Error ? e.message : String(e)); load(); });
+  };
   const doExport = () => exportCsv().catch((e: unknown) => alert(e instanceof Error ? e.message : String(e)));
   // The new lead from the POST itself: KV lists lag a fresh write and cache the
   // duplicate check's miss for ~60s, so a reload here would not find it yet.
@@ -251,9 +266,14 @@ export function AdminLeads() {
     // Sentence case and a text face, as in the approved mock: the site sets
     // everything else in mono capitals, buttons included.
     <div
+      // The global Lenis eats wheel events, so the panes and board columns would not scroll.
+      data-lenis-prevent
       style={{ fontFamily: 'var(--font-v2-text, "Helvetica Neue", Helvetica, Arial, sans-serif)', letterSpacing: 0 }}
       ref={fit}
-      className="normal-case text-foreground max-lg:pb-[calc(84px+env(safe-area-inset-bottom))] lg:grid lg:grid-cols-[220px_minmax(0,420px)_minmax(0,1fr)] lg:grid-rows-[minmax(0,1fr)] lg:overflow-hidden lg:rounded-[14px] lg:border lg:border-border lg:bg-background [&_button]:normal-case [&_h1]:normal-case [&_h2]:normal-case [&_h3]:normal-case"
+      className={cn(
+        "normal-case text-foreground max-lg:pb-[calc(84px+env(safe-area-inset-bottom))] lg:grid lg:grid-rows-[minmax(0,1fr)] lg:overflow-hidden lg:rounded-[14px] lg:border lg:border-border lg:bg-background [&_button]:normal-case [&_h1]:normal-case [&_h2]:normal-case [&_h3]:normal-case",
+        boarding ? "lg:grid-cols-[220px_minmax(0,1fr)_minmax(0,420px)]" : "lg:grid-cols-[220px_minmax(0,420px)_minmax(0,1fr)]",
+      )}
     >
       {/* Desktop: the sidebar. Every list, then this device's switches. */}
       <nav aria-label="Lead lists" className="hidden min-h-0 flex-col overflow-y-auto border-r border-border p-2.5 lg:flex">
@@ -279,7 +299,7 @@ export function AdminLeads() {
         <div className="mt-auto grid border-t border-border pt-2">{device}</div>
       </nav>
 
-      <section aria-label="Leads" className={cn("min-w-0 lg:min-h-0 lg:overflow-y-auto lg:border-r lg:border-border", open && "max-lg:hidden")}>
+      <section aria-label="Leads" className={cn("min-w-0 lg:min-h-0 lg:border-r lg:border-border", boarding ? "lg:flex lg:flex-col" : "lg:overflow-y-auto", open && "max-lg:hidden")}>
         <header className="grid gap-3 border-b border-border px-1 pb-3 pt-2 lg:px-5 lg:pt-4">
           {tabOf(filter) !== "more" && (
             <p className="font-mono text-[11.5px] uppercase tracking-[0.08em] text-muted-foreground lg:hidden">
@@ -290,6 +310,13 @@ export function AdminLeads() {
             <h1 style={HEAD} className="text-[40px] leading-none tracking-[-0.03em] lg:text-[28px]">{label(filter)}</h1>
             {tool ? null : (
               <span className="flex items-center gap-3">
+                {filter === "open" ? (
+                  <span className="hidden overflow-hidden rounded-lg border border-border font-mono text-[12px] lg:inline-flex">
+                    {(["List", "Board"] as const).map((v) => (
+                      <button key={v} type="button" aria-pressed={board === (v === "Board")} onClick={() => setBoard(v === "Board")} className={cn("px-2.5 py-1", board === (v === "Board") ? "bg-card text-foreground" : "text-muted-foreground hoverable:hover:text-foreground")}>{v}</button>
+                    ))}
+                  </span>
+                ) : null}
                 <span className="font-mono text-[12.5px] text-muted-foreground">{shown.length} {shown.length === 1 ? "lead" : "leads"}</span>
                 <button type="button" onClick={() => pick("new")} aria-label="New lead" className="grid size-11 place-items-center rounded-[10px] border border-border text-[22px] leading-none text-accent lg:hidden">+</button>
               </span>
@@ -377,8 +404,13 @@ export function AdminLeads() {
         ) : (
           <>
             {filter === "trash" && shown.length ? <EmptyTrash n={shown.length} call={call} done={() => { setOpen(null); load(); }} /> : null}
+            {boarding ? (
+              <div className="hidden min-h-0 flex-1 lg:flex">
+                <LeadBoard leads={leads.filter((l) => !aside(l) && l.stage !== "Lost" && (!words || [l.name, l.email, l.kind, l.snippet].some((v) => v?.toLowerCase().includes(words))))} onMove={move} card={(l) => <Card l={l} on={open === l.id} onClick={() => setOpen(l.id ?? null)} />} />
+              </div>
+            ) : null}
             {shown.length ? (
-              <ul>
+              <ul className={cn(boarding && "lg:hidden")}>
                 {shown.map((l) => (
                   <li key={l.id}>
                     <Row l={l} on={open === l.id} upcoming={filter === "upcoming"} onClick={() => setOpen(l.id ?? null)} />
@@ -386,7 +418,7 @@ export function AdminLeads() {
                 ))}
               </ul>
             ) : (
-              <p className="px-1 py-10 text-[15px] text-muted-foreground lg:px-5">
+              <p className={cn("px-1 py-10 text-[15px] text-muted-foreground lg:px-5", boarding && "lg:hidden")}>
                 {words ? "Nothing matches." : filter === "needs" ? "Nothing waiting on you." : filter === "upcoming" ? "No calls or sessions coming up." : "No leads here."}
               </p>
             )}
@@ -396,7 +428,7 @@ export function AdminLeads() {
 
       <section aria-label="Lead" className={cn("min-w-0 lg:min-h-0 lg:overflow-y-auto lg:bg-card/40", !open && "max-lg:hidden")}>
         {current ? (
-          <Detail key={current.id} summary={current} initial={fresh?.email === current.email ? fresh : null} call={call} onChange={changed} onBack={() => { back.current = current.id ?? null; setOpen(null); }} reload={load} templates={templates} others={leads.filter((o) => o.id !== current.id && !o.trashedAt)} />
+          <Detail key={`${current.id}-${moved}`} summary={current} initial={fresh?.email === current.email ? fresh : null} call={call} onChange={changed} onBack={() => { back.current = current.id ?? null; setOpen(null); }} reload={load} templates={templates} others={leads.filter((o) => o.id !== current.id && !o.trashedAt)} />
         ) : (
           <p className="px-8 py-10 text-[15px] text-muted-foreground max-lg:hidden">Pick a lead to see it here.</p>
         )}
@@ -611,6 +643,32 @@ function Row({ l, on, upcoming, onClick }: { l: LeadSummary; on: boolean; upcomi
           <StageLine l={l} />
           <RowAction l={l} next={next} />
         </span>
+      </span>
+    </button>
+  );
+}
+
+/** A row cut down for the board: kind and age, name, the next step, the quote. */
+function Card({ l, on, onClick }: { l: LeadSummary; on: boolean; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      data-lead={l.id}
+      aria-current={on ? "true" : undefined}
+      className={cn("grid w-full gap-0.5 rounded-[10px] bg-card px-2.5 py-2 text-left transition-colors duration-200 hoverable:hover:bg-muted", on && "shadow-[inset_3px_0_0_var(--accent)]")}
+    >
+      <span className="flex justify-between gap-2 font-mono text-[10.5px] uppercase tracking-[0.09em] text-muted-foreground">
+        <span className="truncate">{kindOf(l.kind)}</span>
+        <span className="shrink-0">{ago(l.lastAt)}</span>
+      </span>
+      <span className="flex min-w-0 items-center gap-1.5 text-[15px] font-semibold">
+        {l.unread ? <span className="size-[7px] shrink-0 rounded-full bg-accent" aria-label="New" /> : null}
+        <span className="truncate">{l.name}</span>
+      </span>
+      <span className="mt-1 flex items-center justify-between gap-2">
+        <span className="min-w-0 truncate"><RowAction l={l} next={nextStep(l)} /></span>
+        {l.quote ? <span className="shrink-0 font-mono text-[11.5px] text-muted-foreground">{money(l.quote)}</span> : null}
       </span>
     </button>
   );
