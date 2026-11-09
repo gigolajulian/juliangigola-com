@@ -174,17 +174,20 @@ export async function DELETE(request: Request) {
   const g = await gate(request);
   if ("error" in g) return g.error;
   const q = new URL(request.url).searchParams;
-  const token = q.get("token"), id = q.get("id");
+  const token = q.get("token");
+  // `ids` (comma list) drops several frames in one write: KV takes one write per
+  // key per second, so Lightroom removing frames one request each hit a 429 (500).
+  const ids = q.get("ids")?.split(",") ?? (q.get("id") !== null ? [q.get("id")!] : null);
   if (!isToken(token)) return json({ error: "Which gallery?" }, 400);
   const p = await readProof(g.kv, g.s, token);
   if (!p) return json({ ok: true });
-  if (id !== null) {
-    if (!isFrameId(id)) return json({ error: "Bad frame id." }, 400);
-    await g.r2.delete(frameKey(token, id));
-    const selects = p.selects.filter((s) => s !== id);
+  if (ids) {
+    if (!ids.length || ids.length > 1000 || !ids.every(isFrameId)) return json({ error: "Bad frame id." }, 400);
+    await g.r2.delete(ids.map((id) => frameKey(token, id)));
+    const gone = new Set(ids);
     const notes = { ...p.notes };
-    delete notes[id];
-    await writeProof(g.kv, g.s, { ...p, frames: p.frames.filter((f) => f.id !== id), selects, notes });
+    for (const id of ids) delete notes[id];
+    await writeProof(g.kv, g.s, { ...p, frames: p.frames.filter((f) => !gone.has(f.id)), selects: p.selects.filter((s) => !gone.has(s)), notes });
     return json({ ok: true });
   }
   // The whole gallery: Lightroom's "delete published collection". Only web previews go, never an original.

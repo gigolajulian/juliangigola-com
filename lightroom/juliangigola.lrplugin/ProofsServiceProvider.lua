@@ -221,10 +221,13 @@ end
 function provider.deletePhotosFromPublishedCollection(publishSettings, arrayOfPhotoIds, deletedCallback, localCollectionId)
   local collection = LrApplication.activeCatalog():getPublishedCollectionByLocalIdentifier(localCollectionId)
   local remote = collection and collection:getRemoteId()
-  for _, id in ipairs(arrayOfPhotoIds) do
-    if remote then send("DELETE", ("?token=%s&id=%s"):format(enc(remote), enc(id))) end
-    deletedCallback(id)
+  -- One request for all of them: the gallery is one record, written once.
+  if remote and #arrayOfPhotoIds > 0 then
+    local ids = {}
+    for i, id in ipairs(arrayOfPhotoIds) do ids[i] = enc(id) end
+    send("DELETE", ("?token=%s&ids=%s"):format(enc(remote), table.concat(ids, ",")))
   end
+  for _, id in ipairs(arrayOfPhotoIds) do deletedCallback(id) end
 end
 
 --- Deleting the gallery in Lightroom takes it off the site (web previews only).
