@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { createPortal } from "react-dom";
 import { credentials, KEY_STORE, References } from "@/components/admin-inbox";
 import { LeadBoard } from "@/components/lead-board";
 import { LeadHours } from "@/components/lead-hours";
@@ -361,6 +362,7 @@ export function AdminLeads() {
     <div
       // The global Lenis eats wheel events, so the panes and board columns would not scroll.
       data-lenis-prevent
+      data-desk=""
       style={{ fontFamily: 'var(--font-v2-text, "Helvetica Neue", Helvetica, Arial, sans-serif)', letterSpacing: 0, ...(listW ? { "--list-w": `${listW}px` } : {}) } as React.CSSProperties}
       ref={fit}
       className={cn(
@@ -1098,6 +1100,7 @@ function Detail({ summary, initial, call, onChange, onBack, reload, tick, templa
       onChange(next);
       // A merge deletes the other record; the list has to drop it.
       if (body.mergeFrom) reload();
+      return next;
     },
     [call, key, onChange, reload],
   );
@@ -1526,7 +1529,7 @@ async function exportCsv() {
 
 
 /** The CRM half of a lead: how to reach them, saved replies, a reminder, the quote, notes, merge. */
-function LeadCrm({ l, full, patch, others, templates }: { l: LeadSummary; full: Lead | null; patch: (b: Record<string, unknown>) => Promise<void>; others: LeadSummary[]; templates: Template[] }) {
+function LeadCrm({ l, full, patch, others, templates }: { l: LeadSummary; full: Lead | null; patch: (b: Record<string, unknown>) => Promise<unknown>; others: LeadSummary[]; templates: Template[] }) {
   const [editing, setEditing] = React.useState(false);
   const [d, setD] = React.useState({ name: "", phone: "", ig: "", company: "", source: "", kind: "" });
   const [notes, setNotes] = React.useState<string | null>(null);
@@ -1536,7 +1539,7 @@ function LeadCrm({ l, full, patch, others, templates }: { l: LeadSummary; full: 
   const [into, setInto] = React.useState("");
   const [sure, setSure] = React.useState(false);
   const [note, setNote] = React.useState<string | null>(null);
-  const run = (p: Promise<void>, ok?: string) => p.then(() => setNote(ok ?? null)).catch((e: unknown) => setNote(e instanceof Error ? e.message : String(e)));
+  const run = (p: Promise<unknown>, ok?: string) => p.then(() => setNote(ok ?? null)).catch((e: unknown) => setNote(e instanceof Error ? e.message : String(e)));
   const mail = mailable(l.email);
   const ig = full?.ig ?? (l.email.startsWith("ig:") ? l.email.slice(3) : undefined);
   const phone = full?.phone ?? (l.email.startsWith("tel:") ? l.email.slice(4) : undefined);
@@ -1685,7 +1688,7 @@ const dd = "text-right font-mono text-[14px] leading-6";
 const DOT: Record<Paper, string> = { "Not sent": "○", Sent: "◐", Signed: "●", "Not needed": "–" };
 
 /** "Paperwork: Contract ● · Release ●", from Confirmed on. A tap moves a dot to its next status. */
-function Paperwork({ l, patch }: { l: LeadSummary; patch: (b: Record<string, unknown>) => Promise<void> }) {
+function Paperwork({ l, patch }: { l: LeadSummary; patch: (b: Record<string, unknown>) => Promise<unknown> }) {
   const due = paperDue(l, now());
   return (
     <p className="flex flex-wrap items-center gap-x-1 font-mono text-[13px] text-muted-foreground">
@@ -1712,7 +1715,7 @@ function Paperwork({ l, patch }: { l: LeadSummary; patch: (b: Record<string, unk
   );
 }
 
-function Money({ l, full, patch, run, quote, setQuote }: { l: LeadSummary; full: Lead | null; patch: (b: Record<string, unknown>) => Promise<void>; run: (p: Promise<void>, ok?: string) => void; quote: string | null; setQuote: (v: string | null) => void }) {
+function Money({ l, full, patch, run, quote, setQuote }: { l: LeadSummary; full: Lead | null; patch: (b: Record<string, unknown>) => Promise<unknown>; run: (p: Promise<unknown>, ok?: string) => void; quote: string | null; setQuote: (v: string | null) => void }) {
   const [making, setMaking] = React.useState(false);
   /** `?invb`: design B, the dark invoice with a photo, opt-in until Julian says yes. */
   const [invb] = React.useState(() => typeof window !== "undefined" && new URLSearchParams(location.search).has("invb"));
@@ -1834,7 +1837,7 @@ function InvoiceRow({ inv, l, full }: { inv: Invoice; l: LeadSummary; full: Lead
 type Line = { desc: string; qty: string; rate: string };
 
 /** A new invoice, filled from the lead. Saving numbers it; then the PDF. */
-function InvoiceSheet({ l, full, patch, done }: { l: LeadSummary; full: Lead; patch: (b: Record<string, unknown>) => Promise<void>; done: () => void }) {
+function InvoiceSheet({ l, full, patch, done }: { l: LeadSummary; full: Lead; patch: (b: Record<string, unknown>) => Promise<unknown>; done: () => void }) {
   const [from, setFrom] = React.useState<InvoiceFrom | null>(null);
   const [editFrom, setEditFrom] = React.useState(false);
   const [date, setDate] = React.useState(todayPT);
@@ -2071,7 +2074,20 @@ function PageB(p: PageBProps) {
   );
 }
 
-function InvoiceSheetB({ l, full, patch, done }: { l: LeadSummary; full: Lead; patch: (b: Record<string, unknown>) => Promise<void>; done: () => void }) {
+/** The desk itself on a wide screen (it is `lg:relative`), for the invoice page to cover its left side; null on a phone. */
+function useDeskLeft() {
+  const [el, setEl] = React.useState<HTMLElement | null>(null);
+  React.useEffect(() => {
+    const mq = matchMedia("(min-width: 1024px)");
+    const set = () => setEl(mq.matches ? document.querySelector<HTMLElement>("[data-desk]") : null);
+    set();
+    mq.addEventListener("change", set);
+    return () => mq.removeEventListener("change", set);
+  }, []);
+  return el;
+}
+
+function InvoiceSheetB({ l, full, patch, done }: { l: LeadSummary; full: Lead; patch: (b: Record<string, unknown>) => Promise<unknown>; done: () => void }) {
   const [from, setFrom] = React.useState<InvoiceFrom | null>(null);
   const [editFrom, setEditFrom] = React.useState(false);
   const [date, setDate] = React.useState(todayPT);
@@ -2136,6 +2152,8 @@ function InvoiceSheetB({ l, full, patch, done }: { l: LeadSummary; full: Lead; p
   const setLine = (i: number, k: keyof LineB) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setLines(lines.map((x, j) => (j === i ? { ...x, [k]: k === "amt" ? e.target.value.replace(/[^\d.]/g, "") : e.target.value } : x)));
 
+  const saved = React.useRef<Lead | null>(null);
+  const left = useDeskLeft();
   const save = async () => {
     if (!src) return setErr("Add a photo.");
     setBusy(true);
@@ -2148,16 +2166,17 @@ function InvoiceSheetB({ l, full, patch, done }: { l: LeadSummary; full: Lead; p
         if (!r.ok || !o.key) throw new Error(o.error ?? "Could not save the photo.");
         setPhotoKey((key = o.key));
       }
-      await patch({
+      // Saved once: a retry after a failed PDF makes the PDF again, never a second invoice.
+      saved.current ??= (await patch({
         invoice: {
           date,
           lines: lines.map((x) => ({ desc: x.desc.trim(), sub: x.sub.trim(), qty: 1, rate: Number(x.amt) })),
           paid: dep,
           b: { due, to, project, caption, note, depositNote, photo: key, crop, tone },
         },
-      });
-      const got = await fetch(`/api/inbox?key=${encodeURIComponent(`lead:${l.id ?? ""}`)}`, { headers: authed(), cache: "no-store" });
-      const fresh = ((await got.json()) as { lead: Lead }).lead;
+      })) as Lead;
+      // The PATCH answers with the lead as stored, so no second read (that one asked for a key the full lead has no id for).
+      const fresh = saved.current;
       const inv = fresh.invoices!.at(-1)!;
       setMade({ inv, file: await makePdf(inv, l, fresh, src) });
     } catch (e) {
@@ -2181,10 +2200,14 @@ function InvoiceSheetB({ l, full, patch, done }: { l: LeadSummary; full: Lead; p
   return (
     <form className="grid gap-5 rounded-xl border border-border p-3.5 @container" onSubmit={(e) => { e.preventDefault(); save(); }}>
       <style>{PAGE_B_CSS}</style>
-      <div className="grid gap-5 @[760px]:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] @[760px]:items-start">
-        <div className="grid gap-5 @[760px]:order-2 @[760px]:sticky @[760px]:top-4">
-          <PageB no={no} date={date} due={due} to={to} project={project} caption={caption} note={note} rows={rows} total={total} from={from} src={src} crop={crop} setCrop={setCropRaw} tone={tone} />
-        </div>
+      <div className={cn("grid gap-5", !left && "@[760px]:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] @[760px]:items-start")}>
+        {(() => {
+          const page = <PageB no={no} date={date} due={due} to={to} project={project} caption={caption} note={note} rows={rows} total={total} from={from} src={src} crop={crop} setCrop={setCropRaw} tone={tone} />;
+          // Julian: on desktop the full-size page sits on the left, over the tabs and the list.
+          return left
+            ? createPortal(<div className="absolute inset-y-0 left-0 z-20 w-[calc(220px+var(--list-w,420px))] overflow-y-auto border-r border-border bg-background p-6">{page}</div>, left)
+            : <div className="grid gap-5 @[760px]:order-2 @[760px]:sticky @[760px]:top-4">{page}</div>;
+        })()}
         <div className="grid gap-5">
           {from && editFrom ? <FromForm from={from} saved={(f) => { setFrom(f); setEditFrom(false); }} /> : null}
           <fieldset className="grid gap-2.5">
