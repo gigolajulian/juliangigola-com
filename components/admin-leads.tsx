@@ -7,7 +7,7 @@ import { LeadProofs, ProofsDesk } from "@/components/admin-proofs";
 import { LeadUpcoming } from "@/components/lead-upcoming";
 import { TOKEN_STORE } from "@/lib/admin-github";
 import type { Enquiry } from "@/lib/inbox";
-import { isLate, leadSummary, myMove, NUDGES, quoteNudge, STAGES, trashDaysLeft, type Lead, type LeadEvent, type LeadSummary, type Stage } from "@/lib/leads";
+import { isLate, leadSummary, myMove, NUDGES, PAPER, paperDue, quoteNudge, STAGES, trashDaysLeft, type Lead, type LeadEvent, type LeadSummary, type Paper, type Stage } from "@/lib/leads";
 import { cn } from "@/lib/utils";
 import { fill, mailable } from "@/lib/lead-crm";
 import { balance, DEPOSIT, MAX_LINES, usd, type Invoice, type InvoiceFrom } from "@/lib/invoice";
@@ -38,13 +38,15 @@ const aside = (l: LeadSummary) => !!(l.archivedAt || l.trashedAt);
 const due = (l: LeadSummary) => !!l.due && Date.parse(l.due) <= now();
 /** The desk's search: name, email, type of shoot or their message. */
 const matches = (l: LeadSummary, words: string) => !words || [l.name, l.email, l.kind, l.snippet].some((v) => v?.toLowerCase().includes(words));
-const needsMe = (l: LeadSummary) => !aside(l) && !closed(l.stage) && (due(l) || (!snoozed(l) && (l.unread || isLate(l, now()) || !!l.flags?.length || !!myMove(l, now()))));
+const needsMe = (l: LeadSummary) => !aside(l) && !closed(l.stage) && (due(l) || (!snoozed(l) && (l.unread || isLate(l, now()) || !!l.flags?.length || !!paperDue(l, now()) || !!myMove(l, now()))));
 
 /** What to do next, in a word or two, and whether it is late. */
 function nextStep(l: LeadSummary): string | null {
   if (due(l)) return l.dueText || "Your reminder";
   if (l.flags?.includes("stuck")) return "Refund or rebook";
   if (l.flags?.includes("no-deposit")) return "Ask for the deposit";
+  const paper = paperDue(l, now());
+  if (paper) return paper === "contract" ? "Get contract signed" : "Get release signed";
   if (l.stage === "Inquiry") return "Reply";
   if (l.stage === "Quoted") return quoteNudge(l, now());
   return myMove(l, now());
@@ -1050,6 +1052,8 @@ function Detail({ summary, initial, call, onChange, onBack, reload, templates, o
         </div>
       </fieldset>
 
+      {(["Confirmed", "Shot", "Delivered"] as Stage[]).includes(l.stage) ? <Paperwork l={l} patch={patch} /> : null}
+
       <LeadProofs email={l.email} />
 
       <LeadCrm l={l} full={lead} patch={patch} others={others} templates={templates} />
@@ -1439,6 +1443,37 @@ function LeadCrm({ l, full, patch, others, templates }: { l: LeadSummary; full: 
 const ledger = "grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 gap-y-1.5 text-[15px] tabular-nums";
 const dt = "font-mono text-[13px] leading-6 text-muted-foreground";
 const dd = "text-right font-mono text-[14px] leading-6";
+
+/** A shape per paperwork status, so it never relies on color alone. */
+const DOT: Record<Paper, string> = { "Not sent": "○", Sent: "◐", Signed: "●", "Not needed": "–" };
+
+/** "Paperwork: Contract ● · Release ●", from Confirmed on. A tap moves a dot to its next status. */
+function Paperwork({ l, patch }: { l: LeadSummary; patch: (b: Record<string, unknown>) => Promise<void> }) {
+  const due = paperDue(l, now());
+  return (
+    <p className="flex flex-wrap items-center gap-x-1 font-mono text-[13px] text-muted-foreground">
+      Paperwork:
+      {(["contract", "release"] as const).map((k, i) => {
+        const v = l[k] ?? "Not sent";
+        const name = k === "contract" ? "Contract" : "Release";
+        return (
+          <span key={k} className="inline-flex items-center whitespace-nowrap">
+            {i ? <span aria-hidden="true">·</span> : null}
+            <button
+              type="button"
+              title={v}
+              aria-label={`${name}: ${v}. Change`}
+              onClick={() => patch({ [k]: PAPER[(PAPER.indexOf(v) + 1) % PAPER.length] }).catch(() => {})}
+              className={cn("inline-flex min-h-11 items-center gap-1.5 px-1.5", due === k ? "text-accent" : v === "Signed" ? "text-foreground" : "")}
+            >
+              {name} <span aria-hidden="true">{DOT[v]}</span>
+            </button>
+          </span>
+        );
+      })}
+    </p>
+  );
+}
 
 function Money({ l, full, patch, run, quote, setQuote }: { l: LeadSummary; full: Lead | null; patch: (b: Record<string, unknown>) => Promise<void>; run: (p: Promise<void>, ok?: string) => void; quote: string | null; setQuote: (v: string | null) => void }) {
   const [making, setMaking] = React.useState(false);
