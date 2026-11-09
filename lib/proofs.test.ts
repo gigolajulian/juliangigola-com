@@ -11,8 +11,14 @@ describe("proofs", () => {
   });
   it("charges a reopened gallery only for new extras", () => {
     const base = { included: 10, price: 15, selects: Array.from({ length: 13 }, (_, i) => String(i)) };
-    expect(owed({ ...base, paid: undefined })).toEqual({ n: 3, cents: 4500 });
-    expect(owed({ ...base, paid: { session: "s", amount: 3000, at: "" } })).toEqual({ n: 1, cents: 1500 });
+    expect(owed({ ...base, paid: undefined })).toEqual({ n: 3, balance: 0, cents: 4500 });
+    expect(owed({ ...base, paid: { session: "s", amount: 3000, at: "" } })).toEqual({ n: 1, balance: 0, cents: 1500 });
+  });
+  it("puts the shoot balance before extras, and counts it paid once", () => {
+    const base = { included: 10, price: 15, balance: 200, selects: Array.from({ length: 12 }, (_, i) => String(i)) };
+    expect(owed({ ...base, paid: undefined })).toEqual({ n: 2, balance: 20000, cents: 23000 });
+    expect(owed({ ...base, paid: { session: "s", amount: 23000, at: "" } })).toEqual({ n: 0, balance: 0, cents: 0 });
+    expect(owed({ ...base, selects: [...base.selects, "x"], paid: { session: "s", amount: 23000, at: "" } })).toEqual({ n: 1, balance: 0, cents: 1500 });
   });
   it("reads the pipeline stage", () => {
     expect(stage({})).toBe("Draft");
@@ -46,5 +52,42 @@ describe("proofs", () => {
   it("is open until closesAt", () => {
     expect(isOpen({ closesAt: undefined })).toBe(true);
     expect(isOpen({ closesAt: "2020-01-01T00:00:00Z" })).toBe(false);
+  });
+});
+
+describe("proof activity log", () => {
+  it("logs opens once per device and diffs picks into pick and unpick", async () => {
+    const { track, device } = await import("@/lib/proofs");
+    let v = track(undefined, "t1", { kind: "open", device: "iPhone · Safari", place: "San Jose, CA, US" });
+    v = track(v, "t2", { picks: ["a", "b"] });
+    v = track(v, "t3", { picks: ["b", "c"] });
+    v = track(v, "t4", { kind: "open", device: "iPhone · Safari", looks: { a: 500_000 }, seconds: 9999 });
+    expect(v.visits).toBe(2);
+    expect(v.devices).toEqual(["iPhone · Safari"]);
+    expect(v.picks).toEqual(["b", "c"]);
+    expect(v.events.map((e) => `${e.kind}${e.id ?? ""}`)).toEqual(["open", "picka", "pickb", "pickc", "unpicka", "open"]);
+    expect(v.looks.a).toBe(120_000);
+    expect(v.seconds).toBe(120);
+    expect(device("Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Version/18.0 Mobile/15E148 Safari/604.1")).toBe("iPhone · Safari");
+  });
+});
+
+describe("bank payments", () => {
+  const p = { token: "t", name: "n", included: 10, price: 15, days: 14, createdAt: "", frames: [], selects: Array.from({ length: 12 }, (_, i) => String(i)), notes: {}, views: 0 };
+  const reply = (body: unknown) => vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(JSON.stringify(body)));
+  it("locks on an accepted bank payment and marks it settling", async () => {
+    const f = reply({ status: "complete", payment_status: "unpaid", amount_total: 3000, metadata: { proof: "t" } });
+    expect(await paidFor("sk_test_x", p, "cs_test_B")).toMatchObject({ amount: 3000, pending: true });
+    f.mockRestore();
+  });
+  it("clears or drops a settling payment", async () => {
+    const { settle } = await import("@/lib/proof-submit");
+    const q = { ...p, paid: { session: "cs_test_B", amount: 3000, at: "", pending: true } };
+    let f = reply({ payment_status: "paid", amount_total: 3000 });
+    expect((await settle("sk_test_x", q))?.paid).toMatchObject({ amount: 3000, pending: undefined });
+    f.mockRestore();
+    f = reply({ payment_status: "unpaid", amount_total: 3000, payment_intent: { status: "requires_payment_method" } });
+    expect((await settle("sk_test_x", q))?.paid).toMatchObject({ amount: 0, failed: true });
+    f.mockRestore();
   });
 });

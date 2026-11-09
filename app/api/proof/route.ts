@@ -4,6 +4,7 @@ import { sealer } from "@/lib/lead-crypto";
 import { recordLead } from "@/lib/leads";
 import { closesAt, cleanSettings, DEFAULTS, frameKey, isFrameId, isToken, listProofs, newToken, readProof, writeProof, type Proof } from "@/lib/proofs";
 import { proofMail, proofUrl, sendClient } from "@/lib/proof-mail";
+import { settle } from "@/lib/proof-submit";
 
 /* ── proofs, Julian's side ────────────────────────────────────────
  * Lightroom (the publish service) and /admin Leads both call this, with the
@@ -52,7 +53,16 @@ export async function GET(request: Request) {
   const q = new URL(request.url).searchParams;
   if (q.has("list")) {
     // Opened in full: the desk needs each address to match leads. Galleries are few.
-    const all = await Promise.all((await listProofs(g.kv)).map((x) => readProof(g.kv, g.s, x.token)));
+    const key = g.env.STRIPE_SECRET_KEY;
+    const all = await Promise.all(
+      (await listProofs(g.kv)).map(async (x) => {
+        const p = await readProof(g.kv, g.s, x.token);
+        // Bank payments still settling are checked each time the desk opens.
+        const moved = p?.paid?.pending && key ? await settle(key, p).catch(() => null) : null;
+        if (moved) await writeProof(g.kv, g.s, moved);
+        return moved ?? p;
+      }),
+    );
     return json({ proofs: all.filter((p): p is Proof => !!p).map((p) => ({ ...p, url: proofUrl(p.token) })).sort((a, b) => b.createdAt.localeCompare(a.createdAt)) });
   }
   const preview = q.get("preview");

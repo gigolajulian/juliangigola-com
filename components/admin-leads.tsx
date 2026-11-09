@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { fill, mailable, TEMPLATES } from "@/lib/lead-crm";
 import { endDay, LicenceField, LicenceList } from "@/components/lead-licence";
 import { balance, DEPOSIT, MAX_LINES, usd, type Invoice, type InvoiceFrom } from "@/lib/invoice";
+import { LEAD_KEYS, leadKey, typingIn } from "@/lib/lead-keys";
 
 /* ── the lead desk ────────────────────────────────────────────────
  * Julian (2026-11-03, PLAN-lead-desk.md, mock v3): every inquiry, call
@@ -36,6 +37,8 @@ const closed = (s: Stage) => s === "Delivered" || s === "Lost";
 const aside = (l: LeadSummary) => !!(l.archivedAt || l.trashedAt);
 /** His reminder has come round: it beats a snooze. */
 const due = (l: LeadSummary) => !!l.due && Date.parse(l.due) <= now();
+/** The desk's search: name, email, type of shoot or their message. */
+const matches = (l: LeadSummary, words: string) => !words || [l.name, l.email, l.kind, l.snippet].some((v) => v?.toLowerCase().includes(words));
 /** A licence ending soon brings back even a Delivered lead; a snooze holds it off. */
 const renew = (l: LeadSummary) => !snoozed(l) && renewDue(l, now());
 // An ending licence brings back archived leads too, never trashed ones.
@@ -210,7 +213,7 @@ export function AdminLeads() {
   const words = query.trim().toLowerCase();
   const shown = leads
     .filter((l) => pass(l, filter))
-    .filter((l) => !words || [l.name, l.email, l.kind, l.snippet].some((v) => v?.toLowerCase().includes(words)))
+    .filter((l) => matches(l, words))
     .sort(filter === "upcoming" ? (a, b) => a.when!.localeCompare(b.when!) : (a, b) => b.lastAt.localeCompare(a.lastAt));
   const current = leads.find((l) => l.id === open);
   const tab = tabOf(filter);
@@ -230,6 +233,14 @@ export function AdminLeads() {
     setLeads((rows) => [{ ...leadSummary(lead), id }, ...(rows ?? []).filter((r) => r.id !== id)]);
     setFilter("open");
     setOpen(id);
+  };
+  // A lead picked from the palette: its own list, if this one does not show it.
+  const jump = (l: LeadSummary) => {
+    if (!shown.includes(l)) {
+      setFilter(l.trashedAt ? "trash" : l.archivedAt ? "archived" : snoozed(l) ? "snoozed" : l.stage);
+      setQuery("");
+    }
+    setOpen(l.id ?? null);
   };
   const device = (
     <>
@@ -399,6 +410,8 @@ export function AdminLeads() {
         )}
       </section>
 
+      <DeskKeys leads={leads} shown={shown} open={open} setOpen={setOpen} jump={jump} pick={pick} />
+
       {/* Phone: the tab bar, in thumb reach, above the home indicator. */}
       <nav
         aria-label="Lead tabs"
@@ -420,6 +433,114 @@ export function AdminLeads() {
           </button>
         ))}
       </nav>
+    </div>
+  );
+}
+
+/**
+ * Julian (2026-11-08): keyboard shortcuts. List keys live here, on capture so
+ * an open overlay can keep them from the lead; the lead's own keys live in
+ * Detail. Nothing renders until a key opens it, so the phone never sees it.
+ */
+function DeskKeys({ leads, shown, open, setOpen, jump, pick }: { leads: LeadSummary[]; shown: LeadSummary[]; open: string | null; setOpen: (id: string | null) => void; jump: (l: LeadSummary) => void; pick: (f: Filter) => void }) {
+  const [palette, setPalette] = React.useState(false);
+  const [help, setHelp] = React.useState(false);
+  // Where the open lead sat: once read, it can drop out of Your move, and J / K go on from its place.
+  const row = React.useRef(-1);
+  React.useEffect(() => {
+    const i = shown.findIndex((l) => l.id === open);
+    if (i >= 0 || !open) row.current = i;
+  });
+  React.useEffect(() => {
+    const on = (e: KeyboardEvent) => {
+      const k = leadKey(e, typingIn(e.target), false);
+      if (palette) {
+        // Its own field takes the rest; Cmd K again closes it.
+        if (k?.do === "palette") { e.preventDefault(); setPalette(false); }
+        return;
+      }
+      if (help) {
+        if (!k) return;
+        e.preventDefault();
+        if (k.do === "close" || k.do === "help") setHelp(false);
+        return;
+      }
+      if (!k) return;
+      if (k.do === "palette") setPalette(true);
+      else if (k.do === "help") setHelp(true);
+      else if (k.do === "new") pick("new");
+      else if (k.do === "move") {
+        const i = shown.findIndex((l) => l.id === open);
+        // Gone from the list: the row below has slid into its place, so J stays put.
+        const to = i >= 0 ? i + k.by : row.current < 0 ? 0 : row.current + (k.by < 0 ? -1 : 0);
+        const next = shown[Math.min(shown.length - 1, Math.max(0, to))];
+        if (!next?.id) return;
+        setOpen(next.id);
+        document.querySelector(`[data-lead="${CSS.escape(next.id)}"]`)?.scrollIntoView({ block: "nearest" });
+      } else return;
+      e.preventDefault();
+    };
+    addEventListener("keydown", on, true);
+    return () => removeEventListener("keydown", on, true);
+  });
+  if (palette) return <Palette leads={leads} close={() => setPalette(false)} go={jump} />;
+  if (!help) return null;
+  return (
+    <div role="dialog" aria-modal="true" aria-label="Keyboard shortcuts" onClick={() => setHelp(false)} className="fixed inset-0 z-50 bg-background/60 backdrop-blur-sm">
+      <div className="mx-auto mt-[16vh] w-[min(420px,calc(100%-32px))] rounded-[14px] border border-border bg-background p-5 shadow-2xl">
+        <p className="pb-3 font-mono text-[11.5px] uppercase tracking-[0.08em] text-muted-foreground">Shortcuts</p>
+        <dl className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-6 gap-y-2.5 text-[14.5px]">
+          {LEAD_KEYS.map(([k, t]) => (
+            <React.Fragment key={k}><dt>{t}</dt><dd className="text-right font-mono text-[12.5px] text-muted-foreground">{k}</dd></React.Fragment>
+          ))}
+        </dl>
+      </div>
+    </div>
+  );
+}
+
+/** Cmd K: jump to any lead by name, email or type of shoot. */
+function Palette({ leads, close, go }: { leads: LeadSummary[]; close: () => void; go: (l: LeadSummary) => void }) {
+  const [q, setQ] = React.useState("");
+  const [at, setAt] = React.useState(0);
+  const words = q.trim().toLowerCase();
+  const hits = leads.filter((l) => !l.trashedAt && matches(l, words)).sort((a, b) => b.lastAt.localeCompare(a.lastAt)).slice(0, 8);
+  const choose = (l?: LeadSummary) => { if (!l) return; close(); go(l); };
+  return (
+    <div role="dialog" aria-modal="true" aria-label="Jump to a lead" onMouseDown={(e) => e.target === e.currentTarget && close()} className="fixed inset-0 z-50 bg-background/60 backdrop-blur-sm">
+      <div className="mx-auto mt-[16vh] w-[min(520px,calc(100%-32px))] overflow-hidden rounded-[14px] border border-border bg-background shadow-2xl">
+        <input
+          autoFocus
+          value={q}
+          onChange={(e) => { setQ(e.target.value); setAt(0); }}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") close();
+            else if (e.key === "ArrowDown") setAt((i) => Math.min(hits.length - 1, i + 1));
+            else if (e.key === "ArrowUp") setAt((i) => Math.max(0, i - 1));
+            else if (e.key === "Enter") choose(hits[at]);
+            else return;
+            e.preventDefault();
+          }}
+          placeholder="Jump to a lead"
+          aria-label="Jump to a lead"
+          className="min-h-12 w-full border-b border-border bg-transparent px-4 text-[15px] outline-none placeholder:text-muted-foreground"
+        />
+        {hits.length ? (
+          <ul className="max-h-[50vh] overflow-y-auto py-1">
+            {hits.map((l, i) => (
+              <li key={l.id}>
+                <button type="button" onMouseEnter={() => setAt(i)} onClick={() => choose(l)} aria-current={i === at ? "true" : undefined} className={cn("flex w-full items-baseline gap-3 px-4 py-2.5 text-left", i === at && "bg-card shadow-[inset_3px_0_0_var(--accent)]")}>
+                  <span className="truncate text-[15px] font-medium">{l.name}</span>
+                  <span className="truncate font-mono text-[12px] text-muted-foreground">{[kindOf(l.kind), l.email].filter(Boolean).join(" · ")}</span>
+                  <span className="ml-auto shrink-0 font-mono text-[12px] text-muted-foreground">{l.stage}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="px-4 py-4 text-[14.5px] text-muted-foreground">Nothing matches.</p>
+        )}
+      </div>
     </div>
   );
 }
@@ -795,6 +916,28 @@ function Detail({ summary, initial, call, onChange, onBack, reload, templates, o
   const late = isLate(l, now());
   const reply = compose(l.email, `Re: your ${l.kind ?? "shoot"} inquiry`, `Hi ${first},\n\n`);
   const book = compose(l.email, "Booking a time", `Hi ${first},\n\nYou can pick a time here: https://juliangigola.com/book\n\n`);
+  // The buttons and the keys share these.
+  const snoozeFor = (d: number) => patch({ snoozeUntil: new Date(now() + d * DAY).toISOString() }).then(() => setSnoozing(false));
+  const archive = () => patch({ archive: !l.archivedAt });
+  const setStage = (s: Stage) => l.stage !== s && patch({ stage: s });
+  const replyLink = React.useRef<HTMLAnchorElement>(null);
+  React.useEffect(() => {
+    const on = (e: KeyboardEvent) => {
+      // DeskKeys took it: an overlay is open.
+      if (e.defaultPrevented) return;
+      const k = leadKey(e, typingIn(e.target), snoozing);
+      if (k?.do === "reply" && replyLink.current) replyLink.current.click();
+      else if (k?.do === "snooze") setSnoozing((v) => !v);
+      else if (k?.do === "snoozeFor") snoozeFor(k.days);
+      else if (k?.do === "archive" && !l.trashedAt) archive();
+      else if (k?.do === "stage") setStage(STAGES[k.at]);
+      else if (k?.do === "close" && snoozing) setSnoozing(false);
+      else return;
+      e.preventDefault();
+    };
+    addEventListener("keydown", on);
+    return () => removeEventListener("keydown", on);
+  });
 
   return (
     <div className="grid grid-cols-[minmax(0,1fr)] gap-6 px-5 py-6 lg:px-8 lg:py-7">
@@ -853,7 +996,7 @@ function Detail({ summary, initial, call, onChange, onBack, reload, templates, o
 
       <div className="flex flex-wrap items-center gap-2.5">
         {mailable(l.email) ? (<>
-        <a href={reply} target="_blank" rel="noreferrer" onClick={() => setAsked(true)} className={cn(btn, !renew(l) && primary, "min-h-[52px] px-5 text-base")}>
+        <a ref={replyLink} href={reply} target="_blank" rel="noreferrer" onClick={() => setAsked(true)} className={cn(btn, !renew(l) && primary, "min-h-[52px] px-5 text-base")}>
           Reply in Gmail
         </a>
         {ios() ? (
@@ -869,7 +1012,7 @@ function Detail({ summary, initial, call, onChange, onBack, reload, templates, o
         </>) : null}
         <button type="button" onClick={() => setSnoozing((v) => !v)} aria-expanded={snoozing} className={btn}>Snooze</button>
         {snoozed(l) ? <button type="button" className={btn} onClick={() => patch({ snoozeUntil: "" }).then(() => setSnoozing(false))}>Unsnooze</button> : null}
-        {l.trashedAt ? null : <button type="button" className={btn} onClick={() => patch({ archive: !l.archivedAt })}>{l.archivedAt ? "Unarchive" : "Archive"}</button>}
+        {l.trashedAt ? null : <button type="button" className={btn} onClick={archive}>{l.archivedAt ? "Unarchive" : "Archive"}</button>}
         <button type="button" className={btn} onClick={() => patch({ trash: !l.trashedAt })}>{l.trashedAt ? "Recover" : "Move to trash"}</button>
         <button type="button" className={btn} onClick={() => patch({ seen: false }).then(onBack)}>Mark unread</button>
         <span className="flex-1" />
@@ -885,7 +1028,7 @@ function Detail({ summary, initial, call, onChange, onBack, reload, templates, o
       {snoozing ? (
         <div className="flex flex-wrap gap-2">
           {[["1 day", 1], ["3 days", 3], ["1 week", 7]].map(([t, d]) => (
-            <button key={t} type="button" className={btn} onClick={() => patch({ snoozeUntil: new Date(now() + Number(d) * DAY).toISOString() }).then(() => setSnoozing(false))}>{t}</button>
+            <button key={t} type="button" className={btn} onClick={() => snoozeFor(Number(d))}>{t}</button>
           ))}
           <label className={cn(btn, "gap-2")}>
             Until
@@ -907,7 +1050,7 @@ function Detail({ summary, initial, call, onChange, onBack, reload, templates, o
               key={s}
               type="button"
               aria-pressed={l.stage === s}
-              onClick={() => l.stage !== s && patch({ stage: s })}
+              onClick={() => setStage(s)}
               className={cn(
                 "min-h-11 rounded-[4px] border px-3 font-mono text-[12.5px] transition-colors duration-200",
                 l.stage === s
