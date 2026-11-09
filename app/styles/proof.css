@@ -52,7 +52,7 @@ html:has(.proof) #main{transform:none}
 .proof-x{font:12px var(--p-mono);color:var(--muted-foreground);margin:0 0 14px}
 .proof-srow{display:grid;grid-template-columns:120px 1fr auto;gap:18px;align-items:center;padding:14px 0;border-top:1px solid var(--p-hl)}
 .proof-srow img{width:120px;height:150px;object-fit:cover;display:block;cursor:zoom-in}
-.proof-fn{font:12px var(--p-mono);margin:0 0 10px}
+.proof-fn{font:12px var(--p-mono);margin:0}
 .proof-fn span{color:var(--muted-foreground)}
 .proof textarea,.proof-lf input{width:100%;background:none;border:0;border-bottom:1px solid var(--p-hl);color:var(--foreground);font:16px/1.6 var(--p-mono);padding:6px 0;outline:none;resize:vertical}
 @media (min-width:768px){.proof textarea,.proof-lf input{font-size:13px}}
