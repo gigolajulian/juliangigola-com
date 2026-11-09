@@ -7,7 +7,7 @@ import { LeadProofs, ProofsDesk } from "@/components/admin-proofs";
 import { LeadUpcoming } from "@/components/lead-upcoming";
 import { TOKEN_STORE } from "@/lib/admin-github";
 import type { Enquiry } from "@/lib/inbox";
-import { isLate, STAGES, trashDaysLeft, type Lead, type LeadEvent, type LeadSummary, type Stage } from "@/lib/leads";
+import { isLate, leadSummary, STAGES, trashDaysLeft, type Lead, type LeadEvent, type LeadSummary, type Stage } from "@/lib/leads";
 import { cn } from "@/lib/utils";
 import { fill, mailable } from "@/lib/lead-crm";
 import { balance, DEPOSIT, MAX_LINES, usd, type Invoice, type InvoiceFrom } from "@/lib/invoice";
@@ -117,6 +117,7 @@ function mailto(to: string, subject: string, body: string, quote?: { name: strin
 
 export function AdminLeads() {
   const [leads, setLeads] = React.useState<LeadSummary[] | null>(null);
+  const [fresh, setFresh] = React.useState<Lead | null>(null);
   const [filter, setFilter] = React.useState<Filter>("needs");
   const [open, setOpen] = React.useState<string | null>(null);
   // The row a phone came back from: the list was hidden, so focus fell to the body.
@@ -218,7 +219,14 @@ export function AdminLeads() {
     setError("Not authorized.");
   };
   const doExport = () => exportCsv().catch((e: unknown) => alert(e instanceof Error ? e.message : String(e)));
-  const added = (id: string) => { load(); setFilter("open"); setOpen(id); };
+  // The new lead from the POST itself: KV lists lag a fresh write and cache the
+  // duplicate check's miss for ~60s, so a reload here would not find it yet.
+  const added = (id: string, lead: Lead) => {
+    setFresh(lead);
+    setLeads((rows) => [{ ...leadSummary(lead), id }, ...(rows ?? []).filter((r) => r.id !== id)]);
+    setFilter("open");
+    setOpen(id);
+  };
   const device = (
     <>
       <PushSwitch call={call} />
@@ -378,7 +386,7 @@ export function AdminLeads() {
 
       <section aria-label="Lead" className={cn("min-w-0 lg:min-h-0 lg:overflow-y-auto lg:bg-card/40", !open && "max-lg:hidden")}>
         {current ? (
-          <Detail key={current.id} summary={current} call={call} onChange={changed} onBack={() => { back.current = current.id ?? null; setOpen(null); }} reload={load} templates={templates} others={leads.filter((o) => o.id !== current.id && !o.trashedAt)} />
+          <Detail key={current.id} summary={current} initial={fresh?.email === current.email ? fresh : null} call={call} onChange={changed} onBack={() => { back.current = current.id ?? null; setOpen(null); }} reload={load} templates={templates} others={leads.filter((o) => o.id !== current.id && !o.trashedAt)} />
         ) : (
           <p className="px-8 py-10 text-[15px] text-muted-foreground max-lg:hidden">Pick a lead to see it here.</p>
         )}
@@ -730,8 +738,8 @@ function EmptyTrash({ n, call, done }: { n: number; call: Call; done: () => void
 
 type Call = (init?: RequestInit & { query?: string }) => Promise<Record<string, unknown>>;
 
-function Detail({ summary, call, onChange, onBack, reload, templates, others }: { summary: LeadSummary; call: Call; onChange: (l: Lead) => void; onBack: () => void; reload: () => void; templates: Template[]; others: LeadSummary[] }) {
-  const [lead, setLead] = React.useState<Lead | null>(null);
+function Detail({ summary, initial, call, onChange, onBack, reload, templates, others }: { summary: LeadSummary; initial?: Lead | null; call: Call; onChange: (l: Lead) => void; onBack: () => void; reload: () => void; templates: Template[]; others: LeadSummary[] }) {
+  const [lead, setLead] = React.useState<Lead | null>(initial ?? null);
   const [message, setMessage] = React.useState<Enquiry | null>(null);
   const [msgKey, setMsgKey] = React.useState<string | null>(null);
   const [asked, setAsked] = React.useState(false);
@@ -970,11 +978,11 @@ const SOURCES = ["Instagram DM", "Referral", "Text", "Phone call", "Email", "In 
 const LOST_REASONS = ["Price", "Dates", "No reply", "Went elsewhere", "Not a fit", "Other"];
 
 /** A lead he adds himself: someone who wrote on Instagram, texted, or was referred. */
-function NewLeadForm({ call, done }: { call: Call; done: (id: string) => void }) {
+function NewLeadForm({ call, done }: { call: Call; done: (id: string, lead: Lead) => void }) {
   const [f, setF] = React.useState({ name: "", email: "", ig: "", phone: "", company: "", kind: "", stage: "Inquiry" as Stage, source: "Instagram DM", notes: "" });
   const [note, setNote] = React.useState<string | null>(null);
   const [busy, setBusy] = React.useState(false);
-  const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => setF({ ...f, [k]: e.target.value });
+  const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => { const v = e.target.value; setF((p) => ({ ...p, [k]: v })); };
   return (
     <form
       className="grid gap-4 px-1 py-5 lg:px-5"
@@ -983,7 +991,7 @@ function NewLeadForm({ call, done }: { call: Call; done: (id: string) => void })
         setBusy(true);
         setNote(null);
         call({ method: "POST", body: JSON.stringify({ add: f }) })
-          .then((o) => done(o.id as string))
+          .then((o) => done(o.id as string, o.lead as Lead))
           .catch((err: unknown) => setNote(err instanceof Error ? err.message : String(err)))
           .finally(() => setBusy(false));
       }}
