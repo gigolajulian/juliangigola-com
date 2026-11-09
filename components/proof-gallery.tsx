@@ -26,6 +26,36 @@ const isEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
 
 type Step = null | "review" | "done";
 
+/** A full-screen sheet: focus moves in, Tab stays inside, Escape closes, focus goes back to what opened it. */
+function useDialog(active: boolean, close: () => void) {
+  const ref = React.useRef<HTMLDivElement>(null);
+  const shut = React.useRef(close);
+  React.useEffect(() => {
+    shut.current = close;
+  });
+  React.useEffect(() => {
+    if (!active) return;
+    const back = document.activeElement as HTMLElement | null;
+    const items = () => [...(ref.current?.querySelectorAll<HTMLElement>("button:not([disabled]), a[href]") ?? [])];
+    items()[0]?.focus();
+    const k = (e: KeyboardEvent) => {
+      if (e.key === "Escape") return shut.current();
+      if (e.key !== "Tab") return;
+      const all = items();
+      if (!all.length) return;
+      const i = all.indexOf(document.activeElement as HTMLElement);
+      if (e.shiftKey && i <= 0) { e.preventDefault(); all[all.length - 1].focus(); }
+      else if (!e.shiftKey && (i === -1 || i === all.length - 1)) { e.preventDefault(); all[0].focus(); }
+    };
+    addEventListener("keydown", k);
+    return () => {
+      removeEventListener("keydown", k);
+      back?.focus?.();
+    };
+  }, [active]);
+  return ref;
+}
+
 export function ProofGallery({ token, initial }: { token: string; initial: PublicProof }) {
   const { frames, included, price, balance } = initial;
   const [selects, setSelects] = React.useState<string[]>(initial.selects);
@@ -35,6 +65,8 @@ export function ProofGallery({ token, initial }: { token: string; initial: Publi
   const [open, setOpen] = React.useState<number | null>(null);
   const [step, setStep] = React.useState<Step>(initial.submitted ? "done" : null);
   const [showAll, setShowAll] = React.useState(false);
+  const reviewRef = useDialog(step === "review", () => setStep(null));
+  const gridRef = useDialog(showAll, () => setShowAll(false));
   const [busy, setBusy] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [paid, setPaid] = React.useState(initial.paid);
@@ -273,7 +305,7 @@ export function ProofGallery({ token, initial }: { token: string; initial: Publi
           </div>
         </div>
         {showAll ? (
-          <div className="proof-over" role="dialog" aria-modal="true" aria-label="Your selects">
+          <div ref={gridRef} className="proof-over" role="dialog" aria-modal="true" aria-label="Your selects">
             <div className="proof-rhead">
               <div>
                 <p className="proof-lab">Your selects</p>
@@ -435,7 +467,7 @@ export function ProofGallery({ token, initial }: { token: string; initial: Publi
       ) : null}
 
       {step === "review" ? (
-        <div className="proof-over" role="dialog" aria-modal="true" aria-label="Review your selects">
+        <div ref={reviewRef} className="proof-over" role="dialog" aria-modal="true" aria-label="Review your selects">
           <div className="proof-rhead">
             <div>
               <p className="proof-lab">Your selects</p>
