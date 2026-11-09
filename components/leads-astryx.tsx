@@ -116,6 +116,11 @@ export function LeadsAstryx() {
   const calls = live.filter((l) => pass(l, "upcoming")).sort((a, b) => a.when!.localeCompare(b.when!));
   const current = live.find((l) => l.id === open);
   const changed = (l: Lead) => setLeads((rows) => rows?.map((r) => (r.email === l.email ? { ...r, ...leadSummary(l), id: r.id } : r)) ?? null);
+  /** A swipe on a row: the same PATCH the lead's own Snooze and Archive buttons send. */
+  const act = (l: LeadSummary, body: Record<string, unknown>) =>
+    call({ method: "PATCH", body: JSON.stringify({ key: `lead:${l.id}`, ...body }) })
+      .then((o) => changed(o.lead as Lead))
+      .catch((e: unknown) => { alert(e instanceof Error ? e.message : String(e)); load(); });
 
   const nav = (
     <SideNav header={<SideNavHeading heading="Leads" subheading="Julian Gigola" />} topContent={<Button label="New lead" variant="primary" width="100%" href={CLASSIC} />}>
@@ -160,6 +165,11 @@ export function LeadsAstryx() {
               label={<HStack gap={1.5} vAlign="center"><Text weight={l.unread ? "semibold" : "medium"}>{l.name}</Text>{l.unread ? <StatusDot variant="accent" label="Unread" /> : null}</HStack>}
               description={[l.kind ? shootTag(l.kind) : null, l.stage, ago(l.lastAt)].filter(Boolean).join(" · ")}
               endContent={step ? <Badge label={step} variant="blue" /> : undefined}
+              // Julian: swipe on the iPhone. Right: later, a day; left: archive.
+              swipeActions={{
+                leading: [{ id: "later", label: "Tomorrow", variant: "neutral", hasRemoval: list !== "snoozed", onActivate: () => act(l, { snoozeUntil: new Date(Date.now() + 864e5).toISOString() }) }],
+                trailing: [{ id: "archive", label: "Archived", variant: "accent", hasRemoval: true, onActivate: () => act(l, { archive: true }) }],
+              }}
             />
           );
         })}
