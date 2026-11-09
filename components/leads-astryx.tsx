@@ -85,7 +85,8 @@ export function LeadsAstryx() {
       .catch(() => {});
   }, [call]);
   // Astryx follows the site's own light/dark (html[data-theme], dark when unset), so the ink matches the page behind it.
-  const [mode, setMode] = React.useState<"light" | "dark">("dark");
+  // Unknown until read: Astryx's root Theme writes data-theme onto <html> itself, so mounting it with a guess would lock that guess in.
+  const [mode, setMode] = React.useState<"light" | "dark" | null>(null);
   React.useEffect(() => {
     const read = () => setMode(document.documentElement.dataset.theme === "light" ? "light" : "dark");
     read();
@@ -191,6 +192,7 @@ export function LeadsAstryx() {
     <Detail key={current.id} summary={current} call={call} onChange={changed} onBack={() => setOpen(null)} reload={load} tick={0} templates={templates} others={live.filter((o) => o.id !== current.id)} />
   ) : null;
 
+  if (!mode) return null;
   return (
     <Theme theme={neutralTheme} mode={mode}>
       {/* The site sets mono capitals everywhere; Astryx sets its own type here, in the site's text face. */}
