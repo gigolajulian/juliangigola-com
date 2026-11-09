@@ -1,5 +1,5 @@
 import type { Enquiry } from "@/lib/inbox";
-import type { Stage } from "@/lib/leads";
+import type { Paper, Stage } from "@/lib/leads";
 
 /* ── leads into Notion ────────────────────────────────────────────
  * Every enquiry and Cal.com booking also lands as a row on the Business
@@ -114,24 +114,41 @@ export async function toNotion(token: string | undefined, lead: Lead): Promise<s
   }
 }
 
-/** The board has no "Shot"; after the shoot the row is in Editing. */
-const STATUS: Partial<Record<Stage, string>> = { Shot: "Editing" };
+/** The board has no "Shot", "Invoiced" or "Selecting"; from the shoot to delivery the row is in Editing. */
+const STATUS: Partial<Record<Stage, string>> = { Shot: "Editing", Invoiced: "Editing", Selecting: "Editing" };
+
+/** The board spells the last option "Not required". */
+export const paperOption = (p: Paper) => (p === "Not needed" ? "Not required" : p);
+
+/** The row's Contract and Release selects, for whichever was given. */
+export function paperProperties(p: { contract?: Paper; release?: Paper }) {
+  return {
+    ...(p.contract ? { Contract: { select: { name: paperOption(p.contract) } } } : {}),
+    ...(p.release ? { Release: { select: { name: paperOption(p.release) } } } : {}),
+  };
+}
 
 /**
- * A stage Julian set on the desk, mirrored to the person's Bookings row.
+ * Something Julian set on the desk, mirrored to the person's Bookings row.
  * `page` is the row the lead already knows, else it is looked up by
  * address. Never throws. Returns the page id when the row was updated.
  */
-export async function notionStage(token: string | undefined, email: string, stage: Stage, page?: string): Promise<string | undefined> {
+async function notionRow(token: string | undefined, email: string, properties: Record<string, unknown>, page?: string): Promise<string | undefined> {
   if (!token) return;
   try {
     const id = page ?? (await findRow(token, email));
     // shortcut: a lead with no row is left alone; create one here if old leads ever need it.
     if (!id) return;
-    const res = await notion(token, `/pages/${id}`, "PATCH", { properties: { Status: { select: { name: STATUS[stage] ?? stage } } } });
-    if (!res.ok) return void console.error("notion stage", res.status, (await res.text()).slice(0, 300));
+    const res = await notion(token, `/pages/${id}`, "PATCH", { properties });
+    if (!res.ok) return void console.error("notion row", res.status, (await res.text()).slice(0, 300));
     return id;
   } catch (e) {
-    console.error("notion stage", e);
+    console.error("notion row", e);
   }
 }
+
+export const notionStage = (token: string | undefined, email: string, stage: Stage, page?: string) =>
+  notionRow(token, email, { Status: { select: { name: STATUS[stage] ?? stage } } }, page);
+
+export const notionPaper = (token: string | undefined, email: string, p: { contract?: Paper; release?: Paper }, page?: string) =>
+  notionRow(token, email, paperProperties(p), page);

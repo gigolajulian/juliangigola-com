@@ -128,8 +128,10 @@ describe("the API", () => {
   it("saves templates, serves the defaults until then, and answers stats and CSV", async () => {
     expect((await (await GET(req("GET", { query: "?templates" }))).json()).templates.length).toBeGreaterThan(2);
     const saved = await (await PATCH(req("PATCH", { body: { templates: [{ name: "Hi", subject: "S", body: "B" }, { bad: 1 }] } }))).json();
-    expect(saved.templates).toEqual([{ id: "t0", name: "Hi", subject: "S", body: "B" }]);
-    expect((await (await GET(req("GET", { query: "?templates" }))).json()).templates).toHaveLength(1);
+    // The quote nudges ride along, so a list saved before them still has them.
+    expect(saved.templates[0]).toEqual({ id: "t0", name: "Hi", subject: "S", body: "B" });
+    expect(saved.templates.map((t: { id: string }) => t.id)).toEqual(["t0", "nudge1", "nudge2", "nudge3"]);
+    expect((await (await GET(req("GET", { query: "?templates" }))).json()).templates).toHaveLength(4);
     await recordLead({ INBOX: kv as never, LEADS_KEY }, "m@x.com", { event: { at: "2026-11-01T00:00:00Z", kind: "inquiry", ref: "msg:1" }, name: "Maya", source: "instagram.com" });
     expect((await (await GET(req("GET", { query: "?stats" }))).json()).stats.sources).toEqual([{ source: "instagram.com", leads: 1, booked: 0 }]);
     const file = await GET(req("GET", { query: "?csv" }));

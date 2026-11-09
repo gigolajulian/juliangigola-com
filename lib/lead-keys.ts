@@ -21,7 +21,7 @@ export const LEAD_KEYS: [string, string][] = [
   ["R", "Reply in Gmail"],
   ["S, then 1 / 3 / W", "Snooze 1 day, 3 days, a week"],
   ["E", "Archive"],
-  ["1 to 8", "Set the stage"],
+  ["1 to 9, 0", "Set the stage (0 is Lost)"],
   ["N", "New lead"],
   ["Esc", "Close"],
   ["?", "These shortcuts"],
@@ -42,7 +42,8 @@ export function leadKey(e: Press, typing: boolean, snoozing: boolean): LeadKey |
     // The snooze menu is open: a stray digit must not move the stage.
     if (/^[0-9]$/.test(k)) return null;
   }
-  if (/^[1-8]$/.test(k)) return { do: "stage", at: Number(k) - 1 };
+  // Ten stages: 0 is the tenth, Lost.
+  if (/^[0-9]$/.test(k)) return { do: "stage", at: k === "0" ? 9 : Number(k) - 1 };
   switch (k) {
     case "?": return { do: "help" };
     case "j": return { do: "move", by: 1 };

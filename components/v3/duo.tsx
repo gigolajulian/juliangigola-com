@@ -12,6 +12,7 @@ export function Duo({
   altL,
   sizes,
   priority,
+  fetchPriority,
   className,
 }: {
   d: string;
@@ -20,12 +21,14 @@ export function Duo({
   altL?: string;
   sizes: string;
   priority?: boolean;
+  /** "high" on a lazy pair: the shown one loads first, the hidden one still never loads. */
+  fetchPriority?: "high";
   className?: string;
 }) {
   return (
     <>
-      <Image src={d} alt={alt} fill sizes={sizes} priority={priority} className={className ? `v3d ${className}` : "v3d"} />
-      <Image src={l} alt={altL ?? alt} fill sizes={sizes} className={className ? `v3l ${className}` : "v3l"} />
+      <Image src={d} alt={alt} fill sizes={sizes} priority={priority} fetchPriority={fetchPriority} className={className ? `v3d ${className}` : "v3d"} />
+      <Image src={l} alt={altL ?? alt} fill sizes={sizes} fetchPriority={fetchPriority} className={className ? `v3l ${className}` : "v3l"} />
     </>
   );
 }
