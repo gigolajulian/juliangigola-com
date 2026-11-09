@@ -48,8 +48,9 @@ const lines = (items: { name: string; qty: number; cents: number }[]) =>
     ]),
   );
 
-/** Checkout for the balance and the extras: the session's URL. */
-export async function checkout(key: string, p: Proof, card = false): Promise<{ id: string; url: string }> {
+/** Checkout for the balance and the extras: the session's URL. Bank first (Julian 2026-11-09: ACH is 0.8% capped at $5, card 2.9% + 30c); card when the client picks it. */
+export async function checkout(key: string, p: Proof, method: "bank" | "card" = "bank"): Promise<{ id: string; url: string }> {
+  const card = method === "card";
   const x = owed(p);
   const back = proofUrl(p.token);
   const s = await stripe(
@@ -57,7 +58,7 @@ export async function checkout(key: string, p: Proof, card = false): Promise<{ i
     "/checkout/sessions",
     {
       mode: "payment",
-      ...(card ? {} : { "payment_method_types[0]": "card", "payment_method_types[1]": "us_bank_account" }),
+      "payment_method_types[0]": card ? "card" : "us_bank_account",
       ...lines([
         ...(x.balance ? [{ name: "Shoot balance", qty: 1, cents: x.balance }] : []),
         ...(x.n ? [{ name: "Extra retouched frame", qty: x.n, cents: p.price * 100 }] : []),
@@ -70,11 +71,11 @@ export async function checkout(key: string, p: Proof, card = false): Promise<{ i
     },
     `proof-${p.token}-${card ? "c-" : ""}${p.selects.join(".")}`.slice(0, 255),
   ).catch((e: unknown) => {
-    // Pay by bank (ACH, 0.8% capped at $5) needs it switched on in the Stripe dashboard; card alone until it is.
+    // Pay by bank needs ACH Direct Debit switched on in the Stripe dashboard; card until it is.
     if (card) throw e;
     return null;
   });
-  if (!s) return checkout(key, p, true);
+  if (!s) return checkout(key, p, "card");
   return { id: String(s.id), url: String(s.url) };
 }
 

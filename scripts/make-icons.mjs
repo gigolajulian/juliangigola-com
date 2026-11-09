@@ -4,7 +4,7 @@
  * `app/icon.svg` is the source and the only thing to edit. This writes what
  * cannot be an SVG:
  *
- *   app/favicon.ico          16, 32 and 48, for /favicon.ico and old browsers
+ *   public/favicon.ico       16, 32 and 48, for /favicon.ico and old browsers
  *   app/apple-icon.png       180, for an iOS home screen
  * *
  * Committed rather than generated at build time. They change when the mark
@@ -70,7 +70,7 @@ images.forEach((buf, i) => {
 });
 
 await writeFile(
-  join(root, "app/favicon.ico"),
+  join(root, "public/favicon.ico"),
   Buffer.concat([dir, ...images]),
 );
 

@@ -286,7 +286,8 @@ export function AdminLeads() {
       ref={fit}
       className={cn(
         "normal-case text-foreground max-lg:pb-[calc(84px+env(safe-area-inset-bottom))] lg:relative lg:grid lg:grid-rows-[minmax(0,1fr)] lg:overflow-hidden lg:rounded-[14px] lg:border lg:border-border lg:bg-background [&_button]:normal-case [&_h1]:normal-case [&_h2]:normal-case [&_h3]:normal-case",
-        boarding ? "lg:grid-cols-[220px_minmax(0,1fr)_minmax(0,420px)]" : "lg:grid-cols-[220px_minmax(0,var(--list-w,420px))_minmax(0,1fr)]",
+        // Proofs runs its own list + card, so it takes the lead pane's width too.
+        filter === "proofs" ? "lg:grid-cols-[220px_minmax(0,1fr)]" : boarding ? "lg:grid-cols-[220px_minmax(0,1fr)_minmax(0,420px)]" : "lg:grid-cols-[220px_minmax(0,var(--list-w,420px))_minmax(0,1fr)]",
       )}
     >
       {/* Desktop: the sidebar. Every list, then this device's switches. */}
@@ -443,9 +444,9 @@ export function AdminLeads() {
         )}
       </section>
 
-      {boarding ? null : <ListResizer w={listW ?? LIST_W} onChange={setListW} />}
+      {boarding || filter === "proofs" ? null : <ListResizer w={listW ?? LIST_W} onChange={setListW} />}
 
-      <section aria-label="Lead" className={cn("min-w-0 lg:min-h-0 lg:overflow-y-auto lg:bg-card/40", !open && "max-lg:hidden")}>
+      <section aria-label="Lead" className={cn("min-w-0 lg:min-h-0 lg:overflow-y-auto lg:bg-card/40", !open && "max-lg:hidden", filter === "proofs" && "hidden")}>
         {current ? (
           <Detail key={`${current.id}-${moved}`} summary={current} initial={fresh?.email === current.email ? fresh : null} call={call} onChange={changed} onBack={() => { back.current = current.id ?? null; setOpen(null); }} reload={load} templates={templates} others={leads.filter((o) => o.id !== current.id && !o.trashedAt)} />
         ) : (

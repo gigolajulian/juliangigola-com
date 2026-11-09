@@ -101,14 +101,15 @@ const overflowOf = (tp: HTMLElement) => {
 };
 
 /* The day's open times as bars: the week and the month draw a day the
-   same way (Julian, 2026-10-11). */
+   same way (Julian, 2026-10-11). A bar grows by scale, not height: a
+   month is hundreds of bars and height laid them all out every frame. */
 function Bars({ steps, open, on, className }: { steps: number[]; open: Set<number>; on: boolean; className?: string }) {
   return (
     // A day of quarter hours on a phone tile: the gaps alone were wider
     // than the tile and the bars went to nothing.
     <span aria-hidden className={cn("flex items-end bg-current/10", steps.length > 16 ? "gap-0" : "gap-px", !on && "text-accent", className)}>
       {steps.map((m) => (
-        <s key={m} className="w-[3px] max-sm:w-px flex-1 rounded-[1px] bg-current no-underline opacity-55 transition-[height] duration-500" style={{ height: open.has(m) ? "100%" : "22%" }} />
+        <s key={m} className="h-full w-[3px] max-sm:w-px flex-1 origin-bottom rounded-[1px] bg-current no-underline opacity-55 transition-transform duration-500" style={{ transform: open.has(m) ? "none" : "scaleY(.22)" }} />
       ))}
     </span>
   );

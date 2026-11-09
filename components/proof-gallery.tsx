@@ -40,6 +40,28 @@ export function ProofGallery({ token, initial }: { token: string; initial: Publi
   const [paid, setPaid] = React.useState(initial.paid);
   const locked = step === "done";
   const swipe = React.useRef<number | null>(null);
+  // An overlay takes focus on open and gives it back on close; the page under it is inert.
+  const overlay = React.useRef<HTMLDivElement>(null);
+  const covered = open !== null || step === "review";
+  const opener = React.useRef<HTMLElement | null>(null);
+  // Layout effect: read the opener before the inert page drops its focus.
+  React.useLayoutEffect(() => {
+    if (!covered) return;
+    opener.current = document.activeElement as HTMLElement | null;
+    overlay.current?.querySelector<HTMLElement>("button")?.focus();
+  }, [covered]);
+  React.useEffect(() => {
+    if (covered || !opener.current) return;
+    opener.current.focus();
+    opener.current = null;
+  }, [covered]);
+  // Escape leaves the review sheet, as it closes the lightbox.
+  React.useEffect(() => {
+    if (step !== "review" || busy) return;
+    const k = (e: KeyboardEvent) => e.key === "Escape" && setStep(null);
+    addEventListener("keydown", k);
+    return () => removeEventListener("keydown", k);
+  }, [step, busy]);
 
   const n = selects.length;
   const extra = Math.max(0, n - included);
@@ -170,11 +192,11 @@ export function ProofGallery({ token, initial }: { token: string; initial: Publi
     return () => removeEventListener("keydown", k);
   });
 
-  async function send() {
+  async function send(method: "bank" | "card" = "bank") {
     setBusy(true);
     setError(null);
     try {
-      const res = await fetch(`/api/proof/${token}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email, selects }) });
+      const res = await fetch(`/api/proof/${token}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email, selects, method }) });
       const out = (await res.json()) as { checkout?: string; done?: boolean; paid?: number; error?: string };
       if (out.checkout) return void (location.href = out.checkout);
       if (!res.ok || !out.done) throw new Error(out.error ?? "That did not go through. Try again.");
@@ -216,17 +238,16 @@ export function ProofGallery({ token, initial }: { token: string; initial: Publi
               <h1>Selects are in.</h1>
             </div>
             <div className="proof-thumbs">
-              {ordered.slice(0, showAll ? ordered.length : 5).map((id) => (
+              {ordered.slice(0, 5).map((id) => (
                 // eslint-disable-next-line @next/next/no-img-element -- private frame
                 <img key={id} src={src(id)} alt={`Frame ${(byId.get(id) ?? 0) + 1}`} />
               ))}
-              {!showAll && n > 5 ? <span>+{n - 5}</span> : null}
+              {n > 5 ? <span>+{n - 5}</span> : null}
             </div>
-            {n > 5 ? (
-              <button type="button" className="proof-vs" onClick={() => setShowAll((v) => !v)}>
-                {showAll ? "Show fewer" : `View your ${n} selects →`}
-              </button>
-            ) : null}
+            {/* Opens them as a photo grid, never a list in the side column (Julian 2026-11-09). */}
+            <button type="button" className="proof-vs" onClick={() => setShowAll(true)}>
+              View your {n} {n === 1 ? "select" : "selects"} →
+            </button>
           </div>
           <div className="proof-side">
             <ol className="proof-steps">
@@ -273,12 +294,37 @@ export function ProofGallery({ token, initial }: { token: string; initial: Publi
             </p>
           </div>
         </div>
+        {showAll ? (
+          <div className="proof-over" role="dialog" aria-modal="true" aria-label="Your selects">
+            <div className="proof-rhead">
+              <div>
+                <p className="proof-lab">Your selects</p>
+                <h1>{n} {n === 1 ? "frame" : "frames"}.</h1>
+              </div>
+              <div className="proof-acts">
+                <button type="button" className="proof-btn ghost" onClick={() => setShowAll(false)}>
+                  Back
+                </button>
+              </div>
+            </div>
+            <div className="proof-rgrid">
+              {ordered.map((id, k) => (
+                <div key={id}>
+                  {/* eslint-disable-next-line @next/next/no-img-element -- private frame */}
+                  <img src={src(id)} alt={`Select ${k + 1}`} />
+                  <i>{k + 1}</i>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
       </div>
     );
   }
 
   return (
     <div className="proof">
+      <div inert={covered || undefined}>
       <Top view={view} setView={setView} n={n} included={included} due={due} />
 
       <div className="proof-intro">
@@ -291,35 +337,17 @@ export function ProofGallery({ token, initial }: { token: string; initial: Publi
           {frames.map((f, i) => {
             const at = selects.indexOf(f.id);
             return (
-              <div
-                key={f.id}
-                data-id={f.id}
-                className="proof-cell"
-                data-on={at >= 0 || undefined}
-                role="button"
-                tabIndex={0}
-                aria-pressed={at >= 0}
-                aria-label={`Frame ${i + 1}`}
-                onClick={() => toggle(f.id)}
-                onKeyDown={(e) => {
-                  if (e.key === " " || e.key === "Enter") {
-                    e.preventDefault();
-                    toggle(f.id);
-                  }
-                }}
-              >
+              <div key={f.id} data-id={f.id} className="proof-cell" data-on={at >= 0 || undefined}>
                 {/* eslint-disable-next-line @next/next/no-img-element -- private frames from the Worker, not the image CDN */}
                 <img src={src(f.id)} alt="" loading={i < 8 ? "eager" : "lazy"} width={f.w || undefined} height={f.h || undefined} draggable={false} />
+                <button type="button" className="proof-pick" aria-pressed={at >= 0} aria-label={`Frame ${i + 1}`} onClick={() => toggle(f.id)} />
                 <span className="proof-no">{pad(i)}</span>
                 <span className="proof-mark">{at >= 0 ? at + 1 : ""}</span>
                 <button
                   type="button"
                   className="proof-zoom"
                   aria-label={`Open frame ${i + 1}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setOpen(i);
-                  }}
+                  onClick={() => setOpen(i)}
                 >
                   Open
                 </button>
@@ -373,14 +401,15 @@ export function ProofGallery({ token, initial }: { token: string; initial: Publi
           </button>
         </div>
       </div>
+      </div>
 
       {open !== null ? (
-        <div className="proof-lb" role="dialog" aria-modal="true" aria-label={`Frame ${open + 1}`}>
+        <div className="proof-lb" ref={overlay} role="dialog" aria-modal="true" aria-label={`Frame ${open + 1}`}>
           <div className="proof-lt">
             <span>
               {pad(open)} / {frames.length} · {frames[open].file}
             </span>
-            <button type="button" onClick={() => setOpen(null)}>
+            <button type="button" className="proof-close" onClick={() => setOpen(null)}>
               Close
             </button>
           </div>
@@ -412,7 +441,7 @@ export function ProofGallery({ token, initial }: { token: string; initial: Publi
       ) : null}
 
       {step === "review" ? (
-        <div className="proof-over" role="dialog" aria-modal="true" aria-label="Review your selects">
+        <div className="proof-over" ref={overlay} role="dialog" aria-modal="true" aria-label="Review your selects">
           <div className="proof-rhead">
             <div>
               <p className="proof-lab">Your selects</p>
@@ -422,8 +451,13 @@ export function ProofGallery({ token, initial }: { token: string; initial: Publi
               <button type="button" className="proof-btn ghost" onClick={() => setStep(null)}>
                 Back to frames
               </button>
-              <button type="button" className="proof-btn" disabled={busy} onClick={send}>
-                {busy ? "Sending" : due ? `Pay $${due} and send` : `Send ${n} ${n === 1 ? "select" : "selects"}`}
+              {due ? (
+                <button type="button" className="proof-btn ghost" disabled={busy} onClick={() => send("card")}>
+                  Pay by card
+                </button>
+              ) : null}
+              <button type="button" className="proof-btn" disabled={busy} onClick={() => send()}>
+                {busy ? "Sending" : due ? `Pay $${due} by bank` : `Send ${n} ${n === 1 ? "select" : "selects"}`}
               </button>
             </div>
           </div>
@@ -431,7 +465,7 @@ export function ProofGallery({ token, initial }: { token: string; initial: Publi
             {balDue ? <span>Shoot balance ${balDue}</span> : null}
             <span>{Math.min(n, included)} included</span>
             {extra ? <span>{extra} extra × ${price}</span> : null}
-            <b>{due ? `$${due} by card` : "Nothing to pay"}</b>
+            <b>{due ? `$${due}` : "Nothing to pay"}</b>
           </p>
           {error ? <p className="proof-err" role="alert">{error}</p> : null}
           <div className="proof-rgrid">
@@ -443,7 +477,7 @@ export function ProofGallery({ token, initial }: { token: string; initial: Publi
               </div>
             ))}
           </div>
-          {due ? <p className="proof-stripe">Card or bank payment through Stripe. Selects lock once you send.</p> : <p className="proof-stripe">Selects lock once you send.</p>}
+          {due ? <p className="proof-stripe">Pay by bank through Stripe: sign in to your bank, it clears in about 4 business days. Card works too. Selects lock once you send.</p> : <p className="proof-stripe">Selects lock once you send.</p>}
         </div>
       ) : null}
     </div>
@@ -456,8 +490,8 @@ function Top({ view, setView, n, included, due, hideTabs }: { view: "all" | "sel
       <Link className="proof-word" href="/">Julian Gigola</Link>
       {hideTabs ? <span /> : (
         <nav className="proof-tabs" aria-label="Frames">
-          <button type="button" data-on={view === "all" || undefined} onClick={() => setView("all")}>All</button>
-          <button type="button" data-on={view === "selects" || undefined} onClick={() => setView("selects")}>
+          <button type="button" aria-pressed={view === "all"} data-on={view === "all" || undefined} onClick={() => setView("all")}>All</button>
+          <button type="button" aria-pressed={view === "selects"} data-on={view === "selects" || undefined} onClick={() => setView("selects")}>
             Selects <span className="proof-pill" data-on={n > 0 || undefined}>{n}</span>
           </button>
         </nav>
