@@ -16,8 +16,8 @@ export function GET(req: Request) {
   return Response.json(
     {
       id: root,
-      name: "Leads",
-      short_name: "Leads",
+      name: "LEADS",
+      short_name: "LEADS",
       start_url: root,
       scope: root,
       display: "standalone",

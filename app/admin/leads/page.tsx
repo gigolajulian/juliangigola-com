@@ -14,13 +14,13 @@ import { startupImages } from "@/lib/leads-startup";
  * ─────────────────────────────────────────────────────────────── */
 
 export const metadata: Metadata = {
-  title: "Leads",
+  title: "LEADS",
   robots: { index: false, follow: false, nocache: true, googleBot: { index: false, follow: false } },
   referrer: "no-referrer",
   manifest: "/admin/leads/manifest.webmanifest",
   // The app's own tile, not the site's black JG, in the desktop window and tab.
   icons: { icon: [{ url: "/leads-app/icon-192.png", sizes: "192x192", type: "image/png" }], apple: "/leads-app/apple-touch-icon.png" },
-  appleWebApp: { capable: true, title: "Leads", statusBarStyle: "black-translucent", startupImage: startupImages },
+  appleWebApp: { capable: true, title: "LEADS", statusBarStyle: "black-translucent", startupImage: startupImages },
   // Next writes only `mobile-web-app-capable`; older iOS reads the Apple name.
   other: { "apple-mobile-web-app-capable": "yes" },
 };
