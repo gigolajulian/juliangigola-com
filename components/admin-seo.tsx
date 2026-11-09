@@ -87,7 +87,9 @@ export function AdminSeo() {
   const pull = React.useCallback(async (d: number) => {
     setBusy(true);
     try {
-      setData(await ask<Data>(`/api/seo?days=${d}`));
+      // A partial body shows as empty or "None", not a crash.
+      const body = await ask<Partial<Data>>(`/api/seo?days=${d}`);
+      setData({ at: "", days: d, dates: [], visits: 0, prevVisits: 0, pages: [], sources: [], google: { error: "None" }, tracked: [], ...body });
       setError("");
     } catch (e) {
       setError((e as Error).message);
@@ -108,7 +110,7 @@ export function AdminSeo() {
           SEO
           <span className="label ml-3 text-muted-foreground">
             last {days} days · cloudflare + search console
-            {data ? ` · pulled ${new Date(data.at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}` : ""}
+            {data?.at ? ` · pulled ${new Date(data.at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}` : ""}
           </span>
         </h2>
         <div className="flex gap-3">
@@ -231,8 +233,8 @@ export function AdminSeo() {
           <ClickMapBlock tracked={data.tracked} />
 
           <div className="grid gap-6 lg:grid-cols-3">
-            <List title="Top searches · clicks · position" rows={g?.queries.map((q) => [q.key, `${q.clicks} · ${q.position}`]) ?? []} />
-            <List title="Close to page one" rows={g?.nearPageOne.map((q) => [q.key, `pos ${q.position}`]) ?? []} />
+            <List title="Top searches · clicks · position" rows={g?.queries?.map((q) => [q.key, `${q.clicks} · ${q.position}`]) ?? []} />
+            <List title="Close to page one" rows={g?.nearPageOne?.map((q) => [q.key, `pos ${q.position}`]) ?? []} />
             <List title="Where visits come from" rows={data.sources.map((s) => [s.key, `${Math.round(s.share * 100)}%`])} />
           </div>
         </>
@@ -278,7 +280,7 @@ function ClickMapBlock({ tracked }: { tracked: Data["tracked"] }) {
     if (!current) return;
     let live = true;
     ask<ClickMap>(`/api/seo?map=${encodeURIComponent(current)}`)
-      .then((m) => live && (setMap(m), setError("")))
+      .then((m) => live && (setMap({ ...m, grid: m.grid ?? [] }), setError("")))
       .catch((e: Error) => live && setError(e.message));
     return () => void (live = false);
   }, [current]);
