@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { backfillLead, fold, isLate, leadKey, leadSummary, recordLead, trashDaysLeft, writeLead, type InboxRow, type Lead, type LeadSummary } from "./leads";
+import { backfillLead, fold, isLate, leadKey, myMove, leadSummary, recordLead, trashDaysLeft, writeLead, type InboxRow, type Lead, type LeadSummary } from "./leads";
 import { sealer } from "./lead-crypto";
 
 const at = (h: number) => new Date(Date.UTC(2026, 10, 2, h)).toISOString();
@@ -93,6 +93,18 @@ describe("isLate", () => {
   });
   it("flags a quote unanswered for five days", () => {
     expect(isLate({ stage: "Quoted", stageAt: at(0) }, Date.parse(at(0)) + 6 * 864e5)).toBe(true);
+  });
+});
+
+describe("myMove", () => {
+  const now = Date.parse(at(10));
+  it("puts a shot lead and a call that has happened on Julian, nothing else", () => {
+    expect(myMove({ stage: "Shot" }, now)).toBe("Deliver photos + invoice");
+    expect(myMove({ stage: "Call booked", when: at(5) }, now)).toBe("Send the quote");
+    expect(myMove({ stage: "Call booked" }, now)).toBe("Send the quote");
+    expect(myMove({ stage: "Call booked", when: at(20) }, now)).toBeNull();
+    expect(myMove({ stage: "Replied" }, now)).toBeNull();
+    expect(myMove({ stage: "Confirmed" }, now)).toBeNull();
   });
 });
 

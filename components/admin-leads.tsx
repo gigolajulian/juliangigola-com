@@ -7,7 +7,7 @@ import { LeadProofs, ProofsDesk } from "@/components/admin-proofs";
 import { LeadUpcoming } from "@/components/lead-upcoming";
 import { TOKEN_STORE } from "@/lib/admin-github";
 import type { Enquiry } from "@/lib/inbox";
-import { isLate, leadSummary, STAGES, trashDaysLeft, type Lead, type LeadEvent, type LeadSummary, type Stage } from "@/lib/leads";
+import { isLate, leadSummary, myMove, STAGES, trashDaysLeft, type Lead, type LeadEvent, type LeadSummary, type Stage } from "@/lib/leads";
 import { cn } from "@/lib/utils";
 import { fill, mailable } from "@/lib/lead-crm";
 import { balance, DEPOSIT, MAX_LINES, usd, type Invoice, type InvoiceFrom } from "@/lib/invoice";
@@ -38,7 +38,7 @@ const aside = (l: LeadSummary) => !!(l.archivedAt || l.trashedAt);
 const due = (l: LeadSummary) => !!l.due && Date.parse(l.due) <= now();
 /** The desk's search: name, email, type of shoot or their message. */
 const matches = (l: LeadSummary, words: string) => !words || [l.name, l.email, l.kind, l.snippet].some((v) => v?.toLowerCase().includes(words));
-const needsMe = (l: LeadSummary) => !aside(l) && !closed(l.stage) && (due(l) || (!snoozed(l) && (l.unread || isLate(l, now()) || !!l.flags?.length)));
+const needsMe = (l: LeadSummary) => !aside(l) && !closed(l.stage) && (due(l) || (!snoozed(l) && (l.unread || isLate(l, now()) || !!l.flags?.length || !!myMove(l, now()))));
 
 /** What to do next, in a word or two, and whether it is late. */
 function nextStep(l: LeadSummary): string | null {
@@ -47,8 +47,7 @@ function nextStep(l: LeadSummary): string | null {
   if (l.flags?.includes("no-deposit")) return "Ask for the deposit";
   if (l.stage === "Inquiry") return "Reply";
   if (l.stage === "Quoted" && isLate(l, now())) return "Follow up";
-  if (l.stage === "Shot") return "Deliver";
-  return null;
+  return myMove(l, now());
 }
 
 /** The site's headings are Black capitals; the desk's are the wordmark face at 600, as written. */
