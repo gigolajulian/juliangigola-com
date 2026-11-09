@@ -256,6 +256,8 @@ export function AdminLeads() {
     // Sentence case and a text face, as in the approved mock: the site sets
     // everything else in mono capitals, buttons included.
     <div
+      // The global Lenis eats wheel events, so the panes and board columns would not scroll.
+      data-lenis-prevent
       style={{ fontFamily: 'var(--font-v2-text, "Helvetica Neue", Helvetica, Arial, sans-serif)', letterSpacing: 0 }}
       ref={fit}
       className={cn(
