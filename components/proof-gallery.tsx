@@ -12,18 +12,29 @@ import type { PublicProof } from "@/lib/proofs";
  * save as they change, so a reload keeps them. The watermark is in the
  * JPEGs (Lightroom bakes it in), never drawn here. Theme follows the
  * site's tokens, so light or dark follows the system.
+ *
+ * Julian 2026-11-08 (mock https://claude.ai/artifact/4SWWESHZZ3ScWgYDPsnEnb):
+ * an email gate before the frames (any address opens it, and every pick
+ * and look is logged under it for /admin), a review of the picks before
+ * they go, and a walkthrough after Send in place of the bare receipt. No
+ * notes. Time on the page and per-frame looks go out in one beacon every
+ * 30 seconds and when the tab hides, never one request per frame.
  * ─────────────────────────────────────────────────────────────── */
+
+const EMAIL_STORE = "proof-email";
+const isEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
 
 type Step = null | "review" | "done";
 
 export function ProofGallery({ token, initial }: { token: string; initial: PublicProof }) {
   const { frames, included, price } = initial;
   const [selects, setSelects] = React.useState<string[]>(initial.selects);
-  const [notes, setNotes] = React.useState<Record<string, string>>(initial.notes);
+  const [email, setEmail] = React.useState<string | null>(null);
+  const [ready, setReady] = React.useState(initial.submitted);
   const [view, setView] = React.useState<"all" | "selects">("all");
   const [open, setOpen] = React.useState<number | null>(null);
   const [step, setStep] = React.useState<Step>(initial.submitted ? "done" : null);
-  const [message, setMessage] = React.useState("");
+  const [showAll, setShowAll] = React.useState(false);
   const [busy, setBusy] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [paid, setPaid] = React.useState(initial.paid);
@@ -37,30 +48,108 @@ export function ProofGallery({ token, initial }: { token: string; initial: Publi
   const byId = React.useMemo(() => new Map(frames.map((f, i) => [f.id, i])), [frames]);
   const src = (id: string) => `/proof/${token}/f/${encodeURIComponent(id)}`;
 
-  // Save as they go, a beat after the last change.
-  const first = React.useRef(true);
+  const post = React.useCallback((b: Record<string, unknown>) => fetch(`/api/proof/${token}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(b) }), [token]);
+
+  // A returning visitor skips the gate on this device.
   React.useEffect(() => {
-    if (first.current || locked) {
-      first.current = false;
+    const saved = localStorage.getItem(EMAIL_STORE);
+    if (saved && isEmail(saved)) enter(saved);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once, on arrival
+  }, []);
+
+  async function enter(address: string) {
+    setEmail(address);
+    localStorage.setItem(EMAIL_STORE, address);
+    try {
+      const out = (await (await post({ action: "track", email: address, kind: "open" })).json()) as { picks?: string[] };
+      if (!initial.submitted && out.picks) setSelects(out.picks);
+    } catch {}
+    setReady(true);
+  }
+
+  // Save as they go, a beat after the last change. Skips the first render after the gate fills them in.
+  const saved = React.useRef<string | null>(null);
+  React.useEffect(() => {
+    if (!ready || !email || locked) return;
+    const key = selects.join(",");
+    if (saved.current === null || saved.current === key) {
+      saved.current = key;
       return;
     }
     const t = setTimeout(() => {
-      fetch(`/api/proof/${token}`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ selects, notes }) }).catch(() => {});
+      saved.current = key;
+      fetch(`/api/proof/${token}`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ email, selects }) }).catch(() => {});
     }, 600);
     return () => clearTimeout(t);
-  }, [selects, notes, token, locked]);
+  }, [selects, email, token, locked, ready]);
+
+  // Looks: ms each frame spends mostly on screen or open big; flushed with the seconds on the page.
+  const looks = React.useRef<Record<string, number>>({});
+  const since = React.useRef<Map<string, number>>(new Map());
+  const shown = React.useRef(Date.now());
+  const big = React.useRef<{ id: string; at: number } | null>(null);
+  React.useEffect(() => {
+    if (!ready || !email) return;
+    const add = (id: string, ms: number) => (looks.current[id] = (looks.current[id] ?? 0) + ms);
+    const flush = (beacon = false) => {
+      const now = Date.now();
+      for (const [id, at] of since.current) {
+        add(id, now - at);
+        since.current.set(id, now);
+      }
+      if (big.current) {
+        add(big.current.id, now - big.current.at);
+        big.current.at = now;
+      }
+      const seconds = document.visibilityState === "visible" || beacon ? (now - shown.current) / 1000 : 0;
+      shown.current = now;
+      const body = { action: "track", email, looks: looks.current, seconds };
+      looks.current = {};
+      if (!seconds && !Object.keys(body.looks).length) return;
+      if (beacon) navigator.sendBeacon?.(`/api/proof/${token}`, JSON.stringify(body));
+      else post(body).catch(() => {});
+    };
+    const io = new IntersectionObserver(
+      (es) => {
+        const now = Date.now();
+        for (const e of es) {
+          const id = (e.target as HTMLElement).dataset.id!;
+          if (e.isIntersecting) since.current.set(id, now);
+          else if (since.current.has(id)) {
+            add(id, now - since.current.get(id)!);
+            since.current.delete(id);
+          }
+        }
+      },
+      { threshold: 0.6 },
+    );
+    document.querySelectorAll<HTMLElement>(".proof-cell[data-id]").forEach((el) => io.observe(el));
+    const hide = () => (document.visibilityState === "hidden" ? flush(true) : (shown.current = Date.now()));
+    const t = setInterval(() => flush(), 30_000);
+    document.addEventListener("visibilitychange", hide);
+    return () => {
+      io.disconnect();
+      clearInterval(t);
+      document.removeEventListener("visibilitychange", hide);
+      flush(true);
+    };
+  }, [ready, email, token, post, view, step]);
+
+  // The lightbox counts as a long look at that frame.
+  React.useEffect(() => {
+    if (open === null) return;
+    const id = frames[open].id;
+    big.current = { id, at: Date.now() };
+    return () => {
+      if (big.current?.id === id) looks.current[id] = (looks.current[id] ?? 0) + Date.now() - big.current.at;
+      big.current = null;
+    };
+  }, [open, frames]);
 
   const toggle = (id: string) => {
     if (locked) return;
     setSelects((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
   };
-  const note = (id: string, v: string) =>
-    setNotes((o) => {
-      const next = { ...o };
-      if (v.trim()) next[id] = v;
-      else delete next[id];
-      return next;
-    });
 
   // Lightbox keys.
   React.useEffect(() => {
@@ -83,7 +172,7 @@ export function ProofGallery({ token, initial }: { token: string; initial: Publi
     setBusy(true);
     setError(null);
     try {
-      const res = await fetch(`/api/proof/${token}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ selects, notes, message }) });
+      const res = await fetch(`/api/proof/${token}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email, selects }) });
       const out = (await res.json()) as { checkout?: string; done?: boolean; paid?: number; error?: string };
       if (out.checkout) return void (location.href = out.checkout);
       if (!res.ok || !out.done) throw new Error(out.error ?? "That did not go through. Try again.");
@@ -97,34 +186,82 @@ export function ProofGallery({ token, initial }: { token: string; initial: Publi
     }
   }
 
+  const review = () => {
+    setStep("review");
+    if (email) post({ action: "track", email, kind: "review" }).catch(() => {});
+  };
+
   const pad = (i: number) => String(i + 1).padStart(3, "0");
   const ordered = [...selects].sort((a, b) => (byId.get(a) ?? 0) - (byId.get(b) ?? 0));
 
-  if (step === "done")
+  if (!ready)
     return (
       <div className="proof">
-        <Top view={view} setView={setView} n={n} included={included} due={due} hideTabs />
-        <div className="proof-sheet">
-          <p className="proof-lab">Sent</p>
-          <h1>Selects are in.</h1>
-          <p className="proof-mu">
-            I have your {n} {n === 1 ? "frame" : "frames"}
-            {Object.keys(notes).length ? " and your notes" : ""}.{paid ? ` Paid $${(paid / 100).toFixed(2)}.` : ""} A copy is in your email. I&apos;ll email you when the finals are ready.
-          </p>
-          <div className="proof-rows">
-            {ordered.map((id) => (
-              <div key={id}>
-                <span>{frames[byId.get(id) ?? 0]?.file}</span>
-                <span>{notes[id] ? "note" : ""}</span>
-              </div>
-            ))}
+        <Top view={view} setView={setView} n={0} included={included} due={0} hideTabs />
+        <Gate frames={frames.slice(0, 12).map((f) => src(f.id))} count={frames.length} onEnter={enter} />
+      </div>
+    );
+
+  if (step === "done") {
+    const sentOn = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(new Date());
+    return (
+      <div className="proof">
+        <Top view={view} setView={setView} n={n} included={included} due={0} hideTabs />
+        <div className="proof-done">
+          <div className="proof-side">
+            <div>
+              <p className="proof-lab">Sent · {sentOn}</p>
+              <h1>Selects are in.</h1>
+            </div>
+            <div className="proof-thumbs">
+              {ordered.slice(0, showAll ? ordered.length : 5).map((id) => (
+                // eslint-disable-next-line @next/next/no-img-element -- private frame
+                <img key={id} src={src(id)} alt={`Frame ${(byId.get(id) ?? 0) + 1}`} />
+              ))}
+              {!showAll && n > 5 ? <span>+{n - 5}</span> : null}
+            </div>
+            {n > 5 ? (
+              <button type="button" className="proof-vs" onClick={() => setShowAll((v) => !v)}>
+                {showAll ? "Show fewer" : `View your ${n} selects →`}
+              </button>
+            ) : null}
           </div>
-          <p className="proof-mu">
-            Questions? <a href="mailto:hello@juliangigola.com">hello@juliangigola.com</a>
-          </p>
+          <div className="proof-side">
+            <ol className="proof-steps">
+              <li data-on>
+                <span>01</span>
+                <b>Received</b>
+                <p>{n} {n === 1 ? "frame" : "frames"}. A copy is in your inbox.</p>
+              </li>
+              <li>
+                <span>02</span>
+                <b>Editing</b>
+                <p>I retouch each select by hand.</p>
+              </li>
+              <li data-dim>
+                <span>03</span>
+                <b>Delivery</b>
+                <p>Full-resolution finals by email, a link to download them all.</p>
+              </li>
+            </ol>
+            {paid ? (
+              <div className="proof-paid">
+                <p className="proof-lab">Extras · paid</p>
+                <p>
+                  <span>{price ? Math.round(paid / 100 / price) : 0} extra × ${price}</span>
+                  <b>${(paid / 100).toFixed(0)} ✓</b>
+                </p>
+                <p className="proof-mu">Card through Stripe. The receipt is in your inbox.</p>
+              </div>
+            ) : null}
+            <p className="proof-mu">
+              Questions? <a href="mailto:hello@juliangigola.com">hello@juliangigola.com</a>
+            </p>
+          </div>
         </div>
       </div>
     );
+  }
 
   return (
     <div className="proof">
@@ -142,6 +279,7 @@ export function ProofGallery({ token, initial }: { token: string; initial: Publi
             return (
               <div
                 key={f.id}
+                data-id={f.id}
                 className="proof-cell"
                 data-on={at >= 0 || undefined}
                 role="button"
@@ -158,7 +296,6 @@ export function ProofGallery({ token, initial }: { token: string; initial: Publi
               >
                 {/* eslint-disable-next-line @next/next/no-img-element -- private frames from the Worker, not the image CDN */}
                 <img src={src(f.id)} alt="" loading={i < 8 ? "eager" : "lazy"} width={f.w || undefined} height={f.h || undefined} draggable={false} />
-                {notes[f.id] ? <span className="proof-nt">Note</span> : null}
                 <span className="proof-no">{pad(i)}</span>
                 <span className="proof-mark">{at >= 0 ? at + 1 : ""}</span>
                 <button
@@ -197,7 +334,6 @@ export function ProofGallery({ token, initial }: { token: string; initial: Publi
                       <p className="proof-fn">
                         {pad(i)} <span>· {frames[i].file}</span>
                       </p>
-                      <textarea value={notes[id] ?? ""} onChange={(e) => note(id, e.target.value)} placeholder="Note for the edit" maxLength={500} aria-label={`Note for frame ${i + 1}`} />
                     </div>
                     <button type="button" className="proof-rm" onClick={() => toggle(id)}>
                       Remove
@@ -218,7 +354,7 @@ export function ProofGallery({ token, initial }: { token: string; initial: Publi
           <button type="button" className="proof-btn ghost" onClick={() => { setView(view === "all" ? "selects" : "all"); scrollTo({ top: 0, behavior: "smooth" }); }}>
             {view === "all" ? "View selects" : "Back to all"}
           </button>
-          <button type="button" className="proof-btn" disabled={!n} onClick={() => setStep("review")}>
+          <button type="button" className="proof-btn" disabled={!n} onClick={review}>
             {extra ? `Send selects · Pay $${due}` : "Send selects"}
           </button>
         </div>
@@ -253,7 +389,7 @@ export function ProofGallery({ token, initial }: { token: string; initial: Publi
             </button>
           </div>
           <div className="proof-lf">
-            <input value={notes[frames[open].id] ?? ""} onChange={(e) => note(frames[open].id, e.target.value)} placeholder="Note for the edit" maxLength={500} disabled={!selects.includes(frames[open].id)} aria-label="Note for the edit" />
+            <span>{selects.includes(frames[open].id) ? `Pick ${selects.indexOf(frames[open].id) + 1}` : ""}</span>
             <button type="button" className={`proof-btn${selects.includes(frames[open].id) ? " ghost" : ""}`} onClick={() => toggle(frames[open].id)}>
               {selects.includes(frames[open].id) ? "Selected ✓" : "Select"}
             </button>
@@ -262,37 +398,37 @@ export function ProofGallery({ token, initial }: { token: string; initial: Publi
       ) : null}
 
       {step === "review" ? (
-        <div className="proof-sheet proof-over" role="dialog" aria-modal="true" aria-label="Send selects">
-          <p className="proof-lab">Send selects</p>
-          <h1>{n} frames.</h1>
-          <p className="proof-mu">
-            {extra ? `${included} included, ${extra} extra at $${price} each.` : "All included."} Selects lock once you send.
-          </p>
-          <div className="proof-rows">
-            <div><span>Selected</span><span>{n}</span></div>
-            <div><span>Included</span><span>{included}</span></div>
-            <div><span>Extra</span><span>{extra} × ${price}</span></div>
-            <div><span>Due now</span><span>${due}.00</span></div>
+        <div className="proof-over" role="dialog" aria-modal="true" aria-label="Review your selects">
+          <div className="proof-rhead">
+            <div>
+              <p className="proof-lab">Your selects</p>
+              <h1>{n} {n === 1 ? "frame" : "frames"}.</h1>
+            </div>
+            <div className="proof-acts">
+              <button type="button" className="proof-btn ghost" onClick={() => setStep(null)}>
+                Back to frames
+              </button>
+              <button type="button" className="proof-btn" disabled={busy} onClick={send}>
+                {busy ? "Sending" : due ? `Pay $${due} and send` : `Send ${n} ${n === 1 ? "select" : "selects"}`}
+              </button>
+            </div>
           </div>
-          <div className="proof-files">
-            {ordered.map((id) => (
-              <p key={id}>
-                <i>{frames[byId.get(id) ?? 0]?.file}</i>
-                {notes[id] ? ` · ${notes[id]}` : ""}
-              </p>
+          <p className="proof-rsum">
+            <span>{Math.min(n, included)} included</span>
+            {extra ? <span>{extra} extra × ${price}</span> : null}
+            <b>{due ? `$${due} by card` : "Nothing to pay"}</b>
+          </p>
+          {error ? <p className="proof-err" role="alert">{error}</p> : null}
+          <div className="proof-rgrid">
+            {selects.map((id, k) => (
+              <div key={id}>
+                {/* eslint-disable-next-line @next/next/no-img-element -- private frame */}
+                <img src={src(id)} alt={`Pick ${k + 1}`} />
+                <i>{k + 1}</i>
+              </div>
             ))}
           </div>
-          <textarea value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Anything else" maxLength={1000} aria-label="Anything else" />
-          {error ? <p className="proof-err" role="alert">{error}</p> : null}
-          <div className="proof-acts">
-            <button type="button" className="proof-btn" disabled={busy} onClick={send}>
-              {busy ? "Sending" : extra ? `Pay $${due} and send` : "Send selects"}
-            </button>
-            <button type="button" className="proof-btn ghost" onClick={() => setStep(null)}>
-              Back to frames
-            </button>
-          </div>
-          {extra ? <p className="proof-stripe">Card payment through Stripe.</p> : null}
+          {due ? <p className="proof-stripe">Card payment through Stripe. Selects lock once you send.</p> : <p className="proof-stripe">Selects lock once you send.</p>}
         </div>
       ) : null}
     </div>
@@ -316,5 +452,41 @@ function Top({ view, setView, n, included, due, hideTabs }: { view: "all" | "sel
         {due ? ` · +$${due}` : ""}
       </p>
     </header>
+  );
+}
+
+/** Before the frames: any email opens the gallery, and picks are kept under it. */
+function Gate({ frames, count, onEnter }: { frames: string[]; count: number; onEnter: (email: string) => void }) {
+  const [value, setValue] = React.useState("");
+  const [bad, setBad] = React.useState(false);
+  return (
+    <div className="proof-gate">
+      <div className="proof-wall" aria-hidden="true">
+        {frames.map((u, i) => (
+          // eslint-disable-next-line @next/next/no-img-element -- private frame, blurred behind the gate
+          <img key={i} src={u} alt="" />
+        ))}
+      </div>
+      <form
+        className="proof-card"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (isEmail(value)) onEnter(value.trim());
+          else setBad(true);
+        }}
+      >
+        <div>
+          <p className="proof-lab">Proofs · {count} frames</p>
+          <h1>Pick your proofs.</h1>
+        </div>
+        <label>
+          <span className="proof-lab">Your email</span>
+          <input type="email" inputMode="email" autoComplete="email" required value={value} onChange={(e) => { setValue(e.target.value); setBad(false); }} placeholder="you@email.com" aria-invalid={bad || undefined} />
+        </label>
+        {bad ? <p className="proof-err" role="alert">That email does not look right.</p> : null}
+        <button type="submit" className="proof-btn">Open gallery</button>
+        <p className="proof-mu">Any email opens it. Your picks are logged under this address, and they are still here when you come back.</p>
+      </form>
+    </div>
   );
 }

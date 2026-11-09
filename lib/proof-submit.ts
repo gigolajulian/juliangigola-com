@@ -1,7 +1,7 @@
 import { mail, stripe } from "@/lib/deposit";
 import { recordLead } from "@/lib/leads";
 import { alertLines, proofUrl, receiptMail, sendClient } from "@/lib/proof-mail";
-import { owed, writeProof, type Proof } from "@/lib/proofs";
+import { owed, viewerKey, writeProof, type Proof } from "@/lib/proofs";
 
 /* ── a client sends their selects ─────────────────────────────────
  * No extras: locked and mailed at once. Extras: a Stripe Checkout session
@@ -18,14 +18,23 @@ type Seal = { seal(v: unknown): Promise<string>; open<T>(s: string): Promise<T> 
 
 /** Lock the selects and send both mails. */
 export async function finalize(env: Env, kv: KV, s: Seal, p: Proof, paid?: Proof["paid"]): Promise<Proof> {
-  const done: Proof = { ...p, submittedAt: new Date().toISOString(), checkout: undefined, ...(paid ? { paid } : {}) };
+  const at = new Date().toISOString();
+  let done: Proof = { ...p, submittedAt: at, checkout: undefined, ...(paid ? { paid } : {}) };
+  // The copy goes to whoever sent them, which may not be the address the gallery went to.
+  const to = done.submittedBy ?? done.email;
+  const k = done.submittedBy && viewerKey(done.submittedBy);
+  if (k && done.viewers?.[k]) {
+    const v = done.viewers[k];
+    const events = [...v.events, ...(paid ? [{ at, kind: "pay" as const }] : []), { at, kind: "send" as const }];
+    done = { ...done, viewers: { ...done.viewers, [k]: { ...v, last: at, events } } };
+  }
   await writeProof(kv, s, done);
-  if (done.email) {
+  if (to) {
     const m = receiptMail(done);
-    if (await sendClient(env.CLIENT_EMAIL, done.email, m)) await recordLead(env, done.email, { event: { at: done.submittedAt!, kind: "mail", note: m.subject, mail: { to: "client", kind: "proof-receipt" } } });
+    if (await sendClient(env.CLIENT_EMAIL, to, m)) await recordLead(env, to, { event: { at, kind: "mail", note: m.subject, mail: { to: "client", kind: "proof-receipt" } } });
   }
   const a = alertLines(done);
-  await mail(env.EMAIL, a.subject, [...a.lines, "", proofUrl(done.token)], done.email ? { name: done.email, email: done.email } : undefined);
+  await mail(env.EMAIL, a.subject, [...a.lines, "", proofUrl(done.token)], to ? { name: to, email: to } : undefined);
   return done;
 }
 
@@ -46,7 +55,7 @@ export async function checkout(key: string, p: Proof): Promise<{ id: string; url
       cancel_url: back,
       "metadata[proof]": p.token,
       "metadata[selects]": String(p.selects.length),
-      ...(p.email ? { customer_email: p.email } : {}),
+      ...((p.submittedBy ?? p.email) ? { customer_email: p.submittedBy ?? p.email } : {}),
     },
     `proof-${p.token}-${p.selects.join(".")}`.slice(0, 255),
   );

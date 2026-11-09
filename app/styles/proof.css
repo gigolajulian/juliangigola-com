@@ -1,5 +1,9 @@
 /* ── /proof/<token> (components/proof-gallery.tsx) ────────────────
    The site's tokens, so light and dark follow the system like every page. */
+/* `.rise` rests #main at translateY(0), and any transform makes #main the containing block of the
+   fixed review sheet, lightbox and bar: Confirm opened a sheet pinned to the page top, a black screen
+   for anyone scrolled down (Julian 2026-11-08). Same fix as the admin tab bar. */
+html:has(.proof) #main{transform:none}
 .proof{text-transform:none;--p-mono:var(--font-mono),ui-monospace,Menlo,Consolas,monospace;--p-hl:var(--border);container-type:inline-size;min-height:100svh;background:var(--background);color:var(--foreground)}
 .proof button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
 .proof-lab{font:11px var(--p-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0}
@@ -35,7 +39,6 @@
 .proof-cell[data-on] .proof-mark{background:var(--accent);border-color:var(--accent);color:var(--background)}
 .proof-zoom{position:absolute;right:6px;bottom:4px;padding:4px!important;font:11px var(--p-mono)!important;color:rgba(255,255,255,.8)!important;opacity:0;transition:opacity .15s}
 .proof-cell:hover .proof-zoom,.proof-zoom:focus-visible{opacity:1}
-.proof-nt{position:absolute;left:10px;top:10px;font:10px var(--p-mono);letter-spacing:.1em;text-transform:uppercase;color:#141211;background:#f1f0ed;padding:2px 5px}
 @media (hover:none){.proof-mark,.proof-zoom{opacity:.9;transform:none}}
 
 .proof-sel{padding:0 28px 170px}
@@ -66,24 +69,65 @@
 .proof-li img{max-width:100%;max-height:100%;object-fit:contain}
 .proof-arr{position:absolute;top:50%;transform:translateY(-50%);font:18px var(--p-mono)!important;color:#92908d!important;padding:16px!important}
 .proof-arr.l{left:4px}.proof-arr.r{right:4px}
-.proof-lf{display:flex;gap:12px;align-items:center;padding:16px 22px calc(22px + env(safe-area-inset-bottom));border-top:1px solid rgba(255,255,255,.11)}
+.proof-lf{display:flex;gap:12px;align-items:center;justify-content:space-between;font:12px var(--p-mono);color:#92908d;padding:16px 22px calc(22px + env(safe-area-inset-bottom));border-top:1px solid rgba(255,255,255,.11)}
 .proof-lf input{flex:1;min-width:0;color:#f1f0ed;border-color:rgba(255,255,255,.11)}
 .proof-lf input:disabled{opacity:.4}
 .proof-lb .proof-btn{border-color:#f1f0ed;background:#f1f0ed;color:#0b0a09}
 .proof-lb .proof-btn.ghost{background:none;color:#f1f0ed;border-color:rgba(255,255,255,.2)}
 
 .proof-sheet{max-width:560px;margin:0 auto;padding:56px 28px 80px}
-.proof-over{position:fixed;inset:0;z-index:30;overflow:auto;max-width:none;background:var(--background)}
-.proof-over>*{max-width:504px;margin-left:auto;margin-right:auto}
 .proof-rows{border-top:1px solid var(--p-hl);font:13px var(--p-mono);margin-bottom:22px}
 .proof-rows div{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--p-hl)}
 .proof-rows div span:first-child{color:var(--muted-foreground)}
 .proof-files{font:12px/1.9 var(--p-mono);color:var(--muted-foreground);columns:2;margin:0 0 22px}
 .proof-files p{margin:0}
 .proof-files i{font-style:normal;color:var(--foreground)}
-.proof-over textarea{border:1px solid var(--p-hl);padding:12px;margin-bottom:22px}
 .proof-err{font:13px var(--p-mono);color:var(--destructive,#c0392b);margin:0 0 16px}
 .proof-stripe{margin-top:18px;font:11px var(--p-mono);color:var(--muted-foreground)}
+
+/* gate: the first frames, lightly blurred, under a frosted card (Julian 2026-11-08: glass, less blur) */
+.proof-gate{position:relative;min-height:calc(100svh - 57px);overflow:hidden}
+.proof-wall{position:absolute;inset:0;display:grid;grid-template-columns:repeat(6,1fr);gap:6px;padding:24px 28px;filter:blur(5px);opacity:.9;transform:scale(1.02);pointer-events:none}
+.proof-wall img{width:100%;aspect-ratio:2/3;object-fit:cover;object-position:center 25%;display:block}
+.proof-card{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(440px,calc(100% - 36px));display:flex;flex-direction:column;gap:20px;padding:36px 36px 30px;background:color-mix(in oklab,var(--background) 55%,transparent);backdrop-filter:blur(26px) saturate(1.4);-webkit-backdrop-filter:blur(26px) saturate(1.4);border:1px solid color-mix(in oklab,var(--foreground) 10%,transparent);box-shadow:0 30px 80px rgba(0,0,0,.12)}
+.proof-card h1{font:500 52px/.98 var(--font-display);letter-spacing:-.04em;margin:12px 0 0}
+.proof-card label{display:flex;flex-direction:column;gap:6px}
+.proof-card input{text-transform:none;width:100%;background:none;border:0;border-bottom:1px solid var(--foreground);color:var(--foreground);font:16px var(--p-mono);padding:10px 0;outline:none}
+.proof-card .proof-mu,.proof-card .proof-err{margin:0}
+
+/* review before send */
+.proof-over{position:fixed;inset:0;z-index:30;overflow:auto;background:var(--background);padding:40px 40px 60px}
+.proof-rhead{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap}
+.proof-rhead h1{font:500 clamp(40px,7cqi,72px)/.98 var(--font-display);letter-spacing:-.04em;margin:12px 0 0}
+.proof-rsum{display:flex;justify-content:space-between;gap:12px;font:12px var(--p-mono);color:var(--muted-foreground);padding:12px 0;margin:24px 0 18px;border-top:1px solid var(--p-hl);border-bottom:1px solid var(--p-hl)}
+.proof-rsum b{font-weight:500;color:var(--foreground)}
+.proof-rgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.proof-rgrid div{position:relative}
+.proof-rgrid img{width:100%;aspect-ratio:2/3;object-fit:cover;object-position:center 25%;display:block}
+.proof-rgrid i{position:absolute;left:5px;top:5px;font:500 10px var(--p-mono);font-style:normal;background:var(--accent);color:var(--background);min-width:18px;height:18px;display:grid;place-items:center;border-radius:9px;padding:0 4px}
+
+/* after send */
+.proof-done{display:grid;grid-template-columns:1.1fr 1fr;gap:64px;padding:56px 40px 60px;max-width:1280px}
+.proof-side{display:flex;flex-direction:column;gap:22px}
+.proof-done h1{font:500 clamp(44px,8cqi,88px)/.95 var(--font-display);letter-spacing:-.04em;margin:12px 0 0}
+.proof-thumbs{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.proof-thumbs img{width:72px;height:96px;object-fit:cover;object-position:center 25%;display:block}
+.proof-thumbs span{font:12px var(--p-mono);color:var(--muted-foreground);margin-left:8px}
+.proof .proof-vs{align-self:flex-start;font:500 11px var(--p-mono);letter-spacing:.12em;text-transform:uppercase;text-decoration:underline;text-decoration-color:var(--p-hl);text-underline-offset:4px;margin-top:-10px}
+.proof-steps{list-style:none;padding:0;margin:0;border-top:1px solid var(--p-hl)}
+.proof-steps li{display:grid;grid-template-columns:34px 1fr;gap:4px 0;padding:14px 0;border-bottom:1px solid var(--p-hl)}
+.proof-steps span{font:11px var(--p-mono);color:var(--muted-foreground);padding-top:3px}
+.proof-steps b,.proof-steps p{font-family:var(--font-display)}
+.proof-steps b{font-weight:500;font-size:17px;letter-spacing:-.01em}
+.proof-steps p{grid-column:2;font-size:14px;line-height:1.45;color:var(--muted-foreground);margin:0}
+.proof-steps li[data-on] span{color:var(--accent)}
+.proof-steps li[data-on] b::after{content:"  \2713";color:var(--accent);font-size:14px}
+.proof-steps li[data-dim] b{color:var(--muted-foreground)}
+.proof-paid{border:1px solid var(--foreground);padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.proof-paid p{margin:0}
+.proof-paid p:nth-child(2){display:flex;justify-content:space-between;font:12px var(--p-mono);color:var(--muted-foreground)}
+.proof-paid b{font-weight:500;color:var(--foreground)}
+.proof-paid .proof-mu{font-size:12px}
 
 @container (max-width:520px){
   .proof-top{grid-template-columns:auto 1fr;padding:12px 16px;gap:10px}
@@ -103,5 +147,14 @@
   .proof-arr{display:none}
   .proof-lf{flex-wrap:wrap}
   .proof-files{columns:1}
+  .proof-wall{grid-template-columns:repeat(3,1fr);gap:4px;padding:18px;filter:blur(4px)}
+  .proof-card{top:auto;bottom:0;left:0;transform:none;width:100%;padding:28px 20px calc(30px + env(safe-area-inset-bottom));border-width:1px 0 0}
+  .proof-card h1{font-size:44px}
+  .proof-over{padding:28px 20px 40px}
+  .proof-rhead{flex-direction:column;align-items:stretch}
+  .proof-rhead .proof-acts{order:3;flex-direction:column-reverse}
+  .proof-rgrid{grid-template-columns:repeat(3,1fr);gap:4px}
+  .proof-done{grid-template-columns:1fr;gap:26px;padding:28px 20px 40px}
+  .proof-thumbs img{width:44px;height:58px}
 }
 @media (prefers-reduced-motion:reduce){.proof *{transition:none!important}}

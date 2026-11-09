@@ -48,3 +48,20 @@ describe("proofs", () => {
     expect(isOpen({ closesAt: "2020-01-01T00:00:00Z" })).toBe(false);
   });
 });
+
+describe("proof activity log", () => {
+  it("logs opens once per device and diffs picks into pick and unpick", async () => {
+    const { track, device } = await import("@/lib/proofs");
+    let v = track(undefined, "t1", { kind: "open", device: "iPhone · Safari", place: "San Jose, CA, US" });
+    v = track(v, "t2", { picks: ["a", "b"] });
+    v = track(v, "t3", { picks: ["b", "c"] });
+    v = track(v, "t4", { kind: "open", device: "iPhone · Safari", looks: { a: 500_000 }, seconds: 9999 });
+    expect(v.visits).toBe(2);
+    expect(v.devices).toEqual(["iPhone · Safari"]);
+    expect(v.picks).toEqual(["b", "c"]);
+    expect(v.events.map((e) => `${e.kind}${e.id ?? ""}`)).toEqual(["open", "picka", "pickb", "pickc", "unpicka", "open"]);
+    expect(v.looks.a).toBe(120_000);
+    expect(v.seconds).toBe(120);
+    expect(device("Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Version/18.0 Mobile/15E148 Safari/604.1")).toBe("iPhone · Safari");
+  });
+});
