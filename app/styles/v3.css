@@ -357,6 +357,8 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .f-body{display:flex;flex-direction:column;gap:22px;max-width:640px}
 .v3 .f-bar{margin-top:10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .v3 .f-bar .btn{height:48px;padding:0 24px}
+/* Held off while the times load (time-picker.tsx): there, but not yet a thing to press. */
+.v3 .f-bar .btn:disabled{opacity:.35;cursor:default;pointer-events:none}
 .v3 .f-photo{margin:0;padding:28px var(--gr) 40px 0;position:sticky;top:64px;height:calc(100svh - 64px);box-sizing:border-box}
 /* Caption A (Julian, 2026-10-23): the name and summary sit under the photo, not over it. */
 .v3 .f-photo .in{height:100%;display:flex;flex-direction:column;gap:16px}
