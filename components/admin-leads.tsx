@@ -153,9 +153,7 @@ function mailto(to: string, subject: string, body: string, quote?: { name: strin
 export function AdminLeads() {
   const [leads, setLeads] = React.useState<LeadSummary[] | null>(null);
   const [fresh, setFresh] = React.useState<Lead | null>(null);
-  /** `?desk`: the One Desk (Today first, the /admin tabs folded in), opt-in until Julian says yes. */
-  const [desk] = React.useState(() => typeof window !== "undefined" && new URLSearchParams(location.search).has("desk"));
-  const [filter, setFilter] = React.useState<Filter>(desk ? "today" : "needs");
+  const [filter, setFilter] = React.useState<Filter>("today");
   const [open, setOpen] = React.useState<string | null>(null);
   // The row a phone came back from: the list was hidden, so focus fell to the body.
   const back = React.useRef<string | null>(null);
@@ -310,7 +308,7 @@ export function AdminLeads() {
     .filter((l) => matches(l, words))
     .sort(filter === "upcoming" ? (a, b) => a.when!.localeCompare(b.when!) : (a, b) => b.lastAt.localeCompare(a.lastAt));
   const current = leads.find((l) => l.id === open);
-  const tab = desk && filter === "upcoming" ? "more" : tabOf(filter);
+  const tab = filter === "upcoming" ? "more" : tabOf(filter);
   const section = sectionOf(filter);
   const tabs = SECTIONS.find((x) => x.id === section)!.tabs;
   const tool = TOOLS.includes(filter);
@@ -367,44 +365,19 @@ export function AdminLeads() {
       className={cn(
         "normal-case text-foreground max-lg:pb-[calc(84px+env(safe-area-inset-bottom))] lg:relative lg:grid lg:grid-rows-[minmax(0,1fr)] lg:overflow-hidden lg:rounded-[14px] lg:border lg:border-border lg:bg-background [&_button]:normal-case [&_h1]:normal-case [&_h2]:normal-case [&_h3]:normal-case",
         // Proofs runs its own list + card, so it takes the lead pane's width too.
-        (desk ? WIDE : ["proofs"]).includes(filter) ? "lg:grid-cols-[220px_minmax(0,1fr)]" : boarding ? "lg:grid-cols-[220px_minmax(0,1fr)_minmax(0,420px)]" : "lg:grid-cols-[220px_minmax(0,var(--list-w,420px))_minmax(0,1fr)]",
+        WIDE.includes(filter) ? "lg:grid-cols-[220px_minmax(0,1fr)]" : boarding ? "lg:grid-cols-[220px_minmax(0,1fr)_minmax(0,420px)]" : "lg:grid-cols-[220px_minmax(0,var(--list-w,420px))_minmax(0,1fr)]",
       )}
     >
       {/* Desktop: the sidebar. Every list, then this device's switches. */}
       <nav aria-label="Lead lists" className="hidden min-h-0 flex-col overflow-y-auto border-r border-border p-3.5 lg:flex">
-        {desk ? null : <button type="button" onClick={() => pick("new")} className={cn(btn, primary, "mb-2 min-h-10 text-[14.5px]")}>New lead</button>}
-        {desk ? (
-          <>
-            <div className="flex items-center gap-2.5 px-2 pb-4 pt-0.5">
-              <span aria-hidden="true" className="grid size-[30px] place-items-center rounded-lg bg-accent text-[12px] font-extrabold text-accent-foreground" style={{ fontFamily: "var(--font-display)" }}>JG</span>
-              <span className="grid leading-tight"><b className="text-[14px] font-semibold">Julian</b><span className="font-mono text-[10.5px] text-muted-foreground">Desk</span></span>
-            </div>
-            {SECTIONS.map((x) => (
-              <SideLink key={x.id} on={section === x.id} n={x.id === "today" ? needs : x.id === "leads" ? count("open") : x.id === "calendar" ? count("upcoming") : undefined} icon={x.icon} onClick={() => pick(x.tabs[0][0])} className={x.id === "setup" ? "mt-auto" : undefined}>{x.label}</SideLink>
-            ))}
-          </>
-        ) : <>
-        {(["needs", "open", "upcoming"] as const).map((f) => (
-          <SideLink key={f} on={filter === f} n={count(f)} onClick={() => pick(f)}>{label(f)}</SideLink>
+        <div className="flex items-center gap-2.5 px-2 pb-4 pt-0.5">
+          <span aria-hidden="true" className="grid size-[30px] place-items-center rounded-lg bg-accent text-[12px] font-extrabold text-accent-foreground" style={{ fontFamily: "var(--font-display)" }}>JG</span>
+          <span className="grid leading-tight"><b className="text-[14px] font-semibold">Julian</b><span className="font-mono text-[10.5px] text-muted-foreground">Desk</span></span>
+        </div>
+        <button type="button" onClick={() => pick("new")} className={cn(btn, primary, "mb-3 min-h-10 text-[14.5px]")}>New lead</button>
+        {SECTIONS.map((x) => (
+          <SideLink key={x.id} on={section === x.id} n={x.id === "today" ? needs : x.id === "leads" ? count("open") : x.id === "calendar" ? count("upcoming") : undefined} icon={x.icon} onClick={() => pick(x.tabs[0][0])} className={x.id === "setup" ? "mt-auto" : undefined}>{x.label}</SideLink>
         ))}
-        <SideGroup>Stage</SideGroup>
-        {OPEN_STAGES.map((s) => <SideLink key={s} on={filter === s} n={count(s)} onClick={() => pick(s)}>{s}</SideLink>)}
-        <SideGroup>Closed</SideGroup>
-        {(["Delivered", "Lost"] as const).map((s) => <SideLink key={s} on={filter === s} n={count(s)} onClick={() => pick(s)}>{s}</SideLink>)}
-        <SideGroup>Put aside</SideGroup>
-        {(["snoozed", "archived", "trash"] as const).map((f) => <SideLink key={f} on={filter === f} n={count(f)} onClick={() => pick(f)}>{label(f)}</SideLink>)}
-        <SideGroup>Tools</SideGroup>
-        <SideLink on={filter === "stats"} onClick={() => pick("stats")}>Stats</SideLink>
-        <SideLink on={filter === "money"} onClick={() => pick("money")}>Money</SideLink>
-        <SideLink on={filter === "templates"} onClick={() => pick("templates")}>Templates</SideLink>
-        <SideLink on={filter === "licences"} onClick={() => pick("licences")}>Licences</SideLink>
-        <SideLink on={false} onClick={doExport}>Export CSV</SideLink>
-        <SideGroup>Proofs</SideGroup>
-        <SideLink on={filter === "proofs"} onClick={() => pick("proofs")}>Galleries</SideLink>
-        <SideGroup>Booking</SideGroup>
-        <SideLink on={filter === "hours"} onClick={() => pick("hours")}>Hours</SideLink>
-        </>}
-        {desk ? null : <div className="mt-auto grid border-t border-border pt-2">{device}</div>}
       </nav>
 
       <section aria-label="Leads" className={cn("min-w-0 lg:min-h-0 lg:border-r lg:border-border", boarding ? "lg:flex lg:flex-col" : "lg:overflow-y-auto", open && "max-lg:hidden")}>
@@ -413,7 +386,7 @@ export function AdminLeads() {
           <svg viewBox="0 0 24 24" className={cn("size-[18px] fill-none stroke-current stroke-[1.8]", refreshing && "animate-spin", pull >= PULL_AT && "text-accent")} style={refreshing ? undefined : { transform: `rotate(${(pull / PULL_AT) * 270}deg)` }}><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5" /></svg>
         </div>
         {filter === "today" ? null : <header className="grid gap-3.5 border-b border-border px-3 pb-4 pt-3 lg:px-7 lg:pt-6">
-          {desk && tabs.length > 1 ? (
+          {tabs.length > 1 ? (
             <div role="tablist" aria-label={section} className={cn("-mx-1 flex gap-1 overflow-x-auto px-1", section === "leads" && "max-lg:hidden")}>
               {tabs.map(([f, t]) => {
                 const on = f === filter || (f === "open" && (STAGES.includes(filter as Stage) || MORE.includes(filter)));
@@ -427,7 +400,7 @@ export function AdminLeads() {
             </p>
           )}
           <div className="flex items-baseline justify-between gap-3">
-            <h1 style={HEAD} className="min-w-0 whitespace-nowrap text-[40px] leading-none tracking-[-0.03em] lg:text-[28px]">{desk && filter === "upcoming" ? "Calendar" : label(filter)}</h1>
+            <h1 style={HEAD} className="min-w-0 whitespace-nowrap text-[40px] leading-none tracking-[-0.03em] lg:text-[28px]">{filter === "upcoming" ? "Calendar" : label(filter)}</h1>
             {tool ? null : (
               <span className="flex items-center gap-3">
                 {filter === "open" ? (
@@ -456,14 +429,14 @@ export function AdminLeads() {
             />
           )}
           {/* Phone: the stages ride in the Open tab as one row of chips. */}
-          {tab === "open" || (desk && MORE.includes(filter)) ? (
-            <div className={cn("-mx-1 flex gap-2 overflow-x-auto px-1 pb-0.5", desk ? "lg:flex-wrap" : "lg:hidden")}>
-              {(["open", ...OPEN_STAGES, ...(desk ? MORE : [])] as const).map((f) => (
+          {tab === "open" || MORE.includes(filter) ? (
+            <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-0.5 lg:flex-wrap">
+              {(["open", ...OPEN_STAGES, ...MORE] as const).map((f) => (
                 <Pill key={f} on={filter === f} n={count(f)} onClick={() => pick(f)}>{f === "open" ? "All" : label(f)}</Pill>
               ))}
             </div>
           ) : null}
-          {MORE.includes(filter) || (tool && filter !== "more") || (desk && filter === "upcoming") ? (
+          {MORE.includes(filter) || (tool && filter !== "more") || filter === "upcoming" ? (
             <button type="button" onClick={() => pick("more")} className="inline-flex min-h-11 w-fit items-center gap-1 text-[16px] text-accent lg:hidden">
               <span aria-hidden="true">‹</span> More
             </button>
@@ -488,7 +461,7 @@ export function AdminLeads() {
           </div>
         ) : filter === "seo" ? (
           <div className="px-1 py-5 lg:px-7"><React.Suspense fallback={null}><AdminSeo /></React.Suspense></div>
-        ) : filter === "more" && desk ? (
+        ) : filter === "more" ? (
           <div className="grid gap-6 py-4 lg:hidden">
             {([
               ["Clients", [["Calendar", "upcoming", count("upcoming")], ["Proofs", "proofs"], ["Money", "money"], ["Licences", "licences"]]],
@@ -511,43 +484,6 @@ export function AdminLeads() {
               </ul>
             ))}
             <ul className="grid">
-              <li>
-                <button type="button" onClick={doExport} className="flex min-h-[52px] w-full items-center justify-between border-b border-border px-1 text-left text-[17px]">
-                  Export CSV<span aria-hidden="true" className="font-mono text-[13px] text-muted-foreground">↓</span>
-                </button>
-              </li>
-            </ul>
-            <div className="grid">
-              <p className="px-1 pb-1 font-mono text-[11.5px] uppercase tracking-[0.08em] text-muted-foreground">This device</p>
-              {device}
-            </div>
-          </div>
-        ) : filter === "more" ? (
-          <div className="grid gap-6 py-4 lg:hidden">
-            <ul className="grid">
-              {MORE.map((f) => (
-                <li key={f}>
-                  <button type="button" onClick={() => pick(f)} className="flex min-h-[52px] w-full items-center justify-between border-b border-border px-1 text-left text-[17px]">
-                    {label(f)}
-                    <span className="flex items-center gap-3 font-mono text-[13px] text-muted-foreground">{count(f)} <span aria-hidden="true">›</span></span>
-                  </button>
-                </li>
-              ))}
-              <li>
-                <button type="button" onClick={() => pick("hours")} className="flex min-h-[52px] w-full items-center justify-between border-b border-border px-1 text-left text-[17px]">
-                  Hours <span aria-hidden="true" className="font-mono text-[13px] text-muted-foreground">›</span>
-                </button>
-              </li>
-            </ul>
-            <ul className="grid">
-              <li><p className="px-1 pb-1 font-mono text-[11.5px] uppercase tracking-[0.08em] text-muted-foreground">Tools</p></li>
-              {([["new", "New lead"], ["stats", "Stats"], ["money", "Money"], ["templates", "Templates"], ["licences", "Licences"], ["proofs", "Proofs"]] as const).map(([f, t]) => (
-                <li key={f}>
-                  <button type="button" onClick={() => pick(f)} className="flex min-h-[52px] w-full items-center justify-between border-b border-border px-1 text-left text-[17px]">
-                    {t}<span aria-hidden="true" className="font-mono text-[13px] text-muted-foreground">›</span>
-                  </button>
-                </li>
-              ))}
               <li>
                 <button type="button" onClick={doExport} className="flex min-h-[52px] w-full items-center justify-between border-b border-border px-1 text-left text-[17px]">
                   Export CSV<span aria-hidden="true" className="font-mono text-[13px] text-muted-foreground">↓</span>
@@ -603,9 +539,9 @@ export function AdminLeads() {
         )}
       </section>
 
-      {boarding || (desk ? WIDE : ["proofs"]).includes(filter) ? null : <ListResizer w={listW ?? LIST_W} onChange={setListW} />}
+      {boarding || WIDE.includes(filter) ? null : <ListResizer w={listW ?? LIST_W} onChange={setListW} />}
 
-      <section aria-label="Lead" className={cn("min-w-0 lg:min-h-0 lg:overflow-y-auto lg:bg-card/40", !open && "max-lg:hidden", (desk ? WIDE : ["proofs"]).includes(filter) && "hidden")}>
+      <section aria-label="Lead" className={cn("min-w-0 lg:min-h-0 lg:overflow-y-auto lg:bg-card/40", !open && "max-lg:hidden", WIDE.includes(filter) && "hidden")}>
         {current ? (
           <Detail key={`${current.id}-${moved}`} summary={current} initial={fresh?.email === current.email ? fresh : null} call={call} onChange={changed} onBack={() => { back.current = current.id ?? null; setOpen(null); }} reload={load} tick={tick} templates={templates} others={leads.filter((o) => o.id !== current.id && !o.trashedAt)} />
         ) : (
@@ -620,7 +556,7 @@ export function AdminLeads() {
         aria-label="Lead tabs"
         className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-border bg-background/95 px-1.5 pb-[env(safe-area-inset-bottom)] pt-1.5 backdrop-blur-md lg:hidden"
       >
-        {(desk ? DESK_TABS : TABS).map((t) => (
+        {DESK_TABS.map((t) => (
           <button
             key={t.id}
             type="button"
@@ -902,10 +838,6 @@ function ListResizer({ w, onChange }: { w: number; onChange: (w: number | null) 
       }}
     />
   );
-}
-
-function SideGroup({ children }: { children: React.ReactNode }) {
-  return <p className="px-3 pb-1.5 pt-4 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">{children}</p>;
 }
 
 function SideLink({ on, n, onClick, href, icon, className, children }: { on: boolean; n?: number; onClick?: () => void; href?: string; icon?: React.ReactNode; className?: string; children: React.ReactNode }) {
@@ -2187,9 +2119,10 @@ function DeskToday({ leads, go, pick }: { leads: LeadSummary[]; go: (l: LeadSumm
 
   const card = "rounded-xl bg-card";
   const kpi = (k: string, v: React.ReactNode, sub: React.ReactNode, cls?: string) => (
-    <div className={cn(card, "grid content-between gap-1 px-3.5 py-3", cls)}>
+    <div className={cn(card, "grid content-between gap-1 px-3.5 py-3", cls)} style={{ containerType: "inline-size" }}>
       <span className="font-mono text-[10.5px] uppercase tracking-[0.08em] text-muted-foreground">{k}</span>
-      <span style={HEAD} className="text-[26px] leading-none tabular-nums">{v}</span>
+      {/* A long figure ($1,234.56 at 390) shrinks to the tile instead of spilling or cutting. */}
+      <span style={{ ...HEAD, fontSize: typeof v === "string" ? `min(26px, ${(180 / v.length).toFixed(1)}cqi)` : 26 }} className="leading-none tabular-nums [overflow-wrap:anywhere]">{v}</span>
       <span className="font-mono text-[12px] leading-snug text-muted-foreground [overflow-wrap:anywhere]">{sub}</span>
     </div>
   );
