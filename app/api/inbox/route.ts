@@ -1,7 +1,7 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { authorised, bearer, canPush } from "@/lib/vouch";
 import { SAFE_IMAGE, summary, type Enquiry, type Summary } from "@/lib/inbox";
-import { backfillLead, fold, PAPER, readLead, STAGES, trashDaysLeft, writeLead, type InboxRow, type Lead, type LeadSummary, type Paper, type Stage } from "@/lib/leads";
+import { backfillLead, fold, PAPER, readLead, REMIND_MAX, STAGES, trashDaysLeft, writeLead, type InboxRow, type Lead, type LeadSummary, type Paper, type Stage } from "@/lib/leads";
 import { sealer } from "@/lib/lead-crypto";
 import { notify, subscribe, unsubscribe } from "@/lib/lead-push";
 import { publicKey } from "@/lib/web-push";
@@ -464,7 +464,7 @@ async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: Await
   const cut = (v: unknown, n: number) => (typeof v === "string" && v.trim() ? v.trim().slice(0, n) : undefined);
   if (typeof notes === "string") lead = { ...lead, notes: cut(notes, 5000) };
   if (remind !== undefined) {
-    const r = remind ? { at: new Date(remind.at!).toISOString(), text: cut(remind.text, 200) ?? "" } : undefined;
+    const r = remind ? { at: new Date(remind.at!).toISOString(), text: cut(remind.text, REMIND_MAX) ?? "" } : undefined;
     lead = { ...lead, remind: r, events: [...lead.events, { at, kind: "remind" as const, note: r ? r.at : "" }].slice(-50) };
   }
   if (details) {
