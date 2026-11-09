@@ -2115,7 +2115,7 @@ function DayCol({ d, today, evs, go }: { d: string; today: boolean; evs: DayEv[]
 function Panel({ title, more, go, children }: { title: string; more: string; go: () => void; children: React.ReactNode }) {
   return (
     <section className="grid content-start">
-      <h2 className="flex items-baseline justify-between border-b border-border pb-2 font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
+      <h2 className="label flex items-baseline justify-between border-b border-border pb-2 font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
         {title}
         <button type="button" onClick={go} className="min-h-8 tracking-normal text-accent hoverable:hover:underline">{more} →</button>
       </h2>
