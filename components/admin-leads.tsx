@@ -2026,20 +2026,20 @@ const PAGE_B_CSS = `
 .ivb .col{padding:6cqw 6cqw 5cqw;display:flex;flex-direction:column;min-width:0}
 .ivb .hd{display:flex;flex-direction:column;align-items:flex-end;gap:.5cqw}
 .ivb .wm{font:900 3.6cqw/.9 var(--font-display);letter-spacing:-.045em}
-.ivb .to{margin-top:6cqw;font-size:2.3cqw;line-height:1.45;font-weight:400}
+.ivb .to{margin-top:calc(6cqw*var(--k,1));font-size:2.3cqw;line-height:1.45;font-weight:400}
 .ivb .to .l{margin-bottom:1.2cqw}
 .ivb .dim{color:#7C7F88}
-.ivb .items{margin-top:4cqw;border-top:1px solid #2A2B30}
-.ivb .it{display:flex;justify-content:space-between;gap:3cqw;padding:2.2cqw 0;border-bottom:1px solid #2A2B30;font-size:2.1cqw;font-weight:400}
+.ivb .items{margin-top:calc(4cqw*var(--k,1));border-top:1px solid #2A2B30}
+.ivb .it{display:flex;justify-content:space-between;gap:3cqw;padding:calc(2.2cqw*var(--k,1)) 0;border-bottom:1px solid #2A2B30;font-size:2.1cqw;font-weight:400}
 .ivb .it>span:last-child{font:500 1.95cqw var(--font-mono);white-space:nowrap}
 .ivb .it small{display:block;color:#7C7F88;font-size:1.75cqw;margin-top:.5cqw}
-.ivb .amount{margin-top:6cqw}
+.ivb .amount{margin-top:calc(6cqw*var(--k,1))}
 .ivb .amount .l{margin-bottom:2.4cqw;color:#A99CF0}
 .ivb .k{font:800 10.5cqw/.82 "Archivo B",sans-serif;letter-spacing:-.035em;white-space:nowrap}
 .ivb .sub{display:flex;gap:5cqw;margin-top:3.4cqw;font:500 1.6cqw var(--font-mono);letter-spacing:.06em;text-transform:uppercase;color:#7C7F88}
 .ivb .sub b{color:#EDEDEF;font-weight:500}
 .ivb .sub b.v{color:#A99CF0}
-.ivb .pay{margin-top:4.5cqw;font:500 1.65cqw/1.75 var(--font-mono);color:#B9BBC2}
+.ivb .pay{margin-top:calc(4.5cqw*var(--k,1));font:500 1.65cqw/1.75 var(--font-mono);color:#B9BBC2}
 .ivb .pay .l{margin-bottom:1cqw}
 .ivb .pay em{font-style:normal;color:#7C7F88}
 .ivb .sign{margin-top:auto;margin-bottom:4.5cqw;display:flex;flex-direction:column;align-items:flex-end;gap:2.6cqw;text-align:right}
@@ -2071,12 +2071,23 @@ function PageB(p: PageBProps) {
     el.addEventListener("wheel", wheel, { passive: false });
     return () => { ro.disconnect(); el.removeEventListener("wheel", wheel); };
   }, [setCrop]);
+  // As the PDF does: draw the gaps in until the bank block clears the note by 4cqw.
+  const page = React.useRef<HTMLDivElement>(null);
+  React.useLayoutEffect(() => {
+    const el = page.current;
+    if (!el) return;
+    const pay = el.querySelector(".pay")!, sign = el.querySelector(".sign")!, clear = el.clientWidth * 0.04;
+    for (let k = 1; k >= 0.3; k -= 0.05) {
+      el.style.setProperty("--k", String(k));
+      if (sign.getBoundingClientRect().top - pay.getBoundingClientRect().bottom >= clear) break;
+    }
+  });
   const at = nat.w && box.w ? place(nat.w, nat.h, box.w, box.h, p.crop) : null;
   const clamp = (v: number) => Math.min(1, Math.max(0, v));
   const move = (dx: number, dy: number, from: Crop) => at && p.setCrop({ ...from, x: at.w > box.w ? clamp(from.x - dx / (at.w - box.w)) : 0.5, y: at.h > box.h ? clamp(from.y - dy / (at.h - box.h)) : 0.5 });
   const f = p.from;
   return (
-    <div className="ivb" aria-label="The invoice page">
+    <div ref={page} className="ivb" aria-label="The invoice page">
       <div
         ref={ph}
         className="ph"

@@ -187,6 +187,8 @@ function layout({ from: s, to, inv }: InvoiceDoc, SB: Font, RG: Font) {
  * top; the sign-off and the footer sit on the foot. The photo comes in as
  * the framed column (`lib/invoice-photo.ts`).
  * ─────────────────────────────────────────────────────────────── */
+/** The least room between the bank block and the note: 4cqw, about two lines of the bank block. */
+const CLEAR = 4 * (PW / 100);
 const B = { BG: "#0D0D0F", FG: "#EDEDEF", MUTE: "#7C7F88", RULE: "#2A2B30", VIO: "#A99CF0", PAY: "#B9BBC2", CAP: "#B5B5B8", MARK: { dark: "#2E2F34", light: "#D9DADF" } };
 const U = PW / 100;
 /** B on the page: at full spacing, or with the gaps between blocks drawn in until the flow clears the sign-off. */
@@ -292,7 +294,7 @@ function layoutBAt({ from: s, inv }: InvoiceDoc, F: Record<Face, Font>, k: numbe
   sy += WM2 + 2.6 * U - 1.4 * U;
   t(XR, base(sy, EM, "sb"), EM, B.MUTE, "hello@juliangigola.com", "sb", "end", 0.04);
 
-  return { T, rects, lines, img: { x: 0, y: 0, w: PW * 0.41, h: PH }, overlap: flowEnd > signTop - 2 * U };
+  return { T, rects, lines, img: { x: 0, y: 0, w: PW * 0.41, h: PH }, overlap: flowEnd > signTop - CLEAR };
 }
 
 /* ── the PDF itself ── */
