@@ -67,11 +67,19 @@ export function FlowShell({
   h1?: boolean;
 }) {
   const last = at === steps.length && steps.length > 0;
+  /* A shorter step keeps the scroll of a taller one, which left the rail
+     under the header on /book's You step at 1440x900. Bring it back. */
+  const rail = React.useRef<HTMLOListElement>(null);
+  const first = React.useRef(true);
+  React.useLayoutEffect(() => {
+    if (first.current) return void (first.current = false);
+    if (rail.current && rail.current.getBoundingClientRect().top < 64) rail.current.scrollIntoView({ block: "start" });
+  }, [at]);
   return (
     <div className="flow">
       <div className="f-main">
         {steps.length ? (
-          <ol className="rail lbl" aria-label="Steps">
+          <ol ref={rail} className="rail lbl" aria-label="Steps">
             {steps.map((n, i) => (
               <li key={n} className={i + 1 === at ? "cur" : i + 1 < at || last ? "done" : undefined} aria-current={i + 1 === at ? "step" : undefined}>
                 {pad(i + 1)} <span className="nm">{n}</span>
