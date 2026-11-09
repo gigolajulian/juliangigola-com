@@ -240,7 +240,7 @@ export function AdminTrash({
           return (
             <li
               key={t.slug}
-              className="flex items-center gap-4 border-b border-border py-3"
+              className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-border py-3"
             >
               <span
                 className="relative block h-14 w-11 shrink-0 overflow-hidden opacity-60"
@@ -266,7 +266,7 @@ export function AdminTrash({
                 </span>
               </span>
 
-              <span className="flex shrink-0 items-center gap-2">
+              <span className="flex min-w-0 flex-wrap items-center gap-2">
                 <button
                   type="button"
                   onClick={() => void recover(t.slug)}

@@ -454,7 +454,7 @@ export function AdminProjects({
             >
               <div
                 className={cn(
-                  "flex items-center gap-4 py-3",
+                  "flex flex-wrap items-center gap-x-4 gap-y-2 py-3",
                   (isHidden || isUnlisted) && "opacity-45",
                 )}
               >
@@ -498,7 +498,7 @@ export function AdminProjects({
                   </span>
                 </span>
 
-                <span className="flex shrink-0 items-center gap-2">
+                <span className="flex min-w-0 flex-wrap items-center gap-2">
                   {/* Refiling works on migrated projects too, which is why it
                       is an override map rather than a field: their categories
                       come from the generated manifest, where an edit would last
