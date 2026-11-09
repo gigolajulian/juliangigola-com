@@ -216,17 +216,16 @@ export function ProofGallery({ token, initial }: { token: string; initial: Publi
               <h1>Selects are in.</h1>
             </div>
             <div className="proof-thumbs">
-              {ordered.slice(0, showAll ? ordered.length : 5).map((id) => (
+              {ordered.slice(0, 5).map((id) => (
                 // eslint-disable-next-line @next/next/no-img-element -- private frame
                 <img key={id} src={src(id)} alt={`Frame ${(byId.get(id) ?? 0) + 1}`} />
               ))}
-              {!showAll && n > 5 ? <span>+{n - 5}</span> : null}
+              {n > 5 ? <span>+{n - 5}</span> : null}
             </div>
-            {n > 5 ? (
-              <button type="button" className="proof-vs" onClick={() => setShowAll((v) => !v)}>
-                {showAll ? "Show fewer" : `View your ${n} selects →`}
-              </button>
-            ) : null}
+            {/* Opens them as a photo grid, never a list in the side column (Julian 2026-11-09). */}
+            <button type="button" className="proof-vs" onClick={() => setShowAll(true)}>
+              View your {n} {n === 1 ? "select" : "selects"} →
+            </button>
           </div>
           <div className="proof-side">
             <ol className="proof-steps">
@@ -273,6 +272,30 @@ export function ProofGallery({ token, initial }: { token: string; initial: Publi
             </p>
           </div>
         </div>
+        {showAll ? (
+          <div className="proof-over" role="dialog" aria-modal="true" aria-label="Your selects">
+            <div className="proof-rhead">
+              <div>
+                <p className="proof-lab">Your selects</p>
+                <h1>{n} {n === 1 ? "frame" : "frames"}.</h1>
+              </div>
+              <div className="proof-acts">
+                <button type="button" className="proof-btn ghost" onClick={() => setShowAll(false)}>
+                  Back
+                </button>
+              </div>
+            </div>
+            <div className="proof-rgrid">
+              {ordered.map((id, k) => (
+                <div key={id}>
+                  {/* eslint-disable-next-line @next/next/no-img-element -- private frame */}
+                  <img src={src(id)} alt={`Select ${k + 1}`} />
+                  <i>{k + 1}</i>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
       </div>
     );
   }
