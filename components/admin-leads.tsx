@@ -346,7 +346,7 @@ export function AdminLeads() {
       )}
     >
       {/* Desktop: the sidebar. Every list, then this device's switches. */}
-      <nav aria-label="Lead lists" className="hidden min-h-0 flex-col overflow-y-auto border-r border-border p-2.5 lg:flex">
+      <nav aria-label="Lead lists" className="hidden min-h-0 flex-col overflow-y-auto border-r border-border p-3.5 lg:flex">
         <button type="button" onClick={() => pick("new")} className={cn(btn, primary, "mb-2 min-h-10 text-[14.5px]")}>New lead</button>
         {(["needs", "open", "upcoming"] as const).map((f) => (
           <SideLink key={f} on={filter === f} n={count(f)} onClick={() => pick(f)}>{label(f)}</SideLink>
@@ -375,7 +375,7 @@ export function AdminLeads() {
         <div aria-hidden="true" className="grid place-items-center overflow-hidden text-muted-foreground lg:hidden" style={{ height: pull || (refreshing ? 40 : 0), transition: pull ? "none" : "height 200ms ease-out" }}>
           <svg viewBox="0 0 24 24" className={cn("size-[18px] fill-none stroke-current stroke-[1.8]", refreshing && "animate-spin", pull >= PULL_AT && "text-accent")} style={refreshing ? undefined : { transform: `rotate(${(pull / PULL_AT) * 270}deg)` }}><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5" /></svg>
         </div>
-        <header className="grid gap-3 border-b border-border px-1 pb-3 pt-2 lg:px-5 lg:pt-4">
+        <header className="grid gap-3.5 border-b border-border px-3 pb-4 pt-3 lg:px-7 lg:pt-6">
           {tabOf(filter) !== "more" && (
             <p className="font-mono text-[11.5px] uppercase tracking-[0.08em] text-muted-foreground lg:hidden">
               {needs ? `${needs} waiting on you` : "Nothing waiting on you"}
@@ -705,7 +705,7 @@ function Row({ l, on, upcoming, onClick }: { l: LeadSummary; on: boolean; upcomi
       data-lead={l.id}
       aria-current={on ? "true" : undefined}
       className={cn(
-        "flex w-full gap-3 border-b border-border px-1 py-3.5 text-left transition-colors duration-200 hoverable:hover:bg-card lg:px-5",
+        "flex w-full gap-3 border-b border-border px-3 py-[18px] text-left transition-colors duration-200 hoverable:hover:bg-card lg:px-7",
         on && "bg-card shadow-[inset_3px_0_0_var(--accent)]",
       )}
     >
@@ -1123,7 +1123,7 @@ function Detail({ summary, initial, call, onChange, onBack, reload, tick, templa
   });
 
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)] gap-6 px-5 py-6 lg:px-8 lg:py-7">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-8 px-6 py-8 lg:px-11 lg:py-9">
       <button type="button" onClick={onBack} className="inline-flex min-h-11 items-center gap-1 justify-self-start text-[16px] text-accent lg:hidden">
         <span aria-hidden="true">‹</span> Leads
       </button>
