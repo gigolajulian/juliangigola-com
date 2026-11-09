@@ -768,7 +768,7 @@ export function V3Work({
       b = bar.current?.firstElementChild as HTMLElement | null;
     if (!s || !b) return;
     const m = s.scrollWidth - s.clientWidth;
-    b.style.width = `${m > 0 ? (s.scrollLeft / m) * 100 : 100}%`;
+    b.style.transform = `scaleX(${m > 0 ? s.scrollLeft / m : 1})`; // a scale, not a width: no layout per scroll frame
   }, []);
   React.useEffect(() => {
     if (view !== "strip") return;
