@@ -2,7 +2,8 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { createPortal } from "react-dom";
+import { createPortal, preload } from "react-dom";
+import { getImageProps } from "next/image";
 import { useRouter } from "next/navigation";
 import { CalEmbed } from "@/components/cal-embed";
 import { Calendar, Failed, Field, FlowShell, Hidden, Run, dlabel, duration, iso, useEnquiry, type Shell } from "@/components/v3/flow";
@@ -89,6 +90,27 @@ export function V3BookFlow({ slug, tabs = true, h1 = false }: { slug: SessionSlu
   const S = SESSIONS[slug];
   const router = useRouter();
   const more = tabs && TAB_ORDER.includes(slug);
+  /* The other sessions' photographs, once the page is idle, at the very
+     copy the photo slot will ask for (its `sizes`, the theme showing, the
+     phone frame where there is one). Switching session swapped the src in
+     place, and Safari showed the slot empty until the new file came: about
+     80ms of nothing between Portraits and Headshots (MAC, 2026-11-08). */
+  React.useEffect(() => {
+    if (!more) return;
+    const warm = () => {
+      const light = document.documentElement.dataset.theme === "light";
+      const phone = matchMedia("(max-width: 800px)").matches;
+      for (const x of TAB_ORDER) {
+        if (x === slug) continue;
+        const ph = SESSIONS[x].photo;
+        const src = phone && ph.m ? ph.m : light ? ph.l : ph.d;
+        const { props } = getImageProps({ src, alt: "", fill: true, sizes: phone && ph.m ? "100vw" : "(max-width: 800px) 100vw, 44vw" });
+        preload(props.src, { as: "image", imageSrcSet: props.srcSet, imageSizes: props.sizes, fetchPriority: "low" });
+      }
+    };
+    const idle = "requestIdleCallback" in window ? requestIdleCallback(warm, { timeout: 2000 }) : setTimeout(warm, 1200);
+    return () => ("cancelIdleCallback" in window ? cancelIdleCallback(idle as number) : clearTimeout(idle));
+  }, [more, slug]);
   const shell: Shell = (p) => (
     <FlowShell
       {...p}

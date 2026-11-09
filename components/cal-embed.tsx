@@ -55,8 +55,9 @@ export function CalEmbed({ path, title, className, v3 }: { path: string; title: 
     setDense(new URLSearchParams(window.location.search).has("dense"));
   }, []);
   const paid = isPaid(path.split("/")[1]);
-  const wrap = (body: React.ReactNode) => (v3 ? v3.shell({ steps: [], at: 1, head: paid ? "Book a session" : v3.name === "Consultation" ? "Book a consultation" : "Book a call", body, sum: [] }) : body);
-  if (dense === null) return wrap(<div aria-label={title} className={className} />);
+  const wrap = (body: React.ReactNode, bar?: React.ReactNode) => (v3 ? v3.shell({ steps: [], at: 1, head: paid ? "Book a session" : v3.name === "Consultation" ? "Book a consultation" : "Book a call", body, sum: [], bar }) : body);
+  // The picker's Continue bar, held off, from the first paint (time-picker.tsx).
+  if (dense === null) return wrap(<div aria-label={title} className={className} />, <button type="button" className="btn fill" disabled>Continue</button>);
   const down = <TimesDown title={title} className={className} retry={() => setTries((n) => n + 1)} again={tries > 0} />;
   // `?dense` has no deposit step: a paid session keeps the main picker.
   return dense && !paid ? (

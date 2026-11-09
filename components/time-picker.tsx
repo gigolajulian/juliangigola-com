@@ -944,11 +944,15 @@ export function TimePicker({
   const v3steps = v3paid ? ["Time", "You", "Deposit", "Booked"] : ["Time", "You", "Booked"];
   // The same subtitle as the picker, so nothing below it jumps when the times arrive.
   const v3sub = v3paid ? "Studio in San Jose. I travel across the Bay Area." : "15 minutes, phone or video. Bring your dates and references.";
-  const v3plain = (body: React.ReactNode) => v3!.shell({ steps: v3steps, at: 1, head: v3paid ? "Book a session" : v3!.name === "Consultation" ? "Book a consultation" : "Book a call", sub: v3sub, body, sum: [] });
+  /* While the times load the bar is already there, held off: it popped in
+     a second after the page on a short screen, where it is the thing at the
+     foot of the view (MAC, iPhone Duo folded, 2026-11-08). */
+  const heldBar = <button type="button" className="btn fill" disabled>Continue</button>;
+  const v3plain = (body: React.ReactNode, bar?: React.ReactNode) => v3!.shell({ steps: v3steps, at: 1, head: v3paid ? "Book a session" : v3!.name === "Consultation" ? "Book a consultation" : "Book a call", sub: v3sub, body, sum: [], bar });
   if (state === "fallback") return v3 ? v3plain(fallback) : <>{fallback}</>;
   const waiting = <p role="status" className="lbl mute">Loading availability</p>;
-  if (v3 && (state === "loading" || !days || (held && !orb))) return v3plain(orb ? waiting : jg);
-  if (v3 && !pick) return v3plain(Object.values(days ?? {}).some((l) => l.length) ? waiting : <p className="lbl mute">No open times in the next few months. <a href="mailto:hello@juliangigola.com">hello@juliangigola.com</a></p>);
+  if (v3 && (state === "loading" || !days || (held && !orb))) return v3plain(orb ? waiting : jg, heldBar);
+  if (v3 && !pick) return Object.values(days ?? {}).some((l) => l.length) ? v3plain(waiting, heldBar) : v3plain(<p className="lbl mute">No open times in the next few months. <a href="mailto:hello@juliangigola.com">hello@juliangigola.com</a></p>);
   if (state === "loading" || !days || (held && state === "ready" && !v3)) {
     return (
       // Held to the card's inset and a phone card's height while it waits
