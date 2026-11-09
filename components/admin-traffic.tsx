@@ -49,7 +49,8 @@ export function AdminTraffic() {
       });
       const body = await res.json();
       if (res.ok) {
-        setData(body);
+        // A partial body (a Cloudflare query that failed) shows as empty, not a crash.
+        setData({ visits: 0, bots: 0, days: [], sources: [], pages: [], devices: [], topBots: [], ...body });
         setError("");
       } else setError(body.error ?? "Cloudflare did not answer.");
     } catch {
@@ -88,7 +89,7 @@ export function AdminTraffic() {
         <h2 className="font-display text-xl uppercase tracking-[0]">
           Traffic
           <span className="label ml-3 text-muted-foreground">
-            {data
+            {data?.at
               ? `last 7 days · pulled ${new Date(data.at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}`
               : "last 7 days"}
           </span>
@@ -170,7 +171,7 @@ export function AdminTraffic() {
    the site showed, how often it was clicked, where it ranked, and for what.
    Google from Search Console, Bing from Bing Webmaster Tools. */
 function SearchBlock({ name, source, data: google }: { name: string; source: string; data?: Google }) {
-  const table = (title: string, rows: SearchRow[]) => (
+  const table = (title: string, rows: SearchRow[] = []) => (
     <div className="border border-border p-4">
       <h3 className="label mb-3 flex gap-3 text-muted-foreground">
         <span className="flex-1">{title}</span>
