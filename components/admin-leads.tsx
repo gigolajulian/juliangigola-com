@@ -38,7 +38,8 @@ const aside = (l: LeadSummary) => !!(l.archivedAt || l.trashedAt);
 const due = (l: LeadSummary) => !!l.due && Date.parse(l.due) <= now();
 /** A licence ending soon brings back even a Delivered lead; a snooze holds it off. */
 const renew = (l: LeadSummary) => !snoozed(l) && renewDue(l, now());
-const needsMe = (l: LeadSummary) => !aside(l) && (renew(l) || (!closed(l.stage) && (due(l) || (!snoozed(l) && (l.unread || isLate(l, now()) || !!l.flags?.length || !!myMove(l, now()))))));
+// An ending licence brings back archived leads too, never trashed ones.
+const needsMe = (l: LeadSummary) => !l.trashedAt && (renew(l) || (!l.archivedAt && !closed(l.stage) && (due(l) || (!snoozed(l) && (l.unread || isLate(l, now()) || !!l.flags?.length || !!myMove(l, now()))))));
 
 /** What to do next, in a word or two, and whether it is late. */
 function nextStep(l: LeadSummary): string | null {
@@ -708,8 +709,8 @@ function SignIn({ onKey, wrong }: { onKey: (k: string) => void; wrong: boolean }
 function pass(l: LeadSummary, f: Filter) {
   if (f === "trash") return !!l.trashedAt;
   if (f === "archived") return !!l.archivedAt && !l.trashedAt;
-  if (aside(l)) return false;
   if (f === "needs") return needsMe(l);
+  if (aside(l)) return false;
   if (f === "upcoming") return !!l.when && Date.parse(l.when) > now() - 2 * 3600e3 && !closed(l.stage);
   if (f === "more" || f === "hours" || f === "proofs" || f === "licences") return false;
   if (f === "snoozed") return snoozed(l);
