@@ -178,6 +178,7 @@ export function AdminLeads() {
   /** Julian: the installed app has no reload. The list and the open lead again,
    * in place: rows keep their keys, so the scroll and the selection stay. */
   const [refreshing, setRefreshing] = React.useState(false);
+  const [tick, setTick] = React.useState(0);
   const refresh = () => {
     if (refreshing) return;
     setRefreshing(true);
@@ -186,7 +187,8 @@ export function AdminLeads() {
         const rows = o.leads as LeadSummary[];
         // KV lists lag a fresh write (#662): keep a lead added a moment ago.
         setLeads((had) => [...(had ?? []).filter((r) => fresh && r.email === fresh.email && !rows.some((n) => n.id === r.id)), ...rows]);
-        setMoved((n) => n + 1);
+        // The open lead fetches again in place: a remount would drop his unsaved drafts.
+        setTick((n) => n + 1);
       })
       .catch((e: unknown) => alert(e instanceof Error ? e.message : String(e)))
       .finally(() => setRefreshing(false));
@@ -508,7 +510,7 @@ export function AdminLeads() {
 
       <section aria-label="Lead" className={cn("min-w-0 lg:min-h-0 lg:overflow-y-auto lg:bg-card/40", !open && "max-lg:hidden", filter === "proofs" && "hidden")}>
         {current ? (
-          <Detail key={`${current.id}-${moved}`} summary={current} initial={fresh?.email === current.email ? fresh : null} call={call} onChange={changed} onBack={() => { back.current = current.id ?? null; setOpen(null); }} reload={load} templates={templates} others={leads.filter((o) => o.id !== current.id && !o.trashedAt)} />
+          <Detail key={`${current.id}-${moved}`} summary={current} initial={fresh?.email === current.email ? fresh : null} call={call} onChange={changed} onBack={() => { back.current = current.id ?? null; setOpen(null); }} reload={load} tick={tick} templates={templates} others={leads.filter((o) => o.id !== current.id && !o.trashedAt)} />
         ) : (
           <p className="px-8 py-10 text-[15px] text-muted-foreground max-lg:hidden">Pick a lead to see it here.</p>
         )}
@@ -1045,7 +1047,7 @@ function EmptyTrash({ n, call, done }: { n: number; call: Call; done: () => void
 
 type Call = (init?: RequestInit & { query?: string }) => Promise<Record<string, unknown>>;
 
-function Detail({ summary, initial, call, onChange, onBack, reload, templates, others }: { summary: LeadSummary; initial?: Lead | null; call: Call; onChange: (l: Lead) => void; onBack: () => void; reload: () => void; templates: Template[]; others: LeadSummary[] }) {
+function Detail({ summary, initial, call, onChange, onBack, reload, tick, templates, others }: { summary: LeadSummary; initial?: Lead | null; call: Call; onChange: (l: Lead) => void; onBack: () => void; reload: () => void; tick: number; templates: Template[]; others: LeadSummary[] }) {
   const [lead, setLead] = React.useState<Lead | null>(initial ?? null);
   const [message, setMessage] = React.useState<Enquiry | null>(null);
   const [msgKey, setMsgKey] = React.useState<string | null>(null);
@@ -1080,9 +1082,9 @@ function Detail({ summary, initial, call, onChange, onBack, reload, templates, o
       if (l.unread) patch({ seen: true }).catch(() => {});
     }).catch(() => {});
     return () => void (live = false);
-    // Once per lead: `patch` is stable for the same key.
+    // Once per lead, and again on a refresh (`tick`): `patch` is stable for the same key.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key]);
+  }, [key, tick]);
 
   // On a phone the tapped row is gone, so focus starts at the lead's name.
   const title = React.useRef<HTMLHeadingElement>(null);
