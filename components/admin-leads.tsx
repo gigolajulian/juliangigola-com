@@ -566,7 +566,7 @@ const STEPS: readonly Stage[] = STAGES.filter((s) => s !== "Lost");
 function StageLine({ l }: { l: LeadSummary }) {
   const at = STEPS.indexOf(l.stage);
   return (
-    <span className="flex min-w-0 items-center gap-2.5 font-mono text-[12px] text-muted-foreground">
+    <span className="flex shrink-0 items-center gap-2.5 font-mono text-[12px] text-muted-foreground">
       {at >= 0 ? (
         <span aria-hidden="true" className="flex shrink-0 gap-[3px]">
           {STEPS.map((s, k) => <i key={s} className={cn("h-[3px] w-3 rounded-full", k < at ? "bg-foreground/55" : k === at ? "bg-foreground" : "bg-border")} />)}
@@ -603,7 +603,7 @@ function Row({ l, on, upcoming, onClick }: { l: LeadSummary; on: boolean; upcomi
         on && "bg-card shadow-[inset_3px_0_0_var(--accent)]",
       )}
     >
-      <span className="grid min-w-0 flex-1 gap-0.5">
+      <span className="grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)] gap-0.5">
         <span className="flex items-baseline justify-between gap-3">
           <span className="truncate font-mono text-[11px] uppercase tracking-[0.09em] text-muted-foreground">
             {kindOf(l.kind) ? <b className="font-medium text-foreground">{kindOf(l.kind)}</b> : null}
