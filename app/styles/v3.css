@@ -3,7 +3,7 @@
    old screens and /admin keep theirs. Hover rules sit under
    `(hover:hover)`; master `.page` is `.v3page` here (`.page` is the page
    transition's). Imported last. */
-:root{--bg:oklch(0.145 0.003 70); --ink:oklch(0.955 0.004 80); --mute:oklch(0.655 0.005 80);
+:root{--bg:var(--dark-bg); --ink:var(--dark-ink); --mute:var(--dark-mute);
   --line:oklch(1 0 0 / 13%);
   --display:var(--font-display),"Helvetica Neue",Arial,sans-serif; --mono:var(--font-mono),ui-monospace,monospace;
   --v3u:1vw;
@@ -30,7 +30,7 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
    Firefox (tests/ui/book.spec.ts, PR 499). */
 @media not ((hover:hover) and (pointer:fine)){.sb-thumb{visibility:hidden;pointer-events:none}html[data-sb]::after{display:none}}
 @media (max-width:700px) and (prefers-color-scheme:light){:root:not([data-theme="dark"]) .v3 .a-cover .foot{--bg:var(--l-bg);--ink:var(--l-ink);--mute:var(--l-mute);--line:var(--l-line);--accent:var(--l-accent);color:var(--ink)}}
-.v3 .a-cover,.v3 .sheet figcaption{--bg:oklch(0.145 0.003 70);--ink:oklch(0.955 0.004 80);--mute:oklch(0.78 0.005 80);--line:oklch(1 0 0 / 20%);--accent:oklch(0.72 0.095 195);color:var(--ink)}
+.v3 .a-cover,.v3 .sheet figcaption{--bg:var(--dark-bg);--ink:var(--dark-ink);--mute:oklch(0.78 0.005 80);--line:oklch(1 0 0 / 20%);--accent:var(--dark-accent);color:var(--ink)}
 .v3 *{box-sizing:border-box}
 .v3 [hidden]{display:none!important}
 .v3 #book{align-items:center}
@@ -89,7 +89,7 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .a-cover .ctas{justify-content:flex-start}
 :root[data-theme="light"] .v3 .a-cover .foot{--bg:var(--l-bg);--ink:var(--l-ink);--mute:var(--l-mute);--line:var(--l-line);--accent:var(--l-accent);color:var(--ink)}
 .v3 .a-cover .slides::after{content:"";position:absolute;inset:auto 0 0;height:22%;z-index:1;background:linear-gradient(to top,oklch(0.1 0.003 70 / .45),transparent);pointer-events:none}
-.v3 .a-cover .right>.lbl{position:absolute;z-index:2;left:var(--g);right:var(--gr);bottom:calc(100% + 14px);--ink:oklch(0.955 0.004 80);--mute:oklch(0.78 0.005 80);--line:oklch(1 0 0 / 30%);--accent:oklch(0.72 0.095 195);color:oklch(0.955 0.004 80 / .72);justify-content:flex-end;gap:10px!important;font-size:11px;bottom:calc(100% + 10px)}
+.v3 .a-cover .right>.lbl{position:absolute;z-index:2;left:var(--g);right:var(--gr);bottom:calc(100% + 14px);--ink:var(--dark-ink);--mute:oklch(0.78 0.005 80);--line:oklch(1 0 0 / 30%);--accent:var(--dark-accent);color:color-mix(in oklab,var(--dark-ink) 72%,transparent);justify-content:flex-end;gap:10px!important;font-size:11px;bottom:calc(100% + 10px)}
 .v3 .a-cover .right>.lbl .ticks{gap:4px}
 .v3 .a-cover .right>.lbl .ticks button{width:14px}}
 .v3 .a-index{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,4fr);gap:clamp(24px,5vw,80px);padding:96px var(--gr) 72px var(--g);align-items:start}
@@ -870,7 +870,7 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 .v3 .f-photo.over .ph{border-radius:4px 4px 0 0}
 /* The mid stop sits behind the name: 60% keeps white over the pale studio wall above 3:1 (booking critique, 2026-11-04). */
 .v3 .f-photo.over .ph::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,oklch(0 0 0 / 82%) 0%,oklch(0 0 0 / 60%) 34%,transparent 62%)}
-.v3 .f-photo.over .cap{position:absolute;left:0;right:0;bottom:0;padding:0 28px 32px;color:oklch(0.955 0.004 80);--line:oklch(1 0 0 / 22%);--mute:oklch(1 0 0 / 66%)}}
+.v3 .f-photo.over .cap{position:absolute;left:0;right:0;bottom:0;padding:0 28px 32px;color:var(--dark-ink);--line:oklch(1 0 0 / 22%);--mute:oklch(1 0 0 / 66%)}}
 /* Beside the calendar: the photo stops above the foot, what the session gets
    sits on it in two columns, and the studio line and ways out go under it
    (Julian, 2026-11-04). Upright tablets and phones keep them in the left column. */
