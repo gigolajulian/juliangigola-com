@@ -28,7 +28,8 @@ import { ScrollReveal } from "@/components/v3/scroll-reveal";
 import { keepNames } from "@/lib/keep-names";
 
 /* JG V3 (DESIGN.md): Inter Tight for the display type and the wordmark,
-   IBM Plex Mono for everything else. No other faces. Served from this site
+   IBM Plex Mono for everything else, and Archivo Expanded for the booking
+   card's big numbers only (`--font-figures`). No other faces. Served from this site
    through `next/font`, so a visitor makes no request to Google.
    `--font-wordmark` points at the same face (`styles/v3.css`).
    The files are committed rather than fetched by `next/font/google`
@@ -42,6 +43,14 @@ const display = localFont({
   src: "./fonts/InterTight-Variable.woff2",
   weight: "500 900",
   fallback: ["Helvetica Neue", "Arial", "sans-serif"],
+});
+/* Archivo 800 at 125% width (OFL), cut to 0-9 : $ , and space, 2.4KB.
+   Any other character falls through to Inter Tight (Julian, 2026-11-09). */
+const figures = localFont({
+  variable: "--font-figures",
+  src: "./fonts/ArchivoExpanded-Figures.woff2",
+  weight: "800",
+  adjustFontFallback: false,
 });
 const mono = localFont({
   variable: "--font-mono",
@@ -122,7 +131,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${display.variable} ${mono.variable} h-full antialiased`}
+      className={`${display.variable} ${mono.variable} ${figures.variable} h-full antialiased`}
       // Dark is the default and is what the CSS already declares, so the
       // server renders the correct theme for everyone except the visitor who
       // has chosen light. That one case is what the script below fixes.

@@ -391,7 +391,7 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .opt{height:48px;padding:0 16px;background:none;border:1px solid var(--line);color:var(--ink);font:inherit;cursor:pointer}
 .v3 .opt:disabled{color:var(--mute);text-decoration:line-through;cursor:default}
 .v3 .fig{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap}
-.v3 .fig b{font:900 clamp(3.75rem,calc(7*var(--v3u)),5.5rem)/.82 var(--display);letter-spacing:-.05em;font-variant-numeric:tabular-nums}
+.v3 .fig b{font:800 clamp(3.75rem,calc(7*var(--v3u)),5.5rem)/.82 var(--font-figures),var(--display);letter-spacing:-.035em;font-variant-numeric:tabular-nums}
 .v3 .fig span{padding-bottom:4px}
 .v3 .fld{display:flex;flex-direction:column;gap:6px}
 .v3 .fld label{display:flex;justify-content:space-between}
@@ -472,7 +472,7 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .cal .wd{color:var(--mute);padding:0 0 4px 2px}
 .v3 .cal button{display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;gap:6px;min-height:68px;padding:10px;background:none;border:1px solid var(--line);color:var(--ink);font:inherit;cursor:pointer;text-align:left}
 .v3 .cal.week button{min-height:96px}
-.v3 .cal b{font:900 1.5rem/.9 var(--display);letter-spacing:-.04em}
+.v3 .cal b{font:800 1.5rem/.9 var(--font-figures),var(--display);letter-spacing:-.035em}
 .v3 .cal button span{color:var(--mute);font-size:11px}
 .v3 .cal button .dots{display:flex;gap:3px}
 .v3 .cal button .dots i{width:5px;height:5px;border-radius:50%;background:var(--accent)}
