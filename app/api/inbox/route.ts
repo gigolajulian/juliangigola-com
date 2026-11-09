@@ -7,7 +7,7 @@ import { notify, subscribe, unsubscribe } from "@/lib/lead-push";
 import { publicKey } from "@/lib/web-push";
 import { notionPaper, notionStage } from "@/lib/notion-lead";
 import { cleanTemplates, csv, manualLead, merge, stats, type NewLead } from "@/lib/lead-crm";
-import { balance, cleanFrom, cleanInvoice, invoiceNo, mmyy, usd, type InvoiceFrom } from "@/lib/invoice";
+import { balance, cleanFrom, cleanInvoice, invoiceNo, mmyy, PHOTO_KEY, usd, type InvoiceFrom } from "@/lib/invoice";
 
 /** Where his reply templates live: not personal data, so plain JSON. */
 const TEMPLATES_KEY = "leads:templates";
@@ -188,6 +188,14 @@ export async function GET(request: Request) {
     const date = url.searchParams.get("invoiceNo") ?? "";
     return json({ from, ...(/^\d{4}-\d{2}-\d{2}$/.test(date) ? { no: invoiceNo(date, await taken(gate.inbox, date)) } : {}) });
   }
+  // A design B invoice's photo, sealed like the lead it belongs to.
+  if (url.searchParams.has("invoicePhoto")) {
+    const seal = await gate.seal;
+    if (!seal) return json({ error: "Leads need LEADS_KEY on the Worker." }, 503);
+    const key = url.searchParams.get("invoicePhoto") ?? "";
+    const raw = PHOTO_KEY.test(key) ? await gate.inbox.get(key) : null;
+    return raw ? json({ photo: await seal.open<string>(raw) }) : json({ error: "Photo not found." }, 404);
+  }
   // The numbers, and every lead as CSV (`lib/lead-crm.ts`).
   if (url.searchParams.has("stats") || url.searchParams.has("csv")) {
     const seal = await gate.seal;
@@ -286,6 +294,17 @@ export async function PATCH(request: Request) {
     const from = cleanFrom(given.invoiceFrom);
     await gate.inbox.put(FROM_KEY, await seal.seal(from));
     return json({ from });
+  }
+  // A design B photo, already framed down by the desk: stored under its own hash, so the same photo is kept once.
+  if (typeof given.invoicePhoto === "string") {
+    const seal = await gate.seal;
+    if (!seal) return json({ error: "Leads need LEADS_KEY on the Worker." }, 503);
+    const photo = given.invoicePhoto;
+    if (!photo.startsWith("data:image/jpeg;base64,") || photo.length > 4_000_000) return json({ error: "The photo must be a JPEG under 3 MB." }, 400);
+    const hash = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(photo)));
+    const key = `invoice-photo:${[...hash.slice(0, 16)].map((b) => b.toString(16).padStart(2, "0")).join("")}`;
+    if (!(await gate.inbox.get(key))) await gate.inbox.put(key, await seal.seal(photo));
+    return json({ key });
   }
   if (typeof given.key === "string" && given.key.startsWith("lead:")) return patchLead(gate.inbox, await gate.seal, given, gate.notion);
   // His reply templates, saved whole.
