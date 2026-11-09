@@ -296,7 +296,10 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 /* A name fits about two lines of its cover (width x 2.6 / letters) and its longest word fits one
    line (width x 1.4 / letters, a 900 cap is about .7em wide), never above the base size. */
 .v3 :is(.wt .ph,.sc>a){container-type:inline-size}
-.v3 .wt-n{gap:6px;padding:76px 14px 12px}.v3 .wt-n b{font-size:min(clamp(1.25rem,calc(1.6*var(--v3u)),1.75rem),calc((100cqi - 28px) * 2.6 / var(--n)),calc((100cqi - 28px) * 1.4 / var(--w)))}
+/* Grid titles: #709's curve, denser behind the type so it holds over light covers (AZURE BLOOM
+   2.5 to 3.4:1, I WANNA BE A HUMAN 4.0 to 5.2:1), no shadow round the letters. Julian picked
+   the in-between, 2026-11-09. */
+.v3 .wt-n{gap:6px;padding:76px 14px 12px;text-shadow:none;background:linear-gradient(to top,rgb(var(--scrim) / .8),rgb(var(--scrim) / .68) 16%,rgb(var(--scrim) / .5) 34%,rgb(var(--scrim) / .3) 52%,rgb(var(--scrim) / .13) 72%,rgb(var(--scrim) / .03) 88%,rgb(var(--scrim) / 0))}.v3 .wt-n b{font-size:min(clamp(1.25rem,calc(1.6*var(--v3u)),1.75rem),calc((100cqi - 28px) * 2.6 / var(--n)),calc((100cqi - 28px) * 1.4 / var(--w)))}
 .v3 .sc-n{gap:10px;padding:64px 24px 22px}.v3 .sc-n b{font-size:min(clamp(2.5rem,calc(4.6*var(--v3u)),5rem),calc((100cqi - 48px) * 2.6 / var(--n)),calc((100cqi - 48px) * 1.4 / var(--w)))}
 @media (max-width:1000px){.v3 .wgrid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (max-width:700px){.v3 .wgrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 10px}}
