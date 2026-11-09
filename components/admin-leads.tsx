@@ -28,6 +28,9 @@ import { LEAD_KEYS, leadKey, typingIn } from "@/lib/lead-keys";
 
 type Filter = "needs" | "open" | "upcoming" | Stage | "snoozed" | "archived" | "trash" | "more" | "new" | "stats" | "money" | "templates" | "hours" | "proofs" | "licences";
 /** Views that are not a list of leads. */
+/** Pull-to-refresh: how far the finger travels (px) to commit, and the most the pull shows. iOS rubber-band already halves it at the top. */
+const PULL_AT = 56;
+const PULL_MAX = 80;
 const TOOLS: Filter[] = ["more", "new", "stats", "money", "templates", "hours", "proofs", "licences"];
 
 const DAY = 864e5;
@@ -172,6 +175,57 @@ export function AdminLeads() {
       .catch((e: unknown) => setError(navigator.onLine === false || e instanceof TypeError ? OFFLINE : e instanceof Error ? e.message : String(e)));
   }, [call]);
   React.useEffect(load, [load]);
+  /** Julian: the installed app has no reload. The list and the open lead again,
+   * in place: rows keep their keys, so the scroll and the selection stay. */
+  const [refreshing, setRefreshing] = React.useState(false);
+  const [tick, setTick] = React.useState(0);
+  const refresh = () => {
+    if (refreshing) return;
+    setRefreshing(true);
+    call({ query: "?leads" })
+      .then((o) => {
+        const rows = o.leads as LeadSummary[];
+        // KV lists lag a fresh write (#662): keep a lead added a moment ago.
+        setLeads((had) => [...(had ?? []).filter((r) => fresh && r.email === fresh.email && !rows.some((n) => n.id === r.id)), ...rows]);
+        // The open lead fetches again in place: a remount would drop his unsaved drafts.
+        setTick((n) => n + 1);
+      })
+      .catch((e: unknown) => alert(e instanceof Error ? e.message : String(e)))
+      .finally(() => setRefreshing(false));
+  };
+  /** Julian: "on iPhone, swiping down on the queries should refresh". Phone list
+   * only, from the very top; passive listeners, so iOS keeps its own bounce. */
+  const [pull, setPull] = React.useState(0);
+  const latest = React.useRef(refresh);
+  React.useEffect(() => { latest.current = refresh; });
+  const listUp = !open && !TOOLS.includes(filter);
+  React.useEffect(() => {
+    if (!listUp) return;
+    let from: number | null = null;
+    let by = 0;
+    const start = (e: TouchEvent) => { from = innerWidth < 1024 && scrollY <= 0 ? e.touches[0].clientY : null; by = 0; };
+    const move = (e: TouchEvent) => {
+      if (from === null) return;
+      by = scrollY <= 0 ? Math.min(PULL_MAX, Math.max(0, e.touches[0].clientY - from)) : 0;
+      setPull(by);
+    };
+    const end = () => {
+      if (from !== null && by >= PULL_AT) latest.current();
+      from = null;
+      by = 0;
+      setPull(0);
+    };
+    addEventListener("touchstart", start, { passive: true });
+    addEventListener("touchmove", move, { passive: true });
+    addEventListener("touchend", end);
+    addEventListener("touchcancel", end);
+    return () => {
+      removeEventListener("touchstart", start);
+      removeEventListener("touchmove", move);
+      removeEventListener("touchend", end);
+      removeEventListener("touchcancel", end);
+    };
+  }, [listUp]);
   React.useEffect(() => {
     call({ query: "?templates" }).then((o) => setTemplates(o.templates as Template[])).catch(() => {});
   }, [call]);
@@ -292,7 +346,7 @@ export function AdminLeads() {
       )}
     >
       {/* Desktop: the sidebar. Every list, then this device's switches. */}
-      <nav aria-label="Lead lists" className="hidden min-h-0 flex-col overflow-y-auto border-r border-border p-2.5 lg:flex">
+      <nav aria-label="Lead lists" className="hidden min-h-0 flex-col overflow-y-auto border-r border-border p-3.5 lg:flex">
         <button type="button" onClick={() => pick("new")} className={cn(btn, primary, "mb-2 min-h-10 text-[14.5px]")}>New lead</button>
         {(["needs", "open", "upcoming"] as const).map((f) => (
           <SideLink key={f} on={filter === f} n={count(f)} onClick={() => pick(f)}>{label(f)}</SideLink>
@@ -317,14 +371,18 @@ export function AdminLeads() {
       </nav>
 
       <section aria-label="Leads" className={cn("min-w-0 lg:min-h-0 lg:border-r lg:border-border", boarding ? "lg:flex lg:flex-col" : "lg:overflow-y-auto", open && "max-lg:hidden")}>
-        <header className="grid gap-3 border-b border-border px-1 pb-3 pt-2 lg:px-5 lg:pt-4">
+        {/* Phone: the pull. Turns as it fills, spins once it commits. */}
+        <div aria-hidden="true" className="grid place-items-center overflow-hidden text-muted-foreground lg:hidden" style={{ height: pull || (refreshing ? 40 : 0), transition: pull ? "none" : "height 200ms ease-out" }}>
+          <svg viewBox="0 0 24 24" className={cn("size-[18px] fill-none stroke-current stroke-[1.8]", refreshing && "animate-spin", pull >= PULL_AT && "text-accent")} style={refreshing ? undefined : { transform: `rotate(${(pull / PULL_AT) * 270}deg)` }}><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5" /></svg>
+        </div>
+        <header className="grid gap-3.5 border-b border-border px-3 pb-4 pt-3 lg:px-7 lg:pt-6">
           {tabOf(filter) !== "more" && (
             <p className="font-mono text-[11.5px] uppercase tracking-[0.08em] text-muted-foreground lg:hidden">
               {needs ? `${needs} waiting on you` : "Nothing waiting on you"}
             </p>
           )}
           <div className="flex items-baseline justify-between gap-3">
-            <h1 style={HEAD} className="text-[40px] leading-none tracking-[-0.03em] lg:text-[28px]">{label(filter)}</h1>
+            <h1 style={HEAD} className="min-w-0 whitespace-nowrap text-[40px] leading-none tracking-[-0.03em] lg:text-[28px]">{label(filter)}</h1>
             {tool ? null : (
               <span className="flex items-center gap-3">
                 {filter === "open" ? (
@@ -334,7 +392,10 @@ export function AdminLeads() {
                     ))}
                   </span>
                 ) : null}
-                <span className="font-mono text-[12.5px] text-muted-foreground">{shown.length} {shown.length === 1 ? "lead" : "leads"}</span>
+                <span className="hidden font-mono text-[12.5px] text-muted-foreground lg:inline">{shown.length} {shown.length === 1 ? "lead" : "leads"}</span>
+                <button type="button" onClick={refresh} disabled={refreshing} aria-label="Refresh" title="Refresh (U)" className="grid size-11 place-items-center rounded-[10px] text-muted-foreground hoverable:hover:text-foreground disabled:opacity-60 lg:size-8">
+                  <svg aria-hidden="true" viewBox="0 0 24 24" className={cn("size-[17px] fill-none stroke-current stroke-[1.8]", refreshing && "animate-spin")}><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5" /></svg>
+                </button>
                 <button type="button" onClick={() => pick("new")} aria-label="New lead" className="grid size-11 place-items-center rounded-[10px] border border-border text-[22px] leading-none text-accent lg:hidden">+</button>
               </span>
             )}
@@ -449,13 +510,13 @@ export function AdminLeads() {
 
       <section aria-label="Lead" className={cn("min-w-0 lg:min-h-0 lg:overflow-y-auto lg:bg-card/40", !open && "max-lg:hidden", filter === "proofs" && "hidden")}>
         {current ? (
-          <Detail key={`${current.id}-${moved}`} summary={current} initial={fresh?.email === current.email ? fresh : null} call={call} onChange={changed} onBack={() => { back.current = current.id ?? null; setOpen(null); }} reload={load} templates={templates} others={leads.filter((o) => o.id !== current.id && !o.trashedAt)} />
+          <Detail key={`${current.id}-${moved}`} summary={current} initial={fresh?.email === current.email ? fresh : null} call={call} onChange={changed} onBack={() => { back.current = current.id ?? null; setOpen(null); }} reload={load} tick={tick} templates={templates} others={leads.filter((o) => o.id !== current.id && !o.trashedAt)} />
         ) : (
           <p className="px-8 py-10 text-[15px] text-muted-foreground max-lg:hidden">Pick a lead to see it here.</p>
         )}
       </section>
 
-      <DeskKeys leads={leads} shown={shown} open={open} setOpen={setOpen} jump={jump} pick={pick} />
+      <DeskKeys leads={leads} shown={shown} open={open} setOpen={setOpen} jump={jump} pick={pick} refresh={refresh} />
 
       {/* Phone: the tab bar, in thumb reach, above the home indicator. */}
       <nav
@@ -487,7 +548,7 @@ export function AdminLeads() {
  * an open overlay can keep them from the lead; the lead's own keys live in
  * Detail. Nothing renders until a key opens it, so the phone never sees it.
  */
-function DeskKeys({ leads, shown, open, setOpen, jump, pick }: { leads: LeadSummary[]; shown: LeadSummary[]; open: string | null; setOpen: (id: string | null) => void; jump: (l: LeadSummary) => void; pick: (f: Filter) => void }) {
+function DeskKeys({ leads, shown, open, setOpen, jump, pick, refresh }: { leads: LeadSummary[]; shown: LeadSummary[]; open: string | null; setOpen: (id: string | null) => void; jump: (l: LeadSummary) => void; pick: (f: Filter) => void; refresh: () => void }) {
   const [palette, setPalette] = React.useState(false);
   const [help, setHelp] = React.useState(false);
   // Where the open lead sat: once read, it can drop out of Your move, and J / K go on from its place.
@@ -514,6 +575,7 @@ function DeskKeys({ leads, shown, open, setOpen, jump, pick }: { leads: LeadSumm
       if (k.do === "palette") setPalette(true);
       else if (k.do === "help") setHelp(true);
       else if (k.do === "new") pick("new");
+      else if (k.do === "refresh") refresh();
       else if (k.do === "move") {
         const i = shown.findIndex((l) => l.id === open);
         // Gone from the list: the row below has slid into its place, so J stays put.
@@ -643,7 +705,7 @@ function Row({ l, on, upcoming, onClick }: { l: LeadSummary; on: boolean; upcomi
       data-lead={l.id}
       aria-current={on ? "true" : undefined}
       className={cn(
-        "flex w-full gap-3 border-b border-border px-1 py-3.5 text-left transition-colors duration-200 hoverable:hover:bg-card lg:px-5",
+        "flex w-full gap-3 border-b border-border px-3 py-[18px] text-left transition-colors duration-200 hoverable:hover:bg-card lg:px-7",
         on && "bg-card shadow-[inset_3px_0_0_var(--accent)]",
       )}
     >
@@ -985,7 +1047,7 @@ function EmptyTrash({ n, call, done }: { n: number; call: Call; done: () => void
 
 type Call = (init?: RequestInit & { query?: string }) => Promise<Record<string, unknown>>;
 
-function Detail({ summary, initial, call, onChange, onBack, reload, templates, others }: { summary: LeadSummary; initial?: Lead | null; call: Call; onChange: (l: Lead) => void; onBack: () => void; reload: () => void; templates: Template[]; others: LeadSummary[] }) {
+function Detail({ summary, initial, call, onChange, onBack, reload, tick, templates, others }: { summary: LeadSummary; initial?: Lead | null; call: Call; onChange: (l: Lead) => void; onBack: () => void; reload: () => void; tick: number; templates: Template[]; others: LeadSummary[] }) {
   const [lead, setLead] = React.useState<Lead | null>(initial ?? null);
   const [message, setMessage] = React.useState<Enquiry | null>(null);
   const [msgKey, setMsgKey] = React.useState<string | null>(null);
@@ -1020,9 +1082,9 @@ function Detail({ summary, initial, call, onChange, onBack, reload, templates, o
       if (l.unread) patch({ seen: true }).catch(() => {});
     }).catch(() => {});
     return () => void (live = false);
-    // Once per lead: `patch` is stable for the same key.
+    // Once per lead, and again on a refresh (`tick`): `patch` is stable for the same key.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key]);
+  }, [key, tick]);
 
   // On a phone the tapped row is gone, so focus starts at the lead's name.
   const title = React.useRef<HTMLHeadingElement>(null);
@@ -1061,7 +1123,7 @@ function Detail({ summary, initial, call, onChange, onBack, reload, templates, o
   });
 
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)] gap-6 px-5 py-6 lg:px-8 lg:py-7">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-8 px-6 py-8 lg:px-11 lg:py-9">
       <button type="button" onClick={onBack} className="inline-flex min-h-11 items-center gap-1 justify-self-start text-[16px] text-accent lg:hidden">
         <span aria-hidden="true">‹</span> Leads
       </button>
