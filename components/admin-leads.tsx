@@ -7,7 +7,7 @@ import { LeadProofs, ProofsDesk } from "@/components/admin-proofs";
 import { LeadUpcoming } from "@/components/lead-upcoming";
 import { TOKEN_STORE } from "@/lib/admin-github";
 import type { Enquiry } from "@/lib/inbox";
-import { isLate, leadSummary, myMove, STAGES, trashDaysLeft, type Lead, type LeadEvent, type LeadSummary, type Stage } from "@/lib/leads";
+import { isLate, leadSummary, myMove, NUDGES, quoteNudge, STAGES, trashDaysLeft, type Lead, type LeadEvent, type LeadSummary, type Stage } from "@/lib/leads";
 import { cn } from "@/lib/utils";
 import { fill, mailable } from "@/lib/lead-crm";
 import { balance, DEPOSIT, MAX_LINES, usd, type Invoice, type InvoiceFrom } from "@/lib/invoice";
@@ -46,7 +46,7 @@ function nextStep(l: LeadSummary): string | null {
   if (l.flags?.includes("stuck")) return "Refund or rebook";
   if (l.flags?.includes("no-deposit")) return "Ask for the deposit";
   if (l.stage === "Inquiry") return "Reply";
-  if (l.stage === "Quoted" && isLate(l, now())) return "Follow up";
+  if (l.stage === "Quoted") return quoteNudge(l, now());
   return myMove(l, now());
 }
 
@@ -906,6 +906,8 @@ function Detail({ summary, initial, call, onChange, onBack, reload, templates, o
   const l = lead ?? summary;
   const first = l.name.split(" ")[0];
   const late = isLate(l, now());
+  // The nudge that is due, as his matching template.
+  const nudge = templates.find((t) => t.id === `nudge${NUDGES.indexOf(quoteNudge(l, now()) as (typeof NUDGES)[number]) + 1}`);
   const reply = compose(l.email, `Re: your ${l.kind ?? "shoot"} inquiry`, `Hi ${first},\n\n`);
   const book = compose(l.email, "Booking a time", `Hi ${first},\n\nYou can pick a time here: https://juliangigola.com/book\n\n`);
   // The buttons and the keys share these.
@@ -961,7 +963,8 @@ function Detail({ summary, initial, call, onChange, onBack, reload, templates, o
       {late ? (
         <p role="status" className="flex items-center gap-3 rounded-xl bg-accent/12 px-4 py-3.5 text-[15px]">
           <span aria-hidden="true" className="text-accent">◷</span>
-          <span><b className="font-semibold text-accent">{ago(l.stageAt)} waiting.</b> {l.stage === "Quoted" ? "The quote has had no answer." : "The site promises a reply within a day."}</span>
+          <span><b className="font-semibold text-accent">{ago(l.stageAt)} waiting.</b> {l.stage === "Quoted" ? (quoteNudge(l, now()) === "Mark as lost?" ? "Three nudges, no answer. Mark it lost?" : "The quote has had no answer.") : "The site promises a reply within a day."}</span>
+          {nudge && mailable(l.email) ? <a href={ios() ? mailto(l.email, fill(nudge.subject, l), fill(nudge.body, l)) : compose(l.email, fill(nudge.subject, l), fill(nudge.body, l))} target="_blank" rel="noreferrer" className="ml-auto shrink-0 font-mono text-[12.5px] font-medium text-accent">{nudge.name} →</a> : null}
         </p>
       ) : null}
       {l.trashedAt ? (

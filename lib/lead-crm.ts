@@ -101,6 +101,9 @@ export const TEMPLATES: Template[] = [
   { id: "quote", name: "Quote", subject: "Your {kind} quote", body: "Hi {first},\n\nThanks for the details. Here is what I would suggest for the {kind} shoot, and what it costs:\n\n\n\nIf that works, I will hold a date for you.\n\nJulian" },
   { id: "book", name: "Booking link", subject: "Booking a time", body: "Hi {first},\n\nYou can pick a time here: https://juliangigola.com/book\n\nJulian" },
   { id: "follow", name: "Follow up", subject: "Checking in", body: "Hi {first},\n\nChecking in on the {kind} shoot. Happy to answer anything, or hold a date while you decide.\n\nJulian" },
+  { id: "nudge1", name: "Nudge 1", subject: "Your {kind} quote", body: "Hi {first},\n\nChecking in on the quote I sent for the {kind} shoot. Any questions, just ask.\n\nJulian" },
+  { id: "nudge2", name: "Nudge 2", subject: "Your {kind} quote", body: "Hi {first},\n\nI still have a few dates open this month if you want one held. Here is a recent shoot close to what you described:\n\n\n\nJulian" },
+  { id: "nudge3", name: "Last nudge", subject: "Your {kind} quote", body: "Hi {first},\n\nI haven't heard back, so I'll close this out unless you want to keep going. If the timing changes, write any time.\n\nJulian" },
   { id: "decline", name: "Not a fit", subject: "Your {kind} inquiry", body: "Hi {first},\n\nThank you for thinking of me. This one is not a fit for my schedule right now, but I hope it goes well.\n\nJulian" },
 ];
 export function fill(text: string, l: Pick<Lead, "name" | "kind" | "when">): string {
@@ -116,10 +119,12 @@ export function fill(text: string, l: Pick<Lead, "name" | "kind" | "when">): str
 /** Templates as he saved them, or the defaults; anything malformed is dropped. */
 export function cleanTemplates(v: unknown): Template[] {
   if (!Array.isArray(v)) return TEMPLATES;
-  return v
+  const saved = v
     .filter((t): t is Template => !!t && typeof t === "object" && typeof t.name === "string" && typeof t.subject === "string" && typeof t.body === "string")
     .slice(0, 30)
     .map((t, i) => ({ id: typeof t.id === "string" && t.id ? t.id.slice(0, 40) : `t${i}`, name: t.name.slice(0, 60), subject: t.subject.slice(0, 200), body: t.body.slice(0, 5000) }));
+  // Quote nudges came after his first save: added to a saved list, so a deleted one comes back.
+  return [...saved, ...TEMPLATES.filter((t) => t.id.startsWith("nudge") && !saved.some((s) => s.id === t.id))];
 }
 
 const WON: Stage[] = ["Confirmed", "Shot", "Delivered"];

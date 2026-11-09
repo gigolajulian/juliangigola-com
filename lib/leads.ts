@@ -100,6 +100,8 @@ export type LeadSummary = Omit<Lead, "events" | "notion" | "deposit" | "notes" |
   /** When his reminder is due, and its words, cut short. */
   due?: string;
   dueText?: string;
+  /** A quote's follow-ups, from the timeline: see `quoteTrail`. */
+  quiet?: QuoteTrail;
 };
 
 /** Events kept per lead: the timeline needs the recent ones, KV values stay small. */
@@ -214,16 +216,44 @@ export const trashDaysLeft = (trashedAt: string, now: number) => Math.ceil((Date
 
 /** Hours Julian promises to answer in; the site says "within a day". */
 export const REPLY_HOURS = 24;
-/** A quote with no answer this long is worth a nudge. */
-export const QUOTE_DAYS = 5;
+/** Days of silence after a quote before each nudge: a check-in, something useful, a polite close. */
+export const NUDGE_DAYS = [3, 7, 14];
+export const NUDGES = ["Nudge 1", "Nudge 2", "Last nudge"] as const;
+/** Quiet days after the last nudge before he is asked whether it is lost. Never automatic. */
+export const LOST_DAYS = 7;
+const DAY = 864e5;
+
+/** Since when a quote has been waiting, and the nudges he has sent since. */
+export type QuoteTrail = { from: string; n: number; last?: string };
+
+/** Counted from the timeline, not stored: silence starts at the quote or at their latest mail,
+    and his mails a day or more after that are nudges (sooner is the quote itself, or his answer). */
+export function quoteTrail(l: Pick<Lead, "stage" | "stageAt" | "events">): QuoteTrail | undefined {
+  if (l.stage !== "Quoted") return undefined;
+  const at = (e: LeadEvent) => Date.parse(e.at);
+  const wrote = Math.max(0, ...l.events.filter((e) => e.kind === "wrote").map(at));
+  const from = Math.max(Date.parse(l.stageAt), wrote);
+  const sent = l.events.filter((e) => e.kind === "replied" && at(e) >= from + DAY).map(at).sort((a, b) => a - b);
+  return { from: new Date(from).toISOString(), n: sent.length, ...(sent.length ? { last: new Date(sent[sent.length - 1]).toISOString() } : {}) };
+}
+
+type Quoted = Pick<Lead, "stage" | "stageAt" | "snoozeUntil"> & { events?: LeadEvent[]; quiet?: QuoteTrail };
+
+/** The follow-up a quote is due, or null: three nudges at 3, 7 and 14 days, then "Mark as lost?". */
+export function quoteNudge(l: Quoted, now: number): (typeof NUDGES)[number] | "Mark as lost?" | null {
+  if (l.stage !== "Quoted" || (l.snoozeUntil && Date.parse(l.snoozeUntil) > now)) return null;
+  const t = (l.events ? quoteTrail(l as Lead) : l.quiet) ?? { from: l.stageAt, n: 0 };
+  const last = t.last ? Date.parse(t.last) : 0;
+  if (t.n >= NUDGES.length) return now > last + LOST_DAYS * DAY ? "Mark as lost?" : null;
+  // Three days between nudges at least, so a late first one does not bring the second straight after.
+  return now > Math.max(Date.parse(t.from) + NUDGE_DAYS[t.n] * DAY, last + 3 * DAY) ? NUDGES[t.n] : null;
+}
 
 /** Whether a lead has waited past what was promised. Snoozed leads never are. */
-export function isLate(l: Pick<Lead, "stage" | "stageAt" | "snoozeUntil">, now: number, replyHours = REPLY_HOURS): boolean {
+export function isLate(l: Quoted, now: number, replyHours = REPLY_HOURS): boolean {
   if (l.snoozeUntil && Date.parse(l.snoozeUntil) > now) return false;
-  const waited = now - Date.parse(l.stageAt);
-  if (l.stage === "Inquiry") return waited > replyHours * 3600e3;
-  if (l.stage === "Quoted") return waited > QUOTE_DAYS * 864e5;
-  return false;
+  if (l.stage === "Inquiry") return now - Date.parse(l.stageAt) > replyHours * 3600e3;
+  return quoteNudge(l, now) !== null;
 }
 
 /** The step that is Julian's with no reminder needed, or null: a shoot to deliver, a quote owed after the call. */
@@ -238,6 +268,7 @@ export function myMove(l: Pick<Lead, "stage" | "when">, now: number): string | n
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const leadSummary = ({ events, notion, deposit, notes, remind, phone, ig, company, lostReason, source, invoices, ...rest }: Lead): LeadSummary => ({
   ...rest,
+  ...(rest.stage === "Quoted" ? { quiet: quoteTrail({ ...rest, events }) } : {}),
   ...(remind ? { due: remind.at, dueText: remind.text.slice(0, 40) } : {}),
   name: rest.name?.slice(0, 80),
   email: rest.email.slice(0, 120),
