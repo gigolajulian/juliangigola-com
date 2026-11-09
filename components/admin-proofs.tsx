@@ -101,7 +101,7 @@ export function ProofsDesk() {
         <ul className="grid border-t border-border">
           {list.map((p) => (
             <li key={p.token}>
-              <button type="button" onClick={() => setSel(p.token)} aria-current={p.token === cur.token || undefined} className={cn("grid w-full grid-cols-[44px_1fr] items-center gap-3 border-b border-border px-2 py-2.5 text-left transition-colors hoverable:hover:bg-card", p.token === cur.token && "bg-accent/10 proof-desk-on")}>
+              <button type="button" onClick={() => setSel(p.token)} aria-current={p.token === cur.token || undefined} className={cn("grid w-full grid-cols-[44px_1fr] items-center gap-3 border-b border-border px-2 py-2.5 text-left transition-colors hoverable:hover:bg-card", p.token === cur.token && "bg-accent/10")}>
                 {p.frames[0] ? (
                   // eslint-disable-next-line @next/next/no-img-element -- private proof frame
                   <img src={`/proof/${p.token}/f/${p.frames[0].id}`} alt="" className="aspect-[3/4] w-11 object-cover" />
@@ -321,7 +321,7 @@ function Activity({ p }: { p: Row }) {
         <ul className="grid border-t border-border">
           {people.map(([k, x]) => (
             <li key={k}>
-              <button type="button" onClick={() => setWho(k)} className={cn("grid w-full gap-0.5 border-b border-border px-2 py-2 text-left", k === email && "bg-accent/10 proof-desk-on")}>
+              <button type="button" onClick={() => setWho(k)} className={cn("grid w-full gap-0.5 border-b border-border px-2 py-2 text-left", k === email && "bg-accent/10")}>
                 <span className="truncate text-[14px] font-medium">{k}</span>
                 <span className="font-mono text-[11px] text-muted-foreground">{label(x, k)}</span>
               </button>

@@ -390,6 +390,23 @@ function SiteHeader() {
     addEventListener("v3:menu", open);
     return () => removeEventListener("v3:menu", open);
   }, []);
+  /* Focus goes into the drawer on open and back to the button that opened it
+     on close; the page and footer behind it are inert, the header (its close
+     button) stays live. Read in a layout effect, before inert drops focus. */
+  const opener = React.useRef<HTMLElement | null>(null);
+  React.useLayoutEffect(() => {
+    if (!menu) return;
+    opener.current = document.activeElement as HTMLElement | null;
+    const behind = [...document.querySelectorAll<HTMLElement>("#main, #main ~ .v3")];
+    behind.forEach((el) => (el.inert = true));
+    document.querySelector<HTMLElement>("#pmenu a")?.focus({ preventScroll: true });
+    return () => behind.forEach((el) => (el.inert = false));
+  }, [menu]);
+  React.useEffect(() => {
+    if (menu || !opener.current) return;
+    if (document.activeElement === document.body || document.querySelector("#pmenu")?.contains(document.activeElement)) opener.current.focus({ preventScroll: true });
+    opener.current = null;
+  }, [menu]);
   React.useEffect(() => {
     document.body.style.overflow = menu ? "hidden" : "";
     if (!menu) return;
