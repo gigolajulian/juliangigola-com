@@ -17,6 +17,9 @@ import { LEAD_KEYS, leadKey, typingIn } from "@/lib/lead-keys";
 
 // The /admin tabs the One Desk folds in, loaded only when opened.
 const AdminTraffic = React.lazy(() => import("@/components/admin-traffic").then((m) => ({ default: m.AdminTraffic })));
+const AdminSeo = React.lazy(() => import("@/components/admin-seo").then((m) => ({ default: m.AdminSeo })));
+/** Site: the /admin editor's own tabs, opened there (`?view=`), since they need the server's project data. */
+const SITE: [string, string][] = [["Pages", "/admin?view=home"], ["Work", "/admin?view=projects"], ["Motion", "/admin?view=video"]];
 
 /* ── the lead desk ────────────────────────────────────────────────
  * Julian (2026-11-03, PLAN-lead-desk.md, mock v3): every inquiry, call
@@ -29,12 +32,12 @@ const AdminTraffic = React.lazy(() => import("@/components/admin-traffic").then(
  * open lead side by side. Narrow: the list, then the lead with Back.
  * ─────────────────────────────────────────────────────────────── */
 
-type Filter = "today" | "traffic" | "needs" | "open" | "upcoming" | Stage | "snoozed" | "archived" | "trash" | "more" | "new" | "stats" | "money" | "templates" | "hours" | "proofs" | "licences";
+type Filter = "today" | "traffic" | "seo" | "needs" | "open" | "upcoming" | Stage | "snoozed" | "archived" | "trash" | "more" | "new" | "stats" | "money" | "templates" | "hours" | "proofs" | "licences";
 /** Views that are not a list of leads. */
 /** Pull-to-refresh: how far the finger travels (px) to commit, and the most the pull shows. iOS rubber-band already halves it at the top. */
 const PULL_AT = 56;
 const PULL_MAX = 80;
-const TOOLS: Filter[] = ["today", "traffic", "more", "new", "stats", "money", "templates", "hours", "proofs", "licences"];
+const TOOLS: Filter[] = ["today", "traffic", "seo", "more", "new", "stats", "money", "templates", "hours", "proofs", "licences"];
 
 const DAY = 864e5;
 const BOARD_STORE = "jg-leads-board";
@@ -353,7 +356,28 @@ export function AdminLeads() {
       {/* Desktop: the sidebar. Every list, then this device's switches. */}
       <nav aria-label="Lead lists" className="hidden min-h-0 flex-col overflow-y-auto border-r border-border p-3.5 lg:flex">
         <button type="button" onClick={() => pick("new")} className={cn(btn, primary, "mb-2 min-h-10 text-[14.5px]")}>New lead</button>
-        {desk ? <SideLink on={filter === "today"} n={needs} onClick={() => pick("today")}>Today</SideLink> : null}
+        {desk ? (
+          <>
+            <SideLink on={filter === "today"} n={needs} onClick={() => pick("today")}>Today</SideLink>
+            <SideGroup>Clients</SideGroup>
+            <SideLink on={filter === "needs"} n={needs} onClick={() => pick("needs")}>Your move</SideLink>
+            <SideLink on={filter === "open" || STAGES.includes(filter as Stage) || MORE.includes(filter)} n={count("open")} onClick={() => pick("open")}>Leads</SideLink>
+            <SideLink on={filter === "upcoming"} n={count("upcoming")} onClick={() => pick("upcoming")}>Calendar</SideLink>
+            <SideLink on={filter === "proofs"} onClick={() => pick("proofs")}>Proofs</SideLink>
+            <SideLink on={filter === "money"} onClick={() => pick("money")}>Money</SideLink>
+            <SideLink on={filter === "licences"} onClick={() => pick("licences")}>Licences</SideLink>
+            <SideGroup>Site</SideGroup>
+            {SITE.map(([t, href]) => <SideLink key={t} on={false} href={href}>{t}</SideLink>)}
+            <SideGroup>Numbers</SideGroup>
+            <SideLink on={filter === "traffic"} onClick={() => pick("traffic")}>Traffic</SideLink>
+            <SideLink on={filter === "seo"} onClick={() => pick("seo")}>SEO</SideLink>
+            <SideLink on={filter === "stats"} onClick={() => pick("stats")}>Stats</SideLink>
+            <SideGroup>Setup</SideGroup>
+            <SideLink on={filter === "hours"} onClick={() => pick("hours")}>Hours</SideLink>
+            <SideLink on={filter === "templates"} onClick={() => pick("templates")}>Templates</SideLink>
+            <SideLink on={false} onClick={doExport}>Export CSV</SideLink>
+          </>
+        ) : <>
         {(["needs", "open", "upcoming"] as const).map((f) => (
           <SideLink key={f} on={filter === f} n={count(f)} onClick={() => pick(f)}>{label(f)}</SideLink>
         ))}
@@ -373,6 +397,7 @@ export function AdminLeads() {
         <SideLink on={filter === "proofs"} onClick={() => pick("proofs")}>Galleries</SideLink>
         <SideGroup>Booking</SideGroup>
         <SideLink on={filter === "hours"} onClick={() => pick("hours")}>Hours</SideLink>
+        </>}
         <div className="mt-auto grid border-t border-border pt-2">{device}</div>
       </nav>
 
@@ -388,7 +413,7 @@ export function AdminLeads() {
             </p>
           )}
           <div className="flex items-baseline justify-between gap-3">
-            <h1 style={HEAD} className="min-w-0 whitespace-nowrap text-[40px] leading-none tracking-[-0.03em] lg:text-[28px]">{label(filter)}</h1>
+            <h1 style={HEAD} className="min-w-0 whitespace-nowrap text-[40px] leading-none tracking-[-0.03em] lg:text-[28px]">{desk && filter === "upcoming" ? "Calendar" : label(filter)}</h1>
             {tool ? null : (
               <span className="flex items-center gap-3">
                 {filter === "open" ? (
@@ -417,10 +442,10 @@ export function AdminLeads() {
             />
           )}
           {/* Phone: the stages ride in the Open tab as one row of chips. */}
-          {tab === "open" ? (
-            <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-0.5 lg:hidden">
-              {(["open", ...OPEN_STAGES] as const).map((f) => (
-                <Pill key={f} on={filter === f} n={count(f)} onClick={() => pick(f)}>{f === "open" ? "All" : f}</Pill>
+          {tab === "open" || (desk && MORE.includes(filter)) ? (
+            <div className={cn("-mx-1 flex gap-2 overflow-x-auto px-1 pb-0.5", desk ? "lg:flex-wrap" : "lg:hidden")}>
+              {(["open", ...OPEN_STAGES, ...(desk ? MORE : [])] as const).map((f) => (
+                <Pill key={f} on={filter === f} n={count(f)} onClick={() => pick(f)}>{f === "open" ? "All" : label(f)}</Pill>
               ))}
             </div>
           ) : null}
@@ -435,6 +460,8 @@ export function AdminLeads() {
           <DeskToday leads={leads} go={(l) => { setFilter(pass(l, "needs") ? "needs" : "open"); setOpen(l.id ?? null); }} pick={pick} />
         ) : filter === "traffic" ? (
           <div className="px-1 py-5 lg:px-7"><React.Suspense fallback={null}><AdminTraffic /></React.Suspense></div>
+        ) : filter === "seo" ? (
+          <div className="px-1 py-5 lg:px-7"><React.Suspense fallback={null}><AdminSeo /></React.Suspense></div>
         ) : filter === "more" ? (
           <div className="grid gap-6 py-4 lg:hidden">
             <ul className="grid">
@@ -819,12 +846,11 @@ function SideGroup({ children }: { children: React.ReactNode }) {
   return <p className="px-3 pb-1.5 pt-4 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">{children}</p>;
 }
 
-function SideLink({ on, n, onClick, children }: { on: boolean; n?: number; onClick: () => void; children: React.ReactNode }) {
+function SideLink({ on, n, onClick, href, children }: { on: boolean; n?: number; onClick?: () => void; href?: string; children: React.ReactNode }) {
+  const El = href ? "a" : "button";
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={on}
+    <El
+      {...(href ? { href } : { type: "button" as const, onClick, "aria-pressed": on })}
       className={cn(
         "flex min-h-10 items-center justify-between gap-4 rounded-lg px-3 text-[14.5px] transition-colors duration-200",
         on ? "bg-card font-semibold text-foreground shadow-[inset_2px_0_0_var(--accent)]" : "text-muted-foreground hoverable:hover:bg-card hoverable:hover:text-foreground",
@@ -832,7 +858,7 @@ function SideLink({ on, n, onClick, children }: { on: boolean; n?: number; onCli
     >
       <span>{children}</span>
       {n === undefined || n < 0 ? null : <span className={cn("font-mono text-[12.5px]", on ? "text-accent" : "text-muted-foreground")}>{n}</span>}
-    </button>
+    </El>
   );
 }
 
@@ -1029,7 +1055,7 @@ function pass(l: LeadSummary, f: Filter) {
   if (f === "open") return !closed(l.stage);
   return l.stage === f && !snoozed(l);
 }
-const LABEL: Partial<Record<Filter, string>> = { today: "Today", traffic: "Traffic", needs: "Your move", open: "All open", upcoming: "Upcoming", snoozed: "Snoozed", archived: "Archived", trash: "Trash", more: "More", new: "New lead", stats: "Stats", money: "Money", templates: "Templates", hours: "Hours", proofs: "Proofs", licences: "Licences" };
+const LABEL: Partial<Record<Filter, string>> = { today: "Today", traffic: "Traffic", seo: "SEO", needs: "Your move", open: "All open", upcoming: "Upcoming", snoozed: "Snoozed", archived: "Archived", trash: "Trash", more: "More", new: "New lead", stats: "Stats", money: "Money", templates: "Templates", hours: "Hours", proofs: "Proofs", licences: "Licences" };
 const label = (f: Filter) => LABEL[f] ?? f;
 
 /** Deletes every lead in the trash for good, after a second press. */
