@@ -1345,7 +1345,7 @@ export function AdminEditor({
               {TABS.map((group, g) => (
                 <span
                   key={g}
-                  className="flex shrink-0 border border-border p-0.5"
+                  className="flex max-w-full flex-wrap border border-border p-0.5"
                 >
                   {group.map((t) => (
                     <button
