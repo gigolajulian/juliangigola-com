@@ -89,7 +89,7 @@ export function AdminTraffic() {
         <h2 className="font-display text-xl uppercase tracking-[0]">
           Traffic
           <span className="label ml-3 text-muted-foreground">
-            {data
+            {data?.at
               ? `last 7 days · pulled ${new Date(data.at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}`
               : "last 7 days"}
           </span>
