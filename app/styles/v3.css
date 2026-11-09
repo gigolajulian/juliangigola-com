@@ -296,7 +296,9 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 /* A name fits about two lines of its cover (width x 2.6 / letters) and its longest word fits one
    line (width x 1.4 / letters, a 900 cap is about .7em wide), never above the base size. */
 .v3 :is(.wt .ph,.sc>a){container-type:inline-size}
-.v3 .wt-n{gap:6px;padding:40px 14px 12px}.v3 .wt-n b{font-size:min(clamp(1.25rem,calc(1.6*var(--v3u)),1.75rem),calc((100cqi - 28px) * 2.6 / var(--n)),calc((100cqi - 28px) * 1.4 / var(--w)))}
+/* Grid titles: a taller, softer fade so the type holds over light photos (AZURE BLOOM was 2.6:1, now 5.3:1)
+   without a band edge; Julian picked C, 2026-11-09. */
+.v3 .wt-n{gap:6px;padding:72px 14px 12px;background:linear-gradient(to top,rgb(var(--scrim) / .8) 0,rgb(var(--scrim) / .55) 50%,rgb(var(--scrim) / 0) 100%)}.v3 .wt-n b{font-size:min(clamp(1.25rem,calc(1.6*var(--v3u)),1.75rem),calc((100cqi - 28px) * 2.6 / var(--n)),calc((100cqi - 28px) * 1.4 / var(--w)))}
 .v3 .sc-n{gap:10px;padding:64px 24px 22px}.v3 .sc-n b{font-size:min(clamp(2.5rem,calc(4.6*var(--v3u)),5rem),calc((100cqi - 48px) * 2.6 / var(--n)),calc((100cqi - 48px) * 1.4 / var(--w)))}
 @media (max-width:1000px){.v3 .wgrid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (max-width:700px){.v3 .wgrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 10px}}
