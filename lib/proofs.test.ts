@@ -71,3 +71,23 @@ describe("proof activity log", () => {
     expect(device("Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Version/18.0 Mobile/15E148 Safari/604.1")).toBe("iPhone · Safari");
   });
 });
+
+describe("bank payments", () => {
+  const p = { token: "t", name: "n", included: 10, price: 15, days: 14, createdAt: "", frames: [], selects: Array.from({ length: 12 }, (_, i) => String(i)), notes: {}, views: 0 };
+  const reply = (body: unknown) => vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(JSON.stringify(body)));
+  it("locks on an accepted bank payment and marks it settling", async () => {
+    const f = reply({ status: "complete", payment_status: "unpaid", amount_total: 3000, metadata: { proof: "t" } });
+    expect(await paidFor("sk_test_x", p, "cs_test_B")).toMatchObject({ amount: 3000, pending: true });
+    f.mockRestore();
+  });
+  it("clears or drops a settling payment", async () => {
+    const { settle } = await import("@/lib/proof-submit");
+    const q = { ...p, paid: { session: "cs_test_B", amount: 3000, at: "", pending: true } };
+    let f = reply({ payment_status: "paid", amount_total: 3000 });
+    expect((await settle("sk_test_x", q))?.paid).toMatchObject({ amount: 3000, pending: undefined });
+    f.mockRestore();
+    f = reply({ payment_status: "unpaid", amount_total: 3000, payment_intent: { status: "requires_payment_method" } });
+    expect((await settle("sk_test_x", q))?.paid).toMatchObject({ amount: 0, failed: true });
+    f.mockRestore();
+  });
+});

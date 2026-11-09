@@ -49,7 +49,8 @@ export type Proof = {
   message?: string;
   /** Open Checkout session for the extras, while one is pending. */
   checkout?: string;
-  paid?: { session: string; amount: number; at: string };
+  /** `pending`: a bank (ACH) payment Stripe has accepted but not settled, about 4 business days; `failed`: it bounced, so `amount` no longer counts it. */
+  paid?: { session: string; amount: number; at: string; pending?: boolean; failed?: boolean };
   /** When the client hit Send: selects are locked from here. */
   submittedAt?: string;
   views: number;
@@ -183,6 +184,7 @@ export function publicView(p: Proof) {
     closesAt: p.closesAt ?? null,
     submitted: !!p.submittedAt,
     paid: p.paid?.amount ?? 0,
+    paidPending: !!p.paid?.pending,
   };
 }
 export type PublicProof = ReturnType<typeof publicView>;

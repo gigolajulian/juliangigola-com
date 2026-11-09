@@ -265,7 +265,7 @@ export function ProofGallery({ token, initial }: { token: string; initial: Publi
                   <span>Total</span>
                   <b>${(paid / 100).toFixed(0)} ✓</b>
                 </p>
-                <p className="proof-mu">Card through Stripe. The receipt is in your inbox.</p>
+                <p className="proof-mu">{initial.paidPending ? "Bank payment through Stripe. It clears in about 4 business days; nothing else to do." : "Paid through Stripe. The receipt is in your inbox."}</p>
               </div>
             ) : null}
             <p className="proof-mu">
@@ -443,7 +443,7 @@ export function ProofGallery({ token, initial }: { token: string; initial: Publi
               </div>
             ))}
           </div>
-          {due ? <p className="proof-stripe">Card payment through Stripe. Selects lock once you send.</p> : <p className="proof-stripe">Selects lock once you send.</p>}
+          {due ? <p className="proof-stripe">Card or bank payment through Stripe. Selects lock once you send.</p> : <p className="proof-stripe">Selects lock once you send.</p>}
         </div>
       ) : null}
     </div>

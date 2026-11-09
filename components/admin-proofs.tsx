@@ -67,7 +67,7 @@ function Timeline({ p }: { p: Proof }) {
     ["Opened", p.views ? `${p.views} ${p.views === 1 ? "view" : "views"}` : "Not opened", p.firstViewAt],
     ["Selecting", `${p.selects.length} selected`, p.firstSelectAt],
     ["Selects in", `${p.submittedBy ?? "They"} sent ${p.selects.length}${x.n ? ` · ${x.n} extra` : ""}`, p.submittedAt],
-    ...(x.n || p.paid || p.balance ? [["Paid", p.paid ? `$${(p.paid.amount / 100).toFixed(2)} · Stripe Checkout` : "Not paid", p.paid?.at] as [string, string, string | undefined]] : []),
+    ...(x.n || p.paid || p.balance ? [["Paid", p.paid ? `$${(p.paid.amount / 100).toFixed(2)} · Stripe${p.paid.pending ? " · bank, clearing" : ""}${p.paid.failed ? " · bank payment failed, follow up" : ""}` : "Not paid", p.paid?.at] as [string, string, string | undefined]] : []),
     ["In Lightroom", "Labels and Comments pulled on Publish", p.pulledAt],
   ];
   return (

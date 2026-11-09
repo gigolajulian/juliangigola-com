@@ -49,7 +49,7 @@ const lines = (items: { name: string; qty: number; cents: number }[]) =>
   );
 
 /** Checkout for the balance and the extras: the session's URL. */
-export async function checkout(key: string, p: Proof): Promise<{ id: string; url: string }> {
+export async function checkout(key: string, p: Proof, card = false): Promise<{ id: string; url: string }> {
   const x = owed(p);
   const back = proofUrl(p.token);
   const s = await stripe(
@@ -57,6 +57,7 @@ export async function checkout(key: string, p: Proof): Promise<{ id: string; url
     "/checkout/sessions",
     {
       mode: "payment",
+      ...(card ? {} : { "payment_method_types[0]": "card", "payment_method_types[1]": "us_bank_account" }),
       ...lines([
         ...(x.balance ? [{ name: "Shoot balance", qty: 1, cents: x.balance }] : []),
         ...(x.n ? [{ name: "Extra retouched frame", qty: x.n, cents: p.price * 100 }] : []),
@@ -67,8 +68,13 @@ export async function checkout(key: string, p: Proof): Promise<{ id: string; url
       "metadata[selects]": String(p.selects.length),
       ...((p.submittedBy ?? p.email) ? { customer_email: p.submittedBy ?? p.email } : {}),
     },
-    `proof-${p.token}-${p.selects.join(".")}`.slice(0, 255),
-  );
+    `proof-${p.token}-${card ? "c-" : ""}${p.selects.join(".")}`.slice(0, 255),
+  ).catch((e: unknown) => {
+    // Pay by bank (ACH, 0.8% capped at $5) needs it switched on in the Stripe dashboard; card alone until it is.
+    if (card) throw e;
+    return null;
+  });
+  if (!s) return checkout(key, p, true);
   return { id: String(s.id), url: String(s.url) };
 }
 
@@ -78,7 +84,19 @@ export async function paidFor(key: string, p: Proof, session: string): Promise<P
   if (!/^cs_(test|live)_[A-Za-z0-9]+$/.test(session) || session === p.paid?.session) return null;
   const s = await stripe(key, `/checkout/sessions/${session}`);
   const meta = s.metadata as Record<string, string> | undefined;
-  if (s.payment_status !== "paid" || meta?.proof !== p.token || Number(s.amount_total) < owed(p).cents) return null;
+  // A bank payment comes back complete but unpaid: accepted, settling in about 4 business days. The selects lock now; settle() follows it.
+  const bank = s.status === "complete" && s.payment_status === "unpaid";
+  if ((s.payment_status !== "paid" && !bank) || meta?.proof !== p.token || Number(s.amount_total) < owed(p).cents) return null;
   // Added to anything paid before the gallery was reopened.
-  return { session, amount: (p.paid?.amount ?? 0) + Number(s.amount_total), at: new Date().toISOString() };
+  return { session, amount: (p.paid?.amount ?? 0) + Number(s.amount_total), at: new Date().toISOString(), ...(bank ? { pending: true } : {}) };
+}
+
+/** A settling bank payment, checked again: cleared, bounced, or still on its way. Null when nothing changed. */
+export async function settle(key: string, p: Proof): Promise<Proof | null> {
+  if (!p.paid?.pending) return null;
+  const s = await stripe(key, `/checkout/sessions/${p.paid.session}?expand[]=payment_intent`);
+  if (s.payment_status === "paid") return { ...p, paid: { ...p.paid, pending: undefined } };
+  const pi = s.payment_intent as { status?: string } | null;
+  if (pi?.status === "requires_payment_method" || pi?.status === "canceled") return { ...p, paid: { ...p.paid, pending: undefined, failed: true, amount: Math.max(0, p.paid.amount - Number(s.amount_total)) } };
+  return null;
 }
