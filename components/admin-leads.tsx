@@ -41,8 +41,7 @@ const due = (l: LeadSummary) => !!l.due && Date.parse(l.due) <= now();
 const matches = (l: LeadSummary, words: string) => !words || [l.name, l.email, l.kind, l.snippet].some((v) => v?.toLowerCase().includes(words));
 /** A licence ending soon brings back even a Delivered lead; a snooze holds it off. */
 const renew = (l: LeadSummary) => !snoozed(l) && renewDue(l, now());
-// An ending licence brings back archived leads too, never trashed ones.
-const needsMe = (l: LeadSummary) => !l.trashedAt && (renew(l) || (!l.archivedAt && !closed(l.stage) && (due(l) || (!snoozed(l) && (l.unread || isLate(l, now()) || !!l.flags?.length || !!myMove(l, now()))))));
+const needsMe = (l: LeadSummary) => renew(l) || (!aside(l) && !closed(l.stage) && (due(l) || (!snoozed(l) && (l.unread || isLate(l, now()) || !!l.flags?.length || !!myMove(l, now())))));
 
 /** What to do next, in a word or two, and whether it is late. */
 function nextStep(l: LeadSummary): string | null {
