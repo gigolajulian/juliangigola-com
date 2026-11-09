@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { paidFor } from "@/lib/proof-submit";
-import { cleanNotes, cleanSelects, cleanSettings, extras, isOpen, isToken, newToken, owed, stage } from "@/lib/proofs";
+import { cardPrice, cleanNotes, cleanSelects, cleanSettings, extras, isOpen, isToken, newToken, owed, stage } from "@/lib/proofs";
 
 const frames = ["a", "b", "c"].map((id) => ({ id, file: `${id}.jpg`, w: 1, h: 1 }));
 
@@ -89,5 +89,17 @@ describe("bank payments", () => {
     f = reply({ payment_status: "unpaid", amount_total: 3000, payment_intent: { status: "requires_payment_method" } });
     expect((await settle("sk_test_x", q))?.paid).toMatchObject({ amount: 0, failed: true });
     f.mockRestore();
+  });
+});
+
+describe("card price", () => {
+  it("is the bank amount plus Stripe's card fee, rounded up, so the card net never falls below it", () => {
+    expect(cardPrice(0)).toBe(0);
+    expect(cardPrice(15000)).toBe(15500);
+    for (let c = 100; c <= 500000; c += 100) {
+      const card = cardPrice(c);
+      expect(card % 100).toBe(0);
+      expect(card * 0.971 - 30).toBeGreaterThanOrEqual(c);
+    }
   });
 });

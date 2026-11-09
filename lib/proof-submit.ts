@@ -1,7 +1,7 @@
 import { mail, stripe } from "@/lib/deposit";
 import { recordLead } from "@/lib/leads";
 import { alertLines, proofUrl, receiptMail, sendClient } from "@/lib/proof-mail";
-import { owed, viewerKey, writeProof, type Proof } from "@/lib/proofs";
+import { cardPrice, owed, viewerKey, writeProof, type Proof } from "@/lib/proofs";
 
 /* ── a client sends their selects ─────────────────────────────────
  * Nothing to pay: locked and mailed at once. A shoot balance or extras: a Stripe Checkout session
@@ -53,23 +53,29 @@ export async function checkout(key: string, p: Proof, method: "bank" | "card" = 
   const card = method === "card";
   const x = owed(p);
   const back = proofUrl(p.token);
+  const list = cardPrice(x.cents);
+  const what = [x.balance ? "Shoot balance" : "", x.n ? `${x.n} extra retouched ${x.n === 1 ? "frame" : "frames"}` : ""].filter(Boolean).join(" + ");
+  const tag = `proof-${p.token}-${x.cents}-${p.selects.join(".")}`;
+  // One list price on both receipts; bank gets it back as a discount.
+  const off = card
+    ? null
+    : await stripe(key, "/coupons", { amount_off: String(list - x.cents), currency: "usd", duration: "once", max_redemptions: "1", name: "Paid by bank" }, `${tag}-coupon`.slice(-255)).catch(() => null);
+  if (!card && !off) return checkout(key, p, "card");
   const s = await stripe(
     key,
     "/checkout/sessions",
     {
       mode: "payment",
       "payment_method_types[0]": card ? "card" : "us_bank_account",
-      ...lines([
-        ...(x.balance ? [{ name: "Shoot balance", qty: 1, cents: x.balance }] : []),
-        ...(x.n ? [{ name: "Extra retouched frame", qty: x.n, cents: p.price * 100 }] : []),
-      ]),
+      ...lines([{ name: `${p.name}: ${what}`, qty: 1, cents: list }]),
+      ...(off ? { "discounts[0][coupon]": String(off.id) } : {}),
       success_url: `${back}?paid={CHECKOUT_SESSION_ID}`,
       cancel_url: back,
       "metadata[proof]": p.token,
       "metadata[selects]": String(p.selects.length),
       ...((p.submittedBy ?? p.email) ? { customer_email: p.submittedBy ?? p.email } : {}),
     },
-    `proof-${p.token}-${card ? "c-" : ""}${p.selects.join(".")}`.slice(0, 255),
+    `${tag}-${method}`.slice(-255),
   ).catch((e: unknown) => {
     // Pay by bank needs ACH Direct Debit switched on in the Stripe dashboard; card until it is.
     if (card) throw e;
@@ -89,7 +95,8 @@ export async function paidFor(key: string, p: Proof, session: string): Promise<P
   const bank = s.status === "complete" && s.payment_status === "unpaid";
   if ((s.payment_status !== "paid" && !bank) || meta?.proof !== p.token || Number(s.amount_total) < owed(p).cents) return null;
   // Added to anything paid before the gallery was reopened.
-  return { session, amount: (p.paid?.amount ?? 0) + Number(s.amount_total), at: new Date().toISOString(), ...(bank ? { pending: true } : {}) };
+  // A card payment carries Stripe's fee on top: only what was owed counts toward the balance and extras.
+  return { session, amount: (p.paid?.amount ?? 0) + Math.min(Number(s.amount_total), owed(p).cents), at: new Date().toISOString(), ...(bank ? { pending: true } : {}) };
 }
 
 /** A settling bank payment, checked again: cleared, bounced, or still on its way. Null when nothing changed. */

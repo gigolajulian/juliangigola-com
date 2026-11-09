@@ -158,6 +158,13 @@ export function extras(selected: number, included: number, price: number) {
 }
 
 /** Whether the client can still see the gallery. Unsent galleries are open (Julian previews them). */
+/**
+ * The card price for what bank pays in full: Stripe's card fee (2.9% + 30c) on top, rounded up to the dollar,
+ * so Julian keeps at least the bank amount either way. Shown as the list price; bank is the discount
+ * (Julian 2026-11-09). A discount for another way to pay is allowed in California; a card surcharge is not safe.
+ */
+export const cardPrice = (cents: number) => (cents > 0 ? Math.ceil((cents + 30) / 0.971 / 100) * 100 : 0);
+
 /** What is still to pay at Send: the shoot balance first, then extra frames. A reopened gallery keeps what was already paid. */
 export function owed(p: Pick<Proof, "selects" | "included" | "price" | "paid" | "balance">) {
   let left = p.paid?.amount ?? 0;
