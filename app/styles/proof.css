@@ -179,3 +179,6 @@ html:has(.proof) #main{transform:none}
   .proof-thumbs img{width:44px;height:58px}
 }
 @media (prefers-reduced-motion:reduce){.proof *{transition:none!important}}
+
+/* Admin proofs list: the picked row's accent edge (Tailwind mangled the arbitrary inset shadow). */
+.proof-desk-on{box-shadow:inset 3px 0 var(--accent)}
