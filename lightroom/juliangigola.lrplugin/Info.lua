@@ -7,7 +7,7 @@ return {
   -- publish service, one collection per private gallery.
   LrExportServiceProvider = {
     { title = "juliangigola.com", file = "ExportServiceProvider.lua" },
-    { title = "juliangigola.com proofs", file = "ProofsServiceProvider.lua" },
+    { title = "Client Gallery", file = "ProofsServiceProvider.lua" },
   },
   VERSION = { major = 1, minor = 1, revision = 0, build = 0 },
 }

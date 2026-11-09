@@ -1,5 +1,5 @@
 --[[
-  Publish Services > juliangigola.com proofs.
+  Publish Services > Client Gallery.
 
   Each published collection is one private client gallery at
   juliangigola.com/proof/<token>. Publish uploads ~2000px watermarked JPEGs,
