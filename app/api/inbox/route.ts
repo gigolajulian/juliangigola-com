@@ -1,11 +1,11 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { authorised, bearer, canPush } from "@/lib/vouch";
 import { SAFE_IMAGE, summary, type Enquiry, type Summary } from "@/lib/inbox";
-import { backfillLead, fold, readLead, STAGES, trashDaysLeft, writeLead, type InboxRow, type Lead, type LeadSummary, type Stage } from "@/lib/leads";
+import { backfillLead, fold, PAPER, readLead, STAGES, trashDaysLeft, writeLead, type InboxRow, type Lead, type LeadSummary, type Paper, type Stage } from "@/lib/leads";
 import { sealer } from "@/lib/lead-crypto";
 import { notify, subscribe, unsubscribe } from "@/lib/lead-push";
 import { publicKey } from "@/lib/web-push";
-import { notionStage } from "@/lib/notion-lead";
+import { notionPaper, notionStage } from "@/lib/notion-lead";
 import { cleanTemplates, csv, manualLead, merge, stats, type NewLead } from "@/lib/lead-crm";
 import { balance, cleanFrom, cleanInvoice, invoiceNo, mmyy, usd, type InvoiceFrom } from "@/lib/invoice";
 
@@ -429,6 +429,8 @@ async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: Await
     mergeFrom?: string;
     invoice?: unknown;
   };
+  const { contract, release } = given as { contract?: string; release?: string };
+  for (const p of [contract, release]) if (p !== undefined && !(PAPER as readonly string[]).includes(p)) return json({ error: "Unknown status." }, 400);
   const bill = invoice === undefined ? undefined : cleanInvoice(invoice);
   if (bill && "error" in bill) return json({ error: bill.error }, 400);
   if (remind && (typeof remind.at !== "string" || isNaN(Date.parse(remind.at)))) return json({ error: "Bad time." }, 400);
@@ -443,6 +445,12 @@ async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: Await
     lead = fold(lead, lead.email, { event: { at, kind: "stage", note: stage }, stage: stage as Stage });
     // Mirrored to the Notion board; a Notion failure never blocks the desk.
     const page = await notionStage(notion, lead.email, stage as Stage, lead.notion);
+    if (page) lead.notion = page;
+  }
+  if (contract || release) {
+    const paper = { ...(contract ? { contract: contract as Paper } : {}), ...(release ? { release: release as Paper } : {}) };
+    lead = { ...lead, ...paper };
+    const page = await notionPaper(notion, lead.email, paper, lead.notion);
     if (page) lead.notion = page;
   }
   if (snoozeUntil !== undefined) lead = fold(lead, lead.email, { event: { at, kind: "snooze", note: snoozeUntil || "woken" }, snoozeUntil });

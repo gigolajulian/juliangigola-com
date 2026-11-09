@@ -46,6 +46,10 @@ export type LeadEvent = {
 /** A mail the site sent about this person: to them (book@), or about them to hello@. */
 export type Sent = { to: "client" | "hello@"; kind: string; booking?: string };
 
+/** Contract and model release, tracked from Confirmed on. */
+export const PAPER = ["Not sent", "Sent", "Signed", "Not needed"] as const;
+export type Paper = (typeof PAPER)[number];
+
 /** Something on the lead that needs him, beyond its stage. */
 export type Flag = "stuck" | "no-deposit";
 
@@ -88,6 +92,9 @@ export type Lead = {
   /** Quoted price in dollars. */
   quote?: number;
   lostReason?: string;
+  /** Paperwork for the shoot; unset reads as Not sent. */
+  contract?: Paper;
+  release?: Paper;
   /** Invoices made from this lead (`lib/invoice.ts`), oldest first. */
   invoices?: Invoice[];
   events: LeadEvent[];
@@ -224,6 +231,18 @@ export function isLate(l: Pick<Lead, "stage" | "stageAt" | "snoozeUntil">, now: 
   if (l.stage === "Inquiry") return waited > replyHours * 3600e3;
   if (l.stage === "Quoted") return waited > QUOTE_DAYS * 864e5;
   return false;
+}
+
+/** How close the shoot has to be before unsigned paperwork needs him. */
+export const PAPER_DAYS = 7;
+
+/** The paper to chase: Confirmed, the shoot within a week, and it is not Signed or Not needed. */
+export function paperDue(l: Pick<Lead, "stage" | "when" | "contract" | "release">, now: number): "contract" | "release" | null {
+  if (l.stage !== "Confirmed" || !l.when) return null;
+  const left = Date.parse(l.when) - now;
+  if (!(left >= 0 && left <= PAPER_DAYS * 864e5)) return null;
+  const open = (p?: Paper) => p !== "Signed" && p !== "Not needed";
+  return open(l.contract) ? "contract" : open(l.release) ? "release" : null;
 }
 
 // Name and email capped: KV metadata holds 1024 bytes, and the sealed summary

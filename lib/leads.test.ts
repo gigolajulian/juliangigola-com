@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { backfillLead, fold, isLate, leadKey, leadSummary, recordLead, trashDaysLeft, writeLead, type InboxRow, type Lead, type LeadSummary } from "./leads";
+import { backfillLead, fold, isLate, paperDue, leadKey, leadSummary, recordLead, trashDaysLeft, writeLead, type InboxRow, type Lead, type LeadSummary } from "./leads";
 import { sealer } from "./lead-crypto";
 
 const at = (h: number) => new Date(Date.UTC(2026, 10, 2, h)).toISOString();
@@ -234,5 +234,28 @@ describe("backfillLead", () => {
   it("skips a booking already recorded live under its Cal.com uid", () => {
     const l = fold(null, "maya@example.com", { event: { at: at(3), kind: "booking", ref: "cal-uid" } });
     expect(backfillLead(l, "maya@example.com", [row(3, { type: "booking", detail: "Headshots" })])).toBeNull();
+  });
+});
+
+describe("paperDue", () => {
+  const now = Date.parse("2026-11-08T12:00:00Z");
+  const soon = new Date(now + 3 * 864e5).toISOString();
+  const base = { stage: "Confirmed" as const, when: soon };
+
+  it("asks for the contract first, then the release, when the shoot is within a week", () => {
+    expect(paperDue(base, now)).toBe("contract");
+    expect(paperDue({ ...base, contract: "Sent" }, now)).toBe("contract");
+    expect(paperDue({ ...base, contract: "Signed" }, now)).toBe("release");
+    expect(paperDue({ ...base, contract: "Not needed", release: "Sent" }, now)).toBe("release");
+    expect(paperDue({ ...base, contract: "Signed", release: "Not needed" }, now)).toBeNull();
+  });
+
+  it("stays quiet before Confirmed, after the shoot, more than 7 days out, or with no date", () => {
+    expect(paperDue({ ...base, stage: "Quoted" }, now)).toBeNull();
+    expect(paperDue({ ...base, stage: "Shot" }, now)).toBeNull();
+    expect(paperDue({ ...base, when: new Date(now + 8 * 864e5).toISOString() }, now)).toBeNull();
+    expect(paperDue({ ...base, when: new Date(now - 3600e3).toISOString() }, now)).toBeNull();
+    expect(paperDue({ stage: "Confirmed" }, now)).toBeNull();
+    expect(paperDue({ ...base, when: new Date(now + 7 * 864e5).toISOString() }, now)).toBe("contract");
   });
 });
