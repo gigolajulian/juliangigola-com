@@ -114,7 +114,8 @@ export const metadata: Metadata = {
    takes over what it sized, and fits it again once the faces are in.
    The cover's two lines (`LATE`) and text in clipping boxes (`clips`) are
    left to that later pass, as before. Chrome holds the first paint until then
-   (`rel="expect"` in the head). */
+   (`rel="expect"`, added by the font script only under `?font=v2`: on
+   every page it held the paint for everyone, audit 2026-11-08). */
 const TYPE_EARLY = keepNames(`(function(){try{if(document.documentElement.dataset.font!=="v2")return;var s=(${typeSizer.toString()})(${JSON.stringify(LEVELS)},${JSON.stringify(sizesOf(DEFAULTS))},${JSON.stringify(SKIP)},${JSON.stringify(LIQUID)});s.scan([document.body],${JSON.stringify(`${SKIP}, ${LATE}`)},${clips.toString()});s.fit();window.__jgType=s}catch(e){}})()`);
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -162,7 +163,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             clears it. Before the first paint. */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var q=location.search,k="jg-font";if(/[?&]font=v2/.test(q))sessionStorage.setItem(k,"v2");if(/[?&]font=0/.test(q))sessionStorage.removeItem(k);if(sessionStorage.getItem(k)!=="v2")return;document.documentElement.dataset.font="v2";var l=document.createElement("link");l.rel="stylesheet";l.href="https://use.typekit.net/wxg8xur.css";document.head.appendChild(l)}catch(e){}})()`,
+            __html: `(function(){try{var q=location.search,k="jg-font";if(/[?&]font=v2/.test(q))sessionStorage.setItem(k,"v2");if(/[?&]font=0/.test(q))sessionStorage.removeItem(k);if(sessionStorage.getItem(k)!=="v2")return;document.documentElement.dataset.font="v2";var l=document.createElement("link");l.rel="stylesheet";l.href="https://use.typekit.net/wxg8xur.css";document.head.appendChild(l);var x=document.createElement("link");x.rel="expect";x.href="#jg-sized";x.setAttribute("blocking","render");document.head.appendChild(x)}catch(e){}})()`,
           }}
         />
         {/* Whether this visit gets the opening, decided before the first
@@ -195,9 +196,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             __html: `(function(){try{var kp="jg-mplan",mp=(location.search.match(/[?&]mplan=([a-z0-9,-]+)/)||[])[1];if(mp)sessionStorage.setItem(kp,mp==="0"?"0":mp.split(",").join(" "));mp=sessionStorage.getItem(kp)||"rm pages exits hover scroll reveal keys still touch splash layout";if(mp!=="0")document.documentElement.dataset.mplan=mp}catch(e){}var mo=true;try{var k3="jg-v3motion-off",q3=location.search;if(/[?&]v3motion=0/.test(q3))sessionStorage.setItem(k3,"1");else if(/[?&]v3motion/.test(q3))sessionStorage.removeItem(k3);mo=!sessionStorage.getItem(k3)}catch(e){}if(mo)document.documentElement.dataset.v3motion="";try{var kb="jg-solidhdr";if(/[?&]blur=0/.test(q3))sessionStorage.setItem(kb,"1");else if(/[?&]blur/.test(q3))sessionStorage.removeItem(kb);if(sessionStorage.getItem(kb))document.documentElement.dataset.solidhdr=""}catch(e){}try{if(!matchMedia("(prefers-reduced-motion: reduce)").matches){document.documentElement.dataset.gather="";document.documentElement.dataset.moves=""}}catch(e){}try{var q=location.search;try{if(/[?&]menu3d=1/.test(q))sessionStorage.setItem("jg-menu3d","1");if(/[?&]menu3d=0/.test(q))sessionStorage.removeItem("jg-menu3d");if(sessionStorage.getItem("jg-menu3d"))document.documentElement.dataset.menu3d=""}catch(e){}try{if(/[?&]sleeve=1/.test(q))sessionStorage.setItem("jg-sleeve","1");if(/[?&]sleeve=0/.test(q))sessionStorage.removeItem("jg-sleeve");if(sessionStorage.getItem("jg-sleeve"))document.documentElement.dataset.sleeve=""}catch(e){}if(/[?&]intro=0/.test(q)||!mo)return;var basic=/[?&]splash=basic/.test(q);var sand=/[?&]splash=sand/.test(q);var burst=/[?&]splash=burst/.test(q);var split=/[?&]splash=split/.test(q);var force=basic||sand||burst||split||/[?&]intro=1/.test(q);var seen=false;try{seen=!!sessionStorage.getItem("jg-intro")}catch(e){}var calm=matchMedia("(prefers-reduced-motion: reduce)").matches;var admin=location.pathname.indexOf("/admin")===0||location.pathname.indexOf("/proof/")===0||/^(admin|leads)[.]/.test(location.hostname);if(force||(!admin&&!seen&&!calm)){var r=document.documentElement;r.dataset.intro="1";if(sand)r.dataset.splash="sand";if(split||(location.pathname==="/"&&!burst&&!basic&&!sand&&!/[?&]splash=sheet/.test(q)))r.dataset.splash="split";else if(burst)r.dataset.splash="burst";else if(!basic&&!sand&&!/[?&]splash=sheet/.test(q))r.dataset.splash="name";if(basic){r.dataset.splash="basic";setTimeout(function(){r.dataset.intro="half";r.dataset.splashed="";setTimeout(function(){r.removeAttribute("data-intro");r.removeAttribute("data-splash")},1200)},500)}r.style.setProperty("--jg-blink-at",Math.round(100+Math.random()*160)+"ms")}}catch(e){}})()`,
           }}
         />
-        {process.env.NODE_ENV === "production" ? (
-          <link rel="expect" href="#jg-sized" {...{ blocking: "render" }} />
-        ) : null}
       </head>
       <body className="min-h-full flex flex-col">
         {/* Who Julian is, where he works and what can be booked, for
