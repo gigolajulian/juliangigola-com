@@ -420,7 +420,7 @@ export async function POST(request: Request) {
 async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: Awaited<ReturnType<typeof sealer>>, given: Record<string, unknown>, notion?: string) {
   if (!seal) return json({ error: "Leads need LEADS_KEY on the Worker." }, 503);
   const { key, stage, snoozeUntil, seen, archive, trash } = given as { key: string; stage?: string; snoozeUntil?: string; seen?: boolean; archive?: boolean; trash?: boolean };
-  const { notes, remind, details, quote, lostReason, mergeFrom, invoice } = given as {
+  const { notes, remind, details, quote, lostReason, mergeFrom, invoice, licence } = given as {
     notes?: string;
     remind?: { at?: string; text?: string } | null;
     details?: { name?: string; phone?: string; ig?: string; company?: string; source?: string; kind?: string };
@@ -428,11 +428,13 @@ async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: Await
     lostReason?: string;
     mergeFrom?: string;
     invoice?: unknown;
+    licence?: { use?: string; end?: string } | null;
   };
   const bill = invoice === undefined ? undefined : cleanInvoice(invoice);
   if (bill && "error" in bill) return json({ error: bill.error }, 400);
   if (remind && (typeof remind.at !== "string" || isNaN(Date.parse(remind.at)))) return json({ error: "Bad time." }, 400);
   if (quote !== undefined && quote !== null && !(typeof quote === "number" && quote >= 0 && quote < 1e7)) return json({ error: "Bad amount." }, 400);
+  if (licence && !(typeof licence.end === "string" && /^\d{4}-\d{2}-\d{2}$/.test(licence.end) && !isNaN(Date.parse(licence.end)))) return json({ error: "Bad date." }, 400);
   if (stage !== undefined && !(STAGES as readonly string[]).includes(stage)) return json({ error: "Unknown stage." }, 400);
   if (snoozeUntil !== undefined && snoozeUntil !== "" && isNaN(Date.parse(snoozeUntil))) return json({ error: "Bad time." }, 400);
   const id = key.slice(5);
@@ -470,6 +472,7 @@ async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: Await
   }
   if (quote !== undefined) lead = { ...lead, quote: quote ?? undefined, events: [...lead.events, { at, kind: "quote" as const, note: quote === null ? "" : String(quote) }].slice(-50) };
   if (typeof lostReason === "string") lead = { ...lead, lostReason: cut(lostReason, 80) };
+  if (licence !== undefined) lead = { ...lead, licence: licence ? { use: cut(licence.use, 80) ?? "", end: licence.end! } : undefined };
   // Another record of the same person folded into this one; the other goes for good.
   if (typeof mergeFrom === "string" && mergeFrom.startsWith("lead:") && mergeFrom !== key) {
     const other = await readLead(inbox, seal, mergeFrom.slice(5));

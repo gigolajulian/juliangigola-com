@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { backfillLead, fold, isLate, leadKey, leadSummary, recordLead, trashDaysLeft, writeLead, type InboxRow, type Lead, type LeadSummary } from "./leads";
+import { backfillLead, fold, isLate, leadKey, leadSummary, recordLead, renewDue, trashDaysLeft, writeLead, type InboxRow, type Lead, type LeadSummary } from "./leads";
 import { sealer } from "./lead-crypto";
 
 const at = (h: number) => new Date(Date.UTC(2026, 10, 2, h)).toISOString();
@@ -93,6 +93,24 @@ describe("isLate", () => {
   });
   it("flags a quote unanswered for five days", () => {
     expect(isLate({ stage: "Quoted", stageAt: at(0) }, Date.parse(at(0)) + 6 * 864e5)).toBe(true);
+  });
+});
+
+describe("renewDue", () => {
+  const licence = { use: "Web + social, US", end: "2027-03-01" };
+  const end = Date.parse("2027-03-01T12:00:00Z");
+  it("comes due 60 days before the end, not a day sooner", () => {
+    expect(renewDue({ licence }, end - 61 * 864e5)).toBe(false);
+    expect(renewDue({ licence }, end - 60 * 864e5)).toBe(true);
+    expect(renewDue({ licence }, end - 10 * 864e5)).toBe(true);
+  });
+  it("stays due once ended, and never without a licence", () => {
+    expect(renewDue({ licence }, end + 30 * 864e5)).toBe(true);
+    expect(renewDue({}, end)).toBe(false);
+  });
+  it("rides in the list summary", () => {
+    const l = fold(null, "a@b.co", { event: { at: at(0), kind: "inquiry" } });
+    expect(leadSummary({ ...l, licence }).licence).toEqual(licence);
   });
 });
 

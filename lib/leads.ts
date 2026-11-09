@@ -90,8 +90,12 @@ export type Lead = {
   lostReason?: string;
   /** Invoices made from this lead (`lib/invoice.ts`), oldest first. */
   invoices?: Invoice[];
+  /** Opt-in, for commercial work: what the photos may be used for, and the day that ends (YYYY-MM-DD). */
+  licence?: Licence;
   events: LeadEvent[];
 };
+
+export type Licence = { use: string; end: string };
 
 /** What the list shows, sealed into KV metadata (under its 1024-byte cap). `id` is added when listed. */
 export type LeadSummary = Omit<Lead, "events" | "notion" | "deposit" | "notes" | "remind" | "phone" | "ig" | "company" | "lostReason" | "source" | "invoices"> & {
@@ -217,6 +221,12 @@ export const REPLY_HOURS = 24;
 /** A quote with no answer this long is worth a nudge. */
 export const QUOTE_DAYS = 5;
 
+/** Days before a licence ends that the lead comes back to Your move. */
+export const LICENCE_DAYS = 60;
+/** Whether a licence is ending within LICENCE_DAYS (or has ended): time to offer a renewal. */
+export const renewDue = (l: Pick<Lead, "licence">, now: number) =>
+  !!l.licence && Date.parse(`${l.licence.end}T12:00:00Z`) - LICENCE_DAYS * 864e5 <= now;
+
 /** Whether a lead has waited past what was promised. Snoozed leads never are. */
 export function isLate(l: Pick<Lead, "stage" | "stageAt" | "snoozeUntil">, now: number, replyHours = REPLY_HOURS): boolean {
   if (l.snoozeUntil && Date.parse(l.snoozeUntil) > now) return false;
@@ -235,6 +245,7 @@ export const leadSummary = ({ events, notion, deposit, notes, remind, phone, ig,
   name: rest.name?.slice(0, 80),
   email: rest.email.slice(0, 120),
   ...(rest.snippet ? { snippet: rest.snippet.slice(0, 90) } : {}),
+  ...(rest.licence ? { licence: { use: rest.licence.use.slice(0, 40), end: rest.licence.end } } : {}),
   ...(deposit ? { paid: true as const } : {}),
 });
 
@@ -254,7 +265,7 @@ const META_MAX = 1000;
     the message, then most of the name, then most of the address. */
 const SHRINK: ((m: LeadSummary) => LeadSummary)[] = [
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  ({ snippet, dueText, ...m }) => m,
+  ({ snippet, dueText, ...m }) => ({ ...m, ...(m.licence ? { licence: { ...m.licence, use: "" } } : {}) }),
   (m) => ({ ...m, name: m.name.slice(0, 24) }),
   (m) => ({ ...m, name: m.name.slice(0, 8), email: m.email.slice(0, 40) }),
 ];
