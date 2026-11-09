@@ -15,7 +15,7 @@ html:has(.proof) #main{transform:none}
 .proof-tabs{display:flex;gap:22px;font:12px var(--p-mono);color:var(--muted-foreground);letter-spacing:.04em}
 .proof-tabs button{position:relative;padding:4px 0;border-bottom:1px solid transparent;transition:color .15s}
 /* 44px to the finger without moving the line: the hit area grows, the type does not */
-.proof-tabs button::before,.proof-close::before,.proof-zoom::before{content:"";position:absolute;inset:-11px -8px}
+.proof-tabs button::before,.proof-close::before,.proof-zoom::before{content:"";position:absolute;left:50%;top:50%;width:max(100% + 16px,44px);height:max(100% + 22px,44px);transform:translate(-50%,-50%)}
 .proof-tabs button:hover,.proof-tabs button[data-on]{color:var(--foreground)}
 .proof-tabs button[data-on]{border-color:var(--foreground)}
 .proof-pill{display:inline-block;min-width:20px;padding:1px 6px;margin-left:4px;text-align:center;border:1px solid var(--p-hl);transition:background .2s,color .2s,border-color .2s}
@@ -69,8 +69,7 @@ html:has(.proof) #main{transform:none}
 
 .proof-lb{position:fixed;inset:0;z-index:20;background:rgba(6,6,5,.97);color:#f1f0ed;display:flex;flex-direction:column}
 .proof-close{position:relative}
-.proof-zoom::before{inset:-18px -6px -4px -12px}
-.proof-close::before{inset:-14px -12px}
+.proof-zoom::before{left:auto;top:auto;right:-6px;bottom:-4px;width:max(100% + 18px,44px);height:max(100% + 22px,44px);transform:none}
 .proof-lt{display:flex;justify-content:space-between;padding:16px 22px;font:12px var(--p-mono);color:#92908d}
 .proof-li{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;position:relative;padding:0 56px}
 .proof-li img{max-width:100%;max-height:100%;object-fit:contain}

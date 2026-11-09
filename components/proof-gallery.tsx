@@ -43,12 +43,25 @@ export function ProofGallery({ token, initial }: { token: string; initial: Publi
   // An overlay takes focus on open and gives it back on close; the page under it is inert.
   const overlay = React.useRef<HTMLDivElement>(null);
   const covered = open !== null || step === "review";
-  React.useEffect(() => {
+  const opener = React.useRef<HTMLElement | null>(null);
+  // Layout effect: read the opener before the inert page drops its focus.
+  React.useLayoutEffect(() => {
     if (!covered) return;
-    const back = document.activeElement as HTMLElement | null;
+    opener.current = document.activeElement as HTMLElement | null;
     overlay.current?.querySelector<HTMLElement>("button")?.focus();
-    return () => back?.focus?.();
   }, [covered]);
+  React.useEffect(() => {
+    if (covered || !opener.current) return;
+    opener.current.focus();
+    opener.current = null;
+  }, [covered]);
+  // Escape leaves the review sheet, as it closes the lightbox.
+  React.useEffect(() => {
+    if (step !== "review" || busy) return;
+    const k = (e: KeyboardEvent) => e.key === "Escape" && setStep(null);
+    addEventListener("keydown", k);
+    return () => removeEventListener("keydown", k);
+  }, [step, busy]);
 
   const n = selects.length;
   const extra = Math.max(0, n - included);
