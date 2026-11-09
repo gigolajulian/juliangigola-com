@@ -99,7 +99,8 @@ describe("isLate", () => {
 describe("myMove", () => {
   const now = Date.parse(at(10));
   it("puts a shot lead and a call that has happened on Julian, nothing else", () => {
-    expect(myMove({ stage: "Shot" }, now)).toBe("Invoice + proofs");
+    expect(myMove({ stage: "Shot" }, now)).toBe("Send invoice");
+    expect(myMove({ stage: "Invoiced" }, now)).toBe("Send proofs");
     expect(myMove({ stage: "Selecting" }, now)).toBeNull();
     expect(myMove({ stage: "Call booked", when: at(5) }, now)).toBe("Send the quote");
     expect(myMove({ stage: "Call booked" }, now)).toBe("Send the quote");

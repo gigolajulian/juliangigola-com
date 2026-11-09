@@ -122,7 +122,7 @@ export function cleanTemplates(v: unknown): Template[] {
     .map((t, i) => ({ id: typeof t.id === "string" && t.id ? t.id.slice(0, 40) : `t${i}`, name: t.name.slice(0, 60), subject: t.subject.slice(0, 200), body: t.body.slice(0, 5000) }));
 }
 
-const WON: Stage[] = ["Confirmed", "Shot", "Selecting", "Delivered"];
+const WON: Stage[] = ["Confirmed", "Shot", "Invoiced", "Selecting", "Delivered"];
 const median = (xs: number[]) => {
   if (!xs.length) return null;
   const s = [...xs].sort((a, b) => a - b);

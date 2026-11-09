@@ -69,7 +69,7 @@ const at = (iso: string) =>
 /** The chip a row shows: trouble first, then late, then the stage. */
 /** A shape per stage, so the chip never relies on color alone. */
 const MARK: Record<Stage, string> = {
-  Inquiry: "○", Replied: "◐", "Call booked": "◐", Quoted: "◐", Confirmed: "●", Shot: "●", Selecting: "●", Delivered: "✓", Lost: "×",
+  Inquiry: "○", Replied: "◐", "Call booked": "◐", Quoted: "◐", Confirmed: "●", Shot: "●", Invoiced: "●", Selecting: "●", Delivered: "✓", Lost: "×",
 };
 
 function Tag({ tone, mark, children }: { tone: "plain" | "needs" | "bad" | "quiet"; mark: string; children: React.ReactNode }) {
@@ -1000,12 +1000,12 @@ function Detail({ summary, initial, call, onChange, onBack, reload, templates, o
         {l.stage === "Lost" ? (
           <p className="mt-5"><Tag tone="quiet" mark={MARK.Lost}>Lost</Tag></p>
         ) : (
-          <ol aria-label={`Stage: ${l.stage}`} className="mt-5 grid grid-cols-8 gap-1">
+          <ol aria-label={`Stage: ${l.stage}`} className="mt-5 grid grid-cols-9 gap-1">
             {STEPS.map((s, k) => {
               const at = STEPS.indexOf(l.stage);
               return (
                 <li key={s} aria-current={k === at ? "step" : undefined} className={cn("truncate border-t-[3px] pt-2 font-mono text-[11px]", k < at ? "border-foreground/55 text-muted-foreground" : k === at ? "border-foreground font-medium text-foreground" : "border-border text-muted-foreground")}>
-                  {/* A phone is too narrow for eight names: the line alone, the current one named below. */}
+                  {/* A phone is too narrow for nine names: the line alone, the current one named below. */}
                   <span className="max-sm:sr-only">{s === "Call booked" ? "Call" : s}</span>
                 </li>
               );
