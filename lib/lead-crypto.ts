@@ -14,7 +14,12 @@
 const enc = new TextEncoder();
 const dec = new TextDecoder();
 
-const b64 = (u: Uint8Array) => btoa(String.fromCharCode(...u));
+/** In chunks: spreading a whole invoice photo (100KB+) into one call overflows the stack. */
+const b64 = (u: Uint8Array) => {
+  let s = "";
+  for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode(...u.subarray(i, i + 0x8000));
+  return btoa(s);
+};
 const unb64 = (s: string) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
 
 export type Sealer = {
