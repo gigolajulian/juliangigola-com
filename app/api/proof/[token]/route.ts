@@ -95,7 +95,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
   if (owed(p).cents === 0) return json({ done: true, ...publicView(await finalize(g.env, g.kv, g.s, p)) });
   if (!key) return json({ error: "Payments are off. Reply to my email and I'll sort it." }, 503);
   try {
-    const c = await checkout(key, p);
+    const c = await checkout(key, p, b.method === "card" ? "card" : "bank");
     await writeProof(g.kv, g.s, { ...p, checkout: c.id });
     return json({ checkout: c.url });
   } catch {
