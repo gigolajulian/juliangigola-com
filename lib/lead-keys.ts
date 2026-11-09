@@ -8,6 +8,7 @@ export type LeadKey =
   | { do: "close" }
   | { do: "move"; by: 1 | -1 }
   | { do: "new" }
+  | { do: "refresh" }
   | { do: "reply" }
   | { do: "snooze" }
   | { do: "snoozeFor"; days: number }
@@ -23,6 +24,7 @@ export const LEAD_KEYS: [string, string][] = [
   ["E", "Archive"],
   ["1 to 9, 0", "Set the stage (0 is Lost)"],
   ["N", "New lead"],
+  ["U", "Refresh"],
   ["Esc", "Close"],
   ["?", "These shortcuts"],
 ];
@@ -49,6 +51,7 @@ export function leadKey(e: Press, typing: boolean, snoozing: boolean): LeadKey |
     case "j": return { do: "move", by: 1 };
     case "k": return { do: "move", by: -1 };
     case "n": return { do: "new" };
+    case "u": return { do: "refresh" };
     case "r": return { do: "reply" };
     case "s": return { do: "snooze" };
     case "e": return { do: "archive" };
