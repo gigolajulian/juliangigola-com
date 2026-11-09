@@ -779,7 +779,7 @@ export function V3Work({
        row and the page stays still; below it, a native swipe with snap. */
     const wide = matchMedia("(min-width: 768px)");
     const wheel = (e: WheelEvent) => {
-      if (!wide.matches) return;
+      if (!wide.matches || e.ctrlKey) return; // Ctrl+wheel and pinch are zoom (WCAG 1.4.4)
       e.preventDefault();
       s.scrollLeft +=
         Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX;

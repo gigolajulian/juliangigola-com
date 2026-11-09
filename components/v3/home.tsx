@@ -65,11 +65,11 @@ function Hero() {
   return (
     <div className="a-cover">
       {HERO_PRELOAD.map((p) => (
-        <link key={p.media} rel="preload" as="image" imageSrcSet={p.srcSet} imageSizes="100vw" media={p.media} />
+        <link key={p.media} rel="preload" as="image" imageSrcSet={p.srcSet} imageSizes="100vw" media={p.media} fetchPriority="high" />
       ))}
       <div className="slides">
         {HERO.map((s, n) =>
-          n === 0 || rest ? <Duo key={n} d={s.d.src} l={s.l.src} alt={HERO_ALT[n]} altL={s.l.name} sizes="100vw" className={n === i ? "on" : undefined} /> : null,
+          n === 0 || rest ? <Duo key={n} d={s.d.src} l={s.l.src} alt={HERO_ALT[n]} altL={s.l.name} sizes="100vw" fetchPriority={n === 0 ? "high" : undefined} className={n === i ? "on" : undefined} /> : null,
         )}
       </div>
       <CoverNav />
