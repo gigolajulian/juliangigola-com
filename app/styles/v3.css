@@ -3,7 +3,7 @@
    old screens and /admin keep theirs. Hover rules sit under
    `(hover:hover)`; master `.page` is `.v3page` here (`.page` is the page
    transition's). Imported last. */
-:root{--bg:oklch(0.145 0.003 70); --ink:oklch(0.955 0.004 80); --mute:oklch(0.655 0.005 80);
+:root{--bg:var(--dark-bg); --ink:var(--dark-ink); --mute:var(--dark-mute);
   --line:oklch(1 0 0 / 13%);
   --display:var(--font-display),"Helvetica Neue",Arial,sans-serif; --mono:var(--font-mono),ui-monospace,monospace;
   --v3u:1vw;
@@ -30,7 +30,7 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
    Firefox (tests/ui/book.spec.ts, PR 499). */
 @media not ((hover:hover) and (pointer:fine)){.sb-thumb{visibility:hidden;pointer-events:none}html[data-sb]::after{display:none}}
 @media (max-width:700px) and (prefers-color-scheme:light){:root:not([data-theme="dark"]) .v3 .a-cover .foot{--bg:var(--l-bg);--ink:var(--l-ink);--mute:var(--l-mute);--line:var(--l-line);--accent:var(--l-accent);color:var(--ink)}}
-.v3 .a-cover,.v3 .sheet figcaption{--bg:oklch(0.145 0.003 70);--ink:oklch(0.955 0.004 80);--mute:oklch(0.78 0.005 80);--line:oklch(1 0 0 / 20%);--accent:oklch(0.72 0.095 195);color:var(--ink)}
+.v3 .a-cover,.v3 .sheet figcaption{--bg:var(--dark-bg);--ink:var(--dark-ink);--mute:oklch(0.78 0.005 80);--line:oklch(1 0 0 / 20%);--accent:var(--dark-accent);color:var(--ink)}
 .v3 *{box-sizing:border-box}
 .v3 [hidden]{display:none!important}
 .v3 #book{align-items:center}
@@ -89,7 +89,7 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .a-cover .ctas{justify-content:flex-start}
 :root[data-theme="light"] .v3 .a-cover .foot{--bg:var(--l-bg);--ink:var(--l-ink);--mute:var(--l-mute);--line:var(--l-line);--accent:var(--l-accent);color:var(--ink)}
 .v3 .a-cover .slides::after{content:"";position:absolute;inset:auto 0 0;height:22%;z-index:1;background:linear-gradient(to top,oklch(0.1 0.003 70 / .45),transparent);pointer-events:none}
-.v3 .a-cover .right>.lbl{position:absolute;z-index:2;left:var(--g);right:var(--gr);bottom:calc(100% + 14px);--ink:oklch(0.955 0.004 80);--mute:oklch(0.78 0.005 80);--line:oklch(1 0 0 / 30%);--accent:oklch(0.72 0.095 195);color:oklch(0.955 0.004 80 / .72);justify-content:flex-end;gap:10px!important;font-size:11px;bottom:calc(100% + 10px)}
+.v3 .a-cover .right>.lbl{position:absolute;z-index:2;left:var(--g);right:var(--gr);bottom:calc(100% + 14px);--ink:var(--dark-ink);--mute:oklch(0.78 0.005 80);--line:oklch(1 0 0 / 30%);--accent:var(--dark-accent);color:color-mix(in oklab,var(--dark-ink) 72%,transparent);justify-content:flex-end;gap:10px!important;font-size:11px;bottom:calc(100% + 10px)}
 .v3 .a-cover .right>.lbl .ticks{gap:4px}
 .v3 .a-cover .right>.lbl .ticks button{width:14px}}
 .v3 .a-index{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,4fr);gap:clamp(24px,5vw,80px);padding:96px var(--gr) 72px var(--g);align-items:start}
@@ -291,12 +291,15 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
    sat flush right, 12px from the next tile's name, and the row read as
    one line ("BRAND CAMPAIGNS I WANNA BE A HUMAN", iPad, 2026-11-02). */
 /* Cover captions, grid and strip: name, then discipline, over a scrim. pretty: no lone word ("VOL. 1") on a last line. */
-.v3 :is(.wt-n,.sc-n){position:absolute;inset:auto 0 0;display:flex;flex-direction:column;pointer-events:none;color:rgb(var(--on-photo));background:linear-gradient(to top,rgb(var(--scrim) / .78),rgb(var(--scrim) / 0))}
+.v3 :is(.wt-n,.sc-n){position:absolute;inset:auto 0 0;display:flex;flex-direction:column;pointer-events:none;color:rgb(var(--on-photo));background:linear-gradient(to top,rgb(var(--scrim) / .74),rgb(var(--scrim) / .6) 16%,rgb(var(--scrim) / .4) 34%,rgb(var(--scrim) / .22) 52%,rgb(var(--scrim) / .09) 72%,rgb(var(--scrim) / .02) 88%,rgb(var(--scrim) / 0));text-shadow:0 1px 14px rgb(var(--scrim) / .4)}
 .v3 :is(.wt-n,.sc-n) b{font-family:var(--display);font-weight:900;line-height:.88;letter-spacing:-.05em;text-transform:uppercase;text-wrap:pretty}
 /* A name fits about two lines of its cover (width x 2.6 / letters) and its longest word fits one
    line (width x 1.4 / letters, a 900 cap is about .7em wide), never above the base size. */
 .v3 :is(.wt .ph,.sc>a){container-type:inline-size}
-.v3 .wt-n{gap:6px;padding:40px 14px 12px}.v3 .wt-n b{font-size:min(clamp(1.25rem,calc(1.6*var(--v3u)),1.75rem),calc((100cqi - 28px) * 2.6 / var(--n)),calc((100cqi - 28px) * 1.4 / var(--w)))}
+/* Grid titles: #709's curve, denser behind the type so it holds over light covers (AZURE BLOOM
+   2.5 to 3.4:1, I WANNA BE A HUMAN 4.0 to 5.2:1), no shadow round the letters. Julian picked
+   the in-between, 2026-11-09. */
+.v3 .wt-n{gap:6px;padding:76px 14px 12px;text-shadow:none;background:linear-gradient(to top,rgb(var(--scrim) / .8),rgb(var(--scrim) / .68) 16%,rgb(var(--scrim) / .5) 34%,rgb(var(--scrim) / .3) 52%,rgb(var(--scrim) / .13) 72%,rgb(var(--scrim) / .03) 88%,rgb(var(--scrim) / 0))}.v3 .wt-n b{font-size:min(clamp(1.25rem,calc(1.6*var(--v3u)),1.75rem),calc((100cqi - 28px) * 2.6 / var(--n)),calc((100cqi - 28px) * 1.4 / var(--w)))}
 .v3 .sc-n{gap:10px;padding:64px 24px 22px}.v3 .sc-n b{font-size:min(clamp(2.5rem,calc(4.6*var(--v3u)),5rem),calc((100cqi - 48px) * 2.6 / var(--n)),calc((100cqi - 48px) * 1.4 / var(--w)))}
 @media (max-width:1000px){.v3 .wgrid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (max-width:700px){.v3 .wgrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 10px}}
@@ -870,7 +873,7 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 .v3 .f-photo.over .ph{border-radius:4px 4px 0 0}
 /* The mid stop sits behind the name: 60% keeps white over the pale studio wall above 3:1 (booking critique, 2026-11-04). */
 .v3 .f-photo.over .ph::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,oklch(0 0 0 / 82%) 0%,oklch(0 0 0 / 60%) 34%,transparent 62%)}
-.v3 .f-photo.over .cap{position:absolute;left:0;right:0;bottom:0;padding:0 28px 32px;color:oklch(0.955 0.004 80);--line:oklch(1 0 0 / 22%);--mute:oklch(1 0 0 / 66%)}}
+.v3 .f-photo.over .cap{position:absolute;left:0;right:0;bottom:0;padding:0 28px 32px;color:var(--dark-ink);--line:oklch(1 0 0 / 22%);--mute:oklch(1 0 0 / 66%)}}
 /* Beside the calendar: the photo stops above the foot, what the session gets
    sits on it in two columns, and the studio line and ways out go under it
    (Julian, 2026-11-04). Upright tablets and phones keep them in the left column. */

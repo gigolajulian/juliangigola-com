@@ -95,13 +95,13 @@ export function ProofsDesk() {
   const toPull = list.filter((p) => p.submittedAt && !p.pulledAt).length;
   const cur = list.find((p) => p.token === sel) ?? list[0];
   return (
-    <div className="grid gap-4 px-1 py-4 lg:px-5">
+    <div className="grid grid-cols-1 gap-4 px-1 py-4 lg:px-5">
       <p className={mono}>{open.length} open · {list.length - open.length} closed · {waiting} waiting on client · {toPull} selects to pull in Lightroom · new galleries arrive from Lightroom Publish</p>
-      <div className="grid items-start gap-5 lg:grid-cols-[300px_1fr]">
+      <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[300px_1fr]">
         <ul className="grid border-t border-border">
           {list.map((p) => (
             <li key={p.token}>
-              <button type="button" onClick={() => setSel(p.token)} aria-current={p.token === cur.token || undefined} className={cn("grid w-full grid-cols-[44px_1fr] items-center gap-3 border-b border-border px-2 py-2.5 text-left transition-colors hoverable:hover:bg-card", p.token === cur.token && "bg-accent/10 proof-desk-on")}>
+              <button type="button" onClick={() => setSel(p.token)} aria-current={p.token === cur.token || undefined} className={cn("grid w-full grid-cols-[44px_1fr] items-center gap-3 border-b border-border px-2 py-2.5 text-left transition-colors hoverable:hover:bg-card", p.token === cur.token && "bg-accent/10")}>
                 {p.frames[0] ? (
                   // eslint-disable-next-line @next/next/no-img-element -- private proof frame
                   <img src={`/proof/${p.token}/f/${p.frames[0].id}`} alt="" className="aspect-[3/4] w-11 object-cover" />
@@ -179,7 +179,7 @@ function ProofCard({ p, changed }: { p: Row; changed: () => void }) {
   };
 
   return (
-    <article className="grid gap-3 rounded-[14px] border border-border p-4">
+    <article className="grid grid-cols-1 gap-3 rounded-[14px] border border-border p-4">
       <header className="flex flex-wrap items-baseline justify-between gap-2">
         <h3 className="text-[17px] font-medium">{p.name}</h3>
         <span className="flex items-center gap-2.5"><Track p={p} /><span className={cn("font-mono text-[11.5px] uppercase tracking-[0.08em]", p.submittedAt ? "text-accent" : "text-muted-foreground")}>{status(p)}</span></span>
@@ -321,7 +321,7 @@ function Activity({ p }: { p: Row }) {
         <ul className="grid border-t border-border">
           {people.map(([k, x]) => (
             <li key={k}>
-              <button type="button" onClick={() => setWho(k)} className={cn("grid w-full gap-0.5 border-b border-border px-2 py-2 text-left", k === email && "bg-accent/10 proof-desk-on")}>
+              <button type="button" onClick={() => setWho(k)} className={cn("grid w-full gap-0.5 border-b border-border px-2 py-2 text-left", k === email && "bg-accent/10")}>
                 <span className="truncate text-[14px] font-medium">{k}</span>
                 <span className="font-mono text-[11px] text-muted-foreground">{label(x, k)}</span>
               </button>

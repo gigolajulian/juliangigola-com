@@ -390,6 +390,31 @@ function SiteHeader() {
     addEventListener("v3:menu", open);
     return () => removeEventListener("v3:menu", open);
   }, []);
+  /* Focus goes into the drawer on open and back to the button that opened it
+     on close; the page and footer behind it are inert, the header (its close
+     button) stays live. Read in a layout effect, before inert drops focus. */
+  const opener = React.useRef<HTMLElement | null>(null);
+  React.useLayoutEffect(() => {
+    if (!menu) return;
+    opener.current = document.activeElement as HTMLElement | null;
+    const behind = [...document.querySelectorAll<HTMLElement>('#main, #main ~ .v3, a[href="#main"]')];
+    behind.forEach((el) => (el.inert = true));
+    document.querySelector<HTMLElement>("#pmenu a")?.focus({ preventScroll: true });
+    return () => behind.forEach((el) => (el.inert = false));
+  }, [menu]);
+  React.useEffect(() => {
+    if (menu || !opener.current) return;
+    const back = opener.current;
+    opener.current = null;
+    /* A frame later: the header's links go inert again on the cover as it
+       closes, and the browser drops focus from the close button after this
+       effect would have run (QA, 320 on the home cover). */
+    const id = requestAnimationFrame(() => {
+      const a = document.activeElement;
+      if (!a || a === document.body || a.closest("#pmenu, [inert]")) back.focus({ preventScroll: true });
+    });
+    return () => cancelAnimationFrame(id);
+  }, [menu]);
   React.useEffect(() => {
     document.body.style.overflow = menu ? "hidden" : "";
     if (!menu) return;
@@ -421,7 +446,7 @@ function SiteHeader() {
           right edge (Julian's iPhone). */}
       <div className="pwrap">
         <div className={menu ? "pdim open" : "pdim"} aria-hidden onClick={() => setMenu(false)} />
-        <nav className={menu ? "pmenu drawer open" : "pmenu drawer"} id="pmenu" aria-label="Menu" inert={!menu}>
+        <nav className={menu ? "pmenu drawer open" : "pmenu drawer"} id="pmenu" aria-label="Menu" inert={!menu} onClick={(e) => (e.target as HTMLElement).closest("a") && setMenu(false)}>
           <Link href="/">Home</Link>
           {NAV.map((n) => (
             <Link key={n.href} href={n.href} aria-current={current(path, n.href) ? "page" : undefined}>{n.label}</Link>
