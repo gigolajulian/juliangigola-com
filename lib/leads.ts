@@ -226,6 +226,13 @@ export function isLate(l: Pick<Lead, "stage" | "stageAt" | "snoozeUntil">, now: 
   return false;
 }
 
+/** The step that is Julian's with no reminder needed, or null: a shoot to deliver, a quote owed after the call. */
+export function myMove(l: Pick<Lead, "stage" | "when">, now: number): string | null {
+  if (l.stage === "Shot") return "Deliver photos + invoice";
+  if (l.stage === "Call booked" && (!l.when || Date.parse(l.when) <= now)) return "Send the quote";
+  return null;
+}
+
 // Name and email capped: KV metadata holds 1024 bytes, and the sealed summary
 // grows by a third, so one long Cal.com name must not cost the whole lead.
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
