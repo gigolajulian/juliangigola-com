@@ -49,7 +49,7 @@ const WIDE: Filter[] = ["today", "proofs", "site", "traffic", "seo"];
  * open lead side by side. Narrow: the list, then the lead with Back.
  * ─────────────────────────────────────────────────────────────── */
 
-type Filter = "today" | "traffic" | "seo" | "site" | "device" | "needs" | "open" | "upcoming" | Stage | "snoozed" | "archived" | "trash" | "more" | "new" | "stats" | "money" | "templates" | "hours" | "proofs" | "licences";
+export type Filter = "today" | "traffic" | "seo" | "site" | "device" | "needs" | "open" | "upcoming" | Stage | "snoozed" | "archived" | "trash" | "more" | "new" | "stats" | "money" | "templates" | "hours" | "proofs" | "licences";
 /** Views that are not a list of leads. */
 /** Pull-to-refresh: how far the finger travels (px) to commit, and the most the pull shows. iOS rubber-band already halves it at the top. */
 const PULL_AT = 56;
@@ -66,13 +66,13 @@ const aside = (l: LeadSummary) => !!(l.archivedAt || l.trashedAt);
 /** His reminder has come round: it beats a snooze. */
 const due = (l: LeadSummary) => !!l.due && Date.parse(l.due) <= now();
 /** The desk's search: name, email, type of shoot or their message. */
-const matches = (l: LeadSummary, words: string) => !words || [l.name, l.email, l.kind, l.snippet].some((v) => v?.toLowerCase().includes(words));
+export const matches = (l: LeadSummary, words: string) => !words || [l.name, l.email, l.kind, l.snippet].some((v) => v?.toLowerCase().includes(words));
 /** A licence ending soon brings back even a Delivered lead; a snooze holds it off. */
 const renew = (l: LeadSummary) => !snoozed(l) && renewDue(l, now());
 const needsMe = (l: LeadSummary) => renew(l) || (!aside(l) && !closed(l.stage) && (due(l) || (!snoozed(l) && (l.unread || isLate(l, now()) || !!l.flags?.length || !!paperDue(l, now()) || !!myMove(l, now())))));
 
 /** What to do next, in a word or two, and whether it is late. */
-function nextStep(l: LeadSummary): string | null {
+export function nextStep(l: LeadSummary): string | null {
   // A due reminder on a stage that has its own short step shows the step; the reminder's text stays in the lead.
   if (due(l)) return myMove(l, now()) ?? (l.dueText || "Your reminder");
   if (l.flags?.includes("stuck")) return "Refund or rebook";
@@ -90,7 +90,7 @@ const HEAD: React.CSSProperties = { fontFamily: "var(--font-display)", textTrans
 /** "intro-call" as "Intro call". */
 const kindOf = (k?: string) => (k ? k.charAt(0).toUpperCase() + k.slice(1).replace(/-/g, " ") : undefined);
 
-const ago = (iso: string) => {
+export const ago = (iso: string) => {
   const mins = Math.round((now() - Date.parse(iso)) / 60000);
   if (mins < 60) return `${Math.max(1, mins)} min`;
   if (mins < 48 * 60) return `${Math.round(mins / 60)} h`;
@@ -888,7 +888,7 @@ const PUSH_FLAG = "jg-leads-push";
 const SW_URL = "/admin/leads/sw.js";
 /** The app is the whole origin on leads.juliangigola.com, /admin/leads on the main site. */
 const swScope = () => (location.hostname.startsWith("leads.") ? "/" : "/admin/leads");
-const OFFLINE = "Offline. The desk loads again when you are back online.";
+export const OFFLINE = "Offline. The desk loads again when you are back online.";
 /** The unread count on the app icon (iPhone home screen, desktop dock), and
  * where the service worker reads it to add one per push. */
 function badge(n: number) {
@@ -1009,7 +1009,7 @@ function ImportInbox({ call, done }: { call: Call; done: () => void }) {
   );
 }
 
-function SignIn({ onKey, wrong }: { onKey: (k: string) => void; wrong: boolean }) {
+export function SignIn({ onKey, wrong }: { onKey: (k: string) => void; wrong: boolean }) {
   const [k, setK] = React.useState("");
   return (
     <form
@@ -1046,7 +1046,7 @@ function SignIn({ onKey, wrong }: { onKey: (k: string) => void; wrong: boolean }
   );
 }
 
-function pass(l: LeadSummary, f: Filter) {
+export function pass(l: LeadSummary, f: Filter) {
   if (f === "trash") return !!l.trashedAt;
   if (f === "archived") return !!l.archivedAt && !l.trashedAt;
   if (f === "needs") return needsMe(l);
@@ -1085,7 +1085,7 @@ function EmptyTrash({ n, call, done }: { n: number; call: Call; done: () => void
 
 type Call = (init?: RequestInit & { query?: string }) => Promise<Record<string, unknown>>;
 
-function Detail({ summary, initial, call, onChange, onBack, reload, tick, templates, others }: { summary: LeadSummary; initial?: Lead | null; call: Call; onChange: (l: Lead) => void; onBack: () => void; reload: () => void; tick: number; templates: Template[]; others: LeadSummary[] }) {
+export function Detail({ summary, initial, call, onChange, onBack, reload, tick, templates, others }: { summary: LeadSummary; initial?: Lead | null; call: Call; onChange: (l: Lead) => void; onBack: () => void; reload: () => void; tick: number; templates: Template[]; others: LeadSummary[] }) {
   const [lead, setLead] = React.useState<Lead | null>(initial ?? null);
   const [message, setMessage] = React.useState<Enquiry | null>(null);
   const [msgKey, setMsgKey] = React.useState<string | null>(null);
@@ -1415,7 +1415,7 @@ type Stats = {
   won: number;
   stages: Partial<Record<Stage, number>>;
 };
-const money = (n: number) => `$${Math.round(n).toLocaleString("en-US")}`;
+export const money = (n: number) => `$${Math.round(n).toLocaleString("en-US")}`;
 const hours = (h: number | null) => (h === null ? "None yet" : h < 1 ? `${Math.round(h * 60)} min` : h < 48 ? `${Math.round(h)} h` : `${Math.round(h / 24)} d`);
 
 /** The numbers: is the site turning inquiries into bookings, and how fast does he answer. */
