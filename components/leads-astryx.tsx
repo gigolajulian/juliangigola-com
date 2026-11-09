@@ -84,6 +84,15 @@ export function LeadsAstryx() {
       .then((o: { available?: number } | null) => o?.available !== undefined && setStripe(o.available))
       .catch(() => {});
   }, [call]);
+  // Astryx follows the site's own light/dark (html[data-theme], dark when unset), so the ink matches the page behind it.
+  const [mode, setMode] = React.useState<"light" | "dark">("dark");
+  React.useEffect(() => {
+    const read = () => setMode(document.documentElement.dataset.theme === "light" ? "light" : "dark");
+    read();
+    const watch = new MutationObserver(read);
+    watch.observe(document.documentElement, { attributeFilter: ["data-theme"] });
+    return () => watch.disconnect();
+  }, []);
   React.useEffect(() => {
     const mq = matchMedia("(min-width: 1024px)");
     const set = () => setWide(mq.matches);
@@ -183,7 +192,7 @@ export function LeadsAstryx() {
   ) : null;
 
   return (
-    <Theme theme={neutralTheme} mode="system">
+    <Theme theme={neutralTheme} mode={mode}>
       {/* The site sets mono capitals everywhere; Astryx sets its own type here, in the site's text face. */}
       <div data-astryx-desk="" style={{ height: wide ? "calc(100dvh - 48px)" : undefined, textTransform: "none", letterSpacing: "normal", ["--font-family-body" as string]: 'var(--font-v2-text, "Helvetica Neue", Helvetica, Arial, sans-serif)' }}>
         {wide ? (
