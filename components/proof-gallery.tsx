@@ -40,6 +40,28 @@ export function ProofGallery({ token, initial }: { token: string; initial: Publi
   const [paid, setPaid] = React.useState(initial.paid);
   const locked = step === "done";
   const swipe = React.useRef<number | null>(null);
+  // An overlay takes focus on open and gives it back on close; the page under it is inert.
+  const overlay = React.useRef<HTMLDivElement>(null);
+  const covered = open !== null || step === "review";
+  const opener = React.useRef<HTMLElement | null>(null);
+  // Layout effect: read the opener before the inert page drops its focus.
+  React.useLayoutEffect(() => {
+    if (!covered) return;
+    opener.current = document.activeElement as HTMLElement | null;
+    overlay.current?.querySelector<HTMLElement>("button")?.focus();
+  }, [covered]);
+  React.useEffect(() => {
+    if (covered || !opener.current) return;
+    opener.current.focus();
+    opener.current = null;
+  }, [covered]);
+  // Escape leaves the review sheet, as it closes the lightbox.
+  React.useEffect(() => {
+    if (step !== "review" || busy) return;
+    const k = (e: KeyboardEvent) => e.key === "Escape" && setStep(null);
+    addEventListener("keydown", k);
+    return () => removeEventListener("keydown", k);
+  }, [step, busy]);
 
   const n = selects.length;
   const extra = Math.max(0, n - included);
@@ -279,6 +301,7 @@ export function ProofGallery({ token, initial }: { token: string; initial: Publi
 
   return (
     <div className="proof">
+      <div inert={covered || undefined}>
       <Top view={view} setView={setView} n={n} included={included} due={due} />
 
       <div className="proof-intro">
@@ -291,35 +314,17 @@ export function ProofGallery({ token, initial }: { token: string; initial: Publi
           {frames.map((f, i) => {
             const at = selects.indexOf(f.id);
             return (
-              <div
-                key={f.id}
-                data-id={f.id}
-                className="proof-cell"
-                data-on={at >= 0 || undefined}
-                role="button"
-                tabIndex={0}
-                aria-pressed={at >= 0}
-                aria-label={`Frame ${i + 1}`}
-                onClick={() => toggle(f.id)}
-                onKeyDown={(e) => {
-                  if (e.key === " " || e.key === "Enter") {
-                    e.preventDefault();
-                    toggle(f.id);
-                  }
-                }}
-              >
+              <div key={f.id} data-id={f.id} className="proof-cell" data-on={at >= 0 || undefined}>
                 {/* eslint-disable-next-line @next/next/no-img-element -- private frames from the Worker, not the image CDN */}
                 <img src={src(f.id)} alt="" loading={i < 8 ? "eager" : "lazy"} width={f.w || undefined} height={f.h || undefined} draggable={false} />
+                <button type="button" className="proof-pick" aria-pressed={at >= 0} aria-label={`Frame ${i + 1}`} onClick={() => toggle(f.id)} />
                 <span className="proof-no">{pad(i)}</span>
                 <span className="proof-mark">{at >= 0 ? at + 1 : ""}</span>
                 <button
                   type="button"
                   className="proof-zoom"
                   aria-label={`Open frame ${i + 1}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setOpen(i);
-                  }}
+                  onClick={() => setOpen(i)}
                 >
                   Open
                 </button>
@@ -373,14 +378,15 @@ export function ProofGallery({ token, initial }: { token: string; initial: Publi
           </button>
         </div>
       </div>
+      </div>
 
       {open !== null ? (
-        <div className="proof-lb" role="dialog" aria-modal="true" aria-label={`Frame ${open + 1}`}>
+        <div className="proof-lb" ref={overlay} role="dialog" aria-modal="true" aria-label={`Frame ${open + 1}`}>
           <div className="proof-lt">
             <span>
               {pad(open)} / {frames.length} · {frames[open].file}
             </span>
-            <button type="button" onClick={() => setOpen(null)}>
+            <button type="button" className="proof-close" onClick={() => setOpen(null)}>
               Close
             </button>
           </div>
@@ -412,7 +418,7 @@ export function ProofGallery({ token, initial }: { token: string; initial: Publi
       ) : null}
 
       {step === "review" ? (
-        <div className="proof-over" role="dialog" aria-modal="true" aria-label="Review your selects">
+        <div className="proof-over" ref={overlay} role="dialog" aria-modal="true" aria-label="Review your selects">
           <div className="proof-rhead">
             <div>
               <p className="proof-lab">Your selects</p>
@@ -456,8 +462,8 @@ function Top({ view, setView, n, included, due, hideTabs }: { view: "all" | "sel
       <Link className="proof-word" href="/">Julian Gigola</Link>
       {hideTabs ? <span /> : (
         <nav className="proof-tabs" aria-label="Frames">
-          <button type="button" data-on={view === "all" || undefined} onClick={() => setView("all")}>All</button>
-          <button type="button" data-on={view === "selects" || undefined} onClick={() => setView("selects")}>
+          <button type="button" aria-pressed={view === "all"} data-on={view === "all" || undefined} onClick={() => setView("all")}>All</button>
+          <button type="button" aria-pressed={view === "selects"} data-on={view === "selects" || undefined} onClick={() => setView("selects")}>
             Selects <span className="proof-pill" data-on={n > 0 || undefined}>{n}</span>
           </button>
         </nav>

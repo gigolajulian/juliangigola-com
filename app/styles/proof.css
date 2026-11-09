@@ -13,7 +13,11 @@ html:has(.proof) #main{transform:none}
 .proof-top{position:sticky;top:0;z-index:8;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px;padding:16px 28px;background:var(--background);border-bottom:1px solid var(--p-hl)}
 .proof-word{font:900 22px/1 var(--font-display);letter-spacing:-.045em;text-transform:none;text-decoration:none;justify-self:start}
 .proof-tabs{display:flex;gap:22px;font:12px var(--p-mono);color:var(--muted-foreground);letter-spacing:.04em}
-.proof-tabs button{padding:4px 0;border-bottom:1px solid transparent;transition:color .15s}
+/* All sits over Selects where their hit areas meet (16px gap on a phone), so All keeps a full 44px */
+.proof-tabs button:first-child{z-index:1}
+.proof-tabs button{position:relative;padding:4px 0;border-bottom:1px solid transparent;transition:color .15s}
+/* 44px to the finger without moving the line: the hit area grows, the type does not */
+.proof-tabs button::before,.proof-close::before,.proof-zoom::before{content:"";position:absolute;left:50%;top:50%;width:max(100% + 16px,44px);height:max(100% + 22px,44px);transform:translate(-50%,-50%)}
 .proof-tabs button:hover,.proof-tabs button[data-on]{color:var(--foreground)}
 .proof-tabs button[data-on]{border-color:var(--foreground)}
 .proof-pill{display:inline-block;min-width:20px;padding:1px 6px;margin-left:4px;text-align:center;border:1px solid var(--p-hl);transition:background .2s,color .2s,border-color .2s}
@@ -32,12 +36,14 @@ html:has(.proof) #main{transform:none}
 .proof-cell:active img{transform:scale(.985)}
 .proof-cell[data-on]{outline-color:var(--accent)}
 .proof-cell[data-on] img{opacity:.72}
-.proof-cell:focus-visible{outline-color:var(--foreground)}
+.proof-cell:has(.proof-pick:focus-visible){outline-color:var(--foreground)}
+.proof .proof-pick{position:absolute;inset:0;width:100%;outline:0}
+.proof-no,.proof-mark{pointer-events:none}
 .proof-no{position:absolute;left:10px;bottom:9px;font:11px var(--p-mono);color:rgba(255,255,255,.8);text-shadow:0 1px 6px rgba(0,0,0,.6)}
 .proof-mark{position:absolute;right:10px;top:10px;width:24px;height:24px;border:1px solid rgba(255,255,255,.75);border-radius:50%;display:grid;place-items:center;font:500 11px var(--p-mono);color:#fff;background:rgba(0,0,0,.2);opacity:0;transform:scale(.8);transition:opacity .15s,transform .2s cubic-bezier(.2,.7,.2,1),background .15s}
 .proof-cell:hover .proof-mark,.proof-cell[data-on] .proof-mark{opacity:1;transform:none}
 .proof-cell[data-on] .proof-mark{background:var(--accent);border-color:var(--accent);color:var(--background)}
-.proof-zoom{position:absolute;right:6px;bottom:4px;padding:4px!important;font:11px var(--p-mono)!important;color:rgba(255,255,255,.8)!important;opacity:0;transition:opacity .15s}
+.proof-zoom{position:absolute;z-index:1;right:6px;bottom:4px;padding:4px!important;font:11px var(--p-mono)!important;color:rgba(255,255,255,.8)!important;opacity:0;transition:opacity .15s}
 .proof-cell:hover .proof-zoom,.proof-zoom:focus-visible{opacity:1}
 @media (hover:none){.proof-mark,.proof-zoom{opacity:.9;transform:none}}
 
@@ -64,6 +70,8 @@ html:has(.proof) #main{transform:none}
 .proof .proof-btn:disabled{opacity:.35;cursor:default}
 
 .proof-lb{position:fixed;inset:0;z-index:20;background:rgba(6,6,5,.97);color:#f1f0ed;display:flex;flex-direction:column}
+.proof-close{position:relative}
+.proof-zoom::before{left:auto;top:auto;right:-6px;bottom:-4px;width:max(100% + 18px,44px);height:max(100% + 22px,44px);transform:none}
 .proof-lt{display:flex;justify-content:space-between;padding:16px 22px;font:12px var(--p-mono);color:#92908d}
 .proof-li{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;position:relative;padding:0 56px}
 .proof-li img{max-width:100%;max-height:100%;object-fit:contain}
