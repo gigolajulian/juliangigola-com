@@ -13,6 +13,8 @@ import { cn } from "@/lib/utils";
  * ─────────────────────────────────────────────────────────────── */
 
 const COLUMNS: readonly Stage[] = STAGES.filter((s) => s !== "Lost");
+/** Delivered keeps only the last month, so the column stays short; the sidebar's Delivered list has them all. */
+const RECENT = 30 * 864e5;
 const money = (n: number) => `$${Math.round(n).toLocaleString("en-US")}`;
 
 export function LeadBoard({ leads, card, onMove }: { leads: LeadSummary[]; card: (l: LeadSummary) => React.ReactNode; onMove: (l: LeadSummary, stage: Stage) => void }) {
@@ -22,7 +24,7 @@ export function LeadBoard({ leads, card, onMove }: { leads: LeadSummary[]; card:
   return (
     <div className="grid min-h-0 flex-1 grid-cols-[repeat(7,minmax(168px,1fr))] overflow-x-auto">
       {COLUMNS.map((s) => {
-        const rows = leads.filter((l) => l.stage === s);
+        const rows = leads.filter((l) => l.stage === s && (s !== "Delivered" || Date.now() - Date.parse(l.stageAt) < RECENT));
         const quoted = rows.reduce((n, l) => n + (l.quote ?? 0), 0);
         return (
           <section
@@ -49,7 +51,7 @@ export function LeadBoard({ leads, card, onMove }: { leads: LeadSummary[]; card:
               over === s && "bg-accent/[0.06] shadow-[inset_0_0_0_1px_color-mix(in_oklch,var(--accent)_45%,transparent)]",
             )}
           >
-            <p className="px-3 pb-1 pt-3 text-[13.5px] font-semibold">{s}</p>
+            <p className="px-3 pb-1 pt-3 text-[13.5px] font-semibold">{s}{s === "Delivered" ? <span className="font-normal text-muted-foreground">, 30 d</span> : null}</p>
             <p className="flex justify-between border-b border-border px-3 pb-2.5 font-mono text-[12px] text-muted-foreground">
               <span>{rows.length}</span>
               <span>{quoted ? money(quoted) : null}</span>

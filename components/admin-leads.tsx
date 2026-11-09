@@ -29,6 +29,7 @@ type Filter = "needs" | "open" | "upcoming" | Stage | "snoozed" | "archived" | "
 const TOOLS: Filter[] = ["more", "new", "stats", "money", "templates", "hours", "proofs"];
 
 const DAY = 864e5;
+const BOARD_STORE = "jg-leads-board";
 const now = () => Date.now();
 const snoozed = (l: LeadSummary) => !!l.snoozeUntil && Date.parse(l.snoozeUntil) > now();
 const closed = (s: Stage) => s === "Delivered" || s === "Lost";
@@ -131,7 +132,9 @@ export function AdminLeads() {
   const [error, setError] = React.useState<string | null>(null);
   const [query, setQuery] = React.useState("");
   const [templates, setTemplates] = React.useState<Template[]>([]);
-  const [board, setBoard] = React.useState(false);
+  // List or Board, kept on this device. Leads load after hydration, so the first paint never differs.
+  const [board, setBoardState] = React.useState(() => typeof window !== "undefined" && (() => { try { return localStorage.getItem(BOARD_STORE) === "1"; } catch { return false; } })());
+  const setBoard = (on: boolean) => { setBoardState(on); try { localStorage.setItem(BOARD_STORE, on ? "1" : "0"); } catch {} };
   // A board move of the open lead: remount its pane so it shows the new stage.
   const [moved, setMoved] = React.useState(0);
 
