@@ -291,12 +291,12 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
    sat flush right, 12px from the next tile's name, and the row read as
    one line ("BRAND CAMPAIGNS I WANNA BE A HUMAN", iPad, 2026-11-02). */
 /* Cover captions, grid and strip: name, then discipline, over a scrim. pretty: no lone word ("VOL. 1") on a last line. */
-.v3 :is(.wt-n,.sc-n){position:absolute;inset:auto 0 0;display:flex;flex-direction:column;pointer-events:none;color:rgb(var(--on-photo));background:linear-gradient(to top,rgb(var(--scrim) / .78),rgb(var(--scrim) / 0))}
+.v3 :is(.wt-n,.sc-n){position:absolute;inset:auto 0 0;display:flex;flex-direction:column;pointer-events:none;color:rgb(var(--on-photo));background:linear-gradient(to top,rgb(var(--scrim) / .74),rgb(var(--scrim) / .6) 16%,rgb(var(--scrim) / .4) 34%,rgb(var(--scrim) / .22) 52%,rgb(var(--scrim) / .09) 72%,rgb(var(--scrim) / .02) 88%,rgb(var(--scrim) / 0));text-shadow:0 1px 14px rgb(var(--scrim) / .4)}
 .v3 :is(.wt-n,.sc-n) b{font-family:var(--display);font-weight:900;line-height:.88;letter-spacing:-.05em;text-transform:uppercase;text-wrap:pretty}
 /* A name fits about two lines of its cover (width x 2.6 / letters) and its longest word fits one
    line (width x 1.4 / letters, a 900 cap is about .7em wide), never above the base size. */
 .v3 :is(.wt .ph,.sc>a){container-type:inline-size}
-.v3 .wt-n{gap:6px;padding:40px 14px 12px}.v3 .wt-n b{font-size:min(clamp(1.25rem,calc(1.6*var(--v3u)),1.75rem),calc((100cqi - 28px) * 2.6 / var(--n)),calc((100cqi - 28px) * 1.4 / var(--w)))}
+.v3 .wt-n{gap:6px;padding:76px 14px 12px}.v3 .wt-n b{font-size:min(clamp(1.25rem,calc(1.6*var(--v3u)),1.75rem),calc((100cqi - 28px) * 2.6 / var(--n)),calc((100cqi - 28px) * 1.4 / var(--w)))}
 .v3 .sc-n{gap:10px;padding:64px 24px 22px}.v3 .sc-n b{font-size:min(clamp(2.5rem,calc(4.6*var(--v3u)),5rem),calc((100cqi - 48px) * 2.6 / var(--n)),calc((100cqi - 48px) * 1.4 / var(--w)))}
 @media (max-width:1000px){.v3 .wgrid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (max-width:700px){.v3 .wgrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 10px}}
