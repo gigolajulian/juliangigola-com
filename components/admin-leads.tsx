@@ -375,7 +375,7 @@ export function AdminLeads() {
       <nav aria-label="Lead lists" className="hidden min-h-0 flex-col overflow-y-auto border-r border-border p-3.5 lg:flex">
         <div className="flex items-center gap-2.5 px-2 pb-4 pt-0.5">
           <span aria-hidden="true" className="grid size-[30px] place-items-center rounded-lg bg-accent text-[12px] font-extrabold text-accent-foreground" style={{ fontFamily: "var(--font-display)" }}>JG</span>
-          <span className="grid leading-tight"><b className="text-[14px] font-semibold">Julian</b><span className="font-mono text-[10.5px] text-muted-foreground">Desk</span></span>
+          <span className="grid leading-tight"><b className="text-[14px] font-semibold">Julian</b><span className="font-mono text-[11.5px] text-muted-foreground">Desk</span></span>
         </div>
         <button type="button" onClick={() => pick("new")} className={cn(btn, primary, "mb-3 min-h-10 text-[14.5px]")}>New lead</button>
         {SECTIONS.map((x) => (
@@ -565,12 +565,12 @@ export function AdminLeads() {
             type="button"
             onClick={() => pick(t.id)}
             aria-current={tab === t.id ? "page" : undefined}
-            className={cn("relative flex min-h-[52px] flex-col items-center justify-center gap-1 font-mono text-[10.5px] tracking-[0.02em]", tab === t.id ? "text-accent" : "text-muted-foreground")}
+            className={cn("relative flex min-h-[52px] flex-col items-center justify-center gap-1 font-mono text-[11.5px] tracking-[0.02em]", tab === t.id ? "text-accent" : "text-muted-foreground")}
           >
             <svg viewBox="0 0 24 24" aria-hidden="true" className="size-[23px] fill-none stroke-current stroke-[1.6] [stroke-linecap:round] [stroke-linejoin:round]">{t.icon}</svg>
             {t.label}
             {t.id === "needs" && needs ? (
-              <span className="absolute left-[calc(50%+5px)] top-0.5 grid h-[17px] min-w-[17px] place-items-center rounded-full bg-accent px-1 text-[10.5px] font-semibold text-accent-foreground">{needs}</span>
+              <span className="absolute left-[calc(50%+5px)] top-0.5 grid h-[17px] min-w-[17px] place-items-center rounded-full bg-accent px-1 text-[11.5px] font-semibold text-accent-foreground">{needs}</span>
             ) : null}
           </button>
         ))}
@@ -780,7 +780,7 @@ function Card({ l, on, onClick }: { l: LeadSummary; on: boolean; onClick: () => 
       aria-current={on ? "true" : undefined}
       className={cn("grid w-full gap-0.5 rounded-[10px] bg-card px-2.5 py-2 text-left transition-colors duration-200 hoverable:hover:bg-muted", on && "shadow-[inset_3px_0_0_var(--accent)]")}
     >
-      <span className="flex justify-between gap-2 font-mono text-[10.5px] uppercase tracking-[0.09em] text-muted-foreground">
+      <span className="flex justify-between gap-2 font-mono text-[11.5px] uppercase tracking-[0.09em] text-muted-foreground">
         <span className="truncate" title={kindOf(l.kind)}>{shootTag(l.kind)}</span>
         <span className="shrink-0">{ago(l.lastAt)}</span>
       </span>
@@ -832,6 +832,7 @@ function ListResizer({ w, onChange }: { w: number; onChange: (w: number | null) 
         save(clampW(drag.current.w + e.clientX - drag.current.x));
         drag.current = null;
       }}
+      onPointerCancel={() => (drag.current = null)}
       onDoubleClick={() => save(null)}
       onKeyDown={(e) => {
         if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
@@ -2084,6 +2085,13 @@ function useDeskLeft() {
     mq.addEventListener("change", set);
     return () => mq.removeEventListener("change", set);
   }, []);
+  // What the page covers leaves the tab order and the screen reader while it is up.
+  React.useEffect(() => {
+    if (!el) return;
+    const hid = [...el.querySelectorAll<HTMLElement>(':scope > nav, :scope > section[aria-label="Leads"], :scope > [role="separator"]')];
+    hid.forEach((n) => (n.inert = true));
+    return () => hid.forEach((n) => (n.inert = false));
+  }, [el]);
   return el;
 }
 
@@ -2488,14 +2496,14 @@ function DeskToday({ leads, go, pick }: { leads: LeadSummary[]; go: (l: LeadSumm
   const card = "rounded-xl bg-card";
   const kpi = (k: string, v: React.ReactNode, sub: React.ReactNode, cls?: string) => (
     <div className={cn(card, "grid content-between gap-1 px-3.5 py-3", cls)} style={{ containerType: "inline-size" }}>
-      <span className="font-mono text-[10.5px] uppercase tracking-[0.08em] text-muted-foreground">{k}</span>
+      <span className="font-mono text-[11.5px] uppercase tracking-[0.08em] text-muted-foreground">{k}</span>
       {/* A long figure ($1,234.56 at 390) shrinks to the tile instead of spilling or cutting. */}
       <span style={{ ...HEAD, fontSize: typeof v === "string" ? `min(26px, ${(180 / v.length).toFixed(1)}cqi)` : 26 }} className="leading-none tabular-nums [overflow-wrap:anywhere]">{v}</span>
       <span className="font-mono text-[12px] leading-snug text-muted-foreground [overflow-wrap:anywhere]">{sub}</span>
     </div>
   );
   const head = (title: string, more: string, f: Filter) => (
-    <h2 style={{ textTransform: "uppercase" }} className="label mb-1 flex items-baseline justify-between font-mono text-[10.5px] uppercase tracking-[0.1em] text-muted-foreground">
+    <h2 style={{ textTransform: "uppercase" }} className="label mb-1 flex items-baseline justify-between font-mono text-[11.5px] uppercase tracking-[0.1em] text-muted-foreground">
       {title}
       <button type="button" onClick={() => pick(f)} className="min-h-8 tracking-normal text-accent hoverable:hover:underline">{more} →</button>
     </h2>
