@@ -102,11 +102,13 @@ ${rows(summary)}
 
 /** Julian's alert to hello@: plain lines for `mail()` in lib/deposit. */
 export function alertLines(p: Proof): { subject: string; lines: string[] } {
-  const paid = p.paid ? `, $${(p.paid.amount / 100).toFixed(0)} paid` : "";
+  const paid = p.paid ? `, $${(p.paid.amount / 100).toFixed(0)} paid${p.paid.pending ? " by bank, clearing in about 4 business days" : ""}` : "";
   return {
     subject: `Selects in: ${p.name} (${p.selects.length}${paid})`,
     lines: [
-      `${p.email ?? "The client"} sent ${p.selects.length} selects for ${p.name}${paid}.`,
+      `${p.submittedBy ?? p.email ?? "The client"} sent ${p.selects.length} selects for ${p.name}${paid}.`,
+      ...(p.balance ? [`Shoot balance: $${p.balance}.`] : []),
+      `${Math.min(p.selects.length, p.included)} included${p.selects.length > p.included ? ` · ${p.selects.length - p.included} extra × $${p.price} = $${(p.selects.length - p.included) * p.price}` : ""}.`,
       ...(p.message ? ["", `Message: ${p.message}`] : []),
       "",
       ...fileList(p),
