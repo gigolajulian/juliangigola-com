@@ -281,6 +281,9 @@ export function myMove(l: Pick<Lead, "stage" | "when">, now: number): string | n
   return null;
 }
 
+/** A reminder cut to its first step for the list tag: "Send invoice, then send proofs" reads "Send invoice". */
+export const shortStep = (text: string) => text.split(/,|;| and | then /i)[0].trim().split(/\s+/).slice(0, 3).join(" ");
+
 /** How close the shoot has to be before unsigned paperwork needs him. */
 export const PAPER_DAYS = 7;
 

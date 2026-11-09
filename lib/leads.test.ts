@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { backfillLead, fold, isLate, paperDue, quoteNudge, leadKey, myMove, leadSummary, recordLead, renewDue, trashDaysLeft, writeLead, type InboxRow, type Lead, type LeadSummary } from "./leads";
+import { backfillLead, fold, isLate, shortStep, paperDue, quoteNudge, leadKey, myMove, leadSummary, recordLead, renewDue, trashDaysLeft, writeLead, type InboxRow, type Lead, type LeadSummary } from "./leads";
 import { sealer } from "./lead-crypto";
 
 const at = (h: number) => new Date(Date.UTC(2026, 10, 2, h)).toISOString();
@@ -328,5 +328,13 @@ describe("paperDue", () => {
     expect(paperDue({ ...base, when: new Date(now - 3600e3).toISOString() }, now)).toBeNull();
     expect(paperDue({ stage: "Confirmed" }, now)).toBeNull();
     expect(paperDue({ ...base, when: new Date(now + 7 * 864e5).toISOString() }, now)).toBe("contract");
+  });
+});
+
+describe("shortStep", () => {
+  it("keeps the first step, three words at most", () => {
+    expect(shortStep("Send invoice, then send proofs")).toBe("Send invoice");
+    expect(shortStep("Send invoice and photos to Jenin")).toBe("Send invoice");
+    expect(shortStep("Call her back about the wedding date")).toBe("Call her back");
   });
 });

@@ -8,7 +8,7 @@ import { LeadProofs, ProofsDesk } from "@/components/admin-proofs";
 import { LeadUpcoming } from "@/components/lead-upcoming";
 import { TOKEN_STORE } from "@/lib/admin-github";
 import type { Enquiry } from "@/lib/inbox";
-import { isLate, leadSummary, myMove, NUDGES, PAPER, paperDue, quoteNudge, renewDue, STAGES, trashDaysLeft, type Lead, type LeadEvent, type LeadSummary, type Paper, type Stage } from "@/lib/leads";
+import { isLate, leadSummary, myMove, shortStep, NUDGES, PAPER, paperDue, quoteNudge, renewDue, STAGES, trashDaysLeft, type Lead, type LeadEvent, type LeadSummary, type Paper, type Stage } from "@/lib/leads";
 import { cn } from "@/lib/utils";
 import { fill, mailable, TEMPLATES } from "@/lib/lead-crm";
 import { endDay, LicenceField, LicenceList } from "@/components/lead-licence";
@@ -47,7 +47,7 @@ const needsMe = (l: LeadSummary) => renew(l) || (!aside(l) && !closed(l.stage) &
 
 /** What to do next, in a word or two, and whether it is late. */
 function nextStep(l: LeadSummary): string | null {
-  if (due(l)) return l.dueText || "Your reminder";
+  if (due(l)) return (l.dueText && shortStep(l.dueText)) || "Your reminder";
   if (l.flags?.includes("stuck")) return "Refund or rebook";
   if (l.flags?.includes("no-deposit")) return "Ask for the deposit";
   const paper = paperDue(l, now());
