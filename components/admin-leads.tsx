@@ -623,11 +623,12 @@ function StageLine({ l }: { l: LeadSummary }) {
 
 /** The one thing to do, in teal; money stuck in red; otherwise why it is put aside. */
 function RowAction({ l, next }: { l: LeadSummary; next: string | null }) {
-  const cls = "min-w-0 truncate font-mono text-[12.5px] font-medium";
+  // Wraps instead of cutting: Julian wants the whole step on the row.
+  const cls = "min-w-0 text-right font-mono text-[12.5px] font-medium [text-wrap:balance]";
   if (l.trashedAt) return <span className={cn(cls, "text-muted-foreground")}>Deletes in {Math.max(1, trashDaysLeft(l.trashedAt, now()))} d</span>;
   const bad = l.flags?.includes("stuck") ? "Deposit stuck" : l.flags?.includes("no-deposit") ? "No deposit" : null;
   if (bad) return <span className={cn(cls, "text-destructive")}>! {bad} →</span>;
-  if (next) return <span title={next} className={cn(cls, "text-accent")}>{next} →</span>;
+  if (next) return <span title={next} className={cn(cls, "text-accent")}>{next}{" "}→</span>;
   if (snoozed(l)) return <span className={cn(cls, "text-muted-foreground")}>Until {day(l.snoozeUntil!)}</span>;
   return l.refs ? <span className={cn(cls, "text-muted-foreground")}>{l.refs} {l.refs === 1 ? "picture" : "pictures"}</span> : null;
 }
@@ -688,7 +689,7 @@ function Card({ l, on, onClick }: { l: LeadSummary; on: boolean; onClick: () => 
         <span className="truncate">{l.name}</span>
       </span>
       <span className="mt-1 flex items-center justify-between gap-2">
-        <span className="min-w-0 truncate"><RowAction l={l} next={nextStep(l)} /></span>
+        <span className="min-w-0 text-left"><RowAction l={l} next={nextStep(l)} /></span>
         {l.quote ? <span className="shrink-0 font-mono text-[11.5px] text-muted-foreground">{money(l.quote)}</span> : null}
       </span>
     </button>
