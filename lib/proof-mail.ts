@@ -6,6 +6,7 @@
  * ─────────────────────────────────────────────────────────────── */
 
 import { NAME_INK, NAME_W } from "@/lib/email-logo";
+import { SIG_DARK, SIG_HTML, SIG_TEXT } from "@/lib/email-signature";
 import { extras, type Proof } from "@/lib/proofs";
 
 const FROM = { name: "Julian Gigola", email: "book@juliangigola.com" };
@@ -23,7 +24,7 @@ const label = `font-size:11px;letter-spacing:0.14em;text-transform:uppercase;col
 type Inline = { content: Uint8Array; filename: string; type: string; disposition: "inline"; contentId: string };
 const png = (id: string, b64: string): Inline => ({ content: Uint8Array.from(atob(b64), (c) => c.charCodeAt(0)), filename: `${id}.png`, type: "image/png", disposition: "inline", contentId: id });
 const logos = () => [png("name-ink", NAME_INK), png("name-w", NAME_W)];
-const DARK = "@media (prefers-color-scheme: dark){body,.page{background:#0b0a09!important}.fg{color:#f1f0ed!important}.mu{color:#92908d!important}.ac{color:#50b7b7!important}.rule{border-color:rgba(255,255,255,0.11)!important}.cta{background:#f1f0ed!important;color:#0b0a09!important}.ink-l{display:none!important}.ink-d{display:block!important}}";
+const DARK = `@media (prefers-color-scheme: dark){body,.page{background:#0b0a09!important}.fg{color:#f1f0ed!important}.mu{color:#92908d!important}.ac{color:#50b7b7!important}.rule{border-color:rgba(255,255,255,0.11)!important}.cta{background:#f1f0ed!important;color:#0b0a09!important}.ink-l{display:none!important}.ink-d{display:block!important}${SIG_DARK}}`;
 
 function page(title: string, preheader: string, body: string) {
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark"><meta name="supported-color-schemes" content="light dark">
@@ -36,7 +37,7 @@ function page(title: string, preheader: string, body: string) {
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px" class="mono">
 <tr><td style="padding-bottom:36px"><img class="ink-l" src="cid:name-ink" width="189" height="34" alt="Julian Gigola" style="display:block;border:0"><img class="ink-d" src="cid:name-w" width="189" height="34" alt="Julian Gigola" style="border:0"></td></tr>
 ${body}
-<tr><td class="mono mu" style="font-size:12px;line-height:1.65;color:${C.mu};padding-top:40px">Questions? Reply to this email.<br><a class="mu" href="${SITE}" style="color:${C.mu};text-decoration:none">juliangigola.com</a></td></tr>
+<tr><td class="mono mu" style="font-size:12px;line-height:1.65;color:${C.mu};padding-top:40px">Questions? Reply to this email.<br>${SIG_HTML}</td></tr>
 </table></td></tr></table></body></html>`;
 }
 
@@ -69,7 +70,7 @@ ${rows(terms)}
 <tr><td style="padding:28px 0 30px"><a href="${url}" class="mono cta" style="display:inline-block;padding:14px 20px;background:${C.fg};color:${C.bg};text-decoration:none;font-size:12px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase">See your proofs</a></td></tr>
 <tr><td class="mono mu" style="font-size:13px;line-height:1.9;color:${C.mu}">1. Tap a frame to select it. Your selects collect in Selects.<br>2. Hit Send selects. Extras are paid on the way out.<br>3. I retouch your selects and email you the finals.</td></tr>`,
   );
-  const text = ["Your proofs are ready.", "", lead, ...(p.note ? ["", p.note] : []), "", ...terms.map(([k, v]) => `${k}: ${v}`), "", `See your proofs: ${url}`, "", "Questions? Reply to this email.", SITE].join("\n");
+  const text = ["Your proofs are ready.", "", lead, ...(p.note ? ["", p.note] : []), "", ...terms.map(([k, v]) => `${k}: ${v}`), "", `See your proofs: ${url}`, "", "Questions? Reply to this email.", SIG_TEXT].join("\n");
   const attachments: Inline[] = [...logos(), ...strip.map((f) => ({ content: f.bytes, filename: `${f.id}.jpg`, type: "image/jpeg", disposition: "inline" as const, contentId: `f-${f.id}` }))];
   return { subject: "Your proofs are ready", html, text, attachments };
 }
@@ -95,7 +96,7 @@ export function receiptMail(p: Proof) {
 ${rows(summary)}
 <tr><td class="mono fg rule" style="${C.rule};font-size:12px;line-height:1.9;color:${C.fg};padding-top:18px">${files.map(esc).join("<br>")}</td></tr>`,
   );
-  const text = ["Selects are in.", "", lead, "", summary.map(([k, v]) => `${k}: ${v}`).join(" · "), "", ...files, "", "Questions? Reply to this email.", SITE].join("\n");
+  const text = ["Selects are in.", "", lead, "", summary.map(([k, v]) => `${k}: ${v}`).join(" · "), "", ...files, "", "Questions? Reply to this email.", SIG_TEXT].join("\n");
   return { subject: "Selects are in", html, text, attachments: logos() };
 }
 
