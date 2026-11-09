@@ -31,6 +31,8 @@ export type Proof = {
   included: number;
   /** Dollars per frame past `included`. */
   price: number;
+  /** Dollars left on the shoot, paid with the extras at Send (Julian 2026-11-08: pay the balance to send selects). */
+  balance?: number;
   /** Days open, counted from when the email goes out (or the link is first copied). */
   days: number;
   createdAt: string;
@@ -155,11 +157,14 @@ export function extras(selected: number, included: number, price: number) {
 }
 
 /** Whether the client can still see the gallery. Unsent galleries are open (Julian previews them). */
-/** Extra frames still to pay for: a reopened gallery keeps what was already paid. */
-export function owed(p: Pick<Proof, "selects" | "included" | "price" | "paid">) {
-  const already = p.price ? Math.floor((p.paid?.amount ?? 0) / (p.price * 100)) : 0;
+/** What is still to pay at Send: the shoot balance first, then extra frames. A reopened gallery keeps what was already paid. */
+export function owed(p: Pick<Proof, "selects" | "included" | "price" | "paid" | "balance">) {
+  let left = p.paid?.amount ?? 0;
+  const bal = Math.max(0, (p.balance ?? 0) * 100 - left);
+  left = Math.max(0, left - (p.balance ?? 0) * 100);
+  const already = p.price ? Math.floor(left / (p.price * 100)) : 0;
   const n = Math.max(0, extras(p.selects.length, p.included, p.price).n - already);
-  return { n, cents: n * p.price * 100 };
+  return { n, balance: bal, cents: bal + n * p.price * 100 };
 }
 
 export const isOpen = (p: Pick<Proof, "closesAt">, now = Date.now()) => !p.closesAt || Date.parse(p.closesAt) > now;
@@ -174,6 +179,7 @@ export function publicView(p: Proof) {
     selects: p.submittedAt ? p.selects : [],
     included: p.included,
     price: p.price,
+    balance: p.balance ?? 0,
     closesAt: p.closesAt ?? null,
     submitted: !!p.submittedAt,
     paid: p.paid?.amount ?? 0,
@@ -200,8 +206,8 @@ export function cleanNotes(given: unknown, selects: string[]): Record<string, st
 }
 
 /** Settings Lightroom or /admin may set. Numbers are clamped so a typo cannot price a frame at $15,000. */
-export function cleanSettings(given: Record<string, unknown>): Partial<Pick<Proof, "name" | "email" | "note" | "included" | "price" | "days">> {
-  const out: Partial<Pick<Proof, "name" | "email" | "note" | "included" | "price" | "days">> = {};
+export function cleanSettings(given: Record<string, unknown>): Partial<Pick<Proof, "name" | "email" | "note" | "included" | "price" | "days" | "balance">> {
+  const out: Partial<Pick<Proof, "name" | "email" | "note" | "included" | "price" | "days" | "balance">> = {};
   const int = (v: unknown, lo: number, hi: number) => (typeof v === "number" || typeof v === "string") && Number.isFinite(Number(v)) ? Math.min(hi, Math.max(lo, Math.round(Number(v)))) : undefined;
   if (typeof given.name === "string" && given.name.trim()) out.name = given.name.trim().slice(0, 120);
   if (typeof given.email === "string") out.email = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(given.email.trim()) ? given.email.trim().slice(0, 200) : undefined;
@@ -210,6 +216,8 @@ export function cleanSettings(given: Record<string, unknown>): Partial<Pick<Proo
   if (inc !== undefined) out.included = inc;
   if (pr !== undefined) out.price = pr;
   if (d !== undefined) out.days = d;
+  const bal = int(given.balance, 0, 20000);
+  if (bal !== undefined) out.balance = bal;
   return out;
 }
 

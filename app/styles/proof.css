@@ -125,7 +125,7 @@ html:has(.proof) #main{transform:none}
 .proof-steps li[data-dim] b{color:var(--muted-foreground)}
 .proof-paid{border:1px solid var(--foreground);padding:14px 16px;display:flex;flex-direction:column;gap:8px}
 .proof-paid p{margin:0}
-.proof-paid p:nth-child(2){display:flex;justify-content:space-between;font:12px var(--p-mono);color:var(--muted-foreground)}
+.proof-paid p:not(.proof-lab):not(.proof-mu){display:flex;justify-content:space-between;font:12px var(--p-mono);color:var(--muted-foreground)}
 .proof-paid b{font-weight:500;color:var(--foreground)}
 .proof-paid .proof-mu{font-size:12px}
 

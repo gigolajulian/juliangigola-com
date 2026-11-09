@@ -4,8 +4,8 @@ import { alertLines, proofUrl, receiptMail, sendClient } from "@/lib/proof-mail"
 import { owed, viewerKey, writeProof, type Proof } from "@/lib/proofs";
 
 /* ── a client sends their selects ─────────────────────────────────
- * No extras: locked and mailed at once. Extras: a Stripe Checkout session
- * with one inline line item ("Extra retouched frame", $price × extras), so
+ * Nothing to pay: locked and mailed at once. A shoot balance or extras: a Stripe Checkout session
+ * with inline line items ("Shoot balance", "Extra retouched frame" × extras), so
  * nothing is created in Stripe's catalog. The selects lock only once
  * Checkout reports paid, checked on the return page (and again on any later
  * visit while a session is pending). The amount always comes from the
@@ -38,7 +38,17 @@ export async function finalize(env: Env, kv: KV, s: Seal, p: Proof, paid?: Proof
   return done;
 }
 
-/** Checkout for the extras: the session's URL. */
+const lines = (items: { name: string; qty: number; cents: number }[]) =>
+  Object.fromEntries(
+    items.flatMap((l, i) => [
+      [`line_items[${i}][quantity]`, String(l.qty)],
+      [`line_items[${i}][price_data][currency]`, "usd"],
+      [`line_items[${i}][price_data][unit_amount]`, String(l.cents)],
+      [`line_items[${i}][price_data][product_data][name]`, l.name],
+    ]),
+  );
+
+/** Checkout for the balance and the extras: the session's URL. */
 export async function checkout(key: string, p: Proof): Promise<{ id: string; url: string }> {
   const x = owed(p);
   const back = proofUrl(p.token);
@@ -47,10 +57,10 @@ export async function checkout(key: string, p: Proof): Promise<{ id: string; url
     "/checkout/sessions",
     {
       mode: "payment",
-      "line_items[0][quantity]": String(x.n),
-      "line_items[0][price_data][currency]": "usd",
-      "line_items[0][price_data][unit_amount]": String(p.price * 100),
-      "line_items[0][price_data][product_data][name]": "Extra retouched frame",
+      ...lines([
+        ...(x.balance ? [{ name: "Shoot balance", qty: 1, cents: x.balance }] : []),
+        ...(x.n ? [{ name: "Extra retouched frame", qty: x.n, cents: p.price * 100 }] : []),
+      ]),
       success_url: `${back}?paid={CHECKOUT_SESSION_ID}`,
       cancel_url: back,
       "metadata[proof]": p.token,

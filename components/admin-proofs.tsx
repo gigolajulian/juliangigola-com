@@ -67,7 +67,7 @@ function Timeline({ p }: { p: Proof }) {
     ["Opened", p.views ? `${p.views} ${p.views === 1 ? "view" : "views"}` : "Not opened", p.firstViewAt],
     ["Selecting", `${p.selects.length} selected`, p.firstSelectAt],
     ["Selects in", `${p.submittedBy ?? "They"} sent ${p.selects.length}${x.n ? ` · ${x.n} extra` : ""}`, p.submittedAt],
-    ...(x.n || p.paid ? [["Paid", p.paid ? `$${(p.paid.amount / 100).toFixed(2)} · Stripe Checkout` : "Not paid", p.paid?.at] as [string, string, string | undefined]] : []),
+    ...(x.n || p.paid || p.balance ? [["Paid", p.paid ? `$${(p.paid.amount / 100).toFixed(2)} · Stripe Checkout` : "Not paid", p.paid?.at] as [string, string, string | undefined]] : []),
     ["In Lightroom", "Labels and Comments pulled on Publish", p.pulledAt],
   ];
   return (
@@ -138,8 +138,8 @@ function ProofCard({ p, changed }: { p: Row; changed: () => void }) {
   const [preview, setPreview] = React.useState<string | null>(null);
   const [email, setEmail] = React.useState(p.email ?? "");
   const [tab, setTab] = React.useState<"gallery" | "activity" | "selects">("gallery");
-  const [set, setSet] = React.useState({ included: String(p.included), price: String(p.price), days: String(p.days) });
-  const changedSet = set.included !== String(p.included) || set.price !== String(p.price) || set.days !== String(p.days);
+  const [set, setSet] = React.useState({ balance: String(p.balance ?? 0), included: String(p.included), price: String(p.price), days: String(p.days) });
+  const changedSet = set.balance !== String(p.balance ?? 0) || set.included !== String(p.included) || set.price !== String(p.price) || set.days !== String(p.days);
   const people = Object.keys(p.viewers ?? {}).length;
   const x = extras(p.selects.length, p.included, p.price);
   const thumbs = (p.submittedAt ? p.selects : p.frames.map((f) => f.id)).slice(0, 6);
@@ -225,22 +225,22 @@ function ProofCard({ p, changed }: { p: Row; changed: () => void }) {
       ) : null}
 
       {tab === "gallery" ? (
-        <div className="grid gap-3 sm:grid-cols-4">
-          <label className="grid gap-1 sm:col-span-4">
+        <div className="grid gap-3 sm:grid-cols-5">
+          <label className="grid gap-1 sm:col-span-5">
             <span className={mono}>Client email</span>
             <span className="flex gap-2">
               <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="client@example.com" className="min-h-11 w-full rounded-[10px] border border-border bg-transparent px-3.5 text-base" />
               {email !== (p.email ?? "") ? <button type="button" className={btn} disabled={busy} onClick={() => act({ email }, "PATCH", "Saved.")}>Save</button> : null}
             </span>
           </label>
-          {([["included", "Included frames"], ["price", "Each extra, $"], ["days", p.sentAt ? "Days open (set at send)" : "Days open once sent"]] as const).map(([k, label]) => (
+          {([["balance", "Shoot balance, $ (paid at Send)"], ["included", "Included frames"], ["price", "Each extra, $"], ["days", p.sentAt ? "Days open (set at send)" : "Days open once sent"]] as const).map(([k, label]) => (
             <label key={k} className="grid gap-1">
               <span className={mono}>{label}</span>
               <input inputMode="numeric" value={set[k]} disabled={k === "days" && !!p.sentAt} onChange={(e) => setSet((o) => ({ ...o, [k]: e.target.value }))} className="min-h-11 w-full rounded-[10px] border border-border bg-transparent px-3.5 text-base disabled:opacity-50" />
             </label>
           ))}
           <span className="flex items-end">
-            {changedSet ? <button type="button" className={btn} disabled={busy} onClick={() => act({ included: set.included, price: set.price, days: set.days }, "PATCH", "Saved.")}>Save</button> : null}
+            {changedSet ? <button type="button" className={btn} disabled={busy} onClick={() => act({ balance: set.balance, included: set.included, price: set.price, days: set.days }, "PATCH", "Saved.")}>Save</button> : null}
           </span>
         </div>
       ) : null}

@@ -27,7 +27,7 @@ const isEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
 type Step = null | "review" | "done";
 
 export function ProofGallery({ token, initial }: { token: string; initial: PublicProof }) {
-  const { frames, included, price } = initial;
+  const { frames, included, price, balance } = initial;
   const [selects, setSelects] = React.useState<string[]>(initial.selects);
   const [email, setEmail] = React.useState<string | null>(null);
   const [ready, setReady] = React.useState(initial.submitted);
@@ -43,8 +43,10 @@ export function ProofGallery({ token, initial }: { token: string; initial: Publi
 
   const n = selects.length;
   const extra = Math.max(0, n - included);
-  // A reopened gallery owes only for extras past what was already paid.
-  const due = Math.max(0, extra - (price ? Math.floor(initial.paid / (price * 100)) : 0)) * price;
+  // Same sums as owed() in lib/proofs: the shoot balance first, then extras; a reopened gallery owes only what is new.
+  const balDue = Math.max(0, balance * 100 - initial.paid) / 100;
+  const paidPastBal = Math.max(0, initial.paid - balance * 100);
+  const due = balDue + Math.max(0, extra - (price ? Math.floor(paidPastBal / (price * 100)) : 0)) * price;
   const byId = React.useMemo(() => new Map(frames.map((f, i) => [f.id, i])), [frames]);
   const src = (id: string) => `/proof/${token}/f/${encodeURIComponent(id)}`;
 
@@ -246,9 +248,21 @@ export function ProofGallery({ token, initial }: { token: string; initial: Publi
             </ol>
             {paid ? (
               <div className="proof-paid">
-                <p className="proof-lab">Extras · paid</p>
+                <p className="proof-lab">Paid</p>
+                {balance ? (
+                  <p>
+                    <span>Shoot balance</span>
+                    <b>${balance}</b>
+                  </p>
+                ) : null}
+                {paid > balance * 100 ? (
+                  <p>
+                    <span>{price ? Math.round((paid / 100 - balance) / price) : 0} extra × ${price}</span>
+                    <b>${(paid / 100 - balance).toFixed(0)}</b>
+                  </p>
+                ) : null}
                 <p>
-                  <span>{price ? Math.round(paid / 100 / price) : 0} extra × ${price}</span>
+                  <span>Total</span>
                   <b>${(paid / 100).toFixed(0)} ✓</b>
                 </p>
                 <p className="proof-mu">Card through Stripe. The receipt is in your inbox.</p>
@@ -348,14 +362,14 @@ export function ProofGallery({ token, initial }: { token: string; initial: Publi
 
       <div className="proof-bar" data-empty={!n || undefined}>
         <p className="proof-sum">
-          <b>{n} selected</b> · {included} included · {extra} extra · <b>${due}</b>
+          <b>{n} selected</b> · {included} included · {extra} extra{balDue ? ` · $${balDue} balance` : ""} · <b>${due}</b>
         </p>
         <div className="proof-acts">
           <button type="button" className="proof-btn ghost" onClick={() => { setView(view === "all" ? "selects" : "all"); scrollTo({ top: 0, behavior: "smooth" }); }}>
             {view === "all" ? "View selects" : "Back to all"}
           </button>
           <button type="button" className="proof-btn" disabled={!n} onClick={review}>
-            {extra ? `Send selects · Pay $${due}` : "Send selects"}
+            {due ? `Send selects · Pay $${due}` : "Send selects"}
           </button>
         </div>
       </div>
@@ -414,6 +428,7 @@ export function ProofGallery({ token, initial }: { token: string; initial: Publi
             </div>
           </div>
           <p className="proof-rsum">
+            {balDue ? <span>Shoot balance ${balDue}</span> : null}
             <span>{Math.min(n, included)} included</span>
             {extra ? <span>{extra} extra × ${price}</span> : null}
             <b>{due ? `$${due} by card` : "Nothing to pay"}</b>

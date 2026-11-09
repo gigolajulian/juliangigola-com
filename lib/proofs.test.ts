@@ -11,8 +11,14 @@ describe("proofs", () => {
   });
   it("charges a reopened gallery only for new extras", () => {
     const base = { included: 10, price: 15, selects: Array.from({ length: 13 }, (_, i) => String(i)) };
-    expect(owed({ ...base, paid: undefined })).toEqual({ n: 3, cents: 4500 });
-    expect(owed({ ...base, paid: { session: "s", amount: 3000, at: "" } })).toEqual({ n: 1, cents: 1500 });
+    expect(owed({ ...base, paid: undefined })).toEqual({ n: 3, balance: 0, cents: 4500 });
+    expect(owed({ ...base, paid: { session: "s", amount: 3000, at: "" } })).toEqual({ n: 1, balance: 0, cents: 1500 });
+  });
+  it("puts the shoot balance before extras, and counts it paid once", () => {
+    const base = { included: 10, price: 15, balance: 200, selects: Array.from({ length: 12 }, (_, i) => String(i)) };
+    expect(owed({ ...base, paid: undefined })).toEqual({ n: 2, balance: 20000, cents: 23000 });
+    expect(owed({ ...base, paid: { session: "s", amount: 23000, at: "" } })).toEqual({ n: 0, balance: 0, cents: 0 });
+    expect(owed({ ...base, selects: [...base.selects, "x"], paid: { session: "s", amount: 23000, at: "" } })).toEqual({ n: 1, balance: 0, cents: 1500 });
   });
   it("reads the pipeline stage", () => {
     expect(stage({})).toBe("Draft");

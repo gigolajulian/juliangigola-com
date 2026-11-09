@@ -106,6 +106,7 @@ export function alertLines(p: Proof): { subject: string; lines: string[] } {
     subject: `Selects in: ${p.name} (${p.selects.length}${paid})`,
     lines: [
       `${p.submittedBy ?? p.email ?? "The client"} sent ${p.selects.length} selects for ${p.name}${paid}.`,
+      ...(p.balance ? [`Shoot balance: $${p.balance}.`] : []),
       `${Math.min(p.selects.length, p.included)} included${p.selects.length > p.included ? ` · ${p.selects.length - p.included} extra × $${p.price} = $${(p.selects.length - p.included) * p.price}` : ""}.`,
       ...(p.message ? ["", `Message: ${p.message}`] : []),
       "",
