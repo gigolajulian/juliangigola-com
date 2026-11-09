@@ -130,7 +130,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     };
   });
 
-  const projects = PROJECTS.map((p) => ({
+  // These galleries redirect to their booking pages (`pageRedirects` in next.config.ts), which are listed below.
+  const redirected = new Set(["headshots", "graduation"]);
+  const projects = PROJECTS.filter((p) => !redirected.has(p.slug)).map((p) => ({
     url: `${SITE}/portfolio/${p.slug}`,
     ...showing([p.cover, ...p.images]),
     changeFrequency: "yearly" as const,
