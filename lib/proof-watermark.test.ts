@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { markBox, servedFrame } from "@/lib/proof-watermark";
+import { CARD, markBox, servedFrame, shareCard } from "@/lib/proof-watermark";
 
 /** R2 in memory, and an Images binding that records what it was asked to draw. */
 function fakeEnv(stored: Record<string, string>) {
@@ -16,7 +16,10 @@ function fakeEnv(stored: Record<string, string>) {
       info: async () => ({ width: 1333, height: 2000 }),
       input: (s: ReadableStream) => ({
         transform: (t: unknown) => ({ mark: s, t }),
-        draw: (o: unknown, at: unknown) => (draws.push({ o, at }), { output: async () => ({ response: () => new Response("marked") }) }),
+        draw(o: unknown, at: unknown) {
+          draws.push({ o, at });
+          return { draw: this.draw, output: async () => ({ response: () => new Response("marked") }) };
+        },
       }),
     },
   };
@@ -55,5 +58,15 @@ describe("proof watermark", () => {
   it("is null for a frame that is not in R2", async () => {
     const { env } = fakeEnv({});
     expect(await servedFrame(env, { token: "T", watermark: true }, "a", "https://x")).toBeNull();
+  });
+  it("draws the link card from the first frame once, beside the header panel, with the mark on the photo", async () => {
+    const { env, r2, draws } = fakeEnv({ "T/a.jpg": "clean", "T/b.jpg": "clean" });
+    const p = { token: "T", watermark: true, frames: ["a", "b"].map((id) => ({ id, file: id, w: 1, h: 1 })) };
+    expect(await text(await shareCard(env, p, "https://x"))).toBe("marked");
+    expect(r2.has("T/card-a.v1.jpg")).toBe(true);
+    expect(draws).toMatchObject([{ at: { left: CARD.photoLeft, top: 0 } }, { at: { opacity: 0.5 } }]);
+    await shareCard(env, p, "https://x");
+    expect(draws).toHaveLength(2);
+    expect(await shareCard(env, { ...p, watermark: false }, "https://x")).toBeNull();
   });
 });

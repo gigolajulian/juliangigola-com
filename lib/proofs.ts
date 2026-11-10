@@ -142,6 +142,10 @@ export const proofKey = (token: string) => `proof:${token}`;
 export const frameKey = (token: string, id: string) => `${token}/${id}.jpg`;
 /** The watermarked copy beside the clean original. The version bumps when the mark changes, so old bakes are never served. */
 export const markedKey = (token: string, id: string) => `${token}/${id}.wm1.jpg`;
+/** The link-preview card made from a gallery's first frame. Keyed by that frame, so a new first frame gets a new card. */
+export const cardKey = (token: string, id: string) => `${token}/card-${id}.v1.jpg`;
+/** Every derived file a frame can have in R2, for deletes. */
+export const frameKeys = (token: string, id: string) => [frameKey(token, id), markedKey(token, id), cardKey(token, id)];
 
 const B62 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 /** 16 base62 characters from the platform's CSPRNG (rejection sampling keeps it uniform). */
@@ -182,6 +186,9 @@ export function owed(p: Pick<Proof, "selects" | "included" | "price" | "paid" | 
 }
 
 export const isOpen = (p: Pick<Proof, "closesAt">, now = Date.now()) => !p.closesAt || Date.parse(p.closesAt) > now;
+
+/** The gallery's cover for link previews: its first frame, the site's rule for every set. Only when watermarked and open, so a preview never carries a clean file. */
+export const coverFrame = (p: Pick<Proof, "frames" | "watermark" | "closesAt">): ProofFrame | null => (p.watermark && isOpen(p) && p.frames[0]) || null;
 
 export const closesAt = (days: number, from = Date.now()) => new Date(from + days * 864e5).toISOString();
 

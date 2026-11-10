@@ -2,7 +2,7 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { isAdmin } from "@/lib/vouch";
 import { sealer } from "@/lib/lead-crypto";
 import { recordLead } from "@/lib/leads";
-import { closesAt, cleanSettings, DEFAULTS, frameKey, isFrameId, isToken, listProofs, markedKey, newToken, readProof, writeProof, type Proof } from "@/lib/proofs";
+import { closesAt, cleanSettings, DEFAULTS, frameKey, frameKeys, isFrameId, isToken, listProofs, newToken, readProof, writeProof, type Proof } from "@/lib/proofs";
 import { proofMail, proofUrl, sendClient } from "@/lib/proof-mail";
 import { settle } from "@/lib/proof-submit";
 import { servedFrame } from "@/lib/proof-watermark";
@@ -166,8 +166,8 @@ export async function PUT(request: Request) {
   const p = await readProof(g.kv, g.s, token);
   if (!p) return json({ error: "No such gallery." }, 404);
   await g.r2.put(frameKey(token, id), bytes, { httpMetadata: { contentType: "image/jpeg" } });
-  // A replaced frame is watermarked again on its next fetch.
-  await g.r2.delete(markedKey(token, id));
+  // A replaced frame is watermarked again, and its card redrawn, on the next fetch.
+  await g.r2.delete(frameKeys(token, id).slice(1));
   const frame = { id, file, w, h };
   const i = p.frames.findIndex((f) => f.id === id);
   const frames = i < 0 ? [...p.frames, frame] : p.frames.map((f, j) => (j === i ? frame : f));
@@ -188,7 +188,7 @@ export async function DELETE(request: Request) {
   if (!p) return json({ ok: true });
   if (ids) {
     if (!ids.length || ids.length > 1000 || !ids.every(isFrameId)) return json({ error: "Bad frame id." }, 400);
-    const keys = ids.flatMap((id) => [frameKey(token, id), markedKey(token, id)]);
+    const keys = ids.flatMap((id) => frameKeys(token, id));
     for (let i = 0; i < keys.length; i += 1000) await g.r2.delete(keys.slice(i, i + 1000));
     const gone = new Set(ids);
     const notes = { ...p.notes };
@@ -197,7 +197,7 @@ export async function DELETE(request: Request) {
     return json({ ok: true });
   }
   // The whole gallery: Lightroom's "delete published collection". Only web previews go, never an original.
-  const keys = p.frames.flatMap((f) => [frameKey(token, f.id), markedKey(token, f.id)]);
+  const keys = p.frames.flatMap((f) => frameKeys(token, f.id));
   for (let i = 0; i < keys.length; i += 1000) await g.r2.delete(keys.slice(i, i + 1000));
   await g.kv.delete(`proof:${token}`);
   return json({ ok: true });
