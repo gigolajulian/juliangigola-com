@@ -5,6 +5,28 @@
  * and where a cell sits.
  * ─────────────────────────────────────────────────────────────── */
 
+/** A page either side of this one: where the wheel goes past an end. */
+export type Lead = {
+  href: string;
+  name: string;
+  client?: string;
+  /** Walking back into it opens at its start, not its end (Julian: back
+      from Sessions lands on the first page of the work). */
+  start?: boolean;
+  /** The first photographs it opens on, as its page will ask for
+      them, fetched with the page so its card comes in with them. */
+  warm?: { src: string; srcSet?: string; sizes?: string }[];
+  /** Its first frames, for the card that crosses over (`?cross=1`). */
+  open?: import("@/lib/work-types").Frame[];
+  /** And its credits and frame count, for the same card. */
+  credits?: { role: string; name: string }[];
+  count?: number;
+  /** Its title as its page sets it (the headline, where there is one). */
+  title?: string;
+  /** The line under its title in the head. */
+  sub?: string;
+};
+
 /** How the strips hand over to each other across one client navigation.
     Module state rather than storage: it only has to survive one client
     navigation and nothing more. */

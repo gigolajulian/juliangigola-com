@@ -16,8 +16,9 @@ import { StripRail, useRail } from "@/components/strip/rail";
 import { useStacked } from "@/components/strip/stacked";
 import { useMotion } from "@/components/strip/use-motion";
 import { useReader, type Tick } from "@/components/strip/use-reader";
+import type { Lead } from "@/components/strip/shared";
 
-export { markFilter } from "@/components/strip/shared";
+export { markFilter, type Lead } from "@/components/strip/shared";
 export { useTablet, useWide, useWideNow } from "@/components/strip/media";
 
 /* ── the strip ────────────────────────────────────────────────────
@@ -66,28 +67,6 @@ export { useTablet, useWide, useWideNow } from "@/components/strip/media";
  *   `data-ring="Open"`         the word under the pointer ring
  *   `[data-scroll]` box        the wheel scrolls it first, then the strip
  * ─────────────────────────────────────────────────────────────── */
-
-/** A page either side of this one: where the wheel goes past an end. */
-export type Lead = {
-  href: string;
-  name: string;
-  client?: string;
-  /** Walking back into it opens at its start, not its end (Julian: back
-      from Sessions lands on the first page of the work). */
-  start?: boolean;
-  /** The first photographs it opens on, as its page will ask for
-      them, fetched with the page so its card comes in with them. */
-  warm?: { src: string; srcSet?: string; sizes?: string }[];
-  /** Its first frames, for the card that crosses over (`?cross=1`). */
-  open?: import("@/lib/work-types").Frame[];
-  /** And its credits and frame count, for the same card. */
-  credits?: { role: string; name: string }[];
-  count?: number;
-  /** Its title as its page sets it (the headline, where there is one). */
-  title?: string;
-  /** The line under its title in the head. */
-  sub?: string;
-};
 
 /* ── the other way of looking at it ───────────────────────────────
  * A strip is a sequence and a grid is an inventory, and the two answer

@@ -1,7 +1,6 @@
 import * as React from "react";
 import { preload } from "react-dom";
-import type { Lead } from "@/components/strip";
-import { leftOf } from "./shared";
+import { leftOf, type Lead } from "./shared";
 
 /** The pages either end leads to, fetched before the push that leads
     there. */
