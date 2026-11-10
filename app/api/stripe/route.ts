@@ -4,7 +4,7 @@ import { isDeposit, isIntentId, settle, verifyStripe } from "@/lib/deposit";
 /* ── Stripe's webhook ──────────────────────────────────────────────
  * The source of truth for a deposit: the card saying it paid proves
  * nothing, Stripe's signed `payment_intent.succeeded` does. On it the
- * time is booked on Cal.com, or the deposit refunded (`settle`). Only
+ * time is booked through the lock, or the deposit refunded (`settle`). Only
  * the site's own intents (`isDeposit`); anything else is left alone.
  *
  * Signed with STRIPE_WEBHOOK_SECRET; anything else is refused. Refuses
@@ -35,8 +35,7 @@ export async function POST(request: Request) {
 
   const pi = event.data?.object;
   if (!pi?.id || !isIntentId(pi.id)) return text("No intent.", 400);
-  // Every other payment on the account (Cal.com's own, invoices, payment
-  // links) is none of this route's business: acknowledged, never refunded.
+  // Every other payment on the account (invoices, payment links) is none of this route's business: acknowledged, never refunded.
   if (!isDeposit(pi)) return text("ok", 200);
   const status = await settle({ INBOX: env.INBOX, STRIPE_SECRET_KEY: env.STRIPE_SECRET_KEY, EMAIL: env.EMAIL, CLIENT_EMAIL: env.CLIENT_EMAIL, GCAL_OAUTH: env.GCAL_OAUTH, BOOKING_LOCK: env.BOOKING_LOCK, NOTION_TOKEN: env.NOTION_TOKEN, BOOKING_SECRET: env.BOOKING_SECRET }, pi.id, pi.metadata);
   // Still booking from an earlier delivery: Stripe retries until it ends or hello@ is warned.

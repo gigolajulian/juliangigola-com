@@ -11,7 +11,7 @@ export function generateStaticParams() {
 }
 
 /* Which of a session's picks (0-based) its card uses, cover first, where the first two will not do. */
-const CARD_PICKS: Record<string, number[]> = { portraits: [0, 4] };
+const CARD_PICKS: Record<string, number[]> = { portraits: [1, 5] };
 
 export default async function Image({ params }: { params: Promise<{ slug: string }> }) {
   const slug = (await params).slug;

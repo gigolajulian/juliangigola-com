@@ -423,6 +423,7 @@ export const BOOKING_PAGES: BookingPage[] = [
     tiles: coversOf("portraits"),
     // Julian's six (2026-10-24): faces in frame, from his other sets.
     picks: [
+      "/work/sian/01.jpg",
       "/work/gilt/03.jpg",
       "/work/retro-reverie-vol-02/06.jpg",
       "/work/poise/06.jpg",

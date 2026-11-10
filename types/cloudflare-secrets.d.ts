@@ -41,14 +41,6 @@ interface CloudflareEnv {
   BING_API_KEY?: string;
 
   /**
-   * Signs Cal.com's booking webhook (`app/api/cal/route.ts`). The same
-   * string goes in Cal.com > Settings > Developer > Webhooks > Secret and in:
-   *
-   *   wrangler secret put CAL_WEBHOOK_SECRET
-   */
-  CAL_WEBHOOK_SECRET?: string;
-
-  /**
    * Stripe's secret key for the $100 deposit (`lib/deposit.ts`). Test mode
    * (`sk_test_`) until Julian says live. Unset, deposits are off. Set with:
    *
