@@ -12,6 +12,7 @@ import { Orb, ORB_ROUND } from "@/components/orb";
 import { JgLoad } from "@/components/jg-load";
 import { Calendar, dlabel, duration, fmt, type Shell } from "@/components/v3/flow";
 import { GESTURE_GAP_MS } from "@/components/strip/shared";
+import { looksLikeEmail } from "@/lib/inbox";
 
 /* Goo (Julian, 2026-10-20, OKd 10-21) on the card's buttons, times and
    open days. `?goo=0` turns it off. */
@@ -1097,7 +1098,7 @@ export function TimePicker({
             const data = new FormData(form);
             const no: Record<string, string> = {};
             if (!String(data.get("name") || "").trim()) no.name = "Add your name";
-            if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(data.get("email") || "").trim())) no.email = "Email looks incomplete";
+            if (!looksLikeEmail(String(data.get("email") || "").trim())) no.email = "Email looks incomplete";
             setBad(no);
             setBlank({ name: !String(data.get("name") || "").trim(), email: !String(data.get("email") || "").trim() });
             if (Object.keys(no).length) return form.querySelector<HTMLElement>(`#f-${Object.keys(no)[0]}`)?.focus();

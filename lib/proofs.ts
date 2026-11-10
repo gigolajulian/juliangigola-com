@@ -12,6 +12,8 @@
  * characters, about 95 bits.
  * ─────────────────────────────────────────────────────────────── */
 
+import { looksLikeEmail } from "@/lib/inbox";
+
 export type ProofFrame = {
   /** Short id, stable across publishes: the Lightroom photo's remote id. */
   id: string;
@@ -84,7 +86,7 @@ export type Viewer = {
 /** Kept per address so a busy gallery stays well under KV's value size. */
 const MAX_EVENTS = 400;
 
-export const isEmail = (v: unknown): v is string => typeof v === "string" && v.length <= 200 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
+export const isEmail = (v: unknown): v is string => typeof v === "string" && v.length <= 200 && looksLikeEmail(v.trim());
 export const viewerKey = (email: string) => email.trim().toLowerCase();
 
 /** "iPhone · Safari" from a user agent. shortcut: the common devices and browsers only, "Other" for the rest. */
@@ -219,7 +221,7 @@ export function cleanSettings(given: Record<string, unknown>): Partial<Pick<Proo
   const out: Partial<Pick<Proof, "name" | "email" | "note" | "included" | "price" | "days" | "balance">> = {};
   const int = (v: unknown, lo: number, hi: number) => (typeof v === "number" || typeof v === "string") && Number.isFinite(Number(v)) ? Math.min(hi, Math.max(lo, Math.round(Number(v)))) : undefined;
   if (typeof given.name === "string" && given.name.trim()) out.name = given.name.trim().slice(0, 120);
-  if (typeof given.email === "string") out.email = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(given.email.trim()) ? given.email.trim().slice(0, 200) : undefined;
+  if (typeof given.email === "string") out.email = looksLikeEmail(given.email.trim()) ? given.email.trim().slice(0, 200) : undefined;
   if (typeof given.note === "string") out.note = given.note.trim().slice(0, 600) || undefined;
   const inc = int(given.included, 0, 500), pr = int(given.price, 0, 500), d = int(given.days, 1, 90);
   if (inc !== undefined) out.included = inc;

@@ -130,6 +130,7 @@ const eq = (a, b, what) => {
 
   ok(looksLikeEmail("j@example.com"), "ordinary address");
   ok(!looksLikeEmail("j@example"), "no dot, no address");
+  ok(looksLikeEmail("a@b.c"), "a one-letter ending passes (nobody turned away)");
   ok(!looksLikeEmail("two words@example.com"), "no spaces");
 }
 

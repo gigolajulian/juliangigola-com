@@ -1,5 +1,5 @@
 import { confirmMail, sendConfirm } from "@/lib/confirm";
-import { enquiry, enquiryKey, summary, whenPT } from "@/lib/inbox";
+import { enquiry, enquiryKey, looksLikeEmail, summary, whenPT } from "@/lib/inbox";
 import { logMail, recordLead } from "@/lib/leads";
 import { openNow, type KV } from "@/lib/slots";
 import { EVENTS, type Booking, type Hours } from "@/lib/booking-rules";
@@ -70,7 +70,6 @@ export const recordKey = (intent: string) => `deposit:${intent}`;
 export const refKey = (intent: string, part: string) => `dref:${intent}:${part}`;
 export const isIntentId = (s: string) => /^pi_[A-Za-z0-9]{8,64}$/.test(s);
 
-const looksLikeEmail = (s: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
 // Stripe caps a metadata value at 500 characters.
 const cap = (s: unknown, n = 500) => (typeof s === "string" ? s.trim().slice(0, n) : "");
 
