@@ -1,6 +1,6 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { stripe } from "@/lib/deposit";
-import { authorised, bearer, canPush } from "@/lib/vouch";
+import { isAdmin } from "@/lib/vouch";
 
 /* ── GET /api/money: his Stripe balance and what moved it ─────────
  * Julian (2026-11-06): "add my stripe balance too and show the
@@ -37,8 +37,7 @@ const usd = (list: Amount[] = []) => list.filter((a) => a.currency === "usd").re
 
 export async function GET(request: Request) {
   const { env } = await getCloudflareContext({ async: true });
-  const token = bearer(request);
-  if (!((await authorised(request, env.INBOX_KEY)) || (token && (await canPush(token))))) return json({ error: "Not authorized." }, 401);
+  if (!(await isAdmin(request, env.INBOX_KEY))) return json({ error: "Not authorized." }, 401);
   const key = env.STRIPE_SECRET_KEY;
   if (!key) return json({ error: "Stripe is not connected (STRIPE_SECRET_KEY)." }, 503);
 

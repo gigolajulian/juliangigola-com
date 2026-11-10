@@ -1,7 +1,9 @@
 /**
- * Pushes the harvested archive to R2.
+ * Unused. Pushed the harvested archive to R2 in an earlier setup; the
+ * archive now ships from git in `public/work/` and is served from this origin.
+ * Kept for the record. What follows describes that earlier setup.
  *
- * `public/work/` is 275MB today and ~690MB once re-harvested at 2500px, which
+ * `public/work/` was 275MB then and ~690MB once re-harvested at 2500px, which
  * is why it is not in the repo: git keeps every version of every blob forever,
  * so committing it once would make every clone pay for it for good.
  *

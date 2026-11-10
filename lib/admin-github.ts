@@ -20,6 +20,19 @@
  */
 export const TOKEN_STORE = "jg-admin-token";
 
+/** Where the key is kept between visits. Beside the GitHub token. */
+export const KEY_STORE = "jg-inbox-key";
+
+/**
+ * What to send: the inbox key if one was pasted, else the GitHub token the
+ * editor signed in with. The API takes either — see `canPush` in the route.
+ */
+export const credentials = (key: string): Record<string, string> => {
+  if (key) return { "x-inbox-key": key };
+  const token = window.localStorage.getItem(TOKEN_STORE);
+  return token ? { authorization: `Bearer ${token}` } : {};
+};
+
 export const REPO = {
   owner: "gigolajulian",
   repo: "juliangigola-com",

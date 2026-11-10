@@ -30,10 +30,10 @@ import { TextInput } from "@astryxdesign/core/TextInput";
 import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/SegmentedControl";
 import { ProgressBar } from "@astryxdesign/core/ProgressBar";
 import { StatusDot } from "@astryxdesign/core/StatusDot";
-import { credentials, KEY_STORE } from "@/components/admin-inbox";
+import { credentials, KEY_STORE } from "@/lib/admin-github";
 import { ago, Detail, matches, nextStep, OFFLINE, pass, SignIn } from "@/components/admin-leads";
 import { TOKEN_STORE } from "@/lib/admin-github";
-import { leadSummary, shootTag, STAGES, type Lead, type LeadSummary, type Stage as StageName } from "@/lib/leads";
+import { leadSummary, shootTag, STAGES, type Lead, type LeadPatch, type LeadSummary, type Stage as StageName } from "@/lib/leads";
 import { useRouter } from "next/navigation";
 
 type Call = (init?: RequestInit & { query?: string }) => Promise<Record<string, unknown>>;
@@ -158,7 +158,7 @@ export function LeadsAstryx() {
       headers: { ...credentials(localStorage.getItem(KEY_STORE) ?? ""), "content-type": "application/json" },
       cache: "no-store",
     });
-    const out = (await res.json()) as Record<string, unknown> & { error?: string };
+    const out = (await res.json().catch(() => ({}))) as Record<string, unknown> & { error?: string };
     if (!res.ok) throw new Error(out.error ?? `Request failed (${res.status})`);
     return out;
   }, []);
@@ -211,7 +211,7 @@ export function LeadsAstryx() {
   const current = live.find((l) => l.id === open);
   const changed = (l: Lead) => setLeads((rs) => rs?.map((r) => (r.email === l.email ? { ...r, ...leadSummary(l), id: r.id } : r)) ?? null);
   /** A swipe or a button here: the same PATCH the lead's own Snooze, Archive and stage buttons send. */
-  const act = (l: LeadSummary, body: Record<string, unknown>) =>
+  const act = (l: LeadSummary, body: LeadPatch) =>
     call({ method: "PATCH", body: JSON.stringify({ key: `lead:${l.id}`, ...body }) })
       .then((o) => changed(o.lead as Lead))
       .catch((e: unknown) => { alert(e instanceof Error ? e.message : String(e)); load(); });

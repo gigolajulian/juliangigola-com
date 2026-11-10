@@ -103,3 +103,18 @@ export const ownEngine = () =>
 
 /** The server's choice: the Worker's engine, or a request that asked for the site's own. */
 export const ownOnServer = (env: { BOOKING_ENGINE?: string }, asked?: unknown) => env.BOOKING_ENGINE === "own" || asked === "own";
+
+/** A visitor's booking, checked by `parseBooking` in `lib/deposit.ts`. */
+export type Booking = {
+  slug: string;
+  /** ISO 8601, UTC. */
+  start: string;
+  timeZone: string;
+  name: string;
+  email: string;
+  phone?: string;
+  where?: string;
+  notes?: string;
+  /** "own": booked by the site's engine (`lib/booking-rules.ts`), not Cal.com. */
+  engine?: "own";
+};

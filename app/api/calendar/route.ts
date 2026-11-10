@@ -2,7 +2,7 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { TZ } from "@/lib/booking-rules";
 import { gcal } from "@/lib/gcal";
 import { busyAll, EXTRA_KEY, isIcs, readExtras, zoned, type Extra } from "@/lib/slots";
-import { authorised, bearer, canPush } from "@/lib/vouch";
+import { isAdmin } from "@/lib/vouch";
 
 /* ── the Leads app's Calendar ─────────────────────────────────────
  * Julian (2026-11-04): "control the calendar, block off days, and add
@@ -29,8 +29,7 @@ async function gate(request: Request) {
   const { env } = await getCloudflareContext({ async: true });
   if (!env.INBOX) return { error: json({ error: "No INBOX bound." }, 503) };
   if (!env.GCAL_OAUTH) return { error: json({ error: "The calendar is not connected (GCAL_OAUTH)." }, 503) };
-  const token = bearer(request);
-  if ((await authorised(request, env.INBOX_KEY)) || (token && (await canPush(token)))) return { env };
+  if (await isAdmin(request, env.INBOX_KEY)) return { env };
   return { error: json({ error: "Not authorized." }, 401) };
 }
 

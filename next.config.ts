@@ -336,8 +336,8 @@ const nextConfig: NextConfig = {
    * Photographs are resized and re-encoded by Cloudflare, not by Next.
    *
    * The site runs on Workers, where Next's own optimizer is not available —
-   * and would be the wrong tool anyway, because the archive is not served
-   * from this origin. It lives in R2. The loader rewrites every frame onto
+   * and would be the wrong tool anyway. The archive (public/work) ships from
+   * git and is served from this origin. The loader rewrites every frame onto
    * Cloudflare Image Transformations, which is what finally makes the `sizes`
    * props in the components mean something: under the old static export the
    * loader ignored `width` entirely and every device downloaded the same

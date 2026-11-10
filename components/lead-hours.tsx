@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { credentials, KEY_STORE } from "@/components/admin-inbox";
+import { credentials, KEY_STORE } from "@/lib/admin-github";
 import type { Hours, Window } from "@/lib/booking-rules";
 
 /* ── Hours, in the lead desk ──────────────────────────────────────

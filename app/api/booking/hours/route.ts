@@ -1,7 +1,7 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { lock } from "@/lib/booking-engine";
 import { cleanHours, TZ, type Hours } from "@/lib/booking-rules";
-import { bearer, canPush, digest } from "@/lib/vouch";
+import { authorised, bearer, canPush } from "@/lib/vouch";
 
 /* ── Julian's open hours, from the lead desk (Hours) ──────────────
  * GET the week and the dates that differ; PUT the whole thing back. Kept
@@ -16,7 +16,7 @@ const json = (body: unknown, status = 200) => Response.json(body, { status, head
 
 async function allowed(request: Request, key?: string) {
   const given = request.headers.get("x-inbox-key");
-  if (key && given) return (await digest(given)) === (await digest(key));
+  if (key && given) return authorised(request, key);
   const token = bearer(request);
   return !!token && (await canPush(token));
 }

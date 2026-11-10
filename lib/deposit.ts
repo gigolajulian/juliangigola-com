@@ -1,8 +1,8 @@
 import { confirmMail, sendConfirm } from "@/lib/confirm";
 import { enquiry, enquiryKey, summary, whenPT } from "@/lib/inbox";
 import { logMail, recordLead } from "@/lib/leads";
-import { openNow } from "@/lib/slots";
-import { EVENTS, type Hours } from "@/lib/booking-rules";
+import { openNow, type KV } from "@/lib/slots";
+import { EVENTS, type Booking, type Hours } from "@/lib/booking-rules";
 import { lock, recordBooking, type BookResult } from "@/lib/booking-engine";
 import { manageLinks } from "@/lib/booking-token";
 
@@ -37,9 +37,7 @@ import { manageLinks } from "@/lib/booking-token";
  * not need a dependency. Test-mode keys until Julian says live.
  * ─────────────────────────────────────────────────────────────── */
 
-/** Cal.com event slugs that take the deposit. */
-import { PAID } from "@/lib/paid";
-export { PAID };
+import { isPaid } from "@/lib/paid";
 export const AMOUNT = 10000;
 export const CURRENCY = "usd";
 export const KIND = "deposit";
@@ -59,20 +57,6 @@ export const SESSION: { [slug: string]: string } = { portraits: "Portraits", hea
 /** The intent in Stripe's dashboard, test or live as the key is. */
 export const dashboardLink = (intent: string, key: string) =>
   `https://dashboard.stripe.com/${/_live_/.test(key) ? "" : "test/"}payments/${intent}`;
-
-export type Booking = {
-  slug: string;
-  /** ISO 8601, UTC. */
-  start: string;
-  timeZone: string;
-  name: string;
-  email: string;
-  phone?: string;
-  where?: string;
-  notes?: string;
-  /** "own": booked by the site's engine (`lib/booking-rules.ts`), not Cal.com. */
-  engine?: "own";
-};
 
 /** What GET /api/deposit/<id> reports. "booking" is internal: a webhook is on it. */
 export type Status = "pending" | "booking" | "booked" | "refunded" | "failed";
@@ -94,7 +78,7 @@ const cap = (s: unknown, n = 500) => (typeof s === "string" ? s.trim().slice(0, 
 export function parseBooking(raw: unknown, call = false): Booking | string {
   const b = (raw ?? {}) as { [k: string]: unknown };
   const slug = cap(b.slug);
-  if (call ? !EVENTS[slug]?.call : !(PAID as readonly string[]).includes(slug)) return call ? "Not a call." : "Not a paid session.";
+  if (call ? !EVENTS[slug]?.call : !isPaid(slug)) return call ? "Not a call." : "Not a paid session.";
   const start = cap(b.start);
   const t = Date.parse(start);
   if (!start || isNaN(t) || t < Date.now()) return "Pick a time.";
@@ -124,9 +108,11 @@ export function parseBooking(raw: unknown, call = false): Booking | string {
 const dayIn = (iso: string, tz: string, plus = 0) =>
   new Intl.DateTimeFormat("en-CA", { timeZone: tz }).format(new Date(Date.parse(iso) + plus * 864e5));
 
-/** Whether the start is still offered: by hello@'s calendar for the site's engine, else by Cal.com. */
-/** `hours`: Julian's, from the lock (`liveHours`); the defaults when unset. */
-export async function isOpen(b: Booking, gcalSecret?: string, kv?: Parameters<typeof openNow>[4], hours?: Hours): Promise<boolean> {
+/**
+ * Whether the start is still offered: by hello@'s calendar for the site's engine, else by Cal.com.
+ * `hours`: Julian's, from the lock (`liveHours`); the defaults when unset.
+ */
+export async function isOpen(b: Booking, gcalSecret?: string, kv?: KV, hours?: Hours): Promise<boolean> {
   if (b.engine === "own") return openNow(gcalSecret, b.slug, b.start, undefined, kv, hours);
   const q = new URLSearchParams({
     username: USER,
@@ -181,7 +167,7 @@ export async function stripe(key: string, path: string, form?: { [k: string]: st
   if (!res.ok) {
     const err = out.error as { type?: string; code?: string; message?: string } | undefined;
     console.error("stripe", path, res.status, err?.type, err?.code, err?.message);
-    throw new Error(`Stripe ${path} ${res.status}`);
+    throw Object.assign(new Error(`Stripe ${path} ${res.status}`), { status: res.status });
   }
   return out;
 }
@@ -224,7 +210,7 @@ export async function paidFor(key: string, p: { uid?: string; startTime?: string
     return pi.status === "succeeded" && isDeposit(pi) && same && live ? dashboardLink(ref, key) : undefined;
   } catch (e) {
     // Stripe has no such intent: a made-up ref, so no deposit. Anything else: unknown.
-    return String(e).endsWith(" 404") ? undefined : false;
+    return (e as { status?: number }).status === 404 ? undefined : false;
   }
 }
 
@@ -279,7 +265,6 @@ const NEXT = {
   failed: "Cal.com did not take the booking and the automatic refund failed. Refund it by hand in Stripe and email them.",
 };
 
-/** A plain mail to hello@ saying how a deposit ended. A failed send is logged, never a failed webhook. */
 // Bytes, never a base64 string: `send()` mails a string as-is, so the picture arrives as text.
 type Attachment = { content: ArrayBuffer; filename: string; type: string; disposition: "attachment" };
 
@@ -325,6 +310,7 @@ async function refsOf(inbox: Env["INBOX"], intent: string): Promise<{ files: Att
   }
 }
 
+/** A plain mail to hello@ saying how a deposit ended. A failed send is logged, never a failed webhook. */
 async function tell(env: Env, status: keyof typeof SAID, b: Booking | string, link: string, intent: string) {
   const who = typeof b === "string" ? undefined : b;
   const what = who ? [SESSION[who.slug] ?? who.slug, whenPT(who.start), who.name, "$100"].join(", ") : "$100";
@@ -339,9 +325,9 @@ async function tell(env: Env, status: keyof typeof SAID, b: Booking | string, li
 /**
  * Julian (2026-10-16): Cal.com is $0, so its public page books a paid
  * session with no deposit. Such a booking is flagged, not stopped: a mail
- * to hello@ so he can cancel it or ask for the $100.
+ * to hello@ so he can cancel it or ask for the $100. Returns the subject,
+ * once hello@ has it, so the caller can log it on the lead.
  */
-/** The subject, once hello@ has it, so the caller can log it on the lead. */
 export async function tellNoDeposit(email: Env["EMAIL"], slug: string, start: string | undefined, who: { name: string; email: string }): Promise<string | null> {
   const subject = `Booked without a deposit: ${[SESSION[slug] ?? slug, whenPT(start), who.name].join(", ")}`;
   return (await mail(email, subject, [
