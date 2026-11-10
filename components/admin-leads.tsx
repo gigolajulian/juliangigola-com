@@ -10,7 +10,7 @@ import { LeadProofs, ProofsDesk } from "@/components/admin-proofs";
 import { LeadUpcoming } from "@/components/lead-upcoming";
 import { TOKEN_STORE } from "@/lib/admin-github";
 import type { Enquiry } from "@/lib/inbox";
-import { isLate, leadSummary, myMove, NUDGES, PAPER, paperDue, quoteNudge, REMIND_MAX, renewDue, shootTag, STAGES, trashDaysLeft, type Lead, type LeadEvent, type LeadSummary, type Paper, type Stage } from "@/lib/leads";
+import { isLate, leadSummary, myMove, NUDGES, PAPER, paperDue, quoteNudge, REMIND_MAX, renewDue, shootTag, STAGES, trashDaysLeft, type Lead, type LeadEvent, type LeadPatch, type LeadSummary, type Paper, type Stage } from "@/lib/leads";
 import { cn } from "@/lib/utils";
 import { fill, mailable, TEMPLATES } from "@/lib/lead-crm";
 import { endDay, LicenceField, LicenceList } from "@/components/lead-licence";
@@ -1095,7 +1095,7 @@ export function Detail({ summary, initial, call, onChange, onBack, reload, tick,
   const key = `lead:${summary.id}`;
 
   const patch = React.useCallback(
-    async (body: Record<string, unknown>) => {
+    async (body: LeadPatch) => {
       const o = await call({ method: "PATCH", body: JSON.stringify({ key, ...body }) });
       const next = o.lead as Lead;
       setLead(next);
@@ -1531,7 +1531,7 @@ async function exportCsv() {
 
 
 /** The CRM half of a lead: how to reach them, saved replies, a reminder, the quote, notes, merge. */
-function LeadCrm({ l, full, patch, others, templates }: { l: LeadSummary; full: Lead | null; patch: (b: Record<string, unknown>) => Promise<unknown>; others: LeadSummary[]; templates: Template[] }) {
+function LeadCrm({ l, full, patch, others, templates }: { l: LeadSummary; full: Lead | null; patch: (b: LeadPatch) => Promise<unknown>; others: LeadSummary[]; templates: Template[] }) {
   const [editing, setEditing] = React.useState(false);
   const [d, setD] = React.useState({ name: "", phone: "", ig: "", company: "", source: "", kind: "" });
   const [notes, setNotes] = React.useState<string | null>(null);
@@ -1690,7 +1690,7 @@ const dd = "text-right font-mono text-[14px] leading-6";
 const DOT: Record<Paper, string> = { "Not sent": "○", Sent: "◐", Signed: "●", "Not needed": "–" };
 
 /** "Paperwork: Contract ● · Release ●", from Confirmed on. A tap moves a dot to its next status. */
-function Paperwork({ l, patch }: { l: LeadSummary; patch: (b: Record<string, unknown>) => Promise<unknown> }) {
+function Paperwork({ l, patch }: { l: LeadSummary; patch: (b: LeadPatch) => Promise<unknown> }) {
   const due = paperDue(l, now());
   return (
     <p className="flex flex-wrap items-center gap-x-1 font-mono text-[13px] text-muted-foreground">
@@ -1717,7 +1717,7 @@ function Paperwork({ l, patch }: { l: LeadSummary; patch: (b: Record<string, unk
   );
 }
 
-function Money({ l, full, patch, run, quote, setQuote }: { l: LeadSummary; full: Lead | null; patch: (b: Record<string, unknown>) => Promise<unknown>; run: (p: Promise<unknown>, ok?: string) => void; quote: string | null; setQuote: (v: string | null) => void }) {
+function Money({ l, full, patch, run, quote, setQuote }: { l: LeadSummary; full: Lead | null; patch: (b: LeadPatch) => Promise<unknown>; run: (p: Promise<unknown>, ok?: string) => void; quote: string | null; setQuote: (v: string | null) => void }) {
   const [making, setMaking] = React.useState(false);
   /** `?invb`: design B, the dark invoice with a photo, opt-in until Julian says yes. */
   const [invb] = React.useState(() => typeof window !== "undefined" && new URLSearchParams(location.search).has("invb"));
@@ -1839,7 +1839,7 @@ function InvoiceRow({ inv, l, full }: { inv: Invoice; l: LeadSummary; full: Lead
 type Line = { desc: string; qty: string; rate: string };
 
 /** A new invoice, filled from the lead. Saving numbers it; then the PDF. */
-function InvoiceSheet({ l, full, patch, done }: { l: LeadSummary; full: Lead; patch: (b: Record<string, unknown>) => Promise<unknown>; done: () => void }) {
+function InvoiceSheet({ l, full, patch, done }: { l: LeadSummary; full: Lead; patch: (b: LeadPatch) => Promise<unknown>; done: () => void }) {
   const [from, setFrom] = React.useState<InvoiceFrom | null>(null);
   const [editFrom, setEditFrom] = React.useState(false);
   const [date, setDate] = React.useState(todayPT);
@@ -2096,7 +2096,7 @@ function useDeskLeft() {
   return el;
 }
 
-function InvoiceSheetB({ l, full, patch, done }: { l: LeadSummary; full: Lead; patch: (b: Record<string, unknown>) => Promise<unknown>; done: () => void }) {
+function InvoiceSheetB({ l, full, patch, done }: { l: LeadSummary; full: Lead; patch: (b: LeadPatch) => Promise<unknown>; done: () => void }) {
   const [from, setFrom] = React.useState<InvoiceFrom | null>(null);
   const [editFrom, setEditFrom] = React.useState(false);
   const [date, setDate] = React.useState(todayPT);

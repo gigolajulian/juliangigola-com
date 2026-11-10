@@ -53,6 +53,25 @@ export type Paper = (typeof PAPER)[number];
 /** Something on the lead that needs him, beyond its stage. */
 export type Flag = "stuck" | "no-deposit";
 
+/** A hand edit the lead desk sends to PATCH /api/inbox, beside the lead's key. */
+export type LeadPatch = {
+  stage?: string;
+  snoozeUntil?: string;
+  seen?: boolean;
+  archive?: boolean;
+  trash?: boolean;
+  notes?: string;
+  remind?: { at?: string; text?: string } | null;
+  details?: { name?: string; phone?: string; ig?: string; company?: string; source?: string; kind?: string };
+  quote?: number | null;
+  lostReason?: string;
+  mergeFrom?: string;
+  invoice?: unknown;
+  licence?: { use?: string; end?: string } | null;
+  contract?: string;
+  release?: string;
+};
+
 export type Lead = {
   email: string;
   name: string;

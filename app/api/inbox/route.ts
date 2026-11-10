@@ -1,7 +1,7 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { authorised, bearer, canPush } from "@/lib/vouch";
 import { SAFE_IMAGE, summary, type Enquiry, type Summary } from "@/lib/inbox";
-import { backfillLead, fold, PAPER, readLead, REMIND_MAX, STAGES, trashDaysLeft, writeLead, type InboxRow, type Lead, type LeadSummary, type Paper, type Stage } from "@/lib/leads";
+import { backfillLead, fold, PAPER, readLead, REMIND_MAX, STAGES, trashDaysLeft, writeLead, type InboxRow, type Lead, type LeadPatch, type LeadSummary, type Paper, type Stage } from "@/lib/leads";
 import { sealer } from "@/lib/lead-crypto";
 import { notify, subscribe, unsubscribe } from "@/lib/lead-push";
 import { publicKey } from "@/lib/web-push";
@@ -438,18 +438,7 @@ export async function POST(request: Request) {
  */
 async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: Awaited<ReturnType<typeof sealer>>, given: Record<string, unknown>, notion?: string) {
   if (!seal) return json({ error: "Leads need LEADS_KEY on the Worker." }, 503);
-  const { key, stage, snoozeUntil, seen, archive, trash } = given as { key: string; stage?: string; snoozeUntil?: string; seen?: boolean; archive?: boolean; trash?: boolean };
-  const { notes, remind, details, quote, lostReason, mergeFrom, invoice, licence } = given as {
-    notes?: string;
-    remind?: { at?: string; text?: string } | null;
-    details?: { name?: string; phone?: string; ig?: string; company?: string; source?: string; kind?: string };
-    quote?: number | null;
-    lostReason?: string;
-    mergeFrom?: string;
-    invoice?: unknown;
-    licence?: { use?: string; end?: string } | null;
-  };
-  const { contract, release } = given as { contract?: string; release?: string };
+  const { key, stage, snoozeUntil, seen, archive, trash, notes, remind, details, quote, lostReason, mergeFrom, invoice, licence, contract, release } = given as LeadPatch & { key: string };
   for (const p of [contract, release]) if (p !== undefined && !(PAPER as readonly string[]).includes(p)) return json({ error: "Unknown status." }, 400);
   const bill = invoice === undefined ? undefined : cleanInvoice(invoice);
   if (bill && "error" in bill) return json({ error: bill.error }, 400);
