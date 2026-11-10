@@ -207,6 +207,11 @@ export function TimePicker({
      clicking one used to pick its time as well, skipping step two. */
   const [chosen, setChosen] = React.useState<false | "day" | "time">(false);
   const [step, setStep] = React.useState<"pick" | "form" | "sending" | "check" | "pay" | "done">("pick");
+  /* Option B's row of times (v3): where a swipe on the big number began, and
+     whether the row runs past its edge, which fades it and shows the hint. */
+  const swipeX = React.useRef<number | null>(null);
+  const stripRef = React.useRef<HTMLDivElement>(null);
+  const [more, setMore] = React.useState(false);
   /* A paid session, its deposit taken here (`?deposit`, deposit-step.tsx). */
   const [paid, setPaid] = React.useState(false);
   const [deposit, setDeposit] = React.useState<DepositBody | null>(null);
@@ -470,6 +475,19 @@ export function TimePicker({
   const big = React.useRef<HTMLDivElement>(null);
   /* The times' width: they keep to one line while every box has room for
      its time (Julian: a day of half hours was crammed). */
+  /* The time picked kept in view in option B's row, and the fade and hint
+     only while times run past its edge. */
+  React.useEffect(() => {
+    const ix = stripRef.current;
+    if (!ix) return;
+    const on = ix.querySelector<HTMLElement>('[aria-pressed="true"]');
+    if (on && (on.offsetLeft < ix.scrollLeft || on.offsetLeft + on.offsetWidth > ix.scrollLeft + ix.clientWidth)) ix.scrollLeft = Math.max(0, on.offsetLeft - on.offsetWidth);
+    const fit = () => setMore(ix.scrollLeft + ix.clientWidth < ix.scrollWidth - 4);
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(ix);
+    return () => ro.disconnect();
+  }, [pick?.date, pick?.min, days, step]);
   const slotsBox = React.useRef<HTMLDivElement>(null);
   /* `?layout`: the times come in with GSAP, each one once. The CSS rise
      replayed whenever the list re-rendered, and read as a glitch (Julian). */
@@ -1125,6 +1143,11 @@ export function TimePicker({
     const canNext = +(view === "week" ? monday(anchor) : new Date(anchor.getFullYear(), anchor.getMonth() + 1, 0)) < +today + AHEAD * 864e5;
     const times = days[pick.date] ?? [];
     const [hh, mm] = fmt(pick.min).replace(/ (AM|PM)$/, "").split(":");
+    const at0 = times.findIndex((x) => minutesOf(x.start) === pick.min);
+    const stepTime = (dir: number) => {
+      const next = times[at0 + dir];
+      if (next) choose(pick.date, minutesOf(next.start), true);
+    };
     return shell({
       head: paid ? "Book a session" : v3?.name === "Consultation" ? "Book a consultation" : "Book a call",
       sub: v3sub,
@@ -1150,17 +1173,43 @@ export function TimePicker({
             }}
             onPick={(d) => choose(iso(d), pick.min, false)}
           />
-          <div className="times lbl">
-            {times.map((x) => {
-              const m = minutesOf(x.start);
-              return (
-                <button key={x.start} type="button" className="opt" data-slot="" aria-pressed={m === pick.min} aria-label={fmt(m)} onClick={() => choose(pick.date, m, true)}>{fmt(m)}</button>
-              );
-            })}
+          {/* Option B (Julian, 2026-11-09, "build b"): the time big, stepped with
+              the arrows, a wheel, a swipe or the arrow keys; the day's open times
+              in one row under it, faded with a hint when they run past the edge. */}
+          <div className="fig scrub">
+            <div className="num">
+              <b ref={(el) => {
+                if (!el) return;
+                // A wheel over the number steps the time; React's onWheel is passive and cannot stop the page scrolling.
+                const wheel = (e: WheelEvent) => { if (Math.abs(e.deltaY) < 4) return; e.preventDefault(); stepTime(e.deltaY > 0 ? 1 : -1); };
+                el.addEventListener("wheel", wheel, { passive: false });
+                return () => el.removeEventListener("wheel", wheel);
+              }} tabIndex={0} role="spinbutton" aria-label="Time" aria-valuetext={fmt(pick.min)} data-scrub=""
+                onKeyDown={(e) => { if (e.key === "ArrowLeft" || e.key === "ArrowRight") { e.preventDefault(); stepTime(e.key === "ArrowRight" ? 1 : -1); } }}
+                onPointerDown={(e) => { swipeX.current = e.clientX; }}
+                onPointerMove={(e) => { const x0 = swipeX.current; if (x0 != null && Math.abs(e.clientX - x0) > 36) { stepTime(e.clientX < x0 ? 1 : -1); swipeX.current = e.clientX; } }}
+                onPointerUp={() => { swipeX.current = null; }}
+                onPointerCancel={() => { swipeX.current = null; }}
+              >{hh}<span className="cn">:</span>{mm}</b>
+              <span className="lbl mute ap">{pick.min < 720 ? "AM" : "PM"}</span>
+            </div>
+            <div className="arrs">
+              <button type="button" className="arr" aria-label="Earlier time" disabled={at0 <= 0} onClick={() => stepTime(-1)}>←</button>
+              <button type="button" className="arr" aria-label="Later time" disabled={at0 < 0 || at0 >= times.length - 1} onClick={() => stepTime(1)}>→</button>
+            </div>
+            <span className="lbl mute mline">{dlabel(date)}{chosen === "time" ? ` | until ${fmt(end)}` : ""}</span>
           </div>
-          <div className="fig">
-            <b>{hh}<span className="cn">:</span>{mm}</b>
-            <span className="lbl mute">{pick.min < 720 ? "AM" : "PM"} | until {fmt(end)} | {dlabel(date)}</span>
+          <div className={cn("strip", more && "more")}>
+            <div ref={stripRef} className="idx lbl" onScroll={(e) => { const el = e.currentTarget; setMore(el.scrollLeft + el.clientWidth < el.scrollWidth - 4); }}>
+              {times.map((x) => {
+                const m = minutesOf(x.start);
+                const [h, a] = clock(m);
+                return (
+                  <button key={x.start} type="button" data-slot="" aria-pressed={m === pick.min} aria-label={fmt(m)} onClick={() => choose(pick.date, m, true)}>{h}<small>{a}</small></button>
+                );
+              })}
+            </div>
+            <p className="lbl mute swipe" aria-hidden>Swipe for more times →</p>
           </div>
         </div>
       ),
