@@ -118,7 +118,7 @@ end
 
 -- ── collection settings ───────────────────────────────────────────
 
-local DEFAULTS = { email = "", note = "", included = 10, price = 15, days = 14 }
+local DEFAULTS = { email = "", note = "", included = 10, price = 15, days = 14, watermark = true }
 
 local function settings(cs)
   local out = {}
@@ -152,6 +152,7 @@ function provider.viewForCollectionSettings(f, publishSettings, info)
     f:row {
       label "Included frames", f:edit_field { value = bind "included", width_in_digits = 4, min = 0, max = 500, precision = 0 },
       f:static_text { title = "Each extra $" }, f:edit_field { value = bind "price", width_in_digits = 4, min = 0, max = 500, precision = 0 },
+      f:checkbox { title = "Watermark", value = bind "watermark", tooltip = "Julian Gigola in the bottom third of every frame. The clean files stay for finals." },
     },
     f:row { label "Open for", f:edit_field { value = bind "days", width_in_digits = 3, min = 1, max = 90, precision = 0 }, f:static_text { title = "days, from when you send it in /admin" } },
     f:row { label "", f:static_text { title = "Selects come back as a Purple label and Comments when you publish again.", fill_horizontal = 1 } },
@@ -163,7 +164,7 @@ function provider.updateCollectionSettings(publishSettings, info)
   local remote = info.publishedCollection and info.publishedCollection:getRemoteId()
   if not remote then return end
   local s = settings(info.collectionSettings)
-  send("PATCH", nil, { token = remote, name = info.name, email = s.email, note = s.note, included = s.included, price = s.price, days = s.days })
+  send("PATCH", nil, { token = remote, name = info.name, email = s.email, note = s.note, included = s.included, price = s.price, days = s.days, watermark = s.watermark })
 end
 
 -- ── publish ───────────────────────────────────────────────────────
@@ -179,7 +180,7 @@ function provider.processRenderedPhotos(functionContext, exportContext)
   }
 
   local remote = collection:getRemoteId()
-  local fields = { name = collection:getName(), email = s.email, note = s.note, included = s.included, price = s.price, days = s.days }
+  local fields = { name = collection:getName(), email = s.email, note = s.note, included = s.included, price = s.price, days = s.days, watermark = s.watermark }
   local url
   if not remote then
     fields.action = "create"
