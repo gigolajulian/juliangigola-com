@@ -525,6 +525,8 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .f-head{gap:8px}.v3 .f-head :is(h1,h2){font-size:1.9rem}.v3 .f-head p{line-height:1.4}
 /* The inquiry flow (no `over` photo: /contact/form) has a longer head. */
 .v3 .f-photo:not(.over){height:110px}}
+/* A phone on its side in the stacked layout (Duo unfolded, about 630x400 of Safari): the photo pushed "Book a session" under Continue, so it goes (Julian, 2026-11-09). */
+@media (max-width:800px) and (orientation:landscape) and (max-height:500px){.v3 .f-photo{display:none}}
 .v3 .in-steps{padding:32px var(--gr) 32px var(--g)}
 .v3 .in-steps li{align-content:start}
 .v3 .in-steps ol{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0 clamp(16px,2.5vw,40px)}
