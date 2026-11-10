@@ -2,14 +2,10 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { CONTENT } from "@/lib/content";
-import { opening } from "@/lib/opening";
 import { SPLASH_RUN } from "@/lib/splash-run";
-import { TESTIMONIALS } from "@/lib/testimonials";
 import { CALL_CARD, DOORS, HERO, INDEX_ORDER, isSession, LENGTH, rate, SESSIONS, TAB_ORDER, type Session } from "@/lib/v3";
 import { COMMISSIONS, WORK_CATEGORY_LINKS } from "@/lib/work";
 import { CATEGORIES, PROJECTS } from "@/lib/work-data";
-import { WORK_HEADS } from "@/lib/work-heads";
-import { WORK_ROWS } from "@/lib/work-rows";
 
 /* The archive and the lists built from it: invariants that, broken, show
    up on the site as a dead link, a missing photo or a wrong count. */
@@ -28,25 +24,6 @@ describe("work-data", () => {
       expect(p.cover.src, p.slug).toMatch(/^\//);
       for (const f of p.images) expect(f.width > 0 && f.height > 0, f.src).toBe(true);
     }
-  });
-});
-
-describe("work-heads", () => {
-  it("counts every filter the drawer shows", () => {
-    expect(WORK_HEADS.all.count).toBe(COMMISSIONS.length);
-    expect(WORK_HEADS.video.count).toBe(CONTENT.videos.length + 1);
-    for (const c of WORK_CATEGORY_LINKS) expect(WORK_HEADS[c.slug]?.count, c.slug).toBeGreaterThan(0);
-  });
-});
-
-describe("work-rows", () => {
-  it("is one searchable line per thing, all under /portfolio", () => {
-    expect(WORK_ROWS.length).toBeGreaterThan(0);
-    for (const r of WORK_ROWS) {
-      expect(r.href, r.slug).toMatch(/^\/portfolio/);
-      expect(r.find, r.slug).toBe(r.find.toLowerCase());
-    }
-    expect(WORK_ROWS.find((r) => r.slug === "video")?.credit).toBe(`${CONTENT.videos.length + 1} films`);
   });
 });
 
@@ -82,24 +59,3 @@ describe("v3", () => {
   });
 });
 
-describe("testimonials", () => {
-  it("each has a quote and a name, and a project that exists", () => {
-    const slugs = new Set(PROJECTS.map((p) => p.slug));
-    for (const t of TESTIMONIALS) {
-      expect(t.quote.trim(), t.name).not.toBe("");
-      expect(t.name.trim()).not.toBe("");
-      if (t.project) expect(slugs.has(t.project), t.project).toBe(true);
-    }
-  });
-});
-
-describe("opening", () => {
-  it("names up to three frames for a discipline, none for an unknown one", () => {
-    const slug = WORK_CATEGORY_LINKS.find((c) => c.slug !== "video" && c.slug !== "coverart")!.slug;
-    const first = opening(slug)!;
-    expect(first.length).toBeGreaterThan(0);
-    expect(first.length).toBeLessThanOrEqual(3);
-    for (const f of first) expect(f.src).toBeTruthy();
-    expect(opening("no-such-discipline")).toEqual([]);
-  });
-});

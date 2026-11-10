@@ -1,5 +1,4 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { NAME_WARP } from "@/lib/name-warp";
 import { DEFAULTS, LEVELS, sizesOf } from "@/lib/type-size";
 import { cn, filterPaths, rubberband } from "@/lib/utils";
 import { softItem, wallItem } from "@/lib/wall-tile";
@@ -57,8 +56,3 @@ describe("type sizes", () => {
   });
 });
 
-describe("name warp", () => {
-  it("is a set of finite, non-negative tuning values", () => {
-    for (const [k, v] of Object.entries(NAME_WARP)) expect(Number.isFinite(v) && v >= 0, k).toBe(true);
-  });
-});

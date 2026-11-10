@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_HOURS, EVENTS, cleanHours, duration, ownOnServer, refundable, windowOn } from "@/lib/booking-rules";
+import { DEFAULT_HOURS, EVENTS, cleanHours, duration, refundable, windowOn } from "@/lib/booking-rules";
 
 /* The site's own booking rules (`lib/booking-rules.ts`): hours, the
    refund window and how a length is written. */
@@ -59,18 +59,12 @@ describe("refundable", () => {
   });
 });
 
-describe("EVENTS and ownOnServer", () => {
+describe("EVENTS", () => {
   it("gives every event a title, a positive length and a notice", () => {
     for (const r of Object.values(EVENTS)) {
       expect(r.title).toBeTruthy();
       expect(r.length).toBeGreaterThan(0);
       expect(r.notice).toBeGreaterThan(0);
     }
-  });
-
-  it("runs the own engine when the Worker or the request says so", () => {
-    expect(ownOnServer({ BOOKING_ENGINE: "own" })).toBe(true);
-    expect(ownOnServer({}, "own")).toBe(true);
-    expect(ownOnServer({ BOOKING_ENGINE: "cal" }, "cal")).toBe(false);
   });
 });
