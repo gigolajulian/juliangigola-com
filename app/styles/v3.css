@@ -870,6 +870,8 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 @media (min-width:1200px){.v3 .sv-row .cr2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-content:start;column-gap:48px}.v3 .sv-row .cr2 li{grid-row:var(--r);grid-column:var(--c)}}
 /* Flow photo, overlaid (FlowShell `over`): caption on the photo, the photo to the screen's foot. */
 .v3 .f-photo .fr{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;gap:inherit}
+/* Two columns on a short screen (18 Pro sideways, 874x402): the photo was a strip under its own caption. Only the picture goes; the studio line and the call and Inquire links stay (Julian, 2026-11-09). Below the base .fr rule, which it has to beat. */
+@media (min-width:801px) and (orientation:landscape) and (max-height:500px){.v3 .f-photo .fr{display:none}}
 .v3 .f-foot{display:none}
 @media (min-width:801px){.v3 .f-photo.over{padding-bottom:0}
 .v3 .f-photo.over .ph{border-radius:4px 4px 0 0}
