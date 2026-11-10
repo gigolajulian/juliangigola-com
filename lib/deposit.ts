@@ -167,7 +167,7 @@ export async function stripe(key: string, path: string, form?: { [k: string]: st
   if (!res.ok) {
     const err = out.error as { type?: string; code?: string; message?: string } | undefined;
     console.error("stripe", path, res.status, err?.type, err?.code, err?.message);
-    throw new Error(`Stripe ${path} ${res.status}`);
+    throw Object.assign(new Error(`Stripe ${path} ${res.status}`), { status: res.status });
   }
   return out;
 }
@@ -210,7 +210,7 @@ export async function paidFor(key: string, p: { uid?: string; startTime?: string
     return pi.status === "succeeded" && isDeposit(pi) && same && live ? dashboardLink(ref, key) : undefined;
   } catch (e) {
     // Stripe has no such intent: a made-up ref, so no deposit. Anything else: unknown.
-    return String(e).endsWith(" 404") ? undefined : false;
+    return (e as { status?: number }).status === 404 ? undefined : false;
   }
 }
 

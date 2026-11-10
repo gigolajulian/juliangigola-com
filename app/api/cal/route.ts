@@ -108,9 +108,7 @@ export async function POST(request: Request) {
       where: p.location && !p.location.startsWith("integrations:") ? p.location : undefined,
       uid: p.uid,
     };
-    await sendConfirm(env.CLIENT_EMAIL, confirm);
-    // shortcut: sendConfirm does not say whether the send failed, so this logs every attempt.
-    if (env.CLIENT_EMAIL) await lead.then(() => logMail(env, stored.email, confirmMail(confirm).subject, { to: "client", kind: "confirm", booking: p.uid }));
+    if (await sendConfirm(env.CLIENT_EMAIL, confirm)) await lead.then(() => logMail(env, stored.email, confirmMail(confirm).subject, { to: "client", kind: "confirm", booking: p.uid }));
   }
   return text("ok", 200);
 }
