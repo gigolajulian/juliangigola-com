@@ -20,14 +20,14 @@ import { cn } from "@/lib/utils";
  * look, and a timeline, plus a CSV of every event.
  * ─────────────────────────────────────────────────────────────── */
 
-type Row = Proof & { url: string };
+export type Row = Proof & { url: string };
 
 const btn = "inline-flex min-h-11 items-center justify-center gap-2 rounded-[10px] border border-border px-4 text-[15px] font-medium transition-colors duration-200 hoverable:hover:bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:opacity-40";
 const primary = "border-accent bg-accent font-semibold text-accent-foreground hoverable:hover:bg-accent/90";
 const mono = "font-mono text-[12.5px] text-muted-foreground";
 const when = (iso: string) => new Intl.DateTimeFormat("en-US", { timeZone: "America/Los_Angeles", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(iso));
 
-async function api(init: RequestInit & { query?: string } = {}) {
+export async function api(init: RequestInit & { query?: string } = {}) {
   const res = await fetch(`/api/proof${init.query ?? ""}`, { ...init, headers: { ...credentials(window.localStorage.getItem(KEY_STORE) ?? ""), "content-type": "application/json" }, cache: "no-store" });
   const out = (await res.json()) as Record<string, unknown> & { error?: string };
   if (!res.ok) throw new Error(out.error ?? `Request failed (${res.status})`);
@@ -55,8 +55,8 @@ function Track({ p }: { p: Proof }) {
   );
 }
 
-const closed = (p: Proof) => !!p.closesAt && Date.parse(p.closesAt) < Date.now();
-const status = (p: Proof) => `${stage(p)}${p.checkout && !p.submittedAt ? ", paying" : ""}${closed(p) ? " · closed" : ""}`;
+export const closed = (p: Proof) => !!p.closesAt && Date.parse(p.closesAt) < Date.now();
+export const status = (p: Proof) => `${stage(p)}${p.checkout && !p.submittedAt ? ", paying" : ""}${closed(p) ? " · closed" : ""}`;
 
 /** Every step with its time, for the card on a lead. */
 function Timeline({ p }: { p: Proof }) {
@@ -274,7 +274,7 @@ const csvCell = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
 const secs = (n: number) => (n < 90 ? `${Math.round(n)} s` : `${Math.round(n / 60)} min`);
 
 /** Everyone who opened one gallery, and what they did. */
-function Activity({ p }: { p: Row }) {
+export function Activity({ p }: { p: Row }) {
   const people = Object.entries(p.viewers ?? {}).sort((a, b) => b[1].last.localeCompare(a[1].last));
   const [who, setWho] = React.useState(people[0]?.[0] ?? null);
   if (!people.length) return <p className={mono}>Nobody has opened it yet. Each address typed at the gate shows here.</p>;

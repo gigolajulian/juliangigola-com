@@ -1163,7 +1163,7 @@ export function Detail({ summary, initial, call, onChange, onBack, reload, tick,
 
   return (
     <div className="grid grid-cols-[minmax(0,1fr)] gap-8 px-6 py-8 lg:px-11 lg:py-9">
-      <button type="button" onClick={onBack} className="inline-flex min-h-11 items-center gap-1 justify-self-start text-[16px] text-accent lg:hidden">
+      <button type="button" data-detail-back onClick={onBack} className="inline-flex min-h-11 items-center gap-1 justify-self-start text-[16px] text-accent lg:hidden">
         <span aria-hidden="true">‹</span> Leads
       </button>
       <header className="min-w-0">

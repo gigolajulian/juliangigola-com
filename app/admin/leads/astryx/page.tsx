@@ -10,7 +10,8 @@ export const metadata: Metadata = {
 
 export default function LeadsAstryxPage() {
   return (
-    <div data-workbench data-lead-app className="w-full px-4 pb-6 pt-[max(1rem,env(safe-area-inset-top))] sm:px-6">
+    // Edge to edge: the Astryx shell lays out its own header, nav and tab bar; only the iPhone notch and home bar are kept clear.
+    <div data-workbench data-lead-app className="w-full pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)]">
       <LeadsAstryx />
     </div>
   );
