@@ -916,7 +916,9 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 .v3 .f-photo.over .cap{z-index:1;gap:clamp(10px,1.4vw,18px);padding:0 clamp(18px,2vw,28px) clamp(14px,1.8vw,24px)}
 .v3 .f-photo.over dl.get{display:grid;grid-template-rows:repeat(3,auto);grid-auto-flow:column;grid-auto-columns:auto;column-gap:clamp(18px,2.4vw,36px);border:0;letter-spacing:.04em}
 .v3 .f-photo.over dl.get div{padding:5px 0;border:0;border-top:1px solid var(--line)}
-.v3 .f-photo.over dl.get dt{color:oklch(1 0 0 / 92%);white-space:nowrap}
+/* Labels may wrap: "Ready in 2 business days" ran 17px past a 1024 window on one line (#735). */
+.v3 .f-photo.over dl.get div{min-width:0}
+.v3 .f-photo.over dl.get dt{color:oklch(1 0 0 / 92%);text-wrap:balance}
 .v3 .f-photo.over dl.get dd{display:none}
 .v3 .flow:has(.f-foot) :is(.f-head>p,.f-body .inc,.f-body .stabs-more){display:none}
 .v3 .f-foot{display:flex;flex-direction:column;padding-bottom:18px}
