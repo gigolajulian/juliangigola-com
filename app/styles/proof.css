@@ -123,6 +123,8 @@ html:has(.proof) #main{transform:none}
 .proof-secure{display:flex;align-items:center;gap:8px;margin-top:6px;font:11px/1.5 var(--p-mono);color:var(--muted-foreground)}
 .proof-secure svg{flex:none}
 .proof-amt i[data-mu]{color:var(--muted-foreground)}
+/* Phone: the price's one-line tag squeezed the description to a word a line; the price goes under it instead. */
+@media (max-width:599px){.proof .proof-opt{flex-direction:column;align-items:stretch;gap:12px}.proof-amt{justify-content:flex-start}.proof-amt i{text-align:left}}
 .proof-rgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
 .proof-rgrid div{position:relative}
 .proof-rgrid img{width:100%;aspect-ratio:2/3;object-fit:cover;object-position:center 25%;display:block}
