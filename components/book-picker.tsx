@@ -15,14 +15,14 @@ export type Bookable = {
   blurb: string;
   rate: string;
   length: string;
-  /** Its Cal.com event. */
+  /** Its event, "juliangigola/event-slug" (`lib/booking.ts`). */
   cal: string;
   /** The photographs behind it while it is the one picked. */
   wall: WallTile[];
 };
 
 /* The sessions down the left, the chosen one's calendar beside them:
-   Cal.com's booking page, in the site's frame. The
+   the site's own time picker (`cal-embed.tsx`). The
    choice is kept in the address (`?session=`), so a link can open on one. */
 export function BookPicker({ sessions, start }: { sessions: Bookable[]; start?: string }) {
   const [on, setOn] = React.useState(() => Math.max(0, sessions.findIndex((s) => s.slug === start)));
@@ -48,7 +48,7 @@ export function BookPicker({ sessions, start }: { sessions: Bookable[]; start?: 
   const pick = (i: number) => {
     glide.current = stacked && i !== on;
     setOn(i);
-    // The rest of the address kept (`?dense`, `?cal`): the picker reads it.
+    // The rest of the address kept: the picker reads it.
     const q = new URLSearchParams(location.search);
     q.set("session", sessions[i].slug);
     history.replaceState(null, "", `?${q}`);

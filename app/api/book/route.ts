@@ -6,10 +6,9 @@ import { logMail } from "@/lib/leads";
 import { parseBooking } from "@/lib/deposit";
 
 /* ── a free call, booked by the site's own engine ─────────────────
- * The picker under `?ownbook` posts the call here instead of to Cal.com's
- * `/v2/bookings`. The lock rechecks the time and inserts the event
- * (`lib/booking-engine.ts`), then the Inbox, Notion and the client's
- * "You're in." mail follow, as `/api/cal` does for Cal.com's. Paid
+ * The picker posts a call here. The lock rechecks the time and inserts
+ * the event (`lib/booking-engine.ts`), then the Inbox, Notion and the
+ * client's "You're in." mail follow. Paid
  * sessions never come here: they book from Stripe's webhook.
  * ─────────────────────────────────────────────────────────────── */
 

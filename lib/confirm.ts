@@ -2,13 +2,11 @@ import { duration, refundable } from "@/lib/booking-rules";
 import { SIG_DARK, SIG_HTML, SIG_TEXT } from "@/lib/email-signature";
 /* ── the client's confirmation email ──────────────────────────────
  * Julian (2026-10-16): every booking gets a branded "You're in." mail from
- * the site, on top of Cal.com's stock one (Cal stays on the free plan).
+ * the site.
  *
- *   - Paid sessions: sent by `settle` once Cal.com takes the booking, with
+ *   - Paid sessions: sent by `settle` once the lock takes the booking, with
  *     the $100 receipt block.
- *   - Free calls: sent by Cal.com's webhook (`/api/cal`). Paid sessions are
- *     skipped there, so a site booking mails once and a cal.com booking
- *     without a deposit gets nothing that says it is confirmed.
+ *   - Free calls: sent by `/api/book`.
  *
  * Sent through `CLIENT_EMAIL`, the one binding that may mail outside
  * hello@, and only from book@ (an alias of hello@). A failed send is logged, never a
@@ -35,11 +33,11 @@ export type Confirm = {
   start: string;
   end?: string;
   where?: string;
-  /** Cal.com's booking uid, for the reschedule and cancel links. */
+  /** The booking's id, shown short in the mail. */
   uid: string;
   deposit?: { ref: string; at: string; card?: string };
-  /** The site's own reschedule and cancel links; null: none yet. Unset: Cal.com's. */
-  manage?: { reschedule: string; cancel: string } | null;
+  /** The site's own reschedule and cancel links; null: none (no BOOKING_SECRET). */
+  manage: { reschedule: string; cancel: string } | null;
   /** The time first booked, when it was moved since: the refund is judged by it. */
   firstStart?: string;
   /** "reminder": the day-before mail from the lock Worker's cron. */
@@ -84,16 +82,13 @@ export function confirmMail(c: Confirm) {
     // The site's own engine refunds by Julian's 48-hour rule (`lib/booking-rules.ts`).
     note: remind
       ? "It is under 48 hours now, so a cancel keeps the deposit. Moving to another date carries it over."
-      : c.manage !== undefined
-      ? c.firstStart && c.firstStart !== c.start
-        ? refundable({ intent: "x", start: c.start, firstStart: c.firstStart })
-          ? `The balance is due after the shoot. The deposit moved with the new date. It is refunded only if you cancel 48 hours or more before the time you first booked, ${when(c.firstStart)}.`
-          : `The balance is due after the shoot. The deposit moved with the new date. It is no longer refundable: the time you first booked, ${when(c.firstStart)}, was under 48 hours away.`
-        : "The balance is due after the shoot. The deposit moves with a new date, or is refunded if you cancel 48 hours or more before."
-      : "The balance is due after the shoot. The deposit moves with a new date, or is refunded up to 48 hours before.",
+      : c.firstStart && c.firstStart !== c.start
+      ? refundable({ intent: "x", start: c.start, firstStart: c.firstStart })
+        ? `The balance is due after the shoot. The deposit moved with the new date. It is refunded only if you cancel 48 hours or more before the time you first booked, ${when(c.firstStart)}.`
+        : `The balance is due after the shoot. The deposit moved with the new date. It is no longer refundable: the time you first booked, ${when(c.firstStart)}, was under 48 hours away.`
+      : "The balance is due after the shoot. The deposit moves with a new date, or is refunded if you cancel 48 hours or more before.",
   };
-  const { reschedule, cancel } = c.manage ?? { reschedule: `https://cal.com/reschedule/${encodeURIComponent(c.uid)}`, cancel: `https://cal.com/booking/${encodeURIComponent(c.uid)}?cancel=true` };
-  const links = c.manage !== null;
+  const links = c.manage;
   const preheader = `${c.session}, ${fmt({ weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZoneName: "short" }).format(new Date(c.start)).replace(/ /g, " ")}.${c.deposit ? " Deposit of $100 received." : ""}`;
 
   const rule = "border-top:1px solid rgba(0,0,0,0.12)";
@@ -128,7 +123,7 @@ ${paid.rows.map(([k, v]) => `<tr><td class="muted" style="${muted};padding:3px 0
 <tr><td class="mono muted" style="font-size:13px;line-height:1.65;${muted};padding-bottom:32px">${esc(lead)}</td></tr>
 <tr><td class="rule" style="${rule}"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="mono" style="font-size:13px;line-height:1.5">${detail}</table></td></tr>
 ${receipt}
-${links ? `<tr><td class="rule" style="${rule};padding:22px 0 0"><a href="${reschedule}" class="mono accent" style="${accent};font-size:13px;text-decoration:none">Reschedule</a><span class="muted" style="${muted};font-size:13px">&nbsp;|&nbsp;</span><a href="${cancel}" class="mono accent" style="${accent};font-size:13px;text-decoration:none">Cancel</a></td></tr>` : ""}
+${links ? `<tr><td class="rule" style="${rule};padding:22px 0 0"><a href="${links.reschedule}" class="mono accent" style="${accent};font-size:13px;text-decoration:none">Reschedule</a><span class="muted" style="${muted};font-size:13px">&nbsp;|&nbsp;</span><a href="${links.cancel}" class="mono accent" style="${accent};font-size:13px;text-decoration:none">Cancel</a></td></tr>` : ""}
 <tr><td class="mono muted" style="font-size:12px;line-height:1.65;${muted};padding-top:40px">Questions? Reply to this email.<br>${SIG_HTML}</td></tr>
 </table></td></tr></table></body></html>`;
 
@@ -139,7 +134,7 @@ ${links ? `<tr><td class="rule" style="${rule};padding:22px 0 0"><a href="${resc
     "",
     ...rows.map(([k, v]) => `${k}: ${v}`),
     ...(paid ? ["", "Deposit paid: $100.00", ...paid.rows.map(([k, v]) => `${k}: ${v}`), paid.note] : []),
-    ...(links ? ["", `Reschedule: ${reschedule}`, `Cancel: ${cancel}`] : []),
+    ...(links ? ["", `Reschedule: ${links.reschedule}`, `Cancel: ${links.cancel}`] : []),
     "",
     "Questions? Reply to this email.",
     SIG_TEXT,

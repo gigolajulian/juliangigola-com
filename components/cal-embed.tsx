@@ -3,7 +3,6 @@
 import * as React from "react";
 import Link from "next/link";
 import { TimePicker, type V3Book } from "@/components/time-picker";
-import { DenseTimePicker } from "@/components/time-picker-dense";
 import { isPaid } from "@/lib/paid";
 
 /* ── the booking calendar ────────────────────────────────────────
@@ -44,25 +43,18 @@ function TimesDown({ title, className, retry, again }: { title: string; classNam
 }
 
 /** The site's own time picker for `path`. `className` sizes the box.
-    `v3`: the JG V3 stepper; `?dense` keeps its own look inside it. */
+    `v3`: the JG V3 stepper. */
 export function CalEmbed({ path, title, className, v3 }: { path: string; title: string; className?: string; v3?: V3Book }) {
-  /* `?dense`: the tighter picker while it is tried (time-picker-dense.tsx). */
-  const [dense, setDense] = React.useState<boolean | null>(null);
   // Try again mounts a fresh picker, which asks for the times anew.
   const [tries, setTries] = React.useState(0);
-  React.useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setDense(new URLSearchParams(window.location.search).has("dense"));
-  }, []);
+  // The picker reads the visitor's zone and clock: it mounts on the client only.
+  const [mounted, setMounted] = React.useState(false);
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  React.useEffect(() => setMounted(true), []);
   const paid = isPaid(path.split("/")[1]);
   const wrap = (body: React.ReactNode, bar?: React.ReactNode) => (v3 ? v3.shell({ steps: [], at: 1, head: paid ? "Book a session" : v3.name === "Consultation" ? "Book a consultation" : "Book a call", body, sum: [], bar }) : body);
   // The picker's Continue bar, held off, from the first paint (time-picker.tsx).
-  if (dense === null) return wrap(<div aria-label={title} className={className} />, <button type="button" className="btn fill" disabled>Continue</button>);
+  if (!mounted) return wrap(<div aria-label={title} className={className} />, <button type="button" className="btn fill" disabled>Continue</button>);
   const down = <TimesDown title={title} className={className} retry={() => setTries((n) => n + 1)} again={tries > 0} />;
-  // `?dense` has no deposit step: a paid session keeps the main picker.
-  return dense && !paid ? (
-    wrap(<DenseTimePicker key={tries} path={path} title={title} className={className} fallback={down} />)
-  ) : (
-    <TimePicker key={tries} path={path} title={title} className={className} fallback={down} v3={v3} />
-  );
+  return <TimePicker key={tries} path={path} title={title} className={className} fallback={down} v3={v3} />;
 }

@@ -1,9 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { FakeKV, reply } from "./fakes";
+import { FakeKV, FakeStore, fakeLock, reply } from "./fakes";
+import { forgetToken } from "@/lib/gcal";
+import { BookingLock } from "@/worker/booking-lock";
 
 /* The $100 deposit (`lib/deposit.ts`): the intent is created only for an
-   open time at a fixed amount, Stripe's signed webhook books Cal.com or
-   refunds, a second delivery does nothing, and the status read carries no
+   open time at a fixed amount, Stripe's signed webhook books through the
+   lock or refunds, a second delivery does nothing, and the status read carries no
    personal data. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
@@ -12,17 +14,20 @@ vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ 
 const { POST: start } = await import("@/app/api/deposit/route");
 const { GET: status, PUT: putRefs } = await import("@/app/api/deposit/[id]/route");
 const { POST: hook } = await import("@/app/api/stripe/route");
-const { paidFor } = await import("@/lib/deposit");
 
 const WHSEC = "whsec_test";
 const PI = "pi_TEST1234567890";
-const START = new Date(Math.ceil((Date.now() + 7 * 864e5) / 36e5) * 36e5).toISOString();
+// Wednesday 10 AM Pacific, a week out: inside Julian's hours.
+const wed = new Date(Date.now() + 7 * 864e5);
+wed.setUTCDate(wed.getUTCDate() + ((3 - wed.getUTCDay() + 7) % 7));
+const START = new Date(Date.UTC(wed.getUTCFullYear(), wed.getUTCMonth(), wed.getUTCDate(), 18)).toISOString();
+const OAUTH = JSON.stringify({ client_id: "a", client_secret: "b", refresh_token: "c" });
 const BODY = { slug: "portraits", start: START, timeZone: "America/Los_Angeles", name: "QA Test", email: "qa@example.com", phone: "+14085550100", where: "Studio", amount: 1 };
 
 type Call = { url: string; init?: RequestInit };
 let calls: Call[];
 let open: boolean;
-let calOk: boolean;
+let insertOk: boolean;
 let refundOk: boolean;
 let allowed: boolean;
 type Mail = { subject: string; text: string; replyTo?: { email: string } };
@@ -33,19 +38,22 @@ let sent: ClientMail[];
 let intent: { status?: string; amount: number; currency: string; metadata: Record<string, string> };
 
 beforeEach(() => {
+  forgetToken();
   calls = [];
   open = true;
-  calOk = true;
+  insertOk = true;
   refundOk = true;
   intent = { amount: 10000, currency: "usd", metadata: { kind: "deposit" } };
   mails = [];
   sent = [];
   allowed = true;
-  ctx.env = { INBOX: new FakeKV(), DEPOSIT_LIMIT: { limit: async () => ({ success: allowed }) }, STRIPE_SECRET_KEY: "sk_test_x", STRIPE_WEBHOOK_SECRET: WHSEC, EMAIL: { send: async (m: Mail) => void mails.push(m) }, CLIENT_EMAIL: { send: async (m: ClientMail) => void sent.push(m) } };
+  ctx.env = { INBOX: new FakeKV(), DEPOSIT_LIMIT: { limit: async () => ({ success: allowed }) }, STRIPE_SECRET_KEY: "sk_test_x", STRIPE_WEBHOOK_SECRET: WHSEC, EMAIL: { send: async (m: Mail) => void mails.push(m) }, CLIENT_EMAIL: { send: async (m: ClientMail) => void sent.push(m) }, GCAL_OAUTH: OAUTH, BOOKING_LOCK: fakeLock(new BookingLock({ storage: new FakeStore() }, { GCAL_OAUTH: OAUTH })), BOOKING_SECRET: "test-secret" };
   vi.stubGlobal("fetch", async (url: string, init?: RequestInit) => {
     calls.push({ url, init });
-    if (url.includes("/v2/slots")) return reply({ status: "success", data: { day: open ? [{ start: START }] : [] } });
-    if (url.includes("/v2/bookings")) return calOk ? reply({ status: "success", data: { uid: "cal_uid", start: START, end: new Date(Date.parse(START) + 36e5).toISOString() } }) : reply({ status: "error" }, 400);
+    if (url.includes("oauth2")) return reply({ access_token: "t", expires_in: 3600 });
+    if (url.includes("/events?q=")) return reply({ items: [] });
+    if (url.includes("/freeBusy")) return reply({ calendars: { primary: { busy: open ? [] : [{ start: START, end: new Date(Date.parse(START) + 36e5).toISOString() }] } } });
+    if (url.includes("/events")) return insertOk ? reply({ id: "ev1" }) : reply({ error: {} }, 500);
     if (url.endsWith(`/payment_intents/${PI}?expand[]=latest_charge`)) return reply({ id: PI, ...intent, latest_charge: { payment_method_details: { card: { brand: "visa", last4: "4242" } } } });
     if (url.endsWith("/payment_intents")) return reply({ id: PI, client_secret: `${PI}_secret_x` });
     if (url.endsWith(`/payment_intents/${PI}`)) {
@@ -58,6 +66,8 @@ beforeEach(() => {
 });
 
 const kv = () => ctx.env.INBOX as FakeKV;
+/** The calendar event the lock inserts. */
+const inserted = (c: Call) => c.init?.method === "POST" && /\/calendars\/primary\/events\?/.test(c.url);
 const post = (body: unknown) => start(new Request("https://juliangigola.com/api/deposit", { method: "POST", body: JSON.stringify(body) }));
 const read = (id: string) => status(new Request(`https://juliangigola.com/api/deposit/${id}`), { params: Promise.resolve({ id }) });
 
@@ -77,7 +87,7 @@ describe("POST /api/deposit", () => {
     expect((await post(BODY)).status).toBe(503);
   });
 
-  it("answers 429 past the rate limit, before asking Cal.com or Stripe", async () => {
+  it("answers 429 past the rate limit, before asking the calendar or Stripe", async () => {
     allowed = false;
     expect((await post(BODY)).status).toBe(429);
     expect(calls).toEqual([]);
@@ -108,6 +118,7 @@ describe("POST /api/deposit", () => {
     expect(form.get("metadata[start]")).toBe(START);
     expect(form.get("metadata[amount]")).toBeNull();
     expect(form.get("metadata[kind]")).toBe("deposit");
+    expect(form.get("metadata[engine]")).toBe("own");
     expect(kv().puts).toEqual([]);
   });
 });
@@ -146,7 +157,7 @@ describe("POST /api/stripe", () => {
   });
 
   it("leaves every other payment on the account alone", async () => {
-    // Cal.com's own $100 charge, an invoice, a deposit-shaped intent at another amount.
+    // A $100 charge made elsewhere, an invoice, a deposit-shaped intent at another amount.
     for (const body of [paid({}), paid({ slug: "portraits", start: START }), paid(undefined, 25000)]) {
       expect((await deliver(body)).status).toBe(200);
     }
@@ -154,11 +165,11 @@ describe("POST /api/stripe", () => {
     expect(kv().puts).toEqual([]);
   });
 
-  it("books Cal.com on payment, once, however often Stripe delivers", async () => {
+  it("books through the lock on payment, once, however often Stripe delivers", async () => {
     expect((await deliver(paid())).status).toBe(200);
     expect((await deliver(paid())).status).toBe(200);
-    expect(calls.filter((c) => c.url.includes("/v2/bookings"))).toHaveLength(1);
-    expect(kv().json(`deposit:${PI}`)).toMatchObject({ status: "booked", booking: { uid: "cal_uid" } });
+    expect(calls.filter(inserted)).toHaveLength(1);
+    expect(kv().json(`deposit:${PI}`)).toMatchObject({ status: "booked", booking: { uid: expect.any(String), start: START } });
   });
 
   it("refunds when the time went while they paid", async () => {
@@ -170,14 +181,14 @@ describe("POST /api/stripe", () => {
     expect(kv().json(`deposit:${PI}`).status).toBe("refunded");
   });
 
-  it("refunds when Cal.com refuses the booking", async () => {
-    calOk = false;
+  it("refunds when the calendar refuses the booking", async () => {
+    insertOk = false;
     await deliver(paid());
     expect(kv().json(`deposit:${PI}`).status).toBe("refunded");
   });
 
   it("tells the Inbox when even the refund fails", async () => {
-    calOk = false;
+    insertOk = false;
     refundOk = false;
     await deliver(paid());
     expect(kv().json(`deposit:${PI}`).status).toBe("failed");
@@ -187,7 +198,7 @@ describe("POST /api/stripe", () => {
 });
 
 describe("the client's confirmation", () => {
-  it("mails the client once Cal.com books, with the deposit receipt", async () => {
+  it("mails the client once the time is booked, with the deposit receipt", async () => {
     await deliver(paid());
     expect(sent).toHaveLength(1);
     const [m] = sent;
@@ -198,8 +209,8 @@ describe("the client's confirmation", () => {
     for (const part of [m.html, m.text]) {
       expect(part).toContain("Deposit paid");
       expect(part).toContain("Visa ending 4242");
-      expect(part).toContain("https://cal.com/reschedule/cal_uid");
-      expect(part).toContain("https://cal.com/booking/cal_uid?cancel=true");
+      expect(part).toMatch(/https:\/\/juliangigola\.com\/booking\/[^?"\s]+\?t=[^&"\s]+&(amp;)?do=reschedule/);
+      expect(part).toMatch(/https:\/\/juliangigola\.com\/booking\/[^?"\s]+\?t=[^&"\s]+&(amp;)?do=cancel/);
       expect(part).toContain("Thanks, QA.");
     }
     expect(m.html).not.toMatch(/—/);
@@ -226,16 +237,16 @@ describe("the client's confirmation", () => {
     expect((await deliver(paid())).status).toBe(200);
     expect(kv().json(`deposit:${PI}`).status).toBe("booked");
     const { confirmMail } = await import("@/lib/confirm");
-    const { html, attachments } = confirmMail({ name: "<b>x</b>", email: "x@example.com", session: "Portraits", start: START, where: "<script>", uid: "u" });
+    const { html, attachments } = confirmMail({ name: "<b>x</b>", email: "x@example.com", session: "Portraits", start: START, where: "<script>", uid: "u", manage: null });
     // The name rides inline: a remote logo showed broken in Gmail.
     for (const { contentId } of attachments) expect(html).toContain(`src="cid:${contentId}"`);
     expect(html).not.toContain("<script>");
     expect(html).not.toContain("<b>x</b>");
-    expect(confirmMail({ name: "A", email: "a@example.com", session: "Graduation photos", start: START, uid: "u" }).text).toContain("Your graduation session is booked.");
+    expect(confirmMail({ name: "A", email: "a@example.com", session: "Graduation photos", start: START, uid: "u", manage: null }).text).toContain("Your graduation session is booked.");
     // The length, in the card's words.
     const end = (m: number) => new Date(+new Date(START) + m * 60000).toISOString();
-    expect(confirmMail({ name: "A", email: "a@example.com", session: "Portraits", start: START, end: end(60), uid: "u" }).text).toMatch(/^When: .+, 60 minutes$/m);
-    expect(confirmMail({ name: "A", email: "a@example.com", session: "Portraits", start: START, end: end(120), uid: "u" }).text).toMatch(/, 2 hours$/m);
+    expect(confirmMail({ name: "A", email: "a@example.com", session: "Portraits", start: START, end: end(60), uid: "u", manage: null }).text).toMatch(/^When: .+, 60 minutes$/m);
+    expect(confirmMail({ name: "A", email: "a@example.com", session: "Portraits", start: START, end: end(120), uid: "u", manage: null }).text).toMatch(/, 2 hours$/m);
   });
 
   it("reads the time in Pacific with no city", async () => {
@@ -248,16 +259,14 @@ describe("the client's confirmation", () => {
 describe("telling Julian", () => {
   const LINK = `https://dashboard.stripe.com/test/payments/${PI}`;
 
-  it("mails hello@ when a deposit books, and puts the Stripe link in the Cal.com notes", async () => {
+  it("mails hello@ when a deposit books, and puts the intent on the calendar event", async () => {
     await deliver(paid());
     expect(mails).toHaveLength(1);
     expect(mails[0].subject).toMatch(/^Deposit paid: Portraits, .+, QA Test, \$100$/);
     expect(mails[0].text).toContain(LINK);
     expect(mails[0].replyTo?.email).toBe("qa@example.com");
-    const cal = JSON.parse(String(calls.find((c) => c.url.includes("/v2/bookings"))!.init!.body));
-    expect(cal.metadata).toEqual({ deposit: PI });
-    expect(cal.bookingFieldsResponses.notes).toContain(`Deposit paid on the site: $100 (ref ${PI}).`);
-    expect(cal.bookingFieldsResponses.notes).not.toContain("dashboard.stripe.com");
+    const event = JSON.parse(String(calls.find(inserted)!.init!.body));
+    expect(event.description).toContain(PI);
   });
 
   it("mails a refund, and a deposit stuck paid", async () => {
@@ -275,10 +284,10 @@ describe("telling Julian", () => {
     const at = new Date(Date.now() - 3 * 60 * 1000).toISOString();
     await kv().put(`deposit:${PI}`, JSON.stringify({ status: "booking", at }));
     expect((await deliver(paid())).status).toBe(200);
-    expect(mails.map((m) => m.subject)).toEqual([expect.stringMatching(/^Deposit stuck: check Stripe and Cal\.com: Portraits, .+, QA Test, \$100$/)]);
+    expect(mails.map((m) => m.subject)).toEqual([expect.stringMatching(/^Deposit stuck: check Stripe and the calendar: Portraits, .+, QA Test, \$100$/)]);
     expect(mails[0].text).toContain(LINK);
     expect(kv().json(`deposit:${PI}`)).toMatchObject({ status: "booking", warned: true });
-    expect(calls.some((c) => c.url.includes("/v2/bookings"))).toBe(false);
+    expect(calls.some(inserted)).toBe(false);
     expect((await deliver(paid())).status).toBe(200);
     expect(mails).toHaveLength(1);
   });
@@ -295,29 +304,6 @@ describe("telling Julian", () => {
     expect(kv().json(`deposit:${PI}`).status).toBe("booked");
   });
 
-  it("marks a Cal.com booking paid only when Stripe agrees", async () => {
-    const booking = { startTime: START, attendees: [{ email: "QA@example.com" }], metadata: { deposit: PI } };
-    const paidIntent = { status: "succeeded", amount: 10000, currency: "usd", metadata: { kind: "deposit", email: "qa@example.com", start: START } };
-    intent = { ...paidIntent };
-    expect(await paidFor("sk_test_x", booking)).toBe(LINK);
-    // The same ref typed into the notes of a public Cal.com booking.
-    expect(await paidFor("sk_test_x", { startTime: START, attendees: [{ email: "qa@example.com" }], additionalNotes: `ref ${PI}` })).toBe(LINK);
-    // Someone else's deposit, another time, a payment that never went through, or no ref at all.
-    expect(await paidFor("sk_test_x", { ...booking, attendees: [{ email: "other@example.com" }] })).toBeUndefined();
-    expect(await paidFor("sk_test_x", { ...booking, startTime: "2030-01-01T00:00:00Z" })).toBeUndefined();
-    intent = { ...paidIntent, status: "requires_payment_method" };
-    expect(await paidFor("sk_test_x", booking)).toBeUndefined();
-    expect(await paidFor("sk_test_x", { startTime: START, additionalNotes: "Deposit paid on the site." })).toBeUndefined();
-    // Refunded or failed by the site: a refund leaves the intent succeeded.
-    intent = { ...paidIntent, metadata: { ...paidIntent.metadata, outcome: "refunded" } };
-    expect(await paidFor("sk_test_x", booking)).toBeUndefined();
-    intent = { ...paidIntent, metadata: { ...paidIntent.metadata, outcome: "failed" } };
-    expect(await paidFor("sk_test_x", booking)).toBeUndefined();
-    // Booked by the site: only for that Cal.com booking.
-    intent = { ...paidIntent, metadata: { ...paidIntent.metadata, outcome: "booked", cal_uid: "cal-1" } };
-    expect(await paidFor("sk_test_x", { ...booking, uid: "cal-1" })).toBe(LINK);
-    expect(await paidFor("sk_test_x", { ...booking, uid: "cal-2" })).toBeUndefined();
-  });
 });
 
 describe("GET /api/deposit/<id>", () => {
@@ -356,7 +342,7 @@ describe("GET /api/deposit/<id>", () => {
   it("reports the booking without who made it", async () => {
     await deliver(paid());
     const out = await (await read(PI)).json();
-    expect(out).toEqual({ status: "booked", booking: { uid: "cal_uid", start: START } });
+    expect(out).toEqual({ status: "booked", booking: { uid: expect.any(String), start: START } });
   });
 });
 
