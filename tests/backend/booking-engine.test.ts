@@ -91,7 +91,7 @@ describe("refusals before any calendar call", () => {
   });
 
   it("refuses an unknown event and books a repeated deposit once", async () => {
-    const b = { slug: "portraits", start: "2026-11-20T18:00:00Z", timeZone: "America/Los_Angeles", name: "Ana", email: "ana@example.com" };
+    const b = { slug: "portraits", start: "2026-11-20T18:00:00Z", timeZone: "America/Los_Angeles", name: "Ana", email: "ana@example.com", engine: "own" as const };
     expect(await bookOwn(store, undefined, { ...b, slug: "skydiving" })).toEqual({ ok: false, reason: "unknown" });
     const first = rec("paid");
     await saveBooking(store, first);
