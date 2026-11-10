@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { FakeEmail } from "./fakes";
-import { cancelledSubject, confirmMail, sendCancelled, sendConfirm, when, type Confirm } from "@/lib/confirm";
+import { cancelledSubject, confirmMail, sendCancelled, sendConfirm, when, type Confirm } from "@/lib/booking/confirm";
 import { SIG_DARK, SIG_HTML, SIG_TEXT } from "@/lib/email/email-signature";
 
-/* The client's "You're in." mail and the cancel note (`lib/confirm.ts`),
+/* The client's "You're in." mail and the cancel note (`lib/booking/confirm.ts`),
    signed with Julian's one signature (`lib/email/email-signature.ts`). */
 
 const base: Confirm = {

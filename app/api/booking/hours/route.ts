@@ -1,6 +1,6 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { lock } from "@/lib/booking-engine";
-import { cleanHours, TZ, type Hours } from "@/lib/booking-rules";
+import { lock } from "@/lib/booking/booking-engine";
+import { cleanHours, TZ, type Hours } from "@/lib/booking/booking-rules";
 import { authorised, bearer, canPush } from "@/lib/vouch";
 
 /* ── Julian's open hours, from the lead desk (Hours) ──────────────

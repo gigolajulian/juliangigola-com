@@ -1,7 +1,7 @@
 /* ── the proof mails ──────────────────────────────────────────────
  * Julian (2026-11-06): light by default, dark where the mail app supports
  * it (prefers-color-scheme; Gmail ignores it and stays light). Same table layout and Plex Mono as the booking mail
- * (`lib/confirm.ts`), from book@ through CLIENT_EMAIL, reply-to hello@.
+ * (`lib/booking/confirm.ts`), from book@ through CLIENT_EMAIL, reply-to hello@.
  * Never sent from Lightroom: only when he hits Send in /admin Leads.
  * ─────────────────────────────────────────────────────────────── */
 

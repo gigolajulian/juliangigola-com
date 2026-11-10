@@ -1,12 +1,12 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { isDeposit, isIntentId, refKey, stripe } from "@/lib/deposit";
+import { isDeposit, isIntentId, refKey, stripe } from "@/lib/booking/deposit";
 import { MAX_REFS, takePicks, takeUploads } from "@/lib/inbox";
 
 /* ── how a deposit ended ───────────────────────────────────────────
  * The card polls this after paying: "pending" until Stripe's webhook has
  * run, then "booked", "refunded" or "failed". Read from the intent's
  * metadata on Stripe, not KV, which lags a minute at other locations.
- * Status and booking time only, never who booked. See `lib/deposit.ts`.
+ * Status and booking time only, never who booked. See `lib/booking/deposit.ts`.
  * ─────────────────────────────────────────────────────────────── */
 
 export const dynamic = "force-dynamic";
@@ -38,7 +38,7 @@ export async function GET(_request: Request, ctx: { params: Promise<{ id: string
 /* ── references with a deposit ─────────────────────────────────────
  * The booking card's References (`reference-picks.tsx`), sent by
  * `deposit-step.tsx` once the intent exists and before the card is
- * charged. Kept 30 days beside the intent; `tell` in `lib/deposit.ts`
+ * charged. Kept 30 days beside the intent; `tell` in `lib/booking/deposit.ts`
  * attaches them to the "Deposit paid" mail to hello@. Only for a live
  * deposit not yet settled, so an old id cannot reach the mail.
  * ─────────────────────────────────────────────────────────────── */

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { credentials, KEY_STORE } from "@/lib/admin-github";
-import type { Hours, Window } from "@/lib/booking-rules";
+import type { Hours, Window } from "@/lib/booking/booking-rules";
 
 /* ── Hours, in the lead desk ──────────────────────────────────────
  * Julian (2026-11-04): change when people can book without a deploy.

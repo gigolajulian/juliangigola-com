@@ -1,13 +1,13 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { lock, recordBooking, type BookResult } from "@/lib/booking-engine";
-import { manageLinks } from "@/lib/booking-token";
-import { confirmMail, sendConfirm } from "@/lib/confirm";
+import { lock, recordBooking, type BookResult } from "@/lib/booking/booking-engine";
+import { manageLinks } from "@/lib/booking/booking-token";
+import { confirmMail, sendConfirm } from "@/lib/booking/confirm";
 import { logMail } from "@/lib/leads";
-import { parseBooking } from "@/lib/deposit";
+import { parseBooking } from "@/lib/booking/deposit";
 
 /* ── a free call, booked by the site's own engine ─────────────────
  * The picker posts a call here. The lock rechecks the time and inserts
- * the event (`lib/booking-engine.ts`), then the Inbox, Notion and the
+ * the event (`lib/booking/booking-engine.ts`), then the Inbox, Notion and the
  * client's "You're in." mail follow. Paid
  * sessions never come here: they book from Stripe's webhook.
  * ─────────────────────────────────────────────────────────────── */

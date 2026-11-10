@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { bookingToken, manageLinks, tokenOpens } from "@/lib/booking-token";
+import { bookingToken, manageLinks, tokenOpens } from "@/lib/booking/booking-token";
 
-/* The client's reschedule and cancel links (`lib/booking-token.ts`). */
+/* The client's reschedule and cancel links (`lib/booking/booking-token.ts`). */
 
 const SECRET = "booking-secret-for-tests";
 const NOW = Date.parse("2026-11-10T18:00:00Z");

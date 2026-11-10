@@ -2,8 +2,8 @@
 
 import * as React from "react";
 import { credentials, KEY_STORE } from "@/lib/admin-github";
-import { EVENTS, HOURS, TZ } from "@/lib/booking-rules";
-import { startsFor, zoned } from "@/lib/slots";
+import { EVENTS, HOURS, TZ } from "@/lib/booking/booking-rules";
+import { startsFor, zoned } from "@/lib/booking/slots";
 import { cn } from "@/lib/utils";
 
 /* ── the Leads app's Calendar ─────────────────────────────────────

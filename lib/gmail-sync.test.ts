@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CURSOR, mailChanges, syncGmail, type Msg } from "./gmail-sync";
-import { forgetToken } from "./gcal";
+import { forgetToken } from "./booking/gcal";
 import { fold, leadStoreKey, recordLead, writeLead, type Lead } from "./leads";
 import { canonical, sealer } from "./lead-crypto";
 

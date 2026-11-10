@@ -357,7 +357,7 @@ export function enquiry(
 
 /* ── bookings ─────────────────────────────────────────────────────
  * Each booking the site's engine makes (`recordBooking`,
- * `lib/booking-engine.ts`) is stored beside the enquiries with the type
+ * `lib/booking/booking-engine.ts`) is stored beside the enquiries with the type
  * "booking", so /admin shows it in the same list and says what it is.
  * ─────────────────────────────────────────────────────────────── */
 

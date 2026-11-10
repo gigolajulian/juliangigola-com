@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { credentials, KEY_STORE } from "@/lib/admin-github";
-import { TZ } from "@/lib/booking-rules";
+import { TZ } from "@/lib/booking/booking-rules";
 import type { LeadSummary } from "@/lib/leads";
 import { cn } from "@/lib/utils";
 

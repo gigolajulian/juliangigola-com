@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FakeEmail, FakeKV, FakeStore, fakeLock } from "./fakes";
-import { forgetToken } from "@/lib/gcal";
+import { forgetToken } from "@/lib/booking/gcal";
 import { BookingLock } from "@/worker/booking-lock";
 
-/* The site's own engine (`lib/booking-engine.ts`, `worker/booking-lock.ts`):
+/* The site's own engine (`lib/booking/booking-engine.ts`, `worker/booking-lock.ts`):
    a time is rechecked and inserted inside the lock, so two tabs on one slot
    get one booking; a free call books from `/api/book`, a paid session from
    Stripe's webhook, and both file the Inbox row and the client's mail. */
@@ -11,7 +11,7 @@ import { BookingLock } from "@/worker/booking-lock";
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
 vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env, ctx: { waitUntil: (p: Promise<unknown>) => p } }) }));
 const { POST: book } = await import("@/app/api/book/route");
-const { settle } = await import("@/lib/deposit");
+const { settle } = await import("@/lib/booking/deposit");
 
 // Wednesday 10 AM Pacific, a week out.
 const now = Date.now();

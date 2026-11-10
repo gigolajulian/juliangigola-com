@@ -1,8 +1,8 @@
-import { DEFAULT_HOURS, EVENTS, TZ, windowOn, type Hours, type Rule } from "@/lib/booking-rules";
-import { gcal } from "@/lib/gcal";
+import { DEFAULT_HOURS, EVENTS, TZ, windowOn, type Hours, type Rule } from "@/lib/booking/booking-rules";
+import { gcal } from "@/lib/booking/gcal";
 
 /* ── open times, from hello@'s free/busy ──────────────────────────
- * The rules (`lib/booking-rules.ts`) say when Julian works; Google's
+ * The rules (`lib/booking/booking-rules.ts`) say when Julian works; Google's
  * freeBusy says what is already taken, Cal.com's bookings included while
  * both engines run. A start is offered when the session and its buffer
  * after it touch nothing busy. `GET /api/slots` serves these to the picker

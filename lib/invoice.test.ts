@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { AMOUNT } from "./deposit";
+import { AMOUNT } from "./booking/deposit";
 import { balance, cleanInvoice, dayB, DEPOSIT, invoiceNo, MAX_ROWS_B, mmyy, usdB } from "./invoice";
 
 describe("invoice", () => {

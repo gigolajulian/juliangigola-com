@@ -70,7 +70,7 @@ export const DOORS = {
 export const CALL_CARD = { d: w("channel-orange", "01"), l: w("second-skin", "13") };
 export const ABOUT_PHOTO = "/about/julian-steps.jpg";
 
-/* ── sessions (master SESS; deposit list from lib/paid.ts) ── */
+/* ── sessions (master SESS; deposit list from lib/booking/paid.ts) ── */
 export type SessionSlug = "portraits" | "headshots" | "studio-digitals" | "graduation" | "weddings" | "consultation" | "music-photography" | "brand-photography" | "editorial" | "events";
 export type Session = {
   slug: SessionSlug;
@@ -81,7 +81,7 @@ export type Session = {
   turnaround?: string;
   /** Cal.com "username/event-slug"; none for an on-request session. */
   cal?: string;
-  /** Takes the $100 deposit (`lib/paid.ts`). */
+  /** Takes the $100 deposit (`lib/booking/paid.ts`). */
   paid: boolean;
   /** `m`: a horizontal frame for the phone banner, where the tall one crops badly.
       `at`: where the phone and portrait-tablet banner sits on each frame (an
@@ -157,7 +157,7 @@ export const SESSIONS: Record<SessionSlug, Session> = {
     /* The master's call card shows the About portrait. */
     photo: { d: ABOUT_PHOTO, l: ABOUT_PHOTO, at: { d: "50% 85%", l: "50% 85%" } },
   },
-  /* The commission calls and events (BOOK_MENU in `lib/booking.ts`, same words),
+  /* The commission calls and events (BOOK_MENU in `lib/booking/booking.ts`, same words),
      on the stepper but not in its tabs. */
   "music-photography": {
     slug: "music-photography",

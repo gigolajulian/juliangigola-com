@@ -10,7 +10,7 @@
 //
 //   node scripts/gsc-auth.mjs path\to\client_secret.json cal
 //
-// The same for the booking engine (`lib/gcal.ts`): hello@'s calendar,
+// The same for the booking engine (`lib/booking/gcal.ts`): hello@'s calendar,
 // events and free/busy, plus Gmail read-only for the lead desk's timeline
 // (`lib/gmail-sync.ts`), into `GCAL_OAUTH`. The client must be an
 // Internal one, or Google expires the refresh token after 7 days. It asks

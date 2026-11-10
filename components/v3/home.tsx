@@ -459,7 +459,7 @@ function Commissions({ top }: { top: Record<string, TopWork[]> }) {
 }
 
 /* `?scrollfx=rows` prototype, phones only: the first of each booking page's
-   picks (lib/booking.ts); Graduation has none and keeps its SESSIONS photo. */
+   picks (lib/booking/booking.ts); Graduation has none and keeps its SESSIONS photo. */
 const ROW_SAMPLES: Partial<Record<SessionSlug, string>> = {
   portraits: "/work/gilt/03.jpg",
   headshots: "/work/headshots/04.jpg",

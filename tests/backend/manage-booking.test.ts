@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FakeEmail, FakeKV, FakeStore, fakeLock, LEADS_KEY, leadOf } from "./fakes";
-import { forgetToken } from "@/lib/gcal";
-import { bookingToken, manageLinks, tokenOpens } from "@/lib/booking-token";
+import { forgetToken } from "@/lib/booking/gcal";
+import { bookingToken, manageLinks, tokenOpens } from "@/lib/booking/booking-token";
 import { BookingLock } from "@/worker/booking-lock";
 
 /* Reschedule and cancel (`app/api/booking/[id]`): the mail's signed link
@@ -13,7 +13,7 @@ const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
 vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env, ctx: { waitUntil: (p: Promise<unknown>) => p } }) }));
 const { POST: book } = await import("@/app/api/book/route");
 const { POST: change } = await import("@/app/api/booking/[id]/route");
-const { settle } = await import("@/lib/deposit");
+const { settle } = await import("@/lib/booking/deposit");
 
 const SECRET = "booking-secret-for-tests";
 const OAUTH = JSON.stringify({ client_id: "a", client_secret: "b", refresh_token: "c" });

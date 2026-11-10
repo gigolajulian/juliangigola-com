@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { GET } from "@/app/api/slots/route";
-import { forgetToken } from "@/lib/gcal";
+import { forgetToken } from "@/lib/booking/gcal";
 
 /* /api/slots: public. Off without GCAL_OAUTH, refuses an unknown session,
    a bad range and an unknown zone, and answers in Cal.com's shape. */

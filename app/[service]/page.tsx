@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { shareOg } from "@/lib/share";
 import { notFound } from "next/navigation";
 import { LdJson } from "@/components/local-screens";
-import { BOOKING_PAGES, bookingHref, bookingPage } from "@/lib/booking";
+import { BOOKING_PAGES, bookingHref, bookingPage } from "@/lib/booking/booking";
 import { LINKABLE, getProject, projectsIn } from "@/lib/work";
 import { serviceGraph } from "@/lib/seo";
 import { V3Service } from "@/components/v3/service";
@@ -12,13 +12,13 @@ import { V3Service } from "@/components/v3/service";
  * the homepage's own screens: its floating cover with this service's
  * photographs and title, the testimonials, the details and questions on
  * one screen, and the form, set to this service. The words are in
- * `lib/booking.ts`.
+ * `lib/booking/booking.ts`.
  * ─────────────────────────────────────────────────────────────── */
 
 /* Prerendered, and rendered on request where the prerendered copy is
    not there: a Workers preview upload carries no cache, and
    `dynamicParams = false` turned every miss into a 404. Any address
-   at the root that `lib/booking.ts` does not list is a 404 all the
+   at the root that `lib/booking/booking.ts` does not list is a 404 all the
    same, from `notFound()` below. */
 export function generateStaticParams() {
   return BOOKING_PAGES.map((p) => ({ service: p.slug }));
@@ -54,7 +54,7 @@ export default async function BookingPage(props: PageProps<"/[service]">) {
     });
   /* A session carries its gallery as a screen of its own: the frames
      chosen for it where the gallery is large (`picks`,
-     `lib/booking.ts`), all of it where it fits in four rows of five,
+     `lib/booking/booking.ts`), all of it where it fits in four rows of five,
      and otherwise fourteen, taken in turn from each of the
      discipline's projects or spread through the one gallery. */
   const slug = page.gallery.href.split("/").pop() ?? "";

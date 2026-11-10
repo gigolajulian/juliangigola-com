@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FakeKV, FakeStore, fakeLock, reply } from "./fakes";
-import { forgetToken } from "@/lib/gcal";
+import { forgetToken } from "@/lib/booking/gcal";
 import { BookingLock } from "@/worker/booking-lock";
 
-/* The $100 deposit (`lib/deposit.ts`): the intent is created only for an
+/* The $100 deposit (`lib/booking/deposit.ts`): the intent is created only for an
    open time at a fixed amount, Stripe's signed webhook books through the
    lock or refunds, a second delivery does nothing, and the status read carries no
    personal data. */
@@ -236,7 +236,7 @@ describe("the client's confirmation", () => {
     ctx.env.CLIENT_EMAIL = { send: async () => { throw new Error("quota"); } };
     expect((await deliver(paid())).status).toBe(200);
     expect(kv().json(`deposit:${PI}`).status).toBe("booked");
-    const { confirmMail } = await import("@/lib/confirm");
+    const { confirmMail } = await import("@/lib/booking/confirm");
     const { html, attachments } = confirmMail({ name: "<b>x</b>", email: "x@example.com", session: "Portraits", start: START, where: "<script>", uid: "u", manage: null });
     // The name rides inline: a remote logo showed broken in Gmail.
     for (const { contentId } of attachments) expect(html).toContain(`src="cid:${contentId}"`);
@@ -250,7 +250,7 @@ describe("the client's confirmation", () => {
   });
 
   it("reads the time in Pacific with no city", async () => {
-    const { when } = await import("@/lib/confirm");
+    const { when } = await import("@/lib/booking/confirm");
     expect(when("2026-10-21T23:00:00Z", "2026-10-22T00:00:00Z")).toBe("Wed, Oct 21, 4:00 to 5:00 PM PDT");
     expect(when("2026-12-02T18:30:00Z")).toBe("Wed, Dec 2, 10:30 AM PST");
   });

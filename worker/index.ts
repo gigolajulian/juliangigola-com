@@ -7,9 +7,9 @@
  * (`app/api/leads/gmail`), so leads, their key and Gmail stay on the site.
  * ─────────────────────────────────────────────────────────────── */
 
-import { lock, type BookingRecord } from "../lib/booking-engine";
-import { manageLinks } from "../lib/booking-token";
-import { confirmMail, sendConfirm } from "../lib/confirm";
+import { lock, type BookingRecord } from "../lib/booking/booking-engine";
+import { manageLinks } from "../lib/booking/booking-token";
+import { confirmMail, sendConfirm } from "../lib/booking/confirm";
 
 export { BookingLock } from "./booking-lock";
 

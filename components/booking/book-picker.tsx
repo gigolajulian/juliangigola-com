@@ -15,7 +15,7 @@ export type Bookable = {
   blurb: string;
   rate: string;
   length: string;
-  /** Its event, "juliangigola/event-slug" (`lib/booking.ts`). */
+  /** Its event, "juliangigola/event-slug" (`lib/booking/booking.ts`). */
   cal: string;
   /** The photographs behind it while it is the one picked. */
   wall: WallTile[];

@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { BOOKING_SLUGS } from "@/lib/booking-slugs";
+import { BOOKING_SLUGS } from "@/lib/booking/booking-slugs";
 import { errorsOn, open, RATIOS } from "./ratios";
 
 /* Every page a visitor lands on, at the six ratios: it answers 200, runs

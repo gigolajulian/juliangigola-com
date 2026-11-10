@@ -1,5 +1,5 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { stripe } from "@/lib/deposit";
+import { stripe } from "@/lib/booking/deposit";
 import { isAdmin } from "@/lib/vouch";
 
 /* ── GET /api/money: his Stripe balance and what moved it ─────────

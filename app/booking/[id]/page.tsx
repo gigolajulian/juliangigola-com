@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { ManageBooking } from "@/components/booking/manage-booking";
-import { lock, managed, type BookingRecord } from "@/lib/booking-engine";
-import { tokenOpens } from "@/lib/booking-token";
+import { lock, managed, type BookingRecord } from "@/lib/booking/booking-engine";
+import { tokenOpens } from "@/lib/booking/booking-token";
 
 /* A client's booking, opened from the links in their "You're in." mail
-   (`lib/booking-token.ts`). Nothing shows without the token. */
+   (`lib/booking/booking-token.ts`). Nothing shows without the token. */
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Your booking", robots: { index: false, follow: false } };

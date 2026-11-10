@@ -2,7 +2,7 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { DISCIPLINE_SEO, ldJson, serviceGraph, siteGraph, SITE } from "@/lib/seo";
-import { formatPrice, SESSION_TYPES } from "@/lib/sessions";
+import { formatPrice, SESSION_TYPES } from "@/lib/booking/sessions";
 import { projectFacts, share, shareOg } from "@/lib/share";
 import { BOOKING_URL, RESPONSE_TIME } from "@/lib/site";
 import { isSession } from "@/lib/v3";
