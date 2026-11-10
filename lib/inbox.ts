@@ -356,15 +356,13 @@ export function enquiry(
 }
 
 /* ── bookings ─────────────────────────────────────────────────────
- * Cal.com books in the visitor's browser, so the site never sees a booking
- * happen. Its webhook (`app/api/cal/route.ts`) posts each new one, and it
- * is stored beside the enquiries with the type "booking", so /admin shows
- * it in the same list and says what it is. Cal.com mails Julian its own
- * confirmation, so nothing is mailed from here.
+ * Each booking the site's engine makes (`recordBooking`,
+ * `lib/booking-engine.ts`) is stored beside the enquiries with the type
+ * "booking", so /admin shows it in the same list and says what it is.
  * ─────────────────────────────────────────────────────────────── */
 
-/** The parts of Cal.com's BOOKING_CREATED payload the inbox uses. */
-export type CalBooking = {
+/** The parts of a booking the inbox uses. */
+export type NewBooking = {
   title?: string;
   /** The event type's slug and title: "portraits", "Portraits". */
   type?: string;
@@ -375,8 +373,6 @@ export type CalBooking = {
   location?: string;
   additionalNotes?: string;
   attendees?: { name?: string; email?: string }[];
-  /** Set by `bookCal` for a booking the site's deposit paid for. */
-  metadata?: { [k: string]: unknown };
 };
 
 /** When, in Julian's time, because that is where the sessions are. */
@@ -395,7 +391,7 @@ export const whenPT = (iso?: string) => {
     : "";
 };
 
-export function bookingEnquiry(p: CalBooking, at: number, id: string): Enquiry {
+export function bookingEnquiry(p: NewBooking, at: number, id: string): Enquiry {
   const who = p.attendees?.[0] ?? {};
   const message = [
     p.additionalNotes?.trim(),
@@ -412,7 +408,7 @@ export function bookingEnquiry(p: CalBooking, at: number, id: string): Enquiry {
         detail: [p.eventTitle || p.type || p.title, whenPT(p.startTime)]
           .filter(Boolean)
           .join(" · "),
-        message: message || "Booked on Cal.com. No notes.",
+        message: message || "No notes.",
       },
       at,
       id,

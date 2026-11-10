@@ -29,15 +29,10 @@ export async function open(browser: Browser, browserName: string, r: Ratio): Pro
     colorScheme: "dark",
   });
   await skipSplash(ctx);
-  /* Cal.com answered from fixtures, not the live account: a deposit there
-     (price > 0) or a refused call sends the picker to Cal.com's own form,
-     and no day ever draws (CI on #180). A free event, Wednesday to Sunday
-     open 10:00 to 17:30 every half hour, Monday and Tuesday closed. */
-  await ctx.route("https://api.cal.com/v2/event-types?**", (route) => {
-    const slug = new URL(route.request().url()).searchParams.get("eventSlug") ?? "session";
-    const title = slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-    return route.fulfill({ json: { status: "success", data: [{ slug, title, lengthInMinutes: 30, price: 0, locations: [{ type: "attendeeDefined" }] }] } });
-  });
+  /* The site's own engine (`app/api/slots`) answered from fixtures: CI has
+     no GCAL_OAUTH, so it would 503, and no day ever draws (CI on #180). A
+     free event, Wednesday to Sunday open 10:00 to 17:30 every half hour,
+     Monday and Tuesday closed. */
   const slots = (q: URLSearchParams) => {
     const data: Record<string, { start: string; end: string }[]> = {};
     const day = new Date(`${q.get("start")!.slice(0, 10)}T12:00:00Z`);
@@ -50,8 +45,6 @@ export async function open(browser: Browser, browserName: string, r: Ratio): Pro
     }
     return data;
   };
-  await ctx.route("https://api.cal.com/v2/slots?**", (route) => route.fulfill({ json: { status: "success", data: slots(new URL(route.request().url()).searchParams) } }));
-  /* The site's own engine (`app/api/slots`, NEXT_PUBLIC_BOOKING_ENGINE=own) in the same shape: CI has no GCAL_OAUTH, so it would 503. */
   await ctx.route("**/api/slots?**", (route) => {
     const q = new URL(route.request().url()).searchParams;
     const title = (q.get("slug") ?? "session").replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());

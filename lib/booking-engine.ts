@@ -142,8 +142,8 @@ export async function bookOwn(store: Store, secret: string | undefined, b: BookI
 }
 
 /**
- * The Inbox row and the Notion lead for a booking the site made, as
- * `app/api/cal` files Cal.com's. `deposit` is the Stripe link. Never
+ * The Inbox row and the Notion lead for a booking the site made.
+ * `deposit` is the Stripe link. Never
  * throws: the booking is made, a failed copy must not undo it.
  */
 export async function recordBooking(env: LeadStore & { INBOX?: CloudflareEnv["INBOX"]; NOTION_TOKEN?: string }, r: BookingRecord, deposit?: string) {

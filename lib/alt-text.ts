@@ -87,4 +87,13 @@ export const ALT: Record<string, string> = {
   "/work/diesel/03.jpg": "Close-up of a model's Diesel waistband and low-slung jeans, a group lounging in a warehouse behind",
   "/work/wired-magazine/01.jpg": "Skateboarder in wide jeans mid-push along a grey wall, shot from the ground",
   "/work/nabu/59.jpg": "Figure with long curly hair in a black NABU shirt on a rooftop under a dusk sky",
+
+  // SIAN, Studio digitals
+  "/work/sian/01.jpg": "Person with long dark hair in a black dress leaning on a wooden box, on white",
+  "/work/sian/02.jpg": "Person in a black mini dress, hands on hips, long dark hair flying, on white",
+  "/work/sian/03.jpg": "Person in a black dress and thigh-high stockings reclining on one arm on a white studio floor",
+  "/work/sian/04.jpg": "Close-up of a person with long dark hair, half the frame dragged into motion blur",
+  "/work/sian/05.jpg": "Close-up of a person with long dark hair looking up and away, on white",
+  "/work/sian/06.jpg": "Person in a black dress and heeled boots seated on the floor, small in a wide white frame",
+  "/work/sian/07.jpg": "Person in a black dress and thigh-high stockings kneeling, one hand on the opposite shoulder, on white",
 };
