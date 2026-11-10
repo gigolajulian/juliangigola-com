@@ -11,6 +11,8 @@ import { ownEngine } from "@/lib/booking-rules";
 import { Orb, ORB_ROUND } from "@/components/orb";
 import { JgLoad } from "@/components/jg-load";
 import { Calendar, dlabel, duration, fmt, type Shell } from "@/components/v3/flow";
+import { GESTURE_GAP_MS } from "@/components/strip/shared";
+import { isTrackpad } from "@/lib/motion/wheel";
 
 /* Goo (Julian, 2026-10-20, OKd 10-21) on the card's buttons, times and
    open days. `?goo=0` turns it off. */
@@ -210,6 +212,7 @@ export function TimePicker({
   /* Option B's row of times (v3): where a swipe on the big number began, and
      whether the row runs past its edge, which fades it and shows the hint. */
   const swipeX = React.useRef<number | null>(null);
+  const wheelGate = React.useRef({ at: -Infinity, owned: false });
   const [stripEl, stripRef] = React.useState<HTMLDivElement | null>(null);
   const [more, setMore] = React.useState(false);
   /* A paid session, its deposit taken here (`?deposit`, deposit-step.tsx). */
@@ -1184,17 +1187,25 @@ export function TimePicker({
             <div className="num">
               <b ref={(el) => {
                 if (!el) return;
-                // A wheel over the number steps the time; React's onWheel is passive and cannot stop the page scrolling.
+                /* A wheel over the number steps the time: a mouse once a notch, a
+                   trackpad once a flick (its stream of events, until a gap of
+                   GESTURE_GAP_MS, as the strip reads one). A flick that starts at
+                   the first or last time is the page's. React's onWheel is passive. */
                 const wheel = (e: WheelEvent) => {
+                  if (e.ctrlKey || !e.deltaY) return;
+                  const g = wheelGate.current;
+                  const fresh = e.timeStamp - g.at > GESTURE_GAP_MS;
+                  g.at = e.timeStamp;
+                  const pad = isTrackpad(e, devicePixelRatio);
                   const dir = e.deltaY > 0 ? 1 : -1;
-                  // At the first or last time the page scrolls on.
-                  if (Math.abs(e.deltaY) < 4 || !times[at0 + dir]) return;
+                  if (fresh || !pad) g.owned = !!times[at0 + dir];
+                  if (!g.owned) return;
                   e.preventDefault();
-                  stepTime(dir);
+                  if (fresh || !pad) stepTime(dir);
                 };
                 el.addEventListener("wheel", wheel, { passive: false });
                 return () => el.removeEventListener("wheel", wheel);
-              }} tabIndex={0} role="spinbutton" aria-label="Time" aria-valuetext={fmt(pick.min)} data-scrub=""
+              }} data-lenis-prevent tabIndex={0} role="spinbutton" aria-label="Time" aria-valuetext={fmt(pick.min)} data-scrub=""
                 onKeyDown={(e) => { if (e.key === "ArrowLeft" || e.key === "ArrowRight") { e.preventDefault(); stepTime(e.key === "ArrowRight" ? 1 : -1); } }}
                 onPointerDown={(e) => { swipeX.current = e.clientX; }}
                 onPointerMove={(e) => { const x0 = swipeX.current; if (x0 != null && Math.abs(e.clientX - x0) > 36) { stepTime(e.clientX < x0 ? 1 : -1); swipeX.current = e.clientX; } }}
