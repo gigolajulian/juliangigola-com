@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { sealer } from "@/lib/lead-crypto";
 import { checkPaid, finalize, PAYMENTS_DOWN, settle } from "@/lib/proof-submit";
-import { isOpen, isToken, publicView, readProof, writeProof } from "@/lib/proofs";
+import { coverFrame, isOpen, isToken, publicView, readProof, writeProof } from "@/lib/proofs";
 import { ProofGallery } from "@/components/proof-gallery";
 
 /* ── /proof/<token>: a client's private gallery ──────────────────
@@ -13,11 +13,24 @@ import { ProofGallery } from "@/components/proof-gallery";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
+const base: Metadata = {
   title: "Proofs",
+  description: "Proofs from Julian Gigola.",
   robots: { index: false, follow: false, nocache: true, googleBot: { index: false, follow: false, noimageindex: true } },
   referrer: "no-referrer",
 };
+
+/** The link preview when the gallery is pasted into a text, DM or email: its first frame, watermarked. Never the client's name or address. */
+export async function generateMetadata({ params }: { params: Promise<{ token: string }> }): Promise<Metadata> {
+  const { token } = await params;
+  const { env } = await getCloudflareContext({ async: true });
+  const seal = sealer(env.LEADS_KEY);
+  const p = isToken(token) && env.INBOX && seal ? await readProof(env.INBOX, await seal, token) : null;
+  const f = p && coverFrame(p);
+  if (!f) return base;
+  const images = [{ url: `/proof/${token}/f/${f.id}`, ...(f.w && f.h ? { width: f.w, height: f.h } : {}), alt: "" }];
+  return { ...base, openGraph: { title: "Proofs | Julian Gigola", description: "Proofs from Julian Gigola.", url: `/proof/${token}`, images }, twitter: { card: "summary_large_image", images } };
+}
 
 function Closed() {
   return (

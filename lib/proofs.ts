@@ -183,6 +183,9 @@ export function owed(p: Pick<Proof, "selects" | "included" | "price" | "paid" | 
 
 export const isOpen = (p: Pick<Proof, "closesAt">, now = Date.now()) => !p.closesAt || Date.parse(p.closesAt) > now;
 
+/** The gallery's cover for link previews: its first frame, the site's rule for every set. Only when watermarked and open, so a preview never carries a clean file. */
+export const coverFrame = (p: Pick<Proof, "frames" | "watermark" | "closesAt">): ProofFrame | null => (p.watermark && isOpen(p) && p.frames[0]) || null;
+
 export const closesAt = (days: number, from = Date.now()) => new Date(from + days * 864e5).toISOString();
 
 /** What the client page gets: no address, no Lightroom name. */
