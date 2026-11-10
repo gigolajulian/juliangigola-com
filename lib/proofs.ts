@@ -195,7 +195,8 @@ export const closesAt = (days: number, from = Date.now()) => new Date(from + day
 /** What the client page gets: no address, no Lightroom name. */
 export function publicView(p: Proof) {
   return {
-    frames: p.frames.map(({ id, file, w, h }) => ({ id, file, w, h })),
+    // No file name: Lightroom names are Julian's, the client sees proof numbers.
+    frames: p.frames.map(({ id, w, h }) => ({ id, w, h })),
     // Picks belong to whoever typed their email; only the sent ones are shared.
     selects: p.submittedAt ? p.selects : [],
     included: p.included,
