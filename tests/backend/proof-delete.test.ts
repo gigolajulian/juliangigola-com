@@ -23,7 +23,8 @@ const del = async (query: string) => (await DELETE(new Request(`https://juliangi
 describe("DELETE /api/proof", () => {
   it("drops several frames in one write, and one frame the old way", async () => {
     expect((await del(`?token=${TOKEN}&ids=a,b`)).status).toBe(200);
-    expect(r2.delete).toHaveBeenCalledWith([`${TOKEN}/a.jpg`, `${TOKEN}/b.jpg`]);
+    // The watermarked copies go with the originals.
+    expect(r2.delete).toHaveBeenCalledWith([`${TOKEN}/a.jpg`, `${TOKEN}/a.wm1.jpg`, `${TOKEN}/b.jpg`, `${TOKEN}/b.wm1.jpg`]);
     let p = (await readProof(kv as never, (await sealer(LEADS_KEY))!, TOKEN))!;
     expect(p.frames.map((f) => f.id)).toEqual(["c"]);
     expect(p.selects).toEqual(["c"]);

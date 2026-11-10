@@ -49,6 +49,11 @@ describe("proofs", () => {
   it("clamps settings", () => {
     expect(cleanSettings({ price: 15000, included: -2, days: "14", email: "nope" })).toEqual({ price: 500, included: 0, days: 14, email: undefined });
   });
+  it("takes the watermark switch as a boolean, ignores anything else", () => {
+    expect(cleanSettings({ watermark: true })).toEqual({ watermark: true });
+    expect(cleanSettings({ watermark: "false" })).toEqual({ watermark: false });
+    expect(cleanSettings({ watermark: 1 })).toEqual({});
+  });
   it("is open until closesAt", () => {
     expect(isOpen({ closesAt: undefined })).toBe(true);
     expect(isOpen({ closesAt: "2020-01-01T00:00:00Z" })).toBe(false);

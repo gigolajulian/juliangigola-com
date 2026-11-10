@@ -242,6 +242,10 @@ function ProofCard({ p, changed }: { p: Row; changed: () => void }) {
           <span className="flex items-end">
             {changedSet ? <button type="button" className={btn} disabled={busy} onClick={() => act({ balance: set.balance, included: set.included, price: set.price, days: set.days }, "PATCH", "Saved.")}>Save</button> : null}
           </span>
+          <label className="flex min-h-11 items-center gap-2.5 sm:col-span-5">
+            <input type="checkbox" checked={!!p.watermark} disabled={busy} onChange={(e) => act({ watermark: e.target.checked }, "PATCH", e.target.checked ? "Watermark on." : "Watermark off.")} className="size-4 accent-[var(--accent)]" />
+            <span className={mono}>Watermark: Julian Gigola in the bottom third of every frame</span>
+          </label>
         </div>
       ) : null}
 

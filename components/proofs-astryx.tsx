@@ -22,6 +22,7 @@ import { Heading, Text } from "@astryxdesign/core/Text";
 import { HStack, VStack } from "@astryxdesign/core/Stack";
 import { Tab, TabList } from "@astryxdesign/core/TabList";
 import { TextInput } from "@astryxdesign/core/TextInput";
+import { Switch } from "@astryxdesign/core/Switch";
 import { Card } from "@astryxdesign/core/Card";
 import { Thumbnail } from "@astryxdesign/core/Thumbnail";
 import { MetadataList, MetadataListItem } from "@astryxdesign/core/MetadataList";
@@ -292,6 +293,7 @@ function Gallery({ p, changed, onBack, gone }: { p: Row; changed: () => void; on
             ))}
           </div>
           {changedSet ? <Button label="Save" clickAction={() => act({ balance: set.balance, included: set.included, price: set.price, days: set.days }, "PATCH", "Saved.")} /> : null}
+          <Switch label="Watermark" description="Julian Gigola in the bottom third of every frame" value={!!p.watermark} onChange={(on) => act({ watermark: on }, "PATCH", on ? "Watermark on." : "Watermark off.")} />
         </VStack>
       ) : null}
 

@@ -118,17 +118,7 @@ end
 
 -- ── collection settings ───────────────────────────────────────────
 
-local DEFAULTS = { email = "", note = "", included = 10, price = 15, days = 14 }
-
-local function settings(cs)
-  local out = {}
-  for k, v in pairs(DEFAULTS) do
-    local x = cs and cs[k]
-    if x == nil then x = v end
-    out[k] = x
-  end
-  return out
-end
+local GallerySettings = require "GallerySettings"
 
 function provider.getCollectionBehaviorInfo()
   return {
@@ -141,7 +131,7 @@ end
 
 function provider.viewForCollectionSettings(f, publishSettings, info)
   local cs = info.collectionSettings
-  for k, v in pairs(DEFAULTS) do if cs[k] == nil then cs[k] = v end end
+  GallerySettings.fill(cs, not (info.publishedCollection and info.publishedCollection:getRemoteId()))
   local label = function(t) return f:static_text { title = t, width = share "plabel", alignment = "right" } end
   return f:group_box {
     title = "Client gallery",
@@ -152,6 +142,7 @@ function provider.viewForCollectionSettings(f, publishSettings, info)
     f:row {
       label "Included frames", f:edit_field { value = bind "included", width_in_digits = 4, min = 0, max = 500, precision = 0 },
       f:static_text { title = "Each extra $" }, f:edit_field { value = bind "price", width_in_digits = 4, min = 0, max = 500, precision = 0 },
+      f:checkbox { title = "Watermark", value = bind "watermark", tooltip = "Julian Gigola in the bottom third of every frame. The clean files stay for finals." },
     },
     f:row { label "Open for", f:edit_field { value = bind "days", width_in_digits = 3, min = 1, max = 90, precision = 0 }, f:static_text { title = "days, from when you send it in /admin" } },
     f:row { label "", f:static_text { title = "Selects come back as a Purple label and Comments when you publish again.", fill_horizontal = 1 } },
@@ -162,8 +153,9 @@ end
 function provider.updateCollectionSettings(publishSettings, info)
   local remote = info.publishedCollection and info.publishedCollection:getRemoteId()
   if not remote then return end
-  local s = settings(info.collectionSettings)
-  send("PATCH", nil, { token = remote, name = info.name, email = s.email, note = s.note, included = s.included, price = s.price, days = s.days })
+  local s = GallerySettings.fields(info.collectionSettings, false)
+  s.token, s.name = remote, info.name
+  send("PATCH", nil, s)
 end
 
 -- ── publish ───────────────────────────────────────────────────────
@@ -172,14 +164,14 @@ function provider.processRenderedPhotos(functionContext, exportContext)
   local session = exportContext.exportSession
   local collection = exportContext.publishedCollection
   local info = collection:getCollectionInfoSummary()
-  local s = settings(info.collectionSettings)
   local count = session:countRenditions()
   local progress = exportContext:configureProgress {
     title = ("Uploading %d proof%s to juliangigola.com"):format(count, count == 1 and "" or "s"),
   }
 
   local remote = collection:getRemoteId()
-  local fields = { name = collection:getName(), email = s.email, note = s.note, included = s.included, price = s.price, days = s.days }
+  local fields = GallerySettings.fields(info.collectionSettings, not remote)
+  fields.name = collection:getName()
   local url
   if not remote then
     fields.action = "create"
