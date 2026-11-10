@@ -308,14 +308,6 @@ export function problems(values: {
 }
 
 /**
- * The enquiry as it will be stored, with everything trimmed to a known size.
- *
- * The caps are applied here rather than only checked, because a message is
- * written into a store with a quota: a field that passed validation by one
- * character and a field cut to the limit are both fine, whereas a field that
- * skipped validation is not, and this is the last place before the write.
- */
-/**
  * One line, no control characters. `name` and `detail` are put into the
  * email's Subject and Reply-To by the copy sent to Julian, and a header is
  * ended by a newline — a name of `x\r\nBcc: ...` must not be able to add
@@ -324,6 +316,14 @@ export function problems(values: {
 const oneLine = (s: string): string =>
   s.replace(/[\u0000-\u001f\u007f]+/g, " ").trim();
 
+/**
+ * The enquiry as it will be stored, with everything trimmed to a known size.
+ *
+ * The caps are applied here rather than only checked, because a message is
+ * written into a store with a quota: a field that passed validation by one
+ * character and a field cut to the limit are both fine, whereas a field that
+ * skipped validation is not, and this is the last place before the write.
+ */
 export function enquiry(
   values: {
     type: string;

@@ -4,7 +4,7 @@ import * as React from "react";
 import Image from "next/image";
 import { contextLines, replyLink, type Enquiry, type Summary } from "@/lib/inbox";
 import { cn } from "@/lib/utils";
-import { TOKEN_STORE } from "@/lib/admin-github";
+import { credentials, KEY_STORE, TOKEN_STORE } from "@/lib/admin-github";
 
 /* ── the inbox ────────────────────────────────────────────────────
  * Enquiries from the contact form, which now has somewhere to put them.
@@ -21,19 +21,6 @@ import { TOKEN_STORE } from "@/lib/admin-github";
  * message that has been answered, and keeping somebody's name and email after
  * that is the wrong default.
  * ─────────────────────────────────────────────────────────────── */
-
-/** Where the key is kept between visits. Beside the GitHub token. */
-export const KEY_STORE = "jg-inbox-key";
-
-/**
- * What to send: the inbox key if one was pasted, else the GitHub token the
- * editor signed in with. The API takes either — see `canPush` in the route.
- */
-export const credentials = (key: string): Record<string, string> => {
-  if (key) return { "x-inbox-key": key };
-  const token = window.localStorage.getItem(TOKEN_STORE);
-  return token ? { authorization: `Bearer ${token}` } : {};
-};
 
 type Row = Summary & { key: string };
 
@@ -89,7 +76,7 @@ export function AdminInbox({
         headers: { ...credentials(k), "content-type": "application/json" },
         cache: "no-store",
       });
-      const parsed = (await res.json()) as { error?: string };
+      const parsed = (await res.json().catch(() => ({}))) as { error?: string };
       if (!res.ok)
         throw new Error(parsed.error ?? `Request failed (${res.status})`);
       return parsed;

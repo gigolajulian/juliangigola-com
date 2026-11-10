@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { credentials, KEY_STORE } from "@/components/admin-inbox";
+import { credentials, KEY_STORE } from "@/lib/admin-github";
 import { canonical } from "@/lib/lead-crypto";
 import { extras, stage, STAGES, type Proof, type Viewer } from "@/lib/proofs";
 import { cn } from "@/lib/utils";
@@ -29,7 +29,7 @@ const when = (iso: string) => new Intl.DateTimeFormat("en-US", { timeZone: "Amer
 
 export async function api(init: RequestInit & { query?: string } = {}) {
   const res = await fetch(`/api/proof${init.query ?? ""}`, { ...init, headers: { ...credentials(window.localStorage.getItem(KEY_STORE) ?? ""), "content-type": "application/json" }, cache: "no-store" });
-  const out = (await res.json()) as Record<string, unknown> & { error?: string };
+  const out = (await res.json().catch(() => ({}))) as Record<string, unknown> & { error?: string };
   if (!res.ok) throw new Error(out.error ?? `Request failed (${res.status})`);
   return out;
 }

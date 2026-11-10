@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { renewDue, type Lead, type LeadSummary } from "@/lib/leads";
+import { renewDue, type Lead, type LeadPatch, type LeadSummary } from "@/lib/leads";
 import { cn } from "@/lib/utils";
 
 /* ── licences on commercial work ──────────────────────────────────
@@ -16,7 +16,7 @@ type Cls = { btn: string; field: string; label: string };
 export const endDay = (end: string) => new Date(`${end}T12:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
 
 /** The licence block inside Money: a link until he adds one. */
-export function LicenceField({ full, patch, run, cls }: { full: Lead | null; patch: (b: Record<string, unknown>) => Promise<unknown>; run: (p: Promise<unknown>, ok?: string) => void; cls: Cls }) {
+export function LicenceField({ full, patch, run, cls }: { full: Lead | null; patch: (b: LeadPatch) => Promise<unknown>; run: (p: Promise<unknown>, ok?: string) => void; cls: Cls }) {
   const has = full?.licence;
   const [open, setOpen] = React.useState(false);
   const [use, setUse] = React.useState(has?.use ?? "");

@@ -4,7 +4,7 @@ import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, MotionConfig, motion } from "motion/react";
-import type { Frame } from "@/lib/work-types";
+import type { Frame, ListRow } from "@/lib/work-types";
 import { useWorkQuery } from "@/lib/work-view";
 import { Lightbox, useLightbox } from "@/components/lightbox";
 import { VideoViewer } from "@/components/video-viewer";
@@ -27,26 +27,7 @@ import type { Video } from "@/lib/videos";
  * direction at right angles to the words.
  * ─────────────────────────────────────────────────────────────── */
 
-export type ListRow = {
-  slug: string;
-  /** A film rather than a project: its id in `videos`, which a press
-      plays in the viewer. Julian: clicking a line in the list opens the
-      same thing under the same title as the grid and the strip do. */
-  film?: string;
-  /** A photograph rather than a project: its place in `frames`, which a
-      press opens in the viewer instead of following `href`. */
-  n?: number;
-  name: string;
-  href: string;
-  /** Which discipline it files under, as the chip row names it. */
-  discipline: string;
-  /** Who it was for, or who is in it. */
-  credit: string;
-  frames?: number;
-  cover: Frame;
-  /** Name, discipline, credits and handles, folded, for the search. */
-  find: string;
-};
+export type { ListRow };
 
 /** Every word typed has to be in the row somewhere, in any order. */
 const matches = (row: ListRow, words: string[]) =>

@@ -2,14 +2,15 @@
 
 import * as React from "react";
 import { createPortal } from "react-dom";
-import { credentials, KEY_STORE, References } from "@/components/admin-inbox";
+import { References } from "@/components/admin-inbox";
+import { credentials, KEY_STORE } from "@/lib/admin-github";
 import { LeadBoard } from "@/components/lead-board";
 import { LeadHours } from "@/components/lead-hours";
 import { LeadProofs, ProofsDesk } from "@/components/admin-proofs";
 import { LeadUpcoming } from "@/components/lead-upcoming";
 import { TOKEN_STORE } from "@/lib/admin-github";
 import type { Enquiry } from "@/lib/inbox";
-import { isLate, leadSummary, myMove, NUDGES, PAPER, paperDue, quoteNudge, REMIND_MAX, renewDue, shootTag, STAGES, trashDaysLeft, type Lead, type LeadEvent, type LeadSummary, type Paper, type Stage } from "@/lib/leads";
+import { isLate, leadSummary, myMove, NUDGES, PAPER, paperDue, quoteNudge, REMIND_MAX, renewDue, shootTag, STAGES, trashDaysLeft, type Lead, type LeadEvent, type LeadPatch, type LeadSummary, type Paper, type Stage } from "@/lib/leads";
 import { cn } from "@/lib/utils";
 import { fill, mailable, TEMPLATES } from "@/lib/lead-crm";
 import { endDay, LicenceField, LicenceList } from "@/components/lead-licence";
@@ -187,7 +188,7 @@ export function AdminLeads() {
       headers: { ...credentials(window.localStorage.getItem(KEY_STORE) ?? ""), "content-type": "application/json" },
       cache: "no-store",
     });
-    const out = (await res.json()) as Record<string, unknown> & { error?: string };
+    const out = (await res.json().catch(() => ({}))) as Record<string, unknown> & { error?: string };
     if (!res.ok) throw new Error(out.error ?? `Request failed (${res.status})`);
     return out;
   }, []);
@@ -1066,7 +1067,7 @@ function EmptyTrash({ n, call, done }: { n: number; call: Call; done: () => void
   const [busy, setBusy] = React.useState(false);
   const empty = () => {
     setBusy(true);
-    call({ method: "DELETE", body: JSON.stringify({ emptyTrash: true }) }).then(done).catch(() => {}).finally(() => { setBusy(false); setSure(false); });
+    call({ method: "DELETE", body: JSON.stringify({ emptyTrash: true }) }).then(done).catch((e) => console.error("empty trash", e)).finally(() => { setBusy(false); setSure(false); });
   };
   return (
     <p className="flex flex-wrap items-center gap-3 border-b border-border px-5 py-3 text-[15px]">
@@ -1094,7 +1095,7 @@ export function Detail({ summary, initial, call, onChange, onBack, reload, tick,
   const key = `lead:${summary.id}`;
 
   const patch = React.useCallback(
-    async (body: Record<string, unknown>) => {
+    async (body: LeadPatch) => {
       const o = await call({ method: "PATCH", body: JSON.stringify({ key, ...body }) });
       const next = o.lead as Lead;
       setLead(next);
@@ -1530,7 +1531,7 @@ async function exportCsv() {
 
 
 /** The CRM half of a lead: how to reach them, saved replies, a reminder, the quote, notes, merge. */
-function LeadCrm({ l, full, patch, others, templates }: { l: LeadSummary; full: Lead | null; patch: (b: Record<string, unknown>) => Promise<unknown>; others: LeadSummary[]; templates: Template[] }) {
+function LeadCrm({ l, full, patch, others, templates }: { l: LeadSummary; full: Lead | null; patch: (b: LeadPatch) => Promise<unknown>; others: LeadSummary[]; templates: Template[] }) {
   const [editing, setEditing] = React.useState(false);
   const [d, setD] = React.useState({ name: "", phone: "", ig: "", company: "", source: "", kind: "" });
   const [notes, setNotes] = React.useState<string | null>(null);
@@ -1689,7 +1690,7 @@ const dd = "text-right font-mono text-[14px] leading-6";
 const DOT: Record<Paper, string> = { "Not sent": "○", Sent: "◐", Signed: "●", "Not needed": "–" };
 
 /** "Paperwork: Contract ● · Release ●", from Confirmed on. A tap moves a dot to its next status. */
-function Paperwork({ l, patch }: { l: LeadSummary; patch: (b: Record<string, unknown>) => Promise<unknown> }) {
+function Paperwork({ l, patch }: { l: LeadSummary; patch: (b: LeadPatch) => Promise<unknown> }) {
   const due = paperDue(l, now());
   return (
     <p className="flex flex-wrap items-center gap-x-1 font-mono text-[13px] text-muted-foreground">
@@ -1704,7 +1705,7 @@ function Paperwork({ l, patch }: { l: LeadSummary; patch: (b: Record<string, unk
               type="button"
               title={v}
               aria-label={`${name}: ${v}. Change`}
-              onClick={() => patch({ [k]: PAPER[(PAPER.indexOf(v) + 1) % PAPER.length] }).catch(() => {})}
+              onClick={() => patch({ [k]: PAPER[(PAPER.indexOf(v) + 1) % PAPER.length] }).catch((e) => console.error("paperwork", e))}
               className={cn("inline-flex min-h-11 items-center gap-1.5 px-1.5", due === k ? "text-accent" : v === "Signed" ? "text-foreground" : "")}
             >
               {name} <span aria-hidden="true">{DOT[v]}</span>
@@ -1716,7 +1717,7 @@ function Paperwork({ l, patch }: { l: LeadSummary; patch: (b: Record<string, unk
   );
 }
 
-function Money({ l, full, patch, run, quote, setQuote }: { l: LeadSummary; full: Lead | null; patch: (b: Record<string, unknown>) => Promise<unknown>; run: (p: Promise<unknown>, ok?: string) => void; quote: string | null; setQuote: (v: string | null) => void }) {
+function Money({ l, full, patch, run, quote, setQuote }: { l: LeadSummary; full: Lead | null; patch: (b: LeadPatch) => Promise<unknown>; run: (p: Promise<unknown>, ok?: string) => void; quote: string | null; setQuote: (v: string | null) => void }) {
   const [making, setMaking] = React.useState(false);
   /** `?invb`: design B, the dark invoice with a photo, opt-in until Julian says yes. */
   const [invb] = React.useState(() => typeof window !== "undefined" && new URLSearchParams(location.search).has("invb"));
@@ -1838,7 +1839,7 @@ function InvoiceRow({ inv, l, full }: { inv: Invoice; l: LeadSummary; full: Lead
 type Line = { desc: string; qty: string; rate: string };
 
 /** A new invoice, filled from the lead. Saving numbers it; then the PDF. */
-function InvoiceSheet({ l, full, patch, done }: { l: LeadSummary; full: Lead; patch: (b: Record<string, unknown>) => Promise<unknown>; done: () => void }) {
+function InvoiceSheet({ l, full, patch, done }: { l: LeadSummary; full: Lead; patch: (b: LeadPatch) => Promise<unknown>; done: () => void }) {
   const [from, setFrom] = React.useState<InvoiceFrom | null>(null);
   const [editFrom, setEditFrom] = React.useState(false);
   const [date, setDate] = React.useState(todayPT);
@@ -2095,7 +2096,7 @@ function useDeskLeft() {
   return el;
 }
 
-function InvoiceSheetB({ l, full, patch, done }: { l: LeadSummary; full: Lead; patch: (b: Record<string, unknown>) => Promise<unknown>; done: () => void }) {
+function InvoiceSheetB({ l, full, patch, done }: { l: LeadSummary; full: Lead; patch: (b: LeadPatch) => Promise<unknown>; done: () => void }) {
   const [from, setFrom] = React.useState<InvoiceFrom | null>(null);
   const [editFrom, setEditFrom] = React.useState(false);
   const [date, setDate] = React.useState(todayPT);
@@ -2170,7 +2171,7 @@ function InvoiceSheetB({ l, full, patch, done }: { l: LeadSummary; full: Lead; p
       let key = photoKey;
       if (!key) {
         const r = await fetch("/api/inbox", { method: "PATCH", headers: { ...authed(), "content-type": "application/json" }, body: JSON.stringify({ invoicePhoto: src }) });
-        const o = (await r.json()) as { key?: string; error?: string };
+        const o = (await r.json().catch(() => ({}))) as { key?: string; error?: string };
         if (!r.ok || !o.key) throw new Error(o.error ?? "Could not save the photo.");
         setPhotoKey((key = o.key));
       }
@@ -2302,7 +2303,7 @@ function FromForm({ from, saved }: { from: InvoiceFrom; saved: (f: InvoiceFrom) 
   const save = () =>
     fetch("/api/inbox", { method: "PATCH", headers: { ...authed(), "content-type": "application/json" }, body: JSON.stringify({ invoiceFrom: f }) })
       .then(async (r) => {
-        const o = (await r.json()) as { from?: InvoiceFrom; error?: string };
+        const o = (await r.json().catch(() => ({}))) as { from?: InvoiceFrom; error?: string };
         if (!r.ok || !o.from) throw new Error(o.error ?? "Could not save.");
         saved(o.from);
       })
@@ -2342,7 +2343,7 @@ function MoneyView() {
   const page = React.useCallback((after?: string) => {
     fetch(`/api/money${after ? `?after=${after}` : ""}`, { headers: authed(), cache: "no-store" })
       .then(async (r) => {
-        const o = (await r.json()) as { error?: string; available?: number; pending?: number; test?: boolean; txns: Txn[]; more: boolean };
+        const o = (await r.json().catch(() => ({}))) as { error?: string; available?: number; pending?: number; test?: boolean; txns: Txn[]; more: boolean };
         if (!r.ok) throw new Error(o.error ?? `Request failed (${r.status})`);
         if (o.available !== undefined) setTop({ available: o.available, pending: o.pending ?? 0, test: !!o.test });
         setTxns((t) => (after ? [...t, ...o.txns] : o.txns));

@@ -26,7 +26,7 @@ import { Card } from "@astryxdesign/core/Card";
 import { Thumbnail } from "@astryxdesign/core/Thumbnail";
 import { MetadataList, MetadataListItem } from "@astryxdesign/core/MetadataList";
 import { ProgressBar } from "@astryxdesign/core/ProgressBar";
-import { KEY_STORE } from "@/components/admin-inbox";
+import { KEY_STORE } from "@/lib/admin-github";
 import { SignIn } from "@/components/admin-leads";
 import { Activity, api, closed, status, type Row } from "@/components/admin-proofs";
 import { TOKEN_STORE } from "@/lib/admin-github";

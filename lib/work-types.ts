@@ -139,3 +139,33 @@ export type Project = {
   /** Only on a project that has BTS. */
   bts?: Bts;
 };
+
+/** One photograph on the wall. With `href` the tile is a link. */
+export type DriftWallItem = {
+  image: string;
+  srcSet?: string;
+  title?: string;
+  href?: string;
+};
+
+/** A line in the list view (`components/work-list.tsx`). */
+export type ListRow = {
+  slug: string;
+  /** A film rather than a project: its id in `videos`, which a press
+      plays in the viewer. Julian: clicking a line in the list opens the
+      same thing under the same title as the grid and the strip do. */
+  film?: string;
+  /** A photograph rather than a project: its place in `frames`, which a
+      press opens in the viewer instead of following `href`. */
+  n?: number;
+  name: string;
+  href: string;
+  /** Which discipline it files under, as the chip row names it. */
+  discipline: string;
+  /** Who it was for, or who is in it. */
+  credit: string;
+  frames?: number;
+  cover: Frame;
+  /** Name, discipline, credits and handles, folded, for the search. */
+  find: string;
+};
