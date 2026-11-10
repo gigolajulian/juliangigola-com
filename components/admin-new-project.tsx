@@ -104,7 +104,9 @@ export function AdminNewProject({
       return next;
     });
 
-  const ready = staged.filter((s) => s.processed && !s.error);
+  const ready = staged.filter(
+    (s): s is Staged & { processed: NonNullable<Staged["processed"]> } => !!s.processed && !s.error,
+  );
   const stillReading = staged.some((s) => !s.processed && !s.error);
 
   const slugTaken = existingSlugs.has(slug);
@@ -129,9 +131,9 @@ export function AdminNewProject({
       const dir = `public/work/${slug}`;
       const images: Frame[] = ready.map((item, i) => ({
         src: `/work/${slug}/${String(i + 1).padStart(2, "0")}.jpg`,
-        width: item.processed!.width,
-        height: item.processed!.height,
-        color: item.processed!.color,
+        width: item.processed.width,
+        height: item.processed.height,
+        color: item.processed.color,
         alt: "",
       }));
 
@@ -166,7 +168,7 @@ export function AdminNewProject({
       const files = [
         ...ready.map((item, i) => ({
           path: `${dir}/${String(i + 1).padStart(2, "0")}.jpg`,
-          content: item.processed!.base64,
+          content: item.processed.base64,
           encoding: "base64" as const,
         })),
         {

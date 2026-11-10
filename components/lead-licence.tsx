@@ -53,15 +53,17 @@ export function LicenceField({ full, patch, run, cls }: { full: Lead | null; pat
 /** Every lead with a licence, soonest end first. */
 export function LicenceList({ leads, row }: { leads: LeadSummary[]; row: (l: LeadSummary) => React.ReactNode }) {
   const [now] = React.useState(() => Date.now());
-  const list = leads.filter((l) => l.licence).sort((a, b) => a.licence!.end.localeCompare(b.licence!.end));
+  const list = leads
+    .filter((l): l is LeadSummary & { licence: NonNullable<LeadSummary["licence"]> } => !!l.licence)
+    .sort((a, b) => a.licence.end.localeCompare(b.licence.end));
   if (!list.length) return <p className="px-1 py-10 text-[15px] text-muted-foreground lg:px-5">No licences yet. Add one under Money on a lead.</p>;
   return (
     <ul>
       {list.map((l) => (
         <li key={l.id}>
           <p className="flex items-baseline justify-between gap-3 px-1 pt-3 font-mono text-[12px] text-muted-foreground lg:px-5">
-            <span className="truncate">{l.licence!.use || "Licence"}</span>
-            <span className={cn("shrink-0", renewDue(l, now) && "text-accent")}>Ends {endDay(l.licence!.end)}</span>
+            <span className="truncate">{l.licence.use || "Licence"}</span>
+            <span className={cn("shrink-0", renewDue(l, now) && "text-accent")}>Ends {endDay(l.licence.end)}</span>
           </p>
           {row(l)}
         </li>
