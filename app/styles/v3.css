@@ -866,6 +866,13 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 .v3 .sv-lead{margin:0;max-width:46ch;font-size:clamp(1rem,calc(1.3*var(--v3u)),1.125rem);line-height:1.55;text-wrap:pretty}
 .v3 .sv-top .inc{max-width:72ch}
 .v3 .sv-top .ctas{display:flex;gap:10px;flex-wrap:wrap}
+/* Frames beside the title from 1024px. Each keeps its own ratio: capped by the column and by the title's height, never cropped. */
+.v3 .sv-pics{display:none}
+@media (min-width:1024px){.v3 .sv-hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,42%);--sv-h:min(640px,calc(100svh - 180px))}
+.v3 .sv-pics{display:flex;justify-content:flex-end;align-items:flex-start;gap:24px;height:var(--sv-h);padding:96px var(--gr) 0 0;box-sizing:content-box}
+.v3 .sv-pics img{display:block;width:auto;height:auto;max-width:100%;max-height:100%;min-width:0;border-radius:4px}
+.v3 .sv-pics[data-n="2"] img{max-width:58%;max-height:80%}
+.v3 .sv-pics[data-n="2"] img+img{align-self:flex-end;max-width:38%;max-height:58%}}
 .v3 .sv-seq .ph{position:relative;overflow:hidden;border-radius:4px;background:var(--card);aspect-ratio:4/5}
 .v3 .sv-info{padding:24px var(--gr) 96px var(--g);border-top:1px solid var(--line);margin-top:24px}
 .v3 .sv-row{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,8fr);gap:24px;padding:28px 0;border-bottom:1px solid var(--line)}
