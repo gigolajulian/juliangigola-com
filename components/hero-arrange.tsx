@@ -145,7 +145,7 @@ export function ArrangeInspector({
 
   /* The depth line: drag the picked card's chip along it. */
   const track = React.useRef<HTMLDivElement>(null);
-  const dragDepth = (e: React.PointerEvent, card: string) => {
+  const dragDepth = (card: string) => {
     onPick(card);
     const r = track.current!.getBoundingClientRect();
     const at = (x: number) =>
@@ -337,7 +337,7 @@ export function ArrangeInspector({
                   title={`${k}: ${photoOf(k)}${card.show === false ? " (hidden)" : ""}`}
                   onPointerDown={(e) => {
                     e.preventDefault();
-                    dragDepth(e, k);
+                    dragDepth(k);
                   }}
                   style={{
                     ...quiet,
