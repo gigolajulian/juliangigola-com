@@ -13,14 +13,10 @@ import {
   type PointerEvent as ReactPointerEvent,
   type ReactNode
 } from 'react';
+import type { DriftWallItem } from '@/lib/work-types';
 
-/** One photograph on the wall. With `href` the tile is a link. */
-export type DriftWallItem = {
-  image: string;
-  srcSet?: string;
-  title?: string;
-  href?: string;
-};
+export type { DriftWallItem };
+
 
 export type DriftWallProps = {
   items?: DriftWallItem[];

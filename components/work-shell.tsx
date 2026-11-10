@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import loader from "../image-loader";
+import loader from "@/image-loader";
 import Link from "next/link";
 import { useRouter, useSelectedLayoutSegments } from "next/navigation";
 import { cn } from "@/lib/utils";

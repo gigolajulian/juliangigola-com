@@ -10,7 +10,7 @@ import {
   projectsIn,
 } from "@/lib/work";
 import type { Frame, Project } from "@/lib/work-types";
-import type { ListRow } from "@/components/work-list";
+import type { ListRow } from "@/lib/work-types";
 
 /* ── the whole archive as lines ───────────────────────────────────
  * What the list view draws and the search reads: one lean row per
