@@ -10,13 +10,18 @@ import { LeadProofs, ProofsDesk } from "@/components/admin-proofs";
 import { LeadUpcoming } from "@/components/lead-upcoming";
 import { TOKEN_STORE } from "@/lib/admin-github";
 import type { Enquiry } from "@/lib/inbox";
-import { isLate, leadSummary, myMove, NUDGES, PAPER, paperDue, quoteNudge, REMIND_MAX, renewDue, shootTag, STAGES, trashDaysLeft, type Lead, type LeadEvent, type LeadPatch, type LeadSummary, type Paper, type Stage } from "@/lib/leads";
+import { isLate, leadSummary, NUDGES, PAPER, paperDue, quoteNudge, REMIND_MAX, STAGES, trashDaysLeft, type Lead, type LeadPatch, type LeadSummary, type Paper, type Stage } from "@/lib/leads";
 import { cn } from "@/lib/utils";
 import { fill, mailable, TEMPLATES } from "@/lib/lead-crm";
 import { endDay, LicenceField, LicenceList } from "@/components/lead-licence";
 import { balance, dayB, DEPOSIT, MAX_LINES, MAX_ROWS_B, NOTE_B, usd, usdB, type Crop, type Invoice, type InvoiceB, type InvoiceFrom } from "@/lib/invoice";
 import { framed, loadImage, place, shrink, toneFor } from "@/lib/invoice-photo";
-import { LEAD_KEYS, leadKey, typingIn } from "@/lib/lead-keys";
+import { leadKey, typingIn } from "@/lib/lead-keys";
+import { ago, aside, at, authed, badge, btn, type Call, cash, closed, compose, DAY, day, type Filter, HEAD, ios, kindOf, label, line, mailto, MARK, matches, money, now, OFFLINE, pass, primary, renew, snoozed, STEPS, Tag, type Template } from "@/components/leads/shared";
+import { Card, clampW, LIST_W, LIST_W_STORE, ListResizer, Pill, Row, SideLink } from "@/components/leads/list";
+import { DeskKeys } from "@/components/leads/desk-keys";
+import { DeskToday } from "@/components/leads/today";
+export { ago, type Filter, matches, money, nextStep, OFFLINE, pass } from "@/components/leads/shared";
 
 // The /admin tabs the One Desk folds in, loaded only when opened.
 const AdminTraffic = React.lazy(() => import("@/components/admin-traffic").then((m) => ({ default: m.AdminTraffic })));
@@ -50,108 +55,13 @@ const WIDE: Filter[] = ["today", "proofs", "site", "traffic", "seo"];
  * open lead side by side. Narrow: the list, then the lead with Back.
  * ─────────────────────────────────────────────────────────────── */
 
-export type Filter = "today" | "traffic" | "seo" | "site" | "device" | "needs" | "open" | "upcoming" | Stage | "snoozed" | "archived" | "trash" | "more" | "new" | "stats" | "money" | "templates" | "hours" | "proofs" | "licences";
 /** Views that are not a list of leads. */
 /** Pull-to-refresh: how far the finger travels (px) to commit, and the most the pull shows. iOS rubber-band already halves it at the top. */
 const PULL_AT = 56;
 const PULL_MAX = 80;
 const TOOLS: Filter[] = ["today", "traffic", "seo", "site", "device", "more", "new", "stats", "money", "templates", "hours", "proofs", "licences"];
 
-const DAY = 864e5;
 const BOARD_STORE = "jg-leads-board";
-const now = () => Date.now();
-const snoozed = (l: LeadSummary) => !!l.snoozeUntil && Date.parse(l.snoozeUntil) > now();
-const closed = (s: Stage) => s === "Delivered" || s === "Lost";
-/** Archived or in the trash: out of every list but its own. */
-const aside = (l: LeadSummary) => !!(l.archivedAt || l.trashedAt);
-/** His reminder has come round: it beats a snooze. */
-const due = (l: LeadSummary) => !!l.due && Date.parse(l.due) <= now();
-/** The desk's search: name, email, type of shoot or their message. */
-export const matches = (l: LeadSummary, words: string) => !words || [l.name, l.email, l.kind, l.snippet].some((v) => v?.toLowerCase().includes(words));
-/** A licence ending soon brings back even a Delivered lead; a snooze holds it off. */
-const renew = (l: LeadSummary) => !snoozed(l) && renewDue(l, now());
-const needsMe = (l: LeadSummary) => renew(l) || (!aside(l) && !closed(l.stage) && (due(l) || (!snoozed(l) && (l.unread || isLate(l, now()) || !!l.flags?.length || !!paperDue(l, now()) || !!myMove(l, now())))));
-
-/** What to do next, in a word or two, and whether it is late. */
-export function nextStep(l: LeadSummary): string | null {
-  // A due reminder on a stage that has its own short step shows the step; the reminder's text stays in the lead.
-  if (due(l)) return myMove(l, now()) ?? (l.dueText || "Your reminder");
-  if (l.flags?.includes("stuck")) return "Refund or rebook";
-  if (l.flags?.includes("no-deposit")) return "Ask for the deposit";
-  const paper = paperDue(l, now());
-  if (paper) return paper === "contract" ? "Sign contract" : "Sign release";
-  if (renew(l)) return "Renew licence";
-  if (l.stage === "Inquiry") return "Reply";
-  if (l.stage === "Quoted") return quoteNudge(l, now());
-  return myMove(l, now());
-}
-
-/** The site's headings are Black capitals; the desk's are the wordmark face at 600, as written. */
-const HEAD: React.CSSProperties = { fontFamily: "var(--font-display)", textTransform: "none", fontWeight: 600, letterSpacing: "-0.02em", wordSpacing: 0 };
-/** "intro-call" as "Intro call". */
-const kindOf = (k?: string) => (k ? k.charAt(0).toUpperCase() + k.slice(1).replace(/-/g, " ") : undefined);
-
-export const ago = (iso: string) => {
-  const mins = Math.round((now() - Date.parse(iso)) / 60000);
-  if (mins < 60) return `${Math.max(1, mins)} min`;
-  if (mins < 48 * 60) return `${Math.round(mins / 60)} h`;
-  return `${Math.round(mins / 1440)} d`;
-};
-const day = (iso: string) =>
-  new Intl.DateTimeFormat("en-US", { timeZone: "America/Los_Angeles", month: "short", day: "numeric" }).format(new Date(iso));
-const at = (iso: string) =>
-  new Intl.DateTimeFormat("en-US", { timeZone: "America/Los_Angeles", weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(iso));
-
-/** The chip a row shows: trouble first, then late, then the stage. */
-/** A shape per stage, so the chip never relies on color alone. */
-const MARK: Record<Stage, string> = {
-  Inquiry: "○", Replied: "◐", "Call booked": "◐", Quoted: "◐", Confirmed: "●", Shot: "●", Invoiced: "●", Selecting: "●", Delivered: "✓", Lost: "×",
-};
-
-function Tag({ tone, mark, children }: { tone: "plain" | "needs" | "bad" | "quiet"; mark: string; children: React.ReactNode }) {
-  return (
-    <span
-      className={cn(
-        "inline-flex h-7 shrink-0 items-center gap-2 whitespace-nowrap rounded-[4px] px-3 font-mono text-[12.5px]",
-        tone === "plain" && "bg-card text-foreground",
-        tone === "needs" && "bg-accent/12 text-accent ring-1 ring-inset ring-accent/40",
-        tone === "bad" && "bg-destructive/10 text-destructive ring-1 ring-inset ring-destructive/40",
-        tone === "quiet" && "text-muted-foreground ring-1 ring-inset ring-border",
-      )}
-    >
-      <span aria-hidden="true">{mark}</span>
-      {children}
-    </span>
-  );
-}
-
-const btn = "inline-flex min-h-11 items-center justify-center gap-2 rounded-[10px] border border-border px-4 text-[15px] font-medium transition-colors duration-200 hoverable:hover:bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
-const primary = "border-accent bg-accent font-semibold text-accent-foreground hoverable:hover:bg-accent/90";
-
-/** A Gmail draft from hello@ (the second account in his Chrome, the Gmail app on the phone). */
-const q = (o: Record<string, string>) => new URLSearchParams(o).toString().replace(/\+/g, "%20");
-/** iPhone, or an iPad asking for the desktop site (it says Macintosh, with touch). */
-const ios = () => /iPhone|iPad/.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
-
-function compose(to: string, subject: string, body: string) {
-  return ios()
-    ? `googlegmail://co?${q({ to, subject, body })}`
-    : `https://mail.google.com/mail/u/1/?${q({ view: "cm", fs: "1", to, su: subject, body })}`;
-}
-
-/**
- * Julian: "allow replying in native mail app ios". The same reply for
- * iOS Mail, with their message quoted. iOS Mail sends from its default
- * account, so hello@ has to be that. The quote is cut so the link stays
- * well under what Mail takes in.
- */
-function mailto(to: string, subject: string, body: string, quote?: { name: string; at: string; text: string }) {
-  const cut = (t: string) => (t.length > 1500 ? `${t.slice(0, 1500).trimEnd()}…` : t);
-  const quoted = quote
-    ? `\n\nOn ${new Date(quote.at).toDateString()}, ${quote.name} wrote:\n${cut(quote.text).split("\n").map((line) => `> ${line}`).join("\n")}`
-    : "";
-  return `mailto:${to}?${q({ subject, body: body + quoted })}`;
-}
 
 export function AdminLeads() {
   const [leads, setLeads] = React.useState<LeadSummary[] | null>(null);
@@ -580,115 +490,6 @@ export function AdminLeads() {
   );
 }
 
-/**
- * Julian (2026-11-08): keyboard shortcuts. List keys live here, on capture so
- * an open overlay can keep them from the lead; the lead's own keys live in
- * Detail. Nothing renders until a key opens it, so the phone never sees it.
- */
-function DeskKeys({ leads, shown, open, setOpen, jump, pick, refresh }: { leads: LeadSummary[]; shown: LeadSummary[]; open: string | null; setOpen: (id: string | null) => void; jump: (l: LeadSummary) => void; pick: (f: Filter) => void; refresh: () => void }) {
-  const [palette, setPalette] = React.useState(false);
-  const [help, setHelp] = React.useState(false);
-  // Where the open lead sat: once read, it can drop out of Your move, and J / K go on from its place.
-  const row = React.useRef(-1);
-  React.useEffect(() => {
-    const i = shown.findIndex((l) => l.id === open);
-    if (i >= 0 || !open) row.current = i;
-  });
-  React.useEffect(() => {
-    const on = (e: KeyboardEvent) => {
-      const k = leadKey(e, typingIn(e.target), false);
-      if (palette) {
-        // Its own field takes the rest; Cmd K again closes it.
-        if (k?.do === "palette") { e.preventDefault(); setPalette(false); }
-        return;
-      }
-      if (help) {
-        if (!k) return;
-        e.preventDefault();
-        if (k.do === "close" || k.do === "help") setHelp(false);
-        return;
-      }
-      if (!k) return;
-      if (k.do === "palette") setPalette(true);
-      else if (k.do === "help") setHelp(true);
-      else if (k.do === "new") pick("new");
-      else if (k.do === "refresh") refresh();
-      else if (k.do === "move") {
-        const i = shown.findIndex((l) => l.id === open);
-        // Gone from the list: the row below has slid into its place, so J stays put.
-        const to = i >= 0 ? i + k.by : row.current < 0 ? 0 : row.current + (k.by < 0 ? -1 : 0);
-        const next = shown[Math.min(shown.length - 1, Math.max(0, to))];
-        if (!next?.id) return;
-        setOpen(next.id);
-        document.querySelector(`[data-lead="${CSS.escape(next.id)}"]`)?.scrollIntoView({ block: "nearest" });
-      } else return;
-      e.preventDefault();
-    };
-    addEventListener("keydown", on, true);
-    return () => removeEventListener("keydown", on, true);
-  });
-  if (palette) return <Palette leads={leads} close={() => setPalette(false)} go={jump} />;
-  if (!help) return null;
-  return (
-    <div role="dialog" aria-modal="true" aria-label="Keyboard shortcuts" onClick={() => setHelp(false)} className="fixed inset-0 z-50 bg-background/60 backdrop-blur-sm">
-      <div className="mx-auto mt-[16vh] w-[min(420px,calc(100%-32px))] rounded-[14px] border border-border bg-background p-5 shadow-2xl">
-        <p className="pb-3 font-mono text-[11.5px] uppercase tracking-[0.08em] text-muted-foreground">Shortcuts</p>
-        <dl className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-6 gap-y-2.5 text-[14.5px]">
-          {LEAD_KEYS.map(([k, t]) => (
-            <React.Fragment key={k}><dt>{t}</dt><dd className="text-right font-mono text-[12.5px] text-muted-foreground">{k}</dd></React.Fragment>
-          ))}
-        </dl>
-      </div>
-    </div>
-  );
-}
-
-/** Cmd K: jump to any lead by name, email or type of shoot. */
-function Palette({ leads, close, go }: { leads: LeadSummary[]; close: () => void; go: (l: LeadSummary) => void }) {
-  const [q, setQ] = React.useState("");
-  const [at, setAt] = React.useState(0);
-  const words = q.trim().toLowerCase();
-  const hits = leads.filter((l) => !l.trashedAt && matches(l, words)).sort((a, b) => b.lastAt.localeCompare(a.lastAt)).slice(0, 8);
-  const choose = (l?: LeadSummary) => { if (!l) return; close(); go(l); };
-  return (
-    <div role="dialog" aria-modal="true" aria-label="Jump to a lead" onMouseDown={(e) => e.target === e.currentTarget && close()} className="fixed inset-0 z-50 bg-background/60 backdrop-blur-sm">
-      <div className="mx-auto mt-[16vh] w-[min(520px,calc(100%-32px))] overflow-hidden rounded-[14px] border border-border bg-background shadow-2xl">
-        <input
-          autoFocus
-          value={q}
-          onChange={(e) => { setQ(e.target.value); setAt(0); }}
-          onKeyDown={(e) => {
-            if (e.key === "Escape") close();
-            else if (e.key === "ArrowDown") setAt((i) => Math.min(hits.length - 1, i + 1));
-            else if (e.key === "ArrowUp") setAt((i) => Math.max(0, i - 1));
-            else if (e.key === "Enter") choose(hits[at]);
-            else return;
-            e.preventDefault();
-          }}
-          placeholder="Jump to a lead"
-          aria-label="Jump to a lead"
-          className="min-h-12 w-full border-b border-border bg-transparent px-4 text-[15px] outline-none placeholder:text-muted-foreground"
-        />
-        {hits.length ? (
-          <ul className="max-h-[50vh] overflow-y-auto py-1">
-            {hits.map((l, i) => (
-              <li key={l.id}>
-                <button type="button" onMouseEnter={() => setAt(i)} onClick={() => choose(l)} aria-current={i === at ? "true" : undefined} className={cn("flex w-full items-baseline gap-3 px-4 py-2.5 text-left", i === at && "bg-card shadow-[inset_3px_0_0_var(--accent)]")}>
-                  <span className="truncate text-[15px] font-medium">{l.name}</span>
-                  <span className="truncate font-mono text-[12px] text-muted-foreground">{[kindOf(l.kind), l.email].filter(Boolean).join(" · ")}</span>
-                  <span className="ml-auto shrink-0 font-mono text-[12px] text-muted-foreground">{l.stage}</span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="px-4 py-4 text-[14.5px] text-muted-foreground">Nothing matches.</p>
-        )}
-      </div>
-    </div>
-  );
-}
-
 type Tab = "today" | "needs" | "open" | "upcoming" | "more";
 const OPEN_STAGES = STAGES.filter((s) => !closed(s));
 /** The lists under More on the phone (the sidebar's lower groups on desktop). */
@@ -703,184 +504,6 @@ const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
 /** The One Desk's phone tabs: Today first; Upcoming folds into it, the Calendar under More. */
 const DESK_TABS = [{ id: "today" as Tab, label: "Today", icon: <><rect x="4" y="5" width="16" height="15" rx="2" /><path d="M4 10h16M9 3v4M15 3v4" /><circle cx="12" cy="15" r="1.6" /></> }, ...TABS.filter((t) => t.id !== "upcoming")];
 
-/** The road a lead travels; Lost is off it. */
-const STEPS: readonly Stage[] = STAGES.filter((s) => s !== "Lost");
-
-/** How far a lead has come: a short segment per stage, then its name. */
-function StageLine({ l }: { l: LeadSummary }) {
-  const at = STEPS.indexOf(l.stage);
-  return (
-    <span className="flex shrink-0 items-center gap-2.5 font-mono text-[12px] text-muted-foreground">
-      {at >= 0 ? (
-        <span aria-hidden="true" className="flex shrink-0 gap-[3px]">
-          {STEPS.map((s, k) => <i key={s} className={cn("h-[3px] w-3 rounded-full", k < at ? "bg-foreground/55" : k === at ? "bg-foreground" : "bg-border")} />)}
-        </span>
-      ) : null}
-      <span className="truncate font-medium text-foreground">{l.stage}</span>
-      {isLate(l, now()) ? <span className="shrink-0 text-accent">{ago(l.stageAt)}</span> : null}
-    </span>
-  );
-}
-
-/** The one thing to do, in teal; money stuck in red; otherwise why it is put aside. */
-function RowAction({ l, next }: { l: LeadSummary; next: string | null }) {
-  // Wraps instead of cutting: Julian wants the whole step on the row.
-  const cls = "min-w-0 text-right font-mono text-[12.5px] font-medium [text-wrap:balance]";
-  if (l.trashedAt) return <span className={cn(cls, "text-muted-foreground")}>Deletes in {Math.max(1, trashDaysLeft(l.trashedAt, now()))} d</span>;
-  const bad = l.flags?.includes("stuck") ? "Deposit stuck" : l.flags?.includes("no-deposit") ? "No deposit" : null;
-  if (bad) return <span className={cn(cls, "text-destructive")}>! {bad} →</span>;
-  if (next) return <span title={next} className={cn(cls, "text-accent")}>{next}{" "}→</span>;
-  if (snoozed(l)) return <span className={cn(cls, "text-muted-foreground")}>Until {day(l.snoozeUntil!)}</span>;
-  return l.refs ? <span className={cn(cls, "text-muted-foreground")}>{l.refs} {l.refs === 1 ? "picture" : "pictures"}</span> : null;
-}
-
-/** One lead in a list: who, what and when, the start of their message, where it stands and what is next. */
-function Row({ l, on, upcoming, onClick }: { l: LeadSummary; on: boolean; upcoming: boolean; onClick: () => void }) {
-  const next = nextStep(l);
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      data-lead={l.id}
-      aria-current={on ? "true" : undefined}
-      className={cn(
-        "flex w-full gap-3 border-b border-border px-3 py-[18px] text-left transition-colors duration-200 hoverable:hover:bg-card lg:px-7",
-        on && "bg-card shadow-[inset_3px_0_0_var(--accent)]",
-      )}
-    >
-      <span className="grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)] gap-0.5">
-        <span className="flex items-baseline justify-between gap-3">
-          <span className="truncate font-mono text-[11px] uppercase tracking-[0.09em] text-muted-foreground">
-            {l.kind ? <b className="font-medium text-foreground" title={kindOf(l.kind)}>{shootTag(l.kind)}</b> : null}
-            {l.kind && l.when ? " · " : null}
-            {l.when ? at(l.when) : null}
-          </span>
-          <span className="shrink-0 font-mono text-[12px] text-muted-foreground">{upcoming && l.when ? day(l.when) : ago(l.lastAt)}</span>
-        </span>
-        <span className="flex min-w-0 items-center gap-2 text-[18px] font-semibold tracking-[-0.01em]">
-          {l.unread ? <span className="size-2 shrink-0 rounded-full bg-accent" aria-label="New" /> : null}
-          <span className="truncate">{l.name}</span>
-        </span>
-        {l.snippet ? <span className="line-clamp-2 text-[14.5px] leading-snug text-muted-foreground">{l.snippet}</span> : null}
-        <span className="mt-2 flex items-center justify-between gap-3">
-          <StageLine l={l} />
-          <RowAction l={l} next={next} />
-        </span>
-      </span>
-    </button>
-  );
-}
-
-/** A row cut down for the board: kind and age, name, the next step, the quote. */
-function Card({ l, on, onClick }: { l: LeadSummary; on: boolean; onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      data-lead={l.id}
-      aria-current={on ? "true" : undefined}
-      className={cn("grid w-full gap-0.5 rounded-[10px] bg-card px-2.5 py-2 text-left transition-colors duration-200 hoverable:hover:bg-muted", on && "shadow-[inset_3px_0_0_var(--accent)]")}
-    >
-      <span className="flex justify-between gap-2 font-mono text-[11.5px] uppercase tracking-[0.09em] text-muted-foreground">
-        <span className="truncate" title={kindOf(l.kind)}>{shootTag(l.kind)}</span>
-        <span className="shrink-0">{ago(l.lastAt)}</span>
-      </span>
-      <span className="flex min-w-0 items-center gap-1.5 text-[15px] font-semibold">
-        {l.unread ? <span className="size-[7px] shrink-0 rounded-full bg-accent" aria-label="New" /> : null}
-        <span className="truncate">{l.name}</span>
-      </span>
-      <span className="mt-1 flex items-center justify-between gap-2">
-        <span className="min-w-0 text-left"><RowAction l={l} next={nextStep(l)} /></span>
-        {l.quote ? <span className="shrink-0 font-mono text-[11.5px] text-muted-foreground">{money(l.quote)}</span> : null}
-      </span>
-    </button>
-  );
-}
-
-const LIST_W_STORE = "jg-leads-list-w";
-const LIST_W = 420;
-const clampW = (w: number) => Math.min(720, Math.max(300, Math.round(w)));
-
-/** Desktop: the line between the list and the open lead. Drag or arrow keys to move it, double-click to reset. */
-function ListResizer({ w, onChange }: { w: number; onChange: (w: number | null) => void }) {
-  const drag = React.useRef<{ x: number; w: number } | null>(null);
-  const save = (v: number | null) => {
-    onChange(v);
-    try {
-      if (v) window.localStorage.setItem(LIST_W_STORE, String(v));
-      else window.localStorage.removeItem(LIST_W_STORE);
-    } catch {}
-  };
-  return (
-    <div
-      role="separator"
-      aria-orientation="vertical"
-      aria-label="List width"
-      aria-valuenow={w}
-      aria-valuemin={300}
-      aria-valuemax={720}
-      tabIndex={0}
-      title="Drag to resize, double-click to reset"
-      style={{ left: `calc(220px + ${w}px - 3px)` }}
-      className="absolute inset-y-0 z-10 hidden w-1.5 cursor-col-resize touch-none outline-none hoverable:hover:bg-accent/40 focus-visible:bg-accent/60 lg:block"
-      onPointerDown={(e) => {
-        drag.current = { x: e.clientX, w };
-        e.currentTarget.setPointerCapture(e.pointerId);
-      }}
-      onPointerMove={(e) => drag.current && onChange(clampW(drag.current.w + e.clientX - drag.current.x))}
-      onPointerUp={(e) => {
-        if (!drag.current) return;
-        save(clampW(drag.current.w + e.clientX - drag.current.x));
-        drag.current = null;
-      }}
-      onPointerCancel={() => (drag.current = null)}
-      onDoubleClick={() => save(null)}
-      onKeyDown={(e) => {
-        if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
-          e.preventDefault();
-          save(clampW(w + (e.key === "ArrowLeft" ? -16 : 16)));
-        }
-      }}
-    />
-  );
-}
-
-function SideLink({ on, n, onClick, href, icon, className, children }: { on: boolean; n?: number; onClick?: () => void; href?: string; icon?: React.ReactNode; className?: string; children: React.ReactNode }) {
-  const El = href ? "a" : "button";
-  return (
-    <El
-      {...(href ? { href } : { type: "button" as const, onClick, "aria-pressed": on })}
-      className={cn(
-        "flex min-h-10 items-center justify-between gap-4 rounded-lg px-3 text-[14.5px] transition-colors duration-200",
-        on ? "bg-card font-semibold text-foreground shadow-[inset_2px_0_0_var(--accent)]" : "text-muted-foreground hoverable:hover:bg-card hoverable:hover:text-foreground",
-        className,
-      )}
-    >
-      <span className="flex items-center gap-2.5">
-        {icon ? <svg viewBox="0 0 24 24" aria-hidden="true" className="size-[17px] shrink-0 fill-none stroke-current stroke-[1.6] [stroke-linecap:round] [stroke-linejoin:round]">{icon}</svg> : null}
-        {children}
-      </span>
-      {n === undefined || n < 0 ? null : <span className={cn("font-mono text-[12.5px]", on ? "text-accent" : "text-muted-foreground")}>{n}</span>}
-    </El>
-  );
-}
-
-function Pill({ on, n, onClick, children }: { on: boolean; n: number; onClick: () => void; children: React.ReactNode }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={on}
-      className={cn(
-        "inline-flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-full border px-3.5 font-mono text-[12.5px]",
-        on ? "border-accent text-accent" : "border-border text-muted-foreground",
-      )}
-    >
-      {children} <span className={on ? "text-accent" : "text-muted-foreground/70"}>{n}</span>
-    </button>
-  );
-}
-
 /** The inbox key, pasted once per device. On the iPhone the installed app keeps
     its own storage apart from Safari, so it asks once there too. A password
     field, so a password manager can fill it. */
@@ -889,16 +512,6 @@ const PUSH_FLAG = "jg-leads-push";
 const SW_URL = "/admin/leads/sw.js";
 /** The app is the whole origin on leads.juliangigola.com, /admin/leads on the main site. */
 const swScope = () => (location.hostname.startsWith("leads.") ? "/" : "/admin/leads");
-export const OFFLINE = "Offline. The desk loads again when you are back online.";
-/** The unread count on the app icon (iPhone home screen, desktop dock), and
- * where the service worker reads it to add one per push. */
-function badge(n: number) {
-  try {
-    const nav = navigator as Navigator & { setAppBadge?: (n?: number) => Promise<void>; clearAppBadge?: () => Promise<void> };
-    (n ? nav.setAppBadge?.(n) : nav.clearAppBadge?.())?.catch(() => {});
-    caches?.open("leads-badge").then((c) => c.put("n", new Response(String(n)))).catch(() => {});
-  } catch {}
-}
 function PushSwitch({ call }: { call: Call }) {
   // The desk renders only in the browser (after its list loads), so these read the page directly.
   const able = typeof navigator !== "undefined" && "serviceWorker" in navigator && "PushManager" in window;
@@ -1047,19 +660,6 @@ export function SignIn({ onKey, wrong }: { onKey: (k: string) => void; wrong: bo
   );
 }
 
-export function pass(l: LeadSummary, f: Filter) {
-  if (f === "trash") return !!l.trashedAt;
-  if (f === "archived") return !!l.archivedAt && !l.trashedAt;
-  if (f === "needs") return needsMe(l);
-  if (aside(l)) return false;
-  if (f === "upcoming") return !!l.when && Date.parse(l.when) > now() - 2 * 3600e3 && !closed(l.stage);
-  if (f === "more" || f === "hours" || f === "proofs" || f === "licences") return false;
-  if (f === "snoozed") return snoozed(l);
-  if (f === "open") return !closed(l.stage);
-  return l.stage === f && !snoozed(l);
-}
-const LABEL: Partial<Record<Filter, string>> = { today: "Today", traffic: "Traffic", seo: "SEO", site: "Site", device: "This device", needs: "Your move", open: "All open", upcoming: "Upcoming", snoozed: "Snoozed", archived: "Archived", trash: "Trash", more: "More", new: "New lead", stats: "Stats", money: "Money", templates: "Templates", hours: "Hours", proofs: "Proofs", licences: "Licences" };
-const label = (f: Filter) => LABEL[f] ?? f;
 
 /** Deletes every lead in the trash for good, after a second press. */
 function EmptyTrash({ n, call, done }: { n: number; call: Call; done: () => void }) {
@@ -1083,9 +683,6 @@ function EmptyTrash({ n, call, done }: { n: number; call: Call; done: () => void
     </p>
   );
 }
-
-type Call = (init?: RequestInit & { query?: string }) => Promise<Record<string, unknown>>;
-
 export function Detail({ summary, initial, call, onChange, onBack, reload, tick, templates, others }: { summary: LeadSummary; initial?: Lead | null; call: Call; onChange: (l: Lead) => void; onBack: () => void; reload: () => void; tick: number; templates: Template[]; others: LeadSummary[] }) {
   const [lead, setLead] = React.useState<Lead | null>(initial ?? null);
   const [message, setMessage] = React.useState<Enquiry | null>(null);
@@ -1332,31 +929,6 @@ export function Detail({ summary, initial, call, onChange, onBack, reload, tick,
     </div>
   );
 }
-
-/** One timeline line, in words. */
-function line(e: LeadEvent): string {
-  switch (e.kind) {
-    case "inquiry": return `Inquiry from the form${e.note ? `, ${e.note}` : ""}`;
-    case "call": return `Call booked${e.note ? `: ${e.note}` : ""}`;
-    case "booking": return `Session booked${e.note ? `: ${e.note}` : ""}`;
-    case "no-deposit": return "Booked without a deposit";
-    case "deposit-stuck": return `Deposit stuck${e.note ? `: ${e.note}` : ""}`;
-    case "stage": return `Moved to ${e.note}`;
-    case "snooze": return e.note === "woken" ? "Unsnoozed" : `Snoozed until ${day(e.note ?? "")}`;
-    case "archive": return e.note === "in" ? "Archived" : "Unarchived";
-    case "trash": return e.note === "in" ? "Moved to trash" : "Recovered from trash";
-    case "replied": return `You replied${e.note ? `: ${e.note}` : ""}`;
-    case "wrote": return `They wrote${e.note ? `: ${e.note}` : ""}`;
-    case "mail": return `Mail to ${e.mail?.to === "client" ? "them" : "hello@"}: ${e.note ?? ""}`;
-    case "added": return `Added by hand${e.note ? `, from ${e.note}` : ""}`;
-    case "edit": return "Details changed";
-    case "merge": return `Merged with another record${e.note ? ` (${e.note})` : ""}`;
-    case "remind": return e.note ? `Reminder set for ${at(e.note)}` : "Reminder cleared";
-    case "quote": return e.note ? `Quote: $${Number(e.note).toLocaleString("en-US")}` : "Quote cleared";
-    case "invoice": return `Invoice ${e.note ?? ""}`;
-  }
-}
-
 /* ── the CRM tools: a lead by hand, the numbers, templates, the export ── */
 
 const field = "min-h-11 w-full rounded-[10px] border border-border bg-transparent px-3.5 text-base normal-case placeholder:normal-case placeholder:text-muted-foreground focus-visible:outline-2 focus-visible:outline-accent";
@@ -1416,7 +988,6 @@ type Stats = {
   won: number;
   stages: Partial<Record<Stage, number>>;
 };
-export const money = (n: number) => `$${Math.round(n).toLocaleString("en-US")}`;
 const hours = (h: number | null) => (h === null ? "None yet" : h < 1 ? `${Math.round(h * 60)} min` : h < 48 ? `${Math.round(h)} h` : `${Math.round(h / 24)} d`);
 
 /** The numbers: is the site turning inquiries into bookings, and how fast does he answer. */
@@ -1483,8 +1054,6 @@ function StatsView({ call }: { call: Call }) {
     </div>
   );
 }
-
-type Template = { id: string; name: string; subject: string; body: string };
 
 /** His saved replies. {first}, {name}, {kind} and {when} are filled per lead. */
 function TemplatesEditor({ call, templates, saved }: { call: Call; templates: Template[]; saved: (t: Template[]) => void }) {
@@ -1777,7 +1346,6 @@ function Money({ l, full, patch, run, quote, setQuote }: { l: LeadSummary; full:
 
 /** Pacific today, as the date input wants it. */
 const todayPT = () => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Los_Angeles" }).format(new Date());
-const authed = () => credentials(window.localStorage.getItem(KEY_STORE) ?? "");
 
 /** The PDF of one invoice. Loaded on the tap, fonts and all. A design B one fetches its sealed photo unless `src` is in hand. */
 async function makePdf(inv: Invoice, l: LeadSummary, full: Lead, src?: string) {
@@ -2330,7 +1898,6 @@ function FromForm({ from, saved }: { from: InvoiceFrom; saved: (f: InvoiceFrom) 
  * transactions in there". Read-only, through `/api/money`. */
 
 type Txn = { id: string; at: string; type: string; amount: number; fee: number; net: number; currency: string; status: string; what: string };
-const cash = (cents: number) => `${cents < 0 ? "−" : ""}$${(Math.abs(cents) / 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 /** Stripe's types in his words. */
 const KIND: Record<string, string> = { charge: "Payment", payment: "Payment", refund: "Refund", payment_refund: "Refund", payout: "Payout", stripe_fee: "Stripe fee", adjustment: "Adjustment", dispute: "Dispute" };
 
@@ -2391,195 +1958,6 @@ function MoneyView() {
         {err ? <p role="alert" className="pt-2 text-[14px] text-destructive">{err}</p> : null}
       </section>
       <p className="font-mono text-[12.5px] text-muted-foreground">Net is after the Stripe fee. Payouts show as money leaving the balance.</p>
-    </div>
-  );
-}
-
-/* ── Today, the One Desk's first page ─────────────────────────────
- * Julian (2026-11-09, mock claude.ai/artifact/Y2PXE3dJZcj7oJw5TyihLF, hero
- * C): the week as a row, Mon to Sun, with shoots, calls and what falls
- * due, then Your move, Coming up, Money and the site's traffic. Every
- * number is one the desk already has: lead summaries, `/api/money`,
- * `/api/traffic`. What is owed on invoices is left out: summaries do not
- * carry invoices and nothing marks one paid.
- * ─────────────────────────────────────────────────────────────── */
-
-const PT = "America/Los_Angeles";
-const ymdOf = (ms: number) => new Intl.DateTimeFormat("en-CA", { timeZone: PT }).format(ms);
-const plus = (d: string, n: number) => new Date(Date.parse(`${d}T12:00:00Z`) + n * DAY).toISOString().slice(0, 10);
-const dayHead = (d: string) => `${new Date(`${d}T12:00:00Z`).toLocaleDateString("en-US", { weekday: "short", timeZone: "UTC" })} ${+d.slice(8)}`;
-const clock = (ms: number) => new Intl.DateTimeFormat("en-US", { timeZone: PT, hour: "numeric", minute: "2-digit" }).format(ms);
-/** Where a move comes from, as the mock tags it. */
-const source = (l: LeadSummary) => (renew(l) ? "Licence" : paperDue(l, now()) ? "Paperwork" : l.stage === "Invoiced" || l.stage === "Selecting" ? "Proofs" : "Leads");
-const callOrShoot = (l: LeadSummary) => (l.stage === "Call booked" ? "Call" : shootTag(l.kind) ?? "Shoot");
-
-type DayEv = { small: string; text: string; who?: string; due?: boolean; l: LeadSummary };
-
-/** Each Pacific day from `from` for `n` days, with what is on it. Moves with no date land today. */
-function daysOf(leads: LeadSummary[], from: string, n: number) {
-  const today = ymdOf(now());
-  const map = new Map<string, DayEv[]>();
-  const put = (d: string, e: DayEv) => map.set(d, [...(map.get(d) ?? []), e]);
-  for (const l of leads) {
-    if (aside(l)) continue;
-    const who = l.name || l.email;
-    if (l.when && !closed(l.stage)) {
-      const ms = Date.parse(l.when);
-      put(ymdOf(ms), { small: `${clock(ms)} ${callOrShoot(l)}`, text: who, l });
-    }
-    const step = needsMe(l) ? nextStep(l) : null;
-    if (step) put(today, { small: "Due", text: step, who, due: true, l });
-    else if (l.due && Date.parse(l.due) > now()) put(ymdOf(Date.parse(l.due)), { small: "Reminder", text: l.dueText || "Your reminder", who, l });
-  }
-  return Array.from({ length: n }, (_, i) => plus(from, i)).map((d) => ({ d, today: d === today, evs: map.get(d) ?? [] }));
-}
-
-function Item({ k, t, n, s, onClick, className }: { k: React.ReactNode; t?: string; n: string; s?: string | null; onClick?: () => void; className?: string }) {
-  const body = (
-    <>
-      <span className="truncate font-mono text-[11px] uppercase tracking-[0.09em] text-muted-foreground">{k}</span>
-      <span className="text-right font-mono text-[12px] text-muted-foreground">{t}</span>
-      <span className="truncate text-[16.5px] font-semibold">{n}</span>
-      <span className="self-end text-right font-mono text-[12.5px] font-medium text-accent">{s ? `${s} →` : null}</span>
-    </>
-  );
-  const cls = cn("grid w-full grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-0.5 border-b border-border py-3 text-left", className);
-  return onClick ? <button type="button" onClick={onClick} className={cn(cls, "transition-colors duration-200 hoverable:hover:bg-card")}>{body}</button> : <div className={cls}>{body}</div>;
-}
-
-type Spark = { visits: number; days: { key: string; n: number }[] };
-
-function DeskToday({ leads, go, pick }: { leads: LeadSummary[]; go: (l: LeadSummary) => void; pick: (f: Filter) => void }) {
-  const today = ymdOf(now());
-  const monday = plus(today, -((new Date(`${today}T12:00:00Z`).getUTCDay() + 6) % 7));
-  const week = daysOf(leads, monday, 7);
-  // Phone: the next three days that have something, today first.
-  const soon = daysOf(leads, today, 21).filter((x) => x.today || x.evs.length).slice(0, 3);
-  const moves = leads.filter(needsMe).sort((a, b) => b.lastAt.localeCompare(a.lastAt));
-  const late = moves.filter((l) => isLate(l, now())).length;
-  const coming = leads.filter((l) => pass(l, "upcoming")).sort((a, b) => a.when!.localeCompare(b.when!)).slice(0, 4);
-  // Sessions and calls dated this week, from today on.
-  const booked = week.filter((x) => x.d >= today).flatMap((x) => x.evs.filter((e) => !e.due && e.small !== "Reminder"));
-  const calls = booked.filter((e) => e.l.stage === "Call booked").length;
-  const shoots = booked.length - calls;
-
-  const [money, setMoney] = React.useState<{ available?: number; pending?: number } | string | null>(null);
-  React.useEffect(() => {
-    fetch("/api/money", { headers: authed(), cache: "no-store" })
-      .then(async (r) => { const o = await r.json(); if (!r.ok) throw new Error(o.error ?? `Request failed (${r.status})`); setMoney(o); })
-      .catch(() => setMoney("Not connected"));
-  }, []);
-  // Traffic answers to the GitHub token only, as on /admin.
-  const [traffic, setTraffic] = React.useState<Spark | string | null>(null);
-  React.useEffect(() => {
-    const token = localStorage.getItem(TOKEN_STORE);
-    if (!token) return queueMicrotask(() => setTraffic("GitHub token needed"));
-    fetch("/api/traffic", { headers: { authorization: `Bearer ${token}` }, cache: "no-store" })
-      .then(async (r) => { const o = await r.json(); if (!r.ok) throw new Error(o.error ?? "Cloudflare did not answer."); setTraffic(o); })
-      .catch(() => setTraffic("Cloudflare did not answer"));
-  }, []);
-  const t = typeof traffic === "object" ? traffic : null;
-  const peak = t ? Math.max(1, ...t.days.map((d) => d.n)) : 1;
-  const spark = t ? t.days.map((d, i, a) => `${(i / Math.max(1, a.length - 1)) * 120},${20 - (d.n / peak) * 17}`).join(" ") : "";
-  const m = typeof money === "object" ? money : null;
-
-  const hour = +new Intl.DateTimeFormat("en-US", { timeZone: PT, hour: "numeric", hourCycle: "h23" }).format(now());
-  const hello = hour >= 5 && hour < 12 ? "Morning" : hour >= 12 && hour < 18 ? "Afternoon" : "Evening";
-  const weekday = (iso: string) => new Intl.DateTimeFormat("en-US", { timeZone: PT, weekday: "long" }).format(new Date(iso));
-  const nextShoot = coming.find((l) => l.stage !== "Call booked");
-  const nextCall = coming.find((l) => l.stage === "Call booked");
-  const line = [
-    moves.length ? `${moves.length} on you` : null,
-    nextShoot ? `a shoot ${ymdOf(Date.parse(nextShoot.when!)) === today ? "today" : weekday(nextShoot.when!)}` : null,
-    nextCall ? `a call ${ymdOf(Date.parse(nextCall.when!)) === today ? "today" : weekday(nextCall.when!)}` : null,
-  ].filter(Boolean).join(", ");
-
-  const card = "rounded-xl bg-card";
-  const kpi = (k: string, v: React.ReactNode, sub: React.ReactNode, cls?: string) => (
-    <div className={cn(card, "grid content-between gap-1 px-3.5 py-3", cls)} style={{ containerType: "inline-size" }}>
-      <span className="font-mono text-[11.5px] uppercase tracking-[0.08em] text-muted-foreground">{k}</span>
-      {/* A long figure ($1,234.56 at 390) shrinks to the tile instead of spilling or cutting. */}
-      <span style={{ ...HEAD, fontSize: typeof v === "string" ? `min(26px, ${(180 / v.length).toFixed(1)}cqi)` : 26 }} className="leading-none tabular-nums [overflow-wrap:anywhere]">{v}</span>
-      <span className="font-mono text-[12px] leading-snug text-muted-foreground [overflow-wrap:anywhere]">{sub}</span>
-    </div>
-  );
-  const head = (title: string, more: string, f: Filter) => (
-    <h2 style={{ textTransform: "uppercase" }} className="label mb-1 flex items-baseline justify-between font-mono text-[11.5px] uppercase tracking-[0.1em] text-muted-foreground">
-      {title}
-      <button type="button" onClick={() => pick(f)} className="min-h-8 tracking-normal text-accent hoverable:hover:underline">{more} →</button>
-    </h2>
-  );
-
-  return (
-    <div className="grid content-start gap-4 px-1 py-4 lg:gap-[18px] lg:px-6 lg:py-[22px]">
-      <div className="grid gap-3.5 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]">
-        <div className={cn(card, "grid content-between gap-3 px-[18px] py-4 lg:min-h-[176px]")}>
-          <div>
-            <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
-              {new Intl.DateTimeFormat("en-US", { timeZone: PT, weekday: "short", month: "short", day: "numeric" }).format(now())} · {clock(now())}
-            </p>
-            <h1 style={HEAD} className="mt-1.5 text-[30px] leading-[1.05] tracking-[-0.03em]">{hello}, Julian.</h1>
-          </div>
-          <p className="text-[14px] text-muted-foreground">{line ? <><span className="text-accent">{line.split(", ")[0]}</span>{line.includes(", ") ? `, ${line.split(", ").slice(1).join(", ")}` : ""}.</> : "Nothing on the books this week."}</p>
-        </div>
-        <div className="grid grid-cols-3 gap-2.5 lg:grid-cols-2">
-          {kpi("On you", <span className="text-accent">{moves.length}</span>, late ? `${late} late` : "none late")}
-          {kpi("This week", booked.length, `${shoots} ${shoots === 1 ? "shoot" : "shoots"}, ${calls} ${calls === 1 ? "call" : "calls"}`)}
-          {kpi("Stripe", m ? cash(m.available ?? 0) : "–", m ? `${cash(m.pending ?? 0)} on the way` : typeof money === "string" ? money : "Asking Stripe")}
-          {kpi(
-            "Visits, 7 d",
-            t ? t.visits.toLocaleString("en-US") : "–",
-            t ? <svg viewBox="0 0 120 22" preserveAspectRatio="none" className="h-[18px] w-full" role="img" aria-label={`Visitors, last ${t.days.length} days`}><polyline fill="none" stroke="var(--accent)" strokeWidth="1.6" vectorEffect="non-scaling-stroke" points={spark} /></svg> : typeof traffic === "string" ? traffic : "Asking Cloudflare",
-            "max-lg:hidden",
-          )}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-3 gap-1.5 lg:grid-cols-7">
-        {week.map((x) => <DayTile key={x.d} {...x} go={go} className={cn("max-lg:hidden")} />)}
-        {soon.map((x) => <DayTile key={`p${x.d}`} {...x} go={go} className="lg:hidden" />)}
-      </div>
-
-      <div className="grid gap-3.5 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
-        <section className={cn(card, "px-3.5 pb-1 pt-3")}>
-          {head("Your move", "All", "needs")}
-          {moves.length ? moves.slice(0, 5).map((l, i) => (
-            <Item
-              key={l.id}
-              className={cn("last:border-b-0", i >= 3 && "max-lg:hidden")}
-              onClick={() => go(l)}
-              k={<>{l.kind ? <b className="font-medium text-foreground">{shootTag(l.kind)}</b> : null}{l.kind ? " · " : null}{ago(l.lastAt)} · {source(l)}</>}
-              t={l.stage}
-              n={l.name || l.email}
-              s={nextStep(l)}
-            />
-          )) : <p className="py-3 text-[15px] text-muted-foreground">Nothing waiting on you.</p>}
-        </section>
-        <section className={cn(card, "content-start px-3.5 pb-1 pt-3")}>
-          {head("Coming up", "Calendar", "upcoming")}
-          {coming.length ? coming.map((l) => (
-            <Item key={l.id} className="last:border-b-0" onClick={() => go(l)} k={<><b className="font-medium text-foreground">{callOrShoot(l)}</b> · {at(l.when!)}</>} t={l.paid ? "Deposit paid" : l.stage} n={l.name || l.email} s={nextStep(l)} />
-          )) : <p className="py-3 text-[15px] text-muted-foreground">No calls or sessions coming up.</p>}
-        </section>
-      </div>
-    </div>
-  );
-}
-
-/** One day of the week row, as a tile: today carries the accent on its top edge. */
-function DayTile({ d, today, evs, go, className }: { d: string; today: boolean; evs: DayEv[]; go: (l: LeadSummary) => void; className?: string }) {
-  const MAX = 3;
-  return (
-    <div className={cn("grid min-h-[86px] content-start gap-1.5 rounded-[10px] bg-card px-2.5 py-2", today && "shadow-[inset_0_2px_0_var(--accent)]", className)}>
-      <span className={cn("font-mono text-[10.5px] uppercase tracking-[0.08em]", today ? "text-accent" : "text-muted-foreground")}>{dayHead(d)}</span>
-      {evs.slice(0, MAX).map((e, i) => (
-        <button key={i} type="button" onClick={() => go(e.l)} title={e.who} className={cn("grid min-w-0 text-left text-[12.5px] leading-[1.25] hoverable:hover:underline", e.due && "text-accent")}>
-          <small className="font-mono text-[9.5px] uppercase tracking-[0.05em] text-muted-foreground">{e.small}</small>
-          <span className="truncate">{e.text}</span>
-          {e.who && e.who !== e.text ? <span className="truncate text-[11.5px] text-muted-foreground">{e.who}</span> : null}
-        </button>
-      ))}
-      {evs.length > MAX ? <span className="font-mono text-[10.5px] text-muted-foreground">+{evs.length - MAX} more</span> : null}
     </div>
   );
 }
