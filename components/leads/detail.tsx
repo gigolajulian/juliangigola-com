@@ -504,5 +504,3 @@ function Money({ l, full, patch, run, quote, setQuote }: { l: LeadSummary; full:
     </section>
   );
 }
-
-export { LeadCrm, ledger, dt, dd, DOT, Paperwork, Money };
