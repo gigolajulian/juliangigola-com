@@ -81,7 +81,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
 
   if (typeof b.confirm === "string") {
     if (!key) return json({ error: "Payments are off." }, 503);
-    const paid = await paidFor(key, g.p, b.confirm).catch(() => null);
+    // Stripe refusing the session (4xx) is a payment that did not go through; no answer or a 5xx is Stripe being down.
+    const paid = await paidFor(key, g.p, b.confirm).catch((e: { status?: number }) => (e.status && e.status < 500 ? null : ("down" as const)));
+    if (paid === "down") return json({ error: "Payments are down right now. Try again in a few minutes." }, 502);
     if (!paid) return json({ error: "That payment did not go through." }, 402);
     return json({ done: true, ...publicView(await finalize(g.env, g.kv, g.s, g.p, paid)) });
   }
