@@ -245,9 +245,13 @@ export const MAX = {
   message: 5000,
 } as const;
 
-/** Deliberately loose — the only thing worth rejecting is what cannot be an address. */
+/**
+ * The one email rule every form and route uses. Deliberately loose: the only
+ * thing worth rejecting is what cannot be an address. Julian (2026-11-10):
+ * nobody gets turned away, so a one-letter ending like a@b.c passes too.
+ */
 export const looksLikeEmail = (value: string): boolean =>
-  /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value);
+  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
 /**
  * Whether a sender may write, and if not, how long they have to wait.

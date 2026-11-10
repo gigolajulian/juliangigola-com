@@ -3,6 +3,7 @@ import Image from "next/image";
 import { INITIAL, submitOrKeep } from "@/components/contact-form";
 import { trailContext } from "@/components/visit-trail";
 import type { ContactState } from "@/app/contact/actions";
+import { looksLikeEmail } from "@/lib/inbox";
 
 /* JG V3 stepper (master v39, "one stepper" for booking and inquiry): the
    step rail, the head, the body, the action bar, and the sticky photo with
@@ -199,7 +200,7 @@ export function Field({
 export const checkYou = (name: string, email: string) => {
   const err: Record<string, string> = {};
   if (!name.trim()) err.name = "Add your name";
-  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim())) err.email = "Email looks incomplete";
+  if (!looksLikeEmail(email.trim())) err.email = "Email looks incomplete";
   return err;
 };
 

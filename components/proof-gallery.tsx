@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { cardPrice, type PublicProof } from "@/lib/proofs";
+import { looksLikeEmail } from "@/lib/inbox";
 
 /* ── the client's gallery ─────────────────────────────────────────
  * The look Julian approved 2026-11-06 (mock https://claude.ai/artifact/Nn3EU21DEofuLLJyXJHtcG):
@@ -22,7 +23,7 @@ import { cardPrice, type PublicProof } from "@/lib/proofs";
  * ─────────────────────────────────────────────────────────────── */
 
 const EMAIL_STORE = "proof-email";
-const isEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
+const isEmail = (v: string) => looksLikeEmail(v.trim());
 
 type Step = null | "review" | "done";
 

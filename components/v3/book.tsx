@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { CalEmbed } from "@/components/cal-embed";
 import { Calendar, Failed, Field, FlowShell, Hidden, Run, dlabel, duration, iso, useEnquiry, type Shell } from "@/components/v3/flow";
 import { LENGTH, SESSIONS, TAB_ORDER, rate, type SessionSlug } from "@/lib/v3";
+import { looksLikeEmail } from "@/lib/inbox";
 
 /* JG V3 booking (master v39, /book/<session>): one stepper. The sessions
    with a time book through Cal.com and the $100 deposit as before
@@ -286,7 +287,7 @@ function OnRequestFlow({ slug, shell, stamp }: { slug: SessionSlug; shell: Shell
         e.preventDefault();
         const no: Record<string, string> = {};
         if (!v.name.trim()) no.name = "Add your name";
-        if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.email.trim())) no.email = "Email looks incomplete";
+        if (!looksLikeEmail(v.email.trim())) no.email = "Email looks incomplete";
         setErr(no);
         if (Object.keys(no).length) return e.currentTarget.querySelector<HTMLElement>(`#f-${Object.keys(no)[0]}`)?.focus();
         send(e.currentTarget);
