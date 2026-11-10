@@ -73,5 +73,4 @@ function MoneyView() {
   );
 }
 
-export { KIND, MoneyView };
-export type { Txn };
+export { MoneyView };

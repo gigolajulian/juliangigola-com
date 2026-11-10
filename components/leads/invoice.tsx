@@ -460,5 +460,4 @@ function FromForm({ from, saved }: { from: InvoiceFrom; saved: (f: InvoiceFrom) 
   );
 }
 
-export { todayPT, makePdf, Deliver, InvoiceRow, plusDays, PAGE_B_CSS, PageB, useDeskLeft, InvoiceSheetB, EMPTY_FROM, FROM_FIELDS, FromForm };
-export type { LineB, PageBProps };
+export { InvoiceRow, InvoiceSheetB };
