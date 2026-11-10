@@ -1278,10 +1278,9 @@ const COVER_OVERRIDES: Record<string, Frame> = {
      project in its path, so the credit fell back to the first portrait
      project and the cover linked to OPAL. Pointing at the archive frame lets
      `frameProject` name the shoot the photograph is from. */
-  // SIAN's cover, Julian's pick (2026-11-10). FAUXTOPIA 01 held it before.
   portraits: archiveFrame(
-    "/work/sian/01.jpg",
-    "Person with long dark hair in a black dress leaning on a wooden box, on white",
+    "/work/fauxtopia/01.jpg",
+    "Model in a fur-trimmed hooded coat on the shoreline at sunset",
   ),
   // Exactly 4:5, so it fills the cover column with nothing cropped at all —
   // the only frame in the archive that does.

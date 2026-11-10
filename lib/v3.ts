@@ -101,7 +101,8 @@ export const SESSIONS: Record<SessionSlug, Session> = {
     turnaround: "1 week",
     cal: "juliangigola/portraits",
     paid: true,
-    photo: { d: w("zoe", "16"), l: w("zoe", "16"), at: { d: "50% 30%", l: "50% 30%" } },
+    // SIAN 01, Julian's pick for the Portraits booking card (2026-11-10). Was ZOE 16.
+    photo: { d: w("sian", "01"), l: w("sian", "01"), at: { d: "50% 25%", l: "50% 25%" } },
   },
   graduation: {
     slug: "graduation",
