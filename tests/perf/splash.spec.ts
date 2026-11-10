@@ -4,7 +4,7 @@ import { awake, frameStats, report } from "./helpers";
 import { contextFor, VIEWPORTS } from "./matrix";
 
 /**
- * The first-visit splash (`components/intro.tsx`): when it lifts, and how
+ * The first-visit splash (`components/splash/intro.tsx`): when it lifts, and how
  * its frames go. It is a fixed 3s from the first paint, whatever is still
  * loading, so a lift much later than that means the page held it. The
  * latest it may lift is `splash.liftedMs` in `budgets.json`.

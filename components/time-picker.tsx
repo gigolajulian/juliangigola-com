@@ -8,7 +8,7 @@ import { DepositStep, type DepositBody } from "@/components/deposit-step";
 import { ReferencePicks } from "@/components/reference-picks";
 import { isPaid } from "@/lib/paid";
 import { Orb, ORB_ROUND } from "@/components/orb";
-import { JgLoad } from "@/components/jg-load";
+import { JgLoad } from "@/components/splash/jg-load";
 import { Calendar, dlabel, duration, fmt, type Shell } from "@/components/v3/flow";
 import { GESTURE_GAP_MS } from "@/components/strip/shared";
 import { looksLikeEmail } from "@/lib/inbox";
