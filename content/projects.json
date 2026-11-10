@@ -4045,7 +4045,7 @@
         "src": "/work/sian/cover.jpg",
         "width": 600,
         "height": 800,
-        "color": "#AEA4A1",
+        "color": "#96847E",
         "alt": ""
       },
       "images": [
@@ -4053,21 +4053,21 @@
           "src": "/work/sian/01.jpg",
           "width": 2500,
           "height": 3333,
-          "color": "#AEA4A1",
+          "color": "#96847E",
           "alt": ""
         },
         {
           "src": "/work/sian/02.jpg",
           "width": 2500,
           "height": 3333,
-          "color": "#96847E",
+          "color": "#AEA4A1",
           "alt": ""
         },
         {
           "src": "/work/sian/03.jpg",
           "width": 2500,
           "height": 3333,
-          "color": "#C9C0BC",
+          "color": "#C8C1C0",
           "alt": ""
         },
         {
@@ -4081,14 +4081,14 @@
           "src": "/work/sian/05.jpg",
           "width": 2500,
           "height": 3333,
-          "color": "#C8C1C0",
+          "color": "#AA9892",
           "alt": ""
         },
         {
           "src": "/work/sian/06.jpg",
           "width": 2500,
           "height": 3333,
-          "color": "#AA9892",
+          "color": "#E3E1E0",
           "alt": ""
         },
         {
@@ -4096,13 +4096,6 @@
           "width": 2500,
           "height": 3333,
           "color": "#CEC7C6",
-          "alt": ""
-        },
-        {
-          "src": "/work/sian/08.jpg",
-          "width": 2500,
-          "height": 3333,
-          "color": "#E3E1E0",
           "alt": ""
         }
       ]
