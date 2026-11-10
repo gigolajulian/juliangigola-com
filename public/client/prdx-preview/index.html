@@ -54,6 +54,8 @@ footer a{color:var(--mute);text-decoration:none}footer a:hover{color:var(--fg)}
 .ar svg{width:34px;height:34px;fill:none;stroke:#fff;stroke-width:1.6;filter:drop-shadow(0 1px 4px rgba(0,0,0,.6))}
 #pv{left:max(4px,env(safe-area-inset-left))}#nx{right:max(4px,env(safe-area-inset-right))}
 .ar:hover svg{stroke-width:2.2}
+.ar{transition:opacity .8s}.lb.idle .ar{opacity:.12}
+@media (prefers-reduced-motion:reduce){.ar{transition:none}}
 .x{position:absolute;z-index:2;top:calc(6px + env(safe-area-inset-top));right:6px;font-size:22px!important;line-height:1}
 .sheet{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:20;display:none;align-items:flex-end;justify-content:center}
 .sheet.open{display:flex}
@@ -82,8 +84,10 @@ const pad=n=>String(n).padStart(2,'0'),$=id=>document.getElementById(id);
 const seq=R.map(r=>r[0]);
 $('g').innerHTML=R.map(([n,r])=>{const [w,h]=r.split('/');return `<div class="c" data-n="${n}" style="--ar:${(w/h).toFixed(4)};aspect-ratio:${r}"><img src="t/${pad(n)}.jpg" loading="lazy" alt="PARADOX02 frame ${n}" onload="this.classList.add('in')" style="aspect-ratio:${r}"></div>`}).join('');
 let cur=0;
-function show(k){cur=((k%N)+N)%N;const n=seq[cur];$('lim').src=`i/${pad(n)}.jpg`;$('ln').textContent=`${cur+1} / ${N}`;$('lb').classList.add('open');
+function show(k){cur=((k%N)+N)%N;const n=seq[cur];$('lim').src=`i/${pad(n)}.jpg`;$('ln').textContent=`${cur+1} / ${N}`;$('lb').classList.add('open');wake();
  [seq[(cur+1)%N],seq[(cur-1+N)%N]].forEach(m=>{new Image().src=`i/${pad(m)}.jpg`})}
+let it;function wake(){$('lb').classList.remove('idle');clearTimeout(it);it=setTimeout(()=>$('lb').classList.add('idle'),2500)}
+['pointermove','pointerdown','keydown'].forEach(e=>$('lb').addEventListener(e,wake));document.addEventListener('keydown',wake);
 function close(){$('lb').classList.remove('open')}
 $('g').addEventListener('click',e=>{const c=e.target.closest('.c');if(c)show(seq.indexOf(+c.dataset.n))});
 $('x').onclick=close;$('pv').onclick=()=>show(cur-1);$('nx').onclick=()=>show(cur+1);
