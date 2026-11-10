@@ -21,9 +21,12 @@ export function V3Service({ page, frames }: { page: BookingPage; frames: Frame[]
   /* Six frames, two a column (Julian); the gallery holds the rest. */
   const cols = [0, 1, 2].map((c) => frames.slice(0, 6).filter((_, i) => i % 3 === c));
   const others = BOOKING_PAGES.filter((p) => p !== page);
+  /* Julian's picks: one frame beside the title; on portraits gilt 03 (his) and shattered-mercury 04 (the red one), 2026-11-10. */
+  const hero = (page.slug === "portraits" ? [frames[0], frames[4]] : [frames[0]]).filter(Boolean);
   return (
     <div className="v3 contents">
       <section className="v3page" id="p-service">
+        <div className="sv-hero">
         <header className="sv-top">
           <p className="lbl mute">{page.kicker}</p>
           <h1 className="pg-t">{page.h1.replace(/San (Francisco|Jose)/g, "San $1")}</h1>
@@ -34,6 +37,13 @@ export function V3Service({ page, frames }: { page: BookingPage; frames: Frame[]
             <Link className="btn" href="#work">See the work</Link>
           </div>
         </header>
+        {/* The empty side of the title, filled with this session's own frames at their own shape (Julian, 2026-11-10). */}
+        <div className="sv-pics" data-n={hero.length} aria-hidden="true">
+          {hero.map((f) => (
+            <Image key={f.src} src={f.src} alt="" width={f.width} height={f.height} sizes="(max-width: 1023px) 1px, 40vw" loading="eager" style={{ background: f.color }} />
+          ))}
+        </div>
+        </div>
         <div className="b-head seq-head" id="work">
           <h2>{page.gallery.label}</h2>
           <Link className="btn" href={page.gallery.href}>See the gallery</Link>
