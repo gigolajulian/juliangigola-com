@@ -251,8 +251,8 @@ export function adoptable<F, C, P, B>(
      validates them, at build time, where a bad one fails the deploy and the
      live site keeps serving the last good build. The editor is not the last
      line of defence for a file it wrote itself. */
-  const lists = <T>(v: Record<string, unknown[]>): Record<string, T[]> =>
-    v as Record<string, T[]>;
+  const lists = <T>(v: Record<string, unknown[]> | null): Record<string, T[]> | null =>
+    v as Record<string, T[]> | null;
 
   return {
     hidden:
@@ -270,11 +270,11 @@ export function adoptable<F, C, P, B>(
     frames:
       file.frames === undefined
         ? {}
-        : (lists<F>(listMap(file.frames) ?? {}) ?? fallback.frames),
+        : (lists<F>(listMap(file.frames)) ?? fallback.frames),
     credits:
       file.credits === undefined
         ? {}
-        : (lists<C>(listMap(file.credits) ?? {}) ?? fallback.credits),
+        : (lists<C>(listMap(file.credits)) ?? fallback.credits),
     copy:
       file.copy === undefined
         ? {}
