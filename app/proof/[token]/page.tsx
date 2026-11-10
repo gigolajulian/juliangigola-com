@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { sealer } from "@/lib/lead-crypto";
-import { finalize, paidFor, settle } from "@/lib/proof-submit";
+import { checkPaid, finalize, PAYMENTS_DOWN, settle } from "@/lib/proof-submit";
 import { isOpen, isToken, publicView, readProof, writeProof } from "@/lib/proofs";
 import { ProofGallery } from "@/components/proof-gallery";
 
@@ -40,9 +40,11 @@ export default async function ProofPage({ params, searchParams }: { params: Prom
   if (!p || !isOpen(p)) return <Closed />;
 
   const session = paid ?? p.checkout;
+  let notice: string | undefined;
   if (!p.submittedAt && session && env.STRIPE_SECRET_KEY) {
-    const ok = await paidFor(env.STRIPE_SECRET_KEY, p, session).catch(() => null);
-    if (ok) p = await finalize(env, env.INBOX, s, p, ok);
+    const ok = await checkPaid(env.STRIPE_SECRET_KEY, p, session);
+    if (ok === "down") notice = PAYMENTS_DOWN;
+    else if (ok) p = await finalize(env, env.INBOX, s, p, ok);
   }
   if (p.paid?.pending && env.STRIPE_SECRET_KEY) {
     const moved = await settle(env.STRIPE_SECRET_KEY, p).catch(() => null);
@@ -51,5 +53,5 @@ export default async function ProofPage({ params, searchParams }: { params: Prom
   // Julian's own look before sending is not a client view.
   if (!paid && p.sentAt) await writeProof(env.INBOX, s, { ...p, views: p.views + 1, firstViewAt: p.firstViewAt ?? new Date().toISOString() });
 
-  return <ProofGallery token={token} initial={publicView(p)} />;
+  return <ProofGallery token={token} initial={publicView(p)} notice={notice} />;
 }

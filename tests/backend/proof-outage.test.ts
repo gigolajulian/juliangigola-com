@@ -43,3 +43,28 @@ describe("/api/proof/[token] confirm when Stripe cannot answer", () => {
     expect(await res.json()).toEqual({ error: "That payment did not go through." });
   });
 });
+
+/* The same outage on the way back from Checkout (/proof/<token>?paid=<session>), the path clients actually take. */
+const { default: ProofPage } = await import("@/app/proof/[token]/page");
+const open = async () => (await ProofPage({ params: Promise.resolve({ token: TOKEN }), searchParams: Promise.resolve({ paid: "cs_test_x" }) })) as { props: { notice?: string; initial: { submitted: boolean } } };
+
+describe("/proof/[token] back from Checkout when Stripe cannot answer", () => {
+  it("tells the client payments are down on a Stripe 500, and locks nothing", async () => {
+    vi.stubGlobal("fetch", async () => Response.json({ error: { message: "boom" } }, { status: 500 }));
+    const el = await open();
+    expect(el.props.notice).toBe("Payments are down right now. Try again in a few minutes.");
+    expect(el.props.initial.submitted).toBe(false);
+  });
+
+  it("tells the client payments are down when Stripe does not answer at all", async () => {
+    vi.stubGlobal("fetch", async () => { throw new TypeError("fetch failed"); });
+    expect((await open()).props.notice).toBe("Payments are down right now. Try again in a few minutes.");
+  });
+
+  it("shows the normal unpaid gallery, no message, when the session is not paid", async () => {
+    vi.stubGlobal("fetch", async () => Response.json({ id: "cs_test_x", status: "open", payment_status: "unpaid", metadata: { proof: TOKEN }, amount_total: 0 }));
+    const el = await open();
+    expect(el.props.notice).toBeUndefined();
+    expect(el.props.initial.submitted).toBe(false);
+  });
+});
