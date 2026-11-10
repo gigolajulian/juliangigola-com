@@ -11,7 +11,7 @@ const COUNT = 8;
 const HIDDEN = ["realestate"]; // off the portfolio grid, as on `/portfolio`
 const ENDS = new Set([HERO[0].d.src, HERO[0].l.src]);
 
-export const SPLASH_RUN: string[] = ORDER.map((slug) => PROJECTS.find((p) => p.slug === slug))
-  .filter((p) => p && !HIDDEN.includes(p.slug) && !ENDS.has(p.cover.src))
+export const SPLASH_RUN: string[] = ORDER.flatMap((slug) => PROJECTS.find((p) => p.slug === slug) ?? [])
+  .filter((p) => !HIDDEN.includes(p.slug) && !ENDS.has(p.cover.src))
   .slice(0, COUNT)
-  .map((p) => p!.cover.src);
+  .map((p) => p.cover.src);
