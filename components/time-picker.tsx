@@ -12,7 +12,6 @@ import { Orb, ORB_ROUND } from "@/components/orb";
 import { JgLoad } from "@/components/jg-load";
 import { Calendar, dlabel, duration, fmt, type Shell } from "@/components/v3/flow";
 import { GESTURE_GAP_MS } from "@/components/strip/shared";
-import { isTrackpad } from "@/lib/motion/wheel";
 
 /* Goo (Julian, 2026-10-20, OKd 10-21) on the card's buttons, times and
    open days. `?goo=0` turns it off. */
@@ -1196,7 +1195,8 @@ export function TimePicker({
                   const g = wheelGate.current;
                   const fresh = e.timeStamp - g.at > GESTURE_GAP_MS;
                   g.at = e.timeStamp;
-                  const pad = isTrackpad(e, devicePixelRatio);
+                  // Any pixel stream is one gesture: fast trackpad events pass NOTCH_PX on 2x screens (MAC, #741).
+                  const pad = e.deltaMode === 0;
                   const dir = e.deltaY > 0 ? 1 : -1;
                   if (fresh || !pad) g.owned = !!times[at0 + dir];
                   if (!g.owned) return;
