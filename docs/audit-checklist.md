@@ -49,4 +49,4 @@ Measured or traced and kept on purpose. Skip these unless the reason below stops
 | 15 | P2 | Grid titles readable over light photos | `app/styles/v3.css` `.wt-n` scrim runs .8 at the foot to 0 by 88%, titles at least 3:1 on AZURE BLOOM and I WANNA BE A HUMAN (found 2026-11-09) | fixed in #707 |
 | 16 | P3 | No side stripe on the admin proofs list | `app/styles/proof.css` has no `.proof-desk-on` inset bar; the row uses a tint (found 2026-11-09) | fixed in #704 |
 | 17 | P2 | /admin Work view fits a phone | `/admin?view=projects` scrollWidth equals the viewport at 390, 393, 430 (found 2026-11-09 by QA and MAC) | fixed in #717 |
-| 18 | P3 | Credit avatar grows with a transform | `app/styles/v3.css` `.cr-av` transitions width and margin-right on hover; small cost, likely by design (eb6d67ce), ask Julian before changing (found 2026-11-09) | open |
+| 18 | P3 | Credit avatar grows with a transform | `app/styles/v3.css` `.cr-av` transitions width and margin-right on hover; small cost, likely by design (eb6d67ce), ask Julian before changing (found 2026-11-09) | closed: kept by design, Julian 2026-11-09 |
