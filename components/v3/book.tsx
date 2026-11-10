@@ -10,7 +10,7 @@ import { Calendar, Failed, Field, FlowShell, Hidden, Run, dlabel, duration, iso,
 import { LENGTH, SESSIONS, TAB_ORDER, rate, type SessionSlug } from "@/lib/v3";
 
 /* JG V3 booking (master v39, /book/<session>): one stepper. The sessions
-   with a time book through Cal.com and the $100 deposit as before
+   with a time book through the site's own picker and the $100 deposit
    (`time-picker.tsx`, `deposit-step.tsx`); weddings are on request and post
    through the enquiry action. */
 
