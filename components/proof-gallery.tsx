@@ -57,19 +57,20 @@ function useDialog(active: boolean, close: () => void) {
   return ref;
 }
 
-export function ProofGallery({ token, initial }: { token: string; initial: PublicProof }) {
+/** `notice`: Stripe could not answer on the way back from Checkout; it opens on the review step with the message. */
+export function ProofGallery({ token, initial, notice }: { token: string; initial: PublicProof; notice?: string }) {
   const { frames, included, price, balance } = initial;
   const [selects, setSelects] = React.useState<string[]>(initial.selects);
   const [email, setEmail] = React.useState<string | null>(null);
   const [ready, setReady] = React.useState(initial.submitted);
   const [view, setView] = React.useState<"all" | "selects">("all");
   const [open, setOpen] = React.useState<number | null>(null);
-  const [step, setStep] = React.useState<Step>(initial.submitted ? "done" : null);
+  const [step, setStep] = React.useState<Step>(initial.submitted ? "done" : notice ? "review" : null);
   const [showAll, setShowAll] = React.useState(false);
   const gridRef = useDialog(showAll, () => setShowAll(false));
   const [busy, setBusy] = React.useState(false);
   const [via, setVia] = React.useState<"bank" | "card">("bank");
-  const [error, setError] = React.useState<string | null>(null);
+  const [error, setError] = React.useState<string | null>(notice ?? null);
   const [paid, setPaid] = React.useState(initial.paid);
   const locked = step === "done";
   const swipe = React.useRef<number | null>(null);
