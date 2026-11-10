@@ -14,7 +14,7 @@ import { isLate, leadSummary, NUDGES, PAPER, paperDue, quoteNudge, REMIND_MAX, S
 import { cn } from "@/lib/utils";
 import { fill, mailable, TEMPLATES } from "@/lib/lead-crm";
 import { endDay, LicenceField, LicenceList } from "@/components/lead-licence";
-import { balance, dayB, DEPOSIT, MAX_LINES, MAX_ROWS_B, NOTE_B, usd, usdB, type Crop, type Invoice, type InvoiceB, type InvoiceFrom } from "@/lib/invoice";
+import { balance, dayB, DEPOSIT, MAX_ROWS_B, NOTE_B, usd, usdB, type Crop, type Invoice, type InvoiceB, type InvoiceFrom } from "@/lib/invoice";
 import { framed, loadImage, place, shrink, toneFor } from "@/lib/invoice-photo";
 import { leadKey, typingIn } from "@/lib/lead-keys";
 import { ago, aside, at, authed, badge, btn, type Call, cash, closed, compose, DAY, day, type Filter, HEAD, ios, kindOf, label, line, mailto, MARK, matches, money, now, OFFLINE, pass, primary, renew, snoozed, STEPS, Tag, type Template } from "@/components/leads/shared";
@@ -1288,8 +1288,6 @@ function Paperwork({ l, patch }: { l: LeadSummary; patch: (b: LeadPatch) => Prom
 
 function Money({ l, full, patch, run, quote, setQuote }: { l: LeadSummary; full: Lead | null; patch: (b: LeadPatch) => Promise<unknown>; run: (p: Promise<unknown>, ok?: string) => void; quote: string | null; setQuote: (v: string | null) => void }) {
   const [making, setMaking] = React.useState(false);
-  /** `?invb`: design B, the dark invoice with a photo, opt-in until Julian says yes. */
-  const [invb] = React.useState(() => typeof window !== "undefined" && new URLSearchParams(location.search).has("invb"));
   const paidAt = full?.deposit ? full.events.find((e) => e.kind === "booking")?.at : undefined;
   const q = full?.quote;
   const owed = q !== undefined ? q - (full?.deposit ? DEPOSIT : 0) : undefined;
@@ -1336,7 +1334,7 @@ function Money({ l, full, patch, run, quote, setQuote }: { l: LeadSummary; full:
         </ul>
       ) : null}
       {making && full ? (
-        invb ? <InvoiceSheetB l={l} full={full} patch={patch} done={() => setMaking(false)} /> : <InvoiceSheet l={l} full={full} patch={patch} done={() => setMaking(false)} />
+        <InvoiceSheetB l={l} full={full} patch={patch} done={() => setMaking(false)} />
       ) : (
         <button type="button" onClick={() => setMaking(true)} disabled={!full} className={cn(btn, primary, "justify-self-start")}>Make invoice</button>
       )}
@@ -1404,109 +1402,11 @@ function InvoiceRow({ inv, l, full }: { inv: Invoice; l: LeadSummary; full: Lead
   );
 }
 
-type Line = { desc: string; qty: string; rate: string };
-
-/** A new invoice, filled from the lead. Saving numbers it; then the PDF. */
-function InvoiceSheet({ l, full, patch, done }: { l: LeadSummary; full: Lead; patch: (b: LeadPatch) => Promise<unknown>; done: () => void }) {
-  const [from, setFrom] = React.useState<InvoiceFrom | null>(null);
-  const [editFrom, setEditFrom] = React.useState(false);
-  const [date, setDate] = React.useState(todayPT);
-  const [no, setNo] = React.useState("");
-  const session = [kindOf(l.kind) ?? "Session", l.when ? day(l.when) : ""].filter(Boolean).join(", ");
-  const [lines, setLines] = React.useState<Line[]>([{ desc: session, qty: "1", rate: full.quote !== undefined ? full.quote.toFixed(2) : "" }]);
-  const [paid, setPaid] = React.useState(full.deposit ? DEPOSIT.toFixed(2) : "0");
-  const [made, setMade] = React.useState<{ inv: Invoice; file: File } | null>(null);
-  const [busy, setBusy] = React.useState(false);
-  const [err, setErr] = React.useState<string | null>(null);
-
-  React.useEffect(() => {
-    fetch(`/api/inbox?invoiceNo=${date}`, { headers: authed(), cache: "no-store" })
-      .then((r) => r.json() as Promise<{ from: InvoiceFrom | null; no?: string }>)
-      .then((o) => {
-        setNo(o.no ?? "");
-        setFrom((f) => f ?? o.from ?? EMPTY_FROM);
-        if (!o.from?.name) setEditFrom(true);
-      })
-      .catch(() => {});
-  }, [date]);
-
-  const parsed = lines.map((x) => ({ desc: x.desc.trim(), qty: Number(x.qty), rate: Number(x.rate) }));
-  const owed = balance({ lines: parsed.map((x) => ({ ...x, qty: x.qty || 0, rate: x.rate || 0 })), paid: Number(paid) || 0 });
-  const set = (i: number, k: keyof Line) => (e: React.ChangeEvent<HTMLInputElement>) => setLines(lines.map((x, j) => (j === i ? { ...x, [k]: e.target.value } : x)));
-
-  const save = async () => {
-    setBusy(true);
-    setErr(null);
-    try {
-      await patch({ invoice: { date, lines: parsed, paid: Number(paid) || 0 } });
-      // The saved lead carries the number the Worker gave it.
-      const got = await fetch(`/api/inbox?key=${encodeURIComponent(`lead:${l.id ?? ""}`)}`, { headers: authed(), cache: "no-store" });
-      const fresh = ((await got.json()) as { lead: Lead }).lead;
-      const inv = fresh.invoices!.at(-1)!;
-      setMade({ inv, file: await makePdf(inv, l, fresh) });
-    } catch (e) {
-      setErr(e instanceof Error ? e.message : String(e));
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  if (made)
-    return (
-      <div className="grid gap-3 rounded-xl border border-border p-3.5">
-        <p className="text-[15px]">Invoice <b className="font-mono font-medium">{made.inv.no}</b> made, {usd(balance(made.inv))} due.</p>
-        <Deliver file={made.file} inv={made.inv} l={l} />
-        <button type="button" onClick={done} className={cn(btn, "justify-self-start")}>Done</button>
-      </div>
-    );
-
-  return (
-    <form className="grid gap-3.5 rounded-xl border border-border p-3.5" onSubmit={(e) => { e.preventDefault(); save(); }}>
-      {from && editFrom ? <FromForm from={from} saved={(f) => { setFrom(f); setEditFrom(false); }} /> : null}
-      <div className="grid grid-cols-2 gap-2.5">
-        <div className={fieldLabel}>Invoice no.<span className="flex min-h-11 items-center font-mono text-[15px] text-foreground">{no || "…"}</span></div>
-        <label className={fieldLabel}>Date<input type="date" required value={date} onChange={(e) => e.target.value && setDate(e.target.value)} className={cn(field, "font-mono text-[14px]")} /></label>
-      </div>
-      <p className="text-[15px]">To {l.name}{mailable(l.email) ? <span className="text-muted-foreground"> · {l.email}</span> : null}</p>
-      <fieldset className="grid gap-2">
-        <legend className="mb-1.5 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">Lines: description, quantity, rate</legend>
-        {lines.map((x, i) => (
-          <div key={i} className="grid grid-cols-[minmax(0,1fr)_52px_92px_44px] gap-2">
-            <input aria-label={`Line ${i + 1} description`} required maxLength={48} value={x.desc} onChange={set(i, "desc")} className={cn(field, "px-3")} />
-            <input aria-label={`Line ${i + 1} quantity`} required inputMode="decimal" value={x.qty} onChange={set(i, "qty")} className={cn(field, "px-2 text-right font-mono text-[14px]")} />
-            <input aria-label={`Line ${i + 1} rate`} required inputMode="decimal" value={x.rate} onChange={set(i, "rate")} placeholder="0.00" className={cn(field, "px-2 text-right font-mono text-[14px]")} />
-            {lines.length > 1 ? (
-              <button type="button" aria-label={`Remove line ${i + 1}`} onClick={() => setLines(lines.filter((_, j) => j !== i))} className="grid size-11 place-items-center text-muted-foreground hoverable:hover:text-foreground">×</button>
-            ) : <span aria-hidden="true" />}
-          </div>
-        ))}
-        {lines.length < MAX_LINES ? (
-          <button type="button" onClick={() => setLines([...lines, { desc: "", qty: "1", rate: "" }])} className={cn(btn, "min-h-10 justify-self-start")}>Add a line</button>
-        ) : null}
-      </fieldset>
-      <label className="flex items-center justify-between gap-3 text-[14px] text-muted-foreground">
-        Deposit paid
-        <input inputMode="decimal" value={paid} onChange={(e) => setPaid(e.target.value.replace(/[^\d.]/g, ""))} className={cn(field, "w-[92px] px-2 text-right font-mono text-[14px]")} />
-      </label>
-      <p className="flex justify-between font-mono text-[14px] text-muted-foreground">
-        {Number(paid) ? "Balance due" : "Total"}<b className="text-[16px] font-medium text-accent">{usd(owed)}</b>
-      </p>
-      {err ? <p role="alert" className="text-[15px] text-destructive">{err}</p> : null}
-      <div className="flex flex-wrap gap-2.5">
-        <button type="submit" disabled={busy || !no} className={cn(btn, primary)}>{busy ? "Making" : "Save and make PDF"}</button>
-        <button type="button" onClick={done} className={btn}>Cancel</button>
-        {from && !editFrom ? <button type="button" onClick={() => setEditFrom(true)} className="min-h-11 px-2 font-mono text-[12.5px] text-muted-foreground hoverable:hover:text-foreground">Your details</button> : null}
-      </div>
-    </form>
-  );
-}
-
-
 /* ── design B: the dark invoice with a photo ────────────────────────
  * Julian (2026-11-09): "Add this invoice as my default template ... Ask
  * for everything that is on the page and have it fill it out. They need to
- * also be able to reframe the image so it fits nice." Behind `?invb` until
- * he says yes; the light invoice stays as it is. Every field fills the page
+ * also be able to reframe the image so it fits nice." The only invoice since
+ * 2026-11-10, when the light one was retired (Julian: "only" this one). Every field fills the page
  * beside it; the photo is dragged and zoomed inside its column, and the
  * wordmark on it turns light over a dark patch (Julian: "adjust the top
  * left logo based on the photo"). The PDF is drawn by `layoutB` in
