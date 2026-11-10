@@ -122,5 +122,15 @@ describe("settle (a paid session on the site's engine)", () => {
     expect(await settle(env(), "pi_TEST1234567890", META)).toBe("refunded");
     expect(inserts).toHaveLength(0);
     expect(stripeCalls.some((u) => u.endsWith("/refunds"))).toBe(true);
+    expect(String(mail.sent[0].text)).toContain("The time was gone");
+  });
+
+  it("refunds on a booking error and says what broke, not that the time was gone", async () => {
+    const broken = { idFromName: (n: string) => n, get: () => ({ fetch: async () => { throw new Error("lock down"); } }) };
+    expect(await settle({ ...env(), BOOKING_LOCK: broken as never }, "pi_TEST1234567890", META)).toBe("refunded");
+    expect(stripeCalls.some((u) => u.endsWith("/refunds"))).toBe(true);
+    const text = String(mail.sent[0].text);
+    expect(text).toContain("lock down");
+    expect(text).not.toContain("The time was gone");
   });
 });
