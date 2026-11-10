@@ -1,5 +1,5 @@
 import { duration, refundable } from "@/lib/booking-rules";
-import { SIG_DARK, SIG_HTML, SIG_TEXT } from "@/lib/email-signature";
+import { SIG_DARK, SIG_HTML, SIG_TEXT } from "@/lib/email/email-signature";
 /* ── the client's confirmation email ──────────────────────────────
  * Julian (2026-10-16): every booking gets a branded "You're in." mail from
  * the site.
@@ -16,7 +16,7 @@ import { SIG_DARK, SIG_HTML, SIG_TEXT } from "@/lib/email-signature";
  * it (prefers-color-scheme). Gmail ignores the query and stays light.
  * ─────────────────────────────────────────────────────────────── */
 
-import { NAME_INK, NAME_W } from "@/lib/email-logo";
+import { NAME_INK, NAME_W } from "@/lib/email/email-logo";
 
 const FROM = { name: "Julian Gigola", email: "book@juliangigola.com" };
 const REPLY_TO = "hello@juliangigola.com";

@@ -5,8 +5,8 @@
  * Never sent from Lightroom: only when he hits Send in /admin Leads.
  * ─────────────────────────────────────────────────────────────── */
 
-import { NAME_INK, NAME_W } from "@/lib/email-logo";
-import { SIG_DARK, SIG_HTML, SIG_TEXT } from "@/lib/email-signature";
+import { NAME_INK, NAME_W } from "@/lib/email/email-logo";
+import { SIG_DARK, SIG_HTML, SIG_TEXT } from "@/lib/email/email-signature";
 import { extras, type Proof } from "@/lib/proofs";
 
 const FROM = { name: "Julian Gigola", email: "book@juliangigola.com" };

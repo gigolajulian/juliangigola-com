@@ -1,6 +1,6 @@
 import { mail, stripe } from "@/lib/deposit";
 import { recordLead } from "@/lib/leads";
-import { alertLines, proofUrl, receiptMail, sendClient } from "@/lib/proof-mail";
+import { alertLines, proofUrl, receiptMail, sendClient } from "@/lib/email/proof-mail";
 import { cardPrice, owed, viewerKey, writeProof, type Proof } from "@/lib/proofs";
 
 /* ── a client sends their selects ─────────────────────────────────
