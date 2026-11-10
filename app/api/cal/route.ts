@@ -1,6 +1,7 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { confirmMail, sendConfirm } from "@/lib/confirm";
-import { PAID, paidFor, tellNoDeposit } from "@/lib/deposit";
+import { paidFor, tellNoDeposit } from "@/lib/deposit";
+import { isPaid } from "@/lib/paid";
 import { toNotion } from "@/lib/notion-lead";
 import { logMail, recordLead } from "@/lib/leads";
 import { bookingEnquiry, enquiryKey, summary, type CalBooking } from "@/lib/inbox";
@@ -63,13 +64,13 @@ export async function POST(request: Request) {
   // `false`: Stripe could not be asked, so neither mark.
   const deposit = env.STRIPE_SECRET_KEY ? await paidFor(env.STRIPE_SECRET_KEY, hook.payload ?? {}) : false;
   if (deposit) stored.deposit = deposit;
-  else if (deposit === undefined && (PAID as readonly string[]).includes(hook.payload?.type ?? "")) stored.noDeposit = true;
+  else if (deposit === undefined && isPaid(hook.payload?.type ?? "")) stored.noDeposit = true;
   // ponytail: a retry after a write that succeeded stores the booking twice;
   // key on Cal's `uid` if that ever shows up in the inbox.
   await env.INBOX.put(enquiryKey(now, id.slice(0, 8)), JSON.stringify(stored), {
     metadata: summary(stored),
   });
-  const paid = (PAID as readonly string[]).includes(hook.payload?.type ?? "");
+  const paid = isPaid(hook.payload?.type ?? "");
   // Held, so a mail logged below folds in after it, not over it.
   const lead = recordLead(env, stored.email, {
     event: { at: stored.at, kind: paid ? "booking" : "call", ref: hook.payload?.uid, note: stored.detail },
@@ -96,7 +97,7 @@ export async function POST(request: Request) {
   // Free calls only: a paid session's confirmation comes from the deposit
   // webhook, and one booked on cal.com without paying gets none.
   const p = hook.payload ?? {};
-  if (p.uid && p.startTime && !(PAID as readonly string[]).includes(p.type ?? "")) {
+  if (p.uid && p.startTime && !isPaid(p.type ?? "")) {
     const confirm = {
       name: stored.name,
       email: stored.email,

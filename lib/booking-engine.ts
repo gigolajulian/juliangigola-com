@@ -1,10 +1,9 @@
-import { DEFAULT_HOURS, EVENTS, TZ, type Hours } from "@/lib/booking-rules";
-import type { Booking } from "@/lib/deposit";
+import { DEFAULT_HOURS, EVENTS, TZ, type Booking, type Hours } from "@/lib/booking-rules";
 import { gcal } from "@/lib/gcal";
 import { bookingEnquiry, enquiryKey, summary } from "@/lib/inbox";
 import { recordLead, type LeadStore } from "@/lib/leads";
 import { toNotion } from "@/lib/notion-lead";
-import { openNow } from "@/lib/slots";
+import { openNow, type KV } from "@/lib/slots";
 
 /* ── the site's own booking engine ────────────────────────────────
  * Julian (2026-11-03): in place of Cal.com (PLAN-own-booking.md). One
@@ -88,7 +87,7 @@ function description(b: BookInput, id: string) {
 }
 
 /** Books `b` if its time is still open. Call it only through the lock. Throws when Google fails. */
-export async function bookOwn(store: Store, secret: string | undefined, b: BookInput, kv?: Parameters<typeof openNow>[4]): Promise<BookResult> {
+export async function bookOwn(store: Store, secret: string | undefined, b: BookInput, kv?: KV): Promise<BookResult> {
   const rule = EVENTS[b.slug];
   if (!rule) return { ok: false, reason: "unknown" };
   // A deposit books once, however often Stripe delivers it.
@@ -195,7 +194,7 @@ export async function cancelOwn(store: Store, secret: string | undefined, id: st
 }
 
 /** Moves booking `id` to `start` if that time is open. Call it only through the lock. */
-export async function rescheduleOwn(store: Store, secret: string | undefined, id: string, start: string, kv?: Parameters<typeof openNow>[4]): Promise<ChangeResult> {
+export async function rescheduleOwn(store: Store, secret: string | undefined, id: string, start: string, kv?: KV): Promise<ChangeResult> {
   const was = await findBooking(store, id);
   if (!was) return { ok: false, reason: "missing" };
   if (was.cancelled) return { ok: false, reason: "cancelled" };
@@ -237,10 +236,10 @@ export async function markReminded(store: Store, id: string, now = Date.now()) {
 
 type LockEnv = { BOOKING_LOCK?: { idFromName(name: string): unknown; get(id: unknown): { fetch(url: string, init: RequestInit): Promise<Response> } } };
 
-/** One call to the one lock (`worker/booking-lock.ts`). Throws when it is missing or fails. */
 /** Julian's hours from the lock, or the defaults when it cannot answer (the lock rechecks every booking anyway). */
 export const liveHours = (env: LockEnv) => lock<{ hours: Hours }>(env, "hours", null).then((x) => x.hours, () => DEFAULT_HOURS);
 
+/** One call to the one lock (`worker/booking-lock.ts`). Throws when it is missing or fails. */
 export async function lock<T>(env: LockEnv, op: string, arg: unknown): Promise<T> {
   const ns = env.BOOKING_LOCK;
   if (!ns) throw new Error("BOOKING_LOCK is not bound");

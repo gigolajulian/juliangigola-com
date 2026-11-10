@@ -77,7 +77,7 @@ export function startsFor(rule: Rule, busy: Busy[], from: number, to: number, no
 
 export type Extra = { label: string; src: string };
 export const EXTRA_KEY = "cal:extra";
-type KV = { get(key: string, type: "json"): Promise<unknown> };
+export type KV = { get(key: string, type: "json"): Promise<unknown> };
 export const readExtras = async (kv?: KV) => ((await kv?.get(EXTRA_KEY, "json")) as Extra[] | null) ?? [];
 export const isIcs = (src: string) => /^(https|webcal):\/\//i.test(src);
 
