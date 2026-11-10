@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { gsap } from "gsap";
 import { cn } from "@/lib/utils";
-import { DepositStep, type DepositBody } from "@/components/deposit-step";
+import { DepositStep, type DepositBody } from "@/components/booking/deposit-step";
 import { ReferencePicks } from "@/components/reference-picks";
 import { isPaid } from "@/lib/paid";
 import { Orb, ORB_ROUND } from "@/components/orb";
@@ -25,7 +25,7 @@ const goo = typeof location === "undefined" || new URLSearchParams(location.sear
  *
  * It reads and books through the site's own engine (`/api/slots`,
  * `/api/book`). If the times do not come, `fallback` is shown: Try again,
- * Inquire and the address (`components/cal-embed.tsx`).
+ * Inquire and the address (`components/booking/cal-embed.tsx`).
  * ─────────────────────────────────────────────────────────────── */
 
 const noop = () => () => {};

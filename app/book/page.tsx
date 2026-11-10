@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { shareOg } from "@/lib/share";
-import { BookPicker, type Bookable } from "@/components/book-picker";
+import { BookPicker, type Bookable } from "@/components/booking/book-picker";
 import { V3Book } from "@/components/v3/book";
 import { calEvent, pageForSession } from "@/lib/booking";
 import { isSession } from "@/lib/v3";

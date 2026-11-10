@@ -7,7 +7,7 @@ vi.mock("dialkit", () => ({
     Object.fromEntries(Object.entries(spec).map(([k, v]) => [k, v[0]])),
 }));
 vi.mock("@/lib/dialkit-styles", () => ({ useDialKitStyles: () => {} }));
-vi.mock("@/components/cal-embed", () => ({
+vi.mock("@/components/booking/cal-embed", () => ({
   CalEmbed: ({ path, title }: { path: string; title: string }) => (
     <div data-testid="cal" data-path={path}>
       {title}
@@ -17,7 +17,7 @@ vi.mock("@/components/cal-embed", () => ({
 vi.mock("@/components/inquire-wall", () => ({ InquireWall: () => null }));
 vi.mock("@/components/dial-copy-all", () => ({ DialCopyAll: () => null }));
 
-import { BookPicker, type Bookable } from "@/components/book-picker";
+import { BookPicker, type Bookable } from "@/components/booking/book-picker";
 
 const sessions: Bookable[] = [
   { slug: "portraits", name: "Portraits", blurb: "One look.", rate: "$100 deposit", length: "1 hr", cal: "juliangigola/portraits", wall: [] },

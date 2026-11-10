@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { TimePicker } from "@/components/time-picker";
+import { TimePicker } from "@/components/booking/time-picker";
 import { REFUND_HOURS, refundable } from "@/lib/booking-rules";
 
 /* ── a client's own booking: reschedule or cancel ─────────────────
