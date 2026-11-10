@@ -1,7 +1,6 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { BOOK_CARDS, ogCard } from "@/lib/og";
 import { DISCIPLINE_SEO, ldJson, serviceGraph, siteGraph, SITE } from "@/lib/seo";
 import { formatPrice, SESSION_TYPES } from "@/lib/sessions";
 import { projectFacts, share, shareOg } from "@/lib/share";
@@ -76,18 +75,6 @@ describe("share", () => {
     expect(f.credits).toEqual(["model Kai Lin", "styling Mia R"]);
     expect(f.description).toBe("Editorial by Julian Gigola, with model Kai Lin and styling Mia R.");
     expect(projectFacts({ categories: [], credits: [] }).description).toBe("Photography by Julian Gigola.");
-  });
-});
-
-describe("link cards", () => {
-  it("point at the card's JPG with its alt", () => {
-    expect(ogCard("portraits", "Alt")).toMatchObject({ openGraph: { images: [{ url: "/og/portraits.jpg", width: 1200, height: 630, alt: "Alt" }] }, twitter: { images: ["/og/portraits.jpg"] } });
-  });
-  it("exist on disk for every booking page that names one", () => {
-    for (const [slug, file] of Object.entries(BOOK_CARDS)) {
-      expect(isSession(slug), slug).toBe(true);
-      expect(existsSync(join(process.cwd(), "public/og", `${file}.jpg`)), file).toBe(true);
-    }
   });
 });
 

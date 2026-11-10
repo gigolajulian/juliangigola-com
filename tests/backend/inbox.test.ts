@@ -148,7 +148,7 @@ describe("context and copy", () => {
     const b = bookingEnquiry({ eventTitle: "Portraits", startTime: "2026-11-21T22:00:00Z", attendees: [{ name: "Kai", email: "k@x.co" }] }, 0, "b");
     expect(b.type).toBe("booking");
     expect(b.detail).toBe("Portraits · Sat, Nov 21, 2:00 PM PST");
-    expect(b.message).toBe("Booked on Cal.com. No notes.");
+    expect(b.message).toBe("No notes.");
     expect(summary(b).detail).toBe(b.detail);
   });
   it("writes a reply link with the first name and the message quoted", () => {

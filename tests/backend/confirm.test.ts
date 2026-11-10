@@ -13,6 +13,7 @@ const base: Confirm = {
   start: "2026-11-21T18:00:00Z",
   end: "2026-11-21T19:00:00Z",
   uid: "abcdef1234567890",
+  manage: { reschedule: "https://juliangigola.com/booking/t?do=reschedule", cancel: "https://juliangigola.com/booking/t?do=cancel" },
 };
 
 describe("when", () => {
@@ -30,7 +31,7 @@ describe("confirmMail", () => {
     expect(m.text).toContain("Thanks, Ana.");
     expect(m.text).toContain("When: Sat, Nov 21, 10:00 to 11:00 AM PST, 60 minutes");
     expect(m.text).toContain("Booking: abcdef12");
-    expect(m.text).toContain("https://cal.com/reschedule/abcdef1234567890");
+    expect(m.text).toContain("https://juliangigola.com/booking/t?do=reschedule");
     expect(m.attachments.map((a) => a.contentId)).toEqual(["name-w", "name-ink"]);
   });
 
