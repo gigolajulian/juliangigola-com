@@ -210,7 +210,7 @@ export function TimePicker({
   /* Option B's row of times (v3): where a swipe on the big number began, and
      whether the row runs past its edge, which fades it and shows the hint. */
   const swipeX = React.useRef<number | null>(null);
-  const stripRef = React.useRef<HTMLDivElement>(null);
+  const [stripEl, stripRef] = React.useState<HTMLDivElement | null>(null);
   const [more, setMore] = React.useState(false);
   /* A paid session, its deposit taken here (`?deposit`, deposit-step.tsx). */
   const [paid, setPaid] = React.useState(false);
@@ -478,16 +478,20 @@ export function TimePicker({
   /* The time picked kept in view in option B's row, and the fade and hint
      only while times run past its edge. */
   React.useEffect(() => {
-    const ix = stripRef.current;
+    // The row mounts after the times arrive (a state ref, not useRef, so this runs then).
+    const ix = stripEl;
     if (!ix) return;
     const on = ix.querySelector<HTMLElement>('[aria-pressed="true"]');
-    if (on && (on.offsetLeft < ix.scrollLeft || on.offsetLeft + on.offsetWidth > ix.scrollLeft + ix.clientWidth)) ix.scrollLeft = Math.max(0, on.offsetLeft - on.offsetWidth);
+    if (on && (on.offsetLeft < ix.scrollLeft || on.offsetLeft + on.offsetWidth > ix.scrollLeft + ix.clientWidth)) ix.scrollTo({ left: Math.max(0, on.offsetLeft - on.offsetWidth) });
     const fit = () => setMore(ix.scrollLeft + ix.clientWidth < ix.scrollWidth - 4);
     fit();
+    // The row's own box keeps its width as the times grow or the fonts land: watch the buttons too.
     const ro = new ResizeObserver(fit);
     ro.observe(ix);
+    for (const b of ix.children) ro.observe(b);
+    void document.fonts?.ready.then(fit);
     return () => ro.disconnect();
-  }, [pick?.date, pick?.min, days, step]);
+  }, [stripEl, pick?.date, pick?.min, days, step]);
   const slotsBox = React.useRef<HTMLDivElement>(null);
   /* `?layout`: the times come in with GSAP, each one once. The CSS rise
      replayed whenever the list re-rendered, and read as a glitch (Julian). */
@@ -1181,7 +1185,13 @@ export function TimePicker({
               <b ref={(el) => {
                 if (!el) return;
                 // A wheel over the number steps the time; React's onWheel is passive and cannot stop the page scrolling.
-                const wheel = (e: WheelEvent) => { if (Math.abs(e.deltaY) < 4) return; e.preventDefault(); stepTime(e.deltaY > 0 ? 1 : -1); };
+                const wheel = (e: WheelEvent) => {
+                  const dir = e.deltaY > 0 ? 1 : -1;
+                  // At the first or last time the page scrolls on.
+                  if (Math.abs(e.deltaY) < 4 || !times[at0 + dir]) return;
+                  e.preventDefault();
+                  stepTime(dir);
+                };
                 el.addEventListener("wheel", wheel, { passive: false });
                 return () => el.removeEventListener("wheel", wheel);
               }} tabIndex={0} role="spinbutton" aria-label="Time" aria-valuetext={fmt(pick.min)} data-scrub=""
