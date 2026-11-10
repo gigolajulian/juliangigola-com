@@ -54,6 +54,10 @@ describe("paidFor", () => {
     stripeSays(() => ({ body: { payment_status: "paid", amount_total: 100, metadata: { proof: "tok1" } } }));
     expect(await paidFor("k", proof(), "cs_test_A")).toBeNull();
   });
+  it("refuses a paid session with no amount, so NaN is never stored as paid", async () => {
+    stripeSays(() => ({ body: { payment_status: "paid", metadata: { proof: "tok1" } } }));
+    expect(await paidFor("k", proof(), "cs_test_A")).toBeNull();
+  });
   it("takes a complete but unpaid bank session as pending", async () => {
     stripeSays(() => ({ body: { status: "complete", payment_status: "unpaid", amount_total: 5000, metadata: { proof: "tok1" } } }));
     expect(await paidFor("k", proof(), "cs_live_B")).toMatchObject({ pending: true, amount: 5000 });
@@ -81,6 +85,10 @@ describe("settle", () => {
   it("takes a bounced payment back off what was paid", async () => {
     stripeSays(() => ({ body: { payment_status: "unpaid", amount_total: 5000, payment_intent: { status: "canceled" } } }));
     expect((await settle("k", pending))?.paid).toMatchObject({ amount: 0, failed: true });
+  });
+  it("leaves a bounced payment with no amount settling instead of storing NaN", async () => {
+    stripeSays(() => ({ body: { payment_status: "unpaid", payment_intent: { status: "canceled" } } }));
+    expect(await settle("k", pending)).toBeNull();
   });
   it("is null while still on its way", async () => {
     stripeSays(() => ({ body: { payment_status: "unpaid", payment_intent: { status: "processing" } } }));

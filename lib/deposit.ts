@@ -243,11 +243,13 @@ async function refsOf(inbox: Env["INBOX"], intent: string): Promise<{ files: Att
 }
 
 /** A plain mail to hello@ saying how a deposit ended. A failed send is logged, never a failed webhook. */
-async function tell(env: Env, status: keyof typeof SAID, b: Booking | string, link: string, intent: string) {
+async function tell(env: Env, status: keyof typeof SAID, b: Booking | string, link: string, intent: string, broke = "") {
   const who = typeof b === "string" ? undefined : b;
   const what = who ? [SESSION[who.slug] ?? who.slug, whenPT(who.start), who.name, "$100"].join(", ") : "$100";
   const refs = await refsOf(env.INBOX, intent);
-  const lines = [who ? `${who.name} <${who.email}>` : "Unknown client", NEXT[status], `Stripe: ${link}`];
+  // A refund after an error is not a taken time: say what broke.
+  const next = broke && status === "refunded" ? `The booking failed on an error (${broke}), so Stripe refunded them. Nothing is booked.` : NEXT[status];
+  const lines = [who ? `${who.name} <${who.email}>` : "Unknown client", next, `Stripe: ${link}`];
   if (refs.files.length) lines.push("", `References attached: ${refs.files.length}`);
   if (refs.picks.length) lines.push("", "Picked from my work:", ...refs.picks.map((src) => `https://juliangigola.com${src}`));
   const subject = `${SAID[status]}: ${what}`;
@@ -306,36 +308,38 @@ export async function settle(env: Env, intent: string, metadata: { [k: string]: 
 
   const b = fromMetadata(metadata);
   const link = dashboardLink(intent, env.STRIPE_SECRET_KEY);
+  let broke = "";
   if (typeof b !== "string") {
-    try {
-      // The site's engine rechecks and books in one step, inside its lock.
-      const own = await lock<BookResult>(env, "book", { ...b, intent });
-      if (own.ok) {
-        const booking = own.record;
-        await put({ status: "booked", booking: { uid: booking.id, start: booking.start } });
-        await tell(env, "booked", b, link, intent);
-        await recordBooking(env, booking, dashboardLink(intent, env.STRIPE_SECRET_KEY));
-        const confirm = {
-          ...b,
-          session: SESSION[b.slug] ?? b.slug,
-          start: booking.start,
-          end: booking.end,
-          uid: booking.id,
-          deposit: { ref: intent, at: new Date().toISOString(), card: await cardOf(env.STRIPE_SECRET_KEY, intent) },
-          manage: await manageLinks(env.BOOKING_SECRET, booking),
-        };
-        if (await sendConfirm(env.CLIENT_EMAIL, confirm)) await logMail(env, b.email, confirmMail(confirm).subject, { to: "client", kind: "confirm", booking: booking.id });
-        return "booked";
-      }
-    } catch {
-      // Falls through to the refund.
+    // The site's engine rechecks and books in one step, inside its lock.
+    // Only the booking itself may end in a refund: a step after it never undoes a booked time.
+    const own = await lock<BookResult>(env, "book", { ...b, intent }).catch((e: unknown) => {
+      broke = String(e);
+      console.error("deposit book", broke);
+      return null;
+    });
+    if (own?.ok) {
+      const booking = own.record;
+      await put({ status: "booked", booking: { uid: booking.id, start: booking.start } });
+      await tell(env, "booked", b, link, intent);
+      await recordBooking(env, booking, dashboardLink(intent, env.STRIPE_SECRET_KEY));
+      const confirm = {
+        ...b,
+        session: SESSION[b.slug] ?? b.slug,
+        start: booking.start,
+        end: booking.end,
+        uid: booking.id,
+        deposit: { ref: intent, at: new Date().toISOString(), card: await cardOf(env.STRIPE_SECRET_KEY, intent) },
+        manage: await manageLinks(env.BOOKING_SECRET, booking),
+      };
+      if (await sendConfirm(env.CLIENT_EMAIL, confirm)) await logMail(env, b.email, confirmMail(confirm).subject, { to: "client", kind: "confirm", booking: booking.id });
+      return "booked";
     }
   }
 
   try {
     await stripe(env.STRIPE_SECRET_KEY, "/refunds", { payment_intent: intent }, `refund-${intent}`);
     await put({ status: "refunded" });
-    await tell(env, "refunded", b, link, intent);
+    await tell(env, "refunded", b, link, intent, broke);
     return "refunded";
   } catch {
     await put({ status: "failed" });

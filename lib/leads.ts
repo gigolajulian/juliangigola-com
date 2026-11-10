@@ -374,7 +374,8 @@ export async function canonLeads(kv: KV, s: Sealer): Promise<number> {
   for (;;) {
     const listed = await kv.list({ prefix: "lead:", cursor });
     for (const k of listed.keys) {
-      const lead = await readLead(kv, s, k.name.slice(5));
+      // A lead that will not open stays put, like one whose new id is taken.
+      const lead = await readLead(kv, s, k.name.slice(5)).catch((e: unknown) => (console.error("canon lead", k.name, String(e)), null));
       if (!lead?.email.includes("@")) continue;
       const id = await s.id(lead.email);
       if (leadStoreKey(id) === k.name || (await kv.get(leadStoreKey(id))) !== null) continue;

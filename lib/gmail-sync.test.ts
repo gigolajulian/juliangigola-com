@@ -127,6 +127,15 @@ describe("syncGmail", () => {
     expect(data.get(CURSOR)).toBe("120");
   });
 
+  it("skips a lead that will not open and still moves the cursor", async () => {
+    const s = await sealer(LEADS_KEY)!;
+    data.set(leadStoreKey(await s.id(email)), "not a sealed lead");
+    data.set(CURSOR, "100");
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    expect(await syncGmail(env())).toBe(0);
+    expect(data.get(CURSOR)).toBe("120");
+  });
+
   it("matches Gmail however the dots fall, and moves a lead stored before that", async () => {
     const e = env();
     const s = (await sealer(LEADS_KEY))!;

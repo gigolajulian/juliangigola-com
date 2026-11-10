@@ -281,14 +281,14 @@ html[data-sb]:is([data-intro], [data-landing])::after {
   visibility: hidden;
 }
 
-/* The eye is the `?splash=basic` preview's alone. */
-.jg-intro-eye {
+/* The mark is the `?splash=basic` preview's alone. */
+.jg-intro-mark {
   display: none;
 }
 [data-splash="basic"] .jg-sheet-wrap {
   display: none;
 }
-[data-splash="basic"] .jg-intro-eye {
+[data-splash="basic"] .jg-intro-mark {
   display: block;
   position: absolute;
   left: 50%;
@@ -299,26 +299,9 @@ html[data-sb]:is([data-intro], [data-landing])::after {
   color: #fff;
   mix-blend-mode: difference;
 }
-.jg-intro-eye svg {
+.jg-intro-mark svg {
   width: 100%;
   height: 100%;
-}
-/* One blink, before the sweep is half way. Closed 158ms into the 350
-   (Julian: 240 was too fast, 420 too slow). From the stylesheet, so it
-   keeps the sweep's time however late the script arrives; the moment
-   is picked in `layout.tsx`. The same blink as `blink()` in
-   `not-found-scene.tsx`. */
-@keyframes jg-intro-blink {
-  0%,
-  100% {
-    transform: scaleY(1);
-  }
-  45% {
-    transform: scaleY(0.06);
-  }
-}
-[data-intro] .jg-intro-eye [data-lids] {
-  animation: jg-intro-blink 350ms cubic-bezier(0.45, 0, 0.55, 1) var(--jg-blink-at, 180ms);
 }
 /* An orb that only shows if the wait is long enough to need one
    (`lightbox.tsx`). */
@@ -385,7 +368,7 @@ html[data-sb]:is([data-intro], [data-landing])::after {
   }
 }
 
-/* `?splash=basic` (`intro.tsx`): the eye alone on the page ground, no
+/* `?splash=basic` (`intro.tsx`): the JG mark alone on the page ground, no
    sweep, no shadow on the lift. */
 [data-splash="basic"][data-intro] #jg-intro {
   background: var(--background);
@@ -397,16 +380,16 @@ html[data-sb]:is([data-intro], [data-landing])::after {
 [data-splash="basic"] #jg-intro.jg-intro-open {
   box-shadow: none;
 }
-/* Julian: the eye swipes in, top to bottom, from the first paint.
-   basicagency's mask: the box slides down from above while the eye
+/* Julian: the mark swipes in, top to bottom, from the first paint.
+   basicagency's mask: the box slides down from above while the mark
    inside slides up by as much, so it holds still and is uncovered from
    the top. Two transforms, so it runs off the main thread while the
    page loads under it (a `clip-path` stalled there). */
-[data-splash="basic"][data-intro] .jg-intro-eye {
+[data-splash="basic"][data-intro] .jg-intro-mark {
   overflow: hidden;
   animation: jg-intro-swipe 500ms cubic-bezier(0.28, 0, 0.49, 1) both;
 }
-[data-splash="basic"][data-intro] .jg-intro-eye svg {
+[data-splash="basic"][data-intro] .jg-intro-mark svg {
   animation: jg-intro-swipe-in 500ms cubic-bezier(0.28, 0, 0.49, 1) both;
 }
 @keyframes jg-intro-swipe {
