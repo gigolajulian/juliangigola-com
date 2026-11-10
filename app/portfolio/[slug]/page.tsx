@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { BackLink } from "@/components/back-link";
+import { BackLink } from "@/components/site/back-link";
 import { notFound } from "next/navigation";
 import { CoverArt } from "@/components/v3/sleeves";
 import { CallToAction } from "@/components/call-to-action";

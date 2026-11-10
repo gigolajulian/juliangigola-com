@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { shareOg } from "@/lib/share";
-import { V3LegalPage } from "@/components/legal";
-import { TermsColumn } from "@/components/terms";
-import { PrivacyColumn } from "@/components/privacy";
+import { V3LegalPage } from "@/components/site/legal";
+import { TermsColumn } from "@/components/site/terms";
+import { PrivacyColumn } from "@/components/site/privacy";
 
 export const metadata: Metadata = {
   title: "Legal",
@@ -13,8 +13,8 @@ export const metadata: Metadata = {
 };
 
 /* The terms and the privacy policy on one page, a screen each, dealt as
-   a deck (`components/legal.tsx`). The words live in
-   `components/terms.tsx` and `components/privacy.tsx`; this is only the
+   a deck (`components/site/legal.tsx`). The words live in
+   `components/site/terms.tsx` and `components/site/privacy.tsx`; this is only the
    frame. The page opens whichever clause the address names, which the
    strip handles now, so the old `OpenOnHash` is not needed here. */
 export default function LegalPage_() {

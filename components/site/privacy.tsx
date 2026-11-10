@@ -1,4 +1,4 @@
-import { LegalColumn, Clause } from "@/components/legal";
+import { LegalColumn, Clause } from "@/components/site/legal";
 
 const EMAIL = "hello@juliangigola.com";
 
