@@ -165,5 +165,10 @@ const authed = () => credentials(window.localStorage.getItem(KEY_STORE) ?? "");
 
 const cash = (cents: number) => `${cents < 0 ? "−" : ""}$${(Math.abs(cents) / 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-export { DAY, now, snoozed, closed, aside, renew, needsMe, HEAD, kindOf, day, at, MARK, Tag, btn, primary, ios, compose, mailto, STEPS, badge, label, line, authed, cash };
+const field = "min-h-11 w-full rounded-[10px] border border-border bg-transparent px-3.5 text-base normal-case placeholder:normal-case placeholder:text-muted-foreground focus-visible:outline-2 focus-visible:outline-accent";
+const fieldLabel = "grid gap-1.5 text-[14px] text-muted-foreground";
+
+const LOST_REASONS = ["Price", "Dates", "No reply", "Went elsewhere", "Not a fit", "Other"];
+
+export { DAY, now, snoozed, closed, aside, renew, needsMe, HEAD, kindOf, day, at, MARK, Tag, btn, primary, ios, compose, mailto, STEPS, badge, label, line, authed, cash, field, fieldLabel, LOST_REASONS };
 export type { Call, Template };
