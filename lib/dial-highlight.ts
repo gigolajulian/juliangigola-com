@@ -13,7 +13,7 @@ export function highlightDials(targetFor: (title: string) => string | null) {
   let raf = 0;
   const draw = () => {
     const boxes = on ? [...document.querySelectorAll<HTMLElement>(on)] : [];
-    while (layer.children.length > boxes.length) layer.lastChild!.remove();
+    while (layer.children.length > boxes.length) layer.lastChild?.remove();
     boxes.forEach((b, i) => {
       const r = b.getBoundingClientRect();
       const box =
