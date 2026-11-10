@@ -2,9 +2,9 @@ import { describe, expect, it, vi } from "vitest";
 import worker from "@/book/worker.js";
 
 /* book.juliangigola.com (`book/worker.js`): the four sessions go to
-   their own page on the site (`app/book/[slug]`), the calls stay on the static Cal.com page, and each
-   call's link preview gets its own title. HTMLRewriter is the Workers
-   runtime's; here a stand-in records what it was told to set. */
+   their own page on the site (`app/book/[slug]`), images still serve, and
+   every other page goes to /book: the old Cal.com page is never shown.
+   HTMLRewriter is the Workers runtime's; here a stand-in records what it was told to set. */
 
 const assets = (contentType = "text/html") => ({
   fetch: vi.fn(async () => new Response("<html></html>", { headers: { "content-type": contentType } })),
@@ -51,6 +51,14 @@ describe("book.juliangigola.com", () => {
     const res = await go(`/${call}`);
     expect(res.status).toBe(302);
     expect(res.headers.get("location")).toBe(`https://juliangigola.com/book/${page}`);
+  });
+
+  it.each(["/whatever", "/index.html", "/music-call"])("sends %s to /book, never the old Cal.com page", async (path) => {
+    const env = { ASSETS: assets() };
+    const res = await go(path, env);
+    expect(res.status).toBe(302);
+    expect(res.headers.get("location")).toBe("https://juliangigola.com/book");
+    expect(env.ASSETS.fetch).not.toHaveBeenCalled();
   });
 
   it("passes other files through untouched", async () => {
