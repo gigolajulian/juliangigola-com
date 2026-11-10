@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { AdminEditor } from "@/components/admin-editor";
 import { CLIENT_MARKS, type ClientMarkData } from "@/lib/clients-data";
 import { CONTENT, CONTENT_PATH } from "@/lib/content";
-import { SHOWN as HOMEPAGE_RELEASES } from "@/components/cover-art";
+import { SHOWN as HOMEPAGE_RELEASES } from "@/components/cover/cover-art";
 import {
   PROJECTS,
   ALL_PROJECTS,

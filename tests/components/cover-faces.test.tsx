@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { CoverFaces, coverLabel } from "@/components/cover-faces";
+import { CoverFaces, coverLabel } from "@/components/cover/cover-faces";
 import type { CoverFrame } from "@/lib/cover-art-types";
 
 const f = (src: string, side: string | null): CoverFrame => ({ src, width: 800, height: 800, color: "#000", alt: `${src} alt`, thumb: src, side });
