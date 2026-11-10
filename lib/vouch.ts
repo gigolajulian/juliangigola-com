@@ -16,14 +16,11 @@ import { REPO } from "@/lib/admin-github";
 const VOUCHED_MS = 5 * 60 * 1000;
 const vouched = new Map<string, number>();
 
+const sha256 = async (s: string) =>
+  new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s)));
+
 export const digest = async (s: string) =>
-  [
-    ...new Uint8Array(
-      await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s)),
-    ),
-  ]
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
+  [...(await sha256(s))].map((b) => b.toString(16).padStart(2, "0")).join("");
 
 /**
  * The two kinds of token /admin is set up with: a fine-grained one (what its
@@ -112,13 +109,16 @@ export async function authorised(request: Request, expected?: string) {
   const given = request.headers.get("x-inbox-key");
   if (!given) return false;
 
-  const digest = async (s: string) =>
-    new Uint8Array(
-      await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s)),
-    );
-  const [a, b] = await Promise.all([digest(given), digest(expected)]);
+  const [a, b] = await Promise.all([sha256(given), sha256(expected)]);
 
   let diff = a.length ^ b.length;
   for (let i = 0; i < a.length; i++) diff |= a[i] ^ b[i];
   return diff === 0;
+}
+
+/** The admin gate: the inbox key, or a GitHub token that can push. */
+export async function isAdmin(request: Request, key?: string) {
+  if (await authorised(request, key)) return true;
+  const token = bearer(request);
+  return !!token && (await canPush(token));
 }

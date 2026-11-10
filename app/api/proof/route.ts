@@ -1,5 +1,5 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { authorised, bearer, canPush } from "@/lib/vouch";
+import { isAdmin } from "@/lib/vouch";
 import { sealer } from "@/lib/lead-crypto";
 import { recordLead } from "@/lib/leads";
 import { closesAt, cleanSettings, DEFAULTS, frameKey, isFrameId, isToken, listProofs, newToken, readProof, writeProof, type Proof } from "@/lib/proofs";
@@ -33,7 +33,7 @@ async function gate(request: Request) {
   const { env } = await getCloudflareContext({ async: true });
   const seal = sealer(env.LEADS_KEY);
   if (!env.INBOX || !env.PROOFS || !seal) return { error: json({ error: "Proofs need INBOX, PROOFS and LEADS_KEY on this build." }, 503) };
-  const ok = (env.INBOX_KEY && (await authorised(request, env.INBOX_KEY))) || (bearer(request) && (await canPush(bearer(request)!)));
+  const ok = await isAdmin(request, env.INBOX_KEY);
   if (!ok) return { error: json({ error: "Not signed in." }, 401) };
   return { env, kv: env.INBOX, r2: env.PROOFS, s: await seal };
 }
