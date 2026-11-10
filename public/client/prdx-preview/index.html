@@ -47,10 +47,16 @@ footer a{color:var(--mute);text-decoration:none}footer a:hover{color:var(--fg)}
 .lb.open{display:flex}
 .lb .img{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;touch-action:pan-y}
 .lb img{display:block;max-width:100vw;max-height:calc(100vh - 70px);object-fit:contain;user-select:none;-webkit-user-drag:none}
-.lb .t{display:flex;align-items:center;justify-content:space-between;padding:10px 8px calc(10px + env(safe-area-inset-bottom))}
+.lb .t{display:flex;align-items:center;justify-content:center;padding:14px 8px calc(10px + env(safe-area-inset-bottom))}
 .lb button{font:inherit;color:var(--fg);background:none;border:0;padding:12px 14px;cursor:pointer}
 .lh{display:flex;align-items:center;gap:8px}.lh svg{width:22px;height:22px}
-.x{position:absolute;top:calc(6px + env(safe-area-inset-top));right:6px;font-size:22px!important;line-height:1}
+.ar{position:absolute;top:50%;transform:translateY(-50%);z-index:2;width:72px;height:96px;display:grid;place-items:center;padding:0!important}
+.ar svg{width:34px;height:34px;fill:none;stroke:#fff;stroke-width:1.6;filter:drop-shadow(0 1px 4px rgba(0,0,0,.6))}
+#pv{left:max(4px,env(safe-area-inset-left))}#nx{right:max(4px,env(safe-area-inset-right))}
+.ar:hover svg{stroke-width:2.2}
+.ar{transition:opacity .8s}.lb.idle .ar{opacity:.12}
+@media (prefers-reduced-motion:reduce){.ar{transition:none}}
+.x{position:absolute;z-index:2;top:calc(6px + env(safe-area-inset-top));right:6px;font-size:22px!important;line-height:1}
 .sheet{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:20;display:none;align-items:flex-end;justify-content:center}
 .sheet.open{display:flex}
 .sheet .box{background:var(--bg);border-top:1px solid var(--line);width:100%;max-width:520px;padding:24px 16px calc(24px + env(safe-area-inset-bottom))}
@@ -70,15 +76,18 @@ footer a{color:var(--mute);text-decoration:none}footer a:hover{color:var(--fg)}
 <footer><a class="wm big" href="https://juliangigola.com">Julian Gigola</a><div class="fl mono"><span>Preview images. Finals come clean and full size.</span><a href="mailto:hello@juliangigola.com">hello@juliangigola.com</a></div></footer>
 <div class="lb" id="lb"><button class="x" id="x" aria-label="Close">&times;</button>
 <div class="img" id="li"><span class="wmk"><img id="lim" alt=""></span></div>
-<div class="t mono"><button id="pv" aria-label="Previous">&larr;</button><span id="ln"></span><button id="nx" aria-label="Next">&rarr;</button></div></div>
+<button class="ar" id="pv" aria-label="Previous"><svg viewBox="0 0 24 24"><path d="M15 4l-8 8 8 8"/></svg></button><button class="ar" id="nx" aria-label="Next"><svg viewBox="0 0 24 24"><path d="M9 4l8 8-8 8"/></svg></button>
+<div class="t mono"><span id="ln"></span></div></div>
 <script>
 const M=[[[1,"467/700"],[2,"467/700"],[3,"467/700"]],[[4,"467/700"],[11,"467/700"],[12,"467/700"],[13,"467/700"]],[[5,"467/700"],[6,"467/700"],[7,"467/700"],[8,"467/700"],[9,"467/700"],[10,"467/700"]],[[14,"467/700"],[15,"467/700"]],[[16,"467/700"],[17,"467/700"],[18,"467/700"]],[[19,"467/700"],[20,"467/700"]],[[21,"467/700"],[22,"467/700"],[23,"467/700"]],[[24,"467/700"],[25,"467/700"],[26,"467/700"],[27,"467/700"]],[[28,"467/700"],[29,"467/700"],[30,"467/700"]],[[31,"467/700"],[32,"467/700"],[33,"467/700"],[34,"467/700"]],[[35,"467/700"],[36,"467/700"],[37,"467/700"],[38,"467/700"]],[[39,"467/700"],[40,"467/700"],[41,"467/700"],[42,"467/700"]],[[43,"467/700"],[44,"467/700"],[45,"467/700"],[46,"467/700"]],[[47,"467/700"],[48,"467/700"],[49,"467/700"],[50,"467/700"]],[[51,"467/700"],[52,"467/700"],[53,"467/700"],[54,"467/700"]],[[55,"467/700"],[56,"467/700"],[57,"467/700"],[58,"467/700"]],[[59,"467/700"],[60,"467/700"],[61,"467/700"],[62,"467/700"]],[[63,"467/700"],[64,"467/700"],[65,"467/700"],[66,"467/700"]],[[67,"467/700"],[68,"467/700"],[69,"467/700"]],[[70,"467/700"],[71,"467/700"],[72,"467/700"],[73,"467/700"],[74,"467/700"]]],R=M.flat(),N=R.length;
 const pad=n=>String(n).padStart(2,'0'),$=id=>document.getElementById(id);
 const seq=R.map(r=>r[0]);
 $('g').innerHTML=R.map(([n,r])=>{const [w,h]=r.split('/');return `<div class="c" data-n="${n}" style="--ar:${(w/h).toFixed(4)};aspect-ratio:${r}"><img src="t/${pad(n)}.jpg" loading="lazy" alt="PARADOX02 frame ${n}" onload="this.classList.add('in')" style="aspect-ratio:${r}"></div>`}).join('');
 let cur=0;
-function show(k){cur=((k%N)+N)%N;const n=seq[cur];$('lim').src=`i/${pad(n)}.jpg`;$('ln').textContent=`${cur+1} / ${N}`;$('lb').classList.add('open');
+function show(k){cur=((k%N)+N)%N;const n=seq[cur];$('lim').src=`i/${pad(n)}.jpg`;$('ln').textContent=`${cur+1} / ${N}`;$('lb').classList.add('open');wake();
  [seq[(cur+1)%N],seq[(cur-1+N)%N]].forEach(m=>{new Image().src=`i/${pad(m)}.jpg`})}
+let it;function wake(){$('lb').classList.remove('idle');clearTimeout(it);it=setTimeout(()=>$('lb').classList.add('idle'),2500)}
+['pointermove','pointerdown','keydown'].forEach(e=>$('lb').addEventListener(e,wake));document.addEventListener('keydown',wake);
 function close(){$('lb').classList.remove('open')}
 $('g').addEventListener('click',e=>{const c=e.target.closest('.c');if(c)show(seq.indexOf(+c.dataset.n))});
 $('x').onclick=close;$('pv').onclick=()=>show(cur-1);$('nx').onclick=()=>show(cur+1);
