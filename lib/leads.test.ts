@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { NUDGES, REMIND_MAX, shootTag, backfillLead, fold, isLate, paperDue, quoteNudge, leadKey, myMove, leadSummary, recordLead, renewDue, trashDaysLeft, writeLead, type InboxRow, type Lead, type LeadSummary } from "./leads";
+import { NUDGES, REMIND_MAX, shootTag, backfillLead, fold, isLate, paperDue, quoteNudge, leadStoreKey, myMove, leadSummary, recordLead, renewDue, trashDaysLeft, writeLead, type InboxRow, type Lead, type LeadSummary } from "./leads";
 import { sealer } from "./lead-crypto";
 
 const at = (h: number) => new Date(Date.UTC(2026, 10, 2, h)).toISOString();
@@ -182,7 +182,7 @@ describe("recordLead", () => {
     const store = kv();
     await recordLead({ INBOX: store as never, LEADS_KEY }, email, { event: { at: at(1), kind: "inquiry", ref: "msg:1" }, name: "Maya" });
     const s = await sealer(LEADS_KEY)!;
-    const row = store.data.get(leadKey(await s.id(email)))!;
+    const row = store.data.get(leadStoreKey(await s.id(email)))!;
     expect(row.v).not.toContain("Maya");
     const lead = await s.open<Lead>(row.v);
     expect(lead.events).toHaveLength(1);
@@ -197,7 +197,7 @@ describe("recordLead", () => {
       const store = kv();
       const who = `${name.length}@example.com`;
       await recordLead({ INBOX: store as never, LEADS_KEY }, who, { event: { at: at(1), kind: "inquiry", ref: "msg:1" }, name, snippet, refs: 3, when: at(40), flag: "stuck" });
-      const id = leadKey(await s.id(who));
+      const id = leadStoreKey(await s.id(who));
       // Snoozed and trashed too: every optional field set.
       const lead = await s.open<Lead>(store.data.get(id)!.v);
       await writeLead(store as never, s, id.slice(5), { ...lead, snoozeUntil: at(50), trashedAt: at(2) });

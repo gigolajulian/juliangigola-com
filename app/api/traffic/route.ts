@@ -1,6 +1,6 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { bearer, canPush } from "@/lib/vouch";
-import { ACCOUNT, SITE, ZONE, cloudflare, searchConsole as gsc, sitePath } from "@/lib/analytics";
+import { ACCOUNT, SITE_HOST, ZONE, cloudflare, searchConsole as gsc, sitePath } from "@/lib/analytics";
 
 /* ── traffic ──────────────────────────────────────────────────────
  * The numbers behind /admin's Traffic tab, from Cloudflare's own analytics:
@@ -80,7 +80,7 @@ export async function GET(request: Request) {
       at: now.toISOString(),
       visits: days.reduce((s, d) => s + d.n, 0),
       days: days.sort((a, b) => a.key.localeCompare(b.key)),
-      sources: sources.filter((s) => s.key !== SITE).map((s) => ({ ...s, key: s.key || "direct / Instagram app" })),
+      sources: sources.filter((s) => s.key !== SITE_HOST).map((s) => ({ ...s, key: s.key || "direct / Instagram app" })),
       pages: pages.filter((p) => p.n > 0),
       devices,
       bots,

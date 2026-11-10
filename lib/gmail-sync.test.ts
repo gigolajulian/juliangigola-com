@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CURSOR, mailChanges, syncGmail, type Msg } from "./gmail-sync";
 import { forgetToken } from "./gcal";
-import { fold, leadKey, recordLead, writeLead, type Lead } from "./leads";
+import { fold, leadStoreKey, recordLead, writeLead, type Lead } from "./leads";
 import { canonical, sealer } from "./lead-crypto";
 
 const at = (h: number) => new Date(Date.UTC(2026, 10, 2, h)).toISOString();
@@ -118,11 +118,11 @@ describe("syncGmail", () => {
     data.set(CURSOR, "100");
     expect(await syncGmail(e)).toBe(2);
     const s = await sealer(LEADS_KEY)!;
-    const lead = await s.open<Lead>(data.get(leadKey(await s.id(email)))!);
+    const lead = await s.open<Lead>(data.get(leadStoreKey(await s.id(email)))!);
     expect(lead.events.map((x) => [x.kind, x.ref])).toEqual([["inquiry", "msg:1"], ["replied", "a"], ["wrote", "b"]]);
     expect(lead).toMatchObject({ stage: "Replied", unread: true });
     // news@shop.com is no lead and never becomes one; the draft is never fetched.
-    expect(data.has(leadKey(await s.id("news@shop.com")))).toBe(false);
+    expect(data.has(leadStoreKey(await s.id("news@shop.com")))).toBe(false);
     expect(calls.some((u) => u.includes("messages/x"))).toBe(false);
     expect(data.get(CURSOR)).toBe("120");
   });
@@ -141,8 +141,8 @@ describe("syncGmail", () => {
     } finally {
       [MAIL.a, MAIL.b] = [a, b];
     }
-    expect(data.has(leadKey("old"))).toBe(false);
-    const lead = await s.open<Lead>(data.get(leadKey(await s.id("gigolajulian@gmail.com")))!);
+    expect(data.has(leadStoreKey("old"))).toBe(false);
+    const lead = await s.open<Lead>(data.get(leadStoreKey(await s.id("gigolajulian@gmail.com")))!);
     expect(lead.email).toBe("gigola.julian@gmail.com");
     expect(lead.events.map((x) => x.kind)).toEqual(["inquiry", "replied", "wrote"]);
   });
