@@ -5,8 +5,8 @@ import type { PublicProof } from "@/lib/proofs";
 
 const proof = (over: Partial<PublicProof> = {}): PublicProof => ({
   frames: [
-    { id: "a", file: "a.jpg", w: 1200, h: 1800 },
-    { id: "b", file: "b.jpg", w: 1800, h: 1200 },
+    { id: "a", w: 1200, h: 1800 },
+    { id: "b", w: 1800, h: 1200 },
   ],
   selects: [],
   included: 10,

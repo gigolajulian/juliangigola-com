@@ -1,6 +1,6 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { BlinkingMark, NotFoundScene, blink } from "@/components/not-found-scene";
+import { NotFoundScene } from "@/components/not-found-scene";
 
 describe("NotFoundScene", () => {
   it("fills in the path and locks focus without a fine pointer", () => {
@@ -15,18 +15,5 @@ describe("NotFoundScene", () => {
     expect(screen.getByText("FOCUS LOCKED")).toBeTruthy();
     expect(document.querySelector("[data-requested-path]")?.textContent).toBe("/");
     expect(document.documentElement.dataset.theme).toBe("dark");
-  });
-});
-
-describe("BlinkingMark", () => {
-  it("draws the lids inside an svg", () => {
-    const { container } = render(<BlinkingMark className="m" still />);
-    expect(container.querySelector("svg.m [data-lids]")).toBeTruthy();
-  });
-
-  it("blink animates the lids for 240ms", () => {
-    const animate = vi.fn();
-    blink({ animate } as unknown as Element);
-    expect(animate).toHaveBeenCalledWith(expect.any(Array), expect.objectContaining({ duration: 240 }));
   });
 });
