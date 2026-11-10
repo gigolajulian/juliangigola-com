@@ -75,9 +75,14 @@ export async function syncGmail(env: LeadStore & { GCAL_OAUTH?: string }): Promi
         read++;
         const m = await gcal<Msg>(env.GCAL_OAUTH, `${GMAIL}/messages/${id}?format=metadata&metadataHeaders=From&metadataHeaders=To&metadataHeaders=Cc&metadataHeaders=Subject`);
         for (const { email, c } of mailChanges(m)) {
-          // Only people already on the desk: a newsletter is not a lead.
-          if (!(await readLead(kv, s, await s.id(email)))) continue;
-          if (await recordLead(env, email, c)) folded++;
+          // One lead that will not open must not stop the sync: the cursor would never move past it.
+          try {
+            // Only people already on the desk: a newsletter is not a lead.
+            if (!(await readLead(kv, s, await s.id(email)))) continue;
+            if (await recordLead(env, email, c)) folded++;
+          } catch (e) {
+            console.error("gmail sync lead", String(e));
+          }
         }
       }
       cursor = r.id;
