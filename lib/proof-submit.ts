@@ -99,6 +99,12 @@ export async function paidFor(key: string, p: Proof, session: string): Promise<P
   return { session, amount: (p.paid?.amount ?? 0) + Math.min(Number(s.amount_total), owed(p).cents), at: new Date().toISOString(), ...(bank ? { pending: true } : {}) };
 }
 
+export const PAYMENTS_DOWN = "Payments are down right now. Try again in a few minutes.";
+
+/** paidFor, with Stripe's silence told apart: a refused session (4xx) is null, no answer or a 5xx is "down". */
+export const checkPaid = (key: string, p: Proof, session: string) =>
+  paidFor(key, p, session).catch((e: { status?: number }) => (e.status && e.status < 500 ? null : ("down" as const)));
+
 /** A settling bank payment, checked again: cleared, bounced, or still on its way. Null when nothing changed. */
 export async function settle(key: string, p: Proof): Promise<Proof | null> {
   if (!p.paid?.pending) return null;

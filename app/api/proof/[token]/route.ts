@@ -1,6 +1,6 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { sealer } from "@/lib/lead-crypto";
-import { checkout, finalize, paidFor } from "@/lib/proof-submit";
+import { checkout, checkPaid, finalize, PAYMENTS_DOWN } from "@/lib/proof-submit";
 import { cleanSelects, device, isEmail, isOpen, owed, isToken, publicView, readProof, track, viewerKey, writeProof, type Proof } from "@/lib/proofs";
 
 /* ── proofs, the client's side ────────────────────────────────────
@@ -81,7 +81,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
 
   if (typeof b.confirm === "string") {
     if (!key) return json({ error: "Payments are off." }, 503);
-    const paid = await paidFor(key, g.p, b.confirm).catch(() => null);
+    const paid = await checkPaid(key, g.p, b.confirm);
+    if (paid === "down") return json({ error: PAYMENTS_DOWN }, 502);
     if (!paid) return json({ error: "That payment did not go through." }, 402);
     return json({ done: true, ...publicView(await finalize(g.env, g.kv, g.s, g.p, paid)) });
   }
