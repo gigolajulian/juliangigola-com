@@ -11,7 +11,7 @@ import { extras, type Proof } from "@/lib/proofs";
 
 const FROM = { name: "Julian Gigola", email: "book@juliangigola.com" };
 const REPLY_TO = "hello@juliangigola.com";
-export const SITE = "https://juliangigola.com";
+const SITE = "https://juliangigola.com";
 const TZ = "America/Los_Angeles";
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);

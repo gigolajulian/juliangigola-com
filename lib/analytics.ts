@@ -6,7 +6,7 @@
 
 export const ZONE = "3637b65119d9b2ce278f9c59c4077ace";
 export const ACCOUNT = "7fa0ed7addeb11b728e3b935630a1015";
-export const SITE = "juliangigola.com";
+export const SITE_HOST = "juliangigola.com";
 
 /** A GraphQL caller for `CF_ANALYTICS_TOKEN`. Throws Cloudflare's own message. */
 export function cloudflare(key: string) {

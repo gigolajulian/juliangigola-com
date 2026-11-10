@@ -119,7 +119,7 @@ export type LeadSummary = Omit<Lead, "events" | "notion" | "deposit" | "notes" |
 const KEEP = 50;
 
 /** A lead's KV key: its id (an HMAC of the address, `lib/lead-crypto.ts`), never the address. */
-export const leadKey = (id: string) => `lead:${id}`;
+export const leadStoreKey = (id: string) => `lead:${id}`;
 
 const rank = (s: Stage) => STAGES.indexOf(s);
 const closed = (s: Stage) => s === "Delivered" || s === "Lost";
@@ -313,7 +313,7 @@ export type LeadStore = { INBOX?: KV; LEADS_KEY?: string; VAPID_KEY?: string };
 
 /** One lead, opened. Null when it is not there. */
 export async function readLead(kv: KV, s: Sealer, id: string): Promise<Lead | null> {
-  const raw = await kv.get(leadKey(id));
+  const raw = await kv.get(leadStoreKey(id));
   return raw ? s.open<Lead>(raw) : null;
 }
 
@@ -339,7 +339,7 @@ export async function writeLead(kv: KV, s: Sealer, id: string, lead: Lead): Prom
     summary = cut(summary);
     meta = await s.seal(summary);
   }
-  await kv.put(leadKey(id), await s.seal(lead), { metadata: { s: meta } });
+  await kv.put(leadStoreKey(id), await s.seal(lead), { metadata: { s: meta } });
 }
 
 const CANON = "leads:canon";
@@ -358,7 +358,7 @@ export async function canonLeads(kv: KV, s: Sealer): Promise<number> {
       const lead = await readLead(kv, s, k.name.slice(5));
       if (!lead?.email.includes("@")) continue;
       const id = await s.id(lead.email);
-      if (leadKey(id) === k.name || (await kv.get(leadKey(id))) !== null) continue;
+      if (leadStoreKey(id) === k.name || (await kv.get(leadStoreKey(id))) !== null) continue;
       await writeLead(kv, s, id, lead);
       await kv.delete(k.name);
       moved++;

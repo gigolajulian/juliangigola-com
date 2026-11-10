@@ -40,8 +40,9 @@ tested.
 
 ## How it is put together
 
-**The work is the interface.** One committed dark theme, Univers Bold Condensed for
-display and Geist for everything else, hairline rules instead of boxes, and motion only
+**The work is the interface.** The theme follows the system (light or dark). Inter Tight
+for display and the wordmark, IBM Plex Mono for labels and buttons, Archivo Expanded for
+the booking card's figures only (all loaded in `app/layout.tsx`). Hairline rules instead of boxes, and motion only
 where it does a job. The site is judged on bookings, not looks — every page a visitor can
 finish ends in a single clear ask.
 
@@ -58,7 +59,9 @@ All 74 projects and 1,131 frames were migrated off the old Format site.
 | `lib/site.ts` | Reply-time promise and the booking-calendar URL. |
 | `lib/testimonials.ts` | Client quotes. Empty; the section hides itself until it isn't. |
 
-### Re-running the migration
+### The migration (finished)
+
+A one-off harvest from the retired Format site. Kept for the record; the Format source is gone, so it does not run again.
 
 ```bash
 node scripts/harvest.mjs
@@ -74,17 +77,9 @@ stay sharp in the lightbox, which asks for `sizes="100vw"` and so wants ~2900 de
 pixels on a 1440px retina screen. Cloudflare cuts each one down per device at request
 time, so a larger source costs a visitor nothing.
 
-**The archive is not in this repo.** `public/work/` is ~690MB and git keeps every version
-of every blob forever. It lives in an R2 bucket, served from `images.juliangigola.com`;
-`lib/work-data.ts` is the manifest that points at it. After a harvest, push it:
-
-```bash
-node scripts/sync-r2.mjs
-```
-
-A fresh clone therefore has no photographs under `public/work/` until you either run the
-harvester or pull them down from R2. Everything else — `public/hero/`, `public/covers/` —
-ships with the app.
+**The archive is in this repo.** `public/work/` is tracked in git and served from this
+origin, like `public/hero/` and `public/covers/`. `lib/work-data.ts` is the manifest that
+lists it. `scripts/sync-r2.mjs` is from an earlier R2 setup and is not used.
 
 ### Adding a cover image
 

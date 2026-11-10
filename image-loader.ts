@@ -42,19 +42,6 @@ import SOURCES from "./public/work/sources.json";
  */
 const CDN = process.env.NEXT_PUBLIC_IMAGE_CDN === "1";
 
-/** Where the archive actually lives. Set per environment; see `.env.example`. */
-const R2_ORIGIN = process.env.NEXT_PUBLIC_IMAGE_ORIGIN ?? "";
-
-/**
- * The harvested archive is the only thing on R2 — 275MB of it, and ~690MB
- * once it is re-harvested at 2500px, which is why it is not in the repo.
- *
- * `public/hero` and `public/covers` are a few megabytes of hand-made frames
- * and stay with the app, so they are already served from this origin and want
- * no prefix.
- */
-const onR2 = (src: string) => src.startsWith("/work/");
-
 /**
  * The widths `scripts/make-hero.mjs` writes for `public/hero/*.jpg`. Keep the
  * two lists in step: a width named here that was not generated is a 404.
@@ -132,7 +119,7 @@ export default function cloudflareImageLoader({
   // 1920px frame. The 1080px copy exists for exactly this; hand the resizer
   // that, and it only ever scales down.
   const picked = sizedHero(src, width) ?? src;
-  const source = onR2(picked) ? R2_ORIGIN + picked : picked;
+  const source = picked;
 
   if (!CDN) return source;
 

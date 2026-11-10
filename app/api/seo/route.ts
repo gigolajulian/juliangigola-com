@@ -1,6 +1,6 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { bearer, canPush } from "@/lib/vouch";
-import { ACCOUNT, SITE, cloudflare, engineSql, searchConsole, sitePath } from "@/lib/analytics";
+import { ACCOUNT, SITE_HOST, cloudflare, engineSql, searchConsole, sitePath } from "@/lib/analytics";
 import { BEACON_DATASET } from "@/lib/beacon";
 
 /* ── seo ──────────────────────────────────────────────────────────
@@ -112,7 +112,7 @@ export async function GET(request: Request) {
       prevVisits: prior.reduce((s, g) => s + g.sum.visits, 0),
       pages: [...pages.values()].sort((a, b) => b.visits - a.visits || b.impressions - a.impressions).slice(0, MAX_PAGES),
       sources: sources.map((g) => ({
-        key: g.dimensions.refererHost && g.dimensions.refererHost !== SITE ? g.dimensions.refererHost : "direct / Instagram app",
+        key: g.dimensions.refererHost && g.dimensions.refererHost !== SITE_HOST ? g.dimensions.refererHost : "direct / Instagram app",
         share: g.sum.visits / sourceTotal,
       })),
       google,
