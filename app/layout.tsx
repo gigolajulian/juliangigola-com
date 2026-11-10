@@ -196,9 +196,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             than returning null, so the whole thing is wrapped and a
             failure simply means no opening.
 
-            Also the moment of the eye's one blink (`intro.tsx`), random,
-            100 to 260ms in, picked here so the stylesheet plays it on the
-            sweep's clock rather than the script's.
             `data-mplan`: every MOTION-PLAN.md item is on for everyone
             (Julian, 2026-11-04). `?mplan=0` turns them all off for the tab,
             `?mplan=rm,pages` keeps only those (motion-plan.css). */}

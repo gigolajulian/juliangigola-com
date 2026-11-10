@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { BlinkingMark } from "@/components/not-found-scene";
 import loader from "@/image-loader";
 import { sand } from "@/components/sand-splash";
 import { burst } from "@/components/burst-splash";
@@ -218,8 +217,9 @@ export function Intro({ run: frames }: { run: string[] }) {
         {/* By hydration the script has filled it, which React reports as a
             mismatch it will not patch; that is the point. */}
         <div className="jg-sheet-wrap" suppressHydrationWarning dangerouslySetInnerHTML={{ __html: sheet(frames) }} />
-        <div className="jg-intro-eye">
-          <BlinkingMark still />
+        {/* The JG mark, drawn as `app/icon.svg` draws it. */}
+        <div className="jg-intro-mark">
+          <svg viewBox="-766 -2760 4031 4031" aria-hidden fill="currentColor"><path d="M546 20Q403 20 278.0 -30.0Q153 -80 76.5 -187.0Q0 -294 0 -466V-472H404V-466Q404 -410 421.0 -371.5Q438 -333 470.0 -313.5Q502 -294 546 -294Q591 -294 622.5 -313.5Q654 -333 670.0 -372.0Q686 -411 686 -468V-1490H1084V-468Q1084 -323 1018.5 -213.0Q953 -103 832.0 -41.5Q711 20 546 20ZM1829.12 20Q1612.12 20 1447.62 -72.5Q1283.12 -165 1191.12 -336.0Q1099.12 -507 1099.12 -742Q1099.12 -988 1197.62 -1159.5Q1296.12 -1331 1461.12 -1420.5Q1626.12 -1510 1827.12 -1510Q1959.12 -1510 2072.62 -1472.5Q2186.12 -1435 2274.12 -1366.0Q2362.12 -1297 2415.62 -1203.5Q2469.12 -1110 2481.12 -998H2073.12Q2064.12 -1036 2043.62 -1066.0Q2023.12 -1096 1992.62 -1116.5Q1962.12 -1137 1922.62 -1147.5Q1883.12 -1158 1835.12 -1158Q1734.12 -1158 1662.12 -1109.5Q1590.12 -1061 1552.62 -969.0Q1515.12 -877 1515.12 -748Q1515.12 -617 1551.12 -524.0Q1587.12 -431 1657.62 -381.5Q1728.12 -332 1833.12 -332Q1925.12 -332 1986.62 -359.0Q2048.12 -386 2078.62 -435.5Q2109.12 -485 2109.12 -552L2179.12 -544H1839.12V-832H2499.12V-626Q2499.12 -422 2413.12 -277.5Q2327.12 -133 2175.62 -56.5Q2024.12 20 1829.12 20Z" /></svg>
         </div>
       </div>
     </>

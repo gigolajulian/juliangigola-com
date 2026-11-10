@@ -6,6 +6,7 @@ import { defineConfig } from "vitest/config";
 //   frontend: unit tests beside the code in `lib` (motion, the gooey patch)
 //   backend:  request-level tests of the API routes, the contact action
 //             and the book Worker, in `tests/backend`
+//   components: render smoke tests in jsdom, in `tests/components`
 // `node scripts/test/gate.mjs --frontend` or `--backend` runs one each.
 const alias = { "@": fileURLToPath(new URL(".", import.meta.url)) };
 
@@ -15,6 +16,15 @@ export default defineConfig({
     projects: [
       { resolve: { alias }, test: { name: "frontend", include: ["lib/**/*.test.ts"] } },
       { resolve: { alias }, test: { name: "backend", include: ["tests/backend/**/*.test.ts"], environment: "node" } },
+      {
+        resolve: { alias },
+        test: {
+          name: "components",
+          include: ["tests/components/**/*.test.tsx"],
+          environment: "jsdom",
+          setupFiles: ["tests/components/setup.ts"],
+        },
+      },
     ],
   },
 });
