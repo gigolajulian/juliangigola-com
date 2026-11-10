@@ -31,6 +31,12 @@
 /visit
   X-Robots-Tag: noindex, nofollow
 
+# /client/<name> holds unlisted preview pages sent to one client (static
+# files: index.html, marked images). Same rule as /visit.
+/client/*
+  X-Robots-Tag: noindex, nofollow, noimageindex
+  Cache-Control: public, max-age=3600
+
 # Caching, for the same responses.
 #
 # Workers Static Assets serves every file with `max-age=0, must-revalidate`
