@@ -1208,7 +1208,8 @@ export function TimePicker({
               }} data-lenis-prevent tabIndex={0} role="spinbutton" aria-label="Time" aria-valuetext={fmt(pick.min)} data-scrub=""
                 onKeyDown={(e) => { if (e.key === "ArrowLeft" || e.key === "ArrowRight") { e.preventDefault(); stepTime(e.key === "ArrowRight" ? 1 : -1); } }}
                 onPointerDown={(e) => { swipeX.current = e.clientX; }}
-                onPointerMove={(e) => { const x0 = swipeX.current; if (x0 != null && Math.abs(e.clientX - x0) > 36) { stepTime(e.clientX < x0 ? 1 : -1); swipeX.current = e.clientX; } }}
+                /* One step per swipe, however long (Julian, 2026-11-10): the start clears until the finger lifts. */
+                onPointerMove={(e) => { const x0 = swipeX.current; if (x0 != null && Math.abs(e.clientX - x0) > 36) { stepTime(e.clientX < x0 ? 1 : -1); swipeX.current = null; } }}
                 onPointerUp={() => { swipeX.current = null; }}
                 onPointerCancel={() => { swipeX.current = null; }}
               >{hh}<span className="cn">:</span>{mm}</b>
