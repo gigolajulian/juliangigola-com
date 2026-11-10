@@ -106,39 +106,6 @@ export const longestWord = (text: string) =>
 export const titleWidth = (text: string) =>
   text.replace(/ /g, "").length * 0.76 + (text.split(" ").length - 1) * 0.3;
 
-/** The opening cell of a page's strip: the title set large, with a line or
-    two under it that fade up after. The running head in the page's head
-    waits for this cell to go, so the same words are never on screen
-    twice. */
-export function TitleCell({
-  title,
-  hash,
-  children,
-  className,
-}: {
-  title: string;
-  hash?: string;
-  children?: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <div
-      data-hash={hash}
-      // The whole title's width, for the spine (`globals.css`).
-      style={{ "--title-em": titleWidth(title) } as React.CSSProperties}
-      className={cn(
-        "flex w-full shrink-0 flex-col justify-center gap-4 py-6 sm:gap-5 sm:h-full sm:w-[min(30rem,82vw)] sm:py-0 sm:pr-6",
-        className,
-      )}
-    >
-      <RisingTitle text={title} decorative />
-      {children ? (
-        <div className="title-rest flex flex-col gap-4">{children}</div>
-      ) : null}
-    </div>
-  );
-}
-
 /** Three columns, the outer two the same width from `sm` up, so the title
     is centred on the page and not on whatever is left over. On a phone the
     rails are their content's width: at 112px each, with the gaps and the
