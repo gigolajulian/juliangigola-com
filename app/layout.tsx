@@ -51,6 +51,8 @@ const figures = localFont({
   src: "./fonts/ArchivoExpanded-Figures.woff2",
   weight: "800",
   adjustFontFallback: false,
+  // Only the booking card uses it, so it loads when the card draws, not on every page.
+  preload: false,
 });
 const mono = localFont({
   variable: "--font-mono",
