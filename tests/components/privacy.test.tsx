@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { LegalPage } from "@/components/legal";
-import { PrivacyColumn } from "@/components/privacy";
+import { LegalPage } from "@/components/site/legal";
+import { PrivacyColumn } from "@/components/site/privacy";
 
 describe("PrivacyColumn", () => {
   it("renders without throwing outside the legal page", () => {

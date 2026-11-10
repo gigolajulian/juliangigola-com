@@ -9,7 +9,7 @@ vi.mock("react", async (orig) => {
   return { ...r, ViewTransition: ({ children }: { children: ReactNode }) => children };
 });
 
-import { PageTransition } from "@/components/page-transition";
+import { PageTransition } from "@/components/site/page-transition";
 
 describe("PageTransition", () => {
   it("renders its page", () => {
