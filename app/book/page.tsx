@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 ...shareOg("Book a session","Portraits, graduation, headshots and studio digitals in the San Francisco Bay Area. Pick a time on my calendar."),
 };
 
-/* The four sessions, each a Cal.com event (`CAL_EVENTS`, `lib/booking.ts`);
+/* The four sessions, each an event on the site's own engine (`CAL_EVENTS`, `lib/booking.ts`);
    weddings book a call (its page's `book.cal`). The lengths are the events' own. */
 const LENGTHS: Record<string, string> = {
   portraits: "1 hour",

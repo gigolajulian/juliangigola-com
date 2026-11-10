@@ -315,7 +315,7 @@ export function AdminInbox({
                           {full.noDeposit ? (
                             <>
                               <dt className="label text-muted-foreground">Deposit</dt>
-                              <dd className="text-sm">None. Booked on cal.com without paying: cancel it or ask for the $100.</dd>
+                              <dd className="text-sm">None. Booked without paying: cancel it or ask for the $100.</dd>
                             </>
                           ) : null}
                           {full.deposit ? (
