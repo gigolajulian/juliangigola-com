@@ -11,6 +11,7 @@ import { ownEngine } from "@/lib/booking-rules";
 import { Orb, ORB_ROUND } from "@/components/orb";
 import { JgLoad } from "@/components/jg-load";
 import { Calendar, dlabel, duration, fmt, type Shell } from "@/components/v3/flow";
+import { GESTURE_GAP_MS } from "@/components/strip/shared";
 
 /* Goo (Julian, 2026-10-20, OKd 10-21) on the card's buttons, times and
    open days. `?goo=0` turns it off. */
@@ -207,6 +208,12 @@ export function TimePicker({
      clicking one used to pick its time as well, skipping step two. */
   const [chosen, setChosen] = React.useState<false | "day" | "time">(false);
   const [step, setStep] = React.useState<"pick" | "form" | "sending" | "check" | "pay" | "done">("pick");
+  /* Option B's row of times (v3): where a swipe on the big number began, and
+     whether the row runs past its edge, which fades it and shows the hint. */
+  const swipeX = React.useRef<number | null>(null);
+  const wheelGate = React.useRef({ at: -Infinity, owned: false });
+  const [stripEl, stripRef] = React.useState<HTMLDivElement | null>(null);
+  const [more, setMore] = React.useState(false);
   /* A paid session, its deposit taken here (`?deposit`, deposit-step.tsx). */
   const [paid, setPaid] = React.useState(false);
   const [deposit, setDeposit] = React.useState<DepositBody | null>(null);
@@ -470,6 +477,23 @@ export function TimePicker({
   const big = React.useRef<HTMLDivElement>(null);
   /* The times' width: they keep to one line while every box has room for
      its time (Julian: a day of half hours was crammed). */
+  /* The time picked kept in view in option B's row, and the fade and hint
+     only while times run past its edge. */
+  React.useEffect(() => {
+    // The row mounts after the times arrive (a state ref, not useRef, so this runs then).
+    const ix = stripEl;
+    if (!ix) return;
+    const on = ix.querySelector<HTMLElement>('[aria-pressed="true"]');
+    if (on && (on.offsetLeft < ix.scrollLeft || on.offsetLeft + on.offsetWidth > ix.scrollLeft + ix.clientWidth)) ix.scrollTo({ left: Math.max(0, on.offsetLeft - on.offsetWidth) });
+    const fit = () => setMore(ix.scrollLeft + ix.clientWidth < ix.scrollWidth - 4);
+    fit();
+    // The row's own box keeps its width as the times grow or the fonts land: watch the buttons too.
+    const ro = new ResizeObserver(fit);
+    ro.observe(ix);
+    for (const b of ix.children) ro.observe(b);
+    void document.fonts?.ready.then(fit);
+    return () => ro.disconnect();
+  }, [stripEl, pick?.date, pick?.min, days, step]);
   const slotsBox = React.useRef<HTMLDivElement>(null);
   /* `?layout`: the times come in with GSAP, each one once. The CSS rise
      replayed whenever the list re-rendered, and read as a glitch (Julian). */
@@ -1125,6 +1149,11 @@ export function TimePicker({
     const canNext = +(view === "week" ? monday(anchor) : new Date(anchor.getFullYear(), anchor.getMonth() + 1, 0)) < +today + AHEAD * 864e5;
     const times = days[pick.date] ?? [];
     const [hh, mm] = fmt(pick.min).replace(/ (AM|PM)$/, "").split(":");
+    const at0 = times.findIndex((x) => minutesOf(x.start) === pick.min);
+    const stepTime = (dir: number) => {
+      const next = times[at0 + dir];
+      if (next) choose(pick.date, minutesOf(next.start), true);
+    };
     return shell({
       head: paid ? "Book a session" : v3?.name === "Consultation" ? "Book a consultation" : "Book a call",
       sub: v3sub,
@@ -1150,17 +1179,58 @@ export function TimePicker({
             }}
             onPick={(d) => choose(iso(d), pick.min, false)}
           />
-          <div className="times lbl">
-            {times.map((x) => {
-              const m = minutesOf(x.start);
-              return (
-                <button key={x.start} type="button" className="opt" data-slot="" aria-pressed={m === pick.min} aria-label={fmt(m)} onClick={() => choose(pick.date, m, true)}>{fmt(m)}</button>
-              );
-            })}
+          {/* Option B (Julian, 2026-11-09, "build b"): the time big, stepped with
+              the arrows, a wheel, a swipe or the arrow keys; the day's open times
+              in one row under it, faded with a hint when they run past the edge. */}
+          <div className="fig scrub">
+            <div className="num">
+              <b ref={(el) => {
+                if (!el) return;
+                /* A wheel over the number steps the time: a mouse once a notch, a
+                   trackpad once a flick (its stream of events, until a gap of
+                   GESTURE_GAP_MS, as the strip reads one). A flick that starts at
+                   the first or last time is the page's. React's onWheel is passive. */
+                const wheel = (e: WheelEvent) => {
+                  if (e.ctrlKey || !e.deltaY) return;
+                  const g = wheelGate.current;
+                  const fresh = e.timeStamp - g.at > GESTURE_GAP_MS;
+                  g.at = e.timeStamp;
+                  // Any pixel stream is one gesture: fast trackpad events pass NOTCH_PX on 2x screens (MAC, #741).
+                  const pad = e.deltaMode === 0;
+                  const dir = e.deltaY > 0 ? 1 : -1;
+                  if (fresh || !pad) g.owned = !!times[at0 + dir];
+                  if (!g.owned) return;
+                  e.preventDefault();
+                  if (fresh || !pad) stepTime(dir);
+                };
+                el.addEventListener("wheel", wheel, { passive: false });
+                return () => el.removeEventListener("wheel", wheel);
+              }} data-lenis-prevent tabIndex={0} role="spinbutton" aria-label="Time" aria-valuetext={fmt(pick.min)} data-scrub=""
+                onKeyDown={(e) => { if (e.key === "ArrowLeft" || e.key === "ArrowRight") { e.preventDefault(); stepTime(e.key === "ArrowRight" ? 1 : -1); } }}
+                onPointerDown={(e) => { swipeX.current = e.clientX; }}
+                onPointerMove={(e) => { const x0 = swipeX.current; if (x0 != null && Math.abs(e.clientX - x0) > 36) { stepTime(e.clientX < x0 ? 1 : -1); swipeX.current = e.clientX; } }}
+                onPointerUp={() => { swipeX.current = null; }}
+                onPointerCancel={() => { swipeX.current = null; }}
+              >{hh}<span className="cn">:</span>{mm}</b>
+              <span className="lbl mute ap">{pick.min < 720 ? "AM" : "PM"}</span>
+            </div>
+            <div className="arrs">
+              <button type="button" className="arr" aria-label="Earlier time" disabled={at0 <= 0} onClick={() => stepTime(-1)}>←</button>
+              <button type="button" className="arr" aria-label="Later time" disabled={at0 < 0 || at0 >= times.length - 1} onClick={() => stepTime(1)}>→</button>
+            </div>
+            <span className="lbl mute mline">{dlabel(date)}{chosen === "time" ? ` | until ${fmt(end)}` : ""}</span>
           </div>
-          <div className="fig">
-            <b>{hh}<span className="cn">:</span>{mm}</b>
-            <span className="lbl mute">{pick.min < 720 ? "AM" : "PM"} | until {fmt(end)} | {dlabel(date)}</span>
+          <div className={cn("strip", more && "more")}>
+            <div ref={stripRef} className="idx lbl" onScroll={(e) => { const el = e.currentTarget; setMore(el.scrollLeft + el.clientWidth < el.scrollWidth - 4); }}>
+              {times.map((x) => {
+                const m = minutesOf(x.start);
+                const [h, a] = clock(m);
+                return (
+                  <button key={x.start} type="button" data-slot="" aria-pressed={m === pick.min} aria-label={fmt(m)} onClick={() => choose(pick.date, m, true)}>{h}<small>{a}</small></button>
+                );
+              })}
+            </div>
+            <p className="lbl mute swipe" aria-hidden>Swipe for more times →</p>
           </div>
         </div>
       ),
