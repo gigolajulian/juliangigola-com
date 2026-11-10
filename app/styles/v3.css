@@ -527,6 +527,8 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .f-photo:not(.over){height:110px}}
 /* A phone on its side in the stacked layout (Duo unfolded, about 630x400 of Safari): the photo pushed "Book a session" under Continue, so it goes (Julian, 2026-11-09). */
 @media (max-width:800px) and (orientation:landscape) and (max-height:500px){.v3 .f-photo{display:none}}
+/* Two columns on a short screen (18 Pro sideways, 874x402): the photo was a strip under its own caption. Only the picture goes; the studio line and the call and Inquire links stay (Julian, 2026-11-09). */
+@media (min-width:801px) and (orientation:landscape) and (max-height:500px){.v3 .f-photo .fr{display:none}}
 .v3 .in-steps{padding:32px var(--gr) 32px var(--g)}
 .v3 .in-steps li{align-content:start}
 .v3 .in-steps ol{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0 clamp(16px,2.5vw,40px)}
