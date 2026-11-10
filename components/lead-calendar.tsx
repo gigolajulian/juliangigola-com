@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { credentials, KEY_STORE } from "@/components/admin-inbox";
+import { credentials, KEY_STORE } from "@/lib/admin-github";
 import { EVENTS, HOURS, TZ } from "@/lib/booking-rules";
 import { startsFor, zoned } from "@/lib/slots";
 import { cn } from "@/lib/utils";
