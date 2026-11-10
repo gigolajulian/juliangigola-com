@@ -27,7 +27,7 @@ self.addEventListener("push", (e) => {
   let d = { title: "Leads", body: "Something new on the desk." };
   try { if (e.data) d = e.data.json(); } catch {}
   e.waitUntil(Promise.all([
-    self.registration.showNotification(d.title, { body: d.body, tag: d.tag, icon: "/leads-app/icon-192.png" }),
+    self.registration.showNotification(d.title, { body: d.body, tag: d.tag, icon: "/leads-app/icon-192.png", badge: "/leads-app/badge-96.png" }),
     bump().catch(() => {}),
   ]));
 });
