@@ -30,8 +30,8 @@ html:has(.proof) #main{transform:none}
 .proof-intro h1,.proof-sheet h1{font:500 clamp(40px,8cqi,104px)/.95 var(--font-display);letter-spacing:-.04em;margin:14px 0 0}
 .proof-sheet h1{font-size:32px;line-height:1.1;letter-spacing:-.02em;margin:10px 0 14px}
 
-.proof-grid{columns:4 260px;column-gap:4px;padding:0 4px 140px}
-.proof-cell{break-inside:avoid;margin:0 0 4px;position:relative;cursor:pointer;outline:2px solid transparent;outline-offset:-2px;transition:outline-color .15s;-webkit-tap-highlight-color:transparent}
+.proof-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:4px;align-items:start;padding:0 4px 140px}
+.proof-cell{position:relative;cursor:pointer;outline:2px solid transparent;outline-offset:-2px;transition:outline-color .15s;-webkit-tap-highlight-color:transparent}
 .proof-cell img{display:block;width:100%;height:auto;transition:opacity .25s,transform .35s cubic-bezier(.2,.7,.2,1);user-select:none;-webkit-user-select:none}
 .proof-cell:active img{transform:scale(.985)}
 .proof-cell[data-on]{outline-color:var(--accent)}
@@ -69,7 +69,7 @@ html:has(.proof) #main{transform:none}
 .proof .proof-btn.ghost{background:none;color:var(--foreground);border-color:var(--p-hl)}
 .proof .proof-btn:disabled{opacity:.35;cursor:default}
 
-.proof-lb{position:fixed;inset:0;z-index:20;background:rgba(6,6,5,.97);color:#f1f0ed;display:flex;flex-direction:column}
+.proof-lb{position:fixed;inset:0;z-index:40;background:#060605;color:#f1f0ed;display:flex;flex-direction:column}
 .proof-close{position:relative}
 .proof-zoom::before{left:auto;top:auto;right:-6px;bottom:-4px;width:max(100% + 18px,44px);height:max(100% + 22px,44px);transform:none}
 .proof-lt{display:flex;justify-content:space-between;padding:16px 22px;font:12px var(--p-mono);color:#92908d}
@@ -159,12 +159,10 @@ html:has(.proof) #main{transform:none}
   .proof-tabs{justify-self:end;gap:16px}
   .proof-word{font-size:16px}
   .proof-intro{padding-left:18px;padding-right:18px}
-  .proof-grid{columns:2;column-gap:3px;padding:0 3px 170px}
-  .proof-cell{margin-bottom:3px}
+  .proof-grid{grid-template-columns:repeat(2,1fr);gap:3px;padding:0 3px 170px}
   .proof-sel{padding:0 18px 190px}
-  .proof-srow{grid-template-columns:84px 1fr;gap:12px}
+  .proof-srow{grid-template-columns:84px 1fr auto;gap:12px}
   .proof-srow img{width:84px;height:106px}
-  .proof-rm{grid-column:2}
   .proof-bar{flex-direction:column;align-items:stretch;gap:12px;padding:14px 18px calc(18px + env(safe-area-inset-bottom))}
   .proof-acts .proof-btn{flex:1;text-align:center}
   .proof-li{padding:0}

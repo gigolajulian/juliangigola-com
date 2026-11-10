@@ -409,7 +409,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
                     </button>
                     <div>
                       <p className="proof-fn">
-                        {pad(i)} <span>· {frames[i].file}</span>
+                        {pad(i)}
                       </p>
                     </div>
                     <button type="button" className="proof-rm" onClick={() => toggle(id)}>
@@ -442,7 +442,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
         <div className="proof-lb" ref={overlay} role="dialog" aria-modal="true" aria-label={`Frame ${open + 1}`}>
           <div className="proof-lt">
             <span>
-              {pad(open)} / {frames.length} · {frames[open].file}
+              {pad(open)} / {frames.length}
             </span>
             <button type="button" className="proof-close" onClick={() => setOpen(null)}>
               Close
@@ -467,7 +467,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
             </button>
           </div>
           <div className="proof-lf">
-            <span>{selects.includes(frames[open].id) ? `Pick ${selects.indexOf(frames[open].id) + 1}` : ""}</span>
+            <span>{n} / {included} selected</span>
             <button type="button" className={`proof-btn${selects.includes(frames[open].id) ? " ghost" : ""}`} onClick={() => toggle(frames[open].id)}>
               {selects.includes(frames[open].id) ? "Selected ✓" : "Select"}
             </button>
