@@ -218,11 +218,10 @@ const csp = [
   // The provider stills for the video page, which are 16:9 thumbnails on
   // their own CDNs rather than frames from the archive.
   "img-src 'self' data: blob: https://i.ytimg.com https://i.vimeocdn.com",
-  // Cal.com's embed script sets its loader in its own face, from `cal.com`.
   // Adobe Fonts for the `?font=v2` preview (`app/layout.tsx`): the kit's
   // stylesheet and files from use.typekit.net, its counting stylesheet
   // from p.typekit.net. Nothing loads from either without the flag.
-  "font-src 'self' https://cal.com https://use.typekit.net",
+  "font-src 'self' https://use.typekit.net",
   "style-src 'self' 'unsafe-inline' https://use.typekit.net https://p.typekit.net",
   // Cloudflare Web Analytics. The beacon is injected by the zone, not by
   // this app, so the first CSP blocked it and took the site's only analytics
@@ -239,23 +238,20 @@ const csp = [
      reel stays silent, which is the safe direction). The alternative was
      dropping the volume request or shipping sound at whatever level the
      visitor's last Vimeo session left it at. */
-  // `app.cal.com` is Cal.com's embed script, loaded only on a booking
-  // calendar with `?cal` on the address (`components/cal-embed.tsx`).
-  `script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com https://player.vimeo.com https://app.cal.com https://js.stripe.com https://*.js.stripe.com${__impeccableLiveDev}`,
+  `script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com https://player.vimeo.com https://js.stripe.com https://*.js.stripe.com${__impeccableLiveDev}`,
   // The two players, and only as an embed. `frame-ancestors 'self'` above
   // is the other direction and still says no other site may frame this one.
   // 'self' is the SEO tab's frame of the site's own pages.
   // And the booking calendars on /book and the session pages (Google Calendar
-  // appointment schedules, `components/book-picker.tsx`, `components/contact-screen.tsx`),
-  // and Cal.com's in their place behind `?cal` (`components/cal-embed.tsx`).
+  // appointment schedules, `components/book-picker.tsx`, `components/contact-screen.tsx`).
   // Stripe's Payment Element for the $100 deposit (`lib/deposit.ts`): its
   // script and frames from js.stripe.com, 3D Secure from hooks.stripe.com,
   // and its calls to api.stripe.com.
-  "frame-src 'self' https://www.youtube-nocookie.com https://player.vimeo.com https://calendar.google.com https://app.cal.com https://cal.com https://js.stripe.com https://*.js.stripe.com https://hooks.stripe.com",
+  "frame-src 'self' https://www.youtube-nocookie.com https://player.vimeo.com https://calendar.google.com https://js.stripe.com https://*.js.stripe.com https://hooks.stripe.com",
   // `vimeo.com` and `youtube.com` are oEmbed lookups made by /admin when a
   // link is pasted: the title, and the poster Vimeo does not publish at a
   // guessable URL. No page on the site fetches either.
-  `connect-src 'self' https://api.cal.com https://api.stripe.com https://api.github.com https://vimeo.com https://www.youtube.com${__impeccableLiveDev}`,
+  `connect-src 'self' https://api.stripe.com https://api.github.com https://vimeo.com https://www.youtube.com${__impeccableLiveDev}`,
   // Not on a local build (`LOCAL` above): there is no https on localhost.
   ...(LOCAL ? [] : ["upgrade-insecure-requests"]),
 ].join("; ");

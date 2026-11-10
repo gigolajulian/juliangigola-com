@@ -8,7 +8,7 @@ import { manageLinks } from "@/lib/booking-token";
 
 /* ── the $100 deposit ─────────────────────────────────────────────
  * Julian (2026-10-16): the four paid sessions take a $100 deposit on the
- * site, in the site's own card, before Cal.com books the time. The order
+ * site, in the site's own card, before the time is booked. The order
  * is what keeps it honest: nothing is booked until Stripe says the money
  * arrived, so there are no unpaid holds.
  *
@@ -16,22 +16,18 @@ import { manageLinks } from "@/lib/booking-token";
  *      PaymentIntent. What to book rides on the intent's metadata, so an
  *      abandoned card costs no KV write.
  *   2. The visitor pays in the Stripe Payment Element.
- *   3. Stripe's signed webhook (`/api/stripe`) books Cal.com. If the time
- *      went in the meantime, or Cal.com refuses, the deposit is refunded
- *      at once. If even the refund fails, the Inbox gets a row saying so.
+ *   3. Stripe's signed webhook (`/api/stripe`) books the time through the
+ *      lock (`lib/booking-engine.ts`). If the time went in the meantime,
+ *      the deposit is refunded at once. If even the refund fails, the Inbox gets a row saying so.
  *   4. The card polls GET /api/deposit/<id> for the outcome. The webhook
  *      copies it onto the intent's metadata and the poll reads it from
  *      Stripe: KV caches a miss for up to a minute at the visitor's
  *      location, so the card read "pending" after the booking was made
  *      (QA, 2026-10-16).
  *   5. Julian (2026-10-16) hears about it: hello@ gets a mail for every
- *      deposit booked, refunded, or paid and stuck. The Cal.com booking
- *      carries the intent id (metadata, and a ref in the notes). When
- *      Cal.com's own webhook stores the booking, `paidFor` asks Stripe
- *      whether that intent really paid for this booking before the Inbox
- *      row says "Deposit paid": anyone can type a ref into their notes.
- *      The client's receipt is Stripe's, from `receipt_email`, and the
- *      site's own confirmation (`lib/confirm.ts`) once Cal.com books.
+ *      deposit booked, refunded, or paid and stuck. The client's receipt
+ *      is Stripe's, from `receipt_email`, and the site's own confirmation
+ *      (`lib/confirm.ts`) once the time is booked.
  *
  * Stripe is called over its REST API with fetch, no SDK: three calls do
  * not need a dependency. Test-mode keys until Julian says live.
@@ -45,8 +41,6 @@ export const KIND = "deposit";
 /** Whether a paid intent is one of the site's deposits, not any other payment on the account. */
 export const isDeposit = (pi: { amount?: number; currency?: string; metadata?: { [k: string]: string } }) =>
   pi.metadata?.kind === KIND && pi.amount === AMOUNT && pi.currency === CURRENCY;
-const USER = "juliangigola";
-const CAL = "https://api.cal.com/v2";
 const STRIPE = "https://api.stripe.com/v1";
 /** How old a webhook's timestamp may be before it is treated as a replay. */
 const TOLERANCE_S = 300;
@@ -100,53 +94,16 @@ export function parseBooking(raw: unknown, call = false): Booking | string {
     phone: cap(b.phone, 20) || undefined,
     where: cap(b.where) || undefined,
     notes: cap(b.notes) || undefined,
-    engine: b.engine === "own" ? "own" : undefined,
+    engine: "own",
   };
 }
 
-const dayIn = (iso: string, tz: string, plus = 0) =>
-  new Intl.DateTimeFormat("en-CA", { timeZone: tz }).format(new Date(Date.parse(iso) + plus * 864e5));
-
 /**
- * Whether the start is still offered: by hello@'s calendar for the site's engine, else by Cal.com.
+ * Whether the start is still offered by hello@'s calendar.
  * `hours`: Julian's, from the lock (`liveHours`); the defaults when unset.
  */
 export async function isOpen(b: Booking, gcalSecret?: string, kv?: KV, hours?: Hours): Promise<boolean> {
-  if (b.engine === "own") return openNow(gcalSecret, b.slug, b.start, undefined, kv, hours);
-  const q = new URLSearchParams({
-    username: USER,
-    eventTypeSlug: b.slug,
-    start: dayIn(b.start, b.timeZone, -1),
-    end: dayIn(b.start, b.timeZone, 1),
-    timeZone: b.timeZone,
-  });
-  const res = await fetch(`${CAL}/slots?${q}`, { headers: { "cal-api-version": "2024-09-04" } });
-  if (!res.ok) throw new Error(`Cal.com slots ${res.status}`);
-  const { data } = (await res.json()) as { data?: { [day: string]: { start: string }[] } };
-  const want = Date.parse(b.start);
-  return Object.values(data ?? {}).some((day) => day.some((s) => Date.parse(s.start) === want));
-}
-
-/** Books the time on Cal.com, as the picker does from the browser. */
-export async function bookCal(b: Booking, intent: string): Promise<{ uid: string; start: string; end?: string }> {
-  const res = await fetch(`${CAL}/bookings`, {
-    method: "POST",
-    headers: { "cal-api-version": "2024-08-13", "Content-Type": "application/json" },
-    body: JSON.stringify({
-      start: b.start,
-      eventTypeSlug: b.slug,
-      username: USER,
-      attendee: { name: b.name, email: b.email, timeZone: b.timeZone, language: "en", ...(b.phone ? { phoneNumber: b.phone } : {}) },
-      ...(b.where ? { location: { type: "attendeeDefined", location: b.where } } : {}),
-      metadata: { deposit: intent },
-      bookingFieldsResponses: {
-        notes: [b.phone ? `Phone: ${b.phone}` : "", `Deposit paid on the site: $100 (ref ${intent}).`, b.notes ?? ""].filter(Boolean).join("\n"),
-      },
-    }),
-  });
-  const out = (await res.json().catch(() => ({}))) as { status?: string; data?: { uid?: string; start?: string; end?: string } };
-  if (!res.ok || out.status !== "success" || !out.data?.uid) throw new Error(`Cal.com booking ${res.status}`);
-  return { uid: out.data.uid, start: out.data.start ?? b.start, end: out.data.end };
+  return openNow(gcalSecret, b.slug, b.start, undefined, kv, hours);
 }
 
 /** A call to Stripe's API: a form-encoded POST, or a GET without a form. */
@@ -184,33 +141,9 @@ export function intentForm(b: Booking): { [k: string]: string } {
   };
   for (const [k, v] of Object.entries(b)) if (v) form[`metadata[${k}]`] = v;
   // Marks the site's own intents: the webhook leaves every other payment
-  // on the account (Cal.com's, invoices, payment links) alone.
+  // on the account (invoices, payment links) alone.
   form["metadata[kind]"] = KIND;
   return form;
-}
-
-/**
- * The Stripe link of the deposit that paid for this Cal.com booking;
- * `undefined` when there is none; `false` when Stripe could not be asked,
- * so a real deposit is never called missing (QA on #192). Only an intent
- * Stripe says succeeded, that is one of the site's deposits, and that was
- * made for this booking's email and start counts. A refunded or failed one
- * never does (a refund keeps the intent's status succeeded), and once the
- * site booked it, only for that Cal.com booking.
- */
-export async function paidFor(key: string, p: { uid?: string; startTime?: string; attendees?: { email?: string }[]; additionalNotes?: string; metadata?: { [k: string]: unknown } }) {
-  const ref = typeof p.metadata?.deposit === "string" ? p.metadata.deposit : p.additionalNotes?.match(/\bpi_[A-Za-z0-9]{8,64}\b/)?.[0];
-  if (!ref || !isIntentId(ref)) return undefined;
-  try {
-    const pi = (await stripe(key, `/payment_intents/${ref}`)) as { status?: string; amount?: number; currency?: string; metadata?: { [k: string]: string } };
-    const m = pi.metadata ?? {};
-    const same = m.email?.toLowerCase() === p.attendees?.[0]?.email?.toLowerCase() && Date.parse(m.start ?? "") === Date.parse(p.startTime ?? "");
-    const live = m.outcome !== "refunded" && m.outcome !== "failed" && (!m.cal_uid || m.cal_uid === p.uid);
-    return pi.status === "succeeded" && isDeposit(pi) && same && live ? dashboardLink(ref, key) : undefined;
-  } catch (e) {
-    // Stripe has no such intent: a made-up ref, so no deposit. Anything else: unknown.
-    return (e as { status?: number }).status === 404 ? undefined : false;
-  }
 }
 
 /** The booking back out of an intent's metadata. */
@@ -260,8 +193,8 @@ async function cardOf(key: string, intent: string) {
 const SAID = { booked: "Deposit paid", refunded: "Deposit refunded", failed: "Deposit paid, not booked, not refunded" } as const;
 const NEXT = {
   booked: "Booked.",
-  refunded: "The time was gone or Cal.com refused the booking, so Stripe refunded them. Nothing is booked.",
-  failed: "Cal.com did not take the booking and the automatic refund failed. Refund it by hand in Stripe and email them.",
+  refunded: "The time was gone, so Stripe refunded them. Nothing is booked.",
+  failed: "The time could not be booked and the automatic refund failed. Refund it by hand in Stripe and email them.",
 };
 
 // Bytes, never a base64 string: `send()` mails a string as-is, so the picture arrives as text.
@@ -322,20 +255,6 @@ async function tell(env: Env, status: keyof typeof SAID, b: Booking | string, li
 }
 
 /**
- * Julian (2026-10-16): Cal.com is $0, so its public page books a paid
- * session with no deposit. Such a booking is flagged, not stopped: a mail
- * to hello@ so he can cancel it or ask for the $100. Returns the subject,
- * once hello@ has it, so the caller can log it on the lead.
- */
-export async function tellNoDeposit(email: Env["EMAIL"], slug: string, start: string | undefined, who: { name: string; email: string }): Promise<string | null> {
-  const subject = `Booked without a deposit: ${[SESSION[slug] ?? slug, whenPT(start), who.name].join(", ")}`;
-  return (await mail(email, subject, [
-    `${who.name} <${who.email}>`,
-    "Stripe confirms no deposit for this booking, so it most likely came through cal.com directly. Cancel it in Cal.com or ask them for the $100.",
-  ], who)) ? subject : null;
-}
-
-/**
  * A paid intent becomes a booking, once. Stripe may deliver the same event
  * twice; the record makes every delivery after the first a no-op.
  * ponytail: KV is not a lock, so two deliveries in the same second could both
@@ -346,7 +265,7 @@ export async function settle(env: Env, intent: string, metadata: { [k: string]: 
   const seen = await env.INBOX.get(key);
   if (seen) {
     const r = JSON.parse(seen) as DepositRecord;
-    /* "booking" is written before Cal.com is asked. If the Worker was cut
+    /* "booking" is written before the lock is asked. If the Worker was cut
        off there, every retry from Stripe returned here in silence and the
        deposit sat paid, maybe booked, maybe not. Past two minutes, hello@
        hears once; the record keeps its status and is marked warned. */
@@ -359,10 +278,10 @@ export async function settle(env: Env, intent: string, metadata: { [k: string]: 
       const what = who ? [SESSION[who.slug] ?? who.slug, whenPT(who.start), who.name, "$100"].join(", ") : "$100";
       await env.INBOX.put(key, JSON.stringify({ ...r, warned: true }), { expirationTtl: 90 * 864e2 }).catch((e: unknown) => console.error("deposit record", "warned", String(e)));
       if (who) await recordLead(env, who.email, { event: { at: new Date().toISOString(), kind: "deposit-stuck", ref: intent, note: what }, name: who.name, kind: who.slug, flag: "stuck" });
-      const subject = `Deposit stuck: check Stripe and Cal.com: ${what}`;
+      const subject = `Deposit stuck: check Stripe and the calendar: ${what}`;
       if (await mail(env.EMAIL, subject, [
         who ? `${who.name} <${who.email}>` : "Unknown client",
-        `Paid, and the booking was started at ${r.at} but never finished. Check Cal.com for the booking, then book or refund in Stripe by hand.`,
+        `Paid, and the booking was started at ${r.at} but never finished. Check the calendar for the booking, then book or refund in Stripe by hand.`,
         `Stripe: ${dashboardLink(intent, env.STRIPE_SECRET_KEY)}`,
       ], who)) await logMail(env, who?.email, subject, { to: "hello@", kind: "deposit-stuck", booking: intent });
       return "failed";
@@ -390,23 +309,22 @@ export async function settle(env: Env, intent: string, metadata: { [k: string]: 
   if (typeof b !== "string") {
     try {
       // The site's engine rechecks and books in one step, inside its lock.
-      const own = b.engine === "own" ? await lock<BookResult>(env, "book", { ...b, intent }) : null;
-      const booking = own ? (own.ok ? { uid: own.record.id, start: own.record.start, end: own.record.end } : null) : (await isOpen(b, env.GCAL_OAUTH, env.INBOX)) ? await bookCal(b, intent) : null;
-      if (booking) {
-        await put({ status: "booked", booking: { uid: booking.uid, start: booking.start } });
+      const own = await lock<BookResult>(env, "book", { ...b, intent });
+      if (own.ok) {
+        const booking = own.record;
+        await put({ status: "booked", booking: { uid: booking.id, start: booking.start } });
         await tell(env, "booked", b, link, intent);
-        // Cal.com's webhook files its own bookings; the site files its own here.
-        if (own?.ok) await recordBooking(env, own.record, dashboardLink(intent, env.STRIPE_SECRET_KEY));
+        await recordBooking(env, booking, dashboardLink(intent, env.STRIPE_SECRET_KEY));
         const confirm = {
           ...b,
           session: SESSION[b.slug] ?? b.slug,
           start: booking.start,
           end: booking.end,
-          uid: booking.uid,
+          uid: booking.id,
           deposit: { ref: intent, at: new Date().toISOString(), card: await cardOf(env.STRIPE_SECRET_KEY, intent) },
-          ...(own?.ok ? { manage: await manageLinks(env.BOOKING_SECRET, own.record) } : {}),
+          manage: await manageLinks(env.BOOKING_SECRET, booking),
         };
-        if (await sendConfirm(env.CLIENT_EMAIL, confirm)) await logMail(env, b.email, confirmMail(confirm).subject, { to: "client", kind: "confirm", booking: booking.uid });
+        if (await sendConfirm(env.CLIENT_EMAIL, confirm)) await logMail(env, b.email, confirmMail(confirm).subject, { to: "client", kind: "confirm", booking: booking.id });
         return "booked";
       }
     } catch {
@@ -431,7 +349,7 @@ export async function settle(env: Env, intent: string, metadata: { [k: string]: 
           name: who.name,
           email: who.email,
           detail: `Deposit paid, not booked, not refunded`,
-          message: `A $100 deposit (${intent}) was paid, but Cal.com did not take the booking and the automatic refund failed. Refund it by hand in Stripe and email them.`,
+          message: `A $100 deposit (${intent}) was paid, but the time could not be booked and the automatic refund failed. Refund it by hand in Stripe and email them.`,
         },
         now,
         id,

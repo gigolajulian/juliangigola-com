@@ -86,7 +86,6 @@ export function ManageBooking({ booking, token, open }: { booking: Managed; toke
           <TimePicker
             path={`juliangigola/${b.slug}`}
             title={b.session}
-            own
             onPicked={(start) => act({ action: "reschedule", start })}
             fallback={<p>Times did not load. Reply to your confirmation email and I&apos;ll move it.</p>}
           />

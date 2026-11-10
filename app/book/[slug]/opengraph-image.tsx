@@ -1,17 +1,18 @@
 import { CARD_SIZE, CARD_TYPE, framesOf, renderCard } from "@/lib/share-card";
 import { BOOK_MENU, pageForSession } from "@/lib/booking";
 import { FEATURED } from "@/lib/work";
+import { SESSIONS } from "@/lib/v3";
 
 export const size = CARD_SIZE;
 export const contentType = CARD_TYPE;
 export const alt = "Julian Gigola";
 
 export function generateStaticParams() {
-  return [...BOOK_MENU.map((m) => ({ slug: m.slug })), { slug: "consultation" }, { slug: "editorial" }];
+  return Object.keys(SESSIONS).map((slug) => ({ slug }));
 }
 
 /* Which of a session's picks (0-based) its card uses, cover first, where the first two will not do. */
-const CARD_PICKS: Record<string, number[]> = { portraits: [0, 4] };
+const CARD_PICKS: Record<string, number[]> = { portraits: [1, 5] };
 
 export default async function Image({ params }: { params: Promise<{ slug: string }> }) {
   const slug = (await params).slug;
