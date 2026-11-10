@@ -9,11 +9,11 @@ const goo = typeof location === "undefined" || new URLSearchParams(location.sear
 
 /* ── the deposit ─────────────────────────────────────────────────────
  * Julian (2026-10-16), behind `?deposit`: a paid session's $100 deposit
- * taken in the card, after its form, in place of Cal.com's own checkout.
+ * taken in the card, after its form.
  * Stripe's card fields, dressed as the site.
  * The server side is JG - BACKEND's: POST /api/deposit makes the
  * PaymentIntent (and says 409 when the time has gone), its webhook books
- * Cal.com, GET /api/deposit/<id> says how that went.
+ * the time through the lock, GET /api/deposit/<id> says how that went.
  * ─────────────────────────────────────────────────────────────────── */
 
 type StripeError = { type: string; message?: string };
@@ -110,8 +110,8 @@ export type DepositBody = {
   notes?: string;
   where?: string;
   session?: string;
-  /** The site's own engine books it, not Cal.com (`?ownbook`). */
-  engine?: "own";
+  /** Booked by the site's engine, through its lock. */
+  engine: "own";
 };
 
 type Stage = "loading" | "ready" | "paying" | "confirming" | "taken" | "refunded" | "failed" | "slow" | "broken" | "declined";

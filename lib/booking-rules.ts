@@ -92,18 +92,6 @@ export const REFUND_HOURS = 48;
 export const refundable = (r: { intent?: string; start: string; firstStart?: string }, now = Date.now()) =>
   !!r.intent && Math.min(Date.parse(r.start), Date.parse(r.firstStart ?? r.start)) - now >= REFUND_HOURS * 36e5;
 
-/* Cut over: live books through the site's own engine (Google Calendar
-   times, `/api/book`). NEXT_PUBLIC_BOOKING_ENGINE (.env.production) and
-   the Worker's BOOKING_ENGINE (wrangler.jsonc) are both "own"; "cal"
-   would put the picker back on Cal.com's API. */
-
-/** The browser's choice: the build's engine, or `?ownbook`. */
-export const ownEngine = () =>
-  process.env.NEXT_PUBLIC_BOOKING_ENGINE === "own" || (typeof location !== "undefined" && new URLSearchParams(location.search).has("ownbook"));
-
-/** The server's choice: the Worker's engine, or a request that asked for the site's own. */
-export const ownOnServer = (env: { BOOKING_ENGINE?: string }, asked?: unknown) => env.BOOKING_ENGINE === "own" || asked === "own";
-
 /** A visitor's booking, checked by `parseBooking` in `lib/deposit.ts`. */
 export type Booking = {
   slug: string;
@@ -115,6 +103,6 @@ export type Booking = {
   phone?: string;
   where?: string;
   notes?: string;
-  /** "own": booked by the site's engine (`lib/booking-rules.ts`), not Cal.com. */
-  engine?: "own";
+  /** Booked by the site's engine (`lib/booking-engine.ts`), through its lock. */
+  engine: "own";
 };

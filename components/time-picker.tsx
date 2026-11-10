@@ -7,7 +7,6 @@ import { cn } from "@/lib/utils";
 import { DepositStep, type DepositBody } from "@/components/deposit-step";
 import { ReferencePicks } from "@/components/reference-picks";
 import { isPaid } from "@/lib/paid";
-import { ownEngine } from "@/lib/booking-rules";
 import { Orb, ORB_ROUND } from "@/components/orb";
 import { JgLoad } from "@/components/jg-load";
 import { Calendar, dlabel, duration, fmt, type Shell } from "@/components/v3/flow";
@@ -18,27 +17,20 @@ import { GESTURE_GAP_MS } from "@/components/strip/shared";
 const goo = typeof location === "undefined" || new URLSearchParams(location.search).get("goo") !== "0";
 
 /* ── the time picker ──────────────────────────────────────────────
- * Cal.com's open times, in two plain steps: a day, then a time. Days
+ * The open times, in two plain steps: a day, then a time. Days
  * are cards (a week, or the month) with how open each is; the open times
  * of the day picked are buttons, and the one picked is the large number.
  * Julian: the ruler of ticks was too minimal to read at a glance.
  *
- * It reads and books through Cal.com's public API, which needs no key
- * and allows any origin, so there is no server here: slots from
- * `/v2/slots`, a booking from `/v2/bookings`. The times are Cal.com's,
- * which already hold your working hours, both connected calendars and
- * the minimum notice.
- *
- * Live reads the site's own engine instead (`ownEngine()`, `/api/slots`,
+ * It reads and books through the site's own engine (`/api/slots`,
  * `/api/book`). If the times do not come, `fallback` is shown: Try again,
  * Inquire and the address (`components/cal-embed.tsx`).
  * ─────────────────────────────────────────────────────────────── */
 
 const noop = () => () => {};
-const API = "https://api.cal.com/v2";
 /* An event's details and times, kept a minute, so a picker built again
-   (the homepage menu builds one per row pointed at) does not ask Cal.com
-   again. A reload after a failed booking asks fresh. */
+   (the homepage menu builds one per row pointed at) does not ask the
+   server again. A reload after a failed booking asks fresh. */
 const KEEP = 60_000;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const recent = new Map<string, { at: number; got: Promise<[any, any]> }>();
@@ -137,7 +129,6 @@ export function TimePicker({
   className,
   fallback,
   v3,
-  own: forceOwn,
   onPicked,
 }: {
   /** "username/event-slug" */
@@ -147,8 +138,6 @@ export function TimePicker({
   fallback: React.ReactNode;
   /** JG V3: the booking as the master's stepper, inside the page's shell. */
   v3?: V3Book;
-  /** The site's own engine whatever the address says (a reschedule, `components/manage-booking.tsx`). */
-  own?: boolean;
   /** A time picked and confirmed: handed here instead of opening the form (a reschedule). */
   onPicked?: (start: string) => void;
 }) {
@@ -297,34 +286,25 @@ export function TimePicker({
   }, [ok]);
 
   const load = React.useCallback(async (fresh = false) => {
-    const own = forceOwn || ownEngine();
     const key = `${username}/${slug}/${tz}`;
     try {
       const from = new Date();
       const to = new Date(Date.now() + AHEAD * 864e5);
-      // Cal.com not answering at all left "Loading times" up for good: past
-      // 8 seconds its own calendar takes over, as for any other failure.
+      // No answer at all left "Loading times" up for good: past
+      // 8 seconds the fallback takes over, as for any other failure.
       const signal = AbortSignal.timeout?.(8000);
       const hit = recent.get(key);
-      // The site's own engine answers both in one (`app/api/slots`), in Cal.com's shape.
-      const got = !fresh && hit && Date.now() - hit.at < KEEP ? hit.got : own ? fetch(`/api/slots?slug=${slug}&start=${iso(from)}&end=${iso(to)}&timeZone=${encodeURIComponent(tz)}`, { signal })
+      // The event and its times in one (`app/api/slots`).
+      const got = !fresh && hit && Date.now() - hit.at < KEEP ? hit.got : fetch(`/api/slots?slug=${slug}&start=${iso(from)}&end=${iso(to)}&timeZone=${encodeURIComponent(tz)}`, { signal })
         .then((r) => r.json())
-        .then((j) => [{ data: j.event }, j] as [unknown, unknown]) : Promise.all([
-        fetch(`${API}/event-types?username=${username}&eventSlug=${slug}`, { headers: { "cal-api-version": "2024-06-14" }, signal }).then((r) => r.json()),
-        fetch(`${API}/slots?username=${username}&eventTypeSlug=${slug}&start=${iso(from)}&end=${iso(to)}&timeZone=${encodeURIComponent(tz)}&format=range`, {
-          headers: { "cal-api-version": "2024-09-04" },
-          signal,
-        }).then((r) => r.json()),
-      ]);
+        .then((j) => [{ data: j.event }, j] as [unknown, unknown]);
       if (got !== hit?.got) recent.set(key, { at: Date.now(), got });
       const [meta, slots] = await got;
       const ev = Array.isArray(meta.data) ? meta.data[0] : meta.data;
       if (!ev || slots.status !== "success") throw new Error("no times");
       // A paid event's deposit is taken here (deposit-step.tsx) where the
-      // build has Stripe's key; without it, on Cal.com's own form (Julian:
-      // the site's calendar everywhere, the homepage's sessions too).
-      // Paid by the site's list (lib/paid.ts): Cal.com's price reads 0 with
-      // its own Stripe app off.
+      // build has Stripe's key; without it, the fallback.
+      // Paid by the site's list (lib/paid.ts).
       const owes = isPaid(slug) || (ev.price ?? 0) > 0;
       if (ev.requiresConfirmation || (owes && !process.env.NEXT_PUBLIC_STRIPE_PK)) {
         setState("fallback");
@@ -342,7 +322,7 @@ export function TimePicker({
       // keeps the times it had, and the form with what was typed in it.
       setState((s) => (s === "ready" ? s : "fallback"));
     }
-  }, [username, slug, tz, forceOwn]);
+  }, [username, slug, tz]);
 
   React.useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -783,7 +763,7 @@ export function TimePicker({
     const firstName = name.split(/\s+/)[0];
     if (paid) {
       setBooked({ name: firstName, email: String(form.get("email")).trim(), where, phone, via: "" });
-      setDeposit({ ...(ownEngine() ? { engine: "own" as const } : {}), slug, start: new Date(pick.start).toISOString(), timeZone: tz, name, email: String(form.get("email")), phone, ...(notes ? { notes } : {}), ...(needsWhere ? { where } : {}), session });
+      setDeposit({ engine: "own", slug, start: new Date(pick.start).toISOString(), timeZone: tz, name, email: String(form.get("email")), phone, ...(notes ? { notes } : {}), ...(needsWhere ? { where } : {}), session });
       const sent = new FormData();
       form.getAll("refs").forEach((f) => f instanceof File && f.size && sent.append("refs", f));
       if (form.get("picks")) sent.append("picks", String(form.get("picks")));
@@ -793,33 +773,20 @@ export function TimePicker({
     }
     // A call (editorial): by video on its Meet link, or I ring the number.
     const via = String(form.get("via") || "");
-    const said = via === "Phone" ? `Phone call: ring ${phone}` : via === "Video" ? "Video call (Google Meet)" : "";
     /* Development only: `?sim=ok` books nothing, to see the page after. */
     const sim = process.env.NODE_ENV !== "production" && new URLSearchParams(location.search).get("sim") === "ok";
     try {
       if (!sim) {
-      // The site's own engine (`app/api/book`) answers in Cal.com's shape.
-      const res = ownEngine() ? await fetch("/api/book", {
+      const res = await fetch("/api/book", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ engine: "own", slug, start: new Date(pick.start).toISOString(), timeZone: tz, name, email: String(form.get("email")), phone, via, ...(notes ? { notes } : {}), ...(needsWhere ? { where } : {}) }),
-      }) : await fetch(`${API}/bookings`, {
-        method: "POST",
-        headers: { "cal-api-version": "2024-08-13", "Content-Type": "application/json" },
-        body: JSON.stringify({
-          start: new Date(pick.start).toISOString(),
-          eventTypeSlug: slug,
-          username,
-          attendee: { name, email: String(form.get("email")), ...(phone ? { phoneNumber: phone } : {}), timeZone: tz, language: "en" },
-          ...(needsWhere ? { location: { type: "attendeeDefined", location: where } } : {}),
-          bookingFieldsResponses: { notes: [said, phone && `Phone: ${phone}`, notes].filter(Boolean).join("\n") },
-        }),
       });
       const body = await res.json();
       if (!res.ok || body.status !== "success") throw new Error(body?.error?.message || "failed");
       }
       setBooked({ name: firstName, email: String(form.get("email")).trim(), where, phone, via });
-      /* The orbs get their moment even when Cal.com answers at once, then
+      /* The orbs get their moment even when the server answers at once, then
          turn into the check, which is shown before the page that follows. */
       // JG V3 draws no orb, so it has no moment to wait for.
       if (!v3) {
@@ -827,7 +794,7 @@ export function TimePicker({
         setStep("check");
         await new Promise((go) => setTimeout(go, 1500));
       }
-      // The time is taken now: the next picker asks Cal.com again.
+      // The time is taken now: the next picker asks again.
       recent.delete(`${username}/${slug}/${tz}`);
       setStep("done");
     } catch (e) {

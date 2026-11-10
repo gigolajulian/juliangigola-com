@@ -1,11 +1,10 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { ownOnServer } from "@/lib/booking-rules";
 import { liveHours } from "@/lib/booking-engine";
 import { AMOUNT, CURRENCY, intentForm, isOpen, parseBooking, stripe } from "@/lib/deposit";
 
 /* ── a deposit starts ──────────────────────────────────────────────
  * The card posts the booking it wants; this checks the time is still
- * open on Cal.com and creates a $100 PaymentIntent for the Payment
+ * open in hello@'s calendar and creates a $100 PaymentIntent for the Payment
  * Element. The amount is fixed here, never taken from the request.
  * Off (503) until STRIPE_SECRET_KEY is set. See `lib/deposit.ts`.
  * ─────────────────────────────────────────────────────────────── */
@@ -25,10 +24,9 @@ export async function POST(request: Request) {
 
   const b = parseBooking(await request.json().catch(() => null));
   if (typeof b === "string") return json({ error: b }, 400);
-  if (ownOnServer(env, b.engine)) b.engine = "own";
 
   try {
-    if (!(await isOpen(b, env.GCAL_OAUTH, env.INBOX, b.engine === "own" ? await liveHours(env) : undefined))) return json({ error: "taken" }, 409);
+    if (!(await isOpen(b, env.GCAL_OAUTH, env.INBOX, await liveHours(env)))) return json({ error: "taken" }, 409);
   } catch {
     return json({ error: "Could not reach the calendar. Try again." }, 502);
   }
