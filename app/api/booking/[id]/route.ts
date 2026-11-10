@@ -24,7 +24,7 @@ const SAY = { missing: [404, "No such booking."], cancelled: [409, "This booking
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { env } = await getCloudflareContext({ async: true });
   const { id } = await params;
-  const body = (await request.json().catch(() => ({}))) as { t?: string; action?: string; start?: string };
+  const body = ((await request.json().catch(() => null)) ?? {}) as { t?: string; action?: string; start?: string };
   if (!(await tokenOpens(env.BOOKING_SECRET, id, body.t))) return json({ error: "This link has expired. Reply to your confirmation email." }, 401);
 
   let out: ChangeResult;

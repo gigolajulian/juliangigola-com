@@ -187,7 +187,8 @@ export async function cancelOwn(store: Store, secret: string | undefined, id: st
     await gcal(secret, `/calendars/primary/events/${encodeURIComponent(was.eventId)}?sendUpdates=none`, { method: "DELETE" });
   } catch (e) {
     // Deleted by hand on the calendar already: the cancel still stands.
-    if (!/ (404|410)/.test(String(e))) throw e;
+    const s = (e as { status?: number }).status;
+    if (s !== 404 && s !== 410) throw e;
   }
   const record = { ...was, cancelled: new Date().toISOString() };
   await saveBooking(store, record);

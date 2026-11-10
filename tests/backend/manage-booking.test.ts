@@ -66,6 +66,7 @@ beforeEach(() => {
       return Response.json({ id: ev });
     }
     if (method === "DELETE" && ev) {
+      if (!busy.some((x) => x.id === ev)) return Response.json({ error: { message: "Not Found" } }, { status: 404 });
       busy = busy.filter((x) => x.id !== ev);
       return new Response(null, { status: 204 });
     }
@@ -155,6 +156,19 @@ describe("cancel", () => {
     refundOk = false;
     expect(await (await post(id, { t, action: "cancel" })).json()).toMatchObject({ refunded: false });
     expect(String(mail.sent.at(-1)!.text)).toContain("refund it by hand");
+  });
+
+  it("still cancels when the event was deleted from the calendar by hand", async () => {
+    const { id, t } = await paid(wednesday(7));
+    busy = [];
+    const res = await post(id, { t, action: "cancel" });
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ record: { cancelled: true } });
+  });
+
+  it("answers a JSON null body with the expired-link 401, not a 500", async () => {
+    const { id } = await paid(wednesday(7));
+    expect((await post(id, null)).status).toBe(401);
   });
 
   it("a free call cancels with no money", async () => {

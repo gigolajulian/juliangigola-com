@@ -62,7 +62,7 @@ export async function syncGmail(env: LeadStore & { GCAL_OAUTH?: string }): Promi
       h = await gcal<History>(env.GCAL_OAUTH, `${GMAIL}/history?startHistoryId=${start}&historyTypes=messageAdded${page ? `&pageToken=${page}` : ""}`);
     } catch (e) {
       // A cursor older than Gmail keeps (about a week): start again from now.
-      if (/ 404\b/.test(String(e))) return restart();
+      if ((e as { status?: number }).status === 404) return restart();
       throw e;
     }
     for (const r of h.history ?? []) {
