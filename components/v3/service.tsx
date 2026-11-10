@@ -22,7 +22,7 @@ export function V3Service({ page, frames }: { page: BookingPage; frames: Frame[]
   const cols = [0, 1, 2].map((c) => frames.slice(0, 6).filter((_, i) => i % 3 === c));
   const others = BOOKING_PAGES.filter((p) => p !== page);
   /* Julian's picks from the mock: one frame beside the title, or two offset on portraits. */
-  const hero = (page.slug === "portraits" ? [frames[1], frames[4]] : [frames[0]]).filter(Boolean);
+  const hero = (page.slug === "portraits" ? [frames[3], frames[2]] : [frames[0]]).filter(Boolean);
   return (
     <div className="v3 contents">
       <section className="v3page" id="p-service">
