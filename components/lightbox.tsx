@@ -405,6 +405,15 @@ function useSwipe({
     place(0, 0, 1, 1, true);
   };
 
+  /* A cancel (a system gesture, or the second finger of a pinch) only snaps
+     back: it never steps or closes, wherever the finger was. Any pointer, so
+     the pinch's second finger lets go of the first one's drag. */
+  const onPointerCancel: React.PointerEventHandler<HTMLDivElement> = () => {
+    if (!drag.current) return;
+    drag.current = null;
+    place(0, 0, 1, 1, true);
+  };
+
   const onClickCapture: React.MouseEventHandler<HTMLDivElement> = (e) => {
     if (moved.current) {
       e.stopPropagation();
@@ -418,7 +427,7 @@ function useSwipe({
       onPointerDown,
       onPointerMove,
       onPointerUp,
-      onPointerCancel: onPointerUp,
+      onPointerCancel,
       onClickCapture,
     },
   };
