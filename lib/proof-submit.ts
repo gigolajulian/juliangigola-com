@@ -93,10 +93,12 @@ export async function paidFor(key: string, p: Proof, session: string): Promise<P
   const meta = s.metadata as Record<string, string> | undefined;
   // A bank payment comes back complete but unpaid: accepted, settling in about 4 business days. The selects lock now; settle() follows it.
   const bank = s.status === "complete" && s.payment_status === "unpaid";
-  if ((s.payment_status !== "paid" && !bank) || meta?.proof !== p.token || Number(s.amount_total) < owed(p).cents) return null;
+  // No amount is no payment: NaN would pass the `<` check and be stored as paid.
+  const total = s.amount_total;
+  if ((s.payment_status !== "paid" && !bank) || meta?.proof !== p.token || typeof total !== "number" || total < owed(p).cents) return null;
   // Added to anything paid before the gallery was reopened.
   // A card payment carries Stripe's fee on top: only what was owed counts toward the balance and extras.
-  return { session, amount: (p.paid?.amount ?? 0) + Math.min(Number(s.amount_total), owed(p).cents), at: new Date().toISOString(), ...(bank ? { pending: true } : {}) };
+  return { session, amount: (p.paid?.amount ?? 0) + Math.min(total, owed(p).cents), at: new Date().toISOString(), ...(bank ? { pending: true } : {}) };
 }
 
 export const PAYMENTS_DOWN = "Payments are down right now. Try again in a few minutes.";
@@ -111,6 +113,8 @@ export async function settle(key: string, p: Proof): Promise<Proof | null> {
   const s = await stripe(key, `/checkout/sessions/${p.paid.session}?expand[]=payment_intent`);
   if (s.payment_status === "paid") return { ...p, paid: { ...p.paid, pending: undefined } };
   const pi = s.payment_intent as { status?: string } | null;
-  if (pi?.status === "requires_payment_method" || pi?.status === "canceled") return { ...p, paid: { ...p.paid, pending: undefined, failed: true, amount: Math.max(0, p.paid.amount - Number(s.amount_total)) } };
+  // Without an amount to take back, leave it settling: the next check tries again.
+  if (typeof s.amount_total !== "number") return null;
+  if (pi?.status === "requires_payment_method" || pi?.status === "canceled") return { ...p, paid: { ...p.paid, pending: undefined, failed: true, amount: Math.max(0, p.paid.amount - s.amount_total) } };
   return null;
 }
