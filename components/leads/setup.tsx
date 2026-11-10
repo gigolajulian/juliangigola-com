@@ -349,5 +349,4 @@ async function exportCsv() {
   setTimeout(() => URL.revokeObjectURL(url), 5000);
 }
 
-export { PUSH_FLAG, SW_URL, swScope, PushSwitch, ImportInbox, EmptyTrash, SOURCES, NewLeadForm, hours, StatsView, TemplatesEditor, exportCsv };
-export type { Count, Stats };
+export { SW_URL, swScope, PushSwitch, ImportInbox, EmptyTrash, NewLeadForm, StatsView, TemplatesEditor, exportCsv };
