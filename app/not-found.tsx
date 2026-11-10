@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { NotFoundScene, BlinkingMark } from "@/components/not-found-scene";
+import { NotFoundScene } from "@/components/not-found-scene";
 import DriftWall from "@/components/DriftWall";
 import { DISCIPLINES, WALL, titleCase } from "@/lib/work";
 import { wallItem } from "@/lib/wall-tile";
@@ -89,7 +89,6 @@ export default function NotFound() {
         {/* JG V3 (leftovers card H): the master's type, buttons and rows over the same wall. */}
         <section className="v3 nf pointer-events-none relative [&_a]:pointer-events-auto">
           <div className="rise nf-slate lbl mute">
-            <BlinkingMark className="size-5 shrink-0 text-(--ink)" />
             <span>
               <span aria-hidden className="nf-dot" /> Frame not found
             </span>

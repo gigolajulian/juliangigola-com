@@ -79,6 +79,11 @@
     { "binding": "PROOFS", "bucket_name": "jg-proofs" }
   ],
 
+  /* Cloudflare Images, for the proof watermark (`lib/proof-watermark.ts`):
+     the wordmark is drawn into a frame once and the result kept in R2 next to
+     the clean original. One transformation per frame, inside the free 5,000 a month. */
+  "images": { "binding": "IMAGES" },
+
   /* Caps how fast one address can start deposits (`app/api/deposit`), so a
      script cannot fill Stripe with PaymentIntents. Counted per Cloudflare
      location, nothing stored. */

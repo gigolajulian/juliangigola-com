@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { paidFor } from "@/lib/proof-submit";
-import { cardPrice, cleanNotes, cleanSelects, cleanSettings, extras, isOpen, isToken, newToken, owed, stage } from "@/lib/proofs";
+import { cardPrice, cleanNotes, coverFrame, cleanSelects, cleanSettings, extras, isOpen, isToken, newToken, owed, stage } from "@/lib/proofs";
 
 const frames = ["a", "b", "c"].map((id) => ({ id, file: `${id}.jpg`, w: 1, h: 1 }));
 
@@ -48,6 +48,17 @@ describe("proofs", () => {
   });
   it("clamps settings", () => {
     expect(cleanSettings({ price: 15000, included: -2, days: "14", email: "nope" })).toEqual({ price: 500, included: 0, days: 14, email: undefined });
+  });
+  it("takes the watermark switch as a boolean, ignores anything else", () => {
+    expect(cleanSettings({ watermark: true })).toEqual({ watermark: true });
+    expect(cleanSettings({ watermark: "false" })).toEqual({ watermark: false });
+    expect(cleanSettings({ watermark: 1 })).toEqual({});
+  });
+  it("previews the first frame only when watermarked and open", () => {
+    expect(coverFrame({ frames, watermark: true })).toEqual(frames[0]);
+    expect(coverFrame({ frames, watermark: false })).toBeNull();
+    expect(coverFrame({ frames, watermark: true, closesAt: "2020-01-01T00:00:00Z" })).toBeNull();
+    expect(coverFrame({ frames: [], watermark: true })).toBeNull();
   });
   it("is open until closesAt", () => {
     expect(isOpen({ closesAt: undefined })).toBe(true);

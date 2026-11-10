@@ -37,6 +37,8 @@ export type Proof = {
   balance?: number;
   /** Days open, counted from when the email goes out (or the link is first copied). */
   days: number;
+  /** The "Julian Gigola" wordmark baked into every served frame (Julian 2026-11-10). On for new galleries; unset reads as off. */
+  watermark?: boolean;
   createdAt: string;
   /** Set when the proof mail goes out; the clock starts here. */
   sentAt?: string;
@@ -134,10 +136,16 @@ export function stage(p: Pick<Proof, "sentAt" | "firstViewAt" | "firstSelectAt" 
   return p.sentAt ? "Sent" : "Draft";
 }
 
-export const DEFAULTS = { included: 10, price: 15, days: 14 } as const;
+export const DEFAULTS = { included: 10, price: 15, days: 14, watermark: true } as const;
 
 export const proofKey = (token: string) => `proof:${token}`;
 export const frameKey = (token: string, id: string) => `${token}/${id}.jpg`;
+/** The watermarked copy beside the clean original. The version bumps when the mark changes, so old bakes are never served. */
+export const markedKey = (token: string, id: string) => `${token}/${id}.wm1.jpg`;
+/** The link-preview card made from a gallery's first frame. Keyed by that frame, so a new first frame gets a new card. */
+export const cardKey = (token: string, id: string) => `${token}/card-${id}.v1.jpg`;
+/** Every derived file a frame can have in R2, for deletes. */
+export const frameKeys = (token: string, id: string) => [frameKey(token, id), markedKey(token, id), cardKey(token, id)];
 
 const B62 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 /** 16 base62 characters from the platform's CSPRNG (rejection sampling keeps it uniform). */
@@ -179,6 +187,9 @@ export function owed(p: Pick<Proof, "selects" | "included" | "price" | "paid" | 
 
 export const isOpen = (p: Pick<Proof, "closesAt">, now = Date.now()) => !p.closesAt || Date.parse(p.closesAt) > now;
 
+/** The gallery's cover for link previews: its first frame, the site's rule for every set. Only when watermarked and open, so a preview never carries a clean file. */
+export const coverFrame = (p: Pick<Proof, "frames" | "watermark" | "closesAt">): ProofFrame | null => (p.watermark && isOpen(p) && p.frames[0]) || null;
+
 export const closesAt = (days: number, from = Date.now()) => new Date(from + days * 864e5).toISOString();
 
 /** What the client page gets: no address, no Lightroom name. */
@@ -217,8 +228,9 @@ export function cleanNotes(given: unknown, selects: string[]): Record<string, st
 }
 
 /** Settings Lightroom or /admin may set. Numbers are clamped so a typo cannot price a frame at $15,000. */
-export function cleanSettings(given: Record<string, unknown>): Partial<Pick<Proof, "name" | "email" | "note" | "included" | "price" | "days" | "balance">> {
-  const out: Partial<Pick<Proof, "name" | "email" | "note" | "included" | "price" | "days" | "balance">> = {};
+type Settings = Partial<Pick<Proof, "name" | "email" | "note" | "included" | "price" | "days" | "balance" | "watermark">>;
+export function cleanSettings(given: Record<string, unknown>): Settings {
+  const out: Settings = {};
   const int = (v: unknown, lo: number, hi: number) => (typeof v === "number" || typeof v === "string") && Number.isFinite(Number(v)) ? Math.min(hi, Math.max(lo, Math.round(Number(v)))) : undefined;
   if (typeof given.name === "string" && given.name.trim()) out.name = given.name.trim().slice(0, 120);
   if (typeof given.email === "string") out.email = looksLikeEmail(given.email.trim()) ? given.email.trim().slice(0, 200) : undefined;
@@ -229,6 +241,8 @@ export function cleanSettings(given: Record<string, unknown>): Partial<Pick<Proo
   if (d !== undefined) out.days = d;
   const bal = int(given.balance, 0, 20000);
   if (bal !== undefined) out.balance = bal;
+  // Lightroom's checkbox and the desk send a boolean; a form field may send "true"/"false".
+  if (typeof given.watermark === "boolean" || given.watermark === "true" || given.watermark === "false") out.watermark = given.watermark === true || given.watermark === "true";
   return out;
 }
 
