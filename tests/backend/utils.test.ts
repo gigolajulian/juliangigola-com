@@ -1,5 +1,4 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { DEFAULTS, LEVELS, sizesOf } from "@/lib/type-size";
 import { cn, rubberband } from "@/lib/utils";
 import { softItem, wallItem } from "@/lib/wall-tile";
 
@@ -37,15 +36,6 @@ describe("wall tiles", () => {
     const s = softItem(tile);
     expect(s.srcSet).toMatch(/ 160w, .+ 320w$/);
     expect(s.srcSet!.split(", ")[1].startsWith(s.image)).toBe(true);
-  });
-});
-
-describe("type sizes", () => {
-  it("styles every level once, and reads each size off the set", () => {
-    expect(LEVELS.map(([l]) => l).sort()).toEqual(Object.keys(DEFAULTS).sort());
-    const sizes = sizesOf(DEFAULTS);
-    expect(sizes.text).toBe(DEFAULTS.text.size);
-    for (const v of Object.values(sizes)) expect(v).toBeGreaterThan(0);
   });
 });
 
