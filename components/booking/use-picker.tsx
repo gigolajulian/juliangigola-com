@@ -682,7 +682,7 @@ export function usePicker({ path, title, className, fallback, v3, onPicked }: Pr
       });
       const body = await res.json();
       // 409 is the engine saying the slot went to someone else.
-      if (!res.ok || body.status !== "success") throw Object.assign(new Error(body?.error?.message || "failed"), { status: res.status });
+      if (!res.ok || body.status !== "success") throw Object.assign(new Error(body?.error || "failed"), { status: res.status });
       }
       setBooked({ name: firstName, email: String(form.get("email")).trim(), where, phone, via });
       /* The orbs get their moment even when the server answers at once, then
