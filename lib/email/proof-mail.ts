@@ -100,7 +100,7 @@ ${rows(summary)}
   return { subject: "Selects are in", html, text, attachments: logos() };
 }
 
-/** Julian's alert to hello@: plain lines for `mail()` in lib/deposit. */
+/** Julian's alert to hello@: plain lines for `alertHello()` in lib/hello-mail. */
 export function alertLines(p: Proof): { subject: string; lines: string[] } {
   const paid = p.paid ? `, $${(p.paid.amount / 100).toFixed(0)} paid${p.paid.pending ? " by bank, clearing in about 4 business days" : ""}` : "";
   return {

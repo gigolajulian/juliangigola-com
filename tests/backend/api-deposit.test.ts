@@ -254,9 +254,9 @@ describe("the client's confirmation", () => {
   });
 
   it("reads the time in Pacific with no city", async () => {
-    const { when } = await import("@/lib/booking/confirm");
-    expect(when("2026-10-21T23:00:00Z", "2026-10-22T00:00:00Z")).toBe("Wed, Oct 21, 4:00 to 5:00 PM PDT");
-    expect(when("2026-12-02T18:30:00Z")).toBe("Wed, Dec 2, 10:30 AM PST");
+    const { timeRange } = await import("@/lib/booking/confirm");
+    expect(timeRange("2026-10-21T23:00:00Z", "2026-10-22T00:00:00Z")).toBe("Wed, Oct 21, 4:00 to 5:00 PM PDT");
+    expect(timeRange("2026-12-02T18:30:00Z")).toBe("Wed, Dec 2, 10:30 AM PST");
   });
 });
 

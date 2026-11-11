@@ -1,8 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { TZ } from "@/lib/booking/booking-rules";
-import { adminCall, errorText } from "@/lib/leads/lead-desk";
+import { adminCall, errorText, stampPT } from "@/lib/leads/lead-desk";
 import { canonical } from "@/lib/leads/lead-crypto";
 import { extras, stage, STAGES, type Proof, type Viewer, type ViewerEvent } from "@/lib/proofs";
 import { cn } from "@/lib/utils";
@@ -26,7 +25,6 @@ export type Row = Proof & { url: string };
 const btn = "inline-flex min-h-11 items-center justify-center gap-2 rounded-[10px] border border-border px-4 text-[15px] font-medium transition-colors duration-200 hoverable:hover:bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:opacity-40";
 const primary = "border-accent bg-accent font-semibold text-accent-foreground hoverable:hover:bg-accent/90";
 const mono = "font-mono text-[12.5px] text-muted-foreground";
-const when = (iso: string) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(iso));
 
 export const api = <T = Record<string, unknown>,>({ query = "", ...init }: RequestInit & { query?: string } = {}) => adminCall<T>(`/api/proof${query}`, init);
 
@@ -72,7 +70,7 @@ function Timeline({ p }: { p: Proof }) {
         <li key={k} className="grid grid-cols-[110px_1fr_auto] gap-3 border-b border-border py-2 max-sm:grid-cols-[1fr_auto]">
           <b className={cn("font-medium", !at && "text-muted-foreground")}>{k}</b>
           <span className="text-muted-foreground max-sm:hidden">{v}</span>
-          <i className="not-italic text-muted-foreground">{at ? when(at) : "waiting"}</i>
+          <i className="not-italic text-muted-foreground">{at ? stampPT(at) : "waiting"}</i>
         </li>
       ))}
     </ol>
@@ -190,8 +188,8 @@ function ProofCard({ p, changed }: { p: Row; changed: () => void }) {
       ) : null}
       <p className={mono}>
         {p.frames.length} frames · {p.included} included · ${p.price} each extra
-        {p.sentAt ? ` · sent ${when(p.sentAt)}` : ` · open ${p.days} days once sent`}
-        {p.closesAt ? ` · closes ${when(p.closesAt)}` : ""}
+        {p.sentAt ? ` · sent ${stampPT(p.sentAt)}` : ` · open ${p.days} days once sent`}
+        {p.closesAt ? ` · closes ${stampPT(p.closesAt)}` : ""}
         {p.sentAt && !p.submittedAt ? ` · opened ${p.views} ${p.views === 1 ? "time" : "times"} · ${p.selects.length} selected so far` : ""}
       </p>
 
@@ -211,7 +209,7 @@ function ProofCard({ p, changed }: { p: Row; changed: () => void }) {
       {tab === "selects" && p.selects.length ? (
         <>
           <p className="text-[15px]">
-            {p.selects.length} selected{x.n ? `, ${x.n} extra` : ""}{p.paid ? `, $${(p.paid.amount / 100).toFixed(2)} paid` : ""}{p.submittedAt ? `. Sent ${when(p.submittedAt)}${p.submittedBy ? ` by ${p.submittedBy}` : ""}.` : ". Not sent yet: the latest address's picks."}
+            {p.selects.length} selected{x.n ? `, ${x.n} extra` : ""}{p.paid ? `, $${(p.paid.amount / 100).toFixed(2)} paid` : ""}{p.submittedAt ? `. Sent ${stampPT(p.submittedAt)}${p.submittedBy ? ` by ${p.submittedBy}` : ""}.` : ". Not sent yet: the latest address's picks."}
           </p>
           <ol className="grid gap-0.5 font-mono text-[12.5px] sm:grid-cols-2">
             {p.selects.map((id) => <li key={id}>{file(id)}{p.notes[id] ? <span className="text-muted-foreground"> · {p.notes[id]}</span> : null}</li>)}
@@ -365,8 +363,8 @@ export function Activity({ p }: { p: Row }) {
   };
 
   const facts: [string, string][] = [
-    ["First open", when(v.first)],
-    ["Last seen", when(v.last)],
+    ["First open", stampPT(v.first)],
+    ["Last seen", stampPT(v.last)],
     ["Visits", String(v.visits)],
     ["Time in gallery", secs(v.seconds)],
     ["Devices", v.devices.join(", ") || "Unknown"],
@@ -419,7 +417,7 @@ export function Activity({ p }: { p: Row }) {
         <ol className="grid max-h-[420px] overflow-auto border-t border-border pt-2 font-mono text-[12px] leading-[1.9] text-muted-foreground">
           {[...v.events].reverse().map((e, i) => (
             <li key={i}>
-              {when(e.at)} · <b className={cn("font-medium", e.kind === "pick" ? "text-accent" : "text-foreground")}>{SAID[e.kind](e.id)}</b>
+              {stampPT(e.at)} · <b className={cn("font-medium", e.kind === "pick" ? "text-accent" : "text-foreground")}>{SAID[e.kind](e.id)}</b>
               {e.kind === "open" ? ` · ${[e.device, e.place].filter(Boolean).join(" · ")}` : e.id ? ` · ${file(e.id)}` : ""}
             </li>
           ))}

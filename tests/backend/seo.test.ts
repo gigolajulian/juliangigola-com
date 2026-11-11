@@ -1,11 +1,8 @@
-import { existsSync } from "node:fs";
-import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { DISCIPLINE_SEO, ldJson, serviceGraph, siteGraph, SITE } from "@/lib/seo";
 import { formatPrice, SESSION_TYPES } from "@/lib/booking/sessions";
-import { projectFacts, share, shareOg } from "@/lib/share";
+import { projectFacts, shareMeta, shareOg } from "@/lib/share";
 import { BOOKING_URL, RESPONSE_TIME } from "@/lib/site";
-import { isSession } from "@/lib/v3";
 
 /* What the pages tell search engines and link previews: the JSON-LD, the
    share text, the link cards and the site's public claims. */
@@ -56,7 +53,7 @@ describe("DISCIPLINE_SEO", () => {
 
 describe("share", () => {
   it("adds the site's name to the preview, not the bare title", () => {
-    const m = share("Portraits", "One line.");
+    const m = shareMeta("Portraits", "One line.");
     expect(m.title).toBe("Portraits");
     expect(m.openGraph).toMatchObject({ title: "Portraits | Julian Gigola", siteName: "Julian Gigola", description: "One line." });
     expect(shareOg("A", "b")).not.toHaveProperty("title");

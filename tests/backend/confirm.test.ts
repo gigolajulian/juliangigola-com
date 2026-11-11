@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FakeEmail } from "./fakes";
-import { cancelledSubject, confirmMail, sendCancelled, sendConfirm, when, type Confirm } from "@/lib/booking/confirm";
+import { cancelledSubject, confirmMail, sendCancelled, sendConfirm, timeRange, type Confirm } from "@/lib/booking/confirm";
 import { SIG_DARK, SIG_HTML, SIG_TEXT } from "@/lib/email/email-signature";
 
 /* The client's "You're in." mail and the cancel note (`lib/booking/confirm.ts`),
@@ -16,10 +16,10 @@ const base: Confirm = {
   manage: { reschedule: "https://juliangigola.com/booking/t?do=reschedule", cancel: "https://juliangigola.com/booking/t?do=cancel" },
 };
 
-describe("when", () => {
+describe("timeRange", () => {
   it("writes Julian's time with the range spelled out", () => {
-    expect(when(base.start, base.end)).toBe("Sat, Nov 21, 10:00 to 11:00 AM PST");
-    expect(when(base.start)).toBe("Sat, Nov 21, 10:00 AM PST");
+    expect(timeRange(base.start, base.end)).toBe("Sat, Nov 21, 10:00 to 11:00 AM PST");
+    expect(timeRange(base.start)).toBe("Sat, Nov 21, 10:00 AM PST");
   });
 });
 

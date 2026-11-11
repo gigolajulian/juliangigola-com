@@ -4,7 +4,7 @@ import type { Metadata } from "next";
     `title` is the bare name; the root template adds the rest to <title>.
     A page's openGraph replaces the layout's whole block, so the site fields
     come along. The image comes from the page's opengraph-image file. */
-export const share = (title: string, description: string): Metadata => ({
+export const shareMeta = (title: string, description: string): Metadata => ({
   title,
   description,
   ...shareOg(title, description),

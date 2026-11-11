@@ -1,4 +1,4 @@
-import { mail } from "@/lib/hello-mail";
+import { alertHello } from "@/lib/hello-mail";
 import { stripe } from "@/lib/stripe";
 import { recordLead } from "@/lib/leads/lead-store";
 import { alertLines, proofUrl, receiptMail, sendClient } from "@/lib/email/proof-mail";
@@ -40,7 +40,7 @@ export async function finalize(env: Env, kv: KV, s: Seal, p: Proof, paid?: Proof
     if (await sendClient(env.CLIENT_EMAIL, to, m)) await recordLead(env, to, { event: { at, kind: "mail", note: m.subject, mail: { to: "client", kind: "proof-receipt" } } });
   }
   const a = alertLines(done);
-  await mail(env.EMAIL, a.subject, [...a.lines, "", proofUrl(done.token)], to ? { name: to, email: to } : undefined);
+  await alertHello(env.EMAIL, a.subject, [...a.lines, "", proofUrl(done.token)], to ? { name: to, email: to } : undefined);
   return done;
 }
 
@@ -91,7 +91,9 @@ export async function checkout(key: string, p: Proof, method: "bank" | "card" = 
     return null;
   });
   if (!s) return checkout(key, p, "card");
-  return { id: String(s.id), url: String(s.url) };
+  // A reply without both would send the visitor to /undefined; the route answers it as an outage.
+  if (typeof s.id !== "string" || typeof s.url !== "string") throw new Error("Stripe checkout session without id or url");
+  return { id: s.id, url: s.url };
 }
 
 /** A Checkout session that is paid, for this gallery, for at least what the selects cost now. */

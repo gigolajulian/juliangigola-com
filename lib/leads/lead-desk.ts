@@ -40,6 +40,9 @@ export const OFFLINE = "Offline. The desk loads again when you are back online."
 /** What a failed load says: offline, or the route's own words. */
 export const loadError = (e: unknown) => (navigator.onLine === false || e instanceof TypeError ? OFFLINE : errorText(e));
 
+/** "Nov 11, 4:05 PM" in Julian's time. */
+export const stampPT = (iso: string) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(iso));
+
 export const DAY = 864e5;
 export const now = () => Date.now();
 

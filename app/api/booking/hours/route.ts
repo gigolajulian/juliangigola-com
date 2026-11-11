@@ -1,5 +1,5 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { lock } from "@/lib/booking/booking-engine";
+import { lockOp } from "@/lib/booking/booking-engine";
 import { cleanHours, TZ, type Hours } from "@/lib/booking/booking-rules";
 import { isAdmin } from "@/lib/vouch";
 import { json } from "@/lib/http";
@@ -26,7 +26,7 @@ async function held(ask: () => Promise<{ hours: Hours }>) {
 export async function GET(request: Request) {
   const { env } = await getCloudflareContext({ async: true });
   if (!(await isAdmin(request, env.INBOX_KEY))) return json({ error: "Not authorized." }, 401);
-  return held(() => lock(env, "hours", null));
+  return held(() => lockOp(env, "hours", null));
 }
 
 export async function PUT(request: Request) {
@@ -35,5 +35,5 @@ export async function PUT(request: Request) {
   const today = new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(new Date());
   const hours = cleanHours(await request.json().catch(() => null), today);
   if (!hours) return json({ error: "Those hours do not read right." }, 400);
-  return held(() => lock(env, "setHours", hours));
+  return held(() => lockOp(env, "setHours", hours));
 }

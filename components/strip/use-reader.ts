@@ -1,5 +1,4 @@
 import * as React from "react";
-import { STRIP_SECTION } from "@/lib/events";
 import { createBench } from "./keyboard";
 import { cellFor, centreOf, leftOf, RELAID } from "./shared";
 
@@ -136,8 +135,6 @@ export function useReader({
               "",
               `${window.location.pathname}${window.location.search}${want}`,
             );
-            // A replace fires nothing; the header's links listen for this.
-            window.dispatchEvent(new Event(STRIP_SECTION));
           }
         }, 200);
       }
@@ -416,8 +413,6 @@ export function useReader({
       if (cellFor(el, decodeURIComponent(url.hash.slice(1))) < 0) return;
       e.preventDefault();
       history.pushState(null, "", url.href);
-      // As above: the bar reads the address off this event, not the push.
-      window.dispatchEvent(new Event(STRIP_SECTION));
       onHash();
     };
     document.addEventListener("click", onLink, true);

@@ -15,9 +15,8 @@ import { Text } from "@astryxdesign/core/Text";
 import { MetadataList, MetadataListItem } from "@astryxdesign/core/MetadataList";
 import type { Row } from "@/components/admin/admin-proofs";
 import type { ViewerEvent } from "@/lib/proofs";
-import { TZ } from "@/lib/booking/booking-rules";
+import { stampPT } from "@/lib/leads/lead-desk";
 
-const when = (iso: string) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(iso));
 const csvCell = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
 const secs = (n: number) => (n < 90 ? `${Math.round(n)} s` : `${Math.round(n / 60)} min`);
 
@@ -55,8 +54,8 @@ export function ActivityAstryx({ p }: { p: Row }) {
         <Button label="Export CSV" variant="ghost" size="sm" onClick={exportCsv} />
       </HStack>
       <MetadataList>
-        <MetadataListItem label="First open">{when(v.first)}</MetadataListItem>
-        <MetadataListItem label="Last seen">{when(v.last)}</MetadataListItem>
+        <MetadataListItem label="First open">{stampPT(v.first)}</MetadataListItem>
+        <MetadataListItem label="Last seen">{stampPT(v.last)}</MetadataListItem>
         <MetadataListItem label="Visits">{v.visits}</MetadataListItem>
         <MetadataListItem label="Time in gallery">{secs(v.seconds)}</MetadataListItem>
         <MetadataListItem label="Devices">{v.devices.join(", ") || "Unknown"}</MetadataListItem>
@@ -84,7 +83,7 @@ export function ActivityAstryx({ p }: { p: Row }) {
       <VStack gap={0}>
         {[...v.events].reverse().map((e, i) => (
           <Text key={i} type="code" size="sm" color={e.kind === "pick" ? "accent" : "secondary"}>
-            {when(e.at)} · {SAID[e.kind](e.id)}{e.kind === "open" ? ` · ${[e.device, e.place].filter(Boolean).join(" · ")}` : e.id ? ` · ${file(e.id)}` : ""}
+            {stampPT(e.at)} · {SAID[e.kind](e.id)}{e.kind === "open" ? ` · ${[e.device, e.place].filter(Boolean).join(" · ")}` : e.id ? ` · ${file(e.id)}` : ""}
           </Text>
         ))}
       </VStack>

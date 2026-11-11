@@ -55,7 +55,7 @@ All 74 projects and 1,131 frames were migrated off the old Format site.
 | `lib/work-data.ts` | **Generated.** Every project, its credits, categories and frames. Written by `scripts/harvest.mjs`; do not hand-edit — it gets overwritten. |
 | `lib/work.ts` | The only module the app reads work from. Holds the editorial decisions: what is featured, what leads the homepage, how categories group. |
 | `lib/work-types.ts` | Shapes for the above. |
-| `lib/sessions.ts` | Bookable session types. `from: null` renders as "On request". |
+| `lib/booking/sessions.ts` | Bookable session types. `from: null` renders as "On request". |
 | `lib/site.ts` | Reply-time promise and the booking-calendar URL. |
 
 ### The migration (finished)
@@ -188,6 +188,23 @@ cooldown's boundaries and a clock that runs backwards.
 A Cloudflare **Rate Limiting** rule on `/contact` is still the right thing to
 add on top, since the cooldown is enforced by a store the request can reach
 and a rule is enforced before it gets there.
+
+### Where bookings go
+
+The site books its own sessions: `lib/booking/booking-engine.ts`, with Google
+Calendar holding the time.
+
+- `/api/slots` lists the open starts for a session (`lib/booking/slots.ts`,
+  hello@'s free/busy and the hours set in `/admin`).
+- `/api/book` books a free call; `/api/deposit` opens a Stripe payment for a
+  paid session, and the Stripe webhook (`/api/stripe`) books the time once the
+  payment is signed as paid, or refunds it.
+- `/api/booking/[id]` takes a client's reschedule or cancel from the link in
+  their mail; a cancel 48 hours or more out refunds the deposit.
+- Every booking runs through one Durable Object, the booking lock in
+  `worker/`, so two tabs on one slot cannot both win. It is a Worker of its
+  own; deploy it with `npx wrangler deploy -c worker/wrangler.jsonc`. It also
+  sends the day-before reminders.
 
 ### Security headers
 
