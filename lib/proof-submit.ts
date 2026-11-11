@@ -91,7 +91,9 @@ export async function checkout(key: string, p: Proof, method: "bank" | "card" = 
     return null;
   });
   if (!s) return checkout(key, p, "card");
-  return { id: String(s.id), url: String(s.url) };
+  // A reply without both would send the visitor to /undefined; the route answers it as an outage.
+  if (typeof s.id !== "string" || typeof s.url !== "string") throw new Error("Stripe checkout session without id or url");
+  return { id: s.id, url: s.url };
 }
 
 /** A Checkout session that is paid, for this gallery, for at least what the selects cost now. */
