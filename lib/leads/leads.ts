@@ -9,8 +9,8 @@ import { balance, isPaid, type Invoice } from "./invoice";
  * log) the INBOX namespace holds one `lead:<id>` per person, sealed with
  * LEADS_KEY (`lib/leads/lead-crypto.ts`). Each event
  * that reaches the site (the form, a Cal.com booking, a deposit in
- * trouble) is folded into it here. KV is the source of truth; Notion is a
- * mirror of it, never the other way.
+ * trouble) is folded into it here. KV is the record. Notion was
+ * retired 2026-11-11 (read-only archive); the Google Sheet is a one-way copy.
  *
  * Automatic events only move a lead forward: a second inquiry from a
  * client already Confirmed must not drop them back to Inquiry. A new
@@ -97,7 +97,7 @@ export type Lead = {
   archivedAt?: string;
   /** In the trash: out of every list but Trash, until he recovers it or empties the trash. */
   trashedAt?: string;
-  /** Notion page this lead is mirrored to. */
+  /** Notion page this lead was mirrored to, before Notion retired (2026-11-11). Old records only. */
   notion?: string;
   /** Something new since he last opened it. */
   unread: boolean;

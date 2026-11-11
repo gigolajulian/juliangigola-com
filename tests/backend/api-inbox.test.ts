@@ -315,22 +315,14 @@ describe("leads", () => {
     expect(fetched).not.toHaveBeenCalled();
   });
 
-  it("mirrors a stage to the person's Notion row, then reuses that row", async () => {
+  it("moves a stage without calling out to Notion (retired 2026-11-11)", async () => {
     const calls: string[] = [];
-    vi.stubGlobal("fetch", async (url: string, init: RequestInit) => {
-      calls.push(`${init.method} ${url.split("/v1")[1]} ${init.body}`);
-      return url.endsWith("/query") ? Response.json({ results: [{ id: "row-1" }] }) : Response.json({ id: "row-1" });
-    });
-    ctx.env = { ...ctx.env, NOTION_TOKEN: "test" };
+    vi.stubGlobal("fetch", async (url: string) => (calls.push(url), Response.json({})));
     await lead("a@example.com", "2026-11-01T10:00:00Z");
     const key = `lead:${await idOf("a@example.com")}`;
     await PATCH(req("PATCH", { body: JSON.stringify({ key, stage: "Quoted" }) }));
     await PATCH(req("PATCH", { body: JSON.stringify({ key, stage: "Shot" }) }));
-    expect(calls).toEqual([
-      expect.stringMatching(/^POST \/databases\/.+\/query .*a@example\.com/),
-      'PATCH /pages/row-1 {"properties":{"Status":{"select":{"name":"Quoted"}}}}',
-      'PATCH /pages/row-1 {"properties":{"Status":{"select":{"name":"Editing"}}}}',
-    ]);
+    expect(calls.filter((u) => u.includes("notion"))).toEqual([]);
   });
 
   it("subscribes a device, pings it when a lead arrives, and forgets it when the push service says it is gone", async () => {

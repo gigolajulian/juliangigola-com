@@ -57,14 +57,6 @@ interface CloudflareEnv {
   STRIPE_WEBHOOK_SECRET?: string;
 
   /**
-   * Notion internal integration token (`lib/leads/notion-lead.ts`): copies each
-   * enquiry and booking onto the Business Hub Bookings board. Unset, nothing
-   * is copied. Set with:
-   *
-   *   wrangler versions secret put NOTION_TOKEN
-   */
-  NOTION_TOKEN?: string;
-
   /**
    * hello@'s Google Calendar for the site's own booking engine
    * (`lib/booking/gcal.ts`): JSON `{client_id, client_secret, refresh_token}` of an

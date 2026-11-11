@@ -1,7 +1,10 @@
 import type { Enquiry } from "@/lib/inbox";
 import type { Paper, Stage } from "@/lib/leads/leads";
 
-/* ── leads into Notion ────────────────────────────────────────────
+/* Retired 2026-11-11: Notion is a read-only archive, nothing calls this file.
+ * Kept, not deleted. KV is the record; the Google Sheet is the copy.
+ *
+ * ── leads into Notion ────────────────────────────────────────────
  * Every enquiry and Cal.com booking also lands as a row on the Business
  * Hub "Bookings" database, where the Pipeline board shows it. A copy of
  * the INBOX row, never the record: a Notion outage must not lose an
