@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { credentials, KEY_STORE } from "@/lib/admin-github";
+import { adminCall, ymdPT } from "@/lib/lead-desk";
 import type { Hours, Window } from "@/lib/booking-rules";
 
 /* ── Hours, in the lead desk ──────────────────────────────────────
@@ -16,7 +16,6 @@ const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", 
 const TIMES = Array.from({ length: 33 }, (_, i) => 360 + i * 30);
 const clock = (m: number) => `${((Math.floor(m / 60) + 11) % 12) + 1}:${String(m % 60).padStart(2, "0")} ${m < 720 ? "AM" : "PM"}`;
 const DEFAULT_WINDOW: Window = [600, 1140];
-const today = () => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Los_Angeles" }).format(new Date());
 const dateLabel = (d: string) =>
   new Intl.DateTimeFormat("en-US", { timeZone: "UTC", weekday: "short", month: "short", day: "numeric" }).format(new Date(`${d}T00:00:00Z`));
 
@@ -56,13 +55,9 @@ export function LeadHours() {
   const [pick, setPick] = React.useState("");
 
   const call = React.useCallback(async (init?: RequestInit) => {
-    const res = await fetch("/api/booking/hours", {
-      ...init,
-      headers: { ...credentials(window.localStorage.getItem(KEY_STORE) ?? ""), "content-type": "application/json" },
-    });
-    const body = (await res.json().catch(() => ({}))) as { hours?: Hours; error?: string };
-    if (!res.ok || !body.hours) throw new Error(body.error ?? "Could not reach the booking lock.");
-    return body.hours;
+    const { hours } = await adminCall<{ hours?: Hours }>("/api/booking/hours", init);
+    if (!hours) throw new Error("Could not reach the booking lock.");
+    return hours;
   }, []);
 
   React.useEffect(() => {
@@ -72,7 +67,7 @@ export function LeadHours() {
   if (!hours) return <p className="px-1 py-6 font-mono text-[13px] text-muted-foreground lg:px-5">{note || "Loading hours"}</p>;
 
   const edit = (h: Hours) => { setHours(h); setNote("Not saved"); };
-  const days = Object.entries(hours.days ?? {}).filter(([d]) => d >= today()).sort();
+  const days = Object.entries(hours.days ?? {}).filter(([d]) => d >= ymdPT()).sort();
   const save = async () => {
     setBusy(true);
     try {
@@ -119,7 +114,7 @@ export function LeadHours() {
           ))}
         </ul>
         <div className="flex flex-wrap items-center gap-3 pt-3">
-          <input type="date" aria-label="A date to change" min={today()} value={pick} onChange={(e) => setPick(e.target.value)} className={field} />
+          <input type="date" aria-label="A date to change" min={ymdPT()} value={pick} onChange={(e) => setPick(e.target.value)} className={field} />
           <button
             type="button"
             disabled={!pick}

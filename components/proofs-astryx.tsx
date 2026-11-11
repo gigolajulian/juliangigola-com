@@ -30,11 +30,13 @@ import { ProgressBar } from "@astryxdesign/core/ProgressBar";
 import { KEY_STORE } from "@/lib/admin-github";
 import { SignIn } from "@/components/admin-leads";
 import { Activity, api, closed, status, type Row } from "@/components/admin-proofs";
+import { TZ } from "@/lib/booking-rules";
+import { errorText } from "@/lib/lead-desk";
 import { TOKEN_STORE } from "@/lib/admin-github";
 import { extras, stage, STAGES } from "@/lib/proofs";
 
 const CLASSIC = "/admin";
-const when = (iso: string) => new Intl.DateTimeFormat("en-US", { timeZone: "America/Los_Angeles", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(iso));
+const when = (iso: string) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(iso));
 const frame = (p: Row, id: string) => `/proof/${p.token}/f/${id}`;
 
 function Tile({ k, v }: { k: string; v: string }) {
@@ -55,7 +57,7 @@ export function ProofsAstryx() {
   const [making, setMaking] = React.useState(false);
   const [wide, setWide] = React.useState(false);
   const load = React.useCallback(() => {
-    api({ query: "?list" }).then((o) => setList(o.proofs as Row[])).catch((e: unknown) => setError(e instanceof Error ? e.message : String(e)));
+    api<{ proofs: Row[] }>({ query: "?list" }).then((o) => setList(o.proofs)).catch((e: unknown) => setError(errorText(e)));
   }, []);
   React.useEffect(load, [load]);
   // Same as the leads desk: follow html[data-theme], light only when it says light, read before Theme mounts.
@@ -170,10 +172,10 @@ function NewGallery({ done }: { done: (token?: string) => void }) {
   const [note, setNote] = React.useState<string | null>(null);
   const create = async () => {
     try {
-      const o = await api({ method: "POST", body: JSON.stringify({ action: "create", name, email }) });
-      done(String(o.token));
+      const o = await api<{ token: string }>({ method: "POST", body: JSON.stringify({ action: "create", name, email }) });
+      done(o.token);
     } catch (e) {
-      setNote(e instanceof Error ? e.message : String(e));
+      setNote(errorText(e));
     }
   };
   return (
@@ -214,14 +216,14 @@ function Gallery({ p, changed, onBack, gone }: { p: Row; changed: () => void; on
       setPreview(null);
       changed();
     } catch (e) {
-      setNote(e instanceof Error ? e.message : String(e));
+      setNote(errorText(e));
     }
   };
   const showPreview = async () => {
     try {
-      setPreview(String((await api({ query: `?preview=${p.token}` })).html));
+      setPreview((await api<{ html: string }>({ query: `?preview=${p.token}` })).html);
     } catch (e) {
-      setNote(e instanceof Error ? e.message : String(e));
+      setNote(errorText(e));
     }
   };
   const copy = async (text: string, what: string) => {
@@ -239,7 +241,7 @@ function Gallery({ p, changed, onBack, gone }: { p: Row; changed: () => void; on
       await api({ method: "DELETE", query: `?token=${p.token}` });
       gone();
     } catch (e) {
-      setNote(e instanceof Error ? e.message : String(e));
+      setNote(errorText(e));
     }
   };
 
