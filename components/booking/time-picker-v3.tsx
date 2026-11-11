@@ -13,7 +13,7 @@ import type { Shell } from "@/components/v3/flow";
 import { GESTURE_GAP_MS } from "@/components/strip/shared";
 import { looksLikeEmail } from "@/lib/inbox";
 import { AHEAD, fromIso, iso, minutesOf, recent, STEP_AT, WHERE, clock, type V3Book } from "@/components/booking/time-picker-parts";
-import type { CardCtx } from "@/components/booking/time-picker";
+import type { CardCtx } from "@/components/booking/use-picker";
 
 /* JG V3 (master v39 stepper): Time, You, (Deposit), Booked. The same
    times, booking and deposit as the cards; only the look is new. */
@@ -145,7 +145,7 @@ export function V3Steps({ c }: { c: CardCtx & { v3: V3Book } }) {
   const canBack = view === "week" ? +monday(anchor) > +monday(today) : anchor.getFullYear() * 12 + anchor.getMonth() > today.getFullYear() * 12 + today.getMonth();
   const canNext = +(view === "week" ? monday(anchor) : new Date(anchor.getFullYear(), anchor.getMonth() + 1, 0)) < +today + AHEAD * 864e5;
   const times = days[pick.date] ?? [];
-  const [hh, mm] = fmt(pick.min).replace(/ (AM|PM)$/, "").split(":");
+  const [hh, mm] = clock(pick.min)[0].split(":");
   const at0 = times.findIndex((x) => minutesOf(x.start) === pick.min);
   const stepTime = (dir: number) => {
     const next = times[at0 + dir];
