@@ -1,5 +1,5 @@
 import * as React from "react";
-import { STRIP_SECTION } from "@/lib/utils";
+import { STRIP_SECTION } from "@/lib/events";
 import { createBench } from "./keyboard";
 import { cellFor, centreOf, leftOf, RELAID } from "./shared";
 

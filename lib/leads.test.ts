@@ -19,6 +19,15 @@ describe("fold", () => {
     expect(fold(call, email, { event: { at: at(3), kind: "inquiry", ref: "msg:2" }, snippet: "Again", refs: 0 })).not.toHaveProperty("refs");
   });
 
+  it("logs a proofs open once per gallery, fills a bare name, and is not news", () => {
+    const bare = fold(null, email, { event: { at: at(1), kind: "mail", ref: "m" } });
+    const l = fold(bare, email, { event: { at: at(2), kind: "proofs", ref: "tok", note: "Nov 1" }, name: "Maya" });
+    expect(l).toMatchObject({ name: "Maya", unread: bare.unread, lastAt: bare.lastAt });
+    expect(fold(l, email, { event: { at: at(3), kind: "proofs", ref: "tok" }, name: "M" })).toBe(l);
+    expect(fold({ ...l, name: "Maya R" }, email, { event: { at: at(4), kind: "proofs", ref: "tok2" }, name: "M" }).name).toBe("Maya R");
+    expect(fold(null, email, { event: { at: at(1), kind: "proofs", ref: "tok" }, name: "Maya" })).toMatchObject({ name: "Maya", unread: false });
+  });
+
   it("starts a lead at Inquiry from a form, keyed by the lowercased address", () => {
     const l = fold(null, email, { event: { at: at(1), kind: "inquiry", ref: "msg:1" }, name: "Maya", kind: "portrait" });
     expect(l).toMatchObject({ email: "maya@example.com", name: "Maya", stage: "Inquiry", unread: true, kind: "portrait" });

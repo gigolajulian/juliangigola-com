@@ -29,9 +29,10 @@ export type Stage = (typeof STAGES)[number];
 /** What happened, as it reached the site. `stage` is Julian's own move. */
 export type LeadEvent = {
   at: string;
-  kind: "inquiry" | "call" | "booking" | "no-deposit" | "deposit-stuck" | "stage" | "snooze" | "mail" | "replied" | "wrote" | "archive" | "trash"
+  kind: "inquiry" | "call" | "booking" | "no-deposit" | "deposit-stuck" | "stage" | "snooze" | "mail" | "replied" | "wrote" | "archive" | "trash" | "proofs"
     // Julian's own hand (`lib/lead-crm.ts`): added, details changed, merged, a reminder, a quote.
     | "added" | "edit" | "merge" | "remind" | "quote" | "invoice";
+  /* "proofs": they opened a proof gallery, ref = its token so each gallery is one line. */
   /* "replied" / "wrote": mail between hello@ and them in Gmail, ref = the Gmail message id (`lib/gmail-sync.ts`). */
   /** The raw row (`msg:` key), Cal.com uid or Stripe intent, so a retry folds in once. */
   ref?: string;
@@ -194,6 +195,11 @@ export function fold(lead: Lead | null, email: string, c: Change): Lead {
   }
   // A mail the site sent is a line on the timeline, not news.
   if (event.kind === "mail") return tidy(next);
+  // Opening proofs is a line too. The name they typed fills a lead that only had the address.
+  if (event.kind === "proofs") {
+    if (c.name && next.name.toLowerCase() === next.email) next.name = c.name;
+    return tidy(lead ? next : { ...next, unread: false });
+  }
   // His own reply from Gmail answers the inquiry: Replied, and off Needs me.
   if (event.kind === "replied") {
     if (next.stage === "Inquiry") Object.assign(next, { stage: "Replied", stageAt: event.at });

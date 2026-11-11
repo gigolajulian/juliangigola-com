@@ -1,5 +1,5 @@
 import * as React from "react";
-import { STRIP_SECTION } from "@/lib/utils";
+import { STRIP_SECTION } from "@/lib/events";
 import { cellFor } from "./shared";
 
 // What ends a landing's hold (`pin` below): the visitor moving the page.

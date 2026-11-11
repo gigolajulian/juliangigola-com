@@ -1,3 +1,4 @@
+import { STRIP_HOME, STRIP_NOTE } from "@/lib/events";
 import type { Deck } from "@/lib/deck";
 import { matches } from "@/lib/device";
 import * as React from "react";
@@ -112,12 +113,12 @@ export function useMotion({
     });
     resized.observe(el);
 
-    el.addEventListener("jg:home", onHome);
+    el.addEventListener(STRIP_HOME, onHome);
     el.addEventListener("scroll", onSettle, { passive: true });
     el.addEventListener("scroll", onMoved, { passive: true });
     el.addEventListener("scroll", onNote, { passive: true });
     // A seat set from outside (`arrival.ts`) is the place a resize keeps.
-    el.addEventListener("jg:note", note);
+    el.addEventListener(STRIP_NOTE, note);
     el.addEventListener("scroll", onStart, { passive: true });
     el.addEventListener("focusin", onFocusIn);
     document.addEventListener("keydown", onTab, true);
@@ -147,11 +148,11 @@ export function useMotion({
       stopPaging();
       resized.disconnect();
       m.wall?.cancel();
-      el.removeEventListener("jg:home", onHome);
+      el.removeEventListener(STRIP_HOME, onHome);
       el.removeEventListener("scroll", onSettle);
       el.removeEventListener("scroll", onMoved);
       el.removeEventListener("scroll", onNote);
-      el.removeEventListener("jg:note", note);
+      el.removeEventListener(STRIP_NOTE, note);
       el.removeEventListener("scroll", onStart);
       el.removeEventListener("focusin", onFocusIn);
       document.removeEventListener("keydown", onTab, true);

@@ -5,7 +5,6 @@ import { Orb } from "@/components/orb";
 import {
   CONTENT_PATH,
   type SiteContent,
-  type Testimonial,
 } from "@/lib/content";
 import { AdminNewProject } from "@/components/admin-new-project";
 import { AdminProjects, type AdminProject } from "@/components/admin-projects";
@@ -13,13 +12,14 @@ import { AdminSitemap, type SitemapTarget } from "@/components/admin-sitemap";
 import { AdminDisciplines } from "@/components/admin-disciplines";
 import { AdminPreview } from "@/components/admin-preview";
 import { AdminPage } from "@/components/admin-page";
-import { AdminPicker, type PickerItem } from "@/components/admin-picker";
+import type { PickerItem } from "@/components/admin-picker";
 import { AdminTrash } from "@/components/admin-trash";
 import { AdminInbox, unreadCount } from "@/components/admin-inbox";
 import { AdminLeads } from "@/components/admin-leads";
 import { AdminTraffic } from "@/components/admin-traffic";
 import { AdminSeo } from "@/components/admin-seo";
 import { AdminVideos } from "@/components/admin-videos";
+import { ClientFields, ContactFields, CoverArtFields, HomeFields, inputClass, QuoteFields, SessionFields } from "@/components/admin-fields";
 import { isTextRef, type FrameRef, type TrashedProject } from "@/lib/added";
 import { ADDED_PATH } from "@/lib/added";
 import { type PendingUpload } from "@/components/admin-frames";
@@ -174,6 +174,8 @@ const fromBase64 = (b64: string): string => {
  * which is what lets the check script run it. Here they are the real things.
  */
 type Draft = Manifest<FrameRef, Credit, Copy, Bts>;
+/** The per-project overrides a build applies, one map per kind. */
+export type Overrides = Pick<Draft, "categories" | "frames" | "credits" | "copy" | "slugs">;
 
 /* ── a rename, carried through ────────────────────────────────────
  * Every override this editor holds is keyed by slug, and while the page
@@ -237,11 +239,7 @@ export function AdminEditor({
   initialUnlisted,
   categoryLinks,
   initialTrash,
-  initialRecategorised,
-  initialReframed,
-  initialRecredited,
-  initialRecopied,
-  initialReslugged,
+  initialOverrides,
   initialOrder,
   initialCovers,
   initialAvatars,
@@ -255,7 +253,6 @@ export function AdminEditor({
   initial: SiteContent;
   /** Every project slug, so the cover and featured fields can be checked. */
   slugs: string[];
-  /** Disciplines a project can be filed under, sessions included. */
   /** Disciplines a shoot can be filed under, with the cover each shows. */
   categories: {
     slug: string;
@@ -268,7 +265,6 @@ export function AdminEditor({
   /** Which slugs the last build was hiding. */
   initialHidden: string[];
   initialUnlisted: string[];
-  /** Discipline pages, for the sitemap. */
   /** Disciplines for the sitemap, each under the page it hangs off. */
   categoryLinks: {
     slug: string;
@@ -278,15 +274,10 @@ export function AdminEditor({
   }[];
   /** Removed projects awaiting their week. */
   initialTrash: TrashedProject[];
-  /** Refilings the last build applied, slug → category slug. */
-  initialRecategorised: Record<string, string>;
-  /** Re-sequenced galleries the last build applied, slug → frames. */
-  initialReframed: Record<string, FrameRef[]>;
-  /** Rewritten credits the last build applied, slug → list. */
-  initialRecredited: Record<string, Credit[]>;
-  /** Rewritten titles and intents the last build applied, slug → copy. */
-  initialRecopied: Record<string, Copy>;
-  initialReslugged: Record<string, string>;
+  /** The per-project overrides the last build applied, each slug-keyed:
+      refilings (category slug), re-sequenced galleries, rewritten credits,
+      rewritten titles and intents, and renamed slugs. */
+  initialOverrides: Overrides;
   /** The running order the last build applied, by slug. */
   initialOrder: string[];
   /** Discipline covers the last build applied, category slug to frame path. */
@@ -375,16 +366,11 @@ export function AdminEditor({
     () => new Set(initialUnlisted),
   );
   const [trash, setTrash] = React.useState<TrashedProject[]>(initialTrash);
-  const [recategorised, setRecategorised] =
-    React.useState<Record<string, string>>(initialRecategorised);
-  const [reframed, setReframed] =
-    React.useState<Record<string, FrameRef[]>>(initialReframed);
-  const [recredited, setRecredited] =
-    React.useState<Record<string, Credit[]>>(initialRecredited);
-  const [recopied, setRecopied] =
-    React.useState<Record<string, Copy>>(initialRecopied);
-  const [reslugged, setReslugged] =
-    React.useState<Record<string, string>>(initialReslugged);
+  /** The five per-project override maps, as one state: one setter keyed by kind. */
+  const [overrides, setOverrides] = React.useState<Overrides>(initialOverrides);
+  const setOverride = <K extends keyof Overrides>(kind: K, next: (now: Overrides[K]) => Overrides[K]) =>
+    setOverrides((o) => ({ ...o, [kind]: next(o[kind]) }));
+  const { categories: recategorised, frames: reframed, credits: recredited, copy: recopied, slugs: reslugged } = overrides;
   /** The running order of the work, by slug. Partial - see `lib/added.ts`. */
   const [order, setOrder] = React.useState<string[]>(initialOrder);
   /** The photograph standing for each discipline, by category slug. */
@@ -506,11 +492,7 @@ export function AdminEditor({
     manifest: {
       hidden: [...initialHidden].sort(),
       unlisted: [...initialUnlisted].sort(),
-      categories: initialRecategorised,
-      frames: initialReframed,
-      credits: initialRecredited,
-      copy: initialRecopied,
-      slugs: initialReslugged,
+      ...initialOverrides,
       order: initialOrder,
       covers: initialCovers,
       avatars: initialAvatars,
@@ -885,11 +867,7 @@ export function AdminEditor({
       if (!dirty) {
         setHidden(new Set(repo.hidden));
         setUnlisted(new Set(repo.unlisted));
-        setRecategorised(repo.categories);
-        setReframed(repo.frames);
-        setRecredited(repo.credits);
-        setRecopied(repo.copy);
-        setReslugged(repo.slugs);
+        setOverrides({ categories: repo.categories, frames: repo.frames, credits: repo.credits, copy: repo.copy, slugs: repo.slugs });
         setOrder(repo.order);
         setCovers(repo.covers);
         setAvatars(repo.avatars);
@@ -1064,10 +1042,7 @@ export function AdminEditor({
       /* And the draft takes back what was actually written, so the tidying
          above is visible rather than hiding behind a diff that will not
          clear. */
-      setReframed(written.frames);
-      setRecredited(written.credits);
-      setRecopied(written.copy);
-      setReslugged(written.slugs);
+      setOverrides((o) => ({ ...o, frames: written.frames, credits: written.credits, copy: written.copy, slugs: written.slugs }));
       setBts(written.bts);
 
       // A fresh publish is not live yet by definition, whatever the last one
@@ -1486,7 +1461,7 @@ export function AdminEditor({
                     disciplines={categories}
                     filedAs={recategorised[p.slug] ?? p.categorySlug}
                     onRecategorise={(categorySlug) =>
-                      setRecategorised((r) => ({
+                      setOverride("categories", (r) => ({
                         ...r,
                         [p.slug]: categorySlug,
                       }))
@@ -1494,7 +1469,7 @@ export function AdminEditor({
                     frames={reframed[p.slug] ?? null}
                     uploads={uploads}
                     onReframe={(next) =>
-                      setReframed((r) =>
+                      setOverride("frames", (r) =>
                         withOverride(r, p.slug, next, baseline.manifest.frames),
                       )
                     }
@@ -1506,7 +1481,7 @@ export function AdminEditor({
                     }
                     credits={recredited[p.slug] ?? p.credits}
                     onCredits={(next) =>
-                      setRecredited((c) =>
+                      setOverride("credits", (c) =>
                         withOverride(
                           c,
                           p.slug,
@@ -1517,7 +1492,7 @@ export function AdminEditor({
                     }
                     copy={recopied[p.slug] ?? null}
                     onCopy={(next) =>
-                      setRecopied((c) =>
+                      setOverride("copy", (c) =>
                         withOverride(c, p.slug, next, baseline.manifest.copy),
                       )
                     }
@@ -1535,7 +1510,7 @@ export function AdminEditor({
           {!page && view === "traffic" ? <AdminTraffic /> : null}
           {!page && view === "seo" ? <AdminSeo /> : null}
 
-          {!page && view === "coverart" ? CoverArtFields() : null}
+          {!page && view === "coverart" ? <CoverArtFields draft={draft} set={set} releases={releases} /> : null}
 
           {!page && view === "video" ? (
             <AdminVideos
@@ -1585,7 +1560,7 @@ export function AdminEditor({
                 slugs={reslugged}
                 changed={changed}
                 onSlug={(origin, next) =>
-                  setReslugged((m) => {
+                  setOverride("slugs", (m) => {
                     const out = { ...m };
                     // Back to the original is no rename at all, and leaves
                     // no entry behind to publish.
@@ -1598,7 +1573,7 @@ export function AdminEditor({
                 disciplines={categories}
                 recategorised={recategorised}
                 onRecategorise={(slug, categorySlug) =>
-                  setRecategorised((r) => ({ ...r, [slug]: categorySlug }))
+                  setOverride("categories", (r) => ({ ...r, [slug]: categorySlug }))
                 }
                 reframed={reframed}
                 bts={bts}
@@ -1617,7 +1592,7 @@ export function AdminEditor({
                  that may itself be an override. `withOverride` puts that
                  back rather than dropping it; see the note there. */
                 onReframe={(slug, frames) =>
-                  setReframed((r) =>
+                  setOverride("frames", (r) =>
                     withOverride(r, slug, frames, baseline.manifest.frames),
                   )
                 }
@@ -1633,7 +1608,7 @@ export function AdminEditor({
                  published, and an intentionally empty list is a different
                  thing which `withOverride` keeps. */
                 onCredits={(slug, next) =>
-                  setRecredited((c) =>
+                  setOverride("credits", (c) =>
                     withOverride(c, slug, next, baseline.manifest.credits),
                   )
                 }
@@ -1662,26 +1637,14 @@ export function AdminEditor({
           ) : null}
 
           {/* One area at a time, so switching tabs is not a scroll and the
-            widest column holds only the fields you came for.
-         
-            Called, not rendered as `<HomeFields />`. These are closures over
-            the editor's state, so they are re-created on every render — and as
-            JSX that makes them a *different component type* each time, which
-            React handles by unmounting the subtree and mounting a fresh one.
-            Everything inside loses its state on every keystroke: the picker's
-            search panel snapped shut, its query cleared, and `dragging` reset
-            in the middle of a drag, which is why a card could be picked up and
-            never dropped.
-         
-            Calling them creates no component boundary. The elements land
-            directly in this component's tree, where React reconciles them by
-            position and the real components inside — `AdminPicker` and the
-            rest — keep their identity and their state. */}
-          {!page && view === "home" ? HomeFields() : null}
-          {!page && view === "clients" ? ClientFields() : null}
-          {!page && view === "sessions" ? SessionFields() : null}
-          {!page && view === "testimonials" ? QuoteFields() : null}
-          {!page && view === "contact" ? ContactFields() : null}
+            widest column holds only the fields you came for. The panels are
+            top-level components (components/admin-fields.tsx), so their type
+            is stable across renders and the pickers inside keep their state. */}
+          {!page && view === "home" ? <HomeFields draft={draft} set={set} releases={releases} releaseLimit={releaseLimit} slugs={slugs} unknownSlugs={unknownSlugs} projects={projects} hidden={hidden} heroChoices={heroChoices} /> : null}
+          {!page && view === "clients" ? <ClientFields draft={draft} set={set} clients={clients} /> : null}
+          {!page && view === "sessions" ? <SessionFields draft={draft} set={set} /> : null}
+          {!page && view === "testimonials" ? <QuoteFields draft={draft} set={set} /> : null}
+          {!page && view === "contact" ? <ContactFields draft={draft} set={set} /> : null}
 
           {/* The slug list, shared by every field that takes one, so it has to
             outlive the tab that uses it. */}
@@ -1748,384 +1711,7 @@ export function AdminEditor({
     </CreditDesk>
   );
 
-  function ClientFields() {
-    return (
-      <Area title="Clients">
-        <Field
-          anchor="clientsHome"
-          label="On the homepage, in order"
-          hint="The strip of logos under the cover. Drag to reorder, or use the arrows; remove one to keep it off the homepage only."
-        >
-          <AdminPicker
-            chosen={draft.clientsHome}
-            items={clients}
-            onChange={(next) => set("clientsHome", next)}
-            addLabel="Add a client"
-            searchLabel="Search clients"
-            emptyNote="Nothing chosen, so the strip shows every client, in the order they are filed."
-          />
-        </Field>
-
-        <Field
-          anchor="clientsStudio"
-          label="On the about page, in order"
-          hint="The wall of logos on /about. Its own list, so it can differ from the homepage."
-        >
-          <AdminPicker
-            chosen={draft.clientsStudio}
-            items={clients}
-            onChange={(next) => set("clientsStudio", next)}
-            addLabel="Add a client"
-            searchLabel="Search clients"
-            emptyNote="Nothing chosen, so the wall shows every client, in the order they are filed."
-          />
-        </Field>
-      </Area>
-    );
-  }
-
-  /* The gallery's own running order.
-   *
-   * `lib/cover-art-data.ts` is generated and its order is the script's, so
-   * until now the only way to move a release was to edit that script and
-   * re-run it. It is an editorial decision — which sleeve the gallery opens
-   * on — and it belongs here, on the same picker the homepage rack uses,
-   * because it is the same decision in the same shape.
-   *
-   * Partial: the list names only what has been moved and everything else
-   * keeps the place the script gave it, so leading with one release costs
-   * one entry rather than a snapshot of all twenty-six. */
-  function CoverArtFields() {
-    return (
-      <Area title="Cover art">
-        <Field
-          anchor="coverArtOrder"
-          label="The order of the gallery"
-          hint={`What /work/coverart shows, from first to last. Drag, or use the arrows. ${releases.length} releases in all; anything you do not place stays where it is, after the ones you do.`}
-        >
-          <AdminPicker
-            chosen={draft.coverArtOrder}
-            items={releases}
-            onChange={(next) => set("coverArtOrder", next)}
-            addLabel="Place a release"
-            searchLabel="Search releases"
-            emptyNote="Nothing placed, so the gallery runs in the order it was generated in."
-            shortfallNote="The rest follow in their own order, after these."
-          />
-        </Field>
-      </Area>
-    );
-  }
-
-  function HomeFields() {
-    return (
-      <Area title="Homepage">
-        <Field
-          anchor="featured"
-          label="Selected work, in order"
-          hint="The cards under the cover, three across. Drag to reorder, or use the arrows."
-        >
-          <AdminPicker
-            chosen={draft.featured}
-            items={projects.map((p) => ({
-              slug: p.slug,
-              name: p.name,
-              detail: p.category,
-              cover: { src: p.cover.src, color: p.cover.color },
-            }))}
-            unavailable={hidden}
-            onChange={(next) => set("featured", next)}
-            addLabel="Add a project"
-            searchLabel="Search projects"
-            emptyNote="Nothing selected, so the section is left out of the homepage entirely."
-          />
-        </Field>
-
-        <Field
-          anchor="heroDisciplines"
-          label="Disciplines on the cover"
-          hint="Which disciplines the cover cycles through, and in what order. Every discipline has a page and a row on /work whether or not it is here. This is only the cover. Pick none and it runs the six it always has."
-        >
-          <AdminPicker
-            chosen={draft.heroDisciplines}
-            items={heroChoices}
-            onChange={(next) => set("heroDisciplines", next)}
-            addLabel="Add a discipline"
-            searchLabel="Search disciplines"
-            emptyNote="Nothing picked, so the cover runs Editorial, Brand campaigns, Portraits, Mixed media, Artist presskit and Cover art, as it always has."
-            /* A warning, not a cap. A seventh row renders perfectly well and
-               makes the cover taller than the screen — measured at 1280x700,
-               six rows already put both buttons 198px under the fold — which
-               is a cost to state rather than a decision to take away. */
-            warnAfter={6}
-            warnNote="Past six the cover is taller than a 1280x700 screen and the two buttons fall below the fold."
-          />
-        </Field>
-
-        <Field
-          anchor="coverArt"
-          label="Cover art on the homepage"
-          hint={`Exactly what the homepage rack shows, in this order. Nothing fills in. Up to ${releaseLimit}. The rack runs two across on a phone and, on a wide screen, however many divide your count (five, four or three), so eight, nine and ten all sit in full rows.`}
-        >
-          <AdminPicker
-            chosen={draft.coverArt}
-            items={releases}
-            onChange={(next) => set("coverArt", next)}
-            limit={releaseLimit}
-            addLabel="Add a release"
-            searchLabel="Search releases"
-            emptyNote={`Nothing picked, so the first ${releaseLimit} releases show, as they always have.`}
-            shortfallNote="The rest of the rack fills from the remaining releases in order."
-          />
-        </Field>
-
-        {unknownSlugs.length ? (
-          <p className="text-sm text-accent">
-            No project with{" "}
-            {unknownSlugs.length === 1 ? "this slug" : "these slugs"}:{" "}
-            {unknownSlugs.join(", ")}. Anything unmatched is skipped on the
-            page.
-          </p>
-        ) : null}
-
-        <details className="text-sm text-muted-foreground">
-          <summary className="label cursor-pointer">
-            Every project slug ({slugs.length})
-          </summary>
-          <p className="mt-3 font-mono text-xs leading-relaxed">
-            {slugs.join(" · ")}
-          </p>
-        </details>
-      </Area>
-    );
-  }
-
-  function SessionFields() {
-    return (
-      <Area title="Sessions" anchor="sessions">
-        <p className="max-w-prose text-sm text-muted-foreground">
-          A price left empty reads as &ldquo;On request&rdquo;, which is honest,
-          but a visible number is the single biggest thing that stops a session
-          client leaving without inquiring.
-        </p>
-
-        {draft.sessions.map((session, i) => (
-          <div
-            key={session.slug}
-            className="flex flex-col gap-4 border-t border-border pt-6"
-          >
-            <h3 className="font-display text-xl uppercase tracking-[0]">
-              {session.name}
-            </h3>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Field
-                label="Starting price (USD)"
-                hint="Empty means “On request”."
-              >
-                <input
-                  type="number"
-                  min={0}
-                  step={50}
-                  value={session.from ?? ""}
-                  onChange={(e) =>
-                    updateSession(i, {
-                      from:
-                        e.target.value === "" ? null : Number(e.target.value),
-                    })
-                  }
-                  placeholder="On request"
-                  className={inputClass}
-                />
-              </Field>
-              <Field label="Turnaround">
-                <input
-                  type="text"
-                  value={session.turnaround}
-                  onChange={(e) =>
-                    updateSession(i, { turnaround: e.target.value })
-                  }
-                  className={inputClass}
-                />
-              </Field>
-            </div>
-
-            <Field label="Blurb">
-              <textarea
-                rows={2}
-                value={session.blurb}
-                onChange={(e) => updateSession(i, { blurb: e.target.value })}
-                className={inputClass}
-              />
-            </Field>
-
-            <Field label="What's included" hint="One per line.">
-              <textarea
-                rows={4}
-                value={session.includes.join("\n")}
-                onChange={(e) =>
-                  updateSession(i, { includes: splitLines(e.target.value) })
-                }
-                className={inputClass}
-              />
-            </Field>
-          </div>
-        ))}
-      </Area>
-    );
-  }
-
-  function QuoteFields() {
-    return (
-      <Area title="Quotes" anchor="testimonials">
-        <p className="max-w-prose text-sm text-muted-foreground">
-          The section does not render at all while this is empty, so there is
-          never invented praise on the site. A specific detail beats an
-          adjective: &ldquo;turned a two-hour window into eighteen usable
-          frames&rdquo; earns trust, &ldquo;great to work with&rdquo; does not.
-          Three to five is the useful range.
-        </p>
-
-        {draft.testimonials.map((t, i) => (
-          <div
-            key={i}
-            className="flex flex-col gap-4 border-t border-border pt-6"
-          >
-            <div className="flex items-baseline justify-between gap-4">
-              <span className="label text-muted-foreground">
-                {String(i + 1).padStart(2, "0")}
-              </span>
-              <button
-                type="button"
-                onClick={() =>
-                  set(
-                    "testimonials",
-                    draft.testimonials.filter((_, j) => j !== i),
-                  )
-                }
-                className="label text-muted-foreground transition-colors duration-200 hoverable:hover:text-accent"
-              >
-                Remove
-              </button>
-            </div>
-
-            <textarea
-              rows={3}
-              value={t.quote}
-              onChange={(e) => updateTestimonial(i, { quote: e.target.value })}
-              placeholder="What they said"
-              className={inputClass}
-            />
-            <div className="grid gap-4 sm:grid-cols-3">
-              <input
-                type="text"
-                value={t.name}
-                onChange={(e) => updateTestimonial(i, { name: e.target.value })}
-                placeholder="Name"
-                className={inputClass}
-              />
-              <input
-                type="text"
-                value={t.role ?? ""}
-                onChange={(e) =>
-                  updateTestimonial(i, { role: e.target.value || undefined })
-                }
-                placeholder="Art Director, WIRED"
-                className={inputClass}
-              />
-              <input
-                type="text"
-                list="project-slugs"
-                value={t.project ?? ""}
-                onChange={(e) =>
-                  updateTestimonial(i, {
-                    project: e.target.value || undefined,
-                  })
-                }
-                placeholder="project slug (optional)"
-                className={inputClass}
-              />
-            </div>
-          </div>
-        ))}
-
-        <button
-          type="button"
-          onClick={() =>
-            set("testimonials", [
-              ...draft.testimonials,
-              { quote: "", name: "" },
-            ])
-          }
-          className="label self-start border border-border px-5 py-3 press hoverable:hover:bg-card active:scale-[0.98]"
-        >
-          Add a quote
-        </button>
-      </Area>
-    );
-  }
-
-  function ContactFields() {
-    return (
-      <Area title="Contact">
-        <Field
-          anchor="responseTime"
-          label="Reply-time promise"
-          hint='Shown beside the contact form as "Replies …". Leave empty to say nothing rather than to promise something you will miss.'
-        >
-          <input
-            type="text"
-            value={draft.responseTime ?? ""}
-            onChange={(e) => set("responseTime", e.target.value || null)}
-            placeholder="within 24 hours"
-            className={inputClass}
-          />
-        </Field>
-
-        <Field
-          anchor="bookingUrl"
-          label="Booking link"
-          hint="The public Google Calendar booking page (calendar.app.google/…), not a share or edit link. Set it and a 'Check availability' button appears across the site; leave it empty and everything falls back to the enquiry form."
-        >
-          <input
-            type="url"
-            value={draft.bookingUrl ?? ""}
-            onChange={(e) => set("bookingUrl", e.target.value || null)}
-            placeholder="https://calendar.app.google/…"
-            className={inputClass}
-          />
-        </Field>
-      </Area>
-    );
-  }
-
-  function updateTestimonial(i: number, patch: Partial<Testimonial>) {
-    set(
-      "testimonials",
-      draft.testimonials.map((t, j) => (j === i ? { ...t, ...patch } : t)),
-    );
-  }
-
-  function updateSession(
-    i: number,
-    patch: Partial<SiteContent["sessions"][number]>,
-  ) {
-    set(
-      "sessions",
-      draft.sessions.map((s, j) => (j === i ? { ...s, ...patch } : s)),
-    );
-  }
 }
-
-/** Blank lines dropped, so a stray return does not become an empty bullet. */
-const splitLines = (value: string): string[] =>
-  value
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean);
-
-const inputClass =
-  "w-full border border-border bg-card px-4 py-3 text-sm text-foreground outline-none transition-colors duration-200 placeholder:text-muted-foreground focus-visible:border-foreground";
 
 function Connect({
   token,
@@ -2227,73 +1813,5 @@ function StatusLine({ status }: { status: Status }) {
         </>
       ) : null}
     </p>
-  );
-}
-
-/**
- * One tab's worth of fields, under its own heading.
- *
- * Replaces the numbered `Section` the single Content form used. The numbers
- * were there to be read against an index — "03 Testimonials" told you where
- * you were in a scroll of four — and with a tab per area there is no scroll to
- * be lost in and nothing for a number to count against. The tab is lit; the
- * heading repeats it at reading size, which is how you know the panel
- * switched rather than emptied.
- */
-function Area({
-  title,
-  children,
-  /**
-   * Anchor, where the area itself is what a sitemap row points at.
-   *
-   * Sessions and Quotes have no single field to land on — they are a list of
-   * four prices and a list of quotes — so the row points at the area. Home
-   * and Contact do not need one: their own fields carry anchors, and landing
-   * on the specific field you asked for beats landing on the heading above it.
-   */
-  anchor,
-}: {
-  title: string;
-  children: React.ReactNode;
-  anchor?: string;
-}) {
-  return (
-    <section
-      id={anchor ? `field-${anchor}` : undefined}
-      className="mt-8 flex scroll-mt-28 flex-col gap-6"
-    >
-      <h2 className="font-display border-b border-border pb-3 text-xl uppercase tracking-[0]">
-        {title}
-      </h2>
-      {children}
-    </section>
-  );
-}
-
-function Field({
-  label,
-  hint,
-  children,
-  /** Anchor, so a sitemap row can send the page to this field. */
-  anchor,
-}: {
-  label: string;
-  hint?: string;
-  children: React.ReactNode;
-  anchor?: string;
-}) {
-  return (
-    <label
-      id={anchor ? `field-${anchor}` : undefined}
-      className="flex scroll-mt-28 flex-col gap-2"
-    >
-      <span className="label text-muted-foreground">{label}</span>
-      {hint ? (
-        <span className="max-w-prose text-sm text-muted-foreground">
-          {hint}
-        </span>
-      ) : null}
-      {children}
-    </label>
   );
 }

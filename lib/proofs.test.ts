@@ -69,7 +69,8 @@ describe("proofs", () => {
 describe("proof activity log", () => {
   it("logs opens once per device and diffs picks into pick and unpick", async () => {
     const { track, device } = await import("@/lib/proofs");
-    let v = track(undefined, "t1", { kind: "open", device: "iPhone · Safari", place: "San Jose, CA, US" });
+    let v = track(undefined, "t1", { kind: "open", device: "iPhone · Safari", place: "San Jose, CA, US", name: "Maya" });
+    expect(v.name).toBe("Maya");
     v = track(v, "t2", { picks: ["a", "b"] });
     v = track(v, "t3", { picks: ["b", "c"] });
     v = track(v, "t4", { kind: "open", device: "iPhone · Safari", looks: { a: 500_000 }, seconds: 9999 });

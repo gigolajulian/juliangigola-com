@@ -1,3 +1,4 @@
+import { STRIP_NOTE } from "@/lib/events";
 import * as React from "react";
 import type { Mover } from "./motion";
 import { centreOf, leftOf } from "./shared";
@@ -110,7 +111,7 @@ export function createPaging(m: Mover) {
   let byRight = false;
   const note = (e?: Event) => {
     const kids = el.children;
-    byRight = e?.type === "jg:note";
+    byRight = e?.type === STRIP_NOTE;
     if (byRight) {
       for (let i = kids.length - 1; i >= 0; i--) {
         const cell = kids[i] as HTMLElement;

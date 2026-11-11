@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { NotFoundScene } from "@/components/not-found-scene";
-import DriftWall from "@/components/DriftWall";
+import DriftWall from "@/components/drift-wall";
 import { DISCIPLINES, WALL, titleCase } from "@/lib/work";
 import { wallItem } from "@/lib/wall-tile";
 
@@ -56,21 +56,7 @@ export default function NotFound() {
         <div className="absolute inset-0">
           <DriftWall
             items={WALL.map(wallItem)}
-            columns="fill"
-            tileWidth={300}
-            tileHeight={400}
-            gap={28}
-            radius={8}
-            tilt={16}
-            turn={-14}
-            perspective={1200}
-            depth={120}
             speed={24}
-            direction="up"
-            variance={0.45}
-            parallax={0.6}
-            lift={16}
-            fade={0.6}
             dim={0.4}
             build
             overlayColor="var(--bg)"

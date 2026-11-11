@@ -6,7 +6,7 @@ import { flushSync } from "react-dom";
 import Image from "next/image";
 import { Dialog, VisuallyHidden } from "radix-ui";
 import { cn, rubberband } from "@/lib/utils";
-import TiltedCard from "@/components/TiltedCard";
+import TiltedCard from "@/components/vendor/tilted-card";
 import type { Frame } from "@/lib/work-types";
 import {
   zoomOpen,

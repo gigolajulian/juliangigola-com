@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
-import DriftWall from "@/components/DriftWall";
+import DriftWall from "@/components/drift-wall";
 
 beforeAll(() => {
   // jsdom has no Web Animations API.

@@ -181,3 +181,30 @@ html:has(.proof) #main{transform:none}
 }
 @media (prefers-reduced-motion:reduce){.proof *{transition:none!important}}
 
+
+/* ── ?proofwall=1: the gate as the grid's own wall (components/proof-wall.tsx) ── */
+.proof[data-wall]{position:relative}
+/* compact intro (Julian 2026-11-10: the header does not have to be that big); one line, a long name wraps it to two */
+.proof[data-wall] .proof-intro{padding:clamp(28px,4cqi,48px) 28px clamp(20px,2.5cqi,28px);max-width:none}
+.proof[data-wall] .proof-intro h1{font:500 clamp(20px,calc((100cqi - 56px) / (var(--len,17) * .5)),44px)/1.1 var(--font-display);letter-spacing:-.025em;margin:10px 0 0;text-wrap:balance}
+/* under the wall: the real grid holds its place, hidden, until the wall lands on it */
+.proof[data-wall="gate"] .proof-grid:not(.pw-block),.proof[data-wall="settle"] .proof-grid:not(.pw-block){visibility:hidden}
+.proof[data-wall] .proof-intro,.proof[data-wall] .proof-tabs,.proof[data-wall] .proof-meta{transition:opacity .42s cubic-bezier(.23,1,.32,1)}
+.proof[data-wall="gate"] :is(.proof-intro,.proof-tabs,.proof-meta){opacity:0}
+.proof[data-wall="settle"] :is(.proof-intro,.proof-tabs,.proof-meta){transition-delay:.55s}
+.proof[data-wall="on"] .proof-cell :is(.proof-no,.proof-zoom){animation:pw-in .3s ease-out backwards}
+@keyframes pw-in{from{opacity:0}}
+.pw-layer{position:absolute;left:0;right:0;top:0;z-index:4;pointer-events:none}
+.pw-tilt,.pw-tilt .proof-grid,.pw-tilt .proof-cell{transform-style:preserve-3d}
+.pw-block{padding-bottom:0}
+.pw-block+.pw-block{margin-top:4px}
+.pw-tilt .proof-cell{transform:translateZ(var(--dz,0px));outline:0}
+/* the dim over the wall so the card reads: an overlay that lifts, never the images */
+.pw-dim{position:fixed;left:0;right:0;bottom:0;z-index:5;pointer-events:none;background:color-mix(in oklab,var(--background) var(--pw-tint),transparent);backdrop-filter:blur(var(--pw-blur));-webkit-backdrop-filter:blur(var(--pw-blur))}
+.proof .pw-card{position:fixed;z-index:6;top:calc(50% + 28px)}
+@container (max-width:520px){
+  .pw-block+.pw-block{margin-top:3px}
+  .proof[data-wall] .proof-intro{padding-left:18px;padding-right:18px}
+  .proof[data-wall] .proof-intro h1{font-size:clamp(20px,calc((100cqi - 36px) / (var(--len,17) * .5)),44px)}
+  .proof .pw-card{top:auto}
+}

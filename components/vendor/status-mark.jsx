@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef } from 'react';
 import { animate, useMotionValue, useReducedMotion } from 'motion/react';
 
-import './StatusMark.css';
+import './status-mark.css';
 
 /* React Bits' StatusMark. One change from the source: the ring's geometry
    is written to its ref in a layout effect rather than during render, which
