@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { gsap } from "gsap";
 import { cn } from "@/lib/utils";
-import { DepositStep, type DepositBody } from "@/components/deposit-step";
+import { DepositStep, goo, type DepositBody } from "@/components/deposit-step";
 import { ReferencePicks } from "@/components/reference-picks";
 import { isPaid } from "@/lib/paid";
 import { Orb, ORB_ROUND } from "@/components/orb";
@@ -12,10 +12,11 @@ import { JgLoad } from "@/components/jg-load";
 import { Calendar, dlabel, duration, fmt, type Shell } from "@/components/v3/flow";
 import { GESTURE_GAP_MS } from "@/components/strip/shared";
 import { looksLikeEmail } from "@/lib/inbox";
+import { TZ } from "@/lib/booking-rules";
+import { mplan } from "@/lib/mplan";
 
 /* Goo (Julian, 2026-10-20, OKd 10-21) on the card's buttons, times and
-   open days. `?goo=0` turns it off. */
-const goo = typeof location === "undefined" || new URLSearchParams(location.search).get("goo") !== "0";
+   open days. `?goo=0` turns it off: `goo()` in deposit-step.tsx. */
 
 /* ── the time picker ──────────────────────────────────────────────
  * The open times, in two plain steps: a day, then a time. Days
@@ -124,6 +125,10 @@ function Fold({ on, fill, children }: { on: boolean; fill?: boolean; children: R
   );
 }
 
+type Step = "pick" | "form" | "sending" | "check" | "pay" | "done";
+/** Which of the three steps (pick, details, pay) the progress marks; "done" is handled where it differs. */
+const STEP_AT: Record<Exclude<Step, "done">, number> = { pick: 0, form: 1, sending: 1, check: 1, pay: 2 };
+
 export function TimePicker({
   path,
   title,
@@ -143,9 +148,9 @@ export function TimePicker({
   onPicked?: (start: string) => void;
 }) {
   const [username, slug] = path.split("/");
-  const [tz] = React.useState(() => Intl.DateTimeFormat().resolvedOptions().timeZone || "America/Los_Angeles");
+  const [tz] = React.useState(() => Intl.DateTimeFormat().resolvedOptions().timeZone || TZ);
   /* Julian: the time where I am, with the place, before a time is picked. */
-  const clockHere = () => new Intl.DateTimeFormat("en-US", { timeZone: "America/Los_Angeles", hour: "numeric", minute: "2-digit", timeZoneName: "short" }).format(new Date());
+  const clockHere = () => new Intl.DateTimeFormat("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit", timeZoneName: "short" }).format(new Date());
   const [here, setHere] = React.useState(clockHere);
   React.useEffect(() => {
     const t = setInterval(() => setHere(clockHere()), 15000);
@@ -197,7 +202,7 @@ export function TimePicker({
      on show), a day, or a day and its time. A day alone keeps Confirm off:
      clicking one used to pick its time as well, skipping step two. */
   const [chosen, setChosen] = React.useState<false | "day" | "time">(false);
-  const [step, setStep] = React.useState<"pick" | "form" | "sending" | "check" | "pay" | "done">("pick");
+  const [step, setStep] = React.useState<Step>("pick");
   /* Option B's row of times (v3): where a swipe on the big number began, and
      whether the row runs past its edge, which fades it and shows the hint. */
   const swipeX = React.useRef<number | null>(null);
@@ -784,7 +789,8 @@ export function TimePicker({
         body: JSON.stringify({ engine: "own", slug, start: new Date(pick.start).toISOString(), timeZone: tz, name, email: String(form.get("email")), phone, via, ...(notes ? { notes } : {}), ...(needsWhere ? { where } : {}) }),
       });
       const body = await res.json();
-      if (!res.ok || body.status !== "success") throw new Error(body?.error?.message || "failed");
+      // 409 is the engine saying the slot went to someone else.
+      if (!res.ok || body.status !== "success") throw Object.assign(new Error(body?.error?.message || "failed"), { status: res.status });
       }
       setBooked({ name: firstName, email: String(form.get("email")).trim(), where, phone, via });
       /* The orbs get their moment even when the server answers at once, then
@@ -799,7 +805,7 @@ export function TimePicker({
       recent.delete(`${username}/${slug}/${tz}`);
       setStep("done");
     } catch (e) {
-      setError(/(already|not available|busy|booked)/i.test(String(e)) ? "That time was just taken. Pick another." : "That did not go through. Try again, or write to hello@juliangigola.com.");
+      setError((e as { status?: number }).status === 409 ? "That time was just taken. Pick another." : "That did not go through. Try again, or write to hello@juliangigola.com.");
       setStep("form");
       void load(true);
     }
@@ -903,7 +909,7 @@ export function TimePicker({
         const dir = ahead < -w / 3 ? 1 : ahead > w / 3 && !atStart ? -1 : 0;
         /* MOTION-PLAN.md item 2 (`?mplan=rm`): under Reduce Motion the row
            followed the finger, and on release it snaps; a turned week fades in. */
-        if (document.documentElement.dataset.mplan?.split(" ").includes("rm") && matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        if (mplan("rm") && matchMedia("(prefers-reduced-motion: reduce)").matches) {
           gsap.set(row, { clearProps: "transform" });
           if (dir) {
             shift(dir);
@@ -992,7 +998,7 @@ export function TimePicker({
   if (v3 && editorial) {
     const end = pick.min + length;
     const range = `${fmt(pick.min)} to ${fmt(end)}`;
-    const at = step === "pick" ? 1 : step === "pay" ? 3 : step === "done" ? v3steps.length : 2;
+    const at = step === "done" ? v3steps.length : STEP_AT[step] + 1;
     const rows: [string, React.ReactNode][] = [["Day", dlabel(date)], ["Time", range], ["Length", duration(length)]];
     const shell = (p: Omit<Parameters<Shell>[0], "steps" | "at" | "sum">) => <div ref={v3root} className="contents">{v3.shell({ steps: v3steps, at, sum: rows, ...p })}</div>;
     const back = (to: typeof step) => <button type="button" className="btn" onClick={() => { setBad({}); setStep(to); }}>Back</button>;
@@ -1213,7 +1219,7 @@ export function TimePicker({
     const [, apEnd] = clock(pick.min + length);
     const tzName = zone(pick.start, tz);
     const range = `${d3(date)} ${date.getDate()} ${mon(date)}, ${t}${ap === apEnd ? "" : ` ${ap}`} to ${until} ${apEnd} ${tzName}`;
-    const at = step === "pick" ? 0 : step === "pay" ? 2 : step === "done" ? -1 : 1;
+    const at = step === "done" ? -1 : STEP_AT[step];
     /* A call (no deposit): a handset, its length in minutes (Julian, 2026-10-17: "15:00" read as 3 PM). */
     const call = !paid;
     const handset = (
@@ -1258,7 +1264,7 @@ export function TimePicker({
         <div ref={root} className="contents">
           <DepositStep
             editorial
-            head={<>{bar}{hero("$100", `Deposit. Holds ${dayLine}`, "Balance due after the shoot", <button type="button" data-stick={goo ? "fill" : undefined} className="ed-box" onClick={() => setStep("form")}>Change</button>)}</>}
+            head={<>{bar}{hero("$100", `Deposit. Holds ${dayLine}`, "Balance due after the shoot", <button type="button" data-stick={goo() ? "fill" : undefined} className="ed-box" onClick={() => setStep("form")}>Change</button>)}</>}
             className={className}
             body={deposit}
             rows={[
@@ -1349,7 +1355,7 @@ export function TimePicker({
         {bar}
         {step === "pick"
           ? hero(`${d3(date)} ${date.getDate()} ${mon(date)}`, <>{chosen === "time" ? `${t}${ap === apEnd ? "" : ` ${ap}`} to ${until} ${apEnd}` : "Pick a time"}<br />{what}</>, chosen === "time" ? "Then your details" : "Pick a day, then a time")
-          : hero("Details", <>{dayLine}<br />{what}</>, "Who and where", <button type="button" data-stick={goo ? "fill" : undefined} className="ed-box" onClick={() => setStep("pick")}>Change</button>)}
+          : hero("Details", <>{dayLine}<br />{what}</>, "Who and where", <button type="button" data-stick={goo() ? "fill" : undefined} className="ed-box" onClick={() => setStep("pick")}>Change</button>)}
         {step === "pick" ? (
           <>
             <div className="ed-body">
@@ -1363,8 +1369,8 @@ export function TimePicker({
                     {(["week", "month"] as const).map((v) => (
                       <button key={v} type="button" aria-pressed={view === v} onClick={() => switchView(v)}>{v}</button>
                     ))}
-                    <button type="button" data-stick={goo ? "" : undefined} className="ed-arrow" aria-label="Earlier" disabled={atStart} onClick={() => shift(-1)}>{arrow}</button>
-                    <button type="button" data-stick={goo ? "" : undefined} className="ed-arrow" aria-label="Later" disabled={atEnd} onClick={() => shift(1)}><span className="flex rotate-180">{arrow}</span></button>
+                    <button type="button" data-stick={goo() ? "" : undefined} className="ed-arrow" aria-label="Earlier" disabled={atStart} onClick={() => shift(-1)}>{arrow}</button>
+                    <button type="button" data-stick={goo() ? "" : undefined} className="ed-arrow" aria-label="Later" disabled={atEnd} onClick={() => shift(1)}><span className="flex rotate-180">{arrow}</span></button>
                   </div>
                 </div>
                 <div ref={daysBox} className="touch-pan-y overflow-hidden" {...swipeProps}>
@@ -1394,7 +1400,7 @@ export function TimePicker({
                           }
                           const id = iso(d);
                           return (
-                            <button key={id} data-day={id} type="button" disabled={!open(id).size} aria-pressed={pick.date === id} aria-label={`${WEEKDAYS[d.getDay()]}, ${MONTHS[d.getMonth()]} ${d.getDate()}`} onClick={() => dayPick(id)} data-stick={goo && open(id).size ? "fill" : undefined} className="ed-cell">
+                            <button key={id} data-day={id} type="button" disabled={!open(id).size} aria-pressed={pick.date === id} aria-label={`${WEEKDAYS[d.getDay()]}, ${MONTHS[d.getMonth()]} ${d.getDate()}`} onClick={() => dayPick(id)} data-stick={goo() && open(id).size ? "fill" : undefined} className="ed-cell">
                               <span className="ed-n">{d.getDate()}</span>
                               <i />
                             </button>
@@ -1417,7 +1423,7 @@ export function TimePicker({
                       const m = minutesOf(x.start);
                       const [h, a] = clock(m);
                       return (
-                        <button key={x.start} data-slot="" type="button" aria-pressed={chosen === "time" && m === pick.min} aria-label={`${h} ${a}`} onClick={() => choose(pick.date, m, true)} data-stick={goo ? "fill" : undefined} className="ed-slot">{h} {a}</button>
+                        <button key={x.start} data-slot="" type="button" aria-pressed={chosen === "time" && m === pick.min} aria-label={`${h} ${a}`} onClick={() => choose(pick.date, m, true)} data-stick={goo() ? "fill" : undefined} className="ed-slot">{h} {a}</button>
                       );
                     })}
                   </div>
@@ -1428,9 +1434,9 @@ export function TimePicker({
             </div>
             <div className="ed-floor">
               <span className="label flex flex-col gap-1">
-                {chosen === "time" ? `${sum} ${tzName}` : `San Jose, CA · ${here}${tz === "America/Los_Angeles" ? "" : ` · times in ${tzName}`}`}
+                {chosen === "time" ? `${sum} ${tzName}` : `San Jose, CA · ${here}${tz === TZ ? "" : ` · times in ${tzName}`}`}
               </span>
-              <button type="button" data-stick={goo ? "fill" : undefined} className="ed-btn" onClick={() => setOk("spin")} disabled={chosen !== "time"} aria-busy={!!ok}>
+              <button type="button" data-stick={goo() ? "fill" : undefined} className="ed-btn" onClick={() => setOk("spin")} disabled={chosen !== "time"} aria-busy={!!ok}>
                 <span className={cn("transition-opacity duration-200", ok && "opacity-0")}>Continue</span>
                 {okMark}
               </button>
@@ -1452,7 +1458,7 @@ export function TimePicker({
                     <span className="label">Call</span>
                     <div className="ed-opts">
                       {(["Video", "Phone"] as const).map((v) => (
-                        <label key={v} data-stick={goo ? "fill" : undefined}>
+                        <label key={v} data-stick={goo() ? "fill" : undefined}>
                           <input type="radio" name="via" value={v} checked={via === v} onChange={() => setVia(v)} className="sr-only" />
                           <span className="ed-via">{v === "Video" ? camera : handset}{v} call</span>
                         </label>
@@ -1474,7 +1480,7 @@ export function TimePicker({
                     <span className="label">Location</span>
                     <div className="ed-opts">
                       {opts.map(([label, q]) => (
-                        <label key={label} data-stick={goo ? "fill" : undefined}>
+                        <label key={label} data-stick={goo() ? "fill" : undefined}>
                           <input type="radio" name="opt" value={label} required checked={opt === label} onChange={() => { setOpt(label); if (q) setAsk(q); }} className="sr-only" />
                           <span>{label}</span>
                         </label>
@@ -1490,7 +1496,7 @@ export function TimePicker({
             </div>
             <div className="ed-floor">
               <span className="label">{paid ? "Next: $100 deposit" : `${sum} ${tzName}`}</span>
-              <button type="submit" data-stick={goo ? "fill" : undefined} className="ed-btn" disabled={step === "sending"}>{paid ? "Continue" : step === "sending" ? "Booking" : "Book it"}</button>
+              <button type="submit" data-stick={goo() ? "fill" : undefined} className="ed-btn" disabled={step === "sending"}>{paid ? "Continue" : step === "sending" ? "Booking" : "Book it"}</button>
             </div>
           </form>
         )}
@@ -1833,7 +1839,7 @@ export function TimePicker({
       {/* confirm */}
       {step === "pick" ? (
         <div className="sticky bottom-0 z-10 mt-auto flex flex-col gap-4 pt-6 bg-background/80 backdrop-blur-md tp-short:pb-1 tp-short:pt-4 @md:flex-row @md:items-center @md:justify-between">
-          <span className="label text-muted-foreground">{chosen === "time" ? `${sum} ${zone(pick.start, tz)}` : `San Jose, CA · ${here}${tz === "America/Los_Angeles" ? "" : ` · times in ${zone(pick.start, tz)}`}`}</span>
+          <span className="label text-muted-foreground">{chosen === "time" ? `${sum} ${zone(pick.start, tz)}` : `San Jose, CA · ${here}${tz === TZ ? "" : ` · times in ${zone(pick.start, tz)}`}`}</span>
           <button type="button" data-part="act" onClick={() => setOk("spin")} disabled={chosen !== "time"} aria-busy={!!ok} className="label relative rounded-[2px] border border-foreground bg-foreground px-6 @max-md:w-full py-4 text-background transition-[opacity,scale,background-color,border-color,color] duration-300 enabled:border-accent enabled:bg-accent enabled:text-accent-foreground hoverable:hover:opacity-85 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-35">
             <span className={cn("transition-opacity duration-200", ok && "opacity-0")}>Confirm this time</span>
             {okMark}

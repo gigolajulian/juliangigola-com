@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { TimePicker } from "@/components/time-picker";
-import { REFUND_HOURS, refundable } from "@/lib/booking-rules";
+import { REFUND_HOURS, refundable, TZ } from "@/lib/booking-rules";
 
 /* ── a client's own booking: reschedule or cancel ─────────────────
  * Opened from the links in the "You're in." mail (`app/booking/[id]`).
@@ -49,7 +49,7 @@ export function ManageBooking({ booking, token, open }: { booking: Managed; toke
         <span className="lbl mute">{state === "cancelled" ? "Cancelled" : state === "moved" ? "Moved" : "Your booking"}</span>
         <h1 className="text-2xl">{b.session}</h1>
         <p className="mute">
-          {when(b.start, "America/Los_Angeles")}
+          {when(b.start, TZ)}
           {b.where ? <><br />{b.where}</> : null}
         </p>
       </div>
@@ -92,8 +92,8 @@ export function ManageBooking({ booking, token, open }: { booking: Managed; toke
           {b.paid ? (
             <p className="mute">
               {refund
-                ? `Your $100 deposit moves with it. It is refunded only if you cancel ${REFUND_HOURS} hours or more before the time you first booked, ${when(b.firstStart ?? b.start, "America/Los_Angeles")}.`
-                : `Your $100 deposit moves with it. It is no longer refundable: the time you first booked, ${when(b.firstStart ?? b.start, "America/Los_Angeles")}, is under ${REFUND_HOURS} hours away.`}
+                ? `Your $100 deposit moves with it. It is refunded only if you cancel ${REFUND_HOURS} hours or more before the time you first booked, ${when(b.firstStart ?? b.start, TZ)}.`
+                : `Your $100 deposit moves with it. It is no longer refundable: the time you first booked, ${when(b.firstStart ?? b.start, TZ)}, is under ${REFUND_HOURS} hours away.`}
             </p>
           ) : null}
           <button type="button" className="btn self-start" onClick={() => setMode("")}>Back</button>
