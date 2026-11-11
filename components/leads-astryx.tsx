@@ -29,6 +29,7 @@ import { TextInput } from "@astryxdesign/core/TextInput";
 import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/SegmentedControl";
 import { ProgressBar } from "@astryxdesign/core/ProgressBar";
 import { StatusDot } from "@astryxdesign/core/StatusDot";
+import { Tab, TabList } from "@astryxdesign/core/TabList";
 import { SignIn } from "@/components/admin/admin-leads";
 import { LeadAstryx } from "@/components/leads/lead-astryx";
 import { ago, inboxCall, loadError, matches, nextStep, pass } from "@/lib/leads/lead-desk";
@@ -51,13 +52,16 @@ type Size = "phone" | "mid" | "wide";
 type View = "today" | "leads" | "new" | "calendar" | "money" | "licences" | "aside" | "stats" | "traffic" | "seo" | "hours" | "templates" | "device" | "more";
 const PROOFS = "/admin/proofs/astryx";
 const CLASSIC_HREF = "/admin/leads";
-/** The lower nav groups, and the phone's More page. */
-const GROUPS_MORE: [string, [string, View | string][]][] = [
-  ["Clients", [["Licences", "licences"], ["Proofs", PROOFS], ["Put aside", "aside"]]],
-  ["Numbers", [["Stats", "stats"], ["Traffic", "traffic"], ["SEO", "seo"]]],
-  ["Setup", [["Hours", "hours"], ["Templates", "templates"], ["This device", "device"]]],
-  ["Site", [["Pages and work", "/admin"], ["Classic desk", CLASSIC_HREF]]],
+/** Julian (2026-11-10): "simplify the left tab or group them up", "merge panels that are related", "add icon to all".
+ * One nav item per group; a group with more than one page gets a tab row on top. */
+const SECTIONS: [View, string, [string, View][]][] = [
+  ["leads", "Leads", [["Open", "leads"], ["Put aside", "aside"]]],
+  ["calendar", "Calendar", [["Calendar", "calendar"], ["Hours", "hours"]]],
+  ["money", "Money", [["Stripe", "money"], ["Licences", "licences"]]],
+  ["stats", "Numbers", [["Stats", "stats"], ["Traffic", "traffic"], ["SEO", "seo"]]],
+  ["templates", "Settings", [["Templates", "templates"], ["This device", "device"]]],
 ];
+const sectionOf = (v: View) => SECTIONS.find(([, , pages]) => pages.some(([, p]) => p === v));
 type Group = "now" | "week" | "waiting";
 
 /* The site's tokens (app/styles/tokens.css): warm near-black, one teal accent; the site's own Inter Tight and Plex Mono. */
@@ -97,6 +101,14 @@ const CalendarGlyph = svg(<><rect x="4" y="5" width="16" height="15" rx="2" /><p
 const MoreGlyph = svg(<><circle cx="6" cy="12" r="1.2" /><circle cx="12" cy="12" r="1.2" /><circle cx="18" cy="12" r="1.2" /></>);
 const MoneyGlyph = svg(<><rect x="3" y="6" width="18" height="12" rx="2" /><circle cx="12" cy="12" r="2.5" /></>);
 const PlusGlyph = svg(<path d="M12 5v14M5 12h14" />);
+const ChartGlyph = svg(<path d="M4 20h16M7 16v-5M12 16V7M17 16v-8" />);
+const GearGlyph = svg(<><circle cx="12" cy="12" r="3" /><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1" /></>);
+const PhotoGlyph = svg(<><rect x="4" y="5" width="16" height="14" rx="2" /><circle cx="9" cy="10" r="1.6" /><path d="M20 16l-5-5-8 8" /></>);
+const SiteGlyph = svg(<><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M3 9h18M9 9v11" /></>);
+const BackGlyph = svg(<path d="M10 7l-5 5 5 5M5 12h14" />);
+const GLYPH: Partial<Record<View, React.ComponentType<React.SVGProps<SVGSVGElement>>>> = { leads: InboxGlyph, calendar: CalendarGlyph, money: MoneyGlyph, stats: ChartGlyph, templates: GearGlyph };
+/** Out of the desk: proofs, the site editor, the classic desk until it is retired. */
+const LINKS: [string, string, React.ComponentType<React.SVGProps<SVGSVGElement>>][] = [["Proofs", PROOFS, PhotoGlyph], ["Pages and work", "/admin", SiteGlyph], ["Classic desk", CLASSIC_HREF, BackGlyph]];
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
   return <Text type="code" size="xsm" color="secondary" weight="medium">{children}</Text>;
@@ -130,17 +142,14 @@ function Nav({ needs, view, go }: { needs: number; view: View; go: (v: View) => 
       <SideNavSection title="Desk" isHeaderHidden>
         <SideNavItem label="New lead" icon={PlusGlyph} isSelected={view === "new"} onClick={() => go("new")} />
         <SideNavItem label="Today" icon={HomeGlyph} isSelected={view === "today"} onClick={() => go("today")} />
-        <SideNavItem label="Leads" icon={InboxGlyph} isSelected={view === "leads"} onClick={() => go("leads")} endContent={<Text type="code" size="xsm">{needs}</Text>} />
-        <SideNavItem label="Calendar" icon={CalendarGlyph} isSelected={view === "calendar"} onClick={() => go("calendar")} />
-        <SideNavItem label="Money" icon={MoneyGlyph} isSelected={view === "money"} onClick={() => go("money")} />
+        {SECTIONS.map(([to, label]) => (
+          <SideNavItem key={to} label={label} icon={GLYPH[to]} isSelected={sectionOf(view)?.[0] === to} onClick={() => go(to)}
+            endContent={to === "leads" ? <Text type="code" size="xsm">{needs}</Text> : undefined} />
+        ))}
       </SideNavSection>
-      {GROUPS_MORE.map(([title, items]) => (
-        <SideNavSection key={title} title={title}>
-          {items.map(([label, to]) => to.startsWith("/")
-            ? <SideNavItem key={label} label={label} href={to} />
-            : <SideNavItem key={label} label={label} isSelected={view === to} onClick={() => go(to as View)} />)}
-        </SideNavSection>
-      ))}
+      <SideNavSection title="Elsewhere">
+        {LINKS.map(([label, href, glyph]) => <SideNavItem key={label} label={label} icon={glyph} href={href} />)}
+      </SideNavSection>
     </SideNav>
   );
 }
@@ -154,15 +163,15 @@ function More({ go }: { go: (v: View) => void }) {
       content={
         <LayoutContent role="main" label="More">
           <VStack gap={5}>
-            <List hasDividers><ListItem label="Money" onClick={() => go("money")} /><ListItem label="New lead" onClick={() => go("new")} /></List>
-            {GROUPS_MORE.map(([title, items]) => (
-              <VStack key={title} gap={1}>
-                <Eyebrow>{title.toUpperCase()}</Eyebrow>
-                <List hasDividers>
-                  {items.map(([label, to]) => to.startsWith("/") ? <ListItem key={label} label={label} href={to} /> : <ListItem key={label} label={label} onClick={() => go(to as View)} />)}
-                </List>
-              </VStack>
-            ))}
+            <List hasDividers>
+              <ListItem label="New lead" startContent={<Icon icon={PlusGlyph} color="secondary" />} onClick={() => go("new")} />
+              {SECTIONS.filter(([to]) => to !== "leads" && to !== "calendar").map(([to, label]) => <ListItem key={to} label={label} startContent={<Icon icon={GLYPH[to]!} color="secondary" />} onClick={() => go(to)} />)}
+              <ListItem label="Put aside" startContent={<Icon icon={InboxGlyph} color="secondary" />} onClick={() => go("aside")} />
+            </List>
+            <VStack gap={1}>
+              <Eyebrow>ELSEWHERE</Eyebrow>
+              <List hasDividers>{LINKS.map(([label, href, glyph]) => <ListItem key={label} label={label} startContent={<Icon icon={glyph} color="secondary" />} href={href} />)}</List>
+            </VStack>
           </VStack>
         </LayoutContent>
       }
@@ -416,6 +425,14 @@ export function LeadsAstryx() {
     more: <More go={show} />,
   };
   const page = lead ?? pages[screen] ?? (screen === "money" ? <MoneyAstryx /> : screen === "calendar" ? <CalendarAstryx leads={live.filter((l) => !l.archivedAt)} size={size} open={(l) => setOpen(l.id ?? null)} tab={calTab} setTab={setCalTab} /> : screen === "new" ? <NewLeadAstryx call={call} leads={live} size={size} done={added} open={(l) => setOpen(l.id ?? null)} cancel={() => show("leads")} /> : screen === "today" && leads ? <TodayAstryx leads={live} size={size} open={(l) => setOpen(l.id ?? null)} show={() => show("leads")} /> : home);
+  const section = lead ? null : sectionOf(screen);
+  const shown = section && section[2].length > 1 ? (
+    <Layout
+      height="fill"
+      header={<LayoutHeader><TabList value={screen} onChange={(v) => show(v as View)} hasDivider layout="hug">{section[2].map(([label, v]) => <Tab key={v} value={v} label={label} />)}</TabList></LayoutHeader>}
+      content={page}
+    />
+  ) : page;
   if (!mode) return null;
   return (
     <Theme theme={leadsTheme} mode={mode}>
@@ -424,8 +441,8 @@ export function LeadsAstryx() {
       <style>{":root [data-astryx-desk][data-astryx-desk] *,:root [data-astryx-desk][data-astryx-desk] ::placeholder{text-transform:none}"}</style>
       <div data-astryx-desk="" style={{ height: "100dvh", textTransform: "none", letterSpacing: "normal" }}>
         {size === "phone"
-          ? <Layout height="fill" content={page} footer={<TabBar view={screen} go={show} />} />
-          : <Layout height="fill" start={<LayoutPanel width={260} padding={0} label="Desk" /* SideNav draws 260 wide by default; a narrower panel clipped the counts. */><Nav needs={needs} view={screen} go={show} /></LayoutPanel>} content={page} />}
+          ? <Layout height="fill" content={shown} footer={<TabBar view={screen} go={show} />} />
+          : <Layout height="fill" start={<LayoutPanel width={260} padding={0} label="Desk" /* SideNav draws 260 wide by default; a narrower panel clipped the counts. */><Nav needs={needs} view={screen} go={show} /></LayoutPanel>} content={shown} />}
       </div>
     </Theme>
   );
