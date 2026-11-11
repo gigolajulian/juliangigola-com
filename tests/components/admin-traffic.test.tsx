@@ -13,7 +13,7 @@ describe("AdminTraffic", () => {
     vi.stubGlobal("fetch", vi.fn());
     render(<AdminTraffic />);
     expect(screen.getByRole("heading", { name: /Traffic/ })).toBeTruthy();
-    expect(await screen.findByText("Sign in with the GitHub token first.")).toBeTruthy();
+    expect(await screen.findByText("Sign in with the inbox key or the GitHub token first.")).toBeTruthy();
     expect(fetch).not.toHaveBeenCalled();
   });
 

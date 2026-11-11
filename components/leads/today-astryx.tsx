@@ -16,9 +16,8 @@ import { Heading, Text } from "@astryxdesign/core/Text";
 import { List, ListItem } from "@astryxdesign/core/List";
 import { Badge } from "@astryxdesign/core/Badge";
 import { StatusDot } from "@astryxdesign/core/StatusDot";
-import { TOKEN_STORE } from "@/lib/admin/admin-github";
 import { isLate, shootTag, type LeadSummary } from "@/lib/leads/leads";
-import { adminCall, ago, at, cash, inboxCall, needsMe, nextStep, now, pass, plusDays, ymdPT } from "@/lib/leads/lead-desk";
+import { adminCall, authed, ago, at, cash, inboxCall, needsMe, nextStep, now, pass, plusDays, ymdPT } from "@/lib/leads/lead-desk";
 import { balance, dayB, dueOf, overdue, usd } from "@/lib/leads/invoice";
 import type { InvoiceRow } from "@/components/leads/invoices-astryx";
 import { TZ } from "@/lib/booking/booking-rules";
@@ -67,14 +66,11 @@ export function TodayAstryx({ leads, size, open, show }: { leads: LeadSummary[];
   React.useEffect(() => {
     adminCall<{ available?: number; pending?: number }>("/api/money").then(setMoney).catch(() => setMoney("Not connected"));
   }, []);
-  // Traffic answers to the GitHub token only, as on /admin.
+  // Traffic answers to the inbox key or the GitHub token, like the other admin routes.
   const [traffic, setTraffic] = React.useState<Spark | string | null>(null);
   React.useEffect(() => {
-    const token = localStorage.getItem(TOKEN_STORE);
-    if (!token) return queueMicrotask(() => setTraffic("GitHub token needed"));
-    fetch("/api/traffic", { headers: { authorization: `Bearer ${token}` }, cache: "no-store" })
-      .then(async (r) => { const o = await r.json(); if (!r.ok) throw new Error(o.error); setTraffic(o); })
-      .catch(() => setTraffic("Cloudflare did not answer"));
+    if (!Object.keys(authed()).length) return queueMicrotask(() => setTraffic("Inbox key or GitHub token needed"));
+    adminCall<Spark>("/api/traffic").then(setTraffic).catch(() => setTraffic("Cloudflare did not answer"));
   }, []);
   // Unpaid invoices past their due date, oldest due first.
   const [pastDue, setPastDue] = React.useState<InvoiceRow[]>([]);

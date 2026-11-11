@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { TOKEN_STORE } from "@/lib/admin/admin-github";
+import { authed } from "@/lib/leads/lead-desk";
 
 /* ── seo ──────────────────────────────────────────────────────────
  * What search and visitors make of each page, from `/api/seo`: totals
@@ -69,9 +69,9 @@ const change = (now: number, before: number) =>
   before ? `${now >= before ? "+" : ""}${Math.round(((now - before) / before) * 100)}%` : "new";
 
 async function ask<T>(url: string): Promise<T> {
-  const token = window.localStorage.getItem(TOKEN_STORE);
-  if (!token) throw new Error("Sign in with the GitHub token first.");
-  const res = await fetch(url, { headers: { authorization: `Bearer ${token}` }, cache: "no-store" });
+  const headers = authed();
+  if (!Object.keys(headers).length) throw new Error("Sign in with the inbox key or the GitHub token first.");
+  const res = await fetch(url, { headers, cache: "no-store" });
   const body = await res.json();
   if (!res.ok) throw new Error(body.error ?? "The site did not answer.");
   return body;

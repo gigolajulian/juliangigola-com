@@ -19,7 +19,7 @@ describe("DeskToday", () => {
     render(<DeskToday leads={[lead()]} go={go} pick={pick} />);
     expect(screen.getByRole("heading", { level: 1 }).textContent).toMatch(/^(Morning|Afternoon|Evening), Julian\.$/);
     expect(await screen.findByText("$123.45")).toBeTruthy();
-    expect(screen.getByText("GitHub token needed")).toBeTruthy();
+    expect(screen.getByText("Inbox key or GitHub token needed")).toBeTruthy();
     expect(screen.getByText("No calls or sessions coming up.")).toBeTruthy();
 
     fireEvent.click(screen.getByRole("button", { name: "All →" }));
