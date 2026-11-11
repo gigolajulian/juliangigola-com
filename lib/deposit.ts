@@ -1,6 +1,6 @@
 import { sendConfirm } from "@/lib/confirm";
 import { enquiry, enquiryKey, looksLikeEmail, summary, whenPT } from "@/lib/inbox";
-import { logMail, recordLead } from "@/lib/leads";
+import { logMail, recordLead } from "@/lib/lead-store";
 import { openNow, type KV } from "@/lib/slots";
 import { EVENTS, type Booking, type Hours } from "@/lib/booking-rules";
 import { lock, recordBooking } from "@/lib/booking-engine";

@@ -1,7 +1,7 @@
 import { DEFAULT_HOURS, EVENTS, TZ, type Booking, type Hours } from "@/lib/booking-rules";
 import { gcal } from "@/lib/gcal";
 import { bookingEnquiry, enquiryKey, summary } from "@/lib/inbox";
-import { recordLead, type LeadStore } from "@/lib/leads";
+import { recordLead, type LeadStore } from "@/lib/lead-store";
 import { toNotion } from "@/lib/notion-lead";
 import { openNow, type KV } from "@/lib/slots";
 

@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { summary, enquiry, enquiryKey } from "@/lib/inbox";
-import { recordLead } from "@/lib/leads";
+import { recordLead } from "@/lib/lead-store";
 import { FakeKV, LEADS_KEY, SCOPED, githubToken, reply } from "./fakes";
 import { sealer } from "@/lib/lead-crypto";
 

@@ -1,6 +1,7 @@
 import { gcal } from "./gcal";
 import { sealer } from "./lead-crypto";
-import { canonLeads, readLead, recordLead, type Change, type LeadStore } from "./leads";
+import { type Change } from "./leads";
+import { canonLeads, readLead, recordLead, type LeadStore } from "./lead-store";
 
 /* ── hello@'s Gmail on the lead timeline ─────────────────────────
  * Julian (2026-11-04): "your own Gmail replies on the timeline". Every ten

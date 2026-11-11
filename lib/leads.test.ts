@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { NUDGES, REMIND_MAX, shootTag, backfillLead, fold, isLate, paperDue, quoteNudge, leadStoreKey, myMove, leadSummary, recordLead, renewDue, trashDaysLeft, writeLead, type InboxRow, type Lead, type LeadSummary } from "./leads";
+import { NUDGES, REMIND_MAX, shootTag, backfillLead, fold, isLate, paperDue, quoteNudge, leadStoreKey, myMove, leadSummary, renewDue, trashDaysLeft, type InboxRow, type Lead, type LeadSummary } from "./leads";
+import { recordLead, writeLead } from "./lead-store";
 import { sealer } from "./lead-crypto";
 
 const at = (h: number) => new Date(Date.UTC(2026, 10, 2, h)).toISOString();

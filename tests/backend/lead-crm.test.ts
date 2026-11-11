@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FakeKV, LEADS_KEY } from "./fakes";
 import { sealer } from "@/lib/lead-crypto";
-import { recordLead } from "@/lib/leads";
+import { recordLead } from "@/lib/lead-store";
 import { csv, fill, identity, manualLead, merge, stats } from "@/lib/lead-crm";
 import type { Lead } from "@/lib/leads";
 
