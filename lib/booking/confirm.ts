@@ -47,7 +47,7 @@ const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`)
 const fmt = (o: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, ...o });
 
 /** "Wed, Oct 21, 4:00 to 5:00 PM PDT", Julian's time with no city. */
-export function when(start: string, end?: string) {
+export function timeRange(start: string, end?: string) {
   const s = new Date(start);
   const day = fmt({ weekday: "short", month: "short", day: "numeric" }).format(s);
   const time = fmt({ hour: "numeric", minute: "2-digit", timeZoneName: "short" });
@@ -62,7 +62,7 @@ export function when(start: string, end?: string) {
 const first = (name: string) => name.trim().split(/\s+/)[0] || "there";
 
 export function confirmMail(c: Confirm) {
-  const at = when(c.start, c.end);
+  const at = timeRange(c.start, c.end);
   const remind = c.kind === "reminder";
   const hour = fmt({ hour: "numeric", minute: "2-digit" }).format(new Date(c.start));
   const head = remind ? (c.call ? "Talk tomorrow." : "See you tomorrow.") : "You're in.";
@@ -83,8 +83,8 @@ export function confirmMail(c: Confirm) {
       ? "It is under 48 hours now, so a cancel keeps the deposit. Moving to another date carries it over."
       : c.firstStart && c.firstStart !== c.start
       ? refundable({ intent: "x", start: c.start, firstStart: c.firstStart })
-        ? `The balance is due after the shoot. The deposit moved with the new date. It is refunded only if you cancel 48 hours or more before the time you first booked, ${when(c.firstStart)}.`
-        : `The balance is due after the shoot. The deposit moved with the new date. It is no longer refundable: the time you first booked, ${when(c.firstStart)}, was under 48 hours away.`
+        ? `The balance is due after the shoot. The deposit moved with the new date. It is refunded only if you cancel 48 hours or more before the time you first booked, ${timeRange(c.firstStart)}.`
+        : `The balance is due after the shoot. The deposit moved with the new date. It is no longer refundable: the time you first booked, ${timeRange(c.firstStart)}, was under 48 hours away.`
       : "The balance is due after the shoot. The deposit moves with a new date, or is refunded if you cancel 48 hours or more before.",
   };
   const links = c.manage;
@@ -165,7 +165,7 @@ export async function sendConfirm(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefi
 }
 
 /** The cancel note's subject, for the lead desk's log too. */
-export const cancelledSubject = (c: { session: string; start: string; end?: string }) => `Cancelled: ${c.session}, ${when(c.start, c.end)}`;
+export const cancelledSubject = (c: { session: string; start: string; end?: string }) => `Cancelled: ${c.session}, ${timeRange(c.start, c.end)}`;
 
 /** The client's note that a booking is cancelled, plain, from book@. A failed send is logged, never a failed cancel. Whether it went out. */
 export async function sendCancelled(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefined, c: { name: string; email: string; session: string; start: string; end?: string }, refund: "refunded" | "kept" | "none" | "late"): Promise<boolean> {
@@ -176,7 +176,7 @@ export async function sendCancelled(mailer: CloudflareEnv["CLIENT_EMAIL"] | unde
     kept: "It was under 48 hours before the session as first booked, so the $100 deposit is not refunded.",
     none: "",
   }[refund];
-  const text = [`Hi ${first(c.name)},`, "", `Your ${c.session.toLowerCase()} on ${when(c.start, c.end)} is cancelled.`, money, "", `Book another time: ${SITE}/book`, "", "Questions? Reply to this email.", SIG_TEXT].filter((l, i, a) => l || a[i - 1]).join("\n");
+  const text = [`Hi ${first(c.name)},`, "", `Your ${c.session.toLowerCase()} on ${timeRange(c.start, c.end)} is cancelled.`, money, "", `Book another time: ${SITE}/book`, "", "Questions? Reply to this email.", SIG_TEXT].filter((l, i, a) => l || a[i - 1]).join("\n");
   try {
     await mailer.send({ to: { email: c.email, name: c.name }, from: FROM, replyTo: REPLY_TO, subject: cancelledSubject(c), text });
     return true;

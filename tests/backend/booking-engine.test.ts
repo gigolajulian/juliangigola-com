@@ -6,7 +6,7 @@ import {
   dueReminders,
   findBooking,
   liveHours,
-  lock,
+  lockOp,
   clientView,
   markReminded,
   readHours,
@@ -102,7 +102,7 @@ describe("refusals before any calendar call", () => {
 
 describe("the lock", () => {
   it("throws when it is not bound, and hours fall back to the defaults", async () => {
-    await expect(lock({}, "hours", null)).rejects.toThrow("BOOKING_LOCK is not bound");
+    await expect(lockOp({}, "hours", null)).rejects.toThrow("BOOKING_LOCK is not bound");
     expect(await liveHours({})).toEqual(DEFAULT_HOURS);
   });
 
@@ -113,6 +113,6 @@ describe("the lock", () => {
         get: () => ({ fetch: async () => Response.json({ error: "busy" }, { status: 500 }) }),
       },
     };
-    await expect(lock(env, "book", {} as never)).rejects.toThrow("booking lock book: busy");
+    await expect(lockOp(env, "book", {} as never)).rejects.toThrow("booking lock book: busy");
   });
 });

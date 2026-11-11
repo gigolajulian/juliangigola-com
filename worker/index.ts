@@ -10,17 +10,17 @@
  * to mail hello@ the week (`app/api/leads/weekly`).
  * ─────────────────────────────────────────────────────────────── */
 
-import { lock } from "../lib/booking/booking-engine";
+import { lockOp } from "../lib/booking/booking-engine";
 import { manageLinks } from "../lib/booking/booking-token";
 import { confirmMail, sendConfirm } from "../lib/booking/confirm";
 
 export { BookingLock } from "./booking-lock";
 
-type Env = Parameters<typeof lock>[0] & { CLIENT_EMAIL?: CloudflareEnv["CLIENT_EMAIL"]; BOOKING_SECRET?: string; SITE?: CloudflareEnv["ASSETS"] };
+type Env = Parameters<typeof lockOp>[0] & { CLIENT_EMAIL?: CloudflareEnv["CLIENT_EMAIL"]; BOOKING_SECRET?: string; SITE?: CloudflareEnv["ASSETS"] };
 
 /** Mails every reminder due now, then marks it, so the next hour skips it. Returns how many went out. */
 export async function remind(env: Env) {
-  const { records } = await lock(env, "due", null);
+  const { records } = await lockOp(env, "due", null);
   for (const r of records) {
     const c = {
       kind: "reminder",
@@ -36,7 +36,7 @@ export async function remind(env: Env) {
       ...(r.intent ? { deposit: { ref: r.intent, at: r.at } } : {}),
     } as const;
     const sent = await sendConfirm(env.CLIENT_EMAIL, c);
-    await lock(env, "reminded", r.id);
+    await lockOp(env, "reminded", r.id);
     if (sent) await logSent(env, r.email, confirmMail(c).subject, r.id);
   }
   return records.length;

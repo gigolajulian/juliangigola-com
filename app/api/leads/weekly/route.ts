@@ -4,7 +4,7 @@ import { readMaster } from "@/lib/leads/activity-log";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { everyLead } from "@/lib/leads/lead-store";
 import { weeklyMail } from "@/lib/leads/weekly";
-import { mail } from "@/lib/hello-mail";
+import { alertHello } from "@/lib/hello-mail";
 import { json } from "@/lib/http";
 
 /* ── POST /api/leads/weekly: the Monday mail to hello@ ────────────
@@ -22,5 +22,5 @@ export async function POST(request: Request) {
   if (!env.INBOX || !seal) return json({ error: "Not set up." }, 503);
   const { subject, lines } = weeklyMail(await everyLead(env.INBOX, seal), await readMaster(env.INBOX, seal), Date.now());
   if (new URL(request.url).searchParams.has("dry")) return json({ subject, text: lines.join("\n") });
-  return json({ sent: await mail(env.EMAIL, subject, lines) });
+  return json({ sent: await alertHello(env.EMAIL, subject, lines) });
 }

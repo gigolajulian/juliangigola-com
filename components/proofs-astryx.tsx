@@ -30,14 +30,12 @@ import { ProgressBar } from "@astryxdesign/core/ProgressBar";
 import { KEY_STORE } from "@/lib/admin/admin-github";
 import { SignIn } from "@/components/admin/admin-leads";
 import { api, closed, status, type Row } from "@/components/admin/admin-proofs";
-import { TZ } from "@/lib/booking/booking-rules";
 import { ActivityAstryx } from "@/components/proofs-activity-astryx";
-import { errorText } from "@/lib/leads/lead-desk";
+import { errorText, stampPT } from "@/lib/leads/lead-desk";
 import { TOKEN_STORE } from "@/lib/admin/admin-github";
 import { extras, stage, STAGES } from "@/lib/proofs";
 
 const CLASSIC = "/admin";
-const when = (iso: string) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(iso));
 const frame = (p: Row, id: string) => `/proof/${p.token}/f/${id}`;
 
 function Tile({ k, v }: { k: string; v: string }) {
@@ -134,7 +132,7 @@ export function ProofsAstryx({ embedded = false }: { embedded?: boolean } = {}) 
             onClick={() => { setSel(p.token); setMaking(false); }}
             startContent={<Thumbnail src={p.frames[0] ? frame(p, p.frames[0].id) : undefined} alt="" label={p.name} />}
             label={p.name}
-            description={[`${p.frames.length} frames`, p.viewers ? ((n) => `${n} ${n === 1 ? "email" : "emails"}`)(Object.keys(p.viewers).length) : null, p.sentAt ? `sent ${when(p.sentAt)}` : null].filter(Boolean).join(" · ")}
+            description={[`${p.frames.length} frames`, p.viewers ? ((n) => `${n} ${n === 1 ? "email" : "emails"}`)(Object.keys(p.viewers).length) : null, p.sentAt ? `sent ${stampPT(p.sentAt)}` : null].filter(Boolean).join(" · ")}
             endContent={<Badge label={status(p)} variant={p.submittedAt && !p.pulledAt ? "blue" : "gray"} />}
           />
         ))}
@@ -260,8 +258,8 @@ function Gallery({ p, changed, onBack, gone }: { p: Row; changed: () => void; on
         <ProgressBar label={`Stage ${at + 1} of ${STAGES.length}: ${STAGES[at]}`} isLabelHidden value={at + 1} max={STAGES.length} />
         <Text type="supporting">
           {p.frames.length} frames · {p.included} included · ${p.price} each extra
-          {p.sentAt ? ` · sent ${when(p.sentAt)}` : ` · open ${p.days} days once sent`}
-          {p.closesAt ? ` · closes ${when(p.closesAt)}` : ""}
+          {p.sentAt ? ` · sent ${stampPT(p.sentAt)}` : ` · open ${p.days} days once sent`}
+          {p.closesAt ? ` · closes ${stampPT(p.closesAt)}` : ""}
         </Text>
       </VStack>
       {thumbs.length ? (
@@ -282,12 +280,12 @@ function Gallery({ p, changed, onBack, gone }: { p: Row; changed: () => void; on
       {tab === "gallery" ? (
         <VStack gap={3}>
           <MetadataList>
-            <MetadataListItem label="Draft">{p.createdAt ? when(p.createdAt) : "waiting"}</MetadataListItem>
-            <MetadataListItem label="Sent">{p.sentAt ? `${when(p.sentAt)} to ${p.email}` : "Not sent"}</MetadataListItem>
-            <MetadataListItem label="Opened">{p.firstViewAt ? `${when(p.firstViewAt)} · ${p.views} ${p.views === 1 ? "view" : "views"}` : "Not opened"}</MetadataListItem>
-            <MetadataListItem label="Selects in">{p.submittedAt ? `${when(p.submittedAt)} · ${p.selects.length}${x.n ? `, ${x.n} extra` : ""}` : `${p.selects.length} selected so far`}</MetadataListItem>
+            <MetadataListItem label="Draft">{p.createdAt ? stampPT(p.createdAt) : "waiting"}</MetadataListItem>
+            <MetadataListItem label="Sent">{p.sentAt ? `${stampPT(p.sentAt)} to ${p.email}` : "Not sent"}</MetadataListItem>
+            <MetadataListItem label="Opened">{p.firstViewAt ? `${stampPT(p.firstViewAt)} · ${p.views} ${p.views === 1 ? "view" : "views"}` : "Not opened"}</MetadataListItem>
+            <MetadataListItem label="Selects in">{p.submittedAt ? `${stampPT(p.submittedAt)} · ${p.selects.length}${x.n ? `, ${x.n} extra` : ""}` : `${p.selects.length} selected so far`}</MetadataListItem>
             {x.n || p.paid || p.balance ? <MetadataListItem label="Paid">{p.paid ? `$${(p.paid.amount / 100).toFixed(2)} · Stripe${p.paid.pending ? " · bank, clearing" : ""}${p.paid.failed ? " · bank payment failed, follow up" : ""}` : "Not paid"}</MetadataListItem> : null}
-            <MetadataListItem label="In Lightroom">{p.pulledAt ? when(p.pulledAt) : "waiting"}</MetadataListItem>
+            <MetadataListItem label="In Lightroom">{p.pulledAt ? stampPT(p.pulledAt) : "waiting"}</MetadataListItem>
           </MetadataList>
           <HStack gap={2} vAlign="end">
             <TextInput label="Client email" type="email" value={email} onChange={setEmail} placeholder="client@example.com" />
@@ -309,7 +307,7 @@ function Gallery({ p, changed, onBack, gone }: { p: Row; changed: () => void; on
         p.selects.length ? (
           <VStack gap={2}>
             <Text>
-              {p.selects.length} selected{x.n ? `, ${x.n} extra` : ""}{p.paid ? `, $${(p.paid.amount / 100).toFixed(2)} paid` : ""}{p.submittedAt ? `. Sent ${when(p.submittedAt)}${p.submittedBy ? ` by ${p.submittedBy}` : ""}.` : ". Not sent yet: the latest address's picks."}
+              {p.selects.length} selected{x.n ? `, ${x.n} extra` : ""}{p.paid ? `, $${(p.paid.amount / 100).toFixed(2)} paid` : ""}{p.submittedAt ? `. Sent ${stampPT(p.submittedAt)}${p.submittedBy ? ` by ${p.submittedBy}` : ""}.` : ". Not sent yet: the latest address's picks."}
             </Text>
             <List hasDividers>
               {p.selects.map((id) => <ListItem key={id} startContent={<Thumbnail src={frame(p, id)} alt="" label={file(id)} />} label={file(id)} description={p.notes[id]} />)}

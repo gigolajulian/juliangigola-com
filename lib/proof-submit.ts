@@ -1,4 +1,4 @@
-import { mail } from "@/lib/hello-mail";
+import { alertHello } from "@/lib/hello-mail";
 import { stripe } from "@/lib/stripe";
 import { recordLead } from "@/lib/leads/lead-store";
 import { alertLines, proofUrl, receiptMail, sendClient } from "@/lib/email/proof-mail";
@@ -40,7 +40,7 @@ export async function finalize(env: Env, kv: KV, s: Seal, p: Proof, paid?: Proof
     if (await sendClient(env.CLIENT_EMAIL, to, m)) await recordLead(env, to, { event: { at, kind: "mail", note: m.subject, mail: { to: "client", kind: "proof-receipt" } } });
   }
   const a = alertLines(done);
-  await mail(env.EMAIL, a.subject, [...a.lines, "", proofUrl(done.token)], to ? { name: to, email: to } : undefined);
+  await alertHello(env.EMAIL, a.subject, [...a.lines, "", proofUrl(done.token)], to ? { name: to, email: to } : undefined);
   return done;
 }
 

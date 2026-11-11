@@ -25,7 +25,7 @@ export const COVER_WIDTH = 600;
 
 const QUALITY = 0.82;
 
-type ProcessedImage = {
+type PreparedAsset = {
   /** JPEG bytes, base64, ready for a git blob. */
   base64: string;
   width: number;
@@ -123,7 +123,7 @@ const meanColour = (source: ImageBitmap): string => {
 export async function processImage(
   file: File,
   maxWidth: number,
-): Promise<ProcessedImage> {
+): Promise<PreparedAsset> {
   if (!/^image\/(jpeg|png|webp|avif)$/.test(file.type)) {
     throw new Error(
       `${file.name} is a ${file.type || "unknown type"}, not a photograph.`,
@@ -161,7 +161,7 @@ const MAX_CLIP = 25 * 1024 * 1024;
  * A BTS clip, kept as shot: an MP4 is uploaded byte for byte, and only its
  * size and the mean colour of its first frame are read off it.
  */
-export async function processClip(file: File): Promise<ProcessedImage> {
+export async function readClip(file: File): Promise<PreparedAsset> {
   if (file.type !== "video/mp4") {
     throw new Error(`${file.name} is a ${file.type || "unknown type"}, not an MP4.`);
   }

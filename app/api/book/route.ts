@@ -1,5 +1,5 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { lock, recordBooking, type BookResult } from "@/lib/booking/booking-engine";
+import { lockOp, recordBooking, type BookResult } from "@/lib/booking/booking-engine";
 import { manageLinks } from "@/lib/booking/booking-token";
 import { sendConfirm } from "@/lib/booking/confirm";
 import { logMail } from "@/lib/leads/lead-store";
@@ -32,7 +32,7 @@ export async function POST(request: Request) {
 
   let out: BookResult;
   try {
-    out = await lock(env, "book", { ...b, via });
+    out = await lockOp(env, "book", { ...b, via });
   } catch (e) {
     console.error("book", String(e));
     return json({ status: "error", error: { message: "Could not reach the calendar." } }, 502);
