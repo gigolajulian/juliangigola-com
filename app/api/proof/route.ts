@@ -161,6 +161,8 @@ export async function PUT(request: Request) {
   const q = new URL(request.url).searchParams;
   const token = q.get("token"), id = q.get("id"), file = (q.get("file") ?? "").slice(0, 120);
   const w = Number(q.get("w")) || 0, h = Number(q.get("h")) || 0;
+  // Capture time from Lightroom, Unix seconds; anything implausible is dropped, not refused.
+  const t = Math.round(Number(q.get("t")));
   if (!isToken(token) || !isFrameId(id) || !file) return json({ error: "token, id and file are required." }, 400);
   if (!(request.headers.get("content-type") ?? "").startsWith("image/jpeg")) return json({ error: "Send a JPEG." }, 415);
   const bytes = await request.arrayBuffer();
@@ -170,7 +172,7 @@ export async function PUT(request: Request) {
   await g.r2.put(frameKey(token, id), bytes, { httpMetadata: { contentType: "image/jpeg" } });
   // A replaced frame is watermarked again, and its card redrawn, on the next fetch.
   await g.r2.delete(frameKeys(token, id).slice(1));
-  const frame = { id, file, w, h };
+  const frame = { id, file, w, h, ...(t > 0 && t < 4e9 ? { t } : {}) };
   const i = p.frames.findIndex((f) => f.id === id);
   const frames = i < 0 ? [...p.frames, frame] : p.frames.map((f, j) => (j === i ? frame : f));
   await writeProof(g.kv, g.s, { ...p, frames });

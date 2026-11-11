@@ -194,7 +194,9 @@ function provider.processRenderedPhotos(functionContext, exportContext)
       local id = tostring(photo.localIdentifier)
       local file = (photo:getFormattedMetadata("fileName") or (id .. ".jpg")):gsub("%.[^.]+$", "") .. ".jpg"
       local w, h = Image.measure(path)
-      local q = ("?token=%s&id=%s&file=%s&w=%d&h=%d"):format(enc(remote), enc(id), enc(file), w or 0, h or 0)
+      -- Capture time for shot order and looks on the site: Lightroom counts from 2001, the site from 1970.
+      local shot = photo:getRawMetadata("dateTimeOriginal")
+      local q = ("?token=%s&id=%s&file=%s&w=%d&h=%d&t=%d"):format(enc(remote), enc(id), enc(file), w or 0, h or 0, shot and math.floor(shot + 978307200) or 0)
       local b, hd = LrHttp.post(API .. q, Image.readBytes(path), headers("image/jpeg"), "PUT", 300)
       LrFileUtils.delete(path)
       local pass, err = pcall(check, b, hd, "upload " .. file)

@@ -1,10 +1,18 @@
 import { describe, expect, it, vi } from "vitest";
 import { paidFor } from "@/lib/proof-submit";
-import { cardPrice, cleanNotes, coverFrame, cleanSelects, cleanSettings, extras, isOpen, isToken, newToken, owed, stage } from "@/lib/proofs";
+import { cardPrice, cleanNotes, coverFrame, cleanSelects, cleanSettings, extras, isOpen, isToken, lookStarts, newToken, owed, shotOrder, stage } from "@/lib/proofs";
 
 const frames = ["a", "b", "c"].map((id) => ({ id, file: `${id}.jpg`, w: 1, h: 1 }));
 
 describe("proofs", () => {
+  it("orders by capture time only when every frame has one, and splits looks on a 10 minute gap", () => {
+    const f = [{ id: "c", t: 1300 }, { id: "a", t: 100 }, { id: "b", t: 400 }, { id: "d", t: 1400 }];
+    expect(shotOrder(f).map((x) => x.id)).toEqual(["a", "b", "c", "d"]);
+    expect(shotOrder([{ id: "x" }, { id: "y", t: 1 }]).map((x) => x.id)).toEqual(["x", "y"]);
+    expect(lookStarts(shotOrder(f))).toEqual([0, 2]);
+    expect(lookStarts([{ t: 1 }, { t: 2 }])).toEqual([]);
+    expect(lookStarts([{ t: 1 }, {}])).toEqual([]);
+  });
   it("prices only the frames past the included ones", () => {
     expect(extras(12, 10, 15)).toEqual({ n: 2, dollars: 30 });
     expect(extras(4, 10, 15)).toEqual({ n: 0, dollars: 0 });
