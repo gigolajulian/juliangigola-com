@@ -651,13 +651,14 @@ export function V3Work({
     return () => clearTimeout(t);
   }, [warm, view]);
 
-  /* The scope's points arrive with the Color view, not with the page. */
+  /* The scope's points arrive with the Color view, not with the page. A
+     failed load leaves it unset, so the next visit to Color asks again. */
   React.useEffect(() => {
     if (view !== "color" || scope) return;
     void fetch("/v3/work-scope.json")
-      .then((r) => r.json())
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`scope ${r.status}`))))
       .then(setScope)
-      .catch(() => setScope({}));
+      .catch(() => {});
   }, [view, scope]);
 
   const scoreSet = React.useCallback(
