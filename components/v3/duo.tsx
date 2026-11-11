@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { CLIENT_MARKS } from "@/lib/clients-data";
+import { projectHref } from "@/lib/project-href";
 
 /* A photo slot with its dark and light frame. Both are rendered and the
    theme hides one (`.v3d` / `.v3l` in styles/v3.css), so a theme switch
@@ -81,7 +82,7 @@ export function Marks({ hidden, cell }: { hidden?: boolean; cell?: boolean }) {
         <span key={slug} className="mk" data-mk={slug} {...label} style={{ width: w, height: h, WebkitMask: mask, mask }} />
       );
     if (cell) return <div key={slug}>{mark}</div>;
-    const href = MARK_HREF[slug] ?? `/portfolio/${slug}`;
+    const href = MARK_HREF[slug] ?? projectHref(slug);
     return (
       <Link key={slug} href={href} draggable={false} {...(hidden ? { tabIndex: -1, "aria-hidden": true } : {})}>
         {mark}
