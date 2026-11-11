@@ -127,11 +127,11 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
     // eslint-disable-next-line react-hooks/exhaustive-deps -- once, on arrival
   }, []);
 
-  async function enter(address: string) {
+  async function enter(address: string, name?: string) {
     setEmail(address);
     localStorage.setItem(EMAIL_STORE, address);
     try {
-      const out = (await (await post({ action: "track", email: address, kind: "open" })).json()) as { picks?: string[] };
+      const out = (await (await post({ action: "track", email: address, kind: "open", name })).json()) as { picks?: string[] };
       if (!initial.submitted && out.picks) setSelects(out.picks);
     } catch {}
     setReady(true);
@@ -467,7 +467,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
           isEmail={isEmail}
           onAccept={(name, address) => {
             setHello(name.split(/\s+/)[0]);
-            enter(address);
+            enter(address, name);
           }}
           onDone={() => setOpened(true)}
         />
