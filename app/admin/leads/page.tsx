@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { AdminLeads } from "@/components/admin/admin-leads";
-import { LeadCalendar } from "@/components/leads/lead-calendar";
+import { LeadsAstryx } from "@/components/leads-astryx";
 import { startupImages } from "@/lib/leads/leads-startup";
 
 /* ── the lead desk, on its own ────────────────────────────────────
@@ -27,14 +26,13 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover" };
 
-// `?calendar`: the Calendar on its own, until the desk's navigation (leads-nav) mounts it.
-export default async function LeadsPage({ searchParams }: { searchParams: Promise<{ calendar?: string }> }) {
-  const calendar = (await searchParams).calendar !== undefined;
+// The Astryx desk (components/leads-astryx.tsx) since the original desk retired (2026-11-11).
+export default function LeadsPage() {
   return (
-    // `data-workbench`: no site footer; `data-lead-app`: no site header either,
-    // and the top clears the iPhone status bar plus the blur iOS lays under it.
-    <div data-workbench data-lead-app className="w-full px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] max-lg:pt-[calc(env(safe-area-inset-top)+1.5rem)] sm:px-10">
-      {calendar ? <LeadCalendar /> : <AdminLeads />}
+    // `data-workbench`: no site footer; `data-lead-app`: no site header. Edge to edge: the Astryx shell lays out
+    // its own header, nav and tab bar; only the iPhone notch and home bar are kept clear.
+    <div data-workbench data-lead-app className="w-full pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)]">
+      <LeadsAstryx />
     </div>
   );
 }

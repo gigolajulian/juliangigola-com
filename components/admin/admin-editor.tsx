@@ -15,7 +15,6 @@ import { AdminPage } from "@/components/admin/admin-page";
 import type { PickerItem } from "@/components/admin/admin-picker";
 import { AdminTrash } from "@/components/admin/admin-trash";
 import { AdminInbox, unreadCount } from "@/components/admin/admin-inbox";
-import { AdminLeads } from "@/components/admin/admin-leads";
 import { AdminTraffic } from "@/components/admin/admin-traffic";
 import { AdminSeo } from "@/components/admin/admin-seo";
 import { AdminVideos } from "@/components/admin/admin-videos";
@@ -1505,7 +1504,14 @@ export function AdminEditor({
                 );
               })()
             : null}
-          {!page && view === "leads" ? <AdminLeads /> : null}
+          {/* The lead and proofs desks are their own pages since 2026-11-11: Astryx stays out of the editor. */}
+          {!page && view === "leads" ? (
+            <ul className="grid max-w-md gap-1 py-6">
+              {([["Leads", "/admin/leads"], ["Proofs", "/admin/proofs"]] as const).map(([t, href]) => (
+                <li key={t}><a href={href} className="flex min-h-[52px] items-center justify-between border-b border-border text-[17px] hoverable:hover:text-accent">{t}<span aria-hidden="true" className="font-mono text-[13px] text-muted-foreground">↗</span></a></li>
+              ))}
+            </ul>
+          ) : null}
           {!page && view === "inbox" ? <AdminInbox onUnread={setUnread} /> : null}
           {!page && view === "traffic" ? <AdminTraffic /> : null}
           {!page && view === "seo" ? <AdminSeo /> : null}

@@ -3,7 +3,7 @@
 /* ── the lead desk on Astryx, opt-in ──────────────────────────────
  * Julian (2026-11-09): "use it to redesign leads app", then picked the
  * Leads redesign mock (claude.ai/artifact/9TrLqxf8vV4jU4uWPLZz2W, "yes
- * send it to backend"). Lives at /admin/leads/astryx only, so Astryx's
+ * send it to backend"). /admin/leads since the original desk retired (2026-11-11); Astryx's
  * CSS never reaches the site or the classic desk.
  *
  * Home is the table-filter shape: Your move, This week, Waiting on them,
@@ -32,7 +32,8 @@ import { StatusDot } from "@astryxdesign/core/StatusDot";
 import { Tab, TabList } from "@astryxdesign/core/TabList";
 import { SignIn } from "@/components/admin/admin-leads";
 import { LeadAstryx } from "@/components/leads/lead-astryx";
-import { ago, inboxCall, loadError, matches, nextStep, pass } from "@/lib/leads/lead-desk";
+import { badge } from "@/components/leads/shared";
+import { ago, aside, inboxCall, loadError, matches, nextStep, pass } from "@/lib/leads/lead-desk";
 import type { Template } from "@/lib/leads/lead-crm";
 import { TZ } from "@/lib/booking/booking-rules";
 import { KEY_STORE, TOKEN_STORE } from "@/lib/admin/admin-github";
@@ -51,7 +52,6 @@ import { ProofsAstryx } from "@/components/proofs-astryx";
 type Size = "phone" | "mid" | "wide";
 /** Every page of the desk. */
 type View = "today" | "leads" | "new" | "calendar" | "money" | "licences" | "aside" | "stats" | "traffic" | "seo" | "hours" | "templates" | "device" | "more" | "proofs";
-const CLASSIC_HREF = "/admin/leads";
 /** Julian (2026-11-10): "simplify the left tab or group them up", "merge panels that are related", "add icon to all".
  * One nav item per group; a group with more than one page gets a tab row on top. */
 const SECTIONS: [View, string, [string, View][]][] = [
@@ -106,10 +106,9 @@ const ChartGlyph = svg(<path d="M4 20h16M7 16v-5M12 16V7M17 16v-8" />);
 const GearGlyph = svg(<><circle cx="12" cy="12" r="3" /><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1" /></>);
 const PhotoGlyph = svg(<><rect x="4" y="5" width="16" height="14" rx="2" /><circle cx="9" cy="10" r="1.6" /><path d="M20 16l-5-5-8 8" /></>);
 const SiteGlyph = svg(<><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M3 9h18M9 9v11" /></>);
-const BackGlyph = svg(<path d="M10 7l-5 5 5 5M5 12h14" />);
 const GLYPH: Partial<Record<View, React.ComponentType<React.SVGProps<SVGSVGElement>>>> = { proofs: PhotoGlyph, leads: InboxGlyph, calendar: CalendarGlyph, money: MoneyGlyph, stats: ChartGlyph, templates: GearGlyph };
 /** Out of the desk: proofs, the site editor, the classic desk until it is retired. */
-const LINKS: [string, string, React.ComponentType<React.SVGProps<SVGSVGElement>>][] = [["Pages and work", "/admin", SiteGlyph], ["Classic desk", CLASSIC_HREF, BackGlyph]];
+const LINKS: [string, string, React.ComponentType<React.SVGProps<SVGSVGElement>>][] = [["Pages and work", "/admin", SiteGlyph]];
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
   return <Text type="code" size="xsm" color="secondary" weight="medium">{children}</Text>;
@@ -230,6 +229,8 @@ export function LeadsAstryx() {
       .catch((e: unknown) => setError(loadError(e)));
   }, [call]);
   React.useEffect(load, [load]);
+  // The installed app's badge: unread leads not put aside, as on the original desk.
+  React.useEffect(() => { if (leads) badge(leads.filter((l) => l.unread && !aside(l)).length); }, [leads]);
   React.useEffect(() => {
     call<{ templates: Template[] }>({ query: "?templates" }).then((o) => setTemplates(o.templates)).catch(() => {});
   }, [call]);

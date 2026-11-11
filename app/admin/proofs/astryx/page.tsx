@@ -1,17 +1,6 @@
-import type { Metadata } from "next";
-import { ProofsAstryx } from "@/components/proofs-astryx";
+import { redirect } from "next/navigation";
 
-// The proofs desk on Astryx, opt-in (components/proofs-astryx.tsx). Out of the index like /admin. `data-lead-app`: no site header, as on the leads desk.
-export const metadata: Metadata = {
-  title: "PROOFS",
-  robots: { index: false, follow: false, nocache: true, googleBot: { index: false, follow: false } },
-  referrer: "no-referrer",
-};
-
+// The proofs desk is /admin/proofs since the original desk retired (2026-11-11).
 export default function ProofsAstryxPage() {
-  return (
-    <div data-workbench data-lead-app className="w-full px-4 pb-6 pt-[max(1rem,env(safe-area-inset-top))] sm:px-6">
-      <ProofsAstryx />
-    </div>
-  );
+  redirect("/admin/proofs");
 }
