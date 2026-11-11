@@ -1,17 +1,17 @@
 "use client";
 
 import * as React from "react";
-import { References } from "@/components/admin-inbox";
-import { LeadProofs } from "@/components/admin-proofs";
+import { References } from "@/components/admin/admin-inbox";
+import { LeadProofs } from "@/components/admin/admin-proofs";
 import type { Enquiry } from "@/lib/inbox";
 import { isLate, NUDGES, quoteNudge, REMIND_MAX, STAGES, trashDaysLeft, type Lead, type LeadPatch, type LeadSummary, type Stage } from "@/lib/leads";
 import { cn } from "@/lib/utils";
 import { fill, mailable, TEMPLATES, type Template } from "@/lib/lead-crm";
-import { endDay } from "@/components/lead-licence";
+import { endDay } from "@/components/admin/leads/lead-licence";
 import { leadKey, typingIn } from "@/lib/lead-keys";
 import { ago, at, authed, type Call, DAY, day, errorText, now, type Patch, renew, snoozed } from "@/lib/lead-desk";
-import { btn, compose, field, fieldLabel, HEAD, ios, kindOf, line, mailto, MARK, primary, STEPS, Tag } from "@/components/leads/shared";
-import { Money, Paperwork } from "@/components/leads/money";
+import { btn, compose, field, fieldLabel, HEAD, ios, kindOf, line, mailto, MARK, primary, STEPS, Tag } from "@/components/admin/leads/shared";
+import { Money, Paperwork } from "@/components/admin/leads/money";
 
 export function Detail({ summary, initial, call, onChange, onBack, reload, tick, templates, others }: { summary: LeadSummary; initial?: Lead | null; call: Call; onChange: (l: Lead) => void; onBack: () => void; reload: () => void; tick: number; templates: Template[]; others: LeadSummary[] }) {
   const [lead, setLead] = React.useState<Lead | null>(initial ?? null);

@@ -4,7 +4,7 @@ import * as React from "react";
 import { STAGES, type Lead, type Stage } from "@/lib/leads";
 import { cn } from "@/lib/utils";
 import { type Call, errorText } from "@/lib/lead-desk";
-import { btn, field, fieldLabel, primary } from "@/components/leads/shared";
+import { btn, field, fieldLabel, primary } from "@/components/admin/leads/shared";
 
 /** The inbox key, pasted once per device. On the iPhone the installed app keeps
     its own storage apart from Safari, so it asks once there too. A password

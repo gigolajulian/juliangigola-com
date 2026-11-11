@@ -4,7 +4,7 @@ import * as React from "react";
 import { TOKEN_STORE } from "@/lib/admin-github";
 import { isLate, paperDue, shootTag, type LeadSummary } from "@/lib/leads";
 import { cn } from "@/lib/utils";
-import { HEAD } from "@/components/leads/shared";
+import { HEAD } from "@/components/admin/leads/shared";
 import { adminCall, ago, aside, at, cash, closed, type Filter, needsMe, nextStep, now, pass, plusDays, renew, ymdPT } from "@/lib/lead-desk";
 import { TZ } from "@/lib/booking/booking-rules";
 

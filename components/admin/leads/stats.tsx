@@ -4,7 +4,7 @@ import * as React from "react";
 import { STAGES } from "@/lib/leads";
 import type { Stats } from "@/lib/lead-crm";
 import { type Call, errorText, money } from "@/lib/lead-desk";
-import { HEAD } from "@/components/leads/shared";
+import { HEAD } from "@/components/admin/leads/shared";
 
 const hours = (h: number | null) => (h === null ? "None yet" : h < 1 ? `${Math.round(h * 60)} min` : h < 48 ? `${Math.round(h)} h` : `${Math.round(h / 24)} d`);
 

@@ -4,7 +4,7 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { type Template } from "@/lib/lead-crm";
 import { type Call, errorText } from "@/lib/lead-desk";
-import { btn, field, fieldLabel, primary } from "@/components/leads/shared";
+import { btn, field, fieldLabel, primary } from "@/components/admin/leads/shared";
 
 /** His saved replies. {first}, {name}, {kind} and {when} are filled per lead. */
 export function TemplatesEditor({ call, templates, saved }: { call: Call; templates: Template[]; saved: (t: Template[]) => void }) {

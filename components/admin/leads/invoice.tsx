@@ -8,7 +8,7 @@ import { mailable } from "@/lib/lead-crm";
 import { balance, dayB, DEPOSIT, MAX_ROWS_B, NOTE_B, usd, usdB, type Crop, type Invoice, type InvoiceB, type InvoiceFrom } from "@/lib/invoice";
 import { framed, loadImage, place, shrink, toneFor } from "@/lib/invoice-photo";
 import { adminCall, day, errorText, inboxCall, plusDays, ymdPT } from "@/lib/lead-desk";
-import { btn, compose, field, fieldLabel, kindOf, primary } from "@/components/leads/shared";
+import { btn, compose, field, fieldLabel, kindOf, primary } from "@/components/admin/leads/shared";
 import type { Patch } from "@/lib/lead-desk";
 
 /** The PDF of one invoice. Loaded on the tap, fonts and all. A design B one fetches its sealed photo unless `src` is in hand. */

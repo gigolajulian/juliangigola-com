@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
-import { AdminLeads } from "@/components/admin-leads";
-import { LeadCalendar } from "@/components/lead-calendar";
+import { AdminLeads } from "@/components/admin/admin-leads";
+import { LeadCalendar } from "@/components/admin/leads/lead-calendar";
 import { startupImages } from "@/lib/leads-startup";
 
 /* ── the lead desk, on its own ────────────────────────────────────

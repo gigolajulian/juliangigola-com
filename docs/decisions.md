@@ -81,7 +81,7 @@ asked and the wording of the ask are here.
 
 - Undated attributions ("Julian: ...") are still in about 700 comment
   lines. They have no date to file under, so they were left for now.
-- `components/admin-editor.tsx` keeps "As of 2026-09-12": it is a warning
+- `components/admin/admin-editor.tsx` keeps "As of 2026-09-12": it is a warning
   about the current Cloudflare Access policy, not history.
 - Many comments still name `globals.css` for rules that now live in
   `app/styles/*.css`. `globals.css` is still the entry point, so they were
@@ -265,8 +265,8 @@ reported; a quote after "Julian:" is his wording, as the comment had it.
 - `app/styles/header.css`: From a tablet up as well: the portfolio's title row and the bar are one pane of the homepage's glass, with one hairline under both. Julian: integrate the head into the navbar.
 - `app/styles/header.css`: Room under the chips before the pane's hairline. Julian: some space under the filter.
 - `app/styles/home.css`: About's label is "Biography" since the menu names changed; the old "About" here left its steps hidden for good. (Julian saw it)
-- `components/admin-inbox.tsx`: The references an enquiry arrived with: their uploads, fetched with the inbox's credentials since they are theirs and private, and his own frames they picked, which are public. (Julian)
-- `components/admin-inbox.tsx`: Only what actually loads is shown: a broken tile, or a heading over none, says nothing. (Julian)
+- `components/admin/admin-inbox.tsx`: The references an enquiry arrived with: their uploads, fetched with the inbox's credentials since they are theirs and private, and his own frames they picked, which are public. (Julian)
+- `components/admin/admin-inbox.tsx`: Only what actually loads is shown: a broken tile, or a heading over none, says nothing. (Julian)
 - `components/contact-beam.tsx`: A white line and its glow that go round the form, never sitting still: the beam is the whole effect, wider and brighter (a static line and halo on the card were tried and taken off). (Julian)
 - `components/contact-beam.tsx`: The beam slower: a lap in six seconds, was four. (Julian)
 - `components/contact-form.tsx`: The address on the left, the button on the right, the sentence off the screen (still read out with the button). (Julian)

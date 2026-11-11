@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { LeadCalendar } from "@/components/lead-calendar";
+import { LeadCalendar } from "@/components/admin/leads/lead-calendar";
 
 afterEach(() => vi.unstubAllGlobals());
 

@@ -8,11 +8,11 @@ import {
   type TrashedProject,
 } from "@/lib/added";
 import { commitFiles, readFile } from "@/lib/admin-github";
-import { AdminFrames, type PendingUpload } from "@/components/admin-frames";
+import { AdminFrames, type PendingUpload } from "@/components/admin/admin-frames";
 import { srcOf } from "@/lib/admin-sequence";
 import { twinStats } from "@/lib/frame-twins";
-import { AdminCredits } from "@/components/admin-credits";
-import { AdminBts } from "@/components/admin-bts";
+import { AdminCredits } from "@/components/admin/admin-credits";
+import { AdminBts } from "@/components/admin/admin-bts";
 import type { Bts } from "@/lib/work-types";
 import type { FrameRef } from "@/lib/added";
 import type { Credit } from "@/lib/work-types";

@@ -30,7 +30,7 @@ import { TextInput } from "@astryxdesign/core/TextInput";
 import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/SegmentedControl";
 import { ProgressBar } from "@astryxdesign/core/ProgressBar";
 import { StatusDot } from "@astryxdesign/core/StatusDot";
-import { Detail, SignIn } from "@/components/admin-leads";
+import { Detail, SignIn } from "@/components/admin/admin-leads";
 import { ago, inboxCall, loadError, matches, nextStep, pass } from "@/lib/lead-desk";
 import type { Template } from "@/lib/lead-crm";
 import { TZ } from "@/lib/booking/booking-rules";

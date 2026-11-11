@@ -1,6 +1,6 @@
 ﻿import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { ProofsAstryx } from "@/components/proofs-astryx";
+import { ProofsAstryx } from "@/components/admin/proofs-astryx";
 
 const reply = (body: unknown, status = 200) => vi.fn(async () => new Response(JSON.stringify(body), { status }));
 

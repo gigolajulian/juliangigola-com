@@ -1,6 +1,6 @@
 /**
- * The lead desk's non-UI half, shared by both desks (components/admin-leads.tsx
- * and components/leads-astryx.tsx): the admin fetch, the list filters and the
+ * The lead desk's non-UI half, shared by both desks (components/admin/admin-leads.tsx
+ * and components/admin/leads/leads-astryx.tsx): the admin fetch, the list filters and the
  * small formatters. Browser only: the fetch reads the key from localStorage.
  */
 import { credentials, KEY_STORE } from "@/lib/admin-github";

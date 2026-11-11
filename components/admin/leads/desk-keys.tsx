@@ -4,7 +4,7 @@ import * as React from "react";
 import { type LeadSummary } from "@/lib/leads";
 import { cn } from "@/lib/utils";
 import { LEAD_KEYS, leadKey, typingIn } from "@/lib/lead-keys";
-import { kindOf } from "@/components/leads/shared";
+import { kindOf } from "@/components/admin/leads/shared";
 import { type Filter, matches } from "@/lib/lead-desk";
 
 /**

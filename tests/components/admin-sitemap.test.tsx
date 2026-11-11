@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { AdminSitemap } from "@/components/admin-sitemap";
+import { AdminSitemap } from "@/components/admin/admin-sitemap";
 
 const props = {
   projects: [{ slug: "valgur", name: "VALGUR", category: "Editorial", cover: { src: "/work/v.jpg", color: "#000" } }],

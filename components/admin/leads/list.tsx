@@ -3,7 +3,7 @@
 import * as React from "react";
 import { isLate, shootTag, trashDaysLeft, type LeadSummary } from "@/lib/leads";
 import { cn } from "@/lib/utils";
-import { kindOf, STEPS } from "@/components/leads/shared";
+import { kindOf, STEPS } from "@/components/admin/leads/shared";
 import { ago, at, day, money, nextStep, now, snoozed } from "@/lib/lead-desk";
 
 /** How far a lead has come: a short segment per stage, then its name. */

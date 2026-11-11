@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { LeadsAstryx } from "@/components/leads-astryx";
+import { LeadsAstryx } from "@/components/admin/leads/leads-astryx";
 
 afterEach(() => vi.unstubAllGlobals());
 

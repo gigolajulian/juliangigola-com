@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { AdminBts } from "@/components/admin-bts";
+import { AdminBts } from "@/components/admin/admin-bts";
 
 const bts = {
   by: "crew",

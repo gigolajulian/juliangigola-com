@@ -2,30 +2,30 @@
 
 import * as React from "react";
 import { KEY_STORE, TOKEN_STORE } from "@/lib/admin-github";
-import { LeadBoard } from "@/components/lead-board";
-import { LeadHours } from "@/components/lead-hours";
-import { ProofsDesk } from "@/components/admin-proofs";
-import { LeadUpcoming } from "@/components/lead-upcoming";
+import { LeadBoard } from "@/components/admin/leads/lead-board";
+import { LeadHours } from "@/components/admin/leads/lead-hours";
+import { ProofsDesk } from "@/components/admin/admin-proofs";
+import { LeadUpcoming } from "@/components/admin/leads/lead-upcoming";
 import { leadSummary, STAGES, type Lead, type LeadSummary, type Stage } from "@/lib/leads";
 import { cn } from "@/lib/utils";
 import { type Template } from "@/lib/lead-crm";
-import { LicenceList } from "@/components/lead-licence";
+import { LicenceList } from "@/components/admin/leads/lead-licence";
 import { aside, authed, closed, errorText, type Filter, inboxCall, loadError, matches, pass, snoozed } from "@/lib/lead-desk";
-import { badge, btn, HEAD, label, primary } from "@/components/leads/shared";
-import { Card, clampW, LIST_W, LIST_W_STORE, ListResizer, Pill, Row, SideLink } from "@/components/leads/list";
-import { DeskKeys } from "@/components/leads/desk-keys";
-import { DeskToday } from "@/components/leads/today";
-import { MoneyView } from "@/components/leads/money";
-import { StatsView } from "@/components/leads/stats";
-import { TemplatesEditor } from "@/components/leads/templates";
-import { EmptyTrash, ImportInbox, NewLeadForm, PushSwitch, SignIn, SW_URL, swScope } from "@/components/leads/setup";
-import { Detail } from "@/components/leads/detail";
+import { badge, btn, HEAD, label, primary } from "@/components/admin/leads/shared";
+import { Card, clampW, LIST_W, LIST_W_STORE, ListResizer, Pill, Row, SideLink } from "@/components/admin/leads/list";
+import { DeskKeys } from "@/components/admin/leads/desk-keys";
+import { DeskToday } from "@/components/admin/leads/today";
+import { MoneyView } from "@/components/admin/leads/money";
+import { StatsView } from "@/components/admin/leads/stats";
+import { TemplatesEditor } from "@/components/admin/leads/templates";
+import { EmptyTrash, ImportInbox, NewLeadForm, PushSwitch, SignIn, SW_URL, swScope } from "@/components/admin/leads/setup";
+import { Detail } from "@/components/admin/leads/detail";
 
 export { Detail, SignIn };
 
 // The /admin tabs the One Desk folds in, loaded only when opened.
-const AdminTraffic = React.lazy(() => import("@/components/admin-traffic").then((m) => ({ default: m.AdminTraffic })));
-const AdminSeo = React.lazy(() => import("@/components/admin-seo").then((m) => ({ default: m.AdminSeo })));
+const AdminTraffic = React.lazy(() => import("@/components/admin/admin-traffic").then((m) => ({ default: m.AdminTraffic })));
+const AdminSeo = React.lazy(() => import("@/components/admin/admin-seo").then((m) => ({ default: m.AdminSeo })));
 /** Site: the /admin editor's own tabs, opened there (`?view=`), since they need the server's project data. */
 const SITE: [string, string][] = [["Pages", "/admin?view=home"], ["Work", "/admin?view=projects"], ["Motion", "/admin?view=video"]];
 /** Julian picked A (mock claude.ai/artifact/Y2S4cpbyK881T7ZZB2m46S): seven lines with icons, each page's own lists as tabs on it. */

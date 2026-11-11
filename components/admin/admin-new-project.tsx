@@ -10,7 +10,7 @@ import {
   toSlug,
 } from "@/lib/admin-image";
 import type { Credit, Frame } from "@/lib/work-types";
-import { AdminCredits, tidyCredits } from "@/components/admin-credits";
+import { AdminCredits, tidyCredits } from "@/components/admin/admin-credits";
 import { cn } from "@/lib/utils";
 
 /* ── adding a project ─────────────────────────────────────────────

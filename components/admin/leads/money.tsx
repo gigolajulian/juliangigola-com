@@ -3,11 +3,11 @@
 import * as React from "react";
 import { PAPER, paperDue, type Lead, type LeadSummary, type Paper } from "@/lib/leads";
 import { cn } from "@/lib/utils";
-import { LicenceField } from "@/components/lead-licence";
+import { LicenceField } from "@/components/admin/leads/lead-licence";
 import { DEPOSIT, usd } from "@/lib/invoice";
 import { adminCall, cash, day, errorText, now, type Patch } from "@/lib/lead-desk";
-import { btn, field, fieldLabel, HEAD, primary } from "@/components/leads/shared";
-import { InvoiceRow, InvoiceSheetB } from "@/components/leads/invoice";
+import { btn, field, fieldLabel, HEAD, primary } from "@/components/admin/leads/shared";
+import { InvoiceRow, InvoiceSheetB } from "@/components/admin/leads/invoice";
 
 /* ── money on a lead: the quote, the deposit, the balance, its invoices ──
  * Julian (2026-11-06, Leads plan B1 and A1). One block in place of a bare

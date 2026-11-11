@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { ProofsAstryx } from "@/components/proofs-astryx";
+import { ProofsAstryx } from "@/components/admin/proofs-astryx";
 
-// The proofs desk on Astryx, opt-in (components/proofs-astryx.tsx). Out of the index like /admin. `data-lead-app`: no site header, as on the leads desk.
+// The proofs desk on Astryx, opt-in (components/admin/proofs-astryx.tsx). Out of the index like /admin. `data-lead-app`: no site header, as on the leads desk.
 export const metadata: Metadata = {
   title: "PROOFS",
   robots: { index: false, follow: false, nocache: true, googleBot: { index: false, follow: false } },

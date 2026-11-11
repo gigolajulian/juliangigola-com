@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { kindOf, label, mailto, Tag } from "@/components/leads/shared";
+import { kindOf, label, mailto, Tag } from "@/components/admin/leads/shared";
 import { cash, matches, money, nextStep, pass } from "@/lib/lead-desk";
 import type { LeadSummary } from "@/lib/leads";
 

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { LeadsAstryx } from "@/components/leads-astryx";
+import { LeadsAstryx } from "@/components/admin/leads/leads-astryx";
 
-// The lead desk on Astryx, opt-in (components/leads-astryx.tsx). Out of the index like /admin/leads.
+// The lead desk on Astryx, opt-in (components/admin/leads/leads-astryx.tsx). Out of the index like /admin/leads.
 export const metadata: Metadata = {
   title: "LEADS",
   robots: { index: false, follow: false, nocache: true, googleBot: { index: false, follow: false } },
