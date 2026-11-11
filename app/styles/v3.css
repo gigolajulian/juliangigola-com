@@ -969,7 +969,13 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 .v3 .pj-cr li{flex-direction:column;gap:4px}
 .v3 .pj-cr li .mute{text-align:left}
 .v3 .pj-cr li a{align-self:flex-start}
-@media (min-width:701px){.v3 .pj-cr{grid-row:var(--row);grid-column:var(--col)/span var(--span)}}
+@media (min-width:701px){.v3 .pj-cr{grid-row:var(--row);grid-column:var(--col)/span var(--span)}
+/* Credits set in from both sides and right-aligned in the hole beside the last frame (Julian, 2026-11-11, mock C). */
+.v3 .pj-cr{padding:0 clamp(32px,4vw,64px)}
+.v3 .pj-cr .sv-row{width:min(100%,560px);margin-left:auto}
+.v3 .pj-cr :is(h2,li,li .mute){text-align:right}
+.v3 .pj-cr li{align-items:flex-end}
+.v3 .pj-cr li a{align-self:flex-end}}
 .v3 .pj-next{display:flex;align-items:baseline;gap:20px;padding:40px 0 0;color:inherit;text-decoration:none}
 .v3 .pj-next b{font:900 clamp(2.5rem,calc(6*var(--v3u)),5.5rem)/.9 var(--display);letter-spacing:-.05em;flex:1}
 @media (hover:hover){.v3 .pj-next:hover b{color:var(--accent)}}
