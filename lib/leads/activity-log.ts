@@ -104,4 +104,6 @@ export function eventsCsv(rows: MasterEntry[]): string {
 }
 
 /** What a client has paid, from their whole log: payments less refunds. */
-export const paidTotal = (log: LeadEvent[]) => log.reduce((n, e) => n + (e.kind === "payment" ? e.amount ?? 0 : e.kind === "refund" ? -(e.amount ?? 0) : 0), 0);
+/** Payments less refunds, plus invoices settled by hand (an unmark logs the amount negative). */
+export const paidTotal = (log: LeadEvent[]) =>
+  log.reduce((n, e) => n + (e.kind === "payment" || e.kind === "invoice-paid" ? e.amount ?? 0 : e.kind === "refund" ? -(e.amount ?? 0) : 0), 0);
