@@ -12,7 +12,8 @@ let live: Lenis | null = null;
  *  is written over by Lenis's next frame (page-fly.tsx). `glide` scrolls
  *  there smoothly (the wordmark on the homepage, chrome.tsx). */
 export function scrollTop(glide = false) {
-  if (live) live.scrollTo(0, { immediate: !glide, force: true });
+  // 1.2s ease-in-out for the glide: Lenis's lerp lurched 75% in 200ms, then crawled (Julian, #833).
+  if (live) live.scrollTo(0, glide ? { duration: 1.2, easing: (t) => (t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2), force: true } : { immediate: true, force: true });
   else scrollTo({ top: 0, behavior: glide ? "smooth" : "instant" });
 }
 
