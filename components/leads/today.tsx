@@ -20,13 +20,13 @@ import { TZ } from "@/lib/booking/booking-rules";
 const dayHead = (d: string) => `${new Date(`${d}T12:00:00Z`).toLocaleDateString("en-US", { weekday: "short", timeZone: "UTC" })} ${+d.slice(8)}`;
 const clock = (ms: number) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit" }).format(ms);
 /** Where a move comes from, as the mock tags it. */
-const source = (l: LeadSummary) => (renew(l) ? "Licence" : paperDue(l, now()) ? "Paperwork" : l.stage === "Invoiced" || l.stage === "Selecting" ? "Proofs" : "Leads");
-const callOrShoot = (l: LeadSummary) => (l.stage === "Call booked" ? "Call" : shootTag(l.kind) ?? "Shoot");
+export const source = (l: LeadSummary) => (renew(l) ? "Licence" : paperDue(l, now()) ? "Paperwork" : l.stage === "Invoiced" || l.stage === "Selecting" ? "Proofs" : "Leads");
+export const callOrShoot = (l: LeadSummary) => (l.stage === "Call booked" ? "Call" : shootTag(l.kind) ?? "Shoot");
 
-type DayEv = { small: string; text: string; who?: string; due?: boolean; l: LeadSummary };
+export type DayEv = { small: string; text: string; who?: string; due?: boolean; l: LeadSummary };
 
 /** Each Pacific day from `from` for `n` days, with what is on it. Moves with no date land today. */
-function daysOf(leads: LeadSummary[], from: string, n: number) {
+export function daysOf(leads: LeadSummary[], from: string, n: number) {
   const today = ymdPT(now());
   const map = new Map<string, DayEv[]>();
   const put = (d: string, e: DayEv) => map.set(d, [...(map.get(d) ?? []), e]);
@@ -57,7 +57,7 @@ function Item({ k, t, n, s, onClick, className }: { k: React.ReactNode; t?: stri
   return onClick ? <button type="button" onClick={onClick} className={cn(cls, "transition-colors duration-200 hoverable:hover:bg-card")}>{body}</button> : <div className={cls}>{body}</div>;
 }
 
-type Spark = { visits: number; days: { key: string; n: number }[] };
+export type Spark = { visits: number; days: { key: string; n: number }[] };
 
 function DeskToday({ leads, go, pick }: { leads: LeadSummary[]; go: (l: LeadSummary) => void; pick: (f: Filter) => void }) {
   const today = ymdPT(now());
