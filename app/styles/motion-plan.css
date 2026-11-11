@@ -46,7 +46,7 @@
    The page travels as one snapshot of the screen (root): cheap on a tall
    page, where #main is already kept out of the trip for iPhone memory
    (`data-page-tall`, transitions.css). The header holds still. No delay
-   from the bar or a drawer. A link: the old page fades out in 250 on
+   from the bar. A link: the old page fades out in 250 on
    `out` over the new one, which rises 2.5vh in 400 on `drawer`. A photo
    (`data-mp-fly`, page-fly.tsx): the new page also fades in, the covers
    left behind recede, the photo flies in its own layer. Back
