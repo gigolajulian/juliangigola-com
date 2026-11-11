@@ -52,6 +52,11 @@ provider.titleForGoToPublishedPhoto = "disable"
 provider.disableRenamePublishedCollection = false
 provider.canAddCommentsToService = function() return false end
 provider.titleForPhotoRating = "Selected"
+-- Proofs carry pixels and a file name only: labels, flags and other metadata (the client's picks
+-- included) never mark a frame for re-publish. Develop edits still do.
+function provider.metadataThatTriggersRepublish()
+  return { default = false }
+end
 
 provider.exportPresetFields = {}
 

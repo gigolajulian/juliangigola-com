@@ -17,5 +17,8 @@ return {
     { title = "Check for picks", file = "CheckPicks.lua" },
   },
   LrPluginInfoProvider = "PluginInfo.lua",
-  VERSION = { major = 1, minor = 2, revision = 3, build = 0 },
+  -- Updates itself from the repo at each start (Update.lua).
+  LrInitPlugin = "Init.lua",
+  -- Bump revision with every plugin change: Update.lua only installs a higher version.
+  VERSION = { major = 1, minor = 2, revision = 5, build = 0 },
 }
