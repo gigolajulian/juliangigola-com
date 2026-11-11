@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
-import { Intro } from "@/components/intro";
+import { Intro } from "@/components/splash/intro";
 import { SPLASH_RUN } from "@/lib/splash-run";
 import { PhotoNotice } from "@/components/photo-notice";
 import { GlassLight } from "@/components/glass-light";
