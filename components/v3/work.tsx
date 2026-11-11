@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { projectHref } from "@/lib/project-href";
 import Image, { getImageProps } from "next/image";
 import Link from "next/link";
 import dynamic from "next/dynamic";
@@ -65,10 +66,6 @@ const seen = () =>
     return r.bottom > 0 && r.top < innerHeight && r.right > 0 && r.left < innerWidth;
   });
 
-/* Galleries that live on their booking page (next.config.ts pageRedirects):
-   linked straight there, so a tap skips the redirect and its RSC 404 (audit 2026-11-11). */
-const MOVED: Record<string, string> = { headshots: "/headshots#work", graduation: "/graduation-photos#work" };
-const hrefOf = (s: string) => MOVED[s] ?? `/portfolio/${s}`;
 /** A gallery's cover says its own name in the caption: the image stays silent so it is not read twice. */
 const altOf = (p: WorkItem) => (p.d.join(", ").toLowerCase() === p.n.toLowerCase() ? "" : p.n);
 
@@ -94,7 +91,7 @@ function Cap({ p, cls }: { p: WorkItem; cls: string }) {
 function Tile({ p, swatch, first }: { p: WorkItem; swatch?: string[]; first?: boolean }) {
   return (
     <figure className="wt">
-      <Link href={hrefOf(p.s)} aria-label={named(p)}>
+      <Link href={projectHref(p.s)} aria-label={named(p)}>
         <div className="ph" data-flip-id={p.s}>
           <Image
             src={p.cover}
@@ -651,13 +648,14 @@ export function V3Work({
     return () => clearTimeout(t);
   }, [warm, view]);
 
-  /* The scope's points arrive with the Color view, not with the page. */
+  /* The scope's points arrive with the Color view, not with the page. A
+     failed load leaves it unset, so the next visit to Color asks again. */
   React.useEffect(() => {
     if (view !== "color" || scope) return;
     void fetch("/v3/work-scope.json")
-      .then((r) => r.json())
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`scope ${r.status}`))))
       .then(setScope)
-      .catch(() => setScope({}));
+      .catch(() => {});
   }, [view, scope]);
 
   const scoreSet = React.useCallback(
@@ -1122,7 +1120,7 @@ export function V3Work({
                 if (!f)
                   return (
                     <figure key={p!.s} className="sc" data-flip-id={p!.s}>
-                      <Link href={hrefOf(p!.s)} aria-label={named(p!)}>
+                      <Link href={projectHref(p!.s)} aria-label={named(p!)}>
                         <Image src={p!.cover} alt={altOf(p!)} fill sizes={STRIP_SIZES} decoding="sync" loading={n < 4 ? "eager" : "lazy"} />
                         {cap}
                       </Link>

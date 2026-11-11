@@ -22,6 +22,7 @@ local LrPasswords = import "LrPasswords"
 local LrFileUtils = import "LrFileUtils"
 local LrApplication = import "LrApplication"
 local LrDate = import "LrDate"
+local LrTasks = import "LrTasks"
 
 local Json = require "Json"
 local Image = require "Image"
@@ -51,6 +52,11 @@ provider.titleForGoToPublishedPhoto = "disable"
 provider.disableRenamePublishedCollection = false
 provider.canAddCommentsToService = function() return false end
 provider.titleForPhotoRating = "Selected"
+-- Proofs carry pixels and a file name only: labels, flags and other metadata (the client's picks
+-- included) never mark a frame for re-publish. Develop edits still do.
+function provider.metadataThatTriggersRepublish()
+  return { default = false }
+end
 
 provider.exportPresetFields = {}
 
@@ -194,7 +200,9 @@ function provider.processRenderedPhotos(functionContext, exportContext)
       local id = tostring(photo.localIdentifier)
       local file = (photo:getFormattedMetadata("fileName") or (id .. ".jpg")):gsub("%.[^.]+$", "") .. ".jpg"
       local w, h = Image.measure(path)
-      local q = ("?token=%s&id=%s&file=%s&w=%d&h=%d"):format(enc(remote), enc(id), enc(file), w or 0, h or 0)
+      -- Capture time for shot order and looks on the site: Lightroom counts from 2001, the site from 1970.
+      local shot = photo:getRawMetadata("dateTimeOriginal")
+      local q = ("?token=%s&id=%s&file=%s&w=%d&h=%d&t=%d"):format(enc(remote), enc(id), enc(file), w or 0, h or 0, shot and math.floor(shot + 978307200) or 0)
       local b, hd = LrHttp.post(API .. q, Image.readBytes(path), headers("image/jpeg"), "PUT", 300)
       LrFileUtils.delete(path)
       local pass, err = pcall(check, b, hd, "upload " .. file)
@@ -244,6 +252,12 @@ local function gallery(remote)
   return p
 end
 
+-- Lightroom ids each service of a plugin as "<toolkit id>.<n>" (com.juliangigola.export.2), so match the prefix.
+local function ours(service)
+  local id = tostring(service:getPluginId())
+  return id == _PLUGIN.id or id:sub(1, #_PLUGIN.id + 1) == _PLUGIN.id .. "."
+end
+
 -- LrPublishedPhoto has no way back to its collection, so find the
 -- gallery of this service that holds the first photo.
 -- shortcut: a frame in two proof galleries reads the first one; match on remoteId if that ever happens.
@@ -251,7 +265,7 @@ local function remoteOf(arrayOfPhotoInfo)
   local first = arrayOfPhotoInfo[1]
   if not (first and first.photo) then return end
   for _, pc in ipairs(first.photo:getContainedPublishedCollections()) do
-    if pc:getService():getPluginId() == _PLUGIN.id and pc:getRemoteId() then
+    if ours(pc:getService()) and pc:getRemoteId() then
       return pc:getRemoteId(), pc:getName()
     end
   end
@@ -259,10 +273,12 @@ end
 
 -- One catalog write for every gallery: Pick flag, Purple label, "<gallery> selects".
 -- Safe to run twice: same values, existing collections reused, photos already in stay once.
+-- Returns the selects collections it filled.
 local function markPicks(galleries)
+  local made = {}
   local any = false
   for _, g in ipairs(galleries) do any = any or #g.photos > 0 end
-  if not any then return end
+  if not any then return made end
   local catalog = LrApplication.activeCatalog()
   catalog:withWriteAccessDo("Client selects from juliangigola.com", function()
     local set = catalog:createCollectionSet("Client selects", nil, true)
@@ -272,10 +288,13 @@ local function markPicks(galleries)
           photo:setRawMetadata("colorNameForLabel", LABEL)
           photo:setRawMetadata("pickStatus", 1)
         end
-        catalog:createCollection((g.name or "Gallery") .. " selects", set, true):addPhotos(g.photos)
+        local c = catalog:createCollection((g.name or "Gallery") .. " selects", set, true)
+        c:addPhotos(g.photos)
+        made[#made + 1] = c
       end
     end
   end, { timeout = 30 })
+  return made
 end
 
 function provider.getCommentsFromPublishedCollection(publishSettings, arrayOfPhotoInfo, commentCallback)
@@ -314,11 +333,23 @@ end
 function provider.checkForPicks()
   local catalog = LrApplication.activeCatalog()
   local found, lines, failed, why = {}, {}, {}, nil
-  for _, service in ipairs(catalog:getPublishServices(_PLUGIN.id)) do
-    for _, pc in ipairs(service:getChildCollections()) do
+  local checked = 0
+  -- Every gallery of this plugin's services, at any depth.
+  local all = {}
+  local function walk(node)
+    for _, pc in ipairs(node:getChildCollections()) do all[#all + 1] = pc end
+    for _, set in ipairs(node:getChildCollectionSets()) do walk(set) end
+  end
+  for _, service in ipairs(catalog:getPublishServices()) do
+    if ours(service) then walk(service) end
+  end
+  do
+    for _, pc in ipairs(all) do
       local remote = pc:getRemoteId()
       if remote then
-        local ok, p = pcall(gallery, remote)
+        -- LrTasks.pcall: plain pcall cannot wrap LrHttp, which yields.
+        local ok, p = LrTasks.pcall(gallery, remote)
+        checked = checked + 1
         if not ok then
           failed[#failed + 1], why = pc:getName(), tostring(p)
         elseif p.submittedAt and p.selects and #p.selects > 0 then
@@ -329,15 +360,33 @@ function provider.checkForPicks()
             if want[pp:getRemoteId()] then picked[#picked + 1] = pp:getPhoto() end
           end
           found[#found + 1] = { name = pc:getName(), photos = picked }
-          lines[#lines + 1] = ("%s: %d"):format(pc:getName(), #p.selects)
+          -- Frames taken out of the Lightroom gallery after sending can't be flagged: say so.
+          local missing = #p.selects - #picked
+          lines[#lines + 1] = ("%s: %d %s%s"):format(pc:getName(), #p.selects, #p.selects == 1 and "pick" or "picks", missing > 0 and (" (%d not in this catalog)"):format(missing) or "")
         end
       end
     end
   end
-  markPicks(found)
+  local made = markPicks(found)
   local info = table.concat(lines, "\n")
   if #failed > 0 then info = info .. "\n\nCould not read " .. table.concat(failed, ", ") .. ": " .. why end
-  LrDialogs.message(#lines > 0 and "Client picks" or "No picks yet", info ~= "" and info or nil)
+  if #made == 0 then
+    if info == "" then
+      info = checked == 0 and "No client galleries in this catalog yet." or ("Checked %d %s."):format(checked, checked == 1 and "gallery" or "galleries")
+    end
+    LrDialogs.message(#lines > 0 and "Client picks" or "No picks yet", info)
+  elseif LrDialogs.confirm("Client picks", info .. "\n\nFlagged with a Purple label.", "Show selects", "Close") == "ok" then
+    catalog:setActiveSources(made)
+  end
+end
+
+--- Every entry point (both Plug-in Extras menus, the Plug-in Manager button) runs this.
+function provider.runCheck()
+  LrTasks.startAsyncTask(function()
+    -- LrTasks.pcall: plain pcall cannot wrap LrHttp, which yields.
+    local ok, err = LrTasks.pcall(provider.checkForPicks)
+    if not ok then LrDialogs.message("Check for picks", tostring(err), "critical") end
+  end)
 end
 
 return provider

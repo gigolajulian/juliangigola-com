@@ -30,7 +30,7 @@ import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/Segme
 import { ProgressBar } from "@astryxdesign/core/ProgressBar";
 import { StatusDot } from "@astryxdesign/core/StatusDot";
 import { Tab, TabList } from "@astryxdesign/core/TabList";
-import { SignIn } from "@/components/admin/admin-leads";
+import { SignIn } from "@/components/leads/setup";
 import { LeadAstryx } from "@/components/leads/lead-astryx";
 import { badge } from "@/components/leads/shared";
 import { ago, aside, inboxCall, loadError, matches, nextStep, pass } from "@/lib/leads/lead-desk";

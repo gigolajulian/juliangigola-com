@@ -16,7 +16,10 @@ import { Badge } from "@astryxdesign/core/Badge";
 import { Banner } from "@astryxdesign/core/Banner";
 import { Table } from "@astryxdesign/core/Table";
 import { adminCall, cash, day, errorText } from "@/lib/leads/lead-desk";
-import { KIND, type Txn } from "@/components/leads/money";
+
+export type Txn = { id: string; at: string; type: string; amount: number; fee: number; net: number; currency: string; status: string; what: string };
+/** Stripe's types in his words. */
+export const KIND: Record<string, string> = { charge: "Payment", payment: "Payment", refund: "Refund", payment_refund: "Refund", payout: "Payout", stripe_fee: "Stripe fee", adjustment: "Adjustment", dispute: "Dispute" };
 
 type Row = Txn & Record<string, unknown>;
 const kind = (t: Txn) => KIND[t.type] ?? t.type.replace(/_/g, " ");

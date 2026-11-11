@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { cardPrice, THUMB_W, type PublicProof } from "@/lib/proofs";
+import { cardPrice, lookStarts, shotOrder, THUMB_W, type PublicProof } from "@/lib/proofs";
 import { looksLikeEmail } from "@/lib/inbox";
 import { ProofWall } from "@/components/proof-wall";
 
@@ -21,6 +21,10 @@ import { ProofWall } from "@/components/proof-wall";
  * they go, and a walkthrough after Send in place of the bare receipt. No
  * notes. Time on the page and per-frame looks go out in one beacon every
  * 30 seconds and when the tab hides, never one request per frame.
+ *
+ * Julian 2026-11-11 (audit https://claude.ai/artifact/22rBM6N6e42kRWHcFbUjhE): a tap on a photo opens it, the ring
+ * picks; frames in shot order, split into looks where Lightroom sent capture times; "Selects first" on one line;
+ * frame numbers and the ring black on a light corner, white on a dark one.
  * ─────────────────────────────────────────────────────────────── */
 
 const EMAIL_STORE = "proof-email";
@@ -63,13 +67,39 @@ function useDialog(active: boolean, close: () => void) {
   return ref;
 }
 
+/** Whether a corner of a loaded thumbnail is light: black type there, white elsewhere. Null where canvas is missing. */
+function lightCorners(img: HTMLImageElement): { no: boolean; ring: boolean } | null {
+  const c = document.createElement("canvas").getContext?.("2d", { willReadFrequently: true });
+  if (!c || !img.naturalWidth) return null;
+  const { naturalWidth: w, naturalHeight: h } = img;
+  const s = Math.max(1, Math.round(Math.min(w, h) * 0.14));
+  const light = (x: number, y: number) => {
+    c.drawImage(img, x, y, s, s, 0, 0, 8, 8);
+    const d = c.getImageData(0, 0, 8, 8).data;
+    let sum = 0;
+    for (let i = 0; i < d.length; i += 4) sum += 0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2];
+    return sum / (d.length / 4) > 150;
+  };
+  try {
+    return { no: light(0, h - s), ring: light(w - s, 0) };
+  } catch {
+    return null;
+  }
+}
+
 /** `notice`: Stripe could not answer on the way back from Checkout; it opens on the review step with the message. */
 export function ProofGallery({ token, initial, notice }: { token: string; initial: PublicProof; notice?: string }) {
-  const { frames, included, price, balance } = initial;
+  const { included, price, balance } = initial;
+  const frames = React.useMemo(() => shotOrder(initial.frames), [initial.frames]);
+  const starts = React.useMemo(() => lookStarts(frames), [frames]);
   const [selects, setSelects] = React.useState<string[]>(initial.selects);
   const [email, setEmail] = React.useState<string | null>(null);
   const [ready, setReady] = React.useState(initial.submitted);
   const [view, setView] = React.useState<"all" | "selects">("all");
+  const [sort, setSort] = React.useState<"shot" | "picks">("shot");
+  // "Selects first" holds the picks it opened with, so a frame does not jump to the top under the finger.
+  const [pinned, setPinned] = React.useState<string[]>([]);
+  const [tone, setTone] = React.useState<Record<string, { no: boolean; ring: boolean }>>({});
   const [open, setOpen] = React.useState<number | null>(null);
   const [step, setStep] = React.useState<Step>(initial.submitted ? "done" : notice ? "review" : null);
   const [showAll, setShowAll] = React.useState(false);
@@ -117,6 +147,14 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
   const paidPastBal = Math.max(0, initial.paid - balance * 100);
   const due = balDue + Math.max(0, extra - (price ? Math.floor(paidPastBal / (price * 100)) : 0)) * price;
   const byId = React.useMemo(() => new Map(frames.map((f, i) => [f.id, i])), [frames]);
+  // Frame indexes in the order the grid shows them; the lightbox steps through the same order.
+  const seq = React.useMemo(() => {
+    const all = frames.map((_, i) => i);
+    if (sort !== "picks") return all;
+    const top = new Set(pinned);
+    return [...all.filter((i) => top.has(frames[i].id)), ...all.filter((i) => !top.has(frames[i].id))];
+  }, [frames, sort, pinned]);
+  const nextOf = (i: number, d: 1 | -1) => seq[(seq.indexOf(i) + d + seq.length) % seq.length];
   const src = (id: string) => `/proof/${token}/f/${encodeURIComponent(id)}`;
   // The 800px copy for the grid and the walls; the lightbox keeps the whole frame.
   const thumb = (id: string) => `${src(id)}?w=${THUMB_W}`;
@@ -229,8 +267,8 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
     const k = (e: KeyboardEvent) => {
       if ((e.target as HTMLElement).tagName === "INPUT") return;
       if (e.key === "Escape") setOpen(null);
-      if (e.key === "ArrowLeft") setOpen((i) => (i === null ? i : (i + frames.length - 1) % frames.length));
-      if (e.key === "ArrowRight") setOpen((i) => (i === null ? i : (i + 1) % frames.length));
+      if (e.key === "ArrowLeft") setOpen((i) => (i === null ? i : nextOf(i, -1)));
+      if (e.key === "ArrowRight") setOpen((i) => (i === null ? i : nextOf(i, 1)));
       if (e.key === " ") {
         e.preventDefault();
         toggle(frames[open].id);
@@ -292,7 +330,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
             <div className="proof-thumbs">
               {ordered.slice(0, 5).map((id) => (
                 // eslint-disable-next-line @next/next/no-img-element -- private frame
-                <img key={id} src={src(id)} alt={`Frame ${(byId.get(id) ?? 0) + 1}`} />
+                <img key={id} src={thumb(id)} alt={`Frame ${(byId.get(id) ?? 0) + 1}`} />
               ))}
               {n > 5 ? <span>+{n - 5}</span> : null}
             </div>
@@ -360,11 +398,11 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
               </div>
             </div>
             <div className="proof-rgrid">
-              {ordered.map((id, k) => (
+              {ordered.map((id) => (
                 <div key={id}>
                   {/* eslint-disable-next-line @next/next/no-img-element -- private frame */}
-                  <img src={src(id)} alt={`Select ${k + 1}`} />
-                  <i>{k + 1}</i>
+                  <img src={thumb(id)} alt={`Frame ${(byId.get(id) ?? 0) + 1}`} />
+                  <i>{pad(byId.get(id) ?? 0)}</i>
                 </div>
               ))}
             </div>
@@ -395,28 +433,56 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
       )}
 
       {view === "all" ? (
-        <div className="proof-grid" ref={gridEl}>
-          {frames.map((f, i) => {
-            const at = selects.indexOf(f.id);
-            return (
-              <div key={f.id} data-id={f.id} className="proof-cell" data-on={at >= 0 || undefined}>
-                {/* eslint-disable-next-line @next/next/no-img-element -- private frames from the Worker, not the image CDN */}
-                <img src={thumb(f.id)} alt="" loading={i < 8 ? "eager" : "lazy"} width={f.w || undefined} height={f.h || undefined} draggable={false} />
-                <button type="button" className="proof-pick" aria-pressed={at >= 0} aria-label={`Frame ${i + 1}`} onClick={() => toggle(f.id)} />
-                <span className="proof-no">{pad(i)}</span>
-                <span className="proof-mark">{at >= 0 ? at + 1 : ""}</span>
-                <button
-                  type="button"
-                  className="proof-zoom"
-                  aria-label={`Open frame ${i + 1}`}
-                  onClick={() => setOpen(i)}
-                >
-                  Open
-                </button>
-              </div>
-            );
-          })}
-        </div>
+        <>
+          <nav className="proof-sort" aria-label="Order">
+            <button type="button" aria-pressed={sort === "shot"} onClick={() => setSort("shot")}>
+              {starts.length ? "Looks" : "In order"}
+            </button>
+            <button type="button" aria-pressed={sort === "picks"} disabled={!n} onClick={() => { setPinned(ordered); setSort("picks"); }}>
+              Selects first
+            </button>
+          </nav>
+          <div className="proof-grid" ref={gridEl}>
+            {seq.map((i, k) => {
+              const f = frames[i];
+              const at = selects.indexOf(f.id);
+              const look = sort === "shot" ? starts.indexOf(i) : -1;
+              const size = look < 0 ? 0 : (starts[look + 1] ?? frames.length) - i;
+              const picked = look < 0 ? 0 : frames.slice(i, i + size).filter((x) => selects.includes(x.id)).length;
+              return (
+                <React.Fragment key={f.id}>
+                  {look >= 0 ? (
+                    <p className="proof-look">
+                      <b>Look {look + 1}</b>
+                      <span>{size} · {picked} picked</span>
+                    </p>
+                  ) : null}
+                  <div data-id={f.id} className="proof-cell" data-on={at >= 0 || undefined} data-light-no={tone[f.id]?.no || undefined} data-light-ring={tone[f.id]?.ring || undefined}>
+                    {/* eslint-disable-next-line @next/next/no-img-element -- private frames from the Worker, not the image CDN */}
+                    <img
+                      src={thumb(f.id)}
+                      alt=""
+                      loading={k < 8 ? "eager" : "lazy"}
+                      width={f.w || undefined}
+                      height={f.h || undefined}
+                      draggable={false}
+                      onLoad={(e) => {
+                        const c = lightCorners(e.currentTarget);
+                        if (c) setTone((t) => ({ ...t, [f.id]: c }));
+                      }}
+                    />
+                    {/* The photo opens; the ring picks (Julian 2026-11-11). */}
+                    <button type="button" className="proof-open" aria-label={`Open frame ${i + 1}`} onClick={() => setOpen(i)} />
+                    <span className="proof-no">{pad(i)}</span>
+                    <button type="button" className="proof-mark" aria-pressed={at >= 0} aria-label={`Select frame ${i + 1}`} onClick={() => toggle(f.id)}>
+                      <i>{at >= 0 ? at + 1 : ""}</i>
+                    </button>
+                  </div>
+                </React.Fragment>
+              );
+            })}
+          </div>
+        </>
       ) : (
         <div className="proof-sel">
           {!n ? (
@@ -432,7 +498,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
                   <div className="proof-srow" key={id}>
                     <button type="button" onClick={() => setOpen(i)} aria-label={`Open frame ${i + 1}`}>
                       {/* eslint-disable-next-line @next/next/no-img-element -- private frame */}
-                      <img src={src(id)} alt="" />
+                      <img src={thumb(id)} alt="" />
                     </button>
                     <div>
                       <p className="proof-fn">
@@ -452,10 +518,16 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
 
       <div className="proof-bar" data-empty={!n || undefined}>
         <p className="proof-sum">
-          <b>{n} selected</b> · {included} included · {extra} extra{balDue ? ` · $${balDue} balance` : ""} · <b>${due}</b>
+          <span className="proof-sum-l">
+            <b>{n} selected</b> · {included} included · {extra} extra{balDue ? ` · $${balDue} balance` : ""} · <b>${due}</b>
+          </span>
+          {/* A phone gets one row: the count and the total, then Send (the header's Selects tab replaces View selects). */}
+          <span className="proof-sum-s">
+            <b>{n}</b> / {included} · ${due}
+          </span>
         </p>
         <div className="proof-acts">
-          <button type="button" className="proof-btn ghost" onClick={() => { setView(view === "all" ? "selects" : "all"); scrollTo({ top: 0, behavior: "smooth" }); }}>
+          <button type="button" className="proof-btn ghost proof-vsel" onClick={() => { setView(view === "all" ? "selects" : "all"); scrollTo({ top: 0, behavior: "smooth" }); }}>
             {view === "all" ? "View selects" : "Back to all"}
           </button>
           <button type="button" className="proof-btn" disabled={!n} onClick={review}>
@@ -493,16 +565,16 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
             onTouchStart={(e) => (swipe.current = e.touches[0].clientX)}
             onTouchEnd={(e) => {
               const dx = e.changedTouches[0].clientX - (swipe.current ?? e.changedTouches[0].clientX);
-              if (Math.abs(dx) > 50) setOpen((open + (dx < 0 ? 1 : frames.length - 1)) % frames.length);
+              if (Math.abs(dx) > 50) setOpen(nextOf(open, dx < 0 ? 1 : -1));
               swipe.current = null;
             }}
           >
-            <button type="button" className="proof-arr l" aria-label="Previous" onClick={() => setOpen((open + frames.length - 1) % frames.length)}>
+            <button type="button" className="proof-arr l" aria-label="Previous" onClick={() => setOpen(nextOf(open, -1))}>
               &larr;
             </button>
             {/* eslint-disable-next-line @next/next/no-img-element -- private frame */}
             <img src={src(frames[open].id)} alt={`Frame ${open + 1}`} />
-            <button type="button" className="proof-arr r" aria-label="Next" onClick={() => setOpen((open + 1) % frames.length)}>
+            <button type="button" className="proof-arr r" aria-label="Next" onClick={() => setOpen(nextOf(open, 1))}>
               &rarr;
             </button>
           </div>
@@ -571,17 +643,17 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
               </p>
             </div>
           ) : null}
+          <p className="proof-lock">Selects lock once you send.</p>
           {error ? <p className="proof-err" role="alert">{error}</p> : null}
           <div className="proof-rgrid">
-            {selects.map((id, k) => (
+            {ordered.map((id) => (
               <div key={id}>
                 {/* eslint-disable-next-line @next/next/no-img-element -- private frame */}
-                <img src={src(id)} alt={`Pick ${k + 1}`} />
-                <i>{k + 1}</i>
+                <img src={thumb(id)} alt={`Frame ${(byId.get(id) ?? 0) + 1}`} />
+                <i>{pad(byId.get(id) ?? 0)}</i>
               </div>
             ))}
           </div>
-          <p className="proof-stripe">Selects lock once you send.</p>
         </div>
       ) : null}
     </div>
@@ -641,11 +713,11 @@ function Gate({ frames, count, onEnter }: { frames: string[]; count: number; onE
         </div>
         <label>
           <span className="proof-lab">Your name</span>
-          <input autoComplete="name" required value={name} onChange={(e) => { setName(e.target.value); setBad(null); }} placeholder="Your name" aria-invalid={bad === "Add your name." || undefined} />
+          <input autoComplete="name" required value={name} onChange={(e) => { setName(e.target.value); setBad(null); }} aria-invalid={bad === "Add your name." || undefined} />
         </label>
         <label>
           <span className="proof-lab">Your email</span>
-          <input type="email" inputMode="email" autoComplete="email" required value={value} onChange={(e) => { setValue(e.target.value); setBad(null); }} placeholder="you@email.com" aria-invalid={(!!bad && bad !== "Add your name.") || undefined} />
+          <input type="email" inputMode="email" autoComplete="email" required value={value} onChange={(e) => { setValue(e.target.value); setBad(null); }} aria-invalid={(!!bad && bad !== "Add your name.") || undefined} />
         </label>
         {bad ? <p className="proof-err" role="alert">{bad}</p> : null}
         <button type="submit" className="proof-btn" data-off={!name.trim() || !isEmail(value) || undefined}>Open gallery</button>

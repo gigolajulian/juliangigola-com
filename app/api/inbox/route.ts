@@ -13,7 +13,7 @@ import { notionPaper, notionStage } from "@/lib/leads/notion-lead";
 import { importStripe } from "@/lib/leads/stripe-import";
 import { cleanTemplates, manualLead, merge, stats, type NewLead } from "@/lib/leads/lead-crm";
 import { balance, cleanFrom, cleanInvoice, invoiceNo, mmyy, PHOTO_KEY, usd, type InvoiceFrom } from "@/lib/leads/invoice";
-import { json, NO_STORE } from "@/lib/http";
+import { bodyOf, json, NO_STORE } from "@/lib/http";
 
 /** Where his reply templates live: not personal data, so plain JSON. */
 const TEMPLATES_KEY = "leads:templates";
@@ -57,28 +57,6 @@ async function* everyKey<M>(inbox: NonNullable<CloudflareEnv["INBOX"]>, prefix: 
 
 /** Never prerender, never cache: the answer depends on a header. */
 export const dynamic = "force-dynamic";
-
-/**
- * The request body, or null when it is not JSON.
- *
- * `request.json()` throws on a malformed body, and an exception out of a
- * route handler is a 500 — the Worker's generic error page, for a request
- * that was simply wrong. Anything past the key check is the admin panel and
- * sends well-formed JSON, but a route that can be made to throw is a route
- * that can be made to log, and a 400 says what happened.
- */
-async function parsed(
-  request: Request,
-): Promise<Record<string, unknown> | null> {
-  try {
-    const parsed: unknown = await request.json();
-    return parsed && typeof parsed === "object"
-      ? (parsed as Record<string, unknown>)
-      : null;
-  } catch {
-    return null;
-  }
-}
 
 /**
  * A lead deleted for good (Empty trash, or 30 days in it) leaves `gone:<id>`
@@ -217,7 +195,7 @@ export async function GET(request: Request) {
     return file(await clientsCsv(gate.inbox, seal, master), "leads");
   }
 
-  // The lead desk (`components/admin/admin-leads.tsx`): one record per person.
+  // The lead desk (`components/leads-astryx.tsx`): one record per person.
   // Sealed with LEADS_KEY (`lib/leads/lead-crypto.ts`), opened here and only here.
   if (wanted?.startsWith("lead:") || url.searchParams.has("leads")) {
     const seal = await gate.seal;
@@ -263,7 +241,7 @@ export async function PATCH(request: Request) {
   const gate = await guard(request);
   if (gate.error) return gate.error;
 
-  const given = await parsed(request);
+  const given = await bodyOf(request);
   if (!given) return json({ error: "Not JSON." }, 400);
   // The desk's notification switch: a device subscribing, or turning off.
   if (given.push !== undefined) {
@@ -339,7 +317,7 @@ export async function DELETE(request: Request) {
   const gate = await guard(request);
   if (gate.error) return gate.error;
 
-  const given = await parsed(request);
+  const given = await bodyOf(request);
   if (!given) return json({ error: "Not JSON." }, 400);
   const { key, emptyTrash } = given as { key?: string; emptyTrash?: boolean };
   // The lead desk's "Empty trash": every lead in the trash, deleted for good.
@@ -372,7 +350,7 @@ export async function DELETE(request: Request) {
 export async function POST(request: Request) {
   const gate = await guard(request);
   if (gate.error) return gate.error;
-  const given = await parsed(request);
+  const given = await bodyOf(request);
   // A lead he adds by hand: a DM, a text, a referral.
   if (given?.add && typeof given.add === "object") {
     const seal = await gate.seal;

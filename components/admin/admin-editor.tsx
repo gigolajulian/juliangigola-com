@@ -125,7 +125,7 @@ const TABS = [
    * and what you do afterwards happens in your mail. It also has nothing to
    * publish, which is the one thing every other tab has in common. */
   [
-    // One row per person, with a stage (`admin-leads.tsx`). The Inbox stays the raw log.
+    // One row per person, with a stage (`leads-astryx.tsx`). The Inbox stays the raw log.
     { id: "leads", label: "Leads" },
     { id: "inbox", label: "Inbox" },
     // Read-only too: who came to the site and from where.

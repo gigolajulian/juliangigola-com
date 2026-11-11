@@ -1,37 +1,11 @@
 "use client";
 
-import * as React from "react";
 import { at, day, type Filter } from "@/lib/leads/lead-desk";
-import { STAGES, type LeadEvent, type Stage } from "@/lib/leads/leads";
-import { cn } from "@/lib/utils";
+import type { LeadEvent } from "@/lib/leads/leads";
 
-/** The site's headings are Black capitals; the desk's are the wordmark face at 600, as written. */
-const HEAD: React.CSSProperties = { fontFamily: "var(--font-display)", textTransform: "none", fontWeight: 600, letterSpacing: "-0.02em", wordSpacing: 0 };
 /** "intro-call" as "Intro call". */
 const kindOf = (k?: string) => (k ? k.charAt(0).toUpperCase() + k.slice(1).replace(/-/g, " ") : undefined);
 
-/** The chip a row shows: trouble first, then late, then the stage. */
-/** A shape per stage, so the chip never relies on color alone. */
-const MARK: Record<Stage, string> = {
-  Inquiry: "○", Replied: "◐", "Call booked": "◐", Quoted: "◐", Confirmed: "●", Shot: "●", Invoiced: "●", Selecting: "●", Delivered: "✓", Lost: "×",
-};
-
-function Tag({ tone, mark, children }: { tone: "plain" | "needs" | "bad" | "quiet"; mark: string; children: React.ReactNode }) {
-  return (
-    <span
-      className={cn(
-        "inline-flex h-7 shrink-0 items-center gap-2 whitespace-nowrap rounded-[4px] px-3 font-mono text-[12.5px]",
-        tone === "plain" && "bg-card text-foreground",
-        tone === "needs" && "bg-accent/12 text-accent ring-1 ring-inset ring-accent/40",
-        tone === "bad" && "bg-destructive/10 text-destructive ring-1 ring-inset ring-destructive/40",
-        tone === "quiet" && "text-muted-foreground ring-1 ring-inset ring-border",
-      )}
-    >
-      <span aria-hidden="true">{mark}</span>
-      {children}
-    </span>
-  );
-}
 
 const btn = "inline-flex min-h-11 items-center justify-center gap-2 rounded-[10px] border border-border px-4 text-[15px] font-medium transition-colors duration-200 hoverable:hover:bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
 /** A form field and its label, as the desk's forms draw them. */
@@ -64,8 +38,6 @@ function mailto(to: string, subject: string, body: string, quote?: { name: strin
   return `mailto:${to}?${q({ subject, body: body + quoted })}`;
 }
 
-/** The road a lead travels; Lost is off it. */
-const STEPS: readonly Stage[] = STAGES.filter((s) => s !== "Lost");
 
 /** The unread count on the app icon (iPhone home screen, desktop dock), and
  * where the service worker reads it to add one per push. */
@@ -111,4 +83,4 @@ function line(e: LeadEvent): string {
   }
 }
 
-export { HEAD, kindOf, MARK, Tag, btn, field, fieldLabel, primary, ios, compose, mailto, STEPS, badge, label, line };
+export { kindOf, btn, field, fieldLabel, primary, ios, compose, mailto, badge, label, line };

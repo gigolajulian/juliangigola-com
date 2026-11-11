@@ -393,7 +393,7 @@ export function ProofWall({
             autoComplete="name"
             required
             value={name}
-            placeholder="Your name"
+           
             aria-invalid={bad === "Add your name." || undefined}
             onChange={(e) => {
               setName(e.target.value);
@@ -410,7 +410,7 @@ export function ProofWall({
             autoComplete="email"
             required
             value={email}
-            placeholder="you@email.com"
+           
             aria-invalid={(!!bad && bad !== "Add your name.") || undefined}
             onChange={(e) => {
               setEmail(e.target.value);

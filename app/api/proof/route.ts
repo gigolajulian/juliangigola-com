@@ -6,7 +6,7 @@ import { cardKey, closesAt, cleanSettings, DEFAULTS, frameKey, frameKeys, isFram
 import { proofMail, proofUrl, sendClient } from "@/lib/email/proof-mail";
 import { settle } from "@/lib/proof-submit";
 import { servedFrame } from "@/lib/proof-watermark";
-import { json } from "@/lib/http";
+import { bodyOf, json } from "@/lib/http";
 
 /* ── proofs, Julian's side ────────────────────────────────────────
  * Lightroom (the publish service) and /admin Leads both call this, with the
@@ -36,15 +36,6 @@ async function gate(request: Request) {
   const ok = await isAdmin(request, env.INBOX_KEY);
   if (!ok) return { error: json({ error: "Not authorized." }, 401) };
   return { env, kv: env.INBOX, r2: env.PROOFS, s: await seal };
-}
-
-async function body(request: Request): Promise<Record<string, unknown>> {
-  try {
-    const b: unknown = await request.json();
-    return b && typeof b === "object" ? (b as Record<string, unknown>) : {};
-  } catch {
-    return {};
-  }
 }
 
 export async function GET(request: Request) {
@@ -90,7 +81,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   const g = await gate(request);
   if ("error" in g) return g.error;
-  const b = await body(request);
+  const b = ((await bodyOf(request)) ?? {});
 
   if (b.action === "create") {
     const set = cleanSettings(b);
@@ -142,7 +133,7 @@ export async function POST(request: Request) {
 export async function PATCH(request: Request) {
   const g = await gate(request);
   if ("error" in g) return g.error;
-  const b = await body(request);
+  const b = ((await bodyOf(request)) ?? {});
   if (!isToken(b.token)) return json({ error: "Which gallery?" }, 400);
   const p = await readProof(g.kv, g.s, b.token);
   if (!p) return json({ error: "No such gallery." }, 404);
@@ -161,6 +152,8 @@ export async function PUT(request: Request) {
   const q = new URL(request.url).searchParams;
   const token = q.get("token"), id = q.get("id"), file = (q.get("file") ?? "").slice(0, 120);
   const w = Number(q.get("w")) || 0, h = Number(q.get("h")) || 0;
+  // Capture time from Lightroom, Unix seconds; anything implausible is dropped, not refused.
+  const t = Math.round(Number(q.get("t")));
   if (!isToken(token) || !isFrameId(id) || !file) return json({ error: "token, id and file are required." }, 400);
   if (!(request.headers.get("content-type") ?? "").startsWith("image/jpeg")) return json({ error: "Send a JPEG." }, 415);
   const bytes = await request.arrayBuffer();
@@ -170,7 +163,7 @@ export async function PUT(request: Request) {
   await g.r2.put(frameKey(token, id), bytes, { httpMetadata: { contentType: "image/jpeg" } });
   // A replaced frame is watermarked again, and its card redrawn, on the next fetch.
   await g.r2.delete(frameKeys(token, id).slice(1));
-  const frame = { id, file, w, h };
+  const frame = { id, file, w, h, ...(t > 0 && t < 4e9 ? { t } : {}) };
   const i = p.frames.findIndex((f) => f.id === id);
   const frames = i < 0 ? [...p.frames, frame] : p.frames.map((f, j) => (j === i ? frame : f));
   await writeProof(g.kv, g.s, { ...p, frames });
