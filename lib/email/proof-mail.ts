@@ -113,7 +113,7 @@ export function alertLines(p: Proof): { subject: string; lines: string[] } {
       "",
       ...fileList(p),
       "",
-      "Hit Publish on the gallery in Lightroom to pull them in.",
+      "In Lightroom: Library > Plug-in Extras > Check for picks.",
     ],
   };
 }
