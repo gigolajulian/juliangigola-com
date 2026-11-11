@@ -1,6 +1,6 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { liveHours } from "@/lib/booking/booking-engine";
-import { AMOUNT, CURRENCY, intentForm, isSlotOpen, parseBooking } from "@/lib/booking/deposit";
+import { liveHours, parseBooking } from "@/lib/booking/booking-engine";
+import { AMOUNT, CURRENCY, intentForm, isSlotOpen } from "@/lib/booking/deposit";
 import { PAYMENTS_DOWN, stripe } from "@/lib/stripe";
 import { json } from "@/lib/http";
 
@@ -21,8 +21,9 @@ export async function POST(request: Request) {
   if (!(await env.DEPOSIT_LIMIT.limit({ key: ip })).success)
     return json({ error: "Too many tries. Wait a minute." }, 429);
 
-  const b = parseBooking(await request.json().catch(() => null));
-  if (typeof b === "string") return json({ error: b }, 400);
+  const parsed = parseBooking(await request.json().catch(() => null));
+  if (!parsed.ok) return json({ error: parsed.reason }, 400);
+  const b = parsed.booking;
 
   try {
     if (!(await isSlotOpen(b, env.GCAL_OAUTH, env.INBOX, await liveHours(env)))) return json({ error: "taken" }, 409);

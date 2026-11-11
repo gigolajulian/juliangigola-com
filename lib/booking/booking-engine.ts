@@ -1,6 +1,7 @@
 import { DEFAULT_HOURS, EVENTS, TZ, type Booking, type Hours } from "@/lib/booking/booking-rules";
 import { gcal } from "@/lib/booking/gcal";
-import { bookingEnquiry, enquiryKey, summary } from "@/lib/inbox";
+import { bookingEnquiry, enquiryKey, looksLikeEmail, summary } from "@/lib/inbox";
+import { isPaid } from "@/lib/booking/paid";
 import { recordLead, type LeadStore } from "@/lib/leads/lead-store";
 import { toNotion } from "@/lib/leads/notion-lead";
 import { openNow, type KV } from "@/lib/booking/slots";
@@ -52,6 +53,42 @@ export type Store = {
   put(key: string, value: unknown): Promise<void>;
   list<T>(opts: { prefix: string }): Promise<Map<string, T>>;
 };
+
+// Stripe caps a metadata value at 500 characters.
+const cap = (s: unknown, n = 500) => (typeof s === "string" ? s.trim().slice(0, n) : "");
+
+/** The visitor's booking, checked, or the reason it is not one. `call`: a free call (`app/api/book`), not a paid session. */
+export type Parsed = { ok: true; booking: Booking } | { ok: false; reason: string };
+export function parseBooking(raw: unknown, call = false): Parsed {
+  const b = (raw ?? {}) as { [k: string]: unknown };
+  const slug = cap(b.slug);
+  if (call ? !EVENTS[slug]?.call : !isPaid(slug)) return { ok: false, reason: call ? "Not a call." : "Not a paid session." };
+  const start = cap(b.start);
+  const t = Date.parse(start);
+  if (!start || isNaN(t) || t < Date.now()) return { ok: false, reason: "Pick a time." };
+  const timeZone = cap(b.timeZone, 64);
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone });
+  } catch {
+    return { ok: false, reason: "Unknown time zone." };
+  }
+  const name = cap(b.name, 120);
+  const email = cap(b.email, 200);
+  if (!name) return { ok: false, reason: "Add your name." };
+  if (!looksLikeEmail(email)) return { ok: false, reason: "Check your email." };
+  const booking: Booking = {
+    slug,
+    start: new Date(t).toISOString(),
+    timeZone,
+    name,
+    email,
+    phone: cap(b.phone, 20) || undefined,
+    where: cap(b.where) || undefined,
+    notes: cap(b.notes) || undefined,
+    engine: "own",
+  };
+  return { ok: true, booking };
+}
 
 export type BookInput = Booking & { via?: string; intent?: string };
 export type BookResult = { ok: true; record: BookingRecord } | { ok: false; reason: "taken" | "unknown" };

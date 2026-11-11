@@ -1,9 +1,8 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { lockOp, recordBooking, type BookResult } from "@/lib/booking/booking-engine";
+import { lockOp, parseBooking, recordBooking, type BookResult } from "@/lib/booking/booking-engine";
 import { manageLinks } from "@/lib/booking/booking-token";
 import { sendConfirm } from "@/lib/booking/confirm";
 import { logMail } from "@/lib/leads/lead-store";
-import { parseBooking } from "@/lib/booking/deposit";
 import { json } from "@/lib/http";
 
 // Errors keep Cal.com's { status, error: { message } } envelope (as /api/slots does): the time picker reads either engine the same way.
@@ -26,8 +25,9 @@ export async function POST(request: Request) {
     return json({ status: "error", error: { message: "Too many tries. Wait a minute." } }, 429);
 
   const raw = (await request.json().catch(() => null)) as { via?: unknown } | null;
-  const b = parseBooking(raw, true);
-  if (typeof b === "string") return json({ status: "error", error: { message: b } }, 400);
+  const parsed = parseBooking(raw, true);
+  if (!parsed.ok) return json({ status: "error", error: { message: parsed.reason } }, 400);
+  const b = parsed.booking;
   const via = raw?.via === "Phone" || raw?.via === "Video" ? raw.via : undefined;
 
   let out: BookResult;

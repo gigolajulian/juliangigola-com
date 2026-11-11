@@ -92,7 +92,7 @@ export const REFUND_HOURS = 48;
 export const refundable = (r: { intent?: string; start: string; firstStart?: string }, now = Date.now()) =>
   !!r.intent && Math.min(Date.parse(r.start), Date.parse(r.firstStart ?? r.start)) - now >= REFUND_HOURS * 36e5;
 
-/** A visitor's booking, checked by `parseBooking` in `lib/booking/deposit.ts`. */
+/** A visitor's booking, checked by `parseBooking` in `lib/booking/booking-engine.ts`. */
 export type Booking = {
   slug: string;
   /** ISO 8601, UTC. */
