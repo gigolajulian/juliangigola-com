@@ -97,7 +97,7 @@ export function InvoicesAstryx({ leads, call, open, changed }: { leads: LeadSumm
             { key: "shoot", header: "Shoot", renderCell: (r) => kindOf(byId(r.lead)?.kind) ?? "" },
             { key: "date", header: "Date", renderCell: (r) => day(`${r.date}T12:00:00`) },
             { key: "total", header: "Total", renderCell: (r) => <Text type="code">{usd(subtotal(r.lines))}</Text> },
-            { key: "balance", header: "Balance", renderCell: (r) => <Text type="code">{usd(balance(r))}</Text> },
+            { key: "balance", header: "Balance", renderCell: (r) => <Text type="code">{usd(isPaid(r) ? 0 : balance(r))}</Text> },
             { key: "status", header: "Status", renderCell: (r) => <Badge label={status(r)} variant={status(r) === "Paid" ? "success" : status(r) === "Sent" ? "blue" : "neutral"} /> },
             {
               key: "do", header: "", renderCell: (r) => (
