@@ -190,7 +190,8 @@ html:has(.proof[data-wall]){scrollbar-width:none}
 html:has(.proof[data-wall])::-webkit-scrollbar{display:none}
 /* the page lets the wall show through while it is up; the gallery sits over it */
 .proof[data-wall]:not([data-wall="on"]){background:none}
-.proof[data-wall]>div:not(.pw-layer,.pw-splash){position:relative;z-index:1}
+/* The lightbox and the review sheet are children here too: relative put them under the grid (Jenin, Nov 11). */
+.proof[data-wall]>div:not(.pw-layer,.pw-splash,.proof-lb,.proof-over){position:relative;z-index:1}
 /* Until the page knows it has the wall (the flag is read in the browser), nothing of the plain gate shows: it flashed
    for a frame before the splash. `data-proofwall` is set before the first paint (layout.tsx). */
 :root[data-proofwall] .proof:not([data-wall]):has(.proof-gate){visibility:hidden}
