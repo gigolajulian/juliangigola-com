@@ -2,7 +2,7 @@
  * What /admin commits.
  *
  * The one check in here that runs the real function rather than a copy of it.
- * `lib/admin-payload.ts` is dependency-free precisely so this can import it
+ * `lib/admin/admin-payload.ts` is dependency-free precisely so this can import it
  * under Node's type stripping — the other scripts mirror the code they cover,
  * which is fine for a loop that counts frames and not fine for the function
  * that decides what gets written to the repository.
@@ -23,7 +23,7 @@ import {
   same,
   adoptable,
   withOverride,
-} from "../lib/admin-payload.ts";
+} from "../lib/admin/admin-payload.ts";
 
 const edit = {
   hidden: [],

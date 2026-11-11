@@ -7,9 +7,9 @@ import {
   type AddedProject,
   type TrashedProject,
 } from "@/lib/added";
-import { commitFiles, readFile } from "@/lib/admin-github";
+import { commitFiles, readFile } from "@/lib/admin/admin-github";
 import { AdminFrames, type PendingUpload } from "@/components/admin/admin-frames";
-import { srcOf } from "@/lib/admin-sequence";
+import { srcOf } from "@/lib/admin/admin-sequence";
 import { twinStats } from "@/lib/frame-twins";
 import { AdminCredits } from "@/components/admin/admin-credits";
 import { AdminBts } from "@/components/admin/admin-bts";

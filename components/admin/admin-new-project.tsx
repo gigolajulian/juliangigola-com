@@ -2,13 +2,13 @@
 
 import * as React from "react";
 import { ADDED_PATH, type AddedProject } from "@/lib/added";
-import { commitFiles, readFile } from "@/lib/admin-github";
+import { commitFiles, readFile } from "@/lib/admin/admin-github";
 import {
   COVER_WIDTH,
   MAX_WIDTH,
   processImage,
   toSlug,
-} from "@/lib/admin-image";
+} from "@/lib/admin/admin-image";
 import type { Credit, Frame } from "@/lib/work-types";
 import { AdminCredits, tidyCredits } from "@/components/admin/admin-credits";
 import { cn } from "@/lib/utils";

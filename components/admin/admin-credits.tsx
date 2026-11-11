@@ -3,7 +3,7 @@
 import * as React from "react";
 import type { Credit } from "@/lib/work-types";
 import { instagramHandle } from "@/lib/added";
-import { processImage } from "@/lib/admin-image";
+import { processImage } from "@/lib/admin/admin-image";
 import { cn } from "@/lib/utils";
 
 /* ── credits ──────────────────────────────────────────────────────

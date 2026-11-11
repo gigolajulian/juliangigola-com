@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { TOKEN_STORE } from "@/lib/admin-github";
+import { TOKEN_STORE } from "@/lib/admin/admin-github";
 
 /* ── traffic ──────────────────────────────────────────────────────
  * Who came to the site this week and from where, read from Cloudflare by

@@ -13,7 +13,7 @@ import {
   listDirectory,
   readFile,
   type CommitFile,
-} from "@/lib/admin-github";
+} from "@/lib/admin/admin-github";
 import { cn } from "@/lib/utils";
 
 /* ── recently deleted ─────────────────────────────────────────────

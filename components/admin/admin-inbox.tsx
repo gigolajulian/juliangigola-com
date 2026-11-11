@@ -4,7 +4,7 @@ import * as React from "react";
 import Image from "next/image";
 import { contextLines, replyLink, type Enquiry, type Summary } from "@/lib/inbox";
 import { cn } from "@/lib/utils";
-import { credentials, KEY_STORE, TOKEN_STORE } from "@/lib/admin-github";
+import { credentials, KEY_STORE, TOKEN_STORE } from "@/lib/admin/admin-github";
 
 /* ── the inbox ────────────────────────────────────────────────────
  * Enquiries from the contact form, which now has somewhere to put them.
