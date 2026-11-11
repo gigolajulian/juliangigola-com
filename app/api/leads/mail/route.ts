@@ -1,5 +1,5 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { logMail } from "@/lib/lead-store";
+import { logMail } from "@/lib/leads/lead-store";
 import { fromWorker } from "@/lib/vouch";
 import { json } from "@/lib/http";
 

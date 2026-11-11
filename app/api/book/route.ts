@@ -2,7 +2,7 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { lock, recordBooking, type BookResult } from "@/lib/booking/booking-engine";
 import { manageLinks } from "@/lib/booking/booking-token";
 import { sendConfirm } from "@/lib/booking/confirm";
-import { logMail } from "@/lib/lead-store";
+import { logMail } from "@/lib/leads/lead-store";
 import { parseBooking } from "@/lib/booking/deposit";
 import { json } from "@/lib/http";
 

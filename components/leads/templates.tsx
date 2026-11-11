@@ -2,8 +2,8 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { type Template } from "@/lib/lead-crm";
-import { type Call, errorText } from "@/lib/lead-desk";
+import { type Template } from "@/lib/leads/lead-crm";
+import { type Call, errorText } from "@/lib/leads/lead-desk";
 import { btn, field, fieldLabel, primary } from "@/components/leads/shared";
 
 /** His saved replies. {first}, {name}, {kind} and {when} are filled per lead. */

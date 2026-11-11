@@ -1,7 +1,7 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { isAdmin } from "@/lib/vouch";
-import { sealer } from "@/lib/lead-crypto";
-import { recordLead } from "@/lib/lead-store";
+import { sealer } from "@/lib/leads/lead-crypto";
+import { recordLead } from "@/lib/leads/lead-store";
 import { cardKey, closesAt, cleanSettings, DEFAULTS, frameKey, frameKeys, isFrameId, isToken, listProofs, newToken, readProof, writeProof, type Proof } from "@/lib/proofs";
 import { proofMail, proofUrl, sendClient } from "@/lib/email/proof-mail";
 import { settle } from "@/lib/proof-submit";

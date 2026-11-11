@@ -3,7 +3,7 @@ import { lock, clientView, type ChangeResult } from "@/lib/booking/booking-engin
 import { refundable } from "@/lib/booking/booking-rules";
 import { manageLinks, tokenOpens } from "@/lib/booking/booking-token";
 import { cancelledSubject, sendCancelled, sendConfirm } from "@/lib/booking/confirm";
-import { logMail } from "@/lib/lead-store";
+import { logMail } from "@/lib/leads/lead-store";
 import { dashboardLink } from "@/lib/booking/deposit";
 import { mail } from "@/lib/hello-mail";
 import { stripe } from "@/lib/stripe";

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { adoptable, projectsFile, same, tidySequence, withOverride, type Manifest } from "@/lib/admin-payload";
+import { adoptable, projectsFile, same, tidySequence, withOverride, type Manifest } from "@/lib/admin/admin-payload";
 
-/* What /admin commits as `content/projects.json` (`lib/admin-payload.ts`),
+/* What /admin commits as `content/projects.json` (`lib/admin/admin-payload.ts`),
    and how it reads the file back. */
 
 const empty = (): Manifest => ({

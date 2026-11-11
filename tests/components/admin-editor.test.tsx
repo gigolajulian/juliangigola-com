@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { AdminEditor } from "@/components/admin-editor";
+import { AdminEditor } from "@/components/admin/admin-editor";
 import { CONTENT } from "@/lib/content";
 
 const fetchMock = vi.fn(async () => new Response(JSON.stringify({ message: "Bad credentials" }), { status: 401 }));

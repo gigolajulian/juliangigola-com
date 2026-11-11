@@ -87,12 +87,12 @@ export const SCOPED = { "x-oauth-scopes": "repo" };
 /** A LEADS_KEY for tests: 32 bytes, base64. */
 export const LEADS_KEY = btoa("k".repeat(32));
 
-/** A person's lead as the desk would open it (sealed in KV, `lib/lead-crypto.ts`). */
+/** A person's lead as the desk would open it (sealed in KV, `lib/leads/lead-crypto.ts`). */
 export async function leadOf(kv: FakeKV, email: string) {
-  const { sealer } = await import("@/lib/lead-crypto");
+  const { sealer } = await import("@/lib/leads/lead-crypto");
   const s = await sealer(LEADS_KEY)!;
   const raw = await kv.get(`lead:${await s.id(email)}`);
-  return typeof raw === "string" ? s.open<import("@/lib/leads").Lead>(raw) : undefined;
+  return typeof raw === "string" ? s.open<import("@/lib/leads/leads").Lead>(raw) : undefined;
 }
 
 /** A Durable Object's storage, as `lib/booking/booking-engine.ts` uses it. */

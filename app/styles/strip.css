@@ -486,21 +486,19 @@ a.strip-cell {
   height: 100% !important;
   width: calc((100cqh - 1rem) / 2 * var(--ar, 0.8)) !important;
 }
-/* Julian: on an iPad, whole columns. `--rack-w` is only ever set there:
-   the width of a cover once the window is shared out
-   between a whole number of columns, and `--rack-pad` the room that
-   leaves above and below, so each row is exactly a cover tall. A title
-   column takes the same width, so the columns stay on one beat, and a
-   snap brings a swipe to rest on one. A gallery's frames keep their own
+/* A rack (`data-rack`, `cover-art-gallery.tsx`): no padding above and
+   below, cells at their own width, and a snap brings a swipe to rest on
+   a column. The iPad's fitted column width that used to be written here
+   is gone; `0` and `auto` are what the unset variables resolved to. A gallery's frames keep their own
    shape from the row height, as everywhere else.
 
-   Keyed off `data-rack`, never `[style*="--rack-w"]`: a style attribute
+   Keyed off `data-rack`, never a `[style*=]` match: a style attribute
    in front of a combinator made Chrome restyle the whole subtree of any
    element whose inline style changed, anywhere on any page: 22ms on
    /portfolio per write, and every slide, tilt and view transition writes
    one. */
 .strip-grid[data-rack] {
-  padding-block: var(--rack-pad);
+  padding-block: 0;
   scroll-snap-type: x proximity;
   scroll-padding-inline: 2.5rem;
 }
@@ -520,7 +518,7 @@ a.strip-cell {
 .strip-grid[data-rack] > a:not([style*="--ar"]),
 .strip-grid[data-rack]
   > :where(div, section, article):not([data-hash="where-next"]) {
-  width: var(--rack-w) !important;
+  width: auto !important;
 }
 /* On a phone the page is not locked and the strip is already a column, so
    the sheet is the same idea the other way up: two across, running down,

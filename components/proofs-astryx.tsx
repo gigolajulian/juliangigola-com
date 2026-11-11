@@ -27,12 +27,12 @@ import { Card } from "@astryxdesign/core/Card";
 import { Thumbnail } from "@astryxdesign/core/Thumbnail";
 import { MetadataList, MetadataListItem } from "@astryxdesign/core/MetadataList";
 import { ProgressBar } from "@astryxdesign/core/ProgressBar";
-import { KEY_STORE } from "@/lib/admin-github";
-import { SignIn } from "@/components/admin-leads";
-import { Activity, api, closed, status, type Row } from "@/components/admin-proofs";
+import { KEY_STORE } from "@/lib/admin/admin-github";
+import { SignIn } from "@/components/admin/admin-leads";
+import { Activity, api, closed, status, type Row } from "@/components/admin/admin-proofs";
 import { TZ } from "@/lib/booking/booking-rules";
-import { errorText } from "@/lib/lead-desk";
-import { TOKEN_STORE } from "@/lib/admin-github";
+import { errorText } from "@/lib/leads/lead-desk";
+import { TOKEN_STORE } from "@/lib/admin/admin-github";
 import { extras, stage, STAGES } from "@/lib/proofs";
 
 const CLASSIC = "/admin";

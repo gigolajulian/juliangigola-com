@@ -1,6 +1,6 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { sealer } from "@/lib/lead-crypto";
-import { recordLead } from "@/lib/lead-store";
+import { sealer } from "@/lib/leads/lead-crypto";
+import { recordLead } from "@/lib/leads/lead-store";
 import { checkout, checkPaid, finalize, PAYMENTS_DOWN } from "@/lib/proof-submit";
 import { cleanSelects, device, isEmail, isOpen, owed, isToken, publicView, readProof, track, viewerKey, writeProof, type Proof } from "@/lib/proofs";
 import { json } from "@/lib/http";

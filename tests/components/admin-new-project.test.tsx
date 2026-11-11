@@ -1,12 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 
-vi.mock("@/lib/admin-github", () => ({
+vi.mock("@/lib/admin/admin-github", () => ({
   commitFiles: vi.fn(async () => {}),
   readFile: vi.fn(async () => null),
 }));
 
-import { AdminNewProject } from "@/components/admin-new-project";
+import { AdminNewProject } from "@/components/admin/admin-new-project";
 
 const categories = [{ slug: "editorial", name: "Editorial" }];
 

@@ -1,9 +1,9 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanFrom, type Invoice } from "@/lib/invoice";
-import { fileName, invoicePdf, type InvoiceDoc } from "@/lib/invoice-pdf";
-import { COL, place } from "@/lib/invoice-photo";
+import { cleanFrom, type Invoice } from "@/lib/leads/invoice";
+import { fileName, invoicePdf, type InvoiceDoc } from "@/lib/leads/invoice-pdf";
+import { COL, place } from "@/lib/leads/invoice-photo";
 
 /* The invoice PDF's name and bytes, and design B's photo placement. The
    faces it fetches come from public/ through a stubbed fetch. */

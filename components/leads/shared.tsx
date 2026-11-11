@@ -1,8 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { at, day, type Filter } from "@/lib/lead-desk";
-import { STAGES, type LeadEvent, type Stage } from "@/lib/leads";
+import { at, day, type Filter } from "@/lib/leads/lead-desk";
+import { STAGES, type LeadEvent, type Stage } from "@/lib/leads/leads";
 import { cn } from "@/lib/utils";
 
 /** The site's headings are Black capitals; the desk's are the wordmark face at 600, as written. */

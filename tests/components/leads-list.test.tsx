@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { Card, clampW, ListResizer, Pill, Row, SideLink } from "@/components/leads/list";
-import type { LeadSummary } from "@/lib/leads";
+import type { LeadSummary } from "@/lib/leads/leads";
 
 const iso = new Date().toISOString();
 const lead = (o: Partial<LeadSummary> = {}): LeadSummary => ({ id: "a", email: "ana@x.com", name: "Ana", stage: "Inquiry", stageAt: iso, firstAt: iso, lastAt: iso, unread: true, snippet: "Can we shoot in May?", ...o });

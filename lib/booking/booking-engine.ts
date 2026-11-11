@@ -1,8 +1,8 @@
 import { DEFAULT_HOURS, EVENTS, TZ, type Booking, type Hours } from "@/lib/booking/booking-rules";
 import { gcal } from "@/lib/booking/gcal";
 import { bookingEnquiry, enquiryKey, summary } from "@/lib/inbox";
-import { recordLead, type LeadStore } from "@/lib/lead-store";
-import { toNotion } from "@/lib/notion-lead";
+import { recordLead, type LeadStore } from "@/lib/leads/lead-store";
+import { toNotion } from "@/lib/leads/notion-lead";
 import { openNow, type KV } from "@/lib/booking/slots";
 
 /* ── the site's own booking engine ────────────────────────────────

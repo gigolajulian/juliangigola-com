@@ -11,11 +11,8 @@ import { matches } from "@/lib/device";
  * gallery, moved with the pointer once a frame, so nothing in the
  * galleries themselves is touched.
  * ─────────────────────────────────────────────────────────────── */
-const GALLERIES = ".light-table, .portfolio-arrive .strip-scroll, .contact-sheet, .site-menu nav";
-const CELLS = ".light-cell, .strip-cell, .contact-sheet button, .site-menu a";
-/* The menu's names too, and on a phone under the finger as well as
-   under a mouse. */
-const MENU = ".site-menu nav";
+const GALLERIES = ".light-table, .portfolio-arrive .strip-scroll, .contact-sheet";
+const CELLS = ".light-cell, .strip-cell, .contact-sheet button";
 
 export function FocusField() {
   const ref = React.useRef<HTMLDivElement>(null);
@@ -30,8 +27,6 @@ export function FocusField() {
     const place = () => {
       frame = 0;
       if (!on) return void delete el.dataset.on;
-      // Over the drawer, which stands above everything else on the page.
-      el.style.zIndex = on.matches(MENU) ? "32" : "";
       const r = on.getBoundingClientRect();
       el.style.left = `${r.left}px`;
       el.style.top = `${r.top}px`;
@@ -60,8 +55,8 @@ export function FocusField() {
       x = e.clientX;
       y = e.clientY;
       const target = e.target as Element | null;
-      let g = target?.closest?.(GALLERIES) ?? null;
-      if (!mouse && !g?.matches(MENU)) g = null;
+      // A mouse only; a finger got it only in the old menu.
+      let g = mouse ? (target?.closest?.(GALLERIES) ?? null) : null;
       // Never over the inquiry form: picking a kind of shoot blurred the
       // screen round it.
       if (target?.closest("form, .contact-inquire")) g = null;
@@ -71,11 +66,7 @@ export function FocusField() {
       if (cell && g?.contains(cell)) {
         // Half that on the portfolio, whose frames run the strip's full
         // height and are wide enough to clear the whole screen.
-        // And in the menu, a name's height: the names are a line apart, so a
-        // clearing as wide as one would leave them all sharp.
-        const sharp = g.matches(MENU)
-          ? cell.offsetHeight * 0.7
-          : cell.offsetWidth * (g.matches(".portfolio-arrive .strip-scroll") ? 1.155 : 1.1);
+        const sharp = cell.offsetWidth * (g.matches(".portfolio-arrive .strip-scroll") ? 1.155 : 1.1);
         el.style.setProperty("--ff-sharp", `${Math.round(sharp)}px`);
       }
       on = g;

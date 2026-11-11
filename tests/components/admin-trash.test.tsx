@@ -1,13 +1,13 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 
-vi.mock("@/lib/admin-github", () => ({
+vi.mock("@/lib/admin/admin-github", () => ({
   commitFiles: vi.fn(async () => {}),
   listDirectory: vi.fn(async () => []),
   readFile: vi.fn(async () => null),
 }));
 
-import { AdminTrash } from "@/components/admin-trash";
+import { AdminTrash } from "@/components/admin/admin-trash";
 import type { TrashedProject } from "@/lib/added";
 
 const frame = { src: "/work/x/01.jpg", width: 10, height: 10, color: "#000", alt: "" };

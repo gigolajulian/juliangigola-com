@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { AdminPage } from "@/components/admin-page";
-import type { AdminProject } from "@/components/admin-projects";
+import { AdminPage } from "@/components/admin/admin-page";
+import type { AdminProject } from "@/components/admin/admin-projects";
 
 const frame = { src: "/work/x/01.jpg", width: 100, height: 150, color: "#111" };
 const project: AdminProject = {

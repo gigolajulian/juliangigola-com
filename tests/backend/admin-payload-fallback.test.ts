@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { adoptable, type ProjectsFile } from "@/lib/admin-payload";
+import { adoptable, type ProjectsFile } from "@/lib/admin/admin-payload";
 
 /* `adoptable` keeps the last good value for a field that is present but the
    wrong shape (a hand-edited file); frames and credits used to blank instead. */

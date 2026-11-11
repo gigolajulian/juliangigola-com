@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { sealer } from "@/lib/lead-crypto";
+import { sealer } from "@/lib/leads/lead-crypto";
 import { checkPaid, finalize, PAYMENTS_DOWN, settle } from "@/lib/proof-submit";
 import { coverFrame, isOpen, isToken, publicView, readProof, writeProof } from "@/lib/proofs";
 import { ProofGallery } from "@/components/proof-gallery";

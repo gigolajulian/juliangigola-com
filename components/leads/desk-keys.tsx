@@ -1,11 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { type LeadSummary } from "@/lib/leads";
+import { type LeadSummary } from "@/lib/leads/leads";
 import { cn } from "@/lib/utils";
-import { LEAD_KEYS, leadKey, typingIn } from "@/lib/lead-keys";
+import { LEAD_KEYS, leadKey, typingIn } from "@/lib/leads/lead-keys";
 import { kindOf } from "@/components/leads/shared";
-import { type Filter, matches } from "@/lib/lead-desk";
+import { type Filter, matches } from "@/lib/leads/lead-desk";
 
 /**
  * Julian (2026-11-08): keyboard shortcuts. List keys live here, on capture so

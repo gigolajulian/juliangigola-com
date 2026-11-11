@@ -1,12 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 
-vi.mock("@/lib/admin-github", () => ({
+vi.mock("@/lib/admin/admin-github", () => ({
   commitFiles: vi.fn(async () => {}),
   readFile: vi.fn(async () => null),
 }));
 
-import { AdminProjects, type AdminProject } from "@/components/admin-projects";
+import { AdminProjects, type AdminProject } from "@/components/admin/admin-projects";
 
 const frame = { src: "/work/x/01.jpg", width: 100, height: 150, color: "#111" };
 const project = (slug: string, name: string): AdminProject => ({

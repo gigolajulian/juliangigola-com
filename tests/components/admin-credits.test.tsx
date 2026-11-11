@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { AdminCredits, creditBook, tidyCredits } from "@/components/admin-credits";
+import { AdminCredits, creditBook, tidyCredits } from "@/components/admin/admin-credits";
 
 describe("AdminCredits", () => {
   it("shows the empty note and adds a row", () => {

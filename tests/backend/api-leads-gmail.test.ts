@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { POST } from "@/app/api/leads/gmail/route";
 import { forgetToken } from "@/lib/booking/gcal";
-import { CURSOR } from "@/lib/gmail-sync";
+import { CURSOR } from "@/lib/leads/gmail-sync";
 import { FakeKV, LEADS_KEY } from "./fakes";
 
 /* /api/leads/gmail: the booking Worker's cron, BOOKING_SECRET as bearer.

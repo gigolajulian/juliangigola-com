@@ -1,9 +1,9 @@
-/* Renders the Leads app's startup screens (lib/leads-startup.ts) into
+/* Renders the Leads app's startup screens (lib/leads/leads-startup.ts) into
  * public/leads-app/startup: black, the B1 icon centered, Inter Tight loaded
  * for its LEADS. Run: node scripts/leads-startup.mjs */
 import { chromium } from "playwright";
 import { readFileSync } from "node:fs";
-import { STARTUP_SCREENS } from "../lib/leads-startup.ts";
+import { STARTUP_SCREENS } from "../lib/leads/leads-startup.ts";
 
 const svg = readFileSync("public/leads-app/icon-b1.svg", "utf8").replace("<svg ", '<svg width="100%" height="100%" ');
 const font = readFileSync("app/fonts/InterTight-Variable.woff2").toString("base64");
