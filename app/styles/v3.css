@@ -417,7 +417,7 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .strip.more .swipe{visibility:visible}
 .v3 .fld{display:flex;flex-direction:column;gap:6px}
 .v3 .fld label{display:flex;justify-content:space-between}
-.v3 .fld input,.v3 .fld textarea{background:transparent;border:0;border-bottom:1px solid color-mix(in srgb,var(--ink) 22%,transparent);color:var(--ink);font:inherit;padding:10px 0;border-radius:0;resize:none;color-scheme:inherit}
+.v3 .fld input,.v3 .fld textarea{background:transparent;border:0;border-bottom:1px solid color-mix(in srgb,var(--ink) 48%,transparent);color:var(--ink);font:inherit;padding:10px 0;border-radius:0;resize:none;color-scheme:inherit}
 .v3 .fld input:focus,.v3 .fld textarea:focus{outline:0;border-bottom-color:var(--accent)}
 .v3 .fld.bad :is(input,textarea){border-bottom-color:var(--err)}
 /* Julian (2026-11-06): errors in the field, no box. Empty, the error is the placeholder in red; with text, it sits at the right of the label. */
