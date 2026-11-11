@@ -623,6 +623,7 @@ function Gate({ frames, count, onEnter }: { frames: string[]; count: number; onE
           <img key={i} src={u} alt="" />
         ))}
       </div>
+      {/* No `name` on the fields: a tap before the script runs submits natively, and would put the client's name and email in the URL. */}
       <form
         className="proof-card"
         onSubmit={(e) => {
@@ -639,11 +640,11 @@ function Gate({ frames, count, onEnter }: { frames: string[]; count: number; onE
         </div>
         <label>
           <span className="proof-lab">Your name</span>
-          <input name="name" autoComplete="name" required value={name} onChange={(e) => { setName(e.target.value); setBad(null); }} placeholder="Your name" aria-invalid={bad === "Add your name." || undefined} />
+          <input autoComplete="name" required value={name} onChange={(e) => { setName(e.target.value); setBad(null); }} placeholder="Your name" aria-invalid={bad === "Add your name." || undefined} />
         </label>
         <label>
           <span className="proof-lab">Your email</span>
-          <input type="email" name="email" inputMode="email" autoComplete="email" required value={value} onChange={(e) => { setValue(e.target.value); setBad(null); }} placeholder="you@email.com" aria-invalid={(!!bad && bad !== "Add your name.") || undefined} />
+          <input type="email" inputMode="email" autoComplete="email" required value={value} onChange={(e) => { setValue(e.target.value); setBad(null); }} placeholder="you@email.com" aria-invalid={(!!bad && bad !== "Add your name.") || undefined} />
         </label>
         {bad ? <p className="proof-err" role="alert">{bad}</p> : null}
         <button type="submit" className="proof-btn" data-off={!name.trim() || !isEmail(value) || undefined}>Open gallery</button>
