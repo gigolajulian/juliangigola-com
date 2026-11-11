@@ -4,17 +4,16 @@ import * as React from "react";
 import { flushSync } from "react-dom";
 
 /* ── how the work is being looked at ──────────────────────────────
- * Two settings shared by two components that cannot see each other: the
- * view lives on the layout's head (`work-shell.tsx`) and is read by the
- * page under it (`work-strip.tsx`), which is upwards through the tree and
- * so not something context can carry.
+ * Two settings shared by components that cannot see each other through
+ * the tree (`strip/arrival.ts`, `lead-window.tsx`), so not something
+ * context can carry.
  *
  * A module with subscribers, read through `useSyncExternalStore`, which is
  * the hook for exactly this: the server has no `localStorage` and has to
  * draw the strip, the browser knows better a moment later, and
  * `getServerSnapshot` is what keeps the first render matching the HTML.
- * This was already the shape of the view in `work-shell.tsx`; the search
- * moved in beside it rather than inventing a second mechanism.
+ * The search sits beside the view rather than inventing a second
+ * mechanism.
  *
  * The view is remembered, the search is not: the way somebody wants to
  * look at a body of work is a preference, and what they were looking for
@@ -73,7 +72,7 @@ export const chooseView = (next: WorkView) => {
 /* Julian: changing view needs something dope. Every cover in the window
    flies from where it stands in one view to where it stands in the next,
    one a beat after the last, left to right: a View Transition with a name
-   on each cover (`data-vt`, on `cover-cell.tsx` and the list's picture).
+   on each cover (`data-vt`, on `cover-art-gallery.tsx`).
    Only the covers in sight are named, since every name is a snapshot, and
    a cover that leaves the window keeps its name so it flies out rather
    than vanishing. Not for anybody who asked for less motion. */

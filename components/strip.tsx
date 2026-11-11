@@ -27,7 +27,7 @@ export { useTablet, useWide, useWideNow } from "@/components/strip/media";
  * sideways under friction, a mouse can drag it, the ends give like a
  * rubber band, a wheel that keeps pushing past the end leads on to the
  * next page, and the pictures lean with the speed. It began as the
- * project page's filmstrip (`project-strip.tsx`) and was lifted out
+ * project page's filmstrip and was lifted out
  * unchanged when Julian asked for the horizontal look across the whole
  * site: one machine, many sequences, so they all move the same.
  *
@@ -74,9 +74,8 @@ export { useTablet, useWide, useWideNow } from "@/components/strip/media";
  * "show me everything". /work is 34,512px of ribbon - twenty-four screens
  * at 1440 - and until now there was no way to see it at once.
  *
- * Context rather than a prop, because the control is in the layout
- * (`work-shell.tsx`, which survives a filter change) and the strip is in
- * the page under it. A strip nobody wraps reads the default and is exactly
+ * Context rather than a prop, so a control above the page can set it.
+ * A strip nobody wraps reads the default and is exactly
  * what it was.
  */
 export type StripViewMode = "strip" | "grid";

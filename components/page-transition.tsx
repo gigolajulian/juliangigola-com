@@ -3,7 +3,6 @@
 import * as React from "react";
 import { ViewTransition } from "react";
 import { usePathname } from "next/navigation";
-import { filterPaths } from "@/lib/utils";
 
 const noop = () => () => {};
 
@@ -146,15 +145,6 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
       if (a.pathname === location.pathname) return;
       // The page leaving, before it is snapshotted.
       gauge();
-      /* A chip on the work index is a filter, not a page: /work, a
-         category and the motion page are one page with one row swapped,
-         and the strip already fades the row (`data-arrive="fade"`). The
-         zoom on top of it read as the whole site reloading. */
-      const index = filterPaths();
-      if (index.has(a.pathname) && index.has(location.pathname)) {
-        set("filter");
-        return;
-      }
       /* A crumb ("← All work") and any link marked so are the way out; the
          wordmark too, since home is where every trip started. */
       const out =

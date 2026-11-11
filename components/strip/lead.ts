@@ -1,7 +1,6 @@
 import { openFrom } from "@/components/lead-window";
-import { filterPaths } from "@/lib/utils";
 import type { Mover } from "./motion";
-import { DEAL_MS, markFilter, nav } from "./shared";
+import { DEAL_MS, nav } from "./shared";
 
 /** Preview (`?cards`): the next discipline's card comes over this one
     under the hand, as the chapters do on All, rather than on its own in 640ms.
@@ -118,21 +117,6 @@ export function leadOn(
     }, DEAL_MS);
     if ("cards" in root.dataset)
       scrubDeal(dir, m.touchX !== null && m.touchOn ? { x: m.touchX, on: m.touchOn } : null);
-    m.go(href);
-    return;
-  }
-  /* Places to Motion was a page leaving and a page arriving: the strip
-     slid off, and for the 260ms it took the screen was bare paper -
-     measured on production, mean brightness at 235.8 with nothing on
-     it from 457ms to 718ms. Between two filters the head and the chip
-     row do not change, so there is nothing to leave: the row is
-     swapped where it stands, the way a chip press does it, and the
-     push goes out at once. */
-  const index = filterPaths();
-  if (index.has(window.location.pathname) && index.has(href)) {
-    markFilter(dir);
-    nav.cameBack = dir < 0 && !m.prevStart;
-    nav.arriveDir = dir;
     m.go(href);
     return;
   }
