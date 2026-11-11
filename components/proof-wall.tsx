@@ -83,21 +83,20 @@ export function ProofWall({
   const [bad, setBad] = React.useState<string | null>(null);
   // Julian (2026-11-10): the load-up should feel premium. The wall streams in sharp, every other column from above and below, then racks
   // focus to blur as the card rises in, its lines one after another (`[data-ready]`, proof.css).
-  const [ready, setReady] = React.useState(false);
+  const [wallReady, setReady] = React.useState(false);
   const [flat, setFlat] = React.useState(false);
   const [leaving, setLeaving] = React.useState(false);
   const shown = React.useCallback(() => {
     window.setTimeout(() => setReady(true), reducedMotion() ? 0 : READY_AFTER_MS);
   }, []);
+  // Julian (2026-11-11, "show grid but as a static wall for reduced motion"): with reduced motion there is no drifting
+  // wall; the gallery's own grid stands still and soft behind the card (`data-still`, proof.css) and comes sharp in place.
+  const [still] = React.useState(reducedMotion);
   // A slow phone still gets the card soon: the wall comes in behind it.
   React.useEffect(() => {
     const t = window.setTimeout(() => setReady(true), READY_CAP_MS);
     return () => clearTimeout(t);
   }, []);
-  // The cursor waits in the name field on a desktop; a phone's keyboard stays down until a tap.
-  React.useEffect(() => {
-    if (ready && matchMedia("(pointer: fine)").matches) nameField.current?.focus({ preventScroll: true });
-  }, [ready]);
 
   // The wall on the grid's columns (the grid is laid out, hidden, under the gate).
   const shape = React.useSyncExternalStore(onResize, () => gridShape(grid.current), () => "");
@@ -157,6 +156,17 @@ export function ProofWall({
       clearTimeout(lift);
     };
   }, [wall]);
+
+  // Reduced motion: the grid shows, still and soft, once its photographs are in, with the card over it.
+  React.useEffect(() => {
+    if (!still || !loaded) return;
+    layer.current?.closest<HTMLElement>(".proof")?.setAttribute("data-still", "");
+  }, [still, loaded]);
+  const ready = wallReady || (still && loaded);
+  // The cursor waits in the name field on a desktop; a phone's keyboard stays down until a tap.
+  React.useEffect(() => {
+    if (ready && matchMedia("(pointer: fine)").matches) nameField.current?.focus({ preventScroll: true });
+  }, [ready]);
 
   // The page holds still under the wall.
   React.useEffect(() => {
@@ -345,7 +355,7 @@ export function ProofWall({
         </div>
       </div>
       <div ref={layer} className="pw-layer" data-ready={ready || undefined} data-flat={flat || undefined} data-leave={leaving || undefined}>
-        {wall && loaded ? (
+        {wall && loaded && !still ? (
           <DriftWall
             items={wall.items}
             columns={wall.cols}
