@@ -36,12 +36,13 @@ import type { Template } from "@/lib/leads/lead-crm";
 import { TZ } from "@/lib/booking/booking-rules";
 import { KEY_STORE, TOKEN_STORE } from "@/lib/admin/admin-github";
 import { leadSummary, shootTag, STAGES, type Lead, type LeadPatch, type LeadSummary, type Stage as StageName } from "@/lib/leads/leads";
-import { useRouter } from "next/navigation";
 import { TodayAstryx } from "@/components/leads/today-astryx";
+import { NewLeadAstryx } from "@/components/leads/new-lead-astryx";
+import { BoardAstryx } from "@/components/leads/board-astryx";
 
 type Size = "phone" | "mid" | "wide";
 /** The pages the Astryx desk draws itself; the rest still open the classic desk. */
-type View = "today" | "leads";
+type View = "today" | "leads" | "new";
 type Group = "now" | "week" | "waiting";
 
 /* The site's tokens (app/styles/tokens.css): warm near-black, one teal accent; the site's own Inter Tight and Plex Mono. */
@@ -66,6 +67,7 @@ const ROAD: readonly StageName[] = STAGES.filter((s) => s !== "Lost");
 /** A day from the moment of the swipe or press. */
 const dayOn = () => new Date(Date.now() + 864e5).toISOString();
 const CLASSIC = "/admin/leads";
+const BOARD_STORE = "jg-leads-board";
 const WEEK = 7 * 864e5;
 const fmt = (o: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, ...o });
 const date = (iso: string) => fmt({ weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(iso));
@@ -111,6 +113,7 @@ function Nav({ needs, view, go }: { needs: number; view: View; go: (v: View) => 
   return (
     <SideNav header={<SideNavHeading heading="Desk" subheading="juliangigola.com" />}>
       <SideNavSection title="Desk" isHeaderHidden>
+        <SideNavItem label="New lead" icon={PlusGlyph} isSelected={view === "new"} onClick={() => go("new")} />
         <SideNavItem label="Today" icon={HomeGlyph} isSelected={view === "today"} onClick={() => go("today")} />
         <SideNavItem label="Leads" icon={InboxGlyph} isSelected={view === "leads"} onClick={() => go("leads")} endContent={<Text type="code" size="xsm">{needs}</Text>} />
         <SideNavItem label="Calendar" icon={CalendarGlyph} href={`${CLASSIC}?calendar`} />
@@ -153,11 +156,14 @@ export function LeadsAstryx() {
   const [open, setOpen] = React.useState<string | null>(null);
   // Today first, as on the classic desk.
   const [screen, setScreen] = React.useState<View>("today");
+  const [fresh, setFresh] = React.useState<Lead | null>(null);
+  // List or Board, kept on this device under the classic desk's key. The desk draws nothing until mounted (see `mode`), so no hydration gap.
+  const [board, setBoardState] = React.useState(() => typeof window !== "undefined" && (() => { try { return localStorage.getItem(BOARD_STORE) === "1"; } catch { return false; } })());
+  const setBoard = (on: boolean) => { setBoardState(on); try { localStorage.setItem(BOARD_STORE, on ? "1" : "0"); } catch {} };
   const show = (v: View) => { setScreen(v); setOpen(null); };
   const [templates, setTemplates] = React.useState<Template[]>([]);
   // When the list was loaded: groups by date without reading the clock during render.
   const [at, setAt] = React.useState(0);
-  const router = useRouter();
   const isPhone = useMediaQuery("(max-width: 760px)");
   const isMid = useMediaQuery("(max-width: 1200px)");
   const size: Size = isPhone ? "phone" : isMid ? "mid" : "wide";
@@ -217,15 +223,16 @@ export function LeadsAstryx() {
       .then((o) => changed(o.lead))
       .catch((e: unknown) => { alert(e instanceof Error ? e.message : String(e)); load(); });
   const tomorrow = (l: LeadSummary) => act(l, { snoozeUntil: dayOn() });
+  // The board is for a laptop: a phone keeps the list.
+  const boarding = board && size !== "phone";
   const eyebrow = `${at ? stamp(at) : ""} · ${needs} NEED YOU`;
 
   const newLead = size === "phone"
-    ? <IconButton label="New lead" variant="secondary" href={CLASSIC} icon={<Icon icon={PlusGlyph} />} />
-    : <Button label="New lead" variant="secondary" size="sm" href={CLASSIC} icon={<Icon icon={PlusGlyph} />} />;
+    ? <IconButton label="New lead" variant="secondary" onClick={() => show("new")} icon={<Icon icon={PlusGlyph} />} />
+    : <Button label="New lead" variant="secondary" size="sm" onClick={() => show("new")} icon={<Icon icon={PlusGlyph} />} />;
   const search = <TextInput value={query} onChange={setQuery} label="Find a lead" isLabelHidden placeholder="Name, email, shoot" size="sm" />;
-  // Board lives on the classic desk for now.
   const view = (
-    <SegmentedControl label="View" value="list" onChange={(v) => v === "board" && router.push(CLASSIC)} size="sm">
+    <SegmentedControl label="View" value={board ? "board" : "list"} onChange={(v) => setBoard(v === "board")} size="sm">
       <SegmentedControlItem value="list" label="List" />
       <SegmentedControlItem value="board" label="Board" />
     </SegmentedControl>
@@ -263,7 +270,9 @@ export function LeadsAstryx() {
           <VStack gap={6}>
             {error ? <Text color="secondary">{error}</Text> : null}
             {!leads && !error ? <Eyebrow>LOADING LEADS</Eyebrow> : null}
-            {GROUPS.map(([g, name]) => {
+            {boarding ? (
+              <BoardAstryx leads={live.filter((l) => !l.archivedAt && l.stage !== "Lost" && matches(l, words))} onMove={(l, stage) => act(l, { stage })} open={(l) => setOpen(l.id ?? null)} />
+            ) : GROUPS.map(([g, name]) => {
               const these = rows.filter(([, gg]) => gg === g).map(([l]) => l).sort((a, b) => (g === "week" ? a.when!.localeCompare(b.when!) : b.lastAt.localeCompare(a.lastAt)));
               if (!these.length) return null;
               return (
@@ -296,11 +305,11 @@ export function LeadsAstryx() {
                 </VStack>
               );
             })}
-            {leads && !rows.length ? <Text type="supporting">Nothing here.</Text> : null}
+            {leads && !rows.length && !boarding ? <Text type="supporting">Nothing here.</Text> : null}
           </VStack>
         </LayoutContent>
       }
-      end={size !== "wide" || !sel ? undefined : (
+      end={size !== "wide" || !sel || boarding ? undefined : (
         <LayoutPanel width={400} hasDivider label="Open lead">
           <VStack gap={5}>
             <VStack gap={1}>
@@ -334,10 +343,17 @@ export function LeadsAstryx() {
 
   // The lead page: its own Astryx layout (components/leads/lead-astryx.tsx).
   const lead = current ? (
-    <LeadAstryx key={current.id} summary={current} call={call} onChange={changed} onBack={() => setOpen(null)} reload={load} templates={templates} others={live.filter((o) => o.id !== current.id)} size={size} />
+    <LeadAstryx key={current.id} summary={current} initial={fresh?.email === current.email ? fresh : null} call={call} onChange={changed} onBack={() => setOpen(null)} reload={load} templates={templates} others={live.filter((o) => o.id !== current.id)} size={size} />
   ) : null;
 
-  const page = lead ?? (screen === "today" && leads ? <TodayAstryx leads={live} size={size} open={(l) => setOpen(l.id ?? null)} show={() => show("leads")} /> : home);
+  // The lead from the POST itself: KV lists lag a fresh write, so it goes in by hand and opens whole.
+  const added = (id: string, l: Lead) => {
+    setFresh(l);
+    setLeads((rs) => [{ ...leadSummary(l), id }, ...(rs ?? []).filter((r) => r.id !== id)]);
+    setScreen("leads");
+    setOpen(id);
+  };
+  const page = lead ?? (screen === "new" ? <NewLeadAstryx call={call} leads={live} size={size} done={added} open={(l) => setOpen(l.id ?? null)} cancel={() => show("leads")} /> : screen === "today" && leads ? <TodayAstryx leads={live} size={size} open={(l) => setOpen(l.id ?? null)} show={() => show("leads")} /> : home);
   if (!mode) return null;
   return (
     <Theme theme={leadsTheme} mode={mode}>
@@ -347,7 +363,7 @@ export function LeadsAstryx() {
       <div data-astryx-desk="" style={{ height: "100dvh", textTransform: "none", letterSpacing: "normal" }}>
         {size === "phone"
           ? <Layout height="fill" content={page} footer={<TabBar view={screen} go={show} />} />
-          : <Layout height="fill" start={<Nav needs={needs} view={screen} go={show} />} content={page} />}
+          : <Layout height="fill" start={<LayoutPanel width={240} padding={0} label="Desk"><Nav needs={needs} view={screen} go={show} /></LayoutPanel>} content={page} />}
       </div>
     </Theme>
   );

@@ -4,7 +4,7 @@ import * as React from "react";
 import { flushSync } from "react-dom";
 import DriftWall from "@/components/drift-wall";
 
-/* ── the proof gate over the 404's wall, behind ?proofwall=1 ──────────
+/* ── the proof gate over the 404's wall (the default; ?proofwall=0 for the plain gate) ──
  * Julian (2026-11-10): the 404's wall (`DriftWall`) under a glass card,
  * carrying this gallery's own watermarked frames, and the move from
  * sign-in to gallery seamless. Then: the photos must not travel left or
