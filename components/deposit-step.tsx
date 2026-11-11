@@ -5,7 +5,7 @@ import { gsap } from "gsap";
 import { cn } from "@/lib/utils";
 
 /* Goo: the cursor pours into the buttons (`time-picker.tsx`); `?goo=0` off. */
-const goo = typeof location === "undefined" || new URLSearchParams(location.search).get("goo") !== "0";
+export const goo = () => typeof location === "undefined" || new URLSearchParams(location.search).get("goo") !== "0";
 
 /* ── the deposit ─────────────────────────────────────────────────────
  * Julian (2026-10-16), behind `?deposit`: a paid session's $100 deposit
@@ -196,6 +196,9 @@ export function DepositStep({
   /* Development only, to see the ends without a charge: `?sim=no` (a
      decline), `ok`, `taken`, `refunded`, `failed`, `slow`, `broken`. */
   const sim = process.env.NODE_ENV === "production" ? null : typeof location === "undefined" ? null : new URLSearchParams(location.search).get("sim");
+  /** One source for every pay button: when it takes a tap, and what it says while busy (null: its own idle words). */
+  const canPay = stage === "ready" || (!!sim && stage === "loading");
+  const payLabel = stage === "paying" ? "Paying" : stage === "confirming" ? "Confirming" : error ? "Try again · $100" : null;
 
   /* The intent, made on Pay (409: the time has gone). */
   const make = async (): Promise<{ clientSecret: string; intentId: string } | null> => {
@@ -394,8 +397,8 @@ export function DepositStep({
       bar: (
         <>
           <button type="button" className="btn" onClick={onBack}>Back</button>
-          <button type="button" className="btn fill" onClick={pay} disabled={stage !== "ready" && !(sim && stage === "loading")}>
-            {stage === "paying" ? "Paying" : stage === "confirming" ? "Confirming" : error ? "Try again · $100" : "Pay $100 deposit"}
+          <button type="button" className="btn fill" onClick={pay} disabled={!canPay}>
+            {payLabel ?? "Pay $100 deposit"}
           </button>
         </>
       ),
@@ -431,7 +434,7 @@ export function DepositStep({
             </div>
             <div className="ed-floor">
               {stage === "declined" || stage === "broken" ? <button type="button" onClick={onBack} className="label ed-quiet">Edit details</button> : <span />}
-              {end[3] ? <button type="button" onClick={end[3][1]} data-stick={goo ? "fill" : undefined} className="ed-btn">{end[3][0]}</button> : null}
+              {end[3] ? <button type="button" onClick={end[3][1]} data-stick={goo() ? "fill" : undefined} className="ed-btn">{end[3][0]}</button> : null}
             </div>
           </>
         ) : (
@@ -460,8 +463,8 @@ export function DepositStep({
                 <svg aria-hidden viewBox="0 0 12 14" className="w-3 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.3"><rect x="1" y="6" width="10" height="7" rx="1" /><path d="M3.5 6V4a2.5 2.5 0 0 1 5 0v2" /></svg>
                 Secured by Stripe. I never see your card.
               </span>
-              <button ref={payBtn} type="button" onClick={pay} disabled={bad || (stage !== "ready" && !(sim && stage === "loading"))} data-accent="" data-bad={bad ? "" : undefined} data-stick={goo ? "fill" : undefined} className="ed-btn">
-                {bad ? "Declined" : stage === "paying" ? "Paying" : stage === "confirming" ? "Confirming" : error ? "Try again · $100" : "Pay $100"}
+              <button ref={payBtn} type="button" onClick={pay} disabled={bad || !canPay} data-accent="" data-bad={bad ? "" : undefined} data-stick={goo() ? "fill" : undefined} className="ed-btn">
+                {bad ? "Declined" : payLabel ?? "Pay $100"}
               </button>
             </div>
           </>
@@ -516,8 +519,8 @@ export function DepositStep({
               <svg aria-hidden viewBox="0 0 12 14" className="w-3 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.3"><rect x="1" y="6" width="10" height="7" rx="1" /><path d="M3.5 6V4a2.5 2.5 0 0 1 5 0v2" /></svg>
               Secured by Stripe. I never see your card.
             </span>
-            <button type="button" onClick={pay} data-stick="fill" disabled={stage !== "ready"} className="label shrink-0 rounded-[2px] border border-accent bg-accent px-6 py-4 text-accent-foreground transition-[opacity,scale] duration-300 hoverable:hover:opacity-85 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50">
-              {stage === "paying" ? "Paying" : stage === "confirming" ? "Confirming" : error ? "Try again · $100" : "Pay $100 deposit"}
+            <button type="button" onClick={pay} data-stick="fill" disabled={!canPay} className="label shrink-0 rounded-[2px] border border-accent bg-accent px-6 py-4 text-accent-foreground transition-[opacity,scale] duration-300 hoverable:hover:opacity-85 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50">
+              {payLabel ?? "Pay $100 deposit"}
             </button>
           </div>
         </>
