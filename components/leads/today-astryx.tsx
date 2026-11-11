@@ -16,12 +16,41 @@ import { Heading, Text } from "@astryxdesign/core/Text";
 import { List, ListItem } from "@astryxdesign/core/List";
 import { Badge } from "@astryxdesign/core/Badge";
 import { StatusDot } from "@astryxdesign/core/StatusDot";
-import { isLate, shootTag, type LeadSummary } from "@/lib/leads/leads";
-import { adminCall, authed, ago, at, cash, inboxCall, needsMe, nextStep, now, pass, plusDays, ymdPT } from "@/lib/leads/lead-desk";
+import { isLate, paperDue, shootTag, type LeadSummary } from "@/lib/leads/leads";
+import { adminCall, authed, ago, aside, at, cash, closed, inboxCall, needsMe, nextStep, now, pass, plusDays, renew, ymdPT } from "@/lib/leads/lead-desk";
 import { balance, dayB, dueOf, overdue, usd } from "@/lib/leads/invoice";
 import type { InvoiceRow } from "@/components/leads/invoices-astryx";
 import { TZ } from "@/lib/booking/booking-rules";
-import { callOrShoot, daysOf, source, type Spark } from "@/components/leads/today";
+
+/* Today's helpers, from the retired classic desk (`components/leads/today.tsx`). */
+const clock = (ms: number) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit" }).format(ms);
+/** Where a move comes from, as the mock tags it. */
+export const source = (l: LeadSummary) => (renew(l) ? "Licence" : paperDue(l, now()) ? "Paperwork" : l.stage === "Invoiced" || l.stage === "Selecting" ? "Proofs" : "Leads");
+export const callOrShoot = (l: LeadSummary) => (l.stage === "Call booked" ? "Call" : shootTag(l.kind) ?? "Shoot");
+
+export type DayEv = { small: string; text: string; who?: string; due?: boolean; l: LeadSummary };
+
+/** Each Pacific day from `from` for `n` days, with what is on it. Moves with no date land today. */
+export function daysOf(leads: LeadSummary[], from: string, n: number) {
+  const today = ymdPT(now());
+  const map = new Map<string, DayEv[]>();
+  const put = (d: string, e: DayEv) => map.set(d, [...(map.get(d) ?? []), e]);
+  for (const l of leads) {
+    if (aside(l)) continue;
+    const who = l.name || l.email;
+    if (l.when && !closed(l.stage)) {
+      const ms = Date.parse(l.when);
+      put(ymdPT(ms), { small: `${clock(ms)} ${callOrShoot(l)}`, text: who, l });
+    }
+    const step = needsMe(l) ? nextStep(l) : null;
+    if (step) put(today, { small: "Due", text: step, who, due: true, l });
+    else if (l.due && Date.parse(l.due) > now()) put(ymdPT(Date.parse(l.due)), { small: "Reminder", text: l.dueText || "Your reminder", who, l });
+  }
+  return Array.from({ length: n }, (_, i) => plusDays(from, i)).map((d) => ({ d, today: d === today, evs: map.get(d) ?? [] }));
+}
+
+export type Spark = { visits: number; days: { key: string; n: number }[] };
+
 
 type Size = "phone" | "mid" | "wide";
 

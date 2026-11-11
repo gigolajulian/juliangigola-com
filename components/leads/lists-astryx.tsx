@@ -15,7 +15,7 @@ import { Badge } from "@astryxdesign/core/Badge";
 import { Banner } from "@astryxdesign/core/Banner";
 import { Table } from "@astryxdesign/core/Table";
 import { Tab, TabList } from "@astryxdesign/core/TabList";
-import { endDay } from "@/components/leads/lead-licence";
+import { endDay } from "@/lib/leads/lead-desk";
 import { renewDue, type LeadSummary } from "@/lib/leads/leads";
 import { type Call, day, errorText, pass, type Filter } from "@/lib/leads/lead-desk";
 
