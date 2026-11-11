@@ -12,7 +12,8 @@
 //
 // The same for the booking engine (`lib/booking/gcal.ts`): hello@'s calendar,
 // events and free/busy, plus Gmail read-only for the lead desk's timeline
-// (`lib/leads/gmail-sync.ts`), into `GCAL_OAUTH`. The client must be an
+// (`lib/leads/gmail-sync.ts`), plus the Sheet the site makes on hello@'s Drive
+// (`drive.file`: only files the site made, `lib/leads/sheet-sync.ts`), into `GCAL_OAUTH`. The client must be an
 // Internal one, or Google expires the refresh token after 7 days. It asks
 // hello@'s free/busy once before saving, so a token that cannot read the
 // calendar is never stored. With `cal` it saves the secret on both Workers,
@@ -26,7 +27,7 @@ if (!file) throw new Error("Usage: node scripts/gsc-auth.mjs <client_secret.json
 const cal = process.argv[3] === "cal";
 const SECRET = cal ? "GCAL_OAUTH" : "GSC_OAUTH";
 const SCOPE = cal
-  ? "https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/calendar.freebusy https://www.googleapis.com/auth/gmail.readonly"
+  ? "https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/calendar.freebusy https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/drive.file"
   : "https://www.googleapis.com/auth/webmasters.readonly";
 const raw = JSON.parse(readFileSync(file, "utf8"));
 const { client_id, client_secret } = raw.installed ?? raw.web ?? raw;
