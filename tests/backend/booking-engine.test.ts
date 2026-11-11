@@ -113,6 +113,6 @@ describe("the lock", () => {
         get: () => ({ fetch: async () => Response.json({ error: "busy" }, { status: 500 }) }),
       },
     };
-    await expect(lock(env, "book", {})).rejects.toThrow("booking lock book: busy");
+    await expect(lock(env, "book", {} as never)).rejects.toThrow("booking lock book: busy");
   });
 });

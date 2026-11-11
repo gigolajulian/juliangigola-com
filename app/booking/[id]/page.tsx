@@ -23,7 +23,7 @@ export default async function BookingPage({ params, searchParams }: { params: Pr
   if (!(await tokenOpens(env.BOOKING_SECRET, id, t))) return <Note>This link has expired. Reply to your confirmation email and I&apos;ll sort it out.</Note>;
   let record: BookingRecord | null = null;
   try {
-    ({ record } = await lock<{ record: BookingRecord | null }>(env, "get", id));
+    ({ record } = await lock(env, "get", id));
   } catch {
     return <Note>Your booking did not load. Try again in a minute, or reply to your confirmation email.</Note>;
   }

@@ -2,7 +2,7 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { lock, clientView, type ChangeResult } from "@/lib/booking-engine";
 import { refundable } from "@/lib/booking-rules";
 import { manageLinks, tokenOpens } from "@/lib/booking-token";
-import { cancelledSubject, confirmMail, sendCancelled, sendConfirm } from "@/lib/confirm";
+import { cancelledSubject, sendCancelled, sendConfirm } from "@/lib/confirm";
 import { logMail } from "@/lib/leads";
 import { dashboardLink } from "@/lib/deposit";
 import { mail } from "@/lib/hello-mail";
@@ -30,8 +30,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   let out: ChangeResult;
   try {
-    if (body.action === "cancel") out = await lock<ChangeResult>(env, "cancel", id);
-    else if (body.action === "reschedule" && typeof body.start === "string") out = await lock<ChangeResult>(env, "reschedule", { id, start: body.start });
+    if (body.action === "cancel") out = await lock(env, "cancel", id);
+    else if (body.action === "reschedule" && typeof body.start === "string") out = await lock(env, "reschedule", { id, start: body.start });
     else return json({ error: "Nothing to do." }, 400);
   } catch (e) {
     console.error("booking change", String(e));
@@ -48,7 +48,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     if (await mail(env.EMAIL, `Rescheduled: ${what}`, [`${r.name} <${r.email}>`, `Moved to ${whenPT(r.start)} by the client. The calendar is updated.`, ...(r.intent && !refundable(r) ? [`The deposit is no longer refundable: first booked for ${whenPT(r.firstStart ?? r.start)}, under 48 hours away.`] : [])], who))
       await logMail(env, r.email, `Rescheduled: ${what}`, { to: "hello@", kind: "reschedule", booking: r.id });
     const confirm = { ...who, session: r.session, call: r.call, start: r.start, end: r.end, where: r.where, uid: r.id, manage: await manageLinks(env.BOOKING_SECRET, r), firstStart: r.firstStart, ...(r.intent ? { deposit: { ref: r.intent, at: r.at } } : {}) };
-    if (await sendConfirm(env.CLIENT_EMAIL, confirm)) await logMail(env, r.email, confirmMail(confirm).subject, { to: "client", kind: "reschedule", booking: r.id });
+    const sent = await sendConfirm(env.CLIENT_EMAIL, confirm);
+    if (sent) await logMail(env, r.email, sent, { to: "client", kind: "reschedule", booking: r.id });
     return json({ record: clientView(r) });
   }
 

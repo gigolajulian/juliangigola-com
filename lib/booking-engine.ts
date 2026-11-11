@@ -238,14 +238,26 @@ export async function markReminded(store: Store, id: string, now = Date.now()) {
 type LockEnv = { BOOKING_LOCK?: { idFromName(name: string): unknown; get(id: unknown): { fetch(url: string, init: RequestInit): Promise<Response> } } };
 
 /** Julian's hours from the lock, or the defaults when it cannot answer (the lock rechecks every booking anyway). */
-export const liveHours = (env: LockEnv) => lock<{ hours: Hours }>(env, "hours", null).then((x) => x.hours, () => DEFAULT_HOURS);
+export const liveHours = (env: LockEnv) => lock(env, "hours", null).then((x) => x.hours, () => DEFAULT_HOURS);
+
+/** Each op the lock answers (`worker/booking-lock.ts`): [argument, answer]. */
+export type LockOps = {
+  book: [BookInput, BookResult];
+  cancel: [string, ChangeResult];
+  reschedule: [{ id: string; start: string }, ChangeResult];
+  due: [null, { records: BookingRecord[] }];
+  reminded: [string, { ok: boolean }];
+  hours: [null, { hours: Hours }];
+  setHours: [Hours, { hours: Hours }];
+  get: [string, { record: BookingRecord | null }];
+};
 
 /** One call to the one lock (`worker/booking-lock.ts`). Throws when it is missing or fails. */
-export async function lock<T>(env: LockEnv, op: string, arg: unknown): Promise<T> {
+export async function lock<K extends keyof LockOps>(env: LockEnv, op: K, arg: LockOps[K][0]): Promise<LockOps[K][1]> {
   const ns = env.BOOKING_LOCK;
   if (!ns) throw new Error("BOOKING_LOCK is not bound");
   const res = await ns.get(ns.idFromName("hello@")).fetch("https://lock/", { method: "POST", body: JSON.stringify({ op, arg }) });
-  const out = (await res.json()) as T & { error?: string };
+  const out = (await res.json()) as LockOps[K][1] & { error?: string };
   if (!res.ok) throw new Error(`booking lock ${op}: ${out.error ?? res.status}`);
   return out;
 }

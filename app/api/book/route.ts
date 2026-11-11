@@ -1,7 +1,7 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { lock, recordBooking, type BookResult } from "@/lib/booking-engine";
 import { manageLinks } from "@/lib/booking-token";
-import { confirmMail, sendConfirm } from "@/lib/confirm";
+import { sendConfirm } from "@/lib/confirm";
 import { logMail } from "@/lib/leads";
 import { parseBooking } from "@/lib/deposit";
 import { json } from "@/lib/http";
@@ -32,7 +32,7 @@ export async function POST(request: Request) {
 
   let out: BookResult;
   try {
-    out = await lock<BookResult>(env, "book", { ...b, via });
+    out = await lock(env, "book", { ...b, via });
   } catch (e) {
     console.error("book", String(e));
     return json({ status: "error", error: { message: "Could not reach the calendar." } }, 502);
@@ -45,6 +45,7 @@ export async function POST(request: Request) {
   ctx.waitUntil(filed);
   const confirm = { name: r.name, email: r.email, session: r.session, call: true, start: r.start, end: r.end, where: r.where, uid: r.id, manage: await manageLinks(env.BOOKING_SECRET, r) };
   // Logged after the lead is filed, so the mail lands on its row.
-  if (await sendConfirm(env.CLIENT_EMAIL, confirm)) ctx.waitUntil(filed.then(() => logMail(env, r.email, confirmMail(confirm).subject, { to: "client", kind: "confirm", booking: r.id })));
+  const sent = await sendConfirm(env.CLIENT_EMAIL, confirm);
+  if (sent) ctx.waitUntil(filed.then(() => logMail(env, r.email, sent, { to: "client", kind: "confirm", booking: r.id })));
   return json({ status: "success", data: { uid: r.id, start: r.start, end: r.end, where: r.where } });
 }

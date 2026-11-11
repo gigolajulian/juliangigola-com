@@ -7,7 +7,7 @@
  * (`app/api/leads/gmail`), so leads, their key and Gmail stay on the site.
  * ─────────────────────────────────────────────────────────────── */
 
-import { lock, type BookingRecord } from "../lib/booking-engine";
+import { lock } from "../lib/booking-engine";
 import { manageLinks } from "../lib/booking-token";
 import { confirmMail, sendConfirm } from "../lib/confirm";
 
@@ -17,7 +17,7 @@ type Env = Parameters<typeof lock>[0] & { CLIENT_EMAIL?: CloudflareEnv["CLIENT_E
 
 /** Mails every reminder due now, then marks it, so the next hour skips it. Returns how many went out. */
 export async function remind(env: Env) {
-  const { records } = await lock<{ records: BookingRecord[] }>(env, "due", null);
+  const { records } = await lock(env, "due", null);
   for (const r of records) {
     const c = {
       kind: "reminder",

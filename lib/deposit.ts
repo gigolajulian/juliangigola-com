@@ -1,9 +1,9 @@
-import { confirmMail, sendConfirm } from "@/lib/confirm";
+import { sendConfirm } from "@/lib/confirm";
 import { enquiry, enquiryKey, looksLikeEmail, summary, whenPT } from "@/lib/inbox";
 import { logMail, recordLead } from "@/lib/leads";
 import { openNow, type KV } from "@/lib/slots";
 import { EVENTS, type Booking, type Hours } from "@/lib/booking-rules";
-import { lock, recordBooking, type BookResult } from "@/lib/booking-engine";
+import { lock, recordBooking } from "@/lib/booking-engine";
 import { manageLinks } from "@/lib/booking-token";
 
 /* ── the $100 deposit ─────────────────────────────────────────────
@@ -265,7 +265,7 @@ export async function settle(env: Env, intent: string, metadata: { [k: string]: 
   if (typeof b !== "string") {
     // The site's engine rechecks and books in one step, inside its lock.
     // Only the booking itself may end in a refund: a step after it never undoes a booked time.
-    const own = await lock<BookResult>(env, "book", { ...b, intent }).catch((e: unknown) => {
+    const own = await lock(env, "book", { ...b, intent }).catch((e: unknown) => {
       broke = String(e);
       console.error("deposit book", broke);
       return null;
@@ -284,7 +284,8 @@ export async function settle(env: Env, intent: string, metadata: { [k: string]: 
         deposit: { ref: intent, at: new Date().toISOString(), card: await cardOf(env.STRIPE_SECRET_KEY, intent) },
         manage: await manageLinks(env.BOOKING_SECRET, booking),
       };
-      if (await sendConfirm(env.CLIENT_EMAIL, confirm)) await logMail(env, b.email, confirmMail(confirm).subject, { to: "client", kind: "confirm", booking: booking.id });
+      const sent = await sendConfirm(env.CLIENT_EMAIL, confirm);
+      if (sent) await logMail(env, b.email, sent, { to: "client", kind: "confirm", booking: booking.id });
       return "booked";
     }
   }

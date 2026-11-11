@@ -143,23 +143,23 @@ ${links ? `<tr><td class="rule" style="${rule};padding:22px 0 0"><a href="${link
   return { subject: remind ? `Tomorrow: ${c.session}, ${hour}` : `Booked: ${c.session}, ${at}`, html, text, attachments: [logo("name-w", NAME_W), logo("name-ink", NAME_INK)] };
 }
 
-/** Whether the mail went out. */
-export async function sendConfirm(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefined, c: Confirm): Promise<boolean> {
-  if (!mailer || !c.email) return false;
+/** The subject it sent, for the lead log; null when the mail did not go out. */
+export async function sendConfirm(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefined, c: Confirm): Promise<string | null> {
+  if (!mailer || !c.email) return null;
   const head = { to: { email: c.email, name: c.name }, from: FROM, replyTo: REPLY_TO };
   const { attachments, ...mail } = confirmMail(c);
   try {
     await mailer.send({ ...head, ...mail, attachments });
-    return true;
+    return mail.subject;
   } catch (e) {
     console.error("confirm mail", String(e));
     // Inline parts refused: the client still gets the mail, with the logo linked as before.
     try {
       await mailer.send({ ...head, ...mail, html: mail.html.replace(/cid:(name-w|name-ink)/g, `${SITE}/email-$1.png`) });
-      return true;
+      return mail.subject;
     } catch (e2) {
       console.error("confirm mail, no logo", String(e2));
-      return false;
+      return null;
     }
   }
 }

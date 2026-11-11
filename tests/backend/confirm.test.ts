@@ -66,13 +66,13 @@ describe("confirmMail", () => {
 
 describe("sendConfirm", () => {
   it("sends nothing without a mailer or an address", async () => {
-    expect(await sendConfirm(undefined, base)).toBe(false);
-    expect(await sendConfirm(new FakeEmail() as never, { ...base, email: "" })).toBe(false);
+    expect(await sendConfirm(undefined, base)).toBe(null);
+    expect(await sendConfirm(new FakeEmail() as never, { ...base, email: "" })).toBe(null);
   });
 
   it("sends from book@ to the client", async () => {
     const mail = new FakeEmail();
-    expect(await sendConfirm(mail as never, base)).toBe(true);
+    expect(await sendConfirm(mail as never, base)).toBe(confirmMail(base).subject);
     expect(mail.sent[0]).toMatchObject({ to: { email: "ana@example.com" }, from: { email: "book@juliangigola.com" }, replyTo: "hello@juliangigola.com" });
   });
 
@@ -84,7 +84,7 @@ describe("sendConfirm", () => {
         sent.push(m);
       },
     };
-    expect(await sendConfirm(mailer as never, base)).toBe(true);
+    expect(await sendConfirm(mailer as never, base)).toBe(confirmMail(base).subject);
     expect(sent[0].html).toContain("https://juliangigola.com/email-name-w.png");
     expect(sent[0].html).not.toContain("cid:name-w");
   });
@@ -92,7 +92,7 @@ describe("sendConfirm", () => {
   it("answers false when the mail cannot go at all", async () => {
     const mail = new FakeEmail();
     mail.broken = true;
-    expect(await sendConfirm(mail as never, base)).toBe(false);
+    expect(await sendConfirm(mail as never, base)).toBe(null);
   });
 });
 

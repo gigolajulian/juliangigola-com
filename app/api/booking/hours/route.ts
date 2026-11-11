@@ -14,9 +14,9 @@ import { json } from "@/lib/http";
 export const dynamic = "force-dynamic";
 
 // The lock throws when it is unbound or down: answer the desk's {error} shape, as booking/[id] does.
-async function held(env: CloudflareEnv, op: "hours" | "setHours", arg: Hours | null) {
+async function held(ask: () => Promise<{ hours: Hours }>) {
   try {
-    return json(await lock<{ hours: Hours }>(env, op, arg));
+    return json(await ask());
   } catch (e) {
     console.error("hours", String(e));
     return json({ error: "Could not reach the booking lock. Try again." }, 502);
@@ -26,7 +26,7 @@ async function held(env: CloudflareEnv, op: "hours" | "setHours", arg: Hours | n
 export async function GET(request: Request) {
   const { env } = await getCloudflareContext({ async: true });
   if (!(await isAdmin(request, env.INBOX_KEY))) return json({ error: "Not authorized." }, 401);
-  return held(env, "hours", null);
+  return held(() => lock(env, "hours", null));
 }
 
 export async function PUT(request: Request) {
@@ -35,5 +35,5 @@ export async function PUT(request: Request) {
   const today = new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(new Date());
   const hours = cleanHours(await request.json().catch(() => null), today);
   if (!hours) return json({ error: "Those hours do not read right." }, 400);
-  return held(env, "setHours", hours);
+  return held(() => lock(env, "setHours", hours));
 }
