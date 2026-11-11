@@ -9,8 +9,8 @@ import { balance, isPaid, namesInvoice, type Invoice } from "./invoice";
  * log) the INBOX namespace holds one `lead:<id>` per person, sealed with
  * LEADS_KEY (`lib/leads/lead-crypto.ts`). Each event
  * that reaches the site (the form, a Cal.com booking, a deposit in
- * trouble) is folded into it here. KV is the source of truth; Notion is a
- * mirror of it, never the other way.
+ * trouble) is folded into it here. KV is the source of truth; Notion and the
+ * Google Sheet (`lib/leads/sheet-sync.ts`) are copies of it, never the other way.
  *
  * Automatic events only move a lead forward: a second inquiry from a
  * client already Confirmed must not drop them back to Inquiry. A new

@@ -3,13 +3,14 @@ import { authorised, bearer, canPush } from "@/lib/vouch";
 import { SAFE_IMAGE, summary, type Enquiry, type Summary } from "@/lib/inbox";
 import { backfillLead, fold, PAPER, REMIND_MAX, STAGES, trashDaysLeft, type InboxRow, type Lead, type LeadPatch, type LeadSummary, type Paper, type Stage } from "@/lib/leads/leads";
 import { everyLead, readLead, writeLead } from "@/lib/leads/lead-store";
-import { adoptLog, eventsCsv, forgetLog, paidTotal, readLog, readMaster } from "@/lib/leads/activity-log";
+import { clientsCsv } from "@/lib/leads/sheet-sync";
+import { adoptLog, eventsCsv, forgetLog, readLog, readMaster } from "@/lib/leads/activity-log";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { notify, subscribe, unsubscribe } from "@/lib/leads/lead-push";
 import { publicKey } from "@/lib/leads/web-push";
 import { notionPaper, notionStage } from "@/lib/leads/notion-lead";
 import { importStripe } from "@/lib/leads/stripe-import";
-import { cleanTemplates, csv, manualLead, merge, stats, type NewLead } from "@/lib/leads/lead-crm";
+import { cleanTemplates, manualLead, merge, stats, type NewLead } from "@/lib/leads/lead-crm";
 import { balance, cleanFrom, cleanInvoice, invoiceNo, mmyy, PHOTO_KEY, usd, type InvoiceFrom } from "@/lib/leads/invoice";
 import { json, NO_STORE } from "@/lib/http";
 
@@ -20,7 +21,6 @@ const FROM_KEY = "leads:invoice-from";
 /** How many invoices carry a month's number (`invoices:1126`), so the next is 1126-2. */
 const countKey = (date: string) => `invoices:${mmyy(date)}`;
 const taken = async (inbox: NonNullable<CloudflareEnv["INBOX"]>, date: string) => Number((await inbox.get(countKey(date))) ?? 0) || 0;
-
 
 /* ── reading the inbox ────────────────────────────────────────────
  * The one endpoint /admin's Inbox tab talks to. Lists enquiries, opens one,
@@ -197,15 +197,9 @@ export async function GET(request: Request) {
     const day = new Date().toISOString().slice(0, 10);
     const file = (body: string, name: string) => new Response(body, { headers: { ...NO_STORE, "content-type": "text/csv; charset=utf-8", "content-disposition": `attachment; filename="${name}-${day}.csv"` } });
     if (url.searchParams.get("csv") === "events") return file(eventsCsv(await readMaster(gate.inbox, seal)), "activity");
-    const all = await everyLead(gate.inbox, seal);
-    // One pass over the master log: one list call per 1000 events.
     const master = await readMaster(gate.inbox, seal);
-    if (url.searchParams.has("stats")) return json({ stats: stats(all, Date.now(), master) });
-    const byLead = new Map<string, Lead["events"]>();
-    for (const m of master) byLead.set(m.lead, [...(byLead.get(m.lead) ?? []), m.event]);
-    const paid: Record<string, number> = {};
-    for (const l of all) if (l.id) paid[l.email] = paidTotal(byLead.get(l.id) ?? []);
-    return file(csv(all, paid), "leads");
+    if (url.searchParams.has("stats")) return json({ stats: stats(await everyLead(gate.inbox, seal), Date.now(), master) });
+    return file(await clientsCsv(gate.inbox, seal, master), "leads");
   }
 
   // The lead desk (`components/admin/admin-leads.tsx`): one record per person.
