@@ -1661,6 +1661,8 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
    One gap, the page's own 16px margin, between every frame: under the bar, in the
    hero, between the hero and the sheet, and inside the sheet. */
 .v3 #p-project{--pj:16px}
+/* Phone: half the gap between frames (Julian, 2026-11-11). */
+@media (max-width:700px){.v3 #p-project{--pj:8px}.v3 #p-project .pj-lead{gap:var(--pj);padding-top:var(--pj)}.v3 #p-project .pj-flow{padding-top:var(--pj)}}
 .v3 .pj-flow{gap:var(--pj)}
 @media (min-width:701px){.v3 .pj-flow{padding-top:var(--pj)}
 /* A horizontal takes the whole row at its own shape: never a crop, never a hole
