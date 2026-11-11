@@ -43,11 +43,6 @@
   .contact-card button[type="submit"] {
     min-height: 0;
   }
-  /* The wall's overhang under the rail only gave the screen more to
-     scroll to, as upright. */
-  :root[data-under] .contact-inquire > .enquiry-backdrop {
-    bottom: 0;
-  }
   section.contact-inquire {
     padding-top: calc(var(--bar-h, 3rem) + 0.75rem);
     padding-bottom: 0.5rem;
@@ -60,34 +55,6 @@
 @media (max-height: 30rem) and (min-width: 40rem) and (max-width: 47.99rem) {
   .cover-float-title {
     font-size: calc(var(--h-title-size, 16px) * var(--m-role) * 0.8);
-  }
-}
-
-/* ── the filter as a drop-down, on a phone ────────────────────────
- * The title is the filter, so the list drops from under it rather than
- * sliding in from the side and pushing the page away. It unfolds from the
- * head's foot (`--drop-top`), the
- * names dropping in a step apart, the page dimmed under it; it folds back
- * up quicker, all at once, and a pick folds it while the new title rises
- * in its place.
- * ─────────────────────────────────────────────────────────────── */
-@media (max-width: 39.999rem) {
-  :root[data-drawer="filter"] :is(body > main, body > footer) {
-    translate: none;
-  }
-}
-
-/* ── the menus as glass, over the page ────────────────────────────
- * The menu and the phone's filter drop-down are the glass themselves and
- * open over the page, which stays where it is: no push, no frosting of the
- * page around them. The panels take the head's own pane
- * (`.head-glass::before`), so the drop-down and the head it falls from
- * read as one sheet. The window behind stays clear, still there to be
- * pressed to close.
- * ─────────────────────────────────────────────────────────────── */
-@media (max-width: 63.999rem) {
-  :root[data-drawer="menu"] :is(body > main, body > footer) {
-    translate: none;
   }
 }
 
@@ -264,9 +231,8 @@
     padding-top: 4.75rem;
     padding-bottom: 1.25rem;
     /* Not a scroller here. The card is fitted to the screen, so there
-       is nothing below it to reach; but the wall behind runs on under
-       the rail (`--under`), and in a scroller those 90px were there to
-       scroll to. */
+       is nothing below it to reach; and in a scroller the
+       wall's overhang was there to scroll to. */
     overflow-y: visible;
   }
   .contact-inquire .contact-card {
@@ -310,14 +276,7 @@
     align-self: center;
   }
 }
-/* Upright the Inquiries screen is a scroller of its own, so the
-   wall's overhang under the rail (`--under`) is clipped out of sight
-   there anyway, and all it did was give the screen 90px more to
-   scroll to. */
 @media (pointer: coarse) and (min-width: 40rem) and (orientation: portrait) {
-  :root[data-under] .contact-inquire > .enquiry-backdrop {
-    bottom: 0;
-  }
   /* And a booking page's calendar a height of its own. Its card has none
      to give it upright, and the frame fell back to a browser's 150px. */
   .contact-inquire .booking-embed {
@@ -391,16 +350,5 @@
   }
   .strip-rail .rail-word.origin-bottom-right {
     transform-origin: top right;
-  }
-}
-
-/* ── a MacBook and smaller ──
-   Julian, 2026-10-10: on a 16-inch MacBook and below, the footer a third
-   thinner (38px to 25px) and the rail a little lower, nearer it, so the
-   screens get the room. A pointer and up to 1728px, the 16-inch's
-   default width; the rail follows the footer through `--foot`. */
-@media (min-width: 40rem) and (max-width: 108rem) and (hover: hover) and (pointer: fine) {
-  :root[data-under] .strip-rail {
-    bottom: calc(var(--foot, 38px) - 0.375rem);
   }
 }
