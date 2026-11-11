@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { Clause, LegalColumn, V3LegalPage } from "@/components/legal";
+import { Clause, LegalColumn, V3LegalPage } from "@/components/site/legal";
 
 describe("V3LegalPage", () => {
   it("lays out each document with its contents and anchored clauses", async () => {
