@@ -119,6 +119,8 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
   const src = (id: string) => `/proof/${token}/f/${encodeURIComponent(id)}`;
   // The 800px copy for the grid and the walls; the lightbox keeps the whole frame.
   const thumb = (id: string) => `${src(id)}?w=${THUMB_W}`;
+  // One array for the wall: a new one every render rebuilt the wall under its own landing (its columns and fades reset).
+  const wallFrames = React.useMemo(() => frames.map((f) => ({ src: `/proof/${token}/f/${encodeURIComponent(f.id)}?w=${THUMB_W}`, w: f.w, h: f.h })), [frames, token]);
 
   const post = React.useCallback((b: Record<string, unknown>) => fetch(`/api/proof/${token}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(b) }), [token]);
 
@@ -379,8 +381,8 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
       {wall ? (
         <div className="proof-intro">
           <p className="proof-lab">Proofs · {frames.length} frames · {included} included</p>
-          {/* One line; a long name wraps it to two (--len sizes the type to the line). */}
-          <h1 style={{ "--len": (hello ? `Hey ${hello}, pick your proofs below.` : "Pick your proofs.").length } as React.CSSProperties}>
+          {/* Sized for the greeting from the start (--len), so the line that swaps in on Open proofs does not move the grid. */}
+          <h1 style={{ "--len": 38 } as React.CSSProperties}>
             {hello ? `Hey ${hello}, pick your proofs below.` : "Pick your proofs."}
           </h1>
         </div>
@@ -464,7 +466,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
 
       {walling ? (
         <ProofWall
-          frames={frames.map((f) => ({ src: thumb(f.id), w: f.w, h: f.h }))}
+          frames={wallFrames}
           grid={gridEl}
           isEmail={isEmail}
           onAccept={(name, address) => {

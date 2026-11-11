@@ -356,6 +356,8 @@ const DriftWall = ({
       const paused = heldRef.current;
       anims.forEach((a, c) => {
         if (!a) return;
+        // Flattening with the columns stopped from outside (proof-wall.tsx): left where they were put.
+        if (flatRef.current !== undefined && a.playState === 'paused') return;
         const target = paused || hoveredColRef.current === c ? 0 : 1;
         if (rates[c] === target) {
           // Held and stopped: paused outright, so nothing runs at rate 0.
@@ -429,7 +431,7 @@ const DriftWall = ({
     flatRef.current = flatten;
     const plane = planeRef.current;
     if (flatten === undefined || !plane) return;
-    plane.style.transition = 'transform 1s cubic-bezier(.65,0,.35,1)';
+    plane.style.transition = 'transform var(--dw-flat, 1.3s) cubic-bezier(.45,0,.2,1)';
     applyPlaneTransform(0, 0);
   }, [flatten, applyPlaneTransform]);
 

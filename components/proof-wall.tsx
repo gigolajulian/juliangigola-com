@@ -11,22 +11,24 @@ import DriftWall from "@/components/drift-wall";
  * right to reach the gallery. So the wall is laid out on the gallery's
  * own columns: one wall column of the grid's width for each, carrying
  * that column's frames in order, with spare columns either side for the
- * tilt. On Open proofs the wall eases flat and face on, stops and comes
- * sharp, lined up with the grid; then each photo on the gallery's first
- * screen drops straight down or up from its own tile into its cell,
- * uncropping as it lands, while the rest of the wall falls away.
+ * tilt, its tiles in the gallery's own shape. On Open proofs (Julian
+ * 2026-11-11, "the wall becomes the gallery") each column carries on
+ * from its speed at the click and eases into the slot where its photos
+ * stand on the gallery's cells, while the wall turns flat and face on and
+ * comes sharp. Once still the wall is the gallery to the pixel, and the
+ * gallery takes over in place (`glide`).
  * ─────────────────────────────────────────────────────────────── */
 
 const READY_AFTER_MS = 900; // after the wall shows: the columns mostly in before the focus pull
 const READY_CAP_MS = 4000; // the card comes up by then, whatever the wall's photographs are doing
-const PRELOAD_CAP_MS = 3500; // the longest the wall waits for every one of its photographs
-const FLAT_MS = 1000; // the plane easing flat and sharp (drift-wall.tsx) while each column settles on its cells
-const SETTLE_EASE = "cubic-bezier(.65,0,.35,1)";
-const LAND_MS = 900;
-const LAND_EASE = "cubic-bezier(.6,0,.15,1)";
-const STAGGER = 50; // ms a column, left to right
-const WALL_OUT_MS = 600;
+const PRELOAD_CAP_MS = 8000; // the longest the splash holds for the wall's photographs on a slow connection
+const SPLASH_MIN_MS = 1100; // the name's rise plays out even when everything is cached
+const BAR_DONE_MS = 380; // the line runs full before the splash lifts
 const ROWS = 6; // a wall column's length (DriftWall takes at most six)
+const GLIDE_MS = 1600; // the wall turning flat while every column glides into its slot (proof.css --dw-flat)
+const DECODE_CAP_MS = 1500; // the longest the hand-over waits on the gallery's first screen being drawn
+const CARD_OUT_MS = 450; // `reveal`: the card gone before the gallery comes up
+const RISE_MS = 900;
 
 type Frame = { src: string; w: number; h: number };
 type Box = { x: number; y: number; w: number; h: number; img: HTMLImageElement };
@@ -83,6 +85,7 @@ export function ProofWall({
   // focus to blur as the card rises in, its lines one after another (`[data-ready]`, proof.css).
   const [ready, setReady] = React.useState(false);
   const [flat, setFlat] = React.useState(false);
+  const [leaving, setLeaving] = React.useState(false);
   const shown = React.useCallback(() => {
     window.setTimeout(() => setReady(true), reducedMotion() ? 0 : READY_AFTER_MS);
   }, []);
@@ -114,28 +117,44 @@ export function ProofWall({
         const i = c >= 0 && c < n ? c + r * n : spare++;
         items.push({ image: frames[i % frames.length].src });
       }
-    return { items, cols, w, gap, dx };
+    // Tiles in the gallery's own shape (the middle frame's), so the flat wall stands on its cells.
+    const shapes = frames.map((f) => (f.w && f.h ? f.h / f.w : 4 / 3)).sort((a, b) => a - b);
+    const tall = shapes[shapes.length >> 1];
+    return { items, cols, w, gap, dx, h: Math.round(w * tall) };
   }, [shape, frames]);
 
   // Julian: photos loaded before they come into frame. Every photograph the wall carries is fetched and decoded
   // before it shows (the 800px copies, and the same files the gallery opens on), capped for a slow connection.
+  // Julian: the splash (the name, a line filling under it) stays up until they are in, then lifts into the wall.
   const [loaded, setLoaded] = React.useState(false);
+  const [progress, setProgress] = React.useState(0);
   React.useEffect(() => {
     if (!wall) return;
     let gone = false;
-    const done = () => !gone && setLoaded(true);
+    const t0 = performance.now();
+    let lift = 0;
+    const done = () => {
+      if (gone || lift) return;
+      setProgress(1);
+      lift = window.setTimeout(() => !gone && setLoaded(true), Math.max(BAR_DONE_MS, SPLASH_MIN_MS - (performance.now() - t0)));
+    };
     const cap = window.setTimeout(done, PRELOAD_CAP_MS);
     const srcs = [...new Set(wall.items.map((i) => i.image))];
+    let n = 0;
     void Promise.all(
       srcs.map((src) => {
         const img = new Image();
         img.src = src;
-        return img.decode().catch(() => {});
+        return img
+          .decode()
+          .catch(() => {})
+          .then(() => !gone && setProgress(++n / srcs.length));
       }),
     ).then(done);
     return () => {
       gone = true;
       clearTimeout(cap);
+      clearTimeout(lift);
     };
   }, [wall]);
 
@@ -151,107 +170,195 @@ export function ProofWall({
   }, []);
 
   function open() {
-    if (flat) return;
-    const still = reducedMotion();
-    if (!still) settle();
-    setFlat(true);
-    window.setTimeout(() => land(still), still ? 0 : FLAT_MS);
+    if (flat || leaving) return;
+    if (reducedMotion()) reveal(true);
+    else void glide();
   }
 
-  /** While the wall flattens, each of the grid's columns slides up or down so its first frame stops on its first cell. */
-  function settle() {
+  /** Every wall column's tiles where they would stand with the wall flat and face on (laid out flat for a moment, unpainted). */
+  function flatTracks() {
     const root = layer.current;
     const dw = root?.querySelector<HTMLElement>(".drift-wall");
     const plane = root?.querySelector<HTMLElement>(".drift-wall__plane");
-    const g = grid.current;
-    if (!root || !dw || !plane || !g || !wall) return;
-    // Where the tiles will stand once flat: laid out flat for a moment, unpainted, then put back.
+    if (!root || !dw || !plane || !wall) return [];
     const was = [plane.style.transform, plane.style.transition, dw.style.scale, dw.style.transition];
     plane.style.transition = dw.style.transition = "none";
     plane.style.transform = `translate(calc(-50% + ${wall.dx}px), -50%)`;
     dw.style.scale = "1";
-    const tiles = tilesNear(root);
+    const out = [...root.querySelectorAll<HTMLElement>(".drift-wall__track")].map((track) =>
+      [...track.querySelectorAll<HTMLImageElement>(".drift-wall__tile img")].map((img) => {
+        const r = img.getBoundingClientRect();
+        return { img, y: r.top + r.height / 2 };
+      }),
+    );
     [plane.style.transform, plane.style.transition, dw.style.scale, dw.style.transition] = was;
-    plane.getBoundingClientRect(); // the tilt back in place before the flattening starts from it
-    const cells = [...g.querySelectorAll<HTMLElement>(".proof-cell")];
-    const n = Number(shape.split(",")[0]);
-    // The gallery's first screen fetched now, so nothing lands empty a second from now.
-    for (const img of g.querySelectorAll<HTMLImageElement>(".proof-cell img"))
-      if (img.getBoundingClientRect().top < innerHeight) img.loading = "eager";
-    cells.slice(0, n).forEach((cell, c) => {
-      const to = cell.getBoundingClientRect();
-      const src = cell.querySelector("img")?.getAttribute("src");
-      const cx = to.left + to.width / 2;
-      const cy = to.top + to.height / 2;
-      let from: Box | null = null;
-      for (const t of tiles)
-        if (t.img.getAttribute("src") === src && Math.abs(t.x - cx) < to.width / 2 && (!from || Math.abs(t.y - cy) < Math.abs(from.y - cy))) from = t;
-      const track = from?.img.closest<HTMLElement>(".drift-wall__track");
-      if (from && track) track.animate([{ translate: "0 0" }, { translate: `0 ${cy - from.y}px` }], { duration: FLAT_MS, easing: SETTLE_EASE, delay: c * STAGGER, fill: "forwards" });
-    });
+    plane.getBoundingClientRect();
+    return out;
   }
 
-  function land(still: boolean) {
+  /** Julian 2026-11-11 (the wall becomes the gallery, from the moment of the click): each column's speed is
+   *  read as Open proofs is pressed and the column carries on from it, easing into the slot where its photos stand on the
+   *  gallery's cells, while the wall turns flat and face on and comes sharp. The tiles that land already carry the
+   *  gallery's frames (swapped while still soft, where a column stood on others); the ones above the grid fade. Once still,
+   *  the wall is the gallery to the pixel: the gallery shows over it and the wall goes, nothing moves. */
+  async function glide() {
+    const g = grid.current;
     const root = layer.current;
-    const tiles = root && !still ? tilesNear(root) : [];
+    if (!g || !root || !wall) return reveal(false);
+    const raf = () => new Promise<number>((r) => requestAnimationFrame(r));
+    const wait = (ms: number) => new Promise((r) => window.setTimeout(r, ms));
+    // The gallery's first screen drawn by the time the wall lands.
+    const imgs = [...g.querySelectorAll<HTMLImageElement>(".proof-cell img")].filter((i) => i.getBoundingClientRect().top < innerHeight);
+    for (const i of imgs) i.loading = "eager";
+    const drawn = Promise.race([Promise.all(imgs.map((i) => i.decode().catch(() => {}))), wait(GLIDE_MS + DECODE_CAP_MS)]);
+    // Each column's speed, in flat pixels a second, over two frames.
+    const t0 = await raf();
+    const a = flatTracks();
+    await raf();
+    const t1 = await raf();
+    const tracks = [...root.querySelectorAll<HTMLElement>(".drift-wall__track")];
+    for (const t of tracks) for (const an of t.getAnimations()) an.pause();
+    const b = flatTracks();
+    const dt = Math.max(1, t1 - t0) / 1000;
+    setLeaving(true);
+    setFlat(true);
+
+    const T = GLIDE_MS / 1000;
+    const pitch = wall.h + wall.gap;
+    const n = Number(shape.split(",")[0]);
+    const side = (wall.cols - n) / 2;
+    const cells = [...g.querySelectorAll<HTMLElement>(".proof-cell")];
+    const glides: Animation[] = [];
+    tracks.forEach((track, j) => {
+      const now = b[j] ?? [];
+      const v = now.length && a[j]?.length ? (now[0].y - a[j][0].y) / dt : 0;
+      const c = j - side;
+      // A coast: the speed it had, run down over the glide (start slope 3 on the curve, so a third of v·T).
+      let D = (v * T) / 3;
+      if (c >= 0 && c < n && cells[c]) {
+        const r0 = cells[c].getBoundingClientRect();
+        const y0 = r0.top + r0.height / 2;
+        const order = [...now].sort((p, q) => p.y - q.y);
+        // The slot ahead, the way it was going, if it is close; else the nearest: no column turns back far.
+        const ahead = order.filter((t) => Math.sign(y0 - t.y) === Math.sign(v) && Math.abs(y0 - t.y) < pitch * 0.6);
+        const pick = (ahead.length ? ahead : order).reduce((p, q) => (Math.abs(y0 - q.y) < Math.abs(y0 - p.y) ? q : p));
+        D = y0 - pick.y;
+        const k = order.indexOf(pick);
+        order.forEach((t, i) => {
+          const r = i - k;
+          if (r < 0) {
+            t.img.closest(".drift-wall__inner")?.animate([{ opacity: 1 }, { opacity: 0 }], { duration: GLIDE_MS * 0.55, easing: "ease-out", fill: "forwards" });
+            return;
+          }
+          const cell = cells[c + r * n];
+          if (!cell || t.y + D - pitch / 2 > innerHeight) return;
+          const want = cell.querySelector("img")?.getAttribute("src");
+          if (want && t.img.getAttribute("src") !== want) swap(t.img, want);
+        });
+      }
+      // The curve's start slope set to the column's own speed, so it carries on from where it was, then settles.
+      const y1 = Math.max(-0.3, Math.min(1, D ? (0.3 * v * T) / D : 0.9));
+      glides.push(track.animate([{ translate: "0 0" }, { translate: `0 ${D}px` }], { duration: GLIDE_MS, easing: `cubic-bezier(.3,${y1},.25,1)`, fill: "forwards" }));
+    });
+    await Promise.all(glides.map((x) => x.finished.catch(() => {})));
+    await drawn;
+    handOver();
+  }
+
+  /** A tile's photograph changed under the blur: the new one fades in over it. */
+  function swap(img: HTMLImageElement, src: string) {
+    const ghost = img.cloneNode() as HTMLImageElement;
+    ghost.removeAttribute("srcset");
+    ghost.src = src;
+    ghost.style.cssText = "position:absolute;inset:0";
+    img.after(ghost);
+    ghost.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 500, easing: "ease", fill: "backwards" }).finished.then(
+      () => (img.style.visibility = "hidden"),
+      () => {},
+    );
+  }
+
+  /** The wall standing still on the gallery: the gallery shows over it; a cell not quite on its tile eases the last of the way. */
+  function handOver() {
+    const root = layer.current;
+    const tiles = root ? tilesNear(root).filter((t) => t.img.style.visibility !== "hidden") : [];
     flushSync(() => onAccept(name.trim().replace(/\s+/g, " "), email.trim()));
-    const cells = [...(grid.current?.querySelectorAll<HTMLElement>(".proof-cell") ?? [])];
     const anims: Animation[] = [];
-    const used = new Set<Box>();
-    const pitch = wall ? wall.w + wall.gap : 1;
-    const x0 = cells[0]?.getBoundingClientRect().left ?? 0;
-    for (const cell of still ? [] : cells) {
+    for (const cell of grid.current?.querySelectorAll<HTMLElement>(".proof-cell") ?? []) {
       const to = cell.getBoundingClientRect();
-      if (to.top > innerHeight || !to.width) break;
+      if (to.top > innerHeight) break;
       const src = cell.querySelector("img")?.getAttribute("src");
-      const col = Math.round((to.left - x0) / pitch);
       const cx = to.left + to.width / 2;
       const cy = to.top + to.height / 2;
-      const delay = col * STAGGER;
-      // Its own frame in its own column, settled just about on it (`settle`).
       let from: Box | null = null;
-      for (const t of tiles)
-        if (!used.has(t) && t.img.getAttribute("src") === src && Math.abs(t.x - cx) < pitch / 2 && (!from || Math.abs(t.y - cy) < Math.abs(from.y - cy))) from = t;
-      if (!from) {
-        anims.push(cell.animate([{ transform: "translateY(40px)", opacity: 0 }, { transform: "none", opacity: 1 }], { duration: LAND_MS * 0.8, easing: LAND_EASE, delay, fill: "backwards" }));
-        continue;
-      }
-      used.add(from);
-      from.img.style.visibility = "hidden";
-      // The tile shows the frame cropped to 3:4 (object-fit: cover): start as that crop, open to the whole frame.
-      const s = Math.max(from.w / to.width, from.h / to.height);
-      const ix = Math.max(0, (to.width - from.w / s) / 2);
-      const iy = Math.max(0, (to.height - from.h / s) / 2);
-      anims.push(
-        cell.animate(
-          [
-            { transform: `translate(${from.x - cx}px, ${from.y - cy}px) scale(${s})`, clipPath: `inset(${iy}px ${ix}px)` },
-            { transform: "none", clipPath: "inset(0px 0px)" },
-          ],
-          { duration: LAND_MS, easing: LAND_EASE, delay, fill: "backwards" },
-        ),
-      );
+      for (const t of tiles) if (t.img.getAttribute("src") === src && (!from || Math.hypot(t.x - cx, t.y - cy) < Math.hypot(from.x - cx, from.y - cy))) from = t;
+      if (from && Math.abs(from.x - cx) < 1.5 && Math.abs(from.y - cy) < 1.5 && Math.abs(from.w - to.width) < 2 && Math.abs(from.h - to.height) < 2) continue;
+      const kf: Keyframe[] = from
+        ? [{ transform: `translate(${from.x - cx}px, ${from.y - cy}px) scale(${from.w / to.width}, ${from.h / to.height})` }, { transform: "none" }]
+        : [{ opacity: 0 }, { opacity: 1 }];
+      anims.push(cell.animate(kf, { duration: 450, easing: "cubic-bezier(.22,1,.36,1)", fill: "backwards" }));
     }
-    const out = root?.animate([{ opacity: 1 }, { opacity: 0 }], { duration: still ? 200 : WALL_OUT_MS, delay: still ? 0 : LAND_MS, easing: "ease-out", fill: "forwards" });
+    const out = root?.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 250, easing: "ease-out", fill: "forwards" });
+    Promise.all([out?.finished, ...anims.map((x) => x.finished)].map((p) => p?.catch(() => {}))).then(onDone);
+  }
+
+  /** Reduced motion, or the wall not measurable: nothing travels. The card goes, the wall stops and racks out of focus,
+   *  and the gallery's first screen comes up in place over it once every photo in it is drawn. */
+  async function reveal(still: boolean) {
+    setLeaving(true);
+    const t0 = performance.now();
+    const imgs = [...(grid.current?.querySelectorAll<HTMLImageElement>(".proof-cell img") ?? [])].filter((i) => i.getBoundingClientRect().top < innerHeight);
+    for (const i of imgs) i.loading = "eager";
+    const wait = (ms: number) => new Promise((r) => window.setTimeout(r, ms));
+    await Promise.race([Promise.all(imgs.map((i) => i.decode().catch(() => {}))), wait(DECODE_CAP_MS)]);
+    await wait(Math.max(0, (still ? 0 : CARD_OUT_MS) - (performance.now() - t0)));
+    const root = layer.current;
+    flushSync(() => onAccept(name.trim().replace(/\s+/g, " "), email.trim()));
+    const cells = [...(grid.current?.querySelectorAll<HTMLElement>(".proof-cell") ?? [])];
+    const first = cells[0]?.getBoundingClientRect();
+    const pitch = wall ? wall.w + wall.gap : 1;
+    const anims: Animation[] = [];
+    for (const cell of still ? [] : cells) {
+      const r = cell.getBoundingClientRect();
+      if (r.top > innerHeight) break;
+      const col = Math.round((r.left - (first?.left ?? 0)) / pitch);
+      const row = Math.round((r.top - (first?.top ?? 0)) / Math.max(1, first?.height ?? 1));
+      anims.push(cell.animate([{ opacity: 0, transform: "translateY(10px) scale(.985)" }, { opacity: 1, transform: "none" }], { duration: RISE_MS, easing: "cubic-bezier(.22,1,.36,1)", delay: col * 80 + row * 50, fill: "backwards" }));
+    }
+    const out = root?.animate([{ opacity: 1 }, { opacity: 0 }], { duration: still ? 200 : 1000, delay: still ? 0 : 250, easing: "cubic-bezier(.4,0,.2,1)", fill: "forwards" });
     Promise.all([out?.finished, ...anims.map((a) => a.finished)].map((p) => p?.catch(() => {}))).then(onDone);
   }
 
   return (
     <>
-      <div ref={layer} className="pw-layer" data-ready={ready || undefined} data-flat={flat || undefined}>
+      <div className="pw-splash" data-out={loaded || undefined} aria-hidden>
+        <div className="pw-splash-name">
+          <span>
+            <span>Julian</span>
+          </span>
+          <span>
+            <span>Gigola</span>
+          </span>
+        </div>
+        <div className="pw-splash-bar">
+          <i style={{ transform: `scaleX(${progress})` }} />
+        </div>
+      </div>
+      <div ref={layer} className="pw-layer" data-ready={ready || undefined} data-flat={flat || undefined} data-leave={leaving || undefined}>
         {wall && loaded ? (
           <DriftWall
             items={wall.items}
             columns={wall.cols}
             tileWidth={wall.w}
-            tileHeight={Math.round((wall.w * 4) / 3)}
+            tileHeight={wall.h}
             gap={wall.gap}
-            radius={2}
+            radius={0}
             speed={24}
             dim={0.6}
             overlayColor="var(--background)"
             density={0.5}
             flatten={flat ? wall.dx : undefined}
+            hold={leaving}
             onShown={shown}
           />
         ) : null}
@@ -261,7 +368,7 @@ export function ProofWall({
       <form
         className="proof-card pw-card"
         data-ready={ready || undefined}
-        data-out={flat || undefined}
+        data-out={flat || leaving || undefined}
         noValidate
         onSubmit={(e) => {
           e.preventDefault();
