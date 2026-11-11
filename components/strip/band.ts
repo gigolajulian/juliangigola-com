@@ -1,5 +1,5 @@
 import { rubberband } from "@/lib/utils";
-import { leadOn } from "./lead";
+import { leadOn } from "./peek";
 import { createCross, type Cross } from "./cross";
 import type { Mover } from "./motion";
 import { HOLD, LEAVE_AFTER, RELAX, STRETCH, WHEEL, wantsCross } from "./shared";
@@ -32,7 +32,7 @@ const WALL = [0, 0.403, 0.694, 0.881, 0.979, 1.0, 0.961, 0.878, 0.764, 0.633, 0.
 const WALL_MS = 800;
 
 export type Band = {
-  /** Whether the end that way is a way into the work (`lead-window.tsx`). */
+  /** Whether the end that way is a way into the work (`work-peek.tsx`). */
   door: (dir: 1 | -1) => boolean;
   /** The pull past the end, `dir`, that leads on. */
   after: (dir: 1 | -1) => number;
@@ -50,7 +50,7 @@ export function createBand(m: Mover): Band {
   /* Through the window it is one scroll past it, either way (Julian:
      seamless): the word already said what is next, so there is nothing
      to make sure of. Everywhere else the band asks for a persistent
-     push (`lead-window.tsx`). */
+     push (`work-peek.tsx`). */
   const door = (dir: 1 | -1) =>
     // A cell of no width, but drawn: none under a finger on a phone.
     (dir > 0

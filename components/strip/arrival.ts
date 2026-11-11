@@ -1,3 +1,4 @@
+import { STRIP_NOTE } from "@/lib/events";
 import * as React from "react";
 import { flyCovers } from "@/lib/work-view";
 import {
@@ -166,7 +167,7 @@ export function useArrival({
         }
         /* Kept through the head's late resize (the type pass): without it
            the strip went back to where it stood a frame ago, its very end. */
-        if (crossed) el.dispatchEvent(new Event("jg:note"));
+        if (crossed) el.dispatchEvent(new Event(STRIP_NOTE));
       });
     } else if (zooming) {
       el.dataset.arrive = "zoom";

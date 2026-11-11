@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { submitEnquiry, type ContactState } from "@/app/contact/actions";
 import { RESPONSE_TIME } from "@/lib/site";
 import { cn } from "@/lib/utils";
-import StatusMark from "@/components/StatusMark";
+import StatusMark from "@/components/vendor/status-mark";
 import { Orb, ORB_ROUND } from "@/components/orb";
 import { ReferencePicks } from "@/components/reference-picks";
 import { trailContext } from "@/components/visit-trail";

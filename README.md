@@ -93,6 +93,14 @@ An override that names a frame already in the archive uses `archiveFrame()` inst
 reads the dimensions from the manifest — hardcoding them there is how they went stale when
 the archive moved from 1600px to 2500px.
 
+### Animation: GSAP, and motion only where it came with the code
+
+Site code animates with GSAP (`gsap`, plus `gsap/Flip` loaded on demand for layout
+changes). `motion` stays installed for two reasons only: the vendored React Bits
+components in `components/vendor/` are written against it, and `dialkit` (dev-only tuning)
+needs it as a peer. New site code uses GSAP; a vendored component keeps the library it came
+with.
+
 ## Hosting
 
 Cloudflare Workers, via `@opennextjs/cloudflare`. Push to `main` deploys —

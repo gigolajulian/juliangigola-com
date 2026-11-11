@@ -1,6 +1,6 @@
-/* The drifting wall of photographs (DriftWall.tsx). */
+/* The drifting wall of photographs (drift-wall.tsx). */
 
-/* ── the drifting wall (`DriftWall.tsx`) ─────────────────────────
+/* ── the drifting wall (`drift-wall.tsx`) ─────────────────────────
  * Moved here from `DriftWall.css`. The 404 is bundled with every route,
  * so the component's own sheet was preloaded on every page and went
  * unused on Sessions, Contact and About, with a console warning each
