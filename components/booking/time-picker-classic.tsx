@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { DepositStep } from "@/components/booking/deposit-step";
 import { TZ } from "@/lib/booking/booking-rules";
 import { Bars, DAYS, Fold, iso, minutesOf, MONTHS, PARTS, recent, WEEKDAYS, WHERE, clock, zone } from "@/components/booking/time-picker-parts";
-import type { CardCtx } from "@/components/booking/time-picker";
+import type { CardCtx } from "@/components/booking/use-picker";
 
 /* The card before the editorial one, behind `?classic`. */
 export function ClassicCard({ c }: { c: CardCtx }) {

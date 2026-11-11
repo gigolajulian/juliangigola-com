@@ -1,5 +1,8 @@
 const STRIPE = "https://api.stripe.com/v1";
 
+/** What a visitor reads when Stripe cannot answer. */
+export const PAYMENTS_DOWN = "Payments are down right now. Try again in a few minutes.";
+
 /** A call to Stripe's API: a form-encoded POST, or a GET without a form. */
 export async function stripe(key: string, path: string, form?: { [k: string]: string }, idempotency?: string) {
   const res = await fetch(`${STRIPE}${path}`, {

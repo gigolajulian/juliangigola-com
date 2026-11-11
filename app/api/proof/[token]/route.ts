@@ -1,7 +1,8 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { recordLead } from "@/lib/leads/lead-store";
-import { checkout, checkPaid, finalize, PAYMENTS_DOWN } from "@/lib/proof-submit";
+import { checkout, checkPaid, finalize } from "@/lib/proof-submit";
+import { PAYMENTS_DOWN } from "@/lib/stripe";
 import { cleanSelects, device, isEmail, isOpen, owed, isToken, publicView, readProof, track, viewerKey, writeProof, type Proof } from "@/lib/proofs";
 import { json } from "@/lib/http";
 
@@ -102,6 +103,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
     await writeProof(g.kv, g.s, { ...p, checkout: c.id });
     return json({ checkout: c.url });
   } catch {
-    return json({ error: "Payments are down. Try again in a minute." }, 502);
+    return json({ error: PAYMENTS_DOWN }, 502);
   }
 }

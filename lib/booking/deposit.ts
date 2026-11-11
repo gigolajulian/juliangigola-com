@@ -1,9 +1,9 @@
 import { sendConfirm } from "@/lib/booking/confirm";
-import { enquiry, enquiryKey, looksLikeEmail, summary, whenPT } from "@/lib/inbox";
+import { enquiry, enquiryKey, summary, whenPT } from "@/lib/inbox";
 import { logMail, recordLead } from "@/lib/leads/lead-store";
 import { openNow, type KV } from "@/lib/booking/slots";
-import { EVENTS, type Booking, type Hours } from "@/lib/booking/booking-rules";
-import { lockOp, recordBooking } from "@/lib/booking/booking-engine";
+import type { Booking, Hours } from "@/lib/booking/booking-rules";
+import { lockOp, parseBooking, recordBooking } from "@/lib/booking/booking-engine";
 import { manageLinks } from "@/lib/booking/booking-token";
 
 /* ── the $100 deposit ─────────────────────────────────────────────
@@ -33,7 +33,6 @@ import { manageLinks } from "@/lib/booking/booking-token";
  * not need a dependency. Test-mode keys until Julian says live.
  * ─────────────────────────────────────────────────────────────── */
 
-import { isPaid } from "@/lib/booking/paid";
 import { alertHello, type Attachment } from "@/lib/hello-mail";
 import { stripe } from "@/lib/stripe";
 export const AMOUNT = 10000;
@@ -62,40 +61,6 @@ export const recordKey = (intent: string) => `deposit:${intent}`;
 /** A reference sent with the deposit (`app/api/deposit/[id]`): `f<n>` a file, `picks` frames of mine. */
 export const refKey = (intent: string, part: string) => `dref:${intent}:${part}`;
 export const isIntentId = (s: string) => /^pi_[A-Za-z0-9]{8,64}$/.test(s);
-
-// Stripe caps a metadata value at 500 characters.
-const cap = (s: unknown, n = 500) => (typeof s === "string" ? s.trim().slice(0, n) : "");
-
-/** The visitor's booking, checked, or the reason it is not one. `call`: a free call (`app/api/book`), not a paid session. */
-export function parseBooking(raw: unknown, call = false): Booking | string {
-  const b = (raw ?? {}) as { [k: string]: unknown };
-  const slug = cap(b.slug);
-  if (call ? !EVENTS[slug]?.call : !isPaid(slug)) return call ? "Not a call." : "Not a paid session.";
-  const start = cap(b.start);
-  const t = Date.parse(start);
-  if (!start || isNaN(t) || t < Date.now()) return "Pick a time.";
-  const timeZone = cap(b.timeZone, 64);
-  try {
-    new Intl.DateTimeFormat("en-US", { timeZone });
-  } catch {
-    return "Unknown time zone.";
-  }
-  const name = cap(b.name, 120);
-  const email = cap(b.email, 200);
-  if (!name) return "Add your name.";
-  if (!looksLikeEmail(email)) return "Check your email.";
-  return {
-    slug,
-    start: new Date(t).toISOString(),
-    timeZone,
-    name,
-    email,
-    phone: cap(b.phone, 20) || undefined,
-    where: cap(b.where) || undefined,
-    notes: cap(b.notes) || undefined,
-    engine: "own",
-  };
-}
 
 /**
  * Whether the start is still offered by hello@'s calendar.
@@ -231,8 +196,8 @@ export async function settle(env: Env, intent: string, metadata: { [k: string]: 
     // Stripe to come back (503). Once hello@ has heard, Stripe may stop.
     if (r.status === "booking" && r.warned) return "failed";
     if (r.status === "booking" && Date.now() - Date.parse(r.at) > STUCK_MS) {
-      const b = fromMetadata(metadata);
-      const who = typeof b === "string" ? undefined : b;
+      const parsed = fromMetadata(metadata);
+      const who = parsed.ok ? parsed.booking : undefined;
       const what = who ? [SESSION[who.slug] ?? who.slug, whenPT(who.start), who.name, "$100"].join(", ") : "$100";
       await env.INBOX.put(key, JSON.stringify({ ...r, warned: true }), { expirationTtl: 90 * 864e2 }).catch((e: unknown) => console.error("deposit record", "warned", String(e)));
       if (who) await recordLead(env, who.email, { event: { at: new Date().toISOString(), kind: "deposit-stuck", ref: intent, note: what }, name: who.name, kind: who.slug, flag: "stuck" });
@@ -262,9 +227,11 @@ export async function settle(env: Env, intent: string, metadata: { [k: string]: 
   };
   await put({ status: "booking" });
 
-  const b = fromMetadata(metadata);
+  const parsed = fromMetadata(metadata);
   const link = dashboardLink(intent, env.STRIPE_SECRET_KEY);
   let broke = "";
+  // What tell() and the stuck row read: the booking, or why the metadata is not one.
+  const b = parsed.ok ? parsed.booking : parsed.reason;
   if (typeof b !== "string") {
     // The site's engine rechecks and books in one step, inside its lock.
     // Only the booking itself may end in a refund: a step after it never undoes a booked time.
