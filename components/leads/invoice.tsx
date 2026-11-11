@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { mailable } from "@/lib/lead-crm";
 import { balance, dayB, DEPOSIT, MAX_ROWS_B, NOTE_B, usd, usdB, type Crop, type Invoice, type InvoiceB, type InvoiceFrom } from "@/lib/invoice";
 import { framed, loadImage, place, shrink, toneFor } from "@/lib/invoice-photo";
-import { day, errorText, inboxCall, plusDays, ymdPT } from "@/lib/lead-desk";
+import { adminCall, day, errorText, inboxCall, plusDays, ymdPT } from "@/lib/lead-desk";
 import { btn, compose, field, fieldLabel, kindOf, primary } from "@/components/leads/shared";
 import type { Patch } from "@/lib/lead-desk";
 
@@ -300,7 +300,7 @@ export function InvoiceSheetB({ l, full, patch, done }: { l: LeadSummary; full: 
     try {
       let key = photoKey;
       if (!key) {
-        const o = await inboxCall<{ key?: string }>({ method: "PATCH", body: JSON.stringify({ invoicePhoto: src }) });
+        const o = await adminCall<{ key?: string }>("/api/inbox", { method: "PATCH", body: JSON.stringify({ invoicePhoto: src }) }, "Could not save the photo.");
         if (!o.key) throw new Error("Could not save the photo.");
         setPhotoKey((key = o.key));
       }
@@ -430,7 +430,7 @@ export function FromForm({ from, saved }: { from: InvoiceFrom; saved: (f: Invoic
   const [f, setF] = React.useState(from);
   const [err, setErr] = React.useState<string | null>(null);
   const save = () =>
-    inboxCall<{ from?: InvoiceFrom }>({ method: "PATCH", body: JSON.stringify({ invoiceFrom: f }) })
+    adminCall<{ from?: InvoiceFrom }>("/api/inbox", { method: "PATCH", body: JSON.stringify({ invoiceFrom: f }) }, "Could not save.")
       .then((o) => {
         if (!o.from) throw new Error("Could not save.");
         saved(o.from);

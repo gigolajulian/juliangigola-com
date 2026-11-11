@@ -20,10 +20,11 @@ export class AdminError extends Error {
 }
 
 /** One authed JSON request to an admin route. A non-JSON body (an HTML 502) reads as {}, so the status still shows. */
-export async function adminCall<T = Record<string, unknown>>(path: string, init: RequestInit = {}): Promise<T> {
+/** `fail` is what a failure says when the route gave no error of its own. */
+export async function adminCall<T = Record<string, unknown>>(path: string, init: RequestInit = {}, fail?: string): Promise<T> {
   const res = await fetch(path, { ...init, headers: { ...authed(), "content-type": "application/json", ...init.headers }, cache: "no-store" });
   const out = (await res.json().catch(() => ({}))) as T & { error?: string };
-  if (!res.ok) throw new AdminError(out.error ?? `Request failed (${res.status})`, res.status);
+  if (!res.ok) throw new AdminError(out.error ?? fail ?? `Request failed (${res.status})`, res.status);
   return out;
 }
 

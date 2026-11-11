@@ -55,8 +55,9 @@ export function LeadHours() {
   const [pick, setPick] = React.useState("");
 
   const call = React.useCallback(async (init?: RequestInit) => {
-    const { hours } = await adminCall<{ hours?: Hours }>("/api/booking/hours", init);
-    if (!hours) throw new Error("Could not reach the booking lock.");
+    const lock = "Could not reach the booking lock.";
+    const { hours } = await adminCall<{ hours?: Hours }>("/api/booking/hours", init, lock);
+    if (!hours) throw new Error(lock);
     return hours;
   }, []);
 
