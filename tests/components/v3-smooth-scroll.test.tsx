@@ -27,7 +27,9 @@ describe("smooth-scroll", () => {
     const to = vi.spyOn(window, "scrollTo").mockImplementation(() => {});
     window.scrollBy = vi.fn();
     scrollTop();
-    expect(to).toHaveBeenCalledWith(0, 0);
+    expect(to).toHaveBeenCalledWith({ top: 0, behavior: "instant" });
+    scrollTop(true);
+    expect(to).toHaveBeenCalledWith({ top: 0, behavior: "smooth" });
     shiftScroll(40);
     expect(window.scrollBy).toHaveBeenCalledWith(0, 40);
   });
