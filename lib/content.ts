@@ -55,7 +55,7 @@ export type SiteContent = {
   /**
    * Cover-art releases to lead the homepage rack, in order.
    *
-   * May be shorter than the rack — `components/cover-art.tsx` fills the
+   * May be shorter than the rack — `components/cover/cover-art.tsx` fills the
    * remainder from the manifest, so the grid is always full and an empty list
    * means exactly what it did before this existed.
    */

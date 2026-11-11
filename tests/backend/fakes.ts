@@ -95,7 +95,7 @@ export async function leadOf(kv: FakeKV, email: string) {
   return typeof raw === "string" ? s.open<import("@/lib/leads").Lead>(raw) : undefined;
 }
 
-/** A Durable Object's storage, as `lib/booking-engine.ts` uses it. */
+/** A Durable Object's storage, as `lib/booking/booking-engine.ts` uses it. */
 export class FakeStore {
   data = new Map<string, unknown>();
   async get<T>(key: string) {

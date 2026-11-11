@@ -2,8 +2,8 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { TimePicker } from "@/components/time-picker";
-import { REFUND_HOURS, refundable, TZ } from "@/lib/booking-rules";
+import { TimePicker } from "@/components/booking/time-picker";
+import { REFUND_HOURS, refundable, TZ } from "@/lib/booking/booking-rules";
 
 /* ── a client's own booking: reschedule or cancel ─────────────────
  * Opened from the links in the "You're in." mail (`app/booking/[id]`).

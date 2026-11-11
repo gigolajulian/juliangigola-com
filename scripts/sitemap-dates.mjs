@@ -30,9 +30,9 @@ const OUT = "lib/sitemap-dates.json";
 /** The legal page is words in components, not photographs. */
 const LEGAL = [
   "app/legal/page.tsx",
-  "components/legal.tsx",
-  "components/terms.tsx",
-  "components/privacy.tsx",
+  "components/site/legal.tsx",
+  "components/site/terms.tsx",
+  "components/site/privacy.tsx",
 ];
 
 const git = (...args) =>

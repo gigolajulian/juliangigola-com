@@ -59,7 +59,7 @@
 @import "./styles/v3.css";
 @import "./styles/motion-plan.css"; /* MOTION-PLAN.md items, only under ?mplan= */
 
-/* Time picker (components/time-picker.tsx): a digit rolls in when it changes. */
+/* Time picker (components/booking/time-picker.tsx): a digit rolls in when it changes. */
 @keyframes tp-roll {
   from {
     opacity: 0;

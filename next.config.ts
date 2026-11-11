@@ -6,7 +6,7 @@ import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 // built sends a visitor 308 → 404, which is worse than the plain 404 they
 // would have got, because it looks like the site meant to take them there.
 import { LINKABLE, CATEGORIES, LISTINGS, categoryHref } from "./lib/work";
-import { BOOKING_SLUGS } from "./lib/booking-slugs";
+import { BOOKING_SLUGS } from "./lib/booking/booking-slugs";
 
 /**
  * The old site published every project at the site root — `/wired-magazine`,
@@ -243,8 +243,8 @@ const csp = [
   // is the other direction and still says no other site may frame this one.
   // 'self' is the SEO tab's frame of the site's own pages.
   // And the booking calendars on /book and the session pages (Google Calendar
-  // appointment schedules, `components/book-picker.tsx`, `components/contact-screen.tsx`).
-  // Stripe's Payment Element for the $100 deposit (`lib/deposit.ts`): its
+  // appointment schedules, `components/booking/book-picker.tsx`, `components/contact-screen.tsx`).
+  // Stripe's Payment Element for the $100 deposit (`lib/booking/deposit.ts`): its
   // script and frames from js.stripe.com, 3D Secure from hooks.stripe.com,
   // and its calls to api.stripe.com.
   "frame-src 'self' https://www.youtube-nocookie.com https://player.vimeo.com https://calendar.google.com https://js.stripe.com https://*.js.stripe.com https://hooks.stripe.com",
@@ -449,7 +449,7 @@ const nextConfig: NextConfig = {
   async redirects() {
     // Project slugs win over category slugs where a name is used for both.
     // A booking page wins over both: /headshots was the old site's gallery,
-    // and is now the page that books one (`lib/booking-slugs.ts`).
+    // and is now the page that books one (`lib/booking/booking-slugs.ts`).
     const seen = new Set<string>(BOOKING_SLUGS.map((s) => `/${s}`));
     return [
       // The old site's graduation gallery, in its links and the index:

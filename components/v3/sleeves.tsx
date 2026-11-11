@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { CoverArtGallery } from "@/components/cover-art-gallery";
+import { CoverArtGallery } from "@/components/cover/cover-art-gallery";
 import type { CoverRelease } from "@/lib/cover-art-types";
 
 /* JG V3 Cover Art as sleeves (Julian, 2026-10-27, from the Sleeve Viewer

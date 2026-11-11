@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { POST } from "@/app/api/booking/[id]/route";
-import { bookingToken } from "@/lib/booking-token";
-import { forgetToken } from "@/lib/gcal";
+import { bookingToken } from "@/lib/booking/booking-token";
+import { forgetToken } from "@/lib/booking/gcal";
 import { BookingLock } from "@/worker/booking-lock";
 import { FakeEmail, FakeKV, FakeStore, fakeLock, LEADS_KEY } from "./fakes";
 

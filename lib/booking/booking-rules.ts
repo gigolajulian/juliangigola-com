@@ -92,7 +92,7 @@ export const REFUND_HOURS = 48;
 export const refundable = (r: { intent?: string; start: string; firstStart?: string }, now = Date.now()) =>
   !!r.intent && Math.min(Date.parse(r.start), Date.parse(r.firstStart ?? r.start)) - now >= REFUND_HOURS * 36e5;
 
-/** A visitor's booking, checked by `parseBooking` in `lib/deposit.ts`. */
+/** A visitor's booking, checked by `parseBooking` in `lib/booking/deposit.ts`. */
 export type Booking = {
   slug: string;
   /** ISO 8601, UTC. */
@@ -103,6 +103,6 @@ export type Booking = {
   phone?: string;
   where?: string;
   notes?: string;
-  /** Booked by the site's engine (`lib/booking-engine.ts`), through its lock. */
+  /** Booked by the site's engine (`lib/booking/booking-engine.ts`), through its lock. */
   engine: "own";
 };

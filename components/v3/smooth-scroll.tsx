@@ -8,11 +8,13 @@ type ScrollFn = (y: number) => void;
 const scrollFns = new Set<ScrollFn>();
 let live: Lenis | null = null;
 
-/** Jumps to the top, through Lenis when it runs: a plain scrollTo mid-glide
- *  is written over by Lenis's next frame (page-fly.tsx). */
-export function scrollTop() {
-  if (live) live.scrollTo(0, { immediate: true, force: true });
-  else scrollTo(0, 0);
+/** Goes to the top, through Lenis when it runs: a plain scrollTo mid-glide
+ *  is written over by Lenis's next frame (page-fly.tsx). `glide` scrolls
+ *  there smoothly (the wordmark on the homepage, chrome.tsx). */
+export function scrollTop(glide = false) {
+  // 1.2s ease-in-out for the glide: Lenis's lerp lurched 75% in 200ms, then crawled (Julian, #833).
+  if (live) live.scrollTo(0, glide ? { duration: 1.2, easing: (t) => (t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2), force: true } : { immediate: true, force: true });
+  else scrollTo({ top: 0, behavior: glide ? "smooth" : "instant" });
 }
 
 /** Moves the page by `dy` without breaking a glide: Lenis writes its own

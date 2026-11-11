@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { cleanHours, EVENTS } from "@/lib/booking-rules";
-import { forgetToken } from "@/lib/gcal";
-import { localIso, startsFor, zoned } from "@/lib/slots";
+import { cleanHours, EVENTS } from "@/lib/booking/booking-rules";
+import { forgetToken } from "@/lib/booking/gcal";
+import { localIso, startsFor, zoned } from "@/lib/booking/slots";
 
-/* The site's own open times (`lib/slots.ts`, `app/api/slots`): the rules
+/* The site's own open times (`lib/booking/slots.ts`, `app/api/slots`): the rules
    Cal.com had, minus what hello@'s calendar says is busy, in the visitor's
    zone and Cal.com's shape. */
 

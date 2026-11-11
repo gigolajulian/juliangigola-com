@@ -13,10 +13,10 @@ import {
   saveBooking,
   writeHours,
   type BookingRecord,
-} from "@/lib/booking-engine";
-import { DEFAULT_HOURS } from "@/lib/booking-rules";
+} from "@/lib/booking/booking-engine";
+import { DEFAULT_HOURS } from "@/lib/booking/booking-rules";
 
-/* The record keeping of the site's own engine (`lib/booking-engine.ts`),
+/* The record keeping of the site's own engine (`lib/booking/booking-engine.ts`),
    the parts that never reach Google: what the client page may see, which
    bookings are due a reminder, and the refusals before a calendar call. */
 

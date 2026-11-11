@@ -1,4 +1,4 @@
-import { gcal } from "./gcal";
+import { gcal } from "./booking/gcal";
 import { sealer } from "./lead-crypto";
 import { type Change } from "./leads";
 import { canonLeads, readLead, recordLead, type LeadStore } from "./lead-store";

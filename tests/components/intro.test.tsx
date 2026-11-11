@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { render } from "@testing-library/react";
-import { Intro } from "@/components/intro";
+import { Intro } from "@/components/splash/intro";
 
 describe("Intro", () => {
   it("renders the hidden layer with its inline script", () => {

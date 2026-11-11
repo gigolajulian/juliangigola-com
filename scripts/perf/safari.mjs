@@ -177,7 +177,7 @@ try {
     await wd("POST", `${s}/timeouts`, { script: 15000 });
     await wd("POST", `${s}/window/rect`, { x: 0, y: 0, width: WIDTH, height: HEIGHT });
 
-    /* The splash (`components/intro.tsx`): a new session has not seen it,
+    /* The splash (`components/splash/intro.tsx`): a new session has not seen it,
        so it plays on the first load. Frames from the moment WebDriver
        hands the page back, which is after its load event, until the
        splash has lifted (`data-intro` gone). */

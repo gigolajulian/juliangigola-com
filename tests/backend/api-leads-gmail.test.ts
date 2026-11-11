@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { POST } from "@/app/api/leads/gmail/route";
-import { forgetToken } from "@/lib/gcal";
+import { forgetToken } from "@/lib/booking/gcal";
 import { CURSOR } from "@/lib/gmail-sync";
 import { FakeKV, LEADS_KEY } from "./fakes";
 

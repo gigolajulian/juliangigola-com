@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { DialRoot, useDialKit } from "dialkit";
-import { CalEmbed } from "@/components/cal-embed";
+import { CalEmbed } from "@/components/booking/cal-embed";
 import { DialCopyAll } from "@/components/dial-copy-all";
 import { InquireWall } from "@/components/inquire-wall";
 import type { WallTile } from "@/lib/wall-tile";
@@ -15,7 +15,7 @@ export type Bookable = {
   blurb: string;
   rate: string;
   length: string;
-  /** Its event, "juliangigola/event-slug" (`lib/booking.ts`). */
+  /** Its event, "juliangigola/event-slug" (`lib/booking/booking.ts`). */
   cal: string;
   /** The photographs behind it while it is the one picked. */
   wall: WallTile[];

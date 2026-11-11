@@ -32,7 +32,7 @@ export type Invoice = { no: string; date: string; lines: InvoiceLine[]; paid: nu
 /** His own details on every invoice. Kept sealed in KV, never in the code: the repo is public. Bank and tax lines are design B's. */
 export type InvoiceFrom = { name: string; a1: string; a2: string; a3: string; email: string; phone: string; ein: string; signoff: string; notes: string; bank: string; routing: string; account: string; late: string; tax: string };
 
-/** The site's deposit in dollars: `AMOUNT` in lib/deposit.ts, which the desk's bundle must not import. */
+/** The site's deposit in dollars: `AMOUNT` in lib/booking/deposit.ts, which the desk's bundle must not import. */
 export const DEPOSIT = 100;
 /** Lines that fit above the notes block on the page. */
 export const MAX_LINES = 8;

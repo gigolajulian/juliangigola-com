@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { shareOg } from "@/lib/share";
-import { BookPicker, type Bookable } from "@/components/book-picker";
+import { BookPicker, type Bookable } from "@/components/booking/book-picker";
 import { V3Book } from "@/components/v3/book";
-import { calEvent, pageForSession } from "@/lib/booking";
+import { calEvent, pageForSession } from "@/lib/booking/booking";
 import { isSession } from "@/lib/v3";
 import { wallOf } from "@/lib/work";
-import { SESSION_TYPES, formatPrice } from "@/lib/sessions";
+import { SESSION_TYPES, formatPrice } from "@/lib/booking/sessions";
 
 export const metadata: Metadata = {
   title: "Book a session",
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 ...shareOg("Book a session","Portraits, graduation, headshots and studio digitals in the San Francisco Bay Area. Pick a time on my calendar."),
 };
 
-/* The four sessions, each a Cal.com event (`CAL_EVENTS`, `lib/booking.ts`);
+/* The four sessions, each a Cal.com event (`CAL_EVENTS`, `lib/booking/booking.ts`);
    weddings book a call (its page's `book.cal`). The lengths are the events' own. */
 const LENGTHS: Record<string, string> = {
   portraits: "1 hour",

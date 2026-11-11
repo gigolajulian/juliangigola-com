@@ -2,8 +2,8 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { TimePicker, type V3Book } from "@/components/time-picker";
-import { isPaid } from "@/lib/paid";
+import { TimePicker, type V3Book } from "@/components/booking/time-picker";
+import { isPaid } from "@/lib/booking/paid";
 
 /* ── the booking calendar ────────────────────────────────────────
  * The site's own time picker (`time-picker.tsx`, times from

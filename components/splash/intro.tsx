@@ -2,9 +2,9 @@
 
 import * as React from "react";
 import loader from "@/image-loader";
-import { sand } from "@/components/sand-splash";
-import { burst } from "@/components/burst-splash";
-import { split } from "@/components/split-splash";
+import { sand } from "@/components/splash/sand-splash";
+import { burst } from "@/components/splash/burst-splash";
+import { split } from "@/components/splash/split-splash";
 import { HERO } from "@/lib/v3";
 import { keepNames } from "@/lib/keep-names";
 

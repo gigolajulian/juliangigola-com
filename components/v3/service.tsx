@@ -4,7 +4,7 @@ import { V3Foot } from "@/components/v3/chrome";
 import { V3BookFlow } from "@/components/v3/book";
 import { Run } from "@/components/v3/flow";
 import { Doors } from "@/components/v3/home";
-import { BOOKING_PAGES, bookingHref, type BookingPage } from "@/lib/booking";
+import { BOOKING_PAGES, bookingHref, type BookingPage } from "@/lib/booking/booking";
 import { CAMPUS_GUIDES, campusHref } from "@/lib/campus-guides";
 import { SESSIONS, type SessionSlug } from "@/lib/v3";
 import type { Frame } from "@/lib/work-types";
@@ -12,7 +12,7 @@ import type { Frame } from "@/lib/work-types";
 /* JG V3 service page (leftovers sheet, card A): the title on the left with
    the rate and includes as a run and the two buttons, the frames in the
    home's three-column sequence, the details and questions as rows, then
-   the two doors. The words are `lib/booking.ts`'s, unchanged. */
+   the two doors. The words are `lib/booking/booking.ts`'s, unchanged. */
 
 export function V3Service({ page, frames }: { page: BookingPage; frames: Frame[] }) {
   /* Its booking on the V3 stepper: the same slug, or the session that books the same Cal.com event. */

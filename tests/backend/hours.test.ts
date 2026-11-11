@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FakeStore, fakeLock } from "./fakes";
-import { forgetToken } from "@/lib/gcal";
+import { forgetToken } from "@/lib/booking/gcal";
 import { BookingLock } from "@/worker/booking-lock";
 
 /* Hours from the lead desk (`app/api/booking/hours`): only Julian can set
@@ -10,8 +10,8 @@ const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
 vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
 const { GET, PUT } = await import("@/app/api/booking/hours/route");
 const { GET: slots } = await import("@/app/api/slots/route");
-const { isSlotOpen } = await import("@/lib/deposit");
-const { liveHours } = await import("@/lib/booking-engine");
+const { isSlotOpen } = await import("@/lib/booking/deposit");
+const { liveHours } = await import("@/lib/booking/booking-engine");
 
 const OAUTH = JSON.stringify({ client_id: "a", client_secret: "b", refresh_token: "c" });
 const KEY = "inbox-key-for-tests";

@@ -1,5 +1,5 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { isDeposit, isIntentId, settle, verifyStripe } from "@/lib/deposit";
+import { isDeposit, isIntentId, settle, verifyStripe } from "@/lib/booking/deposit";
 
 /* ── Stripe's webhook ──────────────────────────────────────────────
  * The source of truth for a deposit: the card saying it paid proves

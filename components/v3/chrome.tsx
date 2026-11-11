@@ -5,7 +5,7 @@ import { mplan } from "@/lib/mplan";
 import Link from "next/link";
 import { THEME_COLOR } from "@/lib/theme-color";
 import { usePathname } from "next/navigation";
-import { onLenisScroll } from "./smooth-scroll";
+import { onLenisScroll, scrollTop } from "./smooth-scroll";
 
 /* JG V3 chrome (master v39): the glass header, the phone menu, the theme
    toggle and the footer line. Every route uses it, /admin included (2026-10-31). */
@@ -426,7 +426,13 @@ function SiteHeader() {
     <div className="v3 contents">
       {/* Inert per part, not the whole bar: the portfolio's tools stay live in it while it tucks. */}
       <header ref={hdr} className={`site-hdr${show || menu ? " show" : ""}${dock ? " dock" : ""}${landed || menu ? " landed" : ""}${menu ? " menu-on" : ""}`}>
-        <Link className="wm site-wm" href="/" inert={!(show || menu)}>Julian Gigola</Link>
+        {/* On the homepage it glides back up to the hero (a jump under Reduce Motion); elsewhere page-fly.tsx opens Home at its top. */}
+        <Link className="wm site-wm" href="/" inert={!(show || menu)} onClick={(e) => {
+          if (path !== "/" || e.metaKey || e.ctrlKey || e.shiftKey) return;
+          e.preventDefault();
+          setMenu(false);
+          scrollTop(!matchMedia("(prefers-reduced-motion: reduce)").matches);
+        }}>Julian Gigola</Link>
         <div id="hdr-tools" className="hslot" />
         <nav className="links lbl burger" aria-label="Main" inert={!(show || menu)}>
           {NAV.map((n) => (
