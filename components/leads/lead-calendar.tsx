@@ -15,10 +15,10 @@ import { cn } from "@/lib/utils";
  * a Calendar line in the desktop sidebar, under More on the phone.
  * ─────────────────────────────────────────────────────────────── */
 
-type Ev = { id: string; title: string; start: string; end: string; allDay: boolean; block: boolean; booking: boolean; free: boolean };
-type Busy = { label: string; start: string; end: string };
-type Extra = { label: string; src: string; ics: boolean; failed: boolean };
-type Month = { events: Ev[]; busy: Busy[]; extras: Extra[] };
+export type Ev = { id: string; title: string; start: string; end: string; allDay: boolean; block: boolean; booking: boolean; free: boolean };
+export type Busy = { label: string; start: string; end: string };
+export type Extra = { label: string; src: string; ics: boolean; failed: boolean };
+export type Month = { events: Ev[]; busy: Busy[]; extras: Extra[] };
 
 const HEAD: React.CSSProperties = { fontFamily: "var(--font-display)", textTransform: "none", fontWeight: 600, letterSpacing: "-0.02em", wordSpacing: 0 };
 const DOW = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -36,7 +36,7 @@ const time = (ms: number) =>
 const range = (a: number, b: number) => `${time(a)}–${time(b)}`;
 
 /** The days `[start, end)` touches, in Pacific. */
-function daysOf(start: string, end: string) {
+export function daysOf(start: string, end: string) {
   const out: string[] = [];
   const last = dayOf(Date.parse(end) - 1);
   for (let d = dayOf(Date.parse(start)); d <= last; d = plus(d, 1)) out.push(d);
@@ -44,7 +44,7 @@ function daysOf(start: string, end: string) {
 }
 
 /** The open stretches of `day` within Julian's hours, minus what is busy. */
-function openSpans(day: string, busy: { start: number; end: number }[], now: number) {
+export function openSpans(day: string, busy: { start: number; end: number }[], now: number) {
   const h = HOURS[weekday(day)];
   if (!h) return [];
   let spans = [[zoned(...ymd(day), h[0]), zoned(...ymd(day), h[1])]];
@@ -52,7 +52,7 @@ function openSpans(day: string, busy: { start: number; end: number }[], now: num
   return spans.filter(([a, z]) => z > Math.max(a, now));
 }
 
-const call = <T,>({ query = "", ...init }: RequestInit & { query?: string } = {}) => adminCall<T>(`/api/calendar${query}`, init);
+export const calendarCall = <T,>({ query = "", ...init }: RequestInit & { query?: string } = {}) => adminCall<T>(`/api/calendar${query}`, init);
 
 export function LeadCalendar({ onBack }: { onBack?: () => void }) {
   const [now] = React.useState(() => Date.now());
@@ -74,7 +74,7 @@ export function LeadCalendar({ onBack }: { onBack?: () => void }) {
   const to = cells[cells.length - 1];
   React.useEffect(() => {
     let live = true;
-    call<Month>({ query: `?from=${from}&to=${to}` })
+    calendarCall<Month>({ query: `?from=${from}&to=${to}` })
       .then((o) => live && (setData(o), setError(null)))
       .catch((e: unknown) => live && setError(errorText(e)));
     return () => void (live = false);
@@ -85,7 +85,7 @@ export function LeadCalendar({ onBack }: { onBack?: () => void }) {
     setBusyUi(true);
     setError(null);
     try {
-      await call({ method: "POST", body: JSON.stringify(body) });
+      await calendarCall({ method: "POST", body: JSON.stringify(body) });
       load();
       return true;
     } catch (e) {
