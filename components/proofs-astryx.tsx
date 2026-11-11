@@ -5,7 +5,7 @@
  * proofs desk only. Lives at /admin/proofs/astryx, so Astryx's CSS never
  * reaches the client's proof page or the classic desk. Same API as the
  * classic desk (/api/proof): list, open one, see the picks, create,
- * send, copy the link, and close a draft. Activity is the classic view.
+ * send, copy the link, and close a draft. Activity is components/proofs-activity-astryx.tsx.
  * ─────────────────────────────────────────────────────────────── */
 
 import "@astryxdesign/core/astryx.css";
@@ -29,8 +29,9 @@ import { MetadataList, MetadataListItem } from "@astryxdesign/core/MetadataList"
 import { ProgressBar } from "@astryxdesign/core/ProgressBar";
 import { KEY_STORE } from "@/lib/admin/admin-github";
 import { SignIn } from "@/components/admin/admin-leads";
-import { Activity, api, closed, status, type Row } from "@/components/admin/admin-proofs";
+import { api, closed, status, type Row } from "@/components/admin/admin-proofs";
 import { TZ } from "@/lib/booking/booking-rules";
+import { ActivityAstryx } from "@/components/proofs-activity-astryx";
 import { errorText } from "@/lib/leads/lead-desk";
 import { TOKEN_STORE } from "@/lib/admin/admin-github";
 import { extras, stage, STAGES } from "@/lib/proofs";
@@ -50,7 +51,8 @@ function Tile({ k, v }: { k: string; v: string }) {
   );
 }
 
-export function ProofsAstryx() {
+/** `embedded`: drawn inside the leads desk (its Theme and nav), with no shell of its own. */
+export function ProofsAstryx({ embedded = false }: { embedded?: boolean } = {}) {
   const [list, setList] = React.useState<Row[] | null>(null);
   const [error, setError] = React.useState<string | null>(null);
   const [sel, setSel] = React.useState<string | null>(null);
@@ -143,23 +145,25 @@ export function ProofsAstryx() {
 
   const detail = cur ? <Gallery key={cur.token} p={cur} changed={load} onBack={wide ? undefined : () => setSel(null)} gone={() => { setSel(null); load(); }} /> : null;
 
+  const body = wide ? (
+    <Layout
+      height="fill"
+      start={embedded ? undefined : nav}
+      content={<LayoutContent padding={6} label="Galleries">{galleries}</LayoutContent>}
+      end={<LayoutPanel width={560} padding={6} hasDivider label="Gallery">{detail ?? <Text type="supporting">Pick a gallery to see it here.</Text>}</LayoutPanel>}
+    />
+  ) : (
+    <VStack gap={4}>{detail ?? galleries}</VStack>
+  );
+  if (embedded) return wide ? body : <Layout height="fill" content={<LayoutContent padding={4} label="Proofs">{body}</LayoutContent>} />;
   if (!mode) return null;
   return (
     <Theme theme={neutralTheme} mode={mode}>
       {/* The site sets mono capitals everywhere; Astryx sets its own type here, in the site's text face. */}
-      {/* The site's global `button, ::placeholder` caps (and h2, h3) reach Astryx buttons, rows and titles, and the classic Activity lays out by viewport, too wide for the panel; here, not in globals.css, so public CSS stays the same. */}
-      <style>{`[data-astryx-desk="proofs"] :is(button,h2,h3),[data-astryx-desk="proofs"] ::placeholder{text-transform:none;letter-spacing:normal}[data-astryx-activity]>div{grid-template-columns:1fr}[data-astryx-activity] dl{grid-template-columns:repeat(2,1fr)}`}</style>
+      {/* The site's global `button, ::placeholder` caps (and h2, h3) reach Astryx buttons, rows and titles: here, not in globals.css, so public CSS stays the same. */}
+      <style>{`[data-astryx-desk="proofs"] :is(button,h2,h3),[data-astryx-desk="proofs"] ::placeholder{text-transform:none;letter-spacing:normal}`}</style>
       <div data-astryx-desk="proofs" style={{ height: wide ? "calc(100dvh - 48px)" : undefined, textTransform: "none", letterSpacing: "normal", ["--font-family-body" as string]: 'var(--font-v2-text, "Helvetica Neue", Helvetica, Arial, sans-serif)' }}>
-        {wide ? (
-          <Layout
-            height="fill"
-            start={nav}
-            content={<LayoutContent padding={6} label="Galleries">{galleries}</LayoutContent>}
-            end={<LayoutPanel width={560} padding={6} hasDivider label="Gallery">{detail ?? <Text type="supporting">Pick a gallery to see it here.</Text>}</LayoutPanel>}
-          />
-        ) : (
-          <VStack gap={4}>{detail ?? galleries}</VStack>
-        )}
+        {body}
       </div>
     </Theme>
   );
@@ -299,7 +303,7 @@ function Gallery({ p, changed, onBack, gone }: { p: Row; changed: () => void; on
         </VStack>
       ) : null}
 
-      {tab === "activity" ? <div data-astryx-activity=""><Activity p={p} /></div> : null}
+      {tab === "activity" ? <ActivityAstryx p={p} /> : null}
 
       {tab === "selects" ? (
         p.selects.length ? (

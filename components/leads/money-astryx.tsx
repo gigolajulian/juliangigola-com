@@ -62,7 +62,7 @@ export function MoneyAstryx() {
         </LayoutHeader>
       }
       content={
-        <LayoutContent role="main" label="Money">
+        <LayoutContent role="main" label="Money" padding={4}>
           <VStack gap={6}>
             {err && !top ? <Text color="secondary">{err}</Text> : null}
             {!top && !err ? <Text type="code" size="sm" color="secondary">Asking Stripe</Text> : null}
