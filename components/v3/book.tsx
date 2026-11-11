@@ -97,7 +97,10 @@ export function V3BookFlow({ slug, tabs = true, h1 = false }: { slug: SessionSlu
      place, and Safari showed the slot empty until the new file came: about
      80ms of nothing between Portraits and Headshots (MAC, 2026-11-08). */
   React.useEffect(() => {
-    if (!more) return;
+    /* Save-Data or a slow line skips it, as the portfolio's warm does: the
+       five photos are ~550 KB on a 3x phone (audit 2026-11-11). */
+    const net = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
+    if (!more || net?.saveData || /2g|3g/.test(net?.effectiveType ?? "")) return;
     const warm = () => {
       const light = document.documentElement.dataset.theme === "light";
       const phone = matchMedia("(max-width: 800px)").matches;
