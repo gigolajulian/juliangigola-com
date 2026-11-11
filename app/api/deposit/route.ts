@@ -1,7 +1,7 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { liveHours } from "@/lib/booking/booking-engine";
 import { AMOUNT, CURRENCY, intentForm, isSlotOpen, parseBooking } from "@/lib/booking/deposit";
-import { stripe } from "@/lib/stripe";
+import { PAYMENTS_DOWN, stripe } from "@/lib/stripe";
 import { json } from "@/lib/http";
 
 /* ── a deposit starts ──────────────────────────────────────────────
@@ -36,6 +36,6 @@ export async function POST(request: Request) {
     return json({ clientSecret: pi.client_secret, intentId: pi.id, amount: AMOUNT, currency: CURRENCY });
   } catch (e) {
     console.error("deposit intent", String(e));
-    return json({ error: "Payments are down. Try again in a minute." }, 502);
+    return json({ error: PAYMENTS_DOWN }, 502);
   }
 }
