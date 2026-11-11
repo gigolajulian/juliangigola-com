@@ -243,7 +243,7 @@ const csp = [
   // is the other direction and still says no other site may frame this one.
   // 'self' is the SEO tab's frame of the site's own pages.
   // And the booking calendars on /book and the session pages (Google Calendar
-  // appointment schedules, `components/book-picker.tsx`, `components/contact-screen.tsx`).
+  // appointment schedules, `components/booking/book-picker.tsx`, `components/contact-screen.tsx`).
   // Stripe's Payment Element for the $100 deposit (`lib/deposit.ts`): its
   // script and frames from js.stripe.com, 3D Secure from hooks.stripe.com,
   // and its calls to api.stripe.com.

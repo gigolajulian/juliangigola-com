@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { ManageBooking, type Managed } from "@/components/manage-booking";
+import { ManageBooking, type Managed } from "@/components/booking/manage-booking";
 
 // The picker fetches times on its own; it is not what is under test here.
-vi.mock("@/components/time-picker", () => ({ TimePicker: () => <p>picker</p> }));
+vi.mock("@/components/booking/time-picker", () => ({ TimePicker: () => <p>picker</p> }));
 
 afterEach(() => vi.unstubAllGlobals());
 

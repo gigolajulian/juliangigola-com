@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { TimePicker, type V3Book } from "@/components/time-picker";
+import { TimePicker, type V3Book } from "@/components/booking/time-picker";
 import { isPaid } from "@/lib/paid";
 
 /* ── the booking calendar ────────────────────────────────────────

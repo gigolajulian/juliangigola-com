@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { ManageBooking } from "@/components/manage-booking";
+import { ManageBooking } from "@/components/booking/manage-booking";
 import { lock, clientView, type BookingRecord } from "@/lib/booking-engine";
 import { tokenOpens } from "@/lib/booking-token";
 
