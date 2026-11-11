@@ -184,14 +184,77 @@ html:has(.proof) #main{transform:none}
 
 /* ── ?proofwall=1: the gate over the 404's wall (components/proof-wall.tsx) ── */
 .proof[data-wall]{position:relative;isolation:isolate}
+/* Julian: no scrollbar on the wall. Hidden for the whole page, so the grid does not jump sideways when the wall hands over
+   either (a kept gutter showed as an empty bar). The page still scrolls by wheel, touch and keys. */
+html:has(.proof[data-wall]){scrollbar-width:none}
+html:has(.proof[data-wall])::-webkit-scrollbar{display:none}
 /* the page lets the wall show through while it is up; the gallery sits over it */
 .proof[data-wall]:not([data-wall="on"]){background:none}
-.proof[data-wall]>div:not(.pw-layer){position:relative;z-index:1}
+.proof[data-wall]>div:not(.pw-layer,.pw-splash){position:relative;z-index:1}
+/* Until the page knows it has the wall (the flag is read in the browser), nothing of the plain gate shows: it flashed
+   for a frame before the splash. `data-proofwall` is set before the first paint (layout.tsx). */
+:root[data-proofwall] .proof:not([data-wall]){visibility:hidden}
 .pw-layer{position:fixed;inset:0;z-index:0;background:var(--background)}
 /* Julian: hovering a photo does nothing here, and the wall sits under a blur */
-.pw-layer>.drift-wall{position:absolute;inset:0;pointer-events:none;filter:blur(6px)}
+/* Julian: hovering the wall does nothing. The tiles take the pointer back (drift-wall.css), so they are let go too. */
+.pw-layer .drift-wall__tile{pointer-events:none}
+/* Julian: photos load before they come into frame. A tile whose photograph is not in yet shows nothing (no dark box) and fades up once it is. */
+.pw-layer .drift-wall__inner{background:none}
+/* Julian: the wall lagged. The blur sits on each tile, not on the whole wall: a tile rides a moving column and is
+   blurred once, where a blur over the moving wall was redrawn every frame. Same for the 404's edge mask: the vignette does that job. */
+.pw-layer>.drift-wall{position:absolute;inset:0;pointer-events:none;-webkit-mask:none;mask:none}
+/* `:root[data-moves] .drift-wall{transition:none}` (cover.css) outranks a plain rule and made the push-in snap: a zoom glitch as the card came up. */
+:root .proof .pw-layer>.drift-wall{transition:scale 2.4s cubic-bezier(.2,.7,.1,1)}
+.pw-layer .drift-wall__inner{transition:opacity var(--dur-lg) var(--ease-out-strong),filter 1.8s cubic-bezier(.45,0,.2,1)}
+.pw-layer[data-ready]>.drift-wall{scale:1.04}
+.pw-layer[data-ready] .drift-wall__inner{filter:blur(6px)}
+/* Falloff to the edges, a quiet centre under the card: one light, not a flat wash. */
+.pw-vig{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity 1.6s ease;background:radial-gradient(ellipse 70% 65% at 50% 52%,transparent 35%,color-mix(in oklab,var(--background) 65%,transparent) 100%)}
+.pw-layer[data-ready] .pw-vig{opacity:1}
+/* The card rises out of the blur after the wall, its lines one after another. */
+.proof .pw-card{opacity:0;translate:0 18px;filter:blur(8px);transition:opacity .9s cubic-bezier(.23,1,.32,1),translate 1.1s cubic-bezier(.16,1,.3,1),filter .9s cubic-bezier(.23,1,.32,1)}
+.proof .pw-card>*{opacity:0;translate:0 10px;transition:opacity .7s cubic-bezier(.23,1,.32,1),translate .9s cubic-bezier(.16,1,.3,1)}
+.proof .pw-card[data-ready],.proof .pw-card[data-ready]>*{opacity:1;translate:none;filter:none}
+.proof .pw-card[data-ready]>:nth-child(1){transition-delay:.18s}
+.proof .pw-card[data-ready]>:nth-child(2){transition-delay:.26s}
+.proof .pw-card[data-ready]>:nth-child(3){transition-delay:.33s}
+.proof .pw-card[data-ready]>:nth-child(n+4){transition-delay:.4s}
+/* Open proofs: the wall eases flat, stops, comes sharp and full strength, lined up on the grid (proof-wall.tsx); the card sinks back. */
+.pw-layer[data-flat]>.drift-wall{scale:none}
+:root .proof .pw-layer[data-flat]>.drift-wall{transition:scale 1.3s cubic-bezier(.45,0,.2,1)}
+/* The wall's own splash (proof-wall.tsx): the name rising out of its line, as the site's splash has it, and a line under it
+   filling as the wall's photographs come in. It lifts once they are all in, and the wall streams in under it. */
+.pw-splash{position:fixed;inset:0;z-index:20;display:grid;place-content:center;justify-items:center;gap:26px;background:var(--background);transition:opacity .8s cubic-bezier(.4,0,.2,1),visibility 0s .8s}
+.pw-splash[data-out]{opacity:0;visibility:hidden}
+.pw-splash-name{display:flex;gap:.22em;font:900 min(13vw,10rem)/.86 var(--font-display);letter-spacing:-.05em;color:var(--foreground);white-space:nowrap;transition:translate .8s cubic-bezier(.4,0,.2,1)}
+@media (min-width:700px){.pw-splash-name{font-size:min(4.33vw,3.33rem)}}
+.pw-splash[data-out] .pw-splash-name{translate:0 -10px}
+.pw-splash-name>span{display:inline-flex;overflow:hidden;padding:.04em 0 .2em;margin-bottom:-.16em}
+.pw-splash-name>span>span{display:inline-block;animation:pw-rise .9s cubic-bezier(.16,1,.3,1) both}
+.pw-splash-name>span+span>span{animation-delay:.08s}
+@keyframes pw-rise{from{transform:translateY(105%)}}
+/* Julian: the line runs across the bottom of the page. */
+.pw-splash-bar{position:absolute;left:0;right:0;bottom:0;height:2px;background:color-mix(in oklab,var(--foreground) 10%,transparent);overflow:hidden}
+.pw-splash-bar>i{display:block;height:100%;background:var(--foreground);transform-origin:left;transition:transform .35s cubic-bezier(.4,0,.2,1)}
+@media (prefers-reduced-motion:reduce){.pw-splash,.pw-splash-name,.pw-splash-bar>i{transition:none}.pw-splash-name>span>span{animation:none}}
+.pw-layer[data-flat] .drift-wall__inner{opacity:1;filter:none;transition:opacity .9s ease,filter .9s ease}
+.pw-layer[data-flat] .drift-wall__overlay{opacity:0}
+.pw-layer[data-flat] :is(.pw-vig,.pw-grain){opacity:0;transition:opacity .5s ease}
+/* Open proofs: one 1.6s move, the plane turning flat (drift-wall.tsx) and the columns gliding in (proof-wall.tsx); focus
+   comes back in its second half, so the swapped tiles change under the blur. */
+.proof .pw-layer[data-flat][data-leave]{--dw-flat:1.6s}
+:root .proof .pw-layer[data-flat][data-leave]>.drift-wall{scale:none;transition:scale 1.6s cubic-bezier(.45,0,.2,1)}
+.pw-layer[data-flat][data-leave] .drift-wall__inner{opacity:1;filter:none;transition:filter .9s cubic-bezier(.4,0,.2,1) .6s,opacity .9s ease .3s}
+.pw-layer[data-flat][data-leave] .drift-wall__overlay{transition:opacity 1.2s ease .2s}
+/* `reveal` (reduced motion): the wall racks further out of focus and darkens as it stops; the gallery comes up over it. */
+:root .proof .pw-layer[data-leave]>.drift-wall{scale:1.07;transition:scale 1.4s cubic-bezier(.22,1,.36,1)}
+.pw-layer[data-leave] .drift-wall__inner{filter:blur(14px);opacity:.55;transition:filter .9s cubic-bezier(.22,1,.36,1),opacity .9s ease}
+.pw-layer[data-leave] .pw-vig{opacity:0;transition:opacity .6s ease}
+.proof .pw-card[data-out]{opacity:0;translate:0 14px;filter:blur(6px);pointer-events:none;transition:opacity .4s ease-in,translate .5s cubic-bezier(.4,0,1,1),filter .4s ease-in}
+@media (prefers-reduced-motion:reduce){.pw-layer>.drift-wall,.pw-vig,.proof .pw-card,.proof .pw-card>*{transition:none}}
 /* the 404's dusting of grain over its wall */
-.pw-grain{position:absolute;inset:0;pointer-events:none;opacity:.2;mix-blend-mode:overlay;background-image:radial-gradient(color-mix(in oklab,var(--foreground) 50%,transparent) .5px,transparent .5px);background-size:3px 3px}
+/* No blend mode: blending over the moving wall cost a pass every frame. */
+.pw-grain{position:absolute;inset:0;pointer-events:none;opacity:.07;background-image:radial-gradient(color-mix(in oklab,var(--foreground) 50%,transparent) .5px,transparent .5px);background-size:3px 3px}
 /* compact intro (Julian 2026-11-10: the header does not have to be that big); one line, a long name wraps it to two */
 .proof[data-wall] .proof-intro{padding:clamp(28px,4cqi,48px) 28px clamp(20px,2.5cqi,28px);max-width:none}
 .proof[data-wall] .proof-intro h1{font:500 clamp(20px,calc((100cqi - 56px) / (var(--len,17) * .5)),44px)/1.1 var(--font-display);letter-spacing:-.025em;margin:10px 0 0;text-wrap:balance}
@@ -205,7 +268,8 @@ html:has(.proof) #main{transform:none}
 /* the navbar in the 404's glass (v3.css .site-hdr) */
 .proof[data-wall] .proof-top{background:color-mix(in srgb,var(--background) 52%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
 /* the card: more blur than the default gate's 26px */
-.proof .pw-card{position:fixed;z-index:6;top:calc(50% + 28px);background:color-mix(in oklab,var(--background) 50%,transparent);-webkit-backdrop-filter:blur(44px) saturate(1.5);backdrop-filter:blur(44px) saturate(1.5)}
+/* A lighter glass: the wall under it is already blurred, and the card's blur is redrawn every frame the wall moves. */
+.proof .pw-card{position:fixed;z-index:6;top:calc(50% + 28px);background:color-mix(in oklab,var(--background) 62%,transparent);-webkit-backdrop-filter:blur(20px) saturate(1.3);backdrop-filter:blur(20px) saturate(1.3)}
 /* no backdrop blur (or reduced transparency): a near-solid ground keeps both readable over the photographs */
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
   .proof[data-wall] .proof-top{background:color-mix(in srgb,var(--background) 92%,transparent)}
@@ -216,6 +280,23 @@ html:has(.proof) #main{transform:none}
 }
 @container (max-width:520px){
   .proof[data-wall] .proof-intro{padding-left:18px;padding-right:18px}
-  .proof[data-wall] .proof-intro h1{font-size:clamp(20px,calc((100cqi - 36px) / (var(--len,17) * .5)),44px)}
+  .proof[data-wall] .proof-intro h1{font-size:clamp(20px,calc((100cqi - 36px) / (var(--len,17) * .5)),44px);min-height:2.2em}
   .proof .pw-card{top:auto}
 }
+/* A phone on its side (Julian: "overlay looks horrible" at 844x390): the card was taller than the screen, the wall's and the
+   plain gate's both. Under 500px tall it goes two columns, the heading left and the form right, below the header. */
+@media (max-height:500px) and (orientation:landscape){
+  .proof .proof-card{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);column-gap:28px;row-gap:10px;align-items:end;width:min(640px,calc(100% - 120px));padding:20px 24px}
+  .proof .proof-card>:first-child{grid-column:1;grid-row:1/span 6;align-self:center}
+  .proof .proof-card>:not(:first-child){grid-column:2}
+  .proof .proof-card h1{font-size:34px}
+  .proof .proof-card input{padding:6px 0}
+  .proof .pw-card{top:calc(50% + 24px)}
+}
+/* Julian: "navbar background not needed" on the wall's sign-in: the wordmark sits straight on the wall. */
+.proof[data-wall="gate"] .proof-top{background:none;border-bottom-color:transparent;-webkit-backdrop-filter:none;backdrop-filter:none}
+/* Julian: "button needs to show but grayed out across": Open proofs is there with the card, dim until the name and email are good. */
+.proof .pw-card>.proof-btn,.proof .pw-card[data-ready]>.proof-btn{opacity:1;translate:none;transition:opacity .25s ease;transition-delay:0s}
+.proof .pw-card>.proof-btn[data-off]{opacity:.35}
+.proof-gate .proof-card>.proof-btn{transition:opacity .25s ease}
+.proof-gate .proof-card>.proof-btn[data-off]{opacity:.35}
