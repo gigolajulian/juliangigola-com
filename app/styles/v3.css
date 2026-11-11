@@ -31,6 +31,8 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 @media not ((hover:hover) and (pointer:fine)){.sb-thumb{visibility:hidden;pointer-events:none}html[data-sb]::after{display:none}}
 @media (max-width:700px) and (prefers-color-scheme:light){:root:not([data-theme="dark"]) .v3 .a-cover .foot{--bg:var(--l-bg);--ink:var(--l-ink);--mute:var(--l-mute);--line:var(--l-line);--accent:var(--l-accent);color:var(--ink)}}
 .v3 .a-cover,.v3 .sheet figcaption{--bg:var(--dark-bg);--ink:var(--dark-ink);--mute:oklch(0.78 0.005 80);--line:oklch(1 0 0 / 20%);--accent:var(--dark-accent);color:var(--ink)}
+/* Captions sit on a scrim over the photo: 0.78 fell to 3.6:1 on bright frames, 0.88 holds 4.5:1 (audit 2026-11-11). */
+.v3 .sheet figcaption{--mute:oklch(0.88 0.005 80)}
 .v3 *{box-sizing:border-box}
 .v3 [hidden]{display:none!important}
 .v3 #book{align-items:center}
