@@ -662,11 +662,6 @@
   mask: none;
   -webkit-mask: none;
 }
-html[data-sheet] header.site-bar {
-  background: color-mix(in oklab, var(--background) 50%, transparent);
-  backdrop-filter: none;
-  border-color: transparent;
-}
 html[data-sheet] main.rise {
   transform: none;
 }

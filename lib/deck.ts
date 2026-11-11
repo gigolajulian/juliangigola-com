@@ -244,7 +244,7 @@ export function runDeck(el: HTMLElement, mode: Deck): () => void {
       /* A screen wholly under the next one says so, and what runs a loop
          of its own stops while it is there: the hero's name kept drawing
          at 120 frames a second under the last page, where an observer
-         still counts it on screen (`warp-text.tsx`, `cover-space.tsx`). */
+         still counts it on screen. */
       if (mode === "screens") {
         const buried = cover[i] >= 1;
         if (buried !== "buried" in cards[i].dataset)
@@ -416,7 +416,7 @@ function runLeads(el: HTMLElement): () => void {
   fill();
   const ro = new ResizeObserver(fill);
   ro.observe(el);
-  // Cells arriving, and the iPad's rack fitted (`work-shell.tsx`).
+  // Cells arriving, and the rack fitted (`data-rack`, `cover-art-gallery.tsx`).
   const grown = new MutationObserver(fill);
   grown.observe(el, { childList: true, attributeFilter: ["data-rack"] });
   const relaid = onRelaid(el, fill);

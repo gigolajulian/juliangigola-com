@@ -261,13 +261,6 @@
      when the snapshot goes. */
   background: var(--ground);
 }
-/* Which put the card over the bar, which is on the root and not in any
-   group: the wordmark was eaten from the right as the card came in. The
-   bar is its own group on a deal, above the card, and holds still. */
-:root[data-nav-side] .site-bar,
-:root[data-nav] .site-bar {
-  view-transition-name: site-bar;
-}
 /* No cover flies on a deal. The homepage's selected work and the work
    index share the covers' names (`cover-${slug}`, the morph into a
    project), so dealing one into the other flew the band's covers, pinned
@@ -281,16 +274,6 @@
 :root[data-nav-side] [data-morph],
 :root[data-nav="deal"] [data-morph] {
   view-transition-name: none !important;
-}
-::view-transition-group(site-bar) {
-  z-index: 3;
-  animation: none;
-}
-::view-transition-old(site-bar) {
-  display: none;
-}
-::view-transition-new(site-bar) {
-  animation: none;
 }
 :root[data-nav-side="right"]::view-transition-new(.page) {
   animation-name: jg-bar-in-right;

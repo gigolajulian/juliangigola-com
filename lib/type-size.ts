@@ -47,7 +47,7 @@ export const LEVELS: [Level, string][] = [
 // The copyright card's footer is sized to fit its width (photo-notice.tsx).
 // The navbar's names are sized in `font-v2.css` from the first paint:
 // written here after load, they grew 4% and the row jumped (Julian).
-export const SKIP = ".logo-grow, .v2-bar, .v2-tags, .notice-foot, .site-bar nav";
+export const SKIP = ".logo-grow, .v2-bar, .v2-tags, .notice-foot";
 // And the card captions under Commissions, held to two lines on a phone
 // in `font-v2.css` (QA, #239).
 // And /book's title and session names, sized to the window's height in
@@ -58,7 +58,7 @@ export const LIQUID =
 
 /* Left out of the pass before the first paint: the role and location
    lines under the cover's name fit themselves to each other
-   (`fit-lines.tsx`) once React is up, and sized before that they ended a
+   once React is up, and sized before that they ended a
    different size from the live site's. */
 export const LATE = ".cover-float-title, .cover-float-where";
 
@@ -82,7 +82,7 @@ export function typeSizer(
   // ponytail: sizes multiply the measured px, so a fluid clamp() freezes
   // at this window's size until the next resize; fine for tuning.
   // Each scaled element's own inline size, put back after: lines that fit
-  // themselves (`fit-lines.tsx`) carry one.
+  // themselves carry one.
   const scaled = new Map<HTMLElement, string>();
   const base = new Map<HTMLElement, number>();
   const restore = () => {
@@ -192,7 +192,7 @@ export function typeSizer(
           const k = 1 + (sizes[level] - 1) * room;
           // At 1 on a small window it is still sized, so `fit` can bring it down.
           if (sizes[level] === 1 || el.closest(LIQUID)) continue;
-          // A line that fits itself (`fit-lines.tsx`) sets its own size, so
+          // A line that fits itself sets its own size, so
           // that is the one to scale, not the box around it.
           const fitted = el.querySelectorAll<HTMLElement>("[style*='font-size']");
           for (const c of fitted.length ? [...fitted] : [el]) {
