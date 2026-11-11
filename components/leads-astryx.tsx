@@ -40,10 +40,11 @@ import { TodayAstryx } from "@/components/leads/today-astryx";
 import { NewLeadAstryx } from "@/components/leads/new-lead-astryx";
 import { BoardAstryx } from "@/components/leads/board-astryx";
 import { CalendarAstryx } from "@/components/leads/calendar-astryx";
+import { MoneyAstryx } from "@/components/leads/money-astryx";
 
 type Size = "phone" | "mid" | "wide";
 /** The pages the Astryx desk draws itself; the rest still open the classic desk. */
-type View = "today" | "leads" | "new" | "calendar";
+type View = "today" | "leads" | "new" | "calendar" | "money";
 type Group = "now" | "week" | "waiting";
 
 /* The site's tokens (app/styles/tokens.css): warm near-black, one teal accent; the site's own Inter Tight and Plex Mono. */
@@ -82,6 +83,7 @@ const HomeGlyph = svg(<path d="M4 11l8-7 8 7v9h-5v-6h-6v6H4z" />);
 const InboxGlyph = svg(<><path d="M4 13l3-8h10l3 8v6H4z" /><path d="M4 13h5l1 2h4l1-2h5" /></>);
 const CalendarGlyph = svg(<><rect x="4" y="5" width="16" height="15" rx="2" /><path d="M4 10h16M9 3v4M15 3v4" /></>);
 const MoreGlyph = svg(<><circle cx="6" cy="12" r="1.2" /><circle cx="12" cy="12" r="1.2" /><circle cx="18" cy="12" r="1.2" /></>);
+const MoneyGlyph = svg(<><rect x="3" y="6" width="18" height="12" rx="2" /><circle cx="12" cy="12" r="2.5" /></>);
 const PlusGlyph = svg(<path d="M12 5v14M5 12h14" />);
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
@@ -118,7 +120,7 @@ function Nav({ needs, view, go }: { needs: number; view: View; go: (v: View) => 
         <SideNavItem label="Today" icon={HomeGlyph} isSelected={view === "today"} onClick={() => go("today")} />
         <SideNavItem label="Leads" icon={InboxGlyph} isSelected={view === "leads"} onClick={() => go("leads")} endContent={<Text type="code" size="xsm">{needs}</Text>} />
         <SideNavItem label="Calendar" icon={CalendarGlyph} isSelected={view === "calendar"} onClick={() => go("calendar")} />
-        <SideNavItem label="Money" href={CLASSIC} />
+        <SideNavItem label="Money" icon={MoneyGlyph} isSelected={view === "money"} onClick={() => go("money")} />
       </SideNavSection>
       <SideNavSection title="Site">
         <SideNavItem label="Pages and work" href="/admin" />
@@ -355,7 +357,7 @@ export function LeadsAstryx() {
     setScreen("leads");
     setOpen(id);
   };
-  const page = lead ?? (screen === "calendar" ? <CalendarAstryx leads={live.filter((l) => !l.archivedAt)} size={size} open={(l) => setOpen(l.id ?? null)} tab={calTab} setTab={setCalTab} /> : screen === "new" ? <NewLeadAstryx call={call} leads={live} size={size} done={added} open={(l) => setOpen(l.id ?? null)} cancel={() => show("leads")} /> : screen === "today" && leads ? <TodayAstryx leads={live} size={size} open={(l) => setOpen(l.id ?? null)} show={() => show("leads")} /> : home);
+  const page = lead ?? (screen === "money" ? <MoneyAstryx /> : screen === "calendar" ? <CalendarAstryx leads={live.filter((l) => !l.archivedAt)} size={size} open={(l) => setOpen(l.id ?? null)} tab={calTab} setTab={setCalTab} /> : screen === "new" ? <NewLeadAstryx call={call} leads={live} size={size} done={added} open={(l) => setOpen(l.id ?? null)} cancel={() => show("leads")} /> : screen === "today" && leads ? <TodayAstryx leads={live} size={size} open={(l) => setOpen(l.id ?? null)} show={() => show("leads")} /> : home);
   if (!mode) return null;
   return (
     <Theme theme={leadsTheme} mode={mode}>
