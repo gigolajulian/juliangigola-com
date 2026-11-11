@@ -18,7 +18,8 @@ import DriftWall from "@/components/drift-wall";
  * ─────────────────────────────────────────────────────────────── */
 
 const READY_AFTER_MS = 900; // after the wall shows: the columns mostly in before the focus pull
-const READY_CAP_MS = 1500; // the card comes up by then, whatever the wall's photographs are doing
+const READY_CAP_MS = 4000; // the card comes up by then, whatever the wall's photographs are doing
+const PRELOAD_CAP_MS = 3500; // the longest the wall waits for every one of its photographs
 const FLAT_MS = 1000; // the plane easing flat and sharp (drift-wall.tsx) while each column settles on its cells
 const SETTLE_EASE = "cubic-bezier(.65,0,.35,1)";
 const LAND_MS = 900;
@@ -115,6 +116,28 @@ export function ProofWall({
       }
     return { items, cols, w, gap, dx };
   }, [shape, frames]);
+
+  // Julian: photos loaded before they come into frame. Every photograph the wall carries is fetched and decoded
+  // before it shows (the 800px copies, and the same files the gallery opens on), capped for a slow connection.
+  const [loaded, setLoaded] = React.useState(false);
+  React.useEffect(() => {
+    if (!wall) return;
+    let gone = false;
+    const done = () => !gone && setLoaded(true);
+    const cap = window.setTimeout(done, PRELOAD_CAP_MS);
+    const srcs = [...new Set(wall.items.map((i) => i.image))];
+    void Promise.all(
+      srcs.map((src) => {
+        const img = new Image();
+        img.src = src;
+        return img.decode().catch(() => {});
+      }),
+    ).then(done);
+    return () => {
+      gone = true;
+      clearTimeout(cap);
+    };
+  }, [wall]);
 
   // The page holds still under the wall.
   React.useEffect(() => {
@@ -216,7 +239,7 @@ export function ProofWall({
   return (
     <>
       <div ref={layer} className="pw-layer" data-ready={ready || undefined} data-flat={flat || undefined}>
-        {wall ? (
+        {wall && loaded ? (
           <DriftWall
             items={wall.items}
             columns={wall.cols}
