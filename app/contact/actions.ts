@@ -2,6 +2,7 @@
 
 import { headers } from "next/headers";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
+import { toNotion } from "@/lib/leads/notion-lead";
 import { logMail, recordLead } from "@/lib/leads/lead-store";
 import imageLoader from "@/image-loader";
 import LOOKS from "@/lib/picker-looks.json";
@@ -224,6 +225,8 @@ export async function submitEnquiry(
     await inbox.put(key, JSON.stringify(stored), {
       metadata: summary(stored),
     });
+    // After the response, so a slow Notion never holds up the visitor or the email.
+    ctx.waitUntil(toNotion(env.NOTION_TOKEN, { stored, status: "Inquiry", kind: stored.type }));
     // Held, so the mail logged below folds in after it, not over it.
     const lead = recordLead(env, stored.email, { event: { at: stored.at, kind: "inquiry", ref: key, note: stored.type }, name: stored.name, kind: stored.type, snippet: stored.message, refs: uploads.length, source: context?.referrer || "Direct" });
     ctx.waitUntil(lead);

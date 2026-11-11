@@ -8,6 +8,7 @@ import { adoptLog, eventsCsv, forgetLog, readLog, readMaster } from "@/lib/leads
 import { sealer } from "@/lib/leads/lead-crypto";
 import { notify, subscribe, unsubscribe } from "@/lib/leads/lead-push";
 import { publicKey } from "@/lib/leads/web-push";
+import { notionPaper, notionStage } from "@/lib/leads/notion-lead";
 import { cleanTemplates, manualLead, merge, stats, type NewLead } from "@/lib/leads/lead-crm";
 import { balance, cleanFrom, cleanInvoice, invoiceNo, mmyy, PHOTO_KEY, usd, type InvoiceFrom } from "@/lib/leads/invoice";
 import { json, NO_STORE } from "@/lib/http";
@@ -76,7 +77,7 @@ const bury = (inbox: NonNullable<CloudflareEnv["INBOX"]>, key: string, seal?: Aw
 /** The binding and the secret, or `null` when this build has neither. */
 async function wired() {
   const { env } = await getCloudflareContext({ async: true });
-  return env.INBOX ? { inbox: env.INBOX, key: env.INBOX_KEY, seal: sealer(env.LEADS_KEY), vapid: env.VAPID_KEY } : null;
+  return env.INBOX ? { inbox: env.INBOX, key: env.INBOX_KEY, seal: sealer(env.LEADS_KEY), notion: env.NOTION_TOKEN, vapid: env.VAPID_KEY } : null;
 }
 
 async function guard(request: Request) {
@@ -96,11 +97,11 @@ async function guard(request: Request) {
   // push to the repository. The messages differ so a wrong one can be told
   // from a missing one — but never which characters were wrong.
   if (rig.key && (await authorised(request, rig.key)))
-    return { inbox: rig.inbox, seal: rig.seal, vapid: rig.vapid };
+    return { inbox: rig.inbox, seal: rig.seal, notion: rig.notion, vapid: rig.vapid };
 
   const token = bearer(request);
   if (token) {
-    if (await canPush(token)) return { inbox: rig.inbox, seal: rig.seal, vapid: rig.vapid };
+    if (await canPush(token)) return { inbox: rig.inbox, seal: rig.seal, notion: rig.notion, vapid: rig.vapid };
     return {
       error: json(
         { error: "GitHub did not accept that token for this repository." },
@@ -287,7 +288,7 @@ export async function PATCH(request: Request) {
     if (!(await gate.inbox.get(key))) await gate.inbox.put(key, await seal.seal(photo));
     return json({ key });
   }
-  if (typeof given.key === "string" && given.key.startsWith("lead:")) return patchLead(gate.inbox, await gate.seal, given);
+  if (typeof given.key === "string" && given.key.startsWith("lead:")) return patchLead(gate.inbox, await gate.seal, given, gate.notion);
   // His reply templates, saved whole.
   if (given.templates !== undefined) {
     const templates = cleanTemplates(given.templates);
@@ -356,7 +357,7 @@ export async function DELETE(request: Request) {
  * POST {backfill: true, dry?: true}: the Inbox's `msg:` rows folded into
  * leads (`backfillLead`). Dry, it only counts: how many people, how many
  * new, and the stage each would end on. Rows stay, nothing is mailed,
- * A second run finds nothing to add.
+ * Notion is not touched. A second run finds nothing to add.
  */
 export async function POST(request: Request) {
   const gate = await guard(request);
@@ -417,7 +418,7 @@ export async function POST(request: Request) {
  * it), opened (`seen`) or marked unread (`seen: false`). Stage and snooze go through `fold`, so they land
  * on the timeline like everything else.
  */
-async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: Awaited<ReturnType<typeof sealer>>, given: Record<string, unknown>) {
+async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: Awaited<ReturnType<typeof sealer>>, given: Record<string, unknown>, notion?: string) {
   if (!seal) return json({ error: "Leads need LEADS_KEY on the Worker." }, 503);
   const { key, stage, snoozeUntil, seen, archive, trash, notes, remind, details, quote, lostReason, mergeFrom, invoice, licence, contract, release, invoicePaid } = given as LeadPatch & { key: string };
   for (const p of [contract, release]) if (p !== undefined && !(PAPER as readonly string[]).includes(p)) return json({ error: "Unknown status." }, 400);
@@ -434,10 +435,17 @@ async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: Await
   // What the log compares against: events already logged (this lead's, and a merged record's) are not logged again.
   let from: Lead = lead;
   const at = new Date().toISOString();
-  if (stage) lead = fold(lead, lead.email, { event: { at, kind: "stage", note: stage }, stage: stage as Stage });
+  if (stage) {
+    lead = fold(lead, lead.email, { event: { at, kind: "stage", note: stage }, stage: stage as Stage });
+    // Mirrored to the Notion board; a Notion failure never blocks the desk.
+    const page = await notionStage(notion, lead.email, stage as Stage, lead.notion);
+    if (page) lead.notion = page;
+  }
   if (contract || release) {
     const paper = { ...(contract ? { contract: contract as Paper } : {}), ...(release ? { release: release as Paper } : {}) };
     lead = { ...lead, ...paper };
+    const page = await notionPaper(notion, lead.email, paper, lead.notion);
+    if (page) lead.notion = page;
   }
   if (snoozeUntil !== undefined) lead = fold(lead, lead.email, { event: { at, kind: "snooze", note: snoozeUntil || "woken" }, snoozeUntil });
   if (typeof archive === "boolean") lead = fold(lead, lead.email, { event: { at, kind: "archive", note: archive ? "in" : "out" }, on: archive });

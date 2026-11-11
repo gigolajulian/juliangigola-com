@@ -165,6 +165,7 @@ export function Detail({ summary, initial, call, onChange, onBack, reload, tick,
         <button type="button" className={btn} onClick={() => patch({ trash: !l.trashedAt })}>{l.trashedAt ? "Recover" : "Move to trash"}</button>
         <button type="button" className={btn} onClick={() => patch({ seen: false }).then(onBack)}>Mark unread</button>
         <span className="flex-1" />
+        {lead?.notion ? <a href={`https://www.notion.so/${lead.notion.replace(/-/g, "")}`} target="_blank" rel="noreferrer" className={btn}>Notion</a> : null}
       </div>
 
       {asked && l.stage === "Inquiry" ? (

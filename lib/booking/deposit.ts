@@ -152,6 +152,7 @@ type Env = {
   CLIENT_EMAIL?: CloudflareEnv["CLIENT_EMAIL"];
   GCAL_OAUTH?: string;
   BOOKING_LOCK?: CloudflareEnv["BOOKING_LOCK"];
+  NOTION_TOKEN?: string;
   BOOKING_SECRET?: string;
 };
 

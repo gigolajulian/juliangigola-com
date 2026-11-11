@@ -190,6 +190,7 @@ export function LeadAstryx({ summary, initial, call, onChange, onBack, reload, t
         ...(l.trashedAt ? [] : [{ label: l.archivedAt ? "Unarchive" : "Archive", onClick: archive }]),
         { label: "Mark unread", onClick: () => patch({ seen: false }).then(onBack, (e: unknown) => setNote(errorText(e))) },
         ...(others.length ? [{ label: "Merge with another record", onClick: () => setEditing("merge") }] : []),
+        ...(full?.notion ? [{ label: "Open in Notion", href: `https://www.notion.so/${full.notion.replace(/-/g, "")}`, ...NEW_TAB }] : []),
         { type: "divider" as const },
         { label: l.trashedAt ? "Recover" : "Move to trash", variant: (l.trashedAt ? "default" : "destructive") as "default" | "destructive", onClick: () => run(patch({ trash: !l.trashedAt }), l.trashedAt ? "Recovered." : "In the trash.") },
       ]}
@@ -231,6 +232,7 @@ export function LeadAstryx({ summary, initial, call, onChange, onBack, reload, t
         {l.when ? <MetadataListItem label="Booked for">{at(l.when)}</MetadataListItem> : null}
         {full?.source ? <MetadataListItem label="Came from">{full.source}</MetadataListItem> : null}
         {message?.context?.referrer || message?.context?.landing ? <MetadataListItem label="Landed from">{[message.context.referrer, message.context.landing].filter(Boolean).join(", ")}</MetadataListItem> : null}
+        {full?.notion ? <MetadataListItem label="Notion">Bookings row linked</MetadataListItem> : null}
       </MetadataList>
       {size === "wide" ? (
         <Text type="supporting" color="secondary"><Kbd keys="r" /> reply · <Kbd keys="s" /> snooze · <Kbd keys="e" /> archive · <Kbd keys="1" />–<Kbd keys="9" /> stage</Text>
