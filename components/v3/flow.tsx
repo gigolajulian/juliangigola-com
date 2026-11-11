@@ -55,7 +55,7 @@ export function FlowShell({
   sub?: React.ReactNode;
   body: React.ReactNode;
   bar?: React.ReactNode;
-  photo: { d: string; l: string; m?: string; at?: { d?: string; l?: string; m?: string }; bg?: string };
+  photo: { d: string; l: string; m?: string; at?: { d?: string; l?: string; m?: string; desk?: string }; bg?: string };
   name: string;
   sum: [string, React.ReactNode][];
   /** The caption over the photo, the photo running to the foot of the screen (Julian, every booking). */
@@ -76,7 +76,7 @@ export function FlowShell({
   React.useLayoutEffect(() => {
     if (at > 1 && rail.current && rail.current.getBoundingClientRect().top < 64) rail.current.scrollIntoView({ block: "start" });
   }, [at]);
-  const crop = (a?: string) => ({ ...(a && { "--at": a }), ...(photo.at?.m && { "--at-m": photo.at.m }), ...(photo.bg && { backgroundColor: photo.bg }) }) as React.CSSProperties;
+  const crop = (a?: string) => ({ ...(a && { "--at": a }), ...(photo.at?.m && { "--at-m": photo.at.m }), ...(photo.at?.desk && { "--at-d": photo.at.desk }), ...(photo.bg && { backgroundColor: photo.bg }) }) as React.CSSProperties;
   return (
     <div className="flow">
       <div className="f-main">
@@ -103,7 +103,7 @@ export function FlowShell({
         <div className="f-body">{body}</div>
         {bar ? <div className="f-bar">{bar}</div> : null}
       </div>
-      {/* Each theme's crop, the phone's own (`--at-m`), and the colour behind a crop pushed past the frame's edge. */}
+      {/* Each theme's crop, the phone's own (`--at-m`), the desktop's (`--at-d`), and the colour behind a crop pushed past the frame's edge. */}
       <figure className={over ? "f-photo over" : "f-photo"}>
         <div className="in">
           <div className="fr">
