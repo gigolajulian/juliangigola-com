@@ -1,9 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { credentials, KEY_STORE } from "@/lib/admin-github";
+import { TZ } from "@/lib/booking-rules";
+import { adminCall, errorText } from "@/lib/lead-desk";
 import { canonical } from "@/lib/lead-crypto";
-import { extras, stage, STAGES, type Proof, type Viewer } from "@/lib/proofs";
+import { extras, stage, STAGES, type Proof, type Viewer, type ViewerEvent } from "@/lib/proofs";
 import { cn } from "@/lib/utils";
 
 /* ── proofs in /admin Leads ───────────────────────────────────────
@@ -25,21 +26,16 @@ export type Row = Proof & { url: string };
 const btn = "inline-flex min-h-11 items-center justify-center gap-2 rounded-[10px] border border-border px-4 text-[15px] font-medium transition-colors duration-200 hoverable:hover:bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:opacity-40";
 const primary = "border-accent bg-accent font-semibold text-accent-foreground hoverable:hover:bg-accent/90";
 const mono = "font-mono text-[12.5px] text-muted-foreground";
-const when = (iso: string) => new Intl.DateTimeFormat("en-US", { timeZone: "America/Los_Angeles", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(iso));
+const when = (iso: string) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(iso));
 
-export async function api(init: RequestInit & { query?: string } = {}) {
-  const res = await fetch(`/api/proof${init.query ?? ""}`, { ...init, headers: { ...credentials(window.localStorage.getItem(KEY_STORE) ?? ""), "content-type": "application/json" }, cache: "no-store" });
-  const out = (await res.json().catch(() => ({}))) as Record<string, unknown> & { error?: string };
-  if (!res.ok) throw new Error(out.error ?? `Request failed (${res.status})`);
-  return out;
-}
+export const api = <T = Record<string, unknown>,>({ query = "", ...init }: RequestInit & { query?: string } = {}) => adminCall<T>(`/api/proof${query}`, init);
 
 /** Shared so the tool view and every lead card see the same list. */
 function useProofs() {
   const [list, setList] = React.useState<Row[] | null>(null);
   const [error, setError] = React.useState<string | null>(null);
   const load = React.useCallback(() => {
-    api({ query: "?list" }).then((o) => setList(o.proofs as Row[])).catch((e: unknown) => setError(e instanceof Error ? e.message : String(e)));
+    api<{ proofs: Row[] }>({ query: "?list" }).then((o) => setList(o.proofs)).catch((e: unknown) => setError(errorText(e)));
   }, []);
   React.useEffect(load, [load]);
   return { list, error, load };
@@ -154,7 +150,7 @@ function ProofCard({ p, changed }: { p: Row; changed: () => void }) {
       setPreview(null);
       changed();
     } catch (e) {
-      setNote(e instanceof Error ? e.message : String(e));
+      setNote(errorText(e));
     } finally {
       setBusy(false);
     }
@@ -162,9 +158,9 @@ function ProofCard({ p, changed }: { p: Row; changed: () => void }) {
   const showPreview = async () => {
     setBusy(true);
     try {
-      setPreview(String((await api({ query: `?preview=${p.token}` })).html));
+      setPreview((await api<{ html: string }>({ query: `?preview=${p.token}` })).html);
     } catch (e) {
-      setNote(e instanceof Error ? e.message : String(e));
+      setNote(errorText(e));
     } finally {
       setBusy(false);
     }
@@ -284,6 +280,8 @@ export function Activity({ p }: { p: Row }) {
   if (!people.length) return <p className={mono}>Nobody has opened it yet. Each address typed at the gate shows here.</p>;
   const file = (id?: string) => (id ? p.frames.find((f) => f.id === id)?.file ?? id : "");
   const num = (id?: string) => (id ? `#${p.frames.findIndex((f) => f.id === id) + 1}` : "");
+  /** One viewer event, in words. */
+  const SAID: Record<ViewerEvent["kind"], (id?: string) => string> = { open: () => "opened", pick: (id) => `picked ${num(id)}`, unpick: (id) => `unpicked ${num(id)}`, review: () => "reviewed", pay: () => "paid", send: () => "sent selects" };
   const tally = new Map<string, number>();
   for (const [, v] of people) for (const id of v.picks) tally.set(id, (tally.get(id) ?? 0) + 1);
   const top = [...tally].sort((a, b) => b[1] - a[1]).slice(0, 6);
@@ -360,7 +358,7 @@ export function Activity({ p }: { p: Row }) {
         <ol className="grid max-h-[420px] overflow-auto border-t border-border pt-2 font-mono text-[12px] leading-[1.9] text-muted-foreground">
           {[...v.events].reverse().map((e, i) => (
             <li key={i}>
-              {when(e.at)} · <b className={cn("font-medium", e.kind === "pick" ? "text-accent" : "text-foreground")}>{e.kind === "open" ? "opened" : e.kind === "pick" ? `picked ${num(e.id)}` : e.kind === "unpick" ? `unpicked ${num(e.id)}` : e.kind === "review" ? "reviewed" : e.kind === "pay" ? "paid" : "sent selects"}</b>
+              {when(e.at)} · <b className={cn("font-medium", e.kind === "pick" ? "text-accent" : "text-foreground")}>{SAID[e.kind](e.id)}</b>
               {e.kind === "open" ? ` · ${[e.device, e.place].filter(Boolean).join(" · ")}` : e.id ? ` · ${file(e.id)}` : ""}
             </li>
           ))}

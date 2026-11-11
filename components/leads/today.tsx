@@ -4,7 +4,9 @@ import * as React from "react";
 import { TOKEN_STORE } from "@/lib/admin-github";
 import { isLate, paperDue, shootTag, type LeadSummary } from "@/lib/leads";
 import { cn } from "@/lib/utils";
-import { ago, aside, at, authed, cash, closed, DAY, type Filter, HEAD, needsMe, nextStep, now, pass, renew } from "@/components/leads/shared";
+import { HEAD } from "@/components/leads/shared";
+import { adminCall, ago, aside, at, cash, closed, type Filter, needsMe, nextStep, now, pass, plusDays, renew, ymdPT } from "@/lib/lead-desk";
+import { TZ } from "@/lib/booking-rules";
 
 /* ── Today, the One Desk's first page ─────────────────────────────
  * Julian (2026-11-09, mock claude.ai/artifact/Y2PXE3dJZcj7oJw5TyihLF, hero
@@ -15,11 +17,8 @@ import { ago, aside, at, authed, cash, closed, DAY, type Filter, HEAD, needsMe, 
  * carry invoices and nothing marks one paid.
  * ─────────────────────────────────────────────────────────────── */
 
-const PT = "America/Los_Angeles";
-const ymdOf = (ms: number) => new Intl.DateTimeFormat("en-CA", { timeZone: PT }).format(ms);
-const plus = (d: string, n: number) => new Date(Date.parse(`${d}T12:00:00Z`) + n * DAY).toISOString().slice(0, 10);
 const dayHead = (d: string) => `${new Date(`${d}T12:00:00Z`).toLocaleDateString("en-US", { weekday: "short", timeZone: "UTC" })} ${+d.slice(8)}`;
-const clock = (ms: number) => new Intl.DateTimeFormat("en-US", { timeZone: PT, hour: "numeric", minute: "2-digit" }).format(ms);
+const clock = (ms: number) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit" }).format(ms);
 /** Where a move comes from, as the mock tags it. */
 const source = (l: LeadSummary) => (renew(l) ? "Licence" : paperDue(l, now()) ? "Paperwork" : l.stage === "Invoiced" || l.stage === "Selecting" ? "Proofs" : "Leads");
 const callOrShoot = (l: LeadSummary) => (l.stage === "Call booked" ? "Call" : shootTag(l.kind) ?? "Shoot");
@@ -28,7 +27,7 @@ type DayEv = { small: string; text: string; who?: string; due?: boolean; l: Lead
 
 /** Each Pacific day from `from` for `n` days, with what is on it. Moves with no date land today. */
 function daysOf(leads: LeadSummary[], from: string, n: number) {
-  const today = ymdOf(now());
+  const today = ymdPT(now());
   const map = new Map<string, DayEv[]>();
   const put = (d: string, e: DayEv) => map.set(d, [...(map.get(d) ?? []), e]);
   for (const l of leads) {
@@ -36,13 +35,13 @@ function daysOf(leads: LeadSummary[], from: string, n: number) {
     const who = l.name || l.email;
     if (l.when && !closed(l.stage)) {
       const ms = Date.parse(l.when);
-      put(ymdOf(ms), { small: `${clock(ms)} ${callOrShoot(l)}`, text: who, l });
+      put(ymdPT(ms), { small: `${clock(ms)} ${callOrShoot(l)}`, text: who, l });
     }
     const step = needsMe(l) ? nextStep(l) : null;
     if (step) put(today, { small: "Due", text: step, who, due: true, l });
-    else if (l.due && Date.parse(l.due) > now()) put(ymdOf(Date.parse(l.due)), { small: "Reminder", text: l.dueText || "Your reminder", who, l });
+    else if (l.due && Date.parse(l.due) > now()) put(ymdPT(Date.parse(l.due)), { small: "Reminder", text: l.dueText || "Your reminder", who, l });
   }
-  return Array.from({ length: n }, (_, i) => plus(from, i)).map((d) => ({ d, today: d === today, evs: map.get(d) ?? [] }));
+  return Array.from({ length: n }, (_, i) => plusDays(from, i)).map((d) => ({ d, today: d === today, evs: map.get(d) ?? [] }));
 }
 
 function Item({ k, t, n, s, onClick, className }: { k: React.ReactNode; t?: string; n: string; s?: string | null; onClick?: () => void; className?: string }) {
@@ -61,8 +60,8 @@ function Item({ k, t, n, s, onClick, className }: { k: React.ReactNode; t?: stri
 type Spark = { visits: number; days: { key: string; n: number }[] };
 
 function DeskToday({ leads, go, pick }: { leads: LeadSummary[]; go: (l: LeadSummary) => void; pick: (f: Filter) => void }) {
-  const today = ymdOf(now());
-  const monday = plus(today, -((new Date(`${today}T12:00:00Z`).getUTCDay() + 6) % 7));
+  const today = ymdPT(now());
+  const monday = plusDays(today, -((new Date(`${today}T12:00:00Z`).getUTCDay() + 6) % 7));
   const week = daysOf(leads, monday, 7);
   // Phone: the next three days that have something, today first.
   const soon = daysOf(leads, today, 21).filter((x) => x.today || x.evs.length).slice(0, 3);
@@ -76,8 +75,8 @@ function DeskToday({ leads, go, pick }: { leads: LeadSummary[]; go: (l: LeadSumm
 
   const [money, setMoney] = React.useState<{ available?: number; pending?: number } | string | null>(null);
   React.useEffect(() => {
-    fetch("/api/money", { headers: authed(), cache: "no-store" })
-      .then(async (r) => { const o = await r.json(); if (!r.ok) throw new Error(o.error ?? `Request failed (${r.status})`); setMoney(o); })
+    adminCall<{ available?: number; pending?: number }>("/api/money")
+      .then(setMoney)
       .catch(() => setMoney("Not connected"));
   }, []);
   // Traffic answers to the GitHub token only, as on /admin.
@@ -94,15 +93,15 @@ function DeskToday({ leads, go, pick }: { leads: LeadSummary[]; go: (l: LeadSumm
   const spark = t ? t.days.map((d, i, a) => `${(i / Math.max(1, a.length - 1)) * 120},${20 - (d.n / peak) * 17}`).join(" ") : "";
   const m = typeof money === "object" ? money : null;
 
-  const hour = +new Intl.DateTimeFormat("en-US", { timeZone: PT, hour: "numeric", hourCycle: "h23" }).format(now());
+  const hour = +new Intl.DateTimeFormat("en-US", { timeZone: TZ, hour: "numeric", hourCycle: "h23" }).format(now());
   const hello = hour >= 5 && hour < 12 ? "Morning" : hour >= 12 && hour < 18 ? "Afternoon" : "Evening";
-  const weekday = (iso: string) => new Intl.DateTimeFormat("en-US", { timeZone: PT, weekday: "long" }).format(new Date(iso));
+  const weekday = (iso: string) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, weekday: "long" }).format(new Date(iso));
   const nextShoot = coming.find((l) => l.stage !== "Call booked");
   const nextCall = coming.find((l) => l.stage === "Call booked");
   const line = [
     moves.length ? `${moves.length} on you` : null,
-    nextShoot ? `a shoot ${ymdOf(Date.parse(nextShoot.when!)) === today ? "today" : weekday(nextShoot.when!)}` : null,
-    nextCall ? `a call ${ymdOf(Date.parse(nextCall.when!)) === today ? "today" : weekday(nextCall.when!)}` : null,
+    nextShoot ? `a shoot ${ymdPT(Date.parse(nextShoot.when!)) === today ? "today" : weekday(nextShoot.when!)}` : null,
+    nextCall ? `a call ${ymdPT(Date.parse(nextCall.when!)) === today ? "today" : weekday(nextCall.when!)}` : null,
   ].filter(Boolean).join(", ");
 
   const card = "rounded-xl bg-card";
@@ -127,7 +126,7 @@ function DeskToday({ leads, go, pick }: { leads: LeadSummary[]; go: (l: LeadSumm
         <div className={cn(card, "grid content-between gap-3 px-[18px] py-4 lg:min-h-[176px]")}>
           <div>
             <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
-              {new Intl.DateTimeFormat("en-US", { timeZone: PT, weekday: "short", month: "short", day: "numeric" }).format(now())} · {clock(now())}
+              {new Intl.DateTimeFormat("en-US", { timeZone: TZ, weekday: "short", month: "short", day: "numeric" }).format(now())} · {clock(now())}
             </p>
             <h1 style={HEAD} className="mt-1.5 text-[30px] leading-[1.05] tracking-[-0.03em]">{hello}, Julian.</h1>
           </div>

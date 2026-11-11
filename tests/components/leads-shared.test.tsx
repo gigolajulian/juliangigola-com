@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { cash, kindOf, label, mailto, matches, money, nextStep, pass, Tag } from "@/components/leads/shared";
+import { kindOf, label, mailto, Tag } from "@/components/leads/shared";
+import { cash, matches, money, nextStep, pass } from "@/lib/lead-desk";
 import type { LeadSummary } from "@/lib/leads";
 
 const iso = new Date().toISOString();

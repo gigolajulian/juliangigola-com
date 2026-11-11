@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { credentials, KEY_STORE } from "@/lib/admin-github";
+import { adminCall, errorText } from "@/lib/lead-desk";
 import { EVENTS, HOURS, TZ } from "@/lib/booking-rules";
 import { startsFor, zoned } from "@/lib/slots";
 import { cn } from "@/lib/utils";
@@ -52,16 +52,7 @@ function openSpans(day: string, busy: { start: number; end: number }[], now: num
   return spans.filter(([a, z]) => z > Math.max(a, now));
 }
 
-async function call(init: RequestInit & { query?: string } = {}) {
-  const res = await fetch(`/api/calendar${init.query ?? ""}`, {
-    ...init,
-    headers: { ...credentials(window.localStorage.getItem(KEY_STORE) ?? ""), "content-type": "application/json" },
-    cache: "no-store",
-  });
-  const out = (await res.json().catch(() => ({}))) as Record<string, unknown> & { error?: string };
-  if (!res.ok) throw new Error(out.error ?? `Request failed (${res.status})`);
-  return out;
-}
+const call = <T,>({ query = "", ...init }: RequestInit & { query?: string } = {}) => adminCall<T>(`/api/calendar${query}`, init);
 
 export function LeadCalendar({ onBack }: { onBack?: () => void }) {
   const [now] = React.useState(() => Date.now());
@@ -83,9 +74,9 @@ export function LeadCalendar({ onBack }: { onBack?: () => void }) {
   const to = cells[cells.length - 1];
   React.useEffect(() => {
     let live = true;
-    call({ query: `?from=${from}&to=${to}` })
-      .then((o) => live && (setData(o as unknown as Month), setError(null)))
-      .catch((e: unknown) => live && setError(e instanceof Error ? e.message : String(e)));
+    call<Month>({ query: `?from=${from}&to=${to}` })
+      .then((o) => live && (setData(o), setError(null)))
+      .catch((e: unknown) => live && setError(errorText(e)));
     return () => void (live = false);
   }, [from, to, tick]);
   const load = () => setTick((t) => t + 1);
@@ -98,7 +89,7 @@ export function LeadCalendar({ onBack }: { onBack?: () => void }) {
       load();
       return true;
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      setError(errorText(e));
       return false;
     } finally {
       setBusyUi(false);
