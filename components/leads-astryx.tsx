@@ -39,10 +39,11 @@ import { leadSummary, shootTag, STAGES, type Lead, type LeadPatch, type LeadSumm
 import { TodayAstryx } from "@/components/leads/today-astryx";
 import { NewLeadAstryx } from "@/components/leads/new-lead-astryx";
 import { BoardAstryx } from "@/components/leads/board-astryx";
+import { CalendarAstryx } from "@/components/leads/calendar-astryx";
 
 type Size = "phone" | "mid" | "wide";
 /** The pages the Astryx desk draws itself; the rest still open the classic desk. */
-type View = "today" | "leads" | "new";
+type View = "today" | "leads" | "new" | "calendar";
 type Group = "now" | "week" | "waiting";
 
 /* The site's tokens (app/styles/tokens.css): warm near-black, one teal accent; the site's own Inter Tight and Plex Mono. */
@@ -116,7 +117,7 @@ function Nav({ needs, view, go }: { needs: number; view: View; go: (v: View) => 
         <SideNavItem label="New lead" icon={PlusGlyph} isSelected={view === "new"} onClick={() => go("new")} />
         <SideNavItem label="Today" icon={HomeGlyph} isSelected={view === "today"} onClick={() => go("today")} />
         <SideNavItem label="Leads" icon={InboxGlyph} isSelected={view === "leads"} onClick={() => go("leads")} endContent={<Text type="code" size="xsm">{needs}</Text>} />
-        <SideNavItem label="Calendar" icon={CalendarGlyph} href={`${CLASSIC}?calendar`} />
+        <SideNavItem label="Calendar" icon={CalendarGlyph} isSelected={view === "calendar"} onClick={() => go("calendar")} />
         <SideNavItem label="Money" href={CLASSIC} />
       </SideNavSection>
       <SideNavSection title="Site">
@@ -129,7 +130,7 @@ function Nav({ needs, view, go }: { needs: number; view: View; go: (v: View) => 
 
 function TabBar({ view, go }: { view: View; go: (v: View) => void }) {
   // A view id switches in place; an href still opens the classic desk.
-  const tabs: [string, React.ComponentType<React.SVGProps<SVGSVGElement>>, View | string][] = [["Today", HomeGlyph, "today"], ["Leads", InboxGlyph, "leads"], ["Calendar", CalendarGlyph, `${CLASSIC}?calendar`], ["More", MoreGlyph, CLASSIC]];
+  const tabs: [string, React.ComponentType<React.SVGProps<SVGSVGElement>>, View | string][] = [["Today", HomeGlyph, "today"], ["Leads", InboxGlyph, "leads"], ["Calendar", CalendarGlyph, "calendar"], ["More", MoreGlyph, CLASSIC]];
   return (
     <HStack gap={0} paddingBlockEnd={1}>
       {tabs.map(([label, glyph, to]) => {
@@ -157,6 +158,7 @@ export function LeadsAstryx() {
   // Today first, as on the classic desk.
   const [screen, setScreen] = React.useState<View>("today");
   const [fresh, setFresh] = React.useState<Lead | null>(null);
+  const [calTab, setCalTab] = React.useState<"bookings" | "availability">("bookings");
   // List or Board, kept on this device under the classic desk's key. The desk draws nothing until mounted (see `mode`), so no hydration gap.
   const [board, setBoardState] = React.useState(() => typeof window !== "undefined" && (() => { try { return localStorage.getItem(BOARD_STORE) === "1"; } catch { return false; } })());
   const setBoard = (on: boolean) => { setBoardState(on); try { localStorage.setItem(BOARD_STORE, on ? "1" : "0"); } catch {} };
@@ -353,7 +355,7 @@ export function LeadsAstryx() {
     setScreen("leads");
     setOpen(id);
   };
-  const page = lead ?? (screen === "new" ? <NewLeadAstryx call={call} leads={live} size={size} done={added} open={(l) => setOpen(l.id ?? null)} cancel={() => show("leads")} /> : screen === "today" && leads ? <TodayAstryx leads={live} size={size} open={(l) => setOpen(l.id ?? null)} show={() => show("leads")} /> : home);
+  const page = lead ?? (screen === "calendar" ? <CalendarAstryx leads={live.filter((l) => !l.archivedAt)} size={size} open={(l) => setOpen(l.id ?? null)} tab={calTab} setTab={setCalTab} /> : screen === "new" ? <NewLeadAstryx call={call} leads={live} size={size} done={added} open={(l) => setOpen(l.id ?? null)} cancel={() => show("leads")} /> : screen === "today" && leads ? <TodayAstryx leads={live} size={size} open={(l) => setOpen(l.id ?? null)} show={() => show("leads")} /> : home);
   if (!mode) return null;
   return (
     <Theme theme={leadsTheme} mode={mode}>
