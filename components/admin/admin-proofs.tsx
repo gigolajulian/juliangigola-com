@@ -242,6 +242,7 @@ function ProofCard({ p, changed }: { p: Row; changed: () => void }) {
             <input type="checkbox" checked={!!p.watermark} disabled={busy} onChange={(e) => act({ watermark: e.target.checked }, "PATCH", e.target.checked ? "Watermark on." : "Watermark off.")} className="size-4 accent-[var(--accent)]" />
             <span className={mono}>Watermark: Julian Gigola in the bottom third of every frame</span>
           </label>
+          <CardPick p={p} busy={busy} act={act} />
         </div>
       ) : null}
 
@@ -267,6 +268,66 @@ function ProofCard({ p, changed }: { p: Row; changed: () => void }) {
       </div>
       {note ? <p className={mono} role="status">{note}</p> : null}
     </article>
+  );
+}
+
+/** The card's photo panel, width over height (`CARD` in lib/proof-watermark: 1200 of 1800 wide, 945 tall). */
+const PANEL = 1200 / 945;
+
+/** The link preview: which frame, and how it sits in the card. Saved as `card` on the gallery (Julian 2026-11-10). */
+function CardPick({ p, busy, act }: { p: Row; busy: boolean; act: (body: Record<string, unknown>, method?: string, done?: string) => void }) {
+  const first = p.frames[0];
+  const start = () => {
+    const f = p.frames.find((x) => x.id === p.card?.id) ?? first;
+    return p.card?.id === f?.id && p.card ? { ...p.card } : f ? { id: f.id, x: 0, y: Math.round(f.h * 0.08), w: f.w } : null;
+  };
+  const [d, setD] = React.useState(start);
+  if (!d || !first) return null;
+  const f = p.frames.find((x) => x.id === d.id) ?? first;
+  const h = Math.round(d.w / PANEL);
+  const fit = (c: typeof d) => {
+    const w = Math.min(Math.max(c.w, Math.round(f.w * 0.3)), f.w, Math.round(f.h * PANEL));
+    const ch = Math.round(w / PANEL);
+    return { ...c, w, x: Math.min(Math.max(c.x, 0), f.w - w), y: Math.min(Math.max(c.y, 0), f.h - ch) };
+  };
+  const pick = (id: string) => {
+    const g = p.frames.find((x) => x.id === id)!;
+    setD({ id, x: 0, y: Math.round(g.h * 0.08), w: Math.min(g.w, Math.round(g.h * PANEL)) });
+  };
+  const saved = p.card && p.card.id === d.id && p.card.x === d.x && p.card.y === d.y && p.card.w === d.w;
+  const slider = (label: string, value: number, min: number, max: number, on: (v: number) => void) => (
+    <label className="grid gap-1">
+      <span className={mono}>{label}</span>
+      <input type="range" min={min} max={Math.max(min, max)} value={value} disabled={busy || max <= min} onChange={(e) => on(Number(e.target.value))} className="accent-[var(--accent)]" />
+    </label>
+  );
+  return (
+    <div className="grid gap-2 sm:col-span-5">
+      <span className={mono}>Link preview: the frame and crop shown when the gallery link is shared{p.watermark ? "" : ". Needs the watermark on."}</span>
+      <div className="flex gap-1 overflow-x-auto pb-1">
+        {p.frames.map((x, i) => (
+          <button key={x.id} type="button" onClick={() => pick(x.id)} aria-pressed={x.id === d.id} aria-label={`Frame ${i + 1}`} className={cn("shrink-0", x.id === d.id && "outline outline-2 -outline-offset-2 outline-accent")}>
+            {/* eslint-disable-next-line @next/next/no-img-element -- private proof frame */}
+            <img src={`/proof/${p.token}/f/${x.id}`} alt="" loading="lazy" className="aspect-[3/4] w-12 object-cover" />
+          </button>
+        ))}
+      </div>
+      <div className="grid items-start gap-3 sm:grid-cols-[minmax(0,360px)_1fr]">
+        <div className="relative w-full overflow-hidden bg-border" style={{ aspectRatio: `${PANEL}` }}>
+          {/* eslint-disable-next-line @next/next/no-img-element -- private proof frame, placed to show the crop */}
+          <img src={`/proof/${p.token}/f/${d.id}`} alt="" className="absolute max-w-none" style={{ width: `${(f.w / d.w) * 100}%`, left: `${(-d.x / d.w) * 100}%`, top: `${(-d.y / h) * 100}%` }} />
+        </div>
+        <div className="grid gap-2">
+          {slider("Zoom", f.w - d.w, 0, f.w - Math.round(f.w * 0.3), (v) => setD((c) => c && fit({ ...c, w: f.w - v, x: c.x + Math.round((c.w - (f.w - v)) / 2), y: c.y + Math.round((c.w - (f.w - v)) / PANEL / 2) })))}
+          {slider("Across", d.x, 0, f.w - d.w, (v) => setD((c) => c && fit({ ...c, x: v })))}
+          {slider("Up and down", d.y, 0, f.h - h, (v) => setD((c) => c && fit({ ...c, y: v })))}
+          <span className="flex flex-wrap gap-2">
+            <button type="button" className={cn(btn, !saved && primary)} disabled={busy || !!saved} onClick={() => act({ card: d }, "PATCH", "Preview saved.")}>{saved ? "Saved" : "Save preview"}</button>
+            {p.card ? <button type="button" className={btn} disabled={busy} onClick={() => act({ card: null }, "PATCH", "Preview back to the first frame.")}>Use first frame</button> : null}
+          </span>
+        </div>
+      </div>
+    </div>
   );
 }
 
