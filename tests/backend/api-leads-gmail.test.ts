@@ -45,4 +45,18 @@ describe("POST /api/leads/gmail", () => {
     expect(await res.json()).toEqual({ folded: 0 });
     expect(await kv.get(CURSOR)).toBe("4242");
   });
+
+  it("skips a message deleted since history listed it, and moves the cursor past it", async () => {
+    await kv.put(CURSOR, "100");
+    vi.stubGlobal("fetch", async (url: string) =>
+      url.includes("oauth2")
+        ? Response.json({ access_token: "t", expires_in: 3600 })
+        : url.includes("/history")
+          ? Response.json({ history: [{ id: "101", messagesAdded: [{ message: { id: "gone" } }] }], historyId: "101" })
+          : Response.json({ error: { message: "Requested entity was not found." } }, { status: 404 }),
+    );
+    const res = await call(`Bearer ${SECRET}`);
+    expect(res.status).toBe(200);
+    expect(await kv.get(CURSOR)).not.toBe("100");
+  });
 });
