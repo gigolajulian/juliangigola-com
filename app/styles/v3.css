@@ -536,7 +536,7 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .reach{grid-template-columns:1fr;padding-top:48px}
 .v3 .reach-call{border-left:0;padding-left:0;border-top:1px solid var(--line);padding-top:28px}}
 .v3 .fig .cn{margin:0 .09em 0 .03em}
-@media (max-width:800px){.v3 .f-photo{height:auto;aspect-ratio:4/3;min-width:0;max-width:100%}.v3 .f-photo img{object-position:var(--at,50% 50%)}}
+@media (max-width:800px){.v3 .f-photo{height:auto;aspect-ratio:4/3;min-width:0;max-width:100%}.v3 .f-photo img{object-position:var(--at-m,var(--at,50% 50%))}}
 /* Short phones (iPhone SE, 549px of Safari): a shorter photo and no repeat of
    the session name under it (the tabs say it), so the first session clears
    the sticky Continue bar at load (MAC, v3.0.93). Smaller heading too, for

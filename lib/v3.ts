@@ -86,7 +86,7 @@ export type Session = {
   /** `m`: a horizontal frame for the phone banner, where the tall one crops badly.
       `at`: where the phone and portrait-tablet banner sits on each frame (an
       object-position), where the middle cuts the heads off. */
-  photo: { d: string; l: string; m?: string; at?: { d?: string; l?: string } };
+  photo: { d: string; l: string; m?: string; at?: { d?: string; l?: string; m?: string }; bg?: string };
   /** The enquiry type an on-request booking posts (`lib/inbox.ts`); "session" when unset. */
   type?: string;
 };
@@ -102,7 +102,8 @@ export const SESSIONS: Record<SessionSlug, Session> = {
     cal: "juliangigola/portraits",
     paid: true,
     // SIAN 01, Julian's pick for the Portraits booking card (2026-11-10). Was ZOE 16.
-    photo: { d: w("sian", "01"), l: w("sian", "01"), at: { d: "50% 5%", l: "50% 5%" } },
+    // Face at the panel's middle on desktop (Julian, 2026-11-10): past the top edge, the gap filled with her seamless; the phone's wide crop already centres it.
+    photo: { d: w("sian", "01"), l: w("sian", "01"), at: { d: "50% -38%", l: "50% -38%", m: "50% 5%" }, bg: "#fcf9fc" },
   },
   graduation: {
     slug: "graduation",
