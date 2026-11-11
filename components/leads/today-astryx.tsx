@@ -130,7 +130,7 @@ export function TodayAstryx({ leads, size, open, show }: { leads: LeadSummary[];
         </LayoutHeader>
       }
       content={
-        <LayoutContent role="main" label="Today">
+        <LayoutContent role="main" label="Today" padding={4}>
           <VStack gap={6}>
             <Text type="large" color="secondary">{line ? `${line[0].toUpperCase()}${line.slice(1)}.` : "Nothing on the books this week."}</Text>
             <Grid columns={{ minWidth: 170 }} gap={3}>

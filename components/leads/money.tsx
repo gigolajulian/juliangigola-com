@@ -109,9 +109,9 @@ export function Money({ l, full, patch, run, quote, setQuote }: { l: LeadSummary
  * Julian (2026-11-06): "add my stripe balance too and show the
  * transactions in there". Read-only, through `/api/money`. */
 
-type Txn = { id: string; at: string; type: string; amount: number; fee: number; net: number; currency: string; status: string; what: string };
+export type Txn = { id: string; at: string; type: string; amount: number; fee: number; net: number; currency: string; status: string; what: string };
 /** Stripe's types in his words. */
-const KIND: Record<string, string> = { charge: "Payment", payment: "Payment", refund: "Refund", payment_refund: "Refund", payout: "Payout", stripe_fee: "Stripe fee", adjustment: "Adjustment", dispute: "Dispute" };
+export const KIND: Record<string, string> = { charge: "Payment", payment: "Payment", refund: "Refund", payment_refund: "Refund", payout: "Payout", stripe_fee: "Stripe fee", adjustment: "Adjustment", dispute: "Dispute" };
 
 export function MoneyView() {
   const [top, setTop] = React.useState<{ available: number; pending: number; test: boolean } | null>(null);
