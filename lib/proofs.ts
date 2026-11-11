@@ -39,6 +39,8 @@ export type Proof = {
   days: number;
   /** The "Julian Gigola" wordmark baked into every served frame (Julian 2026-11-10). On for new galleries; unset reads as off. */
   watermark?: boolean;
+  /** Julian's pick for the link preview: a frame and the crop of it, in source pixels (height follows the card). Unset: the first frame, auto-cropped. */
+  card?: CardCrop;
   createdAt: string;
   /** Set when the proof mail goes out; the clock starts here. */
   sentAt?: string;
@@ -67,6 +69,8 @@ export type Proof = {
   /** Everyone who opened the gallery, by lowercased email (Julian 2026-11-08: any email opens it, log everything). */
   viewers?: Record<string, Viewer>;
 };
+
+export type CardCrop = { id: string; x: number; y: number; w: number };
 
 export type ViewerEvent = { at: string; kind: "open" | "pick" | "unpick" | "review" | "pay" | "send"; id?: string; device?: string; place?: string };
 
@@ -191,7 +195,8 @@ export function owed(p: Pick<Proof, "selects" | "included" | "price" | "paid" | 
 export const isOpen = (p: Pick<Proof, "closesAt">, now = Date.now()) => !p.closesAt || Date.parse(p.closesAt) > now;
 
 /** The gallery's cover for link previews: its first frame, the site's rule for every set. Only when watermarked and open, so a preview never carries a clean file. */
-export const coverFrame = (p: Pick<Proof, "frames" | "watermark" | "closesAt">): ProofFrame | null => (p.watermark && isOpen(p) && p.frames[0]) || null;
+export const coverFrame = (p: Pick<Proof, "frames" | "watermark" | "closesAt" | "card">): ProofFrame | null =>
+  (p.watermark && isOpen(p) && (p.frames.find((f) => f.id === p.card?.id) ?? p.frames[0])) || null;
 
 export const closesAt = (days: number, from = Date.now()) => new Date(from + days * 864e5).toISOString();
 
@@ -232,7 +237,7 @@ export function cleanNotes(given: unknown, selects: string[]): Record<string, st
 }
 
 /** Settings Lightroom or /admin may set. Numbers are clamped so a typo cannot price a frame at $15,000. */
-type Settings = Partial<Pick<Proof, "name" | "email" | "note" | "included" | "price" | "days" | "balance" | "watermark">>;
+type Settings = Partial<Pick<Proof, "name" | "email" | "note" | "included" | "price" | "days" | "balance" | "watermark" | "card">>;
 export function cleanSettings(given: Record<string, unknown>): Settings {
   const out: Settings = {};
   const int = (v: unknown, lo: number, hi: number) => (typeof v === "number" || typeof v === "string") && Number.isFinite(Number(v)) ? Math.min(hi, Math.max(lo, Math.round(Number(v)))) : undefined;
@@ -246,6 +251,12 @@ export function cleanSettings(given: Record<string, unknown>): Settings {
   const bal = int(given.balance, 0, 20000);
   if (bal !== undefined) out.balance = bal;
   // Lightroom's checkbox and the desk send a boolean; a form field may send "true"/"false".
+  // The preview pick: {id, x, y, w} in source pixels, or null to go back to the first frame.
+  if (given.card === null) out.card = undefined;
+  else if (given.card && typeof given.card === "object") {
+    const c = given.card as Record<string, unknown>, x = int(c.x, 0, 20000), y = int(c.y, 0, 20000), w = int(c.w, 50, 20000);
+    if (isFrameId(c.id) && x !== undefined && y !== undefined && w !== undefined) out.card = { id: c.id, x, y, w };
+  }
   if (typeof given.watermark === "boolean" || given.watermark === "true" || given.watermark === "false") out.watermark = given.watermark === true || given.watermark === "true";
   return out;
 }

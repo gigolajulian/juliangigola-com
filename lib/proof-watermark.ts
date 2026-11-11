@@ -58,7 +58,7 @@ export async function servedFrame(env: Env, p: Pick<Proof, "token" | "watermark"
 export const CARD = { src: "/proof-card.png", w: 1800, h: 945, photoLeft: 600 } as const;
 
 /** The gallery's card, drawn once per first frame and kept in R2. Null when the gallery has no card (watermark off, closed, empty). */
-export async function shareCard(env: Env, p: Pick<Proof, "token" | "watermark" | "closesAt" | "frames">, origin: string): Promise<{ body: ReadableStream; etag: string } | null> {
+export async function shareCard(env: Env, p: Pick<Proof, "token" | "watermark" | "closesAt" | "frames" | "card">, origin: string): Promise<{ body: ReadableStream; etag: string } | null> {
   const f = coverFrame(p);
   if (!f) return null;
   const kept = await env.PROOFS.get(cardKey(p.token, f.id));
@@ -67,8 +67,13 @@ export async function shareCard(env: Env, p: Pick<Proof, "token" | "watermark" |
   if (!clean) return null;
   const pw = CARD.w - CARD.photoLeft, box = markBox(pw, CARD.h);
   const [panel, mark] = await Promise.all([asset(env, CARD.src, origin), asset(env, MARK.src, origin)]);
+  // Julian's crop when he picked one for this frame, else Images' own subject crop.
+  const c = p.card?.id === f.id ? p.card : null;
+  const photo = c
+    ? env.IMAGES.input(clean.body).transform({ trim: { left: c.x, top: c.y, width: c.w, height: Math.round((c.w * CARD.h) / pw) } }).transform({ width: pw, height: CARD.h, fit: "cover" })
+    : env.IMAGES.input(clean.body).transform({ width: pw, height: CARD.h, fit: "cover", gravity: "auto" });
   const out = await env.IMAGES.input(panel)
-    .draw(env.IMAGES.input(clean.body).transform({ width: pw, height: CARD.h, fit: "cover", gravity: "auto" }), { left: CARD.photoLeft, top: 0 })
+    .draw(photo, { left: CARD.photoLeft, top: 0 })
     .draw(env.IMAGES.input(mark).transform({ width: box.width }), { opacity: MARK.opacity, left: CARD.photoLeft + box.left, top: box.top })
     .output({ format: "image/jpeg", quality: 86 });
   const bytes = await out.response().arrayBuffer();
