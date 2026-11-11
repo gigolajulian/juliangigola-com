@@ -9,8 +9,7 @@
  * Home is the table-filter shape: Your move, This week, Waiting on them,
  * with the open lead beside the list when wide. Phone (≤760) gets a tab
  * bar, mid (≤1200) the side nav and a stacked header. The lead page is
- * still the classic Detail inside the Astryx frame; its detail-page
- * rebuild is the next pass.
+ * its own Astryx layout (components/leads/lead-astryx.tsx).
  * ─────────────────────────────────────────────────────────────── */
 
 import "@astryxdesign/core/astryx.css";
@@ -30,7 +29,8 @@ import { TextInput } from "@astryxdesign/core/TextInput";
 import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/SegmentedControl";
 import { ProgressBar } from "@astryxdesign/core/ProgressBar";
 import { StatusDot } from "@astryxdesign/core/StatusDot";
-import { Detail, SignIn } from "@/components/admin/admin-leads";
+import { SignIn } from "@/components/admin/admin-leads";
+import { LeadAstryx } from "@/components/leads/lead-astryx";
 import { ago, inboxCall, loadError, matches, nextStep, pass } from "@/lib/leads/lead-desk";
 import type { Template } from "@/lib/leads/lead-crm";
 import { TZ } from "@/lib/booking/booking-rules";
@@ -77,7 +77,6 @@ const InboxGlyph = svg(<><path d="M4 13l3-8h10l3 8v6H4z" /><path d="M4 13h5l1 2h
 const CalendarGlyph = svg(<><rect x="4" y="5" width="16" height="15" rx="2" /><path d="M4 10h16M9 3v4M15 3v4" /></>);
 const MoreGlyph = svg(<><circle cx="6" cy="12" r="1.2" /><circle cx="12" cy="12" r="1.2" /><circle cx="18" cy="12" r="1.2" /></>);
 const PlusGlyph = svg(<path d="M12 5v14M5 12h14" />);
-const BackGlyph = svg(<path d="M19 12H5M11 6l-6 6 6 6" />);
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
   return <Text type="code" size="xsm" color="secondary" weight="medium">{children}</Text>;
@@ -322,30 +321,9 @@ export function LeadsAstryx() {
     />
   );
 
-  // The lead page: the Astryx frame and stage; the body is still the classic Detail until its rebuild.
+  // The lead page: its own Astryx layout (components/leads/lead-astryx.tsx).
   const lead = current ? (
-    <Layout
-      height="fill"
-      defaultHasDividers
-      header={
-        <LayoutHeader>
-          <HStack gap={3} vAlign="center">
-            <Button label="Leads" variant="ghost" size="sm" icon={<Icon icon={BackGlyph} />} onClick={() => setOpen(null)} />
-            <StackItem size="fill" />
-            {size !== "phone" ? <Button label="Snooze" variant="ghost" size="sm" onClick={() => tomorrow(current)} /> : null}
-            {size !== "phone" ? <Button label="Mark as lost" variant="ghost" size="sm" onClick={() => act(current, { stage: "Lost" })} /> : null}
-          </HStack>
-        </LayoutHeader>
-      }
-      content={
-        <LayoutContent role="main" label="Lead">
-          <VStack gap={4}>
-            <Stage l={current} />
-            <Detail key={current.id} summary={current} call={call} onChange={changed} onBack={() => setOpen(null)} reload={load} tick={0} templates={templates} others={live.filter((o) => o.id !== current.id)} />
-          </VStack>
-        </LayoutContent>
-      }
-    />
+    <LeadAstryx key={current.id} summary={current} call={call} onChange={changed} onBack={() => setOpen(null)} reload={load} templates={templates} others={live.filter((o) => o.id !== current.id)} size={size} />
   ) : null;
 
   const page = lead ?? home;
@@ -354,7 +332,7 @@ export function LeadsAstryx() {
     <Theme theme={leadsTheme} mode={mode}>
       {/* The site sets mono capitals everywhere; Astryx sets its own type inside. */}
       {/* The site's capitals are unlayered element rules, so they beat Astryx's layers; this beats them inside the desk. */}
-      <style>{":root [data-astryx-desk][data-astryx-desk] *,:root [data-astryx-desk][data-astryx-desk] ::placeholder{text-transform:none}[data-astryx-desk] [data-detail-back]{display:none}"}</style>
+      <style>{":root [data-astryx-desk][data-astryx-desk] *,:root [data-astryx-desk][data-astryx-desk] ::placeholder{text-transform:none}"}</style>
       <div data-astryx-desk="" style={{ height: "100dvh", textTransform: "none", letterSpacing: "normal" }}>
         {size === "phone"
           ? <Layout height="fill" content={page} footer={<TabBar />} />
