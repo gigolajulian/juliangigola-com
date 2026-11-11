@@ -283,12 +283,18 @@ html:has(.proof[data-wall])::-webkit-scrollbar{display:none}
   .proof[data-wall] .proof-intro h1{font-size:clamp(20px,calc((100cqi - 36px) / (var(--len,17) * .5)),44px);min-height:2.2em}
   .proof .pw-card{top:auto}
 }
-/* A phone on its side (Julian: "overlay looks horrible" at 844x390): the card was taller than the screen. Under 500px tall
-   it goes two columns, the heading left and the form right, sized to sit below the header with the wall showing around it. */
+/* A phone on its side (Julian: "overlay looks horrible" at 844x390): the card was taller than the screen, the wall's and the
+   plain gate's both. Under 500px tall it goes two columns, the heading left and the form right, below the header. */
 @media (max-height:500px) and (orientation:landscape){
-  .proof .pw-card{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);column-gap:28px;row-gap:10px;align-items:end;width:min(640px,calc(100% - 120px));padding:20px 24px;top:calc(50% + 24px)}
-  .proof .pw-card>:first-child{grid-column:1;grid-row:1/span 6;align-self:center}
-  .proof .pw-card>:not(:first-child){grid-column:2}
-  .proof .pw-card h1{font-size:34px}
-  .proof .pw-card input{padding:6px 0}
+  .proof .proof-card{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);column-gap:28px;row-gap:10px;align-items:end;width:min(640px,calc(100% - 120px));padding:20px 24px}
+  .proof .proof-card>:first-child{grid-column:1;grid-row:1/span 6;align-self:center}
+  .proof .proof-card>:not(:first-child){grid-column:2}
+  .proof .proof-card h1{font-size:34px}
+  .proof .proof-card input{padding:6px 0}
+  .proof .pw-card{top:calc(50% + 24px)}
 }
+/* Julian: "navbar background not needed" on the wall's sign-in: the wordmark sits straight on the wall. */
+.proof[data-wall="gate"] .proof-top{background:none;border-bottom-color:transparent;-webkit-backdrop-filter:none;backdrop-filter:none}
+/* Julian: "button needs to show but grayed out across": Open proofs is there with the card, dim until the name and email are good. */
+.proof .pw-card>.proof-btn,.proof .pw-card[data-ready]>.proof-btn{opacity:1;translate:none;transition:opacity .25s ease;transition-delay:0s}
+.proof .pw-card>.proof-btn[data-off]{opacity:.35}

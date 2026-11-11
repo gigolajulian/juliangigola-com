@@ -423,7 +423,7 @@ export function ProofWall({
             {bad}
           </p>
         ) : null}
-        <button type="submit" className="proof-btn">
+        <button type="submit" className="proof-btn" data-off={!name.trim() || !isEmail(email) || undefined}>
           Open proofs
         </button>
         <p className="proof-mu">Keep track of your favorites.</p>
