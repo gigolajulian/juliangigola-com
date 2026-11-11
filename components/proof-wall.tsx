@@ -22,7 +22,7 @@ const FLY_EASE = "cubic-bezier(.45,0,.15,1)";
 const STAGGER = 36; // ms per cell, in reading order
 const WALL_OUT_MS = 650;
 const CARD_OUT_MS = 220;
-const READY_AFTER_MS = 700; // after the wall shows: a couple of rows built before the focus pull
+const READY_AFTER_MS = 900; // after the wall shows: the columns mostly in before the focus pull
 
 type Frame = { src: string; w: number; h: number };
 type Box = { x: number; y: number; w: number; h: number; img: HTMLImageElement };
@@ -59,7 +59,7 @@ export function ProofWall({
   const [name, setName] = React.useState("");
   const [email, setEmail] = React.useState("");
   const [bad, setBad] = React.useState<string | null>(null);
-  // Julian (2026-11-10): the load-up should feel premium. The wall builds in sharp, then racks
+  // Julian (2026-11-10): the load-up should feel premium. The wall streams in sharp, every other column from above and below, then racks
   // focus to blur as the card rises in, its lines one after another (`[data-ready]`, proof.css).
   const [ready, setReady] = React.useState(false);
   const shown = React.useCallback(() => {
@@ -130,7 +130,7 @@ export function ProofWall({
   return (
     <>
       <div ref={layer} className="pw-layer" data-ready={ready || undefined}>
-        <DriftWall items={items} speed={24} dim={0.4} build overlayColor="var(--background)" density={0.5} onShown={shown} />
+        <DriftWall items={items} speed={24} dim={0.4} overlayColor="var(--background)" density={0.5} onShown={shown} />
         <div aria-hidden className="pw-vig" />
         <div aria-hidden className="pw-grain" />
       </div>
