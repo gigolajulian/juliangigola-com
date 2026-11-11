@@ -5,7 +5,7 @@
  * (templates.tsx) and the device block (setup.tsx: push, import from the
  * Inbox, sign out, plus Export CSV) rebuilt. Same endpoints and bodies:
  * /api/booking/hours GET and PUT, PATCH `{ templates }`, PATCH `{ push }`,
- * POST `{ backfill, dry }`, GET /api/inbox?csv.
+ * POST `{ backfill, dry }` and `{ importStripe, dry }`, GET /api/inbox?csv.
  * ─────────────────────────────────────────────────────────────── */
 
 import * as React from "react";
@@ -163,6 +163,7 @@ async function exportCsv(what: "leads" | "activity" = "leads") {
 }
 
 type Count = { people: number; added: number; updated: number; stages: Partial<Record<Stage, number>> };
+type StripeCount = { payments: number; refunds: number; already: number; noEmail: number; people: number };
 
 export function DeviceAstryx({ call, reload, signOut }: { call: Call; reload: () => void; signOut: () => void }) {
   // The desk renders only in the browser, so these read the page directly.
@@ -224,6 +225,22 @@ export function DeviceAstryx({ call, reload, signOut }: { call: Call; reload: ()
       .catch((e: unknown) => setSaid(errorText(e)))
       .finally(() => setBusy(false));
   };
+  const [money, setMoney] = React.useState<StripeCount | null>(null);
+  const [paidSaid, setPaidSaid] = React.useState<string | null>(null);
+  /** Same as the Inbox: counts first, imports on the second press. */
+  const fromStripe = (dry: boolean) => {
+    setBusy(true);
+    setPaidSaid(null);
+    call<StripeCount>({ method: "POST", body: JSON.stringify({ importStripe: true, dry }) })
+      .then((c) => {
+        if (dry) return c.payments + c.refunds ? setMoney(c) : setPaidSaid(`Every Stripe payment is already here (${c.already}).`);
+        setMoney(null);
+        setPaidSaid(`Imported: ${c.payments} payments, ${c.refunds} refunds.`);
+        reload();
+      })
+      .catch((e: unknown) => setPaidSaid(errorText(e)))
+      .finally(() => setBusy(false));
+  };
   const by = count ? Object.entries(count.stages).map(([s, n]) => `${s} ${n}`).join(", ") : "";
 
   return (
@@ -244,6 +261,17 @@ export function DeviceAstryx({ call, reload, signOut }: { call: Call; reload: ()
           </>
         ) : <HStack><Button label={busy ? "Counting" : "Count what is new"} variant="secondary" size="sm" isDisabled={busy} onClick={() => backfill(true)} /></HStack>}
         {said ? <Text type="code" size="sm" color="secondary">{said}</Text> : null}
+      </VStack>
+      <Divider />
+      <VStack gap={2}>
+        <Heading level={2}>Import past Stripe payments</Heading>
+        {money ? (
+          <>
+            <Text>{money.payments} payments and {money.refunds} refunds to add, for {money.people} {money.people === 1 ? "person" : "people"}. {money.already} already here{money.noEmail ? `, ${money.noEmail} with no address skipped` : ""}.</Text>
+            <HStack gap={2}><Button label="Import" variant="primary" size="sm" isDisabled={busy} onClick={() => fromStripe(false)} /><Button label="Cancel" variant="ghost" size="sm" isDisabled={busy} onClick={() => setMoney(null)} /></HStack>
+          </>
+        ) : <HStack><Button label={busy ? "Counting" : "Count what is new"} variant="secondary" size="sm" isDisabled={busy} onClick={() => fromStripe(true)} /></HStack>}
+        {paidSaid ? <Text type="code" size="sm" color="secondary">{paidSaid}</Text> : null}
       </VStack>
       <Divider />
       <HStack gap={2}>

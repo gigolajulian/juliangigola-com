@@ -176,6 +176,8 @@ export type Change = {
   /** Kind "payment" from a Stripe payment that is not a deposit: settle a matching invoice. `invoiceNo` from the payment, when it names one. */
   settles?: boolean;
   invoiceNo?: string;
+  /** Imported from before (`lib/leads/stripe-import.ts`): a line on the log, never news, never out of Archived. */
+  past?: boolean;
 };
 
 /** One event folded into a lead. Returns the lead unchanged when the event
@@ -203,7 +205,7 @@ export function fold(lead: Lead | null, email: string, c: Change): Lead {
     return tidy(next);
   }
   // A mail the site sent is a line on the timeline, not news.
-  if (event.kind === "mail") return tidy(next);
+  if (event.kind === "mail" || c.past) return tidy(next);
   // Opening proofs is a line too. The name they typed fills a lead that only had the address.
   if (event.kind === "proofs") {
     if (c.name && next.name.toLowerCase() === next.email) next.name = c.name;
