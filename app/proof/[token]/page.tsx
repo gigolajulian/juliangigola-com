@@ -29,8 +29,9 @@ export async function generateMetadata({ params }: { params: Promise<{ token: st
   const p = isToken(token) && env.INBOX && seal ? await readProof(env.INBOX, await seal, token) : null;
   const f = p && coverFrame(p);
   if (!f) return base;
-  // The card is keyed by the first frame, so a new first frame is a new URL and no app shows a stale preview.
-  const images = [{ url: `/proof/${token}/card?f=${encodeURIComponent(f.id)}`, width: CARD.w, height: CARD.h, alt: "Proofs by Julian Gigola" }];
+  // The URL carries the frame and crop, so a new pick is a new URL and no app shows a stale preview.
+  const crop = p.card?.id === f.id ? `&c=${p.card.x}-${p.card.y}-${p.card.w}` : "";
+  const images = [{ url: `/proof/${token}/card?f=${encodeURIComponent(f.id)}${crop}`, width: CARD.w, height: CARD.h, alt: "Proofs by Julian Gigola" }];
   return { ...base, openGraph: { title: "Proofs | Julian Gigola", description: "Proofs from Julian Gigola.", url: `/proof/${token}`, images }, twitter: { card: "summary_large_image", images } };
 }
 

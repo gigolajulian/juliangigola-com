@@ -60,6 +60,17 @@ describe("proofs", () => {
     expect(coverFrame({ frames, watermark: true, closesAt: "2020-01-01T00:00:00Z" })).toBeNull();
     expect(coverFrame({ frames: [], watermark: true })).toBeNull();
   });
+  it("takes a preview pick as a frame and a crop, or null to clear it", () => {
+    expect(cleanSettings({ card: { id: "86612442", x: 0, y: "170", w: 1334 } })).toEqual({ card: { id: "86612442", x: 0, y: 170, w: 1334 } });
+    expect(cleanSettings({ card: null })).toEqual({ card: undefined });
+    expect(cleanSettings({ card: { id: "../x", x: 0, y: 0, w: 100 } })).toEqual({});
+    expect(cleanSettings({ card: { id: "a", x: 0, y: 0 } })).toEqual({});
+  });
+  it("previews the picked frame when it is still in the gallery", () => {
+    expect(coverFrame({ frames, watermark: true, card: { id: frames[1].id, x: 0, y: 0, w: 100 } })).toEqual(frames[1]);
+    expect(coverFrame({ frames, watermark: true, card: { id: "gone", x: 0, y: 0, w: 100 } })).toEqual(frames[0]);
+    expect(coverFrame({ frames, watermark: false, card: { id: frames[1].id, x: 0, y: 0, w: 100 } })).toBeNull();
+  });
   it("is open until closesAt", () => {
     expect(isOpen({ closesAt: undefined })).toBe(true);
     expect(isOpen({ closesAt: "2020-01-01T00:00:00Z" })).toBe(false);
