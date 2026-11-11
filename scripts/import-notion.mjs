@@ -24,6 +24,9 @@ const table = (name) => {
   return csv(readFileSync(f, "utf8").replace(/^﻿/, ""));
 };
 
+/** A relation cell in a Notion export reads "Name (Name%20<page id>.md)": keep the name only. */
+export const unlink = (v) => v.replace(/\s*\([^()]*%20[0-9a-f]{32}\.md\)/g, "").trim();
+
 /** RFC 4180: quoted fields, doubled quotes, newlines inside quotes. */
 export function csv(text) {
   const rows = [[]];
@@ -43,7 +46,7 @@ export function csv(text) {
   }
   rows.at(-1).push(cell);
   const [head, ...body] = rows.filter((r) => r.some((v) => v !== ""));
-  return body.map((r) => Object.fromEntries(head.map((h, i) => [h, (r[i] ?? "").trim()])));
+  return body.map((r) => Object.fromEntries(head.map((h, i) => [h, unlink((r[i] ?? "").trim())])));
 }
 
 // Same rule as `identity` in lib/leads/lead-crm.ts.
