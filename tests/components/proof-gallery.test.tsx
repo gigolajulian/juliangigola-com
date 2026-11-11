@@ -37,20 +37,40 @@ describe("ProofGallery", () => {
     expect(screen.getByText("Proofs · 2 frames")).toBeTruthy();
   });
 
+  it("asks for a name first", () => {
+    render(<ProofGallery token="t1" initial={proof()} />);
+    fireEvent.change(screen.getByPlaceholderText("you@email.com"), { target: { value: "a@b.co" } });
+    fireEvent.submit(screen.getByRole("button", { name: "Open gallery" }).closest("form")!);
+    expect(screen.getByRole("alert").textContent).toBe("Add your name.");
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   it("refuses an address that is not an email", () => {
     render(<ProofGallery token="t1" initial={proof()} />);
+    fireEvent.change(screen.getByPlaceholderText("First and last"), { target: { value: "Maya" } });
     fireEvent.change(screen.getByPlaceholderText("you@email.com"), { target: { value: "nope" } });
     fireEvent.submit(screen.getByRole("button", { name: "Open gallery" }).closest("form")!);
     expect(screen.getByRole("alert").textContent).toMatch(/does not look right/);
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it("a good email logs the open and remembers it", async () => {
+  it("a name and email log the open with the name, greet by first name, and keep nothing on the device", async () => {
     render(<ProofGallery token="t1" initial={proof()} />);
+    fireEvent.change(screen.getByPlaceholderText("First and last"), { target: { value: " Maya  Ross " } });
     fireEvent.change(screen.getByPlaceholderText("you@email.com"), { target: { value: "a@b.co" } });
     fireEvent.submit(screen.getByRole("button", { name: "Open gallery" }).closest("form")!);
     await waitFor(() => expect(fetchMock).toHaveBeenCalledWith("/api/proof/t1", expect.objectContaining({ method: "POST" })));
-    expect(localStorage.getItem("proof-email")).toBe("a@b.co");
+    expect(JSON.parse((fetchMock.mock.calls as unknown as [string, RequestInit][])[0][1].body as string)).toMatchObject({ action: "track", kind: "open", email: "a@b.co", name: "Maya Ross" });
+    expect(await screen.findByRole("heading", { name: "Hey Maya, pick your proofs below." })).toBeTruthy();
+    expect(localStorage.getItem("proof-email")).toBeNull();
+  });
+
+  it("a saved address from an older build does not skip the gate", () => {
+    localStorage.setItem("proof-email", "a@b.co");
+    render(<ProofGallery token="t1" initial={proof()} />);
+    expect(screen.getByRole("button", { name: "Open gallery" })).toBeTruthy();
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(localStorage.getItem("proof-email")).toBeNull();
   });
 
   it("a sent gallery shows the walkthrough", () => {

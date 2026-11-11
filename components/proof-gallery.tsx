@@ -120,16 +120,11 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
 
   const post = React.useCallback((b: Record<string, unknown>) => fetch(`/api/proof/${token}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(b) }), [token]);
 
-  // A returning visitor skips the gate on this device.
-  React.useEffect(() => {
-    const saved = localStorage.getItem(EMAIL_STORE);
-    if (saved && isEmail(saved)) enter(saved);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- once, on arrival
-  }, []);
+  // Julian 2026-11-10: sign in every visit, the browser's autofill fills it. Clears the address older builds kept.
+  React.useEffect(() => localStorage.removeItem(EMAIL_STORE), []);
 
   async function enter(address: string, name?: string) {
     setEmail(address);
-    localStorage.setItem(EMAIL_STORE, address);
     try {
       const out = (await (await post({ action: "track", email: address, kind: "open", name })).json()) as { picks?: string[] };
       if (!initial.submitted && out.picks) setSelects(out.picks);
@@ -156,10 +151,12 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
   // Looks: ms each frame spends mostly on screen or open big; flushed with the seconds on the page.
   const looks = React.useRef<Record<string, number>>({});
   const since = React.useRef<Map<string, number>>(new Map());
-  const shown = React.useRef(Date.now());
+  const shown = React.useRef(0);
   const big = React.useRef<{ id: string; at: number } | null>(null);
   React.useEffect(() => {
     if (!ready || !email) return;
+    // Time on the page counts from signing in, not from the gate.
+    shown.current = Date.now();
     const add = (id: string, ms: number) => (looks.current[id] = (looks.current[id] ?? 0) + ms);
     const flush = (beacon = false) => {
       const now = Date.now();
@@ -269,7 +266,10 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
     return (
       <div className="proof">
         <Top view={view} setView={setView} n={0} included={included} due={0} hideTabs />
-        <Gate frames={frames.slice(0, 12).map((f) => src(f.id))} count={frames.length} onEnter={enter} />
+        <Gate frames={frames.slice(0, 12).map((f) => src(f.id))} count={frames.length} onEnter={(name, address) => {
+            setHello(name.split(/\s+/)[0]);
+            enter(address, name);
+          }} />
       </div>
     );
 
@@ -385,7 +385,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
       ) : (
         <div className="proof-intro">
           <p className="proof-lab">Proofs</p>
-          <h1>Pick your proofs.</h1>
+          <h1>{hello ? `Hey ${hello}, pick your proofs below.` : "Pick your proofs."}</h1>
         </div>
       )}
 
@@ -607,9 +607,10 @@ function Top({ view, setView, n, included, due, hideTabs }: { view: "all" | "sel
 }
 
 /** Before the frames: any email opens the gallery, and picks are kept under it. */
-function Gate({ frames, count, onEnter }: { frames: string[]; count: number; onEnter: (email: string) => void }) {
+function Gate({ frames, count, onEnter }: { frames: string[]; count: number; onEnter: (name: string, email: string) => void }) {
+  const [name, setName] = React.useState("");
   const [value, setValue] = React.useState("");
-  const [bad, setBad] = React.useState(false);
+  const [bad, setBad] = React.useState<string | null>(null);
   return (
     <div className="proof-gate">
       <div className="proof-wall" aria-hidden="true">
@@ -622,8 +623,10 @@ function Gate({ frames, count, onEnter }: { frames: string[]; count: number; onE
         className="proof-card"
         onSubmit={(e) => {
           e.preventDefault();
-          if (isEmail(value)) onEnter(value.trim());
-          else setBad(true);
+          const who = name.trim().replace(/\s+/g, " ");
+          if (!who) setBad("Add your name.");
+          else if (!isEmail(value)) setBad("That email does not look right.");
+          else onEnter(who, value.trim());
         }}
       >
         <div>
@@ -631,10 +634,14 @@ function Gate({ frames, count, onEnter }: { frames: string[]; count: number; onE
           <h1>Pick your proofs.</h1>
         </div>
         <label>
-          <span className="proof-lab">Your email</span>
-          <input type="email" inputMode="email" autoComplete="email" required value={value} onChange={(e) => { setValue(e.target.value); setBad(false); }} placeholder="you@email.com" aria-invalid={bad || undefined} />
+          <span className="proof-lab">Your name</span>
+          <input name="name" autoComplete="name" required value={name} onChange={(e) => { setName(e.target.value); setBad(null); }} placeholder="First and last" aria-invalid={bad === "Add your name." || undefined} />
         </label>
-        {bad ? <p className="proof-err" role="alert">That email does not look right.</p> : null}
+        <label>
+          <span className="proof-lab">Your email</span>
+          <input type="email" name="email" inputMode="email" autoComplete="email" required value={value} onChange={(e) => { setValue(e.target.value); setBad(null); }} placeholder="you@email.com" aria-invalid={(!!bad && bad !== "Add your name.") || undefined} />
+        </label>
+        {bad ? <p className="proof-err" role="alert">{bad}</p> : null}
         <button type="submit" className="proof-btn">Open gallery</button>
         <p className="proof-mu">Any email opens it. Your picks are logged under this address, and they are still here when you come back.</p>
       </form>

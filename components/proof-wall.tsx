@@ -295,6 +295,7 @@ export function ProofWall({
         <label>
           <span className="proof-lab">Your name</span>
           <input
+            name="name"
             autoComplete="name"
             required
             value={name}
@@ -311,6 +312,7 @@ export function ProofWall({
           <span className="proof-lab">Your email</span>
           <input
             type="email"
+            name="email"
             inputMode="email"
             autoComplete="email"
             required
