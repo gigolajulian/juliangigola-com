@@ -355,4 +355,13 @@ function provider.checkForPicks()
   end
 end
 
+--- Every entry point (both Plug-in Extras menus, the Plug-in Manager button) runs this.
+function provider.runCheck()
+  LrTasks.startAsyncTask(function()
+    -- LrTasks.pcall: plain pcall cannot wrap LrHttp, which yields.
+    local ok, err = LrTasks.pcall(provider.checkForPicks)
+    if not ok then LrDialogs.message("Check for picks", tostring(err), "critical") end
+  end)
+end
+
 return provider
