@@ -298,3 +298,5 @@ html:has(.proof[data-wall])::-webkit-scrollbar{display:none}
 /* Julian: "button needs to show but grayed out across": Open proofs is there with the card, dim until the name and email are good. */
 .proof .pw-card>.proof-btn,.proof .pw-card[data-ready]>.proof-btn{opacity:1;translate:none;transition:opacity .25s ease;transition-delay:0s}
 .proof .pw-card>.proof-btn[data-off]{opacity:.35}
+.proof-gate .proof-card>.proof-btn{transition:opacity .25s ease}
+.proof-gate .proof-card>.proof-btn[data-off]{opacity:.35}

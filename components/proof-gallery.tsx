@@ -646,7 +646,7 @@ function Gate({ frames, count, onEnter }: { frames: string[]; count: number; onE
           <input type="email" name="email" inputMode="email" autoComplete="email" required value={value} onChange={(e) => { setValue(e.target.value); setBad(null); }} placeholder="you@email.com" aria-invalid={(!!bad && bad !== "Add your name.") || undefined} />
         </label>
         {bad ? <p className="proof-err" role="alert">{bad}</p> : null}
-        <button type="submit" className="proof-btn">Open gallery</button>
+        <button type="submit" className="proof-btn" data-off={!name.trim() || !isEmail(value) || undefined}>Open gallery</button>
         <p className="proof-mu">Keep track of your favorites.</p>
       </form>
     </div>
