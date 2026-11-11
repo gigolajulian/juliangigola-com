@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { LeadUpcoming } from "@/components/lead-upcoming";
+import { LeadUpcoming } from "@/components/leads/lead-upcoming";
 import type { LeadSummary } from "@/lib/leads";
 
 afterEach(() => vi.unstubAllGlobals());

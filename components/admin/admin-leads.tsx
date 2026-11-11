@@ -2,14 +2,14 @@
 
 import * as React from "react";
 import { KEY_STORE, TOKEN_STORE } from "@/lib/admin-github";
-import { LeadBoard } from "@/components/lead-board";
-import { LeadHours } from "@/components/lead-hours";
+import { LeadBoard } from "@/components/leads/lead-board";
+import { LeadHours } from "@/components/leads/lead-hours";
 import { ProofsDesk } from "@/components/admin/admin-proofs";
-import { LeadUpcoming } from "@/components/lead-upcoming";
+import { LeadUpcoming } from "@/components/leads/lead-upcoming";
 import { leadSummary, STAGES, type Lead, type LeadSummary, type Stage } from "@/lib/leads";
 import { cn } from "@/lib/utils";
 import { type Template } from "@/lib/lead-crm";
-import { LicenceList } from "@/components/lead-licence";
+import { LicenceList } from "@/components/leads/lead-licence";
 import { aside, authed, closed, errorText, type Filter, inboxCall, loadError, matches, pass, snoozed } from "@/lib/lead-desk";
 import { badge, btn, HEAD, label, primary } from "@/components/leads/shared";
 import { Card, clampW, LIST_W, LIST_W_STORE, ListResizer, Pill, Row, SideLink } from "@/components/leads/list";

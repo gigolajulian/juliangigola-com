@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { endDay, LicenceField, LicenceList } from "@/components/lead-licence";
+import { endDay, LicenceField, LicenceList } from "@/components/leads/lead-licence";
 import type { Lead, LeadSummary } from "@/lib/leads";
 
 const iso = new Date().toISOString();

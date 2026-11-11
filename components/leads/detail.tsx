@@ -7,7 +7,7 @@ import type { Enquiry } from "@/lib/inbox";
 import { isLate, NUDGES, quoteNudge, REMIND_MAX, STAGES, trashDaysLeft, type Lead, type LeadPatch, type LeadSummary, type Stage } from "@/lib/leads";
 import { cn } from "@/lib/utils";
 import { fill, mailable, TEMPLATES, type Template } from "@/lib/lead-crm";
-import { endDay } from "@/components/lead-licence";
+import { endDay } from "@/components/leads/lead-licence";
 import { leadKey, typingIn } from "@/lib/lead-keys";
 import { ago, at, authed, type Call, DAY, day, errorText, now, type Patch, renew, snoozed } from "@/lib/lead-desk";
 import { btn, compose, field, fieldLabel, HEAD, ios, kindOf, line, mailto, MARK, primary, STEPS, Tag } from "@/components/leads/shared";
