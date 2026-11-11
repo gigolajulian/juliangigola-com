@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { api, closed, LeadProofs, ProofsDesk, status, type Row } from "@/components/admin/admin-proofs";
 
 afterEach(() => vi.unstubAllGlobals());
@@ -76,5 +76,18 @@ describe("LeadProofs", () => {
     answer({ proofs: [proof()] });
     render(<LeadProofs email="Ana@Example.com" />);
     expect(await screen.findByRole("region", { name: "Proofs" })).toBeTruthy();
+  });
+});
+
+describe("link preview pick", () => {
+  it("picks a frame and saves it with its crop", async () => {
+    const frames = [{ id: "f1", file: "a.jpg", w: 1334, h: 2000 }, { id: "f2", file: "b.jpg", w: 1334, h: 2000 }] as never[];
+    answer({ proofs: [proof({ frames, watermark: true })] });
+    render(<ProofsDesk />);
+    fireEvent.click(await screen.findByRole("button", { name: "Frame 2" }));
+    fireEvent.click(screen.getByRole("button", { name: "Save preview" }));
+    await waitFor(() => expect(vi.mocked(fetch).mock.calls.some(([, init]) => (init as RequestInit | undefined)?.method === "PATCH")).toBe(true));
+    const [, init] = vi.mocked(fetch).mock.calls.find(([, i]) => (i as RequestInit | undefined)?.method === "PATCH")!;
+    expect(JSON.parse(String((init as RequestInit).body))).toEqual({ token: "tk1", card: { id: "f2", x: 0, y: 160, w: 1334 } });
   });
 });
