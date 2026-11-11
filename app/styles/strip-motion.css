@@ -225,8 +225,10 @@
    next screen waiting flush with the window's edge draws no seam
    there, full by an eighth of the way in, and once the screen is
    pinned the band is off the left of the window. Opacity on a pseudo,
-   so the compositor runs it and nothing repaints. */
-.strip-scroll[data-dealt="screens"] > * + *::before {
+   so the compositor runs it and nothing repaints. `:not(:first-child)`,
+   not `* + *`: a universal sibling restyled the whole page on any node
+   added to <body> (audit 2026-11-11); `:where` keeps the specificity. */
+.strip-scroll[data-dealt="screens"] > :where(:not(:first-child))::before {
   content: "";
   position: absolute;
   top: 0;
@@ -248,7 +250,7 @@
 /* The deck the other way round (`?flyout=1`, `lib/deck.ts`): the shadow
    is the leaving screen's, off its trailing edge onto the one it is
    uncovering. */
-:root[data-flyout] .strip-scroll[data-dealt="screens"] > * + *::before {
+:root[data-flyout] .strip-scroll[data-dealt="screens"] > :where(:not(:first-child))::before {
   content: none;
 }
 :root[data-flyout] .strip-scroll[data-dealt="screens"] > *::after {
