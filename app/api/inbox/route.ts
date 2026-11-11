@@ -2,7 +2,7 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { authorised, bearer, canPush } from "@/lib/vouch";
 import { SAFE_IMAGE, summary, type Enquiry, type Summary } from "@/lib/inbox";
 import { backfillLead, fold, PAPER, REMIND_MAX, STAGES, trashDaysLeft, type InboxRow, type Lead, type LeadPatch, type LeadSummary, type Paper, type Stage } from "@/lib/leads/leads";
-import { readLead, writeLead } from "@/lib/leads/lead-store";
+import { everyLead, readLead, writeLead } from "@/lib/leads/lead-store";
 import { adoptLog, eventsCsv, forgetLog, paidTotal, readLog, readMaster } from "@/lib/leads/activity-log";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { notify, subscribe, unsubscribe } from "@/lib/leads/lead-push";
@@ -21,21 +21,6 @@ const FROM_KEY = "leads:invoice-from";
 const countKey = (date: string) => `invoices:${mmyy(date)}`;
 const taken = async (inbox: NonNullable<CloudflareEnv["INBOX"]>, date: string) => Number((await inbox.get(countKey(date))) ?? 0) || 0;
 
-/** Every lead, opened in full: for the numbers and the export, never the list. */
-async function everyLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: NonNullable<Awaited<ReturnType<typeof sealer>>>) {
-  const out: (Lead & { id?: string })[] = [];
-  let after: string | undefined;
-  for (;;) {
-    const listed = await inbox.list({ prefix: "lead:", cursor: after });
-    for (const k of listed.keys) {
-      const l = await readLead(inbox, seal, k.name.slice(5));
-      if (l) out.push(Object.assign(l, { id: k.name.slice(5) }));
-    }
-    if (listed.list_complete) break;
-    after = listed.cursor;
-  }
-  return out;
-}
 
 /* ── reading the inbox ────────────────────────────────────────────
  * The one endpoint /admin's Inbox tab talks to. Lists enquiries, opens one,
@@ -202,10 +187,11 @@ export async function GET(request: Request) {
     const file = (body: string, name: string) => new Response(body, { headers: { ...NO_STORE, "content-type": "text/csv; charset=utf-8", "content-disposition": `attachment; filename="${name}-${day}.csv"` } });
     if (url.searchParams.get("csv") === "events") return file(eventsCsv(await readMaster(gate.inbox, seal)), "activity");
     const all = await everyLead(gate.inbox, seal);
-    if (url.searchParams.has("stats")) return json({ stats: stats(all, Date.now()) });
-    // Paid per client from one pass over the master log: one list call per 1000 events.
+    // One pass over the master log: one list call per 1000 events.
+    const master = await readMaster(gate.inbox, seal);
+    if (url.searchParams.has("stats")) return json({ stats: stats(all, Date.now(), master) });
     const byLead = new Map<string, Lead["events"]>();
-    for (const m of await readMaster(gate.inbox, seal)) byLead.set(m.lead, [...(byLead.get(m.lead) ?? []), m.event]);
+    for (const m of master) byLead.set(m.lead, [...(byLead.get(m.lead) ?? []), m.event]);
     const paid: Record<string, number> = {};
     for (const l of all) if (l.id) paid[l.email] = paidTotal(byLead.get(l.id) ?? []);
     return file(csv(all, paid), "leads");
