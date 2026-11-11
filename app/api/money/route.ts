@@ -1,6 +1,7 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { stripe } from "@/lib/deposit";
 import { isAdmin } from "@/lib/vouch";
+import { json } from "@/lib/http";
 
 /* ── GET /api/money: his Stripe balance and what moved it ─────────
  * Julian (2026-11-06): "add my stripe balance too and show the
@@ -10,9 +11,6 @@ import { isAdmin } from "@/lib/vouch";
  * ─────────────────────────────────────────────────────────────── */
 
 export const dynamic = "force-dynamic";
-
-const json = (body: unknown, status = 200) =>
-  Response.json(body, { status, headers: { "cache-control": "no-store", "x-robots-tag": "noindex, nofollow" } });
 
 type Amount = { amount: number; currency: string };
 type Txn = {

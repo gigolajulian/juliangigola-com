@@ -2,6 +2,7 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { liveHours } from "@/lib/booking-engine";
 import { EVENTS } from "@/lib/booking-rules";
 import { localIso, openStarts } from "@/lib/slots";
+import { json } from "@/lib/http";
 
 /* ── open times for the picker, from the site's own engine ────────
  * GET /api/slots?slug=portraits&start=2026-11-04&end=2027-03-04&timeZone=...
@@ -13,24 +14,23 @@ import { localIso, openStarts } from "@/lib/slots";
 
 export const dynamic = "force-dynamic";
 
-const json = (body: unknown, status = 200) => Response.json(body, { status, headers: { "cache-control": "no-store" } });
 const DAY = /^\d{4}-\d{2}-\d{2}$/;
 
 export async function GET(request: Request) {
   const { env } = await getCloudflareContext({ async: true });
-  if (!env.GCAL_OAUTH) return json({ status: "error", error: "Not set up." }, 503);
+  if (!env.GCAL_OAUTH) return json({ status: "error", error: { message: "Not set up." } }, 503);
 
   const q = new URL(request.url).searchParams;
   const slug = q.get("slug") ?? "";
   const rule = EVENTS[slug];
   const tz = q.get("timeZone") || "America/Los_Angeles";
   const [start, end] = [q.get("start") ?? "", q.get("end") ?? ""];
-  if (!rule) return json({ status: "error", error: "Unknown session." }, 400);
-  if (!DAY.test(start) || !DAY.test(end)) return json({ status: "error", error: "Bad range." }, 400);
+  if (!rule) return json({ status: "error", error: { message: "Unknown session." } }, 400);
+  if (!DAY.test(start) || !DAY.test(end)) return json({ status: "error", error: { message: "Bad range." } }, 400);
   try {
     new Intl.DateTimeFormat("en-US", { timeZone: tz });
   } catch {
-    return json({ status: "error", error: "Unknown time zone." }, 400);
+    return json({ status: "error", error: { message: "Unknown time zone." } }, 400);
   }
   // The visitor's days, widened by a day each side for any zone; capped at 130 days.
   const from = Date.parse(`${start}T00:00:00Z`) - 864e5;
@@ -41,7 +41,7 @@ export async function GET(request: Request) {
     starts = await openStarts(env.GCAL_OAUTH, slug, from, to, Date.now(), undefined, env.INBOX, await liveHours(env));
   } catch (e) {
     console.error("slots", String(e));
-    return json({ status: "error", error: "Could not reach the calendar." }, 502);
+    return json({ status: "error", error: { message: "Could not reach the calendar." } }, 502);
   }
   const data: { [day: string]: { start: string; end: string }[] } = {};
   for (const s of starts) {

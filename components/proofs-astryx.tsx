@@ -75,7 +75,7 @@ export function ProofsAstryx() {
     return () => mq.removeEventListener("change", set);
   }, []);
 
-  if (error === "Not signed in." || error?.startsWith("GitHub did not accept"))
+  if (error === "Not authorized." || error?.startsWith("GitHub did not accept"))
     return (
       <SignIn
         onKey={(k) => {

@@ -1,6 +1,7 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { bearer, canPush } from "@/lib/vouch";
+import { isAdmin } from "@/lib/vouch";
 import { ACCOUNT, SITE_HOST, ZONE, cloudflare, searchConsole as gsc, sitePath } from "@/lib/analytics";
+import { json } from "@/lib/http";
 
 /* ── traffic ──────────────────────────────────────────────────────
  * The numbers behind /admin's Traffic tab, from Cloudflare's own analytics:
@@ -14,12 +15,6 @@ import { ACCOUNT, SITE_HOST, ZONE, cloudflare, searchConsole as gsc, sitePath } 
 
 export const dynamic = "force-dynamic";
 
-const json = (body: unknown, status = 200) =>
-  new Response(JSON.stringify(body), {
-    status,
-    headers: { "cache-control": "no-store", "content-type": "application/json" },
-  });
-
 type Row = { n: number; key: string };
 
 /* The two queries' answers. Each asks for one of these. */
@@ -29,9 +24,8 @@ type Viewer = {
 };
 
 export async function GET(request: Request) {
-  const token = bearer(request);
-  if (!token || !(await canPush(token))) return json({ error: "Not authorized." }, 401);
   const { env } = await getCloudflareContext({ async: true });
+  if (!(await isAdmin(request, env.INBOX_KEY))) return json({ error: "Not authorized." }, 401);
   // Held in a const: the check above does not narrow `env` inside `gql`,
   // which failed the production type check.
   const key = env.CF_ANALYTICS_TOKEN;

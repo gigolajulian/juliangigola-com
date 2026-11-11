@@ -4,6 +4,9 @@ import { manageLinks } from "@/lib/booking-token";
 import { confirmMail, sendConfirm } from "@/lib/confirm";
 import { logMail } from "@/lib/leads";
 import { parseBooking } from "@/lib/deposit";
+import { json } from "@/lib/http";
+
+// Errors keep Cal.com's { status, error: { message } } envelope (as /api/slots does): the time picker reads either engine the same way.
 
 /* ── a free call, booked by the site's own engine ─────────────────
  * The picker posts a call here. The lock rechecks the time and inserts
@@ -13,8 +16,6 @@ import { parseBooking } from "@/lib/deposit";
  * ─────────────────────────────────────────────────────────────── */
 
 export const dynamic = "force-dynamic";
-
-const json = (body: unknown, status = 200) => Response.json(body, { status, headers: { "cache-control": "no-store" } });
 
 export async function POST(request: Request) {
   const { env, ctx } = await getCloudflareContext({ async: true });
@@ -32,7 +33,8 @@ export async function POST(request: Request) {
   let out: BookResult;
   try {
     out = await lock<BookResult>(env, "book", { ...b, via });
-  } catch {
+  } catch (e) {
+    console.error("book", String(e));
     return json({ status: "error", error: { message: "Could not reach the calendar." } }, 502);
   }
   if (!out.ok && out.reason === "unknown") return json({ status: "error", error: { message: "Unknown session." } }, 400);

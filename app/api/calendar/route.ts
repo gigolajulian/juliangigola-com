@@ -3,6 +3,7 @@ import { TZ } from "@/lib/booking-rules";
 import { gcal } from "@/lib/gcal";
 import { busyAll, EXTRA_KEY, isIcs, readExtras, zoned, type Extra } from "@/lib/slots";
 import { isAdmin } from "@/lib/vouch";
+import { json } from "@/lib/http";
 
 /* ── the Leads app's Calendar ─────────────────────────────────────
  * Julian (2026-11-04): "control the calendar, block off days, and add
@@ -19,8 +20,6 @@ import { isAdmin } from "@/lib/vouch";
 
 export const dynamic = "force-dynamic";
 
-const json = (body: unknown, status = 200) =>
-  Response.json(body, { status, headers: { "cache-control": "no-store", "x-robots-tag": "noindex, nofollow" } });
 const DAY = /^\d{4}-\d{2}-\d{2}$/;
 const TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
 const MAX_EXTRAS = 10;

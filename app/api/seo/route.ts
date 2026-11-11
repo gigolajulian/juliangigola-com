@@ -1,7 +1,8 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { bearer, canPush } from "@/lib/vouch";
+import { isAdmin } from "@/lib/vouch";
 import { ACCOUNT, SITE_HOST, cloudflare, engineSql, searchConsole, sitePath } from "@/lib/analytics";
 import { BEACON_DATASET } from "@/lib/beacon";
+import { json } from "@/lib/http";
 
 /* ── seo ──────────────────────────────────────────────────────────
  * The numbers behind /admin's SEO tab. Same gate and same two keys as
@@ -15,12 +16,6 @@ import { BEACON_DATASET } from "@/lib/beacon";
 
 export const dynamic = "force-dynamic";
 
-const json = (body: unknown, status = 200) =>
-  new Response(JSON.stringify(body), {
-    status,
-    headers: { "cache-control": "no-store", "content-type": "application/json" },
-  });
-
 type Rum = {
   accounts: { rumPageloadEventsAdaptiveGroups: { sum: { visits: number }; dimensions: Record<string, string> }[] }[];
 };
@@ -30,9 +25,8 @@ const MAX_PAGES = 20;
 const PATH = /^\/[\w\-/.#]{0,200}$/;
 
 export async function GET(request: Request) {
-  const token = bearer(request);
-  if (!token || !(await canPush(token))) return json({ error: "Not authorized." }, 401);
   const { env } = await getCloudflareContext({ async: true });
+  if (!(await isAdmin(request, env.INBOX_KEY))) return json({ error: "Not authorized." }, 401);
   const key = env.CF_ANALYTICS_TOKEN;
   if (!key) return json({ error: "No CF_ANALYTICS_TOKEN on this Worker yet." }, 503);
 

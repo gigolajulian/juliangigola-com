@@ -6,6 +6,7 @@ import { cancelledSubject, confirmMail, sendCancelled, sendConfirm } from "@/lib
 import { logMail } from "@/lib/leads";
 import { dashboardLink, mail, stripe } from "@/lib/deposit";
 import { whenPT } from "@/lib/inbox";
+import { json } from "@/lib/http";
 
 /* ── a client reschedules or cancels (`/booking/<id>`) ────────────
  * POST {t, action: "cancel"} or {t, action: "reschedule", start}. The
@@ -16,8 +17,6 @@ import { whenPT } from "@/lib/inbox";
  * ─────────────────────────────────────────────────────────────── */
 
 export const dynamic = "force-dynamic";
-
-const json = (body: unknown, status = 200) => Response.json(body, { status, headers: { "cache-control": "no-store" } });
 
 const SAY = { missing: [404, "No such booking."], cancelled: [409, "This booking is already cancelled."], past: [409, "This session has started."], taken: [409, "taken"] } as const;
 
@@ -32,7 +31,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     if (body.action === "cancel") out = await lock<ChangeResult>(env, "cancel", id);
     else if (body.action === "reschedule" && typeof body.start === "string") out = await lock<ChangeResult>(env, "reschedule", { id, start: body.start });
     else return json({ error: "Nothing to do." }, 400);
-  } catch {
+  } catch (e) {
+    console.error("booking change", String(e));
     return json({ error: "Could not reach the calendar. Try again." }, 502);
   }
   if (!out.ok) return json({ error: SAY[out.reason][1] }, SAY[out.reason][0]);

@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+﻿import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { ProofsAstryx } from "@/components/proofs-astryx";
 
@@ -18,7 +18,7 @@ describe("ProofsAstryx", () => {
   });
 
   it("asks for a key when not signed in", async () => {
-    vi.stubGlobal("fetch", reply({ error: "Not signed in." }, 401));
+    vi.stubGlobal("fetch", reply({ error: "Not authorized." }, 401));
     render(<ProofsAstryx />);
     expect(await screen.findByLabelText("Inbox key or GitHub token")).toBeTruthy();
   });
