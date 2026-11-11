@@ -29,7 +29,7 @@ const SHOOT: Record<string, string> = {
   other: "Other",
 };
 
-export type Lead = {
+export type NotionLead = {
   stored: Enquiry;
   status: "Inquiry" | "Call booked" | "Confirmed";
   /** Website form type or Cal.com event slug. */
@@ -40,7 +40,7 @@ export type Lead = {
 
 const text = (s: string) => ({ rich_text: [{ text: { content: s.slice(0, 2000) } }] });
 
-export function leadProperties({ stored, status, kind, calUid, shootDate }: Lead) {
+export function leadProperties({ stored, status, kind, calUid, shootDate }: NotionLead) {
   const shoot = kind ? SHOOT[kind] : undefined;
   const message = [stored.detail, stored.message].filter(Boolean).join("\n\n");
   return {
@@ -92,7 +92,7 @@ export async function findRow(token: string, email: string): Promise<string | nu
  * Inquiry, and the title and Source stay as first set. When the lookup
  * fails it adds a row, so nothing is lost. Returns the row's page id.
  */
-export async function toNotion(token: string | undefined, lead: Lead): Promise<string | undefined> {
+export async function toNotion(token: string | undefined, lead: NotionLead): Promise<string | undefined> {
   if (!token) return;
   try {
     const props: Record<string, unknown> = leadProperties(lead);

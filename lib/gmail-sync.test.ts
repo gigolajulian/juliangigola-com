@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CURSOR, mailChanges, syncGmail, type Msg } from "./gmail-sync";
 import { forgetToken } from "./gcal";
-import { fold, leadStoreKey, recordLead, writeLead, type Lead } from "./leads";
+import { fold, leadStoreKey, type Lead } from "./leads";
+import { recordLead, writeLead } from "./lead-store";
 import { canonical, sealer } from "./lead-crypto";
 
 const at = (h: number) => new Date(Date.UTC(2026, 10, 2, h)).toISOString();

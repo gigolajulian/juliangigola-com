@@ -1,7 +1,7 @@
 import { DEFAULT_HOURS, EVENTS, TZ, type Booking, type Hours } from "@/lib/booking-rules";
 import { gcal } from "@/lib/gcal";
 import { bookingEnquiry, enquiryKey, summary } from "@/lib/inbox";
-import { recordLead, type LeadStore } from "@/lib/leads";
+import { recordLead, type LeadStore } from "@/lib/lead-store";
 import { toNotion } from "@/lib/notion-lead";
 import { openNow, type KV } from "@/lib/slots";
 
@@ -61,7 +61,7 @@ const intentKey = (intent: string) => `i:${intent}`;
 const newId = () => crypto.randomUUID().replace(/-/g, "").slice(0, 16);
 
 /** What the client's page may show: no email, no phone, no deposit id. */
-export const managed = (r: BookingRecord) => ({ id: r.id, slug: r.slug, session: r.session, start: r.start, end: r.end, firstStart: r.firstStart, where: r.where, paid: !!r.intent, cancelled: !!r.cancelled });
+export const clientView = (r: BookingRecord) => ({ id: r.id, slug: r.slug, session: r.session, start: r.start, end: r.end, firstStart: r.firstStart, where: r.where, paid: !!r.intent, cancelled: !!r.cancelled });
 
 /** The record by its id. */
 export const findBooking = (store: Store, id: string) => store.get<BookingRecord>(recKey(id));
@@ -96,7 +96,7 @@ export async function bookOwn(store: Store, secret: string | undefined, b: BookI
     const r = had && (await findBooking(store, had));
     if (r) return { ok: true, record: r };
   }
-  if (!(await openNow(secret, b.slug, b.start, undefined, kv, await readHours(store)))) return { ok: false, reason: "taken" };
+  if (!(await openNow(secret, b.slug, b.start, { kv, hours: await readHours(store) }))) return { ok: false, reason: "taken" };
 
   const id = newId();
   const end = new Date(Date.parse(b.start) + rule.length * 6e4).toISOString();
@@ -202,7 +202,7 @@ export async function rescheduleOwn(store: Store, secret: string | undefined, id
   if (Date.parse(was.start) <= Date.now()) return { ok: false, reason: "past" };
   const rule = EVENTS[was.slug];
   const t = Date.parse(start);
-  if (!rule || isNaN(t) || !(await openNow(secret, was.slug, start, was, kv, await readHours(store)))) return { ok: false, reason: "taken" };
+  if (!rule || isNaN(t) || !(await openNow(secret, was.slug, start, { mine: was, kv, hours: await readHours(store) }))) return { ok: false, reason: "taken" };
   const end = new Date(t + rule.length * 6e4).toISOString();
   await gcal(secret, `/calendars/primary/events/${encodeURIComponent(was.eventId)}?sendUpdates=none`, {
     method: "PATCH",
@@ -238,14 +238,26 @@ export async function markReminded(store: Store, id: string, now = Date.now()) {
 type LockEnv = { BOOKING_LOCK?: { idFromName(name: string): unknown; get(id: unknown): { fetch(url: string, init: RequestInit): Promise<Response> } } };
 
 /** Julian's hours from the lock, or the defaults when it cannot answer (the lock rechecks every booking anyway). */
-export const liveHours = (env: LockEnv) => lock<{ hours: Hours }>(env, "hours", null).then((x) => x.hours, () => DEFAULT_HOURS);
+export const liveHours = (env: LockEnv) => lock(env, "hours", null).then((x) => x.hours, () => DEFAULT_HOURS);
+
+/** Each op the lock answers (`worker/booking-lock.ts`): [argument, answer]. */
+export type LockOps = {
+  book: [BookInput, BookResult];
+  cancel: [string, ChangeResult];
+  reschedule: [{ id: string; start: string }, ChangeResult];
+  due: [null, { records: BookingRecord[] }];
+  reminded: [string, { ok: boolean }];
+  hours: [null, { hours: Hours }];
+  setHours: [Hours, { hours: Hours }];
+  get: [string, { record: BookingRecord | null }];
+};
 
 /** One call to the one lock (`worker/booking-lock.ts`). Throws when it is missing or fails. */
-export async function lock<T>(env: LockEnv, op: string, arg: unknown): Promise<T> {
+export async function lock<K extends keyof LockOps>(env: LockEnv, op: K, arg: LockOps[K][0]): Promise<LockOps[K][1]> {
   const ns = env.BOOKING_LOCK;
   if (!ns) throw new Error("BOOKING_LOCK is not bound");
   const res = await ns.get(ns.idFromName("hello@")).fetch("https://lock/", { method: "POST", body: JSON.stringify({ op, arg }) });
-  const out = (await res.json()) as T & { error?: string };
+  const out = (await res.json()) as LockOps[K][1] & { error?: string };
   if (!res.ok) throw new Error(`booking lock ${op}: ${out.error ?? res.status}`);
   return out;
 }

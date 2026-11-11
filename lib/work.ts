@@ -114,8 +114,8 @@ const COVER_WIDTH = 600;
  * The archive's order is the old site's order, and in a few places the frame
  * that should introduce a project is not the one sitting first in it. Naming
  * the frame here moves it to the front of the gallery *and* makes it the
- * cover, because those are the same decision — `coverOf` exists on the
- * premise that the cover is the opener, and a project whose card shows one
+ * cover, because those are the same decision: the cover is the opener,
+ * and a project whose card shows one
  * photograph and whose page opens on another reads as a mistake.
  *
  * The derivative lives in `public/hero/` rather than beside the frame it came
@@ -327,7 +327,7 @@ const reframe = (project: Project): Project => {
     ...project,
     images,
     blocks,
-    // The cover is the opener — `coverOf` is built on that — so a gallery that
+    // The cover is the opener, so a gallery that
     // now opens on a different photograph gets a card showing it. The full
     // frame rather than the 600px derivative, because the derivative was cut
     // from the frame that used to lead and still shows it.
@@ -930,7 +930,6 @@ export const bandTile = (p: Project): BandTile => {
  * frame is a deliberate choice; second-guessing it with "the widest" or "the
  * darkest" would override an edit he already made.
  */
-export const coverOf = (p: Project): Frame => p.cover;
 
 /**
  * Homepage order. Named explicitly rather than derived, because "what leads"

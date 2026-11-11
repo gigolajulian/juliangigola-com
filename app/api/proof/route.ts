@@ -1,11 +1,12 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { isAdmin } from "@/lib/vouch";
 import { sealer } from "@/lib/lead-crypto";
-import { recordLead } from "@/lib/leads";
+import { recordLead } from "@/lib/lead-store";
 import { closesAt, cleanSettings, DEFAULTS, frameKey, frameKeys, isFrameId, isToken, listProofs, newToken, readProof, writeProof, type Proof } from "@/lib/proofs";
 import { proofMail, proofUrl, sendClient } from "@/lib/proof-mail";
 import { settle } from "@/lib/proof-submit";
 import { servedFrame } from "@/lib/proof-watermark";
+import { json } from "@/lib/http";
 
 /* ── proofs, Julian's side ────────────────────────────────────────
  * Lightroom (the publish service) and /admin Leads both call this, with the
@@ -25,8 +26,6 @@ import { servedFrame } from "@/lib/proof-watermark";
 
 export const dynamic = "force-dynamic";
 
-const H = { "cache-control": "no-store", "x-robots-tag": "noindex, nofollow" };
-const json = (body: unknown, status = 200) => Response.json(body, { status, headers: H });
 /** A Lightroom export at ~2000px is well under this. */
 const MAX_FRAME = 8 * 1024 * 1024;
 
@@ -35,7 +34,7 @@ async function gate(request: Request) {
   const seal = sealer(env.LEADS_KEY);
   if (!env.INBOX || !env.PROOFS || !seal) return { error: json({ error: "Proofs need INBOX, PROOFS and LEADS_KEY on this build." }, 503) };
   const ok = await isAdmin(request, env.INBOX_KEY);
-  if (!ok) return { error: json({ error: "Not signed in." }, 401) };
+  if (!ok) return { error: json({ error: "Not authorized." }, 401) };
   return { env, kv: env.INBOX, r2: env.PROOFS, s: await seal };
 }
 

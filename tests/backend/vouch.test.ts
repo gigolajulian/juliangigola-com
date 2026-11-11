@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { canPush } from "@/lib/vouch";
+import { authorised, canPush, fromWorker } from "@/lib/vouch";
 import { SCOPED, githubToken, reply } from "./fakes";
 
 /* The gate on /api/inbox, /api/traffic and /api/seo: a token passes only
@@ -51,5 +51,23 @@ describe("canPush", () => {
   it("refuses a token whose owner cannot push, whatever it was granted", async () => {
     vi.stubGlobal("fetch", vi.fn(async () => reply({ permissions: { push: false } }, 200, SCOPED)));
     expect(await canPush(githubToken())).toBe(false);
+  });
+});
+
+const req = (headers: Record<string, string>) => new Request("https://x.test/api", { headers });
+
+describe("authorised and fromWorker", () => {
+  it("authorised matches only the exact inbox key, and nothing when it is unset", async () => {
+    expect(await authorised(req({ "x-inbox-key": "k1" }), "k1")).toBe(true);
+    expect(await authorised(req({ "x-inbox-key": "k2" }), "k1")).toBe(false);
+    expect(await authorised(req({}), "k1")).toBe(false);
+    expect(await authorised(req({ "x-inbox-key": "k1" }), undefined)).toBe(false);
+  });
+
+  it("fromWorker matches only the booking secret as the bearer", async () => {
+    expect(await fromWorker(req({ authorization: "Bearer s3cret" }), "s3cret")).toBe(true);
+    expect(await fromWorker(req({ authorization: "Bearer nope" }), "s3cret")).toBe(false);
+    expect(await fromWorker(req({}), "s3cret")).toBe(false);
+    expect(await fromWorker(req({ authorization: "Bearer s3cret" }), undefined)).toBe(false);
   });
 });

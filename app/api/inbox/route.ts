@@ -1,13 +1,15 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { authorised, bearer, canPush } from "@/lib/vouch";
 import { SAFE_IMAGE, summary, type Enquiry, type Summary } from "@/lib/inbox";
-import { backfillLead, fold, PAPER, readLead, REMIND_MAX, STAGES, trashDaysLeft, writeLead, type InboxRow, type Lead, type LeadPatch, type LeadSummary, type Paper, type Stage } from "@/lib/leads";
+import { backfillLead, fold, PAPER, REMIND_MAX, STAGES, trashDaysLeft, type InboxRow, type Lead, type LeadPatch, type LeadSummary, type Paper, type Stage } from "@/lib/leads";
+import { readLead, writeLead } from "@/lib/lead-store";
 import { sealer } from "@/lib/lead-crypto";
 import { notify, subscribe, unsubscribe } from "@/lib/lead-push";
 import { publicKey } from "@/lib/web-push";
 import { notionPaper, notionStage } from "@/lib/notion-lead";
 import { cleanTemplates, csv, manualLead, merge, stats, type NewLead } from "@/lib/lead-crm";
 import { balance, cleanFrom, cleanInvoice, invoiceNo, mmyy, PHOTO_KEY, usd, type InvoiceFrom } from "@/lib/invoice";
+import { json, NO_STORE } from "@/lib/http";
 
 /** Where his reply templates live: not personal data, so plain JSON. */
 const TEMPLATES_KEY = "leads:templates";
@@ -37,14 +39,10 @@ async function everyLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: NonNu
  * The one endpoint /admin's Inbox tab talks to. Lists enquiries, opens one,
  * marks it read, deletes it.
  *
- * Everything else in /admin is authorised by a GitHub token: the browser
- * holds it, GitHub checks it, and nothing on this site has an opinion. That
- * cannot work here, because the thing being protected is on this site — so
- * this route is the one place that does need a secret of its own.
- *
- * `INBOX_KEY`, set as a Worker secret and pasted into /admin once, exactly
- * like the GitHub token beside it. Compared in constant time, and the route
- * refuses everything when it is unset: an enquiry carries somebody's name,
+ * Opens with the /admin credentials in `lib/vouch.ts`: the `INBOX_KEY`
+ * header, compared in constant time, or a GitHub token that can push. Its
+ * own guard keeps a separate message for a token GitHub refused. With
+ * neither set, it refuses everything: an enquiry carries somebody's name,
  * their email and what they want, and the failure to get wrong is the one
  * where that is readable by whoever asks. Cloudflare Access in front of
  * /admin is still worth having, but it is not what stands between the public
@@ -57,15 +55,6 @@ async function everyLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: NonNu
 
 /** Never prerender, never cache: the answer depends on a header. */
 export const dynamic = "force-dynamic";
-
-const NO_STORE = {
-  "cache-control": "no-store, no-cache, must-revalidate",
-  "content-type": "application/json",
-  "x-robots-tag": "noindex, nofollow",
-} as const;
-
-const json = (body: unknown, status = 200) =>
-  new Response(JSON.stringify(body), { status, headers: NO_STORE });
 
 /**
  * The request body, or null when it is not JSON.

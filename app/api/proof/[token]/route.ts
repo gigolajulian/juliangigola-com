@@ -2,6 +2,7 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { sealer } from "@/lib/lead-crypto";
 import { checkout, checkPaid, finalize, PAYMENTS_DOWN } from "@/lib/proof-submit";
 import { cleanSelects, device, isEmail, isOpen, owed, isToken, publicView, readProof, track, viewerKey, writeProof, type Proof } from "@/lib/proofs";
+import { json } from "@/lib/http";
 
 /* ── proofs, the client's side ────────────────────────────────────
  * The token in the path is the only key; the email typed at the gate (any
@@ -13,9 +14,6 @@ import { cleanSelects, device, isEmail, isOpen, owed, isToken, publicView, readP
  * ─────────────────────────────────────────────────────────────── */
 
 export const dynamic = "force-dynamic";
-
-const H = { "cache-control": "no-store", "x-robots-tag": "noindex, nofollow" };
-const json = (body: unknown, status = 200) => Response.json(body, { status, headers: H });
 
 async function load(token: string) {
   const { env } = await getCloudflareContext({ async: true });

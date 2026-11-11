@@ -3,6 +3,10 @@ import { FakeEmail, FakeKV, FakeStore, fakeLock } from "./fakes";
 import { forgetToken } from "@/lib/gcal";
 import { BookingLock } from "@/worker/booking-lock";
 
+// Pinned clock: weekday hours, DST and the 48h refund window must not depend on the day the suite runs.
+vi.useFakeTimers({ toFake: ["Date"] });
+vi.setSystemTime(new Date("2026-11-11T20:00:00Z")); // a Wednesday, noon in San Jose
+
 /* The site's own engine (`lib/booking-engine.ts`, `worker/booking-lock.ts`):
    a time is rechecked and inserted inside the lock, so two tabs on one slot
    get one booking; a free call books from `/api/book`, a paid session from
