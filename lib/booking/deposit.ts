@@ -207,6 +207,9 @@ async function tell(env: Env, status: keyof typeof SAID, b: Booking | string, li
   if (refs.picks.length) lines.push("", "Picked from my work:", ...refs.picks.map((src) => `https://juliangigola.com${src}`));
   const subject = `${SAID[status]}: ${what}`;
   if (await mail(env.EMAIL, subject, lines, who, refs.files)) await logMail(env, who?.email, subject, { to: "hello@", kind: `deposit-${status}`, booking: intent });
+  // The money itself, on the activity log: $100 in, and out again on a refund.
+  if (who) await recordLead(env, who.email, { event: { at: new Date().toISOString(), kind: "payment", ref: intent, note: "Deposit", amount: 100 } });
+  if (who && status === "refunded") await recordLead(env, who.email, { event: { at: new Date().toISOString(), kind: "refund", ref: `refund-${intent}`, note: "Deposit, the time was gone", amount: 100 } });
 }
 
 /**

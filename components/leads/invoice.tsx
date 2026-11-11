@@ -5,14 +5,14 @@ import { createPortal } from "react-dom";
 import { type Lead, type LeadSummary } from "@/lib/leads/leads";
 import { cn } from "@/lib/utils";
 import { mailable } from "@/lib/leads/lead-crm";
-import { balance, dayB, DEPOSIT, MAX_ROWS_B, NOTE_B, usd, usdB, type Crop, type Invoice, type InvoiceB, type InvoiceFrom } from "@/lib/leads/invoice";
+import { balance, dayB, DEPOSIT, isPaid, MAX_ROWS_B, NOTE_B, usd, usdB, type Crop, type Invoice, type InvoiceB, type InvoiceFrom } from "@/lib/leads/invoice";
 import { framed, loadImage, place, shrink, toneFor } from "@/lib/leads/invoice-photo";
 import { adminCall, day, errorText, inboxCall, plusDays, ymdPT } from "@/lib/leads/lead-desk";
 import { btn, compose, field, fieldLabel, kindOf, primary } from "@/components/leads/shared";
 import type { Patch } from "@/lib/leads/lead-desk";
 
 /** The PDF of one invoice. Loaded on the tap, fonts and all. A design B one fetches its sealed photo unless `src` is in hand. */
-async function makePdf(inv: Invoice, l: LeadSummary, full: Lead, src?: string) {
+export async function makePdf(inv: Invoice, l: LeadSummary, full: Lead, src?: string) {
   const { from } = await inboxCall<{ from: InvoiceFrom | null }>({ query: "?invoiceFrom" });
   if (!from?.name) throw new Error("Add your details for invoices first.");
   let photo;
@@ -28,7 +28,7 @@ async function makePdf(inv: Invoice, l: LeadSummary, full: Lead, src?: string) {
 }
 
 /** What he can do with the PDF. Nothing here sends. */
-function Deliver({ file, inv, l }: { file: File; inv: Invoice; l: LeadSummary }) {
+export function Deliver({ file, inv, l }: { file: File; inv: Invoice; l: LeadSummary }) {
   const url = React.useMemo(() => URL.createObjectURL(file), [file]);
   React.useEffect(() => () => URL.revokeObjectURL(url), [url]);
   const canShare = typeof navigator.canShare === "function" && navigator.canShare({ files: [file] });
@@ -55,7 +55,7 @@ export function InvoiceRow({ inv, l, full }: { inv: Invoice; l: LeadSummary; ful
   return (
     <li className="grid gap-2 border-b border-border py-2.5">
       <p className="flex flex-wrap items-center justify-between gap-3 text-[15px]">
-        <span><b className="font-mono font-medium">{inv.no}</b> <span className="text-muted-foreground">· {day(`${inv.date}T12:00:00`)} · {usd(balance(inv))} due</span></span>
+        <span><b className="font-mono font-medium">{inv.no}</b> <span className="text-muted-foreground">· {day(`${inv.date}T12:00:00`)} · {isPaid(inv) ? "paid" : `${usd(balance(inv))} due`}</span></span>
         {file ? null : (
           <button type="button" className={cn(btn, "min-h-10")} onClick={() => { setErr(null); makePdf(inv, l, full).then(setFile, (e: unknown) => setErr(errorText(e))); }}>PDF</button>
         )}

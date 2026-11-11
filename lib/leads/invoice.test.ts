@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { AMOUNT } from "../booking/deposit";
-import { balance, cleanInvoice, dayB, DEPOSIT, invoiceNo, MAX_ROWS_B, mmyy, usdB } from "./invoice";
+import { balance, cleanInvoice, dayB, DEPOSIT, dueOf, invoiceNo, MAX_ROWS_B, mmyy, namesInvoice, overdue, usdB, type InvoiceB } from "./invoice";
 
 describe("invoice", () => {
   it("numbers by month: 1126, 1126-2, 1126-3", () => {
@@ -34,5 +34,35 @@ describe("invoice", () => {
       expect([usdB(1500), usdB(1500.5), usdB(-100)]).toEqual(["$1,500", "$1,500.50", "-$100"]);
       expect([dayB("2026-11-09"), dayB("2026-11-16", true)]).toEqual(["9 Nov", "16 Nov 2026"]);
     });
+  });
+});
+
+describe("overdue", () => {
+  // Made after PAID_BEFORE, so unpaid until something settles it.
+  const inv = { date: "2026-11-12", at: "2026-11-12T20:00:00Z" };
+  it("design B is due on its own date; one without B, 14 days after its date", () => {
+    expect(dueOf({ ...inv, b: { due: "2026-11-19" } as InvoiceB })).toBe("2026-11-19");
+    expect(dueOf(inv)).toBe("2026-11-26");
+  });
+  it("is unpaid and past due, never on the due day itself", () => {
+    const b = { ...inv, b: { due: "2026-11-19" } as InvoiceB };
+    expect([overdue(b, "2026-11-19"), overdue(b, "2026-11-20")]).toEqual([false, true]);
+    expect(overdue({ ...b, paidAt: "2026-11-18T10:00:00Z" }, "2026-12-01")).toBe(false);
+    // Made before the log: read as paid, so never overdue unless marked unpaid by hand.
+    expect(overdue({ ...b, at: "2026-11-01T10:00:00Z" }, "2026-12-01")).toBe(false);
+    expect(overdue({ ...b, at: "2026-11-01T10:00:00Z", unpaid: true }, "2026-12-01")).toBe(true);
+  });
+});
+
+describe("namesInvoice", () => {
+  it("finds the number in the subject or the PDF's name", () => {
+    expect(namesInvoice("Invoice 1126, Portraits", "1126")).toBe(true);
+    expect(namesInvoice("Re: shoot | INVOICE 1126-2 - TEST CLIENT.pdf", "1126-2")).toBe(true);
+  });
+  it("never inside a longer number, and only beside the word invoice", () => {
+    expect(namesInvoice("Invoice 1126-2", "1126")).toBe(false);
+    expect(namesInvoice("Invoice 11260", "1126")).toBe(false);
+    expect(namesInvoice("Invoice 1126", "1126-2")).toBe(false);
+    expect(namesInvoice("Parking at 1126 Main St", "1126")).toBe(false);
   });
 });

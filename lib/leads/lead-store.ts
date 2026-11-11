@@ -2,6 +2,7 @@
  * desk's components import the pure model from `lib/leads/leads.ts`. */
 import { sealer, type Sealer } from "./lead-crypto";
 import { notify, pushFor } from "./lead-push";
+import { appendLog, fresh } from "./activity-log";
 import { fold, leadStoreKey, leadSummary, type Change, type Lead, type LeadSummary, type Sent } from "./leads";
 
 type KV = Pick<NonNullable<CloudflareEnv["INBOX"]>, "get" | "put" | "list" | "delete">;
@@ -12,6 +13,22 @@ export type LeadStore = { INBOX?: KV; LEADS_KEY?: string; VAPID_KEY?: string };
 export async function readLead(kv: KV, s: Sealer, id: string): Promise<Lead | null> {
   const raw = await kv.get(leadStoreKey(id));
   return raw ? s.open<Lead>(raw) : null;
+}
+
+/** Every lead, opened in full: for the numbers and the export, never the list. */
+export async function everyLead(inbox: KV, seal: Sealer) {
+  const out: (Lead & { id?: string })[] = [];
+  let after: string | undefined;
+  for (;;) {
+    const listed = await inbox.list({ prefix: "lead:", cursor: after });
+    for (const k of listed.keys) {
+      const l = await readLead(inbox, seal, k.name.slice(5));
+      if (l) out.push(Object.assign(l, { id: k.name.slice(5) }));
+    }
+    if (listed.list_complete) break;
+    after = listed.cursor;
+  }
+  return out;
 }
 
 /** Bytes the sealed summary may take: KV metadata holds 1024, as JSON. */
@@ -28,7 +45,8 @@ const SHRINK: ((m: LeadSummary) => LeadSummary)[] = [
 /** One lead, sealed, with its sealed summary as the metadata the list reads.
     The summary shrinks until it fits, so a long CJK name and message never
     make the put throw and the lead go unrecorded. */
-export async function writeLead(kv: KV, s: Sealer, id: string, lead: Lead): Promise<void> {
+/** `from`: the lead before this write (null for a new one); its new events go to the activity log. Left out (a move, a backfill), nothing is logged. */
+export async function writeLead(kv: KV, s: Sealer, id: string, lead: Lead, from?: Lead | null): Promise<void> {
   let summary = leadSummary(lead);
   let meta = await s.seal(summary);
   for (const cut of SHRINK) {
@@ -37,6 +55,8 @@ export async function writeLead(kv: KV, s: Sealer, id: string, lead: Lead): Prom
     meta = await s.seal(summary);
   }
   await kv.put(leadStoreKey(id), await s.seal(lead), { metadata: { s: meta } });
+  // The log never blocks the lead: it is already stored.
+  if (from !== undefined) await appendLog(kv, s, id, lead, fresh(from?.events, lead.events)).catch((e: unknown) => console.error("activity log", String(e)));
 }
 
 const CANON = "leads:canon";
@@ -107,7 +127,7 @@ export async function recordLead(env: LeadStore, email: string, c: Change): Prom
     const before = await readLead(env.INBOX, s, id);
     const after = fold(before, email, c);
     if (after === before) return after;
-    await writeLead(env.INBOX, s, id, after);
+    await writeLead(env.INBOX, s, id, after, before);
     // Something reached the site: ping his devices (`lib/leads/lead-push.ts`).
     const push = pushFor(after, c.event);
     if (push && env.VAPID_KEY) await later(notify(env.INBOX, env.VAPID_KEY, push));

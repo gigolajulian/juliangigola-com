@@ -1,4 +1,4 @@
-import type { Invoice } from "./invoice";
+import { balance, isPaid, namesInvoice, type Invoice } from "./invoice";
 
 /* ── leads: one record per person ─────────────────────────────────
  * Julian (2026-11-03, PLAN-lead-desk.md): every inquiry, call and booking
@@ -9,8 +9,8 @@ import type { Invoice } from "./invoice";
  * log) the INBOX namespace holds one `lead:<id>` per person, sealed with
  * LEADS_KEY (`lib/leads/lead-crypto.ts`). Each event
  * that reaches the site (the form, a Cal.com booking, a deposit in
- * trouble) is folded into it here. KV is the source of truth; Notion is a
- * mirror of it, never the other way.
+ * trouble) is folded into it here. KV is the source of truth; Notion and the
+ * Google Sheet (`lib/leads/sheet-sync.ts`) are copies of it, never the other way.
  *
  * Automatic events only move a lead forward: a second inquiry from a
  * client already Confirmed must not drop them back to Inquiry. A new
@@ -31,13 +31,17 @@ export type LeadEvent = {
   at: string;
   kind: "inquiry" | "call" | "booking" | "no-deposit" | "deposit-stuck" | "stage" | "snooze" | "mail" | "replied" | "wrote" | "archive" | "trash" | "proofs"
     // Julian's own hand (`lib/leads/lead-crm.ts`): added, details changed, merged, a reminder, a quote.
-    | "added" | "edit" | "merge" | "remind" | "quote" | "invoice";
+    | "added" | "edit" | "merge" | "remind" | "quote" | "invoice"
+    // From outside or by hand (2026-11-10): Stripe payments and refunds, a client moving or cancelling, selects sent, an invoice settled.
+    | "payment" | "refund" | "reschedule" | "cancel" | "selects" | "invoice-paid";
   /* "proofs": they opened a proof gallery, ref = its token so each gallery is one line. */
   /* "replied" / "wrote": mail between hello@ and them in Gmail, ref = the Gmail message id (`lib/leads/gmail-sync.ts`). */
   /** The raw row (`msg:` key), Cal.com uid or Stripe intent, so a retry folds in once. */
   ref?: string;
   /** Booking time, session, new stage, a mail's subject: a short line for the timeline. */
   note?: string;
+  /** Kinds "payment", "refund", "selects", "invoice-paid" (negative when unmarked): dollars. */
+  amount?: number;
   /** Kind "mail": who it went to, which mail, and the booking it was about. */
   mail?: Sent;
 };
@@ -69,6 +73,8 @@ export type LeadPatch = {
   licence?: { use?: string; end?: string } | null;
   contract?: string;
   release?: string;
+  /** An invoice settled by hand (cash, Zelle), or opened again. */
+  invoicePaid?: { no: string; paid: boolean };
 };
 
 export type Lead = {
@@ -167,6 +173,13 @@ export type Change = {
   refs?: number;
   /** Where they came from; only the first one sticks. */
   source?: string;
+  /** Kind "payment" from a Stripe payment that is not a deposit: settle a matching invoice. `invoiceNo` from the payment, when it names one. */
+  settles?: boolean;
+  invoiceNo?: string;
+  /** Kind "replied": the sent mail's subject and attachment names, for the invoice it carries. */
+  mailed?: string;
+  /** Imported from before (`lib/leads/stripe-import.ts`): a line on the log, never news, never out of Archived. */
+  past?: boolean;
 };
 
 /** One event folded into a lead. Returns the lead unchanged when the event
@@ -194,7 +207,7 @@ export function fold(lead: Lead | null, email: string, c: Change): Lead {
     return tidy(next);
   }
   // A mail the site sent is a line on the timeline, not news.
-  if (event.kind === "mail") return tidy(next);
+  if (event.kind === "mail" || c.past) return tidy(next);
   // Opening proofs is a line too. The name they typed fills a lead that only had the address.
   if (event.kind === "proofs") {
     if (c.name && next.name.toLowerCase() === next.email) next.name = c.name;
@@ -203,6 +216,12 @@ export function fold(lead: Lead | null, email: string, c: Change): Lead {
   // His own reply from Gmail answers the inquiry: Replied, and off Needs me.
   if (event.kind === "replied") {
     if (next.stage === "Inquiry") Object.assign(next, { stage: "Replied", stageAt: event.at });
+    // A mail to them that names an invoice sent it: Sent on the desk, and a line on the log.
+    const sent = c.mailed ? next.invoices?.filter((v) => !v.sentAt && namesInvoice(c.mailed!, v.no)) : undefined;
+    if (sent?.length) {
+      next.invoices = next.invoices!.map((v) => (sent.includes(v) ? { ...v, sentAt: event.at } : v));
+      next.events = [...next.events, ...sent.map((v) => ({ at: event.at, kind: "invoice" as const, ref: event.ref, note: `${v.no} sent` }))].slice(-KEEP);
+    }
     return tidy({ ...next, unread: false });
   }
   if (event.kind === "snooze") {
@@ -212,6 +231,15 @@ export function fold(lead: Lead | null, email: string, c: Change): Lead {
     return tidy(next);
   }
 
+  // A payment that is not a deposit settles the invoice it names, or the one unpaid invoice of exactly that balance.
+  if (event.kind === "payment" && c.settles && event.amount && next.invoices?.length) {
+    const open = next.invoices.filter((v) => !isPaid(v));
+    const same = open.filter((v) => Math.abs(balance(v) - event.amount!) < 0.005);
+    const hit = (c.invoiceNo && open.find((v) => v.no === c.invoiceNo)) || (same.length === 1 ? same[0] : undefined);
+    if (hit) next.invoices = next.invoices.map((v) => (v === hit ? { ...v, paidAt: event.at, unpaid: undefined } : v));
+  }
+  // A cancelled session is no longer booked.
+  if (event.kind === "cancel") next.when = undefined;
   if (event.kind === "archive") return tidy({ ...next, archivedAt: c.on ? event.at : undefined });
   if (event.kind === "trash") return tidy({ ...next, trashedAt: c.on ? event.at : undefined });
 
@@ -240,6 +268,7 @@ const tidy = (l: Lead): Lead => {
   if (!l.trashedAt) delete l.trashedAt;
   if (!l.snippet) delete l.snippet;
   if (!l.refs) delete l.refs;
+  if (!l.when) delete l.when;
   return l;
 };
 

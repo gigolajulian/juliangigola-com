@@ -1,8 +1,8 @@
 "use client";
 
 /* ── the proofs desk on Astryx, opt-in ────────────────────────────
- * Julian (2026-11-09): the same try as /admin/leads/astryx, for the
- * proofs desk only. Lives at /admin/proofs/astryx, so Astryx's CSS never
+ * Julian (2026-11-09): the same try as the leads desk, for the
+ * proofs desk. /admin/proofs since 2026-11-11, so Astryx's CSS never
  * reaches the client's proof page or the classic desk. Same API as the
  * classic desk (/api/proof): list, open one, see the picks, create,
  * send, copy the link, and close a draft. Activity is components/proofs-activity-astryx.tsx.
@@ -104,10 +104,10 @@ export function ProofsAstryx({ embedded = false }: { embedded?: boolean } = {}) 
     <SideNav header={<SideNavHeading heading="Proofs" subheading="Julian Gigola" />} topContent={<Button label="New gallery" variant="primary" width="100%" onClick={() => { setMaking(true); setSel(null); }} />}>
       <SideNavSection title="Desk" isHeaderHidden>
         <SideNavItem label="Galleries" isSelected endContent={<Text type="supporting" hasTabularNumbers>{open.length}</Text>} />
-        <SideNavItem label="Leads" href="/admin/leads/astryx" />
+        <SideNavItem label="Leads" href="/admin/leads" />
       </SideNavSection>
       <SideNavSection title="Setup" isHeaderHidden>
-        <SideNavItem label="Classic desk" href={CLASSIC} />
+        <SideNavItem label="Pages and work" href={CLASSIC} />
       </SideNavSection>
     </SideNav>
   );

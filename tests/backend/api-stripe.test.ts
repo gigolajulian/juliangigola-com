@@ -1,6 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { POST } from "@/app/api/stripe/route";
-import { FakeKV } from "./fakes";
+import { FakeKV, LEADS_KEY } from "./fakes";
+import { readLog } from "@/lib/leads/activity-log";
+import { sealer } from "@/lib/leads/lead-crypto";
+const logOf = async (kv: unknown, email: string) => { const s = (await sealer(LEADS_KEY))!; return readLog(kv as never, s, await s.id(email)); };
+
 
 /* /api/stripe: Stripe's webhook. Off while a secret is unset, refuses a bad
    signature and a body that is not JSON, and leaves every payment that is
@@ -50,8 +54,29 @@ describe("POST /api/stripe", () => {
   });
 
   it("acknowledges other events and other payments without touching Stripe", async () => {
-    expect((await deliver(event({ id: "pi_TEST1234567890" }, "charge.refunded"))).status).toBe(200);
+    expect((await deliver(event({ id: "pi_TEST1234567890" }, "charge.dispute.created"))).status).toBe(200);
     expect((await deliver(event({ id: "pi_TEST1234567890", amount: 5000, currency: "usd", metadata: {} }))).status).toBe(200);
     expect(fetched).toEqual([]);
+  });
+
+  it("logs another payment on the payer, through the charge when the intent has no address, and never a proof payment", async () => {
+    const kv = new FakeKV();
+    ctx.env = { ...ctx.env, INBOX: kv, LEADS_KEY };
+    vi.stubGlobal("fetch", async (u: string) => (fetched.push(u), Response.json({ billing_details: { email: "pay@example.com" } })));
+    await deliver(event({ id: "pi_TEST1234567891", amount: 120000, amount_received: 120000, currency: "usd", receipt_email: "a@example.com", description: "Invoice 1126", metadata: {} }));
+    await deliver(event({ id: "pi_TEST1234567892", amount: 5000, currency: "usd", latest_charge: "ch_1", metadata: {} }));
+    await deliver(event({ id: "pi_TEST1234567893", amount: 1500, currency: "usd", receipt_email: "a@example.com", metadata: { proof: "AbCd" } }));
+    expect((await logOf(kv, "a@example.com")).map((e) => [e.kind, e.amount])).toEqual([["payment", 1200]]);
+    expect((await logOf(kv, "pay@example.com")).map((e) => [e.kind, e.amount])).toEqual([["payment", 50]]);
+    expect(fetched).toEqual(["https://api.stripe.com/v1/charges/ch_1"]);
+  });
+
+  it("logs a refund made in the dashboard once, however often Stripe delivers it", async () => {
+    const kv = new FakeKV();
+    ctx.env = { ...ctx.env, INBOX: kv, LEADS_KEY };
+    const charge = { id: "ch_2", payment_intent: "pi_TEST1234567894", amount: 10000, amount_refunded: 10000, receipt_email: "r@example.com", refunds: { data: [{ amount: 10000 }] } };
+    await deliver(event(charge, "charge.refunded"));
+    await deliver(event(charge, "charge.refunded"));
+    expect((await logOf(kv, "r@example.com")).map((e) => [e.kind, e.amount, e.ref])).toEqual([["refund", 100, "refund-pi_TEST1234567894"]]);
   });
 });

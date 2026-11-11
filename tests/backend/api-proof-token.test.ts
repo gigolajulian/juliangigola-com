@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { PATCH, POST } from "@/app/api/proof/[token]/route";
 import { sealer } from "@/lib/leads/lead-crypto";
+import { readLog } from "@/lib/leads/activity-log";
 import { readProof, writeProof, type Proof } from "@/lib/proofs";
 import { FakeKV, LEADS_KEY } from "./fakes";
 
@@ -48,5 +49,8 @@ describe("/api/proof/[token]", () => {
     expect(p.selects).toEqual(["a", "b"]);
     expect(p.submittedAt).toBeTruthy();
     expect((await patch({ email: "a@example.com", selects: ["c"] })).status).toBe(409);
+    // On the client's activity log: the selects, with the frame count.
+    const s = await seal();
+    expect((await readLog(kv as never, s, await s.id("a@example.com"))).find((e) => e.kind === "selects")).toMatchObject({ note: "2 frames, Test" });
   });
 });
