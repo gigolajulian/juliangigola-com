@@ -1,4 +1,5 @@
-import { mail, stripe } from "@/lib/deposit";
+import { mail } from "@/lib/hello-mail";
+import { stripe } from "@/lib/stripe";
 import { recordLead } from "@/lib/leads";
 import { alertLines, proofUrl, receiptMail, sendClient } from "@/lib/proof-mail";
 import { cardPrice, owed, viewerKey, writeProof, type Proof } from "@/lib/proofs";

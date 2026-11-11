@@ -6,6 +6,7 @@
  * Pure functions: `app/api/inbox/route.ts` reads and writes, these decide.
  * ─────────────────────────────────────────────────────────────── */
 
+import { TZ } from "./booking-rules";
 import { STAGES, type Lead, type Stage } from "./leads";
 
 /** A lead's identity: the address, or an Instagram handle or phone for someone who never wrote from one. */
@@ -109,7 +110,7 @@ export const TEMPLATES: Template[] = [
 ];
 export function fill(text: string, l: Pick<Lead, "name" | "kind" | "when" | "licence">): string {
   const when = l.when
-    ? new Intl.DateTimeFormat("en-US", { timeZone: "America/Los_Angeles", weekday: "long", month: "long", day: "numeric" }).format(new Date(l.when))
+    ? new Intl.DateTimeFormat("en-US", { timeZone: TZ, weekday: "long", month: "long", day: "numeric" }).format(new Date(l.when))
     : "";
   return text
     .replace(/\{first\}/g, l.name.split(/\s+/)[0] ?? "")

@@ -1,5 +1,5 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { stripe } from "@/lib/deposit";
+import { stripe } from "@/lib/stripe";
 import { isAdmin } from "@/lib/vouch";
 import { json } from "@/lib/http";
 

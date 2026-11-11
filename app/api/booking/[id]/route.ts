@@ -1,10 +1,12 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { lock, managed, type ChangeResult } from "@/lib/booking-engine";
+import { lock, clientView, type ChangeResult } from "@/lib/booking-engine";
 import { refundable } from "@/lib/booking-rules";
 import { manageLinks, tokenOpens } from "@/lib/booking-token";
 import { cancelledSubject, confirmMail, sendCancelled, sendConfirm } from "@/lib/confirm";
 import { logMail } from "@/lib/leads";
-import { dashboardLink, mail, stripe } from "@/lib/deposit";
+import { dashboardLink } from "@/lib/deposit";
+import { mail } from "@/lib/hello-mail";
+import { stripe } from "@/lib/stripe";
 import { whenPT } from "@/lib/inbox";
 import { json } from "@/lib/http";
 
@@ -47,7 +49,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       await logMail(env, r.email, `Rescheduled: ${what}`, { to: "hello@", kind: "reschedule", booking: r.id });
     const confirm = { ...who, session: r.session, call: r.call, start: r.start, end: r.end, where: r.where, uid: r.id, manage: await manageLinks(env.BOOKING_SECRET, r), firstStart: r.firstStart, ...(r.intent ? { deposit: { ref: r.intent, at: r.at } } : {}) };
     if (await sendConfirm(env.CLIENT_EMAIL, confirm)) await logMail(env, r.email, confirmMail(confirm).subject, { to: "client", kind: "reschedule", booking: r.id });
-    return json({ record: managed(r) });
+    return json({ record: clientView(r) });
   }
 
   // The rule is read against the time it was booked for, at the moment of the cancel.
@@ -64,5 +66,5 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const gone = { ...who, session: r.session, start: was.start, end: was.end };
   if (await sendCancelled(env.CLIENT_EMAIL, gone, !r.intent ? "none" : refunded ? "refunded" : refunded === false ? "late" : "kept"))
     await logMail(env, r.email, cancelledSubject(gone), { to: "client", kind: "cancelled", booking: r.id });
-  return json({ record: managed(r), refunded: refunded ?? null });
+  return json({ record: clientView(r), refunded: refunded ?? null });
 }

@@ -7,7 +7,7 @@ import {
   findBooking,
   liveHours,
   lock,
-  managed,
+  clientView,
   markReminded,
   readHours,
   saveBooking,
@@ -43,9 +43,9 @@ beforeEach(() => {
   store = new FakeStore();
 });
 
-describe("managed", () => {
+describe("clientView", () => {
   it("shows the client page no email, phone or deposit id", () => {
-    const m = managed(rec("a"));
+    const m = clientView(rec("a"));
     expect(m).not.toHaveProperty("email");
     expect(m).not.toHaveProperty("phone");
     expect(m).not.toHaveProperty("intent");

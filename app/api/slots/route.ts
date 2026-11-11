@@ -2,6 +2,7 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { liveHours } from "@/lib/booking-engine";
 import { EVENTS } from "@/lib/booking-rules";
 import { localIso, openStarts } from "@/lib/slots";
+import { TZ } from "@/lib/booking-rules";
 import { json } from "@/lib/http";
 
 /* ── open times for the picker, from the site's own engine ────────
@@ -23,7 +24,7 @@ export async function GET(request: Request) {
   const q = new URL(request.url).searchParams;
   const slug = q.get("slug") ?? "";
   const rule = EVENTS[slug];
-  const tz = q.get("timeZone") || "America/Los_Angeles";
+  const tz = q.get("timeZone") || TZ;
   const [start, end] = [q.get("start") ?? "", q.get("end") ?? ""];
   if (!rule) return json({ status: "error", error: { message: "Unknown session." } }, 400);
   if (!DAY.test(start) || !DAY.test(end)) return json({ status: "error", error: { message: "Bad range." } }, 400);
@@ -38,7 +39,7 @@ export async function GET(request: Request) {
 
   let starts: number[];
   try {
-    starts = await openStarts(env.GCAL_OAUTH, slug, from, to, Date.now(), undefined, env.INBOX, await liveHours(env));
+    starts = await openStarts(env.GCAL_OAUTH, slug, from, to, { kv: env.INBOX, hours: await liveHours(env) });
   } catch (e) {
     console.error("slots", String(e));
     return json({ status: "error", error: { message: "Could not reach the calendar." } }, 502);

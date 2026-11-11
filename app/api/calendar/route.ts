@@ -1,6 +1,7 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { TZ } from "@/lib/booking-rules";
 import { gcal } from "@/lib/gcal";
+import { looksLikeEmail } from "@/lib/inbox";
 import { busyAll, EXTRA_KEY, isIcs, readExtras, zoned, type Extra } from "@/lib/slots";
 import { isAdmin } from "@/lib/vouch";
 import { json } from "@/lib/http";
@@ -136,7 +137,7 @@ async function post(request: Request) {
   if (body.extra) {
     const label = String(body.extra.label ?? "").trim().slice(0, 40);
     const src = String(body.extra.src ?? "").trim();
-    let ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(src);
+    let ok = looksLikeEmail(src);
     if (isIcs(src)) {
       try {
         ok = new URL(src.replace(/^webcal:/i, "https:")).protocol === "https:";

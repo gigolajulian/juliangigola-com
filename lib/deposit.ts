@@ -34,6 +34,8 @@ import { manageLinks } from "@/lib/booking-token";
  * ─────────────────────────────────────────────────────────────── */
 
 import { isPaid } from "@/lib/paid";
+import { mail, type Attachment } from "@/lib/hello-mail";
+import { stripe } from "@/lib/stripe";
 export const AMOUNT = 10000;
 export const CURRENCY = "usd";
 export const KIND = "deposit";
@@ -41,11 +43,8 @@ export const KIND = "deposit";
 /** Whether a paid intent is one of the site's deposits, not any other payment on the account. */
 export const isDeposit = (pi: { amount?: number; currency?: string; metadata?: { [k: string]: string } }) =>
   pi.metadata?.kind === KIND && pi.amount === AMOUNT && pi.currency === CURRENCY;
-const STRIPE = "https://api.stripe.com/v1";
 /** How old a webhook's timestamp may be before it is treated as a replay. */
 const TOLERANCE_S = 300;
-const MAIL_TO = "hello@juliangigola.com";
-const MAIL_FROM = "enquiries@notifications.juliangigola.com";
 export const SESSION: { [slug: string]: string } = { portraits: "Portraits", headshots: "Headshots", graduation: "Graduation photos", digitals: "Studio digitals" };
 
 /** The intent in Stripe's dashboard, test or live as the key is. */
@@ -102,30 +101,8 @@ export function parseBooking(raw: unknown, call = false): Booking | string {
  * Whether the start is still offered by hello@'s calendar.
  * `hours`: Julian's, from the lock (`liveHours`); the defaults when unset.
  */
-export async function isOpen(b: Booking, gcalSecret?: string, kv?: KV, hours?: Hours): Promise<boolean> {
-  return openNow(gcalSecret, b.slug, b.start, undefined, kv, hours);
-}
-
-/** A call to Stripe's API: a form-encoded POST, or a GET without a form. */
-export async function stripe(key: string, path: string, form?: { [k: string]: string }, idempotency?: string) {
-  const res = await fetch(`${STRIPE}${path}`, {
-    method: form ? "POST" : "GET",
-    headers: {
-      Authorization: `Bearer ${key}`,
-      "Content-Type": "application/x-www-form-urlencoded",
-      // The account default (2026-09-30) rejects payment_method_types; pin a version that keeps card-only intents.
-      "Stripe-Version": "2025-09-30.clover",
-      ...(idempotency ? { "Idempotency-Key": idempotency } : {}),
-    },
-    body: form ? new URLSearchParams(form) : undefined,
-  });
-  const out = (await res.json().catch(() => ({}))) as { [k: string]: unknown };
-  if (!res.ok) {
-    const err = out.error as { type?: string; code?: string; message?: string } | undefined;
-    console.error("stripe", path, res.status, err?.type, err?.code, err?.message);
-    throw Object.assign(new Error(`Stripe ${path} ${res.status}`), { status: res.status });
-  }
-  return out;
+export async function isSlotOpen(b: Booking, gcalSecret?: string, kv?: KV, hours?: Hours): Promise<boolean> {
+  return openNow(gcalSecret, b.slug, b.start, { kv, hours });
 }
 
 /** The PaymentIntent's form, with the booking in its metadata. */
@@ -196,30 +173,6 @@ const NEXT = {
   refunded: "The time was gone, so Stripe refunded them. Nothing is booked.",
   failed: "The time could not be booked and the automatic refund failed. Refund it by hand in Stripe and email them.",
 };
-
-// Bytes, never a base64 string: `send()` mails a string as-is, so the picture arrives as text.
-type Attachment = { content: ArrayBuffer; filename: string; type: string; disposition: "attachment" };
-
-/** True once hello@ has it. */
-export async function mail(email: Env["EMAIL"], subject: string, lines: string[], who?: { name: string; email: string }, attachments: Attachment[] = []): Promise<boolean> {
-  if (!email) return false;
-  try {
-    await email.send({
-      to: MAIL_TO,
-      from: { name: "Julian Gigola website", email: MAIL_FROM },
-      subject,
-      text: [...lines, "", "Inbox: https://juliangigola.com/admin"].join("\n"),
-      ...(who?.email ? { replyTo: who } : {}),
-      ...(attachments.length ? { attachments } : {}),
-    });
-    return true;
-  } catch (e) {
-    console.error("deposit mail", subject.split(":")[0], String(e));
-    // Images can push a mail past the size limit: the mail matters more, so it goes again without them.
-    if (attachments.length) return mail(email, subject, [...lines, "", `${attachments.length} reference image(s) were too large to attach. Ask the client to email them.`], who);
-    return false;
-  }
-}
 
 /** The references sent with a deposit (`app/api/deposit/[id]`): files to attach, and the frames of mine they picked. Nothing if KV fails. */
 async function refsOf(inbox: Env["INBOX"], intent: string): Promise<{ files: Attachment[]; picks: string[] }> {

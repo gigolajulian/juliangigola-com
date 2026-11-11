@@ -61,7 +61,7 @@ const intentKey = (intent: string) => `i:${intent}`;
 const newId = () => crypto.randomUUID().replace(/-/g, "").slice(0, 16);
 
 /** What the client's page may show: no email, no phone, no deposit id. */
-export const managed = (r: BookingRecord) => ({ id: r.id, slug: r.slug, session: r.session, start: r.start, end: r.end, firstStart: r.firstStart, where: r.where, paid: !!r.intent, cancelled: !!r.cancelled });
+export const clientView = (r: BookingRecord) => ({ id: r.id, slug: r.slug, session: r.session, start: r.start, end: r.end, firstStart: r.firstStart, where: r.where, paid: !!r.intent, cancelled: !!r.cancelled });
 
 /** The record by its id. */
 export const findBooking = (store: Store, id: string) => store.get<BookingRecord>(recKey(id));
@@ -96,7 +96,7 @@ export async function bookOwn(store: Store, secret: string | undefined, b: BookI
     const r = had && (await findBooking(store, had));
     if (r) return { ok: true, record: r };
   }
-  if (!(await openNow(secret, b.slug, b.start, undefined, kv, await readHours(store)))) return { ok: false, reason: "taken" };
+  if (!(await openNow(secret, b.slug, b.start, { kv, hours: await readHours(store) }))) return { ok: false, reason: "taken" };
 
   const id = newId();
   const end = new Date(Date.parse(b.start) + rule.length * 6e4).toISOString();
@@ -202,7 +202,7 @@ export async function rescheduleOwn(store: Store, secret: string | undefined, id
   if (Date.parse(was.start) <= Date.now()) return { ok: false, reason: "past" };
   const rule = EVENTS[was.slug];
   const t = Date.parse(start);
-  if (!rule || isNaN(t) || !(await openNow(secret, was.slug, start, was, kv, await readHours(store)))) return { ok: false, reason: "taken" };
+  if (!rule || isNaN(t) || !(await openNow(secret, was.slug, start, { mine: was, kv, hours: await readHours(store) }))) return { ok: false, reason: "taken" };
   const end = new Date(t + rule.length * 6e4).toISOString();
   await gcal(secret, `/calendars/primary/events/${encodeURIComponent(was.eventId)}?sendUpdates=none`, {
     method: "PATCH",

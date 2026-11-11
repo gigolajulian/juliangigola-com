@@ -330,7 +330,7 @@ type KV = Pick<NonNullable<CloudflareEnv["INBOX"]>, "get" | "put" | "list" | "de
 /** Where leads live: the INBOX namespace, sealed with LEADS_KEY. */
 export type LeadStore = { INBOX?: KV; LEADS_KEY?: string; VAPID_KEY?: string };
 
-/** One lead, opened. Null when it is not there. */
+/** One lead, opened. Null when it is not there; throws when it cannot be opened (a rotated LEADS_KEY). */
 export async function readLead(kv: KV, s: Sealer, id: string): Promise<Lead | null> {
   const raw = await kv.get(leadStoreKey(id));
   return raw ? s.open<Lead>(raw) : null;

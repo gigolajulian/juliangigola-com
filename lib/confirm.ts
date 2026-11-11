@@ -1,4 +1,4 @@
-import { duration, refundable } from "@/lib/booking-rules";
+import { duration, refundable, TZ } from "@/lib/booking-rules";
 import { SIG_DARK, SIG_HTML, SIG_TEXT } from "@/lib/email-signature";
 /* ── the client's confirmation email ──────────────────────────────
  * Julian (2026-10-16): every booking gets a branded "You're in." mail from
@@ -21,7 +21,6 @@ import { NAME_INK, NAME_W } from "@/lib/email-logo";
 const FROM = { name: "Julian Gigola", email: "book@juliangigola.com" };
 const REPLY_TO = "hello@juliangigola.com";
 const SITE = "https://juliangigola.com";
-const TZ = "America/Los_Angeles";
 
 export type Confirm = {
   name: string;

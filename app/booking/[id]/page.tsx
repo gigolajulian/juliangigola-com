@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { ManageBooking } from "@/components/manage-booking";
-import { lock, managed, type BookingRecord } from "@/lib/booking-engine";
+import { lock, clientView, type BookingRecord } from "@/lib/booking-engine";
 import { tokenOpens } from "@/lib/booking-token";
 
 /* A client's booking, opened from the links in their "You're in." mail
@@ -28,5 +28,5 @@ export default async function BookingPage({ params, searchParams }: { params: Pr
     return <Note>Your booking did not load. Try again in a minute, or reply to your confirmation email.</Note>;
   }
   if (!record) return <Note>No such booking. Reply to your confirmation email and I&apos;ll sort it out.</Note>;
-  return <ManageBooking booking={managed(record)} token={t!} open={open} />;
+  return <ManageBooking booking={clientView(record)} token={t!} open={open} />;
 }
