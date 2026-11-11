@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { LeadWindow, openFrom } from "@/components/lead-window";
+import { LeadWindow, openFrom } from "@/components/work-peek";
 import type { IndexRow } from "@/lib/work";
 
 const cover = (n: number) =>

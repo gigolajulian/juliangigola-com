@@ -25,7 +25,7 @@ img[data-fade][data-loaded] {
     opacity: 1;
   }
 }
-/* Through the window into the work and back (`lead-window.tsx`): the
+/* Through the window into the work and back (`work-peek.tsx`): the
    pictures are the ones the window already showed, from the cache, and
    fading them up again inside the door read as the room going blank. */
 :root:is([data-nav-side="open"], [data-nav-side="shut"]) img[data-fade] {

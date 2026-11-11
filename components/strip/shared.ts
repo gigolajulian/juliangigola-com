@@ -5,6 +5,8 @@
  * and where a cell sits.
  * ─────────────────────────────────────────────────────────────── */
 
+import { viewerPop } from "@/lib/zoom";
+
 /** A page either side of this one: where the wheel goes past an end. */
 export type Lead = {
   href: string;
@@ -99,8 +101,7 @@ export const POP_MS = 1500;
 if (typeof window !== "undefined") {
   window.addEventListener("popstate", () => {
     // Not the photo viewer closing on the back button (`lib/zoom.ts`).
-    if (document.documentElement.dataset.viewer === undefined)
-      nav.poppedAt = Date.now();
+    if (!viewerPop()) nav.poppedAt = Date.now();
   });
 }
 /** Where a path's strip was when it was last left. */
@@ -226,7 +227,7 @@ export const centreOf = (el: HTMLElement, i: number) => {
   const cell = el.children[i] as HTMLElement | undefined;
   if (!cell) return null;
   /* The homepage's last screen, narrowed for the window into the work
-     beside it (`lead-window.tsx`): flush left, so the two fill the
+     beside it (`work-peek.tsx`): flush left, so the two fill the
      screen between them. Centred, the window was half off it. */
   if (cell.nextElementSibling?.hasAttribute("data-lead-window"))
     return leftOf(cell);

@@ -1,4 +1,4 @@
-import { openFrom } from "@/components/lead-window";
+import { openFrom } from "@/components/work-peek";
 import type { Mover } from "./motion";
 import { DEAL_MS, nav } from "./shared";
 
@@ -133,7 +133,7 @@ export function leadOn(
   root.dataset.nav = "in";
   /* The window into the work, opened the rest of the way from where
      the pull left it, and back from the work the door shutting into
-     the homepage's right edge (`lead-window.tsx`). */
+     the homepage's right edge (`work-peek.tsx`). */
   if (door(dir)) {
     if (dir > 0 && m.win) openFrom(m.win);
     root.dataset.navSide = dir > 0 ? "open" : "shut";

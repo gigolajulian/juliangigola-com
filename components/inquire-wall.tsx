@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useDialKit } from "dialkit";
-import DriftWall from "@/components/DriftWall";
+import DriftWall from "@/components/drift-wall";
 import { softItem, type WallTile } from "@/lib/wall-tile";
 
 /* The photo wall behind the homepage's last page, on its own DialKit
@@ -139,7 +139,6 @@ export function InquireWall({ items }: { items: WallTile[] }) {
     <DriftWall
       items={tiles}
       className="inquire-wall"
-      columns="fill"
       /* Scaled out so more of the work shows (1.25 to 0.85), and no
          more than 24 photographs loaded for it however wide the
          screen, so it stays light. */
@@ -153,18 +152,9 @@ export function InquireWall({ items }: { items: WallTile[] }) {
       tileWidth={Math.round(300 * scale * k)}
       tileHeight={Math.round(400 * scale * k)}
       gap={Math.round(28 * scale * k)}
-      radius={8}
-      tilt={16}
-      turn={-14}
-      perspective={1200}
-      depth={120}
       /* A third slower (was 24). */
       speed={16 * scale * (flag.slow ? 0.5 : 1)}
       hold={hold}
-      direction="up"
-      variance={0.45}
-      parallax={0.6}
-      lift={16}
       fade={0}
       dim={1 - tint}
       style={{ "--dw-veil": tint * 0.7 }}

@@ -19,7 +19,7 @@ export type { DriftWallItem };
 
 
 export type DriftWallProps = {
-  items?: DriftWallItem[];
+  items: DriftWallItem[];
   columns?: number | 'fill';
   tileWidth?: number;
   tileHeight?: number;
@@ -27,18 +27,15 @@ export type DriftWallProps = {
   radius?: number;
   tilt?: number;
   turn?: number;
-  roll?: number;
   perspective?: number;
   depth?: number;
   speed?: number;
   direction?: 'up' | 'down';
   variance?: number;
   parallax?: number;
-  pauseOnHover?: boolean;
   lift?: number;
   fade?: number;
   dim?: number;
-  grayscale?: boolean;
   overlayColor?: string;
   eager?: boolean;
   limit?: number;
@@ -50,14 +47,6 @@ export type DriftWallProps = {
   className?: string;
   style?: Record<string, string | number>;
 };
-
-const DEFAULT_ITEMS: DriftWallItem[] = Array.from({ length: 15 }, (_, i) => {
-  const ids = [1015, 1025, 1039, 1043, 1044, 1050, 1062, 1069, 1074, 1080, 1084, 106, 110, 133, 164];
-  return {
-    image: `https://picsum.photos/id/${ids[i % ids.length]}/600/400`,
-    title: `Tile ${i + 1}`
-  };
-});
 
 // Read through `useSyncExternalStore` rather than set from an effect: the
 // site's lint forbids setState in an effect body.
@@ -75,26 +64,24 @@ const columnFactor = (index: number, variance: number) => {
 };
 
 const DriftWall = ({
-  items = DEFAULT_ITEMS,
-  columns = 5,
-  tileWidth = 200,
-  tileHeight = 132,
-  gap = 18,
-  radius = 14,
+  items,
+  // The defaults are the site's wall (the 404 and the inquire page).
+  columns = 'fill',
+  tileWidth = 300,
+  tileHeight = 400,
+  gap = 28,
+  radius = 8,
   tilt = 16,
   turn = -14,
-  roll = 0,
   perspective = 1200,
   depth = 120,
   speed = 42,
   direction = 'up',
   variance = 0.45,
   parallax = 0.6,
-  pauseOnHover = false,
-  lift = 64,
+  lift = 16,
   fade = 0.6,
   dim = 0.55,
-  grayscale = false,
   overlayColor = '#060010',
   // The site's additions: load the photographs at once rather than as they
   // near the screen (the intro, where they are the whole point), and say
@@ -120,7 +107,6 @@ const DriftWall = ({
 
   const offsetsRef = useRef<number[]>([]);
   const hoveredColRef = useRef(-1);
-  const wallHoveredRef = useRef(false);
   const pointerRef = useRef({ x: 0, y: 0 });
   const pointerDampedRef = useRef({ x: 0, y: 0 });
 
@@ -298,10 +284,10 @@ const DriftWall = ({
       if (!plane) return;
       plane.style.transform =
         `translate(-50%, -50%) scale(1.18) ` +
-        `rotateX(${tilt + py}deg) rotateY(${turn + px}deg) rotateZ(${roll}deg) ` +
+        `rotateX(${tilt + py}deg) rotateY(${turn + px}deg) ` +
         `translateZ(${-depth}px)`;
     },
-    [tilt, turn, roll, depth]
+    [tilt, turn, depth]
   );
 
   /* The site's rewrite of the drift: each column is one looping animation
@@ -359,7 +345,7 @@ const DriftWall = ({
         busy = true;
       }
 
-      const paused = (wallHoveredRef.current && pauseOnHover) || heldRef.current;
+      const paused = heldRef.current;
       anims.forEach((a, c) => {
         if (!a) return;
         const target = paused || hoveredColRef.current === c ? 0 : 1;
@@ -424,7 +410,7 @@ const DriftWall = ({
         a.cancel();
       });
     };
-  }, [baseVelocities, columnMeta, pauseOnHover, parallax, reduced, applyPlaneTransform]);
+  }, [baseVelocities, columnMeta, parallax, reduced, applyPlaneTransform]);
 
   useEffect(() => {
     heldRef.current = hold;
@@ -469,7 +455,6 @@ const DriftWall = ({
   );
 
   const handlePointerLeaveWall = useCallback(() => {
-    wallHoveredRef.current = false;
     pointerRef.current = { x: 0, y: 0 };
     release();
     wakeRef.current();
@@ -484,12 +469,11 @@ const DriftWall = ({
       '--dw-perspective': `${perspective}px`,
       '--dw-lift': `${lift}px`,
       '--dw-dim': dim,
-      '--dw-gray': grayscale ? 1 : 0,
       '--dw-overlay': overlayColor,
       '--dw-edge': `${Math.max(0, (1 - fade) * 100)}%`,
       ...style
     }) as CSSProperties,
-    [tileWidth, tileHeight, gap, radius, perspective, lift, dim, grayscale, overlayColor, fade, style]
+    [tileWidth, tileHeight, gap, radius, perspective, lift, dim, overlayColor, fade, style]
   );
 
   const renderTile = (item: DriftWallItem, id: string, colIndex: number): ReactNode => {
@@ -545,10 +529,7 @@ const DriftWall = ({
       className={rootClass}
       style={cssVars}
       onPointerMove={handlePointerMove}
-      onPointerEnter={() => {
-        wallHoveredRef.current = true;
-        wakeRef.current();
-      }}
+      onPointerEnter={() => wakeRef.current()}
       onPointerLeave={handlePointerLeaveWall}
       role="group"
       aria-label="Drifting wall of tiles"

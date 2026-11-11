@@ -1,7 +1,7 @@
 /* The portfolio: the window into the work, spines and the deck across pages. */
 
 /* ── the window into the work ─────────────────────────────────────
-   `lead-window.tsx`. Only where the homepage runs sideways. Nothing at
+   `work-peek.tsx`. Only where the homepage runs sideways. Nothing at
    rest (Julian: only when peeking past the last screen): the window is a
    cell of no width after it, and its pane, the size of the window, is
    uncovered as the pull slides the homepage off it. */
@@ -84,7 +84,7 @@
   container-type: inline-size;
 }
 /* The rack instead, for a visitor who keeps the grid
-   (`lead-window.tsx`): the page's own `strip-grid` rules on the row,
+   (`work-peek.tsx`): the page's own `strip-grid` rules on the row,
    so the two rows, the gap, the padding, the column and the plates are
    the page's and the landing changes nothing. A cover in the rack is
    4:5 whatever it was shot at (`--ar` default), and the spine stands
