@@ -23,6 +23,20 @@ const FROM_KEY = "leads:invoice-from";
 const countKey = (date: string) => `invoices:${mmyy(date)}`;
 const taken = async (inbox: NonNullable<CloudflareEnv["INBOX"]>, date: string) => Number((await inbox.get(countKey(date))) ?? 0) || 0;
 
+/** What a lead read or write answers on a Worker without LEADS_KEY. */
+const noSeal = () => json({ error: "Leads need LEADS_KEY on the Worker." }, 503);
+
+/** Every key under a prefix, page after page: one KV list stops at 1000. */
+async function* everyKey<M>(inbox: NonNullable<CloudflareEnv["INBOX"]>, prefix: string) {
+  let cursor: string | undefined;
+  for (;;) {
+    const listed = await inbox.list<M>({ prefix, cursor });
+    yield* listed.keys;
+    if (listed.list_complete) return;
+    cursor = listed.cursor;
+  }
+}
+
 /* ── reading the inbox ────────────────────────────────────────────
  * The one endpoint /admin's Inbox tab talks to. Lists enquiries, opens one,
  * marks it read, deletes it.
@@ -160,7 +174,7 @@ export async function GET(request: Request) {
   // His details for invoices, and the number the next one on a date would get.
   if (url.searchParams.has("invoiceFrom") || url.searchParams.has("invoiceNo")) {
     const seal = await gate.seal;
-    if (!seal) return json({ error: "Leads need LEADS_KEY on the Worker." }, 503);
+    if (!seal) return noSeal();
     const raw = await gate.inbox.get(FROM_KEY);
     const from = raw ? cleanFrom(await seal.open<InvoiceFrom>(raw)) : null;
     const date = url.searchParams.get("invoiceNo") ?? "";
@@ -169,7 +183,7 @@ export async function GET(request: Request) {
   // A design B invoice's photo, sealed like the lead it belongs to.
   if (url.searchParams.has("invoicePhoto")) {
     const seal = await gate.seal;
-    if (!seal) return json({ error: "Leads need LEADS_KEY on the Worker." }, 503);
+    if (!seal) return noSeal();
     const key = url.searchParams.get("invoicePhoto") ?? "";
     const raw = PHOTO_KEY.test(key) ? await gate.inbox.get(key) : null;
     return raw ? json({ photo: await seal.open<string>(raw) }) : json({ error: "Photo not found." }, 404);
@@ -178,7 +192,7 @@ export async function GET(request: Request) {
   // shortcut: one KV get per lead; an invoice index if the desk ever holds thousands of leads.
   if (url.searchParams.has("invoices")) {
     const seal = await gate.seal;
-    if (!seal) return json({ error: "Leads need LEADS_KEY on the Worker." }, 503);
+    if (!seal) return noSeal();
     const invoices = (await everyLead(gate.inbox, seal))
       .filter((l) => !l.trashedAt)
       .flatMap((l) => (l.invoices ?? []).map((i) => ({ ...i, lead: l.id!, name: l.name })))
@@ -188,13 +202,13 @@ export async function GET(request: Request) {
   // One client's whole activity log (`lib/leads/activity-log.ts`).
   if (url.searchParams.has("log")) {
     const seal = await gate.seal;
-    if (!seal) return json({ error: "Leads need LEADS_KEY on the Worker." }, 503);
+    if (!seal) return noSeal();
     return json({ log: await readLog(gate.inbox, seal, (url.searchParams.get("log") ?? "").replace(/^lead:/, "")) });
   }
   // The numbers, every lead as CSV (`lib/leads/lead-crm.ts`), or every event as CSV (`?csv=events`).
   if (url.searchParams.has("stats") || url.searchParams.has("csv")) {
     const seal = await gate.seal;
-    if (!seal) return json({ error: "Leads need LEADS_KEY on the Worker." }, 503);
+    if (!seal) return noSeal();
     const day = new Date().toISOString().slice(0, 10);
     const file = (body: string, name: string) => new Response(body, { headers: { ...NO_STORE, "content-type": "text/csv; charset=utf-8", "content-disposition": `attachment; filename="${name}-${day}.csv"` } });
     if (url.searchParams.get("csv") === "events") return file(eventsCsv(await readMaster(gate.inbox, seal)), "activity");
@@ -207,28 +221,22 @@ export async function GET(request: Request) {
   // Sealed with LEADS_KEY (`lib/leads/lead-crypto.ts`), opened here and only here.
   if (wanted?.startsWith("lead:") || url.searchParams.has("leads")) {
     const seal = await gate.seal;
-    if (!seal) return json({ error: "Leads need LEADS_KEY on the Worker." }, 503);
+    if (!seal) return noSeal();
     if (wanted) {
       const lead = await readLead(gate.inbox, seal, wanted.slice(5));
       return lead ? json({ lead }) : json({ error: "Gone." }, 404);
     }
     const leads: LeadSummary[] = [];
-    let after: string | undefined;
-    for (;;) {
-      const listed = await gate.inbox.list<{ s?: string }>({ prefix: "lead:", cursor: after });
-      for (const k of listed.keys as { name: string; metadata?: { s?: string } }[]) {
-        if (!k.metadata?.s) continue;
-        const one = await seal.open<LeadSummary>(k.metadata.s);
-        // Trash empties itself: 30 days after it went in, the lead goes for good.
-        // The list is the only reader, so it is the one place that checks.
-        if (one.trashedAt && trashDaysLeft(one.trashedAt, Date.now()) <= 0) {
-          await bury(gate.inbox, k.name, seal);
-          continue;
-        }
-        leads.push({ ...one, id: k.name.slice(5) });
+    for await (const k of everyKey<{ s?: string }>(gate.inbox, "lead:")) {
+      if (!k.metadata?.s) continue;
+      const one = await seal.open<LeadSummary>(k.metadata.s);
+      // Trash empties itself: 30 days after it went in, the lead goes for good.
+      // The list is the only reader, so it is the one place that checks.
+      if (one.trashedAt && trashDaysLeft(one.trashedAt, Date.now()) <= 0) {
+        await bury(gate.inbox, k.name, seal);
+        continue;
       }
-      if (listed.list_complete) break;
-      after = listed.cursor;
+      leads.push({ ...one, id: k.name.slice(5) });
     }
     return json({ leads: leads.sort((a, b) => b.lastAt.localeCompare(a.lastAt)) });
   }
@@ -244,13 +252,7 @@ export async function GET(request: Request) {
   // page of 400 kept the oldest and dropped the newest: read every page,
   // then the inbox reads the other way round.
   const keys: { name: string; metadata?: Summary }[] = [];
-  let cursor: string | undefined;
-  for (;;) {
-    const listed = await gate.inbox.list<Summary>({ prefix: "msg:", cursor });
-    keys.push(...listed.keys);
-    if (listed.list_complete) break;
-    cursor = listed.cursor;
-  }
+  for await (const k of everyKey<Summary>(gate.inbox, "msg:")) keys.push(k);
   const rows = keys.map((k) => ({ key: k.name, ...k.metadata })).reverse();
 
   return json({ rows, complete: true });
@@ -286,7 +288,7 @@ export async function PATCH(request: Request) {
   }
   if (given.invoiceFrom !== undefined) {
     const seal = await gate.seal;
-    if (!seal) return json({ error: "Leads need LEADS_KEY on the Worker." }, 503);
+    if (!seal) return noSeal();
     const from = cleanFrom(given.invoiceFrom);
     await gate.inbox.put(FROM_KEY, await seal.seal(from));
     return json({ from });
@@ -294,7 +296,7 @@ export async function PATCH(request: Request) {
   // A design B photo, already framed down by the desk: stored under its own hash, so the same photo is kept once.
   if (typeof given.invoicePhoto === "string") {
     const seal = await gate.seal;
-    if (!seal) return json({ error: "Leads need LEADS_KEY on the Worker." }, 503);
+    if (!seal) return noSeal();
     const photo = given.invoicePhoto;
     if (!photo.startsWith("data:image/jpeg;base64,") || photo.length > 4_000_000) return json({ error: "The photo must be a JPEG under 3 MB." }, 400);
     const hash = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(photo)));
@@ -344,16 +346,10 @@ export async function DELETE(request: Request) {
   // Their Inbox rows stay; the Inbox has its own trash.
   if (emptyTrash === true) {
     const seal = await gate.seal;
-    if (!seal) return json({ error: "Leads need LEADS_KEY on the Worker." }, 503);
+    if (!seal) return noSeal();
     const gone: string[] = [];
-    let after: string | undefined;
-    for (;;) {
-      const listed = await gate.inbox.list<{ s?: string }>({ prefix: "lead:", cursor: after });
-      for (const k of listed.keys as { name: string; metadata?: { s?: string } }[]) {
-        if (k.metadata?.s && (await seal.open<LeadSummary>(k.metadata.s)).trashedAt) gone.push(k.name);
-      }
-      if (listed.list_complete) break;
-      after = listed.cursor;
+    for await (const k of everyKey<{ s?: string }>(gate.inbox, "lead:")) {
+      if (k.metadata?.s && (await seal.open<LeadSummary>(k.metadata.s)).trashedAt) gone.push(k.name);
     }
     await Promise.all(gone.map((k) => bury(gate.inbox, k, seal)));
     return json({ ok: true, deleted: gone.length });
@@ -380,7 +376,7 @@ export async function POST(request: Request) {
   // A lead he adds by hand: a DM, a text, a referral.
   if (given?.add && typeof given.add === "object") {
     const seal = await gate.seal;
-    if (!seal) return json({ error: "Leads need LEADS_KEY on the Worker." }, 503);
+    if (!seal) return noSeal();
     const lead = manualLead(given.add as NewLead, new Date().toISOString());
     if ("error" in lead) return json(lead, 400);
     const id = await seal.id(lead.email);
@@ -392,7 +388,7 @@ export async function POST(request: Request) {
   // Past Notion rows as quiet leads (`lib/leads/notion-import.ts`, `scripts/import-notion.mjs`). Dry, it only counts.
   if (given && "importNotion" in given) {
     const seal = await gate.seal;
-    if (!seal) return json({ error: "Leads need LEADS_KEY on the Worker." }, 503);
+    if (!seal) return noSeal();
     try {
       return json(await importNotion(gate.inbox, seal, given.importNotion, given.dry !== false));
     } catch (e) {
@@ -410,20 +406,14 @@ export async function POST(request: Request) {
   }
   if (given?.backfill !== true) return json({ error: "Unknown." }, 400);
   const seal = await gate.seal;
-  if (!seal) return json({ error: "Leads need LEADS_KEY on the Worker." }, 503);
+  if (!seal) return noSeal();
 
   const people = new Map<string, InboxRow[]>();
-  let cursor: string | undefined;
-  for (;;) {
-    const listed = await gate.inbox.list<Summary>({ prefix: "msg:", cursor });
-    for (const k of listed.keys) {
-      const m = k.metadata;
-      const email = m?.email?.trim().toLowerCase();
-      if (!m || !email?.includes("@")) continue;
-      people.set(email, [...(people.get(email) ?? []), { key: k.name, at: m.at, type: m.type, name: m.name, email, read: m.read, detail: m.detail }]);
-    }
-    if (listed.list_complete) break;
-    cursor = listed.cursor;
+  for await (const k of everyKey<Summary>(gate.inbox, "msg:")) {
+    const m = k.metadata;
+    const email = m?.email?.trim().toLowerCase();
+    if (!m || !email?.includes("@")) continue;
+    people.set(email, [...(people.get(email) ?? []), { key: k.name, at: m.at, type: m.type, name: m.name, email, read: m.read, detail: m.detail }]);
   }
 
   const stages: Partial<Record<Stage, number>> = {};
@@ -452,7 +442,7 @@ export async function POST(request: Request) {
  * on the timeline like everything else.
  */
 async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: Awaited<ReturnType<typeof sealer>>, given: Record<string, unknown>, notion?: string) {
-  if (!seal) return json({ error: "Leads need LEADS_KEY on the Worker." }, 503);
+  if (!seal) return noSeal();
   const { key, stage, snoozeUntil, seen, archive, trash, notes, remind, details, quote, lostReason, mergeFrom, invoice, licence, contract, release, invoicePaid } = given as LeadPatch & { key: string };
   for (const p of [contract, release]) if (p !== undefined && !(PAPER as readonly string[]).includes(p)) return json({ error: "Unknown status." }, 400);
   const bill = invoice === undefined ? undefined : cleanInvoice(invoice);
