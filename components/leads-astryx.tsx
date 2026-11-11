@@ -425,7 +425,7 @@ export function LeadsAstryx() {
       <div data-astryx-desk="" style={{ height: "100dvh", textTransform: "none", letterSpacing: "normal" }}>
         {size === "phone"
           ? <Layout height="fill" content={page} footer={<TabBar view={screen} go={show} />} />
-          : <Layout height="fill" start={<LayoutPanel width={240} padding={0} label="Desk"><Nav needs={needs} view={screen} go={show} /></LayoutPanel>} content={page} />}
+          : <Layout height="fill" start={<LayoutPanel width={260} padding={0} label="Desk" /* SideNav draws 260 wide by default; a narrower panel clipped the counts. */><Nav needs={needs} view={screen} go={show} /></LayoutPanel>} content={page} />}
       </div>
     </Theme>
   );
