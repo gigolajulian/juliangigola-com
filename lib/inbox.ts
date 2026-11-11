@@ -19,6 +19,18 @@
  * `app/api/inbox/route.ts` (the whole admin desk's endpoint).
  * ─────────────────────────────────────────────────────────────── */
 
+/** What the contact form gets back from `submitEnquiry` (`app/contact/actions.ts`). */
+export type ContactState = {
+  status: "idle" | "sent" | "error" | "unconfigured";
+  message?: string;
+  /** Set when delivery is not possible, so the UI can offer a real path. */
+  mailto?: string;
+  /** Field name → problem, for inline errors. */
+  errors?: Record<string, string>;
+  /** Echoed back so a failed submit does not wipe what they typed. */
+  values?: Record<string, string>;
+};
+
 /** What one enquiry looks like once it is stored. */
 export type Enquiry = {
   id: string;

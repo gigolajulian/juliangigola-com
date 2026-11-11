@@ -1,11 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { TOKEN_STORE } from "@/lib/admin/admin-github";
 import { isLate, paperDue, shootTag, type LeadSummary } from "@/lib/leads/leads";
 import { cn } from "@/lib/utils";
 import { HEAD } from "@/components/leads/shared";
-import { adminCall, ago, aside, at, cash, closed, type Filter, needsMe, nextStep, now, pass, plusDays, renew, ymdPT } from "@/lib/leads/lead-desk";
+import { adminCall, authed, ago, aside, at, cash, closed, type Filter, needsMe, nextStep, now, pass, plusDays, renew, ymdPT } from "@/lib/leads/lead-desk";
 import { TZ } from "@/lib/booking/booking-rules";
 
 /* ── Today, the One Desk's first page ─────────────────────────────
@@ -79,14 +78,11 @@ function DeskToday({ leads, go, pick }: { leads: LeadSummary[]; go: (l: LeadSumm
       .then(setMoney)
       .catch(() => setMoney("Not connected"));
   }, []);
-  // Traffic answers to the GitHub token only, as on /admin.
+  // Traffic answers to the inbox key or the GitHub token, like the other admin routes.
   const [traffic, setTraffic] = React.useState<Spark | string | null>(null);
   React.useEffect(() => {
-    const token = localStorage.getItem(TOKEN_STORE);
-    if (!token) return queueMicrotask(() => setTraffic("GitHub token needed"));
-    fetch("/api/traffic", { headers: { authorization: `Bearer ${token}` }, cache: "no-store" })
-      .then(async (r) => { const o = await r.json(); if (!r.ok) throw new Error(o.error ?? "Cloudflare did not answer."); setTraffic(o); })
-      .catch(() => setTraffic("Cloudflare did not answer"));
+    if (!Object.keys(authed()).length) return queueMicrotask(() => setTraffic("Inbox key or GitHub token needed"));
+    adminCall<Spark>("/api/traffic").then(setTraffic).catch(() => setTraffic("Cloudflare did not answer"));
   }, []);
   const t = typeof traffic === "object" ? traffic : null;
   const peak = t ? Math.max(1, ...t.days.map((d) => d.n)) : 1;

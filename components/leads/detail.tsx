@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import { fill, mailable, TEMPLATES, type Template } from "@/lib/leads/lead-crm";
 import { endDay } from "@/components/leads/lead-licence";
 import { leadKey, typingIn } from "@/lib/leads/lead-keys";
-import { ago, at, authed, type Call, DAY, day, errorText, now, type Patch, renew, snoozed } from "@/lib/leads/lead-desk";
+import { ago, at, authed, type Call, DAY, day, errorText, loadError, now, type Patch, renew, snoozed } from "@/lib/leads/lead-desk";
 import { btn, compose, field, fieldLabel, HEAD, ios, kindOf, line, mailto, MARK, primary, STEPS, Tag } from "@/components/leads/shared";
 import { Money, Paperwork } from "@/components/leads/money";
 
@@ -19,6 +19,7 @@ export function Detail({ summary, initial, call, onChange, onBack, reload, tick,
   const [msgKey, setMsgKey] = React.useState<string | null>(null);
   const [asked, setAsked] = React.useState(false);
   const [snoozing, setSnoozing] = React.useState(false);
+  const [failed, setFailed] = React.useState("");
   const key = `lead:${summary.id}`;
 
   const patch = React.useCallback(
@@ -38,6 +39,7 @@ export function Detail({ summary, initial, call, onChange, onBack, reload, tick,
     call<{ lead: Lead }>({ query: `?key=${encodeURIComponent(key)}` }).then(async ({ lead: l }) => {
       if (!live) return;
       setLead(l);
+      setFailed("");
       // Their latest words, from the raw row the form stored.
       const ref = [...l.events].reverse().find((e) => e.kind === "inquiry" && e.ref)?.ref;
       if (ref)
@@ -45,7 +47,7 @@ export function Detail({ summary, initial, call, onChange, onBack, reload, tick,
           .then((m) => live && (setMessage(m.enquiry), setMsgKey(ref)))
           .catch(() => {});
       if (l.unread) patch({ seen: true }).catch(() => {});
-    }).catch(() => {});
+    }).catch((e: unknown) => live && setFailed(loadError(e)));
     return () => void (live = false);
     // Once per lead, and again on a refresh (`tick`): `patch` is stable for the same key.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -96,6 +98,7 @@ export function Detail({ summary, initial, call, onChange, onBack, reload, tick,
         {kindOf(l.kind) ? <p className="font-mono text-[11px] font-medium uppercase tracking-[0.09em]">{kindOf(l.kind)}</p> : null}
         <h1 ref={title} tabIndex={-1} style={HEAD} className="mt-1 text-[30px] leading-tight outline-none">{l.name}</h1>
         <p className="mt-1 break-words text-[15px] text-muted-foreground">{l.email}</p>
+        {failed ? <p role="alert" className="mt-2 text-[14px] text-destructive">{failed}</p> : null}
         {l.stage === "Lost" ? (
           <p className="mt-5"><Tag tone="quiet" mark={MARK.Lost}>Lost</Tag></p>
         ) : (

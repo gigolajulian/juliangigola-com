@@ -9,5 +9,9 @@ return {
     { title = "juliangigola.com", file = "ExportServiceProvider.lua" },
     { title = "Client Gallery", file = "ProofsServiceProvider.lua" },
   },
-  VERSION = { major = 1, minor = 1, revision = 0, build = 0 },
+  -- Library > Plug-in Extras: pull client picks without publishing.
+  LrLibraryMenuItems = {
+    { title = "Check for picks", file = "CheckPicks.lua" },
+  },
+  VERSION = { major = 1, minor = 2, revision = 0, build = 0 },
 }

@@ -180,7 +180,7 @@ export const SESSIONS: Record<SessionSlug, Session> = {
     paid: false,
     photo: { d: w("oakley-x-nike", "01"), l: w("paradox", "01") },
   },
-  /* book.juliangigola.com/editorial's call, its words from `book/public/index.html`. */
+  /* book.juliangigola.com/editorial's call, its words from the retired book page (`book/public/index.html`, in git history). */
   editorial: {
     slug: "editorial",
     name: "Editorial call",

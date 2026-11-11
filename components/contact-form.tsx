@@ -3,7 +3,8 @@
 import * as React from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { submitEnquiry, type ContactState } from "@/app/contact/actions";
+import { submitEnquiry } from "@/app/contact/actions";
+import type { ContactState } from "@/lib/inbox";
 import { RESPONSE_TIME } from "@/lib/site";
 import { cn } from "@/lib/utils";
 import StatusMark from "@/components/vendor/status-mark";

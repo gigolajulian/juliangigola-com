@@ -17,15 +17,12 @@ import { HoverSettle } from "@/components/hover-settle";
 import { FocusField } from "@/components/focus-field";
 import { ldJson, siteGraph } from "@/lib/seo";
 import { DebugGate } from "@/components/debug-gate";
-import { TypeDials } from "@/components/type-dials";
-import { clips, DEFAULTS, LATE, LEVELS, LIQUID, SKIP, sizesOf, typeSizer } from "@/lib/type-size";
 import { VisitTrail } from "@/components/visit-trail";
 import { ClickBeacon } from "@/components/click-beacon";
 import { MotionGate, V3Footer, V3Header } from "@/components/v3/chrome";
 import { ScrollThumb } from "@/components/v3/scroll-thumb";
 import { SmoothScroll } from "@/components/v3/smooth-scroll";
 import { ScrollReveal } from "@/components/v3/scroll-reveal";
-import { keepNames } from "@/lib/keep-names";
 
 /* JG V3 (DESIGN.md): Inter Tight for the display type and the wordmark,
    IBM Plex Mono for everything else, and Archivo Expanded for the booking
@@ -119,16 +116,6 @@ export const metadata: Metadata = {
   verification: { other: { "msvalidate.01": "DEF796C06E3ACDCBF969BF1FF3E4EA6A" } },
 };
 
-/* Font v2's sizes before the first paint (Julian: the text grew and moved
-   about 1.4s after load, when `type-dials.tsx` first sized it). The same
-   sizing, run as the parser reaches the foot of the page; `type-dials.tsx`
-   takes over what it sized, and fits it again once the faces are in.
-   The cover's two lines (`LATE`) and text in clipping boxes (`clips`) are
-   left to that later pass, as before. Chrome holds the first paint until then
-   (`rel="expect"`, added by the font script only under `?font=v2`: on
-   every page it held the paint for everyone, audit 2026-11-08). */
-const TYPE_EARLY = keepNames(`(function(){try{if(document.documentElement.dataset.font!=="v2")return;var s=(${typeSizer.toString()})(${JSON.stringify(LEVELS)},${JSON.stringify(sizesOf(DEFAULTS))},${JSON.stringify(SKIP)},${JSON.stringify(LIQUID)});s.scan([document.body],${JSON.stringify(`${SKIP}, ${LATE}`)},${clips.toString()});s.fit();window.__jgType=s}catch(e){}})()`);
-
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
@@ -169,14 +156,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(){try{var q=location.search,f="deck-flyout";if(/[?&]flyout=1/.test(q))sessionStorage.setItem(f,"1");if(/[?&]flyout=0/.test(q))sessionStorage.removeItem(f);if(sessionStorage.getItem(f)==="1")document.documentElement.dataset.flyout="";var k="door-stack";if(/[?&]stack=0/.test(q))sessionStorage.setItem(k,"0");if(/[?&]stack=1/.test(q))sessionStorage.removeItem(k);if(sessionStorage.getItem(k)!=="0")document.documentElement.dataset.stack=""}catch(e){}var t=null;try{localStorage.removeItem("theme");t=sessionStorage.getItem("theme")}catch(e){}var l=t==="light"||(t!=="dark"&&matchMedia("(prefers-color-scheme: light)").matches);if(location.pathname.indexOf("/proof")===0&&!/[?&]proofwall=0/.test(location.search)){l=false;document.documentElement.dataset.proofwall=""}document.documentElement.dataset.theme=l?"light":"dark";var m=document.querySelectorAll('meta[name="theme-color"]');for(var i=0;i<m.length;i++)m[i].setAttribute("content",l?"#ebedef":"#0b0a09")})()`,
-          }}
-        />
-        {/* Font v2 (`app/styles/font-v2.css`), off since V3 (Inter Tight and
-            Plex Mono only). `?font=v2` brings it back for the tab, `?font=0`
-            clears it. Before the first paint. */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{var q=location.search,k="jg-font";if(/[?&]font=v2/.test(q))sessionStorage.setItem(k,"v2");if(/[?&]font=0/.test(q))sessionStorage.removeItem(k);if(sessionStorage.getItem(k)!=="v2")return;document.documentElement.dataset.font="v2";var l=document.createElement("link");l.rel="stylesheet";l.href="https://use.typekit.net/wxg8xur.css";document.head.appendChild(l);var x=document.createElement("link");x.rel="expect";x.href="#jg-sized";x.setAttribute("blocking","render");document.head.appendChild(x)}catch(e){}})()`,
           }}
         />
         {/* Whether this visit gets the opening, decided before the first
@@ -276,18 +255,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         {/* fps, finger dots and a frame log, only with `?debug`. The
             overlay itself loads only then: `debug-gate.tsx`. */}
         <DebugGate />
-        <TypeDials />
         {/* Clicks and scroll depth for /admin's SEO tab, one beacon per
             page view, no cookie. See `click-beacon.tsx`. Renders nothing. */}
         <ClickBeacon />
-        {/* Production only: on the dev server React reports the sizes as
-            a hydration mismatch, and its double mount undoes them. */}
-        {process.env.NODE_ENV === "production" ? (
-          <>
-            <script dangerouslySetInnerHTML={{ __html: TYPE_EARLY }} />
-            <div id="jg-sized" hidden />
-          </>
-        ) : null}
       </body>
     </html>
   );
