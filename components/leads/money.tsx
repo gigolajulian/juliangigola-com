@@ -3,7 +3,7 @@
 import * as React from "react";
 import { PAPER, paperDue, type Lead, type LeadSummary, type Paper } from "@/lib/leads";
 import { cn } from "@/lib/utils";
-import { LicenceField } from "@/components/lead-licence";
+import { LicenceField } from "@/components/leads/lead-licence";
 import { DEPOSIT, usd } from "@/lib/invoice";
 import { adminCall, cash, day, errorText, now, type Patch } from "@/lib/lead-desk";
 import { btn, field, fieldLabel, HEAD, primary } from "@/components/leads/shared";
