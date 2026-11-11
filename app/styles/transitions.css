@@ -132,16 +132,6 @@
 :root[data-nav-bar]::view-transition-new(.page) {
   animation: jg-page-in var(--dur-lg) cubic-bezier(0.32, 0.72, 0, 1) var(--dur-md) both;
 }
-/* And a longer one out of a drawer, which has a door to shut first. The
-   menu and the filters take 420ms to travel back out; at the bar's 300ms
-   the new page was rising into a screen that was still moving, which is
-   two movements in opposite directions and reads as a stumble. 460 is the
-   drawer's own journey and a beat, so what the page comes up into is
-   still. It arrives over 460 as well, because a wait that long wants an
-   arrival to match it. */
-:root[data-nav-drawer]::view-transition-new(.page) {
-  animation: jg-page-in 460ms cubic-bezier(0.32, 0.72, 0, 1) 460ms both;
-}
 @keyframes jg-page-in {
   from {
     opacity: 0;
@@ -154,7 +144,7 @@
 :root[data-nav="out"]::view-transition-new(.page) {
   animation-name: jg-page-settle;
 }
-/* Out by way of the bar or a drawer: the wordmark, which is home. The
+/* Out by way of the bar: the wordmark, which is home. The
    beat the bar asks for above is a delay on a keyframe that also fades
    the page up; swapping in `jg-page-settle`, which only moves it, left
    the new page in full view under the old one for the whole wait, and
@@ -226,7 +216,7 @@
    it, the way the deck does between projects. Which way it comes is
    where the page sits in the bar (`data-nav-side`, `page-transition.tsx`):
    to the right of this one, it comes in from the right. It replaces the
-   bar's fade and beat; out of a drawer it still waits for the drawer. */
+   bar's fade and beat. */
 /* One movement, landed and done. The in-and-out curve it had first, at
    760ms, crept the last 30px into place over 400ms, and the creep read
    as a second move after the card had landed. */
@@ -237,12 +227,7 @@
   animation-timing-function: cubic-bezier(0.25, 1, 0.5, 1);
   animation-fill-mode: both;
 }
-:root[data-nav-side][data-nav-drawer]::view-transition-old(.page),
-:root[data-nav-side][data-nav-drawer]::view-transition-new(.page) {
-  animation-delay: 460ms;
-}
-/* Out of the drawer the page starts pushed aside and slides home, and the
-   card waiting at its right edge slid with it: a strip of Contact showed
+/* The card waiting at the page's right edge showed a strip of Contact
    down the side of the screen before the deal. Clipped to the page, it
    waits out of sight. */
 :root[data-nav-side]::view-transition-group(.page) {

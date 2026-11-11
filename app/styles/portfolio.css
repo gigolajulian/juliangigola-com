@@ -403,15 +403,6 @@
   }
 }
 
-/* A filter on the work index: no zoom, the row fades on its own. */
-:root[data-nav="filter"]::view-transition-group(.page),
-:root[data-nav="filter"]::view-transition-old(.page),
-:root[data-nav="filter"]::view-transition-new(.page) {
-  animation: none;
-}
-:root[data-nav="filter"]::view-transition-old(.page) {
-  display: none;
-}
 /* The crossing (`cross.ts`): the card is already the next page, so the
    router's trip is a cut under it, the card held on top. */
 :root[data-nav="cross"]::view-transition-group(*),
