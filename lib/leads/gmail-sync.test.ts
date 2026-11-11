@@ -57,6 +57,36 @@ describe("mailChanges", () => {
   });
 });
 
+describe("invoice sent", () => {
+  const billed = (): Lead => ({
+    ...fold(null, email, { event: { at: at(1), kind: "inquiry", ref: "msg:1" }, name: "Maya" }),
+    invoices: [{ no: "1126", date: "2026-11-12", lines: [{ desc: "Portraits", qty: 1, rate: 450 }], paid: 100, at: "2026-11-12T20:00:00Z" }, { no: "1126-2", date: "2026-11-12", lines: [{ desc: "Prints", qty: 1, rate: 90 }], paid: 0, at: "2026-11-12T21:00:00Z" }],
+  });
+  const sent = (subject: string, filename?: string): Msg => {
+    const m = msg("g9", ["SENT"], "hello@juliangigola.com", email, subject);
+    return filename ? { ...m, payload: { ...m.payload, parts: [{ parts: [{ filename: "" }] }, { filename }] } } : m;
+  };
+
+  it("a sent mail naming the invoice in its subject marks it Sent and logs it, once", () => {
+    const [{ c }] = mailChanges(sent("Invoice 1126, Portraits"));
+    const l = fold(billed(), email, c);
+    expect(l.invoices!.map((v) => v.sentAt)).toEqual([at(5), undefined]);
+    expect(l.events.at(-1)).toMatchObject({ kind: "invoice", note: "1126 sent", ref: "g9" });
+    expect(fold(l, email, c)).toBe(l);
+  });
+
+  it("reads the attachment's name when the subject does not say", () => {
+    const [{ c }] = mailChanges(sent("Thanks again", "INVOICE 1126-2 - MAYA.pdf"));
+    expect(fold(billed(), email, c).invoices!.map((v) => v.sentAt)).toEqual([undefined, at(5)]);
+  });
+
+  it("an ordinary reply sends nothing", () => {
+    const [{ c }] = mailChanges(sent("Re: portraits"));
+    expect(c.mailed).toBeUndefined();
+    expect(fold(billed(), email, c).invoices!.every((v) => !v.sentAt)).toBe(true);
+  });
+});
+
 describe("canonical", () => {
   it("drops Gmail dots and +tags, leaves other domains as typed", () => {
     expect(canonical(" Gigola.Julian+site@GoogleMail.com ")).toBe("gigolajulian@gmail.com");

@@ -22,7 +22,7 @@ import { type Call, day, errorText, pass, type Filter } from "@/lib/leads/lead-d
 type Row = LeadSummary & Record<string, unknown>;
 export const ASIDE: [Filter, string][] = [["snoozed", "Snoozed"], ["archived", "Archived"], ["trash", "Trash"], ["Delivered", "Delivered"], ["Lost", "Lost"]];
 
-function Page({ eyebrow, title, children }: { eyebrow: string; title: string; children: React.ReactNode }) {
+export function Page({ eyebrow, title, children }: { eyebrow: string; title: string; children: React.ReactNode }) {
   return (
     <Layout
       height="fill"

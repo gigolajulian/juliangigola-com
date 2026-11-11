@@ -12,7 +12,7 @@ import { btn, compose, field, fieldLabel, kindOf, primary } from "@/components/l
 import type { Patch } from "@/lib/leads/lead-desk";
 
 /** The PDF of one invoice. Loaded on the tap, fonts and all. A design B one fetches its sealed photo unless `src` is in hand. */
-async function makePdf(inv: Invoice, l: LeadSummary, full: Lead, src?: string) {
+export async function makePdf(inv: Invoice, l: LeadSummary, full: Lead, src?: string) {
   const { from } = await inboxCall<{ from: InvoiceFrom | null }>({ query: "?invoiceFrom" });
   if (!from?.name) throw new Error("Add your details for invoices first.");
   let photo;
@@ -28,7 +28,7 @@ async function makePdf(inv: Invoice, l: LeadSummary, full: Lead, src?: string) {
 }
 
 /** What he can do with the PDF. Nothing here sends. */
-function Deliver({ file, inv, l }: { file: File; inv: Invoice; l: LeadSummary }) {
+export function Deliver({ file, inv, l }: { file: File; inv: Invoice; l: LeadSummary }) {
   const url = React.useMemo(() => URL.createObjectURL(file), [file]);
   React.useEffect(() => () => URL.revokeObjectURL(url), [url]);
   const canShare = typeof navigator.canShare === "function" && navigator.canShare({ files: [file] });
