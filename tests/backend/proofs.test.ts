@@ -63,7 +63,7 @@ describe("proofs", () => {
   it("takes a preview pick as a frame and a crop, or null to clear it", () => {
     expect(cleanSettings({ card: { id: "86612442", x: 0, y: "170", w: 1334 } })).toEqual({ card: { id: "86612442", x: 0, y: 170, w: 1334 } });
     expect(cleanSettings({ card: null })).toEqual({ card: undefined });
-    expect(cleanSettings({ card: { id: "../x", x: 0, y: 0, w: 100 } })).toEqual({});
+    expect(cleanSettings({ card: { id: "@/x", x: 0, y: 0, w: 100 } })).toEqual({});
     expect(cleanSettings({ card: { id: "a", x: 0, y: 0 } })).toEqual({});
   });
   it("previews the picked frame when it is still in the gallery", () => {

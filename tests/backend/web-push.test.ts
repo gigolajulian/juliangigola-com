@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { b64url, contentKeys, encrypt, publicKey, send, unb64url, vapid, type Subscription } from "./web-push";
+import { b64url, contentKeys, encrypt, publicKey, send, unb64url, vapid, type Subscription } from "@/lib/leads/web-push";
 
 /** A browser's side: its own key pair and auth secret, as pushManager.subscribe makes them. */
 async function device() {

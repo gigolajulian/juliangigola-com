@@ -5,7 +5,7 @@ import { afterEach, expect, it, vi } from "vitest";
 const waits: Promise<unknown>[] = [];
 vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: () => ({ ctx: { waitUntil: (p: Promise<unknown>) => waits.push(p) } }) }));
 
-const { recordLead } = await import("./lead-store");
+const { recordLead } = await import("@/lib/leads/lead-store");
 
 afterEach(() => vi.unstubAllGlobals());
 
