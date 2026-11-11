@@ -257,7 +257,10 @@ export async function lockOp<K extends keyof LockOps>(env: LockEnv, op: K, arg: 
   const ns = env.BOOKING_LOCK;
   if (!ns) throw new Error("BOOKING_LOCK is not bound");
   const res = await ns.get(ns.idFromName("hello@")).fetch("https://lock/", { method: "POST", body: JSON.stringify({ op, arg }) });
-  const out = (await res.json()) as LockOps[K][1] & { error?: string };
-  if (!res.ok) throw new Error(`booking lock ${op}: ${out.error ?? res.status}`);
-  return out;
+  if (!res.ok) {
+    // A failing lock may answer plain text: keep the status when the body is not JSON.
+    const out = (await res.json().catch(() => ({}))) as { error?: string };
+    throw new Error(`booking lock ${op}: ${out.error ?? res.status}`);
+  }
+  return (await res.json()) as LockOps[K][1];
 }
