@@ -247,6 +247,12 @@ local function gallery(remote)
   return p
 end
 
+-- Lightroom ids each service of a plugin as "<toolkit id>.<n>" (com.juliangigola.export.2), so match the prefix.
+local function ours(service)
+  local id = tostring(service:getPluginId())
+  return id == _PLUGIN.id or id:sub(1, #_PLUGIN.id + 1) == _PLUGIN.id .. "."
+end
+
 -- LrPublishedPhoto has no way back to its collection, so find the
 -- gallery of this service that holds the first photo.
 -- shortcut: a frame in two proof galleries reads the first one; match on remoteId if that ever happens.
@@ -254,7 +260,7 @@ local function remoteOf(arrayOfPhotoInfo)
   local first = arrayOfPhotoInfo[1]
   if not (first and first.photo) then return end
   for _, pc in ipairs(first.photo:getContainedPublishedCollections()) do
-    if pc:getService():getPluginId() == _PLUGIN.id and pc:getRemoteId() then
+    if ours(pc:getService()) and pc:getRemoteId() then
       return pc:getRemoteId(), pc:getName()
     end
   end
@@ -322,12 +328,23 @@ end
 function provider.checkForPicks()
   local catalog = LrApplication.activeCatalog()
   local found, lines, failed, why = {}, {}, {}, nil
-  for _, service in ipairs(catalog:getPublishServices(_PLUGIN.id)) do
-    for _, pc in ipairs(service:getChildCollections()) do
+  local checked = 0
+  -- Every gallery of this plugin's services, at any depth.
+  local all = {}
+  local function walk(node)
+    for _, pc in ipairs(node:getChildCollections()) do all[#all + 1] = pc end
+    for _, set in ipairs(node:getChildCollectionSets()) do walk(set) end
+  end
+  for _, service in ipairs(catalog:getPublishServices()) do
+    if ours(service) then walk(service) end
+  end
+  do
+    for _, pc in ipairs(all) do
       local remote = pc:getRemoteId()
       if remote then
         -- LrTasks.pcall: plain pcall cannot wrap LrHttp, which yields.
         local ok, p = LrTasks.pcall(gallery, remote)
+        checked = checked + 1
         if not ok then
           failed[#failed + 1], why = pc:getName(), tostring(p)
         elseif p.submittedAt and p.selects and #p.selects > 0 then
@@ -349,7 +366,10 @@ function provider.checkForPicks()
   local info = table.concat(lines, "\n")
   if #failed > 0 then info = info .. "\n\nCould not read " .. table.concat(failed, ", ") .. ": " .. why end
   if #made == 0 then
-    LrDialogs.message(#lines > 0 and "Client picks" or "No picks yet", info ~= "" and info or nil)
+    if info == "" then
+      info = checked == 0 and "No client galleries in this catalog yet." or ("Checked %d %s."):format(checked, checked == 1 and "gallery" or "galleries")
+    end
+    LrDialogs.message(#lines > 0 and "Client picks" or "No picks yet", info)
   elseif LrDialogs.confirm("Client picks", info .. "\n\nFlagged with a Purple label.", "Show selects", "Close") == "ok" then
     catalog:setActiveSources(made)
   end

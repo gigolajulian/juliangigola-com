@@ -17,5 +17,5 @@ return {
     { title = "Check for picks", file = "CheckPicks.lua" },
   },
   LrPluginInfoProvider = "PluginInfo.lua",
-  VERSION = { major = 1, minor = 2, revision = 2, build = 0 },
+  VERSION = { major = 1, minor = 2, revision = 3, build = 0 },
 }
