@@ -25,7 +25,6 @@ const clearNav = () => {
   if (root.dataset.nav === "deal") return;
   delete root.dataset.nav;
   delete root.dataset.navBar;
-  delete root.dataset.navDrawer;
   delete root.dataset.navSide;
 };
 
@@ -103,8 +102,8 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
     const root = document.documentElement;
     let clear = 0;
     const set = (
-      way: "in" | "out" | "filter",
-      from: "page" | "bar" | "drawer" = "page",
+      way: "in" | "out",
+      from: "page" | "bar" = "page",
     ) => {
       root.dataset.nav = way;
       /* Kept for the visit: a page reached by a press is not a cold load,
@@ -114,23 +113,9 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
          came from the bar. A link inside the page is a step through the
          work and wants no waiting; the bar is a jump across the site, and
          the old page is given the room to leave before the new one comes
-         up. `globals.css` reads it as a delay on the incoming page.
-
-         A drawer is the same jump with a door to shut first. The menu and
-         the filters take 420ms to travel back out, and the four links in
-         the menu used to be inside `<header>` and so counted as the bar;
-         they are their own component now, which quietly took the beat away
-         and let the new page land under a drawer that was still moving.
-         Julian saw it. The longer wait is the drawer's own journey plus
-         one, so the page arrives at a still screen. */
-      if (from === "page") {
-        delete root.dataset.navBar;
-        delete root.dataset.navDrawer;
-      } else {
-        root.dataset.navBar = "";
-        if (from === "drawer") root.dataset.navDrawer = "";
-        else delete root.dataset.navDrawer;
-      }
+         up. `globals.css` reads it as a delay on the incoming page. */
+      if (from === "page") delete root.dataset.navBar;
+      else root.dataset.navBar = "";
       // Only for a press that never lands; the arrival clears it above.
       window.clearTimeout(clear);
       clear = window.setTimeout(clearNav, 10000);
@@ -151,11 +136,7 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
         a.dataset.back !== undefined ||
         a.textContent?.trimStart().startsWith("←") ||
         a.pathname === "/";
-      const from = a.closest(".drawer")
-        ? "drawer"
-        : a.closest("header")
-          ? "bar"
-          : "page";
+      const from = a.closest("header") ? "bar" : "page";
       set(out ? "out" : "in", from);
       const here = sectionOf(location.pathname);
       /* Portfolio leads the bar, so the homepage's own screens
