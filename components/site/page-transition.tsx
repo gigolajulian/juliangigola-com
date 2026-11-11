@@ -53,7 +53,6 @@ const sectionOf = (path: string) =>
    2026-10-18); `?vt=full` snapshots every page whole again, for testing. */
 const SNAPSHOT_BUDGET = 192 * 2 ** 20;
 const gauge = () => {
-  const root = document.documentElement;
   let on = true;
   try {
     const q = new URLSearchParams(location.search).get("vt");
@@ -62,9 +61,11 @@ const gauge = () => {
   } catch {}
   const m = document.getElementById("main");
   const d = window.devicePixelRatio || 1;
-  if (on && m && m.scrollHeight * m.clientWidth * d * d * 4 > SNAPSHOT_BUDGET)
-    root.dataset.pageTall = "";
-  else delete root.dataset.pageTall;
+  const tall = on && !!m && m.scrollHeight * m.clientWidth * d * d * 4 > SNAPSHOT_BUDGET;
+  /* On #main and its children, not the root: a root attribute over
+     `#main > *` restyled every element on the page as it landed, about
+     1,220 on /portfolio (audit 2026-11-11). */
+  for (const el of m ? [m, ...m.children] : []) el.toggleAttribute("data-page-tall", tall);
 };
 
 export function PageTransition({ children }: { children: React.ReactNode }) {
