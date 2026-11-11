@@ -9,8 +9,7 @@
  * Home is the table-filter shape: Your move, This week, Waiting on them,
  * with the open lead beside the list when wide. Phone (≤760) gets a tab
  * bar, mid (≤1200) the side nav and a stacked header. The lead page is
- * still the classic Detail inside the Astryx frame; its detail-page
- * rebuild is the next pass.
+ * its own Astryx layout (components/leads/lead-astryx.tsx).
  * ─────────────────────────────────────────────────────────────── */
 
 import "@astryxdesign/core/astryx.css";
@@ -30,15 +29,19 @@ import { TextInput } from "@astryxdesign/core/TextInput";
 import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/SegmentedControl";
 import { ProgressBar } from "@astryxdesign/core/ProgressBar";
 import { StatusDot } from "@astryxdesign/core/StatusDot";
-import { Detail, SignIn } from "@/components/admin/admin-leads";
+import { SignIn } from "@/components/admin/admin-leads";
+import { LeadAstryx } from "@/components/leads/lead-astryx";
 import { ago, inboxCall, loadError, matches, nextStep, pass } from "@/lib/leads/lead-desk";
 import type { Template } from "@/lib/leads/lead-crm";
 import { TZ } from "@/lib/booking/booking-rules";
 import { KEY_STORE, TOKEN_STORE } from "@/lib/admin/admin-github";
 import { leadSummary, shootTag, STAGES, type Lead, type LeadPatch, type LeadSummary, type Stage as StageName } from "@/lib/leads/leads";
 import { useRouter } from "next/navigation";
+import { TodayAstryx } from "@/components/leads/today-astryx";
 
 type Size = "phone" | "mid" | "wide";
+/** The pages the Astryx desk draws itself; the rest still open the classic desk. */
+type View = "today" | "leads";
 type Group = "now" | "week" | "waiting";
 
 /* The site's tokens (app/styles/tokens.css): warm near-black, one teal accent; the site's own Inter Tight and Plex Mono. */
@@ -77,7 +80,6 @@ const InboxGlyph = svg(<><path d="M4 13l3-8h10l3 8v6H4z" /><path d="M4 13h5l1 2h
 const CalendarGlyph = svg(<><rect x="4" y="5" width="16" height="15" rx="2" /><path d="M4 10h16M9 3v4M15 3v4" /></>);
 const MoreGlyph = svg(<><circle cx="6" cy="12" r="1.2" /><circle cx="12" cy="12" r="1.2" /><circle cx="18" cy="12" r="1.2" /></>);
 const PlusGlyph = svg(<path d="M12 5v14M5 12h14" />);
-const BackGlyph = svg(<path d="M19 12H5M11 6l-6 6 6 6" />);
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
   return <Text type="code" size="xsm" color="secondary" weight="medium">{children}</Text>;
@@ -105,12 +107,12 @@ function Stage({ l }: { l: LeadSummary }) {
   );
 }
 
-function Nav({ needs }: { needs: number }) {
+function Nav({ needs, view, go }: { needs: number; view: View; go: (v: View) => void }) {
   return (
     <SideNav header={<SideNavHeading heading="Desk" subheading="juliangigola.com" />}>
       <SideNavSection title="Desk" isHeaderHidden>
-        <SideNavItem label="Today" icon={HomeGlyph} href={CLASSIC} />
-        <SideNavItem label="Leads" icon={InboxGlyph} isSelected endContent={<Text type="code" size="xsm">{needs}</Text>} />
+        <SideNavItem label="Today" icon={HomeGlyph} isSelected={view === "today"} onClick={() => go("today")} />
+        <SideNavItem label="Leads" icon={InboxGlyph} isSelected={view === "leads"} onClick={() => go("leads")} endContent={<Text type="code" size="xsm">{needs}</Text>} />
         <SideNavItem label="Calendar" icon={CalendarGlyph} href={`${CLASSIC}?calendar`} />
         <SideNavItem label="Money" href={CLASSIC} />
       </SideNavSection>
@@ -122,18 +124,23 @@ function Nav({ needs }: { needs: number }) {
   );
 }
 
-function TabBar() {
-  const tabs: [string, React.ComponentType<React.SVGProps<SVGSVGElement>>, string | null][] = [["Today", HomeGlyph, CLASSIC], ["Leads", InboxGlyph, null], ["Calendar", CalendarGlyph, `${CLASSIC}?calendar`], ["More", MoreGlyph, CLASSIC]];
+function TabBar({ view, go }: { view: View; go: (v: View) => void }) {
+  // A view id switches in place; an href still opens the classic desk.
+  const tabs: [string, React.ComponentType<React.SVGProps<SVGSVGElement>>, View | string][] = [["Today", HomeGlyph, "today"], ["Leads", InboxGlyph, "leads"], ["Calendar", CalendarGlyph, `${CLASSIC}?calendar`], ["More", MoreGlyph, CLASSIC]];
   return (
     <HStack gap={0} paddingBlockEnd={1}>
-      {tabs.map(([label, glyph, href]) => (
+      {tabs.map(([label, glyph, to]) => {
+        const href = to.startsWith("/") ? to : undefined;
+        const on = to === view;
+        return (
         <StackItem key={label} size="fill">
           <VStack gap={0} hAlign="center">
-            <IconButton label={label} variant="ghost" href={href ?? undefined} icon={<Icon icon={glyph} color={href ? "secondary" : "accent"} />} />
-            <Text type="supporting" size="2xs" color={href ? "secondary" : "accent"}>{label}</Text>
+            <IconButton label={label} variant="ghost" href={href} onClick={href ? undefined : () => go(to as View)} icon={<Icon icon={glyph} color={on ? "accent" : "secondary"} />} />
+            <Text type="supporting" size="2xs" color={on ? "accent" : "secondary"}>{label}</Text>
           </VStack>
         </StackItem>
-      ))}
+        );
+      })}
     </HStack>
   );
 }
@@ -144,6 +151,9 @@ export function LeadsAstryx() {
   const [query, setQuery] = React.useState("");
   const [pick, setPick] = React.useState<string | null>(null);
   const [open, setOpen] = React.useState<string | null>(null);
+  // Today first, as on the classic desk.
+  const [screen, setScreen] = React.useState<View>("today");
+  const show = (v: View) => { setScreen(v); setOpen(null); };
   const [templates, setTemplates] = React.useState<Template[]>([]);
   // When the list was loaded: groups by date without reading the clock during render.
   const [at, setAt] = React.useState(0);
@@ -322,43 +332,22 @@ export function LeadsAstryx() {
     />
   );
 
-  // The lead page: the Astryx frame and stage; the body is still the classic Detail until its rebuild.
+  // The lead page: its own Astryx layout (components/leads/lead-astryx.tsx).
   const lead = current ? (
-    <Layout
-      height="fill"
-      defaultHasDividers
-      header={
-        <LayoutHeader>
-          <HStack gap={3} vAlign="center">
-            <Button label="Leads" variant="ghost" size="sm" icon={<Icon icon={BackGlyph} />} onClick={() => setOpen(null)} />
-            <StackItem size="fill" />
-            {size !== "phone" ? <Button label="Snooze" variant="ghost" size="sm" onClick={() => tomorrow(current)} /> : null}
-            {size !== "phone" ? <Button label="Mark as lost" variant="ghost" size="sm" onClick={() => act(current, { stage: "Lost" })} /> : null}
-          </HStack>
-        </LayoutHeader>
-      }
-      content={
-        <LayoutContent role="main" label="Lead">
-          <VStack gap={4}>
-            <Stage l={current} />
-            <Detail key={current.id} summary={current} call={call} onChange={changed} onBack={() => setOpen(null)} reload={load} tick={0} templates={templates} others={live.filter((o) => o.id !== current.id)} />
-          </VStack>
-        </LayoutContent>
-      }
-    />
+    <LeadAstryx key={current.id} summary={current} call={call} onChange={changed} onBack={() => setOpen(null)} reload={load} templates={templates} others={live.filter((o) => o.id !== current.id)} size={size} />
   ) : null;
 
-  const page = lead ?? home;
+  const page = lead ?? (screen === "today" && leads ? <TodayAstryx leads={live} size={size} open={(l) => setOpen(l.id ?? null)} show={() => show("leads")} /> : home);
   if (!mode) return null;
   return (
     <Theme theme={leadsTheme} mode={mode}>
       {/* The site sets mono capitals everywhere; Astryx sets its own type inside. */}
       {/* The site's capitals are unlayered element rules, so they beat Astryx's layers; this beats them inside the desk. */}
-      <style>{":root [data-astryx-desk][data-astryx-desk] *,:root [data-astryx-desk][data-astryx-desk] ::placeholder{text-transform:none}[data-astryx-desk] [data-detail-back]{display:none}"}</style>
+      <style>{":root [data-astryx-desk][data-astryx-desk] *,:root [data-astryx-desk][data-astryx-desk] ::placeholder{text-transform:none}"}</style>
       <div data-astryx-desk="" style={{ height: "100dvh", textTransform: "none", letterSpacing: "normal" }}>
         {size === "phone"
-          ? <Layout height="fill" content={page} footer={<TabBar />} />
-          : <Layout height="fill" start={<Nav needs={needs} />} content={page} />}
+          ? <Layout height="fill" content={page} footer={<TabBar view={screen} go={show} />} />
+          : <Layout height="fill" start={<Nav needs={needs} view={screen} go={show} />} content={page} />}
       </div>
     </Theme>
   );
