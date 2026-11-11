@@ -21,6 +21,8 @@ export type ProofFrame = {
   file: string;
   w: number;
   h: number;
+  /** Capture time, Unix seconds, from Lightroom. Older galleries have none: they keep upload order and no looks. */
+  t?: number;
 };
 
 export type Proof = {
@@ -205,10 +207,23 @@ export const coverFrame = (p: Pick<Proof, "frames" | "watermark" | "closesAt" | 
 export const closesAt = (days: number, from = Date.now()) => new Date(from + days * 864e5).toISOString();
 
 /** What the client page gets: no address, no Lightroom name. */
+/** Frames by capture time when every frame has one, else as uploaded (a frame published later went to the end). */
+export function shotOrder<F extends { t?: number }>(frames: F[]): F[] {
+  return frames.every((f) => f.t) ? [...frames].sort((a, b) => a.t! - b.t!) : frames;
+}
+
+/** Where each look starts, by index into frames in shot order: a gap of `gap` seconds starts a new one. Empty with no times or one look. */
+export function lookStarts(frames: { t?: number }[], gap = 600): number[] {
+  if (!frames.length || !frames.every((f) => f.t)) return [];
+  const out = [0];
+  for (let i = 1; i < frames.length; i++) if (frames[i].t! - frames[i - 1].t! > gap) out.push(i);
+  return out.length > 1 ? out : [];
+}
+
 export function publicView(p: Proof) {
   return {
     // No file name: Lightroom names are Julian's, the client sees proof numbers.
-    frames: p.frames.map(({ id, w, h }) => ({ id, w, h })),
+    frames: p.frames.map(({ id, w, h, t }) => (t ? { id, w, h, t } : { id, w, h })),
     // Picks belong to whoever typed their email; only the sent ones are shared.
     selects: p.submittedAt ? p.selects : [],
     included: p.included,

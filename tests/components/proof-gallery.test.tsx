@@ -43,7 +43,7 @@ describe("ProofGallery", () => {
 
   it("asks for a name first", () => {
     render(<ProofGallery token="t1" initial={proof()} />);
-    fireEvent.change(screen.getByPlaceholderText("you@email.com"), { target: { value: "a@b.co" } });
+    fireEvent.change(screen.getByLabelText("Your email"), { target: { value: "a@b.co" } });
     fireEvent.submit(screen.getByRole("button", { name: "Open gallery" }).closest("form")!);
     expect(screen.getByRole("alert").textContent).toBe("Add your name.");
     expect(fetchMock).not.toHaveBeenCalled();
@@ -51,8 +51,8 @@ describe("ProofGallery", () => {
 
   it("refuses an address that is not an email", () => {
     render(<ProofGallery token="t1" initial={proof()} />);
-    fireEvent.change(screen.getByPlaceholderText("Your name"), { target: { value: "Maya" } });
-    fireEvent.change(screen.getByPlaceholderText("you@email.com"), { target: { value: "nope" } });
+    fireEvent.change(screen.getByLabelText("Your name"), { target: { value: "Maya" } });
+    fireEvent.change(screen.getByLabelText("Your email"), { target: { value: "nope" } });
     fireEvent.submit(screen.getByRole("button", { name: "Open gallery" }).closest("form")!);
     expect(screen.getByRole("alert").textContent).toMatch(/does not look right/);
     expect(fetchMock).not.toHaveBeenCalled();
@@ -60,13 +60,28 @@ describe("ProofGallery", () => {
 
   it("a name and email log the open with the name, greet by first name, and keep nothing on the device", async () => {
     render(<ProofGallery token="t1" initial={proof()} />);
-    fireEvent.change(screen.getByPlaceholderText("Your name"), { target: { value: " Maya  Ross " } });
-    fireEvent.change(screen.getByPlaceholderText("you@email.com"), { target: { value: "a@b.co" } });
+    fireEvent.change(screen.getByLabelText("Your name"), { target: { value: " Maya  Ross " } });
+    fireEvent.change(screen.getByLabelText("Your email"), { target: { value: "a@b.co" } });
     fireEvent.submit(screen.getByRole("button", { name: "Open gallery" }).closest("form")!);
     await waitFor(() => expect(fetchMock).toHaveBeenCalledWith("/api/proof/t1", expect.objectContaining({ method: "POST" })));
     expect(JSON.parse((fetchMock.mock.calls as unknown as [string, RequestInit][])[0][1].body as string)).toMatchObject({ action: "track", kind: "open", email: "a@b.co", name: "Maya Ross" });
     expect(await screen.findByRole("heading", { name: "Hey Maya, pick your proofs below." })).toBeTruthy();
     expect(localStorage.getItem("proof-email")).toBeNull();
+  });
+
+  it("a tap on the photo opens it, the ring picks it, and frames run in shot order", async () => {
+    render(<ProofGallery token="t1" initial={proof({ frames: [{ id: "a", w: 1, h: 1, t: 200 }, { id: "b", w: 1, h: 1, t: 100 }] })} />);
+    fireEvent.change(screen.getByLabelText("Your name"), { target: { value: "Maya" } });
+    fireEvent.change(screen.getByLabelText("Your email"), { target: { value: "a@b.co" } });
+    fireEvent.submit(screen.getByRole("button", { name: "Open gallery" }).closest("form")!);
+    // "b" was shot first, so it is frame 1
+    const ring = await screen.findByRole("button", { name: "Select frame 1" });
+    fireEvent.click(ring);
+    expect(ring.getAttribute("aria-pressed")).toBe("true");
+    expect(screen.queryByRole("dialog")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Open frame 1" }));
+    expect(screen.getByRole("dialog", { name: "Frame 1" }).querySelector("img")!.getAttribute("src")).toBe("/proof/t1/f/b");
+    expect(screen.getByRole("button", { name: "Selected ✓" })).toBeTruthy();
   });
 
   it("a saved address from an older build does not skip the gate", () => {
@@ -89,7 +104,7 @@ describe("ProofGallery", () => {
     vi.stubGlobal("matchMedia", () => ({ matches: true, addEventListener() {}, removeEventListener() {} }));
     try {
       render(<ProofGallery token="t1" initial={proof()} />);
-      fireEvent.change(screen.getByPlaceholderText("you@email.com"), { target: { value: "sam@email.com" } });
+      fireEvent.change(screen.getByLabelText("Your email"), { target: { value: "sam@email.com" } });
       fireEvent.click(screen.getByRole("button", { name: "Open proofs" }));
       expect(screen.getByRole("alert").textContent).toBe("Add your name.");
       expect(fetchMock).not.toHaveBeenCalled();
