@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { credentials, KEY_STORE } from "@/lib/admin-github";
+import { adminCall } from "@/lib/lead-desk";
 import { TZ } from "@/lib/booking-rules";
 import type { LeadSummary } from "@/lib/leads";
 import { cn } from "@/lib/utils";
@@ -30,12 +30,7 @@ const days = (m: string) => new Date(Date.UTC(+m.slice(0, 4), +m.slice(5, 7), 0)
 const lastDay = (m: string) => `${m}-${String(days(m)).padStart(2, "0")}`;
 
 async function month(m: string): Promise<Ev[]> {
-  const res = await fetch(`/api/calendar?from=${m}-01&to=${lastDay(m)}`, {
-    headers: credentials(window.localStorage.getItem(KEY_STORE) ?? ""),
-    cache: "no-store",
-  });
-  const out = (await res.json().catch(() => ({}))) as { events?: Ev[]; busy?: { label: string; start: string; end: string }[]; error?: string };
-  if (!res.ok) throw new Error(out.error ?? `Request failed (${res.status})`);
+  const out = await adminCall<{ events?: Ev[]; busy?: { label: string; start: string; end: string }[] }>(`/api/calendar?from=${m}-01&to=${lastDay(m)}`);
   // The calendars it also reads (iCloud, another account) give busy time only: their label stands in for a title.
   const busy = (out.busy ?? []).map((b, i) => ({ id: `busy${i}-${b.start}`, title: `${b.label}, busy`, start: b.start, end: b.end, allDay: false, block: false }));
   return [...(out.events ?? []), ...busy];

@@ -1,27 +1,26 @@
 "use client";
 
 import * as React from "react";
-import { createPortal } from "react-dom";
 import { References } from "@/components/admin-inbox";
-import { credentials, KEY_STORE } from "@/lib/admin-github";
+import { KEY_STORE, TOKEN_STORE } from "@/lib/admin-github";
 import { LeadBoard } from "@/components/lead-board";
 import { LeadHours } from "@/components/lead-hours";
 import { LeadProofs, ProofsDesk } from "@/components/admin-proofs";
 import { LeadUpcoming } from "@/components/lead-upcoming";
-import { TOKEN_STORE } from "@/lib/admin-github";
 import type { Enquiry } from "@/lib/inbox";
-import { isLate, leadSummary, NUDGES, PAPER, paperDue, quoteNudge, REMIND_MAX, STAGES, trashDaysLeft, type Lead, type LeadPatch, type LeadSummary, type Paper, type Stage } from "@/lib/leads";
+import { isLate, leadSummary, NUDGES, quoteNudge, REMIND_MAX, STAGES, trashDaysLeft, type Lead, type LeadPatch, type LeadSummary, type Stage } from "@/lib/leads";
 import { cn } from "@/lib/utils";
-import { fill, mailable, TEMPLATES } from "@/lib/lead-crm";
-import { endDay, LicenceField, LicenceList } from "@/components/lead-licence";
-import { balance, dayB, DEPOSIT, MAX_ROWS_B, NOTE_B, usd, usdB, type Crop, type Invoice, type InvoiceB, type InvoiceFrom } from "@/lib/invoice";
-import { framed, loadImage, place, shrink, toneFor } from "@/lib/invoice-photo";
+import { fill, mailable, TEMPLATES, type Template } from "@/lib/lead-crm";
+import { endDay, LicenceList } from "@/components/lead-licence";
 import { leadKey, typingIn } from "@/lib/lead-keys";
-import { ago, aside, at, authed, badge, btn, type Call, cash, closed, compose, DAY, day, type Filter, HEAD, ios, kindOf, label, line, mailto, MARK, matches, money, now, OFFLINE, pass, primary, renew, snoozed, STEPS, Tag, type Template } from "@/components/leads/shared";
+import { ago, aside, at, authed, type Call, closed, DAY, day, errorText, type Filter, inboxCall, loadError, matches, now, type Patch, pass, renew, snoozed } from "@/lib/lead-desk";
+import { badge, btn, compose, field, fieldLabel, HEAD, ios, kindOf, label, line, mailto, MARK, primary, STEPS, Tag } from "@/components/leads/shared";
 import { Card, clampW, LIST_W, LIST_W_STORE, ListResizer, Pill, Row, SideLink } from "@/components/leads/list";
 import { DeskKeys } from "@/components/leads/desk-keys";
 import { DeskToday } from "@/components/leads/today";
-export { ago, type Filter, matches, money, nextStep, OFFLINE, pass } from "@/components/leads/shared";
+import { Money, MoneyView, Paperwork } from "@/components/leads/money";
+import { StatsView } from "@/components/leads/stats";
+import { TemplatesEditor } from "@/components/leads/templates";
 
 // The /admin tabs the One Desk folds in, loaded only when opened.
 const AdminTraffic = React.lazy(() => import("@/components/admin-traffic").then((m) => ({ default: m.AdminTraffic })));
@@ -92,21 +91,12 @@ export function AdminLeads() {
     }
   });
 
-  const call = React.useCallback(async (init: RequestInit & { query?: string } = {}) => {
-    const res = await fetch(`/api/inbox${init.query ?? ""}`, {
-      ...init,
-      headers: { ...credentials(window.localStorage.getItem(KEY_STORE) ?? ""), "content-type": "application/json" },
-      cache: "no-store",
-    });
-    const out = (await res.json().catch(() => ({}))) as Record<string, unknown> & { error?: string };
-    if (!res.ok) throw new Error(out.error ?? `Request failed (${res.status})`);
-    return out;
-  }, []);
+  const call = inboxCall;
 
   const load = React.useCallback(() => {
-    call({ query: "?leads" })
-      .then((o) => setLeads(o.leads as LeadSummary[]))
-      .catch((e: unknown) => setError(navigator.onLine === false || e instanceof TypeError ? OFFLINE : e instanceof Error ? e.message : String(e)));
+    call<{ leads: LeadSummary[] }>({ query: "?leads" })
+      .then((o) => setLeads(o.leads))
+      .catch((e: unknown) => setError(loadError(e)));
   }, [call]);
   React.useEffect(load, [load]);
   /** Julian: the installed app has no reload. The list and the open lead again,
@@ -116,15 +106,15 @@ export function AdminLeads() {
   const refresh = () => {
     if (refreshing) return;
     setRefreshing(true);
-    call({ query: "?leads" })
+    call<{ leads: LeadSummary[] }>({ query: "?leads" })
       .then((o) => {
-        const rows = o.leads as LeadSummary[];
+        const rows = o.leads;
         // KV lists lag a fresh write (#662): keep a lead added a moment ago.
         setLeads((had) => [...(had ?? []).filter((r) => fresh && r.email === fresh.email && !rows.some((n) => n.id === r.id)), ...rows]);
         // The open lead fetches again in place: a remount would drop his unsaved drafts.
         setTick((n) => n + 1);
       })
-      .catch((e: unknown) => alert(e instanceof Error ? e.message : String(e)))
+      .catch((e: unknown) => alert(errorText(e)))
       .finally(() => setRefreshing(false));
   };
   /** Julian: "on iPhone, swiping down on the queries should refresh". Phone list
@@ -161,7 +151,7 @@ export function AdminLeads() {
     };
   }, [listUp]);
   React.useEffect(() => {
-    call({ query: "?templates" }).then((o) => setTemplates(o.templates as Template[])).catch(() => {});
+    call<{ templates: Template[] }>({ query: "?templates" }).then((o) => setTemplates(o.templates)).catch(() => {});
   }, [call]);
   // Back online: load again on its own.
   React.useEffect(() => {
@@ -226,6 +216,8 @@ export function AdminLeads() {
   const tabs = SECTIONS.find((x) => x.id === section)!.tabs;
   const tool = TOOLS.includes(filter);
   const needs = count("needs");
+  /** The number beside each side-nav section. */
+  const badges: Partial<Record<Section, number>> = { today: needs, leads: count("open"), calendar: count("upcoming") };
   const pick = (f: Filter) => { setFilter(f); setOpen(null); scrollTo(0, 0); };
   const signOut = () => {
     try { localStorage.removeItem(KEY_STORE); localStorage.removeItem(TOKEN_STORE); } catch {}
@@ -236,11 +228,11 @@ export function AdminLeads() {
   /** A card dropped on a column: the same PATCH the stage buttons send. */
   const move = (l: LeadSummary, stage: Stage) => {
     setLeads((rows) => rows?.map((r) => (r.id === l.id ? { ...r, stage } : r)) ?? null);
-    call({ method: "PATCH", body: JSON.stringify({ key: `lead:${l.id}`, stage }) })
-      .then((o) => { changed(o.lead as Lead); if (l.id === open) setMoved((n) => n + 1); })
-      .catch((e: unknown) => { alert(e instanceof Error ? e.message : String(e)); load(); });
+    call<{ lead: Lead }>({ method: "PATCH", body: JSON.stringify({ key: `lead:${l.id}`, stage }) })
+      .then((o) => { changed(o.lead); if (l.id === open) setMoved((n) => n + 1); })
+      .catch((e: unknown) => { alert(errorText(e)); load(); });
   };
-  const doExport = () => exportCsv().catch((e: unknown) => alert(e instanceof Error ? e.message : String(e)));
+  const doExport = () => exportCsv().catch((e: unknown) => alert(errorText(e)));
   // The new lead from the POST itself: KV lists lag a fresh write and cache the
   // duplicate check's miss for ~60s, so a reload here would not find it yet.
   const added = (id: string, lead: Lead) => {
@@ -290,7 +282,7 @@ export function AdminLeads() {
         </div>
         <button type="button" onClick={() => pick("new")} className={cn(btn, primary, "mb-3 min-h-10 text-[14.5px]")}>New lead</button>
         {SECTIONS.map((x) => (
-          <SideLink key={x.id} on={section === x.id} n={x.id === "today" ? needs : x.id === "leads" ? count("open") : x.id === "calendar" ? count("upcoming") : undefined} icon={x.icon} onClick={() => pick(x.tabs[0][0])} className={x.id === "setup" ? "mt-auto" : undefined}>{x.label}</SideLink>
+          <SideLink key={x.id} on={section === x.id} n={badges[x.id]} icon={x.icon} onClick={() => pick(x.tabs[0][0])} className={x.id === "setup" ? "mt-auto" : undefined}>{x.label}</SideLink>
         ))}
       </nav>
 
@@ -530,14 +522,14 @@ function PushSwitch({ call }: { call: Call }) {
       if ((await Notification.requestPermission()) !== "granted") return setNote("Notifications are blocked for this app in Settings.");
       const reg = await navigator.serviceWorker.register(SW_URL, { scope: swScope() });
       await navigator.serviceWorker.ready;
-      const { key } = (await call({ query: "?vapid" })) as { key: string };
+      const { key } = await call<{ key: string }>({ query: "?vapid" });
       const raw = Uint8Array.from(atob(key.replace(/-/g, "+").replace(/_/g, "/")), (c) => c.charCodeAt(0));
       const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: raw });
       await call({ method: "PATCH", body: JSON.stringify({ push: sub.toJSON() }) });
       try { localStorage.setItem(PUSH_FLAG, "1"); } catch {}
       setOn(true);
     } catch (e) {
-      setNote(e instanceof Error ? e.message : String(e));
+      setNote(errorText(e));
     }
   };
   const turnOff = async () => {
@@ -549,16 +541,16 @@ function PushSwitch({ call }: { call: Call }) {
       }
       setOn(false);
     } catch (e) {
-      setNote(e instanceof Error ? e.message : String(e));
+      setNote(errorText(e));
     }
   };
   const sendTest = async () => {
     setNote("Sending.");
     try {
-      const { devices } = (await call({ method: "PATCH", body: JSON.stringify({ test: true }) })) as { devices: number };
+      const { devices } = await call<{ devices: number }>({ method: "PATCH", body: JSON.stringify({ test: true }) });
       setNote(devices ? `Arrives in 10 seconds on ${devices} ${devices === 1 ? "device" : "devices"}. Lock the phone now: no banner shows while the app is open.` : "No device is subscribed. Turn notifications off and on again here.");
     } catch (e) {
-      setNote(e instanceof Error ? e.message : String(e));
+      setNote(errorText(e));
     }
   };
   return (
@@ -589,15 +581,14 @@ function ImportInbox({ call, done }: { call: Call; done: () => void }) {
   const run = (dry: boolean) => {
     setBusy(true);
     setNote(null);
-    call({ method: "POST", body: JSON.stringify({ backfill: true, dry }) })
-      .then((o) => {
-        const c = o as unknown as Count;
+    call<Count>({ method: "POST", body: JSON.stringify({ backfill: true, dry }) })
+      .then((c) => {
         if (dry) return c.added + c.updated ? setCount(c) : setNote("Everything in the Inbox is already here.");
         setCount(null);
         setNote(`Imported: ${c.added} new, ${c.updated} updated.`);
         done();
       })
-      .catch((e: unknown) => setNote(e instanceof Error ? e.message : String(e)))
+      .catch((e: unknown) => setNote(errorText(e)))
       .finally(() => setBusy(false));
   };
   const by = count ? Object.entries(count.stages).map(([s, n]) => `${s} ${n}`).join(", ") : "";
@@ -660,7 +651,6 @@ export function SignIn({ onKey, wrong }: { onKey: (k: string) => void; wrong: bo
   );
 }
 
-
 /** Deletes every lead in the trash for good, after a second press. */
 function EmptyTrash({ n, call, done }: { n: number; call: Call; done: () => void }) {
   const [sure, setSure] = React.useState(false);
@@ -693,8 +683,7 @@ export function Detail({ summary, initial, call, onChange, onBack, reload, tick,
 
   const patch = React.useCallback(
     async (body: LeadPatch) => {
-      const o = await call({ method: "PATCH", body: JSON.stringify({ key, ...body }) });
-      const next = o.lead as Lead;
+      const { lead: next } = await call<{ lead: Lead }>({ method: "PATCH", body: JSON.stringify({ key, ...body }) });
       setLead(next);
       onChange(next);
       // A merge deletes the other record; the list has to drop it.
@@ -706,15 +695,14 @@ export function Detail({ summary, initial, call, onChange, onBack, reload, tick,
 
   React.useEffect(() => {
     let live = true;
-    call({ query: `?key=${encodeURIComponent(key)}` }).then(async (o) => {
+    call<{ lead: Lead }>({ query: `?key=${encodeURIComponent(key)}` }).then(async ({ lead: l }) => {
       if (!live) return;
-      const l = o.lead as Lead;
       setLead(l);
       // Their latest words, from the raw row the form stored.
       const ref = [...l.events].reverse().find((e) => e.kind === "inquiry" && e.ref)?.ref;
       if (ref)
-        call({ query: `?key=${encodeURIComponent(ref)}` })
-          .then((m) => live && (setMessage(m.enquiry as Enquiry), setMsgKey(ref)))
+        call<{ enquiry: Enquiry }>({ query: `?key=${encodeURIComponent(ref)}` })
+          .then((m) => live && (setMessage(m.enquiry), setMsgKey(ref)))
           .catch(() => {});
       if (l.unread) patch({ seen: true }).catch(() => {});
     }).catch(() => {});
@@ -899,7 +887,7 @@ export function Detail({ summary, initial, call, onChange, onBack, reload, tick,
           <p className="max-w-[64ch] whitespace-pre-line rounded-xl bg-background px-4 py-4 text-[15px] leading-relaxed">{message.message}</p>
           {/* Their uploads come through /api/inbox with the same key as everything here; never a public URL. */}
           {msgKey && (message.files?.length || message.picks?.length) ? (
-            <References msgKey={msgKey} enquiry={message} auth={credentials(window.localStorage.getItem(KEY_STORE) ?? "")} />
+            <References msgKey={msgKey} enquiry={message} auth={authed()} />
           ) : null}
         </div>
       ) : null}
@@ -931,10 +919,7 @@ export function Detail({ summary, initial, call, onChange, onBack, reload, tick,
 }
 /* ── the CRM tools: a lead by hand, the numbers, templates, the export ── */
 
-const field = "min-h-11 w-full rounded-[10px] border border-border bg-transparent px-3.5 text-base normal-case placeholder:normal-case placeholder:text-muted-foreground focus-visible:outline-2 focus-visible:outline-accent";
-const fieldLabel = "grid gap-1.5 text-[14px] text-muted-foreground";
 const SOURCES = ["Instagram DM", "Referral", "Text", "Phone call", "Email", "In person", "Other"];
-const LOST_REASONS = ["Price", "Dates", "No reply", "Went elsewhere", "Not a fit", "Other"];
 
 /** A lead he adds himself: someone who wrote on Instagram, texted, or was referred. */
 function NewLeadForm({ call, done }: { call: Call; done: (id: string, lead: Lead) => void }) {
@@ -949,9 +934,9 @@ function NewLeadForm({ call, done }: { call: Call; done: (id: string, lead: Lead
         e.preventDefault();
         setBusy(true);
         setNote(null);
-        call({ method: "POST", body: JSON.stringify({ add: f }) })
-          .then((o) => done(o.id as string, o.lead as Lead))
-          .catch((err: unknown) => setNote(err instanceof Error ? err.message : String(err)))
+        call<{ id: string; lead: Lead }>({ method: "POST", body: JSON.stringify({ add: f }) })
+          .then((o) => done(o.id, o.lead))
+          .catch((err: unknown) => setNote(errorText(err)))
           .finally(() => setBusy(false));
       }}
     >
@@ -977,120 +962,9 @@ function NewLeadForm({ call, done }: { call: Call; done: (id: string, lead: Lead
   );
 }
 
-type Stats = {
-  total: number;
-  weeks: { start: string; inquiries: number; booked: number }[];
-  replyHours: number | null;
-  bookedRate: number | null;
-  sources: { source: string; leads: number; booked: number }[];
-  lost: { reason: string; n: number }[];
-  pipeline: number;
-  won: number;
-  stages: Partial<Record<Stage, number>>;
-};
-const hours = (h: number | null) => (h === null ? "None yet" : h < 1 ? `${Math.round(h * 60)} min` : h < 48 ? `${Math.round(h)} h` : `${Math.round(h / 24)} d`);
-
-/** The numbers: is the site turning inquiries into bookings, and how fast does he answer. */
-function StatsView({ call }: { call: Call }) {
-  const [s, setS] = React.useState<Stats | null>(null);
-  const [err, setErr] = React.useState<string | null>(null);
-  React.useEffect(() => {
-    call({ query: "?stats" }).then((o) => setS(o.stats as Stats)).catch((e: unknown) => setErr(e instanceof Error ? e.message : String(e)));
-  }, [call]);
-  if (err) return <p className="px-1 py-8 text-[15px] text-muted-foreground lg:px-5">{err}</p>;
-  if (!s) return <p className="px-1 py-8 font-mono text-[13px] text-muted-foreground lg:px-5">Counting</p>;
-  const top = Math.max(1, ...s.weeks.map((w) => w.inquiries));
-  const tile = (k: string, v: string, hint: string) => (
-    <div className="grid gap-1 rounded-xl border border-border p-3.5">
-      <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">{k}</span>
-      <span style={HEAD} className="text-[26px] leading-none">{v}</span>
-      <span className="text-[12.5px] text-muted-foreground">{hint}</span>
-    </div>
-  );
-  return (
-    <div className="grid gap-6 px-1 py-5 lg:px-5">
-      <div className="grid grid-cols-2 gap-2.5">
-        {tile("Booked", s.bookedRate === null ? "None yet" : `${Math.round(s.bookedRate * 100)}%`, "of leads over a week old")}
-        {tile("First reply", hours(s.replyHours), "median, inquiry to answer")}
-        {tile("Quoted, open", money(s.pipeline), "waiting on an answer")}
-        {tile("Booked value", money(s.won), "from the quotes you entered")}
-      </div>
-      <section className="grid gap-2.5">
-        <h3 aria-level={2} className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">Last 12 weeks</h3>
-        <div className="flex h-32 items-end gap-1.5" role="img" aria-label={s.weeks.map((w) => `Week of ${w.start}: ${w.inquiries} inquiries, ${w.booked} booked`).join(". ")}>
-          {s.weeks.map((w) => (
-            <div key={w.start} className="relative flex h-full flex-1 items-end" title={`Week of ${w.start}: ${w.inquiries} in, ${w.booked} booked`}>
-              <div className="w-full rounded-t-[3px] bg-border" style={{ height: `${(w.inquiries / top) * 100}%` }} />
-              <div className="absolute bottom-0 w-full rounded-t-[3px] bg-accent" style={{ height: `${(Math.min(w.booked, w.inquiries || w.booked) / top) * 100}%` }} />
-            </div>
-          ))}
-        </div>
-        <p className="flex gap-4 font-mono text-[12px] text-muted-foreground">
-          <span><span className="mr-1.5 inline-block size-2.5 rounded-[2px] bg-border align-middle" />Inquiries</span>
-          <span><span className="mr-1.5 inline-block size-2.5 rounded-[2px] bg-accent align-middle" />Booked</span>
-        </p>
-      </section>
-      <section className="grid gap-1">
-        <h3 aria-level={2} className="pb-1 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">Where they came from</h3>
-        {s.sources.length ? s.sources.map((r) => (
-          <p key={r.source} className="flex justify-between gap-3 border-b border-border py-2.5 text-[15px]">
-            <span className="truncate">{r.source}</span>
-            <span className="shrink-0 font-mono text-[13px] text-muted-foreground">{r.leads} in · <b className="font-medium text-accent">{r.booked} booked</b></span>
-          </p>
-        )) : <p className="text-[15px] text-muted-foreground">Nothing yet.</p>}
-      </section>
-      <section className="grid gap-1">
-        <h3 aria-level={2} className="pb-1 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">Why they were lost</h3>
-        {s.lost.length ? s.lost.map((r) => (
-          <p key={r.reason} className="flex justify-between border-b border-border py-2.5 text-[15px]"><span>{r.reason}</span><span className="font-mono text-[13px] text-muted-foreground">{r.n}</span></p>
-        )) : <p className="text-[15px] text-muted-foreground">None lost.</p>}
-      </section>
-      <section className="grid gap-1">
-        <h3 aria-level={2} className="pb-1 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">By stage · {s.total} leads</h3>
-        {STAGES.map((st) => (
-          <p key={st} className="flex justify-between border-b border-border py-2.5 text-[15px]"><span>{st}</span><span className="font-mono text-[13px] text-muted-foreground">{s.stages[st] ?? 0}</span></p>
-        ))}
-      </section>
-    </div>
-  );
-}
-
-/** His saved replies. {first}, {name}, {kind} and {when} are filled per lead. */
-function TemplatesEditor({ call, templates, saved }: { call: Call; templates: Template[]; saved: (t: Template[]) => void }) {
-  const [list, setList] = React.useState(templates);
-  const [note, setNote] = React.useState<string | null>(null);
-  const edit = (i: number, k: keyof Template) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-    setList(list.map((t, j) => (j === i ? { ...t, [k]: e.target.value } : t)));
-  const save = () =>
-    call({ method: "PATCH", body: JSON.stringify({ templates: list }) })
-      .then((o) => { saved(o.templates as Template[]); setList(o.templates as Template[]); setNote("Saved."); })
-      .catch((e: unknown) => setNote(e instanceof Error ? e.message : String(e)));
-  return (
-    <div className="grid gap-5 px-1 py-5 lg:px-5">
-      <p className="text-[14px] text-muted-foreground">
-        <code className="font-mono text-[13px] text-foreground">{"{first}"}</code>, <code className="font-mono text-[13px] text-foreground">{"{name}"}</code>,{" "}
-        <code className="font-mono text-[13px] text-foreground">{"{kind}"}</code> and <code className="font-mono text-[13px] text-foreground">{"{when}"}</code> fill in for each lead.
-      </p>
-      {list.map((t, i) => (
-        <fieldset key={t.id + i} className="grid gap-2.5 rounded-xl border border-border p-3.5">
-          <label className={fieldLabel}>Name<input value={t.name} onChange={edit(i, "name")} className={field} /></label>
-          <label className={fieldLabel}>Subject<input value={t.subject} onChange={edit(i, "subject")} className={field} /></label>
-          <label className={fieldLabel}>Message<textarea value={t.body} onChange={edit(i, "body")} rows={6} className={cn(field, "py-3 leading-relaxed")} /></label>
-          <button type="button" onClick={() => setList(list.filter((_, j) => j !== i))} className={cn(btn, "justify-self-start text-destructive")}>Remove</button>
-        </fieldset>
-      ))}
-      <div className="flex flex-wrap gap-2.5">
-        <button type="button" onClick={() => setList([...list, { id: `t${Date.now()}`, name: "New template", subject: "", body: "Hi {first},\n\n\n\nJulian" }])} className={btn}>Add a template</button>
-        <button type="button" onClick={save} className={cn(btn, primary)}>Save templates</button>
-      </div>
-      {note ? <p role="status" className="font-mono text-[13px] text-muted-foreground">{note}</p> : null}
-    </div>
-  );
-}
-
 /** Every lead as a CSV file, through the same key as the rest of the desk. */
 async function exportCsv() {
-  const res = await fetch("/api/inbox?csv", { headers: credentials(window.localStorage.getItem(KEY_STORE) ?? ""), cache: "no-store" });
+  const res = await fetch("/api/inbox?csv", { headers: authed(), cache: "no-store" });
   if (!res.ok) throw new Error(`Export failed (${res.status})`);
   const url = URL.createObjectURL(await res.blob());
   const a = Object.assign(document.createElement("a"), { href: url, download: `leads-${new Date().toISOString().slice(0, 10)}.csv` });
@@ -1098,9 +972,8 @@ async function exportCsv() {
   setTimeout(() => URL.revokeObjectURL(url), 5000);
 }
 
-
 /** The CRM half of a lead: how to reach them, saved replies, a reminder, the quote, notes, merge. */
-function LeadCrm({ l, full, patch, others, templates }: { l: LeadSummary; full: Lead | null; patch: (b: LeadPatch) => Promise<unknown>; others: LeadSummary[]; templates: Template[] }) {
+function LeadCrm({ l, full, patch, others, templates }: { l: LeadSummary; full: Lead | null; patch: Patch; others: LeadSummary[]; templates: Template[] }) {
   const [editing, setEditing] = React.useState(false);
   const [d, setD] = React.useState({ name: "", phone: "", ig: "", company: "", source: "", kind: "" });
   const [notes, setNotes] = React.useState<string | null>(null);
@@ -1110,7 +983,7 @@ function LeadCrm({ l, full, patch, others, templates }: { l: LeadSummary; full: 
   const [into, setInto] = React.useState("");
   const [sure, setSure] = React.useState(false);
   const [note, setNote] = React.useState<string | null>(null);
-  const run = (p: Promise<unknown>, ok?: string) => p.then(() => setNote(ok ?? null)).catch((e: unknown) => setNote(e instanceof Error ? e.message : String(e)));
+  const run = (p: Promise<unknown>, ok?: string) => p.then(() => setNote(ok ?? null)).catch((e: unknown) => setNote(errorText(e)));
   const mail = mailable(l.email);
   const ig = full?.ig ?? (l.email.startsWith("ig:") ? l.email.slice(3) : undefined);
   const phone = full?.phone ?? (l.email.startsWith("tel:") ? l.email.slice(4) : undefined);
@@ -1243,621 +1116,6 @@ function LeadCrm({ l, full, patch, others, templates }: { l: LeadSummary; full: 
       ) : null}
 
       {note ? <p role="status" className="font-mono text-[13px] text-muted-foreground">{note}</p> : null}
-    </div>
-  );
-}
-
-/* ── money on a lead: the quote, the deposit, the balance, its invoices ──
- * Julian (2026-11-06, Leads plan B1 and A1). One block in place of a bare
- * quote field, a deposit row and a red Stripe button. */
-
-const ledger = "grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 gap-y-1.5 text-[15px] tabular-nums";
-const dt = "font-mono text-[13px] leading-6 text-muted-foreground";
-const dd = "text-right font-mono text-[14px] leading-6";
-
-/** A shape per paperwork status, so it never relies on color alone. */
-const DOT: Record<Paper, string> = { "Not sent": "○", Sent: "◐", Signed: "●", "Not needed": "–" };
-
-/** "Paperwork: Contract ● · Release ●", from Confirmed on. A tap moves a dot to its next status. */
-function Paperwork({ l, patch }: { l: LeadSummary; patch: (b: LeadPatch) => Promise<unknown> }) {
-  const due = paperDue(l, now());
-  return (
-    <p className="flex flex-wrap items-center gap-x-1 font-mono text-[13px] text-muted-foreground">
-      Paperwork:
-      {(["contract", "release"] as const).map((k, i) => {
-        const v = l[k] ?? "Not sent";
-        const name = k === "contract" ? "Contract" : "Release";
-        return (
-          <span key={k} className="inline-flex items-center whitespace-nowrap">
-            {i ? <span aria-hidden="true">·</span> : null}
-            <button
-              type="button"
-              title={v}
-              aria-label={`${name}: ${v}. Change`}
-              onClick={() => patch({ [k]: PAPER[(PAPER.indexOf(v) + 1) % PAPER.length] }).catch((e) => console.error("paperwork", e))}
-              className={cn("inline-flex min-h-11 items-center gap-1.5 px-1.5", due === k ? "text-accent" : v === "Signed" ? "text-foreground" : "")}
-            >
-              {name} <span aria-hidden="true">{DOT[v]}</span>
-            </button>
-          </span>
-        );
-      })}
-    </p>
-  );
-}
-
-function Money({ l, full, patch, run, quote, setQuote }: { l: LeadSummary; full: Lead | null; patch: (b: LeadPatch) => Promise<unknown>; run: (p: Promise<unknown>, ok?: string) => void; quote: string | null; setQuote: (v: string | null) => void }) {
-  const [making, setMaking] = React.useState(false);
-  const paidAt = full?.deposit ? full.events.find((e) => e.kind === "booking")?.at : undefined;
-  const q = full?.quote;
-  const owed = q !== undefined ? q - (full?.deposit ? DEPOSIT : 0) : undefined;
-  return (
-    <section className="grid gap-3">
-      <h3 aria-level={2} className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">Money</h3>
-      <div className="flex flex-wrap items-end gap-2.5">
-        <label className={fieldLabel}>
-          Quote in dollars
-          <input
-            inputMode="decimal"
-            value={quote ?? (q !== undefined ? String(q) : "")}
-            onChange={(e) => setQuote(e.target.value.replace(/[^\d.]/g, ""))}
-            onBlur={() => {
-              if (quote === null) return;
-              const n = quote === "" ? null : Number(quote);
-              if (n === null || Number.isFinite(n)) run(patch({ quote: n }), "Quote saved.");
-            }}
-            placeholder="0"
-            className={cn(field, "w-40 font-mono")}
-          />
-        </label>
-        {l.stage === "Lost" ? (
-          <label className={fieldLabel}>
-            Why it was lost
-            <select value={full?.lostReason ?? ""} onChange={(e) => run(patch({ lostReason: e.target.value }), "Saved.")} className={cn(field, "w-auto")}>
-              <option value="">Pick one</option>
-              {LOST_REASONS.map((r) => <option key={r}>{r}</option>)}
-            </select>
-          </label>
-        ) : null}
-      </div>
-      <LicenceField key={full?.licence?.end ?? ""} full={full} patch={patch} run={run} cls={{ btn, field, label: fieldLabel }} />
-      <dl className={ledger}>
-        <dt className={dt}>{paidAt ? `Deposit, ${day(paidAt)}` : "Deposit"}</dt>
-        <dd className={dd}>
-          {full?.deposit ? <a href={full.deposit} target="_blank" rel="noreferrer" className="text-accent" aria-label={`${usd(DEPOSIT)} paid, open in Stripe`}>{usd(DEPOSIT)} paid</a> : <span className="text-muted-foreground">None</span>}
-        </dd>
-        {owed !== undefined ? (<><dt className={dt}>Balance</dt><dd className={cn(dd, "font-medium text-accent")}>{usd(owed)}</dd></>) : null}
-      </dl>
-      {full?.invoices?.length ? (
-        <ul className="grid">
-          {[...full.invoices].reverse().map((inv) => <InvoiceRow key={inv.no} inv={inv} l={l} full={full} />)}
-        </ul>
-      ) : null}
-      {making && full ? (
-        <InvoiceSheetB l={l} full={full} patch={patch} done={() => setMaking(false)} />
-      ) : (
-        <button type="button" onClick={() => setMaking(true)} disabled={!full} className={cn(btn, primary, "justify-self-start")}>Make invoice</button>
-      )}
-    </section>
-  );
-}
-
-/** Pacific today, as the date input wants it. */
-const todayPT = () => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Los_Angeles" }).format(new Date());
-
-/** The PDF of one invoice. Loaded on the tap, fonts and all. A design B one fetches its sealed photo unless `src` is in hand. */
-async function makePdf(inv: Invoice, l: LeadSummary, full: Lead, src?: string) {
-  const res = await fetch("/api/inbox?invoiceFrom", { headers: authed(), cache: "no-store" });
-  const { from } = (await res.json()) as { from: InvoiceFrom | null };
-  if (!from?.name) throw new Error("Add your details for invoices first.");
-  let photo;
-  if (inv.b) {
-    if (!src) {
-      const r = await fetch(`/api/inbox?invoicePhoto=${inv.b.photo}`, { headers: authed(), cache: "no-store" });
-      src = ((await r.json()) as { photo?: string }).photo;
-      if (!src) throw new Error("This invoice's photo is gone.");
-    }
-    photo = await framed(src, inv.b.crop);
-  }
-  const { invoicePdf } = await import("@/lib/invoice-pdf");
-  return invoicePdf({ from, inv, to: { name: l.name, email: mailable(l.email) ? l.email : undefined, phone: full.phone } }, photo);
-}
-
-/** What he can do with the PDF. Nothing here sends. */
-function Deliver({ file, inv, l }: { file: File; inv: Invoice; l: LeadSummary }) {
-  const url = React.useMemo(() => URL.createObjectURL(file), [file]);
-  React.useEffect(() => () => URL.revokeObjectURL(url), [url]);
-  const canShare = typeof navigator.canShare === "function" && navigator.canShare({ files: [file] });
-  const first = l.name.split(" ")[0];
-  const subject = `Invoice ${inv.no}${l.kind ? `, ${kindOf(l.kind)}` : ""}`;
-  const body = `Hi ${first},\n\nAttached is invoice ${inv.no}. The balance is ${usd(balance(inv))}.\n\nThank you,\nJulian`;
-  return (
-    <div className="grid gap-2">
-      <div className="flex flex-wrap gap-2.5">
-        {canShare ? (
-          <button type="button" className={cn(btn, primary)} onClick={() => navigator.share({ files: [file], title: subject }).catch(() => {})}>Share PDF</button>
-        ) : null}
-        <a href={url} download={file.name} className={cn(btn, !canShare && primary)}>Download PDF</a>
-        {mailable(l.email) ? <a href={compose(l.email, subject, body)} target="_blank" rel="noreferrer" className={btn}>Gmail draft</a> : null}
-      </div>
-      <p className="font-mono text-[12.5px] text-muted-foreground">Nothing is sent. The Gmail draft has no attachment: add the PDF before you send.</p>
-    </div>
-  );
-}
-
-function InvoiceRow({ inv, l, full }: { inv: Invoice; l: LeadSummary; full: Lead }) {
-  const [file, setFile] = React.useState<File | null>(null);
-  const [err, setErr] = React.useState<string | null>(null);
-  return (
-    <li className="grid gap-2 border-b border-border py-2.5">
-      <p className="flex flex-wrap items-center justify-between gap-3 text-[15px]">
-        <span><b className="font-mono font-medium">{inv.no}</b> <span className="text-muted-foreground">· {day(`${inv.date}T12:00:00`)} · {usd(balance(inv))} due</span></span>
-        {file ? null : (
-          <button type="button" className={cn(btn, "min-h-10")} onClick={() => { setErr(null); makePdf(inv, l, full).then(setFile, (e: unknown) => setErr(e instanceof Error ? e.message : String(e))); }}>PDF</button>
-        )}
-      </p>
-      {file ? <Deliver file={file} inv={inv} l={l} /> : null}
-      {err ? <p role="alert" className="text-[14px] text-destructive">{err}</p> : null}
-    </li>
-  );
-}
-
-/* ── design B: the dark invoice with a photo ────────────────────────
- * Julian (2026-11-09): "Add this invoice as my default template ... Ask
- * for everything that is on the page and have it fill it out. They need to
- * also be able to reframe the image so it fits nice." The only invoice since
- * 2026-11-10, when the light one was retired (Julian: "only" this one). Every field fills the page
- * beside it; the photo is dragged and zoomed inside its column, and the
- * wordmark on it turns light over a dark patch (Julian: "adjust the top
- * left logo based on the photo"). The PDF is drawn by `layoutB` in
- * lib/invoice-pdf.ts from the same numbers. */
-
-const plusDays = (iso: string, n: number) => { const d = new Date(`${iso}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
-type LineB = { desc: string; sub: string; amt: string };
-
-/** The page as the PDF draws it, scaled to its box. Its CSS is the approved prototype's. */
-const PAGE_B_CSS = `
-@font-face{font-family:"Archivo B";src:url(/leads-app/invoice/archivo-800-125.ttf) format("truetype");font-weight:800}
-.ivb{aspect-ratio:210/297;width:100%;container-type:inline-size;position:relative;overflow:hidden;background:#0D0D0F;color:#EDEDEF;display:grid;grid-template-columns:41% 1fr;font-family:var(--font-display),sans-serif;line-height:1.4}
-.ivb .l{font:500 1.55cqw/1.4 var(--font-mono),monospace;letter-spacing:.06em;text-transform:uppercase;color:#7C7F88}
-.ivb .ph{position:relative;overflow:hidden;background:#222;cursor:grab;touch-action:none;user-select:none}
-.ivb .ph:active{cursor:grabbing}
-.ivb .ph img{position:absolute;max-width:none;pointer-events:none}
-.ivb .ph::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(13,13,15,0) 55%,rgba(13,13,15,.85));pointer-events:none}
-.ivb .ph:focus-visible{outline:2px solid #A99CF0;outline-offset:-2px}
-.ivb .vno{position:absolute;top:5.5cqw;left:4.5cqw;z-index:1;font:900 3.6cqw/.9 var(--font-display);letter-spacing:-.045em}
-.ivb .cap{position:absolute;left:4.5cqw;right:4cqw;bottom:5cqw;z-index:1;font:500 1.45cqw/1.6 var(--font-mono);letter-spacing:.06em;text-transform:uppercase;color:rgba(237,237,239,.75)}
-.ivb .cap b{display:block;color:#EDEDEF;font-weight:500}
-.ivb .col{padding:6cqw 6cqw 5cqw;display:flex;flex-direction:column;min-width:0}
-.ivb .hd{display:flex;flex-direction:column;align-items:flex-end;gap:.5cqw}
-.ivb .wm{font:900 3.6cqw/.9 var(--font-display);letter-spacing:-.045em}
-.ivb .to{margin-top:calc(6cqw*var(--k,1));font-size:2.3cqw;line-height:1.45;font-weight:400}
-.ivb .to .l{margin-bottom:1.2cqw}
-.ivb .dim{color:#7C7F88}
-.ivb .items{margin-top:calc(4cqw*var(--k,1));border-top:1px solid #2A2B30}
-.ivb .it{display:flex;justify-content:space-between;gap:3cqw;padding:calc(2.2cqw*var(--k,1)) 0;border-bottom:1px solid #2A2B30;font-size:2.1cqw;font-weight:400}
-.ivb .it>span:last-child{font:500 1.95cqw var(--font-mono);white-space:nowrap}
-.ivb .it small{display:block;color:#7C7F88;font-size:1.75cqw;margin-top:.5cqw}
-.ivb .amount{margin-top:calc(6cqw*var(--k,1))}
-.ivb .amount .l{margin-bottom:2.4cqw;color:#A99CF0}
-.ivb .k{font:800 10.5cqw/.82 "Archivo B",sans-serif;letter-spacing:-.035em;white-space:nowrap}
-.ivb .sub{display:flex;gap:5cqw;margin-top:3.4cqw;font:500 1.6cqw var(--font-mono);letter-spacing:.06em;text-transform:uppercase;color:#7C7F88}
-.ivb .sub b{color:#EDEDEF;font-weight:500}
-.ivb .sub b.v{color:#A99CF0}
-.ivb .pay{margin-top:calc(4.5cqw*var(--k,1));font:500 1.65cqw/1.75 var(--font-mono);color:#B9BBC2}
-.ivb .pay .l{margin-bottom:1cqw}
-.ivb .pay em{font-style:normal;color:#7C7F88}
-.ivb .sign{margin-top:auto;margin-bottom:4.5cqw;display:flex;flex-direction:column;align-items:flex-end;gap:2.6cqw;text-align:right}
-.ivb .sign p{font:500 2.05cqw/1.38 var(--font-display);letter-spacing:-.012em}
-.ivb .sign i{display:block;font-style:normal;margin-top:1.6cqw;color:#7C7F88}
-.ivb .sign .em{margin-top:-1.4cqw;font:500 1.4cqw var(--font-mono);letter-spacing:.04em;color:#7C7F88}
-.ivb .wm2{white-space:nowrap;font:900 2.8cqw/1 var(--font-display);letter-spacing:-.045em}
-.ivb .ft{display:flex;justify-content:space-between;padding-top:2.5cqw;border-top:1px solid #2A2B30;font:500 1.4cqw var(--font-mono);letter-spacing:.06em;text-transform:uppercase;color:#7C7F88}
-`;
-
-type PageBProps = {
-  no: string; date: string; due: string; to: InvoiceB["to"]; project: string; caption: string; note: string[];
-  rows: { t: string; sub: string; n: number }[]; total: number; from: InvoiceFrom | null;
-  src: string | null; crop: Crop; setCrop: React.Dispatch<React.SetStateAction<Crop>>; tone: "dark" | "light";
-};
-
-function PageB(p: PageBProps) {
-  const ph = React.useRef<HTMLDivElement>(null);
-  const [box, setBox] = React.useState({ w: 0, h: 0 });
-  const [nat, setNat] = React.useState({ w: 0, h: 0 });
-  const drag = React.useRef<{ x: number; y: number; c: Crop } | null>(null);
-  const { setCrop } = p;
-  React.useEffect(() => {
-    const el = ph.current!;
-    const ro = new ResizeObserver(() => setBox({ w: el.clientWidth, h: el.clientHeight }));
-    ro.observe(el);
-    // Wheel zooms the photo; React's wheel listener is passive and cannot keep the page still.
-    const wheel = (e: WheelEvent) => { e.preventDefault(); setCrop((c) => ({ ...c, z: Math.min(3, Math.max(1, c.z - e.deltaY * 0.0015)) })); };
-    el.addEventListener("wheel", wheel, { passive: false });
-    return () => { ro.disconnect(); el.removeEventListener("wheel", wheel); };
-  }, [setCrop]);
-  // As the PDF does: draw the gaps in until the bank block clears the note by 4cqw.
-  const page = React.useRef<HTMLDivElement>(null);
-  React.useLayoutEffect(() => {
-    const el = page.current;
-    if (!el) return;
-    const pay = el.querySelector(".pay")!, sign = el.querySelector(".sign")!, clear = el.clientWidth * 0.04;
-    for (let k = 1; k >= 0.3; k -= 0.05) {
-      el.style.setProperty("--k", String(k));
-      if (sign.getBoundingClientRect().top - pay.getBoundingClientRect().bottom >= clear) break;
-    }
-  });
-  const at = nat.w && box.w ? place(nat.w, nat.h, box.w, box.h, p.crop) : null;
-  const clamp = (v: number) => Math.min(1, Math.max(0, v));
-  const move = (dx: number, dy: number, from: Crop) => at && p.setCrop({ ...from, x: at.w > box.w ? clamp(from.x - dx / (at.w - box.w)) : 0.5, y: at.h > box.h ? clamp(from.y - dy / (at.h - box.h)) : 0.5 });
-  const f = p.from;
-  return (
-    <div ref={page} className="ivb" aria-label="The invoice page">
-      <div
-        ref={ph}
-        className="ph"
-        tabIndex={0}
-        role="group"
-        aria-label="Photo. Drag or use the arrow keys to move it."
-        onPointerDown={(e) => { drag.current = { x: e.clientX, y: e.clientY, c: p.crop }; e.currentTarget.setPointerCapture(e.pointerId); }}
-        onPointerMove={(e) => { const d = drag.current; if (d) move(e.clientX - d.x, e.clientY - d.y, d.c); }}
-        onPointerUp={() => (drag.current = null)}
-        onPointerCancel={() => (drag.current = null)}
-        onKeyDown={(e) => {
-          const step = e.shiftKey ? 40 : 10, k = { ArrowLeft: [step, 0], ArrowRight: [-step, 0], ArrowUp: [0, step], ArrowDown: [0, -step] }[e.key];
-          if (k) { e.preventDefault(); move(k[0], k[1], p.crop); }
-        }}
-      >
-        {p.src ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={p.src} alt="" onLoad={(e) => setNat({ w: e.currentTarget.naturalWidth, h: e.currentTarget.naturalHeight })} style={at ? { width: at.w, height: at.h, left: at.left, top: at.top } : { visibility: "hidden" }} />
-        ) : null}
-        <span className="vno" style={{ color: p.tone === "dark" ? "#2E2F34" : "#D9DADF" }}>Julian Gigola</span>
-        <div className="cap"><b>{p.project}</b>{p.caption}</div>
-      </div>
-      <div className="col">
-        <div className="hd"><span className="wm">INVOICE</span><span className="l">#{p.no || "…"}</span></div>
-        <div className="to">
-          <div className="l">Billed to</div>
-          {p.to.name}{p.to.company ? <><br />{p.to.company}</> : null}{p.to.email ? <><br /><span className="dim">{p.to.email}</span></> : null}
-        </div>
-        <div className="items">
-          {p.rows.map((r, i) => <div key={i} className="it"><span>{r.t}{r.sub ? <small>{r.sub}</small> : null}</span><span>{usdB(r.n)}</span></div>)}
-        </div>
-        <div className="amount">
-          <div className="l">Total due</div>
-          <div className="k">{usdB(p.total)}</div>
-          <div className="sub"><span>Issued <b>{p.date ? dayB(p.date) : ""}</b></span><span>Due <b className="v">{p.due ? dayB(p.due, true) : ""}</b></span></div>
-        </div>
-        <div className="pay">
-          <div className="l">Bank transfer</div>
-          {f?.bank}<br />{f?.routing ? `Routing ${f.routing}` : null}<br />{f?.account ? `Account ${f.account}` : null}<br /><em>{f?.late}</em>
-        </div>
-        <div className="sign">
-          <p>{p.note.filter(Boolean).map((n, i) => <React.Fragment key={i}>{i ? <br /> : null}{n}</React.Fragment>)}<i>Cheers,</i></p>
-          <span className="wm2">Julian Gigola</span>
-          <span className="em">hello@juliangigola.com</span>
-        </div>
-        <div className="ft"><span>juliangigola.com</span><span>{f?.tax ? `Tax ${f.tax}` : ""}</span></div>
-      </div>
-    </div>
-  );
-}
-
-/** The desk itself on a wide screen (it is `lg:relative`), for the invoice page to cover its left side; null on a phone. */
-function useDeskLeft() {
-  const [el, setEl] = React.useState<HTMLElement | null>(null);
-  React.useEffect(() => {
-    const mq = matchMedia("(min-width: 1024px)");
-    const set = () => setEl(mq.matches ? document.querySelector<HTMLElement>("[data-desk]") : null);
-    set();
-    mq.addEventListener("change", set);
-    return () => mq.removeEventListener("change", set);
-  }, []);
-  // What the page covers leaves the tab order and the screen reader while it is up.
-  React.useEffect(() => {
-    if (!el) return;
-    const hid = [...el.querySelectorAll<HTMLElement>(':scope > nav, :scope > section[aria-label="Leads"], :scope > [role="separator"]')];
-    hid.forEach((n) => (n.inert = true));
-    return () => hid.forEach((n) => (n.inert = false));
-  }, [el]);
-  return el;
-}
-
-function InvoiceSheetB({ l, full, patch, done }: { l: LeadSummary; full: Lead; patch: (b: LeadPatch) => Promise<unknown>; done: () => void }) {
-  const [from, setFrom] = React.useState<InvoiceFrom | null>(null);
-  const [editFrom, setEditFrom] = React.useState(false);
-  const [date, setDate] = React.useState(todayPT);
-  const [due, setDue] = React.useState(() => plusDays(todayPT(), 7));
-  const [no, setNo] = React.useState("");
-  const shot = l.when ? l.when.slice(0, 10) : todayPT();
-  const [project, setProject] = React.useState(full.company ?? "");
-  const [caption, setCaption] = React.useState(`Editorial · ${dayB(shot, true)}`);
-  const [to, setTo] = React.useState<InvoiceB["to"]>({ name: l.name, company: full.company ?? "", email: mailable(l.email) ? l.email : "" });
-  const [lines, setLines] = React.useState<LineB[]>([{ desc: kindOf(l.kind) ?? "Photography", sub: "", amt: full.quote !== undefined ? String(full.quote) : "" }]);
-  const [paid, setPaid] = React.useState(full.deposit ? String(DEPOSIT) : "0");
-  const [depositNote, setDepositNote] = React.useState("Paid at booking");
-  const [note, setNote] = React.useState<string[]>([...NOTE_B]);
-  const [src, setSrc] = React.useState<string | null>(null);
-  const [photoKey, setPhotoKey] = React.useState<string | null>(null);
-  const [crop, setCropRaw] = React.useState<Crop>({ x: 0.5, y: 0.5, z: 1 });
-  const [tone, setTone] = React.useState<"dark" | "light">("dark");
-  const [made, setMade] = React.useState<{ inv: Invoice; file: File } | null>(null);
-  const [busy, setBusy] = React.useState(false);
-  const [err, setErr] = React.useState<string | null>(null);
-  const img = React.useRef<HTMLImageElement | null>(null);
-
-  React.useEffect(() => {
-    fetch(`/api/inbox?invoiceNo=${date}`, { headers: authed(), cache: "no-store" })
-      .then((r) => r.json() as Promise<{ from: InvoiceFrom | null; no?: string }>)
-      .then((o) => {
-        setNo(o.no ?? "");
-        setFrom((f) => f ?? { ...EMPTY_FROM, ...o.from });
-        if (!o.from?.name || !o.from.bank) setEditFrom(true);
-      })
-      .catch(() => {});
-  }, [date]);
-
-  // The last B invoice on this lead lends its photo and framing, so a second one starts where the first ended.
-  React.useEffect(() => {
-    const last = [...(full.invoices ?? [])].reverse().find((i) => i.b)?.b;
-    if (!last) return;
-    fetch(`/api/inbox?invoicePhoto=${last.photo}`, { headers: authed(), cache: "no-store" })
-      .then((r) => r.json() as Promise<{ photo?: string }>)
-      .then((o) => { if (o.photo) { setSrc(o.photo); setPhotoKey(last.photo); setCropRaw(last.crop); setTone(last.tone); } })
-      .catch(() => {});
-  }, [full.invoices]);
-
-  // The tone follows the framing, read from the pixels under the wordmark.
-  React.useEffect(() => {
-    if (!src) return;
-    let live = true;
-    (img.current?.src === src ? Promise.resolve(img.current) : loadImage(src)).then((i) => { img.current = i; if (live) setTone(toneFor(i, crop)); }, () => {});
-    return () => { live = false; };
-  }, [src, crop]);
-
-  const pick = async (file?: File) => {
-    if (!file) return;
-    setErr(null);
-    try { setSrc(await shrink(file)); setPhotoKey(null); setCropRaw({ x: 0.5, y: 0.5, z: 1 }); }
-    catch (e) { setErr(e instanceof Error ? e.message : String(e)); }
-  };
-
-  const dep = Number(paid) || 0;
-  const rows = [...lines.map((x) => ({ t: x.desc, sub: x.sub, n: Number(x.amt) || 0 })), ...(dep ? [{ t: "Deposit received", sub: depositNote, n: -dep }] : [])];
-  const total = rows.reduce((s, r) => s + r.n, 0);
-  const setLine = (i: number, k: keyof LineB) => (e: React.ChangeEvent<HTMLInputElement>) =>
-    setLines(lines.map((x, j) => (j === i ? { ...x, [k]: k === "amt" ? e.target.value.replace(/[^\d.]/g, "") : e.target.value } : x)));
-
-  const saved = React.useRef<Lead | null>(null);
-  const left = useDeskLeft();
-  const save = async () => {
-    if (!src) return setErr("Add a photo.");
-    setBusy(true);
-    setErr(null);
-    try {
-      let key = photoKey;
-      if (!key) {
-        const r = await fetch("/api/inbox", { method: "PATCH", headers: { ...authed(), "content-type": "application/json" }, body: JSON.stringify({ invoicePhoto: src }) });
-        const o = (await r.json().catch(() => ({}))) as { key?: string; error?: string };
-        if (!r.ok || !o.key) throw new Error(o.error ?? "Could not save the photo.");
-        setPhotoKey((key = o.key));
-      }
-      // Saved once: a retry after a failed PDF makes the PDF again, never a second invoice.
-      saved.current ??= (await patch({
-        invoice: {
-          date,
-          lines: lines.map((x) => ({ desc: x.desc.trim(), sub: x.sub.trim(), qty: 1, rate: Number(x.amt) })),
-          paid: dep,
-          b: { due, to, project, caption, note, depositNote, photo: key, crop, tone },
-        },
-      })) as Lead;
-      // The PATCH answers with the lead as stored, so no second read (that one asked for a key the full lead has no id for).
-      const fresh = saved.current;
-      const inv = fresh.invoices!.at(-1)!;
-      setMade({ inv, file: await makePdf(inv, l, fresh, src) });
-    } catch (e) {
-      setErr(e instanceof Error ? e.message : String(e));
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  if (made)
-    return (
-      <div className="grid gap-3 rounded-xl border border-border p-3.5">
-        <p className="text-[15px]">Invoice <b className="font-mono font-medium">{made.inv.no}</b> made, {usd(balance(made.inv))} due.</p>
-        <Deliver file={made.file} inv={made.inv} l={l} />
-        <button type="button" onClick={done} className={cn(btn, "justify-self-start")}>Done</button>
-      </div>
-    );
-
-  const legend = "mb-1.5 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground";
-  const mono = "font-mono text-[14px]";
-  return (
-    <form className="grid gap-5 rounded-xl border border-border p-3.5 @container" onSubmit={(e) => { e.preventDefault(); save(); }}>
-      <style>{PAGE_B_CSS}</style>
-      <div className={cn("grid gap-5", !left && "@[760px]:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] @[760px]:items-start")}>
-        {(() => {
-          const page = <PageB no={no} date={date} due={due} to={to} project={project} caption={caption} note={note} rows={rows} total={total} from={from} src={src} crop={crop} setCrop={setCropRaw} tone={tone} />;
-          // Julian: on desktop the full-size page sits on the left, over the tabs and the list.
-          return left
-            ? createPortal(<div className="absolute inset-y-0 left-0 z-20 w-[calc(220px+var(--list-w,420px))] overflow-y-auto border-r border-border bg-background p-6">{page}</div>, left)
-            : <div className="grid gap-5 @[760px]:order-2 @[760px]:sticky @[760px]:top-4">{page}</div>;
-        })()}
-        <div className="grid gap-5">
-          {from && editFrom ? <FromForm from={from} saved={(f) => { setFrom(f); setEditFrom(false); }} /> : null}
-          <fieldset className="grid gap-2.5">
-            <legend className={legend}>Photo</legend>
-            <div className="flex flex-wrap gap-2.5">
-              <label className={cn(btn, "min-h-10 cursor-pointer")}>
-                {src ? "Replace photo" : "Add a photo"}
-                <input type="file" accept="image/*" className="sr-only" onChange={(e) => pick(e.target.files?.[0])} />
-              </label>
-              {src ? <button type="button" onClick={() => setCropRaw({ x: 0.5, y: 0.5, z: 1 })} className={cn(btn, "min-h-10")}>Reset framing</button> : null}
-            </div>
-            {src ? (
-              <label className="flex items-center gap-3 font-mono text-[12.5px] text-muted-foreground">
-                Zoom
-                <input type="range" min={1} max={3} step={0.01} value={crop.z} onChange={(e) => setCropRaw({ ...crop, z: Number(e.target.value) })} className="flex-1 accent-foreground" />
-                <span className="w-10 text-right">{Math.round(crop.z * 100)}%</span>
-              </label>
-            ) : null}
-            <p className="font-mono text-[12.5px] text-muted-foreground">Drag the photo on the page to move it. The framing is saved with the invoice.</p>
-          </fieldset>
-          <fieldset className="grid gap-2.5">
-            <legend className={legend}>Caption on the photo</legend>
-            <label className={fieldLabel}>Project<input required maxLength={40} value={project} onChange={(e) => setProject(e.target.value)} className={field} /></label>
-            <label className={fieldLabel}>Line under it<input maxLength={40} value={caption} onChange={(e) => setCaption(e.target.value)} className={field} /></label>
-          </fieldset>
-          <fieldset className="grid grid-cols-3 gap-2.5">
-            <legend className={legend}>Invoice</legend>
-            <div className={fieldLabel}>No.<span className="flex min-h-11 items-center font-mono text-[15px] text-foreground">{no || "…"}</span></div>
-            <label className={fieldLabel}>Issued<input type="date" required value={date} onChange={(e) => e.target.value && setDate(e.target.value)} className={cn(field, "px-2", mono)} /></label>
-            <label className={fieldLabel}>Due<input type="date" required value={due} onChange={(e) => e.target.value && setDue(e.target.value)} className={cn(field, "px-2", mono)} /></label>
-          </fieldset>
-          <fieldset className="grid gap-2.5">
-            <legend className={legend}>Billed to</legend>
-            <label className={fieldLabel}>Name<input required maxLength={60} value={to.name} onChange={(e) => setTo({ ...to, name: e.target.value })} className={field} /></label>
-            <label className={fieldLabel}>Company<input maxLength={60} value={to.company} onChange={(e) => setTo({ ...to, company: e.target.value })} className={field} /></label>
-            <label className={fieldLabel}>Email<input type="email" maxLength={80} value={to.email} onChange={(e) => setTo({ ...to, email: e.target.value })} className={field} /></label>
-          </fieldset>
-          <fieldset className="grid gap-2">
-            <legend className={legend}>Lines: title, what was done, amount</legend>
-            {lines.map((x, i) => (
-              <div key={i} className="grid grid-cols-[minmax(0,1fr)_96px_44px] gap-2 border-b border-border pb-2.5">
-                <input aria-label={`Line ${i + 1} title`} required maxLength={48} value={x.desc} onChange={setLine(i, "desc")} className={cn(field, "px-3")} />
-                <input aria-label={`Line ${i + 1} amount`} required inputMode="decimal" value={x.amt} onChange={setLine(i, "amt")} placeholder="0" className={cn(field, "px-2 text-right", mono)} />
-                {lines.length > 1 ? (
-                  <button type="button" aria-label={`Remove line ${i + 1}`} onClick={() => setLines(lines.filter((_, j) => j !== i))} className="grid size-11 place-items-center text-muted-foreground hoverable:hover:text-foreground">×</button>
-                ) : <span aria-hidden="true" />}
-                <input aria-label={`Line ${i + 1}, what was done`} maxLength={60} value={x.sub} onChange={setLine(i, "sub")} placeholder="What was done" className={cn(field, "px-3")} />
-              </div>
-            ))}
-            {lines.length + (dep ? 1 : 0) < MAX_ROWS_B ? (
-              <button type="button" onClick={() => setLines([...lines, { desc: "", sub: "", amt: "" }])} className={cn(btn, "min-h-10 justify-self-start")}>Add a line</button>
-            ) : null}
-          </fieldset>
-          <fieldset className="grid grid-cols-[96px_minmax(0,1fr)] gap-2.5">
-            <legend className={legend}>Deposit received</legend>
-            <label className={fieldLabel}>Amount<input inputMode="decimal" value={paid} onChange={(e) => setPaid(e.target.value.replace(/[^\d.]/g, ""))} className={cn(field, "px-2 text-right", mono)} /></label>
-            <label className={fieldLabel}>Line under it<input maxLength={60} value={depositNote} onChange={(e) => setDepositNote(e.target.value)} className={field} /></label>
-            <p className="col-span-2 font-mono text-[12.5px] text-muted-foreground">0 leaves it off. Above 0 it shows as a line and comes off the total.</p>
-          </fieldset>
-          <fieldset className="grid gap-2">
-            <legend className={legend}>Note</legend>
-            {note.map((n, i) => <input key={i} aria-label={`Note, line ${i + 1}`} maxLength={44} value={n} onChange={(e) => setNote(note.map((m, j) => (j === i ? e.target.value : m)))} className={field} />)}
-          </fieldset>
-          <p className="flex justify-between font-mono text-[14px] text-muted-foreground">Total due<b className="text-[16px] font-medium text-accent">{usd(total)}</b></p>
-          {err ? <p role="alert" className="text-[15px] text-destructive">{err}</p> : null}
-          <div className="flex flex-wrap gap-2.5">
-            <button type="submit" disabled={busy || !no} className={cn(btn, primary)}>{busy ? "Making" : "Save and make PDF"}</button>
-            <button type="button" onClick={done} className={btn}>Cancel</button>
-            {from && !editFrom ? <button type="button" onClick={() => setEditFrom(true)} className="min-h-11 px-2 font-mono text-[12.5px] text-muted-foreground hoverable:hover:text-foreground">Your details</button> : null}
-          </div>
-        </div>
-      </div>
-    </form>
-  );
-}
-
-const EMPTY_FROM: InvoiceFrom = { name: "", a1: "", a2: "", a3: "", email: "hello@juliangigola.com", phone: "", ein: "", signoff: "Best,", notes: "", bank: "", routing: "", account: "", late: "Late payments add 5% per week.", tax: "" };
-const FROM_FIELDS: [keyof InvoiceFrom, string][] = [["name", "Name on the invoice"], ["a1", "Address, line 1"], ["a2", "Address, line 2"], ["a3", "City, state, zip"], ["email", "Email"], ["phone", "Phone"], ["ein", "EIN line"], ["signoff", "Sign-off"], ["notes", "Notes on every invoice"], ["bank", "Bank name"], ["routing", "Routing number"], ["account", "Account number"], ["late", "Late fee line"], ["tax", "Tax number"]];
-
-/** His details, once: sealed on the Worker, never in the code (the repo is public). */
-function FromForm({ from, saved }: { from: InvoiceFrom; saved: (f: InvoiceFrom) => void }) {
-  const [f, setF] = React.useState(from);
-  const [err, setErr] = React.useState<string | null>(null);
-  const save = () =>
-    fetch("/api/inbox", { method: "PATCH", headers: { ...authed(), "content-type": "application/json" }, body: JSON.stringify({ invoiceFrom: f }) })
-      .then(async (r) => {
-        const o = (await r.json().catch(() => ({}))) as { from?: InvoiceFrom; error?: string };
-        if (!r.ok || !o.from) throw new Error(o.error ?? "Could not save.");
-        saved(o.from);
-      })
-      .catch((e: unknown) => setErr(e instanceof Error ? e.message : String(e)));
-  return (
-    <fieldset className="grid gap-2.5 border-b border-border pb-3.5">
-      <legend className="mb-1.5 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">Your details for invoices</legend>
-      {FROM_FIELDS.map(([k, t]) => (
-        <label key={k} className={fieldLabel}>
-          {t}
-          {k === "notes"
-            ? <textarea value={f[k]} onChange={(e) => setF({ ...f, [k]: e.target.value })} rows={3} className={cn(field, "py-3 leading-relaxed")} />
-            : <input value={f[k]} onChange={(e) => setF({ ...f, [k]: e.target.value })} className={field} autoComplete="off" />}
-        </label>
-      ))}
-      {err ? <p role="alert" className="text-[15px] text-destructive">{err}</p> : null}
-      <button type="button" onClick={save} className={cn(btn, "justify-self-start")}>Save details</button>
-    </fieldset>
-  );
-}
-
-/* ── Money: his Stripe balance and what moved it ──────────────────
- * Julian (2026-11-06): "add my stripe balance too and show the
- * transactions in there". Read-only, through `/api/money`. */
-
-type Txn = { id: string; at: string; type: string; amount: number; fee: number; net: number; currency: string; status: string; what: string };
-/** Stripe's types in his words. */
-const KIND: Record<string, string> = { charge: "Payment", payment: "Payment", refund: "Refund", payment_refund: "Refund", payout: "Payout", stripe_fee: "Stripe fee", adjustment: "Adjustment", dispute: "Dispute" };
-
-function MoneyView() {
-  const [top, setTop] = React.useState<{ available: number; pending: number; test: boolean } | null>(null);
-  const [txns, setTxns] = React.useState<Txn[]>([]);
-  const [more, setMore] = React.useState(false);
-  const [err, setErr] = React.useState<string | null>(null);
-  const [busy, setBusy] = React.useState(false);
-  const page = React.useCallback((after?: string) => {
-    fetch(`/api/money${after ? `?after=${after}` : ""}`, { headers: authed(), cache: "no-store" })
-      .then(async (r) => {
-        const o = (await r.json().catch(() => ({}))) as { error?: string; available?: number; pending?: number; test?: boolean; txns: Txn[]; more: boolean };
-        if (!r.ok) throw new Error(o.error ?? `Request failed (${r.status})`);
-        if (o.available !== undefined) setTop({ available: o.available, pending: o.pending ?? 0, test: !!o.test });
-        setTxns((t) => (after ? [...t, ...o.txns] : o.txns));
-        setMore(o.more);
-      })
-      .catch((e: unknown) => setErr(e instanceof Error ? e.message : String(e)))
-      .finally(() => setBusy(false));
-  }, []);
-  React.useEffect(() => page(), [page]);
-
-  if (err && !top) return <p className="px-1 py-8 text-[15px] text-muted-foreground lg:px-5">{err}</p>;
-  if (!top) return <p className="px-1 py-8 font-mono text-[13px] text-muted-foreground lg:px-5">Asking Stripe</p>;
-  const tile = (k: string, v: string, hint: string) => (
-    <div className="grid gap-1 rounded-xl border border-border p-3.5">
-      <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">{k}</span>
-      <span style={HEAD} className="text-[26px] leading-none tabular-nums">{v}</span>
-      <span className="text-[12.5px] text-muted-foreground">{hint}</span>
-    </div>
-  );
-  return (
-    <div className="grid gap-6 px-1 py-5 lg:px-5">
-      {top.test ? <p className="font-mono text-[12.5px] text-muted-foreground">Stripe test mode: these are test payments.</p> : null}
-      <div className="grid grid-cols-2 gap-2.5">
-        {tile("Available", cash(top.available), "ready to pay out")}
-        {tile("On the way", cash(top.pending), "not settled yet")}
-      </div>
-      <section className="grid">
-        <h3 aria-level={2} className="pb-1 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">Transactions</h3>
-        {txns.length ? (
-          <ul>
-            {txns.map((t) => (
-              <li key={t.id} className="flex items-baseline justify-between gap-3 border-b border-border py-2.5">
-                <span className="grid min-w-0">
-                  <span className="truncate text-[15px]">{t.what || KIND[t.type] || t.type.replace(/_/g, " ")}</span>
-                  <span className="font-mono text-[12px] text-muted-foreground">
-                    {day(t.at)} · {KIND[t.type] ?? t.type.replace(/_/g, " ")}{t.status === "pending" ? " · on the way" : ""}{t.fee ? ` · fee ${cash(t.fee)}` : ""}
-                  </span>
-                </span>
-                <span className={cn("shrink-0 font-mono text-[14px] tabular-nums", t.net < 0 ? "text-muted-foreground" : "text-foreground")}>{cash(t.net)}</span>
-              </li>
-            ))}
-          </ul>
-        ) : <p className="py-2.5 text-[15px] text-muted-foreground">Nothing yet.</p>}
-        {more ? <button type="button" disabled={busy} onClick={() => { setBusy(true); page(txns.at(-1)?.id); }} className={cn(btn, "mt-3 justify-self-start")}>{busy ? "Loading" : "Show more"}</button> : null}
-        {err ? <p role="alert" className="pt-2 text-[14px] text-destructive">{err}</p> : null}
-      </section>
-      <p className="font-mono text-[12.5px] text-muted-foreground">Net is after the Stripe fee. Payouts show as money leaving the balance.</p>
     </div>
   );
 }

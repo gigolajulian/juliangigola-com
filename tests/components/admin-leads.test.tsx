@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { AdminLeads, money, OFFLINE, SignIn } from "@/components/admin-leads";
+import { AdminLeads, SignIn } from "@/components/admin-leads";
+import { money, OFFLINE } from "@/lib/lead-desk";
 import { KEY_STORE } from "@/lib/admin-github";
 
 afterEach(() => {

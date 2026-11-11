@@ -30,14 +30,14 @@ import { TextInput } from "@astryxdesign/core/TextInput";
 import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/SegmentedControl";
 import { ProgressBar } from "@astryxdesign/core/ProgressBar";
 import { StatusDot } from "@astryxdesign/core/StatusDot";
-import { credentials, KEY_STORE } from "@/lib/admin-github";
-import { ago, Detail, matches, nextStep, OFFLINE, pass, SignIn } from "@/components/admin-leads";
-import { TOKEN_STORE } from "@/lib/admin-github";
+import { Detail, SignIn } from "@/components/admin-leads";
+import { ago, inboxCall, loadError, matches, nextStep, pass } from "@/lib/lead-desk";
+import type { Template } from "@/lib/lead-crm";
+import { TZ } from "@/lib/booking-rules";
+import { KEY_STORE, TOKEN_STORE } from "@/lib/admin-github";
 import { leadSummary, shootTag, STAGES, type Lead, type LeadPatch, type LeadSummary, type Stage as StageName } from "@/lib/leads";
 import { useRouter } from "next/navigation";
 
-type Call = (init?: RequestInit & { query?: string }) => Promise<Record<string, unknown>>;
-type Template = React.ComponentProps<typeof Detail>["templates"][number];
 type Size = "phone" | "mid" | "wide";
 type Group = "now" | "week" | "waiting";
 
@@ -64,7 +64,7 @@ const ROAD: readonly StageName[] = STAGES.filter((s) => s !== "Lost");
 const dayOn = () => new Date(Date.now() + 864e5).toISOString();
 const CLASSIC = "/admin/leads";
 const WEEK = 7 * 864e5;
-const fmt = (o: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat("en-US", { timeZone: "America/Los_Angeles", ...o });
+const fmt = (o: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, ...o });
 const date = (iso: string) => fmt({ weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(iso));
 const stamp = (t: number) => fmt({ weekday: "short", month: "short", day: "numeric" }).format(new Date(t)).toUpperCase().replace(",", "");
 
@@ -152,24 +152,15 @@ export function LeadsAstryx() {
   const isMid = useMediaQuery("(max-width: 1200px)");
   const size: Size = isPhone ? "phone" : isMid ? "mid" : "wide";
 
-  const call: Call = React.useCallback(async (init = {}) => {
-    const res = await fetch(`/api/inbox${init.query ?? ""}`, {
-      ...init,
-      headers: { ...credentials(localStorage.getItem(KEY_STORE) ?? ""), "content-type": "application/json" },
-      cache: "no-store",
-    });
-    const out = (await res.json().catch(() => ({}))) as Record<string, unknown> & { error?: string };
-    if (!res.ok) throw new Error(out.error ?? `Request failed (${res.status})`);
-    return out;
-  }, []);
+  const call = inboxCall;
   const load = React.useCallback(() => {
-    call({ query: "?leads" })
-      .then((o) => { setLeads(o.leads as LeadSummary[]); setAt(Date.now()); })
-      .catch((e: unknown) => setError(navigator.onLine === false || e instanceof TypeError ? OFFLINE : e instanceof Error ? e.message : String(e)));
+    call<{ leads: LeadSummary[] }>({ query: "?leads" })
+      .then((o) => { setLeads(o.leads); setAt(Date.now()); })
+      .catch((e: unknown) => setError(loadError(e)));
   }, [call]);
   React.useEffect(load, [load]);
   React.useEffect(() => {
-    call({ query: "?templates" }).then((o) => setTemplates(o.templates as Template[])).catch(() => {});
+    call<{ templates: Template[] }>({ query: "?templates" }).then((o) => setTemplates(o.templates)).catch(() => {});
   }, [call]);
   // Astryx follows the site's own light/dark (html[data-theme], dark when unset), so the ink matches the page behind it.
   // Unknown until read: Astryx's root Theme writes data-theme onto <html> itself, so mounting it with a guess would lock that guess in.
@@ -212,8 +203,8 @@ export function LeadsAstryx() {
   const changed = (l: Lead) => setLeads((rs) => rs?.map((r) => (r.email === l.email ? { ...r, ...leadSummary(l), id: r.id } : r)) ?? null);
   /** A swipe or a button here: the same PATCH the lead's own Snooze, Archive and stage buttons send. */
   const act = (l: LeadSummary, body: LeadPatch) =>
-    call({ method: "PATCH", body: JSON.stringify({ key: `lead:${l.id}`, ...body }) })
-      .then((o) => changed(o.lead as Lead))
+    call<{ lead: Lead }>({ method: "PATCH", body: JSON.stringify({ key: `lead:${l.id}`, ...body }) })
+      .then((o) => changed(o.lead))
       .catch((e: unknown) => { alert(e instanceof Error ? e.message : String(e)); load(); });
   const tomorrow = (l: LeadSummary) => act(l, { snoozeUntil: dayOn() });
   const eyebrow = `${at ? stamp(at) : ""} · ${needs} NEED YOU`;
