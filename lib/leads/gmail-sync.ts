@@ -82,7 +82,14 @@ export async function syncGmail(env: LeadStore & { GCAL_OAUTH?: string }): Promi
       }
       for (const { id } of added) {
         read++;
-        const m = await gcal<Msg>(env.GCAL_OAUTH, `${GMAIL}/messages/${id}?${FIELDS}`);
+        let m: Msg;
+        try {
+          m = await gcal<Msg>(env.GCAL_OAUTH, `${GMAIL}/messages/${id}?${FIELDS}`);
+        } catch (e) {
+          // Deleted (or a draft replaced) since history listed it: skip it, or the cursor never moves past it.
+          if ((e as { status?: number }).status === 404) continue;
+          throw e;
+        }
         for (const { email, c } of mailChanges(m)) {
           // One lead that will not open must not stop the sync: the cursor would never move past it.
           try {
