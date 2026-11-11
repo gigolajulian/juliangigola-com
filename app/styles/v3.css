@@ -536,9 +536,7 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .reach{grid-template-columns:1fr;padding-top:48px}
 .v3 .reach-call{border-left:0;padding-left:0;border-top:1px solid var(--line);padding-top:28px}}
 .v3 .fig .cn{margin:0 .09em 0 .03em}
-@media (max-width:800px){.v3 .f-photo{height:auto;aspect-ratio:4/3;min-width:0;max-width:100%}.v3 .f-photo img{object-position:var(--at-m,var(--at,50% 50%))}}
-/* Desktop's own crop where a session sets one (`at.desk`, lib/v3.ts); the portrait-tablet rule below still reads --at. */
-@media (min-width:801px){.v3 .f-photo img{object-position:var(--at-d,50% 50%)}}
+@media (max-width:800px){.v3 .f-photo{height:auto;aspect-ratio:4/3;min-width:0;max-width:100%}.v3 .f-photo img{object-position:var(--at,50% 50%)}}
 /* Short phones (iPhone SE, 549px of Safari): a shorter photo and no repeat of
    the session name under it (the tabs say it), so the first session clears
    the sticky Continue bar at load (MAC, v3.0.93). Smaller heading too, for
@@ -938,6 +936,9 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 /* A flow photo's phone frame (`photo.m`): it stands in for both themes' frames on phones. */
 .v3 .f-photo .v3m{display:none}
 @media (max-width:800px){.v3 .f-photo .ph:has(.v3m) :is(.v3d,.v3l){display:none}.v3 .f-photo .v3m{display:block}}
+/* A desktop-only frame (`photo.desk`, lib/v3.ts), not on portrait tablets where the photo runs wide. */
+.v3 .f-photo .v3k{display:none}
+@media (min-width:1101px),(min-width:801px) and (orientation:landscape){.v3 .f-photo .ph:has(.v3k) :is(.v3d,.v3l){display:none}.v3 .f-photo .v3k{display:block;object-position:50% 0}}
 /* The booking under a service page's frames. */
 .v3 .sv-book{border-top:1px solid var(--line);margin-top:48px;scroll-margin-top:64px}
 /* Project page (components/v3/project.tsx): the hero (title, two verticals, a full-bleed vertical right), then the rhythm, credits, next. */
