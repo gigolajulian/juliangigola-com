@@ -249,12 +249,9 @@ export function runDeck(el: HTMLElement, mode: Deck): () => void {
         const buried = cover[i] >= 1;
         if (buried !== "buried" in cards[i].dataset)
           cards[i].toggleAttribute("data-buried", buried);
-      }
-      if (mode === "screens") {
         scrub(live, cards[i], cover[i], RECEDE);
         if (cards[i + 1]) shade(shades, cards[i + 1], cover[i]);
-      }
-      else scrub(live, cards[i], over / cards.length, STEP * cards.length);
+      } else scrub(live, cards[i], over / cards.length, STEP * cards.length);
     }
   };
 
