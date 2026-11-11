@@ -96,6 +96,14 @@ export function LeadAstryx({ summary, initial, call, onChange, onBack, reload, t
     [call, key, onChange, reload],
   );
   const run = (p: Promise<unknown>, ok?: string) => p.then(() => { setNote(ok ?? null); setEditing(null); }).catch((e: unknown) => setNote(errorText(e)));
+  // The whole activity log (`lib/leads/activity-log.ts`); the lead itself keeps only its last 50 events.
+  const [log, setLog] = React.useState<Lead["events"] | null>(null);
+  const seenEvents = lead?.events.length ?? 0;
+  React.useEffect(() => {
+    let live = true;
+    call<{ log: Lead["events"] }>({ query: `?log=${encodeURIComponent(summary.id ?? "")}` }).then((o) => live && setLog(o.log)).catch(() => {});
+    return () => { live = false; };
+  }, [call, summary.id, seenEvents]);
 
   React.useEffect(() => {
     let live = true;
@@ -201,7 +209,7 @@ export function LeadAstryx({ summary, initial, call, onChange, onBack, reload, t
       <Heading level={2}>Timeline</Heading>
       {lead ? (
         <VStack gap={4}>
-          {[...lead.events].reverse().map((e, i) => (
+          {[...(log && log.length >= lead.events.length ? log : lead.events)].reverse().map((e, i) => (
             <VStack key={i} gap={0}>
               <Eyebrow>{day(e.at).toUpperCase()}</Eyebrow>
               <Text type="body">{line(e)}</Text>
@@ -335,7 +343,15 @@ export function LeadAstryx({ summary, initial, call, onChange, onBack, reload, t
                 </MetadataList>
                 {editing === "licence" ? <LicenceForm has={full?.licence} onSave={(v) => run(patch({ licence: v }), v ? "Licence saved." : "Licence cleared.")} onCancel={() => setEditing(null)} /> : null}
                 {/* The invoice rows and design B stay the classic components: the sheet is its own page. */}
-                {full?.invoices?.length ? <ul>{[...full.invoices].reverse().map((inv) => <InvoiceRow key={inv.no} inv={inv} l={l} full={full} />)}</ul> : null}
+                {full?.invoices?.length ? <ul>{[...full.invoices].reverse().map((inv) => (
+                  <React.Fragment key={inv.no}>
+                    <InvoiceRow inv={inv} l={l} full={full} />
+                    <li style={{ listStyle: "none" }}><HStack gap={2} vAlign="center">
+                      {inv.paidAt ? <Badge label={`Paid ${day(inv.paidAt)}`} variant="success" /> : <Badge label="Unpaid" variant="neutral" />}
+                      <Button label={inv.paidAt ? "Mark unpaid" : "Mark paid"} variant="ghost" size="sm" onClick={() => run(patch({ invoicePaid: { no: inv.no, paid: !inv.paidAt } }), inv.paidAt ? "Unpaid again." : "Marked paid.")} />
+                    </HStack></li>
+                  </React.Fragment>
+                ))}</ul> : null}
                 {editing === "invoice" && full ? <InvoiceSheetB l={l} full={full} patch={patch} done={() => setEditing(null)} /> : null}
               </VStack>
             </Section>

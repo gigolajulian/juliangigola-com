@@ -153,11 +153,11 @@ export function TemplatesAstryx({ call, templates, saved }: { call: Call; templa
 }
 
 /** Every lead as a CSV file, through the same key as the rest of the desk. */
-async function exportCsv() {
-  const res = await fetch("/api/inbox?csv", { headers: authed(), cache: "no-store" });
+async function exportCsv(what: "leads" | "activity" = "leads") {
+  const res = await fetch(what === "activity" ? "/api/inbox?csv=events" : "/api/inbox?csv", { headers: authed(), cache: "no-store" });
   if (!res.ok) throw new Error(`Export failed (${res.status})`);
   const url = URL.createObjectURL(await res.blob());
-  const a = Object.assign(document.createElement("a"), { href: url, download: `leads-${new Date().toISOString().slice(0, 10)}.csv` });
+  const a = Object.assign(document.createElement("a"), { href: url, download: `${what}-${new Date().toISOString().slice(0, 10)}.csv` });
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 5000);
 }
@@ -247,7 +247,8 @@ export function DeviceAstryx({ call, reload, signOut }: { call: Call; reload: ()
       </VStack>
       <Divider />
       <HStack gap={2}>
-        <Button label="Export CSV" variant="secondary" size="sm" onClick={() => exportCsv().catch((e: unknown) => alert(errorText(e)))} />
+        <Button label="Clients CSV" variant="secondary" size="sm" onClick={() => exportCsv().catch((e: unknown) => alert(errorText(e)))} />
+        <Button label="Activity CSV" variant="secondary" size="sm" onClick={() => exportCsv("activity").catch((e: unknown) => alert(errorText(e)))} />
         <Button label="Sign out on this device" variant="ghost" size="sm" onClick={signOut} />
       </HStack>
     </Page>
