@@ -202,8 +202,11 @@ export async function GET(request: Request) {
     if (url.searchParams.get("csv") === "events") return file(eventsCsv(await readMaster(gate.inbox, seal)), "activity");
     const all = await everyLead(gate.inbox, seal);
     if (url.searchParams.has("stats")) return json({ stats: stats(all, Date.now()) });
+    // Paid per client from one pass over the master log: one list call per 1000 events.
+    const byLead = new Map<string, Lead["events"]>();
+    for (const m of await readMaster(gate.inbox, seal)) byLead.set(m.lead, [...(byLead.get(m.lead) ?? []), m.event]);
     const paid: Record<string, number> = {};
-    for (const l of all) if (l.id) paid[l.email] = paidTotal(await readLog(gate.inbox, seal, l.id).catch(() => []));
+    for (const l of all) if (l.id) paid[l.email] = paidTotal(byLead.get(l.id) ?? []);
     return file(csv(all, paid), "leads");
   }
 

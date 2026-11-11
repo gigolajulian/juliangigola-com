@@ -73,6 +73,14 @@ const mail = (to: string, subject: string, body: string) => (ios() ? mailto(to, 
 /** `YYYY-MM-DDTHH:MM` in his clock, for the reminder fields. */
 const localParts = (iso: string) => new Date(Date.parse(iso) - new Date().getTimezoneOffset() * 60e3).toISOString().slice(0, 16).split("T");
 
+/** The whole log and the lead's own last 50, as one list: the log only starts at the day it shipped. */
+const history = (log: Lead["events"] | null, own: Lead["events"]) => {
+  const seen = new Set<string>();
+  return [...(log ?? []), ...own]
+    .filter((e) => { const k = `${e.at}|${e.kind}|${e.ref ?? ""}|${e.note ?? ""}`; return !seen.has(k) && !!seen.add(k); })
+    .sort((a, b) => a.at.localeCompare(b.at));
+};
+
 export function LeadAstryx({ summary, initial, call, onChange, onBack, reload, templates, others, size, toProofs }: { toProofs?: () => void; summary: LeadSummary; initial?: Lead | null; call: Call; onChange: (l: Lead) => void; onBack: () => void; reload: () => void; templates: Template[]; others: LeadSummary[]; size: Size }) {
   // A lead added a moment ago comes in whole: KV may not serve its key yet.
   const [lead, setLead] = React.useState<Lead | null>(initial ?? null);
@@ -98,12 +106,12 @@ export function LeadAstryx({ summary, initial, call, onChange, onBack, reload, t
   const run = (p: Promise<unknown>, ok?: string) => p.then(() => { setNote(ok ?? null); setEditing(null); }).catch((e: unknown) => setNote(errorText(e)));
   // The whole activity log (`lib/leads/activity-log.ts`); the lead itself keeps only its last 50 events.
   const [log, setLog] = React.useState<Lead["events"] | null>(null);
-  const seenEvents = lead?.events.length ?? 0;
+  const newest = lead?.events.at(-1)?.at ?? "";
   React.useEffect(() => {
     let live = true;
     call<{ log: Lead["events"] }>({ query: `?log=${encodeURIComponent(summary.id ?? "")}` }).then((o) => live && setLog(o.log)).catch(() => {});
     return () => { live = false; };
-  }, [call, summary.id, seenEvents]);
+  }, [call, summary.id, newest]);
 
   React.useEffect(() => {
     let live = true;
@@ -209,7 +217,7 @@ export function LeadAstryx({ summary, initial, call, onChange, onBack, reload, t
       <Heading level={2}>Timeline</Heading>
       {lead ? (
         <VStack gap={4}>
-          {[...(log && log.length >= lead.events.length ? log : lead.events)].reverse().map((e, i) => (
+          {history(log, lead.events).reverse().map((e, i) => (
             <VStack key={i} gap={0}>
               <Eyebrow>{day(e.at).toUpperCase()}</Eyebrow>
               <Text type="body">{line(e)}</Text>
