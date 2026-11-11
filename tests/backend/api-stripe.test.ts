@@ -54,7 +54,7 @@ describe("POST /api/stripe", () => {
   });
 
   it("acknowledges other events and other payments without touching Stripe", async () => {
-    expect((await deliver(event({ id: "pi_TEST1234567890" }, "charge.refunded"))).status).toBe(200);
+    expect((await deliver(event({ id: "pi_TEST1234567890" }, "charge.dispute.created"))).status).toBe(200);
     expect((await deliver(event({ id: "pi_TEST1234567890", amount: 5000, currency: "usd", metadata: {} }))).status).toBe(200);
     expect(fetched).toEqual([]);
   });
@@ -69,5 +69,14 @@ describe("POST /api/stripe", () => {
     expect((await logOf(kv, "a@example.com")).map((e) => [e.kind, e.amount])).toEqual([["payment", 1200]]);
     expect((await logOf(kv, "pay@example.com")).map((e) => [e.kind, e.amount])).toEqual([["payment", 50]]);
     expect(fetched).toEqual(["https://api.stripe.com/v1/charges/ch_1"]);
+  });
+
+  it("logs a refund made in the dashboard once, however often Stripe delivers it", async () => {
+    const kv = new FakeKV();
+    ctx.env = { ...ctx.env, INBOX: kv, LEADS_KEY };
+    const charge = { id: "ch_2", payment_intent: "pi_TEST1234567894", amount: 10000, amount_refunded: 10000, receipt_email: "r@example.com", refunds: { data: [{ amount: 10000 }] } };
+    await deliver(event(charge, "charge.refunded"));
+    await deliver(event(charge, "charge.refunded"));
+    expect((await logOf(kv, "r@example.com")).map((e) => [e.kind, e.amount, e.ref])).toEqual([["refund", 100, "refund-pi_TEST1234567894"]]);
   });
 });

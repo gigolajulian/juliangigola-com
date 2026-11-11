@@ -33,6 +33,7 @@ export async function POST(request: Request) {
   } catch {
     return text("Not JSON.", 400);
   }
+  if (event.type === "charge.refunded") return refunded(env, event.data?.object as Charge | undefined);
   if (event.type !== "payment_intent.succeeded") return text("ok", 200);
 
   const pi = event.data?.object;
@@ -56,5 +57,19 @@ export async function POST(request: Request) {
   const status = await settle({ INBOX: env.INBOX, STRIPE_SECRET_KEY: env.STRIPE_SECRET_KEY, EMAIL: env.EMAIL, CLIENT_EMAIL: env.CLIENT_EMAIL, GCAL_OAUTH: env.GCAL_OAUTH, BOOKING_LOCK: env.BOOKING_LOCK, NOTION_TOKEN: env.NOTION_TOKEN, BOOKING_SECRET: env.BOOKING_SECRET }, pi.id, pi.metadata);
   // Still booking from an earlier delivery: Stripe retries until it ends or hello@ is warned.
   if (status === "booking") return text("Still booking.", 503);
+  return text("ok", 200);
+}
+
+type Charge = { id?: string; payment_intent?: string | null; amount?: number; amount_refunded?: number; receipt_email?: string | null; billing_details?: { email?: string | null }; refunds?: { data?: { amount?: number }[] } };
+
+/** A refund, from the site or by hand in the dashboard, on the client's activity log. A full refund shares the
+ * site's own ref (`refund-<intent>`), so a cancel's refund is never logged twice; a partial one is keyed by the running total. */
+async function refunded(env: CloudflareEnv, c: Charge | undefined) {
+  const email = c?.receipt_email || c?.billing_details?.email;
+  if (!c?.payment_intent || !email || !c.amount_refunded) return text("ok", 200);
+  const full = c.amount_refunded >= (c.amount ?? Infinity);
+  await recordLead(env, email, {
+    event: { at: new Date().toISOString(), kind: "refund", ref: full ? `refund-${c.payment_intent}` : `refund-${c.payment_intent}-${c.amount_refunded}`, note: "Stripe", amount: (c.refunds?.data?.[0]?.amount ?? c.amount_refunded) / 100 },
+  });
   return text("ok", 200);
 }

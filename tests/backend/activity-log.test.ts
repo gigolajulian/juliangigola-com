@@ -26,7 +26,8 @@ const env = () => ({ INBOX: kv as never, LEADS_KEY });
 const t = (m: number) => new Date(Date.UTC(2026, 10, 1, 10, m)).toISOString();
 
 describe("fold, money", () => {
-  const inv = (no: string, rate: number) => ({ no, date: "2026-11-01", lines: [{ desc: "Session", qty: 1, rate }], paid: 0, at: t(0) });
+  // Made after the cut-off (PAID_BEFORE), so only a payment settles them.
+  const inv = (no: string, rate: number) => ({ no, date: "2026-12-01", lines: [{ desc: "Session", qty: 1, rate }], paid: 0, at: "2026-12-01T10:00:00Z" });
   const withInvoices = (...invoices: ReturnType<typeof inv>[]): Lead => ({ ...fold(null, "a@example.com", { event: { at: t(0), kind: "inquiry" } }), invoices });
 
   it("settles the one invoice a non-deposit payment matches, and never on a deposit", () => {
@@ -119,6 +120,16 @@ describe("the log", () => {
     expect(events[0]).toBe("time,client,email,kind,detail,amount,lead id");
     expect(events).toHaveLength(3);
     expect(events[2]).toContain("payment");
+  });
+});
+
+describe("old invoices", () => {
+  it("count as paid before the cut-off unless marked unpaid; newer ones wait for a payment", async () => {
+    const { isPaid, PAID_BEFORE } = await import("@/lib/leads/invoice");
+    expect(isPaid({ at: "2026-10-01T00:00:00Z" })).toBe(true);
+    expect(isPaid({ at: "2026-10-01T00:00:00Z", unpaid: true })).toBe(false);
+    expect(isPaid({ at: `${PAID_BEFORE}T10:00:00Z` })).toBe(false);
+    expect(isPaid({ at: `${PAID_BEFORE}T10:00:00Z`, paidAt: "x" })).toBe(true);
   });
 });
 

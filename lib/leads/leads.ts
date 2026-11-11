@@ -1,4 +1,4 @@
-import { balance, type Invoice } from "./invoice";
+import { balance, isPaid, type Invoice } from "./invoice";
 
 /* ── leads: one record per person ─────────────────────────────────
  * Julian (2026-11-03, PLAN-lead-desk.md): every inquiry, call and booking
@@ -223,10 +223,10 @@ export function fold(lead: Lead | null, email: string, c: Change): Lead {
 
   // A payment that is not a deposit settles the invoice it names, or the one unpaid invoice of exactly that balance.
   if (event.kind === "payment" && c.settles && event.amount && next.invoices?.length) {
-    const open = next.invoices.filter((v) => !v.paidAt);
+    const open = next.invoices.filter((v) => !isPaid(v));
     const same = open.filter((v) => Math.abs(balance(v) - event.amount!) < 0.005);
     const hit = (c.invoiceNo && open.find((v) => v.no === c.invoiceNo)) || (same.length === 1 ? same[0] : undefined);
-    if (hit) next.invoices = next.invoices.map((v) => (v === hit ? { ...v, paidAt: event.at } : v));
+    if (hit) next.invoices = next.invoices.map((v) => (v === hit ? { ...v, paidAt: event.at, unpaid: undefined } : v));
   }
   // A cancelled session is no longer booked.
   if (event.kind === "cancel") next.when = undefined;
