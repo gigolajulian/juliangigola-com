@@ -7,9 +7,9 @@
 // <export folder>: the unzipped Notion export (IMPORT/notion-archive/). Reads
 // the `_all.csv` of each database, skips test rows, groups rows by person
 // (email, else Instagram, else phone) and posts them to /api/inbox on the live
-// site with your GitHub token (`gh auth token`, never printed). Only fields
+// site with the INBOX_KEY Worker secret, read from your environment
+// (`$env:INBOX_KEY`), never printed. The desk refuses gh's OAuth token. Only fields
 // the lead lacks are filled; a second run adds nothing. Prints counts only.
-import { execSync } from "node:child_process";
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 
@@ -100,10 +100,11 @@ for (const r of table("Clients CRM")) {
 const body = [...people.values()].map(({ notes, stageAt, ...p }) => ({ ...p, ...(notes.length ? { notes: `From Notion (2026-11-11):\n${notes.join("\n\n")}` } : {}) }));
 console.log(`Read: ${body.length} people, ${body.reduce((n, p) => n + p.rows.length, 0)} rows, ${tests} test rows skipped, ${nobody} rows with no email, Instagram or phone.`);
 
-const token = execSync("gh auth token", { encoding: "utf8" }).trim();
+const key = process.env.INBOX_KEY;
+if (!key) throw new Error("Set INBOX_KEY in this shell first (the Worker secret). Nothing was sent.");
 const res = await fetch(`${SITE}/api/inbox`, {
   method: "POST",
-  headers: { authorization: `Bearer ${token}`, "content-type": "application/json" },
+  headers: { "x-inbox-key": key, "content-type": "application/json" },
   body: JSON.stringify({ importNotion: body, dry: flag !== "--go" }),
 });
 console.log(res.status, JSON.stringify(await res.json()));
