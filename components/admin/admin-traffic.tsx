@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { TOKEN_STORE } from "@/lib/admin/admin-github";
+import { authed } from "@/lib/leads/lead-desk";
 
 /* ── traffic ──────────────────────────────────────────────────────
  * Who came to the site this week and from where, read from Cloudflare by
@@ -39,12 +39,12 @@ export function AdminTraffic() {
   const [busy, setBusy] = React.useState(false);
 
   const pull = React.useCallback(async () => {
-    const token = window.localStorage.getItem(TOKEN_STORE);
-    if (!token) return setError("Sign in with the GitHub token first.");
+    const headers = authed();
+    if (!Object.keys(headers).length) return setError("Sign in with the inbox key or the GitHub token first.");
     setBusy(true);
     try {
       const res = await fetch("/api/traffic", {
-        headers: { authorization: `Bearer ${token}` },
+        headers,
         cache: "no-store",
       });
       const body = await res.json();

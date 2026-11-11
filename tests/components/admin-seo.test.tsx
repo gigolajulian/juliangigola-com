@@ -13,7 +13,7 @@ describe("AdminSeo", () => {
     vi.stubGlobal("fetch", vi.fn());
     render(<AdminSeo />);
     expect(screen.getByRole("heading", { name: /SEO/ })).toBeTruthy();
-    expect(await screen.findByText("Sign in with the GitHub token first.")).toBeTruthy();
+    expect(await screen.findByText("Sign in with the inbox key or the GitHub token first.")).toBeTruthy();
   });
 
   it("pulls the range and switches it", async () => {
