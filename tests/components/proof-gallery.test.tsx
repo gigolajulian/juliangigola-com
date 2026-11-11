@@ -31,6 +31,10 @@ afterEach(() => {
 });
 
 describe("ProofGallery", () => {
+  // The grid wall gate is the default since #884; these cover the plain gate, kept behind ?proofwall=0.
+  beforeEach(() => history.replaceState(null, "", "/?proofwall=0"));
+  afterEach(() => history.replaceState(null, "", "/"));
+
   it("opens on the email gate", () => {
     render(<ProofGallery token="t1" initial={proof()} />);
     expect(screen.getByRole("heading", { name: "Pick your proofs." })).toBeTruthy();
@@ -79,8 +83,8 @@ describe("ProofGallery", () => {
     expect(screen.getByRole("button", { name: /View your 1 select/ })).toBeTruthy();
   });
 
-  it("?proofwall=1 asks for a name as well as the email", () => {
-    history.replaceState(null, "", "/?proofwall=1");
+  it("the wall gate, the default, asks for a name as well as the email", () => {
+    history.replaceState(null, "", "/");
     // reduced motion: the wall lies flat and nothing animates under jsdom
     vi.stubGlobal("matchMedia", () => ({ matches: true, addEventListener() {}, removeEventListener() {} }));
     try {
@@ -90,7 +94,7 @@ describe("ProofGallery", () => {
       expect(screen.getByRole("alert").textContent).toBe("Add your name.");
       expect(fetchMock).not.toHaveBeenCalled();
     } finally {
-      history.replaceState(null, "", "/");
+      vi.unstubAllGlobals();
     }
   });
 });
