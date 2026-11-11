@@ -5,7 +5,7 @@ import Link from "next/link";
 import { createPortal, preload } from "react-dom";
 import { getImageProps } from "next/image";
 import { useRouter } from "next/navigation";
-import { CalEmbed } from "@/components/cal-embed";
+import { CalEmbed } from "@/components/booking/cal-embed";
 import { Calendar, Failed, Field, FlowShell, Hidden, Run, dlabel, duration, iso, useEnquiry, type Shell } from "@/components/v3/flow";
 import { LENGTH, SESSIONS, TAB_ORDER, rate, type SessionSlug } from "@/lib/v3";
 import { looksLikeEmail } from "@/lib/inbox";

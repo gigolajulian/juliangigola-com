@@ -3,7 +3,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import type * as React from "react";
 
 const seen = vi.hoisted(() => ({ mounts: 0 }));
-vi.mock("@/components/time-picker", () => ({
+vi.mock("@/components/booking/time-picker", () => ({
   TimePicker: ({ path, fallback }: { path: string; fallback: React.ReactNode }) => {
     seen.mounts++;
     return (
@@ -14,7 +14,7 @@ vi.mock("@/components/time-picker", () => ({
   },
 }));
 
-import { CalEmbed } from "@/components/cal-embed";
+import { CalEmbed } from "@/components/booking/cal-embed";
 
 describe("CalEmbed", () => {
   it("mounts the picker with a way out when times fail", () => {
