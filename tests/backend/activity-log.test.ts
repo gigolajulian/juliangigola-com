@@ -91,7 +91,12 @@ describe("the log", () => {
     const no = made.lead.invoices[0].no;
     const paid = await (await PATCH(req("PATCH", { body: JSON.stringify({ key, invoicePaid: { no, paid: true } }) }))).json();
     expect(paid.lead.invoices[0].paidAt).toBeTruthy();
-    expect((await readLog(kv as never, seal, key.slice(5))).at(-1)).toMatchObject({ kind: "invoice-paid" });
+    expect((await readLog(kv as never, seal, key.slice(5))).at(-1)).toMatchObject({ kind: "invoice-paid", amount: 800 });
+    // Cash counts as money in the export; unmarking takes it off again.
+    const paidCol = async () => { const [h, r] = (await (await GET(req("GET", { query: "?csv" }))).text()).trim().split("\r\n"); return r.split(",")[h.split(",").indexOf("paid total")]; };
+    expect(await paidCol()).toBe("800");
+    await PATCH(req("PATCH", { body: JSON.stringify({ key, invoicePaid: { no, paid: false } }) }));
+    expect(await paidCol()).toBe("0");
   });
 
   it("emptying the trash deletes the log and its master entries too", async () => {
