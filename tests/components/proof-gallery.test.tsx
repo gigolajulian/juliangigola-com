@@ -47,7 +47,7 @@ describe("ProofGallery", () => {
 
   it("refuses an address that is not an email", () => {
     render(<ProofGallery token="t1" initial={proof()} />);
-    fireEvent.change(screen.getByPlaceholderText("First and last"), { target: { value: "Maya" } });
+    fireEvent.change(screen.getByPlaceholderText("Your name"), { target: { value: "Maya" } });
     fireEvent.change(screen.getByPlaceholderText("you@email.com"), { target: { value: "nope" } });
     fireEvent.submit(screen.getByRole("button", { name: "Open gallery" }).closest("form")!);
     expect(screen.getByRole("alert").textContent).toMatch(/does not look right/);
@@ -56,7 +56,7 @@ describe("ProofGallery", () => {
 
   it("a name and email log the open with the name, greet by first name, and keep nothing on the device", async () => {
     render(<ProofGallery token="t1" initial={proof()} />);
-    fireEvent.change(screen.getByPlaceholderText("First and last"), { target: { value: " Maya  Ross " } });
+    fireEvent.change(screen.getByPlaceholderText("Your name"), { target: { value: " Maya  Ross " } });
     fireEvent.change(screen.getByPlaceholderText("you@email.com"), { target: { value: "a@b.co" } });
     fireEvent.submit(screen.getByRole("button", { name: "Open gallery" }).closest("form")!);
     await waitFor(() => expect(fetchMock).toHaveBeenCalledWith("/api/proof/t1", expect.objectContaining({ method: "POST" })));

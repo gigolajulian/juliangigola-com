@@ -46,6 +46,8 @@ export function SmoothScroll() {
   React.useEffect(() => {
     // Skip if reduced motion is requested
     if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    // On trial with ?proofwall=1: native scroll in a proof gallery (Julian, Mac: the scroll felt tense).
+    if (location.pathname.startsWith("/proof/") && new URLSearchParams(location.search).get("proofwall") === "1") return;
 
     // A lerp follows the wheel as it moves instead of replaying a fixed
     // 1.2s glide on every event, which read as lag on a trackpad (2026-10-30).
