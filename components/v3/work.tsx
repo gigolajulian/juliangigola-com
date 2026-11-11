@@ -65,6 +65,13 @@ const seen = () =>
     return r.bottom > 0 && r.top < innerHeight && r.right > 0 && r.left < innerWidth;
   });
 
+/* Galleries that live on their booking page (next.config.ts pageRedirects):
+   linked straight there, so a tap skips the redirect and its RSC 404 (audit 2026-11-11). */
+const MOVED: Record<string, string> = { headshots: "/headshots#work", graduation: "/graduation-photos#work" };
+const hrefOf = (s: string) => MOVED[s] ?? `/portfolio/${s}`;
+/** A gallery's cover says its own name in the caption: the image stays silent so it is not read twice. */
+const altOf = (p: WorkItem) => (p.d.join(", ").toLowerCase() === p.n.toLowerCase() ? "" : p.n);
+
 /** A cover link's name: the words its caption shows, so voice control and axe label-in-name match. */
 const named = (p: WorkItem) => {
   const d = p.d.join(", ");
@@ -87,11 +94,11 @@ function Cap({ p, cls }: { p: WorkItem; cls: string }) {
 function Tile({ p, swatch, first }: { p: WorkItem; swatch?: string[]; first?: boolean }) {
   return (
     <figure className="wt">
-      <Link href={`/portfolio/${p.s}`} aria-label={named(p)}>
+      <Link href={hrefOf(p.s)} aria-label={named(p)}>
         <div className="ph" data-flip-id={p.s}>
           <Image
             src={p.cover}
-            alt={p.n}
+            alt={altOf(p)}
             fill
             sizes={GRID_SIZES}
             decoding="sync"
@@ -626,7 +633,8 @@ export function V3Work({
      wait for a hand on the strip button, and Save-Data skips it all. */
   const warm = React.useCallback(
     (n: number) => {
-      if (view === "color" || (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData) return;
+      const net = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
+      if (view === "color" || net?.saveData || /2g|3g/.test(net?.effectiveType ?? "")) return;
       for (const p of list.slice(0, n)) {
         const { props } = getImageProps({ src: p.cover, alt: "", fill: true, sizes: view === "strip" ? GRID_SIZES : STRIP_SIZES });
         const im = new window.Image();
@@ -1114,8 +1122,8 @@ export function V3Work({
                 if (!f)
                   return (
                     <figure key={p!.s} className="sc" data-flip-id={p!.s}>
-                      <Link href={`/portfolio/${p!.s}`} aria-label={named(p!)}>
-                        <Image src={p!.cover} alt={p!.n} fill sizes={STRIP_SIZES} decoding="sync" loading={n < 4 ? "eager" : "lazy"} />
+                      <Link href={hrefOf(p!.s)} aria-label={named(p!)}>
+                        <Image src={p!.cover} alt={altOf(p!)} fill sizes={STRIP_SIZES} decoding="sync" loading={n < 4 ? "eager" : "lazy"} />
                         {cap}
                       </Link>
                     </figure>

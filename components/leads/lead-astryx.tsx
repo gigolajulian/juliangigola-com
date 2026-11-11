@@ -43,7 +43,7 @@ import { canonical } from "@/lib/leads/lead-crypto";
 import { isLate, NUDGES, PAPER, quoteNudge, REMIND_MAX, STAGES, trashDaysLeft, type Lead, type LeadPatch, type LeadSummary, type Stage } from "@/lib/leads/leads";
 import { fill, mailable, TEMPLATES, type Template } from "@/lib/leads/lead-crm";
 import { leadKey, typingIn } from "@/lib/leads/lead-keys";
-import { DEPOSIT, usd } from "@/lib/leads/invoice";
+import { balance, DEPOSIT, subtotal, usd } from "@/lib/leads/invoice";
 import { ago, at, authed, type Call, DAY, day, errorText, nextStep, now, renew, snoozed } from "@/lib/leads/lead-desk";
 import { compose, ios, kindOf, line, mailto } from "@/components/leads/shared";
 
@@ -241,7 +241,10 @@ export function LeadAstryx({ summary, initial, call, onChange, onBack, reload, t
   );
 
   const at0 = ROAD.indexOf(l.stage as (typeof ROAD)[number]);
-  const owed = full?.quote !== undefined ? full.quote - (full.deposit ? DEPOSIT : 0) : undefined;
+  // Julian (2026-11-11): one invoice total per client, lines as needed. Once invoiced, the balance is what the open invoices still owe.
+  const invoices = full?.invoices ?? [];
+  const invoiced = invoices.length ? subtotal(invoices.flatMap((v) => v.lines)) : undefined;
+  const owed = invoices.length ? invoices.filter((v) => !isPaid(v)).reduce((n, v) => n + balance(v), 0) : full?.quote !== undefined ? full.quote - (full.deposit ? DEPOSIT : 0) : undefined;
   const paidAt = full?.deposit ? full.events.find((e) => e.kind === "booking")?.at : undefined;
 
   return (
@@ -343,6 +346,7 @@ export function LeadAstryx({ summary, initial, call, onChange, onBack, reload, t
                   <MetadataListItem label="Deposit">
                     {full?.deposit ? <HStack gap={2} vAlign="center"><StackItem size="fill"><Text type="code">{usd(DEPOSIT)} paid{paidAt ? `, ${day(paidAt)}` : ""}</Text></StackItem><Button label="Stripe" variant="ghost" size="sm" href={full.deposit} target="_blank" rel="noreferrer" /></HStack> : <Text color="secondary">None</Text>}
                   </MetadataListItem>
+                  {invoiced !== undefined ? <MetadataListItem label="Invoiced"><Text type="code">{usd(invoiced)}</Text></MetadataListItem> : null}
                   {owed !== undefined ? <MetadataListItem label="Balance"><Text type="code" weight="bold" color="accent">{usd(owed)}</Text></MetadataListItem> : null}
                   <MetadataListItem label="Licence">
                     {editing === "licence" ? null : full?.licence ? (
