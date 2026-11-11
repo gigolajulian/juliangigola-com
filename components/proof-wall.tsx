@@ -152,6 +152,9 @@ export function ProofWall({
     plane.getBoundingClientRect(); // the tilt back in place before the flattening starts from it
     const cells = [...g.querySelectorAll<HTMLElement>(".proof-cell")];
     const n = Number(shape.split(",")[0]);
+    // The gallery's first screen fetched now, so nothing lands empty a second from now.
+    for (const img of g.querySelectorAll<HTMLImageElement>(".proof-cell img"))
+      if (img.getBoundingClientRect().top < innerHeight) img.loading = "eager";
     cells.slice(0, n).forEach((cell, c) => {
       const to = cell.getBoundingClientRect();
       const src = cell.querySelector("img")?.getAttribute("src");

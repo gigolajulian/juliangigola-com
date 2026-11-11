@@ -193,6 +193,8 @@ html:has(.proof[data-wall]){scrollbar-gutter:stable}
 /* Julian: hovering a photo does nothing here, and the wall sits under a blur */
 /* Julian: hovering the wall does nothing. The tiles take the pointer back (drift-wall.css), so they are let go too. */
 .pw-layer .drift-wall__tile{pointer-events:none}
+/* Julian: photos load before they come into frame. A tile whose photograph is not in yet shows nothing (no dark box) and fades up once it is. */
+.pw-layer .drift-wall__inner{background:none}
 .pw-layer>.drift-wall{position:absolute;inset:0;pointer-events:none;transition:filter 1.8s cubic-bezier(.45,0,.2,1),scale 2.4s cubic-bezier(.2,.7,.1,1)}
 .pw-layer[data-ready]>.drift-wall{filter:blur(6px);scale:1.04}
 /* Falloff to the edges, a quiet centre under the card: one light, not a flat wash. */
