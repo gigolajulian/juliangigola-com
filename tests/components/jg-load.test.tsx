@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
-import { JgLoad } from "@/components/jg-load";
+import { JgLoad } from "@/components/splash/jg-load";
 
 describe("JgLoad", () => {
   it("shows the wait as a status with a zero count", () => {
