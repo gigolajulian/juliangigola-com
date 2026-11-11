@@ -146,6 +146,7 @@ function line(e: LeadEvent): string {
     case "archive": return e.note === "in" ? "Archived" : "Unarchived";
     case "trash": return e.note === "in" ? "Moved to trash" : "Recovered from trash";
     case "replied": return `You replied${e.note ? `: ${e.note}` : ""}`;
+    case "proofs": return `Opened proofs${e.note ? `: ${e.note}` : ""}`;
     case "wrote": return `They wrote${e.note ? `: ${e.note}` : ""}`;
     case "mail": return `Mail to ${e.mail?.to === "client" ? "them" : "hello@"}: ${e.note ?? ""}`;
     case "added": return `Added by hand${e.note ? `, from ${e.note}` : ""}`;

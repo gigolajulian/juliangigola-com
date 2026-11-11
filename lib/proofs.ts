@@ -71,6 +71,8 @@ export type Proof = {
 export type ViewerEvent = { at: string; kind: "open" | "pick" | "unpick" | "review" | "pay" | "send"; id?: string; device?: string; place?: string };
 
 export type Viewer = {
+  /** The name they typed at the gate (`?proofwall=1`), latest wins. */
+  name?: string;
   first: string;
   last: string;
   visits: number;
@@ -102,10 +104,11 @@ export function device(ua: string): string {
 export function track(
   v: Viewer | undefined,
   at: string,
-  e: { kind?: ViewerEvent["kind"]; picks?: string[]; looks?: Record<string, number>; seconds?: number; device?: string; place?: string },
+  e: { kind?: ViewerEvent["kind"]; picks?: string[]; looks?: Record<string, number>; seconds?: number; device?: string; place?: string; name?: string },
 ): Viewer {
   const base: Viewer = v ?? { first: at, last: at, visits: 0, seconds: 0, devices: [], places: [], picks: [], looks: {}, events: [] };
   const out: Viewer = { ...base, last: at, events: [...base.events], looks: { ...base.looks } };
+  if (e.name) out.name = e.name;
   if (e.kind === "open") {
     out.visits += 1;
     if (e.device && !out.devices.includes(e.device)) out.devices = [...out.devices, e.device];
