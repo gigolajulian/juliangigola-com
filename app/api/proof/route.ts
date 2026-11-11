@@ -2,7 +2,7 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { isAdmin } from "@/lib/vouch";
 import { sealer } from "@/lib/lead-crypto";
 import { recordLead } from "@/lib/lead-store";
-import { closesAt, cleanSettings, DEFAULTS, frameKey, frameKeys, isFrameId, isToken, listProofs, newToken, readProof, writeProof, type Proof } from "@/lib/proofs";
+import { cardKey, closesAt, cleanSettings, DEFAULTS, frameKey, frameKeys, isFrameId, isToken, listProofs, newToken, readProof, writeProof, type Proof } from "@/lib/proofs";
 import { proofMail, proofUrl, sendClient } from "@/lib/email/proof-mail";
 import { settle } from "@/lib/proof-submit";
 import { servedFrame } from "@/lib/proof-watermark";
@@ -146,7 +146,10 @@ export async function PATCH(request: Request) {
   if (!isToken(b.token)) return json({ error: "Which gallery?" }, 400);
   const p = await readProof(g.kv, g.s, b.token);
   if (!p) return json({ error: "No such gallery." }, 404);
-  const next: Proof = { ...p, ...cleanSettings(b) };
+  const set = cleanSettings(b);
+  const next: Proof = { ...p, ...set };
+  // A new preview pick redraws the card of the frame it leaves and the one it lands on.
+  if ("card" in set) await g.r2.delete([...new Set([p.card?.id, next.card?.id, p.frames[0]?.id])].filter((id): id is string => !!id).map((id) => cardKey(b.token as string, id)));
   await writeProof(g.kv, g.s, next);
   return json({ proof: next });
 }
