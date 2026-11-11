@@ -10,6 +10,7 @@ import { shiftScroll } from "@/components/v3/smooth-scroll";
 import { useSiteTheme } from "@/lib/site-theme";
 import { COMMISSIONS, COMMISSION_TABS, DOORS, HERO, HERO_ALT, INDEX_ORDER, RECENT, SESSIONS, rate, type SessionSlug } from "@/lib/v3";
 import { mplan } from "@/lib/mplan";
+import { projectHref } from "@/lib/project-href";
 
 /* JG V3 homepage (master v39, section A): hero crossfade, logo strip,
    Recent work, Commissions sheet, Sessions index, the two doors. */
@@ -352,7 +353,7 @@ function Recent() {
                 these), so neither column waits on the other. */}
             {[...c.shots.map((s) => ({ s, m: false })), ...(k < 2 && RECENT[2] ? [{ s: RECENT[2].shots[k], m: true }] : [])].map(({ s, m }, n) => (
               <figure key={n} className={m ? "m-only" : undefined}>
-                <Link className="fig" href={`/portfolio/${slugOf(theme === "light" ? s.l.src : s.d.src)}`}>
+                <Link className="fig" href={projectHref(slugOf(theme === "light" ? s.l.src : s.d.src))}>
                   <div className="ph">
                     <Duo d={s.d.src} l={s.l.src} alt={s.d.name} altL={s.l.name} sizes="(max-width: 700px) 50vw, 30vw" />
                   </div>
@@ -448,8 +449,8 @@ function Commissions({ top }: { top: Record<string, TopWork[]> }) {
               {s.d.meta ? <span className="mute"><Pick d={s.d.meta} l={s.l.meta!} /></span> : null}
             </figcaption>
             {/* The frame opens its project; the theme hides the other one's link. */}
-            <Link className="v3d tile" href={`/portfolio/${s.s ?? s.d.src.split("/")[2]}`} aria-label={s.d.name} />
-            <Link className="v3l tile" href={`/portfolio/${s.s ?? s.l.src.split("/")[2]}`} aria-label={s.l.name} />
+            <Link className="v3d tile" href={projectHref(s.s ?? s.d.src.split("/")[2])} aria-label={s.d.name} />
+            <Link className="v3l tile" href={projectHref(s.s ?? s.l.src.split("/")[2])} aria-label={s.l.name} />
           </figure>
         ))}
       </div>
