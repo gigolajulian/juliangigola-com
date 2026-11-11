@@ -55,7 +55,7 @@ export function FlowShell({
   sub?: React.ReactNode;
   body: React.ReactNode;
   bar?: React.ReactNode;
-  photo: { d: string; l: string; m?: string; at?: { d?: string; l?: string } };
+  photo: { d: string; l: string; m?: string; desk?: string; at?: { d?: string; l?: string } };
   name: string;
   sum: [string, React.ReactNode][];
   /** The caption over the photo, the photo running to the foot of the screen (Julian, every booking). */
@@ -108,6 +108,7 @@ export function FlowShell({
             <div className="ph">
               <Image className="v3d" src={photo.d} alt={`${name} sample frame`} fill sizes="(max-width: 800px) 100vw, 44vw" loading="eager" fetchPriority="high" decoding="sync" style={photo.at?.d ? ({ "--at": photo.at.d } as React.CSSProperties) : undefined} />
               <Image className="v3l" src={photo.l} alt={`${name} sample frame`} fill sizes="(max-width: 800px) 100vw, 44vw" loading="eager" decoding="sync" style={photo.at?.l ? ({ "--at": photo.at.l } as React.CSSProperties) : undefined} />
+              {photo.desk ? <Image className="v3k" src={photo.desk} alt={`${name} sample frame`} fill sizes="44vw" /> : null}
               {photo.m ? <Image className="v3m" src={photo.m} alt={`${name} sample frame`} fill sizes="100vw" loading="eager" decoding="sync" /> : null}
             </div>
             <div className="cap">
