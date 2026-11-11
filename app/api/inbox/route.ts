@@ -4,6 +4,7 @@ import { SAFE_IMAGE, summary, type Enquiry, type Summary } from "@/lib/inbox";
 import { backfillLead, fold, PAPER, REMIND_MAX, STAGES, trashDaysLeft, type InboxRow, type Lead, type LeadPatch, type LeadSummary, type Paper, type Stage } from "@/lib/leads/leads";
 import { everyLead, readLead, writeLead } from "@/lib/leads/lead-store";
 import { clientsCsv } from "@/lib/leads/sheet-sync";
+import { importNotion } from "@/lib/leads/notion-import";
 import { adoptLog, eventsCsv, forgetLog, readLog, readMaster } from "@/lib/leads/activity-log";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { notify, subscribe, unsubscribe } from "@/lib/leads/lead-push";
@@ -387,6 +388,16 @@ export async function POST(request: Request) {
     await Promise.all((await seal.ids(lead.email)).map((i) => gate.inbox.delete(`gone:${i}`)));
     await writeLead(gate.inbox, seal, id, lead, null);
     return json({ lead, id });
+  }
+  // Past Notion rows as quiet leads (`lib/leads/notion-import.ts`, `scripts/import-notion.mjs`). Dry, it only counts.
+  if (given && "importNotion" in given) {
+    const seal = await gate.seal;
+    if (!seal) return json({ error: "Leads need LEADS_KEY on the Worker." }, 503);
+    try {
+      return json(await importNotion(gate.inbox, seal, given.importNotion, given.dry !== false));
+    } catch (e) {
+      return json({ error: String(e instanceof Error ? e.message : e) }, 400);
+    }
   }
   // Past Stripe payments and refunds onto the log (`lib/leads/stripe-import.ts`). Dry, it only counts.
   if (given?.importStripe === true) {
