@@ -2,7 +2,7 @@ import * as React from "react";
 import Image from "next/image";
 import { INITIAL, submitOrKeep } from "@/components/contact-form";
 import { trailContext } from "@/components/visit-trail";
-import type { ContactState } from "@/app/contact/actions";
+import type { ContactState } from "@/lib/inbox";
 import { looksLikeEmail } from "@/lib/inbox";
 
 /* JG V3 stepper (master v39, "one stepper" for booking and inquiry): the
