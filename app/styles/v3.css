@@ -1667,7 +1667,8 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
    beside it (an all-horizontal set stacked down two thirds of the page). */
 .v3 .pj-flow .pj-r.w{grid-column:1/-1;aspect-ratio:var(--ar,3/2)}}
 @media (min-width:901px){
-.v3 #p-project .pj-hero{height:calc(100svh - 64px - var(--pj));min-height:604px;padding-top:var(--pj);column-gap:var(--pj)}
+/* Border-box: the hero's own top padding counts in its height, or the big frame spills 16px into the sheet and the gap under the first row closes (Julian, 2026-11-11). */
+.v3 #p-project .pj-hero{height:calc(100svh - 64px);min-height:calc(604px + var(--pj));padding-top:var(--pj);column-gap:var(--pj)}
 .v3 .pj-big{height:calc(100svh - 64px - var(--pj));min-height:604px}
 .v3 .pj-top{padding-top:40px}
 /* The frames under the title: whole, each the size of its own picture, level
