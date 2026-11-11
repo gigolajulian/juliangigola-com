@@ -8,7 +8,7 @@
 
 import { TZ } from "../booking/booking-rules";
 import { STAGES, type Lead, type Stage } from "./leads";
-import { balance } from "./invoice";
+import { balance, isPaid } from "./invoice";
 
 /** A lead's identity: the address, or an Instagram handle or phone for someone who never wrote from one. */
 export function identity(o: { email?: string; ig?: string; phone?: string }): string | null {
@@ -216,7 +216,7 @@ export function csv(leads: Lead[], paid: Record<string, number> = {}): string {
     return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
   };
   const rows = leads.map((l) =>
-    [l.name, mailable(l.email) ? l.email : "", l.phone, l.ig, l.company, l.stage, l.kind, l.source, l.quote, paid[l.email] ?? 0, (l.invoices ?? []).filter((v) => !v.paidAt).reduce((n, v) => n + balance(v), 0), l.lostReason, l.firstAt, l.lastAt, l.when, l.archivedAt ? "yes" : "", l.notes].map(cell).join(","),
+    [l.name, mailable(l.email) ? l.email : "", l.phone, l.ig, l.company, l.stage, l.kind, l.source, l.quote, paid[l.email] ?? 0, (l.invoices ?? []).filter((v) => !isPaid(v)).reduce((n, v) => n + balance(v), 0), l.lostReason, l.firstAt, l.lastAt, l.when, l.archivedAt ? "yes" : "", l.notes].map(cell).join(","),
   );
   return [cols.join(","), ...rows].join("\r\n") + "\r\n";
 }

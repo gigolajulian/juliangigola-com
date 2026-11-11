@@ -28,8 +28,11 @@ export type InvoiceB = {
   tone: "dark" | "light";
 };
 /** One invoice as it was made. `date` is the day on it, YYYY-MM-DD. `paid` is the deposit taken off. `b` marks a design B invoice. */
-/** `paidAt`: when it was settled, by a matching Stripe payment or by hand. */
-export type Invoice = { no: string; date: string; lines: InvoiceLine[]; paid: number; notes?: string; at: string; b?: InvoiceB; paidAt?: string };
+/** `paidAt`: when it was settled, by a matching Stripe payment or by hand. `unpaid`: marked unpaid by hand, for one made before PAID_BEFORE. */
+export type Invoice = { no: string; date: string; lines: InvoiceLine[]; paid: number; notes?: string; at: string; b?: InvoiceB; paidAt?: string; unpaid?: boolean };
+/** Julian (2026-11-11), "ok" to marking the invoices made before the activity log as paid: read here, no record rewritten. */
+export const PAID_BEFORE = "2026-11-12";
+export const isPaid = (i: Pick<Invoice, "paidAt" | "unpaid" | "at">) => !!i.paidAt || (!i.unpaid && i.at < PAID_BEFORE);
 /** His own details on every invoice. Kept sealed in KV, never in the code: the repo is public. Bank and tax lines are design B's. */
 export type InvoiceFrom = { name: string; a1: string; a2: string; a3: string; email: string; phone: string; ein: string; signoff: string; notes: string; bank: string; routing: string; account: string; late: string; tax: string };
 

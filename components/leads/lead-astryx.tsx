@@ -36,6 +36,7 @@ import { Kbd } from "@astryxdesign/core/Kbd";
 import { References } from "@/components/admin/admin-inbox";
 import { api as proofApi, status as proofStatus, type Row as ProofRow } from "@/components/admin/admin-proofs";
 import { InvoiceRow, InvoiceSheetB } from "@/components/leads/invoice";
+import { isPaid } from "@/lib/leads/invoice";
 import { endDay } from "@/components/leads/lead-licence";
 import type { Enquiry } from "@/lib/inbox";
 import { canonical } from "@/lib/leads/lead-crypto";
@@ -355,8 +356,8 @@ export function LeadAstryx({ summary, initial, call, onChange, onBack, reload, t
                   <React.Fragment key={inv.no}>
                     <InvoiceRow inv={inv} l={l} full={full} />
                     <li style={{ listStyle: "none" }}><HStack gap={2} vAlign="center">
-                      {inv.paidAt ? <Badge label={`Paid ${day(inv.paidAt)}`} variant="success" /> : <Badge label="Unpaid" variant="neutral" />}
-                      <Button label={inv.paidAt ? "Mark unpaid" : "Mark paid"} variant="ghost" size="sm" onClick={() => run(patch({ invoicePaid: { no: inv.no, paid: !inv.paidAt } }), inv.paidAt ? "Unpaid again." : "Marked paid.")} />
+                      {isPaid(inv) ? <Badge label={inv.paidAt ? `Paid ${day(inv.paidAt)}` : "Paid"} variant="success" /> : <Badge label="Unpaid" variant="neutral" />}
+                      <Button label={isPaid(inv) ? "Mark unpaid" : "Mark paid"} variant="ghost" size="sm" onClick={() => run(patch({ invoicePaid: { no: inv.no, paid: !isPaid(inv) } }), isPaid(inv) ? "Unpaid again." : "Marked paid.")} />
                     </HStack></li>
                   </React.Fragment>
                 ))}</ul> : null}

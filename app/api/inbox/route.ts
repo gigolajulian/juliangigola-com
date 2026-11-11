@@ -517,7 +517,7 @@ async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: Await
     if (!inv) return json({ error: "No such invoice." }, 404);
     lead = {
       ...lead,
-      invoices: lead.invoices!.map((v) => (v === inv ? { ...v, paidAt: invoicePaid.paid ? at : undefined } : v)),
+      invoices: lead.invoices!.map((v) => (v === inv ? { ...v, paidAt: invoicePaid.paid ? at : undefined, unpaid: invoicePaid.paid ? undefined : true } : v)),
       events: [...lead.events, { at, kind: "invoice-paid" as const, note: `${inv.no} ${invoicePaid.paid ? `paid, ${usd(balance(inv))}` : "unpaid again"}` }].slice(-50),
     };
   }
