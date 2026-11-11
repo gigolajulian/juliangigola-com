@@ -326,7 +326,7 @@ export function Activity({ p }: { p: Row }) {
           {people.map(([k, x]) => (
             <li key={k}>
               <button type="button" onClick={() => setWho(k)} className={cn("grid w-full gap-0.5 border-b border-border px-2 py-2 text-left", k === email && "bg-accent/10")}>
-                <span className="truncate text-[14px] font-medium">{k}</span>
+                <span className="truncate text-[14px] font-medium">{x.name ? `${x.name} · ${k}` : k}</span>
                 <span className="font-mono text-[11px] text-muted-foreground">{label(x, k)}</span>
               </button>
             </li>

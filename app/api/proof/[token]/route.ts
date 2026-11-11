@@ -1,5 +1,6 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { sealer } from "@/lib/lead-crypto";
+import { recordLead } from "@/lib/leads";
 import { checkout, checkPaid, finalize, PAYMENTS_DOWN } from "@/lib/proof-submit";
 import { cleanSelects, device, isEmail, isOpen, owed, isToken, publicView, readProof, track, viewerKey, writeProof, type Proof } from "@/lib/proofs";
 
@@ -69,8 +70,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
     const kind = b.kind === "open" || b.kind === "review" ? b.kind : undefined;
     const looks = b.looks && typeof b.looks === "object" ? Object.fromEntries(Object.entries(b.looks as Record<string, unknown>).filter(([id, ms]) => g.p.frames.some((f) => f.id === id) && typeof ms === "number")) as Record<string, number> : undefined;
     const open = kind === "open" ? { device: device(request.headers.get("user-agent") ?? ""), place: await where() } : {};
-    const next = logged(g.p, b.email, { kind, looks, seconds: Number(b.seconds) || 0, ...open });
+    // The name from the gate, sent with the open only.
+    const name = kind === "open" && typeof b.name === "string" && b.name.trim() ? b.name.trim().replace(/\s+/g, " ").slice(0, 80) : undefined;
+    const next = logged(g.p, b.email, { kind, looks, seconds: Number(b.seconds) || 0, ...open, name });
     await writeProof(g.kv, g.s, next);
+    if (kind === "open") await recordLead(g.env, b.email, { event: { at: new Date().toISOString(), kind: "proofs", ref: g.p.token, note: g.p.name }, name });
     // An address coming back gets its own picks; once sent, everyone sees what was sent.
     return json({ picks: g.p.submittedAt ? g.p.selects : (next.viewers?.[viewerKey(b.email)]?.picks ?? []) });
   }
