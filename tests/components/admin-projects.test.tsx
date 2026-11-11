@@ -6,7 +6,7 @@ vi.mock("@/lib/admin-github", () => ({
   readFile: vi.fn(async () => null),
 }));
 
-import { AdminProjects, type AdminProject } from "@/components/admin-projects";
+import { AdminProjects, type AdminProject } from "@/components/admin/admin-projects";
 
 const frame = { src: "/work/x/01.jpg", width: 100, height: 150, color: "#111" };
 const project = (slug: string, name: string): AdminProject => ({

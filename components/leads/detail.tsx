@@ -1,8 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { References } from "@/components/admin-inbox";
-import { LeadProofs } from "@/components/admin-proofs";
+import { References } from "@/components/admin/admin-inbox";
+import { LeadProofs } from "@/components/admin/admin-proofs";
 import type { Enquiry } from "@/lib/inbox";
 import { isLate, NUDGES, quoteNudge, REMIND_MAX, STAGES, trashDaysLeft, type Lead, type LeadPatch, type LeadSummary, type Stage } from "@/lib/leads";
 import { cn } from "@/lib/utils";

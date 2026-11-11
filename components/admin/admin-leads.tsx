@@ -4,7 +4,7 @@ import * as React from "react";
 import { KEY_STORE, TOKEN_STORE } from "@/lib/admin-github";
 import { LeadBoard } from "@/components/lead-board";
 import { LeadHours } from "@/components/lead-hours";
-import { ProofsDesk } from "@/components/admin-proofs";
+import { ProofsDesk } from "@/components/admin/admin-proofs";
 import { LeadUpcoming } from "@/components/lead-upcoming";
 import { leadSummary, STAGES, type Lead, type LeadSummary, type Stage } from "@/lib/leads";
 import { cn } from "@/lib/utils";
@@ -24,8 +24,8 @@ import { Detail } from "@/components/leads/detail";
 export { Detail, SignIn };
 
 // The /admin tabs the One Desk folds in, loaded only when opened.
-const AdminTraffic = React.lazy(() => import("@/components/admin-traffic").then((m) => ({ default: m.AdminTraffic })));
-const AdminSeo = React.lazy(() => import("@/components/admin-seo").then((m) => ({ default: m.AdminSeo })));
+const AdminTraffic = React.lazy(() => import("@/components/admin/admin-traffic").then((m) => ({ default: m.AdminTraffic })));
+const AdminSeo = React.lazy(() => import("@/components/admin/admin-seo").then((m) => ({ default: m.AdminSeo })));
 /** Site: the /admin editor's own tabs, opened there (`?view=`), since they need the server's project data. */
 const SITE: [string, string][] = [["Pages", "/admin?view=home"], ["Work", "/admin?view=projects"], ["Motion", "/admin?view=video"]];
 /** Julian picked A (mock claude.ai/artifact/Y2S4cpbyK881T7ZZB2m46S): seven lines with icons, each page's own lists as tabs on it. */

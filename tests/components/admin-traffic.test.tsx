@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { AdminTraffic } from "@/components/admin-traffic";
+import { AdminTraffic } from "@/components/admin/admin-traffic";
 import { TOKEN_STORE } from "@/lib/admin-github";
 
 afterEach(() => {

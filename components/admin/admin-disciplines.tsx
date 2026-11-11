@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
-import type { AdminProject } from "@/components/admin-projects";
+import type { AdminProject } from "@/components/admin/admin-projects";
 import { cn } from "@/lib/utils";
 
 /* ── the disciplines ──────────────────────────────────────────────

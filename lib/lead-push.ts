@@ -2,7 +2,7 @@ import { send, type Push, type Subscription } from "./web-push";
 import type { Lead, LeadEvent } from "./leads";
 
 /* ── the lead desk's devices ──────────────────────────────────────
- * Each device that turned notifications on (`components/admin-leads.tsx`)
+ * Each device that turned notifications on (`components/admin/admin-leads.tsx`)
  * is one `push:<hash of its endpoint>` row in INBOX. A lead's arrival
  * pings them all; a device the push service says is gone is forgotten.
  * Nothing is sent while no device has subscribed, so the switch on the

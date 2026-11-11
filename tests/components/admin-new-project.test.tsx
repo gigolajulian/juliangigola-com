@@ -6,7 +6,7 @@ vi.mock("@/lib/admin-github", () => ({
   readFile: vi.fn(async () => null),
 }));
 
-import { AdminNewProject } from "@/components/admin-new-project";
+import { AdminNewProject } from "@/components/admin/admin-new-project";
 
 const categories = [{ slug: "editorial", name: "Editorial" }];
 
