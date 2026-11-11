@@ -18,8 +18,10 @@ import DriftWall from "@/components/drift-wall";
  * ─────────────────────────────────────────────────────────────── */
 
 const READY_AFTER_MS = 900; // after the wall shows: the columns mostly in before the focus pull
-const FLAT_MS = 800; // the plane easing flat and sharp (drift-wall.tsx), then the drop
-const LAND_MS = 1000;
+const READY_CAP_MS = 1500; // the card comes up by then, whatever the wall's photographs are doing
+const FLAT_MS = 1000; // the plane easing flat and sharp (drift-wall.tsx) while each column settles on its cells
+const SETTLE_EASE = "cubic-bezier(.65,0,.35,1)";
+const LAND_MS = 900;
 const LAND_EASE = "cubic-bezier(.6,0,.15,1)";
 const STAGGER = 50; // ms a column, left to right
 const WALL_OUT_MS = 600;
@@ -50,7 +52,8 @@ function gridShape(g: HTMLElement | null) {
   const gap = parseFloat(cs.columnGap) || 0;
   const left = g.getBoundingClientRect().left + (parseFloat(cs.paddingLeft) || 0);
   const width = cols.length * cols[0] + (cols.length - 1) * gap;
-  return [cols.length, cols[0], gap, left + width / 2 - innerWidth / 2].map((n) => Math.round(n * 100) / 100).join(",");
+  // From the middle of the wall's layer, which stops short of a scrollbar.
+  return [cols.length, cols[0], gap, left + width / 2 - document.documentElement.clientWidth / 2].map((n) => Math.round(n * 100) / 100).join(",");
 }
 const onResize = (cb: () => void) => {
   addEventListener("resize", cb);
@@ -71,6 +74,7 @@ export function ProofWall({
   onDone: () => void;
 }) {
   const layer = React.useRef<HTMLDivElement>(null);
+  const nameField = React.useRef<HTMLInputElement>(null);
   const [name, setName] = React.useState("");
   const [email, setEmail] = React.useState("");
   const [bad, setBad] = React.useState<string | null>(null);
@@ -81,6 +85,15 @@ export function ProofWall({
   const shown = React.useCallback(() => {
     window.setTimeout(() => setReady(true), reducedMotion() ? 0 : READY_AFTER_MS);
   }, []);
+  // A slow phone still gets the card soon: the wall comes in behind it.
+  React.useEffect(() => {
+    const t = window.setTimeout(() => setReady(true), READY_CAP_MS);
+    return () => clearTimeout(t);
+  }, []);
+  // The cursor waits in the name field on a desktop; a phone's keyboard stays down until a tap.
+  React.useEffect(() => {
+    if (ready && matchMedia("(pointer: fine)").matches) nameField.current?.focus({ preventScroll: true });
+  }, [ready]);
 
   // The wall on the grid's columns (the grid is laid out, hidden, under the gate).
   const shape = React.useSyncExternalStore(onResize, () => gridShape(grid.current), () => "");
@@ -117,8 +130,39 @@ export function ProofWall({
   function open() {
     if (flat) return;
     const still = reducedMotion();
+    if (!still) settle();
     setFlat(true);
     window.setTimeout(() => land(still), still ? 0 : FLAT_MS);
+  }
+
+  /** While the wall flattens, each of the grid's columns slides up or down so its first frame stops on its first cell. */
+  function settle() {
+    const root = layer.current;
+    const dw = root?.querySelector<HTMLElement>(".drift-wall");
+    const plane = root?.querySelector<HTMLElement>(".drift-wall__plane");
+    const g = grid.current;
+    if (!root || !dw || !plane || !g || !wall) return;
+    // Where the tiles will stand once flat: laid out flat for a moment, unpainted, then put back.
+    const was = [plane.style.transform, plane.style.transition, dw.style.scale, dw.style.transition];
+    plane.style.transition = dw.style.transition = "none";
+    plane.style.transform = `translate(calc(-50% + ${wall.dx}px), -50%)`;
+    dw.style.scale = "1";
+    const tiles = tilesNear(root);
+    [plane.style.transform, plane.style.transition, dw.style.scale, dw.style.transition] = was;
+    plane.getBoundingClientRect(); // the tilt back in place before the flattening starts from it
+    const cells = [...g.querySelectorAll<HTMLElement>(".proof-cell")];
+    const n = Number(shape.split(",")[0]);
+    cells.slice(0, n).forEach((cell, c) => {
+      const to = cell.getBoundingClientRect();
+      const src = cell.querySelector("img")?.getAttribute("src");
+      const cx = to.left + to.width / 2;
+      const cy = to.top + to.height / 2;
+      let from: Box | null = null;
+      for (const t of tiles)
+        if (t.img.getAttribute("src") === src && Math.abs(t.x - cx) < to.width / 2 && (!from || Math.abs(t.y - cy) < Math.abs(from.y - cy))) from = t;
+      const track = from?.img.closest<HTMLElement>(".drift-wall__track");
+      if (from && track) track.animate([{ translate: "0 0" }, { translate: `0 ${cy - from.y}px` }], { duration: FLAT_MS, easing: SETTLE_EASE, delay: c * STAGGER, fill: "forwards" });
+    });
   }
 
   function land(still: boolean) {
@@ -128,17 +172,8 @@ export function ProofWall({
     const cells = [...(grid.current?.querySelectorAll<HTMLElement>(".proof-cell") ?? [])];
     const anims: Animation[] = [];
     const used = new Set<Box>();
-    // Per grid column: how far its wall column slides, up or down, so its first frame lands on its first cell.
-    // The whole strip slides as one and every cell rides on its own tile.
-    const shift = new Map<number, number>();
     const pitch = wall ? wall.w + wall.gap : 1;
     const x0 = cells[0]?.getBoundingClientRect().left ?? 0;
-    const tileOf = (src: string | null | undefined, cx: number, y: number) => {
-      let from: Box | null = null;
-      for (const t of tiles)
-        if (!used.has(t) && t.img.getAttribute("src") === src && Math.abs(t.x - cx) < pitch / 2 && (!from || Math.abs(t.y - y) < Math.abs(from.y - y))) from = t;
-      return from;
-    };
     for (const cell of still ? [] : cells) {
       const to = cell.getBoundingClientRect();
       if (to.top > innerHeight || !to.width) break;
@@ -147,14 +182,10 @@ export function ProofWall({
       const cx = to.left + to.width / 2;
       const cy = to.top + to.height / 2;
       const delay = col * STAGGER;
-      let from = tileOf(src, cx, cy - (shift.get(col) ?? 0));
-      if (from && !shift.has(col)) {
-        const dy = cy - from.y;
-        shift.set(col, dy);
-        const track = from.img.closest<HTMLElement>(".drift-wall__track");
-        track?.animate([{ translate: "0 0" }, { translate: `0 ${dy}px` }], { duration: LAND_MS, easing: LAND_EASE, delay, fill: "forwards" });
-        from = tileOf(src, cx, cy - dy);
-      }
+      // Its own frame in its own column, settled just about on it (`settle`).
+      let from: Box | null = null;
+      for (const t of tiles)
+        if (!used.has(t) && t.img.getAttribute("src") === src && Math.abs(t.x - cx) < pitch / 2 && (!from || Math.abs(t.y - cy) < Math.abs(from.y - cy))) from = t;
       if (!from) {
         anims.push(cell.animate([{ transform: "translateY(40px)", opacity: 0 }, { transform: "none", opacity: 1 }], { duration: LAND_MS * 0.8, easing: LAND_EASE, delay, fill: "backwards" }));
         continue;
@@ -175,7 +206,7 @@ export function ProofWall({
         ),
       );
     }
-    const out = root?.animate([{ opacity: 1 }, { opacity: 0 }], { duration: still ? 200 : WALL_OUT_MS, delay: still ? 0 : LAND_MS * 0.55, easing: "ease-out", fill: "forwards" });
+    const out = root?.animate([{ opacity: 1 }, { opacity: 0 }], { duration: still ? 200 : WALL_OUT_MS, delay: still ? 0 : LAND_MS, easing: "ease-out", fill: "forwards" });
     Promise.all([out?.finished, ...anims.map((a) => a.finished)].map((p) => p?.catch(() => {}))).then(onDone);
   }
 
@@ -191,7 +222,7 @@ export function ProofWall({
             gap={wall.gap}
             radius={2}
             speed={24}
-            dim={0.4}
+            dim={0.6}
             overlayColor="var(--background)"
             density={0.5}
             flatten={flat ? wall.dx : undefined}
@@ -220,6 +251,7 @@ export function ProofWall({
         <label>
           <span className="proof-lab">Your name</span>
           <input
+            ref={nameField}
             name="name"
             autoComplete="name"
             required

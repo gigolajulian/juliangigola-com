@@ -184,6 +184,8 @@ html:has(.proof) #main{transform:none}
 
 /* ── ?proofwall=1: the gate over the 404's wall (components/proof-wall.tsx) ── */
 .proof[data-wall]{position:relative;isolation:isolate}
+/* The scrollbar's room kept while the wall holds the page still, so the grid does not jump when it comes back. */
+html:has(.proof[data-wall]){scrollbar-gutter:stable}
 /* the page lets the wall show through while it is up; the gallery sits over it */
 .proof[data-wall]:not([data-wall="on"]){background:none}
 .proof[data-wall]>div:not(.pw-layer){position:relative;z-index:1}
@@ -194,7 +196,7 @@ html:has(.proof) #main{transform:none}
 .pw-layer>.drift-wall{position:absolute;inset:0;pointer-events:none;transition:filter 1.8s cubic-bezier(.45,0,.2,1),scale 2.4s cubic-bezier(.2,.7,.1,1)}
 .pw-layer[data-ready]>.drift-wall{filter:blur(6px);scale:1.04}
 /* Falloff to the edges, a quiet centre under the card: one light, not a flat wash. */
-.pw-vig{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity 1.6s ease;background:radial-gradient(ellipse 70% 65% at 50% 52%,transparent 35%,color-mix(in oklab,var(--background) 80%,transparent) 100%)}
+.pw-vig{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity 1.6s ease;background:radial-gradient(ellipse 70% 65% at 50% 52%,transparent 35%,color-mix(in oklab,var(--background) 65%,transparent) 100%)}
 .pw-layer[data-ready] .pw-vig{opacity:1}
 /* The card rises out of the blur after the wall, its lines one after another. */
 .proof .pw-card{opacity:0;translate:0 18px;filter:blur(8px);transition:opacity .9s cubic-bezier(.23,1,.32,1),translate 1.1s cubic-bezier(.16,1,.3,1),filter .9s cubic-bezier(.23,1,.32,1)}
@@ -205,7 +207,7 @@ html:has(.proof) #main{transform:none}
 .proof .pw-card[data-ready]>:nth-child(3){transition-delay:.33s}
 .proof .pw-card[data-ready]>:nth-child(n+4){transition-delay:.4s}
 /* Open proofs: the wall eases flat, stops, comes sharp and full strength, lined up on the grid (proof-wall.tsx); the card sinks back. */
-.pw-layer[data-flat]>.drift-wall{filter:none;scale:none;-webkit-mask:none;mask:none;transition:filter .6s ease,scale .75s cubic-bezier(.65,0,.35,1)}
+.pw-layer[data-flat]>.drift-wall{filter:none;scale:none;-webkit-mask:none;mask:none;transition:filter .6s ease,scale 1s cubic-bezier(.65,0,.35,1)}
 .pw-layer[data-flat] .drift-wall__inner{opacity:1}
 .pw-layer[data-flat] .drift-wall__overlay{opacity:0}
 .pw-layer[data-flat] :is(.pw-vig,.pw-grain){opacity:0;transition:opacity .5s ease}

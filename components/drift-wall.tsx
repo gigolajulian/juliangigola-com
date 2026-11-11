@@ -429,7 +429,7 @@ const DriftWall = ({
     flatRef.current = flatten;
     const plane = planeRef.current;
     if (flatten === undefined || !plane) return;
-    plane.style.transition = 'transform 0.75s cubic-bezier(.65,0,.35,1)';
+    plane.style.transition = 'transform 1s cubic-bezier(.65,0,.35,1)';
     applyPlaneTransform(0, 0);
   }, [flatten, applyPlaneTransform]);
 
