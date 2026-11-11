@@ -1,9 +1,9 @@
-// book.juliangigola.com: static booking page, separate from the main site's Worker.
-// worker.js runs first so each booking link gets its own preview title.
+// book.juliangigola.com: the old booking address, separate from the main site's Worker.
+// worker.js redirects every page to juliangigola.com/book and serves the images old link cards point at.
 {
   "name": "juliangigola-book",
   "main": "worker.js",
   "compatibility_date": "2026-10-01",
-  "assets": { "directory": "./public", "binding": "ASSETS", "not_found_handling": "single-page-application", "run_worker_first": true },
+  "assets": { "directory": "./public", "binding": "ASSETS", "run_worker_first": true },
   "routes": [{ "pattern": "book.juliangigola.com/*", "zone_name": "juliangigola.com" }]
 }
