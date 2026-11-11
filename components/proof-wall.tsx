@@ -5,41 +5,57 @@ import { flushSync } from "react-dom";
 import DriftWall from "@/components/drift-wall";
 
 /* ── the proof gate over the 404's wall, behind ?proofwall=1 ──────────
- * Julian (2026-11-10, after v3.0.171): the tilted grid wall looked
- * horrible; use the 404's wall (`DriftWall`, as `app/not-found.tsx` sets
- * it) and make the move from sign-in to gallery seamless. So the wall is
- * the 404's, carrying this gallery's own watermarked frames, under a
- * glass card. On accept the gallery is laid out underneath at once, and
- * each photo in its first screen flies out of the wall: from a tile
- * showing the same frame where one is in view, from the nearest free tile
- * otherwise, growing into its cell, while the rest of the wall and the
- * card fall away. One move, no cut.
+ * Julian (2026-11-10): the 404's wall (`DriftWall`) under a glass card,
+ * carrying this gallery's own watermarked frames, and the move from
+ * sign-in to gallery seamless. Then: the photos must not travel left or
+ * right to reach the gallery. So the wall is laid out on the gallery's
+ * own columns: one wall column of the grid's width for each, carrying
+ * that column's frames in order, with spare columns either side for the
+ * tilt. On Open proofs the wall eases flat and face on, stops and comes
+ * sharp, lined up with the grid; then each photo on the gallery's first
+ * screen drops straight down or up from its own tile into its cell,
+ * uncropping as it lands, while the rest of the wall falls away.
  * ─────────────────────────────────────────────────────────────── */
 
-// Julian: the wall keeps going until Open proofs, then eases each photo into its spot.
-const FLY_MS = 1250;
-const FLY_EASE = "cubic-bezier(.45,0,.15,1)";
-const STAGGER = 36; // ms per cell, in reading order
-const WALL_OUT_MS = 650;
-const CARD_OUT_MS = 220;
 const READY_AFTER_MS = 900; // after the wall shows: the columns mostly in before the focus pull
+const FLAT_MS = 800; // the plane easing flat and sharp (drift-wall.tsx), then the drop
+const LAND_MS = 1000;
+const LAND_EASE = "cubic-bezier(.6,0,.15,1)";
+const STAGGER = 50; // ms a column, left to right
+const WALL_OUT_MS = 600;
+const ROWS = 6; // a wall column's length (DriftWall takes at most six)
 
 type Frame = { src: string; w: number; h: number };
 type Box = { x: number; y: number; w: number; h: number; img: HTMLImageElement };
 
 const reducedMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-/** Every wall tile on screen with its photograph loaded, as a box in the viewport. */
-function tilesInView(root: HTMLElement): Box[] {
+/** Every loaded wall tile within a screen of the view, as a box in the viewport. */
+function tilesNear(root: HTMLElement): Box[] {
   const out: Box[] = [];
   for (const img of root.querySelectorAll<HTMLImageElement>(".drift-wall__tile img.is-loaded")) {
     const r = img.getBoundingClientRect();
-    // A tile swung behind the camera projects to a huge box: not in view.
-    if (r.width < 8 || r.width > innerWidth || r.bottom < 0 || r.top > innerHeight || r.right < 0 || r.left > innerWidth) continue;
+    if (r.width < 8 || r.width > innerWidth || r.bottom < -innerHeight || r.top > 2 * innerHeight) continue;
     out.push({ x: r.left + r.width / 2, y: r.top + r.height / 2, w: r.width, h: r.height, img });
   }
   return out;
 }
+
+/** The grid's columns as "count,width,gap,offset from the middle of the screen": a string, so it compares. */
+function gridShape(g: HTMLElement | null) {
+  if (!g) return "";
+  const cs = getComputedStyle(g);
+  const cols = cs.gridTemplateColumns.split(" ").map(parseFloat).filter((n) => n > 0);
+  if (!cols.length) return "";
+  const gap = parseFloat(cs.columnGap) || 0;
+  const left = g.getBoundingClientRect().left + (parseFloat(cs.paddingLeft) || 0);
+  const width = cols.length * cols[0] + (cols.length - 1) * gap;
+  return [cols.length, cols[0], gap, left + width / 2 - innerWidth / 2].map((n) => Math.round(n * 100) / 100).join(",");
+}
+const onResize = (cb: () => void) => {
+  addEventListener("resize", cb);
+  return () => removeEventListener("resize", cb);
+};
 
 export function ProofWall({
   frames,
@@ -55,18 +71,37 @@ export function ProofWall({
   onDone: () => void;
 }) {
   const layer = React.useRef<HTMLDivElement>(null);
-  const card = React.useRef<HTMLFormElement>(null);
   const [name, setName] = React.useState("");
   const [email, setEmail] = React.useState("");
   const [bad, setBad] = React.useState<string | null>(null);
   // Julian (2026-11-10): the load-up should feel premium. The wall streams in sharp, every other column from above and below, then racks
   // focus to blur as the card rises in, its lines one after another (`[data-ready]`, proof.css).
   const [ready, setReady] = React.useState(false);
+  const [flat, setFlat] = React.useState(false);
   const shown = React.useCallback(() => {
     window.setTimeout(() => setReady(true), reducedMotion() ? 0 : READY_AFTER_MS);
   }, []);
-  // The 404's wall carries the first two dozen frames: what the gallery opens on.
-  const items = React.useMemo(() => frames.slice(0, 24).map((f) => ({ image: f.src })), [frames]);
+
+  // The wall on the grid's columns (the grid is laid out, hidden, under the gate).
+  const shape = React.useSyncExternalStore(onResize, () => gridShape(grid.current), () => "");
+  const wall = React.useMemo(() => {
+    if (!shape || !frames.length) return null;
+    const [n, w, gap, dx] = shape.split(",").map(Number);
+    // Spare columns either side, enough to fill the tilted view (DriftWall's own "fill").
+    const side = Math.max(1, Math.ceil((Math.ceil((innerWidth * 1.5) / (w + gap)) - n) / 2));
+    const cols = n + 2 * side;
+    // Row by row, as DriftWall deals them out (item i to column i % cols): an inner column carries
+    // its grid column's frames top down, the spares the frames past the first screens.
+    const items: { image: string }[] = [];
+    let spare = n * ROWS;
+    for (let r = 0; r < ROWS; r++)
+      for (let j = 0; j < cols; j++) {
+        const c = j - side;
+        const i = c >= 0 && c < n ? c + r * n : spare++;
+        items.push({ image: frames[i % frames.length].src });
+      }
+    return { items, cols, w, gap, dx };
+  }, [shape, frames]);
 
   // The page holds still under the wall.
   React.useEffect(() => {
@@ -80,64 +115,96 @@ export function ProofWall({
   }, []);
 
   function open() {
+    if (flat) return;
+    const still = reducedMotion();
+    setFlat(true);
+    window.setTimeout(() => land(still), still ? 0 : FLAT_MS);
+  }
+
+  function land(still: boolean) {
     const root = layer.current;
-    const tiles = root ? tilesInView(root) : [];
+    const tiles = root && !still ? tilesNear(root) : [];
     flushSync(() => onAccept(name.trim().replace(/\s+/g, " "), email.trim()));
     const cells = [...(grid.current?.querySelectorAll<HTMLElement>(".proof-cell") ?? [])];
     const anims: Animation[] = [];
-    const still = reducedMotion();
-
-    if (!still) {
-      const free = new Set(tiles);
-      let k = 0;
-      for (const cell of cells) {
-        const to = cell.getBoundingClientRect();
-        if (to.top > innerHeight || !to.width) break;
-        const src = cell.querySelector("img")?.getAttribute("src");
-        const cx = to.left + to.width / 2;
-        const cy = to.top + to.height / 2;
-        // Its own frame on the wall if one is in view, else the nearest tile left.
-        let from: Box | null = null;
-        let best = Infinity;
-        for (const t of free) {
-          const d = (t.img.getAttribute("src") === src ? 0 : 1e9) + Math.hypot(t.x - cx, t.y - cy);
-          if (d < best) [best, from] = [d, t];
-        }
-        const delay = k++ * STAGGER;
-        if (from) {
-          free.delete(from);
-          from.img.style.visibility = "hidden";
-          const s = Math.min(from.w / to.width, from.h / to.height);
-          anims.push(
-            cell.animate([{ transform: `translate(${from.x - cx}px, ${from.y - cy}px) scale(${s})` }, { transform: "none" }], {
-              duration: FLY_MS,
-              easing: FLY_EASE,
-              delay,
-              fill: "backwards",
-            }),
-          );
-        } else {
-          anims.push(cell.animate([{ transform: "translateY(24px)", opacity: 0 }, { transform: "none", opacity: 1 }], { duration: FLY_MS * 0.7, easing: FLY_EASE, delay, fill: "backwards" }));
-        }
+    const used = new Set<Box>();
+    // Per grid column: how far its wall column slides, up or down, so its first frame lands on its first cell.
+    // The whole strip slides as one and every cell rides on its own tile.
+    const shift = new Map<number, number>();
+    const pitch = wall ? wall.w + wall.gap : 1;
+    const x0 = cells[0]?.getBoundingClientRect().left ?? 0;
+    const tileOf = (src: string | null | undefined, cx: number, y: number) => {
+      let from: Box | null = null;
+      for (const t of tiles)
+        if (!used.has(t) && t.img.getAttribute("src") === src && Math.abs(t.x - cx) < pitch / 2 && (!from || Math.abs(t.y - y) < Math.abs(from.y - y))) from = t;
+      return from;
+    };
+    for (const cell of still ? [] : cells) {
+      const to = cell.getBoundingClientRect();
+      if (to.top > innerHeight || !to.width) break;
+      const src = cell.querySelector("img")?.getAttribute("src");
+      const col = Math.round((to.left - x0) / pitch);
+      const cx = to.left + to.width / 2;
+      const cy = to.top + to.height / 2;
+      const delay = col * STAGGER;
+      let from = tileOf(src, cx, cy - (shift.get(col) ?? 0));
+      if (from && !shift.has(col)) {
+        const dy = cy - from.y;
+        shift.set(col, dy);
+        const track = from.img.closest<HTMLElement>(".drift-wall__track");
+        track?.animate([{ translate: "0 0" }, { translate: `0 ${dy}px` }], { duration: LAND_MS, easing: LAND_EASE, delay, fill: "forwards" });
+        from = tileOf(src, cx, cy - dy);
       }
+      if (!from) {
+        anims.push(cell.animate([{ transform: "translateY(40px)", opacity: 0 }, { transform: "none", opacity: 1 }], { duration: LAND_MS * 0.8, easing: LAND_EASE, delay, fill: "backwards" }));
+        continue;
+      }
+      used.add(from);
+      from.img.style.visibility = "hidden";
+      // The tile shows the frame cropped to 3:4 (object-fit: cover): start as that crop, open to the whole frame.
+      const s = Math.max(from.w / to.width, from.h / to.height);
+      const ix = Math.max(0, (to.width - from.w / s) / 2);
+      const iy = Math.max(0, (to.height - from.h / s) / 2);
+      anims.push(
+        cell.animate(
+          [
+            { transform: `translate(${from.x - cx}px, ${from.y - cy}px) scale(${s})`, clipPath: `inset(${iy}px ${ix}px)` },
+            { transform: "none", clipPath: "inset(0px 0px)" },
+          ],
+          { duration: LAND_MS, easing: LAND_EASE, delay, fill: "backwards" },
+        ),
+      );
     }
-
-    card.current?.animate([{ opacity: 1 }, { opacity: 0 }], { duration: CARD_OUT_MS, easing: "ease-in", fill: "forwards" });
-    const out = root?.animate([{ opacity: 1 }, { opacity: 0 }], { duration: still ? 200 : WALL_OUT_MS, easing: "ease-out", fill: "forwards" });
+    const out = root?.animate([{ opacity: 1 }, { opacity: 0 }], { duration: still ? 200 : WALL_OUT_MS, delay: still ? 0 : LAND_MS * 0.55, easing: "ease-out", fill: "forwards" });
     Promise.all([out?.finished, ...anims.map((a) => a.finished)].map((p) => p?.catch(() => {}))).then(onDone);
   }
 
   return (
     <>
-      <div ref={layer} className="pw-layer" data-ready={ready || undefined}>
-        <DriftWall items={items} speed={24} dim={0.4} overlayColor="var(--background)" density={0.5} onShown={shown} />
+      <div ref={layer} className="pw-layer" data-ready={ready || undefined} data-flat={flat || undefined}>
+        {wall ? (
+          <DriftWall
+            items={wall.items}
+            columns={wall.cols}
+            tileWidth={wall.w}
+            tileHeight={Math.round((wall.w * 4) / 3)}
+            gap={wall.gap}
+            radius={2}
+            speed={24}
+            dim={0.4}
+            overlayColor="var(--background)"
+            density={0.5}
+            flatten={flat ? wall.dx : undefined}
+            onShown={shown}
+          />
+        ) : null}
         <div aria-hidden className="pw-vig" />
         <div aria-hidden className="pw-grain" />
       </div>
       <form
-        ref={card}
         className="proof-card pw-card"
         data-ready={ready || undefined}
+        data-out={flat || undefined}
         noValidate
         onSubmit={(e) => {
           e.preventDefault();

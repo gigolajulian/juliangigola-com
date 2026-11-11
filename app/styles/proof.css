@@ -202,6 +202,12 @@ html:has(.proof) #main{transform:none}
 .proof .pw-card[data-ready]>:nth-child(2){transition-delay:.26s}
 .proof .pw-card[data-ready]>:nth-child(3){transition-delay:.33s}
 .proof .pw-card[data-ready]>:nth-child(n+4){transition-delay:.4s}
+/* Open proofs: the wall eases flat, stops, comes sharp and full strength, lined up on the grid (proof-wall.tsx); the card sinks back. */
+.pw-layer[data-flat]>.drift-wall{filter:none;scale:none;-webkit-mask:none;mask:none;transition:filter .6s ease,scale .75s cubic-bezier(.65,0,.35,1)}
+.pw-layer[data-flat] .drift-wall__inner{opacity:1}
+.pw-layer[data-flat] .drift-wall__overlay{opacity:0}
+.pw-layer[data-flat] :is(.pw-vig,.pw-grain){opacity:0;transition:opacity .5s ease}
+.proof .pw-card[data-out]{opacity:0;translate:0 14px;filter:blur(6px);pointer-events:none;transition:opacity .4s ease-in,translate .5s cubic-bezier(.4,0,1,1),filter .4s ease-in}
 @media (prefers-reduced-motion:reduce){.pw-layer>.drift-wall,.pw-vig,.proof .pw-card,.proof .pw-card>*{transition:none}}
 /* the 404's dusting of grain over its wall */
 .pw-grain{position:absolute;inset:0;pointer-events:none;opacity:.2;mix-blend-mode:overlay;background-image:radial-gradient(color-mix(in oklab,var(--foreground) 50%,transparent) .5px,transparent .5px);background-size:3px 3px}
