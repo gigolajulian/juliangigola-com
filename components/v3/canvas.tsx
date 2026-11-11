@@ -5,6 +5,7 @@ import Link from "next/link";
 import { getImageProps } from "next/image";
 import { DECEL } from "@/lib/motion/throw";
 import { isTrackpad } from "@/lib/motion/wheel";
+import { projectHref } from "@/lib/project-href";
 import type { WorkItem } from "@/components/v3/work";
 
 /* `?canvas=1` prototype (mock approved by Julian, 2026-11-07): every frame
@@ -392,7 +393,7 @@ export function V3Canvas({ list, onClose }: { list: WorkItem[]; onClose: () => v
             <h2>{p.n}</h2>
             {/* The canvas comes down before the page crossing: WebKit crashed snapshotting the
                 live field into the view transition (4 of 4, iPhone, iPad and desktop). */}
-            <Link className="lbl" href={`/portfolio/${p.s}`} onClick={onClose}>
+            <Link className="lbl" href={projectHref(p.s)} onClick={onClose}>
               Open project
             </Link>
           </div>
