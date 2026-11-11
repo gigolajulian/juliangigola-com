@@ -635,7 +635,7 @@ function Gate({ frames, count, onEnter }: { frames: string[]; count: number; onE
         </div>
         <label>
           <span className="proof-lab">Your name</span>
-          <input name="name" autoComplete="name" required value={name} onChange={(e) => { setName(e.target.value); setBad(null); }} placeholder="First and last" aria-invalid={bad === "Add your name." || undefined} />
+          <input name="name" autoComplete="name" required value={name} onChange={(e) => { setName(e.target.value); setBad(null); }} placeholder="Your name" aria-invalid={bad === "Add your name." || undefined} />
         </label>
         <label>
           <span className="proof-lab">Your email</span>
@@ -643,7 +643,7 @@ function Gate({ frames, count, onEnter }: { frames: string[]; count: number; onE
         </label>
         {bad ? <p className="proof-err" role="alert">{bad}</p> : null}
         <button type="submit" className="proof-btn">Open gallery</button>
-        <p className="proof-mu">Any email opens it. Your picks are logged under this address, and they are still here when you come back.</p>
+        <p className="proof-mu">Keep track of your favorites.</p>
       </form>
     </div>
   );

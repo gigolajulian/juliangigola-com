@@ -16,9 +16,10 @@ import DriftWall from "@/components/drift-wall";
  * card fall away. One move, no cut.
  * ─────────────────────────────────────────────────────────────── */
 
-const FLY_MS = 950;
-const FLY_EASE = "cubic-bezier(.2,.75,.15,1)";
-const STAGGER = 28; // ms per cell, in reading order
+// Julian: the wall keeps going until Open proofs, then eases each photo into its spot.
+const FLY_MS = 1250;
+const FLY_EASE = "cubic-bezier(.45,0,.15,1)";
+const STAGGER = 36; // ms per cell, in reading order
 const WALL_OUT_MS = 650;
 const CARD_OUT_MS = 220;
 
@@ -147,7 +148,7 @@ export function ProofWall({
             autoComplete="name"
             required
             value={name}
-            placeholder="First and last"
+            placeholder="Your name"
             aria-invalid={bad === "Add your name." || undefined}
             onChange={(e) => {
               setName(e.target.value);
@@ -180,7 +181,7 @@ export function ProofWall({
         <button type="submit" className="proof-btn">
           Open proofs
         </button>
-        <p className="proof-mu">Any email opens it. Your picks are logged under this address, and they are still here when you come back.</p>
+        <p className="proof-mu">Keep track of your favorites.</p>
       </form>
     </>
   );
