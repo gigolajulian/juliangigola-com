@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { cardPrice, type PublicProof } from "@/lib/proofs";
+import { cardPrice, THUMB_W, type PublicProof } from "@/lib/proofs";
 import { looksLikeEmail } from "@/lib/inbox";
 import { ProofWall } from "@/components/proof-wall";
 
@@ -117,6 +117,8 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
   const due = balDue + Math.max(0, extra - (price ? Math.floor(paidPastBal / (price * 100)) : 0)) * price;
   const byId = React.useMemo(() => new Map(frames.map((f, i) => [f.id, i])), [frames]);
   const src = (id: string) => `/proof/${token}/f/${encodeURIComponent(id)}`;
+  // The 800px copy for the grid and the walls; the lightbox keeps the whole frame.
+  const thumb = (id: string) => `${src(id)}?w=${THUMB_W}`;
 
   const post = React.useCallback((b: Record<string, unknown>) => fetch(`/api/proof/${token}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(b) }), [token]);
 
@@ -266,7 +268,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
     return (
       <div className="proof">
         <Top view={view} setView={setView} n={0} included={included} due={0} hideTabs />
-        <Gate frames={frames.slice(0, 12).map((f) => src(f.id))} count={frames.length} onEnter={(name, address) => {
+        <Gate frames={frames.slice(0, 12).map((f) => thumb(f.id))} count={frames.length} onEnter={(name, address) => {
             setHello(name.split(/\s+/)[0]);
             enter(address, name);
           }} />
@@ -396,7 +398,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
             return (
               <div key={f.id} data-id={f.id} className="proof-cell" data-on={at >= 0 || undefined}>
                 {/* eslint-disable-next-line @next/next/no-img-element -- private frames from the Worker, not the image CDN */}
-                <img src={src(f.id)} alt="" loading={i < 8 ? "eager" : "lazy"} width={f.w || undefined} height={f.h || undefined} draggable={false} />
+                <img src={thumb(f.id)} alt="" loading={i < 8 ? "eager" : "lazy"} width={f.w || undefined} height={f.h || undefined} draggable={false} />
                 <button type="button" className="proof-pick" aria-pressed={at >= 0} aria-label={`Frame ${i + 1}`} onClick={() => toggle(f.id)} />
                 <span className="proof-no">{pad(i)}</span>
                 <span className="proof-mark">{at >= 0 ? at + 1 : ""}</span>
@@ -462,7 +464,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
 
       {walling ? (
         <ProofWall
-          frames={frames.map((f) => ({ src: src(f.id), w: f.w, h: f.h }))}
+          frames={frames.map((f) => ({ src: thumb(f.id), w: f.w, h: f.h }))}
           grid={gridEl}
           isEmail={isEmail}
           onAccept={(name, address) => {

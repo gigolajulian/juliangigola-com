@@ -195,8 +195,12 @@ html:has(.proof[data-wall]){scrollbar-gutter:stable}
 .pw-layer .drift-wall__tile{pointer-events:none}
 /* Julian: photos load before they come into frame. A tile whose photograph is not in yet shows nothing (no dark box) and fades up once it is. */
 .pw-layer .drift-wall__inner{background:none}
-.pw-layer>.drift-wall{position:absolute;inset:0;pointer-events:none;transition:filter 1.8s cubic-bezier(.45,0,.2,1),scale 2.4s cubic-bezier(.2,.7,.1,1)}
-.pw-layer[data-ready]>.drift-wall{filter:blur(6px);scale:1.04}
+/* Julian: the wall lagged. The blur sits on each tile, not on the whole wall: a tile rides a moving column and is
+   blurred once, where a blur over the moving wall was redrawn every frame. Same for the 404's edge mask: the vignette does that job. */
+.pw-layer>.drift-wall{position:absolute;inset:0;pointer-events:none;-webkit-mask:none;mask:none;transition:scale 2.4s cubic-bezier(.2,.7,.1,1)}
+.pw-layer .drift-wall__inner{transition:opacity var(--dur-lg) var(--ease-out-strong),filter 1.8s cubic-bezier(.45,0,.2,1)}
+.pw-layer[data-ready]>.drift-wall{scale:1.04}
+.pw-layer[data-ready] .drift-wall__inner{filter:blur(6px)}
 /* Falloff to the edges, a quiet centre under the card: one light, not a flat wash. */
 .pw-vig{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity 1.6s ease;background:radial-gradient(ellipse 70% 65% at 50% 52%,transparent 35%,color-mix(in oklab,var(--background) 65%,transparent) 100%)}
 .pw-layer[data-ready] .pw-vig{opacity:1}
@@ -209,14 +213,15 @@ html:has(.proof[data-wall]){scrollbar-gutter:stable}
 .proof .pw-card[data-ready]>:nth-child(3){transition-delay:.33s}
 .proof .pw-card[data-ready]>:nth-child(n+4){transition-delay:.4s}
 /* Open proofs: the wall eases flat, stops, comes sharp and full strength, lined up on the grid (proof-wall.tsx); the card sinks back. */
-.pw-layer[data-flat]>.drift-wall{filter:none;scale:none;-webkit-mask:none;mask:none;transition:filter .6s ease,scale 1s cubic-bezier(.65,0,.35,1)}
-.pw-layer[data-flat] .drift-wall__inner{opacity:1}
+.pw-layer[data-flat]>.drift-wall{scale:none;transition:scale 1s cubic-bezier(.65,0,.35,1)}
+.pw-layer[data-flat] .drift-wall__inner{opacity:1;filter:none;transition:opacity .6s ease,filter .6s ease}
 .pw-layer[data-flat] .drift-wall__overlay{opacity:0}
 .pw-layer[data-flat] :is(.pw-vig,.pw-grain){opacity:0;transition:opacity .5s ease}
 .proof .pw-card[data-out]{opacity:0;translate:0 14px;filter:blur(6px);pointer-events:none;transition:opacity .4s ease-in,translate .5s cubic-bezier(.4,0,1,1),filter .4s ease-in}
 @media (prefers-reduced-motion:reduce){.pw-layer>.drift-wall,.pw-vig,.proof .pw-card,.proof .pw-card>*{transition:none}}
 /* the 404's dusting of grain over its wall */
-.pw-grain{position:absolute;inset:0;pointer-events:none;opacity:.2;mix-blend-mode:overlay;background-image:radial-gradient(color-mix(in oklab,var(--foreground) 50%,transparent) .5px,transparent .5px);background-size:3px 3px}
+/* No blend mode: blending over the moving wall cost a pass every frame. */
+.pw-grain{position:absolute;inset:0;pointer-events:none;opacity:.07;background-image:radial-gradient(color-mix(in oklab,var(--foreground) 50%,transparent) .5px,transparent .5px);background-size:3px 3px}
 /* compact intro (Julian 2026-11-10: the header does not have to be that big); one line, a long name wraps it to two */
 .proof[data-wall] .proof-intro{padding:clamp(28px,4cqi,48px) 28px clamp(20px,2.5cqi,28px);max-width:none}
 .proof[data-wall] .proof-intro h1{font:500 clamp(20px,calc((100cqi - 56px) / (var(--len,17) * .5)),44px)/1.1 var(--font-display);letter-spacing:-.025em;margin:10px 0 0;text-wrap:balance}
@@ -230,7 +235,8 @@ html:has(.proof[data-wall]){scrollbar-gutter:stable}
 /* the navbar in the 404's glass (v3.css .site-hdr) */
 .proof[data-wall] .proof-top{background:color-mix(in srgb,var(--background) 52%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
 /* the card: more blur than the default gate's 26px */
-.proof .pw-card{position:fixed;z-index:6;top:calc(50% + 28px);background:color-mix(in oklab,var(--background) 50%,transparent);-webkit-backdrop-filter:blur(44px) saturate(1.5);backdrop-filter:blur(44px) saturate(1.5)}
+/* A lighter glass: the wall under it is already blurred, and the card's blur is redrawn every frame the wall moves. */
+.proof .pw-card{position:fixed;z-index:6;top:calc(50% + 28px);background:color-mix(in oklab,var(--background) 62%,transparent);-webkit-backdrop-filter:blur(20px) saturate(1.3);backdrop-filter:blur(20px) saturate(1.3)}
 /* no backdrop blur (or reduced transparency): a near-solid ground keeps both readable over the photographs */
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
   .proof[data-wall] .proof-top{background:color-mix(in srgb,var(--background) 92%,transparent)}
