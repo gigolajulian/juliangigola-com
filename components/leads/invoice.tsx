@@ -426,7 +426,7 @@ const EMPTY_FROM: InvoiceFrom = { name: "", a1: "", a2: "", a3: "", email: "hell
 const FROM_FIELDS: [keyof InvoiceFrom, string][] = [["name", "Name on the invoice"], ["a1", "Address, line 1"], ["a2", "Address, line 2"], ["a3", "City, state, zip"], ["email", "Email"], ["phone", "Phone"], ["ein", "EIN line"], ["signoff", "Sign-off"], ["notes", "Notes on every invoice"], ["bank", "Bank name"], ["routing", "Routing number"], ["account", "Account number"], ["late", "Late fee line"], ["tax", "Tax number"]];
 
 /** His details, once: sealed on the Worker, never in the code (the repo is public). */
-export function FromForm({ from, saved }: { from: InvoiceFrom; saved: (f: InvoiceFrom) => void }) {
+function FromForm({ from, saved }: { from: InvoiceFrom; saved: (f: InvoiceFrom) => void }) {
   const [f, setF] = React.useState(from);
   const [err, setErr] = React.useState<string | null>(null);
   const save = () =>

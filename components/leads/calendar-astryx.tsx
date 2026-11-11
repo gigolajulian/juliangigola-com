@@ -23,9 +23,34 @@ import { Token } from "@astryxdesign/core/Token";
 import { Divider } from "@astryxdesign/core/Divider";
 import { EVENTS, HOURS, TZ } from "@/lib/booking/booking-rules";
 import { startsFor, zoned } from "@/lib/booking/slots";
-import { errorText } from "@/lib/leads/lead-desk";
 import type { LeadSummary } from "@/lib/leads/leads";
-import { calendarCall, daysOf, openSpans, type Busy, type Ev, type Month } from "@/components/leads/lead-calendar";
+import { adminCall, errorText } from "@/lib/leads/lead-desk";
+
+/* The calendar's data and day maths, from the retired classic desk (`components/leads/lead-calendar.tsx`). */
+export type Ev = { id: string; title: string; start: string; end: string; allDay: boolean; block: boolean; booking: boolean; free: boolean };
+export type Busy = { label: string; start: string; end: string };
+export type Extra = { label: string; src: string; ics: boolean; failed: boolean };
+export type Month = { events: Ev[]; busy: Busy[]; extras: Extra[] };
+
+/** The days `[start, end)` touches, in Pacific. */
+export function daysOf(start: string, end: string) {
+  const out: string[] = [];
+  const last = dayOf(Date.parse(end) - 1);
+  for (let d = dayOf(Date.parse(start)); d <= last; d = plus(d, 1)) out.push(d);
+  return out;
+}
+
+/** The open stretches of `day` within Julian's hours, minus what is busy. */
+export function openSpans(day: string, busy: { start: number; end: number }[], now: number) {
+  const h = HOURS[weekday(day)];
+  if (!h) return [];
+  let spans = [[zoned(...ymd(day), h[0]), zoned(...ymd(day), h[1])]];
+  for (const b of busy) spans = spans.flatMap(([a, z]) => (b.end <= a || b.start >= z ? [[a, z]] : [[a, b.start], [b.end, z]].filter(([x, y]) => y > x)));
+  return spans.filter(([a, z]) => z > Math.max(a, now));
+}
+
+export const calendarCall = <T,>({ query = "", ...init }: RequestInit & { query?: string } = {}) => adminCall<T>(`/api/calendar${query}`, init);
+
 
 type Size = "phone" | "mid" | "wide";
 const dayOf = (ms: number) => new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(ms);

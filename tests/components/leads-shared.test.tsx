@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { render, screen } from "@testing-library/react";
-import { kindOf, label, mailto, Tag } from "@/components/leads/shared";
+import { kindOf, label, mailto } from "@/components/leads/shared";
 import { cash, matches, money, nextStep, pass } from "@/lib/leads/lead-desk";
 import type { LeadSummary } from "@/lib/leads/leads";
 
@@ -44,10 +43,5 @@ describe("leads/shared", () => {
     const url = mailto("a@x.com", "Hi", "Thanks", { name: "Ana", at: iso, text: "Can we shoot?" });
     expect(url.startsWith("mailto:a@x.com?")).toBe(true);
     expect(decodeURIComponent(url)).toContain("> Can we shoot?");
-  });
-
-  it("Tag renders its mark and words", () => {
-    render(<Tag tone="needs" mark="o">Reply</Tag>);
-    expect(screen.getByText("Reply").textContent).toBe("oReply");
   });
 });

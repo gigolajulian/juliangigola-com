@@ -1,6 +1,6 @@
 /**
- * The lead desk's non-UI half, shared by both desks (components/admin/admin-leads.tsx
- * and components/leads-astryx.tsx): the admin fetch, the list filters and the
+ * The lead desk's non-UI half (components/leads-astryx.tsx and its
+ * screens): the admin fetch, the list filters and the
  * small formatters. Browser only: the fetch reads the key from localStorage.
  */
 import { credentials, KEY_STORE } from "@/lib/admin/admin-github";
@@ -42,6 +42,9 @@ export const loadError = (e: unknown) => (navigator.onLine === false || e instan
 
 /** "Nov 11, 4:05 PM" in Julian's time. */
 export const stampPT = (iso: string) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(iso));
+
+/** A licence's end date, "Mar 4, 2027". */
+export const endDay = (end: string) => new Date(`${end}T12:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
 
 export const DAY = 864e5;
 export const now = () => Date.now();

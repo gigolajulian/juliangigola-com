@@ -13,7 +13,7 @@ import { Badge } from "@astryxdesign/core/Badge";
 import { Selector } from "@astryxdesign/core/Selector";
 import { Text } from "@astryxdesign/core/Text";
 import { MetadataList, MetadataListItem } from "@astryxdesign/core/MetadataList";
-import type { Row } from "@/components/admin/admin-proofs";
+import type { Row } from "@/lib/proof-desk";
 import type { ViewerEvent } from "@/lib/proofs";
 import { stampPT } from "@/lib/leads/lead-desk";
 
