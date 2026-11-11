@@ -1,6 +1,6 @@
 import * as React from "react";
 import { createBench } from "./keyboard";
-import { cellFor, centreOf, leftOf, RELAID } from "./shared";
+import { cellFor, centreOf, leftOf, RELAID, takeCellLink } from "./shared";
 
 /** How long after the strip stops before the rail takes the shape of the
     chapter you have landed in. The shape follows the page, and reshaping
@@ -405,15 +405,7 @@ export function useReader({
        Next's Link moves the address without a hashchange, so the strip
        takes the click. `pushState` keeps the router's search params. */
     const onLink = (e: MouseEvent) => {
-      if (e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-      const a = (e.target as Element).closest?.<HTMLAnchorElement>("a[href]");
-      if (!a || a.target) return;
-      const url = new URL(a.href);
-      if (url.origin !== location.origin || url.pathname !== location.pathname) return;
-      if (cellFor(el, decodeURIComponent(url.hash.slice(1))) < 0) return;
-      e.preventDefault();
-      history.pushState(null, "", url.href);
-      onHash();
+      if (takeCellLink(e, el)) onHash();
     };
     document.addEventListener("click", onLink, true);
     // A frame later rather than now, so the first render is not followed
