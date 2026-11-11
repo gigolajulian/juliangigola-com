@@ -40,7 +40,7 @@ export type LeadEvent = {
   ref?: string;
   /** Booking time, session, new stage, a mail's subject: a short line for the timeline. */
   note?: string;
-  /** Kinds "payment", "refund", "selects": dollars. */
+  /** Kinds "payment", "refund", "selects", "invoice-paid" (negative when unmarked): dollars. */
   amount?: number;
   /** Kind "mail": who it went to, which mail, and the booking it was about. */
   mail?: Sent;

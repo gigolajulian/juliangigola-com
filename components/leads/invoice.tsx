@@ -55,7 +55,7 @@ export function InvoiceRow({ inv, l, full }: { inv: Invoice; l: LeadSummary; ful
   return (
     <li className="grid gap-2 border-b border-border py-2.5">
       <p className="flex flex-wrap items-center justify-between gap-3 text-[15px]">
-        <span><b className="font-mono font-medium">{inv.no}</b> <span className="text-muted-foreground">· {day(`${inv.date}T12:00:00`)} · {usd(balance(inv))} due</span></span>
+        <span><b className="font-mono font-medium">{inv.no}</b> <span className="text-muted-foreground">· {day(`${inv.date}T12:00:00`)} · {inv.paidAt ? "paid" : `${usd(balance(inv))} due`}</span></span>
         {file ? null : (
           <button type="button" className={cn(btn, "min-h-10")} onClick={() => { setErr(null); makePdf(inv, l, full).then(setFile, (e: unknown) => setErr(errorText(e))); }}>PDF</button>
         )}

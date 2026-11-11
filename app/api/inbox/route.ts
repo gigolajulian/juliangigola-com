@@ -518,7 +518,8 @@ async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: Await
     lead = {
       ...lead,
       invoices: lead.invoices!.map((v) => (v === inv ? { ...v, paidAt: invoicePaid.paid ? at : undefined } : v)),
-      events: [...lead.events, { at, kind: "invoice-paid" as const, note: `${inv.no} ${invoicePaid.paid ? `paid, ${usd(balance(inv))}` : "unpaid again"}` }].slice(-50),
+      // Cash or Zelle is money too: the amount counts in paid total, and comes off again if he unmarks it.
+      events: [...lead.events, { at, kind: "invoice-paid" as const, note: `${inv.no} ${invoicePaid.paid ? `paid, ${usd(balance(inv))}` : "unpaid again"}`, amount: invoicePaid.paid ? balance(inv) : -balance(inv) }].slice(-50),
     };
   }
   for (const k of Object.keys(lead) as (keyof Lead)[]) if (lead[k] === undefined) delete lead[k];
