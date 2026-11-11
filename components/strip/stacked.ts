@@ -1,5 +1,4 @@
 import * as React from "react";
-import { STRIP_SECTION } from "@/lib/events";
 import { cellFor } from "./shared";
 
 // What ends a landing's hold (`pin` below): the visitor moving the page.
@@ -119,12 +118,6 @@ export function useStacked(
       if (cellFor(el, decodeURIComponent(url.hash.slice(1))) < 0) return;
       e.preventDefault();
       history.pushState(null, "", url.href);
-      /* `pushState` fires no event, so the bar, which reads the address
-         through `STRIP_SECTION` and `hashchange`, heard nothing and lit
-         the new screen only when something else re-rendered it. The dev
-         build re-renders enough to hide that; production did not
-         (measured). Said here, the moment the address moves. */
-      window.dispatchEvent(new Event(STRIP_SECTION));
       go(true);
     };
     window.addEventListener("hashchange", onHash);
