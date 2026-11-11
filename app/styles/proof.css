@@ -188,7 +188,8 @@ html:has(.proof) #main{transform:none}
 .proof[data-wall]:not([data-wall="on"]){background:none}
 .proof[data-wall]>div:not(.pw-layer){position:relative;z-index:1}
 .pw-layer{position:fixed;inset:0;z-index:0;background:var(--background)}
-.pw-layer>.drift-wall{position:absolute;inset:0}
+/* Julian: hovering a photo does nothing here, and the wall sits under a blur */
+.pw-layer>.drift-wall{position:absolute;inset:0;pointer-events:none;filter:blur(6px)}
 /* the 404's dusting of grain over its wall */
 .pw-grain{position:absolute;inset:0;pointer-events:none;opacity:.2;mix-blend-mode:overlay;background-image:radial-gradient(color-mix(in oklab,var(--foreground) 50%,transparent) .5px,transparent .5px);background-size:3px 3px}
 /* compact intro (Julian 2026-11-10: the header does not have to be that big); one line, a long name wraps it to two */
