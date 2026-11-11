@@ -6,9 +6,10 @@
   one at a time. Nothing is mailed from here: the gallery waits in
   /admin Leads until Julian hits Send.
 
-  Publish again (or right-click > Refresh Comments) brings the client's
-  selects back: a Purple label on each selected frame, their note in
-  Comments, and a "<gallery> selects" collection under Client selects.
+  Library > Plug-in Extras > Check for picks (or Publish again) brings the
+  client's selects back: the Pick flag and a Purple label on each selected
+  frame, and a "<gallery> selects" collection under Client selects. Their
+  notes land in Comments on Publish or right-click > Refresh Comments.
 
   Light on purpose (Lightroom must never lag): one JSON call per refresh,
   catalog writes batched in one write, no catalog scans.
@@ -145,7 +146,7 @@ function provider.viewForCollectionSettings(f, publishSettings, info)
       f:checkbox { title = "Watermark", value = bind "watermark", tooltip = "Julian Gigola in the bottom third of every frame. The clean files stay for finals." },
     },
     f:row { label "Open for", f:edit_field { value = bind "days", width_in_digits = 3, min = 1, max = 90, precision = 0 }, f:static_text { title = "days, from when you send it in /admin" } },
-    f:row { label "", f:static_text { title = "Selects come back as a Purple label and Comments when you publish again.", fill_horizontal = 1 } },
+    f:row { label "", f:static_text { title = "Selects come back flagged with a Purple label: Library > Plug-in Extras > Check for picks, or publish again.", fill_horizontal = 1 } },
   }
 end
 
@@ -256,6 +257,27 @@ local function remoteOf(arrayOfPhotoInfo)
   end
 end
 
+-- One catalog write for every gallery: Pick flag, Purple label, "<gallery> selects".
+-- Safe to run twice: same values, existing collections reused, photos already in stay once.
+local function markPicks(galleries)
+  local any = false
+  for _, g in ipairs(galleries) do any = any or #g.photos > 0 end
+  if not any then return end
+  local catalog = LrApplication.activeCatalog()
+  catalog:withWriteAccessDo("Client selects from juliangigola.com", function()
+    local set = catalog:createCollectionSet("Client selects", nil, true)
+    for _, g in ipairs(galleries) do
+      if #g.photos > 0 then
+        for _, photo in ipairs(g.photos) do
+          photo:setRawMetadata("colorNameForLabel", LABEL)
+          photo:setRawMetadata("pickStatus", 1)
+        end
+        catalog:createCollection((g.name or "Gallery") .. " selects", set, true):addPhotos(g.photos)
+      end
+    end
+  end, { timeout = 30 })
+end
+
 function provider.getCommentsFromPublishedCollection(publishSettings, arrayOfPhotoInfo, commentCallback)
   local remote = remoteOf(arrayOfPhotoInfo)
   if not remote then return end
@@ -284,16 +306,38 @@ function provider.getRatingsFromPublishedCollection(publishSettings, arrayOfPhot
     ratingCallback { publishedPhoto = info, rating = on and 1 or 0 }
     if on then picked[#picked + 1] = info.photo end
   end
-  if #picked == 0 then return end
+  markPicks { { name = name, photos = picked } }
+end
 
-  -- One catalog write for every label and the Selects collection.
+--- Library > Plug-in Extras > Check for picks: every gallery of this
+--  plugin, one read each, nothing published. Run inside an async task.
+function provider.checkForPicks()
   local catalog = LrApplication.activeCatalog()
-  catalog:withWriteAccessDo("Client selects from juliangigola.com", function()
-    for _, photo in ipairs(picked) do photo:setRawMetadata("colorNameForLabel", LABEL) end
-    local set = catalog:createCollectionSet("Client selects", nil, true)
-    local c = catalog:createCollection((name or "Gallery") .. " selects", set, true)
-    c:addPhotos(picked)
-  end, { timeout = 30 })
+  local found, lines, failed, why = {}, {}, {}, nil
+  for _, service in ipairs(catalog:getPublishServices(_PLUGIN.id)) do
+    for _, pc in ipairs(service:getChildCollections()) do
+      local remote = pc:getRemoteId()
+      if remote then
+        local ok, p = pcall(gallery, remote)
+        if not ok then
+          failed[#failed + 1], why = pc:getName(), tostring(p)
+        elseif p.submittedAt and p.selects and #p.selects > 0 then
+          local want = {}
+          for _, id in ipairs(p.selects) do want[id] = true end
+          local picked = {}
+          for _, pp in ipairs(pc:getPublishedPhotos()) do
+            if want[pp:getRemoteId()] then picked[#picked + 1] = pp:getPhoto() end
+          end
+          found[#found + 1] = { name = pc:getName(), photos = picked }
+          lines[#lines + 1] = ("%s: %d"):format(pc:getName(), #p.selects)
+        end
+      end
+    end
+  end
+  markPicks(found)
+  local info = table.concat(lines, "\n")
+  if #failed > 0 then info = info .. "\n\nCould not read " .. table.concat(failed, ", ") .. ": " .. why end
+  LrDialogs.message(#lines > 0 and "Client picks" or "No picks yet", info ~= "" and info or nil)
 end
 
 return provider
