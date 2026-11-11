@@ -19,6 +19,8 @@ export type MasterEntry = { lead: string; email: string; name: string; event: Le
 
 // shortcut: one sealed blob per client, capped; a paged log if a client ever passes it.
 export const LOG_MAX = 5000;
+/** Set when the log changes, so the next cron copies the desk to the Sheet (`lib/leads/sheet-sync.ts`). */
+export const SHEET_DIRTY = "sheet:dirty";
 /** KV metadata holds 1024 bytes; a longer note is cut in the master entry only. */
 const META_MAX = 1000;
 const sig = (e: LeadEvent) => `${e.at}|${e.kind}|${e.ref ?? ""}|${e.note ?? ""}`;
@@ -51,6 +53,7 @@ export async function appendLog(kv: KV, s: Sealer, id: string, lead: Pick<Lead, 
     added.push({ ...event, m });
   }
   await kv.put(`log:${id}`, await s.seal([...(await readLog(kv, s, id)), ...added].slice(-LOG_MAX)));
+  await kv.put(SHEET_DIRTY, "1");
 }
 
 /** A merge: the other record's log joins this one, and its master entries point here. */
@@ -68,6 +71,7 @@ export async function forgetLog(kv: KV, s: Sealer, id: string): Promise<void> {
   const log = await readLog(kv, s, id).catch(() => [] as LogEntry[]);
   await Promise.all(log.map((e) => kv.delete(e.m)));
   await kv.delete(`log:${id}`);
+  await kv.put(SHEET_DIRTY, "1");
 }
 
 /** Every master entry, oldest first: one list call per 1000 events. */

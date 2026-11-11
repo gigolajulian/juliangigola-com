@@ -18,8 +18,13 @@ export const CURSOR = "gmail:history";
 /** Messages read per run: the Worker's subrequest cap. The cursor resumes the rest next run. */
 const BUDGET = 25;
 const SKIP = ["SPAM", "TRASH", "DRAFT", "CHAT"];
+/** Headers and attachment names, no bodies: `format=metadata` has no part names, so the full format cut down by `fields`. */
+export const FIELDS = "format=full&fields=id,labelIds,internalDate,payload(headers(name,value),parts(filename,parts(filename,parts(filename))))";
 
-export type Msg = { id: string; labelIds?: string[]; internalDate?: string; payload?: { headers?: { name: string; value: string }[] } };
+type Part = { filename?: string; parts?: Part[] };
+export type Msg = { id: string; labelIds?: string[]; internalDate?: string; payload?: { headers?: { name: string; value: string }[]; parts?: Part[] } };
+/** Attachment names, nested parts included: an invoice PDF is named "INVOICE 1126 - CLIENT.pdf". */
+const files = (ps: Part[] = []): string[] => ps.flatMap((p) => [...(p.filename ? [p.filename] : []), ...files(p.parts)]);
 type History = { history?: { id: string; messagesAdded?: { message: Msg }[] }[]; historyId?: string; nextPageToken?: string };
 
 const ADDRESS = /[\w.+'-]+@[\w-]+(?:\.[\w-]+)+/g;
@@ -32,7 +37,10 @@ export function mailChanges(m: Msg): { email: string; c: Change }[] {
   if (labels.some((l) => SKIP.includes(l))) return [];
   const h = (n: string) => m.payload?.headers?.find((x) => x.name.toLowerCase() === n)?.value ?? "";
   const event = { at: new Date(Number(m.internalDate)).toISOString(), ref: m.id, note: h("subject").slice(0, 120) || undefined };
-  if (labels.includes("SENT")) return people(`${h("to")},${h("cc")}`).map((email) => ({ email, c: { event: { ...event, kind: "replied" as const } } }));
+  if (labels.includes("SENT")) {
+    const mailed = [h("subject"), ...files(m.payload?.parts)].join(" | ");
+    return people(`${h("to")},${h("cc")}`).map((email) => ({ email, c: { event: { ...event, kind: "replied" as const }, ...(/invoice/i.test(mailed) ? { mailed } : {}) } }));
+  }
   const [email] = people(h("from"));
   const name = h("from").replace(/<[^>]*>/, "").replace(/"/g, "").trim();
   return email ? [{ email, c: { event: { ...event, kind: "wrote" as const }, ...(name && !name.includes("@") ? { name } : {}) } }] : [];
@@ -74,7 +82,7 @@ export async function syncGmail(env: LeadStore & { GCAL_OAUTH?: string }): Promi
       }
       for (const { id } of added) {
         read++;
-        const m = await gcal<Msg>(env.GCAL_OAUTH, `${GMAIL}/messages/${id}?format=metadata&metadataHeaders=From&metadataHeaders=To&metadataHeaders=Cc&metadataHeaders=Subject`);
+        const m = await gcal<Msg>(env.GCAL_OAUTH, `${GMAIL}/messages/${id}?${FIELDS}`);
         for (const { email, c } of mailChanges(m)) {
           // One lead that will not open must not stop the sync: the cursor would never move past it.
           try {
