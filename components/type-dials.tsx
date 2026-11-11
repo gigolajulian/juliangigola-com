@@ -273,7 +273,7 @@ function useTypeApply(
     };
     /* New text only, not the bar's or the tags' own redraws, or they tag
        themselves forever. No style watching on the whole page: motion
-       writes styles every frame. A line that fits itself (`fit-lines.tsx`)
+       writes styles every frame. A line that fits itself
        re-fits after we size it, so those few lines are watched alone. */
     watch = new MutationObserver((list) => {
       for (const m of list) {
@@ -286,7 +286,7 @@ function useTypeApply(
     });
     watch.observe(document.body, { childList: true, subtree: true });
     const all = () => later();
-    /* A strip switched between its grid and the strip (`work-shell.tsx`)
+    /* A strip switched between its grid and the strip
        sets its names for another width, so they are measured again, as on
        a resize. Kept at the strip view's size, the grid's long titles ran
        out of their cards (Julian: hidden in grid view). */

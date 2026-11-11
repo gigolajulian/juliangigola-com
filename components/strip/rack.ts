@@ -295,7 +295,7 @@ export function useWall({
       paint();
     });
     watch.observe(el);
-    /* And when the iPad's rack is fitted (`--rack-w`, `work-shell.tsx`):
+    /* And when the iPad's rack is fitted (`data-rack`, `cover-art-gallery.tsx`):
        it resizes the covers after this, and the walls stood up to half a
        screen onto their words at 1180. */
     const fitted = new MutationObserver(paint);

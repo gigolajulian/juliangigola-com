@@ -1,5 +1,5 @@
 /* Julian's notes on each photograph while arranging the cover, written in
-   the arrange inspector (`hero-arrange.tsx`) and carried by DialKit's
+   the arrange inspector and carried by DialKit's
    "Copy all" (`dial-copy-all.tsx`), so a paste brings them with the
    values. Dev server only. Kept for the tab's life in sessionStorage, as
    the layout panels' values are, so a reload keeps them. */

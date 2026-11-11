@@ -12,9 +12,8 @@
 /* Julian: a layout of their own for the smaller screens (the cards
    looked too small there, the arrangement not the best), one for a
    tablet held upright and one for a short landscape screen, each with
-   its places, widths, depths and which cards show (`UPRIGHT` and
-   `LANDSCAPE` in `lib/cover-slots.ts`, each on its own "Photo layout"
-   panel). 1280px wide and up keeps the large screen's. */
+   its places, widths, depths and which cards show (each
+   once on its own "Photo layout" panel). 1280px wide and up keeps the large screen's. */
 /* A phone on its side, or any landscape window under 512px tall (an
    iPhone at 844 by 390, the iPhone Duo folded and turned, 678 by 466):
    its own layout, `SIDEWAYS`. After the landscape one, which it
@@ -117,7 +116,7 @@
   color: var(--hero-where);
 }
 /* Julian: on a phone the role and the location one line each, as wide as
-   the wordmark (`fit-lines.tsx` spreads them, or scales one down), set
+   the wordmark (spread, or one scaled down), set
    close. */
 @media (max-width: 39.99rem) and (orientation: portrait) {
   .cover-float-title,
@@ -144,7 +143,7 @@
   }
 }
 /* Julian (iPad upright): the location set closer under the role. Its
-   size follows the role's length (`fit-lines.tsx`). */
+   size follows the role's length. */
 @media (min-width: 40rem) and (max-width: 79.99rem) and (orientation: portrait) {
   .cover-float-title,
   .cover-float-where {
@@ -202,7 +201,7 @@
 }
 /* Pointing at a frame: it swells a little, over the ones round it, and
    the line under the name trades the job title for that frame's
-   discipline (`cover-role.tsx`). The words share one grid cell, so the
+   discipline. The words share one grid cell, so the
    line keeps its height whichever is showing; the old word drops out of
    the slot as the new one rises into it. */
 @media (hover: hover) and (pointer: fine) {
@@ -227,7 +226,7 @@
      Flagged on the glass by `CoverCard`: as
      `:root:has(.cover-float-frame:hover)` Chrome restyled every element
      of the page on each hover in and out, 20 to 30ms a time. */
-  :is(.site-bar, .strip-rail, .head-glass)[data-photo-hover] {
+  :is(.strip-rail, .head-glass)[data-photo-hover] {
     --glass-tint: 22%;
     --glass-blur: 4px;
   }
