@@ -127,6 +127,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       suppressHydrationWarning
     >
       <head>
+        {/* Two preview flags, before the first paint: `?flyout=1` and `?stack=0`
+            (sessionStorage, for the tab; `=0` / `=1` clear them). */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var q=location.search,f="deck-flyout";if(/[?&]flyout=1/.test(q))sessionStorage.setItem(f,"1");if(/[?&]flyout=0/.test(q))sessionStorage.removeItem(f);if(sessionStorage.getItem(f)==="1")document.documentElement.dataset.flyout="";var k="door-stack";if(/[?&]stack=0/.test(q))sessionStorage.setItem(k,"0");if(/[?&]stack=1/.test(q))sessionStorage.removeItem(k);if(sessionStorage.getItem(k)!=="0")document.documentElement.dataset.stack=""}catch(e){}})()`,
+          }}
+        />
         {/* Applies the theme before the first paint: a choice made with the
          * toggle if there is one, otherwise whatever the visitor's system is
          * set to — Julian asked for the site to match how they have it set
@@ -135,7 +142,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
          * It has to be inline and it has to be here: an effect runs after
          * hydration, which is several hundred milliseconds of a full-bleed
          * dark page for somebody whose system is light — the flash that
-         * makes a theme feel broken. `theme-toggle.tsx` keeps following the
+         * makes a theme feel broken. `components/v3/chrome.tsx` keeps following the
          * system after that, until the toggle is pressed.
          *
          * It also writes the page's colour onto both `theme-color` tags. Julian,
@@ -145,7 +152,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
          * scheme — so a phone set to light with the site switched to dark got
          * the light colour over a black page. The tags stay for the visitor
          * with no JavaScript, and from here on both carry whichever theme is
-         * actually showing; `theme-toggle.tsx` rewrites them when it changes.
+         * actually showing; `components/v3/chrome.tsx` rewrites them when it changes.
          *
          * The proof gate's wall (the default; `?proofwall=0` for the plain gate) is always dark (Julian, 2026-11-10).
          *
@@ -155,7 +162,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
          */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var q=location.search,f="deck-flyout";if(/[?&]flyout=1/.test(q))sessionStorage.setItem(f,"1");if(/[?&]flyout=0/.test(q))sessionStorage.removeItem(f);if(sessionStorage.getItem(f)==="1")document.documentElement.dataset.flyout="";var k="door-stack";if(/[?&]stack=0/.test(q))sessionStorage.setItem(k,"0");if(/[?&]stack=1/.test(q))sessionStorage.removeItem(k);if(sessionStorage.getItem(k)!=="0")document.documentElement.dataset.stack=""}catch(e){}var t=null;try{localStorage.removeItem("theme");t=sessionStorage.getItem("theme")}catch(e){}var l=t==="light"||(t!=="dark"&&matchMedia("(prefers-color-scheme: light)").matches);if(location.pathname.indexOf("/proof")===0&&!/[?&]proofwall=0/.test(location.search)){l=false;document.documentElement.dataset.proofwall=""}document.documentElement.dataset.theme=l?"light":"dark";var m=document.querySelectorAll('meta[name="theme-color"]');for(var i=0;i<m.length;i++)m[i].setAttribute("content",l?"#ebedef":"#0b0a09")})()`,
+            __html: `(function(){var t=null;try{t=sessionStorage.getItem("theme")}catch(e){}var l=t==="light"||(t!=="dark"&&matchMedia("(prefers-color-scheme: light)").matches);if(location.pathname.indexOf("/proof")===0&&!/[?&]proofwall=0/.test(location.search)){l=false;document.documentElement.dataset.proofwall=""}document.documentElement.dataset.theme=l?"light":"dark";var m=document.querySelectorAll('meta[name="theme-color"]');for(var i=0;i<m.length;i++)m[i].setAttribute("content",l?"#ebedef":"#0b0a09")})()`,
           }}
         />
         {/* Whether this visit gets the opening, decided before the first
