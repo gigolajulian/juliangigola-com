@@ -9,6 +9,7 @@ import { sealer } from "@/lib/leads/lead-crypto";
 import { notify, subscribe, unsubscribe } from "@/lib/leads/lead-push";
 import { publicKey } from "@/lib/leads/web-push";
 import { notionPaper, notionStage } from "@/lib/leads/notion-lead";
+import { importStripe } from "@/lib/leads/stripe-import";
 import { cleanTemplates, manualLead, merge, stats, type NewLead } from "@/lib/leads/lead-crm";
 import { balance, cleanFrom, cleanInvoice, invoiceNo, mmyy, PHOTO_KEY, usd, type InvoiceFrom } from "@/lib/leads/invoice";
 import { json, NO_STORE } from "@/lib/http";
@@ -77,7 +78,7 @@ const bury = (inbox: NonNullable<CloudflareEnv["INBOX"]>, key: string, seal?: Aw
 /** The binding and the secret, or `null` when this build has neither. */
 async function wired() {
   const { env } = await getCloudflareContext({ async: true });
-  return env.INBOX ? { inbox: env.INBOX, key: env.INBOX_KEY, seal: sealer(env.LEADS_KEY), notion: env.NOTION_TOKEN, vapid: env.VAPID_KEY } : null;
+  return env.INBOX ? { inbox: env.INBOX, key: env.INBOX_KEY, seal: sealer(env.LEADS_KEY), notion: env.NOTION_TOKEN, vapid: env.VAPID_KEY, env } : null;
 }
 
 async function guard(request: Request) {
@@ -97,11 +98,11 @@ async function guard(request: Request) {
   // push to the repository. The messages differ so a wrong one can be told
   // from a missing one — but never which characters were wrong.
   if (rig.key && (await authorised(request, rig.key)))
-    return { inbox: rig.inbox, seal: rig.seal, notion: rig.notion, vapid: rig.vapid };
+    return { inbox: rig.inbox, seal: rig.seal, notion: rig.notion, vapid: rig.vapid, env: rig.env };
 
   const token = bearer(request);
   if (token) {
-    if (await canPush(token)) return { inbox: rig.inbox, seal: rig.seal, notion: rig.notion, vapid: rig.vapid };
+    if (await canPush(token)) return { inbox: rig.inbox, seal: rig.seal, notion: rig.notion, vapid: rig.vapid, env: rig.env };
     return {
       error: json(
         { error: "GitHub did not accept that token for this repository." },
@@ -172,6 +173,17 @@ export async function GET(request: Request) {
     const raw = PHOTO_KEY.test(key) ? await gate.inbox.get(key) : null;
     return raw ? json({ photo: await seal.open<string>(raw) }) : json({ error: "Photo not found." }, 404);
   }
+  // Every invoice on every lead, newest first, for Money > Invoices and Today's overdue list. Trashed leads are left out.
+  // shortcut: one KV get per lead; an invoice index if the desk ever holds thousands of leads.
+  if (url.searchParams.has("invoices")) {
+    const seal = await gate.seal;
+    if (!seal) return json({ error: "Leads need LEADS_KEY on the Worker." }, 503);
+    const invoices = (await everyLead(gate.inbox, seal))
+      .filter((l) => !l.trashedAt)
+      .flatMap((l) => (l.invoices ?? []).map((i) => ({ ...i, lead: l.id!, name: l.name })))
+      .sort((a, b) => b.at.localeCompare(a.at));
+    return json({ invoices });
+  }
   // One client's whole activity log (`lib/leads/activity-log.ts`).
   if (url.searchParams.has("log")) {
     const seal = await gate.seal;
@@ -185,8 +197,9 @@ export async function GET(request: Request) {
     const day = new Date().toISOString().slice(0, 10);
     const file = (body: string, name: string) => new Response(body, { headers: { ...NO_STORE, "content-type": "text/csv; charset=utf-8", "content-disposition": `attachment; filename="${name}-${day}.csv"` } });
     if (url.searchParams.get("csv") === "events") return file(eventsCsv(await readMaster(gate.inbox, seal)), "activity");
-    if (url.searchParams.has("stats")) return json({ stats: stats(await everyLead(gate.inbox, seal), Date.now()) });
-    return file(await clientsCsv(gate.inbox, seal), "leads");
+    const master = await readMaster(gate.inbox, seal);
+    if (url.searchParams.has("stats")) return json({ stats: stats(await everyLead(gate.inbox, seal), Date.now(), master) });
+    return file(await clientsCsv(gate.inbox, seal, master), "leads");
   }
 
   // The lead desk (`components/admin/admin-leads.tsx`): one record per person.
@@ -374,6 +387,15 @@ export async function POST(request: Request) {
     await Promise.all((await seal.ids(lead.email)).map((i) => gate.inbox.delete(`gone:${i}`)));
     await writeLead(gate.inbox, seal, id, lead, null);
     return json({ lead, id });
+  }
+  // Past Stripe payments and refunds onto the log (`lib/leads/stripe-import.ts`). Dry, it only counts.
+  if (given?.importStripe === true) {
+    if (!gate.env.STRIPE_SECRET_KEY) return json({ error: "Stripe is not set up on the Worker." }, 503);
+    try {
+      return json(await importStripe(gate.env, gate.env.STRIPE_SECRET_KEY, given.dry === true));
+    } catch (e) {
+      return json({ error: String(e instanceof Error ? e.message : e) }, 502);
+    }
   }
   if (given?.backfill !== true) return json({ error: "Unknown." }, 400);
   const seal = await gate.seal;

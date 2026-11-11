@@ -44,6 +44,7 @@ import { BoardAstryx } from "@/components/leads/board-astryx";
 import { CalendarAstryx } from "@/components/leads/calendar-astryx";
 import { MoneyAstryx } from "@/components/leads/money-astryx";
 import { AsideAstryx, LicencesAstryx } from "@/components/leads/lists-astryx";
+import { InvoicesAstryx } from "@/components/leads/invoices-astryx";
 import { PanelAstryx, StatsAstryx } from "@/components/leads/numbers-astryx";
 import { DeviceAstryx, HoursAstryx, TemplatesAstryx } from "@/components/leads/setup-astryx";
 import { type Filter } from "@/lib/leads/lead-desk";
@@ -51,13 +52,13 @@ import { ProofsAstryx } from "@/components/proofs-astryx";
 
 type Size = "phone" | "mid" | "wide";
 /** Every page of the desk. */
-type View = "today" | "leads" | "new" | "calendar" | "money" | "licences" | "aside" | "stats" | "traffic" | "seo" | "hours" | "templates" | "device" | "more" | "proofs";
+type View = "today" | "leads" | "new" | "calendar" | "money" | "invoices" | "licences" | "aside" | "stats" | "traffic" | "seo" | "hours" | "templates" | "device" | "more" | "proofs";
 /** Julian (2026-11-10): "simplify the left tab or group them up", "merge panels that are related", "add icon to all".
  * One nav item per group; a group with more than one page gets a tab row on top. */
 const SECTIONS: [View, string, [string, View][]][] = [
   ["leads", "Leads", [["Open", "leads"], ["Put aside", "aside"]]],
   ["calendar", "Calendar", [["Calendar", "calendar"], ["Hours", "hours"]]],
-  ["money", "Money", [["Stripe", "money"], ["Licences", "licences"]]],
+  ["money", "Money", [["Stripe", "money"], ["Invoices", "invoices"], ["Licences", "licences"]]],
   ["stats", "Numbers", [["Stats", "stats"], ["Traffic", "traffic"], ["SEO", "seo"]]],
   ["templates", "Settings", [["Templates", "templates"], ["This device", "device"]]],
   ["proofs", "Proofs", [["Galleries", "proofs"]]],
@@ -416,6 +417,7 @@ export function LeadsAstryx() {
     setError("Not authorized.");
   };
   const pages: Partial<Record<View, React.ReactNode>> = {
+    invoices: <InvoicesAstryx leads={live} call={call} open={openLead} changed={changed} />,
     licences: <LicencesAstryx leads={live} open={openLead} />,
     aside: <AsideAstryx leads={leads ?? []} call={call} open={openLead} done={() => { setOpen(null); load(); }} tab={asideTab} setTab={setAsideTab} />,
     stats: <StatsAstryx call={call} />,

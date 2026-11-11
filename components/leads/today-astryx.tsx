@@ -18,7 +18,9 @@ import { Badge } from "@astryxdesign/core/Badge";
 import { StatusDot } from "@astryxdesign/core/StatusDot";
 import { TOKEN_STORE } from "@/lib/admin/admin-github";
 import { isLate, shootTag, type LeadSummary } from "@/lib/leads/leads";
-import { adminCall, ago, at, cash, needsMe, nextStep, now, pass, plusDays, ymdPT } from "@/lib/leads/lead-desk";
+import { adminCall, ago, at, cash, inboxCall, needsMe, nextStep, now, pass, plusDays, ymdPT } from "@/lib/leads/lead-desk";
+import { balance, dayB, dueOf, overdue, usd } from "@/lib/leads/invoice";
+import type { InvoiceRow } from "@/components/leads/invoices-astryx";
 import { TZ } from "@/lib/booking/booking-rules";
 import { callOrShoot, daysOf, source, type Spark } from "@/components/leads/today";
 
@@ -74,6 +76,13 @@ export function TodayAstryx({ leads, size, open, show }: { leads: LeadSummary[];
       .then(async (r) => { const o = await r.json(); if (!r.ok) throw new Error(o.error); setTraffic(o); })
       .catch(() => setTraffic("Cloudflare did not answer"));
   }, []);
+  // Unpaid invoices past their due date, oldest due first.
+  const [pastDue, setPastDue] = React.useState<InvoiceRow[]>([]);
+  React.useEffect(() => {
+    inboxCall<{ invoices: InvoiceRow[] }>({ query: "?invoices" })
+      .then((o) => setPastDue(o.invoices.filter((i) => overdue(i, today)).sort((a, b) => dueOf(a).localeCompare(dueOf(b)))))
+      .catch(() => {});
+  }, [today]);
   const m = typeof money === "object" ? money : null;
   const t = typeof traffic === "object" ? traffic : null;
 
@@ -143,6 +152,17 @@ export function TodayAstryx({ leads, size, open, show }: { leads: LeadSummary[];
               <HStack vAlign="center"><StackItem size="fill"><Eyebrow>YOUR MOVE · {leadMoves.length}</Eyebrow></StackItem><Button label="All leads" variant="ghost" size="sm" onClick={() => show()} /></HStack>
               {leadMoves.length ? <List hasDividers>{leadMoves.slice(0, 6).map(row)}</List> : <Text type="supporting" color="secondary">Nothing waiting on you.</Text>}
             </VStack>
+            {pastDue.length ? (
+              <VStack gap={1}>
+                <Eyebrow>OVERDUE · {pastDue.length}</Eyebrow>
+                <List hasDividers>
+                  {pastDue.map((i) => {
+                    const l = leads.find((x) => x.id === i.lead);
+                    return <ListItem key={i.no} onClick={l ? () => open(l) : undefined} label={`${i.name}, invoice ${i.no}`} description={`${usd(balance(i))} was due ${dayB(dueOf(i), true)}${i.sentAt ? "" : " · not sent"}`} endContent={<Badge label="Overdue" variant="error" />} />;
+                  })}
+                </List>
+              </VStack>
+            ) : null}
             {dueMoves.length ? (
               <VStack gap={1}>
                 <Eyebrow>DUE · PAPERWORK, PROOFS, LICENCES</Eyebrow>

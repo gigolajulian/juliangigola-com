@@ -151,8 +151,12 @@ export const frameKey = (token: string, id: string) => `${token}/${id}.jpg`;
 export const markedKey = (token: string, id: string) => `${token}/${id}.wm1.jpg`;
 /** The link-preview card made from a gallery's first frame. Keyed by that frame, so a new first frame gets a new card. */
 export const cardKey = (token: string, id: string) => `${token}/card-${id}.v1.jpg`;
+/** The smaller copy the gate's wall and the grid show (`?w=` on a frame's URL), clean or marked: a phone decoding fifty
+    full-size frames at once lagged (Julian 2026-11-10). Made once by Cloudflare Images, then read from R2. */
+export const THUMB_W = 800;
+export const thumbKey = (token: string, id: string, marked: boolean) => `${token}/${id}.t${THUMB_W}${marked ? ".wm1" : ""}.jpg`;
 /** Every derived file a frame can have in R2, for deletes. */
-export const frameKeys = (token: string, id: string) => [frameKey(token, id), markedKey(token, id), cardKey(token, id)];
+export const frameKeys = (token: string, id: string) => [frameKey(token, id), markedKey(token, id), cardKey(token, id), thumbKey(token, id, true), thumbKey(token, id, false)];
 
 const B62 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 /** 16 base62 characters from the platform's CSPRNG (rejection sampling keeps it uniform). */

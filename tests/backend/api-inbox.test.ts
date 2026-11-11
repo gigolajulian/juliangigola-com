@@ -402,6 +402,18 @@ describe("invoices", () => {
     expect(leads[0].invoices).toBeUndefined();
   });
 
+  it("?invoices lists every invoice with its lead's id and name, newest first, behind the gate", async () => {
+    const a = await make("a@example.com"), b = await make("b@example.com");
+    await bill(a);
+    await bill(b, "2026-12-01");
+    const { invoices } = await (await GET(req("GET", { query: "?invoices" }))).json();
+    expect(invoices.map((i: { no: string; lead: string; name: string; paid: number }) => [i.no, `lead:${i.lead}`, i.name, i.paid])).toEqual([["1226", b, "Maya Ortiz", 100], ["1126", a, "Maya Ortiz", 100]]);
+    // A trashed lead's invoices leave the list.
+    await PATCH(req("PATCH", { body: JSON.stringify({ key: b, trash: true }) }));
+    expect((await (await GET(req("GET", { query: "?invoices" }))).json()).invoices).toHaveLength(1);
+    expect((await GET(req("GET", { key: null, query: "?invoices" }))).status).toBe(401);
+  });
+
   it("refuses a bad invoice and stays behind the gate", async () => {
     const a = await make("a@example.com");
     const bad = await PATCH(req("PATCH", { body: JSON.stringify({ key: a, invoice: { date: "2026-11-06", lines: [] } }) }));

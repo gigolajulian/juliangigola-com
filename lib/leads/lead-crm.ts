@@ -9,6 +9,7 @@
 import { TZ } from "../booking/booking-rules";
 import { STAGES, type Lead, type Stage } from "./leads";
 import { balance, isPaid } from "./invoice";
+import { paidTotal, type MasterEntry } from "./activity-log";
 
 /** A lead's identity: the address, or an Instagram handle or phone for someone who never wrote from one. */
 export function identity(o: { email?: string; ig?: string; phone?: string }): string | null {
@@ -150,11 +151,23 @@ export type Stats = {
   pipeline: number;
   won: number;
   stages: Partial<Record<Stage, number>>;
+  /** Clients with two or more bookings or calls in their log. */
+  repeat: number;
+  /** Paid less refunds, averaged over clients who paid anything. */
+  lifetime: number | null;
+  top: { name: string; sessions: number; paid: number }[];
 };
 
-/** The desk's numbers. Trash is left out; archived leads count. */
-export function stats(all: Lead[], now: number): Stats {
+/** The desk's numbers. Trash is left out; archived leads count. `master`: the whole activity log, for repeat clients and lifetime value. */
+export function stats(all: (Lead & { id?: string })[], now: number, master: MasterEntry[] = []): Stats {
   const leads = all.filter((l) => !l.trashedAt);
+  const byLead = new Map<string, Lead["events"]>();
+  for (const m of master) byLead.set(m.lead, [...(byLead.get(m.lead) ?? []), m.event]);
+  const clients = leads.flatMap((l) => {
+    const log = (l.id && byLead.get(l.id)) || [];
+    return [{ name: l.name, sessions: log.filter((e) => e.kind === "booking" || e.kind === "call").length, paid: paidTotal(log) }];
+  });
+  const paying = clients.filter((c) => c.paid > 0);
   const week = 7 * 864e5;
   // Weeks start Monday, Pacific time is close enough at this scale.
   const monday = (t: number) => {
@@ -203,6 +216,9 @@ export function stats(all: Lead[], now: number): Stats {
     pipeline: leads.filter((l) => l.stage === "Quoted" && !l.archivedAt).reduce((n, l) => n + (l.quote ?? 0), 0),
     won: leads.filter(won).reduce((n, l) => n + (l.quote ?? 0), 0),
     stages,
+    repeat: clients.filter((c) => c.sessions >= 2).length,
+    lifetime: paying.length ? paying.reduce((n, c) => n + c.paid, 0) / paying.length : null,
+    top: paying.sort((a, b) => b.paid - a.paid).slice(0, 10),
   };
 }
 
