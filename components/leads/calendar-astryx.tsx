@@ -134,8 +134,8 @@ function Bookings({ leads, size, open, today }: { leads: LeadSummary[]; size: Si
     </VStack>
   );
   return size === "wide" ? (
-    <Layout height="fill" content={<LayoutContent role="main" label="Bookings">{list}</LayoutContent>} end={<LayoutPanel width={340} hasDivider label="Pick a day">{picker}</LayoutPanel>} />
-  ) : <LayoutContent role="main" label="Bookings"><VStack gap={5}>{picker}{list}</VStack></LayoutContent>;
+    <Layout height="fill" content={<LayoutContent role="main" label="Bookings" padding={4}>{list}</LayoutContent>} end={<LayoutPanel width={340} hasDivider label="Pick a day">{picker}</LayoutPanel>} />
+  ) : <LayoutContent role="main" label="Bookings" padding={4}><VStack gap={5}>{picker}{list}</VStack></LayoutContent>;
 }
 
 /* ── Availability: block days or hours, the calendars it reads ──── */
@@ -237,8 +237,8 @@ function Availability({ size, today, now }: { size: Size; today: string; now: nu
     </VStack>
   );
   return size === "wide" ? (
-    <Layout height="fill" content={<LayoutContent role="main" label="Availability">{main}</LayoutContent>} end={<LayoutPanel width={340} hasDivider label="Calendars it reads">{reads}</LayoutPanel>} />
-  ) : <LayoutContent role="main" label="Availability">{main}</LayoutContent>;
+    <Layout height="fill" content={<LayoutContent role="main" label="Availability" padding={4}>{main}</LayoutContent>} end={<LayoutPanel width={340} hasDivider label="Calendars it reads">{reads}</LayoutPanel>} />
+  ) : <LayoutContent role="main" label="Availability" padding={4}>{main}</LayoutContent>;
 }
 
 function Calendars({ extras, post, working }: { extras?: Month["extras"]; post: (b: unknown) => Promise<boolean>; working: boolean }) {

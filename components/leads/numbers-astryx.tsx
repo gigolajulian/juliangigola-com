@@ -26,7 +26,7 @@ function Page({ eyebrow, title, children }: { eyebrow: string; title: string; ch
       height="fill"
       defaultHasDividers
       header={<LayoutHeader><VStack gap={0}><Text type="code" size="xsm" color="secondary" weight="medium">{eyebrow}</Text><Heading level={1} weight="bold">{title}</Heading></VStack></LayoutHeader>}
-      content={<LayoutContent role="main" label={title}>{children}</LayoutContent>}
+      content={<LayoutContent role="main" label={title} padding={4}>{children}</LayoutContent>}
     />
   );
 }

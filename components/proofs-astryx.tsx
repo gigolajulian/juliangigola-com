@@ -51,7 +51,8 @@ function Tile({ k, v }: { k: string; v: string }) {
   );
 }
 
-export function ProofsAstryx() {
+/** `embedded`: drawn inside the leads desk (its Theme and nav), with no shell of its own. */
+export function ProofsAstryx({ embedded = false }: { embedded?: boolean } = {}) {
   const [list, setList] = React.useState<Row[] | null>(null);
   const [error, setError] = React.useState<string | null>(null);
   const [sel, setSel] = React.useState<string | null>(null);
@@ -144,6 +145,17 @@ export function ProofsAstryx() {
 
   const detail = cur ? <Gallery key={cur.token} p={cur} changed={load} onBack={wide ? undefined : () => setSel(null)} gone={() => { setSel(null); load(); }} /> : null;
 
+  const body = wide ? (
+    <Layout
+      height="fill"
+      start={embedded ? undefined : nav}
+      content={<LayoutContent padding={6} label="Galleries">{galleries}</LayoutContent>}
+      end={<LayoutPanel width={560} padding={6} hasDivider label="Gallery">{detail ?? <Text type="supporting">Pick a gallery to see it here.</Text>}</LayoutPanel>}
+    />
+  ) : (
+    <VStack gap={4}>{detail ?? galleries}</VStack>
+  );
+  if (embedded) return wide ? body : <Layout height="fill" content={<LayoutContent padding={4} label="Proofs">{body}</LayoutContent>} />;
   if (!mode) return null;
   return (
     <Theme theme={neutralTheme} mode={mode}>
@@ -151,16 +163,7 @@ export function ProofsAstryx() {
       {/* The site's global `button, ::placeholder` caps (and h2, h3) reach Astryx buttons, rows and titles: here, not in globals.css, so public CSS stays the same. */}
       <style>{`[data-astryx-desk="proofs"] :is(button,h2,h3),[data-astryx-desk="proofs"] ::placeholder{text-transform:none;letter-spacing:normal}`}</style>
       <div data-astryx-desk="proofs" style={{ height: wide ? "calc(100dvh - 48px)" : undefined, textTransform: "none", letterSpacing: "normal", ["--font-family-body" as string]: 'var(--font-v2-text, "Helvetica Neue", Helvetica, Arial, sans-serif)' }}>
-        {wide ? (
-          <Layout
-            height="fill"
-            start={nav}
-            content={<LayoutContent padding={6} label="Galleries">{galleries}</LayoutContent>}
-            end={<LayoutPanel width={560} padding={6} hasDivider label="Gallery">{detail ?? <Text type="supporting">Pick a gallery to see it here.</Text>}</LayoutPanel>}
-          />
-        ) : (
-          <VStack gap={4}>{detail ?? galleries}</VStack>
-        )}
+        {body}
       </div>
     </Theme>
   );

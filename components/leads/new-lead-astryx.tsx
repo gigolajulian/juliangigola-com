@@ -59,7 +59,7 @@ export function NewLeadAstryx({ call, leads, size, done, open, cancel }: { call:
       defaultHasDividers
       header={<LayoutHeader><VStack gap={0}><Text type="code" size="xsm" color="secondary" weight="medium">BY HAND · A CALL, A DM, A REFERRAL</Text><Heading level={1} weight="bold">New lead</Heading></VStack></LayoutHeader>}
       content={
-        <LayoutContent role="main" label="New lead">
+        <LayoutContent role="main" label="New lead" padding={4}>
           <form onSubmit={(e) => { e.preventDefault(); if (f.name.trim() && reachable) add(); }}>
             <VStack gap={4} maxWidth={560}>
               {size === "phone" ? (

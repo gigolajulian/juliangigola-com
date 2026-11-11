@@ -73,7 +73,7 @@ const mail = (to: string, subject: string, body: string) => (ios() ? mailto(to, 
 /** `YYYY-MM-DDTHH:MM` in his clock, for the reminder fields. */
 const localParts = (iso: string) => new Date(Date.parse(iso) - new Date().getTimezoneOffset() * 60e3).toISOString().slice(0, 16).split("T");
 
-export function LeadAstryx({ summary, initial, call, onChange, onBack, reload, templates, others, size }: { summary: LeadSummary; initial?: Lead | null; call: Call; onChange: (l: Lead) => void; onBack: () => void; reload: () => void; templates: Template[]; others: LeadSummary[]; size: Size }) {
+export function LeadAstryx({ summary, initial, call, onChange, onBack, reload, templates, others, size, toProofs }: { toProofs?: () => void; summary: LeadSummary; initial?: Lead | null; call: Call; onChange: (l: Lead) => void; onBack: () => void; reload: () => void; templates: Template[]; others: LeadSummary[]; size: Size }) {
   // A lead added a moment ago comes in whole: KV may not serve its key yet.
   const [lead, setLead] = React.useState<Lead | null>(initial ?? null);
   const [message, setMessage] = React.useState<Enquiry | null>(null);
@@ -260,7 +260,7 @@ export function LeadAstryx({ summary, initial, call, onChange, onBack, reload, t
         </LayoutHeader>
       }
       content={
-        <LayoutContent role="main" label="Lead">
+        <LayoutContent role="main" label="Lead" padding={4}>
           <VStack gap={4}>
             {note ? <Text type="code" size="sm" color="secondary" role="status">{note}</Text> : null}
             {l.trashedAt ? <Banner status="warning" title="In the trash" description={`Deleted for good in ${Math.max(1, trashDaysLeft(l.trashedAt, now()))} days unless recovered.`} endContent={<Button label="Recover" variant="secondary" size="sm" onClick={() => run(patch({ trash: false }), "Recovered.")} />} /> : null}
@@ -367,7 +367,7 @@ export function LeadAstryx({ summary, initial, call, onChange, onBack, reload, t
             {proofs.length ? (
               <Section>
                 <VStack gap={3}>
-                  <Head title="Proofs"><Button label="Open the proofs desk" variant="ghost" size="sm" href="/admin/proofs/astryx" /></Head>
+                  <Head title="Proofs"><Button label="Open Proofs" variant="ghost" size="sm" onClick={toProofs} /></Head>
                   {proofs.map((p) => (
                     <HStack key={p.token} gap={3} vAlign="center">
                       <StackItem size="fill"><VStack gap={0}><Text type="label">{p.name}</Text><Text type="supporting" color="secondary">{p.frames.length} frames{p.views ? ` · opened ${p.views} ${p.views === 1 ? "time" : "times"}` : ""}</Text></VStack></StackItem>

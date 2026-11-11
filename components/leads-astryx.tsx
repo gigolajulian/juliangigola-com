@@ -46,11 +46,11 @@ import { AsideAstryx, LicencesAstryx } from "@/components/leads/lists-astryx";
 import { PanelAstryx, StatsAstryx } from "@/components/leads/numbers-astryx";
 import { DeviceAstryx, HoursAstryx, TemplatesAstryx } from "@/components/leads/setup-astryx";
 import { type Filter } from "@/lib/leads/lead-desk";
+import { ProofsAstryx } from "@/components/proofs-astryx";
 
 type Size = "phone" | "mid" | "wide";
 /** Every page of the desk. */
-type View = "today" | "leads" | "new" | "calendar" | "money" | "licences" | "aside" | "stats" | "traffic" | "seo" | "hours" | "templates" | "device" | "more";
-const PROOFS = "/admin/proofs/astryx";
+type View = "today" | "leads" | "new" | "calendar" | "money" | "licences" | "aside" | "stats" | "traffic" | "seo" | "hours" | "templates" | "device" | "more" | "proofs";
 const CLASSIC_HREF = "/admin/leads";
 /** Julian (2026-11-10): "simplify the left tab or group them up", "merge panels that are related", "add icon to all".
  * One nav item per group; a group with more than one page gets a tab row on top. */
@@ -60,6 +60,7 @@ const SECTIONS: [View, string, [string, View][]][] = [
   ["money", "Money", [["Stripe", "money"], ["Licences", "licences"]]],
   ["stats", "Numbers", [["Stats", "stats"], ["Traffic", "traffic"], ["SEO", "seo"]]],
   ["templates", "Settings", [["Templates", "templates"], ["This device", "device"]]],
+  ["proofs", "Proofs", [["Galleries", "proofs"]]],
 ];
 const sectionOf = (v: View) => SECTIONS.find(([, , pages]) => pages.some(([, p]) => p === v));
 type Group = "now" | "week" | "waiting";
@@ -106,9 +107,9 @@ const GearGlyph = svg(<><circle cx="12" cy="12" r="3" /><path d="M12 3v3M12 18v3
 const PhotoGlyph = svg(<><rect x="4" y="5" width="16" height="14" rx="2" /><circle cx="9" cy="10" r="1.6" /><path d="M20 16l-5-5-8 8" /></>);
 const SiteGlyph = svg(<><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M3 9h18M9 9v11" /></>);
 const BackGlyph = svg(<path d="M10 7l-5 5 5 5M5 12h14" />);
-const GLYPH: Partial<Record<View, React.ComponentType<React.SVGProps<SVGSVGElement>>>> = { leads: InboxGlyph, calendar: CalendarGlyph, money: MoneyGlyph, stats: ChartGlyph, templates: GearGlyph };
+const GLYPH: Partial<Record<View, React.ComponentType<React.SVGProps<SVGSVGElement>>>> = { proofs: PhotoGlyph, leads: InboxGlyph, calendar: CalendarGlyph, money: MoneyGlyph, stats: ChartGlyph, templates: GearGlyph };
 /** Out of the desk: proofs, the site editor, the classic desk until it is retired. */
-const LINKS: [string, string, React.ComponentType<React.SVGProps<SVGSVGElement>>][] = [["Proofs", PROOFS, PhotoGlyph], ["Pages and work", "/admin", SiteGlyph], ["Classic desk", CLASSIC_HREF, BackGlyph]];
+const LINKS: [string, string, React.ComponentType<React.SVGProps<SVGSVGElement>>][] = [["Pages and work", "/admin", SiteGlyph], ["Classic desk", CLASSIC_HREF, BackGlyph]];
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
   return <Text type="code" size="xsm" color="secondary" weight="medium">{children}</Text>;
@@ -161,7 +162,7 @@ function More({ go }: { go: (v: View) => void }) {
       height="fill"
       header={<LayoutHeader><Heading level={1} weight="bold">More</Heading></LayoutHeader>}
       content={
-        <LayoutContent role="main" label="More">
+        <LayoutContent role="main" label="More" padding={4}>
           <VStack gap={5}>
             <List hasDividers>
               <ListItem label="New lead" startContent={<Icon icon={PlusGlyph} color="secondary" />} onClick={() => go("new")} />
@@ -320,7 +321,7 @@ export function LeadsAstryx() {
         </LayoutHeader>
       }
       content={
-        <LayoutContent role="main" label="Leads">
+        <LayoutContent role="main" label="Leads" padding={4}>
           <VStack gap={6}>
             {error ? <Text color="secondary">{error}</Text> : null}
             {!leads && !error ? <Eyebrow>LOADING LEADS</Eyebrow> : null}
@@ -397,7 +398,7 @@ export function LeadsAstryx() {
 
   // The lead page: its own Astryx layout (components/leads/lead-astryx.tsx).
   const lead = current ? (
-    <LeadAstryx key={current.id} summary={current} initial={fresh?.email === current.email ? fresh : null} call={call} onChange={changed} onBack={() => setOpen(null)} reload={load} templates={templates} others={live.filter((o) => o.id !== current.id)} size={size} />
+    <LeadAstryx key={current.id} summary={current} initial={fresh?.email === current.email ? fresh : null} call={call} onChange={changed} onBack={() => setOpen(null)} reload={load} templates={templates} others={live.filter((o) => o.id !== current.id)} size={size} toProofs={() => show("proofs")} />
   ) : null;
 
   // The lead from the POST itself: KV lists lag a fresh write, so it goes in by hand and opens whole.
@@ -423,6 +424,7 @@ export function LeadsAstryx() {
     templates: <TemplatesAstryx call={call} templates={templates} saved={setTemplates} />,
     device: <DeviceAstryx call={call} reload={load} signOut={signOut} />,
     more: <More go={show} />,
+    proofs: <ProofsAstryx embedded />,
   };
   const page = lead ?? pages[screen] ?? (screen === "money" ? <MoneyAstryx /> : screen === "calendar" ? <CalendarAstryx leads={live.filter((l) => !l.archivedAt)} size={size} open={(l) => setOpen(l.id ?? null)} tab={calTab} setTab={setCalTab} /> : screen === "new" ? <NewLeadAstryx call={call} leads={live} size={size} done={added} open={(l) => setOpen(l.id ?? null)} cancel={() => show("leads")} /> : screen === "today" && leads ? <TodayAstryx leads={live} size={size} open={(l) => setOpen(l.id ?? null)} show={() => show("leads")} /> : home);
   const section = lead ? null : sectionOf(screen);
