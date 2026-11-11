@@ -24,7 +24,7 @@ describe("DELETE /api/proof", () => {
   it("drops several frames in one write, and one frame the old way", async () => {
     expect((await del(`?token=${TOKEN}&ids=a,b`)).status).toBe(200);
     // The watermarked copies and link cards go with the originals.
-    expect(r2.delete).toHaveBeenCalledWith(["a", "b"].flatMap((id) => [`${TOKEN}/${id}.jpg`, `${TOKEN}/${id}.wm1.jpg`, `${TOKEN}/card-${id}.v1.jpg`]));
+    expect(r2.delete).toHaveBeenCalledWith(["a", "b"].flatMap((id) => [`${TOKEN}/${id}.jpg`, `${TOKEN}/${id}.wm1.jpg`, `${TOKEN}/card-${id}.v1.jpg`, `${TOKEN}/${id}.t800.wm1.jpg`, `${TOKEN}/${id}.t800.jpg`]));
     let p = (await readProof(kv as never, (await sealer(LEADS_KEY))!, TOKEN))!;
     expect(p.frames.map((f) => f.id)).toEqual(["c"]);
     expect(p.selects).toEqual(["c"]);
