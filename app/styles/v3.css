@@ -959,7 +959,8 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 /* Start, not stretch (MAC, 2026-11-05): a stretched cell drops its aspect-ratio in
    Safari 27.2, so a row with no credits cell in it sized to 0 and the sheet vanished.
    The ratio sizes the row; height:100% then levels a 4/5 with an 8/5 beside it. */
-.v3 .pj-flow .pj-r{position:relative;aspect-ratio:4/5;align-self:start;height:100%}
+/* Height from the frame's own 4:5, not the row: a tall credits cell (6 credits at 1024) stretched the row and widened its frames into the next column. */
+.v3 .pj-flow .pj-r{position:relative;aspect-ratio:4/5;align-self:start}
 .v3 .pj-flow .pj-r.w{grid-column:span 2;aspect-ratio:8/5}
 .v3 .pj-flow .pj-r img{position:absolute;inset:0;height:100%;object-fit:cover}
 /* The credits in the cells the last row leaves empty (project.tsx): set at the foot like a caption, each
