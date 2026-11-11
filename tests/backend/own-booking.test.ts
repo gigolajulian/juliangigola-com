@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { FakeEmail, FakeKV, FakeStore, fakeLock } from "./fakes";
+import { FakeEmail, FakeKV, FakeStore, fakeLock, LEADS_KEY } from "./fakes";
+import { readLog } from "@/lib/leads/activity-log";
+import { sealer } from "@/lib/leads/lead-crypto";
 import { forgetToken } from "@/lib/booking/gcal";
 import { BookingLock } from "@/worker/booking-lock";
 
@@ -119,6 +121,13 @@ describe("settle (a paid session on the site's engine)", () => {
     // A second delivery whose KV record was lost: the lock still knows the intent.
     await settle({ ...env(), INBOX: new FakeKV() as never }, "pi_TEST1234567890", META);
     expect(inserts).toHaveLength(1);
+  });
+
+  it("logs the $100 deposit on the client's activity log", async () => {
+    ctx.env = { ...ctx.env, LEADS_KEY };
+    expect(await settle(env(), "pi_TEST1234567890", META)).toBe("booked");
+    const s = (await sealer(LEADS_KEY))!;
+    expect((await readLog(kv as never, s, await s.id("qa@example.com"))).find((e) => e.kind === "payment")).toMatchObject({ amount: 100, note: "Deposit" });
   });
 
   it("refunds when the time is gone", async () => {

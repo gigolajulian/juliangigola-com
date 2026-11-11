@@ -102,6 +102,12 @@ function line(e: LeadEvent): string {
     case "remind": return e.note ? `Reminder set for ${at(e.note)}` : "Reminder cleared";
     case "quote": return e.note ? `Quote: $${Number(e.note).toLocaleString("en-US")}` : "Quote cleared";
     case "invoice": return `Invoice ${e.note ?? ""}`;
+    case "payment": return `Paid $${(e.amount ?? 0).toLocaleString("en-US")}${e.note ? `, ${e.note}` : ""}`;
+    case "refund": return `Refunded $${(e.amount ?? 0).toLocaleString("en-US")}${e.note ? `, ${e.note}` : ""}`;
+    case "reschedule": return `Moved the session${e.note ? ` to ${e.note}` : ""}`;
+    case "cancel": return `Cancelled the session${e.note ? `. ${e.note}` : ""}`;
+    case "selects": return `Sent selects${e.note ? `: ${e.note}` : ""}`;
+    case "invoice-paid": return `Invoice ${e.note ?? ""}`;
   }
 }
 

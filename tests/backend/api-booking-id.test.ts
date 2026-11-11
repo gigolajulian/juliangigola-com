@@ -1,4 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { readLog } from "@/lib/leads/activity-log";
+import { sealer } from "@/lib/leads/lead-crypto";
 import { POST } from "@/app/api/booking/[id]/route";
 import { bookingToken } from "@/lib/booking/booking-token";
 import { forgetToken } from "@/lib/booking/gcal";
@@ -66,5 +68,7 @@ describe("POST /api/booking/[id]", () => {
     expect(mail.sent).toHaveLength(1);
     expect(client.sent).toHaveLength(1);
     expect((await post({ t, action: "cancel" })).status).toBe(409);
+    const s = (await sealer(LEADS_KEY))!;
+    expect((await readLog(ctx.env.INBOX as never, s, await s.id("qa@example.com"))).map((e) => e.kind)).toContain("cancel");
   });
 });

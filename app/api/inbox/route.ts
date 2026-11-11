@@ -3,6 +3,7 @@ import { authorised, bearer, canPush } from "@/lib/vouch";
 import { SAFE_IMAGE, summary, type Enquiry, type Summary } from "@/lib/inbox";
 import { backfillLead, fold, PAPER, REMIND_MAX, STAGES, trashDaysLeft, type InboxRow, type Lead, type LeadPatch, type LeadSummary, type Paper, type Stage } from "@/lib/leads/leads";
 import { readLead, writeLead } from "@/lib/leads/lead-store";
+import { adoptLog, eventsCsv, forgetLog, paidTotal, readLog, readMaster } from "@/lib/leads/activity-log";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { notify, subscribe, unsubscribe } from "@/lib/leads/lead-push";
 import { publicKey } from "@/lib/leads/web-push";
@@ -21,13 +22,13 @@ const taken = async (inbox: NonNullable<CloudflareEnv["INBOX"]>, date: string) =
 
 /** Every lead, opened in full: for the numbers and the export, never the list. */
 async function everyLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: NonNullable<Awaited<ReturnType<typeof sealer>>>) {
-  const out: Lead[] = [];
+  const out: (Lead & { id?: string })[] = [];
   let after: string | undefined;
   for (;;) {
     const listed = await inbox.list({ prefix: "lead:", cursor: after });
     for (const k of listed.keys) {
       const l = await readLead(inbox, seal, k.name.slice(5));
-      if (l) out.push(l);
+      if (l) out.push(Object.assign(l, { id: k.name.slice(5) }));
     }
     if (listed.list_complete) break;
     after = listed.cursor;
@@ -84,8 +85,9 @@ async function parsed(
  * old rows. The id is the HMAC, never the address. A new message still
  * starts a fresh lead.
  */
-const bury = (inbox: NonNullable<CloudflareEnv["INBOX"]>, key: string) =>
-  Promise.all([inbox.delete(key), inbox.put(`gone:${key.slice(5)}`, "")]);
+/** A lead deleted for good, with its activity log when `seal` can open it. */
+const bury = (inbox: NonNullable<CloudflareEnv["INBOX"]>, key: string, seal?: Awaited<ReturnType<typeof sealer>>) =>
+  Promise.all([inbox.delete(key), inbox.put(`gone:${key.slice(5)}`, ""), seal ? forgetLog(inbox, seal, key.slice(5)) : null]);
 
 /** The binding and the secret, or `null` when this build has neither. */
 async function wired() {
@@ -185,15 +187,27 @@ export async function GET(request: Request) {
     const raw = PHOTO_KEY.test(key) ? await gate.inbox.get(key) : null;
     return raw ? json({ photo: await seal.open<string>(raw) }) : json({ error: "Photo not found." }, 404);
   }
-  // The numbers, and every lead as CSV (`lib/leads/lead-crm.ts`).
+  // One client's whole activity log (`lib/leads/activity-log.ts`).
+  if (url.searchParams.has("log")) {
+    const seal = await gate.seal;
+    if (!seal) return json({ error: "Leads need LEADS_KEY on the Worker." }, 503);
+    return json({ log: await readLog(gate.inbox, seal, (url.searchParams.get("log") ?? "").replace(/^lead:/, "")) });
+  }
+  // The numbers, every lead as CSV (`lib/leads/lead-crm.ts`), or every event as CSV (`?csv=events`).
   if (url.searchParams.has("stats") || url.searchParams.has("csv")) {
     const seal = await gate.seal;
     if (!seal) return json({ error: "Leads need LEADS_KEY on the Worker." }, 503);
+    const day = new Date().toISOString().slice(0, 10);
+    const file = (body: string, name: string) => new Response(body, { headers: { ...NO_STORE, "content-type": "text/csv; charset=utf-8", "content-disposition": `attachment; filename="${name}-${day}.csv"` } });
+    if (url.searchParams.get("csv") === "events") return file(eventsCsv(await readMaster(gate.inbox, seal)), "activity");
     const all = await everyLead(gate.inbox, seal);
     if (url.searchParams.has("stats")) return json({ stats: stats(all, Date.now()) });
-    return new Response(csv(all), {
-      headers: { ...NO_STORE, "content-type": "text/csv; charset=utf-8", "content-disposition": `attachment; filename="leads-${new Date().toISOString().slice(0, 10)}.csv"` },
-    });
+    // Paid per client from one pass over the master log: one list call per 1000 events.
+    const byLead = new Map<string, Lead["events"]>();
+    for (const m of await readMaster(gate.inbox, seal)) byLead.set(m.lead, [...(byLead.get(m.lead) ?? []), m.event]);
+    const paid: Record<string, number> = {};
+    for (const l of all) if (l.id) paid[l.email] = paidTotal(byLead.get(l.id) ?? []);
+    return file(csv(all, paid), "leads");
   }
 
   // The lead desk (`components/admin/admin-leads.tsx`): one record per person.
@@ -215,7 +229,7 @@ export async function GET(request: Request) {
         // Trash empties itself: 30 days after it went in, the lead goes for good.
         // The list is the only reader, so it is the one place that checks.
         if (one.trashedAt && trashDaysLeft(one.trashedAt, Date.now()) <= 0) {
-          await bury(gate.inbox, k.name);
+          await bury(gate.inbox, k.name, seal);
           continue;
         }
         leads.push({ ...one, id: k.name.slice(5) });
@@ -348,7 +362,7 @@ export async function DELETE(request: Request) {
       if (listed.list_complete) break;
       after = listed.cursor;
     }
-    await Promise.all(gone.map((k) => bury(gate.inbox, k)));
+    await Promise.all(gone.map((k) => bury(gate.inbox, k, seal)));
     return json({ ok: true, deleted: gone.length });
   }
   if (!key?.startsWith("msg:")) return json({ error: "Unknown." }, 400);
@@ -379,7 +393,7 @@ export async function POST(request: Request) {
     const id = await seal.id(lead.email);
     if (await readLead(gate.inbox, seal, id)) return json({ error: "That person is already a lead.", id }, 409);
     await Promise.all((await seal.ids(lead.email)).map((i) => gate.inbox.delete(`gone:${i}`)));
-    await writeLead(gate.inbox, seal, id, lead);
+    await writeLead(gate.inbox, seal, id, lead, null);
     return json({ lead, id });
   }
   if (given?.backfill !== true) return json({ error: "Unknown." }, 400);
@@ -427,7 +441,7 @@ export async function POST(request: Request) {
  */
 async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: Awaited<ReturnType<typeof sealer>>, given: Record<string, unknown>, notion?: string) {
   if (!seal) return json({ error: "Leads need LEADS_KEY on the Worker." }, 503);
-  const { key, stage, snoozeUntil, seen, archive, trash, notes, remind, details, quote, lostReason, mergeFrom, invoice, licence, contract, release } = given as LeadPatch & { key: string };
+  const { key, stage, snoozeUntil, seen, archive, trash, notes, remind, details, quote, lostReason, mergeFrom, invoice, licence, contract, release, invoicePaid } = given as LeadPatch & { key: string };
   for (const p of [contract, release]) if (p !== undefined && !(PAPER as readonly string[]).includes(p)) return json({ error: "Unknown status." }, 400);
   const bill = invoice === undefined ? undefined : cleanInvoice(invoice);
   if (bill && "error" in bill) return json({ error: bill.error }, 400);
@@ -439,6 +453,8 @@ async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: Await
   const id = key.slice(5);
   let lead = await readLead(inbox, seal, id);
   if (!lead) return json({ error: "Gone." }, 404);
+  // What the log compares against: events already logged (this lead's, and a merged record's) are not logged again.
+  let from: Lead = lead;
   const at = new Date().toISOString();
   if (stage) {
     lead = fold(lead, lead.email, { event: { at, kind: "stage", note: stage }, stage: stage as Stage });
@@ -483,6 +499,8 @@ async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: Await
     const other = await readLead(inbox, seal, mergeFrom.slice(5));
     if (!other) return json({ error: "Gone." }, 404);
     lead = merge(lead, other, at);
+    from = { ...from, events: [...from.events, ...other.events] };
+    await adoptLog(inbox, seal, id, mergeFrom.slice(5), lead).catch((e: unknown) => console.error("activity log merge", String(e)));
     await bury(inbox, mergeFrom);
   }
   // A new invoice takes the month's next number: 1126, then 1126-2.
@@ -493,7 +511,18 @@ async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: Await
     lead = { ...lead, invoices: [...(lead.invoices ?? []), made], events: [...lead.events, { at, kind: "invoice" as const, note: `${made.no}, ${usd(balance(made))} due` }].slice(-50) };
     await inbox.put(countKey(bill.date), String(n + 1));
   }
+  // Settled by hand (cash, Zelle), or opened again.
+  if (invoicePaid && typeof invoicePaid.no === "string") {
+    const inv = lead.invoices?.find((v) => v.no === invoicePaid.no);
+    if (!inv) return json({ error: "No such invoice." }, 404);
+    lead = {
+      ...lead,
+      invoices: lead.invoices!.map((v) => (v === inv ? { ...v, paidAt: invoicePaid.paid ? at : undefined } : v)),
+      // Cash or Zelle is money too: the amount counts in paid total, and comes off again if he unmarks it.
+      events: [...lead.events, { at, kind: "invoice-paid" as const, note: `${inv.no} ${invoicePaid.paid ? `paid, ${usd(balance(inv))}` : "unpaid again"}`, amount: invoicePaid.paid ? balance(inv) : -balance(inv) }].slice(-50),
+    };
+  }
   for (const k of Object.keys(lead) as (keyof Lead)[]) if (lead[k] === undefined) delete lead[k];
-  await writeLead(inbox, seal, id, lead);
+  await writeLead(inbox, seal, id, lead, from);
   return json({ lead });
 }

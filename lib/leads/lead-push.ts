@@ -24,10 +24,14 @@ const TITLE: Partial<Record<LeadEvent["kind"], string>> = {
   booking: "New booking",
   "deposit-stuck": "Deposit stuck",
   wrote: "New reply",
+  cancel: "Session cancelled",
+  reschedule: "Session moved",
+  selects: "Selects in",
 };
 
 export function pushFor(lead: Lead, event: LeadEvent): Push | null {
-  const title = TITLE[event.kind];
+  // A payment pings unless it is a deposit: the booking already did.
+  const title = event.kind === "payment" && !/deposit/i.test(event.note ?? "") ? "Payment in" : TITLE[event.kind];
   if (!title) return null;
   // No tag: on iOS a push with an earlier one's tag replaces it without a banner.
   return { title, body: [lead.name, lead.kind].filter(Boolean).join(", "), url: "/admin/leads" };

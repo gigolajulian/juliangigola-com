@@ -8,6 +8,7 @@
 
 import { TZ } from "../booking/booking-rules";
 import { STAGES, type Lead, type Stage } from "./leads";
+import { balance } from "./invoice";
 
 /** A lead's identity: the address, or an Instagram handle or phone for someone who never wrote from one. */
 export function identity(o: { email?: string; ig?: string; phone?: string }): string | null {
@@ -206,15 +207,16 @@ export function stats(all: Lead[], now: number): Stats {
 }
 
 /** Every lead as CSV, for his records. Spreadsheet formulas are defused. */
-export function csv(leads: Lead[]): string {
-  const cols = ["name", "email", "phone", "instagram", "company", "stage", "kind", "source", "quote", "lost reason", "first seen", "last activity", "booked for", "archived", "notes"] as const;
+/** `paid`: dollars paid per email, from the activity log. Open balance: invoices not settled. */
+export function csv(leads: Lead[], paid: Record<string, number> = {}): string {
+  const cols = ["name", "email", "phone", "instagram", "company", "stage", "kind", "source", "quote", "paid total", "open balance", "lost reason", "first seen", "last activity", "booked for", "archived", "notes"] as const;
   const cell = (v: unknown) => {
     let s = v === undefined || v === null ? "" : String(v);
     if (/^[=+\-@]/.test(s)) s = `'${s}`;
     return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
   };
   const rows = leads.map((l) =>
-    [l.name, mailable(l.email) ? l.email : "", l.phone, l.ig, l.company, l.stage, l.kind, l.source, l.quote, l.lostReason, l.firstAt, l.lastAt, l.when, l.archivedAt ? "yes" : "", l.notes].map(cell).join(","),
+    [l.name, mailable(l.email) ? l.email : "", l.phone, l.ig, l.company, l.stage, l.kind, l.source, l.quote, paid[l.email] ?? 0, (l.invoices ?? []).filter((v) => !v.paidAt).reduce((n, v) => n + balance(v), 0), l.lostReason, l.firstAt, l.lastAt, l.when, l.archivedAt ? "yes" : "", l.notes].map(cell).join(","),
   );
   return [cols.join(","), ...rows].join("\r\n") + "\r\n";
 }

@@ -31,6 +31,11 @@ export async function finalize(env: Env, kv: KV, s: Seal, p: Proof, paid?: Proof
   }
   await writeProof(kv, s, done);
   if (to) {
+    await recordLead(env, to, { event: { at, kind: "selects", ref: `selects:${done.token}:${at}`, note: `${done.selects.length} frames, ${done.name}` } });
+    // A shoot balance paid here settles its invoice; Stripe's webhook skips these (`metadata[proof]`).
+    if (paid && !paid.pending && !paid.failed) await recordLead(env, to, { event: { at, kind: "payment", ref: paid.session, note: `Proofs, ${done.name}`, amount: paid.amount / 100 }, settles: true });
+  }
+  if (to) {
     const m = receiptMail(done);
     if (await sendClient(env.CLIENT_EMAIL, to, m)) await recordLead(env, to, { event: { at, kind: "mail", note: m.subject, mail: { to: "client", kind: "proof-receipt" } } });
   }
@@ -56,7 +61,8 @@ export async function checkout(key: string, p: Proof, method: "bank" | "card" = 
   const back = proofUrl(p.token);
   const list = cardPrice(x.cents);
   const what = [x.balance ? "Shoot balance" : "", x.n ? `${x.n} extra retouched ${x.n === 1 ? "frame" : "frames"}` : ""].filter(Boolean).join(" + ");
-  const tag = `proof-${p.token}-${x.cents}-${p.selects.join(".")}`;
+  // v2: the request gained payment_intent_data metadata (2026-11-11); Stripe refuses an old key with new parameters.
+  const tag = `proof2-${p.token}-${x.cents}-${p.selects.join(".")}`;
   // One list price on both receipts; bank gets it back as a discount.
   const off = card
     ? null
@@ -73,6 +79,8 @@ export async function checkout(key: string, p: Proof, method: "bank" | "card" = 
       success_url: `${back}?paid={CHECKOUT_SESSION_ID}`,
       cancel_url: back,
       "metadata[proof]": p.token,
+      // On the payment too, so the webhook knows it is a proof payment.
+      "payment_intent_data[metadata][proof]": p.token,
       "metadata[selects]": String(p.selects.length),
       ...((p.submittedBy ?? p.email) ? { customer_email: p.submittedBy ?? p.email } : {}),
     },

@@ -1,5 +1,7 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { isDeposit, isIntentId, settle, verifyStripe } from "@/lib/booking/deposit";
+import { recordLead } from "@/lib/leads/lead-store";
+import { stripe } from "@/lib/stripe";
 
 /* ── Stripe's webhook ──────────────────────────────────────────────
  * The source of truth for a deposit: the card saying it paid proves
@@ -25,7 +27,7 @@ export async function POST(request: Request) {
   if (!(await verifyStripe(body, request.headers.get("stripe-signature") ?? "", env.STRIPE_WEBHOOK_SECRET)))
     return text("Bad signature.", 401);
 
-  let event: { type?: string; data?: { object?: { id?: string; amount?: number; currency?: string; metadata?: { [k: string]: string } } } };
+  let event: { type?: string; data?: { object?: { id?: string; amount?: number; amount_received?: number; currency?: string; receipt_email?: string | null; latest_charge?: string | null; description?: string | null; metadata?: { [k: string]: string } } } };
   try {
     event = JSON.parse(body);
   } catch {
@@ -35,8 +37,22 @@ export async function POST(request: Request) {
 
   const pi = event.data?.object;
   if (!pi?.id || !isIntentId(pi.id)) return text("No intent.", 400);
-  // Every other payment on the account (invoices, payment links) is none of this route's business: acknowledged, never refunded.
-  if (!isDeposit(pi)) return text("ok", 200);
+  // Every other payment on the account (invoices, payment links) is never refunded here, only logged on the client's lead
+  // and matched to an invoice. Proof checkouts log themselves (`lib/proof-submit.ts`), with the client's address.
+  // The address: `receipt_email`, else the charge's billing details (Checkout and Payment Links keep it there).
+  // A payer who is not a lead yet becomes one: they are a client now.
+  if (!isDeposit(pi)) {
+    const email = pi.metadata?.proof ? null : pi.receipt_email || (pi.latest_charge ? await stripe(env.STRIPE_SECRET_KEY, `/charges/${pi.latest_charge}`).then((c) => (c as { billing_details?: { email?: string | null } }).billing_details?.email ?? null, () => null) : null);
+    if (email) {
+      const said = `${pi.description ?? ""} ${pi.metadata?.invoice ?? ""}`;
+      await recordLead(env, email, {
+        event: { at: new Date().toISOString(), kind: "payment", ref: pi.id, note: pi.description ?? "Stripe", amount: (pi.amount_received ?? pi.amount ?? 0) / 100 },
+        settles: true,
+        invoiceNo: said.match(/\b\d{4}(?:-\d+)?\b/)?.[0],
+      });
+    }
+    return text("ok", 200);
+  }
   const status = await settle({ INBOX: env.INBOX, STRIPE_SECRET_KEY: env.STRIPE_SECRET_KEY, EMAIL: env.EMAIL, CLIENT_EMAIL: env.CLIENT_EMAIL, GCAL_OAUTH: env.GCAL_OAUTH, BOOKING_LOCK: env.BOOKING_LOCK, NOTION_TOKEN: env.NOTION_TOKEN, BOOKING_SECRET: env.BOOKING_SECRET }, pi.id, pi.metadata);
   // Still booking from an earlier delivery: Stripe retries until it ends or hello@ is warned.
   if (status === "booking") return text("Still booking.", 503);
