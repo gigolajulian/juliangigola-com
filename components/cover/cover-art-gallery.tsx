@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Lightbox, useLightbox } from "@/components/lightbox";
-import { CoverFaces, coverLabel } from "@/components/cover-faces";
+import { CoverFaces, coverLabel } from "@/components/cover/cover-faces";
 import type { CoverRelease } from "@/lib/cover-art-types";
 import { cn } from "@/lib/utils";
 

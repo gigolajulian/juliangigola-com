@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { SHOWN } from "@/components/cover-art";
+import { SHOWN } from "@/components/cover/cover-art";
 
 describe("cover-art", () => {
   it("counts ten covers for the admin picker", () => {
