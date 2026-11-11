@@ -1,10 +1,10 @@
-import { sendConfirm } from "@/lib/confirm";
+import { sendConfirm } from "@/lib/booking/confirm";
 import { enquiry, enquiryKey, looksLikeEmail, summary, whenPT } from "@/lib/inbox";
 import { logMail, recordLead } from "@/lib/lead-store";
-import { openNow, type KV } from "@/lib/slots";
-import { EVENTS, type Booking, type Hours } from "@/lib/booking-rules";
-import { lock, recordBooking } from "@/lib/booking-engine";
-import { manageLinks } from "@/lib/booking-token";
+import { openNow, type KV } from "@/lib/booking/slots";
+import { EVENTS, type Booking, type Hours } from "@/lib/booking/booking-rules";
+import { lock, recordBooking } from "@/lib/booking/booking-engine";
+import { manageLinks } from "@/lib/booking/booking-token";
 
 /* ── the $100 deposit ─────────────────────────────────────────────
  * Julian (2026-10-16): the four paid sessions take a $100 deposit on the
@@ -17,7 +17,7 @@ import { manageLinks } from "@/lib/booking-token";
  *      abandoned card costs no KV write.
  *   2. The visitor pays in the Stripe Payment Element.
  *   3. Stripe's signed webhook (`/api/stripe`) books the time through the
- *      lock (`lib/booking-engine.ts`). If the time went in the meantime,
+ *      lock (`lib/booking/booking-engine.ts`). If the time went in the meantime,
  *      the deposit is refunded at once. If even the refund fails, the Inbox gets a row saying so.
  *   4. The card polls GET /api/deposit/<id> for the outcome. The webhook
  *      copies it onto the intent's metadata and the poll reads it from
@@ -27,13 +27,13 @@ import { manageLinks } from "@/lib/booking-token";
  *   5. Julian (2026-10-16) hears about it: hello@ gets a mail for every
  *      deposit booked, refunded, or paid and stuck. The client's receipt
  *      is Stripe's, from `receipt_email`, and the site's own confirmation
- *      (`lib/confirm.ts`) once the time is booked.
+ *      (`lib/booking/confirm.ts`) once the time is booked.
  *
  * Stripe is called over its REST API with fetch, no SDK: three calls do
  * not need a dependency. Test-mode keys until Julian says live.
  * ─────────────────────────────────────────────────────────────── */
 
-import { isPaid } from "@/lib/paid";
+import { isPaid } from "@/lib/booking/paid";
 import { mail, type Attachment } from "@/lib/hello-mail";
 import { stripe } from "@/lib/stripe";
 export const AMOUNT = 10000;

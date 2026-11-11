@@ -1,10 +1,10 @@
-import { bookOwn, cancelOwn, dueReminders, findBooking, markReminded, readHours, rescheduleOwn, writeHours, type BookInput, type Store } from "../lib/booking-engine";
-import type { Hours } from "../lib/booking-rules";
+import { bookOwn, cancelOwn, dueReminders, findBooking, markReminded, readHours, rescheduleOwn, writeHours, type BookInput, type Store } from "../lib/booking/booking-engine";
+import type { Hours } from "../lib/booking/booking-rules";
 
 /* ── the booking lock: one Durable Object for hello@'s calendar ─────
  * Every booking passes through `serial`, so a recheck and its insert
  * finish before the next booking's recheck starts. Its storage holds the
- * booking records (`lib/booking-engine.ts`). Reached by fetch, not RPC,
+ * booking records (`lib/booking/booking-engine.ts`). Reached by fetch, not RPC,
  * so it needs no runtime import and runs the same in the tests.
  * ─────────────────────────────────────────────────────────────── */
 

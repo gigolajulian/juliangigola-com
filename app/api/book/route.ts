@@ -1,16 +1,16 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { lock, recordBooking, type BookResult } from "@/lib/booking-engine";
-import { manageLinks } from "@/lib/booking-token";
-import { sendConfirm } from "@/lib/confirm";
+import { lock, recordBooking, type BookResult } from "@/lib/booking/booking-engine";
+import { manageLinks } from "@/lib/booking/booking-token";
+import { sendConfirm } from "@/lib/booking/confirm";
 import { logMail } from "@/lib/lead-store";
-import { parseBooking } from "@/lib/deposit";
+import { parseBooking } from "@/lib/booking/deposit";
 import { json } from "@/lib/http";
 
 // Errors keep Cal.com's { status, error: { message } } envelope (as /api/slots does): the time picker reads either engine the same way.
 
 /* ── a free call, booked by the site's own engine ─────────────────
  * The picker posts a call here. The lock rechecks the time and inserts
- * the event (`lib/booking-engine.ts`), then the Inbox, Notion and the
+ * the event (`lib/booking/booking-engine.ts`), then the Inbox, Notion and the
  * client's "You're in." mail follow. Paid
  * sessions never come here: they book from Stripe's webhook.
  * ─────────────────────────────────────────────────────────────── */

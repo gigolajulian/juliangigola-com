@@ -6,13 +6,13 @@ import { gsap } from "gsap";
 import { cn } from "@/lib/utils";
 import { DepositStep, goo, type DepositBody } from "@/components/booking/deposit-step";
 import { ReferencePicks } from "@/components/reference-picks";
-import { isPaid } from "@/lib/paid";
+import { isPaid } from "@/lib/booking/paid";
 import { Orb, ORB_ROUND } from "@/components/orb";
 import { JgLoad } from "@/components/splash/jg-load";
 import { Calendar, dlabel, duration, fmt, type Shell } from "@/components/v3/flow";
 import { GESTURE_GAP_MS } from "@/components/strip/shared";
 import { looksLikeEmail } from "@/lib/inbox";
-import { TZ } from "@/lib/booking-rules";
+import { TZ } from "@/lib/booking/booking-rules";
 import { mplan } from "@/lib/mplan";
 
 /* Goo (Julian, 2026-10-20, OKd 10-21) on the card's buttons, times and
@@ -310,7 +310,7 @@ export function TimePicker({
       if (!ev || slots.status !== "success") throw new Error("no times");
       // A paid event's deposit is taken here (deposit-step.tsx) where the
       // build has Stripe's key; without it, the fallback.
-      // Paid by the site's list (lib/paid.ts).
+      // Paid by the site's list (lib/booking/paid.ts).
       const owes = isPaid(slug) || (ev.price ?? 0) > 0;
       if (ev.requiresConfirmation || (owes && !process.env.NEXT_PUBLIC_STRIPE_PK)) {
         setState("fallback");

@@ -41,7 +41,7 @@ interface CloudflareEnv {
   BING_API_KEY?: string;
 
   /**
-   * Stripe's secret key for the $100 deposit (`lib/deposit.ts`). Test mode
+   * Stripe's secret key for the $100 deposit (`lib/booking/deposit.ts`). Test mode
    * (`sk_test_`) until Julian says live. Unset, deposits are off. Set with:
    *
    *   wrangler versions secret put STRIPE_SECRET_KEY
@@ -67,7 +67,7 @@ interface CloudflareEnv {
 
   /**
    * hello@'s Google Calendar for the site's own booking engine
-   * (`lib/gcal.ts`): JSON `{client_id, client_secret, refresh_token}` of an
+   * (`lib/booking/gcal.ts`): JSON `{client_id, client_secret, refresh_token}` of an
    * Internal OAuth client, scopes calendar.events, calendar.freebusy and
    * gmail.readonly (his own replies on the lead desk, `lib/gmail-sync.ts`).
    * Made and set by `node scripts/gsc-auth.mjs <client.json> cal`.
@@ -75,7 +75,7 @@ interface CloudflareEnv {
   GCAL_OAUTH?: string;
 
   /**
-   * Signs the client's reschedule and cancel links (`lib/booking-token.ts`).
+   * Signs the client's reschedule and cancel links (`lib/booking/booking-token.ts`).
    * Any long random string. Unset, the mail carries no links. Set with:
    *
    *   wrangler versions secret put BOOKING_SECRET

@@ -1,9 +1,9 @@
-import { DEFAULT_HOURS, EVENTS, TZ, type Booking, type Hours } from "@/lib/booking-rules";
-import { gcal } from "@/lib/gcal";
+import { DEFAULT_HOURS, EVENTS, TZ, type Booking, type Hours } from "@/lib/booking/booking-rules";
+import { gcal } from "@/lib/booking/gcal";
 import { bookingEnquiry, enquiryKey, summary } from "@/lib/inbox";
 import { recordLead, type LeadStore } from "@/lib/lead-store";
 import { toNotion } from "@/lib/notion-lead";
-import { openNow, type KV } from "@/lib/slots";
+import { openNow, type KV } from "@/lib/booking/slots";
 
 /* ── the site's own booking engine ────────────────────────────────
  * Julian (2026-11-03): in place of Cal.com (PLAN-own-booking.md). One
@@ -15,7 +15,7 @@ import { openNow, type KV } from "@/lib/slots";
  * Google Calendar holds the time; the record (DO storage) holds what the
  * site needs after: the event id, the deposit, the reminder sent. The
  * event goes in with `sendUpdates=none`, so the only mail the client gets
- * is the site's own (`lib/confirm.ts`).
+ * is the site's own (`lib/booking/confirm.ts`).
  * ─────────────────────────────────────────────────────────────── */
 
 export type BookingRecord = {
