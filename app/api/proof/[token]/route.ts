@@ -4,7 +4,7 @@ import { recordLead } from "@/lib/leads/lead-store";
 import { checkout, checkPaid, finalize } from "@/lib/proof-submit";
 import { PAYMENTS_DOWN } from "@/lib/stripe";
 import { cleanSelects, device, isEmail, isOpen, owed, isToken, publicView, readProof, track, viewerKey, writeProof, type Proof } from "@/lib/proofs";
-import { json } from "@/lib/http";
+import { bodyOf, json } from "@/lib/http";
 
 /* ── proofs, the client's side ────────────────────────────────────
  * The token in the path is the only key; the email typed at the gate (any
@@ -38,20 +38,11 @@ async function where() {
   return [cf?.city, cf?.region, cf?.country].filter((v) => typeof v === "string" && v).join(", ") || undefined;
 }
 
-async function body(request: Request): Promise<Record<string, unknown>> {
-  try {
-    const b: unknown = await request.json();
-    return b && typeof b === "object" ? (b as Record<string, unknown>) : {};
-  } catch {
-    return {};
-  }
-}
-
 export async function PATCH(request: Request, { params }: { params: Promise<{ token: string }> }) {
   const g = await load((await params).token);
   if (!g) return json({ error: "This gallery closed." }, 404);
   if (g.p.submittedAt) return json({ error: "Selects are already in." }, 409);
-  const b = await body(request);
+  const b = ((await bodyOf(request)) ?? {});
   if (!isEmail(b.email)) return json({ error: "Add your email first." }, 400);
   const selects = cleanSelects(b.selects, g.p.frames);
   const next = { ...logged(g.p, b.email, { picks: selects }), selects, firstSelectAt: g.p.firstSelectAt ?? (selects.length && g.p.sentAt ? new Date().toISOString() : undefined) };
@@ -62,7 +53,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ to
 export async function POST(request: Request, { params }: { params: Promise<{ token: string }> }) {
   const g = await load((await params).token);
   if (!g) return json({ error: "This gallery closed." }, 404);
-  const b = await body(request);
+  const b = ((await bodyOf(request)) ?? {});
 
   if (b.action === "track") {
     if (!isEmail(b.email)) return json({ error: "Add your email first." }, 400);

@@ -6,7 +6,7 @@ import { cardKey, closesAt, cleanSettings, DEFAULTS, frameKey, frameKeys, isFram
 import { proofMail, proofUrl, sendClient } from "@/lib/email/proof-mail";
 import { settle } from "@/lib/proof-submit";
 import { servedFrame } from "@/lib/proof-watermark";
-import { json } from "@/lib/http";
+import { bodyOf, json } from "@/lib/http";
 
 /* ── proofs, Julian's side ────────────────────────────────────────
  * Lightroom (the publish service) and /admin Leads both call this, with the
@@ -36,15 +36,6 @@ async function gate(request: Request) {
   const ok = await isAdmin(request, env.INBOX_KEY);
   if (!ok) return { error: json({ error: "Not authorized." }, 401) };
   return { env, kv: env.INBOX, r2: env.PROOFS, s: await seal };
-}
-
-async function body(request: Request): Promise<Record<string, unknown>> {
-  try {
-    const b: unknown = await request.json();
-    return b && typeof b === "object" ? (b as Record<string, unknown>) : {};
-  } catch {
-    return {};
-  }
 }
 
 export async function GET(request: Request) {
@@ -90,7 +81,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   const g = await gate(request);
   if ("error" in g) return g.error;
-  const b = await body(request);
+  const b = ((await bodyOf(request)) ?? {});
 
   if (b.action === "create") {
     const set = cleanSettings(b);
@@ -142,7 +133,7 @@ export async function POST(request: Request) {
 export async function PATCH(request: Request) {
   const g = await gate(request);
   if ("error" in g) return g.error;
-  const b = await body(request);
+  const b = ((await bodyOf(request)) ?? {});
   if (!isToken(b.token)) return json({ error: "Which gallery?" }, 400);
   const p = await readProof(g.kv, g.s, b.token);
   if (!p) return json({ error: "No such gallery." }, 404);
