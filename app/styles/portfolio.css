@@ -291,16 +291,6 @@
   translate: calc(100% - var(--lead-pull, 0px)) 0;
   transition: translate 320ms var(--ease-out-strong);
 }
-/* The card runs on down under the glass, as the screens' own pictures
-   do, or the last screen's wall showed through the pane below it; and
-   the homepage's rail gives way as it comes, so the pane never reads
-   Inquire over the portfolio. */
-:root[data-stack][data-under] .lead-pane {
-  bottom: calc(-1 * var(--under, 94px));
-}
-:root[data-stack][data-under] .lead-under {
-  bottom: var(--under, 94px);
-}
 :root[data-stack] .strip-rail > * {
   opacity: calc(1 - min(1, var(--lead-in, 0) * 2));
   transition: opacity 320ms var(--ease-out-strong);
