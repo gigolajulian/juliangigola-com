@@ -22,6 +22,7 @@ local LrPasswords = import "LrPasswords"
 local LrFileUtils = import "LrFileUtils"
 local LrApplication = import "LrApplication"
 local LrDate = import "LrDate"
+local LrTasks = import "LrTasks"
 
 local Json = require "Json"
 local Image = require "Image"
@@ -261,10 +262,12 @@ end
 
 -- One catalog write for every gallery: Pick flag, Purple label, "<gallery> selects".
 -- Safe to run twice: same values, existing collections reused, photos already in stay once.
+-- Returns the selects collections it filled.
 local function markPicks(galleries)
+  local made = {}
   local any = false
   for _, g in ipairs(galleries) do any = any or #g.photos > 0 end
-  if not any then return end
+  if not any then return made end
   local catalog = LrApplication.activeCatalog()
   catalog:withWriteAccessDo("Client selects from juliangigola.com", function()
     local set = catalog:createCollectionSet("Client selects", nil, true)
@@ -274,10 +277,13 @@ local function markPicks(galleries)
           photo:setRawMetadata("colorNameForLabel", LABEL)
           photo:setRawMetadata("pickStatus", 1)
         end
-        catalog:createCollection((g.name or "Gallery") .. " selects", set, true):addPhotos(g.photos)
+        local c = catalog:createCollection((g.name or "Gallery") .. " selects", set, true)
+        c:addPhotos(g.photos)
+        made[#made + 1] = c
       end
     end
   end, { timeout = 30 })
+  return made
 end
 
 function provider.getCommentsFromPublishedCollection(publishSettings, arrayOfPhotoInfo, commentCallback)
@@ -320,7 +326,8 @@ function provider.checkForPicks()
     for _, pc in ipairs(service:getChildCollections()) do
       local remote = pc:getRemoteId()
       if remote then
-        local ok, p = pcall(gallery, remote)
+        -- LrTasks.pcall: plain pcall cannot wrap LrHttp, which yields.
+        local ok, p = LrTasks.pcall(gallery, remote)
         if not ok then
           failed[#failed + 1], why = pc:getName(), tostring(p)
         elseif p.submittedAt and p.selects and #p.selects > 0 then
@@ -331,15 +338,21 @@ function provider.checkForPicks()
             if want[pp:getRemoteId()] then picked[#picked + 1] = pp:getPhoto() end
           end
           found[#found + 1] = { name = pc:getName(), photos = picked }
-          lines[#lines + 1] = ("%s: %d"):format(pc:getName(), #p.selects)
+          -- Frames taken out of the Lightroom gallery after sending can't be flagged: say so.
+          local missing = #p.selects - #picked
+          lines[#lines + 1] = ("%s: %d %s%s"):format(pc:getName(), #p.selects, #p.selects == 1 and "pick" or "picks", missing > 0 and (" (%d not in this catalog)"):format(missing) or "")
         end
       end
     end
   end
-  markPicks(found)
+  local made = markPicks(found)
   local info = table.concat(lines, "\n")
   if #failed > 0 then info = info .. "\n\nCould not read " .. table.concat(failed, ", ") .. ": " .. why end
-  LrDialogs.message(#lines > 0 and "Client picks" or "No picks yet", info ~= "" and info or nil)
+  if #made == 0 then
+    LrDialogs.message(#lines > 0 and "Client picks" or "No picks yet", info ~= "" and info or nil)
+  elseif LrDialogs.confirm("Client picks", info .. "\n\nFlagged with a Purple label.", "Show selects", "Close") == "ok" then
+    catalog:setActiveSources(made)
+  end
 end
 
 return provider
