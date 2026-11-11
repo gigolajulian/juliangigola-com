@@ -275,9 +275,6 @@ html:has(.proof[data-wall])::-webkit-scrollbar{display:none}
   .proof[data-wall] .proof-top{background:color-mix(in srgb,var(--background) 92%,transparent)}
   .proof .pw-card{background:color-mix(in oklab,var(--background) 90%,transparent)}
 }
-/* Reduced motion (proof-wall.tsx `still`): the gallery's grid, flat and still, soft behind the card; sharp on Open proofs. */
-.proof[data-still] .proof-grid{transition:filter .3s ease}
-.proof[data-still][data-wall="gate"] .proof-grid{visibility:visible;filter:blur(6px) brightness(.45)}
 @media (prefers-reduced-transparency:reduce){
   .proof[data-wall] .proof-top,.proof .pw-card{background:var(--background);-webkit-backdrop-filter:none;backdrop-filter:none}
 }

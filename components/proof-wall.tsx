@@ -83,15 +83,12 @@ export function ProofWall({
   const [bad, setBad] = React.useState<string | null>(null);
   // Julian (2026-11-10): the load-up should feel premium. The wall streams in sharp, every other column from above and below, then racks
   // focus to blur as the card rises in, its lines one after another (`[data-ready]`, proof.css).
-  const [wallReady, setReady] = React.useState(false);
+  const [ready, setReady] = React.useState(false);
   const [flat, setFlat] = React.useState(false);
   const [leaving, setLeaving] = React.useState(false);
   const shown = React.useCallback(() => {
     window.setTimeout(() => setReady(true), reducedMotion() ? 0 : READY_AFTER_MS);
   }, []);
-  // Julian (2026-11-11, "show grid but as a static wall for reduced motion"): with reduced motion there is no drifting
-  // wall; the gallery's own grid stands still and soft behind the card (`data-still`, proof.css) and comes sharp in place.
-  const [still] = React.useState(reducedMotion);
   // A slow phone still gets the card soon: the wall comes in behind it.
   React.useEffect(() => {
     const t = window.setTimeout(() => setReady(true), READY_CAP_MS);
@@ -157,12 +154,6 @@ export function ProofWall({
     };
   }, [wall]);
 
-  // Reduced motion: the grid shows, still and soft, once its photographs are in, with the card over it.
-  React.useEffect(() => {
-    if (!still || !loaded) return;
-    layer.current?.closest<HTMLElement>(".proof")?.setAttribute("data-still", "");
-  }, [still, loaded]);
-  const ready = wallReady || (still && loaded);
   // The cursor waits in the name field on a desktop; a phone's keyboard stays down until a tap.
   React.useEffect(() => {
     if (ready && matchMedia("(pointer: fine)").matches) nameField.current?.focus({ preventScroll: true });
@@ -313,7 +304,9 @@ export function ProofWall({
   }
 
   /** Reduced motion, or the wall not measurable: nothing travels. The card goes, the wall stops and racks out of focus,
-   *  and the gallery's first screen comes up in place over it once every photo in it is drawn. */
+   *  and the gallery's first screen comes up in place over it once every photo in it is drawn. Reduced motion (Julian
+   *  2026-11-11: "3d gridwall on email entering page and just fade in the proof gallery"): the wall stays, held still by
+   *  DriftWall, and the gallery fades in over it while it fades out. */
   async function reveal(still: boolean) {
     setLeaving(true);
     const t0 = performance.now();
@@ -335,7 +328,8 @@ export function ProofWall({
       const row = Math.round((r.top - (first?.top ?? 0)) / Math.max(1, first?.height ?? 1));
       anims.push(cell.animate([{ opacity: 0, transform: "translateY(10px) scale(.985)" }, { opacity: 1, transform: "none" }], { duration: RISE_MS, easing: "cubic-bezier(.22,1,.36,1)", delay: col * 80 + row * 50, fill: "backwards" }));
     }
-    const out = root?.animate([{ opacity: 1 }, { opacity: 0 }], { duration: still ? 200 : 1000, delay: still ? 0 : 250, easing: "cubic-bezier(.4,0,.2,1)", fill: "forwards" });
+    if (still) anims.push(...[grid.current?.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 600, easing: "ease", fill: "backwards" })].filter((a) => !!a));
+    const out = root?.animate([{ opacity: 1 }, { opacity: 0 }], { duration: still ? 600 : 1000, delay: still ? 0 : 250, easing: "cubic-bezier(.4,0,.2,1)", fill: "forwards" });
     Promise.all([out?.finished, ...anims.map((a) => a.finished)].map((p) => p?.catch(() => {}))).then(onDone);
   }
 
@@ -355,7 +349,7 @@ export function ProofWall({
         </div>
       </div>
       <div ref={layer} className="pw-layer" data-ready={ready || undefined} data-flat={flat || undefined} data-leave={leaving || undefined}>
-        {wall && loaded && !still ? (
+        {wall && loaded ? (
           <DriftWall
             items={wall.items}
             columns={wall.cols}
