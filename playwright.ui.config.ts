@@ -21,8 +21,9 @@ const projects = [
 export default defineConfig({
   testDir: "tests/ui",
   fullyParallel: true,
-  /* Cal.com answers the pickers live; one retry absorbs a slow answer, and
-     the report still lists anything that needed it as flaky. */
+  /* The pickers' slots come from fixtures (`tests/ui/ratios.ts`); one retry
+     absorbs a slow dev-server compile, and the report still lists anything
+     that needed it as flaky. */
   retries: 1,
   timeout: 120_000,
   outputDir: "test-results/ui",

@@ -652,18 +652,6 @@ export const getProject = (slug: string): Project | undefined =>
  */
 const HAS_VIDEOS = CONTENT.videos.length > 0;
 
-/**
- * Where a category's work lives.
- *
- * A listing gets its own filtered index page — a real URL, so a discipline
- * can be linked, shared and indexed, rather than a filter someone has to
- * apply by hand after landing on everything at once.
- *
- * A category that is itself one gallery points at the gallery: the listing
- * for it would be a page with a single row on it, which is a click for
- * nothing. And a category with no work yet has no page to point at, so it
- * falls back to the full index instead of a route that does not exist.
- */
 /** Whether a discipline gets a listing page: not Video (its page is
     the films), and not one with no work yet. Cover art has one again:
     its rack under the filters, scrolling sideways like every other
@@ -685,8 +673,8 @@ export const categoryHref = (categorySlug: string): string => {
   return `/portfolio?d=${categorySlug}`;
 };
 
-/** The disciplines with a listing page of their own, at `/portfolio/<slug>`:
-    the category route's pages, its rewrites and its sitemap entries. */
+/** The disciplines with work of their own. Their retired `/portfolio/<slug>`
+    listing addresses redirect to the filtered index (`next.config.ts`). */
 export const LISTINGS: Category[] = WORK_CATEGORIES.filter((c) => isListing(c.slug));
 
 /** The pages a strip leads on to once its own sequence has run out: the

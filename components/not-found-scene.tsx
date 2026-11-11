@@ -12,9 +12,8 @@ import { THEME_COLOR } from "@/lib/theme-color";
  * approaches rather than snapping when it arrives — and a readout in the
  * foot of the page reports the focus as a percentage until it locks.
  *
- * Written straight to the nodes on every move, like the wordmark handoff in
- * `site-header.tsx`: a `setState` per mousemove would re-render the page to
- * move a blur. The readout and the requested path are plain elements the
+ * Written straight to the nodes on every move: a `setState` per mousemove
+ * would re-render the page to move a blur. The readout and the requested path are plain elements the
  * server renders with placeholders; this fills them in.
  *
  * Only where there is a pointer to follow. On a touch screen — or before any

@@ -8,7 +8,7 @@ import { shareOg } from "@/lib/share";
 export const metadata: Metadata = shareOg("Photographer and creative director","Fashion editorial, campaigns and portraits in the San Francisco Bay Area. Available worldwide.");
 
 /* JG V3 homepage (master v39). The old deck (strip, cover float, screens)
-   is retired; its components are left in place, unused. */
+   is retired. */
 /* Each Commissions tab's top projects in Julian's portfolio order, as
    /portfolio shows them: nine, or five, the counts that fill the sheet
    (one large and its small ones). Fewer than five and the tab keeps
