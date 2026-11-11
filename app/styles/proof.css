@@ -182,7 +182,7 @@ html:has(.proof) #main{transform:none}
 @media (prefers-reduced-motion:reduce){.proof *{transition:none!important}}
 
 
-/* ── ?proofwall=1: the gate over the 404's wall (components/proof-wall.tsx) ── */
+/* ── the gate over the 404's wall (components/proof-wall.tsx), the default; `?proofwall=0` for the plain gate ── */
 .proof[data-wall]{position:relative;isolation:isolate}
 /* Julian: no scrollbar on the wall. Hidden for the whole page, so the grid does not jump sideways when the wall hands over
    either (a kept gutter showed as an empty bar). The page still scrolls by wheel, touch and keys. */
@@ -193,7 +193,7 @@ html:has(.proof[data-wall])::-webkit-scrollbar{display:none}
 .proof[data-wall]>div:not(.pw-layer,.pw-splash){position:relative;z-index:1}
 /* Until the page knows it has the wall (the flag is read in the browser), nothing of the plain gate shows: it flashed
    for a frame before the splash. `data-proofwall` is set before the first paint (layout.tsx). */
-:root[data-proofwall] .proof:not([data-wall]){visibility:hidden}
+:root[data-proofwall] .proof:not([data-wall]):has(.proof-gate){visibility:hidden}
 .pw-layer{position:fixed;inset:0;z-index:0;background:var(--background)}
 /* Julian: hovering a photo does nothing here, and the wall sits under a blur */
 /* Julian: hovering the wall does nothing. The tiles take the pointer back (drift-wall.css), so they are let go too. */

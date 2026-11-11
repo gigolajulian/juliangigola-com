@@ -28,9 +28,10 @@ const isEmail = (v: string) => looksLikeEmail(v.trim());
 
 type Step = null | "review" | "done";
 
-// ?proofwall=1: the gate as the grid's own wall (components/proof-wall.tsx), on trial. Read on the client only.
+// The gate as the grid's own wall (components/proof-wall.tsx), the default since Julian 2026-11-11 ("make the new gridwall
+// proof gallery default"); `?proofwall=0` for the plain gate. Read on the client only.
 const noop = () => () => {};
-const readWall = () => new URLSearchParams(location.search).get("proofwall") === "1";
+const readWall = () => new URLSearchParams(location.search).get("proofwall") !== "0";
 
 /** A full-screen sheet: focus moves in, Tab stays inside, Escape closes, focus goes back to what opened it. */
 function useDialog(active: boolean, close: () => void) {
