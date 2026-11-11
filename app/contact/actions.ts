@@ -2,6 +2,7 @@
 
 import { headers } from "next/headers";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
+import type { ContactState } from "@/lib/inbox";
 import { toNotion } from "@/lib/leads/notion-lead";
 import { logMail, recordLead } from "@/lib/leads/lead-store";
 import imageLoader from "@/image-loader";
@@ -48,17 +49,6 @@ import {
  * a notification to his phone is wanted later, it belongs beside this write
  * and not instead of it.
  */
-
-export type ContactState = {
-  status: "idle" | "sent" | "error" | "unconfigured";
-  message?: string;
-  /** Set when delivery is not possible, so the UI can offer a real path. */
-  mailto?: string;
-  /** Field name → problem, for inline errors. */
-  errors?: Record<string, string>;
-  /** Echoed back so a failed submit does not wipe what they typed. */
-  values?: Record<string, string>;
-};
 
 const TO = "contact@juliangigola.com";
 /** The sending subdomain onboarded to Cloudflare Email Sending. See wrangler.jsonc. */
