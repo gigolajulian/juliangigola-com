@@ -8,6 +8,7 @@ import { sealer } from "@/lib/leads/lead-crypto";
 import { notify, subscribe, unsubscribe } from "@/lib/leads/lead-push";
 import { publicKey } from "@/lib/leads/web-push";
 import { notionPaper, notionStage } from "@/lib/leads/notion-lead";
+import { importStripe } from "@/lib/leads/stripe-import";
 import { cleanTemplates, csv, manualLead, merge, stats, type NewLead } from "@/lib/leads/lead-crm";
 import { balance, cleanFrom, cleanInvoice, invoiceNo, mmyy, PHOTO_KEY, usd, type InvoiceFrom } from "@/lib/leads/invoice";
 import { json, NO_STORE } from "@/lib/http";
@@ -92,7 +93,7 @@ const bury = (inbox: NonNullable<CloudflareEnv["INBOX"]>, key: string, seal?: Aw
 /** The binding and the secret, or `null` when this build has neither. */
 async function wired() {
   const { env } = await getCloudflareContext({ async: true });
-  return env.INBOX ? { inbox: env.INBOX, key: env.INBOX_KEY, seal: sealer(env.LEADS_KEY), notion: env.NOTION_TOKEN, vapid: env.VAPID_KEY } : null;
+  return env.INBOX ? { inbox: env.INBOX, key: env.INBOX_KEY, seal: sealer(env.LEADS_KEY), notion: env.NOTION_TOKEN, vapid: env.VAPID_KEY, env } : null;
 }
 
 async function guard(request: Request) {
@@ -112,11 +113,11 @@ async function guard(request: Request) {
   // push to the repository. The messages differ so a wrong one can be told
   // from a missing one — but never which characters were wrong.
   if (rig.key && (await authorised(request, rig.key)))
-    return { inbox: rig.inbox, seal: rig.seal, notion: rig.notion, vapid: rig.vapid };
+    return { inbox: rig.inbox, seal: rig.seal, notion: rig.notion, vapid: rig.vapid, env: rig.env };
 
   const token = bearer(request);
   if (token) {
-    if (await canPush(token)) return { inbox: rig.inbox, seal: rig.seal, notion: rig.notion, vapid: rig.vapid };
+    if (await canPush(token)) return { inbox: rig.inbox, seal: rig.seal, notion: rig.notion, vapid: rig.vapid, env: rig.env };
     return {
       error: json(
         { error: "GitHub did not accept that token for this repository." },
@@ -395,6 +396,15 @@ export async function POST(request: Request) {
     await Promise.all((await seal.ids(lead.email)).map((i) => gate.inbox.delete(`gone:${i}`)));
     await writeLead(gate.inbox, seal, id, lead, null);
     return json({ lead, id });
+  }
+  // Past Stripe payments and refunds onto the log (`lib/leads/stripe-import.ts`). Dry, it only counts.
+  if (given?.importStripe === true) {
+    if (!gate.env.STRIPE_SECRET_KEY) return json({ error: "Stripe is not set up on the Worker." }, 503);
+    try {
+      return json(await importStripe(gate.env, gate.env.STRIPE_SECRET_KEY, given.dry === true));
+    } catch (e) {
+      return json({ error: String(e instanceof Error ? e.message : e) }, 502);
+    }
   }
   if (given?.backfill !== true) return json({ error: "Unknown." }, 400);
   const seal = await gate.seal;
