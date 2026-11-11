@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { LeadHours } from "@/components/lead-hours";
-import { DEFAULT_HOURS } from "@/lib/booking-rules";
+import { DEFAULT_HOURS } from "@/lib/booking/booking-rules";
 
 const ok = (body: unknown) => Promise.resolve(new Response(JSON.stringify(body), { status: 200 }));
 

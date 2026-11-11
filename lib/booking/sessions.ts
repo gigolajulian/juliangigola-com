@@ -15,8 +15,8 @@
  * always his actual work and never goes stale.
  */
 
-import { CONTENT } from "./content";
-import type { SessionType } from "./content";
+import { CONTENT } from "../content";
+import type { SessionType } from "../content";
 
 export type { SessionType };
 

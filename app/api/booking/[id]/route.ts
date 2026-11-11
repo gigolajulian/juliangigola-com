@@ -1,10 +1,10 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { lock, clientView, type ChangeResult } from "@/lib/booking-engine";
-import { refundable } from "@/lib/booking-rules";
-import { manageLinks, tokenOpens } from "@/lib/booking-token";
-import { cancelledSubject, sendCancelled, sendConfirm } from "@/lib/confirm";
+import { lock, clientView, type ChangeResult } from "@/lib/booking/booking-engine";
+import { refundable } from "@/lib/booking/booking-rules";
+import { manageLinks, tokenOpens } from "@/lib/booking/booking-token";
+import { cancelledSubject, sendCancelled, sendConfirm } from "@/lib/booking/confirm";
 import { logMail } from "@/lib/lead-store";
-import { dashboardLink } from "@/lib/deposit";
+import { dashboardLink } from "@/lib/booking/deposit";
 import { mail } from "@/lib/hello-mail";
 import { stripe } from "@/lib/stripe";
 import { whenPT } from "@/lib/inbox";
@@ -12,8 +12,8 @@ import { json } from "@/lib/http";
 
 /* ── a client reschedules or cancels (`/booking/<id>`) ────────────
  * POST {t, action: "cancel"} or {t, action: "reschedule", start}. The
- * token from their mail opens it (`lib/booking-token.ts`); the lock does
- * the change (`lib/booking-engine.ts`). A cancel 48 hours or more before
+ * token from their mail opens it (`lib/booking/booking-token.ts`); the lock does
+ * the change (`lib/booking/booking-engine.ts`). A cancel 48 hours or more before
  * the start refunds the deposit through Stripe; under that it keeps it
  * (Julian, 2026-11-03). hello@ hears about every change.
  * ─────────────────────────────────────────────────────────────── */

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { TZ } from "@/lib/booking-rules";
+import { TZ } from "@/lib/booking/booking-rules";
 import { adminCall, errorText } from "@/lib/lead-desk";
 import { canonical } from "@/lib/lead-crypto";
 import { extras, stage, STAGES, type Proof, type Viewer, type ViewerEvent } from "@/lib/proofs";

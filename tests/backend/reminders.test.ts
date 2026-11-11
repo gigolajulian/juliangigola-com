@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FakeEmail, FakeStore, fakeLock } from "./fakes";
-import { saveBooking, type BookingRecord } from "@/lib/booking-engine";
+import { saveBooking, type BookingRecord } from "@/lib/booking/booking-engine";
 import { BookingLock } from "@/worker/booking-lock";
 import { remind } from "@/worker/index";
 

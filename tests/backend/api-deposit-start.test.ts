@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { POST } from "@/app/api/deposit/route";
 import { FakeKV, reply } from "./fakes";
-import { forgetToken } from "@/lib/gcal";
+import { forgetToken } from "@/lib/booking/gcal";
 
 /* /api/deposit: off without Stripe, rate limited, refuses a bad booking,
    and creates a fixed $100 intent for an open time. */

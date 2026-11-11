@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_HOURS, EVENTS, cleanHours, duration, refundable, windowOn } from "@/lib/booking-rules";
+import { DEFAULT_HOURS, EVENTS, cleanHours, duration, refundable, windowOn } from "@/lib/booking/booking-rules";
 
-/* The site's own booking rules (`lib/booking-rules.ts`): hours, the
+/* The site's own booking rules (`lib/booking/booking-rules.ts`): hours, the
    refund window and how a length is written. */
 
 const week = DEFAULT_HOURS.week;

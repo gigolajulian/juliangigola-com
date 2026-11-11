@@ -19,7 +19,7 @@ export async function POST(request: Request) {
   try {
     return json({ folded: await syncGmail(env) });
   } catch (e) {
-    // Google's status and message only, never a token (`lib/gcal.ts`).
+    // Google's status and message only, never a token (`lib/booking/gcal.ts`).
     console.error("gmail", String(e));
     return json({ error: "Gmail sync failed." }, 502);
   }

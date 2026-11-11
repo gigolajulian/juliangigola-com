@@ -2,8 +2,8 @@
 
 import * as React from "react";
 import { adminCall, errorText } from "@/lib/lead-desk";
-import { EVENTS, HOURS, TZ } from "@/lib/booking-rules";
-import { startsFor, zoned } from "@/lib/slots";
+import { EVENTS, HOURS, TZ } from "@/lib/booking/booking-rules";
+import { startsFor, zoned } from "@/lib/booking/slots";
 import { cn } from "@/lib/utils";
 
 /* ── the Leads app's Calendar ─────────────────────────────────────

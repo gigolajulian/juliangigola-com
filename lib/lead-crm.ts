@@ -6,7 +6,7 @@
  * Pure functions: `app/api/inbox/route.ts` reads and writes, these decide.
  * ─────────────────────────────────────────────────────────────── */
 
-import { TZ } from "./booking-rules";
+import { TZ } from "./booking/booking-rules";
 import { STAGES, type Lead, type Stage } from "./leads";
 
 /** A lead's identity: the address, or an Instagram handle or phone for someone who never wrote from one. */

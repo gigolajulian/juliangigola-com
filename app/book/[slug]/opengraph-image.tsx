@@ -1,5 +1,5 @@
 import { CARD_SIZE, CARD_TYPE, framesOf, renderCard } from "@/lib/share-card";
-import { BOOK_MENU, pageForSession } from "@/lib/booking";
+import { BOOK_MENU, pageForSession } from "@/lib/booking/booking";
 import { FEATURED } from "@/lib/work";
 import { SESSIONS } from "@/lib/v3";
 

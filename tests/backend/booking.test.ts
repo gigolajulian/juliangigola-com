@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { BOOKING_PAGES, BOOK_MENU, CAL_EVENTS, bookingHref, bookingPage, calEvent, pageForSession } from "@/lib/booking";
-import { BOOKING_SLUGS } from "@/lib/booking-slugs";
+import { BOOKING_PAGES, BOOK_MENU, CAL_EVENTS, bookingHref, bookingPage, calEvent, pageForSession } from "@/lib/booking/booking";
+import { BOOKING_SLUGS } from "@/lib/booking/booking-slugs";
 
-/* The booking pages and the homepage booking menu (`lib/booking.ts`),
-   against the slug list next.config reads (`lib/booking-slugs.ts`). */
+/* The booking pages and the homepage booking menu (`lib/booking/booking.ts`),
+   against the slug list next.config reads (`lib/booking/booking-slugs.ts`). */
 
 describe("booking pages", () => {
   it("has one page per booking slug, and no other", () => {

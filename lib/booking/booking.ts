@@ -18,11 +18,11 @@
  */
 
 import { SESSION_TYPES, formatPrice, type SessionType } from "./sessions";
-import { RESPONSE_TIME } from "./site";
-import { CONTENT } from "./content";
-import { getProject, projectsIn } from "./work";
+import { RESPONSE_TIME } from "../site";
+import { CONTENT } from "../content";
+import { getProject, projectsIn } from "../work";
 import type { BookingSlug } from "./booking-slugs";
-import type { Frame } from "./work-types";
+import type { Frame } from "../work-types";
 
 export type Faq = { q: string; a: string };
 export type Block = { heading: string; items?: string[]; body?: string };
@@ -98,7 +98,7 @@ export const calEvent = (sessionSlug?: string): string | undefined =>
 
 const session = (slug: string): SessionType => {
   const s = SESSION_TYPES.find((t) => t.slug === slug);
-  if (!s) throw new Error(`lib/booking.ts: no session "${slug}" in content/site.json.`);
+  if (!s) throw new Error(`lib/booking/booking.ts: no session "${slug}" in content/site.json.`);
   return s;
 };
 

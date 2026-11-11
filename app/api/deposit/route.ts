@@ -1,6 +1,6 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { liveHours } from "@/lib/booking-engine";
-import { AMOUNT, CURRENCY, intentForm, isSlotOpen, parseBooking } from "@/lib/deposit";
+import { liveHours } from "@/lib/booking/booking-engine";
+import { AMOUNT, CURRENCY, intentForm, isSlotOpen, parseBooking } from "@/lib/booking/deposit";
 import { stripe } from "@/lib/stripe";
 import { json } from "@/lib/http";
 
@@ -8,7 +8,7 @@ import { json } from "@/lib/http";
  * The card posts the booking it wants; this checks the time is still
  * open in hello@'s calendar and creates a $100 PaymentIntent for the Payment
  * Element. The amount is fixed here, never taken from the request.
- * Off (503) until STRIPE_SECRET_KEY is set. See `lib/deposit.ts`.
+ * Off (503) until STRIPE_SECRET_KEY is set. See `lib/booking/deposit.ts`.
  * ─────────────────────────────────────────────────────────────── */
 
 export const dynamic = "force-dynamic";

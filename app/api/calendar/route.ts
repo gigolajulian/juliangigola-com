@@ -1,8 +1,8 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { TZ } from "@/lib/booking-rules";
-import { gcal } from "@/lib/gcal";
+import { TZ } from "@/lib/booking/booking-rules";
+import { gcal } from "@/lib/booking/gcal";
 import { looksLikeEmail } from "@/lib/inbox";
-import { busyAll, EXTRA_KEY, isIcs, readExtras, zoned, type Extra } from "@/lib/slots";
+import { busyAll, EXTRA_KEY, isIcs, readExtras, zoned, type Extra } from "@/lib/booking/slots";
 import { isAdmin } from "@/lib/vouch";
 import { json } from "@/lib/http";
 
@@ -15,7 +15,7 @@ import { json } from "@/lib/http";
  * A block is an event on hello@ ("Blocked", marked `jgBlock`), so Cal.com
  * and the site's own engine both stop offering it at once, and it shows in
  * Google Calendar too. Only events with that mark can be unblocked here:
- * this route never deletes a booking. Extras live in INBOX (`lib/slots.ts`).
+ * this route never deletes a booking. Extras live in INBOX (`lib/booking/slots.ts`).
  * Same gate as /api/inbox: the inbox key or a GitHub token that can push.
  * ─────────────────────────────────────────────────────────────── */
 

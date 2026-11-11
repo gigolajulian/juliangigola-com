@@ -1,4 +1,4 @@
-import { duration, refundable, TZ } from "@/lib/booking-rules";
+import { duration, refundable, TZ } from "@/lib/booking/booking-rules";
 import { SIG_DARK, SIG_HTML, SIG_TEXT } from "@/lib/email/email-signature";
 /* ── the client's confirmation email ──────────────────────────────
  * Julian (2026-10-16): every booking gets a branded "You're in." mail from
@@ -78,7 +78,7 @@ export function confirmMail(c: Confirm) {
   const rows: [string, string][] = [["Session", c.session], ["When", mins > 0 ? `${at}, ${duration(mins)}` : at], ...(c.where ? [["Where", c.where] as [string, string]] : []), ["Booking", c.uid.slice(0, 8)]];
   const paid = c.deposit && {
     rows: [["Paid", fmt({ month: "short", day: "numeric", year: "numeric" }).format(new Date(c.deposit.at))], ...(c.deposit.card ? [["Card", c.deposit.card]] : []), ["Ref", c.deposit.ref.slice(0, 11)]] as [string, string][],
-    // The site's own engine refunds by Julian's 48-hour rule (`lib/booking-rules.ts`).
+    // The site's own engine refunds by Julian's 48-hour rule (`lib/booking/booking-rules.ts`).
     note: remind
       ? "It is under 48 hours now, so a cancel keeps the deposit. Moving to another date carries it over."
       : c.firstStart && c.firstStart !== c.start

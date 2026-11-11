@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { forgetToken, gcal, gcalToken } from "@/lib/gcal";
+import { forgetToken, gcal, gcalToken } from "@/lib/booking/gcal";
 
-/* hello@'s calendar (`lib/gcal.ts`): one token swap per hour, a 401 asks
+/* hello@'s calendar (`lib/booking/gcal.ts`): one token swap per hour, a 401 asks
    for a fresh token once, and no error carries the token. */
 
 const SECRET = JSON.stringify({ client_id: "id", client_secret: "shh", refresh_token: "rt-secret" });

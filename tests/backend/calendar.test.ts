@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- fakes of Google's JSON */
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { forgetToken } from "@/lib/gcal";
-import { busyAll, EXTRA_KEY, icsBusy } from "@/lib/slots";
+import { forgetToken } from "@/lib/booking/gcal";
+import { busyAll, EXTRA_KEY, icsBusy } from "@/lib/booking/slots";
 import { FakeKV } from "./fakes";
 
 /* The Leads app's Calendar (`app/api/calendar`): blocks are events on
