@@ -187,6 +187,17 @@ export async function GET(request: Request) {
     const raw = PHOTO_KEY.test(key) ? await gate.inbox.get(key) : null;
     return raw ? json({ photo: await seal.open<string>(raw) }) : json({ error: "Photo not found." }, 404);
   }
+  // Every invoice on every lead, newest first, for Money > Invoices and Today's overdue list. Trashed leads are left out.
+  // shortcut: one KV get per lead; an invoice index if the desk ever holds thousands of leads.
+  if (url.searchParams.has("invoices")) {
+    const seal = await gate.seal;
+    if (!seal) return json({ error: "Leads need LEADS_KEY on the Worker." }, 503);
+    const invoices = (await everyLead(gate.inbox, seal))
+      .filter((l) => !l.trashedAt)
+      .flatMap((l) => (l.invoices ?? []).map((i) => ({ ...i, lead: l.id!, name: l.name })))
+      .sort((a, b) => b.at.localeCompare(a.at));
+    return json({ invoices });
+  }
   // One client's whole activity log (`lib/leads/activity-log.ts`).
   if (url.searchParams.has("log")) {
     const seal = await gate.seal;
