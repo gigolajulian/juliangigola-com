@@ -120,7 +120,8 @@ export function alertLines(p: Proof): { subject: string; lines: string[] } {
 
 export async function sendClient(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefined, to: string, m: { subject: string; html: string; text: string; attachments: Inline[] }): Promise<boolean> {
   if (!mailer) return false;
-  const head = { to: { email: to }, from: FROM, replyTo: REPLY_TO };
+  // A plain address: Cloudflare refuses an EmailAddress without a name (live 2026-11-11, every client mail failed).
+  const head = { to, from: FROM, replyTo: REPLY_TO };
   try {
     await mailer.send({ ...head, ...m });
     return true;
