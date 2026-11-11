@@ -1,4 +1,4 @@
-import { balance, isPaid, type Invoice } from "./invoice";
+import { balance, isPaid, namesInvoice, type Invoice } from "./invoice";
 
 /* ── leads: one record per person ─────────────────────────────────
  * Julian (2026-11-03, PLAN-lead-desk.md): every inquiry, call and booking
@@ -176,6 +176,10 @@ export type Change = {
   /** Kind "payment" from a Stripe payment that is not a deposit: settle a matching invoice. `invoiceNo` from the payment, when it names one. */
   settles?: boolean;
   invoiceNo?: string;
+  /** Kind "replied": the sent mail's subject and attachment names, for the invoice it carries. */
+  mailed?: string;
+  /** Imported from before (`lib/leads/stripe-import.ts`): a line on the log, never news, never out of Archived. */
+  past?: boolean;
 };
 
 /** One event folded into a lead. Returns the lead unchanged when the event
@@ -203,7 +207,7 @@ export function fold(lead: Lead | null, email: string, c: Change): Lead {
     return tidy(next);
   }
   // A mail the site sent is a line on the timeline, not news.
-  if (event.kind === "mail") return tidy(next);
+  if (event.kind === "mail" || c.past) return tidy(next);
   // Opening proofs is a line too. The name they typed fills a lead that only had the address.
   if (event.kind === "proofs") {
     if (c.name && next.name.toLowerCase() === next.email) next.name = c.name;
@@ -212,6 +216,12 @@ export function fold(lead: Lead | null, email: string, c: Change): Lead {
   // His own reply from Gmail answers the inquiry: Replied, and off Needs me.
   if (event.kind === "replied") {
     if (next.stage === "Inquiry") Object.assign(next, { stage: "Replied", stageAt: event.at });
+    // A mail to them that names an invoice sent it: Sent on the desk, and a line on the log.
+    const sent = c.mailed ? next.invoices?.filter((v) => !v.sentAt && namesInvoice(c.mailed!, v.no)) : undefined;
+    if (sent?.length) {
+      next.invoices = next.invoices!.map((v) => (sent.includes(v) ? { ...v, sentAt: event.at } : v));
+      next.events = [...next.events, ...sent.map((v) => ({ at: event.at, kind: "invoice" as const, ref: event.ref, note: `${v.no} sent` }))].slice(-KEEP);
+    }
     return tidy({ ...next, unread: false });
   }
   if (event.kind === "snooze") {

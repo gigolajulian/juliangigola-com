@@ -10,6 +10,7 @@
 import * as React from "react";
 import { Layout, LayoutContent, LayoutHeader, VStack, Card } from "@astryxdesign/core/Layout";
 import { Grid } from "@astryxdesign/core/Grid";
+import { Table } from "@astryxdesign/core/Table";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { MetadataList, MetadataListItem } from "@astryxdesign/core/MetadataList";
 import { STAGES } from "@/lib/leads/leads";
@@ -56,7 +57,24 @@ export function StatsAstryx({ call }: { call: Call }) {
             {tile("First reply", hours(s.replyHours), "median, inquiry to answer")}
             {tile("Quoted, open", money(s.pipeline), "waiting on an answer")}
             {tile("Booked value", money(s.won), "from the quotes you entered")}
+            {tile("Repeat clients", String(s.repeat), "two or more sessions or calls")}
+            {tile("Lifetime value", s.lifetime === null ? "None yet" : money(Math.round(s.lifetime)), "average paid, less refunds")}
           </Grid>
+          <VStack gap={2}>
+            <Heading level={2}>Top clients by paid</Heading>
+            {s.top.length ? (
+              <Table<Stats["top"][number] & { id: number }>
+                data={s.top.map((c, id) => ({ ...c, id }))}
+                idKey="id"
+                textOverflow="truncate"
+                columns={[
+                  { key: "name", header: "Client", renderCell: (c) => c.name },
+                  { key: "sessions", header: "Sessions", align: "end", renderCell: (c) => String(c.sessions) },
+                  { key: "paid", header: "Paid", align: "end", renderCell: (c) => <Text type="code" weight="medium">{money(c.paid)}</Text> },
+                ]}
+              />
+            ) : <Text color="secondary">No payments logged yet.</Text>}
+          </VStack>
           <VStack gap={2}>
             <Heading level={2}>Last 12 weeks</Heading>
             <div role="img" aria-label={s.weeks.map((w) => `Week of ${w.start}: ${w.inquiries} inquiries, ${w.booked} booked`).join(". ")} style={{ display: "flex", alignItems: "flex-end", gap: 6, height: 128 }}>

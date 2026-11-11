@@ -7,7 +7,7 @@
  * option on covers frames already uploaded: each is baked on its first fetch.
  * ─────────────────────────────────────────────────────────────── */
 
-import { cardKey, coverFrame, frameKey, markedKey, type Proof } from "@/lib/proofs";
+import { cardKey, coverFrame, frameKey, markedKey, THUMB_W, thumbKey, type Proof } from "@/lib/proofs";
 
 /** White Inter Tight 900, rendered at 1600px so it stays sharp on a 2000px frame. */
 export const MARK = { src: "/proof-mark.png", w: 1600, h: 274, opacity: 0.5 } as const;
@@ -36,6 +36,25 @@ export async function bake(env: Env, jpeg: ArrayBuffer, origin: string): Promise
     .draw(env.IMAGES.input(mark).transform({ width: box.width }), { opacity: MARK.opacity, left: box.left, top: box.top })
     .output({ format: "image/jpeg", quality: 90 });
   return out.response().arrayBuffer();
+}
+
+/** The frame at `THUMB_W` wide (`small`), or whole. The small copy is made from the served one, so it carries the mark when that does. */
+export async function servedSize(env: Env, p: Pick<Proof, "token" | "watermark">, id: string, origin: string, small: boolean) {
+  if (!small) return servedFrame(env, p, id, origin);
+  const key = thumbKey(p.token, id, !!p.watermark);
+  const kept = await env.PROOFS.get(key);
+  if (kept) return { body: kept.body, etag: kept.httpEtag };
+  const full = await servedFrame(env, p, id, origin);
+  if (!full) return null;
+  // The small copy is a nicety: if it cannot be made or kept, the whole frame (already marked, now in R2) is served instead.
+  try {
+    const out = await env.IMAGES.input(full.body).transform({ width: THUMB_W, fit: "scale-down" }).output({ format: "image/jpeg", quality: 82 });
+    const bytes = await out.response().arrayBuffer();
+    const put = await env.PROOFS.put(key, bytes, { httpMetadata: { contentType: "image/jpeg" } });
+    return { body: stream(bytes), etag: put.httpEtag };
+  } catch {
+    return servedFrame(env, p, id, origin);
+  }
 }
 
 /** One frame as the client may see it: clean, or with the mark (baked on first fetch, then read from R2). */
