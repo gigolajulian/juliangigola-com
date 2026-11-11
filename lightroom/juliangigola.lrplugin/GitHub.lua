@@ -57,6 +57,11 @@ local function call(token, method, path, body)
   return Json.decode(b)
 end
 
+--- A folder at the branch head: { { name, type, sha }, ... }.
+function G.list(token, path)
+  return call(token, "GET", "/contents/" .. path .. "?ref=" .. BRANCH)
+end
+
 --- A file at the branch head, as raw bytes. nil when it does not exist.
 function G.read(token, path)
   local b, h = LrHttp.get(API .. "/contents/" .. path .. "?ref=" .. BRANCH,
