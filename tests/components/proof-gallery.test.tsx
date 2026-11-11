@@ -58,4 +58,19 @@ describe("ProofGallery", () => {
     expect(screen.getByRole("heading", { name: "Selects are in." })).toBeTruthy();
     expect(screen.getByRole("button", { name: /View your 1 select/ })).toBeTruthy();
   });
+
+  it("?proofwall=1 asks for a name as well as the email", () => {
+    history.replaceState(null, "", "/?proofwall=1");
+    // reduced motion: the wall lies flat and nothing animates under jsdom
+    vi.stubGlobal("matchMedia", () => ({ matches: true, addEventListener() {}, removeEventListener() {} }));
+    try {
+      render(<ProofGallery token="t1" initial={proof()} />);
+      fireEvent.change(screen.getByPlaceholderText("you@email.com"), { target: { value: "sam@email.com" } });
+      fireEvent.click(screen.getByRole("button", { name: "Open proofs" }));
+      expect(screen.getByRole("alert").textContent).toBe("Add your name.");
+      expect(fetchMock).not.toHaveBeenCalled();
+    } finally {
+      history.replaceState(null, "", "/");
+    }
+  });
 });

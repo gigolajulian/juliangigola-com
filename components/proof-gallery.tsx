@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { cardPrice, type PublicProof } from "@/lib/proofs";
 import { looksLikeEmail } from "@/lib/inbox";
+import { ProofWall } from "@/components/proof-wall";
 
 /* ── the client's gallery ─────────────────────────────────────────
  * The look Julian approved 2026-11-06 (mock https://claude.ai/artifact/Nn3EU21DEofuLLJyXJHtcG):
@@ -26,6 +27,10 @@ const EMAIL_STORE = "proof-email";
 const isEmail = (v: string) => looksLikeEmail(v.trim());
 
 type Step = null | "review" | "done";
+
+// ?proofwall=1: the gate as the grid's own wall (components/proof-wall.tsx), on trial. Read on the client only.
+const noop = () => () => {};
+const readWall = () => new URLSearchParams(location.search).get("proofwall") === "1";
 
 /** A full-screen sheet: focus moves in, Tab stays inside, Escape closes, focus goes back to what opened it. */
 function useDialog(active: boolean, close: () => void) {
@@ -72,6 +77,13 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
   const [via, setVia] = React.useState<"bank" | "card">("bank");
   const [error, setError] = React.useState<string | null>(notice ?? null);
   const [paid, setPaid] = React.useState(initial.paid);
+  const wall = React.useSyncExternalStore(noop, readWall, () => false);
+  // The name greets them in the header for this visit only; it is not saved or sent.
+  const [hello, setHello] = React.useState<string | null>(null);
+  const [opened, setOpened] = React.useState(false);
+  const gridEl = React.useRef<HTMLDivElement>(null);
+  // The wall stays up from the gate until it has landed, whatever the track call is doing meanwhile.
+  const walling = wall && !opened && (!ready || hello !== null);
   const locked = step === "done";
   const swipe = React.useRef<number | null>(null);
   // An overlay takes focus on open and gives it back on close; the page under it is inert.
@@ -253,7 +265,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
   const pad = (i: number) => String(i + 1).padStart(3, "0");
   const ordered = [...selects].sort((a, b) => (byId.get(a) ?? 0) - (byId.get(b) ?? 0));
 
-  if (!ready)
+  if (!ready && !wall)
     return (
       <div className="proof">
         <Top view={view} setView={setView} n={0} included={included} due={0} hideTabs />
@@ -358,17 +370,27 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
   }
 
   return (
-    <div className="proof">
-      <div inert={covered || undefined}>
+    <div className="proof" data-wall={wall ? (!walling ? "on" : hello === null ? "gate" : "settle") : undefined}>
+      <div inert={covered || walling || undefined}>
       <Top view={view} setView={setView} n={n} included={included} due={due} />
 
-      <div className="proof-intro">
-        <p className="proof-lab">Proofs</p>
-        <h1>Pick your proofs.</h1>
-      </div>
+      {wall ? (
+        <div className="proof-intro">
+          <p className="proof-lab">Proofs · {frames.length} frames · {included} included</p>
+          {/* One line; a long name wraps it to two (--len sizes the type to the line). */}
+          <h1 style={{ "--len": (hello ? `Hey ${hello}, pick your proofs below.` : "Pick your proofs.").length } as React.CSSProperties}>
+            {hello ? `Hey ${hello}, pick your proofs below.` : "Pick your proofs."}
+          </h1>
+        </div>
+      ) : (
+        <div className="proof-intro">
+          <p className="proof-lab">Proofs</p>
+          <h1>Pick your proofs.</h1>
+        </div>
+      )}
 
       {view === "all" ? (
-        <div className="proof-grid">
+        <div className="proof-grid" ref={gridEl}>
           {frames.map((f, i) => {
             const at = selects.indexOf(f.id);
             return (
@@ -437,6 +459,19 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
         </div>
       </div>
       </div>
+
+      {walling ? (
+        <ProofWall
+          frames={frames.map((f) => ({ src: src(f.id), w: f.w, h: f.h }))}
+          grid={gridEl}
+          isEmail={isEmail}
+          onAccept={(name, address) => {
+            setHello(name.split(/\s+/)[0]);
+            enter(address);
+          }}
+          onDone={() => setOpened(true)}
+        />
+      ) : null}
 
       {open !== null ? (
         <div className="proof-lb" ref={overlay} role="dialog" aria-modal="true" aria-label={`Frame ${open + 1}`}>
