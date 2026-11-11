@@ -1,10 +1,8 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { CONTENT } from "@/lib/content";
 import { SPLASH_RUN } from "@/lib/splash-run";
 import { CALL_CARD, DOORS, HERO, INDEX_ORDER, isSession, LENGTH, rate, SESSIONS, TAB_ORDER, type Session } from "@/lib/v3";
-import { COMMISSIONS, WORK_CATEGORY_LINKS } from "@/lib/work";
 import { CATEGORIES, PROJECTS } from "@/lib/work-data";
 
 /* The archive and the lists built from it: invariants that, broken, show
