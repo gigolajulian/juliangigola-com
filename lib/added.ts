@@ -43,6 +43,20 @@ const fail = (path: string, wanted: string, got: unknown): never => {
   );
 };
 
+/** An optional section: absent is empty, anything else must be an object. */
+const optRecord = (v: unknown, path: string): Record<string, unknown> => {
+  const r = v === undefined ? {} : v;
+  return isRecord(r) ? r : fail(path, "an object", r);
+};
+/** An optional list: absent is empty, anything else must be an array. */
+const optArray = (v: unknown, path: string): unknown[] => {
+  const r = v === undefined ? [] : v;
+  return Array.isArray(r) ? r : fail(path, "an array", r);
+};
+
+/** What a slug is: it goes into routes, directory names and redirects. */
+const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
 const isRecord = (v: unknown): v is Record<string, unknown> =>
   typeof v === "object" && v !== null && !Array.isArray(v);
 
@@ -190,7 +204,7 @@ const project = (v: unknown, path: string): AddedProject => {
   const slug = str(v.slug, `${path}.slug`);
   // The slug becomes a route and a directory name, so it is held to what can
   // safely be both.
-  if (!/^[a-z0-9][a-z0-9-]*$/.test(slug)) {
+  if (!SLUG.test(slug)) {
     return fail(`${path}.slug`, "lowercase letters, digits and hyphens", slug);
   }
 
@@ -451,17 +465,13 @@ function parse(v: unknown): AddedFile {
     }
   }
 
-  const rawCategories = v.categories === undefined ? {} : v.categories;
-  if (!isRecord(rawCategories)) {
-    return fail("categories", "an object", rawCategories);
-  }
+  const rawCategories = optRecord(v.categories, "categories");
   const categories: Record<string, string> = {};
   for (const [slug, category] of Object.entries(rawCategories)) {
     categories[slug] = str(category, `categories["${slug}"]`);
   }
 
-  const rawFrames = v.frames === undefined ? {} : v.frames;
-  if (!isRecord(rawFrames)) return fail("frames", "an object", rawFrames);
+  const rawFrames = optRecord(v.frames, "frames");
   const frames: Record<string, FrameRef[]> = {};
   for (const [slug, list] of Object.entries(rawFrames)) {
     if (!Array.isArray(list))
@@ -485,8 +495,7 @@ function parse(v: unknown): AddedFile {
     frames[slug] = sequence;
   }
 
-  const rawCredits = v.credits === undefined ? {} : v.credits;
-  if (!isRecord(rawCredits)) return fail("credits", "an object", rawCredits);
+  const rawCredits = optRecord(v.credits, "credits");
   const credits: Record<string, Credit[]> = {};
   for (const [slug, list] of Object.entries(rawCredits)) {
     if (!Array.isArray(list))
@@ -494,8 +503,7 @@ function parse(v: unknown): AddedFile {
     credits[slug] = list.map((c, i) => credit(c, `credits["${slug}"][${i}]`));
   }
 
-  const rawCopy = v.copy === undefined ? {} : v.copy;
-  if (!isRecord(rawCopy)) return fail("copy", "an object", rawCopy);
+  const rawCopy = optRecord(v.copy, "copy");
   const copy: Record<string, Copy> = {};
   for (const [slug, c] of Object.entries(rawCopy)) {
     if (!isRecord(c)) return fail(`copy["${slug}"]`, "an object", c);
@@ -508,8 +516,7 @@ function parse(v: unknown): AddedFile {
     };
   }
 
-  const rawBts = v.bts === undefined ? {} : v.bts;
-  if (!isRecord(rawBts)) return fail("bts", "an object", rawBts);
+  const rawBts = optRecord(v.bts, "bts");
   const bts: Record<string, Bts> = {};
   for (const [slug, b] of Object.entries(rawBts)) {
     if (!isRecord(b) || !Array.isArray(b.frames) || !b.frames.length)
@@ -520,8 +527,7 @@ function parse(v: unknown): AddedFile {
     };
   }
 
-  const rawOrder = v.order === undefined ? [] : v.order;
-  if (!Array.isArray(rawOrder)) return fail("order", "an array", rawOrder);
+  const rawOrder = optArray(v.order, "order");
   const order = rawOrder.map((slug, i) => str(slug, `order[${i}]`));
   // A slug listed twice has two positions, and which one wins would depend on
   // the sort — so it is a mistake to catch here rather than a tie to break.
@@ -532,16 +538,14 @@ function parse(v: unknown): AddedFile {
     seenInOrder.add(slug);
   }
 
-  const rawDisciplines = v.disciplines === undefined ? [] : v.disciplines;
-  if (!Array.isArray(rawDisciplines))
-    return fail("disciplines", "an array", rawDisciplines);
+  const rawDisciplines = optArray(v.disciplines, "disciplines");
   const disciplines = rawDisciplines.map((d, i) => {
     const at = `disciplines[${i}]`;
     if (!isRecord(d)) return fail(at, "an object", d);
     const slug = str(d.slug, `${at}.slug`);
     // The slug becomes a route segment and is matched against project
     // categories, so it is held to what can safely be both.
-    if (!/^[a-z0-9][a-z0-9-]*$/.test(slug)) {
+    if (!SLUG.test(slug)) {
       return fail(`${at}.slug`, "lowercase letters, digits and hyphens", slug);
     }
     // Asserted, then immediately proved by the check below. `!==` against
@@ -557,8 +561,7 @@ function parse(v: unknown): AddedFile {
     return { slug, name: str(d.name, `${at}.name`), section };
   });
 
-  const rawAvatars = v.avatars === undefined ? {} : v.avatars;
-  if (!isRecord(rawAvatars)) return fail("avatars", "an object", rawAvatars);
+  const rawAvatars = optRecord(v.avatars, "avatars");
   const avatars: Record<string, string> = {};
   for (const [who, src] of Object.entries(rawAvatars)) {
     /* Both sides are held to what they are: a handle Instagram would
@@ -571,21 +574,19 @@ function parse(v: unknown): AddedFile {
       avatars[handle] = path;
   }
 
-  const rawCovers = v.covers === undefined ? {} : v.covers;
-  if (!isRecord(rawCovers)) return fail("covers", "an object", rawCovers);
+  const rawCovers = optRecord(v.covers, "covers");
   const covers: Record<string, string> = {};
   for (const [category, src] of Object.entries(rawCovers)) {
     covers[category] = str(src, `covers["${category}"]`);
   }
 
-  const rawSlugs = v.slugs === undefined ? {} : v.slugs;
-  if (!isRecord(rawSlugs)) return fail("slugs", "an object", rawSlugs);
+  const rawSlugs = optRecord(v.slugs, "slugs");
   const slugs: Record<string, string> = {};
   for (const [from, to] of Object.entries(rawSlugs)) {
     const next = str(to, `slugs["${from}"]`);
     // A slug goes into a route and a redirect, so it is held to what a
     // slug is. One that is not fails the build rather than the site.
-    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(next))
+    if (!SLUG.test(next))
       return fail(`slugs["${from}"]`, "a lower-case slug", next);
     if (next !== from) slugs[from] = next;
   }
