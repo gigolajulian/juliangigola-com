@@ -3,7 +3,7 @@
 import * as React from "react";
 import type { FrameRef } from "@/lib/added";
 import type { Bts, Frame } from "@/lib/work-types";
-import { MAX_WIDTH, processClip, processImage } from "@/lib/admin/admin-image";
+import { MAX_WIDTH, readClip, processImage } from "@/lib/admin/admin-image";
 import { useSequence, srcOf, type PendingUpload } from "@/lib/admin/admin-sequence";
 import { cn } from "@/lib/utils";
 
@@ -63,7 +63,7 @@ export function AdminBts({
       try {
         const clip = file.type === "video/mp4";
         const media = clip
-          ? await processClip(file)
+          ? await readClip(file)
           : await processImage(file, MAX_WIDTH);
         const path = `public/work/${slug}/bts/b${stamp}-${i + 1}.${clip ? "mp4" : "jpg"}`;
         made.push({

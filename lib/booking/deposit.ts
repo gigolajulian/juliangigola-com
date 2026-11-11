@@ -3,7 +3,7 @@ import { enquiry, enquiryKey, looksLikeEmail, summary, whenPT } from "@/lib/inbo
 import { logMail, recordLead } from "@/lib/leads/lead-store";
 import { openNow, type KV } from "@/lib/booking/slots";
 import { EVENTS, type Booking, type Hours } from "@/lib/booking/booking-rules";
-import { lock, recordBooking } from "@/lib/booking/booking-engine";
+import { lockOp, recordBooking } from "@/lib/booking/booking-engine";
 import { manageLinks } from "@/lib/booking/booking-token";
 
 /* ── the $100 deposit ─────────────────────────────────────────────
@@ -34,7 +34,7 @@ import { manageLinks } from "@/lib/booking/booking-token";
  * ─────────────────────────────────────────────────────────────── */
 
 import { isPaid } from "@/lib/booking/paid";
-import { mail, type Attachment } from "@/lib/hello-mail";
+import { alertHello, type Attachment } from "@/lib/hello-mail";
 import { stripe } from "@/lib/stripe";
 export const AMOUNT = 10000;
 export const CURRENCY = "usd";
@@ -206,7 +206,7 @@ async function tell(env: Env, status: keyof typeof SAID, b: Booking | string, li
   if (refs.files.length) lines.push("", `References attached: ${refs.files.length}`);
   if (refs.picks.length) lines.push("", "Picked from my work:", ...refs.picks.map((src) => `https://juliangigola.com${src}`));
   const subject = `${SAID[status]}: ${what}`;
-  if (await mail(env.EMAIL, subject, lines, who, refs.files)) await logMail(env, who?.email, subject, { to: "hello@", kind: `deposit-${status}`, booking: intent });
+  if (await alertHello(env.EMAIL, subject, lines, who, refs.files)) await logMail(env, who?.email, subject, { to: "hello@", kind: `deposit-${status}`, booking: intent });
   // The money itself, on the activity log: $100 in, and out again on a refund.
   if (who) await recordLead(env, who.email, { event: { at: new Date().toISOString(), kind: "payment", ref: intent, note: "Deposit", amount: 100 } });
   if (who && status === "refunded") await recordLead(env, who.email, { event: { at: new Date().toISOString(), kind: "refund", ref: `refund-${intent}`, note: "Deposit, the time was gone", amount: 100 } });
@@ -237,7 +237,7 @@ export async function settle(env: Env, intent: string, metadata: { [k: string]: 
       await env.INBOX.put(key, JSON.stringify({ ...r, warned: true }), { expirationTtl: 90 * 864e2 }).catch((e: unknown) => console.error("deposit record", "warned", String(e)));
       if (who) await recordLead(env, who.email, { event: { at: new Date().toISOString(), kind: "deposit-stuck", ref: intent, note: what }, name: who.name, kind: who.slug, flag: "stuck" });
       const subject = `Deposit stuck: check Stripe and the calendar: ${what}`;
-      if (await mail(env.EMAIL, subject, [
+      if (await alertHello(env.EMAIL, subject, [
         who ? `${who.name} <${who.email}>` : "Unknown client",
         `Paid, and the booking was started at ${r.at} but never finished. Check the calendar for the booking, then book or refund in Stripe by hand.`,
         `Stripe: ${dashboardLink(intent, env.STRIPE_SECRET_KEY)}`,
@@ -268,7 +268,7 @@ export async function settle(env: Env, intent: string, metadata: { [k: string]: 
   if (typeof b !== "string") {
     // The site's engine rechecks and books in one step, inside its lock.
     // Only the booking itself may end in a refund: a step after it never undoes a booked time.
-    const own = await lock(env, "book", { ...b, intent }).catch((e: unknown) => {
+    const own = await lockOp(env, "book", { ...b, intent }).catch((e: unknown) => {
       broke = String(e);
       console.error("deposit book", broke);
       return null;

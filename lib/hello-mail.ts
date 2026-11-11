@@ -7,7 +7,7 @@ export type Attachment = { content: ArrayBuffer; filename: string; type: string;
 
 
 /** True once hello@ has it. */
-export async function mail(email: CloudflareEnv["EMAIL"] | undefined, subject: string, lines: string[], who?: { name: string; email: string }, attachments: Attachment[] = []): Promise<boolean> {
+export async function alertHello(email: CloudflareEnv["EMAIL"] | undefined, subject: string, lines: string[], who?: { name: string; email: string }, attachments: Attachment[] = []): Promise<boolean> {
   if (!email) return false;
   try {
     await email.send({
@@ -22,7 +22,7 @@ export async function mail(email: CloudflareEnv["EMAIL"] | undefined, subject: s
   } catch (e) {
     console.error("hello mail", subject.split(":")[0], String(e));
     // Images can push a mail past the size limit: the mail matters more, so it goes again without them.
-    if (attachments.length) return mail(email, subject, [...lines, "", `${attachments.length} reference image(s) were too large to attach. Ask the client to email them.`], who);
+    if (attachments.length) return alertHello(email, subject, [...lines, "", `${attachments.length} reference image(s) were too large to attach. Ask the client to email them.`], who);
     return false;
   }
 }

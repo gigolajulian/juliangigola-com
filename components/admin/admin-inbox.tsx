@@ -42,7 +42,7 @@ export async function unreadCount(): Promise<number | null> {
   }
 }
 
-const when = (at: string) => {
+const timeAgo = (at: string) => {
   const d = new Date(at);
   const mins = Math.round((Date.now() - d.getTime()) / 60000);
   if (mins < 1) return "just now";
@@ -275,7 +275,7 @@ export function AdminInbox({
                     </span>
                   )}
                   <span className="label ml-auto shrink-0 text-muted-foreground">
-                    {when(row.at)}
+                    {timeAgo(row.at)}
                     {row.country ? ` · ${row.country}` : ""}
                   </span>
                   <span className="sr-only">

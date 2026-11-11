@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { ManageBooking } from "@/components/booking/manage-booking";
-import { lock, clientView, type BookingRecord } from "@/lib/booking/booking-engine";
+import { lockOp, clientView, type BookingRecord } from "@/lib/booking/booking-engine";
 import { tokenOpens } from "@/lib/booking/booking-token";
 
 /* A client's booking, opened from the links in their "You're in." mail
@@ -23,7 +23,7 @@ export default async function BookingPage({ params, searchParams }: { params: Pr
   if (!(await tokenOpens(env.BOOKING_SECRET, id, t))) return <Note>This link has expired. Reply to your confirmation email and I&apos;ll sort it out.</Note>;
   let record: BookingRecord | null = null;
   try {
-    ({ record } = await lock(env, "get", id));
+    ({ record } = await lockOp(env, "get", id));
   } catch {
     return <Note>Your booking did not load. Try again in a minute, or reply to your confirmation email.</Note>;
   }

@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { CoverArt } from "@/components/v3/sleeves";
 import { CallToAction } from "@/components/call-to-action";
 import { SESSION_SEO } from "@/lib/seo";
-import { projectFacts, share } from "@/lib/share";
+import { projectFacts, shareMeta } from "@/lib/share";
 import { V3Project } from "@/components/v3/project";
 import {
   LINKABLE,
@@ -45,7 +45,7 @@ export async function generateMetadata(
      title `lib/seo.ts` gives it for the search; its share card is unified. */
   const session = SESSION_SEO[project.slug];
   const facts = projectFacts(project);
-  const card = share(project.name, facts.description);
+  const card = shareMeta(project.name, facts.description);
   const title = session?.title ?? project.name;
   const description = session?.description ?? facts.description;
 
