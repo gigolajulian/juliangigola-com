@@ -1,7 +1,7 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { sealer } from "@/lib/leads/lead-crypto";
-import { isFrameId, isOpen, isToken, readProof } from "@/lib/proofs";
-import { servedFrame } from "@/lib/proof-watermark";
+import { isFrameId, isOpen, isToken, readProof, THUMB_W } from "@/lib/proofs";
+import { servedSize } from "@/lib/proof-watermark";
 
 /* One proof frame from the private bucket, only while its gallery is open.
    Cached in the visitor's browser only: a closed gallery stops serving on
@@ -16,7 +16,9 @@ export async function GET(request: Request, { params }: { params: Promise<{ toke
   const p = await readProof(env.INBOX, await seal, token);
   if (!p || !isOpen(p) || !p.frames.some((f) => f.id === id)) return new Response("Not found", { status: 404 });
   // The watermark, when on, is in the bytes. If it cannot be drawn the frame is not served at all.
-  const o = await servedFrame(env, p, id, request.url).catch(() => undefined);
+  // `?w=800`: the smaller copy for the wall and the grid (THUMB_W). Any other width gets the whole frame.
+  const small = new URL(request.url).searchParams.get("w") === String(THUMB_W);
+  const o = await servedSize(env, p, id, request.url, small).catch(() => undefined);
   if (o === undefined) return new Response("Try again shortly", { status: 503, headers: { "retry-after": "5" } });
   if (!o) return new Response("Not found", { status: 404 });
   return new Response(o.body, {

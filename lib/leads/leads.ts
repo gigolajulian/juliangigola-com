@@ -178,6 +178,8 @@ export type Change = {
   invoiceNo?: string;
   /** Kind "replied": the sent mail's subject and attachment names, for the invoice it carries. */
   mailed?: string;
+  /** Imported from before (`lib/leads/stripe-import.ts`): a line on the log, never news, never out of Archived. */
+  past?: boolean;
 };
 
 /** One event folded into a lead. Returns the lead unchanged when the event
@@ -205,7 +207,7 @@ export function fold(lead: Lead | null, email: string, c: Change): Lead {
     return tidy(next);
   }
   // A mail the site sent is a line on the timeline, not news.
-  if (event.kind === "mail") return tidy(next);
+  if (event.kind === "mail" || c.past) return tidy(next);
   // Opening proofs is a line too. The name they typed fills a lead that only had the address.
   if (event.kind === "proofs") {
     if (c.name && next.name.toLowerCase() === next.email) next.name = c.name;

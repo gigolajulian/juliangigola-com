@@ -43,6 +43,8 @@ export type DriftWallProps = {
   hold?: boolean;
   /** The tiles build up row by row instead of streaming in (the 404). */
   build?: boolean;
+  /** The proof gate's: the plane eases flat and face on, shifted this far right, and the columns stop. */
+  flatten?: number;
   onShown?: () => void;
   className?: string;
   style?: Record<string, string | number>;
@@ -97,6 +99,7 @@ const DriftWall = ({
   // and stays paused until this goes false, then eases back up.
   hold = false,
   build = false,
+  flatten,
   onShown,
   className = '',
   style
@@ -278,10 +281,15 @@ const DriftWall = ({
     offsetsRef.current = columnMeta.map((meta, c) => meta.copyHeight * ((c * 0.37) % 1));
   }, [columnMeta, columnItems]);
 
+  const flatRef = useRef(flatten);
   const applyPlaneTransform = useCallback(
     (px: number, py: number) => {
       const plane = planeRef.current;
       if (!plane) return;
+      if (flatRef.current !== undefined) {
+        plane.style.transform = `translate(calc(-50% + ${flatRef.current}px), -50%)`;
+        return;
+      }
       plane.style.transform =
         `translate(-50%, -50%) scale(1.18) ` +
         `rotateX(${tilt + py}deg) rotateY(${turn + px}deg) ` +
@@ -348,6 +356,8 @@ const DriftWall = ({
       const paused = heldRef.current;
       anims.forEach((a, c) => {
         if (!a) return;
+        // Flattening with the columns stopped from outside (proof-wall.tsx): left where they were put.
+        if (flatRef.current !== undefined && a.playState === 'paused') return;
         const target = paused || hoveredColRef.current === c ? 0 : 1;
         if (rates[c] === target) {
           // Held and stopped: paused outright, so nothing runs at rate 0.
@@ -413,9 +423,17 @@ const DriftWall = ({
   }, [baseVelocities, columnMeta, parallax, reduced, applyPlaneTransform]);
 
   useEffect(() => {
-    heldRef.current = hold;
+    heldRef.current = hold || flatten !== undefined;
     wakeRef.current();
-  }, [hold]);
+  }, [hold, flatten]);
+
+  useEffect(() => {
+    flatRef.current = flatten;
+    const plane = planeRef.current;
+    if (flatten === undefined || !plane) return;
+    plane.style.transition = 'transform var(--dw-flat, 1.3s) cubic-bezier(.45,0,.2,1)';
+    applyPlaneTransform(0, 0);
+  }, [flatten, applyPlaneTransform]);
 
   const activate = useCallback((id: string, index: number) => {
     activeIdRef.current = id;
