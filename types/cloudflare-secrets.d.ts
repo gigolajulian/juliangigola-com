@@ -57,7 +57,7 @@ interface CloudflareEnv {
   STRIPE_WEBHOOK_SECRET?: string;
 
   /**
-   * Notion internal integration token (`lib/notion-lead.ts`): copies each
+   * Notion internal integration token (`lib/leads/notion-lead.ts`): copies each
    * enquiry and booking onto the Business Hub Bookings board. Unset, nothing
    * is copied. Set with:
    *
@@ -69,7 +69,7 @@ interface CloudflareEnv {
    * hello@'s Google Calendar for the site's own booking engine
    * (`lib/booking/gcal.ts`): JSON `{client_id, client_secret, refresh_token}` of an
    * Internal OAuth client, scopes calendar.events, calendar.freebusy and
-   * gmail.readonly (his own replies on the lead desk, `lib/gmail-sync.ts`).
+   * gmail.readonly (his own replies on the lead desk, `lib/leads/gmail-sync.ts`).
    * Made and set by `node scripts/gsc-auth.mjs <client.json> cal`.
    */
   GCAL_OAUTH?: string;

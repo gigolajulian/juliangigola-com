@@ -1,7 +1,7 @@
 /* Example leads in the local INBOX, for working on the lead desk in
  * `next dev` (/admin/leads). Writes only to wrangler's local state
  * (.wrangler/), never to the real namespace. Names are made up. Sealed
- * like the real ones (`lib/lead-crypto.ts`), with LEADS_KEY from .dev.vars.
+ * like the real ones (`lib/leads/lead-crypto.ts`), with LEADS_KEY from .dev.vars.
  *
  *   node scripts/seed-leads.mjs
  */

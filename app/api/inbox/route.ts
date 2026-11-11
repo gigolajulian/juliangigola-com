@@ -1,14 +1,14 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { authorised, bearer, canPush } from "@/lib/vouch";
 import { SAFE_IMAGE, summary, type Enquiry, type Summary } from "@/lib/inbox";
-import { backfillLead, fold, PAPER, REMIND_MAX, STAGES, trashDaysLeft, type InboxRow, type Lead, type LeadPatch, type LeadSummary, type Paper, type Stage } from "@/lib/leads";
-import { readLead, writeLead } from "@/lib/lead-store";
-import { sealer } from "@/lib/lead-crypto";
-import { notify, subscribe, unsubscribe } from "@/lib/lead-push";
-import { publicKey } from "@/lib/web-push";
-import { notionPaper, notionStage } from "@/lib/notion-lead";
-import { cleanTemplates, csv, manualLead, merge, stats, type NewLead } from "@/lib/lead-crm";
-import { balance, cleanFrom, cleanInvoice, invoiceNo, mmyy, PHOTO_KEY, usd, type InvoiceFrom } from "@/lib/invoice";
+import { backfillLead, fold, PAPER, REMIND_MAX, STAGES, trashDaysLeft, type InboxRow, type Lead, type LeadPatch, type LeadSummary, type Paper, type Stage } from "@/lib/leads/leads";
+import { readLead, writeLead } from "@/lib/leads/lead-store";
+import { sealer } from "@/lib/leads/lead-crypto";
+import { notify, subscribe, unsubscribe } from "@/lib/leads/lead-push";
+import { publicKey } from "@/lib/leads/web-push";
+import { notionPaper, notionStage } from "@/lib/leads/notion-lead";
+import { cleanTemplates, csv, manualLead, merge, stats, type NewLead } from "@/lib/leads/lead-crm";
+import { balance, cleanFrom, cleanInvoice, invoiceNo, mmyy, PHOTO_KEY, usd, type InvoiceFrom } from "@/lib/leads/invoice";
 import { json, NO_STORE } from "@/lib/http";
 
 /** Where his reply templates live: not personal data, so plain JSON. */
@@ -185,7 +185,7 @@ export async function GET(request: Request) {
     const raw = PHOTO_KEY.test(key) ? await gate.inbox.get(key) : null;
     return raw ? json({ photo: await seal.open<string>(raw) }) : json({ error: "Photo not found." }, 404);
   }
-  // The numbers, and every lead as CSV (`lib/lead-crm.ts`).
+  // The numbers, and every lead as CSV (`lib/leads/lead-crm.ts`).
   if (url.searchParams.has("stats") || url.searchParams.has("csv")) {
     const seal = await gate.seal;
     if (!seal) return json({ error: "Leads need LEADS_KEY on the Worker." }, 503);
@@ -196,8 +196,8 @@ export async function GET(request: Request) {
     });
   }
 
-  // The lead desk (`components/admin-leads.tsx`): one record per person.
-  // Sealed with LEADS_KEY (`lib/lead-crypto.ts`), opened here and only here.
+  // The lead desk (`components/admin/admin-leads.tsx`): one record per person.
+  // Sealed with LEADS_KEY (`lib/leads/lead-crypto.ts`), opened here and only here.
   if (wanted?.startsWith("lead:") || url.searchParams.has("leads")) {
     const seal = await gate.seal;
     if (!seal) return json({ error: "Leads need LEADS_KEY on the Worker." }, 503);
@@ -457,7 +457,7 @@ async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: Await
   if (typeof trash === "boolean") lead = fold(lead, lead.email, { event: { at, kind: "trash", note: trash ? "in" : "out" }, on: trash });
   // Opened (true), or marked unread again by hand (false).
   if (typeof seen === "boolean") lead = { ...lead, unread: !seen };
-  // His own words and numbers (`lib/lead-crm.ts`).
+  // His own words and numbers (`lib/leads/lead-crm.ts`).
   const cut = (v: unknown, n: number) => (typeof v === "string" && v.trim() ? v.trim().slice(0, n) : undefined);
   if (typeof notes === "string") lead = { ...lead, notes: cut(notes, 5000) };
   if (remind !== undefined) {

@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { reply } from "./fakes";
-import { TOKEN_STORE, credentials, listDirectory, readFile } from "@/lib/admin-github";
+import { TOKEN_STORE, credentials, listDirectory, readFile } from "@/lib/admin/admin-github";
 
-/* The GitHub calls /admin makes (`lib/admin-github.ts`), against a stubbed fetch. */
+/* The GitHub calls /admin makes (`lib/admin/admin-github.ts`), against a stubbed fetch. */
 
 afterEach(() => vi.unstubAllGlobals());
 

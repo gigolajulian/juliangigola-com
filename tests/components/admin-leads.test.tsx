@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { AdminLeads, SignIn } from "@/components/admin-leads";
-import { money, OFFLINE } from "@/lib/lead-desk";
-import { KEY_STORE } from "@/lib/admin-github";
+import { AdminLeads, SignIn } from "@/components/admin/admin-leads";
+import { money, OFFLINE } from "@/lib/leads/lead-desk";
+import { KEY_STORE } from "@/lib/admin/admin-github";
 
 afterEach(() => {
   vi.unstubAllGlobals();

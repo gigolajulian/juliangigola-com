@@ -1,11 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { TOKEN_STORE } from "@/lib/admin-github";
-import { isLate, paperDue, shootTag, type LeadSummary } from "@/lib/leads";
+import { TOKEN_STORE } from "@/lib/admin/admin-github";
+import { isLate, paperDue, shootTag, type LeadSummary } from "@/lib/leads/leads";
 import { cn } from "@/lib/utils";
 import { HEAD } from "@/components/leads/shared";
-import { adminCall, ago, aside, at, cash, closed, type Filter, needsMe, nextStep, now, pass, plusDays, renew, ymdPT } from "@/lib/lead-desk";
+import { adminCall, ago, aside, at, cash, closed, type Filter, needsMe, nextStep, now, pass, plusDays, renew, ymdPT } from "@/lib/leads/lead-desk";
 import { TZ } from "@/lib/booking/booking-rules";
 
 /* ── Today, the One Desk's first page ─────────────────────────────

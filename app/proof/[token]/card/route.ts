@@ -1,5 +1,5 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { sealer } from "@/lib/lead-crypto";
+import { sealer } from "@/lib/leads/lead-crypto";
 import { isToken, readProof } from "@/lib/proofs";
 import { shareCard } from "@/lib/proof-watermark";
 

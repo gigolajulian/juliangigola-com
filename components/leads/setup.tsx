@@ -1,9 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { STAGES, type Lead, type Stage } from "@/lib/leads";
+import { STAGES, type Lead, type Stage } from "@/lib/leads/leads";
 import { cn } from "@/lib/utils";
-import { type Call, errorText } from "@/lib/lead-desk";
+import { type Call, errorText } from "@/lib/leads/lead-desk";
 import { btn, field, fieldLabel, primary } from "@/components/leads/shared";
 
 /** The inbox key, pasted once per device. On the iPhone the installed app keeps
