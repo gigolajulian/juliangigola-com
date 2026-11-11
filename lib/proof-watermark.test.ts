@@ -69,6 +69,17 @@ describe("proof watermark", () => {
     expect(sized).toHaveLength(1);
     expect(await text(await servedSize(env, { token: "T", watermark: true }, "a", "https://x", false))).toBe("marked");
   });
+  it("serves the whole marked frame when the small copy cannot be made", async () => {
+    const { env, r2 } = fakeEnv({ "T/a.jpg": "clean" });
+    const images = env.IMAGES as unknown as { input: (s: ReadableStream) => unknown };
+    const draw = images.input;
+    images.input = (s: ReadableStream) => {
+      const real = draw(s) as { transform: (t: { fit?: string }) => unknown };
+      return { ...real, transform: (t: { fit?: string }) => (t.fit === "scale-down" ? (() => { throw new Error("images down"); })() : real.transform(t)) };
+    };
+    expect(await text(await servedSize(env, { token: "T", watermark: true }, "a", "https://x", true))).toBe("marked");
+    expect(r2.has("T/a.t800.wm1.jpg")).toBe(false);
+  });
   it("is null for a frame that is not in R2", async () => {
     const { env } = fakeEnv({});
     expect(await servedFrame(env, { token: "T", watermark: true }, "a", "https://x")).toBeNull();

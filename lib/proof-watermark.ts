@@ -46,10 +46,15 @@ export async function servedSize(env: Env, p: Pick<Proof, "token" | "watermark">
   if (kept) return { body: kept.body, etag: kept.httpEtag };
   const full = await servedFrame(env, p, id, origin);
   if (!full) return null;
-  const out = await env.IMAGES.input(full.body).transform({ width: THUMB_W, fit: "scale-down" }).output({ format: "image/jpeg", quality: 82 });
-  const bytes = await out.response().arrayBuffer();
-  const put = await env.PROOFS.put(key, bytes, { httpMetadata: { contentType: "image/jpeg" } });
-  return { body: stream(bytes), etag: put.httpEtag };
+  // The small copy is a nicety: if it cannot be made or kept, the whole frame (already marked, now in R2) is served instead.
+  try {
+    const out = await env.IMAGES.input(full.body).transform({ width: THUMB_W, fit: "scale-down" }).output({ format: "image/jpeg", quality: 82 });
+    const bytes = await out.response().arrayBuffer();
+    const put = await env.PROOFS.put(key, bytes, { httpMetadata: { contentType: "image/jpeg" } });
+    return { body: stream(bytes), etag: put.httpEtag };
+  } catch {
+    return servedFrame(env, p, id, origin);
+  }
 }
 
 /** One frame as the client may see it: clean, or with the mark (baked on first fetch, then read from R2). */
