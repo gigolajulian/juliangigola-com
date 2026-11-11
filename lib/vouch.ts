@@ -1,4 +1,4 @@
-import { REPO } from "@/lib/admin-github";
+import { REPO } from "@/lib/admin/admin-github";
 
 /* ── the key the editor already has ───────────────────────────────
  * Whoever can push to the repository publishes the site, so a GitHub token

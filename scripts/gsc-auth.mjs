@@ -12,7 +12,7 @@
 //
 // The same for the booking engine (`lib/booking/gcal.ts`): hello@'s calendar,
 // events and free/busy, plus Gmail read-only for the lead desk's timeline
-// (`lib/gmail-sync.ts`), into `GCAL_OAUTH`. The client must be an
+// (`lib/leads/gmail-sync.ts`), into `GCAL_OAUTH`. The client must be an
 // Internal one, or Google expires the refresh token after 7 days. It asks
 // hello@'s free/busy once before saving, so a token that cannot read the
 // calendar is never stored. With `cal` it saves the secret on both Workers,

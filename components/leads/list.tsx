@@ -1,10 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { isLate, shootTag, trashDaysLeft, type LeadSummary } from "@/lib/leads";
+import { isLate, shootTag, trashDaysLeft, type LeadSummary } from "@/lib/leads/leads";
 import { cn } from "@/lib/utils";
 import { kindOf, STEPS } from "@/components/leads/shared";
-import { ago, at, day, money, nextStep, now, snoozed } from "@/lib/lead-desk";
+import { ago, at, day, money, nextStep, now, snoozed } from "@/lib/leads/lead-desk";
 
 /** How far a lead has come: a short segment per stage, then its name. */
 function StageLine({ l }: { l: LeadSummary }) {

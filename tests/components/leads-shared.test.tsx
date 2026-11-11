@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { kindOf, label, mailto, Tag } from "@/components/leads/shared";
-import { cash, matches, money, nextStep, pass } from "@/lib/lead-desk";
-import type { LeadSummary } from "@/lib/leads";
+import { cash, matches, money, nextStep, pass } from "@/lib/leads/lead-desk";
+import type { LeadSummary } from "@/lib/leads/leads";
 
 const iso = new Date().toISOString();
 const lead = (o: Partial<LeadSummary> = {}): LeadSummary => ({ id: "a", email: "ana@x.com", name: "Ana", stage: "Inquiry", stageAt: iso, firstAt: iso, lastAt: iso, unread: false, ...o });
