@@ -277,6 +277,20 @@ export const cellFor = (el: HTMLElement, hash: string): number => {
   );
 };
 
+/** A plain click on a link to a cell of this strip, on this page: taken over
+    (no navigation, the address pushed) so the strip can move to it. */
+export function takeCellLink(e: MouseEvent, el: HTMLElement): boolean {
+  if (e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return false;
+  const a = (e.target as Element).closest?.<HTMLAnchorElement>("a[href]");
+  if (!a || a.target) return false;
+  const url = new URL(a.href);
+  if (url.origin !== location.origin || url.pathname !== location.pathname) return false;
+  if (cellFor(el, decodeURIComponent(url.hash.slice(1))) < 0) return false;
+  e.preventDefault();
+  history.pushState(null, "", url.href);
+  return true;
+}
+
 /** Preview (`?cross=1`): the reworked end of a project, its headline per
     discipline, the next project under the fingers and the ask opening in
     place. `?cross=0` turns it off. Held for the tab, so a page led on to

@@ -1,5 +1,5 @@
 import * as React from "react";
-import { cellFor } from "./shared";
+import { cellFor, takeCellLink } from "./shared";
 
 // What ends a landing's hold (`pin` below): the visitor moving the page.
 const TAKE = ["touchstart", "wheel", "keydown", "pointerdown"] as const;
@@ -110,15 +110,7 @@ export function useStacked(
     go(false);
     const onHash = () => go(true);
     const onLink = (e: MouseEvent) => {
-      if (e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-      const a = (e.target as Element).closest?.<HTMLAnchorElement>("a[href]");
-      if (!a || a.target) return;
-      const url = new URL(a.href);
-      if (url.origin !== location.origin || url.pathname !== location.pathname) return;
-      if (cellFor(el, decodeURIComponent(url.hash.slice(1))) < 0) return;
-      e.preventDefault();
-      history.pushState(null, "", url.href);
-      go(true);
+      if (takeCellLink(e, el)) go(true);
     };
     window.addEventListener("hashchange", onHash);
     document.addEventListener("click", onLink, true);
