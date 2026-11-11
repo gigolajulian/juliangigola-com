@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { DEFAULTS, LEVELS, sizesOf } from "@/lib/type-size";
-import { cn, filterPaths, rubberband } from "@/lib/utils";
+import { cn, rubberband } from "@/lib/utils";
 import { softItem, wallItem } from "@/lib/wall-tile";
 
 /* Small shared helpers and tuned values. */
@@ -22,13 +22,6 @@ describe("rubberband", () => {
 describe("cn", () => {
   it("joins classes and drops falsy ones", () => {
     expect(cn("a", false, null, "b")).toBe("a b");
-  });
-});
-
-describe("filterPaths", () => {
-  it("reads the filter drawer's links as paths", () => {
-    vi.stubGlobal("document", { querySelectorAll: () => [{ pathname: "/portfolio" }, { pathname: "/portfolio/editorial" }, { pathname: "/portfolio" }] });
-    expect(filterPaths()).toEqual(new Set(["/portfolio", "/portfolio/editorial"]));
   });
 });
 

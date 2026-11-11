@@ -9,25 +9,9 @@
  * `overscroll-x: contain` so reaching the end of the sequence does not hand
  * the gesture to the browser and trigger a back-swipe.
  * ─────────────────────────────────────────────────────────────── */
-/* The project strips ask for the footer without the ask: one line of
-   housekeeping under the sequence, nothing selling. The page marks itself
-   and the footer, which lives in the root layout, reads the mark. */
-body:has([data-quiet-footer]) .site-footer-ask {
-  display: none;
-}
-body:has([data-quiet-footer]) .site-footer-body {
-  /* One line and the air it needs. Every strip page has to give this band
-     the bottom of its window, so every pixel here is a pixel off the
-     photographs — 24px of padding around a 14px line made a 62px bar under
-     a cover that was fighting for 20. */
-  padding-block: 0.75rem;
-}
 /* And less again where the window is a tablet or a phone, which is where
    the photographs have least to spare. Julian asked. */
 @media (pointer: coarse) and (min-width: 40rem), (max-width: 40rem) {
-  body:has([data-quiet-footer]) .site-footer-body {
-    padding-block: 0.4rem;
-  }
   .strip-band {
     /* The gap the pages leave between the chip row and the first
        photograph. A desktop can afford 16px of it; a tablet held in two
@@ -35,24 +19,9 @@ body:has([data-quiet-footer]) .site-footer-body {
     margin-top: 0.5rem;
   }
 }
-body:has([data-quiet-footer]) .site-footer-row {
-  margin-top: 0;
-  border-top: 0;
-  padding-top: 0;
-}
 /* Julian: room to breathe on a phone, which scrolls, so the line takes
    nothing from the photographs; and clear of the home indicator. */
 @media (max-width: 39.99rem) {
-  body:has([data-quiet-footer]) .site-footer-body {
-    /* Squashed on an iPhone. More above the rule, more under the
-       line, and clear of Safari's bar. */
-    /* Close under the rule; the rights line near the page's end. */
-    padding-top: 1.25rem;
-    padding-bottom: calc(1.25rem + env(safe-area-inset-bottom));
-  }
-  body:has([data-quiet-footer]) .site-footer-row {
-    gap: 1.25rem;
-  }
   /* The grid's last row has the same air before the footer. */
   .strip-grid {
     padding-bottom: 3rem;
@@ -134,20 +103,6 @@ body:has(.strip-scroll[data-past-hero]) .home-wordmark {
      strip inside is the thing that has to give. */
   body:has([data-quiet-footer]) > main {
     min-height: 0;
-  }
-  /* `viewportFit: "cover"` is set and nothing else pads for it, so held
-     sideways the last line would sit under the home indicator. */
-  body:has([data-quiet-footer]) .site-footer-body {
-    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
-  }
-}
-/* An iPad held sideways: the line a third thinner. The home
-   indicator's inset is most of the air under it now, rather than added
-   on top of 12px of its own. */
-@media (pointer: coarse) and (min-width: 40rem) and (orientation: landscape) {
-  body:has([data-quiet-footer]) .site-footer-body {
-    padding-top: 0.25rem;
-    padding-bottom: max(0.25rem, calc(env(safe-area-inset-bottom) - 0.25rem));
   }
 }
 
@@ -531,8 +486,8 @@ a.strip-cell {
   height: 100% !important;
   width: calc((100cqh - 1rem) / 2 * var(--ar, 0.8)) !important;
 }
-/* Julian: on an iPad, whole columns. `--rack-w` is only ever set there
-   (`work-shell.tsx`): the width of a cover once the window is shared out
+/* Julian: on an iPad, whole columns. `--rack-w` is only ever set there:
+   the width of a cover once the window is shared out
    between a whole number of columns, and `--rack-pad` the room that
    leaves above and below, so each row is exactly a cover tall. A title
    column takes the same width, so the columns stay on one beat, and a
