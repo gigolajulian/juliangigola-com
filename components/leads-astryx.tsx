@@ -38,10 +38,11 @@ import { KEY_STORE, TOKEN_STORE } from "@/lib/admin/admin-github";
 import { leadSummary, shootTag, STAGES, type Lead, type LeadPatch, type LeadSummary, type Stage as StageName } from "@/lib/leads/leads";
 import { useRouter } from "next/navigation";
 import { TodayAstryx } from "@/components/leads/today-astryx";
+import { NewLeadAstryx } from "@/components/leads/new-lead-astryx";
 
 type Size = "phone" | "mid" | "wide";
 /** The pages the Astryx desk draws itself; the rest still open the classic desk. */
-type View = "today" | "leads";
+type View = "today" | "leads" | "new";
 type Group = "now" | "week" | "waiting";
 
 /* The site's tokens (app/styles/tokens.css): warm near-black, one teal accent; the site's own Inter Tight and Plex Mono. */
@@ -111,6 +112,7 @@ function Nav({ needs, view, go }: { needs: number; view: View; go: (v: View) => 
   return (
     <SideNav header={<SideNavHeading heading="Desk" subheading="juliangigola.com" />}>
       <SideNavSection title="Desk" isHeaderHidden>
+        <SideNavItem label="New lead" icon={PlusGlyph} isSelected={view === "new"} onClick={() => go("new")} />
         <SideNavItem label="Today" icon={HomeGlyph} isSelected={view === "today"} onClick={() => go("today")} />
         <SideNavItem label="Leads" icon={InboxGlyph} isSelected={view === "leads"} onClick={() => go("leads")} endContent={<Text type="code" size="xsm">{needs}</Text>} />
         <SideNavItem label="Calendar" icon={CalendarGlyph} href={`${CLASSIC}?calendar`} />
@@ -153,6 +155,7 @@ export function LeadsAstryx() {
   const [open, setOpen] = React.useState<string | null>(null);
   // Today first, as on the classic desk.
   const [screen, setScreen] = React.useState<View>("today");
+  const [fresh, setFresh] = React.useState<Lead | null>(null);
   const show = (v: View) => { setScreen(v); setOpen(null); };
   const [templates, setTemplates] = React.useState<Template[]>([]);
   // When the list was loaded: groups by date without reading the clock during render.
@@ -220,8 +223,8 @@ export function LeadsAstryx() {
   const eyebrow = `${at ? stamp(at) : ""} · ${needs} NEED YOU`;
 
   const newLead = size === "phone"
-    ? <IconButton label="New lead" variant="secondary" href={CLASSIC} icon={<Icon icon={PlusGlyph} />} />
-    : <Button label="New lead" variant="secondary" size="sm" href={CLASSIC} icon={<Icon icon={PlusGlyph} />} />;
+    ? <IconButton label="New lead" variant="secondary" onClick={() => show("new")} icon={<Icon icon={PlusGlyph} />} />
+    : <Button label="New lead" variant="secondary" size="sm" onClick={() => show("new")} icon={<Icon icon={PlusGlyph} />} />;
   const search = <TextInput value={query} onChange={setQuery} label="Find a lead" isLabelHidden placeholder="Name, email, shoot" size="sm" />;
   // Board lives on the classic desk for now.
   const view = (
@@ -334,10 +337,17 @@ export function LeadsAstryx() {
 
   // The lead page: its own Astryx layout (components/leads/lead-astryx.tsx).
   const lead = current ? (
-    <LeadAstryx key={current.id} summary={current} call={call} onChange={changed} onBack={() => setOpen(null)} reload={load} templates={templates} others={live.filter((o) => o.id !== current.id)} size={size} />
+    <LeadAstryx key={current.id} summary={current} initial={fresh?.email === current.email ? fresh : null} call={call} onChange={changed} onBack={() => setOpen(null)} reload={load} templates={templates} others={live.filter((o) => o.id !== current.id)} size={size} />
   ) : null;
 
-  const page = lead ?? (screen === "today" && leads ? <TodayAstryx leads={live} size={size} open={(l) => setOpen(l.id ?? null)} show={() => show("leads")} /> : home);
+  // The lead from the POST itself: KV lists lag a fresh write, so it goes in by hand and opens whole.
+  const added = (id: string, l: Lead) => {
+    setFresh(l);
+    setLeads((rs) => [{ ...leadSummary(l), id }, ...(rs ?? []).filter((r) => r.id !== id)]);
+    setScreen("leads");
+    setOpen(id);
+  };
+  const page = lead ?? (screen === "new" ? <NewLeadAstryx call={call} leads={live} size={size} done={added} open={(l) => setOpen(l.id ?? null)} cancel={() => show("leads")} /> : screen === "today" && leads ? <TodayAstryx leads={live} size={size} open={(l) => setOpen(l.id ?? null)} show={() => show("leads")} /> : home);
   if (!mode) return null;
   return (
     <Theme theme={leadsTheme} mode={mode}>

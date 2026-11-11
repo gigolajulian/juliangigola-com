@@ -73,8 +73,9 @@ const mail = (to: string, subject: string, body: string) => (ios() ? mailto(to, 
 /** `YYYY-MM-DDTHH:MM` in his clock, for the reminder fields. */
 const localParts = (iso: string) => new Date(Date.parse(iso) - new Date().getTimezoneOffset() * 60e3).toISOString().slice(0, 16).split("T");
 
-export function LeadAstryx({ summary, call, onChange, onBack, reload, templates, others, size }: { summary: LeadSummary; call: Call; onChange: (l: Lead) => void; onBack: () => void; reload: () => void; templates: Template[]; others: LeadSummary[]; size: Size }) {
-  const [lead, setLead] = React.useState<Lead | null>(null);
+export function LeadAstryx({ summary, initial, call, onChange, onBack, reload, templates, others, size }: { summary: LeadSummary; initial?: Lead | null; call: Call; onChange: (l: Lead) => void; onBack: () => void; reload: () => void; templates: Template[]; others: LeadSummary[]; size: Size }) {
+  // A lead added a moment ago comes in whole: KV may not serve its key yet.
+  const [lead, setLead] = React.useState<Lead | null>(initial ?? null);
   const [message, setMessage] = React.useState<Enquiry | null>(null);
   const [msgKey, setMsgKey] = React.useState<string | null>(null);
   const [asked, setAsked] = React.useState(false);
@@ -108,7 +109,7 @@ export function LeadAstryx({ summary, call, onChange, onBack, reload, templates,
           .then((m) => live && (setMessage(m.enquiry), setMsgKey(ref)))
           .catch(() => {});
       if (l.unread) patch({ seen: true }).catch(() => {});
-    }).catch((e: unknown) => live && setNote(errorText(e)));
+    }).catch((e: unknown) => live && !initial && setNote(errorText(e)));
     proofApi<{ proofs: ProofRow[] }>({ query: "?list" })
       .then((o) => live && setProofs(o.proofs.filter((p) => p.email && canonical(p.email) === canonical(summary.email))))
       .catch(() => {});
