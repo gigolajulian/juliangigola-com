@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { AdminPicker } from "@/components/admin-picker";
+import { AdminPicker } from "@/components/admin/admin-picker";
 
 const items = [
   { slug: "a", name: "Alpha", detail: "Editorial", cover: { src: "/work/a.jpg", color: "#000" } },

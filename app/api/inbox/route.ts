@@ -196,7 +196,7 @@ export async function GET(request: Request) {
     });
   }
 
-  // The lead desk (`components/admin-leads.tsx`): one record per person.
+  // The lead desk (`components/admin/admin-leads.tsx`): one record per person.
   // Sealed with LEADS_KEY (`lib/lead-crypto.ts`), opened here and only here.
   if (wanted?.startsWith("lead:") || url.searchParams.has("leads")) {
     const seal = await gate.seal;

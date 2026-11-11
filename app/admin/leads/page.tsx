@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { AdminLeads } from "@/components/admin-leads";
+import { AdminLeads } from "@/components/admin/admin-leads";
 import { LeadCalendar } from "@/components/lead-calendar";
 import { startupImages } from "@/lib/leads-startup";
 

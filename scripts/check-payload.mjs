@@ -354,7 +354,7 @@ const edit = {
   );
 }
 
-/* The guard in `components/admin-editor.tsx` that refuses a publish which
+/* The guard in `components/admin/admin-editor.tsx` that refuses a publish which
    would undo somebody else's commit. It is this comparison and nothing else,
    so this is where it is worth proving.
 

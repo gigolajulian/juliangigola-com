@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { api, closed, LeadProofs, ProofsDesk, status, type Row } from "@/components/admin-proofs";
+import { api, closed, LeadProofs, ProofsDesk, status, type Row } from "@/components/admin/admin-proofs";
 
 afterEach(() => vi.unstubAllGlobals());
 

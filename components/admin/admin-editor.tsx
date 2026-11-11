@@ -6,24 +6,24 @@ import {
   CONTENT_PATH,
   type SiteContent,
 } from "@/lib/content";
-import { AdminNewProject } from "@/components/admin-new-project";
-import { AdminProjects, type AdminProject } from "@/components/admin-projects";
-import { AdminSitemap, type SitemapTarget } from "@/components/admin-sitemap";
-import { AdminDisciplines } from "@/components/admin-disciplines";
-import { AdminPreview } from "@/components/admin-preview";
-import { AdminPage } from "@/components/admin-page";
-import type { PickerItem } from "@/components/admin-picker";
-import { AdminTrash } from "@/components/admin-trash";
-import { AdminInbox, unreadCount } from "@/components/admin-inbox";
-import { AdminLeads } from "@/components/admin-leads";
-import { AdminTraffic } from "@/components/admin-traffic";
-import { AdminSeo } from "@/components/admin-seo";
-import { AdminVideos } from "@/components/admin-videos";
-import { ClientFields, ContactFields, CoverArtFields, HomeFields, inputClass, QuoteFields, SessionFields } from "@/components/admin-fields";
+import { AdminNewProject } from "@/components/admin/admin-new-project";
+import { AdminProjects, type AdminProject } from "@/components/admin/admin-projects";
+import { AdminSitemap, type SitemapTarget } from "@/components/admin/admin-sitemap";
+import { AdminDisciplines } from "@/components/admin/admin-disciplines";
+import { AdminPreview } from "@/components/admin/admin-preview";
+import { AdminPage } from "@/components/admin/admin-page";
+import type { PickerItem } from "@/components/admin/admin-picker";
+import { AdminTrash } from "@/components/admin/admin-trash";
+import { AdminInbox, unreadCount } from "@/components/admin/admin-inbox";
+import { AdminLeads } from "@/components/admin/admin-leads";
+import { AdminTraffic } from "@/components/admin/admin-traffic";
+import { AdminSeo } from "@/components/admin/admin-seo";
+import { AdminVideos } from "@/components/admin/admin-videos";
+import { ClientFields, ContactFields, CoverArtFields, HomeFields, inputClass, QuoteFields, SessionFields } from "@/components/admin/admin-fields";
 import { isTextRef, type FrameRef, type TrashedProject } from "@/lib/added";
 import { ADDED_PATH } from "@/lib/added";
-import { type PendingUpload } from "@/components/admin-frames";
-import { CreditDesk, creditBook } from "@/components/admin-credits";
+import { type PendingUpload } from "@/components/admin/admin-frames";
+import { CreditDesk, creditBook } from "@/components/admin/admin-credits";
 import {
   adoptable,
   projectsFile,
@@ -1638,7 +1638,7 @@ export function AdminEditor({
 
           {/* One area at a time, so switching tabs is not a scroll and the
             widest column holds only the fields you came for. The panels are
-            top-level components (components/admin-fields.tsx), so their type
+            top-level components (components/admin/admin-fields.tsx), so their type
             is stable across renders and the pickers inside keep their state. */}
           {!page && view === "home" ? <HomeFields draft={draft} set={set} releases={releases} releaseLimit={releaseLimit} slugs={slugs} unknownSlugs={unknownSlugs} projects={projects} hidden={hidden} heroChoices={heroChoices} /> : null}
           {!page && view === "clients" ? <ClientFields draft={draft} set={set} clients={clients} /> : null}
