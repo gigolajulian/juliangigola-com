@@ -7,7 +7,7 @@ import type { Invoice } from "./invoice";
  *
  * So beside the raw rows (`msg:`, still written first and kept as the
  * log) the INBOX namespace holds one `lead:<id>` per person, sealed with
- * LEADS_KEY (`lib/lead-crypto.ts`). Each event
+ * LEADS_KEY (`lib/leads/lead-crypto.ts`). Each event
  * that reaches the site (the form, a Cal.com booking, a deposit in
  * trouble) is folded into it here. KV is the source of truth; Notion is a
  * mirror of it, never the other way.
@@ -30,10 +30,10 @@ export type Stage = (typeof STAGES)[number];
 export type LeadEvent = {
   at: string;
   kind: "inquiry" | "call" | "booking" | "no-deposit" | "deposit-stuck" | "stage" | "snooze" | "mail" | "replied" | "wrote" | "archive" | "trash" | "proofs"
-    // Julian's own hand (`lib/lead-crm.ts`): added, details changed, merged, a reminder, a quote.
+    // Julian's own hand (`lib/leads/lead-crm.ts`): added, details changed, merged, a reminder, a quote.
     | "added" | "edit" | "merge" | "remind" | "quote" | "invoice";
   /* "proofs": they opened a proof gallery, ref = its token so each gallery is one line. */
-  /* "replied" / "wrote": mail between hello@ and them in Gmail, ref = the Gmail message id (`lib/gmail-sync.ts`). */
+  /* "replied" / "wrote": mail between hello@ and them in Gmail, ref = the Gmail message id (`lib/leads/gmail-sync.ts`). */
   /** The raw row (`msg:` key), Cal.com uid or Stripe intent, so a retry folds in once. */
   ref?: string;
   /** Booking time, session, new stage, a mail's subject: a short line for the timeline. */
@@ -113,7 +113,7 @@ export type Lead = {
   /** Paperwork for the shoot; unset reads as Not sent. */
   contract?: Paper;
   release?: Paper;
-  /** Invoices made from this lead (`lib/invoice.ts`), oldest first. */
+  /** Invoices made from this lead (`lib/leads/invoice.ts`), oldest first. */
   invoices?: Invoice[];
   /** Opt-in, for commercial work: what the photos may be used for, and the day that ends (YYYY-MM-DD). */
   licence?: Licence;
@@ -136,7 +136,7 @@ export type LeadSummary = Omit<Lead, "events" | "notion" | "deposit" | "notes" |
 /** Events kept per lead: the timeline needs the recent ones, KV values stay small. */
 const KEEP = 50;
 
-/** A lead's KV key: its id (an HMAC of the address, `lib/lead-crypto.ts`), never the address. */
+/** A lead's KV key: its id (an HMAC of the address, `lib/leads/lead-crypto.ts`), never the address. */
 export const leadStoreKey = (id: string) => `lead:${id}`;
 
 const rank = (s: Stage) => STAGES.indexOf(s);

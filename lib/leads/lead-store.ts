@@ -1,5 +1,5 @@
 /* Reading, writing and pushing leads (KV, LEADS_KEY, web push). Server only: the
- * desk's components import the pure model from `lib/leads.ts`. */
+ * desk's components import the pure model from `lib/leads/leads.ts`. */
 import { sealer, type Sealer } from "./lead-crypto";
 import { notify, pushFor } from "./lead-push";
 import { fold, leadStoreKey, leadSummary, type Change, type Lead, type LeadSummary, type Sent } from "./leads";
@@ -42,7 +42,7 @@ export async function writeLead(kv: KV, s: Sealer, id: string, lead: Lead): Prom
 const CANON = "leads:canon";
 /**
  * Once: moves each lead stored before ids ignored Gmail dots and "+tags"
- * (`canonical` in lib/lead-crypto.ts, 2026-11-04) to its new id. A lead whose
+ * (`canonical` in lib/leads/lead-crypto.ts, 2026-11-04) to its new id. A lead whose
  * new id is already taken stays put, for Merge on the desk. Returns how many moved.
  */
 export async function canonLeads(kv: KV, s: Sealer): Promise<number> {
@@ -108,7 +108,7 @@ export async function recordLead(env: LeadStore, email: string, c: Change): Prom
     const after = fold(before, email, c);
     if (after === before) return after;
     await writeLead(env.INBOX, s, id, after);
-    // Something reached the site: ping his devices (`lib/lead-push.ts`).
+    // Something reached the site: ping his devices (`lib/leads/lead-push.ts`).
     const push = pushFor(after, c.event);
     if (push && env.VAPID_KEY) await later(notify(env.INBOX, env.VAPID_KEY, push));
     return after;

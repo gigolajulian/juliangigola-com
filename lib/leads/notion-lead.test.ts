@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { notionPaper, notionStage, paperProperties, toNotion } from "@/lib/notion-lead";
+import { notionPaper, notionStage, paperProperties, toNotion } from "@/lib/leads/notion-lead";
 import type { Enquiry } from "@/lib/inbox";
 
 type Call = { url: string; method: string; body: { properties?: Record<string, unknown>; filter?: unknown } };

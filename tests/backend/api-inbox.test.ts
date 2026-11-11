@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { summary, enquiry, enquiryKey } from "@/lib/inbox";
-import { recordLead } from "@/lib/lead-store";
+import { recordLead } from "@/lib/leads/lead-store";
 import { FakeKV, LEADS_KEY, SCOPED, githubToken, reply } from "./fakes";
-import { sealer } from "@/lib/lead-crypto";
+import { sealer } from "@/lib/leads/lead-crypto";
 
 /* /admin's inbox (`app/api/inbox/route.ts`): somebody's name, email and
    message, so the gate is the point. Either the INBOX_KEY or a GitHub

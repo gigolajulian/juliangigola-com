@@ -3,7 +3,7 @@
  * template of his JG INVOICE GENERATOR, numbered MMYY, a second one in the
  * same month 1126-2. It never sends: the desk makes the PDF and hands it
  * to Share or a Gmail draft. Pure functions here; `/api/inbox` stores the
- * invoice on the lead (sealed) and `lib/invoice-pdf.ts` draws it.
+ * invoice on the lead (sealed) and `lib/leads/invoice-pdf.ts` draws it.
  * ─────────────────────────────────────────────────────────────── */
 
 /** `sub` is design B's short line under a title: what was done. */

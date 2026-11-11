@@ -1,9 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { adminCall } from "@/lib/lead-desk";
+import { adminCall } from "@/lib/leads/lead-desk";
 import { TZ } from "@/lib/booking/booking-rules";
-import type { LeadSummary } from "@/lib/leads";
+import type { LeadSummary } from "@/lib/leads/leads";
 import { cn } from "@/lib/utils";
 
 /* ── Upcoming as a month ──────────────────────────────────────────

@@ -31,11 +31,11 @@ import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/Segme
 import { ProgressBar } from "@astryxdesign/core/ProgressBar";
 import { StatusDot } from "@astryxdesign/core/StatusDot";
 import { Detail, SignIn } from "@/components/admin/admin-leads";
-import { ago, inboxCall, loadError, matches, nextStep, pass } from "@/lib/lead-desk";
-import type { Template } from "@/lib/lead-crm";
+import { ago, inboxCall, loadError, matches, nextStep, pass } from "@/lib/leads/lead-desk";
+import type { Template } from "@/lib/leads/lead-crm";
 import { TZ } from "@/lib/booking/booking-rules";
 import { KEY_STORE, TOKEN_STORE } from "@/lib/admin/admin-github";
-import { leadSummary, shootTag, STAGES, type Lead, type LeadPatch, type LeadSummary, type Stage as StageName } from "@/lib/leads";
+import { leadSummary, shootTag, STAGES, type Lead, type LeadPatch, type LeadSummary, type Stage as StageName } from "@/lib/leads/leads";
 import { useRouter } from "next/navigation";
 
 type Size = "phone" | "mid" | "wide";

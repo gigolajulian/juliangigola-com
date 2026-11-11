@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FakeKV, LEADS_KEY } from "./fakes";
-import { sealer } from "@/lib/lead-crypto";
-import { recordLead } from "@/lib/lead-store";
-import { csv, fill, identity, manualLead, merge, stats } from "@/lib/lead-crm";
-import type { Lead } from "@/lib/leads";
+import { sealer } from "@/lib/leads/lead-crypto";
+import { recordLead } from "@/lib/leads/lead-store";
+import { csv, fill, identity, manualLead, merge, stats } from "@/lib/leads/lead-crm";
+import type { Lead } from "@/lib/leads/leads";
 
-/* The desk as a CRM (`lib/lead-crm.ts`, `app/api/inbox/route.ts`): leads
+/* The desk as a CRM (`lib/leads/lead-crm.ts`, `app/api/inbox/route.ts`): leads
    added by hand, notes, reminders, details, quotes, merges, templates, the
    numbers and the export. */
 

@@ -185,7 +185,7 @@ function layout({ from: s, to, inv }: InvoiceDoc, SB: Font, RG: Font) {
  * into points: 1cqw is a hundredth of the page width, line boxes as CSS
  * builds them from each face's hhea metrics. The flow runs down from the
  * top; the sign-off and the footer sit on the foot. The photo comes in as
- * the framed column (`lib/invoice-photo.ts`).
+ * the framed column (`lib/leads/invoice-photo.ts`).
  * ─────────────────────────────────────────────────────────────── */
 /** The least room between the bank block and the note: 4cqw, about two lines of the bank block. */
 const CLEAR = 4 * (PW / 100);
@@ -335,7 +335,7 @@ function face(k: Face): Promise<Loaded> {
 const who = (d: InvoiceDoc) => (d.inv.b ? (d.inv.b.to.company || d.inv.b.to.name).toUpperCase() : d.to.name);
 export const fileName = (d: InvoiceDoc) => `INVOICE ${d.inv.no} - ${who(d).replace(/[\\/:*?"<>|]/g, "").trim()}.pdf`;
 
-/** Design B's photo column, framed (`lib/invoice-photo.ts`). */
+/** Design B's photo column, framed (`lib/leads/invoice-photo.ts`). */
 export type Photo = { jpeg: Uint8Array; w: number; h: number };
 
 /** The invoice as a PDF file, ready for Share or a download. A design B invoice needs its framed photo. */

@@ -31,7 +31,7 @@ import { KEY_STORE } from "@/lib/admin/admin-github";
 import { SignIn } from "@/components/admin/admin-leads";
 import { Activity, api, closed, status, type Row } from "@/components/admin/admin-proofs";
 import { TZ } from "@/lib/booking/booking-rules";
-import { errorText } from "@/lib/lead-desk";
+import { errorText } from "@/lib/leads/lead-desk";
 import { TOKEN_STORE } from "@/lib/admin/admin-github";
 import { extras, stage, STAGES } from "@/lib/proofs";
 
