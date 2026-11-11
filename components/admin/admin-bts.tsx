@@ -3,8 +3,8 @@
 import * as React from "react";
 import type { FrameRef } from "@/lib/added";
 import type { Bts, Frame } from "@/lib/work-types";
-import { MAX_WIDTH, processClip, processImage } from "@/lib/admin-image";
-import { useSequence, srcOf, type PendingUpload } from "@/lib/admin-sequence";
+import { MAX_WIDTH, processClip, processImage } from "@/lib/admin/admin-image";
+import { useSequence, srcOf, type PendingUpload } from "@/lib/admin/admin-sequence";
 import { cn } from "@/lib/utils";
 
 /* ── a project's BTS ──────────────────────────────────────────────

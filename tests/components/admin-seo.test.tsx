@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { AdminSeo } from "@/components/admin/admin-seo";
-import { TOKEN_STORE } from "@/lib/admin-github";
+import { TOKEN_STORE } from "@/lib/admin/admin-github";
 
 afterEach(() => {
   vi.unstubAllGlobals();

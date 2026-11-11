@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { KEY_STORE, TOKEN_STORE } from "@/lib/admin-github";
+import { KEY_STORE, TOKEN_STORE } from "@/lib/admin/admin-github";
 import { LeadBoard } from "@/components/leads/lead-board";
 import { LeadHours } from "@/components/leads/lead-hours";
 import { ProofsDesk } from "@/components/admin/admin-proofs";

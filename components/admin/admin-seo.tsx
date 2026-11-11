@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { TOKEN_STORE } from "@/lib/admin-github";
+import { TOKEN_STORE } from "@/lib/admin/admin-github";
 
 /* ── seo ──────────────────────────────────────────────────────────
  * What search and visitors make of each page, from `/api/seo`: totals

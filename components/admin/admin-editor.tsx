@@ -31,13 +31,13 @@ import {
   withOverride,
   type Manifest,
   type ProjectsFile,
-} from "@/lib/admin-payload";
+} from "@/lib/admin/admin-payload";
 import {
   commitFiles,
   readFile,
   type CommitFile,
   TOKEN_STORE,
-} from "@/lib/admin-github";
+} from "@/lib/admin/admin-github";
 import type { Bts, Copy, Credit } from "@/lib/work-types";
 import { cn } from "@/lib/utils";
 
@@ -169,7 +169,7 @@ const fromBase64 = (b64: string): string => {
 /**
  * The manifest half of the draft, as the editor holds it.
  *
- * `Manifest` in `lib/admin-payload.ts` is loose about what a frame and a
+ * `Manifest` in `lib/admin/admin-payload.ts` is loose about what a frame and a
  * credit are — that module deliberately knows only that a sequence is a list,
  * which is what lets the check script run it. Here they are the real things.
  */
@@ -973,7 +973,7 @@ export function AdminEditor({
           });
           return;
         }
-        // Built by `lib/admin-payload.ts`, covered by
+        // Built by `lib/admin/admin-payload.ts`, covered by
         // `scripts/check-payload.mjs`. That is the one part of publishing
         // testable without a token, and the part where a dropped field
         // publishes as "you never made that edit".

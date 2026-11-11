@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { TOKEN_STORE } from "@/lib/admin-github";
+import { TOKEN_STORE } from "@/lib/admin/admin-github";
 import { isLate, paperDue, shootTag, type LeadSummary } from "@/lib/leads";
 import { cn } from "@/lib/utils";
 import { HEAD } from "@/components/leads/shared";

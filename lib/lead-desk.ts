@@ -3,7 +3,7 @@
  * and components/leads-astryx.tsx): the admin fetch, the list filters and the
  * small formatters. Browser only: the fetch reads the key from localStorage.
  */
-import { credentials, KEY_STORE } from "@/lib/admin-github";
+import { credentials, KEY_STORE } from "@/lib/admin/admin-github";
 import { TZ } from "@/lib/booking/booking-rules";
 import { isLate, myMove, paperDue, quoteNudge, renewDue, type Lead, type LeadPatch, type LeadSummary, type Stage } from "@/lib/leads";
 

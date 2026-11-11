@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { isTextRef, type FrameRef, type TextRef } from "@/lib/added";
-import { MAX_WIDTH, processImage } from "@/lib/admin-image";
+import { MAX_WIDTH, processImage } from "@/lib/admin/admin-image";
 
 /* ── a project's sequence, as state ───────────────────────────────
  * Everything that changes the order of a project's frames and passages,
