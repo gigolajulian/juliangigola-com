@@ -57,7 +57,6 @@ All 74 projects and 1,131 frames were migrated off the old Format site.
 | `lib/work-types.ts` | Shapes for the above. |
 | `lib/sessions.ts` | Bookable session types. `from: null` renders as "On request". |
 | `lib/site.ts` | Reply-time promise and the booking-calendar URL. |
-| `lib/testimonials.ts` | Client quotes. Empty; the section hides itself until it isn't. |
 
 ### The migration (finished)
 
@@ -146,24 +145,14 @@ leave orphans behind.
 
 ### Where enquiries go
 
-The contact form writes to a KV namespace and `/admin`'s **Inbox** tab reads
-it. Nothing is emailed, which is the point: an enquiry that is stored cannot
-bounce, cannot land in a spam folder, and needs no sending domain, no API key
-and no monthly bill. The sender needs no mail app either — the form used to
-hand back a prefilled `mailto:` and ask them to send it themselves, which is
-work for the one person you want to hear from.
+`app/contact/actions.ts` stores each enquiry in the `INBOX` KV namespace,
+mails it to hello@ through Cloudflare Email Sending
+(`notifications.juliangigola.com`), files it as a lead (`lib/lead-store.ts`,
+sealed with `LEADS_KEY`) and adds a row in Notion when `NOTION_TOKEN` is set.
+The store comes first: a failed mail or Notion call never loses the enquiry.
 
-Two things make it work, and only one of them is set up for you:
-
-- **`INBOX` namespace** — bound in `wrangler.jsonc`, created already. Writing
-  an enquiry needs nothing else, so the form captures messages from the first
-  deploy.
-- **`INBOX_KEY` secret** — `wrangler secret put INBOX_KEY`, any long random
-  string, then paste it into the Inbox tab once. Until it is set the route
-  **refuses every read**: an enquiry carries somebody's name, their address
-  and what they want, and the failure to avoid is the one where that is
-  readable by whoever asks. The GitHub token cannot stand in for it — GitHub
-  has no opinion about data held on this site.
+`/admin` reads it with either credential in `lib/vouch.ts`: the `INBOX_KEY`
+header or a GitHub token that can push. With neither, every read is refused.
 
 Cloudflare Access in front of `/admin` is still worth having, but it is not
 what protects this.
@@ -267,12 +256,7 @@ send mail. All three are fixed by having a server.
 
 ## Still to wire up
 
-- **Booking** — set `BOOKING_URL` in `lib/site.ts` to a Google Calendar appointment
-  schedule. "Check availability" buttons then appear on `/sessions` and `/contact`.
-- **The inbox key** — `wrangler secret put INBOX_KEY`, then paste it into /admin's
-  Inbox tab. Enquiries are captured either way; without the key they cannot be read.
-- **Session rates** — `from` is `null` on every entry in `lib/sessions.ts`.
-- **Alt text** — 1,084 frames came across without any. The ones that appear in indexes
+- **Alt text**: 1,084 frames came across without any. The ones that appear in indexes
   and covers are worth a pass by hand.
 
 ## Notes

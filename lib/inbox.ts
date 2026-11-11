@@ -380,7 +380,7 @@ export const whenPT = (iso?: string) => {
   const d = iso ? new Date(iso) : null;
   return d && !isNaN(+d)
     ? new Intl.DateTimeFormat("en-US", {
-        timeZone: "America/Los_Angeles",
+        timeZone: "America/Los_Angeles", // booking-rules TZ; no imports here, scripts/check-inbox.mjs runs this file in plain Node
         weekday: "short",
         month: "short",
         day: "numeric",

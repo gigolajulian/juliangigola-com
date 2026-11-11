@@ -6,7 +6,7 @@ import { gcal } from "@/lib/gcal";
  * freeBusy says what is already taken, Cal.com's bookings included while
  * both engines run. A start is offered when the session and its buffer
  * after it touch nothing busy. `GET /api/slots` serves these to the picker
- * and `isOpen` rechecks one before money or a booking moves.
+ * and `isSlotOpen` rechecks one before money or a booking moves.
  * ─────────────────────────────────────────────────────────────── */
 
 /** Calendars whose busy time blocks a booking. */
@@ -213,7 +213,10 @@ export async function busyBetween(secret: string | undefined, from: number, to: 
 }
 
 /** Open starts of `slug` between `from` and `to`, as UTC ms. `mine`: a booking being moved, whose own time is not in the way. `kv`: where the extra calendars are listed. */
-export async function openStarts(secret: string | undefined, slug: string, from: number, to: number, now = Date.now(), mine?: { start: string; end: string }, kv?: KV, hours?: Hours) {
+/** What a slot check may know beyond the calendar: the booking being moved (`mine`), the store of extra calendars, the hours. */
+export type SlotOpts = { now?: number; mine?: { start: string; end: string }; kv?: KV; hours?: Hours };
+
+export async function openStarts(secret: string | undefined, slug: string, from: number, to: number, { now = Date.now(), mine, kv, hours }: SlotOpts = {}) {
   const rule = EVENTS[slug];
   if (!rule) return [];
   // The buffer after a session reaches past `to`.
@@ -224,7 +227,7 @@ export async function openStarts(secret: string | undefined, slug: string, from:
 }
 
 /** Whether `start` (ISO) is still open for `slug`, asking Google now. */
-export async function openNow(secret: string | undefined, slug: string, start: string, mine?: { start: string; end: string }, kv?: KV, hours?: Hours) {
+export async function openNow(secret: string | undefined, slug: string, start: string, opts: Omit<SlotOpts, "now"> = {}) {
   const t = Date.parse(start);
-  return (await openStarts(secret, slug, t - 864e5, t + 864e5, Date.now(), mine, kv, hours)).includes(t);
+  return (await openStarts(secret, slug, t - 864e5, t + 864e5, opts)).includes(t);
 }

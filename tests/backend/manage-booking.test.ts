@@ -4,6 +4,11 @@ import { forgetToken } from "@/lib/gcal";
 import { bookingToken, manageLinks, tokenOpens } from "@/lib/booking-token";
 import { BookingLock } from "@/worker/booking-lock";
 
+// Pinned clock: weekday hours, DST and the 48h refund window must not depend on the day the suite runs.
+vi.useFakeTimers({ toFake: ["Date"] });
+const PIN = new Date("2026-11-11T20:00:00Z"); // a Wednesday, noon in San Jose
+vi.setSystemTime(PIN);
+
 /* Reschedule and cancel (`app/api/booking/[id]`): the mail's signed link
    opens one booking until a day after it; a cancel 48 hours or more ahead
    refunds the deposit, under that it does not; a move patches the event
@@ -129,7 +134,7 @@ describe("cancel", () => {
     vi.useFakeTimers({ toFake: ["Date"] });
     vi.setSystemTime(Date.parse(start) - 47 * 36e5);
     const res = await post(id, { t, action: "cancel" });
-    vi.useRealTimers();
+    vi.setSystemTime(PIN);
     expect(await res.json()).toMatchObject({ refunded: null, record: { cancelled: true } });
     expect(calls.some((c) => c.url.endsWith("/refunds"))).toBe(false);
     expect(String(client.sent.at(-1)!.text)).toContain("not refunded");
@@ -145,7 +150,7 @@ describe("cancel", () => {
     expect(String(client.sent.at(-1)!.text)).toContain("no longer refundable");
     expect(String(mail.sent.at(-1)!.text)).toContain("no longer refundable");
     const res = await post(id, { t, action: "cancel" });
-    vi.useRealTimers();
+    vi.setSystemTime(PIN);
     expect(await res.json()).toMatchObject({ refunded: null, record: { cancelled: true, firstStart: start } });
     expect(calls.some((c) => c.url.endsWith("/refunds"))).toBe(false);
     expect(String(client.sent.at(-1)!.text)).toContain("not refunded");

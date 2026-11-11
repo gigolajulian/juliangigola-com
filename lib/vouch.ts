@@ -8,10 +8,12 @@ import { REPO } from "@/lib/admin-github";
  * remembered for five minutes by a hash of it, so a panel's every click is
  * not a round trip.
  *
- * Lifted out of `app/api/inbox/route.ts`, which is where it was written and
- * which still uses it: a route file may only export its handlers, and the
- * avatar route needs the same gate. One copy, so a change to how the site
- * trusts a token is a change in one place.
+ * Three credentials, one copy each, so a change to how the site trusts a
+ * request is a change in one place:
+ * - `isAdmin`: /admin routes (inbox, calendar, money, proof, booking hours,
+ *   seo, traffic). The `INBOX_KEY` header or a GitHub token that can push.
+ * - `fromWorker`: the booking Worker calling the site (leads/gmail,
+ *   leads/mail), with `BOOKING_SECRET` as the bearer.
  * ─────────────────────────────────────────────────────────────── */
 const VOUCHED_MS = 5 * 60 * 1000;
 const vouched = new Map<string, number>();
@@ -105,16 +107,20 @@ export const bearer = (request: Request): string | undefined =>
  * in a test under Node without a Workers shim.
  */
 export async function authorised(request: Request, expected?: string) {
-  if (!expected) return false;
-  const given = request.headers.get("x-inbox-key");
-  if (!given) return false;
+  return same(request.headers.get("x-inbox-key"), expected);
+}
 
+async function same(given?: string | null, expected?: string) {
+  if (!expected || !given) return false;
   const [a, b] = await Promise.all([sha256(given), sha256(expected)]);
 
   let diff = a.length ^ b.length;
   for (let i = 0; i < a.length; i++) diff |= a[i] ^ b[i];
   return diff === 0;
 }
+
+/** The booking Worker, calling with `BOOKING_SECRET` as its bearer. */
+export const fromWorker = (request: Request, secret?: string) => same(bearer(request), secret);
 
 /** The admin gate: the inbox key, or a GitHub token that can push. */
 export async function isAdmin(request: Request, key?: string) {

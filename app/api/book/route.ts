@@ -1,9 +1,12 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { lock, recordBooking, type BookResult } from "@/lib/booking-engine";
 import { manageLinks } from "@/lib/booking-token";
-import { confirmMail, sendConfirm } from "@/lib/confirm";
-import { logMail } from "@/lib/leads";
+import { sendConfirm } from "@/lib/confirm";
+import { logMail } from "@/lib/lead-store";
 import { parseBooking } from "@/lib/deposit";
+import { json } from "@/lib/http";
+
+// Errors keep Cal.com's { status, error: { message } } envelope (as /api/slots does): the time picker reads either engine the same way.
 
 /* ── a free call, booked by the site's own engine ─────────────────
  * The picker posts a call here. The lock rechecks the time and inserts
@@ -13,8 +16,6 @@ import { parseBooking } from "@/lib/deposit";
  * ─────────────────────────────────────────────────────────────── */
 
 export const dynamic = "force-dynamic";
-
-const json = (body: unknown, status = 200) => Response.json(body, { status, headers: { "cache-control": "no-store" } });
 
 export async function POST(request: Request) {
   const { env, ctx } = await getCloudflareContext({ async: true });
@@ -31,8 +32,9 @@ export async function POST(request: Request) {
 
   let out: BookResult;
   try {
-    out = await lock<BookResult>(env, "book", { ...b, via });
-  } catch {
+    out = await lock(env, "book", { ...b, via });
+  } catch (e) {
+    console.error("book", String(e));
     return json({ status: "error", error: { message: "Could not reach the calendar." } }, 502);
   }
   if (!out.ok && out.reason === "unknown") return json({ status: "error", error: { message: "Unknown session." } }, 400);
@@ -43,6 +45,7 @@ export async function POST(request: Request) {
   ctx.waitUntil(filed);
   const confirm = { name: r.name, email: r.email, session: r.session, call: true, start: r.start, end: r.end, where: r.where, uid: r.id, manage: await manageLinks(env.BOOKING_SECRET, r) };
   // Logged after the lead is filed, so the mail lands on its row.
-  if (await sendConfirm(env.CLIENT_EMAIL, confirm)) ctx.waitUntil(filed.then(() => logMail(env, r.email, confirmMail(confirm).subject, { to: "client", kind: "confirm", booking: r.id })));
+  const sent = await sendConfirm(env.CLIENT_EMAIL, confirm);
+  if (sent) ctx.waitUntil(filed.then(() => logMail(env, r.email, sent, { to: "client", kind: "confirm", booking: r.id })));
   return json({ status: "success", data: { uid: r.id, start: r.start, end: r.end, where: r.where } });
 }

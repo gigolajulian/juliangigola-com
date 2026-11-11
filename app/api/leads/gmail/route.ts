@@ -1,6 +1,7 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { bearer, digest } from "@/lib/vouch";
+import { fromWorker } from "@/lib/vouch";
 import { syncGmail } from "@/lib/gmail-sync";
+import { json } from "@/lib/http";
 
 /* ── POST /api/leads/gmail: fold hello@'s new mail into leads ─────
  * Called every ten minutes by the booking Worker's cron (`worker/index.ts`)
@@ -10,13 +11,10 @@ import { syncGmail } from "@/lib/gmail-sync";
 
 export const dynamic = "force-dynamic";
 
-const json = (body: unknown, status = 200) => Response.json(body, { status, headers: { "cache-control": "no-store" } });
-
 export async function POST(request: Request) {
   const { env } = await getCloudflareContext({ async: true });
-  const got = bearer(request);
   // Hashes compared, so the check takes the same time however close a guess is.
-  if (!env.BOOKING_SECRET || !got || (await digest(got)) !== (await digest(env.BOOKING_SECRET))) return json({ error: "No." }, 401);
+  if (!(await fromWorker(request, env.BOOKING_SECRET))) return json({ error: "Not authorized." }, 401);
   if (!env.GCAL_OAUTH || !env.LEADS_KEY) return json({ error: "Not set up." }, 503);
   try {
     return json({ folded: await syncGmail(env) });

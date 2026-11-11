@@ -1,6 +1,8 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { isDeposit, isIntentId, refKey, stripe } from "@/lib/deposit";
+import { isDeposit, isIntentId, refKey } from "@/lib/deposit";
+import { stripe } from "@/lib/stripe";
 import { MAX_REFS, takePicks, takeUploads } from "@/lib/inbox";
+import { json } from "@/lib/http";
 
 /* ── how a deposit ended ───────────────────────────────────────────
  * The card polls this after paying: "pending" until Stripe's webhook has
@@ -10,9 +12,6 @@ import { MAX_REFS, takePicks, takeUploads } from "@/lib/inbox";
  * ─────────────────────────────────────────────────────────────── */
 
 export const dynamic = "force-dynamic";
-
-const json = (body: unknown, status = 200) =>
-  Response.json(body, { status, headers: { "cache-control": "no-store" } });
 
 const DONE = ["booked", "refunded", "failed"];
 

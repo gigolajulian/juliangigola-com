@@ -10,7 +10,7 @@ const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
 vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
 const { GET, PUT } = await import("@/app/api/booking/hours/route");
 const { GET: slots } = await import("@/app/api/slots/route");
-const { isOpen } = await import("@/lib/deposit");
+const { isSlotOpen } = await import("@/lib/deposit");
 const { liveHours } = await import("@/lib/booking-engine");
 
 const OAUTH = JSON.stringify({ client_id: "a", client_secret: "b", refresh_token: "c" });
@@ -42,8 +42,8 @@ describe("hours", () => {
     expect(r.data["2026-11-23"].map((x: { start: string }) => x.start.slice(11, 16))).toEqual(["08:00", "09:00"]);
     // The deposit's pre-check reads the same hours: the opened Monday passes, a default Monday would not.
     const b = { engine: "own" as const, slug: "portraits", start: "2026-11-23T16:00:00.000Z", timeZone: "America/Los_Angeles", name: "QA", email: "qa@example.com" };
-    expect(await isOpen(b as never, OAUTH, undefined, await liveHours(ctx.env as never))).toBe(true);
-    expect(await isOpen(b as never, OAUTH)).toBe(false);
+    expect(await isSlotOpen(b as never, OAUTH, undefined, await liveHours(ctx.env as never))).toBe(true);
+    expect(await isSlotOpen(b as never, OAUTH)).toBe(false);
     vi.useRealTimers();
   });
 });

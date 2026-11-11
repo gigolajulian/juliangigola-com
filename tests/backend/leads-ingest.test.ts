@@ -27,7 +27,7 @@ describe("POST /api/leads/mail", () => {
     for (const auth of [undefined, "Bearer wrong-secret"]) {
       const res = await call(mailPost, "mail", MAIL, auth);
       expect(res.status).toBe(401);
-      expect(await res.json()).toEqual({ error: "No." });
+      expect(await res.json()).toEqual({ error: "Not authorized." });
     }
     expect(kv.puts).toEqual([]);
   });
@@ -59,7 +59,7 @@ describe("POST /api/leads/gmail", () => {
     for (const auth of [undefined, "Bearer wrong-secret"]) {
       const res = await call(gmailPost, "gmail", {}, auth);
       expect(res.status).toBe(401);
-      expect(await res.json()).toEqual({ error: "No." });
+      expect(await res.json()).toEqual({ error: "Not authorized." });
     }
   });
 

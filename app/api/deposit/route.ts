@@ -1,6 +1,8 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { liveHours } from "@/lib/booking-engine";
-import { AMOUNT, CURRENCY, intentForm, isOpen, parseBooking, stripe } from "@/lib/deposit";
+import { AMOUNT, CURRENCY, intentForm, isSlotOpen, parseBooking } from "@/lib/deposit";
+import { stripe } from "@/lib/stripe";
+import { json } from "@/lib/http";
 
 /* ── a deposit starts ──────────────────────────────────────────────
  * The card posts the booking it wants; this checks the time is still
@@ -10,9 +12,6 @@ import { AMOUNT, CURRENCY, intentForm, isOpen, parseBooking, stripe } from "@/li
  * ─────────────────────────────────────────────────────────────── */
 
 export const dynamic = "force-dynamic";
-
-const json = (body: unknown, status = 200) =>
-  Response.json(body, { status, headers: { "cache-control": "no-store" } });
 
 export async function POST(request: Request) {
   const { env } = await getCloudflareContext({ async: true });
@@ -26,15 +25,17 @@ export async function POST(request: Request) {
   if (typeof b === "string") return json({ error: b }, 400);
 
   try {
-    if (!(await isOpen(b, env.GCAL_OAUTH, env.INBOX, await liveHours(env)))) return json({ error: "taken" }, 409);
-  } catch {
+    if (!(await isSlotOpen(b, env.GCAL_OAUTH, env.INBOX, await liveHours(env)))) return json({ error: "taken" }, 409);
+  } catch (e) {
+    console.error("deposit calendar", String(e));
     return json({ error: "Could not reach the calendar. Try again." }, 502);
   }
 
   try {
     const pi = await stripe(env.STRIPE_SECRET_KEY, "/payment_intents", intentForm(b));
     return json({ clientSecret: pi.client_secret, intentId: pi.id, amount: AMOUNT, currency: CURRENCY });
-  } catch {
+  } catch (e) {
+    console.error("deposit intent", String(e));
     return json({ error: "Payments are down. Try again in a minute." }, 502);
   }
 }
