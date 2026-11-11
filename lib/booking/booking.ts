@@ -316,7 +316,7 @@ export const BOOKING_PAGES: BookingPage[] = [
       },
     ],
     tiles: framesOf("graduation"),
-    gallery: { href: "/portfolio/graduation", label: "The graduation gallery" },
+    gallery: { href: "/graduation-photos#work", label: "The graduation gallery" },
     book: { type: "session", session: grad.name, title: "Book a graduation session", cal: "juliangigola/graduation" },
   },
   {
