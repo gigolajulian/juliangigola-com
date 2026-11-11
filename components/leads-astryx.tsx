@@ -41,10 +41,23 @@ import { NewLeadAstryx } from "@/components/leads/new-lead-astryx";
 import { BoardAstryx } from "@/components/leads/board-astryx";
 import { CalendarAstryx } from "@/components/leads/calendar-astryx";
 import { MoneyAstryx } from "@/components/leads/money-astryx";
+import { AsideAstryx, LicencesAstryx } from "@/components/leads/lists-astryx";
+import { PanelAstryx, StatsAstryx } from "@/components/leads/numbers-astryx";
+import { DeviceAstryx, HoursAstryx, TemplatesAstryx } from "@/components/leads/setup-astryx";
+import { type Filter } from "@/lib/leads/lead-desk";
 
 type Size = "phone" | "mid" | "wide";
-/** The pages the Astryx desk draws itself; the rest still open the classic desk. */
-type View = "today" | "leads" | "new" | "calendar" | "money";
+/** Every page of the desk. */
+type View = "today" | "leads" | "new" | "calendar" | "money" | "licences" | "aside" | "stats" | "traffic" | "seo" | "hours" | "templates" | "device" | "more";
+const PROOFS = "/admin/proofs/astryx";
+const CLASSIC_HREF = "/admin/leads";
+/** The lower nav groups, and the phone's More page. */
+const GROUPS_MORE: [string, [string, View | string][]][] = [
+  ["Clients", [["Licences", "licences"], ["Proofs", PROOFS], ["Put aside", "aside"]]],
+  ["Numbers", [["Stats", "stats"], ["Traffic", "traffic"], ["SEO", "seo"]]],
+  ["Setup", [["Hours", "hours"], ["Templates", "templates"], ["This device", "device"]]],
+  ["Site", [["Pages and work", "/admin"], ["Classic desk", CLASSIC_HREF]]],
+];
 type Group = "now" | "week" | "waiting";
 
 /* The site's tokens (app/styles/tokens.css): warm near-black, one teal accent; the site's own Inter Tight and Plex Mono. */
@@ -68,7 +81,6 @@ const GROUPS: [Group, string][] = [["now", "Your move"], ["week", "This week"], 
 const ROAD: readonly StageName[] = STAGES.filter((s) => s !== "Lost");
 /** A day from the moment of the swipe or press. */
 const dayOn = () => new Date(Date.now() + 864e5).toISOString();
-const CLASSIC = "/admin/leads";
 const BOARD_STORE = "jg-leads-board";
 const WEEK = 7 * 864e5;
 const fmt = (o: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, ...o });
@@ -122,17 +134,45 @@ function Nav({ needs, view, go }: { needs: number; view: View; go: (v: View) => 
         <SideNavItem label="Calendar" icon={CalendarGlyph} isSelected={view === "calendar"} onClick={() => go("calendar")} />
         <SideNavItem label="Money" icon={MoneyGlyph} isSelected={view === "money"} onClick={() => go("money")} />
       </SideNavSection>
-      <SideNavSection title="Site">
-        <SideNavItem label="Pages and work" href="/admin" />
-        <SideNavItem label="Classic desk" href={CLASSIC} />
-      </SideNavSection>
+      {GROUPS_MORE.map(([title, items]) => (
+        <SideNavSection key={title} title={title}>
+          {items.map(([label, to]) => to.startsWith("/")
+            ? <SideNavItem key={label} label={label} href={to} />
+            : <SideNavItem key={label} label={label} isSelected={view === to} onClick={() => go(to as View)} />)}
+        </SideNavSection>
+      ))}
     </SideNav>
+  );
+}
+
+/** The phone's More tab: everything the side nav holds below the four tabs. */
+function More({ go }: { go: (v: View) => void }) {
+  return (
+    <Layout
+      height="fill"
+      header={<LayoutHeader><Heading level={1} weight="bold">More</Heading></LayoutHeader>}
+      content={
+        <LayoutContent role="main" label="More">
+          <VStack gap={5}>
+            <List hasDividers><ListItem label="Money" onClick={() => go("money")} /><ListItem label="New lead" onClick={() => go("new")} /></List>
+            {GROUPS_MORE.map(([title, items]) => (
+              <VStack key={title} gap={1}>
+                <Eyebrow>{title.toUpperCase()}</Eyebrow>
+                <List hasDividers>
+                  {items.map(([label, to]) => to.startsWith("/") ? <ListItem key={label} label={label} href={to} /> : <ListItem key={label} label={label} onClick={() => go(to as View)} />)}
+                </List>
+              </VStack>
+            ))}
+          </VStack>
+        </LayoutContent>
+      }
+    />
   );
 }
 
 function TabBar({ view, go }: { view: View; go: (v: View) => void }) {
   // A view id switches in place; an href still opens the classic desk.
-  const tabs: [string, React.ComponentType<React.SVGProps<SVGSVGElement>>, View | string][] = [["Today", HomeGlyph, "today"], ["Leads", InboxGlyph, "leads"], ["Calendar", CalendarGlyph, "calendar"], ["More", MoreGlyph, CLASSIC]];
+  const tabs: [string, React.ComponentType<React.SVGProps<SVGSVGElement>>, View | string][] = [["Today", HomeGlyph, "today"], ["Leads", InboxGlyph, "leads"], ["Calendar", CalendarGlyph, "calendar"], ["More", MoreGlyph, "more"]];
   return (
     <HStack gap={0} paddingBlockEnd={1}>
       {tabs.map(([label, glyph, to]) => {
@@ -161,6 +201,7 @@ export function LeadsAstryx() {
   const [screen, setScreen] = React.useState<View>("today");
   const [fresh, setFresh] = React.useState<Lead | null>(null);
   const [calTab, setCalTab] = React.useState<"bookings" | "availability">("bookings");
+  const [asideTab, setAsideTab] = React.useState<Filter>("snoozed");
   // List or Board, kept on this device under the classic desk's key. The desk draws nothing until mounted (see `mode`), so no hydration gap.
   const [board, setBoardState] = React.useState(() => typeof window !== "undefined" && (() => { try { return localStorage.getItem(BOARD_STORE) === "1"; } catch { return false; } })());
   const setBoard = (on: boolean) => { setBoardState(on); try { localStorage.setItem(BOARD_STORE, on ? "1" : "0"); } catch {} };
@@ -357,7 +398,24 @@ export function LeadsAstryx() {
     setScreen("leads");
     setOpen(id);
   };
-  const page = lead ?? (screen === "money" ? <MoneyAstryx /> : screen === "calendar" ? <CalendarAstryx leads={live.filter((l) => !l.archivedAt)} size={size} open={(l) => setOpen(l.id ?? null)} tab={calTab} setTab={setCalTab} /> : screen === "new" ? <NewLeadAstryx call={call} leads={live} size={size} done={added} open={(l) => setOpen(l.id ?? null)} cancel={() => show("leads")} /> : screen === "today" && leads ? <TodayAstryx leads={live} size={size} open={(l) => setOpen(l.id ?? null)} show={() => show("leads")} /> : home);
+  const openLead = (l: LeadSummary) => setOpen(l.id ?? null);
+  const signOut = () => {
+    try { localStorage.removeItem(KEY_STORE); localStorage.removeItem(TOKEN_STORE); } catch {}
+    setLeads(null);
+    setError("Not authorized.");
+  };
+  const pages: Partial<Record<View, React.ReactNode>> = {
+    licences: <LicencesAstryx leads={live} open={openLead} />,
+    aside: <AsideAstryx leads={leads ?? []} call={call} open={openLead} done={() => { setOpen(null); load(); }} tab={asideTab} setTab={setAsideTab} />,
+    stats: <StatsAstryx call={call} />,
+    traffic: <PanelAstryx which="traffic" />,
+    seo: <PanelAstryx which="seo" />,
+    hours: <HoursAstryx />,
+    templates: <TemplatesAstryx call={call} templates={templates} saved={setTemplates} />,
+    device: <DeviceAstryx call={call} reload={load} signOut={signOut} />,
+    more: <More go={show} />,
+  };
+  const page = lead ?? pages[screen] ?? (screen === "money" ? <MoneyAstryx /> : screen === "calendar" ? <CalendarAstryx leads={live.filter((l) => !l.archivedAt)} size={size} open={(l) => setOpen(l.id ?? null)} tab={calTab} setTab={setCalTab} /> : screen === "new" ? <NewLeadAstryx call={call} leads={live} size={size} done={added} open={(l) => setOpen(l.id ?? null)} cancel={() => show("leads")} /> : screen === "today" && leads ? <TodayAstryx leads={live} size={size} open={(l) => setOpen(l.id ?? null)} show={() => show("leads")} /> : home);
   if (!mode) return null;
   return (
     <Theme theme={leadsTheme} mode={mode}>
