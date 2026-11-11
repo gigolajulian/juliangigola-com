@@ -177,11 +177,7 @@ export default function AdminPage() {
         initialHidden={[...HIDDEN]}
         initialUnlisted={[...UNLISTED]}
         initialTrash={TRASH}
-        initialRecategorised={RECATEGORISED}
-        initialReframed={REFRAMED}
-        initialRecredited={RECREDITED}
-        initialRecopied={RECOPIED}
-        initialReslugged={SLUGS}
+        initialOverrides={{ categories: RECATEGORISED, frames: REFRAMED, credits: RECREDITED, copy: RECOPIED, slugs: SLUGS }}
         /* The running order and the picked discipline covers, as the last
            build applied them. Spread rather than passed through, because
            both are frozen reads of the content file and the editor holds
