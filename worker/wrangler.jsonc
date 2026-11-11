@@ -23,7 +23,8 @@
 
   // The day-before reminders (`index.ts` `remind`): bookings 23 to 24 hours out.
   // Every ten minutes: hello@'s Gmail into leads (`syncMail`, through SITE).
-  "triggers": { "crons": ["0 * * * *", "*/10 * * * *"] },
+  // Mondays 16:00 and 17:00 UTC: the week to hello@ (`weekly`), sent at whichever is 9 AM Pacific.
+  "triggers": { "crons": ["0 * * * *", "*/10 * * * *", "0 16,17 * * 1"] },
   "services": [{ "binding": "SITE", "service": "juliangigola" }],
   "send_email": [{ "name": "CLIENT_EMAIL", "allowed_sender_addresses": ["book@juliangigola.com"] }],
 

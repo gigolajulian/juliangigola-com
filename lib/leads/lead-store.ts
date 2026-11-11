@@ -15,6 +15,22 @@ export async function readLead(kv: KV, s: Sealer, id: string): Promise<Lead | nu
   return raw ? s.open<Lead>(raw) : null;
 }
 
+/** Every lead, opened in full: for the numbers and the export, never the list. */
+export async function everyLead(inbox: KV, seal: Sealer) {
+  const out: (Lead & { id?: string })[] = [];
+  let after: string | undefined;
+  for (;;) {
+    const listed = await inbox.list({ prefix: "lead:", cursor: after });
+    for (const k of listed.keys) {
+      const l = await readLead(inbox, seal, k.name.slice(5));
+      if (l) out.push(Object.assign(l, { id: k.name.slice(5) }));
+    }
+    if (listed.list_complete) break;
+    after = listed.cursor;
+  }
+  return out;
+}
+
 /** Bytes the sealed summary may take: KV metadata holds 1024, as JSON. */
 const META_MAX = 1000;
 /** What a summary gives up, in order, when non-Latin text makes it too big:
