@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { cardPrice, type PublicProof } from "@/lib/proofs";
+import { cardPrice, THUMB_W, type PublicProof } from "@/lib/proofs";
 import { looksLikeEmail } from "@/lib/inbox";
 import { ProofWall } from "@/components/proof-wall";
 
@@ -117,6 +117,10 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
   const due = balDue + Math.max(0, extra - (price ? Math.floor(paidPastBal / (price * 100)) : 0)) * price;
   const byId = React.useMemo(() => new Map(frames.map((f, i) => [f.id, i])), [frames]);
   const src = (id: string) => `/proof/${token}/f/${encodeURIComponent(id)}`;
+  // The 800px copy for the grid and the walls; the lightbox keeps the whole frame.
+  const thumb = (id: string) => `${src(id)}?w=${THUMB_W}`;
+  // One array for the wall: a new one every render rebuilt the wall under its own landing (its columns and fades reset).
+  const wallFrames = React.useMemo(() => frames.map((f) => ({ src: `/proof/${token}/f/${encodeURIComponent(f.id)}?w=${THUMB_W}`, w: f.w, h: f.h })), [frames, token]);
 
   const post = React.useCallback((b: Record<string, unknown>) => fetch(`/api/proof/${token}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(b) }), [token]);
 
@@ -266,7 +270,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
     return (
       <div className="proof">
         <Top view={view} setView={setView} n={0} included={included} due={0} hideTabs />
-        <Gate frames={frames.slice(0, 12).map((f) => src(f.id))} count={frames.length} onEnter={(name, address) => {
+        <Gate frames={frames.slice(0, 12).map((f) => thumb(f.id))} count={frames.length} onEnter={(name, address) => {
             setHello(name.split(/\s+/)[0]);
             enter(address, name);
           }} />
@@ -377,8 +381,8 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
       {wall ? (
         <div className="proof-intro">
           <p className="proof-lab">Proofs · {frames.length} frames · {included} included</p>
-          {/* One line; a long name wraps it to two (--len sizes the type to the line). */}
-          <h1 style={{ "--len": (hello ? `Hey ${hello}, pick your proofs below.` : "Pick your proofs.").length } as React.CSSProperties}>
+          {/* Sized for the greeting from the start (--len), so the line that swaps in on Open proofs does not move the grid. */}
+          <h1 style={{ "--len": 38 } as React.CSSProperties}>
             {hello ? `Hey ${hello}, pick your proofs below.` : "Pick your proofs."}
           </h1>
         </div>
@@ -396,7 +400,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
             return (
               <div key={f.id} data-id={f.id} className="proof-cell" data-on={at >= 0 || undefined}>
                 {/* eslint-disable-next-line @next/next/no-img-element -- private frames from the Worker, not the image CDN */}
-                <img src={src(f.id)} alt="" loading={i < 8 ? "eager" : "lazy"} width={f.w || undefined} height={f.h || undefined} draggable={false} />
+                <img src={thumb(f.id)} alt="" loading={i < 8 ? "eager" : "lazy"} width={f.w || undefined} height={f.h || undefined} draggable={false} />
                 <button type="button" className="proof-pick" aria-pressed={at >= 0} aria-label={`Frame ${i + 1}`} onClick={() => toggle(f.id)} />
                 <span className="proof-no">{pad(i)}</span>
                 <span className="proof-mark">{at >= 0 ? at + 1 : ""}</span>
@@ -462,7 +466,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
 
       {walling ? (
         <ProofWall
-          frames={frames.map((f) => ({ src: src(f.id), w: f.w, h: f.h }))}
+          frames={wallFrames}
           grid={gridEl}
           isEmail={isEmail}
           onAccept={(name, address) => {
@@ -619,6 +623,7 @@ function Gate({ frames, count, onEnter }: { frames: string[]; count: number; onE
           <img key={i} src={u} alt="" />
         ))}
       </div>
+      {/* No `name` on the fields: a tap before the script runs submits natively, and would put the client's name and email in the URL. */}
       <form
         className="proof-card"
         onSubmit={(e) => {
@@ -635,14 +640,14 @@ function Gate({ frames, count, onEnter }: { frames: string[]; count: number; onE
         </div>
         <label>
           <span className="proof-lab">Your name</span>
-          <input name="name" autoComplete="name" required value={name} onChange={(e) => { setName(e.target.value); setBad(null); }} placeholder="Your name" aria-invalid={bad === "Add your name." || undefined} />
+          <input autoComplete="name" required value={name} onChange={(e) => { setName(e.target.value); setBad(null); }} placeholder="Your name" aria-invalid={bad === "Add your name." || undefined} />
         </label>
         <label>
           <span className="proof-lab">Your email</span>
-          <input type="email" name="email" inputMode="email" autoComplete="email" required value={value} onChange={(e) => { setValue(e.target.value); setBad(null); }} placeholder="you@email.com" aria-invalid={(!!bad && bad !== "Add your name.") || undefined} />
+          <input type="email" inputMode="email" autoComplete="email" required value={value} onChange={(e) => { setValue(e.target.value); setBad(null); }} placeholder="you@email.com" aria-invalid={(!!bad && bad !== "Add your name.") || undefined} />
         </label>
         {bad ? <p className="proof-err" role="alert">{bad}</p> : null}
-        <button type="submit" className="proof-btn">Open gallery</button>
+        <button type="submit" className="proof-btn" data-off={!name.trim() || !isEmail(value) || undefined}>Open gallery</button>
         <p className="proof-mu">Keep track of your favorites.</p>
       </form>
     </div>
