@@ -37,8 +37,11 @@ import { TZ } from "@/lib/booking/booking-rules";
 import { KEY_STORE, TOKEN_STORE } from "@/lib/admin/admin-github";
 import { leadSummary, shootTag, STAGES, type Lead, type LeadPatch, type LeadSummary, type Stage as StageName } from "@/lib/leads/leads";
 import { useRouter } from "next/navigation";
+import { TodayAstryx } from "@/components/leads/today-astryx";
 
 type Size = "phone" | "mid" | "wide";
+/** The pages the Astryx desk draws itself; the rest still open the classic desk. */
+type View = "today" | "leads";
 type Group = "now" | "week" | "waiting";
 
 /* The site's tokens (app/styles/tokens.css): warm near-black, one teal accent; the site's own Inter Tight and Plex Mono. */
@@ -105,12 +108,12 @@ function Stage({ l }: { l: LeadSummary }) {
   );
 }
 
-function Nav({ needs }: { needs: number }) {
+function Nav({ needs, view, go }: { needs: number; view: View; go: (v: View) => void }) {
   return (
     <SideNav header={<SideNavHeading heading="Desk" subheading="juliangigola.com" />}>
       <SideNavSection title="Desk" isHeaderHidden>
-        <SideNavItem label="Today" icon={HomeGlyph} href={CLASSIC} />
-        <SideNavItem label="Leads" icon={InboxGlyph} isSelected endContent={<Text type="code" size="xsm">{needs}</Text>} />
+        <SideNavItem label="Today" icon={HomeGlyph} isSelected={view === "today"} onClick={() => go("today")} />
+        <SideNavItem label="Leads" icon={InboxGlyph} isSelected={view === "leads"} onClick={() => go("leads")} endContent={<Text type="code" size="xsm">{needs}</Text>} />
         <SideNavItem label="Calendar" icon={CalendarGlyph} href={`${CLASSIC}?calendar`} />
         <SideNavItem label="Money" href={CLASSIC} />
       </SideNavSection>
@@ -122,18 +125,23 @@ function Nav({ needs }: { needs: number }) {
   );
 }
 
-function TabBar() {
-  const tabs: [string, React.ComponentType<React.SVGProps<SVGSVGElement>>, string | null][] = [["Today", HomeGlyph, CLASSIC], ["Leads", InboxGlyph, null], ["Calendar", CalendarGlyph, `${CLASSIC}?calendar`], ["More", MoreGlyph, CLASSIC]];
+function TabBar({ view, go }: { view: View; go: (v: View) => void }) {
+  // A view id switches in place; an href still opens the classic desk.
+  const tabs: [string, React.ComponentType<React.SVGProps<SVGSVGElement>>, View | string][] = [["Today", HomeGlyph, "today"], ["Leads", InboxGlyph, "leads"], ["Calendar", CalendarGlyph, `${CLASSIC}?calendar`], ["More", MoreGlyph, CLASSIC]];
   return (
     <HStack gap={0} paddingBlockEnd={1}>
-      {tabs.map(([label, glyph, href]) => (
+      {tabs.map(([label, glyph, to]) => {
+        const href = to.startsWith("/") ? to : undefined;
+        const on = to === view;
+        return (
         <StackItem key={label} size="fill">
           <VStack gap={0} hAlign="center">
-            <IconButton label={label} variant="ghost" href={href ?? undefined} icon={<Icon icon={glyph} color={href ? "secondary" : "accent"} />} />
-            <Text type="supporting" size="2xs" color={href ? "secondary" : "accent"}>{label}</Text>
+            <IconButton label={label} variant="ghost" href={href} onClick={href ? undefined : () => go(to as View)} icon={<Icon icon={glyph} color={on ? "accent" : "secondary"} />} />
+            <Text type="supporting" size="2xs" color={on ? "accent" : "secondary"}>{label}</Text>
           </VStack>
         </StackItem>
-      ))}
+        );
+      })}
     </HStack>
   );
 }
@@ -144,6 +152,9 @@ export function LeadsAstryx() {
   const [query, setQuery] = React.useState("");
   const [pick, setPick] = React.useState<string | null>(null);
   const [open, setOpen] = React.useState<string | null>(null);
+  // Today first, as on the classic desk.
+  const [screen, setScreen] = React.useState<View>("today");
+  const show = (v: View) => { setScreen(v); setOpen(null); };
   const [templates, setTemplates] = React.useState<Template[]>([]);
   // When the list was loaded: groups by date without reading the clock during render.
   const [at, setAt] = React.useState(0);
@@ -348,7 +359,7 @@ export function LeadsAstryx() {
     />
   ) : null;
 
-  const page = lead ?? home;
+  const page = lead ?? (screen === "today" && leads ? <TodayAstryx leads={live} size={size} open={(l) => setOpen(l.id ?? null)} show={() => show("leads")} /> : home);
   if (!mode) return null;
   return (
     <Theme theme={leadsTheme} mode={mode}>
@@ -357,8 +368,8 @@ export function LeadsAstryx() {
       <style>{":root [data-astryx-desk][data-astryx-desk] *,:root [data-astryx-desk][data-astryx-desk] ::placeholder{text-transform:none}[data-astryx-desk] [data-detail-back]{display:none}"}</style>
       <div data-astryx-desk="" style={{ height: "100dvh", textTransform: "none", letterSpacing: "normal" }}>
         {size === "phone"
-          ? <Layout height="fill" content={page} footer={<TabBar />} />
-          : <Layout height="fill" start={<Nav needs={needs} />} content={page} />}
+          ? <Layout height="fill" content={page} footer={<TabBar view={screen} go={show} />} />
+          : <Layout height="fill" start={<Nav needs={needs} view={screen} go={show} />} content={page} />}
       </div>
     </Theme>
   );
