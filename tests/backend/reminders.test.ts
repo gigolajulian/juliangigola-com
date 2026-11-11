@@ -1,8 +1,12 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FakeEmail, FakeStore, fakeLock } from "./fakes";
 import { saveBooking, type BookingRecord } from "@/lib/booking-engine";
 import { BookingLock } from "@/worker/booking-lock";
 import { remind } from "@/worker/index";
+
+// Pinned clock: weekday hours, DST and the 48h refund window must not depend on the day the suite runs.
+vi.useFakeTimers({ toFake: ["Date"] });
+vi.setSystemTime(new Date("2026-11-11T20:00:00Z")); // a Wednesday, noon in San Jose
 
 /* The hourly cron in the lock Worker (`worker/index.ts`): a reminder goes
    to each live booking 23 to 24 hours out, once; a booking made inside its
