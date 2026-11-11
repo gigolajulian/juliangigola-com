@@ -82,8 +82,7 @@ describe("adoptable", () => {
     expect(m.covers).toEqual({ kept: "/k.jpg" });
   });
 
-  // Bug: `listMap(file.frames) ?? {}` makes a wrong-shape `frames` or `credits` read as {} and never reach the fallback.
-  it.skip("keeps the fallback frames when the file's frames are the wrong shape", () => {
+  it("keeps the fallback frames when the file's frames are the wrong shape", () => {
     const m = adoptable({ projects: [], trash: [], frames: { a: "not a list" } } as never, { ...empty(), frames: { a: ["/kept.jpg"] } });
     expect(m.frames).toEqual({ a: ["/kept.jpg"] });
   });
