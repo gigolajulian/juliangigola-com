@@ -17,7 +17,7 @@ html:has(.proof) #main{transform:none}
 .proof-tabs button:first-child{z-index:1}
 .proof-tabs button{position:relative;padding:4px 0;border-bottom:1px solid transparent;transition:color .15s}
 /* 44px to the finger without moving the line: the hit area grows, the type does not */
-.proof-tabs button::before,.proof-close::before,.proof-zoom::before{content:"";position:absolute;left:50%;top:50%;width:max(100% + 16px,44px);height:max(100% + 22px,44px);transform:translate(-50%,-50%)}
+.proof-tabs button::before,.proof-close::before,.proof-sort button::before{content:"";position:absolute;left:50%;top:50%;width:max(100% + 16px,44px);height:max(100% + 22px,44px);transform:translate(-50%,-50%)}
 .proof-tabs button:hover,.proof-tabs button[data-on]{color:var(--foreground)}
 .proof-tabs button[data-on]{border-color:var(--foreground)}
 .proof-pill{display:inline-block;min-width:20px;padding:1px 6px;margin-left:4px;text-align:center;border:1px solid var(--p-hl);transition:background .2s,color .2s,border-color .2s}
@@ -36,16 +36,29 @@ html:has(.proof) #main{transform:none}
 .proof-cell:active img{transform:scale(.985)}
 .proof-cell[data-on]{outline-color:var(--accent)}
 .proof-cell[data-on] img{opacity:.72}
-.proof-cell:has(.proof-pick:focus-visible){outline-color:var(--foreground)}
-.proof .proof-pick{position:absolute;inset:0;width:100%;outline:0}
-.proof-no,.proof-mark{pointer-events:none}
-.proof-no{position:absolute;left:10px;bottom:9px;font:11px var(--p-mono);color:rgba(255,255,255,.8);text-shadow:0 1px 6px rgba(0,0,0,.6)}
-.proof-mark{position:absolute;right:10px;top:10px;width:24px;height:24px;border:1px solid rgba(255,255,255,.75);border-radius:50%;display:grid;place-items:center;font:500 11px var(--p-mono);color:#fff;background:rgba(0,0,0,.2);opacity:0;transform:scale(.8);transition:opacity .15s,transform .2s cubic-bezier(.2,.7,.2,1),background .15s}
-.proof-cell:hover .proof-mark,.proof-cell[data-on] .proof-mark{opacity:1;transform:none}
-.proof-cell[data-on] .proof-mark{background:var(--accent);border-color:var(--accent);color:var(--background)}
-.proof-zoom{position:absolute;z-index:1;right:6px;bottom:4px;padding:4px!important;font:11px var(--p-mono)!important;color:rgba(255,255,255,.8)!important;opacity:0;transition:opacity .15s}
-.proof-cell:hover .proof-zoom,.proof-zoom:focus-visible{opacity:1}
-@media (hover:none){.proof-mark,.proof-zoom{opacity:.9;transform:none}}
+.proof-cell:has(.proof-open:focus-visible){outline-color:var(--foreground)}
+/* Julian 2026-11-11: the photo opens, the ring in its corner picks (a 44px square around a 24px ring). */
+.proof .proof-open{position:absolute;inset:0;width:100%;outline:0;cursor:zoom-in}
+.proof .proof-mark{position:absolute;z-index:1;right:0;top:0;width:44px;height:44px;display:grid;place-items:center;outline:0}
+.proof-no{pointer-events:none}
+/* Black on a light corner, white on a dark one (lightCorners in proof-gallery.tsx reads each thumbnail once). */
+.proof-no{position:absolute;left:10px;bottom:9px;font:11px var(--p-mono);color:#fff}
+.proof-cell[data-light-no] .proof-no{color:#0b0a09}
+.proof-mark i{width:24px;height:24px;border:1.5px solid #fff;border-radius:50%;display:grid;place-items:center;font:500 11px var(--p-mono);font-style:normal;color:#fff;background:rgba(0,0,0,.18);transition:transform .2s cubic-bezier(.2,.7,.2,1),background .15s,border-color .15s}
+.proof-cell[data-light-ring] .proof-mark i{border-color:#0b0a09;background:rgba(255,255,255,.2)}
+.proof-mark:hover i{transform:scale(1.1)}
+.proof-mark:active i{transform:scale(.92)}
+.proof-mark:focus-visible i{box-shadow:0 0 0 2px var(--background),0 0 0 4px var(--foreground)}
+.proof-cell[data-on] .proof-mark i{background:var(--accent);border-color:var(--accent);color:var(--background)}
+/* the order line over the grid, and a look's heading across it */
+.proof-sort{display:flex;gap:20px;padding:0 28px 16px;font:12px var(--p-mono);color:var(--muted-foreground);letter-spacing:.04em}
+.proof .proof-sort button{position:relative;padding:4px 0;transition:color .15s}
+.proof .proof-sort button:hover:not(:disabled),.proof .proof-sort button[aria-pressed="true"]{color:var(--foreground)}
+.proof .proof-sort button[aria-pressed="true"]{text-decoration:underline;text-underline-offset:5px}
+.proof .proof-sort button:disabled{opacity:.35;cursor:default}
+.proof-look{grid-column:1/-1;display:flex;justify-content:space-between;gap:12px;margin:0;padding:26px 8px 8px;font:11px var(--p-mono);color:var(--muted-foreground);letter-spacing:.06em}
+.proof-look:first-child{padding-top:4px}
+.proof-look b{font-weight:500;color:var(--foreground);letter-spacing:.14em;text-transform:uppercase}
 
 .proof-sel{padding:0 28px 170px}
 .proof-empty{font:13px/1.65 var(--p-mono);color:var(--muted-foreground);padding:60px 0;border-top:1px solid var(--p-hl);margin:0}
@@ -63,6 +76,7 @@ html:has(.proof) #main{transform:none}
 .proof-bar{position:fixed;left:0;right:0;bottom:0;z-index:7;display:flex;align-items:center;gap:18px;justify-content:space-between;padding:16px 28px calc(16px + env(safe-area-inset-bottom));background:color-mix(in oklab,var(--background) 94%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-top:1px solid var(--p-hl);font:13px var(--p-mono);transition:transform .35s cubic-bezier(.2,.7,.2,1),opacity .25s}
 .proof-bar[data-empty]{transform:translateY(100%);opacity:0;pointer-events:none}
 .proof-sum{color:var(--muted-foreground);margin:0}
+.proof-sum-s{display:none}
 .proof-sum b{font-weight:500;color:var(--foreground)}
 .proof-acts{display:flex;gap:8px;flex-wrap:wrap}
 .proof .proof-btn{font:500 12px var(--p-mono);letter-spacing:.12em;text-transform:uppercase;padding:13px 18px;border:1px solid var(--foreground);background:var(--foreground);color:var(--background);white-space:nowrap;min-height:44px}
@@ -71,7 +85,6 @@ html:has(.proof) #main{transform:none}
 
 .proof-lb{position:fixed;inset:0;z-index:40;background:#060605;color:#f1f0ed;display:flex;flex-direction:column}
 .proof-close{position:relative}
-.proof-zoom::before{left:auto;top:auto;right:-6px;bottom:-4px;width:max(100% + 18px,44px);height:max(100% + 22px,44px);transform:none}
 .proof-lt{display:flex;justify-content:space-between;padding:16px 22px;font:12px var(--p-mono);color:#92908d}
 .proof-li{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;position:relative;padding:0 56px}
 .proof-li img{max-width:100%;max-height:100%;object-fit:contain}
@@ -92,6 +105,8 @@ html:has(.proof) #main{transform:none}
 .proof-files i{font-style:normal;color:var(--foreground)}
 .proof-err{font:13px var(--p-mono);color:var(--destructive,#c0392b);margin:0 0 16px}
 .proof-stripe{margin-top:18px;font:11px var(--p-mono);color:var(--muted-foreground)}
+/* by the Send and Pay buttons, where it is read before the tap */
+.proof-lock{font:12px var(--p-mono);color:var(--muted-foreground);margin:-6px 0 20px}
 
 /* gate: the first frames, lightly blurred, under a frosted card (Julian 2026-11-08: glass, less blur) */
 .proof-gate{position:relative;min-height:calc(100svh - 57px);overflow:hidden}
@@ -159,11 +174,16 @@ html:has(.proof) #main{transform:none}
   .proof-tabs{justify-self:end;gap:16px}
   .proof-word{font-size:16px}
   .proof-intro{padding-left:18px;padding-right:18px}
-  .proof-grid{grid-template-columns:repeat(2,1fr);gap:3px;padding:0 3px 170px}
+  .proof-grid{grid-template-columns:repeat(2,1fr);gap:3px;padding:0 3px 110px}
   .proof-sel{padding:0 18px 190px}
   .proof-srow{grid-template-columns:84px 1fr auto;gap:12px}
   .proof-srow img{width:84px;height:106px}
-  .proof-bar{flex-direction:column;align-items:stretch;gap:12px;padding:14px 18px calc(18px + env(safe-area-inset-bottom))}
+  /* one row: 'n / 10 · $x' and Send; the header's Selects tab does what View selects did */
+  .proof-bar{gap:14px;padding:10px 14px calc(10px + env(safe-area-inset-bottom))}
+  .proof-sum-l,.proof-vsel{display:none}
+  .proof-sum-s{display:inline;white-space:nowrap}
+  .proof-bar .proof-acts{flex:1;justify-content:flex-end}
+  .proof-sort{padding-left:18px;padding-right:18px}
   .proof-acts .proof-btn{flex:1;text-align:center}
   .proof-li{padding:0}
   .proof-arr{display:none}
@@ -261,10 +281,10 @@ html:has(.proof[data-wall])::-webkit-scrollbar{display:none}
 .proof[data-wall] .proof-intro h1{font:500 clamp(20px,calc((100cqi - 56px) / (var(--len,17) * .5)),44px)/1.1 var(--font-display);letter-spacing:-.025em;margin:10px 0 0;text-wrap:balance}
 /* the grid is laid out from the start; on accept its first screen flies out of the wall */
 .proof[data-wall="gate"] .proof-grid{visibility:hidden}
-.proof[data-wall] :is(.proof-intro,.proof-tabs,.proof-meta){transition:opacity .42s cubic-bezier(.23,1,.32,1)}
-.proof[data-wall="gate"] :is(.proof-intro,.proof-tabs,.proof-meta){opacity:0}
-.proof[data-wall="settle"] :is(.proof-intro,.proof-tabs,.proof-meta){transition-delay:.35s}
-.proof[data-wall="on"] .proof-cell :is(.proof-no,.proof-zoom){animation:pw-in .3s ease-out backwards}
+.proof[data-wall] :is(.proof-intro,.proof-sort,.proof-tabs,.proof-meta){transition:opacity .42s cubic-bezier(.23,1,.32,1)}
+.proof[data-wall="gate"] :is(.proof-intro,.proof-sort,.proof-tabs,.proof-meta){opacity:0}
+.proof[data-wall="settle"] :is(.proof-intro,.proof-sort,.proof-tabs,.proof-meta){transition-delay:.35s}
+.proof[data-wall="on"] .proof-cell :is(.proof-no,.proof-mark){animation:pw-in .3s ease-out backwards}
 @keyframes pw-in{from{opacity:0}}
 /* the navbar in the 404's glass (v3.css .site-hdr) */
 .proof[data-wall] .proof-top{background:color-mix(in srgb,var(--background) 52%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
