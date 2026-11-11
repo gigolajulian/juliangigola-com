@@ -2,14 +2,14 @@
 
 import * as React from "react";
 import { createPortal } from "react-dom";
-import { type Lead, type LeadSummary } from "@/lib/leads";
+import { type Lead, type LeadSummary } from "@/lib/leads/leads";
 import { cn } from "@/lib/utils";
-import { mailable } from "@/lib/lead-crm";
-import { balance, dayB, DEPOSIT, MAX_ROWS_B, NOTE_B, usd, usdB, type Crop, type Invoice, type InvoiceB, type InvoiceFrom } from "@/lib/invoice";
-import { framed, loadImage, place, shrink, toneFor } from "@/lib/invoice-photo";
-import { adminCall, day, errorText, inboxCall, plusDays, ymdPT } from "@/lib/lead-desk";
+import { mailable } from "@/lib/leads/lead-crm";
+import { balance, dayB, DEPOSIT, MAX_ROWS_B, NOTE_B, usd, usdB, type Crop, type Invoice, type InvoiceB, type InvoiceFrom } from "@/lib/leads/invoice";
+import { framed, loadImage, place, shrink, toneFor } from "@/lib/leads/invoice-photo";
+import { adminCall, day, errorText, inboxCall, plusDays, ymdPT } from "@/lib/leads/lead-desk";
 import { btn, compose, field, fieldLabel, kindOf, primary } from "@/components/leads/shared";
-import type { Patch } from "@/lib/lead-desk";
+import type { Patch } from "@/lib/leads/lead-desk";
 
 /** The PDF of one invoice. Loaded on the tap, fonts and all. A design B one fetches its sealed photo unless `src` is in hand. */
 async function makePdf(inv: Invoice, l: LeadSummary, full: Lead, src?: string) {
@@ -23,7 +23,7 @@ async function makePdf(inv: Invoice, l: LeadSummary, full: Lead, src?: string) {
     }
     photo = await framed(src, inv.b.crop);
   }
-  const { invoicePdf } = await import("@/lib/invoice-pdf");
+  const { invoicePdf } = await import("@/lib/leads/invoice-pdf");
   return invoicePdf({ from, inv, to: { name: l.name, email: mailable(l.email) ? l.email : undefined, phone: full.phone } }, photo);
 }
 
@@ -74,7 +74,7 @@ export function InvoiceRow({ inv, l, full }: { inv: Invoice; l: LeadSummary; ful
  * beside it; the photo is dragged and zoomed inside its column, and the
  * wordmark on it turns light over a dark patch (Julian: "adjust the top
  * left logo based on the photo"). The PDF is drawn by `layoutB` in
- * lib/invoice-pdf.ts from the same numbers. */
+ * lib/leads/invoice-pdf.ts from the same numbers. */
 
 type LineB = { desc: string; sub: string; amt: string };
 

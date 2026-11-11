@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { STARTUP_SCREENS, startupFile, startupImages } from "@/lib/leads-startup";
+import { STARTUP_SCREENS, startupFile, startupImages } from "@/lib/leads/leads-startup";
 
 /* iOS shows a startup screen only for an exact size match: one per size,
    each with its PNG on disk. */

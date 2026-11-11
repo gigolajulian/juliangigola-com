@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { AdminFrames } from "@/components/admin-frames";
+import { AdminFrames } from "@/components/admin/admin-frames";
 
 const original = ["/work/x/01.jpg", "/work/x/02.jpg"];
 

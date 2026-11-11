@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { AdminPreview } from "@/components/admin-preview";
+import { AdminPreview } from "@/components/admin/admin-preview";
 import type { SiteContent } from "@/lib/content";
 
 const draft = {

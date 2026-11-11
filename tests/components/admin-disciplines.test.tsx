@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { AdminDisciplines } from "@/components/admin-disciplines";
-import type { AdminProject } from "@/components/admin-projects";
+import { AdminDisciplines } from "@/components/admin/admin-disciplines";
+import type { AdminProject } from "@/components/admin/admin-projects";
 
 const frame = { src: "/work/a/01.jpg", width: 100, height: 120, color: "#111" };
 const project = (slug: string, categorySlug: string): AdminProject => ({
