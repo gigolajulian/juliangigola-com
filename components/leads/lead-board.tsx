@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { STAGES, type LeadSummary, type Stage } from "@/lib/leads";
+import { STAGES, type LeadSummary, type Stage } from "@/lib/leads/leads";
 import { cn } from "@/lib/utils";
 
 /* ── the pipeline board ───────────────────────────────────────────

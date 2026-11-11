@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FakeKV } from "./fakes";
-import { notify, pushFor, subscribe, unsubscribe } from "@/lib/lead-push";
+import { notify, pushFor, subscribe, unsubscribe } from "@/lib/leads/lead-push";
 
 /* The lead desk's pushes: one row per device, only arrivals ping, a
    device the push service calls gone is forgotten, and nothing throws. */
 
 const sent = vi.hoisted(() => ({ gone: new Set<string>(), calls: [] as string[] }));
-vi.mock("@/lib/web-push", () => ({
+vi.mock("@/lib/leads/web-push", () => ({
   send: async (_secret: string, sub: { endpoint: string }) => {
     sent.calls.push(sub.endpoint);
     return sent.gone.has(sub.endpoint) ? "gone" : "ok";

@@ -1,5 +1,5 @@
 import type { Enquiry } from "@/lib/inbox";
-import type { Paper, Stage } from "@/lib/leads";
+import type { Paper, Stage } from "@/lib/leads/leads";
 
 /* ── leads into Notion ────────────────────────────────────────────
  * Every enquiry and Cal.com booking also lands as a row on the Business

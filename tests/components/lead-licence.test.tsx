@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { endDay, LicenceField, LicenceList } from "@/components/leads/lead-licence";
-import type { Lead, LeadSummary } from "@/lib/leads";
+import type { Lead, LeadSummary } from "@/lib/leads/leads";
 
 const iso = new Date().toISOString();
 const full = { email: "a@x.com", name: "Ana", stage: "Confirmed", stageAt: iso, firstAt: iso, lastAt: iso, unread: false, events: [] } as Lead;

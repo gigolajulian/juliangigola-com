@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FakeKV, LEADS_KEY } from "./fakes";
-import { sealer } from "@/lib/lead-crypto";
+import { sealer } from "@/lib/leads/lead-crypto";
 import { readProof, writeProof, type Proof } from "@/lib/proofs";
 
 const KEY = "inbox-key-for-tests";

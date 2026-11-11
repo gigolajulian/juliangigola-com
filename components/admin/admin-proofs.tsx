@@ -2,8 +2,8 @@
 
 import * as React from "react";
 import { TZ } from "@/lib/booking/booking-rules";
-import { adminCall, errorText } from "@/lib/lead-desk";
-import { canonical } from "@/lib/lead-crypto";
+import { adminCall, errorText } from "@/lib/leads/lead-desk";
+import { canonical } from "@/lib/leads/lead-crypto";
 import { extras, stage, STAGES, type Proof, type Viewer, type ViewerEvent } from "@/lib/proofs";
 import { cn } from "@/lib/utils";
 

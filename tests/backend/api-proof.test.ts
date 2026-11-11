@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { DELETE, GET, PATCH, POST, PUT } from "@/app/api/proof/route";
-import { sealer } from "@/lib/lead-crypto";
+import { sealer } from "@/lib/leads/lead-crypto";
 import { readProof } from "@/lib/proofs";
 import { FakeKV, LEADS_KEY } from "./fakes";
 

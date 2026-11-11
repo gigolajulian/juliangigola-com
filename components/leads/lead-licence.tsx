@@ -1,14 +1,14 @@
 "use client";
 
 import * as React from "react";
-import { renewDue, type Lead, type LeadPatch, type LeadSummary } from "@/lib/leads";
+import { renewDue, type Lead, type LeadPatch, type LeadSummary } from "@/lib/leads/leads";
 import { cn } from "@/lib/utils";
 
 /* ── licences on commercial work ──────────────────────────────────
  * Julian (2026-11-08, CRMO plan, feature 5): usage and an end date,
  * opt-in per lead behind "+ Licence" in Money, so portrait leads never see
  * it. LICENCE_DAYS before the end the lead comes back to Your move with
- * "Renew licence" (`renewDue` in lib/leads.ts). One list, by end date.
+ * "Renew licence" (`renewDue` in lib/leads/leads.ts). One list, by end date.
  * ─────────────────────────────────────────────────────────────── */
 
 type Cls = { btn: string; field: string; label: string };

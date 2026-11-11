@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { adminCall, errorText } from "@/lib/lead-desk";
+import { adminCall, errorText } from "@/lib/leads/lead-desk";
 import { EVENTS, HOURS, TZ } from "@/lib/booking/booking-rules";
 import { startsFor, zoned } from "@/lib/booking/slots";
 import { cn } from "@/lib/utils";

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { adminCall, ymdPT } from "@/lib/lead-desk";
+import { adminCall, ymdPT } from "@/lib/leads/lead-desk";
 import type { Hours, Window } from "@/lib/booking/booking-rules";
 
 /* ── Hours, in the lead desk ──────────────────────────────────────

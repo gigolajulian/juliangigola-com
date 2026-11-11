@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { AdminLeads } from "@/components/admin/admin-leads";
 import { LeadCalendar } from "@/components/leads/lead-calendar";
-import { startupImages } from "@/lib/leads-startup";
+import { startupImages } from "@/lib/leads/leads-startup";
 
 /* ── the lead desk, on its own ────────────────────────────────────
  * Julian (2026-11-03): "a different section, hidden from all seo". The
