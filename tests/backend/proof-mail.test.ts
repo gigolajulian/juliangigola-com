@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { alertLines, proofMail, proofUrl, receiptMail, sendClient } from "@/lib/email/proof-mail";
-import type { Proof } from "@/lib/proofs";
+import type { Proof } from "@/lib/proofs/proof";
 
 /* The proof mails: what the client and Julian read, and the send that
    falls back to a plain copy when the inline frames are refused. */

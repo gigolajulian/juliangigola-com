@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { PATCH, POST } from "@/app/api/proof/[token]/route";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { readLog } from "@/lib/leads/activity-log";
-import { readProof, writeProof, type Proof } from "@/lib/proofs";
+import { readProof, writeProof, type Proof } from "@/lib/proofs/proof";
 import { FakeKV, LEADS_KEY } from "./fakes";
 
 /* /api/proof/[token]: the client's side. The token is the only key: an

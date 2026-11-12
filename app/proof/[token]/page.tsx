@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { sealer } from "@/lib/leads/lead-crypto";
-import { checkPaid, finalize, recheckTransfer } from "@/lib/proof-submit";
+import { checkPaid, finalize, recheckTransfer } from "@/lib/proofs/submit";
 import { PAYMENTS_DOWN } from "@/lib/stripe";
-import { coverFrame, isOpen, isToken, publicView, readPublic, writeProof } from "@/lib/proofs";
-import { ProofGallery } from "@/components/proof-gallery";
-import { CARD } from "@/lib/proof-watermark";
+import { coverFrame, isOpen, isToken, publicView, readPublic, writeProof } from "@/lib/proofs/proof";
+import { ProofGallery } from "@/components/proofs/gallery";
+import { CARD } from "@/lib/proofs/watermark";
 
 /* ── /proof/<token>: a client's private gallery ──────────────────
  * Unlisted: noindex, not in the sitemap, no site header or splash.

@@ -7,7 +7,7 @@
  * option on covers frames already uploaded: each is baked on its first fetch.
  * ─────────────────────────────────────────────────────────────── */
 
-import { cardKey, coverFrame, frameKey, markedKey, THUMB_W, thumbKey, type Proof } from "@/lib/proofs";
+import { cardKey, coverFrame, frameKey, markedKey, THUMB_W, thumbKey, type Proof } from "@/lib/proofs/proof";
 
 /** White Inter Tight 900, rendered at 1600px so it stays sharp on a 2000px frame. */
 export const MARK = { src: "/proof-mark.png", w: 1600, h: 274, opacity: 0.5 } as const;

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import { paidFor } from "@/lib/proof-submit";
-import { cardPrice, cleanNotes, coverFrame, cleanSelects, cleanSettings, extras, isOpen, isToken, lookStarts, newToken, proofDay, proofId, owed, shotOrder, stage } from "@/lib/proofs";
+import { paidFor } from "@/lib/proofs/submit";
+import { cardPrice, cleanNotes, coverFrame, cleanSelects, cleanSettings, extras, isOpen, isToken, lookStarts, newToken, proofDay, proofId, owed, shotOrder, stage } from "@/lib/proofs/proof";
 
 const frames = ["a", "b", "c"].map((id) => ({ id, file: `${id}.jpg`, w: 1, h: 1 }));
 
@@ -100,7 +100,7 @@ describe("proofs", () => {
 
 describe("proof activity log", () => {
   it("logs opens once per device and diffs picks into pick and unpick", async () => {
-    const { track, device } = await import("@/lib/proofs");
+    const { track, device } = await import("@/lib/proofs/proof");
     let v = track(undefined, "t1", { kind: "open", device: "iPhone · Safari", place: "San Jose, CA, US", name: "Maya" });
     expect(v.name).toBe("Maya");
     v = track(v, "t2", { picks: ["a", "b"] });
@@ -125,7 +125,7 @@ describe("bank payments", () => {
     f.mockRestore();
   });
   it("clears or drops a settling payment", async () => {
-    const { recheckTransfer } = await import("@/lib/proof-submit");
+    const { recheckTransfer } = await import("@/lib/proofs/submit");
     const q = { ...p, paid: { session: "cs_test_B", amount: 3000, at: "", pending: true } };
     let f = reply({ payment_status: "paid", amount_total: 3000 });
     expect((await recheckTransfer("sk_test_x", q))?.paid).toMatchObject({ amount: 3000, pending: undefined });
