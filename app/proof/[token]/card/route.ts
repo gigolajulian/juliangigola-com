@@ -1,6 +1,6 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { sealer } from "@/lib/leads/lead-crypto";
-import { isToken, readProof } from "@/lib/proofs";
+import { isToken, findProof } from "@/lib/proofs";
 import { shareCard } from "@/lib/proof-watermark";
 
 /* The gallery's link-preview card (`shareCard`). Only while the gallery is open and watermarked. */
@@ -11,7 +11,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ toke
   const { env } = await getCloudflareContext({ async: true });
   const seal = sealer(env.LEADS_KEY);
   if (!isToken(token) || !env.INBOX || !env.PROOFS || !seal) return new Response("Not found", { status: 404 });
-  const p = await readProof(env.INBOX, await seal, token);
+  const p = await findProof(env.INBOX, await seal, token);
   if (!p) return new Response("Not found", { status: 404 });
   const c = await shareCard(env, p, request.url).catch(() => undefined);
   if (c === undefined) return new Response("Try again shortly", { status: 503, headers: { "retry-after": "5" } });
