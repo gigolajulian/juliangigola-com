@@ -11,6 +11,7 @@ import { notify, subscribe, unsubscribe } from "@/lib/leads/lead-push";
 import { publicKey } from "@/lib/leads/web-push";
 import { notionPaper, notionStage } from "@/lib/leads/notion-lead";
 import { importStripe } from "@/lib/leads/stripe-import";
+import { STRIPE_UNSET } from "@/lib/stripe";
 import { cleanTemplates, manualLead, merge, stats, type NewLead } from "@/lib/leads/lead-crm";
 import { balance, cleanFrom, cleanInvoice, invoiceNo, mmyy, PHOTO_KEY, usd, type InvoiceFrom } from "@/lib/leads/invoice";
 import { bodyOf, json, NO_STORE } from "@/lib/http";
@@ -379,7 +380,7 @@ export async function POST(request: Request) {
   }
   // Past Stripe payments and refunds onto the log (`lib/leads/stripe-import.ts`). Dry, it only counts.
   if (given?.importStripe === true) {
-    if (!gate.env.STRIPE_SECRET_KEY) return json({ error: "Stripe is not set up on the Worker." }, 503);
+    if (!gate.env.STRIPE_SECRET_KEY) return json({ error: STRIPE_UNSET }, 503);
     try {
       return json(await importStripe(gate.env, gate.env.STRIPE_SECRET_KEY, given.dry === true));
     } catch (e) {
