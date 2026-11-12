@@ -1,9 +1,8 @@
 /* The opening and the lift: the splash over the first visit. */
 
 /* ── the opening ──────────────────────────────────────────────────
- * A contact sheet over the page's ground (`intro.tsx`): frames land on a
- * tilted plane from the centre outward, then whoosh up and away while the
- * ground fades to the page.
+ * The wordmark over the page's ground (`burst-splash.ts`), or on the
+ * homepage the split name over the hero (`split-splash.ts`).
  *
  * Hidden unless the script in `layout.tsx` has decided, before the first
  * paint, that this visit gets one. Without that attribute this is
@@ -20,7 +19,7 @@
   display: block;
   overflow: hidden;
 }
-/* The sheet's plane tilts in this space (`intro.tsx`). */
+/* The splash's layer (`burst-splash.ts`, `split-splash.ts`). */
 .jg-sheet-wrap {
   position: absolute;
   inset: 0;
@@ -33,51 +32,6 @@
   inset: 0;
   background: var(--bg);
 }
-/* The grid per screen, in step with `grid()` in `intro.tsx`: a phone
-   4 x 6, a tablet held upright 5 x 6, anything wider 8 x 4. */
-.jg-sheet-plane {
-  position: absolute;
-  inset: 6.3% 5.6% 7.9%;
-  display: grid;
-  gap: 6px;
-  transform-style: preserve-3d;
-}
-@media (min-width: 700px) {
-  .jg-sheet-plane {
-    inset: 8.9% 10.4% 11.6%;
-    gap: 12px;
-  }
-}
-@media (min-width: 700px) and (max-width: 1099px) and (orientation: portrait) {
-  .jg-sheet-plane {
-    inset: 7.5% 7.7% 9.2%;
-    gap: 10px;
-  }
-}
-.jg-sheet-cell {
-  position: relative;
-  overflow: hidden;
-  background: var(--card);
-  opacity: 0;
-  backface-visibility: hidden;
-}
-.jg-sheet-cell img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  opacity: 0;
-}
-/* `?splash=sand` (`sand-splash.ts`): the name, then the hero, in grains
-   over the ground. */
-.jg-sand {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
 /* `?splash=burst` (`burst-splash.ts`): the wordmark in the hero's own
    type (a third of the hero's size on a wider screen, Julian), its
    letters rising out of each word's line; then the frames. */
@@ -281,28 +235,6 @@ html[data-sb]:is([data-intro], [data-landing])::after {
   visibility: hidden;
 }
 
-/* The mark is the `?splash=basic` preview's alone. */
-.jg-intro-mark {
-  display: none;
-}
-[data-splash="basic"] .jg-sheet-wrap {
-  display: none;
-}
-[data-splash="basic"] .jg-intro-mark {
-  display: block;
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  translate: -50% -50%;
-  width: clamp(4.5rem, 8vw, 7rem);
-  aspect-ratio: 1;
-  color: #fff;
-  mix-blend-mode: difference;
-}
-.jg-intro-mark svg {
-  width: 100%;
-  height: 100%;
-}
 /* An orb that only shows if the wait is long enough to need one
    (`lightbox.tsx`). */
 .orb-late {
@@ -365,68 +297,5 @@ html[data-sb]:is([data-intro], [data-landing])::after {
   to {
     --lift-clip: 0;
     clip-path: inset(0 0 calc(var(--lift-clip) * 1%) 0);
-  }
-}
-
-/* `?splash=basic` (`intro.tsx`): the JG mark alone on the page ground, no
-   sweep, no shadow on the lift. */
-[data-splash="basic"][data-intro] #jg-intro {
-  background: var(--background);
-  color: var(--foreground);
-}
-[data-splash="basic"] #jg-intro::before {
-  display: none;
-}
-[data-splash="basic"] #jg-intro.jg-intro-open {
-  box-shadow: none;
-}
-/* Julian: the mark swipes in, top to bottom, from the first paint.
-   basicagency's mask: the box slides down from above while the mark
-   inside slides up by as much, so it holds still and is uncovered from
-   the top. Two transforms, so it runs off the main thread while the
-   page loads under it (a `clip-path` stalled there). */
-[data-splash="basic"][data-intro] .jg-intro-mark {
-  overflow: hidden;
-  animation: jg-intro-swipe 500ms cubic-bezier(0.28, 0, 0.49, 1) both;
-}
-[data-splash="basic"][data-intro] .jg-intro-mark svg {
-  animation: jg-intro-swipe-in 500ms cubic-bezier(0.28, 0, 0.49, 1) both;
-}
-@keyframes jg-intro-swipe {
-  from {
-    transform: translateY(-100%);
-  }
-}
-@keyframes jg-intro-swipe-in {
-  from {
-    transform: translateY(100%);
-  }
-}
-/* At 500ms from the first paint the script in `layout.tsx` sets
-   `half`: the layer lifts off the top while the first screen slides up
-   in under it, then the header's logo and each item fade and rise,
-   500ms each, 25ms apart. It clears both attributes 1.2s later, once
-   all of it has played. */
-[data-splash="basic"][data-intro="half"] #jg-intro {
-  pointer-events: none;
-  animation: jg-basic-out 500ms cubic-bezier(0.28, 0, 0.49, 1) forwards;
-}
-@keyframes jg-basic-out {
-  to {
-    transform: translateY(-100%);
-  }
-}
-[data-splash="basic"][data-intro="half"] main {
-  animation: jg-basic-in 1000ms cubic-bezier(0.72, 0, 0.28, 1) backwards;
-}
-@keyframes jg-basic-in {
-  from {
-    transform: translateY(100%);
-  }
-}
-@keyframes jg-basic-rise {
-  from {
-    opacity: 0;
-    transform: translateY(100%);
   }
 }

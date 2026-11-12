@@ -172,14 +172,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
 
             Three conditions (the first page of a visit, whichever it is,
             but not /admin; not seen yet; motion not turned down), and
-            `?intro=1` to see it again on demand. `?splash=basic` plays
-            the basicagency.com preview instead (`intro.tsx`). On the
-            homepage the opening is J and G round a window of frames
-            (`split-splash.ts`, Julian 2026-11-07), which opens into the
-            hero; `?splash=burst` keeps the burst (2026-10-28). Other pages have no hero
-            to land on and their own photographs to show, so they get the
-            name alone (`data-splash="name"`, 2026-10-30); `?splash=sheet`
-            keeps the contact sheet.
+            `?intro=1` to see it again on demand. On the homepage the
+            opening is J and G round a window of frames (`split-splash.ts`,
+            Julian 2026-11-07), which opens into the hero; `?splash=burst`
+            keeps the burst (2026-10-28). Other pages have no hero to land
+            on and their own photographs to show, so they get the name
+            alone (`data-splash="name"`, 2026-10-30).
             `sessionStorage` throws outright in some privacy modes rather
             than returning null, so the whole thing is wrapped and a
             failure simply means no opening.
@@ -189,7 +187,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             `?mplan=rm,pages` keeps only those (motion-plan.css). */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var kp="jg-mplan",mp=(location.search.match(/[?&]mplan=([a-z0-9,-]+)/)||[])[1];if(mp)sessionStorage.setItem(kp,mp==="0"?"0":mp.split(",").join(" "));mp=sessionStorage.getItem(kp)||"rm pages exits hover scroll reveal keys still touch splash layout";if(mp!=="0")document.documentElement.dataset.mplan=mp}catch(e){}var mo=true;try{var k3="jg-v3motion-off",q3=location.search;if(/[?&]v3motion=0/.test(q3))sessionStorage.setItem(k3,"1");else if(/[?&]v3motion/.test(q3))sessionStorage.removeItem(k3);mo=!sessionStorage.getItem(k3)}catch(e){}if(mo)document.documentElement.dataset.v3motion="";try{var kb="jg-solidhdr";if(/[?&]blur=0/.test(q3))sessionStorage.setItem(kb,"1");else if(/[?&]blur/.test(q3))sessionStorage.removeItem(kb);if(sessionStorage.getItem(kb))document.documentElement.dataset.solidhdr=""}catch(e){}try{if(!matchMedia("(prefers-reduced-motion: reduce)").matches){document.documentElement.dataset.gather="";document.documentElement.dataset.moves=""}}catch(e){}try{var q=location.search;try{if(/[?&]sleeve=1/.test(q))sessionStorage.setItem("jg-sleeve","1");if(/[?&]sleeve=0/.test(q))sessionStorage.removeItem("jg-sleeve");if(sessionStorage.getItem("jg-sleeve"))document.documentElement.dataset.sleeve=""}catch(e){}if(/[?&]intro=0/.test(q)||!mo)return;var basic=/[?&]splash=basic/.test(q);var sand=/[?&]splash=sand/.test(q);var burst=/[?&]splash=burst/.test(q);var split=/[?&]splash=split/.test(q);var force=basic||sand||burst||split||/[?&]intro=1/.test(q);var seen=false;try{seen=!!sessionStorage.getItem("jg-intro")}catch(e){}var calm=matchMedia("(prefers-reduced-motion: reduce)").matches;var admin=location.pathname.indexOf("/admin")===0||location.pathname.indexOf("/proof/")===0||/^(admin|leads)[.]/.test(location.hostname);if(force||(!admin&&!seen&&!calm)){var r=document.documentElement;r.dataset.intro="1";if(sand)r.dataset.splash="sand";if(split||(location.pathname==="/"&&!burst&&!basic&&!sand&&!/[?&]splash=sheet/.test(q)))r.dataset.splash="split";else if(burst)r.dataset.splash="burst";else if(!basic&&!sand&&!/[?&]splash=sheet/.test(q))r.dataset.splash="name";if(basic){r.dataset.splash="basic";setTimeout(function(){r.dataset.intro="half";r.dataset.splashed="";setTimeout(function(){r.removeAttribute("data-intro");r.removeAttribute("data-splash")},1200)},500)}r.style.setProperty("--jg-blink-at",Math.round(100+Math.random()*160)+"ms")}}catch(e){}})()`,
+            __html: `(function(){try{var kp="jg-mplan",mp=(location.search.match(/[?&]mplan=([a-z0-9,-]+)/)||[])[1];if(mp)sessionStorage.setItem(kp,mp==="0"?"0":mp.split(",").join(" "));mp=sessionStorage.getItem(kp)||"rm pages exits hover scroll reveal keys still touch splash layout";if(mp!=="0")document.documentElement.dataset.mplan=mp}catch(e){}var mo=true;try{var k3="jg-v3motion-off",q3=location.search;if(/[?&]v3motion=0/.test(q3))sessionStorage.setItem(k3,"1");else if(/[?&]v3motion/.test(q3))sessionStorage.removeItem(k3);mo=!sessionStorage.getItem(k3)}catch(e){}if(mo)document.documentElement.dataset.v3motion="";try{var kb="jg-solidhdr";if(/[?&]blur=0/.test(q3))sessionStorage.setItem(kb,"1");else if(/[?&]blur/.test(q3))sessionStorage.removeItem(kb);if(sessionStorage.getItem(kb))document.documentElement.dataset.solidhdr=""}catch(e){}try{if(!matchMedia("(prefers-reduced-motion: reduce)").matches){document.documentElement.dataset.gather="";document.documentElement.dataset.moves=""}}catch(e){}try{var q=location.search;try{if(/[?&]sleeve=1/.test(q))sessionStorage.setItem("jg-sleeve","1");if(/[?&]sleeve=0/.test(q))sessionStorage.removeItem("jg-sleeve");if(sessionStorage.getItem("jg-sleeve"))document.documentElement.dataset.sleeve=""}catch(e){}if(/[?&]intro=0/.test(q)||!mo)return;var burst=/[?&]splash=burst/.test(q);var split=/[?&]splash=split/.test(q);var force=burst||split||/[?&]intro=1/.test(q);var seen=false;try{seen=!!sessionStorage.getItem("jg-intro")}catch(e){}var calm=matchMedia("(prefers-reduced-motion: reduce)").matches;var admin=location.pathname.indexOf("/admin")===0||location.pathname.indexOf("/proof/")===0||/^(admin|leads)[.]/.test(location.hostname);if(force||(!admin&&!seen&&!calm)){var r=document.documentElement;r.dataset.intro="1";if(split||(location.pathname==="/"&&!burst))r.dataset.splash="split";else if(burst)r.dataset.splash="burst";else r.dataset.splash="name";r.style.setProperty("--jg-blink-at",Math.round(100+Math.random()*160)+"ms")}}catch(e){}})()`,
           }}
         />
       </head>
@@ -211,9 +209,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           Skip to content
         </a>
 
-        {/* The contact sheet opens over the page on a first arrival, and the
+        {/* The splash opens over the page on a first arrival, and the
             page is already underneath it. See `intro.tsx`. Not behind
-            MotionGate: that renders nothing on the server, and the sheet
+            MotionGate: that renders nothing on the server, and the splash
             has to be in the HTML to start before hydration. The head
             script above sets `data-intro` on a first arrival unless `?v3motion=0`. */}
         <Intro run={SPLASH_RUN} />

@@ -95,6 +95,11 @@ describe("the log", () => {
     // Cash counts as money in the export; unmarking takes it off again.
     const paidCol = async () => { const [h, r] = (await (await GET(req("GET", { query: "?csv" }))).text()).trim().split("\r\n"); return r.split(",")[h.split(",").indexOf("paid total")]; };
     expect(await paidCol()).toBe("800");
+    // A double tap counts once.
+    await PATCH(req("PATCH", { body: JSON.stringify({ key, invoicePaid: { no, paid: true } }) }));
+    expect(await paidCol()).toBe("800");
+    await PATCH(req("PATCH", { body: JSON.stringify({ key, invoicePaid: { no, paid: false } }) }));
+    expect(await paidCol()).toBe("0");
     await PATCH(req("PATCH", { body: JSON.stringify({ key, invoicePaid: { no, paid: false } }) }));
     expect(await paidCol()).toBe("0");
   });
