@@ -45,6 +45,12 @@ export type DriftWallProps = {
   build?: boolean;
   /** The proof gate's: the plane eases flat and face on, shifted this far right, and the columns stop. */
   flatten?: number;
+  /** The tilted plane's scale and its shift from the middle in px (the proof gate's tuned wall; the site's is 1.18, 0, 0). */
+  scale?: number;
+  offsetX?: number;
+  offsetY?: number;
+  /** Where, from the top of the wall, each column's first tile starts with the wall flat (the proof gate: the gallery's first row). */
+  start?: number;
   onShown?: () => void;
   className?: string;
   style?: Record<string, string | number>;
@@ -100,6 +106,10 @@ const DriftWall = ({
   hold = false,
   build = false,
   flatten,
+  scale = 1.18,
+  offsetX = 0,
+  offsetY = 0,
+  start,
   onShown,
   className = '',
   style
@@ -278,8 +288,13 @@ const DriftWall = ({
   }, [columnItems, speed, direction, variance]);
 
   useEffect(() => {
-    offsetsRef.current = columnMeta.map((meta, c) => meta.copyHeight * ((c * 0.37) % 1));
-  }, [columnMeta, columnItems]);
+    offsetsRef.current = columnMeta.map((meta, c) => {
+      if (start === undefined) return meta.copyHeight * ((c * 0.37) % 1);
+      // A column hangs about the middle of the wall: its first tile brought to `start`, one copy along at most.
+      const top = containerHeight / 2 - (meta.copies * meta.copyHeight) / 2 + gap / 2;
+      return (((top - start) % meta.copyHeight) + meta.copyHeight) % meta.copyHeight;
+    });
+  }, [columnMeta, columnItems, start, containerHeight, gap]);
 
   const flatRef = useRef(flatten);
   const applyPlaneTransform = useCallback(
@@ -291,11 +306,12 @@ const DriftWall = ({
         return;
       }
       plane.style.transform =
-        `translate(-50%, -50%) scale(1.18) ` +
+        (offsetX || offsetY ? `translate(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px)) ` : `translate(-50%, -50%) `) +
+        `scale(${scale}) ` +
         `rotateX(${tilt + py}deg) rotateY(${turn + px}deg) ` +
         `translateZ(${-depth}px)`;
     },
-    [tilt, turn, depth]
+    [tilt, turn, depth, scale, offsetX, offsetY]
   );
 
   /* The site's rewrite of the drift: each column is one looping animation

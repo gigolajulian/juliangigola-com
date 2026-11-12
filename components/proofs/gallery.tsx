@@ -5,6 +5,7 @@ import Link from "next/link";
 import { cardPrice, lookStarts, shotOrder, THUMB_W, type PublicProof } from "@/lib/proofs/proof";
 import { looksLikeEmail } from "@/lib/inbox";
 import { ProofWall } from "@/components/proofs/wall";
+import { gridwallFor } from "@/lib/proofs/gridwall";
 
 /* ── the client's gallery ─────────────────────────────────────────
  * The look Julian approved 2026-11-06 (mock https://claude.ai/artifact/Nn3EU21DEofuLLJyXJHtcG):
@@ -36,6 +37,12 @@ type Step = null | "review" | "done";
 // proof gallery default"); `?proofwall=0` for the plain gate. Read on the client only.
 const noop = () => () => {};
 const readWall = () => new URLSearchParams(location.search).get("proofwall") !== "0";
+// `?gw=1`: the wall tuned per screen in the gridwall tuner (Julian 2026-11-11), until he says yes. The window's size, so it compares.
+const onResize = (cb: () => void) => {
+  addEventListener("resize", cb);
+  return () => removeEventListener("resize", cb);
+};
+const readGw = () => (new URLSearchParams(location.search).get("gw") === "1" ? `${innerWidth}x${innerHeight}` : "");
 
 /** A full-screen sheet: focus moves in, Tab stays inside, Escape closes, focus goes back to what opened it. */
 function useDialog(active: boolean, close: () => void) {
@@ -109,6 +116,12 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
   const [error, setError] = React.useState<string | null>(notice ?? null);
   const [paid, setPaid] = React.useState(initial.paid);
   const wall = React.useSyncExternalStore(noop, readWall, () => false);
+  const gw = React.useSyncExternalStore(onResize, readGw, () => "");
+  const tune = React.useMemo(() => {
+    if (!gw) return null;
+    const [w, h] = gw.split("x").map(Number);
+    return gridwallFor(w, h);
+  }, [gw]);
   // The name greets them in the header for this visit only; it is not saved or sent.
   const [hello, setHello] = React.useState<string | null>(null);
   const [opened, setOpened] = React.useState(false);
@@ -442,7 +455,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
               Selects first
             </button>
           </nav>
-          <div className="proof-grid" ref={gridEl}>
+          <div className="proof-grid" ref={gridEl} style={tune?.cols ? { gridTemplateColumns: `repeat(${tune.cols},minmax(0,1fr))` } : undefined}>
             {seq.map((i, k) => {
               const f = frames[i];
               const at = selects.indexOf(f.id);
@@ -541,6 +554,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
         <ProofWall
           frames={wallFrames}
           grid={gridEl}
+          tune={tune}
           isEmail={isEmail}
           onAccept={(name, address) => {
             setHello(name.split(/\s+/)[0]);

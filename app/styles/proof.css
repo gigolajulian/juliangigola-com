@@ -266,6 +266,12 @@ html:has(.proof[data-wall])::-webkit-scrollbar{display:none}
 .proof .pw-layer[data-flat][data-leave]{--dw-flat:1.6s}
 :root .proof .pw-layer[data-flat][data-leave]>.drift-wall{scale:none;transition:scale 1.6s cubic-bezier(.45,0,.2,1)}
 .pw-layer[data-flat][data-leave] .drift-wall__inner{opacity:1;filter:none;transition:filter .9s cubic-bezier(.4,0,.2,1) .6s,opacity .9s ease .3s}
+/* `?gw=1`: sharpening every tile's own blur at once dropped up to 100 frames of 330 in the 2.3s of Open proofs (144Hz, GPU on,
+   the gridwall tuner, 2026-11-11). The tiles hand their blur to one on the whole wall, and that one comes sharp: 0 frames over
+   25ms. The drift keeps the blur on each tile (a blur over the moving wall was redrawn every frame). */
+.pw-layer[data-gw][data-flat][data-leave] .drift-wall__inner{filter:none;transition:opacity .9s ease .3s}
+.pw-layer[data-gw][data-flat][data-leave]>.drift-wall{animation:pw-sharpen .9s cubic-bezier(.4,0,.2,1) .6s both}
+@keyframes pw-sharpen{from{filter:blur(6px)}}
 .pw-layer[data-flat][data-leave] .drift-wall__overlay{transition:opacity 1.2s ease .2s}
 /* `reveal` (reduced motion): the wall racks further out of focus and darkens as it stops; the gallery comes up over it. */
 :root .proof .pw-layer[data-leave]>.drift-wall{scale:1.07;transition:scale 1.4s cubic-bezier(.22,1,.36,1)}
