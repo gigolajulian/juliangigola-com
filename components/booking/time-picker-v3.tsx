@@ -10,10 +10,12 @@ import { dlabel } from "@/components/v3/flow";
 import { duration } from "@/lib/booking/booking-rules";
 import { fmt } from "@/components/v3/flow";
 import type { Shell } from "@/components/v3/flow";
-import { GESTURE_GAP_MS } from "@/components/strip/shared";
 import { looksLikeEmail } from "@/lib/inbox";
 import { AHEAD, fromIso, iso, minutesOf, recent, STEP_AT, WHERE, clock, type V3Book } from "@/components/booking/time-picker-parts";
 import type { CardCtx } from "@/components/booking/use-picker";
+
+/** The quiet that ends a trackpad flick: events closer than this are still the same push. */
+const GESTURE_GAP_MS = 120;
 
 /* JG V3 (master v39 stepper): Time, You, (Deposit), Booked. The same
    times, booking and deposit as the cards; only the look is new. */
@@ -185,7 +187,7 @@ export function V3Steps({ c }: { c: CardCtx & { v3: V3Book } }) {
               if (!el) return;
               /* A wheel over the number steps the time: a mouse once a notch, a
                  trackpad once a flick (its stream of events, until a gap of
-                 GESTURE_GAP_MS, as the strip reads one). A flick that starts at
+                 GESTURE_GAP_MS, read as one). A flick that starts at
                  the first or last time is the page's. React's onWheel is passive. */
               const wheel = (e: WheelEvent) => {
                 if (e.ctrlKey || !e.deltaY) return;
