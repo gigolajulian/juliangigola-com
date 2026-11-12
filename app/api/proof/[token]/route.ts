@@ -3,7 +3,7 @@ import { sealer } from "@/lib/leads/lead-crypto";
 import { recordLead } from "@/lib/leads/lead-store";
 import { checkout, checkPaid, finalize } from "@/lib/proof-submit";
 import { PAYMENTS_DOWN } from "@/lib/stripe";
-import { cleanSelects, device, isEmail, isOpen, owed, isToken, publicView, readProof, track, viewerKey, writeProof, type Proof } from "@/lib/proofs";
+import { cleanSelects, device, isEmail, isOpen, owed, isToken, publicView, readPublic, track, viewerKey, writeProof, type Proof } from "@/lib/proofs";
 import { bodyOf, json } from "@/lib/http";
 
 /* ── proofs, the client's side ────────────────────────────────────
@@ -22,7 +22,7 @@ async function load(token: string) {
   const seal = sealer(env.LEADS_KEY);
   if (!env.INBOX || !seal || !isToken(token)) return null;
   const s = await seal;
-  const p = await readProof(env.INBOX, s, token);
+  const p = await readPublic(env.INBOX, s, token);
   return p && isOpen(p) ? { env, kv: env.INBOX, s, p } : null;
 }
 
