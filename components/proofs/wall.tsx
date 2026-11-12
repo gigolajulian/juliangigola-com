@@ -3,6 +3,7 @@
 import * as React from "react";
 import { flushSync } from "react-dom";
 import DriftWall from "@/components/drift-wall";
+import { GRIDWALL, wallFill, type Gridwall } from "@/lib/proofs/gridwall";
 
 /* ── the proof gate over the 404's wall (the default; ?proofwall=0 for the plain gate) ──
  * Julian (2026-11-10): the 404's wall (`DriftWall`) under a glass card,
@@ -46,7 +47,7 @@ function tilesNear(root: HTMLElement): Box[] {
   return out;
 }
 
-/** The grid's columns as "count,width,gap,offset from the middle of the screen": a string, so it compares. */
+/** The grid's columns as "count,width,gap,offset from the middle of the screen,top of its first row": a string, so it compares. */
 function gridShape(g: HTMLElement | null) {
   if (!g) return "";
   const cs = getComputedStyle(g);
@@ -56,7 +57,8 @@ function gridShape(g: HTMLElement | null) {
   const left = g.getBoundingClientRect().left + (parseFloat(cs.paddingLeft) || 0);
   const width = cols.length * cols[0] + (cols.length - 1) * gap;
   // From the middle of the wall's layer, which stops short of a scrollbar.
-  return [cols.length, cols[0], gap, left + width / 2 - document.documentElement.clientWidth / 2].map((n) => Math.round(n * 100) / 100).join(",");
+  const top = g.getBoundingClientRect().top + (parseFloat(cs.paddingTop) || 0);
+  return [cols.length, cols[0], gap, left + width / 2 - document.documentElement.clientWidth / 2, top].map((n) => Math.round(n * 100) / 100).join(",");
 }
 const onResize = (cb: () => void) => {
   addEventListener("resize", cb);
@@ -69,8 +71,11 @@ export function ProofWall({
   isEmail,
   onAccept,
   onDone,
+  tune,
 }: {
   frames: Frame[];
+  /** The wall tuned per screen (lib/proofs/gridwall.ts); null with `?gw=0`. */
+  tune?: Gridwall | null;
   grid: React.RefObject<HTMLDivElement | null>;
   isEmail: (v: string) => boolean;
   onAccept: (name: string, email: string) => void;
@@ -99,9 +104,9 @@ export function ProofWall({
   const shape = React.useSyncExternalStore(onResize, () => gridShape(grid.current), () => "");
   const wall = React.useMemo(() => {
     if (!shape || !frames.length) return null;
-    const [n, w, gap, dx] = shape.split(",").map(Number);
+    const [n, w, gap, dx, top] = shape.split(",").map(Number);
     // Spare columns either side, enough to fill the tilted view (DriftWall's own "fill").
-    const side = Math.max(1, Math.ceil((Math.ceil((innerWidth * 1.5) / (w + gap)) - n) / 2));
+    const side = Math.max(1, Math.ceil((Math.ceil((innerWidth * (tune ? wallFill(innerWidth, innerHeight) : 1.5)) / (w + gap)) - n) / 2));
     const cols = n + 2 * side;
     // Row by row, as DriftWall deals them out (item i to column i % cols): an inner column carries
     // its grid column's frames top down, the spares the frames past the first screens.
@@ -116,8 +121,8 @@ export function ProofWall({
     // Tiles in the gallery's own shape (the middle frame's), so the flat wall stands on its cells.
     const shapes = frames.map((f) => (f.w && f.h ? f.h / f.w : 4 / 3)).sort((a, b) => a - b);
     const tall = shapes[shapes.length >> 1];
-    return { items, cols, w, gap, dx, h: Math.round(w * tall) };
-  }, [shape, frames]);
+    return { items, cols, w, gap, dx, top, h: Math.round(w * tall) };
+  }, [shape, frames, tune]);
 
   // Julian: photos loaded before they come into frame. Every photograph the wall carries is fetched and decoded
   // before it shows (the 800px copies, and the same files the gallery opens on), capped for a slow connection.
@@ -297,7 +302,7 @@ export function ProofWall({
       const kf: Keyframe[] = from
         ? [{ transform: `translate(${from.x - cx}px, ${from.y - cy}px) scale(${from.w / to.width}, ${from.h / to.height})` }, { transform: "none" }]
         : [{ opacity: 0 }, { opacity: 1 }];
-      anims.push(cell.animate(kf, { duration: 450, easing: "cubic-bezier(.22,1,.36,1)", fill: "backwards" }));
+      anims.push(cell.animate(kf, { duration: tune ? GRIDWALL.handOver : 450, easing: "cubic-bezier(.22,1,.36,1)", fill: "backwards" }));
     }
     const out = root?.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 250, easing: "ease-out", fill: "forwards" });
     Promise.all([out?.finished, ...anims.map((x) => x.finished)].map((p) => p?.catch(() => {}))).then(onDone);
@@ -348,7 +353,7 @@ export function ProofWall({
           <i style={{ transform: `scaleX(${progress})` }} />
         </div>
       </div>
-      <div ref={layer} className="pw-layer" data-ready={ready || undefined} data-flat={flat || undefined} data-leave={leaving || undefined}>
+      <div ref={layer} className="pw-layer" data-gw={tune ? "" : undefined} data-ready={ready || undefined} data-flat={flat || undefined} data-leave={leaving || undefined}>
         {wall && loaded ? (
           <DriftWall
             items={wall.items}
@@ -356,8 +361,19 @@ export function ProofWall({
             tileWidth={wall.w}
             tileHeight={wall.h}
             gap={wall.gap}
-            radius={0}
-            speed={24}
+            radius={tune ? GRIDWALL.photoRadius : 0}
+            speed={tune ? GRIDWALL.speed : 24}
+            {...(tune && {
+              tilt: GRIDWALL.tilt,
+              turn: GRIDWALL.turn,
+              depth: GRIDWALL.depth,
+              perspective: GRIDWALL.persp,
+              scale: tune.scale,
+              offsetX: tune.x,
+              offsetY: tune.y,
+              // Each column starts on the gallery's first row, so Open proofs barely moves it (Julian: start at the top).
+              start: wall.top,
+            })}
             dim={0.6}
             overlayColor="var(--background)"
             density={0.5}
@@ -371,6 +387,7 @@ export function ProofWall({
       </div>
       <form
         className="proof-card pw-card"
+        style={tune ? { scale: tune.card, borderRadius: tune.cardRadius, transformOrigin: innerWidth <= 520 ? "50% 100%" : undefined } : undefined}
         data-ready={ready || undefined}
         data-out={flat || leaving || undefined}
         noValidate
