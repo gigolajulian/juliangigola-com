@@ -302,7 +302,7 @@ export function ProofWall({
       const kf: Keyframe[] = from
         ? [{ transform: `translate(${from.x - cx}px, ${from.y - cy}px) scale(${from.w / to.width}, ${from.h / to.height})` }, { transform: "none" }]
         : [{ opacity: 0 }, { opacity: 1 }];
-      anims.push(cell.animate(kf, { duration: 450, easing: "cubic-bezier(.22,1,.36,1)", fill: "backwards" }));
+      anims.push(cell.animate(kf, { duration: tune ? GRIDWALL.handOver : 450, easing: "cubic-bezier(.22,1,.36,1)", fill: "backwards" }));
     }
     const out = root?.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 250, easing: "ease-out", fill: "forwards" });
     Promise.all([out?.finished, ...anims.map((x) => x.finished)].map((p) => p?.catch(() => {}))).then(onDone);

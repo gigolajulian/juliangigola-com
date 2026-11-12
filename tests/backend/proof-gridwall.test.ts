@@ -18,7 +18,7 @@ describe("gridwall", () => {
   it("takes the nearest shape for a size in between, its shift scaled to the window", () => {
     expect(gridwallScreen(2560, 1440)).toBe("1080p-16x9");
     expect(gridwallScreen(3440, 1440)).toBe("ultrawide-21x9");
-    expect(gridwallFor(2880, 1800)).toMatchObject({ scale: 1.21, x: -314 });
+    expect(gridwallFor(2880, 1800)).toMatchObject({ scale: 1.4, x: -314 });
   });
 
   it("runs the wall wider only on wide screens", () => {
@@ -29,6 +29,6 @@ describe("gridwall", () => {
   it("grows the card past a laptop, but never the square phone portrait card", () => {
     expect(gridwallFor(1440, 900)).toMatchObject({ card: GRIDWALL.card, cardRadius: GRIDWALL.cardRadius });
     expect(gridwallFor(5120, 1440).card).toBeCloseTo(GRIDWALL.card * 1.6, 3);
-    expect(gridwallFor(390, 844)).toMatchObject({ card: 1, cardRadius: 0 });
+    expect(gridwallFor(390, 844)).toMatchObject({ card: 1.04, cardRadius: 0 });
   });
 });

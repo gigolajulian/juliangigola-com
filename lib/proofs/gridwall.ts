@@ -8,18 +8,18 @@
 type Screen = { w: number; h: number; scale: number; x: number; y: number; cols?: number; card?: number };
 
 export const GRIDWALL_SCREENS: Record<string, Screen> = {
-  "phone-portrait": { w: 390, h: 844, scale: 0.86, x: -111, y: 7, card: 1 },
-  "phone-landscape": { w: 844, h: 390, scale: 0.73, x: -78, y: 0 },
+  "phone-portrait": { w: 390, h: 844, scale: 0.86, x: -111, y: 7, card: 1.04 },
+  "phone-landscape": { w: 844, h: 390, scale: 0.63, x: -78, y: 0 },
   "ipad-portrait": { w: 820, h: 1180, scale: 0.95, x: -43, y: 0 },
-  "ipad-landscape": { w: 1180, h: 820, scale: 0.99, x: 31, y: 0 },
-  "laptop-16x10": { w: 1440, h: 900, scale: 1.21, x: -157, y: 0 },
+  "ipad-landscape": { w: 1180, h: 820, scale: 0.99, x: -59, y: 0 },
+  "laptop-16x10": { w: 1440, h: 900, scale: 1.4, x: -157, y: 0 },
   "1080p-16x9": { w: 1920, h: 1080, scale: 1.51, x: 0, y: 0 },
   "ultrawide-21x9": { w: 2560, h: 1080, scale: 1.53, x: 0, y: 0 },
-  "superwide-32x9": { w: 5120, h: 1440, scale: 2.83, x: 0, y: 0 },
+  "superwide-32x9": { w: 5120, h: 1440, scale: 2.74, x: 0, y: 0 },
 };
 
 export const GRIDWALL = {
-  tilt: 16,
+  tilt: 27,
   turn: -14,
   depth: 120,
   persp: 1200,
@@ -28,7 +28,9 @@ export const GRIDWALL = {
   photoRadius: 0,
   /** The card's corners; the phone portrait card sits flush on the bottom edge and stays square. */
   cardRadius: 8,
-  speed: 19,
+  speed: 30,
+  /** Open proofs: a gallery cell not quite on its tile eases the last of the way over this (live 450). */
+  handOver: 500,
 };
 
 /** How many screens wide the wall runs: the site's 1.5 left the far edge bare on wide screens once the wall turns (32:9).
