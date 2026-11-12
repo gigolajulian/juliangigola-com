@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { tailHole } from "./sheet";
-import type { Frame } from "./work-types";
+import { tailHole } from "@/lib/sheet";
+import type { Frame } from "@/lib/work-types";
 
 const v = { width: 3, height: 4 } as Frame;
 const w = { width: 3, height: 2 } as Frame;

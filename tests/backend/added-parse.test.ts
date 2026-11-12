@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { instagramHandle } from "./added";
+import { instagramHandle } from "@/lib/added";
 
 /* The handle goes into an href: only Instagram's alphabet gets through. */
 describe("instagramHandle", () => {
@@ -12,6 +12,6 @@ describe("instagramHandle", () => {
     ["a".repeat(30), "a".repeat(30)],
   ])("keeps %s as %s", (raw, want) => expect(instagramHandle(raw)).toBe(want));
 
-  it.each([".hidden", "..", "javascript:alert(1)", "a".repeat(31), "", "a b", "../x", "<b>"])("refuses %s", (raw) =>
+  it.each([".hidden", "..", "javascript:alert(1)", "a".repeat(31), "", "a b", "@/x", "<b>"])("refuses %s", (raw) =>
     expect(instagramHandle(raw)).toBeNull());
 });
