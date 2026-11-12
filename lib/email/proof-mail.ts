@@ -113,7 +113,7 @@ export function alertLines(p: Proof): { subject: string; lines: string[] } {
       "",
       ...fileList(p),
       "",
-      "In Lightroom: Library > Plug-in Extras > Check for picks.",
+      "In Lightroom: Library > Plug-in Extras > Sync with proof.",
     ],
   };
 }
