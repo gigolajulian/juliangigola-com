@@ -4,7 +4,7 @@
  * Browser only, like `lib/leads/lead-desk.ts`.
  */
 import { adminCall } from "@/lib/leads/lead-desk";
-import { stage, type Proof } from "@/lib/proofs";
+import { stage, type Proof } from "@/lib/proofs/proof";
 
 /** A gallery as `/api/proof?list` answers it, with its client link. */
 export type Row = Proof & { url: string };

@@ -29,11 +29,11 @@ import { MetadataList, MetadataListItem } from "@astryxdesign/core/MetadataList"
 import { ProgressBar } from "@astryxdesign/core/ProgressBar";
 import { KEY_STORE } from "@/lib/admin/admin-github";
 import { SignIn } from "@/components/leads/setup";
-import { api, closed, status, type Row } from "@/lib/proof-desk";
+import { api, closed, status, type Row } from "@/lib/proofs/desk";
 import { ActivityDesk } from "@/components/proofs/activity";
 import { errorText, stampPT } from "@/lib/leads/lead-desk";
 import { TOKEN_STORE } from "@/lib/admin/admin-github";
-import { extras, stage, STAGES } from "@/lib/proofs";
+import { extras, stage, STAGES } from "@/lib/proofs/proof";
 
 const CLASSIC = "/admin";
 const frame = (p: Row, id: string) => `/proof/${p.token}/f/${id}`;

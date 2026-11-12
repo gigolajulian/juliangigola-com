@@ -2,9 +2,9 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { cardPrice, lookStarts, shotOrder, THUMB_W, type PublicProof } from "@/lib/proofs";
+import { cardPrice, lookStarts, shotOrder, THUMB_W, type PublicProof } from "@/lib/proofs/proof";
 import { looksLikeEmail } from "@/lib/inbox";
-import { ProofWall } from "@/components/proof-wall";
+import { ProofWall } from "@/components/proofs/wall";
 
 /* ── the client's gallery ─────────────────────────────────────────
  * The look Julian approved 2026-11-06 (mock https://claude.ai/artifact/Nn3EU21DEofuLLJyXJHtcG):
@@ -32,7 +32,7 @@ const isEmail = (v: string) => looksLikeEmail(v.trim());
 
 type Step = null | "review" | "done";
 
-// The gate as the grid's own wall (components/proof-wall.tsx), the default since Julian 2026-11-11 ("make the new gridwall
+// The gate as the grid's own wall (components/proofs/wall.tsx), the default since Julian 2026-11-11 ("make the new gridwall
 // proof gallery default"); `?proofwall=0` for the plain gate. Read on the client only.
 const noop = () => () => {};
 const readWall = () => new URLSearchParams(location.search).get("proofwall") !== "0";

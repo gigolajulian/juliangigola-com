@@ -4,7 +4,7 @@
  * payer's lead with the refs the live paths use, so nothing counts twice:
  *   payment   ref = the intent id (deposits in `lib/booking/deposit.ts`, others in `app/api/stripe/route.ts`)
  *   refund    ref = `refund-<intent>` when the charge is fully refunded, else `refund-<intent>-<cents refunded so far>`
- * Proof checkouts are skipped: `lib/proof-submit.ts` logs them under the Checkout session id.
+ * Proof checkouts are skipped: `lib/proofs/submit.ts` logs them under the Checkout session id.
  * An event already on the lead or anywhere in its log is left alone. Server only.
  * ─────────────────────────────────────────────────────────────── */
 

@@ -2,7 +2,7 @@ import { alertHello } from "@/lib/hello-mail";
 import { stripe } from "@/lib/stripe";
 import { recordLead } from "@/lib/leads/lead-store";
 import { alertLines, proofUrl, receiptMail, sendClient } from "@/lib/email/proof-mail";
-import { cardPrice, owed, publicId, viewerKey, writeProof, type Proof } from "@/lib/proofs";
+import { cardPrice, owed, publicId, viewerKey, writeProof, type Proof } from "@/lib/proofs/proof";
 
 /* ── a client sends their selects ─────────────────────────────────
  * Nothing to pay: locked and mailed at once. A shoot balance or extras: a Stripe Checkout session

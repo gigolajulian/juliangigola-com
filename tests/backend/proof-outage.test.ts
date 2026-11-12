@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FakeKV, LEADS_KEY } from "./fakes";
 import { sealer } from "@/lib/leads/lead-crypto";
-import { readProof, writeProof, type Proof } from "@/lib/proofs";
+import { readProof, writeProof, type Proof } from "@/lib/proofs/proof";
 
 /* Confirming a proof payment while Stripe is down: the client is told payments
    are down (502), not that their payment failed, and nothing is locked. */

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { api, closed, status, type Row } from "@/lib/proof-desk";
+import { api, closed, status, type Row } from "@/lib/proofs/desk";
 
 afterEach(() => vi.unstubAllGlobals());
 
