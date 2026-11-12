@@ -7,7 +7,7 @@ import { DepositStep } from "@/components/booking/deposit-step";
 import { ReferencePicks } from "@/components/reference-picks";
 import { Calendar } from "@/components/v3/flow";
 import { dlabel } from "@/components/v3/flow";
-import { duration } from "@/components/v3/flow";
+import { duration } from "@/lib/booking/booking-rules";
 import { fmt } from "@/components/v3/flow";
 import type { Shell } from "@/components/v3/flow";
 import { looksLikeEmail } from "@/lib/inbox";
