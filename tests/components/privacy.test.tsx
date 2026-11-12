@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { LegalPage } from "@/components/site/legal";
+import { V3LegalPage } from "@/components/site/legal";
 import { PrivacyColumn } from "@/components/site/privacy";
 
 describe("PrivacyColumn", () => {
@@ -10,9 +10,9 @@ describe("PrivacyColumn", () => {
 
   it("shelves its clauses for the legal page", async () => {
     render(
-      <LegalPage>
+      <V3LegalPage>
         <PrivacyColumn />
-      </LegalPage>,
+      </V3LegalPage>,
     );
     expect((await screen.findAllByText(/What is collected, and when/)).length).toBeGreaterThan(0);
   });

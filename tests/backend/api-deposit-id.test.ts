@@ -48,6 +48,12 @@ describe("PUT /api/deposit/[id]", () => {
     expect(kv.puts).toEqual([]);
   });
 
+  it("tells Stripe being down from an unknown deposit", async () => {
+    expect((await put(new FormData(), "pi_OTHER1234567890")).status).toBe(404);
+    vi.stubGlobal("fetch", async () => reply({ error: {} }, 500));
+    expect((await put(new FormData())).status).toBe(502);
+  });
+
   it("keeps the site picks and a file beside the intent", async () => {
     const form = new FormData();
     form.set("picks", "/work/sago/01.jpg\n../etc/passwd");

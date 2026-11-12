@@ -27,10 +27,11 @@ const MAX_EXTRAS = 10;
 
 async function gate(request: Request) {
   const { env } = await getCloudflareContext({ async: true });
+  // Who is asking first: what this build is missing is for /admin only.
+  if (!(await isAdmin(request, env.INBOX_KEY))) return { error: json({ error: "Not authorized." }, 401) };
   if (!env.INBOX) return { error: json({ error: "No INBOX bound." }, 503) };
   if (!env.GCAL_OAUTH) return { error: json({ error: "The calendar is not connected (GCAL_OAUTH)." }, 503) };
-  if (await isAdmin(request, env.INBOX_KEY)) return { env };
-  return { error: json({ error: "Not authorized." }, 401) };
+  return { env };
 }
 
 type GEvent = {

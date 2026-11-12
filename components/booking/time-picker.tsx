@@ -7,13 +7,12 @@ import { clock, DAYS, fromIso, MONTHS, type V3Book } from "@/components/booking/
 import { usePicker, type CardCtx, type Props } from "@/components/booking/use-picker";
 import { V3Steps } from "@/components/booking/time-picker-v3";
 import { EditorialCard } from "@/components/booking/time-picker-editorial";
-import { ClassicCard } from "@/components/booking/time-picker-classic";
 
 export type { V3Book };
 
 export function TimePicker(props: Props) {
   const c = usePicker(props);
-  const { title, className, fallback, v3, length, days, state, held, orb, jg, pick, editorial, heldBar, v3plain } = c;
+  const { title, className, fallback, v3, length, days, state, held, orb, jg, pick, heldBar, v3plain } = c;
   if (state === "fallback") return v3 ? v3plain(fallback) : <>{fallback}</>;
   const waiting = <p role="status" className="lbl mute">Loading availability</p>;
   if (v3 && (state === "loading" || !days || (held && !orb))) return v3plain(orb ? waiting : jg, heldBar);
@@ -58,7 +57,6 @@ export function TimePicker(props: Props) {
   const ctx: CardCtx = { ...c, pick, days, t, ap, until, date, sum, waiting };
   /* ── JG V3 (master v39 stepper): Time, You, (Deposit), Booked. The same
      times, booking and deposit as the cards below; only the look is new. */
-  if (v3 && editorial) return <V3Steps c={{ ...ctx, v3 }} />;
-  if (editorial) return <EditorialCard c={ctx} />;
-  return <ClassicCard c={ctx} />;
+  if (v3) return <V3Steps c={{ ...ctx, v3 }} />;
+  return <EditorialCard c={ctx} />;
 }

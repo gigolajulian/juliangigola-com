@@ -2,7 +2,7 @@ import { alertHello } from "@/lib/hello-mail";
 import { stripe } from "@/lib/stripe";
 import { recordLead } from "@/lib/leads/lead-store";
 import { alertLines, proofUrl, receiptMail, sendClient } from "@/lib/email/proof-mail";
-import { cardPrice, owed, viewerKey, writeProof, type Proof } from "@/lib/proofs";
+import { cardPrice, owed, publicId, viewerKey, writeProof, type Proof } from "@/lib/proofs";
 
 /* ── a client sends their selects ─────────────────────────────────
  * Nothing to pay: locked and mailed at once. A shoot balance or extras: a Stripe Checkout session
@@ -40,7 +40,7 @@ export async function finalize(env: Env, kv: KV, s: Seal, p: Proof, paid?: Proof
     if (await sendClient(env.CLIENT_EMAIL, to, m)) await recordLead(env, to, { event: { at, kind: "mail", note: m.subject, mail: { to: "client", kind: "proof-receipt" } } });
   }
   const a = alertLines(done);
-  await alertHello(env.EMAIL, a.subject, [...a.lines, "", proofUrl(done.token)], to ? { name: to, email: to } : undefined);
+  await alertHello(env.EMAIL, a.subject, [...a.lines, "", proofUrl(publicId(done))], to ? { name: to, email: to } : undefined);
   return done;
 }
 
@@ -58,7 +58,7 @@ const lines = (items: { name: string; qty: number; cents: number }[]) =>
 export async function checkout(key: string, p: Proof, method: "bank" | "card" = "bank"): Promise<{ id: string; url: string }> {
   const card = method === "card";
   const x = owed(p);
-  const back = proofUrl(p.token);
+  const back = proofUrl(publicId(p));
   const list = cardPrice(x.cents);
   const what = [x.balance ? "Shoot balance" : "", x.n ? `${x.n} extra retouched ${x.n === 1 ? "frame" : "frames"}` : ""].filter(Boolean).join(" + ");
   // v2: the request gained payment_intent_data metadata (2026-11-11); Stripe refuses an old key with new parameters.

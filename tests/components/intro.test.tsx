@@ -8,7 +8,7 @@ describe("Intro", () => {
     const layer = container.querySelector("#jg-intro")!;
     expect(layer.getAttribute("aria-hidden")).toBe("true");
     expect(container.querySelector("style")?.textContent).toBe("#jg-intro{display:none}");
-    expect(layer.querySelector(".jg-sheet-plane")).toBeTruthy();
+    expect(layer.querySelector(".jg-sheet-ground")).toBeTruthy();
     // Scripts set through innerHTML never run, so the opening itself does not play in jsdom.
     expect(layer.querySelector("script")?.textContent).toContain("jg-intro");
   });
