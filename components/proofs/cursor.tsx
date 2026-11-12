@@ -43,7 +43,7 @@ export function ProofCursor() {
       });
     };
     // The page scrolls under a still pointer, and a pick flips the ring: read what is under it again.
-    const again = () => read(document.elementFromPoint(x, y));
+    const again = () => read(document.elementFromPoint?.(x, y) ?? null); // jsdom has none
     const picked = () => requestAnimationFrame(again); // after React paints the new aria-pressed
     const out = () => read(null);
     addEventListener("pointermove", move, { passive: true });
