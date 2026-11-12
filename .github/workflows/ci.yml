@@ -41,6 +41,20 @@ jobs:
       - run: npm ci
       - run: node scripts/test/gate.mjs --backend
 
+  # The component tests (tests/components, jsdom). Too slow for the commit
+  # hook (about 5 minutes), so they run here on every pull request.
+  components:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx vitest run --project components
+
   frontend:
     runs-on: ubuntu-24.04
     timeout-minutes: 45
