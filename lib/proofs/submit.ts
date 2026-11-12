@@ -37,7 +37,10 @@ export async function finalize(env: Env, kv: KV, s: Seal, p: Proof, paid?: Proof
   }
   if (to) {
     const m = receiptMail(done);
-    if (await sendClient(env.CLIENT_EMAIL, to, m)) await recordLead(env, to, { event: { at, kind: "mail", note: m.subject, mail: { to: "client", kind: "proof-receipt" } } });
+    if (await sendClient(env.CLIENT_EMAIL, to, m)) {
+      await writeProof(kv, s, (done = { ...done, receiptAt: new Date().toISOString() }));
+      await recordLead(env, to, { event: { at, kind: "mail", note: m.subject, mail: { to: "client", kind: "proof-receipt" } } });
+    }
   }
   const a = alertLines(done);
   await alertHello(env.EMAIL, a.subject, [...a.lines, "", proofUrl(publicId(done))], to ? { name: to, email: to } : undefined);

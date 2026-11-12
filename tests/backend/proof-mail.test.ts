@@ -30,18 +30,23 @@ describe("proofMail", () => {
     expect(proofUrl("tok123")).toBe("https://juliangigola.com/proof/tok123");
     expect(m.text).toContain("All 3 frames are up. Select the ten you want");
     expect(m.text).toContain("Open until: Fri, Nov 20");
-    expect(m.text).toContain("See your proofs: https://juliangigola.com/proof/tok123");
+    expect(m.text).toContain("Open proofs: https://juliangigola.com/proof/tok123");
     expect(m.html).not.toContain("<script>x");
     expect(m.attachments.map((a) => a.contentId)).toEqual(["name-ink", "name-w", "f-a"]);
   });
 });
 
 describe("receiptMail", () => {
-  it("lists the selects with their notes and what was paid", () => {
+  it("lists the selects by proof number, never the Lightroom names, and what was paid", () => {
     const m = receiptMail(proof({ selects: ["b", "a"], notes: { b: "brighter" }, paid: { session: "cs_test_1", amount: 2550, at: "" } }));
     expect(m.text).toContain("I have your 2 frames and your notes.");
     expect(m.text).toContain("Paid: $25.50");
-    expect(m.text).toContain("B.jpg · brighter\nA.jpg");
+    expect(m.text).toContain("001\n002");
+    expect(m.text).not.toContain(".jpg");
+  });
+
+  it("leaves Paid out when nothing was owed", () => {
+    expect(receiptMail(proof({ selects: ["a"] })).text).not.toContain("Paid");
   });
 });
 
