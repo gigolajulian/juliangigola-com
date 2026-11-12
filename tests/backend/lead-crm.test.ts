@@ -121,6 +121,9 @@ describe("the API", () => {
     await recordLead({ INBOX: kv as never, LEADS_KEY }, "a@x.com", { event: { at: "2026-11-01T00:00:00Z", kind: "inquiry", ref: "msg:1" }, name: "A" });
     await recordLead({ INBOX: kv as never, LEADS_KEY }, "a@work.com", { event: { at: "2026-11-02T00:00:00Z", kind: "call", ref: "cal:1" }, name: "A" });
     const [a, b] = [`lead:${await idOf("a@x.com")}`, `lead:${await idOf("a@work.com")}`];
+    // A merge whose patch fails keeps the other record.
+    expect((await PATCH(req("PATCH", { body: { key: a, mergeFrom: b, invoicePaid: { no: "0000", paid: true } } }))).status).toBe(404);
+    expect(await kv.get(b)).not.toBeNull();
     const { lead } = await (await PATCH(req("PATCH", { body: { key: a, mergeFrom: b } }))).json();
     expect(lead).toMatchObject({ stage: "Call booked" });
     expect(await kv.get(b)).toBeNull();

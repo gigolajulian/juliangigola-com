@@ -474,14 +474,15 @@ async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: Await
   if (quote !== undefined) lead = { ...lead, quote: quote ?? undefined, events: [...lead.events, { at, kind: "quote" as const, note: quote === null ? "" : String(quote) }].slice(-50) };
   if (typeof lostReason === "string") lead = { ...lead, lostReason: cut(lostReason, 80) };
   if (licence !== undefined) lead = { ...lead, licence: licence ? { use: cut(licence.use, 80) ?? "", end: licence.end! } : undefined };
-  // Another record of the same person folded into this one; the other goes for good.
+  // Another record of the same person folded into this one; the other goes for good, once this one is written.
+  let merged: string | undefined;
   if (typeof mergeFrom === "string" && mergeFrom.startsWith("lead:") && mergeFrom !== key) {
     const other = await readLead(inbox, seal, mergeFrom.slice(5));
     if (!other) return json({ error: "Gone." }, 404);
     lead = merge(lead, other, at);
     from = { ...from, events: [...from.events, ...other.events] };
     await adoptLog(inbox, seal, id, mergeFrom.slice(5), lead).catch((e: unknown) => console.error("activity log merge", String(e)));
-    await bury(inbox, mergeFrom);
+    merged = mergeFrom;
   }
   // A new invoice takes the month's next number: 1126, then 1126-2.
   // shortcut: read then write the count is not atomic; one person makes these by hand, a Durable Object if that changes.
@@ -511,5 +512,6 @@ async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: Await
   }
   for (const k of Object.keys(lead) as (keyof Lead)[]) if (lead[k] === undefined) delete lead[k];
   await writeLead(inbox, seal, id, lead, from);
+  if (merged) await bury(inbox, merged);
   return json({ lead });
 }
