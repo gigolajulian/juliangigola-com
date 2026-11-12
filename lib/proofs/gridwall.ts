@@ -1,5 +1,5 @@
 /* ── the proof gate's wall, tuned per screen (Julian 2026-11-11, in the gridwall tuner) ──
- * Behind `?gw=1` until Julian says yes. Each screen size carries the wall's scale and shift (x, y in px of that screen)
+ * The default since Julian's yes (2026-11-11); `?gw=0` for the untuned wall. Each screen size carries the wall's scale and shift (x, y in px of that screen)
  * and, where set, the gallery's column count; the rest is one set for every screen. A window takes the values of the
  * nearest screen by shape, its shift scaled to its own size: phone portrait at 520 wide and under, phone landscape under
  * 500 tall (the sizes proof.css already lays the card out for), else the nearest by width over height.

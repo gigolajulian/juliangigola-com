@@ -74,7 +74,7 @@ export function ProofWall({
   tune,
 }: {
   frames: Frame[];
-  /** `?gw=1`: the wall tuned per screen (lib/proofs/gridwall.ts). */
+  /** The wall tuned per screen (lib/proofs/gridwall.ts); null with `?gw=0`. */
   tune?: Gridwall | null;
   grid: React.RefObject<HTMLDivElement | null>;
   isEmail: (v: string) => boolean;

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { GRIDWALL, gridwallFor, gridwallScreen, wallFill } from "@/lib/proofs/gridwall";
 
-/* `?gw=1`: a window takes the tuned values of the nearest screen by shape (lib/proofs/gridwall.ts). */
+/* The proof gate wall: a window takes the tuned values of the nearest screen by shape (lib/proofs/gridwall.ts). */
 
 describe("gridwall", () => {
   it("matches each tuned screen to itself", () => {

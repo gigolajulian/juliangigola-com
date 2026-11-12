@@ -37,12 +37,13 @@ type Step = null | "review" | "done";
 // proof gallery default"); `?proofwall=0` for the plain gate. Read on the client only.
 const noop = () => () => {};
 const readWall = () => new URLSearchParams(location.search).get("proofwall") !== "0";
-// `?gw=1`: the wall tuned per screen in the gridwall tuner (Julian 2026-11-11), until he says yes. The window's size, so it compares.
+// The wall tuned per screen in the gridwall tuner, the default since Julian's yes (2026-11-11); `?gw=0` for the untuned wall.
+// The window's size, so it compares.
 const onResize = (cb: () => void) => {
   addEventListener("resize", cb);
   return () => removeEventListener("resize", cb);
 };
-const readGw = () => (new URLSearchParams(location.search).get("gw") === "1" ? `${innerWidth}x${innerHeight}` : "");
+const readGw = () => (new URLSearchParams(location.search).get("gw") !== "0" ? `${innerWidth}x${innerHeight}` : "");
 
 /** A full-screen sheet: focus moves in, Tab stays inside, Escape closes, focus goes back to what opened it. */
 function useDialog(active: boolean, close: () => void) {
