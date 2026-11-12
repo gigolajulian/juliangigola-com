@@ -70,6 +70,8 @@ export type Proof = {
   paid?: { session: string; amount: number; at: string; pending?: boolean; failed?: boolean };
   /** When the client hit Send: selects are locked from here. */
   submittedAt?: string;
+  /** When the client's receipt mail went out; unset if it failed. */
+  receiptAt?: string;
   views: number;
   /** The pipeline in /admin: first client view after sending, first select, and when Lightroom pulled the selects. */
   firstViewAt?: string;
@@ -274,6 +276,8 @@ export function publicView(p: Proof) {
     balance: p.balance ?? 0,
     closesAt: p.closesAt ?? null,
     submitted: !!p.submittedAt,
+    submittedAt: p.submittedAt ?? null,
+    mailed: !!p.receiptAt,
     paid: p.paid?.amount ?? 0,
     paidPending: !!p.paid?.pending,
   };

@@ -8,7 +8,7 @@
 import { TZ } from "@/lib/booking/booking-rules";
 import { NAME_INK, NAME_W } from "@/lib/email/email-logo";
 import { SIG_DARK, SIG_HTML, SIG_TEXT } from "@/lib/email/email-signature";
-import { extras, publicId, type Proof } from "@/lib/proofs/proof";
+import { extras, publicId, shotOrder, type Proof } from "@/lib/proofs/proof";
 
 const FROM = { name: "Julian Gigola", email: "book@juliangigola.com" };
 const REPLY_TO = "hello@juliangigola.com";
@@ -67,13 +67,19 @@ export function proofMail(p: Proof, strip: { id: string; bytes: Uint8Array }[]) 
 ${p.note ? `<tr><td class="mono fg rule" style="font-size:13px;line-height:1.65;color:${C.fg};padding:0 0 30px 14px;border-left:1px solid ${C.ac}">${esc(p.note)}</td></tr>` : ""}
 ${imgs}
 ${rows(terms)}
-<tr><td style="padding:28px 0 30px"><a href="${url}" class="mono cta" style="display:inline-block;padding:14px 20px;background:${C.fg};color:${C.bg};text-decoration:none;font-size:12px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase">See your proofs</a></td></tr>
-<tr><td class="mono mu" style="font-size:13px;line-height:1.9;color:${C.mu}">1. Tap a frame to select it. Your selects collect in Selects.<br>2. Hit Send selects. Extras are paid on the way out.<br>3. I retouch your selects and email you the finals.</td></tr>`,
+<tr><td style="padding:28px 0 30px"><a href="${url}" class="mono cta" style="display:inline-block;padding:14px 20px;background:${C.fg};color:${C.bg};text-decoration:none;font-size:12px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase">Open proofs</a></td></tr>
+<tr><td class="mono mu" style="font-size:13px;line-height:1.9;color:${C.mu}">1. Tap the ring on a frame to select it. Tap the photo to see it large.<br>2. Hit Send selects. Extras are paid on the way out.<br>3. I retouch your selects and email you the finals.</td></tr>`,
   );
-  const text = ["Your proofs are ready.", "", lead, ...(p.note ? ["", p.note] : []), "", ...terms.map(([k, v]) => `${k}: ${v}`), "", `See your proofs: ${url}`, "", "Questions? Reply to this email.", SIG_TEXT].join("\n");
+  const text = ["Your proofs are ready.", "", lead, ...(p.note ? ["", p.note] : []), "", ...terms.map(([k, v]) => `${k}: ${v}`), "", `Open proofs: ${url}`, "", "Questions? Reply to this email.", SIG_TEXT].join("\n");
   const attachments: Inline[] = [...logos(), ...strip.map((f) => ({ content: f.bytes, filename: `${f.id}.jpg`, type: "image/jpeg", disposition: "inline" as const, contentId: `f-${f.id}` }))];
   return { subject: "Your proofs are ready", html, text, attachments };
 }
+
+// The client's copy names frames by proof number, as the gallery does; Lightroom names stay Julian's.
+const numberList = (p: Proof) => {
+  const order = shotOrder(p.frames).map((f) => f.id);
+  return p.selects.map((id) => String(order.indexOf(id) + 1).padStart(3, "0")).sort();
+};
 
 const fileList = (p: Proof) => p.selects.map((id) => {
   const f = p.frames.find((x) => x.id === id);
@@ -83,9 +89,9 @@ const fileList = (p: Proof) => p.selects.map((id) => {
 /** The receipt the client gets when they send. */
 export function receiptMail(p: Proof) {
   const x = extras(p.selects.length, p.included, p.price);
-  const files = fileList(p);
-  const paid = p.paid ? `$${(p.paid.amount / 100).toFixed(2)}` : "$0.00";
-  const summary: [string, string][] = [["Selected", String(p.selects.length)], ["Included", String(p.included)], ["Extra", String(x.n)], ["Paid", paid]];
+  const files = numberList(p);
+  const paid = p.paid ? `$${(p.paid.amount / 100).toFixed(2)}` : "";
+  const summary: [string, string][] = [["Selected", String(p.selects.length)], ["Included", String(p.included)], ["Extra", String(x.n)], ...(paid ? [["Paid", paid] as [string, string]] : [])];
   const lead = `I have your ${p.selects.length} ${p.selects.length === 1 ? "frame" : "frames"}${Object.keys(p.notes).length ? " and your notes" : ""}. I'll email you when the finals are ready.`;
   const html = page(
     "Selects are in",
