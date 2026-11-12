@@ -116,6 +116,9 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
   const [via, setVia] = React.useState<"bank" | "card">("bank");
   const [error, setError] = React.useState<string | null>(notice ?? null);
   const [paid, setPaid] = React.useState(initial.paid);
+  // When they sent and whether the receipt mail went out, so the done screen says only what is true.
+  const [sent, setSent] = React.useState({ at: initial.submittedAt, mailed: initial.mailed });
+  const [unsaved, setUnsaved] = React.useState(false);
   const wall = React.useSyncExternalStore(noop, readWall, () => false);
   const gw = React.useSyncExternalStore(onResize, readGw, () => "");
   const tune = React.useMemo(() => {
@@ -178,7 +181,14 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
   const post = React.useCallback((b: Record<string, unknown>) => fetch(`/api/proof/${token}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(b) }), [token]);
 
   // Julian 2026-11-10: sign in every visit, the browser's autofill fills it. Clears the address older builds kept.
-  React.useEffect(() => localStorage.removeItem(EMAIL_STORE), []);
+  // Back from Stripe in the same tab (paid, cancelled or failed): the address it left, so they are not asked again.
+  React.useEffect(() => {
+    localStorage.removeItem(EMAIL_STORE);
+    const back = sessionStorage.getItem(`${EMAIL_STORE}:${token}`);
+    sessionStorage.removeItem(`${EMAIL_STORE}:${token}`);
+    if (back && !initial.submitted) void enter(back);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once, on arrival
+  }, []);
 
   async function enter(address: string, name?: string) {
     setEmail(address);
@@ -198,9 +208,15 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
       saved.current = key;
       return;
     }
+    // A failed save says so in the bar and tries again on the next change.
     const t = setTimeout(() => {
-      saved.current = key;
-      fetch(`/api/proof/${token}`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ email, selects }) }).catch(() => {});
+      fetch(`/api/proof/${token}`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ email, selects }) })
+        .then((r) => {
+          if (!r.ok) throw new Error(String(r.status));
+          saved.current = key;
+          setUnsaved(false);
+        })
+        .catch(() => setUnsaved(true));
     }, 600);
     return () => clearTimeout(t);
   }, [selects, email, token, locked, ready]);
@@ -298,10 +314,14 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
     setError(null);
     try {
       const res = await fetch(`/api/proof/${token}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email, selects, method }) });
-      const out = (await res.json()) as { checkout?: string; done?: boolean; paid?: number; error?: string };
-      if (out.checkout) return void (location.href = out.checkout);
+      const out = (await res.json()) as { checkout?: string; done?: boolean; paid?: number; submittedAt?: string | null; mailed?: boolean; error?: string };
+      if (out.checkout) {
+        if (email) sessionStorage.setItem(`${EMAIL_STORE}:${token}`, email);
+        return void (location.href = out.checkout);
+      }
       if (!res.ok || !out.done) throw new Error(out.error ?? "That did not go through. Try again.");
       setPaid(out.paid ?? 0);
+      setSent({ at: out.submittedAt ?? new Date().toISOString(), mailed: !!out.mailed });
       setStep("done");
       scrollTo({ top: 0 });
     } catch (e) {
@@ -317,6 +337,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
   };
 
   const pad = (i: number) => String(i + 1).padStart(3, "0");
+  const closes = initial.closesAt ? new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(new Date(initial.closesAt)) : null;
   const ordered = [...selects].sort((a, b) => (byId.get(a) ?? 0) - (byId.get(b) ?? 0));
 
   if (!ready && !wall)
@@ -331,7 +352,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
     );
 
   if (step === "done") {
-    const sentOn = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(new Date());
+    const sentOn = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(sent.at ? new Date(sent.at) : new Date());
     return (
       <div className="proof">
         <Top view={view} setView={setView} n={n} included={included} due={0} hideTabs />
@@ -358,7 +379,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
               <li data-on>
                 <span>01</span>
                 <b>Received</b>
-                <p>{n} {n === 1 ? "frame" : "frames"}. A copy is in your inbox.</p>
+                <p>{n} {n === 1 ? "frame" : "frames"}.{sent.mailed ? " A copy is in your inbox." : ""}</p>
               </li>
               <li>
                 <span>02</span>
@@ -390,7 +411,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
                   <span>Total</span>
                   <b>${(paid / 100).toFixed(0)} ✓</b>
                 </p>
-                <p className="proof-mu">{initial.paidPending ? "Bank payment through Stripe. It clears in about 4 business days; nothing else to do." : "Paid through Stripe. The receipt is in your inbox."}</p>
+                <p className="proof-mu">{initial.paidPending ? "Bank payment through Stripe. It clears in about 4 business days; nothing else to do." : `Paid through Stripe.${sent.mailed ? " The receipt is in your inbox." : ""}`}</p>
               </div>
             ) : null}
             <p className="proof-mu">
@@ -433,16 +454,18 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
 
       {wall ? (
         <div className="proof-intro">
-          <p className="proof-lab">Proofs · {frames.length} frames · {included} included</p>
+          <p className="proof-lab">Proofs · {frames.length} frames · {included} included{closes ? ` · Open until ${closes}` : ""}</p>
           {/* Sized for the greeting from the start (--len), so the line that swaps in on Open proofs does not move the grid. */}
           <h1 style={{ "--len": 38 } as React.CSSProperties}>
             {hello ? `Hey ${hello}, pick your proofs below.` : "Pick your proofs."}
           </h1>
+          <p className="proof-hint">Tap the ring to select a frame. Tap the photo to see it large.</p>
         </div>
       ) : (
         <div className="proof-intro">
-          <p className="proof-lab">Proofs</p>
+          <p className="proof-lab">Proofs{closes ? ` · Open until ${closes}` : ""}</p>
           <h1>{hello ? `Hey ${hello}, pick your proofs below.` : "Pick your proofs."}</h1>
+          <p className="proof-hint">Tap the ring to select a frame. Tap the photo to see it large.</p>
         </div>
       )}
 
@@ -519,7 +542,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
                         {pad(i)}
                       </p>
                     </div>
-                    <button type="button" className="proof-rm" onClick={() => toggle(id)}>
+                    <button type="button" className="proof-rm" aria-label={`Remove frame ${i + 1}`} onClick={() => toggle(id)}>
                       Remove
                     </button>
                   </div>
@@ -539,6 +562,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
           <span className="proof-sum-s">
             <b>{n}</b> / {included} · ${due}
           </span>
+          {unsaved ? <span className="proof-unsaved" role="status">Not saved. Check your connection.</span> : null}
         </p>
         <div className="proof-acts">
           <button type="button" className="proof-btn ghost proof-vsel" onClick={() => { setView(view === "all" ? "selects" : "all"); scrollTo({ top: 0, behavior: "smooth" }); }}>
@@ -620,6 +644,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
               )}
             </div>
           </div>
+          <p className="proof-lock">Selects lock once you send.</p>
           <p className="proof-rsum">
             {balDue ? <span>Shoot balance ${balDue}</span> : null}
             <span>{Math.min(n, included)} included</span>
@@ -648,17 +673,15 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
                   <i data-mu>Includes card processing</i>
                 </span>
               </button>
-              <p className="proof-secure">Prices are card prices. Paying by bank skips the processing cost, so you get it back.</p>
               <p className="proof-secure">
                 <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true">
                   <rect x="3" y="7" width="10" height="7.5" rx="1.5" fill="none" stroke="currentColor" strokeWidth="1.3" />
                   <path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" fill="none" stroke="currentColor" strokeWidth="1.3" />
                 </svg>
-                Secure checkout on Stripe, encrypted and PCI certified. I never see your card or bank details.
+                Checkout on Stripe. I never see your card or bank details.
               </p>
             </div>
           ) : null}
-          <p className="proof-lock">Selects lock once you send.</p>
           {error ? <p className="proof-err" role="alert">{error}</p> : null}
           <div className="proof-rgrid">
             {ordered.map((id) => (
@@ -735,7 +758,7 @@ function Gate({ frames, count, onEnter }: { frames: string[]; count: number; onE
           <input type="email" inputMode="email" autoComplete="email" required value={value} onChange={(e) => { setValue(e.target.value); setBad(null); }} aria-invalid={(!!bad && bad !== "Add your name.") || undefined} />
         </label>
         {bad ? <p className="proof-err" role="alert">{bad}</p> : null}
-        <button type="submit" className="proof-btn" data-off={!name.trim() || !isEmail(value) || undefined}>Open gallery</button>
+        <button type="submit" className="proof-btn" data-off={!name.trim() || !isEmail(value) || undefined}>Open proofs</button>
         <p className="proof-mu">Keep track of your favorites.</p>
       </form>
     </div>
