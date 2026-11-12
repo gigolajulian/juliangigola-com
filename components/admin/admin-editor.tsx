@@ -36,6 +36,8 @@ import {
   readFile,
   type CommitFile,
   TOKEN_STORE,
+  REPO,
+  GITHUB_API,
 } from "@/lib/admin/admin-github";
 import type { Bts, Copy, Credit } from "@/lib/work-types";
 import { cn } from "@/lib/utils";
@@ -60,22 +62,11 @@ import { cn } from "@/lib/utils";
  * browser and is never served with the page.
  * ─────────────────────────────────────────────────────────────── */
 
-const REPO = {
-  owner: "gigolajulian",
-  repo: "juliangigola-com",
-  branch: "main",
-};
-const API = "https://api.github.com";
-
-/**
- * Where the token is kept between visits.
- *
- * `localStorage`, on this device only — it never reaches this site's server
- * (there isn't one) and it is never sent anywhere but api.github.com. Anyone
- * with this browser profile can use it, which is the trade for not having to
- * paste it every time. "Forget token" clears it.
- */
-const TOKEN_KEY = TOKEN_STORE;
+/* The token is kept between visits in `localStorage` (`TOKEN_STORE`), on
+ * this device only: it never reaches this site's server and is never sent
+ * anywhere but api.github.com. Anyone with this browser profile can use it,
+ * which is the trade for not having to paste it every time. "Forget token"
+ * clears it. */
 
 /**
  * The Content form's own sections, in the order they are set.
@@ -784,7 +775,7 @@ export function AdminEditor({
   // here directly would be a cascading render on every mount, and the token
   // field would flash a value that may already be expired.
   React.useEffect(() => {
-    const saved = window.localStorage.getItem(TOKEN_KEY);
+    const saved = window.localStorage.getItem(TOKEN_STORE);
     if (saved) void load(saved);
     // Once, on mount — `load` closes over nothing that changes what a stored
     // token should do, and in the deps it would refetch on every keystroke.
@@ -817,14 +808,14 @@ export function AdminEditor({
     setStatus({ kind: "working", message: "Reading the current content…" });
     try {
       const res = await fetch(
-        `${API}/repos/${REPO.owner}/${REPO.repo}/contents/${CONTENT_PATH}?ref=${REPO.branch}`,
+        `${GITHUB_API}/repos/${REPO.owner}/${REPO.repo}/contents/${CONTENT_PATH}?ref=${REPO.branch}`,
         { headers: headers(t), cache: "no-store" },
       );
       const body = await res.json();
       if (!res.ok) {
         // A rejected token is not worth keeping — otherwise every visit
         // retries it and the page looks broken rather than logged out.
-        if (res.status === 401) window.localStorage.removeItem(TOKEN_KEY);
+        if (res.status === 401) window.localStorage.removeItem(TOKEN_STORE);
         setStatus({
           kind: "error",
           message:
@@ -879,7 +870,7 @@ export function AdminEditor({
       }
 
       setToken(t);
-      window.localStorage.setItem(TOKEN_KEY, t);
+      window.localStorage.setItem(TOKEN_STORE, t);
       setStatus({ kind: "idle" });
     } catch (e) {
       setStatus({
@@ -907,7 +898,7 @@ export function AdminEditor({
     setStatus({ kind: "working", message: "Checking for newer content…" });
     try {
       const check = await fetch(
-        `${API}/repos/${REPO.owner}/${REPO.repo}/contents/${CONTENT_PATH}?ref=${REPO.branch}`,
+        `${GITHUB_API}/repos/${REPO.owner}/${REPO.repo}/contents/${CONTENT_PATH}?ref=${REPO.branch}`,
         { headers: headers(token), cache: "no-store" },
       );
       const checkBody = await check.json();
@@ -1028,7 +1019,7 @@ export function AdminEditor({
       // Re-read so a second publish in the same session compares against what
       // is now in the repo rather than against the SHA we just replaced.
       const after = await fetch(
-        `${API}/repos/${REPO.owner}/${REPO.repo}/contents/${CONTENT_PATH}?ref=${REPO.branch}`,
+        `${GITHUB_API}/repos/${REPO.owner}/${REPO.repo}/contents/${CONTENT_PATH}?ref=${REPO.branch}`,
         { headers: headers(token), cache: "no-store" },
       );
       setSha((await after.json())?.sha ?? null);
@@ -1672,7 +1663,7 @@ export function AdminEditor({
                 <button
                   type="button"
                   onClick={() => {
-                    window.localStorage.removeItem(TOKEN_KEY);
+                    window.localStorage.removeItem(TOKEN_STORE);
                     setToken("");
                     setSha(null);
                     setStatus({ kind: "idle" });
