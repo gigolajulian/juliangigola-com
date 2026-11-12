@@ -385,9 +385,10 @@ export function ProofWall({
         <div aria-hidden className="pw-vig" />
         <div aria-hidden className="pw-grain" />
       </div>
+      {/* `scale` applies after the card's translate(-50%,-50%), so a centered origin slid a grown card left; origin x 0 is the card's own center there. */}
       <form
         className="proof-card pw-card"
-        style={tune ? { scale: tune.card, borderRadius: tune.cardRadius, transformOrigin: innerWidth <= 520 ? "50% 100%" : undefined } : undefined}
+        style={tune ? { scale: tune.card, borderRadius: tune.cardRadius, transformOrigin: innerWidth <= 520 ? "50% 100%" : "0 50%" } : undefined}
         data-ready={ready || undefined}
         data-out={flat || leaving || undefined}
         noValidate
