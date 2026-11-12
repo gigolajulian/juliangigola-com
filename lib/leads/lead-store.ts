@@ -5,7 +5,9 @@ import { notify, pushFor } from "./lead-push";
 import { appendLog, fresh } from "./activity-log";
 import { fold, leadStoreKey, leadSummary, type Change, type Lead, type LeadSummary, type Sent } from "./leads";
 
-type KV = Pick<NonNullable<CloudflareEnv["INBOX"]>, "get" | "put" | "list" | "delete">;
+/** The INBOX namespace as the lead, log, push, proof and sheet code use it. */
+export type InboxKV = Pick<NonNullable<CloudflareEnv["INBOX"]>, "get" | "put" | "list" | "delete">;
+type KV = InboxKV;
 /** Where leads live: the INBOX namespace, sealed with LEADS_KEY. */
 export type LeadStore = { INBOX?: KV; LEADS_KEY?: string; VAPID_KEY?: string };
 
@@ -15,9 +17,10 @@ export async function readLead(kv: KV, s: Sealer, id: string): Promise<Lead | nu
   return raw ? s.open<Lead>(raw) : null;
 }
 
-/** Every lead, opened in full: for the numbers and the export, never the list. */
+/** Every lead, opened in full: for the numbers and the export, never the list.
+    Throws if any one lead cannot be opened (a rotated LEADS_KEY), like `readLead`. */
 export async function everyLead(inbox: KV, seal: Sealer) {
-  const out: (Lead & { id?: string })[] = [];
+  const out: (Lead & { id: string })[] = [];
   let after: string | undefined;
   for (;;) {
     const listed = await inbox.list({ prefix: "lead:", cursor: after });
@@ -44,8 +47,8 @@ const SHRINK: ((m: LeadSummary) => LeadSummary)[] = [
 
 /** One lead, sealed, with its sealed summary as the metadata the list reads.
     The summary shrinks until it fits, so a long CJK name and message never
-    make the put throw and the lead go unrecorded. */
-/** `from`: the lead before this write (null for a new one); its new events go to the activity log. Left out (a move, a backfill), nothing is logged. */
+    make the put throw and the lead go unrecorded.
+    `from`: the lead before this write (null for a new one); its new events go to the activity log. Left out (a move, a backfill), nothing is logged. */
 export async function writeLead(kv: KV, s: Sealer, id: string, lead: Lead, from?: Lead | null): Promise<void> {
   let summary = leadSummary(lead);
   let meta = await s.seal(summary);

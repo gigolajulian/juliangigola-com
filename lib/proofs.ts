@@ -18,6 +18,7 @@
  * ─────────────────────────────────────────────────────────────── */
 
 import { looksLikeEmail } from "@/lib/inbox";
+import type { InboxKV as KV } from "@/lib/leads/lead-store";
 
 export type ProofFrame = {
   /** Short id, stable across publishes: the Lightroom photo's remote id. */
@@ -320,7 +321,6 @@ export function cleanSettings(given: Record<string, unknown>): Settings {
   return out;
 }
 
-type KV = Pick<NonNullable<CloudflareEnv["INBOX"]>, "get" | "put" | "list" | "delete">;
 type Seal = { seal(v: unknown): Promise<string>; open<T>(s: string): Promise<T> };
 
 export async function readProof(kv: KV, s: Seal, token: string): Promise<Proof | null> {

@@ -3,6 +3,7 @@ import { stripe } from "@/lib/stripe";
 import { recordLead } from "@/lib/leads/lead-store";
 import { alertLines, proofUrl, receiptMail, sendClient } from "@/lib/email/proof-mail";
 import { cardPrice, owed, publicId, viewerKey, writeProof, type Proof } from "@/lib/proofs";
+import type { InboxKV as KV } from "@/lib/leads/lead-store";
 
 /* ── a client sends their selects ─────────────────────────────────
  * Nothing to pay: locked and mailed at once. A shoot balance or extras: a Stripe Checkout session
@@ -14,7 +15,6 @@ import { cardPrice, owed, publicId, viewerKey, writeProof, type Proof } from "@/
  * ─────────────────────────────────────────────────────────────── */
 
 type Env = Pick<CloudflareEnv, "INBOX" | "LEADS_KEY" | "VAPID_KEY" | "CLIENT_EMAIL" | "EMAIL"> & { STRIPE_SECRET_KEY?: string };
-type KV = Pick<NonNullable<CloudflareEnv["INBOX"]>, "get" | "put" | "list" | "delete">;
 type Seal = { seal(v: unknown): Promise<string>; open<T>(s: string): Promise<T> };
 
 /** Lock the selects and send both mails. */
