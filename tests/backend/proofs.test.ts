@@ -125,13 +125,13 @@ describe("bank payments", () => {
     f.mockRestore();
   });
   it("clears or drops a settling payment", async () => {
-    const { settle } = await import("@/lib/proof-submit");
+    const { recheckTransfer } = await import("@/lib/proof-submit");
     const q = { ...p, paid: { session: "cs_test_B", amount: 3000, at: "", pending: true } };
     let f = reply({ payment_status: "paid", amount_total: 3000 });
-    expect((await settle("sk_test_x", q))?.paid).toMatchObject({ amount: 3000, pending: undefined });
+    expect((await recheckTransfer("sk_test_x", q))?.paid).toMatchObject({ amount: 3000, pending: undefined });
     f.mockRestore();
     f = reply({ payment_status: "unpaid", amount_total: 3000, payment_intent: { status: "requires_payment_method" } });
-    expect((await settle("sk_test_x", q))?.paid).toMatchObject({ amount: 0, failed: true });
+    expect((await recheckTransfer("sk_test_x", q))?.paid).toMatchObject({ amount: 0, failed: true });
     f.mockRestore();
   });
 });

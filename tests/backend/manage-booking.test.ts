@@ -18,7 +18,7 @@ const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
 vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env, ctx: { waitUntil: (p: Promise<unknown>) => p } }) }));
 const { POST: book } = await import("@/app/api/book/route");
 const { POST: change } = await import("@/app/api/booking/[id]/route");
-const { settle } = await import("@/lib/booking/deposit");
+const { bookDeposit } = await import("@/lib/booking/deposit");
 
 const SECRET = "booking-secret-for-tests";
 const OAUTH = JSON.stringify({ client_id: "a", client_secret: "b", refresh_token: "c" });
@@ -84,7 +84,7 @@ beforeEach(() => {
 /** A paid portraits session through the webhook; its id and token from the client's mail. */
 async function paid(start: string) {
   const meta = { kind: "deposit", engine: "own", slug: "portraits", start, timeZone: "America/Los_Angeles", name: "QA Test", email: "qa@example.com" };
-  expect(await settle(ctx.env as never, "pi_TEST1234567890", meta)).toBe("booked");
+  expect(await bookDeposit(ctx.env as never, "pi_TEST1234567890", meta)).toBe("booked");
   const link = String(client.sent.at(-1)!.text).match(/\/booking\/(\w+)\?t=([\w.-]+)&do=cancel/)!;
   return { id: link[1], t: link[2] };
 }

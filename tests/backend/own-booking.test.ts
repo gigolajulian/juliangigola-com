@@ -17,7 +17,7 @@ vi.setSystemTime(new Date("2026-11-11T20:00:00Z")); // a Wednesday, noon in San 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
 vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env, ctx: { waitUntil: (p: Promise<unknown>) => p } }) }));
 const { POST: book } = await import("@/app/api/book/route");
-const { settle } = await import("@/lib/booking/deposit");
+const { bookDeposit } = await import("@/lib/booking/deposit");
 
 // Wednesday 10 AM Pacific, a week out.
 const now = Date.now();
@@ -108,31 +108,31 @@ describe("POST /api/book (a free call)", () => {
   });
 });
 
-describe("settle (a paid session on the site's engine)", () => {
+describe("bookDeposit (a paid session on the site's engine)", () => {
   const META = { kind: "deposit", engine: "own", slug: "portraits", start: START, timeZone: "America/Los_Angeles", name: "QA Test", email: "qa@example.com" };
-  const env = () => ctx.env as unknown as Parameters<typeof settle>[0];
+  const env = () => ctx.env as unknown as Parameters<typeof bookDeposit>[0];
 
   it("books through the lock, files the deposit, and books once however often Stripe delivers", async () => {
-    expect(await settle(env(), "pi_TEST1234567890", META)).toBe("booked");
+    expect(await bookDeposit(env(), "pi_TEST1234567890", META)).toBe("booked");
     expect(inserts).toHaveLength(1);
     expect(inserts[0].body.description).toContain("pi_TEST1234567890");
     expect(kv.json(kv.puts.find((k) => k.startsWith("msg:"))!)).toMatchObject({ type: "booking", deposit: expect.stringContaining("pi_TEST1234567890") });
     expect(client.sent).toHaveLength(1);
     // A second delivery whose KV record was lost: the lock still knows the intent.
-    await settle({ ...env(), INBOX: new FakeKV() as never }, "pi_TEST1234567890", META);
+    await bookDeposit({ ...env(), INBOX: new FakeKV() as never }, "pi_TEST1234567890", META);
     expect(inserts).toHaveLength(1);
   });
 
   it("logs the $100 deposit on the client's activity log", async () => {
     ctx.env = { ...ctx.env, LEADS_KEY };
-    expect(await settle(env(), "pi_TEST1234567890", META)).toBe("booked");
+    expect(await bookDeposit(env(), "pi_TEST1234567890", META)).toBe("booked");
     const s = (await sealer(LEADS_KEY))!;
     expect((await readLog(kv as never, s, await s.id("qa@example.com"))).find((e) => e.kind === "payment")).toMatchObject({ amount: 100, note: "Deposit" });
   });
 
   it("refunds when the time is gone", async () => {
     busy = [{ start: START, end: new Date(Date.parse(START) + 36e5).toISOString() }];
-    expect(await settle(env(), "pi_TEST1234567890", META)).toBe("refunded");
+    expect(await bookDeposit(env(), "pi_TEST1234567890", META)).toBe("refunded");
     expect(inserts).toHaveLength(0);
     expect(stripeCalls.some((u) => u.endsWith("/refunds"))).toBe(true);
     expect(String(mail.sent[0].text)).toContain("The time was gone");
@@ -140,7 +140,7 @@ describe("settle (a paid session on the site's engine)", () => {
 
   it("refunds on a booking error and says what broke, not that the time was gone", async () => {
     const broken = { idFromName: (n: string) => n, get: () => ({ fetch: async () => { throw new Error("lock down"); } }) };
-    expect(await settle({ ...env(), BOOKING_LOCK: broken as never }, "pi_TEST1234567890", META)).toBe("refunded");
+    expect(await bookDeposit({ ...env(), BOOKING_LOCK: broken as never }, "pi_TEST1234567890", META)).toBe("refunded");
     expect(stripeCalls.some((u) => u.endsWith("/refunds"))).toBe(true);
     const text = String(mail.sent[0].text);
     expect(text).toContain("lock down");
