@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FakeKV, LEADS_KEY, reply } from "./fakes";
 import { sealer } from "@/lib/leads/lead-crypto";
-import { readProof, writeProof, type Proof } from "@/lib/proofs";
+import { readProof, writeProof, type Proof } from "@/lib/proofs/proof";
 
 /* The client's side of a proof gallery (`app/api/proof/[token]`): PATCH saves
    picks under the typed email, POST {confirm} locks the selects only for a paid

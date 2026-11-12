@@ -72,14 +72,14 @@
 
   // Worker logs, so `wrangler tail` has something to show when a Server
   // Action fails in production.
-  /* Client proof frames (`lib/proofs.ts`): private, no public URL. The
+  /* Client proof frames (`lib/proofs/proof.ts`): private, no public URL. The
      Worker serves them at /proof/<token>/f/<id> only while the gallery is
      open. Created 2026-11-06. */
   "r2_buckets": [
     { "binding": "PROOFS", "bucket_name": "jg-proofs" }
   ],
 
-  /* Cloudflare Images, for the proof watermark (`lib/proof-watermark.ts`):
+  /* Cloudflare Images, for the proof watermark (`lib/proofs/watermark.ts`):
      the wordmark is drawn into a frame once and the result kept in R2 next to
      the clean original. One transformation per frame, inside the free 5,000 a month. */
   "images": { "binding": "IMAGES" },

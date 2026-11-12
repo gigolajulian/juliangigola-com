@@ -39,7 +39,7 @@ export async function POST(request: Request) {
   const pi = event.data?.object;
   if (!pi?.id || !isIntentId(pi.id)) return text("No intent.", 400);
   // Every other payment on the account (invoices, payment links) is never refunded here, only logged on the client's lead
-  // and matched to an invoice. Proof checkouts log themselves (`lib/proof-submit.ts`), with the client's address.
+  // and matched to an invoice. Proof checkouts log themselves (`lib/proofs/submit.ts`), with the client's address.
   // The address: `receipt_email`, else the charge's billing details (Checkout and Payment Links keep it there).
   // A payer who is not a lead yet becomes one: they are a client now.
   if (!isDeposit(pi)) {

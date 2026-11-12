@@ -1,7 +1,7 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { sealer } from "@/lib/leads/lead-crypto";
-import { isToken, findProof } from "@/lib/proofs";
-import { shareCard } from "@/lib/proof-watermark";
+import { isToken, findProof } from "@/lib/proofs/proof";
+import { shareCard } from "@/lib/proofs/watermark";
 
 /* The gallery's link-preview card (`shareCard`). Only while the gallery is open and watermarked. */
 export const dynamic = "force-dynamic";

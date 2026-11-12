@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { checkout, checkPaid, paidFor, recheckTransfer } from "@/lib/proof-submit";
-import type { Proof } from "@/lib/proofs";
+import { checkout, checkPaid, paidFor, recheckTransfer } from "@/lib/proofs/submit";
+import type { Proof } from "@/lib/proofs/proof";
 
 /* Paying for selects: a Stripe session only counts when it is paid, for
    this gallery, for at least what is owed; a settling bank payment is
