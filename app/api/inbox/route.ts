@@ -236,7 +236,11 @@ export async function GET(request: Request) {
   return json({ rows, complete: true });
 }
 
-/** PATCH — mark one read or unread. The only thing a row's state can be. */
+/** PATCH: the desk's writes, told apart by the body's shape and taken in this order, so the first match wins:
+    `push` (a device subscribing or, with `off`, unsubscribing), `test: true` (a test notification),
+    `invoiceFrom` (the invoice's from block), `invoicePhoto` (a design B photo), `key: "lead:..."` (a lead's
+    patch, `patchLead`), `templates` (the reply templates), then `key: "msg:..."` with `read` (an enquiry
+    read or unread). Anything else is a 400. */
 export async function PATCH(request: Request) {
   const gate = await guard(request);
   if (gate.error) return gate.error;
