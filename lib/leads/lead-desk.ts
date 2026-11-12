@@ -1,5 +1,5 @@
 /**
- * The lead desk's non-UI half (components/leads-astryx.tsx and its
+ * The lead desk's non-UI half (components/leads/desk.tsx and its
  * screens): the admin fetch, the list filters and the
  * small formatters. Browser only: the fetch reads the key from localStorage.
  */

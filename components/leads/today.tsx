@@ -19,10 +19,10 @@ import { StatusDot } from "@astryxdesign/core/StatusDot";
 import { isLate, paperDue, shootTag, type LeadSummary } from "@/lib/leads/leads";
 import { adminCall, authed, ago, aside, at, cash, closed, inboxCall, needsMe, nextStep, now, pass, plusDays, renew, ymdPT } from "@/lib/leads/lead-desk";
 import { balance, dayB, dueOf, overdue, usd } from "@/lib/leads/invoice";
-import type { InvoiceRow } from "@/components/leads/invoices-astryx";
+import type { InvoiceRow } from "@/components/leads/invoices";
 import { TZ } from "@/lib/booking/booking-rules";
 
-/* Today's helpers, from the retired classic desk (`components/leads/today.tsx`). */
+/* Today's helpers, from the retired classic desk. */
 const clock = (ms: number) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit" }).format(ms);
 /** Where a move comes from, as the mock tags it. */
 export const source = (l: LeadSummary) => (renew(l) ? "Licence" : paperDue(l, now()) ? "Paperwork" : l.stage === "Invoiced" || l.stage === "Selecting" ? "Proofs" : "Leads");
@@ -71,7 +71,7 @@ function Tile({ k, v, sub, onClick }: { k: string; v: React.ReactNode; sub: Reac
   );
 }
 
-export function TodayAstryx({ leads, size, open, show }: { leads: LeadSummary[]; size: Size; open: (l: LeadSummary) => void; show: () => void }) {
+export function TodayDesk({ leads, size, open, show }: { leads: LeadSummary[]; size: Size; open: (l: LeadSummary) => void; show: () => void }) {
   const today = ymdPT(now());
   const monday = plusDays(today, -((new Date(`${today}T12:00:00Z`).getUTCDay() + 6) % 7));
   const week = daysOf(leads, monday, 7);

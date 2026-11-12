@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { CalendarAstryx } from "@/components/leads/calendar-astryx";
+import { CalendarDesk } from "@/components/leads/calendar";
 import type { LeadSummary } from "@/lib/leads/leads";
 
 afterEach(() => vi.unstubAllGlobals());
@@ -17,11 +17,11 @@ function stub() {
   return fetch;
 }
 
-describe("CalendarAstryx", () => {
+describe("CalendarDesk", () => {
   it("lists the lead's call beside the rest of hello@ in Bookings", async () => {
     stub();
     const open = vi.fn();
-    render(<CalendarAstryx leads={[ana]} size="mid" open={open} tab="bookings" setTab={() => {}} />);
+    render(<CalendarDesk leads={[ana]} size="mid" open={open} tab="bookings" setTab={() => {}} />);
     fireEvent.click(await screen.findByText("Ana"));
     expect(open).toHaveBeenCalledWith(ana);
     expect(await screen.findByText("Dentist")).toBeTruthy();
@@ -29,7 +29,7 @@ describe("CalendarAstryx", () => {
 
   it("blocks the picked day with the classic POST in Availability", async () => {
     const fetch = stub();
-    render(<CalendarAstryx leads={[]} size="mid" open={() => {}} tab="availability" setTab={() => {}} />);
+    render(<CalendarDesk leads={[]} size="mid" open={() => {}} tab="availability" setTab={() => {}} />);
     fireEvent.click(await screen.findByRole("button", { name: "Block the day" }));
     await waitFor(() => expect(fetch.mock.calls.some(([, i]) => i?.method === "POST")).toBe(true));
     const body = JSON.parse(String(fetch.mock.calls.find(([, i]) => i?.method === "POST")![1]!.body));

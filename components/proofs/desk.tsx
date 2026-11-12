@@ -5,7 +5,7 @@
  * proofs desk. /admin/proofs since 2026-11-11, so Astryx's CSS never
  * reaches the client's proof page or the classic desk. Same API as the
  * classic desk (/api/proof): list, open one, see the picks, create,
- * send, copy the link, and close a draft. Activity is components/proofs-activity-astryx.tsx.
+ * send, copy the link, and close a draft. Activity is components/proofs/activity.tsx.
  * ─────────────────────────────────────────────────────────────── */
 
 import "@astryxdesign/core/astryx.css";
@@ -30,7 +30,7 @@ import { ProgressBar } from "@astryxdesign/core/ProgressBar";
 import { KEY_STORE } from "@/lib/admin/admin-github";
 import { SignIn } from "@/components/leads/setup";
 import { api, closed, status, type Row } from "@/lib/proof-desk";
-import { ActivityAstryx } from "@/components/proofs-activity-astryx";
+import { ActivityDesk } from "@/components/proofs/activity";
 import { errorText, stampPT } from "@/lib/leads/lead-desk";
 import { TOKEN_STORE } from "@/lib/admin/admin-github";
 import { extras, stage, STAGES } from "@/lib/proofs";
@@ -50,7 +50,7 @@ function Tile({ k, v }: { k: string; v: string }) {
 }
 
 /** `embedded`: drawn inside the leads desk (its Theme and nav), with no shell of its own. */
-export function ProofsAstryx({ embedded = false }: { embedded?: boolean } = {}) {
+export function ProofsDesk({ embedded = false }: { embedded?: boolean } = {}) {
   const [list, setList] = React.useState<Row[] | null>(null);
   const [error, setError] = React.useState<string | null>(null);
   const [sel, setSel] = React.useState<string | null>(null);
@@ -301,7 +301,7 @@ function Gallery({ p, changed, onBack, gone }: { p: Row; changed: () => void; on
         </VStack>
       ) : null}
 
-      {tab === "activity" ? <ActivityAstryx p={p} /> : null}
+      {tab === "activity" ? <ActivityDesk p={p} /> : null}
 
       {tab === "selects" ? (
         p.selects.length ? (

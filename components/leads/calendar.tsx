@@ -26,7 +26,7 @@ import { startsFor, zoned } from "@/lib/booking/slots";
 import type { LeadSummary } from "@/lib/leads/leads";
 import { adminCall, errorText } from "@/lib/leads/lead-desk";
 
-/* The calendar's data and day maths, from the retired classic desk (`components/leads/lead-calendar.tsx`). */
+/* The calendar's data and day maths, from the retired classic desk. */
 export type Ev = { id: string; title: string; start: string; end: string; allDay: boolean; block: boolean; booking: boolean; free: boolean };
 export type Busy = { label: string; start: string; end: string };
 export type Extra = { label: string; src: string; ics: boolean; failed: boolean };
@@ -85,7 +85,7 @@ function useRange(from: string, to: string, tick: number) {
   return { data, error, byDay };
 }
 
-export function CalendarAstryx({ leads, size, open, tab, setTab }: { leads: LeadSummary[]; size: Size; open: (l: LeadSummary) => void; tab: "bookings" | "availability"; setTab: (t: "bookings" | "availability") => void }) {
+export function CalendarDesk({ leads, size, open, tab, setTab }: { leads: LeadSummary[]; size: Size; open: (l: LeadSummary) => void; tab: "bookings" | "availability"; setTab: (t: "bookings" | "availability") => void }) {
   const [now] = React.useState(() => Date.now());
   const today = dayOf(now);
   return (

@@ -15,7 +15,7 @@ import { Text } from "@astryxdesign/core/Text";
 import { Badge } from "@astryxdesign/core/Badge";
 import { Selector } from "@astryxdesign/core/Selector";
 import { Table } from "@astryxdesign/core/Table";
-import { Page } from "@/components/leads/lists-astryx";
+import { Page } from "@/components/leads/lists";
 import { Deliver, InvoiceSheetB, makePdf } from "@/components/leads/invoice";
 import { kindOf } from "@/components/leads/shared";
 import { balance, isPaid, subtotal, usd, type Invoice } from "@/lib/leads/invoice";
@@ -28,7 +28,7 @@ type Row = InvoiceRow & Record<string, unknown>;
 
 export const status = (i: Invoice) => (isPaid(i) ? "Paid" : i.sentAt ? "Sent" : "Unpaid");
 
-export function InvoicesAstryx({ leads, call, open, changed }: { leads: LeadSummary[]; call: Call; open: (l: LeadSummary) => void; changed: (l: Lead) => void }) {
+export function InvoicesDesk({ leads, call, open, changed }: { leads: LeadSummary[]; call: Call; open: (l: LeadSummary) => void; changed: (l: Lead) => void }) {
   const [rows, setRows] = React.useState<InvoiceRow[] | null>(null);
   const [note, setNote] = React.useState<string | null>(null);
   const [made, setMade] = React.useState<{ inv: Invoice; l: LeadSummary; file: File } | null>(null);

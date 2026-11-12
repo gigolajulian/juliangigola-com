@@ -195,7 +195,7 @@ export async function GET(request: Request) {
     return file(await clientsCsv(gate.inbox, seal, master), "leads");
   }
 
-  // The lead desk (`components/leads-astryx.tsx`): one record per person.
+  // The lead desk (`components/leads/desk.tsx`): one record per person.
   // Sealed with LEADS_KEY (`lib/leads/lead-crypto.ts`), opened here and only here.
   if (wanted?.startsWith("lead:") || url.searchParams.has("leads")) {
     const seal = await gate.seal;

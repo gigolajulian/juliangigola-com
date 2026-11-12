@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { LeadAstryx } from "@/components/leads/lead-astryx";
+import { LeadDesk } from "@/components/leads/lead";
 import type { Call } from "@/lib/leads/lead-desk";
 import type { Lead, LeadSummary } from "@/lib/leads/leads";
 
@@ -18,11 +18,11 @@ function setup() {
     return { lead: full };
   }) as unknown as Call & ReturnType<typeof vi.fn>;
   const onChange = vi.fn();
-  render(<LeadAstryx summary={summary} call={call} onChange={onChange} onBack={() => {}} reload={() => {}} templates={[]} others={[]} size="wide" />);
+  render(<LeadDesk summary={summary} call={call} onChange={onChange} onBack={() => {}} reload={() => {}} templates={[]} others={[]} size="wide" />);
   return { call, onChange };
 }
 
-describe("LeadAstryx", () => {
+describe("LeadDesk", () => {
   it("shows the lead, its reply link, quote and notes", async () => {
     setup();
     expect(screen.getByRole("heading", { level: 1, name: "Ana Ruiz" })).toBeTruthy();
