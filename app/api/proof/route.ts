@@ -32,9 +32,9 @@ const MAX_FRAME = 8 * 1024 * 1024;
 async function gate(request: Request) {
   const { env } = await getCloudflareContext({ async: true });
   const seal = sealer(env.LEADS_KEY);
+  // Who is asking first: what this build is missing is for /admin only.
+  if (!(await isAdmin(request, env.INBOX_KEY))) return { error: json({ error: "Not authorized." }, 401) };
   if (!env.INBOX || !env.PROOFS || !seal) return { error: json({ error: "Proofs need INBOX, PROOFS and LEADS_KEY on this build." }, 503) };
-  const ok = await isAdmin(request, env.INBOX_KEY);
-  if (!ok) return { error: json({ error: "Not authorized." }, 401) };
   return { env, kv: env.INBOX, r2: env.PROOFS, s: await seal };
 }
 
