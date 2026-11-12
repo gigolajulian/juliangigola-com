@@ -58,7 +58,7 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
   const swipe = React.useRef<number | null>(null);
   const thumb = (fid: string) => `/delivery/${id}/f/${fid}?w=800`;
   const total = finals.reduce((n, f) => n + f.bytes, 0);
-  const closes = initial.closesAt ? new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: "America/Los_Angeles" }).format(new Date(initial.closesAt)) : null;
+  const closes = initial.closesAt ? new Intl.DateTimeFormat("en-US", { month: "long", day: "numeric", timeZone: "America/Los_Angeles" }).format(new Date(initial.closesAt)) : null;
 
   const track = React.useCallback(
     (b: Record<string, unknown>) => fetch(`/api/proof/${id}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "track", ...b }), keepalive: true }).catch(() => {}),
@@ -87,7 +87,7 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
       <div className="proof">
         <SplitGate
           cover={`/delivery/${id}/f/${initial.cover ?? finals[0].id}`}
-          sub={`${finals.length} ${finals.length === 1 ? "photo" : "photos"}, full size${closes ? `. Open until ${closes}` : ""}.`}
+          sub={`Your photos at full resolution.${closes ? ` Save them by ${closes}.` : ""}`}
           onEnter={(address) => {
             setEmail(address);
             track({ email: address, kind: "open" });

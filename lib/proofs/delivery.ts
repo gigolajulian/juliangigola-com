@@ -7,16 +7,9 @@
  * ─────────────────────────────────────────────────────────────── */
 
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { sealer } from "@/lib/leads/lead-crypto";
+import { openDeliveryIn } from "@/lib/proofs/delivery-serve";
 import { crc32 } from "@/lib/zip";
-import { finalKey, isOpen, isStrongId, isToken, PREVIEW_W, readPublic, THUMB_W, type Proof } from "@/lib/proofs/proof";
-
-declare global {
-  /** Workers' own stream with a known length (R2 and a Content-Length need it). Not in this project's DOM types; Workers only, not `next dev`. */
-  class FixedLengthStream extends TransformStream<Uint8Array, Uint8Array> {
-    constructor(length: number);
-  }
-}
+import { finalKey, PREVIEW_W, THUMB_W } from "@/lib/proofs/proof";
 
 /** Under Cloudflare's 100 MB request body cap. A 61 MP JPEG at quality 100 is about 40-60 MB. */
 export const MAX_FINAL = 95 * 1024 * 1024;
@@ -60,21 +53,9 @@ export async function servedPreview(env: Env, token: string, id: string, small: 
   return kept || null;
 }
 
-/**
- * The gallery a delivery link opens, or null. By its public id only, and only a strong one (Send finals moves an old
- * Nov 11 id to a shoot id). Before Send finals Julian can look at it, as with proofs; after, it closes with the gallery.
- */
+/** `openDeliveryIn` with the request's own bindings, for Next's pages and routes. */
 export async function openDelivery(id: string) {
   const { env, ctx } = await getCloudflareContext({ async: true });
-  const seal = sealer(env.LEADS_KEY);
-  if (!isToken(id) || !isStrongId(id) || !env.INBOX || !env.PROOFS || !seal) return null;
-  const s = await seal;
-  const p = await readPublic(env.INBOX, s, id);
-  if (!p?.finals?.length || (p.deliveredAt && !isOpen(p))) return null;
-  return { env, ctx, s, p };
+  const g = await openDeliveryIn(env, id);
+  return g && { env, ctx, ...g };
 }
-
-export const finalOf = (p: Proof, id: string) => p.finals?.find((f) => f.id === id);
-
-/** A download header: an ASCII fallback name and the real one. */
-export const attachment = (name: string) => `attachment; filename="${name.replace(/[^\x20-\x7e]|["\\]/g, "_")}"; filename*=UTF-8''${encodeURIComponent(name)}`;

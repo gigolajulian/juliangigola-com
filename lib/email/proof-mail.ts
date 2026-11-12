@@ -15,6 +15,7 @@ const REPLY_TO = "hello@juliangigola.com";
 const SITE = "https://juliangigola.com";
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+const longDay = (iso: string) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, month: "long", day: "numeric" }).format(new Date(iso));
 const day = (iso: string) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, weekday: "short", month: "short", day: "numeric" }).format(new Date(iso));
 export const proofUrl = (token: string) => `${SITE}/proof/${token}`;
 
@@ -86,7 +87,7 @@ export function deliveryMail(p: Proof) {
   const terms: [string, string][] = [["Photos", String(n)], ["Format", "JPEG, full size"], ...(closes ? [["Open until", closes] as [string, string]] : [])];
   const html = page(
     "Your photos are ready",
-    `${n} photos, full size${closes ? `, open until ${closes}` : ""}.`,
+    `Your photos at full resolution.${p.closesAt ? ` Save them by ${longDay(p.closesAt)}.` : ""}`,
     `<tr><td class="mono ac" style="${label};padding-bottom:10px">Finals</td></tr>
 <tr><td class="mono fg" style="font-size:22px;line-height:1.3;color:${C.fg};padding-bottom:16px">Your photos are ready.</td></tr>
 <tr><td class="mono mu" style="font-size:13px;line-height:1.65;color:${C.mu};padding-bottom:${p.note ? 18 : 30}px">${esc(lead)}</td></tr>
