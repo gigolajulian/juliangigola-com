@@ -6,7 +6,8 @@
   // moved by hand — it is effectively permanent.
   "name": "juliangigola",
 
-  "main": ".open-next/worker.js",
+  // `worker.ts` wraps OpenNext's `.open-next/worker.js` (delivery downloads first).
+  "main": "worker.ts",
 
   // Must be 2024-09-23 or later for the adapter. `nodejs_compat` is not
   // optional: Next's server code reaches for Node built-ins, and without the
@@ -88,7 +89,10 @@
      script cannot fill Stripe with PaymentIntents. Counted per Cloudflare
      location, nothing stored. */
   "ratelimits": [
-    { "name": "DEPOSIT_LIMIT", "namespace_id": "1001", "simple": { "limit": 5, "period": 60 } }
+    { "name": "DEPOSIT_LIMIT", "namespace_id": "1001", "simple": { "limit": 5, "period": 60 } },
+    /* Delivery downloads (`app/delivery/[id]`), per address: a client saving photos one by one stays well under it,
+       a script trying links does not. */
+    { "name": "DOWNLOAD_LIMIT", "namespace_id": "1002", "simple": { "limit": 60, "period": 60 } }
   ],
 
   /* The booking lock (`worker/booking-lock.ts`): one instance, every

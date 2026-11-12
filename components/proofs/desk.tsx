@@ -35,11 +35,12 @@ import { api, cardCrop, closed, cropAt, status, type Row } from "@/lib/proofs/de
 import { ActivityDesk } from "@/components/proofs/activity";
 import { errorText, stampPT } from "@/lib/leads/lead-desk";
 import { TOKEN_STORE } from "@/lib/admin/admin-github";
-import { extras, stage, STAGES, THUMB_W, type CardCrop } from "@/lib/proofs/proof";
+import { extras, publicId, stage, STAGES, THUMB_W, type CardCrop } from "@/lib/proofs/proof";
 
 const CLASSIC = "/admin";
-// The small copy the client's grid uses: every frame on the desk is a thumbnail.
-const frame = (p: Row, id: string) => `/proof/${p.token}/f/${id}?w=${THUMB_W}`;
+// The small copy the client's grid uses: every frame on the desk is a thumbnail. Once delivered the proof copies are gone: the finals' small copies stand in.
+const frame = (p: Row, id: string) => (p.deliveredAt ? `/delivery/${publicId(p)}/f/${id}?w=${THUMB_W}` : `/proof/${p.token}/f/${id}?w=${THUMB_W}`);
+const first = (p: Row) => (p.deliveredAt ? p.finals?.[0] : p.frames[0]);
 
 function Tile({ k, v }: { k: string; v: string }) {
   return (
@@ -133,9 +134,9 @@ export function ProofsDesk({ embedded = false }: { embedded?: boolean } = {}) {
             key={p.token}
             isSelected={p.token === cur?.token}
             onClick={() => { setSel(p.token); setMaking(false); }}
-            startContent={<Thumbnail src={p.frames[0] ? frame(p, p.frames[0].id) : undefined} alt="" label={p.name} />}
+            startContent={<Thumbnail src={first(p) ? frame(p, first(p)!.id) : undefined} alt="" label={p.name} />}
             label={p.name}
-            description={[`${p.frames.length} frames`, p.viewers ? ((n) => `${n} ${n === 1 ? "email" : "emails"}`)(Object.keys(p.viewers).length) : null, p.sentAt ? `sent ${stampPT(p.sentAt)}` : null].filter(Boolean).join(" · ")}
+            description={[`${p.frames.length} frames`, p.finals?.length ? `${p.finals.length} finals` : null, p.viewers ? ((n) => `${n} ${n === 1 ? "email" : "emails"}`)(Object.keys(p.viewers).length) : null, p.sentAt ? `sent ${stampPT(p.sentAt)}` : null].filter(Boolean).join(" · ")}
             endContent={<Badge label={status(p)} variant={p.submittedAt && !p.pulledAt ? "blue" : "gray"} />}
           />
         ))}
@@ -208,7 +209,7 @@ function Gallery({ p, changed, onBack, gone }: { p: Row; changed: () => void; on
   const changedSet = set.balance !== String(p.balance ?? 0) || set.included !== String(p.included) || set.price !== String(p.price) || set.days !== String(p.days);
   const people = Object.keys(p.viewers ?? {}).length;
   const x = extras(p.selects.length, p.included, p.price);
-  const thumbs = (p.submittedAt ? p.selects : p.frames.map((f) => f.id)).slice(0, 6);
+  const thumbs = (p.deliveredAt ? (p.finals ?? []).map((f) => f.id) : p.submittedAt ? p.selects : p.frames.map((f) => f.id)).slice(0, 6);
   const file = (id: string) => p.frames.find((f) => f.id === id)?.file ?? id;
   const at = STAGES.indexOf(stage(p));
 
@@ -269,6 +270,8 @@ function Gallery({ p, changed, onBack, gone }: { p: Row; changed: () => void; on
           {p.frames.length} frames · {p.included} included · ${p.price} each extra
           {p.sentAt ? ` · sent ${stampPT(p.sentAt)}` : ` · open ${p.days} days once sent`}
           {p.closesAt ? ` · closes ${stampPT(p.closesAt)}` : ""}
+          {p.finals?.length ? ` · ${p.finals.length} finals${p.deliveredAt ? ` sent ${stampPT(p.deliveredAt)}` : " ready"}` : ""}
+          {p.firstDownloadAt ? ` · first download ${stampPT(p.firstDownloadAt)}` : ""}
         </Text>
       </VStack>
       {thumbs.length ? (
@@ -345,7 +348,8 @@ function Gallery({ p, changed, onBack, gone }: { p: Row; changed: () => void; on
       <HStack gap={2} wrap="wrap">
         {!p.sentAt && !preview ? <Button label="Preview email" variant="primary" isDisabled={!p.email || !p.frames.length} clickAction={showPreview} /> : null}
         {!p.sentAt && preview ? <Button label={`Send to ${p.email}`} variant="primary" clickAction={() => act({ action: "send" }, "POST", "Sent.")} /> : null}
-        {p.sentAt && !p.submittedAt ? <Button label="Extend 7 days" clickAction={() => act({ action: "extend", days: 7 }, "POST", "Seven more days.")} /> : null}
+        {p.finals?.length && !p.deliveredAt ? <Button label={`Send finals to ${p.email ?? "…"}`} variant="primary" isDisabled={!p.email} clickAction={() => (confirm(`Send ${p.finals!.length} finals to ${p.email}? The gallery becomes the delivery, open 60 days, and the proof previews are removed.`) ? act({ action: "deliver" }, "POST", "Finals sent.") : undefined)} /> : null}
+        {(p.sentAt && !p.submittedAt) || p.deliveredAt ? <Button label="Extend 7 days" clickAction={() => act({ action: "extend", days: 7 }, "POST", "Seven more days.")} /> : null}
         {p.submittedAt ? <Button label="Copy file names" onClick={() => copy(p.selects.map(file).join("\n"), "File names")} /> : null}
         {p.submittedAt ? <Button label="Reopen for changes" clickAction={reopen} /> : null}
         <Button label="Open gallery" href={p.url} target="_blank" rel="noreferrer" />

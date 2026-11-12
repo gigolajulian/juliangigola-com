@@ -33,7 +33,9 @@ export type LeadEvent = {
     // Julian's own hand (`lib/leads/lead-crm.ts`): added, details changed, merged, a reminder, a quote.
     | "added" | "edit" | "merge" | "remind" | "quote" | "invoice"
     // From outside or by hand (2026-11-10): Stripe payments and refunds, a client moving or cancelling, selects sent, an invoice settled.
-    | "payment" | "refund" | "reschedule" | "cancel" | "selects" | "invoice-paid";
+    | "payment" | "refund" | "reschedule" | "cancel" | "selects" | "invoice-paid"
+    // The client's first download of their finals (2026-11-12): Delivered.
+    | "download";
   /* "proofs": they opened a proof gallery, ref = its token so each gallery is one line. */
   /* "replied" / "wrote": mail between hello@ and them in Gmail, ref = the Gmail message id (`lib/leads/gmail-sync.ts`). */
   /** The raw row (`msg:` key), Cal.com uid or Stripe intent, so a retry folds in once. */
@@ -153,6 +155,7 @@ const asks: Partial<Record<LeadEvent["kind"], Stage>> = {
   inquiry: "Inquiry",
   call: "Call booked",
   booking: "Confirmed",
+  download: "Delivered",
 };
 
 export type Change = {

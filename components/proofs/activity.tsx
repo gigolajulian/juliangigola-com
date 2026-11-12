@@ -27,7 +27,7 @@ export function ActivityDesk({ p, changed }: { p: Row; changed: () => void }) {
   if (!people.length) return <Text type="code" size="sm" color="secondary">Nobody has opened it yet. Each address typed at the gate shows here.</Text>;
   const file = (id?: string) => (id ? p.frames.find((f) => f.id === id)?.file ?? id : "");
   const num = (id?: string) => (id ? `#${p.frames.findIndex((f) => f.id === id) + 1}` : "");
-  const SAID: Record<ViewerEvent["kind"], (id?: string) => string> = { open: () => "opened", pick: (id) => `picked ${num(id)}`, unpick: (id) => `unpicked ${num(id)}`, review: () => "reviewed", pay: () => "paid", send: () => "sent selects" };
+  const SAID: Record<ViewerEvent["kind"], (id?: string) => string> = { open: () => "opened", pick: (id) => `picked ${num(id)}`, unpick: (id) => `unpicked ${num(id)}`, review: () => "reviewed", pay: () => "paid", send: () => "sent selects", download: (id) => (id === "all" ? "downloaded all" : `saved ${p.finals?.find((f) => f.id === id)?.file ?? id}`) };
   const tally = new Map<string, number>();
   for (const [, v] of people) for (const id of v.picks) tally.set(id, (tally.get(id) ?? 0) + 1);
   const top = [...tally].sort((a, b) => b[1] - a[1]).slice(0, 6);

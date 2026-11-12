@@ -49,7 +49,7 @@ export function SmoothScroll() {
     // Skip if reduced motion is requested
     if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     // Native scroll in proof galleries: Lenis's glide read as a delay on a Mac trackpad (Julian 2026-11-10).
-    if (location.pathname.startsWith("/proof/")) return;
+    if (location.pathname.startsWith("/proof/") || location.pathname.startsWith("/delivery/")) return;
 
     // A lerp follows the wheel as it moves instead of replaying a fixed
     // 1.2s glide on every event, which read as lag on a trackpad (2026-10-30).
