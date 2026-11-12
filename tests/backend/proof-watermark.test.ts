@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { CARD, markBox, servedFrame, servedSize, shareCard } from "@/lib/proof-watermark";
+import { CARD, markBox, servedFrame, servedSize, shareCard } from "@/lib/proofs/watermark";
 
 /** R2 in memory, and an Images binding that records what it was asked to draw. */
 function fakeEnv(stored: Record<string, string>) {

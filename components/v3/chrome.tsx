@@ -308,7 +308,7 @@ function useScrub(on: boolean, hdr: React.RefObject<HTMLElement | null>, setLand
   return active;
 }
 
-/** Client proof galleries carry their own bar (`components/proof-gallery.tsx`). */
+/** Client proof galleries carry their own bar (`components/proofs/gallery.tsx`). */
 export function V3Header() {
   return usePathname().startsWith("/proof/") ? null : <SiteHeader />;
 }

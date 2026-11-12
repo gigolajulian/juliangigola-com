@@ -1,7 +1,7 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { sealer } from "@/lib/leads/lead-crypto";
-import { isFrameId, isOpen, isToken, findProof, THUMB_W } from "@/lib/proofs";
-import { servedSize } from "@/lib/proof-watermark";
+import { isFrameId, isOpen, isToken, findProof, THUMB_W } from "@/lib/proofs/proof";
+import { servedSize } from "@/lib/proofs/watermark";
 
 /* One proof frame from the private bucket, only while its gallery is open.
    Cached in the visitor's browser only: a closed gallery stops serving on
