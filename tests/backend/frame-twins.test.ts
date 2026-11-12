@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import data from "./frame-twins.json";
-import { TWIN_THRESHOLD, backToBack, twinGroups, twinScore, twinStats } from "./frame-twins";
+import data from "@/lib/frame-twins.json";
+import { TWIN_THRESHOLD, backToBack, twinGroups, twinScore, twinStats } from "@/lib/frame-twins";
 
 // The strongest stored pair: certainly a twin, whichever set it is in.
 const [pair] = Object.values(data.sets as Record<string, { pairs: Record<string, number> }>)

@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { CURSOR, mailChanges, syncGmail, type Msg } from "./gmail-sync";
-import { forgetToken } from "../booking/gcal";
-import { fold, leadStoreKey, type Lead } from "./leads";
-import { recordLead, writeLead } from "./lead-store";
-import { canonical, sealer } from "./lead-crypto";
+import { CURSOR, mailChanges, syncGmail, type Msg } from "@/lib/leads/gmail-sync";
+import { forgetToken } from "@/lib/booking/gcal";
+import { fold, leadStoreKey, type Lead } from "@/lib/leads/leads";
+import { recordLead, writeLead } from "@/lib/leads/lead-store";
+import { canonical, sealer } from "@/lib/leads/lead-crypto";
 
 const at = (h: number) => new Date(Date.UTC(2026, 10, 2, h)).toISOString();
 const email = "maya@example.com";

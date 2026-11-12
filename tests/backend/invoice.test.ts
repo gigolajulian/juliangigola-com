@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { AMOUNT } from "../booking/deposit";
-import { balance, cleanInvoice, dayB, DEPOSIT, dueOf, invoiceNo, MAX_ROWS_B, mmyy, namesInvoice, overdue, usdB, type InvoiceB } from "./invoice";
+import { AMOUNT } from "@/lib/booking/deposit";
+import { balance, cleanInvoice, dayB, DEPOSIT, dueOf, invoiceNo, MAX_ROWS_B, mmyy, namesInvoice, overdue, usdB, type InvoiceB } from "@/lib/leads/invoice";
 
 describe("invoice", () => {
   it("numbers by month: 1126, 1126-2, 1126-3", () => {

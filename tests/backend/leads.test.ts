@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { NUDGES, REMIND_MAX, shootTag, backfillLead, fold, isLate, paperDue, quoteNudge, leadStoreKey, myMove, leadSummary, renewDue, trashDaysLeft, type InboxRow, type Lead, type LeadSummary } from "./leads";
-import { recordLead, writeLead } from "./lead-store";
-import { sealer } from "./lead-crypto";
+import { NUDGES, REMIND_MAX, shootTag, backfillLead, fold, isLate, paperDue, quoteNudge, leadStoreKey, myMove, leadSummary, renewDue, trashDaysLeft, type InboxRow, type Lead, type LeadSummary } from "@/lib/leads/leads";
+import { recordLead, writeLead } from "@/lib/leads/lead-store";
+import { sealer } from "@/lib/leads/lead-crypto";
 
 const at = (h: number) => new Date(Date.UTC(2026, 10, 2, h)).toISOString();
 const email = "Maya@Example.com";
