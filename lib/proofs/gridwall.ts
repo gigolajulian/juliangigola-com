@@ -10,7 +10,7 @@ type Screen = { w: number; h: number; scale: number; x: number; y: number; cols?
 export const GRIDWALL_SCREENS: Record<string, Screen> = {
   "phone-portrait": { w: 390, h: 844, scale: 0.86, x: -111, y: 7, card: 1.04 },
   "phone-landscape": { w: 844, h: 390, scale: 0.63, x: -78, y: 0 },
-  "ipad-portrait": { w: 820, h: 1180, scale: 0.95, x: -43, y: 0 },
+  "ipad-portrait": { w: 820, h: 1180, scale: 1.05, x: -43, y: 0 },
   "ipad-landscape": { w: 1180, h: 820, scale: 1.24, x: -59, y: 0 },
   "laptop-16x10": { w: 1440, h: 900, scale: 1.4, x: -157, y: 0 },
   "1080p-16x9": { w: 1920, h: 1080, scale: 1.76, x: -209, y: 0 },
