@@ -3,7 +3,7 @@ import { lockOp, parseBooking, recordBooking, type BookResult } from "@/lib/book
 import { manageLinks } from "@/lib/booking/booking-token";
 import { sendConfirm } from "@/lib/booking/confirm";
 import { logMail } from "@/lib/leads/lead-store";
-import { json } from "@/lib/http";
+import { bodyOf, json } from "@/lib/http";
 
 // Errors answer { error: string }, as every other booking route does.
 
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
   if (!(await env.DEPOSIT_LIMIT.limit({ key: `book:${ip}` })).success)
     return json({ error: "Too many tries. Wait a minute." }, 429);
 
-  const raw = (await request.json().catch(() => null)) as { via?: unknown } | null;
+  const raw = await bodyOf(request);
   const parsed = parseBooking(raw, true);
   if (!parsed.ok) return json({ error: parsed.reason }, 400);
   const b = parsed.booking;

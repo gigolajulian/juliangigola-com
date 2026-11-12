@@ -2,7 +2,7 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { liveHours, parseBooking } from "@/lib/booking/booking-engine";
 import { AMOUNT, CURRENCY, intentForm, isSlotOpen } from "@/lib/booking/deposit";
 import { PAYMENTS_DOWN, stripe } from "@/lib/stripe";
-import { json } from "@/lib/http";
+import { bodyOf, json } from "@/lib/http";
 
 /* ── a deposit starts ──────────────────────────────────────────────
  * The card posts the booking it wants; this checks the time is still
@@ -21,7 +21,7 @@ export async function POST(request: Request) {
   if (!(await env.DEPOSIT_LIMIT.limit({ key: ip })).success)
     return json({ error: "Too many tries. Wait a minute." }, 429);
 
-  const parsed = parseBooking(await request.json().catch(() => null));
+  const parsed = parseBooking(await bodyOf(request));
   if (!parsed.ok) return json({ error: parsed.reason }, 400);
   const b = parsed.booking;
 
