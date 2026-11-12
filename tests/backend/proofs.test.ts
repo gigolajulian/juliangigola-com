@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { paidFor } from "@/lib/proof-submit";
-import { cardPrice, cleanNotes, coverFrame, cleanSelects, cleanSettings, extras, isOpen, isToken, lookStarts, newToken, owed, shotOrder, stage } from "@/lib/proofs";
+import { cardPrice, cleanNotes, coverFrame, cleanSelects, cleanSettings, extras, isOpen, isToken, lookStarts, newToken, proofDay, proofId, owed, shotOrder, stage } from "@/lib/proofs";
 
 const frames = ["a", "b", "c"].map((id) => ({ id, file: `${id}.jpg`, w: 1, h: 1 }));
 
@@ -46,6 +46,19 @@ describe("proofs", () => {
     const t = newToken();
     expect(isToken(t)).toBe(true);
     expect(new Set(Array.from({ length: 200 }, newToken)).size).toBe(200);
+  });
+  it("makes date ids by Pacific day with the next free counter", () => {
+    // 2026-11-07 06:30 UTC is still Nov 6 in San Jose.
+    expect(proofDay(Date.UTC(2026, 10, 7, 6, 30))).toBe("11062026");
+    expect(proofId("11062026", [], "k7q2")).toBe("11062026-01-k7q2");
+    expect(proofId("11062026", ["11062026-01-aaaa", "11062026-03-bbbb", "11052026-07-cccc", "Ab3dEf6hJk9mNp2q"], "zz00")).toBe("11062026-04-zz00");
+    const t = proofId("11062026", []);
+    expect(isToken(t)).toBe(true);
+  });
+  it("accepts both token formats and nothing looser", () => {
+    expect(isToken("Ab3dEf6hJk9mNp2q")).toBe(true);
+    expect(isToken("11062026-01-k7q2")).toBe(true);
+    for (const bad of ["11062026-01", "11062026-01-K7Q2", "11062026-1-k7q2", "11062026-01-k7q", "1106202-01-k7q2", "11062026-01-k7q2x", "Ab3dEf6hJk9mNp2", "../11062026-01-k7q2", 42, null]) expect(isToken(bad)).toBe(false);
   });
   it("keeps selects to real frames, once each, in pick order", () => {
     expect(cleanSelects(["c", "x", "a", "c", 3], frames)).toEqual(["c", "a"]);
