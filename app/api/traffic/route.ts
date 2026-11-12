@@ -8,7 +8,7 @@ import { json } from "@/lib/http";
  * real visits (Web Analytics, which only counts pages that ran in a
  * browser) and, for the last day, how many page requests were bots.
  *
- * Behind the same gate as the rest of /admin: a GitHub token that can push.
+ * Behind the same gate as the rest of /admin (`isAdmin`): the inbox key or a GitHub token that can push.
  * The Cloudflare token stays on the Worker (`CF_ANALYTICS_TOKEN`) and only
  * ever reads analytics.
  * ─────────────────────────────────────────────────────────────── */
