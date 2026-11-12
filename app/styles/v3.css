@@ -228,7 +228,7 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .a-seq .col:nth-child(2) figure.m-only .ph{aspect-ratio:3/4}
 /* iOS zooms into a field under 16px and the page then pans sideways. */
 .v3 :is(input,textarea,select){font-size:max(16px,1em)}}
-.v3 .site-hdr{position:fixed;left:0;right:0;top:0;z-index:30;display:flex;justify-content:space-between;align-items:center;padding:14px var(--gr) 14px var(--g);background:linear-gradient(color-mix(in srgb,var(--bg) 89%,transparent),color-mix(in srgb,var(--bg) 30%,transparent));-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);border-bottom:1px solid color-mix(in srgb,var(--line) 40%,transparent);transform:translateY(-100%);opacity:0;pointer-events:none;transition:transform .25s ease,opacity .2s ease}
+.v3 .site-hdr{position:fixed;left:0;right:0;top:0;z-index:30;display:flex;justify-content:space-between;align-items:center;padding:14px var(--gr) 14px var(--g);background:linear-gradient(var(--bg),color-mix(in srgb,var(--bg) 53%,transparent));-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);border-bottom:1px solid color-mix(in srgb,currentColor 7%,transparent);transform:translateY(-100%);opacity:0;pointer-events:none;transition:transform .25s ease,opacity .2s ease}
 .v3 .site-hdr.show{transform:none;opacity:1;pointer-events:auto}
 .v3 .site-wm{font-size:20px;letter-spacing:-.045em;text-transform:none}
 .v3 .site-hdr .links{display:flex;gap:28px}
@@ -1485,7 +1485,7 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
    chips and view buttons read as one glass bar the work scrolls under (Julian, 2026-10-28).
    Phones and iPads keep the tuck above. */
 @media (min-width:701px) and (hover:hover) and (pointer:fine){
-:root[data-pf] .v3 .site-hdr{background:linear-gradient(color-mix(in srgb,var(--bg) 89%,transparent),color-mix(in srgb,var(--bg) 30%,transparent));-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+:root[data-pf] .v3 .site-hdr{background:linear-gradient(var(--bg),color-mix(in srgb,var(--bg) 53%,transparent));-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
 .v3 #p-work .whead{display:block;margin-top:32px;padding-bottom:14px;border-bottom:1px solid var(--line)}
 .v3 #p-work:is(.strip-on,.color-on) .whead{margin-top:8px}
 .v3 #p-work .whead .wtools{margin-top:0}
