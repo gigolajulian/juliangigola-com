@@ -54,7 +54,8 @@ export async function POST(request: Request) {
     }
     return text("ok", 200);
   }
-  const status = await settle({ INBOX: env.INBOX, STRIPE_SECRET_KEY: env.STRIPE_SECRET_KEY, EMAIL: env.EMAIL, CLIENT_EMAIL: env.CLIENT_EMAIL, GCAL_OAUTH: env.GCAL_OAUTH, BOOKING_LOCK: env.BOOKING_LOCK, NOTION_TOKEN: env.NOTION_TOKEN, BOOKING_SECRET: env.BOOKING_SECRET }, pi.id, pi.metadata);
+  // The whole env: a hand-picked copy once dropped LEADS_KEY, so no deposit reached the lead's log.
+  const status = await settle({ ...env, INBOX: env.INBOX, STRIPE_SECRET_KEY: env.STRIPE_SECRET_KEY }, pi.id, pi.metadata);
   // Still booking from an earlier delivery: Stripe retries until it ends or hello@ is warned.
   if (status === "booking") return text("Still booking.", 503);
   return text("ok", 200);
