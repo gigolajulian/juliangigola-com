@@ -11,6 +11,10 @@ export const noop = () => () => {};
 export const KEEP = 60_000;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const recent = new Map<string, { at: number; got: Promise<[any, any]> }>();
+/** The key an event's times are kept under. */
+export const recentKey = (username: string, slug: string, tz: string) => `${username}/${slug}/${tz}`;
+/** Forget an event's kept times, so the next picker asks fresh (a time just taken). */
+export const forgetTimes = (username: string, slug: string, tz: string) => void recent.delete(recentKey(username, slug, tz));
 export const DAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 export const WEEKDAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 export const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
