@@ -53,4 +53,14 @@ describe("/api/proof/[token]", () => {
     const s = await seal();
     expect((await readLog(kv as never, s, await s.id("a@example.com"))).find((e) => e.kind === "selects")).toMatchObject({ note: "2 frames, Test" });
   });
+
+  it("records a gate open as a lead, but not from a reserved test address", async () => {
+    const leads = async () => (await kv.list({ prefix: "lead:" })).keys.length;
+    expect((await post({ action: "track", kind: "open", email: "qa@example.com" })).status).toBe(200);
+    expect((await post({ action: "track", kind: "open", email: "qa@studio.test" })).status).toBe(200);
+    expect(await leads()).toBe(0);
+    expect((await stored()).viewers).toBeTruthy();
+    expect((await post({ action: "track", kind: "open", email: "maya@gmail.com" })).status).toBe(200);
+    expect(await leads()).toBe(1);
+  });
 });

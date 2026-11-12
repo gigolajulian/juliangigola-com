@@ -16,7 +16,7 @@
  * Where the editor keeps the GitHub token in the browser. Named here, not
  * in the editor, because the inbox reads it too — the token proves the
  * caller can push to this repository, which is the one thing that should
- * open the inbox. See `app/api/inbox/route.ts`.
+ * open the inbox. See `isAdmin` in `lib/vouch.ts`.
  */
 export const TOKEN_STORE = "jg-admin-token";
 
@@ -25,7 +25,7 @@ export const KEY_STORE = "jg-inbox-key";
 
 /**
  * What to send: the inbox key if one was pasted, else the GitHub token the
- * editor signed in with. The API takes either — see `canPush` in the route.
+ * editor signed in with. The API takes either: see `isAdmin` in `lib/vouch.ts`.
  */
 export const credentials = (key: string): Record<string, string> => {
   if (key) return { "x-inbox-key": key };

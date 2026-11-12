@@ -1,5 +1,5 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { authorised, bearer, canPush } from "@/lib/vouch";
+import { bearer, isAdmin } from "@/lib/vouch";
 import { SAFE_IMAGE, summary, type Enquiry, type Summary } from "@/lib/inbox";
 import { backfillLead, fold, PAPER, REMIND_MAX, STAGES, trashDaysLeft, type InboxRow, type Lead, type LeadPatch, type LeadSummary, type Paper, type Stage } from "@/lib/leads/leads";
 import { everyLead, readLead, writeLead } from "@/lib/leads/lead-store";
@@ -88,23 +88,10 @@ async function guard(request: Request) {
       ),
     };
   }
-  // Either credential opens it: the inbox key, or a GitHub token that can
-  // push to the repository. The messages differ so a wrong one can be told
-  // from a missing one — but never which characters were wrong.
-  if (rig.key && (await authorised(request, rig.key)))
-    return { inbox: rig.inbox, seal: rig.seal, notion: rig.notion, vapid: rig.vapid, env: rig.env };
-
-  const token = bearer(request);
-  if (token) {
-    if (await canPush(token)) return { inbox: rig.inbox, seal: rig.seal, notion: rig.notion, vapid: rig.vapid, env: rig.env };
-    return {
-      error: json(
-        { error: "GitHub did not accept that token for this repository." },
-        401,
-      ),
-    };
-  }
-  return { error: json({ error: "Not authorized." }, 401) };
+  // The admin gate (`isAdmin`): the inbox key, or a GitHub token that can push.
+  // The messages differ so a wrong token can be told from a missing one, never which characters were wrong.
+  if (await isAdmin(request, rig.key)) return { inbox: rig.inbox, seal: rig.seal, notion: rig.notion, vapid: rig.vapid, env: rig.env };
+  return { error: json({ error: bearer(request) ? "GitHub did not accept that token for this repository." : "Not authorized." }, 401) };
 }
 
 /**
@@ -479,14 +466,14 @@ async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: Await
   if (quote !== undefined) lead = { ...lead, quote: quote ?? undefined, events: [...lead.events, { at, kind: "quote" as const, note: quote === null ? "" : String(quote) }].slice(-50) };
   if (typeof lostReason === "string") lead = { ...lead, lostReason: cut(lostReason, 80) };
   if (licence !== undefined) lead = { ...lead, licence: licence ? { use: cut(licence.use, 80) ?? "", end: licence.end! } : undefined };
-  // Another record of the same person folded into this one; the other goes for good.
+  // Another record of the same person folded into this one; the other goes for good, once this one is written.
+  let merged: string | undefined;
   if (typeof mergeFrom === "string" && mergeFrom.startsWith("lead:") && mergeFrom !== key) {
     const other = await readLead(inbox, seal, mergeFrom.slice(5));
     if (!other) return json({ error: "Gone." }, 404);
     lead = merge(lead, other, at);
     from = { ...from, events: [...from.events, ...other.events] };
-    await adoptLog(inbox, seal, id, mergeFrom.slice(5), lead).catch((e: unknown) => console.error("activity log merge", String(e)));
-    await bury(inbox, mergeFrom);
+    merged = mergeFrom;
   }
   // A new invoice takes the month's next number: 1126, then 1126-2.
   // shortcut: read then write the count is not atomic; one person makes these by hand, a Durable Object if that changes.
@@ -516,5 +503,9 @@ async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: Await
   }
   for (const k of Object.keys(lead) as (keyof Lead)[]) if (lead[k] === undefined) delete lead[k];
   await writeLead(inbox, seal, id, lead, from);
+  if (merged) {
+    await adoptLog(inbox, seal, id, merged.slice(5), lead).catch((e: unknown) => console.error("activity log merge", String(e)));
+    await bury(inbox, merged);
+  }
   return json({ lead });
 }
