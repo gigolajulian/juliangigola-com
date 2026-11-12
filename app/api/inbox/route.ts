@@ -174,7 +174,7 @@ export async function GET(request: Request) {
     if (!seal) return noSeal();
     const invoices = (await everyLead(gate.inbox, seal))
       .filter((l) => !l.trashedAt)
-      .flatMap((l) => (l.invoices ?? []).map((i) => ({ ...i, lead: l.id!, name: l.name })))
+      .flatMap((l) => (l.invoices ?? []).map((i) => ({ ...i, lead: l.id, name: l.name })))
       .sort((a, b) => b.at.localeCompare(a.at));
     return json({ invoices });
   }
