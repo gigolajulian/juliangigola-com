@@ -1,6 +1,6 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { isDeposit, isIntentId, refKey } from "@/lib/booking/deposit";
-import { stripe } from "@/lib/stripe";
+import { PAYMENTS_DOWN, stripe } from "@/lib/stripe";
 import { MAX_REFS, takePicks, takeUploads } from "@/lib/inbox";
 import { json } from "@/lib/http";
 
@@ -53,8 +53,10 @@ export async function PUT(request: Request, ctx: { params: Promise<{ id: string 
   let pi: { amount?: number; currency?: string; metadata?: { [k: string]: string } };
   try {
     pi = await stripe(env.STRIPE_SECRET_KEY, `/payment_intents/${id}`);
-  } catch {
-    return json({ error: "Unknown deposit." }, 404);
+  } catch (e) {
+    // As in GET: only Stripe's 404 means no such deposit; anything else is Stripe being down.
+    if ((e as { status?: number }).status === 404) return json({ error: "Unknown deposit." }, 404);
+    return json({ error: PAYMENTS_DOWN }, 502);
   }
   if (!isDeposit(pi) || pi.metadata?.outcome) return json({ error: "Unknown deposit." }, 404);
 
