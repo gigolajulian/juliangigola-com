@@ -12,7 +12,7 @@ import { fmt } from "@/components/v3/flow";
 import type { Shell } from "@/components/v3/flow";
 import { GESTURE_GAP_MS } from "@/components/strip/shared";
 import { looksLikeEmail } from "@/lib/inbox";
-import { AHEAD, fromIso, iso, minutesOf, recent, STEP_AT, WHERE, clock, type V3Book } from "@/components/booking/time-picker-parts";
+import { AHEAD, fromIso, iso, minutesOf, forgetTimes, STEP_AT, WHERE, clock, type V3Book } from "@/components/booking/time-picker-parts";
 import type { CardCtx } from "@/components/booking/use-picker";
 
 /* JG V3 (master v39 stepper): Time, You, (Deposit), Booked. The same
@@ -39,7 +39,7 @@ export function V3Steps({ c }: { c: CardCtx & { v3: V3Book } }) {
           ["Balance after the shoot", v3.from != null ? `$${v3.from - 100}` : "Rest of the quote"],
         ]}
         onBooked={() => {
-          recent.delete(`${username}/${slug}/${tz}`);
+          forgetTimes(username, slug, tz);
           setStep("done");
         }}
         onTaken={() => {

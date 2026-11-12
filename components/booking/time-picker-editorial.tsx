@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { DepositStep } from "@/components/booking/deposit-step";
 import { goo } from "@/components/booking/deposit-step";
 import { TZ } from "@/lib/booking/booking-rules";
-import { AHEAD, DAYS, iso, minutesOf, MONTHS, recent, STEP_AT, WEEKDAYS, WHERE, clock, zone } from "@/components/booking/time-picker-parts";
+import { AHEAD, DAYS, iso, minutesOf, MONTHS, forgetTimes, STEP_AT, WEEKDAYS, WHERE, clock, zone } from "@/components/booking/time-picker-parts";
 import type { CardCtx } from "@/components/booking/use-picker";
 
 /* The card as a magazine page (editorial.css), the default since 2026-10-17. */
@@ -70,7 +70,7 @@ export function EditorialCard({ c }: { c: CardCtx }) {
             ["When", range],
           ]}
           onBooked={() => {
-            recent.delete(`${username}/${slug}/${tz}`);
+            forgetTimes(username, slug, tz);
             setStep("done");
           }}
           onTaken={() => {
