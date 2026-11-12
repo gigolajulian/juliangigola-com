@@ -7,6 +7,7 @@ interface __BaseEnv_CloudflareEnv {
 	CLIENT_EMAIL: SendEmail;
 	BEACON: AnalyticsEngineDataset;
 	DEPOSIT_LIMIT: RateLimit;
+	DOWNLOAD_LIMIT: RateLimit;
 	IMAGES: ImagesBinding;
 	ASSETS: Fetcher;
 	INBOX_KEY: string;

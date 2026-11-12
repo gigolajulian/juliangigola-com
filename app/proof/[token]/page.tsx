@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { checkPaid, finalize, recheckTransfer } from "@/lib/proofs/submit";
@@ -54,6 +55,8 @@ export default async function ProofPage({ params, searchParams }: { params: Prom
   if (!isToken(token) || !env.INBOX || !seal) return <Closed />;
   const s = await seal;
   let p = await readPublic(env.INBOX, s, token);
+  // Delivered: the same shoot id now opens the finals.
+  if (p?.deliveredAt) redirect(`/delivery/${token}`);
   if (!p || !isOpen(p)) return <Closed />;
 
   const session = paid ?? p.checkout;

@@ -57,15 +57,21 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
 
   if (b.action === "track") {
     if (!isEmail(b.email)) return json({ error: "Add your email first." }, 400);
-    const kind = b.kind === "open" || b.kind === "review" ? b.kind : undefined;
+    // "download" (a delivery's Save or Download all) names the final, or "all" for the zip.
+    const dl = b.kind === "download" && g.p.finals?.length && (b.id === "all" || g.p.finals.some((f) => f.id === b.id)) ? (b.id as string) : undefined;
+    const kind = b.kind === "open" || b.kind === "review" ? b.kind : dl ? "download" : undefined;
     const looks = b.looks && typeof b.looks === "object" ? Object.fromEntries(Object.entries(b.looks as Record<string, unknown>).filter(([id, ms]) => g.p.frames.some((f) => f.id === id) && typeof ms === "number")) as Record<string, number> : undefined;
     const open = kind === "open" ? { device: device(request.headers.get("user-agent") ?? ""), place: await where() } : {};
     // The name from the gate, sent with the open only.
     const name = kind === "open" && typeof b.name === "string" && b.name.trim() ? b.name.trim().replace(/\s+/g, " ").slice(0, 80) : undefined;
-    const next = logged(g.p, b.email, { kind, looks, seconds: Number(b.seconds) || 0, ...open, name });
+    let next = logged(g.p, b.email, { kind, id: dl, looks, seconds: Number(b.seconds) || 0, ...open, name });
+    // The client's first download of the finals moves their lead to Delivered. Against the gallery's address, so the right lead moves.
+    const first = dl && g.p.deliveredAt && !g.p.firstDownloadAt && !isTestEmail(b.email);
+    if (first) next = { ...next, firstDownloadAt: new Date().toISOString() };
     await writeProof(g.kv, g.s, next);
+    if (first) await recordLead(g.env, g.p.email ?? b.email, { event: { at: next.firstDownloadAt!, kind: "download", ref: g.p.token, note: g.p.name } });
     // A test address opening the gate (QA) stays in the gallery's own log, not on the desk as a lead.
-    if (kind === "open" && !isTestEmail(b.email)) await recordLead(g.env, b.email, { event: { at: new Date().toISOString(), kind: "proofs", ref: g.p.token, note: g.p.name }, name });
+    if (kind === "open" && !isTestEmail(b.email)) await recordLead(g.env, b.email, { event: { at: new Date().toISOString(), kind: "proofs", ref: g.p.token, note: g.p.deliveredAt ? `${g.p.name}, finals` : g.p.name }, name });
     // An address coming back gets its own picks; once sent, everyone sees what was sent.
     return json({ picks: g.p.submittedAt ? g.p.selects : (next.viewers?.[viewerKey(b.email)]?.picks ?? []) });
   }

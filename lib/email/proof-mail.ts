@@ -15,6 +15,7 @@ const REPLY_TO = "hello@juliangigola.com";
 const SITE = "https://juliangigola.com";
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+const longDay = (iso: string) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, month: "long", day: "numeric" }).format(new Date(iso));
 const day = (iso: string) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, weekday: "short", month: "short", day: "numeric" }).format(new Date(iso));
 export const proofUrl = (token: string) => `${SITE}/proof/${token}`;
 
@@ -73,6 +74,30 @@ ${rows(terms)}
   const text = ["Your proofs are ready.", "", lead, ...(p.note ? ["", p.note] : []), "", ...terms.map(([k, v]) => `${k}: ${v}`), "", `Open proofs: ${url}`, "", "Questions? Reply to this email.", SIG_TEXT].join("\n");
   const attachments: Inline[] = [...logos(), ...strip.map((f) => ({ content: f.bytes, filename: `${f.id}.jpg`, type: "image/jpeg", disposition: "inline" as const, contentId: `f-${f.id}` }))];
   return { subject: "Your proofs are ready", html, text, attachments };
+}
+
+export const deliveryUrl = (id: string) => `${SITE}/delivery/${id}`;
+
+/** The "Your photos are ready" mail at Send finals (Julian 2026-11-12). No photos inline: the finals are the client's to open. */
+export function deliveryMail(p: Proof) {
+  const url = deliveryUrl(publicId(p));
+  const n = p.finals?.length ?? 0;
+  const closes = p.closesAt ? day(p.closesAt) : "";
+  const lead = `Thanks again for the shoot. Your ${n} finished ${n === 1 ? "photo is" : "photos are"} ready, full size. Save them one by one or all at once.`;
+  const terms: [string, string][] = [["Photos", String(n)], ["Format", "JPEG, full size"], ...(closes ? [["Open until", closes] as [string, string]] : [])];
+  const html = page(
+    "Your photos are ready",
+    `Your photos at full resolution.${p.closesAt ? ` Save them by ${longDay(p.closesAt)}.` : ""}`,
+    `<tr><td class="mono ac" style="${label};padding-bottom:10px">Finals</td></tr>
+<tr><td class="mono fg" style="font-size:22px;line-height:1.3;color:${C.fg};padding-bottom:16px">Your photos are ready.</td></tr>
+<tr><td class="mono mu" style="font-size:13px;line-height:1.65;color:${C.mu};padding-bottom:${p.note ? 18 : 30}px">${esc(lead)}</td></tr>
+${p.note ? `<tr><td class="mono fg rule" style="font-size:13px;line-height:1.65;color:${C.fg};padding:0 0 30px 14px;border-left:1px solid ${C.ac}">${esc(p.note)}</td></tr>` : ""}
+${rows(terms)}
+<tr><td style="padding:28px 0 30px"><a href="${url}" class="mono cta" style="display:inline-block;padding:14px 20px;background:${C.fg};color:${C.bg};text-decoration:none;font-size:12px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase">See your photos</a></td></tr>
+<tr><td class="mono mu" style="font-size:13px;line-height:1.9;color:${C.mu}">Save a copy somewhere safe. The link closes${closes ? ` on ${closes}` : ""}.</td></tr>`,
+  );
+  const text = ["Your photos are ready.", "", lead, ...(p.note ? ["", p.note] : []), "", ...terms.map(([k, v]) => `${k}: ${v}`), "", `See your photos: ${url}`, "", "Questions? Reply to this email.", SIG_TEXT].join("\n");
+  return { subject: "Your photos are ready", html, text, attachments: logos() };
 }
 
 // The client's copy names frames by proof number, as the gallery does; Lightroom names stay Julian's.

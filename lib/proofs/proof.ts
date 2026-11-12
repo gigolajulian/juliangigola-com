@@ -31,6 +31,13 @@ export type ProofFrame = {
   t?: number;
 };
 
+/** One finished photo for the delivery: the full-size JPEG Lightroom's Delivery service published (Julian 2026-11-12). */
+export type Final = ProofFrame & {
+  /** Size in bytes and CRC-32 of the stored file, worked out once at upload so the zip only pipes bytes. */
+  bytes: number;
+  crc: number;
+};
+
 export type Proof = {
   /** The storage id: KV key, R2 prefix, Stripe metadata, Lightroom's remote id. Never changes. */
   token: string;
@@ -81,11 +88,17 @@ export type Proof = {
   submittedBy?: string;
   /** Everyone who opened the gallery, by lowercased email (Julian 2026-11-08: any email opens it, log everything). */
   viewers?: Record<string, Viewer>;
+  /** The finished photos (Julian 2026-11-12: the proof gallery becomes the delivery). Uploaded before Send finals; the client sees them after. */
+  finals?: Final[];
+  /** When Send finals went out: the gallery is a delivery from here, at /delivery/<id>, and `closesAt` counts from it. */
+  deliveredAt?: string;
+  /** The client's first download, one file or the zip: the lead moves to Delivered. Julian's own and test addresses do not count. */
+  firstDownloadAt?: string;
 };
 
 export type CardCrop = { id: string; x: number; y: number; w: number };
 
-export type ViewerEvent = { at: string; kind: "open" | "pick" | "unpick" | "review" | "pay" | "send"; id?: string; device?: string; place?: string };
+export type ViewerEvent = { at: string; kind: "open" | "pick" | "unpick" | "review" | "pay" | "send" | "download"; id?: string; device?: string; place?: string };
 
 export type Viewer = {
   /** The name they typed at the gate (`?proofwall=1`), latest wins. */
@@ -123,7 +136,7 @@ export function device(ua: string): string {
 export function track(
   v: Viewer | undefined,
   at: string,
-  e: { kind?: ViewerEvent["kind"]; picks?: string[]; looks?: Record<string, number>; seconds?: number; device?: string; place?: string; name?: string },
+  e: { kind?: ViewerEvent["kind"]; id?: string; picks?: string[]; looks?: Record<string, number>; seconds?: number; device?: string; place?: string; name?: string },
 ): Viewer {
   const base: Viewer = v ?? { first: at, last: at, visits: 0, seconds: 0, devices: [], places: [], picks: [], looks: {}, events: [] };
   const out: Viewer = { ...base, last: at, events: [...base.events], looks: { ...base.looks } };
@@ -133,7 +146,7 @@ export function track(
     if (e.device && !out.devices.includes(e.device)) out.devices = [...out.devices, e.device];
     if (e.place && !out.places.includes(e.place)) out.places = [...out.places, e.place];
   }
-  if (e.kind) out.events.push({ at, kind: e.kind, ...(e.kind === "open" ? { device: e.device, place: e.place } : {}) });
+  if (e.kind) out.events.push({ at, kind: e.kind, ...(e.kind === "open" ? { device: e.device, place: e.place } : {}), ...(e.id ? { id: e.id } : {}) });
   if (e.picks) {
     for (const id of e.picks) if (!base.picks.includes(id)) out.events.push({ at, kind: "pick", id });
     for (const id of base.picks) if (!e.picks.includes(id)) out.events.push({ at, kind: "unpick", id });
@@ -173,6 +186,12 @@ export const cardKey = (token: string, id: string) => `${token}/card-${id}.v1.jp
     full-size frames at once lagged (Julian 2026-11-10). Made once by Cloudflare Images, then read from R2. */
 export const THUMB_W = 800;
 export const thumbKey = (token: string, id: string, marked: boolean) => `${token}/${id}.t${THUMB_W}${marked ? ".wm1" : ""}.jpg`;
+/** A final and its two web copies, under their own prefix so a lifecycle rule could reach them alone. */
+export const finalKey = (token: string, id: string, w?: number) => `delivery/${token}/${id}${w ? `.w${w}` : ""}.jpg`;
+export const PREVIEW_W = 2000;
+export const finalKeys = (token: string, id: string) => [finalKey(token, id), finalKey(token, id, PREVIEW_W), finalKey(token, id, THUMB_W)];
+/** Days a delivery stays open from Send finals (Julian 2026-11-12). Extend still adds days. */
+export const DELIVERY_DAYS = 60;
 /** Every derived file a frame can have in R2, for deletes. */
 export const frameKeys = (token: string, id: string) => [frameKey(token, id), markedKey(token, id), cardKey(token, id), thumbKey(token, id, true), thumbKey(token, id, false)];
 
@@ -214,9 +233,32 @@ export function proofId(day: string, taken: Iterable<string>, rand = tail()): st
   if (n >= 99) throw new Error("99 galleries on one day already.");
   return `${day}-${String(n + 1).padStart(2, "0")}-${rand}`;
 }
-export const isDateId = (t: unknown): t is string => typeof t === "string" && DATE_ID.test(t);
-/** Either format, nothing looser: the random part is the only secret. */
-export const isToken = (t: unknown): t is string => typeof t === "string" && (/^[0-9A-Za-z]{16}$/.test(t) || DATE_ID.test(t));
+/* The shoot id (Julian 2026-11-12): the shoot day and 8 characters from 30 that cannot be misread (no 0, 1, i, l, o, u),
+   about 39 random bits. One id for the whole shoot: /proof/<id> while picking, /delivery/<id> after. */
+const SHOOT = "23456789abcdefghjkmnpqrstvwxyz";
+const SHOOT_ID = /^(\d{8})-[2-9a-hjkmnp-tv-z]{8}$/;
+export function shootIdTag(): string {
+  let out = "";
+  while (out.length < 8) {
+    for (const b of crypto.getRandomValues(new Uint8Array(16))) {
+      if (b < 240 && out.length < 8) out += SHOOT[b % 30];
+    }
+  }
+  return out;
+}
+/** `MMDDYYYY` as Lightroom sends the shoot day, or null when it is not a real date. */
+export function shootDay(v: unknown): string | null {
+  if (typeof v !== "string" || !/^\d{8}$/.test(v)) return null;
+  const [m, d, y] = [Number(v.slice(0, 2)), Number(v.slice(2, 4)), Number(v.slice(4))];
+  const t = new Date(Date.UTC(y, m - 1, d));
+  return y >= 2000 && y < 2100 && t.getUTCMonth() === m - 1 && t.getUTCDate() === d ? v : null;
+}
+/** A date id of either age: `MMDDYYYY-NN-xxxx` (Nov 11) or the shoot id. */
+export const isDateId = (t: unknown): t is string => typeof t === "string" && (DATE_ID.test(t) || SHOOT_ID.test(t));
+/** The id is strong enough to front clean full-size finals: only the shoot id and the old 16-character tokens. */
+export const isStrongId = (t: string) => SHOOT_ID.test(t) || /^[0-9A-Za-z]{16}$/.test(t);
+/** Every format, nothing looser: the random part is the only secret. */
+export const isToken = (t: unknown): t is string => typeof t === "string" && (/^[0-9A-Za-z]{16}$/.test(t) || isDateId(t));
 export const isFrameId = (t: unknown): t is string => typeof t === "string" && /^[0-9A-Za-z_-]{1,64}$/.test(t);
 
 /** How many frames are past the included ones, and what they cost in dollars. */
@@ -283,6 +325,15 @@ export function publicView(p: Proof) {
   };
 }
 export type PublicProof = ReturnType<typeof publicView>;
+
+/** What the delivery page gets: the finals in shot order, file names included (they are the files they download). */
+export function deliveryView(p: Proof) {
+  const finals = shotOrder(p.finals ?? []);
+  // The gate's photo: Julian's preview pick when it is one of the finals, else the first final.
+  const cover = finals.find((f) => f.id === p.card?.id)?.id ?? finals[0]?.id ?? null;
+  return { finals: finals.map(({ id, file, w, h, bytes }) => ({ id, file, w, h, bytes })), cover, closesAt: p.closesAt ?? null };
+}
+export type PublicDelivery = ReturnType<typeof deliveryView>;
 
 /** The client's selects, kept to frames that exist, deduped, in pick order. */
 export function cleanSelects(given: unknown, frames: ProofFrame[]): string[] {
@@ -351,19 +402,12 @@ export async function readPublic(kv: KV, s: Seal, id: string): Promise<Proof | n
   const p = await findProof(kv, s, id);
   return p && publicId(p) === id ? p : null;
 }
-/** A new date id for today, past every gallery and alias already made today. shortcut: two creates in the same instant can take the same counter; the random tail still keeps the ids apart. */
-export async function nextProofId(kv: KV, now: Date | number = new Date()): Promise<string> {
-  const day = proofDay(now);
-  const taken: string[] = [];
-  for (const prefix of [`proof:${day}-`, `proofalias:${day}-`]) {
-    let cursor: string | undefined;
-    do {
-      const page = await kv.list({ prefix, cursor });
-      for (const k of page.keys) taken.push(k.name.slice(k.name.indexOf(":") + 1));
-      cursor = page.list_complete ? undefined : page.cursor;
-    } while (cursor);
+/** A new shoot id: the shoot day Lightroom sent, else today in Pacific, and a tag no gallery or alias has. */
+export async function nextProofId(kv: KV, day: string = proofDay()): Promise<string> {
+  for (;;) {
+    const id = `${day}-${shootIdTag()}`;
+    if (!(await kv.get(proofKey(id))) && !(await kv.get(aliasKey(id)))) return id;
   }
-  return proofId(day, taken);
 }
 
 /** Listed with a small summary in metadata so the desk never opens every record. */
