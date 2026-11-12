@@ -5,6 +5,7 @@ import Link from "next/link";
 import { cardPrice, lookStarts, shotOrder, THUMB_W, type PublicProof } from "@/lib/proofs/proof";
 import { looksLikeEmail } from "@/lib/inbox";
 import { ProofWall } from "@/components/proofs/wall";
+import { ProofCursor } from "@/components/proofs/cursor";
 import { gridwallFor } from "@/lib/proofs/gridwall";
 
 /* ── the client's gallery ─────────────────────────────────────────
@@ -449,6 +450,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
 
   return (
     <div className="proof" data-wall={wall ? (!walling ? "on" : hello === null ? "gate" : "settle") : undefined}>
+      <ProofCursor />
       <div inert={covered || walling || undefined}>
       <Top view={view} setView={setView} n={n} included={included} due={due} />
 
