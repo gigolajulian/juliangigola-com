@@ -390,9 +390,17 @@ export function ProofWall({
         <div aria-hidden className="pw-vig" />
         <div aria-hidden className="pw-grain" />
       </div>
+      {/* `scale` applies after the card's translate(-50%,-50%), so a centered origin slid a grown card left; origin x 0 is the card's own center there.
+          The phone portrait sheet is full width: it lays out at width/scale so the scaled card ends exactly at the screen edges. */}
       <form
         className="proof-card pw-card"
-        style={tune ? { scale: tune.card, borderRadius: tune.cardRadius, transformOrigin: innerWidth <= 520 ? "50% 100%" : undefined } : undefined}
+        style={
+          tune
+            ? innerWidth <= 520
+              ? { scale: tune.card, borderRadius: tune.cardRadius, transformOrigin: "50% 100%", width: `calc(100% / ${tune.card})`, left: `calc(50% - 50% / ${tune.card})` }
+              : { scale: tune.card, borderRadius: tune.cardRadius, transformOrigin: "0 50%" }
+            : undefined
+        }
         data-ready={ready || undefined}
         data-out={flat || leaving || undefined}
         noValidate
