@@ -8,12 +8,12 @@ import { REPO } from "@/lib/admin/admin-github";
  * remembered for five minutes by a hash of it, so a panel's every click is
  * not a round trip.
  *
- * Three credentials, one copy each, so a change to how the site trusts a
- * request is a change in one place:
+ * Two gates, one copy each, so a change to how the site trusts a request is
+ * a change in one place:
  * - `isAdmin`: /admin routes (inbox, calendar, money, proof, booking hours,
  *   seo, traffic). The `INBOX_KEY` header or a GitHub token that can push.
  * - `fromWorker`: the booking Worker calling the site (leads/gmail,
- *   leads/mail), with `BOOKING_SECRET` as the bearer.
+ *   leads/mail, leads/sheet, leads/weekly), with `BOOKING_SECRET` as the bearer.
  * ─────────────────────────────────────────────────────────────── */
 const VOUCHED_MS = 5 * 60 * 1000;
 const vouched = new Map<string, number>();
