@@ -272,6 +272,9 @@ html:has(.proof[data-wall])::-webkit-scrollbar{display:none}
 .pw-layer[data-gw][data-flat][data-leave] .drift-wall__inner{filter:none;transition:opacity .9s ease .3s}
 .pw-layer[data-gw][data-flat][data-leave]>.drift-wall{animation:pw-sharpen .9s cubic-bezier(.4,0,.2,1) .6s both}
 @keyframes pw-sharpen{from{filter:blur(6px)}}
+/* `?gw=1`: the turn to flat starts quicker (Julian took the tuner's suggested easeIn .3, live .45): the columns are already moving. */
+.proof .pw-layer[data-gw]{--dw-flat-ease:cubic-bezier(.3,0,.2,1)}
+:root .proof .pw-layer[data-gw][data-flat][data-leave]>.drift-wall{transition:scale 1.6s var(--dw-flat-ease)}
 .pw-layer[data-flat][data-leave] .drift-wall__overlay{transition:opacity 1.2s ease .2s}
 /* `reveal` (reduced motion): the wall racks further out of focus and darkens as it stops; the gallery comes up over it. */
 :root .proof .pw-layer[data-leave]>.drift-wall{scale:1.07;transition:scale 1.4s cubic-bezier(.22,1,.36,1)}
