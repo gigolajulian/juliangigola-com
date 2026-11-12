@@ -28,6 +28,11 @@ describe("fold", () => {
     expect(fold(null, email, { event: { at: at(1), kind: "proofs", ref: "tok" }, name: "Maya" })).toMatchObject({ name: "Maya", unread: false });
   });
 
+  it("moves to Delivered on the first download of the finals, from any earlier stage", () => {
+    const l = fold(null, email, { event: { at: at(1), kind: "booking", ref: "cal:9" } });
+    const sel = fold(l, email, { event: { at: at(2), kind: "stage" }, stage: "Selecting" });
+    expect(fold(sel, email, { event: { at: at(3), kind: "download", ref: "tok", note: "Nov 1" } })).toMatchObject({ stage: "Delivered", stageAt: at(3) });
+  });
   it("starts a lead at Inquiry from a form, keyed by the lowercased address", () => {
     const l = fold(null, email, { event: { at: at(1), kind: "inquiry", ref: "msg:1" }, name: "Maya", kind: "portrait" });
     expect(l).toMatchObject({ email: "maya@example.com", name: "Maya", stage: "Inquiry", unread: true, kind: "portrait" });

@@ -88,7 +88,10 @@
      script cannot fill Stripe with PaymentIntents. Counted per Cloudflare
      location, nothing stored. */
   "ratelimits": [
-    { "name": "DEPOSIT_LIMIT", "namespace_id": "1001", "simple": { "limit": 5, "period": 60 } }
+    { "name": "DEPOSIT_LIMIT", "namespace_id": "1001", "simple": { "limit": 5, "period": 60 } },
+    /* Delivery downloads (`app/delivery/[id]`), per address: a client saving photos one by one stays well under it,
+       a script trying links does not. */
+    { "name": "DOWNLOAD_LIMIT", "namespace_id": "1002", "simple": { "limit": 60, "period": 60 } }
   ],
 
   /* The booking lock (`worker/booking-lock.ts`): one instance, every

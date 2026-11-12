@@ -2,8 +2,9 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { isAdmin } from "@/lib/vouch";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { recordLead } from "@/lib/leads/lead-store";
-import { cardKey, closesAt, cleanSettings, DEFAULTS, frameKey, frameKeys, aliasKey, isFrameId, isToken, listProofs, nextProofId, publicId, readProof, viewerKey, writeProof, type Proof } from "@/lib/proofs/proof";
-import { proofMail, proofUrl, sendClient } from "@/lib/email/proof-mail";
+import { cardKey, closesAt, cleanSettings, DEFAULTS, DELIVERY_DAYS, finalKeys, frameKey, frameKeys, aliasKey, isDateId, isFrameId, isStrongId, isToken, listProofs, nextProofId, publicId, readProof, shootDay, viewerKey, writeProof, type Proof } from "@/lib/proofs/proof";
+import { deliveryMail, deliveryUrl, proofMail, proofUrl, sendClient } from "@/lib/email/proof-mail";
+import { MAX_FINAL, storeFinal } from "@/lib/proofs/delivery";
 import { recheckTransfer } from "@/lib/proofs/submit";
 import { servedFrame } from "@/lib/proofs/watermark";
 import { bodyOf, json } from "@/lib/http";
@@ -20,6 +21,9 @@ import { bodyOf, json } from "@/lib/http";
  *   POST   {action:"reopen"|"extend"}  unlock selects | add days
  *   POST   {action:"forget", token, email} drop one visitor's record (his own test visits)
  *   POST   {action:"relink", token}    a new date id for the client's link; the old link closes
+ *   POST   {action:"deliver", token}   Send finals: the "your photos are ready" mail, /delivery/<id> open 60 days
+ *   PUT    ?token&id&...&final=1 <jpeg> add or replace one final (Lightroom's Delivery service)
+ *   DELETE ?token&ids&final=1          drop finals
  *   PATCH  {token, ...settings}        name, email, note, included, price, days, watermark
  *   PUT    ?token&id&file&w&h  <jpeg>  add or replace one frame
  *   DELETE ?token&id                   drop one frame
@@ -56,7 +60,7 @@ export async function GET(request: Request) {
         return moved ?? p;
       }),
     );
-    return json({ proofs: all.filter((p): p is Proof => !!p).map((p) => ({ ...p, url: proofUrl(publicId(p)) })).sort((a, b) => b.createdAt.localeCompare(a.createdAt)) });
+    return json({ proofs: all.filter((p): p is Proof => !!p).map((p) => ({ ...p, url: (p.deliveredAt ? deliveryUrl : proofUrl)(publicId(p)) })).sort((a, b) => b.createdAt.localeCompare(a.createdAt)) });
   }
   const preview = q.get("preview");
   if (isToken(preview)) {
@@ -87,7 +91,8 @@ export async function POST(request: Request) {
 
   if (b.action === "create") {
     const set = cleanSettings(b);
-    const p: Proof = { token: await nextProofId(g.kv), name: set.name ?? "Proofs", ...DEFAULTS, ...set, createdAt: new Date().toISOString(), frames: [], selects: [], notes: {}, views: 0 };
+    // The shoot day from Lightroom (earliest capture date) names the gallery; a plugin that sends none gets today.
+    const p: Proof = { token: await nextProofId(g.kv, shootDay(b.day) ?? undefined), name: set.name ?? "Proofs", ...DEFAULTS, ...set, createdAt: new Date().toISOString(), frames: [], selects: [], notes: {}, views: 0 };
     await writeProof(g.kv, g.s, p);
     return json({ token: p.token, url: proofUrl(p.token) }, 201);
   }
@@ -116,6 +121,25 @@ export async function POST(request: Request) {
     await writeProof(g.kv, g.s, sent);
     await recordLead(g.env, p.email, { event: { at: sent.sentAt!, kind: "mail", note: m.subject, mail: { to: "client", kind: "proofs" } } });
     return json({ proof: sent });
+  }
+  if (b.action === "deliver") {
+    if (!p.email) return json({ error: "Add the client's email first." }, 400);
+    if (!p.finals?.length) return json({ error: "Publish the finals from Lightroom first." }, 400);
+    // A Nov 11 id is too short to front full-size files: the finals go out on a new shoot id and the old link closes.
+    const was = publicId(p);
+    const link = isStrongId(was) ? was : await nextProofId(g.kv, isDateId(was) ? was.slice(0, 8) : undefined);
+    if (link !== was) await g.kv.put(aliasKey(link), p.token);
+    const now = Date.now();
+    const sent: Proof = { ...p, ...(link !== p.token ? { link } : {}), deliveredAt: new Date(now).toISOString(), closesAt: closesAt(DELIVERY_DAYS, now) };
+    const m = deliveryMail(sent);
+    if (!(await sendClient(g.env.CLIENT_EMAIL, p.email, m))) return json({ error: "The mail did not go out. Try again." }, 502);
+    await writeProof(g.kv, g.s, sent);
+    if (link !== was && p.link) await g.kv.delete(aliasKey(p.link));
+    await recordLead(g.env, p.email, { event: { at: sent.deliveredAt!, kind: "mail", note: m.subject, mail: { to: "client", kind: "finals" } } });
+    // The proof's web copies go once the finals are out (Julian 2026-11-12). Only copies: never an original.
+    const keys = p.frames.flatMap((f) => frameKeys(p.token, f.id));
+    for (let i = 0; i < keys.length; i += 1000) await g.r2.delete(keys.slice(i, i + 1000));
+    return json({ proof: sent, url: deliveryUrl(link) });
   }
   if (b.action === "relink") {
     // Storage stays put (R2, Stripe metadata, Lightroom's remote id); only the public id moves.
@@ -175,10 +199,26 @@ export async function PUT(request: Request) {
   const t = Math.round(Number(q.get("t")));
   if (!isToken(token) || !isFrameId(id) || !file) return json({ error: "token, id and file are required." }, 400);
   if (!(request.headers.get("content-type") ?? "").startsWith("image/jpeg")) return json({ error: "Send a JPEG." }, 415);
+  if (q.get("final") === "1") {
+    // Full size: streamed to R2, never held in the Worker.
+    const length = Number(request.headers.get("content-length"));
+    if (!request.body || !(length > 0)) return json({ error: "Send the file with its length." }, 411);
+    if (length > MAX_FINAL) return json({ error: "Final is over 95 MB." }, 413);
+    if (!(await readProof(g.kv, g.s, token))) return json({ error: "No such gallery." }, 404);
+    const { bytes, crc } = await storeFinal(g.env, token, id, request.body, length);
+    // Read again after the upload: a long upload must not write back a record from before it.
+    const p = await readProof(g.kv, g.s, token);
+    if (!p) return json({ error: "No such gallery." }, 404);
+    const final = { id, file, w, h, bytes, crc, ...(t > 0 && t < 4e9 ? { t } : {}) };
+    const finals = [...(p.finals ?? []).filter((f) => f.id !== id), final];
+    await writeProof(g.kv, g.s, { ...p, finals });
+    return json({ ok: true, finals: finals.length, url: deliveryUrl(publicId(p)) });
+  }
   const bytes = await request.arrayBuffer();
   if (!bytes.byteLength || bytes.byteLength > MAX_FRAME) return json({ error: "Frame is empty or over 8 MB." }, 413);
   const p = await readProof(g.kv, g.s, token);
   if (!p) return json({ error: "No such gallery." }, 404);
+  if (p.deliveredAt) return json({ error: "This gallery was delivered. Publish to the Delivery collection instead." }, 409);
   await g.r2.put(frameKey(token, id), bytes, { httpMetadata: { contentType: "image/jpeg" } });
   // A replaced frame is watermarked again, and its card redrawn, on the next fetch.
   await g.r2.delete(frameKeys(token, id).slice(1));
@@ -200,6 +240,17 @@ export async function DELETE(request: Request) {
   if (!isToken(token)) return json({ error: "Which gallery?" }, 400);
   const p = await readProof(g.kv, g.s, token);
   if (!p) return json({ ok: true });
+  if (q.get("final") === "1") {
+    // Lightroom's Delivery service: finals out of the gallery. The record stays; the proof side owns it.
+    if (!ids?.length || ids.length > 1000 || !ids.every(isFrameId)) return json({ error: "Bad frame id." }, 400);
+    const keys = ids.flatMap((id) => finalKeys(token, id));
+    for (let i = 0; i < keys.length; i += 1000) await g.r2.delete(keys.slice(i, i + 1000));
+    const gone = new Set(ids);
+    await writeProof(g.kv, g.s, { ...p, finals: (p.finals ?? []).filter((f) => !gone.has(f.id)) });
+    return json({ ok: true });
+  }
+  // Unpublishing the proof collection must not take the client's finals with it.
+  if (p.deliveredAt) return json({ error: "This gallery was delivered. Its finals stay until you remove them from the Delivery collection." }, 409);
   if (ids) {
     if (!ids.length || ids.length > 1000 || !ids.every(isFrameId)) return json({ error: "Bad frame id." }, 400);
     const keys = ids.flatMap((id) => frameKeys(token, id));

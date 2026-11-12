@@ -12,4 +12,4 @@ export type Row = Proof & { url: string };
 export const api = <T = Record<string, unknown>,>({ query = "", ...init }: RequestInit & { query?: string } = {}) => adminCall<T>(`/api/proof${query}`, init);
 
 export const closed = (p: Proof) => !!p.closesAt && Date.parse(p.closesAt) < Date.now();
-export const status = (p: Proof) => `${stage(p)}${p.checkout && !p.submittedAt ? ", paying" : ""}${closed(p) ? " · closed" : ""}`;
+export const status = (p: Proof) => p.deliveredAt ? `Delivered${p.firstDownloadAt ? ", downloaded" : ""}${closed(p) ? " · closed" : ""}` : `${stage(p)}${p.checkout && !p.submittedAt ? ", paying" : ""}${closed(p) ? " · closed" : ""}`;

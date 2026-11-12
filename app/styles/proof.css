@@ -330,3 +330,26 @@ html:has(.proof[data-wall])::-webkit-scrollbar{display:none}
 .proof .pw-card>.proof-btn[data-off]{opacity:.35}
 .proof-gate .proof-card>.proof-btn{transition:opacity .25s ease}
 .proof-gate .proof-card>.proof-btn[data-off]{opacity:.35}
+
+/* ── /delivery/<id> gate (components/proofs/delivery.tsx), Julian 2026-11-12: the cover photo on the left half,
+   the header and email on the right; on a phone the photo takes the top two thirds and the form sits below. */
+.dlv-gate{display:grid;grid-template-columns:1fr 1fr;min-height:100svh}
+.dlv-photo{position:relative;overflow:hidden;background:#060605}
+.dlv-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 30%;display:block}
+.dlv-side{display:flex;flex-direction:column;justify-content:center;gap:26px;padding:clamp(28px,6vw,104px);max-width:620px}
+.dlv-side .proof-word{position:absolute;top:22px}
+.dlv-side h1{font:500 clamp(44px,5vw,72px)/.96 var(--font-display);letter-spacing:-.04em;margin:0 0 14px}
+.dlv-side .proof-mu{margin:0}
+.dlv-side label{display:flex;flex-direction:column;gap:6px}
+.dlv-side input{text-transform:none;width:100%;background:none;border:0;border-bottom:1px solid var(--foreground);color:var(--foreground);font:16px var(--p-mono);padding:10px 0;outline:none}
+.dlv-side .proof-err{margin:0}
+.dlv-side>.proof-btn{align-self:flex-start;transition:opacity .25s ease}
+.dlv-side>.proof-btn[data-off]{opacity:.35}
+.dlv-gate{position:relative}
+@media (max-width:767px){
+  .dlv-gate{grid-template-columns:1fr;grid-template-rows:66svh auto}
+  .dlv-side{justify-content:flex-start;gap:18px;padding:22px 22px calc(28px + env(safe-area-inset-bottom));max-width:none}
+  .dlv-side .proof-word{position:static;display:none}
+  .dlv-side h1{font-size:36px;margin-bottom:8px}
+  .dlv-side>.proof-btn{align-self:stretch}
+}

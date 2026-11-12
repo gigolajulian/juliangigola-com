@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { paidFor } from "@/lib/proofs/submit";
-import { cardPrice, cleanNotes, coverFrame, cleanSelects, cleanSettings, extras, isOpen, isToken, lookStarts, newToken, proofDay, proofId, owed, shotOrder, stage } from "@/lib/proofs/proof";
+import { cardPrice, cleanNotes, coverFrame, cleanSelects, cleanSettings, extras, isOpen, isStrongId, isToken, lookStarts, newToken, nextProofId, proofDay, proofId, owed, shootDay, shotOrder, stage } from "@/lib/proofs/proof";
 
 const frames = ["a", "b", "c"].map((id) => ({ id, file: `${id}.jpg`, w: 1, h: 1 }));
 
@@ -54,6 +54,19 @@ describe("proofs", () => {
     expect(proofId("11062026", ["11062026-01-aaaa", "11062026-03-bbbb", "11052026-07-cccc", "Ab3dEf6hJk9mNp2q"], "zz00")).toBe("11062026-04-zz00");
     const t = proofId("11062026", []);
     expect(isToken(t)).toBe(true);
+  });
+  it("makes shoot ids from the shoot day and 8 unmistakable characters", async () => {
+    const taken = new Set(["proof:11082026-aaaaaaaa"]);
+    const kv = { get: async (k: string) => (taken.has(k) ? "x" : null) } as unknown as Parameters<typeof nextProofId>[0];
+    const id = await nextProofId(kv, "11082026");
+    expect(id).toMatch(/^11082026-[2-9a-hjkmnp-tv-z]{8}$/);
+    expect(isToken(id) && isStrongId(id)).toBe(true);
+    expect(isStrongId("11062026-01-k7q2")).toBe(false);
+    expect(isToken("11082026-aaaaaaa0")).toBe(false);
+    expect(isToken("11082026-aaaaaaal")).toBe(false);
+    expect(shootDay("11082026")).toBe("11082026");
+    expect(shootDay("02302026")).toBeNull();
+    expect(shootDay("1108202")).toBeNull();
   });
   it("accepts both token formats and nothing looser", () => {
     expect(isToken("Ab3dEf6hJk9mNp2q")).toBe(true);
