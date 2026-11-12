@@ -2,8 +2,8 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { recordLead } from "@/lib/leads/lead-store";
 import { checkout, checkPaid, finalize } from "@/lib/proof-submit";
-import { PAYMENTS_DOWN } from "@/lib/stripe";
-import { cleanSelects, device, isEmail, isOpen, isTestEmail, owed, isToken, publicView, readProof, track, viewerKey, writeProof, type Proof } from "@/lib/proofs";
+import { PAYMENTS_DOWN, PAYMENTS_OFF } from "@/lib/stripe";
+import { cleanSelects, device, isEmail, isOpen, isTestEmail, owed, isToken, publicView, readPublic, track, viewerKey, writeProof, type Proof } from "@/lib/proofs";
 import { bodyOf, json } from "@/lib/http";
 
 /* ── proofs, the client's side ────────────────────────────────────
@@ -22,7 +22,7 @@ async function load(token: string) {
   const seal = sealer(env.LEADS_KEY);
   if (!env.INBOX || !seal || !isToken(token)) return null;
   const s = await seal;
-  const p = await readProof(env.INBOX, s, token);
+  const p = await readPublic(env.INBOX, s, token);
   return p && isOpen(p) ? { env, kv: env.INBOX, s, p } : null;
 }
 
@@ -75,7 +75,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
   const key = g.env.STRIPE_SECRET_KEY;
 
   if (typeof b.confirm === "string") {
-    if (!key) return json({ error: "Payments are off." }, 503);
+    if (!key) return json({ error: PAYMENTS_OFF }, 503);
     const paid = await checkPaid(key, g.p, b.confirm);
     if (paid === "down") return json({ error: PAYMENTS_DOWN }, 502);
     if (!paid) return json({ error: "That payment did not go through." }, 402);
@@ -89,7 +89,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
   const p: Proof = { ...logged(g.p, b.email, { picks: selects }), selects, notes: {}, message: undefined, submittedBy: b.email.trim() };
 
   if (owed(p).cents === 0) return json({ done: true, ...publicView(await finalize(g.env, g.kv, g.s, p)) });
-  if (!key) return json({ error: "Payments are off. Reply to my email and I'll sort it." }, 503);
+  if (!key) return json({ error: PAYMENTS_OFF }, 503);
   try {
     const c = await checkout(key, p, b.method === "card" ? "card" : "bank");
     await writeProof(g.kv, g.s, { ...p, checkout: c.id });

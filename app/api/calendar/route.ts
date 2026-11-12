@@ -4,7 +4,7 @@ import { gcal } from "@/lib/booking/gcal";
 import { looksLikeEmail } from "@/lib/inbox";
 import { busyAll, EXTRA_KEY, isIcs, readExtras, zoned, type Extra } from "@/lib/booking/slots";
 import { isAdmin } from "@/lib/vouch";
-import { json } from "@/lib/http";
+import { bodyOf, json } from "@/lib/http";
 
 /* ── the Leads app's Calendar ─────────────────────────────────────
  * Julian (2026-11-04): "control the calendar, block off days, and add
@@ -27,10 +27,11 @@ const MAX_EXTRAS = 10;
 
 async function gate(request: Request) {
   const { env } = await getCloudflareContext({ async: true });
+  // Who is asking first: what this build is missing is for /admin only.
+  if (!(await isAdmin(request, env.INBOX_KEY))) return { error: json({ error: "Not authorized." }, 401) };
   if (!env.INBOX) return { error: json({ error: "No INBOX bound." }, 503) };
   if (!env.GCAL_OAUTH) return { error: json({ error: "The calendar is not connected (GCAL_OAUTH)." }, 503) };
-  if (await isAdmin(request, env.INBOX_KEY)) return { env };
-  return { error: json({ error: "Not authorized." }, 401) };
+  return { env };
 }
 
 type GEvent = {
@@ -102,8 +103,8 @@ type Body = {
 async function post(request: Request) {
   const g = await gate(request);
   if (g.error) return g.error;
-  const body = (await request.json().catch(() => null)) as Body | null;
-  if (!body || typeof body !== "object") return json({ error: "Bad request." }, 400);
+  const body = (await bodyOf(request)) as Body | null;
+  if (!body) return json({ error: "Bad request." }, 400);
   const { env } = g;
 
   if (body.block) {

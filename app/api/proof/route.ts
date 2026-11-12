@@ -2,9 +2,9 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { isAdmin } from "@/lib/vouch";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { recordLead } from "@/lib/leads/lead-store";
-import { cardKey, closesAt, cleanSettings, DEFAULTS, frameKey, frameKeys, isFrameId, isToken, listProofs, newToken, readProof, writeProof, type Proof } from "@/lib/proofs";
+import { cardKey, closesAt, cleanSettings, DEFAULTS, frameKey, frameKeys, aliasKey, isFrameId, isToken, listProofs, nextProofId, publicId, readProof, viewerKey, writeProof, type Proof } from "@/lib/proofs";
 import { proofMail, proofUrl, sendClient } from "@/lib/email/proof-mail";
-import { settle } from "@/lib/proof-submit";
+import { recheckTransfer } from "@/lib/proof-submit";
 import { servedFrame } from "@/lib/proof-watermark";
 import { bodyOf, json } from "@/lib/http";
 
@@ -18,6 +18,8 @@ import { bodyOf, json } from "@/lib/http";
  *   POST   {action:"create", ...}      new gallery, returns token + url
  *   POST   {action:"send", token}      the proof mail; the clock starts
  *   POST   {action:"reopen"|"extend"}  unlock selects | add days
+ *   POST   {action:"forget", token, email} drop one visitor's record (his own test visits)
+ *   POST   {action:"relink", token}    a new date id for the client's link; the old link closes
  *   PATCH  {token, ...settings}        name, email, note, included, price, days, watermark
  *   PUT    ?token&id&file&w&h  <jpeg>  add or replace one frame
  *   DELETE ?token&id                   drop one frame
@@ -32,9 +34,9 @@ const MAX_FRAME = 8 * 1024 * 1024;
 async function gate(request: Request) {
   const { env } = await getCloudflareContext({ async: true });
   const seal = sealer(env.LEADS_KEY);
+  // Who is asking first: what this build is missing is for /admin only.
+  if (!(await isAdmin(request, env.INBOX_KEY))) return { error: json({ error: "Not authorized." }, 401) };
   if (!env.INBOX || !env.PROOFS || !seal) return { error: json({ error: "Proofs need INBOX, PROOFS and LEADS_KEY on this build." }, 503) };
-  const ok = await isAdmin(request, env.INBOX_KEY);
-  if (!ok) return { error: json({ error: "Not authorized." }, 401) };
   return { env, kv: env.INBOX, r2: env.PROOFS, s: await seal };
 }
 
@@ -49,12 +51,12 @@ export async function GET(request: Request) {
       (await listProofs(g.kv)).map(async (x) => {
         const p = await readProof(g.kv, g.s, x.token);
         // Bank payments still settling are checked each time the desk opens.
-        const moved = p?.paid?.pending && key ? await settle(key, p).catch(() => null) : null;
+        const moved = p?.paid?.pending && key ? await recheckTransfer(key, p).catch(() => null) : null;
         if (moved) await writeProof(g.kv, g.s, moved);
         return moved ?? p;
       }),
     );
-    return json({ proofs: all.filter((p): p is Proof => !!p).map((p) => ({ ...p, url: proofUrl(p.token) })).sort((a, b) => b.createdAt.localeCompare(a.createdAt)) });
+    return json({ proofs: all.filter((p): p is Proof => !!p).map((p) => ({ ...p, url: proofUrl(publicId(p)) })).sort((a, b) => b.createdAt.localeCompare(a.createdAt)) });
   }
   const preview = q.get("preview");
   if (isToken(preview)) {
@@ -75,7 +77,7 @@ export async function GET(request: Request) {
     p = { ...p, pulledAt: new Date().toISOString() };
     await writeProof(g.kv, g.s, p);
   }
-  return json({ proof: p, url: proofUrl(p.token) });
+  return json({ proof: p, url: proofUrl(publicId(p)) });
 }
 
 export async function POST(request: Request) {
@@ -85,7 +87,7 @@ export async function POST(request: Request) {
 
   if (b.action === "create") {
     const set = cleanSettings(b);
-    const p: Proof = { token: newToken(), name: set.name ?? "Proofs", ...DEFAULTS, ...set, createdAt: new Date().toISOString(), frames: [], selects: [], notes: {}, views: 0 };
+    const p: Proof = { token: await nextProofId(g.kv), name: set.name ?? "Proofs", ...DEFAULTS, ...set, createdAt: new Date().toISOString(), frames: [], selects: [], notes: {}, views: 0 };
     await writeProof(g.kv, g.s, p);
     return json({ token: p.token, url: proofUrl(p.token) }, 201);
   }
@@ -114,6 +116,23 @@ export async function POST(request: Request) {
     await writeProof(g.kv, g.s, sent);
     await recordLead(g.env, p.email, { event: { at: sent.sentAt!, kind: "mail", note: m.subject, mail: { to: "client", kind: "proofs" } } });
     return json({ proof: sent });
+  }
+  if (b.action === "relink") {
+    // Storage stays put (R2, Stripe metadata, Lightroom's remote id); only the public id moves.
+    const link = await nextProofId(g.kv);
+    await g.kv.put(aliasKey(link), p.token);
+    const next: Proof = { ...p, link };
+    await writeProof(g.kv, g.s, next);
+    if (p.link) await g.kv.delete(aliasKey(p.link));
+    return json({ proof: next, url: proofUrl(link) });
+  }
+  if (b.action === "forget") {
+    const who = typeof b.email === "string" ? viewerKey(b.email) : "";
+    if (!who || !p.viewers?.[who]) return json({ error: "No visit from that address." }, 404);
+    const { [who]: _gone, ...viewers } = p.viewers;
+    const next: Proof = { ...p, viewers };
+    await writeProof(g.kv, g.s, next);
+    return json({ proof: next });
   }
   if (b.action === "reopen") {
     const next: Proof = { ...p, submittedAt: undefined, pulledAt: undefined };
@@ -167,7 +186,7 @@ export async function PUT(request: Request) {
   const i = p.frames.findIndex((f) => f.id === id);
   const frames = i < 0 ? [...p.frames, frame] : p.frames.map((f, j) => (j === i ? frame : f));
   await writeProof(g.kv, g.s, { ...p, frames });
-  return json({ ok: true, frames: frames.length, url: proofUrl(token) });
+  return json({ ok: true, frames: frames.length, url: proofUrl(publicId(p)) });
 }
 
 export async function DELETE(request: Request) {
@@ -194,6 +213,7 @@ export async function DELETE(request: Request) {
   // The whole gallery: Lightroom's "delete published collection". Only web previews go, never an original.
   const keys = p.frames.flatMap((f) => frameKeys(token, f.id));
   for (let i = 0; i < keys.length; i += 1000) await g.r2.delete(keys.slice(i, i + 1000));
+  if (p.link) await g.kv.delete(aliasKey(p.link));
   await g.kv.delete(`proof:${token}`);
   return json({ ok: true });
 }

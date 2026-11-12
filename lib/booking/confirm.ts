@@ -4,7 +4,7 @@ import { SIG_DARK, SIG_HTML, SIG_TEXT } from "@/lib/email/email-signature";
  * Julian (2026-10-16): every booking gets a branded "You're in." mail from
  * the site.
  *
- *   - Paid sessions: sent by `settle` once the lock takes the booking, with
+ *   - Paid sessions: sent by `bookDeposit` once the lock takes the booking, with
  *     the $100 receipt block.
  *   - Free calls: sent by `/api/book`.
  *

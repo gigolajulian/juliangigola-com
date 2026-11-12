@@ -9,8 +9,8 @@
 import type { Sealer } from "./lead-crypto";
 import { readLead, writeLead } from "./lead-store";
 import { PAPER, STAGES, type Lead, type LeadEvent, type Paper, type Stage } from "./leads";
+import type { InboxKV as KV } from "./lead-store";
 
-type KV = Pick<NonNullable<CloudflareEnv["INBOX"]>, "get" | "put" | "list" | "delete">;
 
 /** What the script sends per person. Strings only, cut to size here. */
 export type NotionPerson = {

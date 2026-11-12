@@ -183,7 +183,7 @@ async function tell(env: Env, status: keyof typeof SAID, b: Booking | string, li
  * ponytail: KV is not a lock, so two deliveries in the same second could both
  * book. Stripe spaces its retries by minutes; a Durable Object if that changes.
  */
-export async function settle(env: Env, intent: string, metadata: { [k: string]: string } | undefined): Promise<Status> {
+export async function bookDeposit(env: Env, intent: string, metadata: { [k: string]: string } | undefined): Promise<Status> {
   const key = recordKey(intent);
   const seen = await env.INBOX.get(key);
   if (seen) {

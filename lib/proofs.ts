@@ -8,11 +8,17 @@
  * `lead:` records), sealed with LEADS_KEY because it carries the client's
  * address. Frames live in the private R2 bucket `jg-proofs` under
  * `<token>/<frame id>.jpg`, served only through `/proof/<token>/f/<id>` while
- * the gallery is open. The token is the only secret: 16 random base62
- * characters, about 95 bits.
+ * the gallery is open. The token is the only secret. Older galleries: 16
+ * random base62 characters, about 95 bits. New ones (Julian 2026-11-11) read
+ * by the day they were made, Pacific: `MMDDYYYY-NN-xxxx`, a counter for that
+ * day and 4 random base36 characters, about 20 bits per date and counter.
+ * A renamed gallery keeps its storage token (R2 keys, Stripe metadata, the
+ * Lightroom remote id) and gets a date id in `link`, found through a
+ * `proofalias:<id>` key; its old public link stops.
  * ─────────────────────────────────────────────────────────────── */
 
 import { looksLikeEmail } from "@/lib/inbox";
+import type { InboxKV as KV } from "@/lib/leads/lead-store";
 
 export type ProofFrame = {
   /** Short id, stable across publishes: the Lightroom photo's remote id. */
@@ -26,7 +32,10 @@ export type ProofFrame = {
 };
 
 export type Proof = {
+  /** The storage id: KV key, R2 prefix, Stripe metadata, Lightroom's remote id. Never changes. */
   token: string;
+  /** The public id after a rename (`relink`): the client's link uses this, and the old token's page closes. */
+  link?: string;
   /** The collection name in Lightroom: "Nov 1 portraits". Never shown to the client. */
   name: string;
   email?: string;
@@ -150,6 +159,9 @@ export function stage(p: Pick<Proof, "sentAt" | "firstViewAt" | "firstSelectAt" 
 export const DEFAULTS = { included: 10, price: 15, days: 14, watermark: true } as const;
 
 export const proofKey = (token: string) => `proof:${token}`;
+export const aliasKey = (id: string) => `proofalias:${id}`;
+/** The id the client's link carries. */
+export const publicId = (p: Pick<Proof, "token" | "link">) => p.link ?? p.token;
 export const frameKey = (token: string, id: string) => `${token}/${id}.jpg`;
 /** The watermarked copy beside the clean original. The version bumps when the mark changes, so old bakes are never served. */
 export const markedKey = (token: string, id: string) => `${token}/${id}.wm1.jpg`;
@@ -163,7 +175,7 @@ export const thumbKey = (token: string, id: string, marked: boolean) => `${token
 export const frameKeys = (token: string, id: string) => [frameKey(token, id), markedKey(token, id), cardKey(token, id), thumbKey(token, id, true), thumbKey(token, id, false)];
 
 const B62 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-/** 16 base62 characters from the platform's CSPRNG (rejection sampling keeps it uniform). */
+/** 16 base62 characters from the platform's CSPRNG (rejection sampling keeps it uniform). Older galleries only; new ones get `proofId`. */
 export function newToken(): string {
   let out = "";
   while (out.length < 16) {
@@ -173,7 +185,36 @@ export function newToken(): string {
   }
   return out;
 }
-export const isToken = (t: unknown): t is string => typeof t === "string" && /^[0-9A-Za-z]{16}$/.test(t);
+const B36 = "0123456789abcdefghijklmnopqrstuvwxyz";
+/** 4 base36 characters, uniform: the part of a date id nobody can guess. */
+export function tail(): string {
+  let out = "";
+  while (out.length < 4) {
+    for (const b of crypto.getRandomValues(new Uint8Array(8))) {
+      if (b < 252 && out.length < 4) out += B36[b % 36];
+    }
+  }
+  return out;
+}
+/** `MMDDYYYY` for a moment, in Pacific time. */
+export const proofDay = (t: Date | number = new Date()) => {
+  const [y, m, d] = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Los_Angeles" }).format(t).split("-");
+  return `${m}${d}${y}`;
+};
+const DATE_ID = /^(\d{8})-(\d{2})-[0-9a-z]{4}$/;
+/** `MMDDYYYY-NN-xxxx`: the next free counter for that day among `taken` ids (storage tokens and aliases). shortcut: caps at 99 a day, widen the counter if that is ever reached. */
+export function proofId(day: string, taken: Iterable<string>, rand = tail()): string {
+  let n = 0;
+  for (const t of taken) {
+    const m = DATE_ID.exec(t);
+    if (m && m[1] === day) n = Math.max(n, Number(m[2]));
+  }
+  if (n >= 99) throw new Error("99 galleries on one day already.");
+  return `${day}-${String(n + 1).padStart(2, "0")}-${rand}`;
+}
+export const isDateId = (t: unknown): t is string => typeof t === "string" && DATE_ID.test(t);
+/** Either format, nothing looser: the random part is the only secret. */
+export const isToken = (t: unknown): t is string => typeof t === "string" && (/^[0-9A-Za-z]{16}$/.test(t) || DATE_ID.test(t));
 export const isFrameId = (t: unknown): t is string => typeof t === "string" && /^[0-9A-Za-z_-]{1,64}$/.test(t);
 
 /** How many frames are past the included ones, and what they cost in dollars. */
@@ -282,7 +323,6 @@ export function cleanSettings(given: Record<string, unknown>): Settings {
   return out;
 }
 
-type KV = Pick<NonNullable<CloudflareEnv["INBOX"]>, "get" | "put" | "list" | "delete">;
 type Seal = { seal(v: unknown): Promise<string>; open<T>(s: string): Promise<T> };
 
 export async function readProof(kv: KV, s: Seal, token: string): Promise<Proof | null> {
@@ -293,6 +333,33 @@ export async function readProof(kv: KV, s: Seal, token: string): Promise<Proof |
   } catch {
     return null;
   }
+}
+
+/** A gallery by its storage token or a renamed gallery's date id. Frames and cards read this, so the desk's thumbnails keep working. */
+export async function findProof(kv: KV, s: Seal, id: string): Promise<Proof | null> {
+  const p = await readProof(kv, s, id);
+  if (p) return p;
+  const token = isDateId(id) ? await kv.get(aliasKey(id)) : null;
+  return token ? readProof(kv, s, token) : null;
+}
+/** The gallery a client link opens: only by its public id, so a renamed gallery's old link closes. */
+export async function readPublic(kv: KV, s: Seal, id: string): Promise<Proof | null> {
+  const p = await findProof(kv, s, id);
+  return p && publicId(p) === id ? p : null;
+}
+/** A new date id for today, past every gallery and alias already made today. shortcut: two creates in the same instant can take the same counter; the random tail still keeps the ids apart. */
+export async function nextProofId(kv: KV, now: Date | number = new Date()): Promise<string> {
+  const day = proofDay(now);
+  const taken: string[] = [];
+  for (const prefix of [`proof:${day}-`, `proofalias:${day}-`]) {
+    let cursor: string | undefined;
+    do {
+      const page = await kv.list({ prefix, cursor });
+      for (const k of page.keys) taken.push(k.name.slice(k.name.indexOf(":") + 1));
+      cursor = page.list_complete ? undefined : page.cursor;
+    } while (cursor);
+  }
+  return proofId(day, taken);
 }
 
 /** Listed with a small summary in metadata so the desk never opens every record. */

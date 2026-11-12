@@ -1,5 +1,5 @@
 /**
- * The proofs desk's non-UI half (`components/proofs-astryx.tsx` and the
+ * The proofs desk's non-UI half (`components/proofs/desk.tsx` and the
  * lead's proof card): the admin fetch and how a gallery's state reads.
  * Browser only, like `lib/leads/lead-desk.ts`.
  */

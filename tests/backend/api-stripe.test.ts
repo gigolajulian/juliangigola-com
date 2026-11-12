@@ -8,7 +8,7 @@ const logOf = async (kv: unknown, email: string) => { const s = (await sealer(LE
 
 /* /api/stripe: Stripe's webhook. Off while a secret is unset, refuses a bad
    signature and a body that is not JSON, and leaves every payment that is
-   not the site's own deposit alone. The settle path is covered in
+   not the site's own deposit alone. The bookDeposit path is covered in
    api-deposit.test.ts. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));

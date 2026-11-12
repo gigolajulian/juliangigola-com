@@ -8,7 +8,7 @@ import { Orb, ORB_ROUND } from "@/components/orb";
 import { JgLoad } from "@/components/splash/jg-load";
 import { TZ } from "@/lib/booking/booking-rules";
 import { mplan } from "@/lib/mplan";
-import { AHEAD, e164, fromIso, iso, KEEP, minutesOf, noop, overflowOf, recent, WHERE, type Pick, type Slot, type Step, type V3Book } from "@/components/booking/time-picker-parts";
+import { AHEAD, e164, fromIso, iso, KEEP, minutesOf, noop, overflowOf, recent, recentKey, forgetTimes, WHERE, type Pick, type Slot, type Step, type V3Book } from "@/components/booking/time-picker-parts";
 
 
 /* Goo (Julian, 2026-10-20, OKd 10-21) on the card's buttons, times and
@@ -80,8 +80,8 @@ export function usePicker({ path, title, className, fallback, v3, onPicked }: Pr
     return () => window.clearTimeout(t);
   }, [orb]);
   const jg = <JgLoad done={state === "ready" && !!days} onDone={() => setHeld(false)} className="min-h-[16rem] w-full" />;
-  // The editorial card opens on its month (2026-10-20); `?classic` keeps the week.
-  const [view, setView] = React.useState<"week" | "month">(() => (typeof location !== "undefined" && new URLSearchParams(location.search).has("classic") ? "week" : "month"));
+  // The card opens on its month (2026-10-20).
+  const [view, setView] = React.useState<"week" | "month">("month");
   const [anchor, setAnchor] = React.useState(() => new Date()); // the week or month on show
   const [pick, setPick] = React.useState<Pick | null>(null);
   /* Julian: the arrows more defined, larger. Drawn, not the font's. */
@@ -115,13 +115,6 @@ export function usePicker({ path, title, className, fallback, v3, onPicked }: Pr
   React.useEffect(() => {
     if (smooth) document.documentElement.dataset.smooth = "";
   }, [smooth]);
-  /* The card as a magazine page (editorial.css, booking-editorial-mock.html),
-     everywhere since 2026-10-17 (Julian: "make sure the new card design is
-     out"). The card before it stays behind `?classic`. */
-  const editorial = React.useSyncExternalStore(noop, () => !new URLSearchParams(location.search).has("classic"), () => true);
-  React.useEffect(() => {
-    if (!editorial) document.documentElement.dataset.classic = "";
-  }, [editorial]);
   const root = React.useRef<HTMLDivElement>(null);
   const v3root = React.useRef<HTMLDivElement>(null); // the V3 stepper's own, so root's slide motion stays editorial-card only
   const was = React.useRef(step);
@@ -133,30 +126,19 @@ export function usePicker({ path, title, className, fallback, v3, onPicked }: Pr
     // A step opens at its top: on an iPhone Details opened where Continue
     // had been, Name and Email above the screen (JG - MAC, 2026-10-17).
     const card = el?.matches(".ed") ? el : el?.querySelector<HTMLElement>(".ed");
-    if (editorial && dir && card && card.getBoundingClientRect().top < 0) card.scrollIntoView({ block: "start" });
+    if (dir && card && card.getBoundingClientRect().top < 0) card.scrollIntoView({ block: "start" });
     // Back to the taller Time step keeps You's scroll too; FlowShell only sees forward steps.
     const rail = v3root.current?.querySelector<HTMLElement>(".rail");
     if (dir < 0 && rail && rail.getBoundingClientRect().top < 64) rail.scrollIntoView({ block: "start" });
-    if (!(smooth || editorial) || !dir || !el || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    if (editorial) {
-      // Booked rises in; any other step slides in from the side it comes from.
-      const up = step === "done";
-      gsap.fromTo(
-        el.querySelectorAll(".ed-l > *, .ed-r > *, .ed-floor"),
-        { autoAlpha: 0, x: up ? 0 : 28 * dir, y: up ? 14 : 0 },
-        { autoAlpha: 1, x: 0, y: 0, duration: 0.5, ease: "expo.out", stagger: 0.035, clearProps: "opacity,visibility,transform" },
-      );
-      return;
-    }
-    if (step === "pick") return;
-    const box = step === "form" ? el.querySelector("form") : step === "pay" ? el.firstElementChild : el;
-    if (!box?.children.length) return;
+    if (!dir || !el || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    // Booked rises in; any other step slides in from the side it comes from.
+    const up = step === "done";
     gsap.fromTo(
-      box.children,
-      { autoAlpha: 0, x: 32 * dir, filter: "blur(6px)" },
-      { autoAlpha: 1, x: 0, filter: "blur(0px)", duration: 0.6, ease: "expo.out", stagger: 0.04, clearProps: "opacity,visibility,transform,filter" },
+      el.querySelectorAll(".ed-l > *, .ed-r > *, .ed-floor"),
+      { autoAlpha: 0, x: up ? 0 : 28 * dir, y: up ? 14 : 0 },
+      { autoAlpha: 1, x: 0, y: 0, duration: 0.5, ease: "expo.out", stagger: 0.035, clearProps: "opacity,visibility,transform" },
     );
-  }, [step, smooth, editorial]);
+  }, [step]);
   const [error, setError] = React.useState("");
   /* JG V3: a field's one sentence (master `check()`). */
   const [bad, setBad] = React.useState<Record<string, string>>({});
@@ -184,7 +166,7 @@ export function usePicker({ path, title, className, fallback, v3, onPicked }: Pr
   }, [ok]);
 
   const load = React.useCallback(async (fresh = false) => {
-    const key = `${username}/${slug}/${tz}`;
+    const key = recentKey(username, slug, tz);
     try {
       const from = new Date();
       const to = new Date(Date.now() + AHEAD * 864e5);
@@ -326,7 +308,6 @@ export function usePicker({ path, title, className, fallback, v3, onPicked }: Pr
      a day that was not on show fades in. Measured before the switch,
      played once the new view is laid out. */
   const daysBox = React.useRef<HTMLDivElement>(null);
-  const flip = React.useRef<{ at: Map<string, DOMRect>; h: number; card: number } | null>(null);
   /* Where a month and a day's times do not fit together (`data-split`,
      below): the month, then the day's times in its place. Julian, no
      scroll in the card, ever (2026-10-11). */
@@ -335,13 +316,7 @@ export function usePicker({ path, title, className, fallback, v3, onPicked }: Pr
     if (v === view) return;
     setSlide(0);
     setMstep("days");
-    const box = daysBox.current;
-    // Editorial: the new view is drawn in place, no flip.
-    if (box && !editorial) {
-      const at = new Map<string, DOMRect>();
-      for (const b of box.querySelectorAll<HTMLElement>("[data-day]")) at.set(b.dataset.day!, b.getBoundingClientRect());
-      flip.current = { at, h: box.offsetHeight, card: box.closest<HTMLElement>("#book-card")?.offsetHeight ?? 0 };
-    }
+    // The new view is drawn in place, no flip.
     // Into the week from a month: the week of the day picked, when it is in that month.
     if (v === "week" && pick && fromIso(pick.date).getMonth() === anchor.getMonth()) setAnchor(fromIso(pick.date));
     setView(v);
@@ -508,47 +483,13 @@ export function usePicker({ path, title, className, fallback, v3, onPicked }: Pr
       tp.removeAttribute("data-split");
     };
   }, [view, month, pick?.date, days, mstep, held]);
-  React.useLayoutEffect(() => {
-    const f = flip.current;
-    flip.current = null;
-    const box = daysBox.current;
-    if (!f || !box || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const ms = 520;
-    const easing = "cubic-bezier(0.22, 1, 0.36, 1)";
-    // Measured again once the box is at its height: until then it hides what overflows.
-    /* And the card round it, on a phone where it grows with what it holds,
-       from its height before the switch, measured before the days start
-       their glide. Left to its own ease (`easeHeight`) it was measured
-       after the big time and the week row had gone, and snapped shorter
-       for a frame before it grew (QA, on an iPhone, Week to Month). */
-    const card = f.card ? box.closest<HTMLElement>("#book-card") : null;
-    const to = card?.offsetHeight ?? 0;
-    box.animate([{ height: `${f.h}px` }, { height: `${box.offsetHeight}px` }], { duration: ms, easing }).finished.then(() => refit.current(), () => {});
-    if (card && Math.abs(to - f.card) > 1) card.animate([{ height: `${f.card}px` }, { height: `${to}px` }], { duration: ms, easing });
-    let n = 0;
-    for (const el of box.querySelectorAll<HTMLElement>("[data-day]")) {
-      const to = el.getBoundingClientRect();
-      const from = f.at.get(el.dataset.day!);
-      if (from) {
-        el.animate(
-          [
-            { transformOrigin: "0 0", transform: `translate(${from.left - to.left}px, ${from.top - to.top}px) scale(${from.width / to.width}, ${from.height / to.height})` },
-            { transformOrigin: "0 0", transform: "none" },
-          ],
-          { duration: ms, easing },
-        );
-      } else {
-        el.animate([{ opacity: 0, transform: "translateY(6px)" }, { opacity: 1, transform: "none" }], { duration: 380, delay: 80 + n++ * 9, easing, fill: "backwards" });
-      }
-    }
-  }, [view]);
   /* Editorial: the card never scrolls. Over by anything, it closes up a
      step at a time (`data-fit`, editorial.css): a smaller time, no big
      time, then the days and the times as two screens. */
   React.useLayoutEffect(() => {
     const el = root.current;
     const body = el?.querySelector<HTMLElement>(".ed-body");
-    if (!editorial || step !== "pick" || !el || !body) return;
+    if (step !== "pick" || !el || !body) return;
     const fit = () => {
       el.removeAttribute("data-scroll");
       /* Measured two ways: WebKit reported no scroll while the month's
@@ -585,13 +526,13 @@ export function usePicker({ path, title, className, fallback, v3, onPicked }: Pr
     const ro = new ResizeObserver(fit);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [editorial, step, view, month, week, pick?.date, chosen, days, mstep, held]);
+  }, [step, view, month, week, pick?.date, chosen, days, mstep, held]);
   /* Split in two and scrolling, each screen opens at its top: the times
      opened where the days had been scrolled to, their way back hidden. */
   React.useLayoutEffect(() => {
     const body = root.current?.querySelector<HTMLElement>(".ed-body");
-    if (editorial && body) body.scrollTop = 0;
-  }, [editorial, mstep]);
+    if (body) body.scrollTop = 0;
+  }, [mstep]);
   /* Editorial: the days cascade in, left to right across a week, a ripple from the top left of a month
      (Julian, 2026-10-16). On every week or month shown, but not the first:
      once the orb goes the card is there whole (Julian, 2026-10-20). */
@@ -599,7 +540,7 @@ export function usePicker({ path, title, className, fallback, v3, onPicked }: Pr
   const shown = view === "week" ? `w${iso(week[0])}` : `m${anchor.getFullYear()}-${anchor.getMonth()}`;
   React.useLayoutEffect(() => {
     const box = daysBox.current;
-    if (!editorial || step !== "pick" || !box || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (step !== "pick" || !box || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     if (!first.current) return void (first.current = true);
     const cells = [...box.querySelectorAll<HTMLElement>(".ed-day, .ed-cell, .ed-blank")];
     const at = (k: number) => (view === "week" ? k * 0.06 : (k % 7) * 0.03 + Math.floor(k / 7) * 0.06);
@@ -607,14 +548,14 @@ export function usePicker({ path, title, className, fallback, v3, onPicked }: Pr
       gsap.fromTo(c, { autoAlpha: 0, y: 10, rotationX: -35, transformPerspective: 500, transformOrigin: "50% 0%" }, { autoAlpha: 1, y: 0, rotationX: 0, duration: 0.45, delay: at(k), ease: "expo.out", clearProps: "opacity,visibility,transform" }),
     );
     return () => tw.forEach((t) => t.progress(1).kill());
-  }, [editorial, step, shown, view, held, state]);
+  }, [step, shown, view, held, state]);
   /* The swipe nudge (Julian, 2026-10-17, on for everyone): on a touch
      screen the week eases 8px left and back after the cascade, no
      bounce (Julian: the 16px spring was too much), so the strip reads as
      something that swipes. Once a visit. */
   React.useEffect(() => {
     const row = daysBox.current?.firstElementChild as HTMLElement | null;
-    if (!editorial || step !== "pick" || view !== "week" || !row) return;
+    if (step !== "pick" || view !== "week" || !row) return;
     if (!matchMedia("(pointer: coarse)").matches || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     try { if (sessionStorage.getItem("ed-nudged")) return; } catch {}
     const seen = () => { try { sessionStorage.setItem("ed-nudged", "1"); } catch {} };
@@ -633,7 +574,7 @@ export function usePicker({ path, title, className, fallback, v3, onPicked }: Pr
       tl.kill();
       if (begun) gsap.set(row, { x: 0 });
     };
-  }, [editorial, step, view, held, state]);
+  }, [step, view, held, state]);
   /* Nothing to go back to before today. */
   const atStart = view === "week" ? +week[0] <= +today : anchor.getFullYear() * 12 + anchor.getMonth() <= today.getFullYear() * 12 + today.getMonth();
 
@@ -656,7 +597,7 @@ export function usePicker({ path, title, className, fallback, v3, onPicked }: Pr
       return;
     }
     const notes = String(form.get("notes") || "").trim();
-    // JG V3 asks one Name; the classic and editorial cards ask first and last.
+    // JG V3 asks one Name; the editorial card asks first and last.
     const name = String(form.get("name") ?? `${String(form.get("first")).trim()} ${String(form.get("last")).trim()}`).trim();
     const firstName = name.split(/\s+/)[0];
     if (paid) {
@@ -694,7 +635,7 @@ export function usePicker({ path, title, className, fallback, v3, onPicked }: Pr
         await new Promise((go) => setTimeout(go, 1500));
       }
       // The time is taken now: the next picker asks again.
-      recent.delete(`${username}/${slug}/${tz}`);
+      forgetTimes(username, slug, tz);
       setStep("done");
     } catch (e) {
       setError((e as { status?: number }).status === 409 ? "That time was just taken. Pick another." : "That did not go through. Try again, or write to hello@juliangigola.com.");
@@ -772,7 +713,7 @@ export function usePicker({ path, title, className, fallback, v3, onPicked }: Pr
        a third of the row turns the week; less springs back. */
     onPointerMove: (e) => {
       const s = swipe.current, row = daysBox.current?.firstElementChild as HTMLElement | null;
-      if (!(smooth || editorial) || !s || !row) return;
+      if (!s || !row) return;
       const dx = e.clientX - s.x, dy = e.clientY - s.y;
       if (!s.drag) {
         if (Math.abs(dx) < 10 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
@@ -844,7 +785,7 @@ export function usePicker({ path, title, className, fallback, v3, onPicked }: Pr
      foot of the view (MAC, iPhone Duo folded, 2026-11-08). */
   const heldBar = <button type="button" className="btn fill" disabled>Continue</button>;
   const v3plain = (body: React.ReactNode, bar?: React.ReactNode) => v3!.shell({ steps: v3steps, at: 1, head: v3paid ? "Book a session" : v3!.name === "Consultation" ? "Book a consultation" : "Book a call", sub: v3sub, body, sum: [], bar });
-  return { path, title, className, fallback, v3, onPicked, username, slug, tz, clockHere, here, setHere, length, setLength, needsWhere, setNeedsWhere, opt, setOpt, via, setVia, ask, setAsk, session, setSession, booked, setBooked, days, setDays, state, setState, held, setHeld, orb, setOrb, jg, view, setView, anchor, setAnchor, pick, setPick, arrow, chosen, setChosen, step, setStep, swipeX, wheelGate, stripEl, stripRef, more, setMore, paid, setPaid, deposit, setDeposit, refs, setRefs, typed, smooth, editorial, root, v3root, was, error, setError, bad, setBad, blank, setBlank, ok, setOk, handOff, load, lo, hi, open, steps, choose, showTimes, today, week, month, slide, setSlide, swipe, shift, daysBox, flip, mstep, setMstep, switchView, monthGrid, big, slotsBox, gs, seen, slotsW, setSlotsW, slotsRO, slotsRef, at, lastPick, refit, first, shown, atStart, book, grow, refill, busy, okMark, swipeProps, v3paid, v3steps, v3sub, heldBar, v3plain };
+  return { path, title, className, fallback, v3, onPicked, username, slug, tz, clockHere, here, setHere, length, setLength, needsWhere, setNeedsWhere, opt, setOpt, via, setVia, ask, setAsk, session, setSession, booked, setBooked, days, setDays, state, setState, held, setHeld, orb, setOrb, jg, view, setView, anchor, setAnchor, pick, setPick, arrow, chosen, setChosen, step, setStep, swipeX, wheelGate, stripEl, stripRef, more, setMore, paid, setPaid, deposit, setDeposit, refs, setRefs, typed, smooth, root, v3root, was, error, setError, bad, setBad, blank, setBlank, ok, setOk, handOff, load, lo, hi, open, steps, choose, showTimes, today, week, month, slide, setSlide, swipe, shift, daysBox, mstep, setMstep, switchView, monthGrid, big, slotsBox, gs, seen, slotsW, setSlotsW, slotsRO, slotsRef, at, lastPick, refit, first, shown, atStart, book, grow, refill, busy, okMark, swipeProps, v3paid, v3steps, v3sub, heldBar, v3plain };
 }
 
 type Picker = ReturnType<typeof usePicker>;

@@ -1,15 +1,15 @@
 import { send, type Push, type Subscription } from "./web-push";
 import type { Lead, LeadEvent } from "./leads";
+import type { InboxKV as KV } from "./lead-store";
 
 /* ── the lead desk's devices ──────────────────────────────────────
- * Each device that turned notifications on (`components/leads/setup-astryx.tsx`)
+ * Each device that turned notifications on (`components/leads/setup-panels.tsx`)
  * is one `push:<hash of its endpoint>` row in INBOX. A lead's arrival
  * pings them all; a device the push service says is gone is forgotten.
  * Nothing is sent while no device has subscribed, so the switch on the
  * desk is the only thing that turns this on.
  * ─────────────────────────────────────────────────────────────── */
 
-type KV = Pick<NonNullable<CloudflareEnv["INBOX"]>, "get" | "put" | "list" | "delete">;
 
 const keyOf = async (endpoint: string) =>
   `push:${[...new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(endpoint)))].slice(0, 12).map((b) => b.toString(16).padStart(2, "0")).join("")}`;

@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { sealer } from "@/lib/leads/lead-crypto";
-import { checkPaid, finalize, settle } from "@/lib/proof-submit";
+import { checkPaid, finalize, recheckTransfer } from "@/lib/proof-submit";
 import { PAYMENTS_DOWN } from "@/lib/stripe";
-import { coverFrame, isOpen, isToken, publicView, readProof, writeProof } from "@/lib/proofs";
+import { coverFrame, isOpen, isToken, publicView, readPublic, writeProof } from "@/lib/proofs";
 import { ProofGallery } from "@/components/proof-gallery";
 import { CARD } from "@/lib/proof-watermark";
 
@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: { params: Promise<{ token: st
   const { token } = await params;
   const { env } = await getCloudflareContext({ async: true });
   const seal = sealer(env.LEADS_KEY);
-  const p = isToken(token) && env.INBOX && seal ? await readProof(env.INBOX, await seal, token) : null;
+  const p = isToken(token) && env.INBOX && seal ? await readPublic(env.INBOX, await seal, token) : null;
   const f = p && coverFrame(p);
   if (!f) return base;
   // The URL carries the frame and crop, so a new pick is a new URL and no app shows a stale preview.
@@ -53,7 +53,7 @@ export default async function ProofPage({ params, searchParams }: { params: Prom
   const seal = sealer(env.LEADS_KEY);
   if (!isToken(token) || !env.INBOX || !seal) return <Closed />;
   const s = await seal;
-  let p = await readProof(env.INBOX, s, token);
+  let p = await readPublic(env.INBOX, s, token);
   if (!p || !isOpen(p)) return <Closed />;
 
   const session = paid ?? p.checkout;
@@ -64,7 +64,7 @@ export default async function ProofPage({ params, searchParams }: { params: Prom
     else if (ok) p = await finalize(env, env.INBOX, s, p, ok);
   }
   if (p.paid?.pending && env.STRIPE_SECRET_KEY) {
-    const moved = await settle(env.STRIPE_SECRET_KEY, p).catch(() => null);
+    const moved = await recheckTransfer(env.STRIPE_SECRET_KEY, p).catch(() => null);
     if (moved) await writeProof(env.INBOX, s, (p = moved));
   }
   // Julian's own look before sending is not a client view.

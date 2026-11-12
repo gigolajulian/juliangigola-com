@@ -8,7 +8,7 @@
 import { TZ } from "@/lib/booking/booking-rules";
 import { NAME_INK, NAME_W } from "@/lib/email/email-logo";
 import { SIG_DARK, SIG_HTML, SIG_TEXT } from "@/lib/email/email-signature";
-import { extras, type Proof } from "@/lib/proofs";
+import { extras, publicId, type Proof } from "@/lib/proofs";
 
 const FROM = { name: "Julian Gigola", email: "book@juliangigola.com" };
 const REPLY_TO = "hello@juliangigola.com";
@@ -48,7 +48,7 @@ const rows = (r: [string, string][]) =>
 
 /** The "Your proofs are ready" mail. `strip` is up to four frames sent inline. */
 export function proofMail(p: Proof, strip: { id: string; bytes: Uint8Array }[]) {
-  const url = proofUrl(p.token);
+  const url = proofUrl(publicId(p));
   const closes = p.closesAt ? day(p.closesAt) : "";
   const n = p.frames.length;
   const lead = `Thanks again for the shoot. All ${n} frames are up. Select the ${p.included === 10 ? "ten" : p.included} you want and I'll retouch them.`;
