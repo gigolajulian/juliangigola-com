@@ -3,7 +3,7 @@ import { sealer } from "@/lib/leads/lead-crypto";
 import { recordLead } from "@/lib/leads/lead-store";
 import { checkout, checkPaid, finalize } from "@/lib/proof-submit";
 import { PAYMENTS_DOWN, PAYMENTS_OFF } from "@/lib/stripe";
-import { cleanSelects, device, isEmail, isOpen, owed, isToken, publicView, readPublic, track, viewerKey, writeProof, type Proof } from "@/lib/proofs";
+import { cleanSelects, device, isEmail, isOpen, isTestEmail, owed, isToken, publicView, readPublic, track, viewerKey, writeProof, type Proof } from "@/lib/proofs";
 import { bodyOf, json } from "@/lib/http";
 
 /* ── proofs, the client's side ────────────────────────────────────
@@ -64,7 +64,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
     const name = kind === "open" && typeof b.name === "string" && b.name.trim() ? b.name.trim().replace(/\s+/g, " ").slice(0, 80) : undefined;
     const next = logged(g.p, b.email, { kind, looks, seconds: Number(b.seconds) || 0, ...open, name });
     await writeProof(g.kv, g.s, next);
-    if (kind === "open") await recordLead(g.env, b.email, { event: { at: new Date().toISOString(), kind: "proofs", ref: g.p.token, note: g.p.name }, name });
+    // A test address opening the gate (QA) stays in the gallery's own log, not on the desk as a lead.
+    if (kind === "open" && !isTestEmail(b.email)) await recordLead(g.env, b.email, { event: { at: new Date().toISOString(), kind: "proofs", ref: g.p.token, note: g.p.name }, name });
     // An address coming back gets its own picks; once sent, everyone sees what was sent.
     return json({ picks: g.p.submittedAt ? g.p.selects : (next.viewers?.[viewerKey(b.email)]?.picks ?? []) });
   }

@@ -106,6 +106,8 @@ export type Viewer = {
 const MAX_EVENTS = 400;
 
 export const isEmail = (v: unknown): v is string => typeof v === "string" && v.length <= 200 && looksLikeEmail(v.trim());
+/** A reserved test address (RFC 2606/6761: example.com/net/org, .test, .invalid, .example, .localhost): QA at a gallery's gate, never a client. */
+export const isTestEmail = (v: string) => /@(?:[^@\s]+\.)?(?:example\.(?:com|net|org)|[^@\s]+\.(?:test|invalid|example|localhost))$/i.test(v.trim());
 export const viewerKey = (email: string) => email.trim().toLowerCase();
 
 /** "iPhone · Safari" from a user agent. shortcut: the common devices and browsers only, "Other" for the rest. */
