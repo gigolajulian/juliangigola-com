@@ -35,11 +35,6 @@ import { backToBack, twinGroups } from "@/lib/frame-twins";
 export type { PendingUpload };
 
 /** The path of a photograph. Empty for a passage, which has no file. */
-/* Re-exported so this panel's callers keep importing it from here. The
-   implementation moved to `lib/admin/admin-payload.ts`, beside the publish payload
-   it is part of and where a test can reach it. */
-export { tidySequence } from "@/lib/admin/admin-payload";
-
 /**
  * A name the harvester cannot collide with.
  *
