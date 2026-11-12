@@ -5,7 +5,7 @@
  * proofs desk. /admin/proofs since 2026-11-11, so Astryx's CSS never
  * reaches the client's proof page or the classic desk. Same API as the
  * classic desk (/api/proof): list, open one, see the picks, create,
- * send, copy the link, and close a draft. Activity is components/proofs/activity.tsx.
+ * send, copy the link, a new link, the link preview, and close a draft. Activity is components/proofs/activity.tsx.
  * ─────────────────────────────────────────────────────────────── */
 
 import "@astryxdesign/core/astryx.css";
@@ -27,17 +27,19 @@ import { Card } from "@astryxdesign/core/Card";
 import { Thumbnail } from "@astryxdesign/core/Thumbnail";
 import { MetadataList, MetadataListItem } from "@astryxdesign/core/MetadataList";
 import { ProgressBar } from "@astryxdesign/core/ProgressBar";
+import { Selector } from "@astryxdesign/core/Selector";
+import { Slider } from "@astryxdesign/core/Slider";
 import { KEY_STORE } from "@/lib/admin/admin-github";
 import { SignIn } from "@/components/leads/setup";
-import { api, closed, status, type Row } from "@/lib/proofs/desk";
+import { api, cardCrop, closed, cropAt, status, type Row } from "@/lib/proofs/desk";
 import { ActivityDesk } from "@/components/proofs/activity";
 import { errorText, stampPT } from "@/lib/leads/lead-desk";
 import { TOKEN_STORE } from "@/lib/admin/admin-github";
-import { extras, publicId, stage, STAGES } from "@/lib/proofs/proof";
+import { extras, publicId, stage, STAGES, THUMB_W, type CardCrop } from "@/lib/proofs/proof";
 
 const CLASSIC = "/admin";
-// Once delivered the proof copies are gone: the finals' small copies stand in.
-const frame = (p: Row, id: string) => (p.deliveredAt ? `/delivery/${publicId(p)}/f/${id}?w=800` : `/proof/${p.token}/f/${id}`);
+// The small copy the client's grid uses: every frame on the desk is a thumbnail. Once delivered the proof copies are gone: the finals' small copies stand in.
+const frame = (p: Row, id: string) => (p.deliveredAt ? `/delivery/${publicId(p)}/f/${id}?w=${THUMB_W}` : `/proof/${p.token}/f/${id}?w=${THUMB_W}`);
 const first = (p: Row) => (p.deliveredAt ? p.finals?.[0] : p.frames[0]);
 
 function Tile({ k, v }: { k: string; v: string }) {
@@ -238,6 +240,12 @@ function Gallery({ p, changed, onBack, gone }: { p: Row; changed: () => void; on
       setNote(text);
     }
   };
+  const reopen = () => {
+    if (confirm(`Reopen "${p.name}"? ${p.email ?? "The client"} can change the selects they sent, and Lightroom pulls them again.`)) return act({ action: "reopen" }, "POST", "Reopened. They can change their selects.");
+  };
+  const relink = () => {
+    if (confirm(`Give "${p.name}" a new link? The old link stops working. Nothing is mailed: send the new one yourself.`)) return act({ action: "relink" }, "POST", "New link made. Copy it to send.");
+  };
   // Close: only a draft nobody has been sent, so a client's gallery can never vanish from here. Frames are web previews, never originals.
   const close = async () => {
     if (!confirm(`Close the draft "${p.name}"? Its web previews are removed. Nothing in Lightroom changes.`)) return;
@@ -302,10 +310,11 @@ function Gallery({ p, changed, onBack, gone }: { p: Row; changed: () => void; on
           </div>
           {changedSet ? <Button label="Save" clickAction={() => act({ balance: set.balance, included: set.included, price: set.price, days: set.days }, "PATCH", "Saved.")} /> : null}
           <Switch label="Watermark" description="Julian Gigola in the bottom third of every frame" value={!!p.watermark} onChange={(on) => act({ watermark: on }, "PATCH", on ? "Watermark on." : "Watermark off.")} />
+          <LinkPreview p={p} save={(card) => act({ card }, "PATCH", card ? "Link preview saved." : "Link preview back to auto.")} />
         </VStack>
       ) : null}
 
-      {tab === "activity" ? <ActivityDesk p={p} /> : null}
+      {tab === "activity" ? <ActivityDesk p={p} changed={changed} /> : null}
 
       {tab === "selects" ? (
         p.selects.length ? (
@@ -325,6 +334,7 @@ function Gallery({ p, changed, onBack, gone }: { p: Row; changed: () => void; on
         <HStack gap={2} vAlign="center">
           <div style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}><Text type="supporting">{p.url.replace(/^https?:\/\//, "")}</Text></div>
           <Button label="Copy link" size="sm" variant="ghost" onClick={() => copy(p.url, "Link")} />
+          <Button label="New link" size="sm" variant="ghost" clickAction={relink} />
         </HStack>
       </Card>
 
@@ -341,11 +351,41 @@ function Gallery({ p, changed, onBack, gone }: { p: Row; changed: () => void; on
         {p.finals?.length && !p.deliveredAt ? <Button label={`Send finals to ${p.email ?? "…"}`} variant="primary" isDisabled={!p.email} clickAction={() => (confirm(`Send ${p.finals!.length} finals to ${p.email}? The gallery becomes the delivery, open 60 days, and the proof previews are removed.`) ? act({ action: "deliver" }, "POST", "Finals sent.") : undefined)} /> : null}
         {(p.sentAt && !p.submittedAt) || p.deliveredAt ? <Button label="Extend 7 days" clickAction={() => act({ action: "extend", days: 7 }, "POST", "Seven more days.")} /> : null}
         {p.submittedAt ? <Button label="Copy file names" onClick={() => copy(p.selects.map(file).join("\n"), "File names")} /> : null}
-        {p.submittedAt ? <Button label="Reopen for changes" clickAction={() => act({ action: "reopen" }, "POST", "Reopened. They can change their selects.")} /> : null}
+        {p.submittedAt ? <Button label="Reopen for changes" clickAction={reopen} /> : null}
         <Button label="Open gallery" href={p.url} target="_blank" rel="noreferrer" />
         {!p.sentAt ? <Button label="Close draft" variant="destructive" clickAction={close} /> : null}
       </HStack>
       {note ? <Text type="supporting" role="status">{note}</Text> : null}
+    </VStack>
+  );
+}
+
+/** The link preview (`shareCard`): which frame, and where the crop sits on it. Unset is the first frame, auto-cropped. */
+function LinkPreview({ p, save }: { p: Row; save: (card: CardCrop | null) => Promise<void> }) {
+  const f = p.frames.find((x) => x.id === p.card?.id) ?? p.frames[0];
+  const [at, setAt] = React.useState(() => (f && p.card?.id === f.id ? cropAt(f, p.card) : 0.5));
+  // Behind a button: the card is drawn on first fetch, so nothing loads until he asks.
+  const [shown, setShown] = React.useState(false);
+  if (!f) return null;
+  if (!shown) return <HStack><Button label="Link preview" size="sm" variant="ghost" onClick={() => setShown(true)} /></HStack>;
+  const sized = p.frames.filter((x) => x.w && x.h);
+  // The card is cached an hour: a new crop is a new address.
+  const v = p.card ? `${p.card.id}-${p.card.x}-${p.card.y}-${p.card.w}` : f.id;
+  return (
+    <VStack gap={2}>
+      <Text type="supporting">Link preview</Text>
+      {p.watermark && !closed(p) ? (
+        // eslint-disable-next-line @next/next/no-img-element -- the gallery's share card from the Worker
+        <img src={`/proof/${p.token}/card?v=${v}`} alt="Link preview" style={{ width: "100%", aspectRatio: "1800 / 945", objectFit: "cover", borderRadius: 4 }} />
+      ) : <Text type="supporting">Drawn while the gallery is open with the watermark on.</Text>}
+      <HStack gap={2} vAlign="end">
+        <Selector label="Frame" size="sm" value={f.id} isDisabled={!sized.length}
+          onChange={(id) => { const c = cardCrop(sized.find((x) => x.id === id) ?? f, 0.5); setAt(0.5); if (c) void save(c); }}
+          options={(sized.includes(f) ? sized : [f, ...sized]).map((x) => ({ value: x.id, label: `#${p.frames.indexOf(x) + 1} · ${x.file}` }))} />
+        {p.card ? <Button label="Auto" size="sm" variant="ghost" clickAction={() => { setAt(0.5); return save(null); }} /> : null}
+      </HStack>
+      <Slider label="Crop" min={0} max={100} value={Math.round(at * 100)} valueDisplay="none" isDisabled={!f.w || !f.h}
+        onChange={(n: number) => setAt(n / 100)} onChangeEnd={(n: number) => { const c = cardCrop(f, n / 100); if (c) void save(c); }} />
     </VStack>
   );
 }

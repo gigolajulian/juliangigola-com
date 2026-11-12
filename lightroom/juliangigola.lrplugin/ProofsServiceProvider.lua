@@ -6,9 +6,10 @@
   one at a time. Nothing is mailed from here: the gallery waits in
   /admin Leads until Julian hits Send.
 
-  Library > Plug-in Extras > Check for picks (or Publish again) brings the
-  client's selects back: the Pick flag and a Purple label on each selected
-  frame, and a "<gallery> selects" collection under Client selects. Their
+  Library > Plug-in Extras > Sync with proof (or Publish again) mirrors the
+  client's selects, sent or not: the Pick flag and a Purple label on each
+  selected frame, and a "<gallery> selects" collection under Client selects.
+  A frame the client unpicks loses both and leaves that collection. Their
   notes land in Comments on Publish or right-click > Refresh Comments.
 
   Light on purpose (Lightroom must never lag): one JSON call per refresh,
@@ -152,7 +153,7 @@ function provider.viewForCollectionSettings(f, publishSettings, info)
       f:checkbox { title = "Watermark", value = bind "watermark", tooltip = "Julian Gigola in the bottom third of every frame. The clean files stay for finals." },
     },
     f:row { label "Open for", f:edit_field { value = bind "days", width_in_digits = 3, min = 1, max = 90, precision = 0 }, f:static_text { title = "days, from when you send it in /admin" } },
-    f:row { label "", f:static_text { title = "Selects come back flagged with a Purple label: Library > Plug-in Extras > Check for picks, or publish again.", fill_horizontal = 1 } },
+    f:row { label "", f:static_text { title = "Selects come back flagged with a Purple label: Library > Plug-in Extras > Sync with proof, or publish again.", fill_horizontal = 1 } },
   }
 end
 
@@ -271,27 +272,46 @@ local function remoteOf(arrayOfPhotoInfo)
   end
 end
 
--- One catalog write for every gallery: Pick flag, Purple label, "<gallery> selects".
--- Safe to run twice: same values, existing collections reused, photos already in stay once.
--- Returns the selects collections it filled.
-local function markPicks(galleries)
+-- One catalog write for every gallery, mirroring the site: picks get the Pick flag, a Purple
+-- label and "<gallery> selects"; the rest (g.others) lose them. Only a Purple label is cleared,
+-- so a label Julian set by hand stays, and a frame picked in any gallery is never cleared.
+-- Safe to run twice. Returns the selects collections that hold picks.
+local function syncPicks(galleries)
   local made = {}
-  local any = false
-  for _, g in ipairs(galleries) do any = any or #g.photos > 0 end
+  local picked, any = {}, false
+  for _, g in ipairs(galleries) do
+    for _, photo in ipairs(g.photos) do picked[photo.localIdentifier] = true end
+    any = any or #g.photos > 0 or #(g.others or {}) > 0
+  end
   if not any then return made end
   local catalog = LrApplication.activeCatalog()
   catalog:withWriteAccessDo("Client selects from juliangigola.com", function()
     local set = catalog:createCollectionSet("Client selects", nil, true)
+    local existing = {}
+    for _, c in ipairs(set:getChildCollections()) do existing[c:getName()] = c end
     for _, g in ipairs(galleries) do
+      local name = (g.name or "Gallery") .. " selects"
+      local c = existing[name]
       if #g.photos > 0 then
         for _, photo in ipairs(g.photos) do
           photo:setRawMetadata("colorNameForLabel", LABEL)
           photo:setRawMetadata("pickStatus", 1)
         end
-        local c = catalog:createCollection((g.name or "Gallery") .. " selects", set, true)
+        c = c or catalog:createCollection(name, set, true)
         c:addPhotos(g.photos)
         made[#made + 1] = c
       end
+      local drop = {}
+      for _, photo in ipairs(g.others or {}) do
+        if not picked[photo.localIdentifier] then
+          if photo:getRawMetadata("colorNameForLabel") == LABEL then
+            photo:setRawMetadata("colorNameForLabel", "none")
+            if photo:getRawMetadata("pickStatus") == 1 then photo:setRawMetadata("pickStatus", 0) end
+          end
+          drop[#drop + 1] = photo
+        end
+      end
+      if c and #drop > 0 then c:removePhotos(drop) end
     end
   end, { timeout = 30 })
   return made
@@ -319,17 +339,17 @@ function provider.getRatingsFromPublishedCollection(publishSettings, arrayOfPhot
   local selected = {}
   for _, id in ipairs(p.selects or {}) do selected[id] = true end
 
-  local picked = {}
+  local picked, others = {}, {}
   for _, info in ipairs(arrayOfPhotoInfo) do
     local on = selected[info.remoteId] == true
     ratingCallback { publishedPhoto = info, rating = on and 1 or 0 }
-    if on then picked[#picked + 1] = info.photo end
+    if on then picked[#picked + 1] = info.photo else others[#others + 1] = info.photo end
   end
-  markPicks { { name = name, photos = picked } }
+  syncPicks { { name = name, photos = picked, others = others } }
 end
 
---- Library > Plug-in Extras > Check for picks: every gallery of this
---  plugin, one read each, nothing published. Run inside an async task.
+--- Library > Plug-in Extras > Sync with proof: every gallery of this
+--  plugin, one read each, nothing published. Picks not sent yet count too. Run inside an async task.
 function provider.checkForPicks()
   local catalog = LrApplication.activeCatalog()
   local found, lines, failed, why = {}, {}, {}, nil
@@ -352,22 +372,27 @@ function provider.checkForPicks()
         checked = checked + 1
         if not ok then
           failed[#failed + 1], why = pc:getName(), tostring(p)
-        elseif p.submittedAt and p.selects and #p.selects > 0 then
+        else
+          local selects = p.selects or {}
           local want = {}
-          for _, id in ipairs(p.selects) do want[id] = true end
-          local picked = {}
+          for _, id in ipairs(selects) do want[id] = true end
+          local picked, others = {}, {}
           for _, pp in ipairs(pc:getPublishedPhotos()) do
-            if want[pp:getRemoteId()] then picked[#picked + 1] = pp:getPhoto() end
+            if want[pp:getRemoteId()] then picked[#picked + 1] = pp:getPhoto() else others[#others + 1] = pp:getPhoto() end
           end
-          found[#found + 1] = { name = pc:getName(), photos = picked }
-          -- Frames taken out of the Lightroom gallery after sending can't be flagged: say so.
-          local missing = #p.selects - #picked
-          lines[#lines + 1] = ("%s: %d %s%s"):format(pc:getName(), #p.selects, #p.selects == 1 and "pick" or "picks", missing > 0 and (" (%d not in this catalog)"):format(missing) or "")
+          found[#found + 1] = { name = pc:getName(), photos = picked, others = others }
+          if #selects > 0 then
+            -- Frames taken out of the Lightroom gallery after sending can't be flagged: say so.
+            local missing = #selects - #picked
+            lines[#lines + 1] = ("%s: %d %s%s%s"):format(pc:getName(), #selects, #selects == 1 and "pick" or "picks",
+              p.submittedAt and "" or " (not sent yet)",
+              missing > 0 and (" (%d not in this catalog)"):format(missing) or "")
+          end
         end
       end
     end
   end
-  local made = markPicks(found)
+  local made = syncPicks(found)
   local info = table.concat(lines, "\n")
   if #failed > 0 then info = info .. "\n\nCould not read " .. table.concat(failed, ", ") .. ": " .. why end
   if #made == 0 then
@@ -375,7 +400,7 @@ function provider.checkForPicks()
       info = checked == 0 and "No client galleries in this catalog yet." or ("Checked %d %s."):format(checked, checked == 1 and "gallery" or "galleries")
     end
     LrDialogs.message(#lines > 0 and "Client picks" or "No picks yet", info)
-  elseif LrDialogs.confirm("Client picks", info .. "\n\nFlagged with a Purple label.", "Show selects", "Close") == "ok" then
+  elseif LrDialogs.confirm("Client picks", info .. "\n\nPicks flagged with a Purple label. Unpicked frames cleared.", "Show selects", "Close") == "ok" then
     catalog:setActiveSources(made)
   end
 end
@@ -385,7 +410,7 @@ function provider.runCheck()
   LrTasks.startAsyncTask(function()
     -- LrTasks.pcall: plain pcall cannot wrap LrHttp, which yields.
     local ok, err = LrTasks.pcall(provider.checkForPicks)
-    if not ok then LrDialogs.message("Check for picks", tostring(err), "critical") end
+    if not ok then LrDialogs.message("Sync with proof", tostring(err), "critical") end
   end)
 end
 

@@ -23,6 +23,7 @@ import { GRIDWALL, wallFill, type Gridwall } from "@/lib/proofs/gridwall";
 const READY_AFTER_MS = 900; // after the wall shows: the columns mostly in before the focus pull
 const READY_CAP_MS = 4000; // the card comes up by then, whatever the wall's photographs are doing
 const PRELOAD_CAP_MS = 8000; // the longest the splash holds for the wall's photographs on a slow connection
+const RETURN_CAP_MS = 2500; // the same on a return visit, when most photographs are cached
 const SPLASH_MIN_MS = 1100; // the name's rise plays out even when everything is cached
 const BAR_DONE_MS = 380; // the line runs full before the splash lifts
 const ROWS = 6; // a wall column's length (DriftWall takes at most six)
@@ -133,13 +134,17 @@ export function ProofWall({
     if (!wall) return;
     let gone = false;
     const t0 = performance.now();
+    // A return visit to this gallery: no minimum for the name, and a shorter wait on the photographs.
+    const seenKey = `proof-seen:${location.pathname}`;
+    const back = !!localStorage.getItem(seenKey);
+    localStorage.setItem(seenKey, "1");
     let lift = 0;
     const done = () => {
       if (gone || lift) return;
       setProgress(1);
-      lift = window.setTimeout(() => !gone && setLoaded(true), Math.max(BAR_DONE_MS, SPLASH_MIN_MS - (performance.now() - t0)));
+      lift = window.setTimeout(() => !gone && setLoaded(true), Math.max(BAR_DONE_MS, (back ? 0 : SPLASH_MIN_MS) - (performance.now() - t0)));
     };
-    const cap = window.setTimeout(done, PRELOAD_CAP_MS);
+    const cap = window.setTimeout(done, back ? RETURN_CAP_MS : PRELOAD_CAP_MS);
     const srcs = [...new Set(wall.items.map((i) => i.image))];
     let n = 0;
     void Promise.all(

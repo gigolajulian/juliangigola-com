@@ -16,6 +16,8 @@ const proof = (over: Partial<PublicProof> = {}): PublicProof => ({
   submitted: false,
   paid: 0,
   paidPending: false,
+  submittedAt: null,
+  mailed: false,
   ...over,
 });
 
@@ -44,7 +46,7 @@ describe("ProofGallery", () => {
   it("asks for a name first", () => {
     render(<ProofGallery token="t1" initial={proof()} />);
     fireEvent.change(screen.getByLabelText("Your email"), { target: { value: "a@b.co" } });
-    fireEvent.submit(screen.getByRole("button", { name: "Open gallery" }).closest("form")!);
+    fireEvent.submit(screen.getByRole("button", { name: "Open proofs" }).closest("form")!);
     expect(screen.getByRole("alert").textContent).toBe("Add your name.");
     expect(fetchMock).not.toHaveBeenCalled();
   });
@@ -53,7 +55,7 @@ describe("ProofGallery", () => {
     render(<ProofGallery token="t1" initial={proof()} />);
     fireEvent.change(screen.getByLabelText("Your name"), { target: { value: "Maya" } });
     fireEvent.change(screen.getByLabelText("Your email"), { target: { value: "nope" } });
-    fireEvent.submit(screen.getByRole("button", { name: "Open gallery" }).closest("form")!);
+    fireEvent.submit(screen.getByRole("button", { name: "Open proofs" }).closest("form")!);
     expect(screen.getByRole("alert").textContent).toMatch(/does not look right/);
     expect(fetchMock).not.toHaveBeenCalled();
   });
@@ -62,7 +64,7 @@ describe("ProofGallery", () => {
     render(<ProofGallery token="t1" initial={proof()} />);
     fireEvent.change(screen.getByLabelText("Your name"), { target: { value: " Maya  Ross " } });
     fireEvent.change(screen.getByLabelText("Your email"), { target: { value: "a@b.co" } });
-    fireEvent.submit(screen.getByRole("button", { name: "Open gallery" }).closest("form")!);
+    fireEvent.submit(screen.getByRole("button", { name: "Open proofs" }).closest("form")!);
     await waitFor(() => expect(fetchMock).toHaveBeenCalledWith("/api/proof/t1", expect.objectContaining({ method: "POST" })));
     expect(JSON.parse((fetchMock.mock.calls as unknown as [string, RequestInit][])[0][1].body as string)).toMatchObject({ action: "track", kind: "open", email: "a@b.co", name: "Maya Ross" });
     expect(await screen.findByRole("heading", { name: "Hey Maya, pick your proofs below." })).toBeTruthy();
@@ -73,7 +75,7 @@ describe("ProofGallery", () => {
     render(<ProofGallery token="t1" initial={proof({ frames: [{ id: "a", w: 1, h: 1, t: 200 }, { id: "b", w: 1, h: 1, t: 100 }] })} />);
     fireEvent.change(screen.getByLabelText("Your name"), { target: { value: "Maya" } });
     fireEvent.change(screen.getByLabelText("Your email"), { target: { value: "a@b.co" } });
-    fireEvent.submit(screen.getByRole("button", { name: "Open gallery" }).closest("form")!);
+    fireEvent.submit(screen.getByRole("button", { name: "Open proofs" }).closest("form")!);
     // "b" was shot first, so it is frame 1
     const ring = await screen.findByRole("button", { name: "Select frame 1" });
     fireEvent.click(ring);
@@ -87,7 +89,7 @@ describe("ProofGallery", () => {
   it("a saved address from an older build does not skip the gate", () => {
     localStorage.setItem("proof-email", "a@b.co");
     render(<ProofGallery token="t1" initial={proof()} />);
-    expect(screen.getByRole("button", { name: "Open gallery" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Open proofs" })).toBeTruthy();
     expect(fetchMock).not.toHaveBeenCalled();
     expect(localStorage.getItem("proof-email")).toBeNull();
   });
@@ -111,5 +113,14 @@ describe("ProofGallery", () => {
     } finally {
       vi.unstubAllGlobals();
     }
+  });
+
+  it("dates the send from the record and claims the inbox copy only when it went out", () => {
+    const { unmount } = render(<ProofGallery token="t1" initial={proof({ submitted: true, selects: ["a"], submittedAt: "2026-11-03T20:00:00Z", mailed: false })} />);
+    expect(screen.getByText(/Sent · Nov 3/)).toBeTruthy();
+    expect(screen.queryByText(/in your inbox/)).toBeNull();
+    unmount();
+    render(<ProofGallery token="t1" initial={proof({ submitted: true, selects: ["a"], submittedAt: "2026-11-03T20:00:00Z", mailed: true })} />);
+    expect(screen.getByText(/A copy is in your inbox/)).toBeTruthy();
   });
 });
