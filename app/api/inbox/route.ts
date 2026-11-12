@@ -495,16 +495,19 @@ async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: Await
   if (invoicePaid && typeof invoicePaid.no === "string") {
     const inv = lead.invoices?.find((v) => v.no === invoicePaid.no);
     if (!inv) return json({ error: "No such invoice." }, 404);
-    // What his last hand mark on this invoice added, if that mark is still standing.
-    const handPaid = [...lead.events].reverse().find((e) => e.kind === "invoice-paid" && e.note?.startsWith(`${inv.no} `))?.amount;
-    const lastAdded = handPaid !== undefined && handPaid > 0 ? handPaid : undefined;
-    lead = {
-      ...lead,
-      invoices: lead.invoices!.map((v) => (v === inv ? { ...v, paidAt: invoicePaid.paid ? at : undefined, unpaid: invoicePaid.paid ? undefined : true } : v)),
-      // Cash or Zelle is money too: the amount counts in paid total. An unmark takes off only what a hand mark added
-      // (an old invoice counted as paid, or one a Stripe payment settled, was never added here).
-      events: [...lead.events, { at, kind: "invoice-paid" as const, note: `${inv.no} ${invoicePaid.paid ? `paid, ${usd(balance(inv))}` : "unpaid again"}`, amount: invoicePaid.paid ? balance(inv) : -(lastAdded ?? 0) || undefined }].slice(-50),
-    };
+    // A second tap (or a retry) on an invoice already in that state changes nothing: no double count in paid total.
+    if (!!inv.paidAt !== !!invoicePaid.paid) {
+      // What his last hand mark on this invoice added, if that mark is still standing.
+      const handPaid = [...lead.events].reverse().find((e) => e.kind === "invoice-paid" && e.note?.startsWith(`${inv.no} `))?.amount;
+      const lastAdded = handPaid !== undefined && handPaid > 0 ? handPaid : undefined;
+      lead = {
+        ...lead,
+        invoices: lead.invoices!.map((v) => (v === inv ? { ...v, paidAt: invoicePaid.paid ? at : undefined, unpaid: invoicePaid.paid ? undefined : true } : v)),
+        // Cash or Zelle is money too: the amount counts in paid total. An unmark takes off only what a hand mark added
+        // (an old invoice counted as paid, or one a Stripe payment settled, was never added here).
+        events: [...lead.events, { at, kind: "invoice-paid" as const, note: `${inv.no} ${invoicePaid.paid ? `paid, ${usd(balance(inv))}` : "unpaid again"}`, amount: invoicePaid.paid ? balance(inv) : -(lastAdded ?? 0) || undefined }].slice(-50),
+      };
+    }
   }
   for (const k of Object.keys(lead) as (keyof Lead)[]) if (lead[k] === undefined) delete lead[k];
   await writeLead(inbox, seal, id, lead, from);
