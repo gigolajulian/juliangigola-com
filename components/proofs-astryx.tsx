@@ -337,7 +337,7 @@ function Gallery({ p, changed, onBack, gone }: { p: Row; changed: () => void; on
         {p.sentAt && !p.submittedAt ? <Button label="Extend 7 days" clickAction={() => act({ action: "extend", days: 7 }, "POST", "Seven more days.")} /> : null}
         {p.submittedAt ? <Button label="Copy file names" onClick={() => copy(p.selects.map(file).join("\n"), "File names")} /> : null}
         {p.submittedAt ? <Button label="Reopen for changes" clickAction={() => act({ action: "reopen" }, "POST", "Reopened. They can change their selects.")} /> : null}
-        <Button label="Open gallery" href={`/proof/${p.token}`} target="_blank" rel="noreferrer" />
+        <Button label="Open gallery" href={p.url} target="_blank" rel="noreferrer" />
         {!p.sentAt ? <Button label="Close draft" variant="destructive" clickAction={close} /> : null}
       </HStack>
       {note ? <Text type="supporting" role="status">{note}</Text> : null}
