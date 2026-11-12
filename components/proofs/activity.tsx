@@ -3,7 +3,7 @@
 /* ── a gallery's Activity on Astryx ───────────────────────────────
  * The classic Activity rebuilt for the
  * Astryx proofs desk: pick a viewer, their facts, the most picked frames,
- * the event log, Export CSV. Same data (`p.viewers`), no new reads.
+ * the event log, Export CSV, and Forget for his own test visits. Same data (`p.viewers`), no new reads.
  * ─────────────────────────────────────────────────────────────── */
 
 import * as React from "react";
@@ -13,16 +13,17 @@ import { Badge } from "@astryxdesign/core/Badge";
 import { Selector } from "@astryxdesign/core/Selector";
 import { Text } from "@astryxdesign/core/Text";
 import { MetadataList, MetadataListItem } from "@astryxdesign/core/MetadataList";
-import type { Row } from "@/lib/proofs/desk";
-import type { ViewerEvent } from "@/lib/proofs/proof";
-import { stampPT } from "@/lib/leads/lead-desk";
+import { api, type Row } from "@/lib/proofs/desk";
+import { THUMB_W, type ViewerEvent } from "@/lib/proofs/proof";
+import { errorText, stampPT } from "@/lib/leads/lead-desk";
 
 const csvCell = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
 const secs = (n: number) => (n < 90 ? `${Math.round(n)} s` : `${Math.round(n / 60)} min`);
 
-export function ActivityDesk({ p }: { p: Row }) {
+export function ActivityDesk({ p, changed }: { p: Row; changed: () => void }) {
   const people = Object.entries(p.viewers ?? {}).sort((a, b) => b[1].last.localeCompare(a[1].last));
   const [who, setWho] = React.useState(people[0]?.[0] ?? "");
+  const [note, setNote] = React.useState<string | null>(null);
   if (!people.length) return <Text type="code" size="sm" color="secondary">Nobody has opened it yet. Each address typed at the gate shows here.</Text>;
   const file = (id?: string) => (id ? p.frames.find((f) => f.id === id)?.file ?? id : "");
   const num = (id?: string) => (id ? `#${p.frames.findIndex((f) => f.id === id) + 1}` : "");
@@ -34,6 +35,18 @@ export function ActivityDesk({ p }: { p: Row }) {
   const sent = p.submittedBy?.toLowerCase() === email;
   const longest = Object.entries(v.looks).sort((a, b) => b[1] - a[1])[0];
   const unpicked = v.events.filter((e) => e.kind === "unpick").length;
+
+  // His own test visits: off this gallery's Activity and off Leads. Sent selects stay.
+  const forget = async () => {
+    if (!confirm(`Forget ${email}'s visits to "${p.name}"? They leave this Activity and Leads. Sent selects stay.`)) return;
+    try {
+      await api({ method: "POST", body: JSON.stringify({ action: "forget", token: p.token, email }) });
+      setNote(`${email} forgotten.`);
+      changed();
+    } catch (e) {
+      setNote(errorText(e));
+    }
+  };
 
   const exportCsv = () => {
     const rows = [["email", "time", "event", "frame", "file", "device", "place"]];
@@ -52,7 +65,9 @@ export function ActivityDesk({ p }: { p: Row }) {
         <Selector label="Viewer" size="sm" value={email} onChange={setWho}
           options={people.map(([k, x]) => ({ value: k, label: `${x.name ? `${x.name} · ` : ""}${k} · ${p.submittedBy?.toLowerCase() === k ? "sent" : x.picks.length ? "browsing" : "opened"} · ${x.picks.length} picks` }))} />
         <Button label="Export CSV" variant="ghost" size="sm" onClick={exportCsv} />
+        <Button label="Forget" variant="ghost" size="sm" clickAction={forget} />
       </HStack>
+      {note ? <Text type="supporting" role="status">{note}</Text> : null}
       <MetadataList>
         <MetadataListItem label="First open">{stampPT(v.first)}</MetadataListItem>
         <MetadataListItem label="Last seen">{stampPT(v.last)}</MetadataListItem>
@@ -73,7 +88,7 @@ export function ActivityDesk({ p }: { p: Row }) {
             {top.map(([id, c]) => (
               <VStack key={id} gap={0} hAlign="center">
                 {/* eslint-disable-next-line @next/next/no-img-element -- private proof frame */}
-                <img src={`/proof/${p.token}/f/${id}`} alt={num(id)} style={{ width: 48, aspectRatio: "3 / 4", objectFit: "cover" }} />
+                <img src={`/proof/${p.token}/f/${id}?w=${THUMB_W}`} alt={num(id)} style={{ width: 48, aspectRatio: "3 / 4", objectFit: "cover" }} />
                 <Badge label={String(c)} variant="neutral" />
               </VStack>
             ))}
