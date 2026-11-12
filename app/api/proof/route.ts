@@ -1,7 +1,8 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { isAdmin } from "@/lib/vouch";
 import { sealer } from "@/lib/leads/lead-crypto";
-import { recordLead } from "@/lib/leads/lead-store";
+import { readLead, recordLead, writeLead } from "@/lib/leads/lead-store";
+import { leadStoreKey } from "@/lib/leads/leads";
 import { cardKey, closesAt, cleanSettings, DEFAULTS, frameKey, frameKeys, aliasKey, isFrameId, isToken, listProofs, nextProofId, publicId, readProof, viewerKey, writeProof, type Proof } from "@/lib/proofs/proof";
 import { proofMail, proofUrl, sendClient } from "@/lib/email/proof-mail";
 import { recheckTransfer } from "@/lib/proofs/submit";
@@ -18,7 +19,7 @@ import { bodyOf, json } from "@/lib/http";
  *   POST   {action:"create", ...}      new gallery, returns token + url
  *   POST   {action:"send", token}      the proof mail; the clock starts
  *   POST   {action:"reopen"|"extend"}  unlock selects | add days
- *   POST   {action:"forget", token, email} drop one visitor's record (his own test visits)
+ *   POST   {action:"forget", token, email} drop one visitor's record and its line in Leads (his own test visits)
  *   POST   {action:"relink", token}    a new date id for the client's link; the old link closes
  *   PATCH  {token, ...settings}        name, email, note, included, price, days, watermark
  *   PUT    ?token&id&file&w&h  <jpeg>  add or replace one frame
@@ -132,6 +133,14 @@ export async function POST(request: Request) {
     const { [who]: _gone, ...viewers } = p.viewers;
     const next: Proof = { ...p, viewers };
     await writeProof(g.kv, g.s, next);
+    // The open also put a "proofs" line on their lead. A lead made only of this gallery's opens, with nothing of his on it, goes with it.
+    const id = await g.s.id(who);
+    const lead = await readLead(g.kv, g.s, id);
+    const events = lead?.events.filter((e) => !(e.kind === "proofs" && e.ref === p.token));
+    if (lead && events && events.length < lead.events.length) {
+      if (events.length || lead.notes || lead.remind || lead.invoices?.length || lead.deposit || lead.notion) await writeLead(g.kv, g.s, id, { ...lead, events });
+      else await g.kv.delete(leadStoreKey(id));
+    }
     return json({ proof: next });
   }
   if (b.action === "reopen") {

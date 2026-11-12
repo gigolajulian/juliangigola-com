@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { DELETE, GET, PATCH, POST, PUT } from "@/app/api/proof/route";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { readProof, writeProof } from "@/lib/proofs/proof";
+import { readLead, writeLead } from "@/lib/leads/lead-store";
 import { FakeKV, LEADS_KEY } from "./fakes";
 
 /* /api/proof: Julian's side of proof galleries. Off without its bindings,
@@ -79,5 +80,21 @@ describe("/api/proof", () => {
     const after = (await readProof(kv as never, s, token))!;
     expect(Object.keys(after.viewers ?? {})).toEqual(["hello@example.test"]);
     expect(after.selects).toEqual(["a1"]);
+  });
+
+  it("forget takes the gallery's opens off Leads, and a lead made only of them", async () => {
+    const { token } = await (await call(POST, req("POST", { body: json({ action: "create", name: "Test" }) }))).json();
+    const s = (await sealer(LEADS_KEY))!;
+    const p = (await readProof(kv as never, s, token))!;
+    const v = { first: "", last: "", visits: 1, seconds: 0, picks: [] };
+    await writeProof(kv as never, s, { ...p, viewers: { "me@x.com": v, "ana@x.com": v } } as never);
+    const open = { at: "2026-11-12T00:00:00Z", kind: "proofs" as const, ref: token };
+    const lead = (email: string, events: unknown[]) => ({ email, name: email, stage: "Inquiry", stageAt: open.at, firstAt: open.at, lastAt: open.at, events }) as never;
+    const me = await s.id("me@x.com"), ana = await s.id("ana@x.com");
+    await writeLead(kv as never, s, me, lead("me@x.com", [open]));
+    await writeLead(kv as never, s, ana, lead("ana@x.com", [{ ...open, kind: "inquiry", ref: undefined }, open]));
+    for (const email of ["me@x.com", "ana@x.com"]) expect((await call(POST, req("POST", { body: json({ action: "forget", token, email }) }))).status).toBe(200);
+    expect(await readLead(kv as never, s, me)).toBeNull();
+    expect((await readLead(kv as never, s, ana))?.events.map((e) => e.kind)).toEqual(["inquiry"]);
   });
 });
