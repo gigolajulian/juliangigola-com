@@ -4,7 +4,7 @@
  * Julian (2026-11-10) approved the mock (claude.ai/artifact/WWQy2jVbaeTG7sdDKgGmU5,
  * "looks goood push"): the same lead as the classic Detail, every action
  * kept, laid out as header + sections + a timeline rail. Rendered only
- * inside /admin/leads/astryx, so Astryx's CSS stays off the site.
+ * inside /admin/leads, so Astryx's CSS stays off the site.
  *
  * Header: back, snooze, lost, the rest under ⋯; the next step as the one
  * filled button beside Reply and the templates. Sections: message,
@@ -82,7 +82,7 @@ const history = (log: Lead["events"] | null, own: Lead["events"]) => {
     .sort((a, b) => a.at.localeCompare(b.at));
 };
 
-export function LeadAstryx({ summary, initial, call, onChange, onBack, reload, templates, others, size, toProofs }: { toProofs?: () => void; summary: LeadSummary; initial?: Lead | null; call: Call; onChange: (l: Lead) => void; onBack: () => void; reload: () => void; templates: Template[]; others: LeadSummary[]; size: Size }) {
+export function LeadDesk({ summary, initial, call, onChange, onBack, reload, templates, others, size, toProofs }: { toProofs?: () => void; summary: LeadSummary; initial?: Lead | null; call: Call; onChange: (l: Lead) => void; onBack: () => void; reload: () => void; templates: Template[]; others: LeadSummary[]; size: Size }) {
   // A lead added a moment ago comes in whole: KV may not serve its key yet.
   const [lead, setLead] = React.useState<Lead | null>(initial ?? null);
   const [message, setMessage] = React.useState<Enquiry | null>(null);

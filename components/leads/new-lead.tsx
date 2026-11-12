@@ -36,7 +36,7 @@ export function sameAs(leads: LeadSummary[], f: { name: string; email: string; i
   });
 }
 
-export function NewLeadAstryx({ call, leads, size, done, open, cancel }: { call: Call; leads: LeadSummary[]; size: "phone" | "mid" | "wide"; done: (id: string, lead: Lead) => void; open: (l: LeadSummary) => void; cancel: () => void }) {
+export function NewLeadDesk({ call, leads, size, done, open, cancel }: { call: Call; leads: LeadSummary[]; size: "phone" | "mid" | "wide"; done: (id: string, lead: Lead) => void; open: (l: LeadSummary) => void; cancel: () => void }) {
   const [f, setF] = React.useState({ name: "", email: "", ig: "", phone: "", company: "", kind: "", stage: "Inquiry" as Stage, source: "Instagram DM", notes: "" });
   const [note, setNote] = React.useState<string | null>(null);
   const [busy, setBusy] = React.useState(false);

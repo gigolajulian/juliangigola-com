@@ -24,7 +24,7 @@ export const KIND: Record<string, string> = { charge: "Payment", payment: "Payme
 type Row = Txn & Record<string, unknown>;
 const kind = (t: Txn) => KIND[t.type] ?? t.type.replace(/_/g, " ");
 
-export function MoneyAstryx() {
+export function MoneyDesk() {
   const [top, setTop] = React.useState<{ available: number; pending: number; test: boolean } | null>(null);
   const [txns, setTxns] = React.useState<Txn[]>([]);
   const [more, setMore] = React.useState(false);

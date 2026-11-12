@@ -1,7 +1,7 @@
 "use client";
 
 /* ── Stats, Traffic and SEO on Astryx ─────────────────────────────
- * Stats is the classic StatsView (components/leads/stats.tsx) rebuilt:
+ * Stats is the classic StatsView rebuilt:
  * same `?stats` read, tiles, 12 weeks of bars, sources, lost reasons,
  * stages. Traffic and SEO are the shared /admin panels, loaded lazily
  * inside an Astryx page: /admin uses them too, so they stay one copy.
@@ -32,7 +32,7 @@ function Page({ eyebrow, title, children }: { eyebrow: string; title: string; ch
   );
 }
 
-export function StatsAstryx({ call }: { call: Call }) {
+export function StatsDesk({ call }: { call: Call }) {
   const [s, setS] = React.useState<Stats | null>(null);
   const [err, setErr] = React.useState<string | null>(null);
   React.useEffect(() => {
@@ -106,7 +106,7 @@ export function StatsAstryx({ call }: { call: Call }) {
 }
 
 /** A shared /admin panel inside the desk. */
-export function PanelAstryx({ which }: { which: "traffic" | "seo" }) {
+export function PanelDesk({ which }: { which: "traffic" | "seo" }) {
   return (
     <Page eyebrow={which === "traffic" ? "CLOUDFLARE" : "SEARCH"} title={which === "traffic" ? "Traffic" : "SEO"}>
       <React.Suspense fallback={<Text type="code" size="sm" color="secondary">Loading</Text>}>{which === "traffic" ? <AdminTraffic /> : <AdminSeo />}</React.Suspense>

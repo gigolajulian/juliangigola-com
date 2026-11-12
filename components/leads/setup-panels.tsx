@@ -1,7 +1,7 @@
 "use client";
 
 /* ── Hours, Templates and This device on Astryx ───────────────────
- * The classic LeadHours (components/leads/lead-hours.tsx), TemplatesEditor
+ * The classic LeadHours, TemplatesEditor
  * (templates.tsx) and the device block (setup.tsx: push, import from the
  * Inbox, sign out, plus Export CSV) rebuilt. Same endpoints and bodies:
  * /api/booking/hours GET and PUT, PATCH `{ templates }`, PATCH `{ push }`,
@@ -53,7 +53,7 @@ function Times({ w, set, label }: { w: Window; set: (w: Window) => void; label: 
   );
 }
 
-export function HoursAstryx() {
+export function HoursDesk() {
   const [hours, setHours] = React.useState<Hours | null>(null);
   const [note, setNote] = React.useState("");
   const [busy, setBusy] = React.useState(false);
@@ -122,7 +122,7 @@ export function HoursAstryx() {
   );
 }
 
-export function TemplatesAstryx({ call, templates, saved }: { call: Call; templates: Template[]; saved: (t: Template[]) => void }) {
+export function TemplatesDesk({ call, templates, saved }: { call: Call; templates: Template[]; saved: (t: Template[]) => void }) {
   const [list, setList] = React.useState(templates);
   const [note, setNote] = React.useState<string | null>(null);
   const edit = (i: number, k: keyof Template) => (v: string) => setList(list.map((t, j) => (j === i ? { ...t, [k]: v } : t)));
@@ -165,7 +165,7 @@ async function exportCsv(what: "leads" | "activity" = "leads") {
 type Count = { people: number; added: number; updated: number; stages: Partial<Record<Stage, number>> };
 type StripeCount = { payments: number; refunds: number; already: number; noEmail: number; people: number };
 
-export function DeviceAstryx({ call, reload, signOut }: { call: Call; reload: () => void; signOut: () => void }) {
+export function DeviceDesk({ call, reload, signOut }: { call: Call; reload: () => void; signOut: () => void }) {
   // The desk renders only in the browser, so these read the page directly.
   const able = typeof navigator !== "undefined" && "serviceWorker" in navigator && "PushManager" in window;
   const [on, setOn] = React.useState<boolean | null>(null);
