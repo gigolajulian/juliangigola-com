@@ -1,5 +1,5 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { authorised, bearer, canPush } from "@/lib/vouch";
+import { bearer, isAdmin } from "@/lib/vouch";
 import { SAFE_IMAGE, summary, type Enquiry, type Summary } from "@/lib/inbox";
 import { backfillLead, fold, PAPER, REMIND_MAX, STAGES, trashDaysLeft, type InboxRow, type Lead, type LeadPatch, type LeadSummary, type Paper, type Stage } from "@/lib/leads/leads";
 import { everyLead, readLead, writeLead } from "@/lib/leads/lead-store";
@@ -87,23 +87,10 @@ async function guard(request: Request) {
       ),
     };
   }
-  // Either credential opens it: the inbox key, or a GitHub token that can
-  // push to the repository. The messages differ so a wrong one can be told
-  // from a missing one — but never which characters were wrong.
-  if (rig.key && (await authorised(request, rig.key)))
-    return { inbox: rig.inbox, seal: rig.seal, notion: rig.notion, vapid: rig.vapid, env: rig.env };
-
-  const token = bearer(request);
-  if (token) {
-    if (await canPush(token)) return { inbox: rig.inbox, seal: rig.seal, notion: rig.notion, vapid: rig.vapid, env: rig.env };
-    return {
-      error: json(
-        { error: "GitHub did not accept that token for this repository." },
-        401,
-      ),
-    };
-  }
-  return { error: json({ error: "Not authorized." }, 401) };
+  // The admin gate (`isAdmin`): the inbox key, or a GitHub token that can push.
+  // The messages differ so a wrong token can be told from a missing one, never which characters were wrong.
+  if (await isAdmin(request, rig.key)) return { inbox: rig.inbox, seal: rig.seal, notion: rig.notion, vapid: rig.vapid, env: rig.env };
+  return { error: json({ error: bearer(request) ? "GitHub did not accept that token for this repository." : "Not authorized." }, 401) };
 }
 
 /**
