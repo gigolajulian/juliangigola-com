@@ -251,7 +251,8 @@ html:has(.proof[data-wall])::-webkit-scrollbar{display:none}
    filling as the wall's photographs come in. It lifts once they are all in, and the wall streams in under it. */
 .pw-splash{position:fixed;inset:0;z-index:20;display:grid;place-content:center;justify-items:center;gap:26px;background:var(--background);transition:opacity .8s cubic-bezier(.4,0,.2,1),visibility 0s .8s}
 .pw-splash[data-out]{opacity:0;visibility:hidden}
-.pw-splash-name{display:flex;gap:.22em;font:900 min(13vw,10rem)/.86 var(--font-display);letter-spacing:-.05em;color:var(--foreground);white-space:nowrap;transition:translate .8s cubic-bezier(.4,0,.2,1)}
+/* phone: a third smaller than 13vw (Julian 2026-11-12) */
+.pw-splash-name{display:flex;gap:.22em;font:900 min(8.67vw,6.67rem)/.86 var(--font-display);letter-spacing:-.05em;color:var(--foreground);white-space:nowrap;transition:translate .8s cubic-bezier(.4,0,.2,1)}
 @media (min-width:700px){.pw-splash-name{font-size:min(4.33vw,3.33rem)}}
 .pw-splash[data-out] .pw-splash-name{translate:0 -10px}
 .pw-splash-name>span{display:inline-flex;overflow:hidden;padding:.04em 0 .2em;margin-bottom:-.16em}
