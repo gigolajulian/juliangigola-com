@@ -12,6 +12,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { isEmail, type PublicDelivery } from "@/lib/proofs/proof";
+import { ProofCursor } from "@/components/proofs/cursor";
 
 const size = (b: number) => (b >= 1e9 ? `${(b / 1e9).toFixed(1)} GB` : `${Math.max(1, Math.round(b / 1e6))} MB`);
 const pad = (i: number) => String(i + 1).padStart(2, "0");
@@ -99,6 +100,7 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
 
   return (
     <div className="proof">
+      <ProofCursor />
       <header className="proof-top">
         <Link className="proof-word" href="/">Julian Gigola</Link>
         <span />
