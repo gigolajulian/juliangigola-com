@@ -560,7 +560,7 @@ export function lockScroll() {
 let entries = 0;
 /** Whether a popstate belongs to the viewer. An entry counts until the pop
     that takes it off has been heard by every listener (the count drops a
-    task later), so the strip (`components/strip/shared.ts`) never takes a
+    task later), so a back-navigation listener never takes a
     viewer close for a back navigation, whichever listener runs first. */
 export const viewerPop = () => entries > 0;
 const release = () => setTimeout(() => entries--);
