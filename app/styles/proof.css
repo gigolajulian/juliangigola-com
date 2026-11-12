@@ -92,6 +92,8 @@ html:has(.proof) #main{transform:none}
 .proof-li img{max-width:100%;max-height:100%;object-fit:contain}
 .proof-arr{position:absolute;top:50%;transform:translateY(-50%);font:18px var(--p-mono)!important;color:#92908d!important;padding:16px!important}
 .proof-arr.l{left:4px}.proof-arr.r{right:4px}
+/* the global [role=dialog] button rule makes them relative, which drops them into the flex row under the photo */
+.proof-arr{position:absolute!important;flex-shrink:0;z-index:1}
 .proof-lf{display:flex;gap:12px;align-items:center;justify-content:space-between;font:12px var(--p-mono);color:#92908d;padding:16px 22px calc(22px + env(safe-area-inset-bottom));border-top:1px solid rgba(255,255,255,.11)}
 .proof-lf input{flex:1;min-width:0;color:#f1f0ed;border-color:rgba(255,255,255,.11)}
 .proof-lf input:disabled{opacity:.4}
