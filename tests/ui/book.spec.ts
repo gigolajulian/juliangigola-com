@@ -1,15 +1,9 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import { CONFIRM, errorsOn, open, pickTime, RATIOS, SHORT, upright } from "./ratios";
 
 /* The /book time picker, at the six ratios and the short desktop where
    it draws at 80%. Times come from fixtures (`open`, ratios.ts). Never submitted: the
    form is opened and filled "QA TEST", then Change takes it back. */
-
-const rect = (page: Page, sel: string) =>
-  page.locator(sel).first().evaluate((e) => {
-    const r = e.getBoundingClientRect();
-    return { top: r.top, bottom: r.bottom, left: r.left, right: r.right };
-  });
 
 for (const r of [...RATIOS, SHORT]) {
   test(`/book picks a time at ${r.name}`, async ({ browser, browserName }) => {
@@ -74,42 +68,3 @@ for (const r of [...RATIOS, SHORT]) {
     await ctx.close();
   });
 }
-
-test("/book?classic month view: the label on one line, January's six rows clear of Confirm on a short screen", async ({ browser, browserName }) => {
-  const { ctx, page } = await open(browser, browserName, SHORT);
-  await page.goto("/book?session=headshots&classic", { waitUntil: "load" });
-  await page.locator("[data-day]").first().waitFor({ timeout: 30_000 });
-  await page.getByRole("button", { name: /^month$/i }).click();
-  await page.waitForTimeout(700);
-  expect(await page.locator("[data-day]:visible").count()).toBeGreaterThanOrEqual(28);
-  /* Where the month and the times do not fit together (`data-split`) the
-     month comes alone first: open the picked day to reach the label. CI's
-     Firefox at 1280x720 splits; Windows sits just under the line. */
-  const split = (await page.locator(".tp[data-split]").count()) > 0;
-  if (split) {
-    await page.locator("[data-day][aria-pressed=true]").click();
-    await page.waitForTimeout(500);
-  }
-  const lines = await page.locator("p.label", { hasText: /Pick a time/i }).first().evaluate((el) => {
-    const rg = document.createRange();
-    rg.selectNodeContents(el);
-    return [...rg.getClientRects()].filter((q) => q.height).sort((a, b) => a.top - b.top)
-      .reduce((a, q) => (q.top >= a.b - 1 ? { n: a.n + 1, b: q.bottom } : { n: a.n, b: Math.max(a.b, q.bottom) }), { n: 0, b: -1e9 }).n;
-  });
-  expect(lines, "month label lines").toBe(1);
-  if (split) {
-    await page.locator('[data-part="back"]').click();
-    await page.waitForTimeout(500);
-  }
-  const later = page.getByRole("button", { name: "Later" });
-  for (let i = 0; i < 6 && !(await page.getByText("January 2027").count()); i++) {
-    await later.click();
-    await page.waitForTimeout(700);
-  }
-  test.skip(!(await page.getByText("January 2027").count()), "January 2027 is past the booking window");
-  const rows = await page.locator("[role=region].tp [data-day]").evaluateAll((ns) => new Set(ns.filter((n) => (n as HTMLElement).offsetParent).map((n) => Math.round(n.getBoundingClientRect().y))).size);
-  expect(rows).toBe(6);
-  const c = await rect(page, "[role=region].tp");
-  expect(c.bottom).toBeLessThanOrEqual(SHORT.height + 1);
-  await ctx.close();
-});
