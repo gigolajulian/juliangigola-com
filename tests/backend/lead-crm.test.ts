@@ -124,6 +124,7 @@ describe("the API", () => {
     // A merge whose patch fails keeps the other record.
     expect((await PATCH(req("PATCH", { body: { key: a, mergeFrom: b, invoicePaid: { no: "0000", paid: true } } }))).status).toBe(404);
     expect(await kv.get(b)).not.toBeNull();
+    expect(await kv.get(`log:${b.slice(5)}`)).not.toBeNull();
     const { lead } = await (await PATCH(req("PATCH", { body: { key: a, mergeFrom: b } }))).json();
     expect(lead).toMatchObject({ stage: "Call booked" });
     expect(await kv.get(b)).toBeNull();
