@@ -62,8 +62,11 @@ export function ActivityDesk({ p, changed }: { p: Row; changed: () => void }) {
   return (
     <VStack gap={4}>
       <HStack gap={2} vAlign="end">
-        <Selector label="Viewer" size="sm" value={email} onChange={setWho}
-          options={people.map(([k, x]) => ({ value: k, label: `${x.name ? `${x.name} · ` : ""}${k} · ${p.submittedBy?.toLowerCase() === k ? "sent" : x.picks.length ? "browsing" : "opened"} · ${x.picks.length} picks` }))} />
+        {/* The selector takes the room left, so the buttons beside it keep their full labels. */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <Selector label="Viewer" size="sm" width="100%" value={email} onChange={setWho}
+            options={people.map(([k, x]) => ({ value: k, label: `${x.name ? `${x.name} · ` : ""}${k} · ${p.submittedBy?.toLowerCase() === k ? "sent" : x.picks.length ? "browsing" : "opened"} · ${x.picks.length} picks` }))} />
+        </div>
         <Button label="Export CSV" variant="ghost" size="sm" onClick={exportCsv} />
         <Button label="Forget" variant="ghost" size="sm" clickAction={forget} />
       </HStack>
