@@ -2,7 +2,7 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { lockOp } from "@/lib/booking/booking-engine";
 import { cleanHours, TZ, type Hours } from "@/lib/booking/booking-rules";
 import { isAdmin } from "@/lib/vouch";
-import { json } from "@/lib/http";
+import { bodyOf, json } from "@/lib/http";
 
 /* ── Julian's open hours, from the lead desk (Hours) ──────────────
  * GET the week and the dates that differ; PUT the whole thing back. Kept
@@ -33,7 +33,7 @@ export async function PUT(request: Request) {
   const { env } = await getCloudflareContext({ async: true });
   if (!(await isAdmin(request, env.INBOX_KEY))) return json({ error: "Not authorized." }, 401);
   const today = new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(new Date());
-  const hours = cleanHours(await request.json().catch(() => null), today);
+  const hours = cleanHours(await bodyOf(request), today);
   if (!hours) return json({ error: "Those hours do not read right." }, 400);
   return held(() => lockOp(env, "setHours", hours));
 }

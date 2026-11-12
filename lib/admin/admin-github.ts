@@ -38,7 +38,8 @@ export const REPO = {
   repo: "juliangigola-com",
   branch: "main",
 };
-const API = "https://api.github.com";
+/** GitHub's REST API, for the reads and commits /admin makes. */
+export const GITHUB_API = "https://api.github.com";
 
 export type CommitFile = {
   /** Repo-relative, e.g. `public/work/new-thing/01.jpg`. */
@@ -63,7 +64,7 @@ export async function listDirectory(
   path: string,
 ): Promise<string[]> {
   const res = await fetch(
-    `${API}/repos/${REPO.owner}/${REPO.repo}/contents/${path}?ref=${REPO.branch}`,
+    `${GITHUB_API}/repos/${REPO.owner}/${REPO.repo}/contents/${path}?ref=${REPO.branch}`,
     { headers: headers(token), cache: "no-store" },
   );
   if (res.status === 404) return [];
@@ -97,7 +98,7 @@ async function gh<T>(
   path: string,
   init?: { method?: string; body?: unknown },
 ): Promise<T> {
-  const res = await fetch(`${API}/repos/${REPO.owner}/${REPO.repo}${path}`, {
+  const res = await fetch(`${GITHUB_API}/repos/${REPO.owner}/${REPO.repo}${path}`, {
     method: init?.method ?? "GET",
     headers: { ...headers(token), "Content-Type": "application/json" },
     body: init?.body ? JSON.stringify(init.body) : undefined,
@@ -206,7 +207,7 @@ export async function readFile(
   path: string,
 ): Promise<string | null> {
   const res = await fetch(
-    `${API}/repos/${REPO.owner}/${REPO.repo}/contents/${path}?ref=${REPO.branch}`,
+    `${GITHUB_API}/repos/${REPO.owner}/${REPO.repo}/contents/${path}?ref=${REPO.branch}`,
     { headers: headers(token), cache: "no-store" },
   );
   if (res.status === 404) return null;

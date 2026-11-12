@@ -11,6 +11,7 @@ import { notify, subscribe, unsubscribe } from "@/lib/leads/lead-push";
 import { publicKey } from "@/lib/leads/web-push";
 import { notionPaper, notionStage } from "@/lib/leads/notion-lead";
 import { importStripe } from "@/lib/leads/stripe-import";
+import { STRIPE_UNSET } from "@/lib/stripe";
 import { cleanTemplates, manualLead, merge, stats, type NewLead } from "@/lib/leads/lead-crm";
 import { balance, cleanFrom, cleanInvoice, invoiceNo, mmyy, PHOTO_KEY, usd, type InvoiceFrom } from "@/lib/leads/invoice";
 import { bodyOf, json, NO_STORE } from "@/lib/http";
@@ -173,7 +174,7 @@ export async function GET(request: Request) {
     if (!seal) return noSeal();
     const invoices = (await everyLead(gate.inbox, seal))
       .filter((l) => !l.trashedAt)
-      .flatMap((l) => (l.invoices ?? []).map((i) => ({ ...i, lead: l.id!, name: l.name })))
+      .flatMap((l) => (l.invoices ?? []).map((i) => ({ ...i, lead: l.id, name: l.name })))
       .sort((a, b) => b.at.localeCompare(a.at));
     return json({ invoices });
   }
@@ -195,7 +196,7 @@ export async function GET(request: Request) {
     return file(await clientsCsv(gate.inbox, seal, master), "leads");
   }
 
-  // The lead desk (`components/leads-astryx.tsx`): one record per person.
+  // The lead desk (`components/leads/desk.tsx`): one record per person.
   // Sealed with LEADS_KEY (`lib/leads/lead-crypto.ts`), opened here and only here.
   if (wanted?.startsWith("lead:") || url.searchParams.has("leads")) {
     const seal = await gate.seal;
@@ -236,7 +237,11 @@ export async function GET(request: Request) {
   return json({ rows, complete: true });
 }
 
-/** PATCH — mark one read or unread. The only thing a row's state can be. */
+/** PATCH: the desk's writes, told apart by the body's shape and taken in this order, so the first match wins:
+    `push` (a device subscribing or, with `off`, unsubscribing), `test: true` (a test notification),
+    `invoiceFrom` (the invoice's from block), `invoicePhoto` (a design B photo), `key: "lead:..."` (a lead's
+    patch, `patchLead`), `templates` (the reply templates), then `key: "msg:..."` with `read` (an enquiry
+    read or unread). Anything else is a 400. */
 export async function PATCH(request: Request) {
   const gate = await guard(request);
   if (gate.error) return gate.error;
@@ -375,7 +380,7 @@ export async function POST(request: Request) {
   }
   // Past Stripe payments and refunds onto the log (`lib/leads/stripe-import.ts`). Dry, it only counts.
   if (given?.importStripe === true) {
-    if (!gate.env.STRIPE_SECRET_KEY) return json({ error: "Stripe is not set up on the Worker." }, 503);
+    if (!gate.env.STRIPE_SECRET_KEY) return json({ error: STRIPE_UNSET }, 503);
     try {
       return json(await importStripe(gate.env, gate.env.STRIPE_SECRET_KEY, given.dry === true));
     } catch (e) {

@@ -14,8 +14,8 @@ import { eventsCsv, paidTotal, readMaster, SHEET_DIRTY, type MasterEntry } from 
 import { csv } from "./lead-crm";
 import { everyLead } from "./lead-store";
 import type { Lead } from "./leads";
+import type { InboxKV as KV } from "./lead-store";
 
-type KV = Pick<NonNullable<CloudflareEnv["INBOX"]>, "get" | "put" | "list" | "delete">;
 const SHEETS = "https://sheets.googleapis.com/v4/spreadsheets";
 export const SHEET_ID = "sheet:id";
 export const SHEET_AT = "sheet:at";

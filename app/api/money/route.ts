@@ -1,5 +1,5 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { stripe } from "@/lib/stripe";
+import { STRIPE_UNSET, stripe } from "@/lib/stripe";
 import { isAdmin } from "@/lib/vouch";
 import { json } from "@/lib/http";
 
@@ -37,7 +37,7 @@ export async function GET(request: Request) {
   const { env } = await getCloudflareContext({ async: true });
   if (!(await isAdmin(request, env.INBOX_KEY))) return json({ error: "Not authorized." }, 401);
   const key = env.STRIPE_SECRET_KEY;
-  if (!key) return json({ error: "Stripe is not connected (STRIPE_SECRET_KEY)." }, 503);
+  if (!key) return json({ error: STRIPE_UNSET }, 503);
 
   const after = new URL(request.url).searchParams.get("after");
   if (after && !/^txn_[A-Za-z0-9]{8,64}$/.test(after)) return json({ error: "Bad cursor." }, 400);

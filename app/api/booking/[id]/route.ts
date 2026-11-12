@@ -8,7 +8,7 @@ import { dashboardLink } from "@/lib/booking/deposit";
 import { alertHello } from "@/lib/hello-mail";
 import { stripe } from "@/lib/stripe";
 import { whenPT } from "@/lib/inbox";
-import { json } from "@/lib/http";
+import { bodyOf, json } from "@/lib/http";
 
 /* ── a client reschedules or cancels (`/booking/<id>`) ────────────
  * POST {t, action: "cancel"} or {t, action: "reschedule", start}. The
@@ -25,8 +25,8 @@ const SAY = { missing: [404, "No such booking."], cancelled: [409, "This booking
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { env } = await getCloudflareContext({ async: true });
   const { id } = await params;
-  const body = ((await request.json().catch(() => null)) ?? {}) as { t?: string; action?: string; start?: string };
-  if (!(await tokenOpens(env.BOOKING_SECRET, id, body.t))) return json({ error: "This link has expired. Reply to your confirmation email." }, 401);
+  const body = (await bodyOf(request)) ?? {};
+  if (!(await tokenOpens(env.BOOKING_SECRET, id, typeof body.t === "string" ? body.t : undefined))) return json({ error: "This link has expired. Reply to your confirmation email." }, 401);
 
   let out: ChangeResult;
   try {

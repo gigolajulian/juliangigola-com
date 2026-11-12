@@ -1,12 +1,12 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { isDeposit, isIntentId, settle, verifyStripe } from "@/lib/booking/deposit";
+import { isDeposit, isIntentId, bookDeposit, verifyStripe } from "@/lib/booking/deposit";
 import { recordLead } from "@/lib/leads/lead-store";
 import { stripe } from "@/lib/stripe";
 
 /* ── Stripe's webhook ──────────────────────────────────────────────
  * The source of truth for a deposit: the card saying it paid proves
  * nothing, Stripe's signed `payment_intent.succeeded` does. On it the
- * time is booked through the lock, or the deposit refunded (`settle`). Only
+ * time is booked through the lock, or the deposit refunded (`bookDeposit`). Only
  * the site's own intents (`isDeposit`); anything else is left alone.
  *
  * Signed with STRIPE_WEBHOOK_SECRET; anything else is refused. Refuses
@@ -55,7 +55,7 @@ export async function POST(request: Request) {
     return text("ok", 200);
   }
   // The whole env: a hand-picked copy once dropped LEADS_KEY, so no deposit reached the lead's log.
-  const status = await settle({ ...env, INBOX: env.INBOX, STRIPE_SECRET_KEY: env.STRIPE_SECRET_KEY }, pi.id, pi.metadata);
+  const status = await bookDeposit({ ...env, INBOX: env.INBOX, STRIPE_SECRET_KEY: env.STRIPE_SECRET_KEY }, pi.id, pi.metadata);
   // Still booking from an earlier delivery: Stripe retries until it ends or hello@ is warned.
   if (status === "booking") return text("Still booking.", 503);
   return text("ok", 200);

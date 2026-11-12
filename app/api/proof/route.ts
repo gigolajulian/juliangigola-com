@@ -4,7 +4,7 @@ import { sealer } from "@/lib/leads/lead-crypto";
 import { recordLead } from "@/lib/leads/lead-store";
 import { cardKey, closesAt, cleanSettings, DEFAULTS, frameKey, frameKeys, aliasKey, isFrameId, isToken, listProofs, nextProofId, publicId, readProof, writeProof, type Proof } from "@/lib/proofs";
 import { proofMail, proofUrl, sendClient } from "@/lib/email/proof-mail";
-import { settle } from "@/lib/proof-submit";
+import { recheckTransfer } from "@/lib/proof-submit";
 import { servedFrame } from "@/lib/proof-watermark";
 import { bodyOf, json } from "@/lib/http";
 
@@ -50,7 +50,7 @@ export async function GET(request: Request) {
       (await listProofs(g.kv)).map(async (x) => {
         const p = await readProof(g.kv, g.s, x.token);
         // Bank payments still settling are checked each time the desk opens.
-        const moved = p?.paid?.pending && key ? await settle(key, p).catch(() => null) : null;
+        const moved = p?.paid?.pending && key ? await recheckTransfer(key, p).catch(() => null) : null;
         if (moved) await writeProof(g.kv, g.s, moved);
         return moved ?? p;
       }),

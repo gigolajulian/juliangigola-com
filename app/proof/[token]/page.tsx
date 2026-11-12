@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { sealer } from "@/lib/leads/lead-crypto";
-import { checkPaid, finalize, settle } from "@/lib/proof-submit";
+import { checkPaid, finalize, recheckTransfer } from "@/lib/proof-submit";
 import { PAYMENTS_DOWN } from "@/lib/stripe";
 import { coverFrame, isOpen, isToken, publicView, readPublic, writeProof } from "@/lib/proofs";
 import { ProofGallery } from "@/components/proof-gallery";
@@ -64,7 +64,7 @@ export default async function ProofPage({ params, searchParams }: { params: Prom
     else if (ok) p = await finalize(env, env.INBOX, s, p, ok);
   }
   if (p.paid?.pending && env.STRIPE_SECRET_KEY) {
-    const moved = await settle(env.STRIPE_SECRET_KEY, p).catch(() => null);
+    const moved = await recheckTransfer(env.STRIPE_SECRET_KEY, p).catch(() => null);
     if (moved) await writeProof(env.INBOX, s, (p = moved));
   }
   // Julian's own look before sending is not a client view.

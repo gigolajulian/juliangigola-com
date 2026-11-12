@@ -4,12 +4,12 @@
  * Julian (2026-11-09): "use it to redesign leads app", then picked the
  * Leads redesign mock (claude.ai/artifact/9TrLqxf8vV4jU4uWPLZz2W, "yes
  * send it to backend"). /admin/leads since the original desk retired (2026-11-11); Astryx's
- * CSS never reaches the site or the classic desk.
+ * CSS never reaches the site.
  *
  * Home is the table-filter shape: Your move, This week, Waiting on them,
  * with the open lead beside the list when wide. Phone (≤760) gets a tab
  * bar, mid (≤1200) the side nav and a stacked header. The lead page is
- * its own Astryx layout (components/leads/lead-astryx.tsx).
+ * its own Astryx layout (components/leads/lead.tsx).
  * ─────────────────────────────────────────────────────────────── */
 
 import "@astryxdesign/core/astryx.css";
@@ -31,24 +31,24 @@ import { ProgressBar } from "@astryxdesign/core/ProgressBar";
 import { StatusDot } from "@astryxdesign/core/StatusDot";
 import { Tab, TabList } from "@astryxdesign/core/TabList";
 import { SignIn } from "@/components/leads/setup";
-import { LeadAstryx } from "@/components/leads/lead-astryx";
+import { LeadDesk } from "@/components/leads/lead";
 import { badge } from "@/components/leads/shared";
 import { ago, aside, inboxCall, loadError, matches, nextStep, pass } from "@/lib/leads/lead-desk";
 import type { Template } from "@/lib/leads/lead-crm";
 import { TZ } from "@/lib/booking/booking-rules";
 import { KEY_STORE, TOKEN_STORE } from "@/lib/admin/admin-github";
 import { leadSummary, shootTag, STAGES, type Lead, type LeadPatch, type LeadSummary, type Stage as StageName } from "@/lib/leads/leads";
-import { TodayAstryx } from "@/components/leads/today-astryx";
-import { NewLeadAstryx } from "@/components/leads/new-lead-astryx";
-import { BoardAstryx } from "@/components/leads/board-astryx";
-import { CalendarAstryx } from "@/components/leads/calendar-astryx";
-import { MoneyAstryx } from "@/components/leads/money-astryx";
-import { AsideAstryx, LicencesAstryx } from "@/components/leads/lists-astryx";
-import { InvoicesAstryx } from "@/components/leads/invoices-astryx";
-import { PanelAstryx, StatsAstryx } from "@/components/leads/numbers-astryx";
-import { DeviceAstryx, HoursAstryx, TemplatesAstryx } from "@/components/leads/setup-astryx";
+import { TodayDesk } from "@/components/leads/today";
+import { NewLeadDesk } from "@/components/leads/new-lead";
+import { BoardDesk } from "@/components/leads/board";
+import { CalendarDesk } from "@/components/leads/calendar";
+import { MoneyDesk } from "@/components/leads/money";
+import { AsideDesk, LicencesDesk } from "@/components/leads/lists";
+import { InvoicesDesk } from "@/components/leads/invoices";
+import { PanelDesk, StatsDesk } from "@/components/leads/numbers";
+import { DeviceDesk, HoursDesk, TemplatesDesk } from "@/components/leads/setup-panels";
 import { type Filter } from "@/lib/leads/lead-desk";
-import { ProofsAstryx } from "@/components/proofs-astryx";
+import { ProofsDesk } from "@/components/proofs/desk";
 
 type Size = "phone" | "mid" | "wide";
 /** Every page of the desk. */
@@ -108,7 +108,7 @@ const GearGlyph = svg(<><circle cx="12" cy="12" r="3" /><path d="M12 3v3M12 18v3
 const PhotoGlyph = svg(<><rect x="4" y="5" width="16" height="14" rx="2" /><circle cx="9" cy="10" r="1.6" /><path d="M20 16l-5-5-8 8" /></>);
 const SiteGlyph = svg(<><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M3 9h18M9 9v11" /></>);
 const GLYPH: Partial<Record<View, React.ComponentType<React.SVGProps<SVGSVGElement>>>> = { proofs: PhotoGlyph, leads: InboxGlyph, calendar: CalendarGlyph, money: MoneyGlyph, stats: ChartGlyph, templates: GearGlyph };
-/** Out of the desk: proofs, the site editor, the classic desk until it is retired. */
+/** Out of the desk: the site editor. */
 const LINKS: [string, string, React.ComponentType<React.SVGProps<SVGSVGElement>>][] = [["Pages and work", "/admin", SiteGlyph]];
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
@@ -181,17 +181,15 @@ function More({ go }: { go: (v: View) => void }) {
 }
 
 function TabBar({ view, go }: { view: View; go: (v: View) => void }) {
-  // A view id switches in place; an href still opens the classic desk.
-  const tabs: [string, React.ComponentType<React.SVGProps<SVGSVGElement>>, View | string][] = [["Today", HomeGlyph, "today"], ["Leads", InboxGlyph, "leads"], ["Calendar", CalendarGlyph, "calendar"], ["More", MoreGlyph, "more"]];
+  const tabs: [string, React.ComponentType<React.SVGProps<SVGSVGElement>>, View][] = [["Today", HomeGlyph, "today"], ["Leads", InboxGlyph, "leads"], ["Calendar", CalendarGlyph, "calendar"], ["More", MoreGlyph, "more"]];
   return (
     <HStack gap={0} paddingBlockEnd={1}>
       {tabs.map(([label, glyph, to]) => {
-        const href = to.startsWith("/") ? to : undefined;
         const on = to === view;
         return (
         <StackItem key={label} size="fill">
           <VStack gap={0} hAlign="center">
-            <IconButton label={label} variant="ghost" href={href} onClick={href ? undefined : () => go(to as View)} icon={<Icon icon={glyph} color={on ? "accent" : "secondary"} />} />
+            <IconButton label={label} variant="ghost" onClick={() => go(to)} icon={<Icon icon={glyph} color={on ? "accent" : "secondary"} />} />
             <Text type="supporting" size="2xs" color={on ? "accent" : "secondary"}>{label}</Text>
           </VStack>
         </StackItem>
@@ -201,7 +199,7 @@ function TabBar({ view, go }: { view: View; go: (v: View) => void }) {
   );
 }
 
-export function LeadsAstryx() {
+export function LeadsDesk() {
   const [leads, setLeads] = React.useState<LeadSummary[] | null>(null);
   const [error, setError] = React.useState<string | null>(null);
   const [query, setQuery] = React.useState("");
@@ -328,7 +326,7 @@ export function LeadsAstryx() {
             {error ? <Text color="secondary">{error}</Text> : null}
             {!leads && !error ? <Eyebrow>LOADING LEADS</Eyebrow> : null}
             {boarding ? (
-              <BoardAstryx leads={live.filter((l) => !l.archivedAt && l.stage !== "Lost" && matches(l, words))} onMove={(l, stage) => act(l, { stage })} open={(l) => setOpen(l.id ?? null)} />
+              <BoardDesk leads={live.filter((l) => !l.archivedAt && l.stage !== "Lost" && matches(l, words))} onMove={(l, stage) => act(l, { stage })} open={(l) => setOpen(l.id ?? null)} />
             ) : GROUPS.map(([g, name]) => {
               const these = rows.filter(([, gg]) => gg === g).map(([l]) => l).sort((a, b) => (g === "week" ? a.when!.localeCompare(b.when!) : b.lastAt.localeCompare(a.lastAt)));
               if (!these.length) return null;
@@ -398,9 +396,9 @@ export function LeadsAstryx() {
     />
   );
 
-  // The lead page: its own Astryx layout (components/leads/lead-astryx.tsx).
+  // The lead page: its own Astryx layout (components/leads/lead.tsx).
   const lead = current ? (
-    <LeadAstryx key={current.id} summary={current} initial={fresh?.email === current.email ? fresh : null} call={call} onChange={changed} onBack={() => setOpen(null)} reload={load} templates={templates} others={live.filter((o) => o.id !== current.id)} size={size} toProofs={() => show("proofs")} />
+    <LeadDesk key={current.id} summary={current} initial={fresh?.email === current.email ? fresh : null} call={call} onChange={changed} onBack={() => setOpen(null)} reload={load} templates={templates} others={live.filter((o) => o.id !== current.id)} size={size} toProofs={() => show("proofs")} />
   ) : null;
 
   // The lead from the POST itself: KV lists lag a fresh write, so it goes in by hand and opens whole.
@@ -417,19 +415,19 @@ export function LeadsAstryx() {
     setError("Not authorized.");
   };
   const pages: Partial<Record<View, React.ReactNode>> = {
-    invoices: <InvoicesAstryx leads={live} call={call} open={openLead} changed={changed} />,
-    licences: <LicencesAstryx leads={live} open={openLead} />,
-    aside: <AsideAstryx leads={leads ?? []} call={call} open={openLead} done={() => { setOpen(null); load(); }} tab={asideTab} setTab={setAsideTab} />,
-    stats: <StatsAstryx call={call} />,
-    traffic: <PanelAstryx which="traffic" />,
-    seo: <PanelAstryx which="seo" />,
-    hours: <HoursAstryx />,
-    templates: <TemplatesAstryx call={call} templates={templates} saved={setTemplates} />,
-    device: <DeviceAstryx call={call} reload={load} signOut={signOut} />,
+    invoices: <InvoicesDesk leads={live} call={call} open={openLead} changed={changed} />,
+    licences: <LicencesDesk leads={live} open={openLead} />,
+    aside: <AsideDesk leads={leads ?? []} call={call} open={openLead} done={() => { setOpen(null); load(); }} tab={asideTab} setTab={setAsideTab} />,
+    stats: <StatsDesk call={call} />,
+    traffic: <PanelDesk which="traffic" />,
+    seo: <PanelDesk which="seo" />,
+    hours: <HoursDesk />,
+    templates: <TemplatesDesk call={call} templates={templates} saved={setTemplates} />,
+    device: <DeviceDesk call={call} reload={load} signOut={signOut} />,
     more: <More go={show} />,
-    proofs: <ProofsAstryx embedded />,
+    proofs: <ProofsDesk embedded />,
   };
-  const page = lead ?? pages[screen] ?? (screen === "money" ? <MoneyAstryx /> : screen === "calendar" ? <CalendarAstryx leads={live.filter((l) => !l.archivedAt)} size={size} open={(l) => setOpen(l.id ?? null)} tab={calTab} setTab={setCalTab} /> : screen === "new" ? <NewLeadAstryx call={call} leads={live} size={size} done={added} open={(l) => setOpen(l.id ?? null)} cancel={() => show("leads")} /> : screen === "today" && leads ? <TodayAstryx leads={live} size={size} open={(l) => setOpen(l.id ?? null)} show={() => show("leads")} /> : home);
+  const page = lead ?? pages[screen] ?? (screen === "money" ? <MoneyDesk /> : screen === "calendar" ? <CalendarDesk leads={live.filter((l) => !l.archivedAt)} size={size} open={(l) => setOpen(l.id ?? null)} tab={calTab} setTab={setCalTab} /> : screen === "new" ? <NewLeadDesk call={call} leads={live} size={size} done={added} open={(l) => setOpen(l.id ?? null)} cancel={() => show("leads")} /> : screen === "today" && leads ? <TodayDesk leads={live} size={size} open={(l) => setOpen(l.id ?? null)} show={() => show("leads")} /> : home);
   const section = lead ? null : sectionOf(screen);
   const shown = section && section[2].length > 1 ? (
     <Layout

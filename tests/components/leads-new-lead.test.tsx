@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { NewLeadAstryx, sameAs } from "@/components/leads/new-lead-astryx";
+import { NewLeadDesk, sameAs } from "@/components/leads/new-lead";
 import type { Call } from "@/lib/leads/lead-desk";
 import type { LeadSummary } from "@/lib/leads/leads";
 
@@ -19,11 +19,11 @@ describe("sameAs", () => {
   });
 });
 
-describe("NewLeadAstryx", () => {
+describe("NewLeadDesk", () => {
   it("adds only with a name and a way back, through the classic POST", async () => {
     const call = vi.fn(async () => ({ id: "n1", lead: { email: "ig:ana" } })) as unknown as Call & ReturnType<typeof vi.fn>;
     const done = vi.fn();
-    render(<NewLeadAstryx call={call} leads={[]} size="wide" done={done} open={() => {}} cancel={() => {}} />);
+    render(<NewLeadDesk call={call} leads={[]} size="wide" done={done} open={() => {}} cancel={() => {}} />);
     const add = screen.getByRole("button", { name: "Add lead" });
     fireEvent.change(screen.getByLabelText(/Name/), { target: { value: "Ana" } });
     expect(add.getAttribute("aria-disabled") === "true" || (add as HTMLButtonElement).disabled).toBe(true);

@@ -8,7 +8,7 @@ import { Orb, ORB_ROUND } from "@/components/orb";
 import { JgLoad } from "@/components/splash/jg-load";
 import { TZ } from "@/lib/booking/booking-rules";
 import { mplan } from "@/lib/mplan";
-import { AHEAD, e164, fromIso, iso, KEEP, minutesOf, noop, overflowOf, recent, WHERE, type Pick, type Slot, type Step, type V3Book } from "@/components/booking/time-picker-parts";
+import { AHEAD, e164, fromIso, iso, KEEP, minutesOf, noop, overflowOf, recent, recentKey, forgetTimes, WHERE, type Pick, type Slot, type Step, type V3Book } from "@/components/booking/time-picker-parts";
 
 
 /* Goo (Julian, 2026-10-20, OKd 10-21) on the card's buttons, times and
@@ -166,7 +166,7 @@ export function usePicker({ path, title, className, fallback, v3, onPicked }: Pr
   }, [ok]);
 
   const load = React.useCallback(async (fresh = false) => {
-    const key = `${username}/${slug}/${tz}`;
+    const key = recentKey(username, slug, tz);
     try {
       const from = new Date();
       const to = new Date(Date.now() + AHEAD * 864e5);
@@ -635,7 +635,7 @@ export function usePicker({ path, title, className, fallback, v3, onPicked }: Pr
         await new Promise((go) => setTimeout(go, 1500));
       }
       // The time is taken now: the next picker asks again.
-      recent.delete(`${username}/${slug}/${tz}`);
+      forgetTimes(username, slug, tz);
       setStep("done");
     } catch (e) {
       setError((e as { status?: number }).status === 409 ? "That time was just taken. Pick another." : "That did not go through. Try again, or write to hello@juliangigola.com.");

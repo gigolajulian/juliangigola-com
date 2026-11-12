@@ -3,6 +3,7 @@ import { stripe } from "@/lib/stripe";
 import { recordLead } from "@/lib/leads/lead-store";
 import { alertLines, proofUrl, receiptMail, sendClient } from "@/lib/email/proof-mail";
 import { cardPrice, owed, publicId, viewerKey, writeProof, type Proof } from "@/lib/proofs";
+import type { InboxKV as KV } from "@/lib/leads/lead-store";
 
 /* ── a client sends their selects ─────────────────────────────────
  * Nothing to pay: locked and mailed at once. A shoot balance or extras: a Stripe Checkout session
@@ -14,7 +15,6 @@ import { cardPrice, owed, publicId, viewerKey, writeProof, type Proof } from "@/
  * ─────────────────────────────────────────────────────────────── */
 
 type Env = Pick<CloudflareEnv, "INBOX" | "LEADS_KEY" | "VAPID_KEY" | "CLIENT_EMAIL" | "EMAIL"> & { STRIPE_SECRET_KEY?: string };
-type KV = Pick<NonNullable<CloudflareEnv["INBOX"]>, "get" | "put" | "list" | "delete">;
 type Seal = { seal(v: unknown): Promise<string>; open<T>(s: string): Promise<T> };
 
 /** Lock the selects and send both mails. */
@@ -102,7 +102,7 @@ export async function paidFor(key: string, p: Proof, session: string): Promise<P
   if (!/^cs_(test|live)_[A-Za-z0-9]+$/.test(session) || session === p.paid?.session) return null;
   const s = await stripe(key, `/checkout/sessions/${session}`);
   const meta = s.metadata as Record<string, string> | undefined;
-  // A bank payment comes back complete but unpaid: accepted, settling in about 4 business days. The selects lock now; settle() follows it.
+  // A bank payment comes back complete but unpaid: accepted, settling in about 4 business days. The selects lock now; recheckTransfer() follows it.
   const bank = s.status === "complete" && s.payment_status === "unpaid";
   // No amount is no payment: NaN would pass the `<` check and be stored as paid.
   const total = s.amount_total;
@@ -117,7 +117,7 @@ export const checkPaid = (key: string, p: Proof, session: string) =>
   paidFor(key, p, session).catch((e: { status?: number }) => (e.status && e.status < 500 ? null : ("down" as const)));
 
 /** A settling bank payment, checked again: cleared, bounced, or still on its way. Null when nothing changed. */
-export async function settle(key: string, p: Proof): Promise<Proof | null> {
+export async function recheckTransfer(key: string, p: Proof): Promise<Proof | null> {
   if (!p.paid?.pending) return null;
   const s = await stripe(key, `/checkout/sessions/${p.paid.session}?expand[]=payment_intent`);
   if (s.payment_status === "paid") return { ...p, paid: { ...p.paid, pending: undefined } };

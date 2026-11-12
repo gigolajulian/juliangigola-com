@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { checkout, checkPaid, paidFor, settle } from "@/lib/proof-submit";
+import { checkout, checkPaid, paidFor, recheckTransfer } from "@/lib/proof-submit";
 import type { Proof } from "@/lib/proofs";
 
 /* Paying for selects: a Stripe session only counts when it is paid, for
@@ -73,26 +73,26 @@ describe("checkPaid", () => {
   });
 });
 
-describe("settle", () => {
+describe("recheckTransfer", () => {
   const pending = proof({ paid: { session: "cs_test_A", amount: 5000, at: "", pending: true } });
   it("does nothing for a payment that is not settling", async () => {
-    expect(await settle("k", proof())).toBeNull();
+    expect(await recheckTransfer("k", proof())).toBeNull();
   });
   it("clears a payment Stripe now calls paid", async () => {
     stripeSays(() => ({ body: { payment_status: "paid" } }));
-    expect((await settle("k", pending))?.paid).toMatchObject({ amount: 5000, pending: undefined });
+    expect((await recheckTransfer("k", pending))?.paid).toMatchObject({ amount: 5000, pending: undefined });
   });
   it("takes a bounced payment back off what was paid", async () => {
     stripeSays(() => ({ body: { payment_status: "unpaid", amount_total: 5000, payment_intent: { status: "canceled" } } }));
-    expect((await settle("k", pending))?.paid).toMatchObject({ amount: 0, failed: true });
+    expect((await recheckTransfer("k", pending))?.paid).toMatchObject({ amount: 0, failed: true });
   });
   it("leaves a bounced payment with no amount settling instead of storing NaN", async () => {
     stripeSays(() => ({ body: { payment_status: "unpaid", payment_intent: { status: "canceled" } } }));
-    expect(await settle("k", pending)).toBeNull();
+    expect(await recheckTransfer("k", pending)).toBeNull();
   });
   it("is null while still on its way", async () => {
     stripeSays(() => ({ body: { payment_status: "unpaid", payment_intent: { status: "processing" } } }));
-    expect(await settle("k", pending)).toBeNull();
+    expect(await recheckTransfer("k", pending)).toBeNull();
   });
 });
 

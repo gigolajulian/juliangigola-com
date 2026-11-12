@@ -1,7 +1,7 @@
 "use client";
 
 /* ── a gallery's Activity on Astryx ───────────────────────────────
- * The classic Activity (components/admin/admin-proofs.tsx) rebuilt for the
+ * The classic Activity rebuilt for the
  * Astryx proofs desk: pick a viewer, their facts, the most picked frames,
  * the event log, Export CSV. Same data (`p.viewers`), no new reads.
  * ─────────────────────────────────────────────────────────────── */
@@ -20,7 +20,7 @@ import { stampPT } from "@/lib/leads/lead-desk";
 const csvCell = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
 const secs = (n: number) => (n < 90 ? `${Math.round(n)} s` : `${Math.round(n / 60)} min`);
 
-export function ActivityAstryx({ p }: { p: Row }) {
+export function ActivityDesk({ p }: { p: Row }) {
   const people = Object.entries(p.viewers ?? {}).sort((a, b) => b[1].last.localeCompare(a[1].last));
   const [who, setWho] = React.useState(people[0]?.[0] ?? "");
   if (!people.length) return <Text type="code" size="sm" color="secondary">Nobody has opened it yet. Each address typed at the gate shows here.</Text>;

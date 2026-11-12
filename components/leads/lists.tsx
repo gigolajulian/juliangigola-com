@@ -1,7 +1,7 @@
 "use client";
 
 /* ── Licences and Put aside on Astryx ─────────────────────────────
- * The classic desk's LicenceList (components/leads/lead-licence.tsx) and
+ * The classic desk's LicenceList and
  * its Put aside lists (Snoozed, Archived, Trash, Delivered, Lost) as
  * tables. Same filters (`pass` in lib/leads/lead-desk.ts), same Empty
  * trash DELETE, asked twice as before.
@@ -35,7 +35,7 @@ export function Page({ eyebrow, title, children }: { eyebrow: string; title: str
 
 const nameCol = (open: (l: LeadSummary) => void) => ({ key: "name", header: "Lead", renderCell: (l: Row) => <Button label={l.name || l.email} variant="ghost" size="sm" onClick={() => open(l)} /> });
 
-export function LicencesAstryx({ leads, open }: { leads: LeadSummary[]; open: (l: LeadSummary) => void }) {
+export function LicencesDesk({ leads, open }: { leads: LeadSummary[]; open: (l: LeadSummary) => void }) {
   const [now] = React.useState(() => Date.now());
   const list = leads.filter((l) => l.licence).sort((a, b) => a.licence!.end.localeCompare(b.licence!.end)) as Row[];
   return (
@@ -56,7 +56,7 @@ export function LicencesAstryx({ leads, open }: { leads: LeadSummary[]; open: (l
   );
 }
 
-export function AsideAstryx({ leads, call, open, done, tab, setTab }: { leads: LeadSummary[]; call: Call; open: (l: LeadSummary) => void; done: () => void; tab: Filter; setTab: (f: Filter) => void }) {
+export function AsideDesk({ leads, call, open, done, tab, setTab }: { leads: LeadSummary[]; call: Call; open: (l: LeadSummary) => void; done: () => void; tab: Filter; setTab: (f: Filter) => void }) {
   const [sure, setSure] = React.useState(false);
   const [busy, setBusy] = React.useState(false);
   const [note, setNote] = React.useState<string | null>(null);

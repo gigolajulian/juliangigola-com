@@ -8,16 +8,15 @@
  * anything, and it writes one file under `.next`, which is not committed.
  * ─────────────────────────────────────────────────────────────── */
 
+import { bodyOf } from "@/lib/http";
+
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   if (process.env.NODE_ENV !== "development")
     return new Response(null, { status: 404 });
 
-  const body = (await request.json().catch(() => null)) as {
-    title?: unknown;
-    values?: unknown;
-  } | null;
+  const body = await bodyOf(request);
   if (
     !body ||
     typeof body.title !== "string" ||
