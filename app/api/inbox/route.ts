@@ -468,7 +468,6 @@ async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: Await
     if (!other) return json({ error: "Gone." }, 404);
     lead = merge(lead, other, at);
     from = { ...from, events: [...from.events, ...other.events] };
-    await adoptLog(inbox, seal, id, mergeFrom.slice(5), lead).catch((e: unknown) => console.error("activity log merge", String(e)));
     merged = mergeFrom;
   }
   // A new invoice takes the month's next number: 1126, then 1126-2.
@@ -499,6 +498,9 @@ async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: Await
   }
   for (const k of Object.keys(lead) as (keyof Lead)[]) if (lead[k] === undefined) delete lead[k];
   await writeLead(inbox, seal, id, lead, from);
-  if (merged) await bury(inbox, merged);
+  if (merged) {
+    await adoptLog(inbox, seal, id, merged.slice(5), lead).catch((e: unknown) => console.error("activity log merge", String(e)));
+    await bury(inbox, merged);
+  }
   return json({ lead });
 }
