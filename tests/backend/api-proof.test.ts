@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { DELETE, GET, PATCH, POST, PUT } from "@/app/api/proof/route";
 import { sealer } from "@/lib/leads/lead-crypto";
-import { readProof } from "@/lib/proofs/proof";
+import { readProof, writeProof } from "@/lib/proofs/proof";
 import { FakeKV, LEADS_KEY } from "./fakes";
 
 /* /api/proof: Julian's side of proof galleries. Off without its bindings,
@@ -66,5 +66,18 @@ describe("/api/proof", () => {
     const got = await (await call(GET, req("GET", { query: `?token=${token}` }))).json();
     expect(got.proof.frames).toEqual([{ id: "a1", file: "a.jpg", w: 3, h: 2 }]);
     expect((await readProof(kv as never, (await sealer(LEADS_KEY))!, token))?.name).toBe("Test");
+  });
+
+  it("forgets one visitor and keeps the rest of the gallery", async () => {
+    const { token } = await (await call(POST, req("POST", { body: json({ action: "create", name: "Test" }) }))).json();
+    const s = (await sealer(LEADS_KEY))!;
+    const p = (await readProof(kv as never, s, token))!;
+    const v = { first: "", last: "", visits: 1, seconds: 0, picks: [] };
+    await writeProof(kv as never, s, { ...p, selects: ["a1"], viewers: { "me@example.test": v, "hello@example.test": v } } as never);
+    expect((await call(POST, req("POST", { body: json({ action: "forget", token, email: "nobody@example.test" }) }))).status).toBe(404);
+    expect((await call(POST, req("POST", { body: json({ action: "forget", token, email: " ME@example.test " }) }))).status).toBe(200);
+    const after = (await readProof(kv as never, s, token))!;
+    expect(Object.keys(after.viewers ?? {})).toEqual(["hello@example.test"]);
+    expect(after.selects).toEqual(["a1"]);
   });
 });

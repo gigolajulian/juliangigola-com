@@ -2,7 +2,7 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { isAdmin } from "@/lib/vouch";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { recordLead } from "@/lib/leads/lead-store";
-import { cardKey, closesAt, cleanSettings, DEFAULTS, frameKey, frameKeys, aliasKey, isFrameId, isToken, listProofs, nextProofId, publicId, readProof, writeProof, type Proof } from "@/lib/proofs/proof";
+import { cardKey, closesAt, cleanSettings, DEFAULTS, frameKey, frameKeys, aliasKey, isFrameId, isToken, listProofs, nextProofId, publicId, readProof, viewerKey, writeProof, type Proof } from "@/lib/proofs/proof";
 import { proofMail, proofUrl, sendClient } from "@/lib/email/proof-mail";
 import { recheckTransfer } from "@/lib/proofs/submit";
 import { servedFrame } from "@/lib/proofs/watermark";
@@ -18,6 +18,7 @@ import { bodyOf, json } from "@/lib/http";
  *   POST   {action:"create", ...}      new gallery, returns token + url
  *   POST   {action:"send", token}      the proof mail; the clock starts
  *   POST   {action:"reopen"|"extend"}  unlock selects | add days
+ *   POST   {action:"forget", token, email} drop one visitor's record (his own test visits)
  *   POST   {action:"relink", token}    a new date id for the client's link; the old link closes
  *   PATCH  {token, ...settings}        name, email, note, included, price, days, watermark
  *   PUT    ?token&id&file&w&h  <jpeg>  add or replace one frame
@@ -124,6 +125,14 @@ export async function POST(request: Request) {
     await writeProof(g.kv, g.s, next);
     if (p.link) await g.kv.delete(aliasKey(p.link));
     return json({ proof: next, url: proofUrl(link) });
+  }
+  if (b.action === "forget") {
+    const who = typeof b.email === "string" ? viewerKey(b.email) : "";
+    if (!who || !p.viewers?.[who]) return json({ error: "No visit from that address." }, 404);
+    const { [who]: _gone, ...viewers } = p.viewers;
+    const next: Proof = { ...p, viewers };
+    await writeProof(g.kv, g.s, next);
+    return json({ proof: next });
   }
   if (b.action === "reopen") {
     const next: Proof = { ...p, submittedAt: undefined, pulledAt: undefined };
