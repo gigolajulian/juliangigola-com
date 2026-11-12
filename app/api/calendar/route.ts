@@ -4,7 +4,7 @@ import { gcal } from "@/lib/booking/gcal";
 import { looksLikeEmail } from "@/lib/inbox";
 import { busyAll, EXTRA_KEY, isIcs, readExtras, zoned, type Extra } from "@/lib/booking/slots";
 import { isAdmin } from "@/lib/vouch";
-import { json } from "@/lib/http";
+import { bodyOf, json } from "@/lib/http";
 
 /* ── the Leads app's Calendar ─────────────────────────────────────
  * Julian (2026-11-04): "control the calendar, block off days, and add
@@ -102,8 +102,8 @@ type Body = {
 async function post(request: Request) {
   const g = await gate(request);
   if (g.error) return g.error;
-  const body = (await request.json().catch(() => null)) as Body | null;
-  if (!body || typeof body !== "object") return json({ error: "Bad request." }, 400);
+  const body = (await bodyOf(request)) as Body | null;
+  if (!body) return json({ error: "Bad request." }, 400);
   const { env } = g;
 
   if (body.block) {
