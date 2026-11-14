@@ -32,10 +32,9 @@ function Form({ from, opt, reply, onClose }: { from: InquiryFrom; opt?: QuoteOpt
           {label}
           {req ? <span className="req" aria-hidden="true"> *</span> : null}
         </span>
-        {err[k] ? <span className="fe" aria-hidden="true">{err[k]}</span> : null}
       </label>
       {el}
-      {err[k] ? <p className="sr-only" id={`mq-${k}-err`} role="alert">{err[k]}</p> : null}
+      {err[k] ? <p className="lbl mt-fe" id={`mq-${k}-err`} role="alert">{err[k]}</p> : null}
     </div>
   );
   const input = (k: keyof typeof v, extra: React.InputHTMLAttributes<HTMLInputElement>) => (
