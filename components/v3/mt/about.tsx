@@ -12,7 +12,7 @@ const WORDMARK = "Julian Gigola";
 export function MtAbout({ does }: { does: string[] }) {
   const words = ABOUT_SENTENCE.split(" ");
   return (
-    <section className="mt-about" data-mt="about" data-hold="1.7">
+    <section className="mt-about" aria-label="About" data-mt="about" data-hold="1.7">
       <div className="mt-stage">
         <figure className="mt-ab-ph">
           <Image src="/about/julian-studio.jpg" alt="Julian Gigola at the tether station on set" fill sizes="100vw" />

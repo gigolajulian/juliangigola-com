@@ -93,7 +93,7 @@ function Form({ from, opt, reply, onClose }: { from: InquiryFrom; opt?: QuoteOpt
       {reply ? <p className="lbl mute mt-reply">Replies {reply}</p> : null}
       {!quote ? (
         <p className="lbl mute mt-talk">
-          Prefer to talk? <Link href="/book/consultation">15 min call</Link> <i>|</i> <Link href="/contact/form">Full inquiry form</Link> <i>|</i> <a href="mailto:hello@juliangigola.com">Email</a>
+          Prefer to talk? <Link href="/book/consultation">15 min call</Link> <i aria-hidden>|</i> <Link href="/contact/form">Full inquiry form</Link> <i aria-hidden>|</i> <a href="mailto:hello@juliangigola.com">Email</a>
         </p>
       ) : null}
     </form>

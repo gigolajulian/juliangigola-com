@@ -370,6 +370,8 @@
   [data-mtscroll] .mt-br .w{display:none}
   [data-mtscroll] .mt-brw[data-on] .mt-br-d{display:block;margin:0 0 12px;font:500 13px/1.4 var(--display);color:#a8a8a8}
   :root[data-mtscroll][data-theme="light"] .mt-brw[data-on] .mt-br-d{color:var(--body)}
+  :root[data-mtscroll][data-theme="light"] :is(.mt-dep,.mt-q-line,.mt-qw:not([aria-pressed="true"],:focus-visible) b){color:var(--mute)}
+  :root[data-mtscroll][data-theme="light"] .mt-qo-d{color:var(--body)}
   [data-mtscroll] .mt-brs.pair{column-gap:14px}
   [data-mtscroll] .mt-brs.pair .mt-br{flex-direction:column;gap:4px}
   [data-mtscroll] .mt-brs.pair .mt-br b{font-size:22px}

@@ -100,7 +100,7 @@ export function MtMotion({ films }: { films: MtFilm[] }) {
         <div className="mt-mofoot">
           <p className="lbl">{pad(cur + 1)}/{pad(films.length)}</p>
           <h3 className="mt-ttl"><span className="ln"><span>{films[cur].title}</span></span></h3>
-          <p className="lbl mute">{films[cur].kind} <i>|</i> {films[cur].client}</p>
+          <p className="lbl mute">{films[cur].kind} <i aria-hidden>|</i> {films[cur].client}</p>
           <Link className="btn mt-sm" href={films[cur].href}>View more</Link>
         </div>
       </div>

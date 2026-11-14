@@ -94,7 +94,7 @@ export function MtBookOnline({ open, onOpen, onClose }: { open: BookRow["key"] |
     onOpen(BOOK_ROWS[i].key);
   };
   return (
-    <section className="mt-book" data-mt="book" data-on={r.key} data-open={open ? "" : undefined} ref={sec}>
+    <section className="mt-book" aria-label="Book online" data-mt="book" data-on={r.key} data-open={open ? "" : undefined} ref={sec}>
       <div className="mt-frame">
         <p className="lbl mute mt-label">Book online</p>
         <div className="mt-book-col">
@@ -105,7 +105,7 @@ export function MtBookOnline({ open, onOpen, onClose }: { open: BookRow["key"] |
                 <Link className="mt-link" href={`/book/${r.slug}`}>Open full page</Link>
               </div>
               <h3 className="mt-bin-t" tabIndex={-1} ref={head}>{r.name}</h3>
-              <p className="lbl mt-bin-m">{r.len} <i>|</i> {r.price}</p>
+              <p className="lbl mt-bin-m">{r.len} <i aria-hidden>|</i> {r.price}</p>
               <div className="mt-bin-flow" ref={box}>
                 <V3BookFlow key={r.slug} slug={r.slug} tabs={false} />
               </div>
@@ -126,7 +126,7 @@ export function MtBookOnline({ open, onOpen, onClose }: { open: BookRow["key"] |
                       onClick={() => (fine() || i === on ? pick(i) : setOn(i))}
                     >
                       <b>{x.name}</b>
-                      <span className="lbl">{x.len} <i>|</i> {x.price}</span>
+                      <span className="lbl">{x.len} <i aria-hidden>|</i> {x.price}</span>
                     </button>
                   </div>
                 ))}
