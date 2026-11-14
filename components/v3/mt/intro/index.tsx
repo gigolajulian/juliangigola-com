@@ -167,6 +167,11 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
         return g;
       };
 
+      // the same ratios as the rules that hide side columns once the intro is over (mtscroll.css)
+      const tight = matchMedia("(max-aspect-ratio: 19/10)").matches;
+      const mid = matchMedia("(max-aspect-ratio: 29/10)").matches;
+      const leaves = (el: HTMLElement) => tight || (mid && (el.dataset.col === "-2" || el.dataset.col === "4"));
+
       // 1. the real columns, each with frames above and below it so the canvas has no holes
       cols.forEach((c, i) => {
         const b = c.b;
@@ -177,6 +182,8 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
         for (let y = b[b.length - 1].y + R; y < ymax; y += R) tile(g, b[0].x, y);
         c.els.forEach((el) => (rise(el, from, delay), flat ? light(el.querySelector(".ph")!, delay, "::after") : light(el, delay, "::after")));
         rise(g, from, delay);
+        // a side column this screen does not keep leaves with the extras, so no sliver of it rides the push to the edge of the hero
+        if (c.side && leaves(c.els[0])) play(c.els[0], [{ opacity: 1 }, { opacity: 0 }], { duration: 700, delay: 3000, easing: OUT });
       });
       // 2. extra columns on the wall's own pitch, wherever no real column stands
       const real = cols.map((c) => c.b[0].x);
