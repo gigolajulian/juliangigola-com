@@ -20,6 +20,31 @@ const X_FROM = [700, 980, 620, 860, 1040, 760, 920]; // px below, per extra colu
 const RISE = 1700;
 const LIGHT = 750; // a photo comes up from black, never an opacity fade
 const END = 4500;
+const PUSH = 3000; // the push in starts
+
+/* "Depth push" (opt-in, ?splash=2; ?splash=1 turns it off again): the same
+   canvas, but the frames that are not the hero stand nearer the lens. At rest
+   it is the flat canvas; when the camera moves, each of those columns grows
+   faster than the wall, slides off past its neighbours, loses focus and is gone
+   before the hero lands. The hero is the only plane that stays sharp. The push
+   overshoots a touch and settles. Drawn in 2D: each strip scales around the
+   point the wall scales around, as a plane at depth d would. */
+const DEEP_PUSH = 2900;
+const DEEP_LAND = 4150; // the push peaks here, then settles back to END
+const DEEP_OVER = 0.007;
+const DEPTHS = [0.5, 0.28, 0.62, 0.36, 0.56, 0.22, 0.44]; // per extra column: 0 the hero's plane, 1 the lens
+const SETTLE = "cubic-bezier(0.45, 0, 0.55, 1)";
+
+function deepMode() {
+  const q = location.search;
+  try {
+    if (/[?&]splash=2/.test(q)) sessionStorage.setItem("jg-splash", "2");
+    else if (/[?&]splash=[01]/.test(q)) sessionStorage.removeItem("jg-splash");
+    return sessionStorage.getItem("jg-splash") === "2";
+  } catch {
+    return /[?&]splash=2/.test(q);
+  }
+}
 
 function shouldPlay() {
   const root = document.documentElement;
@@ -106,6 +131,9 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
     const run = () => {
       if (started || over) return;
       started = true;
+      const deep = deepMode();
+      const pushAt = deep ? DEEP_PUSH : PUSH;
+      const land = deep ? DEEP_LAND : END;
       const W = window.innerWidth;
       const H = window.innerHeight;
       const wr = wall.getBoundingClientRect();
@@ -166,6 +194,26 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
         light(v, delay);
         return g;
       };
+      // deep: a strip (or a column that leaves) at depth d, 0 the hero's plane and 1 the lens. `ox, oy` is the wall's scale point in the element's own box.
+      const depth = (el: HTMLElement, ox: number, oy: number, d: number) => {
+        el.style.transformOrigin = `${ox}px ${oy}px`;
+        el.style.zIndex = String(Math.round(d * 100));
+        const r = (1 - d * S0) / (1 - d); // how much more than the wall this plane has grown when the wall is at 1
+        const T = land - pushAt;
+        const blur = Math.round(5 + d * 14);
+        const gone = 0.74 - d * 0.22; // nearer planes pass the lens sooner
+        play(el, [{ scale: "1", easing: IN_OUT }, { scale: String(r) }], { duration: T, delay: pushAt });
+        play(
+          el,
+          [
+            { opacity: 1, filter: "blur(0px)" },
+            { opacity: 1, filter: `blur(${blur * 0.25}px)`, offset: 0.34 },
+            { opacity: 0, filter: `blur(${blur}px)`, offset: gone },
+            { opacity: 0, filter: `blur(${blur}px)` },
+          ],
+          { duration: T, delay: pushAt },
+        );
+      };
 
       // the same ratios as the rules that hide side columns once the intro is over (mtscroll.css)
       const tight = matchMedia("(max-aspect-ratio: 19/10)").matches;
@@ -183,7 +231,11 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
         c.els.forEach((el) => (rise(el, from, delay), flat ? light(el.querySelector(".ph")!, delay, "::after") : light(el, delay, "::after")));
         rise(g, from, delay);
         // a side column this screen does not keep leaves with the extras, so no sliver of it rides the push to the edge of the hero
-        if (c.side && leaves(c.els[0])) play(c.els[0], [{ opacity: 1 }, { opacity: 0 }], { duration: 700, delay: 3000, easing: OUT });
+        const out = c.side && leaves(c.els[0]);
+        if (deep) {
+          depth(g, px - b[0].x, py - top0, out ? 0.4 : 0.18); // the frames above and below a column are not the hero either
+          if (out) depth(c.els[0], px - c.els[0].offsetLeft, py - c.els[0].offsetTop, 0.4);
+        } else if (out) play(c.els[0], [{ opacity: 1 }, { opacity: 0 }], { duration: 700, delay: PUSH, easing: OUT });
       });
       // 2. extra columns on the wall's own pitch, wherever no real column stands
       const real = cols.map((c) => c.b[0].x);
@@ -194,15 +246,28 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
         const g = group(x, 800 + k * 70);
         for (let y = ymin - h + (k % 2 ? R * 0.25 : 0); y < ymax; y += R) tile(g, x, y);
         rise(g, X_FROM[k % X_FROM.length], 800 + k * 70);
+        if (deep) depth(g, px - x, py - top0, DEPTHS[k % DEPTHS.length]);
         k++;
       }
       // the extras stay through the push, so the canvas never shrinks to the wall alone; they leave as the push starts, so only the hero frames travel in
-      play(layer, [{ opacity: 1 }, { opacity: 0 }], { duration: 700, delay: 3000, easing: OUT });
+      if (!deep) play(layer, [{ opacity: 1 }, { opacity: 0 }], { duration: 700, delay: PUSH, easing: OUT });
 
       // the push in, .46 to 1
       wall.style.transformOrigin = `${px}px ${py}px`;
       const far = `translate3d(0,${ty}px,0) scale(${S0})`;
-      play(wall, [{ transform: far, easing: "linear" }, { transform: far, offset: 3000 / END, easing: IN_OUT }, { transform: "translate3d(0,0,0) scale(1)" }], { duration: END });
+      const home = "translate3d(0,0,0) scale(1)";
+      play(
+        wall,
+        deep
+          ? [
+              { transform: far, easing: "linear" },
+              { transform: far, offset: pushAt / END, easing: IN_OUT },
+              { transform: `translate3d(0,0,0) scale(${1 + DEEP_OVER})`, offset: land / END, easing: SETTLE }, // the push carries a touch past, then settles
+              { transform: home },
+            ]
+          : [{ transform: far, easing: "linear" }, { transform: far, offset: PUSH / END, easing: IN_OUT }, { transform: home }],
+        { duration: END },
+      );
 
       // JG, under every photo
       const jg = document.createElement("div");
@@ -225,7 +290,7 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
 
       root.dataset.mtIntro = "2";
       const t0 = performance.now();
-      timers.push(window.setTimeout(() => (root.dataset.mtIntro = "3"), 2950)); // scroll unlocks as the frames land
+      timers.push(window.setTimeout(() => (root.dataset.mtIntro = "3"), pushAt - 50)); // scroll unlocks as the frames land
       timers.push(window.setTimeout(() => finish(true), END + 60));
       // nobody is made to wait: a wheel, tap or key plays the rest fast and gives the scroll back
       hurry = () => {
