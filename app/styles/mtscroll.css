@@ -17,6 +17,7 @@
 [data-mtscroll] .mt button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;text-align:left}
 [data-mtscroll] .mt :is(button,a):focus-visible{outline:1px solid var(--accent);outline-offset:3px}
 [data-mtscroll] .mt .btn{justify-content:center}
+[data-mtscroll] .mt .fig{display:block}
 [data-mtscroll] .mt .mt-big{height:auto;padding:calc(20 * var(--u)) calc(32 * var(--u));font-size:max(11px,calc(13 * var(--u)))}
 [data-mtscroll] .mt .mt-sm{height:auto;min-height:32px;padding:calc(9 * var(--u)) calc(14 * var(--u));font-size:10px}
 [data-mtscroll] .mt .mt-link{font:500 max(10px,calc(11 * var(--u)))/1.2 var(--mono);letter-spacing:.14em;text-transform:uppercase;text-decoration:underline;text-underline-offset:4px;text-decoration-color:color-mix(in srgb,var(--ink) 40%,transparent)}
@@ -198,7 +199,8 @@
 [data-mtscroll] .mt-dim{position:fixed;inset:0;z-index:100;background:rgb(0 0 0 / .46)}
 [data-mtscroll] .mt-dim-b{-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
 [data-mtscroll] .mt-card{--hair:color-mix(in srgb,var(--ink) 16%,transparent);--u:1px;position:fixed;z-index:101;left:50%;top:50%;translate:-50% -50%;background:var(--bg);color:var(--ink);border:1px solid var(--hair);font:400 14px/1.6 var(--mono);outline:none}
-[data-mtscroll] .mt-card button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+[data-mtscroll] .mt-card :is(.mt-x,.mt-close-t,.mt-bk-tabs button,.mt-chips button){font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+[data-mtscroll] .mt-card .btn{justify-content:center}
 [data-mtscroll] .mt-handle{display:none}
 [data-mtscroll] .mt-dim[data-state="open"]{animation:mt-fade .34s ease-out}
 [data-mtscroll] .mt-dim-q[data-state="open"]{animation-duration:.26s}
@@ -252,6 +254,12 @@
 [data-mtscroll] .mt-bk-more{position:absolute;left:28px;bottom:40px;translate:0 50%}
 [data-mtscroll] .mt-bk:not(:has(.f-bar>:only-child)) .mt-bk-more{display:none}
 [data-mtscroll] .mt-bk-none .mt-detail{max-width:none}
+[data-mtscroll] .mt-bk-flow form{display:flex;flex-direction:column;flex:1;min-height:0}
+[data-mtscroll] .mt-bk .cal button{min-height:42px;padding:6px 8px;gap:4px}
+[data-mtscroll] .mt-bk .cal.week button{min-height:62px}
+[data-mtscroll] .mt-bk .cal.month b{font-size:15px}
+[data-mtscroll] .mt-bk .cal.week b{font-size:22px}
+[data-mtscroll] .mt-bk .scrub .num>b{font-size:56px;line-height:.9}
 [data-mtscroll] .mt-inq{width:min(640px,calc(100vw - 32px));max-height:calc(100svh - 32px);overflow:auto;overscroll-behavior:contain;padding:34px 36px 30px}
 [data-mtscroll] .mt-close-t{position:absolute;top:30px;right:32px;min-height:44px;padding:0 4px!important;letter-spacing:.14em}
 [data-mtscroll] .mt-card-t{font:900 56px/.95 var(--display);letter-spacing:-.05em;margin:0 0 12px}
@@ -400,7 +408,7 @@
   [data-mtscroll] .mt-ab-foot{position:static;margin-top:72px}
   [data-mtscroll] .mt-ab-foot hr,[data-mtscroll] .mt-ab-foot dl{display:none}
   [data-mtscroll] .mt-facts{display:block;margin:0}
-  [data-mtscroll] .mt-more-me{position:absolute;right:16px;bottom:auto;margin-top:-118px;padding:12px 14px;min-height:44px}
+  [data-mtscroll] .mt-more-me{position:static;display:flex;width:fit-content;margin:24px 16px 0 auto;padding:12px 14px;min-height:44px}
   [data-mtscroll] .mt-about .mt-frame{position:relative}
 
   /* Footer: link groups, the wall as one row under them, the phrase. */
@@ -452,7 +460,7 @@
   [data-mtscroll] .mt-card{left:0;right:0;top:auto;bottom:0;translate:none;width:100%!important;max-height:calc(100dvh - 24px);border-width:1px 0 0;border-radius:14px 14px 0 0;padding-bottom:max(16px,env(safe-area-inset-bottom))}
   [data-mtscroll] .mt-handle{display:block;position:absolute;z-index:3;top:8px;left:50%;translate:-50% 0;width:36px;height:4px;border-radius:2px;background:color-mix(in srgb,var(--ink) 30%,transparent)}
   [data-mtscroll] .mt-bk{height:calc(100dvh - 24px);grid-template-rows:auto minmax(0,1fr)}
-  [data-mtscroll] .mt-bk-ph{height:min(340px,36svh)}
+  [data-mtscroll] .mt-bk-ph{height:min(340px,24svh)}
   [data-mtscroll] .mt-bk-ph img{filter:brightness(.78);object-position:50% 14%!important}
   [data-mtscroll] .mt-bk:has(.cal.month) .mt-bk-ph{display:none}
   [data-mtscroll] .mt-bk-form{padding:58px 16px 8px}

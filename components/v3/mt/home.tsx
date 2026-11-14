@@ -21,7 +21,11 @@ import { MtIntro } from "./intro";
 export function MtHome({ data }: { data: MtData }) {
   const [book, setBook] = React.useState<BookRow["key"] | null>(null);
   const [inq, setInq] = React.useState<{ from: InquiryFrom; opt?: QuoteOpt["key"] } | null>(null);
-  const cards = React.useMemo<Cards>(() => ({ book: (k) => setBook(k), inquire: (from, opt) => setInq({ from, opt }) }), []);
+  // The control that opened a card gets focus back when it closes (spec 3.6, 3.11).
+  const opener = React.useRef<HTMLElement | null>(null);
+  const keep = () => (opener.current = document.activeElement as HTMLElement | null);
+  const cards = React.useMemo<Cards>(() => ({ book: (k) => (keep(), setBook(k)), inquire: (from, opt) => (keep(), setInq({ from, opt })) }), []);
+  const back = () => opener.current?.focus({ preventScroll: true });
   return (
     <CardsCtx.Provider value={cards}>
       <MtIntro extras={data.extras} />
@@ -35,8 +39,8 @@ export function MtHome({ data }: { data: MtData }) {
         <MtAbout does={data.does} />
         <MtFoot />
       </section>
-      <BookCard at={book} onTab={setBook} onClose={() => setBook(null)} />
-      <InquiryCard at={inq} reply={data.reply} onClose={() => setInq(null)} />
+      <BookCard at={book} onTab={setBook} onClose={() => setBook(null)} onBack={back} />
+      <InquiryCard at={inq} reply={data.reply} onClose={() => setInq(null)} onBack={back} />
     </CardsCtx.Provider>
   );
 }

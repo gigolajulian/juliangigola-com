@@ -44,7 +44,7 @@ function useWeekFirst(box: React.RefObject<HTMLDivElement | null>, key: string |
   }, [box, key]);
 }
 
-export function BookCard({ at, onTab, onClose }: { at: BookRow["key"] | null; onTab: (k: BookRow["key"]) => void; onClose: () => void }) {
+export function BookCard({ at, onTab, onClose, onBack }: { at: BookRow["key"] | null; onTab: (k: BookRow["key"]) => void; onClose: () => void; onBack: () => void }) {
   const r = BOOK_ROWS.find((x) => x.key === at) ?? BOOK_ROWS[0];
   const box = React.useRef<HTMLDivElement>(null);
   useWeekFirst(box, at);
@@ -54,7 +54,7 @@ export function BookCard({ at, onTab, onClose }: { at: BookRow["key"] | null; on
       <Dialog.Portal>
         <div className="v3 contents">
           <Dialog.Overlay className="mt-dim mt-dim-b" data-lenis-prevent />
-          <Dialog.Content className="mt-card mt-bk" data-lenis-prevent aria-describedby={undefined}>
+          <Dialog.Content className="mt-card mt-bk" data-lenis-prevent aria-describedby={undefined} onCloseAutoFocus={(e) => { e.preventDefault(); onBack(); }}>
             <span className="mt-handle" aria-hidden />
             <figure className="mt-bk-ph">
               {BOOK_ROWS.map((x) => <RowPhoto key={x.key} r={x} on={x.key === r.key} sizes="(max-width: 1023px) 100vw, 420px" />)}

@@ -100,14 +100,14 @@ function Form({ from, opt, reply, onClose }: { from: InquiryFrom; opt?: QuoteOpt
   );
 }
 
-export function InquiryCard({ at, reply, onClose }: { at: { from: InquiryFrom; opt?: QuoteOpt["key"] } | null; reply: string | null; onClose: () => void }) {
+export function InquiryCard({ at, reply, onClose, onBack }: { at: { from: InquiryFrom; opt?: QuoteOpt["key"] } | null; reply: string | null; onClose: () => void; onBack: () => void }) {
   const opt = QUOTE_OPTS.find((o) => o.key === at?.opt);
   return (
     <Dialog.Root open={!!at} onOpenChange={(o) => !o && onClose()}>
       <Dialog.Portal>
         <div className="v3 contents">
           <Dialog.Overlay className="mt-dim mt-dim-q" data-lenis-prevent />
-          <Dialog.Content className="mt-card mt-inq" data-from={at?.from} data-lenis-prevent>
+          <Dialog.Content className="mt-card mt-inq" data-from={at?.from} data-lenis-prevent onCloseAutoFocus={(e) => { e.preventDefault(); onBack(); }}>
             <span className="mt-handle" aria-hidden />
             <Dialog.Close className="mt-close-t lbl">Close</Dialog.Close>
             {at ? <Form key={`${at.from}-${at.opt}`} from={at.from} opt={opt} reply={reply} onClose={onClose} /> : null}
