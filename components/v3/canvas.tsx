@@ -54,6 +54,11 @@ export function V3Canvas({ list, onClose, onLeave, bar }: { list: WorkItem[]; on
     [list, all],
   );
 
+  // The page under the canvas is inert, so focus moves to the bar's pressed view button.
+  React.useEffect(() => {
+    field.current?.parentElement?.querySelector<HTMLElement>('.cv-top .wviews [aria-pressed="true"]')?.focus();
+  }, []);
+
   const [opened, setOpened] = React.useState<Opened | null>(null);
   const [grown, setGrown] = React.useState(false);
   const [hint, setHint] = React.useState(true);

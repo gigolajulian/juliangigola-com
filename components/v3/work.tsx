@@ -453,7 +453,7 @@ const viewUrl = (canvas: boolean) => {
   const u = new URL(location.href);
   if (canvas) u.searchParams.set("view", "canvas");
   else u.searchParams.delete("view");
-  history.replaceState(null, "", u);
+  if (u.href !== location.href) history.replaceState(null, "", u);
 };
 
 export function V3Work({
@@ -1058,6 +1058,8 @@ export function V3Work({
               : "v3page"
         }
         id="p-work"
+        // The canvas covers the page: Tab goes to its bar, not to the page under it.
+        inert={view === "canvas"}
       >
         <div className="pg-head">
           <h1 className="pg-t">{filter === "All" ? "Portfolio" : filter}</h1>
@@ -1264,7 +1266,8 @@ export function V3Work({
                   onLeave={leaveCanvas}
                   bar={
                     <>
-                      <div className="chips lbl" role="group" aria-label="Sort by discipline">
+                      {/* A mouse wheel runs the row sideways, as it does on the page's chips. */}
+                      <div className="chips lbl" role="group" aria-label="Sort by discipline" onWheel={(e) => (e.currentTarget.scrollLeft += e.deltaY)}>
                         {["All", ...order].map((d) => (
                           <button key={d} type="button" aria-pressed={d === filter} onClick={() => setFilter(d)}>
                             {d}
