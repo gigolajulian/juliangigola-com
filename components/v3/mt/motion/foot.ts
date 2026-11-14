@@ -54,7 +54,7 @@ function setup(el: HTMLElement, ctx: Ctx) {
   let W = 0, pad = 0, x = 0, v = 0, pk = 0, tr = 0, first = true;
   const clones: Node[] = [];
   // dot and spot
-  let hot = false, cx = 0, cy = 0, ca = 0, sx = -1, sy = 0, sa = 0, saOut = "", ground = "";
+  let hot = false, cx = 0, cy = 0, ca = 0, sx = -1, sy = 0, sa = 0, saOut = "", ink = "";
   let MK: HTMLCanvasElement | null = null, mz = 1;
   // phone row
   let rx = 0, rpz = 1, held = ctx.held;
@@ -121,8 +121,9 @@ function setup(el: HTMLElement, ctx: Ctx) {
     return gr;
   };
 
-  /* The spot: the wall through the letters, sharp near the dot, blurred toward
-     the edge. The canvas is only the spot's box inside the phrase band. */
+  /* The spot: the letters lit to full ink near the dot, falling off to their
+     resting grey. (The wall showed through here until Julian took it out,
+     2026-11-14.) The canvas is only the spot's box inside the phrase band. */
   const draw = (r: DOMRect, u: number) => {
     const br = btn.getBoundingClientRect();
     if (!MK && W && document.fonts.status === "loaded") MK = mask(br);
@@ -142,22 +143,9 @@ function setup(el: HTMLElement, ctx: Ctx) {
     fit(Bc, Math.ceil(cw / 6), Math.ceil(ch / 6));
     cut.style.transform = `translate3d(${ox}px,${oy}px,0)`;
 
-    // the wall with the same matrix as the one behind, so both line up
     w.setTransform(dpr, 0, 0, dpr, 0, 0);
-    w.fillStyle = ground;
+    w.fillStyle = ink;
     w.fillRect(0, 0, bw, bh);
-    const ex = (1 - S) * (r.width / 2) + tx * wu - ox, ey = (1 - S) * (r.height / 2) + ty * wu - oy;
-    w.setTransform(dpr * S, 0, 0, dpr * S, dpr * ex, dpr * ey);
-    const x0 = -ex / S, x1 = (bw - ex) / S, y0 = -ey / S, y1 = (bh - ey) / S, fw = 150 * wu, fh = 200 * wu;
-    for (const col of cols) {
-      if (col.x + fw < x0 || col.x > x1) continue;
-      col.imgs.forEach((im, j) => {
-        const y = (mod(j * PITCH - col.y + 220, P) - 220) * wu;
-        if (!im || !im.complete || !im.naturalWidth || y + fh < y0 || y > y1) return;
-        const sc = Math.max(fw / im.naturalWidth, fh / im.naturalHeight), sw = fw / sc, sh = fh / sc;
-        w.drawImage(im, (im.naturalWidth - sw) / 2, (im.naturalHeight - sh) / 2, sw, sh, col.x, y, fw, fh);
-      });
-    }
 
     const gx = (sx - ox) * dpr, gy = (sy - oy) * dpr, ud = u * dpr;
     // blur without ctx.filter (Safari): down to 1/6 and back up
@@ -404,7 +392,7 @@ function setup(el: HTMLElement, ctx: Ctx) {
     // spot
     const show = hot || (!busy && btn.matches(":focus-visible"));
     if (show && sa === 0) {
-      ground = getComputedStyle(cut).color;
+      ink = getComputedStyle(stage).getPropertyValue("--ink").trim() || "#ececec";
       if (hot || sx < 0) {
         sx = hot ? lx : r.width / 2;
         sy = hot ? ly : r.height - 210 * u;
