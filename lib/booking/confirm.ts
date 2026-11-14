@@ -71,7 +71,7 @@ export function confirmMail(c: Confirm) {
       ? `${first(c.name)}, your ${c.session.toLowerCase()} is tomorrow at ${hour}.${c.where?.startsWith("http") ? " The Meet link is below." : ""}`
       : `${first(c.name)}, your ${c.session.toLowerCase().replace(/ photos$/, "")} session is tomorrow at ${hour}. Give yourself time to get there.`
     : c.call
-    ? `Thanks, ${first(c.name)}. Your ${c.session.toLowerCase()} is booked. I'll call you then.`
+    ? `Thanks, ${first(c.name)}. Your ${c.session.toLowerCase()} is booked. ${c.where?.startsWith("http") ? "Join with the Meet link below at that time." : "I'll call you then."}`
     : `Thanks, ${first(c.name)}. Your ${c.session.toLowerCase().replace(/ photos$/, "")} session is booked. I'll call you before the day to go over the concept, rate and schedule.`;
   // The length as the booking card says it: "Sat, Nov 8, 10:00 to 11:00 AM PST, 60 minutes".
   const mins = c.end ? Math.round((+new Date(c.end) - +new Date(c.start)) / 60000) : 0;
