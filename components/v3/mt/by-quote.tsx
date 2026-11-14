@@ -102,8 +102,9 @@ export function MtByQuote({ stills, reply }: { stills: Record<string, string>; r
         </div>
       </div>
       <div className="mt-bar">
-        <Link className="lbl mt-bar-call" href={o.call}><span>Free<br />consultation&nbsp;<span aria-hidden>&rarr;</span></span></Link>
-        <button type="button" className="btn fill" onClick={() => cards.inquire("quote", o.key)}>Inquire about {o.name.toLowerCase()}</button>
+        <Link className="lbl mt-bar-call" href={o.call}><span>Free call&nbsp;<span aria-hidden>&rarr;</span></span></Link>
+        {/* the picked row above names the session; the label keeps it for screen readers */}
+        <button type="button" className="btn fill" aria-label={`Inquire about ${o.name.toLowerCase()}`} onClick={() => cards.inquire("quote", o.key)}>Inquire</button>
       </div>
     </section>
   );
