@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { DEFAULT_HOURS, EVENTS, cleanHours, duration, refundable, windowOn } from "@/lib/booking/booking-rules";
+import { SESSION } from "@/lib/booking/deposit";
+import { PAID } from "@/lib/booking/paid";
+import { LENGTH, SESSIONS } from "@/lib/v3";
 
 /* The site's own booking rules (`lib/booking/booking-rules.ts`): hours, the
    refund window and how a length is written. */
@@ -65,6 +68,16 @@ describe("EVENTS", () => {
       expect(r.title).toBeTruthy();
       expect(r.length).toBeGreaterThan(0);
       expect(r.notice).toBeGreaterThan(0);
+    }
+  });
+  it("has a rule and a name for every session that takes the deposit, and a V3 session that books it", () => {
+    for (const slug of PAID) {
+      expect(EVENTS[slug], slug).toBeTruthy();
+      expect(EVENTS[slug].call, slug).toBeFalsy();
+      expect(SESSION[slug], slug).toBe(EVENTS[slug].title);
+      const s = Object.values(SESSIONS).find((x) => x.cal === `juliangigola/${slug}`);
+      expect(s?.paid, slug).toBe(true);
+      expect(LENGTH[s!.slug], slug).toBeGreaterThan(0);
     }
   });
 });

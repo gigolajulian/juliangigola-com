@@ -71,7 +71,7 @@ export const CALL_CARD = { d: w("channel-orange", "01"), l: w("second-skin", "13
 export const ABOUT_PHOTO = "/about/julian-steps.jpg";
 
 /* ── sessions (master SESS; deposit list from lib/booking/paid.ts) ── */
-export type SessionSlug = "portraits" | "headshots" | "studio-digitals" | "graduation" | "weddings" | "consultation" | "music-photography" | "brand-photography" | "editorial" | "events";
+export type SessionSlug = "portraits" | "headshots" | "studio-digitals" | "model-test" | "graduation" | "weddings" | "consultation" | "music-photography" | "brand-photography" | "editorial" | "events";
 export type Session = {
   slug: SessionSlug;
   name: string;
@@ -137,6 +137,18 @@ export const SESSIONS: Record<SessionSlug, Session> = {
     cal: "juliangigola/digitals",
     paid: true,
     photo: { d: w("abril", "03"), l: w("abril", "03"), at: { d: "50% 10%", l: "50% 10%" } },
+  },
+  /* Julian, 2026-11-14: the name, an hour, a week and the $100 deposit; the rate is quoted on the call. */
+  "model-test": {
+    slug: "model-test",
+    name: "Model test",
+    blurb: "One look, built with you.",
+    from: null,
+    includes: ["One hour", "Styled"],
+    turnaround: "1 week",
+    cal: "juliangigola/model-test",
+    paid: true,
+    photo: { d: w("sonder", "01"), l: w("sonder", "01") },
   },
   weddings: {
     slug: "weddings",
@@ -204,10 +216,10 @@ export const SESSIONS: Record<SessionSlug, Session> = {
 };
 export const isSession = (s?: string): s is SessionSlug => !!s && Object.hasOwn(SESSIONS, s);
 /** The session tabs' order (DESIGN.md, Stepper). */
-export const TAB_ORDER: SessionSlug[] = ["portraits", "headshots", "studio-digitals", "graduation", "weddings", "consultation"];
+export const TAB_ORDER: SessionSlug[] = ["portraits", "headshots", "studio-digitals", "model-test", "graduation", "weddings", "consultation"];
 /** The homepage index and the doors' order. */
 export const INDEX_ORDER: SessionSlug[] = ["portraits", "graduation", "headshots", "studio-digitals", "weddings"];
 export const rate = (s: Session) =>
   !s.paid && s.cal ? "15 min" : s.from != null ? `From $${s.from}` : s.paid ? "$100 deposit" : "On request";
 /** Session lengths in minutes (master MIN); Cal.com's own length wins where it answers. */
-export const LENGTH: Record<SessionSlug, number> = { portraits: 60, graduation: 90, headshots: 45, "studio-digitals": 60, weddings: 480, consultation: 15, "music-photography": 15, "brand-photography": 15, editorial: 15, events: 0 };
+export const LENGTH: Record<SessionSlug, number> = { portraits: 60, graduation: 90, headshots: 45, "studio-digitals": 60, "model-test": 60, weddings: 480, consultation: 15, "music-photography": 15, "brand-photography": 15, editorial: 15, events: 0 };

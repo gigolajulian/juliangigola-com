@@ -36,6 +36,7 @@ export const WHERE: Record<string, [label: string, ask?: string][]> = {
   portraits: [["Studio"], ["Outdoor", "Where?"], ["Your location", "Where?"]],
   headshots: [["Studio"], ["On location", "Address"]],
   digitals: [["Studio"]],
+  "model-test": [["Studio"]],
 };
 
 /** The zone's short name ("PDT", or PST by the date); no city (Julian,

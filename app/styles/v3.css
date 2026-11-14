@@ -477,7 +477,7 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .f-body:has(>.f-in>.cal.month){grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);grid-template-areas:"tabs tabs" "top fig" "cal times" "cal .";grid-template-rows:auto auto auto 1fr;column-gap:48px}
 .v3 .f-body:has(>.f-in>.cal.month)>.f-in>.times{grid-template-columns:repeat(3,minmax(0,1fr))}
 .v3 .f-body:has(>.f-in>.cal)>:not(.f-in){grid-column:1/-1}
-.v3 .f-body:has(>.f-in>.cal)>.stabs{grid-area:tabs;grid-template-columns:repeat(5,minmax(0,1fr))}
+.v3 .f-body:has(>.f-in>.cal)>.stabs{grid-area:tabs;grid-template-columns:repeat(6,minmax(0,1fr))}
 .v3 .f-in>.cal-top{grid-area:top}
 .v3 .f-in>.cal{grid-area:cal}
 .v3 .f-in>:is(.times,.strip){grid-area:times}

@@ -44,7 +44,7 @@ export const isDeposit = (pi: { amount?: number; currency?: string; metadata?: {
   pi.metadata?.kind === KIND && pi.amount === AMOUNT && pi.currency === CURRENCY;
 /** How old a webhook's timestamp may be before it is treated as a replay. */
 const TOLERANCE_S = 300;
-export const SESSION: { [slug: string]: string } = { portraits: "Portraits", headshots: "Headshots", graduation: "Graduation photos", digitals: "Studio digitals" };
+export const SESSION: { [slug: string]: string } = { portraits: "Portraits", headshots: "Headshots", graduation: "Graduation photos", digitals: "Studio digitals", "model-test": "Model test" };
 
 /** The intent in Stripe's dashboard, test or live as the key is. */
 export const dashboardLink = (intent: string, key: string) =>
