@@ -189,8 +189,8 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
         rise(g, X_FROM[k % X_FROM.length], 800 + k * 70);
         k++;
       }
-      // the extras stay through the push, so the canvas never shrinks to the wall alone; they leave as the hero arrives
-      play(layer, [{ opacity: 1 }, { opacity: 0 }], { duration: 500, delay: 3950 });
+      // the extras stay through the push, so the canvas never shrinks to the wall alone; they leave as the push starts, so only the hero frames travel in
+      play(layer, [{ opacity: 1 }, { opacity: 0 }], { duration: 700, delay: 3000, easing: OUT });
 
       // the push in, .46 to 1
       wall.style.transformOrigin = `${px}px ${py}px`;
