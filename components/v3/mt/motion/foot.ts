@@ -45,7 +45,7 @@ function setup(el: HTMLElement, ctx: Ctx) {
 
   // wall
   let cols: Col[] = [], wu = ctx.u, dirty = true;
-  let rv = 0, kick = 0, tx = 0, ty = 0, S = 1.14, pz = 1, mx = 0, my = 0;
+  let rv = 0, kick = 0, tx = 0, ty = 0, pz = 1, mx = 0, my = 0;
   // pointer, client px
   let px = -1, py = -1, okT = false;
   // lift
@@ -60,7 +60,8 @@ function setup(el: HTMLElement, ctx: Ctx) {
   let rx = 0, rpz = 1, held = ctx.held;
 
   const collect = () => {
-    cols = [...wall.children].map((c, i) => {
+    // shortcut: the wall is one still now, so there are no columns; the column, lift and open code below is dead, remove it once Julian has OKd the still
+    cols = [...wall.querySelectorAll<HTMLElement>(".mt-fcol")].map((c, i) => {
       const figs = [...c.children] as HTMLElement[];
       return { el: c as HTMLElement, figs, imgs: figs.map((f) => f.querySelector("img")), x: (c as HTMLElement).offsetLeft, y: cols[i]?.y ?? (i * 197) % P, s: (i % 2 ? 1 : -1) * (7 + ((i * 5) % 9)), wr: [] };
     });
@@ -328,7 +329,6 @@ function setup(el: HTMLElement, ctx: Ctx) {
     }
 
     // wall: reveal, lean, drift
-    if (wall.childElementCount !== cols.length) collect();
     rv += (smooth(span(clamp((c.vh - r.top) / r.height), 0.25, 1)) - rv) * Math.min(1, sec * 5);
     kick += (Math.min(9, Math.abs(c.dy) * 0.25) - kick) * Math.min(1, sec * 6);
     if (c.fine && px >= 0) {
@@ -339,10 +339,8 @@ function setup(el: HTMLElement, ctx: Ctx) {
       tx += (mx * -28 - tx) * Math.min(1, sec * 3);
       ty += (my * -20 - ty) * Math.min(1, sec * 3);
     }
-    S = 1.14 - 0.08 * rv;
     pz += ((LF || opened ? 0 : 1) - pz) * Math.min(1, sec * 7);
     wall.style.opacity = rv.toFixed(3);
-    wall.style.transform = `translate3d(${(tx * wu).toFixed(1)}px,${(ty * wu).toFixed(1)}px,0) scale(${S.toFixed(4)})`;
     const over = `translate3d(0,${(P * wu).toFixed(1)}px,0)`;
     for (const col of cols) {
       col.y = mod(col.y + col.s * sec * (1 + kick) * pz, P);

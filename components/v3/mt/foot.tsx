@@ -8,47 +8,43 @@ import { CardsCtx } from "./ctx";
 import { scrollTop } from "@/components/v3/smooth-scroll";
 
 /* Spec 3.10: HomeFoot. Four link columns, the "Contact me" phrase (a
-   button that opens the inquiry card), the wall of work behind under its
-   scrim. Static: no reveal, drift, lean, spot or lift (MOTION-HOOKS.md). */
+   button that opens the inquiry card), one still of work behind under its
+   scrim. Motion lives in motion/foot.ts. */
 const PHRASE = "Contact me";
-type Wall = { src: string; slug: string; name: string }[];
+const STILL = "/work/diesel/03.jpg";
+const EVERY = 2000;
 
-/** One frame per project from /canvas.json, fetched when the footer nears. */
-function useWall(ref: React.RefObject<HTMLElement | null>) {
-  const [wall, setWall] = React.useState<Wall>([]);
+/** The still behind the footer and the one after it. The list is one landscape
+    frame per project from /canvas.json (a tall frame crops badly in a wide
+    footer), fetched when the still first shows; it changes every 2s while it
+    is on screen. Phones hide the still, so nothing is fetched there. */
+function useStills(ref: React.RefObject<HTMLElement | null>) {
+  const [list, setList] = React.useState([STILL]);
+  const [i, setI] = React.useState(0);
+  const [on, setOn] = React.useState(false);
   React.useEffect(() => {
-    const io = new IntersectionObserver(
-      ([e]) => {
-        if (!e.isIntersecting) return;
-        io.disconnect();
-        fetch("/canvas.json")
-          .then((r) => r.json())
-          .then((j: Record<string, [string, number, string, string][]>) =>
-            setWall(Object.entries(j).flatMap(([slug, f]) => (f[0] ? [{ src: f[0][0], slug, name: f[0][2] }] : []))),
-          )
-          .catch(() => {});
-      },
-      { rootMargin: "1200px 0px" },
-    );
+    let asked = false;
+    const io = new IntersectionObserver(([e]) => {
+      setOn(e.isIntersecting);
+      if (!e.isIntersecting || asked) return;
+      asked = true;
+      fetch("/canvas.json")
+        .then((r) => r.json())
+        .then((j: Record<string, [string, number][]>) => {
+          const wide = Object.values(j).flatMap((fr) => fr.find((x) => x[1] < 0.9)?.[0] ?? []);
+          setList([STILL, ...wide.filter((src) => !src.startsWith("/work/diesel/"))]);
+        })
+        .catch(() => {});
+    });
     io.observe(ref.current!);
     return () => io.disconnect();
   }, [ref]);
-  return wall;
-}
-
-/** How many wall columns cover the screen at 162 design units each. */
-function useCols() {
-  const [n, setN] = React.useState(9);
   React.useEffect(() => {
-    const fit = () => {
-      const u = Math.min(1.6, Math.max(0.7, Math.min(innerWidth / 1440, innerHeight / 900)));
-      setN(Math.max(9, Math.ceil(innerWidth / (162 * u)) + 1));
-    };
-    fit();
-    addEventListener("resize", fit);
-    return () => removeEventListener("resize", fit);
-  }, []);
-  return n;
+    if (!on || list.length < 2 || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const t = setInterval(() => setI((n) => (n + 1) % list.length), EVERY);
+    return () => clearInterval(t);
+  }, [on, list.length]);
+  return list.length < 2 ? [list[0]] : [list[i], list[(i + 1) % list.length]];
 }
 
 function Phrase({ copy }: { copy?: boolean }) {
@@ -61,29 +57,16 @@ function Phrase({ copy }: { copy?: boolean }) {
 
 export function MtFoot() {
   const cards = React.useContext(CardsCtx);
-  const root = React.useRef<HTMLElement>(null);
-  const wall = useWall(root);
-  const cols = useCols();
+  const wall = React.useRef<HTMLDivElement>(null);
+  const stills = useStills(wall);
   const year = new Date().getFullYear();
-  const per = 6;
   return (
-    <footer className="mt-foot" data-mt="foot" data-hold="1" ref={root}>
+    <footer className="mt-foot" data-mt="foot" data-hold="1">
       <div className="mt-stage">
-        <div className="mt-fwall" aria-hidden>
-          {wall.length
-            ? Array.from({ length: cols }, (_, c) => (
-                <div key={c} className="mt-fcol" data-col={c} style={{ "--c": c } as React.CSSProperties}>
-                  {Array.from({ length: per }, (_, r) => {
-                    const f = wall[(c * per + r) % wall.length];
-                    return (
-                      <figure key={r} data-slug={f.slug} data-name={f.name}>
-                        <Image src={f.src} alt="" fill sizes="160px" />
-                      </figure>
-                    );
-                  })}
-                </div>
-              ))
-            : null}
+        {/* one still behind the links, dimmed by the scrim (Julian picked this over the wall of frames, 2026-11-14).
+            The next still sits under it unseen, so it is loaded by the time it shows. */}
+        <div className="mt-fwall" aria-hidden ref={wall}>
+          {stills.map((src, n) => <Image key={src} src={src} alt="" fill sizes="100vw" style={n ? { opacity: 0 } : undefined} />)}
         </div>
         {/* shortcut: the phone photo row is gone (Julian, 2026-11-14) but motion/foot.ts still asks for this node; drop both when the desktop wall is replaced */}
         <div className="mt-frow" aria-hidden />
