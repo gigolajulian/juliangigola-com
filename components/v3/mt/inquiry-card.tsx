@@ -24,7 +24,11 @@ function Form({ from, opt, reply, onClose }: { from: InquiryFrom; opt?: QuoteOpt
   const [err, setErr] = React.useState<Record<string, string>>({});
   const quote = from === "quote" && opt;
   const call = quote && chip === CALL_CHIP;
-  const set = (k: keyof typeof v) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setV({ ...v, [k]: e.target.value });
+  // typing in a field takes its error line away; the next Send checks it again
+  const set = (k: keyof typeof v) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setV({ ...v, [k]: e.target.value });
+    if (err[k]) setErr({ ...err, [k]: "" });
+  };
   const fld = (k: keyof typeof v, label: string, el: React.ReactElement<{ placeholder?: string }>, req = true) => (
     <div className={err[k] ? "fld bad" : "fld"}>
       <label className="lbl mute" htmlFor={`mq-${k}`}>
