@@ -598,3 +598,5 @@ html[data-mt-intro="1"]{overflow:hidden}
 [data-mtscroll] .mt-quote>.mt-bar .btn{flex:none;min-height:44px;padding-inline:28px}
 /* Footer link columns sit on the photo wall: a halo in the ground colour keeps them readable over a bright frame */
 @media (min-width:1024px) and (min-height:600px){[data-mtscroll] .mt-fcols :is(p,a,button){text-shadow:0 0 2px var(--bg),0 0 12px var(--bg),0 1px 22px var(--bg)}}
+/* Phone and tablet footer under a finger: every link is a 44px row, Top is 44px wide */
+@media not ((min-width:1024px) and (min-height:600px)){@media (pointer:coarse){[data-mtscroll] .mt-fcols :is(a,button){display:inline-flex;align-items:center;min-height:44px;padding:0}[data-mtscroll] .mt-fline .po{display:inline-flex;justify-content:flex-end;min-width:44px}}}
