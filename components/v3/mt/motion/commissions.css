@@ -4,3 +4,5 @@
 html[data-mt-motion] .mt-logos-track [data-copy]{display:flex}
 /* no scrim behind the Commissions head (Julian, 2026-11-14): the heading sits straight on the photos */
 [data-mtscroll] .mt .mt-comm-head { background: none; }
+/* nor under the photo captions: a tight shadow keeps the labels readable on bright frames */
+[data-mtscroll] .mt .mt-comm .sheet figcaption { background: none; text-shadow: 0 0 2px rgb(0 0 0 / .9), 0 1px 10px rgb(0 0 0 / .7); }

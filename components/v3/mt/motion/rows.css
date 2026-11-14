@@ -34,5 +34,19 @@ html[data-mt-motion] .mt-film{container-type:size}
 html[data-mt-motion] .mt-film iframe{position:absolute;top:50%;left:50%;width:max(100cqw,100cqh * 16 / 9);height:max(100cqh,100cqw * 9 / 16);translate:-50% -50%;scale:1.2;border:0;pointer-events:none;opacity:0;transition:opacity .8s ease}
 html[data-mt-motion] .mt-film iframe[data-ready]{opacity:1}
 
+/* Motion, desktop structure: a vertical stack in natural scroll (the layout is the
+   "Motion: vertical films" block of mtscroll.css). Each film keeps its full frame
+   as its box, 330 apart, and is clipped to an 84 strip; rows.ts opens it (--o) at
+   the middle of the screen. No transitions: scroll is the only clock. */
+html[data-mt-held] .mt-motion.mt-held .mt-row{overflow:visible;touch-action:auto;cursor:auto;user-select:auto;-webkit-user-select:auto}
+html[data-mt-held] .mt-motion.mt-held .mt-track{gap:0;will-change:auto}
+html[data-mt-held] .mt-motion .mt-film{--c:calc((1 - var(--o,0)) * 183 * var(--u));margin-block:calc(-60 * var(--u));clip-path:inset(var(--c) 0 round calc(4 * var(--u)));opacity:calc(.5 + var(--o,0) * .5)}
+html[data-mt-held] .mt-motion .mt-film:first-child{margin-top:0}
+html[data-mt-held] .mt-motion .mt-film:last-child{margin-bottom:0}
+html[data-mt-held] .mt-motion .mt-film img{transform:scale(calc(1.1 - var(--o,0) * .1))}
+/* The clip cuts the site's outline ring, so the ring is drawn inside the open part. */
+html[data-mt-held] .mt-motion .mt-film:focus-visible{outline:0;opacity:1}
+html[data-mt-held] .mt-motion .mt-film:focus-visible::after{content:"";position:absolute;inset:calc(var(--c) + 3px) 3px;z-index:1;border:1px solid var(--accent);border-radius:calc(3 * var(--u));pointer-events:none}
+
 /* Snap rows: the record now comes fully out of the bottom (118px), more than the static row's 72px of room. */
 html[data-mt-motion]:not([data-mt-held]) .mt-covers .mt-row{padding-bottom:126px}

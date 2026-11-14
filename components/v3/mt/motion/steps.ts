@@ -5,11 +5,13 @@ import { clamp, type Driver } from "./engine";
    length is added. The section listens for `mt-step` and makes that row the
    current one; a tap wins for a few seconds. */
 const HOLD_AFTER_TAP = 4000;
+const DWELL = 450;
 
 const stepper = (name: string, count: number): Driver => {
   let last = -1;
   let tap = -HOLD_AFTER_TAP;
   let bar = false;
+  let changed = -DWELL;
   return {
     name,
     always: true,
@@ -29,11 +31,13 @@ const stepper = (name: string, count: number): Driver => {
       const top = el.getBoundingClientRect().top;
       if (top < ctx.vh * 0.45 !== bar) el.toggleAttribute("data-bar", (bar = !bar));
       if (ctx.t - tap < HOLD_AFTER_TAP || el.closest<HTMLElement>(".mt")?.dataset.cards === "open") return;
-      // the walk runs while the rows themselves are on screen: from the section's top a quarter down the screen to a third above it
+      // the walk runs while the rows themselves are on screen: from the section's top a quarter down the screen to just over half a screen above it
       const from = ctx.vh * 0.25;
-      const t = clamp((from - top) / (ctx.vh * 0.61));
+      const t = clamp((from - top) / (ctx.vh * 0.8));
       const i = Math.min(count - 1, Math.floor(t * count));
-      if (i === last) return;
+      // one row at a time, and never faster than the photo can change: a hard flick does not strobe through them
+      if (i === last || ctx.t - changed < DWELL) return;
+      changed = ctx.t;
       last = i;
       el.dispatchEvent(new CustomEvent("mt-step", { detail: i }));
     },

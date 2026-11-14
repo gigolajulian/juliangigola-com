@@ -49,11 +49,8 @@ html[data-mt-held] .mt-sheet figure:nth-child(3n+2) { --k: -5%; }
   html[data-mt-motion]:not([data-mt-held]) .mt-about .mt-frame { background: var(--bg); }
 }
 
-/* Book online on phones: each session's photo wipes up over the last one as scroll walks the rows (steps.ts) */
-@media (max-width: 599px) {
-  html[data-mt-motion]:not([data-mt-held]) .mt .mt-book .mt-photo[data-rv] > * { opacity: 1; clip-path: inset(100% 0 0 0); z-index: 0; transition: clip-path 0s .6s, scale 1.6s cubic-bezier(.16, 1, .3, 1); }
-  html[data-mt-motion]:not([data-mt-held]) .mt .mt-book .mt-photo[data-rv] > .on { clip-path: inset(0); z-index: 1; transition: clip-path .6s cubic-bezier(.7, 0, .15, 1), scale 1.6s cubic-bezier(.16, 1, .3, 1); }
-}
+/* Book online on phones: the session photo crossfades as scroll walks the rows (steps.ts) */
+html[data-mt-motion]:not([data-mt-held]) .mt .mt-book .mt-photo[data-rv] > * { transition: opacity .7s cubic-bezier(0.23, 1, 0.32, 1), scale 1.6s cubic-bezier(.16, 1, .3, 1); }
 
 /* the held bottom bar shows once its section fills the screen (steps.ts sets data-bar) */
 html[data-mt-motion]:not([data-mt-held]) .mt :is(.mt-book, .mt-quote) > .mt-bar { transition: opacity .25s ease-out, visibility .25s; }

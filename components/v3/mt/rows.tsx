@@ -44,34 +44,66 @@ export function MtCovers() {
   );
 }
 
-/* Spec 3.8: the film row, posters only; the embed loads on the film's own page. */
+const D = "(min-width:1024px) and (min-height:600px)";
+
+/* Spec 3.8. Phones and tablets: the same native snap row as HeldRow. Desktop
+   structure: the films stack one under another in natural scroll (motion/rows.ts
+   opens the one at the middle of the screen). The current film is read here, so
+   the head stays in step with the engine off too. */
 export function MtMotion({ films }: { films: MtFilm[] }) {
+  const row = React.useRef<HTMLDivElement>(null);
+  const [cur, setCur] = React.useState(0);
+  React.useEffect(() => {
+    const el = row.current!;
+    const items = el.querySelectorAll<HTMLElement>(".mt-item");
+    const mq = matchMedia(D);
+    let raf = 0;
+    const read = () => {
+      raf = 0;
+      if (items.length < 2) return;
+      const a = items[0].getBoundingClientRect(), b = items[1].getBoundingClientRect();
+      // Desktop: the film nearest the middle of the screen. Elsewhere: the row's own snap step.
+      const at = mq.matches ? (innerHeight / 2 - a.top - a.height / 2) / (b.top - a.top) : el.scrollLeft / (b.left - a.left);
+      setCur(Math.max(0, Math.min(items.length - 1, Math.round(at))));
+    };
+    const on = () => (raf ||= requestAnimationFrame(read));
+    el.addEventListener("scroll", on, { passive: true });
+    addEventListener("scroll", on, { passive: true });
+    addEventListener("resize", on);
+    on();
+    return () => {
+      el.removeEventListener("scroll", on);
+      removeEventListener("scroll", on);
+      removeEventListener("resize", on);
+      cancelAnimationFrame(raf);
+    };
+  }, []);
+  React.useEffect(() => {
+    row.current!.querySelectorAll(".mt-item").forEach((it, i) => it.toggleAttribute("data-on", i === cur));
+  }, [cur]);
   return (
-    <HeldRow
-      name="motion"
-      hold={2.5}
-      label="Films"
-      count={films.length}
-      head={() => (
+    <section className="mt-held mt-motion" data-mt="motion" data-cur={cur} style={{ "--n": films.length } as React.CSSProperties}>
+      <div className="mt-stage">
         <div className="mt-mohead">
           <h2>Motion</h2>
           <p className="lbl mute">Director and DP | {films.length} films</p>
         </div>
-      )}
-      foot={(cur) => (
+        <div className="mt-row" ref={row} tabIndex={0} aria-label="Films">
+          <div className="mt-track">
+            {films.map((f, i) => (
+              <Link key={f.id} href={f.href} className="mt-item mt-film" data-i={i} data-film={f.id} data-preview={f.preview} aria-label={`${f.title}, ${f.kind}`}>
+                {f.poster ? <Image src={f.poster} alt="" fill sizes="(max-width: 599px) 92vw, 56vw" /> : null}
+              </Link>
+            ))}
+          </div>
+        </div>
         <div className="mt-mofoot">
           <p className="lbl">{pad(cur + 1)}/{pad(films.length)}</p>
           <h3 className="mt-ttl"><span className="ln"><span>{films[cur].title}</span></span></h3>
           <p className="lbl mute">{films[cur].kind} <i>|</i> {films[cur].client}</p>
           <Link className="btn mt-sm" href={films[cur].href}>View more</Link>
         </div>
-      )}
-    >
-      {films.map((f, i) => (
-        <Link key={f.id} href={f.href} className="mt-item mt-film" data-i={i} data-film={f.id} data-preview={f.preview} aria-label={`${f.title}, ${f.kind}`}>
-          {f.poster ? <Image src={f.poster} alt="" fill sizes="(max-width: 599px) 92vw, 50vw" /> : null}
-        </Link>
-      ))}
-    </HeldRow>
+      </div>
+    </section>
   );
 }

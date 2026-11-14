@@ -411,8 +411,8 @@
   [data-mtscroll] .mt-does b{font-size:18px}
   [data-mtscroll] .mt-ab-foot{position:static;margin-top:72px}
   [data-mtscroll] .mt-ab-foot hr,[data-mtscroll] .mt-ab-foot dl{display:none}
-  [data-mtscroll] .mt-facts{display:block;margin:0}
-  [data-mtscroll] .mt-more-me{position:static;display:flex;width:fit-content;margin:24px 16px 0 auto;padding:12px 14px;min-height:44px}
+  [data-mtscroll] .mt-facts{display:block;margin:0;white-space:nowrap;font-size:10px!important;letter-spacing:.08em!important}
+  [data-mtscroll] .mt-more-me{position:static;inset:auto;display:flex;width:fit-content;margin:24px 16px 0 auto;padding:12px 14px;min-height:44px}
   [data-mtscroll] .mt-about .mt-frame{position:relative}
 
   /* Footer: link groups, the wall as one row under them, the phrase. */
@@ -520,4 +520,23 @@ html[data-mt-intro="1"]{overflow:hidden}
   [data-mtscroll] .mt-book .mt-photo img{object-fit:cover;object-position:50% 18%}
   [data-mtscroll] .mt-bar-call{white-space:nowrap;line-height:1.5!important}
   [data-mtscroll] .mt-bar .btn{white-space:nowrap;justify-content:center;text-align:center;font-size:12px;padding-inline:10px}
+}
+
+/* Motion: vertical films */
+/* Desktop structure: the films stack one under another in natural scroll, the
+   head and the current film's lines stay beside them. This is also the whole
+   layout with the engine off (reduced motion); motion/rows.css closes the films
+   that are not at the middle of the screen. --fh: frame height, --ft: where the
+   film lines hold, their foot level with the foot of a frame at mid screen. */
+@media (min-width:1024px) and (min-height:600px){
+  [data-mtscroll] .mt-motion .mt-stage{--fh:calc(450 * var(--u));--ft:calc(50svh + 60 * var(--u));display:grid;grid-template-columns:minmax(0,1fr) calc(800 * var(--u));column-gap:calc(36 * var(--u));padding-inline:calc(var(--fx) + 36 * var(--u))}
+  [data-mtscroll] .mt-motion :is(.mt-mohead,.mt-mofoot){grid-area:1/1;align-self:start;position:sticky;top:calc(104 * var(--u));width:auto;margin:0;padding:0}
+  /* Keeps the heading's margin box as deep as the film lines reach, so both let go together at the last film. */
+  [data-mtscroll] .mt-motion .mt-mohead{margin-bottom:calc(var(--ft) - 59 * var(--u))}
+  [data-mtscroll] .mt-motion .mt-mofoot{top:var(--ft);margin-top:calc(var(--ft) - 104 * var(--u))}
+  [data-mtscroll] .mt-motion .mt-mofoot h3{font-size:calc(52 * var(--u))}
+  [data-mtscroll] .mt-motion .mt-mofoot .btn{position:static;margin-top:calc(22 * var(--u))}
+  [data-mtscroll] .mt-motion .mt-row{grid-area:1/2;margin-top:max(0px,calc(50svh - var(--fh) / 2 - 104 * var(--u)));padding:0;overflow:visible;scroll-snap-type:none}
+  [data-mtscroll] .mt-motion .mt-track{flex-direction:column;width:auto;gap:calc(24 * var(--u))}
+  [data-mtscroll] .mt-motion .mt-film{width:100%;height:var(--fh)}
 }
