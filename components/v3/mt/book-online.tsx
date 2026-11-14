@@ -122,7 +122,7 @@ export function MtBookOnline({ open, onOpen, onClose }: { open: BookRow["key"] |
                       ref={(el) => void (rows.current[i] = el)}
                       aria-pressed={i === on}
                       onPointerEnter={() => fine() && setOn(i)}
-                      onFocus={() => setOn(i)}
+                      onFocus={(e) => e.currentTarget.matches(":focus-visible") && setOn(i)}
                       onClick={() => (fine() || i === on ? pick(i) : setOn(i))}
                     >
                       <b>{x.name}</b>
