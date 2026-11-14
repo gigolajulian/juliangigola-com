@@ -13,6 +13,7 @@ import { MtFoot } from "./foot";
 import { BookCard } from "./book-card";
 import { InquiryCard } from "./inquiry-card";
 import { MtIntro } from "./intro";
+import { MtMotionLayer } from "./motion";
 
 /* v4 homepage (`?mtscroll=1`, SPEC-home-scroll.md), the static build: every
    screen at its resting state. Motion hooks: MOTION-HOOKS.md. */
@@ -39,6 +40,7 @@ export function MtHome({ data }: { data: MtData }) {
         <MtAbout does={data.does} />
         <MtFoot />
       </section>
+      <MtMotionLayer />
       <BookCard at={book} onTab={setBook} onClose={() => setBook(null)} onBack={back} />
       <InquiryCard at={inq} reply={data.reply} onClose={() => setInq(null)} onBack={back} />
     </CardsCtx.Provider>
