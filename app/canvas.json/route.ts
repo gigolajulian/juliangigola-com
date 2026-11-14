@@ -1,6 +1,6 @@
 import { PROJECTS } from "@/lib/work";
 
-/* Every frame of every project for the `?canvas=1` prototype
+/* Every frame of every project for the canvas view
    (components/v3/canvas.tsx). A file of its own, fetched when the canvas
    opens, so /portfolio does not carry frames it may never show. */
 export const dynamic = "force-static";
