@@ -1,4 +1,5 @@
 /* v4 home motion: hero. Applies only under html[data-mt-motion]. */
 /* held: "See the work" would scroll across the sticky stage, so it sits at the end of the hold and rises into the ground under the last row */
 html[data-mt-held] .mt-hero { position: relative; }
-html[data-mt-held] .mt-hero .mt-more { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; }
+html[data-mt-held] .mt-hero .mt-more { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; justify-content: flex-end; padding: 0 calc(36 * var(--u)) calc(32 * var(--u)); }
+html[data-mt-scrolling] .mt-hero .mt-more .btn { pointer-events: none; }

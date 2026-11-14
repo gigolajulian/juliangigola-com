@@ -61,11 +61,15 @@ export function startEngine(root: HTMLElement, drivers: Driver[]) {
   html.setAttribute("data-mt-motion", "");
   const offs = drivers.flatMap((d) => secs.filter((s) => s.dataset.mt === d.name).map((s) => d.setup?.(s, ctx)));
   let raf = 0;
+  let moved = -1e9;
   const tick = (now: number) => {
     raf = requestAnimationFrame(tick);
     ctx.dt = Math.min(50, now - ctx.t);
     ctx.t = now;
     ctx.dy = scrollY - ctx.y;
+    // while the page moves, things passing under a resting pointer must not light up as hovered
+    if (ctx.dy) moved = now;
+    html.toggleAttribute("data-mt-scrolling", now - moved < 180);
     ctx.y = scrollY;
     for (const s of secs) {
       const r = s.getBoundingClientRect();
@@ -94,6 +98,7 @@ export function startEngine(root: HTMLElement, drivers: Driver[]) {
     offs.forEach((off) => off?.());
     html.removeAttribute("data-mt-held");
     html.removeAttribute("data-mt-motion");
+    html.removeAttribute("data-mt-scrolling");
     for (const s of secs) (s.style.removeProperty("--p"), s.style.removeProperty("--in"));
   };
 }
