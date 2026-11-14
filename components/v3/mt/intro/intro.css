@@ -4,18 +4,20 @@
 html[data-mt-intro="1"], html[data-mt-intro="2"] { overflow: hidden; }
 html[data-mt-intro="1"] .mt-hero .mt-wall { opacity: 0; }
 html[data-mt-intro] .mt-hero .mt-wall { z-index: 1; }
-@property --mt-veil { syntax: "<number>"; inherits: true; initial-value: 0; }
-html[data-mt-intro] .mt-hero :is(.mt-col, .mt-col figure), html[data-mt-intro] .mt-ix > div { will-change: transform; }
+html[data-mt-intro] .mt-hero .mt-col, html[data-mt-intro] .mt-ix > div { will-change: transform; }
 html[data-mt-intro="2"] .mt-hero .mt-col, html[data-mt-intro="2"] .mt-ix > div { visibility: hidden; }
 /* phones: the columns are display: contents, so each figure moves on its own */
 @media (max-width: 599px) { html[data-mt-intro="2"] .mt-hero .mt-col figure { visibility: hidden; } }
-html[data-mt-intro] .mt-hero .mt-col .ph::after, html[data-mt-intro] .mt-ix i::after { content: ""; position: absolute; inset: 0; background: var(--bg); opacity: var(--mt-veil); pointer-events: none; }
+/* the veil: ground colour over a whole column (over each frame on phones), lifted by one opacity animation */
+@media (min-width: 600px) { html[data-mt-intro] .mt-hero .mt-col::after { content: ""; position: absolute; inset: 0; z-index: 1; background: var(--bg); opacity: 0; pointer-events: none; } }
+@media (max-width: 599px) { html[data-mt-intro] .mt-hero .mt-col .ph::after { content: ""; position: absolute; inset: 0; background: var(--bg); opacity: 0; pointer-events: none; } html[data-mt-intro] .mt-hero .mt-col figure { will-change: transform; } }
+.mt-ix b { position: absolute; inset: 0; z-index: 1; background: var(--bg); pointer-events: none; }
 html[data-mt-intro] .mt-hero :is(.mt-scrim, h1, .mt-cap, .mt-ctas, figcaption), html[data-mt-intro] .site-hdr { opacity: 0; }
 html[data-mt-intro] .mt-hero .mt-name { z-index: 2; pointer-events: none; }
 
 .mt-ix { position: absolute; inset: 0; pointer-events: none; }
-.mt-ix > div { position: absolute; inset: 0; }
-.mt-ix i { position: absolute; display: block; background: var(--card, var(--bg)) center / cover no-repeat; }
+.mt-ix > div { position: absolute; }
+.mt-ix i { position: absolute; left: 0; right: 0; display: block; background: var(--card, var(--bg)) center / cover no-repeat; }
 
 html[data-mt-intro] .mt-hero { position: relative; }
 /* absolute, not fixed: an ancestor of the home carries a transform */

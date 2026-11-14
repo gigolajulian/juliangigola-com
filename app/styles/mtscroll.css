@@ -506,3 +506,6 @@
 /* intro waiting state, set by the head script before first paint (the rest lives in components/v3/mt/intro/intro.css) */
 html[data-mt-intro="1"] .site-hdr{opacity:0!important}
 html[data-mt-intro="1"]{overflow:hidden}
+/* side columns only where a real part of one fits: below about 1.9:1 just a 15px sliver shows at each edge. The intro still uses them. */
+@media (min-width:1024px) and (min-height:600px) and (max-aspect-ratio:19/10){html:not([data-mt-intro]) .mt-hero .mt-col.side{visibility:hidden}}
+@media (min-width:1024px) and (min-height:600px) and (max-aspect-ratio:29/10){html:not([data-mt-intro]) .mt-hero .mt-col.side:is([data-col="-2"],[data-col="4"]){visibility:hidden}}

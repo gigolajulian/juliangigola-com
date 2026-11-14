@@ -79,8 +79,9 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
       play(el, [{ transform: `translate3d(0,${from}px,0)` }, { transform: "translate3d(0,0,0)" }], { duration: RISE, delay, easing: OUT, composite: "add" }); // added on top of the scroll travel, so scrolling as the intro lands never snaps
       // out of sight until it moves, then opaque at once: it comes up out of the ground colour, never an opacity fade
       play(el, [{ visibility: "visible" }, { visibility: "visible" }], { duration: RISE, delay, fill: "forwards" });
-      play(el, [{ "--mt-veil": 1 } as Keyframe, { "--mt-veil": 0 } as Keyframe], { duration: LIGHT, delay });
     };
+    // the ground colour lifts off a column: one opacity per column, so nothing repaints
+    const light = (el: Element, delay: number, pseudoElement?: string) => play(el, [{ opacity: 1 }, { opacity: 0 }], { duration: LIGHT, delay, pseudoElement });
     const fadeIn = (sel: string, delay: number, duration: number, lift = 0) =>
       document.querySelectorAll(sel).forEach((el) =>
         play(el, [{ opacity: 0, transform: lift ? `translate3d(0,${lift}px,0)` : "none" }, { opacity: 1, transform: "none" }], { duration, delay, easing: lift ? OUT : "linear" }),
@@ -132,27 +133,33 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
       wall.prepend(layer);
       made.push(layer);
       let n = 0;
-      const tile = (into: HTMLElement, x: number, y: number) => {
+      const top0 = ymin - h - R;
+      const tile = (into: HTMLElement, _x: number, y: number) => {
         if (!ready.length) return;
         const t = document.createElement("i");
-        t.style.cssText = `left:${x}px;top:${y}px;width:${w}px;height:${h}px;background-image:url("${ready[n++ % ready.length]}")`;
+        t.style.cssText = `top:${y - top0}px;height:${h}px;background-image:url("${ready[n++ % ready.length]}")`;
         into.append(t);
       };
-      const group = () => {
+      // a group is one column strip: a small layer, with its own veil
+      const group = (x: number, delay: number) => {
         const g = document.createElement("div");
+        g.style.cssText = `left:${x}px;top:${top0}px;width:${w}px;height:${ymax - top0 + R}px`;
+        const v = document.createElement("b");
+        g.append(v);
         layer.append(g);
+        light(v, delay);
         return g;
       };
 
       // 1. the real columns, each with frames above and below it so the canvas has no holes
       cols.forEach((c, i) => {
         const b = c.b;
-        const g = group();
-        for (let y = b[0].y - R; y + h > ymin; y -= R) tile(g, b[0].x, y);
-        for (let y = b[b.length - 1].y + R; y < ymax; y += R) tile(g, b[0].x, y);
         const from = WALL_FROM[i % 3];
         const delay = 800 + i * 110;
-        c.els.forEach((el) => rise(el, from, delay));
+        const g = group(b[0].x, delay);
+        for (let y = b[0].y - R; y + h > ymin; y -= R) tile(g, b[0].x, y);
+        for (let y = b[b.length - 1].y + R; y < ymax; y += R) tile(g, b[0].x, y);
+        c.els.forEach((el) => (rise(el, from, delay), flat ? light(el.querySelector(".ph")!, delay, "::after") : light(el, delay, "::after")));
         rise(g, from, delay);
       });
       // 2. extra columns on the wall's own pitch, wherever no real column stands
@@ -161,12 +168,13 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
       for (let m = -16; m <= 16; m++) {
         const x = first[0].x + m * P;
         if (x + w < xmin || x > xmax || real.some((r) => Math.abs(r - x) < P * 0.5)) continue;
-        const g = group();
+        const g = group(x, 800 + k * 70);
         for (let y = ymin - h + (k % 2 ? R * 0.25 : 0); y < ymax; y += R) tile(g, x, y);
         rise(g, X_FROM[k % X_FROM.length], 800 + k * 70);
         k++;
       }
-      play(layer, [{ opacity: 1 }, { opacity: 0 }], { duration: 500, delay: 2950 });
+      // the extras stay through the push, so the canvas never shrinks to the wall alone; they leave as the hero arrives
+      play(layer, [{ opacity: 1 }, { opacity: 0 }], { duration: 500, delay: 3950 });
 
       // the push in, .46 to 1
       wall.style.transformOrigin = `${px}px ${py}px`;
