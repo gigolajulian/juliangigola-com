@@ -24,9 +24,9 @@ export const FILM_PICKS: [title: string, kind: string][] = [
   ["Dide O Del", "Music video"],
 ];
 
-/* ── Book online: the five sessions the home sells, each with the $100 deposit. ── */
+/* ── Book online: the four sessions the home sells, each with the $100 deposit. Model test books on /book. ── */
 export type BookRow = {
-  key: "portraits" | "headshots" | "graduation" | "studio-digitals" | "model-test";
+  key: "portraits" | "headshots" | "graduation" | "studio-digitals";
   /** The live session it books; Test shoot has none yet (no SESSIONS / EVENTS entry). */
   slug: SessionSlug | null;
   group: "s" | "a";
@@ -46,7 +46,6 @@ export const BOOK_ROWS: BookRow[] = [
   { key: "headshots", slug: "headshots", group: "s", name: "Headshots", len: "30 min", what: "LinkedIn, corporate", price: "$100 deposit", detail: "For LinkedIn, company sites and press. Retouched selects. Booking a team? Ask for a day rate.", btn: "Book headshots", ready: "3 business days", photo: "", at: "50% 40%" },
   { key: "graduation", slug: "graduation", group: "s", name: "Graduation", len: "90 min", what: "On campus", price: "$100 deposit", detail: "Two outfits. Edited gallery, print release. Booking spring {year} now.", btn: "Book graduation", ready: "1 week", photo: "", at: "50% 18%" },
   { key: "studio-digitals", slug: "studio-digitals", group: "a", name: "Studio digitals", len: "45 min", what: "Unretouched", price: "$100 deposit", detail: "Full length, three-quarter, close. Front and profile.", btn: "Book digitals", ready: "2 business days", photo: "", at: "50% 50%" },
-  { key: "model-test", slug: "model-test", group: "a", name: "Model test", len: "60 min", what: "Styled", price: "$100 deposit", detail: "One look, built with you.", btn: "Book a model test", ready: "1 week", photo: "", at: "50% 50%" },
 ];
 export { gradYear } from "@/lib/grad-year";
 
