@@ -2,3 +2,5 @@
 
 /* The endless logos line needs its second copy (and any extra ones commissions.ts adds on wide screens). */
 html[data-mt-motion] .mt-logos-track [data-copy]{display:flex}
+/* no scrim behind the Commissions head (Julian, 2026-11-14): the heading sits straight on the photos */
+[data-mtscroll] .mt .mt-comm-head { background: none; }

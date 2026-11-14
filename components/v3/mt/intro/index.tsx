@@ -12,7 +12,9 @@ import "./intro.css";
    screen ratio. Extras are intro-only nodes, removed when it ends. */
 
 const S0 = 0.46;
-const OUT = "cubic-bezier(.16,1,.3,1)";
+const OUT = "cubic-bezier(0.23, 1, 0.32, 1)"; // arrivals and exits
+const IN_OUT = "cubic-bezier(0.77, 0, 0.175, 1)"; // the push in, a move on screen
+const HURRY = 6; // a wheel, tap or key during the intro plays the rest this many times faster
 const WALL_FROM = [620, 900, 740]; // px below, per wall column
 const X_FROM = [700, 980, 620, 860, 1040, 760, 920]; // px below, per extra column
 const RISE = 1700;
@@ -41,7 +43,17 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
   React.useLayoutEffect(() => {
     const root = document.documentElement;
     // the head script hides the header from the first paint (state 1); give it back if the intro will not run
-    if (!shouldPlay()) return void delete root.dataset.mtIntro;
+    if (!shouldPlay()) {
+      delete root.dataset.mtIntro;
+      const calm = matchMedia("(prefers-reduced-motion: reduce)").matches && !/[?&]intro=0/.test(location.search) && window.scrollY <= 4;
+      let seen = true;
+      try {
+        seen = !!sessionStorage.getItem("jg-intro");
+        if (calm && !seen) sessionStorage.setItem("jg-intro", "1");
+      } catch {}
+      if (calm && !seen) document.querySelector('[data-mt="hero"] .mt-wall')?.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 400, easing: "ease" });
+      return;
+    }
     const hero = document.querySelector<HTMLElement>('[data-mt="hero"]');
     const wall = hero?.querySelector<HTMLElement>(".mt-wall");
     if (!hero || !wall) return void delete root.dataset.mtIntro;
@@ -52,12 +64,16 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
     const timers: number[] = [];
     let over = false;
     let started = false;
+    const INPUTS = ["wheel", "touchstart", "pointerdown", "keydown"] as const;
+    let hurry = () => {};
+    const stopHurry = () => INPUTS.forEach((e) => window.removeEventListener(e, hurry));
     const origin = wall.style.transformOrigin;
     const ready: string[] = [];
 
     const finish = (seen: boolean) => {
       if (over) return;
       over = true;
+      stopHurry();
       timers.forEach(clearTimeout);
       anims.forEach((a) => a.cancel());
       made.forEach((n) => n.remove());
@@ -84,7 +100,7 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
     const light = (el: Element, delay: number, pseudoElement?: string) => play(el, [{ opacity: 1 }, { opacity: 0 }], { duration: LIGHT, delay, pseudoElement });
     const fadeIn = (sel: string, delay: number, duration: number, lift = 0) =>
       document.querySelectorAll(sel).forEach((el) =>
-        play(el, [{ opacity: 0, transform: lift ? `translate3d(0,${lift}px,0)` : "none" }, { opacity: 1, transform: "none" }], { duration, delay, easing: lift ? OUT : "linear" }),
+        play(el, [{ opacity: 0, transform: lift ? `translate3d(0,${lift}px,0)` : "none" }, { opacity: 1, transform: "none" }], { duration, delay, easing: OUT }),
       );
 
     const run = () => {
@@ -179,7 +195,7 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
       // the push in, .46 to 1
       wall.style.transformOrigin = `${px}px ${py}px`;
       const far = `translate3d(0,${ty}px,0) scale(${S0})`;
-      play(wall, [{ transform: far, easing: "linear" }, { transform: far, offset: 3000 / END, easing: "cubic-bezier(.7,0,.15,1)" }, { transform: "translate3d(0,0,0) scale(1)" }], { duration: END });
+      play(wall, [{ transform: far, easing: "linear" }, { transform: far, offset: 3000 / END, easing: IN_OUT }, { transform: "translate3d(0,0,0) scale(1)" }], { duration: END });
 
       // JG, under every photo
       const jg = document.createElement("div");
@@ -191,7 +207,7 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
       [...jg.children].forEach((b, i) => {
         play(b, [{ opacity: 0, transform: `translate3d(0,${i ? 110 : -110}px,0)`, filter: "blur(22px)" }, { opacity: 1, transform: "none", filter: "blur(0)" }], { duration: 750, easing: OUT });
         (b as HTMLElement).style.transformOrigin = i ? "0 50%" : "100% 50%";
-        play(b, [{ opacity: 1, scale: "1" }, { opacity: 0, scale: ".9" }], { duration: 900, delay: 950, easing: "cubic-bezier(.45,0,.55,1)", composite: "replace" });
+        play(b, [{ opacity: 1, scale: "1" }, { opacity: 0, scale: ".9" }], { duration: 900, delay: 950, easing: OUT, composite: "replace" });
       });
 
       // the hero's own parts arrive as the push lands
@@ -201,8 +217,18 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
       fadeIn(".mt-hero figcaption", 4050, 450);
 
       root.dataset.mtIntro = "2";
+      const t0 = performance.now();
       timers.push(window.setTimeout(() => (root.dataset.mtIntro = "3"), 2950)); // scroll unlocks as the frames land
       timers.push(window.setTimeout(() => finish(true), END + 60));
+      // nobody is made to wait: a wheel, tap or key plays the rest fast and gives the scroll back
+      hurry = () => {
+        stopHurry();
+        timers.forEach(clearTimeout);
+        anims.forEach((a) => a.updatePlaybackRate(HURRY));
+        root.dataset.mtIntro = "3";
+        timers.push(window.setTimeout(() => finish(true), Math.max(0, END - (performance.now() - t0)) / HURRY + 60));
+      };
+      for (const e of INPUTS) window.addEventListener(e, hurry, { passive: true, once: true });
     };
 
     // extras are drawn only from thumbs that have arrived, so the canvas never shows an empty tile
