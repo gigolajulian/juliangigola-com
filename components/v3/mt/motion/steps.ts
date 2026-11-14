@@ -44,4 +44,4 @@ const stepper = (name: string, count: number): Driver => {
   };
 };
 
-export const stepDrivers: Driver[] = [stepper("book", 4), stepper("quote", 4)];
+export const stepDrivers: Driver[] = [stepper("book", 5), stepper("quote", 4)];

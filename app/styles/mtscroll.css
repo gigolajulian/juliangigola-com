@@ -546,7 +546,7 @@ html[data-mt-intro="1"]{overflow:hidden}
   [data-mtscroll] .mt-motion .mt-film{width:100%;height:var(--fh)}
 }
 
-/* Book online: four rows, one line each, and the booking in place (book-online.tsx) */
+/* Book online: one line a row, and the booking in place (book-online.tsx) */
 [data-mtscroll] .mt-book .mt-act{flex-direction:row;align-items:center;justify-content:space-between;margin-top:calc(28 * var(--u))}
 [data-mtscroll] .mt-book[data-open]>.mt-bar{display:none}
 [data-mtscroll] .mt-book{scroll-margin-top:0}

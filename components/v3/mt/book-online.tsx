@@ -9,7 +9,7 @@ import { SESSIONS } from "@/lib/v3";
 import { BOOK_ROWS, gradYear, type BookRow } from "./data";
 import { useNextOpen } from "./next-open";
 
-/* Book online: four sessions, one line each. A row is picked by hover (fine
+/* Book online: five sessions, one line each. A row is picked by hover (fine
    pointers), focus or tap, and the photo follows it. Booking finishes here:
    the list gives way to the LIVE flow (`V3BookFlow`: its own picker, Cal.com
    events, Stripe deposit and copy, untouched) and the photo stays. */
