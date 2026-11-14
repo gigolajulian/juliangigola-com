@@ -56,6 +56,7 @@
 @import "./styles/devices.css";
 @import "./styles/v3.css";
 @import "./styles/motion-plan.css"; /* MOTION-PLAN.md items, only under ?mplan= */
+@import "./styles/mtscroll.css"; /* v4 homepage, only under ?mtscroll=1 */
 
 /* Time picker (components/booking/time-picker.tsx): a digit rolls in when it changes. */
 @keyframes tp-roll {

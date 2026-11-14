@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { mplan } from "@/lib/mplan";
+import { mtscroll } from "@/lib/mtscroll";
 import Link from "next/link";
 import { THEME_COLOR } from "@/lib/theme-color";
 import { usePathname } from "next/navigation";
@@ -378,7 +379,9 @@ function SiteHeader() {
     const dx = was.right - now.right, dy = was.top - now.top;
     if (dx || dy) bar.animate({ transform: [`translate(${dx}px,${dy}px)`, "none"] }, { duration: 250, easing: "cubic-bezier(.23,1,.32,1)" });
   }, [tuck]);
-  const show = (!home || past) && !tuck;
+  // `?mtscroll=1`: the v4 home has no cover to wait for, the bar is there from the start.
+  const mt = React.useSyncExternalStore(noop, mtscroll, () => false);
+  const show = (!home || past || mt) && !tuck;
   const [menu, setMenu] = React.useState(false);
   /* A route change closes it. */
   const [was, setWas] = React.useState(path);

@@ -1,7 +1,13 @@
 import type { Metadata } from "next";
 import { V3Home, type TopWork } from "@/components/v3/home";
+import { MtGate } from "@/components/v3/mt/gate";
+import { COMM_KEYS, FILM_PICKS, HERO_KEYS, type MtData, type MtFrame } from "@/components/v3/mt/data";
+import { DOES } from "@/components/v3/about";
 import { COMMISSION_TABS } from "@/lib/v3";
-import { PROJECTS, categoryLabel } from "@/lib/work";
+import { PROJECTS, categoryLabel, getProject } from "@/lib/work";
+import { CONTENT } from "@/lib/content";
+import { REEL, posterFor } from "@/lib/videos";
+import { RESPONSE_TIME } from "@/lib/site";
 import ORDER from "@/lib/portfolio-order.json";
 import { shareOg } from "@/lib/share";
 
@@ -29,6 +35,41 @@ const TOP: Record<string, TopWork[]> = Object.fromEntries(
   }),
 );
 
+/* `?mtscroll=1` (v4 home): the frames resolved here so lib/work stays out of the client. */
+const frame = (key: string): MtFrame => {
+  const [slug, n] = key.split("/");
+  const p = getProject(slug);
+  const src = `/work/${slug}/${n}.jpg`;
+  const f = p?.images.find((x) => x.src === src) ?? p?.cover;
+  return { src, slug, name: `${p?.name ?? slug} ${n}`, meta: p?.categories[0] ? categoryLabel(p.categories[0]) : "", r: f ? +(f.height / f.width).toFixed(3) : 1.25 };
+};
+const markOf = (client: string) => (client === "Sammy Shiblaq" ? "empire" : client === "Imanemun" ? "paydar" : client.toLowerCase().replace(/\s+/g, "-"));
+const vid = (title: string) => CONTENT.videos.find((v) => v.title === title);
+const used = new Set([...HERO_KEYS, ...COMM_KEYS].map((k) => k.split("/")[0]));
+const MT: MtData = {
+  hero: HERO_KEYS.map(frame),
+  // Side columns on wide screens (spec 5): Commissions frames, then each project's first frame not already on the wall.
+  extras: [...COMM_KEYS.map(frame), ...PROJECTS.filter((p) => !used.has(p.slug) && p.images[0]).slice(0, 40).map((p) => frame(`${p.slug}/${p.images[0].src.split("/").pop()!.replace(".jpg", "")}`))],
+  comm: COMM_KEYS.map(frame),
+  films: FILM_PICKS.map(([title, kind]) => {
+    if (title === REEL.title) return { id: "reel", title, kind, client: "2023", poster: REEL.poster, href: "/portfolio/video" };
+    const v = vid(title);
+    return { id: v?.id ?? title, title, kind, client: v?.client ?? "", poster: v ? posterFor(v) : null, href: v?.client ? `/portfolio/video#${markOf(v.client)}` : "/portfolio/video" };
+  }),
+  does: DOES,
+  reply: RESPONSE_TIME,
+  stills: Object.fromEntries(
+    ([["film:pear-vc", "Pear VC Campaign"], ["film:ladera", "Ladera Granola"]] as const).map(([k, t]) => {
+      const v = vid(t);
+      return [k, (v && posterFor(v)) ?? ""];
+    }),
+  ),
+};
+
 export default function Home() {
-  return <V3Home top={TOP} />;
+  return (
+    <MtGate data={MT}>
+      <V3Home top={TOP} />
+    </MtGate>
+  );
 }
