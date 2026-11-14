@@ -22,7 +22,7 @@ const LIGHT = 750; // a photo comes up from black, never an opacity fade
 const END = 4500;
 const PUSH = 3000; // the push in starts
 
-/* "Depth push" (opt-in, ?splash=2; ?splash=1 turns it off again): the same
+/* "Depth push", the V4 intro (?splash=1 plays the flat one, ?splash=2 comes back): the same
    canvas, but the frames that are not the hero stand nearer the lens. At rest
    it is the flat canvas; when the camera moves, each of those columns grows
    faster than the wall, slides off past its neighbours, loses focus and is gone
@@ -38,11 +38,11 @@ const SETTLE = "cubic-bezier(0.45, 0, 0.55, 1)";
 function deepMode() {
   const q = location.search;
   try {
-    if (/[?&]splash=2/.test(q)) sessionStorage.setItem("jg-splash", "2");
-    else if (/[?&]splash=[01]/.test(q)) sessionStorage.removeItem("jg-splash");
-    return sessionStorage.getItem("jg-splash") === "2";
+    if (/[?&]splash=1/.test(q)) sessionStorage.setItem("jg-splash", "1");
+    else if (/[?&]splash=[02]/.test(q)) sessionStorage.removeItem("jg-splash");
+    return sessionStorage.getItem("jg-splash") !== "1";
   } catch {
-    return /[?&]splash=2/.test(q);
+    return !/[?&]splash=1/.test(q);
   }
 }
 
