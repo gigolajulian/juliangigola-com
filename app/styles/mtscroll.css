@@ -596,3 +596,5 @@ html[data-mt-intro="1"]{overflow:hidden}
 /* By quote, held bar: the link leads, the button is only as wide as its word */
 [data-mtscroll] .mt-quote>.mt-bar{justify-content:space-between}
 [data-mtscroll] .mt-quote>.mt-bar .btn{flex:none;min-height:44px;padding-inline:28px}
+/* Footer link columns sit on the photo wall: a halo in the ground colour keeps them readable over a bright frame */
+@media (min-width:1024px) and (min-height:600px){[data-mtscroll] .mt-fcols :is(p,a,button){text-shadow:0 0 2px var(--bg),0 0 12px var(--bg),0 1px 22px var(--bg)}}
