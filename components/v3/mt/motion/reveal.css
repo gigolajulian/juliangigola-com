@@ -1,0 +1,3 @@
+/* v4 home motion: scroll-in reveal where nothing is held (reveal.ts). */
+html[data-mt-motion]:not([data-mt-held]) .mt [data-rv] { transition: opacity .7s ease-out, transform .9s cubic-bezier(.16,1,.3,1); }
+html[data-mt-motion]:not([data-mt-held]) .mt [data-rv=""] { opacity: 0; transform: translate3d(0, 28px, 0); }

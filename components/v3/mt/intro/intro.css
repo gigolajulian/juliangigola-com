@@ -1,0 +1,25 @@
+/* v4 home intro (spec 3.1). Everything here applies only while the intro runs:
+   `data-mt-intro` is set and removed by components/v3/mt/intro/index.tsx.
+   1 = waiting for the first frames, 2 = playing, 3 = playing, scroll unlocked. */
+html[data-mt-intro="1"], html[data-mt-intro="2"] { overflow: hidden; }
+html[data-mt-intro="1"] .mt-hero .mt-wall { opacity: 0; }
+html[data-mt-intro] .mt-hero .mt-wall { z-index: 1; }
+html[data-mt-intro] .mt-hero .mt-col, html[data-mt-intro] .mt-ix > div { will-change: transform; }
+html[data-mt-intro="2"] .mt-hero .mt-col, html[data-mt-intro="2"] .mt-ix > div { visibility: hidden; }
+/* phones: the columns are display: contents, so each figure moves on its own */
+@media (max-width: 599px) { html[data-mt-intro="2"] .mt-hero .mt-col figure { visibility: hidden; } }
+/* the veil: ground colour over a whole column (over each frame on phones), lifted by one opacity animation */
+@media (min-width: 600px) { html[data-mt-intro] .mt-hero .mt-col::after { content: ""; position: absolute; inset: 0; z-index: 1; background: var(--bg); opacity: 0; pointer-events: none; } }
+@media (max-width: 599px) { html[data-mt-intro] .mt-hero .mt-col .ph::after { content: ""; position: absolute; inset: 0; background: var(--bg); opacity: 0; pointer-events: none; } html[data-mt-intro] .mt-hero .mt-col figure { will-change: transform; } }
+.mt-ix b { position: absolute; inset: 0; z-index: 1; background: var(--bg); pointer-events: none; }
+html[data-mt-intro] .mt-hero :is(.mt-scrim, h1, .mt-cap, .mt-ctas, figcaption), html[data-mt-intro] .site-hdr { opacity: 0; }
+html[data-mt-intro] .mt-hero .mt-name { z-index: 2; pointer-events: none; }
+
+.mt-ix { position: absolute; inset: 0; pointer-events: none; }
+.mt-ix > div { position: absolute; }
+.mt-ix i { position: absolute; left: 0; right: 0; display: block; background: var(--card, var(--bg)) center / cover no-repeat; }
+
+html[data-mt-intro] .mt-hero { position: relative; }
+/* absolute, not fixed: an ancestor of the home carries a transform */
+.mt-jg { position: absolute; inset: 0 0 auto; height: 100svh; z-index: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; color: var(--ink, #ececec); font: 900 clamp(84px, min(10.4vw, 16.7vh), 210px) / 1 var(--display); letter-spacing: -0.05em; }
+.mt-jg b { display: block; font-weight: 900; }

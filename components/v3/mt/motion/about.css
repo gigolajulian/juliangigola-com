@@ -1,0 +1,33 @@
+/* v4 home motion: about. Applies only under html[data-mt-motion]. */
+
+/* Desktop hold (spec 3.9): every beat is a function of the section's --p. */
+html[data-mt-held] .mt-about{--r:min(1,calc(var(--p,0) * 1.6));--e:clamp(0,calc((var(--p,0) - .72) * 5),1);--sw:calc(var(--p,0) * 1.9);--dr:calc((var(--p,0) - .48) * 14);--lo:.13}
+/* Other structures: about.ts writes --sp (sentence) and --rp (rows) as they scroll through the screen. */
+html[data-mt-motion]:not([data-mt-held]) .mt-about{--sw:var(--sp,1);--dr:calc(var(--rp,1) * 3.5);--lo:.16}
+
+/* 3. Sentence, word by word */
+html[data-mt-motion] .mt-say span{--v:clamp(0,calc(var(--sw) * (var(--n) + 1) - var(--w)),1);opacity:calc(var(--lo) + var(--v) * (1 - var(--lo)))}
+html[data-mt-held] .mt-say span{transform:translateY(calc((1 - var(--v)) * .16em));filter:blur(calc((1 - var(--v)) * 5px));will-change:transform,filter,opacity}
+
+/* 4. What I do: number and name fade, the name rises, the hairline draws */
+html[data-mt-motion] .mt-does li{--f:clamp(0,calc(var(--dr) - var(--j) * .5),1);position:relative;overflow:clip;border-bottom-color:transparent}
+html[data-mt-motion] .mt-does li::after{content:"";position:absolute;inset:auto 0 0;height:1px;background:color-mix(in srgb,var(--ink) 16%,transparent);transform-origin:0 50%;transform:scaleX(var(--f))}
+html[data-mt-motion]:not([data-mt-held]) .mt-does li::after{background:var(--hair)}
+html[data-mt-motion] .mt-does li .lbl{opacity:var(--f)}
+html[data-mt-motion] .mt-does li b{opacity:var(--f);transform:translateY(calc((1 - var(--f)) * 22px))}
+html[data-mt-held] .mt-does h2{opacity:clamp(0,calc((var(--p,0) - .46) * 12),1)}
+
+/* 1. Wordmark letters rise into the clipped line */
+html[data-mt-held] .mt-wordmark span{transform:translateY(calc((1 - clamp(0,calc(var(--p,0) * 5 - var(--j) * .07),1)) * 114%));will-change:transform}
+
+/* 2. Photo */
+html[data-mt-held] .mt-ab-ph{opacity:calc(.35 + var(--r) * .65)}
+html[data-mt-held] .mt-ab-ph img{transform-origin:32% 45%;transform:scale(calc(1.22 - var(--r) * .22));filter:blur(calc((1 - var(--r)) * 10px));will-change:transform,filter}
+
+/* 5 to 7. Hairline, facts, button */
+html[data-mt-held] .mt-ab-foot hr{transform-origin:0 50%;transform:scaleX(var(--e))}
+html[data-mt-held] .mt-ab-foot dl>div{--f:clamp(0,calc(var(--e) * 2.2 - var(--j) * .4),1);opacity:var(--f);transform:translateY(calc((1 - var(--f)) * 12px))}
+html[data-mt-held] .mt-more-me{opacity:clamp(0,calc(var(--e) * 2.2 - 1.2),1)}
+/* a keyboard user can land on it before the last beat */
+html[data-mt-held] .mt-more-me:focus-visible{opacity:1}
+

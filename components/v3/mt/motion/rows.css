@@ -1,0 +1,52 @@
+/* v4 home motion: rows. Applies only under html[data-mt-motion]. */
+@property --hin{syntax:"<number>";inherits:true;initial-value:0}
+@property --fl{syntax:"<number>";inherits:true;initial-value:0}
+
+/* Held (D): the page scroll moves the track (rows.ts). `hidden`, not `clip`:
+   rows.ts still steps the row's scroll so held-row.tsx names the current item. */
+html[data-mt-held] .mt-held .mt-row{overflow-x:hidden;scroll-snap-type:none;touch-action:pan-y;cursor:grab;user-select:none;-webkit-user-select:none}
+html[data-mt-held] .mt-held .mt-track{will-change:transform}
+/* The title line's clip (for the rise) cut descenders at line-height .9. */
+html[data-mt-held] .mt-held .mt-ttl .ln{padding-bottom:.14em;margin-bottom:-.14em}
+/* Room inside the row's clip for the lift and its shadow. */
+html[data-mt-held] .mt-covers .mt-row{margin-top:0;padding-top:calc(60 * var(--u));padding-bottom:calc(96 * var(--u));margin-bottom:calc(-96 * var(--u))}
+/* The record sticking out must not count as hovering its sleeve. */
+html[data-mt-held] .mt-sleeve .disc{pointer-events:none}
+
+/* Cover art hover lift and two-sided flip (spec 3.7, fine pointers). */
+@media (hover:hover) and (pointer:fine){
+  html[data-mt-held] .mt-sleeve{--m:max(0,calc(4 * var(--fl) * (1 - var(--fl))));transform:perspective(1000px) translateY(calc((var(--hin) * -16 - var(--m) * 12) * var(--u))) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) scale(calc(1 + var(--hin) * .05 + var(--m) * .07));transition:--hin .55s cubic-bezier(.16,1,.3,1),--fl .7s cubic-bezier(.5,0,.2,1),transform .22s ease-out}
+  html[data-mt-held] .mt-sleeve.hv{--hin:1;z-index:3}
+  html[data-mt-held] .mt-sleeve[data-flip].hv{--fl:1;transition:--hin .55s cubic-bezier(.16,1,.3,1),--fl 1.05s cubic-bezier(.62,-.04,.18,1.06) .5s,transform .22s ease-out}
+  /* The face stops clipping so the two sides can turn; corners and shadow move to the images. */
+  html[data-mt-held] .mt-sleeve .face{overflow:visible;background:none}
+  html[data-mt-held] .mt-sleeve .face img{border-radius:calc(4 * var(--u));background:var(--card);box-shadow:0 calc(var(--hin) * 34px + var(--m) * 26px) calc(var(--hin) * 60px + var(--m) * 40px) calc(var(--hin) * -22px) rgba(0,0,0,.85)}
+  html[data-mt-held] .mt-sleeve[data-flip] .face img{backface-visibility:hidden;transform:perspective(1500px) rotateY(calc(var(--fl) * 180deg));filter:brightness(calc(1 - var(--m) * .5))}
+  html[data-mt-held] .mt-sleeve[data-flip] .face .back{opacity:1;transform:perspective(1500px) rotateY(calc(180deg + var(--fl) * 180deg))}
+  /* The record goes back in under a lifted sleeve and is hidden for the whole flip. */
+  html[data-mt-held] .mt-sleeve .disc{transform:translateX(calc(var(--o,0) * (1 - var(--hin)) * 103 * var(--u))) rotate(calc(var(--o,0) * (1 - var(--hin)) * 200deg))}
+  html[data-mt-held] .mt-sleeve .disc::after{transform:rotate(calc(var(--o,0) * (1 - var(--hin)) * -200deg))}
+  html[data-mt-held] .mt-sleeve[data-flip] .disc{opacity:clamp(0,calc(1 - var(--fl) * 40),1)}
+}
+
+/* Motion: the current film's muted preview over its poster (same fit as .mo-loop in v3.css). */
+html[data-mt-motion] .mt-film{container-type:size}
+html[data-mt-motion] .mt-film iframe{position:absolute;top:50%;left:50%;width:max(100cqw,100cqh * 16 / 9);height:max(100cqh,100cqw * 9 / 16);translate:-50% -50%;scale:1.2;border:0;pointer-events:none;opacity:0;transition:opacity .8s ease}
+html[data-mt-motion] .mt-film iframe[data-ready]{opacity:1}
+
+/* Motion, desktop structure: a vertical stack in natural scroll (the layout is the
+   "Motion: vertical films" block of mtscroll.css). Each film keeps its full frame
+   as its box, 330 apart, and is clipped to an 84 strip; rows.ts opens it (--o) at
+   the middle of the screen. No transitions: scroll is the only clock. */
+html[data-mt-held] .mt-motion.mt-held .mt-row{overflow:visible;touch-action:auto;cursor:auto;user-select:auto;-webkit-user-select:auto}
+html[data-mt-held] .mt-motion.mt-held .mt-track{gap:0;will-change:auto}
+html[data-mt-held] .mt-motion .mt-film{--c:calc((1 - var(--o,0)) * 183 * var(--u));margin-block:calc(-60 * var(--u));clip-path:inset(var(--c) 0 round calc(4 * var(--u)));opacity:calc(.5 + var(--o,0) * .5)}
+html[data-mt-held] .mt-motion .mt-film:first-child{margin-top:0}
+html[data-mt-held] .mt-motion .mt-film:last-child{margin-bottom:0}
+html[data-mt-held] .mt-motion .mt-film img{transform:scale(calc(1.1 - var(--o,0) * .1))}
+/* The clip cuts the site's outline ring, so the ring is drawn inside the open part. */
+html[data-mt-held] .mt-motion .mt-film:focus-visible{outline:0;opacity:1}
+html[data-mt-held] .mt-motion .mt-film:focus-visible::after{content:"";position:absolute;inset:calc(var(--c) + 3px) 3px;z-index:1;border:1px solid var(--accent);border-radius:calc(3 * var(--u));pointer-events:none}
+
+/* Snap rows: the record now comes fully out of the bottom (118px), more than the static row's 72px of room. */
+html[data-mt-motion]:not([data-mt-held]) .mt-covers .mt-row{padding-bottom:126px}

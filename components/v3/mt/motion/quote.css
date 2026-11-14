@@ -1,0 +1,12 @@
+/* v4 home motion: quote. Applies only under html[data-mt-motion]. */
+
+/* Client rotation (spec 3.5): quote.ts marks the current client `data-q`; drift and fade.
+   React's own `.on` (always client 0) is overridden here. */
+html[data-mt-motion] .mt-quote :is(.mt-photo,.mt-photo-w)>.cl{opacity:0;transform:scale(1.08);transition:opacity 1.6s cubic-bezier(.4,0,.2,1),transform 7s cubic-bezier(.2,.4,.3,1)}
+html[data-mt-motion] .mt-quote :is(.mt-photo,.mt-photo-w)>.cl[data-q]{opacity:1;transform:none}
+/* `data-rot`: the client photo shows (no option under the pointer, or 8s after the last tap) */
+html[data-mt-motion] .mt-quote[data-rot] .mt-photo>.op{opacity:0}
+html[data-mt-motion] .mt-quote .mt-clcap{opacity:0;transition:opacity .3s}
+html[data-mt-motion] .mt-quote[data-rot] .mt-clcap{opacity:1}
+html[data-mt-motion] .mt-quote .mt-by .nm{transition:opacity .5s}
+html[data-mt-motion] .mt-quote :is(.mt-by .nm,.mt-clcap)[data-sw]{opacity:0;transition-duration:.5s}
