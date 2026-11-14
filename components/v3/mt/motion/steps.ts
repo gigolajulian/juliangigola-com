@@ -1,13 +1,14 @@
 import { clamp, type Driver } from "./engine";
 
-/* Phones and tablets: as Book online and By quote come up the screen, the
-   scroll walks through their rows one by one. Nothing is pinned and no scroll
-   length is added. The section listens for `mt-step` and makes that row the
-   current one; a tap wins for a few seconds. */
+/* Phones and tablets: as By quote comes up the screen, the scroll walks
+   through its rows one by one. Nothing is pinned and no scroll length is
+   added. The section listens for `mt-step` and makes that row the current
+   one; a tap wins for a few seconds. Book online does not walk: its rows
+   change only when one is tapped. Both get the bottom bar. */
 const HOLD_AFTER_TAP = 4000;
 const DWELL = 450;
 
-const stepper = (name: string, count: number): Driver => {
+const stepper = (name: string, count: number, walk = true): Driver => {
   let last = -1;
   let tap = -HOLD_AFTER_TAP;
   let bar = false;
@@ -30,7 +31,7 @@ const stepper = (name: string, count: number): Driver => {
       // the bottom bar belongs to the section that fills the screen, so two bars never stack
       const top = ctx.top;
       if (top < ctx.vh * 0.45 !== bar) el.toggleAttribute("data-bar", (bar = !bar));
-      if (ctx.t - tap < HOLD_AFTER_TAP || el.closest<HTMLElement>(".mt")?.dataset.cards === "open" || el.hasAttribute("data-open")) return;
+      if (!walk || ctx.t - tap < HOLD_AFTER_TAP || el.closest<HTMLElement>(".mt")?.dataset.cards === "open" || el.hasAttribute("data-open")) return;
       // the walk runs while the rows themselves are on screen: from the section's top a quarter down the screen to just over half a screen above it
       const from = ctx.vh * 0.25;
       const t = clamp((from - top) / (ctx.vh * 0.8));
@@ -44,4 +45,4 @@ const stepper = (name: string, count: number): Driver => {
   };
 };
 
-export const stepDrivers: Driver[] = [stepper("book", 4), stepper("quote", 4)];
+export const stepDrivers: Driver[] = [stepper("book", 4, false), stepper("quote", 4)];
