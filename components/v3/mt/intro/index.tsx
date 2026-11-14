@@ -105,6 +105,7 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
       timers.forEach(clearTimeout);
       anims.forEach((a) => a.cancel());
       made.forEach((n) => n.remove());
+      held.forEach((h) => (h.style.pointerEvents = ""));
       wall.style.transformOrigin = origin;
       delete root.dataset.mtIntro;
       if (seen) {
@@ -127,6 +128,7 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
        The browser skips whatever is fully hidden, and the first draw of the columns holds the screen for about 100ms.
        So each one waits at opacity 0, goes to 1% under its veil at DRAW, and is drawn before the first column moves. */
     const hidden: [Element, number][] = [];
+    const held: HTMLElement[] = [];
     // the ground colour lifts off a column: one opacity per column, so nothing repaints
     const light = (el: Element, delay: number, pseudoElement?: string) => play(el, [{ opacity: 1 }, { opacity: 0 }], { duration: LIGHT, delay, pseudoElement });
     const fadeIn = (sel: string, delay: number, duration: number, lift = 0) =>
@@ -326,8 +328,14 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
 
       // made last, so they sit on top of every other opacity animation on the same element
       hidden.forEach(([el, delay]) => {
-        const at = Math.min(DRAW, delay / 2) / delay;
-        play(el, [{ opacity: 0 }, { opacity: 0, offset: at }, { opacity: 0.01, offset: at }, { opacity: 0.01 }], { duration: delay, fill: "none" });
+        const at = Math.min(DRAW, delay / 2);
+        play(el, [{ opacity: 0 }, { opacity: 0 }], { duration: at, fill: "none" });
+        play(el, [{ opacity: 0.01 }, { opacity: 0.01 }], { duration: delay - at, delay: at, fill: "none" });
+        // unseen, so untouchable: a tap that hurries the intro must not open a project
+        const h = el as HTMLElement;
+        h.style.pointerEvents = "none";
+        held.push(h);
+        timers.push(window.setTimeout(() => (h.style.pointerEvents = ""), delay));
       });
 
       root.dataset.mtIntro = "2";
