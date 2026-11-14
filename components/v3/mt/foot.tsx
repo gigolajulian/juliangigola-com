@@ -85,14 +85,8 @@ export function MtFoot() {
               ))
             : null}
         </div>
-        {/* Phone: the wall as one sideways row under the links. */}
-        <div className="mt-frow" aria-hidden>
-          {wall.slice(0, 16).map((f) => (
-            <figure key={f.slug} data-slug={f.slug} data-name={f.name}>
-              <Image src={f.src} alt="" fill sizes="132px" />
-            </figure>
-          ))}
-        </div>
+        {/* shortcut: the phone photo row is gone (Julian, 2026-11-14) but motion/foot.ts still asks for this node; drop both when the desktop wall is replaced */}
+        <div className="mt-frow" aria-hidden />
         <div className="mt-fscrim" aria-hidden />
         <nav className="mt-fcols lbl" aria-label="Footer">
           <div>
@@ -115,7 +109,7 @@ export function MtFoot() {
           </div>
           <div>
             <p className="mute">Reach</p>
-            <p><a href="mailto:hello@juliangigola.com">hello@juliangigola.com</a></p>
+            <p><a href="mailto:hello@juliangigola.com"><span className="dk">hello@juliangigola.com</span><span className="po">Email me</span></a></p>
             <p><a href="https://instagram.com/juliangigola" rel="noopener"><span className="dk">Instagram&nbsp;</span>@juliangigola</a></p>
             <p className="mute mt-based">Based</p>
             <p><span className="dk">San Francisco Bay Area</span><span className="po">SF Bay Area</span></p>

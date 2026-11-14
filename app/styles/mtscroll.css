@@ -433,7 +433,7 @@
   [data-mtscroll] .mt-fcols p{margin:0}
   [data-mtscroll] .mt-fcols :is(a,button){display:inline-block;padding:8px 0}
   [data-mtscroll] .mt-fcols .mt-based{margin-top:10px}
-  [data-mtscroll] .mt-frow{display:flex;gap:6px;overflow-x:auto;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scrollbar-width:none;padding:24px 16px 12px;margin-top:20px;-webkit-mask:linear-gradient(rgb(0 0 0 / .5),rgb(0 0 0 / .68) 38%,rgb(0 0 0 / .4) 74%,transparent);mask:linear-gradient(rgb(0 0 0 / .5),rgb(0 0 0 / .68) 38%,rgb(0 0 0 / .4) 74%,transparent)}
+  [data-mtscroll] .mt-frow{display:none;gap:6px;overflow-x:auto;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scrollbar-width:none;padding:24px 16px 12px;margin-top:20px;-webkit-mask:linear-gradient(rgb(0 0 0 / .5),rgb(0 0 0 / .68) 38%,rgb(0 0 0 / .4) 74%,transparent);mask:linear-gradient(rgb(0 0 0 / .5),rgb(0 0 0 / .68) 38%,rgb(0 0 0 / .4) 74%,transparent)}
   [data-mtscroll] .mt-frow::-webkit-scrollbar{display:none}
   [data-mtscroll] .mt-frow figure{width:124px;scroll-snap-align:start}
   [data-mtscroll] .mt-phrase{position:static;margin-top:8px}
