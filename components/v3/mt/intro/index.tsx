@@ -21,6 +21,7 @@ const RISE = 1700;
 const LIGHT = 750; // a photo comes up from black, never an opacity fade
 const END = 4500;
 const PUSH = 3000; // the push in starts
+const DRAW = 350; // the columns get their first draw here, out of sight, while JG settles
 
 /* "Depth push", the V4 intro (?splash=1 plays the flat one, ?splash=2 comes back): the same
    canvas, but the frames that are not the hero stand nearer the lens. At rest
@@ -120,9 +121,12 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
     };
     const rise = (el: Element, from: number, delay: number) => {
       play(el, [{ transform: `translate3d(0,${from}px,0)` }, { transform: "translate3d(0,0,0)" }], { duration: RISE, delay, easing: OUT, composite: "add" }); // added on top of the scroll travel, so scrolling as the intro lands never snaps
-      // out of sight until it moves, then opaque at once: it comes up out of the ground colour, never an opacity fade
-      play(el, [{ visibility: "visible" }, { visibility: "visible" }], { duration: RISE, delay, fill: "forwards" });
+      hidden.push([el, delay]);
     };
+    /* Out of sight until it moves, then opaque at once: it comes up out of the ground colour, never an opacity fade.
+       The browser skips whatever is fully hidden, and the first draw of the columns holds the screen for about 100ms.
+       So each one waits at opacity 0, goes to 1% under its veil at DRAW, and is drawn before the first column moves. */
+    const hidden: [Element, number][] = [];
     // the ground colour lifts off a column: one opacity per column, so nothing repaints
     const light = (el: Element, delay: number, pseudoElement?: string) => play(el, [{ opacity: 1 }, { opacity: 0 }], { duration: LIGHT, delay, pseudoElement });
     const fadeIn = (sel: string, delay: number, duration: number, lift = 0) =>
@@ -319,6 +323,12 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
       fadeIn(".mt-hero h1", 3960, 900, 70);
       fadeIn(".mt-hero .mt-cap, .mt-hero .mt-ctas, .site-hdr", 4280, 600);
       fadeIn(".mt-hero figcaption", 4050, 450);
+
+      // made last, so they sit on top of every other opacity animation on the same element
+      hidden.forEach(([el, delay]) => {
+        const at = Math.min(DRAW, delay / 2) / delay;
+        play(el, [{ opacity: 0 }, { opacity: 0, offset: at }, { opacity: 0.01, offset: at }, { opacity: 0.01 }], { duration: delay, fill: "none" });
+      });
 
       root.dataset.mtIntro = "2";
       const t0 = performance.now();
