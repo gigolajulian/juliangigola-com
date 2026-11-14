@@ -454,7 +454,7 @@
   [data-mtscroll] .mt-hero .mt-stage{height:calc(1650 * var(--pu))}
   [data-mtscroll] .mt-col{display:contents}
   [data-mtscroll] .mt-col figure{position:absolute;left:calc((16 + var(--c2) * 187) * var(--pu));top:calc((68 + var(--r2) * 250 + var(--c2) * 64) * var(--pu));width:calc(171 * var(--pu));height:calc(214 * var(--pu))}
-  [data-mtscroll] .mt-col figcaption{padding-top:6px;font-size:10px}
+  [data-mtscroll] .mt-col figcaption{padding-top:6px;font-size:10px;line-height:1.2}
   [data-mtscroll] .mt-name h1{font-size:min(58px,calc(56 * var(--pu)));line-height:.9}
   [data-mtscroll] .mt-ctas{bottom:max(44px,calc(env(safe-area-inset-bottom) + 20px))}
   [data-mtscroll] .mt-covers .mt-row{--cv:calc(358 * var(--pu));padding-inline:calc(16 * var(--pu))}
@@ -503,3 +503,6 @@
   [data-mtscroll] .mt-bk{grid-template-rows:minmax(0,1fr);width:calc(100vw - 32px - env(safe-area-inset-left) - env(safe-area-inset-right));height:calc(100svh - 16px)}
   [data-mtscroll] .mt-bk-ph{display:none}
 }
+/* intro waiting state, set by the head script before first paint (the rest lives in components/v3/mt/intro/intro.css) */
+html[data-mt-intro="1"] .site-hdr{opacity:0!important}
+html[data-mt-intro="1"]{overflow:hidden}

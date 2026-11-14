@@ -1,0 +1,4 @@
+/* v4 home motion, shared (engine.ts). `data-mt-motion`: the engine runs.
+   `data-mt-held`: desktop structure, held sections are on. */
+html[data-mt-held] .mt [data-hold] { height: calc((1 + var(--hold, 1)) * max(100svh, 600px)); }
+html[data-mt-held] .mt [data-hold] > .mt-stage { position: sticky; top: 0; height: max(100svh, 600px); min-height: 0; overflow: clip; }
