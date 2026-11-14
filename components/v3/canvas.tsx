@@ -8,7 +8,7 @@ import { isTrackpad } from "@/lib/motion/wheel";
 import { projectHref } from "@/lib/project-href";
 import type { WorkItem } from "@/components/v3/work";
 
-/* `?canvas=1` prototype (mock approved by Julian, 2026-11-07): every frame
+/* The canvas view (mock approved by Julian, 2026-11-07): every frame
    of every project as one endless field you pan by dragging, flicking or
    scrolling. Columns loop on their own heights and starts, so the field
    repeats with no seam and no straight rows. A scale slider sets the size.
@@ -28,9 +28,9 @@ type Frames = Record<string, [string, number, string, string][]>;
 /* Upright frames sit as 3:4 on the field, like the grid and strip (Julian, 2026-11-07); square and wide keep theirs. The opened frame shows the whole photo. */
 const shape = (r: number) => (r > 1.02 ? 4 / 3 : r);
 const mod = (a: number, b: number) => ((a % b) + b) % b;
-const plural = (n: number) => `${n} ${n === 1 ? "project" : "projects"}`;
 
-export function V3Canvas({ list, onClose }: { list: WorkItem[]; onClose: () => void }) {
+/** `bar`: the discipline chips and the view row. `onLeave`: Open project takes the canvas down. */
+export function V3Canvas({ list, onClose, onLeave, bar }: { list: WorkItem[]; onClose: () => void; onLeave: () => void; bar: React.ReactNode }) {
   const field = React.useRef<HTMLDivElement>(null);
   /* Covers until `/canvas.json` lands, then every frame, projects in the page's order. */
   const [all, setAll] = React.useState<Frames | null>(null);
@@ -53,6 +53,11 @@ export function V3Canvas({ list, onClose }: { list: WorkItem[]; onClose: () => v
       ),
     [list, all],
   );
+
+  // The page under the canvas is inert, so focus moves to the bar's pressed view button.
+  React.useEffect(() => {
+    field.current?.parentElement?.querySelector<HTMLElement>('.cv-top .wviews [aria-pressed="true"]')?.focus();
+  }, []);
 
   const [opened, setOpened] = React.useState<Opened | null>(null);
   const [grown, setGrown] = React.useState(false);
@@ -335,16 +340,10 @@ export function V3Canvas({ list, onClose }: { list: WorkItem[]; onClose: () => v
       <div className="cv-field" ref={field} />
       {/* An open frame has its own Back; the bar would sit under it. */}
       <div className="cv-top lbl" style={opened ? { visibility: "hidden" } : undefined}>
-        <span className="mute">
-          {plural(list.length)}
-          {all ? ` · ${frames.length} frames` : ""}
-        </span>
-        <button type="button" className="cv-q" onClick={onClose}>
-          Close
-        </button>
+        {bar}
       </div>
       <div className="cv-foot lbl mute">
-        <span className={hint ? "" : "gone"}>Drag to explore</span>
+        <span>{hint || !all ? "Drag to explore" : `${frames.length} frames`}</span>
         <label className="cv-scale">
           Scale
           <input
@@ -374,7 +373,8 @@ export function V3Canvas({ list, onClose }: { list: WorkItem[]; onClose: () => v
           <p>Drag, flick or scroll in any direction. Every frame of every project, and the field never ends.</p>
           <p>Scale sets the size. Double-click it for 1×.</p>
           <p>Click a photo to open its project.</p>
-          <p className="mute">Arrow keys pan. Esc closes.</p>
+          <p>A discipline brings its frames to the front.</p>
+          <p className="mute">Arrow keys pan. Esc goes back to the grid.</p>
         </div>
       ) : null}
       {p && fr ? (
@@ -393,7 +393,7 @@ export function V3Canvas({ list, onClose }: { list: WorkItem[]; onClose: () => v
             <h2>{p.n}</h2>
             {/* The canvas comes down before the page crossing: WebKit crashed snapshotting the
                 live field into the view transition (4 of 4, iPhone, iPad and desktop). */}
-            <Link className="lbl" href={projectHref(p.s)} onClick={onClose}>
+            <Link className="lbl" href={projectHref(p.s)} onClick={onLeave}>
               Open project
             </Link>
           </div>

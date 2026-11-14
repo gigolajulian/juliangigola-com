@@ -365,7 +365,7 @@ export const BOOKING_PAGES: BookingPage[] = [
       },
       {
         q: "Do you shoot portfolio tests too?",
-        a: "Yes. A styled test is a different shoot from digitals and is quoted on request: the editorial work shows what one looks like.",
+        a: "Yes. A styled test is a different shoot from digitals. Book one with the $100 deposit and I quote on the call.",
       },
     ],
     tiles: coversOf("studio-digitals"),

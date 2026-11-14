@@ -77,6 +77,7 @@ export const EVENTS: Record<string, Rule> = {
   headshots: { title: "Headshots", length: 30, ...SHOOT },
   graduation: { title: "Graduation photos", length: 90, ...SHOOT },
   digitals: { title: "Studio digitals", length: 45, ...SHOOT },
+  "model-test": { title: "Model test", length: 60, ...SHOOT },
   editorial: { title: "Editorial call", notice: 1440, ahead: 180, ...CALL },
   campaign: { title: "Brand & Campaign Call", notice: 1440, ahead: 180, ...CALL },
   consultation: { title: "Consultation", notice: 120, ...CALL },
