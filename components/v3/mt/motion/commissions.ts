@@ -8,7 +8,7 @@ const MAX = 0.6; // px/ms, so a hard flick does not blur the marks
 const MAX_PHONE = 0.35;
 const RISE: KeyframeAnimationOptions = { duration: 600, easing: "cubic-bezier(.16,1,.3,1)" };
 
-const s = { track: null as HTMLElement | null, w: 0, seen: false, x: 0, v: IDLE, kick: 0 };
+const s = { head: null as HTMLElement | null, logos: null as HTMLElement | null, o: 1, track: null as HTMLElement | null, w: 0, seen: false, x: 0, v: IDLE, kick: 0 };
 const put = (n: Element | null, text: string) => {
   // keep React's own text node
   if (n?.firstChild) (n.firstChild as Text).data = text;
@@ -66,10 +66,23 @@ export const commissionsDrivers: Driver[] = [
         track.style.transform = "";
         el.dataset.cur = "0";
         [count, name, meta].forEach((n, i) => put(n, first[i]));
-        s.track = null;
+        s.track = s.head = s.logos = null;
+        s.o = 1;
       };
     },
-    frame(_p, _el, ctx) {
+    frame(_p, el, ctx) {
+      const head = (s.head ??= el.querySelector<HTMLElement>(".mt-comm-head"));
+      const logos = (s.logos ??= el.querySelector<HTMLElement>(".mt-logos"));
+      if (head && logos) {
+        // gone while the logos are still 40% of a screen below it
+        const o = ctx.held ? clamp((logos.getBoundingClientRect().top - head.getBoundingClientRect().bottom - ctx.vh * 0.4) / (ctx.vh * 0.25)) : 1;
+        if (o !== s.o) {
+          s.o = o;
+          head.style.opacity = o < 1 ? o.toFixed(3) : "";
+          head.style.transform = o < 1 ? `translate3d(0,${((o - 1) * 28).toFixed(1)}px,0)` : "";
+          head.style.visibility = o ? "" : "hidden";
+        }
+      }
       if (!s.seen || !s.w || !s.track) return;
       const max = ctx.held ? MAX : MAX_PHONE;
       s.kick = clamp(s.kick * 0.94 ** (ctx.dt / 16.7) + ctx.dy * GAIN, -max, max);

@@ -47,6 +47,7 @@ export function startEngine(root: HTMLElement, drivers: Driver[]) {
   const ctx: Ctx = { vw: innerWidth, vh: innerHeight, y: scrollY, dy: 0, t: performance.now(), dt: 16, held: mqD.matches, fine: mqFine.matches, u: 1 };
   const secs = [...root.querySelectorAll<HTMLElement>("[data-mt]")];
   const last = new Map<HTMLElement, number>();
+  const lastIn = new Map<HTMLElement, number>();
   const measure = () => {
     ctx.vw = innerWidth;
     ctx.vh = innerHeight;
@@ -75,6 +76,11 @@ export function startEngine(root: HTMLElement, drivers: Driver[]) {
         last.set(s, p);
         s.style.setProperty("--p", p.toFixed(4));
       }
+      const enter = clamp((ctx.vh - r.top) / ctx.vh);
+      if (Math.abs((lastIn.get(s) ?? -1) - enter) > 0.002) {
+        lastIn.set(s, enter);
+        s.style.setProperty("--in", enter.toFixed(3));
+      }
       for (const d of drivers) if (d.frame && d.name === s.dataset.mt && (ctx.held || d.always)) d.frame(p, s, ctx);
     }
   };
@@ -88,6 +94,6 @@ export function startEngine(root: HTMLElement, drivers: Driver[]) {
     offs.forEach((off) => off?.());
     html.removeAttribute("data-mt-held");
     html.removeAttribute("data-mt-motion");
-    for (const s of secs) s.style.removeProperty("--p");
+    for (const s of secs) (s.style.removeProperty("--p"), s.style.removeProperty("--in"));
   };
 }

@@ -307,9 +307,9 @@ function setup(el: HTMLElement, ctx: Ctx) {
     }
 
     // phrase: one speed easing toward idle plus whatever the scroll adds
-    pk = clamp(pk * Math.pow(0.94, k) + c.dy * 0.004, -1.5, 1.5);
+    pk = clamp(pk * Math.pow(0.94, k) + c.dy * 0.0012, -0.35, 0.35);
     if (Math.abs(pk) < 0.0005) pk = 0;
-    v += ((busy ? 0 : 0.055 * u * (hot ? 0.22 : 1)) + pk - v) * (1 - Math.exp(-dt / 180));
+    v += ((busy ? 0 : 0.03 * u * (hot ? 0.22 : 1)) + pk - v) * (1 - Math.exp(-dt / 180));
     x += v * dt;
     tr = -pad - mod(x, W || 1);
     row.style.transform = `translate3d(${tr.toFixed(1)}px,0,0)`;

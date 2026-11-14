@@ -509,3 +509,6 @@ html[data-mt-intro="1"]{overflow:hidden}
 /* side columns only where a real part of one fits: below about 1.9:1 just a 15px sliver shows at each edge. The intro still uses them. */
 @media (min-width:1024px) and (min-height:600px) and (max-aspect-ratio:19/10){html:not([data-mt-intro]) .mt-hero .mt-col.side{visibility:hidden}}
 @media (min-width:1024px) and (min-height:600px) and (max-aspect-ratio:29/10){html:not([data-mt-intro]) .mt-hero .mt-col.side:is([data-col="-2"],[data-col="4"]){visibility:hidden}}
+/* What I do: two columns of three on every structure */
+@media (min-width:600px){[data-mtscroll] .mt-does ol{display:grid;grid-template-columns:1fr 1fr;grid-auto-flow:column;grid-template-rows:repeat(3,auto);column-gap:calc(20 * var(--u))}}
+@media (min-width:600px){[data-mtscroll] .mt-does li{gap:8px}[data-mtscroll] .mt-does b{font-size:calc(15 * var(--u));white-space:nowrap}}
