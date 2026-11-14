@@ -15,6 +15,21 @@ describe("ImageFallback", () => {
     img.remove();
   });
 
+  it("sweeps a picture that failed before it mounted, and leaves one still loading", () => {
+    const failed = document.createElement("img");
+    failed.src = "https://juliangigola.com/cdn-cgi/image/width=640,quality=78,format=auto/work/nyx/02.jpg";
+    Object.defineProperty(failed, "complete", { value: true });
+    const loading = document.createElement("img");
+    loading.src = "/cdn-cgi/image/width=640,quality=78/work/nyx/03.jpg";
+    document.body.append(failed, loading);
+    render(<ImageFallback />);
+    expect(failed.src).toBe(`${location.origin}/work/nyx/02.jpg`);
+    expect(failed.dataset.plain).toBe("");
+    expect(loading.dataset.plain).toBeUndefined();
+    failed.remove();
+    loading.remove();
+  });
+
   it("a preview's picture from the live zone falls back to this origin's file", () => {
     render(<ImageFallback />);
     const img = document.createElement("img");
