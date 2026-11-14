@@ -1,7 +1,7 @@
 import { CARD_SIZE, CARD_TYPE, framesOf, renderCard } from "@/lib/share-card";
 import { BOOK_MENU, pageForSession } from "@/lib/booking/booking";
 import { FEATURED } from "@/lib/work";
-import { SESSIONS } from "@/lib/v3";
+import { SESSIONS, isSession } from "@/lib/v3";
 
 export const size = CARD_SIZE;
 export const contentType = CARD_TYPE;
@@ -23,7 +23,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
   const frames = chosen?.length ? await framesOf(chosen) : page?.picks?.length ? await framesOf(page.picks) : (page?.tiles ?? []).map((t) => t.frame);
   return renderCard({
     kicker: "Book a session",
-    title: m?.name ?? (slug === "consultation" ? "Consultation" : slug[0].toUpperCase() + slug.slice(1)),
+    title: m?.name ?? (isSession(slug) ? SESSIONS[slug].name : slug[0].toUpperCase() + slug.slice(1)),
     byline: "with Julian Gigola",
     frames: frames.length ? frames : FEATURED.map((p) => p.images[0]),
   });
