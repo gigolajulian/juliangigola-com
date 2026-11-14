@@ -10,7 +10,7 @@ import type { Flip as FlipT } from "gsap/Flip";
 import { V3Foot } from "@/components/v3/chrome";
 import DISC from "@/lib/discipline-order.json";
 import { mplan, GSAP_OUT } from "@/lib/mplan";
-// The `?canvas=1` prototype loads only when it opens, not with every /portfolio visit.
+// The canvas view loads only when it opens, not with every /portfolio visit.
 const V3Canvas = dynamic(() => import("@/components/v3/canvas").then((m) => m.V3Canvas), { ssr: false });
 import { launchSpeed, stepSpring, springSettled, frameDt } from "@/lib/motion/spring";
 
@@ -448,6 +448,14 @@ function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: number 
   );
 }
 
+/** Writes or clears `?view=canvas` on the address in place, with no new history entry. */
+const viewUrl = (canvas: boolean) => {
+  const u = new URL(location.href);
+  if (canvas) u.searchParams.set("view", "canvas");
+  else u.searchParams.delete("view");
+  if (u.href !== location.href) history.replaceState(null, "", u);
+};
+
 export function V3Work({
   work,
   chip = {},
@@ -467,16 +475,20 @@ export function V3Work({
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (d) setFilter(d);
   }, [chip]);
-  const [view, setView] = React.useState<"grid" | "strip" | "color">("grid");
-  const back = React.useRef<"grid" | "strip">("grid");
-  /* `?canvas=1` prototype: a fourth view button opens the drag canvas. */
-  const [canvasOk, setCanvasOk] = React.useState(false);
-  const [canvas, setCanvas] = React.useState(false);
-  const closeCanvas = React.useCallback(() => setCanvas(false), []);
+  const [view, setView] = React.useState<"grid" | "strip" | "color" | "canvas">("grid");
+  const back = React.useRef<"grid" | "strip" | "canvas">("grid");
+  /* `?view=canvas` opens on the canvas. The address carries it while the
+     canvas is on, so Back from a project it opened lands on the canvas again. */
   React.useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setCanvasOk(new URLSearchParams(location.search).get("canvas") === "1");
+    if (new URLSearchParams(location.search).get("view") === "canvas") setView("canvas");
   }, []);
+  const closeCanvas = React.useCallback(() => {
+    viewUrl(false);
+    setView("grid");
+  }, []);
+  // Open project: the canvas comes down, the address keeps `?view=canvas` for Back.
+  const leaveCanvas = React.useCallback(() => setView("grid"), []);
   /* Grid, strip and color views, and the discipline chips: the covers on
      screen fly from where they were to where they land, new ones fade in
      (GSAP Flip). Only with ?v3motion. */
@@ -491,7 +503,10 @@ export function V3Work({
       flip.current = Flip.current.getState(seen());
     set();
   };
-  const go = (v: typeof view) => flipped(() => setView(v));
+  const go = (v: typeof view) => {
+    viewUrl(v === "canvas");
+    flipped(() => setView(v));
+  };
   const [q, setQ] = React.useState("");
   /* Option 2 (Julian, 2026-11-04): once the search row scrolls under the
      header, a magnifier and the view buttons ride in the header instead of a
@@ -604,6 +619,9 @@ export function V3Work({
       ),
     [work, filter, q],
   );
+  /* The canvas always shows every frame (Julian, 2026-11-13): a chip or a
+     search sorts its projects to the front, the rest follow. */
+  const field = React.useMemo(() => [...list, ...work.filter((p) => !list.includes(p))], [list, work]);
   /* A gallery chip with no search shows its frames, not its one cover. */
   const shown = !q ? frames[filter] : undefined;
   /* The strip runs a gallery out too: its chip shows every frame, and under
@@ -1000,8 +1018,7 @@ export function V3Work({
       >
         {VIEWS[2][2]}
       </button>
-      {canvasOk ? (
-        <button type="button" aria-pressed={canvas} aria-label="Canvas view" title="Canvas view" onClick={() => setCanvas(true)}>
+      <button type="button" aria-pressed={view === "canvas"} aria-label="Canvas view" title="Canvas view" onClick={() => go("canvas")}>
           <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
             <rect x="1.5" y="3" width="4" height="5" />
             <rect x="6.5" y="1" width="4" height="5" />
@@ -1010,8 +1027,7 @@ export function V3Work({
             <rect x="6.5" y="7.5" width="4" height="5" />
             <rect x="11.5" y="10.5" width="3" height="4" />
           </svg>
-        </button>
-      ) : null}
+      </button>
       {[VIEWS[1], VIEWS[0]].map(([v, label, icon]) => (
         <button
           key={v}
@@ -1042,6 +1058,8 @@ export function V3Work({
               : "v3page"
         }
         id="p-work"
+        // The canvas covers the page: Tab goes to its bar, not to the page under it.
+        inert={view === "canvas"}
       >
         <div className="pg-head">
           <h1 className="pg-t">{filter === "All" ? "Portfolio" : filter}</h1>
@@ -1239,7 +1257,31 @@ export function V3Work({
             </div>,
             document.getElementById("hdr-tools")!,
           )}
-        {canvas ? createPortal(<div className="v3"><V3Canvas list={list} onClose={closeCanvas} /></div>, document.body) : null}
+        {view === "canvas"
+          ? createPortal(
+              <div className="v3">
+                <V3Canvas
+                  list={field}
+                  onClose={closeCanvas}
+                  onLeave={leaveCanvas}
+                  bar={
+                    <>
+                      {/* A mouse wheel runs the row sideways, as it does on the page's chips. */}
+                      <div className="chips lbl" role="group" aria-label="Sort by discipline" onWheel={(e) => (e.currentTarget.scrollLeft += e.deltaY)}>
+                        {["All", ...order].map((d) => (
+                          <button key={d} type="button" aria-pressed={d === filter} onClick={() => setFilter(d)}>
+                            {d}
+                          </button>
+                        ))}
+                      </div>
+                      {views}
+                    </>
+                  }
+                />
+              </div>,
+              document.body,
+            )
+          : null}
         <V3Foot />
       </section>
     </div>

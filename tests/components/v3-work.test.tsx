@@ -27,4 +27,18 @@ describe("V3Work", () => {
     const outside = WORK.find((w) => !w.d.includes(d));
     if (outside) expect(container.querySelector(`.wgrid a[href="/portfolio/${outside.s}"]`)).toBeNull();
   });
+
+  it("the canvas is a view of its own, and `?view=canvas` opens on it", () => {
+    const { unmount } = render(<V3Work work={WORK} />);
+    const btn = screen.getByRole("button", { name: "Canvas view" });
+    expect(btn.getAttribute("aria-pressed")).toBe("false");
+    fireEvent.click(btn);
+    expect(btn.getAttribute("aria-pressed")).toBe("true");
+    expect(location.search).toBe("?view=canvas");
+    unmount();
+    render(<V3Work work={WORK} />);
+    expect(screen.getAllByRole("button", { name: "Canvas view" })[0].getAttribute("aria-pressed")).toBe("true");
+    fireEvent.click(screen.getAllByRole("button", { name: "Grid view" })[0]);
+    expect(location.search).toBe("");
+  });
 });
