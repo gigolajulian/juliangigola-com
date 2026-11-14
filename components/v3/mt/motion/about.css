@@ -7,7 +7,8 @@ html[data-mt-motion]:not([data-mt-held]) .mt-about{--sw:var(--sp,1);--dr:calc(va
 
 /* 3. Sentence, word by word */
 html[data-mt-motion] .mt-say span{--v:clamp(0,calc(var(--sw) * (var(--n) + 1) - var(--w)),1);opacity:calc(var(--lo) + var(--v) * (1 - var(--lo)))}
-html[data-mt-held] .mt-say span{transform:translateY(calc((1 - var(--v)) * .16em));filter:blur(calc((1 - var(--v)) * 5px));will-change:transform,filter,opacity}
+html[data-mt-held] .mt-say span{transform:translateY(calc((1 - var(--v)) * .16em));filter:blur(calc((1 - var(--v)) * 5px))}
+html[data-mt-held] .mt-about[data-mt-near] .mt-say span{will-change:transform,filter,opacity}
 
 /* 4. What I do: number and name fade, the name rises, the hairline draws */
 html[data-mt-motion] .mt-does li{--f:clamp(0,calc(var(--dr) - var(--j) * .5),1);position:relative;overflow:clip;border-bottom-color:transparent}
@@ -18,11 +19,13 @@ html[data-mt-motion] .mt-does li b{opacity:var(--f);transform:translateY(calc((1
 html[data-mt-held] .mt-does h2{opacity:clamp(0,calc((var(--p,0) - .46) * 12),1)}
 
 /* 1. Wordmark letters rise into the clipped line */
-html[data-mt-held] .mt-wordmark span{transform:translateY(calc((1 - clamp(0,calc(var(--p,0) * 5 - var(--j) * .07),1)) * 114%));will-change:transform}
+html[data-mt-held] .mt-wordmark span{transform:translateY(calc((1 - clamp(0,calc(var(--p,0) * 5 - var(--j) * .07),1)) * 114%))}
+html[data-mt-held] .mt-about[data-mt-near] .mt-wordmark span{will-change:transform}
 
 /* 2. Photo */
 html[data-mt-held] .mt-ab-ph{opacity:calc(.35 + var(--r) * .65)}
-html[data-mt-held] .mt-ab-ph img{transform-origin:32% 45%;transform:scale(calc(1.22 - var(--r) * .22));filter:blur(calc((1 - var(--r)) * 10px));will-change:transform,filter}
+html[data-mt-held] .mt-ab-ph img{transform-origin:32% 45%;transform:scale(calc(1.22 - var(--r) * .22));filter:blur(calc((1 - var(--r)) * 10px))}
+html[data-mt-held] .mt-about[data-mt-near] .mt-ab-ph img{will-change:transform,filter}
 
 /* 5 to 7. Hairline, facts, button */
 html[data-mt-held] .mt-ab-foot hr{transform-origin:0 50%;transform:scaleX(var(--e))}

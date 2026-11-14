@@ -50,7 +50,7 @@ export function HeldRow({
     <section className={`mt-held mt-${name}`} data-mt={name} data-hold={hold} data-cur={cur} style={{ "--n": count } as React.CSSProperties}>
       <div className="mt-stage">
         {head?.(cur)}
-        <div className="mt-row" ref={row} tabIndex={0} aria-label={label}>
+        <div className="mt-row" ref={row} role="group" tabIndex={0} aria-label={label}>
           <div className="mt-track">{children}</div>
         </div>
         {foot?.(cur)}

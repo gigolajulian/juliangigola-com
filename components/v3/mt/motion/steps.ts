@@ -28,7 +28,7 @@ const stepper = (name: string, count: number): Driver => {
     frame(_p, el, ctx) {
       if (ctx.held) return void (last = -1);
       // the bottom bar belongs to the section that fills the screen, so two bars never stack
-      const top = el.getBoundingClientRect().top;
+      const top = ctx.top;
       if (top < ctx.vh * 0.45 !== bar) el.toggleAttribute("data-bar", (bar = !bar));
       if (ctx.t - tap < HOLD_AFTER_TAP || el.closest<HTMLElement>(".mt")?.dataset.cards === "open" || el.hasAttribute("data-open")) return;
       // the walk runs while the rows themselves are on screen: from the section's top a quarter down the screen to just over half a screen above it

@@ -2,12 +2,12 @@
 html[data-mt-motion] .mt-foot .mt-ph[data-copy]{visibility:visible}
 /* links, phrase and last line stay above the lifted frame */
 html[data-mt-motion] .mt-foot :is(.mt-fcols,.mt-phrase,.mt-fline){z-index:2}
-html[data-mt-held] .mt-fwall{will-change:transform,opacity}
-html[data-mt-held] .mt-fcol{will-change:transform}
+html[data-mt-held] .mt-foot[data-mt-near] .mt-fwall{will-change:transform,opacity}
+html[data-mt-held] .mt-foot[data-mt-near] .mt-fcol{will-change:transform}
 
 /* phone row: the drift replaces the native sideways scroll */
 html[data-mt-motion]:not([data-mt-held]) .mt-frow{overflow:hidden;scroll-snap-type:none}
-html[data-mt-motion]:not([data-mt-held]) .mt-frow figure{will-change:transform}
+html[data-mt-motion]:not([data-mt-held]) .mt-foot[data-mt-near] .mt-frow figure{will-change:transform}
 
 /* hover spot (canvas) and dot pointer; `color` is the ground the canvas reads */
 html[data-mt-motion] .mt-fcut{position:absolute;left:0;top:0;z-index:3;pointer-events:none;opacity:0;color:var(--bg);will-change:transform}

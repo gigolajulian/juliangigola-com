@@ -190,6 +190,7 @@ function setup(el: HTMLElement, ctx: Ctx) {
     g.drawImage(Mc, 0, 0);
   };
 
+  let under: HTMLElement | null = null, hx = -2, hy = -2, hitT = 0;
   const hit = (cxp: number, cyp: number) => (document.elementsFromPoint(cxp, cyp).find((e) => e.parentElement?.classList.contains("mt-fcol")) as HTMLElement | undefined) ?? null;
 
   /** A larger file of the same photo from the image's own srcset. */
@@ -364,7 +365,13 @@ function setup(el: HTMLElement, ctx: Ctx) {
     if (!c.fine) return;
     // dwell lift
     if (!opened) {
-      const fig = !busy && okT && px >= 0 && inWall(r, py) ? hit(px, py) : null;
+      if (px !== hx || py !== hy || c.t - hitT > 100) {
+        hx = px;
+        hy = py;
+        hitT = c.t;
+        under = !busy && okT && px >= 0 && inWall(r, py) ? hit(px, py) : null;
+      }
+      const fig = !busy && okT && px >= 0 ? under : null;
       if (fig !== hov) {
         hov = fig;
         ht = c.t;

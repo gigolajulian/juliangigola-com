@@ -3,7 +3,7 @@ import { QUOTE_CLIENTS } from "../data";
 
 /* By quote client rotation (spec 3.5). Runs on the engine's frame, so it
    stops with the tab; it also waits while the section is off screen, a card is
-   open or an option's photo is showing. The DOM is marked directly (`data-q`,
+   open, an option's photo is showing or keyboard focus is inside the section. The DOM is marked directly (`data-q`,
    `data-rot`, `data-sw`): React's `ci` stays 0 and never rewrites these. */
 const EVERY = 5500;
 const SWAP = 500; // the name fades out, swaps, fades in
@@ -54,7 +54,7 @@ export const quoteDrivers: Driver[] = [
       if (s.swap > 0 && (s.swap -= ctx.dt) <= 0) write(s.k);
       const rot = ctx.fine ? !el.hasAttribute("data-opt") : ctx.t - s.tap > REST;
       if (rot !== s.rot) el.toggleAttribute("data-rot", (s.rot = rot));
-      if (!rot || (!ctx.held && (p <= 0 || p >= 1)) || s.root?.dataset.cards === "open") return;
+      if (!rot || (!ctx.held && (p <= 0 || p >= 1)) || s.root?.dataset.cards === "open" || el.contains(document.activeElement)) return;
       if ((s.t += ctx.dt) < EVERY) return;
       s.t = 0;
       s.k = (s.k + 1) % QUOTE_CLIENTS.length;

@@ -8,7 +8,7 @@ const MAX = 0.6; // px/ms, so a hard flick does not blur the marks
 const MAX_PHONE = 0.35;
 const RISE: KeyframeAnimationOptions = { duration: 600, easing: "cubic-bezier(.16,1,.3,1)" };
 
-const s = { head: null as HTMLElement | null, logos: null as HTMLElement | null, o: 1, track: null as HTMLElement | null, w: 0, seen: false, x: 0, v: IDLE, kick: 0 };
+const s = { head: null as HTMLElement | null, logos: null as HTMLElement | null, o: 1, track: null as HTMLElement | null, w: 0, seen: false, x: 0, v: IDLE, kick: 0, hover: false, focus: false };
 const put = (n: Element | null, text: string) => {
   // keep React's own text node
   if (n?.firstChild) (n.firstChild as Text).data = text;
@@ -58,10 +58,18 @@ export const commissionsDrivers: Driver[] = [
       ro.observe(set);
       const see = new IntersectionObserver(([e]) => (s.seen = e.isIntersecting));
       see.observe(strip);
+      const ac = new AbortController();
+      const on = (type: string, f: () => void) => row.addEventListener(type, f, { signal: ac.signal });
+      on("pointerenter", () => (s.hover = true));
+      on("pointerleave", () => (s.hover = false));
+      on("focusin", () => (s.focus = true));
+      on("focusout", () => (s.focus = false));
       return () => {
         cur.disconnect();
         ro.disconnect();
         see.disconnect();
+        ac.abort();
+        s.hover = s.focus = false;
         extra.forEach((n) => n.remove());
         track.style.transform = "";
         el.dataset.cur = "0";
@@ -73,7 +81,7 @@ export const commissionsDrivers: Driver[] = [
     frame(_p, el, ctx) {
       const head = (s.head ??= el.querySelector<HTMLElement>(".mt-comm-head"));
       const logos = (s.logos ??= el.querySelector<HTMLElement>(".mt-logos"));
-      if (head && logos) {
+      if (head && logos && (ctx.dy || ctx.fresh)) {
         // gone while the logos are still 40% of a screen below it
         const o = ctx.held ? clamp((logos.getBoundingClientRect().top - head.getBoundingClientRect().bottom - ctx.vh * 0.4) / (ctx.vh * 0.25)) : 1;
         if (o !== s.o) {
@@ -86,7 +94,7 @@ export const commissionsDrivers: Driver[] = [
       if (!s.seen || !s.w || !s.track) return;
       const max = ctx.held ? MAX : MAX_PHONE;
       s.kick = clamp(s.kick * 0.94 ** (ctx.dt / 16.7) + ctx.dy * GAIN, -max, max);
-      s.v += (IDLE + s.kick - s.v) * (1 - Math.exp(-ctx.dt / 180));
+      s.v += ((s.hover || s.focus ? 0 : IDLE) + s.kick - s.v) * (1 - Math.exp(-ctx.dt / 180));
       s.x = (((s.x + s.v * ctx.dt) % s.w) + s.w) % s.w;
       s.track.style.transform = `translate3d(${-s.x}px,0,0)`;
     },

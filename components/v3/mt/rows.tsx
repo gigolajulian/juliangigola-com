@@ -58,9 +58,12 @@ export function MtMotion({ films }: { films: MtFilm[] }) {
     const items = el.querySelectorAll<HTMLElement>(".mt-item");
     const mq = matchMedia(D);
     let raf = 0;
+    let seen = true;
+    const io = new IntersectionObserver(([e]) => (seen = e.isIntersecting), { rootMargin: "100% 0px" });
+    io.observe(el);
     const read = () => {
       raf = 0;
-      if (items.length < 2) return;
+      if (items.length < 2 || !seen) return;
       const a = items[0].getBoundingClientRect(), b = items[1].getBoundingClientRect();
       // Desktop: the film nearest the middle of the screen. Elsewhere: the row's own snap step.
       const at = mq.matches ? (innerHeight / 2 - a.top - a.height / 2) / (b.top - a.top) : el.scrollLeft / (b.left - a.left);
@@ -72,6 +75,7 @@ export function MtMotion({ films }: { films: MtFilm[] }) {
     addEventListener("resize", on);
     on();
     return () => {
+      io.disconnect();
       el.removeEventListener("scroll", on);
       removeEventListener("scroll", on);
       removeEventListener("resize", on);
@@ -88,7 +92,7 @@ export function MtMotion({ films }: { films: MtFilm[] }) {
           <h2>Motion</h2>
           <p className="lbl mute">Director and DP | {films.length} films</p>
         </div>
-        <div className="mt-row" ref={row} tabIndex={0} aria-label="Films">
+        <div className="mt-row" ref={row} role="group" tabIndex={0} aria-label="Films">
           <div className="mt-track">
             {films.map((f, i) => (
               <Link key={f.id} href={f.href} className="mt-item mt-film" data-i={i} data-film={f.id} data-preview={f.preview} aria-label={`${f.title}, ${f.kind}`}>

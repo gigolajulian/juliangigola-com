@@ -70,9 +70,8 @@ export const heroDrivers: Driver[] = [
       }
 
       // the columns lead upward, so nothing runs past the bottom of the wall
-      const r = el.getBoundingClientRect();
-      const gone = clamp(-r.top, 0, LAG_MAX);
-      if (mode === "p") for (const f of st.figs) move(f, -DRIFT[f.c] * clamp(gone / Math.max(1, r.height)));
+      const gone = clamp(-ctx.top, 0, LAG_MAX);
+      if (mode === "p") for (const f of st.figs) move(f, -DRIFT[f.c] * clamp(gone / Math.max(1, ctx.h)));
       else for (const c of st.cols) move(c, -gone * c.a * 0.5 * (ctx.vw / 1440));
     },
   },

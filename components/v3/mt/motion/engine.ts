@@ -20,6 +20,11 @@ export type Ctx = {
   fine: boolean;
   /** design unit in px (the `--u` of mtscroll.css on D) */
   u: number;
+  /** the section being framed: its top edge on screen and its height, px. Drivers read these, not the layout. */
+  top: number;
+  h: number;
+  /** true on the frames where the section boxes were measured again (first frame, resize, a section changed height) */
+  fresh: boolean;
 };
 
 export type Driver = {
@@ -27,7 +32,7 @@ export type Driver = {
   name: string;
   /** once, after the section is in the DOM. Return a cleanup. */
   setup?: (el: HTMLElement, ctx: Ctx) => void | (() => void);
-  /** every frame while the section is within one screen of the viewport */
+  /** every frame while the section is within one screen of the viewport (it carries `data-mt-near` then) */
   frame?: (p: number, el: HTMLElement, ctx: Ctx) => void;
   /** run `frame` on every structure. Default: only when holds are on (D). */
   always?: boolean;
@@ -44,12 +49,29 @@ export function startEngine(root: HTMLElement, drivers: Driver[]) {
   if (matchMedia("(prefers-reduced-motion: reduce)").matches) return () => {};
   const mqD = matchMedia(D);
   const mqFine = matchMedia("(hover:hover) and (pointer:fine)");
-  const ctx: Ctx = { vw: innerWidth, vh: innerHeight, y: scrollY, dy: 0, t: performance.now(), dt: 16, held: mqD.matches, fine: mqFine.matches, u: 1 };
+  const ctx: Ctx = { vw: innerWidth, vh: innerHeight, y: scrollY, dy: 0, t: performance.now(), dt: 16, held: mqD.matches, fine: mqFine.matches, u: 1, top: 0, h: 0, fresh: true };
   const secs = [...root.querySelectorAll<HTMLElement>("[data-mt]")];
   const last = new Map<HTMLElement, number>();
   const lastIn = new Map<HTMLElement, number>();
   const lastOut = new Map<HTMLElement, number>();
+  // Section boxes in page coordinates. Measured when something can have moved them, never per frame:
+  // a resize, a section or the home changing height, and once a second while the page scrolls as a net.
+  const boxes = new Map<HTMLElement, { top: number; h: number }>();
+  const near = new Map<HTMLElement, boolean>();
+  let stale = true;
+  let boxedAt = 0;
+  const box = () => {
+    const y = scrollY;
+    for (const s of secs) {
+      const r = s.getBoundingClientRect();
+      boxes.set(s, { top: r.top + y, h: r.height });
+    }
+  };
+  const ro = new ResizeObserver(() => (stale = true));
+  ro.observe(root);
+  for (const s of secs) ro.observe(s);
   const measure = () => {
+    stale = true;
     ctx.vw = innerWidth;
     ctx.vh = innerHeight;
     ctx.held = mqD.matches;
@@ -72,9 +94,21 @@ export function startEngine(root: HTMLElement, drivers: Driver[]) {
     if (ctx.dy) moved = now;
     html.toggleAttribute("data-mt-scrolling", now - moved < 180);
     ctx.y = scrollY;
+    ctx.fresh = stale || (ctx.dy !== 0 && now - boxedAt > 1000);
+    if (ctx.fresh) {
+      stale = false;
+      boxedAt = now;
+      box();
+    }
     for (const s of secs) {
-      const r = s.getBoundingClientRect();
-      if (r.bottom < -ctx.vh || r.top > 2 * ctx.vh) continue;
+      const b = boxes.get(s)!;
+      const r = { top: b.top - ctx.y, bottom: b.top - ctx.y + b.h, height: b.h };
+      const on = !(r.bottom < -ctx.vh || r.top > 2 * ctx.vh);
+      // layers (will-change in the motion css) only for sections near the screen
+      if (near.get(s) !== on) (near.set(s, on), s.toggleAttribute("data-mt-near", on));
+      if (!on) continue;
+      ctx.top = r.top;
+      ctx.h = r.height;
       const hold = ctx.held && !!s.dataset.hold;
       const p = hold ? clamp(-r.top / Math.max(1, r.height - ctx.vh)) : clamp((ctx.vh - r.top) / (r.height + ctx.vh));
       if (Math.abs((last.get(s) ?? -1) - p) > 0.0004) {
@@ -99,12 +133,13 @@ export function startEngine(root: HTMLElement, drivers: Driver[]) {
   mqD.addEventListener("change", measure);
   return () => {
     cancelAnimationFrame(raf);
+    ro.disconnect();
     removeEventListener("resize", measure);
     mqD.removeEventListener("change", measure);
     offs.forEach((off) => off?.());
     html.removeAttribute("data-mt-held");
     html.removeAttribute("data-mt-motion");
     html.removeAttribute("data-mt-scrolling");
-    for (const s of secs) (s.style.removeProperty("--p"), s.style.removeProperty("--in"), s.style.removeProperty("--out"));
+    for (const s of secs) (s.style.removeProperty("--p"), s.style.removeProperty("--in"), s.style.removeProperty("--out"), s.removeAttribute("data-mt-near"));
   };
 }
