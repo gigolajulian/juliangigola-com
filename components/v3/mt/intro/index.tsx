@@ -87,7 +87,8 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
     const anims: Animation[] = [];
     const made: HTMLElement[] = [];
     const timers: number[] = [];
-    let over = false;
+    let over_ = false; // the intro has ended
+    let raf = 0;
     let started = false;
     const INPUTS = ["wheel", "touchstart", "pointerdown", "keydown"] as const;
     let hurry = () => {};
@@ -96,8 +97,9 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
     const ready: string[] = [];
 
     const finish = (seen: boolean) => {
-      if (over) return;
-      over = true;
+      if (over_) return;
+      over_ = true;
+      cancelAnimationFrame(raf);
       stopHurry();
       timers.forEach(clearTimeout);
       anims.forEach((a) => a.cancel());
@@ -129,7 +131,7 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
       );
 
     const run = () => {
-      if (started || over) return;
+      if (started || over_) return;
       started = true;
       const deep = deepMode();
       const pushAt = deep ? DEEP_PUSH : PUSH;
@@ -215,6 +217,30 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
         );
       };
 
+      // JG, under every photo
+      const jg = document.createElement("div");
+      jg.className = "mt-jg";
+      jg.setAttribute("aria-hidden", "true");
+      jg.innerHTML = "<b>J</b><b>G</b>";
+      hero.prepend(jg);
+      made.push(jg);
+      [...jg.children].forEach((b, i) => {
+        play(b, [{ opacity: 0, transform: `translate3d(0,${i ? 110 : -110}px,0)`, filter: "blur(22px)" }, { opacity: 1, transform: "none", filter: "blur(0)" }], { duration: 750, easing: OUT });
+      });
+      // JG stays lit while the wall rises over it, and goes only once the frames have covered it
+      const marks = [...jg.children] as HTMLElement[];
+      const jr = jg.getBoundingClientRect();
+      const jl = jr.left + Math.min(...marks.map((m) => m.offsetLeft));
+      const jw = Math.max(...marks.map((m) => m.offsetLeft + m.offsetWidth)) - Math.min(...marks.map((m) => m.offsetLeft));
+      const jt = jr.top + Math.min(...marks.map((m) => m.offsetTop));
+      // the columns that pass over it: where they stand on screen once the canvas is up
+      const over = cols.filter((c) => {
+        const x = (c.b[0].x - px) * S0 + W / 2;
+        return x < jl + jw && x + w * S0 > jl;
+      });
+      const isOver = new Set(over);
+      const jb = jt + Math.max(...marks.map((m) => m.offsetHeight));
+
       // the same ratios as the rules that hide side columns once the intro is over (mtscroll.css)
       const tight = matchMedia("(max-aspect-ratio: 19/10)").matches;
       const mid = matchMedia("(max-aspect-ratio: 29/10)").matches;
@@ -223,12 +249,17 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
       // 1. the real columns, each with frames above and below it so the canvas has no holes
       cols.forEach((c, i) => {
         const b = c.b;
-        const from = WALL_FROM[i % 3];
         const delay = 800 + i * 110;
-        const g = group(b[0].x, delay);
-        for (let y = b[0].y - R; y + h > ymin; y -= R) tile(g, b[0].x, y);
+        const pass = isOver.has(c);
+        const lit = pass ? Math.max(0, delay - 450) : delay; // lit before it moves: it enters from off screen
+        const g = group(b[0].x, lit);
+        let topY = b[0].y;
+        for (let y = b[0].y - R; y + h > ymin; y -= R) tile(g, b[0].x, (topY = y));
+        // its leading edge starts under the screen, or under the monogram on a tall screen
+        const edge = H / 2 + (topY - py) * S0;
+        const from = pass ? Math.max(WALL_FROM[i % 3], (Math.min(H, jb + 260) + 24 - edge) / S0) : WALL_FROM[i % 3];
         for (let y = b[b.length - 1].y + R; y < ymax; y += R) tile(g, b[0].x, y);
-        c.els.forEach((el) => (rise(el, from, delay), flat ? light(el.querySelector(".ph")!, delay, "::after") : light(el, delay, "::after")));
+        c.els.forEach((el) => (rise(el, from, delay), flat ? light(el.querySelector(".ph")!, lit, "::after") : light(el, lit, "::after")));
         rise(g, from, delay);
         // a side column this screen does not keep leaves with the extras, so no sliver of it rides the push to the edge of the hero
         const out = c.side && leaves(c.els[0]);
@@ -269,18 +300,19 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
         { duration: END },
       );
 
-      // JG, under every photo
-      const jg = document.createElement("div");
-      jg.className = "mt-jg";
-      jg.setAttribute("aria-hidden", "true");
-      jg.innerHTML = "<b>J</b><b>G</b>";
-      hero.prepend(jg);
-      made.push(jg);
-      [...jg.children].forEach((b, i) => {
-        play(b, [{ opacity: 0, transform: `translate3d(0,${i ? 110 : -110}px,0)`, filter: "blur(22px)" }, { opacity: 1, transform: "none", filter: "blur(0)" }], { duration: 750, easing: OUT });
-        (b as HTMLElement).style.transformOrigin = i ? "0 50%" : "100% 50%";
-        play(b, [{ opacity: 1, scale: "1" }, { opacity: 0, scale: ".9" }], { duration: 900, delay: 950, easing: OUT, composite: "replace" });
-      });
+      let hid = false;
+      const hide = () => {
+        if (hid) return;
+        hid = true;
+        play(jg, [{ opacity: 1 }, { opacity: 0 }], { duration: 220, easing: OUT });
+      };
+      const watch = () => {
+        if (over_ || hid) return;
+        if (over.length && over.every((c) => Math.min(...c.els.map((el) => el.getBoundingClientRect().top)) < jt - 12)) return hide();
+        raf = requestAnimationFrame(watch);
+      };
+      raf = requestAnimationFrame(watch);
+      timers.push(window.setTimeout(hide, pushAt)); // whatever the layout, it is gone before the camera moves
 
       // the hero's own parts arrive as the push lands
       fadeIn(".mt-hero .mt-scrim", 3900, 700);
