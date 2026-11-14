@@ -59,10 +59,11 @@ export const commissionsDrivers: Driver[] = [
       const see = new IntersectionObserver(([e]) => (s.seen = e.isIntersecting));
       see.observe(strip);
       const ac = new AbortController();
-      const on = (type: string, f: () => void) => row.addEventListener(type, f, { signal: ac.signal });
+      const on = (type: string, f: (e: Event) => void) => row.addEventListener(type, f, { signal: ac.signal });
       on("pointerenter", () => (s.hover = true));
       on("pointerleave", () => (s.hover = false));
-      on("focusin", () => (s.focus = true));
+      // keyboard focus only: a click focuses the row too, and that focus outlives the pointer
+      on("focusin", (e) => (s.focus = (e.target as Element).matches(":focus-visible")));
       on("focusout", () => (s.focus = false));
       return () => {
         cur.disconnect();
