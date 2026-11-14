@@ -33,6 +33,14 @@ export function MtBookOnline() {
   const [on, setOn] = React.useState(0);
   const cards = React.useContext(CardsCtx);
   const r = BOOK_ROWS[on];
+  // phones: scroll walks through the rows (motion/steps.ts)
+  const sec = React.useRef<HTMLElement>(null);
+  React.useEffect(() => {
+    const el = sec.current!;
+    const step = (e: Event) => setOn(Math.min(BOOK_ROWS.length - 1, (e as CustomEvent<number>).detail));
+    el.addEventListener("mt-step", step);
+    return () => el.removeEventListener("mt-step", step);
+  }, []);
   const next = useNextOpen(r.slug);
   const when = [next && `Next open ${next}`, r.ready && `Ready in ${r.ready}`].filter(Boolean).join(" | ");
   const row = (x: BookRow) => {
@@ -55,7 +63,7 @@ export function MtBookOnline() {
     );
   };
   return (
-    <section className="mt-book" data-mt="book" data-on={r.key}>
+    <section className="mt-book" data-mt="book" data-on={r.key} ref={sec}>
       <div className="mt-frame">
         <p className="lbl mute mt-label">Book online</p>
         <div className="mt-book-col">

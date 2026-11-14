@@ -10,6 +10,7 @@ import { quoteDrivers } from "./quote";
 import { footDrivers } from "./foot";
 import { depthDrivers } from "./depth";
 import { startReveal } from "./reveal";
+import { stepDrivers } from "./steps";
 import "./motion.css";
 import "./hero.css";
 import "./rows.css";
@@ -26,7 +27,7 @@ export function MtMotionLayer() {
   React.useEffect(() => {
     const root = document.querySelector<HTMLElement>(".v3home.mt");
     if (!root || !("v3motion" in document.documentElement.dataset)) return;
-    const stop = startEngine(root, [...heroDrivers, ...rowsDrivers, ...commissionsDrivers, ...aboutDrivers, ...quoteDrivers, ...footDrivers, ...depthDrivers]);
+    const stop = startEngine(root, [...heroDrivers, ...rowsDrivers, ...commissionsDrivers, ...aboutDrivers, ...quoteDrivers, ...footDrivers, ...depthDrivers, ...stepDrivers]);
     const hide = startReveal(root);
     return () => (stop(), hide());
   }, []);

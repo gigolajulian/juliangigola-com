@@ -35,10 +35,28 @@ export function MtByQuote({ stills, reply }: { stills: Record<string, string>; r
     setOn(i);
     setOpt(true);
   };
+  // desktop hold: scroll steps from the clients (-1) through the four options (motion/quote.ts)
+  const sec = React.useRef<HTMLElement>(null);
+  const step = React.useRef(-1);
+  React.useEffect(() => {
+    const el = sec.current!;
+    const on = (e: Event) => {
+      const i = (e as CustomEvent<number>).detail;
+      step.current = i;
+      if (i < 0) setOpt(false);
+      else pick(i);
+    };
+    el.addEventListener("mt-step", on);
+    return () => el.removeEventListener("mt-step", on);
+  }, []);
+  const rest = () => {
+    if (step.current < 0) setOpt(false);
+    else pick(step.current);
+  };
   const client = QUOTE_CLIENTS[ci];
   return (
-    <section className="mt-quote" data-mt="quote" data-client={ci} data-opt={opt || undefined}>
-      <div className="mt-frame">
+    <section className="mt-quote" data-mt="quote" data-hold="1.6" data-client={ci} data-opt={opt || undefined} ref={sec}>
+      <div className="mt-frame mt-stage">
         <figure className="mt-photo">
           {QUOTE_CLIENTS.map((c, i) => <ClientPhoto key={c.name} c={c} on={!opt && i === ci} stills={stills} />)}
           {QUOTE_OPTS.map((x, i) => (
@@ -52,7 +70,7 @@ export function MtByQuote({ stills, reply }: { stills: Record<string, string>; r
         <figure className="mt-photo-w">
           {QUOTE_CLIENTS.map((c, i) => <ClientPhoto key={c.name} c={c} on={i === ci} stills={stills} wide />)}
         </figure>
-        <div className="mt-quote-col" onPointerEnter={() => fine() && setOpt(true)} onPointerLeave={() => fine() && setOpt(false)}>
+        <div className="mt-quote-col" onPointerEnter={() => fine() && setOpt(true)} onPointerLeave={() => fine() && rest()}>
           <p className="lbl mute mt-label">By quote</p>
           <h2 className="mt-q-h">Have something in mind?</h2>
           <p className="lbl mt-by">
