@@ -109,7 +109,9 @@ export function InquiryCard({ at, reply, onClose, onBack }: { at: { from: Inquir
           <Dialog.Overlay className="mt-dim mt-dim-q" data-lenis-prevent />
           <Dialog.Content className="mt-card mt-inq" data-from={at?.from} data-lenis-prevent onCloseAutoFocus={(e) => { e.preventDefault(); onBack(); }}>
             <span className="mt-handle" aria-hidden />
-            <Dialog.Close className="mt-close-t lbl">Close</Dialog.Close>
+            <Dialog.Close className="mt-close-t" aria-label="Close">
+              <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M2 2l12 12M14 2L2 14" fill="none" stroke="currentColor" strokeWidth="1.5" /></svg>
+            </Dialog.Close>
             {at ? <Form key={`${at.from}-${at.opt}`} from={at.from} opt={opt} reply={reply} onClose={onClose} /> : null}
           </Dialog.Content>
         </div>

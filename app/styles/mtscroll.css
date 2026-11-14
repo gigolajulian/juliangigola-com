@@ -266,7 +266,8 @@
 [data-mtscroll] .mt-bk .scrub .num>b{font-size:56px;line-height:.9}
 [data-mtscroll] .mt-inq{width:min(640px,calc(100vw - 32px));max-height:calc(100svh - 32px);overflow:auto;overscroll-behavior:contain;padding:34px 36px 30px}
 /* !important: the site's touch-target rule makes small buttons position:relative on coarse pointers, which dropped Close onto the title */
-[data-mtscroll] .mt-card .mt-close-t{position:absolute!important;top:30px;right:32px;min-height:44px;padding:0 4px!important;letter-spacing:.14em}
+[data-mtscroll] .mt-card .mt-close-t{position:absolute!important;top:22px;right:22px;display:grid;place-items:center;width:44px;min-width:44px;height:44px;padding:0!important;color:var(--mute);transition:color .15s ease-out}
+[data-mtscroll] .mt-card .mt-close-t:is(:hover,:focus-visible){color:var(--ink)}
 [data-mtscroll] .mt-card-t{font:900 56px/.95 var(--display);letter-spacing:-.05em;margin:0 0 12px}
 [data-mtscroll] .mt-card-l{margin:0 0 20px;color:var(--mute);font-size:13px}
 [data-mtscroll] .mt-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
@@ -481,7 +482,7 @@
   [data-mtscroll] .mt-bk .f-bar .btn.fill{width:100%}
   [data-mtscroll] .mt-bk-more{position:static;translate:none;align-self:center;margin-top:12px}
   [data-mtscroll] .mt-inq{padding:28px 16px 16px}
-  [data-mtscroll] .mt-card .mt-close-t{top:18px;right:12px}
+  [data-mtscroll] .mt-card .mt-close-t{top:14px;right:6px}
   [data-mtscroll] .mt-card-t{font-size:40px}
   [data-mtscroll] .mt-inq :is(input,textarea){font-size:16px}
   [data-mtscroll] .mt-inq[data-from="footer"] .mt-two{grid-template-columns:1fr}
