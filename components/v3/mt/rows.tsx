@@ -24,7 +24,7 @@ export function MtCovers() {
           <p className="lbl"><span className="mute">Cover art</span> <span className="mc">{pad(cur + 1)}/{pad(COVERS.length)}</span></p>
           <h2 className="mt-ttl"><span className="ln"><span>{COVERS[cur].title}</span></span></h2>
           <p className="lbl mt-artist">{COVERS[cur].artist}</p>
-          <Link className="btn mt-sm" href="/portfolio/cover-art">See all covers</Link>
+          <Link className="btn mt-sm" href="/portfolio?d=coverart">See all covers</Link>
         </div>
       )}
     >
