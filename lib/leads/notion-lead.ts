@@ -25,6 +25,7 @@ const SHOOT: Record<string, string> = {
   headshots: "Headshots",
   graduation: "Graduation",
   digitals: "Studio Digitals",
+  "model-test": "Model Test",
   event: "Event",
   other: "Other",
 };

@@ -19,7 +19,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const slug = (await params).slug;
   if (slug === "consultation") return { title: "Book a consultation", description: "15 minutes, phone or video. Pick a time on my calendar.", alternates: { canonical: "/book/consultation" }, ...shareOg("Book a consultation", "15 minutes, phone or video, with Julian Gigola. Pick a time on my calendar.") };
   const m = item(slug);
-  const card = shareOg(`Book ${item(slug)?.name ?? slug}`, `${item(slug)?.name ?? "A session"} with Julian Gigola in the San Francisco Bay Area. Pick a time on my calendar.`);
+  const name = item(slug)?.name ?? (isSession(slug) ? SESSIONS[slug].name : undefined);
+  const card = shareOg(`Book ${name ?? slug}`, `${name ?? "A session"} with Julian Gigola in the San Francisco Bay Area. Pick a time on my calendar.`);
   if (!m && isSession(slug)) return { title: `Book ${SESSIONS[slug].name}`, description: SESSIONS[slug].blurb, alternates: { canonical: `/book/${slug}` }, ...card };
   return m ? { title: `Book ${m.name}`, description: m.blurb, alternates: { canonical: `/book/${m.slug}` }, ...card } : {};
 }
