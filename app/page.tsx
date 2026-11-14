@@ -6,7 +6,7 @@ import { DOES } from "@/components/v3/about";
 import { COMMISSION_TABS } from "@/lib/v3";
 import { PROJECTS, categoryLabel, getProject } from "@/lib/work";
 import { CONTENT } from "@/lib/content";
-import { REEL, posterFor } from "@/lib/videos";
+import { REEL, posterFor, previewUrl } from "@/lib/videos";
 import { RESPONSE_TIME } from "@/lib/site";
 import ORDER from "@/lib/portfolio-order.json";
 import { shareOg } from "@/lib/share";
@@ -52,9 +52,9 @@ const MT: MtData = {
   extras: [...COMM_KEYS.map(frame), ...PROJECTS.filter((p) => !used.has(p.slug) && p.images[0]).slice(0, 40).map((p) => frame(`${p.slug}/${p.images[0].src.split("/").pop()!.replace(".jpg", "")}`))],
   comm: COMM_KEYS.map(frame),
   films: FILM_PICKS.map(([title, kind]) => {
-    if (title === REEL.title) return { id: "reel", title, kind, client: "2023", poster: REEL.poster, href: "/portfolio/video" };
+    if (title === REEL.title) return { id: "reel", title, kind, client: "2023", poster: REEL.poster, href: "/portfolio/video", preview: previewUrl({ ...REEL, id: "reel", section: "music" } as Parameters<typeof previewUrl>[0]) };
     const v = vid(title);
-    return { id: v?.id ?? title, title, kind, client: v?.client ?? "", poster: v ? posterFor(v) : null, href: v?.client ? `/portfolio/video#${markOf(v.client)}` : "/portfolio/video" };
+    return { id: v?.id ?? title, title, kind, client: v?.client ?? "", poster: v ? posterFor(v) : null, preview: v ? previewUrl(v) : undefined, href: v?.client ? `/portfolio/video#${markOf(v.client)}` : "/portfolio/video" };
   }),
   does: DOES,
   reply: RESPONSE_TIME,

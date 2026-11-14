@@ -1,0 +1,4 @@
+/* v4 home motion: commissions. Applies only under html[data-mt-motion]. */
+
+/* The endless logos line needs its second copy (and any extra ones commissions.ts adds on wide screens). */
+html[data-mt-motion] .mt-logos-track [data-copy]{display:flex}

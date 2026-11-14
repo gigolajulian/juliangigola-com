@@ -5,7 +5,7 @@ import type { SessionSlug } from "@/lib/v3";
 
 /** A photo with its caption: `r` is height / width. */
 export type MtFrame = { src: string; name: string; meta: string; slug: string; r: number };
-export type MtFilm = { id: string; title: string; kind: string; client: string; poster: string | null; href: string };
+export type MtFilm = { id: string; title: string; kind: string; client: string; poster: string | null; href: string; preview?: string };
 export type MtData = { hero: MtFrame[]; extras: MtFrame[]; comm: MtFrame[]; films: MtFilm[]; does: string[]; reply: string | null; stills: Record<string, string> };
 
 /* Julian's arranger save (save.json), in order. Key `<slug>/<NN>`. */

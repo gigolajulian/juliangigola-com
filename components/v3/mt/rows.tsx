@@ -68,7 +68,7 @@ export function MtMotion({ films }: { films: MtFilm[] }) {
       )}
     >
       {films.map((f, i) => (
-        <Link key={f.id} href={f.href} className="mt-item mt-film" data-i={i} data-film={f.id} aria-label={`${f.title}, ${f.kind}`}>
+        <Link key={f.id} href={f.href} className="mt-item mt-film" data-i={i} data-film={f.id} data-preview={f.preview} aria-label={`${f.title}, ${f.kind}`}>
           {f.poster ? <Image src={f.poster} alt="" fill sizes="(max-width: 599px) 92vw, 50vw" /> : null}
         </Link>
       ))}
