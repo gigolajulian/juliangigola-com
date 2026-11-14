@@ -99,6 +99,12 @@ export function deliveryDownload(request: Request, env: Env) {
   if (request.method !== "GET") return null;
   const m = DOWNLOAD.exec(new URL(request.url).pathname);
   if (!m) return null;
-  const id = decodeURIComponent(m[1]);
-  return m[2] === undefined ? zipResponse(request, env, id) : finalResponse(request, env, id, decodeURIComponent(m[2]));
+  let id: string, fid: string | undefined;
+  try {
+    id = decodeURIComponent(m[1]);
+    fid = m[2] === undefined ? undefined : decodeURIComponent(m[2]);
+  } catch {
+    return Promise.resolve(new Response("Not found", { status: 404 })); // a broken %-escape is a bad link, not a server error
+  }
+  return fid === undefined ? zipResponse(request, env, id) : finalResponse(request, env, id, fid);
 }
