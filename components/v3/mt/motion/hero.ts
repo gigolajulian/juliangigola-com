@@ -5,7 +5,7 @@ import { clamp, smooth, span, type Driver } from "./engine";
    Not held: the page scrolls the wall itself and the columns only drift. */
 
 const WALL = 2640; // wall height, design px (mtscroll.css)
-const TAIL = 160; // ground left under the last row when the travel ends: 1900 at 1440x900
+const TAIL = 264; // ground left under the last row when the travel ends, so "See the work" sits under the photos with room above it
 const LAG_MAX = 2400;
 const DRIFT = [40, 22]; // phone drift caps, px, per column
 
