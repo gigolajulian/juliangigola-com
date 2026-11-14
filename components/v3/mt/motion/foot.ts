@@ -143,9 +143,13 @@ function setup(el: HTMLElement, ctx: Ctx) {
     fit(Bc, Math.ceil(cw / 6), Math.ceil(ch / 6));
     cut.style.transform = `translate3d(${ox}px,${oy}px,0)`;
 
+    // ink at part strength over the grey letters: lit, not white (Julian: "darker")
     w.setTransform(dpr, 0, 0, dpr, 0, 0);
+    w.clearRect(0, 0, bw, bh);
+    w.globalAlpha = LIT;
     w.fillStyle = ink;
     w.fillRect(0, 0, bw, bh);
+    w.globalAlpha = 1;
 
     const gx = (sx - ox) * dpr, gy = (sy - oy) * dpr, ud = u * dpr;
     // blur without ctx.filter (Safari): down to 1/6 and back up
@@ -178,6 +182,7 @@ function setup(el: HTMLElement, ctx: Ctx) {
     g.drawImage(Mc, 0, 0);
   };
 
+  const LIT = 0.35; // how far the spot takes the letters toward full ink
   let under: HTMLElement | null = null, hx = -2, hy = -2, hitT = 0;
   const hit = (cxp: number, cyp: number) => (document.elementsFromPoint(cxp, cyp).find((e) => e.parentElement?.classList.contains("mt-fcol")) as HTMLElement | undefined) ?? null;
 
