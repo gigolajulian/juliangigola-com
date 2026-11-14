@@ -603,3 +603,6 @@ html[data-mt-intro="1"]{overflow:hidden}
 /* Inquiry card: a field's error is a line under it; the hint in the field keeps its own colour */
 [data-mtscroll] .mt-inq .mt-fe{margin:0;color:var(--err)}
 [data-mtscroll] .mt-inq .fld.bad :is(input,textarea)::placeholder{color:revert;opacity:revert}
+/* Intro: the hero is hidden while the intro waits and plays. These two rules sit here, in the stylesheet the page blocks on, and not in intro.css: that one loads with the V4 code, and on iPhone Safari the finished hero painted before it arrived. */
+html[data-mt-intro="1"] .mt-hero .mt-wall{opacity:0}
+html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[data-mt-intro] .site-hdr{opacity:0}
