@@ -48,11 +48,7 @@ export const BOOK_ROWS: BookRow[] = [
   { key: "studio-digitals", slug: "studio-digitals", group: "a", name: "Studio digitals", len: "45 min", what: "Unretouched", price: "From $250", detail: "Full length, three-quarter, close. Front and profile.", btn: "Book digitals", ready: "2 business days", photo: "", at: "50% 50%" },
   { key: "test-shoot", slug: null, group: "a", name: "Test shoot", len: "1 hr", what: "Styled", price: "From $300", detail: "One look, built with you. One hour, $100 deposit.", btn: "Book a test shoot", ready: null, photo: "/work/sonder/01.jpg", at: "50% 50%" },
 ];
-/** Spring's year: this year from January to May, next year from June, Pacific time. */
-export const gradYear = (now = new Date()) => {
-  const [y, m] = new Intl.DateTimeFormat("en-US", { timeZone: "America/Los_Angeles", year: "numeric", month: "numeric" }).formatToParts(now).filter((p) => p.type !== "literal").map((p) => +p.value);
-  return m >= 6 ? y + 1 : y;
-};
+export { gradYear } from "@/lib/grad-year";
 
 /* ── By quote (spec 3.5, SZQ) ── */
 export type QuoteOpt = { key: "music" | "fashion" | "commercial" | "weddings"; name: string; holds: string[]; detail: string; chips: string[]; call: string; photo: string };

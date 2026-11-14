@@ -24,7 +24,10 @@
 [data-mtscroll] .mt .ln{display:inline-block;overflow:clip;vertical-align:top}
 [data-mtscroll] .mt .ln>span{display:inline-block}
 [data-mtscroll] .mt .po{display:none}
-@media (pointer:coarse){[data-mtscroll] .mt :is(.btn,.mt-sm){min-height:44px}}
+[data-mtscroll] .mt-card .mt-link{font:500 max(10px,calc(11 * var(--u)))/1.2 var(--mono);letter-spacing:.14em;text-transform:uppercase;text-decoration:underline;text-underline-offset:4px;text-decoration-color:color-mix(in srgb,var(--ink) 40%,transparent)}
+@media (pointer:coarse){[data-mtscroll] .mt :is(.btn,.mt-sm){min-height:44px}
+  [data-mtscroll] :is(.mt,.mt-card) :is(.mt-link,.mt-bar-call,.mt-fline a,.mt-fline button){display:inline-flex;align-items:center;min-height:44px}
+  [data-mtscroll] .mt .mt-qw{min-height:44px}}
 
 /* ── Hero wall (3.2) ── */
 [data-mtscroll] .mt-hero .mt-stage{position:relative;height:calc(2640 * var(--u))}
