@@ -14,4 +14,14 @@ describe("ImageFallback", () => {
     expect(img.dataset.plain).toBe("");
     img.remove();
   });
+
+  it("a preview's picture from the live zone falls back to this origin's file", () => {
+    render(<ImageFallback />);
+    const img = document.createElement("img");
+    img.src = "https://juliangigola.com/cdn-cgi/image/width=640,quality=78,format=auto/work/nyx/01.jpg";
+    document.body.append(img);
+    img.dispatchEvent(new Event("error"));
+    expect(img.src).toBe(`${location.origin}/work/nyx/01.jpg`);
+    img.remove();
+  });
 });

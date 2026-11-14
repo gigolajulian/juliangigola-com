@@ -271,8 +271,11 @@ npx wrangler tail                   # live production logs
 ```
 
 Two things only work on the custom domain, never on `*.workers.dev`: image
-transformations, and anything else behind `/cdn-cgi/`. Judge image quality on
-`juliangigola.com`.
+transformations, and anything else behind `/cdn-cgi/`. A branch preview asks
+`juliangigola.com` for its resized photographs (`NEXT_PUBLIC_IMAGE_CDN_ORIGIN`,
+set in `next.config.ts` for any Workers Builds branch but `main`), so speed can
+be judged there. A photograph that exists only on the branch falls back to its
+original, and one replaced in place shows the live copy until it ships.
 
 It was on GitHub Pages before this, as a static export. That had no image optimizer — the
 loader ignored `width` and every device downloaded the same file — and no redirects, and a
