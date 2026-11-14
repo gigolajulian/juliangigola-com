@@ -84,7 +84,7 @@ export function MtByQuote({ stills, reply }: { stills: Record<string, string>; r
         </div>
       </div>
       <div className="mt-bar">
-        <Link className="lbl mt-bar-call" href={o.call}>Free call <span aria-hidden>&rarr;</span></Link>
+        <Link className="lbl mt-bar-call" href={o.call}><span>Free<br />consultation&nbsp;<span aria-hidden>&rarr;</span></span></Link>
         <button type="button" className="btn fill" onClick={() => cards.inquire("quote", o.key)}>Inquire about {o.name.toLowerCase()}</button>
       </div>
     </section>

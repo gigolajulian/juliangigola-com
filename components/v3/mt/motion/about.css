@@ -31,7 +31,3 @@ html[data-mt-held] .mt-more-me{opacity:clamp(0,calc(var(--e) * 2.2 - 1.2),1)}
 /* a keyboard user can land on it before the last beat */
 html[data-mt-held] .mt-more-me:focus-visible{opacity:1}
 
-/* 0. Entrance: the stage rises out of the ground as it comes up the screen, before the hold starts */
-html[data-mt-held] .mt-about .mt-frame{opacity:clamp(0,calc(var(--in,1) * 2 - .25),1);transform:translate3d(0,calc((1 - min(1,var(--in,1) * 1.25)) * 14svh),0)}
-/* the whole stage comes up through a soft top edge, so it never arrives as a hard block */
-html[data-mt-held] .mt-about .mt-stage{opacity:clamp(0,calc(var(--in,1) * 1.7 - .15),1);-webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 calc((1 - var(--in,1)) * 70%));mask-image:linear-gradient(to bottom,transparent 0,#000 calc((1 - var(--in,1)) * 70%))}

@@ -48,6 +48,7 @@ export function startEngine(root: HTMLElement, drivers: Driver[]) {
   const secs = [...root.querySelectorAll<HTMLElement>("[data-mt]")];
   const last = new Map<HTMLElement, number>();
   const lastIn = new Map<HTMLElement, number>();
+  const lastOut = new Map<HTMLElement, number>();
   const measure = () => {
     ctx.vw = innerWidth;
     ctx.vh = innerHeight;
@@ -85,6 +86,11 @@ export function startEngine(root: HTMLElement, drivers: Driver[]) {
         lastIn.set(s, enter);
         s.style.setProperty("--in", enter.toFixed(3));
       }
+      const leave = clamp((ctx.vh - r.bottom) / ctx.vh);
+      if (Math.abs((lastOut.get(s) ?? -1) - leave) > 0.002) {
+        lastOut.set(s, leave);
+        s.style.setProperty("--out", leave.toFixed(3));
+      }
       for (const d of drivers) if (d.frame && d.name === s.dataset.mt && (ctx.held || d.always)) d.frame(p, s, ctx);
     }
   };
@@ -99,6 +105,6 @@ export function startEngine(root: HTMLElement, drivers: Driver[]) {
     html.removeAttribute("data-mt-held");
     html.removeAttribute("data-mt-motion");
     html.removeAttribute("data-mt-scrolling");
-    for (const s of secs) (s.style.removeProperty("--p"), s.style.removeProperty("--in"));
+    for (const s of secs) (s.style.removeProperty("--p"), s.style.removeProperty("--in"), s.style.removeProperty("--out"));
   };
 }

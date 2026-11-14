@@ -19,6 +19,7 @@ import "./quote.css";
 import "./foot.css";
 import "./depth.css";
 import "./reveal.css";
+import "./flow.css";
 
 /** The v4 home's motion, on top of the static screens. Mounted once, after them. */
 export function MtMotionLayer() {

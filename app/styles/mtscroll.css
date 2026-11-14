@@ -518,5 +518,6 @@ html[data-mt-intro="1"]{overflow:hidden}
   [data-mtscroll] .mt-covers .mt-rowhead .btn{align-self:flex-end;margin-left:auto!important;margin-right:16px!important}
   [data-mtscroll] .mt-book .mt-photo{aspect-ratio:1/1}
   [data-mtscroll] .mt-book .mt-photo img{object-fit:cover;object-position:50% 18%}
-  [data-mtscroll] .mt-bar-call{white-space:nowrap;gap:6px}
+  [data-mtscroll] .mt-bar-call{white-space:nowrap;line-height:1.5!important}
+  [data-mtscroll] .mt-bar .btn{white-space:nowrap;justify-content:center;text-align:center;font-size:12px;padding-inline:10px}
 }
