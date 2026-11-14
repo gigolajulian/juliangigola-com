@@ -187,7 +187,9 @@ function films(): Driver {
         drop();
         const film = items[cur], src = film?.dataset.preview;
         if (!src || !seen || !ctx.held) return;
-        pvT = window.setTimeout(() => {
+        const mount = () => {
+          // a player takes about 300ms of the graphics thread to start, and shows nothing for 2.5s: never start one mid-scroll
+          if (Math.abs(ctx.dy) > 1.5) return void (pvT = window.setTimeout(mount, 150));
           const yt = src.includes("youtube");
           const f = (pv = document.createElement("iframe"));
           f.src = src + (yt ? "&enablejsapi=1" : "");
@@ -199,7 +201,8 @@ function films(): Driver {
             else readyT = window.setTimeout(() => f.setAttribute("data-ready", ""), 2500);
           };
           film.append(f);
-        }, 300);
+        };
+        pvT = window.setTimeout(mount, 300);
       };
       addEventListener("message", (e) => {
         if (!pv || e.source !== pv.contentWindow) return;
