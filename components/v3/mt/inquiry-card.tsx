@@ -32,9 +32,9 @@ function Form({ from, opt, reply, onClose }: { from: InquiryFrom; opt?: QuoteOpt
           {label}
           {req ? <span className="req" aria-hidden="true"> *</span> : null}
         </span>
-        {err[k] && v[k] ? <span className="fe" aria-hidden="true">{err[k]}</span> : null}
+        {err[k] ? <span className="fe" aria-hidden="true">{err[k]}</span> : null}
       </label>
-      {err[k] && !v[k] ? React.cloneElement(el, { placeholder: err[k] }) : el}
+      {el}
       {err[k] ? <p className="sr-only" id={`mq-${k}-err`} role="alert">{err[k]}</p> : null}
     </div>
   );
