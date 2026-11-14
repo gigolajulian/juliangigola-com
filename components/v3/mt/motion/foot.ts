@@ -294,6 +294,8 @@ function setup(el: HTMLElement, ctx: Ctx) {
   document.fonts.ready.then(onResize);
 
   tick = (c) => {
+    // the section's cached box first: a layout read here, on every frame of the whole page, cost phones about 4ms a frame
+    if (c.top > c.vh || c.top + c.h < 0) return;
     const r = stage.getBoundingClientRect();
     if (r.bottom < 0 || r.top > c.vh || !r.width) return;
     const dt = c.dt, k = dt / 16.7, sec = dt / 1000, u = c.u, busy = mt?.dataset.cards === "open";
