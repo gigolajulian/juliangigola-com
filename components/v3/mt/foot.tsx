@@ -116,7 +116,7 @@ export function MtFoot() {
           <div>
             <p className="mute">Reach</p>
             <p><a href="mailto:hello@juliangigola.com">hello@juliangigola.com</a></p>
-            <p><a href="https://instagram.com/juliangigola" rel="noopener">Instagram @juliangigola</a></p>
+            <p><a href="https://instagram.com/juliangigola" rel="noopener"><span className="dk">Instagram&nbsp;</span>@juliangigola</a></p>
             <p className="mute mt-based">Based</p>
             <p><span className="dk">San Francisco Bay Area</span><span className="po">SF Bay Area</span></p>
           </div>
