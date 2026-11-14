@@ -76,7 +76,7 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
       return a;
     };
     const rise = (el: Element, from: number, delay: number) => {
-      play(el, [{ transform: `translate3d(0,${from}px,0)` }, { transform: "translate3d(0,0,0)" }], { duration: RISE, delay, easing: OUT });
+      play(el, [{ transform: `translate3d(0,${from}px,0)` }, { transform: "translate3d(0,0,0)" }], { duration: RISE, delay, easing: OUT, composite: "add" }); // added on top of the scroll travel, so scrolling as the intro lands never snaps
       // out of sight until it moves, then opaque at once: it comes up out of the ground colour, never an opacity fade
       play(el, [{ visibility: "visible" }, { visibility: "visible" }], { duration: RISE, delay, fill: "forwards" });
       play(el, [{ "--mt-veil": 1 } as Keyframe, { "--mt-veil": 0 } as Keyframe], { duration: LIGHT, delay });
