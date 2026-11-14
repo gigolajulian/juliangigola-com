@@ -10,7 +10,6 @@ import { MtBookOnline } from "./book-online";
 import { MtByQuote } from "./by-quote";
 import { MtAbout } from "./about";
 import { MtFoot } from "./foot";
-import { BookCard } from "./book-card";
 import { InquiryCard } from "./inquiry-card";
 import { MtIntro } from "./intro";
 import { MtMotionLayer } from "./motion";
@@ -25,23 +24,22 @@ export function MtHome({ data }: { data: MtData }) {
   // The control that opened a card gets focus back when it closes (spec 3.6, 3.11).
   const opener = React.useRef<HTMLElement | null>(null);
   const keep = () => (opener.current = document.activeElement as HTMLElement | null);
-  const cards = React.useMemo<Cards>(() => ({ book: (k) => (keep(), setBook(k)), inquire: (from, opt) => (keep(), setInq({ from, opt })) }), []);
+  const cards = React.useMemo<Cards>(() => ({ book: (k) => setBook(k), inquire: (from, opt) => (keep(), setInq({ from, opt })) }), []);
   const back = () => opener.current?.focus({ preventScroll: true });
   return (
     <CardsCtx.Provider value={cards}>
       <MtIntro extras={data.extras} />
-      <section className="v3 v3home mt" data-cards={book || inq ? "open" : undefined}>
+      <section className="v3 v3home mt" data-cards={inq ? "open" : undefined}>
         <MtHero frames={data.hero} extras={data.extras} />
         <MtCommissions frames={data.comm} />
         <MtCovers />
         <MtMotion films={data.films} />
-        <MtBookOnline />
+        <MtBookOnline open={book} onOpen={setBook} onClose={() => setBook(null)} />
         <MtByQuote stills={data.stills} reply={data.reply} />
         <MtAbout does={data.does} />
         <MtFoot />
       </section>
       <MtMotionLayer />
-      <BookCard at={book} onTab={setBook} onClose={() => setBook(null)} onBack={back} />
       <InquiryCard at={inq} reply={data.reply} onClose={() => setInq(null)} onBack={back} />
     </CardsCtx.Provider>
   );

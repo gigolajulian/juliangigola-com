@@ -14,7 +14,7 @@
 [data-mtscroll] .mt .mt-frame{position:relative;width:min(100%,calc(1440 * var(--u)));margin-inline:auto}
 [data-mtscroll] .mt .lbl{font-size:max(10px,calc(11 * var(--u)))}
 [data-mtscroll] .mt .lbl i{font-style:normal;opacity:.45}
-[data-mtscroll] .mt button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;text-align:left}
+[data-mtscroll] .mt button:where(:not(.mt-bin-flow *)){font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;text-align:left}
 [data-mtscroll] .mt :is(button,a):focus-visible{outline:1px solid var(--accent);outline-offset:3px}
 [data-mtscroll] .mt .btn{justify-content:center}
 [data-mtscroll] .mt .fig{display:block}
@@ -265,7 +265,8 @@
 [data-mtscroll] .mt-bk .cal.week b{font-size:22px}
 [data-mtscroll] .mt-bk .scrub .num>b{font-size:56px;line-height:.9}
 [data-mtscroll] .mt-inq{width:min(640px,calc(100vw - 32px));max-height:calc(100svh - 32px);overflow:auto;overscroll-behavior:contain;padding:34px 36px 30px}
-[data-mtscroll] .mt-close-t{position:absolute;top:30px;right:32px;min-height:44px;padding:0 4px!important;letter-spacing:.14em}
+/* !important: the site's touch-target rule makes small buttons position:relative on coarse pointers, which dropped Close onto the title */
+[data-mtscroll] .mt-card .mt-close-t{position:absolute!important;top:30px;right:32px;min-height:44px;padding:0 4px!important;letter-spacing:.14em}
 [data-mtscroll] .mt-card-t{font:900 56px/.95 var(--display);letter-spacing:-.05em;margin:0 0 12px}
 [data-mtscroll] .mt-card-l{margin:0 0 20px;color:var(--mute);font-size:13px}
 [data-mtscroll] .mt-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
@@ -480,7 +481,7 @@
   [data-mtscroll] .mt-bk .f-bar .btn.fill{width:100%}
   [data-mtscroll] .mt-bk-more{position:static;translate:none;align-self:center;margin-top:12px}
   [data-mtscroll] .mt-inq{padding:28px 16px 16px}
-  [data-mtscroll] .mt-close-t{top:18px;right:12px}
+  [data-mtscroll] .mt-card .mt-close-t{top:18px;right:12px}
   [data-mtscroll] .mt-card-t{font-size:40px}
   [data-mtscroll] .mt-inq :is(input,textarea){font-size:16px}
   [data-mtscroll] .mt-inq[data-from="footer"] .mt-two{grid-template-columns:1fr}
@@ -542,4 +543,50 @@ html[data-mt-intro="1"]{overflow:hidden}
   [data-mtscroll] .mt-motion .mt-row{grid-area:1/2;margin-top:max(0px,calc(50svh - var(--fh) / 2 - 104 * var(--u)));padding:0;overflow:visible;scroll-snap-type:none}
   [data-mtscroll] .mt-motion .mt-track{flex-direction:column;width:auto;gap:calc(24 * var(--u))}
   [data-mtscroll] .mt-motion .mt-film{width:100%;height:var(--fh)}
+}
+
+/* Book online: four rows, one line each, and the booking in place (book-online.tsx) */
+[data-mtscroll] .mt-book .mt-act{flex-direction:row;align-items:center;justify-content:space-between;margin-top:calc(28 * var(--u))}
+[data-mtscroll] .mt-book[data-open]>.mt-bar{display:none}
+[data-mtscroll] .mt-book{scroll-margin-top:0}
+[data-mtscroll] .mt-bin{animation:mt-in .3s ease-out}
+[data-mtscroll] .mt-bin-top{display:flex;justify-content:space-between;align-items:center;gap:16px}
+[data-mtscroll] .mt-bin-top button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+[data-mtscroll] .mt-bin-t{margin:calc(14 * var(--u)) 0 0;font:900 calc(72 * var(--u))/1 var(--display);letter-spacing:-.04em;outline:0}
+[data-mtscroll] .mt-bin-m{margin:calc(10 * var(--u)) 0 0}
+/* the live flow, laid into the column: its rail is the step row, its own photo column is the section's photo */
+[data-mtscroll] .mt-bin .flow{display:block;min-height:0}
+[data-mtscroll] .mt-bin .f-photo{display:none}
+[data-mtscroll] .mt-bin .f-main{padding:0;gap:0}
+[data-mtscroll] .mt-bin .rail{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:8px;margin-top:calc(26 * var(--u))}
+[data-mtscroll] .mt-bin .rail li{padding-top:9px;border-top:2px solid var(--hair);font-size:9.5px;color:var(--mute)}
+[data-mtscroll] .mt-bin .rail li .nm{display:inline}
+[data-mtscroll] .mt-bin .rail li:is(.cur,.done){border-top:2px solid var(--accent);color:var(--ink)}
+[data-mtscroll] .mt-bin .f-head{flex-direction:row;flex-wrap:wrap;align-items:baseline;gap:4px 12px;margin-top:16px}
+[data-mtscroll] .mt-bin .f-head :is(h1,h2){font:500 11px/1.2 var(--mono)!important;letter-spacing:.14em;text-transform:uppercase;margin:0}
+[data-mtscroll] .mt-bin .f-head p{font-size:12px;line-height:1.4}
+[data-mtscroll] .mt-bin .f-body{max-width:none;margin-top:14px;gap:14px}
+[data-mtscroll] .mt-bin .f-bar{position:static;margin:18px 0 0;padding:0;border:0;background:none;justify-content:space-between}
+[data-mtscroll] .mt-bin .f-bar>:only-child{margin-left:auto}
+[data-mtscroll] .mt-bin .f-bar .btn.fill{flex:none;padding:0 56px}
+[data-mtscroll] .mt-bin .cal button{min-height:42px;padding:6px 8px;gap:4px}
+[data-mtscroll] .mt-bin .cal.week button{min-height:62px}
+[data-mtscroll] .mt-bin .cal.month b{font-size:15px}
+[data-mtscroll] .mt-bin .cal.week b{font-size:22px}
+[data-mtscroll] .mt-bin .scrub .num>b{font-size:56px;line-height:.9}
+/* one line per session holds here too: the flow's own blurb and includes list stay on the full page */
+[data-mtscroll] .mt-bin :is(.f-head>p,.f-body .inc){display:none}
+@media (min-width:1024px) and (min-height:600px){
+  [data-mtscroll] .mt-book .mt-br{padding:calc(12 * var(--u)) 0 calc(16 * var(--u))!important}
+  [data-mtscroll] .mt-book .mt-br b{font-size:calc(72 * var(--u));line-height:calc(74 * var(--u));letter-spacing:-.04em}
+  [data-mtscroll] .mt-book .mt-brs{border-bottom:1px solid var(--hair)}
+}
+@media not ((min-width:1024px) and (min-height:600px)){
+  [data-mtscroll] .mt-book .mt-act{margin-top:4px;justify-content:flex-end}
+  [data-mtscroll] .mt-book .mt-act .mt-big{display:none}
+  [data-mtscroll] .mt-book{scroll-margin-top:57px}
+  [data-mtscroll] .mt-book[data-open] .mt-photo{aspect-ratio:auto;height:min(240px,24svh)}
+  [data-mtscroll] .mt-bin-t{font-size:40px;margin-top:6px}
+  [data-mtscroll] .mt-bin .f-bar{flex-direction:column;align-items:stretch}
+  [data-mtscroll] .mt-bin .f-bar .btn.fill{width:100%}
 }

@@ -24,7 +24,7 @@ export const FILM_PICKS: [title: string, kind: string][] = [
   ["Dide O Del", "Music video"],
 ];
 
-/* ── Book online (spec 3.4, SZB) ── */
+/* ── Book online: the four sessions the home sells. Test session has no live event yet, so it is not listed. ── */
 export type BookRow = {
   key: "portraits" | "headshots" | "graduation" | "studio-digitals" | "test-shoot";
   /** The live session it books; Test shoot has none yet (no SESSIONS / EVENTS entry). */
@@ -44,9 +44,8 @@ export type BookRow = {
 export const BOOK_ROWS: BookRow[] = [
   { key: "portraits", slug: "portraits", group: "s", name: "Portraits", len: "60 min", what: "Two looks", price: "$100 deposit", detail: "Studio or location. Retouched selects for web and print.", btn: "Book portraits", ready: "1 week", photo: "", at: "50% 50%" },
   { key: "headshots", slug: "headshots", group: "s", name: "Headshots", len: "30 min", what: "LinkedIn, corporate", price: "$100 deposit", detail: "For LinkedIn, company sites and press. Retouched selects. Booking a team? Ask for a day rate.", btn: "Book headshots", ready: "3 business days", photo: "", at: "50% 40%" },
-  { key: "graduation", slug: "graduation", group: "s", name: "Graduation", len: "90 min", what: "On campus", price: "From $400", detail: "Two outfits. Edited gallery, print release. Booking spring {year} now.", btn: "Book graduation", ready: "1 week", photo: "", at: "50% 18%" },
-  { key: "studio-digitals", slug: "studio-digitals", group: "a", name: "Studio digitals", len: "45 min", what: "Unretouched", price: "From $250", detail: "Full length, three-quarter, close. Front and profile.", btn: "Book digitals", ready: "2 business days", photo: "", at: "50% 50%" },
-  { key: "test-shoot", slug: null, group: "a", name: "Test session", len: "1 hr", what: "Styled", price: "$100 deposit", detail: "One look, built with you. One hour, $100 deposit.", btn: "Book a test session", ready: null, photo: "/work/sonder/01.jpg", at: "50% 50%" },
+  { key: "graduation", slug: "graduation", group: "s", name: "Graduation", len: "90 min", what: "On campus", price: "$100 deposit", detail: "Two outfits. Edited gallery, print release. Booking spring {year} now.", btn: "Book graduation", ready: "1 week", photo: "", at: "50% 18%" },
+  { key: "studio-digitals", slug: "studio-digitals", group: "a", name: "Studio digitals", len: "45 min", what: "Unretouched", price: "$100 deposit", detail: "Full length, three-quarter, close. Front and profile.", btn: "Book digitals", ready: "2 business days", photo: "", at: "50% 50%" },
 ];
 export { gradYear } from "@/lib/grad-year";
 
