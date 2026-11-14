@@ -102,7 +102,7 @@ export function MtBookOnline({ open, onOpen, onClose }: { open: BookRow["key"] |
             <div className="mt-bin" onKeyDown={(e) => e.key === "Escape" && onClose()}>
               <div className="mt-bin-top">
                 <button type="button" className="mt-link" onClick={onClose}>Back</button>
-                <Link className="mt-link" href={`/book/${r.slug}`}>Open full page</Link>
+                <Link className="mt-link" href={`/book/${r.slug}`}>More about this session</Link>
               </div>
               <h3 className="mt-bin-t" tabIndex={-1} ref={head}>{r.name}</h3>
               <p className="lbl mt-bin-m">{r.len} <i aria-hidden>|</i> {r.price}</p>
