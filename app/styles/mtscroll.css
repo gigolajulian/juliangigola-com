@@ -591,3 +591,6 @@ html[data-mt-intro="1"]{overflow:hidden}
   [data-mtscroll] .mt-bin .f-bar{flex-direction:column;align-items:stretch}
   [data-mtscroll] .mt-bin .f-bar .btn.fill{width:100%}
 }
+/* By quote, held bar: the link leads, the button is only as wide as its word */
+[data-mtscroll] .mt-quote>.mt-bar{justify-content:space-between}
+[data-mtscroll] .mt-quote>.mt-bar .btn{flex:none;min-height:44px;padding-inline:28px}
