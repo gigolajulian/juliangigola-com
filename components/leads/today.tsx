@@ -199,7 +199,7 @@ export function TodayDesk({ leads, size, open, show }: { leads: LeadSummary[]; s
             {size === "phone" ? rail : null}
             <VStack gap={1}>
               <HStack vAlign="center"><StackItem size="fill"><Title count={leadMoves.length}>Your move</Title></StackItem><Button label="All leads" variant="ghost" onClick={() => show()} /></HStack>
-              {leadMoves.length ? <List hasDividers>{leadMoves.slice(0, 6).map(row)}</List> : <Text type="supporting" color="secondary">Nothing waiting on you.</Text>}
+              {leadMoves.length ? <List hasDividers>{leadMoves.map(row)}</List> : <Text type="supporting" color="secondary">Nothing waiting on you.</Text>}
             </VStack>
             {pastDue.length ? (
               <VStack gap={1}>
@@ -214,7 +214,8 @@ export function TodayDesk({ leads, size, open, show }: { leads: LeadSummary[]; s
             ) : null}
             {dueMoves.length ? (
               <VStack gap={1}>
-                <Title count="paperwork, proofs, licences">Due</Title>
+                {/* a number, so Your move and Due add up to "on you" above (Julian, 2026-11-15); each row badges its own kind */}
+                <Title count={dueMoves.length}>Due</Title>
                 <List hasDividers>
                   {dueMoves.map((l) => (
                     <ListItem key={l.id} onClick={() => open(l)} label={nextStep(l) ?? l.stage} description={`${l.name || l.email}${l.when ? ` · ${callOrShoot(l)} ${at(l.when)}` : ""}`} endContent={<Badge label={source(l)} variant={source(l) === "Proofs" ? "blue" : "neutral"} />} />
