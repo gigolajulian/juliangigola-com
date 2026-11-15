@@ -693,14 +693,14 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
 }
 
 /* Cover art (elevate picks, 2026-11-14): the section is titled "Cover art" with "Design" under it, indented. v1: each
-   record is pressed in one color from its cover, black label. v2: one large count bottom right; each cover is named
+   record is pressed in one color from its cover, black label. v2: one large count bottom left (Julian, 2026-11-15; was right); each cover is named
    under its sleeve and the ones not in front dim. */
 [data-mtscroll] .mt-covers .mt-rowhead h2{margin-bottom:calc(12 * var(--u))}
 [data-mtscroll] .mt-cvsub{margin:0 0 0 calc(24 * var(--u))!important}
 [data-mtscroll] .mt-sleeve .disc{background:radial-gradient(circle,#0b0b0b 0 16.5%,transparent 16.7%),var(--press,#222)}
 [data-mtscroll] .mt-cvcap{position:absolute;left:0;top:calc(100% + 16 * var(--u));margin:0;display:grid;gap:4px;white-space:nowrap;opacity:.35;transition:opacity .3s ease-out}
 [data-mtscroll] .mt-sleeve[data-on] .mt-cvcap{opacity:1}
-[data-mtscroll] .mt-cvn{position:absolute;right:calc(var(--fx) + 36 * var(--u));bottom:calc(40 * var(--u));margin:0;font:500 calc(64 * var(--u))/1 var(--mono);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+[data-mtscroll] .mt-cvn{position:absolute;left:calc(var(--fx) + 36 * var(--u));bottom:calc(40 * var(--u));margin:0;font:500 calc(64 * var(--u))/1 var(--mono);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 [data-mtscroll] .mt-cvn span{font-size:.3em;letter-spacing:.14em;color:var(--mute);margin-left:.4em}
 @media (min-width:1024px) and (min-height:600px){
   [data-mtscroll] .mt-covers .mt-artist{display:none}
