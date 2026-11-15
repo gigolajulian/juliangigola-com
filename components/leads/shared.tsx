@@ -71,7 +71,7 @@ function line(e: LeadEvent): string {
     case "wrote": return `They wrote${e.note ? `: ${e.note}` : ""}`;
     case "mail": return `Mail to ${e.mail?.to === "client" ? "them" : "hello@"}: ${e.note ?? ""}`;
     case "added": return `Added by hand${e.note ? `, from ${e.note}` : ""}`;
-    case "edit": return "Details changed";
+    case "edit": return e.note === "people" ? "People changed" : "Details changed";
     case "merge": return `Merged with another record${e.note ? ` (${e.note})` : ""}`;
     case "remind": return e.note ? `Reminder set for ${at(e.note)}` : "Reminder cleared";
     case "quote": return e.note ? `Quote: $${Number(e.note).toLocaleString("en-US")}` : "Quote cleared";
