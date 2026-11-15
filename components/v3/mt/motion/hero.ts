@@ -10,7 +10,7 @@ const LAG_MAX = 2400;
 const DRIFT = [40, 22]; // phone drift caps, px, per column
 
 type Part = { el: HTMLElement; a: number; c: number; v: number };
-type State = { cols: Part[]; figs: Part[]; name: HTMLElement | null; s: number; mode: string; e: number };
+type State = { cols: Part[]; figs: Part[]; name: HTMLElement | null; s: number; mode: string; e: number; u: number; at: string };
 const states = new WeakMap<HTMLElement, State>();
 
 const move = (p: Part, y: number) => {
@@ -33,6 +33,8 @@ export const heroDrivers: Driver[] = [
         s: -1,
         mode: "",
         e: -1,
+        u: 0,
+        at: "",
       };
       states.set(el, st);
       return () => {
@@ -53,7 +55,13 @@ export const heroDrivers: Driver[] = [
       }
 
       if (mode === "d") {
-        const u = ctx.u;
+        // the wall's own unit: big screens fit more columns by shrinking it (mtscroll.css), so measure it off a column, once a size
+        const at = ctx.vw + "x" + ctx.vh;
+        if (at !== st.at) {
+          st.at = at;
+          st.u = (st.cols.find((c) => !c.el.classList.contains("side"))?.el.offsetWidth ?? 0) / 403 || ctx.u;
+        }
+        const u = st.u;
         const target = p * Math.max(0, (WALL + TAIL) * u - Math.max(ctx.vh, 600));
         // the 0.2 follow of the live Recent(), frame-rate independent
         st.s = st.s < 0 || Math.abs(target - st.s) < 0.1 ? target : st.s + (target - st.s) * (1 - Math.pow(0.8, ctx.dt / 16.7));
@@ -63,7 +71,7 @@ export const heroDrivers: Driver[] = [
         if (st.name && e !== st.e) {
           st.e = e;
           st.name.style.opacity = String(1 - e);
-          st.name.style.transform = e ? `translate3d(0,${(-56 * u * e).toFixed(1)}px,0)` : "";
+          st.name.style.transform = e ? `translate3d(0,${(-56 * ctx.u * e).toFixed(1)}px,0)` : "";
           st.name.style.visibility = e >= 1 ? "hidden" : ""; // gone: its buttons leave the tab order too
         }
         return;
