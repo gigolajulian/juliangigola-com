@@ -18,6 +18,8 @@ import * as React from "react";
 import { defineTheme, Theme } from "@astryxdesign/core/theme";
 import { neutralTheme } from "@astryxdesign/theme-neutral/built";
 import { useMediaQuery } from "@astryxdesign/core/hooks";
+import { CommandPalette } from "@astryxdesign/core/CommandPalette";
+import { createStaticSource, type SearchableItem } from "@astryxdesign/core/Typeahead";
 import { Layout, LayoutContent, LayoutHeader, LayoutPanel, HStack, VStack, StackItem, Card } from "@astryxdesign/core/Layout";
 import { SideNav, SideNavHeading, SideNavItem, SideNavSection } from "@astryxdesign/core/SideNav";
 import { Button } from "@astryxdesign/core/Button";
@@ -33,7 +35,7 @@ import { Badge } from "@astryxdesign/core/Badge";
 import { Tab, TabList } from "@astryxdesign/core/TabList";
 import { SignIn } from "@/components/leads/setup";
 import { LeadDesk } from "@/components/leads/lead";
-import { badge, FROST_ROOM, frostBar, GLASS } from "@/components/leads/shared";
+import { badge, FROST_ROOM, frostBar, GLASS, WIN_CSS } from "@/components/leads/shared";
 import { ago, aside, inboxCall, loadError, matches, nextStep, pass } from "@/lib/leads/lead-desk";
 import type { Template } from "@/lib/leads/lead-crm";
 import { TZ } from "@/lib/booking/booking-rules";
@@ -108,6 +110,7 @@ const PlusGlyph = svg(<path d="M12 5v14M5 12h14" />);
 const ChartGlyph = svg(<path d="M4 20h16M7 16v-5M12 16V7M17 16v-8" />);
 const GearGlyph = svg(<><circle cx="12" cy="12" r="3" /><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1" /></>);
 const PhotoGlyph = svg(<><rect x="4" y="5" width="16" height="14" rx="2" /><circle cx="9" cy="10" r="1.6" /><path d="M20 16l-5-5-8 8" /></>);
+const FindGlyph = svg(<><circle cx="11" cy="11" r="6" /><path d="M20 20l-4.5-4.5" /></>);
 const SiteGlyph = svg(<><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M3 9h18M9 9v11" /></>);
 const GLYPH: Partial<Record<View, React.ComponentType<React.SVGProps<SVGSVGElement>>>> = { proofs: PhotoGlyph, leads: InboxGlyph, calendar: CalendarGlyph, money: MoneyGlyph, stats: ChartGlyph, templates: GearGlyph };
 /** Out of the desk: the site editor. */
@@ -131,20 +134,29 @@ function Stage({ l }: { l: LeadSummary }) {
   );
 }
 
-function Nav({ needs, view, go }: { needs: number; view: View; go: (v: View) => void }) {
+/* The side nav in the order of the work: what to do, what it earns, how it is set up (Julian, 2026-11-14). */
+const NAV: [string, View[]][] = [["Work", ["leads", "calendar", "proofs"]], ["Business", ["money", "stats"]], ["Setup", ["templates"]]];
+const FIND_KEY = () => (/Mac|iPhone|iPad/.test(navigator.userAgent) ? "\u2318K" : "Ctrl K");
+type Found = SearchableItem<{ group: string; words?: string[] }>;
+const GO: Found[] = [["new", "New lead"], ["today", "Today"], ...SECTIONS.map(([to, label]): [View, string] => [to, label])].map(([to, label]) => ({ id: `go:${to}`, label, auxiliaryData: { group: "Go to" } }));
+
+function Nav({ needs, view, go, find }: { needs: number; view: View; go: (v: View) => void; find: () => void }) {
   return (
     <SideNav header={<SideNavHeading heading="Desk" subheading="juliangigola.com" />}>
       <SideNavSection title="Desk" isHeaderHidden>
         <SideNavItem label="New lead" icon={PlusGlyph} isSelected={view === "new"} onClick={() => go("new")} />
-        <SideNavItem label="Today" icon={HomeGlyph} isSelected={view === "today"} onClick={() => go("today")} />
-        {SECTIONS.map(([to, label]) => (
-          <SideNavItem key={to} label={label} icon={GLYPH[to]} isSelected={sectionOf(view)?.[0] === to} onClick={() => go(to)}
-            endContent={to === "leads" ? <Text type="code" size="xsm">{needs}</Text> : undefined} />
-        ))}
+        <SideNavItem label="Search" icon={FindGlyph} onClick={find} endContent={<Text type="code" size="xsm" color="secondary">{FIND_KEY()}</Text>} />
       </SideNavSection>
-      <SideNavSection title="Elsewhere">
-        {LINKS.map(([label, href, glyph]) => <SideNavItem key={label} label={label} icon={glyph} href={href} />)}
-      </SideNavSection>
+      {NAV.map(([title, tos]) => (
+        <SideNavSection key={title} title={title}>
+          {title === "Work" ? <SideNavItem label="Today" icon={HomeGlyph} isSelected={view === "today"} onClick={() => go("today")} /> : null}
+          {SECTIONS.filter(([to]) => tos.includes(to)).map(([to, label]) => (
+            <SideNavItem key={to} label={label} icon={GLYPH[to]} isSelected={sectionOf(view)?.[0] === to} onClick={() => go(to)}
+              endContent={to === "leads" ? <Text type="code" size="xsm">{needs}</Text> : undefined} />
+          ))}
+          {title === "Setup" ? LINKS.map(([label, href, glyph]) => <SideNavItem key={label} label={label} icon={glyph} href={href} />) : null}
+        </SideNavSection>
+      ))}
     </SideNav>
   );
 }
@@ -270,6 +282,24 @@ export function LeadsDesk() {
   }, [call]);
   // Astryx follows the site's own light/dark (html[data-theme], dark when unset), so the ink matches the page behind it.
   // Unknown until read: Astryx's root Theme writes data-theme onto <html> itself, so mounting it with a guess would lock that guess in.
+  // Search and quick actions, on Ctrl or Cmd K: every lead by name, email, shoot or stage, and every page.
+  const [finding, setFinding] = React.useState(false);
+  React.useEffect(() => {
+    const on = (e: KeyboardEvent) => {
+      if (!(e.metaKey || e.ctrlKey) || e.key.toLowerCase() !== "k") return;
+      e.preventDefault();
+      setFinding((v) => !v);
+    };
+    addEventListener("keydown", on);
+    return () => removeEventListener("keydown", on);
+  }, []);
+  const finder = React.useMemo(
+    () => createStaticSource<Found>(
+      [...GO, ...(leads ?? []).filter((l) => !l.trashedAt && l.id).map((l) => ({ id: `lead:${l.id}`, label: l.name || l.email, auxiliaryData: { group: "Leads", words: [l.email, l.kind ?? "", l.stage] } }))],
+      { keywords: (i) => i.auxiliaryData?.words ?? [] },
+    ),
+    [leads],
+  );
   const [mode, setMode] = React.useState<"light" | "dark" | null>(null);
   React.useEffect(() => {
     const read = () => setMode(document.documentElement.dataset.theme === "light" ? "light" : "dark");
@@ -353,7 +383,7 @@ export function LeadsDesk() {
             <HStack gap={3} vAlign="center">
               <StackItem size="fill">{title}</StackItem>
               <StackItem>{switcher}</StackItem>
-              {search}
+              {railed ? search : <Button label={`Search ${FIND_KEY()}`} variant="secondary" size="sm" icon={<Icon icon={FindGlyph} />} onClick={() => setFinding(true)} />}
               {view}
               {newLead}
             </HStack>
@@ -489,13 +519,30 @@ export function LeadsDesk() {
     <Theme theme={leadsTheme} mode={mode}>
       {/* The site sets mono capitals everywhere; Astryx sets its own type inside. */}
       {/* The site's capitals are unlayered element rules, so they beat Astryx's layers; this beats them inside the desk. */}
-      <style>{`:root [data-astryx-desk][data-astryx-desk] *,:root [data-astryx-desk][data-astryx-desk] ::placeholder{text-transform:none}${FROST_ROOM}${GLASS}`}</style>
-      <div data-astryx-desk="" data-bars={size === "phone" ? "" : undefined} data-glass={mode === "dark" && (size === "phone" || railed) ? "" : undefined} style={{ position: "relative", height: "100dvh", textTransform: "none", letterSpacing: "normal" }}>
+      <style>{`:root [data-astryx-desk][data-astryx-desk] *,:root [data-astryx-desk][data-astryx-desk] ::placeholder{text-transform:none}${FROST_ROOM}${GLASS}${WIN_CSS}`}</style>
+      <div data-astryx-desk="" data-bars={size === "phone" ? "" : undefined} data-glass={mode === "dark" ? "" : undefined}
+        // Enter takes the first result when none is marked yet: the palette marks one only after an arrow key.
+        onKeyDownCapture={(e) => {
+          if (e.key !== "Enter" || !finding) return;
+          const rows = e.currentTarget.querySelectorAll<HTMLElement>(".astryx-command-palette-item");
+          if (rows.length && ![...rows].some((r) => r.hasAttribute("data-highlighted") && r.dataset.highlighted !== "false")) rows[0].click();
+        }} style={{ position: "relative", height: "100dvh", textTransform: "none", letterSpacing: "normal" }}>
+        <CommandPalette
+          isOpen={finding}
+          onOpenChange={setFinding}
+          searchSource={finder}
+          label="Search leads and pages"
+          onValueChange={(id) => {
+            setFinding(false);
+            if (id.startsWith("go:")) show(id.slice(3) as View);
+            else setOpen(id.slice(5));
+          }}
+        />
         {size === "phone"
           ? <><Layout height="fill" content={shown} />{lead ? null /* a lead brings its own action bar */ : <div style={frostBar}><TabBar view={screen} go={show} needs={needs} /></div>}</>
           : <Layout height="fill" start={railed
               ? <LayoutPanel width={84} padding={0} hasDivider label="Desk"><Rail needs={needs} view={screen} go={show} /></LayoutPanel>
-              : <LayoutPanel width={260} padding={0} label="Desk" /* SideNav draws 260 wide by default; a narrower panel clipped the counts. */><Nav needs={needs} view={screen} go={show} /></LayoutPanel>} content={shown} />}
+              : <LayoutPanel width={260} padding={0} label="Desk" /* SideNav draws 260 wide by default; a narrower panel clipped the counts. */><Nav needs={needs} view={screen} go={show} find={() => setFinding(true)} /></LayoutPanel>} content={shown} />}
       </div>
     </Theme>
   );
