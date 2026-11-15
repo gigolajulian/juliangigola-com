@@ -45,8 +45,8 @@ export function Timeline({ p }: { p: P }) {
     ["Finals sent", p.deliveredAt],
     ["Downloaded", p.firstDownloadAt],
   ];
-  // The current stage is the first one not reached; a delivered gallery has passed the proof steps whatever their stamps say.
-  const reached = (i: number) => !!steps[i][1] || (!!p.deliveredAt && i < 4);
+  // A stage is reached when it or any later one has a stamp: a link shared by hand has no Sent, a delivery may skip Editing.
+  const reached = (i: number) => steps.slice(i).some(([, at]) => !!at);
   const now = steps.findIndex((_, i) => !reached(i));
   // Days left, read after mount: the server and the browser can disagree near midnight.
   const clock = useClock();

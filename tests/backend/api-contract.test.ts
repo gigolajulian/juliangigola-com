@@ -53,8 +53,11 @@ describe("/api/contract", () => {
     expect(c.text).toContain("$100");
     expect(c.text).toContain("Web and social, until December 31, 2027");
     expect(c.to).toEqual({ name: "Sam Rivera", email: "sam@example.com" });
-    // Sealed: the name never sits in KV in the clear.
-    expect(String(kv.data.get(`contract:${c.id}`)!.value)).not.toContain("Sam");
+    // Sealed: the name and email never sit in KV in the clear. Both hold characters
+    // base64 never makes (a space, "@"), so random ciphertext cannot match them.
+    const raw = String(kv.data.get(`contract:${c.id}`)!.value);
+    expect(raw).not.toContain("Sam Rivera");
+    expect(raw).not.toContain("sam@example.com");
     expect((await (await GET(admin("GET", undefined, `?lead=${LEAD}`))).json()).contract.id).toBe(c.id);
   });
 
@@ -117,6 +120,9 @@ describe("/api/contract", () => {
     expect(l.contract).toBe("Signed");
     expect(l.events.at(-1)).toMatchObject({ kind: "contract", ref: `signed:${c.id}` });
     expect(client.sent.at(-1)!.subject).toBe("Contract signed");
+    const files = (client.sent.at(-1)!.attachments as { filename: string; disposition: string; content: Uint8Array }[]).filter((a) => a.disposition === "attachment");
+    expect(files.map((f) => f.filename)).toEqual(["Contract - Sam Rivera.html"]);
+    expect(new TextDecoder().decode(files[0].content)).toContain("<svg");
     expect(hello.sent.at(-1)!.subject).toBe("Signed: Sam Rivera");
 
     // A second signature, and any edit, are refused.

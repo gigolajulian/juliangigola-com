@@ -383,9 +383,16 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
     const want = (rows6 ? pool.current.slice(30, window.innerWidth >= 3300 ? 80 : 60) : pool.current.slice(16, 46)).map((f) => loader({ src: f.src, width: 640 }));
     let leadIn = false;
     const go = () => leadIn && ready.length >= Math.min(18, want.length) && run();
+    let plain = 0;
     want.forEach((src) => {
       const im = new Image();
-      im.onload = () => (ready.push(src), go());
+      im.onload = () => (ready.push(im.src), go());
+      // the resizer blocked (a content blocker, a preview host): the plain file, as ImageFallback does for pictures in the page.
+      // These images are not in the page, so its listener never hears them. shortcut: 18 originals at most, enough to start; they repeat across the canvas.
+      im.onerror = () => {
+        const rest = /\/cdn-cgi\/image\/[^/]+\/(.+)$/.exec(im.src)?.[1];
+        if (rest && plain++ < 18) im.src = rest.startsWith("http") ? rest : `/${rest}`;
+      };
       im.src = src;
     });
     // start once the first wall frames and enough extras can paint, or after 1500ms regardless
