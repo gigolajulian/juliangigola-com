@@ -11,18 +11,31 @@ export type MtData = { hero: MtFrame[]; extras: MtFrame[]; comm: MtFrame[]; film
 /* Julian's arranger save (save.json), in order. Key `<slug>/<NN>`. */
 export const HERO_KEYS = ["threshold/05", "i-wanna-be-a-human/01", "wired-magazine/01", "astral-allure/04", "wrapped-up/02", "sago/01", "valgur/02", "vigil/05", "ukiyosunknown/01", "nyx/06", "oakley-x-nike/01", "liminal/01"];
 export const COMM_KEYS = ["cyber1a/01", "goodcult/01", "gilt/01", "jubo/03", "paranoia/13", "the-den-talkshow/06", "iris/03", "ukiyosunknown/03", "celestis/03"];
-export const COVER_KEYS = ["the-description", "the-river", "problem-child", "your-way", "est-modvs-in-rebvs", "jahannam", "whole-summer"];
-/* save.json `films` (on), matched to content/site.json by title; kind is this screen's label. */
+/* The top five (Julian, 2026-11-14). The rest are on /portfolio?d=coverart. */
+export const COVER_KEYS = ["the-description", "the-river", "problem-child", "your-way", "est-modvs-in-rebvs"];
+/* v1: one pressing color per release, taken from its cover by eye from the sampled palette (2026-11-14). */
+export const COVER_PRESS: Record<string, string> = {
+  "the-description": "#c9c5bd",
+  "the-river": "#5a6b33",
+  "problem-child": "#24475a",
+  "your-way": "#d2622a",
+  "est-modvs-in-rebvs": "#8fb4c6",
+};
+/* Four films on the home (Julian, 2026-11-14): Purgation, Pear VC, Wonderland and Dide O Del stay on /portfolio/video.
+   Matched to content/site.json by title; kind is this screen's label. */
 export const FILM_PICKS: [title: string, kind: string][] = [
   ["Director's Reel", "Reel"],
   ["Clean", "Music video"],
   ["Ladera Granola", "Commercial"],
   ["The Description", "Music video"],
-  ["Purgation", "Fashion film"],
-  ["Pear VC Campaign", "Commercial"],
-  ["Wonderland", "Music video"],
-  ["Dide O Del", "Music video"],
 ];
+
+/* Per-film dressing on the home (Julian, 2026-11-14). `zoom`: the frame is pushed in from its top left corner, poster and
+   preview alike, so the mark burnt into the bottom right corner of the video is cut. `mark`: the client logo, top right. */
+export const FILM_DRESS: Record<string, { zoom?: number; mark?: { src: string; w: number; h: number; name: string } }> = {
+  "Ladera Granola": { zoom: 1.25, mark: { src: "/clients/ladera-granola.webp", w: 432, h: 73, name: "Ladera" } },
+  "The Description": { zoom: 1.1, mark: { src: "/clients/empire.webp", w: 159, h: 160, name: "Empire" } },
+};
 
 /* ── Book online: the four sessions the home sells, each with the $100 deposit. Model test books on /book. ── */
 export type BookRow = {

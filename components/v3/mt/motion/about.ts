@@ -1,7 +1,6 @@
 import { span, type Driver } from "./engine";
 
-/* About (spec 3.9). The held desktop beats are pure CSS on the engine's --p
-   (about.css). Without a hold the sentence and the rows light as they scroll
+/* About (spec 3.9). The desktop beats are pure CSS on a timer (about.css, `data-seen`). Without a hold the sentence and the rows light as they scroll
    through the screen: this writes their progress as --sp and --rp. */
 const m = { say: 0, ol: 0, h: 1, sp: "", rp: "" };
 
@@ -23,8 +22,13 @@ export const aboutDrivers: Driver[] = [
       const ro = new ResizeObserver(measure);
       ro.observe(el);
       measure();
+      // desktop: the timed reveal starts once a third of the section is on screen, and plays once
+      const io = new IntersectionObserver(([e]) => e.isIntersecting && el.setAttribute("data-seen", ""), { threshold: 0.35 });
+      io.observe(el);
       return () => {
         ro.disconnect();
+        io.disconnect();
+        el.removeAttribute("data-seen");
         el.style.removeProperty("--sp");
         el.style.removeProperty("--rp");
         m.sp = m.rp = "";

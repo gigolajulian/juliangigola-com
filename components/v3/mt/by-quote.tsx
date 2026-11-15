@@ -25,7 +25,7 @@ function ClientPhoto({ c, on, stills, wide }: { c: QuoteClient; on: boolean; sti
   );
 }
 
-export function MtByQuote({ stills, reply }: { stills: Record<string, string>; reply: string | null }) {
+export function MtByQuote({ stills, reply, onTouch }: { stills: Record<string, string>; reply: string | null; onTouch: (i: number) => void }) {
   const [on, setOn] = React.useState(0);
   const [opt, setOpt] = React.useState(false); // the option's photo shows instead of the client's
   const [ci] = React.useState(0); // hook: the client rotation advances this (MOTION-HOOKS.md)
@@ -34,6 +34,7 @@ export function MtByQuote({ stills, reply }: { stills: Record<string, string>; r
   const pick = (i: number) => {
     setOn(i);
     setOpt(true);
+    onTouch(i);
   };
   // desktop hold: scroll steps from the clients (-1) through the four options (motion/quote.ts)
   const sec = React.useRef<HTMLElement>(null);
@@ -55,7 +56,7 @@ export function MtByQuote({ stills, reply }: { stills: Record<string, string>; r
   };
   const client = QUOTE_CLIENTS[ci];
   return (
-    <section className="mt-quote" data-mt="quote" data-hold="1.6" data-client={ci} data-opt={opt || undefined} ref={sec}>
+    <section className="mt-quote" data-mt="quote" data-client={ci} data-opt={opt || undefined} ref={sec}>
       <div className="mt-frame mt-stage">
         <figure className="mt-photo">
           {QUOTE_CLIENTS.map((c, i) => <ClientPhoto key={c.name} c={c} on={!opt && i === ci} stills={stills} />)}
@@ -93,7 +94,7 @@ export function MtByQuote({ stills, reply }: { stills: Record<string, string>; r
           </div>
           <p className="mt-q-line">Send a note or book a free call. I come back with an approach and a quote.</p>
           <div className="mt-q-act">
-            <button type="button" className="btn fill mt-big" onClick={() => cards.inquire("quote", o.key)}>Inquire about {o.name.toLowerCase()}</button>
+            <button type="button" className="btn fill mt-big" aria-label={`Inquire about ${o.name.toLowerCase()}`} onClick={() => cards.inquire("quote", o.key)}>Inquire</button>
             <div className="mt-q-alt">
               <Link className="mt-link" href={o.call}>Or book a free 15 minute call</Link>
               {reply ? <p className="lbl mute">Replies {reply}</p> : null}

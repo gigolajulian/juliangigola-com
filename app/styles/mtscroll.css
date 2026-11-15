@@ -184,7 +184,9 @@
 [data-mtscroll] .mt-fcol{position:absolute;top:0;left:calc((var(--c) * 162 - 9) * var(--u));width:calc(150 * var(--u));display:flex;flex-direction:column;gap:calc(12 * var(--u))}
 [data-mtscroll] .mt-fcol figure,[data-mtscroll] .mt-frow figure{position:relative;margin:0;flex:none;aspect-ratio:3/4;overflow:hidden;background:var(--card)}
 [data-mtscroll] .mt-frow{display:none}
-[data-mtscroll] .mt-fscrim{position:absolute;inset:0;background:linear-gradient(color-mix(in srgb,var(--bg) 90%,transparent),color-mix(in srgb,var(--bg) 74%,transparent) 45%,var(--bg) 94%)}
+[data-mtscroll] .mt-fscrim{position:absolute;inset:0;background:linear-gradient(color-mix(in srgb,var(--bg) 55%,transparent),color-mix(in srgb,var(--bg) 62%,transparent) 45%,var(--bg) 94%)}
+[data-mtscroll] .mt-ftime .t{color:var(--ink)}
+[data-mtscroll] .mt-fline>span{white-space:nowrap}
 [data-mtscroll] .mt-fcols{position:absolute;top:calc(96 * var(--u));left:calc(var(--fx) + 36 * var(--u));right:calc(var(--fx) + 36 * var(--u));display:grid;grid-template-columns:repeat(4,1fr);gap:20px;padding-top:calc(28 * var(--u));border-top:1px solid var(--hair)}
 [data-mtscroll] .mt-fcols p{margin:0 0 calc(12 * var(--u))}
 [data-mtscroll] .mt-fcols .mt-based{margin-top:calc(26 * var(--u))}
@@ -497,7 +499,9 @@
   [data-mtscroll] .mt-col{left:calc((36 + var(--c) * 453) * var(--u))}
   [data-mtscroll] .mt-col.side[data-col="3"]{display:grid}
   [data-mtscroll] .mt-name{height:100svh}
-  [data-mtscroll] .mt-name h1{font-size:44px;bottom:calc(env(safe-area-inset-bottom) + 52px);left:max(16px,env(safe-area-inset-left))}
+  [data-mtscroll] .mt-name h1{font-size:clamp(44px,7.5vw,84px);bottom:calc(env(safe-area-inset-bottom) + 52px);left:max(16px,env(safe-area-inset-left))}
+  /* the wall runs on under the name here, so the ground fades out below it too: no hard edge */
+  [data-mtscroll] .mt-scrim{bottom:-24%;height:84%;background:linear-gradient(to top,transparent,color-mix(in srgb,var(--bg) 92%,transparent) 30%,color-mix(in srgb,var(--bg) 80%,transparent) 52%,transparent)}
   [data-mtscroll] .mt-cap{bottom:calc(env(safe-area-inset-bottom) + 26px);left:max(16px,env(safe-area-inset-left))}
   [data-mtscroll] .mt-cap .pl{display:inline;margin:0}
   [data-mtscroll] .mt-cap .pl::before{content:" | "}
@@ -607,3 +611,74 @@ html[data-mt-intro="1"]{overflow:hidden}
 /* Intro: the hero is hidden while the intro waits and plays. These two rules sit here, in the stylesheet the page blocks on, and not in intro.css: that one loads with the V4 code, and on iPhone Safari the finished hero painted before it arrived. */
 html[data-mt-intro="1"] .mt-hero .mt-wall{opacity:0}
 html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[data-mt-intro] .site-hdr{opacity:0}
+
+/* Booking (b2, q1, q2, approved mock #bq): Book online gets a real heading and stays full size; By quote is a band
+   under it led by the question, its four options in one row. Flow layout, no stop. */
+[data-mtscroll] .mt-bq-h{margin:0;font:900 46px/1 var(--display);letter-spacing:-.05em}
+[data-mtscroll] .mt-next{display:none;margin:0}
+[data-mtscroll] .mt-book .mt-photo>.qp{object-fit:cover}
+@media (min-width:1024px) and (min-height:600px){
+  [data-mtscroll] .mt-bq-h{font-size:calc(112 * var(--u));line-height:.9;letter-spacing:-.055em;margin-bottom:calc(30 * var(--u))}
+  [data-mtscroll] .mt-book .mt-frame{padding-top:calc(112 * var(--u));padding-bottom:calc(72 * var(--u))}
+  [data-mtscroll] .mt-book .mt-photo{top:calc(112 * var(--u));height:min(calc(792 * var(--u)),calc(max(100svh,600px) - 132 * var(--u)))}
+  [data-mtscroll] .mt-book-col{margin-top:0}
+  [data-mtscroll] .mt-next{display:block;margin-left:auto}
+  [data-mtscroll] .mt-book .mt-act{justify-content:flex-start;gap:calc(28 * var(--u))}
+  [data-mtscroll] .mt-quote>.mt-frame{min-height:0;padding:0 calc(36 * var(--u)) calc(110 * var(--u))}
+  [data-mtscroll] .mt-quote .mt-photo,[data-mtscroll] .mt-quote .mt-label{display:none}
+  [data-mtscroll] .mt-quote-col{margin:0;width:auto;padding:calc(48 * var(--u)) 0 0;border-top:1px solid var(--hair);display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"h h" "o a" "l b";column-gap:calc(48 * var(--u));align-items:start}
+  [data-mtscroll] .mt-q-h{grid-area:h;font-size:calc(112 * var(--u));line-height:.9;margin:0 0 calc(34 * var(--u))}
+  [data-mtscroll] .mt-qos{grid-area:o;position:relative;display:flex;column-gap:calc(44 * var(--u));border:0;padding-bottom:calc(64 * var(--u))}
+  [data-mtscroll] .mt-quote :is(.mt-qo,.mt-qw){display:block;width:auto;height:auto;border:0!important;padding:0!important}
+  [data-mtscroll] .mt-quote :is(.mt-qo,.mt-qw) b{display:block;font:900 calc(48 * var(--u))/calc(54 * var(--u)) var(--display);letter-spacing:-.05em;white-space:nowrap}
+  /* the open option's lines sit under the row, from its left edge */
+  [data-mtscroll] .mt-qo .lbl,[data-mtscroll] .mt-qw>span{position:absolute;left:0;top:calc(100% - 54 * var(--u));margin:0;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .25s ease-out;font:500 max(10px,calc(11 * var(--u)))/1.2 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--ink)}
+  [data-mtscroll] :is(.mt-qo,.mt-qw)[aria-pressed="true"] :is(.lbl,span){opacity:1}
+  [data-mtscroll] .mt-qw .po{display:none}
+  [data-mtscroll] .mt-qo-d,[data-mtscroll] .mt-qow[data-on] .mt-qo-d{position:absolute;left:0;top:calc(100% - 30 * var(--u));max-height:none;margin:0;white-space:nowrap;transition:opacity .25s ease-out}
+  [data-mtscroll] .mt-q-act{grid-area:a;margin-top:calc(4 * var(--u))}
+  [data-mtscroll] .mt-q-line{grid-area:l;margin-top:calc(10 * var(--u))}
+  [data-mtscroll] .mt-by{grid-area:b;margin:calc(14 * var(--u)) 0 0;justify-self:end}
+}
+@media not ((min-width:1024px) and (min-height:600px)){
+  [data-mtscroll] .mt-bq-h{order:-2;padding:0 16px}
+  [data-mtscroll] .mt-book .mt-photo>.qp{display:none}
+  /* phones: the sessions first, their photo after them; the booking in place keeps its photo on top */
+  [data-mtscroll] .mt-book:not([data-open]) .mt-photo{order:1;margin-top:20px}
+}
+
+/* Elevate picks, phones (2026-11-14): the By quote client frame is square, held on its left; About is a 4:5 frame
+   cropped onto me (reframe A). */
+@media (max-width:599px){
+  [data-mtscroll] .mt-photo-w{aspect-ratio:1/1}
+  [data-mtscroll] .mt-photo-w img{object-position:25% 50%}
+  [data-mtscroll] .mt-ab-ph{aspect-ratio:4/5}
+  [data-mtscroll] .mt-ab-ph img{object-position:24% 50%}
+}
+
+/* Cover art (elevate picks, 2026-11-14): the section is titled "Cover art" with "Design" under it, indented. v1: each
+   record is pressed in one color from its cover, black label. v2: one large count bottom right; each cover is named
+   under its sleeve and the ones not in front dim. */
+[data-mtscroll] .mt-covers .mt-rowhead h2{margin-bottom:calc(12 * var(--u))}
+[data-mtscroll] .mt-cvsub{margin:0 0 0 calc(24 * var(--u))!important}
+[data-mtscroll] .mt-sleeve .disc{background:radial-gradient(circle,#0b0b0b 0 16.5%,transparent 16.7%),var(--press,#222)}
+[data-mtscroll] .mt-cvcap{position:absolute;left:0;top:calc(100% + 16 * var(--u));margin:0;display:grid;gap:4px;white-space:nowrap;opacity:.35;transition:opacity .3s ease-out}
+[data-mtscroll] .mt-sleeve[data-on] .mt-cvcap{opacity:1}
+[data-mtscroll] .mt-cvn{position:absolute;right:calc(var(--fx) + 36 * var(--u));bottom:calc(40 * var(--u));margin:0;font:500 calc(64 * var(--u))/1 var(--mono);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+[data-mtscroll] .mt-cvn span{font-size:.3em;letter-spacing:.14em;color:var(--mute);margin-left:.4em}
+@media (min-width:1024px) and (min-height:600px){
+  [data-mtscroll] .mt-covers .mt-artist{display:none}
+  [data-mtscroll] .mt-covers .mt-stage{position:relative}
+}
+@media not ((min-width:1024px) and (min-height:600px)){
+  [data-mtscroll] .mt-cvsub{margin-left:27px!important}
+  [data-mtscroll] .mt-covers .mt-artist{margin:10px 16px 0!important}
+  [data-mtscroll] .mt-cvcap,[data-mtscroll] .mt-cvn{display:none}
+}
+
+/* c1 (2026-11-14): the one light room on the page. Only the logo band sits on off-white seamless with black marks;
+   it cuts in and out hard at its edges and the photos stay on black. Dark theme only: the light theme is light already. */
+:root[data-mtscroll]:not([data-theme="light"]) .mt-logos{background:#d9d9d6;color:#141414;padding-block:calc(56 * var(--u))}
+:root[data-mtscroll]:not([data-theme="light"]) .mt-logos>.mute{color:rgb(20 20 20 / .62)}
+:root[data-mtscroll]:not([data-theme="light"]) .mt-logos .mk{color:rgb(20 20 20 / .86)}
+@media (hover:hover){:root[data-mtscroll]:not([data-theme="light"]) .mt-logos a:hover .mk{color:#000}}

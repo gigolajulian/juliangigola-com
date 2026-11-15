@@ -22,6 +22,8 @@ export function MtHome({ data }: { data: MtData }) {
   const [book, setBook] = React.useState<BookRow["key"] | null>(null);
   const [inq, setInq] = React.useState<{ from: InquiryFrom; opt?: QuoteOpt["key"] } | null>(null);
   // The control that opened a card gets focus back when it closes (spec 3.6, 3.11).
+  // the booking photo follows the last row touched in either list: a quote option's index, or null for the sessions
+  const [qp, setQp] = React.useState<number | null>(null);
   const opener = React.useRef<HTMLElement | null>(null);
   const keep = () => (opener.current = document.activeElement as HTMLElement | null);
   const cards = React.useMemo<Cards>(() => ({ book: (k) => setBook(k), inquire: (from, opt) => (keep(), setInq({ from, opt })) }), []);
@@ -34,8 +36,8 @@ export function MtHome({ data }: { data: MtData }) {
         <MtCommissions frames={data.comm} />
         <MtCovers />
         <MtMotion films={data.films} />
-        <MtBookOnline open={book} onOpen={setBook} onClose={() => setBook(null)} />
-        <MtByQuote stills={data.stills} reply={data.reply} />
+        <MtBookOnline open={book} onOpen={setBook} onClose={() => setBook(null)} quote={qp} onOwn={() => setQp(null)} />
+        <MtByQuote stills={data.stills} reply={data.reply} onTouch={setQp} />
         <MtAbout does={data.does} />
         <MtFoot />
       </section>

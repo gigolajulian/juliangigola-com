@@ -1,5 +1,14 @@
 import { shiftScroll } from "@/components/v3/smooth-scroll";
-import { clamp, type Driver } from "./engine";
+import { clamp, smooth, type Driver } from "./engine";
+
+/* The held row's travel: it eases away from its first item and into its last (0.4 of the scroll's speed at the two ends). */
+const ease = (p: number) => p - (0.6 * Math.sin(2 * Math.PI * p)) / (2 * Math.PI);
+/** the scroll share at which `ease` reaches v (it only rises, so halving finds it) */
+const unease = (v: number) => {
+  let a = 0, b = 1;
+  for (let k = 0; k < 20; k++) if (ease((a + b) / 2) < v) a = (a + b) / 2; else b = (a + b) / 2;
+  return (a + b) / 2;
+};
 
 /* Cover art (spec 3.7): on the desktop structure the page scroll walks the row
    sideways. Motion (spec 3.8): a vertical stack there, see films() below.
@@ -36,7 +45,8 @@ function heldRow(name: string, covers: boolean): Driver {
       /* Record rule: out at the stage centre, back in the sleeve `fall` px away. */
       const discs = (x: number, fall: number) => {
         for (let i = 0; i < n; i++) {
-          const v = Math.round(clamp(1 - Math.abs(c0 + i * step - x - mid) / fall) * 1000) / 1000;
+          // eased: the record leaves and returns slowly at both ends instead of at one speed (Julian, 2026-11-14)
+          const v = Math.round(smooth(clamp(1 - Math.abs(c0 + i * step - x - mid) / fall)) * 1000) / 1000;
           if (v !== o[i]) items[i].style.setProperty("--o", String((o[i] = v)));
         }
       };
@@ -46,6 +56,7 @@ function heldRow(name: string, covers: boolean): Driver {
       };
 
       frame = (p) => {
+        p = ease(p);
         const i = Math.round(p * (n - 1)), x = p * (n - 1) * step;
         if (i !== cur) {
           // The row's own scroll steps item by item so held-row.tsx names the current one; the transform carries the rest.
@@ -100,7 +111,7 @@ function heldRow(name: string, covers: boolean): Driver {
         const t = e.target as Element, i = items.indexOf(t.closest<HTMLElement>(".mt-item")!);
         if (!ctx.held || i < 0 || !t.matches(":focus-visible")) return;
         row.scrollLeft = base;
-        shiftScroll(top() + (i / (n - 1)) * range - scrollY);
+        shiftScroll(top() + unease(i / (n - 1)) * range - scrollY);
       }, on);
 
       row.addEventListener("scroll", loose, { passive: true, signal: ac.signal });
@@ -145,14 +156,11 @@ function heldRow(name: string, covers: boolean): Driver {
   };
 }
 
-/* Motion on the desktop structure: the films stack in natural scroll, each a
-   strip that wipes open to its full frame at the middle of the screen. Only
-   `--o` (0 strip, 1 open) is written here; rows.css turns it into the clip. */
+/* Motion on the desktop structure: the films share one screen and rows.tsx
+   picks the current one from the hold. Only the muted preview lives here. */
 function films(): Driver {
-  let frame = () => {};
   return {
     name: "motion",
-    frame: () => frame(),
     setup(el, ctx) {
       const row = el.querySelector<HTMLElement>(".mt-row")!;
       const items = [...el.querySelectorAll<HTMLElement>(".mt-film")];
@@ -160,23 +168,12 @@ function films(): Driver {
       if (n < 2) return;
       const ac = new AbortController();
       const on = { signal: ac.signal };
-      const o: number[] = Array(n).fill(-1);
       let cur = +(el.dataset.cur ?? 0);
-
-      // The films carry no transform, so their own rects are the layout. 1.15: fully open for a short stretch around the middle.
-      frame = () => {
-        const a = items[0].getBoundingClientRect();
-        const f = clamp((ctx.vh / 2 - a.top - a.height / 2) / (items[1].getBoundingClientRect().top - a.top), 0, n - 1);
-        for (let i = 0; i < n; i++) {
-          const v = Math.round(clamp((1 - Math.abs(i - f)) * 1.15) * 1000) / 1000;
-          if (v !== o[i]) items[i].style.setProperty("--o", String((o[i] = v)));
-        }
-      };
-
       /* Preview: one muted iframe in the current film, 300ms after it becomes
          current, gone when the film or the section leaves. The poster stays on
          top until the player says it plays (same wait as video.tsx Loop). */
-      let pv: HTMLIFrameElement | null = null, pvT = 0, readyT = 0, seen = false;
+      let pv: HTMLIFrameElement | null = null, pvT = 0, readyT = 0, seen = false, movedAt = 0;
+      addEventListener("scroll", () => (movedAt = performance.now()), { passive: true, signal: ac.signal });
       const drop = () => {
         clearTimeout(pvT);
         clearTimeout(readyT);
@@ -189,7 +186,9 @@ function films(): Driver {
         if (!src || !seen || !ctx.held) return;
         const mount = () => {
           // a player takes about 300ms of the graphics thread to start, and shows nothing for 2.5s: never start one mid-scroll
-          if (Math.abs(ctx.dy) > 1.5) return void (pvT = window.setTimeout(mount, 150));
+          // "resting" is 600ms with no scroll at all: between two wheel notches the page is still for a moment, and a player
+          // that started there stalled the next notches for 100ms a frame
+          if (performance.now() - movedAt < 600) return void (pvT = window.setTimeout(mount, 200));
           const yt = src.includes("youtube");
           const f = (pv = document.createElement("iframe"));
           f.src = src + (yt ? "&enablejsapi=1" : "");
@@ -229,14 +228,6 @@ function films(): Driver {
       });
       mo.observe(el, { attributeFilter: ["data-cur"] });
 
-      // Tab to a film: bring it to the middle of the screen, where it is open.
-      row.addEventListener("focusin", (e) => {
-        const it = (e.target as Element).closest<HTMLElement>(".mt-film");
-        if (!ctx.held || !it?.matches(":focus-visible")) return;
-        const r = it.getBoundingClientRect();
-        shiftScroll(r.top + r.height / 2 - ctx.vh / 2);
-      }, on);
-
       // The row does not scroll here, so it is not a tab stop of its own.
       const tab = () => void (row.tabIndex = ctx.held ? -1 : 0);
       addEventListener("resize", () => requestAnimationFrame(() => {
@@ -249,9 +240,7 @@ function films(): Driver {
         mo.disconnect();
         io.disconnect();
         drop();
-        frame = () => {};
         row.tabIndex = 0;
-        for (const it of items) it.style.removeProperty("--o");
       };
     },
   };

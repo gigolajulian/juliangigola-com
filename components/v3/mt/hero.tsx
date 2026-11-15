@@ -34,7 +34,7 @@ export function MtHero({ frames, extras }: { frames: MtFrame[]; extras: MtFrame[
   const cols = [0, 1, 2].map((c) => ({ c, list: [0, 1, 2, 3].map((r) => ({ f: frames[c + r * 3], i: c + r * 3 })) }));
   const sides = SIDES.map((c, k) => ({ c, list: [0, 1, 2, 3].map((r) => ({ f: extras[k * 4 + r], i: -1 })).filter((x) => x.f) }));
   return (
-    <section className="mt-hero" data-mt="hero" data-hold="2.1">
+    <section className="mt-hero" data-mt="hero" data-hold="1.6">
       <div className="mt-stage">
         <div className="mt-wall">
           {[...sides.slice(0, 2), ...cols, ...sides.slice(2)].map(({ c, list }) => (

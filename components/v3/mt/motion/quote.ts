@@ -45,8 +45,8 @@ export const quoteDrivers: Driver[] = [
       };
     },
     frame(p, el, ctx) {
-      // held: the first stretch shows the clients, then scroll steps through the four options
-      const step = ctx.held ? (p < 0.14 ? -1 : Math.min(3, Math.floor(((p - 0.14) / 0.86) * 4))) : -2;
+      // a hold (none since q1, 2026-11-14): the first stretch shows the clients, then scroll steps through the four options
+      const step = ctx.held && el.dataset.hold ? (p < 0.14 ? -1 : Math.min(3, Math.floor(((p - 0.14) / 0.86) * 4))) : -2;
       if (step !== s.step) {
         s.step = step;
         if (step > -2) el.dispatchEvent(new CustomEvent("mt-step", { detail: step }));
