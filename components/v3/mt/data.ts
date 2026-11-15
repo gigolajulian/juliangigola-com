@@ -91,7 +91,7 @@ export const QUOTE_CLIENTS: QuoteClient[] = [
   { name: "WIRED", photos: [{ src: "/work/wired-magazine/cover.jpg", alt: "WIRED" }], wide: "/v3/wired-18-wide.jpg" },
   { name: "Sago", photos: [{ src: "/work/sago/02.jpg", alt: "Sago" }] },
   { name: "Jubo", photos: [{ src: "/work/jubo/cover.jpg", alt: "Jubo" }] },
-  { name: "Ukiyo", photos: [{ src: "/work/ukiyosunknown/02.jpg", alt: "Ukiyo" }] },
+  { name: "Ukiyosunknown", photos: [{ src: "/work/ukiyosunknown/02.jpg", alt: "Ukiyo" }] },
   { name: "Goodcult", photos: [{ src: "/work/goodcult/cover.jpg", alt: "Goodcult" }] },
   { name: "Paradox", photos: [{ src: "/work/paradox/cover.jpg", alt: "Paradox" }] },
   { name: "Pear VC | Ladera Granola", photos: [{ src: "film:pear-vc", alt: "Pear VC" }, { src: "film:ladera", alt: "Ladera Granola" }] },
