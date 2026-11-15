@@ -185,6 +185,7 @@
 [data-mtscroll] .mt-fcol figure,[data-mtscroll] .mt-frow figure{position:relative;margin:0;flex:none;aspect-ratio:3/4;overflow:hidden;background:var(--card)}
 [data-mtscroll] .mt-frow,[data-mtscroll] .mt-fveil{display:none}
 [data-mtscroll] .mt-fknock{display:contents}
+[data-mtscroll] .mt-ph-top{display:none}
 [data-mtscroll] .mt-fscrim{position:absolute;inset:0;background:linear-gradient(color-mix(in srgb,var(--bg) 55%,transparent),color-mix(in srgb,var(--bg) 62%,transparent) 45%,var(--bg) 94%)}
 [data-mtscroll] .mt-ftime .t{color:var(--ink)}
 [data-mtscroll] .mt-fline>span{white-space:nowrap}
@@ -701,18 +702,27 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
 @media (min-width:1024px) and (min-height:600px){
   [data-mtscroll] .mt-foot .mt-stage{height:min(max(100svh,600px),calc(800 * var(--u)))}
   [data-mtscroll] .mt-fveil{display:block;position:absolute;inset:0;background:var(--phr);transition:opacity .6s cubic-bezier(.4,0,.2,1)}
-  [data-mtscroll] .mt-foot:is([data-hot],:has(.mt-ph-btn:is(:hover,:focus-visible))) .mt-fveil{opacity:.12;transition:opacity 1.2s cubic-bezier(.4,0,.2,1) .35s}
+  [data-mtscroll] .mt-foot:is([data-hot],:has(.mt-ph-btn:is(:hover,:focus-visible))) .mt-fveil{opacity:0;transition:opacity .9s cubic-bezier(.4,0,.2,1) .3s}
   [data-mtscroll] .mt-fknock{display:block;position:absolute;inset:0;z-index:1;isolation:isolate;mix-blend-mode:darken}
   [data-mtscroll] .mt-fscrim{background:var(--bg)}
+  /* the still is held inside the ground's own range (never lighter than the light ground, never darker than the dark
+     one), or its extremes would show through the ground itself */
+  [data-mtscroll] .mt-fwall::after{content:"";position:absolute;inset:0;background:var(--bg);mix-blend-mode:screen}
+  :root[data-mtscroll][data-theme="light"] .mt-fwall::after{mix-blend-mode:multiply}
   [data-mtscroll] .mt-ph-btn{color:#fff!important}
   :root[data-mtscroll][data-theme="light"] .mt-fknock{mix-blend-mode:lighten}
   :root[data-mtscroll][data-theme="light"] .mt-ph-btn{color:#000!important}
   @media (prefers-color-scheme:light){
     :root[data-mtscroll]:not([data-theme="dark"]) .mt-fknock{mix-blend-mode:lighten}
+    :root[data-mtscroll]:not([data-theme="dark"]) .mt-fwall::after{mix-blend-mode:multiply}
     :root[data-mtscroll]:not([data-theme="dark"]) .mt-ph-btn{color:#000!important}
   }
   [data-mtscroll] .mt-ph-btn:focus-visible .mt-ph{color:inherit;-webkit-text-stroke:0}
   [data-mtscroll] :is(.mt-fcols,.mt-fline){z-index:2}
+  /* the cover copy: shut letters hide the cutout under them. Steps by distance from the pointed letter: 0 open
+     (a 6% wash is the tint), 1 at 38%, 2 at 70%, 3 and further shut. */
+  [data-mtscroll] .mt-ph-top{display:block;z-index:2;overflow:hidden;pointer-events:none;color:var(--phr)}
+  [data-mtscroll] .mt-ph-top .mt-ph>span{opacity:calc(.06 + var(--d,3) * .32);transition:opacity .55s cubic-bezier(.4,0,.2,1)}
   /* shortcut: the old pointer spot is hidden, not removed; foot.ts still draws it. Drop that code if this look stays. */
   html[data-mt-motion] .mt-foot .mt-fcut{display:none}
 }

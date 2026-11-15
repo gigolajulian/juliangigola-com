@@ -21,6 +21,8 @@ function setup(el: HTMLElement, ctx: Ctx) {
   const btn = el.querySelector<HTMLElement>(".mt-ph-btn");
   const row = el.querySelector<HTMLElement>(".mt-ph-row");
   if (!stage || !wall || !frow || !btn || !row) return;
+  // the cover copy of the phrase (foot.tsx): it moves and grows with the real one
+  const row2 = el.querySelector<HTMLElement>(".mt-ph-top .mt-ph-row");
   const mt = el.closest<HTMLElement>(".mt");
 
   const make = <K extends keyof HTMLElementTagNameMap>(tag: K, cls: string) => {
@@ -73,7 +75,10 @@ function setup(el: HTMLElement, ctx: Ctx) {
     W = (row.firstElementChild as HTMLElement).getBoundingClientRect().width;
     pad = parseFloat(getComputedStyle(row).paddingLeft) || 0;
     // ultrawide: three copies do not span the loop, add more
-    for (let n = row.children.length; W > 0 && (n - 1) * W < ctx.vw; n++) clones.push(row.appendChild(row.lastElementChild!.cloneNode(true)));
+    for (let n = row.children.length; W > 0 && (n - 1) * W < ctx.vw; n++) {
+      clones.push(row.appendChild(row.lastElementChild!.cloneNode(true)));
+      if (row2) clones.push(row2.appendChild(row2.lastElementChild!.cloneNode(true)));
+    }
     // start with a copy at the resting position and one already off to its left
     if (first && W) {
       x = -pad;
@@ -310,6 +315,7 @@ function setup(el: HTMLElement, ctx: Ctx) {
     x += v * dt;
     tr = -pad - mod(x, W || 1);
     row.style.transform = `translate3d(${tr.toFixed(1)}px,0,0)`;
+    if (row2) row2.style.transform = row.style.transform;
 
     if (!opened && (LF || performance.now() - dropT < 1000)) place();
 
@@ -423,6 +429,7 @@ function setup(el: HTMLElement, ctx: Ctx) {
     for (const n of [cut, dot, lift, ...clones]) n.parentNode?.removeChild(n);
     el.removeAttribute("data-hot");
     el.removeAttribute("data-lift");
+    row2?.style.removeProperty("transform");
     for (const n of [wall, row, ...wall.querySelectorAll<HTMLElement>(".mt-fcol, figure"), ...(frow.children as HTMLCollectionOf<HTMLElement>)]) {
       n.style.removeProperty("transform");
       n.style.removeProperty("opacity");

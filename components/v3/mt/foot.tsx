@@ -74,6 +74,14 @@ export function MtFoot() {
   const stills = useStills(wall);
   const year = new Date().getFullYear();
   const time = useLocalTime();
+  /* Which letter is under the pointer: the cover letter there opens all the way, the next one each side partway,
+     the one after a little, the rest stay shut (`--d` 0 to 3, mtscroll.css). Steps a letter wide, no gradient. */
+  const near = (e: React.PointerEvent<HTMLButtonElement>) => {
+    const stage = e.currentTarget.closest(".mt-stage")!;
+    const k = e.type === "pointerleave" ? -1 : [...e.currentTarget.querySelectorAll(".mt-ph > span")].indexOf((e.target as Element).closest(".mt-ph > span")!);
+    if (k < 0 && e.type !== "pointerleave") return;
+    stage.querySelectorAll<HTMLElement>(".mt-ph-top .mt-ph > span").forEach((s, i) => (k < 0 ? s.style.removeProperty("--d") : s.style.setProperty("--d", String(Math.min(3, Math.abs(i - k))))));
+  };
   return (
     <footer className="mt-foot" data-mt="foot">
       <div className="mt-stage">
@@ -117,7 +125,7 @@ export function MtFoot() {
         <div className="mt-fknock">
         <div className="mt-fscrim" aria-hidden />
         <div className="mt-phrase">
-          <button type="button" className="mt-ph-btn" aria-label="Contact me, opens the inquiry card" onClick={() => cards.inquire("footer")}>
+          <button type="button" className="mt-ph-btn" aria-label="Contact me, opens the inquiry card" onClick={() => cards.inquire("footer")} onPointerOver={near} onPointerLeave={near}>
             <span className="mt-ph-row">
               <Phrase />
               <Phrase copy />
@@ -125,6 +133,14 @@ export function MtFoot() {
             </span>
           </button>
         </div>
+        </div>
+        {/* a cover copy of the phrase in the letters' grey, over the cutout: each letter lifts by how near the pointer is */}
+        <div className="mt-phrase mt-ph-top" aria-hidden>
+          <span className="mt-ph-row">
+            <Phrase />
+            <Phrase copy />
+            <Phrase copy />
+          </span>
         </div>
         <div className="mt-fline lbl mute">
           <span>&copy; {year} Julian Gigola</span>
