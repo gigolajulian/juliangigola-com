@@ -45,4 +45,38 @@ function M.picked(items, selects)
   return out
 end
 
+--- A lightroom:// link from the site: lightroom://<toolkit id>/<action>?token=<gallery>.
+--  Returns action, token (either may be nil); nil for a link that is not this plugin's.
+function M.parseLink(url, toolkitId)
+  local rest = tostring(url or ""):match("^lightroom://([^?#]*)")
+  if not rest then return nil end
+  local id, action = rest:match("^([^/]+)/?([%w%-]*)")
+  if id ~= toolkitId then return nil end
+  local token = tostring(url):match("[?&]token=([%w%-]+)")
+  return action ~= "" and action or "sync", token
+end
+
+--- What syncing with the site changes. `locals`: { remoteId, name, url, proofs = bool }, `site`: { token, name, url }.
+--  Renames only proof galleries (a delivery may carry its id on the end); refreshes every link. Creates and deletes nothing:
+--  galleries missing on either side are only listed.
+function M.planGalleries(locals, site)
+  local byToken, seen = {}, {}
+  for _, g in ipairs(site) do byToken[g.token] = g end
+  local out = { rename = {}, relink = {}, onlySite = {}, onlyHere = {} }
+  for i, c in ipairs(locals) do
+    local g = byToken[c.remoteId]
+    if not g then
+      out.onlyHere[#out.onlyHere + 1] = c.name
+    else
+      seen[g.token] = true
+      if c.proofs and g.name and g.name ~= "" and g.name ~= c.name then out.rename[#out.rename + 1] = { index = i, name = g.name } end
+      if g.url and g.url ~= c.url then out.relink[#out.relink + 1] = { index = i, url = g.url } end
+    end
+  end
+  for _, g in ipairs(site) do
+    if not seen[g.token] then out.onlySite[#out.onlySite + 1] = g.name or g.token end
+  end
+  return out
+end
+
 return M
