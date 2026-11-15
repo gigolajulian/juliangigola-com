@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   referrer: "no-referrer",
   manifest: "/admin/leads/manifest.webmanifest",
   // The app's own tile, not the site's black JG, in the desktop window and tab.
-  icons: { icon: [{ url: "/leads-app/icon-192.png", sizes: "192x192", type: "image/png" }], apple: "/leads-app/apple-touch-icon.png" },
+  icons: { icon: [{ url: "/leads-app/icon-192.png?v=2", sizes: "192x192", type: "image/png" }], apple: "/leads-app/apple-touch-icon.png?v=2" },
   appleWebApp: { capable: true, title: "LEADS", statusBarStyle: "black-translucent", startupImage: startupImages },
   // Next writes only `mobile-web-app-capable`; older iOS reads the Apple name.
   other: { "apple-mobile-web-app-capable": "yes" },
