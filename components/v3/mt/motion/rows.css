@@ -9,7 +9,11 @@ html[data-mt-held] .mt-held[data-mt-near] .mt-track{will-change:transform}
 /* The title line's clip (for the rise) cut descenders at line-height .9. */
 html[data-mt-held] .mt-held .mt-ttl .ln{padding-bottom:.14em;margin-bottom:-.14em}
 /* Room inside the row's clip for the lift and its shadow. */
-html[data-mt-held] .mt-covers .mt-row{margin-top:0;padding-top:calc(60 * var(--u));padding-bottom:calc(96 * var(--u));margin-bottom:calc(-96 * var(--u))}
+/* padding-top: under 630px tall `--u` stops at .7 and the stage is shorter than the 900 units the layout counts on, so the
+   captions sat on the count and See all covers. The gap above the covers gives up what is missing (1024x600: 30px).
+   `--short` is set on the section because the row swaps `--u` for the covers' own unit on tall windows. */
+html[data-mt-held] .mt-covers{--short:max(0px,900 * var(--u) - 100svh)}
+html[data-mt-held] .mt-covers .mt-row{margin-top:0;padding-top:max(calc(12 * var(--u)),calc(60 * var(--u) - var(--short)));padding-bottom:calc(96 * var(--u));margin-bottom:calc(-96 * var(--u))}
 /* Tall windows (Julian, 2026-11-15: "scale cover, dont add under"): one row, and the covers grow into the height the
    page unit leaves empty. The row gets its own unit: as tall as the 450 design px under the head allow, never so wide
    that the cover passes 40% of the window, never past the page unit's own 1.6px cap. Only on windows narrower than 16:10:
