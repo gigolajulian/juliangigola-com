@@ -189,6 +189,7 @@ function More({ go }: { go: (v: View) => void }) {
 /* The phone's tab bar. Astryx has no bottom bar, so each tab is a plain button: the whole cell is the
  * target (56px tall), a pill marks the tab that is on (not color alone), and Leads carries the count. */
 const tabCell: React.CSSProperties = { flex: 1, minHeight: 56, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2, background: "none", border: 0, padding: 0, cursor: "pointer", touchAction: "manipulation" };
+const PULL = 72; // px of pull, at the top of the page, that refreshes on release
 const tabPill = (on: boolean): React.CSSProperties => ({ position: "relative", width: 60, height: 30, borderRadius: 15, display: "grid", placeItems: "center", background: on ? "color-mix(in oklch, var(--color-accent) 20%, transparent)" : "transparent" });
 const tabCount: React.CSSProperties = { position: "absolute", top: -4, insetInlineEnd: 2 };
 
@@ -308,6 +309,39 @@ export function LeadsDesk() {
     watch.observe(document.documentElement, { attributeFilter: ["data-theme"] });
     return () => watch.disconnect();
   }, []);
+
+  // Pull down to refresh: the installed phone app has no browser bar to do it. At the top of the page, a pull past
+  // PULL px loads the leads again and remounts the page, so its own fetches (money, visits, galleries) run again.
+  // Never with a lead open, which may hold typing.
+  const [tick, setTick] = React.useState(0);
+  const [pull, setPull] = React.useState(0);
+  const pullOk = React.useRef(false);
+  React.useEffect(() => {
+    let x0 = 0, y0 = -1, d = 0;
+    const atTop = (el: Element | null) => { for (; el; el = el.parentElement) if (el.scrollTop > 0) return false; return true; };
+    const start = (e: TouchEvent) => {
+      d = 0;
+      y0 = pullOk.current && e.touches.length === 1 && atTop(e.target as Element) ? e.touches[0].clientY : -1;
+      x0 = e.touches[0].clientX;
+    };
+    const move = (e: TouchEvent) => {
+      if (y0 < 0) return;
+      d = e.touches[0].clientY - y0;
+      // a sideways swipe (the week strip, a tab row) is not a pull
+      if (Math.abs(e.touches[0].clientX - x0) > Math.max(24, d)) { y0 = -1; d = 0; }
+      setPull(Math.max(0, d));
+    };
+    const end = (e: TouchEvent) => {
+      if (e.type === "touchend" && y0 >= 0 && d > PULL) { load(); setTick((t) => t + 1); }
+      y0 = -1;
+      setPull(0);
+    };
+    addEventListener("touchstart", start, { passive: true });
+    addEventListener("touchmove", move, { passive: true });
+    addEventListener("touchend", end);
+    addEventListener("touchcancel", end);
+    return () => { removeEventListener("touchstart", start); removeEventListener("touchmove", move); removeEventListener("touchend", end); removeEventListener("touchcancel", end); };
+  }, [load]);
 
   if (error === "Not authorized." || error?.startsWith("GitHub did not accept"))
     return (
@@ -514,6 +548,7 @@ export function LeadsDesk() {
       content={page}
     />
   ) : page;
+  pullOk.current = !lead;
   if (!mode) return null;
   return (
     <Theme theme={leadsTheme} mode={mode}>
@@ -539,7 +574,7 @@ export function LeadsDesk() {
           }}
         />
         {size === "phone"
-          ? <><Layout height="fill" content={shown} />{lead ? null /* a lead brings its own action bar */ : <div style={frostBar}><TabBar view={screen} go={show} needs={needs} /></div>}</>
+          ? <>{pull > 12 ? <div role="status" style={{ position: "absolute", zIndex: 5, top: "calc(env(safe-area-inset-top) + 10px)", left: 0, right: 0, textAlign: "center", pointerEvents: "none", fontSize: 12, color: "var(--color-text-secondary)", opacity: Math.min(1, pull / PULL) }}>{pull > PULL ? "Release to refresh" : "Pull to refresh"}</div> : null}<Layout height="fill" content={<React.Fragment key={tick}>{shown}</React.Fragment>} />{lead ? null /* a lead brings its own action bar */ : <div style={frostBar}><TabBar view={screen} go={show} needs={needs} /></div>}</>
           : <Layout height="fill" start={railed
               ? <LayoutPanel width={84} padding={0} hasDivider label="Desk"><Rail needs={needs} view={screen} go={show} /></LayoutPanel>
               : <LayoutPanel width={260} padding={0} label="Desk" /* SideNav draws 260 wide by default; a narrower panel clipped the counts. */><Nav needs={needs} view={screen} go={show} find={() => setFinding(true)} /></LayoutPanel>} content={shown} />}
