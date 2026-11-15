@@ -22,4 +22,24 @@ local got = S.picked(items, { "3", "1", "9" })
 assert(#got == 2 and got[1] == "p1" and got[2] == "p3")
 assert(#S.picked(items, nil) == 0)
 
+-- Links from the site: only this plugin's, sync by default, the gallery token when given.
+local ID = "com.juliangigola.export"
+local a, t = S.parseLink("lightroom://com.juliangigola.export/sync?token=11142026-ykqpg2de", ID)
+assert(a == "sync" and t == "11142026-ykqpg2de")
+a, t = S.parseLink("lightroom://com.juliangigola.export", ID)
+assert(a == "sync" and t == nil)
+assert(S.parseLink("lightroom://com.other.plugin/sync", ID) == nil)
+assert(S.parseLink("https://juliangigola.com", ID) == nil)
+assert(S.parseLink("lightroom://com.juliangigola.export/galleries", ID) == "galleries")
+assert(select(2, S.parseLink("lightroom://com.juliangigola.export/sync?token=x;rm", ID)) == "x", "a token is letters, digits and dashes only")
+
+-- Syncing galleries renames proofs only, relinks all, and only lists what is missing on either side.
+local plan = S.planGalleries(
+  { { remoteId = "a", name = "Old", url = "u1", proofs = true }, { remoteId = "a", name = "Old a", url = "u1", proofs = false }, { remoteId = "z", name = "Other catalog", url = "u9", proofs = true } },
+  { { token = "a", name = "New", url = "u2" }, { token = "b", name = "Site only", url = "u3" } })
+assert(#plan.rename == 1 and plan.rename[1].index == 1 and plan.rename[1].name == "New")
+assert(#plan.relink == 2)
+assert(#plan.onlyHere == 1 and plan.onlyHere[1] == "Other catalog")
+assert(#plan.onlySite == 1 and plan.onlySite[1] == "Site only")
+
 print("Shoot.test.lua: ok")
