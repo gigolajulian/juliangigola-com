@@ -711,3 +711,8 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
   /* shortcut: the old pointer spot is hidden, not removed; foot.ts still draws it. Drop that code if this look stays. */
   html[data-mt-motion] .mt-foot .mt-fcut{display:none}
 }
+
+/* seams: less page between the quote band and About */
+@media (min-width:1024px) and (min-height:600px){
+  [data-mtscroll] .mt-quote>.mt-frame{padding-bottom:calc(64 * var(--u))}
+}

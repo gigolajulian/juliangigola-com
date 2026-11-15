@@ -6,7 +6,7 @@
    Out: it sinks and dims while the footer wall slides over it. */
 html[data-mt-held] .mt-about .mt-stage {
   --o: clamp(0, calc(var(--in, 1) * 1.6 - .6), 1);
-  clip-path: inset(calc((1 - var(--o)) * 22%) calc((1 - var(--o)) * 26%) 0 calc((1 - var(--o)) * 26%));
+  clip-path: inset(calc((1 - var(--o)) * 8%) calc((1 - var(--o)) * 22%) 0 calc((1 - var(--o)) * 22%));
   transform: translate3d(0, calc(var(--out, 0) * 22svh), 0) scale(calc(1 - var(--out, 0) * .05));
   transform-origin: 50% 100%;
   opacity: calc(1 - var(--out, 0) * .6);
@@ -55,3 +55,23 @@ html[data-mt-motion]:not([data-mt-held]) .mt .mt-book .mt-photo[data-rv] > * { t
 /* the held bottom bar shows once its section fills the screen (steps.ts sets data-bar) */
 html[data-mt-motion]:not([data-mt-held]) .mt :is(.mt-book, .mt-quote) > .mt-bar { transition: opacity .25s ease-out, visibility .25s; }
 html[data-mt-motion]:not([data-mt-held]) .mt :is(.mt-book, .mt-quote):not([data-bar]) > .mt-bar { opacity: 0; visibility: hidden; }
+
+/* Seams (Julian, 2026-11-14): each section is a sheet that slides over the one before it, which sinks at a slower
+   rate and dims, so less empty page shows between them. Same z-index everywhere: the later sheet wins. */
+html[data-mt-held] .mt :is(.mt-covers, .mt-motion, .mt-book, .mt-quote, .mt-about) { position: relative; z-index: 2; background: var(--bg); }
+html[data-mt-held] .mt-comm { transform: translate3d(0, calc(var(--out, 0) * 16svh), 0); }
+html[data-mt-held] :is(.mt-covers, .mt-motion) .mt-stage { transform: translate3d(0, calc(var(--out, 0) * 30svh), 0); opacity: calc(1 - var(--out, 0) * .55); }
+html[data-mt-held] .mt-quote > .mt-frame { transform: translate3d(0, calc(var(--out, 0) * 26svh), 0); opacity: calc(1 - var(--out, 0) * .5); }
+
+/* Entrances: what is inside a section comes up from further below than the section itself, each part at its own rate. */
+html[data-mt-held] .mt-covers { --e: clamp(0, calc(var(--in, 1) * 1.25), 1); --f: clamp(0, calc(var(--p, 0) * 7), 1); --fe: calc(var(--f) * var(--f) * (3 - 2 * var(--f))); }
+html[data-mt-held] .mt-covers .mt-rowhead { transform: translate3d(0, calc((1 - var(--e)) * 22svh), 0); }
+/* Cover art: the sleeves rise late and small, then once the stage has settled they come up and grow to take the screen */
+html[data-mt-held] .mt-covers .mt-row { transform-origin: 50% 38%; transform: translate3d(0, calc((1 - var(--e)) * 44svh + var(--fe) * 4svh), 0) scale(calc(.84 + var(--e) * .16 + var(--fe) * .2)); }
+html[data-mt-held] .mt-covers .mt-cvn { opacity: var(--fe); }
+/* Motion: the film sits still behind its frame while the frame comes up */
+html[data-mt-held] .mt-motion .mt-row { translate: 0 calc((1 - var(--in, 1)) * -22svh); }
+html[data-mt-held] .mt-motion :is(.mt-mohead, .mt-mofoot) { translate: 0 calc((1 - clamp(0, calc(var(--in, 1) * 1.2), 1)) * 16svh); }
+html[data-mt-held] .mt-book .mt-bq-h { translate: 0 calc((1 - clamp(0, calc(var(--in, 1) * 1.7), 1)) * 14svh); }
+html[data-mt-held] .mt-book .mt-book-col { translate: 0 calc((1 - clamp(0, calc(var(--in, 1) * 1.5), 1)) * 22svh); }
+html[data-mt-held] .mt-quote .mt-quote-col { translate: 0 calc((1 - clamp(0, calc(var(--in, 1) * 2.2), 1)) * 12svh); }

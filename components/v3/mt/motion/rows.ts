@@ -34,11 +34,14 @@ function heldRow(name: string, covers: boolean): Driver {
       let step = 1, c0 = 0, mid = 0, range = 0, cur = -1, base = 0, lastX = NaN;
 
       const measure = () => {
+        // flow.css scales the row as it enters and settles: measure it at rest
+        row.style.transform = "none";
         const a = items[0].getBoundingClientRect();
         step = items[1].getBoundingClientRect().left - a.left;
         c0 = row.getBoundingClientRect().left + parseFloat(getComputedStyle(row).paddingLeft) + a.width / 2;
         mid = innerWidth / 2;
         range = el.offsetHeight - innerHeight;
+        row.style.transform = "";
         cur = -1;
         lastX = NaN;
       };
