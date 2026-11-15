@@ -73,8 +73,11 @@ export function ProofWall({
   onAccept,
   onDone,
   tune,
+  sub,
 }: {
   frames: Frame[];
+  /** The gallery's subheading under the heading, when Julian set one. */
+  sub?: string | null;
   /** The wall tuned per screen (lib/proofs/gridwall.ts); null with `?gw=0`. */
   tune?: Gridwall | null;
   grid: React.RefObject<HTMLDivElement | null>;
@@ -414,6 +417,7 @@ export function ProofWall({
         <div>
           <p className="proof-lab">Proofs · {frames.length} frames</p>
           <h1>Pick your proofs.</h1>
+          {sub ? <p className="proof-sub">{sub}</p> : null}
         </div>
         <label>
           <span className="proof-lab">Your name</span>

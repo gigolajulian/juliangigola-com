@@ -345,7 +345,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
     return (
       <div className="proof">
         <Top view={view} setView={setView} n={0} included={included} due={0} hideTabs />
-        <Gate frames={frames.slice(0, 12).map((f) => thumb(f.id))} count={frames.length} onEnter={(name, address) => {
+        <Gate frames={frames.slice(0, 12).map((f) => thumb(f.id))} count={frames.length} sub={initial.subhead} onEnter={(name, address) => {
             setHello(name.split(/\s+/)[0]);
             enter(address, name);
           }} />
@@ -512,7 +512,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
                     />
                     {/* The photo opens; the ring picks (Julian 2026-11-11). */}
                     <button type="button" className="proof-open" aria-label={`Open frame ${i + 1}`} onClick={() => setOpen(i)} />
-                    <span className="proof-no">{pad(i)}</span>
+                    <span className="proof-no">{pad(i)}{f.file ? ` · ${f.file}` : ""}</span>
                     <button type="button" className="proof-mark" aria-pressed={at >= 0} aria-label={`Select frame ${i + 1}`} onClick={() => toggle(f.id)}>
                       <i>{at >= 0 ? at + 1 : ""}</i>
                     </button>
@@ -580,6 +580,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
       {walling ? (
         <ProofWall
           frames={wallFrames}
+          sub={initial.subhead}
           grid={gridEl}
           tune={tune}
           isEmail={isEmail}
@@ -724,7 +725,7 @@ function Top({ view, setView, n, included, due, hideTabs }: { view: "all" | "sel
 }
 
 /** Before the frames: any email opens the gallery, and picks are kept under it. */
-function Gate({ frames, count, onEnter }: { frames: string[]; count: number; onEnter: (name: string, email: string) => void }) {
+function Gate({ frames, count, sub, onEnter }: { frames: string[]; count: number; sub?: string | null; onEnter: (name: string, email: string) => void }) {
   const [name, setName] = React.useState("");
   const [value, setValue] = React.useState("");
   const [bad, setBad] = React.useState<string | null>(null);
@@ -750,6 +751,7 @@ function Gate({ frames, count, onEnter }: { frames: string[]; count: number; onE
         <div>
           <p className="proof-lab">Proofs · {count} frames</p>
           <h1>Pick your proofs.</h1>
+          {sub ? <p className="proof-sub">{sub}</p> : null}
         </div>
         <label>
           <span className="proof-lab">Your name</span>

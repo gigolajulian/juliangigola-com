@@ -205,6 +205,8 @@ function Gallery({ p, changed, onBack, gone }: { p: Row; changed: () => void; on
   const [note, setNote] = React.useState<string | null>(null);
   const [preview, setPreview] = React.useState<string | null>(null);
   const [email, setEmail] = React.useState(p.email ?? "");
+  const [pass, setPass] = React.useState("");
+  const [sub, setSub] = React.useState(p.subhead ?? "");
   const [tab, setTab] = React.useState<"gallery" | "activity" | "selects">("gallery");
   const [set, setSet] = React.useState({ balance: String(p.balance ?? 0), included: String(p.included), price: String(p.price), days: String(p.days) });
   const changedSet = set.balance !== String(p.balance ?? 0) || set.included !== String(p.included) || set.price !== String(p.price) || set.days !== String(p.days);
@@ -310,6 +312,19 @@ function Gallery({ p, changed, onBack, gone }: { p: Row; changed: () => void; on
             ))}
           </div>
           {changedSet ? <Button label="Save" clickAction={() => act({ balance: set.balance, included: set.included, price: set.price, days: set.days }, "PATCH", "Saved.")} /> : null}
+          <Switch label="Online" description="Off: the gallery, its photos and downloads say offline at once" value={!p.offline} onChange={(on) => act({ offline: !on }, "PATCH", on ? "Online." : "Offline.")} />
+          <HStack gap={2} vAlign="end">
+            <TextInput label={p.hasPass ? "Password, set" : "Password"} isOptional type="password" value={pass} onChange={setPass} placeholder={p.hasPass ? "Type a new one to change it" : "None: anyone with the link"} />
+            {pass ? <Button label="Save" clickAction={() => act({ password: pass }, "PATCH", "Password saved.").then(() => setPass(""))} /> : null}
+            {p.hasPass && !pass ? <Button label="Remove" variant="ghost" clickAction={() => act({ password: "" }, "PATCH", "Password removed.")} /> : null}
+          </HStack>
+          <HStack gap={2} vAlign="end">
+            <TextInput label="Gate subheading" isOptional value={sub} onChange={setSub} placeholder="Client name or shoot date" />
+            {sub !== (p.subhead ?? "") ? <Button label="Save" clickAction={() => act({ subhead: sub }, "PATCH", "Subheading saved.")} /> : null}
+          </HStack>
+          <Switch label="File names on thumbnails" description="The client sees each Lightroom file name under its photo" value={!!p.labels} onChange={(on) => act({ labels: on }, "PATCH", on ? "File names on." : "File names off.")} />
+          <Selector label="Notifications" size="sm" value={p.notify ?? "selects"} onChange={(v) => act({ notify: v }, "PATCH", "Notifications saved.")}
+            options={[{ value: "each", label: "Each action as it happens" }, { value: "daily", label: "Daily summary" }, { value: "selects", label: "Selects in only" }, { value: "off", label: "Off" }]} />
           <Switch label="Watermark" description="Julian Gigola in the bottom third of every frame" value={!!p.watermark} onChange={(on) => act({ watermark: on }, "PATCH", on ? "Watermark on." : "Watermark off.")} />
           <LinkPreview p={p} save={(card) => act({ card }, "PATCH", card ? "Link preview saved." : "Link preview back to auto.")} />
         </VStack>
@@ -377,10 +392,10 @@ function LinkPreview({ p, save }: { p: Row; save: (card: CardCrop | null) => Pro
   return (
     <VStack gap={2}>
       <Text type="supporting">Link preview</Text>
-      {p.watermark && !closed(p) ? (
+      {p.watermark && !p.hasPass && !closed(p) ? (
         // eslint-disable-next-line @next/next/no-img-element -- the gallery's share card from the Worker
         <img src={`/proof/${p.token}/card?v=${v}`} alt="Link preview" style={{ width: "100%", aspectRatio: "1800 / 945", objectFit: "cover", borderRadius: 4 }} />
-      ) : <Text type="supporting">Drawn while the gallery is open with the watermark on.</Text>}
+      ) : <Text type="supporting">Drawn while the gallery is open, watermarked and without a password.</Text>}
       <HStack gap={2} vAlign="end">
         <Selector label="Frame" size="sm" value={f.id} isDisabled={!sized.length}
           onChange={(id) => { const c = cardCrop(sized.find((x) => x.id === id) ?? f, 0.5); setAt(0.5); if (c) void save(c); }}

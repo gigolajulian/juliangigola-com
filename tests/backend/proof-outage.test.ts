@@ -8,6 +8,7 @@ import { readProof, writeProof, type Proof } from "@/lib/proofs/proof";
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
 vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
+vi.mock("next/headers", () => ({ headers: async () => new Headers() }));
 const { POST } = await import("@/app/api/proof/[token]/route");
 
 const TOKEN = "AbCdEfGh12345678";
