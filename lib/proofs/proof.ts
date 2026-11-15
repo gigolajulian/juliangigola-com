@@ -331,7 +331,7 @@ export function deliveryView(p: Proof) {
   const finals = shotOrder(p.finals ?? []);
   // The gate's photo: Julian's preview pick when it is one of the finals, else the first final.
   const cover = finals.find((f) => f.id === p.card?.id)?.id ?? finals[0]?.id ?? null;
-  return { finals: finals.map(({ id, file, w, h, bytes }) => ({ id, file, w, h, bytes })), cover, closesAt: p.closesAt ?? null };
+  return { finals: finals.map(({ id, file, w, h, bytes, crc }) => ({ id, file, w, h, bytes, v: crc })), cover, closesAt: p.closesAt ?? null };
 }
 export type PublicDelivery = ReturnType<typeof deliveryView>;
 

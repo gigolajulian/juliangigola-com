@@ -312,7 +312,7 @@ function useScrub(on: boolean, hdr: React.RefObject<HTMLElement | null>, setLand
 /** Client proof galleries carry their own bar (`components/proofs/gallery.tsx`). */
 export function V3Header() {
   const path = usePathname();
-  return path.startsWith("/proof/") || path.startsWith("/delivery/") ? null : <SiteHeader />;
+  return path.startsWith("/proof/") || path.startsWith("/delivery/") || path.startsWith("/contract/") ? null : <SiteHeader />;
 }
 
 function SiteHeader() {

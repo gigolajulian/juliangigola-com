@@ -36,6 +36,7 @@ import { Kbd } from "@astryxdesign/core/Kbd";
 import { References } from "@/components/admin/admin-inbox";
 import { api as proofApi, status as proofStatus, type Row as ProofRow } from "@/lib/proofs/desk";
 import { InvoiceRow, InvoiceSheetB } from "@/components/leads/invoice";
+import { ContractBlock } from "@/components/leads/contract";
 import { isPaid } from "@/lib/leads/invoice";
 import { endDay } from "@/lib/leads/lead-desk";
 import type { Enquiry } from "@/lib/inbox";
@@ -389,6 +390,7 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
                       </MetadataListItem>
                     ))}
                   </MetadataList>
+                  {summary.id ? <ContractBlock leadId={summary.id} changed={reload} /> : null}
                 </VStack>
               </Section>
             ) : null}

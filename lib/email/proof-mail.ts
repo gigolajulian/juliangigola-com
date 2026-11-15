@@ -168,3 +168,44 @@ export async function sendClient(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefin
     }
   }
 }
+
+/* ── contracts (Julian 2026-11-15): the link to sign, and the signed copy ── */
+
+type ContractMailIn = { id: string; to: { name: string }; text: string; signed?: { name: string; at: string; hash: string; email: string } };
+const contractLink = (id: string) => `${SITE}/contract/${id}`;
+const first = (name: string) => name.split(/\s+/)[0] ?? "";
+
+/** "Your contract": the link to read and sign it. */
+export function contractMail(c: ContractMailIn) {
+  const url = contractLink(c.id);
+  const lead = `Hi ${first(c.to.name)}, here is the contract for the shoot. Read it, type your name and sign online. It takes a minute.`;
+  const html = page(
+    "Your contract",
+    "Read and sign the contract online.",
+    `<tr><td class="mono ac" style="${label};padding-bottom:10px">Contract</td></tr>
+<tr><td class="mono fg" style="font-size:22px;line-height:1.3;color:${C.fg};padding-bottom:16px">Your contract.</td></tr>
+<tr><td class="mono mu" style="font-size:13px;line-height:1.65;color:${C.mu};padding-bottom:30px">${esc(lead)}</td></tr>
+<tr><td style="padding:0 0 30px"><a href="${url}" class="mono cta" style="display:inline-block;padding:14px 20px;background:${C.fg};color:${C.bg};text-decoration:none;font-size:12px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase">Read and sign</a></td></tr>`,
+  );
+  const text = ["Your contract.", "", lead, "", `Read and sign: ${url}`, "", "Questions? Reply to this email.", SIG_TEXT].join("\n");
+  return { subject: "Your contract", html, text, attachments: logos() };
+}
+
+/** The client's copy once signed: the whole text and the signature record. */
+export function signedMail(c: ContractMailIn) {
+  const s = c.signed!;
+  const when = new Intl.DateTimeFormat("en-US", { timeZone: TZ, dateStyle: "long", timeStyle: "short" }).format(new Date(s.at));
+  const record: [string, string][] = [["Signed by", s.name], ["Signed at", when], ["SHA-256", s.hash]];
+  const lead = "Thanks for signing. Your copy is below and on the same link any time.";
+  const html = page(
+    "Contract signed",
+    `Signed by ${s.name}.`,
+    `<tr><td class="mono ac" style="${label};padding-bottom:10px">Signed</td></tr>
+<tr><td class="mono fg" style="font-size:22px;line-height:1.3;color:${C.fg};padding-bottom:16px">Contract signed.</td></tr>
+<tr><td class="mono mu" style="font-size:13px;line-height:1.65;color:${C.mu};padding-bottom:30px">${esc(lead)} <a href="${contractLink(c.id)}" style="color:inherit">${contractLink(c.id)}</a></td></tr>
+${rows(record)}
+<tr><td class="mono fg rule" style="${C.rule};font-size:12px;line-height:1.7;color:${C.fg};padding-top:18px;white-space:pre-wrap">${esc(c.text)}</td></tr>`,
+  );
+  const text = ["Contract signed.", "", lead, contractLink(c.id), "", ...record.map(([k, v]) => `${k}: ${v}`), "", c.text, "", SIG_TEXT].join("\n");
+  return { subject: "Contract signed", html, text, attachments: logos() };
+}

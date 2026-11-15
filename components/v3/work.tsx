@@ -475,20 +475,45 @@ export function V3Work({
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (d) setFilter(d);
   }, [chip]);
-  const [view, setView] = React.useState<"grid" | "strip" | "color" | "canvas">("grid");
-  const back = React.useRef<"grid" | "strip" | "canvas">("grid");
-  /* `?view=canvas` opens on the canvas. The address carries it while the
-     canvas is on, so Back from a project it opened lands on the canvas again. */
+  const [view, setView] = React.useState<"grid" | "strip" | "color">("grid");
+  const back = React.useRef<"grid" | "strip">("grid");
+  /* The canvas lies over whichever view is on, under the page's own title and
+     toolbar, which stay where they are (Julian, 2026-11-14): leaving it lands
+     where you were. `?view=canvas` opens on it. The address carries it while
+     the canvas is on, so Back from a project it opened lands on the canvas again.
+     `leaving` keeps it up for its fade out; `cvTop` is the toolbar's lower edge,
+     where the canvas starts. */
+  const [canvas, setCanvas] = React.useState(false);
+  const [leaving, setLeaving] = React.useState(false);
+  const [cvTop, setCvTop] = React.useState(0);
   React.useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (new URLSearchParams(location.search).get("view") === "canvas") setView("canvas");
+    if (new URLSearchParams(location.search).get("view") === "canvas") setCanvas(true);
   }, []);
   const closeCanvas = React.useCallback(() => {
     viewUrl(false);
-    setView("grid");
+    setCanvas(false);
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    setLeaving(true);
+    setTimeout(() => setLeaving(false), 260);
   }, []);
+  /* The toolbar only sits in its usual place at the top of the page, so the
+     canvas opens there, and starts under the toolbar's last row. */
+  React.useEffect(() => {
+    if (!canvas) return;
+    scrollTo(0, 0);
+    const measure = () => {
+      const bar = document.querySelector("#p-work .whead")?.getBoundingClientRect();
+      const row = document.querySelector("#p-work .chips")?.getBoundingClientRect();
+      // `.whead` is a box on desktop and `display:contents` elsewhere, where the chips are the last row.
+      setCvTop(Math.round(bar?.height ? bar.bottom : (row?.bottom ?? 0) + 12));
+    };
+    measure();
+    addEventListener("resize", measure);
+    return () => removeEventListener("resize", measure);
+  }, [canvas, filter]);
   // Open project: the canvas comes down, the address keeps `?view=canvas` for Back.
-  const leaveCanvas = React.useCallback(() => setView("grid"), []);
+  const leaveCanvas = React.useCallback(() => setCanvas(false), []);
   /* Grid, strip and color views, and the discipline chips: the covers on
      screen fly from where they were to where they land, new ones fade in
      (GSAP Flip). Only with ?v3motion. */
@@ -503,9 +528,14 @@ export function V3Work({
       flip.current = Flip.current.getState(seen());
     set();
   };
-  const go = (v: typeof view) => {
-    viewUrl(v === "canvas");
-    flipped(() => setView(v));
+  const go = (v: typeof view | "canvas") => {
+    if (v === "canvas") {
+      viewUrl(true);
+      setCanvas(true);
+    } else if (canvas) {
+      closeCanvas();
+      setView(v);
+    } else flipped(() => setView(v));
   };
   const [q, setQ] = React.useState("");
   /* Option 2 (Julian, 2026-11-04): once the search row scrolls under the
@@ -1005,34 +1035,35 @@ export function V3Work({
       <button
         type="button"
         className="wcolor"
-        aria-pressed={view === "color"}
+        aria-pressed={!canvas && view === "color"}
         aria-label={VIEWS[2][1]}
         title={VIEWS[2][1]}
         onClick={() => {
-          if (view === "color") go(back.current);
+          // Under the canvas the button is not pressed: it lands on Color, also when Color is the view lying there.
+          if (view === "color" && !canvas) go(back.current);
           else {
-            back.current = view;
+            if (view !== "color") back.current = view;
             go("color");
           }
         }}
       >
         {VIEWS[2][2]}
       </button>
-      <button type="button" aria-pressed={view === "canvas"} aria-label="Canvas view" title="Canvas view" onClick={() => go("canvas")}>
+      <button type="button" aria-pressed={canvas} aria-label="Canvas view" title="Canvas view" onClick={() => go("canvas")}>
           <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
-            <rect x="1.5" y="3" width="4" height="5" />
-            <rect x="6.5" y="1" width="4" height="5" />
-            <rect x="11.5" y="4" width="3" height="5" />
-            <rect x="1.5" y="9.5" width="4" height="5" />
-            <rect x="6.5" y="7.5" width="4" height="5" />
-            <rect x="11.5" y="10.5" width="3" height="4" />
+            {/* Two columns out of step, their ends faded: the field runs past the edge (Julian's pick, 2026-11-14). */}
+            <rect x="1.5" y="1" width="5.5" height="6.5" />
+            <rect x="1.5" y="9" width="5.5" height="6" opacity=".55" />
+            <rect x="9" y="1" width="5.5" height="1" opacity=".55" />
+            <rect x="9" y="3.5" width="5.5" height="6.5" />
+            <rect x="9" y="11.5" width="5.5" height="3.5" opacity=".55" />
           </svg>
       </button>
       {[VIEWS[1], VIEWS[0]].map(([v, label, icon]) => (
         <button
           key={v}
           type="button"
-          aria-pressed={view === v}
+          aria-pressed={!canvas && view === v}
           aria-label={label}
           title={label}
           onPointerDown={v === "strip" ? () => warm(8) : undefined}
@@ -1051,15 +1082,11 @@ export function V3Work({
       <section
         ref={page}
         className={
-          view === "strip"
-            ? "v3page strip-on"
-            : view === "color"
-              ? "v3page color-on"
-              : "v3page"
+          (view === "strip" ? "v3page strip-on" : view === "color" ? "v3page color-on" : "v3page") +
+          // Canvas on: everything under the toolbar hides once the canvas has faded in over it.
+          (canvas ? " cv-on" : "")
         }
         id="p-work"
-        // The canvas covers the page: Tab goes to its bar, not to the page under it.
-        inert={view === "canvas"}
       >
         <div className="pg-head">
           <h1 className="pg-t">{filter === "All" ? "Portfolio" : filter}</h1>
@@ -1257,26 +1284,15 @@ export function V3Work({
             </div>,
             document.getElementById("hdr-tools")!,
           )}
-        {view === "canvas"
+        {canvas || leaving
           ? createPortal(
               <div className="v3">
                 <V3Canvas
                   list={field}
                   onClose={closeCanvas}
                   onLeave={leaveCanvas}
-                  bar={
-                    <>
-                      {/* A mouse wheel runs the row sideways, as it does on the page's chips. */}
-                      <div className="chips lbl" role="group" aria-label="Sort by discipline" onWheel={(e) => (e.currentTarget.scrollLeft += e.deltaY)}>
-                        {["All", ...order].map((d) => (
-                          <button key={d} type="button" aria-pressed={d === filter} onClick={() => setFilter(d)}>
-                            {d}
-                          </button>
-                        ))}
-                      </div>
-                      {views}
-                    </>
-                  }
+                  out={leaving}
+                  top={cvTop}
                 />
               </div>,
               document.body,
