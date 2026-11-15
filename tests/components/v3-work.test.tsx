@@ -41,4 +41,21 @@ describe("V3Work", () => {
     fireEvent.click(screen.getAllByRole("button", { name: "Grid view" })[0]);
     expect(location.search).toBe("");
   });
+
+  it("from the canvas, the Color button lands on Color when Color is the view under it", () => {
+    render(<V3Work work={WORK} />);
+    const pressed = (name: string) => screen.getAllByRole("button", { name })[0].getAttribute("aria-pressed");
+    const click = (name: string) => fireEvent.click(screen.getAllByRole("button", { name })[0]);
+    click("Color view");
+    expect(pressed("Color view")).toBe("true");
+    click("Canvas view");
+    expect(pressed("Canvas view")).toBe("true");
+    expect(pressed("Color view")).toBe("false");
+    click("Color view");
+    expect(pressed("Canvas view")).toBe("false");
+    expect(pressed("Color view")).toBe("true");
+    // Off again goes back to the view Color was opened from.
+    click("Color view");
+    expect(pressed("Grid view")).toBe("true");
+  });
 });

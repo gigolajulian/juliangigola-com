@@ -373,7 +373,8 @@ html:has(.proof[data-wall])::-webkit-scrollbar{display:none}
 .dlv-side>.proof-btn[data-off]{opacity:.35}
 .dlv-gate{position:relative}
 @media (max-width:767px){
-  .dlv-gate{grid-template-columns:1fr;grid-template-rows:66svh auto}
+  /* The photo is two thirds of a tall phone, less on a short one, so the button is always on screen (QA, 375x667). */
+  .dlv-gate{grid-template-columns:1fr;grid-template-rows:minmax(0,66svh) auto;height:100svh;min-height:0}
   .dlv-side{justify-content:flex-start;gap:18px;padding:22px 22px calc(28px + env(safe-area-inset-bottom));max-width:none}
   .dlv-side .proof-word{position:static;display:none}
   .dlv-side h1{font-size:36px;margin-bottom:8px}
