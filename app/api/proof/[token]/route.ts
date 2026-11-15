@@ -3,7 +3,7 @@ import { sealer } from "@/lib/leads/lead-crypto";
 import { recordLead } from "@/lib/leads/lead-store";
 import { checkout, checkPaid, finalize } from "@/lib/proofs/submit";
 import { PAYMENTS_DOWN, PAYMENTS_OFF } from "@/lib/stripe";
-import { cleanSelects, device, isEmail, isOpen, isTestEmail, owed, isToken, publicView, readPublic, track, viewerKey, writeProof, type Proof } from "@/lib/proofs/proof";
+import { checkPass, cleanSelects, device, isEmail, isTestEmail, passCookie, passValue, shut, owed, isToken, publicView, readPublic, track, viewerKey, writeProof, type Proof } from "@/lib/proofs/proof";
 import { bodyOf, json } from "@/lib/http";
 import { alertHello } from "@/lib/hello-mail";
 import { actionAlert, worthMail } from "@/lib/email/proof-mail";
@@ -19,13 +19,31 @@ import { actionAlert, worthMail } from "@/lib/email/proof-mail";
 
 export const dynamic = "force-dynamic";
 
-async function load(token: string) {
+/** The gallery for this request: open, online, and past its password when it has one (the gate's cookie). */
+async function load(token: string, request: Request) {
   const { env } = await getCloudflareContext({ async: true });
   const seal = sealer(env.LEADS_KEY);
   if (!env.INBOX || !seal || !isToken(token)) return null;
   const s = await seal;
   const p = await readPublic(env.INBOX, s, token);
-  return p && isOpen(p) ? { env, kv: env.INBOX, s, p } : null;
+  return p && !(await shut(p, request.headers.get("cookie"), env.LEADS_KEY)) ? { env, kv: env.INBOX, s, p } : null;
+}
+
+/** The gate's password: rate-limited per address, and a right one answers with the cookie every later call needs. */
+async function unlock(token: string, request: Request, password: unknown) {
+  const { env } = await getCloudflareContext({ async: true });
+  const seal = sealer(env.LEADS_KEY);
+  if (!env.INBOX || !seal || !isToken(token)) return json({ error: "This gallery closed." }, 404);
+  const p = await readPublic(env.INBOX, await seal, token);
+  const why = await shut(p, null, env.LEADS_KEY);
+  if (!p || (why && why !== "locked")) return json({ error: why === "offline" ? "This gallery is offline." : "This gallery closed." }, 404);
+  if (!p.pass) return json({ ok: true });
+  // Its own key prefix: wrong passwords never use up the pay attempts on the same limiter.
+  if (!(await env.DEPOSIT_LIMIT.limit({ key: `pass:${request.headers.get("cf-connecting-ip") ?? "unknown"}` })).success) return json({ error: "Too many tries. Wait a minute." }, 429);
+  if (typeof password !== "string" || password.length > 200 || !(await checkPass(p.pass, password))) return json({ error: "That password is not right." }, 403);
+  const res = json({ ok: true });
+  res.headers.append("set-cookie", `${passCookie(p)}=${await passValue(p, env.LEADS_KEY!)}; Path=/; Max-Age=${60 * 864e2}; HttpOnly; Secure; SameSite=Lax`);
+  return res;
 }
 
 /** Work after the answer, inline where there is no request context (tests). */
@@ -48,7 +66,7 @@ async function where() {
 }
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ token: string }> }) {
-  const g = await load((await params).token);
+  const g = await load((await params).token, request);
   if (!g) return json({ error: "This gallery closed." }, 404);
   if (g.p.submittedAt) return json({ error: "Selects are already in." }, 409);
   const b = ((await bodyOf(request)) ?? {});
@@ -60,9 +78,11 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ to
 }
 
 export async function POST(request: Request, { params }: { params: Promise<{ token: string }> }) {
-  const g = await load((await params).token);
-  if (!g) return json({ error: "This gallery closed." }, 404);
+  const { token } = await params;
   const b = ((await bodyOf(request)) ?? {});
+  if (b.action === "unlock") return unlock(token, request, b.password);
+  const g = await load(token, request);
+  if (!g) return json({ error: "This gallery closed." }, 404);
 
   if (b.action === "track") {
     if (!isEmail(b.email)) return json({ error: "Add your email first." }, 400);

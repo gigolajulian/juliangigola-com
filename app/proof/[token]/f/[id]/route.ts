@@ -1,6 +1,6 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { sealer } from "@/lib/leads/lead-crypto";
-import { isFrameId, isOpen, isToken, findProof, THUMB_W } from "@/lib/proofs/proof";
+import { isFrameId, isToken, findProof, shut, THUMB_W } from "@/lib/proofs/proof";
 import { servedSize } from "@/lib/proofs/watermark";
 
 /* One proof frame from the private bucket, only while its gallery is open.
@@ -14,7 +14,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ toke
   const seal = sealer(env.LEADS_KEY);
   if (!isToken(token) || !isFrameId(id) || !env.INBOX || !env.PROOFS || !seal) return new Response("Not found", { status: 404 });
   const p = await findProof(env.INBOX, await seal, token);
-  if (!p || !isOpen(p) || !p.frames.some((f) => f.id === id)) return new Response("Not found", { status: 404 });
+  if (!p || (await shut(p, request.headers.get("cookie"), env.LEADS_KEY)) || !p.frames.some((f) => f.id === id)) return new Response("Not found", { status: 404 });
   // The watermark, when on, is in the bytes. If it cannot be drawn the frame is not served at all.
   // `?w=800`: the smaller copy for the wall and the grid (THUMB_W). Any other width gets the whole frame.
   const small = new URL(request.url).searchParams.get("w") === String(THUMB_W);

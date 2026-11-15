@@ -54,9 +54,9 @@ export async function servedPreview(env: Env, token: string, id: string, small: 
   return kept || null;
 }
 
-/** `openDeliveryIn` with the request's own bindings, for Next's pages and routes. */
-export async function openDelivery(id: string) {
+/** `openDeliveryIn` with the request's own bindings, for Next's pages and routes. `cookie` is the request's Cookie header (the gate's password). */
+export async function openDelivery(id: string, cookie: string | null) {
   const { env, ctx } = await getCloudflareContext({ async: true });
-  const g = await openDeliveryIn(env, id);
+  const g = await openDeliveryIn(env, id, cookie);
   return g && { env, ctx, ...g };
 }
