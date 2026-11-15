@@ -234,6 +234,14 @@ end
 -- label and "<gallery> selects"; the rest (g.others) lose them. Only a Purple label is cleared,
 -- so a label Julian set by hand stays, and a frame picked in any gallery is never cleared.
 -- Safe to run twice. Returns the selects collections that hold picks.
+-- Also fills this plugin's metadata (Metadata.lua): Client gallery, Client pick, Client note, so the
+-- Library Filter and smart collections can find them. g.notes: client notes by photo localIdentifier.
+
+-- One plugin field. Guarded: a field Lightroom has not registered yet (a self-update not reloaded) must never stop the flags.
+local function mark(photo, field, value)
+  pcall(photo.setPropertyForPlugin, photo, _PLUGIN, field, value)
+end
+
 local function syncPicks(galleries)
   local made = {}
   local picked, any = {}, false
@@ -254,6 +262,7 @@ local function syncPicks(galleries)
         for _, photo in ipairs(g.photos) do
           photo:setRawMetadata("colorNameForLabel", LABEL)
           photo:setRawMetadata("pickStatus", 1)
+          mark(photo, "clientPick", "Picked")
         end
         c = c or catalog:createCollection(name, set, true)
         c:addPhotos(g.photos)
@@ -266,10 +275,18 @@ local function syncPicks(galleries)
             photo:setRawMetadata("colorNameForLabel", "none")
             if photo:getRawMetadata("pickStatus") == 1 then photo:setRawMetadata("pickStatus", 0) end
           end
+          mark(photo, "clientPick", nil)
           drop[#drop + 1] = photo
         end
       end
       if c and #drop > 0 then c:removePhotos(drop) end
+      local notes = g.notes or {}
+      for _, list in ipairs { g.photos, g.others or {} } do
+        for _, photo in ipairs(list) do
+          mark(photo, "clientGallery", g.name)
+          mark(photo, "clientNote", notes[photo.localIdentifier])
+        end
+      end
     end
   end, { timeout = 30 })
   return made
@@ -297,13 +314,14 @@ function provider.getRatingsFromPublishedCollection(publishSettings, arrayOfPhot
   local selected = {}
   for _, id in ipairs(p.selects or {}) do selected[id] = true end
 
-  local picked, others = {}, {}
+  local picked, others, notes = {}, {}, {}
   for _, info in ipairs(arrayOfPhotoInfo) do
     local on = selected[info.remoteId] == true
     ratingCallback { publishedPhoto = info, rating = on and 1 or 0 }
     if on then picked[#picked + 1] = info.photo else others[#others + 1] = info.photo end
+    notes[info.photo.localIdentifier] = (p.notes or {})[info.remoteId]
   end
-  syncPicks { { name = name, photos = picked, others = others } }
+  syncPicks { { name = name, photos = picked, others = others, notes = notes } }
 end
 
 --- Library > Plug-in Extras > Sync with proof: every gallery of this
@@ -339,11 +357,13 @@ function provider.checkForPicks(only)
           local selects = p.selects or {}
           local want = {}
           for _, id in ipairs(selects) do want[id] = true end
-          local picked, others = {}, {}
+          local picked, others, notes = {}, {}, {}
           for _, pp in ipairs(pc:getPublishedPhotos()) do
-            if want[pp:getRemoteId()] then picked[#picked + 1] = pp:getPhoto() else others[#others + 1] = pp:getPhoto() end
+            local photo = pp:getPhoto()
+            if want[pp:getRemoteId()] then picked[#picked + 1] = photo else others[#others + 1] = photo end
+            notes[photo.localIdentifier] = (p.notes or {})[pp:getRemoteId()]
           end
-          found[#found + 1] = { name = pc:getName(), photos = picked, others = others }
+          found[#found + 1] = { name = pc:getName(), photos = picked, others = others, notes = notes }
           if #selects > 0 then
             -- Frames taken out of the Lightroom gallery after sending can't be flagged: say so.
             local missing = #selects - #picked

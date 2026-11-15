@@ -352,6 +352,8 @@ function Gallery({ p, changed, onBack, gone }: { p: Row; changed: () => void; on
         {(p.sentAt && !p.submittedAt) || p.deliveredAt ? <Button label="Extend 7 days" clickAction={() => act({ action: "extend", days: 7 }, "POST", "Seven more days.")} /> : null}
         {p.submittedAt ? <Button label="Copy file names" onClick={() => copy(p.selects.map(file).join("\n"), "File names")} /> : null}
         {p.submittedAt ? <Button label="Reopen for changes" clickAction={reopen} /> : null}
+        {/* Opens Lightroom (plugin 1.2.9, `Link.lua`) and runs Sync with proof on this gallery only. */}
+        {p.selects.length ? <Button label="Sync in Lightroom" href={`lightroom://com.juliangigola.export/sync?token=${encodeURIComponent(p.token)}`} /> : null}
         <Button label="Open gallery" href={p.url} target="_blank" rel="noreferrer" />
         {!p.sentAt ? <Button label="Close draft" variant="destructive" clickAction={close} /> : null}
       </HStack>
