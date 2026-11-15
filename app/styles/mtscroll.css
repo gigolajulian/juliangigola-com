@@ -609,3 +609,38 @@ html[data-mt-intro="1"]{overflow:hidden}
 /* Intro: the hero is hidden while the intro waits and plays. These two rules sit here, in the stylesheet the page blocks on, and not in intro.css: that one loads with the V4 code, and on iPhone Safari the finished hero painted before it arrived. */
 html[data-mt-intro="1"] .mt-hero .mt-wall{opacity:0}
 html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[data-mt-intro] .site-hdr{opacity:0}
+
+/* Booking (b2, q1, q2, approved mock #bq): Book online gets a real heading and stays full size; By quote is a band
+   under it led by the question, its four options in one row. Flow layout, no stop. */
+[data-mtscroll] .mt-bq-h{margin:0;font:900 46px/1 var(--display);letter-spacing:-.05em}
+[data-mtscroll] .mt-next{display:none;margin:0}
+[data-mtscroll] .mt-book .mt-photo>.qp{object-fit:cover}
+@media (min-width:1024px) and (min-height:600px){
+  [data-mtscroll] .mt-bq-h{font-size:calc(112 * var(--u));line-height:.9;letter-spacing:-.055em;margin-bottom:calc(30 * var(--u))}
+  [data-mtscroll] .mt-book .mt-frame{padding-top:calc(112 * var(--u));padding-bottom:calc(72 * var(--u))}
+  [data-mtscroll] .mt-book .mt-photo{top:calc(112 * var(--u));height:min(calc(792 * var(--u)),calc(max(100svh,600px) - 132 * var(--u)))}
+  [data-mtscroll] .mt-book-col{margin-top:0}
+  [data-mtscroll] .mt-next{display:block;margin-left:auto}
+  [data-mtscroll] .mt-book .mt-act{justify-content:flex-start;gap:calc(28 * var(--u))}
+  [data-mtscroll] .mt-quote>.mt-frame{min-height:0;padding:0 calc(36 * var(--u)) calc(110 * var(--u))}
+  [data-mtscroll] .mt-quote .mt-photo,[data-mtscroll] .mt-quote .mt-label{display:none}
+  [data-mtscroll] .mt-quote-col{margin:0;width:auto;padding:calc(48 * var(--u)) 0 0;border-top:1px solid var(--hair);display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"h h" "o a" "l b";column-gap:calc(48 * var(--u));align-items:start}
+  [data-mtscroll] .mt-q-h{grid-area:h;font-size:calc(112 * var(--u));line-height:.9;margin:0 0 calc(34 * var(--u))}
+  [data-mtscroll] .mt-qos{grid-area:o;position:relative;display:flex;column-gap:calc(44 * var(--u));border:0;padding-bottom:calc(64 * var(--u))}
+  [data-mtscroll] .mt-quote :is(.mt-qo,.mt-qw){display:block;width:auto;height:auto;border:0!important;padding:0!important}
+  [data-mtscroll] .mt-quote :is(.mt-qo,.mt-qw) b{display:block;font:900 calc(48 * var(--u))/calc(54 * var(--u)) var(--display);letter-spacing:-.05em;white-space:nowrap}
+  /* the open option's lines sit under the row, from its left edge */
+  [data-mtscroll] .mt-qo .lbl,[data-mtscroll] .mt-qw>span{position:absolute;left:0;top:calc(100% - 54 * var(--u));margin:0;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .25s ease-out;font:500 max(10px,calc(11 * var(--u)))/1.2 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--ink)}
+  [data-mtscroll] :is(.mt-qo,.mt-qw)[aria-pressed="true"] :is(.lbl,span){opacity:1}
+  [data-mtscroll] .mt-qw .po{display:none}
+  [data-mtscroll] .mt-qo-d,[data-mtscroll] .mt-qow[data-on] .mt-qo-d{position:absolute;left:0;top:calc(100% - 30 * var(--u));max-height:none;margin:0;white-space:nowrap;transition:opacity .25s ease-out}
+  [data-mtscroll] .mt-q-act{grid-area:a;margin-top:calc(4 * var(--u))}
+  [data-mtscroll] .mt-q-line{grid-area:l;margin-top:calc(10 * var(--u))}
+  [data-mtscroll] .mt-by{grid-area:b;margin:calc(14 * var(--u)) 0 0;justify-self:end}
+}
+@media not ((min-width:1024px) and (min-height:600px)){
+  [data-mtscroll] .mt-bq-h{order:-2;padding:0 16px}
+  [data-mtscroll] .mt-book .mt-photo>.qp{display:none}
+  /* phones: the sessions first, their photo after them; the booking in place keeps its photo on top */
+  [data-mtscroll] .mt-book:not([data-open]) .mt-photo{order:1;margin-top:20px}
+}

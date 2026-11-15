@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Duo } from "@/components/v3/duo";
 import { V3BookFlow } from "@/components/v3/book";
 import { SESSIONS } from "@/lib/v3";
-import { BOOK_ROWS, gradYear, type BookRow } from "./data";
+import { BOOK_ROWS, QUOTE_OPTS, gradYear, type BookRow } from "./data";
 import { useNextOpen } from "./next-open";
 
 /* Book online: four sessions, one line each. A row is picked by hover (fine
@@ -58,8 +58,11 @@ function useWeekFirst(box: React.RefObject<HTMLDivElement | null>, key: string |
   }, [box, key]);
 }
 
-export function MtBookOnline({ open, onOpen, onClose }: { open: BookRow["key"] | null; onOpen: (k: BookRow["key"]) => void; onClose: () => void }) {
-  const [on, setOn] = React.useState(0);
+export function MtBookOnline({ open, onOpen, onClose, quote, onOwn }: { open: BookRow["key"] | null; onOpen: (k: BookRow["key"]) => void; onClose: () => void; quote: number | null; onOwn: () => void }) {
+  const [on, setOnRaw] = React.useState(0);
+  const setOn = (i: number) => (setOnRaw(i), onOwn());
+  // desktop: the photo shows a By quote option while that list was the last one touched; never during a booking
+  const q = open ? null : quote;
   const at = open ? Math.max(0, BOOK_ROWS.findIndex((x) => x.key === open)) : on;
   const r = BOOK_ROWS[at];
   const sec = React.useRef<HTMLElement>(null);
@@ -96,7 +99,7 @@ export function MtBookOnline({ open, onOpen, onClose }: { open: BookRow["key"] |
   return (
     <section className="mt-book" aria-label="Book online" data-mt="book" data-on={r.key} data-open={open ? "" : undefined} ref={sec}>
       <div className="mt-frame">
-        <p className="lbl mute mt-label">Book online</p>
+        <h2 className="mt-bq-h">Book online</h2>
         <div className="mt-book-col">
           {open && r.slug ? (
             <div className="mt-bin" onKeyDown={(e) => e.key === "Escape" && onClose()}>
@@ -133,6 +136,7 @@ export function MtBookOnline({ open, onOpen, onClose }: { open: BookRow["key"] |
               </div>
               <div className="mt-act">
                 <button type="button" className="btn fill mt-big" onClick={() => pick(on)}>{r.btn}</button>
+                {next ? <p className="lbl mt-next"><span className="mute">Next open</span> {next}</p> : null}
                 <Link className="mt-link" href="/book">All sessions</Link>
               </div>
               <p className="lbl mute mt-dep">$100 secures your date and goes toward your balance.</p>
@@ -140,7 +144,8 @@ export function MtBookOnline({ open, onOpen, onClose }: { open: BookRow["key"] |
           )}
         </div>
         <figure className="mt-photo" aria-live="off">
-          {BOOK_ROWS.map((x, i) => <RowPhoto key={x.key} r={x} on={i === at} sizes="(max-width: 1023px) 100vw, 42vw" />)}
+          {BOOK_ROWS.map((x, i) => <RowPhoto key={x.key} r={x} on={q === null && i === at} sizes="(max-width: 1023px) 100vw, 42vw" />)}
+          {QUOTE_OPTS.map((x, i) => <Image key={x.key} src={x.photo} alt={`${x.name} sample`} fill sizes="42vw" className={q === i ? "qp on" : "qp"} />)}
         </figure>
       </div>
       {/* Phone, tablet and on its side: the held bar while the screen is up. */}
