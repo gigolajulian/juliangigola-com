@@ -9,6 +9,19 @@ import { ABOUT_FACTS, ABOUT_SENTENCE } from "./data";
    (`--w`) and the wordmark's per-letter spans (`--j`) are for the motion pass. */
 const WORDMARK = "Julian Gigola";
 
+/* Keyboard: the footer's wall rises over "More about me" as About leaves the screen, and a Tab that landed there left
+   the focused button under the footer's scrim. If something covers it, About comes back to the top of the screen. */
+function shown(e: React.FocusEvent<HTMLAnchorElement>) {
+  const a = e.currentTarget;
+  requestAnimationFrame(() => {
+    if (document.activeElement !== a || !a.matches(":focus-visible")) return;
+    const r = a.getBoundingClientRect();
+    const over = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+    const sec = a.closest("section");
+    if (sec && over && !a.contains(over)) scrollTo({ top: sec.getBoundingClientRect().top + scrollY });
+  });
+}
+
 export function MtAbout({ does }: { does: string[] }) {
   const words = ABOUT_SENTENCE.split(" ");
   return (
@@ -55,7 +68,7 @@ export function MtAbout({ does }: { does: string[] }) {
             </div>
           </div>
         </div>
-        <Link className="btn mt-more-me" href="/about">More about me</Link>
+        <Link className="btn mt-more-me" href="/about" onFocus={shown}>More about me</Link>
       </div>
     </section>
   );
