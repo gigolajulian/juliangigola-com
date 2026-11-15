@@ -8,7 +8,7 @@
 import { TZ } from "@/lib/booking/booking-rules";
 import { NAME_INK, NAME_W } from "@/lib/email/email-logo";
 import { SIG_DARK, SIG_HTML, SIG_TEXT } from "@/lib/email/email-signature";
-import { extras, publicId, shotOrder, type Proof } from "@/lib/proofs/proof";
+import { extras, isTestEmail, publicId, shotOrder, type Proof, type ViewerEvent } from "@/lib/proofs/proof";
 
 const FROM = { name: "Julian Gigola", email: "book@juliangigola.com" };
 const REPLY_TO = "hello@juliangigola.com";
@@ -147,6 +147,49 @@ export function alertLines(p: Proof): { subject: string; lines: string[] } {
       "In Lightroom: Library > Plug-in Extras > Sync with proof.",
     ],
   };
+}
+
+/** What a client did, as it happens, for a gallery on "each" (Julian 2026-11-15). Open, send and download only. */
+export function actionAlert(p: Proof, who: string, kind: "open" | "download", id?: string): { subject: string; lines: string[] } {
+  const name = p.viewers?.[who.toLowerCase()]?.name;
+  const by = name ? `${name} (${who})` : who;
+  const file = id === "all" ? "all photos as one zip" : p.finals?.find((f) => f.id === id)?.file ?? id ?? "a photo";
+  const what = kind === "open" ? `opened ${p.deliveredAt ? "the delivery" : "the proofs"}` : `downloaded ${file}`;
+  return { subject: `${kind === "open" ? "Opened" : "Downloaded"}: ${p.name}`, lines: [`${by} ${what} of ${p.name}.`, "", (p.deliveredAt ? deliveryUrl : proofUrl)(publicId(p))] };
+}
+
+const COUNTED = { open: "opened", pick: "picked", send: "sent selects", download: "downloaded" } as const;
+type Counted = keyof typeof COUNTED;
+
+/**
+ * The daily summary for galleries on "daily": who opened, picked, sent and downloaded between `since` and `until`.
+ * Null when nothing happened, so a quiet day sends nothing. Test addresses (QA) never count.
+ */
+export function digestMail(proofs: Proof[], since: string, until: string): { subject: string; lines: string[] } | null {
+  const out: string[] = [];
+  let total = 0;
+  for (const p of proofs) {
+    if (p.notify !== "daily") continue;
+    const rows: string[] = [];
+    for (const [who, v] of Object.entries(p.viewers ?? {})) {
+      if (isTestEmail(who)) continue;
+      const n: Partial<Record<Counted, number>> = {};
+      for (const e of v.events) if (e.at > since && e.at <= until && e.kind in COUNTED) n[e.kind as Counted] = (n[e.kind as Counted] ?? 0) + 1;
+      const said = (Object.keys(COUNTED) as Counted[]).filter((k) => n[k]).map((k) => (k === "send" ? COUNTED[k] : `${COUNTED[k]} ${n[k]}${k === "open" ? (n[k] === 1 ? " time" : " times") : ""}`));
+      if (said.length) rows.push(`  ${v.name ? `${v.name} (${who})` : who}: ${said.join(", ")}`);
+    }
+    if (!rows.length) continue;
+    total += rows.length;
+    out.push(`${p.name}`, ...rows, `  ${(p.deliveredAt ? deliveryUrl : proofUrl)(publicId(p))}`, "");
+  }
+  if (!out.length) return null;
+  return { subject: `Galleries today: ${total} ${total === 1 ? "visitor" : "visitors"}`, lines: ["Since yesterday's summary:", "", ...out.slice(0, -1)] };
+}
+
+/** Whether this open or download is worth a mail: not a test address, and not the same thing again within `gap` minutes. */
+export function worthMail(events: ViewerEvent[], kind: "open" | "download", at: string, gap: number): boolean {
+  const before = events.filter((e) => e.kind === kind && e.at < at).at(-1);
+  return !before || Date.parse(at) - Date.parse(before.at) > gap * 60_000;
 }
 
 export async function sendClient(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefined, to: string, m: { subject: string; html: string; text: string; attachments: Inline[] }): Promise<boolean> {

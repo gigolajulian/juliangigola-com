@@ -7,7 +7,8 @@
  * (`app/api/leads/gmail`), so leads, their key and Gmail stay on the site,
  * then to copy the desk to the Google Sheet (`app/api/leads/sheet`).
  * Mondays at 16:00 and 17:00 UTC, whichever is 9 AM Pacific asks the site
- * to mail hello@ the week (`app/api/leads/weekly`).
+ * to mail hello@ the week (`app/api/leads/weekly`). Hourly too, the 9 AM
+ * Pacific run asks for the galleries' daily summary (`app/api/proof/daily`).
  * ─────────────────────────────────────────────────────────────── */
 
 import { lockOp } from "../lib/booking/booking-engine";
@@ -77,13 +78,23 @@ export async function weekly(env: Env, now = new Date()) {
   if (!res.ok) console.error("weekly mail", res.status);
 }
 
+/** Asks the site for the galleries' daily summary, at 9 AM Pacific only. Never throws, so the reminders beside it always run. */
+export async function daily(env: Env, now = new Date()) {
+  if (!env.SITE || !env.BOOKING_SECRET) return;
+  if (Number(new Intl.DateTimeFormat("en-US", { timeZone: "America/Los_Angeles", hour: "numeric", hourCycle: "h23" }).format(now)) !== 9) return;
+  const res = await env.SITE.fetch("https://juliangigola.com/api/proof/daily", { method: "POST", headers: { authorization: `Bearer ${env.BOOKING_SECRET}` } }).catch(
+    (e: unknown) => (console.error("gallery summary", String(e)), null),
+  );
+  if (res && !res.ok) console.error("gallery summary", res.status);
+}
+
 export const HOURLY = "0 * * * *";
 export const WEEKLY = "0 16,17 * * 1";
 
 const worker = {
   fetch: () => new Response("Not found.", { status: 404 }),
   scheduled: (event: { cron: string }, env: Env, ctx: { waitUntil(p: Promise<unknown>): void }) =>
-    ctx.waitUntil(event.cron === HOURLY ? remind(env) : event.cron === WEEKLY ? weekly(env) : syncMail(env).then(() => copySheet(env))),
+    ctx.waitUntil(event.cron === HOURLY ? Promise.all([remind(env), daily(env)]) : event.cron === WEEKLY ? weekly(env) : syncMail(env).then(() => copySheet(env))),
 };
 
 export default worker;

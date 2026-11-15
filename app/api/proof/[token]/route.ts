@@ -5,6 +5,8 @@ import { checkout, checkPaid, finalize } from "@/lib/proofs/submit";
 import { PAYMENTS_DOWN, PAYMENTS_OFF } from "@/lib/stripe";
 import { cleanSelects, device, isEmail, isOpen, isTestEmail, owed, isToken, publicView, readPublic, track, viewerKey, writeProof, type Proof } from "@/lib/proofs/proof";
 import { bodyOf, json } from "@/lib/http";
+import { alertHello } from "@/lib/hello-mail";
+import { actionAlert, worthMail } from "@/lib/email/proof-mail";
 
 /* ── proofs, the client's side ────────────────────────────────────
  * The token in the path is the only key; the email typed at the gate (any
@@ -24,6 +26,13 @@ async function load(token: string) {
   const s = await seal;
   const p = await readPublic(env.INBOX, s, token);
   return p && isOpen(p) ? { env, kv: env.INBOX, s, p } : null;
+}
+
+/** Work after the answer, inline where there is no request context (tests). */
+async function later(work: Promise<unknown>) {
+  const { ctx } = await getCloudflareContext({ async: true });
+  if (ctx?.waitUntil) ctx.waitUntil(work);
+  else await work;
 }
 
 /** The gallery with one visitor's record updated. shortcut: read, change, write is not atomic, so two people picking in the same second can drop one log line; a Durable Object if that ever matters. */
@@ -70,6 +79,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
     if (first) next = { ...next, firstDownloadAt: new Date().toISOString() };
     await writeProof(g.kv, g.s, next);
     if (first) await recordLead(g.env, g.p.email ?? b.email, { event: { at: next.firstDownloadAt!, kind: "download", ref: g.p.token, note: g.p.name } });
+    // "each": hello@ hears of an open or a download as it happens, once per address per half hour (opens) or ten minutes (downloads).
+    const mailed = kind === "open" || kind === "download" ? kind : null;
+    if (mailed && g.p.notify === "each" && (g.p.sentAt || g.p.deliveredAt) && !isTestEmail(b.email) && worthMail(g.p.viewers?.[viewerKey(b.email)]?.events ?? [], mailed, new Date().toISOString(), mailed === "open" ? 30 : 10)) {
+      const a = actionAlert(next, viewerKey(b.email), mailed, dl);
+      await later(alertHello(g.env.EMAIL, a.subject, a.lines));
+    }
     // A test address opening the gate (QA) stays in the gallery's own log, not on the desk as a lead.
     if (kind === "open" && !isTestEmail(b.email)) await recordLead(g.env, b.email, { event: { at: new Date().toISOString(), kind: "proofs", ref: g.p.token, note: g.p.deliveredAt ? `${g.p.name}, finals` : g.p.name }, name });
     // An address coming back gets its own picks; once sent, everyone sees what was sent.

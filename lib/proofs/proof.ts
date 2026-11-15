@@ -94,7 +94,13 @@ export type Proof = {
   deliveredAt?: string;
   /** The client's first download, one file or the zip: the lead moves to Delivered. Julian's own and test addresses do not count. */
   firstDownloadAt?: string;
+  /** Mails to hello@ (Julian 2026-11-15, after Format): "each" mails every open, send and download as it happens; "daily" one
+      summary a day; "off" nothing, the Selects in alert included. Unset is the old way: only Selects in. */
+  notify?: Notify;
 };
+
+export const NOTIFY = ["each", "daily", "off"] as const;
+export type Notify = (typeof NOTIFY)[number];
 
 export type CardCrop = { id: string; x: number; y: number; w: number };
 
@@ -354,7 +360,7 @@ export function cleanNotes(given: unknown, selects: string[]): Record<string, st
 }
 
 /** Settings Lightroom or /admin may set. Numbers are clamped so a typo cannot price a frame at $15,000. */
-type Settings = Partial<Pick<Proof, "name" | "email" | "note" | "included" | "price" | "days" | "balance" | "watermark" | "card">>;
+type Settings = Partial<Pick<Proof, "name" | "email" | "note" | "included" | "price" | "days" | "balance" | "watermark" | "card" | "notify">>;
 export function cleanSettings(given: Record<string, unknown>): Settings {
   const out: Settings = {};
   const int = (v: unknown, lo: number, hi: number) => (typeof v === "number" || typeof v === "string") && Number.isFinite(Number(v)) ? Math.min(hi, Math.max(lo, Math.round(Number(v)))) : undefined;
@@ -374,6 +380,9 @@ export function cleanSettings(given: Record<string, unknown>): Settings {
     const c = given.card as Record<string, unknown>, x = int(c.x, 0, 20000), y = int(c.y, 0, 20000), w = int(c.w, 50, 20000);
     if (isFrameId(c.id) && x !== undefined && y !== undefined && w !== undefined) out.card = { id: c.id, x, y, w };
   }
+  // "selects" (or null) goes back to the old way: Selects in only.
+  if (given.notify === "selects" || given.notify === null) out.notify = undefined;
+  else if (NOTIFY.includes(given.notify as Notify)) out.notify = given.notify as Notify;
   if (typeof given.watermark === "boolean" || given.watermark === "true" || given.watermark === "false") out.watermark = given.watermark === true || given.watermark === "true";
   return out;
 }
