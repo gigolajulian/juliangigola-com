@@ -11,7 +11,8 @@ export type MtData = { hero: MtFrame[]; extras: MtFrame[]; comm: MtFrame[]; film
 /* Julian's arranger save (save.json), in order. Key `<slug>/<NN>`. */
 export const HERO_KEYS = ["threshold/05", "i-wanna-be-a-human/01", "wired-magazine/01", "astral-allure/04", "wrapped-up/02", "sago/01", "valgur/02", "vigil/05", "ukiyosunknown/01", "nyx/06", "oakley-x-nike/01", "liminal/01"];
 export const COMM_KEYS = ["cyber1a/01", "goodcult/01", "gilt/01", "jubo/03", "paranoia/13", "the-den-talkshow/06", "iris/03", "ukiyosunknown/03", "celestis/03"];
-export const COVER_KEYS = ["the-description", "the-river", "problem-child", "your-way", "est-modvs-in-rebvs", "jahannam", "whole-summer"];
+/* The top five (Julian, 2026-11-14). The rest are on /portfolio?d=coverart. */
+export const COVER_KEYS = ["the-description", "the-river", "problem-child", "your-way", "est-modvs-in-rebvs"];
 /* save.json `films` (on), matched to content/site.json by title; kind is this screen's label. */
 export const FILM_PICKS: [title: string, kind: string][] = [
   ["Director's Reel", "Reel"],
