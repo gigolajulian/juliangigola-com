@@ -24,22 +24,42 @@ type Col = { items: { i: number; y: number; h: number }[]; period: number; off: 
 type Cell = { f: HTMLElement; img: HTMLImageElement; cap: HTMLElement; i: number };
 type Opened = { i: number; from: DOMRect };
 type Frames = Record<string, [string, number, string, string][]>;
+// `/canvas.json` is kept after the first open, so the next one starts on every frame.
+let kept: Frames | null = null;
 
 /* Upright frames sit as 3:4 on the field, like the grid and strip (Julian, 2026-11-07); square and wide keep theirs. The opened frame shows the whole photo. */
 const shape = (r: number) => (r > 1.02 ? 4 / 3 : r);
 const mod = (a: number, b: number) => ((a % b) + b) % b;
 
-/** `bar`: the discipline chips and the view row. `onLeave`: Open project takes the canvas down. */
-export function V3Canvas({ list, onClose, onLeave, bar }: { list: WorkItem[]; onClose: () => void; onLeave: () => void; bar: React.ReactNode }) {
+/** `onLeave`: Open project takes the canvas down. The canvas runs under the page's own title
+    and toolbar: it is cut off above `top` px, comes in once its frames are laid out, and fades
+    out while `out`. */
+export function V3Canvas({ list, onClose, onLeave, out, top = 0 }: { list: WorkItem[]; onClose: () => void; onLeave: () => void; out?: boolean; top?: number }) {
   const field = React.useRef<HTMLDivElement>(null);
   /* Covers until `/canvas.json` lands, then every frame, projects in the page's order. */
-  const [all, setAll] = React.useState<Frames | null>(null);
+  const [all, setAll] = React.useState<Frames | null>(kept);
+  // The canvas waits for its frames (or for the fetch to fail) and then comes in once.
+  const [ready, setReady] = React.useState(!!kept);
+  // Two frames after the field is laid out, so building it does not land on the first frame of the motion.
+  const [shown, setShown] = React.useState(false);
   React.useEffect(() => {
+    if (!ready) return;
+    let id = requestAnimationFrame(() => {
+      id = requestAnimationFrame(() => setShown(true));
+    });
+    return () => cancelAnimationFrame(id);
+  }, [ready]);
+  React.useEffect(() => {
+    if (kept) return;
     let live = true;
     fetch("/canvas.json")
       .then((r) => (r.ok ? r.json() : null))
-      .then((j: Frames | null) => live && j && setAll(j))
-      .catch(() => {});
+      .then((j: Frames | null) => {
+        if (j) kept = j;
+        if (live && j) setAll(j);
+      })
+      .catch(() => {})
+      .finally(() => live && setReady(true));
     return () => {
       live = false;
     };
@@ -53,11 +73,6 @@ export function V3Canvas({ list, onClose, onLeave, bar }: { list: WorkItem[]; on
       ),
     [list, all],
   );
-
-  // The page under the canvas is inert, so focus moves to the bar's pressed view button.
-  React.useEffect(() => {
-    field.current?.parentElement?.querySelector<HTMLElement>('.cv-top .wviews [aria-pressed="true"]')?.focus();
-  }, []);
 
   const [opened, setOpened] = React.useState<Opened | null>(null);
   const [grown, setGrown] = React.useState(false);
@@ -111,6 +126,7 @@ export function V3Canvas({ list, onClose, onLeave, bar }: { list: WorkItem[]; on
       while (pool.length <= n) {
         const f = document.createElement("figure");
         f.className = "cv-cell";
+        f.style.setProperty("--k", String(pool.length)); // the frames land in this order
         f.innerHTML = '<img alt="" draggable="false" decoding="async"><span class="cv-cap lbl"></span>';
         el.appendChild(f);
         pool.push({ f, img: f.firstChild as HTMLImageElement, cap: f.lastChild as HTMLElement, i: -1 });
@@ -139,6 +155,12 @@ export function V3Canvas({ list, onClose, onLeave, bar }: { list: WorkItem[]; on
               if (ip.srcSet) p.img.srcset = ip.srcSet;
               else p.img.removeAttribute("srcset");
               p.img.src = ip.src;
+              // A photo fades in over its colour when it lands, instead of popping.
+              if (!p.img.complete) {
+                const im = p.img;
+                im.style.opacity = "0";
+                im.onload = im.onerror = () => (im.style.opacity = "");
+              }
               p.img.alt = fr.alt;
               p.f.style.backgroundColor = fr.color ?? "";
               p.cap.textContent = `${w.n} · ${w.d.join(", ")}`;
@@ -330,18 +352,16 @@ export function V3Canvas({ list, onClose, onLeave, bar }: { list: WorkItem[]; on
     const r = opened.from;
     if (!grown) box = { left: r.left, top: r.top, width: r.width, height: r.height, transition: "none" };
     else {
-      const h = Math.min(innerHeight * 0.78, innerWidth * 0.86 * fr.r), w = h / fr.r;
-      box = { left: (innerWidth - w) / 2, top: (innerHeight - h) / 2, width: w, height: h };
+      // Centred in what the toolbar leaves of the window.
+      const room = innerHeight - top;
+      const h = Math.min(room * 0.78, innerWidth * 0.86 * fr.r), w = h / fr.r;
+      box = { left: (innerWidth - w) / 2, top: top + (room - h) / 2, width: w, height: h };
     }
   }
 
   return (
-    <div className="cv" data-lenis-prevent role="dialog" aria-modal="true" aria-label="Portfolio canvas">
+    <div className={`cv ${shown ? "in" : "wait"}${out ? " out" : ""}`} style={{ "--cv-top": `${top}px` } as React.CSSProperties} data-lenis-prevent role="dialog" aria-modal="true" aria-label="Portfolio canvas">
       <div className="cv-field" ref={field} />
-      {/* An open frame has its own Back; the bar would sit under it. */}
-      <div className="cv-top lbl" style={opened ? { visibility: "hidden" } : undefined}>
-        {bar}
-      </div>
       <div className="cv-foot lbl mute">
         <span>{hint || !all ? "Drag to explore" : `${frames.length} frames`}</span>
         <label className="cv-scale">
@@ -374,7 +394,7 @@ export function V3Canvas({ list, onClose, onLeave, bar }: { list: WorkItem[]; on
           <p>Scale sets the size. Double-click it for 1×.</p>
           <p>Click a photo to open its project.</p>
           <p>A discipline brings its frames to the front.</p>
-          <p className="mute">Arrow keys pan. Esc goes back to the grid.</p>
+          <p className="mute">Arrow keys pan. Esc goes back.</p>
         </div>
       ) : null}
       {p && fr ? (
