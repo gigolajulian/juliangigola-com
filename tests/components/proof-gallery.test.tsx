@@ -9,6 +9,8 @@ const proof = (over: Partial<PublicProof> = {}): PublicProof => ({
     { id: "b", w: 1800, h: 1200 },
   ],
   selects: [],
+  subhead: null,
+  labels: false,
   included: 10,
   price: 25,
   balance: 0,
