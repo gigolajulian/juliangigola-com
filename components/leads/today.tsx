@@ -21,6 +21,7 @@ import { adminCall, authed, ago, aside, at, cash, closed, inboxCall, needsMe, ne
 import { balance, dayB, dueOf, overdue, usd } from "@/lib/leads/invoice";
 import type { InvoiceRow } from "@/components/leads/invoices";
 import { TZ } from "@/lib/booking/booking-rules";
+import { api as proofApi, feed, type FeedItem, type Row } from "@/lib/proofs/desk";
 
 /* Today's helpers, from the retired classic desk. */
 const clock = (ms: number) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit" }).format(ms);
@@ -108,6 +109,11 @@ export function TodayDesk({ leads, size, open, show }: { leads: LeadSummary[]; s
       .then((o) => setPastDue(o.invoices.filter((i) => overdue(i, today)).sort((a, b) => dueOf(a).localeCompare(dueOf(b)))))
       .catch(() => {});
   }, [today]);
+  // Gallery activity across every gallery, from the proofs list (never `?token=`, which marks selects as pulled).
+  const [acts, setActs] = React.useState<FeedItem[] | null>(null);
+  React.useEffect(() => {
+    proofApi<{ proofs: Row[] }>({ query: "?list" }).then((o) => setActs(feed(o.proofs))).catch(() => setActs([]));
+  }, []);
   const m = typeof money === "object" ? money : null;
   const t = typeof traffic === "object" ? traffic : null;
 
@@ -198,6 +204,17 @@ export function TodayDesk({ leads, size, open, show }: { leads: LeadSummary[]; s
                 </List>
               </VStack>
             ) : null}
+            <VStack gap={1}>
+              <Eyebrow>GALLERY ACTIVITY</Eyebrow>
+              {acts?.length ? (
+                <List hasDividers>
+                  {acts.map((a, i) => {
+                    const l = leads.find((x) => x.email.toLowerCase() === a.email);
+                    return <ListItem key={`${a.token}-${a.email}-${a.at}-${i}`} onClick={l ? () => open(l) : undefined} label={`${a.who} ${a.what}`} description={`${a.gallery} · ${ago(a.at)}`} />;
+                  })}
+                </List>
+              ) : <Text type="supporting" color="secondary">{acts ? "No gallery activity yet." : "Loading galleries"}</Text>}
+            </VStack>
             {size === "wide" ? null : rail}
           </VStack>
         </LayoutContent>
