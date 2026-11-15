@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { COVER_RELEASES } from "@/lib/cover-art-data";
 import { HeldRow } from "./held-row";
-import { COVER_KEYS, FILM_DRESS, type MtFilm } from "./data";
+import { COVER_KEYS, COVER_PRESS, FILM_DRESS, type MtFilm } from "./data";
 
 const pad = (n: number) => String(n).padStart(2, "0");
 const COVERS = COVER_KEYS.map((k) => COVER_RELEASES.find((r) => r.slug === k)!).filter(Boolean);
@@ -21,22 +21,25 @@ export function MtCovers() {
       count={COVERS.length}
       head={(cur) => (
         <div className="mt-rowhead">
-          <p className="lbl"><span className="mute">Cover art</span> <span className="mc">{pad(cur + 1)}/{pad(COVERS.length)}</span></p>
-          <h2 className="mt-ttl"><span className="ln"><span>{COVERS[cur].title}</span></span></h2>
-          <p className="lbl mt-artist">{COVERS[cur].artist}</p>
+          <h2>Cover art</h2>
+          <p className="lbl mute mt-cvsub">Design</p>
+          {/* phones name the current cover here; desktop names each one under its sleeve */}
+          <p className="lbl mt-ttl mt-artist"><span className="ln"><span>{COVERS[cur].title} <span className="mute">{COVERS[cur].artist}</span></span></span></p>
           <Link className="btn mt-sm" href="/portfolio?d=coverart">See all covers</Link>
         </div>
       )}
+      foot={(cur) => <p className="mt-cvn" aria-hidden>{pad(cur + 1)}<span>/{pad(COVERS.length)}</span></p>}
     >
       {COVERS.map((c, i) => {
         const back = c.frames[1];
         return (
-          <div key={c.slug} className="mt-item mt-sleeve" data-i={i} data-flip={back ? "" : undefined} style={{ "--o": 0.5 } as React.CSSProperties}>
-            <span className="disc" aria-hidden style={{ backgroundImage: `url(${c.frames[0].thumb})` }} />
+          <div key={c.slug} className="mt-item mt-sleeve" data-i={i} data-flip={back ? "" : undefined} style={{ "--o": 0.5, "--press": COVER_PRESS[c.slug] } as React.CSSProperties}>
+            <span className="disc" aria-hidden />
             <div className="face">
               <Image src={c.frames[0].thumb} alt={`${c.title} by ${c.artist}`} fill sizes="(max-width: 599px) 92vw, 30vw" />
               {back ? <Image className="back" src={back.thumb} alt={`${c.title}, back of the sleeve`} fill sizes="30vw" /> : null}
             </div>
+            <p className="lbl mt-cvcap" aria-hidden><span>{c.title}</span><span className="mute">{c.artist}</span></p>
           </div>
         );
       })}

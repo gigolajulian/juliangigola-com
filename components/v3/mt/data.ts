@@ -13,6 +13,14 @@ export const HERO_KEYS = ["threshold/05", "i-wanna-be-a-human/01", "wired-magazi
 export const COMM_KEYS = ["cyber1a/01", "goodcult/01", "gilt/01", "jubo/03", "paranoia/13", "the-den-talkshow/06", "iris/03", "ukiyosunknown/03", "celestis/03"];
 /* The top five (Julian, 2026-11-14). The rest are on /portfolio?d=coverart. */
 export const COVER_KEYS = ["the-description", "the-river", "problem-child", "your-way", "est-modvs-in-rebvs"];
+/* v1: one pressing color per release, taken from its cover by eye from the sampled palette (2026-11-14). */
+export const COVER_PRESS: Record<string, string> = {
+  "the-description": "#c9c5bd",
+  "the-river": "#5a6b33",
+  "problem-child": "#24475a",
+  "your-way": "#d2622a",
+  "est-modvs-in-rebvs": "#8fb4c6",
+};
 /* Four films on the home (Julian, 2026-11-14): Purgation, Pear VC, Wonderland and Dide O Del stay on /portfolio/video.
    Matched to content/site.json by title; kind is this screen's label. */
 export const FILM_PICKS: [title: string, kind: string][] = [
