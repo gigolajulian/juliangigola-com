@@ -15,7 +15,8 @@
  * Like the sheet, it is written into the page as source and run as the
  * document is read, so it touches nothing but the browser and its
  * arguments. Frames that have not loaded by their turn are left out
- * rather than shown blank.
+ * rather than shown blank; one the resizer refuses is tried as its
+ * plain file first (`orPlain`).
  * ─────────────────────────────────────────────────────────────── */
 export function burst(sizes: string[][], heroes: { d: [number, string][]; l: [number, string][] }) {
   const big = innerWidth >= 700 ? 1 : 0; // a phone takes the smaller copies
@@ -76,6 +77,22 @@ export function burst(sizes: string[][], heroes: { d: [number, string][]; l: [nu
 
   /* One image per frame, stacked and decoded ahead, so a cut is a switch
      of opacity and never waits on the network or the decoder. */
+  /* A frame the resizer will not give is asked for again as its plain
+     file, as `image-fallback.tsx` does once the page is up: a blocker
+     eats `/cdn-cgi/`, and on a branch preview a photograph only the branch
+     has 404s on the live zone (`image-loader.ts`, `ORIGIN`). Marked the
+     same way, so the two never swap one picture twice. */
+  const orPlain = (i: HTMLImageElement) => {
+    const rest = /[/]cdn-cgi[/]image[/][^/]+[/](.+)$/.exec(i.src)?.[1];
+    return i.decode().catch((e) => {
+      if (!rest) throw e;
+      if (i.dataset.plain === undefined) {
+        i.dataset.plain = "";
+        i.src = rest.startsWith("http") ? rest : `/${rest}`;
+      }
+      return i.decode();
+    });
+  };
   const shown = new Set<HTMLImageElement>();
   const stack = (src: string, cls: string) => {
     const i = document.createElement("img");
@@ -84,7 +101,7 @@ export function burst(sizes: string[][], heroes: { d: [number, string][]; l: [nu
     if (cls !== "jg-burst-hero") i.fetchPriority = "high"; // the frames first: the hero shows only after them
     i.src = src;
     // the hero has its own wait, after the run, so only the frames hold the wordmark
-    i.decode().then(() => shown.add(i), () => {}).finally(() => cls !== "jg-burst-hero" && done++);
+    orPlain(i).then(() => shown.add(i), () => {}).finally(() => cls !== "jg-burst-hero" && done++);
     layer.append(i);
     return i;
   };
