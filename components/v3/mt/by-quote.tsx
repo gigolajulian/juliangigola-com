@@ -96,8 +96,8 @@ export function MtByQuote({ stills, reply, onTouch }: { stills: Record<string, s
           <div className="mt-q-act">
             <button type="button" className="btn fill mt-big" aria-label={`Inquire about ${o.name.toLowerCase()}`} onClick={() => cards.inquire("quote", o.key)}>Inquire</button>
             <div className="mt-q-alt">
-              <Link className="mt-link" href={o.call}>Or book a free 15 minute call</Link>
               {reply ? <p className="lbl mute">Replies {reply}</p> : null}
+              <Link className="mt-link" href={o.call}>Book a free 15 minute call</Link>
             </div>
           </div>
         </div>
