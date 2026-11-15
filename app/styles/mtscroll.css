@@ -688,5 +688,5 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
 
 /* Idle wall (?idle=1): the new frame develops over the one it replaces, grey and hard first, then its color. Never dark. */
 [data-mtscroll] .mt-hero .ph>img.mt-dev{opacity:0}
-[data-mtscroll] .mt-hero .ph>img.mt-dev[data-on]{animation:mt-dev 1.3s cubic-bezier(.3,0,.2,1) both}
+[data-mtscroll] .mt-hero .ph>img.mt-dev[data-on]{animation:mt-dev .85s cubic-bezier(.3,0,.2,1) both}
 @keyframes mt-dev{0%{opacity:0;filter:brightness(.45) contrast(1.6) grayscale(1)}40%{opacity:1;filter:brightness(.7) contrast(1.4) grayscale(.7)}100%{opacity:1;filter:none}}

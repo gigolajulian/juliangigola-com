@@ -35,9 +35,9 @@ function Fig({ f, was, onDone, i, eager }: { f: MtFrame; was?: MtFrame; onDone?:
 }
 
 const STILL = 4000; // idle wall: still this long before the first swap
-const EVERY = 3000; // then one frame at this pace
+const EVERY = 2500; // then one frame at this pace
 
-/* Idle wall (`?idle=1`, opt-in): after 4 still seconds one wall frame on screen changes every 3 seconds for a frame
+/* Idle wall (`?idle=1`, opt-in): after 4 still seconds one wall frame on screen changes every 2.5 seconds for a frame
    that is not on the wall. Any pointer move, scroll, key or touch holds it. Off for reduced motion and during the splash. */
 function useIdleWall(frames: MtFrame[], extras: MtFrame[]) {
   const root = React.useRef<HTMLElement>(null);
