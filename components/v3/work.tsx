@@ -448,7 +448,7 @@ function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: number 
   );
 }
 
-// `?viewfx`: the curve the toolbar travels on between its row and the header.
+// The curve the toolbar travels on between its row and the header.
 const MERGE = "cubic-bezier(.65,0,.35,1)";
 
 /** Writes or clears `?view=canvas` on the address in place, with no new history entry. */
@@ -484,12 +484,12 @@ export function V3Work({
      were. `?view=canvas` opens on it. The address carries it while the canvas
      is on, so Back from a project it opened lands on the canvas again. */
   const [canvas, setCanvas] = React.useState(false);
-  /* `?viewfx=1` prototype (Julian, 2026-11-14): the site header stays over the
-     canvas, the view buttons travel up into it (the dock they use once the grid
-     scrolls), the chips slide up under it, and the canvas fades in over the view
-     and out again. `leaving` keeps it up for the fade; `docked` holds the view
-     buttons in the header; `barFrom` is how far below the header the chips start. */
-  const [fx, setFx] = React.useState(false);
+  /* The toolbar merges into the site header (Julian, 2026-11-14): the header
+     stays over the canvas, the search and view buttons travel up into it (the
+     dock they use once the grid scrolls), the chips rise to be its second row,
+     and the canvas fades in over the view and out again. `leaving` keeps it up
+     for the fade; `docked` holds the buttons in the header; `barFrom` is how
+     far below the header the chips start. */
   const [leaving, setLeaving] = React.useState(false);
   const [docked, setDocked] = React.useState(false);
   const [barFrom, setBarFrom] = React.useState(-24);
@@ -499,13 +499,11 @@ export function V3Work({
     const q = new URLSearchParams(location.search);
     /* eslint-disable react-hooks/set-state-in-effect */
     if (q.get("view") === "canvas") setCanvas(true);
-    setFx(q.has("viewfx") && q.get("viewfx") !== "0");
     /* eslint-enable react-hooks/set-state-in-effect */
   }, []);
   const closeCanvas = React.useCallback(() => {
     viewUrl(false);
     setCanvas(false);
-    if (!fx) return;
     if (matchMedia("(prefers-reduced-motion: reduce)").matches) return setDocked(false);
     // The view buttons travel back down to their row while the canvas fades.
     const to = document.querySelector("#p-work .wtools .wviews")?.getBoundingClientRect();
@@ -518,15 +516,16 @@ export function V3Work({
       setLeaving(false);
       setDocked(false);
     }, 260);
-  }, [fx]);
+  }, []);
   /* The header is solid and held in view while the canvas is under it; `--cv-top` is where the canvas's bar starts. */
   React.useEffect(() => {
-    if (!fx || !canvas) return;
+    if (!canvas) return;
     const root = document.documentElement;
-    root.style.setProperty("--cv-top", `${document.querySelector(".site-hdr")?.getBoundingClientRect().bottom ?? 56}px`);
+    // offsetHeight, not the box on screen: the header may be mid-slide back into view.
+    root.style.setProperty("--cv-top", `${document.querySelector<HTMLElement>(".site-hdr")?.offsetHeight ?? 56}px`);
     root.toggleAttribute("data-cv", true);
     return () => root.removeAttribute("data-cv");
-  }, [fx, canvas]);
+  }, [canvas]);
   // Docked: the view buttons arrive in the header from where they sat in the row, and take focus.
   React.useLayoutEffect(() => {
     if (!docked) return;
@@ -556,12 +555,10 @@ export function V3Work({
   const go = (v: typeof view | "canvas") => {
     if (v === "canvas") {
       viewUrl(true);
-      if (fx) {
-        const hb = document.querySelector(".site-hdr")?.getBoundingClientRect().bottom ?? 0;
-        const c = chips.current?.getBoundingClientRect();
-        setBarFrom(c && c.top > hb ? c.top - hb : -24);
-        viewsFrom.current = pin ? null : (tools?.querySelector(".wviews")?.getBoundingClientRect() ?? null);
-      }
+      const hb = document.querySelector(".site-hdr")?.getBoundingClientRect().bottom ?? 0;
+      const c = chips.current?.getBoundingClientRect();
+      setBarFrom(c && c.top > hb ? c.top - hb : -24);
+      viewsFrom.current = pin ? null : (tools?.querySelector(".wviews")?.getBoundingClientRect() ?? null);
       setCanvas(true);
     } else if (canvas) {
       closeCanvas();
@@ -1322,7 +1319,6 @@ export function V3Work({
           ? createPortal(
               <div className="v3">
                 <V3Canvas
-                  fx={fx}
                   out={leaving}
                   barFrom={barFrom}
                   onShown={dock}
@@ -1331,7 +1327,7 @@ export function V3Work({
                   onLeave={leaveCanvas}
                   bar={
                     <>
-                      {/* A mouse wheel runs the row sideways, as it does on the page's chips. */}
+                      {/* The view buttons are in the header. A mouse wheel runs the row sideways, as it does on the page's chips. */}
                       <div className="chips lbl" role="group" aria-label="Sort by discipline" onWheel={(e) => (e.currentTarget.scrollLeft += e.deltaY)}>
                         {["All", ...order].map((d) => (
                           <button key={d} type="button" aria-pressed={d === filter} onClick={() => setFilter(d)}>
@@ -1339,7 +1335,6 @@ export function V3Work({
                           </button>
                         ))}
                       </div>
-                      {fx ? null : views}
                     </>
                   }
                 />
