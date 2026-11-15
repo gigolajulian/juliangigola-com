@@ -691,3 +691,23 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
 @media (min-width:1024px) and (min-height:600px){
   [data-mtscroll] .mt-book>.mt-frame{min-height:calc(112 * var(--u) + min(792 * var(--u),max(100svh,600px) - 132 * var(--u)) + 48 * var(--u));padding-bottom:calc(48 * var(--u))}
 }
+
+/* Footer, desktop (Julian, 2026-11-14): one compact screen. The still shows clean at the top, under the links, and
+   fades down into the ground at "Contact me". Pointing at the phrase lifts that fade, so the still shows under it,
+   and tints the words. */
+@media (min-width:1024px) and (min-height:600px){
+  [data-mtscroll] .mt-foot .mt-stage{height:min(max(100svh,600px),calc(800 * var(--u)))}
+  /* the bottom band stays; the long fade is its own layer so the hover can lift it */
+  [data-mtscroll] .mt-fscrim{background:linear-gradient(transparent 80%,var(--bg) 96%)}
+  [data-mtscroll] .mt-fscrim::before{content:"";position:absolute;inset:0;background:linear-gradient(rgb(0 0 0 / .46),rgb(0 0 0 / .26) 28%,transparent 46%,color-mix(in srgb,var(--bg) 70%,transparent) 58%,var(--bg) 74%);transition:opacity .6s cubic-bezier(.23,1,.32,1)}
+  [data-mtscroll] .mt-fscrim::after{content:"";position:absolute;inset:0;background:linear-gradient(rgb(0 0 0 / .46),rgb(0 0 0 / .26) 28%,transparent 46%);opacity:0;transition:opacity .6s cubic-bezier(.23,1,.32,1)}
+  [data-mtscroll] .mt-foot[data-hot] .mt-fscrim::before{opacity:0}
+  [data-mtscroll] .mt-foot[data-hot] .mt-fscrim::after{opacity:1}
+  /* the links sit on the photo in both themes */
+  [data-mtscroll] .mt-fcols{color:rgb(var(--on-photo));border-top-color:rgb(var(--on-photo) / .28);text-shadow:0 0 2px rgb(0 0 0 / .5),0 1px 14px rgb(0 0 0 / .55)}
+  [data-mtscroll] .mt-fcols .mute{color:rgb(var(--on-photo) / .66)}
+  [data-mtscroll] .mt-ph-btn{transition:color .5s cubic-bezier(.23,1,.32,1)}
+  [data-mtscroll] .mt-foot[data-hot] .mt-ph-btn{color:color-mix(in srgb,var(--accent) 72%,transparent)!important}
+  /* shortcut: the old pointer spot is hidden, not removed; foot.ts still draws it. Drop that code if this look stays. */
+  html[data-mt-motion] .mt-foot .mt-fcut{display:none}
+}
