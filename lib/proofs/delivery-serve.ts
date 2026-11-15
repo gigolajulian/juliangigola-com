@@ -8,7 +8,7 @@
  * ─────────────────────────────────────────────────────────────── */
 
 import { sealer } from "@/lib/leads/lead-crypto";
-import { finalKey, isFrameId, isOpen, isStrongId, isToken, readPublic, shotOrder, type Proof } from "@/lib/proofs/proof";
+import { finalKey, isFrameId, isStrongId, isToken, readPublic, shotOrder, shut, type Proof } from "@/lib/proofs/proof";
 import { uniqueNames, zipLayout } from "@/lib/zip";
 
 declare global {
@@ -24,13 +24,21 @@ type Env = Pick<CloudflareEnv, "INBOX" | "PROOFS" | "LEADS_KEY" | "DOWNLOAD_LIMI
  * The gallery a delivery link opens, or null. By its public id only, and only a strong one (Send finals moves an old
  * Nov 11 id to a shoot id). Before Send finals Julian can look at it, as with proofs; after, it closes with the gallery.
  */
-export async function openDeliveryIn(env: Env, id: string) {
+export async function deliveryIn(env: Env, id: string, cookie: string | null) {
   const seal = sealer(env.LEADS_KEY);
-  if (!isToken(id) || !isStrongId(id) || !env.INBOX || !env.PROOFS || !seal) return null;
+  if (!isToken(id) || !isStrongId(id) || !env.INBOX || !env.PROOFS || !seal) return { shut: "closed" as const };
   const s = await seal;
   const p = await readPublic(env.INBOX, s, id);
-  if (!p?.finals?.length || (p.deliveredAt && !isOpen(p))) return null;
+  if (!p?.finals?.length) return { shut: "closed" as const };
+  // Offline and the password hold before Send finals too; only the clock waits for it.
+  const why = await shut(p, cookie, env.LEADS_KEY);
+  if (why === "offline" || why === "locked" || (why === "closed" && p.deliveredAt)) return { shut: why, p };
   return { s, p };
+}
+/** `deliveryIn` for the routes that only serve: null whatever the reason. */
+export async function openDeliveryIn(env: Env, id: string, cookie: string | null) {
+  const g = await deliveryIn(env, id, cookie);
+  return "shut" in g ? null : g;
 }
 
 export const finalOf = (p: Proof, id: string) => p.finals?.find((f) => f.id === id);
@@ -48,7 +56,7 @@ async function limited(env: Env, request: Request) {
 
 /** One final, full size, as a download. R2's body knows its length. */
 export async function finalResponse(request: Request, env: Env, id: string, fid: string) {
-  const g = isFrameId(fid) ? await openDeliveryIn(env, id) : null;
+  const g = isFrameId(fid) ? await openDeliveryIn(env, id, request.headers.get("cookie")) : null;
   const f = g && finalOf(g.p, fid);
   if (!g || !f) return notFound();
   const busy = await limited(env, request);
@@ -61,7 +69,7 @@ export async function finalResponse(request: Request, env: Env, id: string, fid:
 /* Download all: every final in one stored zip, streamed from R2 with its exact length. Sizes and CRCs were
    recorded at upload, so the Worker only pipes bytes. A file that changed since is a broken download, never a wrong one. */
 export async function zipResponse(request: Request, env: Env, id: string) {
-  const g = await openDeliveryIn(env, id);
+  const g = await openDeliveryIn(env, id, request.headers.get("cookie"));
   if (!g) return notFound();
   const busy = await limited(env, request);
   if (busy) return busy;

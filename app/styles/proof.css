@@ -380,6 +380,11 @@ html:has(.proof[data-wall])::-webkit-scrollbar{display:none}
   .dlv-side h1{font-size:36px;margin-bottom:8px}
   .dlv-side>.proof-btn{align-self:stretch}
 }
+/* The password gate (components/proofs/pass-gate.tsx): the plain gate's card, centered with nothing behind it. */
+.proof-pass{min-height:calc(100svh - 57px);display:grid;place-items:center;padding:18px}
+.proof .proof-pass .proof-card{position:static;transform:none;box-shadow:none}
+.proof .proof-show{justify-self:start;align-self:flex-start;background:none;border:0;padding:4px 0;min-height:24px;font:11px var(--p-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted-foreground);cursor:pointer}
+.proof .proof-show:focus-visible{outline:1px solid var(--accent);outline-offset:3px}
 
 /* /contract/<id> (Julian 2026-11-15): the delivery gate's type and fields, one reading column. */
 .ctr{max-width:760px;padding:0 28px 120px}

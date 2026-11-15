@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
-import { openDelivery } from "@/lib/proofs/delivery";
+import { headers } from "next/headers";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
+import { deliveryIn } from "@/lib/proofs/delivery-serve";
+import { PassGate, Shut } from "@/components/proofs/pass-gate";
 import { deliveryView } from "@/lib/proofs/proof";
 import { DeliveryGallery } from "@/components/proofs/delivery";
 
@@ -19,15 +22,8 @@ export const metadata: Metadata = {
 
 export default async function DeliveryPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const g = await openDelivery(id);
-  if (!g) {
-    return (
-      <main className="grid min-h-svh place-items-center px-6 font-mono text-[13px] text-muted-foreground">
-        <p>
-          This gallery closed. <a href="mailto:hello@juliangigola.com" className="underline underline-offset-4">hello@juliangigola.com</a>
-        </p>
-      </main>
-    );
-  }
+  const { env } = await getCloudflareContext({ async: true });
+  const g = await deliveryIn(env, id, (await headers()).get("cookie"));
+  if ("shut" in g) return g.shut === "locked" ? <PassGate id={id} kind="photos" /> : <Shut offline={g.shut === "offline"} />;
   return <DeliveryGallery id={id} initial={deliveryView(g.p)} />;
 }
