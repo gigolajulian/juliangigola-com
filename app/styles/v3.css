@@ -1707,7 +1707,9 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .v3 #p-project .pj-lead .pj-r:only-child{grid-column:1/-1}}
 
 /* The canvas view (components/v3/canvas.tsx): the drag-to-explore field. */
-.v3 .cv{position:fixed;inset:0;z-index:20;background:var(--bg);overscroll-behavior:none}
+/* It runs under the site header and under the page's own title and toolbar: nothing of it paints or takes a click above `--cv-top`, the toolbar's lower edge. */
+.v3 .cv{position:fixed;inset:0;z-index:20;background:var(--bg);overscroll-behavior:none;clip-path:inset(var(--cv-top,0px) 0 0 0)}
+.v3 #p-work.cv-on>.whead~*{visibility:hidden;transition:visibility 0s .45s}
 .v3 .cv-field{position:absolute;inset:0;overflow:hidden;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
 .v3 .cv-field[data-grab]{cursor:grabbing}
 .v3 .cv-cell{position:absolute;left:0;top:0;margin:0;will-change:transform;contain:layout paint}
@@ -1715,31 +1717,17 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .v3 .cv-field[data-grab] .cv-cell img{pointer-events:none}
 .v3 .cv-cap{position:absolute;left:0;bottom:0;width:100%;box-sizing:border-box;padding:6px 8px;color:rgb(var(--on-photo));background:linear-gradient(transparent,rgb(var(--scrim) / 60%));white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0;transition:opacity .2s}
 @media (hover:hover){.v3 .cv-field:not([data-grab]) .cv-cell:hover img{opacity:.82}.v3 .cv-field:not([data-grab]) .cv-cell:hover .cv-cap{opacity:1}}
-.v3 .cv-top,.v3 .cv-foot{position:absolute;left:var(--g);right:var(--gr);display:flex;justify-content:space-between;align-items:center;pointer-events:none}
-.v3 .cv-top{top:0;left:0;right:0;padding:12px var(--gr) 28px var(--g);background:linear-gradient(var(--bg),transparent)}
+.v3 .cv-foot{position:absolute;left:var(--g);right:var(--gr);display:flex;justify-content:space-between;align-items:center;pointer-events:none}
 .v3 .cv-foot{left:0;right:0;bottom:0;padding:28px var(--gr) 10px var(--g);background:linear-gradient(transparent,var(--bg))}
-.v3 .cv-top>*,.v3 .cv-foot>*{pointer-events:auto}
-/* The toolbar merges into the site header: the header stays over the canvas, solid and in view, the chips rise to be its second row (no line between), the canvas fades in over the view and its frames land a few at a time. */
-:root[data-cv] .v3 .site-hdr{transform:none;opacity:1;pointer-events:auto;background:var(--bg);-webkit-backdrop-filter:none;backdrop-filter:none;border-bottom-color:transparent}
-/* A header tucked away on a touch screen comes back whole while the canvas is on. */
-:root[data-cv][data-tuck] .v3 .site-hdr{background:var(--bg)}
-:root[data-cv][data-tuck] .v3 .site-hdr>:not(.hslot){opacity:1;visibility:visible;transition:none}
-:root[data-cv][data-tuck] .v3 .htools{position:static;padding:0;background:none;border:0}
-.v3 .cv-top{top:var(--cv-top,56px);padding-top:2px}
-.v3 .cv .cv-x{top:calc(var(--cv-top,56px) + 12px)}
-/* A phone's header has to seat the wordmark, the search, four views and Menu: the wordmark gives way. */
-@media (max-width:700px){:root[data-cv] .v3 .site-wm{scale:.8;transform-origin:0 50%}:root[data-cv] .v3 .htools{gap:0}}
+.v3 .cv-foot>*{pointer-events:auto}
+/* The canvas fades in over the view once its frames are laid out, and they land a few at a time. */
+.v3 .cv .cv-x{top:calc(var(--cv-top,0px) + 12px)}
 .v3 .cv.wait{opacity:0}
 @media (prefers-reduced-motion:no-preference){
 .v3 .cv.in{animation:cv-in .4s cubic-bezier(.23,1,.32,1) both}
-.v3 .cv.in .cv-top{animation:cv-bar .55s cubic-bezier(.65,0,.35,1) both}
 .v3 .cv.in .cv-cell{animation:cv-cell .5s cubic-bezier(.23,1,.32,1) both;animation-delay:calc(min(var(--k),36)*10ms)}
 .v3 .cv.out{animation:cv-out .25s ease-in both;pointer-events:none}}
-@keyframes cv-in{from{opacity:0}}@keyframes cv-out{to{opacity:0}}@keyframes cv-cell{from{opacity:0;scale:.94}}@keyframes cv-bar{from{transform:translateY(var(--from-y))}}
-/* The chips ride in the canvas's bar, solid so they read over the photos. */
-.v3 .cv-top{gap:8px 20px;padding-bottom:12px;background:var(--bg);border-bottom:1px solid var(--line)}.v3 .cv-top .chips{flex:1;min-width:0;padding:0;margin:0}
-@media (max-width:700px){.v3 .cv-top{flex-wrap:wrap;justify-content:flex-end}.v3 .cv-top .chips{flex-basis:100%;order:2}}
-.v3 .cv-foot span{transition:opacity .6s}.v3 .cv-foot .gone{opacity:0}
+@keyframes cv-in{from{opacity:0}}@keyframes cv-out{to{opacity:0}}@keyframes cv-cell{from{opacity:0;scale:.94}}
 .v3 .cv-q{background:none;border:0;padding:8px 0;color:var(--mute);font:inherit;letter-spacing:inherit;text-transform:inherit;cursor:pointer}
 @media (hover:hover){.v3 .cv-q:hover{color:var(--ink)}}
 .v3 .cv-q:focus-visible,.v3 .cv-open a:focus-visible{outline:1px solid var(--accent);outline-offset:3px}

@@ -7,11 +7,10 @@ import { PROJECTS, categoryLabel } from "@/lib/work";
 const list: WorkItem[] = PROJECTS.slice(0, 8).map((p) => ({ s: p.slug, n: p.name, d: p.categories.map(categoryLabel), c: "", cover: p.cover.src }));
 
 describe("V3Canvas", () => {
-  it("carries the view's bar and goes back on Esc", () => {
+  it("goes back on Esc", () => {
     const onClose = vi.fn();
-    render(<V3Canvas list={list} onClose={onClose} onLeave={vi.fn()} bar={<button type="button">Grid view</button>} />);
-    const dlg = screen.getByRole("dialog", { name: "Portfolio canvas" });
-    expect(dlg.querySelector(".cv-top button")?.textContent).toBe("Grid view");
+    render(<V3Canvas list={list} onClose={onClose} onLeave={vi.fn()} />);
+    expect(screen.getByRole("dialog", { name: "Portfolio canvas" })).toBeTruthy();
     fireEvent.keyDown(window, { key: "Escape" });
     expect(onClose).toHaveBeenCalled();
   });

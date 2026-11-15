@@ -31,10 +31,10 @@ let kept: Frames | null = null;
 const shape = (r: number) => (r > 1.02 ? 4 / 3 : r);
 const mod = (a: number, b: number) => ((a % b) + b) % b;
 
-/** `bar`: the discipline chips. `onLeave`: Open project takes the canvas down. The canvas sits
-    under the site header, comes in once its frames are laid out (`onShown`), its bar rising
-    from `barFrom` px below, and fades out while `out`. */
-export function V3Canvas({ list, onClose, onLeave, bar, out, barFrom, onShown }: { list: WorkItem[]; onClose: () => void; onLeave: () => void; bar: React.ReactNode; out?: boolean; barFrom?: number; onShown?: () => void }) {
+/** `onLeave`: Open project takes the canvas down. The canvas runs under the page's own title
+    and toolbar: it is cut off above `top` px, comes in once its frames are laid out, and fades
+    out while `out`. */
+export function V3Canvas({ list, onClose, onLeave, out, top = 0 }: { list: WorkItem[]; onClose: () => void; onLeave: () => void; out?: boolean; top?: number }) {
   const field = React.useRef<HTMLDivElement>(null);
   /* Covers until `/canvas.json` lands, then every frame, projects in the page's order. */
   const [all, setAll] = React.useState<Frames | null>(kept);
@@ -45,13 +45,10 @@ export function V3Canvas({ list, onClose, onLeave, bar, out, barFrom, onShown }:
   React.useEffect(() => {
     if (!ready) return;
     let id = requestAnimationFrame(() => {
-      id = requestAnimationFrame(() => {
-        setShown(true);
-        onShown?.();
-      });
+      id = requestAnimationFrame(() => setShown(true));
     });
     return () => cancelAnimationFrame(id);
-  }, [ready, onShown]);
+  }, [ready]);
   React.useEffect(() => {
     if (kept) return;
     let live = true;
@@ -355,18 +352,16 @@ export function V3Canvas({ list, onClose, onLeave, bar, out, barFrom, onShown }:
     const r = opened.from;
     if (!grown) box = { left: r.left, top: r.top, width: r.width, height: r.height, transition: "none" };
     else {
-      const h = Math.min(innerHeight * 0.78, innerWidth * 0.86 * fr.r), w = h / fr.r;
-      box = { left: (innerWidth - w) / 2, top: (innerHeight - h) / 2, width: w, height: h };
+      // Centred in what the toolbar leaves of the window.
+      const room = innerHeight - top;
+      const h = Math.min(room * 0.78, innerWidth * 0.86 * fr.r), w = h / fr.r;
+      box = { left: (innerWidth - w) / 2, top: top + (room - h) / 2, width: w, height: h };
     }
   }
 
   return (
-    <div className={`cv ${shown ? "in" : "wait"}${out ? " out" : ""}`} style={{ "--from-y": `${barFrom ?? -24}px` } as React.CSSProperties} data-lenis-prevent role="dialog" aria-modal="true" aria-label="Portfolio canvas">
+    <div className={`cv ${shown ? "in" : "wait"}${out ? " out" : ""}`} style={{ "--cv-top": `${top}px` } as React.CSSProperties} data-lenis-prevent role="dialog" aria-modal="true" aria-label="Portfolio canvas">
       <div className="cv-field" ref={field} />
-      {/* An open frame has its own Back; the bar would sit under it. */}
-      <div className="cv-top lbl" style={opened ? { visibility: "hidden" } : undefined}>
-        {bar}
-      </div>
       <div className="cv-foot lbl mute">
         <span>{hint || !all ? "Drag to explore" : `${frames.length} frames`}</span>
         <label className="cv-scale">

@@ -448,9 +448,6 @@ function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: number 
   );
 }
 
-// The curve the toolbar travels on between its row and the header.
-const MERGE = "cubic-bezier(.65,0,.35,1)";
-
 /** Writes or clears `?view=canvas` on the address in place, with no new history entry. */
 const viewUrl = (canvas: boolean) => {
   const u = new URL(location.href);
@@ -480,62 +477,41 @@ export function V3Work({
   }, [chip]);
   const [view, setView] = React.useState<"grid" | "strip" | "color">("grid");
   const back = React.useRef<"grid" | "strip">("grid");
-  /* The canvas lies over whichever view is on, so leaving it lands where you
-     were. `?view=canvas` opens on it. The address carries it while the canvas
-     is on, so Back from a project it opened lands on the canvas again. */
+  /* The canvas lies over whichever view is on, under the page's own title and
+     toolbar, which stay where they are (Julian, 2026-11-14): leaving it lands
+     where you were. `?view=canvas` opens on it. The address carries it while
+     the canvas is on, so Back from a project it opened lands on the canvas again.
+     `leaving` keeps it up for its fade out; `cvTop` is the toolbar's lower edge,
+     where the canvas starts. */
   const [canvas, setCanvas] = React.useState(false);
-  /* The toolbar merges into the site header (Julian, 2026-11-14): the header
-     stays over the canvas, the search and view buttons travel up into it (the
-     dock they use once the grid scrolls), the chips rise to be its second row,
-     and the canvas fades in over the view and out again. `leaving` keeps it up
-     for the fade; `docked` holds the buttons in the header; `barFrom` is how
-     far below the header the chips start. */
   const [leaving, setLeaving] = React.useState(false);
-  const [docked, setDocked] = React.useState(false);
-  const [barFrom, setBarFrom] = React.useState(-24);
-  const viewsFrom = React.useRef<DOMRect | null>(null);
-  const dock = React.useCallback(() => setDocked(true), []);
+  const [cvTop, setCvTop] = React.useState(0);
   React.useEffect(() => {
-    const q = new URLSearchParams(location.search);
-    /* eslint-disable react-hooks/set-state-in-effect */
-    if (q.get("view") === "canvas") setCanvas(true);
-    /* eslint-enable react-hooks/set-state-in-effect */
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (new URLSearchParams(location.search).get("view") === "canvas") setCanvas(true);
   }, []);
   const closeCanvas = React.useCallback(() => {
     viewUrl(false);
     setCanvas(false);
-    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return setDocked(false);
-    // The view buttons travel back down to their row while the canvas fades.
-    const to = document.querySelector("#p-work .wtools .wviews")?.getBoundingClientRect();
-    const el = document.querySelector<HTMLElement>("#hdr-tools .wviews");
-    const r = el?.getBoundingClientRect();
-    if (el && r && to && to.top > r.bottom)
-      el.animate([{ transform: "none" }, { transform: `translate(${to.left - r.left}px,${to.top - r.top}px)` }], { duration: 260, easing: MERGE, fill: "forwards" });
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     setLeaving(true);
-    setTimeout(() => {
-      setLeaving(false);
-      setDocked(false);
-    }, 260);
+    setTimeout(() => setLeaving(false), 260);
   }, []);
-  /* The header is solid and held in view while the canvas is under it; `--cv-top` is where the canvas's bar starts. */
+  /* The toolbar only sits in its usual place at the top of the page, so the
+     canvas opens there, and starts under the toolbar's last row. */
   React.useEffect(() => {
     if (!canvas) return;
-    const root = document.documentElement;
-    // offsetHeight, not the box on screen: the header may be mid-slide back into view.
-    root.style.setProperty("--cv-top", `${document.querySelector<HTMLElement>(".site-hdr")?.offsetHeight ?? 56}px`);
-    root.toggleAttribute("data-cv", true);
-    return () => root.removeAttribute("data-cv");
-  }, [canvas]);
-  // Docked: the view buttons arrive in the header from where they sat in the row, and take focus.
-  React.useLayoutEffect(() => {
-    if (!docked) return;
-    const el = document.querySelector<HTMLElement>("#hdr-tools .wviews");
-    if (!el) return;
-    el.querySelector<HTMLElement>('[aria-pressed="true"]')?.focus({ preventScroll: true });
-    const f = viewsFrom.current, r = el.getBoundingClientRect();
-    if (f && !matchMedia("(prefers-reduced-motion: reduce)").matches)
-      el.animate([{ transform: `translate(${f.left - r.left}px,${f.top - r.top}px)` }, { transform: "none" }], { duration: 550, easing: MERGE });
-  }, [docked]);
+    scrollTo(0, 0);
+    const measure = () => {
+      const bar = document.querySelector("#p-work .whead")?.getBoundingClientRect();
+      const row = document.querySelector("#p-work .chips")?.getBoundingClientRect();
+      // `.whead` is a box on desktop and `display:contents` elsewhere, where the chips are the last row.
+      setCvTop(Math.round(bar?.height ? bar.bottom : (row?.bottom ?? 0) + 12));
+    };
+    measure();
+    addEventListener("resize", measure);
+    return () => removeEventListener("resize", measure);
+  }, [canvas, filter]);
   // Open project: the canvas comes down, the address keeps `?view=canvas` for Back.
   const leaveCanvas = React.useCallback(() => setCanvas(false), []);
   /* Grid, strip and color views, and the discipline chips: the covers on
@@ -555,10 +531,6 @@ export function V3Work({
   const go = (v: typeof view | "canvas") => {
     if (v === "canvas") {
       viewUrl(true);
-      const hb = document.querySelector(".site-hdr")?.getBoundingClientRect().bottom ?? 0;
-      const c = chips.current?.getBoundingClientRect();
-      setBarFrom(c && c.top > hb ? c.top - hb : -24);
-      viewsFrom.current = pin ? null : (tools?.querySelector(".wviews")?.getBoundingClientRect() ?? null);
       setCanvas(true);
     } else if (canvas) {
       closeCanvas();
@@ -1109,15 +1081,11 @@ export function V3Work({
       <section
         ref={page}
         className={
-          view === "strip"
-            ? "v3page strip-on"
-            : view === "color"
-              ? "v3page color-on"
-              : "v3page"
+          (view === "strip" ? "v3page strip-on" : view === "color" ? "v3page color-on" : "v3page") +
+          // Canvas on: everything under the toolbar hides once the canvas has faded in over it.
+          (canvas ? " cv-on" : "")
         }
         id="p-work"
-        // The canvas covers the page: Tab goes to its bar, not to the page under it.
-        inert={canvas}
       >
         <div className="pg-head">
           <h1 className="pg-t">{filter === "All" ? "Portfolio" : filter}</h1>
@@ -1267,7 +1235,7 @@ export function V3Work({
             </div>
           </div>
         ) : null}
-        {(pin || docked) &&
+        {pin &&
           document.getElementById("hdr-tools") &&
           createPortal(
             <div className={hs ? "htools lbl open" : "htools lbl"}>
@@ -1319,24 +1287,11 @@ export function V3Work({
           ? createPortal(
               <div className="v3">
                 <V3Canvas
-                  out={leaving}
-                  barFrom={barFrom}
-                  onShown={dock}
                   list={field}
                   onClose={closeCanvas}
                   onLeave={leaveCanvas}
-                  bar={
-                    <>
-                      {/* The view buttons are in the header. A mouse wheel runs the row sideways, as it does on the page's chips. */}
-                      <div className="chips lbl" role="group" aria-label="Sort by discipline" onWheel={(e) => (e.currentTarget.scrollLeft += e.deltaY)}>
-                        {["All", ...order].map((d) => (
-                          <button key={d} type="button" aria-pressed={d === filter} onClick={() => setFilter(d)}>
-                            {d}
-                          </button>
-                        ))}
-                      </div>
-                    </>
-                  }
+                  out={leaving}
+                  top={cvTop}
                 />
               </div>,
               document.body,
