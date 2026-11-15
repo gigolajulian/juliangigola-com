@@ -18,6 +18,9 @@ html[data-mt-held] .mt-covers .mt-row{margin-top:0;padding-top:calc(60 * var(--u
 html[data-mt-held] .mt-covers{--cu:max(var(--u),min(calc((100svh - 450 * var(--u)) / 450),calc(100vw / 800),1.6px));--cm:max(0px,calc((100svh - 450 * var(--u) - 450 * var(--cu)) / 2))}
 html[data-mt-held] .mt-covers .mt-row{--u:var(--cu);--pl:calc(50vw - 160 * var(--u));margin-top:var(--cm)}
 }
+/* "See all covers" sits at the bottom, just left of the counter (Julian, 2026-11-15): the head stops being its box, the stage is */
+html[data-mt-held] .mt-covers .mt-rowhead{position:static}
+html[data-mt-held] .mt-covers .mt-rowhead .btn{top:auto;right:calc(var(--fx) + 196 * var(--u));bottom:calc(48 * var(--u))}
 /* The record sticking out must not count as hovering its sleeve. */
 html[data-mt-held] .mt-sleeve .disc{pointer-events:none}
 
@@ -63,7 +66,8 @@ html[data-mt-held] .mt-motion .mt-film:focus-visible::after{content:"";position:
 html[data-mt-held] .mt-motion .mt-stage::before{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;background:linear-gradient(rgb(0 0 0 / .6),transparent 30%,transparent 52%,rgb(0 0 0 / .62))}
 html[data-mt-held] .mt-motion :is(.mt-mohead,.mt-mofoot){position:absolute;z-index:4;left:calc(var(--fx) + 36 * var(--u));width:auto;margin:0;padding:0;pointer-events:none}
 html[data-mt-held] .mt-motion .mt-mohead{top:calc(96 * var(--u))}
-html[data-mt-held] .mt-motion .mt-mohead h2{font-size:calc(40 * var(--u));margin-bottom:calc(8 * var(--u))}
+/* as large as the Cover art heading (Julian, 2026-11-15; was 40) */
+html[data-mt-held] .mt-motion .mt-mohead h2{font-size:calc(88 * var(--u));margin-bottom:calc(12 * var(--u))}
 html[data-mt-held] .mt-motion :is(.mt-mohead,.mt-mofoot) .mute{color:rgb(var(--on-photo) / .72)}
 html[data-mt-held] .mt-motion .mt-mofoot{top:auto;bottom:calc(64 * var(--u))}
 html[data-mt-held] .mt-motion .mt-mofoot h3{font-size:calc(104 * var(--u));margin:calc(12 * var(--u)) 0 calc(14 * var(--u))}

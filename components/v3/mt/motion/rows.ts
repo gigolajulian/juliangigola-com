@@ -47,10 +47,10 @@ function heldRow(name: string, covers: boolean): Driver {
       };
 
       /* Record rule: out at the stage centre, back in the sleeve `fall` px away. */
-      const discs = (x: number, fall: number) => {
+      const discs = (x: number, fall: number, k = 1) => {
         for (let i = 0; i < n; i++) {
           // eased: the record leaves and returns slowly at both ends instead of at one speed (Julian, 2026-11-14)
-          const v = Math.round(smooth(clamp(1 - Math.abs(c0 + i * step - x - mid) / fall)) * 1000) / 1000;
+          const v = Math.round(smooth(clamp(1 - Math.abs(c0 + i * step - x - mid) / fall)) * k * 1000) / 1000;
           if (v !== o[i]) items[i].style.setProperty("--o", String((o[i] = v)));
         }
       };
@@ -60,6 +60,8 @@ function heldRow(name: string, covers: boolean): Driver {
       };
 
       frame = (p) => {
+        // the first record starts inside its sleeve and comes out over the first 5% of the hold (Julian, 2026-11-15)
+        const k = smooth(clamp(p / 0.05));
         p = ease(p);
         const i = Math.round(p * (n - 1)), x = p * (n - 1) * step;
         if (i !== cur) {
@@ -71,7 +73,7 @@ function heldRow(name: string, covers: boolean): Driver {
         lastX = x;
         track.style.transform = `translate3d(${(base - x).toFixed(2)}px,0,0)`;
         // 420 of the 520 design px between covers; by the measured step, so it holds where the covers stand closer (tall windows)
-        if (covers) discs(x, step * (420 / 520));
+        if (covers) discs(x, step * (420 / 520), k);
       };
 
       // The title line rises when held-row.tsx commits the new item.
