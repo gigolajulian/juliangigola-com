@@ -646,3 +646,12 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
   /* phones: the sessions first, their photo after them; the booking in place keeps its photo on top */
   [data-mtscroll] .mt-book:not([data-open]) .mt-photo{order:1;margin-top:20px}
 }
+
+/* Elevate picks, phones (2026-11-14): the By quote client frame is square, held on its left; About is a 4:5 frame
+   cropped onto me (reframe A). */
+@media (max-width:599px){
+  [data-mtscroll] .mt-photo-w{aspect-ratio:1/1}
+  [data-mtscroll] .mt-photo-w img{object-position:25% 50%}
+  [data-mtscroll] .mt-ab-ph{aspect-ratio:4/5}
+  [data-mtscroll] .mt-ab-ph img{object-position:24% 50%}
+}
