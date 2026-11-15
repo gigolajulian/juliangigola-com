@@ -23,8 +23,10 @@ import SOURCES from "./public/work/sources.json";
  * Known limits, each of which looks like a bug if you meet it unprepared:
  *
  *   - `/cdn-cgi/image/` exists only on a Cloudflare **zone**. On
- *     `*.workers.dev` these URLs 404, so previews serve nothing. Judge images
- *     on the custom domain.
+ *     `*.workers.dev` these URLs 404, so a branch preview asks the live zone
+ *     instead (`ORIGIN` below). A photograph that exists only on the branch
+ *     404s there and `components/image-fallback.tsx` shows the original. One
+ *     replaced in place on a branch shows the live copy on its preview.
  *   - A custom loader bypasses `remotePatterns`; Next will not check the R2
  *     origin and neither will it allow it. The bucket's domain has to be
  *     allow-listed under Image Transformations in the Cloudflare dashboard.
@@ -41,6 +43,16 @@ import SOURCES from "./public/work/sources.json";
  * deployed environment says otherwise.
  */
 const CDN = process.env.NEXT_PUBLIC_IMAGE_CDN === "1";
+
+/**
+ * Where the resizer is asked. Empty on the live site: the zone answers
+ * `/cdn-cgi/image/` on its own origin. `https://juliangigola.com` on a
+ * branch preview (`next.config.ts` sets it from Workers Builds' branch), so
+ * a preview decodes the same sized pictures live does and not the 2500px
+ * originals, which made scrolling and intros look slower in review than
+ * they are.
+ */
+const ORIGIN = process.env.NEXT_PUBLIC_IMAGE_CDN_ORIGIN ?? "";
 
 /**
  * The widths `scripts/make-hero.mjs` writes for `public/hero/*.jpg`. Keep the
@@ -103,7 +115,7 @@ export default function cloudflareImageLoader({
   // anything else is already complete.
   if (!src.startsWith("/")) {
     return CDN && POSTER_HOSTS.test(src)
-      ? `/cdn-cgi/image/${options.join(",")}/${src}`
+      ? `${ORIGIN}/cdn-cgi/image/${options.join(",")}/${src}`
       : src;
   }
 
@@ -127,5 +139,5 @@ export default function cloudflareImageLoader({
   // `/cdn-cgi/image/<options>/<path>`, and a second slash in the path is a
   // different URL — a different cache key and a different counted
   // transformation for the same picture.
-  return `/cdn-cgi/image/${options.join(",")}/${source.replace(/^\//, "")}`;
+  return `${ORIGIN}/cdn-cgi/image/${options.join(",")}/${source.replace(/^\//, "")}`;
 }

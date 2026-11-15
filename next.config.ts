@@ -200,6 +200,21 @@ const pageRedirects = [
  */
 const LOCAL = process.env.JG_LOCAL === "1";
 
+/**
+ * A branch preview asks the live zone for its resized photographs.
+ *
+ * `/cdn-cgi/image/` 404s on `*.workers.dev`, so a preview fell back to the
+ * 2500px originals and decoded about 15 times the pixels live does. Workers
+ * Builds names the branch it is building; any branch but `main` gets the
+ * live origin in front of the loader's URLs (`image-loader.ts`). Empty on
+ * main and outside Workers Builds, where the URLs are exactly as before.
+ * Setting the variable by hand wins, for a local build that wants the same.
+ */
+const CI_BRANCH = process.env.WORKERS_CI_BRANCH;
+const IMAGE_CDN_ORIGIN =
+  process.env.NEXT_PUBLIC_IMAGE_CDN_ORIGIN ??
+  (CI_BRANCH && CI_BRANCH !== "main" ? "https://juliangigola.com" : "");
+
 // Dev-only allowance so impeccable live mode can load. Guarded by NODE_ENV.
 const __impeccableLiveDev =
   process.env.NODE_ENV === "development" ? " http://localhost:8400" : "";
@@ -216,8 +231,10 @@ const csp = [
   "frame-ancestors 'self'",
   "form-action 'self'",
   // The provider stills for the video page, which are 16:9 thumbnails on
-  // their own CDNs rather than frames from the archive.
-  "img-src 'self' data: blob: https://i.ytimg.com https://i.vimeocdn.com",
+  // their own CDNs rather than frames from the archive. The site's own
+  // origin by name is for a branch preview on workers.dev, whose resized
+  // photographs come from the live zone (`IMAGE_CDN_ORIGIN` above).
+  "img-src 'self' data: blob: https://juliangigola.com https://i.ytimg.com https://i.vimeocdn.com",
   // Adobe Fonts for the `?font=v2` preview (`app/layout.tsx`): the kit's
   // stylesheet and files from use.typekit.net, its counting stylesheet
   // from p.typekit.net. Nothing loads from either without the flag.
@@ -300,7 +317,10 @@ const nextConfig: NextConfig = {
   // `next dev` refuses its scripts to other hosts; these two are the same app.
   allowedDevOrigins: [ADMIN_HOST, LEADS_HOST],
   // The build stamp `/api/build` reports (Workers Builds sets the sha).
-  env: { BUILD_SHA: process.env.WORKERS_CI_COMMIT_SHA ?? "local" },
+  env: {
+    BUILD_SHA: process.env.WORKERS_CI_COMMIT_SHA ?? "local",
+    NEXT_PUBLIC_IMAGE_CDN_ORIGIN: IMAGE_CDN_ORIGIN,
+  },
   // Hides the floating dev badge that sits over the bottom-left corner of
   // every page while `next dev` is running. It never shipped to production,
   // but it lands exactly where the masthead and the numbered index are, which
