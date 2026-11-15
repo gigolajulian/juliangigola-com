@@ -25,6 +25,7 @@ describe("LeadsDesk", () => {
   it("asks for the key when the desk is not authorized", async () => {
     vi.stubGlobal("fetch", vi.fn(() => Promise.resolve(new Response(JSON.stringify({ error: "Not authorized." }), { status: 401 }))));
     render(<LeadsDesk />);
-    expect(await screen.findByRole("textbox")).toBeTruthy();
+    // By its label: a password field has no textbox role (this passed before on the search box the first test left behind).
+    expect(await screen.findByLabelText(/Inbox key or GitHub token/)).toBeTruthy();
   });
 });

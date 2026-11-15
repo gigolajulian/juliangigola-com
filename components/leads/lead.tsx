@@ -60,6 +60,7 @@ const glyph = (d: React.ReactNode) =>
   };
 const BackGlyph = glyph(<path d="M19 12H5M11 6l-6 6 6 6" />);
 const ClockGlyph = glyph(<><circle cx="12" cy="12" r="8" /><path d="M12 8v4l3 2" /></>);
+const PlaneGlyph = glyph(<path d="M21 3 10 14M21 3l-7 18-4-7-7-4z" />);
 const MailGlyph = glyph(<><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 7l9 6 9-6" /></>);
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
@@ -69,6 +70,16 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
 /** A section title with its actions at the end. */
 function Head({ title, children }: { title: string; children?: React.ReactNode }) {
   return <HStack gap={2} vAlign="center"><StackItem size="fill"><Heading level={2}>{title}</Heading></StackItem>{children}</HStack>;
+}
+
+/** The one filled button. Under a mouse its words turn to what sending it wins, and the plane flies (WIN_CSS in shared.tsx). */
+function Win({ label, win, href, onClick }: { label: string; win: string; href: string; onClick: () => void }) {
+  const [over, setOver] = React.useState(false);
+  return (
+    <span className="jg-win" style={{ display: "inline-flex" }} onPointerEnter={(e) => e.pointerType === "mouse" && setOver(true)} onPointerLeave={() => setOver(false)}>
+      <Button label={over ? win : label} variant="primary" icon={<Icon icon={PlaneGlyph} />} href={href} target="_blank" rel="noreferrer" onClick={onClick} />
+    </span>
+  );
 }
 
 /** A folded section's row: its title and one line of what is inside. */
@@ -156,7 +167,7 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
   const replyHref = mail(l.email, `Re: your ${l.kind ?? "shoot"} inquiry`, `Hi ${first},\n\n`);
   const bookHref = mail(l.email, "Booking a time", `Hi ${first},\n\nYou can pick a time here: https://juliangigola.com/book\n\n`);
   // The one filled button: the nudge or renewal when one is due, else Reply.
-  const lead1 = !mailOk ? null : renew(l) ? { label: "Renew licence", href: mail(l.email, fill(renewT.subject, l), fill(renewT.body, l)) } : nudge && late ? { label: `Send ${nudge.name}`, href: mail(l.email, fill(nudge.subject, l), fill(nudge.body, l)) } : null;
+  const lead1 = !mailOk ? null : renew(l) ? { label: "Renew licence", win: "Keep the licence", href: mail(l.email, fill(renewT.subject, l), fill(renewT.body, l)) } : nudge && late ? { label: `Send ${nudge.name}`, win: "Land the booking", href: mail(l.email, fill(nudge.subject, l), fill(nudge.body, l)) } : null;
 
   const snoozeFor = (d: number) => run(patch({ snoozeUntil: new Date(now() + d * DAY).toISOString() }), "Snoozed.");
   const archive = () => run(patch({ archive: !l.archivedAt }), l.archivedAt ? "Back in the list." : "Archived.");
@@ -207,7 +218,7 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
   const usable = templates.filter((t) => t.id !== "renew" || l.licence);
   const reply = mailOk ? (
     <HStack gap={2} wrap="wrap">
-      {lead1 ? <Button label={lead1.label} variant="primary" href={lead1.href} target="_blank" rel="noreferrer" onClick={() => setAsked(true)} /> : null}
+      {lead1 ? <Win label={lead1.label} win={lead1.win} href={lead1.href} onClick={() => setAsked(true)} /> : null}
       <a ref={replyLink} href={replyHref} target="_blank" rel="noreferrer" hidden aria-hidden="true" tabIndex={-1} onClick={() => setAsked(true)} />
       <Button label="Reply in Gmail" variant={lead1 ? "secondary" : "primary"} icon={<Icon icon={MailGlyph} />} href={replyHref} target="_blank" rel="noreferrer" onClick={() => setAsked(true)} />
       <DropdownMenu
