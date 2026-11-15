@@ -192,6 +192,12 @@ export function worthMail(events: ViewerEvent[], kind: "open" | "download", at: 
   return !before || Date.parse(at) - Date.parse(before.at) > gap * 60_000;
 }
 
+/** Julian's own subject for a proof or delivery mail (Julian 2026-11-15): one line, control characters out, 150 at most; empty keeps the default. */
+export function subjectOr(given: unknown, fallback: string): string {
+  const v = typeof given === "string" ? given.replace(/[\x00-\x1f\x7f]+/g, " ").replace(/\s+/g, " ").trim().slice(0, 150) : "";
+  return v || fallback;
+}
+
 /** `cc`: the other people on the lead with "copy on gallery mail" ticked (`copiesFor` in lib/leads/lead-store). */
 export async function sendClient(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefined, to: string, m: { subject: string; html: string; text: string; attachments: Inline[] }, cc: string[] = []): Promise<boolean> {
   if (!mailer) return false;
