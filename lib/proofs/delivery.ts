@@ -7,7 +7,8 @@
  * ─────────────────────────────────────────────────────────────── */
 
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { openDeliveryIn } from "@/lib/proofs/delivery-serve";
+import { openDeliveryIn, previews } from "@/lib/proofs/delivery-serve";
+export { servedPreview } from "@/lib/proofs/delivery-serve";
 import { crc32 } from "@/lib/zip";
 import { finalKey, PREVIEW_W, THUMB_W } from "@/lib/proofs/proof";
 
@@ -36,27 +37,9 @@ export async function storeFinal(env: Env, token: string, id: string, body: Read
   return { bytes, crc };
 }
 
-/** The 2000px and 800px copies, made once by Cloudflare Images and kept in R2. */
-async function previews(env: Env, token: string, id: string) {
-  const full = await env.PROOFS.get(finalKey(token, id));
-  if (!full) return null;
-  const big = await (await env.IMAGES.input(full.body).transform({ width: PREVIEW_W, fit: "scale-down" }).output({ format: "image/jpeg", quality: 85 })).response().arrayBuffer();
-  await env.PROOFS.put(finalKey(token, id, PREVIEW_W), big, { httpMetadata: { contentType: "image/jpeg" } });
-  const small = await (await env.IMAGES.input(new Response(big).body!).transform({ width: THUMB_W, fit: "scale-down" }).output({ format: "image/jpeg", quality: 82 })).response().arrayBuffer();
-  await env.PROOFS.put(finalKey(token, id, THUMB_W), small, { httpMetadata: { contentType: "image/jpeg" } });
-  return true;
-}
-
-/** A web copy of a final, made now if the upload could not. Never the full file. */
-export async function servedPreview(env: Env, token: string, id: string, small: boolean) {
-  const key = finalKey(token, id, small ? THUMB_W : PREVIEW_W);
-  const kept = (await env.PROOFS.get(key)) ?? ((await previews(env, token, id)) && (await env.PROOFS.get(key)));
-  return kept || null;
-}
-
-/** `openDeliveryIn` with the request's own bindings, for Next's pages and routes. */
-export async function openDelivery(id: string) {
+/** `openDeliveryIn` with the request's own bindings, for Next's pages and routes. `cookie` is the request's Cookie header (the gate's password). */
+export async function openDelivery(id: string, cookie: string | null) {
   const { env, ctx } = await getCloudflareContext({ async: true });
-  const g = await openDeliveryIn(env, id);
+  const g = await openDeliveryIn(env, id, cookie);
   return g && { env, ctx, ...g };
 }
