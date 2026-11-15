@@ -31,7 +31,9 @@ html[data-mt-held] .mt-sleeve .disc{pointer-events:none}
 
 /* Motion: the current film's muted preview over its poster (same fit as .mo-loop in v3.css). */
 html[data-mt-motion] .mt-film{container-type:size}
-html[data-mt-motion] .mt-film iframe{position:absolute;top:50%;left:50%;width:max(100cqw,100cqh * 16 / 9);height:max(100cqh,100cqw * 9 / 16);translate:-50% -50%;scale:1.2;border:0;pointer-events:none;opacity:0;transition:opacity .8s ease}
+/* --q: the player is laid out twice the size it shows at and scaled back down. YouTube and Vimeo pick the stream by
+   the player's own size, so this is what gets 1440p or 4K instead of 720p or 1080p (Julian, 2026-11-14). */
+html[data-mt-motion] .mt-film iframe{--q:2;position:absolute;top:50%;left:50%;width:calc(var(--q) * max(100cqw,100cqh * 16 / 9));height:calc(var(--q) * max(100cqh,100cqw * 9 / 16));translate:-50% -50%;scale:calc(1.2 / var(--q));border:0;pointer-events:none;opacity:0;transition:opacity .8s ease}
 html[data-mt-motion] .mt-film iframe[data-ready]{opacity:1}
 
 /* Motion, desktop structure with the engine on (m1): one screen, four films. The hold gives each film an even share of
@@ -48,7 +50,7 @@ html[data-mt-held] .mt-motion .mt-film[data-was]{opacity:1;visibility:visible;z-
 html[data-mt-held] .mt-motion[data-in] .mt-film[data-on]{visibility:visible;z-index:2;animation:mt-dev-op 1.2s cubic-bezier(.4,0,.2,1) both,mt-dev-col 2s cubic-bezier(.3,.4,.3,1) both}
 /* pushed in from the top left corner, poster and preview alike: a mark burnt into the bottom right of the video is cut */
 html[data-mt-held] .mt-motion .mt-film img{transform-origin:0 0;transform:scale(var(--z,1))}
-html[data-mt-held] .mt-motion .mt-film iframe{scale:calc(1.2 * var(--z,1));translate:calc(-50% + (var(--z,1) - 1) * 50cqw) calc(-50% + (var(--z,1) - 1) * 50cqh)}
+html[data-mt-held] .mt-motion .mt-film iframe{scale:calc(1.2 * var(--z,1) / var(--q));translate:calc(-50% + (var(--z,1) - 1) * 50cqw) calc(-50% + (var(--z,1) - 1) * 50cqh)}
 html[data-mt-held] .mt-motion .mt-film:focus-visible{outline:0}
 html[data-mt-held] .mt-motion .mt-film:focus-visible::after{content:"";position:absolute;inset:3px;z-index:1;border:1px solid var(--accent);pointer-events:none}
 /* the words sit on the film: a soft ground under them, top and bottom */
