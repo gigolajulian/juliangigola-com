@@ -49,7 +49,8 @@ const used = new Set([...HERO_KEYS, ...COMM_KEYS].map((k) => k.split("/")[0]));
 const MT: MtData = {
   hero: HERO_KEYS.map(frame),
   // Side columns on wide screens (spec 5): Commissions frames, then each project's first frame not already on the wall.
-  extras: [...COMM_KEYS.map(frame), ...PROJECTS.filter((p) => !used.has(p.slug) && p.images[0]).slice(0, 40).map((p) => frame(`${p.slug}/${p.images[0].src.split("/").pop()!.replace(".jpg", "")}`))],
+  // 70 of them: wide screens show 30 on the wall itself (side columns, rows five and six) and the intro canvas draws 30 more.
+  extras: [...COMM_KEYS.map(frame), ...PROJECTS.filter((p) => !used.has(p.slug) && p.images[0]).slice(0, 70).map((p) => frame(`${p.slug}/${p.images[0].src.split("/").pop()!.replace(".jpg", "")}`))],
   comm: COMM_KEYS.map(frame),
   films: FILM_PICKS.map(([title, kind]) => {
     if (title === REEL.title) return { id: "reel", title, kind, client: "2023", poster: REEL.poster, href: "/portfolio/video", preview: previewUrl({ ...REEL, id: "reel", section: "music" } as Parameters<typeof previewUrl>[0]) };

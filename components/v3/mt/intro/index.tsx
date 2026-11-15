@@ -156,10 +156,10 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
       const flat = !!lead0 && getComputedStyle(lead0).display === "contents";
       const cols: Col[] = flat
         ? [0, 1].map((c) => {
-            const figs = [...wall.querySelectorAll<HTMLElement>(".mt-col:not(.side) figure")].filter((f) => f.style.getPropertyValue("--c2").trim() === String(c));
+            const figs = [...wall.querySelectorAll<HTMLElement>(".mt-col:not(.side) figure:not(.xr)")].filter((f) => f.style.getPropertyValue("--c2").trim() === String(c));
             return { els: figs, b: figs.map((f) => box(f.querySelector(".ph")!)).sort((a, z) => a.y - z.y), side: false };
           })
-        : all.filter((c) => c.offsetParent !== null && c.querySelector(".ph")).map((c) => ({ els: [c], b: [...c.querySelectorAll(".ph")].map(box), side: c.classList.contains("side") }));
+        : all.filter((c) => c.offsetParent !== null && c.querySelector(".ph")).map((c) => ({ els: [c], b: [...c.querySelectorAll<HTMLElement>(".ph")].filter((ph) => ph.offsetParent !== null).map(box), side: c.classList.contains("side") })); // rows five and six only where they show
       const core = cols.filter((c) => !c.side && c.b.length);
       if (core.length < 2) return finish(false);
       const first = core[0].b;
@@ -353,7 +353,9 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
     };
 
     // extras are drawn only from thumbs that have arrived, so the canvas never shows an empty tile
-    const want = pool.current.slice(16, 46).map((f) => loader({ src: f.src, width: 640 }));
+    // where rows five and six show (wide screens) the wall itself uses extras up to 29, so the canvas draws from the ones after
+    const rows6 = !!wall.querySelector<HTMLElement>("figure.xr")?.offsetParent && pool.current.length >= 48;
+    const want = (rows6 ? pool.current.slice(30, window.innerWidth >= 3300 ? 80 : 60) : pool.current.slice(16, 46)).map((f) => loader({ src: f.src, width: 640 }));
     let leadIn = false;
     const go = () => leadIn && ready.length >= Math.min(18, want.length) && run();
     want.forEach((src) => {
@@ -362,7 +364,7 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
       im.src = src;
     });
     // start once the first wall frames and enough extras can paint, or after 1500ms regardless
-    const lead = [...wall.querySelectorAll<HTMLImageElement>(".mt-col:not(.side) img")].slice(0, 6);
+    const lead = [...wall.querySelectorAll<HTMLImageElement>(".mt-col:not(.side) figure:not(.xr) img")].slice(0, 6);
     Promise.all(lead.map((i) => i.decode().catch(() => {}))).then(() => ((leadIn = true), go()));
     timers.push(window.setTimeout(run, 1500));
     return () => finish(false);

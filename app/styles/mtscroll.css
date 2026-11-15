@@ -34,6 +34,7 @@
 [data-mtscroll] .mt-wall{position:absolute;inset:0}
 [data-mtscroll] .mt-col{position:absolute;top:calc(var(--top) * var(--u));left:calc(50% + (65 - 720 + var(--c) * 453) * var(--u));width:calc(403 * var(--u));display:grid;row-gap:calc(96 * var(--u));will-change:transform}
 [data-mtscroll] .mt-col figure{position:relative;margin:0;height:calc(504 * var(--u))}
+[data-mtscroll] .mt-col figure.xr{display:none}
 [data-mtscroll] .mt-col .ph{position:absolute;inset:0;overflow:hidden;background:var(--card)}
 [data-mtscroll] .mt-col figcaption{position:absolute;top:100%;left:0;right:0;display:flex;justify-content:space-between;gap:12px;padding-top:10px;font-size:max(10px,calc(11 * var(--u)))}
 [data-mtscroll] .mt-col figcaption span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -534,6 +535,8 @@ html[data-mt-intro="1"]{overflow:hidden}
   [data-mtscroll] .mt-hero .mt-wall{--u:min(calc(100vw / 2346),calc(100svh / 900))}
   [data-mtscroll] .mt-hero .mt-col.side{--vis:hidden}
   [data-mtscroll] .mt-hero .mt-col.side:is([data-col="-1"],[data-col="3"]){--vis:visible}
+  /* smaller frames make four rows only two screens of wall: rows five and six bring it back to the laptop's three */
+  [data-mtscroll] .mt-hero .mt-col figure.xr{display:block}
 }
 @media (min-width:3300px) and (min-height:600px){
   [data-mtscroll] .mt-hero .mt-wall{--u:min(calc(100vw / 3252),calc(100svh / 900))}
