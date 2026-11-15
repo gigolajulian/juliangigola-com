@@ -736,5 +736,13 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
    showed none, the hero a sliver on the photo's top edge). A dark band on both sides keeps it readable on a bright photo. */
 [data-mtscroll] .mt-hero a.fig:focus-visible,[data-mtscroll] .mt-comm a.tile:focus-visible{outline:0}
 [data-mtscroll] .mt-hero a.fig:focus-visible .ph::after,[data-mtscroll] .mt-comm a.tile:focus-visible::after{content:"";position:absolute;inset:4px;z-index:3;opacity:1;background:none;border:2px solid var(--accent);box-shadow:0 0 0 2px rgb(0 0 0 / .6),inset 0 0 0 2px rgb(0 0 0 / .6);pointer-events:none}
-/* Polish pass: a long Commissions name ends in an ellipsis before it runs into its discipline */
+/* Polish pass: a long Commissions name ends in an ellipsis before it runs into its discipline; touch targets reach 44px at every layout */
 @media (min-width:1024px) and (min-height:600px){[data-mtscroll] .mt-sheet figcaption{gap:10px}[data-mtscroll] .mt-sheet figcaption span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}[data-mtscroll] .mt-sheet figcaption span.mute{flex-shrink:0}}
+@media (pointer:coarse){
+  [data-mtscroll] .mt-fcols :is(a,button),[data-mtscroll] .mt-fline :is(a,button),[data-mtscroll] .mt-logos-track a{min-width:44px}
+  [data-mtscroll] .mt-logos-track a{justify-content:center;min-width:46px}
+  [data-mtscroll] .mt-fline{align-items:center}
+  /* 48: the hand-over scales these to .95 while they move */
+  [data-mtscroll] .mt .mt-rowhead .btn,[data-mtscroll] .mt .mt-more-me{min-height:48px}
+}
+@media (pointer:coarse) and (min-width:1024px) and (min-height:600px){[data-mtscroll] .mt-fcols :is(a,button){display:inline-flex;align-items:center;min-height:44px}[data-mtscroll] .mt-fcols p{margin-bottom:0}}
