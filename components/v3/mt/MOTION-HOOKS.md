@@ -6,7 +6,7 @@ Styles: `app/styles/mtscroll.css` (design unit `--u`, structures D / T / P / L).
 
 ## Every held section
 - `section[data-mt="<name>"][data-hold="<viewports>"] > .mt-stage`: wrap the stage
-  in the held wrapper and write `--p` (0 to 1) on the section. Holds: hero 2.1,
+  in the held wrapper and write `--p` (0 to 1) on the section. Holds: hero 1.6,
   covers 1.5, motion 2.5, about 1.7, foot 1. Book online, By quote and
   Commissions have none.
 - Ancestors use `overflow-x: clip`, never `hidden`, so sticky stages work.
