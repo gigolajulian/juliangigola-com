@@ -6,7 +6,7 @@
  * thirds on a phone), a header and the email on the right (below). Any
  * email opens it and every download is logged under it. Then the finals at
  * 800px in the grid and 2000px in the lightbox. Save gets one full-size
- * JPEG; Download all gets one zip. Same proof.css as the proof gallery.
+ * JPEG, Save for web the 2000px copy; Download all gets one zip. Same proof.css as the proof gallery.
  * ─────────────────────────────────────────────────────────────── */
 
 import * as React from "react";
@@ -153,7 +153,11 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
           </div>
           <div className="proof-lf">
             <span>{finals[open].file} · {size(finals[open].bytes)}</span>
-            <button type="button" className="proof-btn" onClick={() => download(finals[open].id, `/delivery/${id}/dl/${finals[open].id}`)}>Save</button>
+            <div className="proof-acts">
+              {/* The 2000px copy, for posting and texting (Julian 2026-11-15). */}
+              <button type="button" className="proof-btn ghost" onClick={() => download(finals[open].id, `/delivery/${id}/web/${finals[open].id}`)}>Save for web</button>
+              <button type="button" className="proof-btn" onClick={() => download(finals[open].id, `/delivery/${id}/dl/${finals[open].id}`)}>Save</button>
+            </div>
           </div>
         </div>
       ) : null}
