@@ -3,7 +3,7 @@ import { isAdmin } from "@/lib/vouch";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { copiesFor, readLead, recordLead, writeLead } from "@/lib/leads/lead-store";
 import { leadStoreKey } from "@/lib/leads/leads";
-import { cardKey, closesAt, cleanSettings, DEFAULTS, DELIVERY_DAYS, finalKeys, frameKey, frameKeys, aliasKey, isDateId, isFrameId, isStrongId, isToken, listProofs, nextProofId, publicId, readProof, shootDay, viewerKey, writeProof, type Proof } from "@/lib/proofs/proof";
+import { forDesk, hashPass, cardKey, closesAt, cleanSettings, DEFAULTS, DELIVERY_DAYS, finalKeys, frameKey, frameKeys, aliasKey, isDateId, isFrameId, isStrongId, isToken, listProofs, nextProofId, publicId, readProof, shootDay, viewerKey, writeProof, type Proof } from "@/lib/proofs/proof";
 import { deliveryMail, deliveryUrl, proofMail, proofUrl, sendClient } from "@/lib/email/proof-mail";
 import { MAX_FINAL, storeFinal } from "@/lib/proofs/delivery";
 import { recheckTransfer } from "@/lib/proofs/submit";
@@ -61,7 +61,7 @@ export async function GET(request: Request) {
         return moved ?? p;
       }),
     );
-    return json({ proofs: all.filter((p): p is Proof => !!p).map((p) => ({ ...p, url: (p.deliveredAt ? deliveryUrl : proofUrl)(publicId(p)) })).sort((a, b) => b.createdAt.localeCompare(a.createdAt)) });
+    return json({ proofs: all.filter((p): p is Proof => !!p).map((p) => ({ ...forDesk(p), url: (p.deliveredAt ? deliveryUrl : proofUrl)(publicId(p)) })).sort((a, b) => b.createdAt.localeCompare(a.createdAt)) });
   }
   const preview = q.get("preview");
   if (isToken(preview)) {
@@ -82,7 +82,7 @@ export async function GET(request: Request) {
     p = { ...p, pulledAt: new Date().toISOString() };
     await writeProof(g.kv, g.s, p);
   }
-  return json({ proof: p, url: proofUrl(publicId(p)) });
+  return json({ proof: forDesk(p), url: proofUrl(publicId(p)) });
 }
 
 export async function POST(request: Request) {
@@ -121,7 +121,7 @@ export async function POST(request: Request) {
     if (!(await sendClient(g.env.CLIENT_EMAIL, p.email, m, await copiesFor(g.kv, g.s, p.email).catch(() => [])))) return json({ error: "The mail did not go out. Try again." }, 502);
     await writeProof(g.kv, g.s, sent);
     await recordLead(g.env, p.email, { event: { at: sent.sentAt!, kind: "mail", note: m.subject, mail: { to: "client", kind: "proofs" } } });
-    return json({ proof: sent });
+    return json({ proof: forDesk(sent) });
   }
   if (b.action === "deliver") {
     if (!p.email) return json({ error: "Add the client's email first." }, 400);
@@ -140,7 +140,7 @@ export async function POST(request: Request) {
     // The proof's web copies go once the finals are out (Julian 2026-11-12). Only copies: never an original.
     const keys = p.frames.flatMap((f) => frameKeys(p.token, f.id));
     for (let i = 0; i < keys.length; i += 1000) await g.r2.delete(keys.slice(i, i + 1000));
-    return json({ proof: sent, url: deliveryUrl(link) });
+    return json({ proof: forDesk(sent), url: deliveryUrl(link) });
   }
   if (b.action === "relink") {
     // Storage stays put (R2, Stripe metadata, Lightroom's remote id); only the public id moves.
@@ -149,7 +149,7 @@ export async function POST(request: Request) {
     const next: Proof = { ...p, link };
     await writeProof(g.kv, g.s, next);
     if (p.link) await g.kv.delete(aliasKey(p.link));
-    return json({ proof: next, url: proofUrl(link) });
+    return json({ proof: forDesk(next), url: proofUrl(link) });
   }
   if (b.action === "forget") {
     const who = typeof b.email === "string" ? viewerKey(b.email) : "";
@@ -165,19 +165,19 @@ export async function POST(request: Request) {
       if (events.length || lead.notes || lead.remind || lead.invoices?.length || lead.deposit || lead.notion) await writeLead(g.kv, g.s, id, { ...lead, events });
       else await g.kv.delete(leadStoreKey(id));
     }
-    return json({ proof: next });
+    return json({ proof: forDesk(next) });
   }
   if (b.action === "reopen") {
     const next: Proof = { ...p, submittedAt: undefined, pulledAt: undefined };
     await writeProof(g.kv, g.s, next);
-    return json({ proof: next });
+    return json({ proof: forDesk(next) });
   }
   if (b.action === "extend") {
     const days = Math.min(90, Math.max(1, Math.round(Number(b.days) || 7)));
     const from = Math.max(Date.now(), p.closesAt ? Date.parse(p.closesAt) : Date.now());
     const next: Proof = { ...p, closesAt: closesAt(days, from) };
     await writeProof(g.kv, g.s, next);
-    return json({ proof: next });
+    return json({ proof: forDesk(next) });
   }
   return json({ error: "Unknown action." }, 400);
 }
@@ -190,11 +190,14 @@ export async function PATCH(request: Request) {
   const p = await readProof(g.kv, g.s, b.token);
   if (!p) return json({ error: "No such gallery." }, 404);
   const set = cleanSettings(b);
-  const next: Proof = { ...p, ...set };
+  // The gate's password: hashed here, never stored or answered plain. An empty one takes it off.
+  if (typeof b.password === "string" && b.password && (b.password.length < 4 || b.password.length > 200)) return json({ error: "A password is 4 to 200 characters." }, 400);
+  const pass = typeof b.password === "string" ? { pass: b.password ? await hashPass(b.password) : undefined } : {};
+  const next: Proof = { ...p, ...set, ...pass };
   // A new preview pick redraws the card of the frame it leaves and the one it lands on.
   if ("card" in set) await g.r2.delete([...new Set([p.card?.id, next.card?.id, p.frames[0]?.id])].filter((id): id is string => !!id).map((id) => cardKey(b.token as string, id)));
   await writeProof(g.kv, g.s, next);
-  return json({ proof: next });
+  return json({ proof: forDesk(next) });
 }
 
 /** One frame from Lightroom. shortcut: read, add, write is not atomic, so the plugin uploads one frame at a time; a Durable Object if uploads ever run in parallel. */

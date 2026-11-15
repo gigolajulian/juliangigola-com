@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string; fid: string }> }) {
   const { id, fid } = await params;
-  const g = isFrameId(fid) ? await openDelivery(id) : null;
+  const g = isFrameId(fid) ? await openDelivery(id, request.headers.get("cookie")) : null;
   if (!g || !finalOf(g.p, fid)) return new Response("Not found", { status: 404 });
   const small = new URL(request.url).searchParams.get("w") === "800";
   const o = await servedPreview(g.env, g.p.token, fid, small).catch(() => undefined);
