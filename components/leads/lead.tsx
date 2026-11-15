@@ -379,7 +379,7 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
                   <MetadataListItem label="Licence">
                     {editing === "licence" ? null : full?.licence ? (
                       <HStack gap={2} vAlign="center"><StackItem size="fill"><Text>{full.licence.use || "Licence"}, ends {endDay(full.licence.end)}</Text></StackItem><Button label="Edit" variant="ghost" size="sm" onClick={() => setEditing("licence")} /></HStack>
-                    ) : <Button label="Add a licence" variant="ghost" size="sm" isDisabled={!full} onClick={() => setEditing("licence")} />}
+                    ) : <HStack gap={2} vAlign="center"><StackItem size="fill"><Text color="secondary">None</Text></StackItem><Button label="Add a licence" variant="ghost" size="sm" isDisabled={!full} onClick={() => setEditing("licence")} /></HStack>}
                   </MetadataListItem>
                 </MetadataList>
                 {editing === "licence" ? <LicenceForm has={full?.licence} onSave={(v) => run(patch({ licence: v }), v ? "Licence saved." : "Licence cleared.")} onCancel={() => setEditing(null)} /> : null}
