@@ -70,7 +70,8 @@ function heldRow(name: string, covers: boolean): Driver {
         } else if (x === lastX) return;
         lastX = x;
         track.style.transform = `translate3d(${(base - x).toFixed(2)}px,0,0)`;
-        if (covers) discs(x, 420 * ctx.u);
+        // 420 of the 520 design px between covers; by the measured step, so it holds where the covers stand closer (tall windows)
+        if (covers) discs(x, step * (420 / 520));
       };
 
       // The title line rises when held-row.tsx commits the new item.
