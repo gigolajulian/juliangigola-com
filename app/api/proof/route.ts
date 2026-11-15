@@ -270,6 +270,8 @@ export async function DELETE(request: Request) {
     await writeProof(g.kv, g.s, { ...p, frames: p.frames.filter((f) => !gone.has(f.id)), selects: p.selects.filter((s) => !gone.has(s)), notes });
     return json({ ok: true });
   }
+  // Finals published but not sent yet: dropping the record would orphan them in R2 and lose the delivery.
+  if (p.finals?.length) return json({ error: "This gallery holds finals. Remove them from the Delivery collection first." }, 409);
   // The whole gallery: Lightroom's "delete published collection". Only web previews go, never an original.
   const keys = p.frames.flatMap((f) => frameKeys(token, f.id));
   for (let i = 0; i < keys.length; i += 1000) await g.r2.delete(keys.slice(i, i + 1000));
