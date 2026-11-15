@@ -29,7 +29,9 @@ import { api as proofApi, feed, type FeedItem, type Row } from "@/lib/proofs/des
 const clock = (ms: number) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit" }).format(ms);
 /** Where a move comes from, as the mock tags it. */
 export const source = (l: LeadSummary) => (renew(l) ? "Licence" : paperDue(l, now()) ? "Paperwork" : l.stage === "Invoiced" || l.stage === "Selecting" ? "Proofs" : "Leads");
-export const callOrShoot = (l: LeadSummary) => (l.stage === "Call booked" ? "Call" : shootTag(l.kind) ?? "Shoot");
+/** A date is a call while the call is booked, and stays one once it is done and the quote is out: a quoted lead cannot have shot yet. */
+export const isCall = (l: LeadSummary) => l.stage === "Call booked" || (l.stage === "Quoted" && !!l.when && Date.parse(l.when) < now());
+export const callOrShoot = (l: LeadSummary) => (isCall(l) ? "Call" : shootTag(l.kind) ?? "Shoot");
 
 export type DayEv = { small: string; text: string; who?: string; due?: boolean; l: LeadSummary };
 
@@ -81,8 +83,9 @@ export function TodayDesk({ leads, size, open, show }: { leads: LeadSummary[]; s
   const week = daysOf(leads, monday, 7);
   const moves = leads.filter(needsMe).sort((a, b) => b.lastAt.localeCompare(a.lastAt));
   const late = moves.filter((l) => isLate(l, now())).length;
-  const booked = week.filter((x) => x.d >= today).flatMap((x) => x.evs.filter((e) => !e.due && e.small !== "Reminder"));
-  const calls = booked.filter((e) => e.l.stage === "Call booked").length;
+  // the whole week, days already past included: the card under it lists them, and a call done on Saturday is still this week's call (Julian, 2026-11-15)
+  const booked = week.flatMap((x) => x.evs.filter((e) => !e.due && e.small !== "Reminder"));
+  const calls = booked.filter((e) => isCall(e.l)).length;
   const shoots = booked.length - calls;
   const coming = leads.filter((l) => pass(l, "upcoming")).sort((a, b) => a.when!.localeCompare(b.when!));
   const nextShoot = coming.find((l) => l.stage !== "Call booked");
