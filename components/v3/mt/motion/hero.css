@@ -1,0 +1,9 @@
+/* v4 home motion: hero. Applies only under html[data-mt-motion]. */
+/* held: "See the work" would scroll across the sticky stage, so it sits at the end of the hold and rises into the ground under the last row */
+html[data-mt-held] .mt-hero { position: relative; }
+html[data-mt-held] .mt-hero .mt-more { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; justify-content: flex-end; padding: 0 calc(64 * var(--u)) calc(92 * var(--u)); }
+html[data-mt-scrolling] .mt-hero .mt-more .btn { pointer-events: none; }
+/* Name dock: the header has no wordmark until the hero name lands in its place (hero.ts sets rest, ride, land or off) */
+html[data-mtdock] .v3 .site-wm { transition: none; }
+html[data-mtdock]:not([data-mtdock="land"], [data-mtdock="off"]) .v3 .site-wm { visibility: hidden; }
+/* before the driver's first frame the same holds: that rule is in mtscroll.css, which loads before this file */

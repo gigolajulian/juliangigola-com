@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { mplan } from "@/lib/mplan";
+import { mtscroll } from "@/lib/mtscroll";
 import Link from "next/link";
 import { THEME_COLOR } from "@/lib/theme-color";
 import { usePathname } from "next/navigation";
@@ -324,7 +325,7 @@ function SiteHeader() {
   /* ?v3motion (mock https://claude.ai/artifact/VDtydGRZFjpd4W1kibeqBm, 4b):
      it starts as the name's top reaches it, the name shrinks into the
      wordmark and the bar unrolls from its top edge. */
-  const dock = React.useSyncExternalStore(noop, () => home && document.documentElement.hasAttribute("data-v3motion") && !matchMedia("(prefers-reduced-motion: reduce)").matches, () => false);
+  const dock = React.useSyncExternalStore(noop, () => home && !mtscroll() && document.documentElement.hasAttribute("data-v3motion") && !matchMedia("(prefers-reduced-motion: reduce)").matches, () => false);
   const [landed, setLanded] = React.useState(false);
   React.useEffect(() => {
     const on = dock;
@@ -378,7 +379,9 @@ function SiteHeader() {
     const dx = was.right - now.right, dy = was.top - now.top;
     if (dx || dy) bar.animate({ transform: [`translate(${dx}px,${dy}px)`, "none"] }, { duration: 250, easing: "cubic-bezier(.23,1,.32,1)" });
   }, [tuck]);
-  const show = (!home || past) && !tuck;
+  // `?mtscroll=1`: the v4 home has no cover to wait for, the bar is there from the start.
+  const mt = React.useSyncExternalStore(noop, mtscroll, () => false);
+  const show = (!home || past || mt) && !tuck;
   const [menu, setMenu] = React.useState(false);
   /* A route change closes it. */
   const [was, setWas] = React.useState(path);
