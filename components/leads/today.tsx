@@ -64,10 +64,13 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
 /** One number of the strip: the figure, then what it counts. Four share one row, phone included. */
 function Stat({ v, sub }: { v: React.ReactNode; sub: React.ReactNode }) {
   return (
-    <VStack gap={0.5}>
-      <Text type="large" weight="bold" hasTabularNumbers textWrap="nowrap">{v}</Text>
-      <Text type="supporting" size="xsm" maxLines={1}>{sub}</Text>
-    </VStack>
+    // minWidth 0 lets a cell shrink under its words, so four fit a phone and long text is cut with dots, not clipped by the card.
+    <div style={{ minWidth: 0, overflow: "hidden" }}>
+      <VStack gap={0.5}>
+        <Text type="large" weight="bold" hasTabularNumbers textWrap="nowrap">{v}</Text>
+        <Text type="supporting" size="xsm" maxLines={1}>{sub}</Text>
+      </VStack>
+    </div>
   );
 }
 const many = (n: number, one: string) => `${n} ${one}${n === 1 ? "" : "s"}`;
@@ -189,10 +192,13 @@ export function TodayDesk({ leads, size, open, show }: { leads: LeadSummary[]; s
           <VStack gap={6}>
             <Text type="large" color="secondary">{line ? `${line[0].toUpperCase()}${line.slice(1)}.` : "Nothing on the books this week."}</Text>
             <Card padding={3}>
-              <Grid columns={size === "phone" ? 2 : 4} gap={2}>
+              <Grid columns={4} gap={2}>
                 <Stat v={moves.length} sub="on you" />
-                <Stat v={shoots || !calls ? many(shoots, "shoot") : many(calls, "call")} sub={shoots && calls ? `and ${many(calls, "call")}` : "this week"} />
-                <Stat v={m ? cash(m.available ?? 0) : "–"} sub={m ? (m.pending ? `${cash(m.pending)} on the way` : "Stripe") : typeof money === "string" ? money : "Asking Stripe"} />
+                {size === "phone"
+                  ? <Stat v={shoots || !calls ? shoots : calls} sub={many(shoots || !calls ? shoots : calls, shoots || !calls ? "shoot" : "call").split(" ")[1]} />
+                  : <Stat v={shoots || !calls ? many(shoots, "shoot") : many(calls, "call")} sub={shoots && calls ? `and ${many(calls, "call")}` : "this week"} />}
+                {/* shortcut: whole dollars on a phone so four fit one line, the cents are on the Money page */}
+                <Stat v={m ? (size === "phone" ? cash(Math.round((m.available ?? 0) / 100) * 100).slice(0, -3) : cash(m.available ?? 0)) : "–"} sub={m ? (m.pending ? `${cash(m.pending)} on the way` : "Stripe") : typeof money === "string" ? money : "Asking Stripe"} />
                 <Stat v={t ? t.visits.toLocaleString("en-US") : "–"} sub={t ? "visits, 7 d" : typeof traffic === "string" ? traffic : "Asking Cloudflare"} />
               </Grid>
             </Card>
