@@ -16,7 +16,7 @@ export function MtCovers() {
   return (
     <HeldRow
       name="covers"
-      hold={1.5}
+      hold={(COVERS.length - 1) * 0.375} // the same scroll a cover as the five had in 1.5 screens
       label="Cover art"
       count={COVERS.length}
       head={(cur) => (

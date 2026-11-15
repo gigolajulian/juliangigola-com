@@ -10,18 +10,13 @@ html[data-mt-held] .mt-held[data-mt-near] .mt-track{will-change:transform}
 html[data-mt-held] .mt-held .mt-ttl .ln{padding-bottom:.14em;margin-bottom:-.14em}
 /* Room inside the row's clip for the lift and its shadow. */
 html[data-mt-held] .mt-covers .mt-row{margin-top:0;padding-top:calc(60 * var(--u));padding-bottom:calc(96 * var(--u));margin-bottom:calc(-96 * var(--u))}
-/* Windows taller than wide (Julian, 2026-11-15): the covers grow to fill the height and stand in two staggered rows,
-   so four show at once. Every second cover sits a row down, half a pitch along: cover i is still i steps from the
-   first, so the walk, the counter, the drag and Tab hold as they are. The row gets its own unit; 896 design px is
-   the row's padding, two sleeves and the caption room between them, 344 the head above it. */
-@media (max-aspect-ratio:1/1){
-  html[data-mt-held] .mt-covers{--cu:min(calc(100vw / 1000),calc((100svh - 344 * var(--u)) / 896));--cm:max(0px,calc((100svh - 344 * var(--u) - 896 * var(--cu)) / 2))}
-  html[data-mt-held] .mt-covers .mt-row{--u:var(--cu);--pl:calc(50vw - 160 * var(--u));margin-top:var(--cm)}
-  html[data-mt-held] .mt-covers .mt-track{gap:0;align-items:flex-start}
-  html[data-mt-held] .mt-covers .mt-sleeve{margin-right:calc(-70 * var(--u))}
-  html[data-mt-held] .mt-covers .mt-sleeve:nth-child(even){margin-top:calc(420 * var(--u))}
-  /* the counter's corner now holds the lower row: it moves up under the button */
-  html[data-mt-held] .mt-covers .mt-cvn{bottom:auto;top:calc(252 * var(--u));font-size:calc(44 * var(--u))}
+/* Tall windows (Julian, 2026-11-15: "scale cover, dont add under"): one row, and the covers grow into the height the
+   page unit leaves empty. The row gets its own unit: as tall as the 450 design px under the head allow, never so wide
+   that the cover passes 40% of the window, never past the page unit's own 1.6px cap. Only on windows narrower than 16:10:
+   at that shape the row's unit equals the page's, so it grows from there with no step. --cm centres the row in what is left. */
+@media (max-aspect-ratio:159/100){
+html[data-mt-held] .mt-covers{--cu:max(var(--u),min(calc((100svh - 450 * var(--u)) / 450),calc(100vw / 800),1.6px));--cm:max(0px,calc((100svh - 450 * var(--u) - 450 * var(--cu)) / 2))}
+html[data-mt-held] .mt-covers .mt-row{--u:var(--cu);--pl:calc(50vw - 160 * var(--u));margin-top:var(--cm)}
 }
 /* The record sticking out must not count as hovering its sleeve. */
 html[data-mt-held] .mt-sleeve .disc{pointer-events:none}
