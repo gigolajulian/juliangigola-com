@@ -732,3 +732,7 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
 [data-mtscroll] .mt-hero .ph>img.mt-dev{opacity:0}
 [data-mtscroll] .mt-hero .ph>img.mt-dev[data-on]{animation:mt-dev .85s cubic-bezier(.3,0,.2,1) both}
 @keyframes mt-dev{0%{opacity:0;filter:brightness(.45) contrast(1.6) grayscale(1)}40%{opacity:1;filter:brightness(.7) contrast(1.4) grayscale(.7)}100%{opacity:1;filter:none}}
+/* Keyboard focus on a photo link: the ring is drawn inside the frame, since the frame clips an outer one (Commissions tiles
+   showed none, the hero a sliver on the photo's top edge). A dark band on both sides keeps it readable on a bright photo. */
+[data-mtscroll] .mt-hero a.fig:focus-visible,[data-mtscroll] .mt-comm a.tile:focus-visible{outline:0}
+[data-mtscroll] .mt-hero a.fig:focus-visible .ph::after,[data-mtscroll] .mt-comm a.tile:focus-visible::after{content:"";position:absolute;inset:4px;z-index:3;opacity:1;background:none;border:2px solid var(--accent);box-shadow:0 0 0 2px rgb(0 0 0 / .6),inset 0 0 0 2px rgb(0 0 0 / .6);pointer-events:none}
