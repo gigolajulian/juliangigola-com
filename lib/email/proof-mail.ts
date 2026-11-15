@@ -103,6 +103,31 @@ ${rows(terms)}
   return { subject: "Your photos are ready", html, text, attachments: logos() };
 }
 
+const shortDay = (iso: string) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, month: "short", day: "numeric" }).format(new Date(iso));
+
+/** The one reminder (Julian 2026-11-15): plain, no sales voice. Proofs count the client's own picks so far; finals only say when. */
+export function reminderMail(p: Proof, stage: "proofs" | "finals") {
+  const finals = stage === "finals";
+  const url = (finals ? deliveryUrl : proofUrl)(publicId(p));
+  const by = p.closesAt ? longDay(p.closesAt) : "";
+  const subject = `Your ${finals ? "photos" : "proofs"} close${p.closesAt ? ` ${shortDay(p.closesAt)}` : " soon"}`;
+  const picked = (p.email && p.viewers?.[p.email.trim().toLowerCase()]?.picks.length) || 0;
+  const lead = finals
+    ? `Your photos at full resolution.${by ? ` Save them by ${by}.` : ""}`
+    : `Pick your ${p.included} ${p.included === 1 ? "frame" : "frames"}${by ? ` by ${by}` : ""} and I'll start editing.${picked ? ` You have ${picked} so far.` : ""}`;
+  const cta = finals ? "See your photos" : "Open proofs";
+  const html = page(
+    subject,
+    lead,
+    `<tr><td class="mono ac" style="${label};padding-bottom:10px">${finals ? "Finals" : "Proofs"}</td></tr>
+<tr><td class="mono fg" style="font-size:22px;line-height:1.3;color:${C.fg};padding-bottom:16px">${esc(subject)}.</td></tr>
+<tr><td class="mono mu" style="font-size:13px;line-height:1.65;color:${C.mu};padding-bottom:30px">${esc(lead)}</td></tr>
+<tr><td style="padding:0 0 30px"><a href="${url}" class="mono cta" style="display:inline-block;padding:14px 20px;background:${C.fg};color:${C.bg};text-decoration:none;font-size:12px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase">${cta}</a></td></tr>`,
+  );
+  const text = [`${subject}.`, "", lead, "", `${cta}: ${url}`, "", "Questions? Reply to this email.", SIG_TEXT].join("\n");
+  return { subject, html, text, attachments: logos() };
+}
+
 // The client's copy names frames by proof number, as the gallery does; Lightroom names stay Julian's.
 const numberList = (p: Proof) => {
   const order = shotOrder(p.frames).map((f) => f.id);

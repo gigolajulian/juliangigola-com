@@ -3,8 +3,8 @@ import { isAdmin } from "@/lib/vouch";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { copiesFor, readLead, recordLead, writeLead } from "@/lib/leads/lead-store";
 import { leadStoreKey } from "@/lib/leads/leads";
-import { forDesk, hashPass, cardKey, closesAt, cleanSettings, DEFAULTS, DELIVERY_DAYS, finalKeys, frameKey, frameKeys, aliasKey, isDateId, isFrameId, isStrongId, isToken, listProofs, nextProofId, publicId, readProof, shootDay, viewerKey, writeProof, type Proof } from "@/lib/proofs/proof";
-import { deliveryMail, deliveryUrl, proofMail, proofUrl, sendClient, subjectOr } from "@/lib/email/proof-mail";
+import { forDesk, hashPass, cardKey, closesAt, cleanSettings, DEFAULTS, DELIVERY_DAYS, finalKeys, frameKey, frameKeys, aliasKey, isDateId, isFrameId, isStrongId, isToken, listProofs, nextProofId, publicId, readProof, remindState, shootDay, viewerKey, writeProof, type Proof } from "@/lib/proofs/proof";
+import { deliveryMail, deliveryUrl, proofMail, proofUrl, reminderMail, sendClient, subjectOr } from "@/lib/email/proof-mail";
 import { MAX_FINAL, storeFinal } from "@/lib/proofs/delivery";
 import { recheckTransfer } from "@/lib/proofs/submit";
 import { servedFrame } from "@/lib/proofs/watermark";
@@ -23,6 +23,8 @@ import { bodyOf, json } from "@/lib/http";
  *   POST   {action:"forget", token, email} drop one visitor's record and its line in Leads (his own test visits)
  *   POST   {action:"relink", token}    a new date id for the client's link; the old link closes
  *   POST   {action:"deliver", token}   Send finals: the "your photos are ready" mail, /delivery/<id> open 60 days
+ *   GET    ?remind=X                   the reminder as it would go out, with who gets it
+ *   POST   {action:"remind", token}    the one reminder for the gallery's stage (`remindState`), on Julian's tap only
  *   PUT    ?token&id&...&final=1 <jpeg> add or replace one final (Lightroom's Delivery service)
  *   DELETE ?token&ids&final=1          drop finals
  *   PATCH  {token, ...settings}        name, email, note, included, price, days, watermark
@@ -73,6 +75,16 @@ export async function GET(request: Request) {
     const { subject } = m;
     const html = m.html.replace("cid:name-ink", "/email-name-ink.png").replace("cid:name-w", "/email-name-w.png").replace(/cid:f-([0-9A-Za-z_-]+)/g, (_, id) => `/proof/${p.token}/f/${id}`);
     return json({ html, subject, to: p.email ?? null });
+  }
+  const remind = q.get("remind");
+  if (isToken(remind)) {
+    const p = await readProof(g.kv, g.s, remind);
+    if (!p) return json({ error: "No such gallery." }, 404);
+    const r = remindState(p);
+    if (!r.stage) return json({ error: "Not sent yet." }, 409);
+    const m = reminderMail(p, r.stage);
+    const html = m.html.replace("cid:name-ink", "/email-name-ink.png").replace("cid:name-w", "/email-name-w.png");
+    return json({ html, subject: m.subject, to: p.email ?? null, cc: p.email ? await copiesFor(g.kv, g.s, p.email).catch(() => []) : [], remind: r });
   }
   const token = q.get("token");
   if (!isToken(token)) return json({ error: "Which gallery?" }, 400);
@@ -144,6 +156,25 @@ export async function POST(request: Request) {
     const keys = p.frames.flatMap((f) => frameKeys(p.token, f.id));
     for (let i = 0; i < keys.length; i += 1000) await g.r2.delete(keys.slice(i, i + 1000));
     return json({ proof: forDesk(sent), url: deliveryUrl(link) });
+  }
+  if (b.action === "remind") {
+    const r = remindState(p);
+    if (r.state === "sent") return json({ error: "Already reminded for this stage." }, 409);
+    if (r.state === "locked") return json({ error: "The reminder opens in the last 5 days before the gallery closes." }, 409);
+    if (r.state !== "ready") return json({ error: r.why }, 409);
+    // Stamped before the mail: a double tap or a retry can never send a second. The close date stays.
+    const at = new Date().toISOString();
+    const stamped: Proof = { ...p, reminded: { ...p.reminded, [r.stage]: at } };
+    await writeProof(g.kv, g.s, stamped);
+    const m = reminderMail(p, r.stage);
+    if (!(await sendClient(g.env.CLIENT_EMAIL, p.email!, m, await copiesFor(g.kv, g.s, p.email!).catch(() => [])))) {
+      // Undo the stamp so he can try again. KV allows one write per key per second, so wait that out first.
+      await new Promise((ok) => setTimeout(ok, 1100));
+      const undone = await writeProof(g.kv, g.s, p).then(() => true, () => false);
+      return json({ error: undone ? "The mail did not go out. Try again." : "The mail did not go out, and the reminder is still marked as sent. Tell Claude." }, 502);
+    }
+    await recordLead(g.env, p.email!, { event: { at, kind: "mail", note: m.subject, mail: { to: "client", kind: r.stage } } });
+    return json({ proof: forDesk(stamped) });
   }
   if (b.action === "relink") {
     // Storage stays put (R2, Stripe metadata, Lightroom's remote id); only the public id moves.

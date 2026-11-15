@@ -2,7 +2,8 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { cardPrice, lookStarts, shotOrder, THUMB_W, type PublicProof } from "@/lib/proofs/proof";
+import { useClock } from "@/lib/use-clock";
+import { cardPrice, closingSoon, lookStarts, shotOrder, THUMB_W, type PublicProof } from "@/lib/proofs/proof";
 import { looksLikeEmail } from "@/lib/inbox";
 import { ProofWall } from "@/components/proofs/wall";
 import { ProofCursor } from "@/components/proofs/cursor";
@@ -338,7 +339,11 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
   };
 
   const pad = (i: number) => String(i + 1).padStart(3, "0");
-  const closes = initial.closesAt ? new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(new Date(initial.closesAt)) : null;
+  const closes = initial.closesAt ? new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: "America/Los_Angeles" }).format(new Date(initial.closesAt)) : null;
+  // The last days say so (Julian 2026-11-15). Read after mount: the server and the phone can disagree near midnight.
+  const clock = useClock();
+  const soon = clock ? closingSoon(initial.closesAt, clock) : null;
+  const until = closes ? (soon !== null ? ` · Closes ${closes} · ${soon} ${soon === 1 ? "day" : "days"} left` : ` · Open until ${closes}`) : "";
   const ordered = [...selects].sort((a, b) => (byId.get(a) ?? 0) - (byId.get(b) ?? 0));
 
   if (!ready && !wall)
@@ -456,7 +461,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
 
       {wall ? (
         <div className="proof-intro">
-          <p className="proof-lab">Proofs · {frames.length} frames · {included} included{closes ? ` · Open until ${closes}` : ""}</p>
+          <p className="proof-lab">Proofs · {frames.length} frames · {included} included{until}</p>
           {/* Sized for the greeting from the start (--len), so the line that swaps in on Open proofs does not move the grid. */}
           <h1 style={{ "--len": 38 } as React.CSSProperties}>
             {hello ? `Hey ${hello}, pick your proofs below.` : "Pick your proofs."}
@@ -465,7 +470,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
         </div>
       ) : (
         <div className="proof-intro">
-          <p className="proof-lab">Proofs{closes ? ` · Open until ${closes}` : ""}</p>
+          <p className="proof-lab">Proofs{until}</p>
           <h1>{hello ? `Hey ${hello}, pick your proofs below.` : "Pick your proofs."}</h1>
           <p className="proof-hint">Tap the ring to select a frame. Tap the photo to see it large.</p>
         </div>
