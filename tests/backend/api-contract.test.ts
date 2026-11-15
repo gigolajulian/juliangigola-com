@@ -34,7 +34,9 @@ const made = async () => (await (await POST(admin("POST", { lead: LEAD }))).json
 // The desk fills the "to be set" lines before sending; the tests do the same.
 const make = async () => { const o = await made(); return { ...o, contract: { ...o.contract, text: o.contract.text.replace(/to be set/gi, "agreed") } }; };
 const send = async (c: Contract, extra: Record<string, unknown> = {}) => PATCH(admin("PATCH", { id: c.id, to: c.to, text: c.text, send: "mail", ...extra }));
-const signReq = (id: string, body: unknown) => SIGN(new Request(`https://juliangigola.com/api/contract/${id}`, { method: "POST", headers: { "cf-connecting-ip": "203.0.113.9", "user-agent": "Test UA" }, body: JSON.stringify(body) }), { params: Promise.resolve({ id }) });
+const MARK = "M40 120 Q80 60 120 110 Q160 150 200 90 L240 100";
+// A drawn mark unless the test says otherwise.
+const signReq = (id: string, body: Record<string, unknown>) => SIGN(new Request(`https://juliangigola.com/api/contract/${id}`, { method: "POST", headers: { "cf-connecting-ip": "203.0.113.9", "user-agent": "Test UA" }, body: JSON.stringify({ mark: MARK, ...body }) }), { params: Promise.resolve({ id }) });
 
 describe("/api/contract", () => {
   it("refuses without the admin key", async () => {
@@ -81,6 +83,20 @@ describe("/api/contract", () => {
     expect(stored.text.endsWith("Edited.")).toBe(true);
   });
 
+  it("wants a first and last name and a drawn mark, or the typed name by choice", async () => {
+    const { contract: c } = await make();
+    await send(c);
+    const hash = await sha256(c.text);
+    const base = { email: "sam@example.com", agree: true, hash };
+    expect((await signReq(c.id, { ...base, name: "hi" })).status).toBe(400);
+    expect((await signReq(c.id, { ...base, name: "Sam Rivera", mark: undefined })).status).toBe(400);
+    expect((await signReq(c.id, { ...base, name: "Sam Rivera", mark: '"/><script>alert(1)</script>' })).status).toBe(400);
+    expect((await signReq(c.id, { ...base, name: "Sam Rivera", mark: undefined, typed: true })).status).toBe(200);
+    const stored = (await readContract(kv as never, await seal(), c.id))!;
+    expect(stored.signed).toMatchObject({ name: "Sam Rivera", typed: true });
+    expect(stored.signed!.mark).toBeUndefined();
+  });
+
   it("will not sign a draft that was never sent", async () => {
     const { contract: c } = await make();
     const res = await signReq(c.id, { name: "Sam Rivera", email: "sam@example.com", agree: true, hash: await sha256(c.text) });
@@ -95,7 +111,7 @@ describe("/api/contract", () => {
     const res = await signReq(c.id, { name: "Sam Rivera", email: "sam@example.com", agree: true, hash });
     expect(res.status).toBe(200);
     const stored = (await readContract(kv as never, await seal(), c.id))!;
-    expect(stored.signed).toMatchObject({ name: "Sam Rivera", email: "sam@example.com", ip: "203.0.113.9", ua: "Test UA", hash });
+    expect(stored.signed).toMatchObject({ name: "Sam Rivera", email: "sam@example.com", ip: "203.0.113.9", ua: "Test UA", hash, mark: "M40 120 Q80 60 120 110 Q160 150 200 90 L240 100" });
     expect(stored.signed!.hash).toBe(await sha256(stored.text));
     const l = (await readLead(kv as never, await seal(), LEAD))!;
     expect(l.contract).toBe("Signed");

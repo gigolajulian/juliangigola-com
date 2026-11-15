@@ -414,3 +414,21 @@ html:has(.proof[data-wall])::-webkit-scrollbar{display:none}
   .ctr-sign>.proof-btn{align-self:stretch}
 }
 @media print{.proof-top,.ctr-sign,.ctr-print{display:none!important}.ctr{max-width:none;padding:0}}
+/* the signature pad (Julian 2026-11-15) */
+.ctr-sigf{display:flex;flex-direction:column;gap:8px}
+.ctr-pad{position:relative;aspect-ratio:3/1;border:1px solid var(--p-hl);background:color-mix(in oklab,var(--foreground) 2.5%,transparent);transition:border-color .2s}
+.ctr-pad:hover,.ctr-pad:focus-within{border-color:color-mix(in oklab,var(--foreground) 40%,transparent)}
+.ctr-pad svg{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:crosshair;z-index:1}
+.ctr-pad path,.ctr-mark path{fill:none;stroke:var(--foreground);stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round}
+.ctr-pad::after{content:"";position:absolute;left:8%;right:8%;bottom:26%;border-bottom:1px solid var(--p-hl)}
+.ctr-pad-x{position:absolute;left:8%;bottom:28%;font:14px var(--p-mono);color:var(--muted-foreground)}
+.ctr-pad-hint{position:absolute;left:0;right:0;top:34%;text-align:center;font:11px var(--p-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted-foreground);opacity:.7;pointer-events:none;transition:opacity .2s}
+.ctr-pad[data-on] .ctr-pad-hint{opacity:0}
+.proof .ctr-pad-clear{position:absolute;top:6px;right:6px;z-index:2;font:11px var(--p-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted-foreground);background:none;border:0;padding:10px 12px;min-height:44px;cursor:pointer}
+.ctr-pad-clear:hover{color:var(--foreground)}
+.ctr-typed{display:flex;align-items:center;justify-content:center}
+.ctr-typed i,.ctr-mark i{font:italic 30px/1.4 Georgia,"Times New Roman",serif;color:var(--foreground);padding:0 8%}
+.proof .ctr-alt{text-transform:none;letter-spacing:0;align-self:flex-start;background:none;border:0;padding:6px 0;min-height:32px;font:12px var(--p-mono);color:var(--muted-foreground);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.ctr-alt:hover{color:var(--foreground)}
+.ctr-mark{width:min(300px,100%);aspect-ratio:3/1;margin-top:-12px;border-bottom:1px solid var(--foreground);margin-bottom:16px;display:flex;align-items:center}
+.ctr-mark svg{width:100%;height:100%;display:block}
