@@ -145,7 +145,6 @@
 [data-mtscroll] .mt-quote-col{margin-left:calc(690 * var(--u));width:calc(714 * var(--u));padding:calc(100 * var(--u)) 0 calc(60 * var(--u))}
 [data-mtscroll] .mt-q-h{font:900 calc(58 * var(--u))/.95 var(--display);letter-spacing:-.055em;margin:calc(14 * var(--u)) 0 calc(20 * var(--u));white-space:nowrap}
 [data-mtscroll] .mt-by{margin:0 0 calc(16 * var(--u))}
-[data-mtscroll] .mt-by .nm{text-transform:none;letter-spacing:.02em}
 [data-mtscroll] .mt-qos{border-bottom:1px solid var(--hair)}
 [data-mtscroll] .mt-qo{display:block;width:100%;border-top:1px solid var(--hair)!important;padding:calc(10 * var(--u)) 0 calc(15 * var(--u))!important}
 [data-mtscroll] .mt-qo b{display:block;font:900 calc(64 * var(--u))/calc(68 * var(--u)) var(--display);letter-spacing:-.055em;color:var(--row);transition:color .25s ease-out}
@@ -662,19 +661,28 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
   [data-mtscroll] .mt-book .mt-act{justify-content:flex-start;gap:calc(28 * var(--u))}
   [data-mtscroll] .mt-quote>.mt-frame{min-height:0;padding:0 calc(36 * var(--u)) calc(110 * var(--u))}
   [data-mtscroll] .mt-quote .mt-photo,[data-mtscroll] .mt-quote .mt-label{display:none}
-  [data-mtscroll] .mt-quote-col{margin:0;width:auto;padding:calc(48 * var(--u)) 0 0;border-top:1px solid var(--hair);display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"h h" "o a" "l b";column-gap:calc(48 * var(--u));align-items:start}
-  [data-mtscroll] .mt-q-h{grid-area:h;font-size:calc(112 * var(--u));line-height:.9;margin:0 0 calc(34 * var(--u))}
+  [data-mtscroll] .mt-quote-col{margin:0;width:auto;padding:calc(48 * var(--u)) 0 0;border-top:1px solid var(--hair);display:grid;grid-template-columns:minmax(0,1fr) calc(320 * var(--u));grid-template-areas:"h h" "o a" "l b";column-gap:calc(48 * var(--u));align-items:start}
+  /* smaller than the Sessions heading above it (Julian, 2026-11-15; was 112) */
+  [data-mtscroll] .mt-q-h{grid-area:h;font-size:calc(88 * var(--u));line-height:.9;margin:0 0 calc(30 * var(--u))}
   [data-mtscroll] .mt-qos{grid-area:o;position:relative;display:flex;column-gap:calc(44 * var(--u));border:0;padding-bottom:calc(64 * var(--u))}
   [data-mtscroll] .mt-quote :is(.mt-qo,.mt-qw){display:block;width:auto;height:auto;border:0!important;padding:0!important}
   [data-mtscroll] .mt-quote :is(.mt-qo,.mt-qw) b{display:block;font:900 calc(48 * var(--u))/calc(54 * var(--u)) var(--display);letter-spacing:-.05em;white-space:nowrap}
   /* the open option's lines sit under the row, from its left edge */
-  [data-mtscroll] .mt-qo .lbl,[data-mtscroll] .mt-qw>span{position:absolute;left:0;top:calc(100% - 54 * var(--u));margin:0;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .25s ease-out;font:500 max(10px,calc(11 * var(--u)))/1.2 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--ink)}
-  [data-mtscroll] :is(.mt-qo,.mt-qw)[aria-pressed="true"] :is(.lbl,span){opacity:1}
+  [data-mtscroll] .mt-qo .lbl,[data-mtscroll] .mt-qw>span{position:absolute;left:0;top:calc(100% - 54 * var(--u));margin:0;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .12s ease-out;font:500 max(10px,calc(11 * var(--u)))/1.2 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--ink)}
+  /* the lines of the option being left go first, then the new ones come in: two texts never cross in the same place */
+  [data-mtscroll] :is(.mt-qo,.mt-qw)[aria-pressed="true"] :is(.lbl,span){opacity:1;transition:opacity .25s ease-out .12s}
   [data-mtscroll] .mt-qw .po{display:none}
-  [data-mtscroll] .mt-qo-d,[data-mtscroll] .mt-qow[data-on] .mt-qo-d{position:absolute;left:0;top:calc(100% - 30 * var(--u));max-height:none;margin:0;white-space:nowrap;transition:opacity .25s ease-out}
-  [data-mtscroll] .mt-q-act{grid-area:a;margin-top:calc(4 * var(--u))}
-  [data-mtscroll] .mt-q-line{grid-area:l;margin-top:calc(10 * var(--u))}
-  [data-mtscroll] .mt-by{grid-area:b;margin:calc(14 * var(--u)) 0 0;justify-self:end}
+  [data-mtscroll] .mt-qo-d,[data-mtscroll] .mt-qow[data-on] .mt-qo-d{position:absolute;left:0;top:calc(100% - 30 * var(--u));max-height:none;margin:0;white-space:nowrap;transition:opacity .12s ease-out}
+  [data-mtscroll] .mt-qow[data-on] .mt-qo-d{transition:opacity .25s ease-out .12s}
+  /* a larger Inquire with the call line and the reply time under it (Julian, 2026-11-15; was a 131x61 button with both to its right).
+     The column has a fixed width so the client name changing under it cannot move the button. */
+  [data-mtscroll] .mt-q-act{grid-area:a;flex-direction:column;align-items:stretch;gap:calc(18 * var(--u));margin-top:calc(4 * var(--u))}
+  [data-mtscroll] .mt-q-act .mt-big{width:100%;padding:calc(28 * var(--u)) 0;font-size:max(12px,calc(15 * var(--u)))}
+  /* quieter than the picked option's own line above it, and on one baseline with the client line */
+  [data-mtscroll] .mt-q-line{grid-area:l;margin-top:calc(10 * var(--u));max-width:none;color:var(--mute);align-self:baseline}
+  /* flush right like the lines above it; the longest name is wider than the column and runs out to the left, over nothing */
+  [data-mtscroll] .mt-q-alt{align-items:flex-end}
+  [data-mtscroll] .mt-by{grid-area:b;margin:calc(14 * var(--u)) 0 0;justify-self:end;align-self:baseline;white-space:nowrap}
 }
 @media not ((min-width:1024px) and (min-height:600px)){
   [data-mtscroll] .mt-bq-h{order:-2;padding:0 16px}

@@ -116,10 +116,13 @@ function dockFrame(d: Dock, p: number, dt: number, jump: boolean) {
   const q = cap.toFixed(3) + go.toFixed(3) + sc.toFixed(3);
   if (q === d.q) return;
   d.q = q;
-  if (d.cap) d.cap.style.opacity = cap.toFixed(3);
-  if (d.scrim) d.scrim.style.opacity = sc.toFixed(3);
+  // at rest nothing is written: an inline 1 beat the splash's own `opacity:0` rule, so the caption and buttons
+  // stood alone on the empty page until the splash started (seen in Safari, 2026-11-15)
+  const op = (v: number) => (v >= 1 ? "" : v.toFixed(3));
+  if (d.cap) d.cap.style.opacity = op(cap);
+  if (d.scrim) d.scrim.style.opacity = op(sc);
   if (d.ctas) {
-    d.ctas.style.opacity = go.toFixed(3);
+    d.ctas.style.opacity = op(go);
     d.ctas.style.visibility = go <= 0 ? "hidden" : ""; // gone: the buttons leave the tab order too
   }
 }
