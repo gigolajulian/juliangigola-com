@@ -17,6 +17,7 @@ import { canonical } from "@/lib/leads/lead-crypto";
 import { day } from "@/lib/leads/lead-desk";
 import { closed, type Row } from "@/lib/proofs/desk";
 import { stage } from "@/lib/proofs/proof";
+import { Timeline } from "@/components/proofs/timeline";
 
 /** Where a gallery stands, in one word, and how loud its badge is. */
 function state(p: Row): { label: string; variant: "success" | "blue" | "gray" } {
@@ -58,6 +59,8 @@ export function Galleries({ galleries, lead, open }: { galleries: Row[]; lead: s
               <Badge label={s.label} variant={s.variant} />
               <Button label="Open" variant="ghost" size="sm" onClick={() => open(p.token)} />
             </HStack>
+            {/* Where it stands at a glance (Julian 2026-11-15), the same timeline as the gallery itself. */}
+            {p.sentAt || p.deliveredAt ? <Timeline p={p} /> : null}
           </React.Fragment>
         );
       })}
