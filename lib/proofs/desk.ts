@@ -4,16 +4,17 @@
  * Browser only, like `lib/leads/lead-desk.ts`.
  */
 import { adminCall } from "@/lib/leads/lead-desk";
-import { stage, type CardCrop, type Proof, type ProofFrame } from "@/lib/proofs/proof";
+import { isTestEmail, stage, type CardCrop, type Proof, type ProofFrame } from "@/lib/proofs/proof";
 import { CARD } from "@/lib/proofs/watermark";
 
 /** A gallery as `/api/proof?list` answers it, with its client link. */
-export type Row = Proof & { url: string };
+/** No password hash ever reaches the desk: only whether there is one. */
+export type Row = Omit<Proof, "pass"> & { url: string; hasPass?: boolean };
 
 export const api = <T = Record<string, unknown>,>({ query = "", ...init }: RequestInit & { query?: string } = {}) => adminCall<T>(`/api/proof${query}`, init);
 
 export const closed = (p: Proof) => !!p.closesAt && Date.parse(p.closesAt) < Date.now();
-export const status = (p: Proof) => p.deliveredAt ? `Delivered${p.firstDownloadAt ? ", downloaded" : ""}${closed(p) ? " · closed" : ""}` : `${stage(p)}${p.checkout && !p.submittedAt ? ", paying" : ""}${closed(p) ? " · closed" : ""}`;
+export const status = (p: Proof) => p.offline ? "Offline" : p.deliveredAt ? `Delivered${p.firstDownloadAt ? ", downloaded" : ""}${closed(p) ? " · closed" : ""}` : `${stage(p)}${p.checkout && !p.submittedAt ? ", paying" : ""}${closed(p) ? " · closed" : ""}`;
 
 /** The widest box of the share card's photo shape that fits a frame. */
 const cardBox = (f: Pick<ProofFrame, "w" | "h">) => {
@@ -32,4 +33,35 @@ export function cardCrop(f: Pick<ProofFrame, "id" | "w" | "h">, at: number): Car
 export function cropAt(f: Pick<ProofFrame, "w" | "h">, c: CardCrop): number {
   const { w, h } = cardBox(f);
   return f.w > w ? c.x / (f.w - w) : f.h > h ? c.y / (f.h - h) : 0.5;
+}
+
+export type FeedItem = { at: string; token: string; gallery: string; email: string; who: string; what: string };
+
+/**
+ * Every gallery's client activity in one list for Today (Julian 2026-11-15): opened, picked, sent, downloaded, newest
+ * first. A run of picks by one address in one gallery reads as one line ("picked 4"). Test addresses (QA) are left out.
+ */
+export function feed(rows: Pick<Proof, "token" | "name" | "viewers" | "finals">[], n = 12): FeedItem[] {
+  const out: FeedItem[] = [];
+  for (const p of rows) {
+    for (const [email, v] of Object.entries(p.viewers ?? {})) {
+      if (isTestEmail(email)) continue;
+      const who = v.name ?? email;
+      let run: FeedItem | null = null, picks = 0;
+      for (const e of v.events) {
+        if (e.kind === "pick") {
+          picks++;
+          if (run) Object.assign(run, { at: e.at, what: `picked ${picks}` });
+          else out.push((run = { at: e.at, token: p.token, gallery: p.name, email, who, what: "picked 1" }));
+          continue;
+        }
+        if (e.kind === "unpick" || e.kind === "review" || e.kind === "pay") continue;
+        run = null;
+        picks = 0;
+        const what = e.kind === "open" ? "opened" : e.kind === "send" ? "sent selects" : e.id === "all" ? "downloaded all" : `saved ${p.finals?.find((f) => f.id === e.id)?.file ?? "a photo"}`;
+        out.push({ at: e.at, token: p.token, gallery: p.name, email, who, what });
+      }
+    }
+  }
+  return out.sort((a, b) => b.at.localeCompare(a.at)).slice(0, n);
 }

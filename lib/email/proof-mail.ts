@@ -8,7 +8,7 @@
 import { TZ } from "@/lib/booking/booking-rules";
 import { NAME_INK, NAME_W } from "@/lib/email/email-logo";
 import { SIG_DARK, SIG_HTML, SIG_TEXT } from "@/lib/email/email-signature";
-import { extras, publicId, shotOrder, type Proof } from "@/lib/proofs/proof";
+import { extras, isTestEmail, publicId, shotOrder, type Proof, type ViewerEvent } from "@/lib/proofs/proof";
 
 const FROM = { name: "Julian Gigola", email: "book@juliangigola.com" };
 const REPLY_TO = "hello@juliangigola.com";
@@ -149,10 +149,54 @@ export function alertLines(p: Proof): { subject: string; lines: string[] } {
   };
 }
 
-export async function sendClient(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefined, to: string, m: { subject: string; html: string; text: string; attachments: Inline[] }): Promise<boolean> {
+/** What a client did, as it happens, for a gallery on "each" (Julian 2026-11-15). Open, send and download only. */
+export function actionAlert(p: Proof, who: string, kind: "open" | "download", id?: string): { subject: string; lines: string[] } {
+  const name = p.viewers?.[who.toLowerCase()]?.name;
+  const by = name ? `${name} (${who})` : who;
+  const file = id === "all" ? "all photos as one zip" : p.finals?.find((f) => f.id === id)?.file ?? id ?? "a photo";
+  const what = kind === "open" ? `opened ${p.deliveredAt ? "the delivery" : "the proofs"}` : `downloaded ${file}`;
+  return { subject: `${kind === "open" ? "Opened" : "Downloaded"}: ${p.name}`, lines: [`${by} ${what} of ${p.name}.`, "", (p.deliveredAt ? deliveryUrl : proofUrl)(publicId(p))] };
+}
+
+const COUNTED = { open: "opened", pick: "picked", send: "sent selects", download: "downloaded" } as const;
+type Counted = keyof typeof COUNTED;
+
+/**
+ * The daily summary for galleries on "daily": who opened, picked, sent and downloaded between `since` and `until`.
+ * Null when nothing happened, so a quiet day sends nothing. Test addresses (QA) never count.
+ */
+export function digestMail(proofs: Proof[], since: string, until: string): { subject: string; lines: string[] } | null {
+  const out: string[] = [];
+  let total = 0;
+  for (const p of proofs) {
+    if (p.notify !== "daily") continue;
+    const rows: string[] = [];
+    for (const [who, v] of Object.entries(p.viewers ?? {})) {
+      if (isTestEmail(who)) continue;
+      const n: Partial<Record<Counted, number>> = {};
+      for (const e of v.events) if (e.at > since && e.at <= until && e.kind in COUNTED) n[e.kind as Counted] = (n[e.kind as Counted] ?? 0) + 1;
+      const said = (Object.keys(COUNTED) as Counted[]).filter((k) => n[k]).map((k) => (k === "send" ? COUNTED[k] : `${COUNTED[k]} ${n[k]}${k === "open" ? (n[k] === 1 ? " time" : " times") : ""}`));
+      if (said.length) rows.push(`  ${v.name ? `${v.name} (${who})` : who}: ${said.join(", ")}`);
+    }
+    if (!rows.length) continue;
+    total += rows.length;
+    out.push(`${p.name}`, ...rows, `  ${(p.deliveredAt ? deliveryUrl : proofUrl)(publicId(p))}`, "");
+  }
+  if (!out.length) return null;
+  return { subject: `Galleries today: ${total} ${total === 1 ? "visitor" : "visitors"}`, lines: ["Since yesterday's summary:", "", ...out.slice(0, -1)] };
+}
+
+/** Whether this open or download is worth a mail: not a test address, and not the same thing again within `gap` minutes. */
+export function worthMail(events: ViewerEvent[], kind: "open" | "download", at: string, gap: number): boolean {
+  const before = events.filter((e) => e.kind === kind && e.at < at).at(-1);
+  return !before || Date.parse(at) - Date.parse(before.at) > gap * 60_000;
+}
+
+/** `cc`: the other people on the lead with "copy on gallery mail" ticked (`copiesFor` in lib/leads/lead-store). */
+export async function sendClient(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefined, to: string, m: { subject: string; html: string; text: string; attachments: Inline[] }, cc: string[] = []): Promise<boolean> {
   if (!mailer) return false;
-  // A plain address: Cloudflare refuses an EmailAddress without a name (live 2026-11-11, every client mail failed).
-  const head = { to, from: FROM, replyTo: REPLY_TO };
+  // Plain addresses: Cloudflare refuses an EmailAddress without a name (live 2026-11-11, every client mail failed).
+  const head = { to, from: FROM, replyTo: REPLY_TO, ...(cc.length ? { cc } : {}) };
   try {
     await mailer.send({ ...head, ...m });
     return true;
@@ -164,7 +208,50 @@ export async function sendClient(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefin
       return true;
     } catch (e2) {
       console.error("proof mail, plain", String(e2));
-      return false;
+      // A copy address refused must not stop the client's own mail.
+      if (!cc.length) return false;
+      return sendClient(mailer, to, m);
     }
   }
+}
+
+/* ── contracts (Julian 2026-11-15): the link to sign, and the signed copy ── */
+
+type ContractMailIn = { id: string; to: { name: string }; text: string; signed?: { name: string; at: string; hash: string; email: string } };
+const contractLink = (id: string) => `${SITE}/contract/${id}`;
+const first = (name: string) => name.split(/\s+/)[0] ?? "";
+
+/** "Your contract": the link to read and sign it. */
+export function contractMail(c: ContractMailIn) {
+  const url = contractLink(c.id);
+  const lead = `Hi ${first(c.to.name)}, here is the contract for the shoot. Read it, type your name and sign online. It takes a minute.`;
+  const html = page(
+    "Your contract",
+    "Read and sign the contract online.",
+    `<tr><td class="mono ac" style="${label};padding-bottom:10px">Contract</td></tr>
+<tr><td class="mono fg" style="font-size:22px;line-height:1.3;color:${C.fg};padding-bottom:16px">Your contract.</td></tr>
+<tr><td class="mono mu" style="font-size:13px;line-height:1.65;color:${C.mu};padding-bottom:30px">${esc(lead)}</td></tr>
+<tr><td style="padding:0 0 30px"><a href="${url}" class="mono cta" style="display:inline-block;padding:14px 20px;background:${C.fg};color:${C.bg};text-decoration:none;font-size:12px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase">Read and sign</a></td></tr>`,
+  );
+  const text = ["Your contract.", "", lead, "", `Read and sign: ${url}`, "", "Questions? Reply to this email.", SIG_TEXT].join("\n");
+  return { subject: "Your contract", html, text, attachments: logos() };
+}
+
+/** The client's copy once signed: the whole text and the signature record. */
+export function signedMail(c: ContractMailIn) {
+  const s = c.signed!;
+  const when = new Intl.DateTimeFormat("en-US", { timeZone: TZ, dateStyle: "long", timeStyle: "short" }).format(new Date(s.at));
+  const record: [string, string][] = [["Signed by", s.name], ["Signed at", when], ["SHA-256", s.hash]];
+  const lead = "Thanks for signing. Your copy is below and on the same link any time.";
+  const html = page(
+    "Contract signed",
+    `Signed by ${s.name}.`,
+    `<tr><td class="mono ac" style="${label};padding-bottom:10px">Signed</td></tr>
+<tr><td class="mono fg" style="font-size:22px;line-height:1.3;color:${C.fg};padding-bottom:16px">Contract signed.</td></tr>
+<tr><td class="mono mu" style="font-size:13px;line-height:1.65;color:${C.mu};padding-bottom:30px">${esc(lead)} <a href="${contractLink(c.id)}" style="color:inherit">${contractLink(c.id)}</a></td></tr>
+${rows(record)}
+<tr><td class="mono fg rule" style="${C.rule};font-size:12px;line-height:1.7;color:${C.fg};padding-top:18px;white-space:pre-wrap">${esc(c.text)}</td></tr>`,
+  );
+  const text = ["Contract signed.", "", lead, contractLink(c.id), "", ...record.map(([k, v]) => `${k}: ${v}`), "", c.text, "", SIG_TEXT].join("\n");
+  return { subject: "Contract signed", html, text, attachments: logos() };
 }

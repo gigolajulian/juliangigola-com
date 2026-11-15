@@ -6,7 +6,7 @@
  * thirds on a phone), a header and the email on the right (below). Any
  * email opens it and every download is logged under it. Then the finals at
  * 800px in the grid and 2000px in the lightbox. Save gets one full-size
- * JPEG; Download all gets one zip. Same proof.css as the proof gallery.
+ * JPEG, Save for web the 2000px copy; Download all gets one zip. Same proof.css as the proof gallery.
  * ─────────────────────────────────────────────────────────────── */
 
 import * as React from "react";
@@ -18,7 +18,7 @@ const size = (b: number) => (b >= 1e9 ? `${(b / 1e9).toFixed(1)} GB` : `${Math.m
 const pad = (i: number) => String(i + 1).padStart(2, "0");
 
 /** The delivery's door: the cover photo beside (or above) a header, a line and the email. */
-function SplitGate({ cover, sub, onEnter }: { cover: string; sub: string; onEnter: (email: string) => void }) {
+function SplitGate({ cover, sub, subhead, onEnter }: { cover: string; sub: string; subhead?: string | null; onEnter: (email: string) => void }) {
   const [value, setValue] = React.useState("");
   const [bad, setBad] = React.useState(false);
   return (
@@ -39,6 +39,7 @@ function SplitGate({ cover, sub, onEnter }: { cover: string; sub: string; onEnte
         <Link className="proof-word" href="/">Julian Gigola</Link>
         <div>
           <h1>Your photos.</h1>
+          {subhead ? <p className="proof-sub">{subhead}</p> : null}
           <p className="proof-mu">{sub}</p>
         </div>
         <label>
@@ -57,7 +58,8 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
   const [email, setEmail] = React.useState<string | null>(null);
   const [open, setOpen] = React.useState<number | null>(null);
   const swipe = React.useRef<number | null>(null);
-  const thumb = (fid: string) => `/delivery/${id}/f/${fid}?w=800`;
+  // `v` changes when Lightroom republishes an edit, so a cached old copy is never shown.
+  const src = (f: { id: string; v: number }) => `/delivery/${id}/f/${f.id}?v=${f.v}`;
   const total = finals.reduce((n, f) => n + f.bytes, 0);
   const closes = initial.closesAt ? new Intl.DateTimeFormat("en-US", { month: "long", day: "numeric", timeZone: "America/Los_Angeles" }).format(new Date(initial.closesAt)) : null;
 
@@ -87,7 +89,8 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
     return (
       <div className="proof">
         <SplitGate
-          cover={`/delivery/${id}/f/${initial.cover ?? finals[0].id}`}
+          cover={src(finals.find((f) => f.id === initial.cover) ?? finals[0])}
+          subhead={initial.subhead}
           sub={`Your photos at full resolution.${closes ? ` Save them by ${closes}.` : ""}`}
           onEnter={(address) => {
             setEmail(address);
@@ -122,9 +125,9 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
             {finals.map((f, i) => (
               <div key={f.id} className="proof-cell">
                 {/* eslint-disable-next-line @next/next/no-img-element -- private finals from the Worker, not the image CDN */}
-                <img src={thumb(f.id)} alt="" loading={i < 8 ? "eager" : "lazy"} width={f.w || undefined} height={f.h || undefined} draggable={false} />
+                <img src={`${src(f)}&w=800`} alt="" loading={i < 8 ? "eager" : "lazy"} width={f.w || undefined} height={f.h || undefined} draggable={false} />
                 <button type="button" className="proof-open" aria-label={`Open photo ${i + 1}`} onClick={() => setOpen(i)} />
-                <span className="proof-no">{pad(i)}</span>
+                <span className="proof-no">{pad(i)}{initial.labels ? ` · ${f.file}` : ""}</span>
               </div>
             ))}
           </div>
@@ -147,12 +150,16 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
           >
             <button type="button" className="proof-arr l" aria-label="Previous" onClick={() => setOpen(step(open, -1))}>&larr;</button>
             {/* eslint-disable-next-line @next/next/no-img-element -- private final, 2000px copy */}
-            <img src={`/delivery/${id}/f/${finals[open].id}`} alt={`Photo ${open + 1}`} />
+            <img src={src(finals[open])} alt={`Photo ${open + 1}`} />
             <button type="button" className="proof-arr r" aria-label="Next" onClick={() => setOpen(step(open, 1))}>&rarr;</button>
           </div>
           <div className="proof-lf">
             <span>{finals[open].file} · {size(finals[open].bytes)}</span>
-            <button type="button" className="proof-btn" onClick={() => download(finals[open].id, `/delivery/${id}/dl/${finals[open].id}`)}>Save</button>
+            <div className="proof-acts">
+              {/* The 2000px copy, for posting and texting (Julian 2026-11-15). */}
+              <button type="button" className="proof-btn ghost" onClick={() => download(finals[open].id, `/delivery/${id}/web/${finals[open].id}`)}>Save for web</button>
+              <button type="button" className="proof-btn" onClick={() => download(finals[open].id, `/delivery/${id}/dl/${finals[open].id}`)}>Save</button>
+            </div>
           </div>
         </div>
       ) : null}
