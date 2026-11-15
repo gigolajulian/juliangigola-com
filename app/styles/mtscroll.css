@@ -682,3 +682,6 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
 :root[data-mtscroll]:not([data-theme="light"]) .mt-logos>.mute{color:rgb(20 20 20 / .62)}
 :root[data-mtscroll]:not([data-theme="light"]) .mt-logos .mk{color:rgb(20 20 20 / .86)}
 @media (hover:hover){:root[data-mtscroll]:not([data-theme="light"]) .mt-logos a:hover .mk{color:#000}}
+
+/* the header's bottom line, V4 only: a hairline that is almost not there (Julian, 2026-11-14) */
+:root[data-mtscroll] .v3 .site-hdr{border-bottom-color:color-mix(in srgb,currentColor 6%,transparent)}
