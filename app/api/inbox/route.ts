@@ -2,7 +2,7 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { bearer, isAdmin } from "@/lib/vouch";
 import { SAFE_IMAGE, summary, type Enquiry, type Summary } from "@/lib/inbox";
 import { backfillLead, fold, PAPER, REMIND_MAX, STAGES, trashDaysLeft, type InboxRow, type Lead, type LeadPatch, type LeadSummary, type Paper, type Stage } from "@/lib/leads/leads";
-import { everyLead, findLead, linkPeople, personKey, readLead, writeLead } from "@/lib/leads/lead-store";
+import { everyLead, findLead, hasPerson, linkPeople, personKey, readLead, writeLead } from "@/lib/leads/lead-store";
 import { clientsCsv } from "@/lib/leads/sheet-sync";
 import { importNotion } from "@/lib/leads/notion-import";
 import { adoptLog, eventsCsv, forgetLog, readLog, readMaster } from "@/lib/leads/activity-log";
@@ -436,7 +436,8 @@ async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: Await
       const own = await seal.id(p.email);
       if (own !== id && (await readLead(inbox, seal, own))) return json({ error: `${p.email} has a lead of their own. Merge it into this one instead.` }, 409);
       const to = await inbox.get(personKey(own));
-      if (to && to !== id && (await readLead(inbox, seal, to))) return json({ error: `${p.email} is already on another lead.` }, 409);
+      const there = to && to !== id ? await readLead(inbox, seal, to) : null;
+      if (there && hasPerson(there, p.email)) return json({ error: `${p.email} is already on another lead.` }, 409);
     }
     lead = { ...lead, people: list.length ? list : undefined, events: [...lead.events, { at: new Date().toISOString(), kind: "edit" as const, note: "people" }].slice(-50) };
   }

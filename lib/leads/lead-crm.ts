@@ -119,8 +119,8 @@ export function merge(into: Lead, from: Lead, at: string): Lead {
     flags: [...new Set([...(into.flags ?? []), ...(from.flags ?? [])])],
     notes: notes.slice(0, 5000),
     invoices: [...(from.invoices ?? []), ...(into.invoices ?? [])].sort((a, b) => a.at.localeCompare(b.at)),
-    // Both records' people, once each, never this lead's own address.
-    people: [...(into.people ?? []), ...(from.people ?? [])].filter((p, i, all) => canonical(p.email) !== canonical(into.email) && all.findIndex((x) => canonical(x.email) === canonical(p.email)) === i),
+    // Both records' people, once each, never this lead's own address. The other record's address joins them, so its mail keeps landing here.
+    people: [...(into.people ?? []), ...(from.people ?? []), ...(mailable(from.email) ? [{ name: from.name, email: from.email }] : [])].filter((p, i, all) => canonical(p.email) !== canonical(into.email) && all.findIndex((x) => canonical(x.email) === canonical(p.email)) === i),
     events: [...events, { at, kind: "merge" as const, note: from.name }].slice(-50),
   };
   if (!out.flags?.length) delete out.flags;
