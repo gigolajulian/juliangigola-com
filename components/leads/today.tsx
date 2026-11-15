@@ -233,11 +233,10 @@ export function TodayDesk({ leads, size, open, show }: { leads: LeadSummary[]; s
                 </List>
               ) : <Text type="supporting" color="secondary">{acts ? "No gallery activity yet." : "Loading galleries"}</Text>}
             </VStack>
-            {size === "mid" ? rail : null}
           </VStack>
         </LayoutContent>
       }
-      end={size === "wide" ? <LayoutPanel width={340} hasDivider label="This week">{rail}</LayoutPanel> : undefined}
+      end={size === "phone" ? undefined : <LayoutPanel width={size === "wide" ? 340 : 320} hasDivider label="This week">{rail}</LayoutPanel>}
     />
   );
 }
