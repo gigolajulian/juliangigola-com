@@ -206,6 +206,9 @@ function Gallery({ p, changed, onBack, gone }: { p: Row; changed: () => void; on
   const [preview, setPreview] = React.useState<string | null>(null);
   const [email, setEmail] = React.useState(p.email ?? "");
   const [pass, setPass] = React.useState("");
+  // The mail's subject, editable before Send (Julian 2026-11-15). The server falls back to its default when empty.
+  const [subject, setSubject] = React.useState("Your proofs are ready");
+  const [finalsSubject, setFinalsSubject] = React.useState("Your photos are ready");
   const [sub, setSub] = React.useState(p.subhead ?? "");
   const [tab, setTab] = React.useState<"gallery" | "activity" | "selects">("gallery");
   const [set, setSet] = React.useState({ balance: String(p.balance ?? 0), included: String(p.included), price: String(p.price), days: String(p.days) });
@@ -230,7 +233,9 @@ function Gallery({ p, changed, onBack, gone }: { p: Row; changed: () => void; on
   };
   const showPreview = async () => {
     try {
-      setPreview((await api<{ html: string }>({ query: `?preview=${p.token}` })).html);
+      const o = await api<{ html: string; subject: string }>({ query: `?preview=${p.token}` });
+      setPreview(o.html);
+      setSubject(o.subject);
     } catch (e) {
       setNote(errorText(e));
     }
@@ -356,15 +361,17 @@ function Gallery({ p, changed, onBack, gone }: { p: Row; changed: () => void; on
 
       {preview ? (
         <VStack gap={2}>
-          <Text type="supporting">To {p.email} · Your proofs are ready</Text>
+          <Text type="supporting">To {p.email}</Text>
+          <TextInput label="Subject" value={subject} onChange={setSubject} />
           <iframe title="Email preview" srcDoc={preview} sandbox="" style={{ height: 560, width: "100%", border: 0, borderRadius: 8, background: "#fff" }} />
         </VStack>
       ) : null}
 
+      {p.finals?.length && !p.deliveredAt ? <TextInput label="Finals mail subject" value={finalsSubject} onChange={setFinalsSubject} /> : null}
       <HStack gap={2} wrap="wrap">
         {!p.sentAt && !preview ? <Button label="Preview email" variant="primary" isDisabled={!p.email || !p.frames.length} clickAction={showPreview} /> : null}
-        {!p.sentAt && preview ? <Button label={`Send to ${p.email}`} variant="primary" clickAction={() => act({ action: "send" }, "POST", "Sent.")} /> : null}
-        {p.finals?.length && !p.deliveredAt ? <Button label={`Send finals to ${p.email ?? "…"}`} variant="primary" isDisabled={!p.email} clickAction={() => (confirm(`Send ${p.finals!.length} finals to ${p.email}? The gallery becomes the delivery, open 60 days, and the proof previews are removed.`) ? act({ action: "deliver" }, "POST", "Finals sent.") : undefined)} /> : null}
+        {!p.sentAt && preview ? <Button label={`Send to ${p.email}`} variant="primary" clickAction={() => act({ action: "send", subject }, "POST", "Sent.")} /> : null}
+        {p.finals?.length && !p.deliveredAt ? <Button label={`Send finals to ${p.email ?? "…"}`} variant="primary" isDisabled={!p.email} clickAction={() => (confirm(`Send ${p.finals!.length} finals to ${p.email}? The gallery becomes the delivery, open 60 days, and the proof previews are removed.`) ? act({ action: "deliver", subject: finalsSubject }, "POST", "Finals sent.") : undefined)} /> : null}
         {(p.sentAt && !p.submittedAt) || p.deliveredAt ? <Button label="Extend 7 days" clickAction={() => act({ action: "extend", days: 7 }, "POST", "Seven more days.")} /> : null}
         {p.submittedAt ? <Button label="Copy file names" onClick={() => copy(p.selects.map(file).join("\n"), "File names")} /> : null}
         {p.submittedAt ? <Button label="Reopen for changes" clickAction={reopen} /> : null}

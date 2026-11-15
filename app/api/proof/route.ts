@@ -4,7 +4,7 @@ import { sealer } from "@/lib/leads/lead-crypto";
 import { copiesFor, readLead, recordLead, writeLead } from "@/lib/leads/lead-store";
 import { leadStoreKey } from "@/lib/leads/leads";
 import { forDesk, hashPass, cardKey, closesAt, cleanSettings, DEFAULTS, DELIVERY_DAYS, finalKeys, frameKey, frameKeys, aliasKey, isDateId, isFrameId, isStrongId, isToken, listProofs, nextProofId, publicId, readProof, shootDay, viewerKey, writeProof, type Proof } from "@/lib/proofs/proof";
-import { deliveryMail, deliveryUrl, proofMail, proofUrl, sendClient } from "@/lib/email/proof-mail";
+import { deliveryMail, deliveryUrl, proofMail, proofUrl, sendClient, subjectOr } from "@/lib/email/proof-mail";
 import { MAX_FINAL, storeFinal } from "@/lib/proofs/delivery";
 import { recheckTransfer } from "@/lib/proofs/submit";
 import { servedFrame } from "@/lib/proofs/watermark";
@@ -18,7 +18,7 @@ import { bodyOf, json } from "@/lib/http";
  *   GET    ?list                       every gallery, from KV metadata
  *   GET    ?token=X                    one gallery in full, selects included
  *   POST   {action:"create", ...}      new gallery, returns token + url
- *   POST   {action:"send", token}      the proof mail; the clock starts
+ *   POST   {action:"send", token, subject?} the proof mail; the clock starts; `subject` replaces the default
  *   POST   {action:"reopen"|"extend"}  unlock selects | add days
  *   POST   {action:"forget", token, email} drop one visitor's record and its line in Leads (his own test visits)
  *   POST   {action:"relink", token}    a new date id for the client's link; the old link closes
@@ -69,9 +69,10 @@ export async function GET(request: Request) {
     const p = await readProof(g.kv, g.s, preview);
     if (!p) return json({ error: "No such gallery." }, 404);
     const sent = p.sentAt ? p : { ...p, closesAt: closesAt(p.days) };
-    let { html } = proofMail(sent, p.frames.slice(0, 4).map((f) => ({ id: f.id, bytes: new Uint8Array() })));
-    html = html.replace("cid:name-ink", "/email-name-ink.png").replace("cid:name-w", "/email-name-w.png").replace(/cid:f-([0-9A-Za-z_-]+)/g, (_, id) => `/proof/${p.token}/f/${id}`);
-    return json({ html, subject: "Your proofs are ready", to: p.email ?? null });
+    const m = proofMail(sent, p.frames.slice(0, 4).map((f) => ({ id: f.id, bytes: new Uint8Array() })));
+    const { subject } = m;
+    const html = m.html.replace("cid:name-ink", "/email-name-ink.png").replace("cid:name-w", "/email-name-w.png").replace(/cid:f-([0-9A-Za-z_-]+)/g, (_, id) => `/proof/${p.token}/f/${id}`);
+    return json({ html, subject, to: p.email ?? null });
   }
   const token = q.get("token");
   if (!isToken(token)) return json({ error: "Which gallery?" }, 400);
@@ -117,7 +118,8 @@ export async function POST(request: Request) {
     if (!strip) return json({ error: "The watermark could not be drawn. Try again." }, 502);
     const now = Date.now();
     const sent: Proof = { ...p, sentAt: new Date(now).toISOString(), closesAt: closesAt(p.days, now) };
-    const m = proofMail(sent, strip);
+    const mail = proofMail(sent, strip);
+    const m = { ...mail, subject: subjectOr(b.subject, mail.subject) };
     if (!(await sendClient(g.env.CLIENT_EMAIL, p.email, m, await copiesFor(g.kv, g.s, p.email).catch(() => [])))) return json({ error: "The mail did not go out. Try again." }, 502);
     await writeProof(g.kv, g.s, sent);
     await recordLead(g.env, p.email, { event: { at: sent.sentAt!, kind: "mail", note: m.subject, mail: { to: "client", kind: "proofs" } } });
@@ -132,7 +134,8 @@ export async function POST(request: Request) {
     if (link !== was) await g.kv.put(aliasKey(link), p.token);
     const now = Date.now();
     const sent: Proof = { ...p, ...(link !== p.token ? { link } : {}), deliveredAt: new Date(now).toISOString(), closesAt: closesAt(DELIVERY_DAYS, now) };
-    const m = deliveryMail(sent);
+    const mail = deliveryMail(sent);
+    const m = { ...mail, subject: subjectOr(b.subject, mail.subject) };
     if (!(await sendClient(g.env.CLIENT_EMAIL, p.email, m, await copiesFor(g.kv, g.s, p.email).catch(() => [])))) return json({ error: "The mail did not go out. Try again." }, 502);
     await writeProof(g.kv, g.s, sent);
     if (link !== was && p.link) await g.kv.delete(aliasKey(p.link));
