@@ -56,7 +56,9 @@
 [data-mtscroll] .mt-comm-now{display:flex;flex-direction:column;gap:6px;padding-bottom:calc(6 * var(--u))}
 [data-mtscroll] .mt-count{font-size:max(11px,calc(13 * var(--u)))!important}
 [data-mtscroll] .mt-comm-head .mute{color:rgb(var(--on-photo) / .7)}
-[data-mtscroll] .mt-comm-head .btn{margin-left:auto;height:32px;padding:0 14px;pointer-events:auto;border-color:rgb(var(--on-photo));color:rgb(var(--on-photo))}
+/* "See all projects" rides the foot of the screen, bottom right, and comes to rest in the sheet's last corner (Julian, 2026-11-15); the margins cancel its height */
+[data-mtscroll] .mt-comm-pin{display:flow-root}
+[data-mtscroll] .mt-comm-all{position:sticky;bottom:calc(64 * var(--u));z-index:2;display:flex;width:max-content;height:32px;padding:0 14px;margin:calc(-32px - 64 * var(--u)) calc(64 * var(--u)) calc(64 * var(--u)) auto;border-color:rgb(var(--on-photo));color:rgb(var(--on-photo))}
 [data-mtscroll] .mt-sheet{margin-top:0}
 [data-mtscroll] .mt-masonry{display:none}
 [data-mtscroll] .mt-logos{display:flex;align-items:center;gap:calc(28 * var(--u));padding:calc(40 * var(--u)) calc(36 * var(--u)) calc(96 * var(--u)) calc(var(--fx) + 36 * var(--u))}
@@ -325,7 +327,7 @@
   [data-mtscroll] .mt-ctas .btn{flex:1;min-height:48px}
 
   /* Commissions: masonry, heading once. */
-  [data-mtscroll] .mt-sheet,[data-mtscroll] .mt-comm-now,[data-mtscroll] .mt-comm-head .btn{display:none}
+  [data-mtscroll] .mt-sheet,[data-mtscroll] .mt-comm-now,[data-mtscroll] .mt-comm-all{display:none}
   [data-mtscroll] .mt-comm{padding-top:48px}
   [data-mtscroll] .mt-comm-head{position:static;height:auto;margin:0;padding:0 16px 20px;background:none;color:var(--ink)}
   [data-mtscroll] .mt-comm-head h2{font-size:46px}

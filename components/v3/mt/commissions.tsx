@@ -35,7 +35,6 @@ export function MtCommissions({ frames }: { frames: MtFrame[] }) {
           <span className="lbl mt-count"><span className="ln"><span data-mt-count>{pad(cur + 1)}</span></span>/{pad(frames.length)}</span>
           <span className="lbl mt-cur"><span className="ln"><span data-mt-name>{frames[cur].name}</span> <span className="mute">{frames[cur].meta}</span></span></span>
         </div>
-        <Link className="btn" href="/portfolio">See all projects</Link>
       </div>
       <div className="sheet mt-sheet">
         {frames.map((f, n) => (
@@ -49,6 +48,7 @@ export function MtCommissions({ frames }: { frames: MtFrame[] }) {
           </figure>
         ))}
       </div>
+      <Link className="btn mt-comm-all" href="/portfolio">See all projects</Link>
       </div>
       <div className="mt-masonry">
         {masonry(frames).map((col, c) => (
