@@ -4,7 +4,7 @@ import * as React from "react";
 import Image from "next/image";
 import { V3Foot } from "@/components/v3/chrome";
 import { Mark } from "@/components/v3/duo";
-import { REEL, SECTIONS, creditOf, embedUrl, previewUrl, posterFor, sectionName, type Video, type VideoSection } from "@/lib/videos";
+import { REEL, SECTIONS, creditOf, embedUrl, previewUrl, captionsOff, posterFor, sectionName, type Video, type VideoSection } from "@/lib/videos";
 
 /* JG V3 Motion (Julian): A as an index over one full-screen stage;
    scrolling swaps the film and its title, bottom left. Phones get the same
@@ -55,7 +55,7 @@ function Loop({ v }: { v: Video }) {
       const state = m?.event === "onStateChange" ? m.info : m?.event === "infoDelivery" ? m.info?.playerState : undefined;
       if (typeof state !== "number") return;
       clearTimeout(t);
-      if (state === 1) t = setTimeout(() => setReady(true), 2500);
+      if (state === 1) (captionsOff(ref.current?.contentWindow), (t = setTimeout(() => setReady(true), 2500)));
       else setReady(false);
     };
     addEventListener("message", onMsg);
@@ -140,8 +140,7 @@ function Player({ v, list, onGo, onClose }: { v: Video | null; list: Video[]; on
     if (v.provider === "youtube") {
       w.postMessage(JSON.stringify({ event: "listening", id: 1 }), "*");
       // Captions off by default, whatever the viewer's YouTube setting.
-      for (const mod of ["captions", "cc"]) w.postMessage(JSON.stringify({ event: "command", func: "unloadModule", args: [mod] }), "*");
-      w.postMessage(JSON.stringify({ event: "command", func: "setOption", args: ["captions", "track", {}] }), "*");
+      captionsOff(w);
     } else for (const value of ["pause", "play", "timeupdate", "playProgress"]) w.postMessage(JSON.stringify({ method: "addEventListener", value }), "*");
   }
   const toggle = () => { post(paused ? "playVideo" : "pauseVideo", [], paused ? "play" : "pause"); setPaused(!paused); poke(); };

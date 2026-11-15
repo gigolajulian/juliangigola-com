@@ -1,4 +1,5 @@
 import { shiftScroll } from "@/components/v3/smooth-scroll";
+import { captionsOff } from "@/lib/videos";
 import { clamp, smooth, type Driver } from "./engine";
 
 /* The held row's travel: it eases away from its first item and into its last (0.4 of the scroll's speed at the two ends). */
@@ -196,7 +197,7 @@ function films(): Driver {
           f.tabIndex = -1;
           f.setAttribute("aria-hidden", "true");
           f.onload = () => {
-            if (yt) f.contentWindow?.postMessage(JSON.stringify({ event: "listening", id: 1 }), "*");
+            if (yt) (f.contentWindow?.postMessage(JSON.stringify({ event: "listening", id: 1 }), "*"), captionsOff(f.contentWindow));
             else readyT = window.setTimeout(() => f.setAttribute("data-ready", ""), 2500);
           };
           film.append(f);
@@ -211,6 +212,7 @@ function films(): Driver {
         if (typeof state !== "number") return;
         clearTimeout(readyT);
         const f = pv;
+        if (state === 1) captionsOff(f.contentWindow);
         if (state === 1) readyT = window.setTimeout(() => f.setAttribute("data-ready", ""), 2500);
         else f.removeAttribute("data-ready");
       }, on);
