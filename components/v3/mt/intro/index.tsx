@@ -247,10 +247,8 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
       const isOver = new Set(over);
       const jb = jt + Math.max(...marks.map((m) => m.offsetHeight));
 
-      // the same ratios as the rules that hide side columns once the intro is over (mtscroll.css)
-      const tight = matchMedia("(max-aspect-ratio: 19/10)").matches;
-      const mid = matchMedia("(max-aspect-ratio: 29/10)").matches;
-      const leaves = (el: HTMLElement) => tight || (mid && (el.dataset.col === "-2" || el.dataset.col === "4"));
+      // `--vis`: the rules that hide side columns once the intro is over say which ones (mtscroll.css)
+      const leaves = (el: HTMLElement) => getComputedStyle(el).getPropertyValue("--vis").trim() === "hidden";
 
       // 1. the real columns, each with frames above and below it so the canvas has no holes
       cols.forEach((c, i) => {

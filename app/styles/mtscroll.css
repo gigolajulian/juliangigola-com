@@ -522,8 +522,30 @@
 html[data-mt-intro="1"] .site-hdr{opacity:0!important}
 html[data-mt-intro="1"]{overflow:hidden}
 /* side columns only where a real part of one fits: below about 1.9:1 just a 15px sliver shows at each edge. The intro still uses them. */
-@media (min-width:1024px) and (min-height:600px) and (max-aspect-ratio:19/10){html:not([data-mt-intro]) .mt-hero .mt-col.side{visibility:hidden}}
-@media (min-width:1024px) and (min-height:600px) and (max-aspect-ratio:29/10){html:not([data-mt-intro]) .mt-hero .mt-col.side:is([data-col="-2"],[data-col="4"]){visibility:hidden}}
+/* `--vis` says which side columns a screen keeps once the intro is over. The intro reads it too (intro/index.tsx), so
+   a column that will not stay leaves with the extras. */
+@media (min-width:1024px) and (min-height:600px) and (max-aspect-ratio:19/10){[data-mtscroll] .mt-hero .mt-col.side{--vis:hidden}}
+@media (min-width:1024px) and (min-height:600px) and (max-aspect-ratio:29/10){[data-mtscroll] .mt-hero .mt-col.side:is([data-col="-2"],[data-col="4"]){--vis:hidden}}
+/* Big screens (Julian, 2026-11-15): more columns at about the laptop's frame size, where three would be huge with empty
+   ground beside them. The wall gets its own unit, the design width of that many columns across the window; the name
+   block keeps the page's unit. 4 columns from 1800px wide, 5 from 2400px, 7 from 3300px. motion/hero.ts measures the
+   unit off a column. */
+@media (min-width:1800px) and (min-height:600px){
+  [data-mtscroll] .mt-hero .mt-wall{--u:min(calc(100vw / 1848),calc(100svh / 900))}
+  [data-mtscroll] .mt-hero .mt-col{left:calc(50% + (65 - 946.5 + var(--c) * 453) * var(--u))}
+  [data-mtscroll] .mt-hero .mt-col.side{--vis:hidden}
+  [data-mtscroll] .mt-hero .mt-col.side[data-col="3"]{--vis:visible}
+}
+@media (min-width:2400px) and (min-height:600px){
+  [data-mtscroll] .mt-hero .mt-wall{--u:min(calc(100vw / 2346),calc(100svh / 900))}
+  [data-mtscroll] .mt-hero .mt-col{left:calc(50% + (65 - 720 + var(--c) * 453) * var(--u))}
+  [data-mtscroll] .mt-hero .mt-col.side[data-col="-1"]{--vis:visible}
+}
+@media (min-width:3300px) and (min-height:600px){
+  [data-mtscroll] .mt-hero .mt-wall{--u:min(calc(100vw / 3252),calc(100svh / 900))}
+  [data-mtscroll] .mt-hero .mt-col.side:is([data-col="-2"],[data-col="4"]){--vis:visible}
+}
+html:not([data-mt-intro]) .mt-hero .mt-col.side{visibility:var(--vis,visible)}
 /* What I do: two columns of three on every structure */
 @media (min-width:600px){[data-mtscroll] .mt-does ol{display:grid;grid-template-columns:1fr 1fr;grid-auto-flow:column;grid-template-rows:repeat(3,auto);column-gap:calc(20 * var(--u))}}
 @media (min-width:600px){[data-mtscroll] .mt-does li{gap:8px}[data-mtscroll] .mt-does b{font-size:calc(15 * var(--u));white-space:nowrap}}
