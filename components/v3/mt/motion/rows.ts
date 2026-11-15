@@ -145,14 +145,11 @@ function heldRow(name: string, covers: boolean): Driver {
   };
 }
 
-/* Motion on the desktop structure: the films stack in natural scroll, each a
-   strip that wipes open to its full frame at the middle of the screen. Only
-   `--o` (0 strip, 1 open) is written here; rows.css turns it into the clip. */
+/* Motion on the desktop structure: the films share one screen and rows.tsx
+   picks the current one from the hold. Only the muted preview lives here. */
 function films(): Driver {
-  let frame = () => {};
   return {
     name: "motion",
-    frame: () => frame(),
     setup(el, ctx) {
       const row = el.querySelector<HTMLElement>(".mt-row")!;
       const items = [...el.querySelectorAll<HTMLElement>(".mt-film")];
@@ -160,19 +157,7 @@ function films(): Driver {
       if (n < 2) return;
       const ac = new AbortController();
       const on = { signal: ac.signal };
-      const o: number[] = Array(n).fill(-1);
       let cur = +(el.dataset.cur ?? 0);
-
-      // The films carry no transform, so their own rects are the layout. 1.15: fully open for a short stretch around the middle.
-      frame = () => {
-        const a = items[0].getBoundingClientRect();
-        const f = clamp((ctx.vh / 2 - a.top - a.height / 2) / (items[1].getBoundingClientRect().top - a.top), 0, n - 1);
-        for (let i = 0; i < n; i++) {
-          const v = Math.round(clamp((1 - Math.abs(i - f)) * 1.15) * 1000) / 1000;
-          if (v !== o[i]) items[i].style.setProperty("--o", String((o[i] = v)));
-        }
-      };
-
       /* Preview: one muted iframe in the current film, 300ms after it becomes
          current, gone when the film or the section leaves. The poster stays on
          top until the player says it plays (same wait as video.tsx Loop). */
@@ -229,14 +214,6 @@ function films(): Driver {
       });
       mo.observe(el, { attributeFilter: ["data-cur"] });
 
-      // Tab to a film: bring it to the middle of the screen, where it is open.
-      row.addEventListener("focusin", (e) => {
-        const it = (e.target as Element).closest<HTMLElement>(".mt-film");
-        if (!ctx.held || !it?.matches(":focus-visible")) return;
-        const r = it.getBoundingClientRect();
-        shiftScroll(r.top + r.height / 2 - ctx.vh / 2);
-      }, on);
-
       // The row does not scroll here, so it is not a tab stop of its own.
       const tab = () => void (row.tabIndex = ctx.held ? -1 : 0);
       addEventListener("resize", () => requestAnimationFrame(() => {
@@ -249,9 +226,7 @@ function films(): Driver {
         mo.disconnect();
         io.disconnect();
         drop();
-        frame = () => {};
         row.tabIndex = 0;
-        for (const it of items) it.style.removeProperty("--o");
       };
     },
   };

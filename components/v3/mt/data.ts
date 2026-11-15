@@ -22,6 +22,13 @@ export const FILM_PICKS: [title: string, kind: string][] = [
   ["The Description", "Music video"],
 ];
 
+/* Per-film dressing on the home (Julian, 2026-11-14). `zoom`: the frame is pushed in from its top left corner, poster and
+   preview alike, so the mark burnt into the bottom right corner of the video is cut. `mark`: the client logo, top right. */
+export const FILM_DRESS: Record<string, { zoom?: number; mark?: { src: string; w: number; h: number; name: string } }> = {
+  "Ladera Granola": { zoom: 1.25, mark: { src: "/clients/ladera-granola.webp", w: 432, h: 73, name: "Ladera" } },
+  "The Description": { zoom: 1.1, mark: { src: "/clients/empire.webp", w: 159, h: 160, name: "Empire" } },
+};
+
 /* ── Book online: the four sessions the home sells, each with the $100 deposit. Model test books on /book. ── */
 export type BookRow = {
   key: "portraits" | "headshots" | "graduation" | "studio-digitals";
