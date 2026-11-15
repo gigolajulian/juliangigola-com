@@ -8,7 +8,7 @@
  *
  * Home is the table-filter shape: Your move, This week, Waiting on them,
  * with the open lead beside the list when wide. Phone (≤760) gets a tab
- * bar, mid (≤1200) the side nav and a stacked header. The lead page is
+ * bar, mid (<1180) a stacked header; under 1280 the side nav is an icon rail. The lead page is
  * its own Astryx layout (components/leads/lead.tsx).
  * ─────────────────────────────────────────────────────────────── */
 
@@ -18,6 +18,8 @@ import * as React from "react";
 import { defineTheme, Theme } from "@astryxdesign/core/theme";
 import { neutralTheme } from "@astryxdesign/theme-neutral/built";
 import { useMediaQuery } from "@astryxdesign/core/hooks";
+import { CommandPalette } from "@astryxdesign/core/CommandPalette";
+import { createStaticSource, type SearchableItem } from "@astryxdesign/core/Typeahead";
 import { Layout, LayoutContent, LayoutHeader, LayoutPanel, HStack, VStack, StackItem, Card } from "@astryxdesign/core/Layout";
 import { SideNav, SideNavHeading, SideNavItem, SideNavSection } from "@astryxdesign/core/SideNav";
 import { Button } from "@astryxdesign/core/Button";
@@ -29,10 +31,11 @@ import { TextInput } from "@astryxdesign/core/TextInput";
 import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/SegmentedControl";
 import { ProgressBar } from "@astryxdesign/core/ProgressBar";
 import { StatusDot } from "@astryxdesign/core/StatusDot";
+import { Badge } from "@astryxdesign/core/Badge";
 import { Tab, TabList } from "@astryxdesign/core/TabList";
 import { SignIn } from "@/components/leads/setup";
 import { LeadDesk } from "@/components/leads/lead";
-import { badge } from "@/components/leads/shared";
+import { badge, FROST_ROOM, frostBar, GLASS, WIN_CSS } from "@/components/leads/shared";
 import { ago, aside, inboxCall, loadError, matches, nextStep, pass } from "@/lib/leads/lead-desk";
 import type { Template } from "@/lib/leads/lead-crm";
 import { TZ } from "@/lib/booking/booking-rules";
@@ -43,7 +46,8 @@ import { NewLeadDesk } from "@/components/leads/new-lead";
 import { BoardDesk } from "@/components/leads/board";
 import { CalendarDesk } from "@/components/leads/calendar";
 import { MoneyDesk } from "@/components/leads/money";
-import { AsideDesk, LicencesDesk } from "@/components/leads/lists";
+import { ASIDE, AsideDesk, LicencesDesk } from "@/components/leads/lists";
+import { About, about, Age, Next } from "@/components/leads/row";
 import { InvoicesDesk } from "@/components/leads/invoices";
 import { PanelDesk, StatsDesk } from "@/components/leads/numbers";
 import { DeviceDesk, HoursDesk, TemplatesDesk } from "@/components/leads/setup-panels";
@@ -106,6 +110,7 @@ const PlusGlyph = svg(<path d="M12 5v14M5 12h14" />);
 const ChartGlyph = svg(<path d="M4 20h16M7 16v-5M12 16V7M17 16v-8" />);
 const GearGlyph = svg(<><circle cx="12" cy="12" r="3" /><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1" /></>);
 const PhotoGlyph = svg(<><rect x="4" y="5" width="16" height="14" rx="2" /><circle cx="9" cy="10" r="1.6" /><path d="M20 16l-5-5-8 8" /></>);
+const FindGlyph = svg(<><circle cx="11" cy="11" r="6" /><path d="M20 20l-4.5-4.5" /></>);
 const SiteGlyph = svg(<><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M3 9h18M9 9v11" /></>);
 const GLYPH: Partial<Record<View, React.ComponentType<React.SVGProps<SVGSVGElement>>>> = { proofs: PhotoGlyph, leads: InboxGlyph, calendar: CalendarGlyph, money: MoneyGlyph, stats: ChartGlyph, templates: GearGlyph };
 /** Out of the desk: the site editor. */
@@ -115,14 +120,6 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
   return <Text type="code" size="xsm" color="secondary" weight="medium">{children}</Text>;
 }
 
-/** The one next step in teal; money stuck as an error dot; grey when the ball is with them. */
-function Next({ l, waiting }: { l: LeadSummary; waiting: boolean }) {
-  const bad = l.flags?.includes("stuck") ? "Deposit stuck" : l.flags?.includes("no-deposit") ? "No deposit" : null;
-  if (bad) return <Text type="code" size="sm" color="secondary"><StatusDot variant="error" label="Money stuck" /> {bad}</Text>;
-  const step = nextStep(l);
-  if (!step) return waiting ? <Text type="code" size="sm" color="secondary">Waiting on them</Text> : null;
-  return <Text type="code" size="sm" color="accent">{step} →</Text>;
-}
 
 function Stage({ l }: { l: LeadSummary }) {
   const at = ROAD.indexOf(l.stage);
@@ -137,20 +134,29 @@ function Stage({ l }: { l: LeadSummary }) {
   );
 }
 
-function Nav({ needs, view, go }: { needs: number; view: View; go: (v: View) => void }) {
+/* The side nav in the order of the work: what to do, what it earns, how it is set up (Julian, 2026-11-14). */
+const NAV: [string, View[]][] = [["Work", ["leads", "calendar", "proofs"]], ["Business", ["money", "stats"]], ["Setup", ["templates"]]];
+const FIND_KEY = () => (/Mac|iPhone|iPad/.test(navigator.userAgent) ? "\u2318K" : "Ctrl K");
+type Found = SearchableItem<{ group: string; words?: string[] }>;
+const GO: Found[] = [["new", "New lead"], ["today", "Today"], ...SECTIONS.map(([to, label]): [View, string] => [to, label])].map(([to, label]) => ({ id: `go:${to}`, label, auxiliaryData: { group: "Go to" } }));
+
+function Nav({ needs, view, go, find }: { needs: number; view: View; go: (v: View) => void; find: () => void }) {
   return (
     <SideNav header={<SideNavHeading heading="Desk" subheading="juliangigola.com" />}>
       <SideNavSection title="Desk" isHeaderHidden>
         <SideNavItem label="New lead" icon={PlusGlyph} isSelected={view === "new"} onClick={() => go("new")} />
-        <SideNavItem label="Today" icon={HomeGlyph} isSelected={view === "today"} onClick={() => go("today")} />
-        {SECTIONS.map(([to, label]) => (
-          <SideNavItem key={to} label={label} icon={GLYPH[to]} isSelected={sectionOf(view)?.[0] === to} onClick={() => go(to)}
-            endContent={to === "leads" ? <Text type="code" size="xsm">{needs}</Text> : undefined} />
-        ))}
+        <SideNavItem label="Search" icon={FindGlyph} onClick={find} endContent={<Text type="code" size="xsm" color="secondary">{FIND_KEY()}</Text>} />
       </SideNavSection>
-      <SideNavSection title="Elsewhere">
-        {LINKS.map(([label, href, glyph]) => <SideNavItem key={label} label={label} icon={glyph} href={href} />)}
-      </SideNavSection>
+      {NAV.map(([title, tos]) => (
+        <SideNavSection key={title} title={title}>
+          {title === "Work" ? <SideNavItem label="Today" icon={HomeGlyph} isSelected={view === "today"} onClick={() => go("today")} /> : null}
+          {SECTIONS.filter(([to]) => tos.includes(to)).map(([to, label]) => (
+            <SideNavItem key={to} label={label} icon={GLYPH[to]} isSelected={sectionOf(view)?.[0] === to} onClick={() => go(to)}
+              endContent={to === "leads" ? <Text type="code" size="xsm">{needs}</Text> : undefined} />
+          ))}
+          {title === "Setup" ? LINKS.map(([label, href, glyph]) => <SideNavItem key={label} label={label} icon={glyph} href={href} />) : null}
+        </SideNavSection>
+      ))}
     </SideNav>
   );
 }
@@ -180,22 +186,59 @@ function More({ go }: { go: (v: View) => void }) {
   );
 }
 
-function TabBar({ view, go }: { view: View; go: (v: View) => void }) {
+/* The phone's tab bar. Astryx has no bottom bar, so each tab is a plain button: the whole cell is the
+ * target (56px tall), a pill marks the tab that is on (not color alone), and Leads carries the count. */
+const tabCell: React.CSSProperties = { flex: 1, minHeight: 56, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2, background: "none", border: 0, padding: 0, cursor: "pointer", touchAction: "manipulation" };
+const tabPill = (on: boolean): React.CSSProperties => ({ position: "relative", width: 60, height: 30, borderRadius: 15, display: "grid", placeItems: "center", background: on ? "color-mix(in oklch, var(--color-accent) 20%, transparent)" : "transparent" });
+const tabCount: React.CSSProperties = { position: "absolute", top: -4, insetInlineEnd: 2 };
+
+function TabBar({ view, go, needs }: { view: View; go: (v: View) => void; needs: number }) {
   const tabs: [string, React.ComponentType<React.SVGProps<SVGSVGElement>>, View][] = [["Today", HomeGlyph, "today"], ["Leads", InboxGlyph, "leads"], ["Calendar", CalendarGlyph, "calendar"], ["More", MoreGlyph, "more"]];
   return (
-    <HStack gap={0} paddingBlockEnd={1}>
+    <nav aria-label="Desk" style={{ display: "flex", paddingInline: 8, paddingBlockStart: 4 }}>
       {tabs.map(([label, glyph, to]) => {
-        const on = to === view;
+        // The Leads tab stays on for its pages (Put aside); More for what it opens.
+        const on = to === view || (to === "leads" && view === "aside");
         return (
-        <StackItem key={label} size="fill">
-          <VStack gap={0} hAlign="center">
-            <IconButton label={label} variant="ghost" onClick={() => go(to)} icon={<Icon icon={glyph} color={on ? "accent" : "secondary"} />} />
-            <Text type="supporting" size="2xs" color={on ? "accent" : "secondary"}>{label}</Text>
-          </VStack>
-        </StackItem>
+          <button key={label} type="button" style={tabCell} aria-current={on ? "page" : undefined} onClick={() => go(to)}>
+            <span style={tabPill(on)}>
+              <Icon icon={glyph} size="md" color={on ? "accent" : "secondary"} />
+              {to === "leads" && needs ? <span style={tabCount}><Badge label={needs} variant="teal" /></span> : null}
+            </span>
+            <Text type="supporting" size="xsm" weight="medium" color={on ? "primary" : "secondary"}>{label}</Text>
+          </button>
         );
       })}
-    </HStack>
+    </nav>
+  );
+}
+
+/* The iPad's nav: the tab bar's cells stood on end, 84 wide, so the page keeps the width. */
+const railCell: React.CSSProperties = { ...tabCell, flex: "none", width: 76, minHeight: 58, textDecoration: "none" };
+
+function Rail({ needs, view, go }: { needs: number; view: View; go: (v: View) => void }) {
+  const face = (label: string, glyph: React.ComponentType<React.SVGProps<SVGSVGElement>>, on: boolean, count?: number) => (
+    <>
+      <span style={tabPill(on)}>
+        <Icon icon={glyph} size="md" color={on ? "accent" : "secondary"} />
+        {count ? <span style={tabCount}><Badge label={count} variant="teal" /></span> : null}
+      </span>
+      <Text type="supporting" size="xsm" weight="medium" color={on ? "primary" : "secondary"}>{label}</Text>
+    </>
+  );
+  const items: [string, React.ComponentType<React.SVGProps<SVGSVGElement>>, View, boolean][] = [
+    ["New", PlusGlyph, "new", view === "new"],
+    ["Today", HomeGlyph, "today", view === "today"],
+    ...SECTIONS.map(([to, label]): [string, React.ComponentType<React.SVGProps<SVGSVGElement>>, View, boolean] => [label, GLYPH[to]!, to, sectionOf(view)?.[0] === to]),
+  ];
+  return (
+    <nav aria-label="Desk" style={{ height: "100%", overflowY: "auto", display: "flex", flexDirection: "column", alignItems: "center", gap: 4, paddingBlock: 12, /* the same panel as the phone bars and the desktop nav */ background: frostBar.background, backdropFilter: frostBar.backdropFilter, WebkitBackdropFilter: frostBar.WebkitBackdropFilter }}>
+      {items.map(([label, glyph, to, on]) => (
+        <button key={to} type="button" style={railCell} aria-current={on ? "page" : undefined} onClick={() => go(to)}>{face(label, glyph, on, to === "leads" ? needs : undefined)}</button>
+      ))}
+      <span style={{ flex: 1 }} />
+      {LINKS.map(([label, href, glyph]) => <a key={label} href={href} style={railCell} aria-label={label}>{face("Site", glyph, false)}</a>)}
+    </nav>
   );
 }
 
@@ -220,7 +263,9 @@ export function LeadsDesk() {
   // When the list was loaded: groups by date without reading the clock during render.
   const [at, setAt] = React.useState(0);
   const isPhone = useMediaQuery("(max-width: 760px)");
-  const isMid = useMediaQuery("(max-width: 1200px)");
+  // Wide from 1180, an iPad on its side: the rail below is what leaves room for the open lead.
+  const isMid = useMediaQuery("(max-width: 1179px)");
+  const railed = useMediaQuery("(max-width: 1279px)");
   const size: Size = isPhone ? "phone" : isMid ? "mid" : "wide";
 
   const call = inboxCall;
@@ -237,6 +282,24 @@ export function LeadsDesk() {
   }, [call]);
   // Astryx follows the site's own light/dark (html[data-theme], dark when unset), so the ink matches the page behind it.
   // Unknown until read: Astryx's root Theme writes data-theme onto <html> itself, so mounting it with a guess would lock that guess in.
+  // Search and quick actions, on Ctrl or Cmd K: every lead by name, email, shoot or stage, and every page.
+  const [finding, setFinding] = React.useState(false);
+  React.useEffect(() => {
+    const on = (e: KeyboardEvent) => {
+      if (!(e.metaKey || e.ctrlKey) || e.key.toLowerCase() !== "k") return;
+      e.preventDefault();
+      setFinding((v) => !v);
+    };
+    addEventListener("keydown", on);
+    return () => removeEventListener("keydown", on);
+  }, []);
+  const finder = React.useMemo(
+    () => createStaticSource<Found>(
+      [...GO, ...(leads ?? []).filter((l) => !l.trashedAt && l.id).map((l) => ({ id: `lead:${l.id}`, label: l.name || l.email, auxiliaryData: { group: "Leads", words: [l.email, l.kind ?? "", l.stage] } }))],
+      { keywords: (i) => i.auxiliaryData?.words ?? [] },
+    ),
+    [leads],
+  );
   const [mode, setMode] = React.useState<"light" | "dark" | null>(null);
   React.useEffect(() => {
     const read = () => setMode(document.documentElement.dataset.theme === "light" ? "light" : "dark");
@@ -287,7 +350,16 @@ export function LeadsDesk() {
   const newLead = size === "phone"
     ? <IconButton label="New lead" variant="secondary" onClick={() => show("new")} icon={<Icon icon={PlusGlyph} />} />
     : <Button label="New lead" variant="secondary" size="sm" onClick={() => show("new")} icon={<Icon icon={PlusGlyph} />} />;
-  const search = <TextInput value={query} onChange={setQuery} label="Find a lead" isLabelHidden placeholder="Name, email, shoot" size="sm" />;
+  const search = <TextInput value={query} onChange={setQuery} label="Find a lead" isLabelHidden placeholder="Name, email, shoot" size={size === "phone" ? "lg" : "sm"} />;
+  // Open or Put aside, under the title and search on both pages (it was a tab row above the title).
+  const openCount = live.filter((l) => groupOf(l) !== null).length;
+  const asideCount = (leads ?? []).filter((l) => ASIDE.some(([f]) => pass(l, f))).length;
+  const switcher = (
+    <SegmentedControl label="Open or put aside" value={screen === "aside" ? "aside" : "leads"} onChange={(v) => show(v as View)} layout={size === "wide" ? "hug" : "fill"} size={size === "phone" ? "lg" : "md"}>
+      <SegmentedControlItem value="leads" label={`Open ${openCount}`} />
+      <SegmentedControlItem value="aside" label={`Put aside ${asideCount}`} />
+    </SegmentedControl>
+  );
   const view = (
     <SegmentedControl label="View" value={board ? "board" : "list"} onChange={(v) => setBoard(v === "board")} size="sm">
       <SegmentedControlItem value="list" label="List" />
@@ -310,7 +382,8 @@ export function LeadsDesk() {
           {size === "wide" ? (
             <HStack gap={3} vAlign="center">
               <StackItem size="fill">{title}</StackItem>
-              {search}
+              <StackItem>{switcher}</StackItem>
+              {railed ? search : <Button label={`Search ${FIND_KEY()}`} variant="secondary" size="sm" icon={<Icon icon={FindGlyph} />} onClick={() => setFinding(true)} />}
               {view}
               {newLead}
             </HStack>
@@ -318,6 +391,7 @@ export function LeadsDesk() {
             <VStack gap={3}>
               <HStack gap={2} vAlign="center"><StackItem size="fill">{title}</StackItem>{newLead}</HStack>
               <HStack gap={3} vAlign="center"><StackItem size="fill">{search}</StackItem>{size === "mid" ? view : null}</HStack>
+              {switcher}
             </VStack>
           )}
         </LayoutHeader>
@@ -334,7 +408,7 @@ export function LeadsDesk() {
               if (!these.length) return null;
               return (
                 <VStack key={g} gap={1}>
-                  <Eyebrow>{name.toUpperCase()} · {these.length}</Eyebrow>
+                  <HStack gap={2} vAlign="center"><Text type="label" weight="semibold">{name}</Text><Text type="supporting">{these.length}</Text></HStack>
                   <List hasDividers>
                     {these.map((l) => (
                       <ListItem
@@ -343,11 +417,12 @@ export function LeadsDesk() {
                         isSelected={size === "wide" && l.id === sel?.id}
                         onClick={() => (size === "wide" ? setPick(l.id ?? null) : setOpen(l.id ?? null))}
                         startContent={<StatusDot variant={l.unread ? "accent" : "neutral"} label={l.unread ? "New" : "Read"} />}
-                        label={<HStack gap={2} vAlign="center"><StackItem size="fill"><Text type="large" weight="semibold">{l.name}</Text></StackItem><Text type="code" size="xsm" color="secondary">{ago(l.lastAt)}</Text></HStack>}
+                        label={<HStack gap={2} vAlign="center"><StackItem size="fill"><Text type="large" weight="semibold">{l.name}</Text></StackItem><Age l={l} /></HStack>}
                         description={
                           <VStack gap={1}>
-                            <Eyebrow>{[l.kind ? shootTag(l.kind)?.toUpperCase() : null, l.when ? date(l.when) : null, l.stage.toUpperCase()].filter(Boolean).join(" · ")}</Eyebrow>
-                            {l.snippet ? <Text type="body" color="secondary" maxLines={1}>{l.snippet}</Text> : null}
+                            <About>{about([l.kind ? shootTag(l.kind) : null, l.stage, l.when ? date(l.when) : null])}</About>
+                            {/* Their last words stay beside the list on wider screens; a phone row is three lines. */}
+                            {size !== "phone" && l.snippet ? <Text type="body" color="secondary" maxLines={1}>{l.snippet}</Text> : null}
                             <Next l={l} waiting={g === "waiting"} />
                           </VStack>
                         }
@@ -419,7 +494,7 @@ export function LeadsDesk() {
   const pages: Partial<Record<View, React.ReactNode>> = {
     invoices: <InvoicesDesk leads={live} call={call} open={openLead} changed={changed} />,
     licences: <LicencesDesk leads={live} open={openLead} />,
-    aside: <AsideDesk leads={leads ?? []} call={call} open={openLead} done={() => { setOpen(null); load(); }} tab={asideTab} setTab={setAsideTab} />,
+    aside: <AsideDesk leads={leads ?? []} call={call} open={openLead} done={() => { setOpen(null); load(); }} tab={asideTab} setTab={setAsideTab} top={switcher} />,
     stats: <StatsDesk call={call} />,
     traffic: <PanelDesk which="traffic" />,
     seo: <PanelDesk which="seo" />,
@@ -431,7 +506,8 @@ export function LeadsDesk() {
   };
   const page = lead ?? pages[screen] ?? (screen === "money" ? <MoneyDesk /> : screen === "calendar" ? <CalendarDesk leads={live.filter((l) => !l.archivedAt)} size={size} open={(l) => setOpen(l.id ?? null)} tab={calTab} setTab={setCalTab} /> : screen === "new" ? <NewLeadDesk call={call} leads={live} size={size} done={added} open={(l) => setOpen(l.id ?? null)} cancel={() => show("leads")} /> : screen === "today" && leads ? <TodayDesk leads={live} size={size} open={(l) => setOpen(l.id ?? null)} show={() => show("leads")} /> : home);
   const section = lead ? null : sectionOf(screen);
-  const shown = section && section[2].length > 1 ? (
+  // Leads carries its own Open / Put aside switch under the title; the other groups keep the tab row.
+  const shown = section && section[2].length > 1 && section[0] !== "leads" ? (
     <Layout
       height="fill"
       header={<LayoutHeader><TabList value={screen} onChange={(v) => show(v as View)} hasDivider layout="hug">{section[2].map(([label, v]) => <Tab key={v} value={v} label={label} />)}</TabList></LayoutHeader>}
@@ -443,11 +519,30 @@ export function LeadsDesk() {
     <Theme theme={leadsTheme} mode={mode}>
       {/* The site sets mono capitals everywhere; Astryx sets its own type inside. */}
       {/* The site's capitals are unlayered element rules, so they beat Astryx's layers; this beats them inside the desk. */}
-      <style>{":root [data-astryx-desk][data-astryx-desk] *,:root [data-astryx-desk][data-astryx-desk] ::placeholder{text-transform:none}"}</style>
-      <div data-astryx-desk="" style={{ height: "100dvh", textTransform: "none", letterSpacing: "normal" }}>
+      <style>{`:root [data-astryx-desk][data-astryx-desk] *,:root [data-astryx-desk][data-astryx-desk] ::placeholder{text-transform:none}${FROST_ROOM}${GLASS}${WIN_CSS}`}</style>
+      <div data-astryx-desk="" data-bars={size === "phone" ? "" : undefined} data-glass={mode === "dark" ? "" : undefined}
+        // Enter takes the first result when none is marked yet: the palette marks one only after an arrow key.
+        onKeyDownCapture={(e) => {
+          if (e.key !== "Enter" || !finding) return;
+          const rows = e.currentTarget.querySelectorAll<HTMLElement>(".astryx-command-palette-item");
+          if (rows.length && ![...rows].some((r) => r.hasAttribute("data-highlighted") && r.dataset.highlighted !== "false")) rows[0].click();
+        }} style={{ position: "relative", height: "100dvh", textTransform: "none", letterSpacing: "normal" }}>
+        <CommandPalette
+          isOpen={finding}
+          onOpenChange={setFinding}
+          searchSource={finder}
+          label="Search leads and pages"
+          onValueChange={(id) => {
+            setFinding(false);
+            if (id.startsWith("go:")) show(id.slice(3) as View);
+            else setOpen(id.slice(5));
+          }}
+        />
         {size === "phone"
-          ? <Layout height="fill" content={shown} footer={<TabBar view={screen} go={show} />} />
-          : <Layout height="fill" start={<LayoutPanel width={260} padding={0} label="Desk" /* SideNav draws 260 wide by default; a narrower panel clipped the counts. */><Nav needs={needs} view={screen} go={show} /></LayoutPanel>} content={shown} />}
+          ? <><Layout height="fill" content={shown} />{lead ? null /* a lead brings its own action bar */ : <div style={frostBar}><TabBar view={screen} go={show} needs={needs} /></div>}</>
+          : <Layout height="fill" start={railed
+              ? <LayoutPanel width={84} padding={0} hasDivider label="Desk"><Rail needs={needs} view={screen} go={show} /></LayoutPanel>
+              : <LayoutPanel width={260} padding={0} label="Desk" /* SideNav draws 260 wide by default; a narrower panel clipped the counts. */><Nav needs={needs} view={screen} go={show} find={() => setFinding(true)} /></LayoutPanel>} content={shown} />}
       </div>
     </Theme>
   );

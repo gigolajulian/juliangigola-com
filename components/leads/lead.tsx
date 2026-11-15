@@ -15,6 +15,8 @@
 
 import * as React from "react";
 import { Layout, LayoutContent, LayoutHeader, LayoutPanel, HStack, VStack, StackItem, Section } from "@astryxdesign/core/Layout";
+import { Card } from "@astryxdesign/core/Card";
+import { Collapsible } from "@astryxdesign/core/Collapsible";
 import { Button } from "@astryxdesign/core/Button";
 import { Icon } from "@astryxdesign/core/Icon";
 import { Heading, Text } from "@astryxdesign/core/Text";
@@ -46,7 +48,7 @@ import { fill, mailable, TEMPLATES, type Template } from "@/lib/leads/lead-crm";
 import { leadKey, typingIn } from "@/lib/leads/lead-keys";
 import { balance, DEPOSIT, subtotal, usd } from "@/lib/leads/invoice";
 import { ago, at, authed, type Call, DAY, day, errorText, nextStep, now, renew, snoozed } from "@/lib/leads/lead-desk";
-import { compose, ios, kindOf, line, mailto } from "@/components/leads/shared";
+import { compose, frostBar, ios, kindOf, line, mailto } from "@/components/leads/shared";
 import { People } from "@/components/leads/people";
 import { Galleries } from "@/components/leads/galleries";
 
@@ -61,6 +63,7 @@ const glyph = (d: React.ReactNode) =>
   };
 const BackGlyph = glyph(<path d="M19 12H5M11 6l-6 6 6 6" />);
 const ClockGlyph = glyph(<><circle cx="12" cy="12" r="8" /><path d="M12 8v4l3 2" /></>);
+const PlaneGlyph = glyph(<path d="M21 3 10 14M21 3l-7 18-4-7-7-4z" />);
 const MailGlyph = glyph(<><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 7l9 6 9-6" /></>);
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
@@ -71,6 +74,22 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
 function Head({ title, children }: { title: string; children?: React.ReactNode }) {
   return <HStack gap={2} vAlign="center"><StackItem size="fill"><Heading level={2}>{title}</Heading></StackItem>{children}</HStack>;
 }
+
+/** The one filled button. Under a mouse its words turn to what sending it wins, and the plane flies (WIN_CSS in shared.tsx). */
+function Win({ label, win, href, onClick }: { label: string; win: string; href: string; onClick: () => void }) {
+  const [over, setOver] = React.useState(false);
+  return (
+    <span className="jg-win" style={{ display: "inline-flex" }} onPointerEnter={(e) => e.pointerType === "mouse" && setOver(true)} onPointerLeave={() => setOver(false)}>
+      <Button label={over ? win : label} variant="primary" icon={<Icon icon={PlaneGlyph} />} href={href} target="_blank" rel="noreferrer" onClick={onClick} />
+    </span>
+  );
+}
+
+/** A folded section's row: its title and one line of what is inside. */
+function Fold({ title, note }: { title: string; note?: string }) {
+  return <HStack gap={3} vAlign="center"><Heading level={2}>{title}</Heading>{note ? <Text type="body" size="sm" color="secondary" maxLines={1}>{note}</Text> : null}</HStack>;
+}
+const many = (n: number, one: string) => `${n} ${one}${n === 1 ? "" : "s"}`;
 
 /** A mail link: Mail on iOS, a Gmail compose window elsewhere. */
 const mail = (to: string, subject: string, body: string) => (ios() ? mailto(to, subject, body) : compose(to, subject, body));
@@ -154,7 +173,7 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
   const replyHref = mail(l.email, `Re: your ${l.kind ?? "shoot"} inquiry`, `Hi ${first},\n\n`);
   const bookHref = mail(l.email, "Booking a time", `Hi ${first},\n\nYou can pick a time here: https://juliangigola.com/book\n\n`);
   // The one filled button: the nudge or renewal when one is due, else Reply.
-  const lead1 = !mailOk ? null : renew(l) ? { label: "Renew licence", href: mail(l.email, fill(renewT.subject, l), fill(renewT.body, l)) } : nudge && late ? { label: `Send ${nudge.name}`, href: mail(l.email, fill(nudge.subject, l), fill(nudge.body, l)) } : null;
+  const lead1 = !mailOk ? null : renew(l) ? { label: "Renew licence", win: "Keep the licence", href: mail(l.email, fill(renewT.subject, l), fill(renewT.body, l)) } : nudge && late ? { label: `Send ${nudge.name}`, win: "Land the booking", href: mail(l.email, fill(nudge.subject, l), fill(nudge.body, l)) } : null;
 
   const snoozeFor = (d: number) => run(patch({ snoozeUntil: new Date(now() + d * DAY).toISOString() }), "Snoozed.");
   const archive = () => run(patch({ archive: !l.archivedAt }), l.archivedAt ? "Back in the list." : "Archived.");
@@ -205,7 +224,7 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
   const usable = templates.filter((t) => t.id !== "renew" || l.licence);
   const reply = mailOk ? (
     <HStack gap={2} wrap="wrap">
-      {lead1 ? <Button label={lead1.label} variant="primary" href={lead1.href} target="_blank" rel="noreferrer" onClick={() => setAsked(true)} /> : null}
+      {lead1 ? <Win label={lead1.label} win={lead1.win} href={lead1.href} onClick={() => setAsked(true)} /> : null}
       <a ref={replyLink} href={replyHref} target="_blank" rel="noreferrer" hidden aria-hidden="true" tabIndex={-1} onClick={() => setAsked(true)} />
       <Button label="Reply in Gmail" variant={lead1 ? "secondary" : "primary"} icon={<Icon icon={MailGlyph} />} href={replyHref} target="_blank" rel="noreferrer" onClick={() => setAsked(true)} />
       <DropdownMenu
@@ -221,7 +240,7 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
 
   const timeline = (
     <VStack gap={4}>
-      <Heading level={2}>Timeline</Heading>
+      {size === "wide" ? <Heading level={2}>Timeline</Heading> : null}
       {lead ? (
         <VStack gap={4}>
           {history(log, lead.events).reverse().map((e, i) => (
@@ -253,7 +272,30 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
   const owed = invoices.length ? invoices.filter((v) => !isPaid(v)).reduce((n, v) => n + balance(v), 0) : full?.quote !== undefined ? full.quote - (full.deposit ? DEPOSIT : 0) : undefined;
   const paidAt = full?.deposit ? full.events.find((e) => e.kind === "booking")?.at : undefined;
 
+  const [contactOpen, setContactOpen] = React.useState(false);
+  // What to do now, first on the page. On a phone its buttons sit in the bar at the bottom.
+  const nextCard = step || late ? (
+    <Card padding={3}>
+      <HStack gap={4} vAlign="center" wrap="wrap">
+        <StackItem size="fill">
+          <VStack gap={1}>
+            <Text type="supporting" color="secondary">Next step</Text>
+            <Heading level={2}>{step ?? "Reply"}</Heading>
+            {late ? (
+              <HStack gap={2} vAlign="center" wrap="wrap">
+                <Badge label={`${ago(l.stageAt)} waiting`} variant="warning" />
+                <Text type="body" size="sm" color="secondary">{l.stage === "Quoted" ? (quoteNudge(l, now()) === "Mark as lost?" ? "Three nudges, no answer. Mark it lost?" : "The quote has had no answer.") : "The site promises a reply within a day."}</Text>
+              </HStack>
+            ) : null}
+          </VStack>
+        </StackItem>
+        {phoneSize ? null : reply}
+      </HStack>
+    </Card>
+  ) : null;
+
   return (
+    <>
     <Layout
       height="fill"
       defaultHasDividers
@@ -270,17 +312,12 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
             <HStack gap={4} vAlign="end" wrap="wrap">
               <StackItem size="fill">
                 <VStack gap={1}>
-                  <Eyebrow>{[kindOf(l.kind)?.toUpperCase(), l.when ? day(l.when).toUpperCase() : null, full?.source ? `CAME FROM ${full.source.toUpperCase()}` : null].filter(Boolean).join(" · ") || "LEAD"}</Eyebrow>
+                  <Text type="body" size="sm" color="secondary">{[kindOf(l.kind), l.when ? day(l.when) : null, full?.source ? `Came from ${full.source}` : null].filter(Boolean).join(" · ") || "Lead"}</Text>
                   <Heading level={1}>{l.name}</Heading>
                   <Text type="body" color="secondary">{[mailOk ? l.email : null, ig, phone].filter(Boolean).join(" · ")}</Text>
                 </VStack>
               </StackItem>
-              <VStack gap={2} hAlign={phoneSize ? "start" : "end"}>
-                {late ? (
-                  <Text type="code" size="sm" color="accent">{ago(l.stageAt)} waiting. {l.stage === "Quoted" ? (quoteNudge(l, now()) === "Mark as lost?" ? "Three nudges, no answer. Mark it lost?" : "The quote has had no answer.") : "The site promises a reply within a day."}</Text>
-                ) : step ? <Text type="code" size="sm" color="secondary">Next: {step}</Text> : null}
-                {reply}
-              </VStack>
+              {nextCard || phoneSize ? null : reply}
             </HStack>
           </VStack>
         </LayoutHeader>
@@ -288,6 +325,7 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
       content={
         <LayoutContent role="main" label="Lead" padding={4}>
           <VStack gap={4}>
+            {nextCard}
             {note ? <Text type="code" size="sm" color="secondary" role="status">{note}</Text> : null}
             {l.trashedAt ? <Banner status="warning" title="In the trash" description={`Deleted for good in ${Math.max(1, trashDaysLeft(l.trashedAt, now()))} days unless recovered.`} endContent={<Button label="Recover" variant="secondary" size="sm" onClick={() => run(patch({ trash: false }), "Recovered.")} />} /> : null}
             {l.flags?.includes("stuck") ? <Banner status="error" title="A deposit was paid but not booked" description="Refund or rebook it in Stripe, or send the booking link." endContent={full?.deposit ? <Button label="Open Stripe" variant="secondary" size="sm" href={full.deposit} target="_blank" rel="noreferrer" /> : undefined} /> : null}
@@ -326,22 +364,6 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
 
             <Section>
               <VStack gap={3}>
-                <Head title="Session">
-                  {editing === "remind" ? null : full?.remind ? (
-                    <Button label="Clear reminder" variant="ghost" size="sm" onClick={() => run(patch({ remind: null }), "Reminder cleared.")} />
-                  ) : <Button label="Set reminder" variant="ghost" size="sm" isDisabled={!full} onClick={() => setEditing("remind")} />}
-                </Head>
-                <MetadataList>
-                  <MetadataListItem label="Shoot">{kindOf(l.kind) ?? <Text color="secondary">Not set</Text>}</MetadataListItem>
-                  <MetadataListItem label="Date">{l.when ? at(l.when) : <Text color="secondary">Not booked</Text>}</MetadataListItem>
-                  <MetadataListItem label="Reminder">{full?.remind ? `${at(full.remind.at)}${full.remind.text ? `: ${full.remind.text}` : ""}` : <Text color="secondary">None</Text>}</MetadataListItem>
-                </MetadataList>
-                {editing === "remind" ? <RemindForm onSave={(iso, text) => run(patch({ remind: { at: iso, text } }), "Reminder set.")} onCancel={() => setEditing(null)} /> : null}
-              </VStack>
-            </Section>
-
-            <Section>
-              <VStack gap={3}>
                 <Head title="Money">
                   <Button label={full?.quote !== undefined ? "Edit quote" : "Add a quote"} variant="ghost" size="sm" isDisabled={!full} onClick={() => setEditing("quote")} />
                   <Button label="New invoice" variant="secondary" size="sm" isDisabled={!full} onClick={() => setEditing("invoice")} />
@@ -357,7 +379,7 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
                   <MetadataListItem label="Licence">
                     {editing === "licence" ? null : full?.licence ? (
                       <HStack gap={2} vAlign="center"><StackItem size="fill"><Text>{full.licence.use || "Licence"}, ends {endDay(full.licence.end)}</Text></StackItem><Button label="Edit" variant="ghost" size="sm" onClick={() => setEditing("licence")} /></HStack>
-                    ) : <Button label="Add a licence" variant="ghost" size="sm" isDisabled={!full} onClick={() => setEditing("licence")} />}
+                    ) : <HStack gap={2} vAlign="center"><StackItem size="fill"><Text color="secondary">None</Text></StackItem><Button label="Add a licence" variant="ghost" size="sm" isDisabled={!full} onClick={() => setEditing("licence")} /></HStack>}
                   </MetadataListItem>
                 </MetadataList>
                 {editing === "licence" ? <LicenceForm has={full?.licence} onSave={(v) => run(patch({ licence: v }), v ? "Licence saved." : "Licence cleared.")} onCancel={() => setEditing(null)} /> : null}
@@ -372,6 +394,22 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
                   </React.Fragment>
                 ))}</ul> : null}
                 {editing === "invoice" && full ? <InvoiceSheetB l={l} full={full} patch={patch} done={() => setEditing(null)} /> : null}
+              </VStack>
+            </Section>
+
+            <Section>
+              <VStack gap={3}>
+                <Head title="Session">
+                  {editing === "remind" ? null : full?.remind ? (
+                    <Button label="Clear reminder" variant="ghost" size="sm" onClick={() => run(patch({ remind: null }), "Reminder cleared.")} />
+                  ) : <Button label="Set reminder" variant="ghost" size="sm" isDisabled={!full} onClick={() => setEditing("remind")} />}
+                </Head>
+                <MetadataList>
+                  <MetadataListItem label="Shoot">{kindOf(l.kind) ?? <Text color="secondary">Not set</Text>}</MetadataListItem>
+                  <MetadataListItem label="Date">{l.when ? at(l.when) : <Text color="secondary">Not booked</Text>}</MetadataListItem>
+                  <MetadataListItem label="Reminder">{full?.remind ? `${at(full.remind.at)}${full.remind.text ? `: ${full.remind.text}` : ""}` : <Text color="secondary">None</Text>}</MetadataListItem>
+                </MetadataList>
+                {editing === "remind" ? <RemindForm onSave={(iso, text) => run(patch({ remind: { at: iso, text } }), "Reminder set.")} onCancel={() => setEditing(null)} /> : null}
               </VStack>
             </Section>
 
@@ -407,8 +445,9 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
             ) : null}
 
             <Section>
+              <Collapsible isOpen={contactOpen || editing === "contact"} onOpenChange={setContactOpen} trigger={<Fold title="Contact" note={[full?.company, full?.source].filter(Boolean).join(" · ")} />}>
               <VStack gap={3}>
-                <Head title="Contact">{editing === "contact" ? null : <Button label="Edit details" variant="ghost" size="sm" onClick={() => setEditing("contact")} />}</Head>
+                <HStack hAlign="end">{editing === "contact" ? null : <Button label="Edit details" variant="ghost" size="sm" onClick={() => setEditing("contact")} />}</HStack>
                 {editing === "contact" ? (
                   <ContactForm l={l} full={full} onSave={(d) => run(patch({ details: d }), "Saved.")} onCancel={() => setEditing(null)} />
                 ) : (
@@ -421,6 +460,7 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
                   </MetadataList>
                 )}
               </VStack>
+              </Collapsible>
             </Section>
 
             <Section>
@@ -428,15 +468,19 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
             </Section>
 
             <Section>
-              <Notes key={full ? "loaded" : "loading"} value={full?.notes ?? ""} onSave={(notes) => run(patch({ notes }), "Notes saved.")} />
+              <Collapsible key={full ? "loaded" : "loading"} defaultIsOpen={!!full?.notes} trigger={<Fold title="Notes" note={full?.notes ? "1 note" : "None"} />}>
+                <Notes key={full ? "loaded" : "loading"} value={full?.notes ?? ""} onSave={(notes) => run(patch({ notes }), "Notes saved.")} />
+              </Collapsible>
             </Section>
 
-            {size === "wide" ? null : <Section>{timeline}</Section>}
+            {size === "wide" ? null : <Section><Collapsible defaultIsOpen={false} trigger={<Fold title="Timeline" note={lead ? many(history(log, lead.events).length, "event") : ""} />}>{timeline}</Collapsible></Section>}
           </VStack>
         </LayoutContent>
       }
       end={size === "wide" ? <LayoutPanel width={360} hasDivider label="Timeline">{timeline}</LayoutPanel> : undefined}
     />
+    {phoneSize && reply ? <div style={{ ...frostBar, padding: 12 }}>{reply}</div> : null}
+    </>
   );
 }
 
@@ -499,7 +543,7 @@ function ContactForm({ l, full, onSave, onCancel }: { l: LeadSummary; full: Lead
 /** Saved when he leaves the box, as on the classic desk. */
 function Notes({ value, onSave }: { value: string; onSave: (v: string) => void }) {
   const [v, setV] = React.useState(value);
-  return <TextArea label="Notes" description="Only you see these. Saved when you leave the box." value={v} onChange={setV} onBlur={() => v !== value && onSave(v)} rows={5} placeholder="Anything worth remembering" />;
+  return <TextArea label="Notes" isLabelHidden description="Only you see these. Saved when you leave the box." value={v} onChange={setV} onBlur={() => v !== value && onSave(v)} rows={5} placeholder="Anything worth remembering" />;
 }
 
 function Merge({ others, onMerge, onClose }: { others: LeadSummary[]; onMerge: (id: string) => void; onClose: () => void }) {

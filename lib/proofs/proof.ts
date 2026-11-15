@@ -94,7 +94,21 @@ export type Proof = {
   deliveredAt?: string;
   /** The client's first download, one file or the zip: the lead moves to Delivered. Julian's own and test addresses do not count. */
   firstDownloadAt?: string;
+  /** Mails to hello@ (Julian 2026-11-15, after Format): "each" mails every open, send and download as it happens; "daily" one
+      summary a day; "off" nothing, the Selects in alert included. Unset is the old way: only Selects in. */
+  notify?: Notify;
+  /** Offline (Julian 2026-11-15): the proof, the delivery, every frame and download answer "offline" at once. Unset is online. */
+  offline?: boolean;
+  /** An optional password on the gate: PBKDF2 of it, never the password. Only `hasPass` leaves the server (`forDesk`). */
+  pass?: { salt: string; hash: string };
+  /** A line under the gate's heading, the client's name or the shoot date (Julian 2026-11-15). Unset: none. */
+  subhead?: string;
+  /** File names on the thumbnails, proof and delivery. Unset is off: Lightroom names stay Julian's unless he turns this on. */
+  labels?: boolean;
 };
+
+export const NOTIFY = ["each", "daily", "off"] as const;
+export type Notify = (typeof NOTIFY)[number];
 
 export type CardCrop = { id: string; x: number; y: number; w: number };
 
@@ -285,11 +299,12 @@ export function owed(p: Pick<Proof, "selects" | "included" | "price" | "paid" | 
   return { n, balance: bal, cents: bal + n * p.price * 100 };
 }
 
-export const isOpen = (p: Pick<Proof, "closesAt">, now = Date.now()) => !p.closesAt || Date.parse(p.closesAt) > now;
+export const isOpen = (p: Pick<Proof, "closesAt" | "offline">, now = Date.now()) => !p.offline && (!p.closesAt || Date.parse(p.closesAt) > now);
 
 /** The gallery's cover for link previews: its first frame, the site's rule for every set. Only when watermarked and open, so a preview never carries a clean file. */
-export const coverFrame = (p: Pick<Proof, "frames" | "watermark" | "closesAt" | "card">): ProofFrame | null =>
-  (p.watermark && isOpen(p) && (p.frames.find((f) => f.id === p.card?.id) ?? p.frames[0])) || null;
+export const coverFrame = (p: Pick<Proof, "frames" | "watermark" | "closesAt" | "card" | "offline" | "pass">): ProofFrame | null =>
+  // A password gallery shows nothing to a link preview, which never has the cookie.
+  (p.watermark && !p.pass && isOpen(p) && (p.frames.find((f) => f.id === p.card?.id) ?? p.frames[0])) || null;
 
 export const closesAt = (days: number, from = Date.now()) => new Date(from + days * 864e5).toISOString();
 
@@ -310,7 +325,10 @@ export function lookStarts(frames: { t?: number }[], gap = 600): number[] {
 export function publicView(p: Proof) {
   return {
     // No file name: Lightroom names are Julian's, the client sees proof numbers.
-    frames: p.frames.map(({ id, w, h, t }) => (t ? { id, w, h, t } : { id, w, h })),
+    // With labels on (his choice per gallery), the name goes too.
+    frames: p.frames.map(({ id, w, h, t, file }) => ({ id, w, h, ...(t ? { t } : {}), ...(p.labels ? { file } : {}) })),
+    subhead: p.subhead ?? null,
+    labels: !!p.labels,
     // Picks belong to whoever typed their email; only the sent ones are shared.
     selects: p.submittedAt ? p.selects : [],
     included: p.included,
@@ -331,7 +349,7 @@ export function deliveryView(p: Proof) {
   const finals = shotOrder(p.finals ?? []);
   // The gate's photo: Julian's preview pick when it is one of the finals, else the first final.
   const cover = finals.find((f) => f.id === p.card?.id)?.id ?? finals[0]?.id ?? null;
-  return { finals: finals.map(({ id, file, w, h, bytes, crc }) => ({ id, file, w, h, bytes, v: crc })), cover, closesAt: p.closesAt ?? null };
+  return { finals: finals.map(({ id, file, w, h, bytes, crc }) => ({ id, file, w, h, bytes, v: crc })), cover, closesAt: p.closesAt ?? null, subhead: p.subhead ?? null, labels: !!p.labels };
 }
 export type PublicDelivery = ReturnType<typeof deliveryView>;
 
@@ -354,7 +372,7 @@ export function cleanNotes(given: unknown, selects: string[]): Record<string, st
 }
 
 /** Settings Lightroom or /admin may set. Numbers are clamped so a typo cannot price a frame at $15,000. */
-type Settings = Partial<Pick<Proof, "name" | "email" | "note" | "included" | "price" | "days" | "balance" | "watermark" | "card">>;
+type Settings = Partial<Pick<Proof, "name" | "email" | "note" | "included" | "price" | "days" | "balance" | "watermark" | "card" | "notify" | "offline" | "subhead" | "labels">>;
 export function cleanSettings(given: Record<string, unknown>): Settings {
   const out: Settings = {};
   const int = (v: unknown, lo: number, hi: number) => (typeof v === "number" || typeof v === "string") && Number.isFinite(Number(v)) ? Math.min(hi, Math.max(lo, Math.round(Number(v)))) : undefined;
@@ -374,8 +392,63 @@ export function cleanSettings(given: Record<string, unknown>): Settings {
     const c = given.card as Record<string, unknown>, x = int(c.x, 0, 20000), y = int(c.y, 0, 20000), w = int(c.w, 50, 20000);
     if (isFrameId(c.id) && x !== undefined && y !== undefined && w !== undefined) out.card = { id: c.id, x, y, w };
   }
+  // "selects" (or null) goes back to the old way: Selects in only.
+  if (given.notify === "selects" || given.notify === null) out.notify = undefined;
+  else if (NOTIFY.includes(given.notify as Notify)) out.notify = given.notify as Notify;
+  if (typeof given.subhead === "string") out.subhead = given.subhead.replace(/\s+/g, " ").trim().slice(0, 80) || undefined;
+  if (typeof given.labels === "boolean") out.labels = given.labels || undefined;
+  if (typeof given.offline === "boolean") out.offline = given.offline || undefined;
   if (typeof given.watermark === "boolean" || given.watermark === "true" || given.watermark === "false") out.watermark = given.watermark === true || given.watermark === "true";
   return out;
+}
+
+/* ── the gate's password ──────────────────────────────────────────
+   PBKDF2-SHA256, 100,000 rounds (the most Workers allows) and a random salt. A right password sets an HttpOnly
+   cookie: an HMAC of the gallery and its hash under LEADS_KEY, so a new password, or none, ends every old cookie. */
+const b64 = (b: ArrayBuffer | Uint8Array) => btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+const unb64 = (s: string): Uint8Array<ArrayBuffer> => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/")), (c) => c.charCodeAt(0));
+const enc = (s: string) => new TextEncoder().encode(s);
+async function pbkdf2(pw: string, salt: Uint8Array<ArrayBuffer>) {
+  const k = await crypto.subtle.importKey("raw", enc(pw), "PBKDF2", false, ["deriveBits"]);
+  return new Uint8Array(await crypto.subtle.deriveBits({ name: "PBKDF2", hash: "SHA-256", salt, iterations: 100_000 }, k, 256));
+}
+export async function hashPass(pw: string): Promise<NonNullable<Proof["pass"]>> {
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  return { salt: b64(salt), hash: b64(await pbkdf2(pw, salt)) };
+}
+export async function checkPass(pass: NonNullable<Proof["pass"]>, pw: string): Promise<boolean> {
+  const a = await pbkdf2(pw, unb64(pass.salt)), b = unb64(pass.hash);
+  let d = a.length ^ b.length;
+  for (let i = 0; i < a.length; i++) d |= a[i] ^ (b[i] ?? 0);
+  return d === 0;
+}
+export const passCookie = (p: Pick<Proof, "token" | "link">) => `gp_${publicId(p)}`;
+const hmacKey = (secret: string) => crypto.subtle.importKey("raw", enc(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign", "verify"]);
+const passMsg = (p: Pick<Proof, "token" | "pass">) => enc(`${p.token}:${p.pass?.hash}`);
+export const passValue = async (p: Pick<Proof, "token" | "pass">, secret: string) => b64(await crypto.subtle.sign("HMAC", await hmacKey(secret), passMsg(p)));
+/** No password, or the request's cookie (the raw Cookie header) carries this gallery's current one. */
+export async function passOk(p: Pick<Proof, "token" | "link" | "pass">, cookie: string | null | undefined, secret: string | undefined): Promise<boolean> {
+  if (!p.pass) return true;
+  const name = passCookie(p);
+  const v = cookie?.split(/;\s*/).find((c) => c.startsWith(`${name}=`))?.slice(name.length + 1);
+  if (!v || !secret) return false;
+  try {
+    return await crypto.subtle.verify("HMAC", await hmacKey(secret), unb64(v), passMsg(p));
+  } catch {
+    return false;
+  }
+}
+/** Why a client cannot see a gallery right now, or null when they can. Closed is the clock (or a missing gallery). */
+export async function shut(p: Proof | null, cookie: string | null | undefined, secret: string | undefined): Promise<"closed" | "offline" | "locked" | null> {
+  if (!p) return "closed";
+  if (p.offline) return "offline";
+  if (!isOpen(p)) return "closed";
+  return (await passOk(p, cookie, secret)) ? null : "locked";
+}
+/** A gallery as the desk gets it: never the password hash. */
+export function forDesk<T extends Proof>(p: T): Omit<T, "pass"> & { hasPass: boolean } {
+  const { pass, ...rest } = p;
+  return { ...rest, hasPass: !!pass };
 }
 
 type Seal = { seal(v: unknown): Promise<string>; open<T>(s: string): Promise<T> };

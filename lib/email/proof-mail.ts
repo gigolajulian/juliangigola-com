@@ -8,7 +8,7 @@
 import { TZ } from "@/lib/booking/booking-rules";
 import { NAME_INK, NAME_W } from "@/lib/email/email-logo";
 import { SIG_DARK, SIG_HTML, SIG_TEXT } from "@/lib/email/email-signature";
-import { extras, publicId, shotOrder, type Proof } from "@/lib/proofs/proof";
+import { extras, isTestEmail, publicId, shotOrder, type Proof, type ViewerEvent } from "@/lib/proofs/proof";
 
 const FROM = { name: "Julian Gigola", email: "book@juliangigola.com" };
 const REPLY_TO = "hello@juliangigola.com";
@@ -27,13 +27,16 @@ const png = (id: string, b64: string): Inline => ({ content: Uint8Array.from(ato
 const logos = () => [png("name-ink", NAME_INK), png("name-w", NAME_W)];
 const DARK = `@media (prefers-color-scheme: dark){body,.page{background:#0b0a09!important}.fg{color:#f1f0ed!important}.mu{color:#92908d!important}.ac{color:#50b7b7!important}.rule{border-color:rgba(255,255,255,0.11)!important}.cta{background:#f1f0ed!important;color:#0b0a09!important}.ink-l{display:none!important}.ink-d{display:block!important}${SIG_DARK}}`;
 
+// Spacers after the preheader, so inbox previews stop there instead of running into the body text.
+const PAD = "&#847;&zwnj;&nbsp;".repeat(80);
+
 function page(title: string, preheader: string, body: string) {
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark"><meta name="supported-color-schemes" content="light dark">
 <title>${esc(title)}</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>body{margin:0;padding:0;background:${C.bg}}.mono{font-family:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace}.ink-d{display:none}${DARK}</style>
 </head><body>
-<div style="display:none;max-height:0;overflow:hidden">${esc(preheader)}</div>
+<div style="display:none;max-height:0;overflow:hidden">${esc(preheader)}${PAD}</div>
 <table class="page" role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${C.bg}"><tr><td align="center" style="padding:40px 16px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px" class="mono">
 <tr><td style="padding-bottom:36px"><img class="ink-l" src="cid:name-ink" width="189" height="34" alt="Julian Gigola" style="display:block;border:0"><img class="ink-d" src="cid:name-w" width="189" height="34" alt="Julian Gigola" style="border:0"></td></tr>
@@ -149,6 +152,55 @@ export function alertLines(p: Proof): { subject: string; lines: string[] } {
   };
 }
 
+/** What a client did, as it happens, for a gallery on "each" (Julian 2026-11-15). Open, send and download only. */
+export function actionAlert(p: Proof, who: string, kind: "open" | "download", id?: string): { subject: string; lines: string[] } {
+  const name = p.viewers?.[who.toLowerCase()]?.name;
+  const by = name ? `${name} (${who})` : who;
+  const file = id === "all" ? "all photos as one zip" : p.finals?.find((f) => f.id === id)?.file ?? id ?? "a photo";
+  const what = kind === "open" ? `opened ${p.deliveredAt ? "the delivery" : "the proofs"}` : `downloaded ${file}`;
+  return { subject: `${kind === "open" ? "Opened" : "Downloaded"}: ${p.name}`, lines: [`${by} ${what} of ${p.name}.`, "", (p.deliveredAt ? deliveryUrl : proofUrl)(publicId(p))] };
+}
+
+const COUNTED = { open: "opened", pick: "picked", send: "sent selects", download: "downloaded" } as const;
+type Counted = keyof typeof COUNTED;
+
+/**
+ * The daily summary for galleries on "daily": who opened, picked, sent and downloaded between `since` and `until`.
+ * Null when nothing happened, so a quiet day sends nothing. Test addresses (QA) never count.
+ */
+export function digestMail(proofs: Proof[], since: string, until: string): { subject: string; lines: string[] } | null {
+  const out: string[] = [];
+  let total = 0;
+  for (const p of proofs) {
+    if (p.notify !== "daily") continue;
+    const rows: string[] = [];
+    for (const [who, v] of Object.entries(p.viewers ?? {})) {
+      if (isTestEmail(who)) continue;
+      const n: Partial<Record<Counted, number>> = {};
+      for (const e of v.events) if (e.at > since && e.at <= until && e.kind in COUNTED) n[e.kind as Counted] = (n[e.kind as Counted] ?? 0) + 1;
+      const said = (Object.keys(COUNTED) as Counted[]).filter((k) => n[k]).map((k) => (k === "send" ? COUNTED[k] : `${COUNTED[k]} ${n[k]}${k === "open" ? (n[k] === 1 ? " time" : " times") : ""}`));
+      if (said.length) rows.push(`  ${v.name ? `${v.name} (${who})` : who}: ${said.join(", ")}`);
+    }
+    if (!rows.length) continue;
+    total += rows.length;
+    out.push(`${p.name}`, ...rows, `  ${(p.deliveredAt ? deliveryUrl : proofUrl)(publicId(p))}`, "");
+  }
+  if (!out.length) return null;
+  return { subject: `Galleries today: ${total} ${total === 1 ? "visitor" : "visitors"}`, lines: ["Since yesterday's summary:", "", ...out.slice(0, -1)] };
+}
+
+/** Whether this open or download is worth a mail: not a test address, and not the same thing again within `gap` minutes. */
+export function worthMail(events: ViewerEvent[], kind: "open" | "download", at: string, gap: number): boolean {
+  const before = events.filter((e) => e.kind === kind && e.at < at).at(-1);
+  return !before || Date.parse(at) - Date.parse(before.at) > gap * 60_000;
+}
+
+/** Julian's own subject for a proof or delivery mail (Julian 2026-11-15): one line, control characters out, 150 at most; empty keeps the default. */
+export function subjectOr(given: unknown, fallback: string): string {
+  const v = typeof given === "string" ? given.replace(/[\x00-\x1f\x7f]+/g, " ").replace(/\s+/g, " ").trim().slice(0, 150) : "";
+  return v || fallback;
+}
+
 /** `cc`: the other people on the lead with "copy on gallery mail" ticked (`copiesFor` in lib/leads/lead-store). */
 export async function sendClient(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefined, to: string, m: { subject: string; html: string; text: string; attachments: Inline[] }, cc: string[] = []): Promise<boolean> {
   if (!mailer) return false;
@@ -202,7 +254,7 @@ export function signedMail(c: ContractMailIn) {
   const lead = "Thanks for signing. Your copy is below and on the same link any time.";
   const html = page(
     "Contract signed",
-    `Signed by ${s.name}.`,
+    "Thanks for signing. Your copy is inside.",
     `<tr><td class="mono ac" style="${label};padding-bottom:10px">Signed</td></tr>
 <tr><td class="mono fg" style="font-size:22px;line-height:1.3;color:${C.fg};padding-bottom:16px">Contract signed.</td></tr>
 <tr><td class="mono mu" style="font-size:13px;line-height:1.65;color:${C.mu};padding-bottom:30px">${esc(lead)} <a href="${contractLink(c.id)}" style="color:inherit">${contractLink(c.id)}</a></td></tr>
