@@ -1,5 +1,14 @@
 import { shiftScroll } from "@/components/v3/smooth-scroll";
-import { clamp, type Driver } from "./engine";
+import { clamp, smooth, type Driver } from "./engine";
+
+/* The held row's travel: it eases away from its first item and into its last (0.4 of the scroll's speed at the two ends). */
+const ease = (p: number) => p - (0.6 * Math.sin(2 * Math.PI * p)) / (2 * Math.PI);
+/** the scroll share at which `ease` reaches v (it only rises, so halving finds it) */
+const unease = (v: number) => {
+  let a = 0, b = 1;
+  for (let k = 0; k < 20; k++) if (ease((a + b) / 2) < v) a = (a + b) / 2; else b = (a + b) / 2;
+  return (a + b) / 2;
+};
 
 /* Cover art (spec 3.7): on the desktop structure the page scroll walks the row
    sideways. Motion (spec 3.8): a vertical stack there, see films() below.
@@ -36,7 +45,8 @@ function heldRow(name: string, covers: boolean): Driver {
       /* Record rule: out at the stage centre, back in the sleeve `fall` px away. */
       const discs = (x: number, fall: number) => {
         for (let i = 0; i < n; i++) {
-          const v = Math.round(clamp(1 - Math.abs(c0 + i * step - x - mid) / fall) * 1000) / 1000;
+          // eased: the record leaves and returns slowly at both ends instead of at one speed (Julian, 2026-11-14)
+          const v = Math.round(smooth(clamp(1 - Math.abs(c0 + i * step - x - mid) / fall)) * 1000) / 1000;
           if (v !== o[i]) items[i].style.setProperty("--o", String((o[i] = v)));
         }
       };
@@ -46,6 +56,7 @@ function heldRow(name: string, covers: boolean): Driver {
       };
 
       frame = (p) => {
+        p = ease(p);
         const i = Math.round(p * (n - 1)), x = p * (n - 1) * step;
         if (i !== cur) {
           // The row's own scroll steps item by item so held-row.tsx names the current one; the transform carries the rest.
@@ -100,7 +111,7 @@ function heldRow(name: string, covers: boolean): Driver {
         const t = e.target as Element, i = items.indexOf(t.closest<HTMLElement>(".mt-item")!);
         if (!ctx.held || i < 0 || !t.matches(":focus-visible")) return;
         row.scrollLeft = base;
-        shiftScroll(top() + (i / (n - 1)) * range - scrollY);
+        shiftScroll(top() + unease(i / (n - 1)) * range - scrollY);
       }, on);
 
       row.addEventListener("scroll", loose, { passive: true, signal: ac.signal });

@@ -75,6 +75,7 @@ export const commissionsDrivers: Driver[] = [
         track.style.transform = "";
         el.dataset.cur = "0";
         [count, name, meta].forEach((n, i) => put(n, first[i]));
+        s.head?.removeAttribute("data-out");
         s.track = s.head = s.logos = null;
         s.o = 1;
       };
@@ -84,13 +85,9 @@ export const commissionsDrivers: Driver[] = [
       const logos = (s.logos ??= el.querySelector<HTMLElement>(".mt-logos"));
       if (head && logos && (ctx.dy || ctx.fresh)) {
         // gone while the logos are still 40% of a screen below it
-        const o = ctx.held ? clamp((logos.getBoundingClientRect().top - head.getBoundingClientRect().bottom - ctx.vh * 0.4) / (ctx.vh * 0.25)) : 1;
-        if (o !== s.o) {
-          s.o = o;
-          head.style.opacity = o < 1 ? o.toFixed(3) : "";
-          head.style.transform = o < 1 ? `translate3d(0,${((o - 1) * 28).toFixed(1)}px,0)` : "";
-          head.style.visibility = o ? "" : "hidden";
-        }
+        // on or off, not a scroll-tied fade (Julian, 2026-11-14): commissions.css times the fade
+        const o = !ctx.held || logos.getBoundingClientRect().top - head.getBoundingClientRect().bottom > ctx.vh * 0.5 ? 1 : 0;
+        if (o !== s.o) head.toggleAttribute("data-out", !(s.o = o));
       }
       if (!s.seen || !s.w || !s.track) return;
       const max = ctx.held ? MAX : MAX_PHONE;
