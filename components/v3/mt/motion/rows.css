@@ -18,9 +18,9 @@ html[data-mt-held] .mt-covers .mt-row{margin-top:0;padding-top:calc(60 * var(--u
 html[data-mt-held] .mt-covers{--cu:max(var(--u),min(calc((100svh - 450 * var(--u)) / 450),calc(100vw / 800),1.6px));--cm:max(0px,calc((100svh - 450 * var(--u) - 450 * var(--cu)) / 2))}
 html[data-mt-held] .mt-covers .mt-row{--u:var(--cu);--pl:calc(50vw - 160 * var(--u));margin-top:var(--cm)}
 }
-/* "See all covers" sits at the bottom, just left of the counter (Julian, 2026-11-15): the head stops being its box, the stage is */
+/* "See all covers" sits at the bottom right; the counter moved to the bottom left (Julian, 2026-11-15): the head stops being its box, the stage is */
 html[data-mt-held] .mt-covers .mt-rowhead{position:static}
-html[data-mt-held] .mt-covers .mt-rowhead .btn{top:auto;right:calc(var(--fx) + 196 * var(--u));bottom:calc(48 * var(--u))}
+html[data-mt-held] .mt-covers .mt-rowhead .btn{top:auto;right:calc(var(--fx) + 36 * var(--u));bottom:calc(48 * var(--u))}
 /* The record sticking out must not count as hovering its sleeve. */
 html[data-mt-held] .mt-sleeve .disc{pointer-events:none}
 
