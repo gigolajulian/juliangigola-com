@@ -1,6 +1,6 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { sealer } from "@/lib/leads/lead-crypto";
-import { readContract, sign, writeContract } from "@/lib/contracts/contract";
+import { copyName, readContract, sign, signedCopy, writeContract } from "@/lib/contracts/contract";
 import { contractStep } from "@/lib/contracts/contract-lead";
 import { sendClient, signedMail } from "@/lib/email/proof-mail";
 import { alertHello } from "@/lib/hello-mail";
@@ -30,7 +30,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const sig = done.signed!;
   await contractStep(env.INBOX, s, done.lead, "Signed", { at, kind: "contract", ref: `signed:${done.id}`, note: sig.name }, env.NOTION_TOKEN);
   const [mailed] = await Promise.all([
-    sendClient(env.CLIENT_EMAIL, sig.email, signedMail(done)),
+    sendClient(env.CLIENT_EMAIL, sig.email, signedMail(done, { html: signedCopy(done), filename: copyName(done) })),
     alertHello(env.EMAIL, `Signed: ${done.to.name}`, [`${sig.name} (${sig.email}) signed the contract for ${done.to.name}.`, `SHA-256 ${sig.hash}`, "", "Leads: https://juliangigola.com/admin/leads"], { name: sig.name, email: sig.email }),
   ]);
   return json({ signed: { name: sig.name, at: sig.at, hash: sig.hash, mark: sig.mark ?? null }, mailed });
