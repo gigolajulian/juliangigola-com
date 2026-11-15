@@ -75,7 +75,7 @@ export function MtByQuote({ stills, reply, onTouch }: { stills: Record<string, s
           <p className="lbl mute mt-label">By quote</p>
           <h2 className="mt-q-h">Have something in mind?</h2>
           <p className="lbl mt-by">
-            <span className="mute">Commissioned by</span> <span className="nm" aria-live="off">{client.name}</span>
+            <span className="mute">Commissioned by</span> <span className="nm">{client.name}</span>
           </p>
           <div className="mt-qos">
             {QUOTE_OPTS.slice(0, 3).map((x, i) => (

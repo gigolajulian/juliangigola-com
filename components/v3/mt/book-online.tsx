@@ -143,7 +143,7 @@ export function MtBookOnline({ open, onOpen, onClose, quote, onOwn }: { open: Bo
             </>
           )}
         </div>
-        <figure className="mt-photo" aria-live="off">
+        <figure className="mt-photo">
           {BOOK_ROWS.map((x, i) => <RowPhoto key={x.key} r={x} on={q === null && i === at} sizes="(max-width: 1023px) 100vw, 42vw" />)}
           {QUOTE_OPTS.map((x, i) => <Image key={x.key} src={x.photo} alt={`${x.name} sample`} fill sizes="42vw" className={q === i ? "qp on" : "qp"} />)}
         </figure>
