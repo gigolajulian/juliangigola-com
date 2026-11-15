@@ -1050,12 +1050,12 @@ export function V3Work({
       </button>
       <button type="button" aria-pressed={canvas} aria-label="Canvas view" title="Canvas view" onClick={() => go("canvas")}>
           <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
-            <rect x="1.5" y="3" width="4" height="5" />
-            <rect x="6.5" y="1" width="4" height="5" />
-            <rect x="11.5" y="4" width="3" height="5" />
-            <rect x="1.5" y="9.5" width="4" height="5" />
-            <rect x="6.5" y="7.5" width="4" height="5" />
-            <rect x="11.5" y="10.5" width="3" height="4" />
+            {/* Two columns out of step, their ends faded: the field runs past the edge (Julian's pick, 2026-11-14). */}
+            <rect x="1.5" y="1" width="5.5" height="6.5" />
+            <rect x="1.5" y="9" width="5.5" height="6" opacity=".55" />
+            <rect x="9" y="1" width="5.5" height="1" opacity=".55" />
+            <rect x="9" y="3.5" width="5.5" height="6.5" />
+            <rect x="9" y="11.5" width="5.5" height="3.5" opacity=".55" />
           </svg>
       </button>
       {[VIEWS[1], VIEWS[0]].map(([v, label, icon]) => (
