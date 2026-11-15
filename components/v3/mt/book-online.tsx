@@ -78,6 +78,7 @@ export function MtBookOnline({ open, onOpen, onClose, quote, onOwn }: { open: Bo
     const step = (e: Event) => !isOpen.current && setOn(Math.min(BOOK_ROWS.length - 1, (e as CustomEvent<number>).detail));
     el.addEventListener("mt-step", step);
     return () => el.removeEventListener("mt-step", step);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- one listener for the page's life; setOn only wraps a state setter
   }, []);
 
   // opening or closing puts the block back at the top of the screen and moves focus with it

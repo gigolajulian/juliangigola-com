@@ -49,6 +49,7 @@ export function MtByQuote({ stills, reply, onTouch }: { stills: Record<string, s
     };
     el.addEventListener("mt-step", on);
     return () => el.removeEventListener("mt-step", on);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- one listener for the page's life; pick only calls state setters
   }, []);
   const rest = () => {
     if (step.current < 0) setOpt(false);
