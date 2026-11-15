@@ -49,7 +49,7 @@ ${body}
 
 const rows = (r: [string, string][]) =>
   `<tr><td class="rule" style="${C.rule}"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="mono" style="font-size:13px;line-height:1.5">${r
-    .map(([k, v], i) => `<tr><td class="mu rule" style="color:${C.mu};padding:12px 0;width:38%${i ? `;${C.rule}` : ""}">${k}</td><td class="fg rule" style="color:${C.fg};padding:12px 0${i ? `;${C.rule}` : ""}">${esc(v)}</td></tr>`)
+    .map(([k, v], i) => `<tr><td class="mu rule" style="color:${C.mu};padding:12px 16px 12px 0;width:38%;white-space:nowrap${i ? `;${C.rule}` : ""}">${k}</td><td class="fg rule" style="color:${C.fg};padding:12px 0;overflow-wrap:anywhere;word-break:break-word${i ? `;${C.rule}` : ""}">${esc(v)}</td></tr>`)
     .join("")}</table></td></tr>`;
 
 /** The "Your proofs are ready" mail. `strip` is up to four frames sent inline. */
@@ -284,7 +284,7 @@ export function signedMail(c: ContractMailIn, copy?: { html: string; filename: s
     "Thanks for signing. Your copy is inside.",
     `<tr><td class="mono ac" style="${label};padding-bottom:10px">Signed</td></tr>
 <tr><td class="mono fg" style="font-size:22px;line-height:1.3;color:${C.fg};padding-bottom:16px">Contract signed.</td></tr>
-<tr><td class="mono mu" style="font-size:13px;line-height:1.65;color:${C.mu};padding-bottom:30px">${esc(lead)} <a href="${contractLink(c.id)}" style="color:inherit">${contractLink(c.id)}</a></td></tr>
+<tr><td class="mono mu" style="font-size:13px;line-height:1.65;color:${C.mu};padding-bottom:30px">${esc(lead)} <a href="${contractLink(c.id)}" style="color:inherit;word-break:break-all">${contractLink(c.id)}</a></td></tr>
 ${rows(record)}
 <tr><td class="mono fg rule" style="${C.rule};font-size:12px;line-height:1.7;color:${C.fg};padding-top:18px;white-space:pre-wrap">${esc(c.text)}</td></tr>`,
   );
