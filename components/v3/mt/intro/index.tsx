@@ -358,9 +358,17 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
     const want = pool.current.slice(16, 46).map((f) => loader({ src: f.src, width: 640 }));
     let leadIn = false;
     const go = () => leadIn && ready.length >= Math.min(18, want.length) && run();
+    /* One the resizer refuses (a blocker eats `/cdn-cgi/`, a preview has no resizer) is asked for
+       again as its plain file, as `image-fallback.tsx` does for the page's own pictures: these are
+       never in the page, so their errors never reach it. The tile paints whichever address loaded. */
     want.forEach((src) => {
       const im = new Image();
-      im.onload = () => (ready.push(src), go());
+      im.onload = () => (ready.push(im.src), go());
+      im.onerror = () => {
+        im.onerror = null; // once: a file that is truly missing stays out
+        const rest = /[/]cdn-cgi[/]image[/][^/]+[/](.+)$/.exec(src)?.[1];
+        if (rest) im.src = rest.startsWith("http") ? rest : `/${rest}`;
+      };
       im.src = src;
     });
     // start once the first wall frames and enough extras can paint, or after 1500ms regardless
