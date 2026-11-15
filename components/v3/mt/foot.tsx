@@ -12,11 +12,11 @@ import { scrollTop } from "@/components/v3/smooth-scroll";
    scrim. Motion lives in motion/foot.ts. */
 const PHRASE = "Contact me";
 const STILL = "/work/diesel/03.jpg";
-const EVERY = 2000;
+const EVERY = 5000;
 
 /** The still behind the footer and the one after it. The list is one landscape
     frame per project from /canvas.json (a tall frame crops badly in a wide
-    footer), fetched when the still first shows; it changes every 2s while it
+    footer), fetched when the still first shows; it changes every 5s while it
     is on screen. Phones hide the still, so nothing is fetched there. */
 function useStills(ref: React.RefObject<HTMLElement | null>) {
   const [list, setList] = React.useState([STILL]);
