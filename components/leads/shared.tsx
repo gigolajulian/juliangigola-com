@@ -67,6 +67,7 @@ function line(e: LeadEvent): string {
     case "replied": return `You replied${e.note ? `: ${e.note}` : ""}`;
     case "proofs": return `Opened proofs${e.note ? `: ${e.note}` : ""}`;
     case "download": return `Downloaded the finals${e.note ? `: ${e.note}` : ""}`;
+    case "contract": return `Signed the contract${e.note ? `: ${e.note}` : ""}`;
     case "wrote": return `They wrote${e.note ? `: ${e.note}` : ""}`;
     case "mail": return `Mail to ${e.mail?.to === "client" ? "them" : "hello@"}: ${e.note ?? ""}`;
     case "added": return `Added by hand${e.note ? `, from ${e.note}` : ""}`;
