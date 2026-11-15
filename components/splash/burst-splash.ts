@@ -90,7 +90,12 @@ export function burst(sizes: string[][], heroes: { d: [number, string][]; l: [nu
         i.dataset.plain = "";
         i.src = rest.startsWith("http") ? rest : `/${rest}`;
       }
-      return i.decode();
+      // Firefox refuses a decode() asked for in the same turn as the new src: wait for the file itself
+      return new Promise((ok, no) => {
+        if (i.complete && i.naturalWidth > 0) return ok(0);
+        i.onload = ok;
+        i.onerror = no;
+      }).then(() => i.decode());
     });
   };
   const shown = new Set<HTMLImageElement>();
