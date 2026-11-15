@@ -35,7 +35,9 @@ export type LeadEvent = {
     // From outside or by hand (2026-11-10): Stripe payments and refunds, a client moving or cancelling, selects sent, an invoice settled.
     | "payment" | "refund" | "reschedule" | "cancel" | "selects" | "invoice-paid"
     // The client's first download of their finals (2026-11-12): Delivered.
-    | "download";
+    | "download"
+    // The client signed a contract online (2026-11-15, `lib/contracts/contract.ts`), ref = "signed:<contract id>".
+    | "contract";
   /* "proofs": they opened a proof gallery, ref = its token so each gallery is one line. */
   /* "replied" / "wrote": mail between hello@ and them in Gmail, ref = the Gmail message id (`lib/leads/gmail-sync.ts`). */
   /** The raw row (`msg:` key), Cal.com uid or Stripe intent, so a retry folds in once. */

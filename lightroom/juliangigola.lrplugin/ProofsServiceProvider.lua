@@ -94,10 +94,16 @@ function provider.viewForCollectionSettings(f, publishSettings, info)
   local cs = info.collectionSettings
   GallerySettings.fill(cs, not (info.publishedCollection and info.publishedCollection:getRemoteId()))
   local label = function(t) return f:static_text { title = t, width = share "plabel", alignment = "right" } end
+  local pc = info.publishedCollection
   return f:group_box {
     title = "Client gallery",
     fill_horizontal = 1,
     bind_to_object = cs,
+    f:row {
+      f:spacer { fill_horizontal = 1 },
+      -- Dimmed until the gallery is on the site (first publish).
+      f:push_button { title = "Sync now", enabled = pc and pc:getRemoteId() ~= nil or false, action = function() provider.runCheck(pc) end },
+    },
     f:row { label "Client email", f:edit_field { value = bind "email", width_in_chars = 32 } },
     f:row { label "Note in the email", f:edit_field { value = bind "note", width_in_chars = 32, height_in_lines = 3 } },
     f:row {
@@ -106,7 +112,7 @@ function provider.viewForCollectionSettings(f, publishSettings, info)
       f:checkbox { title = "Watermark", value = bind "watermark", tooltip = "Julian Gigola in the bottom third of every frame. The clean files stay for finals." },
     },
     f:row { label "Open for", f:edit_field { value = bind "days", width_in_digits = 3, min = 1, max = 90, precision = 0 }, f:static_text { title = "days, from when you send it in /admin" } },
-    f:row { label "", f:static_text { title = "Selects come back flagged with a Purple label: Library > Plug-in Extras > Sync with proof, or publish again.", fill_horizontal = 1 } },
+    f:row { label "", f:static_text { title = "Selects come back flagged with a Purple label: Sync now, Library > Plug-in Extras > Sync with proof, or publish again.", fill_horizontal = 1 } },
   }
 end
 
@@ -228,6 +234,14 @@ end
 -- label and "<gallery> selects"; the rest (g.others) lose them. Only a Purple label is cleared,
 -- so a label Julian set by hand stays, and a frame picked in any gallery is never cleared.
 -- Safe to run twice. Returns the selects collections that hold picks.
+-- Also fills this plugin's metadata (Metadata.lua): Client gallery, Client pick, Client note, so the
+-- Library Filter and smart collections can find them. g.notes: client notes by photo localIdentifier.
+
+-- One plugin field. Guarded: a field Lightroom has not registered yet (a self-update not reloaded) must never stop the flags.
+local function mark(photo, field, value)
+  pcall(photo.setPropertyForPlugin, photo, _PLUGIN, field, value)
+end
+
 local function syncPicks(galleries)
   local made = {}
   local picked, any = {}, false
@@ -248,6 +262,7 @@ local function syncPicks(galleries)
         for _, photo in ipairs(g.photos) do
           photo:setRawMetadata("colorNameForLabel", LABEL)
           photo:setRawMetadata("pickStatus", 1)
+          mark(photo, "clientPick", "Picked")
         end
         c = c or catalog:createCollection(name, set, true)
         c:addPhotos(g.photos)
@@ -260,10 +275,18 @@ local function syncPicks(galleries)
             photo:setRawMetadata("colorNameForLabel", "none")
             if photo:getRawMetadata("pickStatus") == 1 then photo:setRawMetadata("pickStatus", 0) end
           end
+          mark(photo, "clientPick", nil)
           drop[#drop + 1] = photo
         end
       end
       if c and #drop > 0 then c:removePhotos(drop) end
+      local notes = g.notes or {}
+      for _, list in ipairs { g.photos, g.others or {} } do
+        for _, photo in ipairs(list) do
+          mark(photo, "clientGallery", g.name)
+          mark(photo, "clientNote", notes[photo.localIdentifier])
+        end
+      end
     end
   end, { timeout = 30 })
   return made
@@ -291,18 +314,20 @@ function provider.getRatingsFromPublishedCollection(publishSettings, arrayOfPhot
   local selected = {}
   for _, id in ipairs(p.selects or {}) do selected[id] = true end
 
-  local picked, others = {}, {}
+  local picked, others, notes = {}, {}, {}
   for _, info in ipairs(arrayOfPhotoInfo) do
     local on = selected[info.remoteId] == true
     ratingCallback { publishedPhoto = info, rating = on and 1 or 0 }
     if on then picked[#picked + 1] = info.photo else others[#others + 1] = info.photo end
+    notes[info.photo.localIdentifier] = (p.notes or {})[info.remoteId]
   end
-  syncPicks { { name = name, photos = picked, others = others } }
+  syncPicks { { name = name, photos = picked, others = others, notes = notes } }
 end
 
 --- Library > Plug-in Extras > Sync with proof: every gallery of this
 --  plugin, one read each, nothing published. Picks not sent yet count too. Run inside an async task.
-function provider.checkForPicks()
+--  only: one published collection (Sync now in its Edit Settings), else every gallery.
+function provider.checkForPicks(only)
   local catalog = LrApplication.activeCatalog()
   local found, lines, failed, why = {}, {}, {}, nil
   local checked = 0
@@ -312,8 +337,12 @@ function provider.checkForPicks()
     for _, pc in ipairs(node:getChildCollections()) do all[#all + 1] = pc end
     for _, set in ipairs(node:getChildCollectionSets()) do walk(set) end
   end
-  for _, service in ipairs(catalog:getPublishServices()) do
-    if ours(service) then walk(service) end
+  if only then
+    all[1] = only
+  else
+    for _, service in ipairs(catalog:getPublishServices()) do
+      if ours(service) then walk(service) end
+    end
   end
   do
     for _, pc in ipairs(all) do
@@ -328,11 +357,13 @@ function provider.checkForPicks()
           local selects = p.selects or {}
           local want = {}
           for _, id in ipairs(selects) do want[id] = true end
-          local picked, others = {}, {}
+          local picked, others, notes = {}, {}, {}
           for _, pp in ipairs(pc:getPublishedPhotos()) do
-            if want[pp:getRemoteId()] then picked[#picked + 1] = pp:getPhoto() else others[#others + 1] = pp:getPhoto() end
+            local photo = pp:getPhoto()
+            if want[pp:getRemoteId()] then picked[#picked + 1] = photo else others[#others + 1] = photo end
+            notes[photo.localIdentifier] = (p.notes or {})[pp:getRemoteId()]
           end
-          found[#found + 1] = { name = pc:getName(), photos = picked, others = others }
+          found[#found + 1] = { name = pc:getName(), photos = picked, others = others, notes = notes }
           if #selects > 0 then
             -- Frames taken out of the Lightroom gallery after sending can't be flagged: say so.
             local missing = #selects - #picked
@@ -347,7 +378,11 @@ function provider.checkForPicks()
   local made = syncPicks(found)
   local info = table.concat(lines, "\n")
   if #failed > 0 then info = info .. "\n\nCould not read " .. table.concat(failed, ", ") .. ": " .. why end
-  if #made == 0 then
+  if only then
+    -- Edit Settings is still open: report only, no jump to the selects behind it.
+    if info == "" then info = "No picks yet." elseif #made > 0 then info = info .. "\n\nPicks flagged with a Purple label, in Client selects." end
+    LrDialogs.message("Client picks", info)
+  elseif #made == 0 then
     if info == "" then
       info = checked == 0 and "No client galleries in this catalog yet." or ("Checked %d %s."):format(checked, checked == 1 and "gallery" or "galleries")
     end
@@ -358,10 +393,10 @@ function provider.checkForPicks()
 end
 
 --- Every entry point (both Plug-in Extras menus, the Plug-in Manager button) runs this.
-function provider.runCheck()
+function provider.runCheck(only)
   LrTasks.startAsyncTask(function()
     -- LrTasks.pcall: plain pcall cannot wrap LrHttp, which yields.
-    local ok, err = LrTasks.pcall(provider.checkForPicks)
+    local ok, err = LrTasks.pcall(provider.checkForPicks, only)
     if not ok then LrDialogs.message("Sync with proof", tostring(err), "critical") end
   end)
 end

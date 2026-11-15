@@ -16,14 +16,21 @@ return {
   LrLibraryMenuItems = {
     { title = "Sync with proof", file = "CheckPicks.lua" },
     { title = "Make delivery from selects", file = "MakeDelivery.lua" },
+    { title = "Sync galleries with site", file = "SyncGalleries.lua" },
   },
   LrExportMenuItems = {
     { title = "Sync with proof", file = "CheckPicks.lua" },
     { title = "Make delivery from selects", file = "MakeDelivery.lua" },
+    { title = "Sync galleries with site", file = "SyncGalleries.lua" },
   },
+  -- Client fields on each photo (Client gallery, pick, note), filled by Sync with proof.
+  LrMetadataProvider = "Metadata.lua",
+  LrMetadataTagsetFactory = "Tagset.lua",
+  -- lightroom://com.juliangigola.export/sync?token=<gallery> from the /admin Proofs desk.
+  URLHandler = "Link.lua",
   LrPluginInfoProvider = "PluginInfo.lua",
   -- Updates itself from the repo at each start (Update.lua).
   LrInitPlugin = "Init.lua",
   -- Bump revision with every plugin change: Update.lua only installs a higher version.
-  VERSION = { major = 1, minor = 2, revision = 7, build = 0 },
+  VERSION = { major = 1, minor = 2, revision = 9, build = 0 },
 }
