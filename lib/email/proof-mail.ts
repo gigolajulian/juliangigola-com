@@ -149,10 +149,11 @@ export function alertLines(p: Proof): { subject: string; lines: string[] } {
   };
 }
 
-export async function sendClient(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefined, to: string, m: { subject: string; html: string; text: string; attachments: Inline[] }): Promise<boolean> {
+/** `cc`: the other people on the lead with "copy on gallery mail" ticked (`copiesFor` in lib/leads/lead-store). */
+export async function sendClient(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefined, to: string, m: { subject: string; html: string; text: string; attachments: Inline[] }, cc: string[] = []): Promise<boolean> {
   if (!mailer) return false;
-  // A plain address: Cloudflare refuses an EmailAddress without a name (live 2026-11-11, every client mail failed).
-  const head = { to, from: FROM, replyTo: REPLY_TO };
+  // Plain addresses: Cloudflare refuses an EmailAddress without a name (live 2026-11-11, every client mail failed).
+  const head = { to, from: FROM, replyTo: REPLY_TO, ...(cc.length ? { cc } : {}) };
   try {
     await mailer.send({ ...head, ...m });
     return true;

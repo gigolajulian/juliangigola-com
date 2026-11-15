@@ -7,7 +7,8 @@
  * ─────────────────────────────────────────────────────────────── */
 
 import { TZ } from "../booking/booking-rules";
-import { STAGES, type Lead, type Stage } from "./leads";
+import { STAGES, type Lead, type Person, type Stage } from "./leads";
+import { canonical } from "./lead-crypto";
 import { balance, isPaid } from "./invoice";
 import { paidTotal, type MasterEntry } from "./activity-log";
 
@@ -38,6 +39,34 @@ export type NewLead = {
 };
 
 const clip = (v: unknown, n: number) => (typeof v === "string" && v.trim() ? v.trim().slice(0, n) : undefined);
+
+/** People a lead holds at most: a brand job is a handful. */
+export const PEOPLE_MAX = 12;
+/** A plain address the mail binding will take as a cc: one bad one fails the whole gallery mail. */
+const ADDRESS = /^[^\s@<>(),;:"\[\]]+@[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}$/i;
+
+/** The people list from the desk, checked: real addresses, none twice, never the lead's own. Copy on unless unticked. */
+export function cleanPeople(v: unknown, own: string): Person[] | { error: string } {
+  if (!Array.isArray(v)) return { error: "Bad people list." };
+  if (v.length > PEOPLE_MAX) return { error: `${PEOPLE_MAX} people at most.` };
+  const seen = new Set<string>();
+  const out: Person[] = [];
+  for (const x of v as Record<string, unknown>[]) {
+    const email = clip(x?.email, 120)?.toLowerCase();
+    if (!email || !ADDRESS.test(email)) return { error: `${email ? `"${email}"` : "A blank"} is not an email address.` };
+    if (canonical(email) === canonical(own)) return { error: "That is the lead's own address." };
+    if (seen.has(canonical(email))) continue;
+    seen.add(canonical(email));
+    const p: Person = { name: clip(x.name, 80) ?? email.split("@")[0], email };
+    const role = clip(x.role, 40);
+    const phone = clip(x.phone, 40);
+    if (role) p.role = role;
+    if (phone) p.phone = phone;
+    if (x.cc === false) p.cc = false;
+    out.push(p);
+  }
+  return out;
+}
 
 /** A lead he added by hand: read already (it is his own news), at the stage he picked. */
 export function manualLead(given: NewLead, at: string): Lead | { error: string } {
@@ -90,11 +119,14 @@ export function merge(into: Lead, from: Lead, at: string): Lead {
     flags: [...new Set([...(into.flags ?? []), ...(from.flags ?? [])])],
     notes: notes.slice(0, 5000),
     invoices: [...(from.invoices ?? []), ...(into.invoices ?? [])].sort((a, b) => a.at.localeCompare(b.at)),
+    // Both records' people, once each, never this lead's own address.
+    people: [...(into.people ?? []), ...(from.people ?? [])].filter((p, i, all) => canonical(p.email) !== canonical(into.email) && all.findIndex((x) => canonical(x.email) === canonical(p.email)) === i),
     events: [...events, { at, kind: "merge" as const, note: from.name }].slice(-50),
   };
   if (!out.flags?.length) delete out.flags;
   if (!out.when) delete out.when;
   if (!out.invoices?.length) delete out.invoices;
+  if (!out.people?.length) delete out.people;
   return out;
 }
 

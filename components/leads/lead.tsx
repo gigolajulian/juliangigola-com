@@ -46,6 +46,7 @@ import { leadKey, typingIn } from "@/lib/leads/lead-keys";
 import { balance, DEPOSIT, subtotal, usd } from "@/lib/leads/invoice";
 import { ago, at, authed, type Call, DAY, day, errorText, nextStep, now, renew, snoozed } from "@/lib/leads/lead-desk";
 import { compose, ios, kindOf, line, mailto } from "@/components/leads/shared";
+import { People } from "@/components/leads/people";
 
 type Size = "phone" | "mid" | "wide";
 /** A menu row that opens in a new tab. */
@@ -422,6 +423,10 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
                   </MetadataList>
                 )}
               </VStack>
+            </Section>
+
+            <Section>
+              <People people={full?.people ?? []} isDisabled={!full} onSave={(people) => patch({ people })} />
             </Section>
 
             <Section>
