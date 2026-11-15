@@ -54,10 +54,11 @@ function Tile({ k, v }: { k: string; v: string }) {
 }
 
 /** `embedded`: drawn inside the leads desk (its Theme and nav), with no shell of its own. */
-export function ProofsDesk({ embedded = false }: { embedded?: boolean } = {}) {
+/** `initial`: a gallery's token to open on, from a lead's Galleries section. */
+export function ProofsDesk({ embedded = false, initial }: { embedded?: boolean; initial?: string } = {}) {
   const [list, setList] = React.useState<Row[] | null>(null);
   const [error, setError] = React.useState<string | null>(null);
-  const [sel, setSel] = React.useState<string | null>(null);
+  const [sel, setSel] = React.useState<string | null>(initial ?? null);
   const [making, setMaking] = React.useState(false);
   const [wide, setWide] = React.useState(false);
   const load = React.useCallback(() => {
@@ -361,6 +362,8 @@ function Gallery({ p, changed, onBack, gone }: { p: Row; changed: () => void; on
         {(p.sentAt && !p.submittedAt) || p.deliveredAt ? <Button label="Extend 7 days" clickAction={() => act({ action: "extend", days: 7 }, "POST", "Seven more days.")} /> : null}
         {p.submittedAt ? <Button label="Copy file names" onClick={() => copy(p.selects.map(file).join("\n"), "File names")} /> : null}
         {p.submittedAt ? <Button label="Reopen for changes" clickAction={reopen} /> : null}
+        {/* Opens Lightroom (plugin 1.2.9, `Link.lua`) and runs Sync with proof on this gallery only. */}
+        {p.selects.length ? <Button label="Sync in Lightroom" href={`lightroom://com.juliangigola.export/sync?token=${encodeURIComponent(p.token)}`} /> : null}
         <Button label="Open gallery" href={p.url} target="_blank" rel="noreferrer" />
         {!p.sentAt ? <Button label="Close draft" variant="destructive" clickAction={close} /> : null}
       </HStack>
