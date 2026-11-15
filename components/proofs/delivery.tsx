@@ -57,7 +57,8 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
   const [email, setEmail] = React.useState<string | null>(null);
   const [open, setOpen] = React.useState<number | null>(null);
   const swipe = React.useRef<number | null>(null);
-  const thumb = (fid: string) => `/delivery/${id}/f/${fid}?w=800`;
+  // `v` changes when Lightroom republishes an edit, so a cached old copy is never shown.
+  const src = (f: { id: string; v: number }) => `/delivery/${id}/f/${f.id}?v=${f.v}`;
   const total = finals.reduce((n, f) => n + f.bytes, 0);
   const closes = initial.closesAt ? new Intl.DateTimeFormat("en-US", { month: "long", day: "numeric", timeZone: "America/Los_Angeles" }).format(new Date(initial.closesAt)) : null;
 
@@ -87,7 +88,7 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
     return (
       <div className="proof">
         <SplitGate
-          cover={`/delivery/${id}/f/${initial.cover ?? finals[0].id}`}
+          cover={src(finals.find((f) => f.id === initial.cover) ?? finals[0])}
           sub={`Your photos at full resolution.${closes ? ` Save them by ${closes}.` : ""}`}
           onEnter={(address) => {
             setEmail(address);
@@ -122,7 +123,7 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
             {finals.map((f, i) => (
               <div key={f.id} className="proof-cell">
                 {/* eslint-disable-next-line @next/next/no-img-element -- private finals from the Worker, not the image CDN */}
-                <img src={thumb(f.id)} alt="" loading={i < 8 ? "eager" : "lazy"} width={f.w || undefined} height={f.h || undefined} draggable={false} />
+                <img src={`${src(f)}&w=800`} alt="" loading={i < 8 ? "eager" : "lazy"} width={f.w || undefined} height={f.h || undefined} draggable={false} />
                 <button type="button" className="proof-open" aria-label={`Open photo ${i + 1}`} onClick={() => setOpen(i)} />
                 <span className="proof-no">{pad(i)}</span>
               </div>
@@ -147,7 +148,7 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
           >
             <button type="button" className="proof-arr l" aria-label="Previous" onClick={() => setOpen(step(open, -1))}>&larr;</button>
             {/* eslint-disable-next-line @next/next/no-img-element -- private final, 2000px copy */}
-            <img src={`/delivery/${id}/f/${finals[open].id}`} alt={`Photo ${open + 1}`} />
+            <img src={src(finals[open])} alt={`Photo ${open + 1}`} />
             <button type="button" className="proof-arr r" aria-label="Next" onClick={() => setOpen(step(open, 1))}>&rarr;</button>
           </div>
           <div className="proof-lf">

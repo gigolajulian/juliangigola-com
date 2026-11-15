@@ -36,8 +36,9 @@ import { NumberInput } from "@astryxdesign/core/NumberInput";
 import { ProgressBar } from "@astryxdesign/core/ProgressBar";
 import { Kbd } from "@astryxdesign/core/Kbd";
 import { References } from "@/components/admin/admin-inbox";
-import { api as proofApi, status as proofStatus, type Row as ProofRow } from "@/lib/proofs/desk";
+import { api as proofApi, type Row as ProofRow } from "@/lib/proofs/desk";
 import { InvoiceRow, InvoiceSheetB } from "@/components/leads/invoice";
+import { ContractBlock } from "@/components/leads/contract";
 import { isPaid } from "@/lib/leads/invoice";
 import { endDay } from "@/lib/leads/lead-desk";
 import type { Enquiry } from "@/lib/inbox";
@@ -48,6 +49,8 @@ import { leadKey, typingIn } from "@/lib/leads/lead-keys";
 import { balance, DEPOSIT, subtotal, usd } from "@/lib/leads/invoice";
 import { ago, at, authed, type Call, DAY, day, errorText, nextStep, now, renew, snoozed } from "@/lib/leads/lead-desk";
 import { compose, frostBar, ios, kindOf, line, mailto } from "@/components/leads/shared";
+import { People } from "@/components/leads/people";
+import { Galleries } from "@/components/leads/galleries";
 
 type Size = "phone" | "mid" | "wide";
 /** A menu row that opens in a new tab. */
@@ -90,7 +93,7 @@ const history = (log: Lead["events"] | null, own: Lead["events"]) => {
     .sort((a, b) => a.at.localeCompare(b.at));
 };
 
-export function LeadDesk({ summary, initial, call, onChange, onBack, reload, templates, others, size, toProofs }: { toProofs?: () => void; summary: LeadSummary; initial?: Lead | null; call: Call; onChange: (l: Lead) => void; onBack: () => void; reload: () => void; templates: Template[]; others: LeadSummary[]; size: Size }) {
+export function LeadDesk({ summary, initial, call, onChange, onBack, reload, templates, others, size, toProofs }: { toProofs?: (token?: string) => void; summary: LeadSummary; initial?: Lead | null; call: Call; onChange: (l: Lead) => void; onBack: () => void; reload: () => void; templates: Template[]; others: LeadSummary[]; size: Size }) {
   // A lead added a moment ago comes in whole: KV may not serve its key yet.
   const [lead, setLead] = React.useState<Lead | null>(initial ?? null);
   const [message, setMessage] = React.useState<Enquiry | null>(null);
@@ -136,7 +139,7 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
       if (l.unread) patch({ seen: true }).catch(() => {});
     }).catch((e: unknown) => live && !initial && setNote(errorText(e)));
     proofApi<{ proofs: ProofRow[] }>({ query: "?list" })
-      .then((o) => live && setProofs(o.proofs.filter((p) => p.email && canonical(p.email) === canonical(summary.email))))
+      .then((o) => live && setProofs(o.proofs.filter((p) => p.email)))
       .catch(() => {});
     return () => void (live = false);
     // Once per lead: `patch` is stable for the same key.
@@ -145,6 +148,9 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
 
   const l = lead ?? summary;
   const full = lead;
+  // The client's galleries: sent to the lead's address or to any of its people (Julian 2026-11-15, Format's client page).
+  const theirs = new Set([l.email, ...(full?.people ?? []).map((p) => p.email)].map(canonical));
+  const galleries = proofs.filter((p) => theirs.has(canonical(p.email!)));
   const first = l.name.split(" ")[0];
   const mailOk = mailable(l.email);
   const ig = full?.ig ?? (l.email.startsWith("ig:") ? l.email.slice(3) : undefined);
@@ -416,21 +422,14 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
                       </MetadataListItem>
                     ))}
                   </MetadataList>
+                  {summary.id ? <ContractBlock leadId={summary.id} changed={reload} /> : null}
                 </VStack>
               </Section>
             ) : null}
 
-            {proofs.length ? (
+            {galleries.length ? (
               <Section>
-                <VStack gap={3}>
-                  <Head title="Proofs"><Button label="Open Proofs" variant="ghost" size="sm" onClick={toProofs} /></Head>
-                  {proofs.map((p) => (
-                    <HStack key={p.token} gap={3} vAlign="center">
-                      <StackItem size="fill"><VStack gap={0}><Text type="label">{p.name}</Text><Text type="supporting" color="secondary">{p.frames.length} frames{p.views ? ` · opened ${p.views} ${p.views === 1 ? "time" : "times"}` : ""}</Text></VStack></StackItem>
-                      <Badge label={proofStatus(p)} variant={p.submittedAt ? "blue" : "gray"} />
-                    </HStack>
-                  ))}
-                </VStack>
+                <Galleries galleries={galleries} lead={l.email} open={(t) => toProofs?.(t)} />
               </Section>
             ) : null}
 
@@ -451,6 +450,10 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
                 )}
               </VStack>
               </Collapsible>
+            </Section>
+
+            <Section>
+              <People people={full?.people ?? []} isDisabled={!full} onSave={(people) => patch({ people })} />
             </Section>
 
             <Section>
