@@ -154,7 +154,24 @@ export const heroDrivers: Driver[] = [
       if (!d) document.documentElement.setAttribute("data-mtdock", "off");
       // late fonts move both boxes: measure again on the next frame
       if (d) document.fonts?.ready.then(() => (st.at = ""), () => {});
+      /* The engine gives a section no frames once it is a screen above the window. A jump past the hero (a reload
+         lower on the page, a header link, a flick) would leave the name wherever it was and the header without its
+         wordmark, so land it here. */
+      const far = () => {
+        if (!d || d.st === "land" || !document.documentElement.hasAttribute("data-mt-held") || el.getBoundingClientRect().bottom > -innerHeight) return;
+        d.st = "land";
+        d.x = 1;
+        d.v = 0;
+        d.f.style.visibility = "hidden";
+        d.h1.style.opacity = "0";
+        document.documentElement.setAttribute("data-mtdock", "land");
+      };
+      if (d) {
+        addEventListener("scroll", far, { passive: true });
+        requestAnimationFrame(() => requestAnimationFrame(far));
+      }
       return () => {
+        removeEventListener("scroll", far);
         [...st.cols, ...st.figs].forEach((p) => (p.el.style.transform = ""));
         if (st.name) st.name.style.cssText = "";
         if (d) {
