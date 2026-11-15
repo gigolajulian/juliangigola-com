@@ -30,7 +30,9 @@ beforeEach(async () => {
 
 const admin = (method: string, body?: unknown, query = "") =>
   new Request(`https://juliangigola.com/api/contract${query}`, { method, headers: { "x-inbox-key": KEY }, ...(body ? { body: JSON.stringify(body) } : {}) });
-const make = async () => (await (await POST(admin("POST", { lead: LEAD }))).json()) as { contract: Contract; url: string };
+const made = async () => (await (await POST(admin("POST", { lead: LEAD }))).json()) as { contract: Contract; url: string };
+// The desk fills the "to be set" lines before sending; the tests do the same.
+const make = async () => { const o = await made(); return { ...o, contract: { ...o.contract, text: o.contract.text.replace(/to be set/gi, "agreed") } }; };
 const send = async (c: Contract, extra: Record<string, unknown> = {}) => PATCH(admin("PATCH", { id: c.id, to: c.to, text: c.text, send: "mail", ...extra }));
 const signReq = (id: string, body: unknown) => SIGN(new Request(`https://juliangigola.com/api/contract/${id}`, { method: "POST", headers: { "cf-connecting-ip": "203.0.113.9", "user-agent": "Test UA" }, body: JSON.stringify(body) }), { params: Promise.resolve({ id }) });
 
@@ -58,6 +60,13 @@ describe("/api/contract", () => {
     await PUT(admin("PUT", { templates: [{ id: "x", name: "Short", body: "{client} pays {fee}." }] }));
     const { contract: c } = await make();
     expect(c.text).toBe("Sam Rivera pays $1,200.");
+  });
+
+  it("refuses to send while a line is still to be set", async () => {
+    const { contract: c } = await made();
+    const res = await PATCH(admin("PATCH", { id: c.id, to: c.to, text: c.text, send: "mail" }));
+    expect(res.status).toBe(400);
+    expect(client.sent.length).toBe(0);
   });
 
   it("sends: mails the link, marks the lead's contract Sent, and opens the page", async () => {

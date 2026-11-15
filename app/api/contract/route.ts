@@ -3,7 +3,7 @@ import { bearer, isAdmin } from "@/lib/vouch";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { readLead } from "@/lib/leads/lead-store";
 import type { InvoiceFrom } from "@/lib/leads/invoice";
-import { cleanContractTemplates, cleanDraft, contractOf, contractUrl, copyName, draft, fillContract, fromLines, readContract, signedCopy, writeContract, CONTRACT_TEMPLATES } from "@/lib/contracts/contract";
+import { cleanContractTemplates, cleanDraft, contractOf, contractUrl, copyName, draft, fillContract, fromLines, readContract, signedCopy, writeContract, CONTRACT_TEMPLATES, UNSET } from "@/lib/contracts/contract";
 import { contractStep } from "@/lib/contracts/contract-lead";
 import { contractMail, sendClient } from "@/lib/email/proof-mail";
 import { attachment } from "@/lib/proofs/delivery-serve";
@@ -96,6 +96,7 @@ export async function PATCH(request: Request) {
   let c = draft(before, before.lead, d, at);
   if ("error" in c) return json(c, 409);
   const send = b.send === "mail" || b.send === "link" ? b.send : null;
+  if (send && UNSET.test(c.text)) return json({ error: "Fill in every line marked \"to be set\" first." }, 400);
   if (send === "mail" && !c.to.email) return json({ error: "Add the client's email to send it." }, 400);
   if (send) {
     const raw = await g.kv.get(FROM_KEY);

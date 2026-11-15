@@ -27,13 +27,16 @@ const png = (id: string, b64: string): Inline => ({ content: Uint8Array.from(ato
 const logos = () => [png("name-ink", NAME_INK), png("name-w", NAME_W)];
 const DARK = `@media (prefers-color-scheme: dark){body,.page{background:#0b0a09!important}.fg{color:#f1f0ed!important}.mu{color:#92908d!important}.ac{color:#50b7b7!important}.rule{border-color:rgba(255,255,255,0.11)!important}.cta{background:#f1f0ed!important;color:#0b0a09!important}.ink-l{display:none!important}.ink-d{display:block!important}${SIG_DARK}}`;
 
+// Spacers after the preheader, so inbox previews stop there instead of running into the body text.
+const PAD = "&#847;&zwnj;&nbsp;".repeat(80);
+
 function page(title: string, preheader: string, body: string) {
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark"><meta name="supported-color-schemes" content="light dark">
 <title>${esc(title)}</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>body{margin:0;padding:0;background:${C.bg}}.mono{font-family:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace}.ink-d{display:none}${DARK}</style>
 </head><body>
-<div style="display:none;max-height:0;overflow:hidden">${esc(preheader)}</div>
+<div style="display:none;max-height:0;overflow:hidden">${esc(preheader)}${PAD}</div>
 <table class="page" role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${C.bg}"><tr><td align="center" style="padding:40px 16px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px" class="mono">
 <tr><td style="padding-bottom:36px"><img class="ink-l" src="cid:name-ink" width="189" height="34" alt="Julian Gigola" style="display:block;border:0"><img class="ink-d" src="cid:name-w" width="189" height="34" alt="Julian Gigola" style="border:0"></td></tr>
@@ -245,7 +248,7 @@ export function signedMail(c: ContractMailIn) {
   const lead = "Thanks for signing. Your copy is below and on the same link any time.";
   const html = page(
     "Contract signed",
-    `Signed by ${s.name}.`,
+    "Thanks for signing. Your copy is inside.",
     `<tr><td class="mono ac" style="${label};padding-bottom:10px">Signed</td></tr>
 <tr><td class="mono fg" style="font-size:22px;line-height:1.3;color:${C.fg};padding-bottom:16px">Contract signed.</td></tr>
 <tr><td class="mono mu" style="font-size:13px;line-height:1.65;color:${C.mu};padding-bottom:30px">${esc(lead)} <a href="${contractLink(c.id)}" style="color:inherit">${contractLink(c.id)}</a></td></tr>
