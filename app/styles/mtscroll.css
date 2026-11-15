@@ -569,7 +569,7 @@ html[data-mt-intro="1"]{overflow:hidden}
 [data-mtscroll] .mt-bin .flow{display:block;min-height:0}
 [data-mtscroll] .mt-bin .f-photo{display:none}
 [data-mtscroll] .mt-bin .f-main{padding:0;gap:0}
-[data-mtscroll] .mt-bin .rail{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:8px;margin-top:calc(26 * var(--u))}
+[data-mtscroll] .mt-bin .rail{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(max-content,1fr);gap:8px;margin-top:calc(26 * var(--u))}
 [data-mtscroll] .mt-bin .rail li{padding-top:9px;border-top:2px solid var(--hair);font-size:9.5px;color:var(--mute)}
 [data-mtscroll] .mt-bin .rail li .nm{display:inline}
 [data-mtscroll] .mt-bin .rail li:is(.cur,.done){border-top:2px solid var(--accent);color:var(--ink)}
