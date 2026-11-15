@@ -30,8 +30,8 @@ export const viewport: Viewport = { width: "device-width", initialScale: 1, view
 export default function LeadsPage() {
   return (
     // `data-workbench`: no site footer; `data-lead-app`: no site header. Edge to edge: the Astryx shell lays out
-    // its own header, nav and tab bar; only the iPhone notch and home bar are kept clear.
-    <div data-workbench data-lead-app className="w-full pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)]">
+    // its own header, nav and tab bar; only the iPhone notch is kept clear here (the tab bar pads the home bar itself).
+    <div data-workbench data-lead-app className="w-full pt-[env(safe-area-inset-top)]">
       <LeadsDesk />
     </div>
   );

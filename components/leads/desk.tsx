@@ -561,7 +561,7 @@ export function LeadsDesk() {
           if (e.key !== "Enter" || !finding) return;
           const rows = e.currentTarget.querySelectorAll<HTMLElement>(".astryx-command-palette-item");
           if (rows.length && ![...rows].some((r) => r.hasAttribute("data-highlighted") && r.dataset.highlighted !== "false")) rows[0].click();
-        }} style={{ position: "relative", height: "100dvh", textTransform: "none", letterSpacing: "normal" }}>
+        }} /* the page pads the status bar above the desk (page.tsx), so the desk is the screen less that: at a full 100dvh the phone tab bar sat that far under the screen */ style={{ position: "relative", height: "calc(100dvh - env(safe-area-inset-top))", textTransform: "none", letterSpacing: "normal" }}>
         <CommandPalette
           isOpen={finding}
           onOpenChange={setFinding}
