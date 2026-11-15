@@ -641,7 +641,8 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
 [data-mtscroll] .mt-book .mt-photo>.qp{object-fit:cover}
 @media (min-width:1024px) and (min-height:600px){
   [data-mtscroll] .mt-bq-h{font-size:calc(112 * var(--u));line-height:.9;letter-spacing:-.055em;margin-bottom:calc(30 * var(--u))}
-  [data-mtscroll] .mt-book .mt-frame{padding-top:calc(112 * var(--u));padding-bottom:calc(72 * var(--u))}
+  /* a full screen, but never more than the 900 design px it is drawn for: a tall window left half a screen empty under it (Julian, 2026-11-15) */
+  [data-mtscroll] .mt-book .mt-frame{padding-top:calc(112 * var(--u));padding-bottom:calc(72 * var(--u));min-height:min(max(100svh,600px),calc(900 * var(--u)))}
   [data-mtscroll] .mt-book .mt-photo{top:calc(112 * var(--u));height:min(calc(792 * var(--u)),calc(max(100svh,600px) - 132 * var(--u)))}
   [data-mtscroll] .mt-book-col{margin-top:0}
   [data-mtscroll] .mt-next{display:block;margin-left:auto}

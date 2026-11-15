@@ -306,7 +306,8 @@ function setup(el: HTMLElement, ctx: Ctx) {
     // phrase: one speed easing toward idle plus whatever the scroll adds
     pk = clamp(pk * Math.pow(0.94, k) + c.dy * 0.0012, -0.35, 0.35);
     if (Math.abs(pk) < 0.0005) pk = 0;
-    v += ((busy ? 0 : 0.03 * u * (hot ? 0.22 : 1)) + pk - v) * (1 - Math.exp(-dt / 180));
+    // 90 design px a second, 60% of that under the pointer (Julian, 2026-11-15: 30 and 22% passed too slow and nearly stopped on hover)
+    v += ((busy ? 0 : 0.09 * u * (hot ? 0.6 : 1)) + pk - v) * (1 - Math.exp(-dt / 180));
     x += v * dt;
     tr = -pad - mod(x, W || 1);
     row.style.transform = `translate3d(${tr.toFixed(1)}px,0,0)`;

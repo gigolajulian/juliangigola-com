@@ -72,10 +72,11 @@ html[data-mt-held] .mt-motion :is(.mt-mohead,.mt-mofoot) .mute{color:rgb(var(--o
 html[data-mt-held] .mt-motion .mt-mofoot{top:auto;bottom:calc(64 * var(--u))}
 html[data-mt-held] .mt-motion .mt-mofoot h3{font-size:calc(104 * var(--u));margin:calc(12 * var(--u)) 0 calc(14 * var(--u))}
 html[data-mt-held] .mt-motion .mt-mofoot .btn{position:static;margin-top:calc(22 * var(--u));pointer-events:auto;border-color:rgb(var(--on-photo));color:rgb(var(--on-photo))}
-html[data-mt-held] .mt-motion .mt-mopg{position:absolute;z-index:4;left:calc(var(--fx) + 36 * var(--u));top:50%;transform:translateY(-50%);margin:0;padding:0;list-style:none;display:grid;gap:calc(12 * var(--u));pointer-events:none}
-html[data-mt-held] .mt-motion .mt-mopg li{display:flex;align-items:center;gap:calc(10 * var(--u));opacity:.55;transition:opacity .25s ease}
-html[data-mt-held] .mt-motion .mt-mopg li::after{content:"";width:calc(40 * var(--u));height:1px;background:currentColor;transform-origin:0 50%;transform:scaleX(0);transition:transform .4s cubic-bezier(.23,1,.32,1)}
-html[data-mt-held] .mt-motion .mt-mopg li[data-on]{opacity:1}
+/* on the right, larger and brighter (Julian, 2026-11-15; was left, 11px, 55%, a 40px hairline) */
+html[data-mt-held] .mt-motion .mt-mopg{position:absolute;z-index:4;right:calc(var(--fx) + 36 * var(--u));top:50%;transform:translateY(-50%);margin:0;padding:0;list-style:none;display:grid;justify-items:end;gap:calc(16 * var(--u));pointer-events:none;font-size:max(15px,calc(20 * var(--u)))}
+html[data-mt-held] .mt-motion .mt-mopg li{display:flex;flex-direction:row-reverse;align-items:center;gap:calc(12 * var(--u));opacity:.7;transition:opacity .25s ease}
+html[data-mt-held] .mt-motion .mt-mopg li::after{content:"";width:calc(96 * var(--u));height:2px;background:currentColor;transform-origin:100% 50%;transform:scaleX(0);transition:transform .4s cubic-bezier(.23,1,.32,1)}
+html[data-mt-held] .mt-motion .mt-mopg li[data-on]{opacity:1;font-weight:600}
 html[data-mt-held] .mt-motion .mt-mopg li[data-on]::after{transform:none}
 /* the client mark: top right only, small, never at the bottom (Julian) */
 html[data-mt-held] .mt-motion .mt-molg{position:absolute;z-index:4;top:calc(96 * var(--u));right:calc(var(--fx) + 48 * var(--u));height:calc(28 * var(--u));aspect-ratio:var(--ar);background:rgb(var(--on-photo) / .8);-webkit-mask:var(--m) center/contain no-repeat;mask:var(--m) center/contain no-repeat;pointer-events:none;animation:mt-dev-op .8s cubic-bezier(.4,0,.2,1) both}
