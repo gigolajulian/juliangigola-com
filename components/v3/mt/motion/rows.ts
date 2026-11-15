@@ -161,7 +161,8 @@ function films(): Driver {
       /* Preview: one muted iframe in the current film, 300ms after it becomes
          current, gone when the film or the section leaves. The poster stays on
          top until the player says it plays (same wait as video.tsx Loop). */
-      let pv: HTMLIFrameElement | null = null, pvT = 0, readyT = 0, seen = false;
+      let pv: HTMLIFrameElement | null = null, pvT = 0, readyT = 0, seen = false, movedAt = 0;
+      addEventListener("scroll", () => (movedAt = performance.now()), { passive: true, signal: ac.signal });
       const drop = () => {
         clearTimeout(pvT);
         clearTimeout(readyT);
@@ -174,7 +175,9 @@ function films(): Driver {
         if (!src || !seen || !ctx.held) return;
         const mount = () => {
           // a player takes about 300ms of the graphics thread to start, and shows nothing for 2.5s: never start one mid-scroll
-          if (Math.abs(ctx.dy) > 1.5) return void (pvT = window.setTimeout(mount, 150));
+          // "resting" is 600ms with no scroll at all: between two wheel notches the page is still for a moment, and a player
+          // that started there stalled the next notches for 100ms a frame
+          if (performance.now() - movedAt < 600) return void (pvT = window.setTimeout(mount, 200));
           const yt = src.includes("youtube");
           const f = (pv = document.createElement("iframe"));
           f.src = src + (yt ? "&enablejsapi=1" : "");
