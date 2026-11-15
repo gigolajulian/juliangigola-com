@@ -173,54 +173,94 @@ function films(): Driver {
       const ac = new AbortController();
       const on = { signal: ac.signal };
       let cur = +(el.dataset.cur ?? 0);
-      /* Preview: one muted iframe in the current film, 300ms after it becomes
-         current, gone when the film or the section leaves. The poster stays on
-         top until the player says it plays (same wait as video.tsx Loop). */
-      let pv: HTMLIFrameElement | null = null, pvT = 0, readyT = 0, seen = false, movedAt = 0;
+      /* Previews: a muted player in the current film, and one in the film before and after it, started and
+         then paused so they are loaded when their turn comes (Julian, 2026-11-14). The poster stays on top
+         until the player says it plays (same wait as video.tsx Loop). Players only ever start while the
+         page rests, the current film's first, the others one at a time. */
+      type Pv = { f: HTMLIFrameElement; yt: boolean; played: boolean; at: number; t: number };
+      const pool = new Map<number, Pv>();
+      let pvT = 0, seen = false, movedAt = 0;
       addEventListener("scroll", () => (movedAt = performance.now()), { passive: true, signal: ac.signal });
+      const say = (v: Pv, yt: string, vimeo: string) =>
+        v.f.contentWindow?.postMessage(JSON.stringify(v.yt ? { event: "command", func: yt, args: [] } : { method: vimeo }), "*");
+      const kill = (i: number) => {
+        const v = pool.get(i);
+        if (!v) return;
+        clearTimeout(v.t);
+        v.f.remove();
+        pool.delete(i);
+      };
       const drop = () => {
         clearTimeout(pvT);
-        clearTimeout(readyT);
-        pv?.remove();
-        pv = null;
+        for (const i of [...pool.keys()]) kill(i);
+      };
+      const mount = (i: number) => {
+        const film = items[i], src = film.dataset.preview!;
+        const yt = src.includes("youtube");
+        const f = document.createElement("iframe");
+        const v: Pv = { f, yt, played: false, at: performance.now(), t: 0 };
+        f.src = src + (yt ? "&enablejsapi=1" : "");
+        f.allow = "autoplay";
+        f.tabIndex = -1;
+        f.setAttribute("aria-hidden", "true");
+        f.onload = () => {
+          if (!yt) return void vimeoListen(f.contentWindow);
+          f.contentWindow?.postMessage(JSON.stringify({ event: "listening", id: 1 }), "*");
+          captionsOff(f.contentWindow);
+        };
+        film.append(f);
+        pool.set(i, v);
+      };
+      const wants = (i: number) => i >= 0 && i < n && !!items[i].dataset.preview && !pool.has(i);
+      const fill = () => {
+        // a player takes about 300ms of the graphics thread to start: never start one mid-scroll. "Resting" is 600ms
+        // with no scroll at all (between two wheel notches the page is still for a moment).
+        if (performance.now() - movedAt < 600) return void (pvT = window.setTimeout(fill, 200));
+        const next = [cur, cur + 1, cur - 1].find(wants);
+        if (next === undefined) return;
+        // a neighbour waits until every player already here plays (or has had 6s: a blocked one never will)
+        const busy = [...pool.values()].some((v) => !v.played && performance.now() - v.at < 6000);
+        if (next !== cur && busy) return void (pvT = window.setTimeout(fill, 400));
+        mount(next);
+        pvT = window.setTimeout(fill, 400);
       };
       const preview = () => {
-        drop();
-        const film = items[cur], src = film?.dataset.preview;
-        if (!src || !seen || !ctx.held) return;
-        const mount = () => {
-          // a player takes about 300ms of the graphics thread to start, and shows nothing for 2.5s: never start one mid-scroll
-          // "resting" is 600ms with no scroll at all: between two wheel notches the page is still for a moment, and a player
-          // that started there stalled the next notches for 100ms a frame
-          if (performance.now() - movedAt < 600) return void (pvT = window.setTimeout(mount, 200));
-          const yt = src.includes("youtube");
-          const f = (pv = document.createElement("iframe"));
-          f.src = src + (yt ? "&enablejsapi=1" : "");
-          f.allow = "autoplay";
-          f.tabIndex = -1;
-          f.setAttribute("aria-hidden", "true");
-          f.onload = () => {
-            if (yt) (f.contentWindow?.postMessage(JSON.stringify({ event: "listening", id: 1 }), "*"), captionsOff(f.contentWindow));
-            else vimeoListen(f.contentWindow);
-          };
-          film.append(f);
-        };
-        pvT = window.setTimeout(mount, 300);
+        clearTimeout(pvT);
+        if (!seen || !ctx.held) return drop();
+        for (const [i, v] of [...pool]) {
+          if (Math.abs(i - cur) > 1) kill(i);
+          else if (i !== cur) {
+            clearTimeout(v.t);
+            v.f.removeAttribute("data-ready");
+            if (v.played) say(v, "pauseVideo", "pause");
+          } else if (v.played) say(v, "playVideo", "play");
+        }
+        pvT = window.setTimeout(fill, 300);
       };
       addEventListener("message", (e) => {
-        if (!pv || e.source !== pv.contentWindow) return;
+        const hit = [...pool].find(([, v]) => v.f.contentWindow === e.source);
+        if (!hit) return;
+        const [i, v] = hit;
         let m;
         try { m = typeof e.data === "string" ? JSON.parse(e.data) : e.data; } catch { return; }
-        const f = pv;
         // Vimeo: the poster lifts only when the player says frames are moving
-        if (m?.event === "ready") return void vimeoListen(f.contentWindow);
-        if (vimeoPlays(m)) return void f.setAttribute("data-ready", "");
+        if (m?.event === "ready") return void vimeoListen(v.f.contentWindow);
         const state = m?.event === "onStateChange" ? m.info : m?.event === "infoDelivery" ? m.info?.playerState : undefined;
-        if (typeof state !== "number") return;
-        clearTimeout(readyT);
-        if (state === 1) captionsOff(f.contentWindow);
-        if (state === 1) readyT = window.setTimeout(() => f.setAttribute("data-ready", ""), 2500);
-        else f.removeAttribute("data-ready");
+        const plays = vimeoPlays(m) || state === 1;
+        if (!plays && typeof state !== "number") return;
+        if (plays) {
+          const first = !v.played;
+          v.played = true;
+          if (state === 1) captionsOff(v.f.contentWindow);
+          if (i !== cur) return void say(v, "pauseVideo", "pause");
+          if (v.f.hasAttribute("data-ready") || v.t) return;
+          // YouTube draws its own title and controls for a moment after a first start; a loaded one resumes clean
+          v.t = window.setTimeout(() => ((v.t = 0), v.f.setAttribute("data-ready", "")), v.yt ? (first ? 2500 : 350) : 0);
+        } else if (i === cur && state !== 2) {
+          clearTimeout(v.t);
+          v.t = 0;
+          v.f.removeAttribute("data-ready");
+        }
       }, on);
       const io = new IntersectionObserver(([e]) => {
         seen = e.isIntersecting;
