@@ -1,7 +1,7 @@
 import { gcal } from "../booking/gcal";
 import { sealer } from "./lead-crypto";
 import { type Change } from "./leads";
-import { canonLeads, readLead, recordLead, type LeadStore } from "./lead-store";
+import { canonLeads, findLead, recordLead, type LeadStore } from "./lead-store";
 
 /* ── hello@'s Gmail on the lead timeline ─────────────────────────
  * Julian (2026-11-04): "your own Gmail replies on the timeline". Every ten
@@ -93,8 +93,8 @@ export async function syncGmail(env: LeadStore & { GCAL_OAUTH?: string }): Promi
         for (const { email, c } of mailChanges(m)) {
           // One lead that will not open must not stop the sync: the cursor would never move past it.
           try {
-            // Only people already on the desk: a newsletter is not a lead.
-            if (!(await readLead(kv, s, await s.id(email)))) continue;
+            // Only people already on the desk, as a lead or one of its people: a newsletter is not a lead.
+            if (!(await findLead(kv, s, email)).lead) continue;
             if (await recordLead(env, email, c)) folded++;
           } catch (e) {
             console.error("gmail sync lead", String(e));

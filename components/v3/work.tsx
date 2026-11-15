@@ -1039,9 +1039,10 @@ export function V3Work({
         aria-label={VIEWS[2][1]}
         title={VIEWS[2][1]}
         onClick={() => {
-          if (view === "color") go(back.current);
+          // Under the canvas the button is not pressed: it lands on Color, also when Color is the view lying there.
+          if (view === "color" && !canvas) go(back.current);
           else {
-            back.current = view;
+            if (view !== "color") back.current = view;
             go("color");
           }
         }}
