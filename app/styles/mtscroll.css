@@ -679,9 +679,10 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
   [data-mtscroll] .mt-cvcap,[data-mtscroll] .mt-cvn{display:none}
 }
 
-/* c1 (2026-11-14): the one light room on the page. Only the logo band sits on off-white seamless with black marks;
+/* c1 (2026-11-14): the logo band is its own room. It began as off-white with black marks; Julian inverted it for the dark
+   theme the same night: a charcoal band with light marks. Was: only the logo band sits on off-white seamless with black marks;
    it cuts in and out hard at its edges and the photos stay on black. Dark theme only: the light theme is light already. */
-:root[data-mtscroll]:not([data-theme="light"]) .mt-logos{background:#d9d9d6;color:#141414;padding-block:calc(56 * var(--u))}
-:root[data-mtscroll]:not([data-theme="light"]) .mt-logos>.mute{color:rgb(20 20 20 / .62)}
-:root[data-mtscroll]:not([data-theme="light"]) .mt-logos .mk{color:rgb(20 20 20 / .86)}
-@media (hover:hover){:root[data-mtscroll]:not([data-theme="light"]) .mt-logos a:hover .mk{color:#000}}
+:root[data-mtscroll]:not([data-theme="light"]) .mt-logos{background:#141414;color:#d9d9d6;padding-block:calc(56 * var(--u))}
+:root[data-mtscroll]:not([data-theme="light"]) .mt-logos>.mute{color:rgb(217 217 214 / .62)}
+:root[data-mtscroll]:not([data-theme="light"]) .mt-logos .mk{color:rgb(217 217 214 / .86)}
+@media (hover:hover){:root[data-mtscroll]:not([data-theme="light"]) .mt-logos a:hover .mk{color:#fff}}
