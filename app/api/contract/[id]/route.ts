@@ -7,7 +7,7 @@ import { alertHello } from "@/lib/hello-mail";
 import { bodyOf, json } from "@/lib/http";
 
 /* ── contracts, the client's side ─────────────────────────────────
- * POST {name, email, agree, hash}: the signature. The id in the path is the
+ * POST {name, email, agree, hash, mark | typed}: the signature. The id in the path is the
  * only key. Stored first, then the lead, then the two mails, so a lead or a
  * mail that fails never loses a signature.
  * ─────────────────────────────────────────────────────────────── */
@@ -24,7 +24,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   if (!(await env.DEPOSIT_LIMIT.limit({ key: request.headers.get("cf-connecting-ip") ?? "unknown" })).success) return json({ error: "Too many tries. Wait a minute." }, 429);
   const b = (await bodyOf(request)) ?? {};
   const at = new Date().toISOString();
-  const done = await sign(c, { name: b.name, email: b.email, agree: b.agree, seen: b.hash, ip: request.headers.get("cf-connecting-ip") ?? "", ua: request.headers.get("user-agent") ?? "" }, at);
+  const done = await sign(c, { name: b.name, email: b.email, agree: b.agree, seen: b.hash, mark: b.mark, typed: b.typed, ip: request.headers.get("cf-connecting-ip") ?? "", ua: request.headers.get("user-agent") ?? "" }, at);
   if ("error" in done) return json({ error: done.error }, done.status);
   await writeContract(env.INBOX, s, done);
   const sig = done.signed!;
@@ -33,5 +33,5 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     sendClient(env.CLIENT_EMAIL, sig.email, signedMail(done)),
     alertHello(env.EMAIL, `Signed: ${done.to.name}`, [`${sig.name} (${sig.email}) signed the contract for ${done.to.name}.`, `SHA-256 ${sig.hash}`, "", "Leads: https://juliangigola.com/admin/leads"], { name: sig.name, email: sig.email }),
   ]);
-  return json({ signed: { name: sig.name, at: sig.at, hash: sig.hash }, mailed });
+  return json({ signed: { name: sig.name, at: sig.at, hash: sig.hash, mark: sig.mark ?? null }, mailed });
 }
