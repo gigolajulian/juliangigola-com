@@ -183,7 +183,7 @@ export function TodayDesk({ leads, size, open, show }: { leads: LeadSummary[]; s
           <VStack gap={6}>
             <Text type="large" color="secondary">{line ? `${line[0].toUpperCase()}${line.slice(1)}.` : "Nothing on the books this week."}</Text>
             <Card padding={3}>
-              <Grid columns={4} gap={2}>
+              <Grid columns={size === "phone" ? 2 : 4} gap={2}>
                 <Stat v={moves.length} sub="on you" />
                 <Stat v={shoots || !calls ? many(shoots, "shoot") : many(calls, "call")} sub={shoots && calls ? `and ${many(calls, "call")}` : "this week"} />
                 <Stat v={m ? cash(m.available ?? 0) : "–"} sub={m ? (m.pending ? `${cash(m.pending)} on the way` : "Stripe") : typeof money === "string" ? money : "Asking Stripe"} />
