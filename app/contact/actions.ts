@@ -321,7 +321,7 @@ async function pickAttachments(picks: string[], assets?: { fetch: typeof fetch }
     picks.map(async (src, i) => {
       try {
         const sized = imageLoader({ src, width: 1080, quality: 82 });
-        const path = sized.replace(/^\/cdn-cgi\/image\/[^/]+\//, "");
+        const path = sized.replace(/^(?:https?:\/\/[^/]+)?\/cdn-cgi\/image\/[^/]+\//, "");
         const signal = AbortSignal.timeout(8000);
         const res = /^https?:/.test(path)
           ? await fetch(path, {

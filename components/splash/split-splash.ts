@@ -41,8 +41,30 @@ export function split(sizes: string[][], heroes: { d: [number, string][]; l: [nu
   hero.src = root.dataset.theme === "light" ? rung(heroes.l) : rung(heroes.d);
   layer.append(win, hero);
 
+  /* A frame the resizer will not give is asked for again as its plain
+     file, as `image-fallback.tsx` does once the page is up: a blocker
+     eats `/cdn-cgi/`, and on a branch preview a photograph only the branch
+     has 404s on the live zone (`image-loader.ts`, `ORIGIN`). Marked the
+     same way, so the two never swap one picture twice. */
+  const orPlain = (i: HTMLImageElement) => {
+    const rest = /[/]cdn-cgi[/]image[/][^/]+[/](.+)$/.exec(i.src)?.[1];
+    return i.decode().catch((e) => {
+      if (!rest) throw e;
+      if (i.dataset.plain === undefined) {
+        i.dataset.plain = "";
+        i.src = rest.startsWith("http") ? rest : `/${rest}`;
+      }
+      // Firefox refuses a decode() asked for in the same turn as the new src: wait for the file itself
+      return new Promise((ok, no) => {
+        if (i.complete && i.naturalWidth > 0) return ok(0);
+        i.onload = ok;
+        // its `error` for the refused one comes after this in Firefox, the new file still on its way
+        i.onerror = () => i.complete && no();
+      }).then(() => i.decode());
+    });
+  };
   const ready = new Set<HTMLImageElement>();
-  hero.decode().then(() => ready.add(hero), () => {});
+  orPlain(hero).then(() => ready.add(hero), () => {});
   /* The window's own width in device pixels (the same sum as below), and
      the copy that covers it with room: the 640 only while it holds 1.2
      pixels to each one drawn. Always the 640 was soft on a laptop: a
@@ -54,7 +76,7 @@ export function split(sizes: string[][], heroes: { d: [number, string][]; l: [nu
     i.alt = "";
     i.fetchPriority = "high";
     i.src = winPx * 1.2 <= 640 ? f[0] : f[1];
-    i.decode().then(() => ready.add(i), () => {});
+    orPlain(i).then(() => ready.add(i), () => {});
     win.append(i);
     return i;
   });

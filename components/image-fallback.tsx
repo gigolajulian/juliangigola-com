@@ -18,11 +18,16 @@ import * as React from "react";
  *
  * Marked once so a picture that is genuinely missing fails quietly rather
  * than looping.
+ *
+ * A picture in the page's HTML can fail before this mounts, and its
+ * `error` is gone by then: on a branch preview a photograph that exists
+ * only on the branch 404s on the live zone within a few milliseconds
+ * (`image-loader.ts`, `ORIGIN`), and stayed an empty box. So the ones
+ * already broken are swept once on mount.
  * ─────────────────────────────────────────────────────────────── */
 export function ImageFallback() {
   React.useEffect(() => {
-    const onError = (e: Event) => {
-      const img = e.target;
+    const plain = (img: EventTarget | null) => {
       if (!(img instanceof HTMLImageElement)) return;
       if (img.dataset.plain !== undefined) return;
       const from = img.currentSrc || img.src;
@@ -32,7 +37,9 @@ export function ImageFallback() {
       img.srcset = "";
       img.src = rest.startsWith("http") ? rest : `/${rest}`;
     };
+    const onError = (e: Event) => plain(e.target);
     window.addEventListener("error", onError, true);
+    for (const img of Array.from(document.images)) if (img.complete && img.naturalWidth === 0) plain(img);
     return () => window.removeEventListener("error", onError, true);
   }, []);
   return null;
