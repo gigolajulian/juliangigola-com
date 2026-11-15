@@ -448,6 +448,9 @@ function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: number 
   );
 }
 
+// `?viewfx`: the curve the toolbar travels on between its row and the header.
+const MERGE = "cubic-bezier(.65,0,.35,1)";
+
 /** Writes or clears `?view=canvas` on the address in place, with no new history entry. */
 const viewUrl = (canvas: boolean) => {
   const u = new URL(location.href);
@@ -481,24 +484,59 @@ export function V3Work({
      were. `?view=canvas` opens on it. The address carries it while the canvas
      is on, so Back from a project it opened lands on the canvas again. */
   const [canvas, setCanvas] = React.useState(false);
-  /* `?viewfx=fade|settle` prototype (Julian, 2026-11-14): the canvas fades in
-     over the view and out again instead of cutting. `leaving` keeps it up for the fade. */
-  const [fx, setFx] = React.useState("");
+  /* `?viewfx=1` prototype (Julian, 2026-11-14): the site header stays over the
+     canvas, the view buttons travel up into it (the dock they use once the grid
+     scrolls), the chips slide up under it, and the canvas fades in over the view
+     and out again. `leaving` keeps it up for the fade; `docked` holds the view
+     buttons in the header; `barFrom` is how far below the header the chips start. */
+  const [fx, setFx] = React.useState(false);
   const [leaving, setLeaving] = React.useState(false);
+  const [docked, setDocked] = React.useState(false);
+  const [barFrom, setBarFrom] = React.useState(-24);
+  const viewsFrom = React.useRef<DOMRect | null>(null);
+  const dock = React.useCallback(() => setDocked(true), []);
   React.useEffect(() => {
     const q = new URLSearchParams(location.search);
     /* eslint-disable react-hooks/set-state-in-effect */
     if (q.get("view") === "canvas") setCanvas(true);
-    setFx(q.get("viewfx") ?? "");
+    setFx(q.has("viewfx") && q.get("viewfx") !== "0");
     /* eslint-enable react-hooks/set-state-in-effect */
   }, []);
   const closeCanvas = React.useCallback(() => {
     viewUrl(false);
     setCanvas(false);
-    if (!fx || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (!fx) return;
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return setDocked(false);
+    // The view buttons travel back down to their row while the canvas fades.
+    const to = document.querySelector("#p-work .wtools .wviews")?.getBoundingClientRect();
+    const el = document.querySelector<HTMLElement>("#hdr-tools .wviews");
+    const r = el?.getBoundingClientRect();
+    if (el && r && to && to.top > r.bottom)
+      el.animate([{ transform: "none" }, { transform: `translate(${to.left - r.left}px,${to.top - r.top}px)` }], { duration: 260, easing: MERGE, fill: "forwards" });
     setLeaving(true);
-    setTimeout(() => setLeaving(false), 260);
+    setTimeout(() => {
+      setLeaving(false);
+      setDocked(false);
+    }, 260);
   }, [fx]);
+  /* The header is solid and held in view while the canvas is under it; `--cv-top` is where the canvas's bar starts. */
+  React.useEffect(() => {
+    if (!fx || !canvas) return;
+    const root = document.documentElement;
+    root.style.setProperty("--cv-top", `${document.querySelector(".site-hdr")?.getBoundingClientRect().bottom ?? 56}px`);
+    root.toggleAttribute("data-cv", true);
+    return () => root.removeAttribute("data-cv");
+  }, [fx, canvas]);
+  // Docked: the view buttons arrive in the header from where they sat in the row, and take focus.
+  React.useLayoutEffect(() => {
+    if (!docked) return;
+    const el = document.querySelector<HTMLElement>("#hdr-tools .wviews");
+    if (!el) return;
+    el.querySelector<HTMLElement>('[aria-pressed="true"]')?.focus({ preventScroll: true });
+    const f = viewsFrom.current, r = el.getBoundingClientRect();
+    if (f && !matchMedia("(prefers-reduced-motion: reduce)").matches)
+      el.animate([{ transform: `translate(${f.left - r.left}px,${f.top - r.top}px)` }, { transform: "none" }], { duration: 550, easing: MERGE });
+  }, [docked]);
   // Open project: the canvas comes down, the address keeps `?view=canvas` for Back.
   const leaveCanvas = React.useCallback(() => setCanvas(false), []);
   /* Grid, strip and color views, and the discipline chips: the covers on
@@ -518,6 +556,12 @@ export function V3Work({
   const go = (v: typeof view | "canvas") => {
     if (v === "canvas") {
       viewUrl(true);
+      if (fx) {
+        const hb = document.querySelector(".site-hdr")?.getBoundingClientRect().bottom ?? 0;
+        const c = chips.current?.getBoundingClientRect();
+        setBarFrom(c && c.top > hb ? c.top - hb : -24);
+        viewsFrom.current = pin ? null : (tools?.querySelector(".wviews")?.getBoundingClientRect() ?? null);
+      }
       setCanvas(true);
     } else if (canvas) {
       closeCanvas();
@@ -1226,7 +1270,7 @@ export function V3Work({
             </div>
           </div>
         ) : null}
-        {pin &&
+        {(pin || docked) &&
           document.getElementById("hdr-tools") &&
           createPortal(
             <div className={hs ? "htools lbl open" : "htools lbl"}>
@@ -1280,6 +1324,8 @@ export function V3Work({
                 <V3Canvas
                   fx={fx}
                   out={leaving}
+                  barFrom={barFrom}
+                  onShown={dock}
                   list={field}
                   onClose={closeCanvas}
                   onLeave={leaveCanvas}
@@ -1293,7 +1339,7 @@ export function V3Work({
                           </button>
                         ))}
                       </div>
-                      {views}
+                      {fx ? null : views}
                     </>
                   }
                 />

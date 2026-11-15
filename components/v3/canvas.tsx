@@ -32,14 +32,28 @@ const shape = (r: number) => (r > 1.02 ? 4 / 3 : r);
 const mod = (a: number, b: number) => ((a % b) + b) % b;
 
 /** `bar`: the discipline chips and the view row. `onLeave`: Open project takes the canvas down.
-    `fx`, `out`: the `?viewfx` prototype's way in, and its fade out. */
-export function V3Canvas({ list, onClose, onLeave, bar, fx, out }: { list: WorkItem[]; onClose: () => void; onLeave: () => void; bar: React.ReactNode; fx?: string; out?: boolean }) {
+    `fx`, `out`, `barFrom`, `onShown`: the `?viewfx` prototype. The canvas sits under the site
+    header, comes in once its frames are laid out (`onShown`), its bar rising from `barFrom` px
+    below, and fades out. */
+export function V3Canvas({ list, onClose, onLeave, bar, fx, out, barFrom, onShown }: { list: WorkItem[]; onClose: () => void; onLeave: () => void; bar: React.ReactNode; fx?: boolean; out?: boolean; barFrom?: number; onShown?: () => void }) {
   const field = React.useRef<HTMLDivElement>(null);
   /* Covers until `/canvas.json` lands, then every frame, projects in the page's order. */
   const [all, setAll] = React.useState<Frames | null>(kept);
   // `?viewfx`: the canvas waits for its frames (or for the fetch to fail) and then comes in once.
   const [ready, setReady] = React.useState(!!kept);
   const fxRef = React.useRef(fx);
+  // Two frames after the field is laid out, so building it does not land on the first frame of the motion.
+  const [shown, setShown] = React.useState(false);
+  React.useEffect(() => {
+    if (!ready) return;
+    let id = requestAnimationFrame(() => {
+      id = requestAnimationFrame(() => {
+        setShown(true);
+        onShown?.();
+      });
+    });
+    return () => cancelAnimationFrame(id);
+  }, [ready, onShown]);
   React.useEffect(() => {
     if (kept) return;
     let live = true;
@@ -354,7 +368,7 @@ export function V3Canvas({ list, onClose, onLeave, bar, fx, out }: { list: WorkI
   }
 
   return (
-    <div className={`cv${fx ? (ready ? ` fx-${fx}` : " wait") : ""}${out ? " out" : ""}`} data-lenis-prevent role="dialog" aria-modal="true" aria-label="Portfolio canvas">
+    <div className={`cv${fx ? ` fx ${shown ? "in" : "wait"}` : ""}${out ? " out" : ""}`} style={{ "--from-y": `${barFrom ?? -24}px` } as React.CSSProperties} data-lenis-prevent role="dialog" aria-modal="true" aria-label="Portfolio canvas">
       <div className="cv-field" ref={field} />
       {/* An open frame has its own Back; the bar would sit under it. */}
       <div className="cv-top lbl" style={opened ? { visibility: "hidden" } : undefined}>
