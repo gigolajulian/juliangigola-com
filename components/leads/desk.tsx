@@ -8,7 +8,7 @@
  *
  * Home is the table-filter shape: Your move, This week, Waiting on them,
  * with the open lead beside the list when wide. Phone (≤760) gets a tab
- * bar, mid (≤1200) the side nav and a stacked header. The lead page is
+ * bar, mid (<1180) a stacked header; under 1280 the side nav is an icon rail. The lead page is
  * its own Astryx layout (components/leads/lead.tsx).
  * ─────────────────────────────────────────────────────────────── */
 
@@ -201,6 +201,35 @@ function TabBar({ view, go, needs }: { view: View; go: (v: View) => void; needs:
   );
 }
 
+/* The iPad's nav: the tab bar's cells stood on end, 84 wide, so the page keeps the width. */
+const railCell: React.CSSProperties = { ...tabCell, flex: "none", width: 76, minHeight: 58, textDecoration: "none" };
+
+function Rail({ needs, view, go }: { needs: number; view: View; go: (v: View) => void }) {
+  const face = (label: string, glyph: React.ComponentType<React.SVGProps<SVGSVGElement>>, on: boolean, count?: number) => (
+    <>
+      <span style={tabPill(on)}>
+        <Icon icon={glyph} size="md" color={on ? "accent" : "secondary"} />
+        {count ? <span style={tabCount}><Badge label={count} variant="teal" /></span> : null}
+      </span>
+      <Text type="supporting" size="xsm" weight="medium" color={on ? "primary" : "secondary"}>{label}</Text>
+    </>
+  );
+  const items: [string, React.ComponentType<React.SVGProps<SVGSVGElement>>, View, boolean][] = [
+    ["New", PlusGlyph, "new", view === "new"],
+    ["Today", HomeGlyph, "today", view === "today"],
+    ...SECTIONS.map(([to, label]): [string, React.ComponentType<React.SVGProps<SVGSVGElement>>, View, boolean] => [label, GLYPH[to]!, to, sectionOf(view)?.[0] === to]),
+  ];
+  return (
+    <nav aria-label="Desk" style={{ height: "100%", overflowY: "auto", display: "flex", flexDirection: "column", alignItems: "center", gap: 4, paddingBlock: 12 }}>
+      {items.map(([label, glyph, to, on]) => (
+        <button key={to} type="button" style={railCell} aria-current={on ? "page" : undefined} onClick={() => go(to)}>{face(label, glyph, on, to === "leads" ? needs : undefined)}</button>
+      ))}
+      <span style={{ flex: 1 }} />
+      {LINKS.map(([label, href, glyph]) => <a key={label} href={href} style={railCell} aria-label={label}>{face("Site", glyph, false)}</a>)}
+    </nav>
+  );
+}
+
 export function LeadsDesk() {
   const [leads, setLeads] = React.useState<LeadSummary[] | null>(null);
   const [error, setError] = React.useState<string | null>(null);
@@ -220,7 +249,9 @@ export function LeadsDesk() {
   // When the list was loaded: groups by date without reading the clock during render.
   const [at, setAt] = React.useState(0);
   const isPhone = useMediaQuery("(max-width: 760px)");
-  const isMid = useMediaQuery("(max-width: 1200px)");
+  // Wide from 1180, an iPad on its side: the rail below is what leaves room for the open lead.
+  const isMid = useMediaQuery("(max-width: 1179px)");
+  const railed = useMediaQuery("(max-width: 1279px)");
   const size: Size = isPhone ? "phone" : isMid ? "mid" : "wide";
 
   const call = inboxCall;
@@ -460,7 +491,9 @@ export function LeadsDesk() {
       <div data-astryx-desk="" style={{ height: "100dvh", textTransform: "none", letterSpacing: "normal" }}>
         {size === "phone"
           ? <Layout height="fill" content={shown} footer={lead ? undefined /* a lead brings its own action bar */ : <TabBar view={screen} go={show} needs={needs} />} />
-          : <Layout height="fill" start={<LayoutPanel width={260} padding={0} label="Desk" /* SideNav draws 260 wide by default; a narrower panel clipped the counts. */><Nav needs={needs} view={screen} go={show} /></LayoutPanel>} content={shown} />}
+          : <Layout height="fill" start={railed
+              ? <LayoutPanel width={84} padding={0} hasDivider label="Desk"><Rail needs={needs} view={screen} go={show} /></LayoutPanel>
+              : <LayoutPanel width={260} padding={0} label="Desk" /* SideNav draws 260 wide by default; a narrower panel clipped the counts. */><Nav needs={needs} view={screen} go={show} /></LayoutPanel>} content={shown} />}
       </div>
     </Theme>
   );
