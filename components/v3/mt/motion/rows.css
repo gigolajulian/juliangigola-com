@@ -69,7 +69,8 @@ html[data-mt-held] .mt-motion .mt-mopg li[data-on]{opacity:1}
 html[data-mt-held] .mt-motion .mt-mopg li[data-on]::after{transform:none}
 /* the client mark: top right only, small, never at the bottom (Julian) */
 html[data-mt-held] .mt-motion .mt-molg{position:absolute;z-index:4;top:calc(96 * var(--u));right:calc(var(--fx) + 48 * var(--u));height:calc(28 * var(--u));aspect-ratio:var(--ar);background:rgb(var(--on-photo) / .8);-webkit-mask:var(--m) center/contain no-repeat;mask:var(--m) center/contain no-repeat;pointer-events:none;animation:mt-dev-op .8s cubic-bezier(.4,0,.2,1) both}
-html[data-mt-held] .mt-motion .mt-mobar{position:absolute;z-index:4;left:0;right:0;bottom:0;height:2px;background:rgb(var(--on-photo));transform-origin:0 50%;transform:scaleX(var(--p,0))}
+/* how far through the films: on the right edge, under the page's own scroll thumb, one segment a film */
+html[data-mt-held] .mt-motion .mt-mobar{position:absolute;z-index:4;right:0;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,rgb(var(--on-photo)) calc(var(--p,0) * 100%),rgb(var(--on-photo) / .24) 0);-webkit-mask:repeating-linear-gradient(to bottom,#000 0 calc(100% / var(--n,4) - 6px),transparent 0 calc(100% / var(--n,4)));mask:repeating-linear-gradient(to bottom,#000 0 calc(100% / var(--n,4) - 6px),transparent 0 calc(100% / var(--n,4)))}
 html:not([data-mt-held]) .mt-motion :is(.mt-mopg,.mt-molg,.mt-mobar){display:none}
 
 /* Snap rows: the record now comes fully out of the bottom (118px), more than the static row's 72px of room. */

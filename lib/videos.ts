@@ -227,6 +227,12 @@ export const captionsOff = (w: Window | null | undefined) => {
   w?.postMessage(JSON.stringify({ event: "command", func: "setOption", args: ["captions", "track", {}] }), "*");
 };
 
+/** Vimeo: ask the player to report playback. It only answers once it is really playing, so a block page or an
+    error inside the frame (Vimeo's "couldn't verify the security of your connection") never counts as a film. */
+export const vimeoListen = (w: Window | null | undefined) => w?.postMessage(JSON.stringify({ method: "addEventListener", value: "playProgress" }), "*");
+/** true for the Vimeo message that says frames are moving */
+export const vimeoPlays = (m: { event?: string; data?: { seconds?: number } } | null | undefined) => m?.event === "playProgress" && (m.data?.seconds ?? 0) > 0;
+
 /** Where the video lives, for the visitor who would rather watch it there. */
 export const watchUrl = (v: Video): string =>
   v.provider === "youtube"

@@ -84,7 +84,8 @@ export function MtFoot() {
         </div>
         {/* shortcut: the phone photo row is gone (Julian, 2026-11-14) but motion/foot.ts still asks for this node; drop both when the desktop wall is replaced */}
         <div className="mt-frow" aria-hidden />
-        <div className="mt-fscrim" aria-hidden />
+        {/* under the cutout group: the letters' own colour at rest, nearly gone while the phrase is pointed at */}
+        <div className="mt-fveil" aria-hidden />
         <nav className="mt-fcols lbl" aria-label="Footer">
           <div>
             <p className="mute">Inquire</p>
@@ -112,6 +113,9 @@ export function MtFoot() {
             <p><span className="dk">San Francisco Bay Area</span><span className="po">SF Bay Area</span></p>
           </div>
         </nav>
+        {/* the ground and the phrase are one group, blended onto the still, so the letters can open onto it (desktop) */}
+        <div className="mt-fknock">
+        <div className="mt-fscrim" aria-hidden />
         <div className="mt-phrase">
           <button type="button" className="mt-ph-btn" aria-label="Contact me, opens the inquiry card" onClick={() => cards.inquire("footer")}>
             <span className="mt-ph-row">
@@ -120,6 +124,7 @@ export function MtFoot() {
               <Phrase copy />
             </span>
           </button>
+        </div>
         </div>
         <div className="mt-fline lbl mute">
           <span>&copy; {year} Julian Gigola</span>

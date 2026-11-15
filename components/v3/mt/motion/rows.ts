@@ -1,5 +1,5 @@
 import { shiftScroll } from "@/components/v3/smooth-scroll";
-import { captionsOff } from "@/lib/videos";
+import { captionsOff, vimeoListen, vimeoPlays } from "@/lib/videos";
 import { clamp, smooth, type Driver } from "./engine";
 
 /* The held row's travel: it eases away from its first item and into its last (0.4 of the scroll's speed at the two ends). */
@@ -201,7 +201,7 @@ function films(): Driver {
           f.setAttribute("aria-hidden", "true");
           f.onload = () => {
             if (yt) (f.contentWindow?.postMessage(JSON.stringify({ event: "listening", id: 1 }), "*"), captionsOff(f.contentWindow));
-            else readyT = window.setTimeout(() => f.setAttribute("data-ready", ""), 2500);
+            else vimeoListen(f.contentWindow);
           };
           film.append(f);
         };
@@ -211,10 +211,13 @@ function films(): Driver {
         if (!pv || e.source !== pv.contentWindow) return;
         let m;
         try { m = typeof e.data === "string" ? JSON.parse(e.data) : e.data; } catch { return; }
+        const f = pv;
+        // Vimeo: the poster lifts only when the player says frames are moving
+        if (m?.event === "ready") return void vimeoListen(f.contentWindow);
+        if (vimeoPlays(m)) return void f.setAttribute("data-ready", "");
         const state = m?.event === "onStateChange" ? m.info : m?.event === "infoDelivery" ? m.info?.playerState : undefined;
         if (typeof state !== "number") return;
         clearTimeout(readyT);
-        const f = pv;
         if (state === 1) captionsOff(f.contentWindow);
         if (state === 1) readyT = window.setTimeout(() => f.setAttribute("data-ready", ""), 2500);
         else f.removeAttribute("data-ready");

@@ -183,7 +183,8 @@
 [data-mtscroll] .mt-fwall img{object-fit:cover;object-position:50% 30%}
 [data-mtscroll] .mt-fcol{position:absolute;top:0;left:calc((var(--c) * 162 - 9) * var(--u));width:calc(150 * var(--u));display:flex;flex-direction:column;gap:calc(12 * var(--u))}
 [data-mtscroll] .mt-fcol figure,[data-mtscroll] .mt-frow figure{position:relative;margin:0;flex:none;aspect-ratio:3/4;overflow:hidden;background:var(--card)}
-[data-mtscroll] .mt-frow{display:none}
+[data-mtscroll] .mt-frow,[data-mtscroll] .mt-fveil{display:none}
+[data-mtscroll] .mt-fknock{display:contents}
 [data-mtscroll] .mt-fscrim{position:absolute;inset:0;background:linear-gradient(color-mix(in srgb,var(--bg) 55%,transparent),color-mix(in srgb,var(--bg) 62%,transparent) 45%,var(--bg) 94%)}
 [data-mtscroll] .mt-ftime .t{color:var(--ink)}
 [data-mtscroll] .mt-fline>span{white-space:nowrap}
@@ -693,26 +694,38 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
 }
 
 /* Footer, desktop (Julian, 2026-11-14): one compact screen. The still shows clean at the top, under the links, and
-   fades down into the ground at "Contact me". Pointing at the phrase lifts that fade, so the still shows under it,
-   and tints the words. */
+   fades down into the ground at "Contact me". Pointing at the phrase opens its letters onto the still: the ground
+   and the words are one group blended onto the photo (lighten on the light ground, darken on the dark one), so a
+   letter darker or lighter than anything in the photo shows the photo. A veil in the letters' own grey sits under
+   the group: solid at rest (the words read as plain grey), nearly gone when pointed at (a light wash is the tint). */
 @media (min-width:1024px) and (min-height:600px){
   [data-mtscroll] .mt-foot .mt-stage{height:min(max(100svh,600px),calc(800 * var(--u)))}
-  /* the bottom band stays; the long fade is its own layer so the hover can lift it */
-  [data-mtscroll] .mt-fscrim{background:linear-gradient(transparent 80%,var(--bg) 96%)}
-  [data-mtscroll] .mt-fscrim::before{content:"";position:absolute;inset:0;background:linear-gradient(rgb(0 0 0 / .46),rgb(0 0 0 / .26) 28%,transparent 46%,color-mix(in srgb,var(--bg) 70%,transparent) 58%,var(--bg) 74%);transition:opacity .6s cubic-bezier(.23,1,.32,1)}
-  [data-mtscroll] .mt-fscrim::after{content:"";position:absolute;inset:0;background:linear-gradient(rgb(0 0 0 / .46),rgb(0 0 0 / .26) 28%,transparent 46%);opacity:0;transition:opacity .6s cubic-bezier(.23,1,.32,1)}
-  [data-mtscroll] .mt-foot[data-hot] .mt-fscrim::before{opacity:0}
-  [data-mtscroll] .mt-foot[data-hot] .mt-fscrim::after{opacity:1}
+  [data-mtscroll] .mt-fwall::after{content:"";position:absolute;inset:0;background:linear-gradient(rgb(0 0 0 / .46),rgb(0 0 0 / .26) 28%,transparent 46%)}
+  [data-mtscroll] .mt-fveil{display:block;position:absolute;left:0;right:0;bottom:0;height:calc(330 * var(--u));background:var(--phr);transition:opacity .7s cubic-bezier(.4,0,.2,1)}
+  [data-mtscroll] .mt-fknock{display:block;position:absolute;inset:0;z-index:1;isolation:isolate;mix-blend-mode:darken}
+  :root[data-mtscroll][data-theme="light"] .mt-fknock{mix-blend-mode:lighten}
+  /* the ground is solid from above the letters down, so the veil never shows around them */
+  /* measured from the bottom, like the phrase: solid to above the tallest letter (the veil's top edge), then the fade */
+  [data-mtscroll] .mt-fscrim{background:linear-gradient(to top,var(--bg) calc(334 * var(--u)),color-mix(in srgb,var(--bg) 70%,transparent) calc(420 * var(--u)),transparent calc(540 * var(--u)))}
+  [data-mtscroll] .mt-ph-btn{color:#fff!important}
+  :root[data-mtscroll][data-theme="light"] .mt-ph-btn{color:#000!important}
+  [data-mtscroll] .mt-ph-btn:focus-visible .mt-ph{color:inherit;-webkit-text-stroke:0}
+  @media (prefers-color-scheme:light){
+    :root[data-mtscroll]:not([data-theme="dark"]) .mt-fknock{mix-blend-mode:lighten}
+    :root[data-mtscroll]:not([data-theme="dark"]) .mt-ph-btn{color:#000!important}
+  }
+  [data-mtscroll] .mt-foot:is([data-hot],:has(.mt-ph-btn:is(:hover,:focus-visible))) .mt-fveil{opacity:.16;transition-duration:1.1s}
+  [data-mtscroll] :is(.mt-fcols,.mt-fline){z-index:2}
   /* the links sit on the photo in both themes */
   [data-mtscroll] .mt-fcols{color:rgb(var(--on-photo));border-top-color:rgb(var(--on-photo) / .28);text-shadow:0 0 2px rgb(0 0 0 / .5),0 1px 14px rgb(0 0 0 / .55)}
   [data-mtscroll] .mt-fcols .mute{color:rgb(var(--on-photo) / .66)}
-  [data-mtscroll] .mt-ph-btn{transition:color .5s cubic-bezier(.23,1,.32,1)}
-  [data-mtscroll] .mt-foot[data-hot] .mt-ph-btn{color:color-mix(in srgb,var(--accent) 72%,transparent)!important}
   /* shortcut: the old pointer spot is hidden, not removed; foot.ts still draws it. Drop that code if this look stays. */
   html[data-mt-motion] .mt-foot .mt-fcut{display:none}
 }
 
-/* seams: less page between the quote band and About */
+/* quote band: close under Book online, room under it before About (Julian, 2026-11-14) */
 @media (min-width:1024px) and (min-height:600px){
-  [data-mtscroll] .mt-quote>.mt-frame{padding-bottom:calc(64 * var(--u))}
+  [data-mtscroll] .mt-book .mt-frame{padding-bottom:calc(36 * var(--u))}
+  [data-mtscroll] .mt-quote-col{padding-top:calc(30 * var(--u))}
+  [data-mtscroll] .mt-quote>.mt-frame{padding-bottom:calc(150 * var(--u))}
 }
