@@ -60,7 +60,7 @@ export function Galleries({ galleries, lead, open }: { galleries: Row[]; lead: s
               <Button label="Open" variant="ghost" size="sm" onClick={() => open(p.token)} />
             </HStack>
             {/* Where it stands at a glance (Julian 2026-11-15), the same timeline as the gallery itself. */}
-            {p.sentAt || p.firstViewAt || p.deliveredAt ? <Timeline p={p} /> : null}
+            {p.sentAt || p.firstViewAt || p.submittedAt || p.pulledAt || p.deliveredAt ? <Timeline p={p} /> : null}
           </React.Fragment>
         );
       })}
