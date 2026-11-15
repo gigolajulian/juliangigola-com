@@ -29,6 +29,7 @@ import { TextInput } from "@astryxdesign/core/TextInput";
 import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/SegmentedControl";
 import { ProgressBar } from "@astryxdesign/core/ProgressBar";
 import { StatusDot } from "@astryxdesign/core/StatusDot";
+import { Badge } from "@astryxdesign/core/Badge";
 import { Tab, TabList } from "@astryxdesign/core/TabList";
 import { SignIn } from "@/components/leads/setup";
 import { LeadDesk } from "@/components/leads/lead";
@@ -43,7 +44,8 @@ import { NewLeadDesk } from "@/components/leads/new-lead";
 import { BoardDesk } from "@/components/leads/board";
 import { CalendarDesk } from "@/components/leads/calendar";
 import { MoneyDesk } from "@/components/leads/money";
-import { AsideDesk, LicencesDesk } from "@/components/leads/lists";
+import { ASIDE, AsideDesk, LicencesDesk } from "@/components/leads/lists";
+import { About, about, Age, Next } from "@/components/leads/row";
 import { InvoicesDesk } from "@/components/leads/invoices";
 import { PanelDesk, StatsDesk } from "@/components/leads/numbers";
 import { DeviceDesk, HoursDesk, TemplatesDesk } from "@/components/leads/setup-panels";
@@ -115,14 +117,6 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
   return <Text type="code" size="xsm" color="secondary" weight="medium">{children}</Text>;
 }
 
-/** The one next step in teal; money stuck as an error dot; grey when the ball is with them. */
-function Next({ l, waiting }: { l: LeadSummary; waiting: boolean }) {
-  const bad = l.flags?.includes("stuck") ? "Deposit stuck" : l.flags?.includes("no-deposit") ? "No deposit" : null;
-  if (bad) return <Text type="code" size="sm" color="secondary"><StatusDot variant="error" label="Money stuck" /> {bad}</Text>;
-  const step = nextStep(l);
-  if (!step) return waiting ? <Text type="code" size="sm" color="secondary">Waiting on them</Text> : null;
-  return <Text type="code" size="sm" color="accent">{step} →</Text>;
-}
 
 function Stage({ l }: { l: LeadSummary }) {
   const at = ROAD.indexOf(l.stage);
@@ -180,22 +174,30 @@ function More({ go }: { go: (v: View) => void }) {
   );
 }
 
-function TabBar({ view, go }: { view: View; go: (v: View) => void }) {
+/* The phone's tab bar. Astryx has no bottom bar, so each tab is a plain button: the whole cell is the
+ * target (56px tall), a pill marks the tab that is on (not color alone), and Leads carries the count. */
+const tabCell: React.CSSProperties = { flex: 1, minHeight: 56, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2, background: "none", border: 0, padding: 0, cursor: "pointer", touchAction: "manipulation" };
+const tabPill = (on: boolean): React.CSSProperties => ({ position: "relative", width: 60, height: 30, borderRadius: 15, display: "grid", placeItems: "center", background: on ? "color-mix(in oklch, var(--color-accent) 20%, transparent)" : "transparent" });
+const tabCount: React.CSSProperties = { position: "absolute", top: -4, insetInlineEnd: 2 };
+
+function TabBar({ view, go, needs }: { view: View; go: (v: View) => void; needs: number }) {
   const tabs: [string, React.ComponentType<React.SVGProps<SVGSVGElement>>, View][] = [["Today", HomeGlyph, "today"], ["Leads", InboxGlyph, "leads"], ["Calendar", CalendarGlyph, "calendar"], ["More", MoreGlyph, "more"]];
   return (
-    <HStack gap={0} paddingBlockEnd={1}>
+    <nav aria-label="Desk" style={{ display: "flex", paddingInline: 8, paddingBlockStart: 4 }}>
       {tabs.map(([label, glyph, to]) => {
-        const on = to === view;
+        // The Leads tab stays on for its pages (Put aside); More for what it opens.
+        const on = to === view || (to === "leads" && view === "aside");
         return (
-        <StackItem key={label} size="fill">
-          <VStack gap={0} hAlign="center">
-            <IconButton label={label} variant="ghost" onClick={() => go(to)} icon={<Icon icon={glyph} color={on ? "accent" : "secondary"} />} />
-            <Text type="supporting" size="2xs" color={on ? "accent" : "secondary"}>{label}</Text>
-          </VStack>
-        </StackItem>
+          <button key={label} type="button" style={tabCell} aria-current={on ? "page" : undefined} onClick={() => go(to)}>
+            <span style={tabPill(on)}>
+              <Icon icon={glyph} size="md" color={on ? "accent" : "secondary"} />
+              {to === "leads" && needs ? <span style={tabCount}><Badge label={needs} variant="teal" /></span> : null}
+            </span>
+            <Text type="supporting" size="xsm" weight="medium" color={on ? "primary" : "secondary"}>{label}</Text>
+          </button>
         );
       })}
-    </HStack>
+    </nav>
   );
 }
 
@@ -285,7 +287,16 @@ export function LeadsDesk() {
   const newLead = size === "phone"
     ? <IconButton label="New lead" variant="secondary" onClick={() => show("new")} icon={<Icon icon={PlusGlyph} />} />
     : <Button label="New lead" variant="secondary" size="sm" onClick={() => show("new")} icon={<Icon icon={PlusGlyph} />} />;
-  const search = <TextInput value={query} onChange={setQuery} label="Find a lead" isLabelHidden placeholder="Name, email, shoot" size="sm" />;
+  const search = <TextInput value={query} onChange={setQuery} label="Find a lead" isLabelHidden placeholder="Name, email, shoot" size={size === "phone" ? "lg" : "sm"} />;
+  // Open or Put aside, under the title and search on both pages (it was a tab row above the title).
+  const openCount = live.filter((l) => groupOf(l) !== null).length;
+  const asideCount = (leads ?? []).filter((l) => ASIDE.some(([f]) => pass(l, f))).length;
+  const switcher = (
+    <SegmentedControl label="Open or put aside" value={screen === "aside" ? "aside" : "leads"} onChange={(v) => show(v as View)} layout={size === "wide" ? "hug" : "fill"} size={size === "phone" ? "lg" : "md"}>
+      <SegmentedControlItem value="leads" label={`Open ${openCount}`} />
+      <SegmentedControlItem value="aside" label={`Put aside ${asideCount}`} />
+    </SegmentedControl>
+  );
   const view = (
     <SegmentedControl label="View" value={board ? "board" : "list"} onChange={(v) => setBoard(v === "board")} size="sm">
       <SegmentedControlItem value="list" label="List" />
@@ -308,6 +319,7 @@ export function LeadsDesk() {
           {size === "wide" ? (
             <HStack gap={3} vAlign="center">
               <StackItem size="fill">{title}</StackItem>
+              <StackItem>{switcher}</StackItem>
               {search}
               {view}
               {newLead}
@@ -316,6 +328,7 @@ export function LeadsDesk() {
             <VStack gap={3}>
               <HStack gap={2} vAlign="center"><StackItem size="fill">{title}</StackItem>{newLead}</HStack>
               <HStack gap={3} vAlign="center"><StackItem size="fill">{search}</StackItem>{size === "mid" ? view : null}</HStack>
+              {switcher}
             </VStack>
           )}
         </LayoutHeader>
@@ -332,7 +345,7 @@ export function LeadsDesk() {
               if (!these.length) return null;
               return (
                 <VStack key={g} gap={1}>
-                  <Eyebrow>{name.toUpperCase()} · {these.length}</Eyebrow>
+                  <HStack gap={2} vAlign="center"><Text type="label" weight="semibold">{name}</Text><Text type="supporting">{these.length}</Text></HStack>
                   <List hasDividers>
                     {these.map((l) => (
                       <ListItem
@@ -341,11 +354,12 @@ export function LeadsDesk() {
                         isSelected={size === "wide" && l.id === sel?.id}
                         onClick={() => (size === "wide" ? setPick(l.id ?? null) : setOpen(l.id ?? null))}
                         startContent={<StatusDot variant={l.unread ? "accent" : "neutral"} label={l.unread ? "New" : "Read"} />}
-                        label={<HStack gap={2} vAlign="center"><StackItem size="fill"><Text type="large" weight="semibold">{l.name}</Text></StackItem><Text type="code" size="xsm" color="secondary">{ago(l.lastAt)}</Text></HStack>}
+                        label={<HStack gap={2} vAlign="center"><StackItem size="fill"><Text type="large" weight="semibold">{l.name}</Text></StackItem><Age l={l} /></HStack>}
                         description={
                           <VStack gap={1}>
-                            <Eyebrow>{[l.kind ? shootTag(l.kind)?.toUpperCase() : null, l.when ? date(l.when) : null, l.stage.toUpperCase()].filter(Boolean).join(" · ")}</Eyebrow>
-                            {l.snippet ? <Text type="body" color="secondary" maxLines={1}>{l.snippet}</Text> : null}
+                            <About>{about([l.kind ? shootTag(l.kind) : null, l.stage, l.when ? date(l.when) : null])}</About>
+                            {/* Their last words stay beside the list on wider screens; a phone row is three lines. */}
+                            {size !== "phone" && l.snippet ? <Text type="body" color="secondary" maxLines={1}>{l.snippet}</Text> : null}
                             <Next l={l} waiting={g === "waiting"} />
                           </VStack>
                         }
@@ -417,7 +431,7 @@ export function LeadsDesk() {
   const pages: Partial<Record<View, React.ReactNode>> = {
     invoices: <InvoicesDesk leads={live} call={call} open={openLead} changed={changed} />,
     licences: <LicencesDesk leads={live} open={openLead} />,
-    aside: <AsideDesk leads={leads ?? []} call={call} open={openLead} done={() => { setOpen(null); load(); }} tab={asideTab} setTab={setAsideTab} />,
+    aside: <AsideDesk leads={leads ?? []} call={call} open={openLead} done={() => { setOpen(null); load(); }} tab={asideTab} setTab={setAsideTab} top={switcher} />,
     stats: <StatsDesk call={call} />,
     traffic: <PanelDesk which="traffic" />,
     seo: <PanelDesk which="seo" />,
@@ -429,7 +443,8 @@ export function LeadsDesk() {
   };
   const page = lead ?? pages[screen] ?? (screen === "money" ? <MoneyDesk /> : screen === "calendar" ? <CalendarDesk leads={live.filter((l) => !l.archivedAt)} size={size} open={(l) => setOpen(l.id ?? null)} tab={calTab} setTab={setCalTab} /> : screen === "new" ? <NewLeadDesk call={call} leads={live} size={size} done={added} open={(l) => setOpen(l.id ?? null)} cancel={() => show("leads")} /> : screen === "today" && leads ? <TodayDesk leads={live} size={size} open={(l) => setOpen(l.id ?? null)} show={() => show("leads")} /> : home);
   const section = lead ? null : sectionOf(screen);
-  const shown = section && section[2].length > 1 ? (
+  // Leads carries its own Open / Put aside switch under the title; the other groups keep the tab row.
+  const shown = section && section[2].length > 1 && section[0] !== "leads" ? (
     <Layout
       height="fill"
       header={<LayoutHeader><TabList value={screen} onChange={(v) => show(v as View)} hasDivider layout="hug">{section[2].map(([label, v]) => <Tab key={v} value={v} label={label} />)}</TabList></LayoutHeader>}
@@ -444,7 +459,7 @@ export function LeadsDesk() {
       <style>{":root [data-astryx-desk][data-astryx-desk] *,:root [data-astryx-desk][data-astryx-desk] ::placeholder{text-transform:none}"}</style>
       <div data-astryx-desk="" style={{ height: "100dvh", textTransform: "none", letterSpacing: "normal" }}>
         {size === "phone"
-          ? <Layout height="fill" content={shown} footer={<TabBar view={screen} go={show} />} />
+          ? <Layout height="fill" content={shown} footer={<TabBar view={screen} go={show} needs={needs} />} />
           : <Layout height="fill" start={<LayoutPanel width={260} padding={0} label="Desk" /* SideNav draws 260 wide by default; a narrower panel clipped the counts. */><Nav needs={needs} view={screen} go={show} /></LayoutPanel>} content={shown} />}
       </div>
     </Theme>

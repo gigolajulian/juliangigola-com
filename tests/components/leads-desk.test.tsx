@@ -19,7 +19,7 @@ describe("LeadsDesk", () => {
     fireEvent.click(screen.getAllByText("Leads")[0]);
     expect(await screen.findByRole("heading", { level: 1, name: "Leads" })).toBeTruthy();
     expect((await screen.findAllByText("Ana")).length).toBeGreaterThan(0);
-    expect(screen.getByText(/YOUR MOVE/)).toBeTruthy();
+    expect(screen.getByText(/Your move/)).toBeTruthy();
   });
 
   it("asks for the key when the desk is not authorized", async () => {
