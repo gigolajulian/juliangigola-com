@@ -5,6 +5,11 @@ import { DepositStep, type DepositBody } from "@/components/booking/deposit-step
 vi.stubGlobal("fetch", vi.fn(() => Promise.reject(new Error("no network"))));
 afterEach(() => {
   delete window.Stripe;
+  // jsdom never loads Stripe.js: fail a load left pending, so the module drops it and the next test starts fresh.
+  document.querySelectorAll<HTMLScriptElement>('script[src*="js.stripe.com"]').forEach((s) => {
+    s.onerror?.(new Event("error"));
+    s.remove();
+  });
 });
 
 const body: DepositBody = {
@@ -22,7 +27,6 @@ const rows: [string, string][] = [
 ];
 
 describe("DepositStep", () => {
-  // Stripe.js loads once per module: the failing start goes first, since a pending load is kept.
   it("says so when Stripe fails to start", async () => {
     window.Stripe = () => {
       throw new Error("bad key");
