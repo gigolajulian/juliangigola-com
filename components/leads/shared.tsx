@@ -67,12 +67,14 @@ function line(e: LeadEvent): string {
     case "archive": return e.note === "in" ? "Archived" : "Unarchived";
     case "trash": return e.note === "in" ? "Moved to trash" : "Recovered from trash";
     case "replied": return `You replied${e.note ? `: ${e.note}` : ""}`;
-    case "proofs": return `Opened proofs${e.note ? `: ${e.note}` : ""}`;
+    // A delivery's opens carry ", finals" (`app/api/proof/[token]`): those are the finals, not proofs.
+    case "proofs": return e.note?.endsWith(", finals") ? `Opened the finals: ${e.note.slice(0, -8)}` : `Opened proofs${e.note ? `: ${e.note}` : ""}`;
     case "download": return `Downloaded the finals${e.note ? `: ${e.note}` : ""}`;
+    case "contract": return `Signed the contract${e.note ? `: ${e.note}` : ""}`;
     case "wrote": return `They wrote${e.note ? `: ${e.note}` : ""}`;
     case "mail": return `Mail to ${e.mail?.to === "client" ? "them" : "hello@"}: ${e.note ?? ""}`;
     case "added": return `Added by hand${e.note ? `, from ${e.note}` : ""}`;
-    case "edit": return "Details changed";
+    case "edit": return e.note === "people" ? "People changed" : "Details changed";
     case "merge": return `Merged with another record${e.note ? ` (${e.note})` : ""}`;
     case "remind": return e.note ? `Reminder set for ${at(e.note)}` : "Reminder cleared";
     case "quote": return e.note ? `Quote: $${Number(e.note).toLocaleString("en-US")}` : "Quote cleared";

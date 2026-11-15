@@ -19,6 +19,7 @@ import { Switch } from "@astryxdesign/core/Switch";
 import { DateInput } from "@astryxdesign/core/DateInput";
 import { Divider } from "@astryxdesign/core/Divider";
 import { SW_URL, swScope } from "@/components/leads/setup";
+import { ContractTemplatesDesk } from "@/components/leads/contract";
 import { adminCall, authed, type Call, errorText, ymdPT } from "@/lib/leads/lead-desk";
 import type { Template } from "@/lib/leads/lead-crm";
 import type { Hours, Window } from "@/lib/booking/booking-rules";
@@ -148,6 +149,8 @@ export function TemplatesDesk({ call, templates, saved }: { call: Call; template
         <Button label="Save templates" variant="primary" onClick={save} />
       </HStack>
       {note ? <Text type="code" size="sm" color="secondary" role="status">{note}</Text> : null}
+      <Divider />
+      <ContractTemplatesDesk />
     </Page>
   );
 }
