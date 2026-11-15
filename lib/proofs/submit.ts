@@ -43,7 +43,8 @@ export async function finalize(env: Env, kv: KV, s: Seal, p: Proof, paid?: Proof
     }
   }
   const a = alertLines(done);
-  await alertHello(env.EMAIL, a.subject, [...a.lines, "", proofUrl(publicId(done))], to ? { name: to, email: to } : undefined);
+  // "off" silences even this one (Julian 2026-11-15); every other setting keeps it instant.
+  if (done.notify !== "off") await alertHello(env.EMAIL, a.subject, [...a.lines, "", proofUrl(publicId(done))], to ? { name: to, email: to } : undefined);
   return done;
 }
 

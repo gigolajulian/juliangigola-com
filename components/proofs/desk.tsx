@@ -310,6 +310,8 @@ function Gallery({ p, changed, onBack, gone }: { p: Row; changed: () => void; on
             ))}
           </div>
           {changedSet ? <Button label="Save" clickAction={() => act({ balance: set.balance, included: set.included, price: set.price, days: set.days }, "PATCH", "Saved.")} /> : null}
+          <Selector label="Notifications" size="sm" value={p.notify ?? "selects"} onChange={(v) => act({ notify: v }, "PATCH", "Notifications saved.")}
+            options={[{ value: "each", label: "Each action as it happens" }, { value: "daily", label: "Daily summary" }, { value: "selects", label: "Selects in only" }, { value: "off", label: "Off" }]} />
           <Switch label="Watermark" description="Julian Gigola in the bottom third of every frame" value={!!p.watermark} onChange={(on) => act({ watermark: on }, "PATCH", on ? "Watermark on." : "Watermark off.")} />
           <LinkPreview p={p} save={(card) => act({ card }, "PATCH", card ? "Link preview saved." : "Link preview back to auto.")} />
         </VStack>
