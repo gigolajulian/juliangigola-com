@@ -476,7 +476,7 @@
   [data-mtscroll] .mt-hero .mt-stage{height:calc(1650 * var(--pu))}
   [data-mtscroll] .mt-col{display:contents}
   [data-mtscroll] .mt-col figure{position:absolute;left:calc((16 + var(--c2) * 187) * var(--pu));top:calc((68 + var(--r2) * 250 + var(--c2) * 64) * var(--pu));width:calc(171 * var(--pu));height:calc(214 * var(--pu))}
-  [data-mtscroll] .mt-col figcaption{padding-top:6px;font-size:11px;line-height:1.2}
+  [data-mtscroll] .mt-col figcaption{padding-top:2px;gap:0;font-size:11px;line-height:1.05}
   [data-mtscroll] .mt-name h1{font-size:min(58px,calc(56 * var(--pu)));line-height:.9}
   [data-mtscroll] .mt-ctas{bottom:max(44px,calc(env(safe-area-inset-bottom) + 20px))}
   [data-mtscroll] .mt-covers .mt-row{--cv:calc(358 * var(--pu));padding-inline:calc(16 * var(--pu))}
