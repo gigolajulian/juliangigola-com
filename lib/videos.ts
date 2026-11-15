@@ -219,6 +219,20 @@ export const previewUrl = (v: Video): string => {
     : `https://player.vimeo.com/video/${v.videoId}?background=1&autoplay=1&loop=1&muted=1&dnt=1#t=${at}s`;
 };
 
+/** YouTube shows captions whenever the visitor's own account or browser has them on, whatever the URL says.
+    These player commands switch them off; send them once the player listens and again when it starts playing
+    (the captions module loads late). */
+export const captionsOff = (w: Window | null | undefined) => {
+  for (const mod of ["captions", "cc"]) w?.postMessage(JSON.stringify({ event: "command", func: "unloadModule", args: [mod] }), "*");
+  w?.postMessage(JSON.stringify({ event: "command", func: "setOption", args: ["captions", "track", {}] }), "*");
+};
+
+/** Vimeo: ask the player to report playback. It only answers once it is really playing, so a block page or an
+    error inside the frame (Vimeo's "couldn't verify the security of your connection") never counts as a film. */
+export const vimeoListen = (w: Window | null | undefined) => w?.postMessage(JSON.stringify({ method: "addEventListener", value: "playProgress" }), "*");
+/** true for the Vimeo message that says frames are moving */
+export const vimeoPlays = (m: { event?: string; data?: { seconds?: number } } | null | undefined) => m?.event === "playProgress" && (m.data?.seconds ?? 0) > 0;
+
 /** Where the video lives, for the visitor who would rather watch it there. */
 export const watchUrl = (v: Video): string =>
   v.provider === "youtube"
