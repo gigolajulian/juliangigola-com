@@ -685,3 +685,9 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
 
 /* the header's bottom line, V4 only: a hairline that is almost not there (Julian, 2026-11-14) */
 :root[data-mtscroll] .v3 .site-hdr{border-bottom-color:color-mix(in srgb,currentColor 6%,transparent)}
+
+/* Booking, desktop: the Book online block is only as tall as its photo, so the question band sits right under it
+   on tall windows too (Julian, 2026-11-14). The photo is absolute, so its height is spelled out here. */
+@media (min-width:1024px) and (min-height:600px){
+  [data-mtscroll] .mt-book>.mt-frame{min-height:calc(112 * var(--u) + min(792 * var(--u),max(100svh,600px) - 132 * var(--u)) + 48 * var(--u));padding-bottom:calc(48 * var(--u))}
+}
