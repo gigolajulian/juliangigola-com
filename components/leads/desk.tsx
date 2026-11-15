@@ -220,7 +220,7 @@ function Rail({ needs, view, go }: { needs: number; view: View; go: (v: View) =>
     ...SECTIONS.map(([to, label]): [string, React.ComponentType<React.SVGProps<SVGSVGElement>>, View, boolean] => [label, GLYPH[to]!, to, sectionOf(view)?.[0] === to]),
   ];
   return (
-    <nav aria-label="Desk" style={{ height: "100%", overflowY: "auto", display: "flex", flexDirection: "column", alignItems: "center", gap: 4, paddingBlock: 12 }}>
+    <nav aria-label="Desk" style={{ height: "100%", overflowY: "auto", display: "flex", flexDirection: "column", alignItems: "center", gap: 4, paddingBlock: 12, /* the same panel as the phone bars and the desktop nav */ background: frostBar.background, backdropFilter: frostBar.backdropFilter, WebkitBackdropFilter: frostBar.WebkitBackdropFilter }}>
       {items.map(([label, glyph, to, on]) => (
         <button key={to} type="button" style={railCell} aria-current={on ? "page" : undefined} onClick={() => go(to)}>{face(label, glyph, on, to === "leads" ? needs : undefined)}</button>
       ))}
