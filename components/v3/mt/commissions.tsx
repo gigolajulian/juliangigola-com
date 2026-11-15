@@ -48,7 +48,7 @@ export function MtCommissions({ frames }: { frames: MtFrame[] }) {
           </figure>
         ))}
       </div>
-      <Link className="btn mt-comm-all" href="/portfolio">See all projects</Link>
+      <div className="mt-comm-foot"><Link className="btn mt-comm-all" href="/portfolio">See all projects</Link></div>
       </div>
       <div className="mt-masonry">
         {masonry(frames).map((col, c) => (

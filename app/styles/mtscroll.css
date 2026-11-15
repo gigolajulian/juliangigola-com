@@ -56,9 +56,13 @@
 [data-mtscroll] .mt-comm-now{display:flex;flex-direction:column;gap:6px;padding-bottom:calc(6 * var(--u))}
 [data-mtscroll] .mt-count{font-size:max(11px,calc(13 * var(--u)))!important}
 [data-mtscroll] .mt-comm-head .mute{color:rgb(var(--on-photo) / .7)}
-/* "See all projects" rides the foot of the screen, bottom right, and comes to rest in the sheet's last corner (Julian, 2026-11-15); the margins cancel its height */
-[data-mtscroll] .mt-comm-pin{display:flow-root}
-[data-mtscroll] .mt-comm-all{position:sticky;bottom:calc(64 * var(--u));z-index:2;display:flex;width:max-content;height:32px;padding:0 14px;margin:calc(-32px - 64 * var(--u)) calc(64 * var(--u)) calc(64 * var(--u)) auto;border-color:rgb(var(--on-photo));color:rgb(var(--on-photo))}
+/* "See all projects" rides the foot of the screen, bottom right, and comes to rest in the sheet's last corner (Julian, 2026-11-15).
+   It sticks inside a layer the size of the sheet, so it never rises past the sheet's top (a negative margin let it, in Safari) and adds no height. */
+[data-mtscroll] .mt-comm-pin{position:relative}
+[data-mtscroll] .mt-comm-foot{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-end;pointer-events:none}
+[data-mtscroll] .mt-comm-all{position:sticky;bottom:calc(64 * var(--u));height:32px;padding:0 14px;margin:0 calc(64 * var(--u)) calc(64 * var(--u)) 0;pointer-events:auto;border-color:rgb(var(--on-photo));color:rgb(var(--on-photo));text-shadow:0 0 2px rgb(0 0 0 / .9),0 1px 10px rgb(0 0 0 / .7);box-shadow:0 0 0 1px rgb(0 0 0 / .35),inset 0 0 0 1px rgb(0 0 0 / .35)}
+/* the label and edge carry the captions' tight shadow, so they hold on a bright frame; the hover fill needs none */
+@media (hover:hover){[data-mtscroll] .mt-comm-all:hover{text-shadow:none}}
 [data-mtscroll] .mt-sheet{margin-top:0}
 [data-mtscroll] .mt-masonry{display:none}
 [data-mtscroll] .mt-logos{display:flex;align-items:center;gap:calc(28 * var(--u));padding:calc(40 * var(--u)) calc(36 * var(--u)) calc(96 * var(--u)) calc(var(--fx) + 36 * var(--u))}
@@ -327,7 +331,7 @@
   [data-mtscroll] .mt-ctas .btn{flex:1;min-height:48px}
 
   /* Commissions: masonry, heading once. */
-  [data-mtscroll] .mt-sheet,[data-mtscroll] .mt-comm-now,[data-mtscroll] .mt-comm-all{display:none}
+  [data-mtscroll] .mt-sheet,[data-mtscroll] .mt-comm-now,[data-mtscroll] .mt-comm-foot{display:none}
   [data-mtscroll] .mt-comm{padding-top:48px}
   [data-mtscroll] .mt-comm-head{position:static;height:auto;margin:0;padding:0 16px 20px;background:none;color:var(--ink)}
   [data-mtscroll] .mt-comm-head h2{font-size:46px}
