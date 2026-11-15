@@ -29,7 +29,9 @@ import { api as proofApi, feed, type FeedItem, type Row } from "@/lib/proofs/des
 const clock = (ms: number) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit" }).format(ms);
 /** Where a move comes from, as the mock tags it. */
 export const source = (l: LeadSummary) => (renew(l) ? "Licence" : paperDue(l, now()) ? "Paperwork" : l.stage === "Invoiced" || l.stage === "Selecting" ? "Proofs" : "Leads");
-export const callOrShoot = (l: LeadSummary) => (l.stage === "Call booked" ? "Call" : shootTag(l.kind) ?? "Shoot");
+/** A date is a call while the call is booked, and stays one once it is done and the quote is out: a quoted lead cannot have shot yet. */
+export const isCall = (l: LeadSummary) => l.stage === "Call booked" || (l.stage === "Quoted" && !!l.when && Date.parse(l.when) < now());
+export const callOrShoot = (l: LeadSummary) => (isCall(l) ? "Call" : shootTag(l.kind) ?? "Shoot");
 
 export type DayEv = { small: string; text: string; who?: string; due?: boolean; l: LeadSummary };
 
@@ -81,8 +83,9 @@ export function TodayDesk({ leads, size, open, show }: { leads: LeadSummary[]; s
   const week = daysOf(leads, monday, 7);
   const moves = leads.filter(needsMe).sort((a, b) => b.lastAt.localeCompare(a.lastAt));
   const late = moves.filter((l) => isLate(l, now())).length;
-  const booked = week.filter((x) => x.d >= today).flatMap((x) => x.evs.filter((e) => !e.due && e.small !== "Reminder"));
-  const calls = booked.filter((e) => e.l.stage === "Call booked").length;
+  // the whole week, days already past included: the card under it lists them, and a call done on Saturday is still this week's call (Julian, 2026-11-15)
+  const booked = week.flatMap((x) => x.evs.filter((e) => !e.due && e.small !== "Reminder"));
+  const calls = booked.filter((e) => isCall(e.l)).length;
   const shoots = booked.length - calls;
   const coming = leads.filter((l) => pass(l, "upcoming")).sort((a, b) => a.when!.localeCompare(b.when!));
   const nextShoot = coming.find((l) => l.stage !== "Call booked");
@@ -199,7 +202,7 @@ export function TodayDesk({ leads, size, open, show }: { leads: LeadSummary[]; s
             {size === "phone" ? rail : null}
             <VStack gap={1}>
               <HStack vAlign="center"><StackItem size="fill"><Title count={leadMoves.length}>Your move</Title></StackItem><Button label="All leads" variant="ghost" onClick={() => show()} /></HStack>
-              {leadMoves.length ? <List hasDividers>{leadMoves.slice(0, 6).map(row)}</List> : <Text type="supporting" color="secondary">Nothing waiting on you.</Text>}
+              {leadMoves.length ? <List hasDividers>{leadMoves.map(row)}</List> : <Text type="supporting" color="secondary">Nothing waiting on you.</Text>}
             </VStack>
             {pastDue.length ? (
               <VStack gap={1}>
@@ -214,7 +217,8 @@ export function TodayDesk({ leads, size, open, show }: { leads: LeadSummary[]; s
             ) : null}
             {dueMoves.length ? (
               <VStack gap={1}>
-                <Title count="paperwork, proofs, licences">Due</Title>
+                {/* a number, so Your move and Due add up to "on you" above (Julian, 2026-11-15); each row badges its own kind */}
+                <Title count={dueMoves.length}>Due</Title>
                 <List hasDividers>
                   {dueMoves.map((l) => (
                     <ListItem key={l.id} onClick={() => open(l)} label={nextStep(l) ?? l.stage} description={`${l.name || l.email}${l.when ? ` · ${callOrShoot(l)} ${at(l.when)}` : ""}`} endContent={<Badge label={source(l)} variant={source(l) === "Proofs" ? "blue" : "neutral"} />} />
