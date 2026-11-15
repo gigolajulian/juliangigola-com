@@ -222,14 +222,26 @@ export const previewUrl = (v: Video): string => {
 /** YouTube shows captions whenever the visitor's own account or browser has them on, whatever the URL says.
     These player commands switch them off; send them once the player listens and again when it starts playing
     (the captions module loads late). */
-export const captionsOff = (w: Window | null | undefined) => {
-  for (const mod of ["captions", "cc"]) w?.postMessage(JSON.stringify({ event: "command", func: "unloadModule", args: [mod] }), "*");
-  w?.postMessage(JSON.stringify({ event: "command", func: "setOption", args: ["captions", "track", {}] }), "*");
+// The captions module can load a few seconds after the first command, and a command sent before it loads does nothing: say it again.
+const AGAIN = [0, 400, 1200, 2500, 5000];
+const say = (w: Window | null | undefined, msgs: object[]) => {
+  if (!w) return;
+  for (const ms of AGAIN) setTimeout(() => { try { for (const m of msgs) w.postMessage(JSON.stringify(m), "*"); } catch {} }, ms);
 };
+export const captionsOff = (w: Window | null | undefined) =>
+  say(w, [
+    { event: "command", func: "unloadModule", args: ["captions"] },
+    { event: "command", func: "unloadModule", args: ["cc"] },
+    { event: "command", func: "setOption", args: ["captions", "track", {}] },
+  ]);
 
 /** Vimeo: ask the player to report playback. It only answers once it is really playing, so a block page or an
-    error inside the frame (Vimeo's "couldn't verify the security of your connection") never counts as a film. */
-export const vimeoListen = (w: Window | null | undefined) => w?.postMessage(JSON.stringify({ method: "addEventListener", value: "playProgress" }), "*");
+    error inside the frame (Vimeo's "couldn't verify the security of your connection") never counts as a film.
+    Captions go off here too: Vimeo shows them when the visitor's own Vimeo setting has them on. */
+export const vimeoListen = (w: Window | null | undefined) => {
+  w?.postMessage(JSON.stringify({ method: "addEventListener", value: "playProgress" }), "*");
+  say(w, [{ method: "disableTextTrack" }]);
+};
 /** true for the Vimeo message that says frames are moving */
 export const vimeoPlays = (m: { event?: string; data?: { seconds?: number } } | null | undefined) => m?.event === "playProgress" && (m.data?.seconds ?? 0) > 0;
 
