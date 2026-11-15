@@ -3,6 +3,8 @@ import { lockOp, parseBooking, recordBooking, type BookResult } from "@/lib/book
 import { manageLinks } from "@/lib/booking/booking-token";
 import { sendConfirm } from "@/lib/booking/confirm";
 import { logMail } from "@/lib/leads/lead-store";
+import { alertHello } from "@/lib/hello-mail";
+import { whenPT } from "@/lib/inbox";
 import { bodyOf, json } from "@/lib/http";
 
 // Errors answer { error: string }, as every other booking route does.
@@ -47,5 +49,6 @@ export async function POST(request: Request) {
   // Logged after the lead is filed, so the mail lands on its row.
   const sent = await sendConfirm(env.CLIENT_EMAIL, confirm);
   if (sent) ctx.waitUntil(filed.then(() => logMail(env, r.email, sent, { to: "client", kind: "confirm", booking: r.id })));
+  ctx.waitUntil(alertHello(env.EMAIL, `Booked: ${[r.session, whenPT(r.start), r.name].join(", ")}`, [`${r.name} <${r.email}>`, ...(r.phone ? [`Phone: ${r.phone}`] : []), r.where ? `Where: ${r.where}` : `Call: ring ${r.phone ?? "(no phone)"}`, ...(r.notes ? ["", r.notes] : [])], { name: r.name, email: r.email }));
   return json({ status: "success", data: { uid: r.id, start: r.start, end: r.end, where: r.where } });
 }
