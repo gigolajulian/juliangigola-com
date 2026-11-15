@@ -23,6 +23,8 @@ const C = { bg: "#ebedef", fg: "#141211", mu: "#515354", ac: "#007a7b", rule: "b
 const label = `font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:${C.ac}`;
 
 type Inline = { content: Uint8Array; filename: string; type: string; disposition: "inline"; contentId: string };
+/** A file the client keeps, like the signed contract. */
+type Attached = { content: Uint8Array; filename: string; type: string; disposition: "attachment" };
 const png = (id: string, b64: string): Inline => ({ content: Uint8Array.from(atob(b64), (c) => c.charCodeAt(0)), filename: `${id}.png`, type: "image/png", disposition: "inline", contentId: id });
 const logos = () => [png("name-ink", NAME_INK), png("name-w", NAME_W)];
 const DARK = `@media (prefers-color-scheme: dark){body,.page{background:#0b0a09!important}.fg{color:#f1f0ed!important}.mu{color:#92908d!important}.ac{color:#50b7b7!important}.rule{border-color:rgba(255,255,255,0.11)!important}.cta{background:#f1f0ed!important;color:#0b0a09!important}.ink-l{display:none!important}.ink-d{display:block!important}${SIG_DARK}}`;
@@ -227,7 +229,7 @@ export function subjectOr(given: unknown, fallback: string): string {
 }
 
 /** `cc`: the other people on the lead with "copy on gallery mail" ticked (`copiesFor` in lib/leads/lead-store). */
-export async function sendClient(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefined, to: string, m: { subject: string; html: string; text: string; attachments: Inline[] }, cc: string[] = []): Promise<boolean> {
+export async function sendClient(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefined, to: string, m: { subject: string; html: string; text: string; attachments: (Inline | Attached)[] }, cc: string[] = []): Promise<boolean> {
   if (!mailer) return false;
   // Plain addresses: Cloudflare refuses an EmailAddress without a name (live 2026-11-11, every client mail failed).
   const head = { to, from: FROM, replyTo: REPLY_TO, ...(cc.length ? { cc } : {}) };
@@ -271,12 +273,12 @@ export function contractMail(c: ContractMailIn) {
   return { subject: "Your contract", html, text, attachments: logos() };
 }
 
-/** The client's copy once signed: the whole text and the signature record. */
-export function signedMail(c: ContractMailIn) {
+/** The client's copy once signed: the whole text and the signature record, with the signed copy (and its drawn signature) attached. */
+export function signedMail(c: ContractMailIn, copy?: { html: string; filename: string }) {
   const s = c.signed!;
   const when = new Intl.DateTimeFormat("en-US", { timeZone: TZ, dateStyle: "long", timeStyle: "short" }).format(new Date(s.at));
   const record: [string, string][] = [["Signed by", s.name], ["Signed at", when], ["SHA-256", s.hash]];
-  const lead = "Thanks for signing. Your copy is below and on the same link any time.";
+  const lead = copy ? "Thanks for signing. Your signed copy is attached, below and on the same link any time." : "Thanks for signing. Your copy is below and on the same link any time.";
   const html = page(
     "Contract signed",
     "Thanks for signing. Your copy is inside.",
@@ -287,5 +289,6 @@ ${rows(record)}
 <tr><td class="mono fg rule" style="${C.rule};font-size:12px;line-height:1.7;color:${C.fg};padding-top:18px;white-space:pre-wrap">${esc(c.text)}</td></tr>`,
   );
   const text = ["Contract signed.", "", lead, contractLink(c.id), "", ...record.map(([k, v]) => `${k}: ${v}`), "", c.text, "", SIG_TEXT].join("\n");
-  return { subject: "Contract signed", html, text, attachments: logos() };
+  const file: Attached[] = copy ? [{ content: new TextEncoder().encode(copy.html), filename: copy.filename, type: "text/html", disposition: "attachment" }] : [];
+  return { subject: "Contract signed", html, text, attachments: [...logos(), ...file] };
 }

@@ -120,6 +120,9 @@ describe("/api/contract", () => {
     expect(l.contract).toBe("Signed");
     expect(l.events.at(-1)).toMatchObject({ kind: "contract", ref: `signed:${c.id}` });
     expect(client.sent.at(-1)!.subject).toBe("Contract signed");
+    const files = (client.sent.at(-1)!.attachments as { filename: string; disposition: string; content: Uint8Array }[]).filter((a) => a.disposition === "attachment");
+    expect(files.map((f) => f.filename)).toEqual(["Contract - Sam Rivera.html"]);
+    expect(new TextDecoder().decode(files[0].content)).toContain("<svg");
     expect(hello.sent.at(-1)!.subject).toBe("Signed: Sam Rivera");
 
     // A second signature, and any edit, are refused.
