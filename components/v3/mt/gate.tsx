@@ -9,7 +9,7 @@ import type { MtData } from "./data";
    the live home (`children`); with the flag, mtscroll.css hides it until this
    swaps the v4 tree in, so there is no flash and no hydration mismatch. The
    v4 code loads only with the flag. */
-const MtHome = dynamic(() => import("./home").then((m) => m.MtHome), { ssr: false });
+const MtHome = dynamic(() => import("./home").then((m) => m.MtHome), { ssr: false, loading: () => <i className="mt-wait" hidden /> });
 const noop = () => () => {};
 
 export function MtGate({ data, children }: { data: MtData; children: React.ReactNode }) {

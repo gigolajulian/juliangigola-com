@@ -8,6 +8,11 @@
 
 /* The live home waits hidden while the flag swaps the v4 tree in (gate.tsx). */
 [data-mtscroll] .v3home:not(.mt){visibility:hidden}
+/* Name dock (motion/hero.ts): on the home's desktop layout the header wordmark waits hidden until the dock says where
+   the name is, so a load never flashes it. .mt-wait is gate.tsx's stand-in while the v4 code loads. */
+@media (min-width:1024px) and (min-height:600px) and (prefers-reduced-motion:no-preference){
+  html[data-v3motion][data-mtscroll]:not([data-mtdock]):has(.v3home,.mt-wait) .v3 .site-wm{visibility:hidden}
+}
 
 [data-mtscroll] .mt{--u:clamp(.7px,min(calc(100vw / 1440),calc(100svh / 900)),1.6px);--fx:max(0px,calc((100vw - 1440 * var(--u)) / 2));--hair:color-mix(in srgb,var(--ink) 14%,transparent);--row:color-mix(in oklab,var(--ink) 50%,var(--bg));--body:color-mix(in oklab,var(--ink) 74%,var(--bg));position:relative;overflow-x:clip}
 [data-mtscroll] .mt section,[data-mtscroll] .mt footer{position:relative}

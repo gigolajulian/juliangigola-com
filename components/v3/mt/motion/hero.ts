@@ -11,12 +11,13 @@ const DRIFT = [40, 22]; // phone drift caps, px, per column
 
 type Part = { el: HTMLElement; a: number; c: number; v: number };
 
-/* Name dock, opt-in with ?mtdock=1 (Julian's pick 02, 2026-11-14). Held layout only. The header starts without its
+/* Name dock (Julian's pick 02, 2026-11-14; the V4 default since 2026-11-15, ?mtdock=0 turns it off). Held layout only. The header starts without its
    wordmark. Between 62% and 92% of the hold a fixed copy of the name, same face and size, rides from the h1's place to
    the wordmark's and shrinks to its size, then the real wordmark takes over. The copy follows its target on a critically
    damped spring, so it leaves late and settles soft: the October version was locked 1:1 to the scroll over one name
    height and read as not smooth. The label fades at 48 to 62%, the buttons at 72 to 92% (his timing).
-   ?mtdock=<n> above 1 sets the spring's stiffness in rad/s, to tune by eye. */
+   ?mtdock=<n> above 1 sets the spring's stiffness in rad/s, to tune by eye.
+   html[data-mtdock] is rest, ride or land, or off when there is no dock: hero.css hides the wordmark until land. */
 const DOCK_W = 11;
 type Geo = { ax: number; ay: number; bx: number; by: number; k: number; ox: number; oy: number; ws: number };
 type Dock = { f: HTMLElement; words: HTMLElement[]; h1: HTMLElement; wm: HTMLElement; cap: HTMLElement | null; ctas: HTMLElement | null; scrim: HTMLElement | null; w: number; m: Geo | null; x: number; v: number; st: string; q: string };
@@ -29,7 +30,7 @@ const ink = (n: Node) => {
 };
 
 function dockSetup(el: HTMLElement): Dock | null {
-  const w = Number(/[?&]mtdock=([\d.]+)/.exec(location.search)?.[1] ?? 0);
+  const w = Number(/[?&]mtdock=([\d.]+)/.exec(location.search)?.[1] ?? 1);
   const h1 = el.querySelector<HTMLElement>(".mt-name h1"), wm = document.querySelector<HTMLElement>(".site-hdr .site-wm");
   if (!w || !h1 || !wm) return null;
   const f = document.createElement("div");
@@ -150,6 +151,7 @@ export const heroDrivers: Driver[] = [
       };
       states.set(el, st);
       const d = st.dock;
+      if (!d) document.documentElement.setAttribute("data-mtdock", "off");
       // late fonts move both boxes: measure again on the next frame
       if (d) document.fonts?.ready.then(() => (st.at = ""), () => {});
       return () => {
@@ -159,6 +161,7 @@ export const heroDrivers: Driver[] = [
           dockOff(d);
           d.f.remove();
         }
+        document.documentElement.removeAttribute("data-mtdock");
       };
     },
     frame(p, el, ctx) {
