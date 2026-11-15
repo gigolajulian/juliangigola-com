@@ -31,7 +31,8 @@ export async function storeFinal(env: Env, token: string, id: string, body: Read
   const piped = body.pipeThrough(count).pipeTo(fixed.writable);
   await Promise.all([env.PROOFS.put(finalKey(token, id), fixed.readable, { httpMetadata: { contentType: "image/jpeg" } }), piped]);
   // The web copies are a nicety at upload: if Images fails here, the page makes them on first view.
-  await previews(env, token, id).catch(() => undefined);
+  // A republished edit must not keep the old copies, so a failure drops them.
+  await previews(env, token, id).catch(() => env.PROOFS.delete([finalKey(token, id, PREVIEW_W), finalKey(token, id, THUMB_W)]).catch(() => undefined));
   return { bytes, crc };
 }
 

@@ -33,6 +33,19 @@ describe("DELETE /api/proof", () => {
     p = (await readProof(kv as never, (await sealer(LEADS_KEY))!, TOKEN))!;
     expect(p.frames).toEqual([]);
   });
+  it("keeps a gallery that holds unsent finals, but still drops its proof frames", async () => {
+    const s = (await sealer(LEADS_KEY))!;
+    const p = (await readProof(kv as never, s, TOKEN))!;
+    await writeProof(kv as never, s, { ...p, finals: [{ id: "f1", file: "f1.jpg", w: 1, h: 1 }] } as unknown as Proof);
+    expect((await del(`?token=${TOKEN}`)).status).toBe(409);
+    expect(r2.delete).not.toHaveBeenCalled();
+    expect((await readProof(kv as never, s, TOKEN))?.finals?.length).toBe(1);
+    expect((await del(`?token=${TOKEN}&ids=a`)).status).toBe(200);
+    // Once the finals are out of the gallery, the whole-gallery delete works again.
+    expect((await del(`?token=${TOKEN}&ids=f1&final=1`)).status).toBe(200);
+    expect((await del(`?token=${TOKEN}`)).status).toBe(200);
+    expect(await readProof(kv as never, s, TOKEN)).toBeNull();
+  });
   it("refuses a bad id in the list", async () => {
     expect((await del(`?token=${TOKEN}&ids=a,bad%20id`)).status).toBe(400);
     expect(r2.delete).not.toHaveBeenCalled();

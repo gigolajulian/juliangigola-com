@@ -1,7 +1,7 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { isAdmin } from "@/lib/vouch";
 import { sealer } from "@/lib/leads/lead-crypto";
-import { readLead, recordLead, writeLead } from "@/lib/leads/lead-store";
+import { copiesFor, readLead, recordLead, writeLead } from "@/lib/leads/lead-store";
 import { leadStoreKey } from "@/lib/leads/leads";
 import { cardKey, closesAt, cleanSettings, DEFAULTS, DELIVERY_DAYS, finalKeys, frameKey, frameKeys, aliasKey, isDateId, isFrameId, isStrongId, isToken, listProofs, nextProofId, publicId, readProof, shootDay, viewerKey, writeProof, type Proof } from "@/lib/proofs/proof";
 import { deliveryMail, deliveryUrl, proofMail, proofUrl, sendClient } from "@/lib/email/proof-mail";
@@ -118,7 +118,7 @@ export async function POST(request: Request) {
     const now = Date.now();
     const sent: Proof = { ...p, sentAt: new Date(now).toISOString(), closesAt: closesAt(p.days, now) };
     const m = proofMail(sent, strip);
-    if (!(await sendClient(g.env.CLIENT_EMAIL, p.email, m))) return json({ error: "The mail did not go out. Try again." }, 502);
+    if (!(await sendClient(g.env.CLIENT_EMAIL, p.email, m, await copiesFor(g.kv, g.s, p.email).catch(() => [])))) return json({ error: "The mail did not go out. Try again." }, 502);
     await writeProof(g.kv, g.s, sent);
     await recordLead(g.env, p.email, { event: { at: sent.sentAt!, kind: "mail", note: m.subject, mail: { to: "client", kind: "proofs" } } });
     return json({ proof: sent });
@@ -133,7 +133,7 @@ export async function POST(request: Request) {
     const now = Date.now();
     const sent: Proof = { ...p, ...(link !== p.token ? { link } : {}), deliveredAt: new Date(now).toISOString(), closesAt: closesAt(DELIVERY_DAYS, now) };
     const m = deliveryMail(sent);
-    if (!(await sendClient(g.env.CLIENT_EMAIL, p.email, m))) return json({ error: "The mail did not go out. Try again." }, 502);
+    if (!(await sendClient(g.env.CLIENT_EMAIL, p.email, m, await copiesFor(g.kv, g.s, p.email).catch(() => [])))) return json({ error: "The mail did not go out. Try again." }, 502);
     await writeProof(g.kv, g.s, sent);
     if (link !== was && p.link) await g.kv.delete(aliasKey(p.link));
     await recordLead(g.env, p.email, { event: { at: sent.deliveredAt!, kind: "mail", note: m.subject, mail: { to: "client", kind: "finals" } } });
@@ -270,6 +270,8 @@ export async function DELETE(request: Request) {
     await writeProof(g.kv, g.s, { ...p, frames: p.frames.filter((f) => !gone.has(f.id)), selects: p.selects.filter((s) => !gone.has(s)), notes });
     return json({ ok: true });
   }
+  // Finals published but not sent yet: dropping the record would orphan them in R2 and lose the delivery.
+  if (p.finals?.length) return json({ error: "This gallery holds finals. Remove them from the Delivery collection first." }, 409);
   // The whole gallery: Lightroom's "delete published collection". Only web previews go, never an original.
   const keys = p.frames.flatMap((f) => frameKeys(token, f.id));
   for (let i = 0; i < keys.length; i += 1000) await g.r2.delete(keys.slice(i, i + 1000));
