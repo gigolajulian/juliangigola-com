@@ -461,7 +461,7 @@ export function LeadsDesk() {
       <style>{":root [data-astryx-desk][data-astryx-desk] *,:root [data-astryx-desk][data-astryx-desk] ::placeholder{text-transform:none}"}</style>
       <div data-astryx-desk="" style={{ height: "100dvh", textTransform: "none", letterSpacing: "normal" }}>
         {size === "phone"
-          ? <Layout height="fill" content={shown} footer={<TabBar view={screen} go={show} needs={needs} />} />
+          ? <Layout height="fill" content={shown} footer={lead ? undefined /* a lead brings its own action bar */ : <TabBar view={screen} go={show} needs={needs} />} />
           : <Layout height="fill" start={<LayoutPanel width={260} padding={0} label="Desk" /* SideNav draws 260 wide by default; a narrower panel clipped the counts. */><Nav needs={needs} view={screen} go={show} /></LayoutPanel>} content={shown} />}
       </div>
     </Theme>
