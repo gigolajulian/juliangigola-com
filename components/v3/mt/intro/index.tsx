@@ -7,19 +7,19 @@ import "./intro.css";
 
 /* v4 home intro, "The canvas" (spec 3.1): JG inks in alone, the whole wall and
    a field of extra frames glide up at .46 scale and cover it, then the view
-   pushes in until the top of the wall is the hero. 4500ms, once per visit.
+   pushes in until the top of the wall is the hero. 5300ms, once per visit.
    Every position is measured from the laid-out wall, so it holds at any
    screen ratio. Extras are intro-only nodes, removed when it ends. */
 
-const S0 = 0.46;
+const S0 = 0.56; // was .46; closer, so fewer and larger frames (Julian picked option a, 2026-11-14)
 const OUT = "cubic-bezier(0.23, 1, 0.32, 1)"; // arrivals and exits
-const IN_OUT = "cubic-bezier(0.77, 0, 0.175, 1)"; // the push in, a move on screen
+const IN_OUT = "cubic-bezier(0.65, 0, 0.25, 1)"; // the push in, a move on screen; softer start than (.77,0,.175,1)
 const HURRY = 6; // a wheel, tap or key during the intro plays the rest this many times faster
 const WALL_FROM = [620, 900, 740]; // px below, per wall column
 const X_FROM = [700, 980, 620, 860, 1040, 760, 920]; // px below, per extra column
 const RISE = 1700;
 const LIGHT = 750; // a photo comes up from black, never an opacity fade
-const END = 4500;
+const END = 5300;
 const PUSH = 3000; // the push in starts
 const DRAW = 350; // the columns get their first draw here, out of sight, while JG settles
 
@@ -30,8 +30,8 @@ const DRAW = 350; // the columns get their first draw here, out of sight, while 
    before the hero lands. The hero is the only plane that stays sharp. The push
    overshoots a touch and settles. Drawn in 2D: each strip scales around the
    point the wall scales around, as a plane at depth d would. */
-const DEEP_PUSH = 2900;
-const DEEP_LAND = 4150; // the push peaks here, then settles back to END
+const DEEP_PUSH = 3350; // the full canvas holds about a second before the push
+const DEEP_LAND = 4850; // the push peaks here (1500ms), then settles back to END
 const DEEP_OVER = 0.007;
 const DEPTHS = [0.5, 0.28, 0.62, 0.36, 0.56, 0.22, 0.44]; // per extra column: 0 the hero's plane, 1 the lens
 const SETTLE = "cubic-bezier(0.45, 0, 0.55, 1)";
@@ -280,9 +280,9 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
       for (let m = -16; m <= 16; m++) {
         const x = first[0].x + m * P;
         if (x + w < xmin || x > xmax || real.some((r) => Math.abs(r - x) < P * 0.5)) continue;
-        const g = group(x, 800 + k * 70);
+        const g = group(x, 800 + k * 55);
         for (let y = ymin - h + (k % 2 ? R * 0.25 : 0); y < ymax; y += R) tile(g, x, y);
-        rise(g, X_FROM[k % X_FROM.length], 800 + k * 70);
+        rise(g, X_FROM[k % X_FROM.length], 800 + k * 55);
         if (deep) depth(g, px - x, py - top0, DEPTHS[k % DEPTHS.length]);
         k++;
       }
@@ -321,10 +321,11 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
       timers.push(window.setTimeout(hide, pushAt)); // whatever the layout, it is gone before the camera moves
 
       // the hero's own parts arrive as the push lands
-      fadeIn(".mt-hero .mt-scrim", 3900, 700);
-      fadeIn(".mt-hero h1", 3960, 900, 70);
-      fadeIn(".mt-hero .mt-cap, .mt-hero .mt-ctas, .site-hdr", 4280, 600);
-      fadeIn(".mt-hero figcaption", 4050, 450);
+      // the name lands with the settle of the push
+      fadeIn(".mt-hero .mt-scrim", land - 250, 700);
+      fadeIn(".mt-hero h1", land - 190, 900, 24);
+      fadeIn(".mt-hero .mt-cap, .mt-hero .mt-ctas, .site-hdr", land + 130, 600);
+      fadeIn(".mt-hero figcaption", land - 100, 450);
 
       // made last, so they sit on top of every other opacity animation on the same element
       hidden.forEach(([el, delay]) => {
@@ -354,7 +355,7 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
     };
 
     // extras are drawn only from thumbs that have arrived, so the canvas never shows an empty tile
-    const want = pool.current.slice(16, 64).map((f) => loader({ src: f.src, width: 640 }));
+    const want = pool.current.slice(16, 46).map((f) => loader({ src: f.src, width: 640 }));
     let leadIn = false;
     const go = () => leadIn && ready.length >= Math.min(18, want.length) && run();
     want.forEach((src) => {
