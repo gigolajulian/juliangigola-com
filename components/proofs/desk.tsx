@@ -26,16 +26,17 @@ import { Switch } from "@astryxdesign/core/Switch";
 import { Card } from "@astryxdesign/core/Card";
 import { Thumbnail } from "@astryxdesign/core/Thumbnail";
 import { MetadataList, MetadataListItem } from "@astryxdesign/core/MetadataList";
-import { ProgressBar } from "@astryxdesign/core/ProgressBar";
 import { Selector } from "@astryxdesign/core/Selector";
 import { Slider } from "@astryxdesign/core/Slider";
 import { KEY_STORE } from "@/lib/admin/admin-github";
 import { SignIn } from "@/components/leads/setup";
 import { api, cardCrop, closed, cropAt, status, type Row } from "@/lib/proofs/desk";
 import { ActivityDesk } from "@/components/proofs/activity";
+import { Timeline } from "@/components/proofs/timeline";
+import { useClock } from "@/lib/use-clock";
 import { errorText, stampPT } from "@/lib/leads/lead-desk";
 import { TOKEN_STORE } from "@/lib/admin/admin-github";
-import { extras, publicId, stage, STAGES, THUMB_W, type CardCrop } from "@/lib/proofs/proof";
+import { extras, publicId, remindState, THUMB_W, type CardCrop } from "@/lib/proofs/proof";
 
 const CLASSIC = "/admin";
 // The small copy the client's grid uses: every frame on the desk is a thumbnail. Once delivered the proof copies are gone: the finals' small copies stand in.
@@ -217,7 +218,18 @@ function Gallery({ p, changed, onBack, gone }: { p: Row; changed: () => void; on
   const x = extras(p.selects.length, p.included, p.price);
   const thumbs = (p.deliveredAt ? (p.finals ?? []).map((f) => f.id) : p.submittedAt ? p.selects : p.frames.map((f) => f.id)).slice(0, 6);
   const file = (id: string) => p.frames.find((f) => f.id === id)?.file ?? id;
-  const at = STAGES.indexOf(stage(p));
+  // The one reminder (Julian 2026-11-15): read after mount, the window is a clock.
+  const clock = useClock();
+  const remind = clock ? remindState(p, clock) : null;
+  const [reminder, setReminder] = React.useState<{ html: string; subject: string; to: string; cc: string[] } | null>(null);
+  const viewer = p.email ? p.viewers?.[p.email.trim().toLowerCase()]?.name : undefined;
+  const who = viewer?.split(/\s+/)[0] || "client";
+  const left = clock && p.closesAt ? Math.max(1, Math.ceil((Date.parse(p.closesAt) - clock) / 864e5)) : 0;
+  const closesIn = `closes in ${left} ${left === 1 ? "day" : "days"}`;
+  const nextLine = !remind ? "" : remind.state === "sent" ? `Reminded ${stampPT(remind.at)}. No more reminders for this stage.`
+    : remind.state === "locked" ? `The reminder opens ${stampPT(remind.opensAt)}, in the last 5 days.`
+    : remind.stage === "finals" ? `Not downloaded yet. The delivery ${closesIn}.`
+    : `${viewer ? who : "The client"} has picked ${p.viewers?.[(p.email ?? "").trim().toLowerCase()]?.picks.length ?? 0} of ${p.included}. The gallery ${closesIn}.`;
 
   // Same calls and messages as the classic ProofCard.
   const act = async (body: Record<string, unknown>, method = "POST", done?: string) => {
@@ -236,6 +248,14 @@ function Gallery({ p, changed, onBack, gone }: { p: Row; changed: () => void; on
       const o = await api<{ html: string; subject: string }>({ query: `?preview=${p.token}` });
       setPreview(o.html);
       setSubject(o.subject);
+    } catch (e) {
+      setNote(errorText(e));
+    }
+  };
+  const showReminder = async () => {
+    setNote(null);
+    try {
+      setReminder(await api<{ html: string; subject: string; to: string; cc: string[] }>({ query: `?remind=${p.token}` }));
     } catch (e) {
       setNote(errorText(e));
     }
@@ -273,7 +293,27 @@ function Gallery({ p, changed, onBack, gone }: { p: Row; changed: () => void; on
           <Heading level={2}>{p.name}</Heading>
           <Badge label={status(p)} variant={p.submittedAt ? "blue" : "gray"} />
         </HStack>
-        <ProgressBar label={`Stage ${at + 1} of ${STAGES.length}: ${STAGES[at]}`} isLabelHidden value={at + 1} max={STAGES.length} />
+        <Timeline p={p} />
+        {remind && remind.state !== "never" ? (
+          <HStack gap={3} vAlign="center">
+            <div style={{ flex: 1, minWidth: 0 }}><Text type="supporting">{nextLine}</Text></div>
+            {remind.state === "ready" && !reminder ? <Button label={`Remind ${who}`} variant="primary" size="sm" clickAction={showReminder} /> : null}
+            {remind.state === "locked" ? <Button label={`Remind ${who}`} size="sm" isDisabled /> : null}
+          </HStack>
+        ) : null}
+        {reminder ? (
+          <Card variant="muted" padding={3} width="100%">
+            <VStack gap={2}>
+              <Text type="supporting">To {reminder.to}{reminder.cc.length ? `, copy to ${reminder.cc.join(", ")}` : ""}. One reminder per stage: after this one, no more.</Text>
+              <Text weight="semibold">{reminder.subject}</Text>
+              <iframe title="Reminder preview" srcDoc={reminder.html} sandbox="" style={{ height: 380, width: "100%", border: 0, borderRadius: 8, background: "#fff" }} />
+              <HStack gap={2}>
+                <Button label="Send reminder" variant="primary" clickAction={() => act({ action: "remind" }, "POST", "Reminder sent.").then(() => setReminder(null))} />
+                <Button label="Cancel" variant="ghost" onClick={() => setReminder(null)} />
+              </HStack>
+            </VStack>
+          </Card>
+        ) : null}
         <Text type="supporting">
           {p.frames.length} frames · {p.included} included · ${p.price} each extra
           {p.sentAt ? ` · sent ${stampPT(p.sentAt)}` : ` · open ${p.days} days once sent`}

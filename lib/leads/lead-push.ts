@@ -27,6 +27,8 @@ const TITLE: Partial<Record<LeadEvent["kind"], string>> = {
   cancel: "Session cancelled",
   reschedule: "Session moved",
   selects: "Selects in",
+  // Recorded once per gallery, on the client's first download (`app/api/proof/[token]`).
+  download: "Finals downloaded",
 };
 
 export function pushFor(lead: Lead, event: LeadEvent): Push | null {

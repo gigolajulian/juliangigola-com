@@ -105,6 +105,8 @@ export type Proof = {
   subhead?: string;
   /** File names on the thumbnails, proof and delivery. Unset is off: Lightroom names stay Julian's unless he turns this on. */
   labels?: boolean;
+  /** When the one reminder per stage went out (Julian 2026-11-15): stamped before the mail, so a second is refused. */
+  reminded?: { proofs?: string; finals?: string };
 };
 
 export const NOTIFY = ["each", "daily", "off"] as const;
@@ -307,6 +309,38 @@ export const coverFrame = (p: Pick<Proof, "frames" | "watermark" | "closesAt" | 
   (p.watermark && !p.pass && isOpen(p) && (p.frames.find((f) => f.id === p.card?.id) ?? p.frames[0])) || null;
 
 export const closesAt = (days: number, from = Date.now()) => new Date(from + days * 864e5).toISOString();
+
+/* ── the one reminder (Julian 2026-11-15) ─────────────────────────
+   Only on his tap in Leads, only in the last REMIND_DAYS before the gallery closes, once per stage, never after
+   the client sent selects (proofs) or downloaded (finals). A reminder never moves the close date. */
+export const REMIND_DAYS = 5;
+export type RemindStage = "proofs" | "finals";
+export type Remind =
+  | { stage: RemindStage; state: "ready" }
+  | { stage: RemindStage; state: "locked"; opensAt: string }
+  | { stage: RemindStage; state: "sent"; at: string }
+  | { stage: RemindStage | null; state: "never"; why: string };
+
+export function remindState(p: Pick<Proof, "email" | "sentAt" | "submittedAt" | "deliveredAt" | "firstDownloadAt" | "closesAt" | "offline" | "reminded">, now = Date.now()): Remind {
+  const stage: RemindStage | null = p.deliveredAt ? "finals" : p.sentAt ? "proofs" : null;
+  if (!stage) return { stage, state: "never", why: "Not sent yet." };
+  const at = p.reminded?.[stage];
+  if (at) return { stage, state: "sent", at };
+  if (stage === "proofs" && p.submittedAt) return { stage, state: "never", why: "Selects are in." };
+  if (stage === "finals" && p.firstDownloadAt) return { stage, state: "never", why: "Downloaded." };
+  if (!p.email) return { stage, state: "never", why: "No client email." };
+  if (p.offline) return { stage, state: "never", why: "Offline." };
+  if (!p.closesAt || Date.parse(p.closesAt) <= now) return { stage, state: "never", why: "Closed." };
+  const opens = Date.parse(p.closesAt) - REMIND_DAYS * 864e5;
+  return opens > now ? { stage, state: "locked", opensAt: new Date(opens).toISOString() } : { stage, state: "ready" };
+}
+
+/** Days left before `closesAt`, rounded up, when inside the reminder window; else null. The client page's "Closes" line. */
+export function closingSoon(closes: string | null | undefined, now = Date.now()): number | null {
+  if (!closes) return null;
+  const left = Date.parse(closes) - now;
+  return left > 0 && left <= REMIND_DAYS * 864e5 ? Math.ceil(left / 864e5) : null;
+}
 
 /** What the client page gets: no address, no Lightroom name. */
 /** Frames by capture time when every frame has one, else as uploaded (a frame published later went to the end). */
