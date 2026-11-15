@@ -41,7 +41,7 @@ function Fig({ f, was, onDone, i, eager, xr, idle }: { f: MtFrame; was?: MtFrame
 const STILL = 4000; // idle wall: still this long before the first swap
 const EVERY = 2500; // then one frame at this pace
 
-/* Idle wall (`?idle=1`, opt-in): after 4 still seconds one of the 12 locked frames on screen changes every 2.5 seconds
+/* Idle wall (the V4 default since 2026-11-15, `?idle=0` turns it off): after 4 still seconds one of the 12 locked frames on screen changes every 2.5 seconds
    for a frame that is not on the wall. Any pointer move, scroll, key or touch holds it. Off for reduced motion and during the splash. */
 function useIdleWall(frames: MtFrame[], extras: MtFrame[]) {
   const root = React.useRef<HTMLElement>(null);
@@ -50,14 +50,15 @@ function useIdleWall(frames: MtFrame[], extras: MtFrame[]) {
   const live = React.useRef({ now, was, pool: extras.slice(30) }); // the first 30 extras are on the wall (side columns, rows five and six)
   React.useEffect(() => void Object.assign(live.current, { now, was }));
   React.useEffect(() => {
-    if (!/[?&]idle=1/.test(location.search) || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (/[?&]idle=0/.test(location.search) || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     let last = performance.now(), swapped = 0;
     const touch = () => (last = performance.now());
     const evs = ["pointermove", "pointerdown", "wheel", "scroll", "keydown", "touchstart"] as const;
     evs.forEach((e) => addEventListener(e, touch, { passive: true }));
     const id = setInterval(() => {
       const t = performance.now(), L = live.current;
-      if (t - last < STILL || t - swapped < EVERY || document.hidden || document.documentElement.hasAttribute("data-mt-intro") || !L.pool.length) return;
+      if (document.documentElement.hasAttribute("data-mt-intro")) return void (last = t); // the 4 still seconds start when the splash lifts
+      if (t - last < STILL || t - swapped < EVERY || document.hidden || !L.pool.length) return;
       const on = [...(root.current?.querySelectorAll<HTMLElement>("figure[data-i]") ?? [])].filter((f) => {
         const r = f.getBoundingClientRect();
         return r.width && r.top < innerHeight * 0.8 && r.bottom > innerHeight * 0.2 && !L.was[+f.dataset.i!];
