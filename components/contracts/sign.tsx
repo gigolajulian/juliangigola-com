@@ -2,8 +2,8 @@
 
 /* ── /contract/<id>: the client reads and signs ───────────────────
  * Julian (2026-11-15): Format's contract, on the site. The text, who it is
- * between, then their full name, a drawn signature (or the typed name, for
- * keyboard only), their email and "I agree". The page posts
+ * between, then their full name, their email, a drawn signature (or the
+ * typed name, for keyboard only) and "I agree". The page posts
  * back the hash of the text it showed (`lib/contracts/contract.ts`). Same
  * proof.css as the delivery gate. Signed, it shows the record and Print.
  * ─────────────────────────────────────────────────────────────── */
@@ -79,6 +79,10 @@ export function ContractSign({ id, initial }: { id: string; initial: PublicContr
               <span className="proof-lab">Full name</span>
               <input autoComplete="name" placeholder="First and last name" value={name} onChange={(e) => { setName(e.target.value); setErr(null); }} />
             </label>
+            <label>
+              <span className="proof-lab">Your email</span>
+              <input type="email" inputMode="email" autoComplete="email" value={email} onChange={(e) => { setEmail(e.target.value); setErr(null); }} />
+            </label>
             <div className="ctr-sigf">
               <span className="proof-lab">Signature</span>
               {typed ? (
@@ -88,10 +92,6 @@ export function ContractSign({ id, initial }: { id: string; initial: PublicContr
               )}
               <button type="button" className="ctr-alt" onClick={() => { setTyped(!typed); setErr(null); }}>{typed ? "Draw it instead" : "Can't draw? Use your typed name"}</button>
             </div>
-            <label>
-              <span className="proof-lab">Your email</span>
-              <input type="email" inputMode="email" autoComplete="email" value={email} onChange={(e) => { setEmail(e.target.value); setErr(null); }} />
-            </label>
             <label className="ctr-agree">
               <input type="checkbox" checked={agree} onChange={(e) => { setAgree(e.target.checked); setErr(null); }} />
               <span>I agree to this contract.</span>
