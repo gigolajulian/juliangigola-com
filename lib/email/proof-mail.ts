@@ -165,7 +165,9 @@ export async function sendClient(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefin
       return true;
     } catch (e2) {
       console.error("proof mail, plain", String(e2));
-      return false;
+      // A copy address refused must not stop the client's own mail.
+      if (!cc.length) return false;
+      return sendClient(mailer, to, m);
     }
   }
 }

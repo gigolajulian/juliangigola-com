@@ -97,15 +97,18 @@ export async function canonLeads(kv: KV, s: Sealer): Promise<number> {
 export const personKey = (hash: string) => `person:${hash}`;
 
 /** The lead an address belongs to: its own record first, else the lead it is a person on.
-    An alias whose lead is gone (merged away, emptied from the trash) is ignored, so a new lead starts at the address's own id. */
+    An alias whose lead is gone or no longer lists the address is ignored, so a new lead starts at the address's own id. */
 export async function findLead(kv: KV, s: Sealer, email: string): Promise<{ id: string; lead: Lead | null }> {
   const own = await s.id(email);
   const lead = await readLead(kv, s, own);
   if (lead) return { id: own, lead };
   const to = await kv.get(personKey(own));
   const other = to ? await readLead(kv, s, to) : null;
-  return other ? { id: to!, lead: other } : { id: own, lead: null };
+  return other && hasPerson(other, email) ? { id: to!, lead: other } : { id: own, lead: null };
 }
+
+/** Whether the lead still lists this address: an alias left behind (a lead recreated at the same id, a failed cleanup) routes nothing. */
+export const hasPerson = (lead: Lead, email: string) => !!lead.people?.some((p) => canonical(p.email) === canonical(email));
 
 /** Points every person on the lead at it, and drops the aliases of people taken off it (only those still pointing here). */
 export async function linkPeople(kv: KV, s: Sealer, id: string, now: Person[] = [], was: Person[] = []): Promise<void> {

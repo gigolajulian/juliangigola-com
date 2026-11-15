@@ -88,7 +88,8 @@ describe("people in the record", () => {
   it("join on a merge, once each, and never as the lead's own address", () => {
     const a = { ...fold(null, BRAND, { event: { at: at(1), kind: "inquiry" } }), people: [AD] };
     const b = { ...fold(null, "other@x.co", { event: { at: at(2), kind: "inquiry" } }), people: [{ ...AD, role: "AD" }, { name: "B", email: BRAND }, { name: "Sam", email: "sam@x.co" }] };
-    expect(merge(a, b, at(3)).people).toEqual([AD, { name: "Sam", email: "sam@x.co" }]);
+    // The merged record's own address joins too, so its mail keeps landing here.
+    expect(merge(a, b, at(3)).people).toEqual([AD, { name: "Sam", email: "sam@x.co" }, { name: "other@x.co", email: "other@x.co" }]);
   });
 });
 
@@ -115,9 +116,13 @@ describe("PATCH people", () => {
     expect(own.status).toBe(409);
     expect((await own.json()).error).toMatch(/Merge/);
     const other = await s.id("other@x.co");
-    await writeLead(kv as never, s, other, fold(null, "other@x.co", { event: { at: at(2), kind: "inquiry" } }));
+    await writeLead(kv as never, s, other, { ...fold(null, "other@x.co", { event: { at: at(2), kind: "inquiry" } }), people: [{ name: "T", email: "taken@x.co" }] });
     await kv.put(personKey(await s.id("taken@x.co")), other);
     expect((await patch({ key, people: [{ email: "taken@x.co" }] })).status).toBe(409);
+    // An alias left behind by a lead that no longer lists the address blocks nothing and routes nothing.
+    await kv.put(personKey(await s.id("stale@x.co")), other);
+    expect((await findLead(kv as never, s, "stale@x.co")).lead).toBeNull();
+    expect((await patch({ key, people: [{ email: "stale@x.co" }] })).status).toBe(200);
   });
 });
 
@@ -140,5 +145,13 @@ describe("gallery mail", () => {
     await writeProof(kv as never, s, { ...p, email: BRAND, finals: [{ id: "a1", file: "a.jpg", w: 10, h: 10, bytes: 1, crc: 1 }] });
     expect((await post({ action: "deliver", token }))!.status).toBe(200);
     expect(sent).toMatchObject([{ to: BRAND, cc: [AD.email] }]);
+  });
+
+  it("still reaches the client when a copy address is refused", async () => {
+    const { sendClient } = await import("@/lib/email/proof-mail");
+    const tries: { cc?: string[] }[] = [];
+    const mailer = { send: async (m: { cc?: string[] }) => { tries.push(m); if (m.cc) throw new Error("bad cc"); } };
+    expect(await sendClient(mailer as never, BRAND, { subject: "s", html: "<p>", text: "t", attachments: [] }, ["bad@x.co"])).toBe(true);
+    expect(tries.map((t) => !!t.cc)).toEqual([true, true, false]);
   });
 });
