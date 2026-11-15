@@ -177,7 +177,7 @@ function films(): Driver {
          then paused so they are loaded when their turn comes (Julian, 2026-11-14). The poster stays on top
          until the player says it plays (same wait as video.tsx Loop). Players only ever start while the
          page rests, the current film's first, the others one at a time. */
-      type Pv = { f: HTMLIFrameElement; yt: boolean; played: boolean; at: number; t: number };
+      type Pv = { f: HTMLIFrameElement; yt: boolean; played: boolean; at: number; t: number; t1: number };
       const pool = new Map<number, Pv>();
       let pvT = 0, seen = false, movedAt = 0;
       addEventListener("scroll", () => (movedAt = performance.now()), { passive: true, signal: ac.signal });
@@ -198,7 +198,7 @@ function films(): Driver {
         const film = items[i], src = film.dataset.preview!;
         const yt = src.includes("youtube");
         const f = document.createElement("iframe");
-        const v: Pv = { f, yt, played: false, at: performance.now(), t: 0 };
+        const v: Pv = { f, yt, played: false, at: performance.now(), t: 0, t1: 0 };
         f.src = src + (yt ? "&enablejsapi=1" : "");
         f.allow = "autoplay";
         f.tabIndex = -1;
@@ -210,6 +210,11 @@ function films(): Driver {
         };
         film.append(f);
         pool.set(i, v);
+      };
+      // YouTube draws its own title and controls for about 2.5s after a first start: the poster covers that
+      const show = (v: Pv) => {
+        if (v.f.hasAttribute("data-ready") || v.t) return;
+        v.t = window.setTimeout(() => ((v.t = 0), v.f.setAttribute("data-ready", "")), v.yt ? Math.max(350, 2500 - (performance.now() - v.t1)) : 0);
       };
       const wants = (i: number) => i >= 0 && i < n && !!items[i].dataset.preview && !pool.has(i);
       const fill = () => {
@@ -231,9 +236,15 @@ function films(): Driver {
           if (Math.abs(i - cur) > 1) kill(i);
           else if (i !== cur) {
             clearTimeout(v.t);
+            v.t = 0;
             v.f.removeAttribute("data-ready");
-            if (v.played) say(v, "pauseVideo", "pause");
-          } else if (v.played) say(v, "playVideo", "play");
+            // a waiting YouTube film keeps playing, muted and unseen: paused, it draws its control bar over the film
+            // when it resumes (JG - MAC, Safari, 2026-11-15). Vimeo's background player has no controls, so it rests.
+            if (v.played && !v.yt) say(v, "pauseVideo", "pause");
+          } else if (v.played) {
+            if (v.yt) show(v);
+            else say(v, "playVideo", "play");
+          }
         }
         pvT = window.setTimeout(fill, 300);
       };
@@ -249,13 +260,11 @@ function films(): Driver {
         const plays = vimeoPlays(m) || state === 1;
         if (!plays && typeof state !== "number") return;
         if (plays) {
-          const first = !v.played;
+          if (!v.played) v.t1 = performance.now();
           v.played = true;
           if (state === 1) captionsOff(v.f.contentWindow);
-          if (i !== cur) return void say(v, "pauseVideo", "pause");
-          if (v.f.hasAttribute("data-ready") || v.t) return;
-          // YouTube draws its own title and controls for a moment after a first start; a loaded one resumes clean
-          v.t = window.setTimeout(() => ((v.t = 0), v.f.setAttribute("data-ready", "")), v.yt ? (first ? 2500 : 350) : 0);
+          if (i !== cur) return void (v.yt || say(v, "pauseVideo", "pause"));
+          show(v);
         } else if (i === cur && state !== 2) {
           clearTimeout(v.t);
           v.t = 0;
