@@ -122,9 +122,10 @@ function setup(el: HTMLElement, ctx: Ctx) {
     return gr;
   };
 
-  /* The spot: the letters lit to full ink near the dot, falling off to their
-     resting grey. (The wall showed through here until Julian took it out,
-     2026-11-14.) The canvas is only the spot's box inside the phrase band. */
+  /* The spot: the letters rest lit (foot.css) and go back to the plain grey
+     near the dot. Idle and hover traded places (Julian, 2026-11-15); before,
+     the letters rested grey and the spot lit them. The canvas is only the
+     spot's box inside the phrase band. */
   const draw = (r: DOMRect, u: number) => {
     const br = btn.getBoundingClientRect();
     if (!MK && W && document.fonts.status === "loaded") MK = mask(br);
@@ -144,13 +145,10 @@ function setup(el: HTMLElement, ctx: Ctx) {
     fit(Bc, Math.ceil(cw / 6), Math.ceil(ch / 6));
     cut.style.transform = `translate3d(${ox}px,${oy}px,0)`;
 
-    // ink at part strength over the grey letters: lit, not white (Julian: "darker")
+    // the resting grey over the lit letters, at full strength (the falloff is in the gradients below)
     w.setTransform(dpr, 0, 0, dpr, 0, 0);
-    w.clearRect(0, 0, bw, bh);
-    w.globalAlpha = LIT;
     w.fillStyle = ink;
     w.fillRect(0, 0, bw, bh);
-    w.globalAlpha = 1;
 
     const gx = (sx - ox) * dpr, gy = (sy - oy) * dpr, ud = u * dpr;
     // blur without ctx.filter (Safari): down to 1/6 and back up
@@ -183,7 +181,6 @@ function setup(el: HTMLElement, ctx: Ctx) {
     g.drawImage(Mc, 0, 0);
   };
 
-  const LIT = 0.35; // how far the spot takes the letters toward full ink
   let under: HTMLElement | null = null, hx = -2, hy = -2, hitT = 0;
   const hit = (cxp: number, cyp: number) => (document.elementsFromPoint(cxp, cyp).find((e) => e.parentElement?.classList.contains("mt-fcol")) as HTMLElement | undefined) ?? null;
 
@@ -306,8 +303,8 @@ function setup(el: HTMLElement, ctx: Ctx) {
     // phrase: one speed easing toward idle plus whatever the scroll adds
     pk = clamp(pk * Math.pow(0.94, k) + c.dy * 0.0012, -0.35, 0.35);
     if (Math.abs(pk) < 0.0005) pk = 0;
-    // 90 design px a second, 60% of that under the pointer (Julian, 2026-11-15: 30 and 22% passed too slow and nearly stopped on hover)
-    v += ((busy ? 0 : 0.09 * u * (hot ? 0.6 : 1)) + pk - v) * (1 - Math.exp(-dt / 180));
+    // 68 design px a second, 54 under the pointer (Julian, 2026-11-15: 30 passed too slow and nearly stopped on hover, 90 was a bit fast; the hover speed stayed)
+    v += ((busy ? 0 : (hot ? 0.054 : 0.068) * u) + pk - v) * (1 - Math.exp(-dt / 180));
     x += v * dt;
     tr = -pad - mod(x, W || 1);
     row.style.transform = `translate3d(${tr.toFixed(1)}px,0,0)`;
@@ -396,7 +393,7 @@ function setup(el: HTMLElement, ctx: Ctx) {
     // spot
     const show = hot || (!busy && btn.matches(":focus-visible"));
     if (show && sa === 0) {
-      ink = getComputedStyle(stage).getPropertyValue("--ink").trim() || "#ececec";
+      ink = getComputedStyle(stage).getPropertyValue("--phr").trim() || "#8a8a8a";
       if (hot || sx < 0) {
         sx = hot ? lx : r.width / 2;
         sy = hot ? ly : r.height - 210 * u;
