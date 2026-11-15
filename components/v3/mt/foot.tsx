@@ -47,6 +47,19 @@ function useStills(ref: React.RefObject<HTMLElement | null>) {
   return list.length < 2 ? [list[0]] : [list[i], list[(i + 1) % list.length]];
 }
 
+/** My local time (f2), to the minute. Empty until mounted, so the server and the first paint agree. */
+function useLocalTime() {
+  const [t, setT] = React.useState("");
+  React.useEffect(() => {
+    const f = new Intl.DateTimeFormat("en-US", { timeZone: "America/Los_Angeles", hour: "numeric", minute: "2-digit", timeZoneName: "short" });
+    const set = () => setT(f.format(new Date()));
+    set();
+    const id = setInterval(set, 30000);
+    return () => clearInterval(id);
+  }, []);
+  return t;
+}
+
 function Phrase({ copy }: { copy?: boolean }) {
   return (
     <span className="mt-ph" aria-hidden={copy || undefined} data-copy={copy || undefined}>
@@ -60,8 +73,9 @@ export function MtFoot() {
   const wall = React.useRef<HTMLDivElement>(null);
   const stills = useStills(wall);
   const year = new Date().getFullYear();
+  const time = useLocalTime();
   return (
-    <footer className="mt-foot" data-mt="foot" data-hold="1">
+    <footer className="mt-foot" data-mt="foot">
       <div className="mt-stage">
         {/* one still behind the links, dimmed by the scrim (Julian picked this over the wall of frames, 2026-11-14).
             The next still sits under it unseen, so it is loaded by the time it shows. */}
@@ -109,6 +123,7 @@ export function MtFoot() {
         </div>
         <div className="mt-fline lbl mute">
           <span>&copy; {year} Julian Gigola</span>
+          {time ? <span className="mt-ftime"><span className="dk">San Jose </span><span className="t">{time}</span></span> : null}
           <Link href="/legal" className="dk">Legal</Link>
           <button type="button" className="po" onClick={() => scrollTop()}>Top <span aria-hidden>&uarr;</span></button>
         </div>

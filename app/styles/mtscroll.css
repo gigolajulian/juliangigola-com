@@ -184,7 +184,9 @@
 [data-mtscroll] .mt-fcol{position:absolute;top:0;left:calc((var(--c) * 162 - 9) * var(--u));width:calc(150 * var(--u));display:flex;flex-direction:column;gap:calc(12 * var(--u))}
 [data-mtscroll] .mt-fcol figure,[data-mtscroll] .mt-frow figure{position:relative;margin:0;flex:none;aspect-ratio:3/4;overflow:hidden;background:var(--card)}
 [data-mtscroll] .mt-frow{display:none}
-[data-mtscroll] .mt-fscrim{position:absolute;inset:0;background:linear-gradient(color-mix(in srgb,var(--bg) 90%,transparent),color-mix(in srgb,var(--bg) 74%,transparent) 45%,var(--bg) 94%)}
+[data-mtscroll] .mt-fscrim{position:absolute;inset:0;background:linear-gradient(color-mix(in srgb,var(--bg) 55%,transparent),color-mix(in srgb,var(--bg) 62%,transparent) 45%,var(--bg) 94%)}
+[data-mtscroll] .mt-ftime .t{color:var(--ink)}
+[data-mtscroll] .mt-fline>span{white-space:nowrap}
 [data-mtscroll] .mt-fcols{position:absolute;top:calc(96 * var(--u));left:calc(var(--fx) + 36 * var(--u));right:calc(var(--fx) + 36 * var(--u));display:grid;grid-template-columns:repeat(4,1fr);gap:20px;padding-top:calc(28 * var(--u));border-top:1px solid var(--hair)}
 [data-mtscroll] .mt-fcols p{margin:0 0 calc(12 * var(--u))}
 [data-mtscroll] .mt-fcols .mt-based{margin-top:calc(26 * var(--u))}
