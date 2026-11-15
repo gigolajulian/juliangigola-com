@@ -11,7 +11,8 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { isEmail, type PublicDelivery } from "@/lib/proofs/proof";
+import { useClock } from "@/lib/use-clock";
+import { closingSoon, isEmail, type PublicDelivery } from "@/lib/proofs/proof";
 import { ProofCursor } from "@/components/proofs/cursor";
 
 const size = (b: number) => (b >= 1e9 ? `${(b / 1e9).toFixed(1)} GB` : `${Math.max(1, Math.round(b / 1e6))} MB`);
@@ -62,6 +63,9 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
   const src = (f: { id: string; v: number }) => `/delivery/${id}/f/${f.id}?v=${f.v}`;
   const total = finals.reduce((n, f) => n + f.bytes, 0);
   const closes = initial.closesAt ? new Intl.DateTimeFormat("en-US", { month: "long", day: "numeric", timeZone: "America/Los_Angeles" }).format(new Date(initial.closesAt)) : null;
+  // The last days say so on the page (Julian 2026-11-15). Read after mount: server and phone can disagree near midnight.
+  const clock = useClock();
+  const soon = clock ? closingSoon(initial.closesAt, clock) : null;
 
   const track = React.useCallback(
     (b: Record<string, unknown>) => fetch(`/api/proof/${id}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "track", ...b }), keepalive: true }).catch(() => {}),
@@ -112,7 +116,7 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
 
       <>
           <div className="proof-intro">
-            <p className="proof-lab">Finals · {finals.length} photos · {size(total)}</p>
+            <p className="proof-lab">Finals · {finals.length} photos · {size(total)}{soon !== null && closes ? ` · Closes ${closes} · ${soon} ${soon === 1 ? "day" : "days"} left` : ""}</p>
             <h1>Your photos.</h1>
             <p className="proof-mu" style={{ marginTop: 18 }}>
               Full size JPEGs. Save the ones you want, or all of them at once.{closes ? ` The link closes ${closes}, so keep a copy.` : ""}
