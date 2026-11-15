@@ -366,6 +366,8 @@ html:has(.proof[data-wall])::-webkit-scrollbar{display:none}
 .dlv-side .proof-word{position:absolute;top:22px}
 .dlv-side h1{font:500 clamp(44px,5vw,72px)/.96 var(--font-display);letter-spacing:-.04em;margin:0 0 14px}
 .dlv-side .proof-mu{margin:0}
+/* Same 12px under the subheading as the proof gate, so it never sits on the line below. */
+.dlv-side .proof-sub{margin:0 0 12px}
 .dlv-side label{display:flex;flex-direction:column;gap:6px}
 .dlv-side input{text-transform:none;width:100%;background:none;border:0;border-bottom:1px solid var(--foreground);color:var(--foreground);font:16px var(--p-mono);padding:10px 0;outline:none}
 .dlv-side .proof-err{margin:0}
