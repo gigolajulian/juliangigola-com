@@ -13,6 +13,10 @@ import { scrollTop } from "@/components/v3/smooth-scroll";
 const PHRASE = "Contact me";
 const STILL = "/work/diesel/03.jpg";
 const EVERY = 5000;
+/* Which projects lend a still. The still is only seen through the letters of the phrase, so these are frames with
+   color and texture across the whole frame; very dark or very bright ones vanish there. My picks from the numbered
+   sheet of 2026-11-14, Julian has not confirmed them. */
+const KEEP = new Set(["nova", "fauxtopia", "ravaged", "valgur", "hua", "places", "kala-x-sharks", "wild-and-unapologetic", "noct", "laced", "industrial-zone"]);
 
 /** The still behind the footer and the one after it. The list is one landscape
     frame per project from /canvas.json (a tall frame crops badly in a wide
@@ -32,7 +36,7 @@ function useStills(ref: React.RefObject<HTMLElement | null>) {
         .then((r) => r.json())
         .then((j: Record<string, [string, number][]>) => {
           const wide = Object.values(j).flatMap((fr) => fr.find((x) => x[1] < 0.9)?.[0] ?? []);
-          setList([STILL, ...wide.filter((src) => !src.startsWith("/work/diesel/"))]);
+          setList([STILL, ...wide.filter((src) => KEEP.has(src.split("/")[2]))]);
         })
         .catch(() => {});
     });
