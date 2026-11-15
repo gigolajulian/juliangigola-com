@@ -19,22 +19,20 @@
 local LrHttp = import "LrHttp"
 local LrView = import "LrView"
 local LrDialogs = import "LrDialogs"
-local LrPasswords = import "LrPasswords"
 local LrFileUtils = import "LrFileUtils"
 local LrApplication = import "LrApplication"
 local LrDate = import "LrDate"
 local LrTasks = import "LrTasks"
 
-local Json = require "Json"
 local Image = require "Image"
+local Site = require "Site"
 
 local bind = LrView.bind
 local share = LrView.share
 
-local SITE = "https://juliangigola.com"
-local API = SITE .. "/api/proof"
--- The same GitHub token the website export saves; the site checks it can push to the repo.
-local TOKEN_KEY = "github-token"
+local SITE, API = Site.SITE, Site.API
+local headers, enc, send, fetch = Site.headers, Site.enc, Site.send, Site.fetch
+local check = Site.check
 local LABEL = "purple"
 
 local provider = {}
@@ -77,51 +75,6 @@ function provider.updateExportSettings(s)
   s.LR_embeddedMetadataOption = "copyrightOnly"
   s.LR_removeLocationMetadata = true
   s.LR_removeFaceMetadata = true
-end
-
--- ── the site ──────────────────────────────────────────────────────
-
-local function token()
-  local t = LrPasswords.retrieve(TOKEN_KEY)
-  if not t or t == "" then
-    error("No GitHub token yet. Open File > Export > juliangigola.com once, paste it and press Save.", 0)
-  end
-  return t
-end
-
-local function headers(contentType)
-  return {
-    { field = "Authorization", value = "Bearer " .. token() },
-    { field = "Content-Type", value = contentType or "application/json" },
-    { field = "User-Agent", value = "juliangigola-lightroom" },
-  }
-end
-
-local function check(body, hdrs, what)
-  local status = hdrs and tonumber(hdrs.status)
-  if not status then error("Could not reach juliangigola.com (" .. what .. "). Check the connection and publish again.", 0) end
-  if status == 401 then error("The site did not accept the GitHub token. Paste a new one in File > Export > juliangigola.com.", 0) end
-  if status >= 300 then
-    local msg = body and body:match('"error"%s*:%s*"([^"]*)"') or what
-    error(("juliangigola.com said %d: %s"):format(status, msg), 0)
-  end
-  return body and body ~= "" and Json.decode(body) or {}
-end
-
-local function enc(s)
-  return (tostring(s):gsub("[^%w%-%._~]", function(c) return ("%%%02X"):format(c:byte()) end))
-end
-
-local function send(method, query, fields)
-  local o = Json.object()
-  for k, v in pairs(fields or {}) do Json.set(o, k, v) end
-  local b, h = LrHttp.post(API .. (query or ""), Json.encode(o), headers(), method, 60)
-  return check(b, h, method .. " " .. (query or "gallery"))
-end
-
-local function fetch(galleryToken)
-  local b, h = LrHttp.get(API .. "?token=" .. enc(galleryToken), headers(), 60)
-  return check(b, h, "read gallery")
 end
 
 -- ── collection settings ───────────────────────────────────────────
@@ -183,6 +136,8 @@ function provider.processRenderedPhotos(functionContext, exportContext)
   local url
   if not remote then
     fields.action = "create"
+    -- The shoot day names the gallery (MMDDYYYY, earliest capture); none and the site uses today.
+    fields.day = Site.day(session:photosToExport())
     local made = send("POST", nil, fields)
     remote, url = made.token, made.url
     session:recordRemoteCollectionId(remote)
@@ -253,11 +208,8 @@ local function gallery(remote)
   return p
 end
 
--- Lightroom ids each service of a plugin as "<toolkit id>.<n>" (com.juliangigola.export.2), so match the prefix.
-local function ours(service)
-  local id = tostring(service:getPluginId())
-  return id == _PLUGIN.id or id:sub(1, #_PLUGIN.id + 1) == _PLUGIN.id .. "."
-end
+-- This plugin's Client Gallery services. Client Delivery collections share the proof token, so Sync with proof skips them.
+local ours = Site.isProofs
 
 -- LrPublishedPhoto has no way back to its collection, so find the
 -- gallery of this service that holds the first photo.
