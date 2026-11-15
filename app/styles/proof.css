@@ -366,6 +366,8 @@ html:has(.proof[data-wall])::-webkit-scrollbar{display:none}
 .dlv-side .proof-word{position:absolute;top:22px}
 .dlv-side h1{font:500 clamp(44px,5vw,72px)/.96 var(--font-display);letter-spacing:-.04em;margin:0 0 14px}
 .dlv-side .proof-mu{margin:0}
+/* Same 12px under the subheading as the proof gate, so it never sits on the line below. */
+.dlv-side .proof-sub{margin:0 0 12px}
 .dlv-side label{display:flex;flex-direction:column;gap:6px}
 .dlv-side input{text-transform:none;width:100%;background:none;border:0;border-bottom:1px solid var(--foreground);color:var(--foreground);font:16px var(--p-mono);padding:10px 0;outline:none}
 .dlv-side .proof-err{margin:0}
@@ -385,6 +387,10 @@ html:has(.proof[data-wall])::-webkit-scrollbar{display:none}
 .proof .proof-pass .proof-card{position:static;transform:none;box-shadow:none}
 .proof .proof-show{justify-self:start;align-self:flex-start;background:none;border:0;padding:4px 0;min-height:24px;font:11px var(--p-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted-foreground);cursor:pointer}
 .proof .proof-show:focus-visible{outline:1px solid var(--accent);outline-offset:3px}
+/* The gate's subheading (Julian 2026-11-15): the client's name or the shoot date, under the heading. */
+.proof-sub{font:13px/1.5 var(--p-mono);color:var(--muted-foreground);margin:12px 0 0;text-transform:none}
+/* With file names on, a long one stops short of the ring. */
+.proof-no{max-width:calc(100% - 64px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* /contract/<id> (Julian 2026-11-15): the delivery gate's type and fields, one reading column. */
 .ctr{max-width:760px;padding:0 28px 120px}

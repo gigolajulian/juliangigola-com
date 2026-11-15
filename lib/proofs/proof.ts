@@ -101,6 +101,10 @@ export type Proof = {
   offline?: boolean;
   /** An optional password on the gate: PBKDF2 of it, never the password. Only `hasPass` leaves the server (`forDesk`). */
   pass?: { salt: string; hash: string };
+  /** A line under the gate's heading, the client's name or the shoot date (Julian 2026-11-15). Unset: none. */
+  subhead?: string;
+  /** File names on the thumbnails, proof and delivery. Unset is off: Lightroom names stay Julian's unless he turns this on. */
+  labels?: boolean;
 };
 
 export const NOTIFY = ["each", "daily", "off"] as const;
@@ -321,7 +325,10 @@ export function lookStarts(frames: { t?: number }[], gap = 600): number[] {
 export function publicView(p: Proof) {
   return {
     // No file name: Lightroom names are Julian's, the client sees proof numbers.
-    frames: p.frames.map(({ id, w, h, t }) => (t ? { id, w, h, t } : { id, w, h })),
+    // With labels on (his choice per gallery), the name goes too.
+    frames: p.frames.map(({ id, w, h, t, file }) => ({ id, w, h, ...(t ? { t } : {}), ...(p.labels ? { file } : {}) })),
+    subhead: p.subhead ?? null,
+    labels: !!p.labels,
     // Picks belong to whoever typed their email; only the sent ones are shared.
     selects: p.submittedAt ? p.selects : [],
     included: p.included,
@@ -342,7 +349,7 @@ export function deliveryView(p: Proof) {
   const finals = shotOrder(p.finals ?? []);
   // The gate's photo: Julian's preview pick when it is one of the finals, else the first final.
   const cover = finals.find((f) => f.id === p.card?.id)?.id ?? finals[0]?.id ?? null;
-  return { finals: finals.map(({ id, file, w, h, bytes, crc }) => ({ id, file, w, h, bytes, v: crc })), cover, closesAt: p.closesAt ?? null };
+  return { finals: finals.map(({ id, file, w, h, bytes, crc }) => ({ id, file, w, h, bytes, v: crc })), cover, closesAt: p.closesAt ?? null, subhead: p.subhead ?? null, labels: !!p.labels };
 }
 export type PublicDelivery = ReturnType<typeof deliveryView>;
 
@@ -365,7 +372,7 @@ export function cleanNotes(given: unknown, selects: string[]): Record<string, st
 }
 
 /** Settings Lightroom or /admin may set. Numbers are clamped so a typo cannot price a frame at $15,000. */
-type Settings = Partial<Pick<Proof, "name" | "email" | "note" | "included" | "price" | "days" | "balance" | "watermark" | "card" | "notify" | "offline">>;
+type Settings = Partial<Pick<Proof, "name" | "email" | "note" | "included" | "price" | "days" | "balance" | "watermark" | "card" | "notify" | "offline" | "subhead" | "labels">>;
 export function cleanSettings(given: Record<string, unknown>): Settings {
   const out: Settings = {};
   const int = (v: unknown, lo: number, hi: number) => (typeof v === "number" || typeof v === "string") && Number.isFinite(Number(v)) ? Math.min(hi, Math.max(lo, Math.round(Number(v)))) : undefined;
@@ -388,6 +395,8 @@ export function cleanSettings(given: Record<string, unknown>): Settings {
   // "selects" (or null) goes back to the old way: Selects in only.
   if (given.notify === "selects" || given.notify === null) out.notify = undefined;
   else if (NOTIFY.includes(given.notify as Notify)) out.notify = given.notify as Notify;
+  if (typeof given.subhead === "string") out.subhead = given.subhead.replace(/\s+/g, " ").trim().slice(0, 80) || undefined;
+  if (typeof given.labels === "boolean") out.labels = given.labels || undefined;
   if (typeof given.offline === "boolean") out.offline = given.offline || undefined;
   if (typeof given.watermark === "boolean" || given.watermark === "true" || given.watermark === "false") out.watermark = given.watermark === true || given.watermark === "true";
   return out;

@@ -18,7 +18,7 @@ const size = (b: number) => (b >= 1e9 ? `${(b / 1e9).toFixed(1)} GB` : `${Math.m
 const pad = (i: number) => String(i + 1).padStart(2, "0");
 
 /** The delivery's door: the cover photo beside (or above) a header, a line and the email. */
-function SplitGate({ cover, sub, onEnter }: { cover: string; sub: string; onEnter: (email: string) => void }) {
+function SplitGate({ cover, sub, subhead, onEnter }: { cover: string; sub: string; subhead?: string | null; onEnter: (email: string) => void }) {
   const [value, setValue] = React.useState("");
   const [bad, setBad] = React.useState(false);
   return (
@@ -39,6 +39,7 @@ function SplitGate({ cover, sub, onEnter }: { cover: string; sub: string; onEnte
         <Link className="proof-word" href="/">Julian Gigola</Link>
         <div>
           <h1>Your photos.</h1>
+          {subhead ? <p className="proof-sub">{subhead}</p> : null}
           <p className="proof-mu">{sub}</p>
         </div>
         <label>
@@ -89,6 +90,7 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
       <div className="proof">
         <SplitGate
           cover={src(finals.find((f) => f.id === initial.cover) ?? finals[0])}
+          subhead={initial.subhead}
           sub={`Your photos at full resolution.${closes ? ` Save them by ${closes}.` : ""}`}
           onEnter={(address) => {
             setEmail(address);
@@ -125,7 +127,7 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
                 {/* eslint-disable-next-line @next/next/no-img-element -- private finals from the Worker, not the image CDN */}
                 <img src={`${src(f)}&w=800`} alt="" loading={i < 8 ? "eager" : "lazy"} width={f.w || undefined} height={f.h || undefined} draggable={false} />
                 <button type="button" className="proof-open" aria-label={`Open photo ${i + 1}`} onClick={() => setOpen(i)} />
-                <span className="proof-no">{pad(i)}</span>
+                <span className="proof-no">{pad(i)}{initial.labels ? ` · ${f.file}` : ""}</span>
               </div>
             ))}
           </div>
