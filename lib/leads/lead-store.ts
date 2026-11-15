@@ -3,7 +3,8 @@
 import { sealer, type Sealer } from "./lead-crypto";
 import { notify, pushFor } from "./lead-push";
 import { appendLog, fresh } from "./activity-log";
-import { fold, leadStoreKey, leadSummary, type Change, type Lead, type LeadSummary, type Sent } from "./leads";
+import { canonical } from "./lead-crypto";
+import { fold, leadStoreKey, leadSummary, type Change, type Lead, type LeadSummary, type Person, type Sent } from "./leads";
 
 /** The INBOX namespace as the lead, log, push, proof and sheet code use it. */
 export type InboxKV = Pick<NonNullable<CloudflareEnv["INBOX"]>, "get" | "put" | "list" | "delete">;
@@ -91,6 +92,44 @@ export async function canonLeads(kv: KV, s: Sealer): Promise<number> {
   return moved;
 }
 
+/** A person's address on someone else's lead (`Lead.people`) points at that lead's id. The key is the
+    HMAC of the address, like a lead's own, so no address shows in a key listing. */
+export const personKey = (hash: string) => `person:${hash}`;
+
+/** The lead an address belongs to: its own record first, else the lead it is a person on.
+    An alias whose lead is gone or no longer lists the address is ignored, so a new lead starts at the address's own id. */
+export async function findLead(kv: KV, s: Sealer, email: string): Promise<{ id: string; lead: Lead | null }> {
+  const own = await s.id(email);
+  const lead = await readLead(kv, s, own);
+  if (lead) return { id: own, lead };
+  const to = await kv.get(personKey(own));
+  const other = to ? await readLead(kv, s, to) : null;
+  return other && hasPerson(other, email) ? { id: to!, lead: other } : { id: own, lead: null };
+}
+
+/** Whether the lead still lists this address: an alias left behind (a lead recreated at the same id, a failed cleanup) routes nothing. */
+export const hasPerson = (lead: Lead, email: string) => !!lead.people?.some((p) => canonical(p.email) === canonical(email));
+
+/** Points every person on the lead at it, and drops the aliases of people taken off it (only those still pointing here). */
+export async function linkPeople(kv: KV, s: Sealer, id: string, now: Person[] = [], was: Person[] = []): Promise<void> {
+  const keep = new Set(await Promise.all(now.map((p) => s.id(p.email))));
+  await Promise.all([...keep].map((h) => kv.put(personKey(h), id)));
+  for (const p of was) {
+    const h = await s.id(p.email);
+    if (!keep.has(h) && (await kv.get(personKey(h))) === id) await kv.delete(personKey(h));
+  }
+}
+
+/** Who gets a copy of gallery and delivery mail sent to `to`: the people on that lead who have it on, and the
+    lead's own address when the gallery went to one of its people. Never `to` itself. */
+export async function copiesFor(kv: KV, s: Sealer, to: string): Promise<string[]> {
+  const { lead } = await findLead(kv, s, to);
+  if (!lead) return [];
+  const all = [lead.email, ...(lead.people ?? []).filter((p) => p.cc !== false).map((p) => p.email)];
+  const seen = new Set([canonical(to)]);
+  return all.filter((e) => e.includes("@") && !e.startsWith("ig:") && !e.startsWith("tel:") && !seen.has(canonical(e)) && !!seen.add(canonical(e)));
+}
+
 /** Logs a mail the site sent against the person it was about. Never throws. */
 export const logMail = (env: LeadStore, email: string | undefined, subject: string, mail: Sent) =>
   recordLead(env, email ?? "", { event: { at: new Date().toISOString(), kind: "mail", note: subject, mail } });
@@ -126,8 +165,8 @@ export async function recordLead(env: LeadStore, email: string, c: Change): Prom
   }
   try {
     const s = await seal;
-    const id = await s.id(email);
-    const before = await readLead(env.INBOX, s, id);
+    // Mail from the art director lands on the client's lead (`findLead`).
+    const { id, lead: before } = await findLead(env.INBOX, s, email);
     const after = fold(before, email, c);
     if (after === before) return after;
     await writeLead(env.INBOX, s, id, after, before);

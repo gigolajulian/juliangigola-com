@@ -2,7 +2,7 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { bearer, isAdmin } from "@/lib/vouch";
 import { SAFE_IMAGE, summary, type Enquiry, type Summary } from "@/lib/inbox";
 import { backfillLead, fold, PAPER, REMIND_MAX, STAGES, trashDaysLeft, type InboxRow, type Lead, type LeadPatch, type LeadSummary, type Paper, type Stage } from "@/lib/leads/leads";
-import { everyLead, readLead, writeLead } from "@/lib/leads/lead-store";
+import { everyLead, findLead, hasPerson, linkPeople, personKey, readLead, writeLead } from "@/lib/leads/lead-store";
 import { clientsCsv } from "@/lib/leads/sheet-sync";
 import { importNotion } from "@/lib/leads/notion-import";
 import { adoptLog, eventsCsv, forgetLog, readLog, readMaster } from "@/lib/leads/activity-log";
@@ -12,7 +12,7 @@ import { publicKey } from "@/lib/leads/web-push";
 import { notionPaper, notionStage } from "@/lib/leads/notion-lead";
 import { importStripe } from "@/lib/leads/stripe-import";
 import { STRIPE_UNSET } from "@/lib/stripe";
-import { cleanTemplates, manualLead, merge, stats, type NewLead } from "@/lib/leads/lead-crm";
+import { cleanPeople, cleanTemplates, manualLead, merge, stats, type NewLead } from "@/lib/leads/lead-crm";
 import { balance, cleanFrom, cleanInvoice, invoiceNo, mmyy, PHOTO_KEY, usd, type InvoiceFrom } from "@/lib/leads/invoice";
 import { bodyOf, json, NO_STORE } from "@/lib/http";
 
@@ -351,6 +351,8 @@ export async function POST(request: Request) {
     if ("error" in lead) return json(lead, 400);
     const id = await seal.id(lead.email);
     if (await readLead(gate.inbox, seal, id)) return json({ error: "That person is already a lead.", id }, 409);
+    const on = lead.email.includes("@") ? await findLead(gate.inbox, seal, lead.email) : null;
+    if (on?.lead) return json({ error: `That address is on ${on.lead.name}'s lead.`, id: on.id }, 409);
     await Promise.all((await seal.ids(lead.email)).map((i) => gate.inbox.delete(`gone:${i}`)));
     await writeLead(gate.inbox, seal, id, lead, null);
     return json({ lead, id });
@@ -413,7 +415,7 @@ export async function POST(request: Request) {
  */
 async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: Awaited<ReturnType<typeof sealer>>, given: Record<string, unknown>, notion?: string) {
   if (!seal) return noSeal();
-  const { key, stage, snoozeUntil, seen, archive, trash, notes, remind, details, quote, lostReason, mergeFrom, invoice, licence, contract, release, invoicePaid } = given as LeadPatch & { key: string };
+  const { key, stage, snoozeUntil, seen, archive, trash, notes, remind, details, quote, lostReason, mergeFrom, invoice, licence, contract, release, invoicePaid, people } = given as LeadPatch & { key: string };
   for (const p of [contract, release]) if (p !== undefined && !(PAPER as readonly string[]).includes(p)) return json({ error: "Unknown status." }, 400);
   const bill = invoice === undefined ? undefined : cleanInvoice(invoice);
   if (bill && "error" in bill) return json({ error: bill.error }, 400);
@@ -425,6 +427,20 @@ async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: Await
   const id = key.slice(5);
   let lead = await readLead(inbox, seal, id);
   if (!lead) return json({ error: "Gone." }, 404);
+  const wasPeople = lead.people;
+  if (people !== undefined) {
+    const list = cleanPeople(people, lead.email);
+    if ("error" in list) return json({ error: list.error }, 400);
+    // An address with a lead of its own, or on another lead, would split their mail: Merge is the way to join them.
+    for (const p of list) {
+      const own = await seal.id(p.email);
+      if (own !== id && (await readLead(inbox, seal, own))) return json({ error: `${p.email} has a lead of their own. Merge it into this one instead.` }, 409);
+      const to = await inbox.get(personKey(own));
+      const there = to && to !== id ? await readLead(inbox, seal, to) : null;
+      if (there && hasPerson(there, p.email)) return json({ error: `${p.email} is already on another lead.` }, 409);
+    }
+    lead = { ...lead, people: list.length ? list : undefined, events: [...lead.events, { at: new Date().toISOString(), kind: "edit" as const, note: "people" }].slice(-50) };
+  }
   // What the log compares against: events already logged (this lead's, and a merged record's) are not logged again.
   let from: Lead = lead;
   const at = new Date().toISOString();
@@ -503,6 +519,8 @@ async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: Await
   }
   for (const k of Object.keys(lead) as (keyof Lead)[]) if (lead[k] === undefined) delete lead[k];
   await writeLead(inbox, seal, id, lead, from);
+  // Their mail finds this lead from now on; a merged record's people now point here too.
+  if (people !== undefined || merged) await linkPeople(inbox, seal, id, lead.people, merged ? undefined : wasPeople);
   if (merged) {
     await adoptLog(inbox, seal, id, merged.slice(5), lead).catch((e: unknown) => console.error("activity log merge", String(e)));
     await bury(inbox, merged);
