@@ -94,7 +94,8 @@ export function burst(sizes: string[][], heroes: { d: [number, string][]; l: [nu
       return new Promise((ok, no) => {
         if (i.complete && i.naturalWidth > 0) return ok(0);
         i.onload = ok;
-        i.onerror = no;
+        // its `error` for the refused one comes after this in Firefox, the new file still on its way
+        i.onerror = () => i.complete && no();
       }).then(() => i.decode());
     });
   };
