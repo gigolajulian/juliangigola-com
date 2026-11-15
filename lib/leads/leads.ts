@@ -35,7 +35,9 @@ export type LeadEvent = {
     // From outside or by hand (2026-11-10): Stripe payments and refunds, a client moving or cancelling, selects sent, an invoice settled.
     | "payment" | "refund" | "reschedule" | "cancel" | "selects" | "invoice-paid"
     // The client's first download of their finals (2026-11-12): Delivered.
-    | "download";
+    | "download"
+    // The client signed a contract online (2026-11-15, `lib/contracts/contract.ts`), ref = "signed:<contract id>".
+    | "contract";
   /* "proofs": they opened a proof gallery, ref = its token so each gallery is one line. */
   /* "replied" / "wrote": mail between hello@ and them in Gmail, ref = the Gmail message id (`lib/leads/gmail-sync.ts`). */
   /** The raw row (`msg:` key), Cal.com uid or Stripe intent, so a retry folds in once. */
@@ -77,7 +79,12 @@ export type LeadPatch = {
   release?: string;
   /** An invoice settled by hand (cash, Zelle), or opened again. */
   invoicePaid?: { no: string; paid: boolean };
+  /** The whole list of people on the lead, replacing what was there. */
+  people?: Person[];
 };
+
+/** Someone else on the same job: the art director, the producer, the stylist. Their mail lands on this lead. */
+export type Person = { name: string; email: string; role?: string; phone?: string; /** Copied on gallery and delivery mail; unset reads as on. */ cc?: boolean };
 
 export type Lead = {
   email: string;
@@ -125,13 +132,15 @@ export type Lead = {
   invoices?: Invoice[];
   /** Opt-in, for commercial work: what the photos may be used for, and the day that ends (YYYY-MM-DD). */
   licence?: Licence;
+  /** More people on the job (Julian 2026-11-15): kept in the full record, never the list summary. */
+  people?: Person[];
   events: LeadEvent[];
 };
 
 export type Licence = { use: string; end: string };
 
 /** What the list shows, sealed into KV metadata (under its 1024-byte cap). `id` is added when listed. */
-export type LeadSummary = Omit<Lead, "events" | "notion" | "deposit" | "notes" | "remind" | "phone" | "ig" | "company" | "lostReason" | "source" | "invoices"> & {
+export type LeadSummary = Omit<Lead, "events" | "notion" | "deposit" | "notes" | "remind" | "phone" | "ig" | "company" | "lostReason" | "source" | "invoices" | "people"> & {
   paid?: true;
   id?: string;
   /** When his reminder is due, and its words, cut short. */
@@ -351,7 +360,7 @@ export function paperDue(l: Pick<Lead, "stage" | "when" | "contract" | "release"
 // Name and email capped: KV metadata holds 1024 bytes, and the sealed summary
 // grows by a third, so one long Cal.com name must not cost the whole lead.
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const leadSummary = ({ events, notion, deposit, notes, remind, phone, ig, company, lostReason, source, invoices, ...rest }: Lead): LeadSummary => ({
+export const leadSummary = ({ events, notion, deposit, notes, remind, phone, ig, company, lostReason, source, invoices, people, ...rest }: Lead): LeadSummary => ({
   ...rest,
   ...(rest.stage === "Quoted" ? { quiet: quoteTrail({ ...rest, events }) } : {}),
   ...(remind ? { due: remind.at, dueText: remind.text.slice(0, 40) } : {}),

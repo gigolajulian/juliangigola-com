@@ -244,7 +244,9 @@ export function LeadsDesk() {
   // List or Board, kept on this device under the classic desk's key. The desk draws nothing until mounted (see `mode`), so no hydration gap.
   const [board, setBoardState] = React.useState(() => typeof window !== "undefined" && (() => { try { return localStorage.getItem(BOARD_STORE) === "1"; } catch { return false; } })());
   const setBoard = (on: boolean) => { setBoardState(on); try { localStorage.setItem(BOARD_STORE, on ? "1" : "0"); } catch {} };
-  const show = (v: View) => { setScreen(v); setOpen(null); };
+  // The gallery a lead's Galleries section opened the Proofs desk on; the side nav opens it on the list.
+  const [proofPick, setProofPick] = React.useState<string | null>(null);
+  const show = (v: View) => { setScreen(v); setOpen(null); setProofPick(null); };
   const [templates, setTemplates] = React.useState<Template[]>([]);
   // When the list was loaded: groups by date without reading the clock during render.
   const [at, setAt] = React.useState(0);
@@ -443,7 +445,7 @@ export function LeadsDesk() {
 
   // The lead page: its own Astryx layout (components/leads/lead.tsx).
   const lead = current ? (
-    <LeadDesk key={current.id} summary={current} initial={fresh?.email === current.email ? fresh : null} call={call} onChange={changed} onBack={() => setOpen(null)} reload={load} templates={templates} others={live.filter((o) => o.id !== current.id)} size={size} toProofs={() => show("proofs")} />
+    <LeadDesk key={current.id} summary={current} initial={fresh?.email === current.email ? fresh : null} call={call} onChange={changed} onBack={() => setOpen(null)} reload={load} templates={templates} others={live.filter((o) => o.id !== current.id)} size={size} toProofs={(token) => { show("proofs"); setProofPick(token ?? null); }} />
   ) : null;
 
   // The lead from the POST itself: KV lists lag a fresh write, so it goes in by hand and opens whole.
@@ -470,7 +472,7 @@ export function LeadsDesk() {
     templates: <TemplatesDesk call={call} templates={templates} saved={setTemplates} />,
     device: <DeviceDesk call={call} reload={load} signOut={signOut} />,
     more: <More go={show} />,
-    proofs: <ProofsDesk embedded />,
+    proofs: <ProofsDesk embedded key={proofPick ?? ""} initial={proofPick ?? undefined} />,
   };
   const page = lead ?? pages[screen] ?? (screen === "money" ? <MoneyDesk /> : screen === "calendar" ? <CalendarDesk leads={live.filter((l) => !l.archivedAt)} size={size} open={(l) => setOpen(l.id ?? null)} tab={calTab} setTab={setCalTab} /> : screen === "new" ? <NewLeadDesk call={call} leads={live} size={size} done={added} open={(l) => setOpen(l.id ?? null)} cancel={() => show("leads")} /> : screen === "today" && leads ? <TodayDesk leads={live} size={size} open={(l) => setOpen(l.id ?? null)} show={() => show("leads")} /> : home);
   const section = lead ? null : sectionOf(screen);
