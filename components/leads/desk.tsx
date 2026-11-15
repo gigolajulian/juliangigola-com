@@ -33,7 +33,7 @@ import { Badge } from "@astryxdesign/core/Badge";
 import { Tab, TabList } from "@astryxdesign/core/TabList";
 import { SignIn } from "@/components/leads/setup";
 import { LeadDesk } from "@/components/leads/lead";
-import { badge, FROST_ROOM, frostBar } from "@/components/leads/shared";
+import { badge, FROST_ROOM, frostBar, GLASS } from "@/components/leads/shared";
 import { ago, aside, inboxCall, loadError, matches, nextStep, pass } from "@/lib/leads/lead-desk";
 import type { Template } from "@/lib/leads/lead-crm";
 import { TZ } from "@/lib/booking/booking-rules";
@@ -489,8 +489,8 @@ export function LeadsDesk() {
     <Theme theme={leadsTheme} mode={mode}>
       {/* The site sets mono capitals everywhere; Astryx sets its own type inside. */}
       {/* The site's capitals are unlayered element rules, so they beat Astryx's layers; this beats them inside the desk. */}
-      <style>{`:root [data-astryx-desk][data-astryx-desk] *,:root [data-astryx-desk][data-astryx-desk] ::placeholder{text-transform:none}${FROST_ROOM}`}</style>
-      <div data-astryx-desk="" data-bars={size === "phone" ? "" : undefined} style={{ position: "relative", height: "100dvh", textTransform: "none", letterSpacing: "normal" }}>
+      <style>{`:root [data-astryx-desk][data-astryx-desk] *,:root [data-astryx-desk][data-astryx-desk] ::placeholder{text-transform:none}${FROST_ROOM}${GLASS}`}</style>
+      <div data-astryx-desk="" data-bars={size === "phone" ? "" : undefined} data-glass={mode === "dark" && (size === "phone" || railed) ? "" : undefined} style={{ position: "relative", height: "100dvh", textTransform: "none", letterSpacing: "normal" }}>
         {size === "phone"
           ? <><Layout height="fill" content={shown} />{lead ? null /* a lead brings its own action bar */ : <div style={frostBar}><TabBar view={screen} go={show} needs={needs} /></div>}</>
           : <Layout height="fill" start={railed

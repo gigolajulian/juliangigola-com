@@ -92,11 +92,15 @@ function line(e: LeadEvent): string {
  * over a blur). They float over the page, so the list shows through as it scrolls; FROST_ROOM keeps the last row clear. */
 const frostBar: CSSProperties = {
   position: "absolute", insetInline: 0, bottom: 0, zIndex: 5,
-  background: "color-mix(in srgb, var(--color-background-card) 50%, transparent)",
+  background: "var(--leads-bar, color-mix(in srgb, var(--color-background-card) 50%, transparent))",
   backdropFilter: "blur(24px) saturate(1.5)", WebkitBackdropFilter: "blur(24px) saturate(1.5)",
   borderTop: "1px solid color-mix(in srgb, currentColor 12%, transparent)",
   paddingBottom: "env(safe-area-inset-bottom)",
 };
 const FROST_ROOM = '[data-astryx-desk][data-bars] [role="main"]::after{content:"";display:block;flex:none;height:calc(72px + env(safe-area-inset-bottom))}';
 
-export { frostBar, FROST_ROOM, kindOf, btn, field, fieldLabel, primary, ios, compose, mailto, badge, label, line };
+/* Glass on a phone and an iPad, dark only (Julian picked "soft" in the mock, 2026-11-14): a teal glow behind the page, and
+ * panels clear enough to show it, as LEADS DESKTOP glass.css does over its window. That shell's rules are !important and win there. */
+const GLASS = "[data-astryx-desk][data-glass]{--color-background-body:transparent;--color-background-card:rgb(255 255 255/.055);--color-background-surface:rgb(255 255 255/.055);--color-background-muted:rgb(255 255 255/.09);--leads-bar:rgb(22 22 22/.47);background:radial-gradient(120% 55% at 0% 0%,rgb(88 198 202/.15) 0,transparent 62%),radial-gradient(95% 50% at 100% 100%,rgb(88 198 202/.1) 0,transparent 66%),oklch(0.145 0.003 70)}";
+
+export { frostBar, FROST_ROOM, GLASS, kindOf, btn, field, fieldLabel, primary, ios, compose, mailto, badge, label, line };
