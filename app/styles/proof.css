@@ -413,7 +413,21 @@ html:has(.proof[data-wall])::-webkit-scrollbar{display:none}
   .ctr-who{grid-template-columns:1fr;gap:16px}
   .ctr-sign>.proof-btn{align-self:stretch}
 }
-@media print{.proof-top,.ctr-sign,.ctr-print{display:none!important}.ctr{max-width:none;padding:0}}
+/* Print: plain paper, black ink, no site chrome (Julian 2026-11-15). */
+@media print{
+  @page{margin:20mm 18mm}
+  :root:has(.ctr){color-scheme:light!important;background:#fff!important}
+  html:has(.ctr),html:has(.ctr) body,.proof{--background:#fff;--foreground:#111;--muted-foreground:#444;--border:#bbb;--accent:#111;background:#fff!important;color:#111!important}
+  html:has(.ctr) body>*:not(:has(.proof)):not(.proof){display:none!important}
+  .proof{min-height:0}
+  .proof-top,.ctr-sign,.ctr-print{display:none!important}
+  .proof-intro{padding:0 0 20px!important}
+  .proof-intro .proof-lab{margin-bottom:10px}
+  .ctr{max-width:none;padding:0}
+  .ctr-who{padding:16px 0}
+  .ctr-text{font-size:10.5pt;line-height:1.6;margin:24px 0 32px}
+  .ctr-mark,.ctr-done{break-inside:avoid}
+}
 /* the signature pad (Julian 2026-11-15) */
 .ctr-sigf{display:flex;flex-direction:column;gap:8px}
 .ctr-pad{position:relative;aspect-ratio:3/1;border:1px solid var(--p-hl);background:color-mix(in oklab,var(--foreground) 2.5%,transparent);transition:border-color .2s}

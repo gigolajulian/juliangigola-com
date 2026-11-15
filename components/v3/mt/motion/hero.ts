@@ -7,7 +7,7 @@ import { clamp, smooth, span, type Driver } from "./engine";
 const WALL = 2640; // wall height with four rows, design px (mtscroll.css); measured off the columns below, since wide screens show six
 const TAIL = 264; // ground left under the last row when the travel ends, so "See the work" sits under the photos with room above it
 const LAG_MAX = 2400;
-const END_D = [280, 0, 40]; // how far each of the three locked columns has dropped behind when the travel ends, design px: mirrors the ends 0.12, 0, 0.2 gave at 1440x900
+const END_D = [280, 0, 70]; // (right was 40: Julian, 2026-11-15, "a bit lower") how far each of the three locked columns has dropped behind when the travel ends, design px: mirrors the ends 0.12, 0, 0.2 gave at 1440x900
 const DRIFT = [40, 22]; // phone drift caps, px, per column
 
 type Part = { el: HTMLElement; a: number; c: number; v: number };
