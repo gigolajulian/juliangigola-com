@@ -33,10 +33,10 @@ function heldRow(name: string, covers: boolean): Driver {
       const o: number[] = Array(n).fill(-1);
       let step = 1, c0 = 0, mid = 0, range = 0, cur = -1, base = 0, lastX = NaN;
 
-      /* ?mtpar=1, opt-in until Julian has seen it: the covers start as one pile on the right and are dealt out to
+      /* The V4 default since 2026-11-15 (Julian: "turn on the parallax by default"), ?mtpar=0 turns it off: the covers start as one pile on the right and are dealt out to
          their places as the section comes up the screen, the first one to the middle. Done by the time the stage
          sticks, so the hold's scroll share per cover is untouched. rows.css has the rest of the flag. */
-      const par = covers && /[?&]mtpar=1/.test(location.search);
+      const par = covers && !/[?&]mtpar=0/.test(location.search);
       if (par) document.documentElement.setAttribute("data-mt-par", "");
       let cw = 0, off = 0, lastE = NaN;
       const unpile = () => {

@@ -87,7 +87,7 @@ html:not([data-mt-held]) .mt-motion :is(.mt-mopg,.mt-molg,.mt-mobar){display:non
 /* Snap rows: the record now comes fully out of the bottom (118px), more than the static row's 72px of room. */
 html[data-mt-motion]:not([data-mt-held]) .mt-covers .mt-row{padding-bottom:126px}
 
-/* ?mtpar=1, opt-in (rows.ts sets html[data-mt-par]). Coming in: the heading and the row ride up at their own rates and
+/* On by default, ?mtpar=0 turns it off (rows.ts sets html[data-mt-par]). Coming in: the heading and the row ride up at their own rates and
    the covers are dealt from a pile on the right (rows.ts). Going out: the stage sinks and dims while Motion slides over
    it, the same hand-over as hero into Commissions (flow.css). Motion's film settles from a slight push-in as it arrives. */
 html[data-mt-par][data-mt-held] .mt-covers .mt-rowhead>:is(h2,p){translate:0 calc((1 - var(--in,1)) * 8svh)}

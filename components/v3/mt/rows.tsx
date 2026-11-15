@@ -62,8 +62,8 @@ export function MtMotion({ films }: { films: MtFilm[] }) {
     const items = el.querySelectorAll<HTMLElement>(".mt-item");
     const mq = matchMedia(D);
     // On screen: the first film develops up from the dark page each time the section comes into view (rows.css).
-    // ?mtpar=1 (opt-in): from the first pixel, so the film is already coming up while the section slides over Cover art; at 0.2 it rose as a black slab first.
-    const inView = new IntersectionObserver(([e]) => sec.toggleAttribute("data-in", e.isIntersecting), { threshold: /[?&]mtpar=1/.test(location.search) ? 0 : 0.2 });
+    // From the first pixel (?mtpar=0 puts the old 0.2 back), so the film is already coming up while the section slides over Cover art; at 0.2 it rose as a black slab first.
+    const inView = new IntersectionObserver(([e]) => sec.toggleAttribute("data-in", e.isIntersecting), { threshold: /[?&]mtpar=0/.test(location.search) ? 0.2 : 0 });
     inView.observe(sec);
     let raf = 0;
     let seen = true;
