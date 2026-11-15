@@ -4,7 +4,9 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { checkPaid, finalize, recheckTransfer } from "@/lib/proofs/submit";
 import { PAYMENTS_DOWN } from "@/lib/stripe";
-import { coverFrame, isOpen, isToken, publicView, readPublic, writeProof } from "@/lib/proofs/proof";
+import { headers } from "next/headers";
+import { coverFrame, isToken, publicView, readPublic, shut, writeProof } from "@/lib/proofs/proof";
+import { PassGate, Shut } from "@/components/proofs/pass-gate";
 import { ProofGallery } from "@/components/proofs/gallery";
 import { CARD } from "@/lib/proofs/watermark";
 
@@ -37,27 +39,20 @@ export async function generateMetadata({ params }: { params: Promise<{ token: st
   return { ...base, openGraph: { title: "Proofs | Julian Gigola", description: "Proofs from Julian Gigola.", url: `/proof/${token}`, images }, twitter: { card: "summary_large_image", images } };
 }
 
-function Closed() {
-  return (
-    <main className="grid min-h-svh place-items-center px-6 font-mono text-[13px] text-muted-foreground">
-      <p>
-        This gallery closed. <a href="mailto:hello@juliangigola.com" className="underline underline-offset-4">hello@juliangigola.com</a>
-      </p>
-    </main>
-  );
-}
-
 export default async function ProofPage({ params, searchParams }: { params: Promise<{ token: string }>; searchParams: Promise<{ paid?: string }> }) {
   const { token } = await params;
   const { paid } = await searchParams;
   const { env } = await getCloudflareContext({ async: true });
   const seal = sealer(env.LEADS_KEY);
-  if (!isToken(token) || !env.INBOX || !seal) return <Closed />;
+  if (!isToken(token) || !env.INBOX || !seal) return <Shut />;
   const s = await seal;
   let p = await readPublic(env.INBOX, s, token);
   // Delivered: the same shoot id now opens the finals.
   if (p?.deliveredAt) redirect(`/delivery/${token}`);
-  if (!p || !isOpen(p)) return <Closed />;
+  // Offline or behind a password: nothing of the gallery is rendered until the gate's cookie is right.
+  const why = await shut(p, (await headers()).get("cookie"), env.LEADS_KEY);
+  if (why === "locked") return <PassGate id={token} kind="proofs" />;
+  if (!p || why) return <Shut offline={why === "offline"} />;
 
   const session = paid ?? p.checkout;
   let notice: string | undefined;
