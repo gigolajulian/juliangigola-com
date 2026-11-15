@@ -171,7 +171,7 @@
 [data-mtscroll] .mt-ab-foot dt,[data-mtscroll] .mt-ab-foot dd{font-size:10px!important;margin:0}
 [data-mtscroll] .mt-ab-foot dt{margin-bottom:6px}
 [data-mtscroll] .mt-facts{display:none}
-[data-mtscroll] .mt-wordmark{position:absolute;z-index:1;left:calc(36 * var(--u));bottom:calc(26 * var(--u));margin:0;max-width:calc(var(--fx) + 974 * var(--u));overflow:clip;white-space:nowrap;font:900 calc(150 * var(--u))/1.12 var(--display);letter-spacing:-.05em;color:rgb(var(--on-photo))}
+[data-mtscroll] .mt-wordmark{position:absolute;z-index:1;left:calc(36 * var(--u));bottom:calc(26 * var(--u));margin:0 0 -.12em;padding-bottom:.12em;max-width:calc(var(--fx) + 974 * var(--u));overflow:clip;white-space:nowrap;font:900 calc(150 * var(--u))/1.12 var(--display);letter-spacing:-.05em;color:rgb(var(--on-photo))}
 [data-mtscroll] .mt-wordmark span{display:inline-block}
 [data-mtscroll] .mt-more-me{position:absolute;z-index:1;right:calc(36 * var(--u));bottom:calc(54 * var(--u));height:auto;padding:calc(11 * var(--u)) calc(16 * var(--u));font-size:10px;background:color-mix(in srgb,var(--bg) 50%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
 
@@ -409,8 +409,9 @@
   [data-mtscroll] .mt-ab-ph{position:relative;inset:auto;aspect-ratio:3/2;-webkit-mask:linear-gradient(#000 calc(100% - 140px),transparent);mask:linear-gradient(#000 calc(100% - 140px),transparent)}
   [data-mtscroll] .mt-ab-ph img{object-position:36% 40%}
   [data-mtscroll] .mt-ab-ph::after{display:none}
-  [data-mtscroll] .mt-wordmark{position:relative;left:auto;bottom:auto;margin:-58px 14px 0;max-width:none;font-size:clamp(40px,14.6vw,96px);line-height:1}
+  [data-mtscroll] .mt-wordmark{position:relative;left:auto;bottom:auto;margin:-58px 14px -.12em;max-width:none;font-size:clamp(40px,14.6vw,96px);line-height:1}
   [data-mtscroll] .mt-ab-col{position:static;width:auto;padding:0 16px;margin-top:18px}
+  [data-mtscroll] .mt-ab-col .mt-label{padding:0}
   [data-mtscroll] .mt-say{font-size:clamp(22px,6.7vw,40px);line-height:1.07;letter-spacing:-.04em;margin-top:8px}
   [data-mtscroll] .mt-does{position:static;margin-top:28px}
   [data-mtscroll] .mt-does ol{display:grid;grid-template-columns:1fr 1fr;grid-auto-flow:column;grid-template-rows:repeat(3,44px);column-gap:16px;border-top:1px solid var(--hair)}
