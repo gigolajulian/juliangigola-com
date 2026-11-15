@@ -33,7 +33,7 @@ const DRAW = 350; // the columns get their first draw here, out of sight, while 
    point the wall scales around, as a plane at depth d would. */
 const DEEP_PUSH = 3350; // the full canvas holds about a second before the push
 const DEEP_LAND = 4850; // the push peaks here (1500ms), then settles back to END
-const DEEP_OVER = 0.007;
+const DEEP_OVER = 0; // was .007: the push carried a touch past and settled back. Julian, 2026-11-15: the settle read as extra, so it lands and stays
 const DEPTHS = [0.5, 0.28, 0.62, 0.36, 0.56, 0.22, 0.44]; // per extra column: 0 the hero's plane, 1 the lens
 const SETTLE = "cubic-bezier(0.45, 0, 0.55, 1)";
 
