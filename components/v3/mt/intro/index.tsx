@@ -7,7 +7,8 @@ import "./intro.css";
 
 /* v4 home intro, "The canvas" (spec 3.1): JG inks in alone, the whole wall and
    a field of extra frames glide up at .46 scale and cover it, then the view
-   pushes in until the top of the wall is the hero. 5300ms, once per visit.
+   pushes in until the top of the wall is the hero. 5300ms, once per visit
+   (3200ms when this browser has seen it in the last 30 days).
    Every position is measured from the laid-out wall, so it holds at any
    screen ratio. Extras are intro-only nodes, removed when it ends. */
 
@@ -36,6 +37,25 @@ const DEEP_OVER = 0.007;
 const DEPTHS = [0.5, 0.28, 0.62, 0.36, 0.56, 0.22, 0.44]; // per extra column: 0 the hero's plane, 1 the lens
 const SETTLE = "cubic-bezier(0.45, 0, 0.55, 1)";
 
+/* Return visits (Julian, 2026-11-14): a browser that has seen the intro in the last 30 days gets it in 3.2s. The same
+   moves with less waiting: JG, the canvas comes up fast, then nearly the same push. First visits keep 5.3s.
+   ?intro=1 plays the full one, ?intro=2 the short one. The stamp is local storage "jg-intro-at": a time, nothing else. */
+const FULL = { end: END, push: DEEP_PUSH, land: DEEP_LAND, rise: RISE, light: LIGHT, at: 800, gap: 110, xgap: 55, lead: 450, jg: 750 };
+const SHORT = { end: 3200, push: 1500, land: 2850, rise: 900, light: 500, at: 350, gap: 40, xgap: 22, lead: 150, jg: 450 }; // JG gets 350ms alone, the last column is up by 1490
+const AGAIN = 30 * 864e5;
+
+function returning() {
+  const q = location.search;
+  if (/[?&]intro=2/.test(q)) return true;
+  if (/[?&]intro=1/.test(q)) return false;
+  try {
+    const at = Number(localStorage.getItem("jg-intro-at"));
+    return at > 0 && Date.now() - at < AGAIN;
+  } catch {
+    return false;
+  }
+}
+
 function deepMode() {
   const q = location.search;
   try {
@@ -53,7 +73,7 @@ function shouldPlay() {
   if (/[?&]intro=0/.test(q) || !("v3motion" in root.dataset)) return false;
   if (matchMedia("(prefers-reduced-motion: reduce)").matches) return false;
   if (window.scrollY > 4) return false;
-  if (/[?&]intro=1/.test(q)) return true;
+  if (/[?&]intro=[12]/.test(q)) return true;
   try {
     if (sessionStorage.getItem("jg-intro")) return false;
   } catch {}
@@ -91,6 +111,7 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
     let over_ = false; // the intro has ended
     let raf = 0;
     let started = false;
+    let T = FULL; // the short one on a return visit, chosen when it starts
     const INPUTS = ["wheel", "touchstart", "pointerdown", "keydown"] as const;
     let hurry = () => {};
     const stopHurry = () => INPUTS.forEach((e) => window.removeEventListener(e, hurry));
@@ -111,6 +132,7 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
       if (seen) {
         try {
           sessionStorage.setItem("jg-intro", "1");
+          localStorage.setItem("jg-intro-at", String(Date.now()));
         } catch {}
       }
     };
@@ -121,7 +143,7 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
       return a;
     };
     const rise = (el: Element, from: number, delay: number) => {
-      play(el, [{ transform: `translate3d(0,${from}px,0)` }, { transform: "translate3d(0,0,0)" }], { duration: RISE, delay, easing: OUT, composite: "add" }); // added on top of the scroll travel, so scrolling as the intro lands never snaps
+      play(el, [{ transform: `translate3d(0,${from}px,0)` }, { transform: "translate3d(0,0,0)" }], { duration: T.rise, delay, easing: OUT, composite: "add" }); // added on top of the scroll travel, so scrolling as the intro lands never snaps
       hidden.push([el, delay]);
     };
     /* Out of sight until it moves, then opaque at once: it comes up out of the ground colour, never an opacity fade.
@@ -130,7 +152,7 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
     const hidden: [Element, number][] = [];
     const held: HTMLElement[] = [];
     // the ground colour lifts off a column: one opacity per column, so nothing repaints
-    const light = (el: Element, delay: number, pseudoElement?: string) => play(el, [{ opacity: 1 }, { opacity: 0 }], { duration: LIGHT, delay, pseudoElement });
+    const light = (el: Element, delay: number, pseudoElement?: string) => play(el, [{ opacity: 1 }, { opacity: 0 }], { duration: T.light, delay, pseudoElement });
     const fadeIn = (sel: string, delay: number, duration: number, lift = 0) =>
       document.querySelectorAll(sel).forEach((el) =>
         play(el, [{ opacity: 0, transform: lift ? `translate3d(0,${lift}px,0)` : "none" }, { opacity: 1, transform: "none" }], { duration, delay, easing: OUT }),
@@ -140,8 +162,11 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
       if (started || over_) return;
       started = true;
       const deep = deepMode();
-      const pushAt = deep ? DEEP_PUSH : PUSH;
-      const land = deep ? DEEP_LAND : END;
+      const short = returning();
+      T = short ? SHORT : FULL;
+      const END = T.end; // every time below is this run's
+      const pushAt = deep || short ? T.push : PUSH;
+      const land = deep ? T.land : END;
       const W = window.innerWidth;
       const H = window.innerHeight;
       const wr = wall.getBoundingClientRect();
@@ -231,7 +256,7 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
       hero.prepend(jg);
       made.push(jg);
       [...jg.children].forEach((b, i) => {
-        play(b, [{ opacity: 0, transform: `translate3d(0,${i ? 110 : -110}px,0)`, filter: "blur(22px)" }, { opacity: 1, transform: "none", filter: "blur(0)" }], { duration: 750, easing: OUT });
+        play(b, [{ opacity: 0, transform: `translate3d(0,${i ? 110 : -110}px,0)`, filter: "blur(22px)" }, { opacity: 1, transform: "none", filter: "blur(0)" }], { duration: T.jg, easing: OUT });
       });
       // JG stays lit while the wall rises over it, and goes only once the frames have covered it
       const marks = [...jg.children] as HTMLElement[];
@@ -253,9 +278,9 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
       // 1. the real columns, each with frames above and below it so the canvas has no holes
       cols.forEach((c, i) => {
         const b = c.b;
-        const delay = 800 + i * 110;
+        const delay = T.at + i * T.gap;
         const pass = isOver.has(c);
-        const lit = pass ? Math.max(0, delay - 450) : delay; // lit before it moves: it enters from off screen
+        const lit = pass ? Math.max(0, delay - T.lead) : delay; // lit before it moves: it enters from off screen
         const g = group(b[0].x, lit);
         let topY = b[0].y;
         for (let y = b[0].y - R; y + h > ymin; y -= R) tile(g, b[0].x, (topY = y));
@@ -270,7 +295,7 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
         if (deep) {
           depth(g, px - b[0].x, py - top0, out ? 0.4 : 0.18); // the frames above and below a column are not the hero either
           if (out) depth(c.els[0], px - c.els[0].offsetLeft, py - c.els[0].offsetTop, 0.4);
-        } else if (out) play(c.els[0], [{ opacity: 1 }, { opacity: 0 }], { duration: 700, delay: PUSH, easing: OUT });
+        } else if (out) play(c.els[0], [{ opacity: 1 }, { opacity: 0 }], { duration: 700, delay: pushAt, easing: OUT });
       });
       // 2. extra columns on the wall's own pitch, wherever no real column stands
       const real = cols.map((c) => c.b[0].x);
@@ -278,14 +303,14 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
       for (let m = -16; m <= 16; m++) {
         const x = first[0].x + m * P;
         if (x + w < xmin || x > xmax || real.some((r) => Math.abs(r - x) < P * 0.5)) continue;
-        const g = group(x, 800 + k * 55);
+        const g = group(x, T.at + k * T.xgap);
         for (let y = ymin - h + (k % 2 ? R * 0.25 : 0); y < ymax; y += R) tile(g, x, y);
-        rise(g, X_FROM[k % X_FROM.length], 800 + k * 55);
+        rise(g, X_FROM[k % X_FROM.length], T.at + k * T.xgap);
         if (deep) depth(g, px - x, py - top0, DEPTHS[k % DEPTHS.length]);
         k++;
       }
       // the extras stay through the push, so the canvas never shrinks to the wall alone; they leave as the push starts, so only the hero frames travel in
-      if (!deep) play(layer, [{ opacity: 1 }, { opacity: 0 }], { duration: 700, delay: PUSH, easing: OUT });
+      if (!deep) play(layer, [{ opacity: 1 }, { opacity: 0 }], { duration: 700, delay: pushAt, easing: OUT });
 
       // the push in, .46 to 1
       wall.style.transformOrigin = `${px}px ${py}px`;
@@ -300,7 +325,7 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
               { transform: `translate3d(0,0,0) scale(${1 + DEEP_OVER})`, offset: land / END, easing: SETTLE }, // the push carries a touch past, then settles
               { transform: home },
             ]
-          : [{ transform: far, easing: "linear" }, { transform: far, offset: PUSH / END, easing: IN_OUT }, { transform: home }],
+          : [{ transform: far, easing: "linear" }, { transform: far, offset: pushAt / END, easing: IN_OUT }, { transform: home }],
         { duration: END },
       );
 
