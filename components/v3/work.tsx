@@ -495,8 +495,13 @@ export function V3Work({
     setCanvas(false);
     if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     setLeaving(true);
-    setTimeout(() => setLeaving(false), 260);
   }, []);
+  // An effect, so unmounting mid-fade clears the timer.
+  React.useEffect(() => {
+    if (!leaving) return;
+    const t = setTimeout(() => setLeaving(false), 260);
+    return () => clearTimeout(t);
+  }, [leaving]);
   /* The toolbar only sits in its usual place at the top of the page, so the
      canvas opens there, and starts under the toolbar's last row. */
   React.useEffect(() => {
