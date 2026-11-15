@@ -7,6 +7,7 @@ import { clamp, smooth, span, type Driver } from "./engine";
 const WALL = 2640; // wall height with four rows, design px (mtscroll.css); measured off the columns below, since wide screens show six
 const TAIL = 264; // ground left under the last row when the travel ends, so "See the work" sits under the photos with room above it
 const LAG_MAX = 2400;
+const END_D = [280, 0, 40]; // how far each of the three locked columns has dropped behind when the travel ends, design px: mirrors the ends 0.12, 0, 0.2 gave at 1440x900
 const DRIFT = [40, 22]; // phone drift caps, px, per column
 
 type Part = { el: HTMLElement; a: number; c: number; v: number };
@@ -138,7 +139,7 @@ export const heroDrivers: Driver[] = [
     setup(el) {
       const part = (n: HTMLElement, a: number, c: number): Part => ({ el: n, a, c, v: 0 });
       const st: State = {
-        cols: [...el.querySelectorAll<HTMLElement>(".mt-col")].map((n) => part(n, Number(n.dataset.a) || 0, 0)),
+        cols: [...el.querySelectorAll<HTMLElement>(".mt-col")].map((n) => part(n, Number(n.dataset.a) || 0, Number(n.dataset.col))),
         figs: [...el.querySelectorAll<HTMLElement>(".mt-col:not(.side) figure")].map((n) => part(n, 0, Number(n.style.getPropertyValue("--c2")) || 0)),
         name: el.querySelector<HTMLElement>("[data-mt-name]"),
         s: -1,
@@ -212,7 +213,13 @@ export const heroDrivers: Driver[] = [
         // the 0.2 follow of the live Recent(), frame-rate independent
         st.s = st.s < 0 || Math.abs(target - st.s) < 0.1 ? target : st.s + (target - st.s) * (1 - Math.pow(0.8, ctx.dt / 16.7));
         const S = st.s;
-        for (const c of st.cols) move(c, -(S - Math.min(S, LAG_MAX * u) * c.a * 0.5));
+        /* Where the wall ends (Julian, 2026-11-15): with three columns the left one ends lowest and the right one
+           highest, a stair down to the left, so "See the work" on the right has the open corner. The markup's lags
+           ended it the other way round. Five and seven columns already end high on the right, so they keep theirs. */
+        const three = ctx.vw < 1920;
+        // a share of the travel, not of the distance: a tall window travels less and must still end on the same stair
+        const share = S / Math.max(1, st.wall * u + TAIL * ctx.u - Math.max(ctx.vh, 600));
+        for (const c of st.cols) move(c, -(S - (three && c.c in END_D ? share * END_D[c.c] * u : Math.min(S, LAG_MAX * u) * c.a * 0.5)));
         if (st.dock) {
           // a jump (a load or a link that lands mid page) places the name, it does not fly it
           dockFrame(st.dock, p, ctx.dt, Math.abs(ctx.dy) > ctx.vh);
