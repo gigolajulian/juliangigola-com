@@ -109,7 +109,7 @@ export function MtMotion({ films }: { films: MtFilm[] }) {
       <div className="mt-stage">
         <div className="mt-mohead">
           <h2>Motion</h2>
-          <p className="lbl mute">Director and DP | {films.length} films</p>
+          <p className="lbl mute">Director of photography | {films.length} films</p>
         </div>
         <div className="mt-row" ref={row} role="group" tabIndex={0} aria-label="Films">
           <div className="mt-track">
