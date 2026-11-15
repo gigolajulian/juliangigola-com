@@ -16,6 +16,8 @@ import { Heading, Text } from "@astryxdesign/core/Text";
 import { List, ListItem } from "@astryxdesign/core/List";
 import { Badge } from "@astryxdesign/core/Badge";
 import { StatusDot } from "@astryxdesign/core/StatusDot";
+import { Divider } from "@astryxdesign/core/Divider";
+import { About, about, Age, Next } from "@/components/leads/row";
 import { isLate, paperDue, shootTag, type LeadSummary } from "@/lib/leads/leads";
 import { adminCall, authed, ago, aside, at, cash, closed, inboxCall, needsMe, nextStep, now, pass, plusDays, renew, ymdPT } from "@/lib/leads/lead-desk";
 import { balance, dayB, dueOf, overdue, usd } from "@/lib/leads/invoice";
@@ -59,18 +61,19 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
   return <Text type="code" size="xsm" color="secondary" weight="medium">{children}</Text>;
 }
 
-function Tile({ k, v, sub, onClick }: { k: string; v: React.ReactNode; sub: React.ReactNode; onClick?: () => void }) {
+/** One number of the strip: the figure, then what it counts. Four share one row, phone included. */
+function Stat({ v, sub }: { v: React.ReactNode; sub: React.ReactNode }) {
   return (
-    <Card padding={4}>
-      <VStack gap={1}>
-        <Eyebrow>{k.toUpperCase()}</Eyebrow>
-        <Heading level={2}>{v}</Heading>
-        <Text type="code" size="sm" color="secondary">{sub}</Text>
-        {onClick ? <StackItem><Button label="Open" variant="ghost" size="sm" onClick={onClick} /></StackItem> : null}
-      </VStack>
-    </Card>
+    <VStack gap={0.5}>
+      <Text type="large" weight="bold" hasTabularNumbers textWrap="nowrap">{v}</Text>
+      <Text type="supporting" size="xsm" maxLines={1}>{sub}</Text>
+    </VStack>
   );
 }
+const many = (n: number, one: string) => `${n} ${one}${n === 1 ? "" : "s"}`;
+const Title = ({ children, count }: { children: React.ReactNode; count?: React.ReactNode }) => (
+  <HStack gap={2} vAlign="center"><Text type="label" weight="semibold">{children}</Text>{count != null ? <Text type="supporting">{count}</Text> : null}</HStack>
+);
 
 export function TodayDesk({ leads, size, open, show }: { leads: LeadSummary[]; size: Size; open: (l: LeadSummary) => void; show: () => void }) {
   const today = ymdPT(now());
@@ -85,7 +88,7 @@ export function TodayDesk({ leads, size, open, show }: { leads: LeadSummary[]; s
   const nextShoot = coming.find((l) => l.stage !== "Call booked");
   const nextCall = coming.find((l) => l.stage === "Call booked");
   const weekday = (iso: string) => (ymdPT(Date.parse(iso)) === today ? "today" : new Intl.DateTimeFormat("en-US", { timeZone: TZ, weekday: "long" }).format(new Date(iso)));
-  const line = [moves.length ? `${moves.length} on you` : null, nextShoot ? `a shoot ${weekday(nextShoot.when!)}` : null, nextCall ? `a call ${weekday(nextCall.when!)}` : null].filter(Boolean).join(", ");
+  const line = [moves.length ? `${moves.length} on you${late ? `, ${late} late` : ""}` : null, nextShoot ? `a shoot ${weekday(nextShoot.when!)}` : null, nextCall ? `a call ${weekday(nextCall.when!)}` : null].filter(Boolean).join(", ");
   const hour = +new Intl.DateTimeFormat("en-US", { timeZone: TZ, hour: "numeric", hourCycle: "h23" }).format(now());
   const hello = hour >= 5 && hour < 12 ? "Morning" : hour >= 12 && hour < 18 ? "Afternoon" : "Evening";
   // Your move splits in two: replies and quotes, then what falls due on paperwork, proofs and licences.
@@ -123,37 +126,49 @@ export function TodayDesk({ leads, size, open, show }: { leads: LeadSummary[]; s
       align="first-line"
       onClick={() => open(l)}
       startContent={<StatusDot variant={l.unread ? "accent" : "neutral"} label={l.unread ? "New" : "Read"} />}
-      label={<Text type="large" weight="semibold">{l.name || l.email}</Text>}
+      label={<HStack gap={2} vAlign="center"><StackItem size="fill"><Text type="large" weight="semibold">{l.name || l.email}</Text></StackItem><Age l={l} /></HStack>}
       description={
         <VStack gap={1}>
-          <Eyebrow>{[l.kind ? shootTag(l.kind)?.toUpperCase() : null, l.stage.toUpperCase(), ago(l.lastAt).toUpperCase()].filter(Boolean).join(" · ")}</Eyebrow>
-          {nextStep(l) ? <Text type="code" size="sm" color="accent">{nextStep(l)} →</Text> : null}
+          <About>{about([l.kind ? shootTag(l.kind) : null, l.stage])}</About>
+          <Next l={l} />
         </VStack>
       }
     />
   );
 
+  /* The week as one card: seven day cells, then what is booked or set as a reminder. The steps that are
+   * due (`e.due`) are the Your move list itself, so they are not repeated here. */
+  const dayName = (d: string) => new Date(`${d}T12:00:00Z`).toLocaleDateString("en-US", { weekday: "short", timeZone: "UTC" });
+  const agenda = week.flatMap(({ d, today: isToday, evs }) => evs.filter((e) => !e.due).map((e) => ({ d, isToday, e })));
   const rail = (
-    <VStack gap={4}>
-      <Heading level={2}>This week</Heading>
-      <VStack gap={3}>
-        {week.map(({ d, today: isToday, evs }) => (
-          <HStack key={d} gap={3} vAlign="start">
-            <VStack gap={0} width={40}>
-              <Eyebrow>{new Date(`${d}T12:00:00Z`).toLocaleDateString("en-US", { weekday: "short", timeZone: "UTC" }).toUpperCase()}</Eyebrow>
-              <Text type="large" weight={isToday ? "bold" : undefined} color={isToday ? "accent" : undefined}>{+d.slice(8)}</Text>
-            </VStack>
-            <StackItem size="fill">
-              <VStack gap={1}>
-                {evs.length ? evs.map((e, i) => (
-                  <Button key={i} variant="ghost" size="sm" onClick={() => open(e.l)}
-                    label={`${e.small} · ${e.text}${e.who && e.who !== e.text ? `, ${e.who}` : ""}`} />
-                )) : <Text type="supporting" color="secondary">Nothing</Text>}
-              </VStack>
-            </StackItem>
-          </HStack>
-        ))}
-      </VStack>
+    <VStack gap={2}>
+      <Title count={`${many(shoots, "shoot")}, ${many(calls, "call")}`}>This week</Title>
+      <Card padding={0}>
+        <VStack gap={0}>
+          <Grid columns={7} gap={0}>
+            {week.map(({ d, today: isToday, evs }) => {
+              const on = evs.filter((e) => !e.due).length;
+              return (
+                <VStack key={d} gap={1} hAlign="center" padding={2}>
+                  <Text type="code" size="2xs" weight="medium" color={isToday ? "accent" : "secondary"}>{isToday ? "TODAY" : dayName(d).toUpperCase()}</Text>
+                  <Text type="large" weight="bold" hasTabularNumbers color={isToday ? "accent" : d < today ? "disabled" : "primary"}>{+d.slice(8)}</Text>
+                  {on ? <StatusDot variant="accent" label={`${on} on ${dayName(d)}`} /> : <Text type="code" size="2xs" color="disabled">·</Text>}
+                </VStack>
+              );
+            })}
+          </Grid>
+          <Divider />
+          {agenda.length ? (
+            <List hasDividers>
+              {agenda.map(({ d, isToday, e }, i) => (
+                <ListItem key={i} onClick={() => open(e.l)}
+                  label={`${e.text}${e.who && e.who !== e.text ? `, ${e.who}` : ""}`}
+                  description={`${isToday ? "Today" : `${dayName(d)} ${+d.slice(8)}`} · ${e.small}`} />
+              ))}
+            </List>
+          ) : <VStack padding={3}><Text type="supporting" color="secondary">Nothing booked this week.</Text></VStack>}
+        </VStack>
+      </Card>
     </VStack>
   );
 
@@ -173,19 +188,22 @@ export function TodayDesk({ leads, size, open, show }: { leads: LeadSummary[]; s
         <LayoutContent role="main" label="Today" padding={4}>
           <VStack gap={6}>
             <Text type="large" color="secondary">{line ? `${line[0].toUpperCase()}${line.slice(1)}.` : "Nothing on the books this week."}</Text>
-            <Grid columns={{ minWidth: 170 }} gap={3}>
-              <Tile k="On you" v={String(moves.length)} sub={late ? `${late} late` : "none late"} onClick={() => show()} />
-              <Tile k="This week" v={`${shoots} ${shoots === 1 ? "shoot" : "shoots"}`} sub={`${calls} ${calls === 1 ? "call" : "calls"}`} />
-              <Tile k="Stripe" v={m ? cash(m.available ?? 0) : "–"} sub={m ? `${cash(m.pending ?? 0)} on the way` : typeof money === "string" ? money : "Asking Stripe"} />
-              <Tile k="Visits, 7 d" v={t ? t.visits.toLocaleString("en-US") : "–"} sub={t ? "Cloudflare" : typeof traffic === "string" ? traffic : "Asking Cloudflare"} />
-            </Grid>
+            <Card padding={3}>
+              <Grid columns={size === "phone" ? 2 : 4} gap={2}>
+                <Stat v={moves.length} sub="on you" />
+                <Stat v={shoots || !calls ? many(shoots, "shoot") : many(calls, "call")} sub={shoots && calls ? `and ${many(calls, "call")}` : "this week"} />
+                <Stat v={m ? cash(m.available ?? 0) : "–"} sub={m ? (m.pending ? `${cash(m.pending)} on the way` : "Stripe") : typeof money === "string" ? money : "Asking Stripe"} />
+                <Stat v={t ? t.visits.toLocaleString("en-US") : "–"} sub={t ? "visits, 7 d" : typeof traffic === "string" ? traffic : "Asking Cloudflare"} />
+              </Grid>
+            </Card>
+            {size === "phone" ? rail : null}
             <VStack gap={1}>
-              <HStack vAlign="center"><StackItem size="fill"><Eyebrow>YOUR MOVE · {leadMoves.length}</Eyebrow></StackItem><Button label="All leads" variant="ghost" size="sm" onClick={() => show()} /></HStack>
+              <HStack vAlign="center"><StackItem size="fill"><Title count={leadMoves.length}>Your move</Title></StackItem><Button label="All leads" variant="ghost" onClick={() => show()} /></HStack>
               {leadMoves.length ? <List hasDividers>{leadMoves.slice(0, 6).map(row)}</List> : <Text type="supporting" color="secondary">Nothing waiting on you.</Text>}
             </VStack>
             {pastDue.length ? (
               <VStack gap={1}>
-                <Eyebrow>OVERDUE · {pastDue.length}</Eyebrow>
+                <Title count={pastDue.length}>Overdue</Title>
                 <List hasDividers>
                   {pastDue.map((i) => {
                     const l = leads.find((x) => x.id === i.lead);
@@ -196,7 +214,7 @@ export function TodayDesk({ leads, size, open, show }: { leads: LeadSummary[]; s
             ) : null}
             {dueMoves.length ? (
               <VStack gap={1}>
-                <Eyebrow>DUE · PAPERWORK, PROOFS, LICENCES</Eyebrow>
+                <Title count="paperwork, proofs, licences">Due</Title>
                 <List hasDividers>
                   {dueMoves.map((l) => (
                     <ListItem key={l.id} onClick={() => open(l)} label={nextStep(l) ?? l.stage} description={`${l.name || l.email}${l.when ? ` · ${callOrShoot(l)} ${at(l.when)}` : ""}`} endContent={<Badge label={source(l)} variant={source(l) === "Proofs" ? "blue" : "neutral"} />} />
@@ -215,7 +233,7 @@ export function TodayDesk({ leads, size, open, show }: { leads: LeadSummary[]; s
                 </List>
               ) : <Text type="supporting" color="secondary">{acts ? "No gallery activity yet." : "Loading galleries"}</Text>}
             </VStack>
-            {size === "wide" ? null : rail}
+            {size === "mid" ? rail : null}
           </VStack>
         </LayoutContent>
       }

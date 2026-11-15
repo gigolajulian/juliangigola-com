@@ -56,7 +56,8 @@ export function LicencesDesk({ leads, open }: { leads: LeadSummary[]; open: (l: 
   );
 }
 
-export function AsideDesk({ leads, call, open, done, tab, setTab }: { leads: LeadSummary[]; call: Call; open: (l: LeadSummary) => void; done: () => void; tab: Filter; setTab: (f: Filter) => void }) {
+/** `top`: the desk's Open / Put aside switch, above the page's own tabs. */
+export function AsideDesk({ leads, call, open, done, tab, setTab, top }: { leads: LeadSummary[]; call: Call; open: (l: LeadSummary) => void; done: () => void; tab: Filter; setTab: (f: Filter) => void; top?: React.ReactNode }) {
   const [sure, setSure] = React.useState(false);
   const [busy, setBusy] = React.useState(false);
   const [note, setNote] = React.useState<string | null>(null);
@@ -70,6 +71,7 @@ export function AsideDesk({ leads, call, open, done, tab, setTab }: { leads: Lea
   };
   return (
     <Page eyebrow="OUT OF THE WAY" title="Put aside">
+      {top}
       <TabList value={tab} onChange={(v) => { setTab(v as Filter); setSure(false); }} hasDivider layout="hug">
         {ASIDE.map(([f, label]) => <Tab key={f} value={f} label={`${label} · ${leads.filter((l) => pass(l, f)).length}`} />)}
       </TabList>
