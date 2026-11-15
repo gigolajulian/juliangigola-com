@@ -475,20 +475,32 @@ export function V3Work({
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (d) setFilter(d);
   }, [chip]);
-  const [view, setView] = React.useState<"grid" | "strip" | "color" | "canvas">("grid");
-  const back = React.useRef<"grid" | "strip" | "canvas">("grid");
-  /* `?view=canvas` opens on the canvas. The address carries it while the
-     canvas is on, so Back from a project it opened lands on the canvas again. */
+  const [view, setView] = React.useState<"grid" | "strip" | "color">("grid");
+  const back = React.useRef<"grid" | "strip">("grid");
+  /* The canvas lies over whichever view is on, so leaving it lands where you
+     were. `?view=canvas` opens on it. The address carries it while the canvas
+     is on, so Back from a project it opened lands on the canvas again. */
+  const [canvas, setCanvas] = React.useState(false);
+  /* `?viewfx=fade|settle` prototype (Julian, 2026-11-14): the canvas fades in
+     over the view and out again instead of cutting. `leaving` keeps it up for the fade. */
+  const [fx, setFx] = React.useState("");
+  const [leaving, setLeaving] = React.useState(false);
   React.useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (new URLSearchParams(location.search).get("view") === "canvas") setView("canvas");
+    const q = new URLSearchParams(location.search);
+    /* eslint-disable react-hooks/set-state-in-effect */
+    if (q.get("view") === "canvas") setCanvas(true);
+    setFx(q.get("viewfx") ?? "");
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, []);
   const closeCanvas = React.useCallback(() => {
     viewUrl(false);
-    setView("grid");
-  }, []);
+    setCanvas(false);
+    if (!fx || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    setLeaving(true);
+    setTimeout(() => setLeaving(false), 260);
+  }, [fx]);
   // Open project: the canvas comes down, the address keeps `?view=canvas` for Back.
-  const leaveCanvas = React.useCallback(() => setView("grid"), []);
+  const leaveCanvas = React.useCallback(() => setCanvas(false), []);
   /* Grid, strip and color views, and the discipline chips: the covers on
      screen fly from where they were to where they land, new ones fade in
      (GSAP Flip). Only with ?v3motion. */
@@ -503,9 +515,14 @@ export function V3Work({
       flip.current = Flip.current.getState(seen());
     set();
   };
-  const go = (v: typeof view) => {
-    viewUrl(v === "canvas");
-    flipped(() => setView(v));
+  const go = (v: typeof view | "canvas") => {
+    if (v === "canvas") {
+      viewUrl(true);
+      setCanvas(true);
+    } else if (canvas) {
+      closeCanvas();
+      setView(v);
+    } else flipped(() => setView(v));
   };
   const [q, setQ] = React.useState("");
   /* Option 2 (Julian, 2026-11-04): once the search row scrolls under the
@@ -1005,7 +1022,7 @@ export function V3Work({
       <button
         type="button"
         className="wcolor"
-        aria-pressed={view === "color"}
+        aria-pressed={!canvas && view === "color"}
         aria-label={VIEWS[2][1]}
         title={VIEWS[2][1]}
         onClick={() => {
@@ -1018,7 +1035,7 @@ export function V3Work({
       >
         {VIEWS[2][2]}
       </button>
-      <button type="button" aria-pressed={view === "canvas"} aria-label="Canvas view" title="Canvas view" onClick={() => go("canvas")}>
+      <button type="button" aria-pressed={canvas} aria-label="Canvas view" title="Canvas view" onClick={() => go("canvas")}>
           <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
             <rect x="1.5" y="3" width="4" height="5" />
             <rect x="6.5" y="1" width="4" height="5" />
@@ -1032,7 +1049,7 @@ export function V3Work({
         <button
           key={v}
           type="button"
-          aria-pressed={view === v}
+          aria-pressed={!canvas && view === v}
           aria-label={label}
           title={label}
           onPointerDown={v === "strip" ? () => warm(8) : undefined}
@@ -1059,7 +1076,7 @@ export function V3Work({
         }
         id="p-work"
         // The canvas covers the page: Tab goes to its bar, not to the page under it.
-        inert={view === "canvas"}
+        inert={canvas}
       >
         <div className="pg-head">
           <h1 className="pg-t">{filter === "All" ? "Portfolio" : filter}</h1>
@@ -1257,10 +1274,12 @@ export function V3Work({
             </div>,
             document.getElementById("hdr-tools")!,
           )}
-        {view === "canvas"
+        {canvas || leaving
           ? createPortal(
               <div className="v3">
                 <V3Canvas
+                  fx={fx}
+                  out={leaving}
                   list={field}
                   onClose={closeCanvas}
                   onLeave={leaveCanvas}

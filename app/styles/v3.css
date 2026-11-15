@@ -1719,6 +1719,13 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .v3 .cv-top{top:0;left:0;right:0;padding:12px var(--gr) 28px var(--g);background:linear-gradient(var(--bg),transparent)}
 .v3 .cv-foot{left:0;right:0;bottom:0;padding:28px var(--gr) 10px var(--g);background:linear-gradient(transparent,var(--bg))}
 .v3 .cv-top>*,.v3 .cv-foot>*{pointer-events:auto}
+/* `?viewfx` prototype: the canvas fades in over the view and out again; `settle` also lands its frames a few at a time. */
+@media (prefers-reduced-motion:no-preference){
+.v3 .cv[class*="fx-"]{animation:cv-in .35s cubic-bezier(.23,1,.32,1) both}
+.v3 .cv.out{animation:cv-out .25s ease-in both;pointer-events:none}
+.v3 .cv.fx-settle .cv-cell{animation:cv-cell .6s cubic-bezier(.23,1,.32,1) both;animation-delay:calc(min(var(--k),36)*14ms)}}
+.v3 .cv.wait{opacity:0}
+@keyframes cv-in{from{opacity:0}}@keyframes cv-out{to{opacity:0}}@keyframes cv-cell{from{opacity:0;scale:.92}}
 /* The chips and the view row ride in the canvas's bar, solid so they read over the photos; on a phone the chips take a row of their own. */
 .v3 .cv-top{gap:8px 20px;padding-bottom:12px;background:var(--bg);border-bottom:1px solid var(--line)}.v3 .cv-top .chips{flex:1;min-width:0;padding:0;margin:0}
 @media (max-width:700px){.v3 .cv-top{flex-wrap:wrap;justify-content:flex-end}.v3 .cv-top .chips{flex-basis:100%;order:2}}

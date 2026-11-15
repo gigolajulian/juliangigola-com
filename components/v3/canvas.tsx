@@ -24,22 +24,33 @@ type Col = { items: { i: number; y: number; h: number }[]; period: number; off: 
 type Cell = { f: HTMLElement; img: HTMLImageElement; cap: HTMLElement; i: number };
 type Opened = { i: number; from: DOMRect };
 type Frames = Record<string, [string, number, string, string][]>;
+// `/canvas.json` is kept after the first open, so the next one starts on every frame.
+let kept: Frames | null = null;
 
 /* Upright frames sit as 3:4 on the field, like the grid and strip (Julian, 2026-11-07); square and wide keep theirs. The opened frame shows the whole photo. */
 const shape = (r: number) => (r > 1.02 ? 4 / 3 : r);
 const mod = (a: number, b: number) => ((a % b) + b) % b;
 
-/** `bar`: the discipline chips and the view row. `onLeave`: Open project takes the canvas down. */
-export function V3Canvas({ list, onClose, onLeave, bar }: { list: WorkItem[]; onClose: () => void; onLeave: () => void; bar: React.ReactNode }) {
+/** `bar`: the discipline chips and the view row. `onLeave`: Open project takes the canvas down.
+    `fx`, `out`: the `?viewfx` prototype's way in, and its fade out. */
+export function V3Canvas({ list, onClose, onLeave, bar, fx, out }: { list: WorkItem[]; onClose: () => void; onLeave: () => void; bar: React.ReactNode; fx?: string; out?: boolean }) {
   const field = React.useRef<HTMLDivElement>(null);
   /* Covers until `/canvas.json` lands, then every frame, projects in the page's order. */
-  const [all, setAll] = React.useState<Frames | null>(null);
+  const [all, setAll] = React.useState<Frames | null>(kept);
+  // `?viewfx`: the canvas waits for its frames (or for the fetch to fail) and then comes in once.
+  const [ready, setReady] = React.useState(!!kept);
+  const fxRef = React.useRef(fx);
   React.useEffect(() => {
+    if (kept) return;
     let live = true;
     fetch("/canvas.json")
       .then((r) => (r.ok ? r.json() : null))
-      .then((j: Frames | null) => live && j && setAll(j))
-      .catch(() => {});
+      .then((j: Frames | null) => {
+        if (j) kept = j;
+        if (live && j) setAll(j);
+      })
+      .catch(() => {})
+      .finally(() => live && setReady(true));
     return () => {
       live = false;
     };
@@ -111,6 +122,7 @@ export function V3Canvas({ list, onClose, onLeave, bar }: { list: WorkItem[]; on
       while (pool.length <= n) {
         const f = document.createElement("figure");
         f.className = "cv-cell";
+        f.style.setProperty("--k", String(pool.length)); // `?viewfx=settle` lands the frames in this order
         f.innerHTML = '<img alt="" draggable="false" decoding="async"><span class="cv-cap lbl"></span>';
         el.appendChild(f);
         pool.push({ f, img: f.firstChild as HTMLImageElement, cap: f.lastChild as HTMLElement, i: -1 });
@@ -139,6 +151,12 @@ export function V3Canvas({ list, onClose, onLeave, bar }: { list: WorkItem[]; on
               if (ip.srcSet) p.img.srcset = ip.srcSet;
               else p.img.removeAttribute("srcset");
               p.img.src = ip.src;
+              // `?viewfx`: a photo fades in over its colour when it lands, instead of popping.
+              if (fxRef.current && !p.img.complete) {
+                const im = p.img;
+                im.style.opacity = "0";
+                im.onload = im.onerror = () => (im.style.opacity = "");
+              }
               p.img.alt = fr.alt;
               p.f.style.backgroundColor = fr.color ?? "";
               p.cap.textContent = `${w.n} · ${w.d.join(", ")}`;
@@ -336,7 +354,7 @@ export function V3Canvas({ list, onClose, onLeave, bar }: { list: WorkItem[]; on
   }
 
   return (
-    <div className="cv" data-lenis-prevent role="dialog" aria-modal="true" aria-label="Portfolio canvas">
+    <div className={`cv${fx ? (ready ? ` fx-${fx}` : " wait") : ""}${out ? " out" : ""}`} data-lenis-prevent role="dialog" aria-modal="true" aria-label="Portfolio canvas">
       <div className="cv-field" ref={field} />
       {/* An open frame has its own Back; the bar would sit under it. */}
       <div className="cv-top lbl" style={opened ? { visibility: "hidden" } : undefined}>
