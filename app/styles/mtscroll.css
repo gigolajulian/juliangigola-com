@@ -528,18 +528,12 @@ html[data-mt-intro="1"]{overflow:hidden}
 @media (min-width:1024px) and (min-height:600px) and (max-aspect-ratio:29/10){[data-mtscroll] .mt-hero .mt-col.side:is([data-col="-2"],[data-col="4"]){--vis:hidden}}
 /* Big screens (Julian, 2026-11-15): more columns at about the laptop's frame size, where three would be huge with empty
    ground beside them. The wall gets its own unit, the design width of that many columns across the window; the name
-   block keeps the page's unit. 4 columns from 1800px wide, 5 from 2400px, 7 from 3300px. motion/hero.ts measures the
-   unit off a column. */
-@media (min-width:1800px) and (min-height:600px){
-  [data-mtscroll] .mt-hero .mt-wall{--u:min(calc(100vw / 1848),calc(100svh / 900))}
-  [data-mtscroll] .mt-hero .mt-col{left:calc(50% + (65 - 946.5 + var(--c) * 453) * var(--u))}
-  [data-mtscroll] .mt-hero .mt-col.side{--vis:hidden}
-  [data-mtscroll] .mt-hero .mt-col.side[data-col="3"]{--vis:visible}
-}
-@media (min-width:2400px) and (min-height:600px){
+   block keeps the page's unit. Julian's picks from the stills: 5 columns from 1920px wide (frames about 330px at 1920,
+   440px at 2560), 7 from 3300px (about 425px at 3440). No 4 column step. motion/hero.ts measures the unit off a column. */
+@media (min-width:1920px) and (min-height:600px){
   [data-mtscroll] .mt-hero .mt-wall{--u:min(calc(100vw / 2346),calc(100svh / 900))}
-  [data-mtscroll] .mt-hero .mt-col{left:calc(50% + (65 - 720 + var(--c) * 453) * var(--u))}
-  [data-mtscroll] .mt-hero .mt-col.side[data-col="-1"]{--vis:visible}
+  [data-mtscroll] .mt-hero .mt-col.side{--vis:hidden}
+  [data-mtscroll] .mt-hero .mt-col.side:is([data-col="-1"],[data-col="3"]){--vis:visible}
 }
 @media (min-width:3300px) and (min-height:600px){
   [data-mtscroll] .mt-hero .mt-wall{--u:min(calc(100vw / 3252),calc(100svh / 900))}
