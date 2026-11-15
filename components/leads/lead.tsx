@@ -14,7 +14,7 @@
  * ─────────────────────────────────────────────────────────────── */
 
 import * as React from "react";
-import { Layout, LayoutContent, LayoutFooter, LayoutHeader, LayoutPanel, HStack, VStack, StackItem, Section } from "@astryxdesign/core/Layout";
+import { Layout, LayoutContent, LayoutHeader, LayoutPanel, HStack, VStack, StackItem, Section } from "@astryxdesign/core/Layout";
 import { Card } from "@astryxdesign/core/Card";
 import { Collapsible } from "@astryxdesign/core/Collapsible";
 import { Button } from "@astryxdesign/core/Button";
@@ -47,7 +47,7 @@ import { fill, mailable, TEMPLATES, type Template } from "@/lib/leads/lead-crm";
 import { leadKey, typingIn } from "@/lib/leads/lead-keys";
 import { balance, DEPOSIT, subtotal, usd } from "@/lib/leads/invoice";
 import { ago, at, authed, type Call, DAY, day, errorText, nextStep, now, renew, snoozed } from "@/lib/leads/lead-desk";
-import { compose, ios, kindOf, line, mailto } from "@/components/leads/shared";
+import { compose, frostBar, ios, kindOf, line, mailto } from "@/components/leads/shared";
 
 type Size = "phone" | "mid" | "wide";
 /** A menu row that opens in a new tab. */
@@ -278,6 +278,7 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
   ) : null;
 
   return (
+    <>
     <Layout
       height="fill"
       defaultHasDividers
@@ -462,9 +463,10 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
           </VStack>
         </LayoutContent>
       }
-      footer={phoneSize && reply ? <LayoutFooter>{reply}</LayoutFooter> : undefined}
       end={size === "wide" ? <LayoutPanel width={360} hasDivider label="Timeline">{timeline}</LayoutPanel> : undefined}
     />
+    {phoneSize && reply ? <div style={{ ...frostBar, padding: 12 }}>{reply}</div> : null}
+    </>
   );
 }
 

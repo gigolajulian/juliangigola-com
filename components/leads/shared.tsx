@@ -1,5 +1,7 @@
 "use client";
 
+import type { CSSProperties } from "react";
+
 import { at, day, type Filter } from "@/lib/leads/lead-desk";
 import type { LeadEvent } from "@/lib/leads/leads";
 
@@ -84,4 +86,15 @@ function line(e: LeadEvent): string {
   }
 }
 
-export { kindOf, btn, field, fieldLabel, primary, ios, compose, mailto, badge, label, line };
+/* The phone's bars, frosted like the desktop app's panels (LEADS DESKTOP glass.css: the card colour at about half,
+ * over a blur). They float over the page, so the list shows through as it scrolls; FROST_ROOM keeps the last row clear. */
+const frostBar: CSSProperties = {
+  position: "absolute", insetInline: 0, bottom: 0, zIndex: 5,
+  background: "color-mix(in srgb, var(--color-background-card) 50%, transparent)",
+  backdropFilter: "blur(24px) saturate(1.5)", WebkitBackdropFilter: "blur(24px) saturate(1.5)",
+  borderTop: "1px solid color-mix(in srgb, currentColor 12%, transparent)",
+  paddingBottom: "env(safe-area-inset-bottom)",
+};
+const FROST_ROOM = '[data-astryx-desk][data-bars] [role="main"]::after{content:"";display:block;flex:none;height:calc(72px + env(safe-area-inset-bottom))}';
+
+export { frostBar, FROST_ROOM, kindOf, btn, field, fieldLabel, primary, ios, compose, mailto, badge, label, line };
