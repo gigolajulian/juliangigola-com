@@ -97,6 +97,7 @@ function dockFrame(d: Dock, p: number, dt: number, jump: boolean) {
   const st = d.x <= 0 ? "rest" : d.x >= 1 || (d.st === "land" && t > 0.995) ? "land" : "ride";
   if (st !== d.st) {
     d.st = st;
+    if (st === "ride") d.f.style.color = getComputedStyle(d.h1).color; // the theme may have changed since the measure
     d.f.style.visibility = st === "ride" ? "visible" : "hidden";
     d.h1.style.opacity = st === "rest" ? "" : "0"; // still there for readers and search
     document.documentElement.setAttribute("data-mtdock", st);
