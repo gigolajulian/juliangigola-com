@@ -37,7 +37,7 @@ export const CAMPUS_GUIDES: CampusGuide[] = [
     name: "SJSU",
     title: "Best Spots for SJSU Grad Photos",
     description:
-      "Where I take SJSU graduation photos: Tower Hall, the palm walk, the San Jose State sign, the glass walkways and the Smith and Carlos statue. Light, timing and a route for one session.",
+      "Where I take SJSU graduation photos: Tower Hall, the palm walk, the San Jose State sign and the glass walkways. Light, timing and a route for one session.",
     h1: "Best spots for SJSU grad photos",
     kicker: "San Jose State · Campus guide",
     lead: "I shoot graduation sessions at SJSU every spring. These are the spots I use and the light that works at each.",
@@ -67,19 +67,14 @@ export const CAMPUS_GUIDES: CampusGuide[] = [
         note: "Glass and steel throw light back at you, so these work even at midday.",
         frames: [g("13"), g("03")],
       },
-      {
-        name: "The Tommie Smith and John Carlos statue",
-        note: "The statue between Clark Hall and Tower Lawn. It gets busy close to commencement, so I plan it early in the session.",
-        frames: [],
-      },
     ],
     // His four lead the row (Julian).
     photos: ["01", "02", "03", "04", "14", "15"].map(g),
-    plan: "I start at the glass walkways, where the light works at any hour, then the sign, the statue and the brick steps, and finish at Tower Hall and the palms when the light is low. Two outfit changes fit between stops in 90 minutes.",
+    plan: "I start at the glass walkways, where the light works at any hour, then the sign and the brick steps, and finish at Tower Hall and the palms when the light is low. Two outfit changes fit between stops in 90 minutes.",
     faqs: [
       {
         q: "Where are the best spots for SJSU grad photos?",
-        a: "Tower Hall and Tower Lawn, the palm walk, the brick steps, the San Jose State University sign, the glass walkways and the Tommie Smith and John Carlos statue.",
+        a: "Tower Hall and Tower Lawn, the palm walk, the brick steps, the San Jose State University sign and the glass walkways.",
       },
       {
         q: "What time of day is best for photos at SJSU?",
