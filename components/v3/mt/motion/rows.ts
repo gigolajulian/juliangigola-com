@@ -1,6 +1,7 @@
 import { shiftScroll } from "@/components/v3/smooth-scroll";
 import { captionsOff, vimeoListen, vimeoPlays } from "@/lib/videos";
 import { clamp, smooth, span, type Driver } from "./engine";
+import { sleeveTilt } from "./sleeve-tilt";
 
 /* The held row's travel: it eases away from its first item and into its last (0.4 of the scroll's speed at the two ends). */
 const ease = (p: number) => p - (0.6 * Math.sin(2 * Math.PI * p)) / (2 * Math.PI);
@@ -164,20 +165,7 @@ function heldRow(name: string, covers: boolean): Driver {
       row.addEventListener("scroll", loose, { passive: true, signal: ac.signal });
 
       /* Hover lift (fine pointers): tilt toward the pointer, up to 9deg each way. rows.css does the rest. */
-      if (covers) for (const it of items) {
-        it.addEventListener("pointermove", (e) => {
-          if (!ctx.held || !ctx.fine || e.pointerType === "touch" || dragged) return;
-          const r = it.getBoundingClientRect();
-          it.classList.add("hv");
-          it.style.setProperty("--ry", (clamp((e.clientX - r.left) / r.width - 0.5, -0.5, 0.5) * 18).toFixed(2) + "deg");
-          it.style.setProperty("--rx", (clamp((e.clientY - r.top) / r.height - 0.5, -0.5, 0.5) * -18).toFixed(2) + "deg");
-        }, on);
-        it.addEventListener("pointerleave", () => {
-          it.classList.remove("hv");
-          it.style.removeProperty("--rx");
-          it.style.removeProperty("--ry");
-        }, on);
-      }
+      if (covers) for (const it of items) sleeveTilt(it, () => ctx.held && ctx.fine && !dragged, on);
 
       // After the engine's own resize pass, so ctx is current.
       addEventListener("resize", () => requestAnimationFrame(() => {

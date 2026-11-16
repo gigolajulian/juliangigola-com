@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { BackLink } from "@/components/site/back-link";
 import { notFound } from "next/navigation";
 import { CoverArt } from "@/components/v3/sleeves";
+import { CoverPage } from "@/components/cover/cover-page";
 import { CallToAction } from "@/components/call-to-action";
 import { SESSION_SEO } from "@/lib/seo";
 import { projectFacts, shareMeta } from "@/lib/share";
@@ -101,7 +102,8 @@ export default async function ProjectPage(props: PageProps<"/portfolio/[slug]">)
      of them two-sided, which is a catalogue and not a sequence. Everything
      else is a sequence and gets the strip. */
   if (project.slug === COVER_ART?.slug) {
-    return (
+    /* `off` is the page as it is live; `?v4pages` (c1) swaps it for the one in the site's system. */
+    const off = (
       <article className="pt-20 sm:pt-20">
         <header className="mx-auto max-w-[100rem] px-6 sm:px-10">
           <Crumb />
@@ -123,6 +125,7 @@ export default async function ProjectPage(props: PageProps<"/portfolio/[slug]">)
         />
       </article>
     );
+    return <CoverPage off={off} releases={COVER_RELEASES} onwards={onwards ? { href: onwards.href, name: onwards.name } : undefined} />;
   }
 
   /* JG V3 (leftovers card B): a vertical page, the client's logo in the head. */
