@@ -57,7 +57,7 @@ export function V3Steps({ c }: { c: CardCtx & { v3: V3Book } }) {
   if (step === "done") {
     const studio = !booked.where || /studio/i.test(booked.where);
     const lines = paid
-      ? [`${dlabel(date)}, ${range}, ${duration(length)}.`, studio ? "San Jose studio. I send the address the day before." : `${booked.where}.`, "Need to move it? Reply to the confirmation up to 48 hours before."]
+      ? [`${dlabel(date)}, ${range}, ${duration(length)}.`, studio ? "San Jose studio. I send the address the day before." : `${booked.where}.`, "Need to move it? Use the link in the confirmation, up to 24 hours before."]
       : [`${dlabel(date)}, ${range}, ${duration(length)}.`, "I call the number you gave, or send a video link the day before.", "Need to move it? Reply to the confirmation."];
     const stamp = (ms: number) => new Date(ms).toISOString().replace(/[-:]|\.\d{3}/g, "");
     const s0 = +new Date(pick.start);
@@ -132,7 +132,7 @@ export function V3Steps({ c }: { c: CardCtx & { v3: V3Book } }) {
               {paid ? <ReferencePicks resync={null} v3 /> : null}
               {error ? <p className="err" role="alert">{error}</p> : null}
               {/* The deposit terms before the commit, in deposit-step's wording. */}
-              {paid ? <p className="lbl mute">Full refund or transfer up to 48 hours before the shoot. 70% refund up to 24 hours. The balance is due after the shoot.</p> : null}
+              {paid ? <p className="lbl mute">90% refund up to 48 hours before the shoot, 70% up to 24 hours. Move it up to 24 hours before. The balance is due after the shoot.</p> : null}
             </>
           ),
           bar: (

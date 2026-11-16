@@ -58,6 +58,13 @@ describe("refundShare", () => {
     expect(refundShare({ start: "2026-12-12T18:00:00Z" }, now)).toBe(0);
   });
 
+  it("keeps the 10% booking fee on an early cancel, only on a booking made with the fee", () => {
+    expect(refundShare({ intent: "pi_1", start: "2026-11-12T18:00:00Z", fee: 10 }, now)).toBe(0.9);
+    expect(refundShare({ intent: "pi_1", start: "2026-11-12T17:59:00Z", fee: 10 }, now)).toBe(0.7);
+    expect(refundShare({ intent: "pi_1", start: "2026-11-11T17:59:00Z", fee: 10 }, now)).toBe(0);
+    expect([100, 150, 200, 250].map((usd) => refundCents(usd, 0.9))).toEqual([9000, 13500, 18000, 22500]);
+  });
+
   it("judges a moved session by the earlier of its first and new start", () => {
     expect(refundShare({ intent: "pi_1", start: "2026-12-01T18:00:00Z", firstStart: "2026-11-11T12:00:00Z" }, now)).toBe(0);
     expect(refundShare({ intent: "pi_1", start: "2026-11-11T12:00:00Z", firstStart: "2026-12-01T18:00:00Z" }, now)).toBe(0);

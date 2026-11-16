@@ -338,17 +338,21 @@ export function TermsColumn() {
         </p>
         <p>
           <strong>Moving a booking.</strong> You can move a booking to another
-          open time from the link in your confirmation email, up to two times.
-          The deposit moves with it.
+          open time from the link in your confirmation email, up to two times and
+          until 24 hours before the session. The deposit moves with it.
         </p>
         <p>
           <strong>Canceling.</strong> You can cancel from the same link. If you
-          cancel 48 hours or more before the session, the deposit is refunded in
-          full. If you cancel under 48 hours but 24 hours or more before, 70% of
+          cancel 48 hours or more before the session, 90% of the deposit is
+          refunded and 10% is kept as a booking fee. If you cancel under 48 hours but 24 hours or more before, 70% of
           the deposit is refunded and 30% is kept. If you cancel under 24 hours
           before, or do not show up, the deposit is not refunded. Where a booking has been moved,
           the hours are counted from the time you first booked, or the new time
           if that is earlier.
+        </p>
+        <p>
+          <strong>If I cancel.</strong> If I have to cancel a session, the
+          deposit is refunded in full.
         </p>
         <p>
           <strong>Payments.</strong> Payments are taken by Stripe. The Site does

@@ -200,7 +200,7 @@ Calendar holding the time.
   paid session, and the Stripe webhook (`/api/stripe`) books the time once the
   payment is signed as paid, or refunds it.
 - `/api/booking/[id]` takes a client's reschedule or cancel from the link in
-  their mail; a cancel 48 hours or more out refunds the deposit, 24 hours or more 70% of it.
+  their mail; a cancel 48 hours or more out refunds 90% of the deposit, 24 hours or more 70% of it.
 - Every booking runs through one Durable Object, the booking lock in
   `worker/`, so two tabs on one slot cannot both win. It is a Worker of its
   own; deploy it with `npx wrangler deploy -c worker/wrangler.jsonc`. It also

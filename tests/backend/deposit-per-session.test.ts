@@ -158,22 +158,22 @@ describe.each([
 
     const res = await cancel();
     expect(await res.json()).toMatchObject({ refunded: true, record: { cancelled: true, paid: true, deposit: usd } });
-    // The whole charge goes back: the refund names the intent and no amount.
+    // A week ahead: 90% of what was paid goes back, 10% is the booking fee.
     const refund = stripeCalls.find((c) => c.url.endsWith("/refunds"))!;
     expect(refund.form.get("payment_intent")).toBe(PI);
-    expect(refund.form.has("amount")).toBe(false);
-    expect(String(client.sent.at(-1)!.text)).toContain(`Your $${usd} deposit is refunded to your card.`);
-    expect(await money()).toEqual([["payment", usd], ["refund", usd]]);
+    expect(refund.form.get("amount")).toBe(String(usd * 90));
+    expect(String(client.sent.at(-1)!.text)).toContain(`$${usd * 0.9} of your $${usd} deposit is refunded to your card. $${usd * 0.1} is kept as the booking fee.`);
+    expect(await money()).toEqual([["payment", usd], ["refund", usd * 0.9]]);
   });
 });
 
 describe("what was paid, not today's price", () => {
-  it("books a Headshots intent made at the old $100, and returns $100", async () => {
+  it("books a Headshots intent made at the old $100, and returns 90% of $100", async () => {
     expect((await pay("headshots", 10000)).status).toBe(200);
     expect(String(client.sent.at(-1)!.text)).toContain("Deposit paid: $100.00");
     await cancel();
-    expect(String(client.sent.at(-1)!.text)).toContain("Your $100 deposit is refunded to your card.");
-    expect(await money()).toEqual([["payment", 100], ["refund", 100]]);
+    expect(String(client.sent.at(-1)!.text)).toContain("$90 of your $100 deposit is refunded to your card.");
+    expect(await money()).toEqual([["payment", 100], ["refund", 90]]);
   });
 
   it("reads a record from before amounts were stored as $100", () => {
