@@ -5,8 +5,9 @@ import * as React from "react";
     s1: the phone book bar on service pages. s2: their list rows as numbered rows.
     a2: About's marks on the charcoal band. m2p: behind the scenes on project pages.
     foot: the V4 ending on inner pages. next: the next project as a full stage.
-    view: the frame viewer on project pages. */
-export const V4PAGES = "s1 s2 a2 m2p foot next view";
+    view: the frame viewer on project pages.
+    c1: Cover art in the site's system. */
+export const V4PAGES = "s1 s2 a2 m2p foot next view c1";
 
 export const v4pages = (key: string) =>
   typeof document !== "undefined" && !!document.documentElement.dataset.v4pages?.split(" ").includes(key);
