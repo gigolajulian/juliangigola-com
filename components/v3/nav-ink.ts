@@ -32,33 +32,64 @@ function colour(css: string): [RGB, number] {
     x.fillStyle = "#0000";
     x.fillStyle = css;
     x.fillRect(0, 0, 1, 1);
-    const d = x.getImageData(0, 0, 1, 1).data;
-    c = [[d[0], d[1], d[2]], d[3] / 255];
+    try {
+      const d = x.getImageData(0, 0, 1, 1).data;
+      c = [[d[0], d[1], d[2]], d[3] / 255];
+    } catch {
+      return c; // not cached: the next call tries again
+    }
   }
   colours.set(css, c);
   return c;
 }
 
 /** A photo or film frame, shrunk to N by N. `null`: its pixels cannot be read. */
-const N = 24;
+const N = 48; // was 24: on a wide photo one cell covered more than a 16px stretch, so a split landed off the real edge
 const thumbs = new WeakMap<Element, { at: number; src: string; data: Uint8ClampedArray | null }>();
+/* A canvas of its own each time: a photo from a host that does not allow reading taints the canvas it is drawn
+   on for good, and on the shared one every later read threw (a preview serves its photos from the live host). */
+function read(src: CanvasImageSource): Uint8ClampedArray | null {
+  try {
+    const c = document.createElement("canvas");
+    c.width = c.height = N;
+    const x = c.getContext("2d");
+    if (!x) return null;
+    x.drawImage(src, 0, 0, N, N);
+    return x.getImageData(0, 0, N, N).data.slice();
+  } catch {
+    return null;
+  }
+}
+/* A photo from another host with no CORS mode cannot be read, and Safari logs an error for the try even when it is
+   caught (QA: 10 to 12 a load on previews). So it is not tried: such a photo goes straight to its same-host copy. */
+const foreign = (src: string, el: HTMLImageElement | HTMLVideoElement) => {
+  if (!src || /^(data|blob):/.test(src)) return false;
+  try {
+    return new URL(src, location.href).origin !== location.origin && el.crossOrigin === null;
+  } catch {
+    return true;
+  }
+};
+/** Called when a photo that could not be read has a readable copy: the header looks again. */
+let poke = () => {};
+const copies = new Map<string, Uint8ClampedArray | null>();
 function thumb(el: HTMLImageElement | HTMLVideoElement): Uint8ClampedArray | null {
   const film = el instanceof HTMLVideoElement, src = el.currentSrc || el.src, now = performance.now();
   const had = thumbs.get(el);
-  if (had && had.src === src && (!film || now - had.at < 400)) return had.data;
-  let data: Uint8ClampedArray | null = null;
-  const x = one();
-  try {
-    if (x) {
-      x.canvas.width = x.canvas.height = N;
-      x.drawImage(el, 0, 0, N, N);
-      data = x.getImageData(0, 0, N, N).data.slice();
-    }
-  } catch {
-    data = null;
-  }
+  if (had && had.src === src && (!film || now - had.at < 400)) return had.data ?? copies.get(src) ?? null;
+  const data = foreign(src, el) ? null : read(el);
   thumbs.set(el, { at: now, src, data });
-  return data;
+  if (data || film) return data;
+  /* Unreadable: the same file from this host, without the resizer (`/cdn-cgi/image/<options>/<path>` on another
+     host becomes `/<path>` here). Asked for once; the word keeps its ink until it lands. */
+  const m = /^https?:\/\/[^/]+\/cdn-cgi\/image\/[^/]+\/(.+)$/.exec(src);
+  if (m && !copies.has(src)) {
+    copies.set(src, null);
+    const im = new Image();
+    im.onload = () => (copies.set(src, read(im)), poke());
+    im.src = "/" + m[1];
+  }
+  return copies.get(src) ?? null;
 }
 
 /** The colour of a photo or film at a point on screen, through its object-fit and object-position. */
@@ -80,52 +111,53 @@ function pixel(el: HTMLImageElement | HTMLVideoElement, x: number, y: number): R
   return [data[i], data[i + 1], data[i + 2]];
 }
 
+/** Each photo's strength, kept for one look (cleared at the start of the next). */
+const seen = new Map<Element, number>();
+/** Filled by `under`: the same thing's colour at another height of the same column, or null where it does not reach. */
+type Hit = { at?: (y: number) => RGB | null };
 /** What shows at a point, under the header: the first photo, film or painted box from the top. */
-function under(x: number, y: number, hdr: HTMLElement, page: RGB): RGB {
+function under(x: number, y: number, hdr: HTMLElement, page: RGB, hit?: Hit): RGB {
   for (const el of document.elementsFromPoint(x, y)) {
     if (hdr.contains(el) || el.closest("[aria-hidden].mt-dockname")) continue;
     if (el instanceof HTMLImageElement || el instanceof HTMLVideoElement) {
       const cs = getComputedStyle(el);
-      if (cs.visibility === "hidden" || +cs.opacity < 0.5) continue;
+      if (cs.visibility === "hidden") continue;
+      // how solid it is, through its parents: the v4 hero's wall thins out as it leaves, and a dark photo at
+      // half strength over a light page is a mid grey, not a dark ground
+      let o = seen.get(el);
+      if (o === undefined) {
+        o = 1;
+        for (let n: Element | null = el; n && n !== document.body; n = n.parentElement) o *= +getComputedStyle(n).opacity; // the hero stage, ten levels up, is what dims
+        seen.set(el, o);
+      }
+      if (o < 0.08) continue;
       const p = pixel(el, x, y);
-      if (p) return p;
+      if (p) {
+        const s = o, mix = (q: RGB) => (s > 0.97 ? q : (q.map((v, i) => v * s + page[i] * (1 - s)) as RGB));
+        if (hit) {
+          const r = el.getBoundingClientRect();
+          hit.at = (yy) => {
+            const q = yy < r.top || yy > r.bottom ? null : pixel(el, x, yy);
+            return q && mix(q);
+          };
+        }
+        return mix(p);
+      }
       continue;
     }
     const [c, a] = colour(getComputedStyle(el).backgroundColor);
-    if (a > 0.5) return c;
+    if (a > 0.5) {
+      if (hit) {
+        const r = el.getBoundingClientRect();
+        hit.at = (yy) => (yy < r.top || yy > r.bottom ? null : c);
+      }
+      return c;
+    }
   }
   return page;
 }
 
 const WORDS = ".site-wm,.links a,.tbtn,.menu-btn,.hslot";
-
-/** The page colour for `inkWord`, from any CSS colour (a token's value). */
-export const inkGround = (css: string): RGB => colour(css)[0];
-
-/** White or black for one word, whichever reads better over what shows under it: `data-ink` ("w" / "b") and
-    `--nav-ink` are set on it. `skip` is what holds the word (the bar), `page` what shows where nothing is painted,
-    `veiled` the bar's own veil on top. Also used by words that sit on the page with no ground of their own
-    (Cover art's sound line, components/cover/cover-sound.tsx). */
-export function inkWord(el: HTMLElement, skip: HTMLElement, page: RGB, veiled = false) {
-  const r = el.getBoundingClientRect();
-  if (!r.width || r.bottom < 0) return;
-  const y = r.top + r.height / 2;
-  // Five points along the word, and the middle one by brightness: the ink suits most of the word, so a
-  // few pixels hanging over a gutter or a photo's edge do not decide it.
-  const ls = [0.1, 0.3, 0.5, 0.7, 0.9].map((t) => {
-    let c = under(r.left + r.width * t, y, skip, page);
-    if (veiled) c = [0, 1, 2].map((i) => c[i] * (1 - VEIL) + page[i] * VEIL) as RGB;
-    return lum(c);
-  }).sort((a, b) => a - b);
-  const white = 1.05 / (ls[2] + 0.05), black = (ls[2] + 0.05) / 0.05;
-  const was = el.dataset.ink;
-  // Keep the ink it has unless the other one is clearly better, so a word does not flicker on a busy photo.
-  const ink = was === "w" && white * 1.25 >= black ? "w" : was === "b" && black * 1.25 >= white ? "b" : white >= black ? "w" : "b";
-  if (ink !== was) {
-    el.dataset.ink = ink;
-    el.style.setProperty("--nav-ink", ink === "w" ? "#fff" : "#000");
-  }
-}
 
 export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string) {
   React.useEffect(() => {
@@ -141,13 +173,18 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
     const paint = () => {
       raf = 0;
       last = performance.now();
+      seen.clear();
       const isTop = top();
       root.toggleAttribute("data-navtop", isTop);
       // The v4 home (Julian, 2026-11-15): the bar's wordmark waits until the hero's big name has gone, faded by hero.ts
       // or scrolled under the bar, so the name never shows twice. navfx.css hides it until this is set.
       const nm = path === "/" ? document.querySelector<HTMLElement>(".mt-name h1") : null;
       const nr = nm?.getBoundingClientRect();
-      const shows = !!nr && nr.bottom > bar.offsetHeight && nr.top < innerHeight && parseFloat(nm?.closest<HTMLElement>("[data-mt-name]")?.style.opacity || "1") > 0.02; // only once the name is fully gone: the two never show together
+      const blk = nm?.closest<HTMLElement>("[data-mt-name]");
+      // only once the name is fully gone, so the two never show together: faded out, hidden by hero.ts at the end
+      // of its exit (it rides out of the window at full strength under ?mtdock=left), or wholly out of the window:
+      // on phones it scrolls up through the bar, and the wordmark came on while it was still passing under it (MAC)
+      const shows = !!nr && nr.bottom > 0 && nr.top < innerHeight && blk?.style.visibility !== "hidden" && parseFloat(blk?.style.opacity || "1") > 0.02;
       root.toggleAttribute("data-navnamegone", !shows);
       // A section that is dark in both themes (the v4 footer sets its own --bg) under a light page: the bar takes
       // the dark ground there (navfx.css), or its light veil over it would be a mid grey nothing reads on.
@@ -157,13 +194,55 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
       root.toggleAttribute("data-navdark", lum(rootBg) > 0.2 && lum(secBg) < 0.2);
       const [page] = colour(getComputedStyle(bar).getPropertyValue("--bg").trim());
       const veiled = !isTop && !root.hasAttribute("data-tuck");
-      for (const el of bar.querySelectorAll<HTMLElement>(WORDS)) inkWord(el, bar, page, veiled);
+      for (const el of bar.querySelectorAll<HTMLElement>(WORDS)) {
+        const r = el.getBoundingClientRect();
+        if (!r.width || r.bottom < 0) continue;
+        /* One ink per stretch of about 16px, so a word that sits half on a photo and half on the page is white
+           on one and black on the other (QA: "Ju" white on light grey). And one for the upper half and one for the
+           lower: a photo's top or bottom edge can run through a word (MAC: the wordmark white, 1.2:1, with only its
+           lower half on a photo; the one look along the middle line called the whole word). A stretch keeps its
+           ink unless the other is clearly better, so it does not flicker on a busy photo, but never below 3:1.
+           `data-inks` is the upper row, a slash, the lower row. */
+        const n = Math.max(1, Math.round(r.width / 16));
+        const ya = r.top + r.height * 0.3, yb = r.top + r.height * 0.7;
+        const prev = el.dataset.inks ?? "";
+        const [pa = "", pb = ""] = prev.split("/");
+        const pick = (g: RGB, was: string) => {
+          const c = veiled ? ([0, 1, 2].map((i) => g[i] * (1 - VEIL) + page[i] * VEIL) as RGB) : g;
+          const l = lum(c), white = 1.05 / (l + 0.05), black = (l + 0.05) / 0.05;
+          return was === "w" && white >= 3 && white * 1.25 >= black ? "w" : was === "b" && black >= 3 && black * 1.25 >= white ? "b" : white >= black ? "w" : "b";
+        };
+        let ra = "", rb = "";
+        for (let k = 0; k < n; k++) {
+          const x = r.left + (r.width * (k + 0.5)) / n, hit: Hit = {};
+          const ca = under(x, ya, bar, page, hit);
+          // the lower half is usually on the same photo or box: a second look only where that one ends
+          const cb = hit.at?.(yb) ?? under(x, yb, bar, page);
+          ra += pick(ca, pa.length === n ? pa[k] : "");
+          rb += pick(cb, pb.length === n ? pb[k] : "");
+        }
+        const inks = ra + "/" + rb;
+        if (inks === prev) continue;
+        el.dataset.inks = inks;
+        // the word's one ink: what most of it has (icons and the hover colours use it)
+        const ink = inks.split("w").length - 1 >= n ? "w" : "b";
+        el.dataset.ink = ink;
+        el.style.setProperty("--nav-ink", ink === "w" ? "#fff" : "#000");
+        // two grounds under a word of text: paint it in stretches (navfx.css clips the gradient to the letters)
+        const mixed = el.matches(".site-wm,.links a") && inks.includes("w") && inks.includes("b");
+        el.toggleAttribute("data-inkmix", mixed);
+        if (mixed) {
+          const row = (s: string) => `linear-gradient(90deg,${[...s].map((ch, k) => `${ch === "w" ? "#fff" : "#000"} ${((k / n) * 100).toFixed(1)}% ${(((k + 1) / n) * 100).toFixed(1)}%`).join(",")})`;
+          // one layer when both halves agree, else the upper half's over the lower half's
+          el.style.setProperty("--nav-mix", ra === rb ? row(ra) : `${row(ra)} 0 0/100% 50% no-repeat,${row(rb)} 0 100%/100% 50% no-repeat`);
+        } else el.style.removeProperty("--nav-mix");
+      }
     };
     /* Words and buttons under the bar. An observer on the band at the top of the window names the few that are in
        it; only those are measured, and each gets a mask cut along a line just under the bar. It follows anything
        that moves, by scroll or by transform (the v4 hero), and nothing outside the band carries a mask. */
     const EDGE = 20, SOFT = 28; // the line sits this far under the bar; the fade is this deep above it
-    const live = new Set<HTMLElement>(), seen = new WeakSet<Element>(), cuts = new WeakMap<HTMLElement, string>();
+    const live = new Set<HTMLElement>(), watched = new WeakSet<Element>(), cuts = new WeakMap<HTMLElement, string>();
     let cutRaf = 0, still = 0, count = -1;
     const mask = (el: HTMLElement, m: string) => {
       if ((cuts.get(el) ?? "") === m) return false;
@@ -213,14 +292,14 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
       const walk = document.createTreeWalker(main, NodeFilter.SHOW_TEXT);
       for (let t = walk.nextNode(); t; t = walk.nextNode()) {
         const el = t.parentElement;
-        if (el && !seen.has(el) && t.nodeValue?.trim()) {
-          seen.add(el);
+        if (el && !watched.has(el) && t.nodeValue?.trim()) {
+          watched.add(el);
           io.observe(el);
         }
       }
       for (const el of main.querySelectorAll("button,input,select,textarea"))
-        if (!seen.has(el)) {
-          seen.add(el);
+        if (!watched.has(el)) {
+          watched.add(el);
           io.observe(el);
         }
     };
@@ -232,17 +311,26 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
       count = -1;
       const main = document.getElementById("main");
       // the old observer's elements go to the new one
-      if (main) for (const el of main.querySelectorAll<HTMLElement>("*")) seen.delete(el);
+      if (main) for (const el of main.querySelectorAll<HTMLElement>("*")) watched.delete(el);
       scan();
     };
     scan();
 
-    // At most every 80ms while scrolling, and once more when it settles.
-    const ask = () => {
-      clearTimeout(timer);
-      timer = window.setTimeout(() => (raf ||= requestAnimationFrame(paint)), 120);
-      if (!raf && performance.now() - last > 80) raf = requestAnimationFrame(paint);
+    /* At most every 50ms while scrolling. The v4 hero's wall glides on for about a second after the last scroll
+       event, so it keeps looking through that second too: one look at 120ms left the ink a photo behind (QA). */
+    let until = 0;
+    const tail = () => {
+      raf ||= requestAnimationFrame(paint);
+      // over the homepage hero the words sit on moving photos with no ground: every frame there, 60ms elsewhere
+      if (performance.now() < until) timer = window.setTimeout(tail, root.hasAttribute("data-navtop") ? 16 : 60);
     };
+    const ask = () => {
+      until = performance.now() + 1100;
+      clearTimeout(timer);
+      timer = window.setTimeout(tail, 60);
+      if (!raf && performance.now() - last > (root.hasAttribute("data-navtop") ? 12 : 50)) raf = requestAnimationFrame(paint);
+    };
+    poke = ask;
     const loaded = (e: Event) => (e.target instanceof HTMLImageElement || e.target instanceof HTMLVideoElement) && ask();
     addEventListener("scroll", ask, { passive: true });
     addEventListener("scroll", kick, { passive: true });
@@ -268,10 +356,38 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
       watch.disconnect();
       clearTimeout(timer);
       clearInterval(again);
+      poke = () => {};
       cancelAnimationFrame(raf);
       root.removeAttribute("data-navtop");
       root.removeAttribute("data-navdark");
       root.removeAttribute("data-navnamegone");
     };
   }, [hdr, path]);
+}
+
+/* For words that sit on the page with no ground of their own (Cover art's sound line,
+   components/cover/cover-sound.tsx): the same measure as the bar's, one ink for the whole word. */
+
+/** The page colour for `inkWord`, from any CSS colour. */
+export const inkGround = (css: string): RGB => colour(css)[0];
+
+/** White or black for one word, whichever reads better over what shows under it: `data-ink` ("w" / "b") and
+    `--nav-ink` are set on it. `skip` is what holds the word, `page` what shows where nothing is painted.
+    Never throws: a look that fails leaves the word the ink it had. */
+export function inkWord(el: HTMLElement, skip: HTMLElement, page: RGB) {
+  try {
+    const r = el.getBoundingClientRect();
+    if (!r.width || r.bottom < 0) return;
+    seen.clear();
+    // Five points along the word, and the middle one by brightness, so a few pixels over a gutter do not decide it.
+    const ls = [0.1, 0.3, 0.5, 0.7, 0.9].map((t) => lum(under(r.left + r.width * t, r.top + r.height / 2, skip, page))).sort((a, b) => a - b);
+    const white = 1.05 / (ls[2] + 0.05), black = (ls[2] + 0.05) / 0.05;
+    const was = el.dataset.ink;
+    // Keep the ink it has unless the other one is clearly better, so a word does not flicker on a busy photo.
+    const ink = was === "w" && white * 1.25 >= black ? "w" : was === "b" && black * 1.25 >= white ? "b" : white >= black ? "w" : "b";
+    if (ink !== was) {
+      el.dataset.ink = ink;
+      el.style.setProperty("--nav-ink", ink === "w" ? "#fff" : "#000");
+    }
+  } catch {}
 }
