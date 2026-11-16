@@ -3,6 +3,8 @@
 import * as React from "react";
 import { mplan } from "@/lib/mplan";
 import { mtscroll } from "@/lib/mtscroll";
+import { useV4pages } from "@/lib/v4pages";
+import { V4Foot } from "./v4-foot";
 import Link from "next/link";
 import { THEME_COLOR } from "@/lib/theme-color";
 import { usePathname } from "next/navigation";
@@ -491,11 +493,23 @@ export function V3Foot() {
    the pages restyled by tokens only get it here, after `main`. */
 const OWN_FOOT = /^\/($|portfolio(\/video)?$|bts$|about$|contact(\/form)?$|book(\/|$)|portraits$|headshots$|graduation-photos(\/|$)|model-digitals$|weddings$|music-photography$|fashion-photography$|brand-photography$|admin(\/|$)|proof\/)/;
 
+/** An inner page's ending: the footer line, or the V4 footer under `?v4pages=foot` (v4-foot.tsx). */
+export function PageFoot() {
+  return useV4pages("foot") ? <V4Foot /> : <V3Foot />;
+}
+
+/* The line stays on the private pages and the forms (booking, contract, delivery, proof, contact). */
+const LINE_ONLY = /^\/(booking|contract|delivery|proof|contact|book|admin)(\/|$)/;
+
 export function V3Footer() {
-  if (OWN_FOOT.test(usePathname())) return null;
+  const path = usePathname();
+  const v4 = useV4pages("foot");
+  // A campus guide carries its own footer inside the page; with the V4 one there, this second line goes.
+  if (OWN_FOOT.test(path) || (v4 && path.startsWith("/graduation-photos/"))) return null;
   return (
     <div className="v3 contents">
-      <V3Foot />
+      {/* remade per page: this footer outlives the page, and its hand-over looks up the page's last block once */}
+      {LINE_ONLY.test(path) ? <V3Foot /> : <PageFoot key={path} />}
     </div>
   );
 }

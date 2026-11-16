@@ -48,7 +48,7 @@ function useStills(ref: React.RefObject<HTMLElement | null>) {
 }
 
 /** My local time (f2), to the minute. Empty until mounted, so the server and the first paint agree. */
-function useLocalTime() {
+export function useLocalTime() {
   const [t, setT] = React.useState("");
   React.useEffect(() => {
     const f = new Intl.DateTimeFormat("en-US", { timeZone: "America/Los_Angeles", hour: "numeric", minute: "2-digit", timeZoneName: "short" });
