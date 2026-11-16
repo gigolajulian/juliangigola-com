@@ -9,6 +9,7 @@ import { TZ } from "@/lib/booking/booking-rules";
 import { NAME_INK, NAME_W } from "@/lib/email/email-logo";
 import { SIG_DARK, SIG_HTML, SIG_TEXT } from "@/lib/email/email-signature";
 import { extras, isTestEmail, publicId, shotOrder, type Proof, type ViewerEvent } from "@/lib/proofs/proof";
+import { byCodeUnit } from "@/lib/utils";
 
 const FROM = { name: "Julian Gigola", email: "book@juliangigola.com" };
 const REPLY_TO = "hello@juliangigola.com";
@@ -133,7 +134,7 @@ export function reminderMail(p: Proof, stage: "proofs" | "finals") {
 // The client's copy names frames by proof number, as the gallery does; Lightroom names stay Julian's.
 const numberList = (p: Proof) => {
   const order = shotOrder(p.frames).map((f) => f.id);
-  return p.selects.map((id) => String(order.indexOf(id) + 1).padStart(3, "0")).sort();
+  return p.selects.map((id) => String(order.indexOf(id) + 1).padStart(3, "0")).sort(byCodeUnit);
 };
 
 const fileList = (p: Proof) => p.selects.map((id) => {

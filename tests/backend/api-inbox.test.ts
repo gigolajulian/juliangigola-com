@@ -3,6 +3,7 @@ import { summary, enquiry, enquiryKey } from "@/lib/inbox";
 import { recordLead } from "@/lib/leads/lead-store";
 import { FakeKV, LEADS_KEY, SCOPED, githubToken, reply } from "./fakes";
 import { sealer } from "@/lib/leads/lead-crypto";
+import { byCodeUnit } from "@/lib/utils";
 
 /* /admin's inbox (`app/api/inbox/route.ts`): somebody's name, email and
    message, so the gate is the point. Either the INBOX_KEY or a GitHub
@@ -169,7 +170,7 @@ describe("DELETE", () => {
     await kv.put(`ref:${k}:1`, "img");
     await kv.put(`ref:${other}:0`, "img");
     expect((await DELETE(req("DELETE", { body: JSON.stringify({ key: k }) }))).status).toBe(200);
-    expect([...kv.data.keys()].sort()).toEqual([other, `ref:${other}:0`].sort());
+    expect([...kv.data.keys()].sort(byCodeUnit)).toEqual([other, `ref:${other}:0`].sort(byCodeUnit));
   });
 
   it("answers 400 to bad JSON or a key outside the inbox, and is behind the gate", async () => {

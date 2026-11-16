@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { forgetToken } from "@/lib/booking/gcal";
 import { busyAll, EXTRA_KEY, icsBusy } from "@/lib/booking/slots";
 import { FakeKV } from "./fakes";
+import { byCodeUnit } from "@/lib/utils";
 
 /* The Leads app's Calendar (`app/api/calendar`): blocks are events on
    hello@, extra calendars (Google ids, ICS links) close slots but are only
@@ -77,7 +78,7 @@ describe("busyAll", () => {
     freebusy = { calendars: { primary: { busy: [] }, "me@gmail.com": { busy: [{ start: "2026-11-22T20:00:00Z", end: "2026-11-22T21:00:00Z" }] } } };
     const out = await busyAll(SECRET, A, B, [{ label: "Personal", src: "me@gmail.com" }, { label: "SGH", src: "https://shifts.example.com/a.ics" }]);
     expect(calls[0].body.items).toEqual([{ id: "primary" }, { id: "me@gmail.com" }]);
-    expect(out.busy.map((b) => b.label).sort()).toEqual(["Personal", "SGH"]);
+    expect(out.busy.map((b) => String(b.label)).sort(byCodeUnit)).toEqual(["Personal", "SGH"]);
     expect(out.failed).toEqual([]);
   });
 
@@ -103,7 +104,7 @@ describe("busyAll", () => {
   it("skips an extra it cannot read, but never hello@ itself", async () => {
     freebusy = { calendars: { primary: { busy: [] }, "x@gmail.com": { errors: [{ reason: "notFound" }] } } };
     const out = await busyAll(SECRET, A, B, [{ label: "X", src: "x@gmail.com" }, { label: "Dead", src: "https://gone.example.com/b.ics" }]);
-    expect(out.failed.sort()).toEqual(["Dead", "X"]);
+    expect(out.failed.sort(byCodeUnit)).toEqual(["Dead", "X"]);
     freebusy = { calendars: { primary: { errors: [{ reason: "x" }] } } };
     await expect(busyAll(SECRET, A, B, [])).rejects.toThrow();
   });

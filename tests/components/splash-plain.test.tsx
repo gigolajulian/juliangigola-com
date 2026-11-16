@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { burst } from "@/components/splash/burst-splash";
 import { split } from "@/components/splash/split-splash";
+import { byCodeUnit } from "@/lib/utils";
 
 /* The splash's frames come from the resizer. One it refuses (a blocker, or
    on a branch preview a photograph only the branch has) is asked for again
@@ -34,7 +35,7 @@ describe.each([["burst", burst], ["split", split]] as const)("%s splash", (name,
     const got = [...document.querySelectorAll<HTMLImageElement>("#jg-intro img")].map((i) => [new URL(i.src).origin, new URL(i.src).pathname, i.dataset.plain]);
     expect(got).toHaveLength(3);
     for (const [origin, , plain] of got) expect([origin, plain]).toEqual([location.origin, ""]);
-    expect(got.map((g) => g[1]).sort()).toEqual(["/work/nyx/a-w1080.jpg", "/work/nyx/b-w1080.jpg", "/work/nyx/hero.jpg"]);
+    expect(got.map((g) => String(g[1])).sort(byCodeUnit)).toEqual(["/work/nyx/a-w1080.jpg", "/work/nyx/b-w1080.jpg", "/work/nyx/hero.jpg"]);
     // the plain file is decoded only once it has loaded (Firefox refuses a decode() in the same turn as the new src)
     expect(decodes).toBe(3);
     for (const i of document.querySelectorAll("#jg-intro img")) i.dispatchEvent(new Event("load"));
