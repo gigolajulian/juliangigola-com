@@ -112,8 +112,9 @@ export function CoverArtGallery({
               <span className="disc" aria-hidden />
               <span className="face">
                 <Image data-frame={front.src} src={front.src} alt={front.alt} fill sizes="34vw" priority={i < 3} style={{ background: front.color }} />
-                {name}
               </span>
+              {/* Named the way the home names its covers: a mono caption under the sleeve, no band over the art. */}
+              <span className="cv4c" aria-hidden><span>{release.title}</span><span className="mute">{release.artist}</span></span>
             </button>
           ) : (
             <button

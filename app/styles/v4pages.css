@@ -82,6 +82,15 @@ html[data-v4pages~="c1"] .cv4 .mt-sleeve{position:relative;display:block;width:1
 /* Space between the covers, on the /portfolio grid's gutters and gap (Julian, 2026-11-15), so photographs take their 4px. */
 html[data-v4pages~="c1"] .cv4 .mt-sleeve .face,html[data-v4pages~="c1"] .cv4 .mt-sleeve .face img{border-radius:4px}
 @media (max-width:700px){html[data-v4pages~="c1"] .cv4{gap:10px}}
+/* The name: the home's cover caption (.mt-cvcap), under the sleeve. Dim at rest, full for the cover under the pointer or the focus. */
+html[data-v4pages~="c1"] .cv4c{display:none}
+@media (min-width:701px){
+  html[data-v4pages~="c1"] .cv4{row-gap:56px;padding-bottom:44px}
+  html[data-v4pages~="c1"] .cv4c{position:absolute;left:0;top:calc(100% + 10px);width:100%;display:grid;gap:4px;font:400 11px/1.2 var(--mono);letter-spacing:.14em;text-transform:uppercase;text-align:left;white-space:nowrap;pointer-events:none;opacity:.35;transition:opacity .3s ease-out}
+  html[data-v4pages~="c1"] .cv4c span{overflow:hidden;text-overflow:ellipsis}
+  html[data-v4pages~="c1"] .cv4c .mute{color:var(--mute,var(--muted-foreground))}
+  html[data-v4pages~="c1"] .cv4 .mt-sleeve:hover .cv4c,html[data-v4pages~="c1"] .cv4 .mt-sleeve:focus-visible .cv4c{opacity:1}
+}
 /* Pinned here: mtscroll.css and rows.css both dress the face at the same weight, and they load in separate files. */
 html[data-v4pages~="c1"] .cv4 .mt-sleeve .face{overflow:visible;background:none}
 html[data-v4pages~="c1"] .cv4 .mt-sleeve .face img{object-fit:cover}
@@ -103,7 +112,7 @@ html[data-v4pages~="c1"] .cv4a .pj-ask{border-top:1px solid var(--line)}
 html[data-v4pages~="c1"] .cv4a .cv4b{display:flex;flex-wrap:wrap;gap:12px}
 @media (min-width:701px){html[data-v4pages~="c1"] .cv4a .cv4b{margin:0 clamp(40px,7vw,140px) 0 auto}}
 
-   p3: the scroll motion of the /portfolio grid */
+/* p3: the scroll motion of the /portfolio grid */
 
 /* ── p3. Two moves, both from the V4 home, both gone at rest.
    Drift: each grid photo sits a little oversized in its frame and travels as the
