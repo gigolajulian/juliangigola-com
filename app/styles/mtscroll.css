@@ -764,7 +764,7 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
 [data-mtscroll] .mt-hero .mt-ctas .btn{box-shadow:0 1px 2px rgb(0 0 0 / 35%),0 6px 24px rgb(0 0 0 / 40%)}
 /* the tagline is small: a tighter, darker shadow than the name's */
 [data-mtscroll] .mt-hero .mt-cap.mt-cap.mt-cap{font-weight:500;text-shadow:0 0 2px rgb(0 0 0 / 70%),0 1px 4px rgb(0 0 0 / 60%),0 0 14px rgb(0 0 0 / 50%)}
-[data-mtscroll] .mt-hero .mt-ctas .btn:not(.fill){background:rgb(0 0 0 / 40%);-webkit-backdrop-filter:blur(14px) saturate(1.15);backdrop-filter:blur(14px) saturate(1.15);color:#f1f1ee;border:.5px solid #f1f1ee;box-shadow:none;text-shadow:0 0 2px rgb(0 0 0 / 70%),0 1px 4px rgb(0 0 0 / 60%),0 0 14px rgb(0 0 0 / 50%)}
+[data-mtscroll] .mt-hero .mt-ctas .btn:not(.fill){background:rgb(0 0 0 / 48%);-webkit-backdrop-filter:blur(14px) saturate(1.15);backdrop-filter:blur(14px) saturate(1.15);color:#f1f1ee;border:.5px solid #f1f1ee;box-shadow:none;text-shadow:0 0 2px rgb(0 0 0 / 70%),0 1px 4px rgb(0 0 0 / 60%),0 0 14px rgb(0 0 0 / 50%)}
 @media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .v3 .mt-hero :is(.mt-name h1,.mt-cap){color:var(--dark-ink)}}
 :root[data-theme="light"] .v3 .mt-hero :is(.mt-name h1,.mt-cap){color:var(--dark-ink)}
 /* Phones and tablets: no wordmark in the bar while the hero, with its big name, is on screen (Julian, 2026-11-16). */
