@@ -31,8 +31,9 @@ const ink = (n: Node) => {
   return r.getBoundingClientRect();
 };
 
-/* Mock (?mtdock=left, Julian 2026-11-15): no dock. The header keeps its wordmark and links from the start with no
-   ground under them, the name leaves to the left as the hero ends, and the header's ground comes in there. */
+/* ?mtdock=left (Julian 2026-11-15): no dock. The header keeps its links from the start with no
+   ground under them, the name leaves to the left as the hero ends, and the header's ground comes in there. The bar's
+   wordmark waits until the big name has gone (2026-11-16: "never together"; the header trial does that). */
 const LEFT = typeof location !== "undefined" && /[?&]mtdock=left/.test(location.search);
 /* With no ground over the hero the nav words sit on the wall (they flip white or black, nav-ink.ts: the flag turns
    ?navfx on in layout.tsx). The wall's captions would run through them, so each fades out over FADE px as it
