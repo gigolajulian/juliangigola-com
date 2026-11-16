@@ -681,7 +681,7 @@ export const LISTINGS: Category[] = WORK_CATEGORIES.filter((c) => isListing(c.sl
     site's order, in the shape the strip takes (`Lead` in `strip.tsx`). */
 export const WORK_PAGE = { href: "/portfolio", name: "Portfolio" };
 export const SESSIONS_PAGE = { href: "/#sessions", name: "Sessions" };
-export const CONTACT = { href: "/#contact", name: "Contact" };
+export const CONTACT = { href: "/contact", name: "Contact" };
 
 /** A category as the index renders it: name plus where it goes. */
 export type CategoryLink = {

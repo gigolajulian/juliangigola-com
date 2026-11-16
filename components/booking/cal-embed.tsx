@@ -29,7 +29,7 @@ function TimesDown({ title, className, retry, again }: { title: string; classNam
         </button>
         <Link
           prefetch={false}
-          href="/#contact"
+          href="/contact"
           className="inline-block border-b border-border text-sm uppercase leading-none tracking-[0.04em] transition-colors duration-200 hoverable:hover:border-current"
         >
           Inquire

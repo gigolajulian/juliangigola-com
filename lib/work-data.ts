@@ -6051,7 +6051,7 @@ export const PROJECTS: Project[] = [
   },
   {
     "slug": "sara",
-    "name": "SARA ",
+    "name": "SARA",
     "headline": null,
     "intent": null,
     "credits": [],

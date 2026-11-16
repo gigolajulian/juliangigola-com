@@ -1141,6 +1141,7 @@ export function V3Work({
         <p className="wnote lbl mute" aria-live="polite">
           {q ? `${plural(list.length)} matching “${q}”` : shown ? `${shown.length} frames` : plural(list.length)}
         </p>
+        {q && !list.length ? <p className="wnone mute">Nothing matches that search yet.</p> : null}
         {view === "grid" && shown ? (
           <div className={shown.every((f) => f.sq) ? "wgrid wframes square" : "wgrid wframes"}>
             {shown.map((f, n) => (
