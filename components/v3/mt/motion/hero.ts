@@ -170,11 +170,10 @@ export const heroDrivers: Driver[] = [
       // the hero is over when its last photos have left from under the header: the same line going down and coming back up
       const hdr = document.querySelector<HTMLElement>(".site-hdr");
       const past = () => document.documentElement.toggleAttribute("data-mt-pasthero", el.getBoundingClientRect().bottom <= (hdr?.offsetHeight ?? 60));
-      if (LEFT) {
-        document.documentElement.setAttribute("data-mtleft", "");
-        addEventListener("scroll", past, { passive: true });
-        past();
-      }
+      if (LEFT) document.documentElement.setAttribute("data-mtleft", "");
+      // always: phones keep the wordmark out of the bar while the hero is on screen (mtscroll.css)
+      addEventListener("scroll", past, { passive: true });
+      past();
       // late fonts move both boxes: measure again on the next frame
       if (d) document.fonts?.ready.then(() => (st.at = ""), () => {});
       /* The engine gives a section no frames once it is a screen above the window. A jump past the hero (a reload

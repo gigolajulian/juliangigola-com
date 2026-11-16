@@ -754,3 +754,19 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
   :root[data-mtscroll]:root .mt-foot{--bg:var(--dark-bg);--ink:var(--dark-ink);--mute:oklch(0.78 0.005 80);--accent:var(--dark-accent);--hair:color-mix(in srgb,var(--ink) 14%,transparent);--phr:#8a8a8a;color:var(--ink)}
   [data-mtscroll] .mt-fscrim{background:linear-gradient(color-mix(in srgb,var(--bg) 72%,transparent),color-mix(in srgb,var(--bg) 62%,transparent) 45%,var(--bg) 94%)}
 }
+
+/* No ground behind the hero name and buttons (Julian, 2026-11-16): the photos run clear to the bottom. */
+[data-mtscroll] .mt-hero .mt-scrim{background:none}
+/* In its place a soft black shadow on the words themselves, and a black fill on the outline button. In the light
+   theme the name and tagline go light grey, so the black shadow carries them over the page and the photos alike. */
+[data-mtscroll] .mt-hero :is(.mt-name h1,.mt-cap){text-shadow:0 1px 2px rgb(0 0 0 / 55%),0 4px 28px rgb(0 0 0 / 70%)}
+/* the tagline is small: a tighter, darker shadow than the name's */
+[data-mtscroll] .mt-hero .mt-cap.mt-cap.mt-cap{font-weight:500;text-shadow:0 0 2px rgb(0 0 0 / 90%),0 1px 4px rgb(0 0 0 / 85%),0 0 14px rgb(0 0 0 / 75%)}
+[data-mtscroll] .mt-hero .mt-ctas .btn:not(.fill){background:#0b0b0a;color:#f1f1ee;border-color:#f1f1ee}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .v3 .mt-hero :is(.mt-name h1,.mt-cap){color:var(--dark-ink)}}
+:root[data-theme="light"] .v3 .mt-hero :is(.mt-name h1,.mt-cap){color:var(--dark-ink)}
+/* Phones and tablets: no wordmark in the bar while the hero, with its big name, is on screen (Julian, 2026-11-16). */
+@media not ((min-width:1024px) and (min-height:600px)){
+  html[data-v3motion][data-mtscroll]:has(.mt-hero) .v3 .site-hdr:not(.menu-on) .site-wm{transition:opacity .25s ease-out}
+  html[data-v3motion][data-mtscroll]:has(.mt-hero):not([data-mt-pasthero]) .v3 .site-hdr:not(.menu-on) .site-wm{opacity:0;pointer-events:none}
+}
