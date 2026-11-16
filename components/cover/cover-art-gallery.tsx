@@ -160,8 +160,10 @@ export function CoverArtGallery({
               data-vt={front.src}
               data-ring="Zoom"
               data-snd={snd ? release.slug : undefined}
-              // `snd`: the record turns while its clip plays (v4pages.css).
-              className={cn("group mt-sleeve", snd && playing === release.slug && "snd")}
+              // The record turns while its clip plays (v4pages.css). An attribute, not a class: a changing
+              // className made React rewrite the class and drop the hover's `hv`, so the sleeve fell back in.
+              data-playing={snd && playing === release.slug ? "" : undefined}
+              className="group mt-sleeve"
               // The pressing: the home's color where it names one, the cover's own otherwise.
               style={{ "--press": COVER_PRESS[release.slug] ?? front.color } as React.CSSProperties}
             >
