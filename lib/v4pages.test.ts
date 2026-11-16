@@ -20,12 +20,12 @@ test("the script and lib/v4pages.ts list the same keys", () => {
   expect(js).toContain(`all="${V4PAGES}"`);
 });
 
-test("off by default without the V4 home", () => {
-  expect(run("", false)).toBeUndefined();
+test("without the V4 home only the grid motion is on", () => {
+  expect(run("", false)).toBe("p3");
 });
 
 test("follows the V4 home when the tab has no choice of its own", () => {
-  expect(run("", true)).toBe(V4PAGES);
+  expect(run("", true)).toBe(V4PAGES.replace(" tilt", "")); // tilt stays opt-in, it is still on trial
 });
 
 test("?v4pages=0 keeps the inner pages off under the V4 home, and stays off for the tab", () => {

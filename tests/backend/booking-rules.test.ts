@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_HOURS, EVENTS, cleanHours, duration, refundable, windowOn } from "@/lib/booking/booking-rules";
+import { DEFAULT_HOURS, EVENTS, cleanHours, duration, refundCents, refundShare, windowOn } from "@/lib/booking/booking-rules";
 import { SESSION } from "@/lib/booking/deposit";
 import { PAID } from "@/lib/booking/paid";
 import { LENGTH, SESSIONS } from "@/lib/v3";
@@ -48,17 +48,32 @@ describe("cleanHours", () => {
   });
 });
 
-describe("refundable", () => {
+describe("refundShare", () => {
   const now = Date.parse("2026-11-10T18:00:00Z");
-  it("needs a deposit and 48 hours before the start", () => {
-    expect(refundable({ intent: "pi_1", start: "2026-11-12T18:00:00Z" }, now)).toBe(true);
-    expect(refundable({ intent: "pi_1", start: "2026-11-12T17:59:00Z" }, now)).toBe(false);
-    expect(refundable({ start: "2026-12-12T18:00:00Z" }, now)).toBe(false);
+  it("is whole at 48 hours or more, 70% at 24 or more, nothing under, and nothing with no deposit", () => {
+    expect(refundShare({ intent: "pi_1", start: "2026-11-12T18:00:00Z" }, now)).toBe(1);
+    expect(refundShare({ intent: "pi_1", start: "2026-11-12T17:59:00Z" }, now)).toBe(0.7);
+    expect(refundShare({ intent: "pi_1", start: "2026-11-11T18:00:00Z" }, now)).toBe(0.7);
+    expect(refundShare({ intent: "pi_1", start: "2026-11-11T17:59:00Z" }, now)).toBe(0);
+    expect(refundShare({ start: "2026-12-12T18:00:00Z" }, now)).toBe(0);
+  });
+
+  it("keeps the 10% booking fee on an early cancel, only on a booking made with the fee", () => {
+    expect(refundShare({ intent: "pi_1", start: "2026-11-12T18:00:00Z", fee: 10 }, now)).toBe(0.9);
+    expect(refundShare({ intent: "pi_1", start: "2026-11-12T17:59:00Z", fee: 10 }, now)).toBe(0.7);
+    expect(refundShare({ intent: "pi_1", start: "2026-11-11T17:59:00Z", fee: 10 }, now)).toBe(0);
+    expect([100, 150, 200, 250].map((usd) => refundCents(usd, 0.9))).toEqual([9000, 13500, 18000, 22500]);
   });
 
   it("judges a moved session by the earlier of its first and new start", () => {
-    expect(refundable({ intent: "pi_1", start: "2026-12-01T18:00:00Z", firstStart: "2026-11-11T18:00:00Z" }, now)).toBe(false);
-    expect(refundable({ intent: "pi_1", start: "2026-11-11T18:00:00Z", firstStart: "2026-12-01T18:00:00Z" }, now)).toBe(false);
+    expect(refundShare({ intent: "pi_1", start: "2026-12-01T18:00:00Z", firstStart: "2026-11-11T12:00:00Z" }, now)).toBe(0);
+    expect(refundShare({ intent: "pi_1", start: "2026-11-11T12:00:00Z", firstStart: "2026-12-01T18:00:00Z" }, now)).toBe(0);
+    expect(refundShare({ intent: "pi_1", start: "2026-12-01T18:00:00Z", firstStart: "2026-11-12T00:00:00Z" }, now)).toBe(0.7);
+  });
+
+  it("returns whole cents of each deposit", () => {
+    expect([100, 150, 200].map((usd) => refundCents(usd, 0.7))).toEqual([7000, 10500, 14000]);
+    expect(refundCents(200, 1)).toBe(20000);
   });
 });
 

@@ -8,7 +8,7 @@ import { BOOK_ROWS, type BookRow } from "./data";
 import { RowPhoto, detailOf } from "./book-online";
 
 /* Spec 3.6: one fixed card (1040x636 at 1440x900) round the LIVE booking
-   flow: `V3BookFlow` with its own picker, Cal.com events, Stripe deposit and
+   flow: `V3BookFlow` with its own picker, the site's events, Stripe deposit and
    copy, untouched. The card adds the photo panel, the five tabs, Close and
    the footer link; mtscroll.css lays the flow's rail, body and bar into the
    card. Radix Dialog: focus trap, Esc, click outside, focus back to the

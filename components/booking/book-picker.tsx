@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { DialRoot, useDialKit } from "dialkit";
-import { CalEmbed } from "@/components/booking/cal-embed";
+import { BookTimes } from "@/components/booking/book-times";
 import { DialCopyAll } from "@/components/dial-copy-all";
 import { InquireWall } from "@/components/inquire-wall";
 import type { WallTile } from "@/lib/wall-tile";
@@ -22,7 +22,7 @@ export type Bookable = {
 };
 
 /* The sessions down the left, the chosen one's calendar beside them:
-   the site's own time picker (`cal-embed.tsx`). The
+   the site's own time picker (`book-times.tsx`). The
    choice is kept in the address (`?session=`), so a link can open on one. */
 export function BookPicker({ sessions, start }: { sessions: Bookable[]; start?: string }) {
   const [on, setOn] = React.useState(() => Math.max(0, sessions.findIndex((s) => s.slug === start)));
@@ -84,7 +84,7 @@ export function BookPicker({ sessions, start }: { sessions: Bookable[]; start?: 
   const cardOf = () => (
     <div className="min-h-[75svh] overflow-hidden lg:min-h-0 rounded-[var(--card-r,12px)] border-[0.5px] border-border lg:h-full lg:max-h-[var(--card-h,47rem)] max-sm:[container:card/inline-size] max-sm:-mx-[calc(1.5rem_-_3px)]">
       {/* A fresh picker per session: the last one's time may not be open in this one. */}
-      <CalEmbed key={current.cal} path={current.cal} title={`Pick a time for ${current.name}`} className="booking-embed block h-full w-full border-0" />
+      <BookTimes key={current.cal} path={current.cal} title={`Pick a time for ${current.name}`} className="booking-embed block h-full w-full border-0" />
     </div>
   );
   return (

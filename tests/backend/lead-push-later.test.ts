@@ -1,7 +1,7 @@
 import { afterEach, expect, it, vi } from "vitest";
 
 /* In the Worker the push goes to waitUntil: a push service that never
-   answers must not hold up the form, Cal.com or Stripe. */
+   answers must not hold up the form, a booking or Stripe. */
 const waits: Promise<unknown>[] = [];
 vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: () => ({ ctx: { waitUntil: (p: Promise<unknown>) => waits.push(p) } }) }));
 

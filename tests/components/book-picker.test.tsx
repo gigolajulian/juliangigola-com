@@ -7,8 +7,8 @@ vi.mock("dialkit", () => ({
     Object.fromEntries(Object.entries(spec).map(([k, v]) => [k, v[0]])),
 }));
 vi.mock("@/lib/dialkit-styles", () => ({ useDialKitStyles: () => {} }));
-vi.mock("@/components/booking/cal-embed", () => ({
-  CalEmbed: ({ path, title }: { path: string; title: string }) => (
+vi.mock("@/components/booking/book-times", () => ({
+  BookTimes: ({ path, title }: { path: string; title: string }) => (
     <div data-testid="cal" data-path={path}>
       {title}
     </div>

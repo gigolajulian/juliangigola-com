@@ -4,7 +4,7 @@ import { FakeKV, reply } from "./fakes";
 import { forgetToken } from "@/lib/booking/gcal";
 
 /* /api/deposit: off without Stripe, rate limited, refuses a bad booking,
-   and creates a fixed $100 intent for an open time. */
+   and creates the session's fixed intent for an open time. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
 vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
@@ -23,7 +23,7 @@ beforeEach(() => {
   forgetToken();
   allowed = true;
   intents = [];
-  // Since #767 an open time is read from hello@'s Google Calendar, not Cal.com.
+  // Since #767 an open time is read from hello@'s Google Calendar.
   ctx.env = { INBOX: new FakeKV(), DEPOSIT_LIMIT: { limit: async () => ({ success: allowed }) }, STRIPE_SECRET_KEY: "sk_test_x", GCAL_OAUTH: JSON.stringify({ client_id: "a", client_secret: "b", refresh_token: "c" }) };
   vi.stubGlobal("fetch", async (url: string, init?: RequestInit) => {
     if (url.includes("oauth2")) return reply({ access_token: "t", expires_in: 3600 });
@@ -56,10 +56,10 @@ describe("POST /api/deposit", () => {
     expect(intents).toEqual([]);
   });
 
-  it("creates an intent for $100 whatever amount was asked", async () => {
+  it("creates the session's intent whatever amount was asked", async () => {
     const res = await post(BODY);
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual({ clientSecret: `${PI}_secret_x`, intentId: PI, amount: 10000, currency: "usd" });
-    expect(new URLSearchParams(intents[0]).get("amount")).toBe("10000");
+    expect(await res.json()).toEqual({ clientSecret: `${PI}_secret_x`, intentId: PI, amount: 25000, currency: "usd" });
+    expect(new URLSearchParams(intents[0]).get("amount")).toBe("25000");
   });
 });

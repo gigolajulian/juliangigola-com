@@ -47,12 +47,23 @@ describe("confirmMail", () => {
     expect(m.html).not.toContain(">Reschedule<");
   });
 
+  it("writes the heads-up: the early refund's deadline, 48 hours before the time it is judged by", () => {
+    const deposit = { ref: "pi_1234567890abc", at: "2026-11-01T18:00:00Z" };
+    const fee = confirmMail({ ...base, kind: "headsup", deposit: { ...deposit, fee: 10 } });
+    expect(fee.subject).toMatch(/^Coming up: Portraits, /);
+    // The session is Sat, Nov 21, 10:00 AM PST: the deadline is Thu, Nov 19, 10:00 AM.
+    expect(fee.text).toContain("Until Thu, Nov 19, 10:00 AM PST you can cancel for 90% back.");
+    expect(confirmMail({ ...base, kind: "headsup", deposit }).text).toContain("you can cancel for a full refund.");
+    // Moved out from an earlier first time: judged by that one.
+    expect(confirmMail({ ...base, kind: "headsup", firstStart: "2026-11-20T18:00:00Z", deposit }).text).toContain("Until Wed, Nov 18, 10:00 AM PST");
+  });
+
   it("writes the reminder and the deposit receipt", () => {
     const m = confirmMail({ ...base, kind: "reminder", deposit: { ref: "pi_1234567890abc", at: "2026-11-01T18:00:00Z", card: "Visa 4242" } });
     expect(m.subject).toBe("Tomorrow: Portraits, 10:00 AM");
     expect(m.text).toContain("See you tomorrow.");
     expect(m.text).toContain("Ref: pi_12345678");
-    expect(m.text).toContain("under 48 hours now");
+    expect(m.text).toContain("under 24 hours now");
   });
 
   it("carries Julian's signature in both parts and its dark rules", () => {

@@ -355,7 +355,7 @@
 .booking-embed {
   animation: jg-fade-in var(--dur-xl) var(--ease-out-strong) both;
 }
-/* The way round when the times do not load (`cal-embed.tsx`) is drawn in
+/* The way round when the times do not load (`book-times.tsx`) is drawn in
    the site's colours too. */
 :root:not([data-theme="light"]) .booking-embed.times-down {
   filter: none;

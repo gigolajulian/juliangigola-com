@@ -136,7 +136,7 @@ export const logMail = (env: LeadStore, email: string | undefined, subject: stri
 
 /**
  * Work that may run after the response: a push service can take seconds,
- * and the form, Cal.com and Stripe all wait on recordLead. In the Worker it
+ * and the form, a booking and Stripe all wait on recordLead. In the Worker it
  * goes to waitUntil; with no request around it (tests, scripts) it runs
  * inline. Imported lazily so the desk's client bundle never loads it.
  */

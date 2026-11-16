@@ -2,7 +2,7 @@ import type { Enquiry } from "@/lib/inbox";
 import type { Paper, Stage } from "@/lib/leads/leads";
 
 /* ── leads into Notion ────────────────────────────────────────────
- * Every enquiry and Cal.com booking also lands as a row on the Business
+ * Every enquiry and booking also lands as a row on the Business
  * Hub "Bookings" database, where the Pipeline board shows it. A copy of
  * the INBOX row, never the record: a Notion outage must not lose an
  * enquiry, so this never throws and does nothing while NOTION_TOKEN is unset.
@@ -12,7 +12,7 @@ import type { Paper, Stage } from "@/lib/leads/leads";
 
 const DATABASE = "66054052b3724788a2d21c66c1a7562d";
 
-/** Form types and Cal.com slugs to the board's Shoot Type options. */
+/** Form types and booking slugs to the board's Shoot Type options. */
 const SHOOT: Record<string, string> = {
   editorial: "Editorial",
   campaign: "Brand",
@@ -33,7 +33,7 @@ const SHOOT: Record<string, string> = {
 export type NotionLead = {
   stored: Enquiry;
   status: "Inquiry" | "Call booked" | "Confirmed";
-  /** Website form type or Cal.com event slug. */
+  /** Website form type or booking slug. */
   kind?: string;
   calUid?: string;
   shootDate?: string;
