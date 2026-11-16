@@ -1,4 +1,4 @@
-import { DEFAULT_HOURS, EVENTS, TZ, type Booking, type Hours } from "@/lib/booking/booking-rules";
+import { DEFAULT_HOURS, EVENTS, MAX_MOVES, TZ, type Booking, type Hours } from "@/lib/booking/booking-rules";
 import { gcal } from "@/lib/booking/gcal";
 import { bookingEnquiry, enquiryKey, looksLikeEmail, summary } from "@/lib/inbox";
 import { isPaid, LEGACY_DEPOSIT } from "@/lib/booking/paid";
@@ -31,6 +31,8 @@ export type BookingRecord = {
   end: string;
   /** The start first booked; a reschedule never changes it (the refund rule reads it). */
   firstStart?: string;
+  /** Times the client has moved it (`MAX_MOVES`). Unset on a record from before 2026-11-16: counted as none. */
+  moves?: number;
   timeZone: string;
   name: string;
   email: string;
@@ -102,7 +104,7 @@ const intentKey = (intent: string) => `i:${intent}`;
 const newId = () => crypto.randomUUID().replace(/-/g, "").slice(0, 16);
 
 /** What the client's page may show: no email, no phone, no deposit id. */
-export const clientView = (r: BookingRecord) => ({ id: r.id, slug: r.slug, session: r.session, start: r.start, end: r.end, firstStart: r.firstStart, where: r.where, paid: !!r.intent, deposit: depositPaid(r), cancelled: !!r.cancelled });
+export const clientView = (r: BookingRecord) => ({ id: r.id, slug: r.slug, session: r.session, start: r.start, end: r.end, firstStart: r.firstStart, where: r.where, moves: r.moves ?? 0, paid: !!r.intent, deposit: depositPaid(r), cancelled: !!r.cancelled });
 
 /** The record by its id. */
 export const findBooking = (store: Store, id: string) => store.get<BookingRecord>(recKey(id));
@@ -216,7 +218,7 @@ export async function recordBooking(env: LeadStore & { INBOX?: CloudflareEnv["IN
   await toNotion(env.NOTION_TOKEN, { stored, status: r.call ? "Call booked" : "Confirmed", kind: r.slug, calUid: r.id, shootDate: r.call ? undefined : r.start });
 }
 
-export type ChangeResult = { ok: true; record: BookingRecord; was: BookingRecord } | { ok: false; reason: "missing" | "past" | "cancelled" | "taken" };
+export type ChangeResult = { ok: true; record: BookingRecord; was: BookingRecord } | { ok: false; reason: "missing" | "past" | "cancelled" | "taken" | "moves" };
 
 /** Cancels booking `id`: the event leaves hello@'s calendar, the record is marked. Call it only through the lock. */
 export async function cancelOwn(store: Store, secret: string | undefined, id: string): Promise<ChangeResult> {
@@ -242,6 +244,7 @@ export async function rescheduleOwn(store: Store, secret: string | undefined, id
   if (!was) return { ok: false, reason: "missing" };
   if (was.cancelled) return { ok: false, reason: "cancelled" };
   if (Date.parse(was.start) <= Date.now()) return { ok: false, reason: "past" };
+  if ((was.moves ?? 0) >= MAX_MOVES) return { ok: false, reason: "moves" };
   const rule = EVENTS[was.slug];
   const t = Date.parse(start);
   if (!rule || isNaN(t) || !(await openNow(secret, was.slug, start, { mine: was, kv, hours: await readHours(store) }))) return { ok: false, reason: "taken" };
@@ -251,7 +254,7 @@ export async function rescheduleOwn(store: Store, secret: string | undefined, id
     body: { start: { dateTime: new Date(t).toISOString(), timeZone: TZ }, end: { dateTime: end, timeZone: TZ } },
   });
   // A moved booking is reminded again before its new time.
-  const record: BookingRecord = { ...was, start: new Date(t).toISOString(), end };
+  const record: BookingRecord = { ...was, start: new Date(t).toISOString(), end, moves: (was.moves ?? 0) + 1 };
   delete record.reminded;
   await saveBooking(store, record);
   return { ok: true, record, was };

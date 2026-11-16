@@ -20,7 +20,7 @@ import { bodyOf, json } from "@/lib/http";
 
 export const dynamic = "force-dynamic";
 
-const SAY = { missing: [404, "No such booking."], cancelled: [409, "This booking is already cancelled."], past: [409, "This session has started."], taken: [409, "taken"] } as const;
+const SAY = { missing: [404, "No such booking."], cancelled: [409, "This booking is already cancelled."], past: [409, "This session has started."], taken: [409, "taken"], moves: [403, "This booking has been moved twice already. It can still be cancelled."] } as const;
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { env } = await getCloudflareContext({ async: true });

@@ -251,6 +251,18 @@ describe("reschedule", () => {
     expect(String(client.sent[1].text)).toContain("judged by the time you first booked");
   });
 
+  it("moves twice, then refuses a third move and still lets it be cancelled", async () => {
+    const start = wednesday(7);
+    const { id, t } = await paid(start);
+    expect((await post(id, { t, action: "reschedule", start: plus(start, 2) })).status).toBe(200);
+    const second = await post(id, { t, action: "reschedule", start: plus(start, 4) });
+    expect((await second.json()).record).toMatchObject({ moves: 2 });
+    const third = await post(id, { t, action: "reschedule", start: plus(start, 6) });
+    expect(third.status).toBe(403);
+    expect((await third.json()).error).toContain("moved twice");
+    expect((await post(id, { t, action: "cancel" })).status).toBe(200);
+  });
+
   it("is not blocked by its own old time, only by another booking", async () => {
     const start = wednesday(7);
     const { id, t } = await paid(start);

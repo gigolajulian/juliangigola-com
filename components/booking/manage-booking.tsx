@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { TimePicker } from "@/components/booking/time-picker";
-import { PART_HOURS, REFUND_HOURS, refundCents, refundShare, TZ } from "@/lib/booking/booking-rules";
+import { MAX_MOVES, PART_HOURS, REFUND_HOURS, refundCents, refundShare, TZ } from "@/lib/booking/booking-rules";
 import { LEGACY_DEPOSIT } from "@/lib/booking/paid";
 
 /* ── a client's own booking: reschedule or cancel ─────────────────
@@ -13,7 +13,7 @@ import { LEGACY_DEPOSIT } from "@/lib/booking/paid";
  * start, Julian 2026-11-03), then asks to confirm.
  * ─────────────────────────────────────────────────────────────── */
 
-export type Managed = { id: string; slug: string; session: string; start: string; end: string; firstStart?: string; where?: string; paid: boolean; /** Dollars this booking paid. */ deposit?: number; cancelled: boolean };
+export type Managed = { id: string; slug: string; session: string; start: string; end: string; firstStart?: string; where?: string; /** Times moved so far. */ moves?: number; paid: boolean; /** Dollars this booking paid. */ deposit?: number; cancelled: boolean };
 
 const stampIn = (iso: string, timeZone?: string) =>
   new Intl.DateTimeFormat("en-US", { timeZone, weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZoneName: "short" }).format(new Date(iso));
@@ -112,9 +112,18 @@ export function ManageBooking({ booking, token, open }: { booking: Managed; toke
           <button type="button" className="btn self-start" onClick={() => setMode("")}>Back</button>
         </div>
       ) : (
-        <div className="flex gap-3">
-          <button type="button" className="btn fill" onClick={() => setMode("reschedule")}>Reschedule</button>
-          <button type="button" className="btn" onClick={() => setMode("cancel")}>Cancel</button>
+        <div className="flex flex-col gap-4">
+          <div className="flex gap-3">
+            {(b.moves ?? 0) < MAX_MOVES ? <button type="button" className="btn fill" onClick={() => setMode("reschedule")}>Reschedule</button> : null}
+            <button type="button" className="btn" onClick={() => setMode("cancel")}>Cancel</button>
+          </div>
+          <p className="mute">
+            {(b.moves ?? 0) >= MAX_MOVES
+              ? "This booking has been moved twice, so it can no longer be moved."
+              : (b.moves ?? 0) === 1
+                ? "You can move this booking one more time."
+                : "A booking can be moved twice."}
+          </p>
         </div>
       )}
       {error ? <p role="alert" className="text-accent">{error}</p> : null}
