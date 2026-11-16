@@ -1,0 +1,29 @@
+/* Inner pages plan on trial, only under ?v4pages (lib/v4pages.ts, head script in app/layout.tsx).
+   p3: the V4 drift in the /portfolio grid tiles */
+
+/* ── p3. Each grid photo sits a little oversized in its frame and travels a few
+   percent as the frame crosses the screen: the home's Commissions sheet move
+   (components/v3/mt/motion/flow.css), on the scroll timeline so no script runs.
+   The frame, grid, gaps and 4px corners stay put. Mouse only, never under
+   reduced motion; a browser without view timelines keeps still, unscaled tiles.
+   `.ph` clips, so it is a scroll container: the timeline is named on it, a bare
+   view() on the img would track `.ph` itself. `scale` and `translate` leave the
+   hover `transform` (v3.css) alone. Travel stays inside the 7% the scale spares.
+   !important: motion plan item 6 (`mplan~=scroll`, motion-plan.css) holds every
+   grid image still with `animation: none !important`; this trial lifts that for
+   the /portfolio grid photos only, and only while the flag is on.
+   `data-v4d` (components/v3/v4-drift.tsx): only tiles near the screen animate,
+   since each animated image is its own compositor layer. ── */
+@supports (animation-timeline: view()) {
+  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    html[data-v4pages~="p3"] .v3 #p-work .wgrid .wt .ph { view-timeline: --v4p3 block; }
+    html[data-v4pages~="p3"] .v3 #p-work .wgrid .wt .ph > img { scale: 1.14; }
+    html[data-v4pages~="p3"] .v3 #p-work .wgrid .wt[data-v4d] .ph > img { animation: v4p3-drift linear both !important; animation-timeline: --v4p3 !important; }
+    html[data-v4pages~="p3"] .v3 #p-work .wgrid .wt:nth-child(3n+1) { --v4k: 12%; }
+    html[data-v4pages~="p3"] .v3 #p-work .wgrid .wt:nth-child(3n+2) { --v4k: 5%; }
+  }
+}
+@keyframes v4p3-drift {
+  from { translate: 0 calc(var(--v4k, 9%) * .5); }
+  to { translate: 0 calc(var(--v4k, 9%) * -.5); }
+}
