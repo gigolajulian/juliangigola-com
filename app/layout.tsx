@@ -194,7 +194,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             every key on for the tab, `?v4pages=foot,next` only those, `?v4pages=0` off. */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var k="jg-v4pages",v=(location.search.match(/[?&]v4pages(?:=([a-z0-9,-]*))?(?:&|$)/)||[]),all="foot next view c1 p3";if(v[0])sessionStorage.setItem(k,v[1]==="0"?"":!v[1]||v[1]==="1"?all:v[1].split(",").join(" "));v=sessionStorage.getItem(k);if(v)document.documentElement.dataset.v4pages=v}catch(e){}})()`,
+            __html: `(function(){try{var k="jg-v4pages",v=(location.search.match(/[?&]v4pages(?:=([a-z0-9,-]*))?(?:&|$)/)||[]),all="s1 s2 a2 m2p foot next view c1 p3";if(v[0])sessionStorage.setItem(k,v[1]==="0"?"":!v[1]||v[1]==="1"?all:v[1].split(",").join(" "));v=sessionStorage.getItem(k);if(v)document.documentElement.dataset.v4pages=v}catch(e){}})()`,
           }}
         />
       </head>
