@@ -4,6 +4,7 @@ import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { COVER_RELEASES } from "@/lib/cover-art-data";
+import { media } from "@/lib/device";
 import { HeldRow, rowKeys } from "./held-row";
 import { COVER_KEYS, COVER_PRESS, FILM_DRESS, type MtFilm } from "./data";
 
@@ -47,8 +48,6 @@ export function MtCovers() {
   );
 }
 
-const D = "(min-width:1024px) and (min-height:600px)";
-
 /* Spec 3.8. Phones and tablets: the same native snap row as HeldRow. Desktop
    structure: the films stack one under another in natural scroll (motion/rows.ts
    opens the one at the middle of the screen). The current film is read here, so
@@ -60,7 +59,7 @@ export function MtMotion({ films }: { films: MtFilm[] }) {
     const el = row.current!;
     const sec = el.closest<HTMLElement>("section")!;
     const items = el.querySelectorAll<HTMLElement>(".mt-item");
-    const mq = matchMedia(D);
+    const mq = media("held");
     // On screen: the first film develops up from the dark page each time the section comes into view (rows.css).
     // From the first pixel (?mtpar=0 puts the old 0.2 back), so the film is already coming up while the section slides over Cover art; at 0.2 it rose as a black slab first.
     const inView = new IntersectionObserver(([e]) => sec.toggleAttribute("data-in", e.isIntersecting), { threshold: /[?&]mtpar=0/.test(location.search) ? 0.2 : 0 });
