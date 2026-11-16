@@ -85,7 +85,7 @@ export const EVENTS: Record<string, Rule> = {
   "wedding-call": { title: "Wedding call", notice: 120, ...CALL },
 };
 
-/** Julian (2026-11-03): a cancel this many hours or more before the start refunds the $100; under it, none. */
+/** Julian (2026-11-03): a cancel this many hours or more before the start refunds the deposit; under it, none. */
 export const REFUND_HOURS = 48;
 /* Julian (2026-11-03, "refund by first time"): judged against the time first
    booked, so moving a session out and then cancelling keeps the deposit. A

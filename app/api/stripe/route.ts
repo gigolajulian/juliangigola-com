@@ -55,7 +55,7 @@ export async function POST(request: Request) {
     return text("ok", 200);
   }
   // The whole env: a hand-picked copy once dropped LEADS_KEY, so no deposit reached the lead's log.
-  const status = await bookDeposit({ ...env, INBOX: env.INBOX, STRIPE_SECRET_KEY: env.STRIPE_SECRET_KEY }, pi.id, pi.metadata);
+  const status = await bookDeposit({ ...env, INBOX: env.INBOX, STRIPE_SECRET_KEY: env.STRIPE_SECRET_KEY }, pi.id, pi.metadata, pi.amount_received ?? pi.amount);
   // Still booking from an earlier delivery: Stripe retries until it ends or hello@ is warned.
   if (status === "booking") return text("Still booking.", 503);
   return text("ok", 200);

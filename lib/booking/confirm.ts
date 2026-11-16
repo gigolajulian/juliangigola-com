@@ -1,11 +1,12 @@
 import { duration, refundable, TZ } from "@/lib/booking/booking-rules";
+import { LEGACY_DEPOSIT } from "@/lib/booking/paid";
 import { SIG_DARK, SIG_HTML, SIG_TEXT } from "@/lib/email/email-signature";
 /* ── the client's confirmation email ──────────────────────────────
  * Julian (2026-10-16): every booking gets a branded "You're in." mail from
  * the site.
  *
  *   - Paid sessions: sent by `bookDeposit` once the lock takes the booking, with
- *     the $100 receipt block.
+ *     the deposit's receipt block.
  *   - Free calls: sent by `/api/book`.
  *
  * Sent through `CLIENT_EMAIL`, the one binding that may mail outside
@@ -34,7 +35,8 @@ export type Confirm = {
   where?: string;
   /** The booking's id, shown short in the mail. */
   uid: string;
-  deposit?: { ref: string; at: string; card?: string };
+  /** `amount`: dollars paid; unset on a booking from before 2026-11-15, $100 then. */
+  deposit?: { ref: string; at: string; amount?: number; card?: string };
   /** The site's own reschedule and cancel links; null: none (no BOOKING_SECRET). */
   manage: { reschedule: string; cancel: string } | null;
   /** The time first booked, when it was moved since: the refund is judged by it. */
@@ -76,6 +78,7 @@ export function confirmMail(c: Confirm) {
   // The length as the booking card says it: "Sat, Nov 8, 10:00 to 11:00 AM PST, 60 minutes".
   const mins = c.end ? Math.round((+new Date(c.end) - +new Date(c.start)) / 60000) : 0;
   const rows: [string, string][] = [["Session", c.session], ["When", mins > 0 ? `${at}, ${duration(mins)}` : at], ...(c.where ? [["Where", c.where] as [string, string]] : []), ["Booking", c.uid.slice(0, 8)]];
+  const usd = c.deposit?.amount ?? LEGACY_DEPOSIT;
   const paid = c.deposit && {
     rows: [["Paid", fmt({ month: "short", day: "numeric", year: "numeric" }).format(new Date(c.deposit.at))], ...(c.deposit.card ? [["Card", c.deposit.card]] : []), ["Ref", c.deposit.ref.slice(0, 11)]] as [string, string][],
     // The site's own engine refunds by Julian's 48-hour rule (`lib/booking/booking-rules.ts`).
@@ -88,7 +91,7 @@ export function confirmMail(c: Confirm) {
       : "The balance is due after the shoot. The deposit moves with a new date, or is refunded if you cancel 48 hours or more before.",
   };
   const links = c.manage;
-  const preheader = `${c.session}, ${fmt({ weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZoneName: "short" }).format(new Date(c.start)).replace(/ /g, " ")}.${c.deposit ? " Deposit of $100 received." : ""}`;
+  const preheader = `${c.session}, ${fmt({ weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZoneName: "short" }).format(new Date(c.start)).replace(/ /g, " ")}.${c.deposit ? ` Deposit of $${usd} received.` : ""}`;
 
   const rule = "border-top:1px solid rgba(0,0,0,0.12)";
   const muted = "color:#515354";
@@ -101,7 +104,7 @@ export function confirmMail(c: Confirm) {
   const receipt = paid
     ? `<tr><td class="rule" style="${rule};padding-top:28px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="mono" style="font-size:13px;line-height:1.5">
 <tr><td colspan="2" class="accent" style="${label};padding-bottom:6px">Deposit paid</td></tr>
-<tr><td class="fg" style="${fg};font-size:22px;padding-bottom:10px">$100.00</td><td></td></tr>
+<tr><td class="fg" style="${fg};font-size:22px;padding-bottom:10px">$${usd}.00</td><td></td></tr>
 ${paid.rows.map(([k, v]) => `<tr><td class="muted" style="${muted};padding:3px 0;width:38%">${k}</td><td class="fg" style="${fg};padding:3px 0">${esc(v)}</td></tr>`).join("")}
 <tr><td colspan="2" class="muted" style="${muted};padding:14px 0 28px;line-height:1.65">${paid.note}</td></tr>
 </table></td></tr>`
@@ -132,7 +135,7 @@ ${links ? `<tr><td class="rule" style="${rule};padding:22px 0 0"><a href="${link
     lead,
     "",
     ...rows.map(([k, v]) => `${k}: ${v}`),
-    ...(paid ? ["", "Deposit paid: $100.00", ...paid.rows.map(([k, v]) => `${k}: ${v}`), paid.note] : []),
+    ...(paid ? ["", `Deposit paid: $${usd}.00`, ...paid.rows.map(([k, v]) => `${k}: ${v}`), paid.note] : []),
     ...(links ? ["", `Reschedule: ${links.reschedule}`, `Cancel: ${links.cancel}`] : []),
     "",
     "Questions? Reply to this email.",
@@ -168,12 +171,12 @@ export async function sendConfirm(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefi
 export const cancelledSubject = (c: { session: string; start: string; end?: string }) => `Cancelled: ${c.session}, ${timeRange(c.start, c.end)}`;
 
 /** The client's note that a booking is cancelled, plain, from book@. A failed send is logged, never a failed cancel. Whether it went out. */
-export async function sendCancelled(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefined, c: { name: string; email: string; session: string; start: string; end?: string }, refund: "refunded" | "kept" | "none" | "late"): Promise<boolean> {
+export async function sendCancelled(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefined, c: { name: string; email: string; session: string; start: string; end?: string }, refund: "refunded" | "kept" | "none" | "late", usd = LEGACY_DEPOSIT): Promise<boolean> {
   if (!mailer || !c.email) return false;
   const money = {
-    refunded: "Your $100 deposit is refunded to your card. Banks take 5 to 10 days to show it.",
+    refunded: `Your $${usd} deposit is refunded to your card. Banks take 5 to 10 days to show it.`,
     late: "The refund did not go through on its own. I'll send it by hand and email you.",
-    kept: "It was under 48 hours before the session as first booked, so the $100 deposit is not refunded.",
+    kept: `It was under 48 hours before the session as first booked, so the $${usd} deposit is not refunded.`,
     none: "",
   }[refund];
   const text = [`Hi ${first(c.name)},`, "", `Your ${c.session.toLowerCase()} on ${timeRange(c.start, c.end)} is cancelled.`, money, "", `Book another time: ${SITE}/book`, "", "Questions? Reply to this email.", SIG_TEXT].filter((l, i, a) => l || a[i - 1]).join("\n");
