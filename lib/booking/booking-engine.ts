@@ -1,4 +1,4 @@
-import { DEFAULT_HOURS, EVENTS, TZ, type Booking, type Hours } from "@/lib/booking/booking-rules";
+import { BOOKING_FEE, DEFAULT_HOURS, EVENTS, HEADS_UP_HOURS, MAX_MOVES, MOVE_HOURS, REFUND_HOURS, TZ, type Booking, type Hours } from "@/lib/booking/booking-rules";
 import { gcal } from "@/lib/booking/gcal";
 import { bookingEnquiry, enquiryKey, looksLikeEmail, summary } from "@/lib/inbox";
 import { isPaid, LEGACY_DEPOSIT } from "@/lib/booking/paid";
@@ -7,8 +7,7 @@ import { toNotion } from "@/lib/leads/notion-lead";
 import { openNow, type KV } from "@/lib/booking/slots";
 
 /* ── the site's own booking engine ────────────────────────────────
- * Julian (2026-11-03): in place of Cal.com (PLAN-own-booking.md). One
- * Durable Object (`worker/booking-lock.ts`) runs every booking through
+ * One Durable Object (`worker/booking-lock.ts`) runs every booking through
  * here one at a time: recheck hello@'s free/busy, insert the event,
  * keep the record. Two tabs on one slot: the second finds it busy.
  * KV could not do this, it is eventually consistent and has no lock.
@@ -31,6 +30,12 @@ export type BookingRecord = {
   end: string;
   /** The start first booked; a reschedule never changes it (the refund rule reads it). */
   firstStart?: string;
+  /** Times the client has moved it (`MAX_MOVES`). Unset on a record from before 2026-11-16: counted as none. */
+  moves?: number;
+  /** The percent kept on an early cancel (`BOOKING_FEE`). Unset on a booking made before the fee: a full refund then. */
+  fee?: number;
+  /** When the heads-up mail went out (`dueHeadsUp`). */
+  headsUp?: string;
   timeZone: string;
   name: string;
   email: string;
@@ -102,7 +107,7 @@ const intentKey = (intent: string) => `i:${intent}`;
 const newId = () => crypto.randomUUID().replace(/-/g, "").slice(0, 16);
 
 /** What the client's page may show: no email, no phone, no deposit id. */
-export const clientView = (r: BookingRecord) => ({ id: r.id, slug: r.slug, session: r.session, start: r.start, end: r.end, firstStart: r.firstStart, where: r.where, paid: !!r.intent, deposit: depositPaid(r), cancelled: !!r.cancelled });
+export const clientView = (r: BookingRecord) => ({ id: r.id, slug: r.slug, session: r.session, start: r.start, end: r.end, firstStart: r.firstStart, where: r.where, moves: r.moves ?? 0, fee: r.fee, paid: !!r.intent, deposit: depositPaid(r), cancelled: !!r.cancelled });
 
 /** The record by its id. */
 export const findBooking = (store: Store, id: string) => store.get<BookingRecord>(recKey(id));
@@ -176,6 +181,7 @@ export async function bookOwn(store: Store, secret: string | undefined, b: BookI
     ...(b.via ? { via: b.via } : {}),
     ...(b.intent ? { intent: b.intent } : {}),
     ...(b.intent && b.deposit ? { deposit: b.deposit } : {}),
+    ...(b.intent ? { fee: BOOKING_FEE } : {}),
     at: new Date().toISOString(),
   };
   await saveBooking(store, record);
@@ -216,7 +222,7 @@ export async function recordBooking(env: LeadStore & { INBOX?: CloudflareEnv["IN
   await toNotion(env.NOTION_TOKEN, { stored, status: r.call ? "Call booked" : "Confirmed", kind: r.slug, calUid: r.id, shootDate: r.call ? undefined : r.start });
 }
 
-export type ChangeResult = { ok: true; record: BookingRecord; was: BookingRecord } | { ok: false; reason: "missing" | "past" | "cancelled" | "taken" };
+export type ChangeResult = { ok: true; record: BookingRecord; was: BookingRecord } | { ok: false; reason: "missing" | "past" | "cancelled" | "taken" | "moves" | "late" };
 
 /** Cancels booking `id`: the event leaves hello@'s calendar, the record is marked. Call it only through the lock. */
 export async function cancelOwn(store: Store, secret: string | undefined, id: string): Promise<ChangeResult> {
@@ -242,6 +248,9 @@ export async function rescheduleOwn(store: Store, secret: string | undefined, id
   if (!was) return { ok: false, reason: "missing" };
   if (was.cancelled) return { ok: false, reason: "cancelled" };
   if (Date.parse(was.start) <= Date.now()) return { ok: false, reason: "past" };
+  if ((was.moves ?? 0) >= MAX_MOVES) return { ok: false, reason: "moves" };
+  // Julian (2026-11-16): inside the last day a slot cannot be sold again, so it no longer moves.
+  if (Date.parse(was.start) - Date.now() < MOVE_HOURS * 36e5) return { ok: false, reason: "late" };
   const rule = EVENTS[was.slug];
   const t = Date.parse(start);
   if (!rule || isNaN(t) || !(await openNow(secret, was.slug, start, { mine: was, kv, hours: await readHours(store) }))) return { ok: false, reason: "taken" };
@@ -251,8 +260,9 @@ export async function rescheduleOwn(store: Store, secret: string | undefined, id
     body: { start: { dateTime: new Date(t).toISOString(), timeZone: TZ }, end: { dateTime: end, timeZone: TZ } },
   });
   // A moved booking is reminded again before its new time.
-  const record: BookingRecord = { ...was, start: new Date(t).toISOString(), end };
+  const record: BookingRecord = { ...was, start: new Date(t).toISOString(), end, moves: (was.moves ?? 0) + 1 };
   delete record.reminded;
+  delete record.headsUp;
   await saveBooking(store, record);
   return { ok: true, record, was };
 }
@@ -268,6 +278,22 @@ export const dueReminders = async (store: Store, now = Date.now()) =>
     const t = Date.parse(r.start);
     return !r.cancelled && !r.reminded && t > now && t - now <= DAY && Date.parse(r.at) <= t - DAY;
   });
+
+/** Paid bookings whose heads-up is due at `now`: live, not sent, the early refund still open (over 48 hours
+    before the time it is judged by), starting within 72 hours, booked before that. A run that comes late sends
+    nothing rather than a claim that is no longer true. */
+export const dueHeadsUp = async (store: Store, now = Date.now()) =>
+  (await allBookings(store)).filter((r) => {
+    const t = Date.parse(r.start);
+    const judged = Math.min(t, Date.parse(r.firstStart ?? r.start));
+    return !!r.intent && !r.cancelled && !r.headsUp && t - now <= HEADS_UP_HOURS * 36e5 && judged - now > REFUND_HOURS * 36e5 && Date.parse(r.at) <= t - HEADS_UP_HOURS * 36e5;
+  });
+
+/** Marks booking `id` as sent its heads-up. */
+export async function markHeadsUp(store: Store, id: string, now = Date.now()) {
+  const r = await findBooking(store, id);
+  if (r) await saveBooking(store, { ...r, headsUp: new Date(now).toISOString() });
+}
 
 /** Marks booking `id` reminded. */
 export async function markReminded(store: Store, id: string, now = Date.now()) {
@@ -289,6 +315,8 @@ export type LockOps = {
   reschedule: [{ id: string; start: string }, ChangeResult];
   due: [null, { records: BookingRecord[] }];
   reminded: [string, { ok: boolean }];
+  dueHeads: [null, { records: BookingRecord[] }];
+  headed: [string, { ok: boolean }];
   hours: [null, { hours: Hours }];
   setHours: [Hours, { hours: Hours }];
   get: [string, { record: BookingRecord | null }];

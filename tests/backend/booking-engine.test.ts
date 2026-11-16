@@ -3,7 +3,9 @@ import { FakeStore } from "./fakes";
 import {
   bookOwn,
   cancelOwn,
+  dueHeadsUp,
   dueReminders,
+  markHeadsUp,
   findBooking,
   liveHours,
   lockOp,
@@ -59,6 +61,22 @@ describe("hours in the store", () => {
     const h = { week: Array(7).fill(null) };
     await writeHours(store, h);
     expect(await readHours(store)).toEqual(h);
+  });
+});
+
+describe("dueHeadsUp", () => {
+  const paid = (id: string, over: Partial<BookingRecord> = {}) => rec(id, { intent: "pi_1", start: new Date(NOW + 60 * H).toISOString(), at: new Date(NOW - 30 * 24 * H).toISOString(), ...over });
+  it("picks paid bookings 72 to 48 hours out, while the early refund is still open", async () => {
+    await saveBooking(store, paid("due"));
+    await saveBooking(store, paid("far", { start: new Date(NOW + 80 * H).toISOString() }));
+    await saveBooking(store, paid("closed", { start: new Date(NOW + 47 * H).toISOString() }));
+    await saveBooking(store, paid("moved", { firstStart: new Date(NOW + 40 * H).toISOString() }));
+    await saveBooking(store, paid("fresh", { at: new Date(NOW - H).toISOString() }));
+    await saveBooking(store, paid("gone", { cancelled: new Date(NOW).toISOString() }));
+    await saveBooking(store, paid("call", { intent: undefined }));
+    expect((await dueHeadsUp(store, NOW)).map((r) => r.id)).toEqual(["due"]);
+    await markHeadsUp(store, "due", NOW);
+    expect(await dueHeadsUp(store, NOW)).toEqual([]);
   });
 });
 

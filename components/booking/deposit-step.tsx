@@ -392,7 +392,7 @@ export function DepositStep({
             <label className="fld"><span className="lbl mute">CVC</span><div ref={cvc} className="f-card" /></label>
           </div>
           <div ref={wallet} className={cn(!wallets && "hidden")} />
-          <p className="lbl mute">Refundable or transferable up to 48 hours before the shoot. Card payment through Stripe.</p>
+          <p className="lbl mute">90% refund up to 48 hours before the shoot, 70% up to 24 hours. Move it up to 24 hours before. Card payment through Stripe. By paying you agree to the <a href="/legal#terms" target="_blank" rel="noreferrer" style={{ color: "color-mix(in srgb, var(--accent) 65%, var(--foreground))", textDecoration: "underline", textUnderlineOffset: "0.2em" }}>booking terms</a>.</p>
           {error ? <p className="err" role="alert">{error}</p> : null}
         </div>
       ),
@@ -456,7 +456,7 @@ export function DepositStep({
                   <label className="ed-row"><span className="label">CVC</span><div ref={cvc} className="ed-field" /></label>
                 </div>
                 <div ref={wallet} className={cn("ed-wallet", !wallets && "hidden")} />
-                <p className="ed-copy">${usd} holds your date. Refundable or transferable up to 48 hours before the shoot. Balance due after the shoot.</p>
+                <p className="ed-copy">${usd} holds your date. 90% refund up to 48 hours before the shoot, 70% up to 24 hours. Move it up to 24 hours before. Balance due after the shoot. By paying you agree to the <a href="/legal#terms" target="_blank" rel="noreferrer" style={{ color: "color-mix(in srgb, var(--accent) 65%, var(--foreground))", textDecoration: "underline", textUnderlineOffset: "0.2em" }}>booking terms</a>.</p>
                 {error && !bad ? <p role="alert" className="ed-err">{error}</p> : null}
               </div>
             </div>
@@ -512,7 +512,7 @@ export function DepositStep({
           <div ref={wallet} className={cn(!wallets && "hidden")} />
           {/* What the deposit does, under the card it comes off (Julian, 2026-10-16). */}
           <p className="text-sm normal-case leading-relaxed text-muted-foreground text-pretty">
-            ${usd} holds your date. Refundable or transferable up to 48 hours before the shoot. Balance due after the shoot.
+            ${usd} holds your date. 90% refund up to 48 hours before the shoot, 70% up to 24 hours. Move it up to 24 hours before. Balance due after the shoot. By paying you agree to the <a href="/legal#terms" target="_blank" rel="noreferrer" style={{ color: "color-mix(in srgb, var(--accent) 65%, var(--foreground))", textDecoration: "underline", textUnderlineOffset: "0.2em" }}>booking terms</a>.
           </p>
           {error ? <p role="alert" className="text-sm normal-case text-foreground">{error}</p> : null}
           <div className="flex flex-col gap-4 border-t border-border pt-5 sm:flex-row sm:items-center sm:justify-between">

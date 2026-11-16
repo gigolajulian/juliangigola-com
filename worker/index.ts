@@ -19,12 +19,16 @@ export { BookingLock } from "./booking-lock";
 
 type Env = Parameters<typeof lockOp>[0] & { CLIENT_EMAIL?: CloudflareEnv["CLIENT_EMAIL"]; BOOKING_SECRET?: string; SITE?: CloudflareEnv["ASSETS"] };
 
-/** Mails every reminder due now, then marks it, so the next hour skips it. Returns how many went out. */
+/** Mails every reminder and heads-up due now, then marks it, so the next hour skips it. Returns how many went out. */
 export async function remind(env: Env) {
-  const { records } = await lockOp(env, "due", null);
+  return (await mailDue(env, "due", "reminded", "reminder")) + (await mailDue(env, "dueHeads", "headed", "headsup"));
+}
+
+async function mailDue(env: Env, due: "due" | "dueHeads", mark: "reminded" | "headed", kind: "reminder" | "headsup") {
+  const { records } = await lockOp(env, due, null);
   for (const r of records) {
     const c = {
-      kind: "reminder",
+      kind,
       name: r.name,
       email: r.email,
       session: r.session,
@@ -34,22 +38,23 @@ export async function remind(env: Env) {
       where: r.where,
       uid: r.id,
       manage: await manageLinks(env.BOOKING_SECRET, r),
-      ...(r.intent ? { deposit: { ref: r.intent, at: r.at, amount: depositPaid(r) } } : {}),
+      firstStart: r.firstStart,
+      ...(r.intent ? { deposit: { ref: r.intent, at: r.at, amount: depositPaid(r), fee: r.fee } } : {}),
     } as const;
     const sent = await sendConfirm(env.CLIENT_EMAIL, c);
-    await lockOp(env, "reminded", r.id);
-    if (sent) await logSent(env, r.email, confirmMail(c).subject, r.id);
+    await lockOp(env, mark, r.id);
+    if (sent) await logSent(env, r.email, confirmMail(c).subject, r.id, kind);
   }
   return records.length;
 }
 
 /** Tells the site's lead desk a reminder went out (the lead key lives there). Never throws. */
-async function logSent(env: Env, email: string, subject: string, booking: string) {
+async function logSent(env: Env, email: string, subject: string, booking: string, kind: string) {
   if (!env.SITE || !env.BOOKING_SECRET) return;
   const res = await env.SITE.fetch("https://juliangigola.com/api/leads/mail", {
     method: "POST",
     headers: { authorization: `Bearer ${env.BOOKING_SECRET}`, "content-type": "application/json" },
-    body: JSON.stringify({ email, subject, kind: "reminder", booking }),
+    body: JSON.stringify({ email, subject, kind, booking }),
   }).catch((e: unknown) => (console.error("lead log", String(e)), null));
   if (res && !res.ok) console.error("lead log", res.status);
 }
