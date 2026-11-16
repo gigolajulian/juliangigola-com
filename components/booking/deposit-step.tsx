@@ -3,12 +3,13 @@
 import * as React from "react";
 import { gsap } from "gsap";
 import { cn } from "@/lib/utils";
+import { depositFor } from "@/lib/booking/paid";
 
 /* Goo: the cursor pours into the buttons (`time-picker.tsx`); `?goo=0` off. */
 export const goo = () => typeof location === "undefined" || new URLSearchParams(location.search).get("goo") !== "0";
 
 /* ── the deposit ─────────────────────────────────────────────────────
- * Julian (2026-10-16), behind `?deposit`: a paid session's $100 deposit
+ * Julian (2026-10-16), behind `?deposit`: a paid session's deposit
  * taken in the card, after its form.
  * Stripe's card fields, dressed as the site.
  * The server side is JG - BACKEND's: POST /api/deposit makes the
@@ -35,7 +36,6 @@ declare global {
   }
 }
 
-const AMOUNT = 10000; // cents; the server charges this whatever is sent
 
 let stripe: Promise<Stripe> | null = null;
 /** Stripe.js from Stripe, once, as it asks to be loaded. */
@@ -131,7 +131,7 @@ export function DepositStep({
   className?: string;
   /** The card's References (`refs` files, `picks`), sent once the intent exists. */
   refs?: FormData | null;
-  /** JG V3: the step's parts for the page's stepper; `head` is the $100
+  /** JG V3: the step's parts for the page's stepper; `head` is the deposit
       figure, `rows` the bill (the "Deposit today" row is the live one). */
   v3?: (p: { head: string; sub?: string; body: React.ReactNode; bar: React.ReactNode }) => React.ReactNode;
   /** `?editorial` (editorial.css): its step bar and heading over it. */
@@ -198,7 +198,9 @@ export function DepositStep({
   const sim = process.env.NODE_ENV === "production" ? null : typeof location === "undefined" ? null : new URLSearchParams(location.search).get("sim");
   /** One source for every pay button: when it takes a tap, and what it says while busy (null: its own idle words). */
   const canPay = stage === "ready" || (!!sim && stage === "loading");
-  const payLabel = stage === "paying" ? "Paying" : stage === "confirming" ? "Confirming" : error ? "Try again · $100" : null;
+  // The session's deposit in dollars, for the words and the wallet sheet; the server sets the charge itself.
+  const usd = depositFor(body.slug);
+  const payLabel = stage === "paying" ? "Paying" : stage === "confirming" ? "Confirming" : error ? `Try again · $${usd}` : null;
 
   /* The intent, made on Pay (409: the time has gone). */
   const make = async (): Promise<{ clientSecret: string; intentId: string } | null> => {
@@ -259,7 +261,7 @@ export function DepositStep({
         card.mount(number.current);
         exp.mount(expiry.current);
         code.mount(cvc.current);
-        const express = s.elements({ mode: "payment", amount: AMOUNT, currency: "usd", allowedPaymentMethodTypes: ["card"], appearance: { variables: { borderRadius: "2px" } } });
+        const express = s.elements({ mode: "payment", amount: usd * 100, currency: "usd", allowedPaymentMethodTypes: ["card"], appearance: { variables: { borderRadius: "2px" } } });
         const wall = express.create("expressCheckout", {
           paymentMethods: { applePay: "always", googlePay: "always", link: "never", paypal: "never", amazonPay: "never", klarna: "never" },
           buttonHeight: 48,
@@ -309,7 +311,7 @@ export function DepositStep({
       made.forEach((f) => { try { f.destroy(); } catch {} });
       els.current = null;
     };
-  }, [tries, body.name, body.email]);
+  }, [tries, body.name, body.email, usd]);
 
   const pay = async () => {
     const e = els.current;
@@ -364,7 +366,7 @@ export function DepositStep({
     );
     /* The ends in the master's error box, with the way on. */
     const ends: Partial<Record<Stage, [line: string, why: string, acts: [string, () => void][]]>> = {
-      declined: ["Card declined.", `${error} Nothing was charged, and the time isn’t held yet.`, [["Edit details", onBack], ["Try again · $100", retry]]],
+      declined: ["Card declined.", `${error} Nothing was charged, and the time isn’t held yet.`, [["Edit details", onBack], [`Try again · $${usd}`, retry]]],
       taken: ["Time taken.", after.taken!, [["Pick another time", onTaken]]],
       refunded: ["Time taken.", after.refunded!, [["Pick another time", onTaken]]],
       failed: ["Paid.", after.failed!, []],
@@ -379,7 +381,7 @@ export function DepositStep({
     if (end) return v3({ head: end[0], body: <div ref={box} className="f-stack" role="region" aria-label="Deposit"><p className="err" role="alert">{end[1]}</p>{bill}</div>, bar: btns(end[2]) });
     return v3({
       head: "Hold the date",
-      sub: "$100 holds your date. The balance is due after the shoot.",
+      sub: `$${usd} holds your date. The balance is due after the shoot.`,
       body: (
         <div ref={box} className="f-stack" role="region" aria-label="Deposit" aria-busy={stage === "loading"}>
           {head}
@@ -398,7 +400,7 @@ export function DepositStep({
         <>
           <button type="button" className="btn" onClick={onBack}>Back</button>
           <button type="button" className="btn fill" onClick={pay} disabled={!canPay}>
-            {payLabel ?? "Pay $100 deposit"}
+            {payLabel ?? `Pay $${usd} deposit`}
           </button>
         </>
       ),
@@ -408,7 +410,7 @@ export function DepositStep({
   if (editorial) {
     /* The ends: a word, a headline, what happened, and the way on. */
     const ends: Partial<Record<Stage, [mark: string, line: string, why: string, act?: [string, () => void]]>> = {
-      declined: ["Not paid", "Card declined.", `${error} Nothing was charged, and the time isn’t held yet.`, ["Try again · $100", retry]],
+      declined: ["Not paid", "Card declined.", `${error} Nothing was charged, and the time isn’t held yet.`, [`Try again · $${usd}`, retry]],
       taken: ["Not paid", "Time taken.", after.taken!, ["Pick another time", onTaken]],
       refunded: ["Refunded", "Time taken.", after.refunded!, ["Pick another time", onTaken]],
       failed: ["Paid", "Paid.", after.failed!],
@@ -440,12 +442,12 @@ export function DepositStep({
         ) : (
           <>
             <div className="ed-body">
-              {/* What the $100 is for; the amount is the heading over it (2026-10-20). */}
+              {/* What the deposit is for; the amount is the heading over it (2026-10-20). */}
               <div className="ed-l">
                 {rows.map(([k, v]) => (
                   <div key={k} className="ed-row"><span className="label">{k}</span><span className="ed-v break-words">{v}</span></div>
                 ))}
-                <div className="ed-row"><span className="label">Due now</span><span className="ed-v">$100</span></div>
+                <div className="ed-row"><span className="label">Due now</span><span className="ed-v">${usd}</span></div>
               </div>
               <div className="ed-r" aria-busy={stage === "loading"}>
                 <label className="ed-row"><span className="label">Card</span><div ref={number} className="ed-field" /></label>
@@ -454,7 +456,7 @@ export function DepositStep({
                   <label className="ed-row"><span className="label">CVC</span><div ref={cvc} className="ed-field" /></label>
                 </div>
                 <div ref={wallet} className={cn("ed-wallet", !wallets && "hidden")} />
-                <p className="ed-copy">$100 holds your date. Refundable or transferable up to 48 hours before the shoot. Balance due after the shoot.</p>
+                <p className="ed-copy">${usd} holds your date. Refundable or transferable up to 48 hours before the shoot. Balance due after the shoot.</p>
                 {error && !bad ? <p role="alert" className="ed-err">{error}</p> : null}
               </div>
             </div>
@@ -464,7 +466,7 @@ export function DepositStep({
                 Secured by Stripe. I never see your card.
               </span>
               <button ref={payBtn} type="button" onClick={pay} disabled={bad || !canPay} data-accent="" data-bad={bad ? "" : undefined} data-stick={goo() ? "fill" : undefined} className="ed-btn">
-                {bad ? "Declined" : payLabel ?? "Pay $100"}
+                {bad ? "Declined" : payLabel ?? `Pay $${usd}`}
               </button>
             </div>
           </>
@@ -508,9 +510,9 @@ export function DepositStep({
           {/* Apple Pay or Google Pay, where there is one, under the card
               fields (Julian, 2026-10-16); nothing otherwise. */}
           <div ref={wallet} className={cn(!wallets && "hidden")} />
-          {/* What the $100 does, under the card it comes off (Julian, 2026-10-16). */}
+          {/* What the deposit does, under the card it comes off (Julian, 2026-10-16). */}
           <p className="text-sm normal-case leading-relaxed text-muted-foreground text-pretty">
-            $100 holds your date. Refundable or transferable up to 48 hours before the shoot. Balance due after the shoot.
+            ${usd} holds your date. Refundable or transferable up to 48 hours before the shoot. Balance due after the shoot.
           </p>
           {error ? <p role="alert" className="text-sm normal-case text-foreground">{error}</p> : null}
           <div className="flex flex-col gap-4 border-t border-border pt-5 sm:flex-row sm:items-center sm:justify-between">
@@ -520,7 +522,7 @@ export function DepositStep({
               Secured by Stripe. I never see your card.
             </span>
             <button type="button" onClick={pay} data-stick="fill" disabled={!canPay} className="label shrink-0 rounded-[2px] border border-accent bg-accent px-6 py-4 text-accent-foreground transition-[opacity,scale] duration-300 hoverable:hover:opacity-85 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50">
-              {payLabel ?? "Pay $100 deposit"}
+              {payLabel ?? `Pay $${usd} deposit`}
             </button>
           </div>
         </>

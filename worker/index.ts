@@ -11,7 +11,7 @@
  * Pacific run asks for the galleries' daily summary (`app/api/proof/daily`).
  * ─────────────────────────────────────────────────────────────── */
 
-import { lockOp } from "../lib/booking/booking-engine";
+import { depositPaid, lockOp } from "../lib/booking/booking-engine";
 import { manageLinks } from "../lib/booking/booking-token";
 import { confirmMail, sendConfirm } from "../lib/booking/confirm";
 
@@ -34,7 +34,7 @@ export async function remind(env: Env) {
       where: r.where,
       uid: r.id,
       manage: await manageLinks(env.BOOKING_SECRET, r),
-      ...(r.intent ? { deposit: { ref: r.intent, at: r.at } } : {}),
+      ...(r.intent ? { deposit: { ref: r.intent, at: r.at, amount: depositPaid(r) } } : {}),
     } as const;
     const sent = await sendConfirm(env.CLIENT_EMAIL, c);
     await lockOp(env, "reminded", r.id);

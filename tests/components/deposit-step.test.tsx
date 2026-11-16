@@ -23,7 +23,7 @@ const body: DepositBody = {
 };
 const rows: [string, string][] = [
   ["Session", "Portraits"],
-  ["Deposit today", "$100"],
+  ["Deposit today", "$250"],
 ];
 
 describe("DepositStep", () => {
@@ -42,7 +42,7 @@ describe("DepositStep", () => {
     render(<DepositStep body={body} rows={rows} onBooked={() => {}} onTaken={() => {}} onBack={onBack} />);
     expect(screen.getByRole("region", { name: "Deposit" })).toBeTruthy();
     expect(screen.getByText("Portraits")).toBeTruthy();
-    expect((screen.getByRole("button", { name: "Pay $100 deposit" }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole("button", { name: "Pay $250 deposit" }) as HTMLButtonElement).disabled).toBe(true);
     fireEvent.click(screen.getByRole("button", { name: "Edit details" }));
     expect(onBack).toHaveBeenCalled();
   });
