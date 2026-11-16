@@ -185,6 +185,15 @@ const coversOf = (category: string, n = Infinity, prefer: string[] = []): Tile[]
     }));
 };
 
+/** Chosen frames by address, in the order given, each opening its project. */
+const framesAt = (srcs: string[]): Tile[] =>
+  srcs.map((src) => {
+    const p = getProject(src.split("/")[2]);
+    const frame = p?.images.find((f) => f.src === src);
+    if (!p || !frame) throw new Error(`lib/booking/booking.ts: no frame "${src}" in the work data.`);
+    return { frame, href: `/portfolio/${p.slug}`, caption: caption(p.name) };
+  });
+
 /** The music videos, by title, from the Motion page's list. */
 const MUSIC_VIDEOS = CONTENT.videos
   .filter((v) => v.section === "music")
@@ -552,6 +561,61 @@ export const BOOKING_PAGES: BookingPage[] = [
     book: { type: "music", title: "Plan a release", cal: "juliangigola/music-call" },
   },
   {
+    slug: "fashion-photography",
+    name: "Fashion",
+    title: "Fashion Editorials & Lookbooks, Bay Area",
+    description:
+      "Fashion editorials, lookbooks and campaign images for designers, stylists and magazines in San Francisco, San Jose and Oakland, shot and art-directed by Julian Gigola.",
+    h1: "Fashion editorials & lookbooks",
+    kicker: "Designers · Stylists · Magazines",
+    lead: "Editorials, lookbooks and campaign images for designers, stylists and magazines in San Francisco, San Jose and across the Bay Area. I shoot and art-direct, so the light, the set and the clothes read as one story.",
+    rate: "Quoted per project",
+    price: null,
+    service: "Fashion and editorial photography",
+    back: PORTFOLIO,
+    blocks: [
+      {
+        heading: "What you can book",
+        items: [
+          "Editorials: a story for print or online, from the concept to the retouch",
+          "Lookbooks: a collection shot in studio or on location",
+          "Campaign images: the lead frames for a launch",
+        ],
+      },
+      PROCESS,
+    ],
+    where: COMMISSION_WHERE,
+    faqs: [
+      {
+        q: "How much does a fashion shoot cost?",
+        a: `Quoted per project. Say what the shoot is for, where the images run and when you need them, and the quote comes back with a treatment. ${reply}`.trim(),
+      },
+      {
+        q: "Who brings the styling and the team?",
+        a: "Say who is already on the shoot in the brief. The treatment has the approach and the shot list, and the quote covers crew and licensing.",
+      },
+      {
+        q: "How do the images come back?",
+        a: "Selects for approval first, then the final retouched files in the crops and color spaces you need. Put the deadline in the brief with the dates.",
+      },
+      {
+        q: "How is usage licensed?",
+        a: "Usage is part of the quote: where the images run, for how long and in which territories. Say what you need in the brief.",
+      },
+    ],
+    // Julian's six, in his order (2026-11-15); the first is the frame beside the title.
+    tiles: framesAt([
+      "/work/i-wanna-be-a-human/02.jpg",
+      "/work/i-wanna-be-a-human/09.jpg",
+      "/work/aegis/04.jpg",
+      "/work/poise/09.jpg",
+      "/work/stratus-lookbook-vol-1/03.jpg",
+      "/work/ukiyosunknown/01.jpg",
+    ]),
+    gallery: { href: "/portfolio?d=editorial", label: "Editorials & lookbooks" },
+    book: { type: "editorial", title: "Plan a shoot", cal: "juliangigola/editorial" },
+  },
+  {
     slug: "brand-photography",
     name: "Brands",
     title: "Brand & Campaign Photographer, SF & San Jose",
@@ -645,6 +709,7 @@ export const BOOK_MENU: MenuItem[] = [
   }),
   callOf("weddings", "Weddings", session("weddings").blurb),
   callOf("music-photography", "Music & artists", "Press photos, cover art and music videos for a release, planned together so it reads as one thing."),
+  callOf("fashion-photography", "Fashion & editorial", "Editorials, lookbooks and campaign images, shot and art-directed as one story."),
   callOf("brand-photography", "Brand campaigns", "Campaign imagery from the concept and the art direction to the shoot and the retouch."),
   // ponytail: no call yet; add `cal: "juliangigola/event-call"` once the event exists in Cal.com.
   { slug: "events", name: "Event coverage", blurb: "Launches, brand events, concerts and parties, shot as they happen.", group: "commission", page: "/portfolio/events", form: { type: "event" } },
