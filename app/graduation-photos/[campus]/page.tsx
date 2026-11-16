@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { shareOg } from "@/lib/share";
 import { LdJson } from "@/components/local-screens";
 import { PageFoot } from "@/components/v3/chrome";
+import { CampusSpots } from "@/components/v3/campus-spots";
 import { CAMPUS_GUIDES, campusGuide, campusHref } from "@/lib/campus-guides";
 import { getProject } from "@/lib/work";
 import { SITE } from "@/lib/seo";
@@ -45,6 +46,11 @@ export default async function CampusPage(props: PageProps<"/graduation-photos/[c
     const f = images.find((x) => x.src === src);
     const spot = c.spots.find((s) => s.frames.includes(src));
     return f && spot ? [{ spot: spot.name, f }] : [];
+  });
+  /* `?v4pages=s4`: the spots that have a photograph, each with its frame from the row above. */
+  const held = c.spots.flatMap((s) => {
+    const f = images.find((x) => x.src === c.photos.find((p) => s.frames.includes(p)));
+    return f ? [{ name: s.name, note: s.note, src: f.src, alt: f.alt || `Graduation photo at ${s.name} by Julian Gigola`, color: f.color }] : [];
   });
   const url = `${SITE}${campusHref(c)}`;
 
@@ -96,12 +102,15 @@ export default async function CampusPage(props: PageProps<"/graduation-photos/[c
             ))}
           </div>
           <div className="sv-info" id="spots">
-            {c.spots.map((s, i) => (
-              <section className="sv-row" key={s.name}>
-                <h2 className="lbl mute">{String(i + 1).padStart(2, "0")} · {s.name}</h2>
-                <p>{s.note}</p>
-              </section>
-            ))}
+            <CampusSpots
+              spots={held}
+              off={c.spots.map((s, i) => (
+                <section className="sv-row" key={s.name}>
+                  <h2 className="lbl mute">{String(i + 1).padStart(2, "0")} · {s.name}</h2>
+                  <p>{s.note}</p>
+                </section>
+              ))}
+            />
             <section className="sv-row">
               <h2 className="lbl mute">How I plan the session</h2>
               <p>{c.plan}</p>
