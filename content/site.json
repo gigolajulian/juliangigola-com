@@ -58,7 +58,7 @@
       "slug": "headshots",
       "name": "Headshots",
       "blurb": "Clean, current and usable everywhere: LinkedIn, press, casting, a company about page. Studio located in San Jose, available to travel across the SF Bay Area.",
-      "from": null,
+      "from": 400,
       "includes": [
         "Studio lighting",
         "Multiple backgrounds",
