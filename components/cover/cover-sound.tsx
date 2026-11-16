@@ -10,8 +10,9 @@ import SOUND from "@/lib/cover-art-sound.json";
    a release with neither, a clip that fails to load and a play the browser blocks are all just silence. */
 type Clip = { id?: number; preview?: string; link?: string; clip?: string };
 const clips: Record<string, Clip> = SOUND;
-/* In over 1.4s on a curve that starts slow (Julian, 2026-11-15: fade in smoothly), out in 0.5s. */
-const KEY = "jg-cover-snd", PEAK = 0.5, IN = 1400, OUT = 500;
+/* In over 1.4s on a curve that starts slow (Julian, 2026-11-15: fade in smoothly), out in 0.5s.
+   Peak 0.3 (Julian, 2026-11-16: lower the audio; was 0.5). */
+const KEY = "jg-cover-snd", PEAK = 0.3, IN = 1400, OUT = 500;
 
 let audio: HTMLAudioElement | null = null, now = "", raf = 0;
 const subs = new Set<() => void>();
