@@ -2,11 +2,11 @@
    --in (0 as a section's top reaches the bottom of the screen, 1 at the top)
    and --out (0 as its bottom reaches the bottom of the screen, 1 at the top). */
 
-/* About, desktop. In: the stage opens from a window as it comes up the screen.
-   Out: it sinks and dims while the footer wall slides over it. */
+/* About, desktop. In: one straight edge uncovers the stage from the bottom up, the way the Book online photo
+   arrives (Julian, 2026-11-16; was a window opening from 22% / 26% insets). Out: it sinks and dims while the footer wall slides over it. */
 html[data-mt-held] .mt-about .mt-stage {
   --o: clamp(0, calc(var(--in, 1) * 1.6 - .6), 1);
-  clip-path: inset(calc((1 - var(--o)) * 22%) calc((1 - var(--o)) * 26%) 0 calc((1 - var(--o)) * 26%));
+  clip-path: inset(calc((1 - clamp(0, calc(var(--in, 1) * 1.7 - .15), 1)) * 100%) 0 0 0);
   transform: translate3d(0, calc(var(--out, 0) * 22svh), 0) scale(calc(1 - var(--out, 0) * .05));
   transform-origin: 50% 100%;
   opacity: calc(1 - var(--out, 0) * .6);
