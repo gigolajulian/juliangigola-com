@@ -8,7 +8,7 @@
 /* The ground is on the bar itself: the bar is its own layer (view-transition-name), so a child could not blur
    what is behind it. The tripled class outranks the portfolio and solid-bar rules without !important, which an
    animation could not override. It fades in by animation, so the bar's own slide and dock transitions stay as they are. */
-:root[data-navfx] .v3 .site-hdr.site-hdr.site-hdr{background:color-mix(in srgb,var(--bg) var(--nav-veil),transparent);-webkit-backdrop-filter:blur(24px) saturate(1.8);backdrop-filter:blur(24px) saturate(1.8);border-bottom-color:var(--line);animation:navfx-in .25s ease both}
+:root[data-navfx] .v3 .site-hdr.site-hdr.site-hdr{background:color-mix(in srgb,var(--bg) var(--nav-veil),transparent);-webkit-backdrop-filter:blur(24px) saturate(1.8);backdrop-filter:blur(24px) saturate(1.8);border-bottom:.5px solid var(--line);animation:navfx-in .25s ease both}
 :root[data-navfx][data-navtop] .v3 .site-hdr.site-hdr.site-hdr,
 :root[data-navfx][data-pft][data-tuck] .v3 .site-hdr.site-hdr.site-hdr,
 :root[data-navfx] .v3 .site-hdr.site-hdr.site-hdr.menu-on{background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none;border-bottom-color:transparent;animation:none}
