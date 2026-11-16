@@ -1,157 +1,18 @@
-/* Julian: refined for 2560 by 1080. The large layout is in vw, so on a
-   screen wider than 16:9 the photographs grew with the width and not the
-   height, a third bigger at 21:9 and into the bar and the rail. `--wide`
-   takes them and their spread across back toward the 16:9 composition, in
-   steps (a ratio of lengths cannot be computed in CSS): about 1.85 times
-   the height wide. Large screens only; a phone on its side is as wide and
-   has its own layout. */
-/* 2560 by 960: at 0.8 the dress came down over the name. */
-/* A big screen, wide and short (1.75 to 2.2 to 1: a 13 or 16 inch laptop in
-   a browser): its own layout, `SHORT` on "Photo layout, wide short". Wider
-   than that keeps the large one with the ultrawide scaling above. */
-/* Julian: a layout of their own for the smaller screens (the cards
-   looked too small there, the arrangement not the best), one for a
-   tablet held upright and one for a short landscape screen, each with
-   its places, widths, depths and which cards show (each
-   once on its own "Photo layout" panel). 1280px wide and up keeps the large screen's. */
-/* A phone on its side, or any landscape window under 512px tall (an
-   iPhone at 844 by 390, the iPhone Duo folded and turned, 678 by 466):
-   its own layout, `SIDEWAYS`. After the landscape one, which it
-   overrides where both match. */
-@media (max-width: 39.99rem) and (orientation: portrait) {
-  .cover-float-off-phone {
-    display: none;
-  }
-}
-/* Julian: the cover's photographs looked low quality, and the files
-   were not it. Chrome rasterises a layer inside the turned,
-   perspective space at one pixel per CSS pixel, not the screen's two,
-   so a 2x screen got a picture stretched to twice its raster
-   (measured: SSIM 0.77 against the same file drawn flat). The card is
-   laid out at twice its size and drawn at half (`scale`), so that one
-   pixel per CSS pixel is two on screen. Everything measured in the
-   card's own pixels is doubled to look as it did: the corner, the
-   blurs (`--os`), the glass's rim and the hover shadow (`CoverCard`).
-   `scale` is flat, so `--fz` is not. */
-@property --os {
-  syntax: "<number>";
-  inherits: true;
-  initial-value: 1;
-}
 /* ── one corner for every photograph ──────────────────────────────
  * Julian: every picture on the site on one corner, 8px, the drifting
- * wall included (`radius` on `DriftWall`): the cover, the strips, the
- * grids, the cover art, the lists, the films, the reel.
+ * wall included (`radius` on `DriftWall`): the grids, the cover art,
+ * the lists, the films, the reel.
  * Controls stay square. `isolation` so Safari clips a picture that zooms
  * inside its rounded frame instead of drawing square corners over it.
  * ───────────────────────────────────────────────────────────────── */
 :root {
   --radius-photo: 8px;
 }
-.strip-cell,
-.photo-corner {
-  border-radius: var(--radius-photo);
-  isolation: isolate;
-}
 /* Julian: cover art always square, wherever it is shown: a sleeve is a
    square. Known by its folder, `/covers/`, which the image loader keeps
    in every URL it writes. */
-:is(.strip-cell, .photo-corner, .drift-wall__inner):has(img[src*="/covers/"]) {
+.drift-wall__inner:has(img[src*="/covers/"]) {
   border-radius: 0;
-}
-/* The name through glass (`warp-text.tsx`): the canvas fills its box. */
-.warp-text {
-  position: relative;
-  display: block;
-  overflow: hidden;
-  isolation: isolate;
-}
-.warp-text canvas {
-  position: absolute;
-  inset: 0;
-  /* Over the pixel size ogl writes on the element, so the canvas always
-     fills its box and can never overhang it and be cut off. */
-  width: 100% !important;
-  height: 100% !important;
-  display: block;
-}
-/* Julian: the name never covered by the photographs. A wide window that
-   is short (a 32:9 screen, or a wide browser window not full height)
-   has the photographs' field as wide as ever and no taller than the
-   window, and the name, set in pixels, filled the gap between the row
-   above it and the row below and ran under both. Smaller as the window
-   is shorter. */
-/* A short phone (iPhone SE): the name ran into the skater and the
-   buttons broke onto two lines, into Sago and the TV. */
-@media (max-width: 39.99rem) and (orientation: portrait) and (max-height: 43.75rem) {
-  .cover-float-ctas {
-    flex-wrap: nowrap;
-  }
-  .cover-float-ctas .cover-cta {
-    white-space: nowrap;
-  }
-}
-/* A booking page's title runs to three lines where the name is one,
-   and on ultrawide reached up into the top row of photographs: lower
-   there. */
-.cover-float-name {
-  color: var(--hero-ink);
-  line-height: 1;
-}
-.cover-float-title {
-  font-family: var(--font-mono);
-  font-weight: 400;
-  font-size: calc(var(--h-title-size, 16px) * var(--m-role));
-  letter-spacing: var(--h-title-track, 0.15em);
-  /* Julian: the lines centred on each other. The spacing after the last
-     letter, matched before the first. */
-  text-indent: var(--h-title-track, 0.15em);
-  text-transform: uppercase;
-  color: var(--hero-sub);
-}
-.cover-float-where {
-  font-family: var(--font-mono);
-  /* The buttons' floor (`--cta-k`, below) for the same short window. */
-  font-size: calc(var(--h-where-size, 14px) * var(--m-where) * max(1, calc(0.9 / var(--mid, 1))));
-  color: var(--hero-where);
-}
-/* Julian: on a phone the role and the location one line each, as wide as
-   the wordmark (spread, or one scaled down), set
-   close. */
-@media (max-width: 39.99rem) and (orientation: portrait) {
-  .cover-float-title,
-  .cover-float-where {
-    line-height: 1.3;
-  }
-}
-.cover-float-ctas {
-  zoom: var(--m-buttons);
-  /* Never under nine tenths of their size, however far a short wide
-     window shrinks the middle. The type and padding grow rather than
-     a zoom, which the liquid fill under them does not measure. */
-  --cta-k: max(1, calc(0.9 / var(--mid, 1)));
-}
-/* The location one line, centred, from a tablet up. */
-@media (min-width: 40rem) {
-  .cover-float-where {
-    max-width: none;
-    white-space: nowrap;
-    text-align: center;
-  }
-  .cover-float-where .fit-line {
-    display: inline-block;
-  }
-}
-/* Julian (iPad upright): the location set closer under the role. Its
-   size follows the role's length. */
-@media (min-width: 40rem) and (max-width: 79.99rem) and (orientation: portrait) {
-  .cover-float-title,
-  .cover-float-where {
-    line-height: 1.2;
-  }
-  .cover-float-where {
-    margin-top: 2px;
-  }
 }
 .cover-cta {
   display: inline-block;
@@ -199,109 +60,16 @@
   outline-width: calc(2px / (var(--m-buttons, 1) * var(--mid, 1)));
   outline-offset: calc(3px / (var(--m-buttons, 1) * var(--mid, 1)));
 }
-/* Pointing at a frame: it swells a little, over the ones round it, and
-   the line under the name trades the job title for that frame's
-   discipline. The words share one grid cell, so the
-   line keeps its height whichever is showing; the old word drops out of
-   the slot as the new one rises into it. */
-@media (hover: hover) and (pointer: fine) {
-  /* Julian: a beat before it answers, and the one pointed at comes into
-     focus. It waits `--focus-wait` going in, so a pointer crossing the
-     ring on its way somewhere does not set off every frame it passes,
-     and lets go at once coming out. In focus: forward toward the viewer,
-     a little larger, sharp; the rest soften behind it,
-     the way a lens racks focus. */
-  /* Letting go waits `--release-wait`, so a pointer crossing the gap
-     from one frame to the next keeps the room racked instead of the
-     others sharpening for a moment and blurring again. */
-  /* Julian: an ease on it. The one pointed at glides forward and back
-     on a soft ease in and out rather than snapping to its place. */
-  :where(:root[data-hover]) .cover-float-frame:hover {
-    z-index: 1;
-  }
-  /* Julian: on a photograph's hover, the navbar and the floor a little
-     clearer: their tint comes down from 34% to 22%, and (Julian: lower
-     blur when a photo is in hover) their blur from 9px to 4px, easing on
-     each one's own transitions.
-     Flagged on the glass by `CoverCard`: as
-     `:root:has(.cover-float-frame:hover)` Chrome restyled every element
-     of the page on each hover in and out, 20 to 30ms a time. */
-  :is(.strip-rail, .head-glass)[data-photo-hover] {
-    --glass-tint: 22%;
-    --glass-blur: 4px;
-  }
-  :where(:root[data-hover]) .cover-float-ring:has(.cover-float-frame:hover) .cover-float-card {
-    /* Julian: less blur round the one in focus, and glass over the rest
-       instead (the pane below). No darkening. */
-    filter: blur(calc(var(--h-others-blur, 0.3px) * var(--os)));
-    transition-delay: var(--blur-wait);
-  }
-  :where(:root[data-hover]) .cover-float-ring:has(.cover-float-frame:hover) .cover-float-card::after {
-    opacity: var(--h-glass, 0.25);
-    transition-delay: var(--blur-wait);
-  }
-  :where(:root[data-hover]) .cover-float-ring .cover-float-frame:hover .cover-float-card::after {
-    opacity: 0;
-    transition-delay: 0ms;
-  }
-  :where(:root[data-hover]) .cover-float-ring .cover-float-frame:hover .cover-float-card {
-    /* Julian: some cards did not cover on hover. The lift was from the
-       card's own depth, so one set far back stayed behind a neighbour
-       further forward; in 3D, depth and not z-index decides. Now it comes
-       out in front of the frontmost photograph as well (`--zmax`, by
-       layout). */
-    transform: translateZ(
-      calc(max(var(--fz, 0px), var(--zmax, 0px)) + var(--h-lift, 21px))
-    );
-    /* Julian: and toward the middle. `--mid-x` and `--mid-y` are the way
-       to the cover's centre, measured as the pointer lands (`CoverCard`);
-       the panel's Toward Middle is the share of it taken. The frame stays
-       put, so the pointer never loses it as the picture moves. */
-    translate: calc(var(--mid-x, 0px) * var(--h-mid, 0.06))
-      calc(var(--mid-y, 0px) * var(--h-mid, 0.06));
-    filter: blur(0px);
-    transition-delay: var(--focus-wait);
-  }
-}
 @media (prefers-reduced-motion: reduce) {
   .lift {
     animation: none;
   }
 }
 
-@custom-variant squat (
-  @media (min-width: 64rem) and (min-aspect-ratio: 9 / 10) and
-    (max-aspect-ratio: 5 / 4)
-);
-
-/* Julian: on a phone and an iPad the photographs sink and fall back as
-   the page scrolls, the near ones furthest, and fade by half a screen;
-   the words drift slower (`CoverSpace` names the timeline, the scroller
-   that moves the cover, and sets each layer's `--par-*` once). Driven by
-   the scroll itself, not a scroll listener: iOS sends those late while a
-   finger is down, and the layers trailed the page and snapped (#139,
-   Julian's recording). No parallax where scroll timelines are missing. */
-@keyframes jg-par {
-  to {
-    translate: var(--par-x, 0px) var(--par-y, 0px) var(--par-z, 0px);
-  }
-}
-@keyframes jg-par-fade {
-  to {
-    opacity: 0;
-  }
-}
-
 /* The walls and a project's frames are hidden until they come in
    (`lib/gather.ts`); `data-moves` is not set under reduced motion. */
-:root[data-moves] .drift-wall:not([data-gathered]) .drift-wall__inner,
-:root[data-moves] .gather-strip:not([data-gathered]) .strip-cell {
+:root[data-moves] .drift-wall:not([data-gathered]) .drift-wall__inner {
   visibility: hidden;
-}
-/* A project's frames slide in instead of rising (`jg-fade-up`,
-   `strip-motion.css`): with both, a phone saw the rise (QA, iOS 27). */
-:root[data-moves] .gather-strip .strip-cell {
-  animation: none;
 }
 /* And a wall shows at once rather than fading up over its tiles' entrance. */
 :root[data-moves] .drift-wall {
