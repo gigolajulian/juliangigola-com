@@ -301,7 +301,7 @@ export function TermsColumn() {
         <p>
           I license my work and I take commissions. If you want to use a
           photograph, or want photographs made, write to {EMAIL} or use the{" "}
-          <Link href="/contact" className="underline underline-offset-4">
+          <Link href="/contact/form" className="underline underline-offset-4">
             contact page
           </Link>
           .
