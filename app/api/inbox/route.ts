@@ -13,14 +13,12 @@ import { notionPaper, notionStage } from "@/lib/leads/notion-lead";
 import { importStripe } from "@/lib/leads/stripe-import";
 import { STRIPE_UNSET } from "@/lib/stripe";
 import { cleanPeople, cleanTemplates, manualLead, merge, stats, type NewLead } from "@/lib/leads/lead-crm";
-import { balance, cleanFrom, cleanInvoice, invoiceNo, mmyy, PHOTO_KEY, usd, type InvoiceFrom } from "@/lib/leads/invoice";
+import { balance, cleanFrom, cleanInvoice, FROM_KEY, invoiceNo, mmyy, PHOTO_KEY, usd, type InvoiceFrom } from "@/lib/leads/invoice";
 import { bodyOf, json, NO_STORE } from "@/lib/http";
 import { parseOr } from "@/lib/json";
 
 /** Where his reply templates live: not personal data, so plain JSON. */
 const TEMPLATES_KEY = "leads:templates";
-/** His name, address and EIN for invoices, sealed: the repo is public, so they live here and nowhere in the code. */
-const FROM_KEY = "leads:invoice-from";
 /** How many invoices carry a month's number (`invoices:1126`), so the next is 1126-2. */
 const countKey = (date: string) => `invoices:${mmyy(date)}`;
 const taken = async (inbox: NonNullable<CloudflareEnv["INBOX"]>, date: string) => Number((await inbox.get(countKey(date))) ?? 0) || 0;

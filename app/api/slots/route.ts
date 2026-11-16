@@ -1,7 +1,7 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { liveHours } from "@/lib/booking/booking-engine";
 import { EVENTS } from "@/lib/booking/booking-rules";
-import { localIso, openStarts } from "@/lib/booking/slots";
+import { localIso, openStarts, type SlotsAnswer } from "@/lib/booking/slots";
 import { TZ } from "@/lib/booking/booking-rules";
 import { json } from "@/lib/http";
 
@@ -44,7 +44,7 @@ export async function GET(request: Request) {
     console.error("slots", String(e));
     return json({ error: "Could not reach the calendar." }, 502);
   }
-  const data: { [day: string]: { start: string; end: string }[] } = {};
+  const data: SlotsAnswer["data"] = {};
   for (const s of starts) {
     const at = localIso(s, tz);
     const day = at.slice(0, 10);
@@ -60,5 +60,5 @@ export async function GET(request: Request) {
       locations: [{ type: rule.call ? "integration" : "attendeeDefined" }],
     },
     data,
-  });
+  } satisfies SlotsAnswer);
 }

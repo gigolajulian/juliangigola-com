@@ -8,7 +8,7 @@ vi.mock("@/components/booking/time-picker", () => ({ TimePicker: () => <p>picker
 afterEach(() => vi.unstubAllGlobals());
 
 const inDays = (n: number) => new Date(Date.now() + n * 864e5).toISOString();
-const booking: Managed = { id: "b1", slug: "portraits", session: "Portraits", start: inDays(5), end: inDays(5), paid: true, cancelled: false };
+const booking: Managed = { id: "b1", slug: "portraits", session: "Portraits", start: inDays(5), end: inDays(5), firstStart: undefined, where: undefined, moves: 0, fee: undefined, paid: true, deposit: undefined, cancelled: false };
 
 describe("ManageBooking", () => {
   it("cancels with the refund spelled out first", async () => {
