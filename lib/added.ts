@@ -1,11 +1,10 @@
 /**
  * Projects added through `/admin`, rather than harvested from the old site.
  *
- * They live in their own file for one reason: `lib/work-data.ts` is generated,
- * and `scripts/harvest.mjs` overwrites it wholesale. A project written there
- * by hand — or by the editor — survives exactly until the next harvest, and
- * then disappears without anything failing. This file is never touched by the
- * harvester, and `lib/work.ts` merges the two.
+ * They live in their own file because `/admin` writes JSON through the GitHub
+ * API, not TypeScript: `lib/work-data.ts` is the archive the retired harvester
+ * (`scripts/harvest.mjs`) wrote, now edited by hand only, and `lib/work.ts`
+ * merges the two.
  *
  * The frames are real files under `public/work/<slug>/`, committed alongside
  * this manifest in the same commit. The editor resizes and re-encodes them in
@@ -261,8 +260,7 @@ export type AddedFile = {
    *
    * A map rather than a field on the project, because it has to work for the
    * 74 harvested projects too — their categories live in `lib/work-data.ts`,
-   * which the harvester regenerates, so an edit there would last exactly
-   * until the next run. Keyed by slug, valued by category slug; applied in
+   * which `/admin` does not write. Keyed by slug, valued by category slug; applied in
    * `lib/work.ts` after both sources are merged.
    */
   categories: Record<string, string>;
@@ -285,8 +283,8 @@ export type AddedFile = {
    * Projects whose credits have been edited by hand.
    *
    * A map for the same reason `categories` and `frames` are maps: the 74
-   * harvested projects keep their credits in the generated manifest, where
-   * `scripts/harvest.mjs` would overwrite an edit on the next run. The value
+   * harvested projects keep their credits in `lib/work-data.ts`, which `/admin`
+   * does not write. The value
    * replaces the list outright rather than merging into it — a crew changes
    * by losing people as well as gaining them, and a merge could not express
    * a removal.

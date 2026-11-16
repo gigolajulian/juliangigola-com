@@ -137,6 +137,7 @@ export async function sign(c: Contract, by: { name: unknown; email: unknown; agr
 
 type Seal = { seal(v: unknown): Promise<string>; open<T>(s: string): Promise<T> };
 
+/** One contract, opened. Null for a malformed id, a missing record, and also one that cannot be opened (a rotated LEADS_KEY), unlike `readLead`, which throws. */
 export async function readContract(kv: KV, s: Seal, id: string): Promise<Contract | null> {
   if (!isContractId(id)) return null;
   const raw = await kv.get(contractKey(id));
