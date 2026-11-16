@@ -1,4 +1,4 @@
-import { bookOwn, cancelOwn, dueReminders, findBooking, markReminded, readHours, rescheduleOwn, writeHours, type BookInput, type Store } from "../lib/booking/booking-engine";
+import { bookOwn, cancelOwn, dueHeadsUp, dueReminders, findBooking, markHeadsUp, markReminded, readHours, rescheduleOwn, writeHours, type BookInput, type Store } from "../lib/booking/booking-engine";
 import type { Hours } from "../lib/booking/booking-rules";
 
 /* ── the booking lock: one Durable Object for hello@'s calendar ─────
@@ -36,6 +36,8 @@ export class BookingLock {
       }
       if (op === "due") return Response.json({ records: await dueReminders(store) });
       if (op === "reminded") return Response.json({ ok: await markReminded(store, String(arg)) ?? true });
+      if (op === "dueHeads") return Response.json({ records: await dueHeadsUp(store) });
+      if (op === "headed") return Response.json({ ok: await markHeadsUp(store, String(arg)) ?? true });
       if (op === "hours") return Response.json({ hours: await readHours(store) });
       // Checked by the route (`cleanHours`); queued so no booking reads half of it.
       if (op === "setHours") return Response.json({ hours: await this.serial(async () => (await writeHours(store, arg as Hours), arg)) });

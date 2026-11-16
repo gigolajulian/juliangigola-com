@@ -3,6 +3,7 @@ import { FakeEmail, FakeKV, FakeStore, fakeLock, LEADS_KEY, leadOf } from "./fak
 import { forgetToken } from "@/lib/booking/gcal";
 import { bookingToken, manageLinks, tokenOpens } from "@/lib/booking/booking-token";
 import { BookingLock } from "@/worker/booking-lock";
+import { findBooking, saveBooking } from "@/lib/booking/booking-engine";
 
 // Pinned clock: weekday hours, DST and the 48h refund window must not depend on the day the suite runs.
 vi.useFakeTimers({ toFake: ["Date"] });
@@ -31,8 +32,10 @@ const wednesday = (days: number) => {
 const plus = (iso: string, hours: number) => new Date(Date.parse(iso) + hours * 36e5).toISOString();
 
 let busy: { start: string; end: string; id: string }[];
-let calls: { method: string; url: string; body?: { start: { dateTime: string }; end: { dateTime: string } } }[];
+let calls: { method: string; url: string; form?: string; body?: { start: { dateTime: string }; end: { dateTime: string } } }[];
 let refundOk: boolean;
+let store: FakeStore;
+const KEY = "inbox-key-for-tests";
 let client: FakeEmail;
 let mail: FakeEmail;
 
@@ -41,12 +44,14 @@ beforeEach(() => {
   busy = [];
   calls = [];
   refundOk = true;
+  store = new FakeStore();
   client = new FakeEmail();
   mail = new FakeEmail();
   ctx.env = {
     GCAL_OAUTH: OAUTH,
     BOOKING_SECRET: SECRET,
-    BOOKING_LOCK: fakeLock(new BookingLock({ storage: new FakeStore() }, { GCAL_OAUTH: OAUTH })),
+    BOOKING_LOCK: fakeLock(new BookingLock({ storage: store }, { GCAL_OAUTH: OAUTH })),
+    INBOX_KEY: KEY,
     INBOX: new FakeKV(),
     LEADS_KEY,
     CLIENT_EMAIL: client,
@@ -58,7 +63,7 @@ beforeEach(() => {
     if (url.includes("oauth2")) return Response.json({ access_token: "t", expires_in: 3600 });
     const method = init?.method ?? "GET";
     const body = init?.body && !url.startsWith("https://api.stripe.com") ? JSON.parse(String(init.body)) : undefined;
-    calls.push({ method, url, body });
+    calls.push({ method, url, body, form: url.startsWith("https://api.stripe.com") ? String(init?.body ?? "") : undefined });
     if (url.includes("/events?q=")) return Response.json({ items: [] });
     if (url.includes("/freeBusy")) return Response.json({ calendars: { primary: { busy } } });
     const ev = /\/events\/([^?]+)/.exec(url)?.[1];
@@ -88,8 +93,8 @@ async function paid(start: string) {
   const link = String(client.sent.at(-1)!.text).match(/\/booking\/(\w+)\?t=([\w.-]+)&do=cancel/)!;
   return { id: link[1], t: link[2] };
 }
-const post = (id: string, body: unknown) =>
-  change(new Request(`https://juliangigola.com/api/booking/${id}`, { method: "POST", body: JSON.stringify(body) }), { params: Promise.resolve({ id }) });
+const post = (id: string, body: unknown, key?: string) =>
+  change(new Request(`https://juliangigola.com/api/booking/${id}`, { method: "POST", body: JSON.stringify(body), headers: key ? { "x-inbox-key": key } : {} }), { params: Promise.resolve({ id }) });
 
 describe("the link", () => {
   it("opens its own booking until a day after it, and nothing else", async () => {
@@ -114,13 +119,15 @@ describe("the link", () => {
 });
 
 describe("cancel", () => {
-  it("48 hours or more ahead: off the calendar, deposit refunded, both told", async () => {
+  it("48 hours or more ahead: off the calendar, 90% refunded, 10% kept as the fee, both told", async () => {
     const { id, t } = await paid(wednesday(7));
     const res = await post(id, { t, action: "cancel" });
     expect(res.status).toBe(200);
     expect(await res.json()).toMatchObject({ refunded: true, record: { cancelled: true, paid: true } });
     expect(calls.some((c) => c.method === "DELETE" && c.url.includes("sendUpdates=none"))).toBe(true);
     expect(calls.filter((c) => c.url.endsWith("/refunds"))).toHaveLength(1);
+    expect(calls.find((c) => c.url.endsWith("/refunds"))!.form).toContain("amount=22500");
+    expect(String(client.sent.at(-1)!.text)).toContain("$225 of your $250 deposit is refunded to your card. $25 is kept as the booking fee.");
     expect(mail.sent.at(-1)!.subject).toMatch(/^Cancelled: /);
     expect(String(client.sent.at(-1)!.text)).toContain("refunded to your card");
     // A second click does nothing more.
@@ -128,27 +135,76 @@ describe("cancel", () => {
     expect(calls.filter((c) => c.url.endsWith("/refunds"))).toHaveLength(1);
   });
 
-  it("under 48 hours: cancelled, deposit kept", async () => {
+  it("under 48 hours but 24 or more: cancelled, 70% refunded, 30% kept, both told the figure", async () => {
     const start = wednesday(7);
     const { id, t } = await paid(start);
     vi.useFakeTimers({ toFake: ["Date"] });
     vi.setSystemTime(Date.parse(start) - 47 * 36e5);
     const res = await post(id, { t, action: "cancel" });
     vi.setSystemTime(PIN);
-    expect(await res.json()).toMatchObject({ refunded: null, record: { cancelled: true } });
+    expect(await res.json()).toMatchObject({ refunded: true, back: 175, record: { cancelled: true } });
+    const refunds = calls.filter((c) => c.url.endsWith("/refunds"));
+    expect(refunds).toHaveLength(1);
+    expect(refunds[0].form).toContain("amount=17500");
+    expect(String(client.sent.at(-1)!.text)).toContain("$175 of your $250 deposit is refunded");
+    expect(String(mail.sent.at(-1)!.text)).toContain("Refunded $175 of the $250 deposit");
+  });
+
+  it("at exactly 24 hours: still 70%", async () => {
+    const start = wednesday(7);
+    const { id, t } = await paid(start);
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(Date.parse(start) - 24 * 36e5);
+    const res = await post(id, { t, action: "cancel" });
+    vi.setSystemTime(PIN);
+    expect(await res.json()).toMatchObject({ refunded: true, back: 175 });
+  });
+
+  it("under 24 hours: cancelled, deposit kept", async () => {
+    const start = wednesday(7);
+    const { id, t } = await paid(start);
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(Date.parse(start) - 23 * 36e5);
+    const res = await post(id, { t, action: "cancel" });
+    vi.setSystemTime(PIN);
+    expect(await res.json()).toMatchObject({ refunded: null, back: 0, record: { cancelled: true } });
     expect(calls.some((c) => c.url.endsWith("/refunds"))).toBe(false);
     expect(String(client.sent.at(-1)!.text)).toContain("not refunded");
+  });
+
+  it("names the figure to refund by hand when a 70% refund fails", async () => {
+    const start = wednesday(7);
+    const { id, t } = await paid(start);
+    refundOk = false;
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(Date.parse(start) - 30 * 36e5);
+    const res = await post(id, { t, action: "cancel" });
+    vi.setSystemTime(PIN);
+    expect(await res.json()).toMatchObject({ refunded: false, back: 0 });
+    expect(String(mail.sent.at(-1)!.text)).toContain("refund $175 by hand");
+  });
+
+  it("a booking made before the fee was sold a full refund, and still gets it", async () => {
+    const { id, t } = await paid(wednesday(7));
+    const r = (await findBooking(store, id))!;
+    delete r.fee;
+    await saveBooking(store, r);
+    const res = await post(id, { t, action: "cancel" });
+    expect(await res.json()).toMatchObject({ refunded: true, back: 250 });
+    expect(calls.find((c) => c.url.endsWith("/refunds"))!.form).not.toContain("amount");
+    expect(String(client.sent.at(-1)!.text)).toContain("Your $250 deposit is refunded to your card.");
   });
 
   it("judges the refund by the time first booked: moved out, then cancelled, keeps the deposit", async () => {
     const start = wednesday(7);
     const { id, t } = await paid(start);
     vi.useFakeTimers({ toFake: ["Date"] });
-    vi.setSystemTime(Date.parse(start) - 24 * 36e5);
+    vi.setSystemTime(Date.parse(start) - 30 * 36e5);
     expect((await post(id, { t, action: "reschedule", start: plus(start, 7 * 24) })).status).toBe(200);
     // The move says so: to the client and to hello@.
-    expect(String(client.sent.at(-1)!.text)).toContain("no longer refundable");
-    expect(String(mail.sent.at(-1)!.text)).toContain("no longer refundable");
+    expect(String(client.sent.at(-1)!.text)).toContain("now refunds 70%");
+    expect(String(mail.sent.at(-1)!.text)).toContain("now refunds 70%");
+    vi.setSystemTime(Date.parse(start) - 23 * 36e5);
     const res = await post(id, { t, action: "cancel" });
     vi.setSystemTime(PIN);
     expect(await res.json()).toMatchObject({ refunded: null, record: { cancelled: true, firstStart: start } });
@@ -160,7 +216,7 @@ describe("cancel", () => {
     const { id, t } = await paid(wednesday(7));
     refundOk = false;
     expect(await (await post(id, { t, action: "cancel" })).json()).toMatchObject({ refunded: false });
-    expect(String(mail.sent.at(-1)!.text)).toContain("refund it by hand");
+    expect(String(mail.sent.at(-1)!.text)).toContain("refund $225 by hand");
   });
 
   it("still cancels when the event was deleted from the calendar by hand", async () => {
@@ -209,7 +265,32 @@ describe("reschedule", () => {
     expect(mail.sent.at(-1)!.subject).toMatch(/^Rescheduled: /);
     expect(client.sent).toHaveLength(2);
     // Moved a week ahead of the first date: still refundable, by the first date.
-    expect(String(client.sent[1].text)).toContain("before the time you first booked");
+    expect(String(client.sent[1].text)).toContain("judged by the time you first booked");
+  });
+
+  it("moves twice, then refuses a third move and still lets it be cancelled", async () => {
+    const start = wednesday(7);
+    const { id, t } = await paid(start);
+    expect((await post(id, { t, action: "reschedule", start: plus(start, 2) })).status).toBe(200);
+    const second = await post(id, { t, action: "reschedule", start: plus(start, 4) });
+    expect((await second.json()).record).toMatchObject({ moves: 2 });
+    const third = await post(id, { t, action: "reschedule", start: plus(start, 6) });
+    expect(third.status).toBe(403);
+    expect((await third.json()).error).toContain("moved twice");
+    expect((await post(id, { t, action: "cancel" })).status).toBe(200);
+  });
+
+  it("refuses a move inside the last 24 hours, and still lets it be cancelled", async () => {
+    const start = wednesday(7);
+    const { id, t } = await paid(start);
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(Date.parse(start) - 23 * 36e5);
+    const res = await post(id, { t, action: "reschedule", start: plus(start, 7 * 24) });
+    const cancelled = await post(id, { t, action: "cancel" });
+    vi.setSystemTime(PIN);
+    expect(res.status).toBe(403);
+    expect((await res.json()).error).toContain("under 24 hours");
+    expect(cancelled.status).toBe(200);
   });
 
   it("is not blocked by its own old time, only by another booking", async () => {
@@ -219,5 +300,57 @@ describe("reschedule", () => {
     expect((await post(id, { t, action: "reschedule", start: plus(start, 3) })).status).toBe(409);
     // One hour on: its own 10 to 11 plus buffer would be in the way if it were not its own.
     expect((await post(id, { t, action: "reschedule", start: plus(start, 1) })).status).toBe(200);
+  });
+});
+
+describe("the desk", () => {
+  it("is closed to the client's token and to no key at all", async () => {
+    const { id, t } = await paid(wednesday(7));
+    expect((await post(id, { t, action: "cancel-mine" })).status).toBe(401);
+    expect((await post(id, { action: "no-show" })).status).toBe(401);
+    expect(calls.some((c) => c.url.endsWith("/refunds"))).toBe(false);
+  });
+
+  it("Julian cancels: off the calendar, the whole deposit back even inside 24 hours, the client and hello@ told, the lead logged once", async () => {
+    const start = wednesday(7);
+    const { id } = await paid(start);
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(Date.parse(start) - 3 * 36e5);
+    const res = await post(id, { action: "cancel-mine" }, KEY);
+    vi.setSystemTime(PIN);
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ refunded: true, back: 250, record: { cancelled: true } });
+    const refunds = calls.filter((c) => c.url.endsWith("/refunds"));
+    expect(refunds).toHaveLength(1);
+    expect(refunds[0].form).not.toContain("amount");
+    expect(calls.some((c) => c.method === "DELETE" && c.url.includes("sendUpdates=none"))).toBe(true);
+    expect(String(client.sent.at(-1)!.text)).toContain("I had to cancel this one");
+    expect(String(client.sent.at(-1)!.text)).toContain("Your $250 deposit is refunded in full to your card.");
+    expect(mail.sent.at(-1)!.subject).toMatch(/^Cancelled by you: /);
+    expect(String(mail.sent.at(-1)!.text)).toContain("Deposit refunded in full: $250.");
+    const events = (await leadOf(ctx.env.INBOX as FakeKV, "qa@example.com"))!.events;
+    expect(events.filter((e) => e.kind === "refund").map((e) => [e.ref, e.amount])).toEqual([["refund-pi_TEST1234567890", 250]]);
+    expect(events.some((e) => e.kind === "cancel" && String(e.note).endsWith("by Julian"))).toBe(true);
+    // A second click does nothing more.
+    expect((await post(id, { action: "cancel-mine" }, KEY)).status).toBe(409);
+    expect(calls.filter((c) => c.url.endsWith("/refunds"))).toHaveLength(1);
+  });
+
+  it("a no-show: only after the start, a line on the lead, a mail to hello@, nothing refunded, the client not mailed, once", async () => {
+    const start = wednesday(7);
+    const { id } = await paid(start);
+    expect((await post(id, { action: "no-show" }, KEY)).status).toBe(409);
+    const before = client.sent.length;
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(Date.parse(start) + 2 * 36e5);
+    const res = await post(id, { action: "no-show" }, KEY);
+    await post(id, { action: "no-show" }, KEY);
+    vi.setSystemTime(PIN);
+    expect(res.status).toBe(200);
+    expect(calls.some((c) => c.url.endsWith("/refunds"))).toBe(false);
+    expect(client.sent).toHaveLength(before);
+    expect(mail.sent.some((m) => /^No-show: /.test(String(m.subject)) && String(m.text).includes("The $250 deposit is kept."))).toBe(true);
+    const lead = (await leadOf(ctx.env.INBOX as FakeKV, "qa@example.com"))!;
+    expect(lead.events.filter((e) => e.kind === "no-show")).toHaveLength(1);
   });
 });

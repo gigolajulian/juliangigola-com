@@ -46,8 +46,8 @@ import { canonical } from "@/lib/leads/lead-crypto";
 import { isLate, NUDGES, PAPER, quoteNudge, REMIND_MAX, STAGES, trashDaysLeft, type Lead, type LeadPatch, type LeadSummary, type Stage } from "@/lib/leads/leads";
 import { fill, mailable, TEMPLATES, type Template } from "@/lib/leads/lead-crm";
 import { leadKey, typingIn } from "@/lib/leads/lead-keys";
-import { balance, DEPOSIT, subtotal, usd } from "@/lib/leads/invoice";
-import { ago, at, authed, type Call, DAY, day, errorText, nextStep, now, renew, snoozed } from "@/lib/leads/lead-desk";
+import { balance, depositOfLead, subtotal, usd } from "@/lib/leads/invoice";
+import { adminCall, ago, at, authed, type Call, DAY, day, errorText, nextStep, now, renew, snoozed } from "@/lib/leads/lead-desk";
 import { compose, frostBar, ios, kindOf, line, mailto } from "@/components/leads/shared";
 import { People } from "@/components/leads/people";
 import { Galleries } from "@/components/leads/galleries";
@@ -206,6 +206,19 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
     { label: "Pick a date", onClick: () => setEditing("snooze") },
     ...(snoozed(l) ? [{ type: "divider" as const }, { label: "Unsnooze", onClick: () => run(patch({ snoozeUntil: "" }), "Unsnoozed.") }] : []),
   ];
+  // The booking the site made for them (`ref` = its id), while it stands: cancel it before it starts, or mark a no-show after.
+  // shortcut: the latest booking only; a lead with two live bookings needs a picker here.
+  const bookedEvent = l.when ? [...(full?.events ?? [])].reverse().find((e) => (e.kind === "booking" || e.kind === "call") && e.ref) : undefined;
+  const booked = bookedEvent?.ref;
+  const which = `${bookedEvent?.note ?? "the booking"} on ${l.when ? at(l.when) : ""}`;
+  const ahead = !!l.when && Date.parse(l.when) > now();
+  const desk = (action: "cancel-mine" | "no-show", ok: string) => run(adminCall(`/api/booking/${booked}`, { method: "POST", body: JSON.stringify({ action }) }).then(reload), ok);
+  const cancelMine = () => {
+    if (window.confirm(`Cancel ${which}? The event leaves the calendar, the deposit is refunded in full through Stripe, and ${first} is emailed.`)) desk("cancel-mine", "Cancelled and refunded.");
+  };
+  const noShow = () => {
+    if (window.confirm(`Mark ${which} as a no-show? It is logged here and mailed to hello@. Nothing is refunded and ${first} is not emailed.`)) desk("no-show", "Marked a no-show.");
+  };
   const more = (
     <MoreMenu
       size="sm"
@@ -215,6 +228,7 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
         ...(l.trashedAt ? [] : [{ label: l.archivedAt ? "Unarchive" : "Archive", onClick: archive }]),
         { label: "Mark unread", onClick: () => patch({ seen: false }).then(onBack, (e: unknown) => setNote(errorText(e))) },
         ...(others.length ? [{ label: "Merge with another record", onClick: () => setEditing("merge") }] : []),
+        ...(booked ? [ahead ? { label: "Cancel and refund in full", onClick: cancelMine } : { label: "Mark as no-show", onClick: noShow }] : []),
         ...(full?.notion ? [{ label: "Open in Notion", href: `https://www.notion.so/${full.notion.replace(/-/g, "")}`, ...NEW_TAB }] : []),
         { type: "divider" as const },
         { label: l.trashedAt ? "Recover" : "Move to trash", variant: (l.trashedAt ? "default" : "destructive") as "default" | "destructive", onClick: () => run(patch({ trash: !l.trashedAt }), l.trashedAt ? "Recovered." : "In the trash.") },
@@ -269,7 +283,7 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
   // Julian (2026-11-11): one invoice total per client, lines as needed. Once invoiced, the balance is what the open invoices still owe.
   const invoices = full?.invoices ?? [];
   const invoiced = invoices.length ? subtotal(invoices.flatMap((v) => v.lines)) : undefined;
-  const owed = invoices.length ? invoices.filter((v) => !isPaid(v)).reduce((n, v) => n + balance(v), 0) : full?.quote !== undefined ? full.quote - (full.deposit ? DEPOSIT : 0) : undefined;
+  const owed = invoices.length ? invoices.filter((v) => !isPaid(v)).reduce((n, v) => n + balance(v), 0) : full?.quote !== undefined ? full.quote - (full.deposit ? depositOfLead(full) : 0) : undefined;
   const paidAt = full?.deposit ? full.events.find((e) => e.kind === "booking")?.at : undefined;
 
   const [contactOpen, setContactOpen] = React.useState(false);
@@ -372,7 +386,7 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
                 <MetadataList>
                   <MetadataListItem label="Quote">{full?.quote !== undefined ? <Text type="code">{usd(full.quote)}</Text> : <Text color="secondary">None yet</Text>}</MetadataListItem>
                   <MetadataListItem label="Deposit">
-                    {full?.deposit ? <HStack gap={2} vAlign="center"><StackItem size="fill"><Text type="code">{usd(DEPOSIT)} paid{paidAt ? `, ${day(paidAt)}` : ""}</Text></StackItem><Button label="Stripe" variant="ghost" size="sm" href={full.deposit} target="_blank" rel="noreferrer" /></HStack> : <Text color="secondary">None</Text>}
+                    {full?.deposit ? <HStack gap={2} vAlign="center"><StackItem size="fill"><Text type="code">{usd(depositOfLead(full))} paid{paidAt ? `, ${day(paidAt)}` : ""}</Text></StackItem><Button label="Stripe" variant="ghost" size="sm" href={full.deposit} target="_blank" rel="noreferrer" /></HStack> : <Text color="secondary">None</Text>}
                   </MetadataListItem>
                   {invoiced !== undefined ? <MetadataListItem label="Invoiced"><Text type="code">{usd(invoiced)}</Text></MetadataListItem> : null}
                   {owed !== undefined ? <MetadataListItem label="Balance"><Text type="code" weight="bold" color="accent">{usd(owed)}</Text></MetadataListItem> : null}
