@@ -16,6 +16,8 @@ export function CampusSpots({ off, spots }: { off: React.ReactNode; spots: HeldS
   const [cur, setCur] = React.useState(0);
   React.useEffect(() => {
     if (!on) return;
+    // A link to #spots was followed on the live rows, before this taller list took their place: land on its first row again.
+    if (location.hash === "#spots") document.getElementById("spots")?.scrollIntoView({ behavior: "instant" });
     // The row crossing the middle of the screen. Between rows or past the list, the last one stays.
     const io = new IntersectionObserver(
       (es) => es.forEach((e) => e.isIntersecting && setCur(Number((e.target as HTMLElement).dataset.i))),
