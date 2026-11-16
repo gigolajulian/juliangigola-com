@@ -107,7 +107,7 @@
 
 /* The hand-over, desktop: the page's last block sinks, scales to .95 and dims to .4 from its bottom edge
    while the footer slides over it (the About into footer numbers of mt/motion/flow.css). v4-foot.tsx puts
-   the attribute on only while the footer is arriving. Phones scroll naturally; reduced motion gets no transform. */
+   the attribute on only while the footer is arriving. On a grid it goes on the tiles of the last screen, each from its own bottom edge, not on the block. Phones scroll naturally; reduced motion gets no transform. */
 @media (min-width:1024px) and (min-height:600px) and (prefers-reduced-motion:no-preference){
   html[data-v4pages~="foot"] [data-v4-sink]{transform:translate3d(0,calc(var(--out,0) * 22svh),0) scale(calc(1 - var(--out,0) * .05));transform-origin:50% 100%;opacity:calc(1 - var(--out,0) * .6)}
 }
