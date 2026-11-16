@@ -411,6 +411,16 @@ export const avatarFor = (
  * manifest into the browser to look up one path. This runs where the
  * archive is free to read, and a credit arrives knowing who it is.
  */
+/** Julian's own photo credit goes last, after the crew (Julian, 2026-10-21 and 2026-11-15). */
+const MINE = /^photo(grapher|graphy)?$/i;
+const ownLast = (project: Project): Project => ({
+  ...project,
+  credits: [
+    ...project.credits.filter((c) => !MINE.test(c.role.trim())),
+    ...project.credits.filter((c) => MINE.test(c.role.trim())),
+  ],
+});
+
 const withFaces = (project: Project): Project => ({
   ...project,
   credits: project.credits.map((c) => {
@@ -504,7 +514,7 @@ export const ALL_PROJECTS: Project[] = [
   ),
 ]
   .map((p) =>
-    withBts(withFaces(withAlt(relabel(reframe(recopy(recredit(refile(reslug(p))))))))),
+    withBts(withFaces(ownLast(withAlt(relabel(reframe(recopy(recredit(refile(reslug(p)))))))))),
   )
   .sort(byRunningOrder);
 
