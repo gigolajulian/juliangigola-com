@@ -35,19 +35,8 @@ const ink = (n: Node) => {
    ground under them, the name leaves to the left as the hero ends, and the header's ground comes in there. The bar's
    wordmark waits until the big name has gone (2026-11-16: "never together"; the header trial does that). */
 const LEFT = typeof location !== "undefined" && /[?&]mtdock=left/.test(location.search);
-/* With no ground over the hero the nav words sit on the wall (they flip white or black, nav-ink.ts: the flag turns
-   ?navfx on in layout.tsx). The wall's captions would run through them, so each fades out over FADE px as it
-   comes up to the bar (Julian: "have a fade for text where the navbar sits"). */
-const FADE = 56;
-let caps: HTMLElement[] = [];
-let barH = 61;
-function fadeCaps() {
-  for (const c of caps) {
-    const o = clamp((c.getBoundingClientRect().top - barH) / FADE);
-    const v = o > 0.99 ? "" : o.toFixed(2);
-    if (c.style.opacity !== v) c.style.opacity = v;
-  }
-}
+/* With no ground over the hero the nav words sit on the wall: they flip white or black (nav-ink.ts; the flag turns
+   ?navfx on in layout.tsx), and page text fades out under the bar there (the same file's text fade). */
 
 function dockSetup(el: HTMLElement): Dock | null {
   if (LEFT) return null;
@@ -182,10 +171,6 @@ export const heroDrivers: Driver[] = [
       const hdr = document.querySelector<HTMLElement>(".site-hdr");
       const past = () => document.documentElement.toggleAttribute("data-mt-pasthero", el.getBoundingClientRect().bottom <= (hdr?.offsetHeight ?? 60));
       if (LEFT) {
-        // the button too: it rises through the bar as the hero leaves. Where the hero is not held the name block
-        // scrolls up with the page and through the bar, so it fades there as well (held: it leaves to the left).
-        caps = [...el.querySelectorAll<HTMLElement>("figcaption, .mt-more .btn" + (document.documentElement.hasAttribute("data-mt-held") ? "" : ", [data-mt-name] > *"))];
-        barH = hdr?.offsetHeight ?? 61;
         document.documentElement.setAttribute("data-mtleft", "");
         addEventListener("scroll", past, { passive: true });
         past();
@@ -211,8 +196,6 @@ export const heroDrivers: Driver[] = [
       return () => {
         removeEventListener("scroll", far);
         removeEventListener("scroll", past);
-        caps.forEach((c) => (c.style.opacity = ""));
-        caps = [];
         document.documentElement.removeAttribute("data-mtleft");
         document.documentElement.removeAttribute("data-mt-pasthero");
         [...st.cols, ...st.figs].forEach((p) => (p.el.style.transform = ""));
@@ -228,7 +211,6 @@ export const heroDrivers: Driver[] = [
       const st = states.get(el);
       if (!st) return;
       const mode = ctx.held ? "d" : ctx.vw < 600 ? "p" : "t";
-      if (false && caps.length && el.getBoundingClientRect().bottom > 0) fadeCaps();
       if (mode !== st.mode) {
         st.mode = mode;
         st.s = -1;
