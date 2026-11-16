@@ -21,7 +21,7 @@ describe("CalEmbed", () => {
     render(<CalEmbed path="juliangigola/portraits" title="Pick a time" />);
     expect(screen.getByTestId("tp").getAttribute("data-path")).toBe("juliangigola/portraits");
     expect(screen.getByRole("alert").textContent).toMatch(/Times didn.t load/);
-    expect(screen.getByRole("link", { name: "Inquire" }).getAttribute("href")).toBe("/#contact");
+    expect(screen.getByRole("link", { name: "Inquire" }).getAttribute("href")).toBe("/contact/form");
     expect(screen.getByRole("link", { name: "hello@juliangigola.com" }).getAttribute("href")).toBe("mailto:hello@juliangigola.com");
   });
 

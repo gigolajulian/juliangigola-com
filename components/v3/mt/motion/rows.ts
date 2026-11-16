@@ -162,6 +162,15 @@ function heldRow(name: string, covers: boolean): Driver {
         shiftScroll(top() + unease(i / (n - 1)) * range - scrollY);
       }, on);
 
+      // Left and right step one item, to that item's own place in the hold (the shares are uneven), and stop at the ends.
+      row.addEventListener("keydown", (e) => {
+        if (!ctx.held || (e.key !== "ArrowRight" && e.key !== "ArrowLeft")) return;
+        e.preventDefault();
+        e.stopPropagation(); // held-row.tsx's even step is for the films
+        const at = Math.max(0, cur), i = clamp(at + (e.key === "ArrowRight" ? 1 : -1), 0, n - 1);
+        if (i !== at) scrollTo({ top: top() + unease(i / (n - 1)) * range, behavior: "smooth" });
+      }, on);
+
       row.addEventListener("scroll", loose, { passive: true, signal: ac.signal });
 
       /* Hover lift (fine pointers): tilt toward the pointer, up to 9deg each way. rows.css does the rest. */

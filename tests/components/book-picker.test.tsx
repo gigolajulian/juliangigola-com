@@ -30,7 +30,7 @@ describe("BookPicker", () => {
     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("Book a session");
     expect(screen.getByRole("button", { name: /Headshots/ }).getAttribute("aria-pressed")).toBe("true");
     expect(screen.getByTestId("cal").getAttribute("data-path")).toBe("juliangigola/headshots");
-    expect(screen.getByRole("link", { name: "Inquire" }).getAttribute("href")).toBe("/#contact");
+    expect(screen.getByRole("link", { name: "Inquire" }).getAttribute("href")).toBe("/contact/form");
   });
 
   it("switches the calendar and the address on a pick", () => {
