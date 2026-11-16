@@ -62,8 +62,10 @@ async function logSent(env: Env, email: string, subject: string, booking: string
 /** Asks the site to read hello@'s new mail into leads. Logs Google's failure, never throws. */
 export async function syncMail(env: Env) {
   if (!env.SITE || !env.BOOKING_SECRET) return;
-  const res = await env.SITE.fetch("https://juliangigola.com/api/leads/gmail", { method: "POST", headers: { authorization: `Bearer ${env.BOOKING_SECRET}` } });
-  if (!res.ok) console.error("gmail sync", res.status);
+  const res = await env.SITE.fetch("https://juliangigola.com/api/leads/gmail", { method: "POST", headers: { authorization: `Bearer ${env.BOOKING_SECRET}` } }).catch(
+    (e: unknown) => (console.error("gmail sync", String(e)), null),
+  );
+  if (res && !res.ok) console.error("gmail sync", res.status);
 }
 
 /** Asks the site to copy the lead desk to the Sheet; it skips when nothing changed. Never throws. */
