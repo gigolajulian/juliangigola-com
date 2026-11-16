@@ -73,7 +73,7 @@ export const CALL_CARD = { d: w("channel-orange", "01"), l: w("second-skin", "13
 export const ABOUT_PHOTO = "/about/julian-steps.jpg";
 
 /* ── sessions (master SESS; deposit list from lib/booking/paid.ts) ── */
-export type SessionSlug = "portraits" | "headshots" | "studio-digitals" | "model-test" | "graduation" | "weddings" | "consultation" | "music-photography" | "brand-photography" | "editorial" | "events";
+export type SessionSlug = "portraits" | "headshots" | "studio-digitals" | "model-test" | "graduation" | "weddings" | "consultation" | "music-photography" | "fashion-photography" | "brand-photography" | "editorial" | "events";
 export type Session = {
   slug: SessionSlug;
   name: string;
@@ -184,6 +184,16 @@ export const SESSIONS: Record<SessionSlug, Session> = {
     paid: false,
     photo: { d: w("valgur", "02"), l: w("iris", "02"), at: { d: "50% 12%", l: "50% 40%" } },
   },
+  "fashion-photography": {
+    slug: "fashion-photography",
+    name: "Fashion & Editorial",
+    blurb: "Editorials, lookbooks and campaign images, shot and art-directed as one story.",
+    from: null,
+    includes: ["Book a phone or video call", "Dates and references"],
+    cal: "juliangigola/editorial",
+    paid: false,
+    photo: { d: w("i-wanna-be-a-human", "02"), l: w("i-wanna-be-a-human", "02") },
+  },
   "brand-photography": {
     slug: "brand-photography",
     name: "Brand campaigns",
@@ -224,4 +234,4 @@ export const INDEX_ORDER: SessionSlug[] = ["portraits", "graduation", "headshots
 export const rate = (s: Session) =>
   !s.paid && s.cal ? "15 min" : s.from != null ? `From $${s.from}` : s.paid ? `$${depositFor(s.cal?.split("/")[1] ?? "")} deposit` : "On request";
 /** Session lengths in minutes (master MIN); the event's own length (`EVENTS`) wins where /api/slots answers. */
-export const LENGTH: Record<SessionSlug, number> = { portraits: 60, graduation: 90, headshots: 45, "studio-digitals": 60, "model-test": 60, weddings: 480, consultation: 15, "music-photography": 15, "brand-photography": 15, editorial: 15, events: 0 };
+export const LENGTH: Record<SessionSlug, number> = { portraits: 60, graduation: 90, headshots: 45, "studio-digitals": 60, "model-test": 60, weddings: 480, consultation: 15, "music-photography": 15, "fashion-photography": 15, "brand-photography": 15, editorial: 15, events: 0 };
