@@ -23,7 +23,8 @@ import { ContractTemplatesDesk } from "@/components/leads/contract";
 import { adminCall, authed, type Call, errorText, ymdPT } from "@/lib/leads/lead-desk";
 import type { Template } from "@/lib/leads/lead-crm";
 import type { Hours, Window } from "@/lib/booking/booking-rules";
-import type { Stage } from "@/lib/leads/leads";
+import type { Stage } from "@/lib/leads/leads";
+import { byCodeUnit } from "@/lib/utils";
 
 const PUSH_FLAG = "jg-leads-push";
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -69,7 +70,7 @@ export function HoursDesk() {
 
   if (!hours) return <Page eyebrow="WHEN PEOPLE CAN BOOK" title="Hours"><Text type="code" size="sm" color="secondary">{note || "Loading hours"}</Text></Page>;
   const edit = (h: Hours) => { setHours(h); setNote("Not saved"); };
-  const days = Object.entries(hours.days ?? {}).filter(([d]) => d >= ymdPT()).sort();
+  const days = Object.entries(hours.days ?? {}).filter(([d]) => d >= ymdPT()).sort(([a], [b]) => byCodeUnit(a, b));
   const save = async () => {
     setBusy(true);
     try { setHours(await call({ method: "PUT", body: JSON.stringify(hours) })); setNote("Saved. The booking page uses it now."); }

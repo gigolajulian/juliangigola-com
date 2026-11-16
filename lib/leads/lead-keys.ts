@@ -55,8 +55,8 @@ export function leadKey(e: Press, typing: boolean, snoozing: boolean): LeadKey |
     case "r": return { do: "reply" };
     case "s": return { do: "snooze" };
     case "e": return { do: "archive" };
+    default: return null;
   }
-  return null;
 }
 
 /** A text field, select or editable region has focus. */

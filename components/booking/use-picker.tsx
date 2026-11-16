@@ -9,6 +9,7 @@ import { JgLoad } from "@/components/splash/jg-load";
 import { TZ } from "@/lib/booking/booking-rules";
 import { mplan } from "@/lib/mplan";
 import { AHEAD, e164, fromIso, iso, KEEP, minutesOf, noop, overflowOf, recent, recentKey, forgetTimes, WHERE, type Pick, type Slot, type Step, type V3Book } from "@/components/booking/time-picker-parts";
+import { byCodeUnit } from "@/lib/utils";
 
 
 /* Goo (Julian, 2026-10-20, OKd 10-21) on the card's buttons, times and
@@ -230,7 +231,7 @@ export function usePicker({ path, title, className, fallback, v3, onPicked }: Pr
   /* First open day and time, once there are any. */
   React.useEffect(() => {
     if (state !== "ready" || !days || pick) return;
-    const date = Object.keys(days).filter((d) => days[d].length).sort()[0];
+    const date = Object.keys(days).filter((d) => days[d].length).sort(byCodeUnit)[0];
     if (!date) return;
     const s = days[date][0];
     // eslint-disable-next-line react-hooks/set-state-in-effect

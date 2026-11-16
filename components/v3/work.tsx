@@ -458,6 +458,14 @@ const viewUrl = (canvas: boolean) => {
   if (u.href !== location.href) history.replaceState(null, "", u);
 };
 
+/** Writes or clears `?d=<slug>` in place: Back from a project, or a reload, lands on the same filter. */
+const filterUrl = (slug?: string) => {
+  const u = new URL(location.href);
+  if (slug) u.searchParams.set("d", slug);
+  else u.searchParams.delete("d");
+  if (u.href !== location.href) history.replaceState(history.state, "", u);
+};
+
 export function V3Work({
   work,
   chip = {},
@@ -1128,7 +1136,10 @@ export function V3Work({
                 key={d}
                 type="button"
                 aria-pressed={d === filter}
-                onClick={() => flipped(() => setFilter(d))}
+                onClick={() => {
+                  flipped(() => setFilter(d));
+                  filterUrl(Object.keys(chip).find((k) => chip[k] === d));
+                }}
               >
                 {d}
                 {/* The count only on the chip that is on (Julian). */}

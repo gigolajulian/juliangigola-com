@@ -106,7 +106,7 @@ export const bearer = (request: Request): string | undefined =>
  * thirty-two fixed iterations of XOR, it is the same guarantee, and it runs
  * in a test under Node without a Workers shim.
  */
-export async function authorised(request: Request, expected?: string) {
+export function authorised(request: Request, expected?: string) {
   return same(request.headers.get("x-inbox-key"), expected);
 }
 

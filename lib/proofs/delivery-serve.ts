@@ -123,7 +123,7 @@ export async function zipResponse(request: Request, env: Env, id: string) {
     await w.close();
   };
   pump().catch((e) => {
-    console.error("delivery zip", g.p.token, String(e));
+    console.error("delivery zip", id, String(e)); // the id, never the gallery's access key
     out.writable.abort(e).catch(() => undefined);
   });
   const day = id.slice(0, 8);

@@ -52,7 +52,8 @@ export async function generateMetadata(
   return {
     title,
     description,
-    alternates: { canonical: `/portfolio/${project.slug}` },
+    // the weddings gallery is the same subject as /weddings, which is the page to rank (audit R1, 2026-11-16)
+    alternates: { canonical: project.slug === "weddings" ? "/weddings" : `/portfolio/${project.slug}` },
     /* Unlisted means unlisted. The sitemap already leaves it out, but a
        page off every index that Google still holds is a page Julian took
        off the site and can be found on it anyway - by the one listing he

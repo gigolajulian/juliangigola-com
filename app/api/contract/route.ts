@@ -8,6 +8,7 @@ import { contractStep } from "@/lib/contracts/contract-lead";
 import { contractMail, sendClient } from "@/lib/email/proof-mail";
 import { attachment } from "@/lib/proofs/delivery-serve";
 import { bodyOf, json, NO_STORE } from "@/lib/http";
+import { parseOr } from "@/lib/json";
 
 /* ── contracts, Julian's side ─────────────────────────────────────
  * Behind the /admin gate like /api/inbox. GET ?templates, ?lead=<lead id>
@@ -33,8 +34,8 @@ async function gate(request: Request) {
 }
 
 const templates = async (kv: NonNullable<CloudflareEnv["INBOX"]>) => {
-  const raw = await kv.get(TEMPLATES_KEY);
-  return raw ? cleanContractTemplates(JSON.parse(raw)) : CONTRACT_TEMPLATES;
+  const saved = parseOr<unknown>(await kv.get(TEMPLATES_KEY), null);
+  return saved ? cleanContractTemplates(saved) : CONTRACT_TEMPLATES;
 };
 
 export async function GET(request: Request) {

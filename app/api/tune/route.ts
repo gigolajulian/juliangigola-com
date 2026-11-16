@@ -9,6 +9,7 @@
  * ─────────────────────────────────────────────────────────────── */
 
 import { bodyOf } from "@/lib/http";
+import { parseOr } from "@/lib/json";
 
 export const dynamic = "force-dynamic";
 
@@ -28,7 +29,7 @@ export async function POST(request: Request) {
   const { readFile, writeFile } = await import("node:fs/promises");
   const { join } = await import("node:path");
   const file = join(process.cwd(), ".next", "tune.json");
-  const kept = JSON.parse(await readFile(file, "utf8").catch(() => "{}"));
+  const kept = parseOr<Record<string, unknown>>(await readFile(file, "utf8").catch(() => null), {});
   kept[body.title] = { values: body.values, at: new Date().toISOString() };
   await writeFile(file, JSON.stringify(kept, null, 2));
   return new Response(null, { status: 204 });
