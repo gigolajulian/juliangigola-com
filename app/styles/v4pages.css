@@ -251,7 +251,7 @@ html[data-v4pages~="c1"] .cv4a .cv4b{display:flex;flex-wrap:wrap;gap:12px}
 }
 @keyframes cv4-spin{to{rotate:360deg}}
 
-/* s4: a campus guide's spots held beside their photo (components/v3/campus-spots.tsx). Phones, narrow
+/* s4: a campus guide's spots held beside their photo (components/v3/campus-spots.tsx). Phones, touch, narrow
    windows and reduced motion: each spot is its photo with its row under it, all lit. Wide: the rows on
    the left, the photos stacked in one held cell on the right, the one whose row is at mid screen shown.
    A hard cut: opacity with no transition, and never `display` or `visibility`, so every alt stays read.
@@ -261,11 +261,13 @@ html[data-v4pages~="s4"] .v3 #p-campus .s4-row{padding:18px 0 28px;border-bottom
 html[data-v4pages~="s4"] .v3 #p-campus .s4-row h2{margin:0;font:900 clamp(1.75rem,calc(4*var(--v3u)),3.75rem)/1 var(--display);letter-spacing:-.045em;text-wrap:balance}
 html[data-v4pages~="s4"] .v3 #p-campus .s4-row h2 .lbl{display:block;margin-bottom:12px}
 html[data-v4pages~="s4"] .v3 #p-campus .s4-row p{margin:14px 0 0;max-width:46ch;line-height:1.6;text-wrap:pretty}
-@media (min-width:1024px) and (prefers-reduced-motion:no-preference){
+@media (min-width:1024px) and (hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
   html[data-v4pages~="s4"] .v3 #p-campus .s4{--s4h:min(72svh,calc(100svh - 128px));display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);column-gap:clamp(32px,5vw,96px);border-bottom:1px solid var(--line)}
-  html[data-v4pages~="s4"] .v3 #p-campus .s4-ph{grid-column:2;grid-row:1/span var(--n);justify-self:end;align-self:start;position:sticky;top:calc((100svh + 64px - var(--s4h)) / 2);height:var(--s4h);margin:0;opacity:0}
+  html[data-v4pages~="s4"] .v3 #p-campus .s4-ph{grid-column:2;grid-row:1/span var(--n);justify-self:end;align-self:start;position:sticky;top:calc((100svh + 64px - var(--s4h)) / 2);height:var(--s4h);max-width:100%;margin:0;opacity:0}
   html[data-v4pages~="s4"] .v3 #p-campus .s4-ph[data-on]{opacity:1}
   html[data-v4pages~="s4"] .v3 #p-campus .s4-row{grid-column:1;grid-row:var(--i);min-height:calc(var(--s4h) / 2 + 48px);box-sizing:border-box;padding:28px 0 40px;border-bottom:0;border-top:1px solid var(--line);color:color-mix(in srgb,var(--ink) 54%,var(--bg));transition:color .25s ease-out}
   html[data-v4pages~="s4"] .v3 #p-campus .s4-row:first-of-type{border-top:0}
+  /* the last row is a photo tall, so the photo is still held when that row is at mid screen */
+  html[data-v4pages~="s4"] .v3 #p-campus .s4-row:last-of-type{min-height:calc(var(--s4h) + 64px)}
   html[data-v4pages~="s4"] .v3 #p-campus .s4-row[data-on]{color:var(--ink)}
 }
