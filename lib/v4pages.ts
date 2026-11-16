@@ -2,7 +2,8 @@ import * as React from "react";
 
 /** The inner-pages plan on trial: `?v4pages` turns every key on for the tab,
     `?v4pages=p3` only those, `?v4pages=0` off (head script, app/layout.tsx).
-    p3: the V4 drift in the /portfolio grid tiles (CSS only, app/styles/v4pages.css). */
+    p3: the /portfolio grid's scroll motion (v4-drift.tsx, app/styles/v4pages.css). On for
+    everyone since 2026-11-15; `?v4pages=0` still turns it off for the tab. */
 export const V4PAGES = "p3";
 
 export const v4pages = (key: string) =>
