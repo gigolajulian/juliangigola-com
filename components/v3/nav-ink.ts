@@ -113,8 +113,10 @@ function pixel(el: HTMLImageElement | HTMLVideoElement, x: number, y: number): R
 
 /** Each photo's strength, kept for one look (cleared at the start of the next). */
 const seen = new Map<Element, number>();
+/** Filled by `under`: the same thing's colour at another height of the same column, or null where it does not reach. */
+type Hit = { at?: (y: number) => RGB | null };
 /** What shows at a point, under the header: the first photo, film or painted box from the top. */
-function under(x: number, y: number, hdr: HTMLElement, page: RGB): RGB {
+function under(x: number, y: number, hdr: HTMLElement, page: RGB, hit?: Hit): RGB {
   for (const el of document.elementsFromPoint(x, y)) {
     if (hdr.contains(el) || el.closest("[aria-hidden].mt-dockname")) continue;
     if (el instanceof HTMLImageElement || el instanceof HTMLVideoElement) {
@@ -130,11 +132,27 @@ function under(x: number, y: number, hdr: HTMLElement, page: RGB): RGB {
       }
       if (o < 0.08) continue;
       const p = pixel(el, x, y);
-      if (p) return o > 0.97 ? p : (p.map((v, i) => v * o + page[i] * (1 - o)) as RGB);
+      if (p) {
+        const s = o, mix = (q: RGB) => (s > 0.97 ? q : (q.map((v, i) => v * s + page[i] * (1 - s)) as RGB));
+        if (hit) {
+          const r = el.getBoundingClientRect();
+          hit.at = (yy) => {
+            const q = yy < r.top || yy > r.bottom ? null : pixel(el, x, yy);
+            return q && mix(q);
+          };
+        }
+        return mix(p);
+      }
       continue;
     }
     const [c, a] = colour(getComputedStyle(el).backgroundColor);
-    if (a > 0.5) return c;
+    if (a > 0.5) {
+      if (hit) {
+        const r = el.getBoundingClientRect();
+        hit.at = (yy) => (yy < r.top || yy > r.bottom ? null : c);
+      }
+      return c;
+    }
   }
   return page;
 }
@@ -179,32 +197,44 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
       for (const el of bar.querySelectorAll<HTMLElement>(WORDS)) {
         const r = el.getBoundingClientRect();
         if (!r.width || r.bottom < 0) continue;
-        const y = r.top + r.height / 2;
         /* One ink per stretch of about 16px, so a word that sits half on a photo and half on the page is white
-           on one and black on the other (QA: "Ju" white on light grey). A stretch keeps its ink unless the other
-           is clearly better, so it does not flicker on a busy photo, but never below 3:1. */
+           on one and black on the other (QA: "Ju" white on light grey). And one for the upper half and one for the
+           lower: a photo's top or bottom edge can run through a word (MAC: the wordmark white, 1.2:1, with only its
+           lower half on a photo; the one look along the middle line called the whole word). A stretch keeps its
+           ink unless the other is clearly better, so it does not flicker on a busy photo, but never below 3:1.
+           `data-inks` is the upper row, a slash, the lower row. */
         const n = Math.max(1, Math.round(r.width / 16));
+        const ya = r.top + r.height * 0.3, yb = r.top + r.height * 0.7;
         const prev = el.dataset.inks ?? "";
-        let inks = "";
-        for (let k = 0; k < n; k++) {
-          let c = under(r.left + (r.width * (k + 0.5)) / n, y, bar, page);
-          if (veiled) c = [0, 1, 2].map((i) => c[i] * (1 - VEIL) + page[i] * VEIL) as RGB;
+        const [pa = "", pb = ""] = prev.split("/");
+        const pick = (g: RGB, was: string) => {
+          const c = veiled ? ([0, 1, 2].map((i) => g[i] * (1 - VEIL) + page[i] * VEIL) as RGB) : g;
           const l = lum(c), white = 1.05 / (l + 0.05), black = (l + 0.05) / 0.05;
-          const was = prev.length === n ? prev[k] : "";
-          inks += was === "w" && white >= 3 && white * 1.25 >= black ? "w" : was === "b" && black >= 3 && black * 1.25 >= white ? "b" : white >= black ? "w" : "b";
+          return was === "w" && white >= 3 && white * 1.25 >= black ? "w" : was === "b" && black >= 3 && black * 1.25 >= white ? "b" : white >= black ? "w" : "b";
+        };
+        let ra = "", rb = "";
+        for (let k = 0; k < n; k++) {
+          const x = r.left + (r.width * (k + 0.5)) / n, hit: Hit = {};
+          const ca = under(x, ya, bar, page, hit);
+          // the lower half is usually on the same photo or box: a second look only where that one ends
+          const cb = hit.at?.(yb) ?? under(x, yb, bar, page);
+          ra += pick(ca, pa.length === n ? pa[k] : "");
+          rb += pick(cb, pb.length === n ? pb[k] : "");
         }
+        const inks = ra + "/" + rb;
         if (inks === prev) continue;
         el.dataset.inks = inks;
         // the word's one ink: what most of it has (icons and the hover colours use it)
-        const ink = inks.split("w").length - 1 >= n / 2 ? "w" : "b";
+        const ink = inks.split("w").length - 1 >= n ? "w" : "b";
         el.dataset.ink = ink;
         el.style.setProperty("--nav-ink", ink === "w" ? "#fff" : "#000");
         // two grounds under a word of text: paint it in stretches (navfx.css clips the gradient to the letters)
         const mixed = el.matches(".site-wm,.links a") && inks.includes("w") && inks.includes("b");
         el.toggleAttribute("data-inkmix", mixed);
         if (mixed) {
-          const stops = [...inks].map((ch, k) => `${ch === "w" ? "#fff" : "#000"} ${((k / n) * 100).toFixed(1)}% ${(((k + 1) / n) * 100).toFixed(1)}%`);
-          el.style.setProperty("--nav-mix", `linear-gradient(90deg,${stops.join(",")})`);
+          const row = (s: string) => `linear-gradient(90deg,${[...s].map((ch, k) => `${ch === "w" ? "#fff" : "#000"} ${((k / n) * 100).toFixed(1)}% ${(((k + 1) / n) * 100).toFixed(1)}%`).join(",")})`;
+          // one layer when both halves agree, else the upper half's over the lower half's
+          el.style.setProperty("--nav-mix", ra === rb ? row(ra) : `${row(ra)} 0 0/100% 50% no-repeat,${row(rb)} 0 100%/100% 50% no-repeat`);
         } else el.style.removeProperty("--nav-mix");
       }
     };
