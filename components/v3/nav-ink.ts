@@ -150,6 +150,8 @@ function pixel(el: HTMLImageElement | HTMLVideoElement, x: number, y: number, hw
   return [unlin(R / k), unlin(G / k), unlin(B / k)];
 }
 
+/** `?navdbg`: what each look saw, for `window.__navink()` (MAC reads words under 3:1 that pass on Windows). Null otherwise. */
+let dbg: unknown[] | null = null;
 /** Each photo's strength, kept for one look (cleared at the start of the next). */
 const seen = new Map<Element, number>();
 /** Filled by `under`: the same thing's colour at another height of the same column, or null where it does not reach. */
@@ -171,6 +173,7 @@ function under(x: number, y: number, hdr: HTMLElement, page: RGB, hit?: Hit, hw 
       }
       if (o < 0.08) continue;
       const p = pixel(el, x, y, hw, hh);
+      dbg?.push({ x: Math.round(x), y: Math.round(y), img: (el instanceof HTMLImageElement ? el.currentSrc || el.src : "video").slice(-48), complete: el instanceof HTMLImageElement ? el.complete : true, o: +o.toFixed(2), copy: copies.has((el as HTMLImageElement).currentSrc) ? (copies.get((el as HTMLImageElement).currentSrc) ? "in" : copies.get((el as HTMLImageElement).currentSrc) === null ? "loading" : "failed") : "none", rgb: p?.map(Math.round) ?? null, pending });
       if (p) {
         const s = o, mix = (q: RGB) => (s > 0.97 ? q : (q.map((v, i) => v * s + page[i] * (1 - s)) as RGB));
         if (hit) {
@@ -187,6 +190,7 @@ function under(x: number, y: number, hdr: HTMLElement, page: RGB, hit?: Hit, hw 
       continue;
     }
     const [c, a] = colour(getComputedStyle(el).backgroundColor);
+    if (a > 0.5) dbg?.push({ x: Math.round(x), y: Math.round(y), box: (el.className?.toString() || el.tagName).slice(0, 40), rgb: c.map(Math.round) });
     if (a > 0.5) {
       if (hit) {
         const r = el.getBoundingClientRect();
@@ -252,6 +256,7 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
         const ya = r.top + r.height * 0.25, yb = r.top + r.height * 0.75; // the middle of each half
         const prev = el.dataset.inks ?? "";
         const [pa = "", pb = ""] = prev.split("/");
+        dbg?.push({ word: el.textContent?.trim().slice(0, 12) || el.className, prev, isTop, veiled });
         const pick = (g: RGB, was: string, unknown?: boolean) => {
           if (unknown && was) return was; // the photo's pixels are not in yet: keep the ink until they are
           const c = veiled ? ([0, 1, 2].map((i) => g[i] * (1 - VEIL) + page[i] * VEIL) as RGB) : g;
@@ -286,6 +291,7 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
         } else el.style.removeProperty("--nav-mix");
       }
     };
+    if (/[?&]navdbg/.test(location.search)) (window as unknown as { __navink: () => unknown[] }).__navink = () => ((dbg = []), paint(), [dbg, (dbg = null)][0] as unknown[]);
     /* Words and buttons under the bar. An observer on the band at the top of the window names the few that are in
        it; only those are measured, and each gets a mask cut along a line just under the bar. It follows anything
        that moves, by scroll or by transform (the v4 hero), and nothing outside the band carries a mask. */
