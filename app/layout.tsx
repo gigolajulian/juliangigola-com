@@ -195,7 +195,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             `p3` is on for everyone unless the tab chose otherwise (Julian, 2026-11-15). */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var k="jg-v4pages",v=(location.search.match(/[?&]v4pages(?:=([a-z0-9,-]*))?(?:&|$)/)||[]),all="p3";if(v[0])sessionStorage.setItem(k,v[1]==="0"?"":!v[1]||v[1]==="1"?all:v[1].split(",").join(" "));v=sessionStorage.getItem(k);if(v==null)v="p3";if(v)document.documentElement.dataset.v4pages=v}catch(e){}})()`,
+            __html: `(function(){try{var k="jg-v4pages",v=(location.search.match(/[?&]v4pages(?:=([a-z0-9,-]*))?(?:&|$)/)||[]),all="p3 tilt";if(v[0])sessionStorage.setItem(k,v[1]==="0"?"":!v[1]||v[1]==="1"?all:v[1].split(",").join(" "));v=sessionStorage.getItem(k);if(v==null)v="p3";if(v)document.documentElement.dataset.v4pages=v}catch(e){}})()`,
           }}
         />
       </head>
