@@ -191,10 +191,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           }}
         />
         {/* `data-v4pages`: the inner-pages plan on trial (lib/v4pages.ts). `?v4pages` turns
-            every key on for the tab, `?v4pages=s1,a2` only those, `?v4pages=0` off. */}
+            every key on for the tab, `?v4pages=s1,a2` only those, `?v4pages=0` off.
+            With no choice made in the tab it follows the V4 home (`data-mtscroll`, set by the
+            script above): all keys on wherever V4 is on. */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var k="jg-v4pages",v=(location.search.match(/[?&]v4pages(?:=([a-z0-9,-]*))?(?:&|$)/)||[]),all="s1 s2 a2 m2p p3";if(v[0])sessionStorage.setItem(k,v[1]==="0"?"":!v[1]||v[1]==="1"?all:v[1].split(",").join(" "));v=sessionStorage.getItem(k);if(v)document.documentElement.dataset.v4pages=v}catch(e){}})()`,
+            __html: `(function(){try{var k="jg-v4pages",v=(location.search.match(/[?&]v4pages(?:=([a-z0-9,-]*))?(?:&|$)/)||[]),all="s1 s2 a2 m2p p3";if(v[0])sessionStorage.setItem(k,v[1]==="0"?"":!v[1]||v[1]==="1"?all:v[1].split(",").join(" "));v=sessionStorage.getItem(k);if(v==null&&"mtscroll" in document.documentElement.dataset)v=all;if(v)document.documentElement.dataset.v4pages=v}catch(e){}})()`,
           }}
         />
       </head>
