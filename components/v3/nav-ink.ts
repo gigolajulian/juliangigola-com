@@ -6,7 +6,8 @@ import * as React from "react";
    1. `data-navtop` on the root while the bar has no ground: the top of a page, and on the homepage for as long
       as the hero shows.
    2. Each word in the bar is white or black, whichever reads better over what is under it (photo, film or page,
-      with the bar's veil on top once it is on). Pixels come from a small copy of each photo, made once. */
+      with the bar's veil on top once it is on). Pixels come from a small copy of each photo, made once.
+   3. Page words and buttons fade out as they slide under the bar; photos do not (Julian, 2026-11-16). */
 
 export const navfx = () => typeof document !== "undefined" && "navfx" in document.documentElement.dataset;
 
@@ -193,6 +194,84 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
         } else el.style.removeProperty("--nav-mix");
       }
     };
+    /* Words and buttons under the bar. An observer on the band at the top of the window names the few that are in
+       it; only those are measured, and each gets a mask cut along a line just under the bar. It follows anything
+       that moves, by scroll or by transform (the v4 hero), and nothing outside the band carries a mask. */
+    const EDGE = 20, SOFT = 28; // the line sits this far under the bar; the fade is this deep above it
+    const live = new Set<HTMLElement>(), watched = new WeakSet<Element>(), cuts = new WeakMap<HTMLElement, string>();
+    let cutRaf = 0, still = 0, count = -1;
+    const mask = (el: HTMLElement, m: string) => {
+      if ((cuts.get(el) ?? "") === m) return false;
+      cuts.set(el, m);
+      el.style.setProperty("-webkit-mask-image", m);
+      el.style.maskImage = m;
+      return true;
+    };
+    const cut = () => {
+      cutRaf = 0;
+      const bottom = bar.getBoundingClientRect().bottom, line = bottom > 0 ? Math.round(bottom) + EDGE : 0; // the bar can slide away
+      let moved = false;
+      for (const el of live) {
+        const t = Math.round(el.getBoundingClientRect().top);
+        if (mask(el, line && t < line ? `linear-gradient(#0000 ${line - t - SOFT}px,#000 ${line - t}px)` : "")) moved = true;
+      }
+      still = moved ? 0 : still + 1;
+      // keeps going while things still move with no scroll event (a glide after the wheel stops), then rests
+      if (live.size && still < 30) cutRaf = requestAnimationFrame(cut);
+    };
+    const kick = () => {
+      still = 0;
+      if (live.size && !cutRaf) cutRaf = requestAnimationFrame(cut);
+    };
+    const band = () =>
+      new IntersectionObserver(
+        (es) => {
+          for (const e of es) {
+            const el = e.target as HTMLElement;
+            // one that already wears a mask of its own (the client marks) keeps it
+            if (e.isIntersecting) {
+              if (getComputedStyle(el).maskImage === "none") live.add(el);
+            } else if (live.delete(el)) mask(el, "");
+          }
+          kick();
+        },
+        { rootMargin: `0px 0px -${Math.max(0, innerHeight - bar.offsetHeight - EDGE - 8)}px 0px` },
+      );
+    let io = band();
+    // every element that holds text of its own, and every control: never one that only wraps a photo
+    const scan = () => {
+      const main = document.getElementById("main");
+      if (!main) return;
+      const n = main.getElementsByTagName("*").length;
+      if (n === count) return;
+      count = n;
+      const walk = document.createTreeWalker(main, NodeFilter.SHOW_TEXT);
+      for (let t = walk.nextNode(); t; t = walk.nextNode()) {
+        const el = t.parentElement;
+        if (el && !watched.has(el) && t.nodeValue?.trim()) {
+          watched.add(el);
+          io.observe(el);
+        }
+      }
+      for (const el of main.querySelectorAll("button,input,select,textarea"))
+        if (!watched.has(el)) {
+          watched.add(el);
+          io.observe(el);
+        }
+    };
+    const rebind = () => {
+      io.disconnect();
+      for (const el of live) mask(el, "");
+      live.clear();
+      io = band();
+      count = -1;
+      const main = document.getElementById("main");
+      // the old observer's elements go to the new one
+      if (main) for (const el of main.querySelectorAll<HTMLElement>("*")) watched.delete(el);
+      scan();
+    };
+    scan();
+
     /* At most every 50ms while scrolling. The v4 hero's wall glides on for about a second after the last scroll
        event, so it keeps looking through that second too: one look at 120ms left the ink a photo behind (QA). */
     let until = 0;
@@ -210,17 +289,24 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
     poke = ask;
     const loaded = (e: Event) => (e.target instanceof HTMLImageElement || e.target instanceof HTMLVideoElement) && ask();
     addEventListener("scroll", ask, { passive: true });
+    addEventListener("scroll", kick, { passive: true });
     addEventListener("resize", ask);
+    addEventListener("resize", rebind);
     document.addEventListener("load", loaded, true);
     document.addEventListener("loadeddata", loaded, true);
     const watch = new MutationObserver(ask);
     watch.observe(root, { attributeFilter: ["data-theme", "data-tuck", "data-mt-intro", "data-mt-pasthero"] });
     paint();
     // Photos also move with no scroll event (the v4 hero glides on after the wheel stops, films play): look again twice a second.
-    const again = window.setInterval(() => document.hidden || ask(), 500);
+    const again = window.setInterval(() => document.hidden || (ask(), scan(), kick()), 500);
     return () => {
       removeEventListener("scroll", ask);
+      removeEventListener("scroll", kick);
       removeEventListener("resize", ask);
+      removeEventListener("resize", rebind);
+      io.disconnect();
+      cancelAnimationFrame(cutRaf);
+      for (const el of live) mask(el, "");
       document.removeEventListener("load", loaded, true);
       document.removeEventListener("loadeddata", loaded, true);
       watch.disconnect();
