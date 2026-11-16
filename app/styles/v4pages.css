@@ -179,8 +179,8 @@ html[data-v4pages~="c1"] .cv4 .mt-sleeve .disc{display:none}
   html[data-v4pages~="c1"] .cv4 .mt-sleeve .disc::after{transform:rotate(calc(var(--o) * -200deg))}
   /* Held under the pointer the record keeps turning (Julian, 2026-11-15): the disc is one flat colour, so the turn
      shows in its sheen, one revolution in 1.8s (33 rpm), starting once the record is out. */
-  /* `.snd`: its clip is playing (`?v4pages=c1,snd`). The same rule, so the turn does not jump when the sound starts. */
-  html[data-v4pages~="c1"] .cv4 .mt-sleeve:is(.hv,.snd) .disc::after{animation:cv4-spin 1.8s linear .45s infinite}
+  /* `[data-playing]`: its clip is playing (`?v4pages=c1,snd`). The same rule, so the turn does not jump when the sound starts. */
+  html[data-v4pages~="c1"] .cv4 .mt-sleeve:is(.hv,[data-playing]) .disc::after{animation:cv4-spin 1.8s linear .45s infinite}
   /* The turn was hard to see (Julian, 2026-11-16): sheen .2 / .13 to .5 / .36, and a dark wedge between the two so it
      reads on a light pressing as well. */
   html[data-v4pages~="c1"] .cv4 .mt-sleeve .disc::after{background:radial-gradient(circle,#070707 0 1.9%,rgba(255,255,255,.3) 2% 2.4%,transparent 2.5%),conic-gradient(from 18deg,rgba(255,255,255,0) 0deg,rgba(255,255,255,.5) 14deg,rgba(255,255,255,0) 34deg,rgba(0,0,0,0) 70deg,rgba(0,0,0,.3) 100deg,rgba(0,0,0,0) 130deg,rgba(255,255,255,0) 168deg,rgba(255,255,255,.36) 192deg,rgba(255,255,255,0) 216deg,rgba(0,0,0,0) 250deg,rgba(0,0,0,.3) 280deg,rgba(0,0,0,0) 310deg,rgba(255,255,255,0) 360deg)}
@@ -274,7 +274,6 @@ html[data-v4pages~="s4"] .v3 #p-campus .s4-row p{margin:14px 0 0;max-width:46ch;
   html[data-v4pages~="s4"] .v3 #p-campus .s4-ph[data-on]{opacity:1}
   html[data-v4pages~="s4"] .v3 #p-campus .s4-row{grid-column:1;grid-row:var(--i);min-height:calc(var(--s4h) / 2 + 48px);box-sizing:border-box;padding:28px 0 40px;border-bottom:0;border-top:1px solid var(--line);color:color-mix(in srgb,var(--ink) 54%,var(--bg));transition:color .25s ease-out}
   html[data-v4pages~="s4"] .v3 #p-campus .s4-row:first-of-type{border-top:0}
-  /* the last row is a photo tall, so the photo is still held when that row is at mid screen */
-  html[data-v4pages~="s4"] .v3 #p-campus .s4-row:last-of-type{min-height:calc(var(--s4h) + 64px)}
+  /* The last row is as tall as the others (Julian, 2026-11-16: it held twice as long), so the photo leaves with it. */
   html[data-v4pages~="s4"] .v3 #p-campus .s4-row[data-on]{color:var(--ink)}
 }
