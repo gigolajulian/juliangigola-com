@@ -379,6 +379,8 @@
   [data-mtscroll] .mt-book-col{width:auto;margin:20px 16px 0}
   [data-mtscroll] .mt-br{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:11px 0!important}
   [data-mtscroll] .mt-br b{font-size:24px;line-height:1.1;letter-spacing:-.045em;color:#8a8a8a}
+  /* unpicked rows: the small line was 4.07:1 on the page, the muted ink is about 6:1 */
+  [data-mtscroll] .mt-br .lbl{color:var(--mute)}
   :root[data-mtscroll][data-theme="light"] .mt-br b{color:var(--row)}
   [data-mtscroll] .mt-br .lbl{margin:0;white-space:nowrap}
   [data-mtscroll] .mt-br .w{display:none}

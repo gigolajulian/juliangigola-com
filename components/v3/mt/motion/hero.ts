@@ -31,7 +31,25 @@ const ink = (n: Node) => {
   return r.getBoundingClientRect();
 };
 
+/* Mock (?mtdock=left, Julian 2026-11-15): no dock. The header keeps its wordmark and links from the start with no
+   ground under them, the name leaves to the left as the hero ends, and the header's ground comes in there. */
+const LEFT = typeof location !== "undefined" && /[?&]mtdock=left/.test(location.search);
+/* With no ground over the hero the nav words sit on the wall (they flip white or black, nav-ink.ts: the flag turns
+   ?navfx on in layout.tsx). The wall's captions would run through them, so each fades out over FADE px as it
+   comes up to the bar (Julian: "have a fade for text where the navbar sits"). */
+const FADE = 56;
+let caps: HTMLElement[] = [];
+let barH = 61;
+function fadeCaps() {
+  for (const c of caps) {
+    const o = clamp((c.getBoundingClientRect().top - barH) / FADE);
+    const v = o > 0.99 ? "" : o.toFixed(2);
+    if (c.style.opacity !== v) c.style.opacity = v;
+  }
+}
+
 function dockSetup(el: HTMLElement): Dock | null {
+  if (LEFT) return null;
   const w = Number(/[?&]mtdock=([\d.]+)/.exec(location.search)?.[1] ?? 1);
   const h1 = el.querySelector<HTMLElement>(".mt-name h1"), wm = document.querySelector<HTMLElement>(".site-hdr .site-wm");
   // ?navfx=1 (Julian, 2026-11-15): no flight. The name fades with the hero, and the bar's wordmark comes in as it goes (nav-ink.ts).
@@ -158,6 +176,19 @@ export const heroDrivers: Driver[] = [
       states.set(el, st);
       const d = st.dock;
       if (!d) document.documentElement.setAttribute("data-mtdock", "off");
+      // by scroll, not by frame: a jump past the hero gets no hero frames
+      // the hero is over when its last photos have left from under the header: the same line going down and coming back up
+      const hdr = document.querySelector<HTMLElement>(".site-hdr");
+      const past = () => document.documentElement.toggleAttribute("data-mt-pasthero", el.getBoundingClientRect().bottom <= (hdr?.offsetHeight ?? 60));
+      if (LEFT) {
+        // the button too: it rises through the bar as the hero leaves. Where the hero is not held the name block
+        // scrolls up with the page and through the bar, so it fades there as well (held: it leaves to the left).
+        caps = [...el.querySelectorAll<HTMLElement>("figcaption, .mt-more .btn" + (document.documentElement.hasAttribute("data-mt-held") ? "" : ", [data-mt-name] > *"))];
+        barH = hdr?.offsetHeight ?? 61;
+        document.documentElement.setAttribute("data-mtleft", "");
+        addEventListener("scroll", past, { passive: true });
+        past();
+      }
       // late fonts move both boxes: measure again on the next frame
       if (d) document.fonts?.ready.then(() => (st.at = ""), () => {});
       /* The engine gives a section no frames once it is a screen above the window. A jump past the hero (a reload
@@ -178,6 +209,11 @@ export const heroDrivers: Driver[] = [
       }
       return () => {
         removeEventListener("scroll", far);
+        removeEventListener("scroll", past);
+        caps.forEach((c) => (c.style.opacity = ""));
+        caps = [];
+        document.documentElement.removeAttribute("data-mtleft");
+        document.documentElement.removeAttribute("data-mt-pasthero");
         [...st.cols, ...st.figs].forEach((p) => (p.el.style.transform = ""));
         if (st.name) st.name.style.cssText = "";
         if (d) {
@@ -191,6 +227,7 @@ export const heroDrivers: Driver[] = [
       const st = states.get(el);
       if (!st) return;
       const mode = ctx.held ? "d" : ctx.vw < 600 ? "p" : "t";
+      if (caps.length && el.getBoundingClientRect().bottom > 0) fadeCaps();
       if (mode !== st.mode) {
         st.mode = mode;
         st.s = -1;
@@ -234,7 +271,7 @@ export const heroDrivers: Driver[] = [
         if (st.name && e !== st.e) {
           st.e = e;
           st.name.style.opacity = String(1 - e);
-          st.name.style.transform = e ? `translate3d(0,${(-56 * ctx.u * e).toFixed(1)}px,0)` : "";
+          st.name.style.transform = !e ? "" : LEFT ? `translate3d(${(-0.6 * ctx.vw * e).toFixed(1)}px,0,0)` : `translate3d(0,${(-56 * ctx.u * e).toFixed(1)}px,0)`;
           st.name.style.visibility = e >= 1 ? "hidden" : ""; // gone: its buttons leave the tab order too
         }
         return;
