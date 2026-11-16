@@ -1,3 +1,4 @@
+import { navfx } from "../../nav-ink";
 import { clamp, smooth, span, type Driver } from "./engine";
 
 /* Hero wall travel (spec 3.2). Held (D): the wall travels up through the hold,
@@ -33,7 +34,8 @@ const ink = (n: Node) => {
 function dockSetup(el: HTMLElement): Dock | null {
   const w = Number(/[?&]mtdock=([\d.]+)/.exec(location.search)?.[1] ?? 1);
   const h1 = el.querySelector<HTMLElement>(".mt-name h1"), wm = document.querySelector<HTMLElement>(".site-hdr .site-wm");
-  if (!w || !h1 || !wm) return null;
+  // ?navfx=1 (Julian, 2026-11-15): no flight. The name fades with the hero, and the bar's wordmark comes in as it goes (nav-ink.ts).
+  if (!w || !h1 || !wm || navfx()) return null;
   const f = document.createElement("div");
   f.className = "mt-dockname";
   f.setAttribute("aria-hidden", "");
