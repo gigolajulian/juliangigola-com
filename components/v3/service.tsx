@@ -4,6 +4,7 @@ import { V3Foot } from "@/components/v3/chrome";
 import { V3BookFlow } from "@/components/v3/book";
 import { Run } from "@/components/v3/flow";
 import { Doors } from "@/components/v3/home";
+import { ServiceBar } from "@/components/v3/service-bar";
 import { BOOKING_PAGES, bookingHref, type BookingPage } from "@/lib/booking/booking";
 import { CAMPUS_GUIDES, campusHref } from "@/lib/campus-guides";
 import { SESSIONS, type SessionSlug } from "@/lib/v3";
@@ -68,7 +69,7 @@ export function V3Service({ page, frames }: { page: BookingPage; frames: Frame[]
         ) : null}
         <div className="sv-info">
           {page.blocks.map((b) => (
-            <section className="sv-row" key={b.heading}>
+            <section className={b.items ? "sv-row sv-v4" : "sv-row"} key={b.heading}>
               <h2 className="lbl mute">{b.heading}</h2>
               {b.items ? (
                 <ul>{b.items.map((x) => <li key={x}>{x}</li>)}</ul>
@@ -115,8 +116,11 @@ export function V3Service({ page, frames }: { page: BookingPage; frames: Frame[]
             </ul>
           </section>
         </div>
+        {/* ?v4pages=s1: where the last screen starts, and the phone book bar that hides there. */}
+        <span data-sv-end />
         <Doors />
         <V3Foot />
+        <ServiceBar name={page.name} rate={page.rate} label={page.book.title} href={s ? "#book" : "/contact/form"} />
       </section>
     </div>
   );
