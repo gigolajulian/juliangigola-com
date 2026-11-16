@@ -102,7 +102,17 @@ export function V3Service({ page, frames }: { page: BookingPage; frames: Frame[]
               {page.faqs.map((f) => (
                 <details key={f.q}>
                   <summary>{f.q}</summary>
-                  <p>{f.a}</p>
+                  <p>
+                    {f.link ? (
+                      <>
+                        {f.a.split(f.link.label)[0]}
+                        <Link href={f.link.href}>{f.link.label}</Link>
+                        {f.a.split(f.link.label)[1]}
+                      </>
+                    ) : (
+                      f.a
+                    )}
+                  </p>
                 </details>
               ))}
             </div>
