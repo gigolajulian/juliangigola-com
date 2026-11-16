@@ -8,6 +8,7 @@ import { ReferencePicks } from "@/components/reference-picks";
 import { Calendar } from "@/components/v3/flow";
 import { dlabel } from "@/components/v3/flow";
 import { duration } from "@/lib/booking/booking-rules";
+import { depositFor } from "@/lib/booking/paid";
 import { fmt } from "@/components/v3/flow";
 import type { Shell } from "@/components/v3/flow";
 import { looksLikeEmail } from "@/lib/inbox";
@@ -22,6 +23,7 @@ const GESTURE_GAP_MS = 120;
 export function V3Steps({ c }: { c: CardCtx & { v3: V3Book } }) {
   const { v3, username, slug, tz, length, needsWhere, opt, setOpt, booked, days, view, setView, anchor, setAnchor, pick, chosen, setChosen, step, setStep, swipeX: swipeXRef, wheelGate, stripRef, more, setMore, paid, deposit, refs, v3root, error, bad, setBad, blank, setBlank, load, choose, today, book, refill, v3steps, v3sub, date } = c;
   const end = pick.min + length;
+  const usd = depositFor(slug);
   const range = `${fmt(pick.min)} to ${fmt(end)}`;
   const at = step === "done" ? v3steps.length : STEP_AT[step] + 1;
   const rows: [string, React.ReactNode][] = [["Day", dlabel(date)], ["Time", range], ["Length", duration(length)]];
@@ -32,12 +34,12 @@ export function V3Steps({ c }: { c: CardCtx & { v3: V3Book } }) {
     return (
       <DepositStep
         v3={(p) => shell(p)}
-        head={<div className="fig"><b>$100</b><span className="lbl mute">Holds {dlabel(date)}, {fmt(pick.min)}</span></div>}
+        head={<div className="fig"><b>${usd}</b><span className="lbl mute">Holds {dlabel(date)}, {fmt(pick.min)}</span></div>}
         body={deposit}
         refs={refs}
         rows={[
           [`${v3.name}, ${duration(length)}`, price],
-          ["Deposit today", "$100"],
+          ["Deposit today", `$${usd}`],
           ["Balance after the shoot", v3.from != null ? `$${v3.from - 100}` : "Rest of the quote"],
         ]}
         onBooked={() => {
@@ -136,7 +138,7 @@ export function V3Steps({ c }: { c: CardCtx & { v3: V3Book } }) {
           bar: (
             <>
               {back("pick")}
-              <button type="submit" className="btn fill" disabled={step === "sending" || step === "check"}>{paid ? "Continue to $100 deposit" : "Book the call"}</button>
+              <button type="submit" className="btn fill" disabled={step === "sending" || step === "check"}>{paid ? `Continue to $${usd} deposit` : "Book the call"}</button>
             </>
           ),
         })}

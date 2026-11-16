@@ -112,11 +112,11 @@ describe("POST /api/deposit", () => {
     expect(calls.some((c) => c.url.includes("stripe"))).toBe(false);
   });
 
-  it("creates a $100 intent whatever amount was sent, with the booking in its metadata", async () => {
+  it("creates the session's intent whatever amount was sent, with the booking in its metadata", async () => {
     const res = await post(BODY);
-    expect(await res.json()).toEqual({ clientSecret: `${PI}_secret_x`, intentId: PI, amount: 10000, currency: "usd" });
+    expect(await res.json()).toEqual({ clientSecret: `${PI}_secret_x`, intentId: PI, amount: 25000, currency: "usd" });
     const form = new URLSearchParams(String(calls.find((c) => c.url.endsWith("/payment_intents"))!.init!.body));
-    expect(form.get("amount")).toBe("10000");
+    expect(form.get("amount")).toBe("25000");
     expect(form.getAll("payment_method_types[]")).toEqual(["card"]);
     expect(form.get("metadata[slug]")).toBe("portraits");
     expect(form.get("metadata[start]")).toBe(START);
@@ -162,7 +162,7 @@ describe("POST /api/stripe", () => {
 
   it("leaves every other payment on the account alone", async () => {
     // A $100 charge made elsewhere, an invoice, a deposit-shaped intent at another amount.
-    for (const body of [paid({}), paid({ slug: "portraits", start: START }), paid(undefined, 25000)]) {
+    for (const body of [paid({}), paid({ slug: "portraits", start: START }), paid(undefined, 30000)]) {
       expect((await deliver(body)).status).toBe(200);
     }
     expect(calls).toEqual([]);

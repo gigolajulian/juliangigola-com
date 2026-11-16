@@ -123,11 +123,11 @@ describe("bookDeposit (a paid session on the site's engine)", () => {
     expect(inserts).toHaveLength(1);
   });
 
-  it("logs the $100 deposit on the client's activity log", async () => {
+  it("logs the deposit on the client's activity log", async () => {
     ctx.env = { ...ctx.env, LEADS_KEY };
     expect(await bookDeposit(env(), "pi_TEST1234567890", META)).toBe("booked");
     const s = (await sealer(LEADS_KEY))!;
-    expect((await readLog(kv as never, s, await s.id("qa@example.com"))).find((e) => e.kind === "payment")).toMatchObject({ amount: 100, note: "Deposit" });
+    expect((await readLog(kv as never, s, await s.id("qa@example.com"))).find((e) => e.kind === "payment")).toMatchObject({ amount: 250, note: "Deposit" });
   });
 
   it("refunds when the time is gone", async () => {

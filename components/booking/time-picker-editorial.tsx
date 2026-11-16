@@ -6,12 +6,14 @@ import { cn } from "@/lib/utils";
 import { DepositStep } from "@/components/booking/deposit-step";
 import { goo } from "@/components/booking/deposit-step";
 import { TZ } from "@/lib/booking/booking-rules";
+import { depositFor } from "@/lib/booking/paid";
 import { AHEAD, DAYS, iso, minutesOf, MONTHS, forgetTimes, STEP_AT, WEEKDAYS, WHERE, clock, zone } from "@/components/booking/time-picker-parts";
 import type { CardCtx } from "@/components/booking/use-picker";
 
 /* The card as a magazine page (editorial.css), the default since 2026-10-17. */
 export function EditorialCard({ c }: { c: CardCtx }) {
   const { title, className, username, slug, tz, here, length, needsWhere, opt, setOpt, via, setVia, ask, setAsk, session, booked, days, view, anchor, pick, arrow, chosen, step, setStep, paid, deposit, root, error, ok, setOk, load, open, choose, showTimes, today, week, month, shift, daysBox, mstep, setMstep, switchView, slotsW, slotsRef, atStart, book, grow, refill, busy, okMark, swipeProps, t, ap, until, date, sum } = c;
+  const usd = depositFor(slug);
   const d3 = (d: Date) => DAYS[d.getDay()][0] + DAYS[d.getDay()].slice(1).toLowerCase();
   const mon = (d: Date) => MONTHS[d.getMonth()].slice(0, 3);
   const [, apEnd] = clock(pick.min + length);
@@ -62,7 +64,7 @@ export function EditorialCard({ c }: { c: CardCtx }) {
       <div ref={root} className="contents">
         <DepositStep
           editorial
-          head={<>{bar}{hero("$100", `Deposit. Holds ${dayLine}`, "Balance due after the shoot", <button type="button" data-stick={goo() ? "fill" : undefined} className="ed-box" onClick={() => setStep("form")}>Change</button>)}</>}
+          head={<>{bar}{hero(`$${usd}`, `Deposit. Holds ${dayLine}`, "Balance due after the shoot", <button type="button" data-stick={goo() ? "fill" : undefined} className="ed-box" onClick={() => setStep("form")}>Change</button>)}</>}
           className={className}
           body={deposit}
           rows={[
@@ -90,7 +92,7 @@ export function EditorialCard({ c }: { c: CardCtx }) {
       ...(call && booked.via ? ([["Call", ring ? `Phone call, ${length} min` : `Video call on Google Meet, ${length} min`]] as [string, string][]) : []),
       ...(ring ? ([["Number", tel(booked.phone)]] as [string, string][]) : []),
       ...(booked.where ? ([["Where", booked.where]] as [string, string][]) : []),
-      ...(deposit ? ([["Deposit", "$100 paid"]] as [string, string][]) : []),
+      ...(deposit ? ([["Deposit", `$${usd} paid`]] as [string, string][]) : []),
       ["Sent to", booked.email],
     ];
     return (
@@ -293,7 +295,7 @@ export function EditorialCard({ c }: { c: CardCtx }) {
             </div>
           </div>
           <div className="ed-floor">
-            <span className="label">{paid ? "Next: $100 deposit" : `${sum} ${tzName}`}</span>
+            <span className="label">{paid ? `Next: $${usd} deposit` : `${sum} ${tzName}`}</span>
             <button type="submit" data-stick={goo() ? "fill" : undefined} className="ed-btn" disabled={step === "sending"}>{paid ? "Continue" : step === "sending" ? "Booking" : "Book it"}</button>
           </div>
         </form>

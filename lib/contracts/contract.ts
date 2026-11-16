@@ -17,7 +17,7 @@
  * ─────────────────────────────────────────────────────────────── */
 
 import { TZ } from "@/lib/booking/booking-rules";
-import { DEPOSIT, type InvoiceFrom } from "@/lib/leads/invoice";
+import { depositOfLead, type InvoiceFrom } from "@/lib/leads/invoice";
 import type { Lead } from "@/lib/leads/leads";
 import type { InboxKV as KV } from "@/lib/leads/lead-store";
 import { isEmail, newToken } from "@/lib/proofs/proof";
@@ -78,14 +78,14 @@ const usd = (n: number) => `$${n.toLocaleString("en-US")}`;
 const longDay = (iso: string) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, weekday: "long", month: "long", day: "numeric", year: "numeric" }).format(new Date(iso));
 
 /** A template's fields filled from a lead. Unknown values stay readable blanks for him to fill. */
-export function fillContract(body: string, l: Pick<Lead, "name" | "when" | "quote" | "licence">, today = new Date().toISOString()): string {
+export function fillContract(body: string, l: Pick<Lead, "name" | "when" | "quote" | "licence"> & Partial<Pick<Lead, "kind" | "deposit" | "events">>, today = new Date().toISOString()): string {
   const usage = l.licence ? `${l.licence.use || "Licensed use"}, until ${new Date(`${l.licence.end}T12:00:00Z`).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "UTC" })}` : "Personal use";
   return body
     .replace(/\{client\}/g, l.name)
     .replace(/\{date\}/g, l.when ? longDay(l.when) : "to be set")
     .replace(/\{today\}/g, longDay(today))
     .replace(/\{fee\}/g, l.quote !== undefined ? usd(l.quote) : "to be set")
-    .replace(/\{deposit\}/g, usd(DEPOSIT))
+    .replace(/\{deposit\}/g, usd(depositOfLead(l)))
     .replace(/\{usage\}/g, usage);
 }
 
