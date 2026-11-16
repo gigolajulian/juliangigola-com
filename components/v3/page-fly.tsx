@@ -115,7 +115,10 @@ export function PageFly() {
       const c = document.createElement("div");
       c.setAttribute("aria-hidden", "");
       Object.assign(c.style, { position: "fixed", zIndex: "60", overflow: "hidden", borderRadius: "4px", pointerEvents: "none", left: `${h.left}px`, top: `${h.top}px`, width: `${h.width}px`, height: `${h.height}px` });
-      c.innerHTML = `<img alt="" src="${src}" style="width:100%;height:100%;object-fit:cover;display:block">`;
+      const img = c.appendChild(document.createElement("img"));
+      img.alt = "";
+      img.src = src;
+      Object.assign(img.style, { width: "100%", height: "100%", objectFit: "cover", display: "block" });
       document.body.append(c);
       if (zin || zout) c.firstElementChild!.animate([zin ?? FLAT, zout ?? FLAT], { duration, easing, fill: "forwards" });
       to.style.visibility = "hidden";
