@@ -4,11 +4,12 @@ import * as React from "react";
 import { gsap } from "gsap";
 import type { DepositBody } from "@/components/booking/deposit-step";
 import { isPaid } from "@/lib/booking/paid";
+import type { SlotsAnswer } from "@/lib/booking/slots";
 import { Orb, ORB_ROUND } from "@/components/orb";
 import { JgLoad } from "@/components/splash/jg-load";
 import { TZ } from "@/lib/booking/booking-rules";
 import { mplan } from "@/lib/mplan";
-import { AHEAD, e164, fromIso, iso, KEEP, minutesOf, noop, overflowOf, recent, recentKey, forgetTimes, WHERE, type Pick, type Slot, type Step, type V3Book } from "@/components/booking/time-picker-parts";
+import { AHEAD, e164, fromIso, iso, KEEP, minutesOf, noop, overflowOf, recent, recentKey, forgetTimes, WHERE, type PickedTime, type Slot, type Step, type V3Book } from "@/components/booking/time-picker-parts";
 import { byCodeUnit } from "@/lib/utils";
 
 
@@ -84,7 +85,7 @@ export function usePicker({ path, title, className, fallback, v3, onPicked }: Pr
   // The card opens on its month (2026-10-20).
   const [view, setView] = React.useState<"week" | "month">("month");
   const [anchor, setAnchor] = React.useState(() => new Date()); // the week or month on show
-  const [pick, setPick] = React.useState<Pick | null>(null);
+  const [pick, setPick] = React.useState<PickedTime | null>(null);
   /* Julian: the arrows more defined, larger. Drawn, not the font's. */
   const arrow = (
     <svg aria-hidden viewBox="0 0 22 16" className="h-4 w-[1.375rem]" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="square">
@@ -177,24 +178,23 @@ export function usePicker({ path, title, className, fallback, v3, onPicked }: Pr
       const hit = recent.get(key);
       // The event and its times in one (`app/api/slots`).
       const got = !fresh && hit && Date.now() - hit.at < KEEP ? hit.got : fetch(`/api/slots?slug=${slug}&start=${iso(from)}&end=${iso(to)}&timeZone=${encodeURIComponent(tz)}`, { signal })
-        .then((r) => r.json())
-        .then((j) => [{ data: j.event }, j] as [unknown, unknown]);
+        .then((r) => r.json() as Promise<SlotsAnswer>);
       if (got !== hit?.got) recent.set(key, { at: Date.now(), got });
-      const [meta, slots] = await got;
-      const ev = Array.isArray(meta.data) ? meta.data[0] : meta.data;
-      if (!ev || slots.status !== "success") throw new Error("no times");
+      const slots = await got;
+      if (slots.status !== "success") throw new Error("no times");
+      const ev = slots.event;
       // A paid event's deposit is taken here (deposit-step.tsx) where the
       // build has Stripe's key; without it, the fallback.
       // Paid by the site's list (lib/booking/paid.ts).
-      const owes = isPaid(slug) || (ev.price ?? 0) > 0;
-      if (ev.requiresConfirmation || (owes && !process.env.NEXT_PUBLIC_STRIPE_PK)) {
+      const owes = isPaid(slug);
+      if (owes && !process.env.NEXT_PUBLIC_STRIPE_PK) {
         setState("fallback");
         return;
       }
       setPaid(owes);
-      setLength(ev.lengthInMinutes || 30);
-      setSession(ev.title || "");
-      setNeedsWhere(Array.isArray(ev.locations) && ev.locations.some((l: { type: string }) => l.type === "attendeeDefined"));
+      setLength(ev.lengthInMinutes);
+      setSession(ev.title);
+      setNeedsWhere(ev.locations.some((l) => l.type === "attendeeDefined"));
       setDays(slots.data);
       setState("ready");
     } catch {
@@ -622,7 +622,7 @@ export function usePicker({ path, title, className, fallback, v3, onPicked }: Pr
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ engine: "own", slug, start: new Date(pick.start).toISOString(), timeZone: tz, name, email: String(form.get("email")), phone, via, ...(notes ? { notes } : {}), ...(needsWhere ? { where } : {}) }),
       });
-      const body = await res.json();
+      const body = await res.json().catch(() => ({}));
       // 409 is the engine saying the slot went to someone else.
       if (!res.ok || body.status !== "success") throw Object.assign(new Error(body?.error || "failed"), { status: res.status });
       }
@@ -639,7 +639,9 @@ export function usePicker({ path, title, className, fallback, v3, onPicked }: Pr
       forgetTimes(username, slug, tz);
       setStep("done");
     } catch (e) {
-      setError((e as { status?: number }).status === 409 ? "That time was just taken. Pick another." : "That did not go through. Try again, or write to hello@juliangigola.com.");
+      const { status, message } = e as Error & { status?: number };
+      // 429 and 503 carry the route's own words ("Too many tries. Wait a minute.", `app/api/book`).
+      setError(status === 409 ? "That time was just taken. Pick another." : (status === 429 || status === 503) && message !== "failed" ? message : "That did not go through. Try again, or write to hello@juliangigola.com.");
       setStep("form");
       void load(true);
     }
@@ -791,4 +793,4 @@ export function usePicker({ path, title, className, fallback, v3, onPicked }: Pr
 
 type Picker = ReturnType<typeof usePicker>;
 /** What a card draws from: the picker, with a time on show. */
-export type CardCtx = Omit<Picker, "pick" | "days"> & { pick: Pick; days: Record<string, Slot[]>; t: string; ap: string; until: string; date: Date; sum: string; waiting: React.ReactElement };
+export type CardCtx = Omit<Picker, "pick" | "days"> & { pick: PickedTime; days: Record<string, Slot[]>; t: string; ap: string; until: string; date: Date; sum: string; waiting: React.ReactElement };

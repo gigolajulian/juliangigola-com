@@ -2,7 +2,7 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { bearer, isAdmin } from "@/lib/vouch";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { readLead } from "@/lib/leads/lead-store";
-import type { InvoiceFrom } from "@/lib/leads/invoice";
+import { FROM_KEY, type InvoiceFrom } from "@/lib/leads/invoice";
 import { cleanContractTemplates, cleanDraft, contractOf, contractUrl, copyName, draft, fillContract, fromLines, readContract, signedCopy, writeContract, CONTRACT_TEMPLATES, UNSET } from "@/lib/contracts/contract";
 import { contractStep } from "@/lib/contracts/contract-lead";
 import { contractMail, sendClient } from "@/lib/email/proof-mail";
@@ -21,8 +21,6 @@ import { parseOr } from "@/lib/json";
 export const dynamic = "force-dynamic";
 
 const TEMPLATES_KEY = "leads:contract-templates";
-/** The invoice details (`app/api/inbox`): the contract shows the name, address and email from them. */
-const FROM_KEY = "leads:invoice-from";
 
 async function gate(request: Request) {
   const { env } = await getCloudflareContext({ async: true });

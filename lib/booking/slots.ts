@@ -213,6 +213,13 @@ export async function busyBetween(secret: string | undefined, from: number, to: 
 
 /** Open starts of `slug` between `from` and `to`, as UTC ms. `mine`: a booking being moved, whose own time is not in the way. `kv`: where the extra calendars are listed. */
 /** What a slot check may know beyond the calendar: the booking being moved (`mine`), the store of extra calendars, the hours. */
+/** What `app/api/slots` answers, read by `components/booking/use-picker.tsx`. Starts are in the visitor's zone, grouped by their day there. */
+export type SlotsAnswer = {
+  status: "success";
+  event: { title: string; lengthInMinutes: number; price: number; locations: { type: "integration" | "attendeeDefined" }[] };
+  data: { [day: string]: { start: string; end: string }[] };
+};
+
 export type SlotOpts = { now?: number; mine?: { start: string; end: string }; kv?: KV; hours?: Hours };
 
 export async function openStarts(secret: string | undefined, slug: string, from: number, to: number, { now = Date.now(), mine, kv, hours }: SlotOpts = {}) {

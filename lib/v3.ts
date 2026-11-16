@@ -1,4 +1,5 @@
-import { depositFor } from "@/lib/booking/paid";
+import { EVENTS } from "@/lib/booking/booking-rules";
+import { depositFor, isPaid } from "@/lib/booking/paid";
 
 /* JG V3 (master v39, DESIGN.md "Photos"): what each screen shows, per theme.
    Dark is the hard-light set; light is a second, brighter set. Paths under
@@ -83,7 +84,7 @@ export type Session = {
   turnaround?: string;
   /** The event it books, "juliangigola/event-slug" (a stored key; the slug keys `EVENTS`); none for an on-request session. */
   cal?: string;
-  /** Takes a deposit (`lib/booking/paid.ts`). */
+  /** Takes a deposit: its event is in `PAID` (`lib/booking/paid.ts`). */
   paid: boolean;
   /** `m`: a horizontal frame for the phone banner, where the tall one crops badly.
       `at`: where the phone and portrait-tablet banner sits on each frame (an
@@ -93,7 +94,7 @@ export type Session = {
   type?: string;
 };
 
-export const SESSIONS: Record<SessionSlug, Session> = {
+const LISTED: Record<SessionSlug, Omit<Session, "paid">> = {
   portraits: {
     slug: "portraits",
     name: "Portraits",
@@ -102,7 +103,6 @@ export const SESSIONS: Record<SessionSlug, Session> = {
     includes: ["One hour, studio or location", "Two looks", "Retouched selects", "Crops for web and print"],
     turnaround: "1 week",
     cal: "juliangigola/portraits",
-    paid: true,
     // SIAN 01, Julian's pick for the Portraits booking card (2026-11-10). Was ZOE 16.
     // Desktop gets sian/01 with 200px of her own backdrop added on top, so her face sits at the panel's middle (Julian, 2026-11-10).
     photo: { d: w("sian", "01"), l: w("sian", "01"), desk: "/v3/portraits-sian-tall.jpg", at: { d: "50% 5%", l: "50% 5%" } },
@@ -115,7 +115,6 @@ export const SESSIONS: Record<SessionSlug, Session> = {
     includes: ["90 minutes on location", "Two outfit changes", "Edited gallery", "Print release"],
     turnaround: "1 week",
     cal: "juliangigola/graduation",
-    paid: true,
     photo: { d: "/work/graduation/cover.jpg", l: w("graduation", "06"), at: { d: "50% 12%" } },
   },
   headshots: {
@@ -126,7 +125,6 @@ export const SESSIONS: Record<SessionSlug, Session> = {
     includes: ["Studio lighting", "Multiple backgrounds", "Retouched selects", "Crops for web and print"],
     turnaround: "3 business days",
     cal: "juliangigola/headshots",
-    paid: true,
     photo: { d: "/v3/headshots-cover.jpg", l: "/v3/headshots-03.jpg" },
   },
   "studio-digitals": {
@@ -137,7 +135,6 @@ export const SESSIONS: Record<SessionSlug, Session> = {
     includes: ["Full length, three-quarter and close", "Front and profile", "Unretouched, as agencies require"],
     turnaround: "2 business days",
     cal: "juliangigola/digitals",
-    paid: true,
     photo: { d: w("abril", "03"), l: w("abril", "03"), at: { d: "50% 10%", l: "50% 10%" } },
   },
   /* Julian, 2026-11-14: the name, an hour, a week and the $100 deposit; the rate is quoted on the call. */
@@ -149,7 +146,6 @@ export const SESSIONS: Record<SessionSlug, Session> = {
     includes: ["One hour", "Styled"],
     turnaround: "1 week",
     cal: "juliangigola/model-test",
-    paid: true,
     photo: { d: w("sonder", "01"), l: w("sonder", "01") },
   },
   weddings: {
@@ -159,7 +155,6 @@ export const SESSIONS: Record<SessionSlug, Session> = {
     from: null,
     includes: ["Full-day coverage", "Second shooter available", "Edited gallery", "Print release"],
     turnaround: "4 weeks",
-    paid: false,
     photo: { d: w("weddings", "02"), l: w("weddings", "07") },
   },
   consultation: {
@@ -168,7 +163,6 @@ export const SESSIONS: Record<SessionSlug, Session> = {
     from: null,
     includes: ["Phone or video", "Dates and references"],
     cal: "juliangigola/consultation",
-    paid: false,
     /* The master's call card shows the About portrait. */
     photo: { d: ABOUT_PHOTO, l: ABOUT_PHOTO, at: { d: "50% 85%", l: "50% 85%" } },
   },
@@ -181,7 +175,6 @@ export const SESSIONS: Record<SessionSlug, Session> = {
     from: null,
     includes: ["Phone or video", "Dates and references"],
     cal: "juliangigola/music-call",
-    paid: false,
     photo: { d: w("valgur", "02"), l: w("iris", "02"), at: { d: "50% 12%", l: "50% 40%" } },
   },
   "fashion-photography": {
@@ -191,7 +184,6 @@ export const SESSIONS: Record<SessionSlug, Session> = {
     from: null,
     includes: ["Book a phone or video call", "Dates and references"],
     cal: "juliangigola/editorial",
-    paid: false,
     photo: { d: w("i-wanna-be-a-human", "02"), l: w("i-wanna-be-a-human", "02") },
   },
   "brand-photography": {
@@ -201,7 +193,6 @@ export const SESSIONS: Record<SessionSlug, Session> = {
     from: null,
     includes: ["Phone or video", "Dates and references"],
     cal: "juliangigola/campaign",
-    paid: false,
     photo: { d: w("oakley-x-nike", "01"), l: w("paradox", "01") },
   },
   /* book.juliangigola.com/editorial's call, its words from the retired book page (`book/public/index.html`, in git history). */
@@ -212,7 +203,6 @@ export const SESSIONS: Record<SessionSlug, Session> = {
     from: null,
     includes: ["Phone or video", "Dates and references"],
     cal: "juliangigola/editorial",
-    paid: false,
     photo: { d: w("novocaine", "04"), l: w("novocaine", "04"), m: w("novocaine", "01") },
   },
   events: {
@@ -221,17 +211,24 @@ export const SESSIONS: Record<SessionSlug, Session> = {
     blurb: "Launches, brand events, concerts and parties, shot as they happen.",
     from: null,
     includes: [],
-    paid: false,
     photo: { d: w("events", "01"), l: w("events", "01") },
     type: "event",
   },
 };
+/** The event slug a session books ("digitals" for studio-digitals), or "". */
+const eventOf = (s: { cal?: string }) => s.cal?.split("/")[1] ?? "";
+export const SESSIONS = Object.fromEntries(Object.entries(LISTED).map(([k, s]) => [k, { ...s, paid: isPaid(eventOf(s)) }])) as Record<SessionSlug, Session>;
 export const isSession = (s?: string): s is SessionSlug => !!s && Object.hasOwn(SESSIONS, s);
 /** The session tabs' order (DESIGN.md, Stepper). */
 export const TAB_ORDER: SessionSlug[] = ["portraits", "headshots", "studio-digitals", "model-test", "graduation", "weddings", "consultation"];
 /** The homepage index and the doors' order. */
 export const INDEX_ORDER: SessionSlug[] = ["portraits", "graduation", "headshots", "studio-digitals", "weddings"];
 export const rate = (s: Session) =>
-  !s.paid && s.cal ? "15 min" : s.from != null ? `From $${s.from}` : s.paid ? `$${depositFor(s.cal?.split("/")[1] ?? "")} deposit` : "On request";
-/** Session lengths in minutes (master MIN); the event's own length (`EVENTS`) wins where /api/slots answers. */
-export const LENGTH: Record<SessionSlug, number> = { portraits: 60, graduation: 90, headshots: 45, "studio-digitals": 60, "model-test": 60, weddings: 480, consultation: 15, "music-photography": 15, "fashion-photography": 15, "brand-photography": 15, editorial: 15, events: 0 };
+  !s.paid && s.cal ? "15 min" : s.from != null ? `From $${s.from}` : s.paid ? `$${depositFor(eventOf(s))} deposit` : "On request";
+/** Session lengths in minutes: the event's own (`EVENTS`), or these where there is none or the stepper says otherwise.
+    Where /api/slots answers, the event's length is the one booked. */
+const OWN_LENGTH: Partial<Record<SessionSlug, number>> = {
+  weddings: 480,
+  events: 0,
+};
+export const LENGTH = Object.fromEntries(Object.values(SESSIONS).map((s) => [s.slug, OWN_LENGTH[s.slug] ?? EVENTS[eventOf(s)]?.length ?? 0])) as Record<SessionSlug, number>;

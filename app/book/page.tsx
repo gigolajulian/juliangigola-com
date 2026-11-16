@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 const LENGTHS: Record<string, string> = {
   portraits: "1 hour",
   graduation: "90 minutes",
-  headshots: "30 minutes",
+  headshots: "45 minutes",
   "studio-digitals": "45 minutes",
   weddings: "Call",
 };

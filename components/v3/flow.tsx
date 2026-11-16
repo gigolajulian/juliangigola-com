@@ -9,7 +9,8 @@ import { looksLikeEmail } from "@/lib/inbox";
    step rail, the head, the body, the action bar, and the sticky photo with
    a live summary. Each flow owns its state and fills these slots. */
 
-const pad = (n: number) => String(n).padStart(2, "0");
+/** Two digits; `iso` below is a local date as "2026-11-04". The booking picker reuses both (`time-picker-parts.tsx`). */
+export const pad = (n: number) => String(n).padStart(2, "0");
 
 export const Check = () => (
   <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
