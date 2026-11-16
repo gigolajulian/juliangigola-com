@@ -10,6 +10,7 @@ import type { Flip as FlipT } from "gsap/Flip";
 import { PageFoot } from "@/components/v3/chrome";
 import DISC from "@/lib/discipline-order.json";
 import { mplan, GSAP_OUT } from "@/lib/mplan";
+import { V4Drift } from "./v4-drift";
 // The canvas view loads only when it opens, not with every /portfolio visit.
 const V3Canvas = dynamic(() => import("@/components/v3/canvas").then((m) => m.V3Canvas), { ssr: false });
 import { launchSpeed, stepSpring, springSettled, frameDt } from "@/lib/motion/spring";
@@ -1084,6 +1085,7 @@ export function V3Work({
 
   return (
     <div className="v3 contents">
+      <V4Drift k={`${view}|${filter}|${q}|${list.length}`} />
       <section
         ref={page}
         className={
@@ -1141,6 +1143,7 @@ export function V3Work({
         <p className="wnote lbl mute" aria-live="polite">
           {q ? `${plural(list.length)} matching “${q}”` : shown ? `${shown.length} frames` : plural(list.length)}
         </p>
+        {q && !list.length ? <p className="wnone mute">Nothing matches that search yet.</p> : null}
         {view === "grid" && shown ? (
           <div className={shown.every((f) => f.sq) ? "wgrid wframes square" : "wgrid wframes"}>
             {shown.map((f, n) => (

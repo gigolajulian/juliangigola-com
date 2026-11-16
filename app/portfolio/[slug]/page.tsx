@@ -12,7 +12,6 @@ import {
   COVER_ART,
   COVER_RELEASES,
   getProject,
-  enquiryTypeFor,
   isDisciplineGallery,
   nextAfter,
   nextDiscipline,
@@ -115,7 +114,8 @@ export default async function ProjectPage(props: PageProps<"/portfolio/[slug]">)
           className="mt-24"
           title="Want something like this?"
           body="Tell me what you have in mind and I'll come back with a treatment and a rate."
-          type={enquiryTypeFor(project)}
+          // The value /contact/form preselects on (TYPE in components/v3/inquire.tsx).
+          type="coverart"
           detail={project.name}
           secondary={
             onwards ? { href: onwards.href, label: onwards.name } : undefined

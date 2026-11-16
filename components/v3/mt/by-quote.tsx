@@ -49,6 +49,7 @@ export function MtByQuote({ stills, reply, onTouch }: { stills: Record<string, s
     };
     el.addEventListener("mt-step", on);
     return () => el.removeEventListener("mt-step", on);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- one listener for the page's life; pick only calls state setters
   }, []);
   const rest = () => {
     if (step.current < 0) setOpt(false);
@@ -75,7 +76,7 @@ export function MtByQuote({ stills, reply, onTouch }: { stills: Record<string, s
           <p className="lbl mute mt-label">By quote</p>
           <h2 className="mt-q-h">Have something in mind?</h2>
           <p className="lbl mt-by">
-            <span className="mute">Commissioned by</span> <span className="nm" aria-live="off">{client.name}</span>
+            <span className="mute">Commissioned by</span> <span className="nm">{client.name}</span>
           </p>
           <div className="mt-qos">
             {QUOTE_OPTS.slice(0, 3).map((x, i) => (

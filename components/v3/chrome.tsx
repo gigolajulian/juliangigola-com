@@ -465,7 +465,7 @@ function SiteHeader() {
           ))}
           <div className="pmenu-foot">
             <ThemeButton />
-            <span className="lbl mute">hello@juliangigola.com</span>
+            <a className="lbl mute" href="mailto:hello@juliangigola.com">hello@juliangigola.com</a>
           </div>
         </nav>
       </div>
@@ -488,7 +488,7 @@ export function V3Foot() {
 
 /* Screens built from the master carry their own footer line (`V3Foot`);
    the pages restyled by tokens only get it here, after `main`. */
-const OWN_FOOT = /^\/($|portfolio(\/video)?$|bts$|about$|contact(\/form)?$|book(\/|$)|portraits$|headshots$|graduation-photos$|model-digitals$|weddings$|music-photography$|brand-photography$|admin(\/|$)|proof\/)/;
+const OWN_FOOT = /^\/($|portfolio(\/video)?$|bts$|about$|contact(\/form)?$|book(\/|$)|portraits$|headshots$|graduation-photos(\/|$)|model-digitals$|weddings$|music-photography$|brand-photography$|admin(\/|$)|proof\/)/;
 
 /** An inner page's ending: the footer line, or the V4 footer under `?v4pages=foot` (v4-foot.tsx). */
 export function PageFoot() {

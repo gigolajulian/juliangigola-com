@@ -234,7 +234,7 @@ function Desk({ films, onPlay }: { films: Video[]; onPlay: (v: Video) => void })
           );
         })}
         <button type="button" className="mo-hit" onClick={() => onPlay(v)} aria-label={`Play ${v.title}`} />
-        <h1 className="mo-h lbl">Motion · {two(films.length)} films</h1>
+        <p className="mo-h lbl" aria-hidden>Motion · {two(films.length)} films</p>
         <div className="mo-cap" key={v.id}>
           <span className="lbl">{two(i)} · {subOf(v)}</span>
           <h2>{v.title}</h2>
@@ -323,7 +323,7 @@ function Stack({ films }: { films: Video[] }) {
   if (!open)
     return (
       <div className="mo-stack">
-        <h1 className="lbl mute">Motion · {two(films.length)} films</h1>
+        <p className="lbl mute" aria-hidden>Motion · {two(films.length)} films</p>
         {films.map((v, i) => <Row key={v.id} v={v} i={i} onOpen={go} />)}
       </div>
     );
@@ -419,6 +419,8 @@ export function V3Video({ videos }: { videos: Video[] }) {
   return (
     <div className="v3 contents">
       <section className="v3page" id="p-video">
+        {/* One h1 for both layouts; their visible copies of the line are aria-hidden. */}
+        <h1 className="sr-only">Motion · {two(all.length)} films</h1>
         <Desk films={all} onPlay={setPlaying} />
         <Stack films={all} />
         <PageFoot />

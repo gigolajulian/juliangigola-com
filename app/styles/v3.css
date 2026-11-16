@@ -278,7 +278,9 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .pmenu.drawer a[aria-current="page"]{color:var(--accent)}
 .v3 .pmenu-foot{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:16px}
 .v3 .pmenu-foot .tbtn{margin-left:-13px}
-.v3 .pmenu-foot .lbl{margin-top:0}}
+.v3 .pmenu-foot .lbl{margin-top:0}
+/* The email is a link now: keep the label face, not the menu links'. */
+.v3 .pmenu-foot a.lbl{font:400 11px/1.2 var(--mono);letter-spacing:.14em;padding:0}}
 @media (min-width:701px){.v3 .pmenu.drawer{display:none}}
 @media (prefers-reduced-motion:reduce){.v3 .pmenu.drawer,.v3 .burger-btn i{transition:none}}
 /* One scrolling row at every width, a fade on the cut chip. */
@@ -567,7 +569,7 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .wsearch:focus-within{border-bottom-color:var(--accent)}
 .v3 .wsearch input{flex:1;min-width:0;background:none;border:0;outline:0;color:var(--ink);font:inherit;letter-spacing:.04em;text-transform:none}
 .v3 .wsearch input::placeholder{color:var(--mute)}
-.v3 .wnote{margin:0;padding:20px var(--gr) 0 var(--g)}
+.v3 .wnote,.v3 .wnone{margin:0;padding:20px var(--gr) 0 var(--g)}
 .v3 .wnote+.wgrid{padding-top:16px}
 .v3 .wt .ph{position:relative}
 .v3 .wstrip{display:flex;gap:12px;overflow-x:auto;scrollbar-width:none;padding:16px var(--gr) 0 var(--g)}
@@ -1186,7 +1188,7 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 .v3 .mo-stack{display:none}
 @media (max-width:800px){.v3 .mo-desk{display:none}
 .v3 .mo-stack{display:flex;flex-direction:column;gap:40px;padding:24px var(--gr) 64px var(--g)}
-.v3 .mo-stack h1{margin:0}
+.v3 .mo-stack>.lbl{margin:0}
 .v3 .mo-row{all:unset;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px 16px;cursor:pointer}
 .v3 .mo-row:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
 .v3 .mo-frame{grid-column:1/-1;position:relative;aspect-ratio:16/9;border-radius:4px;overflow:hidden;background:var(--card)}
