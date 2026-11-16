@@ -1,8 +1,10 @@
 /* v4 home motion engine (spec "Scroll method: Current"). One rAF loop for the
-   whole home. On the desktop structure (D) every `[data-mt][data-hold]` section
+   whole home. On the desktop structure (D, `held` in lib/device.ts) every `[data-mt][data-hold]` section
    becomes a tall wrapper with a sticky stage (motion.css) and gets `--p`, 0 to 1
    through its hold. Sections without a hold get `--p` as they cross the screen.
    Drivers add the per-section motion; each owns one file in this folder. */
+
+import { media } from "@/lib/device";
 
 export type Ctx = {
   /** viewport width and height, px */
@@ -38,7 +40,6 @@ export type Driver = {
   always?: boolean;
 };
 
-const D = "(min-width:1024px) and (min-height:600px)";
 export const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 export const smooth = (v: number) => v * v * (3 - 2 * v);
 /** 0 to 1 as v goes from a to b, clamped */
@@ -47,8 +48,8 @@ export const span = (v: number, a: number, b: number) => clamp((v - a) / (b - a)
 export function startEngine(root: HTMLElement, drivers: Driver[]) {
   const html = document.documentElement;
   if (matchMedia("(prefers-reduced-motion: reduce)").matches) return () => {};
-  const mqD = matchMedia(D);
-  const mqFine = matchMedia("(hover:hover) and (pointer:fine)");
+  const mqD = media("held");
+  const mqFine = media("fine");
   const ctx: Ctx = { vw: innerWidth, vh: innerHeight, y: scrollY, dy: 0, t: performance.now(), dt: 16, held: mqD.matches, fine: mqFine.matches, u: 1, top: 0, h: 0, fresh: true };
   const secs = [...root.querySelectorAll<HTMLElement>("[data-mt]")];
   const last = new Map<HTMLElement, number>();
