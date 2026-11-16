@@ -118,6 +118,25 @@ function thumb(el: HTMLImageElement | HTMLVideoElement): Uint8ClampedArray | nul
    O the perspective origin. Kept for one look, as `seen` is. */
 const boxes = new Map<Element, { left: number; top: number; width: number; height: number }>();
 const webkit = () => navigator.vendor.startsWith("Apple");
+/** The perspectives a box was put back from: each stage and the scales under it. Safari's answer to "what is at this
+    point" follows the reported box too, so `under` also asks at the point each of these would report (MAC: at 1180
+    a photo whose painted bottom edge is 15px under the words was never found, white words at 1.75:1).
+    shortcut: a scale is only known once a photo at that depth was looked at, which the top of the hero does. */
+const stages = new Map<Element, Set<number>>();
+function hits(x: number, y: number) {
+  const list = document.elementsFromPoint(x, y);
+  for (const [stage, scales] of stages) {
+    if (!stage.isConnected) {
+      stages.delete(stage);
+      continue;
+    }
+    const sr = stage.getBoundingClientRect(), o = getComputedStyle(stage).perspectiveOrigin.split(" ").map(parseFloat);
+    const ox = sr.left + o[0], oy = sr.top + o[1];
+    // photos only, ahead of the rest: `pixel` drops the ones whose painted box does not hold the point
+    for (const S of scales) list.unshift(...document.elementsFromPoint(ox + (x - ox) * S, oy + (y - oy) * S).filter((e) => e instanceof HTMLImageElement && !list.includes(e)));
+  }
+  return list;
+}
 function box(el: HTMLElement) {
   const had = boxes.get(el);
   if (had) return had;
@@ -140,6 +159,7 @@ function box(el: HTMLElement) {
     if (stage && Math.abs(S - 1) > 0.005 && Math.abs(k - S) < Math.abs(k - 1)) {
       const sr = stage.getBoundingClientRect(), o = getComputedStyle(stage).perspectiveOrigin.split(" ").map(parseFloat);
       const ox = sr.left + o[0], oy = sr.top + o[1];
+      (stages.get(stage) ?? stages.set(stage, new Set()).get(stage)!).add(S);
       r = { left: ox + (g.left - ox) / S, top: oy + (g.top - oy) / S, width: g.width / S, height: g.height / S };
     }
   }
@@ -195,7 +215,7 @@ const seen = new Map<Element, number>();
 type Hit = { at?: (y: number) => RGB | null; unknown?: boolean };
 /** What shows at a point, under the header: the first photo, film or painted box from the top. */
 function under(x: number, y: number, hdr: HTMLElement, page: RGB, hit?: Hit, hw = 0, hh = 0): RGB {
-  for (const el of document.elementsFromPoint(x, y)) {
+  for (const el of hits(x, y)) {
     if (hdr.contains(el) || el.closest("[aria-hidden].mt-dockname")) continue;
     if (el instanceof HTMLImageElement || el instanceof HTMLVideoElement) {
       const cs = getComputedStyle(el);
