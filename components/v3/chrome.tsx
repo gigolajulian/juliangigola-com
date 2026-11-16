@@ -7,6 +7,7 @@ import Link from "next/link";
 import { THEME_COLOR } from "@/lib/theme-color";
 import { usePathname } from "next/navigation";
 import { onLenisScroll, scrollTop } from "./smooth-scroll";
+import { useNavInk } from "./nav-ink";
 
 /* JG V3 chrome (master v39): the glass header, the phone menu, the theme
    toggle and the footer line. Every route uses it, /admin included (2026-10-31). */
@@ -382,6 +383,8 @@ function SiteHeader() {
   // `?mtscroll=1`: the v4 home has no cover to wait for, the bar is there from the start.
   const mt = React.useSyncExternalStore(noop, mtscroll, () => false);
   const show = (!home || past || mt) && !tuck;
+  // `?navfx=1`: the header on trial (ground off at the top, white or black words).
+  useNavInk(hdr, path);
   const [menu, setMenu] = React.useState(false);
   /* A route change closes it. */
   const [was, setWas] = React.useState(path);
@@ -486,7 +489,7 @@ export function V3Foot() {
 
 /* Screens built from the master carry their own footer line (`V3Foot`);
    the pages restyled by tokens only get it here, after `main`. */
-const OWN_FOOT = /^\/($|portfolio(\/video)?$|bts$|about$|contact(\/form)?$|book(\/|$)|portraits$|headshots$|graduation-photos(\/|$)|model-digitals$|weddings$|music-photography$|brand-photography$|admin(\/|$)|proof\/)/;
+const OWN_FOOT = /^\/($|portfolio(\/video)?$|bts$|about$|contact(\/form)?$|book(\/|$)|portraits$|headshots$|graduation-photos(\/|$)|model-digitals$|weddings$|music-photography$|fashion-photography$|brand-photography$|admin(\/|$)|proof\/)/;
 
 export function V3Footer() {
   if (OWN_FOOT.test(usePathname())) return null;

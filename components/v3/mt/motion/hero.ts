@@ -1,3 +1,4 @@
+import { navfx } from "../../nav-ink";
 import { clamp, smooth, span, type Driver } from "./engine";
 
 /* Hero wall travel (spec 3.2). Held (D): the wall travels up through the hold,
@@ -30,10 +31,19 @@ const ink = (n: Node) => {
   return r.getBoundingClientRect();
 };
 
+/* ?mtdock=left (Julian 2026-11-15): no dock. The header keeps its links from the start with no
+   ground under them, the name leaves to the left as the hero ends, and the header's ground comes in there. The bar's
+   wordmark waits until the big name has gone (2026-11-16: "never together"; the header trial does that). */
+const LEFT = typeof location !== "undefined" && /[?&]mtdock=left/.test(location.search);
+/* With no ground over the hero the nav words sit on the wall: they flip white or black (nav-ink.ts; the flag turns
+   ?navfx on in layout.tsx), and page text fades out under the bar there (the same file's text fade). */
+
 function dockSetup(el: HTMLElement): Dock | null {
+  if (LEFT) return null;
   const w = Number(/[?&]mtdock=([\d.]+)/.exec(location.search)?.[1] ?? 1);
   const h1 = el.querySelector<HTMLElement>(".mt-name h1"), wm = document.querySelector<HTMLElement>(".site-hdr .site-wm");
-  if (!w || !h1 || !wm) return null;
+  // ?navfx=1 (Julian, 2026-11-15): no flight. The name fades with the hero, and the bar's wordmark comes in as it goes (nav-ink.ts).
+  if (!w || !h1 || !wm || navfx()) return null;
   const f = document.createElement("div");
   f.className = "mt-dockname";
   f.setAttribute("aria-hidden", "");
@@ -156,6 +166,15 @@ export const heroDrivers: Driver[] = [
       states.set(el, st);
       const d = st.dock;
       if (!d) document.documentElement.setAttribute("data-mtdock", "off");
+      // by scroll, not by frame: a jump past the hero gets no hero frames
+      // the hero is over when its last photos have left from under the header: the same line going down and coming back up
+      const hdr = document.querySelector<HTMLElement>(".site-hdr");
+      const past = () => document.documentElement.toggleAttribute("data-mt-pasthero", el.getBoundingClientRect().bottom <= (hdr?.offsetHeight ?? 60));
+      if (LEFT) {
+        document.documentElement.setAttribute("data-mtleft", "");
+        addEventListener("scroll", past, { passive: true });
+        past();
+      }
       // late fonts move both boxes: measure again on the next frame
       if (d) document.fonts?.ready.then(() => (st.at = ""), () => {});
       /* The engine gives a section no frames once it is a screen above the window. A jump past the hero (a reload
@@ -176,6 +195,9 @@ export const heroDrivers: Driver[] = [
       }
       return () => {
         removeEventListener("scroll", far);
+        removeEventListener("scroll", past);
+        document.documentElement.removeAttribute("data-mtleft");
+        document.documentElement.removeAttribute("data-mt-pasthero");
         [...st.cols, ...st.figs].forEach((p) => (p.el.style.transform = ""));
         if (st.name) st.name.style.cssText = "";
         if (d) {
@@ -231,8 +253,10 @@ export const heroDrivers: Driver[] = [
         const e = Math.round(smooth(span(p, 0.76, 0.96)) * 1000) / 1000;
         if (st.name && e !== st.e) {
           st.e = e;
-          st.name.style.opacity = String(1 - e);
-          st.name.style.transform = e ? `translate3d(0,${(-56 * ctx.u * e).toFixed(1)}px,0)` : "";
+          // ?mtdock=left (Julian, 2026-11-16: "these should just scroll down and out instead of left"): the name block
+          // rides down out of the window at full strength, no fade. The flag keeps its name.
+          st.name.style.opacity = LEFT ? "" : String(1 - e);
+          st.name.style.transform = !e ? "" : LEFT ? `translate3d(0,${(0.6 * ctx.vh * e).toFixed(1)}px,0)` : `translate3d(0,${(-56 * ctx.u * e).toFixed(1)}px,0)`;
           st.name.style.visibility = e >= 1 ? "hidden" : ""; // gone: its buttons leave the tab order too
         }
         return;

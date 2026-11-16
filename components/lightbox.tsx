@@ -489,10 +489,13 @@ export function Lightbox({
   onOpenChange,
   step,
   settled,
+  note,
 }: {
   frames: Frame[];
   /** What the sequence is, for the dialog's accessible title. */
   name: string;
+  /** A line of the page's own above the viewer's floor (Cover art's sound line). */
+  note?: React.ReactNode;
 } & Omit<ReturnType<typeof useLightbox>, "show">) {
   const current = frames[index];
   const { ref: picture, handlers: swipe } = useSwipe({
@@ -537,6 +540,12 @@ export function Lightbox({
               onStep={step}
               index={index}
             />
+          ) : null}
+
+          {note ? (
+            <div data-zoom-chrome className="shrink-0 px-6 pt-3 sm:px-10" style={{ opacity: 0 }}>
+              {note}
+            </div>
           ) : null}
 
           <div

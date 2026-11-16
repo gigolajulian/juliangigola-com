@@ -68,7 +68,71 @@
 [data-v4pages~="m2p"] #p-project:has(.pj-bts) .pj-flow .pj-cr{display:none}
 
 /* Inner pages plan on trial, only under ?v4pages (lib/v4pages.ts, head script in app/layout.tsx).
-   p3: the scroll motion of the /portfolio grid. On for everyone since 2026-11-15
+   c1: Cover art in the site's system (components/cover/cover-page.tsx) */
+
+/* ── c1. The page title, the home's sleeves in a grid with the /portfolio gap, the project
+   pages' ask. The sleeve, its record and the lift are the home's own rules (mtscroll.css, mt/motion/rows.css,
+   which list `.cv4` beside their own scope); only what differs on a grid is here. `--u` is the home's design
+   unit: a cell is a third of the window where the home's sleeve is 320 units. ── */
+html[data-v4pages~="c1"] .cv4p{padding-top:64px}
+html[data-v4pages~="c1"] .cv4h{padding:56px var(--gr) 0 var(--g)}
+html[data-v4pages~="c1"] .cv4h>div{display:flex;flex-direction:column;align-items:flex-start;gap:20px}
+html[data-v4pages~="c1"] .cv4{--u:calc(100vw / 960);list-style:none;margin:48px 0 0;padding:0 var(--gr) 0 var(--g);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;overflow-x:clip}
+html[data-v4pages~="c1"] .cv4 .mt-sleeve{position:relative;display:block;width:100%;height:auto;aspect-ratio:1;--o:var(--hin)}
+/* Space between the covers, on the /portfolio grid's gutters and gap (Julian, 2026-11-15), so photographs take their 4px. */
+html[data-v4pages~="c1"] .cv4 .mt-sleeve .face,html[data-v4pages~="c1"] .cv4 .mt-sleeve .face img{border-radius:4px}
+@media (max-width:700px){html[data-v4pages~="c1"] .cv4{gap:10px}}
+/* The name: the home's cover caption (.mt-cvcap), under the sleeve. Dim at rest, full for the cover under the pointer or the focus. */
+html[data-v4pages~="c1"] .cv4c{display:none}
+@media (min-width:701px){
+  html[data-v4pages~="c1"] .cv4{row-gap:56px;padding-bottom:44px}
+  html[data-v4pages~="c1"] .cv4c{position:absolute;left:0;top:calc(100% + 10px);width:100%;display:grid;gap:4px;font:400 11px/1.2 var(--mono);letter-spacing:.14em;text-transform:uppercase;text-align:left;white-space:nowrap;pointer-events:none;opacity:.35;transition:opacity .3s ease-out}
+  html[data-v4pages~="c1"] .cv4c span{overflow:hidden;text-overflow:ellipsis}
+  html[data-v4pages~="c1"] .cv4c .mute{color:var(--mute,var(--muted-foreground))}
+  html[data-v4pages~="c1"] .cv4 .mt-sleeve:hover .cv4c,html[data-v4pages~="c1"] .cv4 .mt-sleeve:focus-visible .cv4c{opacity:1}
+}
+/* Pinned here: mtscroll.css and rows.css both dress the face at the same weight, and they load in separate files. */
+html[data-v4pages~="c1"] .cv4 .mt-sleeve .face{overflow:visible;background:none}
+html[data-v4pages~="c1"] .cv4 .mt-sleeve .face img{object-fit:cover}
+html[data-v4pages~="c1"] .cv4 .mt-sleeve:focus-visible{outline:1px solid var(--accent);outline-offset:-1px;z-index:3}
+/* The record only exists where it can move: no hover on touch, no slide under reduced motion.
+   On the home hover tucks it in; here it rests inside and hover brings it out, a third of the sleeve. */
+html[data-v4pages~="c1"] .cv4 .mt-sleeve .disc{display:none}
+@media (hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
+  html[data-v4pages~="c1"] .cv4 .mt-sleeve .disc{display:block;left:1.875%;top:1.875%;width:96.25%;height:96.25%;transform:translateX(calc(var(--o) * 33.4%)) rotate(calc(var(--o) * 200deg))}
+  /* The last column has no room on its right: its record comes out to the left. */
+  html[data-v4pages~="c1"] .cv4 li:nth-child(3n) .mt-sleeve{--o:calc(var(--hin) * -1)}
+  html[data-v4pages~="c1"] .cv4 .mt-sleeve .disc::after{transform:rotate(calc(var(--o) * -200deg))}
+  /* Held under the pointer the record keeps turning (Julian, 2026-11-15): the disc is one flat colour, so the turn
+     shows in its sheen, one revolution in 1.8s (33 rpm), starting once the record is out. */
+  /* `.snd`: its clip is playing (`?v4pages=c1,snd`). The same rule, so the turn does not jump when the sound starts. */
+  html[data-v4pages~="c1"] .cv4 .mt-sleeve:is(.hv,.snd) .disc::after{animation:cv4-spin 1.8s linear .45s infinite}
+}
+/* snd (`?v4pages=c1,snd`, components/cover/cover-sound.tsx): the sound line. On / off, and beside one of Apple's
+   previews the link to the song and the credit its terms ask for. One sits at the foot of the window over the grid,
+   one on the viewer's floor. */
+.cv4s{display:flex;flex-wrap:wrap;align-items:center;gap:6px 20px;font:400 11px/1.4 var(--font-mono),ui-monospace,monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--muted-foreground)}
+.cv4s :is(button,a){font:inherit;letter-spacing:inherit;text-transform:inherit;background:none;border:0;padding:6px 0;cursor:pointer}
+.cv4s a{padding:0}
+.cv4s a img{display:block;height:18px;width:auto}
+.cv4s a.sc img{height:12px}
+/* No ground under the line: each part takes white or black from what is under it (`data-ink`, set by the header's
+   `inkWord`), and Apple's mark swaps between its own white and black files. Before the first look: the theme's. */
+.cv4s>*{color:var(--nav-ink,var(--foreground));transition:color .2s ease}
+.cv4s>span{opacity:.7}
+.cv4s .am-b,html[data-theme="light"] .cv4s a:not([data-ink]) .am-w,.cv4s a[data-ink="b"] .am-w{display:none}
+html[data-theme="light"] .cv4s a:not([data-ink]) .am-b,.cv4s a[data-ink="b"] .am-b{display:block}
+/* The line sits on the right of the screen, on / off outermost (Julian, 2026-11-16): reversed, so the button is
+   still first for the keyboard. */
+.cv4s{flex-direction:row-reverse}
+.cv4s :is(button,a):focus-visible{outline:1px solid currentColor;outline-offset:3px}
+.cv4s.cv4sf{position:fixed;right:0;bottom:0;z-index:20;padding:6px 24px}
+html[data-v4pages~="c1"] .cv4a{padding:24px var(--gr) 96px var(--g);margin-top:24px}
+html[data-v4pages~="c1"] .cv4a .pj-ask{border-top:1px solid var(--line)}
+html[data-v4pages~="c1"] .cv4a .cv4b{display:flex;flex-wrap:wrap;gap:12px}
+@media (min-width:701px){html[data-v4pages~="c1"] .cv4a .cv4b{margin:0 clamp(40px,7vw,140px) 0 auto}}
+
+/* p3: the scroll motion of the /portfolio grid. On for everyone since 2026-11-15
    (the head script defaults to it); `?v4pages=0` turns it off for the tab. */
 
 /* ── p3. Two moves, both from the V4 home, both gone at rest.
@@ -113,3 +177,4 @@
 @media (hover: hover) and (pointer: fine) {
   html[data-v4pages~="tilt"] .v3 #p-work [data-v4scroll] .wt:hover img { transform: none; }
 }
+@keyframes cv4-spin{to{rotate:360deg}}
