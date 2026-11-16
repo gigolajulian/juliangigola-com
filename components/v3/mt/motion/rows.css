@@ -9,13 +9,22 @@ html[data-mt-held] .mt-held[data-mt-near] .mt-track{will-change:transform}
 /* The title line's clip (for the rise) cut descenders at line-height .9. */
 html[data-mt-held] .mt-held .mt-ttl .ln{padding-bottom:.14em;margin-bottom:-.14em}
 /* Room inside the row's clip for the lift and its shadow. */
-html[data-mt-held] .mt-covers .mt-row{margin-top:0;padding-top:calc(60 * var(--u));padding-bottom:calc(96 * var(--u));margin-bottom:calc(-96 * var(--u))}
+/* padding-top: under 630px tall `--u` stops at .7 and the stage is shorter than the 900 units the layout counts on, so the
+   captions sat on the count and See all covers. The gap above the covers gives up what is missing (1024x600: 30px).
+   `--short` is set on the section because the row swaps `--u` for the covers' own unit on tall windows. */
+html[data-mt-held] .mt-covers{--short:max(0px,900 * var(--u) - 100svh);--tu:var(--u)}
+html[data-mt-held] .mt-covers .mt-row{margin-top:0;padding-top:max(calc(12 * var(--u)),calc(60 * var(--u) - var(--short)));padding-bottom:calc(96 * var(--u));margin-bottom:calc(-96 * var(--u))}
 /* Tall windows (Julian, 2026-11-15: "scale cover, dont add under"): one row, and the covers grow into the height the
    page unit leaves empty. The row gets its own unit: as tall as the 450 design px under the head allow, never so wide
    that the cover passes 40% of the window, never past the page unit's own 1.6px cap. Only on windows narrower than 16:10:
    at that shape the row's unit equals the page's, so it grows from there with no step. --cm centres the row in what is left. */
 @media (max-aspect-ratio:159/100){
 html[data-mt-held] .mt-covers{--cu:max(var(--u),min(calc((100svh - 450 * var(--u)) / 450),calc(100vw / 800),1.6px));--cm:max(0px,calc((100svh - 450 * var(--u) - 450 * var(--cu)) / 2))}
+html[data-mt-held] .mt-covers .mt-row{--u:var(--cu);--pl:calc(50vw - 160 * var(--u));margin-top:var(--cm)}
+}
+/* Screens taller than 1440 at any shape (4K at 100%): the page unit has stopped at 1.6px, so the same rule lets the covers grow, up to twice that. Was a 780px empty band at 3840x2160. */
+@media (min-height:1441px) and (min-aspect-ratio:159/100){
+html[data-mt-held] .mt-covers{--cu:max(var(--u),min(calc((100svh - 450 * var(--u)) / 450),calc(100vw / 800),3.2px));--cm:max(0px,calc((100svh - 450 * var(--u) - 450 * var(--cu)) / 2))}
 html[data-mt-held] .mt-covers .mt-row{--u:var(--cu);--pl:calc(50vw - 160 * var(--u));margin-top:var(--cm)}
 }
 /* "See all covers" sits at the bottom right; the counter moved to the bottom left (Julian, 2026-11-15): the head stops being its box, the stage is */
@@ -66,16 +75,17 @@ html[data-mt-held] .mt-motion .mt-film:focus-visible::after{content:"";position:
 html[data-mt-held] .mt-motion .mt-stage::before{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;background:linear-gradient(rgb(0 0 0 / .6),transparent 30%,transparent 52%,rgb(0 0 0 / .62))}
 html[data-mt-held] .mt-motion :is(.mt-mohead,.mt-mofoot){position:absolute;z-index:4;left:calc(var(--fx) + 36 * var(--u));width:auto;margin:0;padding:0;pointer-events:none}
 html[data-mt-held] .mt-motion .mt-mohead{top:calc(96 * var(--u))}
-/* as large as the Cover art heading (Julian, 2026-11-15; was 40) */
-html[data-mt-held] .mt-motion .mt-mohead h2{font-size:calc(88 * var(--u));margin-bottom:calc(12 * var(--u))}
+/* smaller than the film's own title (Julian, 2026-11-15: 88 was too large; before that 40) */
+html[data-mt-held] .mt-motion .mt-mohead h2{font-size:calc(56 * var(--u));margin-bottom:calc(10 * var(--u))}
 html[data-mt-held] .mt-motion :is(.mt-mohead,.mt-mofoot) .mute{color:rgb(var(--on-photo) / .72)}
-html[data-mt-held] .mt-motion .mt-mofoot{top:auto;bottom:calc(64 * var(--u))}
+/* the film's title block sits bottom right (Julian, 2026-11-15; was bottom left) */
+html[data-mt-held] .mt-motion .mt-mofoot{top:auto;bottom:calc(64 * var(--u));left:auto;right:calc(var(--fx) + 36 * var(--u));text-align:right}
 html[data-mt-held] .mt-motion .mt-mofoot h3{font-size:calc(104 * var(--u));margin:calc(12 * var(--u)) 0 calc(14 * var(--u))}
 html[data-mt-held] .mt-motion .mt-mofoot .btn{position:static;margin-top:calc(22 * var(--u));pointer-events:auto;border-color:rgb(var(--on-photo));color:rgb(var(--on-photo))}
-/* on the right, larger and brighter (Julian, 2026-11-15; was left, 11px, 55%, a 40px hairline) */
-html[data-mt-held] .mt-motion .mt-mopg{position:absolute;z-index:4;right:calc(var(--fx) + 36 * var(--u));top:50%;transform:translateY(-50%);margin:0;padding:0;list-style:none;display:grid;justify-items:end;gap:calc(16 * var(--u));pointer-events:none;font-size:max(15px,calc(20 * var(--u)))}
+/* on the right, small and close to the edge (Julian, 2026-11-15: 20px at 36 in was too large) */
+html[data-mt-held] .mt-motion .mt-mopg{position:absolute;z-index:4;right:calc(var(--fx) + 20 * var(--u));top:50%;transform:translateY(-50%);margin:0;padding:0;list-style:none;display:grid;justify-items:end;gap:calc(10 * var(--u));pointer-events:none;font-size:max(11px,calc(13 * var(--u)))}
 html[data-mt-held] .mt-motion .mt-mopg li{display:flex;flex-direction:row-reverse;align-items:center;gap:calc(12 * var(--u));opacity:.7;transition:opacity .25s ease}
-html[data-mt-held] .mt-motion .mt-mopg li::after{content:"";width:calc(96 * var(--u));height:2px;background:currentColor;transform-origin:100% 50%;transform:scaleX(0);transition:transform .4s cubic-bezier(.23,1,.32,1)}
+html[data-mt-held] .mt-motion .mt-mopg li::after{content:"";width:calc(40 * var(--u));height:1px;background:currentColor;transform-origin:100% 50%;transform:scaleX(0);transition:transform .4s cubic-bezier(.23,1,.32,1)}
 html[data-mt-held] .mt-motion .mt-mopg li[data-on]{opacity:1;font-weight:600}
 html[data-mt-held] .mt-motion .mt-mopg li[data-on]::after{transform:none}
 /* the client mark: top right only, small, never at the bottom (Julian) */
@@ -99,3 +109,5 @@ html[data-mt-par][data-mt-held] .mt-covers .mt-stage{transform:translate3d(0,cal
 html[data-mt-par][data-mt-held] .mt-motion{position:relative;z-index:2;background:var(--bg)}
 html[data-mt-par][data-mt-held] .mt-motion .mt-film{scale:calc(1.1 - var(--in,1) * .1)}
 html[data-mt-par][data-mt-held] .mt-motion .mt-mohead{translate:0 calc((1 - var(--in,1)) * 10svh)}
+/* Cover art on a screen taller than 1440: the covers grow to fill the stage (4K had a 780px empty band); their captions keep the page's size */
+html[data-mt-held] .mt-covers .mt-cvcap{font-size:max(11px,calc(11 * var(--tu)))}

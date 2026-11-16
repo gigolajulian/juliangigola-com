@@ -17,19 +17,19 @@
 [data-mtscroll] .mt{--u:clamp(.7px,min(calc(100vw / 1440),calc(100svh / 900)),1.6px);--fx:max(0px,calc((100vw - 1440 * var(--u)) / 2));--hair:color-mix(in srgb,var(--ink) 14%,transparent);--row:color-mix(in oklab,var(--ink) 50%,var(--bg));--body:color-mix(in oklab,var(--ink) 74%,var(--bg));position:relative;overflow-x:clip}
 [data-mtscroll] .mt section,[data-mtscroll] .mt footer{position:relative}
 [data-mtscroll] .mt .mt-frame{position:relative;width:min(100%,calc(1440 * var(--u)));margin-inline:auto}
-[data-mtscroll] .mt .lbl{font-size:max(10px,calc(11 * var(--u)))}
+[data-mtscroll] .mt .lbl{font-size:max(11px,calc(11 * var(--u)))}
 [data-mtscroll] .mt .lbl i{font-style:normal;opacity:.45}
 [data-mtscroll] .mt button:where(:not(.mt-bin-flow *)){font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;text-align:left}
 [data-mtscroll] .mt :is(button,a):focus-visible{outline:1px solid var(--accent);outline-offset:3px}
 [data-mtscroll] .mt .btn{justify-content:center}
 [data-mtscroll] .mt .fig{display:block}
 [data-mtscroll] .mt .mt-big{height:auto;padding:calc(20 * var(--u)) calc(32 * var(--u));font-size:max(11px,calc(13 * var(--u)))}
-[data-mtscroll] .mt .mt-sm{height:auto;min-height:32px;padding:calc(9 * var(--u)) calc(14 * var(--u));font-size:10px}
-[data-mtscroll] .mt .mt-link{font:500 max(10px,calc(11 * var(--u)))/1.2 var(--mono);letter-spacing:.14em;text-transform:uppercase;text-decoration:underline;text-underline-offset:4px;text-decoration-color:color-mix(in srgb,var(--ink) 40%,transparent)}
+[data-mtscroll] .mt .mt-sm{height:auto;min-height:32px;padding:calc(9 * var(--u)) calc(14 * var(--u));font-size:11px}
+[data-mtscroll] .mt .mt-link{font:500 max(11px,calc(11 * var(--u)))/1.2 var(--mono);letter-spacing:.14em;text-transform:uppercase;text-decoration:underline;text-underline-offset:4px;text-decoration-color:color-mix(in srgb,var(--ink) 40%,transparent)}
 [data-mtscroll] .mt .ln{display:inline-block;overflow:clip;vertical-align:top}
 [data-mtscroll] .mt .ln>span{display:inline-block}
 [data-mtscroll] .mt .po{display:none}
-[data-mtscroll] .mt-card .mt-link{font:500 max(10px,calc(11 * var(--u)))/1.2 var(--mono);letter-spacing:.14em;text-transform:uppercase;text-decoration:underline;text-underline-offset:4px;text-decoration-color:color-mix(in srgb,var(--ink) 40%,transparent)}
+[data-mtscroll] .mt-card .mt-link{font:500 max(11px,calc(11 * var(--u)))/1.2 var(--mono);letter-spacing:.14em;text-transform:uppercase;text-decoration:underline;text-underline-offset:4px;text-decoration-color:color-mix(in srgb,var(--ink) 40%,transparent)}
 @media (pointer:coarse){[data-mtscroll] .mt :is(.btn,.mt-sm){min-height:44px}
   [data-mtscroll] :is(.mt,.mt-card) :is(.mt-link,.mt-bar-call,.mt-fline a,.mt-fline button){display:inline-flex;align-items:center;min-height:44px}
   [data-mtscroll] .mt .mt-qw{min-height:44px}}
@@ -41,12 +41,12 @@
 [data-mtscroll] .mt-col figure{position:relative;margin:0;height:calc(504 * var(--u))}
 [data-mtscroll] .mt-col figure.xr{display:none}
 [data-mtscroll] .mt-col .ph{position:absolute;inset:0;overflow:hidden;background:var(--card)}
-[data-mtscroll] .mt-col figcaption{position:absolute;top:100%;left:0;right:0;display:flex;justify-content:space-between;gap:12px;padding-top:10px;font-size:max(10px,calc(11 * var(--u)))}
+[data-mtscroll] .mt-col figcaption{position:absolute;top:100%;left:0;right:0;display:flex;justify-content:space-between;gap:12px;padding-top:10px;font-size:max(11px,calc(11 * var(--u)))}
 [data-mtscroll] .mt-col figcaption span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 [data-mtscroll] .mt-name{position:absolute;inset:0 0 auto;height:max(100svh,600px);pointer-events:none}
 [data-mtscroll] .mt-scrim{position:absolute;inset:auto 0 0;height:56%;background:linear-gradient(to top,color-mix(in srgb,var(--bg) 96%,transparent),color-mix(in srgb,var(--bg) 86%,transparent) 30%,transparent)}
 [data-mtscroll] .mt-name h1{position:absolute;left:calc(36 * var(--u));bottom:calc(92 * var(--u));margin:0;font:900 max(64px,calc(160 * var(--u)))/.86 var(--display);letter-spacing:-.05em;white-space:nowrap}
-[data-mtscroll] .mt-cap{position:absolute;left:calc(38 * var(--u));bottom:calc(54 * var(--u));margin:0;font-size:max(10px,calc(12 * var(--u)))!important;letter-spacing:.12em}
+[data-mtscroll] .mt-cap{position:absolute;left:calc(38 * var(--u));bottom:calc(54 * var(--u));margin:0;font-size:max(11px,calc(12 * var(--u)))!important;letter-spacing:.12em}
 [data-mtscroll] .mt-ctas{position:absolute;right:calc(36 * var(--u));bottom:calc(92 * var(--u));display:flex;gap:8px;pointer-events:auto}
 [data-mtscroll] .mt-more{display:flex;justify-content:center;padding:calc(40 * var(--u)) 0 calc(96 * var(--u))}
 
@@ -171,20 +171,20 @@
 [data-mtscroll] .mt-say{margin:calc(19 * var(--u)) 0 0;font:900 calc(42 * var(--u))/1.05 var(--display);letter-spacing:-.045em}
 [data-mtscroll] .mt-say span{display:inline-block}
 [data-mtscroll] .mt-does{position:absolute;left:0;right:0;top:calc(312 * var(--u))}
-[data-mtscroll] .mt-does h2{margin:0 0 calc(8 * var(--u));font-size:10px}
+[data-mtscroll] .mt-does h2{margin:0 0 calc(8 * var(--u));font-size:11px}
 [data-mtscroll] .mt-does ol{list-style:none;margin:0;padding:0}
 [data-mtscroll] .mt-does li{display:flex;align-items:center;gap:14px;height:calc(33 * var(--u));border-bottom:1px solid color-mix(in srgb,var(--ink) 16%,transparent)}
-[data-mtscroll] .mt-does li .lbl{font-size:10px}
+[data-mtscroll] .mt-does li .lbl{font-size:11px}
 [data-mtscroll] .mt-does b{font:900 calc(21 * var(--u))/1 var(--display);letter-spacing:-.04em}
 [data-mtscroll] .mt-ab-foot{position:absolute;left:0;right:0;bottom:0}
 [data-mtscroll] .mt-ab-foot hr{border:0;height:1px;background:color-mix(in srgb,var(--ink) 20%,transparent);margin:0 0 calc(36 * var(--u))}
 [data-mtscroll] .mt-ab-foot dl{display:flex;flex-wrap:wrap;gap:10px 18px;margin:0}
-[data-mtscroll] .mt-ab-foot dt,[data-mtscroll] .mt-ab-foot dd{font-size:10px!important;margin:0}
+[data-mtscroll] .mt-ab-foot dt,[data-mtscroll] .mt-ab-foot dd{font-size:11px!important;margin:0}
 [data-mtscroll] .mt-ab-foot dt{margin-bottom:6px}
 [data-mtscroll] .mt-facts{display:none}
 [data-mtscroll] .mt-wordmark{position:absolute;z-index:1;left:calc(36 * var(--u));bottom:calc(26 * var(--u));margin:0 0 -.12em;padding-bottom:.12em;max-width:calc(var(--fx) + 974 * var(--u));overflow:clip;white-space:nowrap;font:900 calc(150 * var(--u))/1.12 var(--display);letter-spacing:-.05em;color:rgb(var(--on-photo))}
 [data-mtscroll] .mt-wordmark span{display:inline-block}
-[data-mtscroll] .mt-more-me{position:absolute;z-index:1;right:calc(36 * var(--u));bottom:calc(54 * var(--u));height:auto;padding:calc(11 * var(--u)) calc(16 * var(--u));font-size:10px;background:color-mix(in srgb,var(--bg) 50%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+[data-mtscroll] .mt-more-me{position:absolute;z-index:1;right:calc(36 * var(--u));bottom:calc(54 * var(--u));height:auto;padding:calc(11 * var(--u)) calc(16 * var(--u));font-size:11px;background:color-mix(in srgb,var(--bg) 50%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
 
 /* ── Footer (3.10) ── */
 [data-mtscroll] .mt-foot{--phr:#8a8a8a}
@@ -235,7 +235,7 @@
 [data-mtscroll] .mt-bk-ph::after{content:"";position:absolute;inset:40% 0 0;background:linear-gradient(transparent,rgba(8,8,8,.92))}
 [data-mtscroll] .mt-bk-ph figcaption{position:absolute;z-index:1;left:24px;right:24px;bottom:22px;color:rgb(var(--on-photo))}
 [data-mtscroll] .mt-bk-ph b{display:block;font:900 34px/1 var(--display);letter-spacing:-.05em;margin-bottom:12px}
-[data-mtscroll] .mt-bk-ph ul{list-style:none;margin:0;padding:0;font-size:10.5px;letter-spacing:.12em}
+[data-mtscroll] .mt-bk-ph ul{list-style:none;margin:0;padding:0;font-size:11px;letter-spacing:.12em}
 [data-mtscroll] .mt-bk-ph li{padding:7px 0;border-top:1px solid rgb(var(--on-photo) / .2)}
 [data-mtscroll] .mt-bk-form{position:relative;display:flex;flex-direction:column;min-width:0;min-height:0;padding:58px 28px 24px}
 [data-mtscroll] .mt-bk-band{position:absolute;inset:0 0 auto;height:58px}
@@ -259,7 +259,7 @@
 [data-mtscroll] .mt-bk .f-photo{display:none}
 [data-mtscroll] .mt-bk .f-main{flex:1;min-height:0;display:flex;flex-direction:column;gap:0;padding:0}
 [data-mtscroll] .mt-bk .rail{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:8px;margin-top:20px;flex:none}
-[data-mtscroll] .mt-bk .rail li{padding-top:9px;border-top:2px solid #262626;font-size:9.5px;color:#6a6a6a}
+[data-mtscroll] .mt-bk .rail li{padding-top:9px;border-top:2px solid #262626;font-size:11px;color:#6a6a6a}
 [data-mtscroll] .mt-bk .rail li .nm{display:inline}
 [data-mtscroll] .mt-bk .rail li:is(.cur,.done){border-top:2px solid var(--accent);color:var(--ink)}
 [data-mtscroll] .mt-bk .f-head{flex:none;flex-direction:row;flex-wrap:wrap;align-items:baseline;gap:4px 12px;margin-top:14px}
@@ -312,7 +312,7 @@
    scroll, no held stages, snap rows, held bottom bars. ── */
 @media not ((min-width:1024px) and (min-height:600px)){
   [data-mtscroll] .mt{--g16:16px}
-  [data-mtscroll] .mt .lbl{font-size:max(10px,11px)}
+  [data-mtscroll] .mt .lbl{font-size:max(11px,11px)}
   [data-mtscroll] .mt .dk{display:none}
   [data-mtscroll] .mt .po{display:inline}
 
@@ -339,7 +339,7 @@
   [data-mtscroll] .mt-mcol:nth-child(2){margin-top:56px}
   [data-mtscroll] .mt-mcol figure{margin:0}
   [data-mtscroll] .mt-mcol .ph{position:relative;overflow:hidden;background:var(--card)}
-  [data-mtscroll] .mt-mcol figcaption{display:flex;flex-direction:column;gap:2px;padding-top:7px;font-size:10px}
+  [data-mtscroll] .mt-mcol figcaption{display:flex;flex-direction:column;gap:2px;padding-top:7px;font-size:11px}
   [data-mtscroll] .mt-logos{flex-direction:column;align-items:stretch;gap:8px;padding:40px 0 56px}
   [data-mtscroll] .mt-logos>.mute{padding:0 16px}
   [data-mtscroll] .mt-logos-row{-webkit-mask:none;mask:none}
@@ -444,7 +444,7 @@
   [data-mtscroll] .mt-phrase{order:3}
   [data-mtscroll] .mt-fline{order:4}
   [data-mtscroll] .mt-fwall,[data-mtscroll] .mt-fscrim{display:none}
-  [data-mtscroll] .mt-fcols{position:static;grid-template-columns:repeat(4,1fr);gap:22px 16px;padding:24px 16px 0;margin:0 16px;padding-inline:0}
+  [data-mtscroll] .mt-fcols{position:static;grid-template-columns:repeat(4,1fr);gap:22px 16px;padding:24px 16px 0;margin:0 max(16px,env(safe-area-inset-right)) 0 max(16px,env(safe-area-inset-left));padding-inline:0}
   [data-mtscroll] .mt-fcols p{margin:0}
   [data-mtscroll] .mt-fcols :is(a,button){display:inline-block;padding:8px 0}
   [data-mtscroll] .mt-fcols .mt-based{margin-top:10px}
@@ -476,7 +476,7 @@
   [data-mtscroll] .mt-hero .mt-stage{height:calc(1650 * var(--pu))}
   [data-mtscroll] .mt-col{display:contents}
   [data-mtscroll] .mt-col figure{position:absolute;left:calc((16 + var(--c2) * 187) * var(--pu));top:calc((68 + var(--r2) * 250 + var(--c2) * 64) * var(--pu));width:calc(171 * var(--pu));height:calc(214 * var(--pu))}
-  [data-mtscroll] .mt-col figcaption{padding-top:6px;font-size:10px;line-height:1.2}
+  [data-mtscroll] .mt-col figcaption{padding-top:2px;gap:0;font-size:11px;line-height:1.05}
   [data-mtscroll] .mt-name h1{font-size:min(58px,calc(56 * var(--pu)));line-height:.9}
   [data-mtscroll] .mt-ctas{bottom:max(44px,calc(env(safe-area-inset-bottom) + 20px))}
   [data-mtscroll] .mt-covers .mt-row{--cv:calc(358 * var(--pu));padding-inline:calc(16 * var(--pu))}
@@ -555,7 +555,7 @@ html[data-mt-intro="1"]{overflow:hidden}
 html:not([data-mt-intro]) .mt-hero .mt-col.side{visibility:var(--vis,visible)}
 /* What I do: two columns of three on every structure */
 @media (min-width:600px){[data-mtscroll] .mt-does ol{display:grid;grid-template-columns:1fr 1fr;grid-auto-flow:column;grid-template-rows:repeat(3,auto);column-gap:calc(20 * var(--u))}}
-@media (min-width:600px){[data-mtscroll] .mt-does li{gap:8px}[data-mtscroll] .mt-does b{font-size:calc(15 * var(--u));white-space:nowrap}}
+@media (min-width:600px){[data-mtscroll] .mt-does li{gap:8px}[data-mtscroll] .mt-does b{font-size:max(11px,calc(15 * var(--u)));white-space:nowrap}}
 /* phone: artist sits under the title's left edge, "See all covers" on the right, session photo square and held on the face, call link on one line */
 @media (max-width:599px){
   [data-mtscroll] .mt-covers .mt-artist{margin-left:16px!important}
@@ -599,7 +599,7 @@ html:not([data-mt-intro]) .mt-hero .mt-col.side{visibility:var(--vis,visible)}
 [data-mtscroll] .mt-bin .f-photo{display:none}
 [data-mtscroll] .mt-bin .f-main{padding:0;gap:0}
 [data-mtscroll] .mt-bin .rail{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(max-content,1fr);gap:8px;margin-top:calc(26 * var(--u))}
-[data-mtscroll] .mt-bin .rail li{padding-top:9px;border-top:2px solid var(--hair);font-size:9.5px;color:var(--mute)}
+[data-mtscroll] .mt-bin .rail li{padding-top:9px;border-top:2px solid var(--hair);font-size:11px;color:var(--mute)}
 [data-mtscroll] .mt-bin .rail li .nm{display:inline}
 [data-mtscroll] .mt-bin .rail li:is(.cur,.done){border-top:2px solid var(--accent);color:var(--ink)}
 [data-mtscroll] .mt-bin .f-head{flex-direction:row;flex-wrap:wrap;align-items:baseline;gap:4px 12px;margin-top:16px}
@@ -634,7 +634,6 @@ html:not([data-mt-intro]) .mt-hero .mt-col.side{visibility:var(--vis,visible)}
 [data-mtscroll] .mt-quote>.mt-bar{justify-content:space-between}
 [data-mtscroll] .mt-quote>.mt-bar .btn{flex:none;min-height:44px;padding-inline:28px}
 /* Footer link columns sit on the photo wall: a halo in the ground colour keeps them readable over a bright frame */
-@media (min-width:1024px) and (min-height:600px){[data-mtscroll] .mt-fcols :is(p,a,button){text-shadow:0 0 2px var(--bg),0 0 12px var(--bg),0 1px 22px var(--bg)}}
 /* footer links larger on the desktop layout (Julian, 2026-11-15: 11px was too small) */
 @media (min-width:1024px) and (min-height:600px){[data-mtscroll] .mt-fcols,[data-mtscroll] .mt-fcols :is(p,a,button){font-size:max(13px,calc(15 * var(--u)))}[data-mtscroll] .mt-fcols p{margin-bottom:calc(15 * var(--u))}}
 /* Phone and tablet footer under a finger: every link is a 44px row, Top is 44px wide */
@@ -668,7 +667,7 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
   [data-mtscroll] .mt-quote :is(.mt-qo,.mt-qw){display:block;width:auto;height:auto;border:0!important;padding:0!important}
   [data-mtscroll] .mt-quote :is(.mt-qo,.mt-qw) b{display:block;font:900 calc(48 * var(--u))/calc(54 * var(--u)) var(--display);letter-spacing:-.05em;white-space:nowrap}
   /* the open option's lines sit under the row, from its left edge */
-  [data-mtscroll] .mt-qo .lbl,[data-mtscroll] .mt-qw>span{position:absolute;left:0;top:calc(100% - 54 * var(--u));margin:0;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .12s ease-out;font:500 max(10px,calc(11 * var(--u)))/1.2 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--ink)}
+  [data-mtscroll] .mt-qo .lbl,[data-mtscroll] .mt-qw>span{position:absolute;left:0;top:calc(100% - 54 * var(--u));margin:0;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .12s ease-out;font:500 max(11px,calc(11 * var(--u)))/1.2 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--ink)}
   /* the lines of the option being left go first, then the new ones come in: two texts never cross in the same place */
   [data-mtscroll] :is(.mt-qo,.mt-qw)[aria-pressed="true"] :is(.lbl,span){opacity:1;transition:opacity .25s ease-out .12s}
   [data-mtscroll] .mt-qw .po{display:none}
@@ -732,3 +731,24 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
 [data-mtscroll] .mt-hero .ph>img.mt-dev{opacity:0}
 [data-mtscroll] .mt-hero .ph>img.mt-dev[data-on]{animation:mt-dev .85s cubic-bezier(.3,0,.2,1) both}
 @keyframes mt-dev{0%{opacity:0;filter:brightness(.45) contrast(1.6) grayscale(1)}40%{opacity:1;filter:brightness(.7) contrast(1.4) grayscale(.7)}100%{opacity:1;filter:none}}
+/* Keyboard focus on a photo link: the ring is drawn inside the frame, since the frame clips an outer one (Commissions tiles
+   showed none, the hero a sliver on the photo's top edge). A dark band on both sides keeps it readable on a bright photo. */
+[data-mtscroll] .mt-hero a.fig:focus-visible,[data-mtscroll] .mt-comm a.tile:focus-visible{outline:0}
+[data-mtscroll] .mt-hero a.fig:focus-visible .ph::after,[data-mtscroll] .mt-comm a.tile:focus-visible::after{content:"";position:absolute;inset:4px;z-index:3;opacity:1;background:none;border:2px solid var(--accent);box-shadow:0 0 0 2px rgb(0 0 0 / .6),inset 0 0 0 2px rgb(0 0 0 / .6);pointer-events:none}
+/* Polish pass: a Commissions caption stacks left, name over discipline, so a long name shows whole; touch targets reach 44px at every layout */
+@media (min-width:1024px) and (min-height:600px){[data-mtscroll] .mt-sheet figcaption{flex-direction:column;align-items:flex-start;gap:2px}}
+@media (pointer:coarse){
+  [data-mtscroll] .mt-fcols :is(a,button),[data-mtscroll] .mt-fline :is(a,button),[data-mtscroll] .mt-logos-track a{min-width:44px}
+  [data-mtscroll] .mt-logos-track a{justify-content:center;min-width:46px}
+  [data-mtscroll] .mt-fline{align-items:center}
+  /* 48: the hand-over scales these to .95 while they move */
+  [data-mtscroll] .mt .mt-rowhead .btn,[data-mtscroll] .mt .mt-more-me{min-height:48px}
+}
+@media (pointer:coarse) and (min-width:1024px) and (min-height:600px){[data-mtscroll] .mt-fcols :is(a,button){display:inline-flex;align-items:center;min-height:44px}[data-mtscroll] .mt-fcols p{margin-bottom:0}}
+/* Commissions, desktop: the count and name sit under the heading, so a long line never runs onto the next tile (was beside it) */
+@media (min-width:1024px) and (min-height:600px){[data-mtscroll] .mt-comm-head{flex-direction:column;align-items:flex-start;justify-content:flex-end;gap:calc(10 * var(--u));height:calc(246 * var(--u));margin-bottom:calc(-246 * var(--u))}}
+/* Footer, desktop: a dark photo ground in both themes with light text and no halo (Julian, 2026-11-15: the glow around the links, worst in light) */
+@media (min-width:1024px) and (min-height:600px){
+  :root[data-mtscroll]:root .mt-foot{--bg:var(--dark-bg);--ink:var(--dark-ink);--mute:oklch(0.78 0.005 80);--accent:var(--dark-accent);--hair:color-mix(in srgb,var(--ink) 14%,transparent);--phr:#8a8a8a;color:var(--ink)}
+  [data-mtscroll] .mt-fscrim{background:linear-gradient(color-mix(in srgb,var(--bg) 72%,transparent),color-mix(in srgb,var(--bg) 62%,transparent) 45%,var(--bg) 94%)}
+}

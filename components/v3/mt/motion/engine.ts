@@ -105,7 +105,7 @@ export function startEngine(root: HTMLElement, drivers: Driver[]) {
       const r = { top: b.top - ctx.y, bottom: b.top - ctx.y + b.h, height: b.h };
       const on = !(r.bottom < -ctx.vh || r.top > 2 * ctx.vh);
       // layers (will-change in the motion css) only for sections near the screen
-      if (near.get(s) !== on) (near.set(s, on), s.toggleAttribute("data-mt-near", on));
+      if (near.get(s) !== on) { near.set(s, on); s.toggleAttribute("data-mt-near", on); }
       if (!on) continue;
       ctx.top = r.top;
       ctx.h = r.height;
@@ -140,6 +140,6 @@ export function startEngine(root: HTMLElement, drivers: Driver[]) {
     html.removeAttribute("data-mt-held");
     html.removeAttribute("data-mt-motion");
     html.removeAttribute("data-mt-scrolling");
-    for (const s of secs) (s.style.removeProperty("--p"), s.style.removeProperty("--in"), s.style.removeProperty("--out"), s.removeAttribute("data-mt-near"));
+    for (const s of secs) { s.style.removeProperty("--p"); s.style.removeProperty("--in"); s.style.removeProperty("--out"); s.removeAttribute("data-mt-near"); }
   };
 }

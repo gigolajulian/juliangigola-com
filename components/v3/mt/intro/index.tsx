@@ -105,6 +105,15 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
     if (!hero || !wall) return void delete root.dataset.mtIntro;
 
     root.dataset.mtIntro = "1"; // wall hidden, scroll locked, until the first frames are ready
+    // While the splash covers the page (states 1 and 2) nothing under it takes focus: Tab landed on header links at opacity 0.
+    const under = [document.querySelector<HTMLElement>(".site-hdr"), document.getElementById("main")].filter((n): n is HTMLElement => !!n);
+    const lock = new MutationObserver(() => {
+      const on = root.dataset.mtIntro === "1" || root.dataset.mtIntro === "2";
+      under.forEach((n) => (n.inert = on));
+      if (!("mtIntro" in root.dataset)) lock.disconnect();
+    });
+    lock.observe(root, { attributeFilter: ["data-mt-intro"] });
+    under.forEach((n) => (n.inert = true));
     const anims: Animation[] = [];
     const made: HTMLElement[] = [];
     const timers: number[] = [];

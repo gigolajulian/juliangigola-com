@@ -154,7 +154,7 @@ export function BookPicker({ sessions, start }: { sessions: Bookable[]; start?: 
         </ul>
         <p className="label text-muted-foreground">
           Something else?{" "}
-          <Link prefetch={false} href="/#contact" className="text-foreground underline decoration-border underline-offset-4 hoverable:hover:decoration-current">
+          <Link prefetch={false} href="/contact/form" className="text-foreground underline decoration-border underline-offset-4 hoverable:hover:decoration-current">
             Inquire
           </Link>
         </p>

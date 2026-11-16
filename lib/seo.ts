@@ -211,7 +211,7 @@ const COMMISSIONS = [
   ["Musician press photos", "/music-photography"],
   ["Album cover art", "/portfolio/coverart"],
   ["Music video direction", "/portfolio/video"],
-  ["Creative direction", "/#about"],
+  ["Creative direction", "/about"],
 ] as const;
 
 export function siteGraph() {
