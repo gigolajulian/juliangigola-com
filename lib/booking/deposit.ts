@@ -54,7 +54,7 @@ export const KIND = "deposit";
     Any session's amount passes, not only its own slug's: an intent made at the old $100 just
     before a price change must still book, or it sits paid and unbooked. */
 export const isDeposit = (pi: { amount?: number; currency?: string; metadata?: { [k: string]: string } }) =>
-  pi.metadata?.kind === KIND && Object.values(DEPOSIT).some((d) => d * 100 === pi.amount) && pi.currency === CURRENCY;
+  pi.metadata?.kind === KIND && [...Object.values(DEPOSIT), LEGACY_DEPOSIT].some((d) => d * 100 === pi.amount) && pi.currency === CURRENCY;
 /** How old a webhook's timestamp may be before it is treated as a replay. */
 const TOLERANCE_S = 300;
 export const SESSION: { [slug: string]: string } = { portraits: "Portraits", headshots: "Headshots", graduation: "Graduation photos", digitals: "Studio digitals", "model-test": "Model test" };

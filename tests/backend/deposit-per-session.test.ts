@@ -12,8 +12,8 @@ import { BookingLock } from "@/worker/booking-lock";
 vi.useFakeTimers({ toFake: ["Date"] });
 vi.setSystemTime(new Date("2026-11-11T20:00:00Z"));
 
-/* The deposit by session (Julian, 2026-11-15): Headshots $200, Studio
-   digitals $150, the rest $100. Through the real routes with Stripe and
+/* The deposit by session (Julian, 2026-11-15 and 11-16): Portraits $250,
+   Headshots and Graduation $200, Studio digitals $150, Model test $100. Through the real routes with Stripe and
    Google mocked: the intent's amount comes from the slug, the webhook
    books it, every mail and log says what was paid, and a cancel returns it. */
 
@@ -100,8 +100,8 @@ describe("the amount is the session's, set on the server", () => {
   it.each([
     ["headshots", 20000],
     ["digitals", 15000],
-    ["portraits", 10000],
-    ["graduation", 10000],
+    ["portraits", 25000],
+    ["graduation", 20000],
     ["model-test", 10000],
   ])("%s creates a %i cent intent, whatever amount the request names", async (slug, cents) => {
     const res = await open(slug);
@@ -118,14 +118,16 @@ describe("the amount is the session's, set on the server", () => {
 
   it("takes any session's amount as a deposit, and no other", () => {
     const pi = (amount: number) => ({ amount, currency: "usd", metadata: { kind: "deposit" } });
-    expect([10000, 15000, 20000].every((a) => isDeposit(pi(a)))).toBe(true);
+    expect([10000, 15000, 20000, 25000].every((a) => isDeposit(pi(a)))).toBe(true);
     expect(isDeposit(pi(5000))).toBe(false);
     expect(isDeposit({ ...pi(20000), metadata: {} })).toBe(false);
   });
 });
 
 describe.each([
+  ["portraits", 250],
   ["headshots", 200],
+  ["graduation", 200],
   ["digitals", 150],
 ])("%s end to end at $%i", (slug, usd) => {
   it("books, says the figure everywhere, and a cancel returns it", async () => {
@@ -176,7 +178,7 @@ describe("what was paid, not today's price", () => {
 
 describe("the screens read the same map", () => {
   it("prints each session's deposit on the home rows and the session index", () => {
-    expect(Object.fromEntries(BOOK_ROWS.map((r) => [r.key, r.price]))).toEqual({ portraits: "$100 deposit", headshots: "$200 deposit", graduation: "$100 deposit", "studio-digitals": "$150 deposit" });
+    expect(Object.fromEntries(BOOK_ROWS.map((r) => [r.key, r.price]))).toEqual({ portraits: "$250 deposit", headshots: "$200 deposit", graduation: "$200 deposit", "studio-digitals": "$150 deposit" });
     // Every paid session's Cal.com slug is one the map knows: "studio-digitals" must never fall through to $100.
     for (const s of Object.values(SESSIONS).filter((x) => x.paid)) expect(PAID).toContain(s.cal!.split("/")[1]);
     expect(rate({ ...SESSIONS["studio-digitals"], from: null })).toBe("$150 deposit");

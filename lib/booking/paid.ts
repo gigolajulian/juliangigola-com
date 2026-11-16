@@ -5,10 +5,11 @@ export const PAID = ["portraits", "headshots", "graduation", "digitals", "model-
 export type PaidSlug = (typeof PAID)[number];
 export const isPaid = (slug: string): slug is PaidSlug => (PAID as readonly string[]).includes(slug);
 
-/** Each session's deposit in dollars (Julian, 2026-11-15: Headshots 200, Studio digitals 150).
+/** Each session's deposit in dollars (Julian, 2026-11-15: Headshots 200, Studio digitals 150;
+    2026-11-16: Portraits 250, Graduation 200).
     The one place the figure lives: the charge, the screens and the mails all read it.
     Here and not in `deposit.ts`, which pulls server code the client bundles must not. */
-export const DEPOSIT: Record<PaidSlug, number> = { portraits: 100, headshots: 200, graduation: 100, digitals: 150, "model-test": 100 };
+export const DEPOSIT: Record<PaidSlug, number> = { portraits: 250, headshots: 200, graduation: 200, digitals: 150, "model-test": 100 };
 export const depositOf = (slug: PaidSlug) => DEPOSIT[slug];
 /** What a booking made before amounts were stored paid: every deposit was $100 then. */
 export const LEGACY_DEPOSIT = 100;
