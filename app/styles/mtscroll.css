@@ -634,7 +634,6 @@ html:not([data-mt-intro]) .mt-hero .mt-col.side{visibility:var(--vis,visible)}
 [data-mtscroll] .mt-quote>.mt-bar{justify-content:space-between}
 [data-mtscroll] .mt-quote>.mt-bar .btn{flex:none;min-height:44px;padding-inline:28px}
 /* Footer link columns sit on the photo wall: a halo in the ground colour keeps them readable over a bright frame */
-@media (min-width:1024px) and (min-height:600px){[data-mtscroll] .mt-fcols :is(p,a,button){text-shadow:0 0 2px var(--bg),0 0 12px var(--bg),0 1px 22px var(--bg)}}
 /* footer links larger on the desktop layout (Julian, 2026-11-15: 11px was too small) */
 @media (min-width:1024px) and (min-height:600px){[data-mtscroll] .mt-fcols,[data-mtscroll] .mt-fcols :is(p,a,button){font-size:max(13px,calc(15 * var(--u)))}[data-mtscroll] .mt-fcols p{margin-bottom:calc(15 * var(--u))}}
 /* Phone and tablet footer under a finger: every link is a 44px row, Top is 44px wide */
@@ -736,8 +735,8 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
    showed none, the hero a sliver on the photo's top edge). A dark band on both sides keeps it readable on a bright photo. */
 [data-mtscroll] .mt-hero a.fig:focus-visible,[data-mtscroll] .mt-comm a.tile:focus-visible{outline:0}
 [data-mtscroll] .mt-hero a.fig:focus-visible .ph::after,[data-mtscroll] .mt-comm a.tile:focus-visible::after{content:"";position:absolute;inset:4px;z-index:3;opacity:1;background:none;border:2px solid var(--accent);box-shadow:0 0 0 2px rgb(0 0 0 / .6),inset 0 0 0 2px rgb(0 0 0 / .6);pointer-events:none}
-/* Polish pass: a long Commissions name ends in an ellipsis before it runs into its discipline; touch targets reach 44px at every layout */
-@media (min-width:1024px) and (min-height:600px){[data-mtscroll] .mt-sheet figcaption{gap:10px}[data-mtscroll] .mt-sheet figcaption span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}[data-mtscroll] .mt-sheet figcaption span.mute{flex-shrink:0}}
+/* Polish pass: a Commissions caption stacks left, name over discipline, so a long name shows whole; touch targets reach 44px at every layout */
+@media (min-width:1024px) and (min-height:600px){[data-mtscroll] .mt-sheet figcaption{flex-direction:column;align-items:flex-start;gap:2px}}
 @media (pointer:coarse){
   [data-mtscroll] .mt-fcols :is(a,button),[data-mtscroll] .mt-fline :is(a,button),[data-mtscroll] .mt-logos-track a{min-width:44px}
   [data-mtscroll] .mt-logos-track a{justify-content:center;min-width:46px}
@@ -746,3 +745,10 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
   [data-mtscroll] .mt .mt-rowhead .btn,[data-mtscroll] .mt .mt-more-me{min-height:48px}
 }
 @media (pointer:coarse) and (min-width:1024px) and (min-height:600px){[data-mtscroll] .mt-fcols :is(a,button){display:inline-flex;align-items:center;min-height:44px}[data-mtscroll] .mt-fcols p{margin-bottom:0}}
+/* Commissions, desktop: the count and name sit under the heading, so a long line never runs onto the next tile (was beside it) */
+@media (min-width:1024px) and (min-height:600px){[data-mtscroll] .mt-comm-head{flex-direction:column;align-items:flex-start;justify-content:flex-end;gap:calc(10 * var(--u));height:calc(246 * var(--u));margin-bottom:calc(-246 * var(--u))}}
+/* Footer, desktop: a dark photo ground in both themes with light text and no halo (Julian, 2026-11-15: the glow around the links, worst in light) */
+@media (min-width:1024px) and (min-height:600px){
+  :root[data-mtscroll]:root .mt-foot{--bg:var(--dark-bg);--ink:var(--dark-ink);--mute:oklch(0.78 0.005 80);--accent:var(--dark-accent);--hair:color-mix(in srgb,var(--ink) 14%,transparent);--phr:#8a8a8a;color:var(--ink)}
+  [data-mtscroll] .mt-fscrim{background:linear-gradient(color-mix(in srgb,var(--bg) 72%,transparent),color-mix(in srgb,var(--bg) 62%,transparent) 45%,var(--bg) 94%)}
+}
