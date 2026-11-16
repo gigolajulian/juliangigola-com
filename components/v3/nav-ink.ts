@@ -164,8 +164,9 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
       const nr = nm?.getBoundingClientRect();
       const blk = nm?.closest<HTMLElement>("[data-mt-name]");
       // only once the name is fully gone, so the two never show together: faded out, hidden by hero.ts at the end
-      // of its exit (it rides out of the window at full strength under ?mtdock=left), or out of the window
-      const shows = !!nr && nr.bottom > bar.offsetHeight && nr.top < innerHeight && blk?.style.visibility !== "hidden" && parseFloat(blk?.style.opacity || "1") > 0.02;
+      // of its exit (it rides out of the window at full strength under ?mtdock=left), or wholly out of the window:
+      // on phones it scrolls up through the bar, and the wordmark came on while it was still passing under it (MAC)
+      const shows = !!nr && nr.bottom > 0 && nr.top < innerHeight && blk?.style.visibility !== "hidden" && parseFloat(blk?.style.opacity || "1") > 0.02;
       root.toggleAttribute("data-navnamegone", !shows);
       // A section that is dark in both themes (the v4 footer sets its own --bg) under a light page: the bar takes
       // the dark ground there (navfx.css), or its light veil over it would be a mid grey nothing reads on.
