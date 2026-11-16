@@ -228,7 +228,7 @@ export const heroDrivers: Driver[] = [
       const st = states.get(el);
       if (!st) return;
       const mode = ctx.held ? "d" : ctx.vw < 600 ? "p" : "t";
-      if (caps.length && el.getBoundingClientRect().bottom > 0) fadeCaps();
+      if (false && caps.length && el.getBoundingClientRect().bottom > 0) fadeCaps();
       if (mode !== st.mode) {
         st.mode = mode;
         st.s = -1;
