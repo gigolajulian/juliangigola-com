@@ -444,7 +444,7 @@
   [data-mtscroll] .mt-phrase{order:3}
   [data-mtscroll] .mt-fline{order:4}
   [data-mtscroll] .mt-fwall,[data-mtscroll] .mt-fscrim{display:none}
-  [data-mtscroll] .mt-fcols{position:static;grid-template-columns:repeat(4,1fr);gap:22px 16px;padding:24px 16px 0;margin:0 16px;padding-inline:0}
+  [data-mtscroll] .mt-fcols{position:static;grid-template-columns:repeat(4,1fr);gap:22px 16px;padding:24px 16px 0;margin:0 max(16px,env(safe-area-inset-right)) 0 max(16px,env(safe-area-inset-left));padding-inline:0}
   [data-mtscroll] .mt-fcols p{margin:0}
   [data-mtscroll] .mt-fcols :is(a,button){display:inline-block;padding:8px 0}
   [data-mtscroll] .mt-fcols .mt-based{margin-top:10px}
