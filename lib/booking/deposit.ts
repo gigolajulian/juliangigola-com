@@ -92,7 +92,9 @@ export function intentForm(b: Booking): { [k: string]: string } {
     // Google Pay ride on card.
     "payment_method_types[]": "card",
     receipt_email: b.email,
-    description: `Deposit: ${b.slug}, ${b.start}`,
+    // Julian (2026-11-16): who and which session, readable in Stripe's payments list. Stripe prints it on the client's receipt too.
+    // "Session" is the shoot's time, "Booked" the day they paid, both Pacific.
+    description: `${SESSION[b.slug] ?? b.slug} deposit: ${b.name}. Session ${whenPT(b.start)}. Booked ${new Intl.DateTimeFormat("en-US", { timeZone: "America/Los_Angeles", month: "short", day: "numeric", year: "numeric" }).format(new Date())}.`,
   };
   for (const [k, v] of Object.entries(b)) if (v) form[`metadata[${k}]`] = v;
   // Marks the site's own intents: the webhook leaves every other payment

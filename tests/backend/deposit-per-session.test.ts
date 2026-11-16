@@ -110,6 +110,14 @@ describe("the amount is the session's, set on the server", () => {
     expect(stripeCalls.find((c) => c.url.endsWith("/payment_intents"))!.form.get("amount")).toBe(String(cents));
   });
 
+  it("names the session and the person on the payment in Stripe", async () => {
+    await open("headshots");
+    const form = stripeCalls.find((c) => c.url.endsWith("/payment_intents"))!.form;
+    // The clock is pinned to Nov 11, 2026, noon Pacific; the session is a week on.
+    expect(form.get("description")).toMatch(/^Headshots deposit: QA Test\. Session Wed, Nov 18, .+\. Booked Nov 11, 2026\.$/);
+    expect([form.get("metadata[name]"), form.get("metadata[slug]")]).toEqual(["QA Test", "headshots"]);
+  });
+
   it("has a figure for every paid slug, and refuses any other", () => {
     for (const slug of PAID) expect(amountOf(slug)).toBe(DEPOSIT[slug] * 100);
     expect(() => amountOf("studio-digitals")).toThrow();
