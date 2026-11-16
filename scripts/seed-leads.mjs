@@ -37,7 +37,7 @@ const leads = [
   lead({ email: "maya.okafor@example.com", name: "Maya Okafor", stage: "Inquiry", stageAt: ago(26), kind: "portrait", unread: true, refs: 2, snippet: "Hi Julian, I saw the Portraits set and want something like the red-lit frames. Two of us,",
     events: [{ at: ago(26), kind: "inquiry", ref: mayaKey, note: "portrait" }, { at: ago(26), kind: "mail", note: "Portrait inquiry · Maya Okafor · A weekend before Dec 14", mail: { to: "hello@", kind: "inquiry" } }] }),
   lead({ email: "priya.shah@example.com", name: "Priya Shah", stage: "Inquiry", stageAt: ago(3), kind: "headshots", flags: ["stuck"],
-    events: [{ at: ago(3), kind: "deposit-stuck", ref: "pi_seed1", note: "Headshots, Sat 10:00 AM, $100" }, { at: ago(3), kind: "mail", note: "Deposit stuck: check Stripe and Cal.com", mail: { to: "hello@", kind: "deposit-stuck" } }] }),
+    events: [{ at: ago(3), kind: "deposit-stuck", ref: "pi_seed1", note: "Headshots, Sat 10:00 AM, $100" }, { at: ago(3), kind: "mail", note: "Deposit stuck: check Stripe and the calendar", mail: { to: "hello@", kind: "deposit-stuck" } }] }),
   lead({ email: "lena.park@example.com", name: "Lena Park", stage: "Quoted", stageAt: ago(6 * 24), firstAt: ago(9 * 24), kind: "campaign", snippet: "Thanks, sharing the quote with the brand team this week.",
     events: [{ at: ago(9 * 24), kind: "inquiry", note: "campaign" }, { at: ago(8 * 24), kind: "stage", note: "Replied" }, { at: ago(6 * 24), kind: "stage", note: "Quoted" }] }),
   lead({ email: "daniel.reyes@example.com", name: "Daniel Reyes", stage: "Call booked", stageAt: ago(5), kind: "intro-call", when: ahead(44), unread: true,

@@ -26,7 +26,15 @@ const flag = (k: "mpFly") => {
   window.setTimeout(() => delete root.dataset[k], 1500);
 };
 
-type Fly = { to: string; t: number; r: DOMRect; src: string };
+/** How a /portfolio grid photo sits in its frame (the p3 drift): carried by the flying copy so the crop never steps. */
+type Zoom = { scale: string; translate: string; transform: string };
+const FLAT: Zoom = { scale: "1", translate: "0px 0px", transform: "none" };
+const zoomOf = (img: Element | null | undefined): Zoom | undefined => {
+  const s = img && getComputedStyle(img);
+  return s && s.scale !== "none" ? { scale: s.scale, translate: s.translate === "none" ? FLAT.translate : s.translate, transform: s.transform } : undefined;
+};
+
+type Fly = { to: string; t: number; r: DOMRect; src: string; z?: Zoom };
 type Back = { t: number; hero?: { slug: string; r: DOMRect; src: string } };
 
 function shown(i: HTMLImageElement) {
@@ -50,7 +58,9 @@ export function PageFly() {
       if (!document.documentElement.hasAttribute("data-v3motion") || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
       const scope = el.dataset.flySrc ? document.querySelector(el.dataset.flySrc) : el.querySelector("img") ? el : el.closest(".door");
       const img = scope && [...scope.querySelectorAll("img")].find(shown);
-      fly.current = to && img ? { to, t: Date.now(), r: img.getBoundingClientRect(), src: img.currentSrc || img.src } : null;
+      // An oversized grid photo flies from its frame, not from its own larger box.
+      const z = zoomOf(img);
+      fly.current = to && img ? { to, t: Date.now(), r: ((z && img.closest(".ph")) || img).getBoundingClientRect(), src: img.currentSrc || img.src, z } : null;
       if (fly.current && img && trial()) {
         flag("mpFly");
         /* The covers left behind get names before the page is snapshotted,
@@ -99,13 +109,15 @@ export function PageFly() {
     const box = (r: DOMRect) => ({ left: `${r.left}px`, top: `${r.top}px`, width: `${r.width}px`, height: `${r.height}px` });
     // A fixed copy flies from one box to the other; its box animates (not a
     // scale), so the crop never stretches. `to` is hidden until it lands.
-    const flyCopy = (from: DOMRect, src: string, to: HTMLElement, duration: number, easing: string) => {
+    // `zin`: the photo starts as it sat in its frame and eases flat. `zout`: it ends as the frame it lands in holds it.
+    const flyCopy = (from: DOMRect, src: string, to: HTMLElement, duration: number, easing: string, zin?: Zoom, zout?: Zoom) => {
       const h = to.getBoundingClientRect();
       const c = document.createElement("div");
       c.setAttribute("aria-hidden", "");
       Object.assign(c.style, { position: "fixed", zIndex: "60", overflow: "hidden", borderRadius: "4px", pointerEvents: "none", left: `${h.left}px`, top: `${h.top}px`, width: `${h.width}px`, height: `${h.height}px` });
       c.innerHTML = `<img alt="" src="${src}" style="width:100%;height:100%;object-fit:cover;display:block">`;
       document.body.append(c);
+      if (zin || zout) c.firstElementChild!.animate([zin ?? FLAT, zout ?? FLAT], { duration, easing, fill: "forwards" });
       to.style.visibility = "hidden";
       c.animate([box(from), box(h)], { duration, easing }).finished.then(() => {
         to.style.visibility = "";
@@ -131,7 +143,7 @@ export function PageFly() {
         const tile = document.querySelector<HTMLElement>(`[data-flip-id="${CSS.escape(go.slug)}"]`);
         const r = tile?.getBoundingClientRect();
         if (!tile || !r?.width) return void (++n < 30 && (raf = requestAnimationFrame(home)));
-        if (onScreen(r)) flyCopy(go.r, go.src, tile, 600, MOVE);
+        if (onScreen(r)) flyCopy(go.r, go.src, tile, 600, MOVE, undefined, zoomOf(tile.querySelector("img")));
       };
       raf = requestAnimationFrame(home);
       return () => cancelAnimationFrame(raf);
@@ -146,9 +158,9 @@ export function PageFly() {
       if (h.bottom < 0 || h.top > innerHeight) return;
       if (!t) {
         hero.closest("section, .flow")?.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300, delay: 100, easing: EASE, fill: "backwards" });
-        return flyCopy(f.r, f.src, hero, 550, EASE);
+        return flyCopy(f.r, f.src, hero, 550, EASE, f.z);
       }
-      flyCopy(f.r, f.src, hero, 600, MOVE);
+      flyCopy(f.r, f.src, hero, 600, MOVE, f.z);
       // The project's other frames on screen rise in as the hero lands (pick 2c).
       [...document.querySelectorAll<HTMLElement>(".v3 .pj-r")]
         .filter((e) => !e.contains(hero) && !hero.contains(e) && onScreen(e.getBoundingClientRect()))

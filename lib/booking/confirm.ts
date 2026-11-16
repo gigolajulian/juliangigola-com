@@ -1,11 +1,12 @@
-import { duration, refundable, TZ } from "@/lib/booking/booking-rules";
+import { duration, EARLY_SHARE, PART_SHARE, REFUND_HOURS, refundCents, refundShare, TZ } from "@/lib/booking/booking-rules";
+import { LEGACY_DEPOSIT } from "@/lib/booking/paid";
 import { SIG_DARK, SIG_HTML, SIG_TEXT } from "@/lib/email/email-signature";
 /* ── the client's confirmation email ──────────────────────────────
  * Julian (2026-10-16): every booking gets a branded "You're in." mail from
  * the site.
  *
  *   - Paid sessions: sent by `bookDeposit` once the lock takes the booking, with
- *     the $100 receipt block.
+ *     the deposit's receipt block.
  *   - Free calls: sent by `/api/book`.
  *
  * Sent through `CLIENT_EMAIL`, the one binding that may mail outside
@@ -34,13 +35,14 @@ export type Confirm = {
   where?: string;
   /** The booking's id, shown short in the mail. */
   uid: string;
-  deposit?: { ref: string; at: string; card?: string };
+  /** `amount`: dollars paid; unset on a booking from before 2026-11-15, $100 then. */
+  deposit?: { ref: string; at: string; amount?: number; card?: string; /** The booking fee percent on its record; unset: a full refund when early. */ fee?: number };
   /** The site's own reschedule and cancel links; null: none (no BOOKING_SECRET). */
   manage: { reschedule: string; cancel: string } | null;
   /** The time first booked, when it was moved since: the refund is judged by it. */
   firstStart?: string;
-  /** "reminder": the day-before mail from the lock Worker's cron. */
-  kind?: "reminder";
+  /** "reminder": the day-before mail from the lock Worker's cron. "headsup": three days ahead, while the early refund is open. */
+  kind?: "reminder" | "headsup";
 };
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
@@ -64,9 +66,15 @@ const first = (name: string) => name.trim().split(/\s+/)[0] || "there";
 export function confirmMail(c: Confirm) {
   const at = timeRange(c.start, c.end);
   const remind = c.kind === "reminder";
+  const soon = c.kind === "headsup";
+  // What an early cancel returns: 90% since the booking fee, the whole deposit on a booking made before it.
+  const top = c.deposit?.fee ? "90% back" : "a full refund";
+  const judged = new Date(Math.min(Date.parse(c.start), Date.parse(c.firstStart ?? c.start)) - REFUND_HOURS * 36e5).toISOString();
   const hour = fmt({ hour: "numeric", minute: "2-digit" }).format(new Date(c.start));
-  const head = remind ? (c.call ? "Talk tomorrow." : "See you tomorrow.") : "You're in.";
-  const lead = remind
+  const head = remind ? (c.call ? "Talk tomorrow." : "See you tomorrow.") : soon ? "Coming up." : "You're in.";
+  const lead = soon
+    ? `${first(c.name)}, your ${c.session.toLowerCase().replace(/ photos$/, "")} session is on ${at}.`
+    : remind
     ? c.call
       ? `${first(c.name)}, your ${c.session.toLowerCase()} is tomorrow at ${hour}.${c.where?.startsWith("http") ? " The Meet link is below." : ""}`
       : `${first(c.name)}, your ${c.session.toLowerCase().replace(/ photos$/, "")} session is tomorrow at ${hour}. Give yourself time to get there.`
@@ -76,19 +84,27 @@ export function confirmMail(c: Confirm) {
   // The length as the booking card says it: "Sat, Nov 8, 10:00 to 11:00 AM PST, 60 minutes".
   const mins = c.end ? Math.round((+new Date(c.end) - +new Date(c.start)) / 60000) : 0;
   const rows: [string, string][] = [["Session", c.session], ["When", mins > 0 ? `${at}, ${duration(mins)}` : at], ...(c.where ? [["Where", c.where] as [string, string]] : []), ["Booking", c.uid.slice(0, 8)]];
+  const usd = c.deposit?.amount ?? LEGACY_DEPOSIT;
   const paid = c.deposit && {
     rows: [["Paid", fmt({ month: "short", day: "numeric", year: "numeric" }).format(new Date(c.deposit.at))], ...(c.deposit.card ? [["Card", c.deposit.card]] : []), ["Ref", c.deposit.ref.slice(0, 11)]] as [string, string][],
-    // The site's own engine refunds by Julian's 48-hour rule (`lib/booking/booking-rules.ts`).
+    // The site's own engine refunds by Julian's rule (`refundShare`, `lib/booking/booking-rules.ts`).
     note: remind
-      ? "It is under 48 hours now, so a cancel keeps the deposit. Moving to another date carries it over."
+      ? "It is under 24 hours now, so the session can no longer be moved and a cancel keeps the deposit."
+      : soon
+      ? `Until ${timeRange(judged)} you can cancel for ${top}. After that a cancel returns 70%, and nothing in the last 24 hours.`
       : c.firstStart && c.firstStart !== c.start
-      ? refundable({ intent: "x", start: c.start, firstStart: c.firstStart })
-        ? `The balance is due after the shoot. The deposit moved with the new date. It is refunded only if you cancel 48 hours or more before the time you first booked, ${timeRange(c.firstStart)}.`
-        : `The balance is due after the shoot. The deposit moved with the new date. It is no longer refundable: the time you first booked, ${timeRange(c.firstStart)}, was under 48 hours away.`
-      : "The balance is due after the shoot. The deposit moves with a new date, or is refunded if you cancel 48 hours or more before.",
+      ? `The balance is due after the shoot. The deposit moved with the new date. ${(() => {
+          const share = refundShare({ intent: "x", start: c.start, firstStart: c.firstStart, fee: c.deposit?.fee });
+          return share >= EARLY_SHARE
+            ? `A cancel is judged by the time you first booked, ${timeRange(c.firstStart)}: ${top} 48 hours or more before it, 70% back 24 hours or more before, nothing after.`
+            : share === PART_SHARE
+            ? `A cancel now refunds 70% of it: the time you first booked, ${timeRange(c.firstStart)}, was under 48 hours away.`
+            : `It is no longer refundable: the time you first booked, ${timeRange(c.firstStart)}, was under 24 hours away.`;
+        })()}`
+      : `The balance is due after the shoot. Cancel 48 hours or more before for ${top}, or 24 hours or more before for 70% back. Under 24 hours it is not refunded. You can move it up to two times, until 24 hours before, and the deposit moves with it.`,
   };
   const links = c.manage;
-  const preheader = `${c.session}, ${fmt({ weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZoneName: "short" }).format(new Date(c.start)).replace(/ /g, " ")}.${c.deposit ? " Deposit of $100 received." : ""}`;
+  const preheader = `${c.session}, ${fmt({ weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZoneName: "short" }).format(new Date(c.start)).replace(/ /g, " ")}.${c.deposit ? ` Deposit of $${usd} received.` : ""}`;
 
   const rule = "border-top:1px solid rgba(0,0,0,0.12)";
   const muted = "color:#515354";
@@ -101,7 +117,7 @@ export function confirmMail(c: Confirm) {
   const receipt = paid
     ? `<tr><td class="rule" style="${rule};padding-top:28px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="mono" style="font-size:13px;line-height:1.5">
 <tr><td colspan="2" class="accent" style="${label};padding-bottom:6px">Deposit paid</td></tr>
-<tr><td class="fg" style="${fg};font-size:22px;padding-bottom:10px">$100.00</td><td></td></tr>
+<tr><td class="fg" style="${fg};font-size:22px;padding-bottom:10px">$${usd}.00</td><td></td></tr>
 ${paid.rows.map(([k, v]) => `<tr><td class="muted" style="${muted};padding:3px 0;width:38%">${k}</td><td class="fg" style="${fg};padding:3px 0">${esc(v)}</td></tr>`).join("")}
 <tr><td colspan="2" class="muted" style="${muted};padding:14px 0 28px;line-height:1.65">${paid.note}</td></tr>
 </table></td></tr>`
@@ -117,7 +133,7 @@ ${paid.rows.map(([k, v]) => `<tr><td class="muted" style="${muted};padding:3px 0
 <table role="presentation" class="page" width="100%" cellpadding="0" cellspacing="0" style="background:#ebedef"><tr><td align="center" style="padding:40px 16px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px" class="mono">
 <tr><td style="padding-bottom:36px"><img class="ink-l" src="cid:name-ink" width="189" height="34" alt="Julian Gigola" style="display:block;border:0"><img class="ink-d" src="cid:name-w" width="189" height="34" alt="Julian Gigola" style="border:0"></td></tr>
-<tr><td class="mono accent" style="${label};padding-bottom:10px">${remind ? "Tomorrow" : "Booked"}</td></tr>
+<tr><td class="mono accent" style="${label};padding-bottom:10px">${remind ? "Tomorrow" : soon ? "In three days" : "Booked"}</td></tr>
 <tr><td class="mono fg" style="font-size:22px;line-height:1.3;${fg};padding-bottom:16px">${head}</td></tr>
 <tr><td class="mono muted" style="font-size:13px;line-height:1.65;${muted};padding-bottom:32px">${esc(lead)}</td></tr>
 <tr><td class="rule" style="${rule}"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="mono" style="font-size:13px;line-height:1.5">${detail}</table></td></tr>
@@ -132,7 +148,7 @@ ${links ? `<tr><td class="rule" style="${rule};padding:22px 0 0"><a href="${link
     lead,
     "",
     ...rows.map(([k, v]) => `${k}: ${v}`),
-    ...(paid ? ["", "Deposit paid: $100.00", ...paid.rows.map(([k, v]) => `${k}: ${v}`), paid.note] : []),
+    ...(paid ? ["", `Deposit paid: $${usd}.00`, ...paid.rows.map(([k, v]) => `${k}: ${v}`), paid.note] : []),
     ...(links ? ["", `Reschedule: ${links.reschedule}`, `Cancel: ${links.cancel}`] : []),
     "",
     "Questions? Reply to this email.",
@@ -140,7 +156,7 @@ ${links ? `<tr><td class="rule" style="${rule};padding:22px 0 0"><a href="${link
   ].join("\n");
 
   const logo = (contentId: string, b64: string) => ({ content: Uint8Array.from(atob(b64), (c) => c.charCodeAt(0)), filename: `${contentId}.png`, type: "image/png", disposition: "inline" as const, contentId });
-  return { subject: remind ? `Tomorrow: ${c.session}, ${hour}` : `Booked: ${c.session}, ${at}`, html, text, attachments: [logo("name-w", NAME_W), logo("name-ink", NAME_INK)] };
+  return { subject: remind ? `Tomorrow: ${c.session}, ${hour}` : soon ? `Coming up: ${c.session}, ${at}` : `Booked: ${c.session}, ${at}`, html, text, attachments: [logo("name-w", NAME_W), logo("name-ink", NAME_INK)] };
 }
 
 /** The subject it sent, for the lead log; null when the mail did not go out. */
@@ -168,12 +184,16 @@ export async function sendConfirm(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefi
 export const cancelledSubject = (c: { session: string; start: string; end?: string }) => `Cancelled: ${c.session}, ${timeRange(c.start, c.end)}`;
 
 /** The client's note that a booking is cancelled, plain, from book@. A failed send is logged, never a failed cancel. Whether it went out. */
-export async function sendCancelled(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefined, c: { name: string; email: string; session: string; start: string; end?: string }, refund: "refunded" | "kept" | "none" | "late"): Promise<boolean> {
+export async function sendCancelled(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefined, c: { name: string; email: string; session: string; start: string; end?: string }, refund: "refunded" | "early" | "part" | "kept" | "none" | "late" | "mine" | "mineFree", usd = LEGACY_DEPOSIT, back = refundCents(usd, 0.7) / 100): Promise<boolean> {
   if (!mailer || !c.email) return false;
   const money = {
-    refunded: "Your $100 deposit is refunded to your card. Banks take 5 to 10 days to show it.",
+    refunded: `Your $${usd} deposit is refunded to your card. Banks take 5 to 10 days to show it.`,
     late: "The refund did not go through on its own. I'll send it by hand and email you.",
-    kept: "It was under 48 hours before the session as first booked, so the $100 deposit is not refunded.",
+    early: `$${back} of your $${usd} deposit is refunded to your card. $${usd - back} is kept as the booking fee. Banks take 5 to 10 days to show it.`,
+    mine: `I had to cancel this one, and I'm sorry for the change. Your $${usd} deposit is refunded in full to your card. Banks take 5 to 10 days to show it.`,
+    mineFree: "I had to cancel this one, and I'm sorry for the change.",
+    part: `It was under 48 hours before the session as first booked, so $${back} of your $${usd} deposit is refunded to your card and $${usd - back} is kept. Banks take 5 to 10 days to show it.`,
+    kept: `It was under 24 hours before the session as first booked, so the $${usd} deposit is not refunded.`,
     none: "",
   }[refund];
   const text = [`Hi ${first(c.name)},`, "", `Your ${c.session.toLowerCase()} on ${timeRange(c.start, c.end)} is cancelled.`, money, "", `Book another time: ${SITE}/book`, "", "Questions? Reply to this email.", SIG_TEXT].filter((l, i, a) => l || a[i - 1]).join("\n");

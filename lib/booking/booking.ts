@@ -62,8 +62,8 @@ export type BookingPage = {
       to show whole: chosen, not sampled. */
   picks?: string[];
   /** Presets for the form on the Book screen. */
-  /** `cal`: the Cal.com event ("juliangigola/event-slug"), embedded on the
-      Book screen in place of the form. */
+  /** `cal`: the event it books ("juliangigola/event-slug"; the slug keys
+      `EVENTS` in `booking-rules.ts`), picked on the Book screen in place of the form. */
   book: { type: string; session?: string; title: string; cal?: string };
 };
 
@@ -77,22 +77,21 @@ export const PLACES = [
   "New York",
 ];
 
-/* ── Cal.com ────────────────────────────────────────────────────── */
+/* ── bookable events ────────────────────────────────────────────── */
 
-/** The Cal.com event each session books, by the session's slug in
-    `content/site.json`, as Cal.com writes it after its domain:
-    "username/event-slug". The picker on /book reads these. Weddings, music
+/** The event each session books, by the session's slug in
+    `content/site.json`: "juliangigola/event-slug", a stored key, kept as is. The picker on /book reads these. Weddings, music
     and brand have a call, set on their own pages (`book.cal`). */
-export const CAL_EVENTS: Record<string, string> = {
+export const SESSION_EVENTS: Record<string, string> = {
   portraits: "juliangigola/portraits",
   graduation: "juliangigola/graduation",
   headshots: "juliangigola/headshots",
   "studio-digitals": "juliangigola/digitals",
 };
 
-/** A session's Cal.com event, or nothing where it has none yet. */
-export const calEvent = (sessionSlug?: string): string | undefined =>
-  (sessionSlug && CAL_EVENTS[sessionSlug]) || undefined;
+/** A session's event, or nothing where it has none yet. */
+export const sessionEvent = (sessionSlug?: string): string | undefined =>
+  (sessionSlug && SESSION_EVENTS[sessionSlug]) || undefined;
 
 /* ── shared wording ─────────────────────────────────────────────── */
 
@@ -626,7 +625,7 @@ export type MenuItem = {
   group: "time" | "commission";
   /** Its own page, for "More on". */
   page?: string;
-  /** Its Cal.com event: a session's time, or a commission's call. */
+  /** Its event: a session's time, or a commission's call. */
   cal?: string;
   /** The form's presets, for a commission's "Send details". */
   form?: { type: string; session?: string; ref?: string };
@@ -639,13 +638,13 @@ const callOf = (slug: BookingSlug, name: string, blurb: string): MenuItem => {
 
 export const BOOK_MENU: MenuItem[] = [
   ...SESSION_TYPES.flatMap((s): MenuItem[] => {
-    const cal = calEvent(s.slug);
+    const cal = sessionEvent(s.slug);
     const page = pageForSession(s.slug);
     return cal ? [{ slug: s.slug, name: s.name, blurb: s.blurb, group: "time", cal, page: page && bookingHref(page) }] : [];
   }),
   callOf("weddings", "Weddings", session("weddings").blurb),
   callOf("music-photography", "Music & artists", "Press photos, cover art and music videos for a release, planned together so it reads as one thing."),
   callOf("brand-photography", "Brand campaigns", "Campaign imagery from the concept and the art direction to the shoot and the retouch."),
-  // ponytail: no call yet; add `cal: "juliangigola/event-call"` once the event exists in Cal.com.
+  // ponytail: no call yet; add `cal: "juliangigola/event-call"` once the event exists in `EVENTS` (`booking-rules.ts`).
   { slug: "events", name: "Event coverage", blurb: "Launches, brand events, concerts and parties, shot as they happen.", group: "commission", page: "/portfolio/events", form: { type: "event" } },
 ];

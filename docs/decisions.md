@@ -4,6 +4,22 @@ Dated decisions about how the site is built, and why. Newest first. Code
 comments say what the code does; who asked for a change, when, and what
 it replaced belongs here.
 
+## 2026-11-16: Cal.com is out of the code
+
+The site has booked through its own engine since 2026-11-03, in place of
+Cal.com: open times from hello@'s Google Calendar (`lib/booking/slots.ts`),
+one Durable Object lock (`worker/booking-lock.ts`), deposits in the site's
+own Stripe card (`lib/booking/deposit.ts`). The working hours were copied
+from Cal.com's public event types that day. Julian (2026-11-16) asked for
+the rest to go: comments now say what the code does, `CAL_EVENTS` is
+`SESSION_EVENTS` and `cal-embed.tsx` is `book-times.tsx`.
+
+Kept on purpose, because stored data uses them: the `cal` field and its
+`juliangigola/<slug>` values, Stripe's `cal_uid` and `cal_start` metadata,
+Notion's "Cal UID" column, the `cal:extra` KV key, and the `noDeposit`
+reads for old Inbox rows. The `?cal` flag and the entries about it below
+are history: that flag no longer exists.
+
 ## 2026-10-09: Preview flags from the implementation plan
 
 Motion and booking changes from the plan ship behind a query flag. Each is
@@ -17,7 +33,6 @@ it on his own devices.
 | `?wall=slow` | 1.1 | On a screen 1600px wide or more, the Inquiries wall drifts at half speed with bigger tiles. | `components/inquire-wall.tsx` |
 | `?wall=still` | 1.1 | The wall eases to a stop while the form is in use, and the beam rests. | `components/inquire-wall.tsx`, `components/contact-beam.tsx` |
 | `?notch` | 1.4 | A mouse notch moves the strip by its own ease instead of Lenis. | `components/strip/shared.ts` |
-| `?cal` | 2.1 | Cal.com's calendar in place of the Google Calendar frame, where an event is set in `CAL_EVENTS`. | `components/cal-embed.tsx`, `lib/booking.ts` |
 
 Older previews still in the code: `?flyout`, `?menu3d`, `?deal`, `?cards`,
 `?peek`, `?stack=0`, `?fly`, `?lenis=0`, `?intro` and `?arrange`. Their

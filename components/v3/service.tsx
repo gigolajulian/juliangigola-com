@@ -16,7 +16,7 @@ import type { Frame } from "@/lib/work-types";
    the two doors. The words are `lib/booking/booking.ts`'s, unchanged. */
 
 export function V3Service({ page, frames }: { page: BookingPage; frames: Frame[] }) {
-  /* Its booking on the V3 stepper: the same slug, or the session that books the same Cal.com event. */
+  /* Its booking on the V3 stepper: the same slug, or the session that books the same event. */
   const s = SESSIONS[page.slug as SessionSlug] ?? Object.values(SESSIONS).find((x) => x.cal === page.book.cal);
   const includes = page.blocks.find((b) => b.heading === "What's included")?.items ?? [];
   /* Six frames, two a column (Julian); the gallery holds the rest. */
