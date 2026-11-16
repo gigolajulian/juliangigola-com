@@ -79,7 +79,7 @@ export const isIntentId = (s: string) => /^pi_[A-Za-z0-9]{8,64}$/.test(s);
  * Whether the start is still offered by hello@'s calendar.
  * `hours`: Julian's, from the lock (`liveHours`); the defaults when unset.
  */
-export async function isSlotOpen(b: Booking, gcalSecret?: string, kv?: KV, hours?: Hours): Promise<boolean> {
+export function isSlotOpen(b: Booking, gcalSecret?: string, kv?: KV, hours?: Hours): Promise<boolean> {
   return openNow(gcalSecret, b.slug, b.start, { kv, hours });
 }
 
