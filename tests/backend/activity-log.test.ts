@@ -4,6 +4,7 @@ import { sealer } from "@/lib/leads/lead-crypto";
 import { fold, type Lead } from "@/lib/leads/leads";
 import { fresh, readLog, readMaster } from "@/lib/leads/activity-log";
 import { FakeKV, LEADS_KEY } from "./fakes";
+import { byCodeUnit } from "@/lib/utils";
 
 /* The activity log (`lib/leads/activity-log.ts`): every event in full, per
    client and in one master list, sealed, and cleaned up with the lead. */
@@ -61,7 +62,7 @@ describe("the log", () => {
     expect(log).toHaveLength(60);
     const master = await readMaster(kv as never, seal);
     expect(master).toHaveLength(61);
-    expect(master.map((m) => m.event.at)).toEqual([...master.map((m) => m.event.at)].sort());
+    expect(master.map((m) => m.event.at)).toEqual([...master.map((m) => m.event.at)].sort(byCodeUnit));
     // Linked both ways: the client entry names its master key, the master entry the lead.
     expect(kv.data.has(log[0].m)).toBe(true);
     expect(master.find((m) => m.email === "b@example.com")?.lead).toBe(await seal.id("b@example.com"));

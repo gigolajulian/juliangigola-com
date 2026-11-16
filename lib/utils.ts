@@ -12,3 +12,6 @@ export const rubberband = (over: number, dim: number, c = 0.55) =>
   (over * dim * c) / (dim + c * Math.abs(over));
 
 
+
+/** The default sort order for strings (UTF-16 code units), spelled out. Not `localeCompare`: that reorders case and accents. */
+export const byCodeUnit = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);

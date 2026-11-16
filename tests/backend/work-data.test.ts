@@ -5,6 +5,7 @@ import { SPLASH_RUN } from "@/lib/splash-run";
 import { CALL_CARD, DOORS, HERO, INDEX_ORDER, isSession, LENGTH, rate, SESSIONS, TAB_ORDER, type Session } from "@/lib/v3";
 import { CATEGORIES, PROJECTS } from "@/lib/work-data";
 import { PROJECTS as SITE_PROJECTS } from "@/lib/work";
+import { byCodeUnit } from "@/lib/utils";
 
 /* The archive and the lists built from it: invariants that, broken, show
    up on the site as a dead link, a missing photo or a wrong count. */
@@ -44,7 +45,7 @@ describe("v3", () => {
   });
   it("keys each session by its own slug, with a length, and orders known ones", () => {
     for (const [k, s] of Object.entries(SESSIONS)) expect(s.slug).toBe(k);
-    expect(Object.keys(LENGTH).sort()).toEqual(Object.keys(SESSIONS).sort());
+    expect(Object.keys(LENGTH).sort(byCodeUnit)).toEqual(Object.keys(SESSIONS).sort(byCodeUnit));
     for (const s of [...TAB_ORDER, ...INDEX_ORDER]) expect(isSession(s), s).toBe(true);
     expect(isSession("toString")).toBe(false);
     expect(isSession(undefined)).toBe(false);

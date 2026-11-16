@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { COOLDOWN_MS, DAILY_CAP, dayKey } from "@/lib/inbox";
 import { FakeEmail, FakeKV, reply } from "./fakes";
+import { byCodeUnit } from "@/lib/utils";
 
 /* The contact form's server action (`app/contact/actions.ts`). Its one
    rule: an enquiry never disappears quietly. Stored, or a mailto handed
@@ -45,7 +46,7 @@ describe("submitEnquiry", () => {
   it("returns field errors and echoes the values, storing nothing", async () => {
     const res = await send({ type: "portrait", name: "", email: "not-an-email", message: "" });
     expect(res.status).toBe("error");
-    expect(Object.keys(res.errors!).sort()).toEqual(["email", "message", "name"]);
+    expect(Object.keys(res.errors!).sort(byCodeUnit)).toEqual(["email", "message", "name"]);
     expect(res.values).toMatchObject({ email: "not-an-email" });
     expect(kv.puts).toEqual([]);
   });

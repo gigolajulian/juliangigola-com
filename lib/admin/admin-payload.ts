@@ -107,8 +107,8 @@ export function projectsFile(
 
   // Sorted, so the committed file does not churn on the order a Set happens
   // to iterate in — a diff should show what changed and nothing else.
-  next.hidden = [...edit.hidden].sort();
-  next.unlisted = [...edit.unlisted].sort();
+  next.hidden = [...edit.hidden].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+  next.unlisted = [...edit.unlisted].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
   next.categories = edit.categories;
 
   // A sequence that is nothing but dropped passages leaves no entry at all,

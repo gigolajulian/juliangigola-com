@@ -1,13 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { BOOKING_PAGES, BOOK_MENU, SESSION_EVENTS, bookingHref, bookingPage, sessionEvent, pageForSession } from "@/lib/booking/booking";
 import { BOOKING_SLUGS } from "@/lib/booking/booking-slugs";
+import { byCodeUnit } from "@/lib/utils";
 
 /* The booking pages and the homepage booking menu (`lib/booking/booking.ts`),
    against the slug list next.config reads (`lib/booking/booking-slugs.ts`). */
 
 describe("booking pages", () => {
   it("has one page per booking slug, and no other", () => {
-    expect(BOOKING_PAGES.map((p) => p.slug).sort()).toEqual([...BOOKING_SLUGS].sort());
+    expect(BOOKING_PAGES.map((p) => p.slug).sort(byCodeUnit)).toEqual([...BOOKING_SLUGS].sort(byCodeUnit));
   });
 
   it("finds a page by slug and by session, and links it at the root", () => {

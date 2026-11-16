@@ -79,7 +79,7 @@ export const isIntentId = (s: string) => /^pi_[A-Za-z0-9]{8,64}$/.test(s);
  * Whether the start is still offered by hello@'s calendar.
  * `hours`: Julian's, from the lock (`liveHours`); the defaults when unset.
  */
-export async function isSlotOpen(b: Booking, gcalSecret?: string, kv?: KV, hours?: Hours): Promise<boolean> {
+export function isSlotOpen(b: Booking, gcalSecret?: string, kv?: KV, hours?: Hours): Promise<boolean> {
   return openNow(gcalSecret, b.slug, b.start, { kv, hours });
 }
 
@@ -164,7 +164,8 @@ async function refsOf(inbox: Env["INBOX"], intent: string): Promise<{ files: Att
         .filter((k: Key) => k.metadata?.type)
         .map(async (k: Key) => {
           const buf = (await inbox.get(k.name, "arrayBuffer")) as ArrayBuffer | null;
-          return buf ? { content: buf, filename: k.metadata!.name, type: k.metadata!.type, disposition: "attachment" as const } : null;
+          const m = k.metadata;
+          return buf && m ? { content: buf, filename: m.name, type: m.type, disposition: "attachment" as const } : null;
         }),
     );
     const picks = (((await inbox.get(refKey(intent, "picks"))) as string | null) ?? "").split("\n").filter(Boolean);

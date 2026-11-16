@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FakeKV } from "./fakes";
 import { notify, pushFor, subscribe, unsubscribe } from "@/lib/leads/lead-push";
+import { byCodeUnit } from "@/lib/utils";
 
 /* The lead desk's pushes: one row per device, only arrivals ping, a
    device the push service calls gone is forgotten, and nothing throws. */
@@ -56,7 +57,7 @@ describe("notify", () => {
     await subscribe(kv as never, sub("https://push.example/gone"));
     sent.gone.add("https://push.example/gone");
     await notify(kv as never, "{}", push);
-    expect(sent.calls.sort()).toEqual(["https://push.example/gone", "https://push.example/live"]);
+    expect(sent.calls.sort(byCodeUnit)).toEqual(["https://push.example/gone", "https://push.example/live"]);
     expect(kv.data.size).toBe(1);
   });
   it("never throws when the store is down", async () => {

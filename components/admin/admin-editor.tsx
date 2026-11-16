@@ -40,7 +40,7 @@ import {
   GITHUB_API,
 } from "@/lib/admin/admin-github";
 import type { Bts, Copy, Credit } from "@/lib/work-types";
-import { cn } from "@/lib/utils";
+import { byCodeUnit, cn } from "@/lib/utils";
 
 /* ── the editor ───────────────────────────────────────────────────
  * Edits `content/site.json` and commits it to the repo. The deploy does the
@@ -424,8 +424,8 @@ export function AdminEditor({
       remapSlugs(
         {
           // Sorted, so a set's iteration order is not mistaken for an edit.
-          hidden: [...hidden].sort(),
-          unlisted: [...unlisted].sort(),
+          hidden: [...hidden].sort(byCodeUnit),
+          unlisted: [...unlisted].sort(byCodeUnit),
           categories: recategorised,
           frames: reframed,
           credits: recredited,
@@ -480,8 +480,8 @@ export function AdminEditor({
   }>(() => ({
     content: initial,
     manifest: {
-      hidden: [...initialHidden].sort(),
-      unlisted: [...initialUnlisted].sort(),
+      hidden: [...initialHidden].sort(byCodeUnit),
+      unlisted: [...initialUnlisted].sort(byCodeUnit),
       ...initialOverrides,
       order: initialOrder,
       covers: initialCovers,

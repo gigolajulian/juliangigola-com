@@ -11,6 +11,7 @@ import { STAGES, type Lead, type Person, type Stage } from "./leads";
 import { canonical } from "./lead-crypto";
 import { balance, isPaid } from "./invoice";
 import { paidTotal, type MasterEntry } from "./activity-log";
+import { byCodeUnit } from "@/lib/utils";
 
 /** A lead's identity: the address, or an Instagram handle or phone for someone who never wrote from one. */
 export function identity(o: { email?: string; ig?: string; phone?: string }): string | null {
@@ -115,7 +116,7 @@ export function merge(into: Lead, from: Lead, at: string): Lead {
     firstAt: into.firstAt < from.firstAt ? into.firstAt : from.firstAt,
     lastAt: into.lastAt > from.lastAt ? into.lastAt : from.lastAt,
     unread: into.unread || from.unread,
-    when: [into.when, from.when].filter(Boolean).sort().pop(),
+    when: [into.when, from.when].filter((w): w is string => !!w).sort(byCodeUnit).pop(),
     flags: [...new Set([...(into.flags ?? []), ...(from.flags ?? [])])],
     notes: notes.slice(0, 5000),
     invoices: [...(from.invoices ?? []), ...(into.invoices ?? [])].sort((a, b) => a.at.localeCompare(b.at)),

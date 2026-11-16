@@ -5,6 +5,8 @@
  * binding's send. Each fake keeps what it was asked, so a test can check
  * the writes as well as the answer. */
 
+import { byCodeUnit } from "@/lib/utils";
+
 type Entry = { value: string | ArrayBuffer; metadata?: unknown; ttl?: number };
 
 export class FakeKV {
@@ -45,7 +47,7 @@ export class FakeKV {
 
   async list({ prefix = "", limit = 1000, cursor }: { prefix?: string; limit?: number; cursor?: string } = {}) {
     this.check();
-    const names = [...this.data.keys()].filter((k) => k.startsWith(prefix)).sort();
+    const names = [...this.data.keys()].filter((k) => k.startsWith(prefix)).sort(byCodeUnit);
     // As KV pages a long list: the cursor here is where the next page starts.
     const from = cursor ? Number(cursor) : 0;
     const page = names.slice(from, from + limit);

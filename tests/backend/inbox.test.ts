@@ -18,6 +18,7 @@ import {
   visitContext,
   waitPhrase,
 } from "@/lib/inbox";
+import { byCodeUnit } from "@/lib/utils";
 
 /* The inbox's pure half: keys, validation, the cooldown and the copy. */
 
@@ -54,7 +55,7 @@ describe("cooldown", () => {
 describe("problems", () => {
   it("is empty for a sendable enquiry and names each missing field", () => {
     expect(problems({ name: "A", email: "a@b.c", message: "m" })).toEqual({});
-    expect(Object.keys(problems({ name: "", email: "", message: "" })).sort()).toEqual(["email", "message", "name"]);
+    expect(Object.keys(problems({ name: "", email: "", message: "" })).sort(byCodeUnit)).toEqual(["email", "message", "name"]);
   });
   it("rejects what cannot be an address and fields past the cap", () => {
     expect(problems({ name: "A", email: "nope", message: "m" }).email).toMatch(/does not look/);

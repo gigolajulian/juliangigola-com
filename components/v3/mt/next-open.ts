@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { SESSIONS, type SessionSlug } from "@/lib/v3";
+import { byCodeUnit } from "@/lib/utils";
 
 /* "Next open" (spec 3.4): the first open slot from the same engine /book
    reads (`app/api/slots`). Nothing on failure, slowness or no slots: the
@@ -22,7 +23,7 @@ function lookup(slug: SessionSlug) {
       .then((r) => (r.ok ? r.json() : null))
       .then((j: { status?: string; data?: Record<string, { start: string }[]> } | null) => {
         if (j?.status !== "success" || !j.data) return null;
-        const day = Object.keys(j.data).filter((d) => j.data![d]?.length).sort()[0];
+        const day = Object.keys(j.data).filter((d) => j.data![d]?.length).sort(byCodeUnit)[0];
         return day ? nextOpenLabel(j.data[day][0].start, tz) : null;
       })
       .catch(() => null);
