@@ -1,3 +1,72 @@
+/* The inner pages plan on trial (`?v4pages`, or a list: `?v4pages=s1,a2`; head script in app/layout.tsx, lib/v4pages.ts).
+   Everything here is off without the flag: the new markup is hidden, the old pages are untouched. */
+.v3 .sv-bar,.v3 .btn.v4-m2p,.v3 .pj-bts,.v3 .pj-cr2{display:none}
+.v3 .lg-row{display:contents}
+.v3 .ab-logos .a2-on,[data-v4pages~="a2"] .v3 .ab-logos .a2-off{display:none}
+[data-v4pages~="a2"] .v3 .ab-logos .a2-on{display:inline}
+
+/* s1: the phone book bar on a service page (components/v3/service-bar.tsx). V4's .mt-bar. */
+@media not ((min-width:1024px) and (min-height:600px)){
+  [data-v4pages~="s1"] .v3 .sv-bar{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;align-items:center;gap:12px;padding:12px max(16px,env(safe-area-inset-right)) max(30px,calc(env(safe-area-inset-bottom) + 12px)) max(16px,env(safe-area-inset-left));background:color-mix(in srgb,var(--bg) 72%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-top:1px solid var(--line);transform:translateY(100%);visibility:hidden;transition:transform .25s cubic-bezier(.23,1,.32,1),visibility 0s .25s}
+  [data-v4pages~="s1"] .v3 .sv-bar[data-on]{transform:none;visibility:visible;transition-delay:0s}
+  [data-v4pages~="s1"] .v3 .sv-bar p{margin:0;flex:none;display:flex;flex-direction:column;line-height:1.6}
+  [data-v4pages~="s1"] .v3 .sv-bar .btn{flex:1;justify-content:center;min-height:48px;white-space:nowrap}
+}
+@media (prefers-reduced-motion:reduce){[data-v4pages~="s1"] .v3 .sv-bar{transition:none}}
+
+/* s2: the list rows on a service page as numbered rows in the display face, half ink until pointed at.
+   The questions join them: half ink, full when open. Answers and paragraphs stay mono. */
+[data-v4pages~="s2"] #p-service .sv-v4 ul{counter-reset:row}
+[data-v4pages~="s2"] #p-service .sv-v4 li{counter-increment:row;justify-content:flex-start;align-items:baseline;gap:14px;padding:14px 0;font:900 clamp(1.125rem,calc(1.6*var(--v3u)),1.5rem)/1.15 var(--display);letter-spacing:-.04em;text-wrap:balance;color:color-mix(in srgb,var(--ink) 54%,var(--bg));transition:color .25s}
+[data-v4pages~="s2"] #p-service .sv-v4 li::before{content:counter(row,decimal-leading-zero);flex:none;font:500 11px/1 var(--mono);letter-spacing:.14em;color:var(--mute)}
+[data-v4pages~="s2"] #p-service .sv-row :is(summary,li b){font-weight:900;letter-spacing:-.04em}
+[data-v4pages~="s2"] #p-service .sv-row summary{color:color-mix(in srgb,var(--ink) 54%,var(--bg));transition:color .25s}
+[data-v4pages~="s2"] #p-service .sv-row :is(details[open] summary,summary:focus-visible){color:var(--ink)}
+@media (hover:hover){[data-v4pages~="s2"] #p-service .sv-v4 li:hover{color:var(--ink)}}
+/* no pointer to light a row: each one lights as it crosses the middle of the screen, or stays lit where that is not supported */
+@media (hover:none){
+  [data-v4pages~="s2"] #p-service .sv-v4 li{color:var(--ink)}
+  @supports (animation-timeline:view()){
+    @media (prefers-reduced-motion:no-preference){[data-v4pages~="s2"] #p-service .sv-v4 li{animation:v4-lit linear both;animation-timeline:view();animation-range:cover 20% cover 80%}}
+  }
+}
+@keyframes v4-lit{0%,100%{color:color-mix(in srgb,var(--ink) 54%,var(--bg))}35%,65%{color:var(--ink)}}
+@media (max-width:700px){[data-v4pages~="s2"] #p-service .sv-v4 li{flex-direction:row}}
+
+/* a2: About's marks as V4's band, one drifting line (components/v3/logo-band.tsx), on the page's black. */
+[data-v4pages~="a2"] .v3 .ab-logos{--band-mk:var(--mute);flex-direction:row;align-items:center;gap:28px;padding:56px var(--gr) 56px var(--g);margin-bottom:72px}
+[data-v4pages~="a2"] .v3 .ab-logos h2{flex:none}
+[data-v4pages~="a2"] .v3 .lg-row{display:block;flex:1;min-width:0;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;-webkit-mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
+[data-v4pages~="a2"] .v3 .lg-row::-webkit-scrollbar{display:none}
+[data-v4pages~="a2"] .v3 .ab-logos .lg{display:flex;align-items:center;width:max-content;will-change:transform;backface-visibility:hidden}
+[data-v4pages~="a2"] .v3 .ab-logos .lg>div{flex:none;height:auto;padding:13px 44px}
+[data-v4pages~="a2"] .v3 .ab-logos .lg .mk{transform:none;color:var(--band-mk)}
+/* the page's own black behind the marks, no charcoal ground (Julian, 2026-11-15) */
+:root[data-v4pages~="a2"]:not([data-theme="light"]) .v3 .ab-logos{--band-mk:rgb(217 217 214 / .86)}
+:root[data-v4pages~="a2"]:not([data-theme="light"]) .v3 .ab-logos h2{color:rgb(217 217 214 / .62)}
+@media (prefers-color-scheme:light){
+  :root[data-v4pages~="a2"]:not([data-theme="dark"]) .v3 .ab-logos{background:none;--band-mk:var(--mute);border-block:1px solid var(--line)}
+  :root[data-v4pages~="a2"]:not([data-theme="dark"]) .v3 .ab-logos h2{color:var(--mute)}
+}
+@media (max-width:700px){
+  [data-v4pages~="a2"] .v3 .ab-logos{flex-direction:column;align-items:stretch;gap:8px;padding:40px 0;margin-bottom:48px}
+  [data-v4pages~="a2"] .v3 .ab-logos h2{padding:0 var(--g)}
+  [data-v4pages~="a2"] .v3 .lg-row{-webkit-mask:none;mask:none}
+  [data-v4pages~="a2"] .v3 .ab-logos .lg>div{padding:13px 28px}
+}
+
+/* m2p: behind the scenes on a project page, and its link on About. */
+[data-v4pages~="m2p"] .v3 .btn.v4-m2p{display:inline-flex}
+[data-v4pages~="m2p"] .v3 .pj-bts{display:grid}
+[data-v4pages~="m2p"] .v3 .pj-bts>div:first-child{display:flex;flex-direction:column;align-items:flex-start;gap:12px}
+[data-v4pages~="m2p"] .v3 .pj-bts .label{margin:0;font:400 11px/1.4 var(--mono);letter-spacing:.12em;text-transform:uppercase}
+[data-v4pages~="m2p"] .v3 .pj-bts .text-muted-foreground{color:var(--mute)}
+[data-v4pages~="m2p"] .v3 .pj-bts .text-foreground{color:var(--ink)}
+[data-v4pages~="m2p"] .v3 .pj-bts .grid>div{border-radius:4px}
+/* credits come after it: the copy under the section shows, the one in the sheet's hole goes */
+[data-v4pages~="m2p"] .v3 .pj-cr2{display:contents}
+[data-v4pages~="m2p"] #p-project:has(.pj-bts) .pj-flow .pj-cr{display:none}
+
 /* Inner pages plan on trial, only under ?v4pages (lib/v4pages.ts, head script in app/layout.tsx).
    p3: the scroll motion of the /portfolio grid */
 
