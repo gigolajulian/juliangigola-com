@@ -149,6 +149,8 @@ export function CoverArtGallery({
               onClick={(e) => {
                 if (snd) {
                   // In the click itself, not after the picture has decoded: Safari only lets a gesture start sound.
+                  // shortcut: an open abandoned while the picture decodes (Escape at once) leaves the clip playing
+                  // until it ends or the next one starts. Upgrade if useLightbox ever reports an abandoned open.
                   held.current = release.slug;
                   playSound(release.slug);
                 }
@@ -240,7 +242,7 @@ export function CoverArtGallery({
         note={snd ? <CoverSound /> : undefined}
       />
       {/* On the body: `main` carries a transform, and a fixed line inside it would sit at the foot of the page. */}
-      {snd ? createPortal(<CoverSound className="cv4sf" />, document.body) : null}
+      {snd && !lightbox.open ? createPortal(<CoverSound className="cv4sf" />, document.body) : null}
     </>
   );
 }

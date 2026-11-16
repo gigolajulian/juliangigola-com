@@ -64,8 +64,9 @@ for (const release of COVER_RELEASES) {
   try {
     if (old[slug]?.id) {
       const [x] = songs(await apple("lookup", { id: String(old[slug].id) }));
-      if (x) got = entry(x);
-      else note = `track ${old[slug].id} has no preview any more`;
+      // No preview any more: the id stays, so a pin is never lost, and the page is silent for it.
+      got = x ? entry(x) : { id: old[slug].id };
+      if (!x) note = `track ${old[slug].id} has no preview now`;
     } else {
       const { hit, confirm } = await find(release);
       if (hit) got = entry(hit);
@@ -77,7 +78,7 @@ for (const release of COVER_RELEASES) {
     note = String(e.message);
   }
   if (got || file) out[slug] = { ...got, ...(file ? { clip: file } : {}) };
-  report.push(`${got ? "matched  " : file ? "clip     " : note.startsWith("confirm") ? "confirm  " : "unmatched"} | ${release.title} | ${release.artist}${got ? ` | ${got.id}` : ""}${note ? ` | ${note}` : ""}`);
+  report.push(`${got?.preview ? "matched  " : file ? "clip     " : note.startsWith("confirm") ? "confirm  " : "unmatched"} | ${release.title} | ${release.artist}${got?.id ? ` | ${got.id}` : ""}${note ? ` | ${note}` : ""}`);
 }
 writeFileSync(OUT, JSON.stringify(out, null, 2) + "\n", "utf8");
 console.log(report.join("\n"));
