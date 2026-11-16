@@ -1,7 +1,7 @@
 import { DEFAULT_HOURS, EVENTS, TZ, type Booking, type Hours } from "@/lib/booking/booking-rules";
 import { gcal } from "@/lib/booking/gcal";
 import { bookingEnquiry, enquiryKey, looksLikeEmail, summary } from "@/lib/inbox";
-import { isPaid } from "@/lib/booking/paid";
+import { isPaid, LEGACY_DEPOSIT } from "@/lib/booking/paid";
 import { recordLead, type LeadStore } from "@/lib/leads/lead-store";
 import { toNotion } from "@/lib/leads/notion-lead";
 import { openNow, type KV } from "@/lib/booking/slots";
@@ -42,6 +42,8 @@ export type BookingRecord = {
   via?: string;
   /** The deposit's PaymentIntent. */
   intent?: string;
+  /** What the deposit was, in dollars. Unset on a record made before 2026-11-15: $100 then (`depositPaid`). */
+  deposit?: number;
   at: string;
   reminded?: string;
   cancelled?: string;
@@ -90,7 +92,9 @@ export function parseBooking(raw: unknown, call = false): Parsed {
   return { ok: true, booking };
 }
 
-export type BookInput = Booking & { via?: string; intent?: string };
+export type BookInput = Booking & { via?: string; intent?: string; deposit?: number };
+/** What a booking's deposit was, in dollars: as stored, or the $100 every earlier one paid. Nothing if it took none. */
+export const depositPaid = (r: { intent?: string; deposit?: number }) => (r.intent ? (r.deposit ?? LEGACY_DEPOSIT) : undefined);
 export type BookResult = { ok: true; record: BookingRecord } | { ok: false; reason: "taken" | "unknown" };
 
 const recKey = (id: string) => `b:${id}`;
@@ -98,7 +102,7 @@ const intentKey = (intent: string) => `i:${intent}`;
 const newId = () => crypto.randomUUID().replace(/-/g, "").slice(0, 16);
 
 /** What the client's page may show: no email, no phone, no deposit id. */
-export const clientView = (r: BookingRecord) => ({ id: r.id, slug: r.slug, session: r.session, start: r.start, end: r.end, firstStart: r.firstStart, where: r.where, paid: !!r.intent, cancelled: !!r.cancelled });
+export const clientView = (r: BookingRecord) => ({ id: r.id, slug: r.slug, session: r.session, start: r.start, end: r.end, firstStart: r.firstStart, where: r.where, paid: !!r.intent, deposit: depositPaid(r), cancelled: !!r.cancelled });
 
 /** The record by its id. */
 export const findBooking = (store: Store, id: string) => store.get<BookingRecord>(recKey(id));
@@ -116,7 +120,7 @@ function description(b: BookInput, id: string) {
     b.via && `Call: ${b.via === "Phone" ? `ring ${b.phone ?? ""}`.trim() : "video"}`,
     b.where && `Where: ${b.where}`,
     b.notes && `\n${b.notes}`,
-    b.intent && `\nDeposit paid on the site: $100 (ref ${b.intent}).`,
+    b.intent && `\nDeposit paid on the site: $${depositPaid(b)} (ref ${b.intent}).`,
     `\nBooked on juliangigola.com, booking ${id}.`,
   ]
     .filter(Boolean)
@@ -171,6 +175,7 @@ export async function bookOwn(store: Store, secret: string | undefined, b: BookI
     ...(b.notes ? { notes: b.notes } : {}),
     ...(b.via ? { via: b.via } : {}),
     ...(b.intent ? { intent: b.intent } : {}),
+    ...(b.intent && b.deposit ? { deposit: b.deposit } : {}),
     at: new Date().toISOString(),
   };
   await saveBooking(store, record);
@@ -200,7 +205,7 @@ export async function recordBooking(env: LeadStore & { INBOX?: CloudflareEnv["IN
     now,
     id,
   );
-  if (deposit) stored.deposit = deposit;
+  if (deposit) Object.assign(stored, { deposit, depositUsd: depositPaid(r) });
   try {
     await env.INBOX?.put(enquiryKey(now, id.slice(0, 8)), JSON.stringify(stored), { metadata: summary(stored) });
   } catch (e) {

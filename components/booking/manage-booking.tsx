@@ -4,15 +4,16 @@ import * as React from "react";
 import Link from "next/link";
 import { TimePicker } from "@/components/booking/time-picker";
 import { REFUND_HOURS, refundable, TZ } from "@/lib/booking/booking-rules";
+import { LEGACY_DEPOSIT } from "@/lib/booking/paid";
 
 /* ── a client's own booking: reschedule or cancel ─────────────────
  * Opened from the links in the "You're in." mail (`app/booking/[id]`).
  * Reschedule reuses the picker; picking a time moves the booking. Cancel
- * says first whether the $100 comes back (48 hours or more before the
+ * says first whether the deposit comes back (48 hours or more before the
  * start, Julian 2026-11-03), then asks to confirm.
  * ─────────────────────────────────────────────────────────────── */
 
-export type Managed = { id: string; slug: string; session: string; start: string; end: string; firstStart?: string; where?: string; paid: boolean; cancelled: boolean };
+export type Managed = { id: string; slug: string; session: string; start: string; end: string; firstStart?: string; where?: string; paid: boolean; /** Dollars this booking paid. */ deposit?: number; cancelled: boolean };
 
 const stampIn = (iso: string, timeZone?: string) =>
   new Intl.DateTimeFormat("en-US", { timeZone, weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZoneName: "short" }).format(new Date(iso));
@@ -24,6 +25,7 @@ export function ManageBooking({ booking, token, open }: { booking: Managed; toke
   const [error, setError] = React.useState("");
   const [refunded, setRefunded] = React.useState<boolean | null>(null);
   const [now] = React.useState(() => Date.now());
+  const usd = b.deposit ?? LEGACY_DEPOSIT;
   const past = Date.parse(b.start) <= now;
   const refund = refundable({ intent: b.paid ? "x" : undefined, start: b.start, firstStart: b.firstStart }, now);
 
@@ -57,7 +59,7 @@ export function ManageBooking({ booking, token, open }: { booking: Managed; toke
       {state === "cancelled" ? (
         <p>
           {refunded === true
-            ? "It's cancelled, and your $100 deposit is on its way back to your card. Banks take 5 to 10 days."
+            ? `It's cancelled, and your $${usd} deposit is on its way back to your card. Banks take 5 to 10 days.`
             : refunded === false && b.paid && refund
               ? "It's cancelled. The refund did not go through on its own; I'll send it by hand and email you."
               : "It's cancelled. A note is on its way to your inbox."}{" "}
@@ -71,8 +73,8 @@ export function ManageBooking({ booking, token, open }: { booking: Managed; toke
             {!b.paid
               ? "Cancel this call?"
               : refund
-                ? `It's ${REFUND_HOURS} hours or more before your session, so your $100 deposit is refunded to your card.`
-                : `It's under ${REFUND_HOURS} hours before ${b.firstStart && b.firstStart !== b.start ? "the time you first booked" : "your session"}, so the $100 deposit is not refunded. Moving to another date carries it over.`}
+                ? `It's ${REFUND_HOURS} hours or more before your session, so your $${usd} deposit is refunded to your card.`
+                : `It's under ${REFUND_HOURS} hours before ${b.firstStart && b.firstStart !== b.start ? "the time you first booked" : "your session"}, so the $${usd} deposit is not refunded. Moving to another date carries it over.`}
           </p>
           <div className="flex gap-3">
             <button type="button" className="btn fill" disabled={state === "busy"} onClick={() => act({ action: "cancel" })}>
@@ -92,8 +94,8 @@ export function ManageBooking({ booking, token, open }: { booking: Managed; toke
           {b.paid ? (
             <p className="mute">
               {refund
-                ? `Your $100 deposit moves with it. It is refunded only if you cancel ${REFUND_HOURS} hours or more before the time you first booked, ${stampIn(b.firstStart ?? b.start, TZ)}.`
-                : `Your $100 deposit moves with it. It is no longer refundable: the time you first booked, ${stampIn(b.firstStart ?? b.start, TZ)}, is under ${REFUND_HOURS} hours away.`}
+                ? `Your $${usd} deposit moves with it. It is refunded only if you cancel ${REFUND_HOURS} hours or more before the time you first booked, ${stampIn(b.firstStart ?? b.start, TZ)}.`
+                : `Your $${usd} deposit moves with it. It is no longer refundable: the time you first booked, ${stampIn(b.firstStart ?? b.start, TZ)}, is under ${REFUND_HOURS} hours away.`}
             </p>
           ) : null}
           <button type="button" className="btn self-start" onClick={() => setMode("")}>Back</button>

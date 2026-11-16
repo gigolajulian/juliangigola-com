@@ -4,7 +4,7 @@ import { FakeKV, reply } from "./fakes";
 import { forgetToken } from "@/lib/booking/gcal";
 
 /* /api/deposit: off without Stripe, rate limited, refuses a bad booking,
-   and creates a fixed $100 intent for an open time. */
+   and creates the session's fixed intent for an open time. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
 vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
@@ -56,10 +56,10 @@ describe("POST /api/deposit", () => {
     expect(intents).toEqual([]);
   });
 
-  it("creates an intent for $100 whatever amount was asked", async () => {
+  it("creates the session's intent whatever amount was asked", async () => {
     const res = await post(BODY);
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual({ clientSecret: `${PI}_secret_x`, intentId: PI, amount: 10000, currency: "usd" });
-    expect(new URLSearchParams(intents[0]).get("amount")).toBe("10000");
+    expect(await res.json()).toEqual({ clientSecret: `${PI}_secret_x`, intentId: PI, amount: 25000, currency: "usd" });
+    expect(new URLSearchParams(intents[0]).get("amount")).toBe("25000");
   });
 });

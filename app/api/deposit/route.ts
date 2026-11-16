@@ -1,13 +1,13 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { liveHours, parseBooking } from "@/lib/booking/booking-engine";
-import { AMOUNT, CURRENCY, intentForm, isSlotOpen } from "@/lib/booking/deposit";
+import { amountOf, CURRENCY, intentForm, isSlotOpen } from "@/lib/booking/deposit";
 import { PAYMENTS_DOWN, stripe } from "@/lib/stripe";
 import { bodyOf, json } from "@/lib/http";
 
 /* ── a deposit starts ──────────────────────────────────────────────
  * The card posts the booking it wants; this checks the time is still
- * open in hello@'s calendar and creates a $100 PaymentIntent for the Payment
- * Element. The amount is fixed here, never taken from the request.
+ * open in hello@'s calendar and creates the session's PaymentIntent for the Payment
+ * Element. The amount is set here from the session, never taken from the request.
  * Off (503) until STRIPE_SECRET_KEY is set. See `lib/booking/deposit.ts`.
  * ─────────────────────────────────────────────────────────────── */
 
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
 
   try {
     const pi = await stripe(env.STRIPE_SECRET_KEY, "/payment_intents", intentForm(b));
-    return json({ clientSecret: pi.client_secret, intentId: pi.id, amount: AMOUNT, currency: CURRENCY });
+    return json({ clientSecret: pi.client_secret, intentId: pi.id, amount: amountOf(b.slug), currency: CURRENCY });
   } catch (e) {
     console.error("deposit intent", String(e));
     return json({ error: PAYMENTS_DOWN }, 502);

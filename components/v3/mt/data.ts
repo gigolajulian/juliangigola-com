@@ -2,6 +2,7 @@
    screen owns. Client-safe: no lib/work import. Frames that need project data
    (names, ratios) are resolved on the server in `app/page.tsx` (`mtData`). */
 import type { SessionSlug } from "@/lib/v3";
+import { DEPOSIT } from "@/lib/booking/paid";
 
 /** A photo with its caption: `r` is height / width. */
 export type MtFrame = { src: string; name: string; meta: string; slug: string; r: number };
@@ -39,7 +40,7 @@ export const FILM_DRESS: Record<string, { zoom?: number; mark?: { src: string; w
   "The Description": { zoom: 1.1, mark: { src: "/clients/empire.webp", w: 159, h: 160, name: "Empire" } },
 };
 
-/* ── Book online: the four sessions the home sells, each with the $100 deposit. Model test books on /book. ── */
+/* ── Book online: the four sessions the home sells, each with its deposit (`lib/booking/paid.ts`). Model test books on /book. ── */
 export type BookRow = {
   key: "portraits" | "headshots" | "graduation" | "studio-digitals";
   /** The live session it books; Test shoot has none yet (no SESSIONS / EVENTS entry). */
@@ -57,10 +58,10 @@ export type BookRow = {
   at: string;
 };
 export const BOOK_ROWS: BookRow[] = [
-  { key: "portraits", slug: "portraits", group: "s", name: "Portraits", len: "60 min", what: "Two looks", price: "$100 deposit", detail: "Studio or location. Retouched selects for web and print.", btn: "Book portraits", ready: "1 week", photo: "", at: "50% 50%" },
-  { key: "headshots", slug: "headshots", group: "s", name: "Headshots", len: "30 min", what: "LinkedIn, corporate", price: "$100 deposit", detail: "For LinkedIn, company sites and press. Retouched selects. Booking a team? Ask for a day rate.", btn: "Book headshots", ready: "3 business days", photo: "", at: "50% 40%" },
-  { key: "graduation", slug: "graduation", group: "s", name: "Graduation", len: "90 min", what: "On campus", price: "$100 deposit", detail: "Two outfits. Edited gallery, print release. Booking spring {year} now.", btn: "Book graduation", ready: "1 week", photo: "", at: "50% 18%" },
-  { key: "studio-digitals", slug: "studio-digitals", group: "a", name: "Studio digitals", len: "45 min", what: "Unretouched", price: "$100 deposit", detail: "Full length, three-quarter, close. Front and profile.", btn: "Book digitals", ready: "2 business days", photo: "", at: "50% 50%" },
+  { key: "portraits", slug: "portraits", group: "s", name: "Portraits", len: "60 min", what: "Two looks", price: `$${DEPOSIT.portraits} deposit`, detail: "Studio or location. Retouched selects for web and print.", btn: "Book portraits", ready: "1 week", photo: "", at: "50% 50%" },
+  { key: "headshots", slug: "headshots", group: "s", name: "Headshots", len: "30 min", what: "LinkedIn, corporate", price: `$${DEPOSIT.headshots} deposit`, detail: "For LinkedIn, company sites and press. Retouched selects. Booking a team? Ask for a day rate.", btn: "Book headshots", ready: "3 business days", photo: "", at: "50% 40%" },
+  { key: "graduation", slug: "graduation", group: "s", name: "Graduation", len: "90 min", what: "On campus", price: `$${DEPOSIT.graduation} deposit`, detail: "Two outfits. Edited gallery, print release. Booking spring {year} now.", btn: "Book graduation", ready: "1 week", photo: "", at: "50% 18%" },
+  { key: "studio-digitals", slug: "studio-digitals", group: "a", name: "Studio digitals", len: "45 min", what: "Unretouched", price: `$${DEPOSIT.digitals} deposit`, detail: "Full length, three-quarter, close. Front and profile.", btn: "Book digitals", ready: "2 business days", photo: "", at: "50% 50%" },
 ];
 export { gradYear } from "@/lib/grad-year";
 

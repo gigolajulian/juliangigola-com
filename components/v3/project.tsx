@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Mark } from "@/components/v3/duo";
+import { BtsCredit, BtsPageGrid } from "@/components/bts";
 import { BackLink } from "@/components/site/back-link";
 import { billing, markFor, titleCase } from "@/lib/work";
 import { tailHole } from "@/lib/sheet";
@@ -144,7 +145,18 @@ export function V3Project({ project, next }: { project: Project; next?: { href: 
           ) : null}
         </div>
         <div className="sv-info">
-          {hole ? null : credits}
+          {/* ?v4pages=m2p: behind the scenes after the frames and before the credits, smaller than the work.
+              Credits that sit in the sheet's hole get a second copy here, swapped in by v4pages.css. */}
+          {project.bts ? (
+            <section className="sv-row pj-bts">
+              <div>
+                <h2 className="lbl mute">Behind the scenes</h2>
+                <BtsCredit bts={project.bts} />
+              </div>
+              <BtsPageGrid bts={project.bts} name={name} />
+            </section>
+          ) : null}
+          {hole ? (project.bts ? <div className="pj-cr2">{credits}</div> : null) : credits}
           {/* The page closes on an ask (critique, 2026-10-29), pre-tagged so the form opens on this kind of job. */}
           <div className="pj-ask">
             <div>

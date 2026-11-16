@@ -264,7 +264,7 @@ export function AdminInbox({
                         <span className="text-foreground"> {row.detail}</span>
                       ) : null}
                       {row.deposit ? (
-                        <span className="text-accent"> · Deposit paid · $100</span>
+                        <span className="text-accent"> · Deposit paid · ${row.depositUsd ?? 100}</span>
                       ) : row.noDeposit ? (
                         <span className="text-foreground"> · No deposit</span>
                       ) : null}
@@ -315,14 +315,14 @@ export function AdminInbox({
                           {full.noDeposit ? (
                             <>
                               <dt className="label text-muted-foreground">Deposit</dt>
-                              <dd className="text-sm">None. Booked on cal.com without paying: cancel it or ask for the $100.</dd>
+                              <dd className="text-sm">None. Booked on cal.com without paying: cancel it or ask for the deposit.</dd>
                             </>
                           ) : null}
                           {full.deposit ? (
                             <>
                               <dt className="label text-muted-foreground">Deposit</dt>
                               <dd className="text-sm">
-                                Paid · $100 ·{" "}
+                                Paid · ${full.depositUsd ?? 100} ·{" "}
                                 <a
                                   href={full.deposit}
                                   target="_blank"
