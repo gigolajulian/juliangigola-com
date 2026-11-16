@@ -33,7 +33,7 @@
 @keyframes v4-lit{0%,100%{color:color-mix(in srgb,var(--ink) 54%,var(--bg))}35%,65%{color:var(--ink)}}
 @media (max-width:700px){[data-v4pages~="s2"] #p-service .sv-v4 li{flex-direction:row}}
 
-/* a2: About's marks on V4's charcoal band, one line (components/v3/logo-band.tsx). Dark theme only, as on the home. */
+/* a2: About's marks as V4's band, one drifting line (components/v3/logo-band.tsx), on the page's black. */
 [data-v4pages~="a2"] .v3 .ab-logos{--band-mk:var(--mute);flex-direction:row;align-items:center;gap:28px;padding:56px var(--gr) 56px var(--g);margin-bottom:72px}
 [data-v4pages~="a2"] .v3 .ab-logos h2{flex:none}
 [data-v4pages~="a2"] .v3 .lg-row{display:block;flex:1;min-width:0;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;-webkit-mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
@@ -41,7 +41,8 @@
 [data-v4pages~="a2"] .v3 .ab-logos .lg{display:flex;align-items:center;width:max-content;will-change:transform;backface-visibility:hidden}
 [data-v4pages~="a2"] .v3 .ab-logos .lg>div{flex:none;height:auto;padding:13px 44px}
 [data-v4pages~="a2"] .v3 .ab-logos .lg .mk{transform:none;color:var(--band-mk)}
-:root[data-v4pages~="a2"]:not([data-theme="light"]) .v3 .ab-logos{background:#141414;--band-mk:rgb(217 217 214 / .86)}
+/* the page's own black behind the marks, no charcoal ground (Julian, 2026-11-15) */
+:root[data-v4pages~="a2"]:not([data-theme="light"]) .v3 .ab-logos{--band-mk:rgb(217 217 214 / .86)}
 :root[data-v4pages~="a2"]:not([data-theme="light"]) .v3 .ab-logos h2{color:rgb(217 217 214 / .62)}
 @media (prefers-color-scheme:light){
   :root[data-v4pages~="a2"]:not([data-theme="dark"]) .v3 .ab-logos{background:none;--band-mk:var(--mute);border-block:1px solid var(--line)}
