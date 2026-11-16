@@ -30,7 +30,12 @@ const ink = (n: Node) => {
   return r.getBoundingClientRect();
 };
 
+/* Mock (?mtdock=left, Julian 2026-11-15): no dock. The header keeps its wordmark and links from the start with no
+   ground under them, the name leaves to the left as the hero ends, and the header's ground comes in there. */
+const LEFT = typeof location !== "undefined" && /[?&]mtdock=left/.test(location.search);
+
 function dockSetup(el: HTMLElement): Dock | null {
+  if (LEFT) return null;
   const w = Number(/[?&]mtdock=([\d.]+)/.exec(location.search)?.[1] ?? 1);
   const h1 = el.querySelector<HTMLElement>(".mt-name h1"), wm = document.querySelector<HTMLElement>(".site-hdr .site-wm");
   if (!w || !h1 || !wm) return null;
@@ -156,6 +161,13 @@ export const heroDrivers: Driver[] = [
       states.set(el, st);
       const d = st.dock;
       if (!d) document.documentElement.setAttribute("data-mtdock", "off");
+      // by scroll, not by frame: a jump past the hero gets no hero frames
+      const past = () => document.documentElement.toggleAttribute("data-mt-pasthero", el.getBoundingClientRect().bottom <= (document.documentElement.hasAttribute("data-mt-held") ? innerHeight + 40 : 80));
+      if (LEFT) {
+        document.documentElement.setAttribute("data-mtleft", "");
+        addEventListener("scroll", past, { passive: true });
+        past();
+      }
       // late fonts move both boxes: measure again on the next frame
       if (d) document.fonts?.ready.then(() => (st.at = ""), () => {});
       /* The engine gives a section no frames once it is a screen above the window. A jump past the hero (a reload
@@ -176,6 +188,9 @@ export const heroDrivers: Driver[] = [
       }
       return () => {
         removeEventListener("scroll", far);
+        removeEventListener("scroll", past);
+        document.documentElement.removeAttribute("data-mtleft");
+        document.documentElement.removeAttribute("data-mt-pasthero");
         [...st.cols, ...st.figs].forEach((p) => (p.el.style.transform = ""));
         if (st.name) st.name.style.cssText = "";
         if (d) {
@@ -232,7 +247,7 @@ export const heroDrivers: Driver[] = [
         if (st.name && e !== st.e) {
           st.e = e;
           st.name.style.opacity = String(1 - e);
-          st.name.style.transform = e ? `translate3d(0,${(-56 * ctx.u * e).toFixed(1)}px,0)` : "";
+          st.name.style.transform = !e ? "" : LEFT ? `translate3d(${(-0.6 * ctx.vw * e).toFixed(1)}px,0,0)` : `translate3d(0,${(-56 * ctx.u * e).toFixed(1)}px,0)`;
           st.name.style.visibility = e >= 1 ? "hidden" : ""; // gone: its buttons leave the tab order too
         }
         return;
