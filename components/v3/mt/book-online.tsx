@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Duo } from "@/components/v3/duo";
 import { V3BookFlow } from "@/components/v3/book";
 import { SESSIONS } from "@/lib/v3";
-import { BOOK_ROWS, QUOTE_OPTS, gradYear, type BookRow } from "./data";
+import { BOOK_ROWS, QUOTE_OPTS, type BookRow } from "./data";
 import { useNextOpen } from "./next-open";
 
 /* Book online: four sessions, one line each. A row is picked by hover (fine
@@ -15,9 +15,7 @@ import { useNextOpen } from "./next-open";
    events, Stripe deposit and copy, untouched) and the photo stays. */
 const fine = () => matchMedia("(hover: hover) and (pointer: fine)").matches;
 
-export const detailOf = (r: BookRow) => r.detail.replace("{year}", String(gradYear()));
-
-export function RowPhoto({ r, on, sizes }: { r: BookRow; on: boolean; sizes: string }) {
+function RowPhoto({ r, on, sizes }: { r: BookRow; on: boolean; sizes: string }) {
   const style = { objectPosition: r.at } as React.CSSProperties;
   const cls = on ? "on" : undefined;
   if (!r.slug) return <Image src={r.photo} alt={`${r.name} sample`} fill sizes={sizes} className={cls} style={style} />;

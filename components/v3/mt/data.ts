@@ -63,7 +63,6 @@ export const BOOK_ROWS: BookRow[] = [
   { key: "graduation", slug: "graduation", group: "s", name: "Graduation", len: "90 min", what: "On campus", price: `$${DEPOSIT.graduation} deposit`, detail: "Two outfits. Edited gallery, print release. Booking spring {year} now.", btn: "Book graduation", ready: "1 week", photo: "", at: "50% 18%" },
   { key: "studio-digitals", slug: "studio-digitals", group: "a", name: "Studio digitals", len: "45 min", what: "Unretouched", price: `$${DEPOSIT.digitals} deposit`, detail: "Full length, three-quarter, close. Front and profile.", btn: "Book digitals", ready: "2 business days", photo: "", at: "50% 50%" },
 ];
-export { gradYear } from "@/lib/grad-year";
 
 /* ── By quote (spec 3.5, SZQ) ── */
 export type QuoteOpt = { key: "music" | "fashion" | "commercial" | "weddings"; name: string; holds: string[]; detail: string; chips: string[]; call: string; photo: string };
