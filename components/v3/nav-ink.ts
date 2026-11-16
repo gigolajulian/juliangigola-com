@@ -110,57 +110,37 @@ function thumb(el: HTMLImageElement | HTMLVideoElement): Uint8ClampedArray | nul
   return copies.get(src) || null;
 }
 
-/* Where a photo really is on screen. Safari on a Mac paints the v4 hero's columns in perspective (`.mt-stage` has
-   perspective, the columns sit 48 and 80px forward) and reports their boxes without it, so a look read the wrong
-   row of the photo: black words at 1.2:1 on the dark part of a photo whose pavement, 30px off, is light (MAC,
-   2026-11-16; WebKit on Windows paints flat, Chromium reports the projected box, and both passed). So for a photo
-   that sits forward under a perspective, and whose reported box is not already scaled by it, the edges are found
-   by asking what is at a point, which follows the painting. Kept for one look, as `seen` is.
-   shortcut: needs both side edges of the photo in the window; a photo wider than that keeps its reported box. */
+/* Where a photo is painted. The v4 hero's columns sit 48 and 80px forward under `.mt-stage`'s perspective. Chromium
+   and Firefox paint them in perspective and report the box that way. WebKit paints them flat: on Windows it reports
+   the flat box too, on a Mac it reports the projected one, so a look read a row of the photo 30px off the one under
+   the word (MAC, 2026-11-16: black words at 1.2:1). Asking what is at a point does not help, on a Mac that follows
+   the report. So in WebKit a box that comes back scaled by the perspective is put back: flat = O + (reported - O) / S,
+   O the perspective origin. Kept for one look, as `seen` is. */
 const boxes = new Map<Element, { left: number; top: number; width: number; height: number }>();
-/** Set by the first photo measured: this engine paints such a photo as flat as it reports it, so none is measured again. */
-let paintsFlat = false;
-function box(el: HTMLElement, x: number, y: number) {
+const webkit = () => navigator.vendor.startsWith("Apple");
+function box(el: HTMLElement) {
   const had = boxes.get(el);
   if (had) return had;
   const g = el.getBoundingClientRect();
-  let z = 0, persp = 0;
-  for (let n: Element | null = el; n && n !== document.body && !persp; n = n.parentElement) {
-    const cs = getComputedStyle(n);
-    if (n !== el && cs.perspective !== "none") persp = parseFloat(cs.perspective);
-    else {
-      const t = cs.translate.split(" ");
-      if (t.length === 3) z += parseFloat(t[2]) || 0;
-      const m = /^matrix3d\((.+)\)$/.exec(cs.transform);
-      if (m) z += parseFloat(m[1].split(",")[14]) || 0;
-    }
-  }
-  const S = persp && z && z < persp ? persp / (persp - z) : 1;
   let r = { left: g.left, top: g.top, width: g.width, height: g.height };
-  // flat box under a perspective: a box already projected is S times its laid-out height
-  if (!paintsFlat && Math.abs(S - 1) > 0.005 && el.offsetHeight && Math.abs(g.height / el.offsetHeight - S) > Math.abs(g.height / el.offsetHeight - 1)) {
-    const at = (px: number, py: number) => px >= 0 && py >= 0 && px < innerWidth && py < innerHeight && document.elementsFromPoint(px, py).includes(el);
-    // the edge between a point on the photo and one off it, to a pixel
-    const edge = (on: number, off: number, f: (t: number) => boolean) => {
-      while (Math.abs(off - on) > 1) {
-        const mid = (on + off) / 2;
-        if (f(mid)) on = mid;
-        else off = mid;
+  if (webkit() && el.offsetHeight) {
+    let z = 0, persp = 0, stage: Element | null = null;
+    for (let n: Element | null = el; n && n !== document.body && !persp; n = n.parentElement) {
+      const cs = getComputedStyle(n);
+      if (n !== el && cs.perspective !== "none") (persp = parseFloat(cs.perspective)), (stage = n);
+      else {
+        const t = cs.translate.split(" ");
+        if (t.length === 3) z += parseFloat(t[2]) || 0;
+        const m = /^matrix3d\((.+)\)$/.exec(cs.transform);
+        if (m) z += parseFloat(m[1].split(",")[14]) || 0;
       }
-      return (on + off) / 2;
-    };
-    if (at(x, y)) {
-      // how wide it is painted says how much the painting scales it: 1 where the engine paints flat (then the reported box stands)
-      const reach = g.width * S + 2, R = Math.min(innerWidth - 1, x + reach), L = Math.max(0, x - reach);
-      if (!at(R, y) && !at(L, y)) {
-        const right = edge(x, R, (t) => at(t, y)), left = edge(x, L, (t) => at(t, y)), k = (right - left) / g.width;
-        if (Math.abs(k - 1) <= 0.005) paintsFlat = true;
-        else {
-          const h = g.height * k, down = Math.min(innerHeight - 1, y + h + 2), up = Math.max(0, y - h - 2);
-          const top = !at(x, down) ? edge(y, down, (t) => at(x, t)) - h : !at(x, up) ? edge(y, up, (t) => at(x, t)) : null;
-          if (top !== null) r = { left, top, width: right - left, height: h };
-        }
-      }
+    }
+    const S = stage && z && z < persp ? persp / (persp - z) : 1, k = g.height / el.offsetHeight;
+    // reported in perspective: the box is S times its laid-out height, not 1
+    if (stage && Math.abs(S - 1) > 0.005 && Math.abs(k - S) < Math.abs(k - 1)) {
+      const sr = stage.getBoundingClientRect(), o = getComputedStyle(stage).perspectiveOrigin.split(" ").map(parseFloat);
+      const ox = sr.left + o[0], oy = sr.top + o[1];
+      r = { left: ox + (g.left - ox) / S, top: oy + (g.top - oy) / S, width: g.width / S, height: g.height / S };
     }
   }
   boxes.set(el, r);
@@ -178,7 +158,7 @@ function pixel(el: HTMLImageElement | HTMLVideoElement, x: number, y: number, hw
   }
   const data = thumb(el);
   if (!data) return null;
-  const r = box(el, x, y), cs = getComputedStyle(el);
+  const r = box(el), cs = getComputedStyle(el);
   // the photo's own box on screen: the element's, or the fitted picture inside it
   let left = r.left, top = r.top, w = r.width, h = r.height;
   if (cs.objectFit === "cover" || cs.objectFit === "contain") {
@@ -230,11 +210,11 @@ function under(x: number, y: number, hdr: HTMLElement, page: RGB, hit?: Hit, hw 
       }
       if (o < 0.08) continue;
       const p = pixel(el, x, y, hw, hh);
-      dbg?.push({ x: Math.round(x), y: Math.round(y), img: (el instanceof HTMLImageElement ? el.currentSrc || el.src : "video").slice(-48), complete: el instanceof HTMLImageElement ? el.complete : true, o: +o.toFixed(2), copy: copies.has((el as HTMLImageElement).currentSrc) ? (copies.get((el as HTMLImageElement).currentSrc) ? "in" : copies.get((el as HTMLImageElement).currentSrc) === null ? "loading" : "failed") : "none", rgb: p?.map(Math.round) ?? null, pending, box: Object.values(box(el, x, y)).map(Math.round), rect: (({ left, top, width, height }) => [left, top, width, height].map(Math.round))(el.getBoundingClientRect()) });
+      dbg?.push({ x: Math.round(x), y: Math.round(y), img: (el instanceof HTMLImageElement ? el.currentSrc || el.src : "video").slice(-48), complete: el instanceof HTMLImageElement ? el.complete : true, o: +o.toFixed(2), copy: copies.has((el as HTMLImageElement).currentSrc) ? (copies.get((el as HTMLImageElement).currentSrc) ? "in" : copies.get((el as HTMLImageElement).currentSrc) === null ? "loading" : "failed") : "none", rgb: p?.map(Math.round) ?? null, pending, box: Object.values(box(el)).map(Math.round), rect: (({ left, top, width, height }) => [left, top, width, height].map(Math.round))(el.getBoundingClientRect()) });
       if (p) {
         const s = o, mix = (q: RGB) => (s > 0.97 ? q : (q.map((v, i) => v * s + page[i] * (1 - s)) as RGB));
         if (hit) {
-          const r = box(el, x, y);
+          const r = box(el);
           hit.at = (yy) => {
             const q = yy < r.top || yy > r.top + r.height ? null : pixel(el, x, yy, hw, hh);
             return q && mix(q);
