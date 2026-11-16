@@ -4,6 +4,7 @@ import { Mark } from "@/components/v3/duo";
 import { BackLink } from "@/components/site/back-link";
 import { billing, markFor, titleCase } from "@/lib/work";
 import { tailHole } from "@/lib/sheet";
+import { V4Project } from "@/components/v3/v4-project";
 import type { Frame, Project } from "@/lib/work-types";
 
 /* JG V3 project page (leftovers sheet, card B; Julian: vertical, with the
@@ -154,12 +155,18 @@ export function V3Project({ project, next }: { project: Project; next?: { href: 
             <Link className="btn fill" href={`/contact/form?${new URLSearchParams({ ...(kindOf(project) ? { type: kindOf(project)! } : {}), ref: name })}`}>Inquire</Link>
           </div>
           {next ? (
-            <Link className="pj-next" href={next.href}>
+            <Link className="pj-next" href={next.href} data-sink>
               <span className="lbl mute">Next</span>
               {/* The next set's cover, so it can grow into that page's hero (page-fly.tsx). */}
               {next.cover ? (
                 <span className="pj-nx">
                   <Image src={next.cover.src} alt="" fill sizes="120px" style={{ objectFit: "cover", background: next.cover.color }} />
+                </span>
+              ) : null}
+              {/* `?v4pages=next`: the same cover as a full stage (v4pages.css). Hidden otherwise, and lazy, so it is not fetched. */}
+              {next.cover ? (
+                <span className="pj-stage">
+                  <Image src={next.cover.src} alt="" fill sizes="100vw" style={{ objectFit: "cover", background: next.cover.color }} />
                 </span>
               ) : null}
               {/* --lw: its longest word, so a phone shrinks the name to keep each word whole (Julian). */}
@@ -169,6 +176,8 @@ export function V3Project({ project, next }: { project: Project; next?: { href: 
           ) : null}
         </div>
       </section>
+      {/* The page's frames in the order they are laid out, for the viewer (`?v4pages=view`). */}
+      <V4Project frames={[...(big ? [big] : []), ...lead, ...rest].map((f) => ({ s: project.slug, src: f.src, alt: alt(f.alt), wide: wide(f), sq: f.width === f.height }))} />
     </div>
   );
 }

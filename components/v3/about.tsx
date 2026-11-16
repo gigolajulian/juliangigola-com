@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { V3Foot } from "@/components/v3/chrome";
+import { PageFoot } from "@/components/v3/chrome";
 import { Marks } from "@/components/v3/duo";
 import { AboutGallery } from "@/components/v3/about-gallery";
 
@@ -49,7 +49,7 @@ export function V3About() {
             <Marks cell />
           </div>
         </section>
-        <V3Foot />
+        <PageFoot />
       </section>
     </div>
   );

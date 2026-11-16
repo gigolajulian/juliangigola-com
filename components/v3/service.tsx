@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { V3Foot } from "@/components/v3/chrome";
+import { PageFoot } from "@/components/v3/chrome";
 import { V3BookFlow } from "@/components/v3/book";
 import { Run } from "@/components/v3/flow";
 import { Doors } from "@/components/v3/home";
@@ -116,7 +116,7 @@ export function V3Service({ page, frames }: { page: BookingPage; frames: Frame[]
           </section>
         </div>
         <Doors />
-        <V3Foot />
+        <PageFoot />
       </section>
     </div>
   );

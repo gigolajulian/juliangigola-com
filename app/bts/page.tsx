@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { WITH_BTS, titleCase } from "@/lib/work";
-import { V3Foot } from "@/components/v3/chrome";
+import { PageFoot } from "@/components/v3/chrome";
 import { BtsCredit, BtsPageGrid } from "@/components/bts";
 
 export const metadata: Metadata = {
@@ -56,7 +56,7 @@ export default function BtsPage() {
             </div>
           </section>
         ))}
-        <V3Foot />
+        <PageFoot />
       </section>
     </div>
   );
