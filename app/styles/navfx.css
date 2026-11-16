@@ -46,3 +46,7 @@
   :root[data-navfx] .v3 .site-hdr.site-hdr.site-hdr{animation:none}
   :root[data-navfx] .v3 .site-hdr .site-wm{transition:none}
 }
+/* A word over two grounds (nav-ink.ts): white and black in stretches, clipped to the letters */
+:root[data-navfx] .v3 .site-hdr:not(.menu-on) :is(.site-wm,.links a)[data-inkmix]{background-image:var(--nav-mix);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+/* No ground under the words (the top, the homepage hero): the ink changes at once, a .2s fade is a photo late there */
+:root[data-navfx][data-navtop] .v3 .site-hdr :is(.site-wm,.links a,.tbtn,.menu-btn){transition:none}

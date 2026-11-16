@@ -181,7 +181,9 @@ export const heroDrivers: Driver[] = [
       const hdr = document.querySelector<HTMLElement>(".site-hdr");
       const past = () => document.documentElement.toggleAttribute("data-mt-pasthero", el.getBoundingClientRect().bottom <= (hdr?.offsetHeight ?? 60));
       if (LEFT) {
-        caps = [...el.querySelectorAll<HTMLElement>("figcaption, .mt-more .btn")]; // the button too: it rises through the bar as the hero leaves
+        // the button too: it rises through the bar as the hero leaves. Where the hero is not held the name block
+        // scrolls up with the page and through the bar, so it fades there as well (held: it leaves to the left).
+        caps = [...el.querySelectorAll<HTMLElement>("figcaption, .mt-more .btn" + (document.documentElement.hasAttribute("data-mt-held") ? "" : ", [data-mt-name] > *"))];
         barH = hdr?.offsetHeight ?? 61;
         document.documentElement.setAttribute("data-mtleft", "");
         addEventListener("scroll", past, { passive: true });
