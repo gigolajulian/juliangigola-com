@@ -40,7 +40,7 @@ export function V3Steps({ c }: { c: CardCtx & { v3: V3Book } }) {
         rows={[
           [`${v3.name}, ${duration(length)}`, price],
           ["Deposit today", `$${usd}`],
-          ["Balance after the shoot", v3.from != null ? `$${v3.from - 100}` : "Rest of the quote"],
+          ["Balance after the shoot", v3.from != null ? `$${v3.from - usd}` : "Rest of the quote"],
         ]}
         onBooked={() => {
           forgetTimes(username, slug, tz);
