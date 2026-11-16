@@ -7,6 +7,17 @@ import * as React from "react";
    with snap, which is also its touch and reduced-motion form. The current
    item follows the row's own scroll (snap step), `data-cur` on the section.
    The motion pass drives `--p` on the section and transforms `.mt-track`. */
+/** Held (desktop, motion on) the row does not scroll itself, the page does, so left and right did nothing there.
+    They step the page one item's share of the hold. Elsewhere the row is a native scroller and takes the keys itself. */
+export function rowKeys(e: React.KeyboardEvent<HTMLElement>) {
+  if ((e.key !== "ArrowRight" && e.key !== "ArrowLeft") || !document.documentElement.hasAttribute("data-mt-held")) return;
+  const sec = e.currentTarget.closest<HTMLElement>("section");
+  const n = sec?.querySelectorAll(".mt-item").length;
+  if (!sec || !n) return;
+  e.preventDefault();
+  scrollBy({ top: ((sec.offsetHeight - innerHeight) / n) * (e.key === "ArrowRight" ? 1 : -1), behavior: "smooth" });
+}
+
 export function HeldRow({
   name,
   hold,
@@ -50,7 +61,7 @@ export function HeldRow({
     <section className={`mt-held mt-${name}`} data-mt={name} data-hold={hold} data-cur={cur} style={{ "--n": count } as React.CSSProperties}>
       <div className="mt-stage">
         {head?.(cur)}
-        <div className="mt-row" ref={row} role="group" tabIndex={0} aria-label={label}>
+        <div className="mt-row" ref={row} role="group" tabIndex={0} aria-label={label} onKeyDown={rowKeys}>
           <div className="mt-track">{children}</div>
         </div>
         {foot?.(cur)}
