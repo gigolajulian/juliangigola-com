@@ -7,8 +7,8 @@ import { CoverArtGallery } from "@/components/cover/cover-art-gallery";
 import type { CoverRelease } from "@/lib/cover-art-types";
 import { useV4pages } from "@/lib/v4pages";
 
-/* Cover art in the site's system (inner pages plan, c1), behind `?v4pages`: the page title with the V4
-   home's large count, the home's sleeves as the grid, the project pages' ask. `off` is the page as it
+/* Cover art in the site's system (inner pages plan, c1), behind `?v4pages`: the page title with the
+   count under it as it is live, the home's sleeves as the grid, the project pages' ask. `off` is the page as it
    is live, shown until the flag is read. */
 export function CoverPage({ off, releases, onwards }: { off: React.ReactNode; releases: CoverRelease[]; onwards?: { href: string; name: string } }) {
   if (!useV4pages("c1")) return off;
@@ -19,11 +19,8 @@ export function CoverPage({ off, releases, onwards }: { off: React.ReactNode; re
           <div>
             <BackLink className="lbl mute pj-back" />
             <h1 className="pg-t">Cover art</h1>
+            <p className="lbl mute">{releases.length} releases</p>
           </div>
-          <p className="mt-cvn">
-            {releases.length}
-            <span>/releases</span>
-          </p>
         </header>
         <CoverArtGallery releases={releases} v4 />
         <div className="cv4a">

@@ -708,8 +708,8 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
 [data-mtscroll] .mt-sleeve .disc,.cv4 .mt-sleeve .disc{background:radial-gradient(circle,#0b0b0b 0 16.5%,transparent 16.7%),var(--press,#222)}
 [data-mtscroll] .mt-cvcap{position:absolute;left:0;top:calc(100% + 16 * var(--u));margin:0;display:grid;gap:4px;white-space:nowrap;opacity:.35;transition:opacity .3s ease-out}
 [data-mtscroll] .mt-sleeve[data-on] .mt-cvcap{opacity:1}
-[data-mtscroll] .mt-cvn,.cv4h .mt-cvn{position:absolute;left:calc(var(--fx) + 36 * var(--u));bottom:calc(40 * var(--u));margin:0;font:500 calc(64 * var(--u))/1 var(--mono);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
-[data-mtscroll] .mt-cvn span,.cv4h .mt-cvn span{font-size:.3em;letter-spacing:.14em;color:var(--mute);margin-left:.4em}
+[data-mtscroll] .mt-cvn{position:absolute;left:calc(var(--fx) + 36 * var(--u));bottom:calc(40 * var(--u));margin:0;font:500 calc(64 * var(--u))/1 var(--mono);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+[data-mtscroll] .mt-cvn span{font-size:.3em;letter-spacing:.14em;color:var(--mute);margin-left:.4em}
 @media (min-width:1024px) and (min-height:600px){
   [data-mtscroll] .mt-covers .mt-artist{display:none}
   [data-mtscroll] .mt-covers .mt-stage{position:relative}
