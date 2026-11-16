@@ -31,5 +31,14 @@ export function MtMotionLayer() {
     const hide = startReveal(root);
     return () => (stop(), hide());
   }, []);
+  // Safari on a foldable, rotated with its tab strip on the left: the page is left scrolled sideways by the strip's
+  // width, after both resize events (measured on the Duo, #1062). The page never scrolls sideways, so put it back.
+  // shortcut: the cause on this page is not found, drop this once it is.
+  React.useEffect(() => {
+    const vv = window.visualViewport;
+    const fix = () => void (scrollX && scrollTo(0, scrollY));
+    vv?.addEventListener("scroll", fix);
+    return () => vv?.removeEventListener("scroll", fix);
+  }, []);
   return null;
 }
