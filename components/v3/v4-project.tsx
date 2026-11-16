@@ -27,22 +27,30 @@ export function V4Project({ frames }: { frames: FrameItem[] }) {
       raf = requestAnimationFrame(tick);
       st.style.setProperty("--in", Math.min(1, Math.max(0, (innerHeight - st.getBoundingClientRect().top) / innerHeight)).toFixed(3));
     };
-    // Phones and tablets: natural scroll, the stage opens once as it comes into view.
-    if (!desk) st.dataset.rv = "";
-    const io = new IntersectionObserver(
-      ([e]) => {
+    if (desk) {
+      const io = new IntersectionObserver(([e]) => {
         cancelAnimationFrame(raf);
-        if (!e.isIntersecting) return;
-        if (desk) raf = requestAnimationFrame(tick);
-        else st.dataset.rv = "in";
-      },
-      { threshold: desk ? 0 : 0.15 },
-    );
-    io.observe(st);
+        if (e.isIntersecting) raf = requestAnimationFrame(tick);
+      });
+      io.observe(st);
+      return () => {
+        cancelAnimationFrame(raf);
+        io.disconnect();
+        st.style.removeProperty("--in");
+      };
+    }
+    /* Phones and tablets: natural scroll, the stage opens once as it comes into view. A scroll check, not an
+       IntersectionObserver: the closed stage is clipped to nothing, and Chrome then reports it as never in view. */
+    st.dataset.rv = "";
+    const see = () => {
+      if (st.getBoundingClientRect().top > innerHeight * 0.85) return;
+      st.dataset.rv = "in";
+      removeEventListener("scroll", see);
+    };
+    addEventListener("scroll", see, { passive: true });
+    see();
     return () => {
-      cancelAnimationFrame(raf);
-      io.disconnect();
-      st.style.removeProperty("--in");
+      removeEventListener("scroll", see);
       delete st.dataset.rv;
     };
   }, []);
