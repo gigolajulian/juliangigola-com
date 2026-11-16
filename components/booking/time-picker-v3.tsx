@@ -132,7 +132,7 @@ export function V3Steps({ c }: { c: CardCtx & { v3: V3Book } }) {
               {paid ? <ReferencePicks resync={null} v3 /> : null}
               {error ? <p className="err" role="alert">{error}</p> : null}
               {/* The deposit terms before the commit, in deposit-step's wording. */}
-              {paid ? <p className="lbl mute">Refundable or transferable up to 48 hours before the shoot. The balance is due after the shoot.</p> : null}
+              {paid ? <p className="lbl mute">Full refund or transfer up to 48 hours before the shoot. 70% refund up to 24 hours. The balance is due after the shoot.</p> : null}
             </>
           ),
           bar: (

@@ -52,7 +52,7 @@ describe("confirmMail", () => {
     expect(m.subject).toBe("Tomorrow: Portraits, 10:00 AM");
     expect(m.text).toContain("See you tomorrow.");
     expect(m.text).toContain("Ref: pi_12345678");
-    expect(m.text).toContain("under 48 hours now");
+    expect(m.text).toContain("under 24 hours now");
   });
 
   it("carries Julian's signature in both parts and its dark rules", () => {

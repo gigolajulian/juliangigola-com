@@ -28,7 +28,7 @@ export function TermsColumn() {
       id="terms"
       title="Terms of Service"
       label="Terms of service"
-      effective="2026-09-26"
+      effective="2026-11-16"
     >
       <Clause title="Definitions">
         <p>
@@ -311,15 +311,53 @@ export function TermsColumn() {
           scope has been agreed: the use, the media, the territory, the
           duration, and the fee. Rates shown or described anywhere on the Site
           are indicative, are not an offer, and do not survive a change of
-          brief. Nothing on the Site, and no email exchange short of my express
-          written confirmation, creates a contract for licensing or for
-          services.
+          brief. Apart from a booking made and confirmed on the Site, nothing on
+          the Site, and no email exchange short of my express written
+          confirmation, creates a contract for licensing or for services.
         </p>
         <p>
           Where a separate written agreement between us exists, whether a
           license, an estimate, a booking confirmation, or a contract for
           services, that agreement governs the work it describes and prevails
           over these terms to the extent the two conflict.
+        </p>
+      </Clause>
+
+      <Clause title="Booking, deposits and cancellation">
+        <p>
+          <strong>Booking.</strong> You can book a session or a call on the
+          Site. A booking is confirmed when the Site shows the confirmation and
+          emails it to you. If the time you picked is taken before your booking
+          completes, the booking does not go through and any deposit you paid
+          for it is refunded in full.
+        </p>
+        <p>
+          <strong>Deposits.</strong> Some sessions take a deposit when you book.
+          The amount is shown before you pay. The deposit holds your time. The
+          balance is due after the shoot, unless we agree otherwise in writing.
+        </p>
+        <p>
+          <strong>Moving a booking.</strong> You can move a booking to another
+          open time from the link in your confirmation email. The deposit moves
+          with it.
+        </p>
+        <p>
+          <strong>Canceling.</strong> You can cancel from the same link. If you
+          cancel 48 hours or more before the session, the deposit is refunded in
+          full. If you cancel under 48 hours but 24 hours or more before, 70% of
+          the deposit is refunded and 30% is kept. If you cancel under 24 hours
+          before, the deposit is not refunded. Where a booking has been moved,
+          the hours are counted from the time you first booked, or the new time
+          if that is earlier.
+        </p>
+        <p>
+          <strong>Payments.</strong> Payments are taken by Stripe. The Site does
+          not see or store your card details. Refunds go back to the original
+          payment method and can take 5 to 10 days to show.
+        </p>
+        <p>
+          <strong>Calls.</strong> Calls are free and take no deposit. Move or
+          cancel one from the link in its confirmation.
         </p>
       </Clause>
 
@@ -354,7 +392,8 @@ export function TermsColumn() {
           Films on the Site are embedded from Vimeo and YouTube. Nothing from
           either loads until you press play; once you do, their services, terms
           and privacy policies govern that playback and I have no control over
-          them. The Site links to Instagram, Vimeo and LinkedIn, and may link
+          them. Payments on the Site are processed by Stripe under its own
+          terms. The Site links to Instagram, Vimeo and LinkedIn, and may link
           elsewhere. I am not responsible for any third-party site or service,
           and a link is not an endorsement.
         </p>

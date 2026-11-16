@@ -1,4 +1,4 @@
-import { duration, refundable, TZ } from "@/lib/booking/booking-rules";
+import { duration, refundCents, refundShare, TZ } from "@/lib/booking/booking-rules";
 import { LEGACY_DEPOSIT } from "@/lib/booking/paid";
 import { SIG_DARK, SIG_HTML, SIG_TEXT } from "@/lib/email/email-signature";
 /* ── the client's confirmation email ──────────────────────────────
@@ -81,14 +81,14 @@ export function confirmMail(c: Confirm) {
   const usd = c.deposit?.amount ?? LEGACY_DEPOSIT;
   const paid = c.deposit && {
     rows: [["Paid", fmt({ month: "short", day: "numeric", year: "numeric" }).format(new Date(c.deposit.at))], ...(c.deposit.card ? [["Card", c.deposit.card]] : []), ["Ref", c.deposit.ref.slice(0, 11)]] as [string, string][],
-    // The site's own engine refunds by Julian's 48-hour rule (`lib/booking/booking-rules.ts`).
+    // The site's own engine refunds by Julian's rule (`refundShare`, `lib/booking/booking-rules.ts`).
     note: remind
-      ? "It is under 48 hours now, so a cancel keeps the deposit. Moving to another date carries it over."
+      ? "It is under 24 hours now, so a cancel keeps the deposit. Moving to another date carries it over."
       : c.firstStart && c.firstStart !== c.start
-      ? refundable({ intent: "x", start: c.start, firstStart: c.firstStart })
-        ? `The balance is due after the shoot. The deposit moved with the new date. It is refunded only if you cancel 48 hours or more before the time you first booked, ${timeRange(c.firstStart)}.`
-        : `The balance is due after the shoot. The deposit moved with the new date. It is no longer refundable: the time you first booked, ${timeRange(c.firstStart)}, was under 48 hours away.`
-      : "The balance is due after the shoot. The deposit moves with a new date, or is refunded if you cancel 48 hours or more before.",
+      ? `The balance is due after the shoot. The deposit moved with the new date. ${
+          { 1: `A cancel is judged by the time you first booked, ${timeRange(c.firstStart)}: a full refund 48 hours or more before it, 70% back 24 hours or more before, nothing after.`, 0.7: `A cancel now refunds 70% of it: the time you first booked, ${timeRange(c.firstStart)}, was under 48 hours away.`, 0: `It is no longer refundable: the time you first booked, ${timeRange(c.firstStart)}, was under 24 hours away.` }[refundShare({ intent: "x", start: c.start, firstStart: c.firstStart })]
+        }`
+      : "The balance is due after the shoot. The deposit moves with a new date. Cancel 48 hours or more before for a full refund, or 24 hours or more before for 70% back. Under 24 hours it is not refunded.",
   };
   const links = c.manage;
   const preheader = `${c.session}, ${fmt({ weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZoneName: "short" }).format(new Date(c.start)).replace(/ /g, " ")}.${c.deposit ? ` Deposit of $${usd} received.` : ""}`;
@@ -171,12 +171,13 @@ export async function sendConfirm(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefi
 export const cancelledSubject = (c: { session: string; start: string; end?: string }) => `Cancelled: ${c.session}, ${timeRange(c.start, c.end)}`;
 
 /** The client's note that a booking is cancelled, plain, from book@. A failed send is logged, never a failed cancel. Whether it went out. */
-export async function sendCancelled(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefined, c: { name: string; email: string; session: string; start: string; end?: string }, refund: "refunded" | "kept" | "none" | "late", usd = LEGACY_DEPOSIT): Promise<boolean> {
+export async function sendCancelled(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefined, c: { name: string; email: string; session: string; start: string; end?: string }, refund: "refunded" | "part" | "kept" | "none" | "late", usd = LEGACY_DEPOSIT, back = refundCents(usd, 0.7) / 100): Promise<boolean> {
   if (!mailer || !c.email) return false;
   const money = {
     refunded: `Your $${usd} deposit is refunded to your card. Banks take 5 to 10 days to show it.`,
     late: "The refund did not go through on its own. I'll send it by hand and email you.",
-    kept: `It was under 48 hours before the session as first booked, so the $${usd} deposit is not refunded.`,
+    part: `It was under 48 hours before the session as first booked, so $${back} of your $${usd} deposit is refunded to your card and $${usd - back} is kept. Banks take 5 to 10 days to show it.`,
+    kept: `It was under 24 hours before the session as first booked, so the $${usd} deposit is not refunded.`,
     none: "",
   }[refund];
   const text = [`Hi ${first(c.name)},`, "", `Your ${c.session.toLowerCase()} on ${timeRange(c.start, c.end)} is cancelled.`, money, "", `Book another time: ${SITE}/book`, "", "Questions? Reply to this email.", SIG_TEXT].filter((l, i, a) => l || a[i - 1]).join("\n");

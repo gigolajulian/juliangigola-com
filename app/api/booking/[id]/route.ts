@@ -1,6 +1,6 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { lockOp, clientView, depositPaid, type ChangeResult } from "@/lib/booking/booking-engine";
-import { refundable } from "@/lib/booking/booking-rules";
+import { refundCents, refundShare } from "@/lib/booking/booking-rules";
 import { manageLinks, tokenOpens } from "@/lib/booking/booking-token";
 import { cancelledSubject, sendCancelled, sendConfirm } from "@/lib/booking/confirm";
 import { logMail, recordLead } from "@/lib/leads/lead-store";
@@ -14,8 +14,8 @@ import { bodyOf, json } from "@/lib/http";
  * POST {t, action: "cancel"} or {t, action: "reschedule", start}. The
  * token from their mail opens it (`lib/booking/booking-token.ts`); the lock does
  * the change (`lib/booking/booking-engine.ts`). A cancel 48 hours or more before
- * the start refunds the deposit through Stripe; under that it keeps it
- * (Julian, 2026-11-03). hello@ hears about every change.
+ * the start refunds the deposit through Stripe, 24 hours or more refunds 70%
+ * of it, under that it keeps it (`refundShare`, Julian, 2026-11-16). hello@ hears about every change.
  * ─────────────────────────────────────────────────────────────── */
 
 export const dynamic = "force-dynamic";
@@ -46,7 +46,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   if (body.action === "reschedule") {
     await recordLead(env, r.email, { event: { at: new Date().toISOString(), kind: "reschedule", ref: `${r.id}:${r.start}`, note: whenPT(r.start) }, when: r.start });
-    if (await alertHello(env.EMAIL, `Rescheduled: ${what}`, [`${r.name} <${r.email}>`, `Moved to ${whenPT(r.start)} by the client. The calendar is updated.`, ...(r.intent && !refundable(r) ? [`The deposit is no longer refundable: first booked for ${whenPT(r.firstStart ?? r.start)}, under 48 hours away.`] : [])], who))
+    if (await alertHello(env.EMAIL, `Rescheduled: ${what}`, [`${r.name} <${r.email}>`, `Moved to ${whenPT(r.start)} by the client. The calendar is updated.`, ...(r.intent && refundShare(r) < 1 ? [refundShare(r) ? `A cancel now refunds 70% of the deposit: first booked for ${whenPT(r.firstStart ?? r.start)}, under 48 hours away.` : `The deposit is no longer refundable: first booked for ${whenPT(r.firstStart ?? r.start)}, under 24 hours away.`] : [])], who))
       await logMail(env, r.email, `Rescheduled: ${what}`, { to: "hello@", kind: "reschedule", booking: r.id });
     const confirm = { ...who, session: r.session, call: r.call, start: r.start, end: r.end, where: r.where, uid: r.id, manage: await manageLinks(env.BOOKING_SECRET, r), firstStart: r.firstStart, ...(r.intent ? { deposit: { ref: r.intent, at: r.at, amount: depositPaid(r) } } : {}) };
     const sent = await sendConfirm(env.CLIENT_EMAIL, confirm);
@@ -55,21 +55,28 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   }
 
   // The rule is read against the time it was booked for, at the moment of the cancel.
+  // A whole refund is sent as before, with no amount; a part one names its cents and shares the ref
+  // Stripe's webhook logs it under (`refund-<intent>-<cents so far>`), so the log never counts it twice.
+  const share = r.intent ? refundShare(was) : 0;
+  const paid = depositPaid(r) ?? 0;
+  const cents = refundCents(paid, share);
+  const back = cents / 100;
+  const ref = share === 1 ? `refund-${r.intent}` : `refund-${r.intent}-${cents}`;
   let refunded: boolean | undefined;
-  if (r.intent && refundable(was) && key) {
-    refunded = await stripe(key, "/refunds", { payment_intent: r.intent }, `refund-${r.intent}`).then(
+  if (r.intent && share && key) {
+    refunded = await stripe(key, "/refunds", { payment_intent: r.intent, ...(share === 1 ? {} : { amount: String(cents) }) }, ref).then(
       () => true,
       () => false,
     );
   }
   await recordLead(env, r.email, { event: { at: new Date().toISOString(), kind: "cancel", ref: `cancel:${r.id}`, note: [r.session, whenPT(was.start)].join(", ") } });
-  // What this booking paid, off its record: Stripe returns the whole charge, so the log says the same.
-  if (refunded) await recordLead(env, r.email, { event: { at: new Date().toISOString(), kind: "refund", ref: `refund-${r.intent}`, note: "Deposit, cancelled 48 hours or more ahead", amount: depositPaid(r) } });
-  const money = !r.intent ? "No deposit." : refunded ? "Deposit refunded." : refunded === false ? "The refund FAILED: refund it by hand in Stripe." : "Under 48 hours: the deposit is kept.";
+  // What went back, off this booking's record, so the log says what Stripe did.
+  if (refunded) await recordLead(env, r.email, { event: { at: new Date().toISOString(), kind: "refund", ref, note: share === 1 ? "Deposit, cancelled 48 hours or more ahead" : "70% of the deposit, cancelled 24 to 48 hours ahead", amount: back } });
+  const money = !r.intent ? "No deposit." : refunded ? (share === 1 ? `Deposit refunded: $${back}.` : `Refunded $${back} of the $${paid} deposit (70%). $${paid - back} kept.`) : refunded === false ? `The refund FAILED: refund $${back} by hand in Stripe.` : "Under 24 hours: the deposit is kept.";
   if (await alertHello(env.EMAIL, `Cancelled: ${what}`, [`${r.name} <${r.email}>`, "Cancelled by the client. The event is off the calendar.", money, ...(r.intent && key ? [`Stripe: ${dashboardLink(r.intent, key)}`] : [])], who))
     await logMail(env, r.email, `Cancelled: ${what}`, { to: "hello@", kind: "cancelled", booking: r.id });
   const gone = { ...who, session: r.session, start: was.start, end: was.end };
-  if (await sendCancelled(env.CLIENT_EMAIL, gone, !r.intent ? "none" : refunded ? "refunded" : refunded === false ? "late" : "kept", depositPaid(r)))
+  if (await sendCancelled(env.CLIENT_EMAIL, gone, !r.intent ? "none" : refunded ? (share === 1 ? "refunded" : "part") : refunded === false ? "late" : "kept", depositPaid(r), back))
     await logMail(env, r.email, cancelledSubject(gone), { to: "client", kind: "cancelled", booking: r.id });
-  return json({ record: clientView(r), refunded: refunded ?? null });
+  return json({ record: clientView(r), refunded: refunded ?? null, back: refunded ? back : 0 });
 }
