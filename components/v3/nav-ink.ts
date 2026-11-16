@@ -114,6 +114,12 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
       last = performance.now();
       const isTop = top();
       root.toggleAttribute("data-navtop", isTop);
+      // The v4 home (Julian, 2026-11-15): the bar's wordmark waits until the hero's big name has gone, faded by hero.ts
+      // or scrolled under the bar, so the name never shows twice. navfx.css hides it until this is set.
+      const nm = path === "/" ? document.querySelector<HTMLElement>(".mt-name h1") : null;
+      const nr = nm?.getBoundingClientRect();
+      const shows = !!nr && nr.bottom > bar.offsetHeight && nr.top < innerHeight && parseFloat(nm?.closest<HTMLElement>("[data-mt-name]")?.style.opacity || "1") > 0.5;
+      root.toggleAttribute("data-navnamegone", !shows);
       // A section that is dark in both themes (the v4 footer sets its own --bg) under a light page: the bar takes
       // the dark ground there (navfx.css), or its light veil over it would be a mid grey nothing reads on.
       const [rootBg] = colour(getComputedStyle(root).getPropertyValue("--bg").trim());
@@ -170,6 +176,7 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
       cancelAnimationFrame(raf);
       root.removeAttribute("data-navtop");
       root.removeAttribute("data-navdark");
+      root.removeAttribute("data-navnamegone");
     };
   }, [hdr, path]);
 }

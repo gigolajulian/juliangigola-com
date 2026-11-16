@@ -26,6 +26,9 @@
 :root[data-navfx] .v3 .site-hdr .links a:hover{color:color-mix(in srgb,var(--nav-ink,var(--ink)) 90%,var(--nav-off))}
 :root[data-navfx] .v3 .site-hdr .links a[aria-current="page"]{color:color-mix(in srgb,var(--nav-ink,var(--ink)) 80%,var(--nav-off))}
 :root[data-navfx] .v3 .site-hdr.menu-on :is(.site-wm,.links a,.tbtn,.menu-btn){color:var(--ink)}
+/* The v4 home: no wordmark in the bar while the hero's big name shows (`data-navnamegone`, nav-ink.ts). It fades in as the name goes. */
+:root[data-navfx] .v3 .site-hdr .site-wm{transition:color .2s ease,opacity .3s ease}
+:root[data-navfx][data-mtscroll]:has(.mt-hero):not([data-navnamegone]) .v3 .site-hdr:not(.menu-on) .site-wm{opacity:0;pointer-events:none}
 /* The portfolio's search and view buttons in the bar take the same white or black. */
 @media (min-width:701px){:root[data-navfx] .v3 .site-hdr .hslot{--ink:var(--nav-ink)}}
 
@@ -36,7 +39,7 @@
   :root[data-navfx] .v3 .pmenu.drawer a[aria-current="page"]{color:var(--nav-teal)}
   :root[data-navfx] .v3 .pmenu-foot .lbl{color:var(--ink)}
   /* Menu open: the name rides onto the menu with it and lines up with the links (the drawer's left edge plus its gutter). */
-  :root[data-navfx] .v3 .site-hdr .site-wm{transition:color .2s ease,translate .4s cubic-bezier(.16,1,.3,1)}
+  :root[data-navfx] .v3 .site-hdr .site-wm{transition:color .2s ease,opacity .3s ease,translate .4s cubic-bezier(.16,1,.3,1)}
   :root[data-navfx] .v3 .site-hdr.menu-on .site-wm{translate:calc(100vw - min(86vw,380px)) 0}
 }
 @media (prefers-reduced-motion:reduce){

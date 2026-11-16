@@ -34,7 +34,7 @@ const ink = (n: Node) => {
 function dockSetup(el: HTMLElement): Dock | null {
   const w = Number(/[?&]mtdock=([\d.]+)/.exec(location.search)?.[1] ?? 1);
   const h1 = el.querySelector<HTMLElement>(".mt-name h1"), wm = document.querySelector<HTMLElement>(".site-hdr .site-wm");
-  // ?navfx=1 (Julian, 2026-11-15): no flight. The wordmark is in the bar from the first frame and the name fades with the hero.
+  // ?navfx=1 (Julian, 2026-11-15): no flight. The name fades with the hero, and the bar's wordmark comes in as it goes (nav-ink.ts).
   if (!w || !h1 || !wm || navfx()) return null;
   const f = document.createElement("div");
   f.className = "mt-dockname";
