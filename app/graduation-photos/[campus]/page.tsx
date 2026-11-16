@@ -4,7 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { shareOg } from "@/lib/share";
 import { LdJson } from "@/components/local-screens";
-import { V3Foot } from "@/components/v3/chrome";
+import { PageFoot } from "@/components/v3/chrome";
 import { CAMPUS_GUIDES, campusGuide, campusHref } from "@/lib/campus-guides";
 import { getProject } from "@/lib/work";
 import { SITE } from "@/lib/seo";
@@ -124,7 +124,7 @@ export default async function CampusPage(props: PageProps<"/graduation-photos/[c
               </ul>
             </section>
           </div>
-          <V3Foot />
+          <PageFoot />
         </section>
       </div>
     </>

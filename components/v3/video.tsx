@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { V3Foot } from "@/components/v3/chrome";
+import { PageFoot } from "@/components/v3/chrome";
 import { Mark } from "@/components/v3/duo";
 import { REEL, SECTIONS, creditOf, embedUrl, previewUrl, captionsOff, vimeoListen, vimeoPlays, posterFor, sectionName, type Video, type VideoSection } from "@/lib/videos";
 
@@ -423,7 +423,7 @@ export function V3Video({ videos }: { videos: Video[] }) {
         <h1 className="sr-only">Motion · {two(all.length)} films</h1>
         <Desk films={all} onPlay={setPlaying} />
         <Stack films={all} />
-        <V3Foot />
+        <PageFoot />
       </section>
       <Player v={playing} list={all} onGo={setPlaying} onClose={close} />
     </div>
