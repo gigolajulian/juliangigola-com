@@ -256,6 +256,8 @@ html[data-v4pages~="c1"] .cv4a .cv4b{display:flex;flex-wrap:wrap;gap:12px}
    the left, the photos stacked in one held cell on the right, the one whose row is at mid screen shown.
    A hard cut: opacity with no transition, and never `display` or `visibility`, so every alt stays read.
    A row is half the photo's height and a little more, so the photo is at rest for every cut. */
+/* The photo row under the title goes: its photos are the ones beside the rows (Julian, 2026-11-16). */
+html[data-v4pages~="s4"] .v3 #p-campus .sv-seq{display:none}
 html[data-v4pages~="s4"] .v3 #p-campus .s4-ph{position:relative;margin:28px 0 0;aspect-ratio:4/5;overflow:hidden;border-radius:4px;background:var(--card)}
 html[data-v4pages~="s4"] .v3 #p-campus .s4-row{padding:18px 0 28px;border-bottom:1px solid var(--line)}
 html[data-v4pages~="s4"] .v3 #p-campus .s4-row h2{margin:0;font:900 clamp(1.75rem,calc(4*var(--v3u)),3.75rem)/1 var(--display);letter-spacing:-.045em;text-wrap:balance}
