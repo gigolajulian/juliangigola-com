@@ -106,13 +106,20 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
     const top = () => {
       // The homepage: no ground while its hero shows (the v4 hero, or the cover). Elsewhere: none at the very top.
       const hero = path === "/" ? document.querySelector(".mt-hero, .a-cover") : null;
-      return hero ? hero.getBoundingClientRect().bottom > bar.offsetHeight : scrollY <= 8;
+      // `data-mt-pasthero` is the v4 hero's own "the hero is over" (hero.ts, where it is set); the measure covers a build without it.
+      return hero ? hero.getBoundingClientRect().bottom > bar.offsetHeight && !root.hasAttribute("data-mt-pasthero") : scrollY <= 8;
     };
     const paint = () => {
       raf = 0;
       last = performance.now();
       const isTop = top();
       root.toggleAttribute("data-navtop", isTop);
+      // A section that is dark in both themes (the v4 footer sets its own --bg) under a light page: the bar takes
+      // the dark ground there (navfx.css), or its light veil over it would be a mid grey nothing reads on.
+      const [rootBg] = colour(getComputedStyle(root).getPropertyValue("--bg").trim());
+      const sec = document.elementsFromPoint(innerWidth / 2, bar.getBoundingClientRect().bottom - 1).find((el) => !bar.contains(el) && !el.closest(".mt-dockname"));
+      const [secBg] = sec ? colour(getComputedStyle(sec).getPropertyValue("--bg").trim()) : [rootBg];
+      root.toggleAttribute("data-navdark", lum(rootBg) > 0.2 && lum(secBg) < 0.2);
       const [page] = colour(getComputedStyle(bar).getPropertyValue("--bg").trim());
       const veiled = !isTop && !root.hasAttribute("data-tuck");
       for (const el of bar.querySelectorAll<HTMLElement>(WORDS)) {
@@ -148,7 +155,7 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
     document.addEventListener("load", loaded, true);
     document.addEventListener("loadeddata", loaded, true);
     const watch = new MutationObserver(ask);
-    watch.observe(root, { attributeFilter: ["data-theme", "data-tuck", "data-mt-intro"] });
+    watch.observe(root, { attributeFilter: ["data-theme", "data-tuck", "data-mt-intro", "data-mt-pasthero"] });
     paint();
     // Photos also move with no scroll event (the v4 hero glides on after the wheel stops, films play): look again twice a second.
     const again = window.setInterval(() => document.hidden || ask(), 500);
@@ -162,6 +169,7 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
       clearInterval(again);
       cancelAnimationFrame(raf);
       root.removeAttribute("data-navtop");
+      root.removeAttribute("data-navdark");
     };
   }, [hdr, path]);
 }

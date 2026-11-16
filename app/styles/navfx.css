@@ -12,6 +12,8 @@
 :root[data-navfx][data-navtop] .v3 .site-hdr.site-hdr.site-hdr,
 :root[data-navfx][data-pft][data-tuck] .v3 .site-hdr.site-hdr.site-hdr,
 :root[data-navfx] .v3 .site-hdr.site-hdr.site-hdr.menu-on{background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none;border-bottom-color:transparent;animation:none}
+/* Over a section that is dark in both themes, on a light page (`data-navdark`, nav-ink.ts): the bar's own tokens go dark. */
+:root[data-navfx][data-navdark] .v3 .site-hdr{--bg:var(--dark-bg);--ink:var(--dark-ink);--line:oklch(1 0 0 / 13%)}
 @keyframes navfx-in{from{background-color:transparent;-webkit-backdrop-filter:blur(0) saturate(1);backdrop-filter:blur(0) saturate(1);border-bottom-color:transparent}}
 
 /* Words: white or black from what is under them (--nav-ink is set per word by nav-ink.ts). No teal in the bar;
