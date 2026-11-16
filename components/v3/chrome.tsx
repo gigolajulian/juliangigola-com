@@ -505,7 +505,8 @@ export function V3Footer() {
   if (OWN_FOOT.test(path) || (v4 && path.startsWith("/graduation-photos/"))) return null;
   return (
     <div className="v3 contents">
-      {LINE_ONLY.test(path) ? <V3Foot /> : <PageFoot />}
+      {/* remade per page: this footer outlives the page, and its hand-over looks up the page's last block once */}
+      {LINE_ONLY.test(path) ? <V3Foot /> : <PageFoot key={path} />}
     </div>
   );
 }

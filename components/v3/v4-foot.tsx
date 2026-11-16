@@ -2,16 +2,25 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { BOOK_ROWS, QUOTE_OPTS } from "./mt/data";
 import { useLocalTime } from "./mt/foot";
 
 /* The ending of an inner page, on trial (`?v4pages=foot`, inner-pages plan g1):
    the V4 home footer without its photo wall, about half a screen tall. Four
-   link columns with Book online first, the drifting phrase "Book me" as one
+   link columns with Book online first, a drifting phrase ("Book me" and its variants) as one
    plain link to /book (no card is mounted here), then the last line. On
    desktop the page's last block sinks and dims while this slides over it.
    Styles: app/styles/v4pages.css. */
-const PHRASE = "Book me";
+/* Julian's lines (2026-11-15). A project page takes one by its slug, so it reads the same on every visit; every other page says the first. */
+const PHRASES = ["Book me", "Shoot with me", "You're next", "Work with me", "Book a shoot", "Bring me your idea", "Book your next shoot", "Book a session with me", "Make something with me"];
+const phraseFor = (path: string) => {
+  const slug = path.match(/^\/portfolio\/([^/]+)$/)?.[1];
+  if (!slug || slug === "video") return PHRASES[0];
+  let h = 0;
+  for (const c of slug) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  return PHRASES[h % PHRASES.length];
+};
 /* The inquiry form's types (components/v3/inquire.tsx TYPE); weddings has none, so it opens the form plain. */
 const ASK: Record<string, string> = { music: "coverart", fashion: "editorial", commercial: "campaign" };
 const D = "(min-width:1024px) and (min-height:600px)"; // the desktop structure of mt/motion/engine.ts
@@ -22,13 +31,16 @@ export function V4Foot() {
   const row = React.useRef<HTMLSpanElement>(null);
   const time = useLocalTime();
   const year = new Date().getFullYear();
+  const phrase = phraseFor(usePathname());
 
   React.useEffect(() => {
     const el = foot.current, r = row.current;
     if (!el || !r || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const mqD = matchMedia(D);
     // What sinks: a block that names itself (the project page's Next), else the one right above the footer.
-    const sink = document.querySelector<HTMLElement>("[data-sink]") ?? (el.previousElementSibling as HTMLElement | null);
+    let sink = document.querySelector<HTMLElement>("[data-sink]") ?? (el.previousElementSibling as HTMLElement | null);
+    // a block hidden at this size (the phone list on /portfolio/video) is skipped
+    while (sink && !sink.offsetHeight && sink.previousElementSibling) sink = sink.previousElementSibling as HTMLElement;
     let raf = 0, t0 = 0, y0 = scrollY, x = 0, v = 0, pk = 0, W = 0, out = 0, hot = false;
     const setOut = (o: number) => {
       if (!sink || o === out) return;
@@ -112,10 +124,10 @@ export function V4Foot() {
           <p><span className="dk">San Francisco Bay Area</span><span className="po">SF Bay Area</span></p>
         </div>
       </nav>
-      <Link className="v4f-phrase" href="/book" aria-label="Book me">
+      <Link className="v4f-phrase" href="/book" aria-label={phrase}>
         {/* shortcut: five copies cover a 3440px screen; add more if the phrase gets shorter or screens wider */}
         <span className="v4f-row" ref={row} aria-hidden>
-          {[0, 1, 2, 3, 4].map((n) => <span key={n}>{PHRASE}</span>)}
+          {[0, 1, 2, 3, 4].map((n) => <span key={n}>{phrase}</span>)}
         </span>
       </Link>
       <div className="v4f-line lbl mute">

@@ -23,15 +23,21 @@ export function V4Project({ frames }: { frames: FrameItem[] }) {
     if (!st || !v4pages("next") || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const desk = matchMedia(D).matches;
     let raf = 0;
+    const set = () => st.style.setProperty("--in", Math.min(1, Math.max(0, (innerHeight - st.getBoundingClientRect().top) / innerHeight)).toFixed(3));
     const tick = () => {
       raf = requestAnimationFrame(tick);
-      st.style.setProperty("--in", Math.min(1, Math.max(0, (innerHeight - st.getBoundingClientRect().top) / innerHeight)).toFixed(3));
+      set();
     };
     if (desk) {
-      const io = new IntersectionObserver(([e]) => {
-        cancelAnimationFrame(raf);
-        if (e.isIntersecting) raf = requestAnimationFrame(tick);
-      });
+      // closed before it is on screen, and the loop starts half a screen early: no frame of the open stage as it enters
+      set();
+      const io = new IntersectionObserver(
+        ([e]) => {
+          cancelAnimationFrame(raf);
+          if (e.isIntersecting) raf = requestAnimationFrame(tick);
+        },
+        { rootMargin: "50% 0px" },
+      );
       io.observe(st);
       return () => {
         cancelAnimationFrame(raf);
