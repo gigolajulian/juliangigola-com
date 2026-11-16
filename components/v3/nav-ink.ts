@@ -15,6 +15,7 @@ type RGB = [number, number, number];
 const VEIL = 0.47; // --nav-veil
 const lin = (v: number) => ((v /= 255) <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
 const lum = (c: RGB) => 0.2126 * lin(c[0]) + 0.7152 * lin(c[1]) + 0.0722 * lin(c[2]);
+const unlin = (v: number) => 255 * (v <= 0.0031308 ? v * 12.92 : 1.055 * v ** (1 / 2.4) - 0.055);
 
 let pen: CanvasRenderingContext2D | null | undefined;
 const one = () => (pen === undefined ? (pen = document.createElement("canvas").getContext("2d", { willReadFrequently: true })) : pen);
@@ -44,7 +45,7 @@ function colour(css: string): [RGB, number] {
 }
 
 /** A photo or film frame, shrunk to N by N. `null`: its pixels cannot be read. */
-const N = 48; // was 24: on a wide photo one cell covered more than a 16px stretch, so a split landed off the real edge
+const N = 128; // 24, then 48: a thin dark strip in a photo (a shadow the links sat on, MAC) blurred into the bright ground around it
 const thumbs = new WeakMap<Element, { at: number; src: string; data: Uint8ClampedArray | null }>();
 /* A canvas of its own each time: a photo from a host that does not allow reading taints the canvas it is drawn
    on for good, and on the shared one every later read threw (a preview serves its photos from the live host). */
@@ -54,6 +55,7 @@ function read(src: CanvasImageSource): Uint8ClampedArray | null {
     c.width = c.height = N;
     const x = c.getContext("2d");
     if (!x) return null;
+    x.imageSmoothingQuality = "high"; // an average of the pixels, not every nth one
     x.drawImage(src, 0, 0, N, N);
     return x.getImageData(0, 0, N, N).data.slice();
   } catch {
@@ -108,8 +110,9 @@ function thumb(el: HTMLImageElement | HTMLVideoElement): Uint8ClampedArray | nul
   return copies.get(src) || null;
 }
 
-/** The colour of a photo or film at a point on screen, through its object-fit and object-position. */
-function pixel(el: HTMLImageElement | HTMLVideoElement, x: number, y: number): RGB | null {
+/** The colour of a photo or film at a point on screen, through its object-fit and object-position: the mean, in
+    light, of the patch `hw` by `hh` either side of the point (the stretch of a word it stands for). */
+function pixel(el: HTMLImageElement | HTMLVideoElement, x: number, y: number, hw = 0, hh = 0): RGB | null {
   const nw = el instanceof HTMLVideoElement ? el.videoWidth : el.naturalWidth, nh = el instanceof HTMLVideoElement ? el.videoHeight : el.naturalHeight;
   pending = false;
   if (!nw || !nh) {
@@ -119,16 +122,32 @@ function pixel(el: HTMLImageElement | HTMLVideoElement, x: number, y: number): R
   const data = thumb(el);
   if (!data) return null;
   const r = el.getBoundingClientRect(), cs = getComputedStyle(el);
-  let u = (x - r.left) / r.width, v = (y - r.top) / r.height;
+  // the photo's own box on screen: the element's, or the fitted picture inside it
+  let left = r.left, top = r.top, w = r.width, h = r.height;
   if (cs.objectFit === "cover" || cs.objectFit === "contain") {
     const s = cs.objectFit === "cover" ? Math.max(r.width / nw, r.height / nh) : Math.min(r.width / nw, r.height / nh);
     const [px, py] = cs.objectPosition.split(" ").map((p) => (p.endsWith("%") ? parseFloat(p) / 100 : 0.5));
-    u = (x - r.left - (r.width - nw * s) * (px ?? 0.5)) / (nw * s);
-    v = (y - r.top - (r.height - nh * s) * (py ?? 0.5)) / (nh * s);
+    w = nw * s;
+    h = nh * s;
+    left = r.left + (r.width - w) * (px ?? 0.5);
+    top = r.top + (r.height - h) * (py ?? 0.5);
   }
+  const u = (x - left) / w, v = (y - top) / h;
   if (u < 0 || u > 1 || v < 0 || v > 1) return null;
-  const i = (Math.min(N - 1, Math.floor(v * N)) * N + Math.min(N - 1, Math.floor(u * N))) * 4;
-  return [data[i], data[i + 1], data[i + 2]];
+  const cell = (t: number) => Math.min(N - 1, Math.max(0, Math.floor(t * N)));
+  const i0 = cell((x - hw - left) / w), i1 = cell((x + hw - left) / w), j0 = cell((y - hh - top) / h), j1 = cell((y + hh - top) / h);
+  // at most 8 by 8 cells of the patch
+  const di = Math.max(1, Math.ceil((i1 - i0 + 1) / 8)), dj = Math.max(1, Math.ceil((j1 - j0 + 1) / 8));
+  let R = 0, G = 0, B = 0, k = 0;
+  for (let j = j0; j <= j1; j += dj)
+    for (let i = i0; i <= i1; i += di) {
+      const q = (j * N + i) * 4;
+      R += lin(data[q]);
+      G += lin(data[q + 1]);
+      B += lin(data[q + 2]);
+      k++;
+    }
+  return [unlin(R / k), unlin(G / k), unlin(B / k)];
 }
 
 /** Each photo's strength, kept for one look (cleared at the start of the next). */
@@ -136,7 +155,7 @@ const seen = new Map<Element, number>();
 /** Filled by `under`: the same thing's colour at another height of the same column, or null where it does not reach. */
 type Hit = { at?: (y: number) => RGB | null; unknown?: boolean };
 /** What shows at a point, under the header: the first photo, film or painted box from the top. */
-function under(x: number, y: number, hdr: HTMLElement, page: RGB, hit?: Hit): RGB {
+function under(x: number, y: number, hdr: HTMLElement, page: RGB, hit?: Hit, hw = 0, hh = 0): RGB {
   for (const el of document.elementsFromPoint(x, y)) {
     if (hdr.contains(el) || el.closest("[aria-hidden].mt-dockname")) continue;
     if (el instanceof HTMLImageElement || el instanceof HTMLVideoElement) {
@@ -151,13 +170,13 @@ function under(x: number, y: number, hdr: HTMLElement, page: RGB, hit?: Hit): RG
         seen.set(el, o);
       }
       if (o < 0.08) continue;
-      const p = pixel(el, x, y);
+      const p = pixel(el, x, y, hw, hh);
       if (p) {
         const s = o, mix = (q: RGB) => (s > 0.97 ? q : (q.map((v, i) => v * s + page[i] * (1 - s)) as RGB));
         if (hit) {
           const r = el.getBoundingClientRect();
           hit.at = (yy) => {
-            const q = yy < r.top || yy > r.bottom ? null : pixel(el, x, yy);
+            const q = yy < r.top || yy > r.bottom ? null : pixel(el, x, yy, hw, hh);
             return q && mix(q);
           };
         }
@@ -220,7 +239,8 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
       const [page] = colour(getComputedStyle(bar).getPropertyValue("--bg").trim());
       const veiled = !isTop && !root.hasAttribute("data-tuck");
       for (const el of bar.querySelectorAll<HTMLElement>(WORDS)) {
-        const r = el.getBoundingClientRect();
+        // an icon button is judged by its icon, not its 32px box: half the box can be on a photo the icon is clear of (MAC: the theme icon)
+        const r = ((el.matches(".tbtn,.menu-btn") && el.querySelector("svg")) || el).getBoundingClientRect();
         if (!r.width || r.bottom < 0) continue;
         /* One ink per stretch of about 16px, so a word that sits half on a photo and half on the page is white
            on one and black on the other (QA: "Ju" white on light grey). And one for the upper half and one for the
@@ -229,7 +249,7 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
            ink unless the other is clearly better, so it does not flicker on a busy photo, but never below 3:1.
            `data-inks` is the upper row, a slash, the lower row. */
         const n = Math.max(1, Math.round(r.width / 16));
-        const ya = r.top + r.height * 0.3, yb = r.top + r.height * 0.7;
+        const ya = r.top + r.height * 0.25, yb = r.top + r.height * 0.75; // the middle of each half
         const prev = el.dataset.inks ?? "";
         const [pa = "", pb = ""] = prev.split("/");
         const pick = (g: RGB, was: string, unknown?: boolean) => {
@@ -241,9 +261,10 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
         let ra = "", rb = "";
         for (let k = 0; k < n; k++) {
           const x = r.left + (r.width * (k + 0.5)) / n, hit: Hit = {}, low: Hit = {};
-          const ca = under(x, ya, bar, page, hit);
+          const hw = r.width / n / 2, hh = r.height / 4; // the patch each look stands for: one stretch, half the height
+          const ca = under(x, ya, bar, page, hit, hw, hh);
           // the lower half is usually on the same photo or box: a second look only where that one ends
-          const cb = hit.at?.(yb) ?? under(x, yb, bar, page, low);
+          const cb = hit.at?.(yb) ?? under(x, yb, bar, page, low, hw, hh);
           ra += pick(ca, pa.length === n ? pa[k] : "", hit.unknown);
           rb += pick(cb, pb.length === n ? pb[k] : "", hit.at ? false : low.unknown || hit.unknown);
         }
