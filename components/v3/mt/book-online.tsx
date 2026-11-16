@@ -11,7 +11,7 @@ import { useNextOpen } from "./next-open";
 
 /* Book online: four sessions, one line each. A row is picked by hover (fine
    pointers), focus or tap, and the photo follows it. Booking finishes here:
-   the list gives way to the LIVE flow (`V3BookFlow`: its own picker, Cal.com
+   the list gives way to the LIVE flow (`V3BookFlow`: its own picker, the site's
    events, Stripe deposit and copy, untouched) and the photo stays. */
 const fine = () => matchMedia("(hover: hover) and (pointer: fine)").matches;
 
@@ -140,7 +140,7 @@ export function MtBookOnline({ open, onOpen, onClose, quote, onOwn }: { open: Bo
                 {next ? <p className="lbl mt-next"><span className="mute">Next open</span> {next}</p> : null}
                 <Link className="mt-link" href="/book">All sessions</Link>
               </div>
-              <p className="lbl mute mt-dep">$100 secures your date and goes toward your balance.</p>
+              <p className="lbl mute mt-dep">{r.price.split(" ")[0]} secures your date and goes toward your balance.</p>
             </>
           )}
         </div>

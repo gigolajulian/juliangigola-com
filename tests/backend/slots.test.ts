@@ -3,9 +3,9 @@ import { cleanHours, EVENTS } from "@/lib/booking/booking-rules";
 import { forgetToken } from "@/lib/booking/gcal";
 import { localIso, startsFor, zoned } from "@/lib/booking/slots";
 
-/* The site's own open times (`lib/booking/slots.ts`, `app/api/slots`): the rules
-   Cal.com had, minus what hello@'s calendar says is busy, in the visitor's
-   zone and Cal.com's shape. */
+/* The site's own open times (`lib/booking/slots.ts`, `app/api/slots`): the rules,
+   minus what hello@'s calendar says is busy, in the visitor's
+   zone, grouped by day. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
 vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
@@ -88,7 +88,7 @@ describe("startsFor", () => {
 describe("GET /api/slots", () => {
   const get = (q: string) => GET(new Request(`https://juliangigola.com/api/slots?${q}`));
 
-  it("answers in Cal.com's shape, in the visitor's zone, minus busy time", async () => {
+  it("answers slots by day, in the visitor's zone, minus busy time", async () => {
     vi.setSystemTime(NOW);
     busy = [{ start: "2026-11-18T18:00:00Z", end: "2026-11-18T19:00:00Z" }];
     const r = await (await get("slug=portraits&start=2026-11-18&end=2026-11-18&timeZone=America/New_York")).json();

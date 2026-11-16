@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { BOOKING_PAGES, BOOK_MENU, CAL_EVENTS, bookingHref, bookingPage, calEvent, pageForSession } from "@/lib/booking/booking";
+import { BOOKING_PAGES, BOOK_MENU, SESSION_EVENTS, bookingHref, bookingPage, sessionEvent, pageForSession } from "@/lib/booking/booking";
 import { BOOKING_SLUGS } from "@/lib/booking/booking-slugs";
 
 /* The booking pages and the homepage booking menu (`lib/booking/booking.ts`),
@@ -32,11 +32,11 @@ describe("booking pages", () => {
   });
 });
 
-describe("calEvent", () => {
-  it("names a session's Cal.com event, or nothing", () => {
-    expect(calEvent("portraits")).toBe(CAL_EVENTS.portraits);
-    expect(calEvent("weddings")).toBeUndefined();
-    expect(calEvent()).toBeUndefined();
+describe("sessionEvent", () => {
+  it("names a session's event, or nothing", () => {
+    expect(sessionEvent("portraits")).toBe(SESSION_EVENTS.portraits);
+    expect(sessionEvent("weddings")).toBeUndefined();
+    expect(sessionEvent()).toBeUndefined();
   });
 });
 

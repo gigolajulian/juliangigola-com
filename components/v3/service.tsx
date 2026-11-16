@@ -4,6 +4,7 @@ import { V3Foot } from "@/components/v3/chrome";
 import { V3BookFlow } from "@/components/v3/book";
 import { Run } from "@/components/v3/flow";
 import { Doors } from "@/components/v3/home";
+import { ServiceBar } from "@/components/v3/service-bar";
 import { BOOKING_PAGES, bookingHref, type BookingPage } from "@/lib/booking/booking";
 import { CAMPUS_GUIDES, campusHref } from "@/lib/campus-guides";
 import { SESSIONS, type SessionSlug } from "@/lib/v3";
@@ -15,7 +16,7 @@ import type { Frame } from "@/lib/work-types";
    the two doors. The words are `lib/booking/booking.ts`'s, unchanged. */
 
 export function V3Service({ page, frames }: { page: BookingPage; frames: Frame[] }) {
-  /* Its booking on the V3 stepper: the same slug, or the session that books the same Cal.com event. */
+  /* Its booking on the V3 stepper: the same slug, or the session that books the same event. */
   const s = SESSIONS[page.slug as SessionSlug] ?? Object.values(SESSIONS).find((x) => x.cal === page.book.cal);
   const includes = page.blocks.find((b) => b.heading === "What's included")?.items ?? [];
   /* Six frames, two a column (Julian); the gallery holds the rest. */
@@ -68,7 +69,7 @@ export function V3Service({ page, frames }: { page: BookingPage; frames: Frame[]
         ) : null}
         <div className="sv-info">
           {page.blocks.map((b) => (
-            <section className="sv-row" key={b.heading}>
+            <section className={b.items ? "sv-row sv-v4" : "sv-row"} key={b.heading}>
               <h2 className="lbl mute">{b.heading}</h2>
               {b.items ? (
                 <ul>{b.items.map((x) => <li key={x}>{x}</li>)}</ul>
@@ -115,8 +116,11 @@ export function V3Service({ page, frames }: { page: BookingPage; frames: Frame[]
             </ul>
           </section>
         </div>
+        {/* ?v4pages=s1: where the last screen starts, and the phone book bar that hides there. */}
+        <span data-sv-end />
         <Doors />
         <V3Foot />
+        <ServiceBar name={page.name} rate={page.rate} label={page.book.title} href={s ? "#book" : "/contact/form"} />
       </section>
     </div>
   );

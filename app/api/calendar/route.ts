@@ -12,8 +12,8 @@ import { bodyOf, json } from "@/lib/http";
  * plus the busy time of the extra calendars; POST blocks or unblocks time
  * and adds or drops an extra calendar.
  *
- * A block is an event on hello@ ("Blocked", marked `jgBlock`), so Cal.com
- * and the site's own engine both stop offering it at once, and it shows in
+ * A block is an event on hello@ ("Blocked", marked `jgBlock`), so the
+ * site's engine stops offering it at once, and it shows in
  * Google Calendar too. Only events with that mark can be unblocked here:
  * this route never deletes a booking. Extras live in INBOX (`lib/booking/slots.ts`).
  * Same gate as /api/inbox: the inbox key or a GitHub token that can push.
@@ -116,7 +116,7 @@ async function post(request: Request) {
     const ev = await gcal<GEvent>(env.GCAL_OAUTH, "/calendars/primary/events?sendUpdates=none", {
       body: {
         summary: note ? `Blocked: ${String(note).slice(0, 80)}` : "Blocked",
-        // Opaque even all day: Google's free/busy (and so Cal.com) counts it as busy.
+        // Opaque even all day: Google's free/busy counts it as busy, so no time is offered.
         transparency: "opaque",
         start: timed ? { dateTime: `${from}T${start}:00`, timeZone: TZ } : { date: from },
         end: timed ? { dateTime: `${from}T${end}:00`, timeZone: TZ } : { date: next },

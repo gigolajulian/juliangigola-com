@@ -3,7 +3,7 @@ import { GET } from "@/app/api/slots/route";
 import { forgetToken } from "@/lib/booking/gcal";
 
 /* /api/slots: public. Off without GCAL_OAUTH, refuses an unknown session,
-   a bad range and an unknown zone, and answers in Cal.com's shape. */
+   a bad range and an unknown zone, and answers slots by day. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
 vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
