@@ -158,22 +158,22 @@ describe.each([
 
     const res = await cancel();
     expect(await res.json()).toMatchObject({ refunded: true, record: { cancelled: true, paid: true, deposit: usd } });
-    // The whole charge goes back: the refund names the intent and no amount.
+    // A week ahead: 90% of what was paid goes back, 10% is the booking fee.
     const refund = stripeCalls.find((c) => c.url.endsWith("/refunds"))!;
     expect(refund.form.get("payment_intent")).toBe(PI);
-    expect(refund.form.has("amount")).toBe(false);
-    expect(String(client.sent.at(-1)!.text)).toContain(`Your $${usd} deposit is refunded to your card.`);
-    expect(await money()).toEqual([["payment", usd], ["refund", usd]]);
+    expect(refund.form.get("amount")).toBe(String(usd * 90));
+    expect(String(client.sent.at(-1)!.text)).toContain(`$${usd * 0.9} of your $${usd} deposit is refunded to your card. $${usd * 0.1} is kept as the booking fee.`);
+    expect(await money()).toEqual([["payment", usd], ["refund", usd * 0.9]]);
   });
 });
 
 describe("what was paid, not today's price", () => {
-  it("books a Headshots intent made at the old $100, and returns $100", async () => {
+  it("books a Headshots intent made at the old $100, and returns 90% of $100", async () => {
     expect((await pay("headshots", 10000)).status).toBe(200);
     expect(String(client.sent.at(-1)!.text)).toContain("Deposit paid: $100.00");
     await cancel();
-    expect(String(client.sent.at(-1)!.text)).toContain("Your $100 deposit is refunded to your card.");
-    expect(await money()).toEqual([["payment", 100], ["refund", 100]]);
+    expect(String(client.sent.at(-1)!.text)).toContain("$90 of your $100 deposit is refunded to your card.");
+    expect(await money()).toEqual([["payment", 100], ["refund", 90]]);
   });
 
   it("reads a record from before amounts were stored as $100", () => {
@@ -192,5 +192,27 @@ describe("the screens read the same map", () => {
     expect(rate({ ...SESSIONS["studio-digitals"], from: null })).toBe("$150 deposit");
     expect(rate({ ...SESSIONS.headshots, from: null })).toBe("$200 deposit");
     expect(depositFor("digitals")).toBe(150);
+  });
+});
+
+describe("a cancel between 48 and 24 hours ahead", () => {
+  it("returns 70% of what was paid, and Stripe's own refund event is not logged twice", async () => {
+    expect((await open("headshots")).status).toBe(200);
+    expect((await pay("headshots", 20000)).status).toBe(200);
+    vi.setSystemTime(Date.parse(WHEN) - 30 * 36e5);
+    const res = await cancel();
+    expect(await res.json()).toMatchObject({ refunded: true, back: 140 });
+    const refund = stripeCalls.find((c) => c.url.endsWith("/refunds"))!;
+    expect(refund.form.get("amount")).toBe("14000");
+    expect(String(client.sent.at(-1)!.text)).toContain("$140 of your $200 deposit is refunded to your card and $60 is kept");
+
+    // Stripe then reports the same refund: `charge.refunded`, keyed by the cents refunded so far.
+    const raw = JSON.stringify({ type: "charge.refunded", data: { object: { id: "ch_1", payment_intent: PI, amount: 20000, amount_refunded: 14000, receipt_email: "qa@example.com", refunds: { data: [{ amount: 14000 }] } } } });
+    const at = Math.floor(Date.now() / 1000);
+    const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(WHSEC), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+    const sig = [...new Uint8Array(await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(`${at}.${raw}`)))].map((b) => b.toString(16).padStart(2, "0")).join("");
+    expect((await hook(new Request("https://juliangigola.com/api/stripe", { method: "POST", body: raw, headers: { "stripe-signature": `t=${at},v1=${sig}` } }))).status).toBe(200);
+    vi.setSystemTime(new Date("2026-11-11T20:00:00Z"));
+    expect(await money()).toEqual([["payment", 200], ["refund", 140]]);
   });
 });

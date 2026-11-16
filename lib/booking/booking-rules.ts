@@ -84,13 +84,34 @@ export const EVENTS: Record<string, Rule> = {
   "wedding-call": { title: "Wedding call", notice: 120, ...CALL },
 };
 
-/** Julian (2026-11-03): a cancel this many hours or more before the start refunds the deposit; under it, none. */
+/** Julian (2026-11-16): a cancel 48 hours or more before the start refunds 90% of the deposit
+    (10% is the booking fee: "no free refunds", and it covers Stripe's own fee, which a refund does
+    not return), 24 hours or more refunds 70%, under 24 hours none. A booking made before the fee
+    (no `fee` on its record) was sold a full refund and keeps it. */
 export const REFUND_HOURS = 48;
-/* Julian (2026-11-03, "refund by first time"): judged against the time first
-   booked, so moving a session out and then cancelling keeps the deposit. A
-   session moved earlier is judged by its new, earlier time. */
-export const refundable = (r: { intent?: string; start: string; firstStart?: string }, now = Date.now()) =>
-  !!r.intent && Math.min(Date.parse(r.start), Date.parse(r.firstStart ?? r.start)) - now >= REFUND_HOURS * 36e5;
+export const PART_HOURS = 24;
+export const EARLY_SHARE = 0.9;
+export const PART_SHARE = 0.7;
+/** The percent kept on an early cancel, stamped on each new paid booking's record. */
+export const BOOKING_FEE = 10;
+/** A booking can be moved until this many hours before it starts. */
+export const MOVE_HOURS = 24;
+/** The heads-up mail goes out this many hours ahead, while the early refund is still open. */
+export const HEADS_UP_HOURS = 72;
+/* The share of the deposit a cancel returns now: 0.9 (1 before the fee), 0.7 or 0. Julian
+   (2026-11-03, "refund by first time"): judged against the time first booked,
+   so moving a session out and then cancelling does not earn a better refund.
+   A session moved earlier is judged by its new, earlier time. */
+export const refundShare = (r: { intent?: string; start: string; firstStart?: string; fee?: number }, now = Date.now()): number => {
+  if (!r.intent) return 0;
+  const hours = (Math.min(Date.parse(r.start), Date.parse(r.firstStart ?? r.start)) - now) / 36e5;
+  return hours >= REFUND_HOURS ? (r.fee ? EARLY_SHARE : 1) : hours >= PART_HOURS ? PART_SHARE : 0;
+};
+/** Julian (2026-11-16): a client may move a booking this many times; after that it stays or is cancelled. */
+export const MAX_MOVES = 2;
+/** The cents a cancel returns of a deposit of `usd` dollars. */
+// shortcut: the mails and screens print the dollars raw, whole only while every deposit divides by 10; format cents if one stops.
+export const refundCents = (usd: number, share: number) => Math.round(usd * 100 * share);
 
 /** A visitor's booking, checked by `parseBooking` in `lib/booking/booking-engine.ts`. */
 export type Booking = {
