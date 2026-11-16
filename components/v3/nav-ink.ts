@@ -72,11 +72,24 @@ const foreign = (src: string, el: HTMLImageElement | HTMLVideoElement) => {
 };
 /** Called when a photo that could not be read has a readable copy: the header looks again. */
 let poke = () => {};
-const copies = new Map<string, Uint8ClampedArray | null>();
+/** A same-host copy by photo address: null while it loads, false when it cannot be had. */
+const copies = new Map<string, Uint8ClampedArray | null | false>();
+/** Set by the last `pixel`: the photo is there but its pixels are not known yet (still loading, or its copy is). */
+let pending = false;
+/** True once a photo needed a same-host copy (a preview; the live site reads its own photos): the header then asks ahead. */
+let copied = false;
 function thumb(el: HTMLImageElement | HTMLVideoElement): Uint8ClampedArray | null {
   const film = el instanceof HTMLVideoElement, src = el.currentSrc || el.src, now = performance.now();
   const had = thumbs.get(el);
-  if (had && had.src === src && (!film || now - had.at < 400)) return had.data ?? copies.get(src) ?? null;
+  if (had && had.src === src && (!film || now - had.at < 400)) {
+    pending = !had.data && copies.get(src) === null;
+    return had.data ?? (copies.get(src) || null);
+  }
+  // not all there yet: drawn now it would read as black, and that would be kept (the load event looks again)
+  if (!film && !el.complete) {
+    pending = true;
+    return null;
+  }
   const data = foreign(src, el) ? null : read(el);
   thumbs.set(el, { at: now, src, data });
   if (data || film) return data;
@@ -84,18 +97,25 @@ function thumb(el: HTMLImageElement | HTMLVideoElement): Uint8ClampedArray | nul
      host becomes `/<path>` here). Asked for once; the word keeps its ink until it lands. */
   const m = /^https?:\/\/[^/]+\/cdn-cgi\/image\/[^/]+\/(.+)$/.exec(src);
   if (m && !copies.has(src)) {
+    copied = true;
     copies.set(src, null);
     const im = new Image();
-    im.onload = () => (copies.set(src, read(im)), poke());
+    im.onload = () => (copies.set(src, read(im) ?? false), poke());
+    im.onerror = () => copies.set(src, false);
     im.src = "/" + m[1];
   }
-  return copies.get(src) ?? null;
+  pending = copies.get(src) === null;
+  return copies.get(src) || null;
 }
 
 /** The colour of a photo or film at a point on screen, through its object-fit and object-position. */
 function pixel(el: HTMLImageElement | HTMLVideoElement, x: number, y: number): RGB | null {
   const nw = el instanceof HTMLVideoElement ? el.videoWidth : el.naturalWidth, nh = el instanceof HTMLVideoElement ? el.videoHeight : el.naturalHeight;
-  if (!nw || !nh) return null;
+  pending = false;
+  if (!nw || !nh) {
+    pending = el instanceof HTMLImageElement && !!(el.currentSrc || el.src); // an image that has not arrived
+    return null;
+  }
   const data = thumb(el);
   if (!data) return null;
   const r = el.getBoundingClientRect(), cs = getComputedStyle(el);
@@ -114,7 +134,7 @@ function pixel(el: HTMLImageElement | HTMLVideoElement, x: number, y: number): R
 /** Each photo's strength, kept for one look (cleared at the start of the next). */
 const seen = new Map<Element, number>();
 /** Filled by `under`: the same thing's colour at another height of the same column, or null where it does not reach. */
-type Hit = { at?: (y: number) => RGB | null };
+type Hit = { at?: (y: number) => RGB | null; unknown?: boolean };
 /** What shows at a point, under the header: the first photo, film or painted box from the top. */
 function under(x: number, y: number, hdr: HTMLElement, page: RGB, hit?: Hit): RGB {
   for (const el of document.elementsFromPoint(x, y)) {
@@ -143,6 +163,8 @@ function under(x: number, y: number, hdr: HTMLElement, page: RGB, hit?: Hit): RG
         }
         return mix(p);
       }
+      // a photo is there and its pixels are on their way: what is behind it (its dark tile) is not the ground
+      if (pending && hit) hit.unknown = true;
       continue;
     }
     const [c, a] = colour(getComputedStyle(el).backgroundColor);
@@ -184,7 +206,10 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
       // only once the name is fully gone, so the two never show together: faded out, hidden by hero.ts at the end
       // of its exit (it rides out of the window at full strength under ?mtdock=left), or wholly out of the window:
       // on phones it scrolls up through the bar, and the wordmark came on while it was still passing under it (MAC)
-      const shows = !!nr && nr.bottom > 0 && nr.top < innerHeight && blk?.style.visibility !== "hidden" && parseFloat(blk?.style.opacity || "1") > 0.02;
+      // The whole block, tagline and buttons too, and 80px clear of the top: on an iPhone a ghost of the name still
+      // showed behind the status bar when the wordmark came on, and Inquire then rose through it (MAC, sim).
+      const br = blk?.getBoundingClientRect() ?? nr;
+      const shows = !!br && br.bottom > -80 && br.top < innerHeight && blk?.style.visibility !== "hidden" && parseFloat(blk?.style.opacity || "1") > 0.02;
       root.toggleAttribute("data-navnamegone", !shows);
       // A section that is dark in both themes (the v4 footer sets its own --bg) under a light page: the bar takes
       // the dark ground there (navfx.css), or its light veil over it would be a mid grey nothing reads on.
@@ -207,19 +232,20 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
         const ya = r.top + r.height * 0.3, yb = r.top + r.height * 0.7;
         const prev = el.dataset.inks ?? "";
         const [pa = "", pb = ""] = prev.split("/");
-        const pick = (g: RGB, was: string) => {
+        const pick = (g: RGB, was: string, unknown?: boolean) => {
+          if (unknown && was) return was; // the photo's pixels are not in yet: keep the ink until they are
           const c = veiled ? ([0, 1, 2].map((i) => g[i] * (1 - VEIL) + page[i] * VEIL) as RGB) : g;
           const l = lum(c), white = 1.05 / (l + 0.05), black = (l + 0.05) / 0.05;
           return was === "w" && white >= 3 && white * 1.25 >= black ? "w" : was === "b" && black >= 3 && black * 1.25 >= white ? "b" : white >= black ? "w" : "b";
         };
         let ra = "", rb = "";
         for (let k = 0; k < n; k++) {
-          const x = r.left + (r.width * (k + 0.5)) / n, hit: Hit = {};
+          const x = r.left + (r.width * (k + 0.5)) / n, hit: Hit = {}, low: Hit = {};
           const ca = under(x, ya, bar, page, hit);
           // the lower half is usually on the same photo or box: a second look only where that one ends
-          const cb = hit.at?.(yb) ?? under(x, yb, bar, page);
-          ra += pick(ca, pa.length === n ? pa[k] : "");
-          rb += pick(cb, pb.length === n ? pb[k] : "");
+          const cb = hit.at?.(yb) ?? under(x, yb, bar, page, low);
+          ra += pick(ca, pa.length === n ? pa[k] : "", hit.unknown);
+          rb += pick(cb, pb.length === n ? pb[k] : "", hit.at ? false : low.unknown || hit.unknown);
         }
         const inks = ra + "/" + rb;
         if (inks === prev) continue;
@@ -342,7 +368,15 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
     watch.observe(root, { attributeFilter: ["data-theme", "data-tuck", "data-mt-intro", "data-mt-pasthero"] });
     paint();
     // Photos also move with no scroll event (the v4 hero glides on after the wheel stops, films play): look again twice a second.
-    const again = window.setInterval(() => document.hidden || (ask(), scan(), kick()), 500);
+    // On a preview, where photos need a same-host copy: ask for the ones near the window before they reach the bar.
+    const ahead = () => {
+      if (!copied) return;
+      for (const im of document.querySelectorAll<HTMLImageElement>("#main img")) {
+        const q = im.getBoundingClientRect();
+        if (q.width && q.bottom > -innerHeight / 2 && q.top < innerHeight * 2) thumb(im);
+      }
+    };
+    const again = window.setInterval(() => document.hidden || (ask(), scan(), kick(), ahead()), 500);
     return () => {
       removeEventListener("scroll", ask);
       removeEventListener("scroll", kick);
