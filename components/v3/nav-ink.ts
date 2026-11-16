@@ -44,7 +44,7 @@ function colour(css: string): [RGB, number] {
 }
 
 /** A photo or film frame, shrunk to N by N. `null`: its pixels cannot be read. */
-const N = 24;
+const N = 48; // was 24: on a wide photo one cell covered more than a 16px stretch, so a split landed off the real edge
 const thumbs = new WeakMap<Element, { at: number; src: string; data: Uint8ClampedArray | null }>();
 /* A canvas of its own each time: a photo from a host that does not allow reading taints the canvas it is drawn
    on for good, and on the shared one every later read threw (a preview serves its photos from the live host). */
@@ -60,6 +60,16 @@ function read(src: CanvasImageSource): Uint8ClampedArray | null {
     return null;
   }
 }
+/* A photo from another host with no CORS mode cannot be read, and Safari logs an error for the try even when it is
+   caught (QA: 10 to 12 a load on previews). So it is not tried: such a photo goes straight to its same-host copy. */
+const foreign = (src: string, el: HTMLImageElement | HTMLVideoElement) => {
+  if (!src || /^(data|blob):/.test(src)) return false;
+  try {
+    return new URL(src, location.href).origin !== location.origin && el.crossOrigin === null;
+  } catch {
+    return true;
+  }
+};
 /** Called when a photo that could not be read has a readable copy: the header looks again. */
 let poke = () => {};
 const copies = new Map<string, Uint8ClampedArray | null>();
@@ -67,7 +77,7 @@ function thumb(el: HTMLImageElement | HTMLVideoElement): Uint8ClampedArray | nul
   const film = el instanceof HTMLVideoElement, src = el.currentSrc || el.src, now = performance.now();
   const had = thumbs.get(el);
   if (had && had.src === src && (!film || now - had.at < 400)) return had.data ?? copies.get(src) ?? null;
-  const data = read(el);
+  const data = foreign(src, el) ? null : read(el);
   thumbs.set(el, { at: now, src, data });
   if (data || film) return data;
   /* Unreadable: the same file from this host, without the resizer (`/cdn-cgi/image/<options>/<path>` on another
