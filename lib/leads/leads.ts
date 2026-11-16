@@ -260,7 +260,7 @@ export function fold(lead: Lead | null, email: string, c: Change): Lead {
   // Something arrived from outside: it is news, and out of Archived. The
   // trash keeps it: what he threw out (spam, mostly) stays there.
   Object.assign(next, { lastAt: event.at, unread: true, snoozeUntil: undefined, archivedAt: undefined });
-  if (c.name && (!lead || next.name === next.email)) next.name = c.name;
+  if (c.name && (!lead || next.name.toLowerCase() === next.email)) next.name = c.name;
   if (c.kind) next.kind = c.kind;
   if (c.when) next.when = c.when;
   if (c.deposit) next.deposit = c.deposit;

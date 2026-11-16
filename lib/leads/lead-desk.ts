@@ -68,7 +68,13 @@ const due = (l: LeadSummary) => !!l.due && Date.parse(l.due) <= now();
 export const matches = (l: LeadSummary, words: string) => !words || [l.name, l.email, l.kind, l.snippet].some((v) => v?.toLowerCase().includes(words));
 /** A licence ending soon brings back even a Delivered lead; a snooze holds it off. */
 export const renew = (l: LeadSummary) => !snoozed(l) && renewDue(l, now());
-export const needsMe = (l: LeadSummary) => renew(l) || (!aside(l) && !closed(l.stage) && (due(l) || (!snoozed(l) && (l.unread || isLate(l, now()) || !!l.flags?.length || !!paperDue(l, now()) || !!myMove(l, now())))));
+export function needsMe(l: LeadSummary) {
+  if (renew(l)) return true;
+  if (aside(l) || closed(l.stage)) return false;
+  if (due(l)) return true;
+  if (snoozed(l)) return false;
+  return l.unread || isLate(l, now()) || !!l.flags?.length || !!paperDue(l, now()) || !!myMove(l, now());
+}
 
 /** What to do next, in a word or two, and whether it is late. */
 export function nextStep(l: LeadSummary): string | null {

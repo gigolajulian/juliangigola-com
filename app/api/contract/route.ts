@@ -70,7 +70,8 @@ export async function POST(request: Request) {
   if (g.error) return g.error;
   const b = await bodyOf(request);
   if (typeof b?.lead !== "string") return json({ error: "Not JSON." }, 400);
-  const lead = await readLead(g.kv, g.s, b.lead).catch(() => null);
+  const lead = await readLead(g.kv, g.s, b.lead).catch((e: unknown) => (console.error("contract lead", String(e)), undefined));
+  if (lead === undefined) return json({ error: "That lead cannot be opened. LEADS_KEY may have changed." }, 500);
   if (!lead) return json({ error: "Gone." }, 404);
   const t = (await templates(g.kv)).find((x) => x.id === b.template) ?? (await templates(g.kv))[0];
   if (!t) return json({ error: "Add a contract template first." }, 400);

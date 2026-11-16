@@ -21,8 +21,6 @@ const noop = () => () => {};
  * ─────────────────────────────────────────────────────────────── */
 const clearNav = () => {
   const root = document.documentElement;
-  // A strip dealt across pages clears its own (`leave` in `strip.tsx`).
-  if (root.dataset.nav === "deal") return;
   delete root.dataset.nav;
   delete root.dataset.navBar;
   delete root.dataset.navSide;

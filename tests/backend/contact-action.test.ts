@@ -119,6 +119,19 @@ describe("submitEnquiry", () => {
     expect(msgs()).toHaveLength(1);
   });
 
+  it("mails again without the images when the mail with them is refused", async () => {
+    const send1 = email.send.bind(email);
+    email.send = async (msg) => {
+      if ((msg.attachments as unknown[]).length) throw new Error("message too large");
+      return send1(msg);
+    };
+    expect((await send({ ...GOOD, picks: "/work/nova/01.jpg" })).status).toBe("sent");
+    expect(email.sent).toHaveLength(1);
+    expect(email.sent[0].attachments).toEqual([]);
+    expect(email.sent[0].text).toContain("1 image(s) were too large to attach");
+    expect(email.sent[0].html).not.toContain("cid:");
+  });
+
   it("keeps picks of the site's own shape only, at most eight, and attaches them inline", async () => {
     const good = Array.from({ length: 10 }, (_, i) => `/work/nova/0${i}.jpg`);
     const res = await send({ ...GOOD, picks: [...good, "https://evil.example/x.jpg", "/work/../../etc/passwd"].join("\n") });

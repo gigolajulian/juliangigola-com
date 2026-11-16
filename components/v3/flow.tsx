@@ -310,7 +310,7 @@ export function Failed({ state }: { state: ContactState }) {
   );
 }
 
-/** The enquiry, posted the way `inquire-card.tsx` posts it. */
+/** The enquiry, posted the way `contact-form.tsx` posts it. */
 export function useEnquiry() {
   const [state, act, pending] = React.useActionState(submitOrKeep, INITIAL);
   const [sim, setSim] = React.useState(false);
