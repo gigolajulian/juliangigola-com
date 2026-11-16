@@ -1,6 +1,5 @@
 /* ── hello@'s Google Calendar, for the site's own booking engine ─────
- * Julian (2026-11-03): the site books in place of Cal.com
- * (PLAN-own-booking.md). It reads and writes hello@'s calendar through one
+ * It reads and writes hello@'s calendar through one
  * Workspace OAuth client, Internal, consented once as hello@
  * (`node scripts/gsc-auth.mjs <client.json> cal`). The refresh token lives
  * only in the Worker secret `GCAL_OAUTH`; it is swapped for an access token

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { createPortal, preload } from "react-dom";
 import { getImageProps } from "next/image";
 import { useRouter } from "next/navigation";
-import { CalEmbed } from "@/components/booking/cal-embed";
+import { BookTimes } from "@/components/booking/book-times";
 import { Calendar, Failed, Field, FlowShell, Hidden, Run, dlabel, iso, useEnquiry, type Shell } from "@/components/v3/flow";
 import { duration } from "@/lib/booking/booking-rules";
 import { LENGTH, SESSIONS, TAB_ORDER, rate, type SessionSlug } from "@/lib/v3";
@@ -147,7 +147,7 @@ export function V3BookFlow({ slug, tabs = true, h1 = false }: { slug: SessionSlu
     />
   );
   if (!S.cal) return <OnRequest key={slug} slug={slug} shell={shell} />;
-  return <CalEmbed key={slug} path={S.cal} title={`Pick a time for ${S.name}`} v3={{ shell, name: S.name, from: S.from }} />;
+  return <BookTimes key={slug} path={S.cal} title={`Pick a time for ${S.name}`} v3={{ shell, name: S.name, from: S.from }} />;
 }
 
 export function V3Book({ slug }: { slug: SessionSlug }) {

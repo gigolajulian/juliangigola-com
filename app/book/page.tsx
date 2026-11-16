@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { shareOg } from "@/lib/share";
 import { BookPicker, type Bookable } from "@/components/booking/book-picker";
 import { V3Book } from "@/components/v3/book";
-import { calEvent, pageForSession } from "@/lib/booking/booking";
+import { sessionEvent, pageForSession } from "@/lib/booking/booking";
 import { isSession } from "@/lib/v3";
 import { wallOf } from "@/lib/work";
 import { SESSION_TYPES, formatPrice } from "@/lib/booking/sessions";
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 ...shareOg("Book a session","Portraits, graduation, headshots and studio digitals in the San Francisco Bay Area. Pick a time on my calendar."),
 };
 
-/* The four sessions, each a Cal.com event (`CAL_EVENTS`, `lib/booking/booking.ts`);
+/* The four sessions, each a bookable event (`SESSION_EVENTS`, `lib/booking/booking.ts`);
    weddings book a call (its page's `book.cal`). The lengths are the events' own. */
 const LENGTHS: Record<string, string> = {
   portraits: "1 hour",
@@ -31,7 +31,7 @@ export default async function BookPage({ searchParams }: { searchParams: Promise
   const { session, classic } = await searchParams;
   if (classic === undefined) return <V3Book slug={isSession(session) ? session : "portraits"} />;
   const sessions: Bookable[] = SESSION_TYPES.flatMap((s) => {
-    const cal = calEvent(s.slug) ?? pageForSession(s.slug)?.book.cal;
+    const cal = sessionEvent(s.slug) ?? pageForSession(s.slug)?.book.cal;
     // Its wall, as its own booking page has (`/book/[slug]`).
     const wall = wallOf(pageForSession(s.slug)?.gallery.href.split("/").pop() ?? "");
     return cal ? [{ slug: s.slug, name: s.name, blurb: s.blurb, rate: formatPrice(s.from), length: LENGTHS[s.slug], cal, wall }] : [];

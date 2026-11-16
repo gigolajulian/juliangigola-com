@@ -7,8 +7,7 @@ import { toNotion } from "@/lib/leads/notion-lead";
 import { openNow, type KV } from "@/lib/booking/slots";
 
 /* ── the site's own booking engine ────────────────────────────────
- * Julian (2026-11-03): in place of Cal.com (PLAN-own-booking.md). One
- * Durable Object (`worker/booking-lock.ts`) runs every booking through
+ * One Durable Object (`worker/booking-lock.ts`) runs every booking through
  * here one at a time: recheck hello@'s free/busy, insert the event,
  * keep the record. Two tabs on one slot: the second finds it busy.
  * KV could not do this, it is eventually consistent and has no lock.

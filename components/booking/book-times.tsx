@@ -8,9 +8,7 @@ import { isPaid } from "@/lib/booking/paid";
 /* ── the booking calendar ────────────────────────────────────────
  * The site's own time picker (`time-picker.tsx`, times from
  * `app/api/slots`). If the times do not come, the visitor gets a way to
- * try again, Inquire and the address, in the box the picker would fill.
- * Cal.com's calendar used to stand in here; it is gone (Julian, 2026-11-05).
- * ─────────────────────────────────────────────────────────────── */
+ * try again, Inquire and the address, in the box the picker would fill. * ─────────────────────────────────────────────────────────────── */
 
 const EMAIL = "hello@juliangigola.com";
 
@@ -44,7 +42,7 @@ function TimesDown({ title, className, retry, again }: { title: string; classNam
 
 /** The site's own time picker for `path`. `className` sizes the box.
     `v3`: the JG V3 stepper. */
-export function CalEmbed({ path, title, className, v3 }: { path: string; title: string; className?: string; v3?: V3Book }) {
+export function BookTimes({ path, title, className, v3 }: { path: string; title: string; className?: string; v3?: V3Book }) {
   // Try again mounts a fresh picker, which asks for the times anew.
   const [tries, setTries] = React.useState(0);
   // The picker reads the visitor's zone and clock: it mounts on the client only.

@@ -1,6 +1,5 @@
 /* ── when Julian can be booked, for the site's own engine ──────────
- * Copied from Cal.com on 2026-11-03 (its public event types and the
- * slots it offered): Wednesday to Sunday from 10 AM Pacific, nothing
+ * Wednesday to Sunday from 10 AM Pacific, nothing
  * Monday or Tuesday. Julian (2026-11-04): the last start is 7 PM. These are the defaults: Julian changes the week and
  * single dates from the lead desk (Hours), kept in the booking lock.
  * Client-safe: no server imports.
@@ -59,7 +58,7 @@ export type Rule = {
   after: number;
   /** Minutes kept free before it, after whatever is already booked. */
   before?: number;
-  /** Minutes between offered starts; the length when unset, as Cal.com does. */
+  /** Minutes between offered starts; the length when unset. */
   interval?: number;
   /** How many days ahead may be booked; unset, the picker's own reach. */
   ahead?: number;
@@ -71,7 +70,7 @@ export type Rule = {
 const SHOOT = { notice: 2880, before: 60, after: 60, ahead: 180 };
 const CALL = { length: 15, after: 0, interval: 30, call: true };
 
-/** Every bookable event, by its Cal.com slug. */
+/** Every bookable event, by its slug: the part after the slash in a session's `cal` ("juliangigola/portraits"). */
 export const EVENTS: Record<string, Rule> = {
   portraits: { title: "Portraits", length: 60, ...SHOOT },
   headshots: { title: "Headshots", length: 30, ...SHOOT },

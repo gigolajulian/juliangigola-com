@@ -11,7 +11,7 @@ import { useNextOpen } from "./next-open";
 
 /* Book online: four sessions, one line each. A row is picked by hover (fine
    pointers), focus or tap, and the photo follows it. Booking finishes here:
-   the list gives way to the LIVE flow (`V3BookFlow`: its own picker, Cal.com
+   the list gives way to the LIVE flow (`V3BookFlow`: its own picker, the site's
    events, Stripe deposit and copy, untouched) and the photo stays. */
 const fine = () => matchMedia("(hover: hover) and (pointer: fine)").matches;
 
