@@ -28,7 +28,7 @@ export function PrivacyColumn() {
       id="privacy"
       title="Privacy Policy"
       label="Privacy"
-      effective="2026-10-14"
+      effective="2026-11-16"
     >
       <Clause title="What is collected, and when">
         <p>
@@ -44,6 +44,27 @@ export function PrivacyColumn() {
           note is kept in your browser for that tab only and leaves it only with
           an inquiry you send. That is the complete list. Your IP address is not
           stored with your inquiry.
+        </p>
+        <p>
+          <strong>If you book a session or a call.</strong> The booking card
+          collects your name, your email address, the session and the time you
+          picked, your time zone, and what you choose to add: a phone number,
+          the address for the shoot, and a note. The Site records when the
+          booking was made and keeps it so I can confirm it, remind you, and let
+          you move or cancel it from the link in your confirmation email.
+        </p>
+        <p>
+          <strong>If you pay a deposit or a balance.</strong> Payment is taken
+          by Stripe. Your card or bank details go from your browser straight to
+          Stripe; the Site never sees or stores them. The Site keeps the amount,
+          the date, Stripe&rsquo;s reference for the payment, and whether it was
+          refunded.
+        </p>
+        <p>
+          <strong>If you sign a contract online.</strong> The Site keeps the
+          text you signed, the name you typed, your email address, the date and
+          time, your IP address and your browser type, as the record of the
+          signature.
         </p>
         <p>
           <strong>If you email me directly.</strong> Your address and whatever
@@ -67,8 +88,8 @@ export function PrivacyColumn() {
           <code>theme</code>. It never leaves your device.
         </p>
         <p>
-          <strong>What is not collected.</strong> No account, no payment
-          details, no location request, no fingerprint, and nothing bought from
+          <strong>What is not collected.</strong> No account, no card or
+          bank numbers, no location request, no fingerprint, and nothing bought from
           or matched against a third party.
         </p>
       </Clause>
@@ -125,6 +146,11 @@ export function PrivacyColumn() {
           needed to tell one connection from another.
         </p>
         <p>
+          When you reach the payment step, Stripe&rsquo;s payment form loads
+          from Stripe and may set its own cookies to prevent fraud. Nothing from
+          Stripe loads before that step.
+        </p>
+        <p>
           <strong>There is no third-party analytics on the Site.</strong> No tag
           manager, no pixel, no advertising or third-party beacon. What I see is
           the aggregate traffic Cloudflare counts from
@@ -174,15 +200,30 @@ export function PrivacyColumn() {
         <ul>
           <li>
             <strong>Cloudflare, Inc.</strong> (San&nbsp;Francisco, USA): hosts and
-            delivers the Site, stores inquiries in its key-value storage,
-            derives the country code, and sends the email copy of each inquiry
-            to my mailbox. Cloudflare runs a global network and your request is
+            delivers the Site, stores inquiries, bookings and signed contracts,
+            derives the country code, sends the email copy of each inquiry to my
+            mailbox, and sends the confirmation and reminder emails for a
+            booking. Cloudflare runs a global network and your request is
             handled at the location nearest you.
           </li>
           <li>
-            <strong>Google LLC</strong> (Google Workspace): my email service. A
-            copy of each inquiry is delivered to my mailbox there, and any email
-            you send me is stored there.
+            <strong>Google LLC</strong> (Google Workspace): my email, calendar
+            and files. A copy of each inquiry is delivered to my mailbox there,
+            any email you send me is stored there, each booking is an event on
+            my calendar, and a list of clients and bookings is kept in a
+            spreadsheet on my Drive.
+          </li>
+          <li>
+            <strong>Stripe, Inc.</strong> (San&nbsp;Francisco, USA): takes
+            deposits and other payments. It receives your card or bank details
+            directly, along with your name, email address and the details of the
+            booking the payment is for, and sends your receipt. Stripe also uses
+            that information to prevent fraud, under its own privacy policy.
+          </li>
+          <li>
+            <strong>Notion Labs, Inc.</strong>: my project board. Each inquiry
+            and booking is copied there with your name, email address, the kind
+            of shoot, your message and the date.
           </li>
           <li>
             <strong>GitHub, Inc.</strong>: hosts the code and the published
@@ -233,11 +274,20 @@ export function PrivacyColumn() {
       <Clause title="How long it is kept">
         <ul>
           <li>
-            <strong>Inquiries</strong> stay in the Site&rsquo;s inbox until I
-            have read and answered them, and are then deleted. The email copy in
+            <strong>Inquiries and bookings</strong> are kept in the Site&rsquo;s
+            client records for as long as we are in contact or working together,
+            and afterwards for as long as the record of commissioned work must
+            be kept, generally seven years. Ask me to delete yours sooner and I
+            will, unless the law obliges me to keep it. The email copy in
             my mailbox is kept as long as ordinary business correspondence, and
             longer where it forms part of the record of commissioned work that
             tax and accounting rules oblige me to keep, generally seven years.
+          </li>
+          <li>
+            <strong>Payment records</strong> are kept by Stripe for the periods
+            its own obligations set, and by me for seven years for tax and
+            accounting. <strong>Signed contracts</strong> are kept for the life
+            of the contract and seven years after.
           </li>
           <li>
             <strong>The cooldown hash</strong> deletes itself five minutes after
@@ -263,7 +313,8 @@ export function PrivacyColumn() {
       <Clause title="Security">
         <p>
           The Site is served only over HTTPS, with strict transport security and
-          a content security policy. Inquiries are held in encrypted storage
+          a content security policy. Inquiries, bookings and contracts are held
+          in encrypted storage
           that only the Site&rsquo;s own code and I can read, behind a
           credential that is not shared. The form has a hidden field that
           catches automated submissions, a per-sender cooldown, and a daily
