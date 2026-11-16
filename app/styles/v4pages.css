@@ -2,6 +2,8 @@
    Everything here is off without the flag: the new markup is hidden, the old pages are untouched. */
 .v3 .sv-bar,.v3 .btn.v4-m2p,.v3 .pj-bts,.v3 .pj-cr2{display:none}
 .v3 .lg-row{display:contents}
+.v3 .ab-logos .a2-on,[data-v4pages~="a2"] .v3 .ab-logos .a2-off{display:none}
+[data-v4pages~="a2"] .v3 .ab-logos .a2-on{display:inline}
 
 /* s1: the phone book bar on a service page (components/v3/service-bar.tsx). V4's .mt-bar. */
 @media not ((min-width:1024px) and (min-height:600px)){

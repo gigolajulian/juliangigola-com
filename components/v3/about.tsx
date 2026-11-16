@@ -47,7 +47,8 @@ export function V3About() {
           </div>
         </div>
         <section className="ab-logos">
-          <h2 className="lbl mute">Worked with</h2>
+          {/* ?v4pages=a2 swaps the label (Julian, 2026-11-15); v4pages.css shows one of the two. */}
+          <h2 className="lbl mute"><span className="a2-off">Worked with</span><span className="a2-on">Commissioned and published by</span></h2>
           <LogoBand>
             <Marks cell />
           </LogoBand>
