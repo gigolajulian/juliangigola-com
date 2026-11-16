@@ -5,6 +5,8 @@
  * (`lib/cover-art-match.ts`). A release already in the file keeps its Apple track id and only has
  * its preview URL refreshed, so a hand-pinned id is never searched again. To pin one, add
  * `"<slug>": { "id": <Apple track id> }` to the file and run this.
+ * Only on SoundCloud: add `"<slug>": { "soundcloud": "<track url>" }` by hand. It plays through SoundCloud's player,
+ * and only when the release has no Apple preview and no clip of Julian's.
  * Julian's own clip: drop `public/covers/sound/<slug>.m4a` (or .mp3) and run this. It is used when
  * Apple has no match.
  *
@@ -77,8 +79,10 @@ for (const release of COVER_RELEASES) {
     got = old[slug]?.preview ? { id: old[slug].id, preview: old[slug].preview, link: old[slug].link } : null;
     note = String(e.message);
   }
-  if (got || file) out[slug] = { ...got, ...(file ? { clip: file } : {}) };
-  report.push(`${got?.preview ? "matched  " : file ? "clip     " : note.startsWith("confirm") ? "confirm  " : "unmatched"} | ${release.title} | ${release.artist}${got?.id ? ` | ${got.id}` : ""}${note ? ` | ${note}` : ""}`);
+  // A SoundCloud link is put in by hand and kept: `"<slug>": { "soundcloud": "<track url>" }`.
+  const sc = old[slug]?.soundcloud;
+  if (got || file || sc) out[slug] = { ...got, ...(file ? { clip: file } : {}), ...(sc ? { soundcloud: sc } : {}) };
+  report.push(`${got?.preview ? "matched  " : file ? "clip     " : sc ? "soundcloud" : note.startsWith("confirm") ? "confirm  " : "unmatched"} | ${release.title} | ${release.artist}${got?.id ? ` | ${got.id}` : ""}${note ? ` | ${note}` : ""}`);
 }
 writeFileSync(OUT, JSON.stringify(out, null, 2) + "\n", "utf8");
 console.log(report.join("\n"));

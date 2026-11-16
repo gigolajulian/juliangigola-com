@@ -106,6 +106,7 @@ html[data-v4pages~="c1"] .cv4 .mt-sleeve .disc{display:none}
 .cv4s :is(button,a){font:inherit;letter-spacing:inherit;text-transform:inherit;background:none;border:0;padding:6px 0;cursor:pointer}
 .cv4s a{padding:0}
 .cv4s a img{display:block;height:18px;width:auto}
+.cv4s a.sc img{height:12px}
 /* No ground under the line: each part takes white or black from what is under it (`data-ink`, set by the header's
    `inkWord`), and Apple's mark swaps between its own white and black files. Before the first look: the theme's. */
 .cv4s>*{color:var(--nav-ink,var(--foreground));transition:color .2s ease}
