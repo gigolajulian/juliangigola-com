@@ -13,7 +13,7 @@ import { useLocalTime } from "./mt/foot";
    desktop the page's last block sinks and dims while this slides over it.
    Styles: app/styles/v4pages.css. */
 /* Julian's lines (2026-11-15). A project page takes one by its slug, so it reads the same on every visit; every other page says the first. */
-const PHRASES = ["Book me", "Shoot with me", "You're next", "Work with me", "Book a shoot", "Bring me your idea", "Book your next shoot", "Book a session with me", "Make something with me"];
+const PHRASES = ["Book me", "Shoot with me", "You're next", "Work with me", "Book a shoot", "Bring me your idea", "Book your next shoot", "Book a session with me", "Make something with me", "Plan a shoot with me", "Your idea, on camera"];
 const phraseFor = (path: string) => {
   const slug = path.match(/^\/portfolio\/([^/]+)$/)?.[1];
   if (!slug || slug === "video") return PHRASES[0];
