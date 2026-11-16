@@ -2,10 +2,7 @@
 
 import * as React from "react";
 import { Orb } from "@/components/orb";
-import {
-  CONTENT_PATH,
-  type SiteContent,
-} from "@/lib/content";
+import { type SiteContent } from "@/lib/content";
 import { AdminNewProject } from "@/components/admin/admin-new-project";
 import { AdminProjects, type AdminProject } from "@/components/admin/admin-projects";
 import { AdminSitemap, type SitemapTarget } from "@/components/admin/admin-sitemap";
@@ -18,28 +15,14 @@ import { AdminInbox, unreadCount } from "@/components/admin/admin-inbox";
 import { AdminTraffic } from "@/components/admin/admin-traffic";
 import { AdminSeo } from "@/components/admin/admin-seo";
 import { AdminVideos } from "@/components/admin/admin-videos";
+import { loadRepo, publishDraft, type Draft, type Status } from "@/lib/admin/publish";
 import { ClientFields, ContactFields, CoverArtFields, HomeFields, inputClass, QuoteFields, SessionFields } from "@/components/admin/admin-fields";
-import { isTextRef, type FrameRef, type TrashedProject } from "@/lib/added";
-import { ADDED_PATH } from "@/lib/added";
+import { isTextRef, type TrashedProject } from "@/lib/added";
 import { type PendingUpload } from "@/components/admin/admin-frames";
 import { CreditDesk, creditBook } from "@/components/admin/admin-credits";
-import {
-  adoptable,
-  projectsFile,
-  same,
-  withOverride,
-  type Manifest,
-  type ProjectsFile,
-} from "@/lib/admin/admin-payload";
-import {
-  commitFiles,
-  readFile,
-  type CommitFile,
-  TOKEN_STORE,
-  REPO,
-  GITHUB_API,
-} from "@/lib/admin/admin-github";
-import type { Bts, Copy, Credit } from "@/lib/work-types";
+import { same, withOverride } from "@/lib/admin/admin-payload";
+import { TOKEN_STORE, REPO } from "@/lib/admin/admin-github";
+import type { Bts } from "@/lib/work-types";
 import { byCodeUnit, cn } from "@/lib/utils";
 
 /* ── the editor ───────────────────────────────────────────────────
@@ -149,21 +132,6 @@ const FIELD_TAB: Record<string, View> = {
   testimonials: "testimonials",
 };
 
-const fromBase64 = (b64: string): string => {
-  // The contents API wraps its base64 at 60 characters.
-  const binary = atob(b64.replace(/\s/g, ""));
-  const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
-  return new TextDecoder().decode(bytes);
-};
-
-/**
- * The manifest half of the draft, as the editor holds it.
- *
- * `Manifest` in `lib/admin/admin-payload.ts` is loose about what a frame and a
- * credit are — that module deliberately knows only that a sequence is a list,
- * which is what lets the check script run it. Here they are the real things.
- */
-type Draft = Manifest<FrameRef, Credit, Copy, Bts>;
 /** The per-project overrides a build applies, one map per kind. */
 export type Overrides = Pick<Draft, "categories" | "frames" | "credits" | "copy" | "slugs">;
 
@@ -205,20 +173,6 @@ function remapSlugs(draft: Draft, slugs: Record<string, string>): Draft {
     order: moveList(draft.order),
   };
 }
-
-type Status =
-  | { kind: "idle" }
-  /**
-   * `done`/`total` where the work is countable, absent where it is not.
-   *
-   * Committing is measurable — the editor knows how many files it is sending.
-   * Reading the repo first, and waiting for Cloudflare afterwards, are not:
-   * neither can be asked how far along it is, and inventing a proportion for
-   * them would be a lie shaped exactly like the truth.
-   */
-  | { kind: "working"; message: string; done?: number; total?: number }
-  | { kind: "error"; message: string }
-  | { kind: "saved"; message: string };
 
 export function AdminEditor({
   initial,
@@ -782,13 +736,6 @@ export function AdminEditor({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const headers = (t: string) => ({
-    Authorization: `Bearer ${t}`,
-    Accept: "application/vnd.github+json",
-    "X-GitHub-Api-Version": "2022-11-28",
-  });
-
-  /** Reads the file as it is in the repo right now, and proves the token works. */
   /* A drop in the sitemap: put `from` where `to` is, in the running order.
      The same arithmetic the Disciplines tab does, on the same list — the
      projects as currently displayed, since `order` may name only some of
@@ -806,253 +753,68 @@ export function AdminEditor({
 
   async function load(t: string) {
     setStatus({ kind: "working", message: "Reading the current content…" });
-    try {
-      const res = await fetch(
-        `${GITHUB_API}/repos/${REPO.owner}/${REPO.repo}/contents/${CONTENT_PATH}?ref=${REPO.branch}`,
-        { headers: headers(t), cache: "no-store" },
-      );
-      const body = await res.json();
-      if (!res.ok) {
-        // A rejected token is not worth keeping — otherwise every visit
-        // retries it and the page looks broken rather than logged out.
-        if (res.status === 401) window.localStorage.removeItem(TOKEN_STORE);
-        setStatus({
-          kind: "error",
-          message:
-            res.status === 401
-              ? "GitHub rejected that token. It has probably expired. Make a new one and paste it in."
-              : res.status === 404
-                ? "Token is valid but cannot see this repo's contents. It needs Contents: read and write on juliangigola-com."
-                : `GitHub said ${res.status}: ${body?.message ?? "unknown error"}`,
-        });
-        return;
-      }
-
-      setSha(body.sha);
-      // The repo is the truth, not the build this page shipped with: someone
-      // may have published since, and editing the stale copy would revert it.
-      const content = JSON.parse(fromBase64(body.content)) as SiteContent;
-      setDraft(content);
-
-      /* The project list, from the repo as well.
-       *
-       * Only `site.json` was read here, and the other half of the draft —
-       * hiding, filing, sequences, credits, the running order, the discipline
-       * covers — stayed on whatever the build that served this page was made
-       * with. Two consequences, both of which Julian hit. The marker called
-       * the gap an unpublished edit, so a page loaded inside the couple of
-       * minutes a deploy takes said UNPUBLISHED about work that was already
-       * committed. And publishing from that page wrote the stale list back
-       * over the fresh one, quietly undoing the previous publish.
-       *
-       * Read with the same call `publish` uses, and only adopted when there
-       * is nothing to lose: an untouched page is being brought up to date,
-       * whereas a page with edits on it asked to reconnect would be having
-       * them thrown away. */
-      const manifestJson = await readFile(t, ADDED_PATH);
-      const repo = manifestJson
-        ? adoptable(JSON.parse(manifestJson) as ProjectsFile, baseline.manifest)
-        : baseline.manifest;
-
-      if (!dirty) {
-        setHidden(new Set(repo.hidden));
-        setUnlisted(new Set(repo.unlisted));
-        setOverrides({ categories: repo.categories, frames: repo.frames, credits: repo.credits, copy: repo.copy, slugs: repo.slugs });
-        setOrder(repo.order);
-        setCovers(repo.covers);
-        setAvatars(repo.avatars);
-        setBts(repo.bts);
-        setBaseline({ content, manifest: repo });
-      } else {
-        // The edits stay, and so does the baseline they are measured against
-        // for the project list — only the content half moves.
-        setBaseline((b) => ({ ...b, content }));
-      }
-
-      setToken(t);
-      window.localStorage.setItem(TOKEN_STORE, t);
-      setStatus({ kind: "idle" });
-    } catch (e) {
-      setStatus({
-        kind: "error",
-        message: `Could not reach GitHub: ${String(e)}`,
-      });
+    const r = await loadRepo(t, baseline.manifest);
+    if ("error" in r) return setStatus({ kind: "error", message: r.error });
+    setSha(r.sha);
+    setDraft(r.content);
+    if (!dirty) {
+      const repo = r.repo;
+      setHidden(new Set(repo.hidden));
+      setUnlisted(new Set(repo.unlisted));
+      setOverrides({ categories: repo.categories, frames: repo.frames, credits: repo.credits, copy: repo.copy, slugs: repo.slugs });
+      setOrder(repo.order);
+      setCovers(repo.covers);
+      setAvatars(repo.avatars);
+      setBts(repo.bts);
+      setBaseline({ content: r.content, manifest: repo });
+    } else {
+      // The edits stay, and so does the baseline they are measured against
+      // for the project list: only the content half moves.
+      setBaseline((b) => ({ ...b, content: r.content }));
     }
+    setToken(t);
+    window.localStorage.setItem(TOKEN_STORE, t);
+    setStatus({ kind: "idle" });
   }
 
-  /**
-   * Commits the draft — the content, and the hide list if it moved.
-   *
-   * Both files in one commit, through the Git Data API rather than two
-   * Contents-API writes. Hiding a project lives in `projects.json` while
-   * everything else lives in `site.json`, and as two commits there is a build
-   * in between serving a half-applied draft: the project taken down but still
-   * featured on the homepage, or the reverse.
-   *
-   * The staleness check that the Contents API gave for free is kept by hand —
-   * the blob SHA is re-read first, and a publish is refused if the file moved
-   * since this page loaded rather than overwriting whatever arrived.
-   */
+  /** Commits the draft through `publishDraft`, then takes what was written as the baseline. */
   async function publish() {
     if (!sha) return;
-    setStatus({ kind: "working", message: "Checking for newer content…" });
-    try {
-      const check = await fetch(
-        `${GITHUB_API}/repos/${REPO.owner}/${REPO.repo}/contents/${CONTENT_PATH}?ref=${REPO.branch}`,
-        { headers: headers(token), cache: "no-store" },
-      );
-      const checkBody = await check.json();
-      if (!check.ok) {
-        setStatus({
-          kind: "error",
-          message: `GitHub said ${check.status}: ${checkBody?.message ?? "unknown error"}`,
-        });
-        return;
-      }
-      if (checkBody.sha !== sha) {
-        setStatus({
-          kind: "error",
-          message:
-            "The content changed in the repo since this page loaded. Reload to pick up the new version, then redo the edit.",
-        });
-        return;
-      }
+    const r = await publishDraft({
+      token,
+      sha,
+      draft,
+      manifest,
+      manifestMoved,
+      baseline: baseline.manifest,
+      reframed,
+      bts,
+      uploads,
+      onStatus: setStatus,
+    });
+    if ("error" in r) return setStatus({ kind: "error", message: r.error });
+    const { written } = r;
+    setSha(r.sha);
 
-      /* The manifest as committed, filled in only if one is written. Left
-         as the current baseline otherwise, because a content-only publish
-         does not touch the project list. */
-      let written: Draft = baseline.manifest;
+    /* The repo now matches the draft, so this is the baseline. Without
+       this the marker stayed on UNPUBLISHED after a successful publish,
+       still comparing against the build that served the page, which the
+       publish cannot have changed and which is minutes behind. */
+    setBaseline({ content: draft, manifest: written });
+    /* And the draft takes back what was actually written, so the tidying
+       is visible rather than hiding behind a diff that will not clear. */
+    setOverrides((o) => ({ ...o, frames: written.frames, credits: written.credits, copy: written.copy, slugs: written.slugs }));
+    setBts(written.bts);
 
-      const files: CommitFile[] = [
-        {
-          path: CONTENT_PATH,
-          content: `${JSON.stringify(draft, null, 2)}\n`,
-          encoding: "utf-8" as const,
-        },
-      ];
-
-      if (manifestMoved) {
-        setStatus({ kind: "working", message: "Reading the project list…" });
-        // Read fresh: a project may have been added or deleted since this page
-        // loaded, and writing back a stale list would undo it.
-        const current = await readFile(token, ADDED_PATH);
-
-        /* And the same refusal `site.json` gets above, for the half of the
-           draft that lives here.
-         *
-         * Reading fresh is not enough on its own: `projectsFile` writes this
-         * page's whole manifest over whatever it read, so a key this page has
-         * never heard of is a key it deletes. That is not hypothetical —
-         * `f807362` erased the credits on I WANNA BE A HUMAN and DECOY,
-         * committed by hand two commits before, because this page had been
-         * open since before them.
-         *
-         * `connect` already adopts the repo when the page is clean; a page
-         * with edits on it cannot, because adopting would throw them away.
-         * So it refuses instead. One reload costs a minute. The other way
-         * costs work, silently, and nobody finds out until they look at a
-         * page that used to name three people. */
-        const live = current
-          ? adoptable(JSON.parse(current) as ProjectsFile, baseline.manifest)
-          : baseline.manifest;
-        if (!same(live, baseline.manifest)) {
-          setStatus({
-            kind: "error",
-            message:
-              "The project list changed in the repo since this page loaded, so publishing now would undo it. Reload /admin and make the edit again.",
-          });
-          return;
-        }
-        // Built by `lib/admin/admin-payload.ts`, covered by
-        // `scripts/check-payload.mjs`. That is the one part of publishing
-        // testable without a token, and the part where a dropped field
-        // publishes as "you never made that edit".
-        const parsed = projectsFile(
-          current ? (JSON.parse(current) as ProjectsFile) : null,
-          manifest,
-        );
-        // What the repo will hold, which is not quite what was asked for:
-        // `projectsFile` drops blank passages and empty sequences. Kept, so
-        // the baseline below is what was actually written rather than what
-        // was sent — otherwise a tidied-away passage reads as an edit still
-        // waiting to publish, for ever.
-        written = adoptable(parsed, manifest);
-        files.push({
-          path: ADDED_PATH,
-          content: `${JSON.stringify(parsed, null, 2)}\n`,
-          encoding: "utf-8" as const,
-        });
-      }
-
-      // The photographs the sequences refer to, in the same commit as the
-      // sequences. Only the ones still in a gallery: staging a frame and then
-      // taking it out again should not leave the file in the repository.
-      const referenced = new Set(
-        [...Object.values(reframed), ...Object.values(bts).map((b) => b.frames)]
-          .flat()
-          // A passage names no file, so it contributes nothing here.
-          .flatMap((f) =>
-            isTextRef(f) ? [] : [`public${typeof f === "string" ? f : f.src}`],
-          ),
-      );
-      for (const [path, upload] of Object.entries(uploads)) {
-        if (!referenced.has(path)) continue;
-        files.push({ path, content: upload.base64, encoding: "base64" });
-      }
-
-      setStatus({ kind: "working", message: "Committing…" });
-      await commitFiles({
-        token,
-        message: manifestMoved
-          ? "Update site content and projects from /admin"
-          : "Update site content from /admin",
-        files,
-        onProgress: (done, total) =>
-          setStatus({
-            kind: "working",
-            message: `Uploading ${done} of ${total}`,
-            done,
-            total,
-          }),
-      });
-
-      // Re-read so a second publish in the same session compares against what
-      // is now in the repo rather than against the SHA we just replaced.
-      const after = await fetch(
-        `${GITHUB_API}/repos/${REPO.owner}/${REPO.repo}/contents/${CONTENT_PATH}?ref=${REPO.branch}`,
-        { headers: headers(token), cache: "no-store" },
-      );
-      setSha((await after.json())?.sha ?? null);
-
-      /* The repo now matches the draft, so this is the baseline. Without
-         this the marker stayed on UNPUBLISHED after a successful publish —
-         still comparing against the build that served the page, which the
-         publish cannot have changed and which is minutes behind. */
-      setBaseline({ content: draft, manifest: written });
-      /* And the draft takes back what was actually written, so the tidying
-         above is visible rather than hiding behind a diff that will not
-         clear. */
-      setOverrides((o) => ({ ...o, frames: written.frames, credits: written.credits, copy: written.copy, slugs: written.slugs }));
-      setBts(written.bts);
-
-      // A fresh publish is not live yet by definition, whatever the last one
-      // was — so the green is dropped before the wait begins.
-      setCommitted(true);
-      setAwaitingDeploy(built.current !== null);
-      setStatus({
-        kind: "saved",
-        message:
-          "Committed. The site rebuilds and goes live in a couple of minutes.",
-      });
-    } catch (e) {
-      setStatus({
-        kind: "error",
-        message:
-          e instanceof Error
-            ? e.message
-            : `Could not reach GitHub: ${String(e)}`,
-      });
-    }
+    // A fresh publish is not live yet by definition, whatever the last one
+    // was, so the green is dropped before the wait begins.
+    setCommitted(true);
+    setAwaitingDeploy(built.current !== null);
+    setStatus({
+      kind: "saved",
+      message:
+        "Committed. The site rebuilds and goes live in a couple of minutes.",
+    });
   }
 
   const set = <K extends keyof SiteContent>(key: K, value: SiteContent[K]) =>
