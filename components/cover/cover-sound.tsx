@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { inkGround, inkWord } from "@/components/v3/nav-ink";
 import SOUND from "@/lib/cover-art-sound.json";
 
 /* The song on the cover (inner pages plan, `snd`, only with `?v4pages=c1,snd`): one clip at a time through one
@@ -87,8 +88,33 @@ export const useSound = () => React.useSyncExternalStore(sub, () => now, () => "
 export function CoverSound({ className }: { className?: string }) {
   const off = React.useSyncExternalStore(sub, muted, () => false);
   const clip = clips[useSound()];
+  /* No ground under the line (Julian, 2026-11-16): each part is white or black from what shows under it, by the
+     header's own measure (`inkWord`, components/v3/nav-ink.ts). Looked at again on scroll and resize, and twice a
+     second, as the header does, since a cover lifts under it with no scroll. */
+  const line = React.useRef<HTMLDivElement>(null);
+  React.useEffect(() => {
+    const el = line.current;
+    if (!el) return;
+    let raf = 0;
+    const paint = () => {
+      raf = 0;
+      const page = inkGround(getComputedStyle(document.body).backgroundColor);
+      for (const word of el.children) inkWord(word as HTMLElement, el, page);
+    };
+    const ask = () => void (raf ||= requestAnimationFrame(paint));
+    const ac = new AbortController();
+    addEventListener("scroll", ask, { passive: true, signal: ac.signal });
+    addEventListener("resize", ask, { signal: ac.signal });
+    const again = window.setInterval(() => document.hidden || ask(), 500);
+    paint();
+    return () => {
+      ac.abort();
+      clearInterval(again);
+      cancelAnimationFrame(raf);
+    };
+  }, [clip]);
   return (
-    <div className={className ? `cv4s ${className}` : "cv4s"}>
+    <div ref={line} className={className ? `cv4s ${className}` : "cv4s"}>
       <button
         type="button"
         aria-pressed={!off}

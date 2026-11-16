@@ -103,16 +103,20 @@ html[data-v4pages~="c1"] .cv4 .mt-sleeve .disc{display:none}
    previews the link to the song and the credit its terms ask for. One sits at the foot of the window over the grid,
    one on the viewer's floor. */
 .cv4s{display:flex;flex-wrap:wrap;align-items:center;gap:6px 20px;font:400 11px/1.4 var(--font-mono),ui-monospace,monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--muted-foreground)}
-.cv4s :is(button,a){font:inherit;letter-spacing:inherit;text-transform:inherit;color:var(--foreground);background:none;border:0;padding:6px 0;cursor:pointer}
+.cv4s :is(button,a){font:inherit;letter-spacing:inherit;text-transform:inherit;background:none;border:0;padding:6px 0;cursor:pointer}
 .cv4s a{padding:0}
 .cv4s a img{display:block;height:18px;width:auto}
-.cv4s .am-b,html[data-theme="light"] .cv4s .am-w{display:none}
-html[data-theme="light"] .cv4s .am-b{display:block}
+/* No ground under the line: each part takes white or black from what is under it (`data-ink`, set by the header's
+   `inkWord`), and Apple's mark swaps between its own white and black files. Before the first look: the theme's. */
+.cv4s>*{color:var(--nav-ink,var(--foreground));transition:color .2s ease}
+.cv4s>span{opacity:.7}
+.cv4s .am-b,html[data-theme="light"] .cv4s a:not([data-ink]) .am-w,.cv4s a[data-ink="b"] .am-w{display:none}
+html[data-theme="light"] .cv4s a:not([data-ink]) .am-b,.cv4s a[data-ink="b"] .am-b{display:block}
 /* The line sits on the right of the screen, on / off outermost (Julian, 2026-11-16): reversed, so the button is
    still first for the keyboard. */
 .cv4s{flex-direction:row-reverse}
 .cv4s :is(button,a):focus-visible{outline:1px solid currentColor;outline-offset:3px}
-.cv4s.cv4sf{position:fixed;right:0;bottom:0;z-index:20;padding:6px 24px;background:var(--background)}
+.cv4s.cv4sf{position:fixed;right:0;bottom:0;z-index:20;padding:6px 24px}
 html[data-v4pages~="c1"] .cv4a{padding:24px var(--gr) 96px var(--g);margin-top:24px}
 html[data-v4pages~="c1"] .cv4a .pj-ask{border-top:1px solid var(--line)}
 html[data-v4pages~="c1"] .cv4a .cv4b{display:flex;flex-wrap:wrap;gap:12px}

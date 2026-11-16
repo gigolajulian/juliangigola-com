@@ -99,6 +99,34 @@ function under(x: number, y: number, hdr: HTMLElement, page: RGB): RGB {
 
 const WORDS = ".site-wm,.links a,.tbtn,.menu-btn,.hslot";
 
+/** The page colour for `inkWord`, from any CSS colour (a token's value). */
+export const inkGround = (css: string): RGB => colour(css)[0];
+
+/** White or black for one word, whichever reads better over what shows under it: `data-ink` ("w" / "b") and
+    `--nav-ink` are set on it. `skip` is what holds the word (the bar), `page` what shows where nothing is painted,
+    `veiled` the bar's own veil on top. Also used by words that sit on the page with no ground of their own
+    (Cover art's sound line, components/cover/cover-sound.tsx). */
+export function inkWord(el: HTMLElement, skip: HTMLElement, page: RGB, veiled = false) {
+  const r = el.getBoundingClientRect();
+  if (!r.width || r.bottom < 0) return;
+  const y = r.top + r.height / 2;
+  // Five points along the word, and the middle one by brightness: the ink suits most of the word, so a
+  // few pixels hanging over a gutter or a photo's edge do not decide it.
+  const ls = [0.1, 0.3, 0.5, 0.7, 0.9].map((t) => {
+    let c = under(r.left + r.width * t, y, skip, page);
+    if (veiled) c = [0, 1, 2].map((i) => c[i] * (1 - VEIL) + page[i] * VEIL) as RGB;
+    return lum(c);
+  }).sort((a, b) => a - b);
+  const white = 1.05 / (ls[2] + 0.05), black = (ls[2] + 0.05) / 0.05;
+  const was = el.dataset.ink;
+  // Keep the ink it has unless the other one is clearly better, so a word does not flicker on a busy photo.
+  const ink = was === "w" && white * 1.25 >= black ? "w" : was === "b" && black * 1.25 >= white ? "b" : white >= black ? "w" : "b";
+  if (ink !== was) {
+    el.dataset.ink = ink;
+    el.style.setProperty("--nav-ink", ink === "w" ? "#fff" : "#000");
+  }
+}
+
 export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string) {
   React.useEffect(() => {
     const bar = hdr.current, root = document.documentElement;
@@ -129,26 +157,7 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
       root.toggleAttribute("data-navdark", lum(rootBg) > 0.2 && lum(secBg) < 0.2);
       const [page] = colour(getComputedStyle(bar).getPropertyValue("--bg").trim());
       const veiled = !isTop && !root.hasAttribute("data-tuck");
-      for (const el of bar.querySelectorAll<HTMLElement>(WORDS)) {
-        const r = el.getBoundingClientRect();
-        if (!r.width || r.bottom < 0) continue;
-        const y = r.top + r.height / 2;
-        // Five points along the word, and the middle one by brightness: the ink suits most of the word, so a
-        // few pixels hanging over a gutter or a photo's edge do not decide it.
-        const ls = [0.1, 0.3, 0.5, 0.7, 0.9].map((t) => {
-          let c = under(r.left + r.width * t, y, bar, page);
-          if (veiled) c = [0, 1, 2].map((i) => c[i] * (1 - VEIL) + page[i] * VEIL) as RGB;
-          return lum(c);
-        }).sort((a, b) => a - b);
-        const white = 1.05 / (ls[2] + 0.05), black = (ls[2] + 0.05) / 0.05;
-        const was = el.dataset.ink;
-        // Keep the ink it has unless the other one is clearly better, so a word does not flicker on a busy photo.
-        const ink = was === "w" && white * 1.25 >= black ? "w" : was === "b" && black * 1.25 >= white ? "b" : white >= black ? "w" : "b";
-        if (ink !== was) {
-          el.dataset.ink = ink;
-          el.style.setProperty("--nav-ink", ink === "w" ? "#fff" : "#000");
-        }
-      }
+      for (const el of bar.querySelectorAll<HTMLElement>(WORDS)) inkWord(el, bar, page, veiled);
     };
     /* Words and buttons under the bar. An observer on the band at the top of the window names the few that are in
        it; only those are measured, and each gets a mask cut along a line just under the bar. It follows anything
