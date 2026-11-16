@@ -145,6 +145,12 @@ const pageRedirects = [
   { source: "/privacy", destination: "/legal#privacy", permanent: true },
 ];
 
+/** The old category addresses in one hop (they were two: to `/portfolio/<slug>`, then on): each goes
+    straight to where `/portfolio/<slug>` is itself sent. A slug that is a page of its own keeps the rule below. */
+const categoryPathRedirects = [...pageRedirects, ...disciplineRedirects]
+  .filter((r) => /^\/portfolio\/[a-z0-9-]+$/.test(r.source))
+  .flatMap((r) => ["/portfolio/category/", "/work/category/"].map((pre) => ({ ...r, source: pre + r.source.slice("/portfolio/".length) })));
+
 /**
  * Security headers.
  *
@@ -483,6 +489,7 @@ const nextConfig: NextConfig = {
       ...renameRedirects,
       ...categoryRedirects,
       ...projectRedirects,
+      ...categoryPathRedirects,
       ...workRedirects,
       ...disciplineRedirects,
     ].filter(

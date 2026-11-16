@@ -25,7 +25,8 @@ import { getProject, projectsIn } from "../work";
 import type { BookingSlug } from "./booking-slugs";
 import type { Frame } from "../work-types";
 
-export type Faq = { q: string; a: string };
+/** `link`: words of the answer that are a link on the page (`label` is found in `a`); the answer itself stays plain text. */
+export type Faq = { q: string; a: string; link?: { href: string; label: string } };
 export type Block = { heading: string; items?: string[]; body?: string };
 export type Tile = { frame: Frame; href: string; caption: string };
 /** A place on the Where screen: its name and what working there means. */
@@ -371,7 +372,7 @@ export const BOOKING_PAGES: BookingPage[] = [
       },
       {
         q: "Do you shoot portfolio tests too?",
-        a: "Yes. A styled test is a different shoot from digitals. Book one with the $100 deposit and I quote on the call.",
+        a: "Yes. A styled test is a different shoot from digitals. Book it with the $100 deposit. I send the quote after we talk.",
       },
     ],
     tiles: coversOf("studio-digitals"),
@@ -463,7 +464,14 @@ export const BOOKING_PAGES: BookingPage[] = [
         body: "A few weddings a year, so each one gets the time it needs. Send the date in the form as early as you have it.",
       },
     ],
-    where: SESSION_WHERE,
+    // Julian (2026-11-16): weddings are on location only, so no "studio" here.
+    where: SESSION_WHERE.map((p) =>
+      p.name === "San Francisco"
+        ? { ...p, note: "Ceremony and reception, on location anywhere in the Bay Area." }
+        : p.name === "San Jose"
+          ? { ...p, note: "And across the South Bay and Silicon Valley." }
+          : p,
+    ),
     faqs: [
       {
         q: "How much does a wedding photographer cost in San Francisco or San Jose?",
@@ -547,6 +555,7 @@ export const BOOKING_PAGES: BookingPage[] = [
       {
         q: "Do you direct music videos?",
         a: "Yes. The Motion page has the music videos, directed and shot for artists in the Bay Area.",
+        link: { href: "/portfolio/video", label: "The Motion page" },
       },
       {
         q: "Do you shoot in Los Angeles or New York?",
