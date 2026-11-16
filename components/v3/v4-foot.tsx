@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BOOK_ROWS, QUOTE_OPTS } from "./mt/data";
 import { useLocalTime } from "./mt/foot";
+import { media } from "@/lib/device";
 
 /* The ending of an inner page, on trial (`?v4pages=foot`, inner-pages plan g1):
    the V4 home footer without its photo wall, about half a screen tall. Four
@@ -23,7 +24,6 @@ const phraseFor = (path: string) => {
 };
 /* The inquiry form's types (components/v3/inquire.tsx TYPE); weddings has none, so it opens the form plain. */
 const ASK: Record<string, string> = { music: "coverart", fashion: "editorial", commercial: "campaign" };
-const D = "(min-width:1024px) and (min-height:600px)"; // the desktop structure of mt/motion/engine.ts
 const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 
 export function V4Foot() {
@@ -36,7 +36,7 @@ export function V4Foot() {
   React.useEffect(() => {
     const el = foot.current, r = row.current;
     if (!el || !r || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const mqD = matchMedia(D);
+    const mqD = media("held");
     // What sinks: a block that names itself (the project page's Next), else the one right above the footer.
     let sink = document.querySelector<HTMLElement>("[data-sink]") ?? (el.previousElementSibling as HTMLElement | null);
     // a block hidden at this size (the phone list on /portfolio/video) is skipped
