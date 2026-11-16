@@ -2,6 +2,7 @@ import Link from "next/link";
 import { V3Foot } from "@/components/v3/chrome";
 import { Marks } from "@/components/v3/duo";
 import { AboutGallery } from "@/components/v3/about-gallery";
+import { LogoBand } from "@/components/v3/logo-band";
 
 /* JG V3 About (master v50, /about): portrait gallery, the justified bio, facts,
    What I do, the two CTAs, and the client marks as a grid. */
@@ -40,14 +41,16 @@ export function V3About() {
             <div className="ctas">
               <Link className="btn fill" href="/contact/form">Inquire</Link>
               <Link className="btn" href="/portfolio">See the work</Link>
+              {/* ?v4pages=m2p */}
+              <Link className="btn v4-m2p" href="/bts">Behind the scenes</Link>
             </div>
           </div>
         </div>
         <section className="ab-logos">
           <h2 className="lbl mute">Worked with</h2>
-          <div className="lg">
+          <LogoBand>
             <Marks cell />
-          </div>
+          </LogoBand>
         </section>
         <V3Foot />
       </section>
