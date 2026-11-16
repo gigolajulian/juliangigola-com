@@ -41,7 +41,8 @@ export function V4Drift({ k }: { k: string }) {
       { rootMargin: "50% 0px" }
     );
     tiles.forEach((t) => io.observe(t));
-    if (grid.classList.contains("wframes")) return () => io.disconnect();
+    // a gallery keeps the loop for `data-v4lag` and the long-frame watch, without the lag
+    const lagOn = !grid.classList.contains("wframes");
 
     const col = new Map(tiles.map((t, i) => [t, i]));
     let s = { x: 0, v: 0 }, y = scrollY, at = 0, raf = 0, cols = 4, long = 0;
@@ -71,7 +72,7 @@ export function V4Drift({ k }: { k: string }) {
       }
       for (const el of near) {
         const k = LAG[col.get(el)! % cols];
-        if (k) el.style.translate = `0 ${(s.x * k).toFixed(2)}px`;
+        if (lagOn && k) el.style.translate = `0 ${(s.x * k).toFixed(2)}px`;
       }
       raf = requestAnimationFrame(tick);
     };
@@ -81,7 +82,7 @@ export function V4Drift({ k }: { k: string }) {
       y = scrollY;
       s = { x: 0, v: 0 };
       cols = getComputedStyle(grid).gridTemplateColumns.split(" ").length;
-      grid.setAttribute("data-v4lag", ""); // layers for the moving tiles, only while they move
+      grid.setAttribute("data-v4lag", ""); // while the page moves: layers for the lagging tiles, no hover zoom
       raf = requestAnimationFrame(tick);
     };
     addEventListener("scroll", move, { passive: true });
