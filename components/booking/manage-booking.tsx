@@ -5,6 +5,7 @@ import Link from "next/link";
 import { TimePicker } from "@/components/booking/time-picker";
 import { EARLY_SHARE, MAX_MOVES, MOVE_HOURS, PART_HOURS, REFUND_HOURS, refundCents, refundShare, TZ } from "@/lib/booking/booking-rules";
 import { LEGACY_DEPOSIT } from "@/lib/booking/paid";
+import type { clientView } from "@/lib/booking/booking-engine";
 
 /* ── a client's own booking: reschedule or cancel ─────────────────
  * Opened from the links in the "You're in." mail (`app/booking/[id]`).
@@ -13,7 +14,8 @@ import { LEGACY_DEPOSIT } from "@/lib/booking/paid";
  * start, Julian 2026-11-03), then asks to confirm.
  * ─────────────────────────────────────────────────────────────── */
 
-export type Managed = { id: string; slug: string; session: string; start: string; end: string; firstStart?: string; where?: string; /** Times moved so far. */ moves?: number; /** The booking fee percent; unset: a full refund when early. */ fee?: number; paid: boolean; /** Dollars this booking paid. */ deposit?: number; cancelled: boolean };
+/** What the server sends of a booking (`clientView`); a type only, so no server code reaches the bundle. */
+export type Managed = ReturnType<typeof clientView>;
 
 const stampIn = (iso: string, timeZone?: string) =>
   new Intl.DateTimeFormat("en-US", { timeZone, weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZoneName: "short" }).format(new Date(iso));

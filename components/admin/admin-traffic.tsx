@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { authed } from "@/lib/leads/lead-desk";
+import { AdminError, adminCall, authed } from "@/lib/leads/lead-desk";
 
 /* ── traffic ──────────────────────────────────────────────────────
  * Who came to the site this week and from where, read from Cloudflare by
@@ -43,18 +43,13 @@ export function AdminTraffic() {
     if (!Object.keys(headers).length) return setError("Sign in with the inbox key or the GitHub token first.");
     setBusy(true);
     try {
-      const res = await fetch("/api/traffic", {
-        headers,
-        cache: "no-store",
-      });
-      const body = await res.json();
-      if (res.ok) {
-        // A partial body (a Cloudflare query that failed) shows as empty, not a crash.
-        setData({ visits: 0, bots: 0, days: [], sources: [], pages: [], devices: [], topBots: [], ...body });
-        setError("");
-      } else setError(body.error ?? "Cloudflare did not answer.");
-    } catch {
-      setError("Could not reach the site.");
+      const body = await adminCall<Partial<Data>>("/api/traffic", {}, "Cloudflare did not answer.");
+      // A partial body (a Cloudflare query that failed) shows as empty, not a crash.
+      setData({ visits: 0, bots: 0, days: [], sources: [], pages: [], devices: [], topBots: [], ...body } as Data);
+      setError("");
+    } catch (e) {
+      // The route's own words when it answered, even with an HTML error page; offline otherwise.
+      setError(e instanceof AdminError ? e.message : "Could not reach the site.");
     }
     setBusy(false);
   }, []);

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { authed } from "@/lib/leads/lead-desk";
+import { adminCall, authed } from "@/lib/leads/lead-desk";
 
 /* ── seo ──────────────────────────────────────────────────────────
  * What search and visitors make of each page, from `/api/seo`: totals
@@ -71,10 +71,7 @@ const change = (now: number, before: number) =>
 async function ask<T>(url: string): Promise<T> {
   const headers = authed();
   if (!Object.keys(headers).length) throw new Error("Sign in with the inbox key or the GitHub token first.");
-  const res = await fetch(url, { headers, cache: "no-store" });
-  const body = await res.json();
-  if (!res.ok) throw new Error(body.error ?? "The site did not answer.");
-  return body;
+  return adminCall<T>(url, {}, "The site did not answer.");
 }
 
 export function AdminSeo() {

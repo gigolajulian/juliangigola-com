@@ -1,6 +1,9 @@
 "use client";
 
-import type { Shell } from "@/components/v3/flow";
+import { iso, pad, type Shell } from "@/components/v3/flow";
+import type { SlotsAnswer } from "@/lib/booking/slots";
+
+export { iso, pad };
 
 /* Shared by the time picker and its cards (time-picker.tsx). */
 
@@ -9,8 +12,7 @@ export const noop = () => () => {};
    (the homepage menu builds one per row pointed at) does not ask the
    server again. A reload after a failed booking asks fresh. */
 export const KEEP = 60_000;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const recent = new Map<string, { at: number; got: Promise<[any, any]> }>();
+export const recent = new Map<string, { at: number; got: Promise<SlotsAnswer> }>();
 /** The key an event's times are kept under. */
 export const recentKey = (username: string, slug: string, tz: string) => `${username}/${slug}/${tz}`;
 /** Forget an event's kept times, so the next picker asks fresh (a time just taken). */
@@ -23,10 +25,9 @@ export const AHEAD = 120;
 
 export type Slot = { start: string; end: string };
 export type V3Book = { shell: Shell; name: string; from: number | null };
-export type Pick = { date: string; min: number; start: string };
+/** The time picked: its day, minutes after midnight, and the start as sent. */
+export type PickedTime = { date: string; min: number; start: string };
 
-export const pad = (n: number) => String(n).padStart(2, "0");
-export const iso = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 export const fromIso = (s: string) => new Date(+s.slice(0, 4), +s.slice(5, 7) - 1, +s.slice(8, 10));
 export const minutesOf = (start: string) => +start.slice(11, 13) * 60 + +start.slice(14, 16);
 /** Where the session happens, per event: the choices, and what to ask after one. An event

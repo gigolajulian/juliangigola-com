@@ -57,6 +57,9 @@ export const MAX_LINES = 8;
 export const MAX_ROWS_B = 4;
 export const NOTE_B: [string, string, string] = ["Thanks for having me back.", "Always a blast with you guys.", "Can't wait for the next one!"];
 /** The photo's KV key: `invoice-photo:` and 32 hex of its SHA-256. */
+/** The KV key of his sealed invoice details (name, address, EIN): the repo is public, so they live there and nowhere in the code.
+    Written by `app/api/inbox`, read by the contract (`app/api/contract`). */
+export const FROM_KEY = "leads:invoice-from";
 export const PHOTO_KEY = /^invoice-photo:[0-9a-f]{32}$/;
 
 /** "2026-11-06" as "1126". */

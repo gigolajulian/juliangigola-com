@@ -28,14 +28,14 @@ import { Thumbnail } from "@astryxdesign/core/Thumbnail";
 import { MetadataList, MetadataListItem } from "@astryxdesign/core/MetadataList";
 import { Selector } from "@astryxdesign/core/Selector";
 import { Slider } from "@astryxdesign/core/Slider";
-import { KEY_STORE } from "@/lib/admin/admin-github";
+import { KEY_STORE, saveAdminKey, TOKEN_STORE } from "@/lib/admin/admin-github";
+import { useSiteThemeRead } from "@/lib/site-theme";
 import { SignIn } from "@/components/leads/setup";
 import { api, cardCrop, closed, cropAt, status, type Row } from "@/lib/proofs/desk";
 import { ActivityDesk } from "@/components/proofs/activity";
 import { Timeline } from "@/components/proofs/timeline";
 import { useClock } from "@/lib/use-clock";
 import { errorText, stampPT } from "@/lib/leads/lead-desk";
-import { TOKEN_STORE } from "@/lib/admin/admin-github";
 import { extras, publicId, remindState, THUMB_W, type CardCrop } from "@/lib/proofs/proof";
 
 const CLASSIC = "/admin";
@@ -67,14 +67,7 @@ export function ProofsDesk({ embedded = false, initial }: { embedded?: boolean; 
   }, []);
   React.useEffect(load, [load]);
   // Same as the leads desk: follow html[data-theme], light only when it says light, read before Theme mounts.
-  const [mode, setMode] = React.useState<"light" | "dark" | null>(null);
-  React.useEffect(() => {
-    const read = () => setMode(document.documentElement.dataset.theme === "light" ? "light" : "dark");
-    read();
-    const watch = new MutationObserver(read);
-    watch.observe(document.documentElement, { attributeFilter: ["data-theme"] });
-    return () => watch.disconnect();
-  }, []);
+  const mode = useSiteThemeRead();
   React.useEffect(() => {
     const mq = matchMedia("(min-width: 1024px)");
     const set = () => setWide(mq.matches);
@@ -87,10 +80,7 @@ export function ProofsDesk({ embedded = false, initial }: { embedded?: boolean; 
     return (
       <SignIn
         onKey={(k) => {
-          if (/^(ghp_|github_pat_)/.test(k)) {
-            localStorage.setItem(TOKEN_STORE, k);
-            localStorage.removeItem(KEY_STORE);
-          } else localStorage.setItem(KEY_STORE, k);
+          saveAdminKey(k);
           setError(null);
           load();
         }}

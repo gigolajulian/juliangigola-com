@@ -52,7 +52,7 @@ All 74 projects and 1,131 frames were migrated off the old Format site.
 
 | File | What it is |
 | --- | --- |
-| `lib/work-data.ts` | **Generated.** Every project, its credits, categories and frames. Written by `scripts/harvest.mjs`; do not hand-edit — it gets overwritten. |
+| `lib/work-data.ts` | The archive: every migrated project, its credits, categories and frames. First written by `scripts/harvest.mjs`; the harvester no longer runs, so this file is now edited by hand. |
 | `lib/work.ts` | The only module the app reads work from. Holds the editorial decisions: what is featured, what leads the homepage, how categories group. |
 | `lib/work-types.ts` | Shapes for the above. |
 | `lib/booking/sessions.ts` | Bookable session types. `from: null` renders as "On request". |
@@ -119,19 +119,18 @@ push starts a build, and the edit is live in a couple of minutes.
 
 ### Adding a project from /admin
 
-New shoots go in `content/projects.json`, **not** `lib/work-data.ts` — the
-harvester overwrites that file, so a project written there survives exactly
-until the next harvest and then vanishes with nothing failing. `lib/work.ts`
-merges the two, added work first, so a shoot uploaded today leads its
+New shoots go in `content/projects.json`, **not** `lib/work-data.ts`: that
+file is the migrated archive, and `/admin` writes only `content/projects.json`
+and its override tables. `lib/work.ts` merges the two, added work first, so a shoot uploaded today leads its
 discipline.
 
 The photographs are resized in the browser to the same 2500px/q82 the
-harvester uses (`lib/admin-image.ts`) and committed under
+harvester uses (`lib/admin/admin-image.ts`) and committed under
 `public/work/<slug>/` **in the same commit as the manifest**, via the Git Data
-API (`lib/admin-github.ts`). One commit, one build, and the manifest is never
+API (`lib/admin/admin-github.ts`). One commit, one build, and the manifest is never
 in the repo describing files that are not.
 
-`content/projects.json` is validated as strictly as `site.json`: a frame that
+`content/projects.json` is validated as strictly as `content/site.json`: a frame that
 points anywhere but `/work/`, an unknown discipline, or a duplicate slug fails
 the build rather than shipping. Failing the deploy leaves the last good build
 serving, which is the safe direction.
@@ -140,8 +139,8 @@ serving, which is the safe direction.
 
 **Hide** removes a project from the site — every index, the discipline pages,
 `sitemap.xml`, and its own route — and is reversible. It is the only kind of
-removal a harvested project can have: `lib/work-data.ts` is regenerated, so a
-deletion there returns on the next harvest with nothing to show it ever went.
+removal a harvested project can have from `/admin`, which never edits
+`lib/work-data.ts`.
 The list lives in `hidden` in `content/projects.json`, and `lib/work.ts`
 filters once, where every consumer reads, rather than at each index.
 
@@ -155,7 +154,7 @@ leave orphans behind.
 
 `app/contact/actions.ts` stores each enquiry in the `INBOX` KV namespace,
 mails it to hello@ through Cloudflare Email Sending
-(`notifications.juliangigola.com`), files it as a lead (`lib/lead-store.ts`,
+(`notifications.juliangigola.com`), files it as a lead (`lib/leads/lead-store.ts`,
 sealed with `LEADS_KEY`) and adds a row in Notion when `NOTION_TOKEN` is set.
 The store comes first: a failed mail or Notion call never loses the enquiry.
 
@@ -262,7 +261,7 @@ portfolio behind a login — it is the wrong tool here.
 | `wrangler.jsonc` | Worker name, `nodejs_compat`, and the static asset directory. |
 | `open-next.config.ts` | Deliberately bare — the defaults cover this site. |
 | `image-loader.ts` | Rewrites every frame onto Cloudflare Image Transformations. Off unless `NEXT_PUBLIC_IMAGE_CDN=1`, because `/cdn-cgi/` exists only on a real zone. |
-| `.env.example` | Every variable, and which are secrets. |
+| `.env.example` | Every variable by name, which are secrets, and where each is set. No values. |
 
 ```bash
 npx opennextjs-cloudflare build     # bundle the Worker

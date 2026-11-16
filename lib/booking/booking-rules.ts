@@ -73,7 +73,7 @@ const CALL = { length: 15, after: 0, interval: 30, call: true };
 /** Every bookable event, by its slug: the part after the slash in a session's `cal` ("juliangigola/portraits"). */
 export const EVENTS: Record<string, Rule> = {
   portraits: { title: "Portraits", length: 60, ...SHOOT },
-  headshots: { title: "Headshots", length: 30, ...SHOOT },
+  headshots: { title: "Headshots", length: 45, ...SHOOT },
   graduation: { title: "Graduation photos", length: 90, ...SHOOT },
   digitals: { title: "Studio digitals", length: 45, ...SHOOT },
   "model-test": { title: "Model test", length: 60, ...SHOOT },

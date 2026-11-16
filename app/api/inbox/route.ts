@@ -13,14 +13,12 @@ import { notionPaper, notionStage } from "@/lib/leads/notion-lead";
 import { importStripe } from "@/lib/leads/stripe-import";
 import { STRIPE_UNSET } from "@/lib/stripe";
 import { cleanPeople, cleanTemplates, manualLead, merge, stats, type NewLead } from "@/lib/leads/lead-crm";
-import { balance, cleanFrom, cleanInvoice, invoiceNo, mmyy, PHOTO_KEY, usd, type InvoiceFrom } from "@/lib/leads/invoice";
+import { balance, cleanFrom, cleanInvoice, FROM_KEY, invoiceNo, mmyy, PHOTO_KEY, usd, type InvoiceFrom } from "@/lib/leads/invoice";
 import { bodyOf, json, NO_STORE } from "@/lib/http";
 import { parseOr } from "@/lib/json";
 
 /** Where his reply templates live: not personal data, so plain JSON. */
 const TEMPLATES_KEY = "leads:templates";
-/** His name, address and EIN for invoices, sealed: the repo is public, so they live here and nowhere in the code. */
-const FROM_KEY = "leads:invoice-from";
 /** How many invoices carry a month's number (`invoices:1126`), so the next is 1126-2. */
 const countKey = (date: string) => `invoices:${mmyy(date)}`;
 const taken = async (inbox: NonNullable<CloudflareEnv["INBOX"]>, date: string) => Number((await inbox.get(countKey(date))) ?? 0) || 0;
@@ -40,8 +38,14 @@ async function* everyKey<M>(inbox: NonNullable<CloudflareEnv["INBOX"]>, prefix: 
 }
 
 /* ── reading the inbox ────────────────────────────────────────────
- * The one endpoint /admin's Inbox tab talks to. Lists enquiries, opens one,
- * marks it read, deletes it.
+ * The endpoint behind /admin's Inbox tab and the Leads desk. The mode is
+ * picked by the query string (GET) or the body (the rest):
+ * - GET: enquiries, leads, the activity log, stats, templates, invoices,
+ *   CSVs, the VAPID public key.
+ * - PATCH: push subscribe and test, the invoice From and photo, a lead,
+ *   templates, an enquiry read or unread.
+ * - DELETE: an enquiry, or the emptied lead trash.
+ * - POST: a new lead, the Notion and Stripe imports, the inbox backfill.
  *
  * Opens with the /admin credentials in `lib/vouch.ts`: the `INBOX_KEY`
  * header, compared in constant time, or a GitHub token that can push. Its
