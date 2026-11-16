@@ -8,7 +8,8 @@ import { v4pages } from "@/lib/v4pages";
     leans toward the mouse by up to 1.1 degrees; the hero wall leans 2.5. One
     eased rAF, one `transform` write a frame on one element, stopped once it
     arrives; flat again when the pointer leaves the window. The grid is taller
-    than the screen, so its hinge follows the middle of the viewport.
+    than the screen, so its hinge follows the middle of the viewport, and it
+    straightens while the page scrolls.
     Mouse only, never under reduced motion. `k` changes when the view does. */
 const MAX = 1.1; // degrees
 // first match wins: the canvas (a portal over the page) sits above the grid it covers
@@ -24,12 +25,16 @@ export function V4Tilt({ k }: { k: string }) {
     const draw = () => {
       // the canvas mounts after its button is pressed: look again when the view is gone
       if (!el?.isConnected) (flat(), (el = pick()));
-      cx += (tx - cx) * 0.08;
-      cy += (ty - cy) * 0.08;
-      const still = Math.abs(tx - cx) + Math.abs(ty - cy) < 0.002;
+      // while the page scrolls (`data-v4lag`, v4-drift.tsx) the grid straightens: lean and scroll
+      // motion together cost frames, and a wall that moves should not also swing
+      const hold = !!el?.hasAttribute("data-v4lag");
+      const gx = hold ? 0 : tx, gy = hold ? 0 : ty;
+      cx += (gx - cx) * 0.08;
+      cy += (gy - cy) * 0.08;
+      const still = Math.abs(gx - cx) + Math.abs(gy - cy) < 0.002;
       raf = still ? 0 : requestAnimationFrame(draw);
       if (!el) return;
-      if (still && !tx && !ty) return void flat();
+      if (still && !gx && !gy) return void flat();
       if (el.classList.contains("wgrid")) el.style.transformOrigin = `50% ${(innerHeight / 2 - el.getBoundingClientRect().top).toFixed(0)}px`;
       el.style.transform = `perspective(1400px) rotateX(${(-cy * MAX).toFixed(3)}deg) rotateY(${(cx * MAX).toFixed(3)}deg)`;
     };
