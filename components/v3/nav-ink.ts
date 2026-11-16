@@ -118,7 +118,7 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
       // or scrolled under the bar, so the name never shows twice. navfx.css hides it until this is set.
       const nm = path === "/" ? document.querySelector<HTMLElement>(".mt-name h1") : null;
       const nr = nm?.getBoundingClientRect();
-      const shows = !!nr && nr.bottom > bar.offsetHeight && nr.top < innerHeight && parseFloat(nm?.closest<HTMLElement>("[data-mt-name]")?.style.opacity || "1") > 0.5;
+      const shows = !!nr && nr.bottom > bar.offsetHeight && nr.top < innerHeight && parseFloat(nm?.closest<HTMLElement>("[data-mt-name]")?.style.opacity || "1") > 0.02; // only once the name is fully gone: the two never show together
       root.toggleAttribute("data-navnamegone", !shows);
       // A section that is dark in both themes (the v4 footer sets its own --bg) under a light page: the bar takes
       // the dark ground there (navfx.css), or its light veil over it would be a mid grey nothing reads on.
