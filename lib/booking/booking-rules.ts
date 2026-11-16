@@ -100,6 +100,7 @@ export const refundShare = (r: { intent?: string; start: string; firstStart?: st
   return hours >= REFUND_HOURS ? 1 : hours >= PART_HOURS ? PART_SHARE : 0;
 };
 /** The cents a cancel returns of a deposit of `usd` dollars. */
+// shortcut: the mails and screens print the dollars raw, whole only while every deposit divides by 10; format cents if one stops.
 export const refundCents = (usd: number, share: number) => Math.round(usd * 100 * share);
 
 /** A visitor's booking, checked by `parseBooking` in `lib/booking/booking-engine.ts`. */
