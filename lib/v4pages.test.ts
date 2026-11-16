@@ -1,0 +1,43 @@
+import { readFileSync } from "node:fs";
+import { expect, test } from "vitest";
+import { V4PAGES } from "./v4pages";
+
+// The head script as it ships (app/layout.tsx), run against a fake tab.
+const src = readFileSync(new URL("../app/layout.tsx", import.meta.url), "utf8");
+const js = src.match(/`(\(function\(\)\{try\{var k="jg-v4pages"[^`]*)`/)![1];
+
+function run(search: string, v4home: boolean, stored: Record<string, string> = {}) {
+  const dataset: Record<string, string> = v4home ? { mtscroll: "" } : {};
+  const sessionStorage = {
+    getItem: (k: string) => (k in stored ? stored[k] : null),
+    setItem: (k: string, v: string) => void (stored[k] = v),
+  };
+  new Function("location", "sessionStorage", "document", js)({ search }, sessionStorage, { documentElement: { dataset } });
+  return dataset.v4pages;
+}
+
+test("the script and lib/v4pages.ts list the same keys", () => {
+  expect(js).toContain(`all="${V4PAGES}"`);
+});
+
+test("without the V4 home only the grid motion is on", () => {
+  expect(run("", false)).toBe("p3");
+});
+
+test("follows the V4 home when the tab has no choice of its own", () => {
+  expect(run("", true)).toBe(V4PAGES.replace(" tilt", "")); // tilt stays opt-in, it is still on trial
+});
+
+test("?v4pages=0 keeps the inner pages off under the V4 home, and stays off for the tab", () => {
+  const stored: Record<string, string> = {};
+  expect(run("?v4pages=0", true, stored)).toBeUndefined();
+  expect(run("", true, stored)).toBeUndefined();
+});
+
+test("a key list wins over the V4 home", () => {
+  expect(run("?v4pages=s1,a2", true)).toBe("s1 a2");
+});
+
+test("?v4pages alone still turns every key on", () => {
+  expect(run("?v4pages", false)).toBe(V4PAGES);
+});
