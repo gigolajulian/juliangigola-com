@@ -127,13 +127,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       suppressHydrationWarning
     >
       <head>
-        {/* Two preview flags, before the first paint: `?flyout=1` and `?stack=0`
-            (sessionStorage, for the tab; `=0` / `=1` clear them). */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{var q=location.search,f="deck-flyout";if(/[?&]flyout=1/.test(q))sessionStorage.setItem(f,"1");if(/[?&]flyout=0/.test(q))sessionStorage.removeItem(f);if(sessionStorage.getItem(f)==="1")document.documentElement.dataset.flyout="";var k="door-stack";if(/[?&]stack=0/.test(q))sessionStorage.setItem(k,"0");if(/[?&]stack=1/.test(q))sessionStorage.removeItem(k);if(sessionStorage.getItem(k)!=="0")document.documentElement.dataset.stack=""}catch(e){}})()`,
-          }}
-        />
         {/* Applies the theme before the first paint: a choice made with the
          * toggle if there is one, otherwise whatever the visitor's system is
          * set to — Julian asked for the site to match how they have it set
@@ -162,7 +155,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
          */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){var t=null;try{t=sessionStorage.getItem("theme")}catch(e){}var l=t==="light"||(t!=="dark"&&matchMedia("(prefers-color-scheme: light)").matches);if(location.pathname.indexOf("/proof")===0&&!/[?&]proofwall=0/.test(location.search)){l=false;document.documentElement.dataset.proofwall=""}document.documentElement.dataset.theme=l?"light":"dark";var m=document.querySelectorAll('meta[name="theme-color"]');for(var i=0;i<m.length;i++)m[i].setAttribute("content",l?"#ebedef":"#0b0a09")})()`,
+            __html: `(function(){var t=null;try{t=sessionStorage.getItem("theme")}catch(e){}var l=t==="light"||(t!=="dark"&&matchMedia("(prefers-color-scheme: light)").matches);if(location.pathname.indexOf("/proof")===0&&!/[?&]proofwall=0/.test(location.search)){l=false;document.documentElement.dataset.proofwall=""}document.documentElement.dataset.theme=l?"light":"dark";var m=document.querySelectorAll('meta[name="theme-color"]');for(var i=0;i<m.length;i++)m[i].setAttribute("content",l?"#ffffff":"#000000")})()`,
           }}
         />
         {/* Whether this visit gets the opening, decided before the first

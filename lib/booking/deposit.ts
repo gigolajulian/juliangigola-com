@@ -2,7 +2,7 @@ import { sendConfirm } from "@/lib/booking/confirm";
 import { enquiry, enquiryKey, summary, whenPT } from "@/lib/inbox";
 import { logMail, recordLead } from "@/lib/leads/lead-store";
 import { openNow, type KV } from "@/lib/booking/slots";
-import type { Booking, Hours } from "@/lib/booking/booking-rules";
+import { EVENTS, type Booking, type Hours } from "@/lib/booking/booking-rules";
 import { lockOp, parseBooking, recordBooking } from "@/lib/booking/booking-engine";
 import { manageLinks } from "@/lib/booking/booking-token";
 
@@ -40,7 +40,7 @@ import { manageLinks } from "@/lib/booking/booking-token";
 
 import { alertHello, type Attachment } from "@/lib/hello-mail";
 import { stripe } from "@/lib/stripe";
-import { DEPOSIT, LEGACY_DEPOSIT, isPaid } from "@/lib/booking/paid";
+import { DEPOSIT, LEGACY_DEPOSIT, PAID, isPaid } from "@/lib/booking/paid";
 /** The charge in cents for a session. Throws on a slug that takes no deposit: `parseBooking` lets none through. */
 export function amountOf(slug: string): number {
   if (!isPaid(slug)) throw new Error("Not a paid session.");
@@ -56,7 +56,8 @@ export const isDeposit = (pi: { amount?: number; currency?: string; metadata?: {
   pi.metadata?.kind === KIND && [...Object.values(DEPOSIT), LEGACY_DEPOSIT].some((d) => d * 100 === pi.amount) && pi.currency === CURRENCY;
 /** How old a webhook's timestamp may be before it is treated as a replay. */
 const TOLERANCE_S = 300;
-export const SESSION: { [slug: string]: string } = { portraits: "Portraits", headshots: "Headshots", graduation: "Graduation photos", digitals: "Studio digitals", "model-test": "Model test" };
+/** Each paid event's name, as its rule titles it. */
+export const SESSION: { [slug: string]: string } = Object.fromEntries(PAID.map((s) => [s, EVENTS[s].title]));
 
 /** The intent in Stripe's dashboard, test or live as the key is. */
 export const dashboardLink = (intent: string, key: string) =>

@@ -19,6 +19,7 @@
 
 import { SESSION_TYPES, formatPrice, type SessionType } from "./sessions";
 import { RESPONSE_TIME } from "../site";
+import { isSession, SESSIONS as V3_SESSIONS } from "../v3";
 import { CONTENT } from "../content";
 import { getProject, projectsIn } from "../work";
 import type { BookingSlug } from "./booking-slugs";
@@ -82,12 +83,9 @@ export const PLACES = [
 /** The event each session books, by the session's slug in
     `content/site.json`: "juliangigola/event-slug", a stored key, kept as is. The picker on /book reads these. Weddings, music
     and brand have a call, set on their own pages (`book.cal`). */
-export const SESSION_EVENTS: Record<string, string> = {
-  portraits: "juliangigola/portraits",
-  graduation: "juliangigola/graduation",
-  headshots: "juliangigola/headshots",
-  "studio-digitals": "juliangigola/digitals",
-};
+export const SESSION_EVENTS: Record<string, string> = Object.fromEntries(
+  SESSION_TYPES.flatMap((t) => { const cal = isSession(t.slug) && V3_SESSIONS[t.slug].cal; return cal ? [[t.slug, cal]] : []; }),
+);
 
 /** A session's event, or nothing where it has none yet. */
 export const sessionEvent = (sessionSlug?: string): string | undefined =>
@@ -278,7 +276,7 @@ export const BOOKING_PAGES: BookingPage[] = [
       {
         heading: "Where on campus",
         items: [
-          "SJSU: Tower Hall and Tower Lawn, the Tommie Smith and John Carlos statue and outside King Library.",
+          "SJSU: Tower Hall, Tower Lawn and outside King Library.",
           "Santa Clara University: the Mission Church and its gardens, and Palm Drive.",
           "SF State: Malcolm X Plaza and the J. Paul Leonard Library.",
           "USF: St. Ignatius Church and Lone Mountain.",
