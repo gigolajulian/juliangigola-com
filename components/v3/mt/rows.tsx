@@ -4,7 +4,7 @@ import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { COVER_RELEASES } from "@/lib/cover-art-data";
-import { HeldRow } from "./held-row";
+import { HeldRow, rowKeys } from "./held-row";
 import { COVER_KEYS, COVER_PRESS, FILM_DRESS, type MtFilm } from "./data";
 
 const pad = (n: number) => String(n).padStart(2, "0");
@@ -36,8 +36,8 @@ export function MtCovers() {
           <div key={c.slug} className="mt-item mt-sleeve" data-i={i} data-flip={back ? "" : undefined} style={{ "--o": 0.5, "--press": COVER_PRESS[c.slug] } as React.CSSProperties}>
             <span className="disc" aria-hidden />
             <div className="face">
-              <Image src={c.frames[0].thumb} alt={`${c.title} by ${c.artist}`} fill sizes="(max-width: 599px) 92vw, 30vw" />
-              {back ? <Image className="back" src={back.thumb} alt={`${c.title}, back of the sleeve`} fill sizes="30vw" /> : null}
+              <Image src={c.frames[0].src} alt={`${c.title} by ${c.artist}`} fill sizes="(max-width: 599px) 92vw, 34vw" />
+              {back ? <Image className="back" src={back.src} alt={`${c.title}, back of the sleeve`} fill sizes="34vw" /> : null}
             </div>
             <p className="lbl mt-cvcap" aria-hidden><span>{c.title}</span><span className="mute">{c.artist}</span></p>
           </div>
@@ -101,7 +101,11 @@ export function MtMotion({ films }: { films: MtFilm[] }) {
   // `data-was`: the film that was on screen stays under the new one while it develops, so the swap never passes through black.
   const was = React.useRef(0);
   React.useEffect(() => {
-    row.current!.querySelectorAll(".mt-item").forEach((it, i) => (it.toggleAttribute("data-on", i === cur), it.toggleAttribute("data-was", i === was.current && i !== cur)));
+    const items = row.current!.querySelectorAll<HTMLElement>(".mt-item");
+    items.forEach((it, i) => (it.toggleAttribute("data-on", i === cur), it.toggleAttribute("data-was", i === was.current && i !== cur)));
+    // keyboard: the film that held focus is hidden once the next one is current, and focus fell to the page. It follows the film.
+    const a = document.activeElement;
+    if (a instanceof HTMLElement && a.classList.contains("mt-film") && a !== items[cur] && row.current!.contains(a)) items[cur]?.focus({ preventScroll: true });
     was.current = cur;
   }, [cur]);
   const dress = FILM_DRESS[films[cur].title];
@@ -112,7 +116,7 @@ export function MtMotion({ films }: { films: MtFilm[] }) {
           <h2>Motion</h2>
           <p className="lbl mute">Director and DP | {films.length} films</p>
         </div>
-        <div className="mt-row" ref={row} role="group" tabIndex={0} aria-label="Films">
+        <div className="mt-row" ref={row} role="group" tabIndex={0} aria-label="Films" onKeyDown={rowKeys}>
           <div className="mt-track">
             {films.map((f, i) => (
               <Link key={f.id} href={f.href} className="mt-item mt-film" data-i={i} data-film={f.id} data-preview={f.preview} aria-label={`${f.title}, ${f.kind}`} style={FILM_DRESS[f.title]?.zoom ? ({ "--z": FILM_DRESS[f.title].zoom } as React.CSSProperties) : undefined}>

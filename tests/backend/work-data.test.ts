@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { SPLASH_RUN } from "@/lib/splash-run";
 import { CALL_CARD, DOORS, HERO, INDEX_ORDER, isSession, LENGTH, rate, SESSIONS, TAB_ORDER, type Session } from "@/lib/v3";
 import { CATEGORIES, PROJECTS } from "@/lib/work-data";
+import { PROJECTS as SITE_PROJECTS } from "@/lib/work";
 
 /* The archive and the lists built from it: invariants that, broken, show
    up on the site as a dead link, a missing photo or a wrong count. */
@@ -57,3 +58,15 @@ describe("v3", () => {
   });
 });
 
+
+describe("credits", () => {
+  it("puts Julian's own photo credit last on every page", () => {
+    const photo = /^photo(grapher|graphy)?$/i;
+    const live = SITE_PROJECTS.filter((p) => p.credits.some((c) => photo.test(c.role.trim())));
+    expect(live.length).toBeGreaterThan(10);
+    for (const p of live) {
+      const last = p.credits.findIndex((c) => photo.test(c.role.trim()));
+      expect(p.credits.slice(last).every((c) => photo.test(c.role.trim())), p.slug).toBe(true);
+    }
+  });
+});

@@ -9,12 +9,12 @@ describe("CallToAction", () => {
     );
     expect(screen.getByRole("region", { name: "Like this?" })).toBeTruthy();
     expect(screen.getByText("Write in.")).toBeTruthy();
-    expect(screen.getByRole("link", { name: "Inquire" }).getAttribute("href")).toBe("/?type=editorial&ref=Nyx%20%26%20co#contact");
+    expect(screen.getByRole("link", { name: "Inquire" }).getAttribute("href")).toBe("/contact/form?type=editorial&ref=Nyx%20%26%20co");
     expect(screen.getByRole("link", { name: "Book a session" }).getAttribute("href")).toBe("/book");
   });
 
   it("defaults to other with no detail", () => {
     render(<CallToAction title="Ask" />);
-    expect(screen.getByRole("link", { name: "Inquire" }).getAttribute("href")).toBe("/?type=other#contact");
+    expect(screen.getByRole("link", { name: "Inquire" }).getAttribute("href")).toBe("/contact/form?type=other");
   });
 });

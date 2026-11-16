@@ -35,8 +35,8 @@ export function CallToAction({
 }) {
   const titleId = React.useId();
   const href = detail
-    ? `/?type=${encodeURIComponent(type)}&ref=${encodeURIComponent(detail)}#contact`
-    : `/?type=${encodeURIComponent(type)}#contact`;
+    ? `/contact/form?type=${encodeURIComponent(type)}&ref=${encodeURIComponent(detail)}`
+    : `/contact/form?type=${encodeURIComponent(type)}`;
 
   return (
     <section
