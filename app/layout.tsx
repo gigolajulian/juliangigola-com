@@ -127,13 +127,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       suppressHydrationWarning
     >
       <head>
-        {/* Two preview flags, before the first paint: `?flyout=1` and `?stack=0`
-            (sessionStorage, for the tab; `=0` / `=1` clear them). */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{var q=location.search,f="deck-flyout";if(/[?&]flyout=1/.test(q))sessionStorage.setItem(f,"1");if(/[?&]flyout=0/.test(q))sessionStorage.removeItem(f);if(sessionStorage.getItem(f)==="1")document.documentElement.dataset.flyout="";var k="door-stack";if(/[?&]stack=0/.test(q))sessionStorage.setItem(k,"0");if(/[?&]stack=1/.test(q))sessionStorage.removeItem(k);if(sessionStorage.getItem(k)!=="0")document.documentElement.dataset.stack=""}catch(e){}})()`,
-          }}
-        />
         {/* Applies the theme before the first paint: a choice made with the
          * toggle if there is one, otherwise whatever the visitor's system is
          * set to — Julian asked for the site to match how they have it set
