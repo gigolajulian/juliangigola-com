@@ -184,10 +184,10 @@ export const SESSIONS: Record<SessionSlug, Session> = {
   },
   "fashion-photography": {
     slug: "fashion-photography",
-    name: "Fashion & editorial",
+    name: "Fashion & Editorial",
     blurb: "Editorials, lookbooks and campaign images, shot and art-directed as one story.",
     from: null,
-    includes: ["Phone or video", "Dates and references"],
+    includes: ["Book a phone or video call", "Dates and references"],
     cal: "juliangigola/editorial",
     paid: false,
     photo: { d: w("i-wanna-be-a-human", "02"), l: w("i-wanna-be-a-human", "02") },
