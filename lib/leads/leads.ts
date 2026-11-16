@@ -8,7 +8,7 @@ import { balance, isPaid, namesInvoice, type Invoice } from "./invoice";
  * So beside the raw rows (`msg:`, still written first and kept as the
  * log) the INBOX namespace holds one `lead:<id>` per person, sealed with
  * LEADS_KEY (`lib/leads/lead-crypto.ts`). Each event
- * that reaches the site (the form, a Cal.com booking, a deposit in
+ * that reaches the site (the form, a booking, a deposit in
  * trouble) is folded into it here. KV is the source of truth; Notion and the
  * Google Sheet (`lib/leads/sheet-sync.ts`) are copies of it, never the other way.
  *
@@ -40,7 +40,7 @@ export type LeadEvent = {
     | "contract";
   /* "proofs": they opened a proof gallery, ref = its token so each gallery is one line. */
   /* "replied" / "wrote": mail between hello@ and them in Gmail, ref = the Gmail message id (`lib/leads/gmail-sync.ts`). */
-  /** The raw row (`msg:` key), Cal.com uid or Stripe intent, so a retry folds in once. */
+  /** The raw row (`msg:` key), booking id or Stripe intent, so a retry folds in once. */
   ref?: string;
   /** Booking time, session, new stage, a mail's subject: a short line for the timeline. */
   note?: string;
@@ -94,7 +94,7 @@ export type Lead = {
   stageAt: string;
   firstAt: string;
   lastAt: string;
-  /** Form type or Cal.com slug of the latest event that had one. */
+  /** Form type or booking slug of the latest event that had one. */
   kind?: string;
   /** Next session or call, ISO. */
   when?: string;
@@ -358,7 +358,7 @@ export function paperDue(l: Pick<Lead, "stage" | "when" | "contract" | "release"
 }
 
 // Name and email capped: KV metadata holds 1024 bytes, and the sealed summary
-// grows by a third, so one long Cal.com name must not cost the whole lead.
+// grows by a third, so one long name must not cost the whole lead.
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const leadSummary = ({ events, notion, deposit, notes, remind, phone, ig, company, lostReason, source, invoices, people, ...rest }: Lead): LeadSummary => ({
   ...rest,
@@ -399,7 +399,7 @@ const ARRIVED: LeadEvent["kind"][] = ["inquiry", "call", "booking", "deposit-stu
  * A person's old rows folded into their lead, or null when every row is
  * already there (run twice, changes nothing). Already there: the same row
  * (`ref`), or something that arrived within two minutes of it, which is
- * the same booking recorded live under its Cal.com uid.
+ * the same booking recorded live under its booking id.
  * A new lead is built in time order and is unread only if a row was;
  * one whose rows were all read, still at Inquiry, lands at Replied.
  * An existing lead only gains the events and an earlier First seen: its

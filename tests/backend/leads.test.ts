@@ -317,7 +317,7 @@ describe("backfillLead", () => {
     expect(backfillLead(once, "maya@example.com", [row(1), row(10)])).toBeNull();
   });
 
-  it("skips a booking already recorded live under its Cal.com uid", () => {
+  it("skips a booking already recorded live under its booking id", () => {
     const l = fold(null, "maya@example.com", { event: { at: at(3), kind: "booking", ref: "cal-uid" } });
     expect(backfillLead(l, "maya@example.com", [row(3, { type: "booking", detail: "Headshots" })])).toBeNull();
   });

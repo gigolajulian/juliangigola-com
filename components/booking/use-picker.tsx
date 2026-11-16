@@ -22,7 +22,7 @@ import { AHEAD, e164, fromIso, iso, KEEP, minutesOf, noop, overflowOf, recent, r
  *
  * It reads and books through the site's own engine (`/api/slots`,
  * `/api/book`). If the times do not come, `fallback` is shown: Try again,
- * Inquire and the address (`components/booking/cal-embed.tsx`).
+ * Inquire and the address (`components/booking/book-times.tsx`).
  * ─────────────────────────────────────────────────────────────── */
 
 export type Props = {
