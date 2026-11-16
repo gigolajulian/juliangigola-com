@@ -109,14 +109,13 @@ const pageRedirects = [
   // Permanent since 2026-11-09 (Julian), so Google drops the old addresses.
   { source: "/portfolio/headshots", destination: "/headshots#work", permanent: true },
   { source: "/portfolio/graduation", destination: "/graduation-photos#work", permanent: true },
-  // Julian: change Studio to About. The page moved; the old name follows.
-  { source: "/studio", destination: "/about", permanent: true },
+  // /studio (to /about) and /links (to /contact) are Cloudflare redirect rules since
+  // 2026-11-15 ("studio to about", "links to contact", 308, juliangigola.com only), not code.
   // /rates never got written — it still served the Format demo's biography.
   // Sessions is where a rate question actually gets answered now.
   { source: "/rates", destination: "/#sessions", permanent: true },
   // Julian: Sessions is a homepage screen now, and the page is gone.
   { source: "/sessions", destination: "/#sessions", permanent: true },
-  { source: "/links", destination: "/contact", permanent: true },
   // There was a cart in the header but nothing behind it.
   { source: "/store", destination: "/", permanent: true },
   // "Wedding" (33 frames) was folded into the Weddings gallery; the project
@@ -264,11 +263,16 @@ const csp = [
   // Stripe's Payment Element for the $100 deposit (`lib/booking/deposit.ts`): its
   // script and frames from js.stripe.com, 3D Secure from hooks.stripe.com,
   // and its calls to api.stripe.com.
-  "frame-src 'self' https://www.youtube-nocookie.com https://player.vimeo.com https://calendar.google.com https://js.stripe.com https://*.js.stripe.com https://hooks.stripe.com",
+  // `w.soundcloud.com`: SoundCloud's player, for a cover whose song is only there (`components/cover/cover-sound.tsx`).
+  "frame-src 'self' https://www.youtube-nocookie.com https://player.vimeo.com https://calendar.google.com https://js.stripe.com https://*.js.stripe.com https://hooks.stripe.com https://w.soundcloud.com",
   // `vimeo.com` and `youtube.com` are oEmbed lookups made by /admin when a
   // link is pasted: the title, and the poster Vimeo does not publish at a
   // guessable URL. No page on the site fetches either.
   `connect-src 'self' https://api.stripe.com https://api.github.com https://vimeo.com https://www.youtube.com${__impeccableLiveDev}`,
+  // The song previews on Cover art (`components/cover/cover-sound.tsx`, behind `?v4pages=c1,snd`) stream from
+  // Apple's preview host. Without this line `default-src` covers media and blocks them. `blob:` is /admin's
+  // preview of a clip before it is uploaded.
+  "media-src 'self' blob: https://audio-ssl.itunes.apple.com",
   // Not on a local build (`LOCAL` above): there is no https on localhost.
   ...(LOCAL ? [] : ["upgrade-insecure-requests"]),
 ].join("; ");
