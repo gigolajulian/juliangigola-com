@@ -15,9 +15,14 @@
 @keyframes navfx-in{from{background-color:transparent;-webkit-backdrop-filter:blur(0) saturate(1);backdrop-filter:blur(0) saturate(1);border-bottom-color:transparent}}
 
 /* Words: white or black from what is under them (--nav-ink is set per word by nav-ink.ts). No teal in the bar;
-   the current page is the same ink, bold (Plex Mono 700 is loaded and has the same advance, so nothing shifts). */
+   the current page is the same ink, 4 shades (20%) toward the other one: darker when white, brighter when black.
+   Hover is 2 shades (10%). */
 :root[data-navfx] .v3 .site-hdr :is(.site-wm,.links a,.tbtn,.menu-btn){color:var(--nav-ink,var(--ink));transition:color .2s ease}
-:root[data-navfx] .v3 .site-hdr .links a[aria-current="page"]{color:var(--nav-ink,var(--ink));font-weight:700}
+:root[data-navfx] .v3 .site-hdr .links a{--nav-off:var(--bg)}
+:root[data-navfx] .v3 .site-hdr .links a[data-ink="w"]{--nav-off:#000}
+:root[data-navfx] .v3 .site-hdr .links a[data-ink="b"]{--nav-off:#fff}
+:root[data-navfx] .v3 .site-hdr .links a:hover{color:color-mix(in srgb,var(--nav-ink,var(--ink)) 90%,var(--nav-off))}
+:root[data-navfx] .v3 .site-hdr .links a[aria-current="page"]{color:color-mix(in srgb,var(--nav-ink,var(--ink)) 80%,var(--nav-off))}
 :root[data-navfx] .v3 .site-hdr.menu-on :is(.site-wm,.links a,.tbtn,.menu-btn){color:var(--ink)}
 /* The portfolio's search and view buttons in the bar take the same white or black. */
 @media (min-width:701px){:root[data-navfx] .v3 .site-hdr .hslot{--ink:var(--nav-ink)}}
