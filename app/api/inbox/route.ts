@@ -15,6 +15,7 @@ import { STRIPE_UNSET } from "@/lib/stripe";
 import { cleanPeople, cleanTemplates, manualLead, merge, stats, type NewLead } from "@/lib/leads/lead-crm";
 import { balance, cleanFrom, cleanInvoice, invoiceNo, mmyy, PHOTO_KEY, usd, type InvoiceFrom } from "@/lib/leads/invoice";
 import { bodyOf, json, NO_STORE } from "@/lib/http";
+import { parseOr } from "@/lib/json";
 
 /** Where his reply templates live: not personal data, so plain JSON. */
 const TEMPLATES_KEY = "leads:templates";
@@ -135,7 +136,7 @@ export async function GET(request: Request) {
   // His reply templates, or the defaults.
   if (url.searchParams.has("templates")) {
     const saved = await gate.inbox.get(TEMPLATES_KEY);
-    return json({ templates: cleanTemplates(saved ? JSON.parse(saved) : undefined) });
+    return json({ templates: cleanTemplates(parseOr(saved, undefined)) });
   }
   // His details for invoices, and the number the next one on a date would get.
   if (url.searchParams.has("invoiceFrom") || url.searchParams.has("invoiceNo")) {
@@ -211,7 +212,9 @@ export async function GET(request: Request) {
     if (!wanted.startsWith("msg:")) return json({ error: "Unknown." }, 400);
     const body = await gate.inbox.get(wanted);
     if (body === null) return json({ error: "Gone." }, 404);
-    return json({ enquiry: JSON.parse(body) as Enquiry });
+    const enquiry = parseOr<Enquiry | null>(body, null);
+    if (!enquiry) return json({ error: "Unreadable." }, 500);
+    return json({ enquiry });
   }
 
   // Keys sort oldest first because the timestamp leads them, so a single
@@ -287,8 +290,11 @@ export async function PATCH(request: Request) {
 
   const body = await gate.inbox.get(key);
   if (body === null) return json({ error: "Gone." }, 404);
+  const was = parseOr<Enquiry | null>(body, null);
+  // Unreadable stays as it is: a put of `{ read }` alone would wipe the enquiry.
+  if (!was) return json({ error: "Unreadable." }, 500);
 
-  const next: Enquiry = { ...(JSON.parse(body) as Enquiry), read };
+  const next: Enquiry = { ...was, read };
   // Written back with its metadata, because a put without it drops what the
   // list reads — the row would go blank while the message stayed perfectly
   // intact, which is a confusing way to lose an enquiry.
