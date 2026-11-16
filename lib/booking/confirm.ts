@@ -91,7 +91,7 @@ export function confirmMail(c: Confirm) {
     note: remind
       ? "It is under 24 hours now, so the session can no longer be moved and a cancel keeps the deposit."
       : soon
-      ? `Until ${timeRange(judged)} you can cancel for ${top}. After that a cancel returns 70%, and nothing in the last 24 hours. You can move it until 24 hours before.`
+      ? `Until ${timeRange(judged)} you can cancel for ${top}. After that a cancel returns 70%, and nothing in the last 24 hours.`
       : c.firstStart && c.firstStart !== c.start
       ? `The balance is due after the shoot. The deposit moved with the new date. ${(() => {
           const share = refundShare({ intent: "x", start: c.start, firstStart: c.firstStart, fee: c.deposit?.fee });
