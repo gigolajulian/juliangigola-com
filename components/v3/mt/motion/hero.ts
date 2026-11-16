@@ -162,7 +162,9 @@ export const heroDrivers: Driver[] = [
       const d = st.dock;
       if (!d) document.documentElement.setAttribute("data-mtdock", "off");
       // by scroll, not by frame: a jump past the hero gets no hero frames
-      const past = () => document.documentElement.toggleAttribute("data-mt-pasthero", el.getBoundingClientRect().bottom <= (document.documentElement.hasAttribute("data-mt-held") ? innerHeight + 40 : 80));
+      // the hero is over when its last photos have left from under the header: the same line going down and coming back up
+      const hdr = document.querySelector<HTMLElement>(".site-hdr");
+      const past = () => document.documentElement.toggleAttribute("data-mt-pasthero", el.getBoundingClientRect().bottom <= (hdr?.offsetHeight ?? 60));
       if (LEFT) {
         document.documentElement.setAttribute("data-mtleft", "");
         addEventListener("scroll", past, { passive: true });
