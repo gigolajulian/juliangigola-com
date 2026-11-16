@@ -82,7 +82,7 @@ export function playSound(slug: string) {
 /** The slug whose clip is playing, "" when none. */
 export const useSound = () => React.useSyncExternalStore(sub, () => now, () => "");
 
-/* Sound on / off, kept for the tab. While one of Apple's previews plays: Apple's badge linking to the song and the
+/* Sound on / off, kept for the tab. While one of Apple's previews plays: Apple's mark linking to the song and the
    credit, both of which its terms ask for beside a preview (Search API, Legal). */
 export function CoverSound({ className }: { className?: string }) {
   const off = React.useSyncExternalStore(sub, muted, () => false);
@@ -104,10 +104,13 @@ export function CoverSound({ className }: { className?: string }) {
       </button>
       {clip?.preview && clip.link ? (
         <>
-          {/* Apple's own badge, unaltered (tools.applemediaservices.com): its terms ask for the badge, not a text link. */}
-          <a href={clip.link} target="_blank" rel="noopener noreferrer">
-            {/* eslint-disable-next-line @next/next/no-img-element -- a 10 KB SVG, nothing for the image loader to do */}
-            <img src="/apple-music-badge.svg" alt="Listen on Apple Music" width={141} height={41} />
+          {/* Apple's own one-colour "Listen on Apple Music" mark, unaltered (tools.applemediaservices.com, mono-black
+              and mono-white): its terms ask for Apple's artwork, not a text link. Black on light, white on dark. */}
+          <a href={clip.link} target="_blank" rel="noopener noreferrer" aria-label="Listen on Apple Music">
+            {/* eslint-disable @next/next/no-img-element -- 8 KB SVGs, nothing for the image loader to do */}
+            <img className="am-b" src="/apple-music-black.svg" alt="" width={124} height={27} />
+            <img className="am-w" src="/apple-music-white.svg" alt="" width={124} height={27} />
+            {/* eslint-enable @next/next/no-img-element */}
           </a>
           <span>Preview provided courtesy of iTunes</span>
         </>
