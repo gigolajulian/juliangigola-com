@@ -158,5 +158,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8,
   }));
 
-  return [...pages, ...booking, ...guides, ...categories, ...projects];
+  /* Real pages with no photo set of their own to date them by. /book sits
+     with the booking pages; the rest with /portfolio. */
+  const plain = ["/about", "/contact", "/book", "/bts"].map((path) => ({
+    url: `${SITE}${path}`,
+    changeFrequency: "monthly" as const,
+    priority: path === "/book" ? 0.9 : 0.8,
+  }));
+
+  return [...pages, ...plain, ...booking, ...guides, ...categories, ...projects];
 }

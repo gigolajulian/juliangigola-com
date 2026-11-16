@@ -1,0 +1,38 @@
+/* Inner pages plan on trial, only under ?v4pages (lib/v4pages.ts, head script in app/layout.tsx).
+   p3: the scroll motion of the /portfolio grid */
+
+/* ── p3. Two moves, both from the V4 home, both gone at rest.
+   Drift: each grid photo sits a little oversized in its frame and travels as the
+   frame crosses the screen (the Commissions sheet, components/v3/mt/motion/flow.css),
+   on the scroll timeline so no script runs. `.ph` clips, so it is a scroll
+   container: the timeline is named on it, a bare view() on the img would track
+   `.ph` itself. `scale` and `translate` leave the hover `transform` (v3.css) alone.
+   Travel stays inside the 9% the scale spares.
+   Lag: the columns trail the scroll at their own rates (the hero wall's columns),
+   by their share of the eased scroll speed, which v4-drift.tsx writes as
+   `translate` on the tiles near the screen. Removed at
+   rest, so the grid, gaps and 4px corners are the plain grid whenever it is still.
+   Project covers only: a gallery's wide frames break the nth-child columns.
+   Mouse only, never under reduced motion; a browser without view timelines keeps
+   still, unscaled tiles.
+   !important: motion plan item 6 (`mplan~=scroll`, motion-plan.css) holds every
+   grid image still with `animation: none !important`; this trial lifts that for
+   the /portfolio grid photos only, and only while the flag is on.
+   Not the square Cover art gallery: the oversize would crop the type on the art.
+   `data-v4d` (v4-drift.tsx): only tiles near the screen move, since each moving
+   tile is its own compositor layer. ── */
+@supports (animation-timeline: view()) {
+  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    html[data-v4pages~="p3"] .v3 #p-work .wgrid:not(.square) .wt .ph { view-timeline: --v4p3 block; }
+    html[data-v4pages~="p3"] .v3 #p-work .wgrid:not(.square) .wt .ph > img { scale: 1.18; }
+    html[data-v4pages~="p3"] .v3 #p-work .wgrid:not(.square) .wt[data-v4d] .ph > img { animation: v4p3-drift linear both !important; animation-timeline: --v4p3 !important; }
+    html[data-v4pages~="p3"] .v3 #p-work .wgrid:not(.square) .wt:nth-child(3n+1) { --v4k: 16%; }
+    html[data-v4pages~="p3"] .v3 #p-work .wgrid:not(.square) .wt:nth-child(3n+2) { --v4k: 8%; }
+
+    html[data-v4pages~="p3"] .v3 #p-work .wgrid:not(.wframes) .wt[data-v4d] { will-change: translate; }
+  }
+}
+@keyframes v4p3-drift {
+  from { translate: 0 calc(var(--v4k, 12%) * .5); }
+  to { translate: 0 calc(var(--v4k, 12%) * -.5); }
+}
