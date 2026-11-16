@@ -9,7 +9,7 @@ import { Orb, ORB_ROUND } from "@/components/orb";
 import { JgLoad } from "@/components/splash/jg-load";
 import { TZ } from "@/lib/booking/booking-rules";
 import { mplan } from "@/lib/mplan";
-import { AHEAD, e164, fromIso, iso, KEEP, minutesOf, noop, overflowOf, recent, recentKey, forgetTimes, WHERE, type PickedTime, type Slot, type Step, type V3Book } from "@/components/booking/time-picker-parts";
+import { AHEAD, e164, qaMock, QA_SAYS, fromIso, iso, KEEP, minutesOf, noop, overflowOf, recent, recentKey, forgetTimes, WHERE, type PickedTime, type Slot, type Step, type V3Book } from "@/components/booking/time-picker-parts";
 import { byCodeUnit } from "@/lib/utils";
 
 
@@ -615,9 +615,11 @@ export function usePicker({ path, title, className, fallback, v3, onPicked }: Pr
     const via = String(form.get("via") || "");
     /* Development only: `?sim=ok` books nothing, to see the page after. */
     const sim = process.env.NODE_ENV !== "production" && new URLSearchParams(location.search).get("sim") === "ok";
+    const qa = qaMock(location);
     try {
       if (!sim) {
-      const res = await fetch("/api/book", {
+      // `?qamock=429|503` (dev and preview hosts only): the route's answer, without asking it.
+      const res = qa ? new Response(JSON.stringify({ error: QA_SAYS[qa] }), { status: qa }) : await fetch("/api/book", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ engine: "own", slug, start: new Date(pick.start).toISOString(), timeZone: tz, name, email: String(form.get("email")), phone, via, ...(notes ? { notes } : {}), ...(needsWhere ? { where } : {}) }),

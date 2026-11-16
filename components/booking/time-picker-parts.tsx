@@ -49,6 +49,15 @@ export const zone = (start: string, tz: string) => {
       .find((p) => p.type === "timeZoneName")?.value ?? tz.replace(/_/g, " ")
   );
 };
+/** What `app/api/book` answers on a 429 and a 503, for `?qamock=` below. */
+export const QA_SAYS = { 429: "Too many tries. Wait a minute.", 503: "Booking is off." } as const;
+/** `?qamock=429` or `503` on a free call's booking page: the booking answers that, and nothing is sent.
+    Only in development and on preview hosts (*.workers.dev), never on juliangigola.com. */
+export const qaMock = (at: { search: string; hostname: string }, dev = process.env.NODE_ENV !== "production"): 429 | 503 | 0 => {
+  if (!dev && !at.hostname.endsWith(".workers.dev")) return 0;
+  const n = Number(new URLSearchParams(at.search).get("qamock"));
+  return n === 429 || n === 503 ? n : 0;
+};
 /** A phone number as +E.164: a US number without its country code gets +1. */
 export const e164 = (raw: string) => {
   const digits = raw.replace(/\D/g, "");

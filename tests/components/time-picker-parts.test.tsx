@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { clock, e164, iso, minutesOf } from "@/components/booking/time-picker-parts";
+import { clock, e164, iso, minutesOf, qaMock } from "@/components/booking/time-picker-parts";
 
 /* The picker's pure helpers (`components/booking/time-picker-parts.tsx`):
    the phone number sent to /api/book, and the clock it prints. */
@@ -41,5 +41,20 @@ describe("iso and minutesOf", () => {
   it("reads a local date and a start's minutes", () => {
     expect(iso(new Date(2026, 10, 4))).toBe("2026-11-04");
     expect(minutesOf("2026-11-04T19:30:00-08:00")).toBe(1170);
+  });
+});
+
+describe("qaMock", () => {
+  const at = (hostname: string, search: string) => ({ hostname, search });
+  it("answers 429 or 503 on a preview host, or in development", () => {
+    expect(qaMock(at("jg-next.gigolajulian.workers.dev", "?session=consultation&qamock=429"), false)).toBe(429);
+    expect(qaMock(at("jg-next.gigolajulian.workers.dev", "?qamock=503"), false)).toBe(503);
+    expect(qaMock(at("localhost", "?qamock=503"), true)).toBe(503);
+  });
+  it("does nothing on the live site or for any other value", () => {
+    expect(qaMock(at("juliangigola.com", "?qamock=429"), false)).toBe(0);
+    expect(qaMock(at("www.juliangigola.com", "?qamock=503"), false)).toBe(0);
+    expect(qaMock(at("jg-next.gigolajulian.workers.dev", "?qamock=500"), false)).toBe(0);
+    expect(qaMock(at("jg-next.gigolajulian.workers.dev", ""), false)).toBe(0);
   });
 });
