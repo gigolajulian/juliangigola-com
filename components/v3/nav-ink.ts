@@ -255,7 +255,8 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
         el.dataset.ink = ink;
         el.style.setProperty("--nav-ink", ink === "w" ? "#fff" : "#000");
         // two grounds under a word of text: paint it in stretches (navfx.css clips the gradient to the letters)
-        const mixed = el.matches(".site-wm,.links a") && inks.includes("w") && inks.includes("b");
+        // the wordmark stays one ink, what most of it has (Julian, 2026-11-16: split letters looked broken on a phone)
+        const mixed = el.matches(".links a") && inks.includes("w") && inks.includes("b");
         el.toggleAttribute("data-inkmix", mixed);
         if (mixed) {
           const row = (s: string) => `linear-gradient(90deg,${[...s].map((ch, k) => `${ch === "w" ? "#fff" : "#000"} ${((k / n) * 100).toFixed(1)}% ${(((k + 1) / n) * 100).toFixed(1)}%`).join(",")})`;
