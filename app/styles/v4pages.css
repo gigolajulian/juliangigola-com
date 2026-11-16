@@ -14,6 +14,8 @@ html[data-v4pages~="c1"] .cv4{--u:calc(100vw / 960);list-style:none;margin:48px 
 html[data-v4pages~="c1"] .cv4 .mt-sleeve{position:relative;display:block;width:100%;height:auto;aspect-ratio:1;--o:var(--hin)}
 /* Square corners: the grid is seamless and UI corners are 0. */
 html[data-v4pages~="c1"] .cv4 .mt-sleeve .face,html[data-v4pages~="c1"] .cv4 .mt-sleeve .face img{border-radius:0}
+/* Pinned here: mtscroll.css and rows.css both dress the face at the same weight, and they load in separate files. */
+html[data-v4pages~="c1"] .cv4 .mt-sleeve .face{overflow:visible;background:none}
 html[data-v4pages~="c1"] .cv4 .mt-sleeve .face img{object-fit:cover}
 html[data-v4pages~="c1"] .cv4 .mt-sleeve:focus-visible{outline:1px solid var(--accent);outline-offset:-1px;z-index:3}
 /* The record only exists where it can move: no hover on touch, no slide under reduced motion.
@@ -21,6 +23,8 @@ html[data-v4pages~="c1"] .cv4 .mt-sleeve:focus-visible{outline:1px solid var(--a
 html[data-v4pages~="c1"] .cv4 .mt-sleeve .disc{display:none}
 @media (hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
   html[data-v4pages~="c1"] .cv4 .mt-sleeve .disc{display:block;left:1.875%;top:1.875%;width:96.25%;height:96.25%;transform:translateX(calc(var(--o) * 33.4%)) rotate(calc(var(--o) * 200deg))}
+  /* The last column has no room on its right: its record comes out to the left. */
+  html[data-v4pages~="c1"] .cv4 li:nth-child(3n) .mt-sleeve{--o:calc(var(--hin) * -1)}
   html[data-v4pages~="c1"] .cv4 .mt-sleeve .disc::after{transform:rotate(calc(var(--o) * -200deg))}
 }
 html[data-v4pages~="c1"] .cv4a{padding:24px var(--gr) 96px var(--g);margin-top:24px}
