@@ -25,7 +25,8 @@ import { getProject, projectsIn } from "../work";
 import type { BookingSlug } from "./booking-slugs";
 import type { Frame } from "../work-types";
 
-export type Faq = { q: string; a: string };
+/** `link`: words of the answer that are a link on the page (`label` is found in `a`); the answer itself stays plain text. */
+export type Faq = { q: string; a: string; link?: { href: string; label: string } };
 export type Block = { heading: string; items?: string[]; body?: string };
 export type Tile = { frame: Frame; href: string; caption: string };
 /** A place on the Where screen: its name and what working there means. */
@@ -547,6 +548,7 @@ export const BOOKING_PAGES: BookingPage[] = [
       {
         q: "Do you direct music videos?",
         a: "Yes. The Motion page has the music videos, directed and shot for artists in the Bay Area.",
+        link: { href: "/portfolio/video", label: "The Motion page" },
       },
       {
         q: "Do you shoot in Los Angeles or New York?",
