@@ -70,17 +70,18 @@
 /* Inner pages plan on trial, only under ?v4pages (lib/v4pages.ts, head script in app/layout.tsx).
    c1: Cover art in the site's system (components/cover/cover-page.tsx) */
 
-/* ── c1. The page title, the home's sleeves in an edge to edge grid, the project
+/* ── c1. The page title, the home's sleeves in a grid with the /portfolio gap, the project
    pages' ask. The sleeve, its record and the lift are the home's own rules (mtscroll.css, mt/motion/rows.css,
    which list `.cv4` beside their own scope); only what differs on a grid is here. `--u` is the home's design
    unit: a cell is a third of the window where the home's sleeve is 320 units. ── */
 html[data-v4pages~="c1"] .cv4p{padding-top:64px}
 html[data-v4pages~="c1"] .cv4h{padding:56px var(--gr) 0 var(--g)}
 html[data-v4pages~="c1"] .cv4h>div{display:flex;flex-direction:column;align-items:flex-start;gap:20px}
-html[data-v4pages~="c1"] .cv4{--u:calc(100vw / 960);list-style:none;margin:48px 0 0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));overflow-x:clip}
+html[data-v4pages~="c1"] .cv4{--u:calc(100vw / 960);list-style:none;margin:48px 0 0;padding:0 var(--gr) 0 var(--g);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;overflow-x:clip}
 html[data-v4pages~="c1"] .cv4 .mt-sleeve{position:relative;display:block;width:100%;height:auto;aspect-ratio:1;--o:var(--hin)}
-/* Square corners: the grid is seamless and UI corners are 0. */
-html[data-v4pages~="c1"] .cv4 .mt-sleeve .face,html[data-v4pages~="c1"] .cv4 .mt-sleeve .face img{border-radius:0}
+/* Space between the covers, on the /portfolio grid's gutters and gap (Julian, 2026-11-15), so photographs take their 4px. */
+html[data-v4pages~="c1"] .cv4 .mt-sleeve .face,html[data-v4pages~="c1"] .cv4 .mt-sleeve .face img{border-radius:4px}
+@media (max-width:700px){html[data-v4pages~="c1"] .cv4{gap:10px}}
 /* Pinned here: mtscroll.css and rows.css both dress the face at the same weight, and they load in separate files. */
 html[data-v4pages~="c1"] .cv4 .mt-sleeve .face{overflow:visible;background:none}
 html[data-v4pages~="c1"] .cv4 .mt-sleeve .face img{object-fit:cover}
