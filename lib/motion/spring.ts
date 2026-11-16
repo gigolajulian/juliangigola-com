@@ -1,6 +1,6 @@
 /* ── the lift's spring ────────────────────────────────────────────
  * The spring that carries a paged strip to its screen after a finger
- * lifts (`spring` and `throwTo` in `components/strip/motion.ts`).
+ * lifts.
  * Position in px, speed in px per second, a mass of one.
  * ─────────────────────────────────────────────────────────────── */
 

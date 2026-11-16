@@ -29,7 +29,7 @@ export function CardTilt() {
       if (!el) return;
       if (el !== on) {
         /* The card's own middle, from wherever its origin is: the deck
-           (`lib/deck.ts`) moves a portfolio cell's origin to the
+           moves a portfolio cell's origin to the
            screen's middle for its recede, and turned about that the
            tilt threw the card wide across its neighbours. */
         const [ox, oy] = getComputedStyle(el).transformOrigin.split(" ").map(parseFloat);

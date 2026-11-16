@@ -10,9 +10,8 @@ type G = typeof GSAP;
  * gather where they sit, solid all the way. Each on the line from the
  * middle of the screen out through its own place, in two waves: every
  * other one in their order (`--order` where they carry one, the page's
- * order otherwise), then the rest `WAVE` after. The cover's entrance
- * (`hero-gather.tsx`); the walls and a project's frames come in their
- * own ways (`streams`, `slides`, `gatherWhenSeen`).
+ * order otherwise), then the rest `WAVE` after. The walls and a
+ * project's frames come in their own ways (`streams`, `slides`, `gatherWhenSeen`).
  * ─────────────────────────────────────────────────────────────── */
 
 export const FLY = 1.3; // s
@@ -38,7 +37,7 @@ const radial: Path = (f, r, rank) => {
 
 /** Julian (2026-10-14), for the walls: the photographs stream in from
     above and below, a column at a time, every other column the other
-    way (`data-col` on the tile, `DriftWall.tsx`). */
+    way (`data-col` on the tile, `drift-wall.tsx`). */
 export const streams: Path = (f, r) => {
   const col = Number(f.closest<HTMLElement>("[data-col]")?.dataset.col ?? 0);
   return { x: 0, y: (col % 2 ? 1 : -1) * (innerHeight + r.height), delay: col * 0.05 };

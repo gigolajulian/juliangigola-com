@@ -81,7 +81,7 @@ function parseTTF(buf: ArrayBuffer): Font {
 type Text = { x: number; y: number; size: number; fill: string; text: string; font: Face; anchor: "start" | "end"; tc?: number };
 /** sb: IBM Plex Mono 500, labels and figures. rg: Inter Tight 500, names and notes. wm: Inter Tight Black, the wordmark and the title. B adds r4: Inter Tight 400, and ar: Archivo 800 at 125% width, the total. */
 type Face = "sb" | "rg" | "wm" | "r4" | "ar";
-/** The wordmark's tracking, as `site-header.tsx` sets the name. */
+/** The wordmark's tracking, as the site sets the name. */
 const TRACK = -0.045;
 const WORDMARK = "Julian Gigola";
 const money = (n: number) => `${n < 0 ? "-" : ""}${Math.abs(n).toFixed(2)} USD`;

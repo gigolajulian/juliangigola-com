@@ -2,7 +2,7 @@
 
 /* ── Hours, Templates and This device on Astryx ───────────────────
  * The classic LeadHours, TemplatesEditor
- * (templates.tsx) and the device block (setup.tsx: push, import from the
+ * and the device block (setup.tsx: push, import from the
  * Inbox, sign out, plus Export CSV) rebuilt. Same endpoints and bodies:
  * /api/booking/hours GET and PUT, PATCH `{ templates }`, PATCH `{ push }`,
  * POST `{ backfill, dry }` and `{ importStripe, dry }`, GET /api/inbox?csv.

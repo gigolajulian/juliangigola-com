@@ -61,6 +61,15 @@ describe("/api/contract", () => {
     expect((await (await GET(admin("GET", undefined, `?lead=${LEAD}`))).json()).contract.id).toBe(c.id);
   });
 
+  it("says a lead it cannot open is broken, not gone", async () => {
+    kv.data.get(`lead:${LEAD}`)!.value = "not-sealed";
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const res = await POST(admin("POST", { lead: LEAD }));
+    expect(res.status).toBe(500);
+    expect((await res.json()).error).toContain("cannot be opened");
+    expect((await POST(admin("POST", { lead: "nobody" }))).status).toBe(404);
+  });
+
   it("uses his saved templates", async () => {
     await PUT(admin("PUT", { templates: [{ id: "x", name: "Short", body: "{client} pays {fee}." }] }));
     const { contract: c } = await make();

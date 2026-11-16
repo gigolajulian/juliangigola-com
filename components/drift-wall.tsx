@@ -372,7 +372,7 @@ const DriftWall = ({
       const paused = heldRef.current;
       anims.forEach((a, c) => {
         if (!a) return;
-        // Flattening with the columns stopped from outside (proof-wall.tsx): left where they were put.
+        // Flattening with the columns stopped from outside (`proofs/wall.tsx`): left where they were put.
         if (flatRef.current !== undefined && a.playState === 'paused') return;
         const target = paused || hoveredColRef.current === c ? 0 : 1;
         if (rates[c] === target) {

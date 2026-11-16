@@ -42,13 +42,22 @@ export function V4Foot() {
     // a block hidden at this size (the phone list on /portfolio/video) is skipped
     while (sink && !sink.offsetHeight && sink.previousElementSibling) sink = sink.previousElementSibling as HTMLElement;
     let raf = 0, t0 = 0, y0 = scrollY, x = 0, v = 0, pk = 0, W = 0, out = 0, hot = false;
+    // What moves: the block, or on a grid (/portfolio) only the tiles in its last screen. Sinking and dimming
+    // the whole grid while its photos drift dropped frames (Julian, 2026-11-16).
+    let parts: HTMLElement[] = [];
     const setOut = (o: number) => {
       if (!sink || o === out) return;
+      if (!out) {
+        const tiles = sink.querySelectorAll<HTMLElement>(".wgrid .wt");
+        parts = tiles.length ? [...tiles].filter((t) => t.getBoundingClientRect().bottom > -innerHeight) : [sink];
+      }
       out = o;
-      // only while the footer is arriving: at rest the block has no transform and no layer
-      sink.toggleAttribute("data-v4-sink", o > 0);
-      if (o > 0) sink.style.setProperty("--out", o.toFixed(3));
-      else sink.style.removeProperty("--out");
+      // only while the footer is arriving: at rest nothing has a transform or a layer
+      for (const p of parts) {
+        p.toggleAttribute("data-v4-sink", o > 0);
+        if (o > 0) p.style.setProperty("--out", o.toFixed(3));
+        else p.style.removeProperty("--out");
+      }
     };
     const tick = (now: number) => {
       raf = requestAnimationFrame(tick);

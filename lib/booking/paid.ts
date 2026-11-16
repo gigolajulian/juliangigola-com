@@ -10,7 +10,6 @@ export const isPaid = (slug: string): slug is PaidSlug => (PAID as readonly stri
     The one place the figure lives: the charge, the screens and the mails all read it.
     Here and not in `deposit.ts`, which pulls server code the client bundles must not. */
 export const DEPOSIT: Record<PaidSlug, number> = { portraits: 250, headshots: 200, graduation: 200, digitals: 150, "model-test": 100 };
-export const depositOf = (slug: PaidSlug) => DEPOSIT[slug];
 /** What a booking made before amounts were stored paid: every deposit was $100 then. */
 export const LEGACY_DEPOSIT = 100;
 /** For a slug held as a plain string (a card's event slug). Never the site's own "studio-digitals": that one is `digitals` here. */

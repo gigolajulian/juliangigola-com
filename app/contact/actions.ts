@@ -256,33 +256,33 @@ export async function submitEnquiry(
        chain covers it. */
     try {
       const inline = await pickAttachments(picks, env.ASSETS);
-      const { subject, text, html } = emailCopy(
-        stored,
-        LOOKS,
-        inline.map((a) => a.src),
-      );
+      const files = [
+        ...(await Promise.all(
+          uploads.map(async (f) => ({
+            content: await f.arrayBuffer(),
+            filename: f.name.slice(0, 80),
+            type: f.type,
+            disposition: "attachment" as const,
+          })),
+        )),
+        ...inline.map((a) => a.file),
+      ];
       /* `to` although the binding already fixes the destination: the docs
          call it optional there, and the runtime threw "Email must have at
          least one recipient" on every enquiry until it was set. */
-      await env.EMAIL?.send({
-        to: TO,
-        from: { name: "Julian Gigola website", email: FROM },
-        subject,
-        text,
-        html,
-        replyTo: { name: stored.name, email: stored.email },
-        attachments: [
-          ...(await Promise.all(
-            uploads.map(async (f) => ({
-              content: await f.arrayBuffer(),
-              filename: f.name.slice(0, 80),
-              type: f.type,
-              disposition: "attachment" as const,
-            })),
-          )),
-          ...inline.map((a) => a.file),
-        ],
-      });
+      const mail = (copy: ReturnType<typeof emailCopy>, attachments: typeof files) =>
+        env.EMAIL?.send({ to: TO, from: { name: "Julian Gigola website", email: FROM }, ...copy, replyTo: { name: stored.name, email: stored.email }, attachments });
+      const { subject, ...copy } = emailCopy(stored, LOOKS, inline.map((a) => a.src));
+      try {
+        await mail({ subject, ...copy }, files);
+      } catch (err) {
+        // Images can push a mail past the size limit: the mail matters more, so it goes again without them, as `alertHello` does.
+        if (!files.length) throw err;
+        console.error("contact: mail with images failed, sending without them", err);
+        const plain = emailCopy(stored, LOOKS);
+        const note = `${files.length} image(s) were too large to attach. They are in the Inbox, or ask the client to email them.`;
+        await mail({ ...plain, text: `${plain.text}\n\n${note}`, html: `${plain.html}<p>${note}</p>` }, []);
+      }
       if (env.EMAIL) await lead.then(() => logMail(env, stored.email, subject, { to: "hello@", kind: "inquiry" }));
     } catch (err) {
       console.error(
