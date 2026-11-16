@@ -46,8 +46,11 @@ export const namesInvoice = (text: string, no: string) => /invoice/i.test(text) 
 export type InvoiceFrom = { name: string; a1: string; a2: string; a3: string; email: string; phone: string; ein: string; signoff: string; notes: string; bank: string; routing: string; account: string; late: string; tax: string };
 
 /** A lead's deposit in dollars: what the site logged as paid (`tell` in lib/booking/deposit.ts), else their session's (`lib/booking/paid.ts`), else the $100 every deposit was before 2026-11-15. */
-export const depositOfLead = (l: { kind?: string; events?: { kind: string; note?: string; amount?: number }[] }) =>
-  l.events?.find((e) => e.kind === "payment" && e.note === "Deposit")?.amount ?? depositFor(l.kind ?? "");
+export function depositOfLead(l: { kind?: string; deposit?: string; events?: { kind: string; ref?: string; note?: string; amount?: number }[] }) {
+  const paid = (l.events ?? []).filter((e) => e.kind === "payment" && e.note === "Deposit");
+  // The one the lead's Stripe link names, else the latest: a returning client has an older deposit on the log too.
+  return (paid.find((e) => e.ref && l.deposit?.endsWith(e.ref)) ?? paid.at(-1))?.amount ?? depositFor(l.kind ?? "");
+}
 /** Lines that fit above the notes block on the page. */
 export const MAX_LINES = 8;
 /** Rows that fit on design B, the deposit row counted. */

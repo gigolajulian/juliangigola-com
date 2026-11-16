@@ -78,7 +78,7 @@ const usd = (n: number) => `$${n.toLocaleString("en-US")}`;
 const longDay = (iso: string) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, weekday: "long", month: "long", day: "numeric", year: "numeric" }).format(new Date(iso));
 
 /** A template's fields filled from a lead. Unknown values stay readable blanks for him to fill. */
-export function fillContract(body: string, l: Pick<Lead, "name" | "when" | "quote" | "licence"> & Partial<Pick<Lead, "kind" | "events">>, today = new Date().toISOString()): string {
+export function fillContract(body: string, l: Pick<Lead, "name" | "when" | "quote" | "licence"> & Partial<Pick<Lead, "kind" | "deposit" | "events">>, today = new Date().toISOString()): string {
   const usage = l.licence ? `${l.licence.use || "Licensed use"}, until ${new Date(`${l.licence.end}T12:00:00Z`).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "UTC" })}` : "Personal use";
   return body
     .replace(/\{client\}/g, l.name)

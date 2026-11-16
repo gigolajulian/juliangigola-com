@@ -15,6 +15,10 @@ describe("invoice", () => {
     expect(depositOfLead({ kind: "headshots", events: [] })).toBe(BY_SESSION.headshots);
     expect(depositOfLead({ kind: "digitals" })).toBe(150);
     expect(depositOfLead({ kind: "session" })).toBe(100);
+    // A returning client: the October $100 and today's $200. The link's intent wins, else the latest.
+    const events = [{ kind: "payment", ref: "pi_OLD", note: "Deposit", amount: 100 }, { kind: "payment", ref: "pi_NEW", note: "Deposit", amount: 200 }];
+    expect(depositOfLead({ kind: "headshots", events })).toBe(200);
+    expect(depositOfLead({ kind: "headshots", deposit: "https://dashboard.stripe.com/payments/pi_OLD", events })).toBe(100);
   });
   it("refuses empty lines, a bad date and a negative deposit", () => {
     expect(cleanInvoice({ date: "2026-11-06", lines: [] })).toHaveProperty("error");

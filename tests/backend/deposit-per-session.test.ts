@@ -69,6 +69,7 @@ beforeEach(() => {
       return Response.json({ id: busy.at(-1)!.id });
     }
     if (method === "DELETE") return new Response(null, { status: 204 });
+    if (method === "PATCH") return Response.json({ id: "ev0" });
     if (url.includes("/events")) return Response.json({ items: [] });
     return Response.json({}, { status: 404 });
   });
@@ -87,11 +88,12 @@ async function pay(slug: string, cents: number) {
   return hook(new Request("https://juliangigola.com/api/stripe", { method: "POST", body: raw, headers: { "stripe-signature": `t=${at},v1=${sig}` } }));
 }
 
-/** Cancels through the client's own link, a week ahead: refundable. */
-async function cancel() {
+/** A change through the client's own link, a week ahead: refundable. */
+async function act(body: { action: "cancel" } | { action: "reschedule"; start: string }) {
   const [, id, t] = String(client.sent.at(-1)!.text).match(/\/booking\/(\w+)\?t=([\w.-]+)&do=cancel/)!;
-  return change(new Request(`https://juliangigola.com/api/booking/${id}`, { method: "POST", body: JSON.stringify({ t, action: "cancel" }) }), { params: Promise.resolve({ id }) });
+  return change(new Request(`https://juliangigola.com/api/booking/${id}`, { method: "POST", body: JSON.stringify({ t, ...body }) }), { params: Promise.resolve({ id }) });
 }
+const cancel = () => act({ action: "cancel" });
 const money = async () => (await leadOf(ctx.env.INBOX as FakeKV, "qa@example.com"))!.events.filter((e) => e.kind === "payment" || e.kind === "refund").map((e) => [e.kind, e.amount]);
 
 describe("the amount is the session's, set on the server", () => {
@@ -138,6 +140,11 @@ describe.each([
     expect(mail.sent.at(-1)!.subject).toMatch(new RegExp(`^Deposit paid: .*\\$${usd}$`));
     expect(events[0].description).toContain(`Deposit paid on the site: $${usd} (ref ${PI}).`);
     expect(await money()).toEqual([["payment", usd]]);
+
+    // A move keeps what was paid: the new confirmation says the same figure.
+    busy = [];
+    expect((await act({ action: "reschedule", start: "2026-11-25T18:00:00.000Z" })).status).toBe(200);
+    expect(String(client.sent.at(-1)!.text)).toContain(`Deposit paid: $${usd}.00`);
 
     const res = await cancel();
     expect(await res.json()).toMatchObject({ refunded: true, record: { cancelled: true, paid: true, deposit: usd } });
