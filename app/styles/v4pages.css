@@ -109,3 +109,7 @@
   from { translate: 0 calc(var(--v4k, 12%) * .5); }
   to { translate: 0 calc(var(--v4k, 12%) * -.5); }
 }
+/* tilt: no hover zoom while the page scrolls (v4-tilt.tsx sets `data-v4scroll`), in every browser */
+@media (hover: hover) and (pointer: fine) {
+  html[data-v4pages~="tilt"] .v3 #p-work [data-v4scroll] .wt:hover img { transform: none; }
+}
