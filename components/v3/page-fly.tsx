@@ -3,6 +3,7 @@
 import * as React from "react";
 import { usePathname } from "next/navigation";
 import { scrollTop } from "@/components/v3/smooth-scroll";
+import { v4pages } from "@/lib/v4pages";
 
 /* Page opening A (mock https://claude.ai/artifact/6Nbep18kL572cWznUuA66K):
    the photo you click grows into the next page's hero. Any link, or a row
@@ -68,6 +69,8 @@ export function PageFly() {
        pop, or the replay page-transition.tsx hands back inside its trip. */
     const pop = () => {
       if (!trial() || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      // Closing the frame viewer pops its own entry on the same page: that is not a trip back (`?v4pages=view`, project pages).
+      if (v4pages("view") && location.pathname === here.current) return;
       if (back.current && Date.now() - back.current.t < 300) return;
       const hero = document.querySelector<HTMLElement>(HERO);
       const img = hero?.querySelector("img");

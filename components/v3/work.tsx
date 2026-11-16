@@ -7,7 +7,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { createPortal } from "react-dom";
 import type { Flip as FlipT } from "gsap/Flip";
-import { V3Foot } from "@/components/v3/chrome";
+import { PageFoot } from "@/components/v3/chrome";
 import DISC from "@/lib/discipline-order.json";
 import { mplan, GSAP_OUT } from "@/lib/mplan";
 // The canvas view loads only when it opens, not with every /portfolio visit.
@@ -212,7 +212,7 @@ function FrameTile({ f, first, onOpen }: { f: FrameItem; first?: boolean; onOpen
 }
 
 /** A gallery's frames full size over the page: arrows step, Escape or Back closes. */
-function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: number | null; onGo: (n: number) => void; onClose: () => void }) {
+export function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: number | null; onGo: (n: number) => void; onClose: () => void }) {
   const ref = React.useRef<HTMLDialogElement>(null);
   /* The frame and its two neighbours sit side by side on one track, the
      neighbours loading quietly behind it, so a step is the track gliding
@@ -1304,7 +1304,7 @@ export function V3Work({
               document.body,
             )
           : null}
-        <V3Foot />
+        <PageFoot />
       </section>
     </div>
   );
