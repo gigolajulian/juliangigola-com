@@ -274,7 +274,6 @@ html[data-v4pages~="s4"] .v3 #p-campus .s4-row p{margin:14px 0 0;max-width:46ch;
   html[data-v4pages~="s4"] .v3 #p-campus .s4-ph[data-on]{opacity:1}
   html[data-v4pages~="s4"] .v3 #p-campus .s4-row{grid-column:1;grid-row:var(--i);min-height:calc(var(--s4h) / 2 + 48px);box-sizing:border-box;padding:28px 0 40px;border-bottom:0;border-top:1px solid var(--line);color:color-mix(in srgb,var(--ink) 54%,var(--bg));transition:color .25s ease-out}
   html[data-v4pages~="s4"] .v3 #p-campus .s4-row:first-of-type{border-top:0}
-  /* the last row is a photo tall, so the photo is still held when that row is at mid screen */
-  html[data-v4pages~="s4"] .v3 #p-campus .s4-row:last-of-type{min-height:calc(var(--s4h) + 64px)}
+  /* The last row is as tall as the others (Julian, 2026-11-16: it held twice as long), so the photo leaves with it. */
   html[data-v4pages~="s4"] .v3 #p-campus .s4-row[data-on]{color:var(--ink)}
 }
