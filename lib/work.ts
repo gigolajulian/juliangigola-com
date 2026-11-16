@@ -208,8 +208,8 @@ const fromAdded = (p: AddedProject): Project => {
  * Refiles a project under the discipline `/admin` chose for it.
  *
  * Applied after the merge so it reaches harvested projects as well as added
- * ones — their categories come from the generated manifest, where an edit
- * would survive only until the next harvest.
+ * ones — their categories come from `lib/work-data.ts`, which `/admin` does
+ * not write.
  *
  * An unknown category slug is left alone rather than throwing. This map is
  * keyed by project slug, and a re-harvest can retire a project entirely; a
@@ -246,8 +246,7 @@ const refile = (project: Project): Project => {
  * Replaces the credits `/admin` has rewritten.
  *
  * A map for the same reason `refile` uses one: the harvested projects keep
- * their credits in the generated manifest, and `scripts/harvest.mjs` would
- * take an edit there back on its next run.
+ * their credits in `lib/work-data.ts`, which `/admin` does not write.
  *
  * Checked with `in` rather than by truthiness, so an empty array is honoured.
  * "This project's harvested credits are wrong, publish none" is a real

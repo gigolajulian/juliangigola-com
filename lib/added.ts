@@ -358,8 +358,8 @@ export type AddedFile = {
    * Disciplines added here rather than harvested from the old site.
    *
    * `lib/work-data.ts` holds the thirteen the old nav had, and
-   * `scripts/harvest.mjs` regenerates that file — so a discipline invented
-   * now has to live somewhere the harvest cannot reach. Merged into
+   * `/admin` does not write that file, so a discipline invented now lives
+   * here. Merged into
    * `CATEGORIES` in `lib/work.ts`, after the harvested ones, and a slug that
    * already exists there is ignored rather than duplicated.
    *
@@ -378,10 +378,9 @@ export type AddedFile = {
   /**
    * Slugs to leave off the site.
    *
-   * Harvested projects cannot be deleted: `lib/work-data.ts` is regenerated
-   * from the old site, so a removal there comes back on the next harvest with
-   * nothing to indicate it ever went. Suppressing them here is the only kind
-   * of removal that survives, and it has the advantage of being reversible —
+   * Harvested projects cannot be deleted from `/admin`, which does not write
+   * `lib/work-data.ts`. Suppressing them here is the only removal it has, and
+   * it has the advantage of being reversible —
    * the work is still in the archive, it is simply not published.
    *
    * Applies to added projects too, so "take this down for now" is one

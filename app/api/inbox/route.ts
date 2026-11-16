@@ -40,11 +40,14 @@ async function* everyKey<M>(inbox: NonNullable<CloudflareEnv["INBOX"]>, prefix: 
 }
 
 /* ── reading the inbox ────────────────────────────────────────────
- * The endpoint behind /admin's Inbox tab and the Leads desk. GET lists,
- * opens and exports (enquiries, leads, the activity log, stats, templates,
- * invoices, CSVs); PATCH changes a lead or an enquiry; POST makes leads,
- * invoices and push subscriptions and runs the imports; DELETE removes. The
- * mode is picked by the query string or the body, handler by handler below.
+ * The endpoint behind /admin's Inbox tab and the Leads desk. The mode is
+ * picked by the query string (GET) or the body (the rest):
+ * - GET: enquiries, leads, the activity log, stats, templates, invoices,
+ *   CSVs, the VAPID public key.
+ * - PATCH: push subscribe and test, the invoice From and photo, a lead,
+ *   templates, an enquiry read or unread.
+ * - DELETE: an enquiry, or the emptied lead trash.
+ * - POST: a new lead, the Notion and Stripe imports, the inbox backfill.
  *
  * Opens with the /admin credentials in `lib/vouch.ts`: the `INBOX_KEY`
  * header, compared in constant time, or a GitHub token that can push. Its
