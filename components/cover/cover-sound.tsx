@@ -33,7 +33,7 @@ const ended = () => {
   emit();
 };
 
-/* SoundCloud gives a page no clip to play itself, only its player: one frame the size of a dot, driven by the
+/* SoundCloud gives a page no clip to play itself, only its player: one frame kept off the screen, driven by the
    player's own messages (play, pause, setVolume 0 to 100, seekTo; it answers `ready` and `finish`). */
 const SC = "https://w.soundcloud.com";
 let frame: HTMLIFrameElement | null = null, scReady = false, scUrl = "";
@@ -51,7 +51,9 @@ function scPlay(url: string) {
     frame.title = "SoundCloud player";
     frame.tabIndex = -1;
     frame.setAttribute("aria-hidden", "true");
-    frame.style.cssText = "position:fixed;left:0;bottom:0;width:1px;height:1px;border:0;opacity:0;pointer-events:none";
+    // A real size, off the screen: at 1px SoundCloud's player draws its waveform on an empty canvas, which throws
+    // in WebKit ("The object is in an invalid state", createPattern) and the track never starts (JG - MAC, #1086).
+    frame.style.cssText = "position:fixed;left:-9999px;bottom:0;width:320px;height:166px;border:0;opacity:0;pointer-events:none";
     addEventListener("message", (e) => {
       if (e.origin !== SC || e.source !== frame?.contentWindow) return;
       let method = "";
