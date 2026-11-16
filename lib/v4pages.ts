@@ -4,7 +4,8 @@ import * as React from "react";
     `?v4pages=s1,a2` only those, `?v4pages=0` off (head script, app/layout.tsx).
     s1: the phone book bar on service pages. s2: their list rows as numbered rows.
     a2: About's marks on the charcoal band. m2p: behind the scenes on project pages.
-    p3: the V4 drift in the /portfolio grid tiles (CSS only, app/styles/v4pages.css). */
+    p3: the /portfolio grid's scroll motion (v4-drift.tsx, app/styles/v4pages.css). On for
+    everyone since 2026-11-15; `?v4pages=0` still turns it off for the tab. */
 export const V4PAGES = "s1 s2 a2 m2p p3";
 
 export const v4pages = (key: string) =>
