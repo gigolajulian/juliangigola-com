@@ -6,8 +6,8 @@ import { DEPOSIT, PAID, isPaid } from "@/lib/booking/paid";
 import { LENGTH, SESSIONS } from "@/lib/v3";
 
 /* The session tables derived from `EVENTS` and `PAID` give the values they
-   held when each was written by hand (2026-11-16). A change here is a change
-   on the site. */
+   held when each was written by hand (2026-11-16), with Headshots and Studio
+   digitals at 45 minutes (Julian). A change here is a change on the site. */
 
 describe("session tables", () => {
   it("names each deposit the way it always did", () => {
@@ -17,7 +17,7 @@ describe("session tables", () => {
     expect(SESSION_EVENTS).toEqual({ portraits: "juliangigola/portraits", graduation: "juliangigola/graduation", headshots: "juliangigola/headshots", "studio-digitals": "juliangigola/digitals" });
   });
   it("keeps the V3 lengths", () => {
-    expect(LENGTH).toEqual({ portraits: 60, graduation: 90, headshots: 45, "studio-digitals": 60, "model-test": 60, weddings: 480, consultation: 15, "music-photography": 15, "fashion-photography": 15, "brand-photography": 15, editorial: 15, events: 0 });
+    expect(LENGTH).toEqual({ portraits: 60, graduation: 90, headshots: 45, "studio-digitals": 45, "model-test": 60, weddings: 480, consultation: 15, "music-photography": 15, "fashion-photography": 15, "brand-photography": 15, editorial: 15, events: 0 });
   });
   it("takes a deposit on the same sessions", () => {
     expect(Object.values(SESSIONS).filter((s) => s.paid).map((s) => s.slug)).toEqual(["portraits", "graduation", "headshots", "studio-digitals", "model-test"]);

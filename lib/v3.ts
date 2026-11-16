@@ -230,7 +230,5 @@ export const rate = (s: Session) =>
 const OWN_LENGTH: Partial<Record<SessionSlug, number>> = {
   weddings: 480,
   events: 0,
-  // shortcut: the stepper's master (MIN) says 60, the event 45; kept until Julian picks one.
-  "studio-digitals": 60,
 };
 export const LENGTH = Object.fromEntries(Object.values(SESSIONS).map((s) => [s.slug, OWN_LENGTH[s.slug] ?? EVENTS[eventOf(s)]?.length ?? 0])) as Record<SessionSlug, number>;
