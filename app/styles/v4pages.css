@@ -30,7 +30,7 @@
     html[data-v4pages~="p3"] .v3 #p-work .wgrid:not(.square) .wt:nth-child(3n+1) { --v4k: 16%; }
     html[data-v4pages~="p3"] .v3 #p-work .wgrid:not(.square) .wt:nth-child(3n+2) { --v4k: 8%; }
 
-    html[data-v4pages~="p3"] .v3 #p-work .wgrid:not(.wframes) .wt[data-v4d] { will-change: translate; }
+    html[data-v4pages~="p3"] .v3 #p-work .wgrid[data-v4lag]:not(.wframes) .wt[data-v4d] { will-change: translate; }
   }
 }
 @keyframes v4p3-drift {
