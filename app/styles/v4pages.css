@@ -12,15 +12,16 @@
    !important: motion plan item 6 (`mplan~=scroll`, motion-plan.css) holds every
    grid image still with `animation: none !important`; this trial lifts that for
    the /portfolio grid photos only, and only while the flag is on.
+   Not the square Cover art gallery: the oversize would crop the type on the art.
    `data-v4d` (components/v3/v4-drift.tsx): only tiles near the screen animate,
    since each animated image is its own compositor layer. ── */
 @supports (animation-timeline: view()) {
   @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-    html[data-v4pages~="p3"] .v3 #p-work .wgrid .wt .ph { view-timeline: --v4p3 block; }
-    html[data-v4pages~="p3"] .v3 #p-work .wgrid .wt .ph > img { scale: 1.14; }
-    html[data-v4pages~="p3"] .v3 #p-work .wgrid .wt[data-v4d] .ph > img { animation: v4p3-drift linear both !important; animation-timeline: --v4p3 !important; }
-    html[data-v4pages~="p3"] .v3 #p-work .wgrid .wt:nth-child(3n+1) { --v4k: 12%; }
-    html[data-v4pages~="p3"] .v3 #p-work .wgrid .wt:nth-child(3n+2) { --v4k: 5%; }
+    html[data-v4pages~="p3"] .v3 #p-work .wgrid:not(.square) .wt .ph { view-timeline: --v4p3 block; }
+    html[data-v4pages~="p3"] .v3 #p-work .wgrid:not(.square) .wt .ph > img { scale: 1.14; }
+    html[data-v4pages~="p3"] .v3 #p-work .wgrid:not(.square) .wt[data-v4d] .ph > img { animation: v4p3-drift linear both !important; animation-timeline: --v4p3 !important; }
+    html[data-v4pages~="p3"] .v3 #p-work .wgrid:not(.square) .wt:nth-child(3n+1) { --v4k: 12%; }
+    html[data-v4pages~="p3"] .v3 #p-work .wgrid:not(.square) .wt:nth-child(3n+2) { --v4k: 5%; }
   }
 }
 @keyframes v4p3-drift {
