@@ -112,7 +112,8 @@ html[data-v4pages~="c1"] .cv4a .pj-ask{border-top:1px solid var(--line)}
 html[data-v4pages~="c1"] .cv4a .cv4b{display:flex;flex-wrap:wrap;gap:12px}
 @media (min-width:701px){html[data-v4pages~="c1"] .cv4a .cv4b{margin:0 clamp(40px,7vw,140px) 0 auto}}
 
-/* p3: the scroll motion of the /portfolio grid */
+/*   p3: the scroll motion of the /portfolio grid. On for everyone since 2026-11-15
+   (the head script defaults to it); `?v4pages=0` turns it off for the tab. */
 
 /* ── p3. Two moves, both from the V4 home, both gone at rest.
    Drift: each grid photo sits a little oversized in its frame and travels as the
@@ -129,8 +130,8 @@ html[data-v4pages~="c1"] .cv4a .cv4b{display:flex;flex-wrap:wrap;gap:12px}
    Mouse only, never under reduced motion; a browser without view timelines keeps
    still, unscaled tiles.
    !important: motion plan item 6 (`mplan~=scroll`, motion-plan.css) holds every
-   grid image still with `animation: none !important`; this trial lifts that for
-   the /portfolio grid photos only, and only while the flag is on.
+   grid image still with `animation: none !important`; p3 lifts that for
+   the /portfolio grid photos only (Julian, 2026-11-15).
    Not the square Cover art gallery: the oversize would crop the type on the art.
    `data-v4d` (v4-drift.tsx): only tiles near the screen move, since each moving
    tile is its own compositor layer. ── */
@@ -142,7 +143,10 @@ html[data-v4pages~="c1"] .cv4a .cv4b{display:flex;flex-wrap:wrap;gap:12px}
     html[data-v4pages~="p3"] .v3 #p-work .wgrid:not(.square) .wt:nth-child(3n+1) { --v4k: 16%; }
     html[data-v4pages~="p3"] .v3 #p-work .wgrid:not(.square) .wt:nth-child(3n+2) { --v4k: 8%; }
 
-    html[data-v4pages~="p3"] .v3 #p-work .wgrid:not(.wframes) .wt[data-v4d] { will-change: translate; }
+    html[data-v4pages~="p3"] .v3 #p-work .wgrid[data-v4lag]:not(.wframes) .wt[data-v4d] { will-change: translate; }
+    /* No hover zoom while the page scrolls: tiles passing under a moving pointer each restarted
+       the zoom on a drifting photo, 9 long tasks a scroll against 0 without (and 3 on the plain grid). */
+    html[data-v4pages~="p3"] .v3 #p-work .wgrid[data-v4lag] .wt:hover img { transform: none; }
   }
 }
 @keyframes v4p3-drift {

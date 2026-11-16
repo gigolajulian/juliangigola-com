@@ -3,8 +3,7 @@ import { gcal } from "@/lib/booking/gcal";
 
 /* ── open times, from hello@'s free/busy ──────────────────────────
  * The rules (`lib/booking/booking-rules.ts`) say when Julian works; Google's
- * freeBusy says what is already taken, Cal.com's bookings included while
- * both engines run. A start is offered when the session and its buffer
+ * freeBusy says what is already taken. A start is offered when the session and its buffer
  * after it touch nothing busy. `GET /api/slots` serves these to the picker
  * and `isSlotOpen` rechecks one before money or a booking moves.
  * ─────────────────────────────────────────────────────────────── */
@@ -34,7 +33,7 @@ export function zoned(y: number, m: number, d: number, min: number, tz = TZ) {
   return guess - offset(first, tz);
 }
 
-/** `2026-11-04T10:00:00-08:00`: the instant written in `tz`, as Cal.com writes its slots. */
+/** `2026-11-04T10:00:00-08:00`: the instant written in `tz`, with its offset. */
 export function localIso(ms: number, tz: string) {
   const off = offset(ms, tz) / 6e4;
   const t = new Date(ms + off * 6e4).toISOString().slice(0, 19);

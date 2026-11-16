@@ -7,7 +7,7 @@ import { json } from "@/lib/http";
 
 /* ── open times for the picker, from the site's own engine ────────
  * GET /api/slots?slug=portraits&start=2026-11-04&end=2027-03-04&timeZone=...
- * Answers in Cal.com's shape (`/v2/slots?format=range` plus the event),
+ * Answers { status, event, data: { day: [{ start, end }] } },
  * which `components/booking/use-picker.tsx` reads; a failure is { error }. Starts are
  * written in the visitor's zone and grouped by their day there. See
  * `lib/booking/slots.ts`. Off (503) until GCAL_OAUTH is set.

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { AMOUNT } from "@/lib/booking/deposit";
-import { balance, cleanInvoice, dayB, DEPOSIT, dueOf, invoiceNo, MAX_ROWS_B, mmyy, namesInvoice, overdue, usdB, type InvoiceB } from "@/lib/leads/invoice";
+import { DEPOSIT as BY_SESSION } from "@/lib/booking/paid";
+import { balance, cleanInvoice, dayB, depositOfLead, dueOf, invoiceNo, MAX_ROWS_B, mmyy, namesInvoice, overdue, usdB, type InvoiceB } from "@/lib/leads/invoice";
 
 describe("invoice", () => {
   it("numbers by month: 1126, 1126-2, 1126-3", () => {
@@ -10,7 +10,16 @@ describe("invoice", () => {
   it("takes the deposit off to the cent", () => {
     expect(balance({ lines: [{ desc: "a", qty: 1, rate: 450 }, { desc: "b", qty: 3, rate: 0.1 }], paid: 100 })).toBe(350.3);
   });
-  it("matches the deposit the site charges", () => expect(DEPOSIT * 100).toBe(AMOUNT));
+  it("takes a lead's deposit from what was paid, else their session, else the old $100", () => {
+    expect(depositOfLead({ kind: "headshots", events: [{ kind: "payment", note: "Deposit", amount: 100 }] })).toBe(100);
+    expect(depositOfLead({ kind: "headshots", events: [] })).toBe(BY_SESSION.headshots);
+    expect(depositOfLead({ kind: "digitals" })).toBe(150);
+    expect(depositOfLead({ kind: "session" })).toBe(100);
+    // A returning client: the October $100 and today's $200. The link's intent wins, else the latest.
+    const events = [{ kind: "payment", ref: "pi_OLD", note: "Deposit", amount: 100 }, { kind: "payment", ref: "pi_NEW", note: "Deposit", amount: 200 }];
+    expect(depositOfLead({ kind: "headshots", events })).toBe(200);
+    expect(depositOfLead({ kind: "headshots", deposit: "https://dashboard.stripe.com/payments/pi_OLD", events })).toBe(100);
+  });
   it("refuses empty lines, a bad date and a negative deposit", () => {
     expect(cleanInvoice({ date: "2026-11-06", lines: [] })).toHaveProperty("error");
     expect(cleanInvoice({ date: "11/6/2026", lines: [{ desc: "a", qty: 1, rate: 1 }] })).toHaveProperty("error");

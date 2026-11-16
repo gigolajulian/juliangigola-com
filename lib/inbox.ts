@@ -52,8 +52,10 @@ export type Enquiry = {
   files?: string[];
   /** Where it came from, unasked (`visitContext`). */
   context?: VisitContext;
-  /** Bookings only: the Stripe dashboard link of a $100 deposit paid on the site, once Stripe has confirmed it. */
+  /** Bookings only: the Stripe dashboard link of a deposit paid on the site, once Stripe has confirmed it. */
   deposit?: string;
+  /** Bookings only: what that deposit was, in dollars. Unset on a row from before 2026-11-15: $100 then. */
+  depositUsd?: number;
   /** Bookings only: a paid session booked with no Stripe-confirmed deposit. */
   noDeposit?: boolean;
 };
@@ -454,6 +456,7 @@ export type Summary = {
   detail?: string;
   /** Bookings only: the deposit's Stripe link, so the row says it was paid. */
   deposit?: string;
+  depositUsd?: number;
   noDeposit?: boolean;
 };
 
@@ -548,6 +551,7 @@ export const summary = (e: Enquiry): Summary => ({
   // A booking's session and time, so its row says when without opening.
   ...(e.type === "booking" && e.detail ? { detail: e.detail } : {}),
   ...(e.deposit ? { deposit: e.deposit } : {}),
+  ...(e.depositUsd ? { depositUsd: e.depositUsd } : {}),
   ...(e.noDeposit ? { noDeposit: true } : {}),
 });
 

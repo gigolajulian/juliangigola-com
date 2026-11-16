@@ -83,6 +83,7 @@ function line(e: LeadEvent): string {
     case "refund": return `Refunded $${(e.amount ?? 0).toLocaleString("en-US")}${e.note ? `, ${e.note}` : ""}`;
     case "reschedule": return `Moved the session${e.note ? ` to ${e.note}` : ""}`;
     case "cancel": return `Cancelled the session${e.note ? `. ${e.note}` : ""}`;
+    case "no-show": return `No-show${e.note ? `. ${e.note}` : ""}`;
     case "selects": return `Sent selects${e.note ? `: ${e.note}` : ""}`;
     case "invoice-paid": return `Invoice ${e.note ?? ""}`;
   }

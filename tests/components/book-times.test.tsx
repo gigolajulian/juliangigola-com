@@ -14,11 +14,11 @@ vi.mock("@/components/booking/time-picker", () => ({
   },
 }));
 
-import { CalEmbed } from "@/components/booking/cal-embed";
+import { BookTimes } from "@/components/booking/book-times";
 
-describe("CalEmbed", () => {
+describe("BookTimes", () => {
   it("mounts the picker with a way out when times fail", () => {
-    render(<CalEmbed path="juliangigola/portraits" title="Pick a time" />);
+    render(<BookTimes path="juliangigola/portraits" title="Pick a time" />);
     expect(screen.getByTestId("tp").getAttribute("data-path")).toBe("juliangigola/portraits");
     expect(screen.getByRole("alert").textContent).toMatch(/Times didn.t load/);
     expect(screen.getByRole("link", { name: "Inquire" }).getAttribute("href")).toBe("/contact/form");
@@ -26,7 +26,7 @@ describe("CalEmbed", () => {
   });
 
   it("Try again mounts a fresh picker", () => {
-    render(<CalEmbed path="juliangigola/portraits" title="Pick a time" />);
+    render(<BookTimes path="juliangigola/portraits" title="Pick a time" />);
     const before = seen.mounts;
     fireEvent.click(screen.getByRole("button", { name: "Try again" }));
     expect(seen.mounts).toBeGreaterThan(before);

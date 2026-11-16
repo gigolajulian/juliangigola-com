@@ -8,6 +8,7 @@ import { ReferencePicks } from "@/components/reference-picks";
 import { Calendar } from "@/components/v3/flow";
 import { dlabel } from "@/components/v3/flow";
 import { duration } from "@/lib/booking/booking-rules";
+import { depositFor } from "@/lib/booking/paid";
 import { fmt } from "@/components/v3/flow";
 import type { Shell } from "@/components/v3/flow";
 import { looksLikeEmail } from "@/lib/inbox";
@@ -22,6 +23,7 @@ const GESTURE_GAP_MS = 120;
 export function V3Steps({ c }: { c: CardCtx & { v3: V3Book } }) {
   const { v3, username, slug, tz, length, needsWhere, opt, setOpt, booked, days, view, setView, anchor, setAnchor, pick, chosen, setChosen, step, setStep, swipeX: swipeXRef, wheelGate, stripRef, more, setMore, paid, deposit, refs, v3root, error, bad, setBad, blank, setBlank, load, choose, today, book, refill, v3steps, v3sub, date } = c;
   const end = pick.min + length;
+  const usd = depositFor(slug);
   const range = `${fmt(pick.min)} to ${fmt(end)}`;
   const at = step === "done" ? v3steps.length : STEP_AT[step] + 1;
   const rows: [string, React.ReactNode][] = [["Day", dlabel(date)], ["Time", range], ["Length", duration(length)]];
@@ -32,13 +34,13 @@ export function V3Steps({ c }: { c: CardCtx & { v3: V3Book } }) {
     return (
       <DepositStep
         v3={(p) => shell(p)}
-        head={<div className="fig"><b>$100</b><span className="lbl mute">Holds {dlabel(date)}, {fmt(pick.min)}</span></div>}
+        head={<div className="fig"><b>${usd}</b><span className="lbl mute">Holds {dlabel(date)}, {fmt(pick.min)}</span></div>}
         body={deposit}
         refs={refs}
         rows={[
           [`${v3.name}, ${duration(length)}`, price],
-          ["Deposit today", "$100"],
-          ["Balance after the shoot", v3.from != null ? `$${v3.from - 100}` : "Rest of the quote"],
+          ["Deposit today", `$${usd}`],
+          ["Balance after the shoot", v3.from != null ? `$${v3.from - usd}` : "Rest of the quote"],
         ]}
         onBooked={() => {
           forgetTimes(username, slug, tz);
@@ -55,7 +57,7 @@ export function V3Steps({ c }: { c: CardCtx & { v3: V3Book } }) {
   if (step === "done") {
     const studio = !booked.where || /studio/i.test(booked.where);
     const lines = paid
-      ? [`${dlabel(date)}, ${range}, ${duration(length)}.`, studio ? "San Jose studio. I send the address the day before." : `${booked.where}.`, "Need to move it? Reply to the confirmation up to 48 hours before."]
+      ? [`${dlabel(date)}, ${range}, ${duration(length)}.`, studio ? "San Jose studio. I send the address the day before." : `${booked.where}.`, "Need to move it? Use the link in the confirmation, up to 24 hours before."]
       : [`${dlabel(date)}, ${range}, ${duration(length)}.`, "I call the number you gave, or send a video link the day before.", "Need to move it? Reply to the confirmation."];
     const stamp = (ms: number) => new Date(ms).toISOString().replace(/[-:]|\.\d{3}/g, "");
     const s0 = +new Date(pick.start);
@@ -130,13 +132,13 @@ export function V3Steps({ c }: { c: CardCtx & { v3: V3Book } }) {
               {paid ? <ReferencePicks resync={null} v3 /> : null}
               {error ? <p className="err" role="alert">{error}</p> : null}
               {/* The deposit terms before the commit, in deposit-step's wording. */}
-              {paid ? <p className="lbl mute">Refundable or transferable up to 48 hours before the shoot. The balance is due after the shoot.</p> : null}
+              {paid ? <p className="lbl mute">90% refund up to 48 hours before the shoot, 70% up to 24 hours. Move it up to 24 hours before. The balance is due after the shoot.</p> : null}
             </>
           ),
           bar: (
             <>
               {back("pick")}
-              <button type="submit" className="btn fill" disabled={step === "sending" || step === "check"}>{paid ? "Continue to $100 deposit" : "Book the call"}</button>
+              <button type="submit" className="btn fill" disabled={step === "sending" || step === "check"}>{paid ? `Continue to $${usd} deposit` : "Book the call"}</button>
             </>
           ),
         })}
