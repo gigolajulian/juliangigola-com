@@ -10,3 +10,5 @@ html[data-mtdock]:not([data-mtdock="land"], [data-mtdock="off"]) .v3 .site-wm { 
 /* Mock ?mtdock=left: the header has no ground over the hero, it comes in when the hero ends */
 html[data-mtleft] .v3 .site-hdr { transition: background-color .35s ease-out, border-color .35s ease-out, backdrop-filter .35s ease-out, -webkit-backdrop-filter .35s ease-out; }
 html[data-mtleft]:not([data-mt-pasthero]) .v3 .site-hdr { background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; border-bottom-color: transparent; }
+/* ?mtdock=left with the header trial: the bar's wordmark is there from the first frame (the trial alone waits for the name to go) */
+:root[data-navfx][data-mtleft] .v3 .site-hdr .site-wm { opacity: 1 !important; pointer-events: auto !important; }

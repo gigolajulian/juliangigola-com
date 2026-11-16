@@ -34,6 +34,19 @@ const ink = (n: Node) => {
 /* Mock (?mtdock=left, Julian 2026-11-15): no dock. The header keeps its wordmark and links from the start with no
    ground under them, the name leaves to the left as the hero ends, and the header's ground comes in there. */
 const LEFT = typeof location !== "undefined" && /[?&]mtdock=left/.test(location.search);
+/* With no ground over the hero the nav words sit on the wall (they flip white or black, nav-ink.ts: the flag turns
+   ?navfx on in layout.tsx). The wall's captions would run through them, so each fades out over FADE px as it
+   comes up to the bar (Julian: "have a fade for text where the navbar sits"). */
+const FADE = 56;
+let caps: HTMLElement[] = [];
+let barH = 61;
+function fadeCaps() {
+  for (const c of caps) {
+    const o = clamp((c.getBoundingClientRect().top - barH) / FADE);
+    const v = o > 0.99 ? "" : o.toFixed(2);
+    if (c.style.opacity !== v) c.style.opacity = v;
+  }
+}
 
 function dockSetup(el: HTMLElement): Dock | null {
   if (LEFT) return null;
@@ -168,6 +181,8 @@ export const heroDrivers: Driver[] = [
       const hdr = document.querySelector<HTMLElement>(".site-hdr");
       const past = () => document.documentElement.toggleAttribute("data-mt-pasthero", el.getBoundingClientRect().bottom <= (hdr?.offsetHeight ?? 60));
       if (LEFT) {
+        caps = [...el.querySelectorAll<HTMLElement>("figcaption, .mt-more .btn")]; // the button too: it rises through the bar as the hero leaves
+        barH = hdr?.offsetHeight ?? 61;
         document.documentElement.setAttribute("data-mtleft", "");
         addEventListener("scroll", past, { passive: true });
         past();
@@ -193,6 +208,8 @@ export const heroDrivers: Driver[] = [
       return () => {
         removeEventListener("scroll", far);
         removeEventListener("scroll", past);
+        caps.forEach((c) => (c.style.opacity = ""));
+        caps = [];
         document.documentElement.removeAttribute("data-mtleft");
         document.documentElement.removeAttribute("data-mt-pasthero");
         [...st.cols, ...st.figs].forEach((p) => (p.el.style.transform = ""));
@@ -208,6 +225,7 @@ export const heroDrivers: Driver[] = [
       const st = states.get(el);
       if (!st) return;
       const mode = ctx.held ? "d" : ctx.vw < 600 ? "p" : "t";
+      if (caps.length && el.getBoundingClientRect().bottom > 0) fadeCaps();
       if (mode !== st.mode) {
         st.mode = mode;
         st.s = -1;
