@@ -82,8 +82,8 @@ export function playSound(slug: string) {
 /** The slug whose clip is playing, "" when none. */
 export const useSound = () => React.useSyncExternalStore(sub, () => now, () => "");
 
-/* Sound on / off, kept for the tab. While one of Apple's previews plays: the link to the song and the credit
-   Apple's terms ask for beside it (Search API, Legal: a link to the store, "provided courtesy of iTunes"). */
+/* Sound on / off, kept for the tab. While one of Apple's previews plays: Apple's badge linking to the song and the
+   credit, both of which its terms ask for beside a preview (Search API, Legal). */
 export function CoverSound({ className }: { className?: string }) {
   const off = React.useSyncExternalStore(sub, muted, () => false);
   const clip = clips[useSound()];
@@ -104,7 +104,11 @@ export function CoverSound({ className }: { className?: string }) {
       </button>
       {clip?.preview && clip.link ? (
         <>
-          <a href={clip.link} target="_blank" rel="noopener noreferrer">Listen on Apple Music</a>
+          {/* Apple's own badge, unaltered (tools.applemediaservices.com): its terms ask for the badge, not a text link. */}
+          <a href={clip.link} target="_blank" rel="noopener noreferrer">
+            {/* eslint-disable-next-line @next/next/no-img-element -- a 10 KB SVG, nothing for the image loader to do */}
+            <img src="/apple-music-badge.svg" alt="Listen on Apple Music" width={141} height={41} />
+          </a>
           <span>Preview provided courtesy of iTunes</span>
         </>
       ) : null}
