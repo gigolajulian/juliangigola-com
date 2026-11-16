@@ -1,6 +1,9 @@
-/* MOTION-PLAN.md items on trial. Each block is keyed on a word in
-   `data-mplan`, set only by `?mplan=` (head script, layout.tsx), so the
-   default site is unchanged until Julian says yes and the gate comes off. */
+/* MOTION-PLAN.md items. Each block is keyed on a word in `data-mplan`,
+   which the head script in app/layout.tsx sets to every item by default:
+   all of them are on for everyone since 2026-11-04. `?mplan=0` turns them
+   off for the tab, `?mplan=rm,pages` keeps only those. Each item folds into
+   the main styles, and its gate comes off, one per PR once it has been live
+   a week. */
 
 /* ── Item 2, `rm`: one Reduce Motion rule for the whole site ──────────
    Nothing travels, scales, rotates or blurs; fades stay, at 250 or under.

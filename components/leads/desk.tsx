@@ -36,10 +36,11 @@ import { Tab, TabList } from "@astryxdesign/core/TabList";
 import { SignIn } from "@/components/leads/setup";
 import { LeadDesk } from "@/components/leads/lead";
 import { badge, FROST_ROOM, frostBar, GLASS, WIN_CSS } from "@/components/leads/shared";
-import { ago, aside, inboxCall, loadError, matches, nextStep, pass } from "@/lib/leads/lead-desk";
+import { ago, aside, errorText, inboxCall, loadError, matches, nextStep, pass } from "@/lib/leads/lead-desk";
+import { useSiteThemeRead } from "@/lib/site-theme";
 import type { Template } from "@/lib/leads/lead-crm";
 import { TZ } from "@/lib/booking/booking-rules";
-import { KEY_STORE, TOKEN_STORE } from "@/lib/admin/admin-github";
+import { KEY_STORE, saveAdminKey, TOKEN_STORE } from "@/lib/admin/admin-github";
 import { leadSummary, shootTag, STAGES, type Lead, type LeadPatch, type LeadSummary, type Stage as StageName } from "@/lib/leads/leads";
 import { TodayDesk } from "@/components/leads/today";
 import { NewLeadDesk } from "@/components/leads/new-lead";
@@ -281,8 +282,6 @@ export function LeadsDesk() {
   React.useEffect(() => {
     call<{ templates: Template[] }>({ query: "?templates" }).then((o) => setTemplates(o.templates)).catch(() => {});
   }, [call]);
-  // Astryx follows the site's own light/dark (html[data-theme], dark when unset), so the ink matches the page behind it.
-  // Unknown until read: Astryx's root Theme writes data-theme onto <html> itself, so mounting it with a guess would lock that guess in.
   // Search and quick actions, on Ctrl or Cmd K: every lead by name, email, shoot or stage, and every page.
   const [finding, setFinding] = React.useState(false);
   React.useEffect(() => {
@@ -301,14 +300,9 @@ export function LeadsDesk() {
     ),
     [leads],
   );
-  const [mode, setMode] = React.useState<"light" | "dark" | null>(null);
-  React.useEffect(() => {
-    const read = () => setMode(document.documentElement.dataset.theme === "light" ? "light" : "dark");
-    read();
-    const watch = new MutationObserver(read);
-    watch.observe(document.documentElement, { attributeFilter: ["data-theme"] });
-    return () => watch.disconnect();
-  }, []);
+  // Astryx follows the site's own light/dark (html[data-theme], dark when unset), so the ink matches the page behind it.
+  // Unknown until read: Astryx's root Theme writes data-theme onto <html> itself, so mounting it with a guess would lock that guess in.
+  const mode = useSiteThemeRead();
 
   // Pull down to refresh: the installed phone app has no browser bar to do it. At the top of the page, a pull past
   // PULL px loads the leads again and remounts the page, so its own fetches (money, visits, galleries) run again.
@@ -347,10 +341,7 @@ export function LeadsDesk() {
     return (
       <SignIn
         onKey={(k) => {
-          if (/^(ghp_|github_pat_)/.test(k)) {
-            localStorage.setItem(TOKEN_STORE, k);
-            localStorage.removeItem(KEY_STORE);
-          } else localStorage.setItem(KEY_STORE, k);
+          saveAdminKey(k);
           setError(null);
           load();
         }}
@@ -375,7 +366,7 @@ export function LeadsDesk() {
   const act = (l: LeadSummary, body: LeadPatch) =>
     call<{ lead: Lead }>({ method: "PATCH", body: JSON.stringify({ key: `lead:${l.id}`, ...body }) })
       .then((o) => changed(o.lead))
-      .catch((e: unknown) => { alert(e instanceof Error ? e.message : String(e)); load(); });
+      .catch((e: unknown) => { alert(errorText(e)); load(); });
   const tomorrow = (l: LeadSummary) => act(l, { snoozeUntil: dayOn() });
   // The board is for a laptop: a phone keeps the list.
   const boarding = board && size !== "phone";
