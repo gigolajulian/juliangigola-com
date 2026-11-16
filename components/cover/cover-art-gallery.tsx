@@ -1,14 +1,17 @@
 "use client";
 
 import * as React from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import { Lightbox, useLightbox } from "@/components/lightbox";
 import { COVER_PRESS } from "@/components/v3/mt/data";
 import { sleeveTilt } from "@/components/v3/mt/motion/sleeve-tilt";
 import "@/components/v3/mt/motion/rows.css";
 import { CoverFaces, coverLabel } from "@/components/cover/cover-faces";
+import { CoverSound, playSound, stopSound, useSound } from "@/components/cover/cover-sound";
 import type { CoverRelease } from "@/lib/cover-art-types";
 import { cn } from "@/lib/utils";
+import { useV4pages } from "@/lib/v4pages";
 
 /* ── the cover-art sheet ──────────────────────────────────────────
  * Every release, three across.
@@ -42,13 +45,42 @@ export function CoverArtGallery({
   v4?: boolean;
 }) {
   const list = React.useRef<HTMLUListElement>(null);
+  /* The song on the cover (`?v4pages=c1,snd`, components/cover/cover-sound.tsx): a click that opens a cover plays
+     it, and so does the pointer held on one for half a second, so crossing the grid fires nothing. */
+  const snd = useV4pages("snd") && v4;
+  const playing = useSound();
+  /** The release whose clip a click started: the viewer's, so the pointer leaving its sleeve does not stop it. */
+  const held = React.useRef("");
+  /** When the viewer last closed: the pointer is still on the sleeve it opened from, and that is not a held hover. */
+  const shut = React.useRef(0);
   React.useEffect(() => {
     if (!v4) return;
     const ac = new AbortController();
     const fine = matchMedia("(hover:hover) and (pointer:fine)"), calm = matchMedia("(prefers-reduced-motion: reduce)");
-    list.current?.querySelectorAll<HTMLElement>(".mt-sleeve").forEach((it) => sleeveTilt(it, () => fine.matches && !calm.matches, { signal: ac.signal }));
-    return () => ac.abort();
-  }, [v4]);
+    const ok = () => fine.matches && !calm.matches;
+    list.current?.querySelectorAll<HTMLElement>(".mt-sleeve").forEach((it) => {
+      sleeveTilt(it, ok, { signal: ac.signal });
+      const slug = it.dataset.snd;
+      if (!slug) return;
+      let wait = 0;
+      it.addEventListener("pointerenter", (e) => {
+        if (e.pointerType === "touch" || !ok() || performance.now() - shut.current < 1200) return;
+        wait = window.setTimeout(() => {
+          // Browsers block sound before a first click or key: do not even ask for the file until then.
+          if (ac.signal.aborted || navigator.userActivation?.hasBeenActive === false) return;
+          playSound(slug);
+        }, 500);
+      }, { signal: ac.signal });
+      it.addEventListener("pointerleave", () => {
+        clearTimeout(wait);
+        if (held.current !== slug) stopSound(slug);
+      }, { signal: ac.signal });
+    });
+    return () => {
+      ac.abort();
+      if (snd) stopSound();
+    };
+  }, [v4, snd]);
 
   // The lightbox pages through every side in order, so arrowing off side A
   // lands on side B rather than skipping to the next release.
@@ -57,6 +89,19 @@ export function CoverArtGallery({
     [releases],
   );
   const lightbox = useLightbox(frames);
+
+  // Closing the viewer, or arrowing to another release in it, ends the clip. The back of the same sleeve does not.
+  const quiet = () => {
+    if (!held.current) return;
+    held.current = "";
+    shut.current = performance.now();
+    stopSound();
+  };
+  const shown = frames[lightbox.index]?.src;
+  const viewing = lightbox.open ? releases.find((r) => r.frames.some((f) => f.src === shown))?.slug ?? "" : "";
+  React.useEffect(() => {
+    if (snd && viewing && viewing !== held.current) quiet();
+  }, [snd, viewing]);
 
   // A cell opens at its own position in that flat sequence. Keyed by `src`,
   // which is unique per side.
@@ -101,11 +146,20 @@ export function CoverArtGallery({
           const cell = v4 ? (
             <button
               type="button"
-              onClick={(e) => lightbox.show(positions.get(front.src) ?? 0, e.currentTarget.querySelector<HTMLElement>("img"))}
+              onClick={(e) => {
+                if (snd) {
+                  // In the click itself, not after the picture has decoded: Safari only lets a gesture start sound.
+                  held.current = release.slug;
+                  playSound(release.slug);
+                }
+                lightbox.show(positions.get(front.src) ?? 0, e.currentTarget.querySelector<HTMLElement>("img"));
+              }}
               aria-label={`Open ${coverLabel(release.title, release.artist, release.frames)}`}
               data-vt={front.src}
               data-ring="Zoom"
-              className="group mt-sleeve"
+              data-snd={snd ? release.slug : undefined}
+              // `snd`: the record turns while its clip plays (v4pages.css).
+              className={cn("group mt-sleeve", snd && playing === release.slug && "snd")}
               // The pressing: the home's color where it names one, the cover's own otherwise.
               style={{ "--press": COVER_PRESS[release.slug] ?? front.color } as React.CSSProperties}
             >
@@ -175,7 +229,18 @@ export function CoverArtGallery({
         })}
       </ul>
 
-      <Lightbox frames={frames} name="Cover Art" {...lightbox} />
+      <Lightbox
+        frames={frames}
+        name="Cover Art"
+        {...lightbox}
+        onOpenChange={(o) => {
+          if (!o) quiet();
+          lightbox.onOpenChange(o);
+        }}
+        note={snd ? <CoverSound /> : undefined}
+      />
+      {/* On the body: `main` carries a transform, and a fixed line inside it would sit at the foot of the page. */}
+      {snd ? createPortal(<CoverSound className="cv4sf" />, document.body) : null}
     </>
   );
 }

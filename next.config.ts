@@ -269,6 +269,10 @@ const csp = [
   // link is pasted: the title, and the poster Vimeo does not publish at a
   // guessable URL. No page on the site fetches either.
   `connect-src 'self' https://api.stripe.com https://api.github.com https://vimeo.com https://www.youtube.com${__impeccableLiveDev}`,
+  // The song previews on Cover art (`components/cover/cover-sound.tsx`, behind `?v4pages=c1,snd`) stream from
+  // Apple's preview host. Without this line `default-src` covers media and blocks them. `blob:` is /admin's
+  // preview of a clip before it is uploaded.
+  "media-src 'self' blob: https://audio-ssl.itunes.apple.com",
   // Not on a local build (`LOCAL` above): there is no https on localhost.
   ...(LOCAL ? [] : ["upgrade-insecure-requests"]),
 ].join("; ");
