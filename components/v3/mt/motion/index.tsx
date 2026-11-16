@@ -27,6 +27,9 @@ export function MtMotionLayer() {
   React.useEffect(() => {
     const root = document.querySelector<HTMLElement>(".v3home.mt");
     if (!root || !("v3motion" in document.documentElement.dataset)) return;
+    // mock (Julian, 2026-11-15, "the window opening itself" missed): ?mtabout=plain or wipe, see flow.css
+    const ab = /[?&]mtabout=(plain|wipe)/.exec(location.search)?.[1];
+    if (ab) document.documentElement.dataset.mtabout = ab;
     const stop = startEngine(root, [...heroDrivers, ...rowsDrivers, ...commissionsDrivers, ...aboutDrivers, ...quoteDrivers, ...footDrivers, ...depthDrivers, ...stepDrivers]);
     const hide = startReveal(root);
     return () => (stop(), hide());

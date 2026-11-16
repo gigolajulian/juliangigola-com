@@ -55,3 +55,8 @@ html[data-mt-motion]:not([data-mt-held]) .mt .mt-book .mt-photo[data-rv] > * { t
 /* the held bottom bar shows once its section fills the screen (steps.ts sets data-bar) */
 html[data-mt-motion]:not([data-mt-held]) .mt :is(.mt-book, .mt-quote) > .mt-bar { transition: opacity .25s ease-out, visibility .25s; }
 html[data-mt-motion]:not([data-mt-held]) .mt :is(.mt-book, .mt-quote):not([data-bar]) > .mt-bar { opacity: 0; visibility: hidden; }
+
+/* Mock ?mtabout: About comes in without the window. plain: the stage is never clipped, it scrolls in whole and its
+   contents fade up as before. wipe: one straight edge, bottom to top, the way the Book online photo arrives. */
+html[data-mt-held][data-mtabout="plain"] .mt-about .mt-stage { clip-path: none; }
+html[data-mt-held][data-mtabout="wipe"] .mt-about .mt-stage { clip-path: inset(calc((1 - clamp(0, calc(var(--in, 1) * 1.7 - .15), 1)) * 100%) 0 0 0); }
