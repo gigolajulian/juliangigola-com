@@ -139,7 +139,7 @@ export function MtBookOnline({ open, onOpen, onClose, quote, onOwn }: { open: Bo
                 {next ? <p className="lbl mt-next"><span className="mute">Next open</span> {next}</p> : null}
                 <Link className="mt-link" href="/book">All sessions</Link>
               </div>
-              <p className="lbl mute mt-dep">$100 secures your date and goes toward your balance.</p>
+              <p className="lbl mute mt-dep">{r.price.split(" ")[0]} secures your date and goes toward your balance.</p>
             </>
           )}
         </div>

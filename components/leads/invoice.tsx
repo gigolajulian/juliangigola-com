@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import { type Lead, type LeadSummary } from "@/lib/leads/leads";
 import { cn } from "@/lib/utils";
 import { mailable } from "@/lib/leads/lead-crm";
-import { balance, dayB, DEPOSIT, isPaid, MAX_ROWS_B, NOTE_B, usd, usdB, type Crop, type Invoice, type InvoiceB, type InvoiceFrom } from "@/lib/leads/invoice";
+import { balance, dayB, depositOfLead, isPaid, MAX_ROWS_B, NOTE_B, usd, usdB, type Crop, type Invoice, type InvoiceB, type InvoiceFrom } from "@/lib/leads/invoice";
 import { framed, loadImage, place, shrink, toneFor } from "@/lib/leads/invoice-photo";
 import { adminCall, day, errorText, inboxCall, plusDays, ymdPT } from "@/lib/leads/lead-desk";
 import { btn, compose, field, fieldLabel, kindOf, primary } from "@/components/leads/shared";
@@ -238,7 +238,7 @@ export function InvoiceSheetB({ l, full, patch, done }: { l: LeadSummary; full: 
   const [caption, setCaption] = React.useState(`Editorial · ${dayB(shot, true)}`);
   const [to, setTo] = React.useState<InvoiceB["to"]>({ name: l.name, company: full.company ?? "", email: mailable(l.email) ? l.email : "" });
   const [lines, setLines] = React.useState<LineB[]>([{ desc: kindOf(l.kind) ?? "Photography", sub: "", amt: full.quote !== undefined ? String(full.quote) : "" }]);
-  const [paid, setPaid] = React.useState(full.deposit ? String(DEPOSIT) : "0");
+  const [paid, setPaid] = React.useState(full.deposit ? String(depositOfLead(full)) : "0");
   const [depositNote, setDepositNote] = React.useState("Paid at booking");
   const [note, setNote] = React.useState<string[]>([...NOTE_B]);
   const [src, setSrc] = React.useState<string | null>(null);

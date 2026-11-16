@@ -6,8 +6,8 @@ import type { Booking, Hours } from "@/lib/booking/booking-rules";
 import { lockOp, parseBooking, recordBooking } from "@/lib/booking/booking-engine";
 import { manageLinks } from "@/lib/booking/booking-token";
 
-/* ── the $100 deposit ─────────────────────────────────────────────
- * Julian (2026-10-16): the four paid sessions take a $100 deposit on the
+/* ── the deposit ──────────────────────────────────────────────────
+ * Julian (2026-10-16): the paid sessions take a deposit on the
  * site, in the site's own card, before the time is booked. The order
  * is what keeps it honest: nothing is booked until Stripe says the money
  * arrived, so there are no unpaid holds.
@@ -31,17 +31,30 @@ import { manageLinks } from "@/lib/booking/booking-token";
  *
  * Stripe is called over its REST API with fetch, no SDK: three calls do
  * not need a dependency. Test-mode keys until Julian says live.
+ *
+ * Julian (2026-11-15): the deposit differs by session (`DEPOSIT` in
+ * `lib/booking/paid.ts`). The charge is set here from the slug, never
+ * from the request. What a booking paid is read off the intent and kept
+ * on its record, so a refund, a mail or a log never guesses.
  * ─────────────────────────────────────────────────────────────── */
 
 import { alertHello, type Attachment } from "@/lib/hello-mail";
 import { stripe } from "@/lib/stripe";
-export const AMOUNT = 10000;
+import { DEPOSIT, LEGACY_DEPOSIT, depositOf, isPaid } from "@/lib/booking/paid";
+export { DEPOSIT, depositOf };
+/** The charge in cents for a session. Throws on a slug that takes no deposit: `parseBooking` lets none through. */
+export function amountOf(slug: string): number {
+  if (!isPaid(slug)) throw new Error("Not a paid session.");
+  return depositOf(slug) * 100;
+}
 export const CURRENCY = "usd";
 export const KIND = "deposit";
 
-/** Whether a paid intent is one of the site's deposits, not any other payment on the account. */
+/** Whether a paid intent is one of the site's deposits, not any other payment on the account.
+    Any session's amount passes, not only its own slug's: an intent made at the old $100 just
+    before a price change must still book, or it sits paid and unbooked. */
 export const isDeposit = (pi: { amount?: number; currency?: string; metadata?: { [k: string]: string } }) =>
-  pi.metadata?.kind === KIND && pi.amount === AMOUNT && pi.currency === CURRENCY;
+  pi.metadata?.kind === KIND && Object.values(DEPOSIT).some((d) => d * 100 === pi.amount) && pi.currency === CURRENCY;
 /** How old a webhook's timestamp may be before it is treated as a replay. */
 const TOLERANCE_S = 300;
 export const SESSION: { [slug: string]: string } = { portraits: "Portraits", headshots: "Headshots", graduation: "Graduation photos", digitals: "Studio digitals", "model-test": "Model test" };
@@ -73,7 +86,7 @@ export async function isSlotOpen(b: Booking, gcalSecret?: string, kv?: KV, hours
 /** The PaymentIntent's form, with the booking in its metadata. */
 export function intentForm(b: Booking): { [k: string]: string } {
   const form: { [k: string]: string } = {
-    amount: String(AMOUNT),
+    amount: String(amountOf(b.slug)),
     currency: CURRENCY,
     // Card only, to match the card's deferred-intent Elements. Apple Pay and
     // Google Pay ride on card.
@@ -161,9 +174,9 @@ async function refsOf(inbox: Env["INBOX"], intent: string): Promise<{ files: Att
 }
 
 /** A plain mail to hello@ saying how a deposit ended. A failed send is logged, never a failed webhook. */
-async function tell(env: Env, status: keyof typeof SAID, b: Booking | string, link: string, intent: string, broke = "") {
+async function tell(env: Env, status: keyof typeof SAID, b: Booking | string, link: string, intent: string, usd: number, broke = "") {
   const who = typeof b === "string" ? undefined : b;
-  const what = who ? [SESSION[who.slug] ?? who.slug, whenPT(who.start), who.name, "$100"].join(", ") : "$100";
+  const what = who ? [SESSION[who.slug] ?? who.slug, whenPT(who.start), who.name, `$${usd}`].join(", ") : `$${usd}`;
   const refs = await refsOf(env.INBOX, intent);
   // A refund after an error is not a taken time: say what broke.
   const next = broke && status === "refunded" ? `The booking failed on an error (${broke}), so Stripe refunded them. Nothing is booked.` : NEXT[status];
@@ -172,9 +185,9 @@ async function tell(env: Env, status: keyof typeof SAID, b: Booking | string, li
   if (refs.picks.length) lines.push("", "Picked from my work:", ...refs.picks.map((src) => `https://juliangigola.com${src}`));
   const subject = `${SAID[status]}: ${what}`;
   if (await alertHello(env.EMAIL, subject, lines, who, refs.files)) await logMail(env, who?.email, subject, { to: "hello@", kind: `deposit-${status}`, booking: intent });
-  // The money itself, on the activity log: $100 in, and out again on a refund.
-  if (who) await recordLead(env, who.email, { event: { at: new Date().toISOString(), kind: "payment", ref: intent, note: "Deposit", amount: 100 } });
-  if (who && status === "refunded") await recordLead(env, who.email, { event: { at: new Date().toISOString(), kind: "refund", ref: `refund-${intent}`, note: "Deposit, the time was gone", amount: 100 } });
+  // The money itself, on the activity log: what was paid in, and out again on a refund.
+  if (who) await recordLead(env, who.email, { event: { at: new Date().toISOString(), kind: "payment", ref: intent, note: "Deposit", amount: usd } });
+  if (who && status === "refunded") await recordLead(env, who.email, { event: { at: new Date().toISOString(), kind: "refund", ref: `refund-${intent}`, note: "Deposit, the time was gone", amount: usd } });
 }
 
 /**
@@ -183,7 +196,10 @@ async function tell(env: Env, status: keyof typeof SAID, b: Booking | string, li
  * ponytail: KV is not a lock, so two deliveries in the same second could both
  * book. Stripe spaces its retries by minutes; a Durable Object if that changes.
  */
-export async function bookDeposit(env: Env, intent: string, metadata: { [k: string]: string } | undefined): Promise<Status> {
+export async function bookDeposit(env: Env, intent: string, metadata: { [k: string]: string } | undefined, cents?: number): Promise<Status> {
+  const parsed = fromMetadata(metadata);
+  // What the intent took, from Stripe; unset, the session's own deposit.
+  const usd = cents !== undefined ? cents / 100 : parsed.ok && isPaid(parsed.booking.slug) ? depositOf(parsed.booking.slug) : LEGACY_DEPOSIT;
   const key = recordKey(intent);
   const seen = await env.INBOX.get(key);
   if (seen) {
@@ -196,9 +212,8 @@ export async function bookDeposit(env: Env, intent: string, metadata: { [k: stri
     // Stripe to come back (503). Once hello@ has heard, Stripe may stop.
     if (r.status === "booking" && r.warned) return "failed";
     if (r.status === "booking" && Date.now() - Date.parse(r.at) > STUCK_MS) {
-      const parsed = fromMetadata(metadata);
       const who = parsed.ok ? parsed.booking : undefined;
-      const what = who ? [SESSION[who.slug] ?? who.slug, whenPT(who.start), who.name, "$100"].join(", ") : "$100";
+      const what = who ? [SESSION[who.slug] ?? who.slug, whenPT(who.start), who.name, `$${usd}`].join(", ") : `$${usd}`;
       await env.INBOX.put(key, JSON.stringify({ ...r, warned: true }), { expirationTtl: 90 * 864e2 }).catch((e: unknown) => console.error("deposit record", "warned", String(e)));
       if (who) await recordLead(env, who.email, { event: { at: new Date().toISOString(), kind: "deposit-stuck", ref: intent, note: what }, name: who.name, kind: who.slug, flag: "stuck" });
       const subject = `Deposit stuck: check Stripe and the calendar: ${what}`;
@@ -227,7 +242,6 @@ export async function bookDeposit(env: Env, intent: string, metadata: { [k: stri
   };
   await put({ status: "booking" });
 
-  const parsed = fromMetadata(metadata);
   const link = dashboardLink(intent, env.STRIPE_SECRET_KEY);
   let broke = "";
   // What tell() and the stuck row read: the booking, or why the metadata is not one.
@@ -235,7 +249,7 @@ export async function bookDeposit(env: Env, intent: string, metadata: { [k: stri
   if (typeof b !== "string") {
     // The site's engine rechecks and books in one step, inside its lock.
     // Only the booking itself may end in a refund: a step after it never undoes a booked time.
-    const own = await lockOp(env, "book", { ...b, intent }).catch((e: unknown) => {
+    const own = await lockOp(env, "book", { ...b, intent, deposit: usd }).catch((e: unknown) => {
       broke = String(e);
       console.error("deposit book", broke);
       return null;
@@ -243,7 +257,7 @@ export async function bookDeposit(env: Env, intent: string, metadata: { [k: stri
     if (own?.ok) {
       const booking = own.record;
       await put({ status: "booked", booking: { uid: booking.id, start: booking.start } });
-      await tell(env, "booked", b, link, intent);
+      await tell(env, "booked", b, link, intent, usd);
       await recordBooking(env, booking, dashboardLink(intent, env.STRIPE_SECRET_KEY));
       const confirm = {
         ...b,
@@ -251,7 +265,7 @@ export async function bookDeposit(env: Env, intent: string, metadata: { [k: stri
         start: booking.start,
         end: booking.end,
         uid: booking.id,
-        deposit: { ref: intent, at: new Date().toISOString(), card: await cardOf(env.STRIPE_SECRET_KEY, intent) },
+        deposit: { ref: intent, at: new Date().toISOString(), amount: usd, card: await cardOf(env.STRIPE_SECRET_KEY, intent) },
         manage: await manageLinks(env.BOOKING_SECRET, booking),
       };
       const sent = await sendConfirm(env.CLIENT_EMAIL, confirm);
@@ -263,7 +277,7 @@ export async function bookDeposit(env: Env, intent: string, metadata: { [k: stri
   try {
     await stripe(env.STRIPE_SECRET_KEY, "/refunds", { payment_intent: intent }, `refund-${intent}`);
     await put({ status: "refunded" });
-    await tell(env, "refunded", b, link, intent, broke);
+    await tell(env, "refunded", b, link, intent, usd, broke);
     return "refunded";
   } catch {
     await put({ status: "failed" });
@@ -277,7 +291,7 @@ export async function bookDeposit(env: Env, intent: string, metadata: { [k: stri
           name: who.name,
           email: who.email,
           detail: `Deposit paid, not booked, not refunded`,
-          message: `A $100 deposit (${intent}) was paid, but the time could not be booked and the automatic refund failed. Refund it by hand in Stripe and email them.`,
+          message: `A $${usd} deposit (${intent}) was paid, but the time could not be booked and the automatic refund failed. Refund it by hand in Stripe and email them.`,
         },
         now,
         id,
@@ -286,7 +300,7 @@ export async function bookDeposit(env: Env, intent: string, metadata: { [k: stri
     };
     await env.INBOX.put(enquiryKey(now, id.slice(0, 8)), JSON.stringify(row), { metadata: summary(row) });
     await recordLead(env, who.email, { event: { at: row.at, kind: "deposit-stuck", ref: intent, note: row.detail }, name: who.name, kind: typeof b === "string" ? undefined : b.slug, flag: "stuck" });
-    await tell(env, "failed", b, link, intent);
+    await tell(env, "failed", b, link, intent, usd);
     return "failed";
   }
 }

@@ -1,3 +1,5 @@
+import { depositFor } from "@/lib/booking/paid";
+
 /* ── invoices from a lead ─────────────────────────────────────────
  * Julian (2026-11-06, Leads plan A1): an invoice from the lead, in the
  * template of his JG INVOICE GENERATOR, numbered MMYY, a second one in the
@@ -43,8 +45,9 @@ export const namesInvoice = (text: string, no: string) => /invoice/i.test(text) 
 /** His own details on every invoice. Kept sealed in KV, never in the code: the repo is public. Bank and tax lines are design B's. */
 export type InvoiceFrom = { name: string; a1: string; a2: string; a3: string; email: string; phone: string; ein: string; signoff: string; notes: string; bank: string; routing: string; account: string; late: string; tax: string };
 
-/** The site's deposit in dollars: `AMOUNT` in lib/booking/deposit.ts, which the desk's bundle must not import. */
-export const DEPOSIT = 100;
+/** A lead's deposit in dollars: what the site logged as paid (`tell` in lib/booking/deposit.ts), else their session's (`lib/booking/paid.ts`), else the $100 every deposit was before 2026-11-15. */
+export const depositOfLead = (l: { kind?: string; events?: { kind: string; note?: string; amount?: number }[] }) =>
+  l.events?.find((e) => e.kind === "payment" && e.note === "Deposit")?.amount ?? depositFor(l.kind ?? "");
 /** Lines that fit above the notes block on the page. */
 export const MAX_LINES = 8;
 /** Rows that fit on design B, the deposit row counted. */
