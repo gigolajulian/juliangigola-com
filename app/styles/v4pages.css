@@ -151,8 +151,8 @@ html[data-v4pages~="c1"] .cv4h{padding:56px var(--gr) 0 var(--g)}
 html[data-v4pages~="c1"] .cv4h>div{display:flex;flex-direction:column;align-items:flex-start;gap:20px}
 html[data-v4pages~="c1"] .cv4{--u:calc(100vw / 960);list-style:none;margin:48px 0 0;padding:0 var(--gr) 0 var(--g);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;overflow-x:clip}
 html[data-v4pages~="c1"] .cv4 .mt-sleeve{position:relative;display:block;width:100%;height:auto;aspect-ratio:1;--o:var(--hin)}
-/* Space between the covers, on the /portfolio grid's gutters and gap (Julian, 2026-11-15), so photographs take their 4px. */
-html[data-v4pages~="c1"] .cv4 .mt-sleeve .face,html[data-v4pages~="c1"] .cv4 .mt-sleeve .face img{border-radius:4px}
+/* Space between the covers, on the /portfolio grid's gutters and gap (Julian, 2026-11-15), corners square (Julian, 2026-11-16). */
+html[data-v4pages~="c1"] .cv4 .mt-sleeve .face,html[data-v4pages~="c1"] .cv4 .mt-sleeve .face img{border-radius:0}
 @media (max-width:700px){html[data-v4pages~="c1"] .cv4{gap:10px}}
 /* The name: the home's cover caption (.mt-cvcap), under the sleeve. Dim at rest, full for the cover under the pointer or the focus. */
 html[data-v4pages~="c1"] .cv4c{display:none}

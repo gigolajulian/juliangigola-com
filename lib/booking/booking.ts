@@ -276,7 +276,7 @@ export const BOOKING_PAGES: BookingPage[] = [
       {
         heading: "Where on campus",
         items: [
-          "SJSU: Tower Hall and Tower Lawn, the Tommie Smith and John Carlos statue and outside King Library.",
+          "SJSU: Tower Hall, Tower Lawn and outside King Library.",
           "Santa Clara University: the Mission Church and its gardens, and Palm Drive.",
           "SF State: Malcolm X Plaza and the J. Paul Leonard Library.",
           "USF: St. Ignatius Church and Lone Mountain.",
