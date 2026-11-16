@@ -253,8 +253,10 @@ export const heroDrivers: Driver[] = [
         const e = Math.round(smooth(span(p, 0.76, 0.96)) * 1000) / 1000;
         if (st.name && e !== st.e) {
           st.e = e;
-          st.name.style.opacity = String(1 - e);
-          st.name.style.transform = !e ? "" : LEFT ? `translate3d(${(-0.6 * ctx.vw * e).toFixed(1)}px,0,0)` : `translate3d(0,${(-56 * ctx.u * e).toFixed(1)}px,0)`;
+          // ?mtdock=left (Julian, 2026-11-16: "these should just scroll down and out instead of left"): the name block
+          // rides down out of the window at full strength, no fade. The flag keeps its name.
+          st.name.style.opacity = LEFT ? "" : String(1 - e);
+          st.name.style.transform = !e ? "" : LEFT ? `translate3d(0,${(0.6 * ctx.vh * e).toFixed(1)}px,0)` : `translate3d(0,${(-56 * ctx.u * e).toFixed(1)}px,0)`;
           st.name.style.visibility = e >= 1 ? "hidden" : ""; // gone: its buttons leave the tab order too
         }
         return;
