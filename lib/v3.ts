@@ -81,7 +81,7 @@ export type Session = {
   from: number | null;
   includes: string[];
   turnaround?: string;
-  /** Cal.com "username/event-slug"; none for an on-request session. */
+  /** The event it books, "juliangigola/event-slug" (a stored key; the slug keys `EVENTS`); none for an on-request session. */
   cal?: string;
   /** Takes a deposit (`lib/booking/paid.ts`). */
   paid: boolean;
@@ -223,5 +223,5 @@ export const TAB_ORDER: SessionSlug[] = ["portraits", "headshots", "studio-digit
 export const INDEX_ORDER: SessionSlug[] = ["portraits", "graduation", "headshots", "studio-digitals", "weddings"];
 export const rate = (s: Session) =>
   !s.paid && s.cal ? "15 min" : s.from != null ? `From $${s.from}` : s.paid ? `$${depositFor(s.cal?.split("/")[1] ?? "")} deposit` : "On request";
-/** Session lengths in minutes (master MIN); Cal.com's own length wins where it answers. */
+/** Session lengths in minutes (master MIN); the event's own length (`EVENTS`) wins where /api/slots answers. */
 export const LENGTH: Record<SessionSlug, number> = { portraits: 60, graduation: 90, headshots: 45, "studio-digitals": 60, "model-test": 60, weddings: 480, consultation: 15, "music-photography": 15, "brand-photography": 15, editorial: 15, events: 0 };
