@@ -10,9 +10,9 @@ import { SESSION_TYPES, formatPrice } from "@/lib/booking/sessions";
 export const metadata: Metadata = {
   title: "Book a session",
   description:
-    "Pick a session and a time: portraits, graduation, headshots and studio digitals in the San Francisco Bay Area.",
+    "Pick a session and a time: portraits, graduation, headshots, studio digitals, model tests and weddings in the San Francisco Bay Area.",
   alternates: { canonical: "/book" },
-...shareOg("Book a session","Portraits, graduation, headshots and studio digitals in the San Francisco Bay Area. Pick a time on my calendar."),
+...shareOg("Book a session","Portraits, graduation, headshots, studio digitals, model tests and weddings in the San Francisco Bay Area. Pick a time on my calendar."),
 };
 
 /* The four sessions, each a bookable event (`SESSION_EVENTS`, `lib/booking/booking.ts`);

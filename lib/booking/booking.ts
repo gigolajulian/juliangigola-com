@@ -372,7 +372,7 @@ export const BOOKING_PAGES: BookingPage[] = [
       },
       {
         q: "Do you shoot portfolio tests too?",
-        a: "Yes. A styled test is a different shoot from digitals. Book one with the $100 deposit and I quote on the call.",
+        a: "Yes. A styled test is a different shoot from digitals. Book it with the $100 deposit. I send the quote after we talk.",
       },
     ],
     tiles: coversOf("studio-digitals"),
@@ -464,7 +464,14 @@ export const BOOKING_PAGES: BookingPage[] = [
         body: "A few weddings a year, so each one gets the time it needs. Send the date in the form as early as you have it.",
       },
     ],
-    where: SESSION_WHERE,
+    // Julian (2026-11-16): weddings are on location only, so no "studio" here.
+    where: SESSION_WHERE.map((p) =>
+      p.name === "San Francisco"
+        ? { ...p, note: "Ceremony and reception, on location anywhere in the Bay Area." }
+        : p.name === "San Jose"
+          ? { ...p, note: "And across the South Bay and Silicon Valley." }
+          : p,
+    ),
     faqs: [
       {
         q: "How much does a wedding photographer cost in San Francisco or San Jose?",
