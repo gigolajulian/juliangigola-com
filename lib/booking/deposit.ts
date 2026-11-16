@@ -40,12 +40,11 @@ import { manageLinks } from "@/lib/booking/booking-token";
 
 import { alertHello, type Attachment } from "@/lib/hello-mail";
 import { stripe } from "@/lib/stripe";
-import { DEPOSIT, LEGACY_DEPOSIT, depositOf, isPaid } from "@/lib/booking/paid";
-export { DEPOSIT, depositOf };
+import { DEPOSIT, LEGACY_DEPOSIT, isPaid } from "@/lib/booking/paid";
 /** The charge in cents for a session. Throws on a slug that takes no deposit: `parseBooking` lets none through. */
 export function amountOf(slug: string): number {
   if (!isPaid(slug)) throw new Error("Not a paid session.");
-  return depositOf(slug) * 100;
+  return DEPOSIT[slug] * 100;
 }
 export const CURRENCY = "usd";
 export const KIND = "deposit";
@@ -202,7 +201,7 @@ async function tell(env: Env, status: keyof typeof SAID, b: Booking | string, li
 export async function bookDeposit(env: Env, intent: string, metadata: { [k: string]: string } | undefined, cents?: number): Promise<Status> {
   const parsed = fromMetadata(metadata);
   // What the intent took, from Stripe; unset, the session's own deposit.
-  const usd = cents !== undefined ? cents / 100 : parsed.ok && isPaid(parsed.booking.slug) ? depositOf(parsed.booking.slug) : LEGACY_DEPOSIT;
+  const usd = cents !== undefined ? cents / 100 : parsed.ok && isPaid(parsed.booking.slug) ? DEPOSIT[parsed.booking.slug] : LEGACY_DEPOSIT;
   const key = recordKey(intent);
   const seen = await env.INBOX.get(key);
   if (seen) {

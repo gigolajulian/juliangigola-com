@@ -4,7 +4,7 @@ import * as React from "react";
 import Image from "next/image";
 import { PageFoot } from "@/components/v3/chrome";
 import { Mark } from "@/components/v3/duo";
-import { REEL, SECTIONS, creditOf, embedUrl, previewUrl, captionsOff, vimeoListen, vimeoPlays, posterFor, sectionName, type Video, type VideoSection } from "@/lib/videos";
+import { REEL, creditOf, embedUrl, previewUrl, captionsOff, vimeoListen, vimeoPlays, posterFor, sectionName, type Video } from "@/lib/videos";
 
 /* JG V3 Motion (Julian): A as an index over one full-screen stage;
    scrolling swaps the film and its title, bottom left. Phones get the same
@@ -23,19 +23,6 @@ const markOf = (client: string) => (client === "Sammy Shiblaq" ? "empire" : clie
 const two = (n: number) => String(n).padStart(2, "0");
 const subOf = (v: Video) => (v.id === "reel" ? "Reel" : [creditOf(v), v.year ?? sectionName(v.section)].filter(Boolean).join(" · "));
 const still = () => typeof window !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-function useInView<T extends Element>() {
-  const ref = React.useRef<T>(null);
-  const [on, setOn] = React.useState(false);
-  React.useEffect(() => {
-    const el = ref.current;
-    if (!el || still()) return;
-    const io = new IntersectionObserver(([e]) => setOn(e.isIntersecting), { threshold: 0.5 });
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-  return [ref, on] as const;
-}
 
 /* A muted preview. YouTube draws its own controls while a film loads, is
    paused or has just started (on phones even with controls=0), so the
@@ -261,33 +248,6 @@ function Desk({ films, onPlay }: { films: Video[]; onPlay: (v: Video) => void })
   );
 }
 
-function Frame({ v, ratio, sizes, onPlay }: { v: Video; ratio: string; sizes: string; onPlay: (v: Video) => void }) {
-  const [ref, on] = useInView<HTMLDivElement>();
-  const poster = posterFor(v);
-  return (
-    <div ref={ref} className="cn-frame" style={{ aspectRatio: ratio }}>
-      {poster ? <Image src={poster} alt="" fill sizes={sizes} style={{ objectFit: "cover" }} /> : null}
-      {on ? <Loop v={v} /> : null}
-      <button type="button" onClick={() => onPlay(v)} aria-label={`Play ${v.title}`} />
-    </div>
-  );
-}
-
-function Chapter({ v, n, ratio, small = false, sizes, onPlay }: { v: Video; n: number; ratio: string; small?: boolean; sizes: string; onPlay: (v: Video) => void }) {
-  return (
-    <article className={small ? "cn-ch sm" : "cn-ch"}>
-      <Frame v={v} ratio={ratio} sizes={sizes} onPlay={onPlay} />
-      <div className="cn-cap">
-        <span className="cn-n">{two(n)}</span>
-        <div>
-          <h3>{v.title}</h3>
-          <span className="lbl mute">{subOf(v)}</span>
-        </div>
-      </div>
-    </article>
-  );
-}
-
 function Row({ v, i, onOpen, bare = false }: { v: Video; i: number; onOpen: (v: Video) => void; bare?: boolean }) {
   const poster = posterFor(v);
   return (
@@ -348,57 +308,6 @@ function Stack({ films }: { films: Video[] }) {
           .filter((f) => f.id !== open.id && !f.title.startsWith("Iranian Americans")) // Julian: never suggested
           .slice(0, 2)
           .map((f) => <Row key={f.id} v={f} i={films.indexOf(f)} onOpen={go} bare />)}
-      </div>
-    </div>
-  );
-}
-
-/* Retired 2026-10-24: phones get the stacked stills (Julian). Kept, unused. */
-export function Mob({ videos, onPlay }: { videos: Video[]; onPlay: (v: Video) => void }) {
-  const [tab, setTab] = React.useState<"all" | VideoSection>("all");
-  const [ref, on] = useInView<HTMLDivElement>();
-  const films = tab === "all" ? videos : videos.filter((v) => v.section === tab);
-  /* The rhythm: a wide letterbox, then a big and a small side by side. */
-  const rows: Video[][] = [];
-  for (let i = 0; i < films.length; ) {
-    const wide = rows.length % 2 === 0;
-    rows.push(films.slice(i, i + (wide ? 1 : 2)));
-    i += wide ? 1 : 2;
-  }
-  let n = 0;
-  return (
-    <div className="mo-mob">
-      <div ref={ref} className="cn-hero">
-        <Image src={REEL.poster} alt="" fill priority sizes="100vw" style={{ objectFit: "cover" }} />
-        {on ? <Loop v={reel} /> : null}
-        <div className="cn-hero-foot">
-          <div>
-            <span className="lbl">{REEL.title}</span>
-            <h1 className="cn-t">Motion</h1>
-          </div>
-          <button type="button" className="btn fill cn-light" onClick={() => onPlay(reel)}>Play with sound</button>
-        </div>
-      </div>
-      <div className="cn-tabs lbl" role="group" aria-label="Filter films">
-        <button type="button" aria-pressed={tab === "all"} onClick={() => setTab("all")}>All <span>{two(videos.length)}</span></button>
-        {SECTIONS.map((s) => (
-          <button key={s.id} type="button" aria-pressed={tab === s.id} onClick={() => setTab(s.id)}>
-            {s.name} <span>{two(videos.filter((v) => v.section === s.id).length)}</span>
-          </button>
-        ))}
-      </div>
-      <div className="cn-run">
-        {rows.map((r) =>
-          r.length === 1 ? (
-            <Chapter key={r[0].id} v={r[0]} n={++n} ratio="2.39 / 1" sizes="100vw" onPlay={onPlay} />
-          ) : (
-            <div key={r[0].id} className="cn-pair">
-              {r.map((v, j) => (
-                <Chapter key={v.id} v={v} n={++n} ratio="16 / 9" small={j === 1} sizes="100vw" onPlay={onPlay} />
-              ))}
-            </div>
-          ),
-        )}
       </div>
     </div>
   );

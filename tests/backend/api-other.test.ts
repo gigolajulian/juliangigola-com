@@ -2,8 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { SCOPED, githubToken, reply } from "./fakes";
 
 /* The smaller routes: /api/traffic (behind the GitHub gate, the Cloudflare
-   token never leaves the Worker), /api/tune (dev server only) and
-   /picks.json (the inquiry form's picker). */
+   token never leaves the Worker) and /picks.json (the inquiry form's picker). */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
 vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
@@ -38,17 +37,6 @@ describe("GET /api/traffic", async () => {
       String(u).startsWith("https://api.github.com/") ? reply({ permissions: { push: true } }, 200, SCOPED) : reply("not json at all", 400)));
     const res = await get(githubToken());
     expect(await res.text()).not.toContain(secret);
-  });
-});
-
-describe("POST /api/tune", async () => {
-  const { POST } = await import("@/app/api/tune/route");
-  it("is 404 outside the dev server, before it reads anything", async () => {
-    const body = vi.fn();
-    const res = await POST({ json: body } as unknown as Request);
-    expect(process.env.NODE_ENV).not.toBe("development");
-    expect(res.status).toBe(404);
-    expect(body).not.toHaveBeenCalled();
   });
 });
 
