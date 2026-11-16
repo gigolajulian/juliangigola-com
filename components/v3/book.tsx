@@ -168,7 +168,16 @@ const noop = () => () => {};
    no longer matches the visitor's today and hydration fails. */
 function OnRequest(props: { slug: SessionSlug; shell: Shell }) {
   const stamp = React.useSyncExternalStore(noop, () => new Date().toDateString(), () => "");
-  return stamp ? <OnRequestFlow {...props} stamp={stamp} /> : null;
+  if (stamp) return <OnRequestFlow {...props} stamp={stamp} />;
+  // on the server and until hydration: the same first step without its calendar, so the page is not empty before JS
+  return props.shell({
+    steps: ["Date", "Shoot", "You", "Sent"],
+    at: 1,
+    head: "Book a session",
+    sub: "My studio is in San Jose, and I travel across the Bay Area.",
+    body: <p className="lbl mute">{SESSIONS[props.slug].name} is on request. Pick a preferred date and I&apos;ll confirm it with a quote.</p>,
+    sum: [],
+  });
 }
 
 function OnRequestFlow({ slug, shell, stamp }: { slug: SessionSlug; shell: Shell; stamp: string }) {
