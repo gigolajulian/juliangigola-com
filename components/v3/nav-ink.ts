@@ -102,9 +102,10 @@ function thumb(el: HTMLImageElement | HTMLVideoElement): Uint8ClampedArray | nul
     copied = true;
     copies.set(src, null);
     const im = new Image();
-    im.onload = () => (copies.set(src, read(im) ?? false), poke());
-    im.onerror = () => copies.set(src, false);
     im.src = "/" + m[1];
+    // decoded off the main thread first: the copy is the full-size original, and drawing it undecoded took the
+    // frame (MAC, previews: 218 to 311ms frames on the first pass as new photos came under the bar)
+    im.decode().then(() => (copies.set(src, read(im) ?? false), poke()), () => copies.set(src, false));
   }
   pending = copies.get(src) === null;
   return copies.get(src) || null;
