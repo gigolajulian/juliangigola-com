@@ -18,12 +18,12 @@ const KEY = "k";
 const req = (method: string, body?: unknown, query = "") =>
   new Request(`https://juliangigola.com/api/calendar${query}`, { method, headers: { "x-inbox-key": KEY }, body: body ? JSON.stringify(body) : undefined });
 
-type Call = { url: string; method: string; body?: any };
+type Call = { url: string; method: string; body?: { [k: string]: unknown } };
 let kv: FakeKV;
 let calls: Call[];
-let event: any;
+let event: { [k: string]: unknown };
 let ics: string;
-let freebusy: any;
+let freebusy: unknown;
 
 beforeEach(() => {
   forgetToken();
@@ -77,7 +77,7 @@ describe("busyAll", () => {
     ics = "BEGIN:VEVENT\nDTSTART:20261121T200000Z\nDTEND:20261121T220000Z\nEND:VEVENT";
     freebusy = { calendars: { primary: { busy: [] }, "me@gmail.com": { busy: [{ start: "2026-11-22T20:00:00Z", end: "2026-11-22T21:00:00Z" }] } } };
     const out = await busyAll(SECRET, A, B, [{ label: "Personal", src: "me@gmail.com" }, { label: "SGH", src: "https://shifts.example.com/a.ics" }]);
-    expect(calls[0].body.items).toEqual([{ id: "primary" }, { id: "me@gmail.com" }]);
+    expect(calls[0].body?.items).toEqual([{ id: "primary" }, { id: "me@gmail.com" }]);
     expect(out.busy.map((b) => String(b.label)).sort(byCodeUnit)).toEqual(["Personal", "SGH"]);
     expect(out.failed).toEqual([]);
   });
@@ -124,7 +124,7 @@ describe("/api/calendar", () => {
 
   it("blocks a time range on one day in Pacific", async () => {
     await POST(req("POST", { block: { from: "2026-11-20", start: "14:00", end: "18:00" } }));
-    expect(inserted().body.start).toEqual({ dateTime: "2026-11-20T14:00:00", timeZone: "America/Los_Angeles" });
+    expect(inserted().body?.start).toEqual({ dateTime: "2026-11-20T14:00:00", timeZone: "America/Los_Angeles" });
     expect((await POST(req("POST", { block: { from: "2026-11-20", to: "2026-11-21", start: "14:00", end: "18:00" } }))).status).toBe(400);
     expect((await POST(req("POST", { block: { from: "2026-11-20", start: "18:00", end: "14:00" } }))).status).toBe(400);
   });
