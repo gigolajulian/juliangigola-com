@@ -43,7 +43,7 @@ export const FILM_DRESS: Record<string, { zoom?: number; mark?: { src: string; w
 /* ── Book online: the four sessions the home sells, each with its deposit (`lib/booking/paid.ts`). Model test books on /book. ── */
 export type BookRow = {
   key: "portraits" | "headshots" | "graduation" | "studio-digitals";
-  /** The live session it books; Test shoot has none yet (no SESSIONS / EVENTS entry). */
+  /** The live session it books. */
   slug: SessionSlug | null;
   group: "s" | "a";
   name: string;

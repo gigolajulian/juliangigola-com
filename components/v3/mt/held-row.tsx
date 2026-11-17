@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-/* Cover art and Motion share this (spec 3.7, 3.8): a held block that names
+/* Cover art uses this, Motion borrows `rowKeys` (spec 3.7, 3.8): a held block that names
    the current item and one sideways row. Static form: a native scroll row
    with snap, which is also its touch and reduced-motion form. The current
    item follows the row's own scroll (snap step), `data-cur` on the section.
