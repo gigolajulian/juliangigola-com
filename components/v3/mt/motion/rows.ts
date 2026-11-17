@@ -1,6 +1,6 @@
 import { shiftScroll } from "@/components/v3/smooth-scroll";
 import { captionsOff, vimeoListen, vimeoPlays } from "@/lib/videos";
-import { clamp, smooth, type Driver } from "./engine";
+import { RISE, clamp, smooth, type Driver } from "./engine";
 import { sleeveTilt } from "./sleeve-tilt";
 
 /* The held row's travel: it eases away from its first item and into its last (0.4 of the scroll's speed at the two ends). */
@@ -16,9 +16,7 @@ const unease = (v: number) => {
    sideways. Motion (spec 3.8): a vertical stack there, see films() below.
    Everywhere else the native snap rows stay. */
 
-const RISE: KeyframeAnimationOptions = { duration: 600, easing: "cubic-bezier(.16,1,.3,1)" };
-
-function heldRow(name: string, covers: boolean): Driver {
+function heldRow(name: string): Driver {
   let frame: (p: number) => void = () => {};
   return {
     name,
@@ -36,7 +34,7 @@ function heldRow(name: string, covers: boolean): Driver {
 
       /* The V4 default since 2026-11-15 (Julian: "turn on the parallax by default"), ?mtpar=0 turns it off: the heading and the row ride up at their own
          rates and the stage hands over to Motion (rows.css). The pile the covers were dealt from is gone (Julian, 2026-11-17). */
-      const par = covers && !/[?&]mtpar=0/.test(location.search);
+      const par = !/[?&]mtpar=0/.test(location.search);
       if (par) document.documentElement.setAttribute("data-mt-par", "");
       // kept (Julian, 2026-11-17: "keep the lid"), ?mtlid=0 turns it off: Cover art waits under Commissions, which lifts off it like a lid (rows.css)
       if (par) document.documentElement.toggleAttribute("data-mt-lid", !/[?&]mtlid=0/.test(location.search));
@@ -63,7 +61,7 @@ function heldRow(name: string, covers: boolean): Driver {
       };
       // Snap rows: the disc only exists on the current sleeve, which changes at half a step, so it is back in by then.
       const loose = () => {
-        if (covers && !ctx.held) discs(row.scrollLeft, step / 2);
+        if (!ctx.held) discs(row.scrollLeft, step / 2);
       };
 
       frame = (p) => {
@@ -80,7 +78,7 @@ function heldRow(name: string, covers: boolean): Driver {
         lastX = x;
         track.style.transform = `translate3d(${(base - x).toFixed(2)}px,0,0)`;
         // 420 of the 520 design px between covers; by the measured step, so it holds where the covers stand closer (tall windows)
-        if (covers) discs(x, step * (420 / 520), k);
+        discs(x, step * (420 / 520), k);
       };
 
       // The title line rises when held-row.tsx commits the new item.
@@ -140,7 +138,7 @@ function heldRow(name: string, covers: boolean): Driver {
       row.addEventListener("scroll", loose, { passive: true, signal: ac.signal });
 
       /* Hover lift (fine pointers): tilt toward the pointer, up to 9deg each way. rows.css does the rest. */
-      if (covers) for (const it of items) sleeveTilt(it, () => ctx.held && ctx.fine && !dragged, on);
+      for (const it of items) sleeveTilt(it, () => ctx.held && ctx.fine && !dragged, on);
 
       // After the engine's own resize pass, so ctx is current.
       addEventListener("resize", () => requestAnimationFrame(() => {
@@ -160,7 +158,7 @@ function heldRow(name: string, covers: boolean): Driver {
         if (par) for (const k of ["data-mt-par", "data-mt-lid"]) document.documentElement.removeAttribute(k);
         for (const it of items) {
           it.classList.remove("hv");
-          if (covers) it.style.setProperty("--o", "0.5");
+          it.style.setProperty("--o", "0.5");
         }
       };
     },
@@ -301,4 +299,4 @@ function films(): Driver {
   };
 }
 
-export const rowsDrivers: Driver[] = [heldRow("covers", true), films()];
+export const rowsDrivers: Driver[] = [heldRow("covers"), films()];

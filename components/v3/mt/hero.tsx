@@ -22,16 +22,19 @@ const SIZES = "(max-width: 599px) 50vw, (min-width: 1920px) 18vw, 30vw";
 
 /* `was`: the frame this one replaced (idle wall). It stays under the new one until that has loaded and cut in, so the swap never passes through dark. */
 function Fig({ f, was, onDone, i, eager, xr, idle }: { f: MtFrame; was?: MtFrame; onDone?: () => void; i: number; eager?: boolean; xr?: boolean; idle?: boolean }) {
+  // the caption changes with the photo: the new frame's name waits until its image has loaded and cut in (it led by about 170ms)
+  const [shown, setShown] = React.useState(f.src);
+  const cap = was && shown !== f.src ? was : f;
   return (
     <figure className={xr ? "xr" : undefined} style={{ "--i": i, "--c2": i % 2, "--r2": Math.floor(i / 2) } as React.CSSProperties} data-slug={f.slug} data-i={idle ? i : undefined}>
       <Link href={projectHref(f.slug)} className="fig">
         <div className="ph">
           {was ? <Image key={was.src} src={was.src} alt="" fill sizes={SIZES} /> : null}
-          <Image key={f.src} src={f.src} alt={f.name} fill sizes={SIZES} loading={eager || was ? "eager" : "lazy"} fetchPriority={eager ? "high" : undefined} className={was ? "mt-dev" : undefined} onLoad={was ? (e) => e.currentTarget.setAttribute("data-on", "") : undefined} onAnimationEnd={onDone} />
+          <Image key={f.src} src={f.src} alt={f.name} fill sizes={SIZES} loading={eager || was ? "eager" : "lazy"} fetchPriority={eager ? "high" : undefined} className={was ? "mt-dev" : undefined} onLoad={was ? (e) => (e.currentTarget.setAttribute("data-on", ""), setShown(f.src)) : undefined} onAnimationEnd={onDone} />
         </div>
         <figcaption className="lbl">
-          <span>{f.name}</span>
-          <span className="mute">{f.meta}</span>
+          <span>{cap.name}</span>
+          <span className="mute">{cap.meta}</span>
         </figcaption>
       </Link>
     </figure>
