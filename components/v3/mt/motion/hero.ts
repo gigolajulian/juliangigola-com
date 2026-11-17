@@ -277,14 +277,16 @@ export const heroDrivers: Driver[] = [
         }
         /* Julian, 2026-11-16: "it needs to stay in place until 3 rows are scrolled and move down and out". The name
            holds until the fourth row is whole in the window (its lower edge at the window's: "pinned to screen for
-           3-4 rows"), then rides down out of the window over the next 0.3 of a row, at full strength. Never later than the travel allows. */
-        const len = 0.3 * st.row, travel = st.wall * u + TAIL * ctx.u - Math.max(ctx.vh, 600);
+           3-4 rows"), then rides down out of the window. 2026-11-17: "too quick, it needs to go out a bit slower with parallax": the ride takes
+           0.8 of a row, and the tagline and buttons sink ahead of the name (--mt-out, hero.css). Never later than the travel allows. */
+        const len = 0.8 * st.row, travel = st.wall * u + TAIL * ctx.u - Math.max(ctx.vh, 600);
         const from = Math.max(0, Math.min(4 * st.row - ctx.vh, travel - len));
         const e = Math.round(smooth(clamp((S - from) / Math.max(1, len))) * 1000) / 1000;
         if (st.name && e !== st.e) {
           st.e = e;
           st.out = e >= 1;
           st.name.style.transform = e ? `translate3d(0,${(0.6 * ctx.vh * e).toFixed(1)}px,0)` : "";
+          st.name.style.setProperty("--mt-out", String(e));
           st.name.style.visibility = st.out ? "hidden" : ""; // gone: its buttons leave the tab order too
           // the bar's wordmark comes in as the big name is out, and goes as it comes back (mtscroll.css)
           document.documentElement.toggleAttribute("data-mt-nameout", st.out);
