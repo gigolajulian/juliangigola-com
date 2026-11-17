@@ -5,7 +5,7 @@ html[data-mt-held] .mt-hero .mt-more { position: absolute; left: 0; right: 0; bo
 html[data-mt-scrolling] .mt-hero .mt-more .btn { pointer-events: none; }
 /* captions keep clear of the name, tagline and buttons (hero.ts clearance) */
 html[data-mt-motion] .mt-hero .mt-col figcaption span { transition: opacity .15s ease-out; }
-html[data-mt-motion] .mt-hero .mt-col figcaption span[data-under] { opacity: 0; }
+.mt-hero .mt-col figcaption span[data-under] { opacity: 0; }
 /* Name dock: the header has no wordmark until the hero name lands in its place (hero.ts sets rest, ride, land or off) */
 html[data-mtdock]:not([data-mtdock="off"]) .v3 .site-wm { transition: none; }
 html[data-mtdock]:not([data-mtdock="land"], [data-mtdock="off"]) .v3 .site-wm { visibility: hidden; }

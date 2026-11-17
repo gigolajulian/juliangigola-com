@@ -141,7 +141,7 @@ const states = new WeakMap<HTMLElement, State>();
 /* An unseen margin round the name, the tagline and the buttons (Julian, 2026-11-16: a photo's caption ran through the
    tagline). A caption within PAD of any of them hides (hero.css fades it) and comes back once clear. Held layout only. */
 const PAD = 12;
-function clearance(st: State, on: boolean) {
+function clearance(st: Pick<State, "texts" | "ctas" | "caps">, on: boolean) {
   const z = on ? [...st.texts.map(ink), ...(st.ctas ? [st.ctas.getBoundingClientRect()] : [])].filter((r) => r.width) : [];
   const hit = st.caps.map((c) => {
     if (!z.length) return false;
@@ -157,6 +157,21 @@ const move = (p: Part, y: number) => {
   p.v = v;
   p.el.style.transform = v ? `translate3d(0,${v}px,0)` : "";
 };
+
+/** Reduced motion: the engine is off and nothing moves, so the captions under the name are worked out once and again on resize. */
+export function heroStill(root: HTMLElement) {
+  const el = root.querySelector<HTMLElement>(".mt-hero");
+  if (!el) return () => {};
+  const st = {
+    caps: [...el.querySelectorAll<HTMLElement>(".mt-col figcaption span")],
+    texts: [...el.querySelectorAll<HTMLElement>(".mt-name h1, .mt-name .mt-cap")],
+    ctas: el.querySelector<HTMLElement>(".mt-name .mt-ctas"),
+  };
+  const run = () => clearance(st, true);
+  run();
+  addEventListener("resize", run);
+  return () => removeEventListener("resize", run);
+}
 
 export const heroDrivers: Driver[] = [
   {
