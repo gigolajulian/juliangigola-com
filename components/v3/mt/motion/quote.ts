@@ -9,7 +9,7 @@ const EVERY = 5500;
 const SWAP = 500; // the name fades out, swaps, fades in
 const REST = 8000; // touch: back to the clients this long after the last tap
 
-const s = { step: -2, k: 0, t: 0, swap: 0, tap: -REST, rot: false, sets: [] as Element[][], names: [] as (Element | null)[], root: null as HTMLElement | null };
+const s = { k: 0, t: 0, swap: 0, tap: -REST, rot: false, sets: [] as Element[][], names: [] as (Element | null)[], root: null as HTMLElement | null };
 const show = (k: number) => s.sets.forEach((set) => set.forEach((c, i) => c.toggleAttribute("data-q", i === k)));
 const write = (k: number) =>
   s.names.forEach((n) => {
@@ -41,16 +41,9 @@ export const quoteDrivers: Driver[] = [
         el.removeAttribute("data-rot");
         el.dataset.client = "0";
         s.rot = false;
-        s.step = -2;
       };
     },
     frame(p, el, ctx) {
-      // a hold (none since q1, 2026-11-14): the first stretch shows the clients, then scroll steps through the four options
-      const step = ctx.held && el.dataset.hold ? (p < 0.14 ? -1 : Math.min(3, Math.floor(((p - 0.14) / 0.86) * 4))) : -2;
-      if (step !== s.step) {
-        s.step = step;
-        if (step > -2) el.dispatchEvent(new CustomEvent("mt-step", { detail: step }));
-      }
       if (s.swap > 0 && (s.swap -= ctx.dt) <= 0) write(s.k);
       const rot = ctx.fine ? !el.hasAttribute("data-opt") : ctx.t - s.tap > REST;
       if (rot !== s.rot) el.toggleAttribute("data-rot", (s.rot = rot));
