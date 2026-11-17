@@ -23,7 +23,7 @@ type Part = { el: HTMLElement; a: number; c: number; v: number };
 const DOCK_W = 11;
 type Geo = { ax: number; ay: number; bx: number; by: number; k: number; ox: number; oy: number; ws: number };
 type Dock = { f: HTMLElement; words: HTMLElement[]; h1: HTMLElement; wm: HTMLElement; cap: HTMLElement | null; ctas: HTMLElement | null; scrim: HTMLElement | null; w: number; m: Geo | null; x: number; v: number; st: string; q: string };
-type State = { cols: Part[]; figs: Part[]; caps: HTMLElement[]; texts: HTMLElement[]; ctas: HTMLElement | null; name: HTMLElement | null; s: number; mode: string; e: number; u: number; at: string; wall: number; dock: Dock | null; bar: HTMLElement | null; out: boolean };
+type State = { cols: Part[]; figs: Part[]; caps: HTMLElement[]; texts: HTMLElement[]; ctas: HTMLElement | null; name: HTMLElement | null; s: number; mode: string; e: number; u: number; at: string; wall: number; dock: Dock | null; bar: HTMLElement | null; out: boolean; row: number };
 
 const ink = (n: Node) => {
   const r = document.createRange();
@@ -180,6 +180,7 @@ export const heroDrivers: Driver[] = [
         dock: dockSetup(el),
         bar: document.querySelector<HTMLElement>(".site-hdr"),
         out: false,
+        row: 660,
       };
       states.set(el, st);
       const d = st.dock;
@@ -251,6 +252,9 @@ export const heroDrivers: Driver[] = [
           st.u = (core[0]?.el.offsetWidth ?? 0) / 403 || ctx.u;
           // the lowest column end plus the 46 design px under it: 2640 with four rows
           st.wall = core.length ? Math.max(...core.map((c) => c.el.offsetTop + c.el.offsetHeight)) / st.u + 46 : WALL;
+          // one row of the wall, px: from one photo's top to the next in a column
+          const two = core[0]?.el.querySelectorAll<HTMLElement>("figure");
+          st.row = (two && two[1] ? two[1].offsetTop - two[0].offsetTop : 0) || 660 * st.u;
           if (st.dock && st.name) dockMeasure(st.dock, st.name);
         }
         const u = st.u;
@@ -271,13 +275,16 @@ export const heroDrivers: Driver[] = [
           dockFrame(st.dock, p, ctx.dt, Math.abs(ctx.dy) > ctx.vh);
           return;
         }
-        // Julian, 2026-11-16 ("scrolls up with the hero"): the name block travels up with the wall, locked to the
-        // middle column, and leaves under the bar like the photos do. No flight to the bar, no fade.
-        const e = Math.round(S * 10) / 10;
+        /* Julian, 2026-11-16: "it needs to stay in place until 3 rows are scrolled and move down and out". The name
+           holds until the third row is whole in the window (its lower edge at the window's), then rides down out of
+           the window over the next 0.6 of a row, at full strength. Never later than the travel allows. */
+        const len = 0.6 * st.row, travel = st.wall * u + TAIL * ctx.u - Math.max(ctx.vh, 600);
+        const from = Math.max(0, Math.min(3 * st.row - ctx.vh, travel - len));
+        const e = Math.round(smooth(clamp((S - from) / Math.max(1, len))) * 1000) / 1000;
         if (st.name && e !== st.e) {
           st.e = e;
-          st.name.style.transform = e ? `translate3d(0,${-e}px,0)` : "";
-          st.out = e > 0 && st.name.getBoundingClientRect().bottom <= (st.bar?.offsetHeight ?? 60);
+          st.out = e >= 1;
+          st.name.style.transform = e ? `translate3d(0,${(0.6 * ctx.vh * e).toFixed(1)}px,0)` : "";
           st.name.style.visibility = st.out ? "hidden" : ""; // gone: its buttons leave the tab order too
           // the bar's wordmark comes in as the big name is out, and goes as it comes back (mtscroll.css)
           document.documentElement.toggleAttribute("data-mt-nameout", st.out);
