@@ -714,19 +714,16 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
 @media (hover:hover) and (pointer:fine){html[data-mtscroll] .v3 .mt-hero .mt-ctas .btn:not(.fill):hover{background-size:100% 100%;color:#000;border-color:#fff;text-shadow:none}}
 @media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .v3 .mt-hero :is(.mt-name h1,.mt-cap){color:var(--dark-ink)}}
 :root[data-theme="light"] .v3 .mt-hero :is(.mt-name h1,.mt-cap){color:var(--dark-ink)}
-/* The tagline inverts against whatever is under it, both themes (Julian, 2026-11-17): light over a dark photo or page, dark over a pale one. A blend only reaches
-   what shares its stacking context, so the name block gives up its z-index and the wall goes under it with a negative one, inside an isolated stage. */
-/* an isolated group starts transparent, and a blend over nothing leaves the text white: the stage carries the page colour so the tagline inverts over bare page too */
-.v3 .mt-hero .mt-stage{isolation:isolate;background:var(--bg)}
-.v3 .mt-hero .mt-stage>.mt-name{z-index:auto}
-.v3 .mt-hero .mt-stage>.mt-wall{z-index:-1}
-/* One blend per copy of the text, bottom to top: difference (invert), saturation with a grey (no teal over skin or grass), colour dodge with 50% grey (doubles it, so the
-   tagline is white over dark and mid-tone photos and only goes dark over a pale one). The tone where it matches the photo moves from mid-grey to light grey. */
+/* The tagline's letters change colour with what is under them (Julian, 2026-11-17: black or white, and grey over the white page). No blend: the three stacked blends
+   went plain white in Safari once the photos moved. tone() in motion/hero.ts reads the photo under each letter and sets data-tone: w over a dark photo, k over a
+   light one, p over bare page. Without it (no script yet, or a photo it cannot read) a letter keeps the theme's own tagline colour. */
 :root .v3 .mt-hero .mt-name .mt-name-in .mt-cap{text-shadow:none}
-/* block, because translate does nothing on an inline span and the first copy would stay behind while the other two move */
-:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .t{display:block;color:#fff;mix-blend-mode:difference}
-:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .t+.t{position:absolute;inset:0;color:#808080;mix-blend-mode:saturation;user-select:none}
-:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .t+.t+.t{mix-blend-mode:color-dodge}
+:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .wd{white-space:nowrap}
+:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w{transition:color .15s ease-out}
+:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w[data-tone="w"]{color:#fff}
+:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w[data-tone="k"]{color:#0b0b0c}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w[data-tone="p"]{color:color-mix(in oklab,var(--ink) 58%,var(--bg))}}
+:root[data-theme="light"] .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w[data-tone="p"]{color:color-mix(in oklab,var(--ink) 58%,var(--bg))}
 /* No wordmark in the bar while the hero, with its big name, is on screen (Julian, 2026-11-16: phones first, then every
    size once the name stopped flying to the bar). ?mtdock=1 hands the wordmark over itself, so it is left out. */
 html[data-v3motion][data-mtscroll]:not([data-mtdock="rest"],[data-mtdock="ride"],[data-mtdock="land"]):has(.mt-hero) .v3 .site-hdr:not(.menu-on) .site-wm{transition:opacity .25s ease-out}
