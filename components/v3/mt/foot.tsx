@@ -122,8 +122,8 @@ export function MtFoot() {
               <Phrase copy />
             </span>
           </button>
-          {/* Outside the button, so the hint is its description, not part of its name. */}
-          <span className="sr-only" id="mt-ph-hint">Opens the inquiry card</span>
+          {/* Outside the button, so the hint is its description, not part of its name; aria-hidden so it is not read again as its own line. */}
+          <span className="sr-only" id="mt-ph-hint" aria-hidden>Opens the inquiry card</span>
         </div>
         <div className="mt-fline lbl mute">
           <span>&copy; {year} Julian Gigola</span>
