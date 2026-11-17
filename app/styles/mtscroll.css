@@ -60,9 +60,9 @@
 /* "See all projects" rides the foot of the screen, bottom right, and comes to rest in the sheet's last corner (Julian, 2026-11-15).
    It sticks inside a layer the size of the sheet, so it never rises past the sheet's top (a negative margin let it, in Safari) and adds no height. */
 [data-mtscroll] .mt-comm-pin{position:relative}
-/* the button's run starts under the first photo, two rows of four-across 4:5 frames down (Julian, 2026-11-17) */
-[data-mtscroll] .mt-comm-foot{position:absolute;inset:calc(100vw / 4 * 1.25 * 2) 0 0;z-index:2;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-end;pointer-events:none}
-[data-mtscroll] .mt-comm-all{position:sticky;bottom:calc(64 * var(--u));height:32px;padding:0 14px;margin:0 calc(64 * var(--u)) calc(64 * var(--u)) 0;pointer-events:auto;border-color:rgb(var(--on-photo));color:rgb(var(--on-photo));text-shadow:0 0 2px rgb(0 0 0 / .9),0 1px 10px rgb(0 0 0 / .7);box-shadow:0 0 0 1px rgb(0 0 0 / .35),inset 0 0 0 1px rgb(0 0 0 / .35)}
+/* the button is not pinned (Julian, 2026-11-17): it lies on the sheet's last photo, bottom right */
+[data-mtscroll] .mt-comm-foot{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-end;pointer-events:none}
+[data-mtscroll] .mt-comm-all{height:32px;padding:0 14px;margin:0 calc(64 * var(--u)) calc(64 * var(--u)) 0;pointer-events:auto;border-color:rgb(var(--on-photo));color:rgb(var(--on-photo));text-shadow:0 0 2px rgb(0 0 0 / .9),0 1px 10px rgb(0 0 0 / .7);box-shadow:0 0 0 1px rgb(0 0 0 / .35),inset 0 0 0 1px rgb(0 0 0 / .35)}
 /* the label and edge carry the captions' tight shadow, so they hold on a bright frame; the hover fill needs none */
 @media (hover:hover){[data-mtscroll] .mt-comm-all:hover{text-shadow:none}}
 [data-mtscroll] .mt-sheet{margin-top:0}
