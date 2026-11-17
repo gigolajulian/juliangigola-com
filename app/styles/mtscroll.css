@@ -14,6 +14,8 @@
   html[data-v3motion][data-mtscroll]:not([data-mtdock]):has(.v3home,.mt-wait) .v3 .site-wm{visibility:hidden}
 }
 
+/* One grey for unpicked rows, deposit lines and the footer phrase (was #8a8a8a written out 7 times). */
+:root[data-mtscroll]{--grey:#8a8a8a}
 [data-mtscroll] .mt{--u:clamp(.7px,min(calc(100vw / 1440),calc(100svh / 900)),1.6px);--fx:max(0px,calc((100vw - 1440 * var(--u)) / 2));--hair:color-mix(in srgb,var(--ink) 14%,transparent);--row:color-mix(in oklab,var(--ink) 50%,var(--bg));--body:color-mix(in oklab,var(--ink) 74%,var(--bg));position:relative;overflow-x:clip}
 [data-mtscroll] .mt section,[data-mtscroll] .mt footer{position:relative}
 [data-mtscroll] .mt .mt-frame{position:relative;width:min(100%,calc(1440 * var(--u)));margin-inline:auto}
@@ -187,7 +189,7 @@
 [data-mtscroll] .mt-more-me{position:absolute;z-index:1;right:calc(36 * var(--u));bottom:calc(54 * var(--u));height:auto;padding:calc(11 * var(--u)) calc(16 * var(--u));font-size:11px;background:color-mix(in srgb,var(--bg) 50%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
 
 /* ── Footer (3.10) ── */
-[data-mtscroll] .mt-foot{--phr:#8a8a8a}
+[data-mtscroll] .mt-foot{--phr:var(--grey)}
 :root[data-mtscroll][data-theme="light"] .mt-foot{--phr:#8f8e8a}
 [data-mtscroll] .mt-foot .mt-stage{position:relative;height:max(100svh,600px);overflow:hidden}
 [data-mtscroll] .mt-fwall{position:absolute;inset:0}
@@ -326,7 +328,7 @@
   [data-mtscroll] .mt-book .mt-label{order:-2}
   [data-mtscroll] .mt-book-col{width:auto;margin:20px 16px 0}
   [data-mtscroll] .mt-br{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:11px 0!important}
-  [data-mtscroll] .mt-br b{font-size:24px;line-height:1.1;letter-spacing:-.045em;color:#8a8a8a}
+  [data-mtscroll] .mt-br b{font-size:24px;line-height:1.1;letter-spacing:-.045em;color:var(--grey)}
   /* unpicked rows: the small line was 4.07:1 on the page, the muted ink is about 6:1 */
   [data-mtscroll] .mt-br .lbl{color:var(--mute)}
   :root[data-mtscroll][data-theme="light"] .mt-br b{color:var(--row)}
@@ -341,7 +343,7 @@
   [data-mtscroll] .mt-brs.pair .mt-br b{font-size:22px}
   [data-mtscroll] .mt-group2{margin-top:12px;padding-top:12px;border-top:1px solid var(--hair)}
   [data-mtscroll] .mt-block{display:none}
-  [data-mtscroll] .mt-dep{margin-top:10px;font:500 12px/1.4 var(--display);letter-spacing:0;text-transform:none;color:#8a8a8a}
+  [data-mtscroll] .mt-dep{margin-top:10px;font:500 12px/1.4 var(--display);letter-spacing:0;text-transform:none;color:var(--grey)}
   [data-mtscroll] .mt-bar{position:sticky;bottom:0;z-index:5;display:flex;align-items:center;gap:12px;padding:12px max(16px,env(safe-area-inset-right)) max(30px,calc(env(safe-area-inset-bottom) + 12px)) max(16px,env(safe-area-inset-left));background:color-mix(in srgb,var(--bg) 72%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-top:1px solid var(--hair)}
   [data-mtscroll] .mt-bar>p,[data-mtscroll] .mt-bar>a{margin:0;flex:none;line-height:1.4}
   [data-mtscroll] .mt-bar .btn{flex:1;min-height:48px}
@@ -354,14 +356,14 @@
   [data-mtscroll] .mt-by{order:-1;margin:4px 16px 0}
   [data-mtscroll] .mt-qos{margin:20px 16px 0}
   [data-mtscroll] .mt-qo{padding:11px 0 12px!important}
-  [data-mtscroll] .mt-qo b{font-size:30px;line-height:1.05;letter-spacing:-.05em;color:#8a8a8a}
+  [data-mtscroll] .mt-qo b{font-size:30px;line-height:1.05;letter-spacing:-.05em;color:var(--grey)}
   :root[data-mtscroll][data-theme="light"] .mt-qo b{color:var(--row)}
   [data-mtscroll] .mt-qo-d{font-size:13px;line-height:1.4;color:#a8a8a8}
   [data-mtscroll] .mt-qow[data-on] .mt-qo-d{max-height:80px;margin:0 0 12px}
   [data-mtscroll] .mt-qw{height:46px}
-  [data-mtscroll] .mt-qw b{font-size:18px;color:#8a8a8a}
+  [data-mtscroll] .mt-qw b{font-size:18px;color:var(--grey)}
   [data-mtscroll] .mt-qw>span{font-size:13px}
-  [data-mtscroll] .mt-q-line{margin:12px 16px 0;font-size:12px;line-height:1.4;color:#8a8a8a}
+  [data-mtscroll] .mt-q-line{margin:12px 16px 0;font-size:12px;line-height:1.4;color:var(--grey)}
   [data-mtscroll] .mt-q-act{display:none}
   [data-mtscroll] .mt-bar-call{text-decoration:underline;text-underline-offset:3px}
 
@@ -681,7 +683,7 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
 @media (min-width:1024px) and (min-height:600px){[data-mtscroll] .mt-comm-head{flex-direction:column;align-items:flex-start;justify-content:flex-end;gap:calc(10 * var(--u));height:calc(246 * var(--u));margin-bottom:calc(-246 * var(--u))}}
 /* Footer, desktop: a dark photo ground in both themes with light text and no halo (Julian, 2026-11-15: the glow around the links, worst in light) */
 @media (min-width:1024px) and (min-height:600px){
-  :root[data-mtscroll]:root .mt-foot{--bg:var(--dark-bg);--ink:var(--dark-ink);--mute:oklch(0.78 0.005 80);--accent:var(--dark-accent);--hair:color-mix(in srgb,var(--ink) 14%,transparent);--phr:#8a8a8a;color:var(--ink)}
+  :root[data-mtscroll]:root .mt-foot{--bg:var(--dark-bg);--ink:var(--dark-ink);--mute:oklch(0.78 0.005 80);--accent:var(--dark-accent);--hair:color-mix(in srgb,var(--ink) 14%,transparent);--phr:var(--grey);color:var(--ink)}
   [data-mtscroll] .mt-fscrim{background:linear-gradient(color-mix(in srgb,var(--bg) 72%,transparent),color-mix(in srgb,var(--bg) 62%,transparent) 45%,var(--bg) 94%)}
 }
 

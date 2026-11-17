@@ -62,7 +62,7 @@ export function useLocalTime() {
 
 function Phrase({ copy }: { copy?: boolean }) {
   return (
-    <span className="mt-ph" aria-hidden={copy || undefined} data-copy={copy || undefined}>
+    <span className="mt-ph" aria-hidden data-copy={copy || undefined}>
       {[...PHRASE].map((ch, j) => <span key={j} style={{ "--j": j } as React.CSSProperties}>{ch === " " ? " " : ch}</span>)}
     </span>
   );
@@ -113,7 +113,9 @@ export function MtFoot() {
           </div>
         </nav>
         <div className="mt-phrase">
-          <button type="button" className="mt-ph-btn" aria-label="Contact me, opens the inquiry card" onClick={() => cards.inquire("footer")}>
+          <button type="button" className="mt-ph-btn" onClick={() => cards.inquire("footer")}>
+            {/* The name is real text, the letter-by-letter rows are hidden from it: an aria-label over split letters fails label-in-name (WCAG 2.5.3). */}
+            <span className="sr-only">{PHRASE}</span>
             <span className="mt-ph-row">
               <Phrase />
               <Phrase copy />
