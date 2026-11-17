@@ -710,13 +710,12 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
 @media (hover:hover) and (pointer:fine){html[data-mtscroll] .v3 .mt-hero .mt-ctas .btn:not(.fill):hover{background-size:100% 100%;color:#000;border-color:#fff;text-shadow:none}}
 @media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .v3 .mt-hero :is(.mt-name h1,.mt-cap){color:var(--dark-ink)}}
 :root[data-theme="light"] .v3 .mt-hero :is(.mt-name h1,.mt-cap){color:var(--dark-ink)}
-/* Light theme: the tagline inverts against whatever is under it (Julian, 2026-11-17): dark on the pale page, light over a dark photo. A blend only reaches
-   what shares its stacking context, so here the name block gives up its z-index and the wall goes under it with a negative one, inside an isolated stage. */
-@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .v3 .mt-hero .mt-stage{isolation:isolate}:root:not([data-theme="dark"]) .v3 .mt-hero .mt-stage>.mt-name{z-index:auto}:root:not([data-theme="dark"]) .v3 .mt-hero .mt-stage>.mt-wall{z-index:-1}:root:not([data-theme="dark"]) .v3 .mt-hero .mt-name .mt-name-in .mt-cap{color:#fff;mix-blend-mode:difference;text-shadow:none}}
-:root[data-theme="light"] .v3 .mt-hero .mt-stage{isolation:isolate}
-:root[data-theme="light"] .v3 .mt-hero .mt-stage>.mt-name{z-index:auto}
-:root[data-theme="light"] .v3 .mt-hero .mt-stage>.mt-wall{z-index:-1}
-:root[data-theme="light"] .v3 .mt-hero .mt-name .mt-name-in .mt-cap{color:#fff;mix-blend-mode:difference;text-shadow:none}
+/* The tagline inverts against whatever is under it, both themes (Julian, 2026-11-17): light over a dark photo or page, dark over a pale one. A blend only reaches
+   what shares its stacking context, so the name block gives up its z-index and the wall goes under it with a negative one, inside an isolated stage. */
+.v3 .mt-hero .mt-stage{isolation:isolate}
+.v3 .mt-hero .mt-stage>.mt-name{z-index:auto}
+.v3 .mt-hero .mt-stage>.mt-wall{z-index:-1}
+:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap{color:#fff;mix-blend-mode:difference;text-shadow:none}
 /* No wordmark in the bar while the hero, with its big name, is on screen (Julian, 2026-11-16: phones first, then every
    size once the name stopped flying to the bar). ?mtdock=1 hands the wordmark over itself, so it is left out. */
 html[data-v3motion][data-mtscroll]:not([data-mtdock="rest"],[data-mtdock="ride"],[data-mtdock="land"]):has(.mt-hero) .v3 .site-hdr:not(.menu-on) .site-wm{transition:opacity .25s ease-out}
