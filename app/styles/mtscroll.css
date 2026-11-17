@@ -584,6 +584,8 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
 /* Booking (b2, q1, q2, approved mock #bq): Book online gets a real heading and stays full size; By quote is a band
    under it led by the question, its four options in one row. Flow layout, no stop. */
 [data-mtscroll] .mt-bq-h{margin:0;font:900 46px/1 var(--display);letter-spacing:-.05em}
+/* "Sessions" with "Book online" under it (Julian, 2026-11-17), like Motion's heading and its line */
+[data-mtscroll] .mt-bq-h .lbl{display:block;margin-top:10px}
 [data-mtscroll] .mt-next{display:none;margin:0}
 [data-mtscroll] .mt-book .mt-photo>.qp{object-fit:cover}
 @media (min-width:1024px) and (min-height:600px){
