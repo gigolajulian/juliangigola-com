@@ -700,7 +700,8 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
 [data-mtscroll] .mt-hero .mt-scrim{background:none}
 /* In its place a soft black shadow on the words themselves; the outline button is blurred glass in white, so it holds on the light page too. In the light
    theme the name and tagline go light grey, so the black shadow carries them over the page and the photos alike. */
-[data-mtscroll] .mt-hero :is(.mt-name h1,.mt-cap){text-shadow:0 1px 2px rgb(0 0 0 / 55%),0 4px 28px rgb(0 0 0 / 70%)}
+/* 2026-11-17: two tighter layers under the wide one. Over a pale photo or the light page the wide shadow alone left the letter edges washed out (MAC). */
+[data-mtscroll] .mt-hero :is(.mt-name h1,.mt-cap){text-shadow:0 0 1px rgb(0 0 0 / 60%),0 2px 6px rgb(0 0 0 / 55%),0 3px 14px rgb(0 0 0 / 50%),0 4px 28px rgb(0 0 0 / 70%)}
 /* and the two buttons lift off the photos the same way */
 [data-mtscroll] .mt-hero .mt-ctas .btn{box-shadow:0 1px 2px rgb(0 0 0 / 35%),0 6px 24px rgb(0 0 0 / 40%)}
 /* the tagline is small: a tighter, darker shadow than the name's */
