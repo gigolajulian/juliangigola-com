@@ -260,8 +260,8 @@ export const heroDrivers: Driver[] = [
         const u = st.u;
         // the ground under the last row is in the page's unit, like the button that sits in it
         const target = p * Math.max(0, st.wall * u + TAIL * ctx.u - Math.max(ctx.vh, 600));
-        // the 0.2 follow of the live Recent(), frame-rate independent
-        st.s = st.s < 0 || Math.abs(target - st.s) < 0.1 ? target : st.s + (target - st.s) * (1 - Math.pow(0.8, ctx.dt / 16.7));
+        // a 0.4 follow, frame-rate independent (the live Recent()'s 0.2 felt laggy here: Julian, 2026-11-17, "half the delay")
+        st.s = st.s < 0 || Math.abs(target - st.s) < 0.1 ? target : st.s + (target - st.s) * (1 - Math.pow(0.6, ctx.dt / 16.7));
         const S = st.s;
         /* Where the wall ends (Julian, 2026-11-15): with three columns the left one ends lowest and the right one
            highest, a stair down to the left, so "See the work" on the right has the open corner. The markup's lags

@@ -479,6 +479,8 @@ html[data-mt-intro="1"]{overflow:hidden}
   [data-mtscroll] .mt-hero .mt-col.side:is([data-col="-1"],[data-col="3"]){--vis:visible}
   /* smaller frames make four rows only two screens of wall: rows five and six bring it back to the laptop's three */
   [data-mtscroll] .mt-hero .mt-col figure.xr{display:block}
+  /* row six is out again, five rows on wide screens (Julian, 2026-11-17) */
+  [data-mtscroll] .mt-hero .mt-col figure.xr:last-child{display:none}
 }
 @media (min-width:3300px) and (min-height:600px){
   [data-mtscroll] .mt-hero .mt-wall{--u:min(calc(100vw / 3252),calc(100svh / 900))}
