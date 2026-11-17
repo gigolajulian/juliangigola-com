@@ -11,7 +11,7 @@
   html[data-mt-held] .mt-hero .mt-col[data-col="2"]{translate:0 0 80px}
   /* 2. Name: 4px. Not the scrim (its edge would show) and not a wrapper (it would become the
      containing block of the absolutely placed h1 and caption). */
-  html[data-mt-held] .mt-hero .mt-name :is(h1,.mt-cap,.mt-ctas){translate:calc(var(--px,0) * 4px) calc(var(--py,0) * 4px)}
+  html[data-mt-held] .mt-hero .mt-name :is(h1,.mt-cap,.mt-ctas){translate:calc(var(--px,0) * 4px) calc(var(--py,0) * 4px + var(--mt-drop,0px))}
   /* 3. Commissions: the hovered tile's photo shifts against the pointer, never past its 1% overscan. Half of the first pass, which pushed in too deep (Julian, 2026-11-14) */
   html[data-mt-held] .mt-sheet figure{overflow:hidden}
   /* --hv eases the shift in with the hover; a transition on translate itself would retarget every frame */

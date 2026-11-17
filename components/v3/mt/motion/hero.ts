@@ -129,7 +129,7 @@ function dockFrame(d: Dock, p: number, dt: number, jump: boolean) {
   // at rest nothing is written: an inline 1 beat the splash's own `opacity:0` rule, so the caption and buttons
   // stood alone on the empty page until the splash started (seen in Safari, 2026-11-15)
   const op = (v: number) => (v >= 1 ? "" : v.toFixed(3));
-  if (d.cap) d.cap.style.opacity = op(cap);
+  if (d.cap) d.cap.style.setProperty("--cap-o", op(cap)); // on the copies, not the paragraph (hero.css)
   if (d.scrim) d.scrim.style.opacity = op(sc);
   if (d.ctas) {
     d.ctas.style.opacity = op(go);
@@ -293,7 +293,8 @@ export const heroDrivers: Driver[] = [
         if (st.name && e !== st.e) {
           st.e = e;
           st.out = e >= 1;
-          st.name.style.transform = e ? `translate3d(0,${((st.drop || 0.6 * ctx.vh) * e).toFixed(1)}px,0)` : "";
+          // a length for the h1, the tagline and the buttons to take each on their own (hero.css): a transform on the block itself would cut the tagline's blend off from the photos
+          st.name.style.setProperty("--mt-drop", e ? `${((st.drop || 0.6 * ctx.vh) * e).toFixed(1)}px` : "0px");
           st.name.style.setProperty("--mt-out", String(e));
           st.name.style.visibility = st.out ? "hidden" : ""; // gone: its buttons leave the tab order too
           // the bar's wordmark comes in as the big name is out, and goes as it comes back (mtscroll.css)
