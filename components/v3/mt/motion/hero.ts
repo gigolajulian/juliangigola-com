@@ -23,7 +23,7 @@ type Part = { el: HTMLElement; a: number; c: number; v: number };
 const DOCK_W = 11;
 type Geo = { ax: number; ay: number; bx: number; by: number; k: number; ox: number; oy: number; ws: number };
 type Dock = { f: HTMLElement; words: HTMLElement[]; h1: HTMLElement; wm: HTMLElement; cap: HTMLElement | null; ctas: HTMLElement | null; scrim: HTMLElement | null; w: number; m: Geo | null; x: number; v: number; st: string; q: string };
-type State = { cols: Part[]; figs: Part[]; caps: HTMLElement[]; texts: HTMLElement[]; ctas: HTMLElement | null; name: HTMLElement | null; s: number; mode: string; e: number; u: number; at: string; wall: number; dock: Dock | null };
+type State = { cols: Part[]; figs: Part[]; caps: HTMLElement[]; texts: HTMLElement[]; ctas: HTMLElement | null; name: HTMLElement | null; s: number; mode: string; e: number; u: number; at: string; wall: number; dock: Dock | null; bar: HTMLElement | null; out: boolean };
 
 const ink = (n: Node) => {
   const r = document.createRange();
@@ -178,6 +178,8 @@ export const heroDrivers: Driver[] = [
         at: "",
         wall: WALL,
         dock: dockSetup(el),
+        bar: document.querySelector<HTMLElement>(".site-hdr"),
+        out: false,
       };
       states.set(el, st);
       const d = st.dock;
@@ -269,17 +271,18 @@ export const heroDrivers: Driver[] = [
           dockFrame(st.dock, p, ctx.dt, Math.abs(ctx.dy) > ctx.vh);
           return;
         }
-        const e = Math.round(smooth(span(p, 0.76, 0.96)) * 1000) / 1000;
+        // Julian, 2026-11-16 ("scrolls up with the hero"): the name block travels up with the wall, locked to the
+        // middle column, and leaves under the bar like the photos do. No flight to the bar, no fade.
+        const e = Math.round(S * 10) / 10;
         if (st.name && e !== st.e) {
           st.e = e;
-          // Julian, 2026-11-16: the name block rides down out of the window at full strength as the hero ends, no fade
-          // and no flight to the bar. The bar's wordmark waits for data-mt-pasthero (mtscroll.css).
-          st.name.style.transform = !e ? "" : `translate3d(0,${(0.6 * ctx.vh * e).toFixed(1)}px,0)`;
-          st.name.style.visibility = e >= 1 ? "hidden" : ""; // gone: its buttons leave the tab order too
+          st.name.style.transform = e ? `translate3d(0,${-e}px,0)` : "";
+          st.out = e > 0 && st.name.getBoundingClientRect().bottom <= (st.bar?.offsetHeight ?? 60);
+          st.name.style.visibility = st.out ? "hidden" : ""; // gone: its buttons leave the tab order too
           // the bar's wordmark comes in as the big name is out, and goes as it comes back (mtscroll.css)
-          document.documentElement.toggleAttribute("data-mt-nameout", e >= 1);
+          document.documentElement.toggleAttribute("data-mt-nameout", st.out);
         }
-        clearance(st, e < 1);
+        clearance(st, !st.out);
         return;
       }
 
