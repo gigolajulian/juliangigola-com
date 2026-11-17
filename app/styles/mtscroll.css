@@ -45,7 +45,7 @@
 [data-mtscroll] .mt-col .ph{position:absolute;inset:0;overflow:hidden;background:var(--card)}
 [data-mtscroll] .mt-col figcaption{position:absolute;top:100%;left:0;right:0;display:flex;justify-content:space-between;gap:12px;padding-top:10px;font-size:max(11px,calc(11 * var(--u)))}
 [data-mtscroll] .mt-col figcaption span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-[data-mtscroll] .mt-name{position:absolute;inset:0 0 auto;height:max(100svh,600px);pointer-events:none}
+[data-mtscroll] .mt-name{position:absolute;inset:0 0 auto;height:max(100svh,600px);pointer-events:none;z-index:1}
 [data-mtscroll] .mt-scrim{position:absolute;inset:auto 0 0;height:56%;background:linear-gradient(to top,color-mix(in srgb,var(--bg) 96%,transparent),color-mix(in srgb,var(--bg) 86%,transparent) 30%,transparent)}
 [data-mtscroll] .mt-name h1{position:absolute;left:calc(36 * var(--u));bottom:calc(92 * var(--u));margin:0;font:900 max(64px,calc(160 * var(--u)))/.86 var(--display);letter-spacing:-.05em;white-space:nowrap}
 [data-mtscroll] .mt-cap{position:absolute;left:calc(38 * var(--u));bottom:calc(54 * var(--u));margin:0;font-size:max(11px,calc(12 * var(--u)))!important;letter-spacing:.12em}
