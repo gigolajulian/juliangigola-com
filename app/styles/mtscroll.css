@@ -481,6 +481,8 @@ html[data-mt-intro="1"]{overflow:hidden}
   [data-mtscroll] .mt-hero .mt-col figure.xr{display:block}
   /* row six is out again, five rows on wide screens (Julian, 2026-11-17) */
   [data-mtscroll] .mt-hero .mt-col figure.xr:last-child{display:none}
+  /* and the hold is shorter with it, so the wall moves at the pace it had with six: 1.25 screens for 1.6 (motion.css reads --hold; the engine sets it inline) */
+  html[data-mt-held] .mt .mt-hero[data-hold]{height:calc(2.25 * max(100svh,600px))}
 }
 @media (min-width:3300px) and (min-height:600px){
   [data-mtscroll] .mt-hero .mt-wall{--u:min(calc(100vw / 3252),calc(100svh / 900))}
