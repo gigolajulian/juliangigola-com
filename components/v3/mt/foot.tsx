@@ -113,7 +113,7 @@ export function MtFoot() {
           </div>
         </nav>
         <div className="mt-phrase">
-          <button type="button" className="mt-ph-btn" onClick={() => cards.inquire("footer")}>
+          <button type="button" className="mt-ph-btn" aria-describedby="mt-ph-hint" onClick={() => cards.inquire("footer")}>
             {/* The name is real text, the letter-by-letter rows are hidden from it: an aria-label over split letters fails label-in-name (WCAG 2.5.3). */}
             <span className="sr-only">{PHRASE}</span>
             <span className="mt-ph-row">
@@ -122,6 +122,8 @@ export function MtFoot() {
               <Phrase copy />
             </span>
           </button>
+          {/* Outside the button, so the hint is its description, not part of its name. */}
+          <span className="sr-only" id="mt-ph-hint">Opens the inquiry card</span>
         </div>
         <div className="mt-fline lbl mute">
           <span>&copy; {year} Julian Gigola</span>
