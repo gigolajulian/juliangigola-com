@@ -11,10 +11,10 @@ export const depthDrivers: Driver[] = [
       const hero = [el.querySelector<HTMLElement>(".mt-wall"), el.querySelector<HTMLElement>(".mt-name")];
       const sheet = el.closest(".mt")?.querySelector<HTMLElement>(".mt-sheet") ?? null;
       let heroH = el.offsetHeight;
-      let tx = 0, ty = 0, cx = 0, cy = 0, raf = 0;
+      let tx = 0, ty = 0, cx = 0, cy = 0, raf = 0, k = 0.1;
       const draw = () => {
-        cx += (tx - cx) * 0.1;
-        cy += (ty - cy) * 0.1;
+        cx += (tx - cx) * k;
+        cy += (ty - cy) * k;
         // only the consumer on screen: the hero while it holds, the sheet after
         for (const t of ctx.y < heroH ? hero : [sheet]) {
           t?.style.setProperty("--px", cx.toFixed(4));
@@ -24,12 +24,14 @@ export const depthDrivers: Driver[] = [
       };
       const move = (e: PointerEvent) => {
         if (e.pointerType !== "mouse" || !ctx.held) return;
+        k = 0.1;
         tx = (e.clientX / ctx.vw) * 2 - 1;
         ty = (e.clientY / ctx.vh) * 2 - 1;
         raf ||= requestAnimationFrame(draw);
       };
-      // the pointer left the window: settle flat
+      // the pointer left the window: settle flat, slowly (Julian, 2026-11-17: it snapped back)
       const leave = () => {
+        k = 0.025;
         tx = ty = 0;
         raf ||= requestAnimationFrame(draw);
       };

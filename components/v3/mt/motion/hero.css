@@ -14,4 +14,5 @@ html[data-mtdock]:not([data-mtdock="land"], [data-mtdock="off"]) .v3 .site-wm { 
 html[data-mtleft] .v3 .site-hdr { transition: background-color .35s ease-out, border-color .35s ease-out, backdrop-filter .35s ease-out, -webkit-backdrop-filter .35s ease-out; }
 html[data-mtleft]:not([data-mt-pasthero]) .v3 .site-hdr { background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; border-bottom-color: transparent; }
 /* The name's way out: the tagline and the buttons sink ahead of the name itself. */
-html[data-mt-held] .mt-hero .mt-name :is(.mt-cap, .mt-ctas) { translate: 0 calc(var(--mt-out, 0) * 22vh); }
+/* .mt-name twice: over depth.css's pointer shift on the same elements, which this keeps in the sum. */
+html[data-mt-held] .mt-hero .mt-name.mt-name :is(.mt-cap, .mt-ctas) { translate: calc(var(--px, 0) * 4px) calc(var(--py, 0) * 4px + var(--mt-out, 0) * 22vh); }
