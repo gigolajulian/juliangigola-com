@@ -40,6 +40,8 @@ export type Driver = {
   always?: boolean;
 };
 
+/** A title or name line coming up from under its clip (Cover art, Motion, Commissions). */
+export const RISE: KeyframeAnimationOptions = { duration: 600, easing: "cubic-bezier(.16,1,.3,1)" };
 export const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 export const smooth = (v: number) => v * v * (3 - 2 * v);
 /** 0 to 1 as v goes from a to b, clamped */
