@@ -276,10 +276,10 @@ export const heroDrivers: Driver[] = [
           return;
         }
         /* Julian, 2026-11-16: "it needs to stay in place until 3 rows are scrolled and move down and out". The name
-           holds until the third row is whole in the window (its lower edge at the window's), then rides down out of
-           the window over the next 0.6 of a row, at full strength. Never later than the travel allows. */
-        const len = 0.6 * st.row, travel = st.wall * u + TAIL * ctx.u - Math.max(ctx.vh, 600);
-        const from = Math.max(0, Math.min(3 * st.row - ctx.vh, travel - len));
+           holds until the fourth row is whole in the window (its lower edge at the window's: "pinned to screen for
+           3-4 rows"), then rides down out of the window over the next 0.3 of a row, at full strength. Never later than the travel allows. */
+        const len = 0.3 * st.row, travel = st.wall * u + TAIL * ctx.u - Math.max(ctx.vh, 600);
+        const from = Math.max(0, Math.min(4 * st.row - ctx.vh, travel - len));
         const e = Math.round(smooth(clamp((S - from) / Math.max(1, len))) * 1000) / 1000;
         if (st.name && e !== st.e) {
           st.e = e;
