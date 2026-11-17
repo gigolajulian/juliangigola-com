@@ -10,3 +10,12 @@ html[data-mt-motion] .mt-quote .mt-clcap{opacity:0;transition:opacity .3s}
 html[data-mt-motion] .mt-quote[data-rot] .mt-clcap{opacity:1}
 html[data-mt-motion] .mt-quote .mt-by .nm{transition:opacity .5s}
 html[data-mt-motion] .mt-quote :is(.mt-by .nm,.mt-clcap)[data-sw]{opacity:0;transition-duration:.5s}
+/* ?mtask=1 (trial), desktop: "Have something in mind?" as a full screen, laid out like the Motion screen: the client photo
+   fills it, the question and the ask sit bottom left on it. The compact strip (mtscroll.css) stays the default. */
+html[data-mtask][data-mt-held] .mt-quote{position:relative}
+html[data-mtask][data-mt-held] .mt-quote>.mt-frame{position:relative;width:100%;max-width:none;margin:0;min-height:max(100svh,600px);padding:0 calc(var(--fx,0px) + 36 * var(--u)) calc(64 * var(--u));display:flex;flex-direction:column;justify-content:flex-end}
+html[data-mtask][data-mt-held] .mt-quote .mt-photo{display:block;position:absolute;inset:0;width:auto;height:auto;margin:0;aspect-ratio:auto;z-index:0;overflow:hidden}
+html[data-mtask][data-mt-held] .mt-quote .mt-photo img{object-fit:cover}
+html[data-mtask][data-mt-held] .mt-quote>.mt-frame::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(rgb(0 0 0 / .45),transparent 26%,rgb(0 0 0 / .25) 48%,rgb(0 0 0 / .82))}
+html[data-mtask][data-mt-held] .mt-quote-col{position:relative;z-index:2;border-top:0;padding-top:0;--ink:rgb(var(--on-photo));--mute:rgb(var(--on-photo) / .72);--bg:#0b0b0c;color:var(--ink)}
+html[data-mtask][data-mt-held] .mt-quote .mt-clcap{left:auto;right:calc(36 * var(--u));bottom:calc(64 * var(--u));z-index:2}
