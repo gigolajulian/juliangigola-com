@@ -28,7 +28,7 @@ function ClientPhoto({ c, on, stills, wide }: { c: QuoteClient; on: boolean; sti
 export function MtByQuote({ stills, reply, onTouch }: { stills: Record<string, string>; reply: string | null; onTouch: (i: number) => void }) {
   const [on, setOn] = React.useState(0);
   const [opt, setOpt] = React.useState(false); // the option's photo shows instead of the client's
-  const [ci] = React.useState(0); // hook: the client rotation advances this (MOTION-HOOKS.md)
+  const ci = 0; // the first client: motion/quote.ts rotates by marking the DOM (`data-q`, `data-client`), React never rewrites it
   const cards = React.useContext(CardsCtx);
   const o = QUOTE_OPTS[on];
   const pick = (i: number) => {
@@ -36,28 +36,9 @@ export function MtByQuote({ stills, reply, onTouch }: { stills: Record<string, s
     setOpt(true);
     onTouch(i);
   };
-  // desktop hold: scroll steps from the clients (-1) through the four options (motion/quote.ts)
-  const sec = React.useRef<HTMLElement>(null);
-  const step = React.useRef(-1);
-  React.useEffect(() => {
-    const el = sec.current!;
-    const on = (e: Event) => {
-      const i = (e as CustomEvent<number>).detail;
-      step.current = i;
-      if (i < 0) setOpt(false);
-      else pick(i);
-    };
-    el.addEventListener("mt-step", on);
-    return () => el.removeEventListener("mt-step", on);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- one listener for the page's life; pick only calls state setters
-  }, []);
-  const rest = () => {
-    if (step.current < 0) setOpt(false);
-    else pick(step.current);
-  };
   const client = QUOTE_CLIENTS[ci];
   return (
-    <section className="mt-quote" data-mt="quote" data-client={ci} data-opt={opt || undefined} ref={sec}>
+    <section className="mt-quote" data-mt="quote" data-client={ci} data-opt={opt || undefined}>
       <div className="mt-frame mt-stage">
         <figure className="mt-photo">
           {QUOTE_CLIENTS.map((c, i) => <ClientPhoto key={c.name} c={c} on={!opt && i === ci} stills={stills} />)}
@@ -72,7 +53,7 @@ export function MtByQuote({ stills, reply, onTouch }: { stills: Record<string, s
         <figure className="mt-photo-w">
           {QUOTE_CLIENTS.map((c, i) => <ClientPhoto key={c.name} c={c} on={i === ci} stills={stills} wide />)}
         </figure>
-        <div className="mt-quote-col" onPointerEnter={() => matches("fine") && setOpt(true)} onPointerLeave={() => matches("fine") && rest()}>
+        <div className="mt-quote-col" onPointerEnter={() => matches("fine") && setOpt(true)} onPointerLeave={() => matches("fine") && setOpt(false)}>
           <p className="lbl mute mt-label">By quote</p>
           <h2 className="mt-q-h">Have something in mind?</h2>
           <p className="lbl mt-by">

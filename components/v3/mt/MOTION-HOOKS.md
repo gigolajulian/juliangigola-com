@@ -1,20 +1,19 @@
 # v4 home: motion hooks
 
-The static build (`?mtscroll=1`) renders every screen at rest. These are the
-elements and properties the motion pass drives. Spec: SPEC-home-scroll.md.
+The v4 home (`?mtscroll=1`) renders every screen at rest. These are the
+elements and properties the motion pass (`motion/`) drives. Spec: SPEC-home-scroll.md.
 Styles: `app/styles/mtscroll.css` (design unit `--u`, structures D / T / P / L).
 
 ## Every held section
 - `section[data-mt="<name>"][data-hold="<viewports>"] > .mt-stage`: wrap the stage
-  in the held wrapper and write `--p` (0 to 1) on the section. Holds: hero 1.6,
-  covers 1.5, motion 2.5, about 1.7, foot 1. Book online, By quote and
-  Commissions have none.
+  in the held wrapper and write `--p` (0 to 1) on the section. Hero, Cover art
+  and Motion carry a hold; the markup holds the values. The other sections have none.
 - Ancestors use `overflow-x: clip`, never `hidden`, so sticky stages work.
 
 ## Hero wall (`hero.tsx`)
 - `.mt-wall > .mt-col[data-col][data-a]`: one element per column, `data-a` is the
   lag A (.12 / 0 / .2). Locked columns 0 to 2, side columns `-2 -1 3 4` (class
-  `side`, `aria-hidden`). No transform or filter on `.mt-wall` or `.mt-col` in
+  `side`, real links too). No transform or filter on `.mt-wall` or `.mt-col` in
   CSS; `will-change: transform` is set on `.mt-col`.
 - On phones (P) `.mt-col` is `display: contents` and each `figure` is placed by
   `--c2` / `--r2` (two columns). Phone drift needs a per-figure transform there.
@@ -40,8 +39,8 @@ Styles: `app/styles/mtscroll.css` (design unit `--u`, structures D / T / P / L).
 
 ## Book online and By quote
 - `section[data-on]` (row key); By quote `section[data-client]` and `data-opt`.
-  The client rotation advances `ci` in `by-quote.tsx` (marked hook) and pauses
-  while a card is open (`.mt[data-cards="open"]`).
+  The client rotation is `motion/quote.ts`: it marks the DOM (`data-q`, `data-client`),
+  React's first client stays put. It pauses while a card is open (`.mt[data-cards="open"]`).
 - `.mt-bar`: the held bottom bar (sticky inside its section).
 
 ## About (`about.tsx`)
@@ -50,12 +49,12 @@ Styles: `app/styles/mtscroll.css` (design unit `--u`, structures D / T / P / L).
 - Rows `li[style="--j"]`, facts `div[style="--j"]`, hairline `hr`, button `.mt-more-me`.
 
 ## Footer (`foot.tsx`)
-- Wall: `.mt-fwall > .mt-fcol[data-col][style="--c"] > figure[data-slug][data-name]`.
-  Phone row `.mt-frow > figure`.
+- Wall: one still, `.mt-fwall > img` (the next one sits under it unseen). `.mt-frow`
+  is empty and stays only because `motion/foot.ts` asks for it.
 - Phrase: `.mt-ph-row` takes the drift transform; three `.mt-ph`, copies 2 and 3
   `[data-copy]` (hidden with `visibility` so the width stays); letters
   `span[style="--j"]`.
-- Hover spot, dot pointer, wall lift and open: not built.
+- Hover spot and dot pointer: `motion/foot.ts`. Wall lift and open: written for the old column wall, nothing reaches them now.
 
 ## Cards
 - `.mt-dim`, `.mt-card` (`data-state` from Radix). Open and close keyframes are
