@@ -17,7 +17,7 @@ html[data-mtask][data-mt-held] .mt-quote>.mt-frame{position:relative;width:100%;
 html[data-mtask][data-mt-held] .mt-quote .mt-photo{display:block;position:absolute;inset:0;width:auto;height:auto;margin:0;aspect-ratio:auto;z-index:0;overflow:hidden}
 html[data-mtask][data-mt-held] .mt-quote .mt-photo img{object-fit:cover}
 html[data-mtask][data-mt-held] .mt-quote>.mt-frame::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(rgb(0 0 0 / .45),transparent 26%,rgb(0 0 0 / .25) 48%,rgb(0 0 0 / .82))}
-html[data-mtask][data-mt-held] .mt-quote-col{position:relative;z-index:2;border-top:0;padding-top:0;--ink:rgb(var(--on-photo));--mute:rgb(var(--on-photo) / .72);--bg:#0b0b0c;color:var(--ink)}
+html[data-mtask][data-mt-held] .mt-quote-col{position:relative;z-index:2;border-top:0;padding-top:0;--ink:rgb(var(--on-photo));--mute:rgb(var(--on-photo) / .72);--row:rgb(var(--on-photo) / .58);--bg:#0b0b0c;color:var(--ink)}
 .mt-quote :is(.mt-q-logos,.op>.w){display:none}
 html[data-mtask][data-mt-held] .mt-quote :is(.mt-clcap,.mt-by,.mt-photo>.cl,.op>img:not(.w)){display:none}
 html[data-mtask][data-mt-held] .mt-quote .op>.w{display:block;opacity:0;transition:opacity .6s ease-out}
