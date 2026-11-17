@@ -68,7 +68,13 @@ const MT: MtData = {
   ),
 };
 
-export default function Home() {
+export default async function Home() {
+  // Rendered directly, not through the gate: next/dynamic would leave it in a hidden Suspense block until scripts run.
+  // The env test is written out here so the build drops the import when it is off: the default home must not load v4 files.
+  if (process.env.NEXT_PUBLIC_V4_HOME === "1") {
+    const { MtHome } = await import("@/components/v3/mt/home");
+    return <MtHome data={MT} />;
+  }
   return (
     <MtGate data={MT}>
       <V3Home top={TOP} />
