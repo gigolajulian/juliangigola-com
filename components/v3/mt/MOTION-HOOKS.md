@@ -49,12 +49,11 @@ Styles: `app/styles/mtscroll.css` (design unit `--u`, structures D / T / P / L).
 - Rows `li[style="--j"]`, facts `div[style="--j"]`, hairline `hr`, button `.mt-more-me`.
 
 ## Footer (`foot.tsx`)
-- Wall: one still, `.mt-fwall > img` (the next one sits under it unseen). `.mt-frow`
-  is empty and stays only because `motion/foot.ts` asks for it.
+- Wall: one still, `.mt-fwall > img` (the next one sits under it unseen).
 - Phrase: `.mt-ph-row` takes the drift transform; three `.mt-ph`, copies 2 and 3
   `[data-copy]` (hidden with `visibility` so the width stays); letters
   `span[style="--j"]`.
-- Hover spot and dot pointer: `motion/foot.ts`. Wall lift and open: written for the old column wall, nothing reaches them now.
+- Hover spot and dot pointer: `motion/foot.ts`.
 
 ## Cards
 - `.mt-dim`, `.mt-card` (`data-state` from Radix). Open and close keyframes are

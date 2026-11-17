@@ -1,26 +1,20 @@
-import { projectHref } from "@/lib/project-href";
 import { clamp, smooth, span, type Ctx, type Driver } from "./engine";
 
-/* Footer, spec 3.10: wall reveal, drift and lean, phrase drift, dot pointer and
-   hover spot, frame lift and open, phone row. Wall numbers are design units
-   (1440x900) unless a name says px. */
-const P = 1272; // one column loop: six frames at a 212 pitch
-const PITCH = 212;
+/* Footer, spec 3.10: the still's reveal, phrase drift, dot pointer and hover
+   spot. The wall is one still (foot.tsx), so the column drift, the frame lift
+   and open, and the phone row are gone. Numbers are design units (1440x900)
+   unless a name says px. */
 const R = 510; // spot radius
-const OPEN = 800;
 const mod = (v: number, m: number) => ((v % m) + m) % m;
-
-type Col = { el: HTMLElement; figs: HTMLElement[]; imgs: (HTMLImageElement | null)[]; x: number; y: number; s: number; wr: string[] };
 
 let tick: ((ctx: Ctx) => void) | null = null;
 
 function setup(el: HTMLElement, ctx: Ctx) {
   const stage = el.querySelector<HTMLElement>(".mt-stage");
   const wall = el.querySelector<HTMLElement>(".mt-fwall");
-  const frow = el.querySelector<HTMLElement>(".mt-frow");
   const btn = el.querySelector<HTMLElement>(".mt-ph-btn");
   const row = el.querySelector<HTMLElement>(".mt-ph-row");
-  if (!stage || !wall || !frow || !btn || !row) return;
+  if (!stage || !wall || !btn || !row) return;
   const mt = el.closest<HTMLElement>(".mt");
 
   const make = <K extends keyof HTMLElementTagNameMap>(tag: K, cls: string) => {
@@ -31,11 +25,6 @@ function setup(el: HTMLElement, ctx: Ctx) {
   };
   const cut = make("canvas", "mt-fcut");
   const dot = make("i", "mt-fdot");
-  const lift = make("div", "mt-flift");
-  const limg = lift.appendChild(new Image());
-  const lname = lift.appendChild(document.createElement("span"));
-  limg.alt = "";
-  lname.className = "lbl";
   const buf = () => {
     const c = document.createElement("canvas");
     return [c, c.getContext("2d")!] as const;
@@ -43,31 +32,16 @@ function setup(el: HTMLElement, ctx: Ctx) {
   const g = cut.getContext("2d")!;
   const [Wc, w] = buf(), [Bc, b] = buf(), [Sc, s2] = buf(), [Mc, m] = buf();
 
-  // wall
-  let cols: Col[] = [], wu = ctx.u, dirty = true;
-  let rv = 0, kick = 0, tx = 0, ty = 0, pz = 1, mx = 0, my = 0;
+  // the still's reveal
+  let rv = 0, dirty = true;
   // pointer, client px
-  let px = -1, py = -1, okT = false;
-  // lift
-  let hov: HTMLElement | null = null, ht = 0, LF: HTMLElement | null = null, TR: HTMLElement | null = null, dropT = 0, opened = false, timer = 0;
+  let px = -1, py = -1;
   // phrase
   let W = 0, pad = 0, x = 0, v = 0, pk = 0, tr = 0, first = true;
   const clones: Node[] = [];
   // dot and spot
   let hot = false, cx = 0, cy = 0, ca = 0, sx = -1, sy = 0, sa = 0, saOut = "", ink = "";
   let MK: HTMLCanvasElement | null = null, mz = 1;
-  // phone row
-  let rx = 0, rpz = 1, held = ctx.held;
-
-  const collect = () => {
-    // shortcut: the wall is one still now, so there are no columns; the column, lift and open code below is dead, remove it once Julian has OKd the still
-    cols = [...wall.querySelectorAll<HTMLElement>(".mt-fcol")].map((c, i) => {
-      const figs = [...c.children] as HTMLElement[];
-      return { el: c as HTMLElement, figs, imgs: figs.map((f) => f.querySelector("img")), x: (c as HTMLElement).offsetLeft, y: cols[i]?.y ?? (i * 197) % P, s: (i % 2 ? 1 : -1) * (7 + ((i * 5) % 9)), wr: [] };
-    });
-    const f = cols[0]?.figs[0];
-    wu = f?.offsetWidth ? f.offsetWidth / 150 : ctx.u;
-  };
 
   const measure = () => {
     W = (row.firstElementChild as HTMLElement).getBoundingClientRect().width;
@@ -181,107 +155,20 @@ function setup(el: HTMLElement, ctx: Ctx) {
     g.drawImage(Mc, 0, 0);
   };
 
-  let under: HTMLElement | null = null, hx = -2, hy = -2, hitT = 0;
-  const hit = (cxp: number, cyp: number) => (document.elementsFromPoint(cxp, cyp).find((e) => e.parentElement?.classList.contains("mt-fcol")) as HTMLElement | undefined) ?? null;
-
-  /** A larger file of the same photo from the image's own srcset. */
-  const big = (im: HTMLImageElement) => {
-    const set = im.srcset
-      .split(",")
-      .map((s) => s.trim().split(/\s+/))
-      .map(([url, sz]) => ({ url, w: parseFloat(sz) }))
-      .filter((s) => s.url && s.w)
-      .sort((a, c) => a.w - c.w);
-    return (set.find((s) => s.w >= Math.min(1600, innerWidth)) ?? set[set.length - 1])?.url;
-  };
-
-  const place = () => {
-    if (!TR) return;
-    const f = TR.getBoundingClientRect(), r = stage.getBoundingClientRect();
-    Object.assign(lift.style, { left: `${f.left - r.left}px`, top: `${f.top - r.top}px`, width: `${f.width}px`, height: `${f.height}px` });
-  };
-  const raise = (fig: HTMLElement) => {
-    const im = fig.querySelector("img");
-    if (!im) return;
-    LF = TR = fig;
-    limg.src = im.currentSrc || im.src;
-    // data-name carries the alt text: take the project title out of it, else the slug
-    lname.textContent = /([^,.]+?) \([^)]*\), photographed/.exec(fig.dataset.name ?? "")?.[1].trim() ?? (fig.dataset.slug ?? "").replace(/-/g, " ");
-    const url = big(im);
-    if (url) {
-      const pre = new Image();
-      pre.onload = () => {
-        if (TR === fig) limg.src = url;
-      };
-      pre.src = url;
-    }
-    place();
-    lift.classList.add("on");
-    el.setAttribute("data-lift", "");
-  };
-  const drop = () => {
-    if (!LF || opened) return;
-    LF = null;
-    dropT = performance.now();
-    lift.classList.remove("on");
-    el.removeAttribute("data-lift");
-  };
-  const open = () => {
-    const fig = LF;
-    if (!fig || opened) return;
-    opened = true;
-    // to the screen's box in stage coordinates (an ancestor's transform rules out `fixed`)
-    const r = stage.getBoundingClientRect();
-    place();
-    void lift.offsetWidth;
-    lift.classList.add("open");
-    Object.assign(lift.style, { left: `${-r.left}px`, top: `${-r.top}px`, width: `${innerWidth}px`, height: `${innerHeight}px` });
-    timer = window.setTimeout(() => location.assign(projectHref(fig.dataset.slug)), OPEN);
-  };
-
   const onMove = (e: PointerEvent) => {
     if (e.pointerType === "touch") return;
     px = e.clientX;
     py = e.clientY;
-    okT = !(e.target as Element).closest("a,button");
   };
   const onLeave = () => {
     px = -1;
   };
-  const inWall = (r: DOMRect, y: number) => y - r.top < r.height * (545 / 900);
-  const onClick = (e: MouseEvent) => {
-    if (opened || mt?.dataset.cards === "open") return;
-    const t = e.target as Element;
-    if (t.closest("a,button")) return drop();
-    if (ctx.held && ctx.fine) return open();
-    // touch and the phone structures: first tap lifts, second opens
-    const fig = ctx.held ? (inWall(stage.getBoundingClientRect(), e.clientY) ? hit(e.clientX, e.clientY) : null) : t.closest<HTMLElement>(".mt-frow figure");
-    if (fig && fig === LF) open();
-    else if (fig) raise(fig);
-    else drop();
-  };
-  const onAway = (e: PointerEvent) => {
-    if (LF && !(ctx.held && ctx.fine) && !stage.contains(e.target as Node)) drop();
-  };
   const onResize = () => {
     dirty = true;
   };
-  // back from the project (bfcache) must not land on the grown photo
-  const onShow = (e: PageTransitionEvent) => {
-    if (!e.persisted) return;
-    clearTimeout(timer);
-    opened = false;
-    LF = null;
-    lift.classList.remove("open", "on");
-    lift.style.cssText = "";
-    el.removeAttribute("data-lift");
-  };
   stage.addEventListener("pointermove", onMove);
   stage.addEventListener("pointerleave", onLeave);
-  stage.addEventListener("click", onClick);
-  document.addEventListener("pointerdown", onAway);
   addEventListener("resize", onResize);
-  addEventListener("pageshow", onShow);
   document.fonts.ready.then(onResize);
 
   tick = (c) => {
@@ -292,14 +179,8 @@ function setup(el: HTMLElement, ctx: Ctx) {
     const dt = c.dt, k = dt / 16.7, sec = dt / 1000, u = c.u, busy = mt?.dataset.cards === "open";
     if (dirty) {
       dirty = false;
-      collect();
       measure();
     }
-    if (held !== c.held) {
-      held = c.held;
-      drop();
-    }
-
     // phrase: one speed easing toward idle plus whatever the scroll adds
     pk = clamp(pk * Math.pow(0.94, k) + c.dy * 0.0012, -0.35, 0.35);
     if (Math.abs(pk) < 0.0005) pk = 0;
@@ -309,71 +190,18 @@ function setup(el: HTMLElement, ctx: Ctx) {
     tr = -pad - mod(x, W || 1);
     row.style.transform = `translate3d(${tr.toFixed(1)}px,0,0)`;
 
-    if (!opened && (LF || performance.now() - dropT < 1000)) place();
+    if (!c.held) return;
 
-    if (!c.held) {
-      // phone row: each frame wraps on its own, there is no second copy
-      const figs = frow.children as HTMLCollectionOf<HTMLElement>, n = figs.length;
-      rpz += ((LF || opened || busy ? 0 : 1) - rpz) * Math.min(1, sec * 7);
-      if (n > 1) {
-        const p0 = figs[0].offsetLeft, pitch = figs[1].offsetLeft - p0, L = n * pitch;
-        if (L >= c.vw + pitch) {
-          rx += 14 * sec * rpz;
-          const xm = mod(rx, L);
-          for (let i = 0; i < n; i++) figs[i].style.transform = `translate3d(${(((i + 1) * pitch + p0 < xm ? L : 0) - xm).toFixed(1)}px,0,0)`;
-        }
-      }
-      return;
-    }
-
-    // wall: reveal, lean, drift
+    // the still's reveal
     rv += (smooth(span(clamp((c.vh - r.top) / r.height), 0.25, 1)) - rv) * Math.min(1, sec * 5);
-    kick += (Math.min(9, Math.abs(c.dy) * 0.25) - kick) * Math.min(1, sec * 6);
-    if (c.fine && px >= 0) {
-      mx = (px - r.left) / r.width - 0.5;
-      my = (py - r.top) / r.height - 0.5;
-    }
-    if (!LF) {
-      tx += (mx * -28 - tx) * Math.min(1, sec * 3);
-      ty += (my * -20 - ty) * Math.min(1, sec * 3);
-    }
-    pz += ((LF || opened ? 0 : 1) - pz) * Math.min(1, sec * 7);
     wall.style.opacity = rv.toFixed(3);
-    const over = `translate3d(0,${(P * wu).toFixed(1)}px,0)`;
-    for (const col of cols) {
-      col.y = mod(col.y + col.s * sec * (1 + kick) * pz, P);
-      col.el.style.transform = `translate3d(0,${(-col.y * wu).toFixed(1)}px,0)`;
-      // six frames, no second copy: a frame that left the top goes under the last
-      col.figs.forEach((f, j) => {
-        const t = j * PITCH - col.y < -220 ? over : "";
-        if (col.wr[j] !== t) {
-          col.wr[j] = t;
-          f.style.transform = t;
-        }
-      });
-    }
 
     if (!c.fine) return;
-    // dwell lift
-    if (!opened) {
-      if (px !== hx || py !== hy || c.t - hitT > 100) {
-        hx = px;
-        hy = py;
-        hitT = c.t;
-        under = !busy && okT && px >= 0 && inWall(r, py) ? hit(px, py) : null;
-      }
-      const fig = !busy && okT && px >= 0 ? under : null;
-      if (fig !== hov) {
-        hov = fig;
-        ht = c.t;
-        drop();
-      } else if (fig && !LF && c.t - ht > 600) raise(fig);
-    }
 
     // dot pointer over the phrase band
     const lx = px - r.left, ly = py - r.top;
     const was = hot;
-    hot = !busy && !opened && px >= 0 && ly > r.height - 448 * u && ly < r.height - 88 * u;
+    hot = !busy && px >= 0 && ly > r.height - 448 * u && ly < r.height - 88 * u;
     if (hot !== was) el.toggleAttribute("data-hot", hot);
     if (hot && ca === 0) {
       cx = lx;
@@ -411,17 +239,12 @@ function setup(el: HTMLElement, ctx: Ctx) {
 
   return () => {
     tick = null;
-    clearTimeout(timer);
     stage.removeEventListener("pointermove", onMove);
     stage.removeEventListener("pointerleave", onLeave);
-    stage.removeEventListener("click", onClick);
-    document.removeEventListener("pointerdown", onAway);
     removeEventListener("resize", onResize);
-    removeEventListener("pageshow", onShow);
-    for (const n of [cut, dot, lift, ...clones]) n.parentNode?.removeChild(n);
+    for (const n of [cut, dot, ...clones]) n.parentNode?.removeChild(n);
     el.removeAttribute("data-hot");
-    el.removeAttribute("data-lift");
-    for (const n of [wall, row, ...wall.querySelectorAll<HTMLElement>(".mt-fcol, figure"), ...(frow.children as HTMLCollectionOf<HTMLElement>)]) {
+    for (const n of [wall, row]) {
       n.style.removeProperty("transform");
       n.style.removeProperty("opacity");
     }

@@ -82,8 +82,6 @@ export function MtFoot() {
         <div className="mt-fwall" aria-hidden ref={wall}>
           {stills.map((src, n) => <Image key={src} src={src} alt="" fill sizes="100vw" style={n ? { opacity: 0 } : undefined} />)}
         </div>
-        {/* shortcut: the phone photo row is gone (Julian, 2026-11-14) but motion/foot.ts still asks for this node; drop both when the desktop wall is replaced */}
-        <div className="mt-frow" aria-hidden />
         <div className="mt-fscrim" aria-hidden />
         <nav className="mt-fcols lbl" aria-label="Footer">
           <div>
