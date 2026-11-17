@@ -659,10 +659,11 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
 :root[data-mtscroll]:not([data-theme="light"]) .mt-logos .mk{color:rgb(217 217 214 / .86)}
 @media (hover:hover){:root[data-mtscroll]:not([data-theme="light"]) .mt-logos a:hover .mk{color:#fff}}
 
-/* Idle wall (on by default, ?idle=0 off): the new frame develops over the one it replaces, grey and hard first, then its color. Never dark. */
+/* Idle wall (on by default, ?idle=0 off): a hard cut (Julian, 2026-11-16: "the develop one is too slow, try hard cuts"). The new frame waits
+   hidden over the old one until it has loaded, then shows whole: never dark. The one-step animation is kept because its end clears the old frame (hero.tsx). */
 [data-mtscroll] .mt-hero .ph>img.mt-dev{opacity:0}
-[data-mtscroll] .mt-hero .ph>img.mt-dev[data-on]{animation:mt-dev .85s cubic-bezier(.3,0,.2,1) both}
-@keyframes mt-dev{0%{opacity:0;filter:brightness(.45) contrast(1.6) grayscale(1)}40%{opacity:1;filter:brightness(.7) contrast(1.4) grayscale(.7)}100%{opacity:1;filter:none}}
+[data-mtscroll] .mt-hero .ph>img.mt-dev[data-on]{animation:mt-dev .01s step-end both}
+@keyframes mt-dev{to{opacity:1}}
 /* Keyboard focus on a photo link: the ring is drawn inside the frame, since the frame clips an outer one (Commissions tiles
    showed none, the hero a sliver on the photo's top edge). A dark band on both sides keeps it readable on a bright photo. */
 [data-mtscroll] .mt-hero a.fig:focus-visible,[data-mtscroll] .mt-comm a.tile:focus-visible{outline:0}
