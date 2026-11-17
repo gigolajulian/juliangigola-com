@@ -19,7 +19,9 @@ html[data-mt-held] .mt-covers .mt-row{margin-top:0;padding-top:max(calc(12 * var
    do, so a cover is 368 page units, and it rises until the cover's middle is the stage's (450 of its 900). The first
    cover keeps its left edge. Short windows keep the rule above. */
 @media (min-aspect-ratio:159/100) and (min-height:700px) and (max-height:1440px){
-html[data-mt-held] .mt-covers .mt-row{--u:calc(var(--tu) * 1.15);--pl:calc(var(--fx) + 560 * var(--tu));padding-top:calc(14 * var(--tu));margin-top:calc(-86 * var(--tu))}
+/* padding-top is the room inside the row's clip. 14 units cut the top off a hovered cover (it grows 14% on show, 5% on hover, lifts 16 units and swells mid flip:
+   Julian, 2026-11-17, Jahannam's side B looked zoomed in). 70 more, taken back off the margin, so nothing moves. */
+html[data-mt-held] .mt-covers .mt-row{--u:calc(var(--tu) * 1.15);--pl:calc(var(--fx) + 560 * var(--tu));padding-top:calc(84 * var(--tu));margin-top:calc(-156 * var(--tu))}
 }
 /* Tall windows (Julian, 2026-11-15: "scale cover, dont add under"): one row, and the covers grow into the height the
    page unit leaves empty. The row gets its own unit: as tall as the 450 design px under the head allow, never so wide
