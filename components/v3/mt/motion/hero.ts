@@ -13,7 +13,7 @@ const DRIFT = [40, 22]; // phone drift caps, px, per column
 
 type Part = { el: HTMLElement; a: number; c: number; v: number };
 
-/* Name dock (Julian's pick 02, 2026-11-14; the V4 default since 2026-11-15, ?mtdock=0 turns it off). Held layout only. The header starts without its
+/* Name dock (Julian's pick 02, 2026-11-14; off since 2026-11-16, "should not animate up towards the nav bar": ?mtdock=1 brings it back). Held layout only. The header starts without its
    wordmark. Between 62% and 92% of the hold a fixed copy of the name, same face and size, rides from the h1's place to
    the wordmark's and shrinks to its size, then the real wordmark takes over. The copy follows its target on a critically
    damped spring, so it leaves late and settles soft: the October version was locked 1:1 to the scroll over one name
@@ -40,7 +40,7 @@ const LEFT = typeof location !== "undefined" && /[?&]mtdock=left/.test(location.
 
 function dockSetup(el: HTMLElement): Dock | null {
   if (LEFT) return null;
-  const w = Number(/[?&]mtdock=([\d.]+)/.exec(location.search)?.[1] ?? 1);
+  const w = Number(/[?&]mtdock=([\d.]+)/.exec(location.search)?.[1] ?? 0);
   const h1 = el.querySelector<HTMLElement>(".mt-name h1"), wm = document.querySelector<HTMLElement>(".site-hdr .site-wm");
   // ?navfx=1 (Julian, 2026-11-15): no flight. The name fades with the hero, and the bar's wordmark comes in as it goes (nav-ink.ts).
   if (!w || !h1 || !wm || navfx()) return null;
@@ -252,10 +252,9 @@ export const heroDrivers: Driver[] = [
         const e = Math.round(smooth(span(p, 0.76, 0.96)) * 1000) / 1000;
         if (st.name && e !== st.e) {
           st.e = e;
-          // ?mtdock=left (Julian, 2026-11-16: "these should just scroll down and out instead of left"): the name block
-          // rides down out of the window at full strength, no fade. The flag keeps its name.
-          st.name.style.opacity = LEFT ? "" : String(1 - e);
-          st.name.style.transform = !e ? "" : LEFT ? `translate3d(0,${(0.6 * ctx.vh * e).toFixed(1)}px,0)` : `translate3d(0,${(-56 * ctx.u * e).toFixed(1)}px,0)`;
+          // Julian, 2026-11-16: the name block rides down out of the window at full strength as the hero ends, no fade
+          // and no flight to the bar. The bar's wordmark waits for data-mt-pasthero (mtscroll.css).
+          st.name.style.transform = !e ? "" : `translate3d(0,${(0.6 * ctx.vh * e).toFixed(1)}px,0)`;
           st.name.style.visibility = e >= 1 ? "hidden" : ""; // gone: its buttons leave the tab order too
         }
         return;
