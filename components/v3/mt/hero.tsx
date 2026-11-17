@@ -33,7 +33,8 @@ function Fig({ f, was, onDone, i, eager, xr, idle }: { f: MtFrame; was?: MtFrame
           <Image key={f.src} src={f.src} alt={f.name} fill sizes={SIZES} loading={eager || was ? "eager" : "lazy"} fetchPriority={eager ? "high" : undefined} className={was ? "mt-dev" : undefined} onLoad={was ? (e) => (e.currentTarget.setAttribute("data-on", ""), setShown(f.src)) : undefined} onAnimationEnd={onDone} />
         </div>
         <figcaption className="lbl">
-          <span>{cap.name}</span>
+          {/* the photo alt already names the frame in this link, so a screen reader hears it once */}
+          <span aria-hidden>{cap.name}</span>
           <span className="mute">{cap.meta}</span>
         </figcaption>
       </Link>
@@ -94,7 +95,7 @@ export function MtHero({ frames: first, extras }: { frames: MtFrame[]; extras: M
           <div className="mt-name-in">
             <h1>Julian Gigola</h1>
             {/* three stacked copies, one blend each (mtscroll.css): invert, take the colour out, lift the mid-tones */}
-            <p className="lbl mt-cap">{[0, 1, 2].map((k) => <span key={k} className="t" aria-hidden={k > 0 || undefined}>Photographer and creative director<span className="sep"> | </span><span className="pl">San Francisco Bay Area</span></span>)}</p>
+            <p className="lbl mt-cap">{[0, 1, 2].map((k) => <span key={k} className="t" aria-hidden={k > 0 || undefined}>Photographer and creative director <span className="sep" aria-hidden>| </span><span className="pl">San Francisco Bay Area</span></span>)}</p>
           </div>
           <div className="mt-ctas">
             <Link className="btn fill" href="/contact/form">Inquire</Link>
