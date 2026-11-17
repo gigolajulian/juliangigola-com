@@ -459,7 +459,7 @@
   [data-mtscroll] .mt-scrim{bottom:-24%;height:84%;background:linear-gradient(to top,transparent,color-mix(in srgb,var(--bg) 92%,transparent) 30%,color-mix(in srgb,var(--bg) 80%,transparent) 52%,transparent)}
   [data-mtscroll] .mt-cap{bottom:calc(env(safe-area-inset-bottom) + 26px);left:max(16px,env(safe-area-inset-left))}
   [data-mtscroll] .mt-cap .pl{display:inline;margin:0}
-  [data-mtscroll] .mt-cap .pl::before{content:" | "}
+  [data-mtscroll] .mt-cap .pl::before{content:" | ";content:" | " / ""}
   [data-mtscroll] .mt-ctas{left:auto;right:max(16px,env(safe-area-inset-right));bottom:calc(env(safe-area-inset-bottom) + 52px)}
   [data-mtscroll] .mt-ctas .btn{flex:none}
   [data-mtscroll] .mt-covers .mt-row{--cv:min(70vw,calc(100svh - 140px))}
