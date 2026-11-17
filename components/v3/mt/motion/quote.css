@@ -16,13 +16,16 @@ html[data-mtask][data-mt-held] .mt-quote{position:relative}
 html[data-mtask][data-mt-held] .mt-quote>.mt-frame{position:relative;width:100%;max-width:none;margin:0;min-height:max(100svh,600px);padding:0 calc(var(--fx,0px) + 36 * var(--u)) calc(64 * var(--u));display:flex;flex-direction:column;justify-content:flex-end}
 html[data-mtask][data-mt-held] .mt-quote .mt-photo{display:block;position:absolute;inset:0;width:auto;height:auto;margin:0;aspect-ratio:auto;z-index:0;overflow:hidden}
 html[data-mtask][data-mt-held] .mt-quote .mt-photo img{object-fit:cover}
+/* no wipe or zoom on the way in: the screen scrolls up as it is (Julian, 2026-11-17) */
+html[data-mtask][data-mt-held] .mt-quote .mt-photo{clip-path:none}
+html[data-mtask][data-mt-held] .mt-quote .mt-photo>*{scale:none}
 html[data-mtask][data-mt-held] .mt-quote>.mt-frame::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(rgb(0 0 0 / .45),transparent 26%,rgb(0 0 0 / .25) 48%,rgb(0 0 0 / .82))}
 html[data-mtask][data-mt-held] .mt-quote-col{position:relative;z-index:2;border-top:0;padding-top:0;--ink:rgb(var(--on-photo));--mute:rgb(var(--on-photo) / .72);--row:rgb(var(--on-photo) / .58);--bg:#0b0b0c;color:var(--ink)}
 .mt-quote :is(.mt-q-logos,.op>.w){display:none}
 html[data-mtask][data-mt-held] .mt-quote :is(.mt-clcap,.mt-by,.mt-photo>.cl,.op>img:not(.w)){display:none}
 html[data-mtask][data-mt-held] .mt-quote .op>.w{display:block;opacity:0;transition:opacity .6s ease-out}
 html[data-mtask][data-mt-held] .mt-quote .op>.w[data-on]{opacity:1}
-html[data-mtask][data-mt-held] .mt-quote .op[data-cur]{opacity:1}
+html[data-mtask][data-mt-held] .mt-quote .mt-photo>.op[data-cur]{opacity:1;clip-path:inset(0);z-index:1;transition:clip-path .7s cubic-bezier(.7,0,.15,1)}
 html[data-mtask][data-mt-held] .mt-quote .mt-q-logos{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:calc(32 * var(--u));margin:calc(44 * var(--u)) 0 0}
 html[data-mtask][data-mt-held] .mt-quote .mt-q-logos a{display:flex}
 html[data-mtask][data-mt-held] .mt-quote .mt-q-logos .mk{display:inline-block;flex:none;background:currentColor;color:rgb(var(--on-photo) / .8)}
