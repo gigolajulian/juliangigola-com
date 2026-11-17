@@ -274,8 +274,6 @@ function films(): Driver {
         preview();
       });
       io.observe(el);
-      // ?mtpick=1: Julian's picker for where each preview starts (film-pick.ts), fetched only then
-      if (/[?&]mtpick=1/.test(location.search)) void import("./film-pick").then((m) => m.filmPick(el, items, (i) => (kill(i), preview()), ac.signal));
 
       // rows.tsx names the current film; its preview follows and the title line rises.
       const mo = new MutationObserver(() => {
