@@ -93,7 +93,8 @@ export function MtHero({ frames: first, extras }: { frames: MtFrame[]; extras: M
           <div className="mt-scrim" aria-hidden />
           <div className="mt-name-in">
             <h1>Julian Gigola</h1>
-            <p className="lbl mt-cap">Photographer and creative director<span className="sep"> | </span><span className="pl">San Francisco Bay Area</span></p>
+            {/* three stacked copies, one blend each (mtscroll.css): invert, take the colour out, lift the mid-tones */}
+            <p className="lbl mt-cap">{[0, 1, 2].map((k) => <span key={k} className="t" aria-hidden={k > 0 || undefined}>Photographer and creative director<span className="sep"> | </span><span className="pl">San Francisco Bay Area</span></span>)}</p>
           </div>
           <div className="mt-ctas">
             <Link className="btn fill" href="/contact/form">Inquire</Link>

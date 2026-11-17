@@ -16,3 +16,6 @@ html[data-mtleft]:not([data-mt-pasthero]) .v3 .site-hdr { background: transparen
 /* The name's way out: the tagline and the buttons sink ahead of the name itself. */
 /* .mt-name twice: over depth.css's pointer shift on the same elements, which this keeps in the sum. */
 html[data-mt-held] .mt-hero .mt-name.mt-name :is(.mt-cap, .mt-ctas) { translate: calc(var(--px, 0) * 4px) calc(var(--py, 0) * 4px + var(--mt-out, 0) * 22vh); }
+/* The tagline is three blended copies (mtscroll.css). A translate on the paragraph would make it its own layer and cut those blends off from the photos, so the copies move instead. */
+html[data-mt-held] .mt-hero .mt-name.mt-name .mt-name-in .mt-cap { translate: none; }
+html[data-mt-held] .mt-hero .mt-name.mt-name .mt-cap > .t { translate: calc(var(--px, 0) * 4px) calc(var(--py, 0) * 4px + var(--mt-out, 0) * 22vh); }
