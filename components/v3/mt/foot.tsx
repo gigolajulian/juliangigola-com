@@ -17,7 +17,7 @@ const EVERY = 5000; // was 2000: "photo switches too fast" (Julian, 2026-11-15)
 /** The still behind the footer and the one after it. The list is one landscape
     frame per project from /canvas.json (a tall frame crops badly in a wide
     footer), fetched when the still first shows; it changes every 5s while it
-    is on screen. Phones hide the still, so nothing is fetched there. */
+    is on screen. Phones hide the still, so nothing is fetched there. If the list fails, the one still stays. */
 function useStills(ref: React.RefObject<HTMLElement | null>) {
   const [list, setList] = React.useState([STILL]);
   const [i, setI] = React.useState(0);
@@ -29,7 +29,7 @@ function useStills(ref: React.RefObject<HTMLElement | null>) {
       if (!e.isIntersecting || asked) return;
       asked = true;
       fetch("/canvas.json")
-        .then((r) => r.json())
+        .then((r) => (r.ok ? r.json() : {}))
         .then((j: Record<string, [string, number][]>) => {
           const wide = Object.values(j).flatMap((fr) => fr.find((x) => x[1] < 0.9)?.[0] ?? []);
           setList([STILL, ...wide.filter((src) => !src.startsWith("/work/diesel/"))]);

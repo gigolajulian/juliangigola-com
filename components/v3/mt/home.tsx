@@ -14,16 +14,15 @@ import { InquiryCard } from "./inquiry-card";
 import { MtIntro } from "./intro";
 import { MtMotionLayer } from "./motion";
 
-/* v4 homepage (`?mtscroll=1`, SPEC-home-scroll.md), the static build: every
-   screen at its resting state. Motion hooks: MOTION-HOOKS.md. */
-
+/* v4 homepage (`?mtscroll=1`, SPEC-home-scroll.md): the screens at their resting
+   state, with MtIntro and MtMotionLayer on top. Motion hooks: MOTION-HOOKS.md. */
 
 export function MtHome({ data }: { data: MtData }) {
   const [book, setBook] = React.useState<BookRow["key"] | null>(null);
   const [inq, setInq] = React.useState<{ from: InquiryFrom; opt?: QuoteOpt["key"] } | null>(null);
-  // The control that opened a card gets focus back when it closes (spec 3.6, 3.11).
   // the booking photo follows the last row touched in either list: a quote option's index, or null for the sessions
   const [qp, setQp] = React.useState<number | null>(null);
+  // The control that opened a card gets focus back when it closes (spec 3.6, 3.11).
   const opener = React.useRef<HTMLElement | null>(null);
   const keep = () => (opener.current = document.activeElement as HTMLElement | null);
   const cards = React.useMemo<Cards>(() => ({ book: (k) => setBook(k), inquire: (from, opt) => (keep(), setInq({ from, opt })) }), []);
