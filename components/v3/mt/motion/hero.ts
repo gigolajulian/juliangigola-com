@@ -13,7 +13,7 @@ const DRIFT = [40, 22]; // phone drift caps, px, per column
 
 type Part = { el: HTMLElement; a: number; c: number; v: number };
 
-/* Name dock (Julian's pick 02, 2026-11-14; the V4 default since 2026-11-15, ?mtdock=0 turns it off). Held layout only. The header starts without its
+/* Name dock (Julian's pick 02, 2026-11-14; off since 2026-11-16, "should not animate up towards the nav bar": ?mtdock=1 brings it back). Held layout only. The header starts without its
    wordmark. Between 62% and 92% of the hold a fixed copy of the name, same face and size, rides from the h1's place to
    the wordmark's and shrinks to its size, then the real wordmark takes over. The copy follows its target on a critically
    damped spring, so it leaves late and settles soft: the October version was locked 1:1 to the scroll over one name
@@ -23,7 +23,7 @@ type Part = { el: HTMLElement; a: number; c: number; v: number };
 const DOCK_W = 11;
 type Geo = { ax: number; ay: number; bx: number; by: number; k: number; ox: number; oy: number; ws: number };
 type Dock = { f: HTMLElement; words: HTMLElement[]; h1: HTMLElement; wm: HTMLElement; cap: HTMLElement | null; ctas: HTMLElement | null; scrim: HTMLElement | null; w: number; m: Geo | null; x: number; v: number; st: string; q: string };
-type State = { cols: Part[]; figs: Part[]; name: HTMLElement | null; s: number; mode: string; e: number; u: number; at: string; wall: number; dock: Dock | null };
+type State = { cols: Part[]; figs: Part[]; caps: HTMLElement[]; texts: HTMLElement[]; ctas: HTMLElement | null; more: HTMLElement | null; name: HTMLElement | null; s: number; mode: string; e: number; u: number; at: string; wall: number; dock: Dock | null; bar: HTMLElement | null; out: boolean; row: number; drop: number };
 
 const ink = (n: Node) => {
   const r = document.createRange();
@@ -40,7 +40,7 @@ const LEFT = typeof location !== "undefined" && /[?&]mtdock=left/.test(location.
 
 function dockSetup(el: HTMLElement): Dock | null {
   if (LEFT) return null;
-  const w = Number(/[?&]mtdock=([\d.]+)/.exec(location.search)?.[1] ?? 1);
+  const w = Number(/[?&]mtdock=([\d.]+)/.exec(location.search)?.[1] ?? 0);
   const h1 = el.querySelector<HTMLElement>(".mt-name h1"), wm = document.querySelector<HTMLElement>(".site-hdr .site-wm");
   // ?navfx=1 (Julian, 2026-11-15): no flight. The name fades with the hero, and the bar's wordmark comes in as it goes (nav-ink.ts).
   if (!w || !h1 || !wm || navfx()) return null;
@@ -138,6 +138,19 @@ function dockFrame(d: Dock, p: number, dt: number, jump: boolean) {
 }
 const states = new WeakMap<HTMLElement, State>();
 
+/* An unseen margin round the name, the tagline and the buttons (Julian, 2026-11-16: a photo's caption ran through the
+   tagline). A caption within PAD of any of them hides (hero.css fades it) and comes back once clear. Held layout only. */
+const PAD = 12;
+function clearance(st: State, on: boolean) {
+  const z = on ? [...st.texts.map(ink), ...(st.ctas ? [st.ctas.getBoundingClientRect()] : [])].filter((r) => r.width) : [];
+  const hit = st.caps.map((c) => {
+    if (!z.length) return false;
+    const r = c.getBoundingClientRect();
+    return z.some((q) => r.left < q.right + PAD && r.right > q.left - PAD && r.top < q.bottom + PAD && r.bottom > q.top - PAD);
+  });
+  st.caps.forEach((c, i) => c.toggleAttribute("data-under", hit[i]));
+}
+
 const move = (p: Part, y: number) => {
   const v = Math.round(y * 10) / 10;
   if (v === p.v) return;
@@ -154,6 +167,10 @@ export const heroDrivers: Driver[] = [
       const st: State = {
         cols: [...el.querySelectorAll<HTMLElement>(".mt-col")].map((n) => part(n, Number(n.dataset.a) || 0, Number(n.dataset.col))),
         figs: [...el.querySelectorAll<HTMLElement>(".mt-col:not(.side) figure")].map((n) => part(n, 0, Number(n.style.getPropertyValue("--c2")) || 0)),
+        caps: [...el.querySelectorAll<HTMLElement>(".mt-col figcaption span")],
+        texts: [...el.querySelectorAll<HTMLElement>(".mt-name h1, .mt-name .mt-cap")],
+        ctas: el.querySelector<HTMLElement>(".mt-name .mt-ctas"),
+        more: el.querySelector<HTMLElement>(".mt-more .btn"),
         name: el.querySelector<HTMLElement>("[data-mt-name]"),
         s: -1,
         mode: "",
@@ -162,6 +179,10 @@ export const heroDrivers: Driver[] = [
         at: "",
         wall: WALL,
         dock: dockSetup(el),
+        bar: document.querySelector<HTMLElement>(".site-hdr"),
+        out: false,
+        drop: 0,
+        row: 660,
       };
       states.set(el, st);
       const d = st.dock;
@@ -197,8 +218,10 @@ export const heroDrivers: Driver[] = [
         removeEventListener("scroll", past);
         document.documentElement.removeAttribute("data-mtleft");
         document.documentElement.removeAttribute("data-mt-pasthero");
+        document.documentElement.removeAttribute("data-mt-nameout");
         [...st.cols, ...st.figs].forEach((p) => (p.el.style.transform = ""));
         if (st.name) st.name.style.cssText = "";
+        clearance(st, false);
         if (d) {
           dockOff(d);
           d.f.remove();
@@ -217,6 +240,8 @@ export const heroDrivers: Driver[] = [
         [...st.cols, ...st.figs].forEach((x) => move(x, 0));
         if (st.name) st.name.style.cssText = "";
         if (st.dock) dockOff(st.dock);
+        document.documentElement.removeAttribute("data-mt-nameout");
+        clearance(st, false);
         st.at = "";
       }
 
@@ -229,13 +254,19 @@ export const heroDrivers: Driver[] = [
           st.u = (core[0]?.el.offsetWidth ?? 0) / 403 || ctx.u;
           // the lowest column end plus the 46 design px under it: 2640 with four rows
           st.wall = core.length ? Math.max(...core.map((c) => c.el.offsetTop + c.el.offsetHeight)) / st.u + 46 : WALL;
+          // one row of the wall, px: from one photo's top to the next in a column
+          const two = core[0]?.el.querySelectorAll<HTMLElement>("figure");
+          st.row = (two && two[1] ? two[1].offsetTop - two[0].offsetTop : 0) || 660 * st.u;
+          // how far the name has to sink to clear the window: from its top at rest to the window's lower edge, and 24px. It rode
+          // 0.6 of the window, and was out of sight well before the ride was over (Julian, 2026-11-17: "even longer, almost right before" the button)
+          if (st.texts[0]) st.drop = ctx.vh - (st.texts[0].getBoundingClientRect().top - Math.max(0, st.e) * st.drop) + 24;
           if (st.dock && st.name) dockMeasure(st.dock, st.name);
         }
         const u = st.u;
         // the ground under the last row is in the page's unit, like the button that sits in it
         const target = p * Math.max(0, st.wall * u + TAIL * ctx.u - Math.max(ctx.vh, 600));
-        // the 0.2 follow of the live Recent(), frame-rate independent
-        st.s = st.s < 0 || Math.abs(target - st.s) < 0.1 ? target : st.s + (target - st.s) * (1 - Math.pow(0.8, ctx.dt / 16.7));
+        // a 0.64 follow (0.4 until Julian halved the delay a second time, 2026-11-17), frame-rate independent (the live Recent()'s 0.2 felt laggy here: Julian, 2026-11-17, "half the delay")
+        st.s = st.s < 0 || Math.abs(target - st.s) < 0.1 ? target : st.s + (target - st.s) * (1 - Math.pow(0.36, ctx.dt / 16.7));
         const S = st.s;
         /* Where the wall ends (Julian, 2026-11-15): with three columns the left one ends lowest and the right one
            highest, a stair down to the left, so "See the work" on the right has the open corner. The markup's lags
@@ -249,15 +280,26 @@ export const heroDrivers: Driver[] = [
           dockFrame(st.dock, p, ctx.dt, Math.abs(ctx.dy) > ctx.vh);
           return;
         }
-        const e = Math.round(smooth(span(p, 0.76, 0.96)) * 1000) / 1000;
+        /* Julian, 2026-11-16: "it needs to stay in place until 3 rows are scrolled and move down and out". The name
+           holds until the fourth row is whole in the window (its lower edge at the window's: "pinned to screen for
+           3-4 rows"), then rides down out of the window. 2026-11-17: "too quick, it needs to go out a bit slower with parallax": the ride takes
+           0.8 of a row, and the tagline and buttons sink ahead of the name (--mt-out, hero.css). Never later than the travel allows. */
+        // 2026-11-17, third pass: "too fast, needs to be longer and finish later". The ride is read off See the work: it is
+        // over as the button's top edge enters the window, and takes the last three quarters of the scroll up to that point.
+        // A soft start and then an even pace (t*t*(2-t)), not the s-curve whose middle ran at 1.5 times the scroll.
+        const gap = st.more ? st.more.getBoundingClientRect().top - ctx.vh : 0;
+        const t = clamp(1 - gap / Math.max(1, 0.75 * (gap - ctx.top)));
+        const e = Math.round(t * t * (2 - t) * 1000) / 1000;
         if (st.name && e !== st.e) {
           st.e = e;
-          // ?mtdock=left (Julian, 2026-11-16: "these should just scroll down and out instead of left"): the name block
-          // rides down out of the window at full strength, no fade. The flag keeps its name.
-          st.name.style.opacity = LEFT ? "" : String(1 - e);
-          st.name.style.transform = !e ? "" : LEFT ? `translate3d(0,${(0.6 * ctx.vh * e).toFixed(1)}px,0)` : `translate3d(0,${(-56 * ctx.u * e).toFixed(1)}px,0)`;
-          st.name.style.visibility = e >= 1 ? "hidden" : ""; // gone: its buttons leave the tab order too
+          st.out = e >= 1;
+          st.name.style.transform = e ? `translate3d(0,${((st.drop || 0.6 * ctx.vh) * e).toFixed(1)}px,0)` : "";
+          st.name.style.setProperty("--mt-out", String(e));
+          st.name.style.visibility = st.out ? "hidden" : ""; // gone: its buttons leave the tab order too
+          // the bar's wordmark comes in as the big name is out, and goes as it comes back (mtscroll.css)
+          document.documentElement.toggleAttribute("data-mt-nameout", st.out);
         }
+        clearance(st, !st.out);
         return;
       }
 

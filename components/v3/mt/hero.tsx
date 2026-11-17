@@ -20,7 +20,7 @@ const mod3 = (c: number) => ((c % 3) + 3) % 3;
 
 const SIZES = "(max-width: 599px) 50vw, (min-width: 1920px) 18vw, 30vw";
 
-/* `was`: the frame this one replaced (idle wall). It stays under the new one until that has developed, so the swap never passes through dark. */
+/* `was`: the frame this one replaced (idle wall). It stays under the new one until that has loaded and cut in, so the swap never passes through dark. */
 function Fig({ f, was, onDone, i, eager, xr, idle }: { f: MtFrame; was?: MtFrame; onDone?: () => void; i: number; eager?: boolean; xr?: boolean; idle?: boolean }) {
   return (
     <figure className={xr ? "xr" : undefined} style={{ "--i": i, "--c2": i % 2, "--r2": Math.floor(i / 2) } as React.CSSProperties} data-slug={f.slug} data-i={idle ? i : undefined}>
