@@ -30,3 +30,5 @@ html[data-mtask][data-mt-held] .mt-quote .mt-q-logos{grid-column:1/-1;display:fl
 html[data-mtask][data-mt-held] .mt-quote .mt-q-logos a{display:flex}
 html[data-mtask][data-mt-held] .mt-quote .mt-q-logos .mk{display:inline-block;flex:none;background:currentColor;color:rgb(var(--on-photo) / .8)}
 html[data-mtask][data-mt-held] .mt-quote .mt-q-logos svg.mk{background:none}
+/* Out: the screen holds in place, shrinks a little and dims while About's edge comes up over it (About uncovers itself bottom up, flow.css). */
+html[data-mtask][data-mt-held] .mt-quote>.mt-frame{transform:translate3d(0,calc(var(--out,0) * max(100svh,600px)),0) scale(calc(1 - var(--out,0) * .05));transform-origin:50% 50%;opacity:calc(1 - var(--out,0) * .6)}
