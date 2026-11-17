@@ -19,8 +19,7 @@ html[data-mtleft]:not([data-mt-pasthero]) .v3 .site-hdr { background: transparen
 [data-mt-motion] .mt-hero .mt-name :is(h1, .mt-ctas) { translate: 0 var(--mt-drop, 0px); }
 html[data-mt-held] .mt-hero .mt-name.mt-name :is(.mt-cap, .mt-ctas) { translate: calc(var(--px, 0) * 4px) calc(var(--py, 0) * 4px + var(--mt-out, 0) * 22vh + var(--mt-drop, 0px)); }
 /* The tagline is three blended copies (mtscroll.css), and a blend only reaches the photos while nothing between them is its own layer. Real Safari makes a layer of anything
-   with a translate, or inside one (MAC, #1145: the tagline went plain white), so the tagline takes no pointer tilt, rides out on a margin, and fades on its copies.
+   with a translate, or inside one (MAC, #1145: the tagline went plain white), so the tagline takes no pointer tilt, rides out on a margin, and fades through the alpha of its text colour (--cap-o, mtscroll.css): an opacity under 1 isolated it too (MAC, iPhone).
    One absolute box, so the layout cost is its own. */
 [data-mt-motion] .mt-hero .mt-name .mt-name-in .mt-cap { margin-bottom: calc(-1 * var(--mt-drop, 0px)); }
 html[data-mt-held] .mt-hero .mt-name.mt-name .mt-name-in .mt-cap { translate: none; margin-bottom: calc(var(--mt-out, 0) * -22vh - var(--mt-drop, 0px)); }
-.mt-hero .mt-name .mt-cap .t { opacity: var(--cap-o, 1); }

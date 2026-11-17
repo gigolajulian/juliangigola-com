@@ -129,7 +129,7 @@ function dockFrame(d: Dock, p: number, dt: number, jump: boolean) {
   // at rest nothing is written: an inline 1 beat the splash's own `opacity:0` rule, so the caption and buttons
   // stood alone on the empty page until the splash started (seen in Safari, 2026-11-15)
   const op = (v: number) => (v >= 1 ? "" : v.toFixed(3));
-  if (d.cap) d.cap.style.setProperty("--cap-o", op(cap)); // on the copies, not the paragraph (hero.css)
+  if (d.cap) d.cap.style.setProperty("--cap-o", op(cap)); // the copies' colour alpha, not an opacity (mtscroll.css)
   if (d.scrim) d.scrim.style.opacity = op(sc);
   if (d.ctas) {
     d.ctas.style.opacity = op(go);
