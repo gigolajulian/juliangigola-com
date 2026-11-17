@@ -60,7 +60,8 @@ export function MtCommissions({ frames }: { frames: MtFrame[] }) {
                     <Image src={f.src} alt={f.name} fill sizes="50vw" />
                   </div>
                   <figcaption className="lbl">
-                    <span>{f.name}</span>
+                    {/* the photo alt already names the frame in this link, as on the hero wall */}
+                    <span aria-hidden>{f.name}</span>
                     <span className="mute">{f.meta}</span>
                   </figcaption>
                 </Link>
