@@ -23,7 +23,7 @@ type Part = { el: HTMLElement; a: number; c: number; v: number };
 const DOCK_W = 11;
 type Geo = { ax: number; ay: number; bx: number; by: number; k: number; ox: number; oy: number; ws: number };
 type Dock = { f: HTMLElement; words: HTMLElement[]; h1: HTMLElement; wm: HTMLElement; cap: HTMLElement | null; ctas: HTMLElement | null; scrim: HTMLElement | null; w: number; m: Geo | null; x: number; v: number; st: string; q: string };
-type State = { cols: Part[]; figs: Part[]; caps: HTMLElement[]; texts: HTMLElement[]; ctas: HTMLElement | null; name: HTMLElement | null; s: number; mode: string; e: number; u: number; at: string; wall: number; dock: Dock | null; bar: HTMLElement | null; out: boolean; row: number };
+type State = { cols: Part[]; figs: Part[]; caps: HTMLElement[]; texts: HTMLElement[]; ctas: HTMLElement | null; more: HTMLElement | null; name: HTMLElement | null; s: number; mode: string; e: number; u: number; at: string; wall: number; dock: Dock | null; bar: HTMLElement | null; out: boolean; row: number };
 
 const ink = (n: Node) => {
   const r = document.createRange();
@@ -170,6 +170,7 @@ export const heroDrivers: Driver[] = [
         caps: [...el.querySelectorAll<HTMLElement>(".mt-col figcaption span")],
         texts: [...el.querySelectorAll<HTMLElement>(".mt-name h1, .mt-name .mt-cap")],
         ctas: el.querySelector<HTMLElement>(".mt-name .mt-ctas"),
+        more: el.querySelector<HTMLElement>(".mt-more .btn"),
         name: el.querySelector<HTMLElement>("[data-mt-name]"),
         s: -1,
         mode: "",
@@ -279,9 +280,10 @@ export const heroDrivers: Driver[] = [
            holds until the fourth row is whole in the window (its lower edge at the window's: "pinned to screen for
            3-4 rows"), then rides down out of the window. 2026-11-17: "too quick, it needs to go out a bit slower with parallax": the ride takes
            0.8 of a row, and the tagline and buttons sink ahead of the name (--mt-out, hero.css). Never later than the travel allows. */
-        const len = st.row, travel = st.wall * u + TAIL * ctx.u - Math.max(ctx.vh, 600);
-        const from = Math.max(0, travel - TAIL * ctx.u - len); // 2026-11-17: "start from the row before the last and be out at last row": it rides over the last row's way in, and is out as that row is whole in the window
-        const e = Math.round(smooth(clamp((S - from) / Math.max(1, len))) * 1000) / 1000;
+        // 2026-11-17: "end julian gigola large right before see the work button shows up on screen": the ride is read off
+        // the button itself, a row of scroll long, and is over 16px before the button's top edge enters the window
+        const gap = st.more ? st.more.getBoundingClientRect().top - ctx.vh : 0;
+        const e = Math.round(smooth(clamp(1 - (gap - 16) / Math.max(1, st.row))) * 1000) / 1000;
         if (st.name && e !== st.e) {
           st.e = e;
           st.out = e >= 1;
