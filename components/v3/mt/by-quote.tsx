@@ -4,6 +4,7 @@ import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { matches } from "@/lib/device";
+import { Marks } from "@/components/v3/duo";
 import { QUOTE_CLIENTS, QUOTE_OPTS, type QuoteClient } from "./data";
 import { CardsCtx } from "./ctx";
 
@@ -30,6 +31,13 @@ export function MtByQuote({ stills, reply, onTouch }: { stills: Record<string, s
   const [opt, setOpt] = React.useState(false); // the option's photo shows instead of the client's
   const ci = 0; // the first client: motion/quote.ts rotates by marking the DOM (`data-q`, `data-client`), React never rewrites it
   const cards = React.useContext(CardsCtx);
+  // ?mtask=1 trial: an option with several wide frames steps through them
+  const [tick, setTick] = React.useState(0);
+  React.useEffect(() => {
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const t = setInterval(() => setTick((n) => n + 1), 5000);
+    return () => clearInterval(t);
+  }, []);
   const o = QUOTE_OPTS[on];
   const pick = (i: number) => {
     setOn(i);
@@ -43,8 +51,8 @@ export function MtByQuote({ stills, reply, onTouch }: { stills: Record<string, s
         <figure className="mt-photo">
           {QUOTE_CLIENTS.map((c, i) => <ClientPhoto key={c.name} c={c} on={!opt && i === ci} stills={stills} />)}
           {QUOTE_OPTS.map((x, i) => (
-            <span key={x.key} className={opt && i === on ? "op on" : "op"}>
-              <Image src={x.photo} alt={`${x.name} sample`} fill sizes="(max-width: 1023px) 100vw, 42vw" />
+            <span key={x.key} className={opt && i === on ? "op on" : "op"} data-cur={i === on || undefined}>
+              <Image src={x.photo} alt={`${x.name} sample`} fill sizes="(max-width: 1023px) 100vw, 42vw" />{x.wide?.map(([src, at], k) => <Image key={src} className="w" data-on={k === tick % x.wide!.length || undefined} src={src} alt="" fill sizes="100vw" style={{ objectPosition: at }} />)}
             </span>
           ))}
           <figcaption className="lbl mt-clcap" aria-hidden>{client.name}</figcaption>
@@ -59,6 +67,7 @@ export function MtByQuote({ stills, reply, onTouch }: { stills: Record<string, s
           <p className="lbl mt-by">
             <span className="mute">Commissioned by</span> <span className="nm">{client.name}</span>
           </p>
+          {/* ?mtask=1 trial: the clients as marks, the photo follows the option. */}<div className="mt-q-logos" aria-hidden><Marks hidden /></div>
           <div className="mt-qos">
             {QUOTE_OPTS.slice(0, 3).map((x, i) => (
               <div key={x.key} className="mt-qow" data-on={i === on || undefined}>
