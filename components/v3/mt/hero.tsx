@@ -85,6 +85,18 @@ export function MtHero({ frames: first, extras }: { frames: MtFrame[]; extras: M
   return (
     <section className="mt-hero" data-mt="hero" data-hold="1.6" ref={root}>
       <div className="mt-stage">
+        {/* Before the wall in the DOM so Tab reaches Inquire and Book a session first, while the name is still on screen (it is hidden once scrolled away). z-index keeps it painted over the wall. */}
+        <div className="mt-name" data-mt-name>
+          <div className="mt-scrim" aria-hidden />
+          <div className="mt-name-in">
+            <h1>Julian Gigola</h1>
+            <p className="lbl mt-cap">Photographer and creative director<span className="sep"> | </span><span className="pl">San Francisco Bay Area</span></p>
+          </div>
+          <div className="mt-ctas">
+            <Link className="btn fill" href="/contact/form">Inquire</Link>
+            <Link className="btn" href="/book">Book a session</Link>
+          </div>
+        </div>
         <div className="mt-wall">
           {[...sides.slice(0, 2), ...cols, ...sides.slice(2)].map(({ c, list }) => (
             // side columns are real links too: from 1920px wide they are part of the wall for good. Where a screen hides one, visibility takes its links with it.
@@ -96,17 +108,6 @@ export function MtHero({ frames: first, extras }: { frames: MtFrame[]; extras: M
               )))}
             </div>
           ))}
-        </div>
-        <div className="mt-name" data-mt-name>
-          <div className="mt-scrim" aria-hidden />
-          <div className="mt-name-in">
-            <h1>Julian Gigola</h1>
-            <p className="lbl mt-cap">Photographer and creative director<span className="sep"> | </span><span className="pl">San Francisco Bay Area</span></p>
-          </div>
-          <div className="mt-ctas">
-            <Link className="btn fill" href="/contact/form">Inquire</Link>
-            <Link className="btn" href="/book">Book a session</Link>
-          </div>
         </div>
       </div>
       <div className="mt-more">
