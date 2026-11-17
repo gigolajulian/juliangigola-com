@@ -117,7 +117,7 @@ html[data-mt-par][data-mt-held] .mt-motion .mt-film{scale:calc(1.1 - var(--in,1)
 html[data-mt-par][data-mt-held] .mt-motion .mt-mohead{translate:0 calc((1 - var(--in,1)) * 10svh)}
 /* Cover art on a screen taller than 1440: the covers grow to fill the stage (4K had a 780px empty band); their captions keep the page's size */
 html[data-mt-held] .mt-covers .mt-cvcap{font-size:max(11px,calc(11 * var(--tu)))}
-/* ?mtlid=1 (trial): the stage is held at the top of the window for the whole way in, under Commissions (z-index 2, flow.css),
+/* The lid, on by default (?mtlid=0 turns it off): the stage is held at the top of the window for the whole way in, under Commissions (z-index 2, flow.css),
    whose lower edge lifts off it. No ride up; the heading and covers come up from dim as the edge clears. */
 html[data-mt-lid][data-mt-par][data-mt-held] .mt-covers .mt-stage{transform:translate3d(0,calc(var(--out,0) * 22svh - (1 - var(--in,1)) * max(100svh,600px)),0) scale(calc(1 - var(--out,0) * .05))}
 html[data-mt-lid][data-mt-par][data-mt-held] .mt-covers :is(.mt-rowhead>:is(h2,p),.mt-row){translate:none}
