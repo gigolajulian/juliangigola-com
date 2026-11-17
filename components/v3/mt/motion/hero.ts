@@ -23,7 +23,7 @@ type Part = { el: HTMLElement; a: number; c: number; v: number };
 const DOCK_W = 11;
 type Geo = { ax: number; ay: number; bx: number; by: number; k: number; ox: number; oy: number; ws: number };
 type Dock = { f: HTMLElement; words: HTMLElement[]; h1: HTMLElement; wm: HTMLElement; cap: HTMLElement | null; ctas: HTMLElement | null; scrim: HTMLElement | null; w: number; m: Geo | null; x: number; v: number; st: string; q: string };
-type State = { cols: Part[]; figs: Part[]; caps: HTMLElement[]; texts: HTMLElement[]; ctas: HTMLElement | null; more: HTMLElement | null; name: HTMLElement | null; s: number; mode: string; e: number; u: number; at: string; wall: number; dock: Dock | null; bar: HTMLElement | null; out: boolean; row: number };
+type State = { cols: Part[]; figs: Part[]; caps: HTMLElement[]; texts: HTMLElement[]; ctas: HTMLElement | null; more: HTMLElement | null; name: HTMLElement | null; s: number; mode: string; e: number; u: number; at: string; wall: number; dock: Dock | null; bar: HTMLElement | null; out: boolean; row: number; drop: number };
 
 const ink = (n: Node) => {
   const r = document.createRange();
@@ -181,6 +181,7 @@ export const heroDrivers: Driver[] = [
         dock: dockSetup(el),
         bar: document.querySelector<HTMLElement>(".site-hdr"),
         out: false,
+        drop: 0,
         row: 660,
       };
       states.set(el, st);
@@ -256,6 +257,9 @@ export const heroDrivers: Driver[] = [
           // one row of the wall, px: from one photo's top to the next in a column
           const two = core[0]?.el.querySelectorAll<HTMLElement>("figure");
           st.row = (two && two[1] ? two[1].offsetTop - two[0].offsetTop : 0) || 660 * st.u;
+          // how far the name has to sink to clear the window: from its top at rest to the window's lower edge, and 24px. It rode
+          // 0.6 of the window, and was out of sight well before the ride was over (Julian, 2026-11-17: "even longer, almost right before" the button)
+          if (st.texts[0]) st.drop = ctx.vh - (st.texts[0].getBoundingClientRect().top - Math.max(0, st.e) * st.drop) + 24;
           if (st.dock && st.name) dockMeasure(st.dock, st.name);
         }
         const u = st.u;
@@ -289,7 +293,7 @@ export const heroDrivers: Driver[] = [
         if (st.name && e !== st.e) {
           st.e = e;
           st.out = e >= 1;
-          st.name.style.transform = e ? `translate3d(0,${(0.6 * ctx.vh * e).toFixed(1)}px,0)` : "";
+          st.name.style.transform = e ? `translate3d(0,${((st.drop || 0.6 * ctx.vh) * e).toFixed(1)}px,0)` : "";
           st.name.style.setProperty("--mt-out", String(e));
           st.name.style.visibility = st.out ? "hidden" : ""; // gone: its buttons leave the tab order too
           // the bar's wordmark comes in as the big name is out, and goes as it comes back (mtscroll.css)
