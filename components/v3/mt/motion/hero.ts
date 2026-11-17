@@ -280,7 +280,7 @@ export const heroDrivers: Driver[] = [
            3-4 rows"), then rides down out of the window. 2026-11-17: "too quick, it needs to go out a bit slower with parallax": the ride takes
            0.8 of a row, and the tagline and buttons sink ahead of the name (--mt-out, hero.css). Never later than the travel allows. */
         const len = 0.8 * st.row, travel = st.wall * u + TAIL * ctx.u - Math.max(ctx.vh, 600);
-        const from = Math.max(0, Math.min(4 * st.row - ctx.vh, travel - len));
+        const from = Math.max(0, travel - len); // 2026-11-17: "have the banner go away here", on the wall's last rows: the ride ends with the travel
         const e = Math.round(smooth(clamp((S - from) / Math.max(1, len))) * 1000) / 1000;
         if (st.name && e !== st.e) {
           st.e = e;
