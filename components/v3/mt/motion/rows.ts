@@ -38,6 +38,8 @@ function heldRow(name: string, covers: boolean): Driver {
          rates and the stage hands over to Motion (rows.css). The pile the covers were dealt from is gone (Julian, 2026-11-17). */
       const par = covers && !/[?&]mtpar=0/.test(location.search);
       if (par) document.documentElement.setAttribute("data-mt-par", "");
+      // ?mtlid=1, a trial (Julian, 2026-11-17: "try 1"): Cover art waits under Commissions, which lifts off it like a lid (rows.css)
+      if (par) document.documentElement.toggleAttribute("data-mt-lid", /[?&]mtlid=1/.test(location.search));
       const measure = () => {
         // flow.css scales the row as it enters and settles: measure it at rest
         row.style.transform = "none";
@@ -155,7 +157,7 @@ function heldRow(name: string, covers: boolean): Driver {
         mo.disconnect();
         frame = () => {};
         track.style.transform = "";
-        if (par) document.documentElement.removeAttribute("data-mt-par");
+        if (par) document.documentElement.removeAttribute("data-mt-par"), document.documentElement.removeAttribute("data-mt-lid");
         for (const it of items) {
           it.classList.remove("hv");
           if (covers) it.style.setProperty("--o", "0.5");
