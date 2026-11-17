@@ -716,12 +716,13 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
 :root[data-theme="light"] .v3 .mt-hero :is(.mt-name h1,.mt-cap){color:var(--dark-ink)}
 /* The tagline's letters change colour with what is under them (Julian, 2026-11-17: black or white, and grey over the white page). No blend: the three stacked blends
    went plain white in Safari once the photos moved. tone() in motion/hero.ts reads the photo under each letter and sets data-tone: w over a dark photo, k over a
-   light one, p over bare page. Without it (no script yet, or a photo it cannot read) a letter keeps the theme's own tagline colour. */
+   light one, p over bare page. Without it (no script yet, or a photo it cannot read) a letter keeps the theme's own tagline colour.
+   Each tone carries a thin halo of the opposite one, for mid-tone photos that suit neither (QA, #1155). */
 :root .v3 .mt-hero .mt-name .mt-name-in .mt-cap{text-shadow:none}
 :root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .wd{white-space:nowrap}
-:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w{transition:color .15s ease-out}
-:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w[data-tone="w"]{color:#fff}
-:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w[data-tone="k"]{color:#0b0b0c}
+:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w{transition:color .15s ease-out,text-shadow .15s ease-out}
+:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w[data-tone="w"]{color:#fff;text-shadow:0 0 2px rgb(0 0 0 / .6),0 1px 5px rgb(0 0 0 / .35)}
+:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w[data-tone="k"]{color:#0b0b0c;text-shadow:0 0 2px rgb(255 255 255 / .55),0 1px 5px rgb(255 255 255 / .3)}
 @media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w[data-tone="p"]{color:color-mix(in oklab,var(--ink) 58%,var(--bg))}}
 :root[data-theme="light"] .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w[data-tone="p"]{color:color-mix(in oklab,var(--ink) 58%,var(--bg))}
 /* No wordmark in the bar while the hero, with its big name, is on screen (Julian, 2026-11-16: phones first, then every
