@@ -42,6 +42,11 @@ function Fig({ f, was, onDone, i, eager, xr, idle }: { f: MtFrame; was?: MtFrame
   );
 }
 
+/* The tagline, a span a letter inside a span a word (a word never breaks across lines). */
+const letters = (t: string) => t.split(" ").map((word, n) => (
+  <React.Fragment key={n}>{n ? " " : null}<span className="wd">{[...word].map((ch, k) => <span key={k} className="w">{ch}</span>)}</span></React.Fragment>
+));
+
 const STILL = 4000; // idle wall: still this long before the first swap
 const EVERY = 2500; // then one frame at this pace
 
@@ -94,8 +99,11 @@ export function MtHero({ frames: first, extras }: { frames: MtFrame[]; extras: M
           <div className="mt-scrim" aria-hidden />
           <div className="mt-name-in">
             <h1>Julian Gigola</h1>
-            {/* three stacked copies, one blend each (mtscroll.css): invert, take the colour out, lift the mid-tones */}
-            <p className="lbl mt-cap">{[0, 1, 2].map((k) => <span key={k} className="t" aria-hidden={k > 0 || undefined}>Photographer and creative director <span className="sep" aria-hidden>| </span><span className="pl">San Francisco Bay Area</span></span>)}</p>
+            {/* a span a letter: each takes white, black or grey from what is under it (tone() in motion/hero.ts). Screen readers get the line once, as plain text. */}
+            <p className="lbl mt-cap">
+              <span className="sr-only">Photographer and creative director, San Francisco Bay Area</span>
+              <span aria-hidden>{letters("Photographer and creative director")} <span className="sep w">| </span><span className="pl">{letters("San Francisco Bay Area")}</span></span>
+            </p>
           </div>
           <div className="mt-ctas">
             <Link className="btn fill" href="/contact/form">Inquire</Link>

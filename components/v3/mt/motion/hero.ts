@@ -23,7 +23,7 @@ type Part = { el: HTMLElement; a: number; c: number; v: number };
 const DOCK_W = 11;
 type Geo = { ax: number; ay: number; bx: number; by: number; k: number; ox: number; oy: number; ws: number };
 type Dock = { f: HTMLElement; words: HTMLElement[]; h1: HTMLElement; wm: HTMLElement; cap: HTMLElement | null; ctas: HTMLElement | null; scrim: HTMLElement | null; w: number; m: Geo | null; x: number; v: number; st: string; q: string };
-type State = { cols: Part[]; figs: Part[]; caps: HTMLElement[]; texts: HTMLElement[]; ctas: HTMLElement | null; more: HTMLElement | null; name: HTMLElement | null; s: number; mode: string; e: number; u: number; at: string; wall: number; dock: Dock | null; bar: HTMLElement | null; out: boolean; row: number; drop: number };
+type State = { cols: Part[]; figs: Part[]; caps: HTMLElement[]; tw: HTMLElement[]; phs: HTMLElement[]; texts: HTMLElement[]; ctas: HTMLElement | null; more: HTMLElement | null; name: HTMLElement | null; s: number; mode: string; e: number; u: number; at: string; wall: number; dock: Dock | null; bar: HTMLElement | null; out: boolean; row: number; drop: number };
 
 const ink = (n: Node) => {
   const r = document.createRange();
@@ -141,7 +141,67 @@ const states = new WeakMap<HTMLElement, State>();
 /* An unseen margin round the name, the tagline and the buttons (Julian, 2026-11-16: a photo's caption ran through the
    tagline). A caption within PAD of any of them hides (hero.css fades it) and comes back once clear. Held layout only. */
 const PAD = 12;
-function clearance(st: Pick<State, "texts" | "ctas" | "caps">, on: boolean) {
+
+/* The tagline's colour, a letter at a time (Julian, 2026-11-17: black or white with what is under it, grey over the white page; mtscroll.css holds the
+   colours). Each wall photo is read once into a 12 by 16 grid of brightness; a letter looks up the cells under it. No blend mode, so no Safari layer rules. */
+const GW = 12, GH = 16, LIGHT = 120; // LIGHT: a cell this bright (0 to 255) takes black text
+const LUM = new WeakMap<HTMLImageElement, { src: string; g: Uint8ClampedArray | null }>();
+function grid(im: HTMLImageElement) {
+  if (!im.complete || !im.naturalWidth) return null;
+  const src = im.currentSrc || im.src;
+  const had = LUM.get(im);
+  if (had && had.src === src) return had.g;
+  let g: Uint8ClampedArray | null = null;
+  try {
+    const c = document.createElement("canvas");
+    c.width = GW;
+    c.height = GH;
+    const x = c.getContext("2d", { willReadFrequently: true });
+    if (x) {
+      x.drawImage(im, 0, 0, GW, GH);
+      const d = x.getImageData(0, 0, GW, GH).data;
+      g = new Uint8ClampedArray(GW * GH);
+      for (let i = 0; i < g.length; i++) g[i] = 0.2126 * d[i * 4] + 0.7152 * d[i * 4 + 1] + 0.0722 * d[i * 4 + 2];
+    }
+  } catch {
+    g = null; // a canvas the browser will not let us read: the word keeps the theme's colour
+  }
+  LUM.set(im, { src, g });
+  return g;
+}
+function tone(st: Pick<State, "tw" | "phs">) {
+  const wall = st.phs[0]?.closest(".mt-wall");
+  if (!st.tw.length || !wall) return;
+  for (const w of st.tw) {
+    const r = w.getBoundingClientRect();
+    if (!r.width) continue;
+    const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    /* The photo a visitor sees at this point: a hit test, top first. Scanning the photo boxes took the first box in the document that held the point, and on an
+       iPhone that was a photo lying under another one (MAC, #1155: a line stayed white over a pale photo). The name block takes no pointer events, so it is not in the way.
+       While a swap develops, the incoming photo counts once it has cut in. Off screen there is nothing to hit: bare page. */
+    const im = document.elementsFromPoint(cx, cy).find((n): n is HTMLImageElement => n instanceof HTMLImageElement && wall.contains(n) && n.complete && !!n.naturalWidth && (!n.classList.contains("mt-dev") || n.hasAttribute("data-on")));
+    let t = "p"; // bare page
+    if (im) {
+      const g = grid(im);
+      if (!g) t = "";
+      else {
+        // object-fit: cover, centred: where the letter falls in the whole picture
+        const b = im.getBoundingClientRect();
+        const k = Math.max(b.width / im.naturalWidth, b.height / im.naturalHeight), dw = im.naturalWidth * k, dh = im.naturalHeight * k;
+        const at = (x: number) => Math.floor(clamp((x - b.left + (dw - b.width) / 2) / dw, 0, 0.999) * GW);
+        const row = Math.floor(clamp((cy - b.top + (dh - b.height) / 2) / dh, 0, 0.999) * GH) * GW;
+        const c0 = at(Math.max(r.left, b.left)), c1 = at(Math.min(r.right, b.right));
+        let sum = 0;
+        for (let c = c0; c <= c1; c++) sum += g[row + c];
+        t = sum / (c1 - c0 + 1) >= LIGHT ? "k" : "w";
+      }
+    }
+    if (w.dataset.tone !== t) w.dataset.tone = t;
+  }
+}
+
+function clearance(st: Pick<State, "texts" | "ctas" | "caps" | "tw" | "phs">, on: boolean) {
+  tone(st);
   const z = on ? [...st.texts.map(ink), ...(st.ctas ? [st.ctas.getBoundingClientRect()] : [])].filter((r) => r.width) : [];
   const hit = st.caps.map((c) => {
     if (!z.length) return false;
@@ -164,13 +224,16 @@ export function heroStill(root: HTMLElement) {
   if (!el) return () => {};
   const st = {
     caps: [...el.querySelectorAll<HTMLElement>(".mt-col figcaption span")],
+        tw: [...el.querySelectorAll<HTMLElement>(".mt-name .mt-cap .w")],
+        phs: [...el.querySelectorAll<HTMLElement>(".mt-wall .ph")],
     texts: [...el.querySelectorAll<HTMLElement>(".mt-name h1, .mt-name .mt-cap")],
     ctas: el.querySelector<HTMLElement>(".mt-name .mt-ctas"),
   };
   const run = () => clearance(st, true);
   run();
   addEventListener("resize", run);
-  return () => removeEventListener("resize", run);
+  const look = window.setInterval(run, 600); // photos still loading: the tagline words read them as they arrive
+  return () => (removeEventListener("resize", run), clearInterval(look));
 }
 
 export const heroDrivers: Driver[] = [
@@ -183,6 +246,8 @@ export const heroDrivers: Driver[] = [
         cols: [...el.querySelectorAll<HTMLElement>(".mt-col")].map((n) => part(n, Number(n.dataset.a) || 0, Number(n.dataset.col))),
         figs: [...el.querySelectorAll<HTMLElement>(".mt-col:not(.side) figure")].map((n) => part(n, 0, Number(n.style.getPropertyValue("--c2")) || 0)),
         caps: [...el.querySelectorAll<HTMLElement>(".mt-col figcaption span")],
+        tw: [...el.querySelectorAll<HTMLElement>(".mt-name .mt-cap .w")],
+        phs: [...el.querySelectorAll<HTMLElement>(".mt-wall .ph")],
         texts: [...el.querySelectorAll<HTMLElement>(".mt-name h1, .mt-name .mt-cap")],
         ctas: el.querySelector<HTMLElement>(".mt-name .mt-ctas"),
         more: el.querySelector<HTMLElement>(".mt-more .btn"),
@@ -228,7 +293,9 @@ export const heroDrivers: Driver[] = [
         addEventListener("scroll", far, { passive: true });
         requestAnimationFrame(() => requestAnimationFrame(far));
       }
+      const look = window.setInterval(() => tone(st), 300); // the idle wall swaps a photo with no frame running
       return () => {
+        clearInterval(look);
         removeEventListener("scroll", far);
         removeEventListener("scroll", past);
         document.documentElement.removeAttribute("data-mtleft");
