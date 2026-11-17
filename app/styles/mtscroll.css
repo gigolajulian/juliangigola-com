@@ -53,7 +53,8 @@
 [data-mtscroll] .mt-more{display:flex;justify-content:center;padding:calc(40 * var(--u)) 0 calc(96 * var(--u))}
 
 /* ── Commissions (3.3) ── */
-[data-mtscroll] .mt-comm-head{position:sticky;top:58px;z-index:2;display:flex;align-items:flex-end;gap:calc(24 * var(--u));height:calc(200 * var(--u));margin-bottom:calc(-200 * var(--u));padding:0 calc(36 * var(--u)) calc(28 * var(--u));color:rgb(var(--on-photo));background:linear-gradient(rgb(var(--scrim) / .78),transparent);pointer-events:none}
+/* not pinned (Julian, 2026-11-17): the heading lies on the first photos and scrolls away with them */
+[data-mtscroll] .mt-comm-head{position:relative;z-index:2;display:flex;align-items:flex-end;gap:calc(24 * var(--u));height:calc(200 * var(--u));margin-bottom:calc(-200 * var(--u));padding:0 calc(36 * var(--u)) calc(28 * var(--u));color:rgb(var(--on-photo));background:linear-gradient(rgb(var(--scrim) / .78),transparent);pointer-events:none}
 [data-mtscroll] .mt-comm-head h2{font:900 calc(88 * var(--u))/.9 var(--display);letter-spacing:-.05em;margin:0}
 [data-mtscroll] .mt-comm-now{display:flex;flex-direction:column;gap:6px;padding-bottom:calc(6 * var(--u))}
 [data-mtscroll] .mt-count{font-size:max(11px,calc(13 * var(--u)))!important}
@@ -61,8 +62,9 @@
 /* "See all projects" rides the foot of the screen, bottom right, and comes to rest in the sheet's last corner (Julian, 2026-11-15).
    It sticks inside a layer the size of the sheet, so it never rises past the sheet's top (a negative margin let it, in Safari) and adds no height. */
 [data-mtscroll] .mt-comm-pin{position:relative}
+/* the button is not pinned (Julian, 2026-11-17): it lies on the sheet's last photo, bottom right */
 [data-mtscroll] .mt-comm-foot{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-end;pointer-events:none}
-[data-mtscroll] .mt-comm-all{position:sticky;bottom:calc(64 * var(--u));height:32px;padding:0 14px;margin:0 calc(64 * var(--u)) calc(64 * var(--u)) 0;pointer-events:auto;border-color:rgb(var(--on-photo));color:rgb(var(--on-photo));text-shadow:0 0 2px rgb(0 0 0 / .9),0 1px 10px rgb(0 0 0 / .7);box-shadow:0 0 0 1px rgb(0 0 0 / .35),inset 0 0 0 1px rgb(0 0 0 / .35)}
+[data-mtscroll] .mt-comm-all{height:32px;padding:0 14px;margin:0 calc(64 * var(--u)) calc(64 * var(--u)) 0;pointer-events:auto;border-color:rgb(var(--on-photo));color:rgb(var(--on-photo));text-shadow:0 0 2px rgb(0 0 0 / .9),0 1px 10px rgb(0 0 0 / .7);box-shadow:0 0 0 1px rgb(0 0 0 / .35),inset 0 0 0 1px rgb(0 0 0 / .35)}
 /* the label and edge carry the captions' tight shadow, so they hold on a bright frame; the hover fill needs none */
 @media (hover:hover){[data-mtscroll] .mt-comm-all:hover{text-shadow:none}}
 [data-mtscroll] .mt-sheet{margin-top:0}
@@ -481,6 +483,10 @@ html[data-mt-intro="1"]{overflow:hidden}
   [data-mtscroll] .mt-hero .mt-col.side:is([data-col="-1"],[data-col="3"]){--vis:visible}
   /* smaller frames make four rows only two screens of wall: rows five and six bring it back to the laptop's three */
   [data-mtscroll] .mt-hero .mt-col figure.xr{display:block}
+  /* row six is out again, five rows on wide screens (Julian, 2026-11-17) */
+  [data-mtscroll] .mt-hero .mt-col figure.xr:last-child{display:none}
+  /* and the hold is shorter with it, so the wall moves at the pace it had with six: 1.25 screens for 1.6 (motion.css reads --hold; the engine sets it inline) */
+  html[data-mt-held] .mt .mt-hero[data-hold]{height:calc(2.25 * max(100svh,600px))}
 }
 @media (min-width:3300px) and (min-height:600px){
   [data-mtscroll] .mt-hero .mt-wall{--u:min(calc(100vw / 3252),calc(100svh / 900))}
@@ -582,6 +588,8 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
 /* Booking (b2, q1, q2, approved mock #bq): Book online gets a real heading and stays full size; By quote is a band
    under it led by the question, its four options in one row. Flow layout, no stop. */
 [data-mtscroll] .mt-bq-h{margin:0;font:900 46px/1 var(--display);letter-spacing:-.05em}
+/* "Sessions" with "Book online" under it (Julian, 2026-11-17), like Motion's heading and its line */
+[data-mtscroll] .mt-bq-h .lbl{display:block;margin-top:10px}
 [data-mtscroll] .mt-next{display:none;margin:0}
 [data-mtscroll] .mt-book .mt-photo>.qp{object-fit:cover}
 @media (min-width:1024px) and (min-height:600px){
@@ -656,15 +664,16 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
 /* c1 (2026-11-14): the logo band is its own room. It began as off-white with black marks; Julian inverted it for the dark
    theme the same night: a charcoal band with light marks. Was: only the logo band sits on off-white seamless with black marks;
    it cuts in and out hard at its edges and the photos stay on black. Dark theme only: the light theme is light already. */
-:root[data-mtscroll]:not([data-theme="light"]) .mt-logos{background:#141414;color:#d9d9d6;padding-block:calc(56 * var(--u))}
+:root[data-mtscroll]:not([data-theme="light"]) .mt-logos{background:color-mix(in oklab,var(--bg),#fff 3%);color:#d9d9d6;padding-block:calc(56 * var(--u))}
 :root[data-mtscroll]:not([data-theme="light"]) .mt-logos>.mute{color:rgb(217 217 214 / .62)}
 :root[data-mtscroll]:not([data-theme="light"]) .mt-logos .mk{color:rgb(217 217 214 / .86)}
 @media (hover:hover){:root[data-mtscroll]:not([data-theme="light"]) .mt-logos a:hover .mk{color:#fff}}
 
-/* Idle wall (on by default, ?idle=0 off): the new frame develops over the one it replaces, grey and hard first, then its color. Never dark. */
+/* Idle wall (on by default, ?idle=0 off): a hard cut (Julian, 2026-11-16: "the develop one is too slow, try hard cuts"). The new frame waits
+   hidden over the old one until it has loaded, then shows whole: never dark. The one-step animation is kept because its end clears the old frame (hero.tsx). */
 [data-mtscroll] .mt-hero .ph>img.mt-dev{opacity:0}
-[data-mtscroll] .mt-hero .ph>img.mt-dev[data-on]{animation:mt-dev .85s cubic-bezier(.3,0,.2,1) both}
-@keyframes mt-dev{0%{opacity:0;filter:brightness(.45) contrast(1.6) grayscale(1)}40%{opacity:1;filter:brightness(.7) contrast(1.4) grayscale(.7)}100%{opacity:1;filter:none}}
+[data-mtscroll] .mt-hero .ph>img.mt-dev[data-on]{animation:mt-dev .01s step-end both}
+@keyframes mt-dev{to{opacity:1}}
 /* Keyboard focus on a photo link: the ring is drawn inside the frame, since the frame clips an outer one (Commissions tiles
    showed none, the hero a sliver on the photo's top edge). A dark band on both sides keeps it readable on a bright photo. */
 [data-mtscroll] .mt-hero a.fig:focus-visible,[data-mtscroll] .mt-comm a.tile:focus-visible{outline:0}
@@ -696,15 +705,14 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
 [data-mtscroll] .mt-hero .mt-ctas .btn{box-shadow:0 1px 2px rgb(0 0 0 / 35%),0 6px 24px rgb(0 0 0 / 40%)}
 /* the tagline is small: a tighter, darker shadow than the name's */
 [data-mtscroll] .mt-hero .mt-cap.mt-cap.mt-cap{font-weight:500;text-shadow:0 0 2px rgb(0 0 0 / 70%),0 1px 4px rgb(0 0 0 / 60%),0 0 14px rgb(0 0 0 / 50%)}
-[data-mtscroll] .mt-hero .mt-ctas .btn:not(.fill){background:rgb(0 0 0 / 48%);-webkit-backdrop-filter:blur(14px) saturate(1.15);backdrop-filter:blur(14px) saturate(1.15);color:#f1f1ee;border:.5px solid #f1f1ee;box-shadow:none;text-shadow:0 0 2px rgb(0 0 0 / 70%),0 1px 4px rgb(0 0 0 / 60%),0 0 14px rgb(0 0 0 / 50%)}
+[data-mtscroll] .mt-hero .mt-ctas .btn:not(.fill){background:linear-gradient(#fff,#fff) right/0 100% no-repeat rgb(0 0 0 / 48%);-webkit-backdrop-filter:blur(14px) saturate(1.15);backdrop-filter:blur(14px) saturate(1.15);color:#f1f1ee;border:.5px solid #f1f1ee;box-shadow:none;text-shadow:0 0 2px rgb(0 0 0 / 70%),0 1px 4px rgb(0 0 0 / 60%),0 0 14px rgb(0 0 0 / 50%)}
+/* Book a session, hovered: white with black words, wiped in from the right at Inquire's pace (v3.css motion plan 01 times it) (Julian, 2026-11-16) */
+@media (hover:hover) and (pointer:fine){html[data-mtscroll] .v3 .mt-hero .mt-ctas .btn:not(.fill):hover{background-size:100% 100%;color:#000;border-color:#fff;text-shadow:none}}
 @media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .v3 .mt-hero :is(.mt-name h1,.mt-cap){color:var(--dark-ink)}}
 :root[data-theme="light"] .v3 .mt-hero :is(.mt-name h1,.mt-cap){color:var(--dark-ink)}
-/* Phones and tablets: no wordmark in the bar while the hero, with its big name, is on screen (Julian, 2026-11-16). */
-@media not ((min-width:1024px) and (min-height:600px)){
-  html[data-v3motion][data-mtscroll]:has(.mt-hero) .v3 .site-hdr:not(.menu-on) .site-wm{transition:opacity .25s ease-out}
-  html[data-v3motion][data-mtscroll]:has(.mt-hero):not([data-mt-pasthero]) .v3 .site-hdr:not(.menu-on) .site-wm{opacity:0;pointer-events:none}
-}
-/* The tagline inverts against whatever is under it (Julian, 2026-11-16). The held stage is its own layer, so it needs
-   the page colour behind it for the blend to have something to invert on the plain page. */
-[data-mtscroll] .mt-hero .mt-cap.mt-cap.mt-cap.mt-cap{color:#fff;mix-blend-mode:difference;text-shadow:none}
+/* No wordmark in the bar while the hero, with its big name, is on screen (Julian, 2026-11-16: phones first, then every
+   size once the name stopped flying to the bar). ?mtdock=1 hands the wordmark over itself, so it is left out. */
+html[data-v3motion][data-mtscroll]:not([data-mtdock="rest"],[data-mtdock="ride"],[data-mtdock="land"]):has(.mt-hero) .v3 .site-hdr:not(.menu-on) .site-wm{transition:opacity .25s ease-out}
+html[data-v3motion][data-mtscroll]:not([data-mtdock="rest"],[data-mtdock="ride"],[data-mtdock="land"]):has(.mt-hero):not([data-mt-pasthero],[data-mt-nameout]) .v3 .site-hdr:not(.menu-on) .site-wm{opacity:0;pointer-events:none}
+/* The held stage is its own layer: the page colour behind it. (The tagline's invert blend is gone, Julian 2026-11-17: harder to read.) */
 html[data-mt-held] [data-mtscroll] .mt-hero .mt-stage,html[data-mt-held][data-mtscroll] .mt-hero .mt-stage{background:var(--bg)}

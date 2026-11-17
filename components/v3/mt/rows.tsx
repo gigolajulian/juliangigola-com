@@ -109,7 +109,7 @@ export function MtMotion({ films }: { films: MtFilm[] }) {
   }, [cur]);
   const dress = FILM_DRESS[films[cur].title];
   return (
-    <section className="mt-held mt-motion" data-mt="motion" data-hold={2} data-cur={cur} style={{ "--n": films.length } as React.CSSProperties}>
+    <section className="mt-held mt-motion" data-mt="motion" data-hold={films.length * 0.25 /* a quarter screen a film: Julian halved the 2 screens for four, 2026-11-17 */} data-cur={cur} style={{ "--n": films.length } as React.CSSProperties}>
       <div className="mt-stage">
         <div className="mt-mohead">
           <h2>Motion</h2>
