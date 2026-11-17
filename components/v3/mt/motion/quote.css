@@ -18,4 +18,11 @@ html[data-mtask][data-mt-held] .mt-quote .mt-photo{display:block;position:absolu
 html[data-mtask][data-mt-held] .mt-quote .mt-photo img{object-fit:cover}
 html[data-mtask][data-mt-held] .mt-quote>.mt-frame::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(rgb(0 0 0 / .45),transparent 26%,rgb(0 0 0 / .25) 48%,rgb(0 0 0 / .82))}
 html[data-mtask][data-mt-held] .mt-quote-col{position:relative;z-index:2;border-top:0;padding-top:0;--ink:rgb(var(--on-photo));--mute:rgb(var(--on-photo) / .72);--bg:#0b0b0c;color:var(--ink)}
-html[data-mtask][data-mt-held] .mt-quote .mt-clcap{left:auto;right:calc(36 * var(--u));bottom:calc(64 * var(--u));z-index:2}
+.mt-quote :is(.mt-q-logos,.op>.w){display:none}
+html[data-mtask][data-mt-held] .mt-quote :is(.mt-clcap,.mt-by,.mt-photo>.cl,.op>img:not(.w)){display:none}
+html[data-mtask][data-mt-held] .mt-quote .op>.w{display:block}
+html[data-mtask][data-mt-held] .mt-quote .op[data-cur]{opacity:1}
+html[data-mtask][data-mt-held] .mt-quote .mt-q-logos{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:calc(32 * var(--u));margin:calc(44 * var(--u)) 0 0}
+html[data-mtask][data-mt-held] .mt-quote .mt-q-logos a{display:flex}
+html[data-mtask][data-mt-held] .mt-quote .mt-q-logos .mk{display:inline-block;flex:none;background:currentColor;color:rgb(var(--on-photo) / .8)}
+html[data-mtask][data-mt-held] .mt-quote .mt-q-logos svg.mk{background:none}
