@@ -85,8 +85,8 @@ html[data-mt-held] .mt-motion .mt-mohead{top:calc(96 * var(--u))}
 /* smaller than the film's own title (Julian, 2026-11-15: 88 was too large; before that 40) */
 html[data-mt-held] .mt-motion .mt-mohead h2{font-size:calc(56 * var(--u));margin-bottom:calc(10 * var(--u))}
 html[data-mt-held] .mt-motion :is(.mt-mohead,.mt-mofoot) .mute{color:rgb(var(--on-photo) / .72)}
-/* the film's title block sits bottom right (Julian, 2026-11-15; was bottom left) */
-html[data-mt-held] .mt-motion .mt-mofoot{top:auto;bottom:calc(64 * var(--u));left:auto;right:calc(var(--fx) + 36 * var(--u));text-align:right}
+/* the film's title block sits bottom left again (Julian, 2026-11-17: "on the left"; it was bottom right from 2026-11-15) */
+html[data-mt-held] .mt-motion .mt-mofoot{top:auto;bottom:calc(64 * var(--u))}
 html[data-mt-held] .mt-motion .mt-mofoot h3{font-size:calc(104 * var(--u));margin:calc(12 * var(--u)) 0 calc(14 * var(--u))}
 html[data-mt-held] .mt-motion .mt-mofoot .btn{position:static;margin-top:calc(22 * var(--u));pointer-events:auto;border-color:rgb(var(--on-photo));color:rgb(var(--on-photo))}
 /* on the right, small and close to the edge (Julian, 2026-11-15: 20px at 36 in was too large) */
