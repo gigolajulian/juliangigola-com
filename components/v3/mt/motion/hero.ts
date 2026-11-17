@@ -170,34 +170,31 @@ function grid(im: HTMLImageElement) {
   return g;
 }
 function tone(st: Pick<State, "tw" | "phs">) {
-  if (!st.tw.length) return;
-  const boxes = st.phs.map((p) => p.getBoundingClientRect());
+  const wall = st.phs[0]?.closest(".mt-wall");
+  if (!st.tw.length || !wall) return;
   for (const w of st.tw) {
     const r = w.getBoundingClientRect();
     if (!r.width) continue;
     const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    /* The photo a visitor sees at this point: a hit test, top first. Scanning the photo boxes took the first box in the document that held the point, and on an
+       iPhone that was a photo lying under another one (MAC, #1155: a line stayed white over a pale photo). The name block takes no pointer events, so it is not in the way.
+       While a swap develops, the incoming photo counts once it has cut in. Off screen there is nothing to hit: bare page. */
+    const im = document.elementsFromPoint(cx, cy).find((n): n is HTMLImageElement => n instanceof HTMLImageElement && wall.contains(n) && n.complete && !!n.naturalWidth && (!n.classList.contains("mt-dev") || n.hasAttribute("data-on")));
     let t = "p"; // bare page
-    for (let i = 0; i < boxes.length; i++) {
-      const b = boxes[i];
-      if (cx < b.left || cx > b.right || cy < b.top || cy > b.bottom || !b.width) continue;
-      if (getComputedStyle(st.phs[i]).visibility === "hidden") continue; // a side column this screen does not show
-      // the photo on show: the last one loaded, and while a swap develops, the one that has cut in
-      const im = [...st.phs[i].querySelectorAll("img")].reverse().find((n) => n.complete && n.naturalWidth && (!n.classList.contains("mt-dev") || n.hasAttribute("data-on")));
-      const g = im ? grid(im) : null;
-      if (!im || !g) {
-        t = "";
-        break;
+    if (im) {
+      const g = grid(im);
+      if (!g) t = "";
+      else {
+        // object-fit: cover, centred: where the letter falls in the whole picture
+        const b = im.getBoundingClientRect();
+        const k = Math.max(b.width / im.naturalWidth, b.height / im.naturalHeight), dw = im.naturalWidth * k, dh = im.naturalHeight * k;
+        const at = (x: number) => Math.floor(clamp((x - b.left + (dw - b.width) / 2) / dw, 0, 0.999) * GW);
+        const row = Math.floor(clamp((cy - b.top + (dh - b.height) / 2) / dh, 0, 0.999) * GH) * GW;
+        const c0 = at(Math.max(r.left, b.left)), c1 = at(Math.min(r.right, b.right));
+        let sum = 0;
+        for (let c = c0; c <= c1; c++) sum += g[row + c];
+        t = sum / (c1 - c0 + 1) >= LIGHT ? "k" : "w";
       }
-      // object-fit: cover, centred: where the word's middle falls in the whole picture
-      const k = Math.max(b.width / im.naturalWidth, b.height / im.naturalHeight), dw = im.naturalWidth * k, dh = im.naturalHeight * k;
-      const at = (x: number) => Math.floor(clamp((x - b.left + (dw - b.width) / 2) / dw, 0, 0.999) * GW);
-      const row = Math.floor(clamp((cy - b.top + (dh - b.height) / 2) / dh, 0, 0.999) * GH) * GW;
-      // the mean along the part of the word that is over this photo: one cell flickered between neighbours on a busy frame
-      const c0 = at(Math.max(r.left, b.left)), c1 = at(Math.min(r.right, b.right));
-      let sum = 0;
-      for (let c = c0; c <= c1; c++) sum += g[row + c];
-      t = sum / (c1 - c0 + 1) >= LIGHT ? "k" : "w";
-      break;
     }
     if (w.dataset.tone !== t) w.dataset.tone = t;
   }
