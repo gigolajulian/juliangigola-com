@@ -32,3 +32,14 @@ html[data-mtask][data-mt-held] .mt-quote .mt-q-logos .mk{display:inline-block;fl
 html[data-mtask][data-mt-held] .mt-quote .mt-q-logos svg.mk{background:none}
 /* Out: the screen holds in place, shrinks a little and dims while About's edge comes up over it (About uncovers itself bottom up, flow.css). */
 html[data-mtask][data-mt-held] .mt-quote>.mt-frame{transform:translate3d(0,calc(var(--out,0) * max(100svh,600px)),0) scale(calc(1 - var(--out,0) * .05));transform-origin:50% 50%;opacity:calc(1 - var(--out,0) * .6)}
+/* Trial order (same flag): About moves up between Commissions and Cover art, so the two full-photo screens are not back to back and the page ends on the ask.
+   CSS order only: the DOM and the tab order keep the old sequence. shortcut: fine for a look, a real reorder moves the components in home.tsx. */
+html[data-mtask][data-mt-held] .v3home.mt{display:flex;flex-direction:column}
+html[data-mtask][data-mt-held] .v3home.mt>.mt-hero{order:1}
+html[data-mtask][data-mt-held] .v3home.mt>.mt-comm{order:2}
+html[data-mtask][data-mt-held] .v3home.mt>.mt-about{order:3;position:relative;z-index:2;background:var(--bg)}
+html[data-mtask][data-mt-held] .v3home.mt>.mt-covers{order:4}
+html[data-mtask][data-mt-held] .v3home.mt>.mt-motion{order:5}
+html[data-mtask][data-mt-held] .v3home.mt>.mt-book{order:6}
+html[data-mtask][data-mt-held] .v3home.mt>.mt-quote{order:7}
+html[data-mtask][data-mt-held] .v3home.mt>.mt-foot{order:8}
