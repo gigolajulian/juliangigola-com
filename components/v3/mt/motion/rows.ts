@@ -157,7 +157,7 @@ function heldRow(name: string, covers: boolean): Driver {
         mo.disconnect();
         frame = () => {};
         track.style.transform = "";
-        if (par) document.documentElement.removeAttribute("data-mt-par"), document.documentElement.removeAttribute("data-mt-lid");
+        if (par) for (const k of ["data-mt-par", "data-mt-lid"]) document.documentElement.removeAttribute(k);
         for (const it of items) {
           it.classList.remove("hv");
           if (covers) it.style.setProperty("--o", "0.5");
@@ -274,6 +274,8 @@ function films(): Driver {
         preview();
       });
       io.observe(el);
+      // ?mtpick=1: Julian's picker for where each preview starts (film-pick.ts), fetched only then
+      if (/[?&]mtpick=1/.test(location.search)) void import("./film-pick").then((m) => m.filmPick(el, items, (i) => (kill(i), preview()), ac.signal));
 
       // rows.tsx names the current film; its preview follows and the title line rises.
       const mo = new MutationObserver(() => {
