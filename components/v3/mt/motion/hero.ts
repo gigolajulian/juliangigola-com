@@ -275,6 +275,19 @@ export const heroDrivers: Driver[] = [
       if (LEFT) document.documentElement.setAttribute("data-mtleft", "");
       // Mock ?mtflip=1|2|3: the idle wall turns a card over to its next photo (hero.css), in 900, 600 or 1300ms. The value is the duration: hero.tsx reads it for the caption.
       const flip = FLIP[/[?&]mtflip=([123])/.exec(location.search)?.[1] ?? ""];
+      // Mock ?mthover=1: the photo under the mouse sits a little larger in its frame and drifts against the pointer (hero.css). --hx / --hy are where the pointer is on the card, -1 to 1.
+      const wall = /[?&]mthover=1/.test(location.search) ? el.querySelector<HTMLElement>(".mt-wall") : null;
+      const shift = (e: PointerEvent) => {
+        const ph = e.pointerType === "mouse" ? (e.target as Element).closest("figure")?.querySelector<HTMLElement>(".ph") : null;
+        if (!ph) return;
+        const r = ph.getBoundingClientRect();
+        ph.style.setProperty("--hx", (clamp((e.clientX - r.left) / r.width) * 2 - 1).toFixed(3));
+        ph.style.setProperty("--hy", (clamp((e.clientY - r.top) / r.height) * 2 - 1).toFixed(3));
+      };
+      if (wall) {
+        document.documentElement.setAttribute("data-mt-shift", "");
+        wall.addEventListener("pointermove", shift, { passive: true });
+      }
       if (flip) {
         document.documentElement.setAttribute("data-mt-flip", String(flip));
         document.documentElement.style.setProperty("--mt-flip", flip + "ms");
@@ -307,6 +320,8 @@ export const heroDrivers: Driver[] = [
         removeEventListener("scroll", past);
         document.documentElement.removeAttribute("data-mtleft");
         document.documentElement.removeAttribute("data-mt-flip");
+        document.documentElement.removeAttribute("data-mt-shift");
+        wall?.removeEventListener("pointermove", shift);
         document.documentElement.style.removeProperty("--mt-flip");
         document.documentElement.removeAttribute("data-mt-pasthero");
         document.documentElement.removeAttribute("data-mt-nameout");
