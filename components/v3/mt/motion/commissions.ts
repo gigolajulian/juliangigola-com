@@ -1,4 +1,4 @@
-import { clamp, type Driver } from "./engine";
+import { RISE, clamp, type Driver } from "./engine";
 
 /* Commissions (spec 3.3): the held head names the frame under the screen's
    centre, and the client logos drift as one endless line that scroll pushes. */
@@ -6,7 +6,6 @@ const IDLE = 0.028; // px/ms
 const GAIN = 0.0012; // px/ms of push per px scrolled in a frame
 const MAX = 0.6; // px/ms, so a hard flick does not blur the marks
 const MAX_PHONE = 0.35;
-const RISE: KeyframeAnimationOptions = { duration: 600, easing: "cubic-bezier(.16,1,.3,1)" };
 
 const s = { head: null as HTMLElement | null, logos: null as HTMLElement | null, o: 1, track: null as HTMLElement | null, w: 0, seen: false, x: 0, v: IDLE, kick: 0, hover: false, focus: false };
 const put = (n: Element | null, text: string) => {
