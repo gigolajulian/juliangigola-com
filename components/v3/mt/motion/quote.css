@@ -20,7 +20,8 @@ html[data-mtask][data-mt-held] .mt-quote>.mt-frame::before{content:"";position:a
 html[data-mtask][data-mt-held] .mt-quote-col{position:relative;z-index:2;border-top:0;padding-top:0;--ink:rgb(var(--on-photo));--mute:rgb(var(--on-photo) / .72);--bg:#0b0b0c;color:var(--ink)}
 .mt-quote :is(.mt-q-logos,.op>.w){display:none}
 html[data-mtask][data-mt-held] .mt-quote :is(.mt-clcap,.mt-by,.mt-photo>.cl,.op>img:not(.w)){display:none}
-html[data-mtask][data-mt-held] .mt-quote .op>.w{display:block}
+html[data-mtask][data-mt-held] .mt-quote .op>.w{display:block;opacity:0;transition:opacity .6s ease-out}
+html[data-mtask][data-mt-held] .mt-quote .op>.w[data-on]{opacity:1}
 html[data-mtask][data-mt-held] .mt-quote .op[data-cur]{opacity:1}
 html[data-mtask][data-mt-held] .mt-quote .mt-q-logos{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:calc(32 * var(--u));margin:calc(44 * var(--u)) 0 0}
 html[data-mtask][data-mt-held] .mt-quote .mt-q-logos a{display:flex}
