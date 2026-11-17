@@ -16,9 +16,6 @@ import { useNextOpen } from "./next-open";
    events, Stripe deposit and copy, untouched) and the photo stays. */
 
 function RowPhoto({ r, on, sizes }: { r: BookRow; on: boolean; sizes: string }) {
-  const style = { objectPosition: r.at } as React.CSSProperties;
-  const cls = on ? "on" : undefined;
-  if (!r.slug) return <Image src={r.photo} alt={`${r.name} sample`} fill sizes={sizes} className={cls} style={style} />;
   const p = SESSIONS[r.slug].photo;
   return (
     <span className={on ? "duo on" : "duo"} style={{ "--at": r.at } as React.CSSProperties}>
@@ -70,15 +67,6 @@ export function MtBookOnline({ open, onOpen, onClose, quote, onOwn }: { open: Bo
   const isOpen = React.useRef(false);
   useWeekFirst(box, open);
 
-  // phones: scroll walks through the rows (motion/steps.ts); never while a booking is open, it would drop the chosen time
-  React.useEffect(() => {
-    const el = sec.current!;
-    const step = (e: Event) => !isOpen.current && setOn(Math.min(BOOK_ROWS.length - 1, (e as CustomEvent<number>).detail));
-    el.addEventListener("mt-step", step);
-    return () => el.removeEventListener("mt-step", step);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- one listener for the page's life; setOn only wraps a state setter
-  }, []);
-
   // opening or closing puts the block back at the top of the screen and moves focus with it
   React.useEffect(() => {
     if (!!open === isOpen.current) return;
@@ -100,7 +88,7 @@ export function MtBookOnline({ open, onOpen, onClose, quote, onOwn }: { open: Bo
       <div className="mt-frame">
         <h2 className="mt-bq-h">Sessions <span className="lbl mute">Book online</span></h2>
         <div className="mt-book-col">
-          {open && r.slug ? (
+          {open ? (
             <div className="mt-bin" onKeyDown={(e) => e.key === "Escape" && onClose()}>
               <div className="mt-bin-top">
                 <button type="button" className="mt-link" onClick={onClose}>Back</button>

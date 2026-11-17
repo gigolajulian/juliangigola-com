@@ -22,4 +22,4 @@ const bar = (name: string): Driver => {
   };
 };
 
-export const stepDrivers: Driver[] = [bar("book"), bar("quote")];
+export const barDrivers: Driver[] = [bar("book"), bar("quote")];

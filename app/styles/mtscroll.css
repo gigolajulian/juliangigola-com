@@ -445,6 +445,9 @@
   [data-mtscroll] .mt-inq[data-from="footer"] .mt-two{grid-template-columns:1fr}
 }
 
+/* A short window under 600 wide (iPhone Duo unfolded on its side: 594x368). The name block was laid out for a 600px tall screen, so the name sat at the
+   window's lower edge under Safari's bar and the tagline and buttons were off screen (MAC, 2026-11-17). It takes the window's own height here. */
+@media (max-width:599px) and (max-height:599px) and (orientation:landscape){[data-mtscroll] .mt-name{height:100svh}}
 /* L: phone on its side. Four wall columns, the name on one line with the buttons beside it. */
 @media (max-height:599px) and (min-width:600px){
   [data-mtscroll] .mt-hero{--u:calc(100vw / 1848)}
@@ -700,7 +703,8 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
 [data-mtscroll] .mt-hero .mt-scrim{background:none}
 /* In its place a soft black shadow on the words themselves; the outline button is blurred glass in white, so it holds on the light page too. In the light
    theme the name and tagline go light grey, so the black shadow carries them over the page and the photos alike. */
-[data-mtscroll] .mt-hero :is(.mt-name h1,.mt-cap){text-shadow:0 1px 2px rgb(0 0 0 / 55%),0 4px 28px rgb(0 0 0 / 70%)}
+/* 2026-11-17: two tighter layers under the wide one. Over a pale photo or the light page the wide shadow alone left the letter edges washed out (MAC). */
+[data-mtscroll] .mt-hero :is(.mt-name h1,.mt-cap){text-shadow:0 0 1px rgb(0 0 0 / 60%),0 2px 6px rgb(0 0 0 / 55%),0 3px 14px rgb(0 0 0 / 50%),0 4px 28px rgb(0 0 0 / 70%)}
 /* and the two buttons lift off the photos the same way */
 [data-mtscroll] .mt-hero .mt-ctas .btn{box-shadow:0 1px 2px rgb(0 0 0 / 35%),0 6px 24px rgb(0 0 0 / 40%)}
 /* the tagline is small: a tighter, darker shadow than the name's */

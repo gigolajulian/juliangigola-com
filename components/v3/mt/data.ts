@@ -47,24 +47,19 @@ export const FILM_DRESS: Record<string, { zoom?: number; at?: number; mark?: { s
 export type BookRow = {
   key: "portraits" | "headshots" | "graduation" | "studio-digitals";
   /** The live session it books. */
-  slug: SessionSlug | null;
-  group: "s" | "a";
+  slug: SessionSlug;
   name: string;
   len: string;
-  what: string;
   price: string;
-  detail: string;
   btn: string;
-  ready: string | null;
-  photo: string;
   /** object-position in the 3:4 frame. */
   at: string;
 };
 export const BOOK_ROWS: BookRow[] = [
-  { key: "portraits", slug: "portraits", group: "s", name: "Portraits", len: "60 min", what: "Two looks", price: `$${DEPOSIT.portraits} deposit`, detail: "Studio or location. Retouched selects for web and print.", btn: "Book portraits", ready: "1 week", photo: "", at: "50% 50%" },
-  { key: "headshots", slug: "headshots", group: "s", name: "Headshots", len: "30 min", what: "LinkedIn, corporate", price: `$${DEPOSIT.headshots} deposit`, detail: "For LinkedIn, company sites and press. Retouched selects. Booking a team? Ask for a day rate.", btn: "Book headshots", ready: "3 business days", photo: "", at: "50% 40%" },
-  { key: "graduation", slug: "graduation", group: "s", name: "Graduation", len: "90 min", what: "On campus", price: `$${DEPOSIT.graduation} deposit`, detail: "Two outfits. Edited gallery, print release. Booking spring {year} now.", btn: "Book graduation", ready: "1 week", photo: "", at: "50% 18%" },
-  { key: "studio-digitals", slug: "studio-digitals", group: "a", name: "Studio digitals", len: "45 min", what: "Unretouched", price: `$${DEPOSIT.digitals} deposit`, detail: "Full length, three-quarter, close. Front and profile.", btn: "Book digitals", ready: "2 business days", photo: "", at: "50% 50%" },
+  { key: "portraits", slug: "portraits", name: "Portraits", len: "60 min", price: `$${DEPOSIT.portraits} deposit`, btn: "Book portraits", at: "50% 50%" },
+  { key: "headshots", slug: "headshots", name: "Headshots", len: "30 min", price: `$${DEPOSIT.headshots} deposit`, btn: "Book headshots", at: "50% 40%" },
+  { key: "graduation", slug: "graduation", name: "Graduation", len: "90 min", price: `$${DEPOSIT.graduation} deposit`, btn: "Book graduation", at: "50% 18%" },
+  { key: "studio-digitals", slug: "studio-digitals", name: "Studio digitals", len: "45 min", price: `$${DEPOSIT.digitals} deposit`, btn: "Book digitals", at: "50% 50%" },
 ];
 
 /* ── By quote (spec 3.5, SZQ) ── */
