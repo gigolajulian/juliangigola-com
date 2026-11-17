@@ -703,7 +703,7 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
 /* No wordmark in the bar while the hero, with its big name, is on screen (Julian, 2026-11-16: phones first, then every
    size once the name stopped flying to the bar). ?mtdock=1 hands the wordmark over itself, so it is left out. */
 html[data-v3motion][data-mtscroll]:not([data-mtdock="rest"],[data-mtdock="ride"],[data-mtdock="land"]):has(.mt-hero) .v3 .site-hdr:not(.menu-on) .site-wm{transition:opacity .25s ease-out}
-html[data-v3motion][data-mtscroll]:not([data-mtdock="rest"],[data-mtdock="ride"],[data-mtdock="land"]):has(.mt-hero):not([data-mt-pasthero]) .v3 .site-hdr:not(.menu-on) .site-wm{opacity:0;pointer-events:none}
+html[data-v3motion][data-mtscroll]:not([data-mtdock="rest"],[data-mtdock="ride"],[data-mtdock="land"]):has(.mt-hero):not([data-mt-pasthero],[data-mt-nameout]) .v3 .site-hdr:not(.menu-on) .site-wm{opacity:0;pointer-events:none}
 /* The tagline inverts against whatever is under it (Julian, 2026-11-16). The held stage is its own layer, so it needs
    the page colour behind it for the blend to have something to invert on the plain page. */
 [data-mtscroll] .mt-hero .mt-cap.mt-cap.mt-cap.mt-cap{color:#fff;mix-blend-mode:difference;text-shadow:none}

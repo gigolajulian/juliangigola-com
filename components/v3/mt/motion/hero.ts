@@ -213,6 +213,7 @@ export const heroDrivers: Driver[] = [
         removeEventListener("scroll", past);
         document.documentElement.removeAttribute("data-mtleft");
         document.documentElement.removeAttribute("data-mt-pasthero");
+        document.documentElement.removeAttribute("data-mt-nameout");
         [...st.cols, ...st.figs].forEach((p) => (p.el.style.transform = ""));
         if (st.name) st.name.style.cssText = "";
         clearance(st, false);
@@ -234,6 +235,7 @@ export const heroDrivers: Driver[] = [
         [...st.cols, ...st.figs].forEach((x) => move(x, 0));
         if (st.name) st.name.style.cssText = "";
         if (st.dock) dockOff(st.dock);
+        document.documentElement.removeAttribute("data-mt-nameout");
         clearance(st, false);
         st.at = "";
       }
@@ -274,6 +276,8 @@ export const heroDrivers: Driver[] = [
           // and no flight to the bar. The bar's wordmark waits for data-mt-pasthero (mtscroll.css).
           st.name.style.transform = !e ? "" : `translate3d(0,${(0.6 * ctx.vh * e).toFixed(1)}px,0)`;
           st.name.style.visibility = e >= 1 ? "hidden" : ""; // gone: its buttons leave the tab order too
+          // the bar's wordmark comes in as the big name is out, and goes as it comes back (mtscroll.css)
+          document.documentElement.toggleAttribute("data-mt-nameout", e >= 1);
         }
         clearance(st, e < 1);
         return;
