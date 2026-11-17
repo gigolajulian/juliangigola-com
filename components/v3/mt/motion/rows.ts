@@ -1,6 +1,6 @@
 import { shiftScroll } from "@/components/v3/smooth-scroll";
 import { captionsOff, vimeoListen, vimeoPlays } from "@/lib/videos";
-import { clamp, smooth, span, type Driver } from "./engine";
+import { clamp, smooth, type Driver } from "./engine";
 import { sleeveTilt } from "./sleeve-tilt";
 
 /* The held row's travel: it eases away from its first item and into its last (0.4 of the scroll's speed at the two ends). */
@@ -34,49 +34,14 @@ function heldRow(name: string, covers: boolean): Driver {
       const o: number[] = Array(n).fill(-1);
       let step = 1, c0 = 0, mid = 0, range = 0, cur = -1, base = 0, lastX = NaN;
 
-      /* The V4 default since 2026-11-15 (Julian: "turn on the parallax by default"), ?mtpar=0 turns it off: the covers start as one pile on the right and are dealt out to
-         their places as the section comes up the screen, the first one to the middle. Done by the time the stage
-         sticks, so the hold's scroll share per cover is untouched. rows.css has the rest of the flag. */
+      /* The V4 default since 2026-11-15 (Julian: "turn on the parallax by default"), ?mtpar=0 turns it off: the heading and the row ride up at their own
+         rates and the stage hands over to Motion (rows.css). The pile the covers were dealt from is gone (Julian, 2026-11-17). */
       const par = covers && !/[?&]mtpar=0/.test(location.search);
       if (par) document.documentElement.setAttribute("data-mt-par", "");
-      let cw = 0, off = 0, lastE = NaN;
-      const unpile = () => {
-        for (const it of items) {
-          it.style.removeProperty("translate");
-          it.style.removeProperty("rotate");
-          it.style.removeProperty("z-index");
-          it.style.removeProperty("--st");
-        }
-        lastE = NaN;
-      };
-      const deal = () => {
-        // by where the covers are on the screen, not the section: on a tall window the row sits low in its stage.
-        // The pile holds until the covers are about half up, then deals; all are home when the stage sticks.
-        const enter = clamp((ctx.vh - ctx.top) / ctx.vh), y = ctx.top + off + (1 - enter) * 0.18 * ctx.vh, from = ctx.vh - 0.15 * cw; // .18: the row's own lag in rows.css
-        const e = off >= from ? 1 : smooth(span(span(y, from, off), 0.35, 1));
-        if (e === lastE) return;
-        lastE = e;
-        if (e >= 1) return void unpile(), void (lastE = 1);
-        // the pile stands where the second cover rests, pulled in where that would leave the screen; the ones under it show 12 design px each
-        const fan = 12 * ctx.u, at = Math.min(c0 + step, ctx.vw - cw / 2 - 36 * ctx.u - (n - 1) * fan);
-        for (let i = 0; i < n; i++) {
-          // the top cover leaves first; all are home at e = 1
-          const st = 1 - smooth(clamp(e * 1.5 - (0.5 * i) / (n - 1)));
-          const it = items[i].style;
-          it.setProperty("translate", `${(st * (at + i * fan - c0 - i * step)).toFixed(1)}px 0`);
-          it.setProperty("rotate", `${(st * (i ? (i % 2 ? 1 : -1) * (1.2 + i * 0.5) : 0)).toFixed(2)}deg`);
-          it.setProperty("z-index", String(n - i));
-          it.setProperty("--st", st.toFixed(3));
-        }
-      };
-
       const measure = () => {
         // flow.css scales the row as it enters and settles: measure it at rest
         row.style.transform = "none";
-        if (par) unpile();
         const a = items[0].getBoundingClientRect();
-        cw = a.width;
-        off = row.offsetTop + parseFloat(getComputedStyle(row).paddingTop);
         step = items[1].getBoundingClientRect().left - a.left;
         c0 = row.getBoundingClientRect().left + parseFloat(getComputedStyle(row).paddingLeft) + a.width / 2;
         mid = innerWidth / 2;
@@ -100,7 +65,6 @@ function heldRow(name: string, covers: boolean): Driver {
       };
 
       frame = (p) => {
-        if (par) deal();
         // the first record starts inside its sleeve and comes out over the first 5% of the hold (Julian, 2026-11-15)
         const k = smooth(clamp(p / 0.05));
         p = ease(p);
@@ -191,10 +155,7 @@ function heldRow(name: string, covers: boolean): Driver {
         mo.disconnect();
         frame = () => {};
         track.style.transform = "";
-        if (par) {
-          unpile();
-          document.documentElement.removeAttribute("data-mt-par");
-        }
+        if (par) document.documentElement.removeAttribute("data-mt-par");
         for (const it of items) {
           it.classList.remove("hv");
           if (covers) it.style.setProperty("--o", "0.5");

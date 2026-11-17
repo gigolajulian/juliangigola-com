@@ -104,14 +104,13 @@ html:not([data-mt-held]) .mt-motion :is(.mt-mopg,.mt-molg,.mt-mobar){display:non
 /* Snap rows: the record now comes fully out of the bottom (118px), more than the static row's 72px of room. */
 html[data-mt-motion]:not([data-mt-held]) .mt-covers .mt-row{padding-bottom:126px}
 
-/* On by default, ?mtpar=0 turns it off (rows.ts sets html[data-mt-par]). Coming in: the heading and the row ride up at their own rates and
-   the covers are dealt from a pile on the right (rows.ts). Going out: the stage sinks and dims while Motion slides over
+/* On by default, ?mtpar=0 turns it off (rows.ts sets html[data-mt-par]). Coming in: the heading and the row ride up at their own rates
+   (the pile the covers were dealt from is gone, Julian 2026-11-17). Going out: the stage sinks and dims while Motion slides over
    it, the same hand-over as hero into Commissions (flow.css). Motion's film settles from a slight push-in as it arrives. */
 html[data-mt-par][data-mt-held] .mt-covers .mt-rowhead>:is(h2,p){translate:0 calc((1 - var(--in,1)) * 8svh)}
 html[data-mt-par][data-mt-held] .mt-covers .mt-row{translate:0 calc((1 - var(--in,1)) * 18svh)}
-html[data-mt-par][data-mt-held] .mt-covers[data-mt-near] .mt-sleeve{will-change:translate}
-html[data-mt-par][data-mt-held] .mt-covers .mt-cvcap{opacity:calc(.35 * (1 - var(--st,0)))}
-html[data-mt-par][data-mt-held] .mt-covers .mt-sleeve[data-on] .mt-cvcap{opacity:calc(1 - var(--st,0))}
+html[data-mt-par][data-mt-held] .mt-covers .mt-cvcap{opacity:.35}
+html[data-mt-par][data-mt-held] .mt-covers .mt-sleeve[data-on] .mt-cvcap{opacity:1}
 html[data-mt-par][data-mt-held] .mt-covers .mt-stage{transform:translate3d(0,calc(var(--out,0) * 22svh),0) scale(calc(1 - var(--out,0) * .05));transform-origin:50% 100%;opacity:calc(1 - var(--out,0) * .6)}
 html[data-mt-par][data-mt-held] .mt-motion{position:relative;z-index:2;background:var(--bg)}
 html[data-mt-par][data-mt-held] .mt-motion .mt-film{scale:calc(1.1 - var(--in,1) * .1)}
