@@ -720,13 +720,11 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
 .v3 .mt-hero .mt-stage{isolation:isolate;background:var(--bg)}
 .v3 .mt-hero .mt-stage>.mt-name{z-index:auto}
 .v3 .mt-hero .mt-stage>.mt-wall{z-index:-1}
-/* One blend per copy of the text, bottom to top: difference (invert), saturation with a grey (no teal over skin or grass), colour dodge with 50% grey (doubles it, so the
-   tagline is white over dark and mid-tone photos and only goes dark over a pale one). The tone where it matches the photo moves from mid-grey to light grey. */
+/* One difference blend: the tagline is the inverse of what is under it. A stack of three blends (difference, saturation, colour dodge) kept it white over mid-tones,
+   but iOS Safari dropped the whole stack to plain white as soon as the photos under it moved (MAC, static repro: one layer holds, three do not). So mid-tone photos
+   are the weak spot again. The span is a block so a translate can apply to it. --cap-o is the fade, as the colour's alpha. */
 :root .v3 .mt-hero .mt-name .mt-name-in .mt-cap{text-shadow:none}
-/* block, because translate does nothing on an inline span and the first copy would stay behind while the other two move */
 :root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .t{display:block;color:rgb(255 255 255 / var(--cap-o,1));mix-blend-mode:difference}
-:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .t+.t{position:absolute;inset:0;color:rgb(128 128 128 / var(--cap-o,1));mix-blend-mode:saturation;user-select:none}
-:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .t+.t+.t{mix-blend-mode:color-dodge}
 /* No wordmark in the bar while the hero, with its big name, is on screen (Julian, 2026-11-16: phones first, then every
    size once the name stopped flying to the bar). ?mtdock=1 hands the wordmark over itself, so it is left out. */
 html[data-v3motion][data-mtscroll]:not([data-mtdock="rest"],[data-mtdock="ride"],[data-mtdock="land"]):has(.mt-hero) .v3 .site-hdr:not(.menu-on) .site-wm{transition:opacity .25s ease-out}
