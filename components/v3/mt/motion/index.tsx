@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { startEngine } from "./engine";
-import { heroDrivers } from "./hero";
+import { heroDrivers, heroStill } from "./hero";
 import { rowsDrivers } from "./rows";
 import { commissionsDrivers } from "./commissions";
 import { aboutDrivers } from "./about";
@@ -29,7 +29,8 @@ export function MtMotionLayer() {
     if (!root || !("v3motion" in document.documentElement.dataset)) return;
     const stop = startEngine(root, [...heroDrivers, ...rowsDrivers, ...commissionsDrivers, ...aboutDrivers, ...quoteDrivers, ...footDrivers, ...depthDrivers, ...barDrivers]);
     const hide = startReveal(root);
-    return () => (stop(), hide());
+    const still = matchMedia("(prefers-reduced-motion: reduce)").matches ? heroStill(root) : null;
+    return () => (stop(), hide(), still?.());
   }, []);
   // Safari on a foldable, rotated with its tab strip on the left: the page is left scrolled sideways by the strip's
   // width, after both resize events (measured on the Duo, #1062). The page never scrolls sideways, so put it back.
