@@ -63,9 +63,9 @@ export const BOOK_ROWS: BookRow[] = [
 ];
 
 /* ── By quote (spec 3.5, SZQ) ── */
-export type QuoteOpt = { key: "music" | "fashion" | "commercial" | "weddings"; name: string; holds: string[]; detail: string; chips: string[]; call: string; photo: string; wide?: string };
+export type QuoteOpt = { key: "music" | "fashion" | "commercial" | "weddings"; name: string; holds: string[]; detail: string; chips: string[]; call: string; photo: string; wide?: string; at?: string };
 export const QUOTE_OPTS: QuoteOpt[] = [
-  { key: "commercial", name: "Commercial", holds: ["Brand campaigns", "Lookbooks", "Product"], detail: "Concept, art direction, shoot, retouch. Usage is in the quote.", chips: ["Brand campaign", "Lookbook", "Product"], call: "/book/brand-photography", photo: "/work/oakley-x-nike/01.jpg", wide: "/work/diesel/03.jpg" },
+  { key: "commercial", name: "Commercial", holds: ["Brand campaigns", "Lookbooks", "Product"], detail: "Concept, art direction, shoot, retouch. Usage is in the quote.", chips: ["Brand campaign", "Lookbook", "Product"], call: "/book/brand-photography", photo: "/work/oakley-x-nike/01.jpg", wide: "/work/wired-magazine/09.jpg", at: "50% 100%" },
   { key: "music", name: "Music", holds: ["Cover art", "Artist presskits", "Music videos"], detail: "Artwork, press and video for a release. Concept to final files.", chips: ["Cover art", "Artist presskit", "Music video"], call: "/book/music-photography", photo: "/work/valgur/02.jpg", wide: "/work/valgur/06.jpg" },
   { key: "fashion", name: "Fashion", holds: ["Editorial"], detail: "Stories for print and online.", chips: [], call: "/book/editorial", photo: "/work/threshold/05.jpg", wide: "/work/fauxtopia/06.jpg" },
   { key: "weddings", name: "Weddings", holds: ["Full day", "Couples, engagements"], detail: "", chips: ["Wedding", "Couples", "Engagement"], call: "/book/weddings", photo: "/work/weddings/02.jpg", wide: "/work/weddings/09.jpg" },

@@ -45,7 +45,7 @@ export function MtByQuote({ stills, reply, onTouch }: { stills: Record<string, s
           {QUOTE_CLIENTS.map((c, i) => <ClientPhoto key={c.name} c={c} on={!opt && i === ci} stills={stills} />)}
           {QUOTE_OPTS.map((x, i) => (
             <span key={x.key} className={opt && i === on ? "op on" : "op"} data-cur={i === on || undefined}>
-              <Image src={x.photo} alt={`${x.name} sample`} fill sizes="(max-width: 1023px) 100vw, 42vw" />{x.wide && <Image className="w" src={x.wide} alt="" fill sizes="100vw" />}
+              <Image src={x.photo} alt={`${x.name} sample`} fill sizes="(max-width: 1023px) 100vw, 42vw" />{x.wide && <Image className="w" src={x.wide} alt="" fill sizes="100vw" style={{ objectPosition: x.at }} />}
             </span>
           ))}
           <figcaption className="lbl mt-clcap" aria-hidden>{client.name}</figcaption>
