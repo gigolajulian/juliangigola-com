@@ -307,6 +307,8 @@ export const heroDrivers: Driver[] = [
       const gone = clamp(-ctx.top, 0, LAG_MAX);
       if (mode === "p") for (const f of st.figs) move(f, -DRIFT[f.c] * clamp(gone / Math.max(1, ctx.h)));
       else for (const c of st.cols) move(c, -gone * c.a * 0.5 * (ctx.vw / 1440));
+      // phones and tablets too: captions ran through the name and tagline (MAC, 2026-11-17). Only while the name's screen is in view.
+      clearance(st, -ctx.top < ctx.vh);
     },
   },
 ];
