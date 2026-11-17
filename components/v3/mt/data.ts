@@ -39,7 +39,7 @@ export const FILM_PICKS: [title: string, kind: string][] = [
 export const FILM_DRESS: Record<string, { zoom?: number; at?: number; mark?: { src: string; w: number; h: number; name: string } }> = {
   "Director's Reel": { at: 4 },
   Clean: { at: 48 },
-  "Ladera Granola": { zoom: 1.25, at: 45, mark: { src: "/clients/ladera-granola.webp", w: 432, h: 73, name: "Ladera" } },
+  "Ladera Granola": { zoom: 1.25, at: 17, mark: { src: "/clients/ladera-granola.webp", w: 432, h: 73, name: "Ladera" } },
   "The Description": { zoom: 1.1, at: 34, mark: { src: "/clients/empire.webp", w: 159, h: 160, name: "Empire" } },
 };
 
