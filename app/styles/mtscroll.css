@@ -723,7 +723,8 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
 /* One blend per copy of the text, bottom to top: difference (invert), saturation with a grey (no teal over skin or grass), colour dodge with 50% grey (doubles it, so the
    tagline is white over dark and mid-tone photos and only goes dark over a pale one). The tone where it matches the photo moves from mid-grey to light grey. */
 :root .v3 .mt-hero .mt-name .mt-name-in .mt-cap{text-shadow:none}
-:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .t{color:#fff;mix-blend-mode:difference}
+/* block, because translate does nothing on an inline span and the first copy would stay behind while the other two move */
+:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .t{display:block;color:#fff;mix-blend-mode:difference}
 :root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .t+.t{position:absolute;inset:0;color:#808080;mix-blend-mode:saturation;user-select:none}
 :root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .t+.t+.t{mix-blend-mode:color-dodge}
 /* No wordmark in the bar while the hero, with its big name, is on screen (Julian, 2026-11-16: phones first, then every
