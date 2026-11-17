@@ -23,7 +23,7 @@ type Part = { el: HTMLElement; a: number; c: number; v: number };
 const DOCK_W = 11;
 type Geo = { ax: number; ay: number; bx: number; by: number; k: number; ox: number; oy: number; ws: number };
 type Dock = { f: HTMLElement; words: HTMLElement[]; h1: HTMLElement; wm: HTMLElement; cap: HTMLElement | null; ctas: HTMLElement | null; scrim: HTMLElement | null; w: number; m: Geo | null; x: number; v: number; st: string; q: string };
-type State = { cols: Part[]; figs: Part[]; name: HTMLElement | null; s: number; mode: string; e: number; u: number; at: string; wall: number; dock: Dock | null };
+type State = { cols: Part[]; figs: Part[]; caps: HTMLElement[]; texts: HTMLElement[]; ctas: HTMLElement | null; name: HTMLElement | null; s: number; mode: string; e: number; u: number; at: string; wall: number; dock: Dock | null };
 
 const ink = (n: Node) => {
   const r = document.createRange();
@@ -138,6 +138,19 @@ function dockFrame(d: Dock, p: number, dt: number, jump: boolean) {
 }
 const states = new WeakMap<HTMLElement, State>();
 
+/* An unseen margin round the name, the tagline and the buttons (Julian, 2026-11-16: a photo's caption ran through the
+   tagline). A caption within PAD of any of them hides (hero.css fades it) and comes back once clear. Held layout only. */
+const PAD = 12;
+function clearance(st: State, on: boolean) {
+  const z = on ? [...st.texts.map(ink), ...(st.ctas ? [st.ctas.getBoundingClientRect()] : [])].filter((r) => r.width) : [];
+  const hit = st.caps.map((c) => {
+    if (!z.length) return false;
+    const r = c.getBoundingClientRect();
+    return z.some((q) => r.left < q.right + PAD && r.right > q.left - PAD && r.top < q.bottom + PAD && r.bottom > q.top - PAD);
+  });
+  st.caps.forEach((c, i) => c.toggleAttribute("data-under", hit[i]));
+}
+
 const move = (p: Part, y: number) => {
   const v = Math.round(y * 10) / 10;
   if (v === p.v) return;
@@ -154,6 +167,9 @@ export const heroDrivers: Driver[] = [
       const st: State = {
         cols: [...el.querySelectorAll<HTMLElement>(".mt-col")].map((n) => part(n, Number(n.dataset.a) || 0, Number(n.dataset.col))),
         figs: [...el.querySelectorAll<HTMLElement>(".mt-col:not(.side) figure")].map((n) => part(n, 0, Number(n.style.getPropertyValue("--c2")) || 0)),
+        caps: [...el.querySelectorAll<HTMLElement>(".mt-col figcaption span")],
+        texts: [...el.querySelectorAll<HTMLElement>(".mt-name h1, .mt-name .mt-cap")],
+        ctas: el.querySelector<HTMLElement>(".mt-name .mt-ctas"),
         name: el.querySelector<HTMLElement>("[data-mt-name]"),
         s: -1,
         mode: "",
@@ -199,6 +215,7 @@ export const heroDrivers: Driver[] = [
         document.documentElement.removeAttribute("data-mt-pasthero");
         [...st.cols, ...st.figs].forEach((p) => (p.el.style.transform = ""));
         if (st.name) st.name.style.cssText = "";
+        clearance(st, false);
         if (d) {
           dockOff(d);
           d.f.remove();
@@ -217,6 +234,7 @@ export const heroDrivers: Driver[] = [
         [...st.cols, ...st.figs].forEach((x) => move(x, 0));
         if (st.name) st.name.style.cssText = "";
         if (st.dock) dockOff(st.dock);
+        clearance(st, false);
         st.at = "";
       }
 
@@ -257,6 +275,7 @@ export const heroDrivers: Driver[] = [
           st.name.style.transform = !e ? "" : `translate3d(0,${(0.6 * ctx.vh * e).toFixed(1)}px,0)`;
           st.name.style.visibility = e >= 1 ? "hidden" : ""; // gone: its buttons leave the tab order too
         }
+        clearance(st, e < 1);
         return;
       }
 

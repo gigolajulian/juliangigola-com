@@ -695,9 +695,9 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
 [data-mtscroll] .mt-hero .mt-ctas .btn{box-shadow:0 1px 2px rgb(0 0 0 / 35%),0 6px 24px rgb(0 0 0 / 40%)}
 /* the tagline is small: a tighter, darker shadow than the name's */
 [data-mtscroll] .mt-hero .mt-cap.mt-cap.mt-cap{font-weight:500;text-shadow:0 0 2px rgb(0 0 0 / 70%),0 1px 4px rgb(0 0 0 / 60%),0 0 14px rgb(0 0 0 / 50%)}
-[data-mtscroll] .mt-hero .mt-ctas .btn:not(.fill){background:rgb(0 0 0 / 48%);-webkit-backdrop-filter:blur(14px) saturate(1.15);backdrop-filter:blur(14px) saturate(1.15);color:#f1f1ee;border:.5px solid #f1f1ee;box-shadow:none;text-shadow:0 0 2px rgb(0 0 0 / 70%),0 1px 4px rgb(0 0 0 / 60%),0 0 14px rgb(0 0 0 / 50%)}
-/* Book a session, hovered: white with black words (Julian, 2026-11-16) */
-@media (hover:hover) and (pointer:fine){html[data-mtscroll] .v3 .mt-hero .mt-ctas .btn:not(.fill):hover{background:#fff;color:#000;border-color:#fff;text-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}}
+[data-mtscroll] .mt-hero .mt-ctas .btn:not(.fill){background:linear-gradient(#fff,#fff) right/0 100% no-repeat rgb(0 0 0 / 48%);-webkit-backdrop-filter:blur(14px) saturate(1.15);backdrop-filter:blur(14px) saturate(1.15);color:#f1f1ee;border:.5px solid #f1f1ee;box-shadow:none;text-shadow:0 0 2px rgb(0 0 0 / 70%),0 1px 4px rgb(0 0 0 / 60%),0 0 14px rgb(0 0 0 / 50%)}
+/* Book a session, hovered: white with black words, wiped in from the right at Inquire's pace (v3.css motion plan 01 times it) (Julian, 2026-11-16) */
+@media (hover:hover) and (pointer:fine){html[data-mtscroll] .v3 .mt-hero .mt-ctas .btn:not(.fill):hover{background-size:100% 100%;color:#000;border-color:#fff;text-shadow:none}}
 @media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .v3 .mt-hero :is(.mt-name h1,.mt-cap){color:var(--dark-ink)}}
 :root[data-theme="light"] .v3 .mt-hero :is(.mt-name h1,.mt-cap){color:var(--dark-ink)}
 /* No wordmark in the bar while the hero, with its big name, is on screen (Julian, 2026-11-16: phones first, then every
