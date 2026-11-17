@@ -37,8 +37,10 @@ export const FILM_PICKS: [title: string, kind: string][] = [
    preview alike, so the mark burnt into the bottom right corner of the video is cut. `mark`: the client logo, top right.
    `at`: the second the home's preview starts at, when it is not the film's own previewAt (picked in the Film start picker artifact). */
 export const FILM_DRESS: Record<string, { zoom?: number; at?: number; mark?: { src: string; w: number; h: number; name: string } }> = {
-  "Ladera Granola": { zoom: 1.25, mark: { src: "/clients/ladera-granola.webp", w: 432, h: 73, name: "Ladera" } },
-  "The Description": { zoom: 1.1, mark: { src: "/clients/empire.webp", w: 159, h: 160, name: "Empire" } },
+  "Director's Reel": { at: 4 },
+  Clean: { at: 48 },
+  "Ladera Granola": { zoom: 1.25, at: 45, mark: { src: "/clients/ladera-granola.webp", w: 432, h: 73, name: "Ladera" } },
+  "The Description": { zoom: 1.1, at: 34, mark: { src: "/clients/empire.webp", w: 159, h: 160, name: "Empire" } },
 };
 
 /* ── Book online: the four sessions the home sells, each with its deposit (`lib/booking/paid.ts`). Model test books on /book. ── */
