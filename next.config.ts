@@ -462,6 +462,8 @@ const nextConfig: NextConfig = {
       { source: "/", has: [{ type: "host" as const, value: ADMIN_HOST }], destination: "/admin" },
       // leads.juliangigola.com is the Leads app, opening on Needs me.
       { source: "/", has: [{ type: "host" as const, value: LEADS_HOST }], destination: "/admin/leads" },
+      // `/?mtscroll=1`: the v4 home from the server (app/home-v4), while `/` stays the live home.
+      { source: "/", has: [{ type: "query" as const, key: "mtscroll", value: "1" }], destination: "/home-v4" },
     ];
     if (!LOCAL && process.env.NODE_ENV !== "development") return { beforeFiles, afterFiles: listings };
     return {

@@ -1,13 +1,9 @@
 import type { Metadata } from "next";
 import { V3Home, type TopWork } from "@/components/v3/home";
 import { MtGate } from "@/components/v3/mt/gate";
-import { COMM_KEYS, FILM_PICKS, HERO_KEYS, type MtData, type MtFrame } from "@/components/v3/mt/data";
-import { DOES } from "@/components/v3/about";
 import { COMMISSION_TABS } from "@/lib/v3";
-import { PROJECTS, categoryLabel, getProject } from "@/lib/work";
-import { CONTENT } from "@/lib/content";
-import { REEL, posterFor, previewUrl } from "@/lib/videos";
-import { RESPONSE_TIME } from "@/lib/site";
+import { PROJECTS, categoryLabel } from "@/lib/work";
+import { MT } from "@/lib/mt-home-data";
 import ORDER from "@/lib/portfolio-order.json";
 import { shareOg } from "@/lib/share";
 
@@ -34,39 +30,6 @@ const TOP: Record<string, TopWork[]> = Object.fromEntries(
     return fit ? [[d, list.slice(0, fit)]] : [];
   }),
 );
-
-/* `?mtscroll=1` (v4 home): the frames resolved here so lib/work stays out of the client. */
-const frame = (key: string): MtFrame => {
-  const [slug, n] = key.split("/");
-  const p = getProject(slug);
-  const src = `/work/${slug}/${n}.jpg`;
-  const f = p?.images.find((x) => x.src === src) ?? p?.cover;
-  return { src, slug, name: `${p?.name ?? slug} ${n}`, meta: p?.categories[0] ? categoryLabel(p.categories[0]) : "", r: f ? +(f.height / f.width).toFixed(3) : 1.25 };
-};
-const markOf = (client: string) => (client === "Sammy Shiblaq" ? "empire" : client === "Imanemun" ? "paydar" : client.toLowerCase().replace(/\s+/g, "-"));
-const vid = (title: string) => CONTENT.videos.find((v) => v.title === title);
-const used = new Set([...HERO_KEYS, ...COMM_KEYS].map((k) => k.split("/")[0]));
-const MT: MtData = {
-  hero: HERO_KEYS.map(frame),
-  // Side columns on wide screens (spec 5): Commissions frames, then each project's first frame not already on the wall.
-  // 70 of them: wide screens show 30 on the wall itself (side columns, rows five and six) and the intro canvas draws 30 more.
-  // Only projects whose files sit under /work/<slug>/: `frame` builds that path, and Cover art keeps its files in /covers/ (it 404ed).
-  extras: [...COMM_KEYS.map(frame), ...PROJECTS.filter((p) => !used.has(p.slug) && p.images[0]?.src.startsWith(`/work/${p.slug}/`)).slice(0, 70).map((p) => frame(`${p.slug}/${p.images[0].src.split("/").pop()!.replace(".jpg", "")}`))],
-  comm: COMM_KEYS.map(frame),
-  films: FILM_PICKS.map(([title, kind]) => {
-    if (title === REEL.title) return { id: "reel", title, kind, client: "2023", poster: REEL.poster, href: "/portfolio/video", preview: previewUrl({ ...REEL, id: "reel", section: "music" } as Parameters<typeof previewUrl>[0]) };
-    const v = vid(title);
-    return { id: v?.id ?? title, title, kind, client: v?.client ?? "", poster: v ? posterFor(v) : null, preview: v ? previewUrl(v) : undefined, href: v?.client ? `/portfolio/video#${markOf(v.client)}` : "/portfolio/video" };
-  }),
-  does: DOES,
-  reply: RESPONSE_TIME,
-  stills: Object.fromEntries(
-    ([["film:pear-vc", "Pear VC Campaign"], ["film:ladera", "Ladera Granola"]] as const).map(([k, t]) => {
-      const v = vid(t);
-      return [k, (v && posterFor(v)) ?? ""];
-    }),
-  ),
-};
 
 export default async function Home() {
   // Rendered directly, not through the gate: next/dynamic would leave it in a hidden Suspense block until scripts run.
