@@ -39,7 +39,7 @@ const kindOf = (p: Project) => p.categories.map((c) => KIND[c.slug]).find(Boolea
 export function V3Project({ project, next }: { project: Project; next?: { href: string; name: string; cover?: Frame } }) {
   const mark = markFor(project.slug);
   const client = billing(project);
-  const sub = [client, project.categories[0] && titleCase(project.categories[0].name), `${project.images.length} frames`].filter(Boolean).join(" · ");
+  const sub = [client, project.categories[0] && titleCase(project.categories[0].name)].filter(Boolean).join(" · ");
   const name = titleCase(project.headline ?? project.name);
   const alt = (a: string) => a || `${name} by Julian Gigola`;
   /* The hero (Julian): a vertical full bleed on the right, two verticals under
@@ -112,7 +112,12 @@ export function V3Project({ project, next }: { project: Project; next?: { href: 
             ) : null}
             <div className="pj-row">
               <h1 className="pg-t">{name}</h1>
-              <p className="lbl mute">{sub}</p>
+              {/* The count is what the page shows: a tall window leaves the second frame under the title out (v3.css), and says one fewer. */}
+              <p className="lbl mute">
+                {sub ? `${sub} · ` : null}
+                <span className="pj-ct">{imgs.length}</span>
+                {lead.length > 1 ? <span className="pj-ct tall">{imgs.length - 1}</span> : null} frames
+              </p>
             </div>
             {project.intent ? <p className="sv-lead">{project.intent}</p> : null}
           </header>

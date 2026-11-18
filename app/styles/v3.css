@@ -1715,7 +1715,9 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 @media (min-width:901px){.v3 #p-project .pj-hero.bleed{display:block;height:auto;min-height:0;padding:var(--pj) 0 0}
 .v3 #p-project .pj-hero.bleed .pj-top{padding:40px var(--gr) 32px var(--g)}
 .v3 #p-project .pj-hero.bleed .pj-big{width:100%;max-width:none;height:auto;min-height:0;max-height:calc(100svh - 64px);margin:0}}
+.v3 .pj-ct.tall{display:none}
 @media (min-width:901px) and (max-aspect-ratio:5/4){.v3 #p-project .pj-lead .pj-r + .pj-r{display:none}
+.v3 .pj-ct:has(+ .pj-ct.tall){display:none}.v3 .pj-ct.tall{display:inline}
 .v3 #p-project .pj-lead:has(.pj-r + .pj-r) .pj-r{height:min(100cqh,calc(100cqw / var(--arn)))}}
 /* 701 to 900 (iPad, a narrow window): one column, the same margin and gap. The
    big frame no longer runs edge to edge over inset frames, and a mouse no longer
