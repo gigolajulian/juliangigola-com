@@ -84,7 +84,7 @@ export function MtBookOnline({ open, onOpen, onClose, quotePhoto, onRowPick }: {
     onOpen(BOOK_ROWS[i].key);
   };
   return (
-    <section className="mt-book" aria-label="Book online" data-mt="book" data-on={r.key} data-open={open ? "" : undefined} ref={sec}>
+    <section id="sessions" className="mt-book" aria-label="Book online" data-mt="book" data-on={r.key} data-open={open ? "" : undefined} ref={sec}>
       <div className="mt-frame">
         <h2 className="mt-bq-h">Sessions <span className="lbl mute">Book online</span></h2>
         <div className="mt-book-col">

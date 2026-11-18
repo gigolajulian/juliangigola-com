@@ -25,7 +25,7 @@ function uncoverOnFocus(e: React.FocusEvent<HTMLAnchorElement>) {
 export function MtAbout({ does }: { does: string[] }) {
   const words = ABOUT_SENTENCE.split(" ");
   return (
-    <section className="mt-about" aria-label="About" data-mt="about">
+    <section id="about" className="mt-about" aria-label="About" data-mt="about">
       <div className="mt-stage">
         <figure className="mt-ab-ph">
           <Image src="/about/julian-studio.jpg" alt="Julian Gigola at the tether station on set" fill sizes="100vw" />
