@@ -60,6 +60,8 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .a-cover .nav a{color:var(--ink);cursor:pointer}
 @media (hover:hover){.v3 .a-cover .nav a:hover{color:var(--accent)}}
 .v3 .nav,.v3 .site-hdr .links{align-items:center}
+/* a link is one line: "Book a session" broke in two in the cover's nav on a phone (QA, 390 wide) */
+.v3 :is(.nav,.site-hdr .links) a{white-space:nowrap}
 .v3 .tbtn{position:relative;display:grid;place-items:center;width:32px;height:32px;margin-left:6px;padding:0;background:none;border:0;color:var(--ink);cursor:pointer}
 .v3 .tbtn::before{content:"";position:absolute;left:-17px;top:7px;bottom:7px;width:1px;background:currentColor;opacity:.3}
 .v3 .tbtn svg{transition:transform .5s cubic-bezier(.65,0,.35,1)}
