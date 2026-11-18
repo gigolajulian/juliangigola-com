@@ -1,7 +1,7 @@
 /* v4 homepage (`?mtscroll=1`, SPEC-home-scroll.md): the copy and picks this
    screen owns. Client-safe: no lib/work import. Frames that need project data
    (names, ratios) are resolved on the server in `app/page.tsx` (`mtData`). */
-import type { SessionSlug } from "@/lib/v3";
+import { rate, SESSIONS, type SessionSlug } from "@/lib/v3";
 import { DEPOSIT } from "@/lib/booking/paid";
 
 /** A photo with its caption: `r` is height / width. */
@@ -57,16 +57,19 @@ export type BookRow = {
   slug: SessionSlug;
   name: string;
   len: string;
+  /** What /book shows for it: "From $400", or "$250 deposit" where the price is quoted after (`rate`, lib/v3). */
   price: string;
+  /** The deposit that books it. */
+  dep: string;
   btn: string;
   /** object-position in the 3:4 frame. */
   at: string;
 };
 export const BOOK_ROWS: BookRow[] = [
-  { key: "portraits", slug: "portraits", name: "Portraits", len: "60 min", price: `$${DEPOSIT.portraits} deposit`, btn: "Book portraits", at: "50% 50%" },
-  { key: "headshots", slug: "headshots", name: "Headshots", len: "30 min", price: `$${DEPOSIT.headshots} deposit`, btn: "Book headshots", at: "50% 40%" },
-  { key: "graduation", slug: "graduation", name: "Graduation", len: "90 min", price: `$${DEPOSIT.graduation} deposit`, btn: "Book graduation", at: "50% 18%" },
-  { key: "studio-digitals", slug: "studio-digitals", name: "Studio digitals", len: "45 min", price: `$${DEPOSIT.digitals} deposit`, btn: "Book digitals", at: "50% 50%" },
+  { key: "portraits", slug: "portraits", name: "Portraits", len: "60 min", price: rate(SESSIONS["portraits"]), dep: `$${DEPOSIT.portraits}`, btn: "Book portraits", at: "50% 50%" },
+  { key: "headshots", slug: "headshots", name: "Headshots", len: "30 min", price: rate(SESSIONS["headshots"]), dep: `$${DEPOSIT.headshots}`, btn: "Book headshots", at: "50% 40%" },
+  { key: "graduation", slug: "graduation", name: "Graduation", len: "90 min", price: rate(SESSIONS["graduation"]), dep: `$${DEPOSIT.graduation}`, btn: "Book graduation", at: "50% 18%" },
+  { key: "studio-digitals", slug: "studio-digitals", name: "Studio digitals", len: "45 min", price: rate(SESSIONS["studio-digitals"]), dep: `$${DEPOSIT.digitals}`, btn: "Book digitals", at: "50% 50%" },
 ];
 
 /* ── By quote (spec 3.5, SZQ) ── */
