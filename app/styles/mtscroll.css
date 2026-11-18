@@ -124,7 +124,8 @@
 [data-mtscroll] .mt-group2{margin-top:calc(22 * var(--u))}
 [data-mtscroll] .mt-br{display:block;width:100%;border-top:1px solid var(--hair)!important;padding:calc(7 * var(--u)) 0 calc(12 * var(--u))!important}
 [data-mtscroll] .mt-br b{display:block;font:900 calc(46 * var(--u))/calc(52 * var(--u)) var(--display);letter-spacing:-.052em;color:var(--row);transition:color .25s ease-out}
-[data-mtscroll] .mt-br .lbl{display:block;margin-top:2px;color:var(--row);transition:color .25s ease-out}
+/* the small line under a row name: a step up from --row, which measured 4.07:1 dark and 3.87:1 light at 11px (audit 2026-11-18) */
+[data-mtscroll] .mt-br .lbl{display:block;margin-top:2px;color:color-mix(in oklab,var(--ink) 58%,var(--bg));transition:color .25s ease-out}
 [data-mtscroll] .mt-br:is([aria-pressed="true"],:focus-visible) :is(b,.lbl){color:var(--ink)}
 @media (hover:hover){[data-mtscroll] .mt-br:hover :is(b,.lbl){color:var(--ink)}}
 [data-mtscroll] .mt-br-d{display:none}
@@ -648,7 +649,7 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
 [data-mtscroll] .mt-covers .mt-rowhead h2{margin-bottom:calc(12 * var(--u))}
 [data-mtscroll] .mt-cvsub{margin:0 0 0 calc(24 * var(--u))!important}
 [data-mtscroll] .mt-sleeve .disc,.cv4 .mt-sleeve .disc{background:radial-gradient(circle,#0b0b0b 0 16.5%,transparent 16.7%),var(--press,#222)}
-[data-mtscroll] .mt-cvcap{position:absolute;left:0;top:calc(100% + 16 * var(--u));margin:0;display:grid;gap:4px;white-space:nowrap;opacity:.35;transition:opacity .3s ease-out}
+[data-mtscroll] .mt-cvcap{position:absolute;left:0;top:calc(100% + 16 * var(--u));margin:0;display:grid;gap:4px;white-space:nowrap;opacity:.6;transition:opacity .3s ease-out}
 [data-mtscroll] .mt-sleeve[data-on] .mt-cvcap{opacity:1}
 [data-mtscroll] .mt-cvn{position:absolute;left:calc(var(--fx) + 36 * var(--u));bottom:calc(40 * var(--u));margin:0;font:500 calc(64 * var(--u))/1 var(--mono);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 [data-mtscroll] .mt-cvn span{font-size:.3em;letter-spacing:.14em;color:var(--mute);margin-left:.4em}
