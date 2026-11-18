@@ -7,6 +7,10 @@
   /* 1. Wall: up to 2.5deg each way, columns at 48 / 0 / 80px */
   html[data-mt-held] .mt-hero>.mt-stage{perspective:1400px}
   html[data-mt-held] .mt-hero .mt-wall{transform-style:preserve-3d;rotate:calc(var(--py,0) * -1) var(--px,0) 0 calc(hypot(var(--px,0),var(--py,0)) * 2.5deg)}
+  /* The tilted wall takes no hits, its links do: under preserve-3d the wall's own plane cut in front of the middle column (z 0), so the
+     middle of some photos hit the wall, a click did nothing and :hover never matched (QA and MAC, 2026-11-17). */
+  html[data-mt-held] .mt-hero .mt-wall{pointer-events:none}
+  html[data-mt-held] .mt-hero .mt-wall a{pointer-events:auto}
   html[data-mt-held] .mt-hero .mt-col[data-col="0"]{translate:0 0 48px}
   html[data-mt-held] .mt-hero .mt-col[data-col="2"]{translate:0 0 80px}
   /* 2. Name: 4px. Not the scrim (its edge would show) and not a wrapper (it would become the
