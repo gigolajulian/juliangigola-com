@@ -33,9 +33,9 @@
 :root[data-navfx] .v3 .site-hdr .site-wm{transition:color .2s ease,opacity .3s ease}
 :root[data-navfx][data-mtscroll]:has(.mt-hero):not([data-navnamegone]) .v3 .site-hdr:not(.menu-on) .site-wm{opacity:0;pointer-events:none}
 /* The portfolio's search and view buttons in the bar take the same white or black. */
-@media (min-width:640px),(min-width:480px) and (not (pointer:coarse)){:root[data-navfx] .v3 .site-hdr .hslot{--ink:var(--nav-ink)}}
+@media (min-width:640px){:root[data-navfx] .v3 .site-hdr .hslot{--ink:var(--nav-ink)}}
 
-@media (max-width:479.98px),(pointer:coarse) and (max-width:639.98px){
+@media (max-width:639.98px){
   /* Phone menu: the same ground; the dim behind it takes the page colour so a light menu is not on a black dim. */
   :root[data-navfx] .v3 .pmenu.drawer{background:color-mix(in srgb,var(--bg) var(--nav-veil),transparent);-webkit-backdrop-filter:blur(24px) saturate(1.8);backdrop-filter:blur(24px) saturate(1.8)}
   :root[data-navfx] .v3 .pdim{background:color-mix(in srgb,var(--bg) 45%,transparent)}
