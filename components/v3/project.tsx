@@ -46,8 +46,11 @@ export function V3Project({ project, next }: { project: Project; next?: { href: 
      the title; a set that is mostly horizontal gets one horizontal there instead. */
   const imgs = project.images;
   const across = imgs.filter(wide).length > imgs.length / 2;
-  const big = imgs.find((f) => !wide(f)) ?? imgs[0];
-  const lead = across ? imgs.filter((f) => f !== big && wide(f)).slice(0, 1) : imgs.filter((f) => f !== big && !wide(f)).slice(0, 2);
+  /* A set whose cover is a horizontal opens on that cover, full bleed under the title (Julian, 2026-11-18):
+     the page used to open on the first vertical, a different picture from the one pressed. */
+  const bleed = !!imgs[0] && wide(imgs[0]);
+  const big = bleed ? imgs[0] : (imgs.find((f) => !wide(f)) ?? imgs[0]);
+  const lead = bleed ? [] : across ? imgs.filter((f) => f !== big && wide(f)).slice(0, 1) : imgs.filter((f) => f !== big && !wide(f)).slice(0, 2);
   const rest = imgs.filter((f) => f !== big && !lead.includes(f));
   const pic = (f: Frame, sizes: string, priority = false) => (
     <Image src={f.src} alt={alt(f.alt)} width={f.width} height={f.height} sizes={sizes} priority={priority} style={{ background: f.color }} />
@@ -98,7 +101,7 @@ export function V3Project({ project, next }: { project: Project; next?: { href: 
   return (
     <div className="v3 contents">
       <section className="v3page" id="p-project">
-        <div className={across ? "pj-hero two" : "pj-hero"}>
+        <div className={bleed ? "pj-hero bleed" : across ? "pj-hero two" : "pj-hero"}>
           <header className="pj-top">
             <BackLink className="lbl mute pj-back" />
             {/* On a phone the logo moves up to the Back row (Julian); the one on the frame hides there. */}
@@ -115,7 +118,7 @@ export function V3Project({ project, next }: { project: Project; next?: { href: 
           </header>
           {big ? (
             <figure className="pj-big" style={{ aspectRatio: `${big.width} / ${big.height}`, "--ar": big.width / big.height } as React.CSSProperties}>
-              <Image src={big.src} alt={alt(big.alt)} fill sizes={across ? "(max-width: 900px) 100vw, 60vw" : "(max-width: 900px) 100vw, 40vw"} priority style={{ objectFit: "cover", background: big.color }} />
+              <Image src={big.src} alt={alt(big.alt)} fill sizes={bleed ? "100vw" : across ? "(max-width: 900px) 100vw, 60vw" : "(max-width: 900px) 100vw, 40vw"} priority style={{ objectFit: "cover", background: big.color }} />
               {/* The client's logo signs the opening frame, bottom right (Julian). */}
               {mark ? (
                 <span className="pj-mark">
