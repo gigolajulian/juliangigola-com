@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { COVER_RELEASES } from "@/lib/cover-art-data";
 import { media } from "@/lib/device";
-import { HeldRow, rowKeys } from "./held-row";
+import { HeldRow } from "./held-row";
 import { COVER_KEYS, COVER_PRESS, FILM_DRESS, pad, type MtFilm } from "./data";
 
 const COVERS = COVER_KEYS.map((k) => COVER_RELEASES.find((r) => r.slug === k)!).filter(Boolean);
@@ -114,7 +114,7 @@ export function MtFilms({ films }: { films: MtFilm[] }) {
           <h2>Motion</h2>
           <p className="lbl mute">Director and DP | {films.length} films</p>
         </div>
-        <div className="mt-row" ref={row} role="group" tabIndex={0} aria-label="Films" onKeyDown={rowKeys}>
+        <div className="mt-row" ref={row} role="group" tabIndex={0} aria-label="Films">
           <div className="mt-track">
             {films.map((f, i) => (
               <Link key={f.id} href={f.href} className="mt-item mt-film" data-i={i} data-film={f.id} data-preview={f.preview} aria-label={`${f.title}, ${f.kind}`} style={FILM_DRESS[f.title]?.zoom ? ({ "--z": FILM_DRESS[f.title]?.zoom } as React.CSSProperties) : undefined}>

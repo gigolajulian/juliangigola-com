@@ -131,7 +131,6 @@ function heldRow(name: string): Driver {
       row.addEventListener("keydown", (e) => {
         if (!ctx.held || (e.key !== "ArrowRight" && e.key !== "ArrowLeft")) return;
         e.preventDefault();
-        e.stopPropagation(); // held-row.tsx's even step is for the films
         const at = Math.max(0, cur), i = clamp(at + (e.key === "ArrowRight" ? 1 : -1), 0, n - 1);
         if (i !== at) scrollTo({ top: top() + unease(i / (n - 1)) * range, behavior: "smooth" });
       }, opts);
@@ -180,6 +179,12 @@ function films(): Driver {
       const ac = new AbortController();
       const opts = { signal: ac.signal };
       let cur = +(el.dataset.cur ?? 0);
+      // held, the row does not scroll itself, the page does: left and right step the page one film's share of the hold
+      row.addEventListener("keydown", (e) => {
+        if (!ctx.held || (e.key !== "ArrowRight" && e.key !== "ArrowLeft")) return;
+        e.preventDefault();
+        scrollBy({ top: ((el.offsetHeight - innerHeight) / n) * (e.key === "ArrowRight" ? 1 : -1), behavior: "smooth" });
+      }, opts);
       /* Previews: a muted player in the current film, and one in the film before and after it, started and
          then paused so they are loaded when their turn comes (Julian, 2026-11-14). The poster stays on top
          until the player says it plays (same wait as video.tsx Loop). Players only ever start while the
