@@ -34,9 +34,9 @@ const zoomOf = (img: Element | null | undefined): Zoom | undefined => {
   return s && s.scale !== "none" ? { scale: s.scale, translate: s.translate === "none" ? FLAT.translate : s.translate, transform: s.transform } : undefined;
 };
 
-/* The default since 2026-11-18 (Julian, on the live recording: "default"; it was the `?fly=b` trial). `?fly=0` turns it off for the tab
-   and `?fly=b` back on: the old copied-photo path below stays behind that switch for a week, then goes.
-   The browser carries the photo.
+/* The page opening since 2026-11-18 (Julian, on the live recording: "default"; it was the `?fly=b` trial, and the `?fly` switch is gone).
+   The browser carries the photo. The copied-photo path below stays for what this cannot do: a browser without view
+   transitions, and a booking row, which swaps its photo as it is pressed.
    The copy below is a fresh <img>, which decodes off the frame it is added in: the photo was missing for the
    frames that took (about 80ms on production). Decoding it first (`decoding = "sync"`) held the trip 150ms.
    The pressed frame and the next page's hero share one view-transition-name, so the photo is its own
@@ -48,16 +48,7 @@ const zoomOf = (img: Element | null | undefined): Zoom | undefined => {
    to its own frame down the page was tried: a wide set holds that frame at another shape, and the crop
    stepped as it landed. */
 const NAME = "mp-fly";
-const carried = () => {
-  try {
-    const q = new URLSearchParams(location.search).get("fly");
-    if (q === "0") sessionStorage.setItem("jg-fly", "0");
-    else if (q === "b") sessionStorage.removeItem("jg-fly");
-    return "startViewTransition" in document && sessionStorage.getItem("jg-fly") !== "0" ? "b" : null;
-  } catch {
-    return null;
-  }
-};
+const carried = () => "startViewTransition" in document;
 /* What a carried trip set, taken back when the trip ends, or 4s after a press that never lands (as long as a fly is good for). */
 let undo: (() => void)[] = [];
 const settle = () => {
@@ -128,7 +119,7 @@ export function PageFly() {
           const mine = undo;
           fly.current.vt = true;
           fly.current.photo = photo(img);
-          document.documentElement.dataset.fly = mode;
+          document.documentElement.dataset.fly = "b";
           // How the grid held the photo in its frame (the p3 drift): the hero sets off held the same way and eases flat, so nothing steps as it lifts.
           const rs = document.documentElement.style;
           rs.setProperty("--fly-z", z?.scale ?? "1");

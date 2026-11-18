@@ -94,7 +94,7 @@
   :root[data-mplan~="pages"]::view-transition-old(.mp-out) {
     animation: mp-recede var(--dur-small) var(--ease-out-strong) both;
   }
-  /* The default page opening (page-fly.tsx; `?fly=0` turns it off): the pressed photo and the frame it becomes are one named layer.
+  /* The default page opening (page-fly.tsx): the pressed photo and the frame it becomes are one named layer.
      The photo left behind stays whole underneath and the new one comes up over it at once, before the two
      crops part, so the picture is solid for the whole trip. It has weight: a shadow under it while it is
      in the air, gone as it lands. */
