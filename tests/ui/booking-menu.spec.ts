@@ -55,3 +55,23 @@ test("keyboard: a row takes focus and Enter opens its session", async ({ browser
   await expect(sec).toHaveAttribute("data-on", "headshots");
   await ctx.close();
 });
+
+/* The other old links: /about lands on About, /contact on the footer with the inquiry card open. */
+for (const r of [RATIOS[0], RATIOS[4]]) {
+  test(`old anchors at ${r.name}`, async ({ browser, browserName }) => {
+    const { ctx, page } = await open(browser, browserName, r);
+    await page.goto("/#about", { waitUntil: "load" });
+    await expect.poll(() => page.locator("#about").evaluate((e) => Math.abs(Math.round(e.getBoundingClientRect().top)))).toBeLessThan(80);
+    // a full load, as the 308 from /contact gives: a hash-only move this soon after the first load races the router
+    await page.goto("/#contact");
+    await page.reload({ waitUntil: "load" });
+    const card = page.locator(".mt-inq");
+    await expect(card).toBeVisible();
+    expect(await card.evaluate((e) => e.contains(document.activeElement)), "focus is in the card").toBe(true);
+    await expect(page.locator("footer#contact")).toBeInViewport();
+    await page.keyboard.press("Escape");
+    await expect(card).toHaveCount(0);
+    await expect(page.locator("#contact .mt-ph-btn")).toBeFocused();
+    await ctx.close();
+  });
+}

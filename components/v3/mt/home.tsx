@@ -28,13 +28,25 @@ export function MtHome({ data }: { data: MtData }) {
   const cards = React.useMemo<Cards>(() => ({ book: (k) => setBook(k), inquire: (from, opt) => (keep(), setInq({ from, opt })) }), []);
   const back = () => opener.current?.focus({ preventScroll: true });
   // Old links (/sessions, /about and /contact 308 to /#sessions, /#about, /#contact): the screens take their heights after the browser's own anchor jump, so land again once they have.
+  // #contact is the footer, and arriving there opens the inquiry card its "Contact me" opens (Julian, 2026-11-18); closing hands focus to that button.
   React.useEffect(() => {
-    const el = location.hash.length > 1 ? document.getElementById(location.hash.slice(1)) : null;
-    if (!el) return;
-    const land = () => scrollTo({ top: scrollY + el.getBoundingClientRect().top - (parseFloat(getComputedStyle(el).scrollMarginTop) || 0) });
-    const t = setTimeout(land, 300);
+    const target = () => (location.hash.length > 1 ? document.getElementById(location.hash.slice(1)) : null);
+    const land = () => {
+      const el = target();
+      if (el) scrollTo({ top: scrollY + el.getBoundingClientRect().top - (parseFloat(getComputedStyle(el).scrollMarginTop) || 0) });
+      return el;
+    };
+    const arrive = () => {
+      const el = land();
+      if (el?.id !== "contact") return;
+      opener.current = el.querySelector<HTMLElement>(".mt-ph-btn");
+      setInq({ from: "footer" });
+    };
+    const t = setTimeout(arrive, 300);
     if (document.readyState !== "complete") addEventListener("load", land, { once: true });
-    return () => (clearTimeout(t), removeEventListener("load", land));
+    // a link to one of these from the home itself changes the hash without a load
+    addEventListener("hashchange", arrive);
+    return () => (clearTimeout(t), removeEventListener("load", land), removeEventListener("hashchange", arrive));
   }, []);
   return (
     <CardsCtx.Provider value={cards}>

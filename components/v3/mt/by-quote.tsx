@@ -46,7 +46,7 @@ export function MtByQuote({ stills, reply, onOptionPick }: { stills: Record<stri
   };
   const client = QUOTE_CLIENTS[ci];
   return (
-    <section id="contact" className="mt-quote" data-mt="quote" data-client={ci} data-opt={opt || undefined}>
+    <section className="mt-quote" data-mt="quote" data-client={ci} data-opt={opt || undefined}>
       <div className="mt-frame mt-stage">
         <figure className="mt-photo">
           {QUOTE_CLIENTS.map((c, i) => <ClientPhoto key={c.name} c={c} on={!opt && i === ci} stills={stills} />)}
