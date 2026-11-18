@@ -22,7 +22,8 @@ function heldRow(name: string): Driver {
     name,
     frame: (p) => frame(p),
     setup(el, ctx) {
-      const row = el.querySelector<HTMLElement>(".mt-row")!;
+      const row = el.querySelector<HTMLElement>(".mt-row");
+      if (!row) return;
       const track = row.firstElementChild as HTMLElement;
       const items = [...track.children] as HTMLElement[];
       const n = items.length;
@@ -171,7 +172,8 @@ function films(): Driver {
   return {
     name: "motion",
     setup(el, ctx) {
-      const row = el.querySelector<HTMLElement>(".mt-row")!;
+      const row = el.querySelector<HTMLElement>(".mt-row");
+      if (!row) return;
       const items = [...el.querySelectorAll<HTMLElement>(".mt-film")];
       const n = items.length;
       if (n < 2) return;

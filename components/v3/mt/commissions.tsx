@@ -24,15 +24,15 @@ const masonry = (frames: MtFrame[]) => {
 };
 
 export function MtCommissions({ frames }: { frames: MtFrame[] }) {
-  const cur = 0; // hook: the motion pass sets the frame under the screen's centre (data-cur)
+  // the first frame as served; motion/commissions.ts owns data-cur and these three lines from then on
   return (
-    <section className="mt-comm" data-mt="comm" data-cur={cur}>
+    <section className="mt-comm" data-mt="comm" data-cur="0">
       <div className="mt-comm-pin">
       <div className="mt-comm-head">
         <h2>Commissions</h2>
         <div className="mt-comm-now" aria-hidden>
-          <span className="lbl mt-count"><span className="ln"><span data-mt-count>{pad(cur + 1)}</span></span>/{pad(frames.length)}</span>
-          <span className="lbl mt-cur"><span className="ln"><span data-mt-name>{frames[cur].name}</span> <span className="mute">{frames[cur].meta}</span></span></span>
+          <span className="lbl mt-count"><span className="ln"><span data-mt-count>{pad(1)}</span></span>/{pad(frames.length)}</span>
+          <span className="lbl mt-cur"><span className="ln"><span data-mt-name>{frames[0].name}</span> <span className="mute">{frames[0].meta}</span></span></span>
         </div>
       </div>
       <div className="sheet mt-sheet">

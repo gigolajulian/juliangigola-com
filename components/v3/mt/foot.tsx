@@ -7,6 +7,7 @@ import { BOOK_ROWS, QUOTE_OPTS } from "./data";
 import { CardsCtx } from "./ctx";
 import { scrollTop } from "@/components/v3/smooth-scroll";
 import { matches } from "@/lib/device";
+import { useLocalTime } from "@/components/v3/use-local-time";
 
 /* Spec 3.10: HomeFoot. Four link columns, the "Contact me" phrase (a
    button that opens the inquiry card), one still of work behind under its
@@ -46,19 +47,6 @@ function useStills(ref: React.RefObject<HTMLElement | null>) {
     return () => clearInterval(t);
   }, [on, list.length]);
   return list.length < 2 ? [list[0]] : [list[i], list[(i + 1) % list.length]];
-}
-
-/** My local time (f2), to the minute. Empty until mounted, so the server and the first paint agree. */
-export function useLocalTime() {
-  const [t, setT] = React.useState("");
-  React.useEffect(() => {
-    const f = new Intl.DateTimeFormat("en-US", { timeZone: "America/Los_Angeles", hour: "numeric", minute: "2-digit", timeZoneName: "short" });
-    const set = () => setT(f.format(new Date()));
-    set();
-    const id = setInterval(set, 30000);
-    return () => clearInterval(id);
-  }, []);
-  return t;
 }
 
 function Phrase({ copy }: { copy?: boolean }) {
