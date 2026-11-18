@@ -63,6 +63,11 @@ html[data-mt-held] .mt-sleeve .disc,.cv4 .mt-sleeve .disc{pointer-events:none}
 html[data-mt-motion] .mt-film{container-type:size}
 html[data-mt-motion] .mt-film iframe{position:absolute;top:50%;left:50%;width:max(100cqw,100cqh * 16 / 9);height:max(100cqh,100cqw * 9 / 16);translate:-50% -50%;scale:1.2;border:0;pointer-events:none;opacity:0;transition:opacity .8s ease}
 html[data-mt-motion] .mt-film iframe[data-ready]{opacity:1}
+/* YouTube at twice the size, scaled back by half: it picks 1440p for 720p (rows.ts) */
+html[data-mt-motion] .mt-film iframe[data-big]{width:calc(2 * max(100cqw,100cqh * 16 / 9));height:calc(2 * max(100cqh,100cqw * 9 / 16));scale:.6}
+/* the site's own file: the poster's box and fit, so it lands on the poster exactly */
+html[data-mt-motion] .mt-film video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;opacity:0;transition:opacity .4s ease}
+html[data-mt-motion] .mt-film video[data-ready]{opacity:1}
 
 /* Motion, desktop structure with the engine on (m1): one screen, four films. The hold gives each film an even share of
    the scroll (rows.tsx sets `data-on`). The new film develops over the one before it (`data-was`): a plain fade while
@@ -77,8 +82,10 @@ html[data-mt-held] .mt-motion .mt-film{position:absolute;inset:0;width:auto;heig
 html[data-mt-held] .mt-motion .mt-film[data-was]{opacity:1;visibility:visible;z-index:1}
 html[data-mt-held] .mt-motion[data-in] .mt-film[data-on]{visibility:visible;z-index:2;animation:mt-dev-op 1.2s cubic-bezier(.4,0,.2,1) both,mt-dev-col 2s cubic-bezier(.3,.4,.3,1) both}
 /* pushed in from the top left corner, poster and preview alike: a mark burnt into the bottom right of the video is cut */
-html[data-mt-held] .mt-motion .mt-film img{transform-origin:0 0;transform:scale(var(--z,1))}
-html[data-mt-held] .mt-motion .mt-film iframe{scale:calc(1.2 * var(--z,1));translate:calc(-50% + (var(--z,1) - 1) * 50cqw) calc(-50% + (var(--z,1) - 1) * 50cqh)}
+html[data-mt-held] .mt-motion .mt-film :is(img,video){transform-origin:0 0;transform:scale(var(--z,1))}
+html[data-mt-held] .mt-motion .mt-film iframe[data-big]{scale:calc(.6 * var(--z,1))}
+html[data-mt-held] .mt-motion .mt-film iframe:not([data-big]){scale:calc(1.2 * var(--z,1))}
+html[data-mt-held] .mt-motion .mt-film iframe{translate:calc(-50% + (var(--z,1) - 1) * 50cqw) calc(-50% + (var(--z,1) - 1) * 50cqh)}
 html[data-mt-held] .mt-motion .mt-film:focus-visible{outline:0}
 html[data-mt-held] .mt-motion .mt-film:focus-visible::after{content:"";position:absolute;inset:3px;z-index:1;border:1px solid var(--accent);pointer-events:none}
 /* the words sit on the film: a soft ground under them, top and bottom */

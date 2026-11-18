@@ -301,6 +301,9 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
       root.toggleAttribute("data-navdark", lum(rootBg) > 0.2 && lum(secBg) < 0.2);
       const [page] = colour(getComputedStyle(bar).getPropertyValue("--bg").trim());
       const veiled = !isTop && !root.hasAttribute("data-tuck");
+      // One ink for the whole bar (Julian, 2026-11-17: no word on its own, all of them fade to the other colour together).
+      // Each word still looks under itself in stretches; the stretches vote.
+      const votes = { w: 0, n: 0, els: [] as HTMLElement[] };
       for (const el of bar.querySelectorAll<HTMLElement>(WORDS)) {
         // an icon button is judged by its icon, not its 32px box: half the box can be on a photo the icon is clear of (MAC: the theme icon)
         const r = ((el.matches(".tbtn,.menu-btn") && el.querySelector("svg")) || el).getBoundingClientRect();
@@ -333,21 +336,21 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
           rb += pick(cb, pb.length === n ? pb[k] : "", hit.at ? false : low.unknown || hit.unknown);
         }
         const inks = ra + "/" + rb;
-        if (inks === prev) continue;
         el.dataset.inks = inks;
-        // the word's one ink: what most of it has (icons and the hover colours use it)
-        const ink = inks.split("w").length - 1 >= n ? "w" : "b";
-        el.dataset.ink = ink;
-        el.style.setProperty("--nav-ink", ink === "w" ? "#fff" : "#000");
-        // two grounds under a word of text: paint it in stretches (navfx.css clips the gradient to the letters)
-        // the wordmark stays one ink, what most of it has (Julian, 2026-11-16: split letters looked broken on a phone)
-        const mixed = el.matches(".links a") && inks.includes("w") && inks.includes("b");
-        el.toggleAttribute("data-inkmix", mixed);
-        if (mixed) {
-          const row = (s: string) => `linear-gradient(90deg,${[...s].map((ch, k) => `${ch === "w" ? "#fff" : "#000"} ${((k / n) * 100).toFixed(1)}% ${(((k + 1) / n) * 100).toFixed(1)}%`).join(",")})`;
-          // one layer when both halves agree, else the upper half's over the lower half's
-          el.style.setProperty("--nav-mix", ra === rb ? row(ra) : `${row(ra)} 0 0/100% 50% no-repeat,${row(rb)} 0 100%/100% 50% no-repeat`);
-        } else el.style.removeProperty("--nav-mix");
+        votes.w += inks.split("w").length - 1;
+        votes.n += 2 * n;
+        votes.els.push(el);
+      }
+      if (votes.n) {
+        // the bar keeps the ink it has until the other one clearly leads (60% of the stretches), so it does not flip back and forth on a busy photo
+        const was = bar.getAttribute("data-ink"), share = votes.w / votes.n;
+        const ink = was === "w" ? (share >= 0.4 ? "w" : "b") : was === "b" ? (share <= 0.6 ? "b" : "w") : share >= 0.5 ? "w" : "b";
+        bar.setAttribute("data-ink", ink);
+        for (const el of votes.els) {
+          if (el.dataset.ink === ink) continue;
+          el.dataset.ink = ink;
+          el.style.setProperty("--nav-ink", ink === "w" ? "#fff" : "#000"); // navfx.css fades the colour
+        }
       }
     };
     if (/[?&]navdbg/.test(location.search)) (window as unknown as { __navink: () => unknown[] }).__navink = () => ((dbg = []), paint(), [dbg, (dbg = null)][0] as unknown[]);

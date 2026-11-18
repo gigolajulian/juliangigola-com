@@ -6,7 +6,7 @@ import { DEPOSIT } from "@/lib/booking/paid";
 
 /** A photo with its caption: `r` is height / width. */
 export type MtFrame = { src: string; name: string; meta: string; slug: string; r: number };
-export type MtFilm = { id: string; title: string; kind: string; client: string; poster: string | null; href: string; preview?: string };
+export type MtFilm = { id: string; title: string; kind: string; client: string; poster: string | null; href: string; preview?: string; file?: string };
 /** A count as two digits: 01, 02. */
 export const pad = (n: number) => String(n).padStart(2, "0");
 
@@ -29,6 +29,9 @@ export const COVER_PRESS: Partial<Record<string, string>> = {
 };
 /* Four films on the home (Julian, 2026-11-14): Purgation, Pear VC, Wonderland and Dide O Del stay on /portfolio/video.
    Matched to content/site.json by title; kind is this screen's label. */
+/* Films the site hosts itself (public/films, 1080p, no sound, under the host's 25 MB a file): Vimeo refused its player (401) and could not
+   be preloaded (Julian sent the files, 2026-11-17). The home plays these; the link still opens the film's page. */
+export const FILM_FILES: Record<string, string> = { "Director's Reel": "/films/directors-reel.mp4", "Ladera Granola": "/films/ladera-granola.mp4" };
 export const FILM_PICKS: [title: string, kind: string][] = [
   ["Director's Reel", "Reel"],
   ["Clean", "Music video"],

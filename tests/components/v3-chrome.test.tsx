@@ -4,7 +4,7 @@ import { CoverNav, MotionGate, NAV, V3Foot, V3Footer, V3Header } from "@/compone
 
 describe("chrome", () => {
   it("NAV lists the four pages", () => {
-    expect(NAV.map((n) => n.href)).toEqual(["/portfolio", "/book", "/about", "/contact/form"]);
+    expect(NAV.map((n) => n.href)).toEqual(["/portfolio", "/about", "/contact/form", "/book"]);
   });
 
   it("MotionGate shows the fallback without data-v3motion", () => {
