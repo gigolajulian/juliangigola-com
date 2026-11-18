@@ -268,6 +268,11 @@ export function PageFly() {
         const cover = !f.photo || photo(hi) === f.photo;
         if (cover) {
           named(hero);
+          // Edge to edge: the long tail of the drawer curve left bars at the sides while it crept the last few px.
+          if (hero.closest(".pj-hero.bleed") && matchMedia("(min-width:901px)").matches) {
+            document.documentElement.dataset.flyWide = "";
+            undo.push(() => delete document.documentElement.dataset.flyWide);
+          }
           /* The hero's own file is rarely here yet. Until it is, the frame shows the picture already on screen,
              at the hero's crop, so what lands is what stays: the tile's tighter crop stretched into the frame
              stepped out when the file arrived. Left in place; the file loads over the same picture. */
