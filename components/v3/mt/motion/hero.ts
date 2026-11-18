@@ -222,20 +222,9 @@ export const heroDrivers: Driver[] = [
       if (LEFT) document.documentElement.setAttribute("data-mtleft", "");
       // The idle wall turns a card over to its next photo (hero.css). The value is the duration: hero.tsx reads it for the caption. `?mtflip=0` brings the hard cut back.
       const flip = /[?&]mtflip=0/.test(location.search) ? 0 : FLIP;
-      // The photo under the mouse sits a little larger in its frame and drifts against the pointer (hero.css). --hx / --hy are where the pointer is on the card, -1 to 1. `?mthover=0` turns it off.
-      const wall = /[?&]mthover=0/.test(location.search) ? null : el.querySelector<HTMLElement>(".mt-wall");
-      const shift = (e: PointerEvent) => {
-        const ph = e.pointerType === "mouse" ? (e.target as Element).closest("figure")?.querySelector<HTMLElement>(".ph") : null;
-        if (!ph) return;
-        const r = ph.getBoundingClientRect();
-        ph.style.setProperty("--hx", (clamp((e.clientX - r.left) / r.width) * 2 - 1).toFixed(3));
-        ph.style.setProperty("--hy", (clamp((e.clientY - r.top) / r.height) * 2 - 1).toFixed(3));
-      };
+      // A card the pointer rests on lifts toward the viewer (hero.css, all CSS). `?mthover=0` turns it off.
       const ac = new AbortController();
-      if (wall) {
-        document.documentElement.setAttribute("data-mt-shift", "");
-        wall.addEventListener("pointermove", shift, { passive: true, signal: ac.signal });
-      }
+      if (!/[?&]mthover=0/.test(location.search)) document.documentElement.setAttribute("data-mt-lift", "");
       if (flip) {
         document.documentElement.setAttribute("data-mt-flip", String(flip));
         document.documentElement.style.setProperty("--mt-flip", flip + "ms");
@@ -249,7 +238,7 @@ export const heroDrivers: Driver[] = [
         ac.abort();
         document.documentElement.removeAttribute("data-mtleft");
         document.documentElement.removeAttribute("data-mt-flip");
-        document.documentElement.removeAttribute("data-mt-shift");
+        document.documentElement.removeAttribute("data-mt-lift");
         document.documentElement.style.removeProperty("--mt-flip");
         document.documentElement.removeAttribute("data-mt-pasthero");
         clearTimeout(due);
