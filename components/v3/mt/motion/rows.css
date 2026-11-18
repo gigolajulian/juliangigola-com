@@ -87,7 +87,8 @@ html[data-mt-held] .mt-motion .mt-film iframe[data-big]{scale:calc(.6 * var(--z,
 html[data-mt-held] .mt-motion .mt-film iframe:not([data-big]){scale:calc(1.2 * var(--z,1))}
 html[data-mt-held] .mt-motion .mt-film iframe{translate:calc(-50% + (var(--z,1) - 1) * 50cqw) calc(-50% + (var(--z,1) - 1) * 50cqh)}
 html[data-mt-held] .mt-motion .mt-film:focus-visible{outline:0}
-html[data-mt-held] .mt-motion .mt-film:focus-visible::after{content:"";position:absolute;inset:3px;z-index:1;border:1px solid var(--accent);pointer-events:none}
+/* the focus mark on a full-screen film: white, 2px, well inside the edges (audit 2026-11-18: 1px accent at 3px was too faint) */
+html[data-mt-held] .mt-motion .mt-film:focus-visible::after{content:"";position:absolute;inset:8px;z-index:1;border:2px solid var(--dark-ink);pointer-events:none}
 /* the words sit on the film: a soft ground under them, top and bottom */
 html[data-mt-held] .mt-motion .mt-stage::before{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;background:linear-gradient(rgb(0 0 0 / .6),transparent 30%,transparent 52%,rgb(0 0 0 / .62))}
 html[data-mt-held] .mt-motion :is(.mt-mohead,.mt-mofoot){position:absolute;z-index:4;left:calc(var(--fx) + 36 * var(--u));width:auto;margin:0;padding:0;pointer-events:none}
@@ -119,7 +120,7 @@ html[data-mt-motion]:not([data-mt-held]) .mt-covers .mt-row{padding-bottom:126px
    it, the same hand-over as hero into Commissions (flow.css). Motion's film settles from a slight push-in as it arrives. */
 html[data-mt-par][data-mt-held] .mt-covers .mt-rowhead>:is(h2,p){translate:0 calc((1 - var(--in,1)) * 8svh)}
 html[data-mt-par][data-mt-held] .mt-covers .mt-row{translate:0 calc((1 - var(--in,1)) * 18svh)}
-html[data-mt-par][data-mt-held] .mt-covers .mt-cvcap{opacity:.35}
+html[data-mt-par][data-mt-held] .mt-covers .mt-cvcap{opacity:.6}
 html[data-mt-par][data-mt-held] .mt-covers .mt-sleeve[data-on] .mt-cvcap{opacity:1}
 html[data-mt-par][data-mt-held] .mt-covers .mt-stage{transform:translate3d(0,calc(var(--out,0) * 22svh),0) scale(calc(1 - var(--out,0) * .05));transform-origin:50% 100%;opacity:calc(1 - var(--out,0) * .6)}
 html[data-mt-par][data-mt-held] .mt-motion{position:relative;z-index:2;background:var(--bg)}
