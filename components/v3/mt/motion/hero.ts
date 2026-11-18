@@ -94,8 +94,10 @@ function tone(st: Pick<State, "tw" | "phs">) {
     document.elementsFromPoint(r.left + r.width / 2, r.top + r.height / 2).find((n): n is HTMLImageElement => n instanceof HTMLImageElement && wall.contains(n) && n.complete && !!n.naturalWidth && (!n.classList.contains("mt-dev") || n.hasAttribute("data-on"))) ?? null;
   let wd: Element | null = null;
   let same: HTMLImageElement | null | undefined;
+  const ts: string[] = [];
   for (let n = 0; n < st.tw.length; n++) {
     const w = st.tw[n], r = rs[n];
+    ts[n] = "";
     if (!r.width) continue;
     const cy = r.top + r.height / 2;
     const word = w.parentElement?.classList.contains("wd") ? w.parentElement : null;
@@ -124,7 +126,19 @@ function tone(st: Pick<State, "tw" | "phs">) {
         t = sum / (c1 - c0 + 1) >= LIGHT ? "k" : "w";
       }
     }
-    if (w.dataset.tone !== t) w.dataset.tone = t;
+    ts[n] = t;
+  }
+  // one tone per word (Julian, 2026-11-18): a word takes what most of its letters sit on, so it turns whole and never splits black and white
+  const lines = new Map<Element, number[]>();
+  rs.forEach((r, n) => {
+    const k = st.tw[n].parentElement?.classList.contains("wd") ? st.tw[n].parentElement! : st.tw[n];
+    if (r.width) lines.set(k, [...(lines.get(k) ?? []), n]);
+  });
+  for (const ns of lines.values()) {
+    const count: Record<string, number> = {};
+    for (const n of ns) if (ts[n]) count[ts[n]] = (count[ts[n]] ?? 0) + 1;
+    const t = Object.keys(count).sort((a, b) => count[b] - count[a])[0] ?? "";
+    for (const n of ns) if (st.tw[n].dataset.tone !== t) st.tw[n].dataset.tone = t;
   }
 }
 
