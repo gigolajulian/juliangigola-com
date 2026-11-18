@@ -124,7 +124,7 @@ export function MtFilms({ films }: { films: MtFilm[] }) {
         <div className="mt-row" ref={row} role="group" tabIndex={0} aria-label="Films">
           <div className="mt-track">
             {films.map((f, i) => (
-              <Link key={f.id} href={f.href} className="mt-item mt-film" data-i={i} data-film={f.id} data-preview={f.preview} data-file={f.file} aria-label={`${f.title}, ${f.kind}`} style={FILM_DRESS[f.title]?.zoom ? ({ "--z": FILM_DRESS[f.title]?.zoom } as React.CSSProperties) : undefined}>
+              <Link key={f.id} href={f.href} className="mt-item mt-film" tabIndex={i === cur ? 0 : -1 /* only the film on screen is in the Tab order: the others lie under it */} data-i={i} data-film={f.id} data-preview={f.preview} data-file={f.file} aria-label={`${f.title}, ${f.kind}`} style={FILM_DRESS[f.title]?.zoom ? ({ "--z": FILM_DRESS[f.title]?.zoom } as React.CSSProperties) : undefined}>
                 {f.poster ? <Image src={f.poster} alt="" fill sizes="(max-width: 599px) 92vw, 100vw" /> : null}
               </Link>
             ))}
