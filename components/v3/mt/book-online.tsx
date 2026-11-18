@@ -84,7 +84,7 @@ export function MtBookOnline({ open, onOpen, onClose, quotePhoto, onRowPick }: {
     onOpen(BOOK_ROWS[i].key);
   };
   return (
-    <section className="mt-book" aria-label="Book online" data-mt="book" data-on={r.key} data-open={open ? "" : undefined} ref={sec}>
+    <section id="sessions" className="mt-book" aria-label="Book online" data-mt="book" data-on={r.key} data-open={open ? "" : undefined} ref={sec}>
       <div className="mt-frame">
         <h2 className="mt-bq-h">Sessions <span className="lbl mute">Book online</span></h2>
         <div className="mt-book-col">
@@ -126,7 +126,7 @@ export function MtBookOnline({ open, onOpen, onClose, quotePhoto, onRowPick }: {
                 {next ? <p className="lbl mt-next"><span className="mute">Next open</span> {next}</p> : null}
                 <Link className="mt-link" href="/book">All sessions</Link>
               </div>
-              <p className="lbl mute mt-dep">{r.price.split(" ")[0]} secures your date and goes toward your balance.</p>
+              <p className="lbl mute mt-dep">{r.dep} deposit secures your date and goes toward your balance.</p>
             </>
           )}
         </div>

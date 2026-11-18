@@ -13,6 +13,7 @@ import { MtFoot } from "./foot";
 import { InquiryCard } from "./inquiry-card";
 import { MtIntro } from "./intro";
 import { MtMotionLayer } from "./motion";
+import { glideTo } from "@/components/v3/smooth-scroll";
 
 /* v4 homepage (`?mtscroll=1`, SPEC-home-scroll.md): the screens at their resting
    state, with MtIntro and MtMotionLayer on top. Motion hooks: MOTION-HOOKS.md. */
@@ -27,6 +28,41 @@ export function MtHome({ data }: { data: MtData }) {
   const keep = () => (opener.current = document.activeElement as HTMLElement | null);
   const cards = React.useMemo<Cards>(() => ({ book: (k) => setBook(k), inquire: (from, opt) => (keep(), setInq({ from, opt })) }), []);
   const back = () => opener.current?.focus({ preventScroll: true });
+  // Anchors (/sessions 308s to /#sessions; #about and #contact are linkable too): the screens take their heights after the browser's own anchor jump, so land again once they have.
+  // #contact is the footer, and arriving there opens the inquiry card its "Contact me" opens (Julian, 2026-11-18); closing hands focus to that button.
+  React.useEffect(() => {
+    const target = () => (location.hash.length > 1 ? document.getElementById(location.hash.slice(1)) : null);
+    const land = () => {
+      const el = target();
+      if (el) scrollTo({ top: scrollY + el.getBoundingClientRect().top - (parseFloat(getComputedStyle(el).scrollMarginTop) || 0) });
+      return el;
+    };
+    const card = (el: HTMLElement | null) => {
+      if (el?.id !== "contact") return;
+      opener.current = el.querySelector<HTMLElement>(".mt-ph-btn");
+      setInq({ from: "footer" });
+    };
+    const arrive = () => card(land());
+    // already on the home (Julian, 2026-11-18): a link to /#contact glides down to the footer, then opens the card.
+    // Taken at the click: by the time a hash change is heard the browser has jumped there.
+    const go = (e: MouseEvent) => {
+      const a = (e.target as Element).closest<HTMLAnchorElement>("a[href]");
+      const el = document.getElementById("contact");
+      if (!a || !el || e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || a.target === "_blank") return;
+      const u = new URL(a.href);
+      if (u.origin !== location.origin || u.pathname !== "/" || u.hash !== "#contact") return;
+      e.preventDefault();
+      e.stopPropagation();
+      if (location.hash !== "#contact") history.pushState(null, "", "/#contact");
+      glideTo(scrollY + el.getBoundingClientRect().top, () => card(el));
+    };
+    const t = setTimeout(arrive, 300);
+    if (document.readyState !== "complete") addEventListener("load", land, { once: true });
+    // a link to one of these from the home itself changes the hash without a load
+    addEventListener("hashchange", arrive);
+    document.addEventListener("click", go, true);
+    return () => (clearTimeout(t), removeEventListener("load", land), removeEventListener("hashchange", arrive), document.removeEventListener("click", go, true));
+  }, []);
   return (
     <CardsCtx.Provider value={cards}>
       <MtIntro extras={data.extras} />

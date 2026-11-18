@@ -64,7 +64,7 @@ export function MtFoot() {
   const year = new Date().getFullYear();
   const time = useLocalTime();
   return (
-    <footer className="mt-foot" data-mt="foot">
+    <footer id="contact" className="mt-foot" data-mt="foot">
       <div className="mt-stage">
         {/* one still behind the links, dimmed by the scrim (Julian picked this over the wall of frames, 2026-11-14).
             The next still sits under it unseen, so it is loaded by the time it shows. */}
