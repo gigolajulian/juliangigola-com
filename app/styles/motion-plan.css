@@ -118,9 +118,22 @@
     object-fit: cover;
   }
   /* The hero is on top from the first frame, held as the grid held the photo, and eases flat as it grows:
-     one picture the whole way. The photo left behind only shows if the hero has nothing painted yet. */
+     one picture the whole way, at rest the moment the frame lands (a settle after landing read as moving in
+     place). The photo left behind only shows if the hero has nothing painted yet. */
   :root[data-fly]::view-transition-new(mp-fly) {
-    animation: mp-zoom 900ms linear both;
+    animation: mp-zoom 560ms var(--ease-drawer) both;
+  }
+  /* A cover that lands edge to edge (`data-fly-wide`): its sides leave the screen, so they need not slow down
+     to meet it. The curve ends at half speed: the last 1% of the width takes about 10ms, where the drawer
+     curve took 160 and left a bar at each side. */
+  :root[data-fly-wide]::view-transition-group(mp-fly),
+  :root[data-fly-wide]::view-transition-new(mp-fly) {
+    animation-duration: 440ms;
+    animation-timing-function: cubic-bezier(0.3, 0.5, 0.6, 0.8);
+  }
+  :root[data-fly-wide]::view-transition-image-pair(mp-fly) {
+    border-radius: 0;
+    animation-duration: 440ms;
   }
   /* Not the photo the page opens on, and not on screen there: it is the last to go, where it was. */
   :root[data-fly="away"]::view-transition-group(mp-fly) {
@@ -144,11 +157,8 @@
   }
 }
 @keyframes mp-out { to { opacity: 0; } }
-/* The settle: the frame lands at 560 and the picture inside is still a touch large, then comes to rest. */
 @keyframes mp-zoom {
-  from { scale: var(--fly-z, 1); translate: var(--fly-t, 0 0); animation-timing-function: var(--ease-drawer); }
-  60% { scale: 1.04; translate: 0 0; animation-timing-function: var(--ease-out-strong); }
-  to { scale: 1; }
+  from { scale: var(--fly-z, 1); translate: var(--fly-t, 0 0); }
 }
 @keyframes mp-weight {
   35% { filter: drop-shadow(0 28px 36px rgb(0 0 0 / 0.3)); }

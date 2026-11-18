@@ -60,6 +60,8 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .a-cover .nav a{color:var(--ink);cursor:pointer}
 @media (hover:hover){.v3 .a-cover .nav a:hover{color:var(--accent)}}
 .v3 .nav,.v3 .site-hdr .links{align-items:center}
+/* a link is one line: "Book a session" broke in two in the cover's nav on a phone (QA, 390 wide) */
+.v3 :is(.nav,.site-hdr .links) a{white-space:nowrap}
 .v3 .tbtn{position:relative;display:grid;place-items:center;width:32px;height:32px;margin-left:6px;padding:0;background:none;border:0;color:var(--ink);cursor:pointer}
 .v3 .tbtn::before{content:"";position:absolute;left:-17px;top:7px;bottom:7px;width:1px;background:currentColor;opacity:.3}
 .v3 .tbtn svg{transition:transform .5s cubic-bezier(.65,0,.35,1)}
@@ -683,6 +685,8 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 @media (pointer:coarse){.v3 .tbtn{width:44px;height:44px}.v3 .menu-btn{min-height:44px}}
 /* The header's wordmark and links clear a notch on a phone on its side. */
 .v3 .site-hdr{padding-top:max(14px,env(safe-area-inset-top,0px))}
+/* Large displays: the bar a step larger (Julian, 2026-11-17). */
+@media (min-width:1920px){.v3 .site-hdr{padding-block:18px}.v3 .site-wm{font-size:24px}.v3 .site-hdr .links{gap:36px}.v3 .site-hdr .links a{font-size:13px}}
 /* A slot's dark and light frame (components/v3/duo.tsx): the theme hides one. */
 :root[data-theme="light"] .v3 .v3d{display:none}
 :root:not([data-theme="light"]) .v3 .v3l{display:none}
@@ -794,7 +798,6 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
   .v3 .a-cover .right>.lbl .ticks button{width:18px;height:24px}
   .v3 .a-cover .right>.lbl .ticks button::after{left:2px;right:2px}
 }
-@media (pointer:fine) and (max-width:420px){.v3 .a-cover .nav{gap:16px}}
 .v3 .wsearch:has(input:focus-visible){outline:1px solid var(--accent);outline-offset:4px}
 .v3 .tbtn:focus-visible{outline-color:var(--accent)}
 /* Narrow phones: the calendar's gaps cost the day cells their 44px. */
@@ -1655,7 +1658,8 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 
 /* Audit v3.0.92: under 350px the cover's words clipped; the Menu takes their place. */
 .v3 .a-cover .cover-burger{display:none}
-@media (max-width:349.98px){.v3 .a-cover .nav>a,.v3 .a-cover .nav>.tbtn{display:none}.v3 .a-cover .cover-burger{display:block}}
+/* under 480px the four links no longer fit on one line ("Book a session" is longer than "Sessions" was: "Portfolio" ran off the left at 390, QA): the menu button */
+@media (max-width:479.98px){.v3 .a-cover .nav>a,.v3 .a-cover .nav>.tbtn{display:none}.v3 .a-cover .cover-burger{display:block}}
 /* Opened from the cover, the bar's close button shows over the scroll-tied fade, which writes inline opacity. */
 .v3 .site-hdr.menu-on{opacity:1!important;transform:none!important}
 /* Julian: two lines at 320, the role on one and the place under it. */

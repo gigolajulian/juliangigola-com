@@ -189,12 +189,13 @@ function films(): Driver {
          then paused so they are loaded when their turn comes (Julian, 2026-11-14). The poster stays on top
          until the player says it plays (same wait as video.tsx Loop). Players only ever start while the
          page rests, the current film's first, the others one at a time. */
-      type Pv = { f: HTMLIFrameElement; yt: boolean; played: boolean; at: number; t: number };
+      type Pv = { f: HTMLIFrameElement | HTMLVideoElement; yt: boolean; played: boolean; at: number; t: number };
+      const win = (v: Pv) => (v.f instanceof HTMLIFrameElement ? v.f.contentWindow : null);
       const pool = new Map<number, Pv>();
       let pvT = 0, seen = false, movedAt = 0;
       addEventListener("scroll", () => (movedAt = performance.now()), { passive: true, signal: ac.signal });
       const say = (v: Pv, yt: string, vimeo: string) =>
-        v.f.contentWindow?.postMessage(JSON.stringify(v.yt ? { event: "command", func: yt, args: [] } : { method: vimeo }), "*");
+        v.f instanceof HTMLVideoElement ? void (vimeo === "play" ? v.f.play().catch(() => {}) : v.f.pause()) : v.f.contentWindow?.postMessage(JSON.stringify(v.yt ? { event: "command", func: yt, args: [] } : { method: vimeo }), "*");
       const kill = (i: number) => {
         const v = pool.get(i);
         if (!v) return;
@@ -208,10 +209,27 @@ function films(): Driver {
       };
       const mount = (i: number) => {
         const film = items[i], src = film.dataset.preview!;
+        /* The site's own file (data.ts FILM_FILES): a plain video, no player to wait for. It says "playing" itself. */
+        if (film.dataset.file) {
+          const f = document.createElement("video");
+          const v: Pv = { f, yt: false, played: false, at: performance.now(), t: 0 };
+          Object.assign(f, { muted: true, loop: true, playsInline: true, autoplay: true, preload: "auto", tabIndex: -1, src: film.dataset.file });
+          f.setAttribute("aria-hidden", "true");
+          f.addEventListener("playing", () => {
+            v.played = true;
+            if (i !== cur) f.pause();
+            else f.setAttribute("data-ready", "");
+          });
+          film.append(f);
+          pool.set(i, v);
+          return;
+        }
         const yt = src.includes("youtube");
         const f = document.createElement("iframe");
         const v: Pv = { f, yt, played: false, at: performance.now(), t: 0 };
         f.src = src + (yt ? "&enablejsapi=1" : "");
+        // YouTube picks its quality from the player's size and ignores a quality setting (720p at 1440 wide, measured): rows.css draws it at twice the size, scaled back
+        if (yt) f.setAttribute("data-big", "");
         f.allow = "autoplay";
         f.tabIndex = -1;
         f.setAttribute("aria-hidden", "true");
@@ -225,11 +243,11 @@ function films(): Driver {
       };
       const wants = (i: number) => i >= 0 && i < n && !!items[i].dataset.preview && !pool.has(i);
       const fill = () => {
-        // a player takes about 300ms of the graphics thread to start: never start one mid-scroll. "Resting" is 600ms
-        // with no scroll at all (between two wheel notches the page is still for a moment).
-        if (performance.now() - movedAt < 600) return void (pvT = window.setTimeout(fill, 200));
         const next = [cur, cur + 1, cur - 1].find(wants);
         if (next === undefined) return;
+        // a player takes about 300ms of the graphics thread to start: never start one mid-scroll. "Resting" is 600ms
+        // with no scroll at all (between two wheel notches the page is still for a moment). The site's own file costs nothing: at once.
+        if (!items[next].dataset.file && performance.now() - movedAt < 600) return void (pvT = window.setTimeout(fill, 200));
         // a neighbour waits until every player already here plays (or has had 6s: a blocked one never will)
         const busy = [...pool.values()].some((v) => !v.played && performance.now() - v.at < 6000);
         if (next !== cur && busy) return void (pvT = window.setTimeout(fill, 400));
@@ -247,23 +265,23 @@ function films(): Driver {
             if (v.played) say(v, "pauseVideo", "pause");
           } else if (v.played) say(v, "playVideo", "play");
         }
-        pvT = window.setTimeout(fill, 300);
+        pvT = window.setTimeout(fill, wants(cur) && items[cur].dataset.file ? 0 : 300);
       };
       addEventListener("message", (e) => {
-        const hit = [...pool].find(([, v]) => v.f.contentWindow === e.source);
+        const hit = [...pool].find(([, v]) => win(v) === e.source);
         if (!hit) return;
         const [i, v] = hit;
         let m;
         try { m = typeof e.data === "string" ? JSON.parse(e.data) : e.data; } catch { return; }
         // Vimeo: the poster lifts only when the player says frames are moving
-        if (m?.event === "ready") return void vimeoListen(v.f.contentWindow);
+        if (m?.event === "ready") return void vimeoListen(win(v));
         const state = m?.event === "onStateChange" ? m.info : m?.event === "infoDelivery" ? m.info?.playerState : undefined;
         const plays = vimeoPlays(m) || state === 1;
         if (!plays && typeof state !== "number") return;
         if (plays) {
           const first = !v.played;
           v.played = true;
-          if (state === 1) captionsOff(v.f.contentWindow);
+          if (state === 1) captionsOff(win(v));
           if (i !== cur) return void say(v, "pauseVideo", "pause");
           if (v.f.hasAttribute("data-ready") || v.t) return;
           // YouTube draws its own title and controls for a moment after a first start; a loaded one resumes clean
@@ -274,10 +292,11 @@ function films(): Driver {
           v.f.removeAttribute("data-ready");
         }
       }, opts);
+      // a screen early, so the first film is already playing when the section arrives (Julian, 2026-11-17: play as soon as possible)
       const io = new IntersectionObserver(([e]) => {
         seen = e.isIntersecting;
         preview();
-      });
+      }, { rootMargin: "100% 0px" });
       io.observe(el);
 
       // rows.tsx names the current film; its preview follows and the title line rises.

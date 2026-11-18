@@ -32,12 +32,13 @@ export function MtHome({ data }: { data: MtData }) {
       <MtIntro extras={data.extras} />
       <section className="v3 v3home mt" data-cards={inq ? "open" : undefined}>
         <MtHero frames={data.hero} extras={data.extras} />
-        <MtCommissions frames={data.comm} />
-        <MtCovers />
+        {/* order (Julian, 2026-11-17): Motion, Cover art, About, Sessions, By quote, then Commissions */}
         <MtFilms films={data.films} />
+        <MtCovers />
+        <MtAbout does={data.does} />
         <MtBookOnline open={book} onOpen={setBook} onClose={() => setBook(null)} quotePhoto={quotePhoto} onRowPick={() => setQuotePhoto(null)} />
         <MtByQuote stills={data.stills} reply={data.reply} onOptionPick={setQuotePhoto} />
-        <MtAbout does={data.does} />
+        <MtCommissions frames={data.comm} />
         <MtFoot />
       </section>
       <MtMotionLayer />

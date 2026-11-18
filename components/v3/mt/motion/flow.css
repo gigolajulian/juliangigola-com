@@ -13,6 +13,8 @@ html[data-mt-held] .mt-about .mt-stage {
 }
 html[data-mt-held] .mt-about .mt-frame, html[data-mt-held] .mt-about .mt-wordmark { opacity: clamp(0, calc(var(--o) * 2.5 - 1.5), 1); }
 html[data-mt-held] .mt-foot { position: relative; z-index: 2; background: var(--bg); }
+/* Sessions follows About now (Julian, 2026-11-17) and slides over it the same way: About's sinking name showed through the Sessions heading */
+html[data-mt-held] .mt-about + .mt-book { position: relative; z-index: 2; background: var(--bg); }
 
 /* Book online and By quote, desktop: the photo wipes up into its frame and settles, the column fades in behind it */
 html[data-mt-held] :is(.mt-book, .mt-quote) .mt-photo { clip-path: inset(calc((1 - clamp(0, calc(var(--in, 1) * 1.7 - .15), 1)) * 100%) 0 0 0); }

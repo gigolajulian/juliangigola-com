@@ -133,6 +133,10 @@ export function PageFly() {
           rs.setProperty("--fly-t", z?.translate ?? "0px 0px");
           undo.push(() => (delete document.documentElement.dataset.fly, rs.removeProperty("--fly-z"), rs.removeProperty("--fly-t")));
           unnameSource = named(img.closest<HTMLElement>(".ph") ?? img);
+          // The press (below) is now the trip's: it runs on until the page it opens is in place.
+          const held = press;
+          press = null;
+          undo.push(() => held?.cancel());
           window.setTimeout(() => undo === mine && settle(), 4000);
         }
         /* The covers left behind get names before the page is snapshotted,
@@ -161,9 +165,30 @@ export function PageFly() {
       const slug = here.current.match(/^\/portfolio\/([^/]+)$/)?.[1];
       back.current = { t: Date.now(), hero: hero && img && r && onScreen(r) && slug ? { slug, r, src: img.currentSrc || img.src } : undefined };
     };
+    /* On trial: building the next page holds the screen for 150 to 250ms after the click, and nothing started in
+       the click can show until then. So the photo answers the press itself: it dips, then lifts, on the
+       compositor, and is still rising when the trip takes it over.
+       shortcut: mouse and pen only (a finger that starts a scroll would dip every cover), add touch if the trial goes live. */
+    let press: Animation | null = null;
+    const down = (e: PointerEvent) => {
+      if (e.button || e.pointerType === "touch" || !carried() || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      const ph = (e.target as Element).closest('.v3 a[href^="/portfolio/"]')?.querySelector<HTMLElement>(".ph");
+      press?.cancel();
+      press = ph?.animate({ scale: ["1", "0.975", "1.035"], offset: [0, 0.22, 1], easing: "cubic-bezier(.23,1,.32,1)" }, { duration: 560, fill: "forwards" }) ?? null;
+    };
+    // Let go without opening anything (a drag, a release off the photo): back to rest. A click has taken the press by then.
+    const up = () => window.setTimeout(() => (press?.cancel(), (press = null)), 0);
+    document.addEventListener("pointerdown", down, true);
+    document.addEventListener("pointerup", up, true);
+    document.addEventListener("pointercancel", up, true);
+    document.addEventListener("dragstart", up, true);
     document.addEventListener("click", click, true);
     window.addEventListener("popstate", pop, true);
     return () => {
+      document.removeEventListener("pointerdown", down, true);
+      document.removeEventListener("pointerup", up, true);
+      document.removeEventListener("pointercancel", up, true);
+      document.removeEventListener("dragstart", up, true);
       document.removeEventListener("click", click, true);
       window.removeEventListener("popstate", pop, true);
     };
@@ -243,6 +268,11 @@ export function PageFly() {
         const cover = !f.photo || photo(hi) === f.photo;
         if (cover) {
           named(hero);
+          // Edge to edge: the long tail of the drawer curve left bars at the sides while it crept the last few px.
+          if (hero.closest(".pj-hero.bleed") && matchMedia("(min-width:901px)").matches) {
+            document.documentElement.dataset.flyWide = "";
+            undo.push(() => delete document.documentElement.dataset.flyWide);
+          }
           /* The hero's own file is rarely here yet. Until it is, the frame shows the picture already on screen,
              at the hero's crop, so what lands is what stays: the tile's tighter crop stretched into the frame
              stepped out when the file arrived. Left in place; the file loads over the same picture. */

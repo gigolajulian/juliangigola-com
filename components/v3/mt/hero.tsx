@@ -16,7 +16,7 @@ import type { MtFrame } from "./data";
 const A = [0.12, 0, 0.2];
 const SIDES = [-2, -1, 3, 4];
 const TOPS = [100, 290, 180];
-const XR = [4, 5];
+const XR: number[] = []; // rows five and six are off the wall (Julian, 2026-11-17: one less row, twice); their photos turn up in the idle swaps
 const mod3 = (c: number) => ((c % 3) + 3) % 3;
 
 const SIZES = "(max-width: 599px) 50vw, (min-width: 1920px) 18vw, 30vw";
@@ -61,7 +61,7 @@ function useIdleWall(frames: MtFrame[], extras: MtFrame[]) {
   const root = React.useRef<HTMLElement>(null);
   const [now, setNow] = React.useState(frames);
   const [was, setWas] = React.useState<Record<number, MtFrame>>({});
-  const live = React.useRef({ now, was, pool: extras.slice(30) }); // the first 30 extras are on the wall (side columns, rows five and six)
+  const live = React.useRef({ now, was, pool: extras.slice(16) }); // the first 16 extras are on the wall (side columns); the rest come in by the idle swap
   React.useEffect(() => void Object.assign(live.current, { now, was }));
   React.useEffect(() => {
     if (/[?&]idle=0/.test(location.search) || matches("calm")) return;
