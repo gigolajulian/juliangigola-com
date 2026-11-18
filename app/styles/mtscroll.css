@@ -419,7 +419,7 @@
   [data-mtscroll] .mt-col figcaption{padding-top:2px;gap:0;font-size:11px;line-height:1.05}
   /* Julian's arrange (2026-11-18, iPhone 390x664): name bigger and lower, line and buttons lower, a 39% ground back under them. The three share the safe-area lift, so they never close up on each other. */
   [data-mtscroll] .mt-name h1{font-size:min(68px,calc(65.5 * var(--pu)));line-height:.9;left:8px;bottom:calc(98px + env(safe-area-inset-bottom))}
-  [data-mtscroll] .mt-cap{font-size:9.8px!important;left:19px;bottom:calc(60px + env(safe-area-inset-bottom))}
+  [data-mtscroll] .mt-cap{font-size:min(12px,calc(9.8 * var(--pu)))!important;left:calc(16 * var(--pu));bottom:calc(60px + env(safe-area-inset-bottom));letter-spacing:.09em}
   [data-mtscroll] .mt-ctas{bottom:calc(2px + env(safe-area-inset-bottom))}
   [data-mtscroll] .mt-hero .mt-scrim.mt-scrim{background:linear-gradient(to top,color-mix(in srgb,var(--dark-bg) 37%,transparent),color-mix(in srgb,var(--dark-bg) 34%,transparent) 30%,transparent)}
   /* dark only: on the light page it showed as a grey band between the photos */
