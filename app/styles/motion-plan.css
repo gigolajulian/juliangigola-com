@@ -94,22 +94,18 @@
   :root[data-mplan~="pages"]::view-transition-old(.mp-out) {
     animation: mp-recede var(--dur-small) var(--ease-out-strong) both;
   }
-  /* On trial (`?fly=a|b`, page-fly.tsx): the pressed photo and the hero it becomes are one named layer.
-     The photo left behind stays whole underneath and the hero comes up over it, so the picture is solid
-     for the whole trip. */
+  /* On trial (`?fly=b`, page-fly.tsx): the pressed photo and the frame it becomes are one named layer.
+     The photo left behind stays whole underneath and the new one comes up over it at once, before the two
+     crops part, so the picture is solid for the whole trip. It has weight: a shadow under it while it is
+     in the air, gone as it lands. */
   :root[data-fly]::view-transition-group(mp-fly) {
     z-index: 4;
-    overflow: hidden;
-    border-radius: 4px;
-    animation-duration: 600ms;
-    animation-timing-function: var(--ease-in-out-strong);
-  }
-  :root[data-fly="b"]::view-transition-group(mp-fly) {
-    animation-duration: 500ms;
+    animation-duration: 560ms;
     animation-timing-function: var(--ease-drawer);
   }
   :root[data-fly]::view-transition-image-pair(mp-fly) {
     isolation: auto;
+    animation: mp-weight 560ms var(--ease-drawer) both;
   }
   :root[data-fly]::view-transition-old(mp-fly),
   :root[data-fly]::view-transition-new(mp-fly) {
@@ -118,17 +114,24 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    border-radius: 4px;
   }
   :root[data-fly]::view-transition-new(mp-fly) {
-    animation: mp-in var(--dur-xs) linear both;
-  }
-  /* b moves from the first frame, so the hero is up before the two crops part. */
-  :root[data-fly="b"]::view-transition-new(mp-fly) {
-    animation-duration: var(--dur-2xs);
+    animation: mp-in var(--dur-2xs) linear both;
   }
   :root[data-fly-wait]::view-transition-new(mp-fly) {
     animation: none;
     opacity: 0;
+  }
+  /* Not the photo the page opens on, and not on screen there: it is the last to go, where it was. */
+  :root[data-fly="away"]::view-transition-group(mp-fly) {
+    animation: none;
+  }
+  :root[data-fly="away"]::view-transition-image-pair(mp-fly) {
+    animation: none;
+  }
+  :root[data-fly="away"]::view-transition-old(mp-fly) {
+    animation: mp-recede var(--dur-page) var(--ease-out-strong) both;
   }
   .v3 [data-flying] {
     background: transparent !important;
@@ -138,6 +141,10 @@
   }
 }
 @keyframes mp-out { to { opacity: 0; } }
+@keyframes mp-weight {
+  35% { filter: drop-shadow(0 28px 36px rgb(0 0 0 / 0.3)); }
+  0%, 100% { filter: drop-shadow(0 0 0 rgb(0 0 0 / 0)); }
+}
 @keyframes mp-in { from { opacity: 0; } }
 @keyframes mp-rise { from { transform: translateY(2.5vh); } }
 @keyframes mp-drop { from { transform: translateY(-2.5vh); } }

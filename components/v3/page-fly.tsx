@@ -34,19 +34,23 @@ const zoomOf = (img: Element | null | undefined): Zoom | undefined => {
   return s && s.scale !== "none" ? { scale: s.scale, translate: s.translate === "none" ? FLAT.translate : s.translate, transform: s.transform } : undefined;
 };
 
-/* On trial (`?fly=a`, `?fly=b`, `?fly=0` to leave; kept for the tab): the browser carries the photo.
+/* On trial (`?fly=b`, `?fly=0` to leave; kept for the tab): the browser carries the photo.
    The copy below is a fresh <img>, which decodes off the frame it is added in: the photo was missing for the
    frames that took (about 80ms on production). Decoding it first (`decoding = "sync"`) held the trip 150ms.
    The pressed frame and the next page's hero share one view-transition-name, so the photo is its own
    layer from the trip's first frame: it never fades out with the page it left, and the compositor moves
-   it, not layout. a: the live trip (move, 600). b: the same on `drawer` in 500, which sets off at once
-   (motion-plan.css). */
+   it, not layout. It travels on `drawer`, which sets off at once, with a shadow under it while it is in the
+   air (motion-plan.css).
+   A photo only becomes the hero when it is the hero (Julian, 2026-11-17). Pressed on another frame of the
+   project, it recedes last, where it was, and the project rises in whole (`data-fly="away"`). Flying it
+   to its own frame down the page was tried: a wide set holds that frame at another shape, and the crop
+   stepped as it landed. */
 const NAME = "mp-fly";
 const carried = () => {
   try {
     const q = new URLSearchParams(location.search).get("fly");
     if (q === "0") sessionStorage.removeItem("jg-fly");
-    else if (q === "a" || q === "b") sessionStorage.setItem("jg-fly", q);
+    else if (q === "b") sessionStorage.setItem("jg-fly", q);
     return "startViewTransition" in document ? sessionStorage.getItem("jg-fly") : null;
   } catch {
     return null;
@@ -68,8 +72,10 @@ const named = (e: HTMLElement) => {
   return unname;
 };
 let unnameSource = () => {};
+/** Which photograph a file is, whatever size or loader served it: "iris/03". */
+const photo = (i: HTMLImageElement | null | undefined) => (i ? decodeURIComponent(i.currentSrc || i.src).match(/\/work\/([^/?]+\/\d+)/)?.[1] : undefined);
 
-type Fly = { to: string; t: number; r: DOMRect; src: string; z?: Zoom; vt?: boolean };
+type Fly = { to: string; t: number; r: DOMRect; src: string; z?: Zoom; vt?: boolean; photo?: string };
 type Back = { t: number; hero?: { slug: string; r: DOMRect; src: string } };
 
 function shown(i: HTMLImageElement) {
@@ -104,6 +110,7 @@ export function PageFly() {
           settle();
           const mine = undo;
           fly.current.vt = true;
+          fly.current.photo = photo(img);
           document.documentElement.dataset.fly = mode;
           undo.push(() => (delete document.documentElement.dataset.fly, delete document.documentElement.dataset.flyWait));
           unnameSource = named(img.closest<HTMLElement>(".ph") ?? img);
@@ -213,12 +220,14 @@ export function PageFly() {
       if (f.vt && !n) {
         // The page left is already captured. A frame that outlives the trip (project to project) must not hold the name too: two of one name and the browser skips the trip.
         unnameSource();
-        named(hero);
-        // A hero still loading would come up blank over the photo: the photo left behind carries the whole trip instead.
         const hi = hero.querySelector("img");
-        if (!(hi?.complete && hi.naturalWidth)) {
-          document.documentElement.dataset.flyWait = "";
-        }
+        const cover = !f.photo || photo(hi) === f.photo;
+        if (cover) {
+          named(hero);
+          // A hero still loading would come up blank over the photo in the air: the photo left behind carries the whole trip instead.
+          if (!(hi?.complete && hi.naturalWidth)) document.documentElement.dataset.flyWait = "";
+        } else document.documentElement.dataset.fly = "away";
+        if (!cover) hero.animate({ opacity: [0, 1], transform: ["translateY(16px)", "none"] }, { duration: 600, delay: 200, easing: OUT, fill: "backwards" });
         const trip = (document as Document & { activeViewTransition?: { finished: Promise<void> } | null }).activeViewTransition;
         if (trip) trip.finished.finally(settle);
         else window.setTimeout(settle, 1500);
