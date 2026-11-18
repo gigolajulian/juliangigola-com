@@ -247,12 +247,6 @@ export function PageFly() {
              at the hero's crop, so what lands is what stays: the tile's tighter crop stretched into the frame
              stepped out when the file arrived. Left in place; the file loads over the same picture. */
           hero.style.background = `url("${f.src}") center / cover no-repeat`;
-          // A horizontal cover carries its title; the flying photo hides it, so it rises as the photo comes to rest.
-          if (matchMedia("(min-width:901px)").matches)
-            hero.closest(".pj-hero.bleed")?.querySelector(".pg-t")?.animate(
-              { translate: ["0 100%", "0 0"], clipPath: ["inset(-.2em -1em 100% -1em)", "inset(-.2em -1em -.2em -1em)"] },
-              { duration: 500, delay: 760, easing: "cubic-bezier(.16,1,.3,1)", fill: "backwards" },
-            );
         } else document.documentElement.dataset.fly = "away";
         if (!cover) slideUp(hero, 0);
         const trip = (document as Document & { activeViewTransition?: { finished: Promise<void> } | null }).activeViewTransition;
