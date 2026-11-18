@@ -238,7 +238,7 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .site-hdr.show{transform:none;opacity:1;pointer-events:auto}
 .v3 .site-wm{font-size:20px;letter-spacing:-.045em;text-transform:none}
 .v3 .site-hdr .links{display:flex;gap:28px}
-@media (max-width:479.98px){.v3 .site-hdr .links a{display:none}
+@media (max-width:479.98px),(pointer:coarse) and (max-width:639.98px){.v3 .site-hdr .links a{display:none}
 .v3 .site-hdr .tbtn::before{display:none}}
 .v3 .door{justify-content:flex-start;padding-top:clamp(180px,24vw,380px)}
 .v3 .door p{text-wrap:pretty}
@@ -258,7 +258,7 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .pg-t{font:900 clamp(3rem,calc(8*var(--v3u)),7rem)/.86 var(--display);letter-spacing:-.05em;margin:0}
 .v3 .site-hdr .links a[aria-current="page"]{color:var(--accent)}
 .v3 .menu-btn{display:none;background:none;border:0;color:var(--ink);font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;padding:10px 0;cursor:pointer}
-@media (max-width:479.98px){.v3 .menu-btn{display:block}}
+@media (max-width:479.98px),(pointer:coarse) and (max-width:639.98px){.v3 .menu-btn{display:block}}
 .v3 .pmenu{position:fixed;inset:0;z-index:29;background:var(--bg);display:flex;flex-direction:column;justify-content:center;gap:6px;padding:72px var(--gr) 40px var(--g)}
 .v3 .pmenu a{font:900 3rem/1 var(--display);letter-spacing:-.05em;padding:6px 0}
 .v3 .pmenu .lbl{margin-top:28px}
@@ -269,7 +269,7 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .burger-btn i:first-child{top:18px}.v3 .burger-btn i:last-child{top:25px}
 .v3 .burger-btn.open i:first-child{translate:0 3.5px;rotate:45deg}.v3 .burger-btn.open i:last-child{translate:0 -3.5px;rotate:-45deg}
 .v3 .pdim,.v3 .pwrap{display:none}
-@media (max-width:479.98px){.v3 .site-hdr .links.burger>.tbtn{display:none}
+@media (max-width:479.98px),(pointer:coarse) and (max-width:639.98px){.v3 .site-hdr .links.burger>.tbtn{display:none}
 .v3 .pwrap{display:block;position:fixed;inset:0;z-index:28;overflow:hidden;pointer-events:none}
 .v3 .pwrap>*{pointer-events:auto}
 .v3 .pdim{display:block;position:absolute;inset:0;z-index:0;background:oklch(0 0 0 / 45%);opacity:0;pointer-events:none;transition:opacity .3s ease}
@@ -283,7 +283,7 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .pmenu-foot .lbl{margin-top:0}
 /* The email is a link now: keep the label face, not the menu links'. */
 .v3 .pmenu-foot a.lbl{font:400 11px/1.2 var(--mono);letter-spacing:.14em;padding:0}}
-@media (min-width:480px){.v3 .pmenu.drawer{display:none}}
+@media (min-width:640px),(min-width:480px) and (not (pointer:coarse)){.v3 .pmenu.drawer{display:none}}
 @media (prefers-reduced-motion:reduce){.v3 .pmenu.drawer,.v3 .burger-btn i{transition:none}}
 /* One scrolling row at every width, a fade on the cut chip. */
 .v3 .chips{display:flex;flex-wrap:nowrap;gap:6px;padding:28px var(--gr) 0 var(--g);overflow-x:auto;scrollbar-width:none;-webkit-mask-image:linear-gradient(to right,#000 calc(100% - 48px),transparent);mask-image:linear-gradient(to right,#000 calc(100% - 48px),transparent)}
@@ -803,7 +803,7 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 /* Narrow phones: the calendar's gaps cost the day cells their 44px. */
 @media (pointer:coarse) and (max-width:360px){.v3 .cal{gap:0}}
 /* The 44px links above must not bring the header links back on a phone: Menu holds them. */
-@media (pointer:coarse) and (max-width:479.98px){.v3 .site-hdr .links a{display:none}}
+@media (pointer:coarse) and (max-width:639.98px){.v3 .site-hdr .links a{display:none}}
 /* Tablet widths: the kind tiles and the photo's name scale with the column,
    so "Something" and "Commissions" stay inside their borders (the master
    overflows here). */
@@ -1660,9 +1660,10 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .v3 .a-cover .cover-burger{display:none}
 /* under 480px the four links no longer fit on one line ("Book a session" is longer than "Sessions" was: "Portfolio" ran off the left at 390, QA): the menu button */
 @media (max-width:479.98px){.v3 .a-cover .nav>a,.v3 .a-cover .nav>.tbtn{display:none}.v3 .a-cover .cover-burger{display:block}}
-/* Every page's bar shows its four links from 480px (Julian, 2026-11-18; it kept the menu button until 700). Beside the name they need 580px at full size,
+/* Every page's bar shows its four links from 480px with a mouse (Julian, 2026-11-18; it kept the menu button until 700). A touch screen keeps the menu
+   button until 640px, where the links fit at full size: tighter than that they sat packed against the name (Julian, same day). Beside the name they need 580px at full size,
    so from 480 to 640 the bar is set tighter: smaller words, closer together, the gaps opening with the width. */
-@media (min-width:480px) and (max-width:639.98px){.v3 .site-hdr .site-wm{font-size:18px;flex:none}.v3 .site-hdr .links{gap:clamp(11px,calc(11px + (100vw - 480px) * .1),28px);padding-left:8px}.v3 .site-hdr .links a{font-size:10px;letter-spacing:.08em}.v3 .site-hdr .links>.tbtn{margin-left:0}.v3 .site-hdr .tbtn::before{display:none}}
+@media (min-width:480px) and (max-width:639.98px) and (not (pointer:coarse)){.v3 .site-hdr .site-wm{font-size:18px;flex:none}.v3 .site-hdr .links{gap:clamp(11px,calc(11px + (100vw - 480px) * .1),28px);padding-left:8px}.v3 .site-hdr .links a{font-size:10px;letter-spacing:.08em}.v3 .site-hdr .links>.tbtn{margin-left:0}.v3 .site-hdr .tbtn::before{display:none}}
 /* Opened from the cover, the bar's close button shows over the scroll-tied fade, which writes inline opacity. */
 .v3 .site-hdr.menu-on{opacity:1!important;transform:none!important}
 /* Julian: two lines at 320, the role on one and the place under it. */
