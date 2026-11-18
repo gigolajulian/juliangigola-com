@@ -161,17 +161,33 @@ export function PageFly() {
     /* On trial: building the next page holds the screen for 150 to 250ms after the click, and nothing started in
        the click can show until then. So the photo answers the press itself: it dips, then lifts, on the
        compositor, and is still rising when the trip takes it over.
-       shortcut: mouse and pen only (a finger that starts a scroll would dip every cover), add touch if the trial goes live. */
+       A finger too (Julian, 2026-11-18). A scroll starts like a press, so under a finger the photo waits 90ms for the
+       browser to claim the gesture (pointercancel); a tap shorter than that starts as the finger lifts. */
     let press: Animation | null = null;
+    let wait = 0;
+    let begin: (() => void) | null = null;
     const down = (e: PointerEvent) => {
-      if (e.button || e.pointerType === "touch" || !carried() || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      if (e.button || !carried() || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
       // the next-project link at the foot of a project page holds its cover in .pj-nx or the full stage, whichever is showing
       const ph = [...((e.target as Element).closest('.v3 a[href^="/portfolio/"]')?.querySelectorAll<HTMLElement>(".ph, .pj-nx, .pj-stage") ?? [])].find((n) => n.offsetWidth);
       press?.cancel();
-      press = ph?.animate({ scale: ["1", "0.975", "1.035"], offset: [0, 0.22, 1], easing: "cubic-bezier(.23,1,.32,1)" }, { duration: 560, fill: "forwards" }) ?? null;
+      press = null;
+      window.clearTimeout(wait);
+      const start = () => ((begin = null), (press = ph?.animate({ scale: ["1", "0.975", "1.035"], offset: [0, 0.22, 1], easing: "cubic-bezier(.23,1,.32,1)" }, { duration: 560, fill: "forwards" }) ?? null));
+      if (e.pointerType !== "touch") return void start();
+      begin = start;
+      wait = window.setTimeout(start, 90);
     };
-    // Let go without opening anything (a drag, a release off the photo): back to rest. A click has taken the press by then.
-    const up = () => window.setTimeout(() => (press?.cancel(), (press = null)), 0);
+    // Let go without opening anything (a drag, a release off the photo, a scroll): back to rest. A click has taken the press by then.
+    // A finger's click can come a task or more after its pointerup (iOS), so there the press holds 300ms for it.
+    const up = (e: Event) => {
+      window.clearTimeout(wait);
+      const tap = e.type === "pointerup" && (e as PointerEvent).pointerType === "touch";
+      if (tap) begin?.();
+      begin = null;
+      const mine = press;
+      window.setTimeout(() => press === mine && (press?.cancel(), (press = null)), tap ? 300 : 0);
+    };
     document.addEventListener("pointerdown", down, true);
     document.addEventListener("pointerup", up, true);
     document.addEventListener("pointercancel", up, true);
