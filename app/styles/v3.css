@@ -1707,6 +1707,22 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .v3 #p-project .pj-lead .pj-r{flex:0 0 auto;display:block;translate:none;aspect-ratio:var(--arn);width:auto;height:min(100cqh,calc(100cqw / var(--arn)))}
 .v3 #p-project .pj-lead:has(.pj-r + .pj-r) .pj-r{height:min(100cqh,calc((100cqw - var(--pj)) / 2 / var(--arn)))}
 .v3 #p-project .pj-lead .pj-r img{width:100%;height:100%;max-width:none;max-height:none;object-fit:cover}}
+/* A tall or narrow window (Julian, 2026-11-17): the big frame keeps its picture, up to 62vw, where it was cut
+   to 48vw. Under 5:4 one frame stands under the title, at the size the column gives it; the second is left out
+   there. A copy of it closing the sheet sat alone on the last row, and Julian cut it (2026-11-18). */
+@media (min-width:901px){.v3 #p-project .pj-hero:not(.two):not(.bleed) .pj-big{max-width:62vw}}
+/* A horizontal cover (Julian, 2026-11-18): the title where it always is, the line that was under it across
+   from it on the right, then the cover edge to edge, cut to what the screen has left under the bar. */
+@media (min-width:901px){.v3 #p-project .pj-hero.bleed{display:block;height:auto;min-height:0;padding:var(--pj) 0 0}
+.v3 #p-project .pj-hero.bleed .pj-top{padding:40px var(--gr) 32px var(--g)}
+.v3 #p-project .pj-hero.bleed .pj-row{flex-direction:row;justify-content:space-between;align-items:baseline;gap:32px}
+.v3 #p-project .pj-hero.bleed .pj-row .pg-t{margin-bottom:0}
+.v3 #p-project .pj-hero.bleed .pj-row .lbl{flex:none;margin:0;text-align:right}
+.v3 #p-project .pj-hero.bleed .pj-big{width:100%;max-width:none;height:auto;min-height:0;max-height:calc(100svh - 64px);margin:0}}
+.v3 .pj-ct.tall{display:none}
+@media (min-width:901px) and (max-aspect-ratio:5/4){.v3 #p-project .pj-lead .pj-r + .pj-r{display:none}
+.v3 .pj-ct:has(+ .pj-ct.tall){display:none}.v3 .pj-ct.tall{display:inline}
+.v3 #p-project .pj-lead:has(.pj-r + .pj-r) .pj-r{height:min(100cqh,calc(100cqw / var(--arn)))}}
 /* 701 to 900 (iPad, a narrow window): one column, the same margin and gap. The
    big frame no longer runs edge to edge over inset frames, and a mouse no longer
    gets the desktop's three-column hero squeezed into half the screen. */
