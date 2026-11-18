@@ -47,7 +47,8 @@ export function V3Service({ page, frames }: { page: BookingPage; frames: Frame[]
         </div>
         <div className="b-head seq-head" id="work">
           <h2>{page.gallery.label}</h2>
-          <Link className="btn" href={page.gallery.href}>See the gallery</Link>
+          {/* Headshots and Graduation show their whole gallery right here: the old address redirects back to this screen (next.config.ts), so a button would loop. */}
+          {!/#work$|^\/portfolio\/headshots$/.test(page.gallery.href) && <Link className="btn" href={page.gallery.href}>See the gallery</Link>}
         </div>
         <div className="a-seq sv-seq">
           {cols.map((c, k) => (
