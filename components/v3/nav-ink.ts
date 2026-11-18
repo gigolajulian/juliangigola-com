@@ -217,7 +217,7 @@ type Hit = { at?: (y: number) => RGB | null; unknown?: boolean };
 /** What shows at a point, under the header: the first photo, film or painted box from the top. */
 function under(x: number, y: number, hdr: HTMLElement, page: RGB, hit?: Hit, hw = 0, hh = 0): RGB {
   for (const el of hits(x, y)) {
-    if (hdr.contains(el) || el.closest("[aria-hidden].mt-dockname")) continue;
+    if (hdr.contains(el)) continue;
     if (el instanceof HTMLImageElement || el instanceof HTMLVideoElement) {
       const cs = getComputedStyle(el);
       if (cs.visibility === "hidden") continue;
@@ -296,7 +296,7 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
       // A section that is dark in both themes (the v4 footer sets its own --bg) under a light page: the bar takes
       // the dark ground there (navfx.css), or its light veil over it would be a mid grey nothing reads on.
       const [rootBg] = colour(getComputedStyle(root).getPropertyValue("--bg").trim());
-      const sec = document.elementsFromPoint(innerWidth / 2, bar.getBoundingClientRect().bottom - 1).find((el) => !bar.contains(el) && !el.closest(".mt-dockname"));
+      const sec = document.elementsFromPoint(innerWidth / 2, bar.getBoundingClientRect().bottom - 1).find((el) => !bar.contains(el));
       const [secBg] = sec ? colour(getComputedStyle(sec).getPropertyValue("--bg").trim()) : [rootBg];
       root.toggleAttribute("data-navdark", lum(rootBg) > 0.2 && lum(secBg) < 0.2);
       const [page] = colour(getComputedStyle(bar).getPropertyValue("--bg").trim());
