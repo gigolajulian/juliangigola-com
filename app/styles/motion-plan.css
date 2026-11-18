@@ -120,7 +120,7 @@
   /* The hero is on top from the first frame, held as the grid held the photo, and eases flat as it grows:
      one picture the whole way. The photo left behind only shows if the hero has nothing painted yet. */
   :root[data-fly]::view-transition-new(mp-fly) {
-    animation: mp-zoom 560ms var(--ease-drawer) both;
+    animation: mp-zoom 900ms linear both;
   }
   /* Not the photo the page opens on, and not on screen there: it is the last to go, where it was. */
   :root[data-fly="away"]::view-transition-group(mp-fly) {
@@ -144,7 +144,12 @@
   }
 }
 @keyframes mp-out { to { opacity: 0; } }
-@keyframes mp-zoom { from { scale: var(--fly-z, 1); translate: var(--fly-t, 0 0); } }
+/* The settle: the frame lands at 560 and the picture inside is still a touch large, then comes to rest. */
+@keyframes mp-zoom {
+  from { scale: var(--fly-z, 1); translate: var(--fly-t, 0 0); animation-timing-function: var(--ease-drawer); }
+  60% { scale: 1.04; translate: 0 0; animation-timing-function: var(--ease-out-strong); }
+  to { scale: 1; }
+}
 @keyframes mp-weight {
   35% { filter: drop-shadow(0 28px 36px rgb(0 0 0 / 0.3)); }
   0%, 100% { filter: drop-shadow(0 0 0 rgb(0 0 0 / 0)); }

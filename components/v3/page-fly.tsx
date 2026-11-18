@@ -75,6 +75,21 @@ let unnameSource = () => {};
 /** Which photograph a file is, whatever size or loader served it: "iris/03". */
 const photo = (i: HTMLImageElement | null | undefined) => (i ? decodeURIComponent(i.currentSrc || i.src).match(/\/work\/([^/?]+\/\d+)/)?.[1] : undefined);
 
+/** On trial: a frame's picture slides up from its own foot, behind the frame's edge, at full strength (Julian: no fade, slide from the bottom). */
+const slideUp = (e: HTMLElement, i: number) => {
+  const pic = e.querySelector("img");
+  if (!pic) return;
+  e.style.overflow = "clip";
+  pic.style.transform = "translateY(101%)";
+  const t0 = performance.now();
+  // Held below the frame until the picture is there to slide (1.5s at most): a file that landed mid-slide popped in.
+  Promise.race([pic.decode().catch(() => {}), new Promise((r) => window.setTimeout(r, 1500))]).then(() => {
+    pic.style.removeProperty("transform");
+    const delay = Math.max(0, 140 + i * 70 - (performance.now() - t0));
+    pic.animate({ transform: ["translateY(101%)", "none"] }, { duration: 700, delay, easing: "cubic-bezier(.32,.72,0,1)", fill: "backwards" }).finished.finally(() => e.style.removeProperty("overflow"));
+  });
+};
+
 type Fly = { to: string; t: number; r: DOMRect; src: string; z?: Zoom; vt?: boolean; photo?: string };
 type Back = { t: number; hero?: { slug: string; r: DOMRect; src: string } };
 
@@ -233,7 +248,7 @@ export function PageFly() {
              stepped out when the file arrived. Left in place; the file loads over the same picture. */
           hero.style.background = `url("${f.src}") center / cover no-repeat`;
         } else document.documentElement.dataset.fly = "away";
-        if (!cover) hero.animate({ opacity: [0, 1], transform: ["translateY(16px)", "none"] }, { duration: 600, delay: 200, easing: OUT, fill: "backwards" });
+        if (!cover) slideUp(hero, 0);
         const trip = (document as Document & { activeViewTransition?: { finished: Promise<void> } | null }).activeViewTransition;
         if (trip) trip.finished.finally(settle);
         else window.setTimeout(settle, 1500);
@@ -241,11 +256,11 @@ export function PageFly() {
         settle();
         flyCopy(f.r, f.src, hero, 600, MOVE, f.z);
       }
-      // The project's other frames on screen rise in as the hero lands (pick 2c).
+      // The project's other frames on screen rise in as the hero lands (pick 2c). On trial: they slide up instead, no fade.
       [...document.querySelectorAll<HTMLElement>(".v3 .pj-r")]
         .filter((e) => !e.contains(hero) && !hero.contains(e) && onScreen(e.getBoundingClientRect()))
         .slice(0, 6)
-        .forEach((e, i) => e.animate({ opacity: [0, 1], transform: ["translateY(16px)", "none"] }, { duration: 600, delay: 300 + i * 40, easing: OUT, fill: "backwards" }));
+        .forEach((e, i) => f.vt ? slideUp(e, i + 1) : e.animate({ opacity: [0, 1], transform: ["translateY(16px)", "none"] }, { duration: 600, delay: 300 + i * 40, easing: OUT, fill: "backwards" }));
     };
     land();
     return () => cancelAnimationFrame(raf);
