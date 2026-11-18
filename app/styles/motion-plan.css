@@ -105,6 +105,8 @@
   }
   :root[data-fly]::view-transition-image-pair(mp-fly) {
     isolation: auto;
+    overflow: clip;
+    border-radius: 4px;
     animation: mp-weight 560ms var(--ease-drawer) both;
   }
   :root[data-fly]::view-transition-old(mp-fly),
@@ -114,14 +116,11 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    border-radius: 4px;
   }
+  /* The hero is on top from the first frame, held as the grid held the photo, and eases flat as it grows:
+     one picture the whole way. The photo left behind only shows if the hero has nothing painted yet. */
   :root[data-fly]::view-transition-new(mp-fly) {
-    animation: mp-in var(--dur-2xs) linear both;
-  }
-  :root[data-fly-wait]::view-transition-new(mp-fly) {
-    animation: none;
-    opacity: 0;
+    animation: mp-zoom 560ms var(--ease-drawer) both;
   }
   /* Not the photo the page opens on, and not on screen there: it is the last to go, where it was. */
   :root[data-fly="away"]::view-transition-group(mp-fly) {
@@ -133,14 +132,19 @@
   :root[data-fly="away"]::view-transition-old(mp-fly) {
     animation: mp-recede var(--dur-page) var(--ease-out-strong) both;
   }
+  /* No card ground and no placeholder colour over the picture while its file loads. */
   .v3 [data-flying] {
-    background: transparent !important;
+    background-color: transparent !important;
+  }
+  .v3 [data-flying] img {
+    background: none !important;
   }
   .v3 [data-flying] :is(.wt-n, .sw) {
     visibility: hidden;
   }
 }
 @keyframes mp-out { to { opacity: 0; } }
+@keyframes mp-zoom { from { scale: var(--fly-z, 1); translate: var(--fly-t, 0 0); } }
 @keyframes mp-weight {
   35% { filter: drop-shadow(0 28px 36px rgb(0 0 0 / 0.3)); }
   0%, 100% { filter: drop-shadow(0 0 0 rgb(0 0 0 / 0)); }

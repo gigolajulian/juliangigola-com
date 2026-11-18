@@ -112,7 +112,11 @@ export function PageFly() {
           fly.current.vt = true;
           fly.current.photo = photo(img);
           document.documentElement.dataset.fly = mode;
-          undo.push(() => (delete document.documentElement.dataset.fly, delete document.documentElement.dataset.flyWait));
+          // How the grid held the photo in its frame (the p3 drift): the hero sets off held the same way and eases flat, so nothing steps as it lifts.
+          const rs = document.documentElement.style;
+          rs.setProperty("--fly-z", z?.scale ?? "1");
+          rs.setProperty("--fly-t", z?.translate ?? "0px 0px");
+          undo.push(() => (delete document.documentElement.dataset.fly, rs.removeProperty("--fly-z"), rs.removeProperty("--fly-t")));
           unnameSource = named(img.closest<HTMLElement>(".ph") ?? img);
           window.setTimeout(() => undo === mine && settle(), 4000);
         }
@@ -224,8 +228,10 @@ export function PageFly() {
         const cover = !f.photo || photo(hi) === f.photo;
         if (cover) {
           named(hero);
-          // A hero still loading would come up blank over the photo in the air: the photo left behind carries the whole trip instead.
-          if (!(hi?.complete && hi.naturalWidth)) document.documentElement.dataset.flyWait = "";
+          /* The hero's own file is rarely here yet. Until it is, the frame shows the picture already on screen,
+             at the hero's crop, so what lands is what stays: the tile's tighter crop stretched into the frame
+             stepped out when the file arrived. Left in place; the file loads over the same picture. */
+          hero.style.background = `url("${f.src}") center / cover no-repeat`;
         } else document.documentElement.dataset.fly = "away";
         if (!cover) hero.animate({ opacity: [0, 1], transform: ["translateY(16px)", "none"] }, { duration: 600, delay: 200, easing: OUT, fill: "backwards" });
         const trip = (document as Document & { activeViewTransition?: { finished: Promise<void> } | null }).activeViewTransition;
