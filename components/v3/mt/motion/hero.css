@@ -21,11 +21,11 @@ html[data-mt-flip] .mt-hero .ph:has(> img.mt-dev[data-on]) > img.mt-dev { animat
 @keyframes mt-flip-out { to { transform: rotateY(180deg); } }
 @keyframes mt-flip-in { from { opacity: 1; transform: rotateY(-180deg); } to { opacity: 1; transform: none; } }
 /* Hover (hero.ts sets html[data-mt-lift], `?mthover=0` turns it off): the photo stays still in its frame (Julian, 2026-11-18; it sat 4% larger and
-   drifted against the pointer). A card the pointer rests on for 0.7s (was 0.4s, Julian: longer) lifts 40px toward the viewer in the wall's own 3D space (depth.css), about 3%
+   drifted against the pointer). A card the pointer rests on for 0.5s (was 0.4s, then 0.7s; Julian picked 0.5) lifts 40px toward the viewer in the wall's own 3D space (depth.css), about 3%
    larger at this perspective: the sign that it opens its project. Passing over the wall lifts nothing. Leaving, it settles at once.
    The column keeps its children in 3D for this; `translate`, so the flip's transform is left alone. */
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
   html[data-mt-lift][data-mt-held] .mt-hero .mt-col { transform-style: preserve-3d; }
   html[data-mt-lift][data-mt-held] .mt-hero .mt-col figure { transition: translate .3s cubic-bezier(.23, 1, .32, 1); }
-  html[data-mt-lift][data-mt-held] .mt-hero .mt-col figure:has(a.fig:hover) { translate: 0 0 40px; transition: translate .5s cubic-bezier(.23, 1, .32, 1) .7s; }
+  html[data-mt-lift][data-mt-held] .mt-hero .mt-col figure:has(a.fig:hover) { translate: 0 0 40px; transition: translate .5s cubic-bezier(.23, 1, .32, 1) .5s; }
 }
