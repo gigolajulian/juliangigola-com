@@ -60,12 +60,22 @@ function dockSetup(el: HTMLElement): Dock | null {
   return { f, words, h1, wm, cap: q(".mt-cap"), ctas: q(".mt-ctas"), scrim: q(".mt-scrim"), w: w > 1 ? w : DOCK_W, m: null, x: -1, v: 0, st: "", q: "" };
 }
 
+/* Gone, but still there for a screen reader. VoiceOver in Safari scrolls the page far down when it lands on the name (the stage is sticky), and
+   visibility:hidden then took the tagline and the buttons out of its tree before its next step: it read the name, then the wall (MAC, 2026-11-17).
+   So a gone block is see-through, takes no clicks and leaves the tab order, and nothing more. */
+function park(ctas: HTMLElement | null, out: boolean) {
+  if (!ctas) return;
+  ctas.style.pointerEvents = out ? "none" : "";
+  for (const a of ctas.querySelectorAll("a,button")) out ? a.setAttribute("tabindex", "-1") : a.removeAttribute("tabindex");
+}
+
 function dockOff(d: Dock) {
   d.st = d.q = "";
   d.x = -1;
   d.f.style.visibility = "hidden";
   d.h1.style.opacity = "";
   for (const n of [d.cap, d.ctas, d.scrim]) if (n) n.style.cssText = "";
+  park(d.ctas, false);
   document.documentElement.removeAttribute("data-mtdock");
 }
 
@@ -133,7 +143,7 @@ function dockFrame(d: Dock, p: number, dt: number, jump: boolean) {
   if (d.scrim) d.scrim.style.opacity = op(sc);
   if (d.ctas) {
     d.ctas.style.opacity = op(go);
-    d.ctas.style.visibility = go <= 0 ? "hidden" : ""; // gone: the buttons leave the tab order too
+    park(d.ctas, go <= 0);
   }
 }
 const states = new WeakMap<HTMLElement, State>();
@@ -169,9 +179,14 @@ function grid(im: HTMLImageElement) {
   LUM.set(im, { src, g });
   return g;
 }
+let toned = 0;
 function tone(st: Pick<State, "tw" | "phs">) {
   const wall = st.phs[0]?.closest(".mt-wall");
   if (!st.tw.length || !wall) return;
+  // a pass is 51 hit tests, about 5ms at 1440 (measured 2026-11-17): ten a second at most, not one a scroll frame. The colour takes .15s to change anyway.
+  const now = performance.now();
+  if (now - toned < 100) return;
+  toned = now;
   for (const w of st.tw) {
     const r = w.getBoundingClientRect();
     if (!r.width) continue;
@@ -303,6 +318,7 @@ export const heroDrivers: Driver[] = [
         document.documentElement.removeAttribute("data-mt-nameout");
         [...st.cols, ...st.figs].forEach((p) => (p.el.style.transform = ""));
         if (st.name) st.name.style.cssText = "";
+        park(st.ctas, false);
         clearance(st, false);
         if (d) {
           dockOff(d);
@@ -321,6 +337,7 @@ export const heroDrivers: Driver[] = [
         st.e = -1;
         [...st.cols, ...st.figs].forEach((x) => move(x, 0));
         if (st.name) st.name.style.cssText = "";
+        park(st.ctas, false);
         if (st.dock) dockOff(st.dock);
         document.documentElement.removeAttribute("data-mt-nameout");
         clearance(st, false);
@@ -377,7 +394,8 @@ export const heroDrivers: Driver[] = [
           st.out = e >= 1;
           st.name.style.transform = e ? `translate3d(0,${((st.drop || 0.6 * ctx.vh) * e).toFixed(1)}px,0)` : "";
           st.name.style.setProperty("--mt-out", String(e));
-          st.name.style.visibility = st.out ? "hidden" : ""; // gone: its buttons leave the tab order too
+          st.name.style.opacity = st.out ? "0" : "";
+          park(st.ctas, st.out);
           // the bar's wordmark comes in as the big name is out, and goes as it comes back (mtscroll.css)
           document.documentElement.toggleAttribute("data-mt-nameout", st.out);
         }
