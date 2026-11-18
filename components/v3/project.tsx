@@ -139,12 +139,6 @@ export function V3Project({ project, next }: { project: Project; next?: { href: 
               {pic(f, wide(f) ? "(max-width: 700px) 100vw, 66vw" : "(max-width: 700px) 100vw, 33vw")}
             </figure>
           ))}
-          {/* A tall or narrow window keeps one frame under the title (v3.css); the other stands here, so the set is still whole. */}
-          {lead[1] ? (
-            <figure className="pj-r pj-spill" aria-hidden="true">
-              {pic(lead[1], "(max-width: 700px) 100vw, 33vw")}
-            </figure>
-          ) : null}
           {hole ? (
             <div className="pj-cr" style={{ "--row": hole.row, "--col": hole.col, "--span": hole.span } as React.CSSProperties}>
               {credits}

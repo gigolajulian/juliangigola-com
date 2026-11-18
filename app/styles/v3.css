@@ -1708,13 +1708,11 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .v3 #p-project .pj-lead:has(.pj-r + .pj-r) .pj-r{height:min(100cqh,calc((100cqw - var(--pj)) / 2 / var(--arn)))}
 .v3 #p-project .pj-lead .pj-r img{width:100%;height:100%;max-width:none;max-height:none;object-fit:cover}}
 /* A tall or narrow window (Julian, 2026-11-17): the big frame keeps its picture, up to 62vw, where it was cut
-   to 48vw. Under 5:4 one frame stands under the title, at the size the column gives it, and the other closes
-   the sheet (`.pj-spill`, project.tsx). */
-.v3 .pj-flow .pj-spill{display:none}
+   to 48vw. Under 5:4 one frame stands under the title, at the size the column gives it; the second is left out
+   there. A copy of it closing the sheet sat alone on the last row, and Julian cut it (2026-11-18). */
 @media (min-width:901px){.v3 #p-project .pj-hero:not(.two) .pj-big{max-width:62vw}}
 @media (min-width:901px) and (max-aspect-ratio:5/4){.v3 #p-project .pj-lead .pj-r + .pj-r{display:none}
-.v3 #p-project .pj-lead:has(.pj-r + .pj-r) .pj-r{height:min(100cqh,calc(100cqw / var(--arn)))}
-.v3 .pj-flow .pj-spill{display:block}}
+.v3 #p-project .pj-lead:has(.pj-r + .pj-r) .pj-r{height:min(100cqh,calc(100cqw / var(--arn)))}}
 /* 701 to 900 (iPad, a narrow window): one column, the same margin and gap. The
    big frame no longer runs edge to edge over inset frames, and a mouse no longer
    gets the desktop's three-column hero squeezed into half the screen. */
