@@ -61,12 +61,22 @@ function dockSetup(el: HTMLElement): Dock | null {
   return { f, words, h1, wm, cap: q(".mt-cap"), ctas: q(".mt-ctas"), scrim: q(".mt-scrim"), w: w > 1 ? w : DOCK_W, m: null, x: -1, v: 0, st: "", q: "" };
 }
 
+/* Gone, but still there for a screen reader. VoiceOver in Safari scrolls the page far down when it lands on the name (the stage is sticky), and
+   visibility:hidden then took the tagline and the buttons out of its tree before its next step: it read the name, then the wall (MAC, 2026-11-17).
+   So a gone block is see-through, takes no clicks and leaves the tab order, and nothing more. */
+function park(ctas: HTMLElement | null, out: boolean) {
+  if (!ctas) return;
+  ctas.style.pointerEvents = out ? "none" : "";
+  for (const a of ctas.querySelectorAll("a,button")) out ? a.setAttribute("tabindex", "-1") : a.removeAttribute("tabindex");
+}
+
 function dockOff(d: Dock) {
   d.st = d.q = "";
   d.x = -1;
   d.f.style.visibility = "hidden";
   d.h1.style.opacity = "";
   for (const n of [d.cap, d.ctas, d.scrim]) if (n) n.style.cssText = "";
+  park(d.ctas, false);
   document.documentElement.removeAttribute("data-mtdock");
 }
 
@@ -134,7 +144,7 @@ function dockFrame(d: Dock, p: number, dt: number, jump: boolean) {
   if (d.scrim) d.scrim.style.opacity = op(sc);
   if (d.ctas) {
     d.ctas.style.opacity = op(go);
-    d.ctas.style.visibility = go <= 0 ? "hidden" : ""; // gone: the buttons leave the tab order too
+    park(d.ctas, go <= 0);
   }
 }
 const states = new WeakMap<HTMLElement, State>();
@@ -170,17 +180,41 @@ function grid(im: HTMLImageElement) {
   LUM.set(im, { src, g });
   return g;
 }
+let toned = 0, tonedY = -1;
 function tone(st: Pick<State, "tw" | "phs">) {
   const wall = st.phs[0]?.closest(".mt-wall");
   if (!st.tw.length || !wall) return;
-  for (const w of st.tw) {
-    const r = w.getBoundingClientRect();
+  /* A pass cost 51 hit tests: 5 to 8ms at 1440, 52ms on a phone-speed CPU, and it ran every frame, idle included (measured on live, 2026-11-17).
+     Now ten passes a second at most (the colour takes .15s to change anyway), and a word is hit tested at its two ends: the same photo under both
+     is the photo under the whole word. Only a word that straddles two photos goes letter by letter. About 17 hit tests a pass.
+     shortcut: a third photo lying on top of a word's middle only is missed, go back to a test a letter if a layout ever does that. */
+  const now = performance.now();
+  // standing still, only an idle photo swap can change what is under a letter: three passes a second cover that
+  if (now - toned < (scrollY === tonedY ? 280 : 100)) return;
+  tonedY = scrollY;
+  toned = now;
+  const rs = st.tw.map((w) => w.getBoundingClientRect());
+  /* The photo a visitor sees at this point: a hit test, top first. Scanning the photo boxes took the first box in the document that held the point, and on an
+     iPhone that was a photo lying under another one (MAC, #1155: a line stayed white over a pale photo). The name block takes no pointer events, so it is not in the way.
+     While a swap develops, the incoming photo counts once it has cut in. Off screen there is nothing to hit: bare page. */
+  const hit = (r: DOMRect) =>
+    document.elementsFromPoint(r.left + r.width / 2, r.top + r.height / 2).find((n): n is HTMLImageElement => n instanceof HTMLImageElement && wall.contains(n) && n.complete && !!n.naturalWidth && (!n.classList.contains("mt-dev") || n.hasAttribute("data-on"))) ?? null;
+  let wd: Element | null = null;
+  let same: HTMLImageElement | null | undefined;
+  for (let n = 0; n < st.tw.length; n++) {
+    const w = st.tw[n], r = rs[n];
     if (!r.width) continue;
-    const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
-    /* The photo a visitor sees at this point: a hit test, top first. Scanning the photo boxes took the first box in the document that held the point, and on an
-       iPhone that was a photo lying under another one (MAC, #1155: a line stayed white over a pale photo). The name block takes no pointer events, so it is not in the way.
-       While a swap develops, the incoming photo counts once it has cut in. Off screen there is nothing to hit: bare page. */
-    const im = document.elementsFromPoint(cx, cy).find((n): n is HTMLImageElement => n instanceof HTMLImageElement && wall.contains(n) && n.complete && !!n.naturalWidth && (!n.classList.contains("mt-dev") || n.hasAttribute("data-on")));
+    const cy = r.top + r.height / 2;
+    const word = w.parentElement?.classList.contains("wd") ? w.parentElement : null;
+    if (!word) same = undefined;
+    else if (word !== wd) {
+      let z = n;
+      while (st.tw[z + 1]?.parentElement === word) z++;
+      const a = hit(r);
+      same = z === n || a === hit(rs[z]) ? a : undefined;
+    }
+    wd = word;
+    const im = same !== undefined ? same : hit(r);
     let t = "p"; // bare page
     if (im) {
       const g = grid(im);
@@ -327,6 +361,7 @@ export const heroDrivers: Driver[] = [
         document.documentElement.removeAttribute("data-mt-nameout");
         [...st.cols, ...st.figs].forEach((p) => (p.el.style.transform = ""));
         if (st.name) st.name.style.cssText = "";
+        park(st.ctas, false);
         clearance(st, false);
         if (d) {
           dockOff(d);
@@ -345,6 +380,7 @@ export const heroDrivers: Driver[] = [
         st.e = -1;
         [...st.cols, ...st.figs].forEach((x) => move(x, 0));
         if (st.name) st.name.style.cssText = "";
+        park(st.ctas, false);
         if (st.dock) dockOff(st.dock);
         document.documentElement.removeAttribute("data-mt-nameout");
         clearance(st, false);
@@ -401,7 +437,8 @@ export const heroDrivers: Driver[] = [
           st.out = e >= 1;
           st.name.style.transform = e ? `translate3d(0,${((st.drop || 0.6 * ctx.vh) * e).toFixed(1)}px,0)` : "";
           st.name.style.setProperty("--mt-out", String(e));
-          st.name.style.visibility = st.out ? "hidden" : ""; // gone: its buttons leave the tab order too
+          st.name.style.opacity = st.out ? "0" : "";
+          park(st.ctas, st.out);
           // the bar's wordmark comes in as the big name is out, and goes as it comes back (mtscroll.css)
           document.documentElement.toggleAttribute("data-mt-nameout", st.out);
         }
