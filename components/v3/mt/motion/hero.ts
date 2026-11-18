@@ -1,5 +1,4 @@
-import { navfx } from "@/components/v3/nav-ink";
-import { clamp, smooth, span, type Driver } from "./engine";
+import { clamp, type Driver } from "./engine";
 
 /* Hero wall travel (spec 3.2). Held (D): the wall travels up through the hold,
    each column trailing by its lag A, and the name block leaves once at the end.
@@ -14,17 +13,7 @@ const FLIP = 1300; // the idle wall's card turn, ms (Julian's pick of 600 / 900 
 
 type Part = { el: HTMLElement; a: number; c: number; v: number };
 
-/* Name dock (Julian's pick 02, 2026-11-14; off since 2026-11-16, "should not animate up towards the nav bar": ?mtdock=1 brings it back). Held layout only. The header starts without its
-   wordmark. Between 62% and 92% of the hold a fixed copy of the name, same face and size, rides from the h1's place to
-   the wordmark's and shrinks to its size, then the real wordmark takes over. The copy follows its target on a critically
-   damped spring, so it leaves late and settles soft: the October version was locked 1:1 to the scroll over one name
-   height and read as not smooth. The label fades at 48 to 62%, the buttons at 72 to 92% (his timing).
-   ?mtdock=<n> above 1 sets the spring's stiffness in rad/s, to tune by eye.
-   html[data-mtdock] is rest, ride or land, or off when there is no dock: hero.css hides the wordmark until land. */
-const DOCK_W = 11;
-type Geo = { ax: number; ay: number; bx: number; by: number; k: number; ox: number; oy: number; ws: number };
-type Dock = { copy: HTMLElement; words: HTMLElement[]; h1: HTMLElement; wm: HTMLElement; cap: HTMLElement | null; ctas: HTMLElement | null; scrim: HTMLElement | null; stiffness: number; geo: Geo | null; pos: number; vel: number; phase: string; fadeKey: string };
-type State = { cols: Part[]; figs: Part[]; caps: HTMLElement[]; tw: HTMLElement[]; phs: HTMLElement[]; texts: HTMLElement[]; ctas: HTMLElement | null; more: HTMLElement | null; name: HTMLElement | null; scroll: number; mode: "" | "d" | "p" | "t"; exit: number; unit: number; sizeKey: string; wall: number; dock: Dock | null; bar: HTMLElement | null; out: boolean; row: number; drop: number };
+type State = { cols: Part[]; figs: Part[]; caps: HTMLElement[]; tw: HTMLElement[]; phs: HTMLElement[]; texts: HTMLElement[]; ctas: HTMLElement | null; more: HTMLElement | null; name: HTMLElement | null; scroll: number; mode: "" | "d" | "p" | "t"; exit: number; unit: number; sizeKey: string; wall: number; bar: HTMLElement | null; out: boolean; row: number; drop: number };
 
 const ink = (n: Node) => {
   const r = document.createRange();
@@ -39,28 +28,6 @@ const LEFT = typeof location !== "undefined" && /[?&]mtdock=left/.test(location.
 /* With no ground over the hero the nav words sit on the wall: they flip white or black (nav-ink.ts; the flag turns
    ?navfx on in layout.tsx), and page text fades out under the bar there (the same file's text fade). */
 
-function dockSetup(el: HTMLElement): Dock | null {
-  if (LEFT) return null;
-  const w = Number(/[?&]mtdock=([\d.]+)/.exec(location.search)?.[1] ?? 0);
-  const h1 = el.querySelector<HTMLElement>(".mt-name h1"), wm = document.querySelector<HTMLElement>(".site-hdr .site-wm");
-  // ?navfx=1 (Julian, 2026-11-15): no flight. The name fades with the hero, and the bar's wordmark comes in as it goes (nav-ink.ts).
-  if (!w || !h1 || !wm || navfx()) return null;
-  const f = document.createElement("div");
-  f.className = "mt-dockname";
-  f.setAttribute("aria-hidden", "");
-  // one span a word: the h1 sets its words wider apart than the wordmark does, so the gap closes on the way, by transform
-  const words = (h1.textContent ?? "").split(" ").map((w) => Object.assign(document.createElement("span"), { textContent: w }));
-  words.forEach((w, i) => {
-    w.style.display = "inline-block";
-    f.append(i ? " " : "", w);
-  });
-  // above the header (z 30): its backdrop blur would soften the name on the way in
-  Object.assign(f.style, { position: "fixed", left: "0", top: "0", margin: "0", zIndex: "31", pointerEvents: "none", whiteSpace: "nowrap", transformOrigin: "0 0", willChange: "transform", visibility: "hidden" });
-  document.body.append(f);
-  const q = (s: string) => el.querySelector<HTMLElement>(s);
-  return { copy: f, words, h1, wm, cap: q(".mt-cap"), ctas: q(".mt-ctas"), scrim: q(".mt-scrim"), stiffness: w > 1 ? w : DOCK_W, geo: null, pos: -1, vel: 0, phase: "", fadeKey: "" };
-}
-
 /* Gone, but still there for a screen reader. VoiceOver in Safari scrolls the page far down when it lands on the name (the stage is sticky), and
    visibility:hidden then took the tagline and the buttons out of its tree before its next step: it read the name, then the wall (MAC, 2026-11-17).
    So a gone block is see-through, takes no clicks and leaves the tab order, and nothing more. */
@@ -73,83 +40,6 @@ function park(ctas: HTMLElement | null, on: boolean, why: "out" | "past" = "out"
   for (const a of ctas.querySelectorAll("a,button")) out ? a.setAttribute("tabindex", "-1") : a.removeAttribute("tabindex");
 }
 
-function dockOff(d: Dock) {
-  d.phase = d.fadeKey = "";
-  d.pos = -1;
-  d.copy.style.visibility = "hidden";
-  d.h1.style.opacity = "";
-  for (const n of [d.cap, d.ctas, d.scrim]) if (n) n.style.cssText = "";
-  park(d.ctas, false);
-  document.documentElement.removeAttribute("data-mtdock");
-}
-
-// where the name rests and where it lands, in the window: the stage is stuck at the top for the whole ride
-function dockMeasure(d: Dock, name: HTMLElement) {
-  const cs = getComputedStyle(d.h1), a = ink(d.h1), top = name.getBoundingClientRect().top;
-  Object.assign(d.copy.style, { transform: "none", fontFamily: cs.fontFamily, fontWeight: cs.fontWeight, fontSize: cs.fontSize, lineHeight: cs.lineHeight, letterSpacing: cs.letterSpacing, wordSpacing: "0px", textTransform: cs.textTransform, color: cs.color });
-  for (const w of d.words) w.style.transform = "";
-  const o = ink(d.copy), b = ink(d.wm), k = b.width / o.width;
-  // landed, the copy's line box is centred on the wordmark's: the two differ a hair in tracking, so match by width, both with the words set close
-  d.geo = a.width ? { ax: a.left, ay: a.top - top, bx: b.left, by: b.top + b.height / 2 - (a.height * k) / 2, k, ox: o.left, oy: o.top, ws: parseFloat(cs.wordSpacing) || 0 } : null;
-  d.pos = -1;
-  d.fadeKey = "";
-}
-
-function dockFrame(d: Dock, p: number, dt: number, jump: boolean) {
-  const m = d.geo;
-  if (!m) return;
-  const t = smooth(span(p, 0.62, 0.92));
-  if (d.pos < 0 || jump) {
-    d.pos = t;
-    d.vel = 0;
-  } else {
-    // critically damped, in small steps so a slow frame cannot throw it
-    let n = Math.max(1, Math.ceil(dt / 8));
-    const h = dt / 1000 / n;
-    while (n--) {
-      d.vel += (-2 * d.stiffness * d.vel - d.stiffness * d.stiffness * (d.pos - t)) * h;
-      d.pos += d.vel * h;
-    }
-    if (d.pos < 0 || d.pos > 1) {
-      d.pos = clamp(d.pos);
-      d.vel = 0;
-    }
-    if ((t === 0 || t === 1) && Math.abs(d.pos - t) < 0.0005) {
-      d.pos = t;
-      d.vel = 0;
-    }
-  }
-  // "land" holds until the target has really left the top, so the hand-over cannot flicker at the edge
-  const st = d.pos <= 0 ? "rest" : d.pos >= 1 || (d.phase === "land" && t > 0.995) ? "land" : "ride";
-  if (st !== d.phase) {
-    d.phase = st;
-    if (st === "ride") d.copy.style.color = getComputedStyle(d.h1).color; // the theme may have changed since the measure
-    d.copy.style.visibility = st === "ride" ? "visible" : "hidden";
-    d.h1.style.opacity = st === "rest" ? "" : "0"; // still there for readers and search
-    document.documentElement.setAttribute("data-mtdock", st);
-  }
-  if (st === "ride") {
-    const s = 1 + (m.k - 1) * d.pos;
-    const tf = `translate3d(${(m.ax + (m.bx - m.ax) * d.pos - m.ox * s).toFixed(2)}px,${(m.ay + (m.by - m.ay) * d.pos - m.oy * s).toFixed(2)}px,0) scale(${s.toFixed(5)})`;
-    if (tf !== d.copy.style.transform) {
-      d.copy.style.transform = tf;
-      d.words.forEach((w, i) => i && (w.style.transform = `translate3d(${(m.ws * i * (1 - d.pos)).toFixed(2)}px,0,0)`));
-    }
-  }
-  const cap = 1 - span(p, 0.48, 0.62), go = 1 - span(p, 0.72, 0.92), sc = 1 - span(p, 0.62, 0.92);
-  const q = cap.toFixed(3) + go.toFixed(3) + sc.toFixed(3);
-  if (q === d.fadeKey) return;
-  d.fadeKey = q;
-  // at rest nothing is written: an inline 1 beat the splash's own `opacity:0` rule, so the caption and buttons
-  // stood alone on the empty page until the splash started (seen in Safari, 2026-11-15)
-  const op = (v: number) => (v >= 1 ? "" : v.toFixed(3));
-  if (d.cap) d.cap.style.opacity = op(cap);
-  if (d.scrim) d.scrim.style.opacity = op(sc);
-  if (d.ctas) {
-    d.ctas.style.opacity = op(go);
-    park(d.ctas, go <= 0);
-  }
-}
 const states = new WeakMap<HTMLElement, State>();
 
 /* An unseen margin round the name, the tagline and the buttons (Julian, 2026-11-16: a photo's caption ran through the
@@ -296,15 +186,14 @@ export const heroDrivers: Driver[] = [
         unit: 0,
         sizeKey: "",
         wall: WALL,
-        dock: dockSetup(el),
         bar: document.querySelector<HTMLElement>(".site-hdr"),
         out: false,
         drop: 0,
         row: 660,
       };
       states.set(el, st);
-      const d = st.dock;
-      if (!d) document.documentElement.setAttribute("data-mtdock", "off");
+      // "off": the hero runs and no name flies to the bar, so mtscroll.css keeps the bar's wordmark hidden until the name leaves
+      document.documentElement.setAttribute("data-mtdock", "off");
       // by scroll, not by frame: a jump past the hero gets no hero frames
       // the hero is over when its last photos have left from under the header: the same line going down and coming back up
       const hdr = document.querySelector<HTMLElement>(".site-hdr");
@@ -354,24 +243,6 @@ export const heroDrivers: Driver[] = [
       // always: phones keep the wordmark out of the bar while the hero is on screen (mtscroll.css)
       addEventListener("scroll", past, { passive: true, signal: ac.signal });
       past();
-      // late fonts move both boxes: measure again on the next frame
-      if (d) document.fonts.ready.then(() => (st.sizeKey = ""));
-      /* The engine gives a section no frames once it is a screen above the window. A jump past the hero (a reload
-         lower on the page, a header link, a flick) would leave the name wherever it was and the header without its
-         wordmark, so land it here. */
-      const far = () => {
-        if (!d || d.phase === "land" || !document.documentElement.hasAttribute("data-mt-held") || el.getBoundingClientRect().bottom > -innerHeight) return;
-        d.phase = "land";
-        d.pos = 1;
-        d.vel = 0;
-        d.copy.style.visibility = "hidden";
-        d.h1.style.opacity = "0";
-        document.documentElement.setAttribute("data-mtdock", "land");
-      };
-      if (d) {
-        addEventListener("scroll", far, { passive: true, signal: ac.signal });
-        requestAnimationFrame(() => requestAnimationFrame(far));
-      }
       const look = window.setInterval(() => tone(st), 300); // the idle wall swaps a photo with no frame running
       return () => {
         clearInterval(look);
@@ -389,10 +260,6 @@ export const heroDrivers: Driver[] = [
         if (st.name) st.name.style.cssText = "";
         park(st.ctas, false);
         clearance(st, false);
-        if (d) {
-          dockOff(d);
-          d.copy.remove();
-        }
         document.documentElement.removeAttribute("data-mtdock");
       };
     },
@@ -407,7 +274,6 @@ export const heroDrivers: Driver[] = [
         [...st.cols, ...st.figs].forEach((x) => move(x, 0));
         if (st.name) st.name.style.cssText = "";
         park(st.ctas, false);
-        if (st.dock) dockOff(st.dock);
         document.documentElement.removeAttribute("data-mt-nameout");
         clearance(st, false);
         st.sizeKey = "";
@@ -428,7 +294,6 @@ export const heroDrivers: Driver[] = [
           // how far the name has to sink to clear the window: from its top at rest to the window's lower edge, and 24px. It rode
           // 0.6 of the window, and was out of sight well before the ride was over (Julian, 2026-11-17: "even longer, almost right before" the button)
           if (st.texts[0]) st.drop = ctx.vh - (st.texts[0].getBoundingClientRect().top - Math.max(0, st.exit) * st.drop) + 24;
-          if (st.dock && st.name) dockMeasure(st.dock, st.name);
         }
         const u = st.unit;
         // the ground under the last row is in the page's unit, like the button that sits in it
@@ -443,11 +308,6 @@ export const heroDrivers: Driver[] = [
         // a share of the travel, not of the distance: a tall window travels less and must still end on the same stair
         const share = S / Math.max(1, st.wall * u + TAIL * ctx.u - Math.max(ctx.vh, 600));
         for (const c of st.cols) move(c, -(S - (three && c.c in END_D ? share * END_D[c.c] * u : Math.min(S, LAG_MAX * u) * c.a * 0.5)));
-        if (st.dock) {
-          // a jump (a load or a link that lands mid page) places the name, it does not fly it
-          dockFrame(st.dock, p, ctx.dt, Math.abs(ctx.dy) > ctx.vh);
-          return;
-        }
         /* Julian, 2026-11-16: "it needs to stay in place until 3 rows are scrolled and move down and out". The name
            holds until the fourth row is whole in the window (its lower edge at the window's: "pinned to screen for
            3-4 rows"), then rides down out of the window. 2026-11-17: "too quick, it needs to go out a bit slower with parallax": the ride takes
