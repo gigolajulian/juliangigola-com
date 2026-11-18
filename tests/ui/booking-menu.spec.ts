@@ -75,3 +75,21 @@ for (const r of [RATIOS[0], RATIOS[4]]) {
     await ctx.close();
   });
 }
+
+test("on the home, a link to /contact glides to the footer, then opens the card", async ({ browser, browserName }) => {
+  const { ctx, page } = await open(browser, browserName, RATIOS[4]);
+  await page.goto("/", { waitUntil: "load" });
+  await page.locator("#contact .mt-ph-btn").waitFor({ state: "attached" });
+  await page.waitForTimeout(1000); // the home's click listener is on once it has hydrated
+  // no link on the home points there today: a stand-in, as any page link to /contact would be
+  await page.evaluate(() => {
+    const a = Object.assign(document.createElement("a"), { href: "/contact", id: "t-contact", textContent: "contact" });
+    a.style.cssText = "position:fixed;left:4px;top:120px;z-index:99999";
+    document.body.append(a);
+  });
+  await page.locator("#t-contact").click();
+  await expect(page.locator(".mt-inq")).toBeVisible();
+  await expect(page).toHaveURL(/\/#contact$/);
+  await expect(page.locator("footer#contact")).toBeInViewport();
+  await ctx.close();
+});

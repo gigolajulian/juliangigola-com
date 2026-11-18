@@ -17,6 +17,20 @@ export function scrollTop(glide = false) {
   else scrollTo({ top: 0, behavior: glide ? "smooth" : "instant" });
 }
 
+/** Glides to `y` with the same 1.2s ease as the wordmark's trip to the top, then calls `done` (once, also if the glide is cut short). */
+export function glideTo(y: number, done: () => void) {
+  let over = false;
+  const end = () => void (over || ((over = true), done()));
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return scrollTo({ top: y, behavior: "instant" }), end();
+  if (live) live.scrollTo(y, { duration: 1.2, easing: (t) => (t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2), force: true, onComplete: end });
+  else {
+    scrollTo({ top: y, behavior: "smooth" });
+    addEventListener("scrollend", end, { once: true });
+  }
+  // shortcut: Safari before 26 has no scrollend, and a glide can be interrupted: the card opens by 1.6s regardless
+  setTimeout(end, 1600);
+}
+
 /** Moves the page by `dy` without breaking a glide: Lenis writes its own
  *  position every frame, so a plain scrollBy is undone (home.tsx rows). */
 export function shiftScroll(dy: number) {
