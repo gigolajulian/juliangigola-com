@@ -28,7 +28,7 @@ function heldRow(name: string): Driver {
       const n = items.length;
       if (n < 2) return;
       const ac = new AbortController();
-      const on = { signal: ac.signal };
+      const opts = { signal: ac.signal };
       const o: number[] = Array(n).fill(-1);
       let step = 1, c0 = 0, mid = 0, range = 0, cur = -1, base = 0, lastX = NaN;
 
@@ -95,7 +95,7 @@ function heldRow(name: string): Driver {
         down = e.clientX;
         downY = scrollY;
         dragged = false;
-      }, on);
+      }, opts);
       row.addEventListener("pointermove", (e) => {
         if (down === null) return;
         if (!e.buttons) return void (down = null);
@@ -106,17 +106,17 @@ function heldRow(name: string): Driver {
         // From the drag's start, not step by step: scrollY rounds and the error would add up.
         const t = top();
         shiftScroll(clamp(downY - (dx * range) / ((n - 1) * step), t, t + range) - scrollY);
-      }, on);
+      }, opts);
       const up = () => void (down = null);
-      row.addEventListener("pointerup", up, on);
-      row.addEventListener("pointercancel", up, on);
+      row.addEventListener("pointerup", up, opts);
+      row.addEventListener("pointercancel", up, opts);
       row.addEventListener("click", (e) => {
         if (!dragged) return;
         dragged = false;
         e.preventDefault();
         e.stopPropagation();
       }, { capture: true, signal: ac.signal });
-      row.addEventListener("dragstart", (e) => { if (ctx.held) e.preventDefault(); }, on);
+      row.addEventListener("dragstart", (e) => { if (ctx.held) e.preventDefault(); }, opts);
 
       // Tab to a film: the browser scrolls the hidden row to show it. Put that back and move the page there instead.
       row.addEventListener("focusin", (e) => {
@@ -124,7 +124,7 @@ function heldRow(name: string): Driver {
         if (!ctx.held || i < 0 || !t.matches(":focus-visible")) return;
         row.scrollLeft = base;
         shiftScroll(top() + unease(i / (n - 1)) * range - scrollY);
-      }, on);
+      }, opts);
 
       // Left and right step one item, to that item's own place in the hold (the shares are uneven), and stop at the ends.
       row.addEventListener("keydown", (e) => {
@@ -133,12 +133,12 @@ function heldRow(name: string): Driver {
         e.stopPropagation(); // held-row.tsx's even step is for the films
         const at = Math.max(0, cur), i = clamp(at + (e.key === "ArrowRight" ? 1 : -1), 0, n - 1);
         if (i !== at) scrollTo({ top: top() + unease(i / (n - 1)) * range, behavior: "smooth" });
-      }, on);
+      }, opts);
 
       row.addEventListener("scroll", loose, { passive: true, signal: ac.signal });
 
       /* Hover lift (fine pointers): tilt toward the pointer, up to 9deg each way. rows.css does the rest. */
-      for (const it of items) sleeveTilt(it, () => ctx.held && ctx.fine && !dragged, on);
+      for (const it of items) sleeveTilt(it, () => ctx.held && ctx.fine && !dragged, opts);
 
       // After the engine's own resize pass, so ctx is current.
       addEventListener("resize", () => requestAnimationFrame(() => {
@@ -146,7 +146,7 @@ function heldRow(name: string): Driver {
         if (ctx.held) return;
         track.style.transform = "";
         loose();
-      }), on);
+      }), opts);
 
       measure();
       loose();
@@ -176,7 +176,7 @@ function films(): Driver {
       const n = items.length;
       if (n < 2) return;
       const ac = new AbortController();
-      const on = { signal: ac.signal };
+      const opts = { signal: ac.signal };
       let cur = +(el.dataset.cur ?? 0);
       /* Previews: a muted player in the current film, and one in the film before and after it, started and
          then paused so they are loaded when their turn comes (Julian, 2026-11-14). The poster stays on top
@@ -266,7 +266,7 @@ function films(): Driver {
           v.t = 0;
           v.f.removeAttribute("data-ready");
         }
-      }, on);
+      }, opts);
       const io = new IntersectionObserver(([e]) => {
         seen = e.isIntersecting;
         preview();
@@ -286,7 +286,7 @@ function films(): Driver {
       addEventListener("resize", () => requestAnimationFrame(() => {
         tab();
         if (!ctx.held) drop();
-      }), on);
+      }), opts);
       tab();
       return () => {
         ac.abort();

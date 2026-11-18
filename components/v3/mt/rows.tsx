@@ -51,7 +51,7 @@ export function MtCovers() {
    structure: the films stack one under another in natural scroll (motion/rows.ts
    opens the one at the middle of the screen). The current film is read here, so
    the head stays in step with the engine off too. */
-export function MtMotion({ films }: { films: MtFilm[] }) {
+export function MtFilms({ films }: { films: MtFilm[] }) {
   const row = React.useRef<HTMLDivElement>(null);
   const [cur, setCur] = React.useState(0);
   React.useEffect(() => {

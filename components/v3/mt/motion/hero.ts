@@ -23,8 +23,8 @@ type Part = { el: HTMLElement; a: number; c: number; v: number };
    html[data-mtdock] is rest, ride or land, or off when there is no dock: hero.css hides the wordmark until land. */
 const DOCK_W = 11;
 type Geo = { ax: number; ay: number; bx: number; by: number; k: number; ox: number; oy: number; ws: number };
-type Dock = { f: HTMLElement; words: HTMLElement[]; h1: HTMLElement; wm: HTMLElement; cap: HTMLElement | null; ctas: HTMLElement | null; scrim: HTMLElement | null; w: number; m: Geo | null; x: number; v: number; st: string; q: string };
-type State = { cols: Part[]; figs: Part[]; caps: HTMLElement[]; tw: HTMLElement[]; phs: HTMLElement[]; texts: HTMLElement[]; ctas: HTMLElement | null; more: HTMLElement | null; name: HTMLElement | null; s: number; mode: "" | "d" | "p" | "t"; e: number; u: number; at: string; wall: number; dock: Dock | null; bar: HTMLElement | null; out: boolean; row: number; drop: number };
+type Dock = { copy: HTMLElement; words: HTMLElement[]; h1: HTMLElement; wm: HTMLElement; cap: HTMLElement | null; ctas: HTMLElement | null; scrim: HTMLElement | null; stiffness: number; geo: Geo | null; pos: number; vel: number; phase: string; fadeKey: string };
+type State = { cols: Part[]; figs: Part[]; caps: HTMLElement[]; tw: HTMLElement[]; phs: HTMLElement[]; texts: HTMLElement[]; ctas: HTMLElement | null; more: HTMLElement | null; name: HTMLElement | null; scroll: number; mode: "" | "d" | "p" | "t"; exit: number; unit: number; sizeKey: string; wall: number; dock: Dock | null; bar: HTMLElement | null; out: boolean; row: number; drop: number };
 
 const ink = (n: Node) => {
   const r = document.createRange();
@@ -58,7 +58,7 @@ function dockSetup(el: HTMLElement): Dock | null {
   Object.assign(f.style, { position: "fixed", left: "0", top: "0", margin: "0", zIndex: "31", pointerEvents: "none", whiteSpace: "nowrap", transformOrigin: "0 0", willChange: "transform", visibility: "hidden" });
   document.body.append(f);
   const q = (s: string) => el.querySelector<HTMLElement>(s);
-  return { f, words, h1, wm, cap: q(".mt-cap"), ctas: q(".mt-ctas"), scrim: q(".mt-scrim"), w: w > 1 ? w : DOCK_W, m: null, x: -1, v: 0, st: "", q: "" };
+  return { copy: f, words, h1, wm, cap: q(".mt-cap"), ctas: q(".mt-ctas"), scrim: q(".mt-scrim"), stiffness: w > 1 ? w : DOCK_W, geo: null, pos: -1, vel: 0, phase: "", fadeKey: "" };
 }
 
 /* Gone, but still there for a screen reader. VoiceOver in Safari scrolls the page far down when it lands on the name (the stage is sticky), and
@@ -74,9 +74,9 @@ function park(ctas: HTMLElement | null, on: boolean, why: "out" | "past" = "out"
 }
 
 function dockOff(d: Dock) {
-  d.st = d.q = "";
-  d.x = -1;
-  d.f.style.visibility = "hidden";
+  d.phase = d.fadeKey = "";
+  d.pos = -1;
+  d.copy.style.visibility = "hidden";
   d.h1.style.opacity = "";
   for (const n of [d.cap, d.ctas, d.scrim]) if (n) n.style.cssText = "";
   park(d.ctas, false);
@@ -86,60 +86,60 @@ function dockOff(d: Dock) {
 // where the name rests and where it lands, in the window: the stage is stuck at the top for the whole ride
 function dockMeasure(d: Dock, name: HTMLElement) {
   const cs = getComputedStyle(d.h1), a = ink(d.h1), top = name.getBoundingClientRect().top;
-  Object.assign(d.f.style, { transform: "none", fontFamily: cs.fontFamily, fontWeight: cs.fontWeight, fontSize: cs.fontSize, lineHeight: cs.lineHeight, letterSpacing: cs.letterSpacing, wordSpacing: "0px", textTransform: cs.textTransform, color: cs.color });
+  Object.assign(d.copy.style, { transform: "none", fontFamily: cs.fontFamily, fontWeight: cs.fontWeight, fontSize: cs.fontSize, lineHeight: cs.lineHeight, letterSpacing: cs.letterSpacing, wordSpacing: "0px", textTransform: cs.textTransform, color: cs.color });
   for (const w of d.words) w.style.transform = "";
-  const o = ink(d.f), b = ink(d.wm), k = b.width / o.width;
+  const o = ink(d.copy), b = ink(d.wm), k = b.width / o.width;
   // landed, the copy's line box is centred on the wordmark's: the two differ a hair in tracking, so match by width, both with the words set close
-  d.m = a.width ? { ax: a.left, ay: a.top - top, bx: b.left, by: b.top + b.height / 2 - (a.height * k) / 2, k, ox: o.left, oy: o.top, ws: parseFloat(cs.wordSpacing) || 0 } : null;
-  d.x = -1;
-  d.q = "";
+  d.geo = a.width ? { ax: a.left, ay: a.top - top, bx: b.left, by: b.top + b.height / 2 - (a.height * k) / 2, k, ox: o.left, oy: o.top, ws: parseFloat(cs.wordSpacing) || 0 } : null;
+  d.pos = -1;
+  d.fadeKey = "";
 }
 
 function dockFrame(d: Dock, p: number, dt: number, jump: boolean) {
-  const m = d.m;
+  const m = d.geo;
   if (!m) return;
   const t = smooth(span(p, 0.62, 0.92));
-  if (d.x < 0 || jump) {
-    d.x = t;
-    d.v = 0;
+  if (d.pos < 0 || jump) {
+    d.pos = t;
+    d.vel = 0;
   } else {
     // critically damped, in small steps so a slow frame cannot throw it
     let n = Math.max(1, Math.ceil(dt / 8));
     const h = dt / 1000 / n;
     while (n--) {
-      d.v += (-2 * d.w * d.v - d.w * d.w * (d.x - t)) * h;
-      d.x += d.v * h;
+      d.vel += (-2 * d.stiffness * d.vel - d.stiffness * d.stiffness * (d.pos - t)) * h;
+      d.pos += d.vel * h;
     }
-    if (d.x < 0 || d.x > 1) {
-      d.x = clamp(d.x);
-      d.v = 0;
+    if (d.pos < 0 || d.pos > 1) {
+      d.pos = clamp(d.pos);
+      d.vel = 0;
     }
-    if ((t === 0 || t === 1) && Math.abs(d.x - t) < 0.0005) {
-      d.x = t;
-      d.v = 0;
+    if ((t === 0 || t === 1) && Math.abs(d.pos - t) < 0.0005) {
+      d.pos = t;
+      d.vel = 0;
     }
   }
   // "land" holds until the target has really left the top, so the hand-over cannot flicker at the edge
-  const st = d.x <= 0 ? "rest" : d.x >= 1 || (d.st === "land" && t > 0.995) ? "land" : "ride";
-  if (st !== d.st) {
-    d.st = st;
-    if (st === "ride") d.f.style.color = getComputedStyle(d.h1).color; // the theme may have changed since the measure
-    d.f.style.visibility = st === "ride" ? "visible" : "hidden";
+  const st = d.pos <= 0 ? "rest" : d.pos >= 1 || (d.phase === "land" && t > 0.995) ? "land" : "ride";
+  if (st !== d.phase) {
+    d.phase = st;
+    if (st === "ride") d.copy.style.color = getComputedStyle(d.h1).color; // the theme may have changed since the measure
+    d.copy.style.visibility = st === "ride" ? "visible" : "hidden";
     d.h1.style.opacity = st === "rest" ? "" : "0"; // still there for readers and search
     document.documentElement.setAttribute("data-mtdock", st);
   }
   if (st === "ride") {
-    const s = 1 + (m.k - 1) * d.x;
-    const tf = `translate3d(${(m.ax + (m.bx - m.ax) * d.x - m.ox * s).toFixed(2)}px,${(m.ay + (m.by - m.ay) * d.x - m.oy * s).toFixed(2)}px,0) scale(${s.toFixed(5)})`;
-    if (tf !== d.f.style.transform) {
-      d.f.style.transform = tf;
-      d.words.forEach((w, i) => i && (w.style.transform = `translate3d(${(m.ws * i * (1 - d.x)).toFixed(2)}px,0,0)`));
+    const s = 1 + (m.k - 1) * d.pos;
+    const tf = `translate3d(${(m.ax + (m.bx - m.ax) * d.pos - m.ox * s).toFixed(2)}px,${(m.ay + (m.by - m.ay) * d.pos - m.oy * s).toFixed(2)}px,0) scale(${s.toFixed(5)})`;
+    if (tf !== d.copy.style.transform) {
+      d.copy.style.transform = tf;
+      d.words.forEach((w, i) => i && (w.style.transform = `translate3d(${(m.ws * i * (1 - d.pos)).toFixed(2)}px,0,0)`));
     }
   }
   const cap = 1 - span(p, 0.48, 0.62), go = 1 - span(p, 0.72, 0.92), sc = 1 - span(p, 0.62, 0.92);
   const q = cap.toFixed(3) + go.toFixed(3) + sc.toFixed(3);
-  if (q === d.q) return;
-  d.q = q;
+  if (q === d.fadeKey) return;
+  d.fadeKey = q;
   // at rest nothing is written: an inline 1 beat the splash's own `opacity:0` rule, so the caption and buttons
   // stood alone on the empty page until the splash started (seen in Safari, 2026-11-15)
   const op = (v: number) => (v >= 1 ? "" : v.toFixed(3));
@@ -290,11 +290,11 @@ export const heroDrivers: Driver[] = [
         ctas: el.querySelector<HTMLElement>(".mt-name .mt-ctas"),
         more: el.querySelector<HTMLElement>(".mt-more .btn"),
         name: el.querySelector<HTMLElement>("[data-mt-name]"),
-        s: -1,
+        scroll: -1,
         mode: "",
-        e: -1,
-        u: 0,
-        at: "",
+        exit: -1,
+        unit: 0,
+        sizeKey: "",
         wall: WALL,
         dock: dockSetup(el),
         bar: document.querySelector<HTMLElement>(".site-hdr"),
@@ -355,16 +355,16 @@ export const heroDrivers: Driver[] = [
       addEventListener("scroll", past, { passive: true, signal: ac.signal });
       past();
       // late fonts move both boxes: measure again on the next frame
-      if (d) document.fonts.ready.then(() => (st.at = ""));
+      if (d) document.fonts.ready.then(() => (st.sizeKey = ""));
       /* The engine gives a section no frames once it is a screen above the window. A jump past the hero (a reload
          lower on the page, a header link, a flick) would leave the name wherever it was and the header without its
          wordmark, so land it here. */
       const far = () => {
-        if (!d || d.st === "land" || !document.documentElement.hasAttribute("data-mt-held") || el.getBoundingClientRect().bottom > -innerHeight) return;
-        d.st = "land";
-        d.x = 1;
-        d.v = 0;
-        d.f.style.visibility = "hidden";
+        if (!d || d.phase === "land" || !document.documentElement.hasAttribute("data-mt-held") || el.getBoundingClientRect().bottom > -innerHeight) return;
+        d.phase = "land";
+        d.pos = 1;
+        d.vel = 0;
+        d.copy.style.visibility = "hidden";
         d.h1.style.opacity = "0";
         document.documentElement.setAttribute("data-mtdock", "land");
       };
@@ -391,7 +391,7 @@ export const heroDrivers: Driver[] = [
         clearance(st, false);
         if (d) {
           dockOff(d);
-          d.f.remove();
+          d.copy.remove();
         }
         document.documentElement.removeAttribute("data-mtdock");
       };
@@ -402,40 +402,40 @@ export const heroDrivers: Driver[] = [
       const mode = ctx.held ? "d" : ctx.vw < 600 ? "p" : "t";
       if (mode !== st.mode) {
         st.mode = mode;
-        st.s = -1;
-        st.e = -1;
+        st.scroll = -1;
+        st.exit = -1;
         [...st.cols, ...st.figs].forEach((x) => move(x, 0));
         if (st.name) st.name.style.cssText = "";
         park(st.ctas, false);
         if (st.dock) dockOff(st.dock);
         document.documentElement.removeAttribute("data-mt-nameout");
         clearance(st, false);
-        st.at = "";
+        st.sizeKey = "";
       }
 
       if (mode === "d") {
         // the wall's own unit: big screens fit more columns by shrinking it (mtscroll.css), so measure it off a column, once a size
         const at = ctx.vw + "x" + ctx.vh;
-        if (at !== st.at) {
-          st.at = at;
+        if (at !== st.sizeKey) {
+          st.sizeKey = at;
           const core = st.cols.filter((c) => !c.el.classList.contains("side"));
-          st.u = (core[0]?.el.offsetWidth ?? 0) / 403 || ctx.u;
+          st.unit = (core[0]?.el.offsetWidth ?? 0) / 403 || ctx.u;
           // the lowest column end plus the 46 design px under it: 2640 with four rows
-          st.wall = core.length ? Math.max(...core.map((c) => c.el.offsetTop + c.el.offsetHeight)) / st.u + 46 : WALL;
+          st.wall = core.length ? Math.max(...core.map((c) => c.el.offsetTop + c.el.offsetHeight)) / st.unit + 46 : WALL;
           // one row of the wall, px: from one photo's top to the next in a column
           const two = core[0]?.el.querySelectorAll<HTMLElement>("figure");
-          st.row = (two && two[1] ? two[1].offsetTop - two[0].offsetTop : 0) || 660 * st.u;
+          st.row = (two && two[1] ? two[1].offsetTop - two[0].offsetTop : 0) || 660 * st.unit;
           // how far the name has to sink to clear the window: from its top at rest to the window's lower edge, and 24px. It rode
           // 0.6 of the window, and was out of sight well before the ride was over (Julian, 2026-11-17: "even longer, almost right before" the button)
-          if (st.texts[0]) st.drop = ctx.vh - (st.texts[0].getBoundingClientRect().top - Math.max(0, st.e) * st.drop) + 24;
+          if (st.texts[0]) st.drop = ctx.vh - (st.texts[0].getBoundingClientRect().top - Math.max(0, st.exit) * st.drop) + 24;
           if (st.dock && st.name) dockMeasure(st.dock, st.name);
         }
-        const u = st.u;
+        const u = st.unit;
         // the ground under the last row is in the page's unit, like the button that sits in it
         const target = p * Math.max(0, st.wall * u + TAIL * ctx.u - Math.max(ctx.vh, 600));
         // a 0.64 follow (0.4 until Julian halved the delay a second time, 2026-11-17), frame-rate independent (the live Recent()'s 0.2 felt laggy here: Julian, 2026-11-17, "half the delay")
-        st.s = st.s < 0 || Math.abs(target - st.s) < 0.1 ? target : st.s + (target - st.s) * (1 - Math.pow(0.36, ctx.dt / 16.7));
-        const S = st.s;
+        st.scroll = st.scroll < 0 || Math.abs(target - st.scroll) < 0.1 ? target : st.scroll + (target - st.scroll) * (1 - Math.pow(0.36, ctx.dt / 16.7));
+        const S = st.scroll;
         /* Where the wall ends (Julian, 2026-11-15): with three columns the left one ends lowest and the right one
            highest, a stair down to the left, so "See the work" on the right has the open corner. The markup's lags
            ended it the other way round. Five and seven columns already end high on the right, so they keep theirs. */
@@ -458,8 +458,8 @@ export const heroDrivers: Driver[] = [
         const gap = st.more ? st.more.getBoundingClientRect().top - ctx.vh : 0;
         const t = clamp(1 - gap / Math.max(1, 0.75 * (gap - ctx.top)));
         const e = Math.round(t * t * (2 - t) * 1000) / 1000;
-        if (st.name && e !== st.e) {
-          st.e = e;
+        if (st.name && e !== st.exit) {
+          st.exit = e;
           st.out = e >= 1;
           st.name.style.transform = e ? `translate3d(0,${((st.drop || 0.6 * ctx.vh) * e).toFixed(1)}px,0)` : "";
           st.name.style.setProperty("--mt-out", String(e));

@@ -119,10 +119,10 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
     const anims: Animation[] = [];
     const made: HTMLElement[] = [];
     const timers: number[] = [];
-    let over_ = false; // the intro has ended
+    let finished = false; // the intro has ended
     let raf = 0;
     let started = false;
-    let T = FULL; // the short one on a return visit, chosen when it starts
+    let pace = FULL; // the short one on a return visit, chosen when it starts
     const INPUTS = ["wheel", "touchstart", "pointerdown", "keydown"] as const;
     let hurry = () => {};
     const stopHurry = () => INPUTS.forEach((e) => window.removeEventListener(e, hurry));
@@ -130,8 +130,8 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
     const ready: string[] = [];
 
     const finish = (seen: boolean) => {
-      if (over_) return;
-      over_ = true;
+      if (finished) return;
+      finished = true;
       cancelAnimationFrame(raf);
       stopHurry();
       timers.forEach(clearTimeout);
@@ -154,7 +154,7 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
       return a;
     };
     const rise = (el: Element, from: number, delay: number) => {
-      play(el, [{ transform: `translate3d(0,${from}px,0)` }, { transform: "translate3d(0,0,0)" }], { duration: T.rise, delay, easing: OUT, composite: "add" }); // added on top of the scroll travel, so scrolling as the intro lands never snaps
+      play(el, [{ transform: `translate3d(0,${from}px,0)` }, { transform: "translate3d(0,0,0)" }], { duration: pace.rise, delay, easing: OUT, composite: "add" }); // added on top of the scroll travel, so scrolling as the intro lands never snaps
       hidden.push([el, delay]);
     };
     /* Out of sight until it moves, then opaque at once: it comes up out of the ground colour, never an opacity fade.
@@ -163,21 +163,21 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
     const hidden: [Element, number][] = [];
     const held: HTMLElement[] = [];
     // the ground colour lifts off a column: one opacity per column, so nothing repaints
-    const light = (el: Element, delay: number, pseudoElement?: string) => play(el, [{ opacity: 1 }, { opacity: 0 }], { duration: T.light, delay, pseudoElement });
+    const light = (el: Element, delay: number, pseudoElement?: string) => play(el, [{ opacity: 1 }, { opacity: 0 }], { duration: pace.light, delay, pseudoElement });
     const fadeIn = (sel: string, delay: number, duration: number, lift = 0) =>
       document.querySelectorAll(sel).forEach((el) =>
         play(el, [{ opacity: 0, transform: lift ? `translate3d(0,${lift}px,0)` : "none" }, { opacity: 1, transform: "none" }], { duration, delay, easing: OUT }),
       );
 
     const run = () => {
-      if (started || over_) return;
+      if (started || finished) return;
       started = true;
       const deep = deepMode();
       const short = returning();
-      T = short ? SHORT : FULL;
-      const END = T.end; // every time below is this run's
-      const pushAt = deep || short ? T.push : PUSH;
-      const land = deep ? T.land : END;
+      pace = short ? SHORT : FULL;
+      const END = pace.end; // every time below is this run's
+      const pushAt = deep || short ? pace.push : PUSH;
+      const land = deep ? pace.land : END;
       const W = window.innerWidth;
       const H = window.innerHeight;
       const wr = wall.getBoundingClientRect();
@@ -267,7 +267,7 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
       hero.prepend(jg);
       made.push(jg);
       [...jg.children].forEach((b, i) => {
-        play(b, [{ opacity: 0, transform: `translate3d(0,${i ? 110 : -110}px,0)`, filter: "blur(22px)" }, { opacity: 1, transform: "none", filter: "blur(0)" }], { duration: T.jg, easing: OUT });
+        play(b, [{ opacity: 0, transform: `translate3d(0,${i ? 110 : -110}px,0)`, filter: "blur(22px)" }, { opacity: 1, transform: "none", filter: "blur(0)" }], { duration: pace.jg, easing: OUT });
       });
       // JG stays lit while the wall rises over it, and goes only once the frames have covered it
       const marks = [...jg.children] as HTMLElement[];
@@ -289,9 +289,9 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
       // 1. the real columns, each with frames above and below it so the canvas has no holes
       cols.forEach((c, i) => {
         const b = c.b;
-        const delay = T.at + i * T.gap;
+        const delay = pace.at + i * pace.gap;
         const pass = isOver.has(c);
-        const lit = pass ? Math.max(0, delay - T.lead) : delay; // lit before it moves: it enters from off screen
+        const lit = pass ? Math.max(0, delay - pace.lead) : delay; // lit before it moves: it enters from off screen
         const g = group(b[0].x, lit);
         let topY = b[0].y;
         for (let y = b[0].y - R; y + h > ymin; y -= R) tile(g, (topY = y));
@@ -314,9 +314,9 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
       for (let m = -16; m <= 16; m++) {
         const x = first[0].x + m * P;
         if (x + w < xmin || x > xmax || real.some((r) => Math.abs(r - x) < P * 0.5)) continue;
-        const g = group(x, T.at + k * T.xgap);
+        const g = group(x, pace.at + k * pace.xgap);
         for (let y = ymin - h + (k % 2 ? R * 0.25 : 0); y < ymax; y += R) tile(g, y);
-        rise(g, X_FROM[k % X_FROM.length], T.at + k * T.xgap);
+        rise(g, X_FROM[k % X_FROM.length], pace.at + k * pace.xgap);
         if (deep) depth(g, px - x, py - top0, DEPTHS[k % DEPTHS.length]);
         k++;
       }
@@ -347,7 +347,7 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
         play(jg, [{ opacity: 1 }, { opacity: 0 }], { duration: 220, easing: OUT });
       };
       const watch = () => {
-        if (over_ || hid) return;
+        if (finished || hid) return;
         if (over.length && over.every((c) => Math.min(...c.els.map((el) => el.getBoundingClientRect().top)) < jt - 12)) return hide();
         raf = requestAnimationFrame(watch);
       };

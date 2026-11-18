@@ -11,7 +11,7 @@ const WORDMARK = "Julian Gigola";
 
 /* Keyboard: the footer's wall rises over "More about me" as About leaves the screen, and a Tab that landed there left
    the focused button under the footer's scrim. If something covers it, About comes back to the top of the screen. */
-function shown(e: React.FocusEvent<HTMLAnchorElement>) {
+function uncoverOnFocus(e: React.FocusEvent<HTMLAnchorElement>) {
   const a = e.currentTarget;
   requestAnimationFrame(() => {
     if (document.activeElement !== a || !a.matches(":focus-visible")) return;
@@ -68,7 +68,7 @@ export function MtAbout({ does }: { does: string[] }) {
             </div>
           </div>
         </div>
-        <Link className="btn mt-more-me" href="/about" onFocus={shown}>More about me</Link>
+        <Link className="btn mt-more-me" href="/about" onFocus={uncoverOnFocus}>More about me</Link>
       </div>
     </section>
   );
