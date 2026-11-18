@@ -31,10 +31,10 @@ export function MtByQuote({ stills, reply, onOptionPick }: { stills: Record<stri
   const [opt, setOpt] = React.useState(false); // the option's photo shows instead of the client's
   const ci = 0; // the first client: motion/quote.ts rotates by marking the DOM (`data-q`, `data-client`), React never rewrites it
   const cards = React.useContext(CardsCtx);
-  // ?mtask=1 trial: an option with several wide frames steps through them
+  // an option with several wide frames steps through them (`?mtask=0` turns the photo strip off, quote.css)
   const [tick, setTick] = React.useState(0);
   React.useEffect(() => {
-    if (matches("calm") || !/[?&]mtask=1/.test(location.search)) return; // only the trial shows the wide frames (quote.css)
+    if (matches("calm") || /[?&]mtask=0/.test(location.search)) return; // off: no wide frames to step through
     const t = setInterval(() => setTick((n) => n + 1), 5000);
     return () => clearInterval(t);
   }, []);
@@ -67,7 +67,7 @@ export function MtByQuote({ stills, reply, onOptionPick }: { stills: Record<stri
           <p className="lbl mt-by">
             <span className="mute">Commissioned by</span> <span className="nm">{client.name}</span>
           </p>
-          {/* ?mtask=1 trial: the clients as marks, the photo follows the option. */}<div className="mt-q-logos" aria-hidden><Marks hidden /></div>
+          {/* the clients as marks, the photo follows the option (`?mtask=0`: off) */}<div className="mt-q-logos" aria-hidden><Marks hidden /></div>
           <div className="mt-qos">
             {QUOTE_OPTS.slice(0, 3).map((x, i) => (
               <div key={x.key} className="mt-qow" data-on={i === sel || undefined}>

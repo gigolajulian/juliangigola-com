@@ -23,8 +23,8 @@ export const quoteDrivers: Driver[] = [
     name: "quote",
     always: true,
     setup(el) {
-      // ?mtask=1, a trial (Julian, 2026-11-17): the section as a full screen with the client photo behind the question (quote.css)
-      document.documentElement.toggleAttribute("data-mtask", /[?&]mtask=1/.test(location.search));
+      // The V4 default (Julian, 2026-11-18: "keep"; it was the ?mtask=1 trial): two thirds of a screen with the option's photo behind the question (quote.css). `?mtask=0` turns it off.
+      document.documentElement.toggleAttribute("data-mtask", !/[?&]mtask=0/.test(location.search));
       s.sets = [".mt-photo", ".mt-photo-w"].map((f) => [...el.querySelectorAll(`${f} > .cl`)]);
       s.names = [el.querySelector(".mt-by .nm"), el.querySelector(".mt-clcap")];
       s.root = el.closest<HTMLElement>(".mt");
