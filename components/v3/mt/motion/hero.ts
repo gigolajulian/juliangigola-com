@@ -10,7 +10,7 @@ const TAIL = 264; // ground left under the last row when the travel ends, so "Se
 const LAG_MAX = 2400;
 const END_D = [280, 0, 70]; // (right was 40: Julian, 2026-11-15, "a bit lower") how far each of the three locked columns has dropped behind when the travel ends, design px: mirrors the ends 0.12, 0, 0.2 gave at 1440x900
 const DRIFT = [40, 22]; // phone drift caps, px, per column
-const FLIP: Record<string, number> = { 1: 900, 2: 600, 3: 1300 }; // ?mtflip, ms
+const FLIP = 1300; // the idle wall's card turn, ms (Julian's pick of 600 / 900 / 1300, 2026-11-17)
 
 type Part = { el: HTMLElement; a: number; c: number; v: number };
 
@@ -331,10 +331,10 @@ export const heroDrivers: Driver[] = [
         if (!due) due = window.setTimeout(sweep, 100); // ten sweeps a second while scrolling, and one after the last scroll event
       };
       if (LEFT) document.documentElement.setAttribute("data-mtleft", "");
-      // Mock ?mtflip=1|2|3: the idle wall turns a card over to its next photo (hero.css), in 900, 600 or 1300ms. The value is the duration: hero.tsx reads it for the caption.
-      const flip = FLIP[/[?&]mtflip=([123])/.exec(location.search)?.[1] ?? ""];
-      // Mock ?mthover=1: the photo under the mouse sits a little larger in its frame and drifts against the pointer (hero.css). --hx / --hy are where the pointer is on the card, -1 to 1.
-      const wall = /[?&]mthover=1/.test(location.search) ? el.querySelector<HTMLElement>(".mt-wall") : null;
+      // The idle wall turns a card over to its next photo (hero.css). The value is the duration: hero.tsx reads it for the caption. `?mtflip=0` brings the hard cut back.
+      const flip = /[?&]mtflip=0/.test(location.search) ? 0 : FLIP;
+      // The photo under the mouse sits a little larger in its frame and drifts against the pointer (hero.css). --hx / --hy are where the pointer is on the card, -1 to 1. `?mthover=0` turns it off.
+      const wall = /[?&]mthover=0/.test(location.search) ? null : el.querySelector<HTMLElement>(".mt-wall");
       const shift = (e: PointerEvent) => {
         const ph = e.pointerType === "mouse" ? (e.target as Element).closest("figure")?.querySelector<HTMLElement>(".ph") : null;
         if (!ph) return;
