@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { matches } from "@/lib/device";
 import { startEngine } from "./engine";
 import { heroDrivers, heroStill } from "./hero";
 import { rowsDrivers } from "./rows";
@@ -29,7 +30,7 @@ export function MtMotionLayer() {
     if (!root || !("v3motion" in document.documentElement.dataset)) return;
     const stop = startEngine(root, [...heroDrivers, ...rowsDrivers, ...commissionsDrivers, ...aboutDrivers, ...quoteDrivers, ...footDrivers, ...depthDrivers, ...barDrivers]);
     const hide = startReveal(root);
-    const still = matchMedia("(prefers-reduced-motion: reduce)").matches ? heroStill(root) : null;
+    const still = matches("calm") ? heroStill(root) : null;
     return () => (stop(), hide(), still?.());
   }, []);
   // Safari on a foldable, rotated with its tab strip on the left: the page is left scrolled sideways by the strip's

@@ -26,23 +26,23 @@ function ClientPhoto({ c, on, stills, wide }: { c: QuoteClient; on: boolean; sti
   );
 }
 
-export function MtByQuote({ stills, reply, onTouch }: { stills: Record<string, string>; reply: string | null; onTouch: (i: number) => void }) {
-  const [on, setOn] = React.useState(0);
+export function MtByQuote({ stills, reply, onOptionPick }: { stills: Record<string, string>; reply: string | null; onOptionPick: (i: number) => void }) {
+  const [sel, setSel] = React.useState(0);
   const [opt, setOpt] = React.useState(false); // the option's photo shows instead of the client's
   const ci = 0; // the first client: motion/quote.ts rotates by marking the DOM (`data-q`, `data-client`), React never rewrites it
   const cards = React.useContext(CardsCtx);
   // ?mtask=1 trial: an option with several wide frames steps through them
   const [tick, setTick] = React.useState(0);
   React.useEffect(() => {
-    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (matches("calm")) return;
     const t = setInterval(() => setTick((n) => n + 1), 5000);
     return () => clearInterval(t);
   }, []);
-  const o = QUOTE_OPTS[on];
+  const o = QUOTE_OPTS[sel];
   const pick = (i: number) => {
-    setOn(i);
+    setSel(i);
     setOpt(true);
-    onTouch(i);
+    onOptionPick(i);
   };
   const client = QUOTE_CLIENTS[ci];
   return (
@@ -51,7 +51,7 @@ export function MtByQuote({ stills, reply, onTouch }: { stills: Record<string, s
         <figure className="mt-photo">
           {QUOTE_CLIENTS.map((c, i) => <ClientPhoto key={c.name} c={c} on={!opt && i === ci} stills={stills} />)}
           {QUOTE_OPTS.map((x, i) => (
-            <span key={x.key} className={opt && i === on ? "op on" : "op"} data-cur={i === on || undefined}>
+            <span key={x.key} className={opt && i === sel ? "op on" : "op"} data-cur={i === sel || undefined}>
               <Image src={x.photo} alt={`${x.name} sample`} fill sizes="(max-width: 1023px) 100vw, 42vw" />{x.wide?.map(([src, at], k) => <Image key={src} className="w" data-on={k === tick % x.wide!.length || undefined} src={src} alt="" fill sizes="100vw" style={{ objectPosition: at }} />)}
             </span>
           ))}
@@ -70,15 +70,15 @@ export function MtByQuote({ stills, reply, onTouch }: { stills: Record<string, s
           {/* ?mtask=1 trial: the clients as marks, the photo follows the option. */}<div className="mt-q-logos" aria-hidden><Marks hidden /></div>
           <div className="mt-qos">
             {QUOTE_OPTS.slice(0, 3).map((x, i) => (
-              <div key={x.key} className="mt-qow" data-on={i === on || undefined}>
-                <button type="button" className="mt-qo" aria-pressed={i === on} onPointerEnter={() => matches("fine") && pick(i)} onFocus={() => pick(i)} onClick={() => pick(i)}>
+              <div key={x.key} className="mt-qow" data-on={i === sel || undefined}>
+                <button type="button" className="mt-qo" aria-pressed={i === sel} onPointerEnter={() => matches("fine") && pick(i)} onFocus={() => pick(i)} onClick={() => pick(i)}>
                   <b>{x.name}</b>
                   <span className="lbl">{x.holds.map((h, k) => <React.Fragment key={h}>{k ? <i> | </i> : null}{h}</React.Fragment>)}</span>
                 </button>
                 <p className="mt-qo-d">{x.detail}</p>
               </div>
             ))}
-            <button type="button" className="mt-qw" aria-pressed={on === 3} onPointerEnter={() => matches("fine") && pick(3)} onFocus={() => pick(3)} onClick={() => pick(3)}>
+            <button type="button" className="mt-qw" aria-pressed={sel === 3} onPointerEnter={() => matches("fine") && pick(3)} onFocus={() => pick(3)} onClick={() => pick(3)}>
               <b>Weddings</b>
               <span><span className="dk">Full day | Couples, engagements</span><span className="po">Full day | Couples</span></span>
             </button>

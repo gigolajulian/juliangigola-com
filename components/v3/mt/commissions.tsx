@@ -5,12 +5,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { Marks } from "@/components/v3/duo";
 import { projectHref } from "@/lib/project-href";
-import type { MtFrame } from "./data";
+import { pad, type MtFrame } from "./data";
 
 /* Spec 3.3: the gapless sheet with its heading row held on top, a counter
    and the current frame's name beside it, the client logos as its last line.
    Phone: two-column masonry, each frame at its own ratio in the shorter column. */
-const pad = (n: number) => String(n).padStart(2, "0");
 
 /** Each frame to the shorter of two columns (heights by ratio; the right one starts 56/171 of a frame lower). */
 const masonry = (frames: MtFrame[]) => {
@@ -25,15 +24,15 @@ const masonry = (frames: MtFrame[]) => {
 };
 
 export function MtCommissions({ frames }: { frames: MtFrame[] }) {
-  const cur = 0; // hook: the motion pass sets the frame under the screen's centre (data-cur)
+  // the first frame as served; motion/commissions.ts owns data-cur and these three lines from then on
   return (
-    <section className="mt-comm" data-mt="comm" data-cur={cur}>
+    <section className="mt-comm" data-mt="comm" data-cur="0">
       <div className="mt-comm-pin">
       <div className="mt-comm-head">
         <h2>Commissions</h2>
         <div className="mt-comm-now" aria-hidden>
-          <span className="lbl mt-count"><span className="ln"><span data-mt-count>{pad(cur + 1)}</span></span>/{pad(frames.length)}</span>
-          <span className="lbl mt-cur"><span className="ln"><span data-mt-name>{frames[cur].name}</span> <span className="mute">{frames[cur].meta}</span></span></span>
+          <span className="lbl mt-count"><span className="ln"><span data-mt-count>{pad(1)}</span></span>/{pad(frames.length)}</span>
+          <span className="lbl mt-cur"><span className="ln"><span data-mt-name>{frames[0].name}</span> <span className="mute">{frames[0].meta}</span></span></span>
         </div>
       </div>
       <div className="sheet mt-sheet">

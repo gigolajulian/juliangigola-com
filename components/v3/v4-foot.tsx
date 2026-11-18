@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BOOK_ROWS, QUOTE_OPTS } from "./mt/data";
-import { useLocalTime } from "./mt/foot";
+import { useLocalTime } from "./use-local-time";
 import { media } from "@/lib/device";
 
 /* The ending of an inner page, on trial (`?v4pages=foot`, inner-pages plan g1):
