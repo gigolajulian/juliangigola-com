@@ -16,14 +16,14 @@ html[data-mtleft]:not([data-mt-pasthero]) .v3 .site-hdr { background: transparen
 /* The name's way out: the tagline and the buttons sink ahead of the name itself. */
 /* .mt-name twice: over depth.css's pointer shift on the same elements, which this keeps in the sum. */
 html[data-mt-held] .mt-hero .mt-name.mt-name :is(.mt-cap, .mt-ctas) { translate: calc(var(--px, 0) * 4px) calc(var(--py, 0) * 4px + var(--mt-out, 0) * 22vh); }
-/* Mock ?mtflip=1|2|3 (hero.ts sets html[data-mt-flip] and --mt-flip): the idle wall turns the card about its vertical axis, the old photo away and the new one in,
+/* The idle wall's card turn (hero.ts sets html[data-mt-flip] and --mt-flip): the idle wall turns the card about its vertical axis, the old photo away and the new one in,
    once the new one has loaded. One from/to pair a face, so the move curve runs once and the card is fastest edge-on. The new photo keeps a single animation: its end clears the old one (hero.tsx). */
 html[data-mt-flip] .mt-hero .ph:has(> img.mt-dev[data-on]) { perspective: 1600px; overflow: visible; background: none; }
 html[data-mt-flip] .mt-hero .ph:has(> img.mt-dev[data-on]) > img { -webkit-backface-visibility: hidden; backface-visibility: hidden; will-change: transform; animation: mt-flip-out var(--mt-flip, .9s) cubic-bezier(.77, 0, .175, 1) both; }
 html[data-mt-flip] .mt-hero .ph:has(> img.mt-dev[data-on]) > img.mt-dev { animation-name: mt-flip-in; }
 @keyframes mt-flip-out { to { transform: rotateY(180deg); } }
 @keyframes mt-flip-in { from { opacity: 1; transform: rotateY(-180deg); } to { opacity: 1; transform: none; } }
-/* Mock ?mthover=1 (hero.ts sets html[data-mt-shift] and --hx / --hy on the frame): the photo under the mouse sits 4% larger in its frame and drifts up to 1.5% of its size against the pointer.
+/* Hover (hero.ts sets html[data-mt-shift] and --hx / --hy on the frame): the photo under the mouse sits 4% larger in its frame and drifts up to 1.5% of its size against the pointer.
    The frame itself stays put: the wall already tilts with the pointer (depth.css). scale and translate, so the flip's transform is left alone. */
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
   html[data-mt-shift] .mt-hero .mt-col .ph > img { transition: scale .6s cubic-bezier(.165, .84, .44, 1), translate .35s cubic-bezier(.165, .84, .44, 1); }
