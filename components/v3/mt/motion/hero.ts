@@ -307,18 +307,27 @@ export const heroDrivers: Driver[] = [
       // by scroll, not by frame: a jump past the hero gets no hero frames
       // the hero is over when its last photos have left from under the header: the same line going down and coming back up
       const hdr = document.querySelector<HTMLElement>(".site-hdr");
-      /* Past the hero its links leave the tab order: Tab from the header went to the first wall photo and pulled the page back to the top
-         (MAC, #1157). The buttons have their own rule (park). shortcut: Shift+Tab from the next section goes to the header, not back into the hero;
-         scroll the hero back and its links return. */
+      /* The wall's links leave the tab order once the name has left (a phone, whose name never leaves: once the first screen is above the header).
+         Tab from the header went to the first wall photo and pulled the page back to the top (MAC, #1157), also partway through the hero, with its
+         bottom still showing (MAC, #1160). All of them at once: a link at a time was tried, and focus on a photo inside the pinned stage still
+         scrolled the page. See the work stays until the whole hero is past. The buttons go through park.
+         shortcut: Shift+Tab from further down skips the wall; scroll back to the top and its links return. */
       const links = () => el.querySelectorAll<HTMLElement>(".mt-wall a, .mt-more a"); // read when needed: the wall swaps its photos
-      let gone = false;
+      let due = 0;
+      const sweep = () => {
+        due = 0;
+        const top = hdr?.offsetHeight ?? 60, c = st.ctas;
+        const over = el.getBoundingClientRect().bottom <= top, up = !!c && c.getBoundingClientRect().bottom <= top;
+        const wall = over || up || !!c?.hasAttribute("data-park-out");
+        for (const a of links()) {
+          const off = a.closest(".mt-more") ? over : wall;
+          if ((a.getAttribute("tabindex") === "-1") !== off) off ? a.setAttribute("tabindex", "-1") : a.removeAttribute("tabindex");
+        }
+        park(c, over || up, "past");
+      };
       const past = () => {
-        const over = el.getBoundingClientRect().bottom <= (hdr?.offsetHeight ?? 60);
-        document.documentElement.toggleAttribute("data-mt-pasthero", over);
-        if (over === gone) return;
-        gone = over;
-        for (const a of links()) over ? a.setAttribute("tabindex", "-1") : a.removeAttribute("tabindex");
-        park(st.ctas, over, "past");
+        document.documentElement.toggleAttribute("data-mt-pasthero", el.getBoundingClientRect().bottom <= (hdr?.offsetHeight ?? 60));
+        if (!due) due = window.setTimeout(sweep, 100); // ten sweeps a second while scrolling, and one after the last scroll event
       };
       if (LEFT) document.documentElement.setAttribute("data-mtleft", "");
       // always: phones keep the wordmark out of the bar while the hero is on screen (mtscroll.css)
@@ -349,6 +358,7 @@ export const heroDrivers: Driver[] = [
         removeEventListener("scroll", past);
         document.documentElement.removeAttribute("data-mtleft");
         document.documentElement.removeAttribute("data-mt-pasthero");
+        clearTimeout(due);
         for (const a of links()) a.removeAttribute("tabindex");
         park(st.ctas, false, "past");
         document.documentElement.removeAttribute("data-mt-nameout");
