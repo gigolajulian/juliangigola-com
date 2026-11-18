@@ -1711,10 +1711,16 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
    to 48vw. Under 5:4 one frame stands under the title, at the size the column gives it; the second is left out
    there. A copy of it closing the sheet sat alone on the last row, and Julian cut it (2026-11-18). */
 @media (min-width:901px){.v3 #p-project .pj-hero:not(.two):not(.bleed) .pj-big{max-width:62vw}}
-/* A horizontal cover: the title, then the cover edge to edge at its own shape, no taller than the screen under the bar. */
-@media (min-width:901px){.v3 #p-project .pj-hero.bleed{display:block;height:auto;min-height:0;padding:var(--pj) 0 0}
-.v3 #p-project .pj-hero.bleed .pj-top{padding:40px var(--gr) 32px var(--g)}
-.v3 #p-project .pj-hero.bleed .pj-big{width:100%;max-width:none;height:auto;min-height:0;max-height:calc(100svh - 64px);margin:0}}
+/* A horizontal cover (Julian, 2026-11-18): edge to edge, cut to what the screen has left under the bar. The
+   title lies over its foot; Back sits above it on the left and the line that was under the title on the right. */
+@media (min-width:901px){.v3 #p-project .pj-hero.bleed{position:relative;display:block;height:auto;min-height:0;padding:0}
+.v3 #p-project .pj-hero.bleed .pj-top{flex-direction:row;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px 24px;padding:18px var(--gr) 18px var(--g)}
+.v3 #p-project .pj-hero.bleed .pj-row{display:contents}
+.v3 #p-project .pj-hero.bleed .pj-row .lbl{margin:0 0 0 auto;text-align:right}
+.v3 #p-project .pj-hero.bleed .pg-t{position:absolute;z-index:2;left:var(--g);right:var(--gr);bottom:clamp(24px,calc(3.2*var(--v3u)),56px);margin:0;color:#fff;pointer-events:none}
+.v3 #p-project .pj-hero.bleed .pj-big{display:block;width:100%;max-width:none;height:calc(100svh - 64px - 56px);min-height:420px;max-height:none;aspect-ratio:auto!important;margin:0}
+/* Ground for the title, the photo's own foot darkened; the logo keeps its corner. */
+.v3 #p-project .pj-hero.bleed .pj-big::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(0deg,rgb(0 0 0/.6) 0%,rgb(0 0 0/.22) 26%,transparent 52%)}}
 .v3 .pj-ct.tall{display:none}
 @media (min-width:901px) and (max-aspect-ratio:5/4){.v3 #p-project .pj-lead .pj-r + .pj-r{display:none}
 .v3 .pj-ct:has(+ .pj-ct.tall){display:none}.v3 .pj-ct.tall{display:inline}
