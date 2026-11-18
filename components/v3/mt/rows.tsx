@@ -109,7 +109,14 @@ export function MtFilms({ films }: { films: MtFilm[] }) {
   const dress = FILM_DRESS[films[cur].title];
   return (
     <section className="mt-held mt-motion" data-mt="motion" data-hold={films.length * 0.25 /* a quarter screen a film: Julian halved the 2 screens for four, 2026-11-17 */} data-cur={cur} style={{ "--n": films.length } as React.CSSProperties}>
-      <div className="mt-stage">
+      <div
+        className="mt-stage"
+        onFocus={(e) => {
+          // a film taking keyboard focus before the block is held: bring the stage up, so the film and its focus mark are whole on screen
+          const top = e.currentTarget.getBoundingClientRect().top;
+          if (top > 0 && document.documentElement.hasAttribute("data-mt-held") && (e.target as Element).matches(".mt-film:focus-visible")) scrollBy({ top });
+        }}
+      >
         <div className="mt-mohead">
           <h2>Motion</h2>
           <p className="lbl mute">Director and DP | {films.length} films</p>
