@@ -179,22 +179,41 @@ function grid(im: HTMLImageElement) {
   LUM.set(im, { src, g });
   return g;
 }
-let toned = 0;
+let toned = 0, tonedY = -1;
 function tone(st: Pick<State, "tw" | "phs">) {
   const wall = st.phs[0]?.closest(".mt-wall");
   if (!st.tw.length || !wall) return;
-  // a pass is 51 hit tests, about 5ms at 1440 (measured 2026-11-17): ten a second at most, not one a scroll frame. The colour takes .15s to change anyway.
+  /* A pass cost 51 hit tests: 5 to 8ms at 1440, 52ms on a phone-speed CPU, and it ran every frame, idle included (measured on live, 2026-11-17).
+     Now ten passes a second at most (the colour takes .15s to change anyway), and a word is hit tested at its two ends: the same photo under both
+     is the photo under the whole word. Only a word that straddles two photos goes letter by letter. About 17 hit tests a pass.
+     shortcut: a third photo lying on top of a word's middle only is missed, go back to a test a letter if a layout ever does that. */
   const now = performance.now();
-  if (now - toned < 100) return;
+  // standing still, only an idle photo swap can change what is under a letter: three passes a second cover that
+  if (now - toned < (scrollY === tonedY ? 280 : 100)) return;
+  tonedY = scrollY;
   toned = now;
-  for (const w of st.tw) {
-    const r = w.getBoundingClientRect();
+  const rs = st.tw.map((w) => w.getBoundingClientRect());
+  /* The photo a visitor sees at this point: a hit test, top first. Scanning the photo boxes took the first box in the document that held the point, and on an
+     iPhone that was a photo lying under another one (MAC, #1155: a line stayed white over a pale photo). The name block takes no pointer events, so it is not in the way.
+     While a swap develops, the incoming photo counts once it has cut in. Off screen there is nothing to hit: bare page. */
+  const hit = (r: DOMRect) =>
+    document.elementsFromPoint(r.left + r.width / 2, r.top + r.height / 2).find((n): n is HTMLImageElement => n instanceof HTMLImageElement && wall.contains(n) && n.complete && !!n.naturalWidth && (!n.classList.contains("mt-dev") || n.hasAttribute("data-on"))) ?? null;
+  let wd: Element | null = null;
+  let same: HTMLImageElement | null | undefined;
+  for (let n = 0; n < st.tw.length; n++) {
+    const w = st.tw[n], r = rs[n];
     if (!r.width) continue;
-    const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
-    /* The photo a visitor sees at this point: a hit test, top first. Scanning the photo boxes took the first box in the document that held the point, and on an
-       iPhone that was a photo lying under another one (MAC, #1155: a line stayed white over a pale photo). The name block takes no pointer events, so it is not in the way.
-       While a swap develops, the incoming photo counts once it has cut in. Off screen there is nothing to hit: bare page. */
-    const im = document.elementsFromPoint(cx, cy).find((n): n is HTMLImageElement => n instanceof HTMLImageElement && wall.contains(n) && n.complete && !!n.naturalWidth && (!n.classList.contains("mt-dev") || n.hasAttribute("data-on")));
+    const cy = r.top + r.height / 2;
+    const word = w.parentElement?.classList.contains("wd") ? w.parentElement : null;
+    if (!word) same = undefined;
+    else if (word !== wd) {
+      let z = n;
+      while (st.tw[z + 1]?.parentElement === word) z++;
+      const a = hit(r);
+      same = z === n || a === hit(rs[z]) ? a : undefined;
+    }
+    wd = word;
+    const im = same !== undefined ? same : hit(r);
     let t = "p"; // bare page
     if (im) {
       const g = grid(im);
