@@ -34,7 +34,63 @@ const zoomOf = (img: Element | null | undefined): Zoom | undefined => {
   return s && s.scale !== "none" ? { scale: s.scale, translate: s.translate === "none" ? FLAT.translate : s.translate, transform: s.transform } : undefined;
 };
 
-type Fly = { to: string; t: number; r: DOMRect; src: string; z?: Zoom };
+/* On trial (`?fly=b`, `?fly=0` to leave; kept for the tab): the browser carries the photo.
+   The copy below is a fresh <img>, which decodes off the frame it is added in: the photo was missing for the
+   frames that took (about 80ms on production). Decoding it first (`decoding = "sync"`) held the trip 150ms.
+   The pressed frame and the next page's hero share one view-transition-name, so the photo is its own
+   layer from the trip's first frame: it never fades out with the page it left, and the compositor moves
+   it, not layout. It travels on `drawer`, which sets off at once, with a shadow under it while it is in the
+   air (motion-plan.css).
+   A photo only becomes the hero when it is the hero (Julian, 2026-11-17). Pressed on another frame of the
+   project, it recedes last, where it was, and the project rises in whole (`data-fly="away"`). Flying it
+   to its own frame down the page was tried: a wide set holds that frame at another shape, and the crop
+   stepped as it landed. */
+const NAME = "mp-fly";
+const carried = () => {
+  try {
+    const q = new URLSearchParams(location.search).get("fly");
+    if (q === "0") sessionStorage.removeItem("jg-fly");
+    else if (q === "b") sessionStorage.setItem("jg-fly", q);
+    return "startViewTransition" in document ? sessionStorage.getItem("jg-fly") : null;
+  } catch {
+    return null;
+  }
+};
+/* What a carried trip set, taken back when the trip ends, or 4s after a press that never lands (as long as a fly is good for). */
+let undo: (() => void)[] = [];
+const settle = () => {
+  undo.forEach((u) => u());
+  undo = [];
+};
+/** Names a frame for the trip; the returned call takes the name alone back off. */
+const named = (e: HTMLElement) => {
+  // `data-flying`: the frame carries the photo alone, no caption, and no card ground over a hero still loading (motion-plan.css).
+  e.dataset.flying = "";
+  e.style.setProperty("view-transition-name", NAME);
+  const unname = () => e.style.removeProperty("view-transition-name");
+  undo.push(() => (delete e.dataset.flying, unname()));
+  return unname;
+};
+let unnameSource = () => {};
+/** Which photograph a file is, whatever size or loader served it: "iris/03". */
+const photo = (i: HTMLImageElement | null | undefined) => (i ? decodeURIComponent(i.currentSrc || i.src).match(/\/work\/([^/?]+\/\d+)/)?.[1] : undefined);
+
+/** On trial: a frame's picture slides up from its own foot, behind the frame's edge, at full strength (Julian: no fade, slide from the bottom). */
+const slideUp = (e: HTMLElement, i: number) => {
+  const pic = e.querySelector("img");
+  if (!pic) return;
+  e.style.overflow = "clip";
+  pic.style.transform = "translateY(101%)";
+  const t0 = performance.now();
+  // Held below the frame until the picture is there to slide (1.5s at most): a file that landed mid-slide popped in.
+  Promise.race([pic.decode().catch(() => {}), new Promise((r) => window.setTimeout(r, 1500))]).then(() => {
+    pic.style.removeProperty("transform");
+    const delay = Math.max(0, 140 + i * 70 - (performance.now() - t0));
+    pic.animate({ transform: ["translateY(101%)", "none"] }, { duration: 700, delay, easing: "cubic-bezier(.32,.72,0,1)", fill: "backwards" }).finished.finally(() => e.style.removeProperty("overflow"));
+  });
+};
+
+type Fly = { to: string; t: number; r: DOMRect; src: string; z?: Zoom; vt?: boolean; photo?: string };
 type Back = { t: number; hero?: { slug: string; r: DOMRect; src: string } };
 
 function shown(i: HTMLImageElement) {
@@ -63,6 +119,22 @@ export function PageFly() {
       fly.current = to && img ? { to, t: Date.now(), r: ((z && img.closest(".ph")) || img).getBoundingClientRect(), src: img.currentSrc || img.src, z } : null;
       if (fly.current && img && trial()) {
         flag("mpFly");
+        const mode = carried();
+        // Project pages only: a booking row swaps its photo as it is pressed, and keeps the copy.
+        if (mode && to!.startsWith("/portfolio/")) {
+          settle();
+          const mine = undo;
+          fly.current.vt = true;
+          fly.current.photo = photo(img);
+          document.documentElement.dataset.fly = mode;
+          // How the grid held the photo in its frame (the p3 drift): the hero sets off held the same way and eases flat, so nothing steps as it lifts.
+          const rs = document.documentElement.style;
+          rs.setProperty("--fly-z", z?.scale ?? "1");
+          rs.setProperty("--fly-t", z?.translate ?? "0px 0px");
+          undo.push(() => (delete document.documentElement.dataset.fly, rs.removeProperty("--fly-z"), rs.removeProperty("--fly-t")));
+          unnameSource = named(img.closest<HTMLElement>(".ph") ?? img);
+          window.setTimeout(() => undo === mine && settle(), 4000);
+        }
         /* The covers left behind get names before the page is snapshotted,
            so each recedes on its own (`.mp-out`, motion-plan.css). */
         const others = [...document.querySelectorAll<HTMLElement>(".v3 .wgrid .wt .ph, .v3 .sc-res .wt .ph")]
@@ -163,12 +235,32 @@ export function PageFly() {
         hero.closest("section, .flow")?.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300, delay: 100, easing: EASE, fill: "backwards" });
         return flyCopy(f.r, f.src, hero, 550, EASE, f.z);
       }
-      flyCopy(f.r, f.src, hero, 600, MOVE, f.z);
-      // The project's other frames on screen rise in as the hero lands (pick 2c).
+      // Found in the layout phase, the hero is named before the new page is captured; found later, the copy flies as before.
+      if (f.vt && !n) {
+        // The page left is already captured. A frame that outlives the trip (project to project) must not hold the name too: two of one name and the browser skips the trip.
+        unnameSource();
+        const hi = hero.querySelector("img");
+        const cover = !f.photo || photo(hi) === f.photo;
+        if (cover) {
+          named(hero);
+          /* The hero's own file is rarely here yet. Until it is, the frame shows the picture already on screen,
+             at the hero's crop, so what lands is what stays: the tile's tighter crop stretched into the frame
+             stepped out when the file arrived. Left in place; the file loads over the same picture. */
+          hero.style.background = `url("${f.src}") center / cover no-repeat`;
+        } else document.documentElement.dataset.fly = "away";
+        if (!cover) slideUp(hero, 0);
+        const trip = (document as Document & { activeViewTransition?: { finished: Promise<void> } | null }).activeViewTransition;
+        if (trip) trip.finished.finally(settle);
+        else window.setTimeout(settle, 1500);
+      } else {
+        settle();
+        flyCopy(f.r, f.src, hero, 600, MOVE, f.z);
+      }
+      // The project's other frames on screen rise in as the hero lands (pick 2c). On trial: they slide up instead, no fade.
       [...document.querySelectorAll<HTMLElement>(".v3 .pj-r")]
         .filter((e) => !e.contains(hero) && !hero.contains(e) && onScreen(e.getBoundingClientRect()))
         .slice(0, 6)
-        .forEach((e, i) => e.animate({ opacity: [0, 1], transform: ["translateY(16px)", "none"] }, { duration: 600, delay: 300 + i * 40, easing: OUT, fill: "backwards" }));
+        .forEach((e, i) => f.vt ? slideUp(e, i + 1) : e.animate({ opacity: [0, 1], transform: ["translateY(16px)", "none"] }, { duration: 600, delay: 300 + i * 40, easing: OUT, fill: "backwards" }));
     };
     land();
     return () => cancelAnimationFrame(raf);
