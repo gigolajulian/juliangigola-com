@@ -23,7 +23,7 @@ html[data-mt-flip] .mt-hero .ph:has(> img.mt-dev[data-on]) > img { -webkit-backf
 html[data-mt-flip] .mt-hero .ph:has(> img.mt-dev[data-on]) > img.mt-dev { animation-name: mt-flip-in; }
 @keyframes mt-flip-out { to { transform: rotateY(180deg); } }
 @keyframes mt-flip-in { from { opacity: 1; transform: rotateY(-180deg); } to { opacity: 1; transform: none; } }
-/* Mock ?mthover=1 (hero.ts sets html[data-mt-shift] and --hx / --hy on the frame): the photo under the mouse sits 4% larger in its frame and drifts up to 1.5% of its size against the pointer.
+/* Hover (hero.ts sets html[data-mt-shift] and --hx / --hy on the frame): the photo under the mouse sits 4% larger in its frame and drifts up to 1.5% of its size against the pointer.
    The frame itself stays put: the wall already tilts with the pointer (depth.css). scale and translate, so the flip's transform is left alone. */
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
   html[data-mt-shift] .mt-hero .mt-col .ph > img { transition: scale .6s cubic-bezier(.165, .84, .44, 1), translate .35s cubic-bezier(.165, .84, .44, 1); }

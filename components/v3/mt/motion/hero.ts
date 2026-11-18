@@ -333,8 +333,8 @@ export const heroDrivers: Driver[] = [
       if (LEFT) document.documentElement.setAttribute("data-mtleft", "");
       // The idle wall turns a card over to its next photo (hero.css). The value is the duration: hero.tsx reads it for the caption. `?mtflip=0` brings the hard cut back.
       const flip = /[?&]mtflip=0/.test(location.search) ? 0 : FLIP;
-      // Mock ?mthover=1: the photo under the mouse sits a little larger in its frame and drifts against the pointer (hero.css). --hx / --hy are where the pointer is on the card, -1 to 1.
-      const wall = /[?&]mthover=1/.test(location.search) ? el.querySelector<HTMLElement>(".mt-wall") : null;
+      // The photo under the mouse sits a little larger in its frame and drifts against the pointer (hero.css). --hx / --hy are where the pointer is on the card, -1 to 1. `?mthover=0` turns it off.
+      const wall = /[?&]mthover=0/.test(location.search) ? null : el.querySelector<HTMLElement>(".mt-wall");
       const shift = (e: PointerEvent) => {
         const ph = e.pointerType === "mouse" ? (e.target as Element).closest("figure")?.querySelector<HTMLElement>(".ph") : null;
         if (!ph) return;
