@@ -63,8 +63,11 @@ function dockSetup(el: HTMLElement): Dock | null {
 /* Gone, but still there for a screen reader. VoiceOver in Safari scrolls the page far down when it lands on the name (the stage is sticky), and
    visibility:hidden then took the tagline and the buttons out of its tree before its next step: it read the name, then the wall (MAC, 2026-11-17).
    So a gone block is see-through, takes no clicks and leaves the tab order, and nothing more. */
-function park(ctas: HTMLElement | null, out: boolean) {
+function park(ctas: HTMLElement | null, on: boolean, why: "out" | "past" = "out") {
   if (!ctas) return;
+  // two reasons, either is enough: the name has left (out), or the whole hero is above the window (past: a phone's name never leaves)
+  ctas.toggleAttribute("data-park-" + why, on);
+  const out = ctas.hasAttribute("data-park-out") || ctas.hasAttribute("data-park-past");
   ctas.style.pointerEvents = out ? "none" : "";
   for (const a of ctas.querySelectorAll("a,button")) out ? a.setAttribute("tabindex", "-1") : a.removeAttribute("tabindex");
 }
@@ -304,7 +307,19 @@ export const heroDrivers: Driver[] = [
       // by scroll, not by frame: a jump past the hero gets no hero frames
       // the hero is over when its last photos have left from under the header: the same line going down and coming back up
       const hdr = document.querySelector<HTMLElement>(".site-hdr");
-      const past = () => document.documentElement.toggleAttribute("data-mt-pasthero", el.getBoundingClientRect().bottom <= (hdr?.offsetHeight ?? 60));
+      /* Past the hero its links leave the tab order: Tab from the header went to the first wall photo and pulled the page back to the top
+         (MAC, #1157). The buttons have their own rule (park). shortcut: Shift+Tab from the next section goes to the header, not back into the hero;
+         scroll the hero back and its links return. */
+      const links = () => el.querySelectorAll<HTMLElement>(".mt-wall a, .mt-more a"); // read when needed: the wall swaps its photos
+      let gone = false;
+      const past = () => {
+        const over = el.getBoundingClientRect().bottom <= (hdr?.offsetHeight ?? 60);
+        document.documentElement.toggleAttribute("data-mt-pasthero", over);
+        if (over === gone) return;
+        gone = over;
+        for (const a of links()) over ? a.setAttribute("tabindex", "-1") : a.removeAttribute("tabindex");
+        park(st.ctas, over, "past");
+      };
       if (LEFT) document.documentElement.setAttribute("data-mtleft", "");
       // always: phones keep the wordmark out of the bar while the hero is on screen (mtscroll.css)
       addEventListener("scroll", past, { passive: true });
@@ -334,6 +349,8 @@ export const heroDrivers: Driver[] = [
         removeEventListener("scroll", past);
         document.documentElement.removeAttribute("data-mtleft");
         document.documentElement.removeAttribute("data-mt-pasthero");
+        for (const a of links()) a.removeAttribute("tabindex");
+        park(st.ctas, false, "past");
         document.documentElement.removeAttribute("data-mt-nameout");
         [...st.cols, ...st.figs].forEach((p) => (p.el.style.transform = ""));
         if (st.name) st.name.style.cssText = "";
