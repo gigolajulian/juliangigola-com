@@ -34,7 +34,9 @@ const zoomOf = (img: Element | null | undefined): Zoom | undefined => {
   return s && s.scale !== "none" ? { scale: s.scale, translate: s.translate === "none" ? FLAT.translate : s.translate, transform: s.transform } : undefined;
 };
 
-/* On trial (`?fly=b`, `?fly=0` to leave; kept for the tab): the browser carries the photo.
+/* The default since 2026-11-18 (Julian, on the live recording: "default"; it was the `?fly=b` trial). `?fly=0` turns it off for the tab
+   and `?fly=b` back on: the old copied-photo path below stays behind that switch for a week, then goes.
+   The browser carries the photo.
    The copy below is a fresh <img>, which decodes off the frame it is added in: the photo was missing for the
    frames that took (about 80ms on production). Decoding it first (`decoding = "sync"`) held the trip 150ms.
    The pressed frame and the next page's hero share one view-transition-name, so the photo is its own
@@ -49,9 +51,9 @@ const NAME = "mp-fly";
 const carried = () => {
   try {
     const q = new URLSearchParams(location.search).get("fly");
-    if (q === "0") sessionStorage.removeItem("jg-fly");
-    else if (q === "b") sessionStorage.setItem("jg-fly", q);
-    return "startViewTransition" in document ? sessionStorage.getItem("jg-fly") : null;
+    if (q === "0") sessionStorage.setItem("jg-fly", "0");
+    else if (q === "b") sessionStorage.removeItem("jg-fly");
+    return "startViewTransition" in document && sessionStorage.getItem("jg-fly") !== "0" ? "b" : null;
   } catch {
     return null;
   }
