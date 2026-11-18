@@ -5,10 +5,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { COVER_RELEASES } from "@/lib/cover-art-data";
 import { media } from "@/lib/device";
-import { HeldRow, rowKeys } from "./held-row";
-import { COVER_KEYS, COVER_PRESS, FILM_DRESS, type MtFilm } from "./data";
+import { HeldRow } from "./held-row";
+import { COVER_KEYS, COVER_PRESS, FILM_DRESS, pad, type MtFilm } from "./data";
 
-const pad = (n: number) => String(n).padStart(2, "0");
 const COVERS = COVER_KEYS.map((k) => COVER_RELEASES.find((r) => r.slug === k)!).filter(Boolean);
 
 /* Spec 3.7: sleeves with a picture disc behind each. `--o` per sleeve (0 in,
@@ -52,7 +51,7 @@ export function MtCovers() {
    structure: the films stack one under another in natural scroll (motion/rows.ts
    opens the one at the middle of the screen). The current film is read here, so
    the head stays in step with the engine off too. */
-export function MtMotion({ films }: { films: MtFilm[] }) {
+export function MtFilms({ films }: { films: MtFilm[] }) {
   const row = React.useRef<HTMLDivElement>(null);
   const [cur, setCur] = React.useState(0);
   React.useEffect(() => {
@@ -115,10 +114,10 @@ export function MtMotion({ films }: { films: MtFilm[] }) {
           <h2>Motion</h2>
           <p className="lbl mute">Director and DP | {films.length} films</p>
         </div>
-        <div className="mt-row" ref={row} role="group" tabIndex={0} aria-label="Films" onKeyDown={rowKeys}>
+        <div className="mt-row" ref={row} role="group" tabIndex={0} aria-label="Films">
           <div className="mt-track">
             {films.map((f, i) => (
-              <Link key={f.id} href={f.href} className="mt-item mt-film" data-i={i} data-film={f.id} data-preview={f.preview} aria-label={`${f.title}, ${f.kind}`} style={FILM_DRESS[f.title]?.zoom ? ({ "--z": FILM_DRESS[f.title].zoom } as React.CSSProperties) : undefined}>
+              <Link key={f.id} href={f.href} className="mt-item mt-film" data-i={i} data-film={f.id} data-preview={f.preview} aria-label={`${f.title}, ${f.kind}`} style={FILM_DRESS[f.title]?.zoom ? ({ "--z": FILM_DRESS[f.title]?.zoom } as React.CSSProperties) : undefined}>
                 {f.poster ? <Image src={f.poster} alt="" fill sizes="(max-width: 599px) 92vw, 100vw" /> : null}
               </Link>
             ))}

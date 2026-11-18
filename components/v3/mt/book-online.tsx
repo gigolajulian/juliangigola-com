@@ -53,12 +53,12 @@ function useWeekFirst(box: React.RefObject<HTMLDivElement | null>, key: string |
   }, [box, key]);
 }
 
-export function MtBookOnline({ open, onOpen, onClose, quote, onOwn }: { open: BookRow["key"] | null; onOpen: (k: BookRow["key"]) => void; onClose: () => void; quote: number | null; onOwn: () => void }) {
-  const [on, setOnRaw] = React.useState(0);
-  const setOn = (i: number) => (setOnRaw(i), onOwn());
+export function MtBookOnline({ open, onOpen, onClose, quotePhoto, onRowPick }: { open: BookRow["key"] | null; onOpen: (k: BookRow["key"]) => void; onClose: () => void; quotePhoto: number | null; onRowPick: () => void }) {
+  const [sel, setSelRaw] = React.useState(0);
+  const setSel = (i: number) => (setSelRaw(i), onRowPick());
   // desktop: the photo shows a By quote option while that list was the last one touched; never during a booking
-  const q = open ? null : quote;
-  const at = open ? Math.max(0, BOOK_ROWS.findIndex((x) => x.key === open)) : on;
+  const q = open ? null : quotePhoto;
+  const at = open ? Math.max(0, BOOK_ROWS.findIndex((x) => x.key === open)) : sel;
   const r = BOOK_ROWS[at];
   const sec = React.useRef<HTMLElement>(null);
   const box = React.useRef<HTMLDivElement>(null);
@@ -80,7 +80,7 @@ export function MtBookOnline({ open, onOpen, onClose, quote, onOwn }: { open: Bo
 
   const next = useNextOpen(r.slug);
   const pick = (i: number) => {
-    setOn(i);
+    setSel(i);
     onOpen(BOOK_ROWS[i].key);
   };
   return (
@@ -104,16 +104,16 @@ export function MtBookOnline({ open, onOpen, onClose, quote, onOwn }: { open: Bo
             <>
               <div className="mt-brs">
                 {BOOK_ROWS.map((x, i) => (
-                  <div key={x.key} className="mt-brw" data-on={i === on || undefined}>
+                  <div key={x.key} className="mt-brw" data-on={i === sel || undefined}>
                     {/* a mouse picks by hover and books by click; a finger picks first, then books */}
                     <button
                       type="button"
                       className="mt-br"
                       ref={(el) => void (rows.current[i] = el)}
-                      aria-pressed={i === on}
-                      onPointerEnter={() => matches("fine") && setOn(i)}
-                      onFocus={(e) => e.currentTarget.matches(":focus-visible") && setOn(i)}
-                      onClick={() => (matches("fine") || i === on ? pick(i) : setOn(i))}
+                      aria-pressed={i === sel}
+                      onPointerEnter={() => matches("fine") && setSel(i)}
+                      onFocus={(e) => e.currentTarget.matches(":focus-visible") && setSel(i)}
+                      onClick={() => (matches("fine") || i === sel ? pick(i) : setSel(i))}
                     >
                       <b>{x.name}</b>
                       <span className="lbl">{x.len} <i aria-hidden>|</i> {x.price}</span>
@@ -122,7 +122,7 @@ export function MtBookOnline({ open, onOpen, onClose, quote, onOwn }: { open: Bo
                 ))}
               </div>
               <div className="mt-act">
-                <button type="button" className="btn fill mt-big" onClick={() => pick(on)}>{r.btn}</button>
+                <button type="button" className="btn fill mt-big" onClick={() => pick(sel)}>{r.btn}</button>
                 {next ? <p className="lbl mt-next"><span className="mute">Next open</span> {next}</p> : null}
                 <Link className="mt-link" href="/book">All sessions</Link>
               </div>
@@ -138,7 +138,7 @@ export function MtBookOnline({ open, onOpen, onClose, quote, onOwn }: { open: Bo
       {/* Phone, tablet and on its side: the held bar while the screen is up. */}
       <div className="mt-bar">
         <p className="lbl mute">{next ? <>Next open<br />{next}</> : null}</p>
-        <button type="button" className="btn fill" onClick={() => pick(on)}>{r.btn}</button>
+        <button type="button" className="btn fill" onClick={() => pick(sel)}>{r.btn}</button>
       </div>
     </section>
   );

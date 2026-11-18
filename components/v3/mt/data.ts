@@ -7,6 +7,9 @@ import { DEPOSIT } from "@/lib/booking/paid";
 /** A photo with its caption: `r` is height / width. */
 export type MtFrame = { src: string; name: string; meta: string; slug: string; r: number };
 export type MtFilm = { id: string; title: string; kind: string; client: string; poster: string | null; href: string; preview?: string };
+/** A count as two digits: 01, 02. */
+export const pad = (n: number) => String(n).padStart(2, "0");
+
 export type MtData = { hero: MtFrame[]; extras: MtFrame[]; comm: MtFrame[]; films: MtFilm[]; does: string[]; reply: string | null; stills: Record<string, string> };
 
 /* Julian's arranger save (save.json), in order. Key `<slug>/<NN>`. */
@@ -15,7 +18,7 @@ export const COMM_KEYS = ["cyber1a/01", "goodcult/01", "gilt/01", "jubo/03", "pa
 /* Julian's seven: the top five (2026-11-14), then Jahannam and Whole Summer (2026-11-15). The rest are on /portfolio?d=coverart. */
 export const COVER_KEYS = ["the-description", "the-river", "problem-child", "your-way", "est-modvs-in-rebvs", "jahannam", "whole-summer"];
 /* v1: one pressing color per release, taken from its cover by eye from the sampled palette (2026-11-14). */
-export const COVER_PRESS: Record<string, string> = {
+export const COVER_PRESS: Partial<Record<string, string>> = {
   "the-description": "#c9c5bd",
   "the-river": "#5a6b33",
   "problem-child": "#24475a",
@@ -36,7 +39,8 @@ export const FILM_PICKS: [title: string, kind: string][] = [
 /* Per-film dressing on the home (Julian, 2026-11-14). `zoom`: the frame is pushed in from its top left corner, poster and
    preview alike, so the mark burnt into the bottom right corner of the video is cut. `mark`: the client logo, top right.
    `at`: the second the home's preview starts at, when it is not the film's own previewAt (picked in the Film start picker artifact). */
-export const FILM_DRESS: Record<string, { zoom?: number; at?: number; mark?: { src: string; w: number; h: number; name: string } }> = {
+export type FilmDress = { zoom?: number; at?: number; mark?: { src: string; w: number; h: number; name: string } };
+export const FILM_DRESS: Partial<Record<string, FilmDress>> = {
   "Director's Reel": { at: 4 },
   Clean: { at: 48 },
   "Ladera Granola": { zoom: 1.25, at: 17, mark: { src: "/clients/ladera-granola.webp", w: 432, h: 73, name: "Ladera" } },

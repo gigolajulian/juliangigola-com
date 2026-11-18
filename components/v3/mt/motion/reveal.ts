@@ -1,3 +1,5 @@
+import { matches } from "@/lib/device";
+
 /* Phone and tablet (no holds): each block comes into frame as it scrolls into view, once.
    The desktop holds have their own beats, so reveal.css only applies when nothing is held. */
 const BLOCKS = [
@@ -9,7 +11,7 @@ const BLOCKS = [
 ].join(",");
 
 export function startReveal(root: HTMLElement) {
-  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return () => {};
+  if (matches("calm")) return () => {};
   const els = [...root.querySelectorAll<HTMLElement>(BLOCKS)];
   const io = new IntersectionObserver(
     (es) => {

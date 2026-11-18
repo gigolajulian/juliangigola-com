@@ -33,14 +33,14 @@ function setup(el: HTMLElement, ctx: Ctx) {
   const [Wc, w] = buf(), [Bc, b] = buf(), [Sc, s2] = buf(), [Mc, m] = buf();
 
   // the still's reveal
-  let rv = 0, dirty = true;
+  let reveal = 0, dirty = true;
   // pointer, client px
   let px = -1, py = -1;
   // phrase
-  let W = 0, pad = 0, x = 0, v = 0, pk = 0, tr = 0, first = true;
+  let W = 0, pad = 0, phraseX = 0, phraseV = 0, pk = 0, tr = 0, first = true;
   const clones: Node[] = [];
   // dot and spot
-  let hot = false, cx = 0, cy = 0, ca = 0, sx = -1, sy = 0, sa = 0, saOut = "", ink = "";
+  let hot = false, dotX = 0, dotY = 0, dotAlpha = 0, spotX = -1, spotY = 0, spotAlpha = 0, spotOut = "", ink = "";
   let MK: HTMLCanvasElement | null = null, mz = 1;
 
   const measure = () => {
@@ -50,7 +50,7 @@ function setup(el: HTMLElement, ctx: Ctx) {
     for (let n = row.children.length; W > 0 && (n - 1) * W < ctx.vw; n++) clones.push(row.appendChild(row.lastElementChild!.cloneNode(true)));
     // start with a copy at the resting position and one already off to its left
     if (first && W) {
-      x = -pad;
+      phraseX = -pad;
       first = false;
     }
     MK = null;
@@ -106,7 +106,7 @@ function setup(el: HTMLElement, ctx: Ctx) {
     if (!MK) return;
     const dpr = Math.min(2, devicePixelRatio || 1), Ru = R * u, bw = 2 * Ru, bh = br.height;
     const snap = (n: number) => Math.round(n * dpr) / dpr;
-    const ox = snap(sx - Ru), oy = snap(br.top - r.top);
+    const ox = snap(spotX - Ru), oy = snap(br.top - r.top);
     const cw = Math.round(bw * dpr), ch = Math.round(bh * dpr);
     if (cut.width !== cw || cut.height !== ch) {
       cut.style.width = `${bw}px`;
@@ -124,7 +124,7 @@ function setup(el: HTMLElement, ctx: Ctx) {
     w.fillStyle = ink;
     w.fillRect(0, 0, bw, bh);
 
-    const gx = (sx - ox) * dpr, gy = (sy - oy) * dpr, ud = u * dpr;
+    const gx = (spotX - ox) * dpr, gy = (spotY - oy) * dpr, ud = u * dpr;
     // blur without ctx.filter (Safari): down to 1/6 and back up
     b.imageSmoothingQuality = "high";
     b.globalCompositeOperation = "copy";
@@ -166,9 +166,10 @@ function setup(el: HTMLElement, ctx: Ctx) {
   const onResize = () => {
     dirty = true;
   };
-  stage.addEventListener("pointermove", onMove);
-  stage.addEventListener("pointerleave", onLeave);
-  addEventListener("resize", onResize);
+  const ac = new AbortController();
+  stage.addEventListener("pointermove", onMove, { signal: ac.signal });
+  stage.addEventListener("pointerleave", onLeave, { signal: ac.signal });
+  addEventListener("resize", onResize, { signal: ac.signal });
   document.fonts.ready.then(onResize);
 
   tick = (c) => {
@@ -185,16 +186,16 @@ function setup(el: HTMLElement, ctx: Ctx) {
     pk = clamp(pk * Math.pow(0.94, k) + c.dy * 0.0012, -0.35, 0.35);
     if (Math.abs(pk) < 0.0005) pk = 0;
     // 68 design px a second, 54 under the pointer (Julian, 2026-11-15: 30 passed too slow and nearly stopped on hover, 90 was a bit fast; the hover speed stayed)
-    v += ((busy ? 0 : (hot ? 0.054 : 0.068) * u) + pk - v) * (1 - Math.exp(-dt / 180));
-    x += v * dt;
-    tr = -pad - mod(x, W || 1);
+    phraseV += ((busy ? 0 : (hot ? 0.054 : 0.068) * u) + pk - phraseV) * (1 - Math.exp(-dt / 180));
+    phraseX += phraseV * dt;
+    tr = -pad - mod(phraseX, W || 1);
     row.style.transform = `translate3d(${tr.toFixed(1)}px,0,0)`;
 
     if (!c.held) return;
 
     // the still's reveal
-    rv += (smooth(span(clamp((c.vh - r.top) / r.height), 0.25, 1)) - rv) * Math.min(1, sec * 5);
-    wall.style.opacity = rv.toFixed(3);
+    reveal += (smooth(span(clamp((c.vh - r.top) / r.height), 0.25, 1)) - reveal) * Math.min(1, sec * 5);
+    wall.style.opacity = reveal.toFixed(3);
 
     if (!c.fine) return;
 
@@ -203,45 +204,43 @@ function setup(el: HTMLElement, ctx: Ctx) {
     const was = hot;
     hot = !busy && px >= 0 && ly > r.height - 448 * u && ly < r.height - 88 * u;
     if (hot !== was) el.toggleAttribute("data-hot", hot);
-    if (hot && ca === 0) {
-      cx = lx;
-      cy = ly;
+    if (hot && dotAlpha === 0) {
+      dotX = lx;
+      dotY = ly;
     }
-    if (hot || ca > 0) {
+    if (hot || dotAlpha > 0) {
       if (px >= 0) {
-        cx += (lx - cx) * Math.min(1, 0.22 * k);
-        cy += (ly - cy) * Math.min(1, 0.22 * k);
+        dotX += (lx - dotX) * Math.min(1, 0.22 * k);
+        dotY += (ly - dotY) * Math.min(1, 0.22 * k);
       }
-      ca += ((hot ? 1 : 0) - ca) * Math.min(1, 0.18 * k);
-      if (!hot && ca < 0.004) ca = 0;
-      dot.style.opacity = ca.toFixed(3);
-      dot.style.transform = `translate3d(${(cx - 7).toFixed(1)}px,${(cy - 7).toFixed(1)}px,0) scale(${(0.4 + 0.6 * ca).toFixed(3)})`;
+      dotAlpha += ((hot ? 1 : 0) - dotAlpha) * Math.min(1, 0.18 * k);
+      if (!hot && dotAlpha < 0.004) dotAlpha = 0;
+      dot.style.opacity = dotAlpha.toFixed(3);
+      dot.style.transform = `translate3d(${(dotX - 7).toFixed(1)}px,${(dotY - 7).toFixed(1)}px,0) scale(${(0.4 + 0.6 * dotAlpha).toFixed(3)})`;
     }
 
     // spot
     const show = hot || (!busy && btn.matches(":focus-visible"));
-    if (show && sa === 0) {
+    if (show && spotAlpha === 0) {
       ink = getComputedStyle(stage).getPropertyValue("--phr").trim() || "#8a8a8a";
-      if (hot || sx < 0) {
-        sx = hot ? lx : r.width / 2;
-        sy = hot ? ly : r.height - 210 * u;
+      if (hot || spotX < 0) {
+        spotX = hot ? lx : r.width / 2;
+        spotY = hot ? ly : r.height - 210 * u;
       }
     }
     if (hot) {
-      sx += (lx - sx) * Math.min(1, 0.18 * k);
-      sy += (ly - sy) * Math.min(1, 0.18 * k);
+      spotX += (lx - spotX) * Math.min(1, 0.18 * k);
+      spotY += (ly - spotY) * Math.min(1, 0.18 * k);
     }
-    sa = clamp(sa + ((show ? 1 : -1) * dt) / 450);
-    const out = sa.toFixed(3);
-    if (out !== saOut) cut.style.opacity = saOut = out;
-    if (sa > 0.01) draw(r, u);
+    spotAlpha = clamp(spotAlpha + ((show ? 1 : -1) * dt) / 450);
+    const out = spotAlpha.toFixed(3);
+    if (out !== spotOut) cut.style.opacity = spotOut = out;
+    if (spotAlpha > 0.01) draw(r, u);
   };
 
   return () => {
     tick = null;
-    stage.removeEventListener("pointermove", onMove);
-    stage.removeEventListener("pointerleave", onLeave);
-    removeEventListener("resize", onResize);
+    ac.abort();
     for (const n of [cut, dot, ...clones]) n.parentNode?.removeChild(n);
     el.removeAttribute("data-hot");
     for (const n of [wall, row]) {

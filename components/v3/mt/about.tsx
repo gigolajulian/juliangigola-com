@@ -3,7 +3,7 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ABOUT_FACTS, ABOUT_SENTENCE } from "./data";
+import { ABOUT_FACTS, ABOUT_SENTENCE, pad } from "./data";
 
 /* Spec 3.9: one screen. The sentence is one paragraph; the per-word spans
    (`--w`) and the wordmark's per-letter spans (`--j`) are for the motion pass. */
@@ -11,7 +11,7 @@ const WORDMARK = "Julian Gigola";
 
 /* Keyboard: the footer's wall rises over "More about me" as About leaves the screen, and a Tab that landed there left
    the focused button under the footer's scrim. If something covers it, About comes back to the top of the screen. */
-function shown(e: React.FocusEvent<HTMLAnchorElement>) {
+function uncoverOnFocus(e: React.FocusEvent<HTMLAnchorElement>) {
   const a = e.currentTarget;
   requestAnimationFrame(() => {
     if (document.activeElement !== a || !a.matches(":focus-visible")) return;
@@ -48,7 +48,7 @@ export function MtAbout({ does }: { does: string[] }) {
               <ol>
                 {does.map((d, j) => (
                   <li key={d} style={{ "--j": j } as React.CSSProperties}>
-                    <span className="lbl mute">{String(j + 1).padStart(2, "0")}</span>
+                    <span className="lbl mute">{pad(j + 1)}</span>
                     <b>{d}</b>
                   </li>
                 ))}
@@ -68,7 +68,7 @@ export function MtAbout({ does }: { does: string[] }) {
             </div>
           </div>
         </div>
-        <Link className="btn mt-more-me" href="/about" onFocus={shown}>More about me</Link>
+        <Link className="btn mt-more-me" href="/about" onFocus={uncoverOnFocus}>More about me</Link>
       </div>
     </section>
   );

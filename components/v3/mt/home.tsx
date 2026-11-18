@@ -5,7 +5,7 @@ import type { MtData, BookRow, QuoteOpt } from "./data";
 import { CardsCtx, type Cards, type InquiryFrom } from "./ctx";
 import { MtHero } from "./hero";
 import { MtCommissions } from "./commissions";
-import { MtCovers, MtMotion } from "./rows";
+import { MtCovers, MtFilms } from "./rows";
 import { MtBookOnline } from "./book-online";
 import { MtByQuote } from "./by-quote";
 import { MtAbout } from "./about";
@@ -21,7 +21,7 @@ export function MtHome({ data }: { data: MtData }) {
   const [book, setBook] = React.useState<BookRow["key"] | null>(null);
   const [inq, setInq] = React.useState<{ from: InquiryFrom; opt?: QuoteOpt["key"] } | null>(null);
   // the booking photo follows the last row touched in either list: a quote option's index, or null for the sessions
-  const [qp, setQp] = React.useState<number | null>(null);
+  const [quotePhoto, setQuotePhoto] = React.useState<number | null>(null);
   // The control that opened a card gets focus back when it closes (spec 3.6, 3.11).
   const opener = React.useRef<HTMLElement | null>(null);
   const keep = () => (opener.current = document.activeElement as HTMLElement | null);
@@ -34,9 +34,9 @@ export function MtHome({ data }: { data: MtData }) {
         <MtHero frames={data.hero} extras={data.extras} />
         <MtCommissions frames={data.comm} />
         <MtCovers />
-        <MtMotion films={data.films} />
-        <MtBookOnline open={book} onOpen={setBook} onClose={() => setBook(null)} quote={qp} onOwn={() => setQp(null)} />
-        <MtByQuote stills={data.stills} reply={data.reply} onTouch={setQp} />
+        <MtFilms films={data.films} />
+        <MtBookOnline open={book} onOpen={setBook} onClose={() => setBook(null)} quotePhoto={quotePhoto} onRowPick={() => setQuotePhoto(null)} />
+        <MtByQuote stills={data.stills} reply={data.reply} onOptionPick={setQuotePhoto} />
         <MtAbout does={data.does} />
         <MtFoot />
       </section>
