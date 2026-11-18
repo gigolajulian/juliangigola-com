@@ -20,7 +20,7 @@ const mod3 = (c: number) => ((c % 3) + 3) % 3;
 
 const SIZES = "(max-width: 599px) 50vw, (min-width: 1920px) 18vw, 30vw";
 
-/* Mock ?mtflip (motion/hero.ts sets html[data-mt-flip] to the flip's ms): the caption changes as the card is edge-on. The move curve is not symmetric: it passes 90 degrees at 0.479 of its time. The timer starts on animationstart, which arrives a frame after the animation began (measured): hence the 16ms off. */
+/* The card turn (motion/hero.ts sets html[data-mt-flip] to the flip's ms): the caption changes as the card is edge-on. The move curve is not symmetric: it passes 90 degrees at 0.479 of its time. The timer starts on animationstart, which arrives a frame after the animation began (measured): hence the 16ms off. */
 const EDGE = 0.479;
 const flipMs = () => Number(document.documentElement.dataset.mtFlip) || 0;
 
