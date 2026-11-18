@@ -729,3 +729,10 @@ html[data-v3motion][data-mtscroll]:has(.mt-hero) .v3 .site-hdr:not(.menu-on) .si
 html[data-v3motion][data-mtscroll]:has(.mt-hero):not([data-mt-pasthero],[data-mt-nameout]) .v3 .site-hdr:not(.menu-on) .site-wm{opacity:0;pointer-events:none}
 /* The held stage is its own layer: the page colour behind it. (The tagline's invert blend is gone, Julian 2026-11-17: harder to read.) */
 html[data-mt-held] [data-mtscroll] .mt-hero .mt-stage,html[data-mt-held][data-mtscroll] .mt-hero .mt-stage{background:var(--bg)}
+/* Phone tagline (Julian, 2026-11-18): one colour per theme over a tint of the page, in place of the per-letter photo tones, which still sank into busy photos.
+   The tint is a full-bleed band along the foot of the hero: even up to the top of the small text, then it feathers out under the name. */
+@media (max-width:599px){
+  :root:root .v3 .mt-hero .mt-scrim.mt-scrim.mt-scrim{--t:var(--bg);height:calc(200px + env(safe-area-inset-bottom));background:linear-gradient(to top,color-mix(in srgb,var(--t) 60%,transparent) 48%,color-mix(in srgb,var(--t) 44%,transparent) 62%,color-mix(in srgb,var(--t) 24%,transparent) 77%,color-mix(in srgb,var(--t) 8%,transparent) 90%,transparent)}
+  :root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap{color:var(--ink)}
+  :root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w.w[data-tone]{color:inherit;text-shadow:none}
+}
