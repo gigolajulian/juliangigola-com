@@ -174,7 +174,8 @@ export function PageFly() {
     let press: Animation | null = null;
     const down = (e: PointerEvent) => {
       if (e.button || e.pointerType === "touch" || !carried() || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-      const ph = (e.target as Element).closest('.v3 a[href^="/portfolio/"]')?.querySelector<HTMLElement>(".ph");
+      // the next-project link at the foot of a project page holds its cover in .pj-nx or the full stage, whichever is showing
+      const ph = [...((e.target as Element).closest('.v3 a[href^="/portfolio/"]')?.querySelectorAll<HTMLElement>(".ph, .pj-nx, .pj-stage") ?? [])].find((n) => n.offsetWidth);
       press?.cancel();
       press = ph?.animate({ scale: ["1", "0.975", "1.035"], offset: [0, 0.22, 1], easing: "cubic-bezier(.23,1,.32,1)" }, { duration: 560, fill: "forwards" }) ?? null;
     };
