@@ -34,7 +34,30 @@ const zoomOf = (img: Element | null | undefined): Zoom | undefined => {
   return s && s.scale !== "none" ? { scale: s.scale, translate: s.translate === "none" ? FLAT.translate : s.translate, transform: s.transform } : undefined;
 };
 
-type Fly = { to: string; t: number; r: DOMRect; src: string; z?: Zoom };
+/* On trial (`?fly=a`, `?fly=b`, `?fly=0` to leave; kept for the tab): the browser carries the photo.
+   The pressed frame and the next page's hero share one view-transition-name, so the photo is its own
+   layer from the trip's first frame: it never fades out with the page it left, and the compositor moves
+   it, not layout. a: the live trip (move, 600). b: the same on `drawer` in 500, which sets off at once
+   (motion-plan.css). */
+const NAME = "mp-fly";
+const carried = () => {
+  try {
+    const q = new URLSearchParams(location.search).get("fly");
+    if (q === "0") sessionStorage.removeItem("jg-fly");
+    else if (q === "a" || q === "b") sessionStorage.setItem("jg-fly", q);
+    return "startViewTransition" in document ? sessionStorage.getItem("jg-fly") : null;
+  } catch {
+    return null;
+  }
+};
+const named = (e: HTMLElement) => {
+  // `data-flying`: the frame carries the photo alone, no caption, and no card ground over a hero still loading (motion-plan.css).
+  e.dataset.flying = "";
+  e.style.setProperty("view-transition-name", NAME);
+  window.setTimeout(() => (delete e.dataset.flying, e.style.removeProperty("view-transition-name")), 1500);
+};
+
+type Fly = { to: string; t: number; r: DOMRect; src: string; z?: Zoom; vt?: boolean };
 type Back = { t: number; hero?: { slug: string; r: DOMRect; src: string } };
 
 function shown(i: HTMLImageElement) {
@@ -63,6 +86,13 @@ export function PageFly() {
       fly.current = to && img ? { to, t: Date.now(), r: ((z && img.closest(".ph")) || img).getBoundingClientRect(), src: img.currentSrc || img.src, z } : null;
       if (fly.current && img && trial()) {
         flag("mpFly");
+        const mode = carried();
+        if (mode) {
+          fly.current.vt = true;
+          document.documentElement.dataset.fly = mode;
+          window.setTimeout(() => delete document.documentElement.dataset.fly, 1500);
+          named(img.closest<HTMLElement>(".ph") ?? img);
+        }
         /* The covers left behind get names before the page is snapshotted,
            so each recedes on its own (`.mp-out`, motion-plan.css). */
         const others = [...document.querySelectorAll<HTMLElement>(".v3 .wgrid .wt .ph, .v3 .sc-res .wt .ph")]
@@ -163,7 +193,16 @@ export function PageFly() {
         hero.closest("section, .flow")?.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300, delay: 100, easing: EASE, fill: "backwards" });
         return flyCopy(f.r, f.src, hero, 550, EASE, f.z);
       }
-      flyCopy(f.r, f.src, hero, 600, MOVE, f.z);
+      // Found in the layout phase, the hero is named before the new page is captured; found later, the copy flies as before.
+      if (f.vt && !n) {
+        named(hero);
+        // A hero still loading would come up blank over the photo: the photo left behind carries the whole trip instead.
+        const hi = hero.querySelector("img");
+        if (!(hi?.complete && hi.naturalWidth)) {
+          document.documentElement.dataset.flyWait = "";
+          window.setTimeout(() => delete document.documentElement.dataset.flyWait, 1500);
+        }
+      } else flyCopy(f.r, f.src, hero, 600, MOVE, f.z);
       // The project's other frames on screen rise in as the hero lands (pick 2c).
       [...document.querySelectorAll<HTMLElement>(".v3 .pj-r")]
         .filter((e) => !e.contains(hero) && !hero.contains(e) && onScreen(e.getBoundingClientRect()))
