@@ -34,7 +34,7 @@ export function MtByQuote({ stills, reply, onOptionPick }: { stills: Record<stri
   // ?mtask=1 trial: an option with several wide frames steps through them
   const [tick, setTick] = React.useState(0);
   React.useEffect(() => {
-    if (matches("calm")) return;
+    if (matches("calm") || !/[?&]mtask=1/.test(location.search)) return; // only the trial shows the wide frames (quote.css)
     const t = setInterval(() => setTick((n) => n + 1), 5000);
     return () => clearInterval(t);
   }, []);

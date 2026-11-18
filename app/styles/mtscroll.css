@@ -8,8 +8,8 @@
 
 /* The live home waits hidden while the flag swaps the v4 tree in (gate.tsx). */
 [data-mtscroll] .v3home:not(.mt){visibility:hidden}
-/* Name dock (motion/hero.ts): on the home's desktop layout the header wordmark waits hidden until the dock says where
-   the name is, so a load never flashes it. .mt-wait is gate.tsx's stand-in while the v4 code loads. */
+/* On the home's desktop layout the header wordmark waits hidden until motion/hero.ts sets data-mtdock ("off") and takes over
+   the bar, so a load never flashes it. .mt-wait is gate.tsx's stand-in while the v4 code loads. */
 @media (min-width:1024px) and (min-height:600px) and (prefers-reduced-motion:no-preference){
   html[data-v3motion][data-mtscroll]:not([data-mtdock]):has(.v3home,.mt-wait) .v3 .site-wm{visibility:hidden}
 }
@@ -719,8 +719,8 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
 @media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w[data-tone="p"]{color:color-mix(in oklab,var(--ink) 58%,var(--bg))}}
 :root[data-theme="light"] .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w[data-tone="p"]{color:color-mix(in oklab,var(--ink) 58%,var(--bg))}
 /* No wordmark in the bar while the hero, with its big name, is on screen (Julian, 2026-11-16: phones first, then every
-   size once the name stopped flying to the bar). ?mtdock=1 hands the wordmark over itself, so it is left out. */
-html[data-v3motion][data-mtscroll]:not([data-mtdock="rest"],[data-mtdock="ride"],[data-mtdock="land"]):has(.mt-hero) .v3 .site-hdr:not(.menu-on) .site-wm{transition:opacity .25s ease-out}
-html[data-v3motion][data-mtscroll]:not([data-mtdock="rest"],[data-mtdock="ride"],[data-mtdock="land"]):has(.mt-hero):not([data-mt-pasthero],[data-mt-nameout]) .v3 .site-hdr:not(.menu-on) .site-wm{opacity:0;pointer-events:none}
+   size once the name stopped flying to the bar). */
+html[data-v3motion][data-mtscroll]:has(.mt-hero) .v3 .site-hdr:not(.menu-on) .site-wm{transition:opacity .25s ease-out}
+html[data-v3motion][data-mtscroll]:has(.mt-hero):not([data-mt-pasthero],[data-mt-nameout]) .v3 .site-hdr:not(.menu-on) .site-wm{opacity:0;pointer-events:none}
 /* The held stage is its own layer: the page colour behind it. (The tagline's invert blend is gone, Julian 2026-11-17: harder to read.) */
 html[data-mt-held] [data-mtscroll] .mt-hero .mt-stage,html[data-mt-held][data-mtscroll] .mt-hero .mt-stage{background:var(--bg)}

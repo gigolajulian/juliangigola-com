@@ -169,9 +169,18 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
         play(el, [{ opacity: 0, transform: lift ? `translate3d(0,${lift}px,0)` : "none" }, { opacity: 1, transform: "none" }], { duration, delay, easing: OUT }),
       );
 
+    // a throw while building the intro gives the page back (scroll, focus, wall) instead of leaving it locked
     const run = () => {
       if (started || finished) return;
       started = true;
+      try {
+        build();
+      } catch (e) {
+        finish(false);
+        throw e;
+      }
+    };
+    const build = () => {
       const deep = deepMode();
       const short = returning();
       pace = short ? SHORT : FULL;
