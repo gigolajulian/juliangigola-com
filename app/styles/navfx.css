@@ -4,22 +4,25 @@
    colour under it lifted, a hairline. It is off at the top of a page and while the home hero shows
    (`data-navtop`, set by components/v3/nav-ink.ts, which also picks white or black for each word). */
 :root[data-navfx]{--nav-veil:47%;--nav-teal:oklch(.51 .09 195)}
+/* Light page: the line under the bar is barely there (Julian, 2026-11-17: "I don't want to almost see it"). Dark keeps --line. */
+@media (prefers-color-scheme:light){:root[data-navfx]:not([data-theme="dark"]){--nav-line:color-mix(in srgb,var(--line) 30%,transparent)}}
+:root[data-navfx][data-theme="light"]{--nav-line:color-mix(in srgb,var(--line) 30%,transparent)}
 
 /* The ground is on the bar itself: the bar is its own layer (view-transition-name), so a child could not blur
    what is behind it. The tripled class outranks the portfolio and solid-bar rules without !important, which an
    animation could not override. It fades in by animation, so the bar's own slide and dock transitions stay as they are. */
-:root[data-navfx] .v3 .site-hdr.site-hdr.site-hdr{background:color-mix(in srgb,var(--bg) var(--nav-veil),transparent);-webkit-backdrop-filter:blur(24px) saturate(1.8);backdrop-filter:blur(24px) saturate(1.8);border-bottom:.5px solid var(--line);animation:navfx-in .25s ease both}
+:root[data-navfx] .v3 .site-hdr.site-hdr.site-hdr{background:color-mix(in srgb,var(--bg) var(--nav-veil),transparent);-webkit-backdrop-filter:blur(24px) saturate(1.8);backdrop-filter:blur(24px) saturate(1.8);border-bottom:.5px solid var(--nav-line,var(--line));animation:navfx-in .25s ease both}
 :root[data-navfx][data-navtop] .v3 .site-hdr.site-hdr.site-hdr,
 :root[data-navfx][data-pft][data-tuck] .v3 .site-hdr.site-hdr.site-hdr,
 :root[data-navfx] .v3 .site-hdr.site-hdr.site-hdr.menu-on{background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none;border-bottom-color:transparent;animation:none}
 /* Over a section that is dark in both themes, on a light page (`data-navdark`, nav-ink.ts): the bar's own tokens go dark. */
-:root[data-navfx][data-navdark] .v3 .site-hdr{--bg:var(--dark-bg);--ink:var(--dark-ink);--line:oklch(1 0 0 / 13%)}
+:root[data-navfx][data-navdark] .v3 .site-hdr{--bg:var(--dark-bg);--ink:var(--dark-ink);--line:oklch(1 0 0 / 13%);--nav-line:var(--line)}
 @keyframes navfx-in{from{background-color:transparent;-webkit-backdrop-filter:blur(0) saturate(1);backdrop-filter:blur(0) saturate(1);border-bottom-color:transparent}}
 
 /* Words: white or black from what is under them (--nav-ink is set per word by nav-ink.ts). No teal in the bar;
    the current page is the same ink, 4 shades (20%) toward the other one: darker when white, brighter when black.
    Hover is 2 shades (10%). */
-:root[data-navfx] .v3 .site-hdr :is(.site-wm,.links a,.tbtn,.menu-btn){color:var(--nav-ink,var(--ink));transition:color .2s ease}
+:root[data-navfx] .v3 .site-hdr :is(.site-wm,.links a,.tbtn,.menu-btn){color:var(--nav-ink,var(--ink));transition:color .35s ease}
 :root[data-navfx] .v3 .site-hdr .links a{--nav-off:var(--bg)}
 :root[data-navfx] .v3 .site-hdr .links a[data-ink="w"]{--nav-off:#000}
 :root[data-navfx] .v3 .site-hdr .links a[data-ink="b"]{--nav-off:#fff}

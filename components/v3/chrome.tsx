@@ -97,9 +97,9 @@ function ThemeButton() {
 
 export const NAV = [
   { href: "/portfolio", label: "Portfolio" },
-  { href: "/book", label: "Sessions" },
   { href: "/about", label: "About" },
-  { href: "/contact/form", label: "Inquire" },
+  { href: "/contact/form", label: "Contact" },
+  { href: "/book", label: "Book a session" },
 ];
 const current = (path: string, href: string) => path === href || path.startsWith(`${href}/`);
 
