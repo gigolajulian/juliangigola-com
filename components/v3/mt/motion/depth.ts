@@ -36,14 +36,13 @@ export const depthDrivers: Driver[] = [
         raf ||= requestAnimationFrame(draw);
       };
       const size = () => (heroH = el.offsetHeight);
-      addEventListener("pointermove", move, { passive: true });
-      document.documentElement.addEventListener("mouseleave", leave);
-      addEventListener("resize", size);
+      const ac = new AbortController();
+      addEventListener("pointermove", move, { passive: true, signal: ac.signal });
+      document.documentElement.addEventListener("mouseleave", leave, { signal: ac.signal });
+      addEventListener("resize", size, { signal: ac.signal });
       return () => {
         cancelAnimationFrame(raf);
-        removeEventListener("pointermove", move);
-        document.documentElement.removeEventListener("mouseleave", leave);
-        removeEventListener("resize", size);
+        ac.abort();
         for (const t of [...hero, sheet]) {
           t?.style.removeProperty("--px");
           t?.style.removeProperty("--py");

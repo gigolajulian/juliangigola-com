@@ -6,6 +6,7 @@ import Link from "next/link";
 import { BOOK_ROWS, QUOTE_OPTS } from "./data";
 import { CardsCtx } from "./ctx";
 import { scrollTop } from "@/components/v3/smooth-scroll";
+import { matches } from "@/lib/device";
 
 /* Spec 3.10: HomeFoot. Four link columns, the "Contact me" phrase (a
    button that opens the inquiry card), one still of work behind under its
@@ -40,7 +41,7 @@ function useStills(ref: React.RefObject<HTMLElement | null>) {
     return () => io.disconnect();
   }, [ref]);
   React.useEffect(() => {
-    if (!on || list.length < 2 || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (!on || list.length < 2 || matches("calm")) return;
     const t = setInterval(() => setI((n) => (n + 1) % list.length), EVERY);
     return () => clearInterval(t);
   }, [on, list.length]);

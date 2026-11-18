@@ -5,12 +5,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { Marks } from "@/components/v3/duo";
 import { projectHref } from "@/lib/project-href";
-import type { MtFrame } from "./data";
+import { pad, type MtFrame } from "./data";
 
 /* Spec 3.3: the gapless sheet with its heading row held on top, a counter
    and the current frame's name beside it, the client logos as its last line.
    Phone: two-column masonry, each frame at its own ratio in the shorter column. */
-const pad = (n: number) => String(n).padStart(2, "0");
 
 /** Each frame to the shorter of two columns (heights by ratio; the right one starts 56/171 of a frame lower). */
 const masonry = (frames: MtFrame[]) => {

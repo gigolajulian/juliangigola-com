@@ -4,7 +4,7 @@
    through its hold. Sections without a hold get `--p` as they cross the screen.
    Drivers add the per-section motion; each owns one file in this folder. */
 
-import { media } from "@/lib/device";
+import { matches, media } from "@/lib/device";
 
 export type Ctx = {
   /** viewport width and height, px */
@@ -49,7 +49,7 @@ export const span = (v: number, a: number, b: number) => clamp((v - a) / (b - a)
 
 export function startEngine(root: HTMLElement, drivers: Driver[]) {
   const html = document.documentElement;
-  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return () => {};
+  if (matches("calm")) return () => {};
   const mqD = media("held");
   const mqFine = media("fine");
   const ctx: Ctx = { vw: innerWidth, vh: innerHeight, y: scrollY, dy: 0, t: performance.now(), dt: 16, held: mqD.matches, fine: mqFine.matches, u: 1, top: 0, h: 0, fresh: true };

@@ -1,3 +1,4 @@
+import { pad } from "../data";
 import { RISE, clamp, type Driver } from "./engine";
 
 /* Commissions (spec 3.3): the held head names the frame under the screen's
@@ -28,7 +29,7 @@ export const commissionsDrivers: Driver[] = [
           const f = es.find((e) => e.isIntersecting)?.target as HTMLElement | undefined;
           if (!f || f.dataset.i === el.dataset.cur) return;
           el.dataset.cur = f.dataset.i;
-          put(count, String(Number(f.dataset.i) + 1).padStart(2, "0"));
+          put(count, pad(Number(f.dataset.i) + 1));
           put(name, f.querySelector(".nm")?.textContent ?? "");
           put(meta, f.querySelector("figcaption .mute")?.textContent ?? "");
           for (const n of [count, name, meta]) n?.animate([{ transform: "translateY(110%)" }, { transform: "none" }], RISE);

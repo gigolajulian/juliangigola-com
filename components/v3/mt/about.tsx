@@ -3,7 +3,7 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ABOUT_FACTS, ABOUT_SENTENCE } from "./data";
+import { ABOUT_FACTS, ABOUT_SENTENCE, pad } from "./data";
 
 /* Spec 3.9: one screen. The sentence is one paragraph; the per-word spans
    (`--w`) and the wordmark's per-letter spans (`--j`) are for the motion pass. */
@@ -48,7 +48,7 @@ export function MtAbout({ does }: { does: string[] }) {
               <ol>
                 {does.map((d, j) => (
                   <li key={d} style={{ "--j": j } as React.CSSProperties}>
-                    <span className="lbl mute">{String(j + 1).padStart(2, "0")}</span>
+                    <span className="lbl mute">{pad(j + 1)}</span>
                     <b>{d}</b>
                   </li>
                 ))}

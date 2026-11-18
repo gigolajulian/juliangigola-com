@@ -166,9 +166,10 @@ function setup(el: HTMLElement, ctx: Ctx) {
   const onResize = () => {
     dirty = true;
   };
-  stage.addEventListener("pointermove", onMove);
-  stage.addEventListener("pointerleave", onLeave);
-  addEventListener("resize", onResize);
+  const ac = new AbortController();
+  stage.addEventListener("pointermove", onMove, { signal: ac.signal });
+  stage.addEventListener("pointerleave", onLeave, { signal: ac.signal });
+  addEventListener("resize", onResize, { signal: ac.signal });
   document.fonts.ready.then(onResize);
 
   tick = (c) => {
@@ -239,9 +240,7 @@ function setup(el: HTMLElement, ctx: Ctx) {
 
   return () => {
     tick = null;
-    stage.removeEventListener("pointermove", onMove);
-    stage.removeEventListener("pointerleave", onLeave);
-    removeEventListener("resize", onResize);
+    ac.abort();
     for (const n of [cut, dot, ...clones]) n.parentNode?.removeChild(n);
     el.removeAttribute("data-hot");
     for (const n of [wall, row]) {

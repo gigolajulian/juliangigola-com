@@ -1,4 +1,4 @@
-import { navfx } from "../../nav-ink";
+import { navfx } from "@/components/v3/nav-ink";
 import { clamp, smooth, span, type Driver } from "./engine";
 
 /* Hero wall travel (spec 3.2). Held (D): the wall travels up through the hold,
@@ -24,7 +24,7 @@ type Part = { el: HTMLElement; a: number; c: number; v: number };
 const DOCK_W = 11;
 type Geo = { ax: number; ay: number; bx: number; by: number; k: number; ox: number; oy: number; ws: number };
 type Dock = { f: HTMLElement; words: HTMLElement[]; h1: HTMLElement; wm: HTMLElement; cap: HTMLElement | null; ctas: HTMLElement | null; scrim: HTMLElement | null; w: number; m: Geo | null; x: number; v: number; st: string; q: string };
-type State = { cols: Part[]; figs: Part[]; caps: HTMLElement[]; tw: HTMLElement[]; phs: HTMLElement[]; texts: HTMLElement[]; ctas: HTMLElement | null; more: HTMLElement | null; name: HTMLElement | null; s: number; mode: string; e: number; u: number; at: string; wall: number; dock: Dock | null; bar: HTMLElement | null; out: boolean; row: number; drop: number };
+type State = { cols: Part[]; figs: Part[]; caps: HTMLElement[]; tw: HTMLElement[]; phs: HTMLElement[]; texts: HTMLElement[]; ctas: HTMLElement | null; more: HTMLElement | null; name: HTMLElement | null; s: number; mode: "" | "d" | "p" | "t"; e: number; u: number; at: string; wall: number; dock: Dock | null; bar: HTMLElement | null; out: boolean; row: number; drop: number };
 
 const ink = (n: Node) => {
   const r = document.createRange();
@@ -342,19 +342,20 @@ export const heroDrivers: Driver[] = [
         ph.style.setProperty("--hx", (clamp((e.clientX - r.left) / r.width) * 2 - 1).toFixed(3));
         ph.style.setProperty("--hy", (clamp((e.clientY - r.top) / r.height) * 2 - 1).toFixed(3));
       };
+      const ac = new AbortController();
       if (wall) {
         document.documentElement.setAttribute("data-mt-shift", "");
-        wall.addEventListener("pointermove", shift, { passive: true });
+        wall.addEventListener("pointermove", shift, { passive: true, signal: ac.signal });
       }
       if (flip) {
         document.documentElement.setAttribute("data-mt-flip", String(flip));
         document.documentElement.style.setProperty("--mt-flip", flip + "ms");
       }
       // always: phones keep the wordmark out of the bar while the hero is on screen (mtscroll.css)
-      addEventListener("scroll", past, { passive: true });
+      addEventListener("scroll", past, { passive: true, signal: ac.signal });
       past();
       // late fonts move both boxes: measure again on the next frame
-      if (d) document.fonts?.ready.then(() => (st.at = ""), () => {});
+      if (d) document.fonts.ready.then(() => (st.at = ""));
       /* The engine gives a section no frames once it is a screen above the window. A jump past the hero (a reload
          lower on the page, a header link, a flick) would leave the name wherever it was and the header without its
          wordmark, so land it here. */
@@ -368,18 +369,16 @@ export const heroDrivers: Driver[] = [
         document.documentElement.setAttribute("data-mtdock", "land");
       };
       if (d) {
-        addEventListener("scroll", far, { passive: true });
+        addEventListener("scroll", far, { passive: true, signal: ac.signal });
         requestAnimationFrame(() => requestAnimationFrame(far));
       }
       const look = window.setInterval(() => tone(st), 300); // the idle wall swaps a photo with no frame running
       return () => {
         clearInterval(look);
-        removeEventListener("scroll", far);
-        removeEventListener("scroll", past);
+        ac.abort();
         document.documentElement.removeAttribute("data-mtleft");
         document.documentElement.removeAttribute("data-mt-flip");
         document.documentElement.removeAttribute("data-mt-shift");
-        wall?.removeEventListener("pointermove", shift);
         document.documentElement.style.removeProperty("--mt-flip");
         document.documentElement.removeAttribute("data-mt-pasthero");
         clearTimeout(due);

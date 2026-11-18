@@ -3,6 +3,7 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { matches } from "@/lib/device";
 import { projectHref } from "@/lib/project-href";
 import type { MtFrame } from "./data";
 
@@ -63,7 +64,7 @@ function useIdleWall(frames: MtFrame[], extras: MtFrame[]) {
   const live = React.useRef({ now, was, pool: extras.slice(30) }); // the first 30 extras are on the wall (side columns, rows five and six)
   React.useEffect(() => void Object.assign(live.current, { now, was }));
   React.useEffect(() => {
-    if (/[?&]idle=0/.test(location.search) || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (/[?&]idle=0/.test(location.search) || matches("calm")) return;
     let last = performance.now(), swapped = 0;
     const touch = () => (last = performance.now());
     const evs = ["pointermove", "pointerdown", "wheel", "scroll", "keydown", "touchstart"] as const;

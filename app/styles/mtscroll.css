@@ -196,9 +196,6 @@
 [data-mtscroll] .mt-foot .mt-stage{position:relative;height:max(100svh,600px);overflow:hidden}
 [data-mtscroll] .mt-fwall{position:absolute;inset:0}
 [data-mtscroll] .mt-fwall img{object-fit:cover;object-position:50% 30%}
-[data-mtscroll] .mt-fcol{position:absolute;top:0;left:calc((var(--c) * 162 - 9) * var(--u));width:calc(150 * var(--u));display:flex;flex-direction:column;gap:calc(12 * var(--u))}
-[data-mtscroll] .mt-fcol figure,[data-mtscroll] .mt-frow figure{position:relative;margin:0;flex:none;aspect-ratio:3/4;overflow:hidden;background:var(--card)}
-[data-mtscroll] .mt-frow{display:none}
 [data-mtscroll] .mt-fscrim{position:absolute;inset:0;background:linear-gradient(color-mix(in srgb,var(--bg) 55%,transparent),color-mix(in srgb,var(--bg) 62%,transparent) 45%,var(--bg) 94%)}
 [data-mtscroll] .mt-ftime .t{color:var(--ink)}
 [data-mtscroll] .mt-fline>span{white-space:nowrap}
@@ -394,7 +391,6 @@
   /* Footer: link groups, the wall as one row under them, the phrase. */
   [data-mtscroll] .mt-foot .mt-stage{height:auto;overflow:visible;padding-top:40px;display:flex;flex-direction:column}
   [data-mtscroll] .mt-fcols{order:1}
-  [data-mtscroll] .mt-frow{order:2}
   [data-mtscroll] .mt-phrase{order:3}
   [data-mtscroll] .mt-fline{order:4}
   [data-mtscroll] .mt-fwall,[data-mtscroll] .mt-fscrim{display:none}
@@ -402,9 +398,6 @@
   [data-mtscroll] .mt-fcols p{margin:0}
   [data-mtscroll] .mt-fcols :is(a,button){display:inline-block;padding:8px 0}
   [data-mtscroll] .mt-fcols .mt-based{margin-top:10px}
-  [data-mtscroll] .mt-frow{display:none;gap:6px;overflow-x:auto;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scrollbar-width:none;padding:24px 16px 12px;margin-top:20px;-webkit-mask:linear-gradient(rgb(0 0 0 / .5),rgb(0 0 0 / .68) 38%,rgb(0 0 0 / .4) 74%,transparent);mask:linear-gradient(rgb(0 0 0 / .5),rgb(0 0 0 / .68) 38%,rgb(0 0 0 / .4) 74%,transparent)}
-  [data-mtscroll] .mt-frow::-webkit-scrollbar{display:none}
-  [data-mtscroll] .mt-frow figure{width:124px;scroll-snap-align:start}
   [data-mtscroll] .mt-phrase{position:static;margin-top:8px}
   [data-mtscroll] .mt-ph-row{padding-left:16px}
   [data-mtscroll] .mt-ph{font-size:200px}

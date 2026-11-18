@@ -34,7 +34,7 @@ export function MtByQuote({ stills, reply, onTouch }: { stills: Record<string, s
   // ?mtask=1 trial: an option with several wide frames steps through them
   const [tick, setTick] = React.useState(0);
   React.useEffect(() => {
-    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (matches("calm")) return;
     const t = setInterval(() => setTick((n) => n + 1), 5000);
     return () => clearInterval(t);
   }, []);

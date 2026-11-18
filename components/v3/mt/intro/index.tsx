@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import loader from "@/image-loader";
+import { matches } from "@/lib/device";
 import type { MtFrame } from "../data";
 import "./intro.css";
 
@@ -72,7 +73,7 @@ function shouldPlay() {
   const root = document.documentElement;
   const q = location.search;
   if (/[?&]intro=0/.test(q) || !("v3motion" in root.dataset)) return false;
-  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return false;
+  if (matches("calm")) return false;
   if (window.scrollY > 4) return false;
   if (/[?&]intro=[12]/.test(q)) return true;
   try {
@@ -92,7 +93,7 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
     // the head script hides the header from the first paint (state 1); give it back if the intro will not run
     if (!shouldPlay()) {
       delete root.dataset.mtIntro;
-      const calm = matchMedia("(prefers-reduced-motion: reduce)").matches && !/[?&]intro=0/.test(location.search) && window.scrollY <= 4;
+      const calm = matches("calm") && !/[?&]intro=0/.test(location.search) && window.scrollY <= 4;
       let seen = true;
       try {
         seen = !!sessionStorage.getItem("jg-intro");
