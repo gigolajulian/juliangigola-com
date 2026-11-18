@@ -15,7 +15,14 @@ describe("V3Service", () => {
     const { container } = render(<V3Service page={page} frames={frames} />);
     expect(screen.getAllByRole("heading", { level: 1 }).length).toBeGreaterThan(0);
     expect(screen.getByRole("heading", { name: page.gallery.label })).toBeTruthy();
-    expect(screen.getByRole("link", { name: "See the gallery" }).getAttribute("href")).toBe(page.gallery.href);
+    // headshots shows its whole gallery here; its old address redirects back, so no button to itself
+    expect(screen.queryByRole("link", { name: "See the gallery" })).toBeNull();
     expect(container.querySelectorAll(".sv-seq figure")).toHaveLength(6);
+  });
+
+  it("links to a gallery that lives on its own page", () => {
+    const page = BOOKING_PAGES.find((p) => p.slug === "weddings")!;
+    render(<V3Service page={page} frames={PROJECTS.slice(0, 6).map((p) => p.cover)} />);
+    expect(screen.getByRole("link", { name: "See the gallery" }).getAttribute("href")).toBe(page.gallery.href);
   });
 });
