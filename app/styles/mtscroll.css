@@ -492,6 +492,8 @@ html:not([data-mt-intro]) .mt-hero .mt-col.side{visibility:var(--vis,visible)}
 /* What I do: two columns of three on every structure */
 @media (min-width:600px){[data-mtscroll] .mt-does ol{display:grid;grid-template-columns:1fr 1fr;grid-auto-flow:column;grid-template-rows:repeat(3,auto);column-gap:calc(20 * var(--u))}}
 @media (min-width:600px){[data-mtscroll] .mt-does li{gap:8px}[data-mtscroll] .mt-does b{font-size:max(11px,calc(15 * var(--u)));white-space:nowrap}}
+/* stacked layout (no hold) from 600px wide: the columns are wide, so the labels keep the phone's 18px (they fell to 11px, smaller than the lines around them; Julian, 2026-11-18) */
+@media (min-width:600px) and (not ((min-width:1024px) and (min-height:600px))){[data-mtscroll] .mt-does b{font-size:18px}}
 /* phone: artist sits under the title's left edge, "See all covers" on the right, session photo square and held on the face, call link on one line */
 @media (max-width:599px){
   [data-mtscroll] .mt-covers .mt-artist{margin-left:16px!important}
