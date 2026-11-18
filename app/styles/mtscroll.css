@@ -417,8 +417,14 @@
   [data-mtscroll] .mt-col{display:contents}
   [data-mtscroll] .mt-col figure{position:absolute;left:calc((16 + var(--c2) * 187) * var(--pu));top:calc((68 + var(--r2) * 250 + var(--c2) * 64) * var(--pu));width:calc(171 * var(--pu));height:calc(214 * var(--pu))}
   [data-mtscroll] .mt-col figcaption{padding-top:2px;gap:0;font-size:11px;line-height:1.05}
-  [data-mtscroll] .mt-name h1{font-size:min(58px,calc(56 * var(--pu)));line-height:.9}
-  [data-mtscroll] .mt-ctas{bottom:max(44px,calc(env(safe-area-inset-bottom) + 20px))}
+  /* Julian's arrange (2026-11-18, iPhone 390x664): name bigger and lower, line and buttons lower, a 39% ground back under them. The three share the safe-area lift, so they never close up on each other. */
+  [data-mtscroll] .mt-name h1{font-size:min(68px,calc(65.5 * var(--pu)));line-height:.9;left:8px;bottom:calc(98px + env(safe-area-inset-bottom))}
+  [data-mtscroll] .mt-cap{font-size:9.8px!important;left:19px;bottom:calc(60px + env(safe-area-inset-bottom))}
+  [data-mtscroll] .mt-ctas{bottom:calc(2px + env(safe-area-inset-bottom))}
+  [data-mtscroll] .mt-hero .mt-scrim.mt-scrim{background:linear-gradient(to top,color-mix(in srgb,var(--dark-bg) 37%,transparent),color-mix(in srgb,var(--dark-bg) 34%,transparent) 30%,transparent)}
+  /* dark only: on the light page it showed as a grey band between the photos */
+  @media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .mt-hero .mt-scrim.mt-scrim.mt-scrim{background:none}}
+  :root[data-theme="light"] .mt-hero .mt-scrim.mt-scrim.mt-scrim{background:none}
   [data-mtscroll] .mt-covers .mt-row{--cv:calc(358 * var(--pu));padding-inline:calc(16 * var(--pu))}
   [data-mtscroll] .mt-photo{aspect-ratio:390/226}
   [data-mtscroll] .mt-photo-w{aspect-ratio:390/190}
@@ -714,7 +720,7 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
 :root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .wd{white-space:nowrap}
 :root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w{transition:color .15s ease-out,text-shadow .15s ease-out}
 :root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w[data-tone="w"]{color:#fff;text-shadow:0 0 2px rgb(0 0 0 / .6),0 1px 5px rgb(0 0 0 / .35)}
-:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w[data-tone="k"]{color:#0b0b0c;text-shadow:0 0 2px rgb(255 255 255 / .55),0 1px 5px rgb(255 255 255 / .3)}
+:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w[data-tone="k"]{color:#0b0b0c;text-shadow:none}
 @media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w[data-tone="p"]{color:color-mix(in oklab,var(--ink) 58%,var(--bg))}}
 :root[data-theme="light"] .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w[data-tone="p"]{color:color-mix(in oklab,var(--ink) 58%,var(--bg))}
 /* No wordmark in the bar while the hero, with its big name, is on screen (Julian, 2026-11-16: phones first, then every
