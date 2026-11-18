@@ -10,6 +10,7 @@ const TAIL = 264; // ground left under the last row when the travel ends, so "Se
 const LAG_MAX = 2400;
 const END_D = [280, 0, 70]; // (right was 40: Julian, 2026-11-15, "a bit lower") how far each of the three locked columns has dropped behind when the travel ends, design px: mirrors the ends 0.12, 0, 0.2 gave at 1440x900
 const DRIFT = [40, 22]; // phone drift caps, px, per column
+const FLIP: Record<string, number> = { 1: 900, 2: 600, 3: 1300 }; // ?mtflip, ms
 
 type Part = { el: HTMLElement; a: number; c: number; v: number };
 
@@ -272,6 +273,25 @@ export const heroDrivers: Driver[] = [
       const hdr = document.querySelector<HTMLElement>(".site-hdr");
       const past = () => document.documentElement.toggleAttribute("data-mt-pasthero", el.getBoundingClientRect().bottom <= (hdr?.offsetHeight ?? 60));
       if (LEFT) document.documentElement.setAttribute("data-mtleft", "");
+      // Mock ?mtflip=1|2|3: the idle wall turns a card over to its next photo (hero.css), in 900, 600 or 1300ms. The value is the duration: hero.tsx reads it for the caption.
+      const flip = FLIP[/[?&]mtflip=([123])/.exec(location.search)?.[1] ?? ""];
+      // Mock ?mthover=1: the photo under the mouse sits a little larger in its frame and drifts against the pointer (hero.css). --hx / --hy are where the pointer is on the card, -1 to 1.
+      const wall = /[?&]mthover=1/.test(location.search) ? el.querySelector<HTMLElement>(".mt-wall") : null;
+      const shift = (e: PointerEvent) => {
+        const ph = e.pointerType === "mouse" ? (e.target as Element).closest("figure")?.querySelector<HTMLElement>(".ph") : null;
+        if (!ph) return;
+        const r = ph.getBoundingClientRect();
+        ph.style.setProperty("--hx", (clamp((e.clientX - r.left) / r.width) * 2 - 1).toFixed(3));
+        ph.style.setProperty("--hy", (clamp((e.clientY - r.top) / r.height) * 2 - 1).toFixed(3));
+      };
+      if (wall) {
+        document.documentElement.setAttribute("data-mt-shift", "");
+        wall.addEventListener("pointermove", shift, { passive: true });
+      }
+      if (flip) {
+        document.documentElement.setAttribute("data-mt-flip", String(flip));
+        document.documentElement.style.setProperty("--mt-flip", flip + "ms");
+      }
       // always: phones keep the wordmark out of the bar while the hero is on screen (mtscroll.css)
       addEventListener("scroll", past, { passive: true });
       past();
@@ -299,6 +319,10 @@ export const heroDrivers: Driver[] = [
         removeEventListener("scroll", far);
         removeEventListener("scroll", past);
         document.documentElement.removeAttribute("data-mtleft");
+        document.documentElement.removeAttribute("data-mt-flip");
+        document.documentElement.removeAttribute("data-mt-shift");
+        wall?.removeEventListener("pointermove", shift);
+        document.documentElement.style.removeProperty("--mt-flip");
         document.documentElement.removeAttribute("data-mt-pasthero");
         document.documentElement.removeAttribute("data-mt-nameout");
         [...st.cols, ...st.figs].forEach((p) => (p.el.style.transform = ""));
