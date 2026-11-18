@@ -27,7 +27,8 @@ describe("v4 next open", () => {
   });
 
   it("shows nothing when the engine fails, errors or has no slots", async () => {
-    const replies = [() => Promise.reject(new Error("offline")), () => Promise.resolve({ ok: false }), () => Promise.resolve(slots({}, "error")), () => Promise.resolve(slots({ "2026-11-20": [] }))];
+    const slot = slots({ "2026-11-20": [{ start: "2026-11-20T17:00:00Z" }] }); // a real slot, so only the failure keeps the line empty
+    const replies = [() => Promise.reject(new Error("offline")), () => Promise.resolve({ ...slot, ok: false }), () => Promise.resolve(slots({ "2026-11-20": [{ start: "2026-11-20T17:00:00Z" }] }, "error")), () => Promise.resolve(slots({ "2026-11-20": [] }))];
     for (const reply of replies) {
       fetchMock.mockImplementationOnce(reply);
       const { useNextOpen } = await load();
