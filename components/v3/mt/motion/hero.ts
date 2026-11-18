@@ -123,12 +123,14 @@ function tone(st: Pick<State, "tw" | "phs">) {
         const c0 = at(Math.max(r.left, b.left)), c1 = at(Math.min(r.right, b.right));
         let sum = 0;
         for (let c = c0; c <= c1; c++) sum += g[row + c];
-        t = sum / (c1 - c0 + 1) >= LIGHT ? "k" : "w";
+        // a letter across the photo's edge belongs to whichever side holds most of it: the hit test alone is off by a pixel there (MAC, #1203)
+        t = Math.min(r.right, b.right) - Math.max(r.left, b.left) < r.width / 2 ? "p" : sum / (c1 - c0 + 1) >= LIGHT ? "k" : "w";
       }
     }
     ts[n] = t;
   }
-  // one tone per word (Julian, 2026-11-18): a word takes what most of its letters sit on, so it turns whole and never splits black and white
+  // one tone per word (Julian, 2026-11-18): a word takes what most of its letters sit on, so it turns whole and never splits black and white.
+  // A letter over the bare page, where a word hangs past its photo, keeps the page tone: the photo's white is lost on the light page (QA, #1203).
   const lines = new Map<Element, number[]>();
   rs.forEach((r, n) => {
     const k = st.tw[n].parentElement?.classList.contains("wd") ? st.tw[n].parentElement! : st.tw[n];
@@ -136,9 +138,12 @@ function tone(st: Pick<State, "tw" | "phs">) {
   });
   for (const ns of lines.values()) {
     const count: Record<string, number> = {};
-    for (const n of ns) if (ts[n]) count[ts[n]] = (count[ts[n]] ?? 0) + 1;
-    const t = Object.keys(count).sort((a, b) => count[b] - count[a])[0] ?? "";
-    for (const n of ns) if (st.tw[n].dataset.tone !== t) st.tw[n].dataset.tone = t;
+    for (const n of ns) if (ts[n] && ts[n] !== "p") count[ts[n]] = (count[ts[n]] ?? 0) + 1;
+    const word = Object.keys(count).sort((a, b) => count[b] - count[a])[0];
+    for (const n of ns) {
+      const t = ts[n] === "p" || word === undefined ? ts[n] : word;
+      if (st.tw[n].dataset.tone !== t) st.tw[n].dataset.tone = t;
+    }
   }
 }
 
