@@ -35,6 +35,8 @@ const zoomOf = (img: Element | null | undefined): Zoom | undefined => {
 };
 
 /* On trial (`?fly=a`, `?fly=b`, `?fly=0` to leave; kept for the tab): the browser carries the photo.
+   The copy below is a fresh <img>, which decodes off the frame it is added in: the photo was missing for the
+   frames that took (about 80ms on production). Decoding it first (`decoding = "sync"`) held the trip 150ms.
    The pressed frame and the next page's hero share one view-transition-name, so the photo is its own
    layer from the trip's first frame: it never fades out with the page it left, and the compositor moves
    it, not layout. a: the live trip (move, 600). b: the same on `drawer` in 500, which sets off at once
@@ -50,12 +52,22 @@ const carried = () => {
     return null;
   }
 };
+/* What a carried trip set, taken back when the trip ends, or 4s after a press that never lands (as long as a fly is good for). */
+let undo: (() => void)[] = [];
+const settle = () => {
+  undo.forEach((u) => u());
+  undo = [];
+};
+/** Names a frame for the trip; the returned call takes the name alone back off. */
 const named = (e: HTMLElement) => {
   // `data-flying`: the frame carries the photo alone, no caption, and no card ground over a hero still loading (motion-plan.css).
   e.dataset.flying = "";
   e.style.setProperty("view-transition-name", NAME);
-  window.setTimeout(() => (delete e.dataset.flying, e.style.removeProperty("view-transition-name")), 1500);
+  const unname = () => e.style.removeProperty("view-transition-name");
+  undo.push(() => (delete e.dataset.flying, unname()));
+  return unname;
 };
+let unnameSource = () => {};
 
 type Fly = { to: string; t: number; r: DOMRect; src: string; z?: Zoom; vt?: boolean };
 type Back = { t: number; hero?: { slug: string; r: DOMRect; src: string } };
@@ -87,11 +99,15 @@ export function PageFly() {
       if (fly.current && img && trial()) {
         flag("mpFly");
         const mode = carried();
-        if (mode) {
+        // Project pages only: a booking row swaps its photo as it is pressed, and keeps the copy.
+        if (mode && to!.startsWith("/portfolio/")) {
+          settle();
+          const mine = undo;
           fly.current.vt = true;
           document.documentElement.dataset.fly = mode;
-          window.setTimeout(() => delete document.documentElement.dataset.fly, 1500);
-          named(img.closest<HTMLElement>(".ph") ?? img);
+          undo.push(() => (delete document.documentElement.dataset.fly, delete document.documentElement.dataset.flyWait));
+          unnameSource = named(img.closest<HTMLElement>(".ph") ?? img);
+          window.setTimeout(() => undo === mine && settle(), 4000);
         }
         /* The covers left behind get names before the page is snapshotted,
            so each recedes on its own (`.mp-out`, motion-plan.css). */
@@ -195,14 +211,21 @@ export function PageFly() {
       }
       // Found in the layout phase, the hero is named before the new page is captured; found later, the copy flies as before.
       if (f.vt && !n) {
+        // The page left is already captured. A frame that outlives the trip (project to project) must not hold the name too: two of one name and the browser skips the trip.
+        unnameSource();
         named(hero);
         // A hero still loading would come up blank over the photo: the photo left behind carries the whole trip instead.
         const hi = hero.querySelector("img");
         if (!(hi?.complete && hi.naturalWidth)) {
           document.documentElement.dataset.flyWait = "";
-          window.setTimeout(() => delete document.documentElement.dataset.flyWait, 1500);
         }
-      } else flyCopy(f.r, f.src, hero, 600, MOVE, f.z);
+        const trip = (document as Document & { activeViewTransition?: { finished: Promise<void> } | null }).activeViewTransition;
+        if (trip) trip.finished.finally(settle);
+        else window.setTimeout(settle, 1500);
+      } else {
+        settle();
+        flyCopy(f.r, f.src, hero, 600, MOVE, f.z);
+      }
       // The project's other frames on screen rise in as the hero lands (pick 2c).
       [...document.querySelectorAll<HTMLElement>(".v3 .pj-r")]
         .filter((e) => !e.contains(hero) && !hero.contains(e) && onScreen(e.getBoundingClientRect()))
