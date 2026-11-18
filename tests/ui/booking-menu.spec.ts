@@ -56,13 +56,13 @@ test("keyboard: a row takes focus and Enter opens its session", async ({ browser
   await ctx.close();
 });
 
-/* The other old links: /about lands on About, /contact on the footer with the inquiry card open. */
+/* The other old links: /#about lands on About, /#contact on the footer with the inquiry card open (/about and /contact are pages of their own). */
 for (const r of [RATIOS[0], RATIOS[4]]) {
   test(`old anchors at ${r.name}`, async ({ browser, browserName }) => {
     const { ctx, page } = await open(browser, browserName, r);
     await page.goto("/#about", { waitUntil: "load" });
     await expect.poll(() => page.locator("#about").evaluate((e) => Math.abs(Math.round(e.getBoundingClientRect().top)))).toBeLessThan(80);
-    // a full load, as the 308 from /contact gives: a hash-only move this soon after the first load races the router
+    // a full load: a hash-only move this soon after the first load races the router
     await page.goto("/#contact");
     await page.reload({ waitUntil: "load" });
     const card = page.locator(".mt-inq");
@@ -76,14 +76,14 @@ for (const r of [RATIOS[0], RATIOS[4]]) {
   });
 }
 
-test("on the home, a link to /contact glides to the footer, then opens the card", async ({ browser, browserName }) => {
+test("on the home, a link to /#contact glides to the footer, then opens the card", async ({ browser, browserName }) => {
   const { ctx, page } = await open(browser, browserName, RATIOS[4]);
   await page.goto("/", { waitUntil: "load" });
   await page.locator("#contact .mt-ph-btn").waitFor({ state: "attached" });
   await page.waitForTimeout(1000); // the home's click listener is on once it has hydrated
-  // no link on the home points there today: a stand-in, as any page link to /contact would be
+  // no link on the home points there today: a stand-in, as any page link to /#contact would be
   await page.evaluate(() => {
-    const a = Object.assign(document.createElement("a"), { href: "/contact", id: "t-contact", textContent: "contact" });
+    const a = Object.assign(document.createElement("a"), { href: "/#contact", id: "t-contact", textContent: "contact" });
     a.style.cssText = "position:fixed;left:4px;top:120px;z-index:99999";
     document.body.append(a);
   });

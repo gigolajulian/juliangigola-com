@@ -28,7 +28,7 @@ export function MtHome({ data }: { data: MtData }) {
   const keep = () => (opener.current = document.activeElement as HTMLElement | null);
   const cards = React.useMemo<Cards>(() => ({ book: (k) => setBook(k), inquire: (from, opt) => (keep(), setInq({ from, opt })) }), []);
   const back = () => opener.current?.focus({ preventScroll: true });
-  // Old links (/sessions, /about and /contact 308 to /#sessions, /#about, /#contact): the screens take their heights after the browser's own anchor jump, so land again once they have.
+  // Anchors (/sessions 308s to /#sessions; #about and #contact are linkable too): the screens take their heights after the browser's own anchor jump, so land again once they have.
   // #contact is the footer, and arriving there opens the inquiry card its "Contact me" opens (Julian, 2026-11-18); closing hands focus to that button.
   React.useEffect(() => {
     const target = () => (location.hash.length > 1 ? document.getElementById(location.hash.slice(1)) : null);
@@ -43,14 +43,14 @@ export function MtHome({ data }: { data: MtData }) {
       setInq({ from: "footer" });
     };
     const arrive = () => card(land());
-    // already on the home (Julian, 2026-11-18): a link to /contact or /#contact glides down to the footer, then opens the card.
+    // already on the home (Julian, 2026-11-18): a link to /#contact glides down to the footer, then opens the card.
     // Taken at the click: by the time a hash change is heard the browser has jumped there.
     const go = (e: MouseEvent) => {
       const a = (e.target as Element).closest<HTMLAnchorElement>("a[href]");
       const el = document.getElementById("contact");
       if (!a || !el || e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || a.target === "_blank") return;
       const u = new URL(a.href);
-      if (u.origin !== location.origin || !((u.pathname === "/" && u.hash === "#contact") || u.pathname === "/contact")) return;
+      if (u.origin !== location.origin || u.pathname !== "/" || u.hash !== "#contact") return;
       e.preventDefault();
       e.stopPropagation();
       if (location.hash !== "#contact") history.pushState(null, "", "/#contact");
