@@ -743,22 +743,22 @@ html[data-mt-held] [data-mtscroll] .mt-hero .mt-stage,html[data-mt-held][data-mt
   :root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w.w[data-tone]{color:inherit;text-shadow:none}
 }
 
-/* `?lightname=1` preview (Julian via DEPLOY, 2026-11-19; `?lightname=0` clears): light theme only, dark stays as live. The name goes soft charcoal (#333) with no shadow, and a page-colour band
+/* `?lightname=1` preview (Julian via DEPLOY, 2026-11-19; `?lightname=0` clears): light theme only, dark stays as live. The name goes dark ink with no shadow, and a page-colour band
    along the foot of the hero (the phone's, 741) holds it where it crosses a dark photo; the photos above the band run clear. The tagline sits on the band in one colour. */
 @media (prefers-color-scheme:light){
-  html[data-lightname]:root:not([data-theme="dark"]) .v3 .mt-hero .mt-name h1{color:#333;text-shadow:none}
+  html[data-lightname]:root:not([data-theme="dark"]) .v3 .mt-hero .mt-name h1{color:var(--ink);text-shadow:none}
   html[data-lightname]:root:not([data-theme="dark"]) .v3 .mt-hero .mt-name .mt-name-in .mt-cap{color:var(--ink)}
   html[data-lightname]:root:not([data-theme="dark"]) .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w.w[data-tone]{color:inherit;text-shadow:none}
 }
-html[data-lightname][data-theme="light"]:root .v3 .mt-hero .mt-name h1{color:#333;text-shadow:none}
+html[data-lightname][data-theme="light"]:root .v3 .mt-hero .mt-name h1{color:var(--ink);text-shadow:none}
 html[data-lightname][data-theme="light"]:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap{color:var(--ink)}
 html[data-lightname][data-theme="light"]:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w.w[data-tone]{color:inherit;text-shadow:none}
 @media (min-width:600px){
-  @media (prefers-color-scheme:light){html[data-lightname]:root:not([data-theme="dark"]) .v3 .mt-hero .mt-scrim.mt-scrim.mt-scrim{--t:var(--bg);height:calc(400 * var(--u));background:linear-gradient(to top,color-mix(in srgb,var(--t) 84%,transparent) 30%,color-mix(in srgb,var(--t) 70%,transparent) 50%,color-mix(in srgb,var(--t) 40%,transparent) 70%,color-mix(in srgb,var(--t) 14%,transparent) 86%,transparent)}}
-  html[data-lightname][data-theme="light"]:root .v3 .mt-hero .mt-scrim.mt-scrim.mt-scrim{--t:var(--bg);height:calc(400 * var(--u));background:linear-gradient(to top,color-mix(in srgb,var(--t) 84%,transparent) 30%,color-mix(in srgb,var(--t) 70%,transparent) 50%,color-mix(in srgb,var(--t) 40%,transparent) 70%,color-mix(in srgb,var(--t) 14%,transparent) 86%,transparent)}
+  @media (prefers-color-scheme:light){html[data-lightname]:root:not([data-theme="dark"]) .v3 .mt-hero .mt-scrim.mt-scrim.mt-scrim{--t:var(--bg);height:calc(400 * var(--u));background:linear-gradient(to top,color-mix(in srgb,var(--t) 63%,transparent) 30%,color-mix(in srgb,var(--t) 53%,transparent) 50%,color-mix(in srgb,var(--t) 30%,transparent) 70%,color-mix(in srgb,var(--t) 11%,transparent) 86%,transparent)}}
+  html[data-lightname][data-theme="light"]:root .v3 .mt-hero .mt-scrim.mt-scrim.mt-scrim{--t:var(--bg);height:calc(400 * var(--u));background:linear-gradient(to top,color-mix(in srgb,var(--t) 63%,transparent) 30%,color-mix(in srgb,var(--t) 53%,transparent) 50%,color-mix(in srgb,var(--t) 30%,transparent) 70%,color-mix(in srgb,var(--t) 11%,transparent) 86%,transparent)}
 }
-/* `?lightname=1` on a phone: the soft charcoal name (#333) needs a firmer band than the phone's own, which left the tops of the letters on a dark photo at about 2:1. */
+/* `?lightname=1` on a phone: a taller band than the phone's own, which left the tops of the letters on a dark photo at about 2:1. Both bands are the lightest that keep the name at 4.5:1 over the darkest 5% behind it (Julian: "a bit lighter", 2026-11-19). */
 @media (max-width:599px){
-  @media (prefers-color-scheme:light){html[data-lightname]:root:not([data-theme="dark"]) .v3 .mt-hero .mt-scrim.mt-scrim.mt-scrim{--t:var(--bg);height:calc(260px + env(safe-area-inset-bottom));background:linear-gradient(to top,color-mix(in srgb,var(--t) 86%,transparent) 42%,color-mix(in srgb,var(--t) 74%,transparent) 62%,color-mix(in srgb,var(--t) 40%,transparent) 80%,color-mix(in srgb,var(--t) 12%,transparent) 92%,transparent)}}
-  html[data-lightname][data-theme="light"]:root .v3 .mt-hero .mt-scrim.mt-scrim.mt-scrim{--t:var(--bg);height:calc(260px + env(safe-area-inset-bottom));background:linear-gradient(to top,color-mix(in srgb,var(--t) 86%,transparent) 42%,color-mix(in srgb,var(--t) 74%,transparent) 62%,color-mix(in srgb,var(--t) 40%,transparent) 80%,color-mix(in srgb,var(--t) 12%,transparent) 92%,transparent)}
+  @media (prefers-color-scheme:light){html[data-lightname]:root:not([data-theme="dark"]) .v3 .mt-hero .mt-scrim.mt-scrim.mt-scrim{--t:var(--bg);height:calc(260px + env(safe-area-inset-bottom));background:linear-gradient(to top,color-mix(in srgb,var(--t) 56%,transparent) 42%,color-mix(in srgb,var(--t) 48%,transparent) 62%,color-mix(in srgb,var(--t) 26%,transparent) 80%,color-mix(in srgb,var(--t) 8%,transparent) 92%,transparent)}}
+  html[data-lightname][data-theme="light"]:root .v3 .mt-hero .mt-scrim.mt-scrim.mt-scrim{--t:var(--bg);height:calc(260px + env(safe-area-inset-bottom));background:linear-gradient(to top,color-mix(in srgb,var(--t) 56%,transparent) 42%,color-mix(in srgb,var(--t) 48%,transparent) 62%,color-mix(in srgb,var(--t) 26%,transparent) 80%,color-mix(in srgb,var(--t) 8%,transparent) 92%,transparent)}
 }
