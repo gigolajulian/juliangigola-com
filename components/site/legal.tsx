@@ -73,7 +73,7 @@ export function LegalColumn({
         {clauses.map((c) => (
           <article key={c.id} id={c.id} className="lg-clause">
             <p className="lbl mute">
-              {label}
+              {c.n === 1 ? label : null /* the part's name once, over its first clause (audit 2026-11-19) */}
               <span>{two(c.n)}</span>
             </p>
             <h3>{c.title}</h3>
