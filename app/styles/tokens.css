@@ -297,6 +297,8 @@
   --muted: oklch(0.235 0.003 70);
   /* 7.4:1 on the ground — captions and credits are real text, not decoration. */
   --muted-foreground: var(--dark-mute);
+  /* The footer phrase, one grey per theme. Large text, so 3:1 is the floor (light was 2.79:1 at #8f8e8a, audit 2026-11-19). */
+  --phrase: #8a8a8a;
 
   /* The one accent, sampled from the teal that recurs across his own work
      (Oakley, Own Brand, the studio portraits). Focus and hover only — never a
@@ -404,6 +406,7 @@
   /* Held to the same ~7:1 the dark ground gives, so credits and captions
      are no less readable for the theme being lighter. */
   --muted-foreground: oklch(0.44 0.003 250);
+  --phrase: #82817d; /* 3.3:1 on the light ground */
 
   /* Darkened the same way the accent is below, for the same reason: a green
      that reads on a dark ground is too pale to read on a light one. */
