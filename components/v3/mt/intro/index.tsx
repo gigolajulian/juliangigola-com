@@ -231,10 +231,14 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
       made.push(layer);
       let n = 0;
       const top0 = ymin - h - R;
+      /* Arrived thumbs first, then the ones still on the way: on a slow laptop the 1500ms start can come with only a
+         few in, and cycling those filled whole edge columns with one photo (Windows Chrome, 2026-11-19). A tile on a
+         thumb still loading stays dark until its own photo lands. */
+      const pick = [...ready, ...want.map((s) => new URL(s, location.href).href).filter((s) => !ready.includes(s))]; // ready holds im.src, always absolute
       const tile = (into: HTMLElement, y: number) => {
-        if (!ready.length) return;
+        if (!pick.length) return;
         const t = document.createElement("i");
-        t.style.cssText = `top:${y - top0}px;height:${h}px;background-image:url("${ready[n++ % ready.length]}")`;
+        t.style.cssText = `top:${y - top0}px;height:${h}px;background-image:url("${pick[n++ % pick.length]}")`;
         into.append(t);
       };
       // a group is one column strip: a small layer, with its own veil
