@@ -718,9 +718,9 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
 @media (hover:hover) and (pointer:fine){html[data-mtscroll] .v3 .mt-hero .mt-ctas .btn:not(.fill):hover{background-size:100% 100%;color:#000;border-color:#fff;text-shadow:none}}
 @media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .v3 .mt-hero :is(.mt-name h1,.mt-cap){color:var(--dark-ink)}}
 :root[data-theme="light"] .v3 .mt-hero :is(.mt-name h1,.mt-cap){color:var(--dark-ink)}
-/* Light theme: the name's shadow spread wider and lighter, so it reads as a soft shade on the pale page, not a hard dark edge (Julian, 2026-11-19). The 1px layer keeps the letter edges. */
-@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .v3 .mt-hero .mt-name h1{text-shadow:0 0 1px rgb(0 0 0 / 40%),0 2px 12px rgb(0 0 0 / 28%),0 6px 36px rgb(0 0 0 / 32%),0 12px 72px rgb(0 0 0 / 30%)}}
-:root[data-theme="light"] .v3 .mt-hero .mt-name h1{text-shadow:0 0 1px rgb(0 0 0 / 40%),0 2px 12px rgb(0 0 0 / 28%),0 6px 36px rgb(0 0 0 / 32%),0 12px 72px rgb(0 0 0 / 30%)}
+/* Light theme: the name's shadow spread wider and lighter, at half the dark theme's strength, so it reads as a soft shade on the pale page (Julian, 2026-11-19). The 1px layer keeps the letter edges. */
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .v3 .mt-hero .mt-name h1{text-shadow:0 0 1px rgb(0 0 0 / 30%),0 2px 12px rgb(0 0 0 / 28%),0 6px 36px rgb(0 0 0 / 25%),0 12px 72px rgb(0 0 0 / 35%)}}
+:root[data-theme="light"] .v3 .mt-hero .mt-name h1{text-shadow:0 0 1px rgb(0 0 0 / 30%),0 2px 12px rgb(0 0 0 / 28%),0 6px 36px rgb(0 0 0 / 25%),0 12px 72px rgb(0 0 0 / 35%)}
 /* The tagline's letters change colour with what is under them (Julian, 2026-11-17: black or white, and grey over the white page). No blend: the three stacked blends
    went plain white in Safari once the photos moved. tone() in motion/hero.ts reads the photo under each letter and sets data-tone: w over a dark photo, k over a
    light one, p over bare page. Without it (no script yet, or a photo it cannot read) a letter keeps the theme's own tagline colour.
