@@ -1,24 +1,17 @@
 import { scrollGoal, settleTo, shiftScroll } from "@/components/v3/smooth-scroll";
+import { holdEase as ease, holdUnease as unease } from "@/lib/motion/hold-ease";
 import { captionsOff, vimeoListen, vimeoPlays } from "@/lib/videos";
 import { RISE, clamp, smooth, type Ctx, type Driver } from "./engine";
 import { sleeveTilt } from "./sleeve-tilt";
 
-/* The held row's travel: it eases away from its first item and into its last (0.4 of the scroll's speed at the two ends). */
-const ease = (p: number) => p - (0.6 * Math.sin(2 * Math.PI * p)) / (2 * Math.PI);
-/** the scroll share at which `ease` reaches v (it only rises, so halving finds it) */
-const unease = (v: number) => {
-  let a = 0, b = 1;
-  for (let k = 0; k < 20; k++) if (ease((a + b) / 2) < v) a = (a + b) / 2; else b = (a + b) / 2;
-  return (a + b) / 2;
-};
 
-/* ?mtsnap=1 (trial, Julian 2026-11-18): a hold never rests between two items. When the scroll stops inside the hold, the page glides to the
+/* Julian, 2026-11-18 (?mtsnap=0 turns it off): a hold never rests between two items. When the scroll stops inside the hold, the page glides to the
    nearest one. Within a step of the item it rested on it leans 0.44 of a step the way the scroll went, so one wheel notch (100px, a small part of a step) moves on instead of
    falling back; ?mtsnap=near is plain nearest. `at`: the hold's share as an item position; `share`: an item's resting share of the hold. */
 function snap(el: HTMLElement, ctx: Ctx, n: number, at: (p: number) => number, share: (i: number) => number, busy: () => boolean, signal: AbortSignal) {
-  const m = /[?&]mtsnap=(\w+)/.exec(location.search);
-  if (!m || m[1] === "0" || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  const lean = m[1] === "near" ? 0 : 0.44;
+  const m = /[?&]mtsnap=(\w+)/.exec(location.search)?.[1];
+  if (m === "0" || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const lean = m === "near" ? 0 : 0.44;
   let t = 0, rest = NaN; // the item position the page last settled on; NaN outside the hold, so arriving is plain nearest
   const settle = () => {
     if (!ctx.held || busy()) return;
@@ -208,8 +201,8 @@ function films(): Driver {
       const ac = new AbortController();
       const opts = { signal: ac.signal };
       let cur = +(el.dataset.cur ?? 0);
-      // each film rests at the middle of its share of the hold
-      snap(el, ctx, n, (p) => p * n - 0.5, (i) => (i + 0.5) / n, () => false, ac.signal);
+      // each film rests at the middle of its share of the hold; the shares are eased like Cover art's (rows.tsx)
+      snap(el, ctx, n, (p) => ease(p) * n - 0.5, (i) => unease((i + 0.5) / n), () => false, ac.signal);
       // held, the row does not scroll itself, the page does: left and right step the page one film's share of the hold
       row.addEventListener("keydown", (e) => {
         if (!ctx.held || (e.key !== "ArrowRight" && e.key !== "ArrowLeft")) return;

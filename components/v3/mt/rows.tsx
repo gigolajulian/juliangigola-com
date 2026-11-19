@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { COVER_RELEASES } from "@/lib/cover-art-data";
 import { media } from "@/lib/device";
+import { holdEase } from "@/lib/motion/hold-ease";
 import { HeldRow } from "./held-row";
 import { COVER_KEYS, COVER_PRESS, FILM_DRESS, pad, type MtFilm } from "./data";
 
@@ -75,7 +76,8 @@ export function MtFilms({ films }: { films: MtFilm[] }) {
       if (mq.matches && document.documentElement.hasAttribute("data-mt-held")) {
         const r = sec.getBoundingClientRect();
         const p = Math.max(0, Math.min(0.9999, -r.top / Math.max(1, r.height - innerHeight)));
-        return setCur(Math.floor(p * items.length));
+        // the hold eases in and out like Cover art's, so the first and last film take more of the scroll (Julian, 2026-11-18; ?mtsnap=0: the old even shares)
+        return setCur(Math.floor((/[?&]mtsnap=0/.test(location.search) ? p : holdEase(p)) * items.length));
       }
       const a = items[0].getBoundingClientRect(), b = items[1].getBoundingClientRect();
       const at = mq.matches ? (innerHeight / 2 - a.top - a.height / 2) / (b.top - a.top) : el.scrollLeft / (b.left - a.left);

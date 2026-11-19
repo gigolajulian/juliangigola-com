@@ -34,9 +34,10 @@ export function glideTo(y: number, done: () => void) {
 /** Where the page is headed: Lenis's target while it glides, the scroll itself otherwise. */
 export const scrollGoal = () => live?.targetScroll ?? scrollY;
 
-/** A short glide to `y` that the next wheel or touch takes over (no lock): the held rows settle on an item with it (mt/motion/rows.ts). */
+/** Heads for `y` on a soft lerp that the next wheel or touch takes over (no lock): the held rows settle on an item with it (mt/motion/rows.ts).
+ *  A lerp, not a timed glide: it carries on from the speed the page already has, where a timed ease stopped and started again (Julian: "smoother"). */
 export function settleTo(y: number) {
-  if (live) live.scrollTo(y, { duration: 0.6, easing: (t) => (t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2) });
+  if (live) live.scrollTo(y, { lerp: 0.07 });
   else scrollTo({ top: y, behavior: "smooth" });
 }
 
