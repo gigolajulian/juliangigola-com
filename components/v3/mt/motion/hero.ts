@@ -263,9 +263,7 @@ export const heroDrivers: Driver[] = [
       if (!PIN) document.documentElement.setAttribute("data-mt-nopin", "");
       // The idle wall turns a card over to its next photo (hero.css). The value is the duration: hero.tsx reads it for the caption. `?mtflip=0` brings the hard cut back.
       const flip = /[?&]mtflip=0/.test(location.search) ? 0 : FLIP;
-      // A card the pointer rests on lifts toward the viewer (hero.css, all CSS). `?mthover=0` turns it off.
       const ac = new AbortController();
-      if (!/[?&]mthover=0/.test(location.search)) document.documentElement.setAttribute("data-mt-lift", "");
       if (flip) {
         document.documentElement.setAttribute("data-mt-flip", String(flip));
         document.documentElement.style.setProperty("--mt-flip", flip + "ms");
@@ -280,7 +278,6 @@ export const heroDrivers: Driver[] = [
         document.documentElement.removeAttribute("data-mtleft");
         document.documentElement.removeAttribute("data-mt-nopin");
         document.documentElement.removeAttribute("data-mt-flip");
-        document.documentElement.removeAttribute("data-mt-lift");
         document.documentElement.style.removeProperty("--mt-flip");
         document.documentElement.removeAttribute("data-mt-pasthero");
         clearTimeout(due);
