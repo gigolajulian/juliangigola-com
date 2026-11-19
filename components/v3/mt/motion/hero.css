@@ -11,7 +11,9 @@ html[data-mt-motion] .mt-hero .mt-col figcaption span { transition: opacity .15s
 html[data-mtleft] .v3 .site-hdr { transition: background-color .35s ease-out, border-color .35s ease-out, backdrop-filter .35s ease-out, -webkit-backdrop-filter .35s ease-out; }
 html[data-mtleft]:not([data-mt-pasthero]) .v3 .site-hdr { background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; border-bottom-color: transparent; }
 /* Phones and tablets: the name block holds on screen while the wall scrolls under it (desktop pins the whole stage instead). The stage keeps its own height, so the block takes no room. hero.ts sinks it out at the end; `?mtpin=0` turns it off there. */
-html[data-mt-motion]:not([data-mt-held], [data-mt-nopin]) .mt-hero .mt-name { position: sticky; top: 0; }
+html[data-mt-motion]:not([data-mt-held], [data-mt-nopin]) .mt-hero .mt-name { position: sticky; top: 0; height: max(100dvh, 600px); }
+/* dvh, not svh: pinned, the block must follow Safari's bar as it collapses, or the buttons float above the lower edge (MAC, #1211). A short landscape window takes its own height. */
+@media (max-height: 599px) { html[data-mt-motion]:not([data-mt-held], [data-mt-nopin]) .mt-hero .mt-name { height: 100dvh; } }
 /* The name's way out: the tagline and the buttons sink ahead of the name itself. */
 /* .mt-name twice: over depth.css's pointer shift on the same elements, which this keeps in the sum. */
 html[data-mt-motion] .mt-hero .mt-name.mt-name :is(.mt-cap, .mt-ctas) { translate: calc(var(--px, 0) * 4px) calc(var(--py, 0) * 4px + var(--mt-out, 0) * 22vh); }
