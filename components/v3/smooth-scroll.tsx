@@ -31,6 +31,15 @@ export function glideTo(y: number, done: () => void) {
   setTimeout(end, 1600);
 }
 
+/** Where the page is headed: Lenis's target while it glides, the scroll itself otherwise. */
+export const scrollGoal = () => live?.targetScroll ?? scrollY;
+
+/** A short glide to `y` that the next wheel or touch takes over (no lock): the held rows settle on an item with it (mt/motion/rows.ts). */
+export function settleTo(y: number) {
+  if (live) live.scrollTo(y, { duration: 0.6, easing: (t) => (t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2) });
+  else scrollTo({ top: y, behavior: "smooth" });
+}
+
 /** Moves the page by `dy` without breaking a glide: Lenis writes its own
  *  position every frame, so a plain scrollBy is undone (home.tsx rows). */
 export function shiftScroll(dy: number) {
