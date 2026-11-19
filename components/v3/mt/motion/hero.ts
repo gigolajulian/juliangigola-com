@@ -42,6 +42,27 @@ function park(ctas: HTMLElement | null, on: boolean, why: "out" | "past" = "out"
 
 const states = new WeakMap<HTMLElement, State>();
 
+/* Phones and tablets pin the name too (hero.css). `?mtpin=0` brings back the name that scrolls away with the first screen. */
+const PIN = typeof location === "undefined" || !/[?&]mtpin=0/.test(location.search);
+
+/* The name's way out, the same on every layout: it rides down out of the window and is over as See the work's top edge enters it.
+   2026-11-17, third pass: "too fast, needs to be longer and finish later". It takes the last three quarters of the scroll up to that point,
+   a soft start and then an even pace (t*t*(2-t)), not the s-curve whose middle ran at 1.5 times the scroll. */
+function sink(st: State, ctx: { vh: number; top: number }) {
+  const gap = st.more ? st.more.getBoundingClientRect().top - ctx.vh : 0;
+  const t = clamp(1 - gap / Math.max(1, 0.75 * (gap - ctx.top)));
+  const e = Math.round(t * t * (2 - t) * 1000) / 1000;
+  if (!st.name || e === st.exit) return;
+  st.exit = e;
+  st.out = e >= 1;
+  st.name.style.transform = e ? `translate3d(0,${((st.drop || 0.6 * ctx.vh) * e).toFixed(1)}px,0)` : "";
+  st.name.style.setProperty("--mt-out", String(e));
+  st.name.style.opacity = st.out ? "0" : "";
+  park(st.ctas, st.out);
+  // the bar's wordmark comes in as the big name is out, and goes as it comes back (mtscroll.css)
+  document.documentElement.toggleAttribute("data-mt-nameout", st.out);
+}
+
 /* An unseen margin round the name, the tagline and the buttons (Julian, 2026-11-16: a photo's caption ran through the
    tagline). A caption within PAD of any of them hides (hero.css fades it) and comes back once clear. Held layout only. */
 const PAD = 12;
@@ -239,6 +260,7 @@ export const heroDrivers: Driver[] = [
         if (!due) due = window.setTimeout(sweep, 100); // ten sweeps a second while scrolling, and one after the last scroll event
       };
       if (LEFT) document.documentElement.setAttribute("data-mtleft", "");
+      if (!PIN) document.documentElement.setAttribute("data-mt-nopin", "");
       // The idle wall turns a card over to its next photo (hero.css). The value is the duration: hero.tsx reads it for the caption. `?mtflip=0` brings the hard cut back.
       const flip = /[?&]mtflip=0/.test(location.search) ? 0 : FLIP;
       // A card the pointer rests on lifts toward the viewer (hero.css, all CSS). `?mthover=0` turns it off.
@@ -256,6 +278,7 @@ export const heroDrivers: Driver[] = [
         clearInterval(look);
         ac.abort();
         document.documentElement.removeAttribute("data-mtleft");
+        document.documentElement.removeAttribute("data-mt-nopin");
         document.documentElement.removeAttribute("data-mt-flip");
         document.documentElement.removeAttribute("data-mt-lift");
         document.documentElement.style.removeProperty("--mt-flip");
@@ -323,19 +346,7 @@ export const heroDrivers: Driver[] = [
         // 2026-11-17, third pass: "too fast, needs to be longer and finish later". The ride is read off See the work: it is
         // over as the button's top edge enters the window, and takes the last three quarters of the scroll up to that point.
         // A soft start and then an even pace (t*t*(2-t)), not the s-curve whose middle ran at 1.5 times the scroll.
-        const gap = st.more ? st.more.getBoundingClientRect().top - ctx.vh : 0;
-        const t = clamp(1 - gap / Math.max(1, 0.75 * (gap - ctx.top)));
-        const e = Math.round(t * t * (2 - t) * 1000) / 1000;
-        if (st.name && e !== st.exit) {
-          st.exit = e;
-          st.out = e >= 1;
-          st.name.style.transform = e ? `translate3d(0,${((st.drop || 0.6 * ctx.vh) * e).toFixed(1)}px,0)` : "";
-          st.name.style.setProperty("--mt-out", String(e));
-          st.name.style.opacity = st.out ? "0" : "";
-          park(st.ctas, st.out);
-          // the bar's wordmark comes in as the big name is out, and goes as it comes back (mtscroll.css)
-          document.documentElement.toggleAttribute("data-mt-nameout", st.out);
-        }
+        sink(st, ctx);
         clearance(st, !st.out);
         return;
       }
@@ -344,8 +355,16 @@ export const heroDrivers: Driver[] = [
       const gone = clamp(-ctx.top, 0, LAG_MAX);
       if (mode === "p") for (const f of st.figs) move(f, -DRIFT[f.c] * clamp(gone / Math.max(1, ctx.h)));
       else for (const c of st.cols) move(c, -gone * c.a * 0.5 * (ctx.vw / 1440));
-      // phones and tablets too: captions ran through the name and tagline (MAC, 2026-11-17). Only while the name's screen is in view.
-      clearance(st, -ctx.top < ctx.vh);
+      /* Phones and tablets: the name block is sticky (hero.css), so it holds while the wall scrolls under it, then sinks out the desktop's way.
+         Julian, 2026-11-18: it scrolled away with the first screen. How far it sinks: from the name's top to the window's lower edge, and 24px. */
+      if (PIN && st.name && st.texts[0] && ctx.vw + "x" + ctx.vh !== st.sizeKey) {
+        st.sizeKey = ctx.vw + "x" + ctx.vh;
+        const b = st.name.getBoundingClientRect();
+        st.drop = b.height - (st.texts[0].getBoundingClientRect().top - b.top) + 24;
+      }
+      if (PIN) sink(st, ctx);
+      // phones and tablets too: captions ran through the name and tagline (MAC, 2026-11-17). Only while the name is on screen.
+      clearance(st, PIN ? !st.out && el.getBoundingClientRect().bottom > 0 : -ctx.top < ctx.vh);
     },
   },
 ];
