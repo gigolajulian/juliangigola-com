@@ -10,7 +10,9 @@ export type MtFilm = { id: string; title: string; kind: string; client: string; 
 /** A count as two digits: 01, 02. */
 export const pad = (n: number) => String(n).padStart(2, "0");
 
-export type MtData = { hero: MtFrame[]; extras: MtFrame[]; comm: MtFrame[]; films: MtFilm[]; does: string[]; reply: string | null; stills: Record<string, string> };
+/** `?pf=range`: one cell a discipline, its top covers to step through (lib/pf.ts). */
+export type MtRange = { label: string; href: string; n: number; srcs: string[] };
+export type MtData = { hero: MtFrame[]; extras: MtFrame[]; comm: MtFrame[]; films: MtFilm[]; does: string[]; reply: string | null; stills: Record<string, string>; range: MtRange[] };
 
 /* Julian's arranger save (save.json), in order. Key `<slug>/<NN>`. */
 export const HERO_KEYS = ["threshold/05", "i-wanna-be-a-human/01", "wired-magazine/01", "astral-allure/04", "wrapped-up/02", "sago/01", "valgur/02", "vigil/05", "ukiyosunknown/01", "nyx/06", "oakley-x-nike/01", "liminal/01"];

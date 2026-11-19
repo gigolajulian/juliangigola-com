@@ -1,6 +1,8 @@
 import { COMM_KEYS, FILM_DRESS, FILM_FILES, FILM_PICKS, HERO_KEYS, type MtData, type MtFrame } from "@/components/v3/mt/data";
 import { DOES } from "@/components/v3/about";
-import { PROJECTS, categoryLabel, getProject } from "@/lib/work";
+import { CATEGORIES, PROJECTS, categoryLabel, getProject } from "@/lib/work";
+import DISC from "@/lib/discipline-order.json";
+import ORDER from "@/lib/portfolio-order.json";
 import { CONTENT } from "@/lib/content";
 import { REEL, posterFor, previewUrl } from "@/lib/videos";
 import { RESPONSE_TIME } from "@/lib/site";
@@ -19,6 +21,15 @@ const markOf = (client: string) => (client === "Sammy Shiblaq" ? "empire" : clie
 // the site's own file for a film, starting at the same second as its player preview (`#t=8s` in the preview URL)
 const file = (title: string, preview?: string) => (FILM_FILES[title] ? `${FILM_FILES[title]}#t=${preview?.match(/#t=(\d+)s/)?.[1] ?? 8}` : undefined);
 const vid = (title: string) => CONTENT.videos.find((v) => v.title === title);
+// `?pf=range`: the disciplines in Julian's chip order, each with its first five covers in his portfolio order
+const rank = (slug: string) => (ORDER.indexOf(slug) + ORDER.length + 1) % (ORDER.length + 1);
+const range = DISC.flatMap((label) => {
+  const c = CATEGORIES.find((x) => categoryLabel(x) === label);
+  const ps = c ? PROJECTS.filter((p) => p.slug !== "realestate" && p.categories.some((k) => k.slug === c.slug)).sort((a, b) => rank(a.slug) - rank(b.slug)) : [];
+  // a gallery discipline (one project, many frames) steps through its own frames
+  const srcs = ps.length > 1 ? ps.slice(0, 5).map((p) => p.cover.src) : (ps[0]?.images.slice(0, 5).map((f) => f.src) ?? []);
+  return c && srcs.length ? [{ label, href: `/portfolio?d=${c.slug}`, n: ps.length, srcs }] : [];
+}).slice(0, 14);
 const used = new Set([...HERO_KEYS, ...COMM_KEYS].map((k) => k.split("/")[0]));
 export const MT: MtData = {
   hero: HERO_KEYS.map(frame),
@@ -33,6 +44,7 @@ export const MT: MtData = {
     const v = vid(title), preview = v ? previewUrl({ ...v, ...at(title) }) : undefined;
     return { id: v?.id ?? title, title, kind, client: v?.client ?? "", poster: v ? posterFor(v) : null, preview, file: file(title, preview), href: v?.client ? `/portfolio/video#${markOf(v.client)}` : "/portfolio/video" };
   }),
+  range,
   does: DOES,
   reply: RESPONSE_TIME,
   stills: Object.fromEntries(

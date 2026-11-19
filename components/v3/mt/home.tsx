@@ -9,6 +9,8 @@ import { MtCovers, MtFilms } from "./rows";
 import { MtBookOnline } from "./book-online";
 import { MtByQuote } from "./by-quote";
 import { MtAbout } from "./about";
+import { MtRange } from "./range";
+import "@/components/v3/pf-ref.css";
 import { MtFoot } from "./foot";
 import { InquiryCard } from "./inquiry-card";
 import { MtIntro } from "./intro";
@@ -70,6 +72,7 @@ export function MtHome({ data }: { data: MtData }) {
         <MtHero frames={data.hero} extras={data.extras} />
         {/* order (Julian, 2026-11-17): Motion, Cover art, About, Sessions, By quote, then Commissions */}
         <MtFilms films={data.films} />
+        <MtRange range={data.range} />
         <MtCovers />
         <MtAbout does={data.does} />
         <MtBookOnline open={book} onOpen={setBook} onClose={() => setBook(null)} quotePhoto={quotePhoto} onRowPick={() => setQuotePhoto(null)} />

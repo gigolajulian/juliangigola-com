@@ -16,6 +16,8 @@ import { V4Tilt } from "./v4-tilt";
 const V3Canvas = dynamic(() => import("@/components/v3/canvas").then((m) => m.V3Canvas), { ssr: false });
 import { launchSpeed, stepSpring, springSettled, frameDt } from "@/lib/motion/spring";
 import "./pf-ref.css";
+import { Cycle } from "./pf-cycle";
+import { pfOn, lite } from "@/lib/pf";
 
 /* JG V3 Portfolio (master v39, /work): search, discipline chips, and the
    Grid, Strip and Color views. Best first (lib's order: the vectorscope's
@@ -91,33 +93,6 @@ function Cap({ p, cls }: { p: WorkItem; cls: string }) {
   );
 }
 
-/* `?pf=cycle` prototype (Julian, 2026-11-19, from a reference recording): a cover in view steps through
-   a few of its project's frames, hard cuts, the cover first. Mounts only with the flag; skipped on
-   reduced motion and Save-Data. */
-function Cycle({ srcs }: { srcs: string[] }) {
-  const el = React.useRef<HTMLSpanElement>(null);
-  const [n, setN] = React.useState(-1);
-  React.useEffect(() => {
-    const e = el.current!;
-    let t = 0;
-    const io = new IntersectionObserver(([x]) => {
-      clearInterval(t);
-      if (!x.isIntersecting) return;
-      t = window.setInterval(() => setN((i) => (i + 2 > srcs.length ? -1 : i + 1)), 1400 + Math.random() * 500);
-    });
-    io.observe(e);
-    return () => {
-      io.disconnect();
-      clearInterval(t);
-    };
-  }, [srcs]);
-  return (
-    <span className="pf-cyc" ref={el} aria-hidden>
-      {n >= 0 ? srcs.map((src, i) => <Image key={src} src={src} alt="" fill sizes={GRID_SIZES} style={{ opacity: i === n ? 1 : 0 }} />) : null}
-    </span>
-  );
-}
-
 function Tile({ p, swatch, first, cyc }: { p: WorkItem; swatch?: string[]; first?: boolean; cyc?: string[] }) {
   return (
     <figure className="wt">
@@ -133,7 +108,7 @@ function Tile({ p, swatch, first, cyc }: { p: WorkItem; swatch?: string[]; first
                waited a beat and landed as empty cards. */
             loading={first ? "eager" : "lazy"}
           />
-          {cyc?.length ? <Cycle srcs={cyc} /> : null}
+          {cyc?.length ? <Cycle srcs={cyc} sizes={GRID_SIZES} /> : null}
           {swatch ? (
             <span className="sw">
               {swatch.map((c) => (
@@ -506,22 +481,30 @@ export function V3Work({
 }) {
   const [filter, setFilter] = React.useState("All");
   const [at, setAt] = React.useState<number | null>(null);
-  /* `?pf=grow` and `?pf=cycle`: motion prototypes from a reference (Julian, 2026-11-19). Off by default. */
+  /* `?pf=` motion prototypes (lib/pf.ts): grow, cycle, open, caps. Off by default. */
   const [pf, setPf] = React.useState("");
   const [cyc, setCyc] = React.useState<Record<string, string[]>>({});
   const pfCap = React.useRef<HTMLParagraphElement>(null);
   React.useEffect(() => {
-    const f = new URLSearchParams(location.search).get("pf") ?? "";
+    const f = pfOn().join(" ");
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setPf(f);
-    const lite = matchMedia("(prefers-reduced-motion: reduce)").matches || (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
-    if (!f.includes("cycle") || lite) return;
+    if (!f.includes("cycle") || lite()) return;
     fetch("/canvas.json")
       .then((r) => (r.ok ? r.json() : null))
       .then((j: Record<string, [string][]> | null) => j && setCyc(Object.fromEntries(Object.entries(j).map(([k, v]) => [k, v.slice(1, 5).map((x) => x[0])]))))
       .catch(() => {});
   }, []);
   const nameOf = React.useMemo(() => new Map(work.map((p) => [p.s, p.n])), [work]);
+  /* The strip's page caption; with `caps` a new name slides up into place (220ms) instead of jumping. */
+  const capTo = (s?: string) => {
+    const el = pfCap.current, t = (s && nameOf.get(s)) || "";
+    if (!el || el.textContent === t) return;
+    const span = document.createElement("span");
+    span.textContent = t;
+    el.replaceChildren(span);
+    if (pf.includes("caps") && t) span.animate([{ transform: "translateY(100%)" }, { transform: "none" }], { duration: 220, easing: "cubic-bezier(0.23, 1, 0.32, 1)" });
+  };
   const closeView = React.useCallback(() => setAt(null), []);
   /* `?d=<slug>`: the retired discipline pages and the site's links land here
      with that chip on. Read after mount, so the page itself stays static. */
@@ -1231,7 +1214,7 @@ export function V3Work({
               ref={strip}
               onScroll={stripBar}
               /* `?pf=grow`: the page caption names the photo under the pointer, written straight to the node (no re-render of the row). */
-              onPointerOver={pf.includes("grow") ? (e) => { const s = (e.target as HTMLElement).closest<HTMLElement>("[data-s]")?.dataset.s; if (pfCap.current) pfCap.current.textContent = (s && nameOf.get(s)) || ""; } : undefined}
+              onPointerOver={pf.includes("grow") ? (e) => capTo((e.target as HTMLElement).closest<HTMLElement>("[data-s]")?.dataset.s) : undefined}
             >
               {cells.map(({ f, p }, n) => {
                 /* Name, then discipline, both on the photo, as in the grid (Julian, 2026-11-04). */

@@ -32,3 +32,16 @@
 /* ?pf=cycle: a grid cover steps through its project's frames. Hard cuts, no fade, no black frame. */
 .v3 .pf-cyc { position: absolute; inset: 0; pointer-events: none }
 .v3 .pf-cyc img { transition: none !important }
+
+/* ?pf=range: the home's discipline grid after Motion. */
+[data-mtscroll] .mt-range { padding-block: calc(120 * var(--u)) calc(96 * var(--u)); background: var(--background); position: relative; z-index: 1 }
+.v3 .mt-rg { list-style: none; margin: 0 auto; padding: 0 calc(36 * var(--u)); width: min(100%, calc(1440 * var(--u))); display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 28px 12px }
+.v3 .mt-rg a { display: flex; flex-direction: column; gap: 8px; color: inherit; text-decoration: none }
+.v3 .mt-rg .ph { position: relative; aspect-ratio: 3 / 4; overflow: hidden; border-radius: 2px; background: var(--card) }
+.v3 .mt-rg img { object-fit: cover }
+@media (max-width: 1023px) { .v3 .mt-rg { grid-template-columns: repeat(4, minmax(0, 1fr)) } }
+@media (max-width: 599px) { .v3 .mt-rg { grid-template-columns: repeat(2, minmax(0, 1fr)); padding-inline: 16px } .v3 .mt-rg li:nth-child(n+9) { display: none } [data-mtscroll] .mt-range { padding-block: 64px 48px } [data-mtscroll] .mt-range .mt-rowhead { margin-bottom: 24px } [data-mtscroll] .mt-range .mt-rowhead .btn { margin-top: 16px } }
+
+/* ?pf=caps: a changing name slides up into place instead of jumping. */
+.v3 .pf-cap { overflow: hidden }
+.v3 .pf-cap > span { display: inline-block }

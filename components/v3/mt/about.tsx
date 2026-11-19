@@ -4,6 +4,10 @@ import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ABOUT_FACTS, ABOUT_SENTENCE, pad } from "./data";
+import { Cycle } from "@/components/v3/pf-cycle";
+import { usePf, lite } from "@/lib/pf";
+/* `?pf=about` (lib/pf.ts): the photo steps through the other two portraits. */
+const MORE = ["/about/julian-steps.jpg", "/about/julian.jpg"];
 
 /* Spec 3.9: one screen. The sentence is one paragraph; the per-word spans
    (`--w`) and the wordmark's per-letter spans (`--j`) are for the motion pass. */
@@ -24,11 +28,16 @@ function uncoverOnFocus(e: React.FocusEvent<HTMLAnchorElement>) {
 
 export function MtAbout({ does }: { does: string[] }) {
   const words = ABOUT_SENTENCE.split(" ");
+  const pf = usePf("about");
+  const [cyc, setCyc] = React.useState(false);
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  React.useEffect(() => setCyc(pf && !lite()), [pf]);
   return (
     <section id="about" className="mt-about" aria-label="About" data-mt="about">
       <div className="mt-stage">
         <figure className="mt-ab-ph">
           <Image src="/about/julian-studio.jpg" alt="Julian Gigola at the tether station on set" fill sizes="100vw" />
+          {cyc ? <Cycle srcs={MORE} sizes="100vw" ms={2200} /> : null}
         </figure>
         <p className="mt-wordmark" aria-hidden>
           {[...WORDMARK].map((ch, j) => <span key={j} style={{ "--j": j } as React.CSSProperties}>{ch === " " ? " " : ch}</span>)}
