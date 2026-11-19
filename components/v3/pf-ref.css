@@ -1,0 +1,34 @@
+/* /portfolio motion prototypes from a reference recording (Julian, 2026-11-19). Off unless `?pf=` names them. */
+
+/* ?pf=grow: the strip becomes one short row through the middle of the page; the photo under the
+   pointer grows where it sits, over its neighbours, no reflow. Mouse only: touch keeps the strip as it is. */
+@media (hover: hover) and (pointer: fine) and (min-width: 768px) {
+  .v3 #p-work.strip-on[data-pf~="grow"] .wstrip { align-items: center; padding-inline: 14vw; gap: 6px }
+  .v3 #p-work.strip-on[data-pf~="grow"] .sc {
+    height: clamp(120px, 22vh, 240px);
+    border-radius: 2px;
+    overflow: visible;
+    background: none;
+    transition: scale var(--dur-page) var(--ease-out-strong);
+  }
+  .v3 #p-work.strip-on[data-pf~="grow"] .sc a { position: absolute; inset: 0; overflow: hidden; background: var(--card) }
+  .v3 #p-work.strip-on[data-pf~="grow"] .sc:hover,
+  .v3 #p-work.strip-on[data-pf~="grow"] .sc:has(:focus-visible) { scale: 2.3; z-index: 2 }
+  .v3 #p-work.strip-on[data-pf~="grow"] .sc-n { display: none }
+  .v3 #p-work.strip-on[data-pf~="grow"] .pf-cap {
+    position: absolute;
+    left: var(--g);
+    bottom: 28px;
+    margin: 0;
+    min-height: 1em;
+    color: var(--ink);
+    pointer-events: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .v3 #p-work.strip-on[data-pf~="grow"] .sc { transition: none }
+}
+
+/* ?pf=cycle: a grid cover steps through its project's frames. Hard cuts, no fade, no black frame. */
+.v3 .pf-cyc { position: absolute; inset: 0; pointer-events: none }
+.v3 .pf-cyc img { transition: none !important }

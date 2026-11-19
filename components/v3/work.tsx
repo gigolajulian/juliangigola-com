@@ -15,6 +15,7 @@ import { V4Tilt } from "./v4-tilt";
 // The canvas view loads only when it opens, not with every /portfolio visit.
 const V3Canvas = dynamic(() => import("@/components/v3/canvas").then((m) => m.V3Canvas), { ssr: false });
 import { launchSpeed, stepSpring, springSettled, frameDt } from "@/lib/motion/spring";
+import "./pf-ref.css";
 
 /* JG V3 Portfolio (master v39, /work): search, discipline chips, and the
    Grid, Strip and Color views. Best first (lib's order: the vectorscope's
@@ -90,7 +91,34 @@ function Cap({ p, cls }: { p: WorkItem; cls: string }) {
   );
 }
 
-function Tile({ p, swatch, first }: { p: WorkItem; swatch?: string[]; first?: boolean }) {
+/* `?pf=cycle` prototype (Julian, 2026-11-19, from a reference recording): a cover in view steps through
+   a few of its project's frames, hard cuts, the cover first. Mounts only with the flag; skipped on
+   reduced motion and Save-Data. */
+function Cycle({ srcs }: { srcs: string[] }) {
+  const el = React.useRef<HTMLSpanElement>(null);
+  const [n, setN] = React.useState(-1);
+  React.useEffect(() => {
+    const e = el.current!;
+    let t = 0;
+    const io = new IntersectionObserver(([x]) => {
+      clearInterval(t);
+      if (!x.isIntersecting) return;
+      t = window.setInterval(() => setN((i) => (i + 2 > srcs.length ? -1 : i + 1)), 1400 + Math.random() * 500);
+    });
+    io.observe(e);
+    return () => {
+      io.disconnect();
+      clearInterval(t);
+    };
+  }, [srcs]);
+  return (
+    <span className="pf-cyc" ref={el} aria-hidden>
+      {n >= 0 ? srcs.map((src, i) => <Image key={src} src={src} alt="" fill sizes={GRID_SIZES} style={{ opacity: i === n ? 1 : 0 }} />) : null}
+    </span>
+  );
+}
+
+function Tile({ p, swatch, first, cyc }: { p: WorkItem; swatch?: string[]; first?: boolean; cyc?: string[] }) {
   return (
     <figure className="wt">
       <Link href={projectHref(p.s)} aria-label={named(p)}>
@@ -105,6 +133,7 @@ function Tile({ p, swatch, first }: { p: WorkItem; swatch?: string[]; first?: bo
                waited a beat and landed as empty cards. */
             loading={first ? "eager" : "lazy"}
           />
+          {cyc?.length ? <Cycle srcs={cyc} /> : null}
           {swatch ? (
             <span className="sw">
               {swatch.map((c) => (
@@ -477,6 +506,22 @@ export function V3Work({
 }) {
   const [filter, setFilter] = React.useState("All");
   const [at, setAt] = React.useState<number | null>(null);
+  /* `?pf=grow` and `?pf=cycle`: motion prototypes from a reference (Julian, 2026-11-19). Off by default. */
+  const [pf, setPf] = React.useState("");
+  const [cyc, setCyc] = React.useState<Record<string, string[]>>({});
+  const pfCap = React.useRef<HTMLParagraphElement>(null);
+  React.useEffect(() => {
+    const f = new URLSearchParams(location.search).get("pf") ?? "";
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setPf(f);
+    const lite = matchMedia("(prefers-reduced-motion: reduce)").matches || (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
+    if (!f.includes("cycle") || lite) return;
+    fetch("/canvas.json")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j: Record<string, [string][]> | null) => j && setCyc(Object.fromEntries(Object.entries(j).map(([k, v]) => [k, v.slice(1, 5).map((x) => x[0])]))))
+      .catch(() => {});
+  }, []);
+  const nameOf = React.useMemo(() => new Map(work.map((p) => [p.s, p.n])), [work]);
   const closeView = React.useCallback(() => setAt(null), []);
   /* `?d=<slug>`: the retired discipline pages and the site's links land here
      with that chip on. Read after mount, so the page itself stays static. */
@@ -1104,6 +1149,7 @@ export function V3Work({
           (canvas ? " cv-on" : "")
         }
         id="p-work"
+        data-pf={pf || undefined}
       >
         <div className="pg-head">
           <h1 className="pg-t">{filter === "All" ? "Portfolio" : filter}</h1>
@@ -1172,20 +1218,27 @@ export function V3Work({
         {view === "grid" && !shown ? (
           <div className="wgrid">
             {list.map((p, n) => (
-              <Tile key={p.s} p={p} first={n < 12} />
+              <Tile key={p.s} p={p} first={n < 12} cyc={cyc[p.s]} />
             ))}
           </div>
         ) : null}
         {view === "strip" ? (
           <>
             {/* A new chip starts its own strip at the start: the frames it shares with All kept the old scroll. */}
-            <div className="wstrip" key={filter} ref={strip} onScroll={stripBar}>
+            <div
+              className="wstrip"
+              key={filter}
+              ref={strip}
+              onScroll={stripBar}
+              /* `?pf=grow`: the page caption names the photo under the pointer, written straight to the node (no re-render of the row). */
+              onPointerOver={pf.includes("grow") ? (e) => { const s = (e.target as HTMLElement).closest<HTMLElement>("[data-s]")?.dataset.s; if (pfCap.current) pfCap.current.textContent = (s && nameOf.get(s)) || ""; } : undefined}
+            >
               {cells.map(({ f, p }, n) => {
                 /* Name, then discipline, both on the photo, as in the grid (Julian, 2026-11-04). */
                 const cap = p ? <Cap p={p} cls="sc-n" /> : null;
                 if (!f)
                   return (
-                    <figure key={p!.s} className="sc" data-flip-id={p!.s}>
+                    <figure key={p!.s} className="sc" data-flip-id={p!.s} data-s={p!.s}>
                       <Link href={projectHref(p!.s)} aria-label={named(p!)}>
                         <Image src={p!.cover} alt={altOf(p!)} fill sizes={STRIP_SIZES} decoding="sync" loading={n < 4 ? "eager" : "lazy"} />
                         {cap}
@@ -1194,7 +1247,7 @@ export function V3Work({
                   );
                 const i = stripFrames.indexOf(f);
                 return (
-                  <figure key={f.src} className={f.wide ? "sc wide" : f.sq ? "sc sq" : "sc"} data-flip-id={f.src}>
+                  <figure key={f.src} className={f.wide ? "sc wide" : f.sq ? "sc sq" : "sc"} data-flip-id={f.src} data-s={f.s}>
                     {/* Opens full size, as in the grid. */}
                     <a
                       href={f.src}
@@ -1216,6 +1269,7 @@ export function V3Work({
             <div className="wbar" ref={bar}>
               <i />
             </div>
+            {pf.includes("grow") ? <p className="pf-cap lbl" ref={pfCap} aria-hidden /> : null}
           </>
         ) : null}
         {view === "color" ? (
