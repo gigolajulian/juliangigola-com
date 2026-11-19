@@ -75,11 +75,47 @@ function shouldPlay() {
   if (/[?&]intro=0/.test(q) || !("v3motion" in root.dataset)) return false;
   if (matches("calm")) return false;
   if (window.scrollY > 4) return false;
+  // the head script already gave the page back at 6s (a slow CPU hydrates later than that): starting now would blank the hero the visitor is looking at
+  if ("mtLate" in root.dataset) return false;
   if (/[?&]intro=[12]/.test(q)) return true;
   try {
     if (sessionStorage.getItem("jg-intro")) return false;
   } catch {}
   return true;
+}
+
+/* ?preload=1: the splash holds until these have loaded and decoded. CAP_AT: a dead or slow photo never strands the visitor. It starts by
+   6s from navigation, the deadline the head script's own fallback uses, and never sooner than today's 1500ms after hydration. */
+const CAP_AT = 6000;
+/** Photos on screen at any point of the splash: the wall frames inside the canvas view (the screen at scale S0 around the point build() pushes into), and any photo on the first screen at rest. */
+function onScreen(hero: HTMLElement, wall: HTMLElement) {
+  const W = window.innerWidth;
+  const H = window.innerHeight;
+  const u = (wall.querySelector(".mt-col:not(.side) figure:not(.xr) .ph")?.getBoundingClientRect().width ?? 403) / 403;
+  const cy = hero.getBoundingClientRect().top + 1150 * u; // build(): py, in screen space
+  const hit = (r: DOMRect, l: number, t: number, rt: number, b: number) => r.width > 0 && r.right > l && r.left < rt && r.bottom > t && r.top < b;
+  const imgs = [...document.querySelectorAll<HTMLImageElement>("main img")].filter((i) => i.offsetParent !== null);
+  return imgs.filter((i) => {
+    const r = i.getBoundingClientRect();
+    return hit(r, 0, 0, W, H) || (wall.contains(i) && hit(r, W / 2 - W / (2 * S0), cy - H / (2 * S0), W / 2 + W / (2 * S0), cy + H / (2 * S0)));
+  });
+}
+
+/** ?preload=1: how many extra tiles the canvas draws on this screen, and the thumb width that covers one at this pixel ratio.
+    Estimated from the laid-out wall the way build() measures it: the screen at scale S0, on the wall's own column and row pitch. */
+function fitExtras(wall: HTMLElement) {
+  const ph = [...wall.querySelectorAll<HTMLElement>(".mt-col:not(.side) figure:not(.xr) .ph")].map((e) => e.getBoundingClientRect()).filter((r) => r.width);
+  if (!ph.length) return null;
+  const w = ph[0].width;
+  const lefts = [...new Set(ph.map((r) => Math.round(r.left)))].sort((a, z) => a - z);
+  const tops = ph.filter((r) => Math.round(r.left) === lefts[0]).map((r) => r.top).sort((a, z) => a - z);
+  const P = lefts.length > 1 ? lefts[1] - lefts[0] : w * 1.1;
+  const R = tops.length > 1 ? tops[1] - tops[0] : ph[0].height * 1.19;
+  const n = (Math.ceil(window.innerWidth / S0 / P) + 2) * (Math.ceil((window.innerHeight / S0 + ph[0].height) / R) + 1) - ph.length;
+  // a tile is drawn at S0 and blurs out as it grows with the push, so its drawn size is enough. Three widths, so the resizer keeps few copies.
+  const px = w * S0 * devicePixelRatio;
+  const width = px <= 256 ? 256 : px <= 384 ? 384 : 640;
+  return { n: Math.max(6, Math.min(30, n)), width };
 }
 
 export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
@@ -107,6 +143,7 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
     if (!hero || !wall) return void delete root.dataset.mtIntro;
 
     root.dataset.mtIntro = "1"; // wall hidden, scroll locked, until the first frames are ready
+    root.dataset.mtOwn = ""; // the intro holds state 1 now, with its own cap: the head script's 6s fallback stands down
     // While the splash covers the page (states 1 and 2) nothing under it takes focus: Tab landed on header links at opacity 0.
     const under = [document.querySelector<HTMLElement>(".site-hdr"), document.getElementById("main")].filter((n): n is HTMLElement => !!n);
     const lock = new MutationObserver(() => {
@@ -128,6 +165,8 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
     const stopHurry = () => INPUTS.forEach((e) => window.removeEventListener(e, hurry));
     const origin = wall.style.transformOrigin;
     const ready: string[] = [];
+    const all = /[?&]preload=1/.test(location.search);
+    const parked: [HTMLImageElement, string | null, string | null][] = [];
 
     const finish = (seen: boolean) => {
       if (finished) return;
@@ -138,8 +177,10 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
       anims.forEach((a) => a.cancel());
       made.forEach((n) => n.remove());
       held.forEach((h) => (h.style.pointerEvents = ""));
+      parked.forEach(([i, set, src]) => (set && i.setAttribute("srcset", set), src && i.setAttribute("src", src)));
       wall.style.transformOrigin = origin;
       delete root.dataset.mtIntro;
+      delete root.dataset.mtOwn;
       if (seen) {
         try {
           sessionStorage.setItem("jg-intro", "1");
@@ -404,9 +445,12 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
     // extras are drawn only from thumbs that have arrived, so the canvas never shows an empty tile
     // where rows five and six show (wide screens) the wall itself uses extras up to 29, so the canvas draws from the ones after
     const rows6 = !!wall.querySelector<HTMLElement>("figure.xr")?.offsetParent && pool.current.length >= 48;
-    const want = (rows6 ? pool.current.slice(30, window.innerWidth >= 3300 ? 80 : 60) : pool.current.slice(16, 46)).map((f) => loader({ src: f.src, width: 640 }));
+    const from = rows6 ? 30 : 16;
+    const fit = all ? fitExtras(wall) : null; // ?preload=1: only as many as this screen's canvas draws, at the size it draws them
+    const want = pool.current.slice(from, fit ? from + fit.n : rows6 ? (window.innerWidth >= 3300 ? 80 : 60) : 46).map((f) => loader({ src: f.src, width: fit?.width ?? 640 }));
     let leadIn = false;
-    const go = () => leadIn && ready.length >= Math.min(18, want.length) && run();
+    let dead = 0; // extras that failed for good: they count as settled, so one dead file never holds the splash
+    const go = () => leadIn && (all ? ready.length + dead >= want.length : ready.length >= Math.min(18, want.length)) && run();
     let plain = 0;
     want.forEach((src) => {
       const im = new Image();
@@ -416,13 +460,25 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
       im.onerror = () => {
         const rest = /\/cdn-cgi\/image\/[^/]+\/(.+)$/.exec(im.src)?.[1];
         if (rest && plain++ < 18) im.src = rest.startsWith("http") ? rest : `/${rest}`;
+        else dead++;
       };
       im.src = src;
     });
-    // start once the first wall frames and enough extras can paint, or after 1500ms regardless
-    const lead = [...wall.querySelectorAll<HTMLImageElement>(".mt-col:not(.side) figure:not(.xr) img")].slice(0, 6);
+    // start once the first wall frames and enough extras can paint, or after 1500ms regardless.
+    // ?preload=1 (opt-in until Julian approves it): every photo the splash will show, on the canvas or on the first screen after it, and every extra, with a 3000ms cap.
+    const lead = all ? onScreen(hero, wall) : [...wall.querySelectorAll<HTMLImageElement>(".mt-col:not(.side) figure:not(.xr) img")].slice(0, 6);
+    if (all) lead.forEach((i) => (i.loading = "eager")); // lazy frames off the first screen would wait for a scroll that is locked
+    // ?preload=1: lazy pictures further down (film posters at full width) start inside the browser's own look-ahead and take the splash's
+    // bandwidth. Nothing scrolls until the splash ends, so they wait for it: both attributes off (no request, no error event), back in finish().
+    if (all)
+      for (const i of document.querySelectorAll<HTMLImageElement>("main img[loading=lazy]")) {
+        if (i.complete || lead.includes(i)) continue;
+        parked.push([i, i.getAttribute("srcset"), i.getAttribute("src")]);
+        i.removeAttribute("srcset");
+        i.removeAttribute("src");
+      }
     Promise.all(lead.map((i) => i.decode().catch(() => {}))).then(() => ((leadIn = true), go()));
-    timers.push(window.setTimeout(run, 1500));
+    timers.push(window.setTimeout(run, all ? Math.max(1500, CAP_AT - performance.now()) : 1500));
     return () => finish(false);
   }, []);
 
