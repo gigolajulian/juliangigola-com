@@ -14,7 +14,8 @@ function snap(el: HTMLElement, ctx: Ctx, n: number, at: (p: number) => number, s
   const lean = m === "near" ? 0 : 0.44;
   let t = 0, rest = NaN; // the item position the page last settled on; NaN outside the hold, so arriving is plain nearest
   const settle = () => {
-    if (!ctx.held || busy()) return;
+    // fine pointers only: a finger's own momentum is left alone (MAC, #1209: the iPad snapped too)
+    if (!ctx.held || !ctx.fine || busy()) return;
     const top = el.getBoundingClientRect().top + scrollY, range = el.offsetHeight - innerHeight, y = scrollGoal(), p = (y - top) / range;
     // the two ends are items too: resting exactly there keeps `rest`, a pixel past them the page is free
     if (y < top - 1 || y > top + range + 1) return void (rest = NaN);
