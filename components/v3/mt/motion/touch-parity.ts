@@ -5,6 +5,7 @@ export type TpItem = (typeof TP)[number];
 
 export const tp = (k: TpItem) => {
   if (typeof location === "undefined") return false;
+  if (matchMedia("(hover: hover) and (pointer: fine)").matches) return false; // a mouse gets the desktop motion; iPad landscape (held, coarse) keeps flip and press
   const m = /[?&]mttp=([\w,-]+)/.exec(location.search)?.[1];
   if (!m || m === "all") return true;
   if (m === "0") return false;
