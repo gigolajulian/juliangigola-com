@@ -2,7 +2,7 @@ import { span, type Driver } from "./engine";
 
 /* About (spec 3.9). The desktop beats are pure CSS on a timer (about.css, `data-seen`). Without a hold the sentence and the rows light as they scroll
    through the screen: this writes their progress as --sp and --rp. */
-const m = { say: 0, ol: 0, h: 1, sp: "", rp: "" };
+const m = { say: 0, ol: 0, ft: 0, h: 1, sp: "", rp: "", ep: "" };
 
 export const aboutDrivers: Driver[] = [
   {
@@ -18,6 +18,7 @@ export const aboutDrivers: Driver[] = [
         m.h = r.height;
         m.say = say.getBoundingClientRect().top - r.top;
         m.ol = ol.getBoundingClientRect().top - r.top;
+        m.ft = (el.querySelector(".mt-ab-foot") ?? ol).getBoundingClientRect().top - r.top;
       };
       const ro = new ResizeObserver(measure);
       ro.observe(el);
@@ -31,7 +32,8 @@ export const aboutDrivers: Driver[] = [
         el.removeAttribute("data-seen");
         el.style.removeProperty("--sp");
         el.style.removeProperty("--rp");
-        m.sp = m.rp = "";
+        el.style.removeProperty("--ep");
+        m.sp = m.rp = m.ep = "";
       };
     },
     frame(p, el, ctx) {
@@ -42,6 +44,9 @@ export const aboutDrivers: Driver[] = [
       const rp = span(top + m.ol, 0.72 * ctx.vh, 0.48 * ctx.vh).toFixed(3);
       if (sp !== m.sp) el.style.setProperty("--sp", (m.sp = sp));
       if (rp !== m.rp) el.style.setProperty("--rp", (m.rp = rp));
+      // ?mttp=about: the facts and the button come up as the foot of the column reaches the lower part of the screen
+      const ep = span(top + m.ft, 0.92 * ctx.vh, 0.55 * ctx.vh).toFixed(3);
+      if (ep !== m.ep) el.style.setProperty("--ep", (m.ep = ep));
     },
   },
 ];
