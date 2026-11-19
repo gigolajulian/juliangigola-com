@@ -192,8 +192,7 @@
 [data-mtscroll] .mt-more-me{position:absolute;z-index:1;right:calc(36 * var(--u));bottom:calc(54 * var(--u));height:auto;padding:calc(11 * var(--u)) calc(16 * var(--u));font-size:11px;background:color-mix(in srgb,var(--bg) 50%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
 
 /* ── Footer (3.10) ── */
-[data-mtscroll] .mt-foot{--phr:var(--grey)}
-:root[data-mtscroll][data-theme="light"] .mt-foot{--phr:#8f8e8a}
+[data-mtscroll] .mt-foot{--phr:var(--phrase)}
 [data-mtscroll] .mt-foot .mt-stage{position:relative;height:max(100svh,600px);overflow:hidden}
 [data-mtscroll] .mt-fwall{position:absolute;inset:0}
 [data-mtscroll] .mt-fwall img{object-fit:cover;object-position:50% 30%}
@@ -655,6 +654,8 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
 [data-mtscroll] .mt-sleeve .disc,.cv4 .mt-sleeve .disc{background:radial-gradient(circle,#0b0b0b 0 16.5%,transparent 16.7%),var(--press,#222)}
 [data-mtscroll] .mt-cvcap{position:absolute;left:0;top:calc(100% + 16 * var(--u));margin:0;display:grid;gap:4px;white-space:nowrap;opacity:.6;transition:opacity .3s ease-out}
 [data-mtscroll] .mt-sleeve[data-on] .mt-cvcap{opacity:1}
+/* Touch has no hover to lift it, so the caption sits at full there (audit 2026-11-19: the artist line was 2.9:1 at rest). */
+@media (hover:none){[data-mtscroll] .mt-cvcap{opacity:1}}
 [data-mtscroll] .mt-cvn{position:absolute;left:calc(var(--fx) + 36 * var(--u));bottom:calc(40 * var(--u));margin:0;font:500 calc(64 * var(--u))/1 var(--mono);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 [data-mtscroll] .mt-cvn span{font-size:.3em;letter-spacing:.14em;color:var(--mute);margin-left:.4em}
 @media (min-width:1024px) and (min-height:600px){

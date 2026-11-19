@@ -123,6 +123,7 @@ html[data-mt-par][data-mt-held] .mt-covers .mt-rowhead>:is(h2,p){translate:0 cal
 html[data-mt-par][data-mt-held] .mt-covers .mt-row{translate:0 calc((1 - var(--in,1)) * 18svh)}
 html[data-mt-par][data-mt-held] .mt-covers .mt-cvcap{opacity:.6}
 html[data-mt-par][data-mt-held] .mt-covers .mt-sleeve[data-on] .mt-cvcap{opacity:1}
+@media (hover:none){html[data-mt-par][data-mt-held] .mt-covers .mt-cvcap{opacity:1}} /* touch: full at rest, as mtscroll.css */
 html[data-mt-par][data-mt-held] .mt-covers .mt-stage{transform:translate3d(0,calc(var(--out,0) * 22svh),0) scale(calc(1 - var(--out,0) * .05));transform-origin:50% 100%;opacity:calc(1 - var(--out,0) * .6)}
 html[data-mt-par][data-mt-held] .mt-motion{position:relative;z-index:2;background:var(--bg)}
 html[data-mt-par][data-mt-held] .mt-motion .mt-film{scale:calc(1.1 - var(--in,1) * .1)}
