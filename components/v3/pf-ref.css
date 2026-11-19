@@ -45,3 +45,16 @@
 /* ?pf=caps: a changing name slides up into place instead of jumping. */
 .v3 .pf-cap { overflow: hidden }
 .v3 .pf-cap > span { display: inline-block }
+
+/* ?pf=open: the strip fades before a project opens; the project page is one full-height row read sideways. */
+.v3 .wstrip.pf-leave { opacity: 0; transition: opacity 300ms var(--ease-out-strong) }
+html[data-pf-open] #p-project .pj-hero,
+html[data-pf-open] #p-project .pj-flow > figure { display: none }
+.v3 .pf-row-w { position: relative; padding-top: 16px }
+.v3 .pf-row { display: flex; gap: 8px; height: calc(100svh - 64px - 64px); min-height: 360px; overflow-x: auto; scrollbar-width: none; padding-inline: var(--g) var(--gr); overscroll-behavior-x: contain; animation: pf-in 500ms var(--ease-out-strong) both }
+.v3 .pf-row::-webkit-scrollbar { display: none }
+.v3 .pf-row figure { position: relative; flex: none; height: 100%; margin: 0; border-radius: 2px; overflow: hidden }
+.v3 .pf-row-cap { margin: 14px var(--gr) 0 var(--g); display: flex; gap: 10px }
+@keyframes pf-in { from { opacity: 0 } }
+@media (max-width: 700px) { .v3 .pf-row { height: 70svh; min-height: 0 } }
+@media (prefers-reduced-motion: reduce) { .v3 .pf-row { animation: none } .v3 .wstrip.pf-leave { transition: none } }

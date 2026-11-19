@@ -4,6 +4,7 @@ import * as React from "react";
 import { projectHref } from "@/lib/project-href";
 import Image, { getImageProps } from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { createPortal } from "react-dom";
 import type { Flip as FlipT } from "gsap/Flip";
@@ -495,6 +496,15 @@ export function V3Work({
       .then((j: Record<string, [string][]> | null) => j && setCyc(Object.fromEntries(Object.entries(j).map(([k, v]) => [k, v.slice(1, 5).map((x) => x[0])]))))
       .catch(() => {});
   }, []);
+  const router = useRouter();
+  /* `?pf=open`: a project in the strip fades the row out (300ms) before its page opens as a row of its own. */
+  const leave = (e: React.MouseEvent) => {
+    const a = (e.target as HTMLElement).closest<HTMLAnchorElement>('a[href^="/portfolio/"]');
+    if (!pf.includes("open") || !a || e.metaKey || e.ctrlKey || e.shiftKey || e.button) return;
+    e.preventDefault();
+    e.currentTarget.classList.add("pf-leave");
+    setTimeout(() => router.push(a.getAttribute("href")!), 300);
+  };
   const nameOf = React.useMemo(() => new Map(work.map((p) => [p.s, p.n])), [work]);
   /* The strip's page caption; with `caps` a new name slides up into place (220ms) instead of jumping. */
   const capTo = (s?: string) => {
@@ -1213,6 +1223,7 @@ export function V3Work({
               key={filter}
               ref={strip}
               onScroll={stripBar}
+              onClickCapture={pf ? leave : undefined}
               /* `?pf=grow`: the page caption names the photo under the pointer, written straight to the node (no re-render of the row). */
               onPointerOver={pf.includes("grow") ? (e) => capTo((e.target as HTMLElement).closest<HTMLElement>("[data-s]")?.dataset.s) : undefined}
             >

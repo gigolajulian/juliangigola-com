@@ -6,6 +6,7 @@ import { BackLink } from "@/components/site/back-link";
 import { billing, markFor, titleCase } from "@/lib/work";
 import { tailHole } from "@/lib/sheet";
 import { V4Project } from "@/components/v3/v4-project";
+import { PfRow } from "@/components/v3/pf-row";
 import type { Frame, Project } from "@/lib/work-types";
 
 /* JG V3 project page (leftovers sheet, card B; Julian: vertical, with the
@@ -101,6 +102,7 @@ export function V3Project({ project, next }: { project: Project; next?: { href: 
   return (
     <div className="v3 contents">
       <section className="v3page" id="p-project">
+        <PfRow frames={imgs.map((f) => ({ src: f.src, alt: alt(f.alt), w: f.width, h: f.height, color: f.color }))} name={name} sub={sub} />
         <div className={bleed ? "pj-hero bleed" : across ? "pj-hero two" : "pj-hero"}>
           <header className="pj-top">
             <BackLink className="lbl mute pj-back" />
