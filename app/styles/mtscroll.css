@@ -732,7 +732,7 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
 /* No wordmark in the bar while the hero, with its big name, is on screen (Julian, 2026-11-16: phones first, then every
    size once the name stopped flying to the bar). */
 html[data-v3motion][data-mtscroll]:has(.mt-hero) .v3 .site-hdr:not(.menu-on) .site-wm{transition:opacity .25s ease-out}
-html[data-v3motion][data-mtscroll]:has(.mt-hero):not([data-mt-pasthero],[data-mt-nameout]) .v3 .site-hdr:not(.menu-on) .site-wm{opacity:0;pointer-events:none}
+html[data-v3motion][data-mtscroll]:has(.mt-hero):not([data-mt-pasthero],[data-mt-nameout]) .v3 .site-hdr:not(.menu-on) .site-wm:not(:focus-visible){opacity:0;pointer-events:none} /* keyboard focus shows it, as navfx.css */
 /* The held stage is its own layer: the page colour behind it. (The tagline's invert blend is gone, Julian 2026-11-17: harder to read.) */
 html[data-mt-held] [data-mtscroll] .mt-hero .mt-stage,html[data-mt-held][data-mtscroll] .mt-hero .mt-stage{background:var(--bg)}
 /* Phone tagline (Julian, 2026-11-18): one colour per theme over a tint of the page, in place of the per-letter photo tones, which still sank into busy photos.
