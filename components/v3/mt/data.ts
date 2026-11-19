@@ -13,10 +13,10 @@ export const pad = (n: number) => String(n).padStart(2, "0");
 export type MtData = { hero: MtFrame[]; extras: MtFrame[]; comm: MtFrame[]; films: MtFilm[]; does: string[]; reply: string | null; stills: Record<string, string> };
 
 /* Julian's arranger save (save.json), in order. Key `<slug>/<NN>`. */
-export const HERO_KEYS = ["threshold/05", "i-wanna-be-a-human/01", "wired-magazine/01", "astral-allure/04", "wrapped-up/02", "sago/01", "valgur/02", "vigil/05", "ukiyosunknown/01", "nyx/06", "oakley-x-nike/01", "liminal/01"];
+export const HERO_KEYS = ["threshold/05", "i-wanna-be-a-human/01", "wired-magazine/01", "wrapped-up/02", "sago/01", "valgur/02", "vigil/05", "ukiyosunknown/01", "nyx/06", "oakley-x-nike/01", "astral-allure/04", "liminal/01"];
 export const COMM_KEYS = ["cyber1a/01", "goodcult/01", "gilt/01", "jubo/03", "paranoia/13", "the-den-talkshow/06", "iris/03", "ukiyosunknown/03", "celestis/03"];
-/* Julian's seven: the top five (2026-11-14), then Jahannam and Whole Summer (2026-11-15). The rest are on /portfolio?d=coverart. */
-export const COVER_KEYS = ["the-description", "the-river", "problem-child", "your-way", "est-modvs-in-rebvs", "jahannam", "whole-summer"];
+/* Julian's eight, in his order from Home Picks (2026-11-19). The rest are on /portfolio?d=coverart. */
+export const COVER_KEYS = ["the-river", "in-the-hoodie-on-your-sleeve", "the-description", "your-way", "problem-child", "est-modvs-in-rebvs", "whole-summer", "jahannam"];
 /* v1: one pressing color per release, taken from its cover by eye from the sampled palette (2026-11-14). */
 export const COVER_PRESS: Partial<Record<string, string>> = {
   "the-description": "#c9c5bd",
@@ -26,6 +26,7 @@ export const COVER_PRESS: Partial<Record<string, string>> = {
   "est-modvs-in-rebvs": "#8fb4c6",
   "jahannam": "#c8964e",
   "whole-summer": "#b02a2e",
+  "in-the-hoodie-on-your-sleeve": "#d4483c",
 };
 /* Four films on the home (Julian, 2026-11-14): Purgation, Pear VC, Wonderland and Dide O Del stay on /portfolio/video.
    Matched to content/site.json by title; kind is this screen's label. */
