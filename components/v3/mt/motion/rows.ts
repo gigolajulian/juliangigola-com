@@ -162,10 +162,15 @@ function heldRow(name: string): Driver {
       row.addEventListener("scroll", loose, { passive: true, signal: ac.signal });
       snap(el, ctx, n, (p) => ease(p) * (n - 1), (i) => unease(i / (n - 1)), () => down !== null, ac.signal);
 
-      // ?mttp=flip: a tap turns a sleeve with a back over, a second tap turns it back (touch-parity.css). Mouse pointers flip on hover instead.
+      // a tap turns a sleeve with a back over, a second tap turns it back (touch-parity.css), one sleeve at a time (MAC, #1212: two stayed turned in the phone's side row). Mouse pointers flip on hover instead.
       if (tp("flip"))
         for (const it of items)
-          if (it.hasAttribute("data-flip")) it.addEventListener("click", () => !ctx.fine && it.toggleAttribute("data-tp-fl"), opts);
+          if (it.hasAttribute("data-flip"))
+            it.addEventListener("click", () => {
+              if (ctx.fine) return;
+              for (const o of items) if (o !== it) o.removeAttribute("data-tp-fl");
+              it.toggleAttribute("data-tp-fl");
+            }, opts);
 
       /* Hover lift (fine pointers): tilt toward the pointer, up to 9deg each way. rows.css does the rest. */
       for (const it of items) sleeveTilt(it, () => ctx.held && ctx.fine && !dragged, opts);
