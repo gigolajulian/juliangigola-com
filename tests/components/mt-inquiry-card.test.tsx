@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 
 const push = vi.fn();
@@ -15,6 +15,8 @@ const hidden = (name: string) => document.querySelector<HTMLInputElement>(`input
 const submit = () => fireEvent.submit(document.querySelector("form")!);
 
 describe("v4 inquiry card", () => {
+  // the card keeps its draft for the visit (mt-inq-draft); each test starts with none
+  beforeEach(() => sessionStorage.clear());
   it("from the footer it is a plain note filed as other", () => {
     open({ from: "footer" });
     expect(screen.getByText("Contact me")).toBeTruthy();

@@ -16,13 +16,29 @@ import { tp } from "./motion/touch-parity";
    ride in `detail`. Radix Dialog traps focus and returns it to the opener. */
 
 const CALL_CHIP = "Music video";
+/* The typed fields last the visit, through a full close and reopen (Julian, 2026-11-19: "keep the draft"); a send clears them. */
+const DRAFT = "mt-inq-draft";
+const EMPTY = { name: "", email: "", when: "", message: "" };
+const readDraft = (): typeof EMPTY => {
+  try {
+    return { ...EMPTY, ...JSON.parse(sessionStorage.getItem(DRAFT) ?? "{}") };
+  } catch {
+    return EMPTY;
+  }
+};
 
 function Form({ from, opt, reply, onClose }: { from: InquiryFrom; opt?: QuoteOpt; reply: string | null; onClose: () => void }) {
   const router = useRouter();
   const { state, pending, sent, send } = useEnquiry();
   const [chip, setChip] = React.useState(opt?.chips[0] ?? "");
-  const [v, setV] = React.useState({ name: "", email: "", when: "", message: "" });
+  const [v, setV] = React.useState(readDraft);
   const [err, setErr] = React.useState<Record<string, string>>({});
+  React.useEffect(() => {
+    try {
+      if (sent) sessionStorage.removeItem(DRAFT);
+      else sessionStorage.setItem(DRAFT, JSON.stringify(v));
+    } catch {}
+  }, [v, sent]);
   const quote = from === "quote" && opt;
   const call = quote && chip === CALL_CHIP;
   // typing in a field takes its error line away; the next Send checks it again
