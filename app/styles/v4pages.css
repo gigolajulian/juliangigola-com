@@ -75,8 +75,7 @@
 /* ── foot (g1). The type, columns, phrase and last line of the V4 home footer
    (mtscroll.css `.mt-foot`), in flow so it is as tall as its content: about
    half a screen on desktop. No photo wall. `--u` is the home's design unit. ── */
-.v3 .v4f{--u:clamp(.7px,min(calc(100vw / 1440),calc(100svh / 900)),1.6px);--hair:color-mix(in srgb,var(--ink) 14%,transparent);--phr:#8a8a8a;position:relative;z-index:2;display:flex;flex-direction:column;justify-content:space-between;gap:calc(40 * var(--u));min-height:max(50svh,400px);padding-top:calc(28 * var(--u));background:var(--bg);border-top:1px solid var(--hair);overflow:clip}
-:root[data-theme="light"] .v3 .v4f{--phr:#8f8e8a}
+.v3 .v4f{--u:clamp(.7px,min(calc(100vw / 1440),calc(100svh / 900)),1.6px);--hair:color-mix(in srgb,var(--ink) 14%,transparent);--phr:var(--phrase);position:relative;z-index:2;display:flex;flex-direction:column;justify-content:space-between;gap:calc(40 * var(--u));min-height:max(50svh,400px);padding-top:calc(28 * var(--u));background:var(--bg);border-top:1px solid var(--hair);overflow:clip}
 .v3 .v3page>.v4f{margin-top:auto}
 #p-video>.v4f{margin-top:96px}
 .v3 #p-work:is(.strip-on,.color-on) .v4f{display:none}
@@ -165,6 +164,8 @@ html[data-v4pages~="c1"] .cv4c{display:none}
   html[data-v4pages~="c1"] .cv4c .mute{color:var(--mute,var(--muted-foreground))}
   html[data-v4pages~="c1"] .cv4 .mt-sleeve:hover .cv4c,html[data-v4pages~="c1"] .cv4 .mt-sleeve:focus-visible .cv4c{opacity:1}
 }
+/* Touch never hovers, so the name sits at full there (audit 2026-11-19: 1.7 to 2.9:1 at rest). */
+@media (hover:none){html[data-v4pages~="c1"] .cv4c{opacity:1}}
 /* Pinned here: mtscroll.css and rows.css both dress the face at the same weight, and they load in separate files. */
 html[data-v4pages~="c1"] .cv4 .mt-sleeve .face{overflow:visible;background:none}
 html[data-v4pages~="c1"] .cv4 .mt-sleeve .face img{object-fit:cover}
