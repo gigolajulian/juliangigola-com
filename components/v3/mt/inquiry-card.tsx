@@ -7,6 +7,7 @@ import { Dialog } from "radix-ui";
 import { Check, Failed, Hidden, NEED_MSG, checkYou, first, useEnquiry } from "@/components/v3/flow";
 import { CHIP_TYPE, QUOTE_OPTS, type QuoteOpt } from "./data";
 import type { InquiryFrom } from "./ctx";
+import { tp } from "./motion/touch-parity";
 
 /* Spec 3.11: the quick note over a dim layer (a bottom sheet on phones),
    posted through the site's enquiry action (`useEnquiry`, the same one
@@ -103,6 +104,47 @@ function Form({ from, opt, reply, onClose }: { from: InquiryFrom; opt?: QuoteOpt
   );
 }
 
+/* ?mttp=sheet, phones: the handle drags the sheet down. Past 110px, or a quick flick, it closes; shorter, it springs back, so a half-typed note survives a slip.
+   Only the handle drags: the card's own scroll is left alone. */
+function Handle({ onClose }: { onClose: () => void }) {
+  const drag = React.useRef<{ y: number; t: number } | null>(null);
+  const card = (e: React.PointerEvent) => e.currentTarget.closest<HTMLElement>(".mt-card");
+  const back = (c: HTMLElement | null) => {
+    if (!c) return;
+    c.style.transition = "translate .3s cubic-bezier(.32, .72, 0, 1)";
+    c.style.translate = "";
+  };
+  return (
+    <span
+      className="mt-handle"
+      aria-hidden
+      onPointerDown={(e) => {
+        if (!tp("sheet") || !matchMedia("(max-width: 599px)").matches) return;
+        e.currentTarget.setPointerCapture(e.pointerId);
+        drag.current = { y: e.clientY, t: performance.now() };
+        const c = card(e);
+        if (c) c.style.transition = "none";
+      }}
+      onPointerMove={(e) => {
+        const c = card(e);
+        if (drag.current && c) c.style.translate = `0 ${Math.max(0, e.clientY - drag.current.y)}px`;
+      }}
+      onPointerUp={(e) => {
+        const d = drag.current;
+        if (!d) return;
+        drag.current = null;
+        const dy = e.clientY - d.y, v = dy / Math.max(1, performance.now() - d.t);
+        if (dy > 110 || (dy > 24 && v > 0.6)) onClose();
+        else back(card(e));
+      }}
+      onPointerCancel={(e) => {
+        drag.current = null;
+        back(card(e));
+      }}
+    />
+  );
+}
+
 export function InquiryCard({ at, reply, onClose, onBack }: { at: { from: InquiryFrom; opt?: QuoteOpt["key"] } | null; reply: string | null; onClose: () => void; onBack: () => void }) {
   const opt = QUOTE_OPTS.find((o) => o.key === at?.opt);
   return (
@@ -111,7 +153,7 @@ export function InquiryCard({ at, reply, onClose, onBack }: { at: { from: Inquir
         <div className="v3 contents">
           <Dialog.Overlay className="mt-dim mt-dim-q" data-lenis-prevent />
           <Dialog.Content className="mt-card mt-inq" data-from={at?.from} data-lenis-prevent onCloseAutoFocus={(e) => { e.preventDefault(); onBack(); }}>
-            <span className="mt-handle" aria-hidden />
+            <Handle onClose={onClose} />
             <Dialog.Close className="mt-close-t" aria-label="Close">
               <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M2 2l12 12M14 2L2 14" fill="none" stroke="currentColor" strokeWidth="1.5" /></svg>
             </Dialog.Close>

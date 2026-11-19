@@ -5,6 +5,7 @@
    Drivers add the per-section motion; each owns one file in this folder. */
 
 import { matches, media } from "@/lib/device";
+import { touchParity } from "./touch-parity";
 
 export type Ctx = {
   /** viewport width and height, px */
@@ -85,6 +86,7 @@ export function startEngine(root: HTMLElement, drivers: Driver[]) {
   };
   measure();
   html.setAttribute("data-mt-motion", "");
+  const tpOff = touchParity();
   const offs = drivers.flatMap((d) => secs.filter((s) => s.dataset.mt === d.name).map((s) => d.setup?.(s, ctx)));
   let raf = 0;
   let moved = -1e9;
@@ -142,6 +144,7 @@ export function startEngine(root: HTMLElement, drivers: Driver[]) {
     offs.forEach((off) => off?.());
     html.removeAttribute("data-mt-held");
     html.removeAttribute("data-mt-motion");
+    tpOff();
     html.removeAttribute("data-mt-scrolling");
     for (const s of secs) { s.style.removeProperty("--p"); s.style.removeProperty("--in"); s.style.removeProperty("--out"); s.removeAttribute("data-mt-near"); }
   };

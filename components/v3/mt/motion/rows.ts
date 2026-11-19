@@ -3,6 +3,7 @@ import { holdEase as ease, holdUnease as unease } from "@/lib/motion/hold-ease";
 import { captionsOff, vimeoListen, vimeoPlays } from "@/lib/videos";
 import { RISE, clamp, smooth, type Ctx, type Driver } from "./engine";
 import { sleeveTilt } from "./sleeve-tilt";
+import { tp } from "./touch-parity";
 
 
 /* Julian, 2026-11-18 (?mtsnap=0 turns it off): a hold never rests between two items. When the scroll stops inside the hold, the page glides to the
@@ -104,9 +105,10 @@ function heldRow(name: string): Driver {
         discs(x, step * (420 / 520), k);
       };
 
-      // The title line rises when held-row.tsx commits the new item.
+      // The title line rises when held-row.tsx commits the new item (on touch too with ?mttp=covers). A turned sleeve turns back.
       const mo = new MutationObserver(() => {
-        if (ctx.held) el.querySelector(".mt-ttl .ln > span")?.animate([{ transform: "translateY(110%)" }, { transform: "none" }], RISE);
+        for (const it of items) it.removeAttribute("data-tp-fl");
+        if (ctx.held || tp("covers")) el.querySelector(".mt-ttl .ln > span")?.animate([{ transform: "translateY(110%)" }, { transform: "none" }], RISE);
       });
       mo.observe(el, { attributeFilter: ["data-cur"] });
 
@@ -159,6 +161,11 @@ function heldRow(name: string): Driver {
 
       row.addEventListener("scroll", loose, { passive: true, signal: ac.signal });
       snap(el, ctx, n, (p) => ease(p) * (n - 1), (i) => unease(i / (n - 1)), () => down !== null, ac.signal);
+
+      // ?mttp=flip: a tap turns a sleeve with a back over, a second tap turns it back (touch-parity.css). Mouse pointers flip on hover instead.
+      if (tp("flip"))
+        for (const it of items)
+          if (it.hasAttribute("data-flip")) it.addEventListener("click", () => !ctx.fine && it.toggleAttribute("data-tp-fl"), opts);
 
       /* Hover lift (fine pointers): tilt toward the pointer, up to 9deg each way. rows.css does the rest. */
       for (const it of items) sleeveTilt(it, () => ctx.held && ctx.fine && !dragged, opts);
@@ -268,7 +275,8 @@ function films(): Driver {
       };
       const wants = (i: number) => i >= 0 && i < n && !!items[i].dataset.preview && !pool.has(i);
       const fill = () => {
-        const next = [cur, cur + 1, cur - 1].find(wants);
+        // on touch only the film in view loads: no neighbours on a phone's data
+        const next = (ctx.held ? [cur, cur + 1, cur - 1] : [cur]).find(wants);
         if (next === undefined) return;
         // a player takes about 300ms of the graphics thread to start: never start one mid-scroll. "Resting" is 600ms
         // with no scroll at all (between two wheel notches the page is still for a moment). The site's own file costs nothing: at once.
@@ -279,9 +287,11 @@ function films(): Driver {
         mount(next);
         pvT = window.setTimeout(fill, 400);
       };
+      // ?mttp=films: phones and tablets play the current film's preview too, unless the visitor asked to save data
+      const touchFilms = tp("films") && !(navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
       const preview = () => {
         clearTimeout(pvT);
-        if (!seen || !ctx.held) return drop();
+        if (!seen || !(ctx.held || touchFilms)) return drop();
         for (const [i, v] of [...pool]) {
           if (Math.abs(i - cur) > 1) kill(i);
           else if (i !== cur) {
@@ -328,7 +338,7 @@ function films(): Driver {
       const mo = new MutationObserver(() => {
         cur = +(el.dataset.cur ?? 0);
         preview();
-        if (ctx.held) el.querySelector(".mt-ttl .ln > span")?.animate([{ transform: "translateY(110%)" }, { transform: "none" }], RISE);
+        if (ctx.held || touchFilms) el.querySelector(".mt-ttl .ln > span")?.animate([{ transform: "translateY(110%)" }, { transform: "none" }], RISE);
       });
       mo.observe(el, { attributeFilter: ["data-cur"] });
 
@@ -336,7 +346,7 @@ function films(): Driver {
       const tab = () => void (row.tabIndex = ctx.held ? -1 : 0);
       addEventListener("resize", () => requestAnimationFrame(() => {
         tab();
-        if (!ctx.held) drop();
+        if (!ctx.held && !touchFilms) drop(); // a phone's toolbar resizes the window as it scrolls
       }), opts);
       tab();
       return () => {

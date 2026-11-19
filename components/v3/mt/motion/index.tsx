@@ -20,6 +20,7 @@ import "./about.css";
 import "./quote.css";
 import "./foot.css";
 import "./depth.css";
+import "./touch-parity.css";
 import "./reveal.css";
 import "./flow.css";
 
