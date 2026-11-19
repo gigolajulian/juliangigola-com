@@ -1,16 +1,38 @@
-import { shiftScroll } from "@/components/v3/smooth-scroll";
+import { scrollGoal, settleTo, shiftScroll } from "@/components/v3/smooth-scroll";
+import { holdEase as ease, holdUnease as unease } from "@/lib/motion/hold-ease";
 import { captionsOff, vimeoListen, vimeoPlays } from "@/lib/videos";
-import { RISE, clamp, smooth, type Driver } from "./engine";
+import { RISE, clamp, smooth, type Ctx, type Driver } from "./engine";
 import { sleeveTilt } from "./sleeve-tilt";
 
-/* The held row's travel: it eases away from its first item and into its last (0.4 of the scroll's speed at the two ends). */
-const ease = (p: number) => p - (0.6 * Math.sin(2 * Math.PI * p)) / (2 * Math.PI);
-/** the scroll share at which `ease` reaches v (it only rises, so halving finds it) */
-const unease = (v: number) => {
-  let a = 0, b = 1;
-  for (let k = 0; k < 20; k++) if (ease((a + b) / 2) < v) a = (a + b) / 2; else b = (a + b) / 2;
-  return (a + b) / 2;
-};
+
+/* Julian, 2026-11-18 (?mtsnap=0 turns it off): a hold never rests between two items. When the scroll stops inside the hold, the page glides to the
+   nearest one. Within a step of the item it rested on it leans 0.44 of a step the way the scroll went, so one wheel notch (100px, a small part of a step) moves on instead of
+   falling back; ?mtsnap=near is plain nearest. `at`: the hold's share as an item position; `share`: an item's resting share of the hold. */
+function snap(el: HTMLElement, ctx: Ctx, n: number, at: (p: number) => number, share: (i: number) => number, busy: () => boolean, signal: AbortSignal) {
+  const m = /[?&]mtsnap=(\w+)/.exec(location.search)?.[1];
+  if (m === "0" || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const lean = m === "near" ? 0 : 0.44;
+  let t = 0, rest = NaN; // the item position the page last settled on; NaN outside the hold, so arriving is plain nearest
+  const settle = () => {
+    // fine pointers only: a finger's own momentum is left alone (MAC, #1209: the iPad snapped too)
+    if (!ctx.held || !ctx.fine || busy()) return;
+    const top = el.getBoundingClientRect().top + scrollY, range = el.offsetHeight - innerHeight, y = scrollGoal(), p = (y - top) / range;
+    // the two ends are items too: resting exactly there keeps `rest`, a pixel past them the page is free
+    if (y < top - 1 || y > top + range + 1) return void (rest = NaN);
+    const f = at(p), i = clamp(Math.round(f + (Math.abs(f - rest) < 1 ? Math.sign(f - rest) * lean : 0)), 0, n - 1), to = top + share(i) * range;
+    rest = i;
+    // 1px: scrollY is fractional, an exact compare would glide forever
+    if (Math.abs(to - y) > 1) settleTo(to);
+  };
+  const on = () => {
+    clearTimeout(t);
+    t = window.setTimeout(settle, 140);
+  };
+  // wheel: the glide starts when the hand stops, not when Lenis's long tail does. scroll: keys, the scrollbar, touch.
+  addEventListener("wheel", on, { passive: true, signal });
+  addEventListener("scroll", on, { passive: true, signal });
+  signal.addEventListener("abort", () => clearTimeout(t));
+}
 
 /* Cover art (spec 3.7): on the desktop structure the page scroll walks the row
    sideways. Motion (spec 3.8): a vertical stack there, see films() below.
@@ -136,6 +158,7 @@ function heldRow(name: string): Driver {
       }, opts);
 
       row.addEventListener("scroll", loose, { passive: true, signal: ac.signal });
+      snap(el, ctx, n, (p) => ease(p) * (n - 1), (i) => unease(i / (n - 1)), () => down !== null, ac.signal);
 
       /* Hover lift (fine pointers): tilt toward the pointer, up to 9deg each way. rows.css does the rest. */
       for (const it of items) sleeveTilt(it, () => ctx.held && ctx.fine && !dragged, opts);
@@ -179,6 +202,8 @@ function films(): Driver {
       const ac = new AbortController();
       const opts = { signal: ac.signal };
       let cur = +(el.dataset.cur ?? 0);
+      // each film rests at the middle of its share of the hold; the shares are eased like Cover art's (rows.tsx)
+      snap(el, ctx, n, (p) => ease(p) * n - 0.5, (i) => unease((i + 0.5) / n), () => false, ac.signal);
       // held, the row does not scroll itself, the page does: left and right step the page one film's share of the hold
       row.addEventListener("keydown", (e) => {
         if (!ctx.held || (e.key !== "ArrowRight" && e.key !== "ArrowLeft")) return;
