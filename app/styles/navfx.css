@@ -31,7 +31,7 @@
 :root[data-navfx] .v3 .site-hdr.menu-on :is(.site-wm,.links a,.tbtn,.menu-btn){color:var(--ink)}
 /* The v4 home: no wordmark in the bar while the hero's big name shows (`data-navnamegone`, nav-ink.ts). It fades in as the name goes. */
 :root[data-navfx] .v3 .site-hdr .site-wm{transition:color .2s ease,opacity .3s ease}
-:root[data-navfx][data-mtscroll]:has(.mt-hero):not([data-navnamegone]) .v3 .site-hdr:not(.menu-on) .site-wm{opacity:0;pointer-events:none}
+:root[data-navfx][data-mtscroll]:has(.mt-hero):not([data-navnamegone]) .v3 .site-hdr:not(.menu-on) .site-wm:not(:focus-visible){opacity:0;pointer-events:none} /* keyboard focus shows it (Mac QA v3.0.295: Tab stop 2 had no ring) */
 /* The portfolio's search and view buttons in the bar take the same white or black. */
 @media (min-width:640px){:root[data-navfx] .v3 .site-hdr .hslot{--ink:var(--nav-ink)}}
 
