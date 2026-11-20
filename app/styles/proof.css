@@ -452,7 +452,9 @@ html:has(.proof[data-wall])::-webkit-scrollbar{display:none}
 .dlv-dl .proof-mu{margin:0}
 .dlv-dl .proof-mu b{font-weight:500;color:var(--foreground)}
 .proof [data-done]{opacity:.7}
-.dlv-models{grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:28px 4px}
+.dlv-models{grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:36px 6px}
+.dlv-minis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px;width:100%;margin-top:3px}
+.dlv-minis img{display:block;width:100%;aspect-ratio:1;object-fit:cover;user-select:none;-webkit-user-select:none}
 .dlv-cover{position:relative;aspect-ratio:4/5;overflow:hidden;background:#111}
 .dlv-cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;transition:filter .2s ease-out;user-select:none;-webkit-user-select:none}
 .dlv-cover::after{content:"";position:absolute;top:0;right:0;width:60%;aspect-ratio:1;background:radial-gradient(circle at 100% 0,rgba(0,0,0,.42),transparent 62%);pointer-events:none}
@@ -466,7 +468,7 @@ html:has(.proof[data-wall])::-webkit-scrollbar{display:none}
 .dlv-back{display:block;font:12px var(--p-mono);color:var(--muted-foreground);min-height:36px;margin-bottom:22px}
 .dlv-back:hover{color:var(--foreground)}
 .dlv-mh h1{margin-bottom:22px}
-@media(max-width:700px){.dlv-models{grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 3px}}
+@media(max-width:700px){.dlv-models{grid-template-columns:1fr;gap:28px 0}}
 /* The mock's intro: big heading (the wall gate's 44px cap is for the proofs' greeting), Download all bottom right. */
 .proof .dlv-intro{max-width:none;display:grid;grid-template-columns:1fr auto;column-gap:24px;align-items:start;justify-items:start}
 .dlv-intro>*{grid-column:1}

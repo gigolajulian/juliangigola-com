@@ -202,14 +202,26 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
 
         {view === "models" ? (
           <div className="proof-grid dlv-models" ref={grid}>
-            {models.map(([k, fs], i) => (
+            {models.map(([k, fs], i) => {
+              // Julian 2026-11-19: one top pick (five stars, else the first) with the next three under it, styling and angles.
+              const top = fs.find((f) => f.top) ?? fs[0];
+              const under = fs.filter((f) => f !== top).slice(0, 3);
+              return (
               <div key={k} className="dlv-card">
                 <div className="dlv-cover">
                   {/* eslint-disable-next-line @next/next/no-img-element -- private final, 800px copy */}
-                  <img src={`${src(fs[0])}&w=800`} alt="" loading={i < 8 ? "eager" : "lazy"} draggable={false} />
+                  <img src={`${src(top)}&w=800`} alt="" loading={i < 6 ? "eager" : "lazy"} draggable={false} />
                   <span className="dlv-num" aria-hidden="true">{k.slice(1)}</span>
                   <button type="button" className="proof-open" aria-label={`Open model ${k.slice(1)}`} onClick={() => go(k)} />
                 </div>
+                {under.length ? (
+                  <button type="button" className="dlv-minis" tabIndex={-1} aria-hidden="true" onClick={() => go(k)}>
+                    {under.map((f) => (
+                      // eslint-disable-next-line @next/next/no-img-element -- private final, 800px copy
+                      <img key={f.id} src={`${src(f)}&w=800`} alt="" loading={i < 6 ? "eager" : "lazy"} draggable={false} />
+                    ))}
+                  </button>
+                ) : null}
                 <div className="dlv-cap">
                   <span>{fs.length} photos</span>
                   <button type="button" className="dlv-zip" data-done={done[k] ? "" : undefined} onClick={() => download(k, zipHref(k))}>
@@ -217,7 +229,8 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
                   </button>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         ) : (
           <div className="proof-grid" ref={grid}>
