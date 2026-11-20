@@ -1,13 +1,14 @@
 "use client";
 
 import * as React from "react";
+import { flushSync } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
 import { COVER_RELEASES } from "@/lib/cover-art-data";
 import type { CoverRelease } from "@/lib/cover-art-types";
 import { media } from "@/lib/device";
 import { holdEase, holdUnease } from "@/lib/motion/hold-ease";
-import { clamp, progress } from "./motion/engine";
+import { clamp, MT2, progress } from "./motion/engine";
 import { COVER_KEYS, COVER_PRESS, FILM_DRESS, pad, type MtFilm } from "@/lib/v4-home/data";
 
 const COVERS = COVER_KEYS.map((k) => COVER_RELEASES.find((r) => r.slug === k)).filter((r): r is CoverRelease => !!r);
@@ -23,8 +24,10 @@ export function MtCovers() {
   React.useEffect(() => {
     const el = row.current!;
     let raf = 0;
+    const held = media("held");
     const read = () => {
       raf = 0;
+      if (MT2 && held.matches) return; // ?mt2=1: held, the driver tells the item; a stray row scroll (Tab into a cover) must not reset it
       const items = el.querySelectorAll<HTMLElement>(".mt-item");
       if (items.length < 2) return;
       const step = items[1].offsetLeft - items[0].offsetLeft;
@@ -32,8 +35,16 @@ export function MtCovers() {
     };
     const onScroll = () => (raf ||= requestAnimationFrame(read));
     el.addEventListener("scroll", onScroll, { passive: true });
+    // ?mt2=1: on D the covers driver tells the item (motion/engine.ts tell) instead of moving the row's scroll
+    const sec = el.closest("section")!;
+    const told = (e: Event) => {
+      const { cur: i, now } = (e as CustomEvent<{ cur?: number; now: boolean }>).detail;
+      if (typeof i === "number") (now ? flushSync : (f: () => void) => f())(() => setCur(i));
+    };
+    sec.addEventListener("mt-tell", told);
     return () => {
       el.removeEventListener("scroll", onScroll);
+      sec.removeEventListener("mt-tell", told);
       cancelAnimationFrame(raf);
     };
   }, []);

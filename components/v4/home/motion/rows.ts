@@ -3,7 +3,7 @@ import { matches } from "@/lib/device";
 import { qvalue } from "@/lib/v4-home/flags";
 import { holdEase as ease, holdUnease as unease } from "@/lib/motion/hold-ease";
 import { captionsOff, vimeoListen, vimeoPlays } from "@/lib/videos";
-import { clamp, rise, smooth, type Ctx, type Driver } from "./engine";
+import { clamp, MT2, rise, smooth, tell, type Ctx, type Driver } from "./engine";
 import { sleeveTilt } from "@/components/cover/sleeve-tilt";
 import { tp } from "./touch-parity";
 
@@ -93,7 +93,8 @@ function covers(): Driver {
         const i = Math.round(p * (n - 1)), x = p * (n - 1) * step;
         if (i !== cur) {
           // The row's own scroll steps item by item so MtCovers (rows.tsx) names the current one; the transform carries the rest.
-          row.scrollLeft = i * step;
+          if (MT2) tell(el, { cur: i }); // ?mt2=1: tell MtCovers the item; the row's scroll stays at 0 and the transform carries all of it
+          else row.scrollLeft = i * step;
           base = row.scrollLeft;
           cur = i;
         } else if (x === lastX) return;
@@ -179,8 +180,10 @@ function covers(): Driver {
 
       // After the engine's own resize pass, so ctx is current.
       addEventListener("resize", () => requestAnimationFrame(() => {
+        const was = cur; // measure() resets it
         measure();
         if (ctx.held) return;
+        if (MT2 && was > 0) row.scrollLeft = was * step; // ?mt2=1: the row rested at 0 while held; land it on the told item
         track.style.transform = "";
         loose();
       }), opts);
