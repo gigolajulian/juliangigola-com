@@ -66,6 +66,8 @@ function reveal(cover: HTMLElement) {
      (a small window onto it reads as an empty letter), and the ground fades
      while the cut is still a size Chrome draws: text past a few thousand px
      stops rendering and the whole cover flashed solid. */
+  // over the calendar only, 4 times is past the box's edges and the letters never showed the page (Julian: "the cutout doesn't show what's under it")
+  const off = page ? 4 : 1.25;
   const frame = (p: number) => {
     const e = ease(p), k = Math.exp(Math.log(BIG) * e);
     mg.setAttribute("transform", `translate(${ox} ${oy}) scale(${k}) translate(${-ox} ${-oy})`);
@@ -73,9 +75,9 @@ function reveal(cover: HTMLElement) {
     /* Off in one frame at 4 times its size, when the letters show a good
        piece of the page on any screen: faded, it read as a grey veil over
        the page (JG - MAC, Safari); empty sooner over the dark calendar. */
-    ink.style.opacity = k < 4 ? "1" : "0";
+    ink.style.opacity = k < off ? "1" : "0";
     // the G's inside is cut in the same frame, so no piece of ground crosses the face as the cut grows (closing it over a few frames still showed it)
-    if (ct && k >= 4 && ct.getAttribute("rx") === "0") {
+    if (ct && k >= off && ct.getAttribute("rx") === "0") {
       ct.setAttribute("rx", ct.dataset.rx ?? "0");
       ct.setAttribute("ry", ct.dataset.ry ?? "0");
     }
