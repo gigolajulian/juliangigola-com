@@ -65,6 +65,17 @@ describe("reminders", () => {
     expect(client.sent).toHaveLength(2);
   });
 
+  it("counts only the mails that went out, and still marks a failed one so it is never sent twice", async () => {
+    await saveBooking(store, rec("due", 23.5));
+    client.broken = true;
+    const err = vi.spyOn(console, "error").mockImplementation(() => {});
+    expect(await remind(env)).toBe(0);
+    client.broken = false;
+    expect(await remind(env)).toBe(0);
+    expect(client.sent).toHaveLength(0);
+    err.mockRestore();
+  });
+
   it("a call reads as a call", async () => {
     await saveBooking(store, rec("call", 23.5, { slug: "music-call", session: "Music call", call: true, where: "https://meet.google.com/abc-defg-hij" }));
     await remind(env);

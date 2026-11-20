@@ -43,6 +43,14 @@ describe("ManageBooking", () => {
     expect(screen.getByText(/under 24 hours before your session, so it can no longer be moved/)).toBeTruthy();
   });
 
+  it("says why a cancel was refused instead of calling every 409 a taken time", async () => {
+    vi.stubGlobal("fetch", vi.fn(() => Promise.resolve(new Response(JSON.stringify({ error: "This booking is already cancelled." }), { status: 409 }))));
+    render(<ManageBooking booking={booking} token="t" open="cancel" />);
+    fireEvent.click(screen.getByRole("button", { name: "Cancel booking" }));
+    expect(await screen.findByText("This booking is already cancelled.")).toBeTruthy();
+    expect(screen.queryByText(/just taken/)).toBeNull();
+  });
+
   it("opens the picker from the reschedule link", () => {
     render(<ManageBooking booking={booking} token="t" open="reschedule" />);
     expect(screen.getByText("picker")).toBeTruthy();
