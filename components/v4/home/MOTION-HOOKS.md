@@ -47,7 +47,7 @@ Typed readers live in `motion/root-attrs.ts` (`flipMs`); everything else reads t
   drift transform. The second copy `.set[data-copy]` is `display: none` until the
   drift shows it (it is already `aria-hidden`).
 
-## Cover art and Motion (`held-row.tsx`, `rows.tsx`)
+## Cover art and Motion (`rows.tsx`)
 - `.mt-row` is a native snap row; `.mt-track` takes the vertical-to-sideways
   transform on D. `section[data-cur]` and `.mt-item[data-on]` follow the row's own
   scroll (replace the source with p when the row is held).
