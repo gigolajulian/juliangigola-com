@@ -754,8 +754,8 @@ html[data-theme="light"]:root .v3 .mt-hero .mt-name h1{color:var(--ink);text-sha
 html[data-theme="light"]:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap{color:var(--ink)}
 html[data-theme="light"]:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w.w[data-tone]{color:inherit;text-shadow:none}
 @media (min-width:600px){
-  @media (prefers-color-scheme:light){html:root:not([data-theme="dark"]) .v3 .mt-hero .mt-scrim.mt-scrim.mt-scrim{--t:var(--bg);height:calc(400 * var(--u));background:linear-gradient(to top,color-mix(in srgb,var(--t) 63%,transparent) 30%,color-mix(in srgb,var(--t) 53%,transparent) 50%,color-mix(in srgb,var(--t) 30%,transparent) 70%,color-mix(in srgb,var(--t) 11%,transparent) 86%,transparent)}}
-  html[data-theme="light"]:root .v3 .mt-hero .mt-scrim.mt-scrim.mt-scrim{--t:var(--bg);height:calc(400 * var(--u));background:linear-gradient(to top,color-mix(in srgb,var(--t) 63%,transparent) 30%,color-mix(in srgb,var(--t) 53%,transparent) 50%,color-mix(in srgb,var(--t) 30%,transparent) 70%,color-mix(in srgb,var(--t) 11%,transparent) 86%,transparent)}
+  @media (prefers-color-scheme:light){html:root:not([data-theme="dark"]) .v3 .mt-hero .mt-scrim.mt-scrim.mt-scrim{--t:var(--bg);height:calc(422 * var(--u));background:linear-gradient(to top,color-mix(in srgb,var(--t) 63%,transparent) 30%,color-mix(in srgb,var(--t) 53%,transparent) 50%,color-mix(in srgb,var(--t) 30%,transparent) 70%,color-mix(in srgb,var(--t) 11%,transparent) 86%,transparent)}}
+  html[data-theme="light"]:root .v3 .mt-hero .mt-scrim.mt-scrim.mt-scrim{--t:var(--bg);height:calc(422 * var(--u));background:linear-gradient(to top,color-mix(in srgb,var(--t) 63%,transparent) 30%,color-mix(in srgb,var(--t) 53%,transparent) 50%,color-mix(in srgb,var(--t) 30%,transparent) 70%,color-mix(in srgb,var(--t) 11%,transparent) 86%,transparent)}
 }
 /* 600 to 1023 wide the name sits higher than 400u reaches, which left it on bare photo (QA, #1238). The name sits about 260px up at these widths: a short band that holds its strength to there (Julian: 56svh went "too far up"). */
 @media (min-width:600px) and (max-width:1023px){
@@ -777,8 +777,8 @@ html[data-theme="dark"]:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap{color:var
 @media (prefers-color-scheme:dark){html:root:not([data-theme="light"]) .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w.w[data-tone]{color:inherit;text-shadow:none}}
 html[data-theme="dark"]:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w.w[data-tone]{color:inherit;text-shadow:none}
 @media (min-width:1024px){
-  @media (prefers-color-scheme:dark){html:root:not([data-theme="light"]) .v3 .mt-hero .mt-scrim.mt-scrim.mt-scrim{height:calc(400 * var(--u));background:linear-gradient(to top,color-mix(in srgb,var(--bg) 72%,transparent) 30%,color-mix(in srgb,var(--bg) 62%,transparent) 50%,color-mix(in srgb,var(--bg) 38%,transparent) 70%,color-mix(in srgb,var(--bg) 12%,transparent) 86%,transparent)}}
-  html[data-theme="dark"]:root .v3 .mt-hero .mt-scrim.mt-scrim.mt-scrim{height:calc(400 * var(--u));background:linear-gradient(to top,color-mix(in srgb,var(--bg) 72%,transparent) 30%,color-mix(in srgb,var(--bg) 62%,transparent) 50%,color-mix(in srgb,var(--bg) 38%,transparent) 70%,color-mix(in srgb,var(--bg) 12%,transparent) 86%,transparent)}
+  @media (prefers-color-scheme:dark){html:root:not([data-theme="light"]) .v3 .mt-hero .mt-scrim.mt-scrim.mt-scrim{height:calc(422 * var(--u));background:linear-gradient(to top,color-mix(in srgb,var(--bg) 72%,transparent) 30%,color-mix(in srgb,var(--bg) 62%,transparent) 50%,color-mix(in srgb,var(--bg) 38%,transparent) 70%,color-mix(in srgb,var(--bg) 12%,transparent) 86%,transparent)}}
+  html[data-theme="dark"]:root .v3 .mt-hero .mt-scrim.mt-scrim.mt-scrim{height:calc(422 * var(--u));background:linear-gradient(to top,color-mix(in srgb,var(--bg) 72%,transparent) 30%,color-mix(in srgb,var(--bg) 62%,transparent) 50%,color-mix(in srgb,var(--bg) 38%,transparent) 70%,color-mix(in srgb,var(--bg) 12%,transparent) 86%,transparent)}
 }
 @media (min-width:600px) and (max-width:1023px){
   @media (prefers-color-scheme:dark){html:root:not([data-theme="light"]) .v3 .mt-hero .mt-scrim.mt-scrim.mt-scrim{height:320px;background:linear-gradient(to top,color-mix(in srgb,var(--bg) 74%,transparent) 30%,color-mix(in srgb,var(--bg) 68%,transparent) 60%,color-mix(in srgb,var(--bg) 60%,transparent) 78%,color-mix(in srgb,var(--bg) 20%,transparent) 92%,transparent)}}
@@ -791,4 +791,6 @@ html[data-theme="dark"]:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w.w[data
 
 /* Hero tagline in Geist Mono 600, larger than the labels (Julian, 2026-11-19: "I like mono but it needs to be more visible", then "BIGGER"). */
 html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap.mt-cap{font-family:var(--font-tagline),var(--mono);font-weight:600;letter-spacing:.08em;font-size:max(15px,calc(17.5 * var(--u)))!important}
-@media (max-width:599px){html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap.mt-cap{font-size:14.5px!important;letter-spacing:.06em}html:root:root .v3 .mt-hero .mt-name h1{bottom:calc(110px + env(safe-area-inset-bottom))}} /* the name up 12px: the larger tagline met its descenders */
+@media (max-width:599px){html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap.mt-cap{font-size:14.5px!important;letter-spacing:.06em}html:root:root .v3 .mt-hero .mt-name h1{bottom:calc(118px + env(safe-area-inset-bottom))}}
+@media (min-width:1024px){html:root:root .v3 .mt-hero .mt-name h1{bottom:calc(114 * var(--u))}}
+/* The name sits higher (phone 98 to 118px, desktop 92 to 114u) so the tagline never runs under the descenders of "Gigola" (Julian, 2026-11-19: "make sure it doesnt pass the g, if it does, take Julian Gigola higher"). */
