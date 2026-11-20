@@ -1,6 +1,6 @@
 import Image from "next/image";
 import type { Bts, Frame } from "@/lib/work-types";
-import { BtsClip } from "@/components/bts-clip";
+import { BtsClip } from "@/components/bts/bts-clip";
 
 /* Behind the scenes: the plate that names who shot it, and the grid of
    frames. On a project page they sit after the last frame, before the end

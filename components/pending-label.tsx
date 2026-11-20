@@ -1,7 +1,7 @@
 "use client";
 
 import { useLinkStatus } from "next/link";
-import { Orb } from "@/components/orb";
+import { Orb } from "@/components/effects/orb";
 
 /* Julian: an orb in place of a button's words while the page it opens is
    on its way (Book a session: connecting; Inquire: composing). Only when

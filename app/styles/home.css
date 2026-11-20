@@ -259,7 +259,7 @@
     --screen-title-y: 6rem;
   }
 }
-/* "Copy all" (components/dial-copy-all.tsx), in the panel's header,
+/* "Copy all" (components/dev/dial-copy-all.tsx), in the panel's header,
    left of the close button; hidden while the panel is folded. The open
    header is DialKit's sticky one, which it sits against; making the header
    relative instead pulled the folded button's icon off centre. */

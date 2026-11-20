@@ -335,5 +335,5 @@ Don't:
 - Don't use the teal accent as a fill or for status.
 - Don't make logos react to hover.
 - Don't outline a surface to lift it; step its lightness instead.
-Map: components/debug-overlay.tsx
+Map: components/dev/debug-overlay.tsx
 Full: .impeccable/design-full.md (read a section when you need its detail)

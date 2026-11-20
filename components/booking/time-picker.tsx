@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { Orb } from "@/components/orb";
+import { Orb } from "@/components/effects/orb";
 import { clock, DAYS, fromIso, MONTHS, type V3Book } from "@/components/booking/time-picker-parts";
 import { usePicker, type CardCtx, type Props } from "@/components/booking/use-picker";
 import { V3Steps } from "@/components/booking/time-picker-v3";

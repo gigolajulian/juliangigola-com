@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Liquid } from "@/components/liquid";
+import { Liquid } from "@/components/effects/liquid";
 import { useDevice } from "@/lib/device";
 
 /* Julian: the buttons in liquid (`liquid-gooey`). The first button is a

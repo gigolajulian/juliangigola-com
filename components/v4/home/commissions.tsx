@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Marks } from "@/components/v3/duo";
 import { projectHref } from "@/lib/project-href";
-import { pad, type MtFrame } from "@/lib/mt-home";
+import { pad, type MtFrame } from "@/lib/v4-home/data";
 import { useTold } from "./ctx";
 
 /* Spec 3.3: the gapless sheet with its heading row held on top, a counter

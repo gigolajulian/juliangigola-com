@@ -1,4 +1,4 @@
-import { qflag } from "@/lib/mtflags";
+import { qflag } from "@/lib/v4-home/flags";
 import { clamp, type Ctx, type Driver } from "./engine";
 
 /* Hero wall travel (spec 3.2). Held (D): the wall travels up through the hold,
