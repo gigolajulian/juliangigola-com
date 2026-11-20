@@ -19,13 +19,15 @@ export { BookingLock } from "./booking-lock";
 
 type Env = Parameters<typeof lockOp>[0] & { CLIENT_EMAIL?: CloudflareEnv["CLIENT_EMAIL"]; BOOKING_SECRET?: string; SITE?: CloudflareEnv["ASSETS"] };
 
-/** Mails every reminder and heads-up due now, then marks it, so the next hour skips it. Returns how many went out. */
+/** Mails every reminder and heads-up due now, then marks it, so the next hour skips it. A failed send is marked too, so a
+    flaky binding never mails anyone twice. Returns how many went out. */
 export async function remind(env: Env) {
   return (await mailDue(env, "due", "reminded", "reminder")) + (await mailDue(env, "dueHeads", "headed", "headsup"));
 }
 
 async function mailDue(env: Env, due: "due" | "dueHeads", mark: "reminded" | "headed", kind: "reminder" | "headsup") {
   const { records } = await lockOp(env, due, null);
+  let out = 0;
   for (const r of records) {
     const c = {
       kind,
@@ -43,9 +45,11 @@ async function mailDue(env: Env, due: "due" | "dueHeads", mark: "reminded" | "he
     } as const;
     const sent = await sendConfirm(env.CLIENT_EMAIL, c);
     await lockOp(env, mark, r.id);
-    if (sent) await logSent(env, r.email, confirmMail(c).subject, r.id, kind);
+    if (!sent) continue;
+    out++;
+    await logSent(env, r.email, confirmMail(c).subject, r.id, kind);
   }
-  return records.length;
+  return out;
 }
 
 /** Tells the site's lead desk a reminder went out (the lead key lives there). Never throws. */
