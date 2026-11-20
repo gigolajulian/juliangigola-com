@@ -9,6 +9,7 @@ import { SESSIONS } from "@/lib/v3";
 import { matches } from "@/lib/device";
 import { BOOK_ROWS, QUOTE_OPTS, type BookRow, type QuoteOpt } from "./data";
 import { useNextOpen } from "./next-open";
+import { CardsCtx } from "./ctx";
 
 /* Book online: four sessions, one line each. A row is picked by hover (fine
    pointers), focus or tap, and the photo follows it. Booking finishes here:
@@ -24,36 +25,8 @@ function RowPhoto({ r, on, sizes }: { r: BookRow; on: boolean; sizes: string }) 
   );
 }
 
-/* Week first: the live picker opens on Month (use-picker.tsx), so this presses its Week once per session. */
-function useWeekFirst(box: React.RefObject<HTMLDivElement | null>, key: string | null) {
-  React.useEffect(() => {
-    if (!key) return;
-    let done = false;
-    let mo: MutationObserver | null = null;
-    const press = () => {
-      const el = box.current;
-      const wk = el?.querySelector<HTMLButtonElement>('.cal-top .seg button[aria-pressed="false"]:first-child');
-      if (!el || done) return;
-      if (el.querySelector(".cal.week")) done = true;
-      else if (wk) {
-        wk.click();
-        done = true;
-      }
-      if (done) mo?.disconnect();
-    };
-    const t = setTimeout(() => {
-      mo = new MutationObserver(press);
-      if (box.current) mo.observe(box.current, { childList: true, subtree: true });
-      press();
-    }, 0);
-    return () => {
-      clearTimeout(t);
-      mo?.disconnect();
-    };
-  }, [box, key]);
-}
-
-export function MtBookOnline({ open, onOpen, onClose, quotePhoto, onRowPick }: { open: BookRow["slug"] | null; onOpen: (k: BookRow["slug"]) => void; onClose: () => void; quotePhoto: QuoteOpt["key"] | null; onRowPick: () => void }) {
+export function MtBookOnline({ open, onClose, quotePhoto, onRowPick }: { open: BookRow["slug"] | null; onClose: () => void; quotePhoto: QuoteOpt["key"] | null; onRowPick: () => void }) {
+  const cards = React.useContext(CardsCtx);
   const [sel, setSelRaw] = React.useState(0);
   const setSel = (i: number) => (setSelRaw(i), onRowPick());
   // desktop: the photo shows a By quote option while that list was the last one touched; never during a booking
@@ -61,11 +34,9 @@ export function MtBookOnline({ open, onOpen, onClose, quotePhoto, onRowPick }: {
   const shownIdx = open ? Math.max(0, BOOK_ROWS.findIndex((x) => x.slug === open)) : sel;
   const r = BOOK_ROWS[shownIdx];
   const sec = React.useRef<HTMLElement>(null);
-  const box = React.useRef<HTMLDivElement>(null);
   const head = React.useRef<HTMLHeadingElement>(null);
   const rows = React.useRef<(HTMLButtonElement | null)[]>([]);
   const isOpen = React.useRef(false);
-  useWeekFirst(box, open);
 
   // opening or closing puts the block back at the top of the screen and moves focus with it
   React.useEffect(() => {
@@ -81,7 +52,7 @@ export function MtBookOnline({ open, onOpen, onClose, quotePhoto, onRowPick }: {
   const next = useNextOpen(r.slug);
   const pick = (i: number) => {
     setSel(i);
-    onOpen(BOOK_ROWS[i].slug);
+    cards.book(BOOK_ROWS[i].slug);
   };
   return (
     <section id="sessions" className="mt-book" aria-label="Book online" data-mt="book" data-on={r.slug} data-open={open ? "" : undefined} ref={sec}>
@@ -96,8 +67,9 @@ export function MtBookOnline({ open, onOpen, onClose, quotePhoto, onRowPick }: {
               </div>
               <h3 className="mt-bin-t" tabIndex={-1} ref={head}>{r.name}</h3>
               <p className="lbl mt-bin-m">{r.len} <i aria-hidden>|</i> {r.price}</p>
-              <div className="mt-bin-flow" ref={box}>
-                <V3BookFlow key={r.slug} slug={r.slug} tabs={false} />
+              <div className="mt-bin-flow">
+                {/* the live picker opens on Month; here it opens on the week */}
+                <V3BookFlow key={r.slug} slug={r.slug} tabs={false} startView="week" />
               </div>
             </div>
           ) : (

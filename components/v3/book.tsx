@@ -90,7 +90,7 @@ const getList = (S: (typeof SESSIONS)[SessionSlug]) => {
 };
 
 /** `tabs`: false where the page is already about one booking (the service pages). */
-export function V3BookFlow({ slug, tabs = true, h1 = false }: { slug: SessionSlug; tabs?: boolean; h1?: boolean }) {
+export function V3BookFlow({ slug, tabs = true, h1 = false, startView }: { slug: SessionSlug; tabs?: boolean; h1?: boolean; startView?: "week" | "month" }) {
   const S = SESSIONS[slug];
   const router = useRouter();
   const more = tabs && TAB_ORDER.includes(slug);
@@ -149,7 +149,7 @@ export function V3BookFlow({ slug, tabs = true, h1 = false }: { slug: SessionSlu
     />
   );
   if (!S.cal) return <OnRequest key={slug} slug={slug} shell={shell} />;
-  return <BookTimes key={slug} path={S.cal} title={`Pick a time for ${S.name}`} v3={{ shell, name: S.name, from: S.from }} />;
+  return <BookTimes key={slug} path={S.cal} title={`Pick a time for ${S.name}`} v3={{ shell, name: S.name, from: S.from }} startView={startView} />;
 }
 
 /* When a session tab was last picked: the next booking page is the same

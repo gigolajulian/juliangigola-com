@@ -3,11 +3,11 @@
 import * as React from "react";
 import type { BookRow, QuoteOpt } from "./data";
 
-/** "footer" opens "Contact me", "quote" opens "Inquire" with an option. */
-export type InquiryFrom = "footer" | "quote";
+/** The inquiry card's mode: "footer" is the Contact me card, "quote" the Inquire card (with an option), which the footer's Inquire links also open. */
+export type InquiryMode = "footer" | "quote";
 export type Cards = {
   book: (row: BookRow["slug"]) => void;
-  inquire: (from: InquiryFrom, opt?: QuoteOpt["key"]) => void;
+  inquire: (from: InquiryMode, opt?: QuoteOpt["key"]) => void;
 };
-/** The two cards' openers, for every screen that opens one. */
+/** The openers, for every screen that opens one: inquire opens the inquiry card, book opens a session's booking inline in Sessions. */
 export const CardsCtx = React.createContext<Cards>({ book: () => {}, inquire: () => {} });
