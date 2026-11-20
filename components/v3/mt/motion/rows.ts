@@ -1,7 +1,7 @@
 import { scrollGoal, settleTo, shiftScroll } from "@/components/v3/smooth-scroll";
 import { holdEase as ease, holdUnease as unease } from "@/lib/motion/hold-ease";
 import { captionsOff, vimeoListen, vimeoPlays } from "@/lib/videos";
-import { RISE, clamp, smooth, type Ctx, type Driver } from "./engine";
+import { RISE, clamp, smooth, type Ctx, type Driver, type MtSection } from "./engine";
 import { sleeveTilt } from "./sleeve-tilt";
 import { tp } from "./touch-parity";
 
@@ -39,11 +39,9 @@ function snap(el: HTMLElement, ctx: Ctx, n: number, at: (p: number) => number, s
    sideways. Motion (spec 3.8): a vertical stack there, see films() below.
    Everywhere else the native snap rows stay. */
 
-function heldRow(name: string): Driver {
-  let frame: (p: number) => void = () => {};
+function heldRow(name: MtSection): Driver {
   return {
     name,
-    frame: (p) => frame(p),
     setup(el, ctx) {
       const row = el.querySelector<HTMLElement>(".mt-row");
       if (!row) return;
@@ -88,7 +86,7 @@ function heldRow(name: string): Driver {
         if (!ctx.held) discs(row.scrollLeft, step / 2);
       };
 
-      frame = (p) => {
+      const frame = (p: number) => {
         // the first record starts inside its sleeve and comes out over the first 5% of the hold (Julian, 2026-11-15)
         const k = smooth(clamp(p / 0.05));
         p = ease(p);
@@ -185,10 +183,9 @@ function heldRow(name: string): Driver {
 
       measure();
       loose();
-      return () => {
+      const off = () => {
         ac.abort();
         mo.disconnect();
-        frame = () => {};
         track.style.transform = "";
         if (par) for (const k of ["data-mt-par", "data-mt-lid"]) document.documentElement.removeAttribute(k);
         for (const it of items) {
@@ -196,6 +193,7 @@ function heldRow(name: string): Driver {
           it.style.setProperty("--o", "0.5");
         }
       };
+      return { frame, off };
     },
   };
 }

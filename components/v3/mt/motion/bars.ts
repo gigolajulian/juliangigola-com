@@ -1,25 +1,22 @@
-import type { Driver } from "./engine";
+import type { Driver, MtSection } from "./engine";
 
 /* Phones and tablets: Book online and By quote each get the bottom bar while
    they fill the screen. Their rows change only when one is tapped: the scroll
    walk through the rows is gone (Julian, 2026-11-14). */
-const bar = (name: string): Driver => {
-  let on = false;
-  return {
-    name,
-    always: true,
-    setup(el) {
-      return () => {
-        el.removeAttribute("data-bar");
-        on = false;
-      };
-    },
-    frame(_p, el, ctx) {
-      if (ctx.held) return;
-      // the bottom bar belongs to the section that fills the screen, so two bars never stack
-      if (ctx.top < ctx.vh * 0.45 !== on) el.toggleAttribute("data-bar", (on = !on));
-    },
-  };
-};
+const bar = (name: MtSection): Driver => ({
+  name,
+  always: true,
+  setup(el) {
+    let on = false;
+    return {
+      frame: (_p, el, ctx) => {
+        if (ctx.held) return;
+        // the bottom bar belongs to the section that fills the screen, so two bars never stack
+        if (ctx.top < ctx.vh * 0.45 !== on) el.toggleAttribute("data-bar", (on = !on));
+      },
+      off: () => el.removeAttribute("data-bar"),
+    };
+  },
+});
 
 export const barDrivers: Driver[] = [bar("book"), bar("quote")];

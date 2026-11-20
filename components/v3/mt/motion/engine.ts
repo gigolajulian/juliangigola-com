@@ -2,7 +2,8 @@
    whole home. On the desktop structure (D, `held` in lib/device.ts) every `[data-mt][data-hold]` section
    becomes a tall wrapper with a sticky stage (motion.css) and gets `--p`, 0 to 1
    through its hold. Sections without a hold get `--p` as they cross the screen.
-   Drivers add the per-section motion; each owns one file in this folder. */
+   Drivers add the per-section motion and are keyed by the section's `data-mt` name. Most files drive one section;
+   depth.ts adds a second hero driver and bars.ts drives book and quote. */
 
 import { matches, media } from "@/lib/device";
 import { touchParity } from "./touch-parity";
@@ -35,13 +36,17 @@ export type Ctx = {
   fresh: boolean;
 };
 
+/** Every `data-mt` section name in components/v3/mt. */
+export type MtSection = "hero" | "covers" | "motion" | "comm" | "about" | "quote" | "foot" | "book";
+
+/** every frame while the section is within one screen of the viewport (it carries `data-mt-near` then) */
+export type Frame = (p: number, el: HTMLElement, ctx: Ctx) => void;
+
 export type Driver = {
   /** the section's `data-mt` name */
-  name: string;
-  /** once, after the section is in the DOM. Return a cleanup. */
-  setup?: (el: HTMLElement, ctx: Ctx) => void | (() => void);
-  /** every frame while the section is within one screen of the viewport (it carries `data-mt-near` then) */
-  frame?: (p: number, el: HTMLElement, ctx: Ctx) => void;
+  name: MtSection;
+  /** once per section, after it is in the DOM. Returns a cleanup, or the section's frame and cleanup, so state lives in the closure. */
+  setup?: (el: HTMLElement, ctx: Ctx) => void | (() => void) | { frame?: Frame; off?: () => void };
   /** run `frame` on every structure. Default: only when holds are on (D). */
   always?: boolean;
 };
@@ -96,7 +101,17 @@ export function startEngine(root: HTMLElement, drivers: Driver[]) {
   measure();
   html.setAttribute("data-mt-motion", "");
   const tpOff = touchParity();
-  const offs = drivers.flatMap((d) => secs.filter((s) => s.dataset.mt === d.name).map((s) => d.setup?.(s, ctx)));
+  // per section, its drivers' frames in array order (hero.ts, then depth.ts for the hero)
+  const offs: (void | (() => void))[] = [];
+  const runs = new Map<HTMLElement, { f: Frame; always?: boolean }[]>();
+  for (const d of drivers)
+    for (const s of secs) {
+      if (s.dataset.mt !== d.name) continue;
+      const r = d.setup?.(s, ctx);
+      offs.push(typeof r === "function" ? r : r?.off);
+      const f = r && typeof r === "object" ? r.frame : undefined;
+      if (f) runs.set(s, [...(runs.get(s) ?? []), { f, always: d.always }]);
+    }
   let raf = 0;
   let moved = -1e9;
   const tick = (now: number) => {
@@ -139,7 +154,7 @@ export function startEngine(root: HTMLElement, drivers: Driver[]) {
         lastOut.set(s, leave);
         s.style.setProperty("--out", leave.toFixed(3));
       }
-      for (const d of drivers) if (d.frame && d.name === s.dataset.mt && (ctx.held || d.always)) d.frame(p, s, ctx);
+      for (const x of runs.get(s) ?? []) if (ctx.held || x.always) x.f(p, s, ctx);
     }
   };
   raf = requestAnimationFrame(tick);

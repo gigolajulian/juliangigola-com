@@ -1,5 +1,5 @@
 import { pad } from "../data";
-import { RISE, clamp, type Driver } from "./engine";
+import { RISE, clamp, type Ctx, type Driver } from "./engine";
 
 /* Commissions (spec 3.3): the held head names the frame under the screen's
    centre, and the client logos drift as one endless line that scroll pushes. */
@@ -8,7 +8,8 @@ const GAIN = 0.0012; // px/ms of push per px scrolled in a frame
 const MAX = 0.6; // px/ms, so a hard flick does not blur the marks
 const MAX_PHONE = 0.35;
 
-const s = { head: null as HTMLElement | null, logos: null as HTMLElement | null, o: 1, track: null as HTMLElement | null, w: 0, seen: false, x: 0, v: IDLE, kick: 0, hover: false, focus: false };
+// the logo line's offset, speed and push outlive a cleanup: a remount carries on where the line was
+const drift = { x: 0, v: IDLE, kick: 0 };
 const put = (n: Element | null, text: string) => {
   // keep React's own text node
   if (n?.firstChild) (n.firstChild as Text).data = text;
@@ -19,6 +20,17 @@ export const commissionsDrivers: Driver[] = [
     name: "comm",
     always: true,
     setup(el) {
+      const s = { o: 1, w: 0, seen: false, hover: false, focus: false };
+      const head = el.querySelector<HTMLElement>(".mt-comm-head");
+      const logos = el.querySelector<HTMLElement>(".mt-logos");
+      const fade = (ctx: Ctx) => {
+        if (head && logos && (ctx.dy || ctx.fresh)) {
+          // gone while the logos are still 40% of a screen below it
+          // on or off, not a scroll-tied fade (Julian, 2026-11-14): commissions.css times the fade
+          const o = !ctx.held || logos.getBoundingClientRect().top - head.getBoundingClientRect().bottom > ctx.vh * 0.5 ? 1 : 0;
+          if (o !== s.o) head.toggleAttribute("data-out", !(s.o = o));
+        }
+      };
       const count = el.querySelector("[data-mt-count]");
       const name = el.querySelector(".mt-cur [data-mt-name]");
       const meta = el.querySelector(".mt-cur .mute");
@@ -40,10 +52,10 @@ export const commissionsDrivers: Driver[] = [
 
       const strip = el.querySelector<HTMLElement>(".mt-logos");
       const row = el.querySelector<HTMLElement>(".mt-logos-row");
-      const track = (s.track = el.querySelector<HTMLElement>(".mt-logos-track"));
+      const track = el.querySelector<HTMLElement>(".mt-logos-track");
       const set = track?.querySelector<HTMLElement>(".set");
       const copy = track?.querySelector<HTMLElement>("[data-copy]");
-      if (!strip || !row || !track || !set || !copy) return () => cur.disconnect();
+      if (!strip || !row || !track || !set || !copy) return { frame: (_p, _el, ctx) => fade(ctx), off: () => cur.disconnect() };
       const extra: Element[] = [];
       const measure = () => {
         s.w = set.offsetWidth;
@@ -65,36 +77,28 @@ export const commissionsDrivers: Driver[] = [
       // keyboard focus only: a click focuses the row too, and that focus outlives the pointer
       on("focusin", (e) => (s.focus = (e.target as Element).matches(":focus-visible")));
       on("focusout", () => (s.focus = false));
-      return () => {
-        cur.disconnect();
-        ro.disconnect();
-        see.disconnect();
-        ac.abort();
-        s.hover = s.focus = false;
-        extra.forEach((n) => n.remove());
-        track.style.transform = "";
-        el.dataset.cur = "0";
-        [count, name, meta].forEach((n, i) => put(n, first[i]));
-        s.head?.removeAttribute("data-out");
-        s.track = s.head = s.logos = null;
-        s.o = 1;
+      return {
+        frame: (_p, _el, ctx) => {
+          fade(ctx);
+          if (!s.seen || !s.w) return;
+          const max = ctx.held ? MAX : MAX_PHONE;
+          drift.kick = clamp(drift.kick * 0.94 ** (ctx.dt / 16.7) + ctx.dy * GAIN, -max, max);
+          drift.v += ((s.hover || s.focus ? 0 : IDLE) + drift.kick - drift.v) * (1 - Math.exp(-ctx.dt / 180));
+          drift.x = (((drift.x + drift.v * ctx.dt) % s.w) + s.w) % s.w;
+          track.style.transform = `translate3d(${-drift.x}px,0,0)`;
+        },
+        off: () => {
+          cur.disconnect();
+          ro.disconnect();
+          see.disconnect();
+          ac.abort();
+          extra.forEach((n) => n.remove());
+          track.style.transform = "";
+          el.dataset.cur = "0";
+          [count, name, meta].forEach((n, i) => put(n, first[i]));
+          head?.removeAttribute("data-out");
+        },
       };
-    },
-    frame(_p, el, ctx) {
-      const head = (s.head ??= el.querySelector<HTMLElement>(".mt-comm-head"));
-      const logos = (s.logos ??= el.querySelector<HTMLElement>(".mt-logos"));
-      if (head && logos && (ctx.dy || ctx.fresh)) {
-        // gone while the logos are still 40% of a screen below it
-        // on or off, not a scroll-tied fade (Julian, 2026-11-14): commissions.css times the fade
-        const o = !ctx.held || logos.getBoundingClientRect().top - head.getBoundingClientRect().bottom > ctx.vh * 0.5 ? 1 : 0;
-        if (o !== s.o) head.toggleAttribute("data-out", !(s.o = o));
-      }
-      if (!s.seen || !s.w || !s.track) return;
-      const max = ctx.held ? MAX : MAX_PHONE;
-      s.kick = clamp(s.kick * 0.94 ** (ctx.dt / 16.7) + ctx.dy * GAIN, -max, max);
-      s.v += ((s.hover || s.focus ? 0 : IDLE) + s.kick - s.v) * (1 - Math.exp(-ctx.dt / 180));
-      s.x = (((s.x + s.v * ctx.dt) % s.w) + s.w) % s.w;
-      s.track.style.transform = `translate3d(${-s.x}px,0,0)`;
     },
   },
 ];
