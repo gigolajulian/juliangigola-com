@@ -180,7 +180,8 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
           <div className="proof-intro dlv-intro dlv-mh">
             <button type="button" className="dlv-back" onClick={() => go("models")}>&larr; All models</button>
             <p className="proof-lab">Model · {one[1].length} photos · {sizeOf(one[1])}</p>
-            <h1>{modelLabel(one[0])}</h1>
+            {/* Julian 2026-11-19: "SUBJECT02" in the tiles' heavy face; a named model keeps its name. */}
+            <h1>{/^\d+$/.test(modelLabel(one[0])) ? `SUBJECT${modelLabel(one[0])}` : modelLabel(one[0])}</h1>
             <button type="button" className="proof-btn" data-done={done[one[0]] ? "" : undefined} onClick={() => download(one[0], zipHref(one[0]))}>
               {zipLabel(one[0], `Download zip · ${sizeOf(one[1])}`)}
             </button>
@@ -219,8 +220,11 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
                 {under.length ? (
                   <button type="button" className="dlv-minis" tabIndex={-1} aria-hidden="true" onClick={() => go(k)}>
                     {under.map((f) => (
-                      // eslint-disable-next-line @next/next/no-img-element -- private final, 800px copy
-                      <img key={f.id} src={`${src(f)}&w=800`} alt="" loading={i < 6 ? "eager" : "lazy"} draggable={false} />
+                      <span key={f.id} className="dlv-mini">
+                        {/* eslint-disable-next-line @next/next/no-img-element -- private final, 800px copy */}
+                        <img src={`${src(f)}&w=800`} alt="" loading={i < 6 ? "eager" : "lazy"} draggable={false} />
+                        <i className="dlv-mn">{pad(fs.indexOf(f))}</i>
+                      </span>
                     ))}
                   </button>
                 ) : null}
@@ -235,7 +239,7 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
             })}
           </div>
         ) : (
-          <div className="proof-grid" ref={grid}>
+          <div className="proof-grid dlv-grid" ref={grid}>
             {shown.map((f, i) => (
               <div key={f.id} className="proof-cell">
                 {/* eslint-disable-next-line @next/next/no-img-element -- private finals from the Worker, not the image CDN */}
