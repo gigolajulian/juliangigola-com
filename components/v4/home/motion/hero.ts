@@ -12,9 +12,9 @@ const END_D = [280, 0, 70]; // how far each of the three locked columns has drop
 const DRIFT = [40, 22]; // phone drift caps, px, per column
 const FLIP = 1300; // the idle wall's card turn, ms
 
-type Part = { el: HTMLElement; a: number; c: number; v: number };
+type Part = { el: HTMLElement; lag: number; col: number; lastY: number };
 
-type State = { cols: Part[]; figs: Part[]; caps: HTMLElement[]; tw: HTMLElement[]; phs: HTMLElement[]; texts: HTMLElement[]; ctas: HTMLElement | null; more: HTMLElement | null; name: HTMLElement | null; scroll: number; mode: "" | "d" | "p" | "t"; exit: number; unit: number; sizeKey: string; wall: number; out: boolean; drop: number };
+type State = { cols: Part[]; figs: Part[]; caps: HTMLElement[]; letters: HTMLElement[]; photos: HTMLElement[]; texts: HTMLElement[]; ctas: HTMLElement | null; more: HTMLElement | null; name: HTMLElement | null; scroll: number; mode: "" | "d" | "p" | "t"; exit: number; unit: number; sizeKey: string; wall: number; out: boolean; drop: number };
 
 const ink = (n: Node) => {
   const r = document.createRange();
@@ -87,9 +87,9 @@ function grid(im: HTMLImageElement) {
   return g;
 }
 let toned = 0, tonedY = -1;
-function tone(st: Pick<State, "tw" | "phs">) {
-  const wall = st.phs[0]?.closest(".mt-wall");
-  if (!st.tw.length || !wall) return;
+function tone(st: Pick<State, "letters" | "photos">) {
+  const wall = st.photos[0]?.closest(".mt-wall");
+  if (!st.letters.length || !wall) return;
   /* A pass cost 51 hit tests: 5 to 8ms at 1440, 52ms on a phone-speed CPU, and it ran every frame, idle included (measured on live).
      Now ten passes a second at most (the colour takes .15s to change anyway), and a word is hit tested at its two ends: the same photo under both
      is the photo under the whole word. Only a word that straddles two photos goes letter by letter. About 17 hit tests a pass.
@@ -99,7 +99,7 @@ function tone(st: Pick<State, "tw" | "phs">) {
   if (now - toned < (scrollY === tonedY ? 280 : 100)) return;
   tonedY = scrollY;
   toned = now;
-  const rs = st.tw.map((w) => w.getBoundingClientRect());
+  const rs = st.letters.map((w) => w.getBoundingClientRect());
   /* The photo a visitor sees at this point: a hit test, top first. Scanning the photo boxes took the first box in the document that held the point, and on an
      iPhone that was a photo lying under another one (MAC, #1155: a line stayed white over a pale photo). The name block takes no pointer events, so it is not in the way.
      While a swap develops, the incoming photo counts once it has cut in. Off screen there is nothing to hit: bare page. */
@@ -108,8 +108,8 @@ function tone(st: Pick<State, "tw" | "phs">) {
   let wd: Element | null = null;
   let same: HTMLImageElement | null | undefined;
   const ts: string[] = [];
-  for (let n = 0; n < st.tw.length; n++) {
-    const w = st.tw[n], r = rs[n];
+  for (let n = 0; n < st.letters.length; n++) {
+    const w = st.letters[n], r = rs[n];
     ts[n] = "";
     if (!r.width) continue;
     const cy = r.top + r.height / 2;
@@ -117,7 +117,7 @@ function tone(st: Pick<State, "tw" | "phs">) {
     if (!word) same = undefined;
     else if (word !== wd) {
       let z = n;
-      while (st.tw[z + 1]?.parentElement === word) z++;
+      while (st.letters[z + 1]?.parentElement === word) z++;
       const a = hit(r);
       same = z === n || a === hit(rs[z]) ? a : undefined;
     }
@@ -146,7 +146,7 @@ function tone(st: Pick<State, "tw" | "phs">) {
   // A letter over the bare page, where a word hangs past its photo, keeps the page tone: the photo's white is lost on the light page (QA, #1203).
   const lines = new Map<Element, number[]>();
   rs.forEach((r, n) => {
-    const k = st.tw[n].parentElement?.classList.contains("wd") ? st.tw[n].parentElement! : st.tw[n];
+    const k = st.letters[n].parentElement?.classList.contains("wd") ? st.letters[n].parentElement! : st.letters[n];
     if (r.width) lines.set(k, [...(lines.get(k) ?? []), n]);
   });
   for (const ns of lines.values()) {
@@ -155,7 +155,7 @@ function tone(st: Pick<State, "tw" | "phs">) {
     const word = Object.keys(count).sort((a, b) => count[b] - count[a])[0];
     for (const n of ns) {
       const t = ts[n] === "p" || word === undefined ? ts[n] : word;
-      if (st.tw[n].dataset.tone !== t) st.tw[n].dataset.tone = t;
+      if (st.letters[n].dataset.tone !== t) st.letters[n].dataset.tone = t;
     }
   }
 }
@@ -172,16 +172,16 @@ function clearance(st: Pick<State, "texts" | "ctas" | "caps">, on: boolean) {
 
 const move = (p: Part, y: number) => {
   const v = Math.round(y * 10) / 10;
-  if (v === p.v) return;
-  p.v = v;
+  if (v === p.lastY) return;
+  p.lastY = v;
   p.el.style.transform = v ? `translate3d(0,${v}px,0)` : "";
 };
 
 // the name block and wall pieces heroStill and the hero driver both read
 const parts = (el: HTMLElement) => ({
   caps: [...el.querySelectorAll<HTMLElement>(".mt-col figcaption span")],
-  tw: [...el.querySelectorAll<HTMLElement>(".mt-name .mt-cap .w")],
-  phs: [...el.querySelectorAll<HTMLElement>(".mt-wall .ph")],
+  letters: [...el.querySelectorAll<HTMLElement>(".mt-name .mt-cap .w")],
+  photos: [...el.querySelectorAll<HTMLElement>(".mt-wall .ph")],
   texts: [...el.querySelectorAll<HTMLElement>(".mt-name h1, .mt-name .mt-cap")],
   ctas: el.querySelector<HTMLElement>(".mt-name .mt-ctas"),
 });
@@ -208,9 +208,9 @@ export const heroDrivers: Driver[] = [
     always: true,
     setup(el) {
       if (MT2) (toned = 0), (tonedY = -1); // module throttle, fresh per mount
-      const part = (n: HTMLElement, a: number, c: number): Part => ({ el: n, a, c, v: 0 });
+      const part = (n: HTMLElement, a: number, c: number): Part => ({ el: n, lag: a, col: c, lastY: 0 });
       const st: State = {
-        cols: [...el.querySelectorAll<HTMLElement>(".mt-col")].map((n) => part(n, Number(n.dataset.a) || 0, Number(n.dataset.col))),
+        cols: [...el.querySelectorAll<HTMLElement>(".mt-col")].map((n) => part(n, Number(n.dataset.lag) || 0, Number(n.dataset.col))),
         figs: [...el.querySelectorAll<HTMLElement>(".mt-col:not(.side) figure")].map((n) => part(n, 0, Number(n.style.getPropertyValue("--c2")) || 0)),
         ...parts(el),
         more: el.querySelector<HTMLElement>(".mt-more .btn"),
@@ -323,7 +323,7 @@ function heroFrame(st: State, p: number, el: HTMLElement, ctx: Ctx) {
     const three = ctx.vw < 1920;
     // a share of the travel, not of the distance: a tall window travels less and must still end on the same stair
     const share = S / Math.max(1, st.wall * u + TAIL * ctx.u - Math.max(ctx.vh, 600));
-    for (const c of st.cols) move(c, -(S - (three && c.c in END_D ? share * END_D[c.c] * u : Math.min(S, LAG_MAX * u) * c.a * 0.5)));
+    for (const c of st.cols) move(c, -(S - (three && c.col in END_D ? share * END_D[c.col] * u : Math.min(S, LAG_MAX * u) * c.lag * 0.5)));
     /* The name holds, then rides down out of the window, the tagline and buttons sinking ahead of it (--mt-out, hero.css).
        sink() reads the ride off See the work: it is over as the button's top edge enters the window. */
     sink(st, ctx);
@@ -334,8 +334,8 @@ function heroFrame(st: State, p: number, el: HTMLElement, ctx: Ctx) {
 
   // the columns lead upward, so nothing runs past the bottom of the wall
   const gone = clamp(-ctx.top, 0, LAG_MAX);
-  if (mode === "p") for (const f of st.figs) move(f, -DRIFT[f.c] * clamp(gone / Math.max(1, ctx.h)));
-  else for (const c of st.cols) move(c, -gone * c.a * 0.5 * (ctx.vw / 1440));
+  if (mode === "p") for (const f of st.figs) move(f, -DRIFT[f.col] * clamp(gone / Math.max(1, ctx.h)));
+  else for (const c of st.cols) move(c, -gone * c.lag * 0.5 * (ctx.vw / 1440));
   /* Phones and tablets: the name block is sticky (hero.css), so it holds while the wall scrolls under it, then sinks out the desktop's way.
      How far it sinks: from the name's top to the window's lower edge, and 24px. */
   if (PIN && st.name && st.texts[0] && ctx.vw + "x" + ctx.vh !== st.sizeKey) {

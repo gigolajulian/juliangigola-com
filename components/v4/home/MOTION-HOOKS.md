@@ -29,7 +29,7 @@ Typed readers live in `motion/root-attrs.ts` (`flipMs`); everything else reads t
 | `data-mt-intro` (1/2/3), `data-mt-own`, `data-mt-late` | intro/index.tsx, the app/layout.tsx head script | intro/index.tsx, hero.tsx, nav-ink.ts | intro.css, mtscroll.css | the head script on a first v4 visit; the intro as it plays | when the intro ends, or the head script's 6s fallback |
 
 ## Hero wall (`hero.tsx`)
-- `.mt-wall > .mt-col[data-col][data-a]`: one element per column, `data-a` is the
+- `.mt-wall > .mt-col[data-col][data-lag]`: one element per column, `data-lag` is the
   lag A (.12 / 0 / .2). Locked columns 0 to 2, side columns `-2 -1 3 4` (class
   `side`, real links too). No transform or filter on `.mt-wall` or `.mt-col` in
   CSS; `will-change: transform` is set on `.mt-col`.

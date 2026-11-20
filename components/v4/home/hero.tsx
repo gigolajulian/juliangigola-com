@@ -118,7 +118,7 @@ export function MtHero({ frames: first, extras }: { frames: MtFrame[]; extras: M
         <div className="mt-wall">
           {[...sides.slice(0, 2), ...cols, ...sides.slice(2)].map(({ c, list }) => (
             // side columns are real links too: from 1920px wide they are part of the wall for good. Where a screen hides one, visibility takes its links with it.
-            <div key={c} className={c < 0 || c > 2 ? "mt-col side" : "mt-col"} data-col={c} data-a={A[mod3(c)]} style={{ "--c": c, "--top": TOPS[mod3(c)] } as React.CSSProperties}>
+            <div key={c} className={c < 0 || c > 2 ? "mt-col side" : "mt-col"} data-col={c} data-lag={A[mod3(c)]} style={{ "--c": c, "--top": TOPS[mod3(c)] } as React.CSSProperties}>
               {list.map(({ f, i, xr }) => (i >= 0 && !xr ? (
                 <Fig key={i} f={f} was={was[i]} onDone={() => done(i)} i={i} eager={i < 3} idle />
               ) : (
