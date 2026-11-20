@@ -467,8 +467,9 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
     const rows6 = !!wall.querySelector<HTMLElement>("figure.xr")?.offsetParent && pool.current.length >= 48;
     const from = rows6 ? 30 : 16;
     const fit = preload ? fitExtras(hero, wall) : null; // the preload hold: only as many as this screen's canvas draws, at the size it draws them
-    const upto = rows6 ? (window.innerWidth >= 3300 ? 80 : 60) : 46; // never more than before: past this the tiles repeat, as they always have
-    const want = pool.current.slice(from, fit ? Math.min(upto, from + fit.n) : upto).map((f) => loader({ src: f.src, width: fit?.width ?? 640 }));
+    const upto = rows6 ? (window.innerWidth >= 3300 ? 80 : 60) : 46; // ?preload=0: the old fixed set, its tiles repeat past it
+    // the preload hold: one photo per drawn tile, up to the whole pool (an iPad in portrait draws 37 to 39), so no tile repeats while the pool lasts
+    const want = pool.current.slice(from, fit ? from + fit.n : upto).map((f) => loader({ src: f.src, width: fit?.width ?? 640 }));
     let leadIn = false;
     let dead = 0; // extras that failed for good: they count as settled, so one dead file never holds the splash
     const go = () => leadIn && (preload ? ready.length + dead >= want.length : ready.length >= Math.min(18, want.length)) && run();
