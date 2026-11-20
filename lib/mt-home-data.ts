@@ -1,4 +1,4 @@
-import { COMM_KEYS, FILM_DRESS, FILM_FILES, FILM_PICKS, HERO_KEYS, type MtData, type MtFrame } from "@/components/v3/mt/data";
+import { COMM_KEYS, FILM_DRESS, FILM_FILES, FILM_PICKS, HERO_KEYS, type MtData, type MtFrame } from "@/lib/mt-home";
 import { DOES } from "@/components/v3/about";
 import { PROJECTS, categoryLabel, getProject } from "@/lib/work";
 import { CONTENT } from "@/lib/content";

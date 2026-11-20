@@ -4,7 +4,7 @@ import { forgetToken } from "@/lib/booking/gcal";
 import { clientView, depositPaid } from "@/lib/booking/booking-engine";
 import { DEPOSIT, depositFor, PAID } from "@/lib/booking/paid";
 import { amountOf, isDeposit } from "@/lib/booking/deposit";
-import { BOOK_ROWS } from "@/components/v3/mt/data";
+import { BOOK_ROWS } from "@/lib/mt-home";
 import { rate, SESSIONS } from "@/lib/v3";
 import { BookingLock } from "@/worker/booking-lock";
 

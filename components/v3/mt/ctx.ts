@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { flushSync } from "react-dom";
-import type { BookRow, QuoteOpt } from "./data";
+import type { BookRow, QuoteOpt } from "@/lib/mt-home";
 
 /** The inquiry card's mode: "footer" is the Contact me card, "quote" the Inquire card (with an option), which the footer's Inquire links also open. */
 export type InquiryMode = "footer" | "quote";

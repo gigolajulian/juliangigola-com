@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BOOK_ROWS, QUOTE_OPTS } from "./mt/data";
+import { BOOK_ROWS, QUOTE_OPTS } from "@/lib/mt-home";
 import { useLocalTime } from "./use-local-time";
 import { media } from "@/lib/device";
 

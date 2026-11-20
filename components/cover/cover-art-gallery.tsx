@@ -4,7 +4,7 @@ import * as React from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import { Lightbox, useLightbox } from "@/components/lightbox";
-import { COVER_PRESS } from "@/components/v3/mt/data";
+import { COVER_PRESS } from "@/lib/mt-home";
 import { sleeveTilt } from "./sleeve-tilt";
 import "@/components/v3/mt/motion/rows.css";
 import { CoverFaces, coverLabel } from "@/components/cover/cover-faces";

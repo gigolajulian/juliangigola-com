@@ -4,7 +4,7 @@ import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { matches } from "@/lib/device";
-import { QUOTE_CLIENTS, QUOTE_OPTS, type QuoteClient, type QuoteOpt } from "./data";
+import { QUOTE_CLIENTS, QUOTE_OPTS, type QuoteClient, type QuoteOpt } from "@/lib/mt-home";
 import { CardsCtx, useTold } from "./ctx";
 
 /* Spec 3.5: quote second. The photo shows the current client's frame until

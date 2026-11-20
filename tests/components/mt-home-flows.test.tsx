@@ -6,7 +6,7 @@ vi.mock("@/app/contact/actions", () => ({ submitEnquiry: vi.fn() }));
 vi.stubGlobal("fetch", vi.fn(() => Promise.reject(new Error("offline"))));
 
 import { MtHome } from "@/components/v3/mt/home";
-import { BOOK_ROWS, QUOTE_OPTS } from "@/components/v3/mt/data";
+import { BOOK_ROWS, QUOTE_OPTS } from "@/lib/mt-home";
 import { MT } from "@/lib/mt-home-data";
 
 /* The two lists on the v4 home that talk to each other: Book online and By quote. Read through the DOM only,

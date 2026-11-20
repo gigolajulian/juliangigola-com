@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import type { MtData, BookRow, QuoteOpt } from "./data";
+import type { MtData, BookRow, QuoteOpt } from "@/lib/mt-home";
 import { CardsCtx, type Cards, type InquiryMode } from "./ctx";
 import { MtHero } from "./hero";
 import { MtCommissions } from "./commissions";

@@ -3,7 +3,7 @@
 import * as React from "react";
 import dynamic from "next/dynamic";
 import { mtscroll } from "@/lib/mtscroll";
-import type { MtData } from "./data";
+import type { MtData } from "@/lib/mt-home";
 
 /* Three ways to the v4 home. `/?mtscroll=1` is rewritten on the server to
    app/home-v4 (next.config.ts). A NEXT_PUBLIC_V4_HOME=1 build renders MtHome

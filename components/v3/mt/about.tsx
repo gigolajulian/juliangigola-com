@@ -3,7 +3,7 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ABOUT_FACTS, ABOUT_SENTENCE, pad } from "./data";
+import { ABOUT_FACTS, ABOUT_SENTENCE, pad } from "@/lib/mt-home";
 
 /* Spec 3.9: one screen. The sentence is one paragraph; the per-word spans
    (`--w`) and the wordmark's per-letter spans (`--j`) are for the motion pass. */
