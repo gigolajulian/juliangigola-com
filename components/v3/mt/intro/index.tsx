@@ -101,21 +101,73 @@ function onScreen(hero: HTMLElement, wall: HTMLElement) {
   });
 }
 
-/** the preload hold: how many extra tiles the canvas draws on this screen, and the thumb width that covers one at this pixel ratio.
-    Estimated from the laid-out wall the way build() measures it: the screen at scale S0, on the wall's own column and row pitch. */
-function fitExtras(wall: HTMLElement) {
-  const ph = [...wall.querySelectorAll<HTMLElement>(".mt-col:not(.side) figure:not(.xr) .ph")].map((e) => e.getBoundingClientRect()).filter((r) => r.width);
-  if (!ph.length) return null;
-  const w = ph[0].width;
-  const lefts = [...new Set(ph.map((r) => Math.round(r.left)))].sort((a, z) => a - z);
-  const tops = ph.filter((r) => Math.round(r.left) === lefts[0]).map((r) => r.top).sort((a, z) => a - z);
-  const P = lefts.length > 1 ? lefts[1] - lefts[0] : w * 1.1;
-  const R = tops.length > 1 ? tops[1] - tops[0] : ph[0].height * 1.19;
-  const n = (Math.ceil(window.innerWidth / S0 / P) + 2) * (Math.ceil((window.innerHeight / S0 + ph[0].height) / R) + 1) - ph.length;
+/** The canvas, measured from the laid-out wall: the columns, the frame and pitch, and the view at scale S0 around the point the push goes into.
+    build() draws from it, and the preload hold counts from it the tiles that build() will draw. */
+function canvasOf(hero: HTMLElement, wall: HTMLElement) {
+  const W = window.innerWidth;
+  const H = window.innerHeight;
+  const wr = wall.getBoundingClientRect();
+  const box = (el: Element) => {
+    const r = el.getBoundingClientRect();
+    return { x: r.left - wr.left, y: r.top - wr.top, w: r.width, h: r.height };
+  };
+  // a column is what moves together: the column element, or on phones (columns are `display: contents`) its figures
+  type Col = { els: HTMLElement[]; b: ReturnType<typeof box>[]; side: boolean };
+  const all = [...wall.querySelectorAll<HTMLElement>(".mt-col")];
+  const lead0 = all.find((c) => !c.classList.contains("side"));
+  const flat = !!lead0 && getComputedStyle(lead0).display === "contents";
+  const cols: Col[] = flat
+    ? [0, 1].map((c) => {
+        const figs = [...wall.querySelectorAll<HTMLElement>(".mt-col:not(.side) figure:not(.xr)")].filter((f) => f.style.getPropertyValue("--c2").trim() === String(c));
+        return { els: figs, b: figs.map((f) => box(f.querySelector(".ph")!)).sort((a, z) => a.y - z.y), side: false };
+      })
+    : all.filter((c) => c.offsetParent !== null && c.querySelector(".ph")).map((c) => ({ els: [c], b: [...c.querySelectorAll<HTMLElement>(".ph")].filter((ph) => ph.offsetParent !== null).map(box), side: c.classList.contains("side") })); // rows five and six only where they show
+  const core = cols.filter((c) => !c.side && c.b.length);
+  if (core.length < 2) return null;
+  const first = core[0].b;
+  const w = first[0].w;
+  const h = first[0].h;
+  const R = first.length > 1 ? first[1].y - first[0].y : h * 1.19; // row pitch
+  const P = core[1].b[0].x - first[0].x; // column pitch
+  const u = w / 403; // the mock's frame is 403 wide
+
+  // the view: scale .46 around a point of the wall that sits at the screen centre
+  const px = W / 2 - wr.left;
+  const py = hero.getBoundingClientRect().top - wr.top + 1150 * u;
+  const ty = H / 2 - (wr.top + py);
+  const xmin = px - W / (2 * S0);
+  const xmax = px + W / (2 * S0);
+  const ymin = py - H / (2 * S0);
+  const ymax = py + H / (2 * S0);
+  return { W, H, flat, cols, core, first, w, h, R, P, u, px, py, ty, xmin, xmax, ymin, ymax };
+}
+
+/** Extra tiles build() draws: above and below each real column, and the columns on the wall's pitch where none stands. Its loops, counted. */
+function tilesOf(g: NonNullable<ReturnType<typeof canvasOf>>) {
+  const { cols, first, w, h, R, P, xmin, xmax, ymin, ymax } = g;
+  let n = 0;
+  for (const { b } of cols) {
+    for (let y = b[0].y - R; y + h > ymin; y -= R) n++;
+    for (let y = b[b.length - 1].y + R; y < ymax; y += R) n++;
+  }
+  const real = cols.map((c) => c.b[0].x);
+  let k = 0;
+  for (let m = -16; m <= 16; m++) {
+    const x = first[0].x + m * P;
+    if (x + w < xmin || x > xmax || real.some((r) => Math.abs(r - x) < P * 0.5)) continue;
+    for (let y = ymin - h + (k % 2 ? R * 0.25 : 0); y < ymax; y += R) n++;
+    k++;
+  }
+  return n;
+}
+
+/** The preload hold: one thumb per extra tile this screen's canvas draws (so none is fetched and never shown), at a width that covers it at this pixel ratio. */
+function fitExtras(hero: HTMLElement, wall: HTMLElement) {
+  const g = canvasOf(hero, wall);
+  if (!g) return null;
   // a tile is drawn at S0 and blurs out as it grows with the push, so its drawn size is enough. Three widths, so the resizer keeps few copies.
-  const px = w * S0 * devicePixelRatio;
-  const width = px <= 256 ? 256 : px <= 384 ? 384 : 640;
-  return { n: Math.max(6, Math.min(30, n)), width };
+  const px = g.w * S0 * devicePixelRatio;
+  return { n: Math.max(1, tilesOf(g)), width: px <= 256 ? 256 : px <= 384 ? 384 : 640 };
 }
 
 export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
@@ -228,41 +280,9 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
       const END = pace.end; // every time below is this run's
       const pushAt = deep || short ? pace.push : PUSH;
       const land = deep ? pace.land : END;
-      const W = window.innerWidth;
-      const H = window.innerHeight;
-      const wr = wall.getBoundingClientRect();
-      const box = (el: Element) => {
-        const r = el.getBoundingClientRect();
-        return { x: r.left - wr.left, y: r.top - wr.top, w: r.width, h: r.height };
-      };
-      // a column is what moves together: the column element, or on phones (columns are `display: contents`) its figures
-      type Col = { els: HTMLElement[]; b: ReturnType<typeof box>[]; side: boolean };
-      const all = [...wall.querySelectorAll<HTMLElement>(".mt-col")];
-      const lead0 = all.find((c) => !c.classList.contains("side"));
-      const flat = !!lead0 && getComputedStyle(lead0).display === "contents";
-      const cols: Col[] = flat
-        ? [0, 1].map((c) => {
-            const figs = [...wall.querySelectorAll<HTMLElement>(".mt-col:not(.side) figure:not(.xr)")].filter((f) => f.style.getPropertyValue("--c2").trim() === String(c));
-            return { els: figs, b: figs.map((f) => box(f.querySelector(".ph")!)).sort((a, z) => a.y - z.y), side: false };
-          })
-        : all.filter((c) => c.offsetParent !== null && c.querySelector(".ph")).map((c) => ({ els: [c], b: [...c.querySelectorAll<HTMLElement>(".ph")].filter((ph) => ph.offsetParent !== null).map(box), side: c.classList.contains("side") })); // rows five and six only where they show
-      const core = cols.filter((c) => !c.side && c.b.length);
-      if (core.length < 2) return finish(false);
-      const first = core[0].b;
-      const w = first[0].w;
-      const h = first[0].h;
-      const R = first.length > 1 ? first[1].y - first[0].y : h * 1.19; // row pitch
-      const P = core[1].b[0].x - first[0].x; // column pitch
-      const u = w / 403; // the mock's frame is 403 wide
-
-      // the view: scale .46 around a point of the wall that sits at the screen centre
-      const px = W / 2 - wr.left;
-      const py = hero.getBoundingClientRect().top - wr.top + 1150 * u;
-      const ty = H / 2 - (wr.top + py);
-      const xmin = px - W / (2 * S0);
-      const xmax = px + W / (2 * S0);
-      const ymin = py - H / (2 * S0);
-      const ymax = py + H / (2 * S0);
+      const g = canvasOf(hero, wall);
+      if (!g) return finish(false);
+      const { W, H, flat, cols, core, first, w, h, R, P, u, px, py, ty, xmin, xmax, ymin, ymax } = g;
 
       // extras: a layer in the wall's own space
       const layer = document.createElement("div");
@@ -446,8 +466,9 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
     // where rows five and six show (wide screens) the wall itself uses extras up to 29, so the canvas draws from the ones after
     const rows6 = !!wall.querySelector<HTMLElement>("figure.xr")?.offsetParent && pool.current.length >= 48;
     const from = rows6 ? 30 : 16;
-    const fit = preload ? fitExtras(wall) : null; // the preload hold: only as many as this screen's canvas draws, at the size it draws them
-    const want = pool.current.slice(from, fit ? from + fit.n : rows6 ? (window.innerWidth >= 3300 ? 80 : 60) : 46).map((f) => loader({ src: f.src, width: fit?.width ?? 640 }));
+    const fit = preload ? fitExtras(hero, wall) : null; // the preload hold: only as many as this screen's canvas draws, at the size it draws them
+    const upto = rows6 ? (window.innerWidth >= 3300 ? 80 : 60) : 46; // never more than before: past this the tiles repeat, as they always have
+    const want = pool.current.slice(from, fit ? Math.min(upto, from + fit.n) : upto).map((f) => loader({ src: f.src, width: fit?.width ?? 640 }));
     let leadIn = false;
     let dead = 0; // extras that failed for good: they count as settled, so one dead file never holds the splash
     const go = () => leadIn && (preload ? ready.length + dead >= want.length : ready.length >= Math.min(18, want.length)) && run();
