@@ -5,8 +5,13 @@ comments now state the current rule; who asked, when, and what it replaced is
 here. Grouped by file, newest first. Site-wide decisions are in
 `docs/decisions.md`.
 
-Not moved yet: `data.ts`, `home.tsx` and `rows.tsx` still carry their dated
-notes (another branch was editing them).
+## data.ts
+
+- 2026-11-19: the home's eight covers, in Julian's order from Home Picks.
+- 2026-11-17: Director's Reel and Ladera Granola are hosted by the site (public/films). Vimeo refused its player (401) and could not be preloaded; Julian sent the files.
+- 2026-11-14: four films on the home (Julian). Purgation, Pear VC, Wonderland and Dide O Del stay on /portfolio/video.
+- 2026-11-14: the per-film dressing (zoom, start second, client mark) (Julian).
+- 2026-11-14: v1 pressing colors, one per release, taken from each cover by eye from the sampled palette.
 
 ## foot.tsx
 
@@ -17,6 +22,12 @@ notes (another branch was editing them).
 
 - 2026-11-17: rows five and six are off the wall (Julian: one less row, twice). Their photos turn up in the idle swaps.
 - 2026-11-15: the idle wall became the V4 default. `?idle=0` turns it off.
+
+## home.tsx
+
+- 2026-11-18: arriving at #contact opens the inquiry card the footer's "Contact me" opens; closing hands focus to that button (Julian).
+- 2026-11-18: already on the home, a link to /#contact glides down to the footer, then opens the card (Julian).
+- 2026-11-17: the section order is Motion, Cover art, About, Sessions, By quote, then Commissions (Julian).
 
 ## inquiry-card.tsx
 
@@ -124,3 +135,8 @@ notes (another branch was editing them).
 ## motion/touch-parity.ts
 
 - 2026-11-18: phones and tablets get the desktop's motion. Julian: "integrate", then "push" after MAC passed all eight.
+
+## rows.tsx
+
+- 2026-11-18: the Motion hold eases in and out like Cover art's, so the first and last film take more of the scroll (Julian). `?mtsnap=0` is the old even shares.
+- 2026-11-17: the Motion hold is a quarter screen a film. Julian halved the 2 screens for four.

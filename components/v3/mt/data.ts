@@ -19,10 +19,10 @@ export type MtData = { hero: MtFrame[]; extras: MtFrame[]; comm: MtFrame[]; film
 /* Julian's arranger save (save.json), in order. Key `<slug>/<NN>`. */
 export const HERO_KEYS = ["threshold/05", "i-wanna-be-a-human/01", "wired-magazine/01", "wrapped-up/02", "sago/01", "valgur/02", "vigil/05", "ukiyosunknown/01", "nyx/06", "oakley-x-nike/01", "astral-allure/04", "liminal/01"];
 export const COMM_KEYS = ["cyber1a/01", "goodcult/01", "gilt/01", "jubo/03", "paranoia/13", "the-den-talkshow/06", "iris/03", "ukiyosunknown/03", "celestis/03"];
-/* Julian's eight, in his order from Home Picks (2026-11-19). The rest are on /portfolio?d=coverart. */
+/* Julian's eight, in his order from Home Picks. The rest are on /portfolio?d=coverart. */
 export const COVER_KEYS = ["the-river", "in-the-hoodie-on-your-sleeve", "the-description", "your-way", "problem-child", "est-modvs-in-rebvs", "whole-summer", "jahannam"] as const;
 export type CoverKey = (typeof COVER_KEYS)[number];
-/* v1: one pressing color per release, taken from its cover by eye from the sampled palette (2026-11-14). */
+/* One pressing color per release, taken from its cover by eye from the sampled palette. */
 export const COVER_PRESS: Partial<Record<string, string>> = {
   "the-description": "#c9c5bd",
   "the-river": "#5a6b33",
@@ -33,10 +33,10 @@ export const COVER_PRESS: Partial<Record<string, string>> = {
   "whole-summer": "#b02a2e",
   "in-the-hoodie-on-your-sleeve": "#d4483c",
 } satisfies Record<CoverKey, string>;
-/* Four films on the home (Julian, 2026-11-14): Purgation, Pear VC, Wonderland and Dide O Del stay on /portfolio/video.
+/* Four films on the home: Purgation, Pear VC, Wonderland and Dide O Del stay on /portfolio/video.
    Matched to content/site.json by title; kind is this screen's label. */
-/* Films the site hosts itself (public/films, 1080p, no sound, under the host's 25 MB a file): Vimeo refused its player (401) and could not
-   be preloaded (Julian sent the files, 2026-11-17). The home plays these; the link still opens the film's page. */
+/* Films the site hosts itself (public/films, 1080p, no sound, under the host's 25 MB a file), so they preload.
+   The home plays these; the link still opens the film's page. */
 export const FILM_FILES: Record<string, string> = { "Director's Reel": "/films/directors-reel.mp4", "Ladera Granola": "/films/ladera-granola.mp4" } satisfies Partial<Record<FilmTitle, string>>;
 export const FILM_PICKS = [
   ["Director's Reel", "Reel"],
@@ -46,7 +46,7 @@ export const FILM_PICKS = [
 ] as const satisfies readonly (readonly [title: string, kind: string])[];
 export type FilmTitle = (typeof FILM_PICKS)[number][0];
 
-/* Per-film dressing on the home (Julian, 2026-11-14). `zoom`: the frame is pushed in from its top left corner, poster and
+/* Per-film dressing on the home. `zoom`: the frame is pushed in from its top left corner, poster and
    preview alike, so the mark burnt into the bottom right corner of the video is cut. `mark`: the client logo, top right.
    `startSec`: the second the home's preview starts at, when it is not the film's own previewAt (picked in the Film start picker artifact). */
 export type FilmDress = { zoom?: number; startSec?: number; mark?: { src: string; w: number; h: number; name: string } };

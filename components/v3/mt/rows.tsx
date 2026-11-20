@@ -78,7 +78,7 @@ export function MtFilms({ films }: { films: MtFilm[] }) {
       if (mq.matches && document.documentElement.hasAttribute("data-mt-held")) {
         const r = sec.getBoundingClientRect();
         const p = Math.min(0.9999, progress(r.top, r.height, innerHeight, true));
-        // the hold eases in and out like Cover art's, so the first and last film take more of the scroll (Julian, 2026-11-18; ?mtsnap=0: the old even shares)
+        // the hold eases in and out like Cover art's, so the first and last film take more of the scroll (?mtsnap=0: even shares)
         return setCur(Math.floor((/[?&]mtsnap=0/.test(location.search) ? p : holdEase(p)) * items.length));
       }
       const a = items[0].getBoundingClientRect(), b = items[1].getBoundingClientRect();
@@ -112,7 +112,7 @@ export function MtFilms({ films }: { films: MtFilm[] }) {
   }, [cur]);
   const dress = FILM_DRESS[films[cur].title];
   return (
-    <section className="mt-held mt-motion" data-mt="motion" data-hold={films.length * 0.25 /* a quarter screen a film: Julian halved the 2 screens for four, 2026-11-17 */} data-cur={cur} style={{ "--n": films.length } as React.CSSProperties}>
+    <section className="mt-held mt-motion" data-mt="motion" data-hold={films.length * 0.25 /* a quarter screen a film */} data-cur={cur} style={{ "--n": films.length } as React.CSSProperties}>
       <div
         className="mt-stage"
         onFocus={(e) => {

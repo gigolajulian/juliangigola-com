@@ -29,7 +29,7 @@ export function MtHome({ data }: { data: MtData }) {
   const cards = React.useMemo<Cards>(() => ({ book: (k) => setBook(k), inquire: (from, opt) => (keep(), setInq({ from, opt })) }), []);
   const back = () => opener.current?.focus({ preventScroll: true });
   // Anchors (/sessions 308s to /#sessions; #about and #contact are linkable too): the screens take their heights after the browser's own anchor jump, so land again once they have.
-  // #contact is the footer, and arriving there opens the inquiry card its "Contact me" opens (Julian, 2026-11-18); closing hands focus to that button.
+  // #contact is the footer, and arriving there opens the inquiry card its "Contact me" opens; closing hands focus to that button.
   React.useEffect(() => {
     const target = () => (location.hash.length > 1 ? document.getElementById(location.hash.slice(1)) : null);
     const land = () => {
@@ -43,7 +43,7 @@ export function MtHome({ data }: { data: MtData }) {
       setInq({ from: "footer" });
     };
     const arrive = () => card(land());
-    // already on the home (Julian, 2026-11-18): a link to /#contact glides down to the footer, then opens the card.
+    // already on the home: a link to /#contact glides down to the footer, then opens the card.
     // Taken at the click: by the time a hash change is heard the browser has jumped there.
     const go = (e: MouseEvent) => {
       const a = (e.target as Element).closest<HTMLAnchorElement>("a[href]");
@@ -68,7 +68,7 @@ export function MtHome({ data }: { data: MtData }) {
       <MtIntro extras={data.extras} />
       <section className="v3 v3home mt" data-cards={inq ? "open" : undefined}>
         <MtHero frames={data.hero} extras={data.extras} />
-        {/* order (Julian, 2026-11-17): Motion, Cover art, About, Sessions, By quote, then Commissions */}
+        {/* order: Motion, Cover art, About, Sessions, By quote, then Commissions */}
         <MtFilms films={data.films} />
         <MtCovers />
         <MtAbout does={data.does} />
