@@ -10,6 +10,10 @@ export type MtFilm = { id: string; title: string; kind: string; client: string; 
 /** A count as two digits: 01, 02. */
 export const pad = (n: number) => String(n).padStart(2, "0");
 
+/** Where each run of MtData.extras goes: 0-15 the side columns (4 a column), 16-21 rows five and six of the locked columns,
+    22-29 those rows of the side columns, 30 on the intro pool. */
+export const EXTRAS = { perCol: 4, sides: 16, xrSides: 22, wall: 30 } as const;
+
 export type MtData = { hero: MtFrame[]; extras: MtFrame[]; comm: MtFrame[]; films: MtFilm[]; does: string[]; reply: string | null; stills: Record<string, string> };
 
 /* Julian's arranger save (save.json), in order. Key `<slug>/<NN>`. */
