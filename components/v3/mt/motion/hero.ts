@@ -1,4 +1,5 @@
-import { clamp, type Driver } from "./engine";
+import { qflag } from "@/lib/mtflags";
+import { clamp, type Ctx, type Driver } from "./engine";
 
 /* Hero wall travel (spec 3.2). Held (D): the wall travels up through the hold,
    each column trailing by its lag A, and the name block leaves once at the end.
@@ -24,7 +25,7 @@ const ink = (n: Node) => {
 /* ?mtdock=left (Julian 2026-11-15): no dock. The header keeps its links from the start with no
    ground under them, the name leaves to the left as the hero ends, and the header's ground comes in there. The bar's
    wordmark waits until the big name has gone (2026-11-16: "never together"; the header trial does that). */
-const LEFT = typeof location !== "undefined" && /[?&]mtdock=left/.test(location.search);
+const LEFT = qflag("mtdock", "left");
 /* With no ground over the hero the nav words sit on the wall: they flip white or black (nav-ink.ts; the flag turns
    ?navfx on in layout.tsx), and page text fades out under the bar there (the same file's text fade). */
 
@@ -40,10 +41,8 @@ function park(ctas: HTMLElement | null, on: boolean, why: "out" | "past" = "out"
   for (const a of ctas.querySelectorAll("a,button")) out ? a.setAttribute("tabindex", "-1") : a.removeAttribute("tabindex");
 }
 
-const states = new WeakMap<HTMLElement, State>();
-
 /* Phones and tablets pin the name too (hero.css). `?mtpin=0` brings back the name that scrolls away with the first screen. */
-const PIN = typeof location === "undefined" || !/[?&]mtpin=0/.test(location.search);
+const PIN = !qflag("mtpin", "0");
 
 /* The name's way out, the same on every layout: it rides down out of the window and is over as See the work's top edge enters it.
    2026-11-17, third pass: "too fast, needs to be longer and finish later". It takes the last three quarters of the scroll up to that point,
@@ -227,7 +226,6 @@ export const heroDrivers: Driver[] = [
         out: false,
         drop: 0,
       };
-      states.set(el, st);
       // "off": the hero runs and no name flies to the bar, so mtscroll.css keeps the bar's wordmark hidden until the name leaves
       document.documentElement.setAttribute("data-mtdock", "off");
       // by scroll, not by frame: a jump past the hero gets no hero frames
@@ -258,7 +256,7 @@ export const heroDrivers: Driver[] = [
       if (LEFT) document.documentElement.setAttribute("data-mtleft", "");
       if (!PIN) document.documentElement.setAttribute("data-mt-nopin", "");
       // The idle wall turns a card over to its next photo (hero.css). The value is the duration: hero.tsx reads it for the caption. `?mtflip=0` brings the hard cut back.
-      const flip = /[?&]mtflip=0/.test(location.search) ? 0 : FLIP;
+      const flip = qflag("mtflip", "0") ? 0 : FLIP;
       const ac = new AbortController();
       if (flip) {
         document.documentElement.setAttribute("data-mt-flip", String(flip));
@@ -268,7 +266,7 @@ export const heroDrivers: Driver[] = [
       addEventListener("scroll", past, { passive: true, signal: ac.signal });
       past();
       const look = window.setInterval(() => tone(st), 300); // the idle wall swaps a photo with no frame running
-      return () => {
+      const off = () => {
         clearInterval(look);
         ac.abort();
         document.documentElement.removeAttribute("data-mtleft");
@@ -287,79 +285,79 @@ export const heroDrivers: Driver[] = [
         clearance(st, false);
         document.documentElement.removeAttribute("data-mtdock");
       };
-    },
-    frame(p, el, ctx) {
-      const st = states.get(el);
-      if (!st) return;
-      const mode = ctx.held ? "d" : ctx.vw < 600 ? "p" : "t";
-      if (mode !== st.mode) {
-        st.mode = mode;
-        st.scroll = -1;
-        st.exit = -1;
-        [...st.cols, ...st.figs].forEach((x) => move(x, 0));
-        if (st.name) st.name.style.cssText = "";
-        park(st.ctas, false);
-        document.documentElement.removeAttribute("data-mt-nameout");
-        tone(st);
-        clearance(st, false);
-        st.sizeKey = "";
-      }
-
-      if (mode === "d") {
-        // the wall's own unit: big screens fit more columns by shrinking it (mtscroll.css), so measure it off a column, once a size
-        const at = ctx.vw + "x" + ctx.vh;
-        if (at !== st.sizeKey) {
-          st.sizeKey = at;
-          const core = st.cols.filter((c) => !c.el.classList.contains("side"));
-          st.unit = (core[0]?.el.offsetWidth ?? 0) / 403 || ctx.u;
-          // the lowest column end plus the 46 design px under it: 2640 with four rows
-          st.wall = core.length ? Math.max(...core.map((c) => c.el.offsetTop + c.el.offsetHeight)) / st.unit + 46 : WALL;
-          // how far the name has to sink to clear the window: from its top at rest to the window's lower edge, and 24px. It rode
-          // 0.6 of the window, and was out of sight well before the ride was over (Julian, 2026-11-17: "even longer, almost right before" the button)
-          if (st.texts[0]) st.drop = ctx.vh - (st.texts[0].getBoundingClientRect().top - Math.max(0, st.exit) * st.drop) + 24;
-        }
-        const u = st.unit;
-        // the ground under the last row is in the page's unit, like the button that sits in it
-        const target = p * Math.max(0, st.wall * u + TAIL * ctx.u - Math.max(ctx.vh, 600));
-        // a 0.64 follow (0.4 until Julian halved the delay a second time, 2026-11-17), frame-rate independent (the live Recent()'s 0.2 felt laggy here: Julian, 2026-11-17, "half the delay")
-        st.scroll = st.scroll < 0 || Math.abs(target - st.scroll) < 0.1 ? target : st.scroll + (target - st.scroll) * (1 - Math.pow(0.36, ctx.dt / 16.7));
-        const S = st.scroll;
-        /* Where the wall ends (Julian, 2026-11-15): with three columns the left one ends lowest and the right one
-           highest, a stair down to the left, so "See the work" on the right has the open corner. The markup's lags
-           ended it the other way round. Five and seven columns already end high on the right, so they keep theirs. */
-        const three = ctx.vw < 1920;
-        // a share of the travel, not of the distance: a tall window travels less and must still end on the same stair
-        const share = S / Math.max(1, st.wall * u + TAIL * ctx.u - Math.max(ctx.vh, 600));
-        for (const c of st.cols) move(c, -(S - (three && c.c in END_D ? share * END_D[c.c] * u : Math.min(S, LAG_MAX * u) * c.a * 0.5)));
-        /* Julian, 2026-11-16: "it needs to stay in place until 3 rows are scrolled and move down and out". The name
-           holds until the fourth row is whole in the window (its lower edge at the window's: "pinned to screen for
-           3-4 rows"), then rides down out of the window. 2026-11-17: "too quick, it needs to go out a bit slower with parallax": the ride takes
-           0.8 of a row, and the tagline and buttons sink ahead of the name (--mt-out, hero.css). Never later than the travel allows. */
-        // 2026-11-17, third pass: "too fast, needs to be longer and finish later". The ride is read off See the work: it is
-        // over as the button's top edge enters the window, and takes the last three quarters of the scroll up to that point.
-        // A soft start and then an even pace (t*t*(2-t)), not the s-curve whose middle ran at 1.5 times the scroll.
-        sink(st, ctx);
-        tone(st);
-        clearance(st, !st.out);
-        return;
-      }
-
-      // the columns lead upward, so nothing runs past the bottom of the wall
-      const gone = clamp(-ctx.top, 0, LAG_MAX);
-      if (mode === "p") for (const f of st.figs) move(f, -DRIFT[f.c] * clamp(gone / Math.max(1, ctx.h)));
-      else for (const c of st.cols) move(c, -gone * c.a * 0.5 * (ctx.vw / 1440));
-      /* Phones and tablets: the name block is sticky (hero.css), so it holds while the wall scrolls under it, then sinks out the desktop's way.
-         Julian, 2026-11-18: it scrolled away with the first screen. How far it sinks: from the name's top to the window's lower edge, and 24px. */
-      if (PIN && st.name && st.texts[0] && ctx.vw + "x" + ctx.vh !== st.sizeKey) {
-        st.sizeKey = ctx.vw + "x" + ctx.vh;
-        const b = st.name.getBoundingClientRect();
-        st.drop = b.height - (st.texts[0].getBoundingClientRect().top - b.top) + 24;
-      }
-      if (PIN) sink(st, ctx);
-      // phones and tablets too: captions ran through the name and tagline (MAC, 2026-11-17). Only while the name is on screen.
-      const on = PIN ? !st.out && el.getBoundingClientRect().bottom > 0 : -ctx.top < ctx.vh; // read before tone, as before the split
-      tone(st);
-      clearance(st, on);
+      return { frame: (p, el, ctx) => heroFrame(st, p, el, ctx), off };
     },
   },
 ];
+
+function heroFrame(st: State, p: number, el: HTMLElement, ctx: Ctx) {
+  const mode = ctx.held ? "d" : ctx.vw < 600 ? "p" : "t";
+  if (mode !== st.mode) {
+    st.mode = mode;
+    st.scroll = -1;
+    st.exit = -1;
+    [...st.cols, ...st.figs].forEach((x) => move(x, 0));
+    if (st.name) st.name.style.cssText = "";
+    park(st.ctas, false);
+    document.documentElement.removeAttribute("data-mt-nameout");
+    tone(st);
+    clearance(st, false);
+    st.sizeKey = "";
+  }
+
+  if (mode === "d") {
+    // the wall's own unit: big screens fit more columns by shrinking it (mtscroll.css), so measure it off a column, once a size
+    const at = ctx.vw + "x" + ctx.vh;
+    if (at !== st.sizeKey) {
+      st.sizeKey = at;
+      const core = st.cols.filter((c) => !c.el.classList.contains("side"));
+      st.unit = (core[0]?.el.offsetWidth ?? 0) / 403 || ctx.u;
+      // the lowest column end plus the 46 design px under it: 2640 with four rows
+      st.wall = core.length ? Math.max(...core.map((c) => c.el.offsetTop + c.el.offsetHeight)) / st.unit + 46 : WALL;
+      // how far the name has to sink to clear the window: from its top at rest to the window's lower edge, and 24px. It rode
+      // 0.6 of the window, and was out of sight well before the ride was over (Julian, 2026-11-17: "even longer, almost right before" the button)
+      if (st.texts[0]) st.drop = ctx.vh - (st.texts[0].getBoundingClientRect().top - Math.max(0, st.exit) * st.drop) + 24;
+    }
+    const u = st.unit;
+    // the ground under the last row is in the page's unit, like the button that sits in it
+    const target = p * Math.max(0, st.wall * u + TAIL * ctx.u - Math.max(ctx.vh, 600));
+    // a 0.64 follow (0.4 until Julian halved the delay a second time, 2026-11-17), frame-rate independent (the live Recent()'s 0.2 felt laggy here: Julian, 2026-11-17, "half the delay")
+    st.scroll = st.scroll < 0 || Math.abs(target - st.scroll) < 0.1 ? target : st.scroll + (target - st.scroll) * (1 - Math.pow(0.36, ctx.dt / 16.7));
+    const S = st.scroll;
+    /* Where the wall ends (Julian, 2026-11-15): with three columns the left one ends lowest and the right one
+       highest, a stair down to the left, so "See the work" on the right has the open corner. The markup's lags
+       ended it the other way round. Five and seven columns already end high on the right, so they keep theirs. */
+    const three = ctx.vw < 1920;
+    // a share of the travel, not of the distance: a tall window travels less and must still end on the same stair
+    const share = S / Math.max(1, st.wall * u + TAIL * ctx.u - Math.max(ctx.vh, 600));
+    for (const c of st.cols) move(c, -(S - (three && c.c in END_D ? share * END_D[c.c] * u : Math.min(S, LAG_MAX * u) * c.a * 0.5)));
+    /* Julian, 2026-11-16: "it needs to stay in place until 3 rows are scrolled and move down and out". The name
+       holds until the fourth row is whole in the window (its lower edge at the window's: "pinned to screen for
+       3-4 rows"), then rides down out of the window. 2026-11-17: "too quick, it needs to go out a bit slower with parallax": the ride takes
+       0.8 of a row, and the tagline and buttons sink ahead of the name (--mt-out, hero.css). Never later than the travel allows. */
+    // 2026-11-17, third pass: "too fast, needs to be longer and finish later". The ride is read off See the work: it is
+    // over as the button's top edge enters the window, and takes the last three quarters of the scroll up to that point.
+    // A soft start and then an even pace (t*t*(2-t)), not the s-curve whose middle ran at 1.5 times the scroll.
+    sink(st, ctx);
+    tone(st);
+    clearance(st, !st.out);
+    return;
+  }
+
+  // the columns lead upward, so nothing runs past the bottom of the wall
+  const gone = clamp(-ctx.top, 0, LAG_MAX);
+  if (mode === "p") for (const f of st.figs) move(f, -DRIFT[f.c] * clamp(gone / Math.max(1, ctx.h)));
+  else for (const c of st.cols) move(c, -gone * c.a * 0.5 * (ctx.vw / 1440));
+  /* Phones and tablets: the name block is sticky (hero.css), so it holds while the wall scrolls under it, then sinks out the desktop's way.
+     Julian, 2026-11-18: it scrolled away with the first screen. How far it sinks: from the name's top to the window's lower edge, and 24px. */
+  if (PIN && st.name && st.texts[0] && ctx.vw + "x" + ctx.vh !== st.sizeKey) {
+    st.sizeKey = ctx.vw + "x" + ctx.vh;
+    const b = st.name.getBoundingClientRect();
+    st.drop = b.height - (st.texts[0].getBoundingClientRect().top - b.top) + 24;
+  }
+  if (PIN) sink(st, ctx);
+  // phones and tablets too: captions ran through the name and tagline (MAC, 2026-11-17). Only while the name is on screen.
+  const on = PIN ? !st.out && el.getBoundingClientRect().bottom > 0 : -ctx.top < ctx.vh; // read before tone, as before the split
+  tone(st);
+  clearance(st, on);
+}

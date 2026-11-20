@@ -1,7 +1,8 @@
 import { scrollGoal, settleTo, shiftScroll } from "@/components/v3/smooth-scroll";
+import { qflag, qvalue } from "@/lib/mtflags";
 import { holdEase as ease, holdUnease as unease } from "@/lib/motion/hold-ease";
 import { captionsOff, vimeoListen, vimeoPlays } from "@/lib/videos";
-import { RISE, clamp, smooth, type Ctx, type Driver } from "./engine";
+import { clamp, rise, smooth, type Ctx, type Driver, type MtSection } from "./engine";
 import { sleeveTilt } from "./sleeve-tilt";
 import { tp } from "./touch-parity";
 
@@ -10,7 +11,7 @@ import { tp } from "./touch-parity";
    nearest one. Within a step of the item it rested on it leans 0.44 of a step the way the scroll went, so one wheel notch (100px, a small part of a step) moves on instead of
    falling back; ?mtsnap=near is plain nearest. `at`: the hold's share as an item position; `share`: an item's resting share of the hold. */
 function snap(el: HTMLElement, ctx: Ctx, n: number, at: (p: number) => number, share: (i: number) => number, busy: () => boolean, signal: AbortSignal) {
-  const m = /[?&]mtsnap=(\w+)/.exec(location.search)?.[1];
+  const m = qvalue("mtsnap");
   if (m === "0" || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   const lean = m === "near" ? 0 : 0.44;
   let t = 0, rest = NaN; // the item position the page last settled on; NaN outside the hold, so arriving is plain nearest
@@ -39,11 +40,9 @@ function snap(el: HTMLElement, ctx: Ctx, n: number, at: (p: number) => number, s
    sideways. Motion (spec 3.8): a vertical stack there, see films() below.
    Everywhere else the native snap rows stay. */
 
-function heldRow(name: string): Driver {
-  let frame: (p: number) => void = () => {};
+function heldRow(name: MtSection): Driver {
   return {
     name,
-    frame: (p) => frame(p),
     setup(el, ctx) {
       const row = el.querySelector<HTMLElement>(".mt-row");
       if (!row) return;
@@ -58,10 +57,10 @@ function heldRow(name: string): Driver {
 
       /* The V4 default since 2026-11-15 (Julian: "turn on the parallax by default"), ?mtpar=0 turns it off: the heading and the row ride up at their own
          rates and the stage hands over to Motion (rows.css). The pile the covers were dealt from is gone (Julian, 2026-11-17). */
-      const par = !/[?&]mtpar=0/.test(location.search);
+      const par = !qflag("mtpar", "0");
       if (par) document.documentElement.setAttribute("data-mt-par", "");
       // kept (Julian, 2026-11-17: "keep the lid"), ?mtlid=0 turns it off: Cover art waits under Commissions, which lifts off it like a lid (rows.css)
-      if (par) document.documentElement.toggleAttribute("data-mt-lid", !/[?&]mtlid=0/.test(location.search));
+      if (par) document.documentElement.toggleAttribute("data-mt-lid", !qflag("mtlid", "0"));
       const measure = () => {
         // flow.css scales the row as it enters and settles: measure it at rest
         row.style.transform = "none";
@@ -88,7 +87,7 @@ function heldRow(name: string): Driver {
         if (!ctx.held) discs(row.scrollLeft, step / 2);
       };
 
-      frame = (p) => {
+      const frame = (p: number) => {
         // the first record starts inside its sleeve and comes out over the first 5% of the hold (Julian, 2026-11-15)
         const k = smooth(clamp(p / 0.05));
         p = ease(p);
@@ -108,7 +107,7 @@ function heldRow(name: string): Driver {
       // The title line rises when held-row.tsx commits the new item (on touch too with ?mttp=covers). A turned sleeve turns back.
       const mo = new MutationObserver(() => {
         for (const it of items) it.removeAttribute("data-tp-fl");
-        if (ctx.held || tp("covers")) el.querySelector(".mt-ttl .ln > span")?.animate([{ transform: "translateY(110%)" }, { transform: "none" }], RISE);
+        if (ctx.held || tp("covers")) rise(el.querySelector(".mt-ttl .ln > span"));
       });
       mo.observe(el, { attributeFilter: ["data-cur"] });
 
@@ -145,7 +144,7 @@ function heldRow(name: string): Driver {
 
       // Tab to a film: the browser scrolls the hidden row to show it. Put that back and move the page there instead.
       row.addEventListener("focusin", (e) => {
-        const t = e.target as Element, i = items.indexOf(t.closest<HTMLElement>(".mt-item")!);
+        const t = e.target as Element, it = t.closest<HTMLElement>(".mt-item"), i = it ? items.indexOf(it) : -1;
         if (!ctx.held || i < 0 || !t.matches(":focus-visible")) return;
         row.scrollLeft = base;
         shiftScroll(top() + unease(i / (n - 1)) * range - scrollY);
@@ -185,10 +184,9 @@ function heldRow(name: string): Driver {
 
       measure();
       loose();
-      return () => {
+      const off = () => {
         ac.abort();
         mo.disconnect();
-        frame = () => {};
         track.style.transform = "";
         if (par) for (const k of ["data-mt-par", "data-mt-lid"]) document.documentElement.removeAttribute(k);
         for (const it of items) {
@@ -196,6 +194,7 @@ function heldRow(name: string): Driver {
           it.style.setProperty("--o", "0.5");
         }
       };
+      return { frame, off };
     },
   };
 }
@@ -343,7 +342,7 @@ function films(): Driver {
       const mo = new MutationObserver(() => {
         cur = +(el.dataset.cur ?? 0);
         preview();
-        if (ctx.held || touchFilms) el.querySelector(".mt-ttl .ln > span")?.animate([{ transform: "translateY(110%)" }, { transform: "none" }], RISE);
+        if (ctx.held || touchFilms) rise(el.querySelector(".mt-ttl .ln > span"));
       });
       mo.observe(el, { attributeFilter: ["data-cur"] });
 

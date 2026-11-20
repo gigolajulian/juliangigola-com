@@ -6,8 +6,8 @@ import { REEL, posterFor, previewUrl } from "@/lib/videos";
 import { RESPONSE_TIME } from "@/lib/site";
 
 /* `?mtscroll=1` (v4 home): the frames resolved on the server so lib/work stays out of the client. */
-// the home's own start second for a film's preview, where one was picked (FILM_DRESS.at)
-const at = (title: string) => (FILM_DRESS[title]?.at === undefined ? {} : { previewAt: FILM_DRESS[title]?.at });
+// the home's own start second for a film's preview, where one was picked (FILM_DRESS.startSec)
+const at = (title: string) => (FILM_DRESS[title]?.startSec === undefined ? {} : { previewAt: FILM_DRESS[title]?.startSec });
 const frame = (key: string): MtFrame => {
   const [slug, n] = key.split("/");
   const p = getProject(slug);

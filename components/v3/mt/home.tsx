@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import type { MtData, BookRow, QuoteOpt } from "./data";
-import { CardsCtx, type Cards, type InquiryFrom } from "./ctx";
+import { CardsCtx, type Cards, type InquiryMode } from "./ctx";
 import { MtHero } from "./hero";
 import { MtCommissions } from "./commissions";
 import { MtCovers, MtFilms } from "./rows";
@@ -19,10 +19,10 @@ import { glideTo } from "@/components/v3/smooth-scroll";
    state, with MtIntro and MtMotionLayer on top. Motion hooks: MOTION-HOOKS.md. */
 
 export function MtHome({ data }: { data: MtData }) {
-  const [book, setBook] = React.useState<BookRow["key"] | null>(null);
-  const [inq, setInq] = React.useState<{ from: InquiryFrom; opt?: QuoteOpt["key"] } | null>(null);
-  // the booking photo follows the last row touched in either list: a quote option's index, or null for the sessions
-  const [quotePhoto, setQuotePhoto] = React.useState<number | null>(null);
+  const [book, setBook] = React.useState<BookRow["slug"] | null>(null);
+  const [inq, setInq] = React.useState<{ from: InquiryMode; opt?: QuoteOpt["key"] } | null>(null);
+  // the booking photo follows the last row touched in either list: a quote option's key, or null for the sessions
+  const [quotePhoto, setQuotePhoto] = React.useState<QuoteOpt["key"] | null>(null);
   // The control that opened a card gets focus back when it closes (spec 3.6, 3.11).
   const opener = React.useRef<HTMLElement | null>(null);
   const keep = () => (opener.current = document.activeElement as HTMLElement | null);
@@ -72,7 +72,7 @@ export function MtHome({ data }: { data: MtData }) {
         <MtFilms films={data.films} />
         <MtCovers />
         <MtAbout does={data.does} />
-        <MtBookOnline open={book} onOpen={setBook} onClose={() => setBook(null)} quotePhoto={quotePhoto} onRowPick={() => setQuotePhoto(null)} />
+        <MtBookOnline open={book} onClose={() => setBook(null)} quotePhoto={quotePhoto} onRowPick={() => setQuotePhoto(null)} />
         <MtByQuote stills={data.stills} reply={data.reply} onOptionPick={setQuotePhoto} />
         <MtCommissions frames={data.comm} />
         <MtFoot />

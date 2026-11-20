@@ -42,7 +42,7 @@ function TimesDown({ title, className, retry, again }: { title: string; classNam
 
 /** The site's own time picker for `path`. `className` sizes the box.
     `v3`: the JG V3 stepper. */
-export function BookTimes({ path, title, className, v3 }: { path: string; title: string; className?: string; v3?: V3Book }) {
+export function BookTimes({ path, title, className, v3, startView }: { path: string; title: string; className?: string; v3?: V3Book; startView?: "week" | "month" }) {
   // Try again mounts a fresh picker, which asks for the times anew.
   const [tries, setTries] = React.useState(0);
   // The picker reads the visitor's zone and clock: it mounts on the client only.
@@ -54,5 +54,5 @@ export function BookTimes({ path, title, className, v3 }: { path: string; title:
   // The picker's Continue bar, held off, from the first paint (time-picker.tsx).
   if (!mounted) return wrap(<div aria-label={title} className={className} />, <button type="button" className="btn fill" disabled>Continue</button>);
   const down = <TimesDown title={title} className={className} retry={() => setTries((n) => n + 1)} again={tries > 0} />;
-  return <TimePicker key={tries} path={path} title={title} className={className} fallback={down} v3={v3} />;
+  return <TimePicker key={tries} path={path} title={title} className={className} fallback={down} v3={v3} startView={startView} />;
 }
