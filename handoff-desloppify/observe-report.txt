@@ -1,0 +1,579 @@
+OBSERVE: all 94 open review issues checked against the current tree (HEAD 2c765a0d, branch desloppify/round-8). I read every file in components/v3/mt (all drivers in motion/, every section .tsx, data.ts, ctx.ts, gate.tsx, next-open.ts, intro/index.tsx, MOTION-HOOKS.md), plus the CSS selectors, app/layout.tsx head script, next.config.ts rewrite, package.json, components/vendor, components/cover/cover-art-gallery.tsx, use-picker.tsx and the mt tests. Ids below are dimension::name (three names repeat across dimensions).
+
+Key finding: the code has moved since the review. hero.ts is 367 lines and the name-dock spring (Dock/Geo types, dockSetup/Measure/Frame/Off, far()) is already gone; only data-mtdock="off" and the ?mtdock=left trial remain. The by-quote 5s interval is already gated on ?mtask=1. intro run() already has the throw-safe try/catch. motion ^13 is used by components/vendor. So those items are false positive or exaggerated.
+
+Tally: 69 genuine, 6 false-positive, 9 exaggerated (real residue, overstated), 0 over-engineering, 10 not-worth-it. Real = 78 (genuine + exaggerated), false positive 6, not worth fixing 10.
+
+Owner-decision flags (behaviour or flags, not defects): deleting ?mtdock=left, ?splash=1 flat intro, ?mtpar/?mtlid/?mtflip/?mthover/?mtask rollback paths, moving the quote/commissions rotation into React.
+
+- hash: abstraction_fitness::about_driver_bypasses_ctx_box
+  verdict: genuine
+  verdict_reasoning: about.ts:42 rebuilds top as ctx.vh - p*(m.h+ctx.vh), inverting engine.ts:118 un-held p; m.h comes from its own ResizeObserver (line 18). engine.ts:26 says drivers read ctx.top/h, and the engine sets them (115-116) before each frame.
+  files_read: [components/v3/mt/motion/about.ts, components/v3/mt/motion/engine.ts]
+  recommendation: Use ctx.top, drop m.h. Behaviour-identical, small.
+
+- hash: abstraction_fitness::bookrow_key_duplicates_slug
+  verdict: genuine
+  verdict_reasoning: data.ts:69-74 every BOOK_ROWS entry has key === slug. home.tsx and foot.tsx use key, book-online.tsx uses both (r.slug for flow, x.key for data-on).
+  files_read: [components/v3/mt/data.ts, components/v3/mt/book-online.tsx, components/v3/mt/home.tsx, components/v3/mt/foot.tsx, components/v3/mt/ctx.ts]
+  recommendation: Drop key, narrow slug with Extract<SessionSlug,...>. Also update tests/components/mt-home-flows.test.tsx:33 which reads BOOK_ROWS[1].key.
+
+- hash: abstraction_fitness::hero_state_dead_fields
+  verdict: genuine
+  verdict_reasoning: hero.ts:16 State has bar and row. bar is set at :229 and never read (hdr is queried again at :239). row is written at :321 and never read (grep st.row finds only the write).
+  files_read: [components/v3/mt/motion/hero.ts]
+  recommendation: Delete both fields, the setup values and lines 319-321.
+
+- hash: ai_generated_debt::changelog_in_comments_hero_motion
+  verdict: genuine
+  verdict_reasoning: hero.ts:10, 12, 49-50, 329, 339-345 carry dates, names and old values; 343-345 repeat 48-50 word for word. foot.ts:188 and intro:16, 37 do the same.
+  files_read: [components/v3/mt/motion/hero.ts, components/v3/mt/motion/foot.ts, components/v3/mt/intro/index.tsx]
+  recommendation: One line of current rule per constant. Comment-only, so pair it with a code fix in the same file or it rewords and reopens.
+
+- hash: ai_generated_debt::herostill_duplicates_setup_queries
+  verdict: genuine
+  verdict_reasoning: heroStill (hero.ts:193-199) copies setup's caps/tw/phs/texts/ctas queries (216-220) verbatim, with broken indentation at 195-196.
+  files_read: [components/v3/mt/motion/hero.ts]
+  recommendation: One parts(el) spread into both.
+
+- hash: ai_generated_debt::retired_dock_spring_still_wired
+  verdict: false-positive
+  verdict_reasoning: The ~130 lines of spring code are gone. No Dock/Geo types, dock functions, far() or st.dock in hero.ts. What is left: data-mtdock="off" set at :236 and removed at :291, read by mtscroll.css:14 to keep the bar wordmark hidden. That attribute is live, not dead.
+  files_read: [components/v3/mt/motion/hero.ts, app/styles/mtscroll.css, components/v3/mt/motion/hero.css]
+  recommendation: Close. The leftover attribute rename belongs with convention_outlier::root_attr_prefix_drift.
+
+- hash: ai_generated_debt::stale_comments_contradict_intro_values
+  verdict: genuine
+  verdict_reasoning: intro:33-34 says the push overshoots and settles, but DEEP_OVER=0 (:37). :134 still says "scale .46", but S0=.56. :410 says "carries a touch past". :431-432 are two comments for one line. The line numbers in the issue have shifted, the text is the same.
+  files_read: [components/v3/mt/intro/index.tsx]
+  recommendation: Fix together with logic_clarity::intro_deep_over_dead_settle so code and comment change in one step.
+
+- hash: api_surface_coherence::cards_opener_asymmetry
+  verdict: genuine
+  verdict_reasoning: Cards.book is used only by foot.tsx:85. MtBookOnline gets its own onOpen={setBook} (home.tsx:75), so there are two openers. InquiryFrom "quote" is also what the footer Inquire links pass (foot.tsx:79), so the name does not say where the call came from.
+  files_read: [components/v3/mt/ctx.ts, components/v3/mt/home.tsx, components/v3/mt/foot.tsx, components/v3/mt/book-online.tsx]
+  recommendation: Fix with mid_level_elegance::two_booking_open_channels and contract_coherence::cards_book_no_opener_focus as one change.
+
+- hash: api_surface_coherence::ctx_liveness_implicit
+  verdict: not-worth-it
+  verdict_reasoning: Real (one shared ctx mutated per section at engine.ts:115-116), but listeners only read vw/vh/held/fine/y, which are global. No reader of top/h outside frame was found.
+  files_read: [components/v3/mt/motion/engine.ts, components/v3/mt/motion/depth.ts, components/v3/mt/motion/rows.ts]
+  recommendation: Skip, or add two comment lines if engine.ts is touched anyway.
+
+- hash: api_surface_coherence::driver_setup_frame_state_smuggling
+  verdict: genuine
+  verdict_reasoning: Driver.setup returns only a cleanup (engine.ts:37). foot.ts:10 bridges through a module `tick`, heldRow reassigns a closure `frame` (rows.ts:43,91), quote/commissions/about use module objects. Two sections with one name would share state.
+  files_read: [components/v3/mt/motion/engine.ts, components/v3/mt/motion/foot.ts, components/v3/mt/motion/rows.ts, components/v3/mt/motion/quote.ts, components/v3/mt/motion/commissions.ts, components/v3/mt/motion/about.ts]
+  recommendation: This is the root of the driver-state cluster. Let setup return { frame?, off? } and store it per section.
+
+- hash: api_surface_coherence::quote_photo_index_not_key
+  verdict: genuine
+  verdict_reasoning: by-quote.tsx:45 onOptionPick(i), home.tsx:25 holds number|null, book-online.tsx:135 matches q === i against QUOTE_OPTS order.
+  files_read: [components/v3/mt/by-quote.tsx, components/v3/mt/home.tsx, components/v3/mt/book-online.tsx]
+  recommendation: Pass QuoteOpt["key"]. Update mt-home-flows.test.tsx:49, which asserts index 1.
+
+- hash: authorization_consistency::slots_query_partial_encoding
+  verdict: genuine
+  verdict_reasoning: next-open.ts:22 interpolates ev raw and encodes only timeZone. ev comes from SESSIONS config, not user input, so there is no injection risk. It is a consistency nit.
+  files_read: [components/v3/mt/next-open.ts]
+  recommendation: Trivial: use URLSearchParams. Low priority.
+
+- hash: contract_coherence::cards_book_no_opener_focus
+  verdict: genuine
+  verdict_reasoning: inquire calls keep() (home.tsx:29), book does not. When a booking opened from the footer closes, book-online.tsx:78 focuses rows.current[at] in Sessions, far from the footer button that opened it.
+  files_read: [components/v3/mt/home.tsx, components/v3/mt/book-online.tsx, components/v3/mt/foot.tsx]
+  recommendation: Fix with the opener cluster.
+
+- hash: contract_coherence::covers_nonnull_then_filter
+  verdict: genuine
+  verdict_reasoning: rows.tsx:12 `.find(...)!).filter(Boolean)`: the assertion and the filter contradict each other.
+  files_read: [components/v3/mt/rows.tsx, components/v3/mt/data.ts]
+  recommendation: Type-guard filter. One line. Close together with type_safety::covers_nonnull_then_filter and logic_clarity::covers_assert_then_filter.
+
+- hash: contract_coherence::ctx_top_bypassed
+  verdict: genuine
+  verdict_reasoning: about.ts:42 as above. rows.tsx:76-80 MtFilms recomputes held p from getBoundingClientRect and html[data-mt-held] instead of using the engine's value.
+  files_read: [components/v3/mt/motion/about.ts, components/v3/mt/rows.tsx, components/v3/mt/motion/engine.ts]
+  recommendation: about part is small. The MtFilms part goes with mid_level_elegance::current_item_round_trip.
+
+- hash: contract_coherence::driver_state_singletons
+  verdict: genuine
+  verdict_reasoning: Counted: module objects in about.ts:5, commissions.ts:11, quote.ts:12; a module tick in foot.ts:10; a WeakMap in hero.ts:43; factory closures in rows.ts heldRow and bars.ts. That is three patterns.
+  files_read: [components/v3/mt/motion/about.ts, components/v3/mt/motion/commissions.ts, components/v3/mt/motion/quote.ts, components/v3/mt/motion/foot.ts, components/v3/mt/motion/hero.ts, components/v3/mt/motion/rows.ts, components/v3/mt/motion/bars.ts]
+  recommendation: Duplicate of api_surface_coherence::driver_setup_frame_state_smuggling. One fix.
+
+- hash: contract_coherence::inquiry_card_duplicates_option_data
+  verdict: genuine
+  verdict_reasoning: inquiry-card.tsx:18 CALL_CHIP="Music video" and :80 hardcodes router.push("/book/music-photography"), which QUOTE_OPTS music.call already holds. :65 special-cases fashion to "editorial" because fashion has chips:[].
+  files_read: [components/v3/mt/inquiry-card.tsx, components/v3/mt/data.ts]
+  recommendation: Use opt.call and a default type on QuoteOpt. Keep the existing mt-inquiry-card test green.
+
+- hash: contract_coherence::quote_option_key_vs_index
+  verdict: genuine
+  verdict_reasoning: Cards.inquire takes o.key, but onOptionPick takes an index. by-quote.tsx:72 slice(0,3) and :81 pick(3)/sel===3 hardcode Weddings as the 4th option, with its holds text duplicated at :83.
+  files_read: [components/v3/mt/by-quote.tsx, components/v3/mt/data.ts, components/v3/mt/book-online.tsx]
+  recommendation: One key-not-index fix with api_surface_coherence::quote_photo_index_not_key and type_safety::quote_option_magic_index.
+
+- hash: contract_coherence::title_keyed_data_maps
+  verdict: genuine
+  verdict_reasoning: data.ts:21 COVER_PRESS is Partial<Record<string,string>>, :35 FILM_FILES is Record<string,string>, :47 FILM_DRESS is keyed by title. None has a type link to COVER_KEYS or FILM_PICKS.
+  files_read: [components/v3/mt/data.ts, lib/mt-home-data.ts]
+  recommendation: Low: `as const` plus union keys. Same as type_safety::film_dress_keyed_by_title.
+
+- hash: convention_outlier::react_text_node_write_twice
+  verdict: genuine
+  verdict_reasoning: commissions.ts:12-15 put() and quote.ts:14-19 write() both do (n.firstChild as Text).data = ..., each with the same "keep React's own text node" comment.
+  files_read: [components/v3/mt/motion/commissions.ts, components/v3/mt/motion/quote.ts]
+  recommendation: Export put from engine.ts.
+
+- hash: convention_outlier::rise_keyframes_repeated
+  verdict: genuine
+  verdict_reasoning: The same [{translateY(110%)},{none}] keyframes with RISE appear at rows.ts:111, rows.ts:346 and commissions.ts:35. That is three sites.
+  files_read: [components/v3/mt/motion/rows.ts, components/v3/mt/motion/commissions.ts, components/v3/mt/motion/engine.ts]
+  recommendation: Add rise(el) to engine.ts.
+
+- hash: convention_outlier::root_attr_prefix_drift
+  verdict: genuine
+  verdict_reasoning: hero.ts sets data-mtdock and data-mtleft, quote.ts sets data-mtask, while the others are data-mt-*. The CSS readers are mtscroll.css:14, hero.css:11-12 and quote.css:15-18.
+  files_read: [components/v3/mt/motion/hero.ts, components/v3/mt/motion/quote.ts, app/styles/mtscroll.css, components/v3/mt/motion/hero.css, components/v3/mt/motion/quote.css]
+  recommendation: Rename only as part of the flag-reader change. Alone it is churn.
+
+- hash: convention_outlier::url_flag_regex_island
+  verdict: genuine
+  verdict_reasoning: mt reads location.search with regexes at about 15 sites. The site's head script and the rest of components use other patterns.
+  files_read: [components/v3/mt/motion/hero.ts, components/v3/mt/motion/rows.ts, components/v3/mt/rows.tsx, components/v3/mt/hero.tsx, components/v3/mt/by-quote.tsx, components/v3/mt/motion/quote.ts, components/v3/mt/intro/index.tsx, app/layout.tsx]
+  recommendation: Fold into the single flag reader. Do not rename idle or intro without the owner, since the live head script shares intro and splash.
+
+- hash: cross_module_architecture::components_read_driver_html_attrs
+  verdict: genuine
+  verdict_reasoning: hero.tsx:26 flipMs reads html[data-mt-flip], which motion/hero.ts:268 writes from the FLIP constant at :12. rows.tsx:76 and :121 read html[data-mt-held], which engine.ts:84 writes.
+  files_read: [components/v3/mt/hero.tsx, components/v3/mt/motion/hero.ts, components/v3/mt/rows.tsx, components/v3/mt/motion/engine.ts]
+  recommendation: Export FLIP and read the flip flag once. Keep the flip behaviour identical.
+
+- hash: cross_module_architecture::depth_driver_crosses_section
+  verdict: not-worth-it
+  verdict_reasoning: True: depth.ts:12 reaches .mt-sheet in Commissions through closest('.mt'). The reach is 40 clear lines with one consumer switch. A second driver plus shared state adds more than it removes.
+  files_read: [components/v3/mt/motion/depth.ts]
+  recommendation: Skip.
+
+- hash: cross_module_architecture::gate_contract_stale_three_paths
+  verdict: genuine
+  verdict_reasoning: gate.tsx:8-11 says ?mtscroll=1 swaps v4 in on the client. next.config.ts:465-466 now rewrites /?mtscroll=1 to /home-v4 on the server. The gate only serves the sessionStorage path.
+  files_read: [components/v3/mt/gate.tsx, next.config.ts, app/page.tsx, app/home-v4/page.tsx, lib/mtscroll.ts]
+  recommendation: Fix the header comment (trivial). Deleting the gate is a later V4_HOME ship step, owner call.
+
+- hash: cross_module_architecture::scattered_query_flag_parsing
+  verdict: genuine
+  verdict_reasoning: Counted flag reads: hero.ts (mtdock=left :27, mtpin :46, mtflip :265), rows.ts (mtsnap :13, mtpar :61, mtlid :64), rows.tsx (mtpar :65, mtsnap :80 and :120), quote.ts mtask :27, by-quote.tsx mtask :37, hero.tsx idle :67, intro (intro x4, splash, preload). mtpar is parsed twice, mtsnap three times, mtask twice.
+  files_read: [components/v3/mt/motion/hero.ts, components/v3/mt/motion/rows.ts, components/v3/mt/rows.tsx, components/v3/mt/motion/quote.ts, components/v3/mt/by-quote.tsx, components/v3/mt/hero.tsx, components/v3/mt/intro/index.tsx]
+  recommendation: Root of the flag cluster. One reader, every flag and default unchanged.
+
+- hash: dependency_health::rows_bundles_full_cover_dataset
+  verdict: not-worth-it
+  verdict_reasoning: rows.tsx:6 imports COVER_RELEASES into the client chunk to pick 8 covers. The size cost is small and the gallery already ships the same data. The '!' half is covered by contract_coherence::covers_nonnull_then_filter.
+  files_read: [components/v3/mt/rows.tsx, lib/mt-home-data.ts]
+  recommendation: Skip the server move. Close with the covers fix.
+
+- hash: dependency_health::unused_motion_dependency
+  verdict: false-positive
+  verdict_reasoning: motion is imported by components/vendor/status-mark.jsx:2 and tilted-card.jsx:4 (motion/react), which components/contact-form.tsx:10 and components/lightbox.tsx:9 use.
+  files_read: [package.json, components/vendor/status-mark.jsx, components/vendor/tilted-card.jsx, components/contact-form.tsx, components/lightbox.tsx]
+  recommendation: Close. Removing motion would break /contact and the lightbox.
+
+- hash: design_coherence::adhoc_query_flags
+  verdict: genuine
+  verdict_reasoning: Same flag count as cross_module_architecture::scattered_query_flag_parsing. The "remove decided trials" half is an owner decision.
+  files_read: [components/v3/mt/motion/hero.ts, components/v3/mt/motion/rows.ts, components/v3/mt/rows.tsx, components/v3/mt/intro/index.tsx]
+  recommendation: Same as the flag reader. Do not remove branches.
+
+- hash: design_coherence::driver_state_three_patterns
+  verdict: genuine
+  verdict_reasoning: Same as contract_coherence::driver_state_singletons, verified pattern by pattern.
+  files_read: [components/v3/mt/motion/about.ts, components/v3/mt/motion/commissions.ts, components/v3/mt/motion/quote.ts, components/v3/mt/motion/foot.ts, components/v3/mt/motion/hero.ts, components/v3/mt/motion/rows.ts, components/v3/mt/motion/bars.ts]
+  recommendation: Duplicate of the driver-state root.
+
+- hash: design_coherence::extras_positional_contract
+  verdict: genuine
+  verdict_reasoning: hero.tsx:64 slice(16), :97 extras[16+..], :98 extras[k*4+r] and extras[22+..]. intro:468 from = rows6 ? 30 : 16. lib/mt-home-data.ts:26 describes the same layout. XR is [] (hero.tsx:19), so the 16+ and 22+ xr branches are unreachable today.
+  files_read: [components/v3/mt/hero.tsx, components/v3/mt/intro/index.tsx, lib/mt-home-data.ts]
+  recommendation: Name the ranges once in data.ts. Note the dead XR branch, but take it out only if XR stays empty, since rows five and six were an owner tweak.
+
+- hash: design_coherence::films_driver_player_pool
+  verdict: genuine
+  verdict_reasoning: rows.ts films() lines 205-366 holds a preview pool, YouTube/Vimeo postMessage and a message listener inside the motion driver. The postMessage protocol already partly lives in lib/videos.
+  files_read: [components/v3/mt/motion/rows.ts, lib/videos.ts]
+  recommendation: Medium. Extract the previews helper only with a test, because preview timing is motion the owner judges by eye.
+
+- hash: design_coherence::hero_driver_god_module
+  verdict: exaggerated
+  verdict_reasoning: The dock concern the issue names is gone. hero.ts is 367 lines: wall travel, sink, tone grid (~100 lines, 70-169), clearance and tab-order sweep. The tone grid is the one clean seam.
+  files_read: [components/v3/mt/motion/hero.ts]
+  recommendation: Optionally move grid/tone/clearance to hero-tone.ts. Do not split further.
+
+- hash: design_coherence::hero_state_dead_fields
+  verdict: genuine
+  verdict_reasoning: Same verification as abstraction_fitness::hero_state_dead_fields.
+  files_read: [components/v3/mt/motion/hero.ts]
+  recommendation: Duplicate. One deletion closes all three ids.
+
+- hash: design_coherence::intro_run_monolith
+  verdict: exaggerated
+  verdict_reasoning: Geometry is already extracted: canvasOf (106-143), tilesOf and fitExtras are pure functions. run() is a 10-line wrapper. build() (276-463) is about 185 lines of DOM building and timing, and PUSH/DEEP_* still sit outside the pace tables.
+  files_read: [components/v3/mt/intro/index.tsx]
+  recommendation: At most fold PUSH/DEEP_PUSH/DEEP_LAND into FULL/SHORT and pull the JG block out of build. Timing must stay identical.
+
+- hash: error_consistency::intro_run_throw_leaves_page_locked
+  verdict: false-positive
+  verdict_reasoning: intro:265-275 already wraps build() in try { } catch (e) { finish(false); throw e; }, and the comment says so. finish undoes the lock, inert state, animations and made nodes.
+  files_read: [components/v3/mt/intro/index.tsx]
+  recommendation: Close. Already fixed.
+
+- hash: high_level_elegance::driver_file_rule_not_followed
+  verdict: genuine
+  verdict_reasoning: engine.ts:5 says each driver owns one file, but bars.ts and depth.ts target the book, quote and hero sections from their own files, and foot.ts uses the module-tick bridge.
+  files_read: [components/v3/mt/motion/engine.ts, components/v3/mt/motion/bars.ts, components/v3/mt/motion/depth.ts, components/v3/mt/motion/foot.ts]
+  recommendation: Fix the header line to state the real rule. foot goes into the driver-state fix.
+
+- hash: high_level_elegance::hero_driver_carries_dormant_dock_modes
+  verdict: exaggerated
+  verdict_reasoning: The dock subsystem is gone. What remains: LEFT (?mtdock=left, :27, :262, :278) plus its hero.css:11-12 rules and the layout.tsx navfx mapping, and PIN (?mtpin=0). These are trial flags, not dead code.
+  files_read: [components/v3/mt/motion/hero.ts, components/v3/mt/motion/hero.css, app/layout.tsx]
+  recommendation: Owner decision on LEFT. Otherwise route it through the flag reader.
+
+- hash: high_level_elegance::html_attribute_bus_undocumented
+  verdict: genuine
+  verdict_reasoning: Verified writers: rows.ts:62-64 data-mt-par/lid (covers driver restyles .mt-motion and Commissions in rows.css), hero.ts data-mtdock/mtleft/mt-nopin/mt-flip/mt-pasthero/mt-nameout and --mt-flip, quote.ts data-mtask, engine data-mt-held/motion/scrolling, intro data-mt-intro/mt-own. MOTION-HOOKS.md has no root-attribute section.
+  files_read: [components/v3/mt/MOTION-HOOKS.md, components/v3/mt/motion/rows.ts, components/v3/mt/motion/hero.ts, components/v3/mt/motion/quote.ts, components/v3/mt/motion/engine.ts, components/v3/mt/motion/rows.css]
+  recommendation: Add the list to MOTION-HOOKS.md and move par/lid writes to the flag module. The doc-only half alone is a reopen risk.
+
+- hash: high_level_elegance::url_trial_flags_scattered
+  verdict: genuine
+  verdict_reasoning: Same count as cross_module_architecture::scattered_query_flag_parsing. lib/mtscroll.ts exists as the natural home.
+  files_read: [components/v3/mt/motion/hero.ts, components/v3/mt/motion/rows.ts, components/v3/mt/rows.tsx, components/v3/mt/motion/quote.ts, components/v3/mt/hero.tsx, components/v3/mt/intro/index.tsx, lib/mtscroll.ts]
+  recommendation: Same fix. The "delete ended trials" part is owner-only.
+
+- hash: incomplete_migration::mtask_trial_runs_for_everyone
+  verdict: exaggerated
+  verdict_reasoning: The 5s interval is already gated (by-quote.tsx:37 returns unless ?mtask=1). Still rendered for everyone: the .w wide images (:55) and the hidden Marks (:70), which CSS hides outside the trial.
+  files_read: [components/v3/mt/by-quote.tsx, components/v3/mt/motion/quote.css, components/v3/mt/data.ts]
+  recommendation: Gate the .w images and Marks on the flag from the flag reader. Small.
+
+- hash: incomplete_migration::quote_ci_constant_residue
+  verdict: genuine
+  verdict_reasoning: by-quote.tsx:32 `const ci = 0` is used at :47, :49, :52, :62 as if it were state.
+  files_read: [components/v3/mt/by-quote.tsx, components/v3/mt/motion/quote.ts]
+  recommendation: Trivial inline. It reopens unless the ownership item (mid_level_elegance::motion_overwrites_react_owned_nodes) is settled.
+
+- hash: incomplete_migration::retired_name_dock_still_wired
+  verdict: exaggerated
+  verdict_reasoning: Dock/Geo types, dock functions and State.dock are already deleted. Left: data-mtdock="off" (live, read by mtscroll.css:14), the data-mtleft rules for the ?mtdock=left trial, and the layout.tsx navfx mapping.
+  files_read: [components/v3/mt/motion/hero.ts, app/styles/mtscroll.css, components/v3/mt/motion/hero.css, app/layout.tsx]
+  recommendation: Owner decision on the LEFT trial. Nothing dead to delete.
+
+- hash: incomplete_migration::rollback_flags_for_decided_defaults
+  verdict: not-worth-it
+  verdict_reasoning: The flags are real (?mtpar, ?mtlid, ?mtflip, ?mtsnap, ?mtpin). The owner keeps opt-in rollback flags until a change has been live a week. The "read mtpar once" half is covered by the flag reader.
+  files_read: [components/v3/mt/motion/rows.ts, components/v3/mt/rows.tsx, components/v3/mt/motion/hero.ts, components/v3/mt/motion/rows.css]
+  recommendation: Owner decision. Do not delete flags in a debt cycle.
+
+- hash: initialization_coupling::driver_module_singleton_state
+  verdict: genuine
+  verdict_reasoning: about.ts:5, commissions.ts:11 (with manual reset at 73-80 and ??= in frame 84-85), foot.ts:10. Verified.
+  files_read: [components/v3/mt/motion/about.ts, components/v3/mt/motion/commissions.ts, components/v3/mt/motion/foot.ts, components/v3/mt/motion/hero.ts]
+  recommendation: Duplicate of the driver-state root.
+
+- hash: initialization_coupling::hero_left_flag_import_snapshot
+  verdict: exaggerated
+  verdict_reasoning: LEFT (:27) and PIN (:46) are read at import. The setup-time ?mtdock=<n> read the issue contrasts with no longer exists, so the "two reads" mismatch is gone. The import-time snapshot remains.
+  files_read: [components/v3/mt/motion/hero.ts]
+  recommendation: Move both reads into setup through the flag reader.
+
+- hash: initialization_coupling::html_dataset_mount_order_protocol
+  verdict: genuine
+  verdict_reasoning: hero.tsx flipMs reads data-mt-flip at render and animation time. rows.tsx reads data-mt-held. Both are written by the motion layer, which mounts after the screens (home.tsx:80).
+  files_read: [components/v3/mt/hero.tsx, components/v3/mt/rows.tsx, components/v3/mt/home.tsx, components/v3/mt/motion/index.tsx]
+  recommendation: Same fix as cross_module_architecture::components_read_driver_html_attrs.
+
+- hash: initialization_coupling::next_open_cache_pins_failures
+  verdict: not-worth-it
+  verdict_reasoning: next-open.ts:29-30 caches null on failure. The file header says "one request per session per visit", so this is deliberate, and a failure only hides an optional label.
+  files_read: [components/v3/mt/next-open.ts]
+  recommendation: Skip.
+
+- hash: initialization_coupling::split_flag_reading_paths
+  verdict: genuine
+  verdict_reasoning: The head script sets v3motion/navfx/mtscroll/mtIntro datasets (layout.tsx:195), while mt code re-reads location.search directly.
+  files_read: [app/layout.tsx, components/v3/mt/motion/hero.ts, components/v3/mt/motion/rows.ts]
+  recommendation: Duplicate of the flag reader.
+
+- hash: logic_clarity::clearance_hides_tone_side_effect
+  verdict: genuine
+  verdict_reasoning: hero.ts:172 clearance() calls tone(). Teardown (:290) and mode resets (:306) call clearance(st,false) and so run tone hit tests. data-tone on st.tw is never cleared in teardown.
+  files_read: [components/v3/mt/motion/hero.ts]
+  recommendation: Call tone() beside clearance at the frame and heroStill sites, and clear data-tone in teardown. Small.
+
+- hash: logic_clarity::covers_assert_then_filter
+  verdict: genuine
+  verdict_reasoning: Same line, rows.tsx:12.
+  files_read: [components/v3/mt/rows.tsx]
+  recommendation: Duplicate of contract_coherence::covers_nonnull_then_filter.
+
+- hash: logic_clarity::duplicated_ternary_branches
+  verdict: genuine
+  verdict_reasoning: by-quote.tsx:19 repeats the className template in both branches. intro:376 repeats light(...) with only the target and pseudo-element differing.
+  files_read: [components/v3/mt/by-quote.tsx, components/v3/mt/intro/index.tsx]
+  recommendation: Trivial.
+
+- hash: logic_clarity::heldrow_dragged_not_reset_on_cancel
+  verdict: genuine
+  verdict_reasoning: rows.ts:135-137 pointercancel runs up(), which clears only `down`. `dragged` stays true until the next click or pointerdown, and sleeveTilt checks !dragged (:176).
+  files_read: [components/v3/mt/motion/rows.ts]
+  recommendation: Set dragged=false on cancel. One line.
+
+- hash: logic_clarity::intro_deep_over_dead_settle
+  verdict: genuine
+  verdict_reasoning: DEEP_OVER=0 (:37), so keyframe :410 scale(1+0) equals home (:411). The SETTLE easing between two identical keyframes does nothing.
+  files_read: [components/v3/mt/intro/index.tsx]
+  recommendation: Drop DEEP_OVER and SETTLE and keep the land offset. Output frames are identical.
+
+- hash: logic_clarity::intro_use_before_declaration
+  verdict: genuine
+  verdict_reasoning: finish (:223) uses held (declared :257). rise (:249) uses hidden (declared :256). It works only because the calls come later.
+  files_read: [components/v3/mt/intro/index.tsx]
+  recommendation: Move the two declarations up beside anims/made/timers.
+
+- hash: logic_clarity::rows_focusin_false_nonnull
+  verdict: genuine
+  verdict_reasoning: rows.ts:148 closest(...)! fed to indexOf, relying on indexOf(null) === -1.
+  files_read: [components/v3/mt/motion/rows.ts]
+  recommendation: Trivial guard.
+
+- hash: low_level_elegance::byquote_trial_interval_always_on
+  verdict: false-positive
+  verdict_reasoning: by-quote.tsx:37 already returns unless ?mtask=1 (and not calm). The interval no longer runs for normal visitors.
+  files_read: [components/v3/mt/by-quote.tsx]
+  recommendation: Close.
+
+- hash: low_level_elegance::driver_state_style_inconsistent
+  verdict: genuine
+  verdict_reasoning: Four styles confirmed: module singleton (about, commissions, quote), module tick (foot), WeakMap (hero), closure (rows, bars).
+  files_read: [components/v3/mt/motion/about.ts, components/v3/mt/motion/commissions.ts, components/v3/mt/motion/quote.ts, components/v3/mt/motion/foot.ts, components/v3/mt/motion/hero.ts, components/v3/mt/motion/rows.ts, components/v3/mt/motion/bars.ts]
+  recommendation: Duplicate of the driver-state root.
+
+- hash: low_level_elegance::hero_dead_state_fields
+  verdict: genuine
+  verdict_reasoning: Same as abstraction_fitness::hero_state_dead_fields. The measurement is now at :319-321, not :425-427.
+  files_read: [components/v3/mt/motion/hero.ts]
+  recommendation: Duplicate.
+
+- hash: low_level_elegance::hero_dock_flag_only_path
+  verdict: false-positive
+  verdict_reasoning: There are no ~130 lines of dock spring code. Dock/Geo, DOCK_W, dock functions, far() and st.dock are all absent from hero.ts. Only the LEFT trial remains, which is an owner flag.
+  files_read: [components/v3/mt/motion/hero.ts]
+  recommendation: Close.
+
+- hash: low_level_elegance::hero_held_frame_monolith
+  verdict: exaggerated
+  verdict_reasoning: The held branch (:310-349) is ~40 lines, not 60, with no dock. The size block (:313-325) is a clean candidate for measure(st, ctx). Most of the bulk is changelog comments (:332-345).
+  files_read: [components/v3/mt/motion/hero.ts]
+  recommendation: Extract measure() and trim the comments together with the changelog item.
+
+- hash: low_level_elegance::hero_setup_teardown_duplication
+  verdict: exaggerated
+  verdict_reasoning: The heroStill copy is real (see herostill_duplicates_setup_queries). data-mtdock is removed once now (:291). The two park calls (:285 "past", :289 "out") clear two different reasons on purpose.
+  files_read: [components/v3/mt/motion/hero.ts]
+  recommendation: Only parts(el). Leave the park calls.
+
+- hash: low_level_elegance::intro_dead_overshoot_and_flat_path
+  verdict: exaggerated
+  verdict_reasoning: The DEEP_OVER half is genuine (see logic_clarity::intro_deep_over_dead_settle). The flat ?splash=1 path is a live owner flag (deepMode :61-70), not dead code.
+  files_read: [components/v3/mt/intro/index.tsx]
+  recommendation: Drop DEEP_OVER only. The flat path is an owner decision.
+
+- hash: low_level_elegance::repeated_rise_and_text_write
+  verdict: genuine
+  verdict_reasoning: Same sites as rise_keyframes_repeated and react_text_node_write_twice.
+  files_read: [components/v3/mt/motion/rows.ts, components/v3/mt/motion/commissions.ts, components/v3/mt/motion/quote.ts]
+  recommendation: Duplicate.
+
+- hash: mid_level_elegance::current_item_round_trip
+  verdict: genuine
+  verdict_reasoning: rows.ts:98 sets row.scrollLeft so held-row.tsx:37 can read it into state, render data-cur, and have rows.ts:113 MutationObserver react. MtFilms (rows.tsx:76-80) recomputes held p and ease for setCur, and rows.ts:343 observes data-cur.
+  files_read: [components/v3/mt/motion/rows.ts, components/v3/mt/held-row.tsx, components/v3/mt/rows.tsx]
+  recommendation: Real, but it touches held-row timing (the title rise). Needs a browser test first. Medium.
+
+- hash: mid_level_elegance::driver_singleton_state
+  verdict: genuine
+  verdict_reasoning: Same verification as api_surface_coherence::driver_setup_frame_state_smuggling.
+  files_read: [components/v3/mt/motion/engine.ts, components/v3/mt/motion/quote.ts, components/v3/mt/motion/commissions.ts, components/v3/mt/motion/about.ts]
+  recommendation: Duplicate of the driver-state root.
+
+- hash: mid_level_elegance::html_attribute_bus
+  verdict: genuine
+  verdict_reasoning: Same as high_level_elegance::html_attribute_bus_undocumented. The data-mt-intro read in hero.tsx:74 is a further React reader.
+  files_read: [components/v3/mt/MOTION-HOOKS.md, components/v3/mt/hero.tsx, components/v3/mt/intro/index.tsx]
+  recommendation: Duplicate. An introDone callback is optional.
+
+- hash: mid_level_elegance::motion_overwrites_react_owned_nodes
+  verdict: genuine
+  verdict_reasoning: quote.ts:17 writes React's text node and :58 data-client. commissions.ts:31-34 writes data-cur and three text nodes that commissions.tsx renders. by-quote.tsx:32 pins ci=0. It is deliberate and documented (MOTION-HOOKS.md:41-43), but still two owners for one value.
+  files_read: [components/v3/mt/motion/quote.ts, components/v3/mt/motion/commissions.ts, components/v3/mt/by-quote.tsx, components/v3/mt/commissions.tsx, components/v3/mt/MOTION-HOOKS.md]
+  recommendation: Moving the rotation into React changes timing, which is an owner call. The cheap step is one shared put() and render-empty labels. Mark owner-review.
+
+- hash: mid_level_elegance::scattered_query_flags
+  verdict: genuine
+  verdict_reasoning: Same count as the other flag items.
+  files_read: [components/v3/mt/motion/rows.ts, components/v3/mt/rows.tsx, components/v3/mt/by-quote.tsx, components/v3/mt/motion/quote.ts]
+  recommendation: Duplicate of the flag reader.
+
+- hash: mid_level_elegance::two_booking_open_channels
+  verdict: genuine
+  verdict_reasoning: home.tsx:29 cards.book and :75 onOpen={setBook} write the same state.
+  files_read: [components/v3/mt/home.tsx, components/v3/mt/book-online.tsx, components/v3/mt/foot.tsx]
+  recommendation: Duplicate of api_surface_coherence::cards_opener_asymmetry.
+
+- hash: mid_level_elegance::week_first_dom_click
+  verdict: genuine
+  verdict_reasoning: book-online.tsx:28-54 useWeekFirst clicks '.cal-top .seg button[aria-pressed="false"]:first-child' through a MutationObserver. use-picker.tsx:86 hardcodes useState("month") with no prop. V3BookFlow (components/v3/book.tsx:93) has no view prop.
+  files_read: [components/v3/mt/book-online.tsx, components/booking/use-picker.tsx, components/v3/book.tsx]
+  recommendation: Thread an initial view prop through V3BookFlow and use-picker. Small to medium.
+
+- hash: naming_quality::at_overloaded
+  verdict: genuine
+  verdict_reasoning: BookRow.at is object-position (data.ts:67), FilmDress.at is a start second (:46), the wide tuple's `at` is object-position (:77), and book-online.tsx:61 `at` is an index.
+  files_read: [components/v3/mt/data.ts, components/v3/mt/book-online.tsx, components/v3/mt/by-quote.tsx]
+  recommendation: Rename. Pure naming reopens easily, so do it while those lines are touched for the key fixes.
+
+- hash: naming_quality::byquote_opt_is_boolean
+  verdict: genuine
+  verdict_reasoning: by-quote.tsx:31 `opt` is boolean. Elsewhere opt is a QuoteOpt or a key (inquiry-card.tsx:30, home.tsx:23).
+  files_read: [components/v3/mt/by-quote.tsx, components/v3/mt/inquiry-card.tsx]
+  recommendation: Rename with the quote key fix.
+
+- hash: naming_quality::clearance_also_tones
+  verdict: genuine
+  verdict_reasoning: Same as logic_clarity::clearance_hides_tone_side_effect.
+  files_read: [components/v3/mt/motion/hero.ts]
+  recommendation: Duplicate. Take tone out of clearance.
+
+- hash: naming_quality::hero_mode_letter_codes
+  verdict: not-worth-it
+  verdict_reasoning: mode is already a typed union "" | "d" | "p" | "t" (hero.ts:16), so a typo fails to compile. It is used in one function, and :297 spells out the mapping.
+  files_read: [components/v3/mt/motion/hero.ts]
+  recommendation: Skip.
+
+- hash: naming_quality::idle_wall_now_is_frames
+  verdict: genuine
+  verdict_reasoning: hero.tsx:62 `now` holds MtFrame[] beside performance.now() at :68, :73. :95 aliases it back to frames.
+  files_read: [components/v3/mt/hero.tsx]
+  recommendation: Rename to shown or wall. Trivial.
+
+- hash: naming_quality::intro_hidden_hid_hide
+  verdict: genuine
+  verdict_reasoning: intro has hidden (:256), held (:257), hid and hide (:417-418) in one scope for three unrelated things.
+  files_read: [components/v3/mt/intro/index.tsx]
+  recommendation: Rename while moving the declarations (logic_clarity::intro_use_before_declaration).
+
+- hash: naming_quality::rows_preview_pool_short_fields
+  verdict: genuine
+  verdict_reasoning: rows.ts:229 Pv = { f, yt, played, at, t } and pvT: long-lived records with one-letter fields.
+  files_read: [components/v3/mt/motion/rows.ts]
+  recommendation: Rename if films_driver_player_pool is done. Otherwise low.
+
+- hash: package_organization::mt_root_mixed_concerns
+  verdict: not-worth-it
+  verdict_reasoning: The root has 14 files. The issue itself says the folder is still navigable.
+  files_read: [components/v3/mt/]
+  recommendation: Skip.
+
+- hash: package_organization::section_styles_split_two_trees
+  verdict: not-worth-it
+  verdict_reasoning: True: app/styles/mtscroll.css is 796 global lines and motion/*.css sits beside the drivers. Moving it means a visual pass at every ratio for zero behaviour gain. It belongs with the eventual folder move.
+  files_read: [app/styles/mtscroll.css, components/v3/mt/motion/index.tsx]
+  recommendation: Defer to the V4_HOME ship.
+
+- hash: package_organization::shared_sleeve_tilt_in_page_motion
+  verdict: genuine
+  verdict_reasoning: components/cover/cover-art-gallery.tsx:7-9 imports COVER_PRESS from mt/data, sleeveTilt from mt/motion/sleeve-tilt and mt/motion/rows.css. A gallery page depends on the homepage's internals.
+  files_read: [components/cover/cover-art-gallery.tsx, components/v3/mt/motion/sleeve-tilt.ts, components/v3/mt/data.ts]
+  recommendation: Move sleeve-tilt, COVER_PRESS and the sleeve CSS to components/cover and lib/cover-art-data. Needs a visual check of sleeve CSS on /portfolio?d=coverart.
+
+- hash: package_organization::v4_home_in_v3_mt_folder
+  verdict: not-worth-it
+  verdict_reasoning: True: components/v3/mt plus components/v3/v4-{drift,foot,project,tilt}.tsx. A full git mv touches app/page.tsx, app/home-v4, cover-art-gallery and comments while V4 is still behind a flag. It is churn now, and a prior resolve already reopened.
+  files_read: [components/v3/mt/, components/v3/v4-drift.tsx, components/v3/v4-foot.tsx, app/page.tsx]
+  recommendation: Owner-scope. Do it with the V4_HOME ship.
+
+- hash: test_strategy::mt_engine_progress_math_inline
+  verdict: genuine
+  verdict_reasoning: engine.ts:118, 123, 128 compute p/enter/leave inline in tick. lib/mt-home.test.ts tests only clamp, smooth and span.
+  files_read: [components/v3/mt/motion/engine.ts, lib/mt-home.test.ts]
+  recommendation: Export a pure progress() and test the edges. This also gives about.ts a helper. High value.
+
+- hash: test_strategy::mt_flows_test_class_coupling
+  verdict: genuine
+  verdict_reasoning: tests/components/mt-home-flows.test.tsx:12-13 claims DOM-only, but selects .mt-book, .mt-brw button and img.qp, and filters by classList "mt-qo" (:48).
+  files_read: [tests/components/mt-home-flows.test.tsx]
+  recommendation: Use [data-mt=book] and role queries. Small.
+
+- hash: test_strategy::mt_intro_timing_untested
+  verdict: genuine
+  verdict_reasoning: returning(), deepMode() and shouldPlay() (intro:48-85) are not exported, and no test reads jg-intro-at or ?intro.
+  files_read: [components/v3/mt/intro/index.tsx, lib/mt-home.test.ts, tests/components/mt-home.test.tsx]
+  recommendation: Export returning() and add the 30-day and ?intro cases. Small.
+
+- hash: test_strategy::mt_motion_layer_no_coverage
+  verdict: genuine
+  verdict_reasoning: MtMotionLayer bails without the v3motion dataset (motion/index.tsx:31), and no vitest sets it. tests/ui has book, booking-menu, booking-pages and pages specs. booking-menu.spec.ts loads /#sessions but asserts no --p or data-bar.
+  files_read: [components/v3/mt/motion/index.tsx, tests/ui/booking-menu.spec.ts, tests/components/mt-home.test.tsx]
+  recommendation: One Playwright spec for --p 0 to 1 and data-bar exclusivity. Highest Test-health value.
+
+- hash: type_safety::bookrow_key_duplicates_slug
+  verdict: genuine
+  verdict_reasoning: Same as abstraction_fitness::bookrow_key_duplicates_slug.
+  files_read: [components/v3/mt/data.ts]
+  recommendation: Duplicate.
+
+- hash: type_safety::chip_type_untyped_record
+  verdict: not-worth-it
+  verdict_reasoning: CHIP_TYPE is Record<string,string> (data.ts:85), but lib/mt-home.test.ts:8-16 already checks both directions (every chip has a type, every type is in SHOOT_TYPES). Typing would only move the check from test time to compile time.
+  files_read: [components/v3/mt/data.ts, lib/mt-home.test.ts, lib/inbox.ts]
+  recommendation: Optional with inquiry_card_duplicates_option_data. Not on its own.
+
+- hash: type_safety::covers_nonnull_then_filter
+  verdict: genuine
+  verdict_reasoning: Same rows.tsx:12 line. COVER_KEYS and COVER_PRESS are plain strings (data.ts:19, 21).
+  files_read: [components/v3/mt/rows.tsx, components/v3/mt/data.ts]
+  recommendation: Duplicate. Add `as const` keys.
+
+- hash: type_safety::dock_phase_string_state
+  verdict: false-positive
+  verdict_reasoning: There is no dock phase left in hero.ts. mode is already the union "" | "d" | "p" | "t" (:16).
+  files_read: [components/v3/mt/motion/hero.ts]
+  recommendation: Close.
+
+- hash: type_safety::film_dress_keyed_by_title
+  verdict: genuine
+  verdict_reasoning: data.ts:47 Partial<Record<string,FilmDress>> keyed by display title, read in rows.tsx:111, 131. FILM_PICKS is not `as const`.
+  files_read: [components/v3/mt/data.ts, components/v3/mt/rows.tsx, lib/mt-home-data.ts]
+  recommendation: Duplicate of contract_coherence::title_keyed_data_maps. Low.
+
+- hash: type_safety::quote_option_magic_index
+  verdict: genuine
+  verdict_reasoning: by-quote.tsx:72 slice(0,3), :81 pick(3) and sel===3.
+  files_read: [components/v3/mt/by-quote.tsx]
+  recommendation: Duplicate of contract_coherence::quote_option_key_vs_index.
+
+- hash: type_safety::section_names_stringly_typed
+  verdict: genuine
+  verdict_reasoning: Driver.name (engine.ts:35) and HeldRow name (held-row.tsx:19) are plain strings matched against data-mt.
+  files_read: [components/v3/mt/motion/engine.ts, components/v3/mt/held-row.tsx]
+  recommendation: Low. Add a MtSection union in engine.ts with the driver-state change.
+
+Auto-cluster:
+- cluster: auto/test_coverage-untested_module
+  verdict: low-value
+  sample_count: 2
+  false_positive_rate: 0.5
+  recommendation: skip
+  note: rows.tsx is imported by home.tsx and runs in tests/components/mt-home*.test.tsx through MtHome, so "0 importers" is wrong. bars.ts truly never runs (engine off in jsdom), and test_strategy::mt_motion_layer_no_coverage already covers it. Leave both out of the queue; the Playwright spec closes the real gap.
