@@ -10,6 +10,25 @@ Styles: `app/styles/mtscroll.css` (design unit `--u`, structures D / T / P / L).
   and Motion carry a hold; the markup holds the values. The other sections have none.
 - Ancestors use `overflow-x: clip`, never `hidden`, so sticky stages work.
 
+## Root attributes (html)
+The motion layer and the intro talk to CSS and to the React screens through attributes on `<html>`.
+Typed readers live in `motion/root-attrs.ts` (`flipMs`); everything else reads the literal name.
+
+| name | writer | readers (TS) | readers (CSS) | set | removed |
+|---|---|---|---|---|---|
+| `data-mt-held` | engine.ts `measure()` | rows.tsx | every `motion/*.css`, mtscroll.css | engine start, resize, the held media change (on while held) | engine stop |
+| `data-mt-motion` | engine.ts | tests/ui (booking-menu, mt-motion) | every `motion/*.css` | engine start | engine stop |
+| `data-mt-scrolling` | engine.ts tick | | hero.css | while the page scrolls, until 180ms after the last scroll | then, and on engine stop |
+| `data-tp-<item>` | touch-parity.ts | (`tp()` reads the query itself) | touch-parity.css | engine start, by `?mttp` | engine stop |
+| `data-mtdock="off"` | motion/hero.ts setup | | mtscroll.css | hero setup | hero cleanup |
+| `data-mt-pasthero` | motion/hero.ts on scroll | nav-ink.ts | hero.css, mtscroll.css | the hero is above the header | hero cleanup |
+| `data-mtleft`, `data-mt-nopin` | motion/hero.ts setup | | hero.css | `?mtdock=left`, `?mtpin=0` | hero cleanup |
+| `data-mt-flip` and `--mt-flip` | motion/hero.ts setup | hero.tsx (`flipMs`) | hero.css | hero setup, unless `?mtflip=0`; missing means the driver is not running | hero cleanup |
+| `data-mt-nameout` | motion/hero.ts `sink()` | | mtscroll.css | the name is out | the name is back, a mode change, hero cleanup |
+| `data-mt-par`, `data-mt-lid` | motion/rows.ts setup | | rows.css | Cover art setup, unless `?mtpar=0` / `?mtlid=0` | rows cleanup |
+| `data-mtask` | motion/quote.ts setup | | quote.css | `?mtask=1` | never |
+| `data-mt-intro` (1/2/3), `data-mt-own`, `data-mt-late` | intro/index.tsx, the app/layout.tsx head script | intro/index.tsx, hero.tsx, nav-ink.ts | intro.css, mtscroll.css | the head script on a first v4 visit; the intro as it plays | when the intro ends, or the head script's 6s fallback |
+
 ## Hero wall (`hero.tsx`)
 - `.mt-wall > .mt-col[data-col][data-a]`: one element per column, `data-a` is the
   lag A (.12 / 0 / .2). Locked columns 0 to 2, side columns `-2 -1 3 4` (class
