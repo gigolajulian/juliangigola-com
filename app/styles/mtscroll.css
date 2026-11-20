@@ -767,3 +767,24 @@ html[data-theme="light"]:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w.w[dat
   @media (prefers-color-scheme:light){html:root:not([data-theme="dark"]) .v3 .mt-hero .mt-scrim.mt-scrim.mt-scrim{--t:var(--bg);height:calc(260px + env(safe-area-inset-bottom));background:linear-gradient(to top,color-mix(in srgb,var(--t) 56%,transparent) 42%,color-mix(in srgb,var(--t) 48%,transparent) 62%,color-mix(in srgb,var(--t) 26%,transparent) 80%,color-mix(in srgb,var(--t) 8%,transparent) 92%,transparent)}}
   html[data-theme="light"]:root .v3 .mt-hero .mt-scrim.mt-scrim.mt-scrim{--t:var(--bg);height:calc(260px + env(safe-area-inset-bottom));background:linear-gradient(to top,color-mix(in srgb,var(--t) 56%,transparent) 42%,color-mix(in srgb,var(--t) 48%,transparent) 62%,color-mix(in srgb,var(--t) 26%,transparent) 80%,color-mix(in srgb,var(--t) 8%,transparent) 92%,transparent)}
 }
+
+/* Dark theme hero name (Julian, 2026-11-19): the light theme's treatment in dark. Light ink, no shadow, no per-letter tagline tones, on a band of the dark page colour.
+   The band is stronger than light's: a light name over bright photos needs more cover. Over the brightest 5% behind the name it holds 5.1:1 or better from 390 to 1920. */
+@media (prefers-color-scheme:dark){html:root:not([data-theme="light"]) .v3 .mt-hero .mt-name h1{color:var(--ink);text-shadow:none}}
+html[data-theme="dark"]:root .v3 .mt-hero .mt-name h1{color:var(--ink);text-shadow:none}
+@media (prefers-color-scheme:dark){html:root:not([data-theme="light"]) .v3 .mt-hero .mt-name .mt-name-in .mt-cap{color:var(--ink)}}
+html[data-theme="dark"]:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap{color:var(--ink)}
+@media (prefers-color-scheme:dark){html:root:not([data-theme="light"]) .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w.w[data-tone]{color:inherit;text-shadow:none}}
+html[data-theme="dark"]:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w.w[data-tone]{color:inherit;text-shadow:none}
+@media (min-width:1024px){
+  @media (prefers-color-scheme:dark){html:root:not([data-theme="light"]) .v3 .mt-hero .mt-scrim.mt-scrim.mt-scrim{height:calc(400 * var(--u));background:linear-gradient(to top,color-mix(in srgb,var(--bg) 72%,transparent) 30%,color-mix(in srgb,var(--bg) 62%,transparent) 50%,color-mix(in srgb,var(--bg) 38%,transparent) 70%,color-mix(in srgb,var(--bg) 12%,transparent) 86%,transparent)}}
+  html[data-theme="dark"]:root .v3 .mt-hero .mt-scrim.mt-scrim.mt-scrim{height:calc(400 * var(--u));background:linear-gradient(to top,color-mix(in srgb,var(--bg) 72%,transparent) 30%,color-mix(in srgb,var(--bg) 62%,transparent) 50%,color-mix(in srgb,var(--bg) 38%,transparent) 70%,color-mix(in srgb,var(--bg) 12%,transparent) 86%,transparent)}
+}
+@media (min-width:600px) and (max-width:1023px){
+  @media (prefers-color-scheme:dark){html:root:not([data-theme="light"]) .v3 .mt-hero .mt-scrim.mt-scrim.mt-scrim{height:320px;background:linear-gradient(to top,color-mix(in srgb,var(--bg) 74%,transparent) 30%,color-mix(in srgb,var(--bg) 68%,transparent) 60%,color-mix(in srgb,var(--bg) 60%,transparent) 78%,color-mix(in srgb,var(--bg) 20%,transparent) 92%,transparent)}}
+  html[data-theme="dark"]:root .v3 .mt-hero .mt-scrim.mt-scrim.mt-scrim{height:320px;background:linear-gradient(to top,color-mix(in srgb,var(--bg) 74%,transparent) 30%,color-mix(in srgb,var(--bg) 68%,transparent) 60%,color-mix(in srgb,var(--bg) 60%,transparent) 78%,color-mix(in srgb,var(--bg) 20%,transparent) 92%,transparent)}
+}
+@media (max-width:599px){
+  @media (prefers-color-scheme:dark){html:root:not([data-theme="light"]) .v3 .mt-hero .mt-scrim.mt-scrim.mt-scrim{height:calc(260px + env(safe-area-inset-bottom));background:linear-gradient(to top,color-mix(in srgb,var(--bg) 56%,transparent) 42%,color-mix(in srgb,var(--bg) 48%,transparent) 62%,color-mix(in srgb,var(--bg) 26%,transparent) 80%,color-mix(in srgb,var(--bg) 8%,transparent) 92%,transparent)}}
+  html[data-theme="dark"]:root .v3 .mt-hero .mt-scrim.mt-scrim.mt-scrim{height:calc(260px + env(safe-area-inset-bottom));background:linear-gradient(to top,color-mix(in srgb,var(--bg) 56%,transparent) 42%,color-mix(in srgb,var(--bg) 48%,transparent) 62%,color-mix(in srgb,var(--bg) 26%,transparent) 80%,color-mix(in srgb,var(--bg) 8%,transparent) 92%,transparent)}
+}
