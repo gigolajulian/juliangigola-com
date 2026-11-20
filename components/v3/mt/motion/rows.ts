@@ -3,7 +3,7 @@ import { qvalue } from "@/lib/mtflags";
 import { holdEase as ease, holdUnease as unease } from "@/lib/motion/hold-ease";
 import { captionsOff, vimeoListen, vimeoPlays } from "@/lib/videos";
 import { clamp, rise, smooth, type Ctx, type Driver, type MtSection } from "./engine";
-import { sleeveTilt } from "./sleeve-tilt";
+import { sleeveTilt } from "@/components/cover/sleeve-tilt";
 import { tp } from "./touch-parity";
 
 
