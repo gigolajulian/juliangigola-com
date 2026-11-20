@@ -7,8 +7,6 @@ import { clamp, smooth, span, type Ctx, type Driver } from "./engine";
 const R = 510; // spot radius
 const mod = (v: number, m: number) => ((v % m) + m) % m;
 
-let tick: ((ctx: Ctx) => void) | null = null;
-
 function setup(el: HTMLElement, ctx: Ctx) {
   const stage = el.querySelector<HTMLElement>(".mt-stage");
   const wall = el.querySelector<HTMLElement>(".mt-fwall");
@@ -172,7 +170,7 @@ function setup(el: HTMLElement, ctx: Ctx) {
   addEventListener("resize", onResize, { signal: ac.signal });
   document.fonts.ready.then(onResize);
 
-  tick = (c) => {
+  const tick = (c: Ctx) => {
     // the section's cached box first: a layout read here, on every frame of the whole page, cost phones about 4ms a frame
     if (c.top > c.vh || c.top + c.h < 0) return;
     const r = stage.getBoundingClientRect();
@@ -238,8 +236,7 @@ function setup(el: HTMLElement, ctx: Ctx) {
     if (spotAlpha > 0.01) draw(r, u);
   };
 
-  return () => {
-    tick = null;
+  const off = () => {
     ac.abort();
     for (const n of [cut, dot, ...clones]) n.parentNode?.removeChild(n);
     el.removeAttribute("data-hot");
@@ -248,6 +245,7 @@ function setup(el: HTMLElement, ctx: Ctx) {
       n.style.removeProperty("opacity");
     }
   };
+  return { frame: (_p: number, _el: HTMLElement, c: Ctx) => tick(c), off };
 }
 
-export const footDrivers: Driver[] = [{ name: "foot", always: true, setup, frame: (_p, _el, ctx) => tick?.(ctx) }];
+export const footDrivers: Driver[] = [{ name: "foot", always: true, setup }];

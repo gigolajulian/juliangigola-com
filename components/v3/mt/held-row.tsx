@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import type { MtSection } from "./motion/engine";
 
 /* Cover art uses this (spec 3.7): a held block that names
    the current item and one sideways row. Static form: a native scroll row
@@ -16,7 +17,7 @@ export function HeldRow({
   foot,
   children,
 }: {
-  name: string;
+  name: MtSection;
   hold: number;
   label: string;
   count: number;
