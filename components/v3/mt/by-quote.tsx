@@ -5,18 +5,21 @@ import Image from "next/image";
 import Link from "next/link";
 import { matches } from "@/lib/device";
 import { Marks } from "@/components/v3/duo";
-import { QUOTE_CLIENTS, QUOTE_OPTS, type QuoteClient } from "./data";
+import { QUOTE_CLIENTS, QUOTE_OPTS, type QuoteClient, type QuoteOpt } from "./data";
 import { CardsCtx } from "./ctx";
 
 /* Spec 3.5: quote second. The photo shows the current client's frame until
    the pointer is over the options column or an option is picked; then the
    option's photo. The client rotation is the motion pass's (`data-client`). */
 
+/* Weddings is its own last row, below the other options. */
+const W = QUOTE_OPTS.findIndex((o) => o.key === "weddings");
+
 function ClientPhoto({ c, on, stills, wide }: { c: QuoteClient; on: boolean; stills: Record<string, string>; wide?: boolean }) {
   const srcs = c.photos.map((p) => ({ ...p, src: stills[p.src] ?? p.src })).filter((p) => p.src);
   if (wide && c.wide) return <span className={on ? "cl on" : "cl"}><Image src={c.wide} alt={c.photos[0].alt} fill sizes="100vw" /></span>;
   return (
-    <span className={on ? `cl on${srcs.length > 1 ? " two" : ""}` : `cl${srcs.length > 1 ? " two" : ""}`}>
+    <span className={`cl${on ? " on" : ""}${srcs.length > 1 ? " two" : ""}`}>
       {srcs.map((p) => (
         <span key={p.src} className="st">
           <Image src={p.src} alt={p.alt} fill sizes="(max-width: 1023px) 100vw, 42vw" />
@@ -26,9 +29,9 @@ function ClientPhoto({ c, on, stills, wide }: { c: QuoteClient; on: boolean; sti
   );
 }
 
-export function MtByQuote({ stills, reply, onOptionPick }: { stills: Record<string, string>; reply: string | null; onOptionPick: (i: number) => void }) {
+export function MtByQuote({ stills, reply, onOptionPick }: { stills: Record<string, string>; reply: string | null; onOptionPick: (k: QuoteOpt["key"]) => void }) {
   const [sel, setSel] = React.useState(0);
-  const [opt, setOpt] = React.useState(false); // the option's photo shows instead of the client's
+  const [optPhoto, setOptPhoto] = React.useState(false); // the option's photo shows instead of the client's
   const ci = 0; // the first client: motion/quote.ts rotates by marking the DOM (`data-q`, `data-client`), React never rewrites it
   const cards = React.useContext(CardsCtx);
   // ?mtask=1 trial: an option with several wide frames steps through them
@@ -41,17 +44,17 @@ export function MtByQuote({ stills, reply, onOptionPick }: { stills: Record<stri
   const o = QUOTE_OPTS[sel];
   const pick = (i: number) => {
     setSel(i);
-    setOpt(true);
-    onOptionPick(i);
+    setOptPhoto(true);
+    onOptionPick(QUOTE_OPTS[i].key);
   };
   const client = QUOTE_CLIENTS[ci];
   return (
-    <section className="mt-quote" data-mt="quote" data-client={ci} data-opt={opt || undefined}>
+    <section className="mt-quote" data-mt="quote" data-client={ci} data-opt={optPhoto || undefined}>
       <div className="mt-frame mt-stage">
         <figure className="mt-photo">
-          {QUOTE_CLIENTS.map((c, i) => <ClientPhoto key={c.name} c={c} on={!opt && i === ci} stills={stills} />)}
+          {QUOTE_CLIENTS.map((c, i) => <ClientPhoto key={c.name} c={c} on={!optPhoto && i === ci} stills={stills} />)}
           {QUOTE_OPTS.map((x, i) => (
-            <span key={x.key} className={opt && i === sel ? "op on" : "op"} data-cur={i === sel || undefined}>
+            <span key={x.key} className={optPhoto && i === sel ? "op on" : "op"} data-cur={i === sel || undefined}>
               <Image src={x.photo} alt={`${x.name} sample`} fill sizes="(max-width: 1023px) 100vw, 42vw" />{x.wide?.map(([src, at], k) => <Image key={src} className="w" data-on={k === tick % x.wide!.length || undefined} src={src} alt="" fill sizes="100vw" style={{ objectPosition: at }} />)}
             </span>
           ))}
@@ -61,7 +64,7 @@ export function MtByQuote({ stills, reply, onOptionPick }: { stills: Record<stri
         <figure className="mt-photo-w">
           {QUOTE_CLIENTS.map((c, i) => <ClientPhoto key={c.name} c={c} on={i === ci} stills={stills} wide />)}
         </figure>
-        <div className="mt-quote-col" onPointerEnter={() => matches("fine") && setOpt(true)} onPointerLeave={() => matches("fine") && setOpt(false)}>
+        <div className="mt-quote-col" onPointerEnter={() => matches("fine") && setOptPhoto(true)} onPointerLeave={() => matches("fine") && setOptPhoto(false)}>
           <p className="lbl mute mt-label">By quote</p>
           <h2 className="mt-q-h">Have something in mind?</h2>
           <p className="lbl mt-by">
@@ -69,7 +72,7 @@ export function MtByQuote({ stills, reply, onOptionPick }: { stills: Record<stri
           </p>
           {/* ?mtask=1 trial: the clients as marks, the photo follows the option. */}<div className="mt-q-logos" aria-hidden><Marks hidden /></div>
           <div className="mt-qos">
-            {QUOTE_OPTS.slice(0, 3).map((x, i) => (
+            {QUOTE_OPTS.map((x, i) => i === W ? null : (
               <div key={x.key} className="mt-qow" data-on={i === sel || undefined}>
                 <button type="button" className="mt-qo" aria-pressed={i === sel} onPointerEnter={() => matches("fine") && pick(i)} onFocus={() => pick(i)} onClick={() => pick(i)}>
                   <b>{x.name}</b>
@@ -78,9 +81,9 @@ export function MtByQuote({ stills, reply, onOptionPick }: { stills: Record<stri
                 <p className="mt-qo-d">{x.detail}</p>
               </div>
             ))}
-            <button type="button" className="mt-qw" aria-pressed={sel === 3} onPointerEnter={() => matches("fine") && pick(3)} onFocus={() => pick(3)} onClick={() => pick(3)}>
-              <b>Weddings</b>
-              <span><span className="dk">Full day | Couples, engagements</span><span className="po">Full day | Couples</span></span>
+            <button type="button" className="mt-qw" aria-pressed={sel === W} onPointerEnter={() => matches("fine") && pick(W)} onFocus={() => pick(W)} onClick={() => pick(W)}>
+              <b>{QUOTE_OPTS[W].name}</b>
+              <span><span className="dk">{QUOTE_OPTS[W].holds.join(" | ")}</span><span className="po">Full day | Couples</span></span>
             </button>
           </div>
           <p className="mt-q-line">Send a note or book a free call. I come back with an approach and a quote.</p>

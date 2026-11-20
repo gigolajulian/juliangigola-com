@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Dialog } from "radix-ui";
 import { Check, Failed, Hidden, NEED_MSG, checkYou, first, useEnquiry } from "@/components/v3/flow";
 import { CHIP_TYPE, QUOTE_OPTS, type QuoteOpt } from "./data";
-import type { InquiryFrom } from "./ctx";
+import type { InquiryMode } from "./ctx";
 import { tp } from "./motion/touch-parity";
 
 /* Spec 3.11: the quick note over a dim layer (a bottom sheet on phones),
@@ -27,7 +27,7 @@ const readDraft = (): typeof EMPTY => {
   }
 };
 
-function Form({ from, opt, reply, onClose }: { from: InquiryFrom; opt?: QuoteOpt; reply: string | null; onClose: () => void }) {
+function Form({ from, opt, reply, onClose }: { from: InquiryMode; opt?: QuoteOpt; reply: string | null; onClose: () => void }) {
   const router = useRouter();
   const { state, pending, sent, send } = useEnquiry();
   const [chip, setChip] = React.useState(opt?.chips[0] ?? "");
@@ -62,7 +62,7 @@ function Form({ from, opt, reply, onClose }: { from: InquiryFrom; opt?: QuoteOpt
     <input id={`mq-${k}`} name={k === "when" ? undefined : k} value={v[k]} onChange={set(k)} aria-invalid={!!err[k] || undefined} aria-describedby={err[k] ? `mq-${k}-err` : undefined} {...extra} />
   );
   const detail = quote ? [`${opt.name}${chip ? `: ${chip}` : ""}`, v.when.trim() && `When: ${v.when.trim()}`].filter(Boolean).join(" · ").slice(0, 200) : undefined;
-  const type = quote ? (CHIP_TYPE[chip] ?? (opt.key === "fashion" ? "editorial" : "other")) : "other";
+  const type = quote ? (CHIP_TYPE[chip] ?? opt.type ?? "other") : "other";
   if (sent)
     return (
       <div className="mt-sent" role="status">
@@ -77,7 +77,7 @@ function Form({ from, opt, reply, onClose }: { from: InquiryFrom; opt?: QuoteOpt
       noValidate
       onSubmit={(e) => {
         e.preventDefault();
-        if (call) return router.push("/book/music-photography");
+        if (call) return router.push(opt.call);
         const bad = checkYou(v.name, v.email);
         if (!v.message.trim()) bad.message = NEED_MSG;
         setErr(bad);
@@ -161,7 +161,7 @@ function Handle({ onClose }: { onClose: () => void }) {
   );
 }
 
-export function InquiryCard({ at, reply, onClose, onBack }: { at: { from: InquiryFrom; opt?: QuoteOpt["key"] } | null; reply: string | null; onClose: () => void; onBack: () => void }) {
+export function InquiryCard({ at, reply, onClose, onBack }: { at: { from: InquiryMode; opt?: QuoteOpt["key"] } | null; reply: string | null; onClose: () => void; onBack: () => void }) {
   const opt = QUOTE_OPTS.find((o) => o.key === at?.opt);
   return (
     <Dialog.Root open={!!at} onOpenChange={(o) => !o && onClose()}>

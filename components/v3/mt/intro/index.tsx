@@ -4,7 +4,7 @@ import * as React from "react";
 import loader from "@/image-loader";
 import { matches } from "@/lib/device";
 import { qflag } from "@/lib/mtflags";
-import type { MtFrame } from "../data";
+import { EXTRAS, type MtFrame } from "../data";
 import "./intro.css";
 
 /* v4 home intro, "The canvas" (spec 3.1): JG inks in alone, the whole wall and
@@ -461,7 +461,7 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
     // extras are drawn only from thumbs that have arrived, so the canvas never shows an empty tile
     // where rows five and six show (wide screens) the wall itself uses extras up to 29, so the canvas draws from the ones after
     const rows6 = !!wall.querySelector<HTMLElement>("figure.xr")?.offsetParent && pool.current.length >= 48;
-    const from = rows6 ? 30 : 16;
+    const from = rows6 ? EXTRAS.wall : EXTRAS.sides;
     const fit = preload ? fitExtras(hero, wall) : null; // the preload hold: only as many as this screen's canvas draws, at the size it draws them
     const upto = rows6 ? (window.innerWidth >= 3300 ? 80 : 60) : 46; // ?preload=0: the old fixed set, its tiles repeat past it
     // the preload hold: one photo per drawn tile, up to the whole pool (an iPad in portrait draws 37 to 39), so no tile repeats while the pool lasts

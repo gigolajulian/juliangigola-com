@@ -4,13 +4,14 @@ import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { COVER_RELEASES } from "@/lib/cover-art-data";
+import type { CoverRelease } from "@/lib/cover-art-types";
 import { media } from "@/lib/device";
 import { holdEase, holdUnease } from "@/lib/motion/hold-ease";
 import { HeldRow } from "./held-row";
 import { progress } from "./motion/engine";
 import { COVER_KEYS, COVER_PRESS, FILM_DRESS, pad, type MtFilm } from "./data";
 
-const COVERS = COVER_KEYS.map((k) => COVER_RELEASES.find((r) => r.slug === k)!).filter(Boolean);
+const COVERS = COVER_KEYS.map((k) => COVER_RELEASES.find((r) => r.slug === k)).filter((r): r is CoverRelease => !!r);
 
 /* Spec 3.7: sleeves with a picture disc behind each. `--o` per sleeve (0 in,
    1 out) is the record's travel; the static page rests it at .5. */
