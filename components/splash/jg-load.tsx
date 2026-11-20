@@ -41,13 +41,14 @@ function reveal(cover: HTMLElement) {
   const gr = cover.querySelector<SVGRectElement>(".gr");
   if (!ink || !ln || !mg || !gr) return cover.remove();
   // where J meets G, the middle of the mark, in the middle of the screen (`jg-cover.ts`)
-  const ox = Number(cover.dataset.ox) || innerWidth / 2, oy = Number(cover.dataset.oy) || innerHeight / 2;
+  const ox = Number(cover.dataset.ox) || cover.clientWidth / 2, oy = Number(cover.dataset.oy) || cover.clientHeight / 2;
   const close = Number(cover.dataset.close) || 0;
   const ct = mg.querySelector<SVGEllipseElement>(".ct");
   const ctx = Number(ct?.getAttribute("cx"));
   /* From below: the session photo's middle under the mark where the layout
      allows (a phone, the photo on top), a fifth of the screen at least. */
-  const page = document.getElementById("p-flow");
+  // over the calendar only (iPad, desktop): the rest of the page is already in place and stays still
+  const page = cover.dataset.box === undefined ? document.getElementById("p-flow") : null;
   const ph = page?.querySelector(".ph")?.getBoundingClientRect();
   const pr = page?.getBoundingClientRect();
   const rise = Math.max(innerHeight * 0.2, ph && ph.height > 0 ? oy - (ph.top + ph.height / 2) : 0);
@@ -148,6 +149,7 @@ export function JgLoad({ done, onDone, className }: { done: boolean; onDone: () 
           fired = true;
           if (cover) {
             // the picker is drawn under the cover first, then the cut opens onto it
+            cover.dataset.hand = "";
             last.current();
             requestAnimationFrame(() => requestAnimationFrame(() => window.setTimeout(() => reveal(cover), 60)));
           } else window.setTimeout(() => last.current(), still ? 0 : 120); // a beat on the full mark before the calendar takes its place

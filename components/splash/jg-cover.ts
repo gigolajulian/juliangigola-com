@@ -57,7 +57,7 @@ function place(d: HTMLElement) {
   const J = ink("J"), G = ink("G");
   const jl = J.l, jr = J.r, gl = G.l, gr = G.r;
   const asc = Math.max(J.asc, G.asc), gap = fs * 0.04, under = fs * 0.2;
-  const w = jr - jl + gap + gr - gl, cx = innerWidth / 2, cy = innerHeight / 2;
+  const w = jr - jl + gap + gr - gl, cx = d.clientWidth / 2, cy = d.clientHeight / 2;
   const base = cy + (asc - under) / 2, xj = cx - w / 2 - jl, xg = cx - w / 2 + (jr - jl) + gap - gl;
   d.querySelectorAll("text").forEach((t) => {
     t.setAttribute("x", String(t.classList.contains("j") ? xj : xg));
@@ -83,11 +83,34 @@ function cover(lay: (d: HTMLElement) => void, markup: string) {
   d.id = "jg-cover";
   d.setAttribute("aria-hidden", "true");
   d.dataset.at = String(performance.now());
-  d.style.cssText = "position:fixed;inset:0;z-index:2147483000";
+  /* iPad and desktop: over the calendar only, the steps, title and cards
+     show at once (Julian, 2026-11-19: "only in the calendar", "on desktop
+     and iPad"); it follows the calendar's box as it is drawn. A phone: the
+     whole screen. */
+  const box = innerWidth >= 768 && document.querySelector("#p-flow .f-body") ? (d.dataset.box = "", true) : false;
+  d.style.cssText = box ? "position:absolute;z-index:5;overflow:hidden" : "position:fixed;inset:0;z-index:2147483000";
   d.innerHTML = markup;
   document.documentElement.appendChild(d);
+  let el: Element | null = null;
+  const ro = box && window.ResizeObserver ? new ResizeObserver(() => go()) : null;
+  const fit = () => {
+    const n = document.querySelector("#p-flow .f-body");
+    if (!n) return;
+    if (n !== el) ro?.observe((el = n));
+    // from under the session cards (and the lines under them) to the foot of the column: the cards stay clear, the calendar's Month switch is covered
+    const r = n.getBoundingClientRect();
+    let t = r.top;
+    for (const c of n.children) {
+      const b = c.getBoundingClientRect();
+      if (b.height && !c.matches("[role=status], .f-in") && !c.querySelector(".cal-top")) t = Math.max(t, b.bottom);
+    }
+    Object.assign(d.style, { left: `${r.left + scrollX}px`, top: `${t + scrollY}px`, width: `${r.width}px`, height: `${r.bottom - t}px` });
+  };
+  // `hand`: the picker is being drawn under it, so the mark holds still while the box grows to the calendar
   const go = () => {
-    if (d.isConnected && d.dataset.go === undefined) lay(d);
+    if (!d.isConnected) return ro?.disconnect();
+    if (box) fit();
+    if (d.dataset.go === undefined && d.dataset.hand === undefined) lay(d);
   };
   go();
   if (document.fonts) document.fonts.ready.then(go);
