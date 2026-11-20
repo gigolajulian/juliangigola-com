@@ -239,7 +239,7 @@ html:has(.proof[data-wall])::-webkit-scrollbar{display:none}
 .proof[data-wall]>div:not(.pw-layer,.pw-splash,.proof-lb,.proof-over){position:relative;z-index:1}
 /* Until the page knows it has the wall (the flag is read in the browser), nothing of the plain gate shows: it flashed
    for a frame before the splash. `data-proofwall` is set before the first paint (layout.tsx). */
-:root[data-proofwall] .proof:not([data-wall]):has(.proof-gate){visibility:hidden}
+:root[data-proofwall] .proof:not([data-wall]):has(.proof-gate,.dlv-gate){visibility:hidden}
 .pw-layer{position:fixed;inset:0;z-index:0;background:var(--background)}
 /* Julian: hovering a photo does nothing here, and the wall sits under a blur */
 /* Julian: hovering the wall does nothing. The tiles take the pointer back (drift-wall.css), so they are let go too. */
@@ -446,3 +446,37 @@ html:has(.proof[data-wall])::-webkit-scrollbar{display:none}
 .ctr-alt:hover{color:var(--foreground)}
 .ctr-mark{width:min(300px,100%);aspect-ratio:3/1;margin-top:-12px;border-bottom:1px solid var(--foreground);margin-bottom:16px;display:flex;align-items:center}
 .ctr-mark svg{width:100%;height:100%;display:block}
+
+/* delivery by model (Julian 2026-11-19): a card per model, the number on the cover's top right, its own zip */
+.dlv-dl{display:flex;flex-wrap:wrap;align-items:center;gap:12px 18px}
+.dlv-dl .proof-mu{margin:0}
+.dlv-dl .proof-mu b{font-weight:500;color:var(--foreground)}
+.proof [data-done]{opacity:.7}
+.dlv-models{grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:36px 6px}
+.dlv-minis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px;width:100%;margin-top:3px}
+.dlv-minis img{display:block;width:100%;aspect-ratio:1;object-fit:cover;user-select:none;-webkit-user-select:none}
+.dlv-cover{position:relative;aspect-ratio:4/5;overflow:hidden;background:#111}
+.dlv-cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;transition:filter .2s ease-out;user-select:none;-webkit-user-select:none}
+.dlv-cover::after{content:"";position:absolute;top:0;right:0;width:60%;aspect-ratio:1;background:radial-gradient(circle at 100% 0,rgba(0,0,0,.42),transparent 62%);pointer-events:none}
+@media(hover:hover){.dlv-card:hover .dlv-cover img{filter:brightness(1.12)}}
+.dlv-num{position:absolute;z-index:1;top:12px;right:14px;font:800 clamp(28px,3vw,40px)/1 var(--font-display);letter-spacing:-.03em;font-variant-numeric:tabular-nums;color:#f0efec;text-shadow:0 1px 14px rgba(0,0,0,.55);pointer-events:none}
+.dlv-cap{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px 10px;padding:12px 6px 0;font:11px var(--p-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted-foreground)}
+.dlv-zip{font:500 11px var(--p-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--foreground);white-space:nowrap;min-height:36px;padding:0 14px;border:1px solid var(--p-hl);transition:background-color .15s ease-out,color .15s ease-out,border-color .15s ease-out}
+.dlv-zip:hover{background:var(--foreground);color:var(--background);border-color:var(--foreground)}
+.dlv-zip:active{transform:scale(.97)}
+@media(hover:hover){.dlv-zip .dlv-sz{display:none}.dlv-zip:is(:hover,:focus-visible) .dlv-sz{display:inline}}
+.dlv-back{display:block;font:12px var(--p-mono);color:var(--muted-foreground);min-height:36px;margin-bottom:22px}
+.dlv-back:hover{color:var(--foreground)}
+.dlv-mh h1{margin-bottom:22px}
+@media(max-width:700px){.dlv-models{grid-template-columns:1fr;gap:28px 0}}
+/* The mock's intro: big heading (the wall gate's 44px cap is for the proofs' greeting), Download all bottom right. */
+.proof .dlv-intro{max-width:none;display:grid;grid-template-columns:1fr auto;column-gap:24px;align-items:start;justify-items:start}
+.dlv-intro>*{grid-column:1}
+.dlv-intro>.dlv-dl{grid-column:2;grid-row:1/span 4;align-self:end;flex-direction:column;align-items:flex-end;text-align:right}
+.proof .proof-intro.dlv-intro h1{font:500 clamp(40px,8cqi,104px)/.95 var(--font-display);letter-spacing:-.04em;margin:14px 0 0;min-height:0}
+.dlv-top .proof-tabs{justify-self:end}
+@container (max-width:700px){
+  .dlv-intro{grid-template-columns:1fr}
+  .dlv-intro>.dlv-dl{grid-column:1;grid-row:auto;align-items:flex-start;text-align:left}
+}
+@container (max-width:520px){.dlv-top>span{display:none}}

@@ -98,14 +98,17 @@ export async function webResponse(request: Request, env: Env, id: string, fid: s
 }
 export const webName = (file: string) => `${file.replace(/\.[a-z0-9]+$/i, "")} web.jpg`;
 
-/* Download all: every final in one stored zip, streamed from R2 with its exact length. Sizes and CRCs were
+/* Download all (or one model's, `?m=`): every final in one stored zip, streamed from R2 with its exact length. Sizes and CRCs were
    recorded at upload, so the Worker only pipes bytes. A file that changed since is a broken download, never a wrong one. */
 export async function zipResponse(request: Request, env: Env, id: string) {
   const g = await openDeliveryIn(env, id, request.headers.get("cookie"));
   if (!g) return notFound();
   const busy = await limited(env, request);
   if (busy) return busy;
-  const finals = shotOrder(g.p.finals ?? []);
+  // `?m=M04`: one model's finals (Julian 2026-11-19). Same stored bytes, so a model zip is as ready as the full one.
+  const m = new URL(request.url).searchParams.get("m");
+  const finals = shotOrder((g.p.finals ?? []).filter((f) => !m || f.model === m));
+  if (!finals.length) return notFound();
   const names = uniqueNames(finals.map((f) => f.file));
   const z = zipLayout(finals.map((f, i) => ({ name: names[i], size: f.bytes, crc: f.crc })));
   const out = new FixedLengthStream(z.total);
@@ -128,7 +131,7 @@ export async function zipResponse(request: Request, env: Env, id: string) {
   });
   const day = id.slice(0, 8);
   return new Response(out.readable, {
-    headers: { "content-type": "application/zip", "content-length": String(z.total), "content-disposition": attachment(`Julian Gigola ${day.slice(0, 2)}-${day.slice(2, 4)}-${day.slice(4)}.zip`), ...PRIVATE },
+    headers: { "content-type": "application/zip", "content-length": String(z.total), "content-disposition": attachment(`Julian Gigola ${day.slice(0, 2)}-${day.slice(2, 4)}-${day.slice(4)}${m ? ` ${m}` : ""}.zip`), ...PRIVATE },
   });
 }
 
