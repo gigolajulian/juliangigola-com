@@ -1,4 +1,4 @@
-/* Phones and tablets get the desktop's motion (Julian, 2026-11-18: "integrate", then "push" after MAC passed all eight). On by default.
+/* Phones and tablets get the desktop's motion. On by default.
    `?mttp=0` turns all of it off, `?mttp=-flip,-sink` the listed items, `?mttp=flip,sink` keeps only those. engine.ts sets html[data-tp-<item>] for touch-parity.css. */
 import { qvalue } from "@/lib/mtflags";
 

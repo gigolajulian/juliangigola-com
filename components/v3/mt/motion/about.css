@@ -1,6 +1,6 @@
 /* v4 home motion: about. Applies only under html[data-mt-motion]. */
 
-/* Desktop (a1, 2026-11-14): no stop. The beats that followed the hold's --p now follow --tp, which runs 0 to 1 on a
+/* Desktop: no stop. The beats that followed the hold's --p now follow --tp, which runs 0 to 1 on a
    timer once the section is on screen (about.ts marks it `data-seen`). */
 @property --tp{syntax:"<number>";inherits:true;initial-value:0}
 html[data-mt-held] .mt-about{--tp:0;transition:--tp 2.8s cubic-bezier(.3,.1,.2,1)}

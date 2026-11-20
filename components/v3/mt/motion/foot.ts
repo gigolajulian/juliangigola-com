@@ -95,8 +95,7 @@ function setup(el: HTMLElement, ctx: Ctx) {
   };
 
   /* The spot: the letters rest lit (foot.css) and go back to the plain grey
-     near the dot. Idle and hover traded places (Julian, 2026-11-15); before,
-     the letters rested grey and the spot lit them. The canvas is only the
+     near the dot. The canvas is only the
      spot's box inside the phrase band. */
   const draw = (r: DOMRect, u: number) => {
     const br = btn.getBoundingClientRect();
@@ -183,7 +182,7 @@ function setup(el: HTMLElement, ctx: Ctx) {
     // phrase: one speed easing toward idle plus whatever the scroll adds
     pk = clamp(pk * Math.pow(0.94, k) + c.dy * 0.0012, -0.35, 0.35);
     if (Math.abs(pk) < 0.0005) pk = 0;
-    // 68 design px a second, 54 under the pointer (Julian, 2026-11-15: 30 passed too slow and nearly stopped on hover, 90 was a bit fast; the hover speed stayed)
+    // 68 design px a second, 54 under the pointer
     phraseV += ((busy ? 0 : (hot ? 0.054 : 0.068) * u) + pk - phraseV) * (1 - Math.exp(-dt / 180));
     phraseX += phraseV * dt;
     tr = -pad - mod(phraseX, W || 1);

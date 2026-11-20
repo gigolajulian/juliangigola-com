@@ -7,7 +7,7 @@ import { sleeveTilt } from "./sleeve-tilt";
 import { tp } from "./touch-parity";
 
 
-/* Julian, 2026-11-18 (?mtsnap=0 turns it off): a hold never rests between two items. When the scroll stops inside the hold, the page glides to the
+/* Snap (?mtsnap=0 turns it off): a hold never rests between two items. When the scroll stops inside the hold, the page glides to the
    nearest one. Within a step of the item it rested on it leans 0.44 of a step the way the scroll went, so one wheel notch (100px, a small part of a step) moves on instead of
    falling back; ?mtsnap=near is plain nearest. `at`: the hold's share as an item position; `share`: an item's resting share of the hold. */
 function snap(el: HTMLElement, ctx: Ctx, n: number, at: (p: number) => number, share: (i: number) => number, busy: () => boolean, signal: AbortSignal) {
@@ -55,11 +55,11 @@ function heldRow(name: MtSection): Driver {
       const o: number[] = Array(n).fill(-1);
       let step = 1, c0 = 0, mid = 0, range = 0, cur = -1, base = 0, lastX = NaN;
 
-      /* The V4 default since 2026-11-15 (Julian: "turn on the parallax by default"), ?mtpar=0 turns it off: the heading and the row ride up at their own
-         rates and the stage hands over to Motion (rows.css). The pile the covers were dealt from is gone (Julian, 2026-11-17). */
+      /* Parallax, on by default, ?mtpar=0 turns it off: the heading and the row ride up at their own
+         rates and the stage hands over to Motion (rows.css). */
       const par = !qflag("mtpar", "0");
       if (par) document.documentElement.setAttribute("data-mt-par", "");
-      // kept (Julian, 2026-11-17: "keep the lid"), ?mtlid=0 turns it off: Cover art waits under Commissions, which lifts off it like a lid (rows.css)
+      // on by default, ?mtlid=0 turns it off: Cover art waits under Commissions, which lifts off it like a lid (rows.css)
       if (par) document.documentElement.toggleAttribute("data-mt-lid", !qflag("mtlid", "0"));
       const measure = () => {
         // flow.css scales the row as it enters and settles: measure it at rest
@@ -77,7 +77,7 @@ function heldRow(name: MtSection): Driver {
       /* Record rule: out at the stage centre, back in the sleeve `fall` px away. */
       const discs = (x: number, fall: number, k = 1) => {
         for (let i = 0; i < n; i++) {
-          // eased: the record leaves and returns slowly at both ends instead of at one speed (Julian, 2026-11-14)
+          // eased: the record leaves and returns slowly at both ends instead of at one speed
           const v = Math.round(smooth(clamp(1 - Math.abs(c0 + i * step - x - mid) / fall)) * k * 1000) / 1000;
           if (v !== o[i]) items[i].style.setProperty("--o", String((o[i] = v)));
         }
@@ -88,7 +88,7 @@ function heldRow(name: MtSection): Driver {
       };
 
       const frame = (p: number) => {
-        // the first record starts inside its sleeve and comes out over the first 5% of the hold (Julian, 2026-11-15)
+        // the first record starts inside its sleeve and comes out over the first 5% of the hold
         const k = smooth(clamp(p / 0.05));
         p = ease(p);
         const i = Math.round(p * (n - 1)), x = p * (n - 1) * step;
@@ -133,7 +133,11 @@ function heldRow(name: MtSection): Driver {
       }, opts);
       const up = () => void (down = null);
       row.addEventListener("pointerup", up, opts);
-      row.addEventListener("pointercancel", up, opts);
+      // a cancelled drag gets no click to clear `dragged`, which would keep the hover tilt off until the next press
+      row.addEventListener("pointercancel", () => {
+        down = null;
+        dragged = false;
+      }, opts);
       row.addEventListener("click", (e) => {
         if (!dragged) return;
         dragged = false;
@@ -222,7 +226,7 @@ function films(): Driver {
         scrollBy({ top: ((el.offsetHeight - innerHeight) / n) * (e.key === "ArrowRight" ? 1 : -1), behavior: "smooth" });
       }, opts);
       /* Previews: a muted player in the current film, and one in the film before and after it, started and
-         then paused so they are loaded when their turn comes (Julian, 2026-11-14). The poster stays on top
+         then paused so they are loaded when their turn comes. The poster stays on top
          until the player says it plays (same wait as video.tsx Loop). Players only ever start while the
          page rests, the current film's first, the others one at a time. */
       type Pv = { f: HTMLIFrameElement | HTMLVideoElement; yt: boolean; played: boolean; at: number; t: number };
@@ -331,7 +335,7 @@ function films(): Driver {
           v.f.removeAttribute("data-ready");
         }
       }, opts);
-      // a screen early, so the first film is already playing when the section arrives (Julian, 2026-11-17: play as soon as possible)
+      // a screen early, so the first film is already playing when the section arrives
       const io = new IntersectionObserver(([e]) => {
         seen = e.isIntersecting;
         preview();

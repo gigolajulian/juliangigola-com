@@ -17,7 +17,7 @@ import { flipMs } from "./motion/root-attrs";
 const A = [0.12, 0, 0.2];
 const SIDES = [-2, -1, 3, 4];
 const TOPS = [100, 290, 180];
-const XR: number[] = []; // rows five and six are off the wall (Julian, 2026-11-17: one less row, twice); their photos turn up in the idle swaps
+const XR: number[] = []; // rows five and six are off the wall; their photos turn up in the idle swaps
 const mod3 = (c: number) => ((c % 3) + 3) % 3;
 
 const SIZES = "(max-width: 599px) 50vw, (min-width: 1920px) 18vw, 30vw";
@@ -55,7 +55,7 @@ const letters = (t: string) => t.split(" ").map((word, n) => (
 const STILL = 4000; // idle wall: still this long before the first swap
 const EVERY = 2500; // then one frame at this pace
 
-/* Idle wall (the V4 default since 2026-11-15, `?idle=0` turns it off): after 4 still seconds one of the 12 locked frames on screen changes every 2.5 seconds
+/* Idle wall (on by default, `?idle=0` turns it off): after 4 still seconds one of the 12 locked frames on screen changes every 2.5 seconds
    for a frame that is not on the wall. Any pointer move, scroll, key or touch holds it. Off for reduced motion and during the splash. */
 function useIdleWall(frames: MtFrame[], extras: MtFrame[]) {
   const root = React.useRef<HTMLElement>(null);

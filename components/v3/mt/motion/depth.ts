@@ -29,7 +29,7 @@ export const depthDrivers: Driver[] = [
         ty = (e.clientY / ctx.vh) * 2 - 1;
         raf ||= requestAnimationFrame(draw);
       };
-      // the pointer left the window: settle flat, slowly (Julian, 2026-11-17: it snapped back)
+      // the pointer left the window: settle flat, slowly
       const leave = () => {
         k = 0.025;
         tx = ty = 0;

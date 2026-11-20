@@ -22,7 +22,7 @@ export const commissionsDrivers: Driver[] = [
       const fade = (ctx: Ctx) => {
         if (head && logos && (ctx.dy || ctx.fresh)) {
           // gone while the logos are still 40% of a screen below it
-          // on or off, not a scroll-tied fade (Julian, 2026-11-14): commissions.css times the fade
+          // on or off, not a scroll-tied fade: commissions.css times the fade
           const o = !ctx.held || logos.getBoundingClientRect().top - head.getBoundingClientRect().bottom > ctx.vh * 0.5 ? 1 : 0;
           if (o !== s.o) head.toggleAttribute("data-out", !(s.o = o));
         }

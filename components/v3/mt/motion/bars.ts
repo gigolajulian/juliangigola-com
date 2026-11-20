@@ -1,8 +1,8 @@
 import type { Driver, MtSection } from "./engine";
 
 /* Phones and tablets: Book online and By quote each get the bottom bar while
-   they fill the screen. Their rows change only when one is tapped: the scroll
-   walk through the rows is gone (Julian, 2026-11-14). */
+   they fill the screen. Their rows change only when one is tapped,
+   never with the scroll. */
 const bar = (name: MtSection): Driver => ({
   name,
   always: true,
