@@ -29,14 +29,13 @@ const DRAW = 350; // the columns get their first draw here, out of sight, while 
    canvas, but the frames that are not the hero stand nearer the lens. At rest
    it is the flat canvas; when the camera moves, each of those columns grows
    faster than the wall, slides off past its neighbours, loses focus and is gone
-   before the hero lands. The hero is the only plane that stays sharp. The push
-   overshoots a touch and settles. Drawn in 2D: each strip scales around the
-   point the wall scales around, as a plane at depth d would. */
+   before the hero lands. The hero is the only plane that stays sharp. Drawn
+   in 2D: each strip scales around the point the wall scales around, as a
+   plane at depth d would. */
 const DEEP_PUSH = 3350; // the full canvas holds about a second before the push
-const DEEP_LAND = 4850; // the push peaks here (1500ms), then settles back to the end
-const DEEP_OVER = 0; // was .007: the push carried a touch past and settled back. Julian, 2026-11-15: the settle read as extra, so it lands and stays
+const DEEP_LAND = 4850; // the push lands here (1500ms) and holds to the end
+// the push used to carry a touch past (.007) and settle back. Julian, 2026-11-15: the settle read as extra, so it lands and stays
 const DEPTHS = [0.5, 0.28, 0.62, 0.36, 0.56, 0.22, 0.44]; // per extra column: 0 the hero's plane, 1 the lens
-const SETTLE = "cubic-bezier(0.45, 0, 0.55, 1)";
 
 /* Return visits (Julian, 2026-11-14): a browser that has seen the intro in the last 30 days gets it in 3.2s. The same
    moves with less waiting: JG, the canvas comes up fast, then nearly the same push. First visits keep 5.3s.
@@ -131,7 +130,7 @@ function canvasOf(hero: HTMLElement, wall: HTMLElement) {
   const P = core[1].b[0].x - first[0].x; // column pitch
   const u = w / 403; // the mock's frame is 403 wide
 
-  // the view: scale .46 around a point of the wall that sits at the screen centre
+  // the view: scale S0 around a point of the wall that sits at the screen centre
   const px = W / 2 - wr.left;
   const py = hero.getBoundingClientRect().top - wr.top + 1150 * u;
   const ty = H / 2 - (wr.top + py);
@@ -208,6 +207,11 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
     const anims: Animation[] = [];
     const made: HTMLElement[] = [];
     const timers: number[] = [];
+    /* Out of sight until it moves, then opaque at once: it comes up out of the ground colour, never an opacity fade.
+       The browser skips whatever is fully hidden, and the first draw of the columns holds the screen for about 100ms.
+       So each one waits at opacity 0, goes to 1% under its veil at DRAW, and is drawn before the first column moves. */
+    const unseen: [Element, number][] = [];
+    const noTap: HTMLElement[] = [];
     let finished = false; // the intro has ended
     let raf = 0;
     let started = false;
@@ -228,7 +232,7 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
       timers.forEach(clearTimeout);
       anims.forEach((a) => a.cancel());
       made.forEach((n) => n.remove());
-      held.forEach((h) => (h.style.pointerEvents = ""));
+      noTap.forEach((h) => (h.style.pointerEvents = ""));
       parked.forEach(([i, set, src]) => (set && i.setAttribute("srcset", set), src && i.setAttribute("src", src)));
       wall.style.transformOrigin = origin;
       delete root.dataset.mtIntro;
@@ -248,13 +252,8 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
     };
     const rise = (el: Element, from: number, delay: number) => {
       play(el, [{ transform: `translate3d(0,${from}px,0)` }, { transform: "translate3d(0,0,0)" }], { duration: pace.rise, delay, easing: OUT, composite: "add" }); // added on top of the scroll travel, so scrolling as the intro lands never snaps
-      hidden.push([el, delay]);
+      unseen.push([el, delay]);
     };
-    /* Out of sight until it moves, then opaque at once: it comes up out of the ground colour, never an opacity fade.
-       The browser skips whatever is fully hidden, and the first draw of the columns holds the screen for about 100ms.
-       So each one waits at opacity 0, goes to 1% under its veil at DRAW, and is drawn before the first column moves. */
-    const hidden: [Element, number][] = [];
-    const held: HTMLElement[] = [];
     // the ground colour lifts off a column: one opacity per column, so nothing repaints
     const light = (el: Element, delay: number, pseudoElement?: string) => play(el, [{ opacity: 1 }, { opacity: 0 }], { duration: pace.light, delay, pseudoElement });
     const fadeIn = (sel: string, delay: number, duration: number, lift = 0) =>
@@ -373,7 +372,7 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
         const edge = H / 2 + (topY - py) * S0;
         const from = pass ? Math.max(WALL_FROM[i % 3], (Math.min(H, jb + 260) + 24 - edge) / S0) : WALL_FROM[i % 3];
         for (let y = b[b.length - 1].y + R; y < ymax; y += R) tile(g, y);
-        c.els.forEach((el) => (rise(el, from, delay), flat ? light(el.querySelector(".ph")!, lit, "::after") : light(el, lit, "::after")));
+        c.els.forEach((el) => (rise(el, from, delay), light(flat ? el.querySelector(".ph")! : el, lit, "::after")));
         rise(g, from, delay);
         // a side column this screen does not keep leaves with the extras, so no sliver of it rides the push to the edge of the hero
         const out = c.side && leaves(c.els[0]);
@@ -407,43 +406,42 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
           ? [
               { transform: far, easing: "linear" },
               { transform: far, offset: pushAt / END, easing: IN_OUT },
-              { transform: `translate3d(0,0,0) scale(${1 + DEEP_OVER})`, offset: land / END, easing: SETTLE }, // the push carries a touch past, then settles
+              { transform: home, offset: land / END }, // the push lands and holds
               { transform: home },
             ]
           : [{ transform: far, easing: "linear" }, { transform: far, offset: pushAt / END, easing: IN_OUT }, { transform: home }],
         { duration: END },
       );
 
-      let hid = false;
-      const hide = () => {
-        if (hid) return;
-        hid = true;
+      let jgGone = false;
+      const hideJg = () => {
+        if (jgGone) return;
+        jgGone = true;
         play(jg, [{ opacity: 1 }, { opacity: 0 }], { duration: 220, easing: OUT });
       };
       const watch = () => {
-        if (finished || hid) return;
-        if (over.length && over.every((c) => Math.min(...c.els.map((el) => el.getBoundingClientRect().top)) < jt - 12)) return hide();
+        if (finished || jgGone) return;
+        if (over.length && over.every((c) => Math.min(...c.els.map((el) => el.getBoundingClientRect().top)) < jt - 12)) return hideJg();
         raf = requestAnimationFrame(watch);
       };
       raf = requestAnimationFrame(watch);
-      timers.push(window.setTimeout(hide, pushAt)); // whatever the layout, it is gone before the camera moves
+      timers.push(window.setTimeout(hideJg, pushAt)); // whatever the layout, it is gone before the camera moves
 
       // the hero's own parts arrive as the push lands
-      // the name lands with the settle of the push
       fadeIn(".mt-hero .mt-scrim", land - 250, 700);
       fadeIn(".mt-hero h1", land - 190, 900, 24);
       fadeIn(".mt-hero .mt-cap, .mt-hero .mt-ctas, .site-hdr", land + 130, 600);
       fadeIn(".mt-hero figcaption", land - 100, 450);
 
       // made last, so they sit on top of every other opacity animation on the same element
-      hidden.forEach(([el, delay]) => {
+      unseen.forEach(([el, delay]) => {
         const at = Math.min(DRAW, delay / 2);
         play(el, [{ opacity: 0 }, { opacity: 0 }], { duration: at, fill: "none" });
         play(el, [{ opacity: 0.01 }, { opacity: 0.01 }], { duration: delay - at, delay: at, fill: "none" });
         // unseen, so untouchable: a tap that hurries the intro must not open a project
         const h = el as HTMLElement;
         h.style.pointerEvents = "none";
-        held.push(h);
+        noTap.push(h);
         timers.push(window.setTimeout(() => (h.style.pointerEvents = ""), delay));
       });
 
