@@ -45,7 +45,7 @@ const FULL = { end: FULL_END, push: DEEP_PUSH, land: DEEP_LAND, rise: RISE, ligh
 const SHORT = { end: 3200, push: 1500, land: 2850, rise: 900, light: 500, at: 350, gap: 40, xgap: 22, lead: 150, jg: 450 }; // JG gets 350ms alone, the last column is up by 1490
 const AGAIN = 30 * 864e5;
 
-function returning() {
+export function returning() {
   const q = location.search;
   if (/[?&]intro=2/.test(q)) return true;
   if (/[?&]intro=1/.test(q)) return false;
@@ -58,7 +58,7 @@ function returning() {
 }
 
 /** Also remembers the choice: `?splash=1` is kept for the session, `?splash=0` or `2` clears it. */
-function deepMode() {
+export function deepMode() {
   const q = location.search;
   try {
     if (/[?&]splash=1/.test(q)) sessionStorage.setItem("jg-splash", "1");
@@ -69,7 +69,7 @@ function deepMode() {
   }
 }
 
-function shouldPlay() {
+export function shouldPlay() {
   const root = document.documentElement;
   const q = location.search;
   if (/[?&]intro=0/.test(q) || !("v3motion" in root.dataset)) return false;

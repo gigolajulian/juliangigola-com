@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, within } from "@testing-library/react";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }), usePathname: () => "/" }));
 vi.mock("@/app/contact/actions", () => ({ submitEnquiry: vi.fn() }));
@@ -15,9 +15,12 @@ const pointer = (fine: boolean) =>
   vi.spyOn(window, "matchMedia").mockImplementation(
     (q: string) => ({ matches: fine && q.includes("pointer: fine"), media: q, onchange: null, addListener() {}, removeListener() {}, addEventListener() {}, removeEventListener() {}, dispatchEvent: () => false }) as MediaQueryList,
   );
-const book = () => document.querySelector<HTMLElement>(".mt-book")!;
-const row = (i: number) => book().querySelectorAll<HTMLElement>(".mt-brw button[aria-pressed]")[i];
-const quotePhoto = () => [...book().querySelectorAll("img.qp")].findIndex((img) => img.classList.contains("on"));
+const book = () => document.querySelector<HTMLElement>('[data-mt="book"]')!;
+const quote = () => document.querySelector<HTMLElement>('[data-mt="quote"]')!;
+// only the four row buttons in Book online carry aria-pressed; the big button under them does not
+const row = (i: number) => book().querySelectorAll<HTMLElement>("button[aria-pressed]")[i];
+// the "on" class is the only state marker on the By quote photos, so it stays the one class this test reads
+const quotePhoto = () => QUOTE_OPTS.findIndex((o) => within(book()).getByAltText(`${o.name} sample`).classList.contains("on"));
 
 describe("v4 home: Book online and By quote", () => {
   afterEach(() => vi.restoreAllMocks());
@@ -45,7 +48,8 @@ describe("v4 home: Book online and By quote", () => {
     pointer(false);
     render(<MtHome data={MT} />);
     expect(quotePhoto()).toBe(-1);
-    fireEvent.click(screen.getAllByRole("button", { name: new RegExp(QUOTE_OPTS[1].name) }).find((b) => b.classList.contains("mt-qo"))!);
+    // pressed: false leaves out the Inquire buttons, which have no aria-pressed
+    fireEvent.click(within(quote()).getByRole("button", { name: new RegExp(QUOTE_OPTS[1].name), pressed: false }));
     expect(quotePhoto()).toBe(1);
     fireEvent.click(row(2));
     expect(quotePhoto()).toBe(-1);
