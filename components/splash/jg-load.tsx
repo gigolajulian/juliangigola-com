@@ -24,7 +24,7 @@ const noop = () => () => {};
 const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2); // in-out cubic, over the log of the scale
 
 /* The cut opens: the letters become windows onto the photo, which starts
-   under them, then the cut grows from inside the J's stem while the page
+   under them, then the cut grows from the middle of the mark while the page
    scales back to its place. Once per cover; the ground is the page's own
    colour all the way, so no frame is ever black. */
 function reveal(cover: HTMLElement) {
@@ -36,13 +36,14 @@ function reveal(cover: HTMLElement) {
   const ln = cover.querySelector<HTMLElement>(".ln");
   const mg = cover.querySelector<SVGGElement>(".mg");
   const gr = cover.querySelector<SVGRectElement>(".gr");
-  const J = mg?.querySelector("text");
-  if (!ink || !ln || !mg || !gr || !J) return cover.remove();
+  if (!ink || !ln || !mg || !gr) return cover.remove();
   /* Where the page starts: the photo under the letters, a touch larger. Set
-     before the holes are cut, so the letters never show the page elsewhere. */
-  const jb = J.getBBox();
-  const ox = jb.x + jb.width * 0.74, oy = jb.y + jb.height * 0.38; // inside the J's stem
-  const cx = innerWidth / 2, cy = jb.y + jb.height / 2;
+     before the holes are cut, so the letters never show the page elsewhere.
+     The cut grows from where J meets G, the middle of the mark, which sits
+     in the middle of the screen (`jg-cover.ts`). */
+  const ox = Number(cover.dataset.ox) || innerWidth / 2, oy = Number(cover.dataset.oy) || innerHeight / 2;
+  const close = Number(cover.dataset.close) || 0;
+  const cx = ox, cy = oy;
   const page = document.getElementById("p-flow");
   const ph = page?.querySelector(".ph")?.getBoundingClientRect();
   const pr = page?.getBoundingClientRect();
@@ -63,6 +64,16 @@ function reveal(cover: HTMLElement) {
   };
   frame(0);
   mg.querySelectorAll("text").forEach((t) => t.setAttribute("fill", "#000"));
+  /* J and G close over the middle as the ink drains, so the point the cut
+     grows from is inside a letter, not in the gap between them. */
+  const texts = [...cover.querySelectorAll<SVGTextElement>("text")].map((t) => ({ t, x: Number(t.getAttribute("x")), dir: t.classList.contains("j") ? 1 : -1 }));
+  const c0 = performance.now();
+  const shut = (now: number) => {
+    const k = Math.min(1, (now - c0) / 240), e = 1 - (1 - k) ** 3;
+    for (const { t, x, dir } of texts) t.setAttribute("x", String(x + dir * close * e));
+    if (k < 1) requestAnimationFrame(shut);
+  };
+  requestAnimationFrame(shut);
   ink.getAnimations().forEach((a) => a.cancel());
   ink.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 240, easing: "ease", fill: "forwards" });
   ln.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 300, easing: "ease", fill: "forwards" });
@@ -101,15 +112,6 @@ export function JgLoad({ done, onDone, className }: { done: boolean; onDone: () 
     // the cover went up as the page was read: its least time counts from then
     const shownFrom = cover ? Number(cover.dataset.at) || start : start;
     const bar = cover?.querySelector<HTMLElement>(".ln u");
-    if (cover) {
-      // the line as wide as J and G themselves, not the guess the markup starts with
-      const [j, g] = cover.querySelectorAll<SVGTextElement>(".ink text");
-      const ln = bar?.parentElement;
-      if (j && g && ln) {
-        const a = j.getBBox(), b = g.getBBox();
-        Object.assign(ln.style, { left: `${a.x}px`, width: `${b.x + b.width - a.x}px`, transform: ln.style.transform.replace("-50%", "0px") });
-      }
-    }
     let from = 0;
     let shown = 0;
     let raf = 0;
