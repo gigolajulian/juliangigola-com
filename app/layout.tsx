@@ -67,6 +67,16 @@ const mono = localFont({
   adjustFontFallback: false,
 });
 
+/* Geist Mono (OFL) for the hero tagline only (Julian, 2026-11-19: "I like mono but it needs to be more visible").
+   Cut to A-Z, a-z, space and "|", weights 400-600, 5KB. */
+const tagline = localFont({
+  variable: "--font-tagline",
+  src: "./fonts/GeistMono-Tagline.woff2",
+  weight: "400 600",
+  fallback: ["ui-monospace", "monospace"],
+  adjustFontFallback: false,
+});
+
 const SITE = "https://juliangigola.com";
 
 /**
@@ -121,7 +131,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${display.variable} ${mono.variable} ${figures.variable} h-full antialiased`}
+      className={`${display.variable} ${mono.variable} ${figures.variable} ${tagline.variable} h-full antialiased`}
       // Dark is the default and is what the CSS already declares, so the
       // server renders the correct theme for everyone except the visitor who
       // has chosen light. That one case is what the script below fixes.
