@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-html-link-for-pages -- plain anchors stand in for the links the component wraps */
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { LiquidPair } from "@/components/liquid-pair";
+import { LiquidPair } from "@/components/effects/liquid-pair";
 
 describe("LiquidPair", () => {
   it("renders plain buttons without a mouse", () => {

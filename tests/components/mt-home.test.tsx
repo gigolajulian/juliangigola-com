@@ -6,8 +6,8 @@ vi.mock("@/app/contact/actions", () => ({ submitEnquiry: vi.fn() }));
 vi.stubGlobal("fetch", vi.fn(() => Promise.reject(new Error("offline"))));
 
 import { MtHome } from "@/components/v4/home/home";
-import { BOOK_ROWS, COVER_KEYS, QUOTE_OPTS } from "@/lib/mt-home";
-import { MT } from "@/lib/mt-home-data";
+import { BOOK_ROWS, COVER_KEYS, QUOTE_OPTS } from "@/lib/v4-home/data";
+import { MT } from "@/lib/v4-home/server";
 
 /* The v4 home with the site's real content: every screen mounts, in order, with the picks it is given. */
 describe("v4 home", () => {

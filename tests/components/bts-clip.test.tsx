@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { BtsClip } from "@/components/bts-clip";
+import { BtsClip } from "@/components/bts/bts-clip";
 
 beforeAll(() => {
   // jsdom has no media playback.

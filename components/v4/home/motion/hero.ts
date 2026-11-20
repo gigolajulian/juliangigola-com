@@ -1,4 +1,4 @@
-import { qflag } from "@/lib/mtflags";
+import { qflag } from "@/lib/v4-home/flags";
 import { clamp, type Ctx, type Driver } from "./engine";
 
 /* Hero wall travel (spec 3.2). Held (D): the wall travels up through the hold,
@@ -193,9 +193,13 @@ export function heroStill(root: HTMLElement) {
   const st = parts(el);
   const run = () => (tone(st), clearance(st, true));
   run();
-  addEventListener("resize", run);
+  const ac = new AbortController();
+  addEventListener("resize", run, { signal: ac.signal });
   const look = window.setInterval(run, 600); // photos still loading: the tagline words read them as they arrive
-  return () => (removeEventListener("resize", run), clearInterval(look));
+  return () => {
+    ac.abort();
+    clearInterval(look);
+  };
 }
 
 export const heroDrivers: Driver[] = [

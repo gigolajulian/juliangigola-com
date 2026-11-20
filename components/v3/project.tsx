@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Mark } from "@/components/v3/duo";
-import { BtsCredit, BtsPageGrid } from "@/components/bts";
+import { BtsCredit, BtsPageGrid } from "@/components/bts/bts";
 import { BackLink } from "@/components/site/back-link";
 import { billing, markFor, titleCase } from "@/lib/work";
 import { tailHole } from "@/lib/sheet";

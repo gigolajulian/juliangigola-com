@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
-import { qflag, qvalue } from "./mtflags";
+import { qflag, qvalue } from "@/lib/v4-home/flags";
 
 const at = (search: string) => vi.stubGlobal("location", { search });
 afterEach(() => vi.unstubAllGlobals());

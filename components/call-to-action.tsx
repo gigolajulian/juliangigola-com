@@ -1,7 +1,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { LiquidPair } from "@/components/liquid-pair";
+import { LiquidPair } from "@/components/effects/liquid-pair";
 import { PendingLabel } from "@/components/pending-label";
 
 /* ── the ask ──────────────────────────────────────────────────────

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isTrackpad } from "./wheel";
+import { isTrackpad } from "@/lib/motion/wheel";
 
 const px = (deltaX: number, deltaY: number) => ({ deltaMode: 0, deltaX, deltaY });
 

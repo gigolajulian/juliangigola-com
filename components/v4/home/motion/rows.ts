@@ -1,8 +1,9 @@
 import { scrollGoal, settleTo, shiftScroll } from "@/components/v3/smooth-scroll";
-import { qvalue } from "@/lib/mtflags";
+import { matches } from "@/lib/device";
+import { qvalue } from "@/lib/v4-home/flags";
 import { holdEase as ease, holdUnease as unease } from "@/lib/motion/hold-ease";
 import { captionsOff, vimeoListen, vimeoPlays } from "@/lib/videos";
-import { clamp, rise, smooth, type Ctx, type Driver, type MtSection } from "./engine";
+import { clamp, rise, smooth, type Ctx, type Driver } from "./engine";
 import { sleeveTilt } from "@/components/cover/sleeve-tilt";
 import { tp } from "./touch-parity";
 
@@ -12,7 +13,7 @@ import { tp } from "./touch-parity";
    falling back; ?mtsnap=near is plain nearest. `at`: the hold's share as an item position; `share`: an item's resting share of the hold. */
 function snap(el: HTMLElement, ctx: Ctx, n: number, at: (p: number) => number, share: (i: number) => number, busy: () => boolean, signal: AbortSignal) {
   const m = qvalue("mtsnap");
-  if (m === "0" || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  if (m === "0" || matches("calm")) return;
   const lean = m === "near" ? 0 : 0.44;
   let t = 0, rest = NaN; // the item position the page last settled on; NaN outside the hold, so arriving is plain nearest
   const settle = () => {
@@ -40,9 +41,9 @@ function snap(el: HTMLElement, ctx: Ctx, n: number, at: (p: number) => number, s
    sideways. Motion (spec 3.8): a vertical stack there, see films() below.
    Everywhere else the native snap rows stay. */
 
-function heldRow(name: MtSection): Driver {
+function covers(): Driver {
   return {
-    name,
+    name: "covers",
     setup(el, ctx) {
       const row = el.querySelector<HTMLElement>(".mt-row");
       if (!row) return;
@@ -91,7 +92,7 @@ function heldRow(name: MtSection): Driver {
         p = ease(p);
         const i = Math.round(p * (n - 1)), x = p * (n - 1) * step;
         if (i !== cur) {
-          // The row's own scroll steps item by item so held-row.tsx names the current one; the transform carries the rest.
+          // The row's own scroll steps item by item so MtCovers (rows.tsx) names the current one; the transform carries the rest.
           row.scrollLeft = i * step;
           base = row.scrollLeft;
           cur = i;
@@ -102,7 +103,7 @@ function heldRow(name: MtSection): Driver {
         discs(x, step * (420 / 520), k);
       };
 
-      // The title line rises when held-row.tsx commits the new item (on touch too with ?mttp=covers). A turned sleeve turns back.
+      // The title line rises when MtCovers (rows.tsx) commits the new item (on touch too with ?mttp=covers). A turned sleeve turns back.
       const mo = new MutationObserver(() => {
         for (const it of items) it.removeAttribute("data-tp-fl");
         if (ctx.held || tp("covers")) rise(el.querySelector(".mt-ttl .ln > span"));
@@ -144,7 +145,7 @@ function heldRow(name: MtSection): Driver {
       }, { capture: true, signal: ac.signal });
       row.addEventListener("dragstart", (e) => { if (ctx.held) e.preventDefault(); }, opts);
 
-      // Tab to a film: the browser scrolls the hidden row to show it. Put that back and move the page there instead.
+      // Tab to a cover: the browser scrolls the hidden row to show it. Put that back and move the page there instead.
       row.addEventListener("focusin", (e) => {
         const t = e.target as Element, it = t.closest<HTMLElement>(".mt-item"), i = it ? items.indexOf(it) : -1;
         if (!ctx.held || i < 0 || !t.matches(":focus-visible")) return;
@@ -247,7 +248,7 @@ function films(): Driver {
       };
       const mount = (i: number) => {
         const film = items[i], src = film.dataset.preview!;
-        /* The site's own file (lib/mt-home.ts FILM_FILES): a plain video, no player to wait for. It says "playing" itself. */
+        /* The site's own file (lib/v4-home/data.ts FILM_FILES): a plain video, no player to wait for. It says "playing" itself. */
         if (film.dataset.file) {
           const f = document.createElement("video");
           const v: Pv = { f, yt: false, played: false, at: performance.now(), t: 0 };
@@ -312,11 +313,12 @@ function films(): Driver {
         const hit = [...pool].find(([, v]) => win(v) === e.source);
         if (!hit) return;
         const [i, v] = hit;
-        let m;
+        // YouTube: onStateChange carries the state as `info`, infoDelivery as `info.playerState`; Vimeo: playProgress `data.seconds`
+        let m: { event?: string; info?: number | { playerState?: number }; data?: { seconds?: number } } | undefined;
         try { m = typeof e.data === "string" ? JSON.parse(e.data) : e.data; } catch { return; }
         // Vimeo: the poster lifts only when the player says frames are moving
         if (m?.event === "ready") return void vimeoListen(win(v));
-        const state = m?.event === "onStateChange" ? m.info : m?.event === "infoDelivery" ? m.info?.playerState : undefined;
+        const state = m?.event === "onStateChange" ? m.info : m?.event === "infoDelivery" && m.info && typeof m.info === "object" ? m.info.playerState : undefined;
         const plays = vimeoPlays(m) || state === 1;
         if (!plays && typeof state !== "number") return;
         if (plays) {
@@ -366,4 +368,4 @@ function films(): Driver {
   };
 }
 
-export const rowsDrivers: Driver[] = [heldRow("covers"), films()];
+export const rowsDrivers: Driver[] = [covers(), films()];

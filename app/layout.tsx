@@ -3,7 +3,7 @@ import localFont from "next/font/local";
 import { Intro } from "@/components/splash/intro";
 import { SPLASH_RUN } from "@/lib/splash-run";
 import { PhotoNotice } from "@/components/photo-notice";
-import { GlassLight } from "@/components/glass-light";
+import { GlassLight } from "@/components/effects/glass-light";
 import { PhotoFade } from "@/components/photo-fade";
 import { TextCaret } from "@/components/text-caret";
 import { NavMemo } from "@/components/site/back-link";
@@ -16,14 +16,14 @@ import { CardTilt } from "@/components/card-tilt";
 import { HoverSettle } from "@/components/hover-settle";
 import { FocusField } from "@/components/focus-field";
 import { ldJson, siteGraph } from "@/lib/seo";
-import { DebugGate } from "@/components/debug-gate";
+import { DebugGate } from "@/components/dev/debug-gate";
 import { VisitTrail } from "@/components/visit-trail";
 import { ClickBeacon } from "@/components/click-beacon";
 import { MotionGate, V3Footer, V3Header } from "@/components/v3/chrome";
 import { ScrollThumb } from "@/components/v3/scroll-thumb";
 import { SmoothScroll } from "@/components/v3/smooth-scroll";
 import { ScrollReveal } from "@/components/v3/scroll-reveal";
-import { V4_HOME } from "@/lib/mtscroll";
+import { V4_HOME } from "@/lib/v4-home/switch";
 
 /* JG V3 (DESIGN.md): Inter Tight for the display type and the wordmark,
    IBM Plex Mono for everything else, and Archivo Expanded for the booking

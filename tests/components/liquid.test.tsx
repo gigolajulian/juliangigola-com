@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { render, renderHook, screen, waitFor } from "@testing-library/react";
-import { Liquid, useQuiet } from "@/components/liquid";
+import { Liquid, useQuiet } from "@/components/effects/liquid";
 
 describe("liquid", () => {
   it("Liquid mounts with an item", () => {

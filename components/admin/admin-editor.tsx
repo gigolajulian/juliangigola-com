@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Orb } from "@/components/orb";
+import { Orb } from "@/components/effects/orb";
 import { type SiteContent } from "@/lib/content";
 import { AdminNewProject } from "@/components/admin/admin-new-project";
 import { AdminProjects, type AdminProject } from "@/components/admin/admin-projects";

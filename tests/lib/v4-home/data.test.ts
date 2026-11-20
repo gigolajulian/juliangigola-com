@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CHIP_TYPE, QUOTE_OPTS } from "@/lib/mt-home";
+import { CHIP_TYPE, QUOTE_OPTS } from "@/lib/v4-home/data";
 import { clamp, progress, smooth, span } from "@/components/v4/home/motion/engine";
 import { SHOOT_TYPES } from "@/lib/inbox";
 
@@ -23,6 +23,10 @@ describe("v4 motion math", () => {
   it("smooth eases 0 to 1 and keeps its ends and middle", () => {
     expect([smooth(0), smooth(0.5), smooth(1)]).toEqual([0, 0.5, 1]);
     expect(smooth(0.25)).toBeLessThan(0.25);
+  });
+
+  it("span runs the other way when a is above b", () => {
+    expect([span(1.2, 1, 0), span(1, 1, 0), span(0.5, 1, 0), span(-1, 1, 0)]).toEqual([0, 0, 0.5, 1]);
   });
 
   it("span maps a to b onto 0 to 1 and clamps outside it", () => {

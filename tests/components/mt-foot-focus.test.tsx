@@ -8,8 +8,8 @@ vi.stubGlobal("fetch", vi.fn(() => Promise.reject(new Error("offline"))));
 vi.stubGlobal("requestAnimationFrame", () => 0);
 
 import { MtHome } from "@/components/v4/home/home";
-import { BOOK_ROWS, QUOTE_OPTS } from "@/lib/mt-home";
-import { MT } from "@/lib/mt-home-data";
+import { BOOK_ROWS, QUOTE_OPTS } from "@/lib/v4-home/data";
+import { MT } from "@/lib/v4-home/server";
 
 /* A card opened from a footer link hands focus back to that link when it closes.
    fireEvent.click does not focus the button, like a click in Safari, so the link is not the active element at open. */

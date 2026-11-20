@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { DebugGate } from "@/components/debug-gate";
+import { DebugGate } from "@/components/dev/debug-gate";
 
 afterEach(() => history.replaceState(null, "", "/"));
 

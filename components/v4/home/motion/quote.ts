@@ -1,5 +1,5 @@
 import { tell, type Driver } from "./engine";
-import { QUOTE_CLIENTS } from "@/lib/mt-home";
+import { QUOTE_CLIENTS } from "@/lib/v4-home/data";
 
 /* By quote client rotation (spec 3.5). Runs on the engine's frame, so it
    stops with the tab; it also waits while the section is off screen, a card is

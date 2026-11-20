@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { keepNames } from "./keep-names";
+import { keepNames } from "@/lib/keep-names";
 
 test("leaves a script without __name as it is", () => {
   expect(keepNames("(function(){})()")).toBe("(function(){})()");
