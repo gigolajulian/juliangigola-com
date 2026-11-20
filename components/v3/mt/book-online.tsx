@@ -25,7 +25,7 @@ function RowPhoto({ r, on, sizes }: { r: BookRow; on: boolean; sizes: string }) 
   );
 }
 
-export function MtBookOnline({ open, onClose, quotePhoto, onRowPick }: { open: BookRow["slug"] | null; onClose: () => void; quotePhoto: QuoteOpt["key"] | null; onRowPick: () => void }) {
+export function MtBookOnline({ open, opener, onClose, quotePhoto, onRowPick }: { open: BookRow["slug"] | null; opener?: React.RefObject<HTMLElement | null>; onClose: () => void; quotePhoto: QuoteOpt["key"] | null; onRowPick: () => void }) {
   const cards = React.useContext(CardsCtx);
   const [sel, setSelRaw] = React.useState(0);
   const setSel = (i: number) => (setSelRaw(i), onRowPick());
@@ -46,8 +46,8 @@ export function MtBookOnline({ open, onClose, quotePhoto, onRowPick }: { open: B
     const el = sec.current;
     if (el) window.scrollTo({ top: window.scrollY + el.getBoundingClientRect().top - (parseFloat(getComputedStyle(el).scrollMarginTop) || 0) });
     if (open) head.current?.focus({ preventScroll: true });
-    else rows.current[shownIdx]?.focus({ preventScroll: true });
-  }, [open, shownIdx]);
+    else (opener?.current ?? rows.current[shownIdx])?.focus({ preventScroll: true });
+  }, [open, shownIdx, opener]);
 
   const next = useNextOpen(r.slug);
   const pick = (i: number) => {

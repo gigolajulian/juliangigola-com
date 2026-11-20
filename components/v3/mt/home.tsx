@@ -25,8 +25,15 @@ export function MtHome({ data }: { data: MtData }) {
   const [quotePhoto, setQuotePhoto] = React.useState<QuoteOpt["key"] | null>(null);
   // The control that opened a card gets focus back when it closes (spec 3.6, 3.11).
   const opener = React.useRef<HTMLElement | null>(null);
-  const keep = () => (opener.current = document.activeElement as HTMLElement | null);
-  const cards = React.useMemo<Cards>(() => ({ book: (k) => setBook(k), inquire: (from, opt) => (keep(), setInq({ from, opt })) }), []);
+  // a booking opened from the footer hands focus back to its footer link; from Sessions itself, to its row (book-online.tsx)
+  const bookOpener = React.useRef<HTMLElement | null>(null);
+  const cards = React.useMemo<Cards>(
+    () => ({
+      book: (k, el) => ((bookOpener.current = el ?? null), setBook(k)),
+      inquire: (from, opt, el) => ((opener.current = el ?? (document.activeElement as HTMLElement | null)), setInq({ from, opt })),
+    }),
+    [],
+  );
   const back = () => opener.current?.focus({ preventScroll: true });
   // Anchors (/sessions 308s to /#sessions; #about and #contact are linkable too): the screens take their heights after the browser's own anchor jump, so land again once they have.
   // #contact is the footer, and arriving there opens the inquiry card its "Contact me" opens (Julian, 2026-11-18); closing hands focus to that button.
@@ -72,7 +79,7 @@ export function MtHome({ data }: { data: MtData }) {
         <MtFilms films={data.films} />
         <MtCovers />
         <MtAbout does={data.does} />
-        <MtBookOnline open={book} onClose={() => setBook(null)} quotePhoto={quotePhoto} onRowPick={() => setQuotePhoto(null)} />
+        <MtBookOnline open={book} opener={bookOpener} onClose={() => setBook(null)} quotePhoto={quotePhoto} onRowPick={() => setQuotePhoto(null)} />
         <MtByQuote stills={data.stills} reply={data.reply} onOptionPick={setQuotePhoto} />
         <MtCommissions frames={data.comm} />
         <MtFoot />
