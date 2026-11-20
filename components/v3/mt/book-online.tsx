@@ -18,7 +18,7 @@ import { useNextOpen } from "./next-open";
 function RowPhoto({ r, on, sizes }: { r: BookRow; on: boolean; sizes: string }) {
   const p = SESSIONS[r.slug].photo;
   return (
-    <span className={on ? "duo on" : "duo"} style={{ "--at": r.at } as React.CSSProperties}>
+    <span className={on ? "duo on" : "duo"} style={{ "--at": r.pos } as React.CSSProperties}>
       <Duo d={p.d} l={p.l} alt={`${r.name} sample`} sizes={sizes} />
     </span>
   );
@@ -53,13 +53,13 @@ function useWeekFirst(box: React.RefObject<HTMLDivElement | null>, key: string |
   }, [box, key]);
 }
 
-export function MtBookOnline({ open, onOpen, onClose, quotePhoto, onRowPick }: { open: BookRow["key"] | null; onOpen: (k: BookRow["key"]) => void; onClose: () => void; quotePhoto: number | null; onRowPick: () => void }) {
+export function MtBookOnline({ open, onOpen, onClose, quotePhoto, onRowPick }: { open: BookRow["slug"] | null; onOpen: (k: BookRow["slug"]) => void; onClose: () => void; quotePhoto: number | null; onRowPick: () => void }) {
   const [sel, setSelRaw] = React.useState(0);
   const setSel = (i: number) => (setSelRaw(i), onRowPick());
   // desktop: the photo shows a By quote option while that list was the last one touched; never during a booking
   const q = open ? null : quotePhoto;
-  const at = open ? Math.max(0, BOOK_ROWS.findIndex((x) => x.key === open)) : sel;
-  const r = BOOK_ROWS[at];
+  const shownIdx = open ? Math.max(0, BOOK_ROWS.findIndex((x) => x.slug === open)) : sel;
+  const r = BOOK_ROWS[shownIdx];
   const sec = React.useRef<HTMLElement>(null);
   const box = React.useRef<HTMLDivElement>(null);
   const head = React.useRef<HTMLHeadingElement>(null);
@@ -75,16 +75,16 @@ export function MtBookOnline({ open, onOpen, onClose, quotePhoto, onRowPick }: {
     const el = sec.current;
     if (el) window.scrollTo({ top: window.scrollY + el.getBoundingClientRect().top - (parseFloat(getComputedStyle(el).scrollMarginTop) || 0) });
     if (open) head.current?.focus({ preventScroll: true });
-    else rows.current[at]?.focus({ preventScroll: true });
-  }, [open, at]);
+    else rows.current[shownIdx]?.focus({ preventScroll: true });
+  }, [open, shownIdx]);
 
   const next = useNextOpen(r.slug);
   const pick = (i: number) => {
     setSel(i);
-    onOpen(BOOK_ROWS[i].key);
+    onOpen(BOOK_ROWS[i].slug);
   };
   return (
-    <section id="sessions" className="mt-book" aria-label="Book online" data-mt="book" data-on={r.key} data-open={open ? "" : undefined} ref={sec}>
+    <section id="sessions" className="mt-book" aria-label="Book online" data-mt="book" data-on={r.slug} data-open={open ? "" : undefined} ref={sec}>
       <div className="mt-frame">
         <h2 className="mt-bq-h">Sessions <span className="lbl mute">Book online</span></h2>
         <div className="mt-book-col">
@@ -104,7 +104,7 @@ export function MtBookOnline({ open, onOpen, onClose, quotePhoto, onRowPick }: {
             <>
               <div className="mt-brs">
                 {BOOK_ROWS.map((x, i) => (
-                  <div key={x.key} className="mt-brw" data-on={i === sel || undefined}>
+                  <div key={x.slug} className="mt-brw" data-on={i === sel || undefined}>
                     {/* a mouse picks by hover and books by click; a finger picks first, then books */}
                     <button
                       type="button"
@@ -131,7 +131,7 @@ export function MtBookOnline({ open, onOpen, onClose, quotePhoto, onRowPick }: {
           )}
         </div>
         <figure className="mt-photo">
-          {BOOK_ROWS.map((x, i) => <RowPhoto key={x.key} r={x} on={q === null && i === at} sizes="(max-width: 1023px) 100vw, 42vw" />)}
+          {BOOK_ROWS.map((x, i) => <RowPhoto key={x.slug} r={x} on={q === null && i === shownIdx} sizes="(max-width: 1023px) 100vw, 42vw" />)}
           {QUOTE_OPTS.map((x, i) => <Image key={x.key} src={x.photo} alt={`${x.name} sample`} fill sizes="42vw" className={q === i ? "qp on" : "qp"} />)}
         </figure>
       </div>

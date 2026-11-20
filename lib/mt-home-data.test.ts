@@ -19,7 +19,7 @@ describe("v4 home picks", () => {
   });
 
   it("every dressed film is one of the picks", () => {
-    const picks = FILM_PICKS.map(([title]) => title);
+    const picks: string[] = FILM_PICKS.map(([title]) => title);
     expect(Object.keys(FILM_DRESS).filter((t) => !picks.includes(t))).toEqual([]);
   });
 

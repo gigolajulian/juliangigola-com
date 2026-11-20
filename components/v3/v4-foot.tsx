@@ -110,7 +110,7 @@ export function V4Foot() {
         <div>
           <p className="mute">Book online</p>
           {BOOK_ROWS.map((b) => (
-            <p key={b.key}><Link href={`/book/${b.slug}`}>{b.name}</Link></p>
+            <p key={b.slug}><Link href={`/book/${b.slug}`}>{b.name}</Link></p>
           ))}
         </div>
         <div>

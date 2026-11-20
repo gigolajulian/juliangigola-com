@@ -19,7 +19,7 @@ import { glideTo } from "@/components/v3/smooth-scroll";
    state, with MtIntro and MtMotionLayer on top. Motion hooks: MOTION-HOOKS.md. */
 
 export function MtHome({ data }: { data: MtData }) {
-  const [book, setBook] = React.useState<BookRow["key"] | null>(null);
+  const [book, setBook] = React.useState<BookRow["slug"] | null>(null);
   const [inq, setInq] = React.useState<{ from: InquiryFrom; opt?: QuoteOpt["key"] } | null>(null);
   // the booking photo follows the last row touched in either list: a quote option's index, or null for the sessions
   const [quotePhoto, setQuotePhoto] = React.useState<number | null>(null);
