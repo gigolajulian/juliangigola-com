@@ -91,6 +91,7 @@ notes (another branch was editing them).
 
 ## motion/quote.css, motion/quote.ts
 
+- 2026-11-20: the `?mtask=1` trial (the full-photo screen, the clients as marks, the options' wide frames, the trial section order) removed; the compact strip is the only form (Julian, owner decisions round 8).
 - 2026-11-17: the `?mtask=1` trial screen is two thirds of a screen tall, was a full screen, so Sessions stays in view above it (Julian).
 - 2026-11-17: no wipe or zoom on the way in (Julian).
 
