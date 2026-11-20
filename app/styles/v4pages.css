@@ -16,11 +16,15 @@
 
 /* s2: the list rows on a service page as numbered rows in the display face, half ink until pointed at.
    The questions join them: half ink, full when open. Answers and paragraphs stay mono. */
+/* The unlit rows and questions: half ink, a step more in light so 18px rows keep 4.5:1 (audit 2026-11-20: 3.81:1 at 54%). */
+html[data-v4pages~="s2"] #p-service{--sv-dim:color-mix(in srgb,var(--ink) 54%,var(--bg))}
+@media (prefers-color-scheme:light){html[data-v4pages~="s2"]:root:not([data-theme="dark"]) #p-service{--sv-dim:color-mix(in srgb,var(--ink) 64%,var(--bg))}}
+html[data-theme="light"][data-v4pages~="s2"]:root #p-service{--sv-dim:color-mix(in srgb,var(--ink) 64%,var(--bg))}
 [data-v4pages~="s2"] #p-service .sv-v4 ul{counter-reset:row}
-[data-v4pages~="s2"] #p-service .sv-v4 li{counter-increment:row;justify-content:flex-start;align-items:baseline;gap:14px;padding:14px 0;font:900 clamp(1.125rem,calc(1.6*var(--v3u)),1.5rem)/1.15 var(--display);letter-spacing:-.04em;text-wrap:balance;color:color-mix(in srgb,var(--ink) 54%,var(--bg));transition:color .25s}
+[data-v4pages~="s2"] #p-service .sv-v4 li{counter-increment:row;justify-content:flex-start;align-items:baseline;gap:14px;padding:14px 0;font:900 clamp(1.125rem,calc(1.6*var(--v3u)),1.5rem)/1.15 var(--display);letter-spacing:-.04em;text-wrap:balance;color:var(--sv-dim);transition:color .25s}
 [data-v4pages~="s2"] #p-service .sv-v4 li::before{content:counter(row,decimal-leading-zero);flex:none;font:500 11px/1 var(--mono);letter-spacing:.14em;color:var(--mute)}
 [data-v4pages~="s2"] #p-service .sv-row :is(summary,li b){font-weight:900;letter-spacing:-.04em}
-[data-v4pages~="s2"] #p-service .sv-row summary{color:color-mix(in srgb,var(--ink) 54%,var(--bg));transition:color .25s}
+[data-v4pages~="s2"] #p-service .sv-row summary{color:var(--sv-dim);transition:color .25s}
 [data-v4pages~="s2"] #p-service .sv-row :is(details[open] summary,summary:focus-visible){color:var(--ink)}
 @media (hover:hover){[data-v4pages~="s2"] #p-service .sv-v4 li:hover{color:var(--ink)}}
 /* no pointer to light a row: each one lights as it crosses the middle of the screen, or stays lit where that is not supported */
@@ -30,7 +34,7 @@
     @media (prefers-reduced-motion:no-preference){[data-v4pages~="s2"] #p-service .sv-v4 li{animation:v4-lit linear both;animation-timeline:view();animation-range:cover 20% cover 80%}}
   }
 }
-@keyframes v4-lit{0%,100%{color:color-mix(in srgb,var(--ink) 54%,var(--bg))}35%,65%{color:var(--ink)}}
+@keyframes v4-lit{0%,100%{color:var(--sv-dim)}35%,65%{color:var(--ink)}}
 @media (max-width:700px){[data-v4pages~="s2"] #p-service .sv-v4 li{flex-direction:row}}
 
 /* a2: About's marks as V4's band, one drifting line (components/v3/logo-band.tsx), on the page's black. */
