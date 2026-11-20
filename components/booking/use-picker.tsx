@@ -177,7 +177,7 @@ export function usePicker({ path, title, className, fallback, v3, onPicked }: Pr
       const signal = AbortSignal.timeout?.(8000);
       const hit = recent.get(key);
       // The event and its times in one (`app/api/slots`).
-      const got = !fresh && hit && Date.now() - hit.at < KEEP ? hit.got : fetch(`/api/slots?slug=${slug}&start=${iso(from)}&end=${iso(to)}&timeZone=${encodeURIComponent(tz)}`, { signal })
+      const got = !fresh && hit && Date.now() - hit.at < KEEP ? hit.got : fetch(`/api/slots?slug=${slug}&start=${iso(from)}&end=${iso(to)}&timeZone=${encodeURIComponent(tz)}${fresh ? "&fresh" : ""}`, { signal })
         .then((r) => r.json() as Promise<SlotsAnswer>);
       if (got !== hit?.got) recent.set(key, { at: Date.now(), got });
       const slots = await got;

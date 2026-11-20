@@ -11,11 +11,17 @@ import { json } from "@/lib/http";
  * which `components/booking/use-picker.tsx` reads; a failure is { error }. Starts are
  * written in the visitor's zone and grouped by their day there. See
  * `lib/booking/slots.ts`. Off (503) until GCAL_OAUTH is set.
+ * An answer is kept a minute in the colo's cache, so the picker does not
+ * wait on Google's free/busy every time (0.5 to 2.3s on a phone, the
+ * booking wait). Safe: a time is checked again before a deposit or a
+ * booking moves (`openNow`). `&fresh` skips it, after a time was taken.
  * ─────────────────────────────────────────────────────────────── */
 
 export const dynamic = "force-dynamic";
 
 const DAY = /^\d{4}-\d{2}-\d{2}$/;
+const KEEP_S = 60;
+const edge = () => (globalThis as { caches?: { default?: Cache } }).caches?.default;
 
 export async function GET(request: Request) {
   const { env } = await getCloudflareContext({ async: true });
@@ -33,6 +39,10 @@ export async function GET(request: Request) {
   } catch {
     return json({ error: "Unknown time zone." }, 400);
   }
+  const cache = edge();
+  const key = new Request(`https://slots-cache.invalid/${slug}/${start}/${end}/${encodeURIComponent(tz)}`);
+  const kept = cache && !q.has("fresh") ? await cache.match(key).catch(() => undefined) : undefined;
+  if (kept) return json(await kept.json());
   // The visitor's days, widened by a day each side for any zone; capped at 130 days.
   const from = Date.parse(`${start}T00:00:00Z`) - 864e5;
   const to = Math.min(Date.parse(`${end}T00:00:00Z`) + 2 * 864e5, from + 130 * 864e5);
@@ -51,7 +61,7 @@ export async function GET(request: Request) {
     if (day < start || day > end) continue;
     (data[day] ??= []).push({ start: at, end: localIso(s + rule.length * 6e4, tz) });
   }
-  return json({
+  const answer = {
     status: "success",
     event: {
       title: rule.title,
@@ -60,5 +70,7 @@ export async function GET(request: Request) {
       locations: [{ type: rule.call ? "integration" : "attendeeDefined" }],
     },
     data,
-  } satisfies SlotsAnswer);
+  } satisfies SlotsAnswer;
+  await cache?.put(key, Response.json(answer, { headers: { "cache-control": `max-age=${KEEP_S}` } })).catch(() => {});
+  return json(answer);
 }

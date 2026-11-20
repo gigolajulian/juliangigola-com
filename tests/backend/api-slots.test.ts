@@ -45,4 +45,24 @@ describe("GET /api/slots", () => {
     expect(o.event).toMatchObject({ lengthInMinutes: expect.any(Number) });
     expect(o.data["2026-11-18"][0].start.slice(11, 16)).toBe("10:00");
   });
+
+  it("keeps an answer a minute in the colo's cache, and asks Google again on &fresh", async () => {
+    const kept = new Map<string, Response>();
+    vi.stubGlobal("caches", {
+      default: {
+        match: async (r: Request) => kept.get(r.url)?.clone(),
+        put: async (r: Request, res: Response) => void kept.set(r.url, res),
+      },
+    });
+    let asks = 0;
+    const real = globalThis.fetch;
+    vi.stubGlobal("fetch", async (url: string, init?: RequestInit) => (url.includes("freeBusy") && asks++, real(url, init)));
+    const a = await (await get(OK)).json();
+    const before = asks;
+    expect(before).toBeGreaterThan(0);
+    expect(await (await get(OK)).json()).toEqual(a);
+    expect(asks).toBe(before);
+    await get(`${OK}&fresh`);
+    expect(asks).toBeGreaterThan(before);
+  });
 });
