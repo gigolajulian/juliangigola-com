@@ -13,7 +13,7 @@ const FLIP = 1300; // the idle wall's card turn, ms (Julian's pick of 600 / 900 
 
 type Part = { el: HTMLElement; a: number; c: number; v: number };
 
-type State = { cols: Part[]; figs: Part[]; caps: HTMLElement[]; tw: HTMLElement[]; phs: HTMLElement[]; texts: HTMLElement[]; ctas: HTMLElement | null; more: HTMLElement | null; name: HTMLElement | null; scroll: number; mode: "" | "d" | "p" | "t"; exit: number; unit: number; sizeKey: string; wall: number; bar: HTMLElement | null; out: boolean; row: number; drop: number };
+type State = { cols: Part[]; figs: Part[]; caps: HTMLElement[]; tw: HTMLElement[]; phs: HTMLElement[]; texts: HTMLElement[]; ctas: HTMLElement | null; more: HTMLElement | null; name: HTMLElement | null; scroll: number; mode: "" | "d" | "p" | "t"; exit: number; unit: number; sizeKey: string; wall: number; out: boolean; drop: number };
 
 const ink = (n: Node) => {
   const r = document.createRange();
@@ -168,8 +168,7 @@ function tone(st: Pick<State, "tw" | "phs">) {
   }
 }
 
-function clearance(st: Pick<State, "texts" | "ctas" | "caps" | "tw" | "phs">, on: boolean) {
-  tone(st);
+function clearance(st: Pick<State, "texts" | "ctas" | "caps">, on: boolean) {
   const z = on ? [...st.texts.map(ink), ...(st.ctas ? [st.ctas.getBoundingClientRect()] : [])].filter((r) => r.width) : [];
   const hit = st.caps.map((c) => {
     if (!z.length) return false;
@@ -186,18 +185,21 @@ const move = (p: Part, y: number) => {
   p.el.style.transform = v ? `translate3d(0,${v}px,0)` : "";
 };
 
+// the name block and wall pieces heroStill and the hero driver both read
+const parts = (el: HTMLElement) => ({
+  caps: [...el.querySelectorAll<HTMLElement>(".mt-col figcaption span")],
+  tw: [...el.querySelectorAll<HTMLElement>(".mt-name .mt-cap .w")],
+  phs: [...el.querySelectorAll<HTMLElement>(".mt-wall .ph")],
+  texts: [...el.querySelectorAll<HTMLElement>(".mt-name h1, .mt-name .mt-cap")],
+  ctas: el.querySelector<HTMLElement>(".mt-name .mt-ctas"),
+});
+
 /** Reduced motion: the engine is off and nothing moves, so the captions under the name are worked out once and again on resize. */
 export function heroStill(root: HTMLElement) {
   const el = root.querySelector<HTMLElement>(".mt-hero");
   if (!el) return () => {};
-  const st = {
-    caps: [...el.querySelectorAll<HTMLElement>(".mt-col figcaption span")],
-        tw: [...el.querySelectorAll<HTMLElement>(".mt-name .mt-cap .w")],
-        phs: [...el.querySelectorAll<HTMLElement>(".mt-wall .ph")],
-    texts: [...el.querySelectorAll<HTMLElement>(".mt-name h1, .mt-name .mt-cap")],
-    ctas: el.querySelector<HTMLElement>(".mt-name .mt-ctas"),
-  };
-  const run = () => clearance(st, true);
+  const st = parts(el);
+  const run = () => (tone(st), clearance(st, true));
   run();
   addEventListener("resize", run);
   const look = window.setInterval(run, 600); // photos still loading: the tagline words read them as they arrive
@@ -213,11 +215,7 @@ export const heroDrivers: Driver[] = [
       const st: State = {
         cols: [...el.querySelectorAll<HTMLElement>(".mt-col")].map((n) => part(n, Number(n.dataset.a) || 0, Number(n.dataset.col))),
         figs: [...el.querySelectorAll<HTMLElement>(".mt-col:not(.side) figure")].map((n) => part(n, 0, Number(n.style.getPropertyValue("--c2")) || 0)),
-        caps: [...el.querySelectorAll<HTMLElement>(".mt-col figcaption span")],
-        tw: [...el.querySelectorAll<HTMLElement>(".mt-name .mt-cap .w")],
-        phs: [...el.querySelectorAll<HTMLElement>(".mt-wall .ph")],
-        texts: [...el.querySelectorAll<HTMLElement>(".mt-name h1, .mt-name .mt-cap")],
-        ctas: el.querySelector<HTMLElement>(".mt-name .mt-ctas"),
+        ...parts(el),
         more: el.querySelector<HTMLElement>(".mt-more .btn"),
         name: el.querySelector<HTMLElement>("[data-mt-name]"),
         scroll: -1,
@@ -226,10 +224,8 @@ export const heroDrivers: Driver[] = [
         unit: 0,
         sizeKey: "",
         wall: WALL,
-        bar: document.querySelector<HTMLElement>(".site-hdr"),
         out: false,
         drop: 0,
-        row: 660,
       };
       states.set(el, st);
       // "off": the hero runs and no name flies to the bar, so mtscroll.css keeps the bar's wordmark hidden until the name leaves
@@ -287,6 +283,7 @@ export const heroDrivers: Driver[] = [
         [...st.cols, ...st.figs].forEach((p) => (p.el.style.transform = ""));
         if (st.name) st.name.style.cssText = "";
         park(st.ctas, false);
+        tone(st);
         clearance(st, false);
         document.documentElement.removeAttribute("data-mtdock");
       };
@@ -303,6 +300,7 @@ export const heroDrivers: Driver[] = [
         if (st.name) st.name.style.cssText = "";
         park(st.ctas, false);
         document.documentElement.removeAttribute("data-mt-nameout");
+        tone(st);
         clearance(st, false);
         st.sizeKey = "";
       }
@@ -316,9 +314,6 @@ export const heroDrivers: Driver[] = [
           st.unit = (core[0]?.el.offsetWidth ?? 0) / 403 || ctx.u;
           // the lowest column end plus the 46 design px under it: 2640 with four rows
           st.wall = core.length ? Math.max(...core.map((c) => c.el.offsetTop + c.el.offsetHeight)) / st.unit + 46 : WALL;
-          // one row of the wall, px: from one photo's top to the next in a column
-          const two = core[0]?.el.querySelectorAll<HTMLElement>("figure");
-          st.row = (two && two[1] ? two[1].offsetTop - two[0].offsetTop : 0) || 660 * st.unit;
           // how far the name has to sink to clear the window: from its top at rest to the window's lower edge, and 24px. It rode
           // 0.6 of the window, and was out of sight well before the ride was over (Julian, 2026-11-17: "even longer, almost right before" the button)
           if (st.texts[0]) st.drop = ctx.vh - (st.texts[0].getBoundingClientRect().top - Math.max(0, st.exit) * st.drop) + 24;
@@ -344,6 +339,7 @@ export const heroDrivers: Driver[] = [
         // over as the button's top edge enters the window, and takes the last three quarters of the scroll up to that point.
         // A soft start and then an even pace (t*t*(2-t)), not the s-curve whose middle ran at 1.5 times the scroll.
         sink(st, ctx);
+        tone(st);
         clearance(st, !st.out);
         return;
       }
@@ -361,7 +357,9 @@ export const heroDrivers: Driver[] = [
       }
       if (PIN) sink(st, ctx);
       // phones and tablets too: captions ran through the name and tagline (MAC, 2026-11-17). Only while the name is on screen.
-      clearance(st, PIN ? !st.out && el.getBoundingClientRect().bottom > 0 : -ctx.top < ctx.vh);
+      const on = PIN ? !st.out && el.getBoundingClientRect().bottom > 0 : -ctx.top < ctx.vh; // read before tone, as before the split
+      tone(st);
+      clearance(st, on);
     },
   },
 ];
