@@ -76,13 +76,13 @@ export function MtFoot() {
           <div>
             <p className="mute">Inquire</p>
             {QUOTE_OPTS.map((o) => (
-              <p key={o.key}><button type="button" onClick={() => cards.inquire("quote", o.key)}>{o.name}</button></p>
+              <p key={o.key}><button type="button" onClick={(e) => cards.inquire("quote", o.key, e.currentTarget)}>{o.name}</button></p>
             ))}
           </div>
           <div>
             <p className="mute">Book online</p>
             {BOOK_ROWS.map((r) => (
-              <p key={r.slug}><button type="button" onClick={() => cards.book(r.slug)}>{r.name}</button></p>
+              <p key={r.slug}><button type="button" onClick={(e) => cards.book(r.slug, e.currentTarget)}>{r.name}</button></p>
             ))}
           </div>
           <div>
@@ -100,7 +100,7 @@ export function MtFoot() {
           </div>
         </nav>
         <div className="mt-phrase">
-          <button type="button" className="mt-ph-btn" aria-describedby="mt-ph-hint" onClick={() => cards.inquire("footer")}>
+          <button type="button" className="mt-ph-btn" aria-describedby="mt-ph-hint" onClick={(e) => cards.inquire("footer", undefined, e.currentTarget)}>
             {/* The name is real text, the letter-by-letter rows are hidden from it: an aria-label over split letters fails label-in-name (WCAG 2.5.3). */}
             <span className="sr-only">{PHRASE}</span>
             <span className="mt-ph-row">

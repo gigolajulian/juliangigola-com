@@ -25,7 +25,7 @@ function RowPhoto({ r, on, sizes }: { r: BookRow; on: boolean; sizes: string }) 
   );
 }
 
-export function MtBookOnline({ open, onClose, quotePhoto, onRowPick }: { open: BookRow["slug"] | null; onClose: () => void; quotePhoto: QuoteOpt["key"] | null; onRowPick: () => void }) {
+export function MtBookOnline({ open, opener, onClose, quotePhoto, onRowPick }: { open: BookRow["slug"] | null; opener?: React.RefObject<HTMLElement | null>; onClose: () => void; quotePhoto: QuoteOpt["key"] | null; onRowPick: () => void }) {
   const cards = React.useContext(CardsCtx);
   const [sel, setSelRaw] = React.useState(0);
   const setSel = (i: number) => (setSelRaw(i), onRowPick());
@@ -42,12 +42,15 @@ export function MtBookOnline({ open, onClose, quotePhoto, onRowPick }: { open: B
   React.useEffect(() => {
     if (!!open === isOpen.current) return;
     isOpen.current = !!open;
+    // opened from a footer link: closing goes back to that link, where the visitor started
+    const back = !open && opener?.current;
+    if (back) return back.focus();
     // by hand, not scrollIntoView: the page keeps a scroll padding for anchors that would leave a gap here; the offset is the block's own scroll-margin (the fixed header on phones)
     const el = sec.current;
     if (el) window.scrollTo({ top: window.scrollY + el.getBoundingClientRect().top - (parseFloat(getComputedStyle(el).scrollMarginTop) || 0) });
     if (open) head.current?.focus({ preventScroll: true });
     else rows.current[shownIdx]?.focus({ preventScroll: true });
-  }, [open, shownIdx]);
+  }, [open, shownIdx, opener]);
 
   const next = useNextOpen(r.slug);
   const pick = (i: number) => {
