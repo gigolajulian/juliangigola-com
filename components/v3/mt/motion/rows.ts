@@ -133,7 +133,11 @@ function heldRow(name: MtSection): Driver {
       }, opts);
       const up = () => void (down = null);
       row.addEventListener("pointerup", up, opts);
-      row.addEventListener("pointercancel", up, opts);
+      // a cancelled drag gets no click to clear `dragged`, which would keep the hover tilt off until the next press
+      row.addEventListener("pointercancel", () => {
+        down = null;
+        dragged = false;
+      }, opts);
       row.addEventListener("click", (e) => {
         if (!dragged) return;
         dragged = false;
