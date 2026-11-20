@@ -7,22 +7,44 @@ import { COVER_RELEASES } from "@/lib/cover-art-data";
 import type { CoverRelease } from "@/lib/cover-art-types";
 import { media } from "@/lib/device";
 import { holdEase, holdUnease } from "@/lib/motion/hold-ease";
-import { HeldRow } from "./held-row";
 import { clamp, progress } from "./motion/engine";
 import { COVER_KEYS, COVER_PRESS, FILM_DRESS, pad, type MtFilm } from "@/lib/mt-home";
 
 const COVERS = COVER_KEYS.map((k) => COVER_RELEASES.find((r) => r.slug === k)).filter((r): r is CoverRelease => !!r);
 
 /* Spec 3.7: sleeves with a picture disc behind each. `--o` per sleeve (0 in,
-   1 out) is the record's travel; the static page rests it at .5. */
+   1 out) is the record's travel; the static page rests it at .5.
+   A held block that names the current cover over one sideways row. Static form: a native scroll row with snap,
+   which is also its touch and reduced-motion form. The current cover follows the row's own scroll (snap step),
+   `data-cur` on the section. The motion pass (motion/rows.ts covers()) drives `--p` and transforms `.mt-track`. */
 export function MtCovers() {
+  const row = React.useRef<HTMLDivElement>(null);
+  const [cur, setCur] = React.useState(0);
+  React.useEffect(() => {
+    const el = row.current!;
+    let raf = 0;
+    const read = () => {
+      raf = 0;
+      const items = el.querySelectorAll<HTMLElement>(".mt-item");
+      if (items.length < 2) return;
+      const step = items[1].offsetLeft - items[0].offsetLeft;
+      setCur(clamp(Math.round(el.scrollLeft / step), 0, items.length - 1));
+    };
+    const onScroll = () => (raf ||= requestAnimationFrame(read));
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      el.removeEventListener("scroll", onScroll);
+      cancelAnimationFrame(raf);
+    };
+  }, []);
+  React.useEffect(() => {
+    row.current!.querySelectorAll(".mt-item").forEach((it, i) => it.toggleAttribute("data-on", i === cur));
+  }, [cur]);
+  // the same scroll a cover as the five had in 1.5 screens
+  const hold = (COVERS.length - 1) * 0.375;
   return (
-    <HeldRow
-      name="covers"
-      hold={(COVERS.length - 1) * 0.375} // the same scroll a cover as the five had in 1.5 screens
-      label="Cover art"
-      count={COVERS.length}
-      head={(cur) => (
+    <section className="mt-held mt-covers" data-mt="covers" data-hold={hold} data-cur={cur} style={{ "--n": COVERS.length } as React.CSSProperties}>
+      <div className="mt-stage">
         <div className="mt-rowhead">
           <h2>Cover art</h2>
           <p className="lbl mute mt-cvsub">Design</p>
@@ -30,27 +52,30 @@ export function MtCovers() {
           <p className="lbl mt-ttl mt-artist"><span className="ln"><span>{COVERS[cur].title} <span className="mute">{COVERS[cur].artist}</span></span></span></p>
           <Link className="btn mt-sm" href="/portfolio?d=coverart">See all covers</Link>
         </div>
-      )}
-      foot={(cur) => <p className="mt-cvn" aria-hidden>{pad(cur + 1)}<span>/{pad(COVERS.length)}</span></p>}
-    >
-      {COVERS.map((c, i) => {
-        const back = c.frames[1];
-        return (
-          <div key={c.slug} className="mt-item mt-sleeve" data-i={i} data-flip={back ? "" : undefined} style={{ "--o": 0.5, "--press": COVER_PRESS[c.slug] } as React.CSSProperties}>
-            <span className="disc" aria-hidden />
-            <div className="face">
-              <Image src={c.frames[0].src} alt={`${c.title} by ${c.artist}`} fill sizes="(max-width: 599px) 92vw, 34vw" />
-              {back ? <Image className="back" src={back.src} alt={`${c.title}, back of the sleeve`} fill sizes="34vw" /> : null}
-            </div>
-            <p className="lbl mt-cvcap" aria-hidden><span>{c.title}</span><span className="mute">{c.artist}</span></p>
+        <div className="mt-row" ref={row} role="group" tabIndex={0} aria-label="Cover art">
+          <div className="mt-track">
+            {COVERS.map((c, i) => {
+              const back = c.frames[1];
+              return (
+                <div key={c.slug} className="mt-item mt-sleeve" data-i={i} data-flip={back ? "" : undefined} style={{ "--o": 0.5, "--press": COVER_PRESS[c.slug] } as React.CSSProperties}>
+                  <span className="disc" aria-hidden />
+                  <div className="face">
+                    <Image src={c.frames[0].src} alt={`${c.title} by ${c.artist}`} fill sizes="(max-width: 599px) 92vw, 34vw" />
+                    {back ? <Image className="back" src={back.src} alt={`${c.title}, back of the sleeve`} fill sizes="34vw" /> : null}
+                  </div>
+                  <p className="lbl mt-cvcap" aria-hidden><span>{c.title}</span><span className="mute">{c.artist}</span></p>
+                </div>
+              );
+            })}
           </div>
-        );
-      })}
-    </HeldRow>
+        </div>
+        <p className="mt-cvn" aria-hidden>{pad(cur + 1)}<span>/{pad(COVERS.length)}</span></p>
+      </div>
+    </section>
   );
 }
 
-/* Spec 3.8. Phones and tablets: the same native snap row as HeldRow. Desktop
+/* Spec 3.8. Phones and tablets: the same native snap row as MtCovers. Desktop
    structure: the films stack one under another in natural scroll (motion/rows.ts
    opens the one at the middle of the screen). The current film is read here, so
    the head stays in step with the engine off too. */

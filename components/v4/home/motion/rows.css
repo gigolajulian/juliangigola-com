@@ -3,7 +3,7 @@
 @property --fl{syntax:"<number>";inherits:true;initial-value:0}
 
 /* Held (D): the page scroll moves the track (rows.ts). `hidden`, not `clip`:
-   rows.ts still steps the row's scroll so held-row.tsx names the current item. */
+   rows.ts still steps the row's scroll so MtCovers (rows.tsx) names the current item. */
 html[data-mt-held] .mt-held .mt-row{overflow-x:hidden;scroll-snap-type:none;touch-action:pan-y;cursor:grab;user-select:none;-webkit-user-select:none}
 html[data-mt-held] .mt-held[data-mt-near] .mt-track{will-change:transform}
 /* The title line's clip (for the rise) cut descenders at line-height .9. */
