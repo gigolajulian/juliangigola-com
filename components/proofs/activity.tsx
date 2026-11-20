@@ -27,7 +27,13 @@ export function ActivityDesk({ p, changed }: { p: Row; changed: () => void }) {
   if (!people.length) return <Text type="code" size="sm" color="secondary">Nobody has opened it yet. Each address typed at the gate shows here.</Text>;
   const file = (id?: string) => (id ? p.frames.find((f) => f.id === id)?.file ?? id : "");
   const num = (id?: string) => (id ? `#${p.frames.findIndex((f) => f.id === id) + 1}` : "");
-  const SAID: Record<ViewerEvent["kind"], (id?: string) => string> = { open: () => "opened", pick: (id) => `picked ${num(id)}`, unpick: (id) => `unpicked ${num(id)}`, review: () => "reviewed", pay: () => "paid", send: () => "sent selects", download: (id) => (id === "all" ? "downloaded all" : `saved ${p.finals?.find((f) => f.id === id)?.file ?? id}`) };
+  const models = [...new Set((p.finals ?? []).map((f) => f.model).filter((m): m is string => !!m))].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+  const isModel = (id?: string) => !!id && models.includes(id);
+  const SAID: Record<ViewerEvent["kind"], (id?: string) => string> = { open: () => "opened", pick: (id) => `picked ${num(id)}`, unpick: (id) => `unpicked ${num(id)}`, review: () => "reviewed", pay: () => "paid", send: () => "sent selects", download: (id) => (id === "all" ? "downloaded all" : isModel(id) ? `downloaded ${id} zip` : `saved ${p.finals?.find((f) => f.id === id)?.file ?? id}`) };
+  // Deliveries: every download under the address that took it, and which models went (Julian 2026-11-19).
+  const dlOf = (x: (typeof people)[number][1]) => x.events.filter((e) => e.kind === "download");
+  const what = (id?: string) => (id === "all" ? "all" : isModel(id) ? `${id} zip` : p.finals?.find((f) => f.id === id)?.file ?? id ?? "");
+  const takenBy = (m: string) => [...new Set(people.filter(([, x]) => dlOf(x).some((e) => e.id === m || e.id === "all" || p.finals?.find((f) => f.id === e.id)?.model === m)).map(([k, x]) => x.name ?? k))];
   const tally = new Map<string, number>();
   for (const [, v] of people) for (const id of v.picks) tally.set(id, (tally.get(id) ?? 0) + 1);
   const top = [...tally].sort((a, b) => b[1] - a[1]).slice(0, 6);
@@ -96,6 +102,26 @@ export function ActivityDesk({ p, changed }: { p: Row; changed: () => void }) {
               </VStack>
             ))}
           </HStack>
+        </VStack>
+      ) : null}
+      {p.finals?.length ? (
+        <VStack gap={1}>
+          <Text type="code" size="xsm" color="accent" weight="medium">DOWNLOADS BY PERSON</Text>
+          {people.map(([k, x]) => (
+            <Text key={k} type="code" size="sm" color="secondary">
+              {x.name ? `${x.name} · ` : ""}{k} · {dlOf(x).length ? [...new Set(dlOf(x).map((e) => what(e.id)))].join(", ") : "nothing yet"}
+            </Text>
+          ))}
+        </VStack>
+      ) : null}
+      {models.length ? (
+        <VStack gap={1}>
+          <Text type="code" size="xsm" color="accent" weight="medium">BY MODEL · {models.filter((m) => takenBy(m).length).length} OF {models.length} TAKEN</Text>
+          {models.map((m) => (
+            <Text key={m} type="code" size="sm" color={takenBy(m).length ? undefined : "secondary"}>
+              {m} · {takenBy(m).join(", ") || "not taken"}
+            </Text>
+          ))}
         </VStack>
       ) : null}
       <VStack gap={0}>

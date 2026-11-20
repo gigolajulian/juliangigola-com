@@ -36,7 +36,16 @@ export type Final = ProofFrame & {
   /** Size in bytes and CRC-32 of the stored file, worked out once at upload so the zip only pipes bytes. */
   bytes: number;
   crc: number;
+  /** The model this final belongs to: its published collection's name inside a delivery set ("04", "Marcus"). Unset: a delivery with no models. */
+  model?: string;
+  /** Five stars in Lightroom: shown on the delivery's gate wall (Julian 2026-11-19). */
+  top?: boolean;
 };
+
+/** A model label from Lightroom: a collection name, one line, up to 40 characters. */
+export const isModel = (v: unknown): v is string => typeof v === "string" && v.trim() === v && v.length > 0 && v.length <= 40 && !/[\x00-\x1f\x7f]/.test(v);
+/** How a label shows on a card: "M04" or "04" as "04", any other name as it is. */
+export const modelLabel = (m: string) => (/^M?\d+$/i.test(m) ? m.replace(/^M/i, "") : m);
 
 export type Proof = {
   /** The storage id: KV key, R2 prefix, Stripe metadata, Lightroom's remote id. Never changes. */
@@ -383,7 +392,7 @@ export function deliveryView(p: Proof) {
   const finals = shotOrder(p.finals ?? []);
   // The gate's photo: Julian's preview pick when it is one of the finals, else the first final.
   const cover = finals.find((f) => f.id === p.card?.id)?.id ?? finals[0]?.id ?? null;
-  return { finals: finals.map(({ id, file, w, h, bytes, crc }) => ({ id, file, w, h, bytes, v: crc })), cover, closesAt: p.closesAt ?? null, subhead: p.subhead ?? null, labels: !!p.labels };
+  return { finals: finals.map(({ id, file, w, h, bytes, crc, model, top }) => ({ id, file, w, h, bytes, v: crc, model: model ?? null, top: !!top })), cover, closesAt: p.closesAt ?? null, subhead: p.subhead ?? null, labels: !!p.labels };
 }
 export type PublicDelivery = ReturnType<typeof deliveryView>;
 

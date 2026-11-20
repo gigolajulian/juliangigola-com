@@ -74,8 +74,11 @@ export function ProofWall({
   onDone,
   tune,
   sub,
+  words,
 }: {
   frames: Frame[];
+  /** The card's words; the proof gate's by default. The delivery passes its own (Julian 2026-11-19). */
+  words?: { lab: string; title: string; cta: string; note: string };
   /** The gallery's subheading under the heading, when Julian set one. */
   sub?: string | null;
   /** The wall tuned per screen (lib/proofs/gridwall.ts); null with `?gw=0`. */
@@ -415,8 +418,8 @@ export function ProofWall({
         }}
       >
         <div>
-          <p className="proof-lab">Proofs · {frames.length} frames</p>
-          <h1>Pick your proofs.</h1>
+          <p className="proof-lab">{words?.lab ?? `Proofs · ${frames.length} frames`}</p>
+          <h1>{words?.title ?? "Pick your proofs."}</h1>
           {sub ? <p className="proof-sub">{sub}</p> : null}
         </div>
         <label>
@@ -458,9 +461,9 @@ export function ProofWall({
           </p>
         ) : null}
         <button type="submit" className="proof-btn" data-off={!name.trim() || !isEmail(email) || undefined}>
-          Open proofs
+          {words?.cta ?? "Open proofs"}
         </button>
-        <p className="proof-mu">Keep track of your favorites.</p>
+        <p className="proof-mu">{words?.note ?? "Keep track of your favorites."}</p>
       </form>
     </>
   );

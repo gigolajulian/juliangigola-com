@@ -3,7 +3,7 @@ import { isAdmin } from "@/lib/vouch";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { copiesFor, readLead, recordLead, writeLead } from "@/lib/leads/lead-store";
 import { leadStoreKey } from "@/lib/leads/leads";
-import { forDesk, hashPass, cardKey, closesAt, cleanSettings, DEFAULTS, DELIVERY_DAYS, finalKeys, frameKey, frameKeys, aliasKey, isDateId, isFrameId, isStrongId, isToken, listProofs, nextProofId, publicId, readProof, remindState, shootDay, viewerKey, writeProof, type Proof } from "@/lib/proofs/proof";
+import { forDesk, hashPass, cardKey, closesAt, cleanSettings, DEFAULTS, DELIVERY_DAYS, finalKeys, frameKey, frameKeys, aliasKey, isDateId, isFrameId, isModel, isStrongId, isToken, listProofs, nextProofId, publicId, readProof, remindState, shootDay, viewerKey, writeProof, type Proof } from "@/lib/proofs/proof";
 import { deliveryMail, deliveryUrl, proofMail, proofUrl, reminderMail, sendClient, subjectOr } from "@/lib/email/proof-mail";
 import { MAX_FINAL, storeFinal } from "@/lib/proofs/delivery";
 import { recheckTransfer } from "@/lib/proofs/submit";
@@ -25,7 +25,7 @@ import { bodyOf, json } from "@/lib/http";
  *   POST   {action:"deliver", token}   Send finals: the "your photos are ready" mail, /delivery/<id> open 60 days
  *   GET    ?remind=X                   the reminder as it would go out, with who gets it
  *   POST   {action:"remind", token}    the one reminder for the gallery's stage (`remindState`), on Julian's tap only
- *   PUT    ?token&id&...&final=1 <jpeg> add or replace one final (Lightroom's Delivery service)
+ *   PUT    ?token&id&...&final=1[&model=<label>&top=1] <jpeg> add or replace one final (Lightroom's Delivery service)
  *   DELETE ?token&ids&final=1          drop finals
  *   PATCH  {token, ...settings}        name, email, note, included, price, days, watermark
  *   PUT    ?token&id&file&w&h  <jpeg>  add or replace one frame
@@ -255,7 +255,8 @@ export async function PUT(request: Request) {
     // Read again after the upload: a long upload must not write back a record from before it.
     const p = await readProof(g.kv, g.s, token);
     if (!p) return json({ error: "No such gallery." }, 404);
-    const final = { id, file, w, h, bytes, crc, ...(t > 0 && t < 4e9 ? { t } : {}) };
+    const model = q.get("model")?.trim().replace(/\s+/g, " ");
+    const final = { id, file, w, h, bytes, crc, ...(t > 0 && t < 4e9 ? { t } : {}), ...(isModel(model) ? { model } : {}), ...(q.get("top") === "1" ? { top: true } : {}) };
     const finals = [...(p.finals ?? []).filter((f) => f.id !== id), final];
     await writeProof(g.kv, g.s, { ...p, finals });
     return json({ ok: true, finals: finals.length, url: deliveryUrl(publicId(p)) });

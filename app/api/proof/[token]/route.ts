@@ -86,8 +86,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
 
   if (b.action === "track") {
     if (!isEmail(b.email)) return json({ error: "Add your email first." }, 400);
-    // "download" (a delivery's Save or Download all) names the final, or "all" for the zip.
-    const dl = b.kind === "download" && g.p.finals?.length && (b.id === "all" || g.p.finals.some((f) => f.id === b.id)) ? (b.id as string) : undefined;
+    // "download" (a delivery's Save or Download all) names the final, "all" for the zip, or a model ("M04") for its zip.
+    const dl = b.kind === "download" && g.p.finals?.length && (b.id === "all" || g.p.finals.some((f) => f.id === b.id || f.model === b.id)) ? (b.id as string) : undefined;
     const kind = b.kind === "open" || b.kind === "review" ? b.kind : dl ? "download" : undefined;
     const looks = b.looks && typeof b.looks === "object" ? Object.fromEntries(Object.entries(b.looks as Record<string, unknown>).filter(([id, ms]) => g.p.frames.some((f) => f.id === id) && typeof ms === "number")) as Record<string, number> : undefined;
     const open = kind === "open" ? { device: device(request.headers.get("user-agent") ?? ""), place: await where() } : {};
