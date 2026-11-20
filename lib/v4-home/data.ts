@@ -3,6 +3,7 @@
    (names, ratios) are resolved on the server in `app/page.tsx` (`mtData`). */
 import { rate, SESSIONS, type SessionSlug } from "@/lib/v3";
 import { DEPOSIT } from "@/lib/booking/paid";
+import type { SHOOT_TYPES } from "@/lib/inbox";
 
 /** A photo with its caption: `r` is height / width. */
 export type MtFrame = { src: string; name: string; meta: string; slug: string; r: number };
@@ -87,7 +88,7 @@ export const QUOTE_OPTS: QuoteOpt[] = [
   { key: "weddings", name: "Weddings", holds: ["Full day", "Couples, engagements"], detail: "", chips: ["Wedding", "Couples", "Engagement"], call: "/book/weddings", photo: "/work/weddings/02.jpg" },
 ];
 /** The enquiry type each chip posts (lib/inbox.ts SHOOT_TYPES). */
-export const CHIP_TYPE: Record<string, string> = {
+export const CHIP_TYPE: Record<string, (typeof SHOOT_TYPES)[number]> = {
   "Cover art": "coverart",
   "Artist presskit": "presskit",
   "Music video": "video",
@@ -112,6 +113,8 @@ export const QUOTE_CLIENTS: QuoteClient[] = [
 ];
 
 /* ── About (spec 3.9) ── */
+/** What I do, as listed on /about and the home's About. */
+export const DOES = ["Editorials", "Still photography", "Camera operation", "Brand imagery", "Post-production", "Creative direction"];
 export const ABOUT_SENTENCE = "I help emerging labels, musicians and technology brands find the image that feels most like them.";
 export const ABOUT_FACTS: [string, string][] = [
   ["Shooting", "12 years"],

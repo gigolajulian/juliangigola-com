@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseOr } from "./json";
+import { parseOr } from "@/lib/json";
 
 describe("parseOr", () => {
   it("parses good JSON, falls back on missing or malformed", () => {

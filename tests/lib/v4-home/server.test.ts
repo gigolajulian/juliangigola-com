@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { COMM_KEYS, COVER_KEYS, COVER_PRESS, FILM_DRESS, FILM_PICKS, HERO_KEYS } from "@/lib/mt-home";
+import { COMM_KEYS, COVER_KEYS, COVER_PRESS, FILM_DRESS, FILM_PICKS, HERO_KEYS } from "@/lib/v4-home/data";
 import { getProject } from "@/lib/work";
-import { MT } from "./mt-home-data";
+import { MT } from "@/lib/v4-home/server";
 
 /* The v4 home picks its photos, covers and films by hand-kept keys. A renamed project or film
    fails quietly (a fallback ratio, a film with no poster), so the keys are checked against the content here. */

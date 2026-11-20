@@ -29,7 +29,7 @@ it on his own devices.
 
 | Flag | Plan item | What it turns on | Where |
 | --- | --- | --- | --- |
-| `?debug` | 0.3 | fps, finger dots and a frame log. Nothing loads without it. | `components/debug-gate.tsx`, `components/debug-overlay.tsx` |
+| `?debug` | 0.3 | fps, finger dots and a frame log. Nothing loads without it. | `components/dev/debug-gate.tsx`, `components/dev/debug-overlay.tsx` |
 | `?wall=slow` | 1.1 | On a screen 1600px wide or more, the Inquiries wall drifts at half speed with bigger tiles. | `components/inquire-wall.tsx` |
 | `?wall=still` | 1.1 | The wall eases to a stop while the form is in use, and the beam rests. | `components/inquire-wall.tsx`, `components/contact-beam.tsx` |
 | `?notch` | 1.4 | A mouse notch moves the strip by its own ease instead of Lenis. | `components/strip/shared.ts` |
@@ -109,7 +109,7 @@ scrolls and while its group is off screen (`patches/liquid-gooey+0.2.2.patch`).
 
 - **Chosen:** keep `patch-package`. Julian owns the patch. `patches/README.md`
   says what it changes, why, and how to redo it on an upgrade. The version
-  is pinned exactly, and `lib/liquid-gooey-patch.test.ts` fails if the patch
+  is pinned exactly, and `tests/lib/liquid-gooey-patch.test.ts` fails if the patch
   is missing from `node_modules`.
 - **Not chosen:** vendoring the package into `lib/vendor/`. It would copy
   about 2,500 lines of built code into the repo to change about 30. The
@@ -290,7 +290,7 @@ reported; a quote after "Julian:" is his wording, as the comment had it.
 - `components/contact-screen.tsx`: The questions' wall behind Inquiries is inert: not to be clicked there. (Julian)
 - `components/cover-float.tsx`: Preview (`?deal=new`, `data-deal`): the frames arrive top to bottom, as one even wave (Julian: top, then the middle, then the bottom, with harmony).
 - `components/inquire-wall.tsx`: A third slower (was 24). (Julian)
-- `components/liquid.tsx`: Every item measures its target as it mounts and the engine goes on measuring for thirty frames, which on a phone was a full restyle of the page in the middle of hydration. From the optimize pass.
+- `components/effects/liquid.tsx`: Every item measures its target as it mounts and the engine goes on measuring for thirty frames, which on a phone was a full restyle of the page in the middle of hydration. From the optimize pass.
 - `components/reference-picks.tsx`: References on the inquiry: uploads, and frames picked from the work. (Julian)
 - `components/site-header.tsx`: Both read before either is written: a write to the root's style and then a read restyled the whole page a second time, 140ms on a throttled phone. From the optimize pass.
 - `components/site-header.tsx`: Glass over the homepage's photographs (`.site-bar[data-home]`), and the same depth on the portfolio. Julian: match it.
@@ -483,8 +483,8 @@ reported; a quote after "Julian:" is his wording, as the comment had it.
 - `components/credit-card.tsx`: One liquid for the whole list (`CreditList`), mounted only while a card is open: a group that is not there measures nothing, so the credits cost no frames while scrolling. From the audit.
 - `components/lead-window.tsx`: The card came in as the strip and the page landed as the grid, and the grid's own covers came in white. (Julian)
 - `components/legal.tsx`: Focusable: from `sm` up the clause scrolls in its own column, and with nothing in it to take the focus a keyboard could not scroll it (WCAG 2.1.1, the audit).
-- `components/liquid-pair.tsx`: Each liquid runs a loop of its own that wakes on any scroll on the page and measures its buttons every frame, and the homepage has five: on the way back from the portfolio they were set up inside the page swap and then measured every frame of the strip's travel, the largest cost of both crossings. From the scroll-craft pass.
-- `components/liquid.tsx`: The library renders its items into `<g>`s through React portals, React hangs its event listeners on every portal container, and Chrome makes an SVG element with focus listeners keyboard focusable: a Tab through the hero's buttons stopped on an invisible group with no name and no ring after "See the work". From the UI/UX review.
+- `components/effects/liquid-pair.tsx`: Each liquid runs a loop of its own that wakes on any scroll on the page and measures its buttons every frame, and the homepage has five: on the way back from the portfolio they were set up inside the page swap and then measured every frame of the strip's travel, the largest cost of both crossings. From the scroll-craft pass.
+- `components/effects/liquid.tsx`: The library renders its items into `<g>`s through React portals, React hangs its event listeners on every portal container, and Chrome makes an SVG element with focus listeners keyboard focusable: a Tab through the hero's buttons stopped on an invisible group with no name and no ring after "See the work". From the UI/UX review.
 - `components/local-questions.tsx`: The session's price and turnaround, and what was the Details screen, beside the questions: one screen for both. (Julian)
 - `components/local-questions.tsx`: The old Details screen, folded the way the questions are and opened by pointing. (Julian)
 - `components/local-questions.tsx`: A mouse opens it by pointing. (Julian)

@@ -9,7 +9,7 @@ vi.mock("dialkit", () => ({
 }));
 vi.mock("@/lib/arrange-notes", () => ({ notesText: () => "" }));
 
-import { DialCopyAll, copyText } from "@/components/dial-copy-all";
+import { DialCopyAll, copyText } from "@/components/dev/dial-copy-all";
 
 describe("DialCopyAll", () => {
   it("copyText writes every panel, modes left out", () => {

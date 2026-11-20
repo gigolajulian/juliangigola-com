@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render } from "@testing-library/react";
-import { GlassLight } from "@/components/glass-light";
+import { GlassLight } from "@/components/effects/glass-light";
 
 afterEach(() => vi.restoreAllMocks());
 

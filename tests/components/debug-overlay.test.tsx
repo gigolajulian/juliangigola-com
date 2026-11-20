@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { DebugOverlay } from "@/components/debug-overlay";
+import { DebugOverlay } from "@/components/dev/debug-overlay";
 
 describe("DebugOverlay", () => {
   it("shows the fps line and its buttons", () => {

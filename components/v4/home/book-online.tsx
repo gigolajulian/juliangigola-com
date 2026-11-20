@@ -7,7 +7,7 @@ import { Duo } from "@/components/v3/duo";
 import { V3BookFlow } from "@/components/v3/book";
 import { SESSIONS } from "@/lib/v3";
 import { matches } from "@/lib/device";
-import { BOOK_ROWS, QUOTE_OPTS, type BookRow, type QuoteOpt } from "@/lib/mt-home";
+import { BOOK_ROWS, QUOTE_OPTS, type BookRow, type QuoteOpt } from "@/lib/v4-home/data";
 import { useNextOpen } from "./next-open";
 import { CardsCtx } from "./ctx";
 

@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { matchSong } from "./cover-art-match";
+import { matchSong } from "@/lib/cover-art-match";
 
 const m = (title: string, artist: string, trackName: string, artistName: string) => matchSong({ title, artist }, { trackName, artistName });
 

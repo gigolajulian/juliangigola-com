@@ -7,8 +7,8 @@ vi.stubGlobal("fetch", vi.fn(() => Promise.reject(new Error("offline"))));
 
 import { MtHome } from "@/components/v4/home/home";
 import { tell } from "@/components/v4/home/motion/engine";
-import { QUOTE_CLIENTS } from "@/lib/mt-home";
-import { MT } from "@/lib/mt-home-data";
+import { QUOTE_CLIENTS } from "@/lib/v4-home/data";
+import { MT } from "@/lib/v4-home/server";
 
 /* The drivers tell the screens what to show (motion/engine.ts `tell`); React renders it in the same call. */
 describe("motion drivers tell, React renders", () => {

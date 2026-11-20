@@ -3,7 +3,7 @@ import { V3Home, type TopWork } from "@/components/v3/home";
 import { MtGate } from "@/components/v4/home/gate";
 import { COMMISSION_TABS } from "@/lib/v3";
 import { PROJECTS, categoryLabel } from "@/lib/work";
-import { MT } from "@/lib/mt-home-data";
+import { MT } from "@/lib/v4-home/server";
 import ORDER from "@/lib/portfolio-order.json";
 import { shareOg } from "@/lib/share";
 
