@@ -17,6 +17,8 @@ html[data-mt-motion]:not([data-mt-held], [data-mt-nopin]) .mt-hero .mt-name { po
 /* The name's way out: the tagline and the buttons sink ahead of the name itself. */
 /* .mt-name twice: over depth.css's pointer shift on the same elements, which this keeps in the sum. */
 html[data-mt-motion] .mt-hero .mt-name.mt-name :is(.mt-cap, .mt-ctas) { translate: calc(var(--px, 0) * 4px) calc(var(--py, 0) * 4px + var(--mt-out, 0) * 22vh); }
+/* The band under the name fades as the tagline and buttons leave, gone by the time they are (Julian, 2026-11-19: "so it looks integrated"). */
+html[data-mt-motion] .mt-hero .mt-name .mt-scrim { opacity: max(0, calc(1 - var(--mt-out, 0) * 1.7)); }
 /* The idle wall's card turn (hero.ts sets html[data-mt-flip] and --mt-flip): the idle wall turns the card about its vertical axis, the old photo away and the new one in,
    once the new one has loaded. One from/to pair a face, so the move curve runs once and the card is fastest edge-on. The new photo keeps a single animation: its end clears the old one (hero.tsx). */
 html[data-mt-flip] .mt-hero .ph:has(> img.mt-dev[data-on]) { perspective: 1600px; overflow: visible; background: none; }
