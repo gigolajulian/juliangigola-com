@@ -87,7 +87,19 @@ function cover(lay: (d: HTMLElement) => void, markup: string) {
      show at once (Julian, 2026-11-19: "only in the calendar", "on desktop
      and iPad"); it follows the calendar's box as it is drawn. A phone: the
      whole screen. */
-  const box = innerWidth >= 768 && document.querySelector("#p-flow .f-body") ? (d.dataset.box = "", true) : false;
+  // under the session cards (and the lines under them): where the calendar starts
+  const top = (n: Element) => {
+    let t = n.getBoundingClientRect().top;
+    for (const c of n.children) {
+      const b = c.getBoundingClientRect();
+      if (b.height && !c.matches("[role=status], .f-in") && !c.querySelector(".cal-top")) t = Math.max(t, b.bottom);
+    }
+    return t;
+  };
+  /* The whole screen on an upright screen, or when the calendar starts out of view: upright, the box sat below
+     the fold and nothing showed (Julian, 2026-11-20: "ON THE WHOLE PAGE HERE"). */
+  const f0 = document.querySelector("#p-flow .f-body");
+  const box = innerWidth >= 768 && innerWidth > innerHeight && f0 && top(f0) < innerHeight - 240 ? (d.dataset.box = "", true) : false;
   d.style.cssText = box ? "position:absolute;z-index:5;overflow:hidden" : "position:fixed;inset:0;z-index:2147483000";
   d.innerHTML = markup;
   // smaller over the calendar (Julian, 2026-11-19: "make the JG smaller")
@@ -100,13 +112,9 @@ function cover(lay: (d: HTMLElement) => void, markup: string) {
     if (!n) return;
     if (n !== el) ro?.observe((el = n));
     // from under the session cards (and the lines under them) to the foot of the column: the cards stay clear, the calendar's Month switch is covered
-    const r = n.getBoundingClientRect();
-    let t = r.top;
-    for (const c of n.children) {
-      const b = c.getBoundingClientRect();
-      if (b.height && !c.matches("[role=status], .f-in") && !c.querySelector(".cal-top")) t = Math.max(t, b.bottom);
-    }
-    Object.assign(d.style, { left: `${r.left + scrollX}px`, top: `${t + scrollY}px`, width: `${r.width}px`, height: `${r.bottom - t}px` });
+    const r = n.getBoundingClientRect(), t = top(n), h = r.bottom - t;
+    // hidden until the calendar gives it room: before that it was a 22px strip with the top of J and G peeking (JG - MAC)
+    Object.assign(d.style, { left: `${r.left + scrollX}px`, top: `${t + scrollY}px`, width: `${r.width}px`, height: `${h}px`, visibility: h < 160 ? "hidden" : "" });
   };
   // `hand`: the picker is being drawn under it, so the mark holds still while the box grows to the calendar
   const go = () => {
