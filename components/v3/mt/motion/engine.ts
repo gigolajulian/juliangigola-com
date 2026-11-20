@@ -8,6 +8,11 @@ import { matches, media } from "@/lib/device";
 import { touchParity } from "./touch-parity";
 
 export type Ctx = {
+  // Liveness, for listeners in a setup closure that read ctx outside frame:
+  // vw, vh, held, fine, u: written by measure() on resize and on the held media change, so they are current
+  // (fine is refreshed only by those two events; nothing listens to the fine query itself).
+  // y, dy, t, dt, fresh: written once per tick, so outside frame they hold the last frame's values.
+  // top, h: overwritten for each section in the tick, valid only inside that section's frame.
   /** viewport width and height, px */
   vw: number;
   vh: number;
@@ -47,6 +52,10 @@ export const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 export const smooth = (v: number) => v * v * (3 - 2 * v);
 /** 0 to 1 as v goes from a to b, clamped */
 export const span = (v: number, a: number, b: number) => clamp((v - a) / (b - a));
+/** A section's `--p`, 0 to 1. Held: through its hold, as its top edge travels the height it has beyond one screen.
+   Not held: as it crosses the screen, from its top edge at the bottom of the screen to its bottom edge at the top. */
+export const progress = (top: number, h: number, vh: number, hold: boolean) =>
+  hold ? clamp(-top / Math.max(1, h - vh)) : clamp((vh - top) / (h + vh));
 
 export function startEngine(root: HTMLElement, drivers: Driver[]) {
   const html = document.documentElement;
@@ -115,7 +124,7 @@ export function startEngine(root: HTMLElement, drivers: Driver[]) {
       ctx.top = r.top;
       ctx.h = r.height;
       const hold = ctx.held && !!s.dataset.hold;
-      const p = hold ? clamp(-r.top / Math.max(1, r.height - ctx.vh)) : clamp((ctx.vh - r.top) / (r.height + ctx.vh));
+      const p = progress(r.top, r.height, ctx.vh, hold);
       if (Math.abs((last.get(s) ?? -1) - p) > 0.0004) {
         last.set(s, p);
         s.style.setProperty("--p", p.toFixed(4));
