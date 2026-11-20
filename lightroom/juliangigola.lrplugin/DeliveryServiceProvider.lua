@@ -68,27 +68,6 @@ function provider.updateExportSettings(s)
   s.LR_removeFaceMetadata = true
 end
 
---- The model a final belongs to (Julian 2026-11-19): "M04" from a collection it sits in, "PARADOX02 M04" or
---- "PARADOX02 M04 Marcus", inside a set named for the shoot ("PARADOX02 EDIT"). Only a collection that starts
---- with the set's first word counts, so "Leica M10 test" is never a model. Nil when none: the delivery shows no models.
-local function modelOf(photo)
-  for _, c in ipairs(photo:getContainedCollections()) do
-    local parent = c:getParent()
-    local shoot = parent and parent:getName():match("^(%S+)")
-    local n = shoot and (c:getName() .. " "):match("^" .. (shoot:gsub("%p", "%%%0")) .. "%s+M(%d%d%d?)%s")
-    if n then return "M" .. n end
-  end
-end
-
---- "Group by model" when he never set it: on when any of these photos sits in an M## collection.
-local function anyModel(photos)
-  for i, photo in ipairs(photos or {}) do
-    if i > 200 then break end
-    if modelOf(photo) then return true end
-  end
-  return false
-end
-
 -- ── collection settings ───────────────────────────────────────────
 
 function provider.getCollectionBehaviorInfo()
@@ -96,25 +75,20 @@ function provider.getCollectionBehaviorInfo()
     defaultCollectionName = "Client delivery",
     defaultCollectionCanBeDeleted = true,
     canAddCollection = true,
-    maxCollectionSetDepth = 0,
+    -- One level: a set is a delivery split into models ("Deliver collection set").
+    maxCollectionSetDepth = 1,
   }
 end
 
 function provider.viewForCollectionSettings(f, publishSettings, info)
   local cs = info.collectionSettings
   if cs.email == nil then cs.email = "" end
-  if cs.byModel == nil then
-    local ok, on = pcall(function() return info.publishedCollection and anyModel(info.publishedCollection:getPhotos()) end)
-    cs.byModel = ok and on or false
-  end
   local linked = info.publishedCollection and info.publishedCollection:getRemoteId()
   return f:group_box {
     title = "Client delivery",
     fill_horizontal = 1,
     bind_to_object = cs,
     f:row { f:static_text { title = "Client email" }, f:edit_field { value = bind "email", width_in_chars = 32 } },
-    -- Julian 2026-11-19: chosen outright, so a typo in a collection name never quietly gives a plain gallery.
-    f:row { f:checkbox { title = "Group by model (collections named like \"PARADOX02 M04\" in the shoot's set)", value = bind "byModel" } },
     f:row {
       f:static_text {
         title = linked and "Finals go into the client's gallery. Send them from /admin when they are all up."
@@ -134,6 +108,13 @@ end
 
 -- ── publish ───────────────────────────────────────────────────────
 
+--- The model a final belongs to (Julian 2026-11-19, "set export"): a delivery made as a published collection set
+--- has one published collection per model, and the collection's name is the label ("04", "Marcus"). A collection
+--- on its own, outside a set, is a plain delivery: no model.
+local function modelOf(collection)
+  local parent = collection:getParent()
+  return parent and collection:getName() or nil
+end
 
 function provider.processRenderedPhotos(functionContext, exportContext)
   local session = exportContext.exportSession
@@ -144,35 +125,18 @@ function provider.processRenderedPhotos(functionContext, exportContext)
     title = ("Uploading %d final%s to juliangigola.com"):format(count, count == 1 and "" or "s"),
   }
 
-  local remote = collection:getRemoteId()
+  local parent = collection:getParent()
+  local remote = collection:getRemoteId() or (parent and parent:getRemoteId())
+  if not remote and parent then
+    -- A model collection publishes into its set's gallery, which "Deliver collection set" makes first.
+    error("This model is in a set with no gallery yet. Run Library > Plug-in Extras > Deliver collection set on the shoot's set first.", 0)
+  end
   if not remote then
     -- A delivery-only shoot: a new gallery, named by the shoot day like a proof gallery.
     local fields = { action = "create", name = collection:getName(), day = Site.day(session:photosToExport()) }
     if cs.email and cs.email ~= "" then fields.email = cs.email end
     remote = Site.send("POST", nil, fields).token
     session:recordRemoteCollectionId(remote)
-  end
-
-  -- Group by model: his checkbox, or (never set) on when the photos sit in M## collections. Off never sends a model.
-  local byModel = cs.byModel
-  if byModel == nil then byModel = anyModel(session:photosToExport()) end
-  if byModel then
-    local missing = {}
-    for _, photo in ipairs(session:photosToExport()) do
-      if not modelOf(photo) then missing[#missing + 1] = photo:getFormattedMetadata("fileName") or "?" end
-    end
-    if #missing > 0 then
-      local go = LrDialogs.confirm(("%d of %d finals are in no model collection"):format(#missing, count),
-        table.concat(missing, ", ", 1, math.min(#missing, 12)) .. (#missing > 12 and ", ..." or "") ..
-        "
-
-They show only under All photos. Put each in its \"<shoot> M##\" collection, or publish anyway.", "Publish anyway", "Cancel")
-      if go ~= "ok" then
-        for _, rendition in exportContext:renditions() do rendition:skipRender() end
-        progress:done()
-        return
-      end
-    end
   end
 
   local url
@@ -187,8 +151,8 @@ They show only under All photos. Put each in its \"<shoot> M##\" collection, or 
       -- Capture time for shot order on the site: Lightroom counts from 2001, the site from 1970.
       local shot = photo:getRawMetadata("dateTimeOriginal")
       local q = ("?token=%s&id=%s&file=%s&w=%d&h=%d&t=%d&final=1"):format(enc(remote), enc(id), enc(file), w or 0, h or 0, shot and math.floor(shot + 978307200) or 0)
-      local model = byModel and modelOf(photo)
-      if model then q = q .. "&model=" .. model end
+      local model = modelOf(collection)
+      if model then q = q .. "&model=" .. enc(model) end
       -- Five stars: on the delivery's gate wall.
       if photo:getRawMetadata("rating") == 5 then q = q .. "&top=1" end
       -- A full-size final is tens of MB: ten minutes before giving up on a slow connection.
@@ -307,6 +271,89 @@ function provider.makeFromSelects()
   end, { timeout = 30 })
   LrDialogs.message("Delivery ready to publish", table.concat(lines, "\n") ..
     "\n\nEdit the finals, then click Publish on the delivery under Client Delivery. Send them from /admin when they are all up.")
+end
+
+-- ── Deliver collection set ────────────────────────────────────────
+
+--- Ready for delivery: the Green label (Julian 2026-11-19, "GREEN READY FOR DELIVERY"). An edit stacked on its raw carries its own.
+local function green(photo)
+  return photo:getRawMetadata("colorNameForLabel") == "green"
+end
+
+--- The normal collection set picked in the Library (PARADOX02 EDIT), or nil.
+local function pickedSet(catalog)
+  for _, src in ipairs(catalog:getActiveSources()) do
+    if type(src) == "table" and src.type and src:type() == "LrCollectionSet" then return src end
+  end
+end
+
+--- Mirrors a normal collection set into Client Delivery: one published set (one gallery), one published collection
+--- per child collection (one model, named as the collection), holding its Green photos. Run again after more
+--- labelling: photos that lost Green leave the delivery, new ones join. His working set is never touched.
+function provider.deliverSet()
+  local catalog = LrApplication.activeCatalog()
+  local service = deliveryService(catalog)
+  if not service then
+    LrDialogs.message("Deliver collection set", "Add a Client Delivery service first: in the Publish Services panel, click + then Go to Publishing Manager, and add a juliangigola.com Client Delivery.")
+    return
+  end
+  local set = pickedSet(catalog)
+  if not set then
+    LrDialogs.message("Deliver collection set", "Select the shoot's collection set in the Collections panel first (the set that holds one collection per model).")
+    return
+  end
+  local name = set:getName()
+  local existing
+  for _, ps in ipairs(service:getChildCollectionSets()) do
+    if ps:getName() == name then existing = ps end
+  end
+  -- Read everything before the catalog write: no HTTP inside withWriteAccessDo.
+  local plans, lines, all = {}, {}, {}
+  for _, c in ipairs(set:getChildCollections()) do
+    local photos = {}
+    for _, photo in ipairs(c:getPhotos()) do
+      if green(photo) then
+        photos[#photos + 1] = photo
+        all[#all + 1] = photo
+      end
+    end
+    lines[#lines + 1] = ("%s: %d Green"):format(c:getName(), #photos)
+    if #photos > 0 then plans[#plans + 1] = { name = c:getName(), photos = photos } end
+  end
+  if #plans == 0 then
+    LrDialogs.message("Deliver collection set", ("No photo in %s has the Green label yet."):format(name))
+    return
+  end
+  local remote = existing and existing:getRemoteId()
+  if not remote then
+    -- A new gallery for the shoot, named by the set and dated by its earliest capture.
+    remote = Site.send("POST", nil, { action = "create", name = name, day = Site.day(all) }).token
+  end
+  catalog:withWriteAccessDo("Deliver collection set", function()
+    local ps = existing or service:createPublishedCollectionSet(name, nil, true)
+    ps:setRemoteId(remote)
+    for _, plan in ipairs(plans) do
+      local pc = service:createPublishedCollection(plan.name, ps, true)
+      pc:setRemoteId(remote)
+      local keep = {}
+      for _, photo in ipairs(plan.photos) do keep[photo.localIdentifier] = true end
+      local gone = {}
+      for _, photo in ipairs(pc:getPhotos()) do
+        if not keep[photo.localIdentifier] then gone[#gone + 1] = photo end
+      end
+      if #gone > 0 then pc:removePhotos(gone) end
+      pc:addPhotos(plan.photos)
+    end
+  end, { timeout = 30 })
+  LrDialogs.message("Delivery ready to publish", table.concat(lines, "\n") ..
+    ("\n\n%s is under Client Delivery, one collection per model. Click Publish on it. 5 stars puts a frame on the gate wall and makes it the model's top pick."):format(name))
+end
+
+function provider.runDeliverSet()
+  LrTasks.startAsyncTask(function()
+    local ok, err = LrTasks.pcall(provider.deliverSet)
+    if not ok then LrDialogs.message("Deliver collection set", tostring(err), "critical") end
+  end)
 end
 
 --- Both Plug-in Extras menus run this.

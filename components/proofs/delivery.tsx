@@ -5,9 +5,10 @@
  * (2026-11-19) is the proof's wall: the top picks (five stars in Lightroom,
  * else every final) drifting under a card asking name and email; the split
  * gate stays behind `?proofwall=0`. Any email opens it and every download
- * is logged under it. Finals with a model ("M04", from the Lightroom
- * collection) get a By model view: a card per model with its own zip
- * (`/zip?m=M04`), and an All photos view. Then the finals at
+ * is logged under it. Finals with a model (a delivery published from a
+ * Lightroom collection set, one collection per model, named as the label)
+ * get a By model view: a card per model with its own zip (`/zip?m=<label>`),
+ * and an All photos view. Then the finals at
  * 800px in the grid and 2000px in the lightbox. Save gets one full-size
  * JPEG, Save for web the 2000px copy; Download all gets one zip. Same proof.css as the proof gallery.
  * ─────────────────────────────────────────────────────────────── */
@@ -15,7 +16,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useClock } from "@/lib/use-clock";
-import { closingSoon, isEmail, type PublicDelivery } from "@/lib/proofs/proof";
+import { closingSoon, isEmail, modelLabel, type PublicDelivery } from "@/lib/proofs/proof";
 import { ProofCursor } from "@/components/proofs/cursor";
 import { ProofWall } from "@/components/proofs/wall";
 
@@ -73,7 +74,8 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
   const models = React.useMemo(() => {
     const by = new Map<string, Final[]>();
     for (const f of finals) if (f.model) by.set(f.model, [...(by.get(f.model) ?? []), f]);
-    return [...by].sort((a, b) => a[0].localeCompare(b[0]));
+    // Set order: Lightroom lists a set's collections by name, so "2" before "10".
+    return [...by].sort((a, b) => a[0].localeCompare(b[0], undefined, { numeric: true }));
   }, [finals]);
   const [view, setView] = React.useState<string>(models.length ? "models" : "all");
   const shown = view === "all" || view === "models" ? finals : finals.filter((f) => f.model === view);
@@ -156,7 +158,7 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
     );
   }
 
-  const zipHref = (k: string) => `/delivery/${id}/zip?m=${k}`;
+  const zipHref = (k: string) => `/delivery/${id}/zip?m=${encodeURIComponent(k)}`;
 
   return (
     <div className="proof" data-wall={wall ? (walling ? (email ? "settle" : "gate") : "on") : undefined}>
@@ -178,9 +180,9 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
           <div className="proof-intro dlv-intro dlv-mh">
             <button type="button" className="dlv-back" onClick={() => go("models")}>&larr; All models</button>
             <p className="proof-lab">Model · {one[1].length} photos · {sizeOf(one[1])}</p>
-            <h1>{one[0].slice(1)}</h1>
+            <h1>{modelLabel(one[0])}</h1>
             <button type="button" className="proof-btn" data-done={done[one[0]] ? "" : undefined} onClick={() => download(one[0], zipHref(one[0]))}>
-              {zipLabel(one[0], `Download ${one[0]} · ${sizeOf(one[1])}`)}
+              {zipLabel(one[0], `Download zip · ${sizeOf(one[1])}`)}
             </button>
           </div>
         ) : (
@@ -211,8 +213,8 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
                 <div className="dlv-cover">
                   {/* eslint-disable-next-line @next/next/no-img-element -- private final, 800px copy */}
                   <img src={`${src(top)}&w=800`} alt="" loading={i < 6 ? "eager" : "lazy"} draggable={false} />
-                  <span className="dlv-num" aria-hidden="true">{k.slice(1)}</span>
-                  <button type="button" className="proof-open" aria-label={`Open model ${k.slice(1)}`} onClick={() => go(k)} />
+                  <span className="dlv-num" aria-hidden="true">{modelLabel(k)}</span>
+                  <button type="button" className="proof-open" aria-label={`Open model ${modelLabel(k)}`} onClick={() => go(k)} />
                 </div>
                 {under.length ? (
                   <button type="button" className="dlv-minis" tabIndex={-1} aria-hidden="true" onClick={() => go(k)}>
@@ -261,7 +263,7 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
       {open !== null && shown[open] ? (
         <div className="proof-lb" role="dialog" aria-modal="true" aria-label={`Photo ${open + 1}`}>
           <div className="proof-lt">
-            <span>{one ? `${one[0]} · ` : ""}{pad(open)} / {shown.length}</span>
+            <span>{one ? `${modelLabel(one[0])} · ` : ""}{pad(open)} / {shown.length}</span>
             <button type="button" className="proof-close" onClick={() => setOpen(null)}>Close</button>
           </div>
           <div

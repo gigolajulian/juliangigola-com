@@ -25,7 +25,7 @@ import { bodyOf, json } from "@/lib/http";
  *   POST   {action:"deliver", token}   Send finals: the "your photos are ready" mail, /delivery/<id> open 60 days
  *   GET    ?remind=X                   the reminder as it would go out, with who gets it
  *   POST   {action:"remind", token}    the one reminder for the gallery's stage (`remindState`), on Julian's tap only
- *   PUT    ?token&id&...&final=1[&model=M04&top=1] <jpeg> add or replace one final (Lightroom's Delivery service)
+ *   PUT    ?token&id&...&final=1[&model=<label>&top=1] <jpeg> add or replace one final (Lightroom's Delivery service)
  *   DELETE ?token&ids&final=1          drop finals
  *   PATCH  {token, ...settings}        name, email, note, included, price, days, watermark
  *   PUT    ?token&id&file&w&h  <jpeg>  add or replace one frame
@@ -255,7 +255,7 @@ export async function PUT(request: Request) {
     // Read again after the upload: a long upload must not write back a record from before it.
     const p = await readProof(g.kv, g.s, token);
     if (!p) return json({ error: "No such gallery." }, 404);
-    const model = q.get("model")?.toUpperCase();
+    const model = q.get("model")?.trim().replace(/\s+/g, " ");
     const final = { id, file, w, h, bytes, crc, ...(t > 0 && t < 4e9 ? { t } : {}), ...(isModel(model) ? { model } : {}), ...(q.get("top") === "1" ? { top: true } : {}) };
     const finals = [...(p.finals ?? []).filter((f) => f.id !== id), final];
     await writeProof(g.kv, g.s, { ...p, finals });
