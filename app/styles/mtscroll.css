@@ -742,3 +742,28 @@ html[data-mt-held] [data-mtscroll] .mt-hero .mt-stage,html[data-mt-held][data-mt
   :root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap{color:var(--ink)}
   :root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w.w[data-tone]{color:inherit;text-shadow:none}
 }
+
+/* Light theme hero name (Julian, 2026-11-19, the default since): light theme only, dark stays as live. The name goes dark ink with no shadow, and a page-colour band
+   along the foot of the hero (the phone's, 741) holds it where it crosses a dark photo; the photos above the band run clear. The tagline sits on the band in one colour. */
+@media (prefers-color-scheme:light){
+  html:root:not([data-theme="dark"]) .v3 .mt-hero .mt-name h1{color:var(--ink);text-shadow:none}
+  html:root:not([data-theme="dark"]) .v3 .mt-hero .mt-name .mt-name-in .mt-cap{color:var(--ink)}
+  html:root:not([data-theme="dark"]) .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w.w[data-tone]{color:inherit;text-shadow:none}
+}
+html[data-theme="light"]:root .v3 .mt-hero .mt-name h1{color:var(--ink);text-shadow:none}
+html[data-theme="light"]:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap{color:var(--ink)}
+html[data-theme="light"]:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w.w[data-tone]{color:inherit;text-shadow:none}
+@media (min-width:600px){
+  @media (prefers-color-scheme:light){html:root:not([data-theme="dark"]) .v3 .mt-hero .mt-scrim.mt-scrim.mt-scrim{--t:var(--bg);height:calc(400 * var(--u));background:linear-gradient(to top,color-mix(in srgb,var(--t) 63%,transparent) 30%,color-mix(in srgb,var(--t) 53%,transparent) 50%,color-mix(in srgb,var(--t) 30%,transparent) 70%,color-mix(in srgb,var(--t) 11%,transparent) 86%,transparent)}}
+  html[data-theme="light"]:root .v3 .mt-hero .mt-scrim.mt-scrim.mt-scrim{--t:var(--bg);height:calc(400 * var(--u));background:linear-gradient(to top,color-mix(in srgb,var(--t) 63%,transparent) 30%,color-mix(in srgb,var(--t) 53%,transparent) 50%,color-mix(in srgb,var(--t) 30%,transparent) 70%,color-mix(in srgb,var(--t) 11%,transparent) 86%,transparent)}
+}
+/* 600 to 1023 wide the name sits higher than 400u reaches, which left it on bare photo (QA, #1238). The name sits about 260px up at these widths: a short band that holds its strength to there (Julian: 56svh went "too far up"). */
+@media (min-width:600px) and (max-width:1023px){
+  @media (prefers-color-scheme:light){html:root:not([data-theme="dark"]) .v3 .mt-hero .mt-scrim.mt-scrim.mt-scrim.mt-scrim{height:320px;background:linear-gradient(to top,color-mix(in srgb,var(--bg) 66%,transparent) 30%,color-mix(in srgb,var(--bg) 60%,transparent) 60%,color-mix(in srgb,var(--bg) 52%,transparent) 78%,color-mix(in srgb,var(--bg) 16%,transparent) 92%,transparent)}}
+  html[data-theme="light"]:root .v3 .mt-hero .mt-scrim.mt-scrim.mt-scrim.mt-scrim{height:320px;background:linear-gradient(to top,color-mix(in srgb,var(--bg) 66%,transparent) 30%,color-mix(in srgb,var(--bg) 60%,transparent) 60%,color-mix(in srgb,var(--bg) 52%,transparent) 78%,color-mix(in srgb,var(--bg) 16%,transparent) 92%,transparent)}
+}
+/* On a phone: a taller band than the phone's own, which left the tops of the letters on a dark photo at about 2:1. Both bands are the lightest that keep the name at 4.5:1 over the darkest 5% behind it (Julian: "a bit lighter", 2026-11-19). */
+@media (max-width:599px){
+  @media (prefers-color-scheme:light){html:root:not([data-theme="dark"]) .v3 .mt-hero .mt-scrim.mt-scrim.mt-scrim{--t:var(--bg);height:calc(260px + env(safe-area-inset-bottom));background:linear-gradient(to top,color-mix(in srgb,var(--t) 56%,transparent) 42%,color-mix(in srgb,var(--t) 48%,transparent) 62%,color-mix(in srgb,var(--t) 26%,transparent) 80%,color-mix(in srgb,var(--t) 8%,transparent) 92%,transparent)}}
+  html[data-theme="light"]:root .v3 .mt-hero .mt-scrim.mt-scrim.mt-scrim{--t:var(--bg);height:calc(260px + env(safe-area-inset-bottom));background:linear-gradient(to top,color-mix(in srgb,var(--t) 56%,transparent) 42%,color-mix(in srgb,var(--t) 48%,transparent) 62%,color-mix(in srgb,var(--t) 26%,transparent) 80%,color-mix(in srgb,var(--t) 8%,transparent) 92%,transparent)}
+}
