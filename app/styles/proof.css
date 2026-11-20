@@ -467,3 +467,14 @@ html:has(.proof[data-wall])::-webkit-scrollbar{display:none}
 .dlv-back:hover{color:var(--foreground)}
 .dlv-mh h1{margin-bottom:22px}
 @media(max-width:700px){.dlv-models{grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 3px}}
+/* The mock's intro: big heading (the wall gate's 44px cap is for the proofs' greeting), Download all bottom right. */
+.proof .dlv-intro{max-width:none;display:grid;grid-template-columns:1fr auto;column-gap:24px;align-items:start;justify-items:start}
+.dlv-intro>*{grid-column:1}
+.dlv-intro>.dlv-dl{grid-column:2;grid-row:1/span 4;align-self:end;flex-direction:column;align-items:flex-end;text-align:right}
+.proof .proof-intro.dlv-intro h1{font:500 clamp(40px,8cqi,104px)/.95 var(--font-display);letter-spacing:-.04em;margin:14px 0 0;min-height:0}
+.dlv-top .proof-tabs{justify-self:end}
+@container (max-width:700px){
+  .dlv-intro{grid-template-columns:1fr}
+  .dlv-intro>.dlv-dl{grid-column:1;grid-row:auto;align-items:flex-start;text-align:left}
+}
+@container (max-width:520px){.dlv-top>span{display:none}}

@@ -108,10 +108,13 @@ end
 -- ── publish ───────────────────────────────────────────────────────
 
 --- The model a final belongs to (Julian 2026-11-19): "M04" from a collection it sits in, "PARADOX02 M04" or
---- "PARADOX02 M04 Marcus". Nil when it is in none: the delivery shows no models.
+--- "PARADOX02 M04 Marcus", inside a set named for the shoot ("PARADOX02 EDIT"). Only a collection that starts
+--- with the set's first word counts, so "Leica M10 test" is never a model. Nil when none: the delivery shows no models.
 local function modelOf(photo)
   for _, c in ipairs(photo:getContainedCollections()) do
-    local n = (" " .. c:getName() .. " "):match("%sM(%d%d%d?)%s")
+    local parent = c:getParent()
+    local shoot = parent and parent:getName():match("^(%S+)")
+    local n = shoot and (c:getName() .. " "):match("^" .. (shoot:gsub("%p", "%%%0")) .. "%s+M(%d%d%d?)%s")
     if n then return "M" .. n end
   end
 end

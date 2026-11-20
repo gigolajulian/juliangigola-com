@@ -162,19 +162,20 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
     <div className="proof" data-wall={wall ? (walling ? (email ? "settle" : "gate") : "on") : undefined}>
       <div inert={walling || open !== null || undefined}>
         <ProofCursor />
-        <header className="proof-top">
+        <header className="proof-top dlv-top">
           <Link className="proof-word" href="/">Julian Gigola</Link>
+          <span />
+          {/* The tabs top right (Julian's mock comments); the count lives in the intro line only. */}
           {models.length ? (
             <nav className="proof-tabs" aria-label="Photos">
               <button type="button" data-on={view !== "all" || undefined} onClick={() => go("models")}>BY MODEL</button>
               <button type="button" data-on={view === "all" || undefined} onClick={() => go("all")}>ALL PHOTOS</button>
             </nav>
-          ) : <span />}
-          <p className="proof-meta"><b>{finals.length}</b> photos</p>
+          ) : <p className="proof-meta"><b>{finals.length}</b> photos</p>}
         </header>
 
         {one ? (
-          <div className="proof-intro dlv-mh">
+          <div className="proof-intro dlv-intro dlv-mh">
             <button type="button" className="dlv-back" onClick={() => go("models")}>&larr; All models</button>
             <p className="proof-lab">Model · {one[1].length} photos · {sizeOf(one[1])}</p>
             <h1>{one[0].slice(1)}</h1>
@@ -183,7 +184,7 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
             </button>
           </div>
         ) : (
-          <div className="proof-intro">
+          <div className="proof-intro dlv-intro">
             <p className="proof-lab">Finals · {models.length ? `${models.length} models · ` : ""}{finals.length} photos · {size(total)}{soon !== null && closes ? ` · ${soon} ${soon === 1 ? "day" : "days"} left` : ""}</p>
             <h1>Your photos.</h1>
             {initial.subhead ? <p className="proof-sub">{initial.subhead}</p> : null}
