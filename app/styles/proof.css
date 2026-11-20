@@ -454,12 +454,16 @@ html:has(.proof[data-wall])::-webkit-scrollbar{display:none}
 .proof [data-done]{opacity:.7}
 .dlv-models{grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:36px 6px}
 .dlv-minis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px;width:100%;margin-top:3px}
+.dlv-mini{position:relative;display:block;overflow:hidden}
 .dlv-minis img{display:block;width:100%;aspect-ratio:1;object-fit:cover;user-select:none;-webkit-user-select:none}
 .dlv-cover{position:relative;aspect-ratio:4/5;overflow:hidden;background:#111}
 .dlv-cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;transition:filter .2s ease-out;user-select:none;-webkit-user-select:none}
-.dlv-cover::after{content:"";position:absolute;top:0;right:0;width:60%;aspect-ratio:1;background:radial-gradient(circle at 100% 0,rgba(0,0,0,.42),transparent 62%);pointer-events:none}
 @media(hover:hover){.dlv-card:hover .dlv-cover img{filter:brightness(1.12)}}
-.dlv-num{position:absolute;z-index:1;top:12px;right:14px;font:800 clamp(28px,3vw,40px)/1 var(--font-display);letter-spacing:-.03em;font-variant-numeric:tabular-nums;color:#f0efec;text-shadow:0 1px 14px rgba(0,0,0,.55);pointer-events:none}
+/* Julian 2026-11-19 ("D"): numerals that invert against the photo, black on white seamless, white on a dark floor */
+.dlv-cover{container-type:inline-size}
+.dlv-num{position:absolute;z-index:1;right:10px;bottom:-.08em;font:900 min(130px,40cqi)/1 var(--font-display);letter-spacing:-.06em;font-variant-numeric:tabular-nums;color:#fff;mix-blend-mode:difference;pointer-events:none}
+.dlv-mn{position:absolute;left:6px;top:4px;font:800 22px/1 var(--font-display);font-style:normal;letter-spacing:-.02em;color:#fff;mix-blend-mode:difference;pointer-events:none}
+.dlv-grid .proof-no{left:10px;top:6px;bottom:auto;font:800 30px/1 var(--font-display);letter-spacing:-.03em;color:#fff;mix-blend-mode:difference}
 .dlv-cap{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px 10px;padding:12px 6px 0;font:11px var(--p-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted-foreground)}
 .dlv-zip{font:500 11px var(--p-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--foreground);white-space:nowrap;min-height:36px;padding:0 14px;border:1px solid var(--p-hl);transition:background-color .15s ease-out,color .15s ease-out,border-color .15s ease-out}
 .dlv-zip:hover{background:var(--foreground);color:var(--background);border-color:var(--foreground)}

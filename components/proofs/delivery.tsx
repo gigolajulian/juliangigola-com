@@ -219,8 +219,11 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
                 {under.length ? (
                   <button type="button" className="dlv-minis" tabIndex={-1} aria-hidden="true" onClick={() => go(k)}>
                     {under.map((f) => (
-                      // eslint-disable-next-line @next/next/no-img-element -- private final, 800px copy
-                      <img key={f.id} src={`${src(f)}&w=800`} alt="" loading={i < 6 ? "eager" : "lazy"} draggable={false} />
+                      <span key={f.id} className="dlv-mini">
+                        {/* eslint-disable-next-line @next/next/no-img-element -- private final, 800px copy */}
+                        <img src={`${src(f)}&w=800`} alt="" loading={i < 6 ? "eager" : "lazy"} draggable={false} />
+                        <i className="dlv-mn">{pad(fs.indexOf(f))}</i>
+                      </span>
                     ))}
                   </button>
                 ) : null}
@@ -235,7 +238,7 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
             })}
           </div>
         ) : (
-          <div className="proof-grid" ref={grid}>
+          <div className="proof-grid dlv-grid" ref={grid}>
             {shown.map((f, i) => (
               <div key={f.id} className="proof-cell">
                 {/* eslint-disable-next-line @next/next/no-img-element -- private finals from the Worker, not the image CDN */}
