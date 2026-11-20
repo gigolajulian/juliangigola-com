@@ -171,11 +171,11 @@ export function V3Book({ slug }: { slug: SessionSlug }) {
   const fromServer = React.useSyncExternalStore(noop, () => false, () => true);
   return (
     <div className="v3 contents">
-      {/* the booking wait's cover, up before the page paints (jg-cover.ts); only where there is a calendar to wait for */}
-      {fromServer && SESSIONS[slug].cal ? <script dangerouslySetInnerHTML={{ __html: JG_COVER }} /> : null}
       <section className="v3page" id="p-flow">
         <V3BookFlow slug={slug} h1 />
       </section>
+      {/* the booking wait's cover, up before the page paints (jg-cover.ts); only where there is a calendar to wait for; after the page, so the calendar's box is there to cover */}
+      {fromServer && SESSIONS[slug].cal ? <script dangerouslySetInnerHTML={{ __html: JG_COVER }} /> : null}
     </div>
   );
 }
