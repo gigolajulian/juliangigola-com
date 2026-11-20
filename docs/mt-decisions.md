@@ -72,6 +72,7 @@ notes (another branch was editing them).
 
 ## motion/hero.ts
 
+- 2026-11-20: `?mtflip=0` (the hard cut back) removed; the card turn is the only path (Julian, owner decisions round 8).
 - 2026-11-18: one tone per word on the tagline, so a word never splits black and white (Julian).
 - 2026-11-18: phones and tablets pin the name and sink it out the desktop's way. Julian: it scrolled away with the first screen.
 - 2026-11-17: the idle card turn is 1300ms, Julian's pick of 600 / 900 / 1300.
@@ -112,9 +113,9 @@ notes (another branch was editing them).
 ## motion/rows.ts
 
 - 2026-11-18: holds snap to the nearest item (Julian). `?mtsnap=0` turns it off.
-- 2026-11-17: the Commissions lid is kept. Julian: "keep the lid". `?mtlid=0` turns it off.
+- 2026-11-17: the Commissions lid is kept. Julian: "keep the lid". `?mtlid=0` turned it off until 2026-11-20 (flag removed, owner decisions round 8).
 - 2026-11-17: the first film starts a screen early. Julian: play as soon as possible.
-- 2026-11-15: the covers parallax became the V4 default. Julian: "turn on the parallax by default". `?mtpar=0` turns it off.
+- 2026-11-15: the covers parallax became the V4 default. Julian: "turn on the parallax by default". `?mtpar=0` turned it off until 2026-11-20 (flag removed, owner decisions round 8).
 - 2026-11-15: the first record comes out of its sleeve over the first 5% of the hold (Julian).
 - 2026-11-14: the record's slide is eased at both ends (Julian).
 - 2026-11-14: previews load in the films before and after the current one (Julian).

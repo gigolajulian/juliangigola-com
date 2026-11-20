@@ -1,5 +1,5 @@
 import { scrollGoal, settleTo, shiftScroll } from "@/components/v3/smooth-scroll";
-import { qflag, qvalue } from "@/lib/mtflags";
+import { qvalue } from "@/lib/mtflags";
 import { holdEase as ease, holdUnease as unease } from "@/lib/motion/hold-ease";
 import { captionsOff, vimeoListen, vimeoPlays } from "@/lib/videos";
 import { clamp, rise, smooth, type Ctx, type Driver, type MtSection } from "./engine";
@@ -55,12 +55,10 @@ function heldRow(name: MtSection): Driver {
       const o: number[] = Array(n).fill(-1);
       let step = 1, c0 = 0, mid = 0, range = 0, cur = -1, base = 0, lastX = NaN;
 
-      /* Parallax, on by default, ?mtpar=0 turns it off: the heading and the row ride up at their own
-         rates and the stage hands over to Motion (rows.css). */
-      const par = !qflag("mtpar", "0");
-      if (par) document.documentElement.setAttribute("data-mt-par", "");
-      // on by default, ?mtlid=0 turns it off: Cover art waits under Commissions, which lifts off it like a lid (rows.css)
-      if (par) document.documentElement.toggleAttribute("data-mt-lid", !qflag("mtlid", "0"));
+      /* Parallax: the heading and the row ride up at their own rates and the stage hands over to Motion (rows.css). */
+      document.documentElement.setAttribute("data-mt-par", "");
+      // the lid: Cover art waits under Commissions, which lifts off it like a lid (rows.css)
+      document.documentElement.setAttribute("data-mt-lid", "");
       const measure = () => {
         // flow.css scales the row as it enters and settles: measure it at rest
         row.style.transform = "none";
@@ -192,7 +190,7 @@ function heldRow(name: MtSection): Driver {
         ac.abort();
         mo.disconnect();
         track.style.transform = "";
-        if (par) for (const k of ["data-mt-par", "data-mt-lid"]) document.documentElement.removeAttribute(k);
+        for (const k of ["data-mt-par", "data-mt-lid"]) document.documentElement.removeAttribute(k);
         for (const it of items) {
           it.classList.remove("hv");
           it.style.setProperty("--o", "0.5");

@@ -23,9 +23,9 @@ Typed readers live in `motion/root-attrs.ts` (`flipMs`); everything else reads t
 | `data-mtdock="off"` | motion/hero.ts setup | | mtscroll.css | hero setup | hero cleanup |
 | `data-mt-pasthero` | motion/hero.ts on scroll | nav-ink.ts | hero.css, mtscroll.css | the hero is above the header | hero cleanup |
 | `data-mt-nopin` | motion/hero.ts setup | | hero.css | `?mtpin=0` | hero cleanup |
-| `data-mt-flip` and `--mt-flip` | motion/hero.ts setup | hero.tsx (`flipMs`) | hero.css | hero setup, unless `?mtflip=0`; missing means the driver is not running | hero cleanup |
+| `data-mt-flip` and `--mt-flip` | motion/hero.ts setup | hero.tsx (`flipMs`) | hero.css | hero setup; missing means the driver is not running | hero cleanup |
 | `data-mt-nameout` | motion/hero.ts `sink()` | | mtscroll.css | the name is out | the name is back, a mode change, hero cleanup |
-| `data-mt-par`, `data-mt-lid` | motion/rows.ts setup | | rows.css | Cover art setup, unless `?mtpar=0` / `?mtlid=0` | rows cleanup |
+| `data-mt-par`, `data-mt-lid` | motion/rows.ts setup | | rows.css | Cover art setup | rows cleanup |
 | `data-mtask` | motion/quote.ts setup | | quote.css | `?mtask=1` | never |
 | `data-mt-intro` (1/2/3), `data-mt-own`, `data-mt-late` | intro/index.tsx, the app/layout.tsx head script | intro/index.tsx, hero.tsx, nav-ink.ts | intro.css, mtscroll.css | the head script on a first v4 visit; the intro as it plays | when the intro ends, or the head script's 6s fallback |
 

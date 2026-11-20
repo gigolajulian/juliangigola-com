@@ -115,7 +115,7 @@ html:not([data-mt-held]) .mt-motion :is(.mt-mopg,.mt-molg,.mt-mobar){display:non
 /* Snap rows: the record now comes fully out of the bottom (118px), more than the static row's 72px of room. */
 html[data-mt-motion]:not([data-mt-held]) .mt-covers .mt-row{padding-bottom:126px}
 
-/* On by default, ?mtpar=0 turns it off (rows.ts sets html[data-mt-par]). Coming in: the heading and the row ride up at their own rates.
+/* rows.ts sets html[data-mt-par] while Cover art's driver runs. Coming in: the heading and the row ride up at their own rates.
    Going out: the stage sinks and dims while Motion slides over
    it, the same hand-over as hero into Commissions (flow.css). Motion's film settles from a slight push-in as it arrives. */
 html[data-mt-par][data-mt-held] .mt-covers .mt-rowhead>:is(h2,p){translate:0 calc((1 - var(--in,1)) * 8svh)}
@@ -129,7 +129,7 @@ html[data-mt-par][data-mt-held] .mt-motion .mt-film{scale:calc(1.1 - var(--in,1)
 html[data-mt-par][data-mt-held] .mt-motion .mt-mohead{translate:0 calc((1 - var(--in,1)) * 10svh)}
 /* Cover art on a screen taller than 1440: the covers grow to fill the stage (4K had a 780px empty band); their captions keep the page's size */
 html[data-mt-held] .mt-covers .mt-cvcap{font-size:max(11px,calc(11 * var(--tu)))}
-/* The lid, on by default (?mtlid=0 turns it off): the stage is held at the top of the window for the whole way in, under Commissions (z-index 2, flow.css),
+/* The lid (rows.ts sets html[data-mt-lid] beside data-mt-par): the stage is held at the top of the window for the whole way in, under Commissions (z-index 2, flow.css),
    whose lower edge lifts off it. No ride up; the heading and covers come up from dim as the edge clears. */
 html[data-mt-lid][data-mt-par][data-mt-held] .mt-covers .mt-stage{transform:translate3d(0,calc(var(--out,0) * 22svh - (1 - var(--in,1)) * max(100svh,600px)),0) scale(calc(1 - var(--out,0) * .05))}
 html[data-mt-lid][data-mt-par][data-mt-held] .mt-covers :is(.mt-rowhead>:is(h2,p),.mt-row){translate:none}

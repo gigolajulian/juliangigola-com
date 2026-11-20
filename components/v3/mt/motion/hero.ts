@@ -247,13 +247,10 @@ export const heroDrivers: Driver[] = [
         if (!due) due = window.setTimeout(sweep, 100); // ten sweeps a second while scrolling, and one after the last scroll event
       };
       if (!PIN) document.documentElement.setAttribute("data-mt-nopin", "");
-      // The idle wall turns a card over to its next photo (hero.css). The value is the duration: hero.tsx reads it for the caption. `?mtflip=0` brings the hard cut back.
-      const flip = qflag("mtflip", "0") ? 0 : FLIP;
+      // The idle wall turns a card over to its next photo (hero.css). The value is the duration: hero.tsx reads it for the caption.
       const ac = new AbortController();
-      if (flip) {
-        document.documentElement.setAttribute("data-mt-flip", String(flip));
-        document.documentElement.style.setProperty("--mt-flip", flip + "ms");
-      }
+      document.documentElement.setAttribute("data-mt-flip", String(FLIP));
+      document.documentElement.style.setProperty("--mt-flip", FLIP + "ms");
       // always: phones keep the wordmark out of the bar while the hero is on screen (mtscroll.css)
       addEventListener("scroll", past, { passive: true, signal: ac.signal });
       past();
