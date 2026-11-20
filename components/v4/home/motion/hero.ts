@@ -1,5 +1,5 @@
 import { qflag } from "@/lib/v4-home/flags";
-import { clamp, type Ctx, type Driver } from "./engine";
+import { clamp, MT2, type Ctx, type Driver } from "./engine";
 
 /* Hero wall travel (spec 3.2). Held (D): the wall travels up through the hold,
    each column trailing by its lag A, and the name block leaves once at the end.
@@ -207,6 +207,7 @@ export const heroDrivers: Driver[] = [
     name: "hero",
     always: true,
     setup(el) {
+      if (MT2) (toned = 0), (tonedY = -1); // module throttle, fresh per mount
       const part = (n: HTMLElement, a: number, c: number): Part => ({ el: n, a, c, v: 0 });
       const st: State = {
         cols: [...el.querySelectorAll<HTMLElement>(".mt-col")].map((n) => part(n, Number(n.dataset.a) || 0, Number(n.dataset.col))),

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { flushSync } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
 import { COVER_RELEASES } from "@/lib/cover-art-data";
@@ -32,8 +33,16 @@ export function MtCovers() {
     };
     const onScroll = () => (raf ||= requestAnimationFrame(read));
     el.addEventListener("scroll", onScroll, { passive: true });
+    // ?mt2=1: on D the covers driver tells the item (motion/engine.ts tell) instead of moving the row's scroll
+    const sec = el.closest("section")!;
+    const told = (e: Event) => {
+      const { cur: i, now } = (e as CustomEvent<{ cur?: number; now: boolean }>).detail;
+      if (typeof i === "number") (now ? flushSync : (f: () => void) => f())(() => setCur(i));
+    };
+    sec.addEventListener("mt-tell", told);
     return () => {
       el.removeEventListener("scroll", onScroll);
+      sec.removeEventListener("mt-tell", told);
       cancelAnimationFrame(raf);
     };
   }, []);
