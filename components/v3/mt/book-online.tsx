@@ -7,7 +7,7 @@ import { Duo } from "@/components/v3/duo";
 import { V3BookFlow } from "@/components/v3/book";
 import { SESSIONS } from "@/lib/v3";
 import { matches } from "@/lib/device";
-import { BOOK_ROWS, QUOTE_OPTS, type BookRow } from "./data";
+import { BOOK_ROWS, QUOTE_OPTS, type BookRow, type QuoteOpt } from "./data";
 import { useNextOpen } from "./next-open";
 
 /* Book online: four sessions, one line each. A row is picked by hover (fine
@@ -53,7 +53,7 @@ function useWeekFirst(box: React.RefObject<HTMLDivElement | null>, key: string |
   }, [box, key]);
 }
 
-export function MtBookOnline({ open, onOpen, onClose, quotePhoto, onRowPick }: { open: BookRow["slug"] | null; onOpen: (k: BookRow["slug"]) => void; onClose: () => void; quotePhoto: number | null; onRowPick: () => void }) {
+export function MtBookOnline({ open, onOpen, onClose, quotePhoto, onRowPick }: { open: BookRow["slug"] | null; onOpen: (k: BookRow["slug"]) => void; onClose: () => void; quotePhoto: QuoteOpt["key"] | null; onRowPick: () => void }) {
   const [sel, setSelRaw] = React.useState(0);
   const setSel = (i: number) => (setSelRaw(i), onRowPick());
   // desktop: the photo shows a By quote option while that list was the last one touched; never during a booking
@@ -132,7 +132,7 @@ export function MtBookOnline({ open, onOpen, onClose, quotePhoto, onRowPick }: {
         </div>
         <figure className="mt-photo">
           {BOOK_ROWS.map((x, i) => <RowPhoto key={x.slug} r={x} on={q === null && i === shownIdx} sizes="(max-width: 1023px) 100vw, 42vw" />)}
-          {QUOTE_OPTS.map((x, i) => <Image key={x.key} src={x.photo} alt={`${x.name} sample`} fill sizes="42vw" className={q === i ? "qp on" : "qp"} />)}
+          {QUOTE_OPTS.map((x) => <Image key={x.key} src={x.photo} alt={`${x.name} sample`} fill sizes="42vw" className={q === x.key ? "qp on" : "qp"} />)}
         </figure>
       </div>
       {/* Phone, tablet and on its side: the held bar while the screen is up. */}

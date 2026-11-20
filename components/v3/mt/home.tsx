@@ -21,8 +21,8 @@ import { glideTo } from "@/components/v3/smooth-scroll";
 export function MtHome({ data }: { data: MtData }) {
   const [book, setBook] = React.useState<BookRow["slug"] | null>(null);
   const [inq, setInq] = React.useState<{ from: InquiryFrom; opt?: QuoteOpt["key"] } | null>(null);
-  // the booking photo follows the last row touched in either list: a quote option's index, or null for the sessions
-  const [quotePhoto, setQuotePhoto] = React.useState<number | null>(null);
+  // the booking photo follows the last row touched in either list: a quote option's key, or null for the sessions
+  const [quotePhoto, setQuotePhoto] = React.useState<QuoteOpt["key"] | null>(null);
   // The control that opened a card gets focus back when it closes (spec 3.6, 3.11).
   const opener = React.useRef<HTMLElement | null>(null);
   const keep = () => (opener.current = document.activeElement as HTMLElement | null);

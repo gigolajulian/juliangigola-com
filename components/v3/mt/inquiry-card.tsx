@@ -62,7 +62,7 @@ function Form({ from, opt, reply, onClose }: { from: InquiryFrom; opt?: QuoteOpt
     <input id={`mq-${k}`} name={k === "when" ? undefined : k} value={v[k]} onChange={set(k)} aria-invalid={!!err[k] || undefined} aria-describedby={err[k] ? `mq-${k}-err` : undefined} {...extra} />
   );
   const detail = quote ? [`${opt.name}${chip ? `: ${chip}` : ""}`, v.when.trim() && `When: ${v.when.trim()}`].filter(Boolean).join(" · ").slice(0, 200) : undefined;
-  const type = quote ? (CHIP_TYPE[chip] ?? (opt.key === "fashion" ? "editorial" : "other")) : "other";
+  const type = quote ? (CHIP_TYPE[chip] ?? opt.type ?? "other") : "other";
   if (sent)
     return (
       <div className="mt-sent" role="status">
@@ -77,7 +77,7 @@ function Form({ from, opt, reply, onClose }: { from: InquiryFrom; opt?: QuoteOpt
       noValidate
       onSubmit={(e) => {
         e.preventDefault();
-        if (call) return router.push("/book/music-photography");
+        if (call) return router.push(opt.call);
         const bad = checkYou(v.name, v.email);
         if (!v.message.trim()) bad.message = NEED_MSG;
         setErr(bad);
