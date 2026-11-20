@@ -30,13 +30,16 @@ describe("v4 home footer: focus comes back to the opener", () => {
     await waitFor(() => expect(document.activeElement).toBe(link));
   });
 
-  it("Book online link: Back closes the booking and the link has focus", () => {
+  it("Book online link: Back closes the booking, the link has focus and the page does not scroll to Sessions", () => {
     render(<MtHome data={MT} />);
     const link = foot().getByRole("button", { name: BOOK_ROWS[0].name });
     fireEvent.click(link);
     const book = document.querySelector<HTMLElement>('[data-mt="book"]')!;
     expect(book.hasAttribute("data-open")).toBe(true);
+    // jsdom's focus() does not scroll, so this checks the scroll to Sessions is skipped; the scroll back to the link is the browser's own
+    const scroll = vi.spyOn(window, "scrollTo").mockImplementation(() => {});
     fireEvent.click(within(book).getByRole("button", { name: "Back" }));
     expect(document.activeElement).toBe(link);
+    expect(scroll).not.toHaveBeenCalled();
   });
 });

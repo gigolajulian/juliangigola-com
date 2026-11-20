@@ -42,11 +42,14 @@ export function MtBookOnline({ open, opener, onClose, quotePhoto, onRowPick }: {
   React.useEffect(() => {
     if (!!open === isOpen.current) return;
     isOpen.current = !!open;
+    // opened from a footer link: closing goes back to that link, where the visitor started
+    const back = !open && opener?.current;
+    if (back) return back.focus();
     // by hand, not scrollIntoView: the page keeps a scroll padding for anchors that would leave a gap here; the offset is the block's own scroll-margin (the fixed header on phones)
     const el = sec.current;
     if (el) window.scrollTo({ top: window.scrollY + el.getBoundingClientRect().top - (parseFloat(getComputedStyle(el).scrollMarginTop) || 0) });
     if (open) head.current?.focus({ preventScroll: true });
-    else (opener?.current ?? rows.current[shownIdx])?.focus({ preventScroll: true });
+    else rows.current[shownIdx]?.focus({ preventScroll: true });
   }, [open, shownIdx, opener]);
 
   const next = useNextOpen(r.slug);
