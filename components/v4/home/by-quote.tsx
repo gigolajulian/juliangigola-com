@@ -33,7 +33,6 @@ function ClientPhoto({ c, on, q, stills, wide }: { c: QuoteClient; on: boolean; 
 export function MtByQuote({ stills, reply, onOptionPick }: { stills: Record<string, string>; reply: string | null; onOptionPick: (k: QuoteOpt["key"]) => void }) {
   const [sel, setSel] = React.useState(0);
   const [optPhoto, setOptPhoto] = React.useState(false); // the option's photo shows instead of the client's
-  const ci = 0; // the first client, for the static form (`.on`)
   // the rotation (motion/quote.ts): `k` is the client shown, `name` the name shown (it follows k after a fade, `sw`)
   const [rot, setRot] = React.useState({ k: 0, name: 0, sw: false });
   const ref = React.useRef<HTMLElement>(null);
@@ -51,7 +50,8 @@ export function MtByQuote({ stills, reply, onOptionPick }: { stills: Record<stri
     <section className="mt-quote" data-mt="quote" data-client={rot.k} data-opt={optPhoto || undefined} ref={ref}>
       <div className="mt-frame mt-stage">
         <figure className="mt-photo">
-          {QUOTE_CLIENTS.map((c, i) => <ClientPhoto key={c.name} c={c} on={!optPhoto && i === ci} q={i === rot.k} stills={stills} />)}
+          {/* the first client stands for the static form (`.on`); the rotation is `q` */}
+          {QUOTE_CLIENTS.map((c, i) => <ClientPhoto key={c.name} c={c} on={!optPhoto && i === 0} q={i === rot.k} stills={stills} />)}
           {QUOTE_OPTS.map((x, i) => (
             <span key={x.key} className={optPhoto && i === sel ? "op on" : "op"} data-cur={i === sel || undefined}>
               <Image src={x.photo} alt={`${x.name} sample`} fill sizes="(max-width: 1023px) 100vw, 42vw" />
@@ -61,7 +61,7 @@ export function MtByQuote({ stills, reply, onOptionPick }: { stills: Record<stri
         </figure>
         {/* Phone and tablet: the client frame at 2:1 (spec 8). */}
         <figure className="mt-photo-w">
-          {QUOTE_CLIENTS.map((c, i) => <ClientPhoto key={c.name} c={c} on={i === ci} q={i === rot.k} stills={stills} wide />)}
+          {QUOTE_CLIENTS.map((c, i) => <ClientPhoto key={c.name} c={c} on={i === 0} q={i === rot.k} stills={stills} wide />)}
         </figure>
         <div className="mt-quote-col" onPointerEnter={() => matches("fine") && setOptPhoto(true)} onPointerLeave={() => matches("fine") && setOptPhoto(false)}>
           <p className="lbl mute mt-label">By quote</p>

@@ -13,7 +13,7 @@ import { useTold } from "./ctx";
    Phone: two-column masonry, each frame at its own ratio in the shorter column. */
 
 /** Each frame to the shorter of two columns (heights by ratio; the right one starts 56/171 of a frame lower). */
-const masonry = (frames: MtFrame[]) => {
+export const masonry = (frames: MtFrame[]) => {
   const h = [0, 56 / 171];
   const cols: { f: MtFrame; i: number }[][] = [[], []];
   frames.forEach((f, i) => {
