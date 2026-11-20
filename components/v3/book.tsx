@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { createPortal, preload } from "react-dom";
 import { getImageProps } from "next/image";
-import { JG_COVER } from "@/components/splash/jg-cover";
+import { JG_COVER, mountCover } from "@/components/splash/jg-cover";
 import { useRouter } from "next/navigation";
 import { BookTimes } from "@/components/booking/book-times";
 import { Calendar, Failed, Field, FlowShell, Hidden, Run, dlabel, iso, useEnquiry, type Shell } from "@/components/v3/flow";
@@ -31,6 +31,7 @@ function Tabs({ at }: { at: SessionSlug }) {
   const [tap, setTap] = React.useState<{ from: SessionSlug; x: SessionSlug } | null>(null);
   const cur = tap?.from === at ? tap.x : at;
   const go = (x: SessionSlug) => {
+    markTab();
     setTap({ from: at, x });
     router.replace(`/book/${x}`, { scroll: false });
   };
@@ -141,7 +142,7 @@ export function V3BookFlow({ slug, tabs = true, h1 = false }: { slug: SessionSlu
         p.at === 1 ? (
           <>
             {p.sub ? <p className="f-where">{p.sub}</p> : null}
-            {more ? <More on={slug === "consultation"} go={(x) => router.replace(`/book/${x}`, { scroll: false })} /> : null}
+            {more ? <More on={slug === "consultation"} go={(x) => (markTab(), router.replace(`/book/${x}`, { scroll: false }))} /> : null}
           </>
         ) : undefined
       }
@@ -151,11 +152,27 @@ export function V3BookFlow({ slug, tabs = true, h1 = false }: { slug: SessionSlu
   return <BookTimes key={slug} path={S.cal} title={`Pick a time for ${S.name}`} v3={{ shell, name: S.name, from: S.from }} />;
 }
 
+/* When a session tab was last picked: the next booking page is the same
+   visit, and keeps the J and G that fill instead of the cover again. */
+let tabbedAt = 0;
+function markTab() {
+  tabbedAt = Date.now();
+}
+
 export function V3Book({ slug }: { slug: SessionSlug }) {
+  /* Reached by a move inside the site (the header's Book a session), the
+     cover's script never runs: React runs no script it inserts. So it goes
+     up here too, before the page paints; on a full load the script has put
+     it up already and this does nothing. */
+  React.useLayoutEffect(() => {
+    if (SESSIONS[slug].cal && Date.now() - tabbedAt > 3000) mountCover();
+  }, [slug]);
+  // the script only in the server's markup: rendered on a move inside the site it would never run, and React warns
+  const fromServer = React.useSyncExternalStore(noop, () => false, () => true);
   return (
     <div className="v3 contents">
       {/* the booking wait's cover, up before the page paints (jg-cover.ts); only where there is a calendar to wait for */}
-      {SESSIONS[slug].cal ? <script dangerouslySetInnerHTML={{ __html: JG_COVER }} /> : null}
+      {fromServer && SESSIONS[slug].cal ? <script dangerouslySetInnerHTML={{ __html: JG_COVER }} /> : null}
       <section className="v3page" id="p-flow">
         <V3BookFlow slug={slug} h1 />
       </section>
