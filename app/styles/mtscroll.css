@@ -789,6 +789,6 @@ html[data-theme="dark"]:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w.w[data
   html[data-theme="dark"]:root .v3 .mt-hero .mt-scrim.mt-scrim.mt-scrim{height:calc(260px + env(safe-area-inset-bottom));background:linear-gradient(to top,color-mix(in srgb,var(--bg) 56%,transparent) 42%,color-mix(in srgb,var(--bg) 48%,transparent) 62%,color-mix(in srgb,var(--bg) 26%,transparent) 80%,color-mix(in srgb,var(--bg) 8%,transparent) 92%,transparent)}
 }
 
-/* Hero tagline in Geist Mono 500, larger than the labels (Julian, 2026-11-19: "I like mono but it needs to be more visible"). */
-html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap.mt-cap{font-family:var(--font-tagline),var(--mono);font-weight:500;letter-spacing:.08em;font-size:max(14px,calc(16 * var(--u)))!important}
-@media (max-width:599px){html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap.mt-cap{font-size:13.5px!important;letter-spacing:.07em}}
+/* Hero tagline in Geist Mono 600, larger than the labels (Julian, 2026-11-19: "I like mono but it needs to be more visible", then "BIGGER"). */
+html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap.mt-cap{font-family:var(--font-tagline),var(--mono);font-weight:600;letter-spacing:.08em;font-size:max(15px,calc(17.5 * var(--u)))!important}
+@media (max-width:599px){html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap.mt-cap{font-size:14.5px!important;letter-spacing:.06em}html:root:root .v3 .mt-hero .mt-name h1{bottom:calc(110px + env(safe-area-inset-bottom))}} /* the name up 12px: the larger tagline met its descenders */
