@@ -40,7 +40,8 @@ Typed readers live in `motion/root-attrs.ts` (`flipMs`); everything else reads t
 
 ## Commissions (`commissions.tsx`)
 - `.mt-comm-head` is sticky (CSS). `section[data-cur]`, `[data-mt-count]`,
-  `[data-mt-name]` inside `.ln` (overflow clip) for the name line rise.
+  `[data-mt-name]` inside `.ln` (overflow clip) for the name line rise. React renders them from the
+  frame motion/commissions.ts tells it (`tell`, `useTold`); the driver runs the rise.
 - Figures carry `data-i`. Phone held label: not built.
 - Logos: `.mt-logos-row` is a native sideways row; `.mt-logos-track` takes the
   drift transform. The second copy `.set[data-copy]` is `display: none` until the
@@ -57,8 +58,8 @@ Typed readers live in `motion/root-attrs.ts` (`flipMs`); everything else reads t
 
 ## Book online and By quote
 - `section[data-on]` (row key); By quote `section[data-client]` and `data-opt`.
-  The client rotation is `motion/quote.ts`: it marks the DOM (`data-q`, `data-client`),
-  React's first client stays put. It pauses while a card is open (`.mt[data-cards="open"]`).
+  The client rotation is `motion/quote.ts`: it tells by-quote.tsx (`tell`, `useTold`) the client to show,
+  which React renders as `data-q`, `data-client`, the name and `data-sw`. It pauses while a card is open (`.mt[data-cards="open"]`).
 - `.mt-bar`: the held bottom bar (sticky inside its section).
 
 ## About (`about.tsx`)

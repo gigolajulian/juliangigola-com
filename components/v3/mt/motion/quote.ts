@@ -1,10 +1,10 @@
-import { put, type Driver } from "./engine";
+import { tell, type Driver } from "./engine";
 import { QUOTE_CLIENTS } from "../data";
 
 /* By quote client rotation (spec 3.5). Runs on the engine's frame, so it
    stops with the tab; it also waits while the section is off screen, a card is
-   open, an option's photo is showing or keyboard focus (not a click's) is inside the section. The DOM is marked directly (`data-q`,
-   `data-rot`, `data-sw`): React's `ci` stays 0 and never rewrites these. */
+   open, an option's photo is showing or keyboard focus (not a click's) is inside the section. It tells by-quote.tsx
+   which client to show (`k`: the photo, `data-q`, `data-client`) and, after the name's fade, which name (`name`, `data-sw`). */
 const EVERY = 5500;
 const SWAP = 500; // the name fades out, swaps, fades in
 const REST = 8000; // touch: back to the clients this long after the last tap
@@ -15,16 +15,7 @@ export const quoteDrivers: Driver[] = [
     always: true,
     setup(el) {
       const s = { k: 0, t: 0, swap: 0, tap: -REST, rot: false };
-      const sets = [".mt-photo", ".mt-photo-w"].map((f) => [...el.querySelectorAll(`${f} > .cl`)]);
-      const names = [el.querySelector(".mt-by .nm"), el.querySelector(".mt-clcap")];
       const root = el.closest<HTMLElement>(".mt");
-      const show = (k: number) => sets.forEach((set) => set.forEach((c, i) => c.toggleAttribute("data-q", i === k)));
-      const write = (k: number) =>
-        names.forEach((n) => {
-          put(n, QUOTE_CLIENTS[k].name);
-          n?.removeAttribute("data-sw");
-        });
-      show(0);
       const tap = (e: PointerEvent) => {
         if (e.pointerType !== "mouse") s.tap = performance.now();
       };
@@ -32,7 +23,7 @@ export const quoteDrivers: Driver[] = [
       opts?.addEventListener("pointerdown", tap);
       return {
         frame: (p, el, ctx) => {
-          if (s.swap > 0 && (s.swap -= ctx.dt) <= 0) write(s.k);
+          if (s.swap > 0 && (s.swap -= ctx.dt) <= 0) tell(el, { name: s.k, sw: false });
           const rot = ctx.fine ? !el.hasAttribute("data-opt") : ctx.t - s.tap > REST;
           if (rot !== s.rot) el.toggleAttribute("data-rot", (s.rot = rot));
           const a = document.activeElement;
@@ -40,17 +31,13 @@ export const quoteDrivers: Driver[] = [
           if ((s.t += ctx.dt) < EVERY) return;
           s.t = 0;
           s.k = (s.k + 1) % QUOTE_CLIENTS.length;
-          show(s.k);
-          el.dataset.client = String(s.k);
-          names.forEach((n) => n?.setAttribute("data-sw", ""));
+          tell(el, { k: s.k, sw: true });
           s.swap = SWAP;
         },
         off: () => {
           opts?.removeEventListener("pointerdown", tap);
-          show(-1);
-          write(0);
           el.removeAttribute("data-rot");
-          el.dataset.client = "0";
+          tell(el, { k: 0, name: 0, sw: false }, false);
         },
       };
     },

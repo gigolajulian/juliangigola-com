@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Marks } from "@/components/v3/duo";
 import { projectHref } from "@/lib/project-href";
 import { pad, type MtFrame } from "./data";
+import { useTold } from "./ctx";
 
 /* Spec 3.3: the gapless sheet with its heading row held on top, a counter
    and the current frame's name beside it, the client logos as its last line.
@@ -24,15 +25,18 @@ const masonry = (frames: MtFrame[]) => {
 };
 
 export function MtCommissions({ frames }: { frames: MtFrame[] }) {
-  // the first frame as served; motion/commissions.ts owns data-cur and these three lines from then on
+  // the frame named in the head: the first as served, then the one under the screen's centre (motion/commissions.ts tells it)
+  const [{ cur }, setCur] = React.useState({ cur: 0 });
+  const ref = React.useRef<HTMLElement>(null);
+  useTold(ref, setCur);
   return (
-    <section className="mt-comm" data-mt="comm" data-cur="0">
+    <section className="mt-comm" data-mt="comm" data-cur={cur} ref={ref}>
       <div className="mt-comm-pin">
       <div className="mt-comm-head">
         <h2>Commissions</h2>
         <div className="mt-comm-now" aria-hidden>
-          <span className="lbl mt-count"><span className="ln"><span data-mt-count>{pad(1)}</span></span>/{pad(frames.length)}</span>
-          <span className="lbl mt-cur"><span className="ln"><span data-mt-name>{frames[0].name}</span> <span className="mute">{frames[0].meta}</span></span></span>
+          <span className="lbl mt-count"><span className="ln"><span data-mt-count>{pad(cur + 1)}</span></span>/{pad(frames.length)}</span>
+          <span className="lbl mt-cur"><span className="ln"><span data-mt-name>{frames[cur].name}</span> <span className="mute">{frames[cur].meta}</span></span></span>
         </div>
       </div>
       <div className="sheet mt-sheet">

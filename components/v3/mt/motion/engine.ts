@@ -54,11 +54,9 @@ export type Driver = {
 /** A title or name line coming up from under its clip (Cover art, Motion, Commissions). */
 const RISE: KeyframeAnimationOptions = { duration: 600, easing: "cubic-bezier(.16,1,.3,1)" };
 export const rise = (n: Element | null | undefined) => n?.animate([{ transform: "translateY(110%)" }, { transform: "none" }], RISE);
-/** Writes a line's text without a React render. */
-export const put = (n: Element | null, text: string) => {
-  // keep React's own text node
-  if (n?.firstChild) (n.firstChild as Text).data = text;
-};
+/** Hands a section's React screen what to show (by-quote.tsx and commissions.tsx read it with `useTold`, ctx.ts).
+    `now`: React commits it before this returns, so the change lands in this frame, as a direct DOM write would. */
+export const tell = (el: HTMLElement, detail: object, now = true) => el.dispatchEvent(new CustomEvent("mt-tell", { detail: { ...detail, now } }));
 export const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 export const smooth = (v: number) => v * v * (3 - 2 * v);
 /** 0 to 1 as v goes from a to b, clamped */

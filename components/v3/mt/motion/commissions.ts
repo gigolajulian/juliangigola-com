@@ -1,5 +1,4 @@
-import { pad } from "../data";
-import { clamp, put, rise, type Ctx, type Driver } from "./engine";
+import { clamp, rise, tell, type Ctx, type Driver } from "./engine";
 
 /* Commissions (spec 3.3): the held head names the frame under the screen's
    centre, and the client logos drift as one endless line that scroll pushes. */
@@ -30,16 +29,12 @@ export const commissionsDrivers: Driver[] = [
       const count = el.querySelector("[data-mt-count]");
       const name = el.querySelector(".mt-cur [data-mt-name]");
       const meta = el.querySelector(".mt-cur .mute");
-      const first = [count, name, meta].map((n) => n?.textContent ?? "");
       // a point at the screen's centre, 1% left of it so it never sits on the sheet's middle seam
       const cur = new IntersectionObserver(
         (es) => {
           const f = es.find((e) => e.isIntersecting)?.target as HTMLElement | undefined;
           if (!f || f.dataset.i === el.dataset.cur) return;
-          el.dataset.cur = f.dataset.i;
-          put(count, pad(Number(f.dataset.i) + 1));
-          put(name, f.querySelector(".nm")?.textContent ?? "");
-          put(meta, f.querySelector("figcaption .mute")?.textContent ?? "");
+          tell(el, { cur: Number(f.dataset.i) }); // commissions.tsx renders data-cur and the three lines
           for (const n of [count, name, meta]) rise(n);
         },
         { rootMargin: "-50% -51% -50% -49%" },
@@ -90,8 +85,7 @@ export const commissionsDrivers: Driver[] = [
           ac.abort();
           extra.forEach((n) => n.remove());
           track.style.transform = "";
-          el.dataset.cur = "0";
-          [count, name, meta].forEach((n, i) => put(n, first[i]));
+          tell(el, { cur: 0 }, false);
           head?.removeAttribute("data-out");
         },
       };
