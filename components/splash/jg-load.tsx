@@ -43,6 +43,8 @@ function reveal(cover: HTMLElement) {
   // where J meets G, the middle of the mark, in the middle of the screen (`jg-cover.ts`)
   const ox = Number(cover.dataset.ox) || innerWidth / 2, oy = Number(cover.dataset.oy) || innerHeight / 2;
   const close = Number(cover.dataset.close) || 0;
+  const ct = mg.querySelector<SVGEllipseElement>(".ct");
+  const ctx = Number(ct?.getAttribute("cx"));
   /* From below: the session photo's middle under the mark where the layout
      allows (a phone, the photo on top), a fifth of the screen at least. */
   const page = document.getElementById("p-flow");
@@ -67,9 +69,17 @@ function reveal(cover: HTMLElement) {
     const e = ease(p), k = Math.exp(Math.log(BIG) * e);
     mg.setAttribute("transform", `translate(${ox} ${oy}) scale(${k}) translate(${-ox} ${-oy})`);
     ink.setAttribute("transform", `translate(${ox} ${oy}) scale(${k}) translate(${-ox} ${-oy})`);
-    // fades between 4 and 10 times its size: by then the letters show a good piece of the page on any screen (JG - MAC: at 1440 they read empty over the dark calendar)
-    ink.style.opacity = String(Math.min(1, Math.max(0, (10 - k) / 6)));
-    gr.style.opacity = String(Math.min(1, Math.max(0, 1 - (p - 0.4) / 0.45)));
+    /* Off in one frame at 4 times its size, when the letters show a good
+       piece of the page on any screen: faded, it read as a grey veil over
+       the page (JG - MAC, Safari); empty sooner over the dark calendar. */
+    ink.style.opacity = k < 4 ? "1" : "0";
+    // the G's inside is cut in the same frame, so no piece of ground crosses the face as the cut grows (closing it over a few frames still showed it)
+    if (ct && k >= 4 && ct.getAttribute("rx") === "0") {
+      ct.setAttribute("rx", ct.dataset.rx ?? "0");
+      ct.setAttribute("ry", ct.dataset.ry ?? "0");
+    }
+    // the ground only once the ink is off, or the page showed dim behind solid letters
+    gr.style.opacity = String(Math.min(1, Math.max(0, 1 - (p - 0.47) / 0.38)));
     settle(p);
   };
   ink.getAnimations().forEach((a) => a.cancel());
@@ -82,6 +92,7 @@ function reveal(cover: HTMLElement) {
   const step = (now: number) => {
     const c = Math.min(1, (now - t0) / 240), ce = 1 - (1 - c) ** 3;
     for (const { t, x, dir } of texts) t.setAttribute("x", String(x + dir * close * ce));
+    if (ct) ct.setAttribute("cx", String(ctx - close * ce)); // with the G
     const p = Math.min(1, Math.max(0, (now - t0 - 120) / REVEAL));
     frame(p);
     if (p < 1) return requestAnimationFrame(step);

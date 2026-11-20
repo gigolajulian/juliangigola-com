@@ -19,7 +19,7 @@ const letters = (fill: string) => `<text class="j" fill="${fill}">J</text><text 
 const MARKUP =
   `<style>@keyframes jg-in{from{opacity:0}}@media (prefers-reduced-motion:reduce){#jg-cover .ink{animation:none!important}}</style>` +
   `<svg width="100%" height="100%" style="position:absolute;inset:0;display:block;font:900 ${SIZE} var(--display)">` +
-  `<defs><mask id="jg-cut" maskUnits="userSpaceOnUse" x="0" y="0" width="100%" height="100%"><rect width="100%" height="100%" fill="#fff"/><g class="mg">${letters("#fff")}</g></mask></defs>` +
+  `<defs><mask id="jg-cut" maskUnits="userSpaceOnUse" x="0" y="0" width="100%" height="100%"><rect width="100%" height="100%" fill="#fff"/><g class="mg">${letters("#fff")}<ellipse class="ct" fill="#000" rx="0" ry="0"/></g></mask></defs>` +
   `<rect class="gr" width="100%" height="100%" mask="url(#jg-cut)" style="fill:var(--bg)"/>` +
   `<g class="ink" style="fill:var(--ink);animation:jg-in .8s ease both">${letters("var(--ink)")}</g></svg>` +
   `<div class="ln" style="position:absolute;height:2px;background:color-mix(in srgb,var(--ink) 18%,transparent);overflow:hidden">` +
@@ -66,6 +66,12 @@ function place(d: HTMLElement) {
   Object.assign((d.querySelector(".ln") as HTMLElement).style, { left: `${cx - w / 2}px`, width: `${w}px`, top: `${base + under}px` });
   // where J meets G, half way up the caps; and how far each moves to close over it
   Object.assign(d.dataset, { ox: String(cx - w / 2 + (jr - jl) + gap / 2), oy: String(base - asc / 2), close: String(gap / 2 + fs * 0.03) });
+  // the inside of the G, which the cut closes like an iris as it grows (JG - MAC: it crossed the face as a wedge)
+  const ct = d.querySelector(".ct") as SVGEllipseElement;
+  // set a tenth right of the G's middle and wide enough to take its mouth beside the bar too
+  ct.setAttribute("cx", String(xg + (gl + gr) / 2 + (gr - gl) * 0.1));
+  ct.setAttribute("cy", String(base - G.asc / 2));
+  Object.assign(ct.dataset, { rx: String((gr - gl) * 0.4), ry: String((G.asc / 2) * 0.68) });
 }
 
 /* Puts the cover up, once. Sent to the page as source too (`JG_COVER`), so
