@@ -7,12 +7,12 @@ import * as React from "react";
  * the real load as far as there is one: it creeps toward 90 while the
  * times are asked for, and only their arrival (`done`) takes it to 100.
  * Then `onDone`, and the picker comes up. `?loader=orb` keeps the orb.
- * `?loader=split` (Julian, 2026-11-19, the Booking wait mock): J and G
+ * The default on the booking pages (Julian, 2026-11-19, the Booking wait
+ * mock, "make it the default"; `?loader=fill` keeps the fill): J and G
  * side by side over the whole page (`jg-cover.ts`), a line under them
  * takes the count; on the answer the picker is drawn under the cover and
  * the cut grows from the middle of the mark until the page, standing
- * still, fills the screen. Behind the flag
- * until he says ship.
+ * still, fills the screen.
  * ─────────────────────────────────────────────────────────────── */
 
 const CREEP = 900; // ms, how slowly the count nears 90 with no answer yet
@@ -95,7 +95,8 @@ let leaving = 0; // an unmount's reveal, held a moment in case the effect is onl
 export function JgLoad({ done, onDone, className }: { done: boolean; onDone: () => void; className?: string }) {
   const fill = React.useRef<HTMLSpanElement>(null);
   const num = React.useRef<HTMLSpanElement>(null);
-  const split = React.useSyncExternalStore(noop, () => new URLSearchParams(location.search).get("loader") === "split", () => false);
+  // the cover is up (a booking page with a calendar, `jg-cover.ts`): it plays the wait; anywhere else, J and G fill
+  const split = React.useSyncExternalStore(noop, () => !!document.getElementById("jg-cover"), () => false);
   const last = React.useRef(onDone);
   React.useEffect(() => {
     last.current = onDone;
@@ -107,7 +108,8 @@ export function JgLoad({ done, onDone, className }: { done: boolean; onDone: () 
 
   React.useEffect(() => {
     const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const cover = split ? document.getElementById("jg-cover") : null;
+    // read here, not from the render: after a move inside the site the page puts the cover up in a layout effect, after this rendered (v3/book.tsx)
+    const cover = document.getElementById("jg-cover");
     window.clearTimeout(leaving);
     const start = performance.now();
     // the cover went up as the page was read: its least time counts from then
@@ -149,7 +151,7 @@ export function JgLoad({ done, onDone, className }: { done: boolean; onDone: () 
       // gone without an answer (the fallback took over): the cover opens onto whatever the page shows
       if (cover && !fired) leaving = window.setTimeout(() => reveal(cover), 50);
     };
-  }, [split]);
+  }, []);
 
   if (split) return <div role="status" className={className}><span className="sr-only">Loading availability</span></div>;
   const mark = "pointer-events-none select-none whitespace-nowrap text-[5rem] leading-[0.74] tracking-[-0.05em] [font-family:var(--font-display)] font-black";
