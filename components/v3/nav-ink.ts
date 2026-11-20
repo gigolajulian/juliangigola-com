@@ -286,7 +286,7 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
       const nr = nm?.getBoundingClientRect();
       const blk = nm?.closest<HTMLElement>("[data-mt-name]");
       // only once the name is fully gone, so the two never show together: faded out, hidden by hero.ts at the end
-      // of its exit (it rides out of the window at full strength under ?mtdock=left), or wholly out of the window:
+      // of its exit, or wholly out of the window:
       // on phones it scrolls up through the bar, and the wordmark came on while it was still passing under it (MAC)
       // The whole block, tagline and buttons too, and 80px clear of the top: on an iPhone a ghost of the name still
       // showed behind the status bar when the wordmark came on, and Inquire then rose through it (MAC, sim).

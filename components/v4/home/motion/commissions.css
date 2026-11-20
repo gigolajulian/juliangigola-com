@@ -1,0 +1,16 @@
+/* v4 home motion: commissions. Applies only under html[data-mt-motion]. */
+
+/* The endless logos line needs its second copy (and any extra ones commissions.ts adds on wide screens). */
+html[data-mt-motion] .mt-logos-track [data-copy]{display:flex}
+/* no scrim behind the Commissions head: the heading sits straight on the photos */
+[data-mtscroll] .mt .mt-comm-head { background: none; }
+/* the head leaves on a timer once the logos are near, and comes back the same way */
+html[data-mt-held] .mt-comm-head { transition: opacity .45s cubic-bezier(.23,1,.32,1), transform .45s cubic-bezier(.23,1,.32,1), visibility 0s; }
+html[data-mt-held] .mt-comm-head[data-out] { opacity: 0; transform: translate3d(0,-20px,0); visibility: hidden; transition-delay: 0s, 0s, .45s; }
+/* nor under the photo captions: a tight shadow keeps the labels readable on bright frames */
+[data-mtscroll] .mt .mt-comm .sheet figcaption { background: none; text-shadow: 0 0 2px rgb(0 0 0 / .9), 0 1px 10px rgb(0 0 0 / .7); }
+/* c3: a tile's caption shows only under the pointer or keyboard focus; touch keeps them all */
+@media (hover:hover) and (pointer:fine){
+  html[data-mt-held] .mt-sheet figcaption{opacity:0;transition:opacity .25s ease-out}
+  html[data-mt-held] .mt-sheet figure:is(:hover,:focus-within) figcaption{opacity:1}
+}

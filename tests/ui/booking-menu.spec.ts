@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { CONFIRM, errorsOn, open, RATIOS, upright } from "./ratios";
 
-/* The homepage's Sessions (V4, `components/v3/mt/book-online.tsx`): a row opens
+/* The homepage's Sessions (V4, `components/v4/home/book-online.tsx`): a row opens
    its session's booking card in place, "All sessions" goes to /book. The old
    links land here too (/sessions 308s to /#sessions). Never submitted. */
 

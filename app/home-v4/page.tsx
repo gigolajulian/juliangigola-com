@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { MtHome } from "@/components/v3/mt/home";
+import { MtHome } from "@/components/v4/home/home";
 import { MT } from "@/lib/mt-home-data";
 import { shareOg } from "@/lib/share";
 

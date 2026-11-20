@@ -29,7 +29,7 @@ export const MEDIA = {
   large: "(min-width: 64rem)",
   /** A landscape window with room in it, where the ruler runs in chapters. */
   desk: "(min-aspect-ratio: 5 / 4) and (min-width: 48rem)",
-  /** The V4 desktop structure (D in components/v3/mt/motion/engine.ts), written as app/styles/mtscroll.css writes it. */
+  /** The V4 desktop structure (D in components/v4/home/motion/engine.ts), written as app/styles/mtscroll.css writes it. */
   held: "(min-width:1024px) and (min-height:600px)",
   /** The visitor asked for less motion. */
   calm: "(prefers-reduced-motion: reduce)",
