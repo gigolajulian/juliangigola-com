@@ -107,6 +107,15 @@ end
 
 -- ── publish ───────────────────────────────────────────────────────
 
+--- The model a final belongs to (Julian 2026-11-19): "M04" from a collection it sits in, "PARADOX02 M04" or
+--- "PARADOX02 M04 Marcus". Nil when it is in none: the delivery shows no models.
+local function modelOf(photo)
+  for _, c in ipairs(photo:getContainedCollections()) do
+    local n = (" " .. c:getName() .. " "):match("%sM(%d%d%d?)%s")
+    if n then return "M" .. n end
+  end
+end
+
 function provider.processRenderedPhotos(functionContext, exportContext)
   local session = exportContext.exportSession
   local collection = exportContext.publishedCollection
@@ -137,6 +146,10 @@ function provider.processRenderedPhotos(functionContext, exportContext)
       -- Capture time for shot order on the site: Lightroom counts from 2001, the site from 1970.
       local shot = photo:getRawMetadata("dateTimeOriginal")
       local q = ("?token=%s&id=%s&file=%s&w=%d&h=%d&t=%d&final=1"):format(enc(remote), enc(id), enc(file), w or 0, h or 0, shot and math.floor(shot + 978307200) or 0)
+      local model = modelOf(photo)
+      if model then q = q .. "&model=" .. model end
+      -- Five stars: on the delivery's gate wall.
+      if photo:getRawMetadata("rating") == 5 then q = q .. "&top=1" end
       -- A full-size final is tens of MB: ten minutes before giving up on a slow connection.
       local b, hd = LrHttp.post(Site.API .. q, Image.readBytes(path), Site.headers("image/jpeg"), "PUT", 600)
       LrFileUtils.delete(path)

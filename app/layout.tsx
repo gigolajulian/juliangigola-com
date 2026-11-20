@@ -167,7 +167,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
          */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){var t=null;try{t=sessionStorage.getItem("theme")}catch(e){}var l=t==="light"||(t!=="dark"&&matchMedia("(prefers-color-scheme: light)").matches);if(location.pathname.indexOf("/proof")===0&&!/[?&]proofwall=0/.test(location.search)){l=false;document.documentElement.dataset.proofwall=""}document.documentElement.dataset.theme=l?"light":"dark";var m=document.querySelectorAll('meta[name="theme-color"]');for(var i=0;i<m.length;i++)m[i].setAttribute("content",l?"#ffffff":"#000000")})()`,
+            __html: `(function(){var t=null;try{t=sessionStorage.getItem("theme")}catch(e){}var l=t==="light"||(t!=="dark"&&matchMedia("(prefers-color-scheme: light)").matches);if((location.pathname.indexOf("/proof")===0||location.pathname.indexOf("/delivery")===0)&&!/[?&]proofwall=0/.test(location.search)){l=false;document.documentElement.dataset.proofwall=""}document.documentElement.dataset.theme=l?"light":"dark";var m=document.querySelectorAll('meta[name="theme-color"]');for(var i=0;i<m.length;i++)m[i].setAttribute("content",l?"#ffffff":"#000000")})()`,
           }}
         />
         {/* Whether this visit gets the opening, decided before the first
