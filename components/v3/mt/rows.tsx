@@ -7,6 +7,7 @@ import { COVER_RELEASES } from "@/lib/cover-art-data";
 import { media } from "@/lib/device";
 import { holdEase, holdUnease } from "@/lib/motion/hold-ease";
 import { HeldRow } from "./held-row";
+import { progress } from "./motion/engine";
 import { COVER_KEYS, COVER_PRESS, FILM_DRESS, pad, type MtFilm } from "./data";
 
 const COVERS = COVER_KEYS.map((k) => COVER_RELEASES.find((r) => r.slug === k)!).filter(Boolean);
@@ -75,7 +76,7 @@ export function MtFilms({ films }: { films: MtFilm[] }) {
       // Desktop without motion: the film nearest the middle of the screen. Elsewhere: the row's own snap step.
       if (mq.matches && document.documentElement.hasAttribute("data-mt-held")) {
         const r = sec.getBoundingClientRect();
-        const p = Math.max(0, Math.min(0.9999, -r.top / Math.max(1, r.height - innerHeight)));
+        const p = Math.min(0.9999, progress(r.top, r.height, innerHeight, true));
         // the hold eases in and out like Cover art's, so the first and last film take more of the scroll (Julian, 2026-11-18; ?mtsnap=0: the old even shares)
         return setCur(Math.floor((/[?&]mtsnap=0/.test(location.search) ? p : holdEase(p)) * items.length));
       }

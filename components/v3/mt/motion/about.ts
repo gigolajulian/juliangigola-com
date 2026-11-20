@@ -2,7 +2,7 @@ import { span, type Driver } from "./engine";
 
 /* About (spec 3.9). The desktop beats are pure CSS on a timer (about.css, `data-seen`). Without a hold the sentence and the rows light as they scroll
    through the screen: this writes their progress as --sp and --rp. */
-const m = { say: 0, ol: 0, ft: 0, h: 1, sp: "", rp: "", ep: "" };
+const m = { say: 0, ol: 0, ft: 0, sp: "", rp: "", ep: "" };
 
 export const aboutDrivers: Driver[] = [
   {
@@ -15,7 +15,6 @@ export const aboutDrivers: Driver[] = [
       // offsets inside the section, so the frame path reads no layout
       const measure = () => {
         const r = el.getBoundingClientRect();
-        m.h = r.height;
         m.say = say.getBoundingClientRect().top - r.top;
         m.ol = ol.getBoundingClientRect().top - r.top;
         m.ft = (el.querySelector(".mt-ab-foot") ?? ol).getBoundingClientRect().top - r.top;
@@ -36,10 +35,9 @@ export const aboutDrivers: Driver[] = [
         m.sp = m.rp = m.ep = "";
       };
     },
-    frame(p, el, ctx) {
+    frame(_p, el, ctx) {
       if (ctx.held) return;
-      // the engine's un-held p, turned back into the section's top edge
-      const top = ctx.vh - p * (m.h + ctx.vh);
+      const top = ctx.top;
       const sp = span(top + m.say, 0.8 * ctx.vh, 0.35 * ctx.vh).toFixed(3);
       const rp = span(top + m.ol, 0.72 * ctx.vh, 0.48 * ctx.vh).toFixed(3);
       if (sp !== m.sp) el.style.setProperty("--sp", (m.sp = sp));
