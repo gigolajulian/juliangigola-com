@@ -471,7 +471,7 @@ html:has(.proof[data-wall])::-webkit-scrollbar{display:none}
 @media(hover:hover){.dlv-zip .dlv-sz{display:none}.dlv-zip:is(:hover,:focus-visible) .dlv-sz{display:inline}}
 .dlv-back{display:block;font:12px var(--p-mono);color:var(--muted-foreground);min-height:36px;margin-bottom:22px}
 .dlv-back:hover{color:var(--foreground)}
-.dlv-mh h1{margin-bottom:22px}
+.proof .proof-intro.dlv-intro.dlv-mh h1{margin-bottom:22px;font-weight:800;letter-spacing:-.03em;font-size:clamp(40px,7cqi,96px)}
 @media(max-width:700px){.dlv-models{grid-template-columns:1fr;gap:28px 0}}
 /* The mock's intro: big heading (the wall gate's 44px cap is for the proofs' greeting), Download all bottom right. */
 .proof .dlv-intro{max-width:none;display:grid;grid-template-columns:1fr auto;column-gap:24px;align-items:start;justify-items:start}

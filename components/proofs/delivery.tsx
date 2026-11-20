@@ -180,7 +180,8 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
           <div className="proof-intro dlv-intro dlv-mh">
             <button type="button" className="dlv-back" onClick={() => go("models")}>&larr; All models</button>
             <p className="proof-lab">Model · {one[1].length} photos · {sizeOf(one[1])}</p>
-            <h1>{modelLabel(one[0])}</h1>
+            {/* Julian 2026-11-19: "SUBJECT02" in the tiles' heavy face; a named model keeps its name. */}
+            <h1>{/^\d+$/.test(modelLabel(one[0])) ? `SUBJECT${modelLabel(one[0])}` : modelLabel(one[0])}</h1>
             <button type="button" className="proof-btn" data-done={done[one[0]] ? "" : undefined} onClick={() => download(one[0], zipHref(one[0]))}>
               {zipLabel(one[0], `Download zip · ${sizeOf(one[1])}`)}
             </button>
