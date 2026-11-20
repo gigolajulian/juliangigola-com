@@ -82,7 +82,7 @@ export function MtFoot() {
           <div>
             <p className="mute">Book online</p>
             {BOOK_ROWS.map((r) => (
-              <p key={r.key}><button type="button" onClick={() => cards.book(r.key)}>{r.name}</button></p>
+              <p key={r.slug}><button type="button" onClick={() => cards.book(r.slug)}>{r.name}</button></p>
             ))}
           </div>
           <div>

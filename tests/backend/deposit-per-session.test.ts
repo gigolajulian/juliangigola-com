@@ -187,8 +187,8 @@ describe("what was paid, not today's price", () => {
 describe("the screens read the same map", () => {
   it("prints each session's /book price on the home rows, and its deposit on the line under Book", () => {
     // the rows show what /book shows (rate): "From" where there is a price, the deposit where the price is quoted after
-    expect(Object.fromEntries(BOOK_ROWS.map((r) => [r.key, r.price]))).toEqual({ portraits: "$250 deposit", headshots: "From $400", graduation: "From $400", "studio-digitals": "From $300" });
-    expect(Object.fromEntries(BOOK_ROWS.map((r) => [r.key, r.dep]))).toEqual({ portraits: "$250", headshots: "$200", graduation: "$200", "studio-digitals": "$150" });
+    expect(Object.fromEntries(BOOK_ROWS.map((r) => [r.slug, r.price]))).toEqual({ portraits: "$250 deposit", headshots: "From $400", graduation: "From $400", "studio-digitals": "From $300" });
+    expect(Object.fromEntries(BOOK_ROWS.map((r) => [r.slug, r.dep]))).toEqual({ portraits: "$250", headshots: "$200", graduation: "$200", "studio-digitals": "$150" });
     // Every paid session's Cal.com slug is one the map knows: "studio-digitals" must never fall through to $100.
     for (const s of Object.values(SESSIONS).filter((x) => x.paid)) expect(PAID).toContain(s.cal!.split("/")[1]);
     expect(rate({ ...SESSIONS["studio-digitals"], from: null })).toBe("$150 deposit");

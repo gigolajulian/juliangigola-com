@@ -37,10 +37,12 @@ export type Props = {
   v3?: V3Book;
   /** A time picked and confirmed: handed here instead of opening the form (a reschedule). */
   onPicked?: (start: string) => void;
+  /** The days the card opens on: the month unless asked (the home opens on the week). */
+  startView?: "week" | "month";
 };
 
 /* The picker's state, times and motion; the cards below only draw it. */
-export function usePicker({ path, title, className, fallback, v3, onPicked }: Props) {
+export function usePicker({ path, title, className, fallback, v3, onPicked, startView }: Props) {
   const [username, slug] = path.split("/");
   const [tz] = React.useState(() => Intl.DateTimeFormat().resolvedOptions().timeZone || TZ);
   /* Julian: the time where I am, with the place, before a time is picked. */
@@ -82,8 +84,8 @@ export function usePicker({ path, title, className, fallback, v3, onPicked }: Pr
     return () => window.clearTimeout(t);
   }, [orb]);
   const jg = <JgLoad done={state === "ready" && !!days} onDone={() => setHeld(false)} className="min-h-[16rem] w-full" />;
-  // The card opens on its month (2026-10-20).
-  const [view, setView] = React.useState<"week" | "month">("month");
+  // The card opens on its month (2026-10-20), or on startView.
+  const [view, setView] = React.useState<"week" | "month">(startView ?? "month");
   const [anchor, setAnchor] = React.useState(() => new Date()); // the week or month on show
   const [pick, setPick] = React.useState<PickedTime | null>(null);
   /* Julian: the arrows more defined, larger. Drawn, not the font's. */

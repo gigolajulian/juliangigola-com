@@ -33,7 +33,7 @@ describe("v4 home: Book online and By quote", () => {
     expect(book().hasAttribute("data-open")).toBe(false);
     fireEvent.click(row(1));
     expect(book().hasAttribute("data-open")).toBe(true);
-    expect(book().dataset.on).toBe(BOOK_ROWS[1].key);
+    expect(book().dataset.on).toBe(BOOK_ROWS[1].slug);
   });
 
   it("mouse: one click on a row opens the booking", () => {
@@ -41,7 +41,7 @@ describe("v4 home: Book online and By quote", () => {
     render(<MtHome data={MT} />);
     fireEvent.click(row(2));
     expect(book().hasAttribute("data-open")).toBe(true);
-    expect(book().dataset.on).toBe(BOOK_ROWS[2].key);
+    expect(book().dataset.on).toBe(BOOK_ROWS[2].slug);
   });
 
   it("picking a By quote option shows its photo in Book online; touching a Book online row takes it back", () => {

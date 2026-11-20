@@ -19,7 +19,8 @@ function lookup(slug: SessionSlug) {
   if (!seen.has(ev)) {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const now = new Date();
-    const p = fetch(`/api/slots?slug=${ev}&start=${ymd(now)}&end=${ymd(new Date(+now + 60 * 864e5))}&timeZone=${encodeURIComponent(tz)}`, { signal: AbortSignal.timeout?.(5000) })
+    const q = new URLSearchParams({ slug: ev, start: ymd(now), end: ymd(new Date(+now + 60 * 864e5)), timeZone: tz });
+    const p = fetch(`/api/slots?${q}`, { signal: AbortSignal.timeout?.(5000) })
       .then((r) => (r.ok ? r.json() : null))
       .then((j: { status?: string; data?: Record<string, { start: string }[]> } | null) => {
         if (j?.status !== "success" || !j.data) return null;
