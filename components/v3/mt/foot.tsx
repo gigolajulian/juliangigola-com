@@ -7,7 +7,7 @@ import { BOOK_ROWS, QUOTE_OPTS } from "@/lib/mt-home";
 import { CardsCtx } from "./ctx";
 import { scrollTop } from "@/components/v3/smooth-scroll";
 import { matches } from "@/lib/device";
-import { useLocalTime } from "@/components/v3/use-local-time";
+import { useLocalTime } from "@/lib/local-time";
 
 /* Spec 3.10: HomeFoot. Four link columns, the "Contact me" phrase (a
    button that opens the inquiry card), one still of work behind under its
