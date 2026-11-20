@@ -22,13 +22,6 @@ const ink = (n: Node) => {
   return r.getBoundingClientRect();
 };
 
-/* ?mtdock=left (Julian 2026-11-15): no dock. The header keeps its links from the start with no
-   ground under them, the name leaves to the left as the hero ends, and the header's ground comes in there. The bar's
-   wordmark waits until the big name has gone (2026-11-16: "never together"; the header trial does that). */
-const LEFT = qflag("mtdock", "left");
-/* With no ground over the hero the nav words sit on the wall: they flip white or black (nav-ink.ts; the flag turns
-   ?navfx on in layout.tsx), and page text fades out under the bar there (the same file's text fade). */
-
 /* Gone, but still there for a screen reader. VoiceOver in Safari scrolls the page far down when it lands on the name (the stage is sticky), and
    visibility:hidden then took the tagline and the buttons out of its tree before its next step: it read the name, then the wall (MAC, 2026-11-17).
    So a gone block is see-through, takes no clicks and leaves the tab order, and nothing more. */
@@ -253,7 +246,6 @@ export const heroDrivers: Driver[] = [
         document.documentElement.toggleAttribute("data-mt-pasthero", el.getBoundingClientRect().bottom <= (hdr?.offsetHeight ?? 60));
         if (!due) due = window.setTimeout(sweep, 100); // ten sweeps a second while scrolling, and one after the last scroll event
       };
-      if (LEFT) document.documentElement.setAttribute("data-mtleft", "");
       if (!PIN) document.documentElement.setAttribute("data-mt-nopin", "");
       // The idle wall turns a card over to its next photo (hero.css). The value is the duration: hero.tsx reads it for the caption. `?mtflip=0` brings the hard cut back.
       const flip = qflag("mtflip", "0") ? 0 : FLIP;
@@ -269,7 +261,6 @@ export const heroDrivers: Driver[] = [
       const off = () => {
         clearInterval(look);
         ac.abort();
-        document.documentElement.removeAttribute("data-mtleft");
         document.documentElement.removeAttribute("data-mt-nopin");
         document.documentElement.removeAttribute("data-mt-flip");
         document.documentElement.style.removeProperty("--mt-flip");

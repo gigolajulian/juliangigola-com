@@ -22,7 +22,7 @@ Typed readers live in `motion/root-attrs.ts` (`flipMs`); everything else reads t
 | `data-tp-<item>` | touch-parity.ts | (`tp()` reads the query itself) | touch-parity.css | engine start, by `?mttp` | engine stop |
 | `data-mtdock="off"` | motion/hero.ts setup | | mtscroll.css | hero setup | hero cleanup |
 | `data-mt-pasthero` | motion/hero.ts on scroll | nav-ink.ts | hero.css, mtscroll.css | the hero is above the header | hero cleanup |
-| `data-mtleft`, `data-mt-nopin` | motion/hero.ts setup | | hero.css | `?mtdock=left`, `?mtpin=0` | hero cleanup |
+| `data-mt-nopin` | motion/hero.ts setup | | hero.css | `?mtpin=0` | hero cleanup |
 | `data-mt-flip` and `--mt-flip` | motion/hero.ts setup | hero.tsx (`flipMs`) | hero.css | hero setup, unless `?mtflip=0`; missing means the driver is not running | hero cleanup |
 | `data-mt-nameout` | motion/hero.ts `sink()` | | mtscroll.css | the name is out | the name is back, a mode change, hero cleanup |
 | `data-mt-par`, `data-mt-lid` | motion/rows.ts setup | | rows.css | Cover art setup, unless `?mtpar=0` / `?mtlid=0` | rows cleanup |
