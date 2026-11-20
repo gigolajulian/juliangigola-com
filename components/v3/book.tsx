@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { createPortal, preload } from "react-dom";
 import { getImageProps } from "next/image";
+import { JG_COVER } from "@/components/splash/jg-cover";
 import { useRouter } from "next/navigation";
 import { BookTimes } from "@/components/booking/book-times";
 import { Calendar, Failed, Field, FlowShell, Hidden, Run, dlabel, iso, useEnquiry, type Shell } from "@/components/v3/flow";
@@ -153,6 +154,8 @@ export function V3BookFlow({ slug, tabs = true, h1 = false }: { slug: SessionSlu
 export function V3Book({ slug }: { slug: SessionSlug }) {
   return (
     <div className="v3 contents">
+      {/* `?loader=split`: the booking wait's cover, up before the page paints (jg-cover.ts) */}
+      <script dangerouslySetInnerHTML={{ __html: JG_COVER }} />
       <section className="v3page" id="p-flow">
         <V3BookFlow slug={slug} h1 />
       </section>
