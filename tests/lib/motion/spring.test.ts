@@ -8,7 +8,7 @@ import {
   launchSpeed,
   springSettled,
   stepSpring,
-} from "./spring";
+} from "@/lib/motion/spring";
 
 /** Runs the spring at 60Hz until it settles and reports how far it went
     past the target and how long it took. */

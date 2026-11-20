@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { masonry } from "@/components/v4/home/commissions";
-import type { MtFrame } from "@/lib/mt-home";
+import type { MtFrame } from "@/lib/v4-home/data";
 
 /* The phone sheet's two columns (`components/v4/home/commissions.tsx`): each
    frame goes to the shorter column by its ratio, the right column starting

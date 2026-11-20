@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { render } from "@testing-library/react";
-import { ORB_ROUND, Orb } from "@/components/orb";
+import { ORB_ROUND, Orb } from "@/components/effects/orb";
 
 describe("Orb", () => {
   it("holds its size and stays hidden from readers until the ink is read", () => {

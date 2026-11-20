@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { MtHome } from "@/components/v4/home/home";
-import { MT } from "@/lib/mt-home-data";
+import { MT } from "@/lib/v4-home/server";
 import { shareOg } from "@/lib/share";
 
 /* The v4 home from the server, for `/?mtscroll=1` (a rewrite in next.config.ts sends that address here).
