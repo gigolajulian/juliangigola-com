@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { deepMode, returning, shouldPlay } from "@/components/v3/mt/intro";
+import { returning, shouldPlay } from "@/components/v3/mt/intro";
 
-/* The v4 home intro's play rules, as they stand: which timing a visitor gets (returning),
-   which intro (deepMode) and whether it plays at all (shouldPlay). Read from the URL,
+/* The v4 home intro's play rules, as they stand: which timing a visitor gets (returning)
+   and whether it plays at all (shouldPlay). Read from the URL,
    local storage and session storage, so each case sets those and nothing else. */
 const DAY = 864e5;
 const at = (q: string) => history.replaceState(null, "", `/${q}`);
@@ -40,27 +40,6 @@ describe("returning: the short intro for a browser that saw it in the last 30 da
     localStorage.setItem("jg-intro-at", String(Date.now()));
     at("?intro=1");
     expect(returning()).toBe(false);
-  });
-});
-
-describe("deepMode: the depth push unless ?splash=1 asked for the flat intro this session", () => {
-  it("is true by default", () => {
-    expect(deepMode()).toBe(true);
-  });
-
-  it("?splash=1 gives the flat one and keeps it for the session", () => {
-    at("?splash=1");
-    expect(deepMode()).toBe(false);
-    expect(sessionStorage.getItem("jg-splash")).toBe("1");
-    at("");
-    expect(deepMode()).toBe(false);
-  });
-
-  it.each(["?splash=2", "?splash=0"])("%s brings the depth push back and clears the choice", (q) => {
-    sessionStorage.setItem("jg-splash", "1");
-    at(q);
-    expect(deepMode()).toBe(true);
-    expect(sessionStorage.getItem("jg-splash")).toBeNull();
   });
 });
 
