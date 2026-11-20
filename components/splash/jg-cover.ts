@@ -90,6 +90,8 @@ function cover(lay: (d: HTMLElement) => void, markup: string) {
   const box = innerWidth >= 768 && document.querySelector("#p-flow .f-body") ? (d.dataset.box = "", true) : false;
   d.style.cssText = box ? "position:absolute;z-index:5;overflow:hidden" : "position:fixed;inset:0;z-index:2147483000";
   d.innerHTML = markup;
+  // smaller over the calendar (Julian, 2026-11-19: "make the JG smaller")
+  if (box) (d.querySelector("svg") as SVGSVGElement).style.fontSize = "96px";
   document.documentElement.appendChild(d);
   let el: Element | null = null;
   const ro = box && window.ResizeObserver ? new ResizeObserver(() => go()) : null;
