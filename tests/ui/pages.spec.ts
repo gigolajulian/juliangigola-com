@@ -29,5 +29,6 @@ for (const r of RATIOS) {
 test("an unknown address answers 404 with the site's own page", async ({ page }) => {
   const res = await page.goto("/no-such-page-qa", { waitUntil: "load" });
   expect(res?.status()).toBe(404);
-  await expect(page.locator("body")).toContainText(/./);
+  // the served HTML, not the live DOM: Firefox in CI sometimes read an empty body here (#1255)
+  expect(await res!.text()).toContain("Frame not found");
 });
