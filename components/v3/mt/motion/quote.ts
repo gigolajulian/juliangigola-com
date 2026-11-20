@@ -1,4 +1,4 @@
-import type { Driver } from "./engine";
+import { put, type Driver } from "./engine";
 import { QUOTE_CLIENTS } from "../data";
 
 /* By quote client rotation (spec 3.5). Runs on the engine's frame, so it
@@ -23,8 +23,7 @@ export const quoteDrivers: Driver[] = [
       const show = (k: number) => sets.forEach((set) => set.forEach((c, i) => c.toggleAttribute("data-q", i === k)));
       const write = (k: number) =>
         names.forEach((n) => {
-          // keep React's own text node
-          if (n?.firstChild) (n.firstChild as Text).data = QUOTE_CLIENTS[k].name;
+          put(n, QUOTE_CLIENTS[k].name);
           n?.removeAttribute("data-sw");
         });
       show(0);

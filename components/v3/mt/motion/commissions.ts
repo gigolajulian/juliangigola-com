@@ -1,5 +1,5 @@
 import { pad } from "../data";
-import { RISE, clamp, type Ctx, type Driver } from "./engine";
+import { clamp, put, rise, type Ctx, type Driver } from "./engine";
 
 /* Commissions (spec 3.3): the held head names the frame under the screen's
    centre, and the client logos drift as one endless line that scroll pushes. */
@@ -10,10 +10,6 @@ const MAX_PHONE = 0.35;
 
 // the logo line's offset, speed and push outlive a cleanup: a remount carries on where the line was
 const drift = { x: 0, v: IDLE, kick: 0 };
-const put = (n: Element | null, text: string) => {
-  // keep React's own text node
-  if (n?.firstChild) (n.firstChild as Text).data = text;
-};
 
 export const commissionsDrivers: Driver[] = [
   {
@@ -44,7 +40,7 @@ export const commissionsDrivers: Driver[] = [
           put(count, pad(Number(f.dataset.i) + 1));
           put(name, f.querySelector(".nm")?.textContent ?? "");
           put(meta, f.querySelector("figcaption .mute")?.textContent ?? "");
-          for (const n of [count, name, meta]) n?.animate([{ transform: "translateY(110%)" }, { transform: "none" }], RISE);
+          for (const n of [count, name, meta]) rise(n);
         },
         { rootMargin: "-50% -51% -50% -49%" },
       );

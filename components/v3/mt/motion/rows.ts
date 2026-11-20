@@ -1,7 +1,7 @@
 import { scrollGoal, settleTo, shiftScroll } from "@/components/v3/smooth-scroll";
 import { holdEase as ease, holdUnease as unease } from "@/lib/motion/hold-ease";
 import { captionsOff, vimeoListen, vimeoPlays } from "@/lib/videos";
-import { RISE, clamp, smooth, type Ctx, type Driver, type MtSection } from "./engine";
+import { clamp, rise, smooth, type Ctx, type Driver, type MtSection } from "./engine";
 import { sleeveTilt } from "./sleeve-tilt";
 import { tp } from "./touch-parity";
 
@@ -106,7 +106,7 @@ function heldRow(name: MtSection): Driver {
       // The title line rises when held-row.tsx commits the new item (on touch too with ?mttp=covers). A turned sleeve turns back.
       const mo = new MutationObserver(() => {
         for (const it of items) it.removeAttribute("data-tp-fl");
-        if (ctx.held || tp("covers")) el.querySelector(".mt-ttl .ln > span")?.animate([{ transform: "translateY(110%)" }, { transform: "none" }], RISE);
+        if (ctx.held || tp("covers")) rise(el.querySelector(".mt-ttl .ln > span"));
       });
       mo.observe(el, { attributeFilter: ["data-cur"] });
 
@@ -143,7 +143,7 @@ function heldRow(name: MtSection): Driver {
 
       // Tab to a film: the browser scrolls the hidden row to show it. Put that back and move the page there instead.
       row.addEventListener("focusin", (e) => {
-        const t = e.target as Element, i = items.indexOf(t.closest<HTMLElement>(".mt-item")!);
+        const t = e.target as Element, it = t.closest<HTMLElement>(".mt-item"), i = it ? items.indexOf(it) : -1;
         if (!ctx.held || i < 0 || !t.matches(":focus-visible")) return;
         row.scrollLeft = base;
         shiftScroll(top() + unease(i / (n - 1)) * range - scrollY);
@@ -341,7 +341,7 @@ function films(): Driver {
       const mo = new MutationObserver(() => {
         cur = +(el.dataset.cur ?? 0);
         preview();
-        if (ctx.held || touchFilms) el.querySelector(".mt-ttl .ln > span")?.animate([{ transform: "translateY(110%)" }, { transform: "none" }], RISE);
+        if (ctx.held || touchFilms) rise(el.querySelector(".mt-ttl .ln > span"));
       });
       mo.observe(el, { attributeFilter: ["data-cur"] });
 
