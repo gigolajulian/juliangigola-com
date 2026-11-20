@@ -3,7 +3,7 @@ import { matches } from "@/lib/device";
 import { qvalue } from "@/lib/mtflags";
 import { holdEase as ease, holdUnease as unease } from "@/lib/motion/hold-ease";
 import { captionsOff, vimeoListen, vimeoPlays } from "@/lib/videos";
-import { clamp, rise, smooth, type Ctx, type Driver, type MtSection } from "./engine";
+import { clamp, rise, smooth, type Ctx, type Driver } from "./engine";
 import { sleeveTilt } from "@/components/cover/sleeve-tilt";
 import { tp } from "./touch-parity";
 
@@ -41,9 +41,9 @@ function snap(el: HTMLElement, ctx: Ctx, n: number, at: (p: number) => number, s
    sideways. Motion (spec 3.8): a vertical stack there, see films() below.
    Everywhere else the native snap rows stay. */
 
-function heldRow(name: MtSection): Driver {
+function covers(): Driver {
   return {
-    name,
+    name: "covers",
     setup(el, ctx) {
       const row = el.querySelector<HTMLElement>(".mt-row");
       if (!row) return;
@@ -92,7 +92,7 @@ function heldRow(name: MtSection): Driver {
         p = ease(p);
         const i = Math.round(p * (n - 1)), x = p * (n - 1) * step;
         if (i !== cur) {
-          // The row's own scroll steps item by item so held-row.tsx names the current one; the transform carries the rest.
+          // The row's own scroll steps item by item so MtCovers (rows.tsx) names the current one; the transform carries the rest.
           row.scrollLeft = i * step;
           base = row.scrollLeft;
           cur = i;
@@ -103,7 +103,7 @@ function heldRow(name: MtSection): Driver {
         discs(x, step * (420 / 520), k);
       };
 
-      // The title line rises when held-row.tsx commits the new item (on touch too with ?mttp=covers). A turned sleeve turns back.
+      // The title line rises when MtCovers (rows.tsx) commits the new item (on touch too with ?mttp=covers). A turned sleeve turns back.
       const mo = new MutationObserver(() => {
         for (const it of items) it.removeAttribute("data-tp-fl");
         if (ctx.held || tp("covers")) rise(el.querySelector(".mt-ttl .ln > span"));
@@ -368,4 +368,4 @@ function films(): Driver {
   };
 }
 
-export const rowsDrivers: Driver[] = [heldRow("covers"), films()];
+export const rowsDrivers: Driver[] = [covers(), films()];
