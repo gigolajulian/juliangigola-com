@@ -6,7 +6,7 @@ import { byCodeUnit } from "@/lib/utils";
 
 /* "Next open" (spec 3.4): the first open slot from the same engine /book
    reads (`app/api/slots`). Nothing on failure, slowness or no slots: the
-   line then shows only its turnaround. One request per session per visit. */
+   line is left out. One request per session per visit. */
 const seen = new Map<string, Promise<string | null>>();
 const ymd = (d: Date) => d.toISOString().slice(0, 10);
 

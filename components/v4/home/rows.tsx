@@ -8,7 +8,7 @@ import type { CoverRelease } from "@/lib/cover-art-types";
 import { media } from "@/lib/device";
 import { holdEase, holdUnease } from "@/lib/motion/hold-ease";
 import { HeldRow } from "./held-row";
-import { progress } from "./motion/engine";
+import { clamp, progress } from "./motion/engine";
 import { COVER_KEYS, COVER_PRESS, FILM_DRESS, pad, type MtFilm } from "@/lib/mt-home";
 
 const COVERS = COVER_KEYS.map((k) => COVER_RELEASES.find((r) => r.slug === k)).filter((r): r is CoverRelease => !!r);
@@ -83,7 +83,7 @@ export function MtFilms({ films }: { films: MtFilm[] }) {
       }
       const a = items[0].getBoundingClientRect(), b = items[1].getBoundingClientRect();
       const at = mq.matches ? (innerHeight / 2 - a.top - a.height / 2) / (b.top - a.top) : el.scrollLeft / (b.left - a.left);
-      setCur(Math.max(0, Math.min(items.length - 1, Math.round(at))));
+      setCur(clamp(Math.round(at), 0, items.length - 1));
     };
     const on = () => (raf ||= requestAnimationFrame(read));
     el.addEventListener("scroll", on, { passive: true });

@@ -25,6 +25,10 @@ describe("v4 motion math", () => {
     expect(smooth(0.25)).toBeLessThan(0.25);
   });
 
+  it("span runs the other way when a is above b", () => {
+    expect([span(1.2, 1, 0), span(1, 1, 0), span(0.5, 1, 0), span(-1, 1, 0)]).toEqual([0, 0, 0.5, 1]);
+  });
+
   it("span maps a to b onto 0 to 1 and clamps outside it", () => {
     expect([span(0.2, 0.25, 1), span(0.25, 0.25, 1), span(0.625, 0.25, 1), span(2, 0.25, 1)]).toEqual([0, 0, 0.5, 1]);
   });
