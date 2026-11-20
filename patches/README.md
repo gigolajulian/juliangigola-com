@@ -22,7 +22,7 @@ reason here. A patch with no entry here is not allowed.
   frame on the strips. The buttons in liquid (`liquid-pair.tsx`) run on
   this engine. The rail's drop no longer does (`RailFollow`,
   `strip/rail.tsx`).
-- **Check:** `lib/liquid-gooey-patch.test.ts` fails if the patch is not in
+- **Check:** `tests/lib/liquid-gooey-patch.test.ts` fails if the patch is not in
   `node_modules`, so `npm test` catches an install that skipped it.
 
 ### Upgrading liquid-gooey

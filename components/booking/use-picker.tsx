@@ -5,7 +5,7 @@ import { gsap } from "gsap";
 import type { DepositBody } from "@/components/booking/deposit-step";
 import { isPaid } from "@/lib/booking/paid";
 import type { SlotsAnswer } from "@/lib/booking/slots";
-import { Orb, ORB_ROUND } from "@/components/orb";
+import { Orb, ORB_ROUND } from "@/components/effects/orb";
 import { JgLoad } from "@/components/splash/jg-load";
 import { TZ } from "@/lib/booking/booking-rules";
 import { mplan } from "@/lib/mplan";

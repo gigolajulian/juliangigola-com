@@ -112,6 +112,8 @@ export const QUOTE_CLIENTS: QuoteClient[] = [
 ];
 
 /* ── About (spec 3.9) ── */
+/** What I do, as listed on /about and the home's About. */
+export const DOES = ["Editorials", "Still photography", "Camera operation", "Brand imagery", "Post-production", "Creative direction"];
 export const ABOUT_SENTENCE = "I help emerging labels, musicians and technology brands find the image that feels most like them.";
 export const ABOUT_FACTS: [string, string][] = [
   ["Shooting", "12 years"],

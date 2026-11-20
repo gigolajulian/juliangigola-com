@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Orb } from "@/components/orb";
+import { Orb } from "@/components/effects/orb";
 import { flushSync } from "react-dom";
 import Image from "next/image";
 import { Dialog, VisuallyHidden } from "radix-ui";

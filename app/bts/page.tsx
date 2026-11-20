@@ -4,7 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { WITH_BTS, titleCase } from "@/lib/work";
 import { PageFoot } from "@/components/v3/chrome";
-import { BtsCredit, BtsPageGrid } from "@/components/bts";
+import { BtsCredit, BtsPageGrid } from "@/components/bts/bts";
 
 export const metadata: Metadata = {
   title: "Behind the scenes",

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CHIP_TYPE, QUOTE_OPTS } from "@/lib/mt-home";
+import { CHIP_TYPE, QUOTE_OPTS } from "@/lib/v4-home/data";
 import { clamp, progress, smooth, span } from "@/components/v4/home/motion/engine";
 import { SHOOT_TYPES } from "@/lib/inbox";
 

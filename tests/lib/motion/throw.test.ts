@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { DECEL, FLICK, dampingFor, projectThrow } from "./throw";
+import { DECEL, FLICK, dampingFor, projectThrow } from "@/lib/motion/throw";
 
 describe("projectThrow", () => {
   it("runs a throw out at iOS's deceleration", () => {

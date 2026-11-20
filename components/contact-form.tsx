@@ -8,7 +8,7 @@ import type { ContactState } from "@/lib/inbox";
 import { RESPONSE_TIME } from "@/lib/site";
 import { cn } from "@/lib/utils";
 import StatusMark from "@/components/vendor/status-mark";
-import { Orb, ORB_ROUND } from "@/components/orb";
+import { Orb, ORB_ROUND } from "@/components/effects/orb";
 import { ReferencePicks } from "@/components/reference-picks";
 import { trailContext } from "@/components/visit-trail";
 

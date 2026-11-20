@@ -9,7 +9,7 @@ import { media } from "@/lib/device";
 import { holdEase, holdUnease } from "@/lib/motion/hold-ease";
 import { HeldRow } from "./held-row";
 import { progress } from "./motion/engine";
-import { COVER_KEYS, COVER_PRESS, FILM_DRESS, pad, type MtFilm } from "@/lib/mt-home";
+import { COVER_KEYS, COVER_PRESS, FILM_DRESS, pad, type MtFilm } from "@/lib/v4-home/data";
 
 const COVERS = COVER_KEYS.map((k) => COVER_RELEASES.find((r) => r.slug === k)).filter((r): r is CoverRelease => !!r);
 

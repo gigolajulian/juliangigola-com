@@ -6,8 +6,8 @@ vi.mock("@/app/contact/actions", () => ({ submitEnquiry: vi.fn() }));
 vi.stubGlobal("fetch", vi.fn(() => Promise.reject(new Error("offline"))));
 
 import { MtHome } from "@/components/v4/home/home";
-import { BOOK_ROWS, QUOTE_OPTS } from "@/lib/mt-home";
-import { MT } from "@/lib/mt-home-data";
+import { BOOK_ROWS, QUOTE_OPTS } from "@/lib/v4-home/data";
+import { MT } from "@/lib/v4-home/server";
 
 /* The two lists on the v4 home that talk to each other: Book online and By quote. Read through the DOM only,
    so a rename inside the components cannot hide a change in what the visitor gets. */

@@ -1,5 +1,5 @@
 import { scrollGoal, settleTo, shiftScroll } from "@/components/v3/smooth-scroll";
-import { qvalue } from "@/lib/mtflags";
+import { qvalue } from "@/lib/v4-home/flags";
 import { holdEase as ease, holdUnease as unease } from "@/lib/motion/hold-ease";
 import { captionsOff, vimeoListen, vimeoPlays } from "@/lib/videos";
 import { clamp, rise, smooth, type Ctx, type Driver, type MtSection } from "./engine";
@@ -247,7 +247,7 @@ function films(): Driver {
       };
       const mount = (i: number) => {
         const film = items[i], src = film.dataset.preview!;
-        /* The site's own file (lib/mt-home.ts FILM_FILES): a plain video, no player to wait for. It says "playing" itself. */
+        /* The site's own file (lib/v4-home/data.ts FILM_FILES): a plain video, no player to wait for. It says "playing" itself. */
         if (film.dataset.file) {
           const f = document.createElement("video");
           const v: Pv = { f, yt: false, played: false, at: performance.now(), t: 0 };
