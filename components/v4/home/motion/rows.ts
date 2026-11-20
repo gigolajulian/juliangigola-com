@@ -180,8 +180,10 @@ function covers(): Driver {
 
       // After the engine's own resize pass, so ctx is current.
       addEventListener("resize", () => requestAnimationFrame(() => {
+        const was = cur; // measure() resets it
         measure();
         if (ctx.held) return;
+        if (MT2 && was > 0) row.scrollLeft = was * step; // ?mt2=1: the row rested at 0 while held; land it on the told item
         track.style.transform = "";
         loose();
       }), opts);
