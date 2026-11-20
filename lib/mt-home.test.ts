@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { CHIP_TYPE, QUOTE_OPTS } from "@/lib/mt-home";
-import { clamp, progress, smooth, span } from "@/components/v3/mt/motion/engine";
+import { clamp, progress, smooth, span } from "@/components/v4/home/motion/engine";
 import { SHOOT_TYPES } from "@/lib/inbox";
 
 /* The server files any type it does not know as "other" without a word, so a renamed chip or a mistyped

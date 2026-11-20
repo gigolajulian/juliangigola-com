@@ -6,7 +6,7 @@ import Image from "next/image";
 import { Lightbox, useLightbox } from "@/components/lightbox";
 import { COVER_PRESS } from "@/lib/mt-home";
 import { sleeveTilt } from "./sleeve-tilt";
-import "@/components/v3/mt/motion/rows.css";
+import "@/components/v4/home/motion/rows.css";
 import { CoverFaces, coverLabel } from "@/components/cover/cover-faces";
 import { CoverSound, playSound, stopSound, useSound } from "@/components/cover/cover-sound";
 import type { CoverRelease } from "@/lib/cover-art-types";

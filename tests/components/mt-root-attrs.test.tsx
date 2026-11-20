@@ -1,5 +1,5 @@
 import { afterEach, expect, test } from "vitest";
-import { flipMs } from "@/components/v3/mt/motion/root-attrs";
+import { flipMs } from "@/components/v4/home/motion/root-attrs";
 
 afterEach(() => document.documentElement.removeAttribute("data-mt-flip"));
 

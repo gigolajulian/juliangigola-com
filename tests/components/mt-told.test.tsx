@@ -5,8 +5,8 @@ vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }), usePat
 vi.mock("@/app/contact/actions", () => ({ submitEnquiry: vi.fn() }));
 vi.stubGlobal("fetch", vi.fn(() => Promise.reject(new Error("offline"))));
 
-import { MtHome } from "@/components/v3/mt/home";
-import { tell } from "@/components/v3/mt/motion/engine";
+import { MtHome } from "@/components/v4/home/home";
+import { tell } from "@/components/v4/home/motion/engine";
 import { QUOTE_CLIENTS } from "@/lib/mt-home";
 import { MT } from "@/lib/mt-home-data";
 

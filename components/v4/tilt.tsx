@@ -3,7 +3,7 @@
 import * as React from "react";
 import { v4pages } from "@/lib/v4pages";
 
-/** `?v4pages=tilt`: the home hero's pointer depth (components/v3/mt/motion/depth.ts),
+/** `?v4pages=tilt`: the home hero's pointer depth (components/v4/home/motion/depth.ts),
     toned down, on /portfolio. The view on screen (grid, strip or canvas field)
     leans toward the mouse by up to 1.1 degrees; the hero wall leans 2.5. One
     eased rAF, one `transform` write a frame on one element, stopped once it
@@ -47,7 +47,7 @@ export function V4Tilt({ k }: { k: string }) {
       tx = ty = 0;
       raf ||= requestAnimationFrame(draw);
     };
-    /* Its own scroll watch, not v4-drift's `data-v4lag`: that one needs scroll timelines, so in Safari
+    /* Its own scroll watch, not v4/drift.tsx's `data-v4lag`: that one needs scroll timelines, so in Safari
        the tilt never straightened and the hover zoom ran on (v4pages.css reads `data-v4scroll`). */
     const scroll = () => {
       hold = true;

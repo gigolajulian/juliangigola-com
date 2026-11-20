@@ -1,6 +1,6 @@
 # v4 home motion: decisions
 
-The dated notes that used to sit in `components/v3/mt` code comments. The
+The dated notes that used to sit in `components/v4/home` code comments. The
 comments now state the current rule; who asked, when, and what it replaced is
 here. Grouped by file, newest first. Site-wide decisions are in
 `docs/decisions.md`.

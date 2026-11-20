@@ -4,7 +4,7 @@ import * as React from "react";
 import { mplan } from "@/lib/mplan";
 import { mtscroll, V4_HOME } from "@/lib/mtscroll";
 import { useV4pages } from "@/lib/v4pages";
-import { V4Foot } from "./v4-foot";
+import { V4Foot } from "@/components/v4/foot";
 import Link from "next/link";
 import { THEME_COLOR } from "@/lib/theme-color";
 import { usePathname } from "next/navigation";
@@ -493,7 +493,7 @@ export function V3Foot() {
    the pages restyled by tokens only get it here, after `main`. */
 const OWN_FOOT = /^\/($|portfolio(\/video)?$|bts$|about$|contact(\/form)?$|book(\/|$)|portraits$|headshots$|graduation-photos(\/|$)|model-digitals$|weddings$|music-photography$|fashion-photography$|brand-photography$|admin(\/|$)|proof\/)/;
 
-/** An inner page's ending: the footer line, or the V4 footer under `?v4pages=foot` (v4-foot.tsx). */
+/** An inner page's ending: the footer line, or the V4 footer under `?v4pages=foot` (v4/foot.tsx). */
 export function PageFoot() {
   return useV4pages("foot") ? <V4Foot /> : <V3Foot />;
 }

@@ -36,7 +36,7 @@ export type Ctx = {
   fresh: boolean;
 };
 
-/** Every `data-mt` section name in components/v3/mt. */
+/** Every `data-mt` section name in components/v4/home. */
 export type MtSection = "hero" | "covers" | "motion" | "comm" | "about" | "quote" | "foot" | "book";
 
 /** every frame while the section is within one screen of the viewport (it carries `data-mt-near` then) */

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { V3Home, type TopWork } from "@/components/v3/home";
-import { MtGate } from "@/components/v3/mt/gate";
+import { MtGate } from "@/components/v4/home/gate";
 import { COMMISSION_TABS } from "@/lib/v3";
 import { PROJECTS, categoryLabel } from "@/lib/work";
 import { MT } from "@/lib/mt-home-data";
@@ -35,7 +35,7 @@ export default async function Home() {
   // Rendered directly, not through the gate: next/dynamic would leave it in a hidden Suspense block until scripts run.
   // The env test is written out here so the build drops the import when it is off: the default home must not load v4 files.
   if (process.env.NEXT_PUBLIC_V4_HOME === "1") {
-    const { MtHome } = await import("@/components/v3/mt/home");
+    const { MtHome } = await import("@/components/v4/home/home");
     return <MtHome data={MT} />;
   }
   return (

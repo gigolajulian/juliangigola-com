@@ -5,7 +5,7 @@ import { BtsCredit, BtsPageGrid } from "@/components/bts";
 import { BackLink } from "@/components/site/back-link";
 import { billing, markFor, titleCase } from "@/lib/work";
 import { tailHole } from "@/lib/sheet";
-import { V4Project } from "@/components/v3/v4-project";
+import { V4Project } from "@/components/v4/project";
 import type { Frame, Project } from "@/lib/work-types";
 
 /* JG V3 project page (leftovers sheet, card B; Julian: vertical, with the
