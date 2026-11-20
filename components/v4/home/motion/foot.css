@@ -1,0 +1,12 @@
+/* v4 home motion: foot. Applies only under html[data-mt-motion]. */
+html[data-mt-motion] .mt-foot .mt-ph[data-copy]{visibility:visible}
+/* links, phrase and last line stay above the still */
+html[data-mt-motion] .mt-foot :is(.mt-fcols,.mt-phrase,.mt-fline){z-index:2}
+html[data-mt-held] .mt-foot[data-mt-near] .mt-fwall{will-change:transform,opacity}
+/* Where the spot can run, the phrase rests lit
+   and the spot (foot.ts, which paints --phr) takes it back to the plain grey. Phones and touch keep the grey. */
+@media (hover:hover) and (pointer:fine){html[data-mt-held] .mt-foot .mt-ph-btn{color:color-mix(in srgb,var(--ink) 55%,var(--phr))!important}}
+/* hover spot (canvas) and dot pointer; `color` is the ground the canvas reads */
+html[data-mt-motion] .mt-fcut{position:absolute;left:0;top:0;z-index:3;pointer-events:none;opacity:0;color:var(--bg);will-change:transform}
+html[data-mt-motion] .mt-fdot{position:absolute;left:0;top:0;z-index:5;width:14px;height:14px;border-radius:50%;background:#ececec;pointer-events:none;mix-blend-mode:difference;opacity:0;will-change:transform}
+html[data-mt-motion] .mt-foot[data-hot] .mt-stage,html[data-mt-motion] .mt-foot[data-hot] .mt-stage *{cursor:none}

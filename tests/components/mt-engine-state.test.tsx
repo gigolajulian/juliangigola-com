@@ -1,6 +1,6 @@
 import { afterEach, expect, test, vi } from "vitest";
-import { startEngine } from "@/components/v3/mt/motion/engine";
-import { barDrivers } from "@/components/v3/mt/motion/bars";
+import { startEngine } from "@/components/v4/home/motion/engine";
+import { barDrivers } from "@/components/v4/home/motion/bars";
 
 /* A driver's state lives in its setup closure, one per section: two sections
    with one driver name never share it (engine.ts Driver.setup). */

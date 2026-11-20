@@ -6,7 +6,7 @@ const slots = (data: Record<string, { start: string }[]>, status = "success") =>
 
 async function load() {
   vi.resetModules(); // the module caches one request per event
-  return import("@/components/v3/mt/next-open");
+  return import("@/components/v4/home/next-open");
 }
 
 describe("v4 next open", () => {

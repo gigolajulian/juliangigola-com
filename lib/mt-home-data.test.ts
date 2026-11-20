@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { COMM_KEYS, COVER_KEYS, COVER_PRESS, FILM_DRESS, FILM_PICKS, HERO_KEYS } from "@/components/v3/mt/data";
+import { COMM_KEYS, COVER_KEYS, COVER_PRESS, FILM_DRESS, FILM_PICKS, HERO_KEYS } from "@/lib/mt-home";
 import { getProject } from "@/lib/work";
 import { MT } from "./mt-home-data";
 

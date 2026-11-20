@@ -6,7 +6,7 @@ const submitEnquiry = vi.fn();
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
 vi.mock("@/app/contact/actions", () => ({ submitEnquiry: (...a: unknown[]) => submitEnquiry(...a) }));
 
-import { InquiryCard } from "@/components/v3/mt/inquiry-card";
+import { InquiryCard } from "@/components/v4/home/inquiry-card";
 
 /* The v4 home's quick note is the lead path: what it files a lead under, what it refuses to send,
    and where a music video goes instead. */
