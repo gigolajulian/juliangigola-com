@@ -82,7 +82,6 @@ export function V3Inquire() {
           <div className="reach-call">
             <Duo d={CALL_CARD.d} l={CALL_CARD.l} alt="" sizes="(max-width: 800px) 100vw, 40vw" />
             <div className="rc-in">
-              <span className="lbl">Prefer to talk</span>
               <h2>Book a consultation</h2>
               <p>15 minutes, phone or video. Pick a time on my calendar.</p>
               <div><CallDialog /></div>
