@@ -80,7 +80,10 @@ test("on the home, a link to /#contact glides to the footer, then opens the card
   const { ctx, page } = await open(browser, browserName, RATIOS[4]);
   await page.goto("/", { waitUntil: "load" });
   await page.locator("#contact .mt-ph-btn").waitFor({ state: "attached" });
-  await page.waitForTimeout(1000); // the home's click listener is on once it has hydrated
+  // a fixed 1s was sometimes too early on CI (#1242, #1255: the card opened with the footer off screen);
+  // the motion engine starting is a sign the home has hydrated, then a beat for its click listener
+  await page.waitForFunction(() => document.documentElement.hasAttribute("data-mt-motion"), null, { timeout: 15000 });
+  await page.waitForTimeout(500);
   // no link on the home points there today: a stand-in, as any page link to /#contact would be
   await page.evaluate(() => {
     const a = Object.assign(document.createElement("a"), { href: "/#contact", id: "t-contact", textContent: "contact" });
@@ -90,6 +93,6 @@ test("on the home, a link to /#contact glides to the footer, then opens the card
   await page.locator("#t-contact").click();
   await expect(page.locator(".mt-inq")).toBeVisible();
   await expect(page).toHaveURL(/\/#contact$/);
-  await expect(page.locator("footer#contact")).toBeInViewport();
+  await expect(page.locator("footer#contact")).toBeInViewport({ timeout: 10000 });
   await ctx.close();
 });
