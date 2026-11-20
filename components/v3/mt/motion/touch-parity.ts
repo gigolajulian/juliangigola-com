@@ -1,11 +1,13 @@
 /* Phones and tablets get the desktop's motion (Julian, 2026-11-18: "integrate", then "push" after MAC passed all eight). On by default.
    `?mttp=0` turns all of it off, `?mttp=-flip,-sink` the listed items, `?mttp=flip,sink` keeps only those. engine.ts sets html[data-tp-<item>] for touch-parity.css. */
+import { qvalue } from "@/lib/mtflags";
+
 export const TP = ["sink", "covers", "flip", "films", "drift", "about", "sheet", "press"] as const;
 export type TpItem = (typeof TP)[number];
 
 export const tp = (k: TpItem) => {
   if (typeof location === "undefined") return false;
-  const m = /[?&]mttp=([\w,-]+)/.exec(location.search)?.[1];
+  const m = qvalue("mttp", "[\\w,-]+");
   if (!m || m === "all") return true;
   if (m === "0") return false;
   const ks = m.split(",");

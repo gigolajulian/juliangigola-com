@@ -3,6 +3,7 @@
 import * as React from "react";
 import loader from "@/image-loader";
 import { matches } from "@/lib/device";
+import { qflag } from "@/lib/mtflags";
 import type { MtFrame } from "../data";
 import "./intro.css";
 
@@ -45,9 +46,8 @@ const SHORT = { end: 3200, push: 1500, land: 2850, rise: 900, light: 500, at: 35
 const AGAIN = 30 * 864e5;
 
 export function returning() {
-  const q = location.search;
-  if (/[?&]intro=2/.test(q)) return true;
-  if (/[?&]intro=1/.test(q)) return false;
+  if (qflag("intro", "2")) return true;
+  if (qflag("intro", "1")) return false;
   try {
     const at = Number(localStorage.getItem("jg-intro-at"));
     return at > 0 && Date.now() - at < AGAIN;
@@ -58,25 +58,23 @@ export function returning() {
 
 /** Also remembers the choice: `?splash=1` is kept for the session, `?splash=0` or `2` clears it. */
 export function deepMode() {
-  const q = location.search;
   try {
-    if (/[?&]splash=1/.test(q)) sessionStorage.setItem("jg-splash", "1");
-    else if (/[?&]splash=[02]/.test(q)) sessionStorage.removeItem("jg-splash");
+    if (qflag("splash", "1")) sessionStorage.setItem("jg-splash", "1");
+    else if (qflag("splash", "[02]")) sessionStorage.removeItem("jg-splash");
     return sessionStorage.getItem("jg-splash") !== "1";
   } catch {
-    return !/[?&]splash=1/.test(q);
+    return !qflag("splash", "1");
   }
 }
 
 export function shouldPlay() {
   const root = document.documentElement;
-  const q = location.search;
-  if (/[?&]intro=0/.test(q) || !("v3motion" in root.dataset)) return false;
+  if (qflag("intro", "0") || !("v3motion" in root.dataset)) return false;
   if (matches("calm")) return false;
   if (window.scrollY > 4) return false;
   // the head script already gave the page back at 6s (a slow CPU hydrates later than that): starting now would blank the hero the visitor is looking at
   if ("mtLate" in root.dataset) return false;
-  if (/[?&]intro=[12]/.test(q)) return true;
+  if (qflag("intro", "[12]")) return true;
   try {
     if (sessionStorage.getItem("jg-intro")) return false;
   } catch {}
@@ -180,7 +178,7 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
     // the head script hides the header from the first paint (state 1); give it back if the intro will not run
     if (!shouldPlay()) {
       delete root.dataset.mtIntro;
-      const calm = matches("calm") && !/[?&]intro=0/.test(location.search) && window.scrollY <= 4;
+      const calm = matches("calm") && !qflag("intro", "0") && window.scrollY <= 4;
       let seen = true;
       try {
         seen = !!sessionStorage.getItem("jg-intro");
@@ -221,7 +219,7 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
     const stopHurry = () => INPUTS.forEach((e) => window.removeEventListener(e, hurry));
     const origin = wall.style.transformOrigin;
     const ready: string[] = [];
-    const preload = !/[?&]preload=0/.test(location.search); // on since Julian's OK (2026-11-19); ?preload=0 is the old 6 + 18 start
+    const preload = !qflag("preload", "0"); // on since Julian's OK (2026-11-19); ?preload=0 is the old 6 + 18 start
     const parked: [HTMLImageElement, string | null, string | null][] = [];
 
     const finish = (seen: boolean) => {

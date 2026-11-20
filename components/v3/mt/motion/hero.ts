@@ -1,3 +1,4 @@
+import { qflag } from "@/lib/mtflags";
 import { clamp, type Ctx, type Driver } from "./engine";
 
 /* Hero wall travel (spec 3.2). Held (D): the wall travels up through the hold,
@@ -24,7 +25,7 @@ const ink = (n: Node) => {
 /* ?mtdock=left (Julian 2026-11-15): no dock. The header keeps its links from the start with no
    ground under them, the name leaves to the left as the hero ends, and the header's ground comes in there. The bar's
    wordmark waits until the big name has gone (2026-11-16: "never together"; the header trial does that). */
-const LEFT = typeof location !== "undefined" && /[?&]mtdock=left/.test(location.search);
+const LEFT = qflag("mtdock", "left");
 /* With no ground over the hero the nav words sit on the wall: they flip white or black (nav-ink.ts; the flag turns
    ?navfx on in layout.tsx), and page text fades out under the bar there (the same file's text fade). */
 
@@ -41,7 +42,7 @@ function park(ctas: HTMLElement | null, on: boolean, why: "out" | "past" = "out"
 }
 
 /* Phones and tablets pin the name too (hero.css). `?mtpin=0` brings back the name that scrolls away with the first screen. */
-const PIN = typeof location === "undefined" || !/[?&]mtpin=0/.test(location.search);
+const PIN = !qflag("mtpin", "0");
 
 /* The name's way out, the same on every layout: it rides down out of the window and is over as See the work's top edge enters it.
    2026-11-17, third pass: "too fast, needs to be longer and finish later". It takes the last three quarters of the scroll up to that point,
@@ -255,7 +256,7 @@ export const heroDrivers: Driver[] = [
       if (LEFT) document.documentElement.setAttribute("data-mtleft", "");
       if (!PIN) document.documentElement.setAttribute("data-mt-nopin", "");
       // The idle wall turns a card over to its next photo (hero.css). The value is the duration: hero.tsx reads it for the caption. `?mtflip=0` brings the hard cut back.
-      const flip = /[?&]mtflip=0/.test(location.search) ? 0 : FLIP;
+      const flip = qflag("mtflip", "0") ? 0 : FLIP;
       const ac = new AbortController();
       if (flip) {
         document.documentElement.setAttribute("data-mt-flip", String(flip));

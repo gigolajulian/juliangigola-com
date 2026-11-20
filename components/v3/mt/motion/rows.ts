@@ -1,4 +1,5 @@
 import { scrollGoal, settleTo, shiftScroll } from "@/components/v3/smooth-scroll";
+import { qflag, qvalue } from "@/lib/mtflags";
 import { holdEase as ease, holdUnease as unease } from "@/lib/motion/hold-ease";
 import { captionsOff, vimeoListen, vimeoPlays } from "@/lib/videos";
 import { clamp, rise, smooth, type Ctx, type Driver, type MtSection } from "./engine";
@@ -10,7 +11,7 @@ import { tp } from "./touch-parity";
    nearest one. Within a step of the item it rested on it leans 0.44 of a step the way the scroll went, so one wheel notch (100px, a small part of a step) moves on instead of
    falling back; ?mtsnap=near is plain nearest. `at`: the hold's share as an item position; `share`: an item's resting share of the hold. */
 function snap(el: HTMLElement, ctx: Ctx, n: number, at: (p: number) => number, share: (i: number) => number, busy: () => boolean, signal: AbortSignal) {
-  const m = /[?&]mtsnap=(\w+)/.exec(location.search)?.[1];
+  const m = qvalue("mtsnap");
   if (m === "0" || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   const lean = m === "near" ? 0 : 0.44;
   let t = 0, rest = NaN; // the item position the page last settled on; NaN outside the hold, so arriving is plain nearest
@@ -56,10 +57,10 @@ function heldRow(name: MtSection): Driver {
 
       /* The V4 default since 2026-11-15 (Julian: "turn on the parallax by default"), ?mtpar=0 turns it off: the heading and the row ride up at their own
          rates and the stage hands over to Motion (rows.css). The pile the covers were dealt from is gone (Julian, 2026-11-17). */
-      const par = !/[?&]mtpar=0/.test(location.search);
+      const par = !qflag("mtpar", "0");
       if (par) document.documentElement.setAttribute("data-mt-par", "");
       // kept (Julian, 2026-11-17: "keep the lid"), ?mtlid=0 turns it off: Cover art waits under Commissions, which lifts off it like a lid (rows.css)
-      if (par) document.documentElement.toggleAttribute("data-mt-lid", !/[?&]mtlid=0/.test(location.search));
+      if (par) document.documentElement.toggleAttribute("data-mt-lid", !qflag("mtlid", "0"));
       const measure = () => {
         // flow.css scales the row as it enters and settles: measure it at rest
         row.style.transform = "none";

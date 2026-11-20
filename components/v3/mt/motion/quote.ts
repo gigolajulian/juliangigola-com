@@ -1,3 +1,4 @@
+import { qflag } from "@/lib/mtflags";
 import { put, type Driver } from "./engine";
 import { QUOTE_CLIENTS } from "../data";
 
@@ -15,7 +16,7 @@ export const quoteDrivers: Driver[] = [
     always: true,
     setup(el) {
       // ?mtask=1, a trial (Julian, 2026-11-17): the section as a full screen with the client photo behind the question (quote.css)
-      document.documentElement.toggleAttribute("data-mtask", /[?&]mtask=1/.test(location.search));
+      document.documentElement.toggleAttribute("data-mtask", qflag("mtask", "1"));
       const s = { k: 0, t: 0, swap: 0, tap: -REST, rot: false };
       const sets = [".mt-photo", ".mt-photo-w"].map((f) => [...el.querySelectorAll(`${f} > .cl`)]);
       const names = [el.querySelector(".mt-by .nm"), el.querySelector(".mt-clcap")];
