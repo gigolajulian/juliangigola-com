@@ -3,6 +3,7 @@
    (names, ratios) are resolved on the server in `app/page.tsx` (`mtData`). */
 import { rate, SESSIONS, type SessionSlug } from "@/lib/v3";
 import { DEPOSIT } from "@/lib/booking/paid";
+import type { SHOOT_TYPES } from "@/lib/inbox";
 
 /** A photo with its caption: `r` is height / width. */
 export type MtFrame = { src: string; name: string; meta: string; slug: string; r: number };
@@ -87,7 +88,7 @@ export const QUOTE_OPTS: QuoteOpt[] = [
   { key: "weddings", name: "Weddings", holds: ["Full day", "Couples, engagements"], detail: "", chips: ["Wedding", "Couples", "Engagement"], call: "/book/weddings", photo: "/work/weddings/02.jpg" },
 ];
 /** The enquiry type each chip posts (lib/inbox.ts SHOOT_TYPES). */
-export const CHIP_TYPE: Record<string, string> = {
+export const CHIP_TYPE: Record<string, (typeof SHOOT_TYPES)[number]> = {
   "Cover art": "coverart",
   "Artist presskit": "presskit",
   "Music video": "video",

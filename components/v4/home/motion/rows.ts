@@ -1,4 +1,5 @@
 import { scrollGoal, settleTo, shiftScroll } from "@/components/v3/smooth-scroll";
+import { matches } from "@/lib/device";
 import { qvalue } from "@/lib/mtflags";
 import { holdEase as ease, holdUnease as unease } from "@/lib/motion/hold-ease";
 import { captionsOff, vimeoListen, vimeoPlays } from "@/lib/videos";
@@ -12,7 +13,7 @@ import { tp } from "./touch-parity";
    falling back; ?mtsnap=near is plain nearest. `at`: the hold's share as an item position; `share`: an item's resting share of the hold. */
 function snap(el: HTMLElement, ctx: Ctx, n: number, at: (p: number) => number, share: (i: number) => number, busy: () => boolean, signal: AbortSignal) {
   const m = qvalue("mtsnap");
-  if (m === "0" || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  if (m === "0" || matches("calm")) return;
   const lean = m === "near" ? 0 : 0.44;
   let t = 0, rest = NaN; // the item position the page last settled on; NaN outside the hold, so arriving is plain nearest
   const settle = () => {
@@ -144,7 +145,7 @@ function heldRow(name: MtSection): Driver {
       }, { capture: true, signal: ac.signal });
       row.addEventListener("dragstart", (e) => { if (ctx.held) e.preventDefault(); }, opts);
 
-      // Tab to a film: the browser scrolls the hidden row to show it. Put that back and move the page there instead.
+      // Tab to a cover: the browser scrolls the hidden row to show it. Put that back and move the page there instead.
       row.addEventListener("focusin", (e) => {
         const t = e.target as Element, it = t.closest<HTMLElement>(".mt-item"), i = it ? items.indexOf(it) : -1;
         if (!ctx.held || i < 0 || !t.matches(":focus-visible")) return;
@@ -312,11 +313,12 @@ function films(): Driver {
         const hit = [...pool].find(([, v]) => win(v) === e.source);
         if (!hit) return;
         const [i, v] = hit;
-        let m;
+        // YouTube: onStateChange carries the state as `info`, infoDelivery as `info.playerState`; Vimeo: playProgress `data.seconds`
+        let m: { event?: string; info?: number | { playerState?: number }; data?: { seconds?: number } } | undefined;
         try { m = typeof e.data === "string" ? JSON.parse(e.data) : e.data; } catch { return; }
         // Vimeo: the poster lifts only when the player says frames are moving
         if (m?.event === "ready") return void vimeoListen(win(v));
-        const state = m?.event === "onStateChange" ? m.info : m?.event === "infoDelivery" ? m.info?.playerState : undefined;
+        const state = m?.event === "onStateChange" ? m.info : m?.event === "infoDelivery" && m.info && typeof m.info === "object" ? m.info.playerState : undefined;
         const plays = vimeoPlays(m) || state === 1;
         if (!plays && typeof state !== "number") return;
         if (plays) {
