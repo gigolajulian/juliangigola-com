@@ -26,14 +26,36 @@ const MARKUP =
 
 /* Lay J, G and the line out by their ink: 0.04em between the letters, the
    line 0.2em under the baseline, the whole group centred on the screen.
-   Sent to the page as source (`toString`), so it touches nothing but globals. */
+   The ink is read off a canvas the letters are drawn on: WebKit's
+   measureText gives no ink box for this face (its left is 0, its right the
+   advance), so the mark sat off centre and J and G never closed (JG - MAC
+   on #1257). Sent to the page as source (`toString`), so it touches
+   nothing but globals. */
 function place(d: HTMLElement) {
   const svg = d.querySelector("svg") as SVGSVGElement, cs = getComputedStyle(svg), fs = parseFloat(cs.fontSize);
-  const c = document.createElement("canvas").getContext("2d") as CanvasRenderingContext2D;
-  c.font = `900 ${fs}px ${cs.fontFamily}`;
-  const J = c.measureText("J"), G = c.measureText("G");
-  const jl = -J.actualBoundingBoxLeft, jr = J.actualBoundingBoxRight, gl = -G.actualBoundingBoxLeft, gr = G.actualBoundingBoxRight;
-  const asc = Math.max(J.actualBoundingBoxAscent, G.actualBoundingBoxAscent), gap = fs * 0.04, under = fs * 0.2;
+  const W = Math.ceil(fs * 1.6), H = Math.ceil(fs * 1.4), X = fs * 0.3, Y = fs * 1.1;
+  const cv = document.createElement("canvas");
+  cv.width = W;
+  cv.height = H;
+  const c = cv.getContext("2d", { willReadFrequently: true }) as CanvasRenderingContext2D;
+  const ink = (ch: string) => {
+    c.clearRect(0, 0, W, H);
+    c.font = `900 ${fs}px ${cs.fontFamily}`;
+    c.fillText(ch, X, Y);
+    const a = c.getImageData(0, 0, W, H).data;
+    let l = W, r = -1, t = H;
+    for (let y = 0; y < H; y++)
+      for (let x = 0; x < W; x++)
+        if (a[(y * W + x) * 4 + 3] > 127) {
+          if (x < l) l = x;
+          if (x > r) r = x;
+          if (y < t) t = y;
+        }
+    return r < 0 ? { l: 0, r: fs * 0.6, asc: fs * 0.72 } : { l: l - X, r: r + 1 - X, asc: Y - t };
+  };
+  const J = ink("J"), G = ink("G");
+  const jl = J.l, jr = J.r, gl = G.l, gr = G.r;
+  const asc = Math.max(J.asc, G.asc), gap = fs * 0.04, under = fs * 0.2;
   const w = jr - jl + gap + gr - gl, cx = innerWidth / 2, cy = innerHeight / 2;
   const base = cy + (asc - under) / 2, xj = cx - w / 2 - jl, xg = cx - w / 2 + (jr - jl) + gap - gl;
   d.querySelectorAll("text").forEach((t) => {

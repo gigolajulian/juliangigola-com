@@ -55,8 +55,9 @@ function reveal(cover: HTMLElement) {
   }
   const settle = (p: number) => {
     if (!page) return;
+    // a touch smaller to its size, never larger: scaled up, the page scrolled sideways while it settled (QA: 147px at 1440)
     const e = ease(Math.min(1, p / 0.85));
-    page.style.transform = e < 1 ? `translateY(${rise * (1 - e)}px) scale(${1.2 - 0.2 * e})` : "";
+    page.style.transform = e < 1 ? `translateY(${rise * (1 - e)}px) scale(${0.94 + 0.06 * e})` : "";
   };
   /* The ink stays in the letters until they are big enough to show the page
      (a small window onto it reads as an empty letter), and the ground fades
@@ -66,7 +67,8 @@ function reveal(cover: HTMLElement) {
     const e = ease(p), k = Math.exp(Math.log(BIG) * e);
     mg.setAttribute("transform", `translate(${ox} ${oy}) scale(${k}) translate(${-ox} ${-oy})`);
     ink.setAttribute("transform", `translate(${ox} ${oy}) scale(${k}) translate(${-ox} ${-oy})`);
-    ink.style.opacity = String(Math.max(0, 1 - p / 0.35));
+    // fades between 4 and 10 times its size: by then the letters show a good piece of the page on any screen (JG - MAC: at 1440 they read empty over the dark calendar)
+    ink.style.opacity = String(Math.min(1, Math.max(0, (10 - k) / 6)));
     gr.style.opacity = String(Math.min(1, Math.max(0, 1 - (p - 0.4) / 0.45)));
     settle(p);
   };
