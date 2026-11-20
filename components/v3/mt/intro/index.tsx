@@ -14,7 +14,7 @@ import "./intro.css";
    Every position is measured from the laid-out wall, so it holds at any
    screen ratio. Extras are intro-only nodes, removed when it ends. */
 
-const S0 = 0.56; // was .46; closer, so fewer and larger frames (Julian picked option a, 2026-11-14)
+const S0 = 0.56; // the canvas scale: fewer, larger frames
 const OUT = "cubic-bezier(0.23, 1, 0.32, 1)"; // arrivals and exits
 const IN_OUT = "cubic-bezier(0.65, 0, 0.25, 1)"; // the push in, a move on screen; softer start than (.77,0,.175,1)
 const HURRY = 6; // a wheel, tap or key during the intro plays the rest this many times faster
@@ -34,10 +34,10 @@ const DRAW = 350; // the columns get their first draw here, out of sight, while 
    plane at depth d would. */
 const DEEP_PUSH = 3350; // the full canvas holds about a second before the push
 const DEEP_LAND = 4850; // the push lands here (1500ms) and holds to the end
-// the push used to carry a touch past (.007) and settle back. Julian, 2026-11-15: the settle read as extra, so it lands and stays
+// the push lands and stays, with no overshoot
 const DEPTHS = [0.5, 0.28, 0.62, 0.36, 0.56, 0.22, 0.44]; // per extra column: 0 the hero's plane, 1 the lens
 
-/* Return visits (Julian, 2026-11-14): a browser that has seen the intro in the last 30 days gets it in 3.2s. The same
+/* Return visits: a browser that has seen the intro in the last 30 days gets it in 3.2s. The same
    moves with less waiting: JG, the canvas comes up fast, then nearly the same push. First visits keep 5.3s.
    ?intro=1 plays the full one, ?intro=2 the short one. The stamp is local storage "jg-intro-at": a time, nothing else. */
 const FULL = { end: FULL_END, push: DEEP_PUSH, land: DEEP_LAND, rise: RISE, light: LIGHT, at: 800, gap: 110, xgap: 55, lead: 450, jg: 750 };
@@ -207,7 +207,7 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
     const stopHurry = () => INPUTS.forEach((e) => window.removeEventListener(e, hurry));
     const origin = wall.style.transformOrigin;
     const ready: string[] = [];
-    const preload = !qflag("preload", "0"); // on since Julian's OK (2026-11-19); ?preload=0 is the old 6 + 18 start
+    const preload = !qflag("preload", "0"); // on by default; ?preload=0 is the old 6 + 18 start
     const parked: [HTMLImageElement, string | null, string | null][] = [];
 
     const finish = (seen: boolean) => {
@@ -277,7 +277,7 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
       let n = 0;
       const top0 = ymin - h - R;
       /* Arrived thumbs first, then the ones still on the way: on a slow laptop the 1500ms start can come with only a
-         few in, and cycling those filled whole edge columns with one photo (Windows Chrome, 2026-11-19). A tile on a
+         few in, and cycling those filled whole edge columns with one photo (Windows Chrome). A tile on a
          thumb still loading stays dark until its own photo lands. */
       const pick = [...ready, ...want.map((s) => new URL(s, location.href).href).filter((s) => !ready.includes(s))]; // ready holds im.src, always absolute
       const tile = (into: HTMLElement, y: number) => {

@@ -16,7 +16,7 @@ import { tp } from "./motion/touch-parity";
    ride in `detail`. Radix Dialog traps focus and returns it to the opener. */
 
 const CALL_CHIP = "Music video";
-/* The typed fields last the visit, through a full close and reopen (Julian, 2026-11-19: "keep the draft"); a send clears them. */
+/* The typed fields last the visit, through a full close and reopen; a send clears them. */
 const DRAFT = "mt-inq-draft";
 const EMPTY = { name: "", email: "", when: "", message: "" };
 const readDraft = (): typeof EMPTY => {

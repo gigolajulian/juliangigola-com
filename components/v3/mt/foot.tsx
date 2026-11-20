@@ -14,7 +14,7 @@ import { useLocalTime } from "@/components/v3/use-local-time";
    scrim. Motion lives in motion/foot.ts. */
 const PHRASE = "Contact me";
 const STILL = "/work/diesel/03.jpg";
-const EVERY = 5000; // was 2000: "photo switches too fast" (Julian, 2026-11-15)
+const EVERY = 5000; // a new still every 5s
 
 /** The still behind the footer and the one after it. The list is one landscape
     frame per project from /canvas.json (a tall frame crops badly in a wide
@@ -66,7 +66,7 @@ export function MtFoot() {
   return (
     <footer id="contact" className="mt-foot" data-mt="foot">
       <div className="mt-stage">
-        {/* one still behind the links, dimmed by the scrim (Julian picked this over the wall of frames, 2026-11-14).
+        {/* one still behind the links, dimmed by the scrim.
             The next still sits under it unseen, so it is loaded by the time it shows. */}
         <div className="mt-fwall" aria-hidden ref={wall}>
           {stills.map((src, n) => <Image key={src} src={src} alt="" fill sizes="100vw" style={n ? { opacity: 0 } : undefined} />)}

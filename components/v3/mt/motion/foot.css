@@ -3,8 +3,8 @@ html[data-mt-motion] .mt-foot .mt-ph[data-copy]{visibility:visible}
 /* links, phrase and last line stay above the still */
 html[data-mt-motion] .mt-foot :is(.mt-fcols,.mt-phrase,.mt-fline){z-index:2}
 html[data-mt-held] .mt-foot[data-mt-near] .mt-fwall{will-change:transform,opacity}
-/* Idle and hover traded places (Julian, 2026-11-15): where the spot can run, the phrase rests at the tone the spot used
-   to light it to, and the spot (foot.ts, which paints --phr) takes it back to the plain grey. Phones and touch keep the grey. */
+/* Where the spot can run, the phrase rests lit
+   and the spot (foot.ts, which paints --phr) takes it back to the plain grey. Phones and touch keep the grey. */
 @media (hover:hover) and (pointer:fine){html[data-mt-held] .mt-foot .mt-ph-btn{color:color-mix(in srgb,var(--ink) 55%,var(--phr))!important}}
 /* hover spot (canvas) and dot pointer; `color` is the ground the canvas reads */
 html[data-mt-motion] .mt-fcut{position:absolute;left:0;top:0;z-index:3;pointer-events:none;opacity:0;color:var(--bg);will-change:transform}

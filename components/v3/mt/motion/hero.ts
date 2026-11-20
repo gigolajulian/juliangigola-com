@@ -8,9 +8,9 @@ import { clamp, type Ctx, type Driver } from "./engine";
 const WALL = 2640; // wall height with four rows, design px (mtscroll.css); measured off the columns below, since wide screens show six
 const TAIL = 264; // ground left under the last row when the travel ends, so "See the work" sits under the photos with room above it
 const LAG_MAX = 2400;
-const END_D = [280, 0, 70]; // (right was 40: Julian, 2026-11-15, "a bit lower") how far each of the three locked columns has dropped behind when the travel ends, design px: mirrors the ends 0.12, 0, 0.2 gave at 1440x900
+const END_D = [280, 0, 70]; // how far each of the three locked columns has dropped behind when the travel ends, design px: mirrors the ends 0.12, 0, 0.2 gave at 1440x900
 const DRIFT = [40, 22]; // phone drift caps, px, per column
-const FLIP = 1300; // the idle wall's card turn, ms (Julian's pick of 600 / 900 / 1300, 2026-11-17)
+const FLIP = 1300; // the idle wall's card turn, ms
 
 type Part = { el: HTMLElement; a: number; c: number; v: number };
 
@@ -23,7 +23,7 @@ const ink = (n: Node) => {
 };
 
 /* Gone, but still there for a screen reader. VoiceOver in Safari scrolls the page far down when it lands on the name (the stage is sticky), and
-   visibility:hidden then took the tagline and the buttons out of its tree before its next step: it read the name, then the wall (MAC, 2026-11-17).
+   visibility:hidden then took the tagline and the buttons out of its tree before its next step: it read the name, then the wall (MAC).
    So a gone block is see-through, takes no clicks and leaves the tab order, and nothing more. */
 function park(ctas: HTMLElement | null, on: boolean, why: "out" | "past" = "out") {
   if (!ctas) return;
@@ -38,7 +38,7 @@ function park(ctas: HTMLElement | null, on: boolean, why: "out" | "past" = "out"
 const PIN = !qflag("mtpin", "0");
 
 /* The name's way out, the same on every layout: it rides down out of the window and is over as See the work's top edge enters it.
-   2026-11-17, third pass: "too fast, needs to be longer and finish later". It takes the last three quarters of the scroll up to that point,
+   It takes the last three quarters of the scroll up to that point,
    a soft start and then an even pace (t*t*(2-t)), not the s-curve whose middle ran at 1.5 times the scroll. */
 function sink(st: State, ctx: { vh: number; top: number }) {
   const gap = st.more ? st.more.getBoundingClientRect().top - ctx.vh : 0;
@@ -55,11 +55,11 @@ function sink(st: State, ctx: { vh: number; top: number }) {
   document.documentElement.toggleAttribute("data-mt-nameout", st.out);
 }
 
-/* An unseen margin round the name, the tagline and the buttons (Julian, 2026-11-16: a photo's caption ran through the
-   tagline). A caption within PAD of any of them hides (hero.css fades it) and comes back once clear. Held layout only. */
+/* An unseen margin round the name, the tagline and the buttons, so no photo caption runs through them.
+   A caption within PAD of any of them hides (hero.css fades it) and comes back once clear. Held layout only. */
 const PAD = 12;
 
-/* The tagline's colour, a letter at a time (Julian, 2026-11-17: black or white with what is under it, grey over the white page; mtscroll.css holds the
+/* The tagline's colour, a letter at a time: black or white with what is under it, grey over the white page (mtscroll.css holds the
    colours). Each wall photo is read once into a 12 by 16 grid of brightness; a letter looks up the cells under it. No blend mode, so no Safari layer rules. */
 const GW = 12, GH = 16, LIGHT = 120; // LIGHT: a cell this bright (0 to 255) takes black text
 const LUM = new WeakMap<HTMLImageElement, { src: string; g: Uint8ClampedArray | null }>();
@@ -90,7 +90,7 @@ let toned = 0, tonedY = -1;
 function tone(st: Pick<State, "tw" | "phs">) {
   const wall = st.phs[0]?.closest(".mt-wall");
   if (!st.tw.length || !wall) return;
-  /* A pass cost 51 hit tests: 5 to 8ms at 1440, 52ms on a phone-speed CPU, and it ran every frame, idle included (measured on live, 2026-11-17).
+  /* A pass cost 51 hit tests: 5 to 8ms at 1440, 52ms on a phone-speed CPU, and it ran every frame, idle included (measured on live).
      Now ten passes a second at most (the colour takes .15s to change anyway), and a word is hit tested at its two ends: the same photo under both
      is the photo under the whole word. Only a word that straddles two photos goes letter by letter. About 17 hit tests a pass.
      shortcut: a third photo lying on top of a word's middle only is missed, go back to a test a letter if a layout ever does that. */
@@ -142,7 +142,7 @@ function tone(st: Pick<State, "tw" | "phs">) {
     }
     ts[n] = t;
   }
-  // one tone per word (Julian, 2026-11-18): a word takes what most of its letters sit on, so it turns whole and never splits black and white.
+  // one tone per word: a word takes what most of its letters sit on, so it turns whole and never splits black and white.
   // A letter over the bare page, where a word hangs past its photo, keeps the page tone: the photo's white is lost on the light page (QA, #1203).
   const lines = new Map<Element, number[]>();
   rs.forEach((r, n) => {
@@ -305,30 +305,25 @@ function heroFrame(st: State, p: number, el: HTMLElement, ctx: Ctx) {
       st.unit = (core[0]?.el.offsetWidth ?? 0) / 403 || ctx.u;
       // the lowest column end plus the 46 design px under it: 2640 with four rows
       st.wall = core.length ? Math.max(...core.map((c) => c.el.offsetTop + c.el.offsetHeight)) / st.unit + 46 : WALL;
-      // how far the name has to sink to clear the window: from its top at rest to the window's lower edge, and 24px. It rode
-      // 0.6 of the window, and was out of sight well before the ride was over (Julian, 2026-11-17: "even longer, almost right before" the button)
+      // how far the name has to sink to clear the window: from its top at rest to the window's lower edge, and 24px,
+      // so it stays in sight until the ride is nearly over
       if (st.texts[0]) st.drop = ctx.vh - (st.texts[0].getBoundingClientRect().top - Math.max(0, st.exit) * st.drop) + 24;
     }
     const u = st.unit;
     // the ground under the last row is in the page's unit, like the button that sits in it
     const target = p * Math.max(0, st.wall * u + TAIL * ctx.u - Math.max(ctx.vh, 600));
-    // a 0.64 follow (0.4 until Julian halved the delay a second time, 2026-11-17), frame-rate independent (the live Recent()'s 0.2 felt laggy here: Julian, 2026-11-17, "half the delay")
+    // a 0.64 follow, frame-rate independent
     st.scroll = st.scroll < 0 || Math.abs(target - st.scroll) < 0.1 ? target : st.scroll + (target - st.scroll) * (1 - Math.pow(0.36, ctx.dt / 16.7));
     const S = st.scroll;
-    /* Where the wall ends (Julian, 2026-11-15): with three columns the left one ends lowest and the right one
+    /* Where the wall ends: with three columns the left one ends lowest and the right one
        highest, a stair down to the left, so "See the work" on the right has the open corner. The markup's lags
        ended it the other way round. Five and seven columns already end high on the right, so they keep theirs. */
     const three = ctx.vw < 1920;
     // a share of the travel, not of the distance: a tall window travels less and must still end on the same stair
     const share = S / Math.max(1, st.wall * u + TAIL * ctx.u - Math.max(ctx.vh, 600));
     for (const c of st.cols) move(c, -(S - (three && c.c in END_D ? share * END_D[c.c] * u : Math.min(S, LAG_MAX * u) * c.a * 0.5)));
-    /* Julian, 2026-11-16: "it needs to stay in place until 3 rows are scrolled and move down and out". The name
-       holds until the fourth row is whole in the window (its lower edge at the window's: "pinned to screen for
-       3-4 rows"), then rides down out of the window. 2026-11-17: "too quick, it needs to go out a bit slower with parallax": the ride takes
-       0.8 of a row, and the tagline and buttons sink ahead of the name (--mt-out, hero.css). Never later than the travel allows. */
-    // 2026-11-17, third pass: "too fast, needs to be longer and finish later". The ride is read off See the work: it is
-    // over as the button's top edge enters the window, and takes the last three quarters of the scroll up to that point.
-    // A soft start and then an even pace (t*t*(2-t)), not the s-curve whose middle ran at 1.5 times the scroll.
+    /* The name holds, then rides down out of the window, the tagline and buttons sinking ahead of it (--mt-out, hero.css).
+       sink() reads the ride off See the work: it is over as the button's top edge enters the window. */
     sink(st, ctx);
     tone(st);
     clearance(st, !st.out);
@@ -340,14 +335,14 @@ function heroFrame(st: State, p: number, el: HTMLElement, ctx: Ctx) {
   if (mode === "p") for (const f of st.figs) move(f, -DRIFT[f.c] * clamp(gone / Math.max(1, ctx.h)));
   else for (const c of st.cols) move(c, -gone * c.a * 0.5 * (ctx.vw / 1440));
   /* Phones and tablets: the name block is sticky (hero.css), so it holds while the wall scrolls under it, then sinks out the desktop's way.
-     Julian, 2026-11-18: it scrolled away with the first screen. How far it sinks: from the name's top to the window's lower edge, and 24px. */
+     How far it sinks: from the name's top to the window's lower edge, and 24px. */
   if (PIN && st.name && st.texts[0] && ctx.vw + "x" + ctx.vh !== st.sizeKey) {
     st.sizeKey = ctx.vw + "x" + ctx.vh;
     const b = st.name.getBoundingClientRect();
     st.drop = b.height - (st.texts[0].getBoundingClientRect().top - b.top) + 24;
   }
   if (PIN) sink(st, ctx);
-  // phones and tablets too: captions ran through the name and tagline (MAC, 2026-11-17). Only while the name is on screen.
+  // phones and tablets too: captions ran through the name and tagline (MAC). Only while the name is on screen.
   const on = PIN ? !st.out && el.getBoundingClientRect().bottom > 0 : -ctx.top < ctx.vh; // read before tone, as before the split
   tone(st);
   clearance(st, on);

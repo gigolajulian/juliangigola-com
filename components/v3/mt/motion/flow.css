@@ -3,7 +3,7 @@
    and --out (0 as its bottom reaches the bottom of the screen, 1 at the top). */
 
 /* About, desktop. In: one straight edge uncovers the stage from the bottom up, the way the Book online photo
-   arrives (Julian, 2026-11-16; was a window opening from 22% / 26% insets). Out: it sinks and dims while the footer wall slides over it. */
+   arrives. Out: it sinks and dims while the footer wall slides over it. */
 html[data-mt-held] .mt-about .mt-stage {
   --o: clamp(0, calc(var(--in, 1) * 1.6 - .6), 1);
   clip-path: inset(calc((1 - clamp(0, calc(var(--in, 1) * 1.7 - .15), 1)) * 100%) 0 0 0);
@@ -13,7 +13,7 @@ html[data-mt-held] .mt-about .mt-stage {
 }
 html[data-mt-held] .mt-about .mt-frame, html[data-mt-held] .mt-about .mt-wordmark { opacity: clamp(0, calc(var(--o) * 2.5 - 1.5), 1); }
 html[data-mt-held] .mt-foot { position: relative; z-index: 2; background: var(--bg); }
-/* Sessions follows About now (Julian, 2026-11-17) and slides over it the same way: About's sinking name showed through the Sessions heading */
+/* Sessions follows About and slides over it the same way, so About's sinking name never shows through the Sessions heading */
 html[data-mt-held] .mt-about + .mt-book { position: relative; z-index: 2; background: var(--bg); }
 
 /* Book online and By quote, desktop: the photo wipes up into its frame and settles, the column fades in behind it */
