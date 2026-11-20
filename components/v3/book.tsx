@@ -154,8 +154,8 @@ export function V3BookFlow({ slug, tabs = true, h1 = false }: { slug: SessionSlu
 export function V3Book({ slug }: { slug: SessionSlug }) {
   return (
     <div className="v3 contents">
-      {/* `?loader=split`: the booking wait's cover, up before the page paints (jg-cover.ts) */}
-      <script dangerouslySetInnerHTML={{ __html: JG_COVER }} />
+      {/* the booking wait's cover, up before the page paints (jg-cover.ts); only where there is a calendar to wait for */}
+      {SESSIONS[slug].cal ? <script dangerouslySetInnerHTML={{ __html: JG_COVER }} /> : null}
       <section className="v3page" id="p-flow">
         <V3BookFlow slug={slug} h1 />
       </section>

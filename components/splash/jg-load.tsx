@@ -7,12 +7,12 @@ import * as React from "react";
  * the real load as far as there is one: it creeps toward 90 while the
  * times are asked for, and only their arrival (`done`) takes it to 100.
  * Then `onDone`, and the picker comes up. `?loader=orb` keeps the orb.
- * `?loader=split` (Julian, 2026-11-19, the Booking wait mock): J and G
+ * The default on the booking pages (Julian, 2026-11-19, the Booking wait
+ * mock, "make it the default"; `?loader=fill` keeps the fill): J and G
  * side by side over the whole page (`jg-cover.ts`), a line under them
  * takes the count; on the answer the picker is drawn under the cover and
  * the cut grows from the middle of the mark until the page, standing
- * still, fills the screen. Behind the flag
- * until he says ship.
+ * still, fills the screen.
  * ─────────────────────────────────────────────────────────────── */
 
 const CREEP = 900; // ms, how slowly the count nears 90 with no answer yet
@@ -95,7 +95,8 @@ let leaving = 0; // an unmount's reveal, held a moment in case the effect is onl
 export function JgLoad({ done, onDone, className }: { done: boolean; onDone: () => void; className?: string }) {
   const fill = React.useRef<HTMLSpanElement>(null);
   const num = React.useRef<HTMLSpanElement>(null);
-  const split = React.useSyncExternalStore(noop, () => new URLSearchParams(location.search).get("loader") === "split", () => false);
+  // the cover is up (a booking page with a calendar, `jg-cover.ts`): it plays the wait; anywhere else, J and G fill
+  const split = React.useSyncExternalStore(noop, () => !!document.getElementById("jg-cover"), () => false);
   const last = React.useRef(onDone);
   React.useEffect(() => {
     last.current = onDone;

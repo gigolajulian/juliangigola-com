@@ -1,4 +1,5 @@
-/* ── `?loader=split`: the cover the booking wait plays on ─────────────
+/* ── the booking wait's cover (the default since 2026-11-19; `?loader=fill`
+ * keeps the J and G that fill, `?loader=orb` the orb) ─────────────────
  * Run as the page is read (a script in the booking page's markup), so the
  * first paint is J and G on the page's own ground, never the page and then
  * a cover over it. The cover is the ground with J and G cut out of it and
@@ -67,4 +68,4 @@ function place(d: HTMLElement) {
   Object.assign(d.dataset, { ox: String(cx - w / 2 + (jr - jl) + gap / 2), oy: String(base - asc / 2), close: String(gap / 2 + fs * 0.03) });
 }
 
-export const JG_COVER = `(function(){if(new URLSearchParams(location.search).get("loader")!=="split"||document.getElementById("jg-cover"))return;var place=${place.toString()};var d=document.createElement("div");d.id="jg-cover";d.setAttribute("aria-hidden","true");d.dataset.at=String(performance.now());d.style.cssText="position:fixed;inset:0;z-index:2147483000";d.innerHTML=${JSON.stringify(MARKUP)};document.documentElement.appendChild(d);var go=function(){if(d.isConnected&&d.dataset.go===undefined)place(d)};go();document.fonts&&document.fonts.ready.then(go);addEventListener("resize",go);setTimeout(function(){if(d.isConnected&&d.dataset.go===undefined){d.dataset.go="";d.style.transition="opacity .4s";d.style.opacity="0";setTimeout(function(){d.remove()},400)}},10000)})()`;
+export const JG_COVER = `(function(){var l=new URLSearchParams(location.search).get("loader");if((l&&l!=="split")||document.getElementById("jg-cover"))return;var place=${place.toString()};var d=document.createElement("div");d.id="jg-cover";d.setAttribute("aria-hidden","true");d.dataset.at=String(performance.now());d.style.cssText="position:fixed;inset:0;z-index:2147483000";d.innerHTML=${JSON.stringify(MARKUP)};document.documentElement.appendChild(d);var go=function(){if(d.isConnected&&d.dataset.go===undefined)place(d)};go();document.fonts&&document.fonts.ready.then(go);addEventListener("resize",go);setTimeout(function(){if(d.isConnected&&d.dataset.go===undefined){d.dataset.go="";d.style.transition="opacity .4s";d.style.opacity="0";setTimeout(function(){d.remove()},400)}},10000)})()`;
