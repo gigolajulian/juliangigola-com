@@ -1,5 +1,6 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { parseBeacon } from "@/lib/beacon";
+import { NO_STORE } from "@/lib/http";
 
 /* ── beacon ───────────────────────────────────────────────────────
  * Where `click-beacon.tsx` sends a page view's clicks and scroll depth.
@@ -10,7 +11,7 @@ import { parseBeacon } from "@/lib/beacon";
 
 export const dynamic = "force-dynamic";
 
-const done = () => new Response(null, { status: 204, headers: { "cache-control": "no-store" } });
+const done = () => new Response(null, { status: 204, headers: NO_STORE });
 
 export async function POST(request: Request) {
   const text = await request.text();

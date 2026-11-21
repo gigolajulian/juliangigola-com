@@ -21,7 +21,7 @@ import { parseOr } from "@/lib/json";
 const TEMPLATES_KEY = "leads:templates";
 /** How many invoices carry a month's number (`invoices:1126`), so the next is 1126-2. */
 const countKey = (date: string) => `invoices:${mmyy(date)}`;
-const taken = async (inbox: NonNullable<CloudflareEnv["INBOX"]>, date: string) => Number((await inbox.get(countKey(date))) ?? 0) || 0;
+const taken = async (inbox: NonNullable<CloudflareEnv["INBOX"]>, date: string) => Number(await inbox.get(countKey(date))) || 0;
 
 /** What a lead read or write answers on a Worker without LEADS_KEY. */
 const noSeal = () => json({ error: "Leads need LEADS_KEY on the Worker." }, 503);
@@ -77,10 +77,17 @@ const bury = (inbox: NonNullable<CloudflareEnv["INBOX"]>, key: string, seal?: Aw
 /** The binding and the secret, or `null` when this build has neither. */
 async function wired() {
   const { env } = await getCloudflareContext({ async: true });
-  return env.INBOX ? { inbox: env.INBOX, key: env.INBOX_KEY, seal: sealer(env.LEADS_KEY), notion: env.NOTION_TOKEN, vapid: env.VAPID_KEY, env } : null;
+  return env.INBOX ? { inbox: env.INBOX, seal: sealer(env.LEADS_KEY), notion: env.NOTION_TOKEN, vapid: env.VAPID_KEY, env } : null;
 }
 
 async function guard(request: Request) {
+  const { env } = await getCloudflareContext({ async: true });
+  // Who is asking first: what this build is missing is for /admin only.
+  // The admin gate (`isAdmin`): the inbox key, or a GitHub token that can push.
+  // The messages differ so a wrong token can be told from a missing one, never which characters were wrong.
+  if (!(await isAdmin(request, env.INBOX_KEY))) {
+    return { error: json({ error: bearer(request) ? "GitHub did not accept that token for this repository." : "Not authorized." }, 401) };
+  }
   const rig = await wired();
   if (!rig) {
     return {
@@ -93,10 +100,7 @@ async function guard(request: Request) {
       ),
     };
   }
-  // The admin gate (`isAdmin`): the inbox key, or a GitHub token that can push.
-  // The messages differ so a wrong token can be told from a missing one, never which characters were wrong.
-  if (await isAdmin(request, rig.key)) return { inbox: rig.inbox, seal: rig.seal, notion: rig.notion, vapid: rig.vapid, env: rig.env };
-  return { error: json({ error: bearer(request) ? "GitHub did not accept that token for this repository." : "Not authorized." }, 401) };
+  return { inbox: rig.inbox, seal: rig.seal, notion: rig.notion, vapid: rig.vapid, env: rig.env };
 }
 
 /**
@@ -228,7 +232,7 @@ export async function GET(request: Request) {
   for await (const k of everyKey<Summary>(gate.inbox, "msg:")) keys.push(k);
   const rows = keys.map((k) => ({ key: k.name, ...k.metadata })).reverse();
 
-  return json({ rows, complete: true });
+  return json({ rows });
 }
 
 /** PATCH: the desk's writes, told apart by the body's shape and taken in this order, so the first match wins:
@@ -353,6 +357,8 @@ export async function POST(request: Request) {
   const gate = await guard(request);
   if (gate.error) return gate.error;
   const given = await bodyOf(request);
+  // One rule for every import: only an explicit `dry: false` writes.
+  const dry = given?.dry !== false;
   // A lead he adds by hand: a DM, a text, a referral.
   if (given?.add && typeof given.add === "object") {
     const seal = await gate.seal;
@@ -372,7 +378,7 @@ export async function POST(request: Request) {
     const seal = await gate.seal;
     if (!seal) return noSeal();
     try {
-      return json(await importNotion(gate.inbox, seal, given.importNotion, given.dry !== false));
+      return json(await importNotion(gate.inbox, seal, given.importNotion, dry));
     } catch (e) {
       return json({ error: String(e instanceof Error ? e.message : e) }, 400);
     }
@@ -381,7 +387,7 @@ export async function POST(request: Request) {
   if (given?.importStripe === true) {
     if (!gate.env.STRIPE_SECRET_KEY) return json({ error: STRIPE_UNSET }, 503);
     try {
-      return json(await importStripe(gate.env, gate.env.STRIPE_SECRET_KEY, given.dry === true));
+      return json(await importStripe(gate.env, gate.env.STRIPE_SECRET_KEY, dry));
     } catch (e) {
       return json({ error: String(e instanceof Error ? e.message : e) }, 502);
     }
@@ -413,9 +419,9 @@ export async function POST(request: Request) {
       added++;
       stages[after.stage] = (stages[after.stage] ?? 0) + 1;
     }
-    if (given.dry !== true) await writeLead(gate.inbox, seal, id, after);
+    if (!dry) await writeLead(gate.inbox, seal, id, after);
   }
-  return json({ dry: given.dry === true, people: people.size, added, updated, stages });
+  return json({ dry, people: people.size, added, updated, stages });
 }
 
 /**
