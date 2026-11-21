@@ -1,5 +1,5 @@
 ﻿import { describe, expect, it } from "vitest";
-import { gradYear } from "@/lib/grad-year";
+import { gradYear } from "@/lib/graduation/grad-year";
 
 describe("gradYear", () => {
   it("is this year through May, Pacific", () => {

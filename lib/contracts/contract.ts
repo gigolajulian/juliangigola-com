@@ -19,7 +19,7 @@
 import { TZ } from "@/lib/booking/booking-rules";
 import { depositOfLead, type InvoiceFrom } from "@/lib/leads/invoice";
 import type { Lead } from "@/lib/leads/leads";
-import type { InboxKV as KV } from "@/lib/leads/lead-store";
+import type { InboxKV as KV } from "@/lib/kv";
 import { isEmail, newToken } from "@/lib/proofs/proof";
 
 export type ContractTemplate = { id: string; name: string; body: string };

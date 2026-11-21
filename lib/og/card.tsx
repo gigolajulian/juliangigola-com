@@ -2,8 +2,8 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { ImageResponse } from "next/og";
 import type { Sharp } from "sharp";
-import framing from "@/lib/share-framing.json";
-import picks from "@/lib/share-picks.json";
+import framing from "@/lib/og/framing.json";
+import picks from "@/lib/og/picks.json";
 import type { Frame } from "@/lib/work-types";
 
 /* The share card (1200x630): the work on the right, the name on the left.

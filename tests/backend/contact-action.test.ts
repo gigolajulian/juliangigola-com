@@ -3,7 +3,7 @@ import { COOLDOWN_MS, DAILY_CAP, dayKey } from "@/lib/inbox";
 import { FakeEmail, FakeKV, reply } from "./fakes";
 import { byCodeUnit } from "@/lib/utils";
 
-/* The contact form's server action (`app/contact/actions.ts`). Its one
+/* The contact form's server action (`lib/leads/enquiry-action.ts`). Its one
    rule: an enquiry never disappears quietly. Stored, or a mailto handed
    back that says why; the mail copy is best effort and never turns a
    stored enquiry into an error. No real mail is sent: EMAIL is a fake. */
@@ -12,7 +12,7 @@ const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown>, cf: {} as Re
 vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env, cf: ctx.cf, ctx: { waitUntil: () => {} } }) }));
 vi.mock("next/headers", () => ({ headers: async () => new Headers({ "cf-connecting-ip": ctx.ip }) }));
 
-const { submitEnquiry } = await import("@/app/contact/actions");
+const { submitEnquiry } = await import("@/lib/leads/enquiry-action");
 
 const form = (fields: Record<string, string | string[] | File[]>) => {
   const f = new FormData();

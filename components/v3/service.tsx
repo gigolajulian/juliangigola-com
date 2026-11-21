@@ -6,7 +6,7 @@ import { Run } from "@/components/v3/flow";
 import { Doors } from "@/components/v3/home";
 import { ServiceBar } from "@/components/v3/service-bar";
 import { BOOKING_PAGES, bookingHref, type BookingPage } from "@/lib/booking/booking";
-import { CAMPUS_GUIDES, campusHref } from "@/lib/campus-guides";
+import { CAMPUS_GUIDES, campusHref } from "@/lib/graduation/campus-guides";
 import { SESSIONS, type SessionSlug } from "@/lib/flags/v3";
 import type { Frame } from "@/lib/work-types";
 

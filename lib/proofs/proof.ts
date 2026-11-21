@@ -18,7 +18,7 @@
  * ─────────────────────────────────────────────────────────────── */
 
 import { looksLikeEmail } from "@/lib/inbox";
-import type { InboxKV as KV } from "@/lib/leads/lead-store";
+import type { InboxKV as KV } from "@/lib/kv";
 
 export type ProofFrame = {
   /** Short id, stable across publishes: the Lightroom photo's remote id. */
