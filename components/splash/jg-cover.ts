@@ -108,6 +108,10 @@ function cover(lay: (d: HTMLElement) => void, markup: string) {
   // smaller over the calendar
   if (box) (d.querySelector("svg") as SVGSVGElement).style.fontSize = "96px";
   document.documentElement.appendChild(d);
+  /* The whole screen hides the page under it until the ink goes off (`reveal`, splash.css): Safari on an iPhone
+     paints no fixed layer under its floating toolbar, however tall, and a strip of the booking page showed there
+     (QA on #1372, /book). Set only once the cover is up; the 10s fallback below clears it too. */
+  if (!box) document.documentElement.dataset.coverHold = "";
   let el: Element | null = null;
   const ro = box && window.ResizeObserver ? new ResizeObserver(() => go()) : null;
   const fit = () => {
