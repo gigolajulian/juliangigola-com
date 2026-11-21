@@ -19,6 +19,7 @@
 
 import { looksLikeEmail } from "@/lib/inbox";
 import type { InboxKV as KV } from "@/lib/leads/lead-store";
+import type { Seal } from "@/lib/leads/lead-crypto";
 
 export type ProofFrame = {
   /** Short id, stable across publishes: the Lightroom photo's remote id. */
@@ -494,7 +495,6 @@ export function forDesk<T extends Proof>(p: T): Omit<T, "pass"> & { hasPass: boo
   return { ...rest, hasPass: !!pass };
 }
 
-type Seal = { seal(v: unknown): Promise<string>; open<T>(s: string): Promise<T> };
 
 /** One gallery, opened. Null when it is not there, and also when it cannot be opened (a rotated LEADS_KEY), unlike `readLead`, which throws. */
 export async function readProof(kv: KV, s: Seal, token: string): Promise<Proof | null> {

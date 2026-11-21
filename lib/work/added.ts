@@ -249,6 +249,9 @@ export type TrashedProject = AddedProject & {
   deletedAt: string;
 };
 
+/** The part of `projects.json` the admin's remove and recover read back from GitHub; older files may lack trash or hidden. */
+export type ManifestRead = Pick<AddedFile, "projects"> & Partial<Pick<AddedFile, "trash" | "hidden">>;
+
 /** How long a removed project is recoverable. */
 export const TRASH_DAYS = 7;
 

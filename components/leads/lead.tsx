@@ -39,7 +39,7 @@ import { api as proofApi, type Row as ProofRow } from "@/lib/proofs/desk";
 import { InvoiceRow, InvoiceSheetB } from "@/components/leads/invoice";
 import { ContractBlock } from "@/components/leads/contract";
 import { isPaid } from "@/lib/leads/invoice";
-import { endDay } from "@/lib/leads/lead-desk";
+import { endDay, type Size } from "@/lib/leads/lead-desk";
 import type { Enquiry } from "@/lib/inbox";
 import { canonical } from "@/lib/leads/lead-crypto";
 import { isLate, NUDGES, PAPER, quoteNudge, REMIND_MAX, STAGES, trashDaysLeft, type Lead, type LeadPatch, type LeadSummary, type Stage } from "@/lib/leads/leads";
@@ -51,7 +51,6 @@ import { compose, frostBar, ios, kindOf, line, mailto } from "@/components/leads
 import { People } from "@/components/leads/people";
 import { Galleries } from "@/components/leads/galleries";
 
-type Size = "phone" | "mid" | "wide";
 /** A menu row that opens in a new tab. */
 const NEW_TAB = { target: "_blank", rel: "noreferrer" } as const;
 const LOST_REASONS = ["Price", "Dates", "No reply", "Went elsewhere", "Not a fit", "Other"];
