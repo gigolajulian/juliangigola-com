@@ -39,16 +39,12 @@ describe("PageTransition", () => {
     delete document.documentElement.dataset.nav;
   });
 
-  it("Back from the Cover art viewer to the home slides a copy of the viewer off once the home lands, with no view transition", async () => {
+  it("Back from the Cover art viewer to the home holds a copy of the viewer until the home lands, then cuts, with no view transition", async () => {
+    vi.useFakeTimers();
     const root = document.documentElement;
     root.setAttribute("data-v3motion", "");
     const vt = vi.fn();
     Object.assign(document, { startViewTransition: vt });
-    const slid: Keyframe[] = [];
-    Element.prototype.animate = vi.fn(function (this: Element, k: Keyframe[] | PropertyIndexedKeyframes) {
-      slid.push(k as Keyframe);
-      return { finished: Promise.resolve() } as unknown as Animation;
-    });
     const viewer = document.createElement("div");
     viewer.setAttribute("role", "dialog");
     viewer.setAttribute("aria-modal", "true");
@@ -62,17 +58,17 @@ describe("PageTransition", () => {
     const lid = document.body.lastElementChild as HTMLElement;
     expect(lid.getAttribute("aria-hidden")).toBe("true");
     expect(lid.textContent).toBe("19 / 25"); // the viewer, copied over the page
-    expect(slid).toHaveLength(0); // held until the home is in place
+    await vi.advanceTimersByTimeAsync(100);
+    expect(lid.isConnected).toBe(true); // held until the home is in place
     nav.path = "/";
     r.rerender(<PageTransition>home</PageTransition>);
-    expect(slid).toHaveLength(1);
-    await Promise.resolve();
+    await vi.advanceTimersByTimeAsync(100); // two frames
     expect(lid.isConnected).toBe(false);
     expect(vt).not.toHaveBeenCalled();
     r.unmount();
     viewer.remove();
+    vi.useRealTimers();
     Reflect.deleteProperty(document, "startViewTransition");
-    Reflect.deleteProperty(Element.prototype, "animate");
     root.removeAttribute("data-v3motion");
     nav.path = "/";
   });

@@ -171,8 +171,8 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
     let replaying = false;
     const onPop = (e: PopStateEvent) => {
       if (replaying || location.pathname === shown.current) return;
-      /* Back from Cover art (its viewer) to the home: a copy of the viewer slides all the way off, opaque, once the home is in
-         place under it (Julian, #1351). Not a view transition: iOS Safari drew its snapshot of the viewer empty, a cut (MAC on 9e9dc6c9). */
+      /* Back from Cover art (its viewer) to the home: a clean cut (Julian, #1351). A copy of the viewer holds the screen until the home is in
+         place under it with its covers decoded, then goes in one frame. Not a view transition: Safari snapshotted the home before its covers painted (MAC). */
       const parts = location.pathname === "/" && shown.current.startsWith("/portfolio/coverart") ? document.querySelectorAll<HTMLElement>("[data-zoom-backdrop], [role=dialog][aria-modal=true]") : [];
       if (parts.length) {
         const lid = document.createElement("div");
@@ -184,12 +184,10 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
           lid.append(c);
         }
         document.body.append(lid);
-        const go = () => {
-          if (landed === go) landed = null;
-          lid.animate({ transform: ["none", "translateY(100vh)"] }, { duration: 200, easing: "cubic-bezier(0.32, 0.72, 0, 1)", fill: "forwards" }).finished.finally(() => lid.remove());
-        };
+        // after the paint that has the home in it, so no frame shows neither
+        const go = () => (landed === go && (landed = null), requestAnimationFrame(() => requestAnimationFrame(() => lid.remove())));
         landed = go;
-        window.setTimeout(() => lid.isConnected && !lid.getAnimations().length && go(), 1500); // a page slower than this: off anyway
+        window.setTimeout(() => lid.isConnected && go(), 1500); // a page slower than this: off anyway
         return;
       }
       set("out");
