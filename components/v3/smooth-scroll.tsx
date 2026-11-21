@@ -31,12 +31,6 @@ export function glideTo(y: number, done: () => void) {
   setTimeout(end, 1600);
 }
 
-/** Puts the page at `y` now, and Lenis with it: a glide it still had from the last page otherwise carried on over a restored scroll (#1313). */
-export function jumpTo(y: number) {
-  if (live) live.scrollTo(y, { immediate: true, force: true });
-  else scrollTo(0, y);
-}
-
 /** Where the page is headed: Lenis's target while it glides, the scroll itself otherwise. */
 export const scrollGoal = () => live?.targetScroll ?? scrollY;
 

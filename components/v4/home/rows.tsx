@@ -7,7 +7,7 @@ import Link from "next/link";
 import { COVER_RELEASES } from "@/lib/cover-art-data";
 import type { CoverRelease } from "@/lib/cover-art-types";
 import { media } from "@/lib/device";
-import { jumpTo, scrollGoal } from "@/components/v3/smooth-scroll";
+import { scrollGoal } from "@/components/v3/smooth-scroll";
 import { projectHref } from "@/lib/project-href";
 import { holdEase, holdUnease } from "@/lib/motion/hold-ease";
 import { clamp, MT2, progress } from "./motion/engine";
@@ -63,7 +63,7 @@ function useBackToCover() {
     const el = document.querySelector<HTMLElement>(".mt-covers .mt-row");
     const go = () => {
       const y = coversTop() + at.off;
-      if (Math.abs(scrollY - y) > 2 || Math.abs(scrollGoal() - y) > 2) jumpTo(y);
+      if (Math.abs(scrollY - y) > 2) scrollTo(0, y);
     };
     go();
     // a phone's sideways row only: held (desktop), the row follows the page's scroll, and setting it too threw the page a screen on (MAC on d82f2b75)
@@ -74,7 +74,7 @@ function useBackToCover() {
     const unlift = requestAnimationFrame(() => requestAnimationFrame(() => lifted.forEach((it) => (it.style.transition = ""))));
     // rAF runs before each paint, so a block above that grows is answered in the same frame
     const end = performance.now() + 900;
-    let raf = 0, done = false, goal = scrollGoal(); // after go(): Lenis's target is the restore spot
+    let raf = 0, done = false, goal = scrollGoal();
     const stop = () => ((done = true), cancelAnimationFrame(raf));
     raf = requestAnimationFrame(function hold(now) {
       // the visitor's scroll wins: Lenis heads somewhere else as soon as a wheel or touch lands, whether or not its event reached us
