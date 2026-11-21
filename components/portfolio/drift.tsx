@@ -1,10 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { v4pages } from "@/lib/flags/v4pages";
 import { frameDt, springSettled, stepSpring } from "@/lib/motion/spring";
 
-/** `?v4pages=p3`, the /portfolio grid's scroll motion (app/styles/v4pages.css).
+/** p3, the /portfolio grid's scroll motion (app/styles/v4pages.css).
     1. Marks the tiles within half a screen of the viewport (`data-v4d`): only
        those animate, since each moving tile is a compositor layer.
     2. Lag: while the page scrolls, the marked tiles trail it by their column's
@@ -25,7 +24,7 @@ const band = (x: number) => (x * BAND) / (BAND + Math.abs(x));
 
 export function V4Drift({ k }: { k: string }) {
   React.useEffect(() => {
-    if (!v4pages("p3") || !CSS.supports("animation-timeline: view()") || !matchMedia("(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)").matches) return;
+    if (!CSS.supports("animation-timeline: view()") || !matchMedia("(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)").matches) return;
     const grid = document.querySelector<HTMLElement>("#p-work .wgrid");
     if (!grid) return;
     const tiles = [...grid.querySelectorAll<HTMLElement>(".wt")];

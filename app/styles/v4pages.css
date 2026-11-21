@@ -1,80 +1,77 @@
-/* The inner pages plan on trial (`?v4pages`, or a list: `?v4pages=s1,a2`; head script in app/layout.tsx, lib/flags/v4pages.ts).
-   Everything here is off without the flag: the new markup is hidden, the old pages are untouched. */
-.v3 .sv-bar,.v3 .btn.v4-m2p,.v3 .pj-bts,.v3 .pj-cr2{display:none}
-.v3 .lg-row{display:contents}
-.v3 .ab-logos .a2-on,[data-v4pages~="a2"] .v3 .ab-logos .a2-off{display:none}
-[data-v4pages~="a2"] .v3 .ab-logos .a2-on{display:inline}
+/* The inner pages plan. s1, s2, a2, m2p, foot, next, c1, s4 and p3 are live for everyone (folded 2026-11-21);
+   `:root` stands where `[data-v4pages~=key]` was, so every rule keeps the weight it had.
+   Still on trial behind `?v4pages` (lib/flags/v4pages.ts): view, tilt and snd. */
+.v3 .sv-bar{display:none}
 
 /* s1: the phone book bar on a service page (components/booking/service-bar.tsx). V4's .mt-bar. */
 @media not ((min-width:1024px) and (min-height:600px)){
-  [data-v4pages~="s1"] .v3 .sv-bar{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;align-items:center;gap:12px;padding:12px max(16px,env(safe-area-inset-right)) max(30px,calc(env(safe-area-inset-bottom) + 12px)) max(16px,env(safe-area-inset-left));background:color-mix(in srgb,var(--bg) 72%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-top:1px solid var(--line);transform:translateY(100%);visibility:hidden;transition:transform .25s cubic-bezier(.23,1,.32,1),visibility 0s .25s}
-  [data-v4pages~="s1"] .v3 .sv-bar[data-on]{transform:none;visibility:visible;transition-delay:0s}
-  [data-v4pages~="s1"] .v3 .sv-bar p{margin:0;flex:none;display:flex;flex-direction:column;line-height:1.6}
-  [data-v4pages~="s1"] .v3 .sv-bar .btn{flex:1;justify-content:center;min-height:48px;white-space:nowrap}
+  :root .v3 .sv-bar{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;align-items:center;gap:12px;padding:12px max(16px,env(safe-area-inset-right)) max(30px,calc(env(safe-area-inset-bottom) + 12px)) max(16px,env(safe-area-inset-left));background:color-mix(in srgb,var(--bg) 72%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-top:1px solid var(--line);transform:translateY(100%);visibility:hidden;transition:transform .25s cubic-bezier(.23,1,.32,1),visibility 0s .25s}
+  :root .v3 .sv-bar[data-on]{transform:none;visibility:visible;transition-delay:0s}
+  :root .v3 .sv-bar p{margin:0;flex:none;display:flex;flex-direction:column;line-height:1.6}
+  :root .v3 .sv-bar .btn{flex:1;justify-content:center;min-height:48px;white-space:nowrap}
 }
-@media (prefers-reduced-motion:reduce){[data-v4pages~="s1"] .v3 .sv-bar{transition:none}}
+@media (prefers-reduced-motion:reduce){:root .v3 .sv-bar{transition:none}}
 
 /* s2: the list rows on a service page as numbered rows in the display face, half ink until pointed at.
    The questions join them: half ink, full when open. Answers and paragraphs stay mono. */
 /* The unlit rows and questions: half ink, a step more in light so 18px rows keep 4.5:1 (audit 2026-11-20: 3.81:1 at 54%). */
-html[data-v4pages~="s2"] #p-service{--sv-dim:color-mix(in srgb,var(--ink) 54%,var(--bg))}
-@media (prefers-color-scheme:light){html[data-v4pages~="s2"]:root:not([data-theme="dark"]) #p-service{--sv-dim:color-mix(in srgb,var(--ink) 64%,var(--bg))}}
-html[data-theme="light"][data-v4pages~="s2"]:root #p-service{--sv-dim:color-mix(in srgb,var(--ink) 64%,var(--bg))}
-[data-v4pages~="s2"] #p-service .sv-v4 ul{counter-reset:row}
-[data-v4pages~="s2"] #p-service .sv-v4 li{counter-increment:row;justify-content:flex-start;align-items:baseline;gap:14px;padding:14px 0;font:900 clamp(1.125rem,calc(1.6*var(--v3u)),1.5rem)/1.15 var(--display);letter-spacing:-.04em;text-wrap:balance;color:var(--sv-dim);transition:color .25s}
-[data-v4pages~="s2"] #p-service .sv-v4 li::before{content:counter(row,decimal-leading-zero);flex:none;font:500 11px/1 var(--mono);letter-spacing:.14em;color:var(--mute)}
-[data-v4pages~="s2"] #p-service .sv-row :is(summary,li b){font-weight:900;letter-spacing:-.04em}
-[data-v4pages~="s2"] #p-service .sv-row summary{color:var(--sv-dim);transition:color .25s}
-[data-v4pages~="s2"] #p-service .sv-row :is(details[open] summary,summary:focus-visible){color:var(--ink)}
-@media (hover:hover){[data-v4pages~="s2"] #p-service .sv-v4 li:hover{color:var(--ink)}}
+html:root #p-service{--sv-dim:color-mix(in srgb,var(--ink) 54%,var(--bg))}
+@media (prefers-color-scheme:light){html:root:root:not([data-theme="dark"]) #p-service{--sv-dim:color-mix(in srgb,var(--ink) 64%,var(--bg))}}
+html[data-theme="light"]:root:root #p-service{--sv-dim:color-mix(in srgb,var(--ink) 64%,var(--bg))}
+:root #p-service .sv-v4 ul{counter-reset:row}
+:root #p-service .sv-v4 li{counter-increment:row;justify-content:flex-start;align-items:baseline;gap:14px;padding:14px 0;font:900 clamp(1.125rem,calc(1.6*var(--v3u)),1.5rem)/1.15 var(--display);letter-spacing:-.04em;text-wrap:balance;color:var(--sv-dim);transition:color .25s}
+:root #p-service .sv-v4 li::before{content:counter(row,decimal-leading-zero);flex:none;font:500 11px/1 var(--mono);letter-spacing:.14em;color:var(--mute)}
+:root #p-service .sv-row :is(summary,li b){font-weight:900;letter-spacing:-.04em}
+:root #p-service .sv-row summary{color:var(--sv-dim);transition:color .25s}
+:root #p-service .sv-row :is(details[open] summary,summary:focus-visible){color:var(--ink)}
+@media (hover:hover){:root #p-service .sv-v4 li:hover{color:var(--ink)}}
 /* no pointer to light a row: each one lights as it crosses the middle of the screen, or stays lit where that is not supported */
 @media (hover:none){
-  [data-v4pages~="s2"] #p-service .sv-v4 li{color:var(--ink)}
+  :root #p-service .sv-v4 li{color:var(--ink)}
   @supports (animation-timeline:view()){
-    @media (prefers-reduced-motion:no-preference){[data-v4pages~="s2"] #p-service .sv-v4 li{animation:v4-lit linear both;animation-timeline:view();animation-range:cover 20% cover 80%}}
+    @media (prefers-reduced-motion:no-preference){:root #p-service .sv-v4 li{animation:v4-lit linear both;animation-timeline:view();animation-range:cover 20% cover 80%}}
   }
 }
 @keyframes v4-lit{0%,100%{color:var(--sv-dim)}35%,65%{color:var(--ink)}}
-@media (max-width:700px){[data-v4pages~="s2"] #p-service .sv-v4 li{flex-direction:row}}
+@media (max-width:700px){:root #p-service .sv-v4 li{flex-direction:row}}
 
 /* a2: About's marks as V4's band, one drifting line (components/about/logo-band.tsx), on the page's black. */
-[data-v4pages~="a2"] .v3 .ab-logos{--band-mk:var(--mute);flex-direction:row;align-items:center;gap:28px;padding:56px var(--gr) 56px var(--g);margin-bottom:72px}
-[data-v4pages~="a2"] .v3 .ab-logos h2{flex:none}
-[data-v4pages~="a2"] .v3 .lg-row{display:block;flex:1;min-width:0;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;-webkit-mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
-[data-v4pages~="a2"] .v3 .lg-row::-webkit-scrollbar{display:none}
-[data-v4pages~="a2"] .v3 .ab-logos .lg{display:flex;align-items:center;width:max-content;will-change:transform;backface-visibility:hidden}
-[data-v4pages~="a2"] .v3 .ab-logos .lg>div{flex:none;height:auto;padding:13px 44px}
-[data-v4pages~="a2"] .v3 .ab-logos .lg .mk{transform:none;color:var(--band-mk)}
+:root .v3 .ab-logos{--band-mk:var(--mute);flex-direction:row;align-items:center;gap:28px;padding:56px var(--gr) 56px var(--g);margin-bottom:72px}
+:root .v3 .ab-logos h2{flex:none}
+:root .v3 .lg-row{display:block;flex:1;min-width:0;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;-webkit-mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
+:root .v3 .lg-row::-webkit-scrollbar{display:none}
+:root .v3 .ab-logos .lg{display:flex;align-items:center;width:max-content;will-change:transform;backface-visibility:hidden}
+:root .v3 .ab-logos .lg>div{flex:none;height:auto;padding:13px 44px}
+:root .v3 .ab-logos .lg .mk{transform:none;color:var(--band-mk)}
 /* the page's own black behind the marks, no charcoal ground */
-:root[data-v4pages~="a2"]:not([data-theme="light"]) .v3 .ab-logos{--band-mk:rgb(217 217 214 / .86)}
-:root[data-v4pages~="a2"]:not([data-theme="light"]) .v3 .ab-logos h2{color:rgb(217 217 214 / .62)}
+:root:root:not([data-theme="light"]) .v3 .ab-logos{--band-mk:rgb(217 217 214 / .86)}
+:root:root:not([data-theme="light"]) .v3 .ab-logos h2{color:rgb(217 217 214 / .62)}
 @media (prefers-color-scheme:light){
-  :root[data-v4pages~="a2"]:not([data-theme="dark"]) .v3 .ab-logos{background:none;--band-mk:var(--mute);border-block:1px solid var(--line)}
-  :root[data-v4pages~="a2"]:not([data-theme="dark"]) .v3 .ab-logos h2{color:var(--mute)}
+  :root:root:not([data-theme="dark"]) .v3 .ab-logos{background:none;--band-mk:var(--mute);border-block:1px solid var(--line)}
+  :root:root:not([data-theme="dark"]) .v3 .ab-logos h2{color:var(--mute)}
 }
 @media (max-width:700px){
-  [data-v4pages~="a2"] .v3 .ab-logos{flex-direction:column;align-items:stretch;gap:8px;padding:40px 0;margin-bottom:48px}
-  [data-v4pages~="a2"] .v3 .ab-logos h2{padding:0 var(--g)}
-  [data-v4pages~="a2"] .v3 .lg-row{-webkit-mask:none;mask:none}
-  [data-v4pages~="a2"] .v3 .ab-logos .lg>div{padding:13px 28px}
+  :root .v3 .ab-logos{flex-direction:column;align-items:stretch;gap:8px;padding:40px 0;margin-bottom:48px}
+  :root .v3 .ab-logos h2{padding:0 var(--g)}
+  :root .v3 .lg-row{-webkit-mask:none;mask:none}
+  :root .v3 .ab-logos .lg>div{padding:13px 28px}
 }
 
 /* m2p: behind the scenes on a project page, and its link on About. */
-[data-v4pages~="m2p"] .v3 .btn.v4-m2p{display:inline-flex}
-[data-v4pages~="m2p"] .v3 .pj-bts{display:grid}
-[data-v4pages~="m2p"] .v3 .pj-bts>div:first-child{display:flex;flex-direction:column;align-items:flex-start;gap:12px}
-[data-v4pages~="m2p"] .v3 .pj-bts .label{margin:0;font:400 11px/1.4 var(--mono);letter-spacing:.12em;text-transform:uppercase}
-[data-v4pages~="m2p"] .v3 .pj-bts .text-muted-foreground{color:var(--mute)}
-[data-v4pages~="m2p"] .v3 .pj-bts .text-foreground{color:var(--ink)}
-[data-v4pages~="m2p"] .v3 .pj-bts .grid>div{border-radius:4px}
+:root .v3 .btn.v4-m2p{display:inline-flex}
+:root .v3 .pj-bts{display:grid}
+:root .v3 .pj-bts>div:first-child{display:flex;flex-direction:column;align-items:flex-start;gap:12px}
+:root .v3 .pj-bts .label{margin:0;font:400 11px/1.4 var(--mono);letter-spacing:.12em;text-transform:uppercase}
+:root .v3 .pj-bts .text-muted-foreground{color:var(--mute)}
+:root .v3 .pj-bts .text-foreground{color:var(--ink)}
+:root .v3 .pj-bts .grid>div{border-radius:4px}
 /* credits come after it: the copy under the section shows, the one in the sheet's hole goes */
-[data-v4pages~="m2p"] .v3 .pj-cr2{display:contents}
-[data-v4pages~="m2p"] #p-project:has(.pj-bts) .pj-flow .pj-cr{display:none}
+:root .v3 .pj-cr2{display:contents}
+:root #p-project:has(.pj-bts) .pj-flow .pj-cr{display:none}
 
-/* Inner pages plan on trial, only under ?v4pages (lib/flags/v4pages.ts, head script in app/layout.tsx).
-   foot: the V4 ending on inner pages (components/site/foot.tsx)
+/* foot: the V4 ending on inner pages (components/site/foot.tsx)
    next: the next project as a full stage (components/portfolio/project.tsx, components/portfolio/project-viewer.tsx)
-   view: the frame viewer on project pages (components/portfolio/project-viewer.tsx) */
+   view: the frame viewer on project pages (components/portfolio/project-viewer.tsx), still on trial behind `?v4pages` */
 
 /* ── foot (g1). The type, columns, phrase and last line of the V4 home footer
    (mtscroll.css `.mt-foot`), in flow so it is as tall as its content: about
@@ -112,33 +109,32 @@ html[data-theme="light"][data-v4pages~="s2"]:root #p-service{--sv-dim:color-mix(
    while the footer slides over it (the About into footer numbers of mt/motion/flow.css). v4/foot.tsx puts
    the attribute on only while the footer is arriving. On a grid it goes on the tiles of the last screen, each from its own bottom edge, not on the block. Phones scroll naturally; reduced motion gets no transform. */
 @media (min-width:1024px) and (min-height:600px) and (prefers-reduced-motion:no-preference){
-  html[data-v4pages~="foot"] [data-v4-sink]{transform:translate3d(0,calc(var(--out,0) * 22svh),0) scale(calc(1 - var(--out,0) * .05));transform-origin:50% 100%;opacity:calc(1 - var(--out,0) * .6)}
+  html:root [data-v4-sink]{transform:translate3d(0,calc(var(--out,0) * 22svh),0) scale(calc(1 - var(--out,0) * .05));transform-origin:50% 100%;opacity:calc(1 - var(--out,0) * .6)}
   /* !important: motion plan item 6 (motion-plan.css) pins every grid tile with `transform: none !important`. */
-  html[data-v4pages~="foot"] .v3 .wgrid .wt[data-v4-sink]{transform:translate3d(0,calc(var(--out,0) * 22svh),0) scale(calc(1 - var(--out,0) * .05)) !important;opacity:calc(1 - var(--out,0) * .6) !important}
+  html:root .v3 .wgrid .wt[data-v4-sink]{transform:translate3d(0,calc(var(--out,0) * 22svh),0) scale(calc(1 - var(--out,0) * .05)) !important;opacity:calc(1 - var(--out,0) * .6) !important}
 }
 
 /* ── next (j2). The Next link as the page's last block: the next set's cover at full width, its name large.
    It wipes up from its bottom edge and the photo settles from 1.12 to 1 as it comes up the screen (`--in`,
    components/portfolio/project-viewer.tsx; the Book online photo of flow.css). A full screen tall, so the wipe is over before the
    footer starts to cover it. ── */
-.v3 .pj-stage{display:none}
-html[data-v4pages~="next"] .v3 .pj-next:has(.pj-stage){position:relative;display:flex;flex-wrap:wrap;align-items:flex-end;align-content:flex-end;gap:0 20px;height:max(100svh,600px);margin:40px calc(-1 * var(--gr)) -96px calc(-1 * var(--g));padding:0 var(--gr) clamp(24px,4vw,56px) var(--g);overflow:hidden;background:var(--card);color:rgb(var(--on-photo));clip-path:inset(calc((1 - clamp(0,calc(var(--in,1) * 1.7 - .15),1)) * 100%) 0 0 0)}
-html[data-v4pages~="next"] .v3 .pj-next:has(.pj-stage) .pj-nx{display:none}
+html:root .v3 .pj-next:has(.pj-stage){position:relative;display:flex;flex-wrap:wrap;align-items:flex-end;align-content:flex-end;gap:0 20px;height:max(100svh,600px);margin:40px calc(-1 * var(--gr)) -96px calc(-1 * var(--g));padding:0 var(--gr) clamp(24px,4vw,56px) var(--g);overflow:hidden;background:var(--card);color:rgb(var(--on-photo));clip-path:inset(calc((1 - clamp(0,calc(var(--in,1) * 1.7 - .15),1)) * 100%) 0 0 0)}
+html:root .v3 .pj-next:has(.pj-stage) .pj-nx{display:none}
 /* on the photo the name stays white under the pointer */
-@media (hover:hover){html[data-v4pages~="next"] .v3 .pj-next:has(.pj-stage):hover b{color:inherit}}
-html[data-v4pages~="next"] .v3 .pj-next .pj-stage{display:block;position:absolute;inset:0}
-html[data-v4pages~="next"] .v3 .pj-next .pj-stage img{scale:calc(1.12 - clamp(0,calc(var(--in,1) * 1.3),1) * .12)}
-html[data-v4pages~="next"] .v3 .pj-next .pj-stage::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgb(var(--scrim) / .72),rgb(var(--scrim) / .3) 30%,rgb(var(--scrim) / 0) 60%)}
-html[data-v4pages~="next"] .v3 .pj-next:has(.pj-stage)>.lbl{position:relative;z-index:1;flex-basis:100%;margin-bottom:14px;color:inherit}
-html[data-v4pages~="next"] .v3 .pj-next:has(.pj-stage)>b{position:relative;z-index:1;flex:1;min-width:0;font-size:min(clamp(3.5rem,calc(12 * var(--v3u)),13rem),calc((100vw - 2 * var(--g) - 15vw) / (var(--lw,8) * .6)));line-height:.86;overflow-wrap:normal}
-html[data-v4pages~="next"] .v3 .pj-next:has(.pj-stage)>span[aria-hidden]{position:relative;z-index:1;font:900 clamp(2rem,5vw,5rem)/1 var(--display)}
+@media (hover:hover){html:root .v3 .pj-next:has(.pj-stage):hover b{color:inherit}}
+html:root .v3 .pj-next .pj-stage{display:block;position:absolute;inset:0}
+html:root .v3 .pj-next .pj-stage img{scale:calc(1.12 - clamp(0,calc(var(--in,1) * 1.3),1) * .12)}
+html:root .v3 .pj-next .pj-stage::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgb(var(--scrim) / .72),rgb(var(--scrim) / .3) 30%,rgb(var(--scrim) / 0) 60%)}
+html:root .v3 .pj-next:has(.pj-stage)>.lbl{position:relative;z-index:1;flex-basis:100%;margin-bottom:14px;color:inherit}
+html:root .v3 .pj-next:has(.pj-stage)>b{position:relative;z-index:1;flex:1;min-width:0;font-size:min(clamp(3.5rem,calc(12 * var(--v3u)),13rem),calc((100vw - 2 * var(--g) - 15vw) / (var(--lw,8) * .6)));line-height:.86;overflow-wrap:normal}
+html:root .v3 .pj-next:has(.pj-stage)>span[aria-hidden]{position:relative;z-index:1;font:900 clamp(2rem,5vw,5rem)/1 var(--display)}
 @media (max-width:1023px),(max-height:599px){
-  html[data-v4pages~="next"] .v3 .pj-next:has(.pj-stage){height:78svh}
+  html:root .v3 .pj-next:has(.pj-stage){height:78svh}
   /* natural scroll: the stage opens downward once when it comes into view, as the home's photos do on phones (`data-rv`, components/portfolio/project-viewer.tsx) */
-  html[data-v4pages~="next"] .v3 .pj-next[data-rv]{clip-path:inset(0);transition:clip-path 1.1s cubic-bezier(.16,1,.3,1)}
-  html[data-v4pages~="next"] .v3 .pj-next[data-rv=""]{clip-path:inset(0 0 100% 0)}
-  html[data-v4pages~="next"] .v3 .pj-next[data-rv] .pj-stage img{scale:1;transition:scale 1.6s cubic-bezier(.16,1,.3,1)}
-  html[data-v4pages~="next"] .v3 .pj-next[data-rv=""] .pj-stage img{scale:1.12}
+  html:root .v3 .pj-next[data-rv]{clip-path:inset(0);transition:clip-path 1.1s cubic-bezier(.16,1,.3,1)}
+  html:root .v3 .pj-next[data-rv=""]{clip-path:inset(0 0 100% 0)}
+  html:root .v3 .pj-next[data-rv] .pj-stage img{scale:1;transition:scale 1.6s cubic-bezier(.16,1,.3,1)}
+  html:root .v3 .pj-next[data-rv=""] .pj-stage img{scale:1.12}
 }
 
 /* ── view (j3). A frame on a project page opens full size (the gallery's `.fv`, v3.css). ── */
@@ -151,44 +147,44 @@ html[data-v4pages~="view"] .v3 #p-project :is(.pj-big,.pj-r):focus-visible{outli
    pages' ask. The sleeve, its record and the lift are the home's own rules (mtscroll.css, mt/motion/rows.css,
    which list `.cv4` beside their own scope); only what differs on a grid is here. `--u` is the home's design
    unit: a cell is a third of the window where the home's sleeve is 320 units. ── */
-html[data-v4pages~="c1"] .cv4p{padding-top:64px}
-html[data-v4pages~="c1"] .cv4h{padding:56px var(--gr) 0 var(--g)}
-html[data-v4pages~="c1"] .cv4h>div{display:flex;flex-direction:column;align-items:flex-start;gap:20px}
-html[data-v4pages~="c1"] .cv4{--u:calc(100vw / 960);list-style:none;margin:48px 0 0;padding:0 var(--gr) 0 var(--g);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;overflow-x:clip}
-html[data-v4pages~="c1"] .cv4 .mt-sleeve{position:relative;display:block;width:100%;height:auto;aspect-ratio:1;--o:var(--hin)}
+html:root .cv4p{padding-top:64px}
+html:root .cv4h{padding:56px var(--gr) 0 var(--g)}
+html:root .cv4h>div{display:flex;flex-direction:column;align-items:flex-start;gap:20px}
+html:root .cv4{--u:calc(100vw / 960);list-style:none;margin:48px 0 0;padding:0 var(--gr) 0 var(--g);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;overflow-x:clip}
+html:root .cv4 .mt-sleeve{position:relative;display:block;width:100%;height:auto;aspect-ratio:1;--o:var(--hin)}
 /* Space between the covers, on the /portfolio grid's gutters and gap, corners square. */
-html[data-v4pages~="c1"] .cv4 .mt-sleeve .face,html[data-v4pages~="c1"] .cv4 .mt-sleeve .face img{border-radius:0}
-@media (max-width:700px){html[data-v4pages~="c1"] .cv4{gap:10px}}
+html:root .cv4 .mt-sleeve .face,html:root .cv4 .mt-sleeve .face img{border-radius:0}
+@media (max-width:700px){html:root .cv4{gap:10px}}
 /* The name: the home's cover caption (.mt-cvcap), under the sleeve. Dim at rest, full for the cover under the pointer or the focus. */
-html[data-v4pages~="c1"] .cv4c{display:none}
+html:root .cv4c{display:none}
 @media (min-width:701px){
-  html[data-v4pages~="c1"] .cv4{row-gap:56px;padding-bottom:44px}
-  html[data-v4pages~="c1"] .cv4c{position:absolute;left:0;top:calc(100% + 10px);width:100%;display:grid;gap:4px;font:400 11px/1.2 var(--mono);letter-spacing:.14em;text-transform:uppercase;text-align:left;white-space:nowrap;pointer-events:none;opacity:.35;transition:opacity .3s ease-out}
-  html[data-v4pages~="c1"] .cv4c span{overflow:hidden;text-overflow:ellipsis}
-  html[data-v4pages~="c1"] .cv4c .mute{color:var(--mute,var(--muted-foreground))}
-  html[data-v4pages~="c1"] .cv4 .mt-sleeve:hover .cv4c,html[data-v4pages~="c1"] .cv4 .mt-sleeve:focus-visible .cv4c{opacity:1}
+  html:root .cv4{row-gap:56px;padding-bottom:44px}
+  html:root .cv4c{position:absolute;left:0;top:calc(100% + 10px);width:100%;display:grid;gap:4px;font:400 11px/1.2 var(--mono);letter-spacing:.14em;text-transform:uppercase;text-align:left;white-space:nowrap;pointer-events:none;opacity:.35;transition:opacity .3s ease-out}
+  html:root .cv4c span{overflow:hidden;text-overflow:ellipsis}
+  html:root .cv4c .mute{color:var(--mute,var(--muted-foreground))}
+  html:root .cv4 .mt-sleeve:hover .cv4c,html:root .cv4 .mt-sleeve:focus-visible .cv4c{opacity:1}
 }
 /* Touch never hovers, so the name sits at full there (audit 2026-11-19: 1.7 to 2.9:1 at rest). */
-@media (hover:none){html[data-v4pages~="c1"] .cv4c{opacity:1}}
+@media (hover:none){html:root .cv4c{opacity:1}}
 /* Pinned here: mtscroll.css and rows.css both dress the face at the same weight, and they load in separate files. */
-html[data-v4pages~="c1"] .cv4 .mt-sleeve .face{overflow:visible;background:none}
-html[data-v4pages~="c1"] .cv4 .mt-sleeve .face img{object-fit:cover}
-html[data-v4pages~="c1"] .cv4 .mt-sleeve:focus-visible{outline:1px solid var(--accent);outline-offset:-1px;z-index:3}
+html:root .cv4 .mt-sleeve .face{overflow:visible;background:none}
+html:root .cv4 .mt-sleeve .face img{object-fit:cover}
+html:root .cv4 .mt-sleeve:focus-visible{outline:1px solid var(--accent);outline-offset:-1px;z-index:3}
 /* The record only exists where it can move: no hover on touch, no slide under reduced motion.
    On the home hover tucks it in; here it rests inside and hover brings it out, a third of the sleeve. */
-html[data-v4pages~="c1"] .cv4 .mt-sleeve .disc{display:none}
+html:root .cv4 .mt-sleeve .disc{display:none}
 @media (hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
-  html[data-v4pages~="c1"] .cv4 .mt-sleeve .disc{display:block;left:1.875%;top:1.875%;width:96.25%;height:96.25%;transform:translateX(calc(var(--o) * 33.4%)) rotate(calc(var(--o) * 200deg))}
+  html:root .cv4 .mt-sleeve .disc{display:block;left:1.875%;top:1.875%;width:96.25%;height:96.25%;transform:translateX(calc(var(--o) * 33.4%)) rotate(calc(var(--o) * 200deg))}
   /* The last column has no room on its right: its record comes out to the left. */
-  html[data-v4pages~="c1"] .cv4 li:nth-child(3n) .mt-sleeve{--o:calc(var(--hin) * -1)}
-  html[data-v4pages~="c1"] .cv4 .mt-sleeve .disc::after{transform:rotate(calc(var(--o) * -200deg))}
+  html:root .cv4 li:nth-child(3n) .mt-sleeve{--o:calc(var(--hin) * -1)}
+  html:root .cv4 .mt-sleeve .disc::after{transform:rotate(calc(var(--o) * -200deg))}
   /* Held under the pointer the record keeps turning: the disc is one flat colour, so the turn
      shows in its sheen, one revolution in 1.8s (33 rpm), starting once the record is out. */
   /* `[data-playing]`: its clip is playing (`?v4pages=c1,snd`). The same rule, so the turn does not jump when the sound starts. */
-  html[data-v4pages~="c1"] .cv4 .mt-sleeve:is(.hv,[data-playing]) .disc::after{animation:cv4-spin 1.8s linear .45s infinite}
+  html:root .cv4 .mt-sleeve:is(.hv,[data-playing]) .disc::after{animation:cv4-spin 1.8s linear .45s infinite}
   /* The turn was hard to see: sheen .2 / .13 to .5 / .36, and a dark wedge between the two so it
      reads on a light pressing as well. */
-  html[data-v4pages~="c1"] .cv4 .mt-sleeve .disc::after{background:radial-gradient(circle,#070707 0 1.9%,rgba(255,255,255,.3) 2% 2.4%,transparent 2.5%),conic-gradient(from 18deg,rgba(255,255,255,0) 0deg,rgba(255,255,255,.5) 14deg,rgba(255,255,255,0) 34deg,rgba(0,0,0,0) 70deg,rgba(0,0,0,.3) 100deg,rgba(0,0,0,0) 130deg,rgba(255,255,255,0) 168deg,rgba(255,255,255,.36) 192deg,rgba(255,255,255,0) 216deg,rgba(0,0,0,0) 250deg,rgba(0,0,0,.3) 280deg,rgba(0,0,0,0) 310deg,rgba(255,255,255,0) 360deg)}
+  html:root .cv4 .mt-sleeve .disc::after{background:radial-gradient(circle,#070707 0 1.9%,rgba(255,255,255,.3) 2% 2.4%,transparent 2.5%),conic-gradient(from 18deg,rgba(255,255,255,0) 0deg,rgba(255,255,255,.5) 14deg,rgba(255,255,255,0) 34deg,rgba(0,0,0,0) 70deg,rgba(0,0,0,.3) 100deg,rgba(0,0,0,0) 130deg,rgba(255,255,255,0) 168deg,rgba(255,255,255,.36) 192deg,rgba(255,255,255,0) 216deg,rgba(0,0,0,0) 250deg,rgba(0,0,0,.3) 280deg,rgba(0,0,0,0) 310deg,rgba(255,255,255,0) 360deg)}
 }
 /* snd (`?v4pages=c1,snd`, components/cover/cover-sound.tsx): the sound line. On / off, and beside one of Apple's
    previews the link to the song and the credit its terms ask for. One sits at the foot of the window over the grid,
@@ -209,13 +205,12 @@ html[data-theme="light"] .cv4s a:not([data-ink]) .am-b,.cv4s a[data-ink="b"] .am
 .cv4s{flex-direction:row-reverse}
 .cv4s :is(button,a):focus-visible{outline:1px solid currentColor;outline-offset:3px}
 .cv4s.cv4sf{position:fixed;right:0;bottom:0;z-index:20;padding:6px 24px}
-html[data-v4pages~="c1"] .cv4a{padding:24px var(--gr) 96px var(--g);margin-top:24px}
-html[data-v4pages~="c1"] .cv4a .pj-ask{border-top:1px solid var(--line)}
-html[data-v4pages~="c1"] .cv4a .cv4b{display:flex;flex-wrap:wrap;gap:12px}
-@media (min-width:701px){html[data-v4pages~="c1"] .cv4a .cv4b{margin:0 clamp(40px,7vw,140px) 0 auto}}
+html:root .cv4a{padding:24px var(--gr) 96px var(--g);margin-top:24px}
+html:root .cv4a .pj-ask{border-top:1px solid var(--line)}
+html:root .cv4a .cv4b{display:flex;flex-wrap:wrap;gap:12px}
+@media (min-width:701px){html:root .cv4a .cv4b{margin:0 clamp(40px,7vw,140px) 0 auto}}
 
-/* p3: the scroll motion of the /portfolio grid. On for everyone since 2026-11-15
-   (the head script defaults to it); `?v4pages=0` turns it off for the tab. */
+/* p3: the scroll motion of the /portfolio grid. On for everyone since 2026-11-15. */
 
 /* ── p3. Two moves, both from the V4 home, both gone at rest.
    Drift: each grid photo sits a little oversized in its frame and travels as the
@@ -239,16 +234,16 @@ html[data-v4pages~="c1"] .cv4a .cv4b{display:flex;flex-wrap:wrap;gap:12px}
    tile is its own compositor layer. ── */
 @supports (animation-timeline: view()) {
   @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-    html[data-v4pages~="p3"] .v3 #p-work .wgrid:not(.square) .wt .ph { view-timeline: --v4p3 block; }
-    html[data-v4pages~="p3"] .v3 #p-work .wgrid:not(.square) .wt .ph > img { scale: 1.18; }
-    html[data-v4pages~="p3"] .v3 #p-work .wgrid:not(.square) .wt[data-v4d] .ph > img { animation: v4p3-drift linear both !important; animation-timeline: --v4p3 !important; }
-    html[data-v4pages~="p3"] .v3 #p-work .wgrid:not(.square) .wt:nth-child(3n+1) { --v4k: 16%; }
-    html[data-v4pages~="p3"] .v3 #p-work .wgrid:not(.square) .wt:nth-child(3n+2) { --v4k: 8%; }
+    html:root .v3 #p-work .wgrid:not(.square) .wt .ph { view-timeline: --v4p3 block; }
+    html:root .v3 #p-work .wgrid:not(.square) .wt .ph > img { scale: 1.18; }
+    html:root .v3 #p-work .wgrid:not(.square) .wt[data-v4d] .ph > img { animation: v4p3-drift linear both !important; animation-timeline: --v4p3 !important; }
+    html:root .v3 #p-work .wgrid:not(.square) .wt:nth-child(3n+1) { --v4k: 16%; }
+    html:root .v3 #p-work .wgrid:not(.square) .wt:nth-child(3n+2) { --v4k: 8%; }
 
-    html[data-v4pages~="p3"] .v3 #p-work .wgrid[data-v4lag]:not(.wframes) .wt[data-v4d] { will-change: translate; }
+    html:root .v3 #p-work .wgrid[data-v4lag]:not(.wframes) .wt[data-v4d] { will-change: translate; }
     /* No hover zoom while the page scrolls: tiles passing under a moving pointer each restarted
        the zoom on a drifting photo, 9 long tasks a scroll against 0 without (and 3 on the plain grid). */
-    html[data-v4pages~="p3"] .v3 #p-work .wgrid[data-v4lag] .wt:hover img { transform: none; }
+    html:root .v3 #p-work .wgrid[data-v4lag] .wt:hover img { transform: none; }
   }
 }
 @keyframes v4p3-drift {
@@ -266,19 +261,17 @@ html[data-v4pages~="c1"] .cv4a .cv4b{display:flex;flex-wrap:wrap;gap:12px}
    the left, the photos stacked in one held cell on the right, the one whose row is at mid screen shown.
    A hard cut: opacity with no transition, and never `display` or `visibility`, so every alt stays read.
    A row is half the photo's height and a little more, so the photo is at rest for every cut. */
-/* The photo row under the title goes: its photos are the ones beside the rows. */
-html[data-v4pages~="s4"] .v3 #p-campus .sv-seq{display:none}
-html[data-v4pages~="s4"] .v3 #p-campus .s4-ph{position:relative;margin:28px 0 0;aspect-ratio:4/5;overflow:hidden;border-radius:4px;background:var(--card)}
-html[data-v4pages~="s4"] .v3 #p-campus .s4-row{padding:18px 0 28px;border-bottom:1px solid var(--line)}
-html[data-v4pages~="s4"] .v3 #p-campus .s4-row h2{margin:0;font:900 clamp(1.75rem,calc(4*var(--v3u)),3.75rem)/1 var(--display);letter-spacing:-.045em;text-wrap:balance}
-html[data-v4pages~="s4"] .v3 #p-campus .s4-row h2 .lbl{display:block;margin-bottom:12px}
-html[data-v4pages~="s4"] .v3 #p-campus .s4-row p{margin:14px 0 0;max-width:46ch;line-height:1.6;text-wrap:pretty}
+html:root .v3 #p-campus .s4-ph{position:relative;margin:28px 0 0;aspect-ratio:4/5;overflow:hidden;border-radius:4px;background:var(--card)}
+html:root .v3 #p-campus .s4-row{padding:18px 0 28px;border-bottom:1px solid var(--line)}
+html:root .v3 #p-campus .s4-row h2{margin:0;font:900 clamp(1.75rem,calc(4*var(--v3u)),3.75rem)/1 var(--display);letter-spacing:-.045em;text-wrap:balance}
+html:root .v3 #p-campus .s4-row h2 .lbl{display:block;margin-bottom:12px}
+html:root .v3 #p-campus .s4-row p{margin:14px 0 0;max-width:46ch;line-height:1.6;text-wrap:pretty}
 @media (min-width:1024px) and (hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
-  html[data-v4pages~="s4"] .v3 #p-campus .s4{--s4h:min(72svh,calc(100svh - 128px));display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);column-gap:clamp(32px,5vw,96px);border-bottom:1px solid var(--line)}
-  html[data-v4pages~="s4"] .v3 #p-campus .s4-ph{grid-column:2;grid-row:1/span var(--n);justify-self:end;align-self:start;position:sticky;top:calc((100svh + 64px - var(--s4h)) / 2);height:var(--s4h);max-width:100%;margin:0;opacity:0}
-  html[data-v4pages~="s4"] .v3 #p-campus .s4-ph[data-on]{opacity:1}
-  html[data-v4pages~="s4"] .v3 #p-campus .s4-row{grid-column:1;grid-row:var(--i);min-height:calc(var(--s4h) / 2 + 48px);box-sizing:border-box;padding:28px 0 40px;border-bottom:0;border-top:1px solid var(--line);color:color-mix(in srgb,var(--ink) 54%,var(--bg));transition:color .25s ease-out}
-  html[data-v4pages~="s4"] .v3 #p-campus .s4-row:first-of-type{border-top:0}
+  html:root .v3 #p-campus .s4{--s4h:min(72svh,calc(100svh - 128px));display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);column-gap:clamp(32px,5vw,96px);border-bottom:1px solid var(--line)}
+  html:root .v3 #p-campus .s4-ph{grid-column:2;grid-row:1/span var(--n);justify-self:end;align-self:start;position:sticky;top:calc((100svh + 64px - var(--s4h)) / 2);height:var(--s4h);max-width:100%;margin:0;opacity:0}
+  html:root .v3 #p-campus .s4-ph[data-on]{opacity:1}
+  html:root .v3 #p-campus .s4-row{grid-column:1;grid-row:var(--i);min-height:calc(var(--s4h) / 2 + 48px);box-sizing:border-box;padding:28px 0 40px;border-bottom:0;border-top:1px solid var(--line);color:color-mix(in srgb,var(--ink) 54%,var(--bg));transition:color .25s ease-out}
+  html:root .v3 #p-campus .s4-row:first-of-type{border-top:0}
   /* The last row is as tall as the others, so the photo leaves with it. */
-  html[data-v4pages~="s4"] .v3 #p-campus .s4-row[data-on]{color:var(--ink)}
+  html:root .v3 #p-campus .s4-row[data-on]{color:var(--ink)}
 }
