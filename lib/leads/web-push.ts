@@ -6,6 +6,7 @@
  * key (RFC 8292). VAPID_KEY is one Worker secret: the private key as a JWK,
  * which also carries the public half the browser subscribes with.
  * ─────────────────────────────────────────────────────────────── */
+import { secretJson } from "@/lib/secrets";
 
 export type Subscription = { endpoint: string; keys: { p256dh: string; auth: string } };
 export type Push = { title: string; body: string; tag?: string; url?: string };
@@ -73,7 +74,7 @@ export async function vapid(jwk: JsonWebKey, endpoint: string, now = Date.now())
  */
 export async function send(secret: string, sub: Subscription, push: Push): Promise<"ok" | "gone" | "failed"> {
   try {
-    const jwk = JSON.parse(secret) as JsonWebKey;
+    const jwk = secretJson<JsonWebKey>(secret, "VAPID_KEY");
     const res = await fetch(sub.endpoint, {
       method: "POST",
       headers: {

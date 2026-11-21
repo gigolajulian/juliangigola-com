@@ -138,6 +138,16 @@ describe("/api/calendar", () => {
     expect(calls.some((c) => c.method === "DELETE")).toBe(false);
   });
 
+  it("an unblock on a missing event is not a block, a calendar that is down is a 502", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const answer = (status: number) =>
+      vi.stubGlobal("fetch", async (url: string) => (url.includes("oauth2") ? Response.json({ access_token: "t", expires_in: 3600 }) : Response.json({ error: { message: "x" } }, { status })));
+    answer(404);
+    expect((await POST(req("POST", { unblock: "e1" }))).status).toBe(400);
+    answer(503);
+    expect((await POST(req("POST", { unblock: "e1" }))).status).toBe(502);
+  });
+
   it("adds and drops extras, and never shows an ICS link in full", async () => {
     expect((await POST(req("POST", { extra: { label: "SGH", src: "https://shifts.example.com/secret-token.ics" } }))).status).toBe(200);
     expect((await POST(req("POST", { extra: { label: "Bad", src: "javascript:alert(1)" } }))).status).toBe(400);
