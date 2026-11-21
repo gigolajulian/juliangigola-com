@@ -100,9 +100,10 @@ function cover(lay: (d: HTMLElement) => void, markup: string) {
   // the whole screen only if the calendar is not in the page yet
   const f0 = document.querySelector("#p-flow .f-body");
   const box = f0 ? (d.dataset.box = "", true) : false;
-  /* The whole screen runs to the large viewport (lvh), under Safari's toolbar: inset:0 stopped at it, and the page
-     showed in a strip below the cover on an iPhone (QA on #1372). 100vh before it for a browser without lvh. */
-  d.style.cssText = box ? "position:absolute;z-index:5;overflow:hidden" : "position:fixed;inset:0 0 auto 0;height:100vh;height:100lvh;z-index:2147483000";
+  /* The whole screen runs 200px past the large viewport: on an iPhone the page draws to the bottom edge behind
+     Safari's floating toolbar, past even 100lvh (754 of 874pt), and a band of it showed under the cover (QA on #1372,
+     on /book too). J and G stay centred on what shows (`place`). 100vh first for a browser without lvh. */
+  d.style.cssText = box ? "position:absolute;z-index:5;overflow:hidden" : "position:fixed;inset:0 0 auto 0;height:calc(100vh + 200px);height:calc(100lvh + 200px);z-index:2147483000";
   d.innerHTML = markup;
   // smaller over the calendar
   if (box) (d.querySelector("svg") as SVGSVGElement).style.fontSize = "96px";
@@ -130,7 +131,6 @@ function cover(lay: (d: HTMLElement) => void, markup: string) {
   setTimeout(() => {
     if (d.isConnected && d.dataset.go === undefined) {
       d.dataset.go = "";
-      delete document.documentElement.dataset.coverHold;
       d.style.transition = "opacity .4s";
       d.style.opacity = "0";
       setTimeout(() => d.remove(), 400);
@@ -150,7 +150,6 @@ export function reveal(cover: HTMLElement) {
   const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2); // in-out cubic, over the log of the scale
   if (cover.dataset.go) return;
   cover.dataset.go = "";
-  delete document.documentElement.dataset.coverHold; // the page under shows again as the cut opens (splash.css)
   cover.style.pointerEvents = "none";
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return cover.remove();
   const ink = cover.querySelector<SVGGElement>(".ink");
@@ -230,12 +229,6 @@ export function reveal(cover: HTMLElement) {
 function drive(open: (c: HTMLElement) => void) {
   const d = document.getElementById("jg-cover");
   if (!d) return;
-  /* The page under is hidden while the cover holds (splash.css): Safari's toolbar glass showed it in a strip below
-     the cover on an iPhone (QA on #1372). Set only once the cover is up, so a cover that fails never hides the page;
-     released when the cut opens, or after 12s whatever happens. */
-  const root = document.documentElement;
-  root.dataset.coverHold = "";
-  setTimeout(() => delete root.dataset.coverHold, 12000);
   const bar = d.querySelector<HTMLElement>(".ln u");
   const at = Number(d.dataset.at) || performance.now();
   const still = matchMedia("(prefers-reduced-motion: reduce)").matches;

@@ -299,10 +299,3 @@ html[data-sb]:is([data-intro], [data-landing])::after {
     clip-path: inset(0 0 calc(var(--lift-clip) * 1%) 0);
   }
 }
-
-/* A first arrival on an inner page (jg-cover.ts, `drive`): the page stays hidden under the JG cover until the cut
-   opens, so Safari's toolbar glass has nothing to show below it (QA on #1372, iPhone). The cover sits outside
-   <body>, so it is not hidden with it. */
-html[data-cover-hold] body {
-  visibility: hidden;
-}
