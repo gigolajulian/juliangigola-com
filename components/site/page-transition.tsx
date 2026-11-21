@@ -37,6 +37,8 @@ let landed: (() => void) | null = null;
 /** What the page returned to still has to paint before it is snapshotted (a Back's restored cover, v4/home/back.ts). */
 const holds: Promise<unknown>[] = [];
 export const holdLanding = (p: Promise<unknown>) => void holds.push(p);
+/** All of them, 300ms at most. */
+const settle = (all: Promise<unknown>[]) => Promise.race([Promise.all(all), new Promise((r) => setTimeout(r, 300))]);
 const sectionOf = (path: string) =>
   SECTIONS.reduce(
     (found, s, i) => (path === s || (s !== "/" && path.startsWith(`${s}/`)) ? i : found),
@@ -84,9 +86,9 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
     // The page arriving, before it is snapshotted.
     gauge();
     // Safari snapshotted the home before the restored cover decoded: an empty sleeve for 1 to 4 frames (MAC on 9e9dc6c9). 300ms at most.
-    const land = landed, wait = holds.splice(0);
+    const land = landed;
     landed = null;
-    if (land) wait.length ? Promise.race([Promise.all(wait), new Promise((r) => setTimeout(r, 300))]).then(land) : land();
+    if (land) settle(holds.splice(0)).then(land);
     if (document.documentElement.dataset.nav === undefined) return;
     const trip = (
       document as Document & {
@@ -178,20 +180,29 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
         const lid = document.createElement("div");
         lid.setAttribute("aria-hidden", "true");
         lid.style.cssText = "position:fixed;inset:0;z-index:2147483647;pointer-events:none";
+        lid.innerHTML = "<style>[data-viewer-copy] *{animation:none!important;transition:none!important}</style>";
+        lid.setAttribute("data-viewer-copy", "");
         for (const n of parts) {
           const c = n.cloneNode(true) as HTMLElement;
-          c.style.opacity = getComputedStyle(n).opacity;
+          // a copy restarts its CSS animations: the neighbours faded in again from nothing (MAC on 153ce8e1). Each element keeps where it is now, still.
+          const from = [n, ...n.querySelectorAll<HTMLElement>("*")], to = [c, ...c.querySelectorAll<HTMLElement>("*")];
+          from.forEach((e, k) => {
+            const cs = getComputedStyle(e);
+            Object.assign(to[k].style, { opacity: cs.opacity, transform: cs.transform, visibility: cs.visibility, filter: cs.filter, clipPath: cs.clipPath });
+          });
           lid.append(c);
         }
         document.body.append(lid);
-        // after the paint that has the home in it, and once the covers row has settled in (it eased in over 60 to 90ms, MAC SSH on 476d12eb), 300ms at most
-        const settled = () => {
-          const runs = document.querySelector(".mt-covers")?.getAnimations({ subtree: true }).filter((a) => a.effect?.getTiming().iterations !== Infinity) ?? [];
-          return Promise.race([Promise.all(runs.map((a) => a.finished.catch(() => {}))), new Promise((r) => setTimeout(r, 300))]);
+        /* Off once the home is in place under it: its covers row mounted, the told cover and its neighbours decoded (back.ts holdLanding), two
+           paints, and the row's own ease-in done (60 to 90ms, MAC SSH on 476d12eb), each wait 300ms at most. By its own clock, not the landing
+           hook: on a warm Back that never came and the copy held for 2.25s (MAC on 153ce8e1). */
+        const t0 = performance.now();
+        const settled = () => settle(document.querySelector(".mt-covers")?.getAnimations?.({ subtree: true }).filter((a) => a.effect?.getTiming().iterations !== Infinity).map((a) => a.finished.catch(() => {})) ?? []);
+        const look = () => {
+          if (!document.querySelector(".mt-covers") && performance.now() - t0 < 1500) return void requestAnimationFrame(look);
+          settle(holds.splice(0)).then(() => requestAnimationFrame(() => requestAnimationFrame(() => void settled().then(() => lid.remove()))));
         };
-        const go = () => (landed === go && (landed = null), requestAnimationFrame(() => requestAnimationFrame(() => void settled().then(() => lid.remove()))));
-        landed = go;
-        window.setTimeout(() => lid.isConnected && go(), 1500); // a page slower than this: off anyway
+        requestAnimationFrame(look);
         return;
       }
       set("out");

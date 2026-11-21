@@ -57,13 +57,19 @@ describe("PageTransition", () => {
     dispatchEvent(new PopStateEvent("popstate"));
     const lid = document.body.lastElementChild as HTMLElement;
     expect(lid.getAttribute("aria-hidden")).toBe("true");
-    expect(lid.textContent).toBe("19 / 25"); // the viewer, copied over the page
+    expect(lid.querySelector("[role=dialog]")?.textContent).toBe("19 / 25"); // the viewer, copied over the page
     await vi.advanceTimersByTimeAsync(100);
     expect(lid.isConnected).toBe(true); // held until the home is in place
     nav.path = "/";
     r.rerender(<PageTransition>home</PageTransition>);
-    await vi.advanceTimersByTimeAsync(100); // two frames
+    await vi.advanceTimersByTimeAsync(100);
+    expect(lid.isConnected).toBe(true); // the home's covers are not in yet
+    const covers = document.createElement("section");
+    covers.className = "mt-covers";
+    document.body.append(covers);
+    await vi.advanceTimersByTimeAsync(100); // seen, then two frames
     expect(lid.isConnected).toBe(false);
+    covers.remove();
     expect(vt).not.toHaveBeenCalled();
     r.unmount();
     viewer.remove();
