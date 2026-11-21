@@ -1,5 +1,6 @@
 import { EVENTS } from "@/lib/booking/booking-rules";
 import { depositFor, isPaid } from "@/lib/booking/paid";
+import { SESSION_TYPES } from "@/lib/booking/sessions";
 
 /* JG V3 (master v39, DESIGN.md "Photos"): what each screen shows, per theme.
    Dark is the hard-light set; light is a second, brighter set. Paths under
@@ -217,7 +218,9 @@ const LISTED: Record<SessionSlug, Omit<Session, "paid">> = {
 };
 /** The event slug a session books ("digitals" for studio-digitals), or "". */
 const eventOf = (s: { cal?: string }) => s.cal?.split("/")[1] ?? "";
-export const SESSIONS = Object.fromEntries(Object.entries(LISTED).map(([k, s]) => [k, { ...s, paid: isPaid(eventOf(s)) }])) as Record<SessionSlug, Session>;
+// The price set in /admin (content/site.json) wins, so the home card and /book never disagree.
+const ADMIN_FROM = new Map(SESSION_TYPES.map((t) => [t.slug, t.from]));
+export const SESSIONS = Object.fromEntries(Object.entries(LISTED).map(([k, s]) => [k, { ...s, from: ADMIN_FROM.has(k) ? ADMIN_FROM.get(k)! : s.from, paid: isPaid(eventOf(s)) }])) as Record<SessionSlug, Session>;
 export const isSession = (s?: string): s is SessionSlug => !!s && Object.hasOwn(SESSIONS, s);
 /** The session tabs' order (DESIGN.md, Stepper). */
 export const TAB_ORDER: SessionSlug[] = ["portraits", "headshots", "studio-digitals", "model-test", "graduation", "weddings", "consultation"];

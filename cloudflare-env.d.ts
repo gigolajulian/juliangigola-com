@@ -10,9 +10,6 @@ interface __BaseEnv_CloudflareEnv {
 	DOWNLOAD_LIMIT: RateLimit;
 	IMAGES: ImagesBinding;
 	ASSETS: Fetcher;
-	INBOX_KEY: string;
-	LEADS_KEY: string;
-	VAPID_KEY: string;
 	BOOKING_LOCK: DurableObjectNamespace;
 }
 declare namespace Cloudflare {

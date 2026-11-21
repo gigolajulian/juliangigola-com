@@ -59,7 +59,7 @@ export async function loadRepo(
 ): Promise<{ error: string } | { sha: string; content: SiteContent; repo: Draft }> {
   try {
     const res = await fetch(contentUrl, { headers: headers(t), cache: "no-store" });
-    const body = await res.json();
+    const body = (await res.json()) as { content: string; sha: string; message?: string };
     if (!res.ok) {
       // A rejected token is not worth keeping, otherwise every visit
       // retries it and the page looks broken rather than logged out.
@@ -149,7 +149,7 @@ export async function publishDraft({
   onStatus({ kind: "working", message: "Checking for newer content…" });
   try {
     const check = await fetch(contentUrl, { headers: headers(token), cache: "no-store" });
-    const checkBody = await check.json();
+    const checkBody = (await check.json()) as { content: string; sha: string; message?: string };
     if (!check.ok) {
       return { error: `GitHub said ${check.status}: ${checkBody?.message ?? "unknown error"}` };
     }
