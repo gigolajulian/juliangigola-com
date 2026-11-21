@@ -5,7 +5,7 @@ vi.mock("@/lib/leads/enquiry-action", () => ({ submitEnquiry: vi.fn() }));
 vi.stubGlobal("fetch", vi.fn(() => Promise.reject(new Error("offline"))));
 
 import { V3Service } from "@/components/v3/service";
-import { BOOKING_PAGES } from "@/lib/booking/booking";
+import { BOOKING_PAGES } from "@/lib/booking/service-pages";
 import { PROJECTS } from "@/lib/work/work";
 
 describe("V3Service", () => {

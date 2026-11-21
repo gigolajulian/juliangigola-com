@@ -4,7 +4,7 @@ import * as service from "@/app/[service]/page";
 import * as book from "@/app/book/[slug]/page";
 import * as campus from "@/app/graduation-photos/[campus]/page";
 import { LINKABLE, UNLISTED } from "@/lib/work/work";
-import { BOOK_MENU, BOOKING_PAGES } from "@/lib/booking/booking";
+import { BOOK_MENU, BOOKING_PAGES } from "@/lib/booking/service-pages";
 import { SESSIONS } from "@/lib/flags/v3";
 import { CAMPUS_GUIDES } from "@/lib/graduation/campus-guides";
 import { SESSION_SEO } from "@/lib/seo";

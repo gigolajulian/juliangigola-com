@@ -15,7 +15,7 @@ import { MtIntro } from "./intro";
 import { MtMotionLayer } from "./motion";
 import { glideTo } from "@/components/v3/smooth-scroll";
 
-/* v4 homepage (`?mtscroll=1`, docs/mt-decisions.md): the screens at their resting
+/* v4 homepage (the home with NEXT_PUBLIC_V4_HOME=1; `?mtscroll=1` previews it on a rollback build; docs/mt-decisions.md): the screens at their resting
    state, with MtIntro and MtMotionLayer on top. Motion hooks: MOTION-HOOKS.md. */
 
 export function MtHome({ data }: { data: MtData }) {
