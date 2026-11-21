@@ -17,7 +17,7 @@ vi.mock("./.open-next/worker.js", () => ({
 }));
 vi.mock("@/lib/proofs/delivery-serve", () => ({ deliveryDownload: fx.deliveryDownload }));
 
-const { default: site } = await import("@/worker.ts");
+const { default: site } = await import("../../worker");
 const { GET: build } = await import("@/app/api/build/route");
 
 const ENV = { PROOFS: {} } as unknown as CloudflareEnv;
