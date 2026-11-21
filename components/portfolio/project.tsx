@@ -13,6 +13,7 @@ import type { Frame, Project } from "@/lib/work-types";
    title case, the logo on the right; then the opening frame wide, the rest
    in three uneven columns, the credits as rows, and the next project. */
 
+const OPEN_NOW = `document.querySelectorAll(".v3 .pj-r").forEach(function(f){var r=f.getBoundingClientRect();if(r.top<innerHeight&&r.bottom>0){f.dataset.open="";f.dataset.inView="true"}})`;
 const wide = (f: Frame) => f.width > f.height;
 
 /* A client or brand is credited by its name, never "@wired" (Julian,
@@ -153,6 +154,11 @@ export function V3Project({ project, next }: { project: Project; next?: { href: 
             </div>
           ) : null}
         </div>
+        {/* Frames already on screen when the page opens show at once, with no fade-up (Julian, 2026-11-21); the ones
+            scrolled to keep it. Inline, so it runs as the page is read: it waits for the stylesheet, so the layout is
+            real, and it marks them before the first paint rather than after hydration, which on a slow phone left the
+            first lead frame empty for seconds under the hero. `data-open` drops the transition (motion-plan.css). */}
+        <script dangerouslySetInnerHTML={{ __html: OPEN_NOW }} />
         <div className="sv-info">
           {/* m2p: behind the scenes after the frames and before the credits, smaller than the work.
               Credits that sit in the sheet's hole get a second copy here, swapped in by v4pages.css. */}
