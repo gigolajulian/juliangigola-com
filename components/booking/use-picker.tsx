@@ -4,12 +4,12 @@ import * as React from "react";
 import { gsap } from "gsap";
 import type { DepositBody } from "@/components/booking/deposit-step";
 import { isPaid } from "@/lib/booking/paid";
-import type { SlotsAnswer } from "@/lib/booking/slots";
 import { Orb, ORB_ROUND } from "@/components/effects/orb";
 import { JgLoad } from "@/components/splash/jg-load";
 import { TZ } from "@/lib/booking/booking-rules";
-import { AHEAD, e164, fromIso, iso, KEEP, minutesOf, noop, overflowOf, recent, recentKey, forgetTimes, WHERE, type PickedTime, type Slot, type Step, type V3Book } from "@/components/booking/time-picker-parts";
+import { e164, fromIso, iso, minutesOf, noop, overflowOf, forgetTimes, WHERE, type PickedTime, type Slot, type Step, type V3Book } from "@/components/booking/time-picker-parts";
 import { byCodeUnit } from "@/lib/utils";
+import { useSlots } from "@/components/booking/use-slots";
 
 
 /* Goo on the card's buttons, times and
@@ -44,6 +44,7 @@ export type Props = {
 export function usePicker({ path, title, className, fallback, v3, onPicked, startView }: Props) {
   const [username, slug] = path.split("/");
   const [tz] = React.useState(() => Intl.DateTimeFormat().resolvedOptions().timeZone || TZ);
+  const { length, needsWhere, session, days, state, paid, load } = useSlots(username, slug, tz);
   /* Julian: the time where I am, with the place, before a time is picked. */
   const clockHere = () => new Intl.DateTimeFormat("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit", timeZoneName: "short" }).format(new Date());
   const [here, setHere] = React.useState(clockHere);
@@ -51,20 +52,14 @@ export function usePicker({ path, title, className, fallback, v3, onPicked, star
     const t = setInterval(() => setHere(clockHere()), 15000);
     return () => clearInterval(t);
   }, []);
-  const [length, setLength] = React.useState(30);
-  /** The event takes its place from the visitor (a studio session or their own address). */
-  const [needsWhere, setNeedsWhere] = React.useState(false);
   const [opt, setOpt] = React.useState("");
   /* A call, editorial: by video (its Meet link) or phone, I ring them. */
   const [via, setVia] = React.useState<"Video" | "Phone">("Video");
   /** The follow-up question, kept while it folds shut so its text does not vanish first. */
   const [ask, setAsk] = React.useState("");
-  const [session, setSession] = React.useState("");
   /** Who booked, for the page that follows. */
   /* `via`: a call taken by video (its Google Meet link) or by phone. */
   const [booked, setBooked] = React.useState({ name: "", email: "", where: "", phone: "", via: "" });
-  const [days, setDays] = React.useState<Record<string, Slot[]> | null>(null);
-  const [state, setState] = React.useState<"loading" | "ready" | "fallback">("loading");
   /* The orb goes one whole round before the days
      come in, however fast the times arrive (`ORB_ROUND`, orb.tsx). */
   /* The picker is not drawn while held: the effects that measure it
@@ -104,8 +99,6 @@ export function usePicker({ path, title, className, fallback, v3, onPicked, star
   const wheelGate = React.useRef({ at: -Infinity, owned: false });
   const [stripEl, stripRef] = React.useState<HTMLDivElement | null>(null);
   const [more, setMore] = React.useState(false);
-  /* A paid session, its deposit taken here (`?deposit`, deposit-step.tsx). */
-  const [paid, setPaid] = React.useState(false);
   const [deposit, setDeposit] = React.useState<DepositBody | null>(null);
   /* JG V3: references picked on the details step, sent with the deposit. */
   const [refs, setRefs] = React.useState<FormData | null>(null);
@@ -168,48 +161,6 @@ export function usePicker({ path, title, className, fallback, v3, onPicked, star
     return () => window.clearTimeout(t);
   }, [ok]);
 
-  const load = React.useCallback(async (fresh = false) => {
-    const key = recentKey(username, slug, tz);
-    try {
-      const from = new Date();
-      const to = new Date(Date.now() + AHEAD * 864e5);
-      // No answer at all left "Loading times" up for good: past
-      // 8 seconds the fallback takes over, as for any other failure.
-      const signal = AbortSignal.timeout?.(8000);
-      const hit = recent.get(key);
-      // The event and its times in one (`app/api/slots`).
-      const got = !fresh && hit && Date.now() - hit.at < KEEP ? hit.got : fetch(`/api/slots?slug=${slug}&start=${iso(from)}&end=${iso(to)}&timeZone=${encodeURIComponent(tz)}${fresh ? "&fresh" : ""}`, { signal })
-        .then((r) => r.json() as Promise<SlotsAnswer>);
-      if (got !== hit?.got) recent.set(key, { at: Date.now(), got });
-      const slots = await got;
-      if (slots.status !== "success") throw new Error("no times");
-      const ev = slots.event;
-      // A paid event's deposit is taken here (deposit-step.tsx) where the
-      // build has Stripe's key; without it, the fallback.
-      // Paid by the site's list (lib/booking/paid.ts).
-      const owes = isPaid(slug);
-      if (owes && !process.env.NEXT_PUBLIC_STRIPE_PK) {
-        setState("fallback");
-        return;
-      }
-      setPaid(owes);
-      setLength(ev.lengthInMinutes);
-      setSession(ev.title);
-      setNeedsWhere(ev.locations.some((l) => l.type === "attendeeDefined"));
-      setDays(slots.data);
-      setState("ready");
-    } catch {
-      recent.delete(key);
-      // Only before the times have come. A reload after a booking failed
-      // keeps the times it had, and the form with what was typed in it.
-      setState((s) => (s === "ready" ? s : "fallback"));
-    }
-  }, [username, slug, tz]);
-
-  React.useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    void load();
-  }, [load]);
 
   /* The ruler's span, from every open time loaded, to the hour. */
   const { lo, hi } = React.useMemo(() => {
@@ -789,7 +740,7 @@ export function usePicker({ path, title, className, fallback, v3, onPicked, star
      foot of the view (MAC, iPhone Duo folded, 2026-11-08). */
   const heldBar = <button type="button" className="btn fill" disabled>Continue</button>;
   const v3plain = (body: React.ReactNode, bar?: React.ReactNode) => v3!.shell({ steps: v3steps, at: 1, head: v3paid ? "Book a session" : v3!.name === "Consultation" ? "Book a consultation" : "Book a call", sub: v3sub, body, sum: [], bar });
-  return { path, title, className, fallback, v3, onPicked, username, slug, tz, clockHere, here, setHere, length, setLength, needsWhere, setNeedsWhere, opt, setOpt, via, setVia, ask, setAsk, session, setSession, booked, setBooked, days, setDays, state, setState, held, setHeld, orb, setOrb, jg, view, setView, anchor, setAnchor, pick, setPick, arrow, chosen, setChosen, step, setStep, swipeX, wheelGate, stripEl, stripRef, more, setMore, paid, setPaid, deposit, setDeposit, refs, setRefs, typed, smooth, root, v3root, was, error, setError, bad, setBad, blank, setBlank, ok, setOk, handOff, load, lo, hi, open, steps, choose, showTimes, today, week, month, slide, setSlide, swipe, shift, daysBox, mstep, setMstep, switchView, monthGrid, big, slotsBox, gs, seen, slotsW, setSlotsW, slotsRO, slotsRef, at, lastPick, refit, first, shown, atStart, book, grow, refill, busy, okMark, swipeProps, v3paid, v3steps, v3sub, heldBar, v3plain };
+  return { path, title, className, fallback, v3, onPicked, username, slug, tz, clockHere, here, setHere, length, needsWhere, opt, setOpt, via, setVia, ask, setAsk, session, booked, setBooked, days, state, held, setHeld, orb, setOrb, jg, view, setView, anchor, setAnchor, pick, setPick, arrow, chosen, setChosen, step, setStep, swipeX, wheelGate, stripEl, stripRef, more, setMore, paid, deposit, setDeposit, refs, setRefs, typed, smooth, root, v3root, was, error, setError, bad, setBad, blank, setBlank, ok, setOk, handOff, load, lo, hi, open, steps, choose, showTimes, today, week, month, slide, setSlide, swipe, shift, daysBox, mstep, setMstep, switchView, monthGrid, big, slotsBox, gs, seen, slotsW, setSlotsW, slotsRO, slotsRef, at, lastPick, refit, first, shown, atStart, book, grow, refill, busy, okMark, swipeProps, v3paid, v3steps, v3sub, heldBar, v3plain };
 }
 
 type Picker = ReturnType<typeof usePicker>;
