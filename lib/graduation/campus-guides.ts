@@ -40,7 +40,7 @@ export const CAMPUS_GUIDES: CampusGuide[] = [
       "Where I take SJSU graduation photos: Tower Hall, the palm walk, the San Jose State sign and the glass walkways. Light, timing and a route for one session.",
     h1: "Best spots for SJSU grad photos",
     kicker: "San Jose State · Campus guide",
-    lead: "I shoot grads at SJSU every spring, so I know this campus well. Here are the spots I take people to, and when the light is best at each one.",
+    lead: "I shoot grads at SJSU every spring, so I know this campus well. Here are the spots I take people to, and when the light is best at each.",
     spots: [
       {
         name: "Tower Hall and Tower Lawn",
