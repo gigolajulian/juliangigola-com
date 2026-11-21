@@ -24,4 +24,10 @@ describe("lightbox", () => {
     fireEvent.click(screen.getByRole("button", { name: "Close" }));
     expect(onOpenChange).toHaveBeenCalledWith(false);
   });
+
+  it("counts by the page's own items when told where the visitor is (Cover art: a back is the same release)", () => {
+    render(<Lightbox frames={frames} name="Cover Art" open index={1} onOpenChange={() => {}} step={() => {}} settled={false} place={[1, 23]} />);
+    expect(screen.getByRole("dialog", { name: "Cover Art, frame 1 of 23" })).toBeTruthy();
+    expect(screen.getByText("1 / 23")).toBeTruthy();
+  });
 });

@@ -518,14 +518,18 @@ export function Lightbox({
   step,
   settled,
   note,
+  place,
 }: {
   frames: Frame[];
   /** What the sequence is, for the dialog's accessible title. */
   name: string;
   /** A line of the page's own above the viewer's floor (Cover art's sound line). */
   note?: React.ReactNode;
+  /** Where the counter says the visitor is, when a step is not one item (Cover art: a sleeve's back is the same release). */
+  place?: [at: number, of: number];
 } & Omit<ReturnType<typeof useLightbox>, "show">) {
   const current = frames[index];
+  const [at, of] = place ?? [index + 1, frames.length];
   const { ref: picture, handlers: swipe } = useSwipe({
     onStep: step,
     onDismiss: () => onOpenChange(false),
@@ -547,7 +551,7 @@ export function Lightbox({
           className="fixed inset-0 z-50 flex flex-col outline-none"
         >
           <VisuallyHidden.Root>
-            <Dialog.Title>{`${name}, frame ${index + 1} of ${frames.length}`}</Dialog.Title>
+            <Dialog.Title>{`${name}, frame ${at} of ${of}`}</Dialog.Title>
           </VisuallyHidden.Root>
 
           {/* Anywhere that is not the picture closes it. The check is against
@@ -593,7 +597,7 @@ export function Lightbox({
               className="label text-muted-foreground"
               style={{ opacity: 0 }}
             >
-              {index + 1} / {frames.length}
+              {at} / {of}
             </p>
 
             <div
