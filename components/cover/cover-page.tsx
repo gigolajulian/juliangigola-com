@@ -24,7 +24,7 @@ export function CoverPage({ off, releases, onwards }: { off: React.ReactNode; re
         </header>
         <CoverArtGallery releases={releases} v4 />
         <div className="cv4a">
-          {/* The same ask as a project page (components/v3/project.tsx), tagged so the form opens on Cover art. */}
+          {/* The same ask as a project page (components/portfolio/project.tsx), tagged so the form opens on Cover art. */}
           <div className="pj-ask">
             <div>
               <h2>Want something like this?</h2>

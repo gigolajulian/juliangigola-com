@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { shareOg } from "@/lib/og/share";
 import { MOTION_SEO } from "@/lib/seo";
 import { CONTENT } from "@/lib/content";
-import { V3Video } from "@/components/v3/video";
+import { V3Video } from "@/components/portfolio/video";
 
 /* ── /work/video ──────────────────────────────────────────────────
  * The moving work, as one more filter on the work index: the `(index)`

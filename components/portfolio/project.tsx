@@ -1,0 +1,203 @@
+import Image from "next/image";
+import Link from "next/link";
+import { Mark } from "@/components/site/duo";
+import { BtsCredit, BtsPageGrid } from "@/components/bts/bts";
+import { BackLink } from "@/components/site/back-link";
+import { billing, markFor, titleCase } from "@/lib/work/work";
+import { tailHole } from "@/lib/sheet";
+import { V4Project } from "@/components/portfolio/project-viewer";
+import type { Frame, Project } from "@/lib/work-types";
+
+/* JG V3 project page (leftovers sheet, card B; Julian: vertical, with the
+   client's logo where there is one). The head: back link, the set's name in
+   title case, the logo on the right; then the opening frame wide, the rest
+   in three uneven columns, the credits as rows, and the next project. */
+
+const wide = (f: Frame) => f.width > f.height;
+
+/* A client or brand is credited by its name, never "@wired" (Julian,
+   2026-10-27); people keep their @handle. Still links to the Instagram. */
+const ORG = /^(client|brand)$/i;
+type Credit = Project["credits"][number];
+/* The handle: the Instagram field, else one typed into the name
+   ("@anisajadee", "Ryan Ohaya (@carti.kun)"), else Julian's own. */
+const handleOf = (c: Credit) =>
+  c.instagram ?? c.name.match(/@([\w.]+)/)?.[1] ?? (/^julian gigola$/i.test(c.name.trim()) ? "juliangigola" : null);
+/* The name leads; the @handle takes its place on hover.
+   A name typed as only a handle has no name to lead with. */
+const nameOf = (c: Credit) => {
+  const n = c.name.replace(/\s*\(@[\w.]+\)/, "").trim();
+  return n.startsWith("@") ? null : n;
+};
+const creditLabel = (c: Credit, h: string | null) =>
+  ORG.test(c.role.trim()) ? c.name.replace(/^@/, "") : (nameOf(c) ?? (h ? `@${h}` : c.name));
+
+/* The commission form's types (components/contact/inquire.tsx TYPE) by discipline. */
+const KIND: Record<string, string> = { campaigns: "campaign", editorial: "editorial", coverart: "coverart", "artist-presskit": "presskit", "music-video": "video", events: "event" };
+const kindOf = (p: Project) => p.categories.map((c) => KIND[c.slug]).find(Boolean);
+
+export function V3Project({ project, next }: { project: Project; next?: { href: string; name: string; cover?: Frame } }) {
+  const mark = markFor(project.slug);
+  const client = billing(project);
+  const sub = [client, project.categories[0] && titleCase(project.categories[0].name)].filter(Boolean).join(" · ");
+  const name = titleCase(project.headline ?? project.name);
+  const alt = (a: string) => a || `${name} by Julian Gigola`;
+  /* The hero (Julian): a vertical full bleed on the right, two verticals under
+     the title; a set that is mostly horizontal gets one horizontal there instead. */
+  const imgs = project.images;
+  const across = imgs.filter(wide).length > imgs.length / 2;
+  /* A set whose cover is a horizontal opens on that cover, full bleed under the title:
+     the page used to open on the first vertical, a different picture from the one pressed. */
+  const bleed = !!imgs[0] && wide(imgs[0]);
+  const big = bleed ? imgs[0] : (imgs.find((f) => !wide(f)) ?? imgs[0]);
+  const lead = bleed ? [] : across ? imgs.filter((f) => f !== big && wide(f)).slice(0, 1) : imgs.filter((f) => f !== big && !wide(f)).slice(0, 2);
+  const rest = imgs.filter((f) => f !== big && !lead.includes(f));
+  const pic = (f: Frame, sizes: string, priority = false) => (
+    <Image src={f.src} alt={alt(f.alt)} width={f.width} height={f.height} sizes={sizes} priority={priority} style={{ background: f.color }} />
+  );
+  /* The credits fill the cells the sheet's last row leaves empty, when they fit there
+     (up to six names, one a line); else they keep their own row under it. */
+  const tail = tailHole(rest);
+  const hole = tail && project.credits.length && project.credits.length <= 6 ? tail : null;
+  const half = Math.floor(project.credits.length / 2);
+  const credits = (
+    <section className="sv-row">
+      <h2 className="lbl mute">Credits</h2>
+      {/* Two columns on a large screen, read down then across; an odd count puts the extra name on the right. Not in a one-cell hole. */}
+      <ul className={hole?.span === 1 ? undefined : "cr2"}>
+        {project.credits.map((c, i) => {
+          const h = handleOf(c);
+          const label = creditLabel(c, h);
+          const av = c.avatar ?? (h === "juliangigola" ? "/people/juliangigola.jpg" : null);
+          return (
+            <li key={`${c.role}${c.name}`} style={{ "--r": i < half ? i + 1 : i - half + 1, "--c": i < half ? 1 : 2 } as React.CSSProperties}>
+              <span className="mute">{c.role}</span>
+              <b>
+                {h ? (
+                  <a href={`https://instagram.com/${h}`} target="_blank" rel="noopener noreferrer">
+                    {/* Their avatar, on hover (always on a phone); the initial where there is none. */}
+                    <span className="cr-av" aria-hidden="true">
+                      {av ? <Image src={av} alt="" fill sizes="28px" /> : label.replace(/^@/, "")[0]}
+                    </span>
+                    {label === `@${h}` || ORG.test(c.role.trim()) ? (
+                      label
+                    ) : (
+                      <>
+                        <span className="cr-n">{label}</span>
+                        <span className="cr-h">@{h}</span>
+                      </>
+                    )}
+                  </a>
+                ) : (
+                  label
+                )}
+              </b>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+  return (
+    <div className="v3 contents">
+      <section className="v3page" id="p-project">
+        <div className={bleed ? "pj-hero bleed" : across ? "pj-hero two" : "pj-hero"}>
+          <header className="pj-top">
+            <BackLink className="lbl mute pj-back" />
+            {/* On a phone the logo moves up to the Back row (Julian); the one on the frame hides there. */}
+            {mark ? (
+              <span className="pj-mark-top">
+                <Mark slug={mark.slug} name={mark.name} h={28} />
+              </span>
+            ) : null}
+            <div className="pj-row">
+              <h1 className="pg-t">{name}</h1>
+              {/* The count is what the page shows: a tall window leaves the second frame under the title out (v3.css), and says one fewer. */}
+              <p className="lbl mute">
+                {sub ? `${sub} · ` : null}
+                <span className="pj-ct">{imgs.length}</span>
+                {lead.length > 1 ? <span className="pj-ct tall">{imgs.length - 1}</span> : null} frames
+              </p>
+            </div>
+            {project.intent ? <p className="sv-lead">{project.intent}</p> : null}
+          </header>
+          {big ? (
+            <figure className="pj-big" style={{ aspectRatio: `${big.width} / ${big.height}`, "--ar": big.width / big.height } as React.CSSProperties}>
+              <Image src={big.src} alt={alt(big.alt)} fill sizes={bleed ? "100vw" : across ? "(max-width: 900px) 100vw, 60vw" : "(max-width: 900px) 100vw, 40vw"} priority style={{ objectFit: "cover", background: big.color }} />
+              {/* The client's logo signs the opening frame, bottom right (Julian). */}
+              {mark ? (
+                <span className="pj-mark">
+                  <Mark slug={mark.slug} name={mark.name} h={28} />
+                </span>
+              ) : null}
+            </figure>
+          ) : null}
+          {lead.length ? (
+            <div className="pj-lead">
+              {lead.map((f) => (
+                <figure key={f.src} className="pj-r" style={{ "--arn": f.width / f.height } as React.CSSProperties}>{pic(f, "(max-width: 900px) 100vw, 30vw", true)}</figure>
+              ))}
+            </div>
+          ) : null}
+        </div>
+        {/* The rest as a contact sheet: even rows of three verticals; a horizontal takes the whole row at its own shape. */}
+        <div className="pj-flow">
+          {rest.map((f) => (
+            <figure key={f.src} className={wide(f) ? "pj-r w" : "pj-r"} style={wide(f) ? ({ "--ar": `${f.width} / ${f.height}` } as React.CSSProperties) : undefined}>
+              {pic(f, wide(f) ? "(max-width: 700px) 100vw, 66vw" : "(max-width: 700px) 100vw, 33vw")}
+            </figure>
+          ))}
+          {hole ? (
+            <div className="pj-cr" style={{ "--row": hole.row, "--col": hole.col, "--span": hole.span } as React.CSSProperties}>
+              {credits}
+            </div>
+          ) : null}
+        </div>
+        <div className="sv-info">
+          {/* ?v4pages=m2p: behind the scenes after the frames and before the credits, smaller than the work.
+              Credits that sit in the sheet's hole get a second copy here, swapped in by v4pages.css. */}
+          {project.bts ? (
+            <section className="sv-row pj-bts">
+              <div>
+                <h2 className="lbl mute">Behind the scenes</h2>
+                <BtsCredit bts={project.bts} />
+              </div>
+              <BtsPageGrid bts={project.bts} name={name} />
+            </section>
+          ) : null}
+          {hole ? (project.bts ? <div className="pj-cr2">{credits}</div> : null) : credits}
+          {/* The page closes on an ask (critique, 2026-10-29), pre-tagged so the form opens on this kind of job. */}
+          <div className="pj-ask">
+            <div>
+              <h2>Want something like this?</h2>
+              <p className="mute">Tell me what you have in mind and I&apos;ll come back with an approach and a quote.</p>
+            </div>
+            <Link className="btn fill" href={`/contact/form?${new URLSearchParams({ ...(kindOf(project) ? { type: kindOf(project)! } : {}), ref: name })}`}>Inquire</Link>
+          </div>
+          {next ? (
+            <Link className="pj-next" href={next.href} data-sink>
+              <span className="lbl mute">Next</span>
+              {/* The next set's cover, so it can grow into that page's hero (page-fly.tsx). */}
+              {next.cover ? (
+                <span className="pj-nx">
+                  <Image src={next.cover.src} alt="" fill sizes="120px" style={{ objectFit: "cover", background: next.cover.color }} />
+                </span>
+              ) : null}
+              {/* `?v4pages=next`: the same cover as a full stage (v4pages.css). Hidden otherwise, and lazy, so it is not fetched. */}
+              {next.cover ? (
+                <span className="pj-stage">
+                  <Image src={next.cover.src} alt="" fill sizes="100vw" style={{ objectFit: "cover", background: next.cover.color }} />
+                </span>
+              ) : null}
+              {/* --lw: its longest word, so a phone shrinks the name to keep each word whole (Julian). */}
+              <b style={{ "--lw": Math.max(...next.name.replace(/^Next: /, "").split(" ").map((w) => w.length)) } as React.CSSProperties}>{titleCase(next.name.replace(/^Next: /, ""))}</b>
+              <span aria-hidden>&rarr;</span>
+            </Link>
+          ) : null}
+        </div>
+      </section>
+      {/* The page's frames in the order they are laid out, for the viewer (`?v4pages=view`). */}
+      <V4Project frames={[...(big ? [big] : []), ...lead, ...rest].map((f) => ({ s: project.slug, src: f.src, alt: alt(f.alt), wide: wide(f), sq: f.width === f.height }))} />
+    </div>
+  );
+}

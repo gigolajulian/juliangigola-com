@@ -3,9 +3,9 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Duo } from "@/components/v3/duo";
-import { V3BookFlow } from "@/components/v3/book";
-import { SESSIONS } from "@/lib/flags/v3";
+import { Duo } from "@/components/site/duo";
+import { V3BookFlow } from "@/components/booking/book";
+import { SESSIONS } from "@/lib/photos-and-sessions";
 import { matches } from "@/lib/device";
 import { BOOK_ROWS, QUOTE_OPTS, type BookRow, type QuoteOpt } from "@/lib/v4-home/data";
 import { useNextOpen } from "./next-open";

@@ -338,56 +338,56 @@ states its rule inline. `SPEC-home-scroll.md` citations point at
 ### components/splash/split-splash.ts
 - 2026-11-07: const UP = 800; // the monogram fading in from nothing
 
-### components/v3/about.tsx
+### components/about/about.tsx
 - 2026-11-04: no-break spaces so they never split.
 - 2026-11-15: ?v4pages=a2 swaps the label; v4pages.css shows one of the two.
 
-### components/v3/book.tsx
+### components/booking/book.tsx
 - 2026-11-04: stays lit beside it while the route loads on a slow tablet.
 - 2026-11-04: tablets, as ruled rows under the photo beside the calendar.
 - 2026-11-04: on the confirmation), the turnaround, then the price.
 
-### components/v3/canvas.tsx
+### components/portfolio/canvas.tsx
 - 2026-11-07: canvas mock approved.
 - 2026-11-07: Upright frames sit as 3:4 on the field, like the grid and strip; square and wide keep theirs. The opened frame shows the whole photo.
 
-### components/v3/chrome.tsx
+### components/site/chrome.tsx
 - 2026-10-28: Desktop keeps the header: it and the toolbar are one glass bar.
 
-### components/v3/flow.tsx
+### components/booking/flow.tsx
 - 2026-11-06: errors live in the field, no box.
 - 2026-11-04: ; the count stays in the label.
 
-### components/v3/home.tsx
+### components/home/rollback.tsx
 - 2026-10-24: "make them go in a loop" (the strip used to follow the scroll). "swipe left and right to see the rest".
 - 2026-10-27: Never the same logo twice on screen: on a strip
 
-### components/v3/nav-ink.ts
+### components/site/nav-ink.ts
 - 2026-11-17: one ink for the whole bar.
 - 2026-11-16: 3. Page words and buttons fade out as they slide under the bar; photos do not.
 - 2026-11-15: The v4 home: the bar's wordmark waits until the hero's big name has gone, faded by hero.ts
 
-### components/v3/page-fly.tsx
+### components/site/page-fly.tsx
 - 2026-11-17: A photo only becomes the hero when it is the hero. Pressed on another frame of the
 - 2026-11-18: A finger too. A scroll starts like a press, so under a finger the photo waits 90ms for the
 
-### components/v3/project.tsx
+### components/portfolio/project.tsx
 - 2026-10-27: The name leads; the @handle takes its place on hover.
 - 2026-11-18: A set whose cover is a horizontal opens on that cover, full bleed under the title:
 - 2026-11-06: Two columns on a large screen, read down then across; an odd count puts the extra name on the right. Not in a one-cell hole.
 - 2026-11-05: The rest as a contact sheet: even rows of three verticals; a horizontal takes the whole row at its own shape.
 
-### components/v3/service.tsx
+### components/booking/service.tsx
 - 2026-11-10: The empty side of the title, filled with this session's own frames at their own shape.
 
-### components/v3/sleeves.tsx
+### components/cover/sleeves.tsx
 - 2026-10-27: from the Sleeve Viewer mock.
 
 ### components/v3/smooth-scroll.tsx
 - 2026-11-10: Native scroll in proof galleries: Lenis's glide read as a delay on a Mac trackpad.
 - 2026-11-14: . `?lerp=0.1` tries another value there.
 
-### components/v3/work.tsx
+### components/portfolio/work.tsx
 - 2026-11-05: the Front / Back label goes under the art.
 - 2026-11-04: --n: a long name sets smaller to stay near two lines; --w: its longest word still fits the cover's width.
 - 2026-11-05: A two-sided sleeve's Front / Back switch, on the cell and in the viewer.
@@ -399,7 +399,7 @@ states its rule inline. `SPEC-home-scroll.md` citations point at
 - 2026-11-04: Name, then discipline, both on the photo, as in the grid.
 - 2026-11-05: here: the viewer's bar has the switch.
 
-### components/v4/foot.tsx
+### components/site/foot.tsx
 - 2026-11-16: the whole grid while its photos drift dropped frames.
 
 ### components/analytics/visit-trail.tsx
@@ -532,7 +532,7 @@ states its rule inline. `SPEC-home-scroll.md` citations point at
 ### lib/theme-color.ts
 - 2026-11-16: The browser bar's colour per theme: pure white and pure black,
 
-### lib/flags/v3.ts
+### lib/photos-and-sessions.ts
 - 2026-11-14: the model test shows the name, an hour, a week and the $100 deposit, with the rate quoted on the call.
 - 2026-11-10: Desktop gets sian/01 with 200px of her own backdrop added on top, so her face sits at the panel's middle.
 
