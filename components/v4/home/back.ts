@@ -4,6 +4,7 @@ import * as React from "react";
 import { jumpTo, scrollGoal } from "@/components/v3/smooth-scroll";
 import { media } from "@/lib/device";
 import { painted } from "@/lib/painted";
+import { tell } from "./motion/engine";
 
 /* Back to the home from any page of the site lands where the visitor left it, from the first paint.
    Safari put back a scroll saved before the held rows' last scroll (MAC on #1313), and from /about showed that page's foot
@@ -111,7 +112,9 @@ export function useBackHome() {
     if (row && !media("held").matches) row.scrollLeft = spot.x;
     // Back into Cover art: the sleeves' lazy art painted grey for up to 1.3s on an iPhone (MAC, v3.0.336). Load and decode it now, with the rest.
     const items = row && spot.b === "covers" ? [...row.querySelectorAll<HTMLElement>(".mt-item")] : [];
-    const step = items.length > 1 ? items[1].offsetLeft - items[0].offsetLeft : 0, i = step ? Math.round(spot.x / step) : 0;
+    const step = items.length > 1 ? items[1].offsetLeft - items[0].offsetLeft : 0, i = step ? Math.min(items.length - 1, Math.max(0, Math.round(spot.x / step))) : 0;
+    // the caption names that cover from the first paint, not the first one for a frame or two until the row's scroll event (Julian)
+    if (items.length && !media("held").matches) tell(row!.closest("section")!, { cur: i }, false);
     for (const it of items.slice(Math.max(0, i - 1), i + 2)) {
       const im = it.querySelector<HTMLImageElement>(".face img:not(.back)");
       if (!im) continue;

@@ -56,11 +56,14 @@ describe("home Back spot", () => {
       return im;
     });
     painted.set("/c/3.jpg", "/seen-3.jpg");
+    const told: unknown[] = [];
+    sec.addEventListener("mt-tell", (e) => told.push((e as CustomEvent).detail));
     keepSpot({ b: "covers", off: 0, x: 900 });
     dispatchEvent(new PopStateEvent("popstate"));
     renderHook(() => useBackHome());
     expect(ims.map((im) => im.loading ?? im.getAttribute("loading"))).toEqual(["lazy", "lazy", "eager", "eager", "eager"]); // cover 4 of 5 and the two beside it
     expect(sec.querySelectorAll("img.back[loading=eager]").length).toBe(0);
+    expect(told).toEqual([{ cur: 3, now: false }]); // the caption names cover 4 before the first paint
     const face = ims[3].parentElement!;
     expect(face.style.background).toContain("/seen-3.jpg");
     await new Promise((r) => setTimeout(r)); // decode resolved: the sleeve's own copy is on top, the under-copy goes

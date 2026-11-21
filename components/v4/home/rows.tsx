@@ -49,7 +49,8 @@ const COVERS = COVER_KEYS.map((k) => COVER_RELEASES.find((r) => r.slug === k)).f
 export function MtCovers() {
   const row = React.useRef<HTMLDivElement>(null);
   const [cur, setCur] = React.useState(0);
-  React.useEffect(() => {
+  // a layout effect: listening before the home's Back restore (back.ts) tells the cover, so the caption is right from the first paint
+  React.useLayoutEffect(() => {
     const el = row.current!;
     let raf = 0;
     const held = media("held");
