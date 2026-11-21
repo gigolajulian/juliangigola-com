@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { Intro } from "@/components/splash/intro";
+import { JG_INNER } from "@/components/splash/jg-cover";
 import { SPLASH_RUN } from "@/lib/flags/splash-run";
 import { PhotoNotice } from "@/components/photo-notice";
 import { GlassLight } from "@/components/effects/glass-light";
@@ -176,11 +177,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             site showing and then a curtain dropping over it is worse than
             no curtain at all.
 
-            Three conditions (the homepage only: Julian, 2026-11-21, "we
-            dont need splash between each page", so a visit that lands on
-            an inner page or opens one in a new tab goes straight to it;
-            not seen yet; motion not turned down), and `?intro=1` to see
-            it again on demand, on any page. On the homepage the
+            Three conditions (the homepage only; not seen yet; motion not
+            turned down), and `?intro=1` to see it again on demand. A first
+            arrival on an inner page gets the booking wait's JG cover
+            instead, once a visit on its own key (`jg-cover-intro`), so the
+            homepage's opening still plays when the visitor gets there
+            (Julian, 2026-11-21: "A, once per visit"). Not on /book, which
+            puts up its own. On the homepage the
             opening is J and G round a window of frames (`split-splash.ts`),
             which opens into the hero; `?splash=burst`
             keeps the burst. Other pages have no hero to land
@@ -191,7 +194,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             failure simply means no opening. */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){var mo=true;try{var k3="jg-v3motion-off",q3=location.search;if(/[?&]v3motion=0/.test(q3))sessionStorage.setItem(k3,"1");else if(/[?&]v3motion/.test(q3))sessionStorage.removeItem(k3);mo=!sessionStorage.getItem(k3)}catch(e){}if(mo)document.documentElement.dataset.v3motion="";try{var kb="jg-solidhdr";if(/[?&]blur=0/.test(q3))sessionStorage.setItem(kb,"1");else if(/[?&]blur/.test(q3))sessionStorage.removeItem(kb);if(sessionStorage.getItem(kb))document.documentElement.dataset.solidhdr=""}catch(e){}try{var kn="jg-navfx";if(/[?&]navfx=0/.test(q3))sessionStorage.removeItem(kn);else if(/[?&]navfx/.test(q3))sessionStorage.setItem(kn,"1");if(sessionStorage.getItem(kn))document.documentElement.dataset.navfx=""}catch(e){}try{if(!matchMedia("(prefers-reduced-motion: reduce)").matches){document.documentElement.dataset.moves=""}}catch(e){}try{var q=location.search;try{if(/[?&]sleeve=1/.test(q))sessionStorage.setItem("jg-sleeve","1");if(/[?&]sleeve=0/.test(q))sessionStorage.removeItem("jg-sleeve");if(sessionStorage.getItem("jg-sleeve"))document.documentElement.dataset.sleeve=""}catch(e){}var mt=false;try{if(/[?&]mtscroll=1/.test(q))sessionStorage.setItem("jg-mtscroll","1");if(/[?&]mtscroll=0/.test(q))sessionStorage.removeItem("jg-mtscroll");if(${V4_HOME ? "1||" : ""}sessionStorage.getItem("jg-mtscroll")){document.documentElement.dataset.mtscroll="";mt=location.pathname==="/"}}catch(e){}if(mt&&mo&&!/[?&]intro=0/.test(q)&&!matchMedia("(prefers-reduced-motion: reduce)").matches&&(/[?&]intro=1/.test(q)||!sessionStorage.getItem("jg-intro"))){var rr=document.documentElement;rr.dataset.mtIntro="1";setTimeout(function(){if(rr.dataset.mtIntro==="1"&&!("mtOwn" in rr.dataset)){delete rr.dataset.mtIntro;rr.dataset.mtLate=""}},6000)}if(/[?&]intro=0/.test(q)||!mo||mt)return;var burst=/[?&]splash=burst/.test(q);var split=/[?&]splash=split/.test(q);var force=burst||split||/[?&]intro=1/.test(q);var seen=false;try{seen=!!sessionStorage.getItem("jg-intro")}catch(e){}var calm=matchMedia("(prefers-reduced-motion: reduce)").matches;var admin=location.pathname.indexOf("/admin")===0||location.pathname.indexOf("/proof/")===0||location.pathname.indexOf("/delivery/")===0||location.pathname.indexOf("/contract/")===0||/^(admin|leads)[.]/.test(location.hostname);if(force||(!admin&&!seen&&!calm&&location.pathname==="/")){var r=document.documentElement;r.dataset.intro="1";if(split||(location.pathname==="/"&&!burst))r.dataset.splash="split";else if(burst)r.dataset.splash="burst";else r.dataset.splash="name";r.style.setProperty("--jg-blink-at",Math.round(100+Math.random()*160)+"ms")}}catch(e){}})()`,
+            __html: `(function(){var mo=true;try{var k3="jg-v3motion-off",q3=location.search;if(/[?&]v3motion=0/.test(q3))sessionStorage.setItem(k3,"1");else if(/[?&]v3motion/.test(q3))sessionStorage.removeItem(k3);mo=!sessionStorage.getItem(k3)}catch(e){}if(mo)document.documentElement.dataset.v3motion="";try{var kb="jg-solidhdr";if(/[?&]blur=0/.test(q3))sessionStorage.setItem(kb,"1");else if(/[?&]blur/.test(q3))sessionStorage.removeItem(kb);if(sessionStorage.getItem(kb))document.documentElement.dataset.solidhdr=""}catch(e){}try{var kn="jg-navfx";if(/[?&]navfx=0/.test(q3))sessionStorage.removeItem(kn);else if(/[?&]navfx/.test(q3))sessionStorage.setItem(kn,"1");if(sessionStorage.getItem(kn))document.documentElement.dataset.navfx=""}catch(e){}try{if(!matchMedia("(prefers-reduced-motion: reduce)").matches){document.documentElement.dataset.moves=""}}catch(e){}try{var q=location.search;try{if(/[?&]sleeve=1/.test(q))sessionStorage.setItem("jg-sleeve","1");if(/[?&]sleeve=0/.test(q))sessionStorage.removeItem("jg-sleeve");if(sessionStorage.getItem("jg-sleeve"))document.documentElement.dataset.sleeve=""}catch(e){}var mt=false;try{if(/[?&]mtscroll=1/.test(q))sessionStorage.setItem("jg-mtscroll","1");if(/[?&]mtscroll=0/.test(q))sessionStorage.removeItem("jg-mtscroll");if(${V4_HOME ? "1||" : ""}sessionStorage.getItem("jg-mtscroll")){document.documentElement.dataset.mtscroll="";mt=location.pathname==="/"}}catch(e){}if(mt&&mo&&!/[?&]intro=0/.test(q)&&!matchMedia("(prefers-reduced-motion: reduce)").matches&&(/[?&]intro=1/.test(q)||!sessionStorage.getItem("jg-intro"))){var rr=document.documentElement;rr.dataset.mtIntro="1";setTimeout(function(){if(rr.dataset.mtIntro==="1"&&!("mtOwn" in rr.dataset)){delete rr.dataset.mtIntro;rr.dataset.mtLate=""}},6000)}if(/[?&]intro=0/.test(q)||!mo||mt)return;var burst=/[?&]splash=burst/.test(q);var split=/[?&]splash=split/.test(q);var force=burst||split||(/[?&]intro=1/.test(q)&&location.pathname==="/");var seen=false;try{seen=!!sessionStorage.getItem("jg-intro")}catch(e){}var calm=matchMedia("(prefers-reduced-motion: reduce)").matches;var admin=location.pathname.indexOf("/admin")===0||location.pathname.indexOf("/proof/")===0||location.pathname.indexOf("/delivery/")===0||location.pathname.indexOf("/contract/")===0||/^(admin|leads)[.]/.test(location.hostname);if(location.pathname!=="/"&&location.pathname.indexOf("/book")!==0&&!admin&&!calm){var kc="jg-cover-intro",sc=false;try{sc=!!sessionStorage.getItem(kc);sessionStorage.setItem(kc,"1")}catch(e){sc=true}if(!sc||/[?&]intro=1/.test(q))document.documentElement.dataset.coverIntro=""}if(force||(!admin&&!seen&&!calm&&location.pathname==="/")){var r=document.documentElement;r.dataset.intro="1";if(split||(location.pathname==="/"&&!burst))r.dataset.splash="split";else if(burst)r.dataset.splash="burst";else r.dataset.splash="name";r.style.setProperty("--jg-blink-at",Math.round(100+Math.random()*160)+"ms")}}catch(e){}})()`,
           }}
         />
         {/* `data-v4pages`: the inner-pages plan on trial (lib/flags/v4pages.ts). `?v4pages` turns
@@ -206,6 +209,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         />
       </head>
       <body className="min-h-full flex flex-col">
+        {/* The JG cover for a first arrival on an inner page (`data-cover-intro`, set in the head), up before the
+            first paint like the booking wait's and opened once the page is ready (`jg-cover.ts`, `JG_INNER`). */}
+        <script dangerouslySetInnerHTML={{ __html: `if("coverIntro" in document.documentElement.dataset){${JG_INNER}}` }} />
         {/* Who Julian is, where he works and what can be booked, for
             search engines and AI answers to read rather than infer. One
             graph on every page; see `lib/seo.ts`. */}
