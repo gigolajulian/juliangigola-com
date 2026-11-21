@@ -127,7 +127,7 @@ export function useBackHome() {
       // the image only: the shorthand also cleared the card colour, so the disc showed through until it decoded
       if (url) Object.assign(face.style, { backgroundImage: `url("${url}")`, backgroundSize: "cover", backgroundPosition: "center" });
       const shown = im.decode().catch(() => {});
-      if (it === items[i]) holdLanding(shown); // the Back's snapshot of the home waits for this cover (page-transition.tsx)
+      holdLanding(shown); // the Back's snapshot of the home waits for these covers, the told one and its neighbours (page-transition.tsx)
       shown.then(() => url && Object.assign(face.style, { backgroundImage: "", backgroundSize: "", backgroundPosition: "" }));
     }
     // a sleeve still marked hovered from before the click turned to its back and then away on arrival (Safari, MAC on 23412f74): unturned at once
