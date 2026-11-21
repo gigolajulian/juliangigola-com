@@ -4,11 +4,11 @@ import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ReferencePicks } from "@/components/reference-picks";
-import { V3Foot } from "@/components/v3/chrome";
-import { CallDialog } from "@/components/v3/book";
-import { Duo } from "@/components/v3/duo";
-import { Check, Failed, Field, FlowShell, Hidden, NEED_MSG, checkYou, first, useEnquiry } from "@/components/v3/flow";
-import { CALL_CARD, DOORS } from "@/lib/flags/v3";
+import { V3Foot } from "@/components/site/chrome";
+import { CallDialog } from "@/components/booking/book";
+import { Duo } from "@/components/site/duo";
+import { Check, Failed, Field, FlowShell, Hidden, NEED_MSG, checkYou, first, useEnquiry } from "@/components/booking/flow";
+import { CALL_CARD, DOORS } from "@/lib/photos-and-sessions";
 
 /* JG V3 Inquire (master v39, /inquire and /inquire/form). Both forms post
    through the site's enquiry action (`app/contact/actions.ts`) with its

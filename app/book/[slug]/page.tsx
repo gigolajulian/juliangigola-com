@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import { BOOK_MENU } from "@/lib/booking/booking";
-import { V3Book } from "@/components/v3/book";
-import { SESSIONS, isSession } from "@/lib/flags/v3";
+import { V3Book } from "@/components/booking/book";
+import { SESSIONS, isSession } from "@/lib/photos-and-sessions";
 import { shareOg } from "@/lib/share";
 
 /* One session's booking on a page of its own, for

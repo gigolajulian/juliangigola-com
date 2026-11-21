@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { AboutGallery } from "@/components/v3/about-gallery";
+import { AboutGallery } from "@/components/about/about-gallery";
 
 describe("AboutGallery", () => {
   it("shows the first caption and steps on a tick", () => {

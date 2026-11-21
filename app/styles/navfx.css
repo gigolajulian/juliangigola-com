@@ -2,7 +2,7 @@
    Mock: https://claude.ai/artifact/BuKhy4pxdjSgbLZBXmyQTA.
    One ground for the bar on every screen and for the phone menu: the page colour at 47%, a 24px blur with the
    colour under it lifted, a hairline. It is off at the top of a page and while the home hero shows
-   (`data-navtop`, set by components/v3/nav-ink.ts, which also picks white or black for each word). */
+   (`data-navtop`, set by components/site/nav-ink.ts, which also picks white or black for each word). */
 :root[data-navfx]{--nav-veil:47%;--nav-teal:oklch(.51 .09 195)}
 /* Light page: the line under the bar is barely there. Dark keeps --line. */
 @media (prefers-color-scheme:light){:root[data-navfx]:not([data-theme="dark"]){--nav-line:color-mix(in srgb,var(--line) 30%,transparent)}}

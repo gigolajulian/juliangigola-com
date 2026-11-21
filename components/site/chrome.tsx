@@ -3,11 +3,11 @@
 import * as React from "react";
 import { mtscroll, V4_HOME } from "@/lib/v4-home/switch";
 import { useV4pages } from "@/lib/flags/v4pages";
-import { V4Foot } from "@/components/v4/foot";
+import { V4Foot } from "@/components/site/foot";
 import Link from "next/link";
 import { THEME_COLOR } from "@/lib/theme-color";
 import { usePathname } from "next/navigation";
-import { onLenisScroll, scrollTop } from "./smooth-scroll";
+import { onLenisScroll, scrollTop } from "../v3/smooth-scroll";
 import { useNavInk } from "./nav-ink";
 
 /* JG V3 chrome (master v39): the glass header, the phone menu, the theme

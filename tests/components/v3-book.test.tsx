@@ -8,7 +8,7 @@ HTMLDialogElement.prototype.showModal ??= function (this: HTMLDialogElement) {
   this.open = true;
 };
 
-import { CallDialog, V3Book, V3BookFlow } from "@/components/v3/book";
+import { CallDialog, V3Book, V3BookFlow } from "@/components/booking/book";
 
 describe("V3Book", () => {
   it("weddings is on request: the date step with the page's own heading", () => {

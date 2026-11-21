@@ -22,7 +22,7 @@ const phraseFor = (path: string) => {
   for (const c of slug) h = (h * 31 + c.charCodeAt(0)) >>> 0;
   return PHRASES[h % PHRASES.length];
 };
-/* The inquiry form's types (components/v3/inquire.tsx TYPE); weddings has none, so it opens the form plain. */
+/* The inquiry form's types (components/contact/inquire.tsx TYPE); weddings has none, so it opens the form plain. */
 const ASK: Record<string, string> = { music: "coverart", fashion: "editorial", commercial: "campaign" };
 // local on purpose: importing motion/engine.ts would pull the home motion engine into every inner page
 const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));

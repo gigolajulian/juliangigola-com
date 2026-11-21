@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { shareOg } from "@/lib/share";
-import { V3Commission } from "@/components/v3/inquire";
+import { V3Commission } from "@/components/contact/inquire";
 
 export const metadata: Metadata = {
   title: "Commissions",
