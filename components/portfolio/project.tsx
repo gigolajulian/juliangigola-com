@@ -122,9 +122,12 @@ export function V3Project({ project, next }: { project: Project; next?: { href: 
             </div>
             {project.intent ? <p className="sv-lead">{project.intent}</p> : null}
           </header>
+          {/* A portrait hero is as tall as the screen under the header and its padding (measured 100vh - 80px at 768 to 1440
+              tall) and as wide as its shape makes that, so `sizes` says so: 40vw undersold it on a 2x laptop (656px drawn,
+              1280 sent for 1312), and 64px oversold it a ladder step (QA on #1376). */}
           {big ? (
             <figure className="pj-big" style={{ aspectRatio: `${big.width} / ${big.height}`, "--ar": big.width / big.height } as React.CSSProperties}>
-              <Image src={big.src} alt={alt(big.alt)} fill sizes={bleed ? "100vw" : across ? "(max-width: 900px) 100vw, 60vw" : "(max-width: 900px) 100vw, 40vw"} priority style={{ objectFit: "cover", background: big.color }} />
+              <Image src={big.src} alt={alt(big.alt)} fill sizes={bleed ? "100vw" : across ? "(max-width: 900px) 100vw, 60vw" : `(max-width: 900px) 100vw, calc((100vh - 80px) * ${(big.width / big.height).toFixed(3)})`} priority style={{ objectFit: "cover", background: big.color }} />
               {/* The client's logo signs the opening frame, bottom right (Julian). */}
               {mark ? (
                 <span className="pj-mark">
