@@ -1,4 +1,5 @@
 import { depositFor } from "@/lib/booking/paid";
+import type { InboxKV as KV } from "@/lib/kv";
 
 /* ── invoices from a lead ─────────────────────────────────────────
  * An invoice from the lead, in the
@@ -133,3 +134,7 @@ export function cleanFrom(v: unknown): InvoiceFrom {
   const o = (v ?? {}) as Record<string, unknown>;
   return Object.fromEntries(FROM_KEYS.map((k) => [k, text(o[k], k === "notes" ? 600 : 80)])) as InvoiceFrom;
 }
+
+/** How many invoices carry a month's number (`invoices:1126`), so the next is 1126-2. */
+export const invoiceCountKey = (date: string) => `invoices:${mmyy(date)}`;
+export const invoicesTaken = async (kv: Pick<KV, "get">, date: string) => Number(await kv.get(invoiceCountKey(date))) || 0;
