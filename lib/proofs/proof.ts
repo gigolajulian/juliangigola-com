@@ -482,7 +482,7 @@ export async function passOk(p: Pick<Proof, "token" | "link" | "pass">, cookie: 
   }
 }
 /** Why a client cannot see a gallery right now, or null when they can. Closed is the clock (or a missing gallery). */
-export async function shut(p: Proof | null, cookie: string | null | undefined, secret: string | undefined): Promise<"closed" | "offline" | "locked" | null> {
+export async function shutReason(p: Proof | null, cookie: string | null | undefined, secret: string | undefined): Promise<"closed" | "offline" | "locked" | null> {
   if (!p) return "closed";
   if (p.offline) return "offline";
   if (!isOpen(p)) return "closed";
