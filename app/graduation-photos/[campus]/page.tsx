@@ -4,15 +4,15 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { shareOg } from "@/lib/og/share";
 import { LdJson } from "@/components/local-screens";
-import { PageFoot } from "@/components/v3/chrome";
-import { CampusSpots } from "@/components/v3/campus-spots";
+import { PageFoot } from "@/components/site/chrome";
+import { CampusSpots } from "@/components/booking/campus-spots";
 import { CAMPUS_GUIDES, campusGuide, campusHref } from "@/lib/graduation/campus-guides";
 import { getProject } from "@/lib/work/work";
 import { SITE } from "@/lib/seo";
 
 /* ── a campus guide ───────────────────────────────────────────────
  * Where I shoot grad photos on one campus, under the graduation
- * booking page. The booking page's layout (`components/v3/service.tsx`):
+ * booking page. The booking page's layout (`components/booking/service.tsx`):
  * the title, the spots' photographs, the spots and questions as rows.
  * The words are in `lib/graduation/campus-guides.ts`.
  * ─────────────────────────────────────────────────────────────── */

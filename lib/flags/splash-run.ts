@@ -1,6 +1,6 @@
 import { PROJECTS } from "@/lib/work/work";
 import ORDER from "@/lib/portfolio-order.json";
-import { HERO } from "@/lib/flags/v3";
+import { HERO } from "@/lib/photos-and-sessions";
 
 /* The splash's run of photographs: the first covers of the portfolio, in
    Julian's order (Work Order arrange page), so reordering the portfolio

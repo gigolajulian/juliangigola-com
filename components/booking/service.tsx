@@ -1,13 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
-import { PageFoot } from "@/components/v3/chrome";
-import { V3BookFlow } from "@/components/v3/book";
-import { Run } from "@/components/v3/flow";
-import { Doors } from "@/components/v3/home";
-import { ServiceBar } from "@/components/v3/service-bar";
+import { PageFoot } from "@/components/site/chrome";
+import { V3BookFlow } from "@/components/booking/book";
+import { Run } from "@/components/booking/flow";
+import { Doors } from "@/components/home/rollback";
+import { ServiceBar } from "@/components/booking/service-bar";
 import { BOOKING_PAGES, bookingHref, type BookingPage } from "@/lib/booking/booking";
 import { CAMPUS_GUIDES, campusHref } from "@/lib/graduation/campus-guides";
-import { SESSIONS, type SessionSlug } from "@/lib/flags/v3";
+import { SESSIONS, type SessionSlug } from "@/lib/photos-and-sessions";
 import type { Frame } from "@/lib/work-types";
 
 /* JG V3 service page (leftovers sheet, card A): the title on the left with

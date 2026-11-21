@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { V3Work, type WorkItem } from "@/components/v3/work";
+import { V3Work, type WorkItem } from "@/components/portfolio/work";
 import { PROJECTS, categoryLabel } from "@/lib/work/work";
 
 const WORK: WorkItem[] = PROJECTS.filter((p) => p.slug !== "realestate").map((p) => ({

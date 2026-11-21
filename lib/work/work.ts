@@ -675,7 +675,7 @@ export const categoryHref = (categorySlug: string): string => {
 
   if (!isListing(categorySlug)) return "/portfolio";
   /* The discipline pages are retired. A discipline is
-     /portfolio with its chip on (`components/v3/work.tsx` reads `?d=`), and
+     /portfolio with its chip on (`components/portfolio/work.tsx` reads `?d=`), and
      the old `/portfolio/<discipline>` addresses redirect there
      (`next.config.ts`). Automotive, Events, Places and Cover art share their
      slug with their one gallery, so those addresses are the project pages. */

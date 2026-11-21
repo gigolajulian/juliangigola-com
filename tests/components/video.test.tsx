@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { V3Video } from "@/components/v3/video";
+import { V3Video } from "@/components/portfolio/video";
 import { CONTENT } from "@/lib/content";
 
 HTMLDialogElement.prototype.showModal ??= function (this: HTMLDialogElement) {

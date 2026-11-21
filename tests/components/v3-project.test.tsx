@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { V3Project } from "@/components/v3/project";
+import { V3Project } from "@/components/portfolio/project";
 import { PROJECTS } from "@/lib/work/work";
 
 describe("V3Project", () => {

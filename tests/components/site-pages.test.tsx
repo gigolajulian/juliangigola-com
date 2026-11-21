@@ -12,7 +12,7 @@ import * as portfolio from "@/app/portfolio/(index)/page";
 import * as video from "@/app/portfolio/(index)/video/page";
 import * as layout from "@/app/layout";
 import { CATEGORIES, DISCIPLINES, PROJECTS, WITH_BTS, categoryLabel, titleCase } from "@/lib/work/work";
-import { COMMISSION_TABS } from "@/lib/flags/v3";
+import { COMMISSION_TABS } from "@/lib/photos-and-sessions";
 import { MOTION_SEO } from "@/lib/seo";
 import { CONTENT } from "@/lib/content";
 import { MT } from "@/lib/v4-home/server";
@@ -32,13 +32,13 @@ const { got, keep } = vi.hoisted(() => {
     );
   return { got, keep };
 });
-vi.mock("@/components/v3/work", () => ({ V3Work: keep("V3Work") }));
-vi.mock("@/components/v3/home", () => ({ V3Home: keep("V3Home") }));
+vi.mock("@/components/portfolio/work", () => ({ V3Work: keep("V3Work") }));
+vi.mock("@/components/home/rollback", () => ({ V3Home: keep("V3Home") }));
 vi.mock("@/components/v4/home/gate", () => ({ MtGate: keep("MtGate") }));
 vi.mock("@/components/v4/home/home", () => ({ MtHome: keep("MtHome") }));
-vi.mock("@/components/v3/video", () => ({ V3Video: keep("V3Video") }));
-vi.mock("@/components/v3/about", () => ({ V3About: keep("V3About") }));
-vi.mock("@/components/v3/inquire", () => ({ V3Inquire: keep("V3Inquire"), V3Commission: keep("V3Commission") }));
+vi.mock("@/components/portfolio/video", () => ({ V3Video: keep("V3Video") }));
+vi.mock("@/components/about/about", () => ({ V3About: keep("V3About") }));
+vi.mock("@/components/contact/inquire", () => ({ V3Inquire: keep("V3Inquire"), V3Commission: keep("V3Commission") }));
 // next/font is compiled by Next; outside it the loader is only a class name.
 vi.mock("next/font/local", () => ({ default: () => ({ variable: "font", className: "font" }) }));
 
