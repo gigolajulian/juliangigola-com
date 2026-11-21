@@ -222,6 +222,21 @@ export function useLightbox(frames: Frame[]) {
       });
       // The back button closes it the way the close button does.
       if (entry) unpush.current = pushHistory(() => closeRef.current());
+      /* No entry: Back leaves the page. The lock goes the moment it starts, before the next page renders and
+         its scroll is put back: Safari clamped that restore under the locked root (MAC on #1313, the row came back on 02, not 04). */
+      else {
+        const lock = unlock.current;
+        addEventListener(
+          "popstate",
+          () => {
+            // only this open's lock: closed with X and another opened since, this Back is that one's
+            if (unlock.current !== lock) return;
+            lock?.(false);
+            unlock.current = null;
+          },
+          { once: true },
+        );
+      }
     });
   };
 
