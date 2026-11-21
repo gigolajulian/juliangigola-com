@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { shareOg } from "@/lib/share";
+import { shareOg } from "@/lib/og/share";
 import { V3LegalPage } from "@/components/site/legal";
 import { TermsColumn } from "@/components/site/terms";
 import { PrivacyColumn } from "@/components/site/privacy";

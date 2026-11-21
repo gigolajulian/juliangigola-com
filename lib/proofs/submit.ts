@@ -3,7 +3,8 @@ import { stripe } from "@/lib/stripe";
 import { recordLead } from "@/lib/leads/lead-store";
 import { alertLines, proofUrl, receiptMail, sendClient } from "@/lib/email/proof-mail";
 import { cardPrice, owed, publicId, viewerKey, writeProof, type Proof } from "@/lib/proofs/proof";
-import type { InboxKV as KV } from "@/lib/leads/lead-store";
+import type { InboxKV as KV } from "@/lib/kv";
+import type { Seal } from "@/lib/leads/lead-crypto";
 
 /* ── a client sends their selects ─────────────────────────────────
  * Nothing to pay: locked and mailed at once. A shoot balance or extras: a Stripe Checkout session
@@ -15,7 +16,6 @@ import type { InboxKV as KV } from "@/lib/leads/lead-store";
  * ─────────────────────────────────────────────────────────────── */
 
 type Env = Pick<CloudflareEnv, "INBOX" | "LEADS_KEY" | "VAPID_KEY" | "CLIENT_EMAIL" | "EMAIL"> & { STRIPE_SECRET_KEY?: string };
-type Seal = { seal(v: unknown): Promise<string>; open<T>(s: string): Promise<T> };
 
 /** Lock the selects and send both mails. */
 export async function finalize(env: Env, kv: KV, s: Seal, p: Proof, paid?: Proof["paid"]): Promise<Proof> {
@@ -70,7 +70,7 @@ export async function checkout(key: string, p: Proof, method: "bank" | "card" = 
   // One list price on both receipts; bank gets it back as a discount.
   const off = card
     ? null
-    : await stripe(key, "/coupons", { amount_off: String(list - x.cents), currency: "usd", duration: "once", max_redemptions: "1", name: "Paid by bank" }, `${tag}-coupon`.slice(-255)).catch(() => null);
+    : await stripe(key, "/coupons", { amount_off: String(list - x.cents), currency: "usd", duration: "once", max_redemptions: "1", name: "Paid by bank" }, `${tag}-coupon`.slice(-255)).catch((e) => (console.error("proof bank coupon", String(e)), null)); // the card checkout still opens
   if (!card && !off) return checkout(key, p, "card");
   const s = await stripe(
     key,

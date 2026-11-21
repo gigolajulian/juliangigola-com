@@ -19,7 +19,7 @@ export async function POST(request: Request) {
   if (!env.STRIPE_SECRET_KEY) return json({ error: "Deposits are off." }, 503);
 
   const ip = request.headers.get("cf-connecting-ip") ?? "unknown";
-  if (!(await env.DEPOSIT_LIMIT.limit({ key: ip })).success)
+  if (!(await env.DEPOSIT_LIMIT.limit({ key: `deposit:${ip}` })).success)
     return json({ error: "Too many tries. Wait a minute." }, 429);
 
   const parsed = parseBooking(await bodyOf(request));

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { DISCIPLINE_SEO, ldJson, serviceGraph, siteGraph, SITE } from "@/lib/seo";
 import { formatPrice, SESSION_TYPES } from "@/lib/booking/sessions";
-import { projectFacts, shareMeta, shareOg } from "@/lib/share";
+import { projectFacts, shareMeta, shareOg } from "@/lib/og/share";
 import { BOOKING_URL, RESPONSE_TIME } from "@/lib/site";
 
 /* What the pages tell search engines and link previews: the JSON-LD, the

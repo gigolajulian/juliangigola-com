@@ -22,7 +22,6 @@ const EVERY = 5000; // a new still every 5s
     is on screen. Phones hide the still, so nothing is fetched there. If the list fails, the one still stays. */
 function useStills(ref: React.RefObject<HTMLElement | null>) {
   const [list, setList] = React.useState([STILL]);
-  const [i, setI] = React.useState(0);
   const [on, setOn] = React.useState(false);
   React.useEffect(() => {
     let asked = false;
@@ -30,23 +29,38 @@ function useStills(ref: React.RefObject<HTMLElement | null>) {
       setOn(e.isIntersecting);
       if (!e.isIntersecting || asked) return;
       asked = true;
-      fetch("/canvas.json")
-        .then((r) => (r.ok ? r.json() : {}))
-        .then((j: Record<string, [string, number][]>) => {
-          const wide = Object.values(j).flatMap((fr) => fr.find((x) => x[1] < 0.9)?.[0] ?? []);
-          setList([STILL, ...wide.filter((src) => !src.startsWith("/work/diesel/"))]);
-        })
-        .catch(() => {});
+      loadStills().then((l) => l && setList(l));
     });
     io.observe(ref.current!);
     return () => io.disconnect();
   }, [ref]);
-  React.useEffect(() => {
-    if (!on || list.length < 2 || matches("calm")) return;
-    const t = setInterval(() => setI((n) => (n + 1) % list.length), EVERY);
-    return () => clearInterval(t);
-  }, [on, list.length]);
+  const i = useEvery(on && list.length >= 2, list.length);
   return list.length < 2 ? [list[0]] : [list[i], list[(i + 1) % list.length]];
+}
+
+/** The still list from /canvas.json, or null if it fails (the one still stays). */
+function loadStills() {
+  return fetch("/canvas.json")
+    .then((r) => (r.ok ? r.json() : {}))
+    .then(widest)
+    .catch(() => null);
+}
+
+/** The still list: STILL first, then one landscape frame per project from /canvas.json. */
+function widest(j: Record<string, [string, number][]>) {
+  const wide = Object.values(j).flatMap((fr) => fr.find((x) => x[1] < 0.9)?.[0] ?? []);
+  return [STILL, ...wide.filter((src) => !src.startsWith("/work/diesel/"))];
+}
+
+/** 0 to n - 1, one step every EVERY ms while `run` holds (never for reduced motion). */
+function useEvery(run: boolean, n: number) {
+  const [i, setI] = React.useState(0);
+  React.useEffect(() => {
+    if (!run || matches("calm")) return;
+    const t = setInterval(() => setI((k) => (k + 1) % n), EVERY);
+    return () => clearInterval(t);
+  }, [run, n]);
+  return i;
 }
 
 function Phrase({ copy }: { copy?: boolean }) {

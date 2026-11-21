@@ -9,7 +9,7 @@
  * ─────────────────────────────────────────────────────────────── */
 
 import * as React from "react";
-import { Layout, LayoutContent, LayoutHeader, HStack, VStack, StackItem, Card } from "@astryxdesign/core/Layout";
+import { HStack, VStack, StackItem, Card } from "@astryxdesign/core/Layout";
 import { Button } from "@astryxdesign/core/Button";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { TextInput } from "@astryxdesign/core/TextInput";
@@ -23,8 +23,10 @@ import { ContractTemplatesDesk } from "@/components/leads/contract";
 import { adminCall, authed, type Call, errorText, ymdPT } from "@/lib/leads/lead-desk";
 import type { Template } from "@/lib/leads/lead-crm";
 import type { Hours, Window } from "@/lib/booking/booking-rules";
-import type { Stage } from "@/lib/leads/leads";
+import type { Stage } from "@/lib/leads/leads";
+
 import { byCodeUnit } from "@/lib/utils";
+import { Page } from "@/components/leads/lists";
 
 const PUSH_FLAG = "jg-leads-push";
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -34,16 +36,6 @@ const TIME_OPTS = TIMES.map((t) => ({ value: String(t), label: clock(t) }));
 const DEFAULT_WINDOW: Window = [600, 1140];
 const dateLabel = (d: string) => new Intl.DateTimeFormat("en-US", { timeZone: "UTC", weekday: "short", month: "short", day: "numeric" }).format(new Date(`${d}T00:00:00Z`));
 
-function Page({ eyebrow, title, children }: { eyebrow: string; title: string; children: React.ReactNode }) {
-  return (
-    <Layout
-      height="fill"
-      defaultHasDividers
-      header={<LayoutHeader><VStack gap={0}><Text type="code" size="xsm" color="secondary" weight="medium">{eyebrow}</Text><Heading level={1} weight="bold">{title}</Heading></VStack></LayoutHeader>}
-      content={<LayoutContent role="main" label={title} padding={4}><VStack gap={6} maxWidth={640}>{children}</VStack></LayoutContent>}
-    />
-  );
-}
 
 function Times({ w, set, label }: { w: Window; set: (w: Window) => void; label: string }) {
   return (
@@ -68,7 +60,7 @@ export function HoursDesk() {
   }, []);
   React.useEffect(() => { call().then(setHours, (e) => setNote(String(e.message))); }, [call]);
 
-  if (!hours) return <Page eyebrow="WHEN PEOPLE CAN BOOK" title="Hours"><Text type="code" size="sm" color="secondary">{note || "Loading hours"}</Text></Page>;
+  if (!hours) return <Page gap={6} maxWidth={640} eyebrow="WHEN PEOPLE CAN BOOK" title="Hours"><Text type="code" size="sm" color="secondary">{note || "Loading hours"}</Text></Page>;
   const edit = (h: Hours) => { setHours(h); setNote("Not saved"); };
   const days = Object.entries(hours.days ?? {}).filter(([d]) => d >= ymdPT()).sort(([a], [b]) => byCodeUnit(a, b));
   const save = async () => {
@@ -79,7 +71,7 @@ export function HoursDesk() {
   };
 
   return (
-    <Page eyebrow="WHEN PEOPLE CAN BOOK" title="Hours">
+    <Page gap={6} maxWidth={640} eyebrow="WHEN PEOPLE CAN BOOK" title="Hours">
       <VStack gap={2}>
         <Heading level={2}>Every week, Pacific</Heading>
         {[3, 4, 5, 6, 0, 1, 2].map((i) => {
@@ -133,7 +125,7 @@ export function TemplatesDesk({ call, templates, saved }: { call: Call; template
       .then((o) => { saved(o.templates); setList(o.templates); setNote("Saved."); })
       .catch((e: unknown) => setNote(errorText(e)));
   return (
-    <Page eyebrow="SAVED REPLIES" title="Templates">
+    <Page gap={6} maxWidth={640} eyebrow="SAVED REPLIES" title="Templates">
       <Text color="secondary">{"{first}, {name}, {kind} and {when} fill in for each lead."}</Text>
       {list.map((t, i) => (
         <Card key={t.id + i} padding={4}>
@@ -248,7 +240,7 @@ export function DeviceDesk({ call, reload, signOut }: { call: Call; reload: () =
   const by = count ? Object.entries(count.stages).map(([s, n]) => `${s} ${n}`).join(", ") : "";
 
   return (
-    <Page eyebrow="THIS PHONE OR LAPTOP" title="This device">
+    <Page gap={6} maxWidth={640} eyebrow="THIS PHONE OR LAPTOP" title="This device">
       <VStack gap={2}>
         <Heading level={2}>Notifications</Heading>
         {on === null ? null : <Switch label="A new lead pings this device" value={on} onChange={(v) => (v ? turnOn() : turnOff())} />}

@@ -2,12 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
-import {
-  ADDED_PATH,
-  TRASH_DAYS,
-  type AddedProject,
-  type TrashedProject,
-} from "@/lib/work/added";
+import { ADDED_PATH, TRASH_DAYS, type TrashedProject, type ManifestRead } from "@/lib/work/added";
 import {
   commitFiles,
   listDirectory,
@@ -60,11 +55,7 @@ export function AdminTrash({
   const readManifest = async () => {
     const current = await readFile(token, ADDED_PATH);
     if (!current) throw new Error("Could not read the project list.");
-    return JSON.parse(current) as {
-      projects: AddedProject[];
-      trash?: TrashedProject[];
-      hidden?: string[];
-    };
+    return JSON.parse(current) as ManifestRead;
   };
 
   /** Entry back into `projects`; the files never left. */

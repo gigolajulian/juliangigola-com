@@ -3,7 +3,7 @@ import { TZ } from "@/lib/booking/booking-rules";
 import { gcal } from "@/lib/booking/gcal";
 import { looksLikeEmail } from "@/lib/inbox";
 import { busyAll, EXTRA_KEY, isIcs, readExtras, zoned, type Extra } from "@/lib/booking/slots";
-import { isAdmin } from "@/lib/vouch";
+import { refuseAdmin } from "@/lib/vouch";
 import { bodyOf, json } from "@/lib/http";
 
 /* ── the Leads app's Calendar ─────────────────────────────────────
@@ -28,7 +28,8 @@ const MAX_EXTRAS = 10;
 async function gate(request: Request) {
   const { env } = await getCloudflareContext({ async: true });
   // Who is asking first: what this build is missing is for /admin only.
-  if (!(await isAdmin(request, env.INBOX_KEY))) return { error: json({ error: "Not authorized." }, 401) };
+  const denied = await refuseAdmin(request, env.INBOX_KEY);
+  if (denied) return { error: denied };
   if (!env.INBOX) return { error: json({ error: "No INBOX bound." }, 503) };
   if (!env.GCAL_OAUTH) return { error: json({ error: "The calendar is not connected (GCAL_OAUTH)." }, 503) };
   return { env };
@@ -128,7 +129,11 @@ async function post(request: Request) {
 
   if (typeof body.unblock === "string") {
     const path = `/calendars/primary/events/${encodeURIComponent(body.unblock)}`;
-    const ev = await gcal<GEvent>(env.GCAL_OAUTH, path).catch(() => null);
+    // Only a missing event is "not a block"; a calendar that is down answers 502 like every other call here.
+    const ev = await gcal<GEvent>(env.GCAL_OAUTH, path).catch((e: { status?: number }) => {
+      if (e.status === 404 || e.status === 410) return null;
+      throw e;
+    });
     // Only a block made here: a booking or anything else on hello@ stays.
     if (!ev?.extendedProperties?.private?.jgBlock) return json({ error: "Not a block." }, 400);
     await gcal(env.GCAL_OAUTH, `${path}?sendUpdates=none`, { method: "DELETE" });

@@ -3,7 +3,7 @@ import { sealer } from "@/lib/leads/lead-crypto";
 import { recordLead } from "@/lib/leads/lead-store";
 import { checkout, checkPaid, finalize } from "@/lib/proofs/submit";
 import { PAYMENTS_DOWN, PAYMENTS_OFF } from "@/lib/stripe";
-import { checkPass, cleanSelects, device, isEmail, isTestEmail, passCookie, passValue, shut, owed, isToken, publicView, readPublic, track, viewerKey, writeProof, type Proof } from "@/lib/proofs/proof";
+import { checkPass, cleanSelects, device, isEmail, isTestEmail, passCookie, passValue, shutReason, owed, isToken, publicView, readPublic, track, viewerKey, writeProof, type Proof } from "@/lib/proofs/proof";
 import { bodyOf, json } from "@/lib/http";
 import { alertHello } from "@/lib/email/hello-mail";
 import { actionAlert, worthMail } from "@/lib/email/proof-mail";
@@ -26,7 +26,7 @@ async function load(token: string, request: Request) {
   if (!env.INBOX || !seal || !isToken(token)) return null;
   const s = await seal;
   const p = await readPublic(env.INBOX, s, token);
-  return p && !(await shut(p, request.headers.get("cookie"), env.LEADS_KEY)) ? { env, kv: env.INBOX, s, p } : null;
+  return p && !(await shutReason(p, request.headers.get("cookie"), env.LEADS_KEY)) ? { env, kv: env.INBOX, s, p } : null;
 }
 
 /** The gate's password: rate-limited per address, and a right one answers with the cookie every later call needs. */
@@ -35,7 +35,7 @@ async function unlock(token: string, request: Request, password: unknown) {
   const seal = sealer(env.LEADS_KEY);
   if (!env.INBOX || !seal || !isToken(token)) return json({ error: "This gallery closed." }, 404);
   const p = await readPublic(env.INBOX, await seal, token);
-  const why = await shut(p, null, env.LEADS_KEY);
+  const why = await shutReason(p, null, env.LEADS_KEY);
   if (!p || (why && why !== "locked")) return json({ error: why === "offline" ? "This gallery is offline." : "This gallery closed." }, 404);
   if (!p.pass) return json({ ok: true });
   // Its own key prefix: wrong passwords never use up the pay attempts on the same limiter.
@@ -111,7 +111,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
     return json({ picks: g.p.submittedAt ? g.p.selects : (next.viewers?.[viewerKey(b.email)]?.picks ?? []) });
   }
 
-  if (!(await g.env.DEPOSIT_LIMIT.limit({ key: request.headers.get("cf-connecting-ip") ?? "unknown" })).success) return json({ error: "Too many tries. Wait a minute." }, 429);
+  if (!(await g.env.DEPOSIT_LIMIT.limit({ key: `picks:${request.headers.get("cf-connecting-ip") ?? "unknown"}` })).success) return json({ error: "Too many tries. Wait a minute." }, 429);
   if (g.p.submittedAt) return json({ done: true, ...publicView(g.p) });
   const key = g.env.STRIPE_SECRET_KEY;
 

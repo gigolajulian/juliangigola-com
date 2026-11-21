@@ -19,8 +19,9 @@
 import { TZ } from "@/lib/booking/booking-rules";
 import { depositOfLead, type InvoiceFrom } from "@/lib/leads/invoice";
 import type { Lead } from "@/lib/leads/leads";
-import type { InboxKV as KV } from "@/lib/leads/lead-store";
+import type { InboxKV as KV } from "@/lib/kv";
 import { isEmail, newToken } from "@/lib/proofs/proof";
+import type { Seal } from "@/lib/leads/lead-crypto";
 
 export type ContractTemplate = { id: string; name: string; body: string };
 
@@ -135,7 +136,6 @@ export async function sign(c: Contract, by: { name: unknown; email: unknown; agr
   return { ...c, signed: { name, email: by.email.trim(), ip: by.ip.slice(0, 64), ua: by.ua.slice(0, 400), at, hash, ...(typed ? { typed: true as const } : { mark: by.mark as string }) } };
 }
 
-type Seal = { seal(v: unknown): Promise<string>; open<T>(s: string): Promise<T> };
 
 /** One contract, opened. Null for a malformed id, a missing record, and also one that cannot be opened (a rotated LEADS_KEY), unlike `readLead`, which throws. */
 export async function readContract(kv: KV, s: Seal, id: string): Promise<Contract | null> {

@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 
 const submitEnquiry = vi.hoisted(() => vi.fn());
-vi.mock("@/app/contact/actions", () => ({ submitEnquiry }));
+vi.mock("@/lib/leads/enquiry-action", () => ({ submitEnquiry }));
 // ReferencePicks needs DataTransfer and element scrollTo, which jsdom lacks.
 vi.mock("@/components/reference-picks", () => ({ ReferencePicks: () => null }));
 vi.stubGlobal("fetch", vi.fn(() => Promise.reject(new Error("no network"))));

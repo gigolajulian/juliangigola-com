@@ -23,24 +23,29 @@ export class BookingLock {
     return run;
   }
 
+  // Each op of `LockOps`, typed against the same map the caller (`lockOp`) is. Ids arrive as JSON, so String() them.
+  private ops(store: Store): { [K in keyof LockOps]: (arg: LockOps[K][0]) => Promise<LockOps[K][1]> } {
+    const env = this.env;
+    return {
+      book: (arg) => this.serial(() => bookOwn(store, env.GCAL_OAUTH, arg, env.INBOX)),
+      cancel: (id) => this.serial(() => cancelOwn(store, env.GCAL_OAUTH, String(id))),
+      reschedule: ({ id, start }) => this.serial(() => rescheduleOwn(store, env.GCAL_OAUTH, id, start, env.INBOX)),
+      due: async () => ({ records: await dueReminders(store) }),
+      reminded: async (id) => ({ ok: (await markReminded(store, String(id)), true) }),
+      dueHeads: async () => ({ records: await dueHeadsUp(store) }),
+      headed: async (id) => ({ ok: (await markHeadsUp(store, String(id)), true) }),
+      hours: async () => ({ hours: await readHours(store) }),
+      // Checked by the route (`cleanHours`); queued so no booking reads half of it.
+      setHours: (hours) => this.serial(async () => (await writeHours(store, hours), { hours })),
+      get: async (id) => ({ record: (await findBooking(store, String(id))) ?? null }),
+    };
+  }
+
   async fetch(request: Request): Promise<Response> {
     const { op, arg } = (await request.json()) as { op: keyof LockOps; arg: unknown };
-    const store = this.state.storage;
+    const ops = this.ops(this.state.storage);
     try {
-      if (op === "book") return Response.json(await this.serial(() => bookOwn(store, this.env.GCAL_OAUTH, arg as LockOps["book"][0], this.env.INBOX)));
-      if (op === "cancel") return Response.json(await this.serial(() => cancelOwn(store, this.env.GCAL_OAUTH, String(arg))));
-      if (op === "reschedule") {
-        const { id, start } = arg as LockOps["reschedule"][0];
-        return Response.json(await this.serial(() => rescheduleOwn(store, this.env.GCAL_OAUTH, id, start, this.env.INBOX)));
-      }
-      if (op === "due") return Response.json({ records: await dueReminders(store) });
-      if (op === "reminded") return Response.json({ ok: (await markReminded(store, String(arg)), true) });
-      if (op === "dueHeads") return Response.json({ records: await dueHeadsUp(store) });
-      if (op === "headed") return Response.json({ ok: (await markHeadsUp(store, String(arg)), true) });
-      if (op === "hours") return Response.json({ hours: await readHours(store) });
-      // Checked by the route (`cleanHours`); queued so no booking reads half of it.
-      if (op === "setHours") return Response.json({ hours: await this.serial(async () => (await writeHours(store, arg as LockOps["setHours"][0]), arg)) });
-      if (op === "get") return Response.json({ record: (await findBooking(store, String(arg))) ?? null });
+      if (Object.hasOwn(ops, op)) return Response.json(await (ops[op] as (a: unknown) => Promise<unknown>)(arg));
       return Response.json({ error: "unknown op" }, { status: 400 });
     } catch (e) {
       console.error("booking lock", op, String(e));

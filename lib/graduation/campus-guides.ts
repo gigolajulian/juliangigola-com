@@ -8,7 +8,7 @@
  * photograph of mine is text only.
  */
 
-import { SESSION_TYPES, formatPrice } from "./booking/sessions";
+import { SESSION_TYPES, formatPrice } from "@/lib/booking/sessions";
 
 export type Spot = { name: string; note: string; frames: string[] };
 

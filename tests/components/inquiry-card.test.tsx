@@ -4,7 +4,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 const push = vi.fn();
 const submitEnquiry = vi.fn();
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
-vi.mock("@/app/contact/actions", () => ({ submitEnquiry: (...a: unknown[]) => submitEnquiry(...a) }));
+vi.mock("@/lib/leads/enquiry-action", () => ({ submitEnquiry: (...a: unknown[]) => submitEnquiry(...a) }));
 
 import { InquiryCard } from "@/components/v4/home/inquiry-card";
 

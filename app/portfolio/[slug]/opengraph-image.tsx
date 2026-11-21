@@ -1,5 +1,5 @@
-import { CARD_SIZE, CARD_TYPE, clientMark, renderCard } from "@/lib/share-card";
-import { projectFacts } from "@/lib/share";
+import { CARD_SIZE, CARD_TYPE, clientMark, renderCard } from "@/lib/og/card";
+import { projectFacts } from "@/lib/og/share";
 import { LINKABLE, getProject, markFor } from "@/lib/work/work";
 import { readdir } from "node:fs/promises";
 import { join } from "node:path";

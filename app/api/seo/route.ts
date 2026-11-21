@@ -1,5 +1,5 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { isAdmin } from "@/lib/vouch";
+import { refuseAdmin } from "@/lib/vouch";
 import { ACCOUNT, SITE_HOST, cloudflare, engineSql, searchConsole, sitePath } from "@/lib/analytics";
 import { BEACON_DATASET } from "@/lib/beacon";
 import { json } from "@/lib/http";
@@ -26,7 +26,8 @@ const PATH = /^\/[\w\-/.#]{0,200}$/;
 
 export async function GET(request: Request) {
   const { env } = await getCloudflareContext({ async: true });
-  if (!(await isAdmin(request, env.INBOX_KEY))) return json({ error: "Not authorized." }, 401);
+  const denied = await refuseAdmin(request, env.INBOX_KEY);
+  if (denied) return denied;
   const key = env.CF_ANALYTICS_TOKEN;
   if (!key) return json({ error: "No CF_ANALYTICS_TOKEN on this Worker yet." }, 503);
 

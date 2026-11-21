@@ -1,5 +1,5 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { isAdmin } from "@/lib/vouch";
+import { refuseAdmin } from "@/lib/vouch";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { copiesFor, readLead, recordLead, writeLead } from "@/lib/leads/lead-store";
 import { leadStoreKey } from "@/lib/leads/leads";
@@ -42,7 +42,8 @@ async function gate(request: Request) {
   const { env } = await getCloudflareContext({ async: true });
   const seal = sealer(env.LEADS_KEY);
   // Who is asking first: what this build is missing is for /admin only.
-  if (!(await isAdmin(request, env.INBOX_KEY))) return { error: json({ error: "Not authorized." }, 401) };
+  const denied = await refuseAdmin(request, env.INBOX_KEY);
+  if (denied) return { error: denied };
   if (!env.INBOX || !env.PROOFS || !seal) return { error: json({ error: "Proofs need INBOX, PROOFS and LEADS_KEY on this build." }, 503) };
   return { env, kv: env.INBOX, r2: env.PROOFS, s: await seal };
 }

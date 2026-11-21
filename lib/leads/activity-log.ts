@@ -89,6 +89,7 @@ export async function readMaster(kv: KV, s: Sealer): Promise<MasterEntry[]> {
   return out;
 }
 
+/** One CSV cell: quoted when it must be, and a leading = + - @ defused so a spreadsheet never runs it. */
 export const cell = (v: unknown) => {
   let s = v === undefined || v === null ? "" : String(v);
   if (/^[=+\-@]/.test(s)) s = `'${s}`;

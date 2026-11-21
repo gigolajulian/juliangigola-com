@@ -6,7 +6,7 @@ import * as campus from "@/app/graduation-photos/[campus]/page";
 import { LINKABLE, UNLISTED } from "@/lib/work/work";
 import { BOOK_MENU, BOOKING_PAGES } from "@/lib/booking/booking";
 import { SESSIONS } from "@/lib/photos-and-sessions";
-import { CAMPUS_GUIDES } from "@/lib/campus-guides";
+import { CAMPUS_GUIDES } from "@/lib/graduation/campus-guides";
 import { SESSION_SEO } from "@/lib/seo";
 
 /* The dynamic pages' static params and metadata: which addresses are

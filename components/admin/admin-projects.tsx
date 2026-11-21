@@ -2,11 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
-import {
-  ADDED_PATH,
-  type AddedProject,
-  type TrashedProject,
-} from "@/lib/work/added";
+import { ADDED_PATH, type TrashedProject, type ManifestRead } from "@/lib/work/added";
 import { commitFiles, readFile } from "@/lib/admin/admin-github";
 import { AdminFrames, type PendingUpload } from "@/components/admin/admin-frames";
 import { srcOf } from "@/lib/admin/admin-sequence";
@@ -297,11 +293,7 @@ export function AdminProjects({
 
       const current = await readFile(token, ADDED_PATH);
       if (!current) throw new Error("Could not read the project list.");
-      const parsed = JSON.parse(current) as {
-        projects: AddedProject[];
-        trash?: TrashedProject[];
-        hidden?: string[];
-      };
+      const parsed = JSON.parse(current) as ManifestRead;
 
       const entry = parsed.projects.find((p) => p.slug === slug);
       if (!entry) {
