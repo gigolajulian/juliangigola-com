@@ -7,6 +7,7 @@ import Link from "next/link";
 import { COVER_RELEASES } from "@/lib/cover-art-data";
 import type { CoverRelease } from "@/lib/cover-art-types";
 import { media } from "@/lib/device";
+import { scrollGoal } from "@/components/v3/smooth-scroll";
 import { projectHref } from "@/lib/project-href";
 import { holdEase, holdUnease } from "@/lib/motion/hold-ease";
 import { clamp, MT2, progress } from "./motion/engine";
@@ -67,16 +68,27 @@ function useBackToCover() {
     go();
     // a phone's sideways row only: held (desktop), the row follows the page's scroll, and setting it too threw the page a screen on (MAC on d82f2b75)
     if (el && !media("held").matches) el.scrollLeft = at.x;
+    // a sleeve still marked hovered from before the click turned to its back and then away on arrival (Safari, MAC on 23412f74): unturned at once
+    const lifted = [...document.querySelectorAll<HTMLElement>(".mt-covers .mt-sleeve.hv")];
+    lifted.forEach((it) => ((it.style.transition = "none"), it.classList.remove("hv")));
+    const unlift = requestAnimationFrame(() => requestAnimationFrame(() => lifted.forEach((it) => (it.style.transition = ""))));
     // rAF runs before each paint, so a block above that grows is answered in the same frame
     const end = performance.now() + 900;
-    let raf = requestAnimationFrame(function hold(now) {
+    let raf = 0, done = false, goal = scrollGoal();
+    const stop = () => ((done = true), cancelAnimationFrame(raf));
+    raf = requestAnimationFrame(function hold(now) {
+      // the visitor's scroll wins: Lenis heads somewhere else as soon as a wheel or touch lands, whether or not its event reached us
+      // (a wheel 0.3s after Back was held for 0.6s, Safari, MAC on 23412f74)
+      // (a wheel 0.3s after Back was held for 0.6s, Safari, MAC on 23412f74). Only a move of its target counts: it starts stale from the last page.
+      const g = scrollGoal(), moved = g !== goal && Math.abs(g - (coversTop() + at.off)) > 2;
+      goal = g;
+      if (done || moved) return stop();
       go();
       if (now < end) raf = requestAnimationFrame(hold);
     });
-    const stop = () => cancelAnimationFrame(raf);
     const ev = ["wheel", "touchstart", "keydown", "pointerdown"] as const;
-    ev.forEach((n) => addEventListener(n, stop, { passive: true, once: true }));
-    return () => (clearTimeout(t), stop(), ev.forEach((n) => removeEventListener(n, stop)));
+    ev.forEach((n) => addEventListener(n, stop, { passive: true, capture: true }));
+    return () => (clearTimeout(t), cancelAnimationFrame(unlift), stop(), ev.forEach((n) => removeEventListener(n, stop, { capture: true })));
   }, []);
 }
 
