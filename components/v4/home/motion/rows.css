@@ -51,7 +51,8 @@ html[data-mt-held] .mt-sleeve .disc,.cv4 .mt-sleeve .disc{pointer-events:none}
   html[data-mt-held] .mt-sleeve .face,.cv4 .mt-sleeve .face{overflow:visible;background:none}
   html[data-mt-held] .mt-sleeve .face img,.cv4 .mt-sleeve .face img{border-radius:calc(4 * var(--u));background:var(--card);box-shadow:0 calc(var(--hin) * 34px + var(--m) * 26px) calc(var(--hin) * 60px + var(--m) * 40px) calc(var(--hin) * -22px) rgba(0,0,0,.85)}
   html[data-mt-held] .mt-sleeve[data-flip] .face img{backface-visibility:hidden;transform:perspective(1500px) rotateY(calc(var(--fl) * 180deg));filter:brightness(calc(1 - var(--m) * .5))}
-  html[data-mt-held] .mt-sleeve[data-flip] .face .back{opacity:1;transform:perspective(1500px) rotateY(calc(180deg + var(--fl) * 180deg))}
+  /* The back shows only past half a turn, when the sleeve is edge on: Safari let it through its backface-visibility for 0.5s after a Back (MAC on #1313). */
+  html[data-mt-held] .mt-sleeve[data-flip] .face .back{opacity:clamp(0,calc((var(--fl) - .5) * 1000),1);transform:perspective(1500px) rotateY(calc(180deg + var(--fl) * 180deg))}
   /* The record goes back in under a lifted sleeve and is hidden for the whole flip. */
   html[data-mt-held] .mt-sleeve .disc{transform:translateX(calc(var(--o,0) * (1 - var(--hin)) * 103 * var(--u))) rotate(calc(var(--o,0) * (1 - var(--hin)) * 200deg))}
   html[data-mt-held] .mt-sleeve .disc::after{transform:rotate(calc(var(--o,0) * (1 - var(--hin)) * -200deg))}
