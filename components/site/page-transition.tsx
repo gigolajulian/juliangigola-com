@@ -35,6 +35,9 @@ const SECTIONS = ["/", "/portfolio"];
 
 /** Ends a held pop's snapshot once the page it went to has rendered. */
 let landed: (() => void) | null = null;
+/** What the page returned to still has to paint before it is snapshotted (a Back's restored cover, v4/home/back.ts). */
+const holds: Promise<unknown>[] = [];
+export const holdLanding = (p: Promise<unknown>) => void holds.push(p);
 const sectionOf = (path: string) =>
   SECTIONS.reduce(
     (found, s, i) => (path === s || (s !== "/" && path.startsWith(`${s}/`)) ? i : found),
@@ -81,8 +84,10 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
     shown.current = path;
     // The page arriving, before it is snapshotted.
     gauge();
-    landed?.();
+    // Safari snapshotted the home before the restored cover decoded: an empty sleeve for 1 to 4 frames (MAC on 9e9dc6c9). 300ms at most.
+    const land = landed, wait = holds.splice(0);
     landed = null;
+    if (land) wait.length ? Promise.race([Promise.all(wait), new Promise((r) => setTimeout(r, 300))]).then(land) : land();
     if (document.documentElement.dataset.nav === undefined) return;
     const trip = (
       document as Document & {
