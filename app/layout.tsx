@@ -24,6 +24,7 @@ import { ScrollThumb } from "@/components/v3/scroll-thumb";
 import { SmoothScroll } from "@/components/v3/smooth-scroll";
 import { ScrollReveal } from "@/components/v3/scroll-reveal";
 import { V4_HOME } from "@/lib/v4-home/switch";
+import { V4PAGES_HEAD } from "@/lib/v4pages";
 
 /* JG V3 (DESIGN.md): Inter Tight for the display type and the wordmark,
    IBM Plex Mono for everything else, and Archivo Expanded for the booking
@@ -198,7 +199,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             `p3` is on for everyone unless the tab chose otherwise (Julian, 2026-11-15). */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var k="jg-v4pages",v=(location.search.match(/[?&]v4pages(?:=([a-z0-9,-]*))?(?:&|$)/)||[]),all="s1 s2 a2 m2p foot next view c1 s4 p3 tilt";if(v[0])sessionStorage.setItem(k,v[1]==="0"?"":!v[1]||v[1]==="1"?all:v[1].split(",").join(" "));v=sessionStorage.getItem(k);if(v==null)v="mtscroll" in document.documentElement.dataset?all.replace(" tilt",""):"p3";if(v)document.documentElement.dataset.v4pages=v}catch(e){}})()`,
+            __html: V4PAGES_HEAD,
           }}
         />
       </head>

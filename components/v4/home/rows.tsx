@@ -10,6 +10,7 @@ import { media } from "@/lib/device";
 import { holdEase, holdUnease } from "@/lib/motion/hold-ease";
 import { clamp, MT2, progress } from "./motion/engine";
 import { COVER_KEYS, COVER_PRESS, FILM_DRESS, pad, type MtFilm } from "@/lib/v4-home/data";
+import { qflag } from "@/lib/v4-home/flags";
 
 const COVERS = COVER_KEYS.map((k) => COVER_RELEASES.find((r) => r.slug === k)).filter((r): r is CoverRelease => !!r);
 
@@ -115,7 +116,7 @@ export function MtFilms({ films }: { films: MtFilm[] }) {
         const r = sec.getBoundingClientRect();
         const p = Math.min(0.9999, progress(r.top, r.height, innerHeight, true));
         // the hold eases in and out like Cover art's, so the first and last film take more of the scroll (?mtsnap=0: even shares)
-        return setCur(Math.floor((/[?&]mtsnap=0/.test(location.search) ? p : holdEase(p)) * items.length));
+        return setCur(Math.floor((qflag("mtsnap", "0") ? p : holdEase(p)) * items.length));
       }
       const a = items[0].getBoundingClientRect(), b = items[1].getBoundingClientRect();
       const at = mq.matches ? (innerHeight / 2 - a.top - a.height / 2) / (b.top - a.top) : el.scrollLeft / (b.left - a.left);
@@ -155,7 +156,7 @@ export function MtFilms({ films }: { films: MtFilm[] }) {
           // a film taking keyboard focus before the block is held: bring the stage up, so the film and its focus mark are whole on screen
           const top = e.currentTarget.getBoundingClientRect().top;
           // straight to the first film's resting place in the hold, so the snap (motion/rows.ts) has nothing left to move (MAC, #1209)
-          const sec = e.currentTarget.parentElement!, rest = /[?&]mtsnap=0/.test(location.search) || !media("fine").matches ? 0 : holdUnease(0.5 / films.length) * (sec.offsetHeight - innerHeight);
+          const sec = e.currentTarget.parentElement!, rest = qflag("mtsnap", "0") || !media("fine").matches ? 0 : holdUnease(0.5 / films.length) * (sec.offsetHeight - innerHeight);
           if (top > 0 && document.documentElement.hasAttribute("data-mt-held") && (e.target as Element).matches(".mt-film:focus-visible")) scrollBy({ top: top + rest });
         }}
       >
