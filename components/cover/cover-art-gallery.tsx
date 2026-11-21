@@ -46,7 +46,7 @@ export function CoverArtGallery({
 }) {
   const list = React.useRef<HTMLUListElement>(null);
   /* The song on the cover (`snd`, components/cover/cover-sound.tsx): a click that opens a cover plays it, and so
-     does the pointer held on one for 3 seconds (Julian 2026-11-21), so crossing or browsing the grid fires nothing. */
+     does the pointer held on one for 4.3 seconds (Julian 2026-11-21), so crossing or browsing the grid fires nothing. */
   const snd = useV4pages("snd") && v4;
   const playing = useSound();
   /** The release whose clip a click started: the viewer's, so the pointer leaving its sleeve does not stop it. */
@@ -69,7 +69,7 @@ export function CoverArtGallery({
           // Browsers block sound before a first click or key: do not even ask for the file until then.
           if (ac.signal.aborted || navigator.userActivation?.hasBeenActive === false) return;
           playSound(slug);
-        }, 3000);
+        }, 4300);
       }, { signal: ac.signal });
       it.addEventListener("pointerleave", () => {
         clearTimeout(wait);
