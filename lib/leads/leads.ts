@@ -42,7 +42,9 @@ export type LeadEvent = {
     // The client's first download of their finals (2026-11-12): Delivered.
     | "download"
     // The client signed a contract online (2026-11-15, `lib/contracts/contract.ts`), ref = "signed:<contract id>".
-    | "contract";
+    | "contract"
+    // A task on the lead ticked done (2026-11-20), ref = "task:<task id>".
+    | "task";
   /* "proofs": they opened a proof gallery, ref = its token so each gallery is one line. */
   /* "replied" / "wrote": mail between hello@ and them in Gmail, ref = the Gmail message id (`lib/leads/gmail-sync.ts`). */
   /** The raw row (`msg:` key), booking id or Stripe intent, so a retry folds in once. */
@@ -86,7 +88,35 @@ export type LeadPatch = {
   invoicePaid?: { no: string; paid: boolean };
   /** The whole list of people on the lead, replacing what was there. */
   people?: Person[];
+  /** The shoot plan, replacing what was there; null clears it. */
+  plan?: ShootPlan | null;
+  /** The whole task list, replacing what was there. A task newly done writes a line to the timeline. */
+  tasks?: Task[];
 };
+
+/* ── the shoot plan and tasks (from CRMO, Julian 2026-11-20) ──────
+ * The desk knew the client and the date but not the shoot. A plan holds
+ * the brief, up to four of his own frames as references, the Cosmos board
+ * (a link, never fetched), the shot list and the call sheet. Tasks are the
+ * prep under the one next step, each with a day and who does it.
+ * Both live in the full record only: Notion and the Sheet do not copy them.
+ * ─────────────────────────────────────────────────────────────── */
+
+/** One line of the shot list. */
+export type Shot = { text: string; done?: boolean };
+/** The call sheet: times as he types them (Pacific), the team as addresses from the lead's People. */
+export type CallSheet = { call?: string; window?: string; place?: string; bring?: string; team?: string[] };
+export type ShootPlan = {
+  brief?: string;
+  /** His own frames, as site paths (`/work/...`), four at most. */
+  refs?: string[];
+  /** A cosmos.so board, kept as a link. */
+  cosmos?: string;
+  shots?: Shot[];
+  sheet?: CallSheet;
+};
+/** One prep item. `due` is YYYY-MM-DD, `who` a person's address on the lead (unset is Julian), `doneAt` when it was ticked. */
+export type Task = { id: string; text: string; due?: string; who?: string; doneAt?: string };
 
 /** Someone else on the same job: the art director, the producer, the stylist. Their mail lands on this lead. */
 export type Person = { name: string; email: string; role?: string; phone?: string; /** Copied on gallery and delivery mail; unset reads as on. */ cc?: boolean };
@@ -139,13 +169,15 @@ export type Lead = {
   licence?: Licence;
   /** More people on the job: kept in the full record, never the list summary. */
   people?: Person[];
+  plan?: ShootPlan;
+  tasks?: Task[];
   events: LeadEvent[];
 };
 
 export type Licence = { use: string; end: string };
 
 /** What the list shows, sealed into KV metadata (under its 1024-byte cap). `id` is added when listed. */
-export type LeadSummary = Omit<Lead, "events" | "notion" | "deposit" | "notes" | "remind" | "phone" | "ig" | "company" | "lostReason" | "source" | "invoices" | "people"> & {
+export type LeadSummary = Omit<Lead, "events" | "notion" | "deposit" | "notes" | "remind" | "phone" | "ig" | "company" | "lostReason" | "source" | "invoices" | "people" | "plan" | "tasks"> & {
   paid?: true;
   id?: string;
   /** When his reminder is due, and its words, cut short. */
@@ -365,7 +397,7 @@ export function paperDue(l: Pick<Lead, "stage" | "when" | "contract" | "release"
 // Name and email capped: KV metadata holds 1024 bytes, and the sealed summary
 // grows by a third, so one long name must not cost the whole lead.
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const leadSummary = ({ events, notion, deposit, notes, remind, phone, ig, company, lostReason, source, invoices, people, ...rest }: Lead): LeadSummary => ({
+export const leadSummary = ({ events, notion, deposit, notes, remind, phone, ig, company, lostReason, source, invoices, people, plan, tasks, ...rest }: Lead): LeadSummary => ({
   ...rest,
   ...(rest.stage === "Quoted" ? { quiet: quoteTrail({ ...rest, events }) } : {}),
   ...(remind ? { due: remind.at, dueText: remind.text.slice(0, 40) } : {}),
@@ -449,4 +481,17 @@ export function shootTag(kind?: string): string | undefined {
   if (hit) return hit[1];
   const w = k.split(/[\s,/-]+/)[0];
   return w.charAt(0).toUpperCase() + w.slice(1, 12);
+}
+
+/** A task with the lead it sits on, as `GET ?tasks` lists them. */
+export type TaskRow = Task & { lead: string; name: string };
+/** Days ahead a task counts as due on Today. */
+export const TASK_DAYS = 7;
+/** Open tasks due within TASK_DAYS of `today` (YYYY-MM-DD, Pacific), late ones included, soonest first. */
+export function dueTasks<T extends Task>(tasks: T[], today: string): (T & { late: boolean })[] {
+  const end = new Date(Date.parse(`${today}T12:00:00Z`) + TASK_DAYS * 864e5).toISOString().slice(0, 10);
+  return tasks
+    .filter((t) => !t.doneAt && t.due && t.due <= end)
+    .map((t) => ({ ...t, late: t.due! < today }))
+    .sort((a, b) => a.due!.localeCompare(b.due!));
 }
