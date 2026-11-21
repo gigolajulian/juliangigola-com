@@ -107,7 +107,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
   title: {
-    /* The region, with its cities in the description: San Jose has its own
+    /* The region only: the cities are in JSON-LD `areaServed` (lib/seo.ts), and San Jose has its own
        pages now, which own that search. */
     default: "Julian Gigola | Photographer & Creative Director, SF Bay Area",
     // Project and section pages set only their own name; this frames it.

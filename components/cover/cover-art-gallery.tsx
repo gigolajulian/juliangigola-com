@@ -247,6 +247,8 @@ export function CoverArtGallery({
           if (!o) quiet();
           lightbox.onOpenChange(o);
         }}
+        // counted by release, as the page's own count is: a sleeve's back is the same record
+        place={[Math.max(0, releases.findIndex((r) => r.frames.some((f) => f.src === shown))) + 1, releases.length]}
         note={snd ? <CoverSound slug={viewing} onPlay={() => (held.current = viewing)} /> : undefined}
       />
       {/* On the body: `main` carries a transform, and a fixed line inside it would sit at the foot of the page. */}
