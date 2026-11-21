@@ -20,9 +20,12 @@ function keepFlip(e: React.MouseEvent<HTMLElement>) {
   if (e.currentTarget.hasAttribute("data-flip") && document.documentElement.hasAttribute("data-tp-flip") && !media("fine").matches) e.preventDefault();
   // Where the home was at the click, for `useBackToCover`: Safari put back a scroll saved before the last of the held row's
   // scroll, 618px short on a Mac and on Motion on the iPhone (MAC on #1313). Session storage: the router rewrites the history entry's state.
+  // The row's own scroll too: a phone's covers are a sideways row, which came back on the first cover.
   else
     try {
-      sessionStorage.setItem(BACK, String(scrollY));
+      sessionStorage.setItem(BACK, JSON.stringify({ y: scrollY, x: e.currentTarget.closest(".mt-row")?.scrollLeft ?? 0 }));
+      // the browser's own restore landed over ours a frame later (Safari 1440, MAC on 01ca50cb); `useBackToCover` gives it back
+      history.scrollRestoration = "manual";
     } catch {}
 }
 
@@ -31,28 +34,31 @@ const BACK = "jg-cover-back";
 let popAt = 0;
 if (typeof window !== "undefined") addEventListener("popstate", () => (popAt = Date.now()));
 
-/** Back from a cover on the Cover art page: the home's scroll as it was at the click (`keepFlip`), set once the page is laid out. */
+/** Back from a cover on the Cover art page: the home's scroll and the row's as they were at the click (`keepFlip`),
+    set before the first paint so the row never shows passing the covers before it (MAC on 01ca50cb). */
 function useBackToCover() {
-  React.useEffect(() => {
-    let y = NaN;
+  React.useLayoutEffect(() => {
+    let at: { y: number; x: number } | null = null;
     try {
-      y = Number(sessionStorage.getItem(BACK) ?? NaN);
+      at = JSON.parse(sessionStorage.getItem(BACK) ?? "null");
     } catch {}
-    if (Number.isNaN(y)) return;
-    const go = () => scrollTo(0, y);
-    let raf = 0, t2: ReturnType<typeof setTimeout> | undefined;
-    // a tick on: the router renders the home inside the same popstate, before this file's listener has stamped it
+    if (!at) return;
+    const el = document.querySelector<HTMLElement>(".mt-covers .mt-row");
+    const go = () => {
+      scrollTo(0, at.y);
+      if (el) el.scrollLeft = at.x;
+    };
+    if (Date.now() - popAt < 2000) go();
+    // taken a tick on, not now: React's dev double mount read it once and dropped it
     const t = setTimeout(() => {
-      // taken here, not on mount: React's dev double mount read it once and dropped it
       try {
         sessionStorage.removeItem(BACK);
+        history.scrollRestoration = "auto";
       } catch {}
-      if (Date.now() - popAt > 2000) return;
-      raf = requestAnimationFrame(go);
-      // again once the held stages have taken their height, which can grow the page after the first frame
-      t2 = setTimeout(() => Math.abs(scrollY - y) > 2 && go(), 400);
     });
-    return () => (clearTimeout(t), clearTimeout(t2), cancelAnimationFrame(raf));
+    // again once the held stages have taken their height, which can grow the page after the first frame
+    const t2 = Date.now() - popAt < 2000 ? setTimeout(() => Math.abs(scrollY - at.y) > 2 && go(), 400) : undefined;
+    return () => (clearTimeout(t), clearTimeout(t2));
   }, []);
 }
 
