@@ -5,13 +5,10 @@ import Link from "next/link";
 import { BackLink } from "@/components/site/back-link";
 import { CoverArtGallery } from "@/components/cover/cover-art-gallery";
 import type { CoverRelease } from "@/lib/work/cover-art-types";
-import { useV4pages } from "@/lib/flags/v4pages";
 
-/* Cover art in the site's system (inner pages plan, c1), behind `?v4pages`: the page title with the
-   count under it as it is live, the home's sleeves as the grid, the project pages' ask. `off` is the page as it
-   is live, shown until the flag is read. */
-export function CoverPage({ off, releases, onwards }: { off: React.ReactNode; releases: CoverRelease[]; onwards?: { href: string; name: string } }) {
-  if (!useV4pages("c1")) return off;
+/* Cover art in the site's system (inner pages plan, c1): the page title with the count under it,
+   the home's sleeves as the grid, the project pages' ask. */
+export function CoverPage({ releases, onwards }: { releases: CoverRelease[]; onwards?: { href: string; name: string } }) {
   return (
     <div className="v3 contents">
       <article className="cv4p">

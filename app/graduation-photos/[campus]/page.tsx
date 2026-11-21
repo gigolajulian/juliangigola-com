@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { shareOg } from "@/lib/og/share";
@@ -41,13 +40,7 @@ export default async function CampusPage(props: PageProps<"/graduation-photos/[c
   if (!c) notFound();
 
   const images = getProject("graduation")?.images ?? [];
-  /* The guide's photo row, each captioned with its spot. */
-  const shown = c.photos.flatMap((src) => {
-    const f = images.find((x) => x.src === src);
-    const spot = c.spots.find((s) => s.frames.includes(src));
-    return f && spot ? [{ spot: spot.name, f }] : [];
-  });
-  /* `?v4pages=s4`: the spots that have a photograph, each with its frame from the row above. */
+  /* The spots that have a photograph, each with its first frame from the guide's photos (s4). */
   const held = c.spots.flatMap((s) => {
     const f = images.find((x) => x.src === c.photos.find((p) => s.frames.includes(p)));
     return f ? [{ name: s.name, note: s.note, src: f.src, alt: f.alt || `Graduation photo at ${s.name} by Julian Gigola`, color: f.color }] : [];
@@ -91,26 +84,8 @@ export default async function CampusPage(props: PageProps<"/graduation-photos/[c
               <Link className="btn" href="#spots">See the spots</Link>
             </div>
           </header>
-          <div className="a-seq sv-seq">
-            {shown.map(({ spot, f }) => (
-              <figure key={f.src}>
-                <div className="ph">
-                  <Image src={f.src} alt={f.alt || `Graduation photo at ${spot} by Julian Gigola`} fill sizes="(max-width: 700px) 50vw, 30vw" style={{ objectFit: "cover", background: f.color }} />
-                </div>
-                <figcaption className="lbl mute">{spot}</figcaption>
-              </figure>
-            ))}
-          </div>
           <div className="sv-info" id="spots">
-            <CampusSpots
-              spots={held}
-              off={c.spots.map((s, i) => (
-                <section className="sv-row" key={s.name}>
-                  <h2 className="lbl mute">{String(i + 1).padStart(2, "0")} · {s.name}</h2>
-                  <p>{s.note}</p>
-                </section>
-              ))}
-            />
+            <CampusSpots spots={held} />
             <section className="sv-row">
               <h2 className="lbl mute">How I plan the session</h2>
               <p>{c.plan}</p>

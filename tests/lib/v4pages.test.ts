@@ -18,8 +18,8 @@ test("the script and lib/flags/v4pages.ts list the same keys", () => {
   expect(js).toContain(`all="${V4PAGES}"`);
 });
 
-test("without the V4 home only the grid motion is on", () => {
-  expect(run("", false)).toBe("p3");
+test("without the V4 home no trial is on", () => {
+  expect(run("", false)).toBeUndefined();
 });
 
 test("follows the V4 home when the tab has no choice of its own", () => {
@@ -33,7 +33,7 @@ test("?v4pages=0 keeps the inner pages off under the V4 home, and stays off for 
 });
 
 test("a key list wins over the V4 home", () => {
-  expect(run("?v4pages=s1,a2", true)).toBe("s1 a2");
+  expect(run("?v4pages=tilt", true)).toBe("tilt");
 });
 
 test("?v4pages alone still turns every key on", () => {
