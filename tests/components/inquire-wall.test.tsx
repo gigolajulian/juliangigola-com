@@ -6,7 +6,7 @@ vi.mock("dialkit", () => ({
     Object.fromEntries(Object.entries(spec).map(([k, v]) => [k, v[0]])),
 }));
 vi.mock("@/components/drift-wall", () => ({
-  default: ({ items, tileWidth }: { items: unknown[]; tileWidth: number }) => <div data-testid="wall" data-n={items.length} data-w={tileWidth} />,
+  DriftWall: ({ items, tileWidth }: { items: unknown[]; tileWidth: number }) => <div data-testid="wall" data-n={items.length} data-w={tileWidth} />,
 }));
 
 import { InquireWall } from "@/components/inquire-wall";

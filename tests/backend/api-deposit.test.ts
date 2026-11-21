@@ -216,6 +216,8 @@ describe("the client's confirmation", () => {
       expect(part).toMatch(/https:\/\/juliangigola\.com\/booking\/[^?"\s]+\?t=[^&"\s]+&(amp;)?do=reschedule/);
       expect(part).toMatch(/https:\/\/juliangigola\.com\/booking\/[^?"\s]+\?t=[^&"\s]+&(amp;)?do=cancel/);
       expect(part).toContain("Thanks, QA.");
+      expect(part).toContain("90% back"); // a paid booking carries the fee: never "a full refund"
+      expect(part).not.toContain("full refund");
     }
     expect(m.html).not.toMatch(/—/);
   });

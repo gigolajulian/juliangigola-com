@@ -76,15 +76,17 @@ export async function listDirectory(
     { headers: headers(token), cache: "no-store" },
   );
   if (res.status === 404) return [];
-  const body = await res.json();
+  const body = (await res.json()) as { type: string; path: string }[] & {
+    message?: string;
+  };
   if (!res.ok)
     throw new Error(
       `GitHub said ${res.status}: ${body?.message ?? "unknown error"}`,
     );
   return Array.isArray(body)
     ? body
-        .filter((e: { type: string }) => e.type === "file")
-        .map((e: { path: string }) => e.path)
+        .filter((e) => e.type === "file")
+        .map((e) => e.path)
     : [];
 }
 
@@ -219,7 +221,7 @@ export async function readFile(
     { headers: headers(token), cache: "no-store" },
   );
   if (res.status === 404) return null;
-  const body = await res.json();
+  const body = (await res.json()) as { content?: string; message?: string };
   if (!res.ok)
     throw new Error(
       `GitHub said ${res.status}: ${body?.message ?? "unknown error"}`,
