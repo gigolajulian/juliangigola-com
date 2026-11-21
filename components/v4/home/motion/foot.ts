@@ -28,52 +28,52 @@ function setup(el: HTMLElement, ctx: Ctx) {
     return [c, c.getContext("2d")!] as const;
   };
   const g = cut.getContext("2d")!;
-  const [Wc, w] = buf(), [Bc, b] = buf(), [Sc, s2] = buf(), [Mc, m] = buf();
+  const [washC, wash] = buf(), [blurC, blur] = buf(), [sharpC, sharp] = buf(), [maskC, maskCtx] = buf();
 
   // the still's reveal
   let reveal = 0, dirty = true;
   // pointer, client px
   let px = -1, py = -1;
   // phrase
-  let W = 0, pad = 0, phraseX = 0, phraseV = 0, pk = 0, tr = 0, first = true;
+  let phraseW = 0, pad = 0, phraseX = 0, phraseV = 0, kick = 0, rowX = 0, first = true;
   const clones: Node[] = [];
   // dot and spot
   let hot = false, dotX = 0, dotY = 0, dotAlpha = 0, spotX = -1, spotY = 0, spotAlpha = 0, spotOut = "", ink = "";
-  let MK: HTMLCanvasElement | null = null, mz = 1;
+  let phraseMask: HTMLCanvasElement | null = null, maskZoom = 1;
 
   const measure = () => {
-    W = (row.firstElementChild as HTMLElement).getBoundingClientRect().width;
+    phraseW = (row.firstElementChild as HTMLElement).getBoundingClientRect().width;
     pad = parseFloat(getComputedStyle(row).paddingLeft) || 0;
     // ultrawide: three copies do not span the loop, add more
-    for (let n = row.children.length; W > 0 && (n - 1) * W < ctx.vw; n++) clones.push(row.appendChild(row.lastElementChild!.cloneNode(true)));
+    for (let n = row.children.length; phraseW > 0 && (n - 1) * phraseW < ctx.vw; n++) clones.push(row.appendChild(row.lastElementChild!.cloneNode(true)));
     // start with a copy at the resting position and one already off to its left
-    if (first && W) {
+    if (first && phraseW) {
       phraseX = -pad;
       first = false;
     }
-    MK = null;
+    phraseMask = null;
   };
 
   /* One phrase as a mask. Drawn at 280px or less with no canvas scale: above
      about 300px fillText punches the variable font's overlaps out as holes. */
   const mask = (br: DOMRect) => {
     const ph = row.firstElementChild as HTMLElement, cs = getComputedStyle(ph), fs = parseFloat(cs.fontSize), pr = ph.getBoundingClientRect();
-    mz = Math.min(1, 280 / fs);
+    maskZoom = Math.min(1, 280 / fs);
     const c = document.createElement("canvas"), k = c.getContext("2d")!;
-    c.width = Math.ceil(W * mz);
-    c.height = Math.ceil(br.height * mz);
+    c.width = Math.ceil(phraseW * maskZoom);
+    c.height = Math.ceil(br.height * maskZoom);
     const probe = document.createElement("b");
     probe.style.cssText = "display:inline-block;width:0;height:0";
     ph.firstElementChild!.appendChild(probe);
-    const base = (probe.getBoundingClientRect().top - br.top) * mz;
+    const base = (probe.getBoundingClientRect().top - br.top) * maskZoom;
     probe.remove();
-    k.font = `${cs.fontWeight} ${fs * mz}px ${cs.fontFamily}`;
+    k.font = `${cs.fontWeight} ${fs * maskZoom}px ${cs.fontFamily}`;
     k.fillStyle = k.strokeStyle = "#fff";
     // a hair wider than the letters, or their grey edge shows around the photo
-    k.lineWidth = 1.5 * mz;
+    k.lineWidth = 1.5 * maskZoom;
     k.lineJoin = "round";
     for (const l of ph.children) {
-      const lx = (l.getBoundingClientRect().left - pr.left) * mz;
+      const lx = (l.getBoundingClientRect().left - pr.left) * maskZoom;
       k.fillText(l.textContent ?? "", lx, base);
       k.strokeText(l.textContent ?? "", lx, base);
     }
@@ -99,8 +99,8 @@ function setup(el: HTMLElement, ctx: Ctx) {
      spot's box inside the phrase band. */
   const draw = (r: DOMRect, u: number) => {
     const br = btn.getBoundingClientRect();
-    if (!MK && W && document.fonts.status === "loaded") MK = mask(br);
-    if (!MK) return;
+    if (!phraseMask && phraseW && document.fonts.status === "loaded") phraseMask = mask(br);
+    if (!phraseMask) return;
     const dpr = Math.min(2, devicePixelRatio || 1), Ru = R * u, bw = 2 * Ru, bh = br.height;
     const snap = (n: number) => Math.round(n * dpr) / dpr;
     const ox = snap(spotX - Ru), oy = snap(br.top - r.top);
@@ -110,46 +110,46 @@ function setup(el: HTMLElement, ctx: Ctx) {
       cut.style.height = `${bh}px`;
     }
     fit(cut, cw, ch);
-    fit(Wc, cw, ch);
-    fit(Sc, cw, ch);
-    fit(Mc, cw, ch);
-    fit(Bc, Math.ceil(cw / 6), Math.ceil(ch / 6));
+    fit(washC, cw, ch);
+    fit(sharpC, cw, ch);
+    fit(maskC, cw, ch);
+    fit(blurC, Math.ceil(cw / 6), Math.ceil(ch / 6));
     cut.style.transform = `translate3d(${ox}px,${oy}px,0)`;
 
     // the resting grey over the lit letters, at full strength (the falloff is in the gradients below)
-    w.setTransform(dpr, 0, 0, dpr, 0, 0);
-    w.fillStyle = ink;
-    w.fillRect(0, 0, bw, bh);
+    wash.setTransform(dpr, 0, 0, dpr, 0, 0);
+    wash.fillStyle = ink;
+    wash.fillRect(0, 0, bw, bh);
 
     const gx = (spotX - ox) * dpr, gy = (spotY - oy) * dpr, ud = u * dpr;
     // blur without ctx.filter (Safari): down to 1/6 and back up
-    b.imageSmoothingQuality = "high";
-    b.globalCompositeOperation = "copy";
-    b.drawImage(Wc, 0, 0, Bc.width, Bc.height);
-    s2.globalCompositeOperation = "copy";
-    s2.drawImage(Wc, 0, 0);
-    s2.globalCompositeOperation = "destination-in";
-    s2.fillStyle = grad(s2, gx, gy, 40 * ud, 300 * ud, 0.35, 0.85);
-    s2.fillRect(0, 0, cw, ch);
+    blur.imageSmoothingQuality = "high";
+    blur.globalCompositeOperation = "copy";
+    blur.drawImage(washC, 0, 0, blurC.width, blurC.height);
+    sharp.globalCompositeOperation = "copy";
+    sharp.drawImage(washC, 0, 0);
+    sharp.globalCompositeOperation = "destination-in";
+    sharp.fillStyle = grad(sharp, gx, gy, 40 * ud, 300 * ud, 0.35, 0.85);
+    sharp.fillRect(0, 0, cw, ch);
     g.imageSmoothingQuality = "high";
     g.globalCompositeOperation = "copy";
-    g.drawImage(Bc, 0, 0, cw, ch);
+    g.drawImage(blurC, 0, 0, cw, ch);
     g.globalCompositeOperation = "source-over";
-    g.drawImage(Sc, 0, 0);
+    g.drawImage(sharpC, 0, 0);
 
     // letters in view, times the spot falloff
-    m.globalCompositeOperation = "source-over";
-    m.clearRect(0, 0, cw, ch);
-    const left = br.left - r.left + pad + tr - ox, mw = (MK.width / mz) * dpr, mh = (MK.height / mz) * dpr;
+    maskCtx.globalCompositeOperation = "source-over";
+    maskCtx.clearRect(0, 0, cw, ch);
+    const left = br.left - r.left + pad + rowX - ox, mw = (phraseMask.width / maskZoom) * dpr, mh = (phraseMask.height / maskZoom) * dpr;
     for (let i = 0; i < row.children.length; i++) {
-      const lx = (left + i * W) * dpr;
-      if (lx < cw && lx + mw > 0) m.drawImage(MK, lx, 0, mw, mh);
+      const lx = (left + i * phraseW) * dpr;
+      if (lx < cw && lx + mw > 0) maskCtx.drawImage(phraseMask, lx, 0, mw, mh);
     }
-    m.globalCompositeOperation = "destination-in";
-    m.fillStyle = grad(m, gx, gy, 45 * ud, R * ud, 0.45, 0.7);
-    m.fillRect(0, 0, cw, ch);
+    maskCtx.globalCompositeOperation = "destination-in";
+    maskCtx.fillStyle = grad(maskCtx, gx, gy, 45 * ud, R * ud, 0.45, 0.7);
+    maskCtx.fillRect(0, 0, cw, ch);
     g.globalCompositeOperation = "destination-in";
-    g.drawImage(Mc, 0, 0);
+    g.drawImage(maskC, 0, 0);
   };
 
   const onMove = (e: PointerEvent) => {
@@ -180,13 +180,13 @@ function setup(el: HTMLElement, ctx: Ctx) {
       measure();
     }
     // phrase: one speed easing toward idle plus whatever the scroll adds
-    pk = clamp(pk * Math.pow(0.94, k) + c.dy * 0.0012, -0.35, 0.35);
-    if (Math.abs(pk) < 0.0005) pk = 0;
+    kick = clamp(kick * Math.pow(0.94, k) + c.dy * 0.0012, -0.35, 0.35);
+    if (Math.abs(kick) < 0.0005) kick = 0;
     // 68 design px a second, 54 under the pointer
-    phraseV += ((busy ? 0 : (hot ? 0.054 : 0.068) * u) + pk - phraseV) * (1 - Math.exp(-dt / 180));
+    phraseV += ((busy ? 0 : (hot ? 0.054 : 0.068) * u) + kick - phraseV) * (1 - Math.exp(-dt / 180));
     phraseX += phraseV * dt;
-    tr = -pad - mod(phraseX, W || 1);
-    row.style.transform = `translate3d(${tr.toFixed(1)}px,0,0)`;
+    rowX = -pad - mod(phraseX, phraseW || 1);
+    row.style.transform = `translate3d(${rowX.toFixed(1)}px,0,0)`;
 
     if (!c.held) return;
 
