@@ -70,7 +70,7 @@ export async function checkout(key: string, p: Proof, method: "bank" | "card" = 
   // One list price on both receipts; bank gets it back as a discount.
   const off = card
     ? null
-    : await stripe(key, "/coupons", { amount_off: String(list - x.cents), currency: "usd", duration: "once", max_redemptions: "1", name: "Paid by bank" }, `${tag}-coupon`.slice(-255)).catch(() => null);
+    : await stripe(key, "/coupons", { amount_off: String(list - x.cents), currency: "usd", duration: "once", max_redemptions: "1", name: "Paid by bank" }, `${tag}-coupon`.slice(-255)).catch((e) => (console.error("proof bank coupon", String(e)), null)); // the card checkout still opens
   if (!card && !off) return checkout(key, p, "card");
   const s = await stripe(
     key,

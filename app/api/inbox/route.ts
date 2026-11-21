@@ -16,6 +16,7 @@ import { cleanPeople, cleanTemplates, manualLead, merge, stats, type NewLead } f
 import { balance, cleanFrom, cleanInvoice, FROM_KEY, invoiceNo, mmyy, PHOTO_KEY, usd, type InvoiceFrom } from "@/lib/leads/invoice";
 import { bodyOf, json, NO_STORE } from "@/lib/http";
 import { parseOr } from "@/lib/json";
+import { secretJson } from "@/lib/secrets";
 
 /** Where his reply templates live: not personal data, so plain JSON. */
 const TEMPLATES_KEY = "leads:templates";
@@ -138,7 +139,7 @@ export async function GET(request: Request) {
   // The key a device subscribes to pushes with. Public by nature, still gated.
   if (url.searchParams.has("vapid")) {
     if (!gate.vapid) return json({ error: "Push needs VAPID_KEY on the Worker." }, 503);
-    return json({ key: publicKey(JSON.parse(gate.vapid) as JsonWebKey) });
+    return json({ key: publicKey(secretJson<JsonWebKey>(gate.vapid, "VAPID_KEY")) });
   }
 
   // His reply templates, or the defaults.
@@ -457,6 +458,14 @@ async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: Await
     }
     lead = { ...lead, people: list.length ? list : undefined, events: [...lead.events, { at: new Date().toISOString(), kind: "edit" as const, note: "people" }].slice(-50) };
   }
+  // Every 404 is decided before anything is written: a patch that fails must not move the Notion board or use up an invoice number.
+  const mergeId = typeof mergeFrom === "string" && mergeFrom.startsWith("lead:") && mergeFrom !== key ? mergeFrom : undefined;
+  const other = mergeId ? await readLead(inbox, seal, mergeId.slice(5)) : null;
+  if (mergeId && !other) return json({ error: "Gone." }, 404);
+  const paidNo = invoicePaid && typeof invoicePaid.no === "string" ? invoicePaid.no : undefined;
+  const billN = bill ? await taken(inbox, bill.date) : 0;
+  const nos = [...(lead.invoices ?? []), ...(other?.invoices ?? [])].map((v) => v.no);
+  if (paidNo && !nos.includes(paidNo) && !(bill && paidNo === invoiceNo(bill.date, billN))) return json({ error: "No such invoice." }, 404);
   // What the log compares against: events already logged (this lead's, and a merged record's) are not logged again.
   let from: Lead = lead;
   const at = new Date().toISOString();
@@ -500,17 +509,15 @@ async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: Await
   if (licence !== undefined) lead = { ...lead, licence: licence ? { use: cut(licence.use, 80) ?? "", end: licence.end! } : undefined };
   // Another record of the same person folded into this one; the other goes for good, once this one is written.
   let merged: string | undefined;
-  if (typeof mergeFrom === "string" && mergeFrom.startsWith("lead:") && mergeFrom !== key) {
-    const other = await readLead(inbox, seal, mergeFrom.slice(5));
-    if (!other) return json({ error: "Gone." }, 404);
+  if (mergeId && other) {
     lead = merge(lead, other, at);
     from = { ...from, events: [...from.events, ...other.events] };
-    merged = mergeFrom;
+    merged = mergeId;
   }
   // A new invoice takes the month's next number: 1126, then 1126-2.
   // shortcut: read then write the count is not atomic; one person makes these by hand, a Durable Object if that changes.
   if (bill) {
-    const n = await taken(inbox, bill.date);
+    const n = billN;
     const made = { ...bill, no: invoiceNo(bill.date, n), at };
     lead = { ...lead, invoices: [...(lead.invoices ?? []), made], events: [...lead.events, { at, kind: "invoice" as const, note: `${made.no}, ${usd(balance(made))} due` }].slice(-50) };
     await inbox.put(countKey(bill.date), String(n + 1));

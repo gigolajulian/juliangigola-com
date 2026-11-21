@@ -128,7 +128,11 @@ async function post(request: Request) {
 
   if (typeof body.unblock === "string") {
     const path = `/calendars/primary/events/${encodeURIComponent(body.unblock)}`;
-    const ev = await gcal<GEvent>(env.GCAL_OAUTH, path).catch(() => null);
+    // Only a missing event is "not a block"; a calendar that is down answers 502 like every other call here.
+    const ev = await gcal<GEvent>(env.GCAL_OAUTH, path).catch((e: { status?: number }) => {
+      if (e.status === 404 || e.status === 410) return null;
+      throw e;
+    });
     // Only a block made here: a booking or anything else on hello@ stays.
     if (!ev?.extendedProperties?.private?.jgBlock) return json({ error: "Not a block." }, 400);
     await gcal(env.GCAL_OAUTH, `${path}?sendUpdates=none`, { method: "DELETE" });
