@@ -253,14 +253,14 @@ export async function bookDeposit(env: Env, intent: string, metadata: { [k: stri
       await put({ status: "booked", booking: { uid: booking.id, start: booking.start } });
       await tell(env, "booked", b, link, intent, usd);
       await recordBooking(env, booking, dashboardLink(intent, env.STRIPE_SECRET_KEY));
-      // Not `confirmOf`: this mail maps the paid Booking and adds the card Stripe charged; it carries no fee, as it always has.
+      // Not `confirmOf`: this mail maps the paid Booking and adds the card Stripe charged. The fee comes from the record, so it says 90% back.
       const confirm = {
         ...b,
         session: SESSION[b.slug] ?? b.slug,
         start: booking.start,
         end: booking.end,
         uid: booking.id,
-        deposit: { ref: intent, at: new Date().toISOString(), amount: usd, card: await cardOf(env.STRIPE_SECRET_KEY, intent) },
+        deposit: { ref: intent, at: new Date().toISOString(), amount: usd, card: await cardOf(env.STRIPE_SECRET_KEY, intent), fee: booking.fee },
         manage: await manageLinks(env.BOOKING_SECRET, booking),
       };
       const sent = await sendConfirm(env.CLIENT_EMAIL, confirm);
