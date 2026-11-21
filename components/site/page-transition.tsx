@@ -200,7 +200,10 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
         const settled = () => settle(document.querySelector(".mt-covers")?.getAnimations?.({ subtree: true }).filter((a) => a.effect?.getTiming().iterations !== Infinity).map((a) => a.finished.catch(() => {})) ?? []);
         const look = () => {
           if (!document.querySelector(".mt-covers") && performance.now() - t0 < 1500) return void requestAnimationFrame(look);
-          settle(holds.splice(0)).then(() => requestAnimationFrame(() => requestAnimationFrame(() => void settled().then(() => lid.remove()))));
+          // one 300ms clock from the row's first frame for the whole hold: the two capped waits chained ran to 407 and 417ms (MAC SSH on 53741f32)
+          const go = () => lid.remove();
+          setTimeout(go, 300);
+          Promise.all(holds.splice(0)).then(() => requestAnimationFrame(() => requestAnimationFrame(() => void settled().then(go))));
         };
         requestAnimationFrame(look);
         return;
