@@ -1,4 +1,4 @@
-/* v4 homepage (`?mtscroll=1`, docs/mt-decisions.md): the copy and picks this
+/* v4 homepage (the home with NEXT_PUBLIC_V4_HOME=1, docs/mt-decisions.md): the copy and picks this
    screen owns. Client-safe: no lib/work import. Frames that need project data
    (names, ratios) are resolved on the server in `app/page.tsx` (`mtData`). */
 import { rate, SESSIONS, type SessionSlug } from "@/lib/photos-and-sessions";

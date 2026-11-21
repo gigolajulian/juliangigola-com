@@ -9,8 +9,8 @@ import { shareOg } from "@/lib/share";
 
 export const metadata: Metadata = shareOg("Photographer and creative director","Fashion editorial, campaigns and portraits in the San Francisco Bay Area. Available worldwide.");
 
-/* JG V3 homepage (master v39). The old deck (strip, cover float, screens)
-   is retired. */
+/* The homepage. With NEXT_PUBLIC_V4_HOME=1 (production) it is the v4 home, MtHome.
+   With 0 it is the rollback: V3Home (master v39), behind MtGate for a `?mtscroll=1` preview of v4. */
 /* Each Commissions tab's top projects in Julian's portfolio order, as
    /portfolio shows them: nine, or five, the counts that fill the sheet
    (one large and its small ones). Fewer than five and the tab keeps

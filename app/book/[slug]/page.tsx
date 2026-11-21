@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
-import { BOOK_MENU } from "@/lib/booking/booking";
+import { BOOK_MENU } from "@/lib/booking/service-pages";
 import { V3Book } from "@/components/booking/book";
 import { SESSIONS, isSession } from "@/lib/photos-and-sessions";
 import { shareOg } from "@/lib/share";

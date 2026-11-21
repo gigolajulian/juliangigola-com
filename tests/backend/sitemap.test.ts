@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import sitemap from "@/app/sitemap";
 import { PROJECTS } from "@/lib/work/work";
-import { BOOKING_PAGES, bookingHref } from "@/lib/booking/booking";
+import { BOOKING_PAGES, bookingHref } from "@/lib/booking/service-pages";
 
 const SITE = "https://juliangigola.com";
 
