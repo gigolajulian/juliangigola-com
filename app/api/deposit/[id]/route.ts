@@ -15,20 +15,26 @@ export const dynamic = "force-dynamic";
 
 const DONE: readonly Status[] = ["booked", "refunded", "failed"];
 
+type Intent = { amount?: number; currency?: string; metadata?: { [k: string]: string } };
+
+/** A deposit's intent from Stripe. "missing": Stripe's 404 or not a deposit (a made-up id, not one still settling); "down": anything else. */
+async function loadIntent(key: string, id: string): Promise<Intent | "missing" | "down"> {
+  try {
+    const pi: Intent = await stripe(key, `/payment_intents/${id}`);
+    return isDeposit(pi) ? pi : "missing";
+  } catch (e) {
+    return (e as { status?: number }).status === 404 ? "missing" : "down";
+  }
+}
+
 export async function GET(_request: Request, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
   if (!isIntentId(id)) return json({ error: "Unknown deposit." }, 404);
   const { env } = await getCloudflareContext({ async: true });
   if (!env.STRIPE_SECRET_KEY) return json({ status: "pending" });
-  let pi: { amount?: number; currency?: string; metadata?: { [k: string]: string } };
-  try {
-    pi = await stripe(env.STRIPE_SECRET_KEY, `/payment_intents/${id}`);
-  } catch (e) {
-    // Stripe has no such intent: a made-up id, not one still settling.
-    if ((e as { status?: number }).status === 404) return json({ error: "Unknown deposit." }, 404);
-    return json({ status: "pending" });
-  }
-  if (!isDeposit(pi)) return json({ error: "Unknown deposit." }, 404);
+  const pi = await loadIntent(env.STRIPE_SECRET_KEY, id);
+  if (pi === "missing") return json({ error: "Unknown deposit." }, 404);
+  if (pi === "down") return json({ status: "pending" });
   const m = pi.metadata ?? {};
   const status: Status = DONE.includes(m.outcome as Status) ? (m.outcome as Status) : "pending";
   return json({ status, ...(status === "booked" && m.cal_uid ? { booking: { uid: m.cal_uid, start: m.cal_start } } : {}) });
@@ -50,15 +56,9 @@ export async function PUT(request: Request, ctx: { params: Promise<{ id: string 
   const ip = request.headers.get("cf-connecting-ip") ?? "unknown";
   if (!(await env.DEPOSIT_LIMIT.limit({ key: `refs:${ip}` })).success) return json({ error: "Too many tries. Wait a minute." }, 429);
 
-  let pi: { amount?: number; currency?: string; metadata?: { [k: string]: string } };
-  try {
-    pi = await stripe(env.STRIPE_SECRET_KEY, `/payment_intents/${id}`);
-  } catch (e) {
-    // As in GET: only Stripe's 404 means no such deposit; anything else is Stripe being down.
-    if ((e as { status?: number }).status === 404) return json({ error: "Unknown deposit." }, 404);
-    return json({ error: PAYMENTS_DOWN }, 502);
-  }
-  if (!isDeposit(pi) || pi.metadata?.outcome) return json({ error: "Unknown deposit." }, 404);
+  const pi = await loadIntent(env.STRIPE_SECRET_KEY, id);
+  if (pi === "down") return json({ error: PAYMENTS_DOWN }, 502);
+  if (pi === "missing" || pi.metadata?.outcome) return json({ error: "Unknown deposit." }, 404);
 
   const form = await request.formData().catch(() => null);
   if (!form) return json({ error: "Not a form." }, 400);

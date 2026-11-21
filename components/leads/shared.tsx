@@ -1,9 +1,15 @@
 "use client";
 
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode, SVGProps } from "react";
 
 import { dateTimeLabel, dayLabel, type Filter } from "@/lib/leads/lead-desk";
 import type { LeadEvent } from "@/lib/leads/leads";
+
+/** A desk icon: a 24 box, a 1.6 line in the text colour. */
+export const glyph = (d: ReactNode) =>
+  function Glyph(p: SVGProps<SVGSVGElement>) {
+    return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...p}>{d}</svg>;
+  };
 
 /** "intro-call" as "Intro call". */
 const kindOf = (k?: string) => (k ? k.charAt(0).toUpperCase() + k.slice(1).replace(/-/g, " ") : undefined);
