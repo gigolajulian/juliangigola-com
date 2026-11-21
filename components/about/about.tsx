@@ -40,14 +40,12 @@ export function V3About() {
             <div className="ctas">
               <Link className="btn fill" href="/contact/form">Inquire</Link>
               <Link className="btn" href="/portfolio">See the work</Link>
-              {/* ?v4pages=m2p */}
               <Link className="btn v4-m2p" href="/bts">Behind the scenes</Link>
             </div>
           </div>
         </div>
         <section className="ab-logos">
-          {/* ?v4pages=a2 swaps the label; v4pages.css shows one of the two. */}
-          <h2 className="lbl mute"><span className="a2-off">Worked with</span><span className="a2-on">Commissioned and published by</span></h2>
+          <h2 className="lbl mute">Commissioned and published by</h2>
           <LogoBand>
             <Marks cell />
           </LogoBand>

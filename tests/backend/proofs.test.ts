@@ -84,6 +84,7 @@ describe("proofs", () => {
     expect(cleanSettings({ price: 15000, included: -2, days: "14", email: "nope" })).toEqual({ price: 500, included: 0, days: 14, email: undefined });
   });
   it("takes the watermark switch as a boolean, ignores anything else", () => {
+    expect(cleanSettings({ email: `${"a".repeat(189)}@example.com` })).toEqual({ email: undefined });
     expect(cleanSettings({ watermark: true })).toEqual({ watermark: true });
     expect(cleanSettings({ watermark: "false" })).toEqual({ watermark: false });
     expect(cleanSettings({ watermark: 1 })).toEqual({});

@@ -240,7 +240,8 @@ export function PageFly() {
     back.current = null;
     if (b && Date.now() - b.t < 4000) {
       const main = document.getElementById("main");
-      if (main && !(document as Document & { activeViewTransition?: unknown }).activeViewTransition) {
+      // not the home: it puts back its own spot (v4/home/back.ts) and lands at rest, a 2.5vh settle there read as the row arriving late (Julian, #1351)
+      if (main && path !== "/" && !(document as Document & { activeViewTransition?: unknown }).activeViewTransition) {
         main.animate({ transform: ["translateY(-2.5vh)", "none"] }, { duration: 400, easing: "cubic-bezier(.32,.72,0,1)" });
         main.animate({ opacity: [0, 1] }, { duration: 400, easing: OUT });
       }

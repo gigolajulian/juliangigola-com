@@ -17,6 +17,7 @@ import {
   type ZoomTrip,
 } from "@/lib/zoom";
 import { matches } from "@/lib/device";
+import { painted } from "@/lib/painted";
 
 /* ── the lightbox ─────────────────────────────────────────────────
  * A frame at the size of the screen, paged with the arrow keys.
@@ -849,7 +850,6 @@ function useZoom(
    the middle picture to a side and a side one to the middle, each a new
    element that paints a frame late; the copy already painted goes under
    it, so nothing is blank for that frame. */
-const painted = new Map<string, string>();
 const paint = (src: string) => (e: React.SyntheticEvent<HTMLImageElement>) =>
   painted.set(src, e.currentTarget.currentSrc);
 /** The best copy of a frame already decoded: the viewer's, or the page's. */

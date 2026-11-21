@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
-import { BackLink } from "@/components/site/back-link";
 import { notFound } from "next/navigation";
-import { CoverArt } from "@/components/cover/sleeves";
 import { CoverPage } from "@/components/cover/cover-page";
-import { CallToAction } from "@/components/call-to-action";
 import { SESSION_SEO } from "@/lib/seo";
 import { projectFacts, shareMeta } from "@/lib/og/share";
 import { V3Project } from "@/components/portfolio/project";
@@ -102,47 +99,9 @@ export default async function ProjectPage(props: PageProps<"/portfolio/[slug]">)
      of them two-sided, which is a catalogue and not a sequence. Everything
      else is a sequence and gets the strip. */
   if (project.slug === COVER_ART?.slug) {
-    /* `off` is the page as it is live; `?v4pages` (c1) swaps it for the one in the site's system. */
-    const off = (
-      <article className="pt-20 sm:pt-20">
-        <header className="mx-auto max-w-[100rem] px-6 sm:px-10">
-          <Crumb />
-          <h1 className="mt-6 title">{project.headline ?? project.name}</h1>
-          <p className="label mt-3 text-muted-foreground">
-            {COVER_RELEASES.length} releases
-          </p>
-        </header>
-        <CoverArt releases={COVER_RELEASES} />
-        <CallToAction
-          className="mt-24"
-          title="Want something like this?"
-          body="Tell me what you have in mind and I'll come back with a treatment and a rate."
-          // The value /contact/form preselects on (TYPE in components/contact/inquire.tsx).
-          type="coverart"
-          detail={project.name}
-          secondary={
-            onwards ? { href: onwards.href, label: onwards.name } : undefined
-          }
-        />
-      </article>
-    );
-    return <CoverPage off={off} releases={COVER_RELEASES} onwards={onwards ? { href: onwards.href, name: onwards.name } : undefined} />;
+    return <CoverPage releases={COVER_RELEASES} onwards={onwards ? { href: onwards.href, name: onwards.name } : undefined} />;
   }
 
   /* JG V3 (leftovers card B): a vertical page, the client's logo in the head. */
   return <V3Project project={project} next={onwards} />;
-}
-
-/** Back where they came from, in the corner both layouts put it. */
-function Crumb() {
-  return (
-    <nav aria-label="Breadcrumb">
-      <BackLink
-        /* One line: on a phone the head's middle column left it 37px
-           and the arrow stood over the word. Padded to a 26px target
-           and pulled back by as much. */
-        className="label -my-1.5 inline-block whitespace-nowrap py-1.5 text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
-      />
-    </nav>
-  );
 }

@@ -33,7 +33,8 @@ export function glideTo(y: number, done: () => void) {
 
 /** Puts the page at `y` now, and Lenis with it: a glide it still had from the last page otherwise carried on over a restored scroll (#1313). */
 export function jumpTo(y: number) {
-  if (live) live.scrollTo(y, { immediate: true, force: true });
+  // resize first: Lenis clamps to the limit it measured, which is still the last page's on a Back (row below the fold for 20 frames, MAC on e1287880)
+  if (live) live.resize(), live.scrollTo(y, { immediate: true, force: true });
   else scrollTo(0, y);
 }
 
