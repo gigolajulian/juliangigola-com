@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { createElement } from "react";
 import { renderToString } from "react-dom/server";
-import { DialRoot, DialStore, useDialKit, useDialKitController } from "@/lib/dialkit-stub";
+import { DialRoot, DialStore, useDialKit, useDialKitController } from "@/lib/dev/dialkit-stub";
 
-/* DialKit's production stand-in (`lib/dialkit-stub.ts`): every read
+/* DialKit's production stand-in (`lib/dev/dialkit-stub.ts`): every read
    returns the default written in the config. */
 
 const read = (config: Record<string, unknown>) => {

@@ -349,13 +349,13 @@ const nextConfig: NextConfig = {
 
   /**
    * DialKit on the dev server only (Julian). A production build gets
-   * `lib/dialkit-stub.ts` in its place: the configs' defaults and no panel,
+   * `lib/dev/dialkit-stub.ts` in its place: the configs' defaults and no panel,
    * so visitors no longer download 72KB gzipped of tuning panels they never
    * saw (the audit, 2026-10-02).
    */
   turbopack: {
     resolveAlias:
-      process.env.NODE_ENV === "production" ? { dialkit: "./lib/dialkit-stub.ts" } : {},
+      process.env.NODE_ENV === "production" ? { dialkit: "./lib/dev/dialkit-stub.ts" } : {},
   },
 
   /**

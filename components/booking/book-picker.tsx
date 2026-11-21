@@ -7,7 +7,7 @@ import { BookTimes } from "@/components/booking/book-times";
 import { DialCopyAll } from "@/components/dev/dial-copy-all";
 import { InquireWall } from "@/components/inquire-wall";
 import type { WallTile } from "@/lib/wall-tile";
-import { useDialKitStyles } from "@/lib/dialkit-styles";
+import { useDialKitStyles } from "@/lib/dev/dialkit-styles";
 
 export type Bookable = {
   slug: string;
