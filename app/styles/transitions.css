@@ -207,19 +207,17 @@
   mix-blend-mode: normal;
 }
 /* Back from Cover art to the home (`data-nav-off`, `page-transition.tsx`): the same drop, a whole screen and opaque, so the
-   home is clean as it is uncovered. A fade over it washed the cover grey for its first frames (MAC on #1351). */
-/* Every old snapshot (the whole screen, the viewer in it, and the bar) slides off together; every new one is shown at rest under it, no fade. */
-:root[data-nav-off]::view-transition-old(*) {
+   home is clean as it is uncovered. A fade over it washed the cover grey for its first frames (MAC on #1351).
+   The page travels as the root snapshot (motion-plan.css): out-ranks its !important fade there (mp-out, mp-drop + mp-in, MAC SSH on 5ef24507).
+   The old screen, viewer and all, slides off opaque on top; the home is shown at rest under it. */
+:root:root:root[data-nav-off]::view-transition-old(root) {
   z-index: 1;
-  animation: jg-page-off var(--dur-xs) cubic-bezier(0.32, 0.72, 0, 1) both;
-  mix-blend-mode: normal; /* the browser's plus-lighter adds two opaque pictures into a wash */
-}
-:root[data-nav-off]::view-transition-new(*) {
-  animation: none;
   mix-blend-mode: normal;
+  animation: jg-page-off var(--dur-xs) cubic-bezier(0.32, 0.72, 0, 1) both !important;
 }
-:root[data-nav-off]::view-transition-image-pair(*) {
-  isolation: auto;
+:root:root:root[data-nav-off]::view-transition-new(root) {
+  mix-blend-mode: normal;
+  animation: none !important;
 }
 @keyframes jg-page-off {
   to {
