@@ -45,7 +45,7 @@ export async function importNotion(kv: KV, s: Sealer, people: unknown, dry: bool
       .filter((r): r is { ref: string; at: string; note: string } => !!(r.ref && r.at && r.note));
     if (!email || !rows.length) { count.skipped++; continue; }
     const id = await s.id(email);
-    if ((await Promise.all((await s.ids(email)).map((i) => kv.get(`gone:${i}`)))).some(Boolean)) { count.gone++; continue; }
+    if ((await Promise.all((await s.ids(email)).map((i) => kv.get(`gone:${i}`)))).some((v: unknown) => v !== null)) { count.gone++; continue; }
 
     const before = await readLead(kv, s, id);
     const fresh: LeadEvent[] = rows
