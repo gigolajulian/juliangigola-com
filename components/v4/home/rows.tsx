@@ -7,10 +7,103 @@ import Link from "next/link";
 import { COVER_RELEASES } from "@/lib/work/cover-art-data";
 import type { CoverRelease } from "@/lib/work/cover-art-types";
 import { media } from "@/lib/device";
+import { jumpTo, scrollGoal } from "@/components/v3/smooth-scroll";
+import { projectHref } from "@/lib/project-href";
 import { holdEase, holdUnease } from "@/lib/motion/hold-ease";
 import { clamp, MT2, progress } from "./motion/engine";
 import { COVER_KEYS, COVER_PRESS, FILM_DRESS, pad, type MtFilm } from "@/lib/v4-home/data";
 import { qflag } from "@/lib/v4-home/flags";
+
+/** A home cover opens on the Cover art page, in that page's viewer (`?cover=`, components/cover/cover-art-gallery.tsx). */
+export const coverHref = (slug: string) => `${projectHref("coverart")}?cover=${encodeURIComponent(slug)}`;
+
+/* A tap on a two-sided sleeve turns it over on touch (?mttp=flip, motion/rows.ts), so that tap does not also leave the page. */
+function keepFlip(e: React.MouseEvent<HTMLElement>) {
+  if (e.currentTarget.hasAttribute("data-flip") && document.documentElement.hasAttribute("data-tp-flip") && !media("fine").matches) e.preventDefault();
+  // Where the home was at the click, for `useBackToCover`: Safari put back a scroll saved before the last of the held row's
+  // scroll, 618px short on a Mac and on Motion on the iPhone (MAC on #1313). Session storage: the router rewrites the history entry's state.
+  // Kept as the distance into the covers block: the held blocks above take their height a frame or more after the page is back,
+  // so a page scroll put back raw landed a block's length on, on cover 08 (Safari 1440, MAC on d4a49299).
+  // The row's own scroll too: a phone's covers are a sideways row, which came back on the first cover.
+  else
+    try {
+      sessionStorage.setItem(BACK, JSON.stringify(clickedSpot(e.currentTarget)));
+      // the browser's own restore landed over ours a frame later (Safari 1440, MAC on 01ca50cb); `useBackToCover` gives it back
+      history.scrollRestoration = "manual";
+    } catch {}
+}
+
+const BACK = "jg-cover-back";
+/** The spot that holds the clicked cover in the middle (Julian: "Back lands on the cover you clicked"): held (desktop), the place in
+    the block's scroll that brings that cover up (the covers driver's own map, motion/rows.ts); a phone's row, that cover's snap. */
+function clickedSpot(it: HTMLElement) {
+  const sec = it.closest<HTMLElement>(".mt-covers"), row = it.closest<HTMLElement>(".mt-row");
+  const items = row ? [...row.querySelectorAll<HTMLElement>(".mt-item")] : [];
+  const i = items.indexOf(it), n = items.length;
+  if (!sec || !row || i < 0 || n < 2) return { off: scrollY - coversTop(), x: row?.scrollLeft ?? 0 };
+  if (media("held").matches) return { off: holdUnease(i / (n - 1)) * (sec.offsetHeight - innerHeight), x: 0 };
+  return { off: scrollY - coversTop(), x: i * (items[1].offsetLeft - items[0].offsetLeft) };
+}
+/** The covers block's top in the page, by layout: its box on screen moves with the blocks' lift transforms. */
+const coversTop = () => {
+  let t = 0;
+  for (let n = document.querySelector<HTMLElement>(".mt-covers"); n; n = n.offsetParent as HTMLElement | null) t += n.offsetTop;
+  return t;
+};
+/** When the last Back or Forward was: the home counts as a return only when it mounts just after one. */
+let popAt = 0;
+if (typeof window !== "undefined") addEventListener("popstate", () => (popAt = Date.now()));
+
+/** Back from a cover on the Cover art page: the home's scroll and the row's as they were at the click (`keepFlip`),
+    set before the first paint so the row never shows passing the covers before it (MAC on 01ca50cb), then held there
+    each frame for a moment while the blocks above settle, until the visitor scrolls. */
+function useBackToCover() {
+  React.useLayoutEffect(() => {
+    let at: { off: number; x: number } | null = null;
+    try {
+      at = JSON.parse(sessionStorage.getItem(BACK) ?? "null");
+    } catch {}
+    // taken a tick on, not now: React's dev double mount read it once and dropped it
+    const t = setTimeout(() => {
+      try {
+        sessionStorage.removeItem(BACK);
+        history.scrollRestoration = "auto";
+      } catch {}
+    });
+    if (!at || typeof at.off !== "number" || Date.now() - popAt > 2000) return () => clearTimeout(t);
+    const el = document.querySelector<HTMLElement>(".mt-covers .mt-row");
+    const go = () => {
+      const y = coversTop() + at.off;
+      if (Math.abs(scrollY - y) > 2 || Math.abs(scrollGoal() - y) > 2) jumpTo(y);
+    };
+    go();
+    // a phone's sideways row only: held (desktop), the row follows the page's scroll, and setting it too threw the page a screen on (MAC on d82f2b75)
+    if (el && !media("held").matches) el.scrollLeft = at.x;
+    // a sleeve still marked hovered from before the click turned to its back and then away on arrival (Safari, MAC on 23412f74): unturned at once
+    const lifted = [...document.querySelectorAll<HTMLElement>(".mt-covers .mt-sleeve.hv")];
+    lifted.forEach((it) => ((it.style.transition = "none"), it.classList.remove("hv")));
+    const unlift = requestAnimationFrame(() => requestAnimationFrame(() => lifted.forEach((it) => (it.style.transition = ""))));
+    // rAF runs before each paint, so a block above that grows is answered in the same frame
+    const end = performance.now() + 900;
+    let raf = 0, done = false, goal = scrollGoal(); // after go(): Lenis's target is the restore spot
+    const stop = () => ((done = true), cancelAnimationFrame(raf));
+    raf = requestAnimationFrame(function hold(now) {
+      // the visitor's scroll wins: Lenis heads somewhere else as soon as a wheel or touch lands, whether or not its event reached us
+      // (a wheel 0.3s after Back was held for 0.6s, Safari, MAC on 23412f74)
+      // (a wheel 0.3s after Back was held for 0.6s, Safari, MAC on 23412f74). Only a move of its target counts: it starts stale from the last page.
+      const g = scrollGoal(), moved = g !== goal && Math.abs(g - (coversTop() + at.off)) > 2;
+      goal = g;
+      if (done || moved) return stop();
+      go();
+      // a sleeve the row carried under a resting pointer lifts and turns to its back: none while the page is being put back (Safari, MAC on 983abf06)
+      for (const it of document.querySelectorAll(".mt-covers .mt-sleeve.hv")) it.classList.remove("hv");
+      if (now < end) raf = requestAnimationFrame(hold);
+    });
+    const ev = ["wheel", "touchstart", "keydown", "pointerdown"] as const;
+    ev.forEach((n) => addEventListener(n, stop, { passive: true, capture: true }));
+    return () => (clearTimeout(t), cancelAnimationFrame(unlift), stop(), ev.forEach((n) => removeEventListener(n, stop, { capture: true })));
+  }, []);
+}
 
 const COVERS = COVER_KEYS.map((k) => COVER_RELEASES.find((r) => r.slug === k)).filter((r): r is CoverRelease => !!r);
 
@@ -52,6 +145,7 @@ export function MtCovers() {
   React.useEffect(() => {
     row.current!.querySelectorAll(".mt-item").forEach((it, i) => it.toggleAttribute("data-on", i === cur));
   }, [cur]);
+  useBackToCover();
   // the same scroll a cover as the five had in 1.5 screens
   const hold = (COVERS.length - 1) * 0.375;
   return (
@@ -69,14 +163,14 @@ export function MtCovers() {
             {COVERS.map((c, i) => {
               const back = c.frames[1];
               return (
-                <div key={c.slug} className="mt-item mt-sleeve" data-i={i} data-flip={back ? "" : undefined} style={{ "--o": 0.5, "--press": COVER_PRESS[c.slug] } as React.CSSProperties}>
+                <Link key={c.slug} href={coverHref(c.slug)} onClick={keepFlip} className="mt-item mt-sleeve" data-i={i} data-flip={back ? "" : undefined} style={{ "--o": 0.5, "--press": COVER_PRESS[c.slug] } as React.CSSProperties}>
                   <span className="disc" aria-hidden />
                   <div className="face">
                     <Image src={c.frames[0].src} alt={`${c.title} by ${c.artist}`} fill sizes="(max-width: 599px) 92vw, 34vw" />
                     {back ? <Image className="back" src={back.src} alt={`${c.title}, back of the sleeve`} fill sizes="34vw" /> : null}
                   </div>
                   <p className="lbl mt-cvcap" aria-hidden><span>{c.title}</span><span className="mute">{c.artist}</span></p>
-                </div>
+                </Link>
               );
             })}
           </div>
