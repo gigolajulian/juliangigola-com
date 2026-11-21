@@ -1,5 +1,5 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { bearer, isAdmin } from "@/lib/vouch";
+import { refuseAdmin } from "@/lib/vouch";
 import { SAFE_IMAGE, summary, type Enquiry, type Summary } from "@/lib/inbox";
 import { backfillLead, fold, PAPER, REMIND_MAX, STAGES, trashDaysLeft, type InboxRow, type Lead, type LeadPatch, type LeadSummary, type Paper, type Stage } from "@/lib/leads/leads";
 import { everyLead, findLead, hasPerson, linkPeople, personKey, readLead, writeLead } from "@/lib/leads/lead-store";
@@ -85,10 +85,8 @@ async function guard(request: Request) {
   const { env } = await getCloudflareContext({ async: true });
   // Who is asking first: what this build is missing is for /admin only.
   // The admin gate (`isAdmin`): the inbox key, or a GitHub token that can push.
-  // The messages differ so a wrong token can be told from a missing one, never which characters were wrong.
-  if (!(await isAdmin(request, env.INBOX_KEY))) {
-    return { error: json({ error: bearer(request) ? "GitHub did not accept that token for this repository." : "Not authorized." }, 401) };
-  }
+  const denied = await refuseAdmin(request, env.INBOX_KEY);
+  if (denied) return { error: denied };
   const rig = await wired();
   if (!rig) {
     return {

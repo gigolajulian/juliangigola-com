@@ -33,7 +33,7 @@ import { Tab, TabList } from "@astryxdesign/core/TabList";
 import { SignIn } from "@/components/leads/setup";
 import { LeadDesk } from "@/components/leads/lead";
 import { badge, FROST_ROOM, frostBar, GLASS, WIN_CSS } from "@/components/leads/shared";
-import { ago, aside, errorText, inboxCall, loadError, matches, nextStep, inFilter } from "@/lib/leads/lead-desk";
+import { ago, aside, errorText, inboxCall, loadError, LOCKED, matches, nextStep, inFilter } from "@/lib/leads/lead-desk";
 import { useSiteThemeRead } from "@/lib/site-theme";
 import type { Template } from "@/lib/leads/lead-crm";
 import { TZ } from "@/lib/booking/booking-rules";
@@ -333,7 +333,7 @@ export function LeadsDesk() {
     return () => { removeEventListener("touchstart", start); removeEventListener("touchmove", move); removeEventListener("touchend", end); removeEventListener("touchcancel", end); };
   }, [load]);
 
-  if (error === "Not authorized." || error?.startsWith("GitHub did not accept"))
+  if (error === LOCKED)
     return (
       <SignIn
         onKey={(k) => {
@@ -510,7 +510,7 @@ export function LeadsDesk() {
   const signOut = () => {
     try { localStorage.removeItem(KEY_STORE); localStorage.removeItem(TOKEN_STORE); } catch {}
     setLeads(null);
-    setError("Not authorized.");
+    setError(LOCKED);
   };
   const pages: Partial<Record<View, React.ReactNode>> = {
     invoices: <InvoicesDesk leads={live} call={call} open={openLead} changed={changed} />,
