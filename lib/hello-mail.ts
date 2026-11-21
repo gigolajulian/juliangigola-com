@@ -1,4 +1,6 @@
 /* Mail to hello@ from the site: deposits, proofs, booking changes. */
+import { logMail, type LeadStore } from "@/lib/leads/lead-store";
+
 const MAIL_TO = "hello@juliangigola.com";
 const MAIL_FROM = "enquiries@notifications.juliangigola.com";
 
@@ -25,4 +27,9 @@ export async function alertHello(email: CloudflareEnv["EMAIL"] | undefined, subj
     if (attachments.length) return alertHello(email, subject, [...lines, "", `${attachments.length} reference image(s) were too large to attach. Ask the client to email them.`], who);
     return false;
   }
+}
+
+/** `alertHello`, then the mail on the lead's log once hello@ has it. */
+export async function alertAndLog(env: LeadStore & { EMAIL?: CloudflareEnv["EMAIL"] }, subject: string, lines: string[], who: { name: string; email: string } | undefined, log: { kind: string; booking: string }, attachments?: Attachment[]) {
+  if (await alertHello(env.EMAIL, subject, lines, who, attachments)) await logMail(env, who?.email, subject, { to: "hello@", ...log });
 }

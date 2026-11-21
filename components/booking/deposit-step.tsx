@@ -4,6 +4,7 @@ import * as React from "react";
 import { gsap } from "gsap";
 import { cn } from "@/lib/utils";
 import { depositFor } from "@/lib/booking/paid";
+import type { Status } from "@/lib/booking/deposit";
 
 /* Goo: the cursor pours into the buttons (`time-picker.tsx`); `?goo=0` off. */
 export const goo = () => typeof location === "undefined" || new URLSearchParams(location.search).get("goo") !== "0";
@@ -228,7 +229,7 @@ export function DepositStep({
       await new Promise((go) => setTimeout(go, 1000));
       try {
         const r = await fetch(`/api/deposit/${encodeURIComponent(intentId)}`);
-        const { status } = await r.json();
+        const { status } = (await r.json()) as { status: Status };
         if (status === "booked") return grow(false, onBooked);
         if (status === "refunded" || status === "failed") return setStage(status);
       } catch {}

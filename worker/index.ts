@@ -11,9 +11,9 @@
  * Pacific run asks for the galleries' daily summary (`app/api/proof/daily`).
  * ─────────────────────────────────────────────────────────────── */
 
-import { depositPaid, lockOp } from "../lib/booking/booking-engine";
+import { lockOp } from "../lib/booking/booking-engine";
 import { manageLinks } from "../lib/booking/booking-token";
-import { confirmMail, sendConfirm } from "../lib/booking/confirm";
+import { confirmOf, sendConfirm } from "../lib/booking/confirm";
 
 export { BookingLock } from "./booking-lock";
 
@@ -29,25 +29,11 @@ async function mailDue(env: Env, due: "due" | "dueHeads", mark: "reminded" | "he
   const { records } = await lockOp(env, due, null);
   let out = 0;
   for (const r of records) {
-    const c = {
-      kind,
-      name: r.name,
-      email: r.email,
-      session: r.session,
-      call: r.call,
-      start: r.start,
-      end: r.end,
-      where: r.where,
-      uid: r.id,
-      manage: await manageLinks(env.BOOKING_SECRET, r),
-      firstStart: r.firstStart,
-      ...(r.intent ? { deposit: { ref: r.intent, at: r.at, amount: depositPaid(r), fee: r.fee } } : {}),
-    } as const;
-    const sent = await sendConfirm(env.CLIENT_EMAIL, c);
+    const sent = await sendConfirm(env.CLIENT_EMAIL, { kind, ...confirmOf(r, await manageLinks(env.BOOKING_SECRET, r)) });
     await lockOp(env, mark, r.id);
     if (!sent) continue;
     out++;
-    await logSent(env, r.email, confirmMail(c).subject, r.id, kind);
+    await logSent(env, r.email, sent, r.id, kind);
   }
   return out;
 }
@@ -81,12 +67,14 @@ export async function copySheet(env: Env) {
   if (res && !res.ok) console.error("sheet sync", res.status);
 }
 
-/** Asks the site to mail hello@ the week, at 9 AM Pacific only (the cron fires at both UTC hours DST can put it on). */
+/** Asks the site to mail hello@ the week, at 9 AM Pacific only (the cron fires at both UTC hours DST can put it on). Never throws. */
 export async function weekly(env: Env, now = new Date()) {
   if (!env.SITE || !env.BOOKING_SECRET) return;
   if (Number(new Intl.DateTimeFormat("en-US", { timeZone: "America/Los_Angeles", hour: "numeric", hourCycle: "h23" }).format(now)) !== 9) return;
-  const res = await env.SITE.fetch("https://juliangigola.com/api/leads/weekly", { method: "POST", headers: { authorization: `Bearer ${env.BOOKING_SECRET}` } });
-  if (!res.ok) console.error("weekly mail", res.status);
+  const res = await env.SITE.fetch("https://juliangigola.com/api/leads/weekly", { method: "POST", headers: { authorization: `Bearer ${env.BOOKING_SECRET}` } }).catch(
+    (e: unknown) => (console.error("weekly mail", String(e)), null),
+  );
+  if (res && !res.ok) console.error("weekly mail", res.status);
 }
 
 /** Asks the site for the galleries' daily summary, at 9 AM Pacific only. Never throws, so the reminders beside it always run. */
