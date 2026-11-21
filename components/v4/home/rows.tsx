@@ -18,6 +18,42 @@ export const coverHref = (slug: string) => `${projectHref("coverart")}?cover=${e
 /* A tap on a two-sided sleeve turns it over on touch (?mttp=flip, motion/rows.ts), so that tap does not also leave the page. */
 function keepFlip(e: React.MouseEvent<HTMLElement>) {
   if (e.currentTarget.hasAttribute("data-flip") && document.documentElement.hasAttribute("data-tp-flip") && !media("fine").matches) e.preventDefault();
+  // Where the home was at the click, for `useBackToCover`: Safari put back a scroll saved before the last of the held row's
+  // scroll, 618px short on a Mac and on Motion on the iPhone (MAC on #1313). Session storage: the router rewrites the history entry's state.
+  else
+    try {
+      sessionStorage.setItem(BACK, String(scrollY));
+    } catch {}
+}
+
+const BACK = "jg-cover-back";
+/** When the last Back or Forward was: the home counts as a return only when it mounts just after one. */
+let popAt = 0;
+if (typeof window !== "undefined") addEventListener("popstate", () => (popAt = Date.now()));
+
+/** Back from a cover on the Cover art page: the home's scroll as it was at the click (`keepFlip`), set once the page is laid out. */
+function useBackToCover() {
+  React.useEffect(() => {
+    let y = NaN;
+    try {
+      y = Number(sessionStorage.getItem(BACK) ?? NaN);
+    } catch {}
+    if (Number.isNaN(y)) return;
+    const go = () => scrollTo(0, y);
+    let raf = 0, t2: ReturnType<typeof setTimeout> | undefined;
+    // a tick on: the router renders the home inside the same popstate, before this file's listener has stamped it
+    const t = setTimeout(() => {
+      // taken here, not on mount: React's dev double mount read it once and dropped it
+      try {
+        sessionStorage.removeItem(BACK);
+      } catch {}
+      if (Date.now() - popAt > 2000) return;
+      raf = requestAnimationFrame(go);
+      // again once the held stages have taken their height, which can grow the page after the first frame
+      t2 = setTimeout(() => Math.abs(scrollY - y) > 2 && go(), 400);
+    });
+    return () => (clearTimeout(t), clearTimeout(t2), cancelAnimationFrame(raf));
+  }, []);
 }
 
 const COVERS = COVER_KEYS.map((k) => COVER_RELEASES.find((r) => r.slug === k)).filter((r): r is CoverRelease => !!r);
@@ -60,6 +96,7 @@ export function MtCovers() {
   React.useEffect(() => {
     row.current!.querySelectorAll(".mt-item").forEach((it, i) => it.toggleAttribute("data-on", i === cur));
   }, [cur]);
+  useBackToCover();
   // the same scroll a cover as the five had in 1.5 screens
   const hold = (COVERS.length - 1) * 0.375;
   return (
