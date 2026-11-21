@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { renderToString } from "react-dom/server";
 import { CoverPage } from "@/components/cover/cover-page";
 import { CampusSpots } from "@/components/booking/campus-spots";
 import { ServiceBar } from "@/components/booking/service-bar";
@@ -16,8 +17,8 @@ vi.mock("next/navigation", () => ({ usePathname: () => nav.path, useRouter: () =
 vi.mock("@/components/lightbox", () => ({ useLightbox: () => ({ show() {} }), Lightbox: () => null }));
 if (!globalThis.CSS?.escape) vi.stubGlobal("CSS", { escape: (s: string) => s });
 
-/* The inner-pages trial (`?v4pages`): each piece is the live page with its key
-   off, and its own thing with the key on. */
+/* The inner-pages plan. s1, s2, a2, m2p, foot, next, c1, s4 and p3 are folded into the pages, so they are
+   there from the server's first paint; view and tilt are still on trial (`?v4pages`) and do nothing without their key. */
 const flag = (keys: string) => (document.documentElement.dataset.v4pages = keys);
 // Every query matches but reduced motion: a desktop mouse with motion allowed.
 const desktop = () =>
@@ -53,15 +54,14 @@ const releases: CoverRelease[] = [
 ];
 
 describe("CoverPage (c1)", () => {
-  it("is the live page with the key off", () => {
-    render(<CoverPage off={<p>live</p>} releases={releases} />);
-    expect(screen.getByText("live")).toBeTruthy();
-    expect(screen.queryByRole("heading", { name: "Cover art" })).toBeNull();
+  it("is in the server's first paint", () => {
+    const html = renderToString(<CoverPage releases={releases} />);
+    expect(html).toContain("Cover art</h1>");
+    expect(html).toContain("2<!-- --> releases");
   });
 
   it("counts the releases and asks for cover art, with the onward link", () => {
-    flag("c1");
-    render(<CoverPage off={<p>live</p>} releases={releases} onwards={{ href: "/portfolio/video", name: "Video" }} />);
+    render(<CoverPage releases={releases} onwards={{ href: "/portfolio/video", name: "Video" }} />);
     expect(screen.getByRole("heading", { name: "Cover art" })).toBeTruthy();
     expect(screen.getByText("2 releases")).toBeTruthy();
     expect(screen.getByRole("link", { name: "Inquire" }).getAttribute("href")).toBe("/contact/form?type=coverart&ref=Cover+art");
@@ -75,15 +75,16 @@ describe("CampusSpots (s4)", () => {
     { name: "Memorial Glade", note: "Open lawn.", src: "/b.jpg", alt: "Glade" },
   ];
 
-  it("is the live rows with the key off", () => {
-    render(<CampusSpots off={<p>rows</p>} spots={spots} />);
-    expect(screen.getByText("rows")).toBeTruthy();
+  it("is in the server's first paint, every spot with its photo", () => {
+    const html = renderToString(<CampusSpots spots={spots} />);
+    expect(html).toContain("Sather Gate");
+    expect(html).toContain("Memorial Glade");
+    expect(html.match(/class="s4-ph"/g)).toHaveLength(2);
   });
 
   it("numbers each spot and lights the row crossing the middle", () => {
-    flag("s4");
     onScreen();
-    const { container } = render(<CampusSpots off={<p>rows</p>} spots={spots} />);
+    const { container } = render(<CampusSpots spots={spots} />);
     expect(screen.getAllByRole("heading").map((h) => h.textContent)).toEqual(["01 Sather Gate", "02 Memorial Glade"]);
     const rows = container.querySelectorAll(".s4-row");
     // both rows crossed in turn: the last one stays lit, with its photo
@@ -96,13 +97,11 @@ describe("CampusSpots (s4)", () => {
 describe("ServiceBar (s1)", () => {
   const bar = <ServiceBar name="Portraits" rate="$450" label="Book portraits" href="#book" />;
 
-  it("renders nothing with the key off", () => {
-    render(bar);
-    expect(screen.queryByRole("link")).toBeNull();
+  it("renders nothing on the server, where there is no <body> to mount on", () => {
+    expect(renderToString(bar)).toBe("");
   });
 
   it("mounts the bar on <body>, linking to the page's booking", () => {
-    flag("s1");
     render(bar);
     const link = screen.getByRole("link", { name: "Book portraits" });
     expect(link.getAttribute("href")).toBe("#book");
@@ -112,13 +111,13 @@ describe("ServiceBar (s1)", () => {
 });
 
 describe("LogoBand (a2)", () => {
-  it("is the plain grid with the key off", () => {
+  it("is the plain line under reduced motion", () => {
+    vi.spyOn(window, "matchMedia").mockImplementation((q: string) => ({ matches: q.includes("reduce"), media: q, addEventListener() {}, removeEventListener() {} }) as never);
     const { container } = render(<LogoBand><i>A</i><i>B</i></LogoBand>);
     expect(container.querySelectorAll(".lg > i")).toHaveLength(2);
   });
 
   it("copies the marks to fill the line, hidden from readers, and takes them back on unmount", () => {
-    flag("a2");
     desktop();
     vi.spyOn(HTMLElement.prototype, "scrollWidth", "get").mockReturnValue(100);
     vi.spyOn(HTMLElement.prototype, "clientWidth", "get").mockReturnValue(250);
@@ -187,7 +186,6 @@ describe("V4Project (view)", () => {
 
   it("feeds the Next stage's wipe on desktop", () => {
     document.body.innerHTML = `<div id="p-project"><a class="pj-next"></a></div>`;
-    flag("next");
     desktop();
     render(<V4Project frames={frames} />);
     expect((document.querySelector(".pj-next") as HTMLElement).style.getPropertyValue("--in")).toMatch(/^\d\.\d{3}$/);
@@ -232,17 +230,17 @@ describe("V4Tilt (tilt)", () => {
 describe("V4Drift (p3)", () => {
   const grid = () => (document.body.innerHTML = `<div id="p-work"><div class="wgrid"><a class="wt"></a><a class="wt"></a></div></div>`);
 
-  it("marks nothing with the key off", () => {
+  it("marks nothing where scroll timelines do not run", () => {
     grid();
     desktop();
     onScreen();
+    vi.stubGlobal("CSS", { supports: () => false, escape: (s: string) => s });
     render(<V4Drift k="a" />);
     expect(document.querySelectorAll("[data-v4d]")).toHaveLength(0);
   });
 
   it("marks the tiles near the screen where scroll timelines run, and lags them on scroll", () => {
     grid();
-    flag("p3");
     desktop();
     onScreen();
     vi.stubGlobal("CSS", { supports: () => true, escape: (s: string) => s });

@@ -40,4 +40,11 @@ describe("importNotion", () => {
     await kv.put(`gone:${await s.id("gone@example.com")}`, "1");
     expect(await importNotion(kv as never, s, [{ email: "gone@example.com", rows: [row("b9")] }], false)).toMatchObject({ gone: 1, created: 0 });
   });
+
+  it("treats the empty tombstone buryLead writes as buried", async () => {
+    const kv = new FakeKV();
+    const s = (await sealer(LEADS_KEY))!;
+    await kv.put(`gone:${await s.id("gone@example.com")}`, "");
+    expect(await importNotion(kv as never, s, [{ email: "gone@example.com", rows: [row("b9")] }], false)).toMatchObject({ gone: 1, created: 0 });
+  });
 });
