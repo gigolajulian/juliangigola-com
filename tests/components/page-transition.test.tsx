@@ -39,28 +39,41 @@ describe("PageTransition", () => {
     delete document.documentElement.dataset.nav;
   });
 
-  it("Back from Cover art to the home slides the page off opaque, other Backs keep the fade", () => {
+  it("Back from the Cover art viewer to the home slides a copy of the viewer off once the home lands, with no view transition", async () => {
     const root = document.documentElement;
     root.setAttribute("data-v3motion", "");
-    const vt = vi.fn((cb: () => unknown) => (cb(), { finished: new Promise(() => {}) }));
+    const vt = vi.fn();
     Object.assign(document, { startViewTransition: vt });
-    const back = (from: string, to: string) => {
-      nav.path = from;
-      history.replaceState(null, "", from);
-      const r = render(<PageTransition>page</PageTransition>);
-      history.replaceState(null, "", to);
-      dispatchEvent(new PopStateEvent("popstate"));
-      const off = root.dataset.navOff;
-      r.unmount();
-      delete root.dataset.navOff;
-      return off;
-    };
-    expect(back("/portfolio/coverart", "/")).toBe("");
-    expect(back("/portfolio/editorial", "/")).toBeUndefined();
-    expect(vt).toHaveBeenCalledTimes(2);
+    const slid: Keyframe[] = [];
+    Element.prototype.animate = vi.fn(function (this: Element, k: Keyframe[] | PropertyIndexedKeyframes) {
+      slid.push(k as Keyframe);
+      return { finished: Promise.resolve() } as unknown as Animation;
+    });
+    const viewer = document.createElement("div");
+    viewer.setAttribute("role", "dialog");
+    viewer.setAttribute("aria-modal", "true");
+    viewer.textContent = "19 / 25";
+    document.body.append(viewer);
+    nav.path = "/portfolio/coverart";
+    history.replaceState(null, "", "/portfolio/coverart");
+    const r = render(<PageTransition>page</PageTransition>);
+    history.replaceState(null, "", "/");
+    dispatchEvent(new PopStateEvent("popstate"));
+    const lid = document.body.lastElementChild as HTMLElement;
+    expect(lid.getAttribute("aria-hidden")).toBe("true");
+    expect(lid.textContent).toBe("19 / 25"); // the viewer, copied over the page
+    expect(slid).toHaveLength(0); // held until the home is in place
+    nav.path = "/";
+    r.rerender(<PageTransition>home</PageTransition>);
+    expect(slid).toHaveLength(1);
+    await Promise.resolve();
+    expect(lid.isConnected).toBe(false);
+    expect(vt).not.toHaveBeenCalled();
+    r.unmount();
+    viewer.remove();
     Reflect.deleteProperty(document, "startViewTransition");
+    Reflect.deleteProperty(Element.prototype, "animate");
     root.removeAttribute("data-v3motion");
-    delete root.dataset.nav;
     nav.path = "/";
   });
 
@@ -91,6 +104,5 @@ describe("PageTransition", () => {
     Reflect.deleteProperty(document, "startViewTransition");
     root.removeAttribute("data-v3motion");
     delete root.dataset.nav;
-    delete root.dataset.navOff;
   });
 });

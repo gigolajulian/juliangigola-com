@@ -24,7 +24,6 @@ const clearNav = () => {
   delete root.dataset.nav;
   delete root.dataset.navBar;
   delete root.dataset.navSide;
-  delete root.dataset.navOff;
 };
 
 /* The bar's order, left to right, the wordmark first. A press in the bar
@@ -172,18 +171,35 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
     let replaying = false;
     const onPop = (e: PopStateEvent) => {
       if (replaying || location.pathname === shown.current) return;
+      /* Back from Cover art (its viewer) to the home: a copy of the viewer slides all the way off, opaque, once the home is in
+         place under it (Julian, #1351). Not a view transition: iOS Safari drew its snapshot of the viewer empty, a cut (MAC on 9e9dc6c9). */
+      const parts = location.pathname === "/" && shown.current.startsWith("/portfolio/coverart") ? document.querySelectorAll<HTMLElement>("[data-zoom-backdrop], [role=dialog][aria-modal=true]") : [];
+      if (parts.length) {
+        const lid = document.createElement("div");
+        lid.setAttribute("aria-hidden", "true");
+        lid.style.cssText = "position:fixed;inset:0;z-index:2147483647;pointer-events:none";
+        for (const n of parts) {
+          const c = n.cloneNode(true) as HTMLElement;
+          c.style.opacity = getComputedStyle(n).opacity;
+          lid.append(c);
+        }
+        document.body.append(lid);
+        const go = () => {
+          if (landed === go) landed = null;
+          lid.animate({ transform: ["none", "translateY(100vh)"] }, { duration: 200, easing: "cubic-bezier(0.32, 0.72, 0, 1)", fill: "forwards" }).finished.finally(() => lid.remove());
+        };
+        landed = go;
+        window.setTimeout(() => lid.isConnected && !lid.getAnimations().length && go(), 1500); // a page slower than this: off anyway
+        return;
+      }
       set("out");
       const ua = (e as PopStateEvent & { hasUAVisualTransition?: boolean })
         .hasUAVisualTransition;
       if (ua || !document.startViewTransition) return;
       e.stopImmediatePropagation();
       gauge();
-      // Back from Cover art (its viewer) to the home: the page slides all the way off, opaque, so the cover under it shows clean (Julian, #1351)
-      // Not split out: the viewer is outside #main, and the home's #main group drew over it at once (MAC on 0df3ca52).
-      const off = location.pathname === "/" && shown.current.startsWith("/portfolio/coverart");
-      if (off) document.documentElement.dataset.navOff = "";
       const main = document.getElementById("main");
-      if (!off) main?.style.setProperty("view-transition-name", "back-page");
+      main?.style.setProperty("view-transition-name", "back-page");
       const trip = document.startViewTransition(
         () =>
           new Promise<void>((done) => {
