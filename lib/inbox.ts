@@ -15,11 +15,11 @@
  *
  * This module is the part with no Cloudflare in it: keys, validation and the
  * cooldown arithmetic, so `scripts/check-inbox.mjs` can run the real
- * functions. The binding itself is touched in `app/contact/actions.ts` and
+ * functions. The binding itself is touched in `lib/leads/enquiry-action.ts` and
  * `app/api/inbox/route.ts` (the whole admin desk's endpoint).
  * ─────────────────────────────────────────────────────────────── */
 
-/** What the contact form gets back from `submitEnquiry` (`app/contact/actions.ts`). */
+/** What the contact form gets back from `submitEnquiry` (`lib/leads/enquiry-action.ts`). */
 export type ContactState = {
   status: "idle" | "sent" | "error" | "unconfigured";
   message?: string;
@@ -117,7 +117,7 @@ const FREE_MAIL = /^(gmail|googlemail|yahoo|ymail|outlook|hotmail|live|msn|iclou
    (security review, 2026-10-15). A visitor's photo is a JPEG already,
    re-drawn in their browser (`reference-picks.tsx`), unless it is a
    HEIC the browser cannot draw (anything but Safari): taken as is. Checked on the way
-   in (`app/contact/actions.ts`) and on the way out
+   in (`lib/leads/enquiry-action.ts`) and on the way out
    (`app/api/inbox/route.ts`). */
 export const SAFE_IMAGE = /^image\/(jpeg|png|heic|heif)$/;
 

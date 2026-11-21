@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { shareOg } from "@/lib/share";
+import { shareOg } from "@/lib/og/share";
 import { V3Commission } from "@/components/v3/inquire";
 
 export const metadata: Metadata = {

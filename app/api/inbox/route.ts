@@ -116,7 +116,7 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const wanted = url.searchParams.get("key");
 
-  // One of the images an enquiry arrived with (`app/contact/actions.ts`).
+  // One of the images an enquiry arrived with (`lib/leads/enquiry-action.ts`).
   if (wanted?.startsWith("ref:msg:")) {
     const got = await gate.inbox.getWithMetadata<{ type?: string }>(wanted, "arrayBuffer");
     if (got.value === null) return json({ error: "Gone." }, 404);

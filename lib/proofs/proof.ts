@@ -18,7 +18,7 @@
  * ─────────────────────────────────────────────────────────────── */
 
 import { looksLikeEmail } from "@/lib/inbox";
-import type { InboxKV as KV } from "@/lib/leads/lead-store";
+import type { InboxKV as KV } from "@/lib/kv";
 import type { Seal } from "@/lib/leads/lead-crypto";
 
 export type ProofFrame = {

@@ -11,7 +11,7 @@ import { Check, Failed, Field, FlowShell, Hidden, NEED_MSG, checkYou, first, use
 import { CALL_CARD, DOORS } from "@/lib/flags/v3";
 
 /* JG V3 Inquire (master v39, /inquire and /inquire/form). Both forms post
-   through the site's enquiry action (`app/contact/actions.ts`) with its
+   through the site's enquiry action (`lib/leads/enquiry-action.ts`) with its
    honeypot and visit context; `?sim=sent` (dev only) shows Sent without
    sending, as `?sim` does on the deposit. */
 
