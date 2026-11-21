@@ -3,6 +3,7 @@
  * GraphQL (and its Analytics Engine SQL, same token) and Google Search
  * Console. Both keys stay on the Worker; nothing here returns them.
  * ─────────────────────────────────────────────────────────────── */
+import { secretJson } from "@/lib/secrets";
 
 export const ZONE = "3637b65119d9b2ce278f9c59c4077ace";
 export const ACCOUNT = "7fa0ed7addeb11b728e3b935630a1015";
@@ -58,20 +59,13 @@ export type SearchRow = { keys?: string[]; clicks: number; impressions: number; 
 
 /** A Search Console query function for `GSC_OAUTH` (hello@, read-only). */
 export async function searchConsole(secret: string) {
-  let p: { [k: string]: string };
-  try {
-    p = JSON.parse(secret);
-  } catch {
-    // JSON.parse quotes the text it chokes on: never let a secret reach a log.
-    throw new Error("GSC_OAUTH is not valid JSON");
-  }
-  const { client_id, client_secret, refresh_token } = p;
-  const tok = (await (
-    await fetch("https://oauth2.googleapis.com/token", {
-      method: "POST",
-      body: new URLSearchParams({ client_id, client_secret, refresh_token, grant_type: "refresh_token" }),
-    })
-  ).json()) as { access_token?: string; error_description?: string; error?: string };
+  const { client_id, client_secret, refresh_token } = secretJson<{ [k: string]: string }>(secret, "GSC_OAUTH");
+  const tokRes = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    body: new URLSearchParams({ client_id, client_secret, refresh_token, grant_type: "refresh_token" }),
+  });
+  // An HTML error page from Google is a refusal too, not a JSON parse crash.
+  const tok = (await tokRes.json().catch(() => ({ error: `HTTP ${tokRes.status}` }))) as { access_token?: string; error_description?: string; error?: string };
   if (!tok.access_token) throw new Error(`Google sign-in failed: ${tok.error_description ?? tok.error}`);
 
   return async (body: Record<string, unknown>): Promise<SearchRow[]> => {

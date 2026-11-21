@@ -111,5 +111,7 @@ describe("checkout", () => {
     stripeSays((url) => (url.endsWith("/coupons") ? { status: 400, body: {} } : { body: { id: "cs_test_C", url: "u" } }));
     expect((await checkout("k", proof())).id).toBe("cs_test_C");
     expect(new URLSearchParams(calls.at(-1)!.body).get("payment_method_types[0]")).toBe("card");
+    // the fallback is quiet for the client, not for the log
+    expect(console.error).toHaveBeenCalledWith("proof bank coupon", expect.any(String));
   });
 });

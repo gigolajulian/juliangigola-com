@@ -10,19 +10,19 @@ const BLOCKS = [
   ".mt-about .mt-ab-ph", ".mt-about .mt-wordmark",
 ].join(",");
 
+// in for good: a block that has come into frame stays in
+function arrived(es: IntersectionObserverEntry[], io: IntersectionObserver) {
+  for (const e of es) {
+    if (!e.isIntersecting) continue;
+    (e.target as HTMLElement).dataset.rv = "in";
+    io.unobserve(e.target);
+  }
+}
+
 export function startReveal(root: HTMLElement) {
   if (matches("calm")) return () => {};
   const els = [...root.querySelectorAll<HTMLElement>(BLOCKS)];
-  const io = new IntersectionObserver(
-    (es) => {
-      for (const e of es) {
-        if (!e.isIntersecting) continue;
-        (e.target as HTMLElement).dataset.rv = "in";
-        io.unobserve(e.target);
-      }
-    },
-    { rootMargin: "0px 0px -8% 0px" },
-  );
+  const io = new IntersectionObserver(arrived, { rootMargin: "0px 0px -8% 0px" });
   for (const el of els) {
     el.dataset.rv = "";
     io.observe(el);

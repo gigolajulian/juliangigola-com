@@ -18,7 +18,8 @@
  * ─────────────────────────────────────────────────────────────── */
 
 import { looksLikeEmail } from "@/lib/inbox";
-import type { InboxKV as KV } from "@/lib/leads/lead-store";
+import type { InboxKV as KV } from "@/lib/kv";
+import type { Seal } from "@/lib/leads/lead-crypto";
 
 export type ProofFrame = {
   /** Short id, stable across publishes: the Lightroom photo's remote id. */
@@ -482,7 +483,7 @@ export async function passOk(p: Pick<Proof, "token" | "link" | "pass">, cookie: 
   }
 }
 /** Why a client cannot see a gallery right now, or null when they can. Closed is the clock (or a missing gallery). */
-export async function shut(p: Proof | null, cookie: string | null | undefined, secret: string | undefined): Promise<"closed" | "offline" | "locked" | null> {
+export async function shutReason(p: Proof | null, cookie: string | null | undefined, secret: string | undefined): Promise<"closed" | "offline" | "locked" | null> {
   if (!p) return "closed";
   if (p.offline) return "offline";
   if (!isOpen(p)) return "closed";
@@ -494,7 +495,6 @@ export function forDesk<T extends Proof>(p: T): Omit<T, "pass"> & { hasPass: boo
   return { ...rest, hasPass: !!pass };
 }
 
-type Seal = { seal(v: unknown): Promise<string>; open<T>(s: string): Promise<T> };
 
 /** One gallery, opened. Null when it is not there, and also when it cannot be opened (a rotated LEADS_KEY), unlike `readLead`, which throws. */
 export async function readProof(kv: KV, s: Seal, token: string): Promise<Proof | null> {

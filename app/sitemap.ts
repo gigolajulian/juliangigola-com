@@ -14,7 +14,7 @@ import type { Frame } from "@/lib/work-types";
 import { COVER_RELEASES } from "@/lib/work/cover-art-data";
 import DATES from "@/lib/sitemap-dates.json";
 import { BOOKING_PAGES, bookingHref } from "@/lib/booking/service-pages";
-import { CAMPUS_GUIDES, campusHref } from "@/lib/campus-guides";
+import { CAMPUS_GUIDES, campusHref } from "@/lib/graduation/campus-guides";
 
 const SITE = "https://juliangigola.com";
 

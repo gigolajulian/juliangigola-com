@@ -63,7 +63,7 @@ describe("GET /picks.json", async () => {
   });
 
   /* The picker must offer only frames an enquiry keeps: the same pattern
-     as the filter in `app/contact/actions.ts`. Found 2026-10-11 when the
+     as the filter in `lib/leads/enquiry-action.ts`. Found 2026-10-11 when the
      action kept only /work/ and dropped 30 /covers/ and /hero/ picks
      (fixed in #119). */
   it("offers only frames the contact form will keep", () => {

@@ -1,6 +1,6 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { STRIPE_UNSET, stripe } from "@/lib/stripe";
-import { isAdmin } from "@/lib/vouch";
+import { refuseAdmin } from "@/lib/vouch";
 import { json } from "@/lib/http";
 
 /* ── GET /api/money: his Stripe balance and what moved it ─────────
@@ -35,7 +35,8 @@ const usd = (list: Amount[] = []) => list.filter((a) => a.currency === "usd").re
 
 export async function GET(request: Request) {
   const { env } = await getCloudflareContext({ async: true });
-  if (!(await isAdmin(request, env.INBOX_KEY))) return json({ error: "Not authorized." }, 401);
+  const denied = await refuseAdmin(request, env.INBOX_KEY);
+  if (denied) return denied;
   const key = env.STRIPE_SECRET_KEY;
   if (!key) return json({ error: STRIPE_UNSET }, 503);
 

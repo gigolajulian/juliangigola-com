@@ -1264,7 +1264,7 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .mo-player .pl-info .mk{color:rgb(var(--on-photo));flex:none}
 @media (prefers-reduced-motion:reduce){.mo-player .pl-bar,.mo-player .pl-info,.mo-player .pl-tint{transition:none}}
 
-/* Motion plan 01: the ink rises from the bottom on hover (180ms in, 120ms out), a press dips to .97. Only with ?v3motion; the glass Play keeps its own look. */
+/* Motion plan 01: the ink rises from the bottom on hover (180ms in, 120ms out), a press dips to .97. Off with ?v3motion=0; the glass Play keeps its own look. */
 :root[data-v3motion] .v3 .btn:not(.cn-light){background:linear-gradient(var(--btn-ink,var(--ink)),var(--btn-ink,var(--ink))) bottom/100% 0 no-repeat transparent;transition:background-size .12s cubic-bezier(.4,0,.2,1),color .12s,scale .08s}
 :root[data-v3motion] .v3 .btn.fill:not(.cn-light){background-size:100% 100%}
 @media (hover:hover){:root[data-v3motion] .v3 .btn:not(.cn-light):hover{background-size:100% 100%;color:var(--bg);transition-duration:.18s,.18s,.08s}

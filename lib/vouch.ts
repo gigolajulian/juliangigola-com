@@ -1,4 +1,5 @@
 import { REPO } from "@/lib/admin/admin-github";
+import { json } from "@/lib/http";
 
 /* ── the key the editor already has ───────────────────────────────
  * Whoever can push to the repository publishes the site, so a GitHub token
@@ -10,10 +11,12 @@ import { REPO } from "@/lib/admin/admin-github";
  *
  * Two gates, one copy each, so a change to how the site trusts a request is
  * a change in one place:
- * - `isAdmin`: /admin routes (inbox, calendar, money, proof, booking hours,
- *   seo, traffic). The `INBOX_KEY` header or a GitHub token that can push.
+ * - `isAdmin`: /admin routes (inbox, calendar, contract, money, proof, booking
+ *   hours and a booking's admin actions, seo, traffic).
+ *   The `INBOX_KEY` header or a GitHub token that can push. `refuseAdmin` is
+ *   the same gate as the 401 every one of those routes answers.
  * - `fromWorker`: the booking Worker calling the site (leads/gmail,
- *   leads/mail, leads/sheet, leads/weekly), with `BOOKING_SECRET` as the bearer.
+ *   leads/mail, leads/sheet, leads/weekly, proof/daily), with `BOOKING_SECRET` as the bearer.
  * ─────────────────────────────────────────────────────────────── */
 const VOUCHED_MS = 5 * 60 * 1000;
 const vouched = new Map<string, number>();
@@ -127,4 +130,13 @@ export async function isAdmin(request: Request, key?: string) {
   if (await authorised(request, key)) return true;
   const token = bearer(request);
   return !!token && (await canPush(token));
+}
+
+/**
+ * The admin gate as a route answers it: null when let in, else the 401. The two messages differ so a wrong
+ * token can be told from a missing one, never which characters were wrong.
+ */
+export async function refuseAdmin(request: Request, key?: string): Promise<Response | null> {
+  if (await isAdmin(request, key)) return null;
+  return json({ error: bearer(request) ? "GitHub did not accept that token for this repository." : "Not authorized." }, 401);
 }

@@ -1,4 +1,4 @@
-import { CARD_SIZE, CARD_TYPE, framesOf, renderCard } from "@/lib/share-card";
+import { CARD_SIZE, CARD_TYPE, framesOf, renderCard } from "@/lib/og/card";
 import { BOOKING_PAGES, bookingPage } from "@/lib/booking/service-pages";
 import { FEATURED } from "@/lib/work/work";
 

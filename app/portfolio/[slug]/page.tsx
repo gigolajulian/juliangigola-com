@@ -5,7 +5,7 @@ import { CoverArt } from "@/components/cover/sleeves";
 import { CoverPage } from "@/components/cover/cover-page";
 import { CallToAction } from "@/components/call-to-action";
 import { SESSION_SEO } from "@/lib/seo";
-import { projectFacts, shareMeta } from "@/lib/share";
+import { projectFacts, shareMeta } from "@/lib/og/share";
 import { V3Project } from "@/components/portfolio/project";
 import {
   LINKABLE,

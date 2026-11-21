@@ -8,7 +8,7 @@
  * ─────────────────────────────────────────────────────────────── */
 
 import { sealer } from "@/lib/leads/lead-crypto";
-import { finalKey, PREVIEW_W, THUMB_W, isFrameId, isStrongId, isToken, readPublic, shotOrder, shut, type Proof } from "@/lib/proofs/proof";
+import { finalKey, PREVIEW_W, THUMB_W, isFrameId, isStrongId, isToken, readPublic, shotOrder, shutReason, type Proof } from "@/lib/proofs/proof";
 import { uniqueNames, zipLayout } from "@/lib/proofs/zip";
 
 declare global {
@@ -31,7 +31,7 @@ export async function deliveryIn(env: Env, id: string, cookie: string | null) {
   const p = await readPublic(env.INBOX, s, id);
   if (!p?.finals?.length) return { shut: "closed" as const };
   // Offline and the password hold before Send finals too; only the clock waits for it.
-  const why = await shut(p, cookie, env.LEADS_KEY);
+  const why = await shutReason(p, cookie, env.LEADS_KEY);
   if (why === "offline" || why === "locked" || (why === "closed" && p.deliveredAt)) return { shut: why, p };
   return { s, p };
 }
@@ -49,7 +49,7 @@ export const attachment = (name: string) => `attachment; filename="${name.replac
 const PRIVATE = { "cache-control": "private, no-store", "x-robots-tag": "noindex, nofollow" };
 const notFound = () => new Response("Not found", { status: 404 });
 
-async function limited(env: Env, request: Request) {
+async function tooManyDownloads(env: Env, request: Request) {
   const ok = (await env.DOWNLOAD_LIMIT.limit({ key: request.headers.get("cf-connecting-ip") ?? "unknown" })).success;
   return ok ? null : new Response("Too many downloads. Wait a minute.", { status: 429, headers: { "retry-after": "60" } });
 }
@@ -59,7 +59,7 @@ export async function finalResponse(request: Request, env: Env, id: string, fid:
   const g = isFrameId(fid) ? await openDeliveryIn(env, id, request.headers.get("cookie")) : null;
   const f = g && finalOf(g.p, fid);
   if (!g || !f) return notFound();
-  const busy = await limited(env, request);
+  const busy = await tooManyDownloads(env, request);
   if (busy) return busy;
   const o = await env.PROOFS.get(finalKey(g.p.token, fid));
   if (!o) return notFound();
@@ -89,7 +89,7 @@ export async function webResponse(request: Request, env: Env, id: string, fid: s
   const g = isFrameId(fid) ? await openDeliveryIn(env, id, request.headers.get("cookie")) : null;
   const f = g && finalOf(g.p, fid);
   if (!g || !f) return notFound();
-  const busy = await limited(env, request);
+  const busy = await tooManyDownloads(env, request);
   if (busy) return busy;
   const o = await servedPreview(env, g.p.token, fid, false).catch(() => undefined);
   if (o === undefined) return new Response("Try again shortly", { status: 503, headers: { "retry-after": "5" } });
@@ -103,7 +103,7 @@ export const webName = (file: string) => `${file.replace(/\.[a-z0-9]+$/i, "")} w
 export async function zipResponse(request: Request, env: Env, id: string) {
   const g = await openDeliveryIn(env, id, request.headers.get("cookie"));
   if (!g) return notFound();
-  const busy = await limited(env, request);
+  const busy = await tooManyDownloads(env, request);
   if (busy) return busy;
   // `?m=M04`: one model's finals. Same stored bytes, so a model zip is as ready as the full one.
   const m = new URL(request.url).searchParams.get("m");

@@ -11,7 +11,7 @@ export const json = (body: unknown, status = 200) => Response.json(body, { statu
 export async function bodyOf(request: Request): Promise<Record<string, unknown> | null> {
   try {
     const b: unknown = await request.json();
-    return b && typeof b === "object" ? (b as Record<string, unknown>) : null;
+    return b && typeof b === "object" && !Array.isArray(b) ? (b as Record<string, unknown>) : null;
   } catch {
     return null;
   }

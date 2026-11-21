@@ -1,6 +1,7 @@
 /* A contract's step on its lead: the Contract paper status and a timeline line. Server only. */
 import type { Sealer } from "@/lib/leads/lead-crypto";
-import { readLead, writeLead, type InboxKV } from "@/lib/leads/lead-store";
+import type { InboxKV } from "@/lib/kv";
+import { readLead, writeLead } from "@/lib/leads/lead-store";
 import { fold, type LeadEvent, type Paper } from "@/lib/leads/leads";
 import { notionPaper } from "@/lib/leads/notion-lead";
 

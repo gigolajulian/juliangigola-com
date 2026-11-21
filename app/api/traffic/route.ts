@@ -1,5 +1,5 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { isAdmin } from "@/lib/vouch";
+import { refuseAdmin } from "@/lib/vouch";
 import { ACCOUNT, SITE_HOST, ZONE, cloudflare, searchConsole as gsc, sitePath } from "@/lib/analytics";
 import { json } from "@/lib/http";
 
@@ -25,7 +25,8 @@ type Viewer = {
 
 export async function GET(request: Request) {
   const { env } = await getCloudflareContext({ async: true });
-  if (!(await isAdmin(request, env.INBOX_KEY))) return json({ error: "Not authorized." }, 401);
+  const denied = await refuseAdmin(request, env.INBOX_KEY);
+  if (denied) return denied;
   // Held in a const: the check above does not narrow `env` inside `gql`,
   // which failed the production type check.
   const key = env.CF_ANALYTICS_TOKEN;

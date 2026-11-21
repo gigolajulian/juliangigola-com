@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 
-vi.mock("@/app/contact/actions", () => ({ submitEnquiry: vi.fn() }));
+vi.mock("@/lib/leads/enquiry-action", () => ({ submitEnquiry: vi.fn() }));
 vi.stubGlobal("fetch", vi.fn(() => Promise.reject(new Error("offline"))));
 
 import { Calendar, Failed, Field, FlowShell, Hidden, Run, checkYou, first, fmt, iso, monthCells, weekCells } from "@/components/booking/flow";

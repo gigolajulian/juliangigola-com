@@ -23,7 +23,7 @@ import { Divider } from "@astryxdesign/core/Divider";
 import { EVENTS, HOURS, TZ } from "@/lib/booking/booking-rules";
 import { startsFor, zoned } from "@/lib/booking/slots";
 import type { LeadSummary } from "@/lib/leads/leads";
-import { adminCall, errorText } from "@/lib/leads/lead-desk";
+import { adminCall, errorText, type Size } from "@/lib/leads/lead-desk";
 
 /* The calendar's data and day maths, from the retired classic desk. */
 export type Ev = { id: string; title: string; start: string; end: string; allDay: boolean; block: boolean; booking: boolean; free: boolean };
@@ -51,7 +51,6 @@ export function openSpans(day: string, busy: { start: number; end: number }[], n
 export const calendarCall = <T,>({ query = "", ...init }: RequestInit & { query?: string } = {}) => adminCall<T>(`/api/calendar${query}`, init);
 
 
-type Size = "phone" | "mid" | "wide";
 const dayOf = (ms: number) => new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(ms);
 const plus = (day: string, n: number) => new Date(Date.parse(`${day}T00:00:00Z`) + n * 864e5).toISOString().slice(0, 10);
 const weekday = (day: string) => new Date(`${day}T00:00:00Z`).getUTCDay();

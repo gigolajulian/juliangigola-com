@@ -39,7 +39,7 @@ import { api as proofApi, type Row as ProofRow } from "@/lib/proofs/desk";
 import { InvoiceRow, InvoiceSheetB } from "@/components/leads/invoice";
 import { ContractBlock } from "@/components/leads/contract";
 import { isPaid } from "@/lib/leads/invoice";
-import { endDay } from "@/lib/leads/lead-desk";
+import { endDay, type Size } from "@/lib/leads/lead-desk";
 import type { Enquiry } from "@/lib/inbox";
 import { canonical } from "@/lib/leads/lead-crypto";
 import { isLate, NUDGES, PAPER, quoteNudge, REMIND_MAX, STAGES, trashDaysLeft, type Lead, type LeadPatch, type LeadSummary, type Stage } from "@/lib/leads/leads";
@@ -47,20 +47,15 @@ import { callSheet, fill, mailable, TEMPLATES, type Template } from "@/lib/leads
 import { leadKey, typingIn } from "@/lib/leads/lead-keys";
 import { balance, depositOfLead, subtotal, usd } from "@/lib/leads/invoice";
 import { adminCall, ago, dateTimeLabel, authed, type Call, DAY, dayLabel, errorText, nextStep, now, renew, snoozed } from "@/lib/leads/lead-desk";
-import { compose, frostBar, ios, kindOf, line, mailto } from "@/components/leads/shared";
+import { compose, frostBar, ios, kindOf, line, mailto, glyph } from "@/components/leads/shared";
 import { People } from "@/components/leads/people";
 import { Galleries } from "@/components/leads/galleries";
 import { PlanSection, TaskSection } from "@/components/leads/plan";
 
-type Size = "phone" | "mid" | "wide";
 /** A menu row that opens in a new tab. */
 const NEW_TAB = { target: "_blank", rel: "noreferrer" } as const;
 const LOST_REASONS = ["Price", "Dates", "No reply", "Went elsewhere", "Not a fit", "Other"];
 const ROAD = STAGES.filter((s) => s !== "Lost");
-const glyph = (d: React.ReactNode) =>
-  function Glyph(p: React.SVGProps<SVGSVGElement>) {
-    return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...p}>{d}</svg>;
-  };
 const BackGlyph = glyph(<path d="M19 12H5M11 6l-6 6 6 6" />);
 const ClockGlyph = glyph(<><circle cx="12" cy="12" r="8" /><path d="M12 8v4l3 2" /></>);
 const PlaneGlyph = glyph(<path d="M21 3 10 14M21 3l-7 18-4-7-7-4z" />);

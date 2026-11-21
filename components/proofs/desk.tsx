@@ -35,7 +35,7 @@ import { api, cardCrop, closed, cropAt, status, type Row } from "@/lib/proofs/de
 import { ActivityDesk } from "@/components/proofs/activity";
 import { Timeline } from "@/components/proofs/timeline";
 import { useClock } from "@/components/proofs/use-clock";
-import { errorText, stampPT } from "@/lib/leads/lead-desk";
+import { errorText, loadError, LOCKED, stampPT } from "@/lib/leads/lead-desk";
 import { extras, publicId, remindState, THUMB_W, type CardCrop } from "@/lib/proofs/proof";
 
 const CLASSIC = "/admin";
@@ -63,7 +63,7 @@ export function ProofsDesk({ embedded = false, initial }: { embedded?: boolean; 
   const [making, setMaking] = React.useState(false);
   const [wide, setWide] = React.useState(false);
   const load = React.useCallback(() => {
-    api<{ proofs: Row[] }>({ query: "?list" }).then((o) => setList(o.proofs)).catch((e: unknown) => setError(errorText(e)));
+    api<{ proofs: Row[] }>({ query: "?list" }).then((o) => setList(o.proofs)).catch((e: unknown) => setError(loadError(e)));
   }, []);
   React.useEffect(load, [load]);
   // Same as the leads desk: follow html[data-theme], light only when it says light, read before Theme mounts.
@@ -76,7 +76,7 @@ export function ProofsDesk({ embedded = false, initial }: { embedded?: boolean; 
     return () => mq.removeEventListener("change", set);
   }, []);
 
-  if (error === "Not authorized." || error?.startsWith("GitHub did not accept"))
+  if (error === LOCKED)
     return (
       <SignIn
         onKey={(k) => {
