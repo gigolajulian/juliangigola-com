@@ -21,13 +21,16 @@ export const layoutTop = (el: HTMLElement) => {
 };
 
 const block = (b: string) => document.querySelector<HTMLElement>(`[data-mt="${b}"]`);
+const coversRow = () => block("covers")?.querySelector<HTMLElement>(".mt-row") ?? null;
 
 /** The spot under the screen's top: the last block that starts at or above it. */
 export function spotHere(): Spot {
-  let at: Spot = { b: "", off: scrollY, x: 0 };
+  // the covers row's own scroll wherever the page is: a phone's row swiped to a cover came back on the first (MAC on d818269b)
+  const x = coversRow()?.scrollLeft ?? 0;
+  let at: Spot = { b: "", off: scrollY, x };
   for (const el of document.querySelectorAll<HTMLElement>("[data-mt]")) {
     const t = layoutTop(el);
-    if (t <= scrollY + 1) at = { b: el.dataset.mt!, off: scrollY - t, x: 0 };
+    if (t <= scrollY + 1) at = { b: el.dataset.mt!, off: scrollY - t, x };
   }
   return at;
 }
@@ -103,7 +106,7 @@ export function useBackHome() {
     };
     go();
     // a phone's sideways covers row only: held (desktop), the row follows the page's scroll, and setting it too threw the page a screen on (MAC on d82f2b75)
-    const row = spot.b === "covers" ? block("covers")?.querySelector<HTMLElement>(".mt-row") : null;
+    const row = coversRow();
     if (row && !media("held").matches) row.scrollLeft = spot.x;
     // a sleeve still marked hovered from before the click turned to its back and then away on arrival (Safari, MAC on 23412f74): unturned at once
     const lifted = [...document.querySelectorAll<HTMLElement>(".mt-covers .mt-sleeve.hv")];

@@ -24,7 +24,7 @@ describe("home Back spot", () => {
     block("covers", 2000);
     block("about", 5000);
     window.scrollY = 2600;
-    expect(spotHere()).toEqual({ b: "covers", off: 600, x: 0 });
+    expect(spotHere()).toEqual({ b: "covers", off: 600, x: 0 }); // no covers row here: x stays 0
   });
 
   it("keeps the spot with the browser's own restore off, and drops it again", () => {
