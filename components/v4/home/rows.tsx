@@ -101,7 +101,8 @@ export function MtCovers() {
                 <Link key={c.slug} href={coverHref(c.slug)} onClick={keepFlip} className="mt-item mt-sleeve" data-i={i} data-flip={back ? "" : undefined} style={{ "--o": 0.5, "--press": COVER_PRESS[c.slug] } as React.CSSProperties}>
                   <span className="disc" aria-hidden />
                   <div className="face">
-                    <Image data-frame={c.frames[0].src} src={c.frames[0].src} alt={`${c.title} by ${c.artist}`} fill sizes="(max-width: 599px) 92vw, 34vw" />
+                    {/* the sleeves a first look at the row shows (one or two on a phone, three on desktop) load with the page: lazy, they painted grey */}
+                    <Image data-frame={c.frames[0].src} src={c.frames[0].src} alt={`${c.title} by ${c.artist}`} fill sizes="(max-width: 599px) 92vw, 34vw" loading={i < 3 ? "eager" : "lazy"} fetchPriority={i < 3 ? "high" : undefined} />
                     {back ? <Image className="back" src={back.src} alt={`${c.title}, back of the sleeve`} fill sizes="34vw" /> : null}
                   </div>
                   <p className="lbl mt-cvcap" aria-hidden><span>{c.title}</span><span className="mute">{c.artist}</span></p>
