@@ -2,7 +2,7 @@
  * desk's components import the pure model from `lib/leads/leads.ts`. */
 import { sealer, type Sealer } from "./lead-crypto";
 import { notify, pushFor } from "./lead-push";
-import { appendLog, fresh } from "./activity-log";
+import { appendLog, forgetLog, fresh } from "./activity-log";
 import { canonical } from "./lead-crypto";
 import { fold, leadStoreKey, leadSummary, type Change, type Lead, type LeadSummary, type InboxKV, type Person, type Sent } from "./leads";
 
@@ -93,6 +93,10 @@ export async function canonLeads(kv: KV, s: Sealer): Promise<number> {
 
 /** A person's address on someone else's lead (`Lead.people`) points at that lead's id. The key is the
     HMAC of the address, like a lead's own, so no address shows in a key listing. */
+/** A lead deleted for good: its record, a `gone:` tombstone, and its activity log when `seal` can open it. */
+export const buryLead = (kv: KV, key: string, seal?: Sealer) =>
+  Promise.all([kv.delete(key), kv.put(`gone:${key.slice(5)}`, ""), seal ? forgetLog(kv, seal, key.slice(5)) : null]);
+
 export const personKey = (hash: string) => `person:${hash}`;
 
 /** The lead an address belongs to: its own record first, else the lead it is a person on.

@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { submitEnquiry } from "@/app/contact/actions";
+import { submitEnquiry } from "@/lib/leads/enquiry-action";
 import type { ContactState } from "@/lib/inbox";
 import { RESPONSE_TIME } from "@/lib/site";
 import { cn } from "@/lib/utils";
@@ -149,7 +149,7 @@ export const INITIAL: ContactState = { status: "idle" };
    erroring) threw out of the action and took the whole page to its error
    screen, the brief gone with it. Caught here instead: the fields come
    back as typed, and the mail app is offered, as when nothing could be
-   stored (`app/contact/actions.ts`). */
+   stored (`lib/leads/enquiry-action.ts`). */
 export async function submitOrKeep(prev: ContactState, data: FormData): Promise<ContactState> {
   try {
     return await submitEnquiry(prev, data);
@@ -379,7 +379,7 @@ export function ContactForm({
     >
       {/* The honeypot. Hidden from sight, from the tab order and from
           assistive technology, so anything that fills it is filling every
-          input on the page rather than reading the form. `app/contact/actions.ts`
+          input on the page rather than reading the form. `lib/leads/enquiry-action.ts`
           decides what happens then.
 
           `sr-only` is deliberately not used: that keeps a field available to

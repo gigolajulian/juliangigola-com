@@ -1,5 +1,5 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { bearer, isAdmin } from "@/lib/vouch";
+import { refuseAdmin } from "@/lib/vouch";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { readLead } from "@/lib/leads/lead-store";
 import { FROM_KEY, type InvoiceFrom } from "@/lib/leads/invoice";
@@ -24,7 +24,8 @@ const TEMPLATES_KEY = "leads:contract-templates";
 
 async function gate(request: Request) {
   const { env } = await getCloudflareContext({ async: true });
-  if (!(await isAdmin(request, env.INBOX_KEY))) return { error: json({ error: bearer(request) ? "GitHub did not accept that token for this repository." : "Not authorized." }, 401) };
+  const denied = await refuseAdmin(request, env.INBOX_KEY);
+  if (denied) return { error: denied };
   if (!env.INBOX) return { error: json({ error: "This build has no inbox attached." }, 503) };
   const seal = sealer(env.LEADS_KEY);
   if (!seal) return { error: json({ error: "Contracts need LEADS_KEY on the Worker." }, 503) };

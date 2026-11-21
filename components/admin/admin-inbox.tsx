@@ -5,7 +5,7 @@ import Image from "next/image";
 import { contextLines, replyLink, type Enquiry, type Summary } from "@/lib/inbox";
 import { cn } from "@/lib/utils";
 import { credentials, KEY_STORE, TOKEN_STORE } from "@/lib/admin/admin-github";
-import { adminCall } from "@/lib/leads/lead-desk";
+import { adminCall, isLocked } from "@/lib/leads/lead-desk";
 
 /* ── the inbox ────────────────────────────────────────────────────
  * Enquiries from the contact form, which now has somewhere to put them.
@@ -91,7 +91,7 @@ export function AdminInbox({
         setError(e instanceof Error ? e.message : String(e));
         // A rejected key is not worth keeping — otherwise every visit retries
         // it and the tab looks broken rather than locked.
-        if (String(e).includes("Not authorized")) {
+        if (isLocked(e)) {
           window.localStorage.removeItem(KEY_STORE);
           setRows(null);
         }

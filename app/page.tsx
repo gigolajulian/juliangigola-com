@@ -5,7 +5,7 @@ import { COMMISSION_TABS } from "@/lib/photos-and-sessions";
 import { PROJECTS, categoryLabel } from "@/lib/work/work";
 import { MT } from "@/lib/v4-home/server";
 import ORDER from "@/lib/portfolio-order.json";
-import { shareOg } from "@/lib/share";
+import { shareOg } from "@/lib/og/share";
 
 export const metadata: Metadata = shareOg("Photographer and creative director","Fashion editorial, campaigns and portraits in the San Francisco Bay Area. Available worldwide.");
 

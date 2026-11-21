@@ -5,7 +5,7 @@ import { sealer } from "@/lib/leads/lead-crypto";
 import { checkPaid, finalize, recheckTransfer } from "@/lib/proofs/submit";
 import { PAYMENTS_DOWN } from "@/lib/stripe";
 import { headers } from "next/headers";
-import { coverFrame, isToken, publicView, readPublic, shut, writeProof } from "@/lib/proofs/proof";
+import { coverFrame, isToken, publicView, readPublic, shutReason, writeProof } from "@/lib/proofs/proof";
 import { PassGate, Shut } from "@/components/proofs/pass-gate";
 import { ProofGallery } from "@/components/proofs/gallery";
 import { CARD } from "@/lib/proofs/watermark";
@@ -50,7 +50,7 @@ export default async function ProofPage({ params, searchParams }: { params: Prom
   // Delivered: the same shoot id now opens the finals.
   if (p?.deliveredAt) redirect(`/delivery/${token}`);
   // Offline or behind a password: nothing of the gallery is rendered until the gate's cookie is right.
-  const why = await shut(p, (await headers()).get("cookie"), env.LEADS_KEY);
+  const why = await shutReason(p, (await headers()).get("cookie"), env.LEADS_KEY);
   if (why === "locked") return <PassGate id={token} kind="proofs" />;
   if (!p || why) return <Shut offline={why === "offline"} />;
 

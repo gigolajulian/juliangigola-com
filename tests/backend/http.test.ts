@@ -20,7 +20,7 @@ describe("json", () => {
 describe("bodyOf", () => {
   it("reads an object body", async () => expect(await bodyOf(post('{"a":1}'))).toEqual({ a: 1 }));
 
-  it("is null for malformed JSON, a bare value or null", async () => {
-    for (const b of ["{oops", "3", '"text"', "null"]) expect(await bodyOf(post(b))).toBeNull();
+  it("is null for malformed JSON, a bare value null or an array", async () => {
+    for (const b of ["{oops", "3", '"text"', "null", "[1,2]"]) expect(await bodyOf(post(b))).toBeNull();
   });
 });

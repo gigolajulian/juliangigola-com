@@ -433,6 +433,20 @@ describe("invoices", () => {
     expect((await GET(req("GET", { key: null, query: "?invoices" }))).status).toBe(401);
   });
 
+  it("a patch that 404s writes nothing first: no Notion mirror, no invoice number used", async () => {
+    const calls: string[] = [];
+    vi.stubGlobal("fetch", async (url: string) => (calls.push(url), Response.json({ results: [], id: "row-1" })));
+    ctx.env = { ...ctx.env, NOTION_TOKEN: "test" };
+    const a = await make("a@example.com");
+    const gone = await PATCH(req("PATCH", { body: JSON.stringify({ key: a, stage: "Quoted", mergeFrom: "lead:nobody" }) }));
+    expect(gone.status).toBe(404);
+    const unknown = { date: "2026-11-06", lines: [{ desc: "Portraits", qty: 1, rate: 450 }] };
+    const none = await PATCH(req("PATCH", { body: JSON.stringify({ key: a, stage: "Quoted", invoice: unknown, invoicePaid: { no: "0999", paid: true } }) }));
+    expect(none.status).toBe(404);
+    expect(calls).toEqual([]);
+    expect((await (await GET(req("GET", { query: "?invoiceNo=2026-11-06" }))).json()).no).toBe("1126");
+  });
+
   it("refuses a bad invoice and stays behind the gate", async () => {
     const a = await make("a@example.com");
     const bad = await PATCH(req("PATCH", { body: JSON.stringify({ key: a, invoice: { date: "2026-11-06", lines: [] } }) }));

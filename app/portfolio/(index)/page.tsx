@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { shareOg } from "@/lib/share";
+import { shareOg } from "@/lib/og/share";
 import { V3Work, type FrameItem, type WorkItem } from "@/components/portfolio/work";
 import { CATEGORIES, PROJECTS, categoryLabel } from "@/lib/work/work";
 import ORDER from "@/lib/portfolio-order.json";

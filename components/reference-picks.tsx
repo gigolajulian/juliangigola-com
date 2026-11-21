@@ -9,7 +9,7 @@ import { MAX_REFS } from "@/lib/inbox";
    Images the visitor uploads, and frames of Julian's they pick from a
    panel that pops out of the form. Uploads are shrunk in the browser to
    1600px JPEGs and ride the form as `refs`; picks go as their paths in
-   `picks`. Both arrive with the enquiry email (`app/contact/actions.ts`). */
+   `picks`. Both arrive with the enquiry email (`lib/leads/enquiry-action.ts`). */
 
 const EDGE = 1600;
 /** How near a dragged image pulls the V3 Upload button, in px. */

@@ -18,7 +18,7 @@ import { Selector } from "@astryxdesign/core/Selector";
 import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/SegmentedControl";
 import { Banner } from "@astryxdesign/core/Banner";
 import { STAGES, type Lead, type LeadSummary, type Stage } from "@/lib/leads/leads";
-import { type Call, errorText } from "@/lib/leads/lead-desk";
+import { type Call, errorText, type Size } from "@/lib/leads/lead-desk";
 
 const SOURCES = ["Instagram DM", "Referral", "Text", "Phone call", "Email", "In person", "Other"];
 const norm = (s: string) => s.trim().toLowerCase().replace(/^@/, "");
@@ -35,7 +35,7 @@ export function sameAs(leads: LeadSummary[], f: { name: string; email: string; i
   });
 }
 
-export function NewLeadDesk({ call, leads, size, done, open, cancel }: { call: Call; leads: LeadSummary[]; size: "phone" | "mid" | "wide"; done: (id: string, lead: Lead) => void; open: (l: LeadSummary) => void; cancel: () => void }) {
+export function NewLeadDesk({ call, leads, size, done, open, cancel }: { call: Call; leads: LeadSummary[]; size: Size; done: (id: string, lead: Lead) => void; open: (l: LeadSummary) => void; cancel: () => void }) {
   const [f, setF] = React.useState({ name: "", email: "", ig: "", phone: "", company: "", kind: "", stage: "Inquiry" as Stage, source: "Instagram DM", notes: "" });
   const [note, setNote] = React.useState<string | null>(null);
   const [busy, setBusy] = React.useState(false);

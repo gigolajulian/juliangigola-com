@@ -1,7 +1,7 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { lockOp, clientView, depositPaid, type ChangeResult } from "@/lib/booking/booking-engine";
 import { EARLY_SHARE, PART_SHARE, refundCents, refundShare } from "@/lib/booking/booking-rules";
-import { isAdmin } from "@/lib/vouch";
+import { refuseAdmin } from "@/lib/vouch";
 import { manageLinks, tokenOpens } from "@/lib/booking/booking-token";
 import { cancelledSubject, confirmOf, sendCancelled, sendConfirm } from "@/lib/booking/confirm";
 import { logMail, recordLead } from "@/lib/leads/lead-store";
@@ -29,7 +29,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const body = (await bodyOf(request)) ?? {};
   // The lead desk's own two: Julian cancels with a full refund, or marks a no-show. Its gate, never the client's token.
   if (body.action === "cancel-mine" || body.action === "no-show") {
-    if (!(await isAdmin(request, env.INBOX_KEY))) return json({ error: "Not authorized." }, 401);
+    const denied = await refuseAdmin(request, env.INBOX_KEY);
+    if (denied) return denied;
     return body.action === "no-show" ? noShow(env, id) : cancelMine(env, id);
   }
   if (!(await tokenOpens(env.BOOKING_SECRET, id, typeof body.t === "string" ? body.t : undefined))) return json({ error: "This link has expired. Reply to your confirmation email." }, 401);

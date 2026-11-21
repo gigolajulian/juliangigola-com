@@ -6,7 +6,7 @@ import { Run } from "@/components/booking/flow";
 import { Doors } from "@/components/home/rollback";
 import { ServiceBar } from "@/components/booking/service-bar";
 import { BOOKING_PAGES, bookingHref, type BookingPage } from "@/lib/booking/booking";
-import { CAMPUS_GUIDES, campusHref } from "@/lib/campus-guides";
+import { CAMPUS_GUIDES, campusHref } from "@/lib/graduation/campus-guides";
 import { SESSIONS, type SessionSlug } from "@/lib/photos-and-sessions";
 import type { Frame } from "@/lib/work-types";
 
