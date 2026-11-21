@@ -16,14 +16,16 @@ import { AdminTraffic } from "@/components/admin/admin-traffic";
 import { AdminSeo } from "@/components/admin/admin-seo";
 import { AdminVideos } from "@/components/admin/admin-videos";
 import { loadRepo, publishDraft, type Draft, type Status } from "@/lib/admin/publish";
-import { ClientFields, ContactFields, CoverArtFields, HomeFields, inputClass, QuoteFields, SessionFields } from "@/components/admin/admin-fields";
+import { ClientFields, ContactFields, CoverArtFields, HomeFields, QuoteFields, SessionFields } from "@/components/admin/admin-fields";
 import { isTextRef, type TrashedProject } from "@/lib/work/added";
 import { type PendingUpload } from "@/components/admin/admin-frames";
 import { CreditDesk, creditBook } from "@/components/admin/admin-credits";
 import { same, withOverride } from "@/lib/admin/admin-payload";
-import { TOKEN_STORE, REPO } from "@/lib/admin/admin-github";
+import { TOKEN_STORE } from "@/lib/admin/admin-github";
 import type { Bts } from "@/lib/work-types";
 import { byCodeUnit, cn } from "@/lib/utils";
+import { useDeployWatch } from "@/components/admin/use-deploy-watch";
+import { Connect, StatusLine } from "@/components/admin/admin-editor-parts";
 
 /* ── the editor ───────────────────────────────────────────────────
  * Edits `content/site.json` and commits it to the repo. The deploy does the
@@ -498,82 +500,7 @@ export function AdminEditor({
   // eslint-disable-next-line react-hooks/set-state-in-effect
   React.useEffect(() => setOrigin(window.location.origin), []);
 
-  /**
-   * Whether the deploy carrying the last publish has landed.
-   *
-   * Committing to GitHub and the change being on the site are a couple of
-   * minutes apart, and until now the editor said nothing about that gap —
-   * "Committed" was the last word, and whether the public site had caught up
-   * was something to go and check by hand.
-   *
-   * `/BUILD_ID` is a file Next emits and the Worker serves as a static asset,
-   * so the build the site is running has a name this page can read. Recorded
-   * on mount, polled after a publish, and when it differs the deploy has
-   * landed. Strictly it means *a* new build is live rather than specifically
-   * yours — but the only thing that triggers a build is a commit to `main`,
-   * and you just made one.
-   *
-   * Null where it cannot be read at all. `next dev` does not serve the file,
-   * so locally this stays null and the indicator simply never claims to be
-   * live, which is better than claiming it wrongly.
-   */
-  const built = React.useRef<string | null>(null);
-  /** Set the moment a publish succeeds, so the wait has something to watch. */
-  const [awaitingDeploy, setAwaitingDeploy] = React.useState(false);
-  /**
-   * Whether this session committed something whose deploy is unconfirmed.
-   *
-   * Distinct from `live` so the label can stop short of claiming green. If the
-   * watch times out, or `/BUILD_ID` cannot be read at all, the honest answer
-   * is "committed, and I do not know whether it has landed" — which is what
-   * "published" says and what "live" would not.
-   */
-  const [committed, setCommitted] = React.useState(false);
-
-  React.useEffect(() => {
-    let cancelled = false;
-    // The effect body only reads; state is set in the callback, after the
-    // request comes back, rather than synchronously during the effect.
-    void fetch("/BUILD_ID", { cache: "no-store" })
-      .then((r) => (r.ok ? r.text() : null))
-      .then((id) => {
-        if (!cancelled) built.current = id?.trim() ?? null;
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  /**
-   * Polls for the deploy, and stops as soon as it lands.
-   *
-   * Ten seconds, because a Cloudflare build is minutes: a tighter loop would
-   * be dozens of requests to learn nothing. It gives up after five minutes —
-   * a build that has not landed by then has failed or queued, and a bar that
-   * sweeps for ever is worse than one that stops and lets you look.
-   */
-  React.useEffect(() => {
-    if (!awaitingDeploy || built.current === null) return;
-
-    const started = Date.now();
-    const id = window.setInterval(() => {
-      if (Date.now() - started > 5 * 60_000) {
-        setAwaitingDeploy(false);
-        return;
-      }
-      void fetch("/BUILD_ID", { cache: "no-store" })
-        .then((r) => (r.ok ? r.text() : null))
-        .then((next) => {
-          if (!next || next.trim() === built.current) return;
-          built.current = next.trim();
-          setCommitted(false);
-          setAwaitingDeploy(false);
-        })
-        .catch(() => {});
-    }, 10_000);
-    return () => window.clearInterval(id);
-  }, [awaitingDeploy]);
+  const { awaitingDeploy, committed, published } = useDeployWatch();
 
   const known = React.useMemo(() => new Set(slugs), [slugs]);
 
@@ -799,10 +726,7 @@ export function AdminEditor({
     setOverrides((o) => ({ ...o, frames: written.frames, credits: written.credits, copy: written.copy, slugs: written.slugs }));
     setBts(written.bts);
 
-    // A fresh publish is not live yet by definition, whatever the last one
-    // was, so the green is dropped before the wait begins.
-    setCommitted(true);
-    setAwaitingDeploy(built.current !== null);
+    published();
     setStatus({
       kind: "saved",
       message:
@@ -1463,107 +1387,4 @@ export function AdminEditor({
     </CreditDesk>
   );
 
-}
-
-function Connect({
-  token,
-  setToken,
-  onConnect,
-  status,
-}: {
-  token: string;
-  setToken: (v: string) => void;
-  onConnect: () => void;
-  status: Status;
-}) {
-  return (
-    <div className="mt-12 max-w-prose">
-      <ol className="flex flex-col gap-4 text-sm leading-relaxed text-muted-foreground">
-        <li>
-          <span className="text-foreground">1.</span> Open{" "}
-          <a
-            href="https://github.com/settings/personal-access-tokens/new"
-            target="_blank"
-            rel="noreferrer"
-            className="text-foreground underline underline-offset-4"
-          >
-            GitHub&rsquo;s fine-grained token page
-          </a>
-          .
-        </li>
-        <li>
-          <span className="text-foreground">2.</span> Repository access:{" "}
-          <em>Only select repositories</em> &rarr; <code>juliangigola-com</code>
-          . Permissions: <em>Contents</em> &rarr; <em>Read and write</em>.
-          Nothing else. That is the only thing this page does.
-        </li>
-        <li>
-          <span className="text-foreground">3.</span> Give it an expiry you are
-          happy with, then paste it below. It is kept in this browser only, and
-          sent only to GitHub.
-        </li>
-      </ol>
-
-      <form
-        className="mt-8 flex flex-col gap-4"
-        onSubmit={(e) => {
-          e.preventDefault();
-          onConnect();
-        }}
-      >
-        <input
-          type="password"
-          value={token}
-          onChange={(e) => setToken(e.target.value)}
-          placeholder="github_pat_…"
-          autoComplete="off"
-          spellCheck={false}
-          aria-label="GitHub token"
-          className={cn(inputClass, "font-mono")}
-        />
-        <button
-          type="submit"
-          disabled={!token.trim() || status.kind === "working"}
-          className="label self-start border border-foreground bg-foreground px-6 py-4 text-background press hoverable:hover:opacity-90 active:scale-[0.98] disabled:opacity-50"
-        >
-          {status.kind === "working" ? "Connecting…" : "Connect"}
-        </button>
-        <StatusLine status={status} />
-      </form>
-    </div>
-  );
-}
-
-function StatusLine({ status }: { status: Status }) {
-  if (status.kind === "idle") return null;
-
-  return (
-    <p
-      // Announced, because the outcome of a publish is the whole point and it
-      // happens away from where the pointer is.
-      role="status"
-      className={cn(
-        "flex items-center gap-2 text-sm",
-        status.kind === "error" ? "text-accent" : "text-muted-foreground",
-      )}
-    >
-      {status.kind === "working" ? <Orb state="connecting" size={20} /> : null}
-      {status.message}
-      {status.kind === "saved" ? (
-        <>
-          {" "}
-          <a
-            // Workers Builds, not GitHub Actions — the workflow file is gone
-            // and deploys are driven from the Cloudflare side now.
-            href={`https://github.com/${REPO.owner}/${REPO.repo}/commits/${REPO.branch}`}
-            target="_blank"
-            rel="noreferrer"
-            className="text-foreground underline underline-offset-4"
-          >
-            Watch the deploy
-          </a>
-        </>
-      ) : null}
-    </p>
-  );
 }
