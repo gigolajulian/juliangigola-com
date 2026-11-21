@@ -13,6 +13,7 @@ export type LeadKey =
   | { do: "snooze" }
   | { do: "snoozeFor"; days: number }
   | { do: "archive" }
+  | { do: "task" }
   | { do: "stage"; at: number };
 
 /** Every shortcut, for the ? overlay. */
@@ -22,6 +23,7 @@ export const LEAD_KEYS: [string, string][] = [
   ["R", "Reply in Gmail"],
   ["S, then 1 / 3 / W", "Snooze 1 day, 3 days, a week"],
   ["E", "Archive"],
+  ["T", "Add a task"],
   ["1 to 9, 0", "Set the stage (0 is Lost)"],
   ["N", "New lead"],
   ["U", "Refresh"],
@@ -55,6 +57,7 @@ export function leadKey(e: Press, typing: boolean, snoozing: boolean): LeadKey |
     case "r": return { do: "reply" };
     case "s": return { do: "snooze" };
     case "e": return { do: "archive" };
+    case "t": return { do: "task" };
     default: return null;
   }
 }

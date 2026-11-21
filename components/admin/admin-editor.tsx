@@ -4,26 +4,33 @@ import * as React from "react";
 import { Orb } from "@/components/effects/orb";
 import { type SiteContent } from "@/lib/content";
 import { AdminNewProject } from "@/components/admin/admin-new-project";
-import { AdminProjects, type AdminProject } from "@/components/admin/admin-projects";
+import { AdminProjects } from "@/components/admin/admin-projects";
 import { AdminSitemap, type SitemapTarget } from "@/components/admin/admin-sitemap";
 import { AdminDisciplines } from "@/components/admin/admin-disciplines";
 import { AdminPreview } from "@/components/admin/admin-preview";
 import { AdminPage } from "@/components/admin/admin-page";
-import type { PickerItem } from "@/components/admin/admin-picker";
 import { AdminTrash } from "@/components/admin/admin-trash";
 import { AdminInbox, unreadCount } from "@/components/admin/admin-inbox";
 import { AdminTraffic } from "@/components/admin/admin-traffic";
 import { AdminSeo } from "@/components/admin/admin-seo";
 import { AdminVideos } from "@/components/admin/admin-videos";
 import { loadRepo, publishDraft, type Draft, type Status } from "@/lib/admin/publish";
-import { ClientFields, ContactFields, CoverArtFields, HomeFields, inputClass, QuoteFields, SessionFields } from "@/components/admin/admin-fields";
+import { ClientFields, ContactFields, CoverArtFields, HomeFields, QuoteFields, SessionFields } from "@/components/admin/admin-fields";
 import { isTextRef, type TrashedProject } from "@/lib/work/added";
 import { type PendingUpload } from "@/components/admin/admin-frames";
 import { CreditDesk, creditBook } from "@/components/admin/admin-credits";
 import { same, withOverride } from "@/lib/admin/admin-payload";
-import { TOKEN_STORE, REPO } from "@/lib/admin/admin-github";
+import { TOKEN_STORE } from "@/lib/admin/admin-github";
 import type { Bts } from "@/lib/work-types";
 import { byCodeUnit, cn } from "@/lib/utils";
+import { FIELD_TAB, TABS, type View } from "@/components/admin/admin-tabs";
+import { remapSlugs } from "@/components/admin/admin-remap-slugs";
+import { Connect, StatusLine } from "@/components/admin/admin-connect";
+import type { AdminEditorProps, Overrides } from "@/components/admin/admin-editor-props";
+import { useDeployWatch } from "@/components/admin/use-deploy-watch";
+
+/** The per-project overrides a build applies, one map per kind. */
+export type { Overrides };
 
 /* ── the editor ───────────────────────────────────────────────────
  * Edits `content/site.json` and commits it to the repo. The deploy does the
@@ -51,121 +58,6 @@ import { byCodeUnit, cn } from "@/lib/utils";
  * which is the trade for not having to paste it every time. "Forget token"
  * clears it. */
 
-/**
- * The tabs, in two groups.
- *
- * Content used to be one tab holding four sections, with an index above it to
- * get between them. That is two mechanisms doing one job — a tab strip and a
- * section strip, stacked — and it left the widest part of the tool as a long
- * scroll of unrelated forms: the reply-time promise and the session prices
- * have nothing to do with each other and were two screens apart.
- *
- * One tab per area instead, and the index goes: the tabs *are* the index.
- *
- * Grouped because the two halves are different kinds of thing. The first four
- * are pages — a fixed set of fields, edited a few times a year. The last two
- * are the work — seventy-three projects that change constantly. Running all
- * six together would suggest they are the same kind of visit.
- */
-const TABS = [
-  [
-    { id: "home", label: "Home" },
-    { id: "clients", label: "Clients" },
-    { id: "sessions", label: "Sessions" },
-    { id: "testimonials", label: "Quotes" },
-    { id: "contact", label: "Contact" },
-  ],
-  [
-    { id: "disciplines", label: "Disciplines" },
-    { id: "projects", label: "Projects" },
-    // With the work rather than with the pages: it is a discipline whose
-    // contents change, not a page whose copy does.
-    { id: "video", label: "Motion" },
-    // Same reason as Motion: a discipline whose contents are arranged, not
-    // a page whose copy is written.
-    { id: "coverart", label: "Cover art" },
-  ],
-  /* Its own group, because it is not the same kind of visit at all.
-   *
-   * The first four tabs are pages and the next two are the work — both of
-   * them things you go in to change. This one is post: you go in to read it,
-   * and what you do afterwards happens in your mail. It also has nothing to
-   * publish, which is the one thing every other tab has in common. */
-  [
-    // One row per person, with a stage (`components/leads/desk.tsx`). The Inbox stays the raw log.
-    { id: "leads", label: "Leads" },
-    { id: "inbox", label: "Inbox" },
-    // Read-only too: who came to the site and from where.
-    { id: "traffic", label: "Traffic" },
-    // And how search and visitors use each page: `admin-seo.tsx`.
-    { id: "seo", label: "SEO" },
-  ],
-] as const;
-
-type View = (typeof TABS)[number][number]["id"];
-
-/**
- * Which tab a field lives on, so a sitemap row can still reach it.
- *
- * The sitemap sends you to a *field* — "Home" means the selected-work list,
- * not the top of a page — and that field is now behind a tab. So a jump is
- * two moves: switch to the tab that holds it, then scroll to it.
- */
-const FIELD_TAB: Record<string, View> = {
-  responseTime: "contact",
-  bookingUrl: "contact",
-  featured: "home",
-  heroDisciplines: "home",
-  coverArt: "home",
-  videos: "video",
-  coverArtOrder: "coverart",
-  clientsHome: "clients",
-  clientsStudio: "clients",
-  sessions: "sessions",
-  testimonials: "testimonials",
-};
-
-/** The per-project overrides a build applies, one map per kind. */
-export type Overrides = Pick<Draft, "categories" | "frames" | "credits" | "copy" | "slugs">;
-
-/* ── a rename, carried through ────────────────────────────────────
- * Every override this editor holds is keyed by slug, and while the page
- * is open every row still wears the slug it was built with. So the draft
- * keeps its keys where the rows can find them, and the *published* draft
- * is this one: each key a rename applies to, moved under the new slug on
- * the way out. Idempotent - once the site has deployed the rename the
- * rows wear the new slug, the old key is absent, and there is nothing to
- * move - so it runs on every publish rather than remembering whether it
- * has. `lib/work/work.ts` renames first in its pipeline for the same reason:
- * the new slug is the one identity, and a renamed project is never two.
- * ─────────────────────────────────────────────────────────────── */
-function remapSlugs(draft: Draft, slugs: Record<string, string>): Draft {
-  const renames = Object.entries(slugs).filter(([from, to]) => from !== to);
-  if (!renames.length) return draft;
-  const moveKeys = <T,>(map: Record<string, T>): Record<string, T> => {
-    const next = { ...map };
-    for (const [from, to] of renames) {
-      if (from in next && !(to in next)) {
-        next[to] = next[from];
-        delete next[from];
-      }
-    }
-    return next;
-  };
-  const moveList = (list: string[]): string[] =>
-    list.map((s) => slugs[s] && slugs[s] !== s ? slugs[s] : s);
-  return {
-    ...draft,
-    hidden: moveList(draft.hidden),
-    unlisted: moveList(draft.unlisted),
-    categories: moveKeys(draft.categories),
-    frames: moveKeys(draft.frames),
-    credits: moveKeys(draft.credits),
-    copy: moveKeys(draft.copy),
-    bts: moveKeys(draft.bts),
-    order: moveList(draft.order),
-  };
-}
 
 export function AdminEditor({
   initial,
@@ -185,60 +77,7 @@ export function AdminEditor({
   releaseLimit,
   heroChoices,
   clients,
-}: {
-  /** The content as it was at build time — what the live site is serving. */
-  initial: SiteContent;
-  /** Every project slug, so the cover and featured fields can be checked. */
-  slugs: string[];
-  /** Disciplines a shoot can be filed under, with the cover each shows. */
-  categories: {
-    slug: string;
-    name: string;
-    group: string;
-    cover?: string;
-  }[];
-  /** Every project, hidden ones included, for the list and the preview. */
-  projects: AdminProject[];
-  /** Which slugs the last build was hiding. */
-  initialHidden: string[];
-  initialUnlisted: string[];
-  /** Disciplines for the sitemap, each under the page it hangs off. */
-  categoryLinks: {
-    slug: string;
-    name: string;
-    href: string;
-    branch: string;
-  }[];
-  /** Removed projects awaiting their week. */
-  initialTrash: TrashedProject[];
-  /** The per-project overrides the last build applied, each slug-keyed:
-      refilings (category slug), re-sequenced galleries, rewritten credits,
-      rewritten titles and intents, and renamed slugs. */
-  initialOverrides: Overrides;
-  /** The running order the last build applied, by slug. */
-  initialOrder: string[];
-  /** Discipline covers the last build applied, category slug to frame path. */
-  initialCovers: Record<string, string>;
-  /** Collaborators' faces the last build applied, handle to picture path. */
-  initialAvatars: Record<string, string>;
-  /** BTS the last build applied, slug → `{ by, frames }`. */
-  initialBts: Record<string, Bts>;
-  /** Every cover-art release, for the homepage rack picker. */
-  releases: PickerItem[];
-  /**
-   * Disciplines the cover could show, which is not all of them.
-   *
-   * `DISCIPLINES` in `lib/work/work.ts` drops any category with no lead project or
-   * no frame, because the cover has to show a photograph for each one and
-   * cannot invent it. So Video and Music video, which have no work at all,
-   * are absent here rather than offered and silently ignored.
-   */
-  heroChoices: PickerItem[];
-  /** Every client with a mark on file, for the two wall pickers. */
-  clients: PickerItem[];
-  /** How many of them the homepage rack actually shows. */
-  releaseLimit: number;
-}) {
+}: AdminEditorProps) {
   const [token, setToken] = React.useState("");
   const [draft, setDraft] = React.useState<SiteContent>(initial);
   /** The blob SHA of the file being edited. Absent until connected. */
@@ -498,82 +337,7 @@ export function AdminEditor({
   // eslint-disable-next-line react-hooks/set-state-in-effect
   React.useEffect(() => setOrigin(window.location.origin), []);
 
-  /**
-   * Whether the deploy carrying the last publish has landed.
-   *
-   * Committing to GitHub and the change being on the site are a couple of
-   * minutes apart, and until now the editor said nothing about that gap —
-   * "Committed" was the last word, and whether the public site had caught up
-   * was something to go and check by hand.
-   *
-   * `/BUILD_ID` is a file Next emits and the Worker serves as a static asset,
-   * so the build the site is running has a name this page can read. Recorded
-   * on mount, polled after a publish, and when it differs the deploy has
-   * landed. Strictly it means *a* new build is live rather than specifically
-   * yours — but the only thing that triggers a build is a commit to `main`,
-   * and you just made one.
-   *
-   * Null where it cannot be read at all. `next dev` does not serve the file,
-   * so locally this stays null and the indicator simply never claims to be
-   * live, which is better than claiming it wrongly.
-   */
-  const built = React.useRef<string | null>(null);
-  /** Set the moment a publish succeeds, so the wait has something to watch. */
-  const [awaitingDeploy, setAwaitingDeploy] = React.useState(false);
-  /**
-   * Whether this session committed something whose deploy is unconfirmed.
-   *
-   * Distinct from `live` so the label can stop short of claiming green. If the
-   * watch times out, or `/BUILD_ID` cannot be read at all, the honest answer
-   * is "committed, and I do not know whether it has landed" — which is what
-   * "published" says and what "live" would not.
-   */
-  const [committed, setCommitted] = React.useState(false);
-
-  React.useEffect(() => {
-    let cancelled = false;
-    // The effect body only reads; state is set in the callback, after the
-    // request comes back, rather than synchronously during the effect.
-    void fetch("/BUILD_ID", { cache: "no-store" })
-      .then((r) => (r.ok ? r.text() : null))
-      .then((id) => {
-        if (!cancelled) built.current = id?.trim() ?? null;
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  /**
-   * Polls for the deploy, and stops as soon as it lands.
-   *
-   * Ten seconds, because a Cloudflare build is minutes: a tighter loop would
-   * be dozens of requests to learn nothing. It gives up after five minutes —
-   * a build that has not landed by then has failed or queued, and a bar that
-   * sweeps for ever is worse than one that stops and lets you look.
-   */
-  React.useEffect(() => {
-    if (!awaitingDeploy || built.current === null) return;
-
-    const started = Date.now();
-    const id = window.setInterval(() => {
-      if (Date.now() - started > 5 * 60_000) {
-        setAwaitingDeploy(false);
-        return;
-      }
-      void fetch("/BUILD_ID", { cache: "no-store" })
-        .then((r) => (r.ok ? r.text() : null))
-        .then((next) => {
-          if (!next || next.trim() === built.current) return;
-          built.current = next.trim();
-          setCommitted(false);
-          setAwaitingDeploy(false);
-        })
-        .catch(() => {});
-    }, 10_000);
-    return () => window.clearInterval(id);
-  }, [awaitingDeploy]);
+  const { built, awaitingDeploy, setAwaitingDeploy, committed, setCommitted } = useDeployWatch();
 
   const known = React.useMemo(() => new Set(slugs), [slugs]);
 
@@ -1463,107 +1227,4 @@ export function AdminEditor({
     </CreditDesk>
   );
 
-}
-
-function Connect({
-  token,
-  setToken,
-  onConnect,
-  status,
-}: {
-  token: string;
-  setToken: (v: string) => void;
-  onConnect: () => void;
-  status: Status;
-}) {
-  return (
-    <div className="mt-12 max-w-prose">
-      <ol className="flex flex-col gap-4 text-sm leading-relaxed text-muted-foreground">
-        <li>
-          <span className="text-foreground">1.</span> Open{" "}
-          <a
-            href="https://github.com/settings/personal-access-tokens/new"
-            target="_blank"
-            rel="noreferrer"
-            className="text-foreground underline underline-offset-4"
-          >
-            GitHub&rsquo;s fine-grained token page
-          </a>
-          .
-        </li>
-        <li>
-          <span className="text-foreground">2.</span> Repository access:{" "}
-          <em>Only select repositories</em> &rarr; <code>juliangigola-com</code>
-          . Permissions: <em>Contents</em> &rarr; <em>Read and write</em>.
-          Nothing else. That is the only thing this page does.
-        </li>
-        <li>
-          <span className="text-foreground">3.</span> Give it an expiry you are
-          happy with, then paste it below. It is kept in this browser only, and
-          sent only to GitHub.
-        </li>
-      </ol>
-
-      <form
-        className="mt-8 flex flex-col gap-4"
-        onSubmit={(e) => {
-          e.preventDefault();
-          onConnect();
-        }}
-      >
-        <input
-          type="password"
-          value={token}
-          onChange={(e) => setToken(e.target.value)}
-          placeholder="github_pat_…"
-          autoComplete="off"
-          spellCheck={false}
-          aria-label="GitHub token"
-          className={cn(inputClass, "font-mono")}
-        />
-        <button
-          type="submit"
-          disabled={!token.trim() || status.kind === "working"}
-          className="label self-start border border-foreground bg-foreground px-6 py-4 text-background press hoverable:hover:opacity-90 active:scale-[0.98] disabled:opacity-50"
-        >
-          {status.kind === "working" ? "Connecting…" : "Connect"}
-        </button>
-        <StatusLine status={status} />
-      </form>
-    </div>
-  );
-}
-
-function StatusLine({ status }: { status: Status }) {
-  if (status.kind === "idle") return null;
-
-  return (
-    <p
-      // Announced, because the outcome of a publish is the whole point and it
-      // happens away from where the pointer is.
-      role="status"
-      className={cn(
-        "flex items-center gap-2 text-sm",
-        status.kind === "error" ? "text-accent" : "text-muted-foreground",
-      )}
-    >
-      {status.kind === "working" ? <Orb state="connecting" size={20} /> : null}
-      {status.message}
-      {status.kind === "saved" ? (
-        <>
-          {" "}
-          <a
-            // Workers Builds, not GitHub Actions — the workflow file is gone
-            // and deploys are driven from the Cloudflare side now.
-            href={`https://github.com/${REPO.owner}/${REPO.repo}/commits/${REPO.branch}`}
-            target="_blank"
-            rel="noreferrer"
-            className="text-foreground underline underline-offset-4"
-          >
-            Watch the deploy
-          </a>
-        </>
-      ) : null}
-    </p>
-  );
 }

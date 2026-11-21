@@ -21,6 +21,8 @@ describe("leadKey", () => {
     expect(leadKey(p("r"), false, false)).toEqual({ do: "reply" });
     expect(leadKey(p("s"), false, false)).toEqual({ do: "snooze" });
     expect(leadKey(p("e"), false, false)).toEqual({ do: "archive" });
+    expect(leadKey(p("t"), false, false)).toEqual({ do: "task" });
+    expect(leadKey(p("t"), true, false)).toBeNull();
     expect(leadKey(p("n"), false, false)).toEqual({ do: "new" });
     expect(leadKey(p("U"), false, false)).toEqual({ do: "refresh" });
     expect(leadKey(p("?"), false, false)).toEqual({ do: "help" });

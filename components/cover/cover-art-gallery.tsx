@@ -110,6 +110,15 @@ export function CoverArtGallery({
     [frames],
   );
 
+  // `?cover=<slug>`: a cover clicked on the home (components/v4/home/rows.tsx) arrives open in the viewer, on side A, with no history entry of its own: one Back goes home.
+  React.useEffect(() => {
+    const slug = new URLSearchParams(location.search).get("cover");
+    const release = slug ? releases.find((r) => r.slug === slug) : undefined;
+    if (release) lightbox.show(positions.get(release.frames[0].src) ?? 0, null, false);
+    // once, on arrival: a later change of releases is not a new arrival
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <>
       <ul
