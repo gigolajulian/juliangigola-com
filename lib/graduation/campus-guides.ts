@@ -8,7 +8,7 @@
  * photograph of mine is text only.
  */
 
-import { SESSION_TYPES, formatPrice } from "@/lib/booking/sessions";
+import { SESSION_TYPES } from "@/lib/booking/sessions";
 
 export type Spot = { name: string; note: string; frames: string[] };
 
@@ -40,59 +40,59 @@ export const CAMPUS_GUIDES: CampusGuide[] = [
       "Where I take SJSU graduation photos: Tower Hall, the palm walk, the San Jose State sign and the glass walkways. Light, timing and a route for one session.",
     h1: "Best spots for SJSU grad photos",
     kicker: "San Jose State · Campus guide",
-    lead: "I shoot graduation sessions at SJSU every spring. These are the spots I use and the light that works at each.",
+    lead: "I shoot grads at SJSU every spring, so I know this campus well. Here are the spots I take people to, and when the light is best at each.",
     spots: [
       {
         name: "Tower Hall and Tower Lawn",
-        note: "The frame everyone wants. The tower lights up late in the afternoon, and the lawn leaves room for the cap toss.",
+        note: "Everyone wants this one, and it's worth it. Late in the afternoon the tower catches the sun, and the lawn gives you room to throw your cap.",
         frames: [g("14")],
       },
       {
         name: "The palm walk",
-        note: "Two rows of palms and one long line down the middle. Best when the sun sits low behind the trees.",
+        note: "Two rows of palms and one long line down the middle. I like it most when the sun drops low behind the trees.",
         frames: [g("15"), g("01")],
       },
       {
         name: "The brick steps",
-        note: "Red brick, a black rail and an old lamp post. Good for sitting poses and the family frame.",
+        note: "Red brick, a black rail and an old lamp post. It's an easy place to sit and relax, and a good spot for a photo with your family.",
         frames: [g("02")],
       },
       {
         name: "The San Jose State University sign",
-        note: "One clear frame that says where you graduated. The blue wall matches the stole.",
+        note: "The one photo that says exactly where you graduated. The blue wall even matches your stole.",
         frames: [g("04")],
       },
       {
         name: "The glass walkways",
-        note: "Glass and steel throw light back at you, so these work even at midday.",
+        note: "All that glass and steel bounces light back at you, so it looks good even at noon. That's why I usually start here.",
         frames: [g("13"), g("03")],
       },
     ],
     // His four lead the row (Julian).
     photos: ["01", "02", "03", "04", "14", "15"].map(g),
-    plan: "I start at the glass walkways, where the light works at any hour, then the sign and the brick steps, and finish at Tower Hall and the palms when the light is low. Two outfit changes fit between stops in 90 minutes.",
+    plan: "I usually start at the glass walkways, since the light works there any time of day. Then the sign and the brick steps. I save Tower Hall and the palms for the end, when the light gets low and soft. It all fits in 90 minutes, with time for two outfit changes.",
     faqs: [
       {
         q: "Where are the best spots for SJSU grad photos?",
-        a: "Tower Hall and Tower Lawn, the palm walk, the brick steps, the San Jose State University sign and the glass walkways.",
+        a: "My favorites are Tower Hall and Tower Lawn, the palm walk, the brick steps, the San Jose State sign and the glass walkways.",
       },
       {
         q: "What time of day is best for photos at SJSU?",
-        a: "Late afternoon. Tower Hall and the palms get the low sun. At midday I work at the glass walkways.",
+        a: "Late afternoon. That's when Tower Hall and the palms get the low sun. If midday is all you have, I'll start at the glass walkways.",
       },
       {
         q: "How much are graduation photos at SJSU?",
         a: grad.from === null
-          ? "Quoted on request. SJSU is included, with no travel fee."
-          : `${formatPrice(grad.from)} for 90 minutes at SJSU, with two outfit changes, an edited gallery and a print release. SJSU is included, with no travel fee.`,
+          ? "I quote it when you get in touch, and there's no travel fee for SJSU."
+          : `It's $${grad.from.toLocaleString("en-US")} for 90 minutes on campus. That covers two outfit changes, an edited gallery and a print release, and there's no travel fee for SJSU.`,
       },
       {
         q: "When should I book my SJSU grad photos?",
-        a: "Four to six weeks ahead, for a shoot a week or two before commencement. Spring dates go first.",
+        a: "Four to six weeks out is a good rule, for a shoot a week or two before commencement. Spring dates fill up first.",
       },
       {
         q: "Can my family join the session?",
-        a: "Yes. I keep the last stop for the family frame.",
+        a: "Of course. I save the last stop for a photo with your family.",
       },
     ],
   },
