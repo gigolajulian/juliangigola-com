@@ -18,7 +18,8 @@ for (const r of RATIOS) {
         const res = await page.goto(path, { waitUntil: "load" });
         expect(res?.status(), "status").toBe(200);
         await expect(page.locator("h1, h2").first()).toBeAttached();
-        await page.waitForTimeout(1500);
+        // the root layout's Lenis starts once the page has hydrated (components/v3/smooth-scroll.tsx)
+        await page.locator("html.lenis").waitFor({ state: "attached" });
         expect(errors).toEqual([]);
         await ctx.close();
       });
