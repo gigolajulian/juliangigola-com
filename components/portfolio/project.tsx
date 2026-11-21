@@ -154,7 +154,7 @@ export function V3Project({ project, next }: { project: Project; next?: { href: 
           ) : null}
         </div>
         <div className="sv-info">
-          {/* ?v4pages=m2p: behind the scenes after the frames and before the credits, smaller than the work.
+          {/* m2p: behind the scenes after the frames and before the credits, smaller than the work.
               Credits that sit in the sheet's hole get a second copy here, swapped in by v4pages.css. */}
           {project.bts ? (
             <section className="sv-row pj-bts">
@@ -183,7 +183,7 @@ export function V3Project({ project, next }: { project: Project; next?: { href: 
                   <Image src={next.cover.src} alt="" fill sizes="120px" style={{ objectFit: "cover", background: next.cover.color }} />
                 </span>
               ) : null}
-              {/* `?v4pages=next`: the same cover as a full stage (v4pages.css). Hidden otherwise, and lazy, so it is not fetched. */}
+              {/* next: the same cover as a full stage (v4pages.css), lazy. */}
               {next.cover ? (
                 <span className="pj-stage">
                   <Image src={next.cover.src} alt="" fill sizes="100vw" style={{ objectFit: "cover", background: next.cover.color }} />
