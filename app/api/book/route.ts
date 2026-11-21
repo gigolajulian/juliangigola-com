@@ -1,7 +1,7 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { lockOp, parseBooking, recordBooking, type BookResult } from "@/lib/booking/booking-engine";
 import { manageLinks } from "@/lib/booking/booking-token";
-import { sendConfirm } from "@/lib/booking/confirm";
+import { confirmOf, sendConfirm } from "@/lib/booking/confirm";
 import { logMail } from "@/lib/leads/lead-store";
 import { alertHello } from "@/lib/hello-mail";
 import { whenPT } from "@/lib/inbox";
@@ -45,7 +45,7 @@ export async function POST(request: Request) {
   const r = out.record;
   const filed = recordBooking(env, r);
   ctx.waitUntil(filed);
-  const confirm = { name: r.name, email: r.email, session: r.session, call: true, start: r.start, end: r.end, where: r.where, uid: r.id, manage: await manageLinks(env.BOOKING_SECRET, r) };
+  const confirm = { ...confirmOf(r, await manageLinks(env.BOOKING_SECRET, r)), call: true };
   // Logged after the lead is filed, so the mail lands on its row.
   const sent = await sendConfirm(env.CLIENT_EMAIL, confirm);
   if (sent) ctx.waitUntil(filed.then(() => logMail(env, r.email, sent, { to: "client", kind: "confirm", booking: r.id })));

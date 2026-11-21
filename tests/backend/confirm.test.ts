@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { FakeEmail } from "./fakes";
-import { cancelledSubject, confirmMail, sendCancelled, sendConfirm, timeRange, type Confirm } from "@/lib/booking/confirm";
+import { cancelledSubject, confirmMail, confirmOf, sendCancelled, sendConfirm, timeRange, type Confirm } from "@/lib/booking/confirm";
+import { depositPaid, type BookingRecord } from "@/lib/booking/booking-engine";
 import { SIG_DARK, SIG_HTML, SIG_TEXT } from "@/lib/email/email-signature";
 
 /* The client's "You're in." mail and the cancel note (`lib/booking/confirm.ts`),
@@ -120,5 +121,30 @@ describe("sendCancelled", () => {
     const mail = new FakeEmail();
     await sendCancelled(mail as never, base, "none");
     expect(mail.sent[0].text).not.toMatch(/\n\n\n/);
+  });
+});
+
+describe("confirmOf", () => {
+  const rec: BookingRecord = { id: "abcdef1234567890", eventId: "ev", slug: "portraits", session: "Portraits", start: "2026-11-21T18:00:00Z", end: "2026-11-21T19:00:00Z", firstStart: "2026-11-21T18:00:00Z", timeZone: "America/Los_Angeles", name: "Ana Lee", email: "ana@example.com", where: "Studio", at: "2026-11-10T00:00:00Z" };
+  const manage = base.manage;
+  // The literal the booking route and the reminder cron built before `confirmOf`.
+  const old = (r: BookingRecord): Confirm => ({ name: r.name, email: r.email, session: r.session, call: r.call, start: r.start, end: r.end, where: r.where, uid: r.id, manage, firstStart: r.firstStart, ...(r.intent ? { deposit: { ref: r.intent, at: r.at, amount: depositPaid(r), fee: r.fee } } : {}) });
+  const same = (a: Confirm, b: Confirm) => {
+    const [x, y] = [confirmMail(a), confirmMail(b)];
+    expect([y.subject, y.html, y.text]).toEqual([x.subject, x.html, x.text]);
+  };
+
+  it("mails a call booking as /api/book did", () => {
+    const call = { ...rec, slug: "call", session: "Wedding call", call: true, where: "https://meet.google.com/x" };
+    same({ name: call.name, email: call.email, session: call.session, call: true, start: call.start, end: call.end, where: call.where, uid: call.id, manage }, { ...confirmOf(call, manage), call: true });
+  });
+
+  it("mails a deposit booking, its reminder and a reschedule as before", () => {
+    const paid = { ...rec, intent: "pi_123456789012", deposit: 150, fee: 10 };
+    same(old(paid), confirmOf(paid, manage));
+    same({ kind: "reminder", ...old(paid) }, { kind: "reminder", ...confirmOf(paid, manage) });
+    const moved = { ...paid, start: "2026-11-23T18:00:00Z", end: "2026-11-23T19:00:00Z", moves: 1 };
+    same(old(moved), confirmOf(moved, manage));
+    expect(confirmMail(confirmOf(moved, manage)).text).toContain("The deposit moved with the new date.");
   });
 });

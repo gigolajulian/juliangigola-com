@@ -1,6 +1,7 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { liveHours, parseBooking } from "@/lib/booking/booking-engine";
-import { amountOf, CURRENCY, intentForm, isSlotOpen } from "@/lib/booking/deposit";
+import { amountOf, CURRENCY, intentForm } from "@/lib/booking/deposit";
+import { openNow } from "@/lib/booking/slots";
 import { PAYMENTS_DOWN, stripe } from "@/lib/stripe";
 import { bodyOf, json } from "@/lib/http";
 
@@ -26,7 +27,7 @@ export async function POST(request: Request) {
   const b = parsed.booking;
 
   try {
-    if (!(await isSlotOpen(b, env.GCAL_OAUTH, env.INBOX, await liveHours(env)))) return json({ error: "taken" }, 409);
+    if (!(await openNow(env.GCAL_OAUTH, b.slug, b.start, { kv: env.INBOX, hours: await liveHours(env) }))) return json({ error: "taken" }, 409);
   } catch (e) {
     console.error("deposit calendar", String(e));
     return json({ error: "Could not reach the calendar. Try again." }, 502);
