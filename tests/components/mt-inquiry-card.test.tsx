@@ -10,7 +10,7 @@ import { InquiryCard } from "@/components/v4/home/inquiry-card";
 
 /* The v4 home's quick note is the lead path: what it files a lead under, what it refuses to send,
    and where a music video goes instead. */
-const open = (at: Parameters<typeof InquiryCard>[0]["at"]) => render(<InquiryCard at={at} reply={null} onClose={() => {}} onBack={() => {}} />);
+const open = (at: Parameters<typeof InquiryCard>[0]["open"]) => render(<InquiryCard open={at} reply={null} onClose={() => {}} onBack={() => {}} />);
 const hidden = (name: string) => document.querySelector<HTMLInputElement>(`input[name="${name}"]`)?.value;
 const submit = () => fireEvent.submit(document.querySelector("form")!);
 

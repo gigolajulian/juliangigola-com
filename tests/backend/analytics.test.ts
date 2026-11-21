@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { reply } from "./fakes";
-import { ACCOUNT, cloudflare, engineSql, sitePath } from "@/lib/analytics";
+import { ACCOUNT, cloudflare, engineSql, searchConsole, sitePath } from "@/lib/analytics";
 
 /* The admin's read-only doors to Cloudflare analytics (`lib/analytics.ts`). */
 
@@ -50,5 +50,18 @@ describe("engineSql", () => {
   it("throws on a failed answer", async () => {
     vi.stubGlobal("fetch", async () => reply("bad sql", 422));
     await expect(engineSql("k", "x")).rejects.toThrow("Analytics Engine answered 422: bad sql");
+  });
+
+  it("throws its own message on a 200 that is not JSON", async () => {
+    vi.stubGlobal("fetch", async () => reply("<html>", 200));
+    await expect(engineSql("k", "x")).rejects.toThrow("Analytics Engine answered 200: <html>");
+  });
+});
+
+describe("searchConsole", () => {
+  it("refuses a malformed GSC_OAUTH without quoting it", async () => {
+    const err = await searchConsole("{bad secret").catch((e: Error) => e.message);
+    expect(err).toBe("GSC_OAUTH is not valid JSON");
+    expect(err).not.toContain("bad secret");
   });
 });

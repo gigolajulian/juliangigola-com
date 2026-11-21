@@ -1,10 +1,8 @@
-import { readFileSync } from "node:fs";
 import { expect, test } from "vitest";
-import { V4PAGES } from "@/lib/v4pages";
+import { V4PAGES, V4PAGES_HEAD } from "@/lib/v4pages";
 
-// The head script as it ships (app/layout.tsx), run against a fake tab.
-const src = readFileSync(new URL("../../app/layout.tsx", import.meta.url), "utf8");
-const js = src.match(/`(\(function\(\)\{try\{var k="jg-v4pages"[^`]*)`/)![1];
+// The head script as it ships (app/layout.tsx renders it), run against a fake tab.
+const js = V4PAGES_HEAD;
 
 function run(search: string, v4home: boolean, stored: Record<string, string> = {}) {
   const dataset: Record<string, string> = v4home ? { mtscroll: "" } : {};

@@ -47,14 +47,25 @@ export async function engineSql<T>(key: string, sql: string): Promise<T[]> {
   });
   const text = await res.text();
   if (!res.ok) throw new Error(`Analytics Engine answered ${res.status}: ${text.slice(0, 160)}`);
-  return (JSON.parse(text) as { data: T[] }).data;
+  try {
+    return (JSON.parse(text) as { data: T[] }).data;
+  } catch {
+    throw new Error(`Analytics Engine answered ${res.status}: ${text.slice(0, 160)}`);
+  }
 }
 
 export type SearchRow = { keys?: string[]; clicks: number; impressions: number; ctr: number; position: number };
 
 /** A Search Console query function for `GSC_OAUTH` (hello@, read-only). */
 export async function searchConsole(secret: string) {
-  const { client_id, client_secret, refresh_token } = JSON.parse(secret);
+  let p: { [k: string]: string };
+  try {
+    p = JSON.parse(secret);
+  } catch {
+    // JSON.parse quotes the text it chokes on: never let a secret reach a log.
+    throw new Error("GSC_OAUTH is not valid JSON");
+  }
+  const { client_id, client_secret, refresh_token } = p;
   const tok = (await (
     await fetch("https://oauth2.googleapis.com/token", {
       method: "POST",

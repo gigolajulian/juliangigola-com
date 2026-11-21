@@ -19,7 +19,7 @@ import { Page } from "@/components/leads/lists";
 import { Deliver, InvoiceSheetB, makePdf } from "@/components/leads/invoice";
 import { kindOf } from "@/components/leads/shared";
 import { balance, isPaid, subtotal, usd, type Invoice } from "@/lib/leads/invoice";
-import { type Call, day, errorText, type Patch } from "@/lib/leads/lead-desk";
+import { type Call, dayLabel, errorText, type Patch } from "@/lib/leads/lead-desk";
 import type { Lead, LeadSummary } from "@/lib/leads/leads";
 
 /** One invoice as `?invoices` answers it: the invoice, its lead's id and name. */
@@ -95,7 +95,7 @@ export function InvoicesDesk({ leads, call, open, changed }: { leads: LeadSummar
             { key: "no", header: "No.", renderCell: (r) => <Text type="code">{r.no}</Text> },
             { key: "name", header: "Client", renderCell: (r) => r.name },
             { key: "shoot", header: "Shoot", renderCell: (r) => kindOf(byId(r.lead)?.kind) ?? "" },
-            { key: "date", header: "Date", renderCell: (r) => day(`${r.date}T12:00:00`) },
+            { key: "date", header: "Date", renderCell: (r) => dayLabel(`${r.date}T12:00:00`) },
             { key: "total", header: "Total", renderCell: (r) => <Text type="code">{usd(subtotal(r.lines))}</Text> },
             { key: "balance", header: "Balance", renderCell: (r) => <Text type="code">{usd(isPaid(r) ? 0 : balance(r))}</Text> },
             { key: "status", header: "Status", renderCell: (r) => <Badge label={status(r)} variant={status(r) === "Paid" ? "success" : status(r) === "Sent" ? "blue" : "neutral"} /> },

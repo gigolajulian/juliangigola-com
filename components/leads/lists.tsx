@@ -3,7 +3,7 @@
 /* ── Licences and Put aside on Astryx ─────────────────────────────
  * The classic desk's LicenceList and
  * its Put aside lists (Snoozed, Archived, Trash, Delivered, Lost) as
- * tables. Same filters (`pass` in lib/leads/lead-desk.ts), same Empty
+ * tables. Same filters (`inFilter` in lib/leads/lead-desk.ts), same Empty
  * trash DELETE, asked twice as before.
  * ─────────────────────────────────────────────────────────────── */
 
@@ -17,7 +17,7 @@ import { Table } from "@astryxdesign/core/Table";
 import { Tab, TabList } from "@astryxdesign/core/TabList";
 import { endDay } from "@/lib/leads/lead-desk";
 import { renewDue, type LeadSummary } from "@/lib/leads/leads";
-import { type Call, day, errorText, pass, type Filter } from "@/lib/leads/lead-desk";
+import { type Call, dayLabel, errorText, inFilter, type Filter } from "@/lib/leads/lead-desk";
 
 type Row = LeadSummary & Record<string, unknown>;
 export const ASIDE: [Filter, string][] = [["snoozed", "Snoozed"], ["archived", "Archived"], ["trash", "Trash"], ["Delivered", "Delivered"], ["Lost", "Lost"]];
@@ -61,7 +61,7 @@ export function AsideDesk({ leads, call, open, done, tab, setTab, top }: { leads
   const [sure, setSure] = React.useState(false);
   const [busy, setBusy] = React.useState(false);
   const [note, setNote] = React.useState<string | null>(null);
-  const rows = leads.filter((l) => pass(l, tab)) as Row[];
+  const rows = leads.filter((l) => inFilter(l, tab)) as Row[];
   const empty = () => {
     setBusy(true);
     call({ method: "DELETE", body: JSON.stringify({ emptyTrash: true }) })
@@ -73,7 +73,7 @@ export function AsideDesk({ leads, call, open, done, tab, setTab, top }: { leads
     <Page eyebrow="OUT OF THE WAY" title="Put aside">
       {top}
       <TabList value={tab} onChange={(v) => { setTab(v as Filter); setSure(false); }} hasDivider layout="hug">
-        {ASIDE.map(([f, label]) => <Tab key={f} value={f} label={`${label} · ${leads.filter((l) => pass(l, f)).length}`} />)}
+        {ASIDE.map(([f, label]) => <Tab key={f} value={f} label={`${label} · ${leads.filter((l) => inFilter(l, f)).length}`} />)}
       </TabList>
       {tab === "trash" && rows.length ? (
         sure ? (
@@ -91,7 +91,7 @@ export function AsideDesk({ leads, call, open, done, tab, setTab, top }: { leads
             nameCol(open),
             { key: "stage", header: "Stage", renderCell: (l) => l.stage },
             { key: "kind", header: "Shoot", renderCell: (l) => l.kind ?? "" },
-            { key: "when", header: tab === "snoozed" ? "Back on" : "Last heard", renderCell: (l) => day(tab === "snoozed" && l.snoozeUntil ? l.snoozeUntil : l.lastAt) },
+            { key: "when", header: tab === "snoozed" ? "Back on" : "Last heard", renderCell: (l) => dayLabel(tab === "snoozed" && l.snoozeUntil ? l.snoozeUntil : l.lastAt) },
           ]}
         />
       ) : <Text color="secondary">No leads here.</Text>}

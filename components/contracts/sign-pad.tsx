@@ -29,7 +29,7 @@ export function SignPad({ onChange }: { onChange: (mark: string | null) => void 
   const all = React.useRef<Pt[][]>([]);
   const draw = (s: Pt[][]) => { all.current = s; setStrokes(s); };
 
-  const at = (e: React.PointerEvent): Pt => {
+  const at = (e: { clientX: number; clientY: number }): Pt => {
     const b = box.current!.getBoundingClientRect();
     return [Math.min(W, Math.max(0, ((e.clientX - b.left) / b.width) * W)), Math.min(H, Math.max(0, ((e.clientY - b.top) / b.height) * H))];
   };
@@ -47,7 +47,7 @@ export function SignPad({ onChange }: { onChange: (mark: string | null) => void 
     // Coalesced events keep a quick flourish smooth on a 60 Hz screen.
     const evs = e.nativeEvent.getCoalescedEvents?.() ?? [e.nativeEvent];
     for (const ev of evs) {
-      const p = at(ev as unknown as React.PointerEvent);
+      const p = at(ev);
       const q = cur[cur.length - 1];
       if (Math.hypot(p[0] - q[0], p[1] - q[1]) > 1.2) cur.push(p);
     }

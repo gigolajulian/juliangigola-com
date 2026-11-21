@@ -2,6 +2,7 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { isDeposit, isIntentId, bookDeposit, verifyStripe } from "@/lib/booking/deposit";
 import { recordLead } from "@/lib/leads/lead-store";
 import { stripe } from "@/lib/stripe";
+import { NO_STORE } from "@/lib/http";
 
 /* ── Stripe's webhook ──────────────────────────────────────────────
  * The source of truth for a deposit: the card saying it paid proves
@@ -17,7 +18,7 @@ import { stripe } from "@/lib/stripe";
 export const dynamic = "force-dynamic";
 
 const text = (body: string, status: number) =>
-  new Response(body, { status, headers: { "cache-control": "no-store" } });
+  new Response(body, { status, headers: NO_STORE });
 
 export async function POST(request: Request) {
   const { env } = await getCloudflareContext({ async: true });

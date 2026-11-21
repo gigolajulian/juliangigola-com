@@ -1,5 +1,5 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { isDeposit, isIntentId, refKey } from "@/lib/booking/deposit";
+import { isDeposit, isIntentId, refKey, type Status } from "@/lib/booking/deposit";
 import { PAYMENTS_DOWN, stripe } from "@/lib/stripe";
 import { MAX_REFS, takePicks, takeUploads } from "@/lib/inbox";
 import { json } from "@/lib/http";
@@ -13,7 +13,7 @@ import { json } from "@/lib/http";
 
 export const dynamic = "force-dynamic";
 
-const DONE = ["booked", "refunded", "failed"];
+const DONE: readonly Status[] = ["booked", "refunded", "failed"];
 
 export async function GET(_request: Request, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
@@ -30,7 +30,7 @@ export async function GET(_request: Request, ctx: { params: Promise<{ id: string
   }
   if (!isDeposit(pi)) return json({ error: "Unknown deposit." }, 404);
   const m = pi.metadata ?? {};
-  const status = DONE.includes(m.outcome) ? m.outcome : "pending";
+  const status: Status = DONE.includes(m.outcome as Status) ? (m.outcome as Status) : "pending";
   return json({ status, ...(status === "booked" && m.cal_uid ? { booking: { uid: m.cal_uid, start: m.cal_start } } : {}) });
 }
 
