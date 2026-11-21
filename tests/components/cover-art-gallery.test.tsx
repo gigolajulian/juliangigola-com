@@ -31,7 +31,8 @@ describe("CoverArtGallery", () => {
     show.mockClear();
     history.replaceState(null, "", "/portfolio/coverart?cover=two");
     render(<CoverArtGallery releases={releases} v4 />);
-    expect(show).toHaveBeenCalledWith(1);
+    // no history entry of its own (null, false): one Back goes home (QA on #1313)
+    expect(show).toHaveBeenCalledWith(1, null, false);
     history.replaceState(null, "", "/");
   });
 });

@@ -144,7 +144,7 @@ export function useLightbox(frames: Frame[]) {
      than letting the viewer come up after it. */
   const pending = React.useRef(false);
   /** The scroll lock, undone as the close starts. */
-  const unlock = React.useRef<(() => void) | null>(null);
+  const unlock = React.useRef<((restore?: boolean) => void) | null>(null);
   /** The history entry, taken off once the close has landed. */
   const unpush = React.useRef<(() => void) | null>(null);
 
@@ -188,7 +188,8 @@ export function useLightbox(frames: Frame[]) {
     [],
   );
 
-  const show = (i: number, el?: HTMLElement | null) => {
+  /** `entry: false` takes no history entry, so Back leaves the page with the viewer: a cover opened on arrival from the home (QA on #1313: it took two Backs). */
+  const show = (i: number, el?: HTMLElement | null, entry = true) => {
     if (open || trip.current) return;
     opener.current = document.activeElement as HTMLElement | null;
     const src = frames[i]?.src;
@@ -220,7 +221,7 @@ export function useLightbox(frames: Frame[]) {
         setSettled(true);
       });
       // The back button closes it the way the close button does.
-      unpush.current = pushHistory(() => closeRef.current());
+      if (entry) unpush.current = pushHistory(() => closeRef.current());
     });
   };
 
@@ -237,6 +238,17 @@ export function useLightbox(frames: Frame[]) {
           : null;
     close(homeOf(home));
   };
+  // Leaving the page with the viewer up (an `entry: false` open): the next page keeps no lock and no viewer mark, and its own scroll.
+  React.useEffect(
+    () => () => {
+      if (!unlock.current) return;
+      unlock.current(false);
+      unlock.current = null;
+      unpush.current?.();
+      markViewer(false);
+    },
+    [],
+  );
   const closeRef = React.useRef(closeTo);
   React.useEffect(() => {
     closeRef.current = closeTo;
