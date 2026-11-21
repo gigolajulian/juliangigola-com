@@ -49,7 +49,8 @@ const COVERS = COVER_KEYS.map((k) => COVER_RELEASES.find((r) => r.slug === k)).f
 export function MtCovers() {
   const row = React.useRef<HTMLDivElement>(null);
   const [cur, setCur] = React.useState(0);
-  React.useEffect(() => {
+  // a layout effect: listening before the home's Back restore (back.ts) tells the cover, so the caption is right from the first paint
+  React.useLayoutEffect(() => {
     const el = row.current!;
     let raf = 0;
     const held = media("held");
@@ -76,7 +77,8 @@ export function MtCovers() {
       cancelAnimationFrame(raf);
     };
   }, []);
-  React.useEffect(() => {
+  // a layout effect: with the caption, before the paint; a frame late, the told cover showed small with its art dim on a Back (MAC on 4c809fcd)
+  React.useLayoutEffect(() => {
     row.current!.querySelectorAll(".mt-item").forEach((it, i) => it.toggleAttribute("data-on", i === cur));
   }, [cur]);
   // the same scroll a cover as the five had in 1.5 screens
@@ -99,7 +101,7 @@ export function MtCovers() {
                 <Link key={c.slug} href={coverHref(c.slug)} onClick={keepFlip} className="mt-item mt-sleeve" data-i={i} data-flip={back ? "" : undefined} style={{ "--o": 0.5, "--press": COVER_PRESS[c.slug] } as React.CSSProperties}>
                   <span className="disc" aria-hidden />
                   <div className="face">
-                    <Image src={c.frames[0].src} alt={`${c.title} by ${c.artist}`} fill sizes="(max-width: 599px) 92vw, 34vw" />
+                    <Image data-frame={c.frames[0].src} src={c.frames[0].src} alt={`${c.title} by ${c.artist}`} fill sizes="(max-width: 599px) 92vw, 34vw" />
                     {back ? <Image className="back" src={back.src} alt={`${c.title}, back of the sleeve`} fill sizes="34vw" /> : null}
                   </div>
                   <p className="lbl mt-cvcap" aria-hidden><span>{c.title}</span><span className="mute">{c.artist}</span></p>

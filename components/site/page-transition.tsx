@@ -24,6 +24,7 @@ const clearNav = () => {
   delete root.dataset.nav;
   delete root.dataset.navBar;
   delete root.dataset.navSide;
+  delete root.dataset.navOff;
 };
 
 /* The bar's order, left to right, the wordmark first. A press in the bar
@@ -172,8 +173,12 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
       if (ua || !document.startViewTransition) return;
       e.stopImmediatePropagation();
       gauge();
+      // Back from Cover art (its viewer) to the home: the page slides all the way off, opaque, so the cover under it shows clean (Julian, #1351)
+      // Not split out: the viewer is outside #main, and the home's #main group drew over it at once (MAC on 0df3ca52).
+      const off = location.pathname === "/" && shown.current.startsWith("/portfolio/coverart");
+      if (off) document.documentElement.dataset.navOff = "";
       const main = document.getElementById("main");
-      main?.style.setProperty("view-transition-name", "back-page");
+      if (!off) main?.style.setProperty("view-transition-name", "back-page");
       const trip = document.startViewTransition(
         () =>
           new Promise<void>((done) => {
