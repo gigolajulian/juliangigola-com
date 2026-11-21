@@ -43,6 +43,11 @@ describe("the gate", () => {
     expect((await GET(req("GET"))).status).toBe(503);
   });
 
+  it("asks who is asking before it says what the build is missing", async () => {
+    ctx.env = { INBOX_KEY: KEY };
+    expect((await GET(req("GET", { key: "wrong" }))).status).toBe(401);
+  });
+
   it("refuses no credential, a wrong key, and a key when none is set", async () => {
     expect((await GET(req("GET", { key: null }))).status).toBe(401);
     expect((await GET(req("GET", { key: "wrong" }))).status).toBe(401);
@@ -92,10 +97,9 @@ describe("GET", () => {
     // take two pages and pass the old 400.
     for (let i = 0; i < 1001; i++) await seed(1_700_000_000_000 + i * 1000, `m${String(i).padStart(4, "0")}`);
     const res = await GET(req("GET"));
-    const body = (await res.json()) as { rows: { key: string }[]; complete: boolean };
+    const body = (await res.json()) as { rows: { key: string }[] };
     expect(body.rows).toHaveLength(1001);
     expect(body.rows[0].key).toBe(enquiryKey(1_700_000_000_000 + 1000 * 1000, "m1000"));
-    expect(body.complete).toBe(true);
   });
 
   it("lists newest first from metadata, without reading a message", async () => {
@@ -107,7 +111,6 @@ describe("GET", () => {
     const body = await (await GET(req("GET"))).json();
     expect(body.rows.map((r: { id: string }) => r.id)).toEqual(["cccccccc", "bbbbbbbb", "aaaaaaaa"]);
     expect(body.rows[0]).toMatchObject({ key: enquiryKey(3_000, "cccccccc"), name: "Person cccccccc", read: false });
-    expect(body.complete).toBe(true);
     expect(get).not.toHaveBeenCalled();
   });
 
@@ -241,7 +244,7 @@ describe("leads", () => {
   it("does not bring an emptied lead back on Import from Inbox", async () => {
     await seed(Date.UTC(2026, 9, 1), "spam");
     await seed(Date.UTC(2026, 9, 2), "keep");
-    const post = async () => (await POST(req("POST", { body: JSON.stringify({ backfill: true }) }))).json();
+    const post = async () => (await POST(req("POST", { body: JSON.stringify({ backfill: true, dry: false }) }))).json();
     expect(await post()).toMatchObject({ added: 2 });
     const spam = `lead:${await idOf("spam@example.com")}`;
     await PATCH(req("PATCH", { body: JSON.stringify({ key: spam, trash: true }) }));
@@ -258,14 +261,14 @@ describe("leads", () => {
     expect(ids).toHaveLength(2);
     // The tombstone a purge wrote under the old id.
     await kv.put(`gone:${ids[1]}`, "");
-    const post = async () => (await POST(req("POST", { body: JSON.stringify({ backfill: true }) }))).json();
+    const post = async () => (await POST(req("POST", { body: JSON.stringify({ backfill: true, dry: false }) }))).json();
     expect(await post()).toMatchObject({ added: 0, updated: 0 });
     expect(kv.data.has(`lead:${ids[0]}`)).toBe(false);
   });
 
   it("does not bring a lead the 30-day sweep removed back on Import from Inbox", async () => {
     await seed(Date.UTC(2026, 9, 1), "old");
-    const post = async () => (await POST(req("POST", { body: JSON.stringify({ backfill: true }) }))).json();
+    const post = async () => (await POST(req("POST", { body: JSON.stringify({ backfill: true, dry: false }) }))).json();
     expect(await post()).toMatchObject({ added: 1 });
     const key = `lead:${await idOf("old@example.com")}`;
     await PATCH(req("PATCH", { body: JSON.stringify({ key, trash: true }) }));
@@ -307,13 +310,28 @@ describe("leads", () => {
     expect((await POST(req("POST", { key: null, body: JSON.stringify({ backfill: true }) }))).status).toBe(401);
     expect(await post({ backfill: true, dry: true })).toEqual({ dry: true, people: 2, added: 1, updated: 1, stages: { Inquiry: 1 } });
     expect([...kv.data.keys()].filter((k) => k.startsWith("lead:"))).toHaveLength(1);
-    expect(await post({ backfill: true })).toMatchObject({ added: 1, updated: 1 });
-    expect(await post({ backfill: true })).toMatchObject({ added: 0, updated: 0 });
+    expect(await post({ backfill: true })).toEqual({ dry: true, people: 2, added: 1, updated: 1, stages: { Inquiry: 1 } });
+    expect([...kv.data.keys()].filter((k) => k.startsWith("lead:"))).toHaveLength(1);
+    expect(await post({ backfill: true, dry: false })).toMatchObject({ added: 1, updated: 1 });
+    expect(await post({ backfill: true, dry: false })).toMatchObject({ added: 0, updated: 0 });
     const old = (await (await GET(req("GET", { query: `?key=lead:${await idOf("old@example.com")}` }))).json()).lead;
     expect(old.firstAt).toBe(new Date(Date.UTC(2026, 9, 1)).toISOString());
     expect(old.events).toHaveLength(3);
     expect([...kv.data.keys()].filter((k) => k.startsWith("msg:"))).toHaveLength(msgs);
     expect(fetched).not.toHaveBeenCalled();
+  });
+
+  it("imports Stripe only on an explicit dry: false", async () => {
+    vi.stubGlobal("fetch", async (input: string) => {
+      const list = new URL(input).pathname.endsWith("/payment_intents")
+        ? [{ id: "pi_dep000001", status: "succeeded", created: 1_780_000_000, amount: 10000, amount_received: 10000, currency: "usd", receipt_email: "ana@example.com", metadata: { kind: "deposit", email: "ana@example.com", name: "Ana Test" }, latest_charge: null }]
+        : [];
+      return Response.json({ data: list, has_more: false });
+    });
+    ctx.env = { ...ctx.env, STRIPE_SECRET_KEY: "sk_test_fake" };
+    const before = kv.data.size;
+    expect(await (await POST(req("POST", { body: JSON.stringify({ importStripe: true }) }))).json()).toMatchObject({ dry: true, payments: 1 });
+    expect(kv.data.size).toBe(before);
   });
 
   it("mirrors a stage to the person's Notion row, then reuses that row", async () => {

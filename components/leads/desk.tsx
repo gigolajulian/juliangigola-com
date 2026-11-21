@@ -36,7 +36,7 @@ import { Tab, TabList } from "@astryxdesign/core/TabList";
 import { SignIn } from "@/components/leads/setup";
 import { LeadDesk } from "@/components/leads/lead";
 import { badge, FROST_ROOM, frostBar, GLASS, WIN_CSS } from "@/components/leads/shared";
-import { ago, aside, errorText, inboxCall, loadError, matches, nextStep, pass } from "@/lib/leads/lead-desk";
+import { ago, aside, errorText, inboxCall, loadError, matches, nextStep, inFilter } from "@/lib/leads/lead-desk";
 import { useSiteThemeRead } from "@/lib/site-theme";
 import type { Template } from "@/lib/leads/lead-crm";
 import { TZ } from "@/lib/booking/booking-rules";
@@ -352,9 +352,9 @@ export function LeadsDesk() {
   const live = (leads ?? []).filter((l) => !l.trashedAt);
   const words = query.trim().toLowerCase();
   const groupOf = (l: LeadSummary): Group | null => {
-    if (pass(l, "needs")) return "now";
-    if (!pass(l, "open")) return null;
-    if (pass(l, "upcoming") && Date.parse(l.when!) < at + WEEK) return "week";
+    if (inFilter(l, "needs")) return "now";
+    if (!inFilter(l, "open")) return null;
+    if (inFilter(l, "upcoming") && Date.parse(l.when!) < at + WEEK) return "week";
     return "waiting";
   };
   const rows = live.filter((l) => matches(l, words)).map((l) => [l, groupOf(l)] as const).filter((r): r is readonly [LeadSummary, Group] => r[1] !== null);
@@ -378,7 +378,7 @@ export function LeadsDesk() {
   const search = <TextInput value={query} onChange={setQuery} label="Find a lead" isLabelHidden placeholder="Name, email, shoot" size={size === "phone" ? "lg" : "sm"} />;
   // Open or Put aside, under the title and search on both pages (it was a tab row above the title).
   const openCount = live.filter((l) => groupOf(l) !== null).length;
-  const asideCount = (leads ?? []).filter((l) => ASIDE.some(([f]) => pass(l, f))).length;
+  const asideCount = (leads ?? []).filter((l) => ASIDE.some(([f]) => inFilter(l, f))).length;
   const switcher = (
     <SegmentedControl label="Open or put aside" value={screen === "aside" ? "aside" : "leads"} onChange={(v) => show(v as View)} layout={size === "wide" ? "hug" : "fill"} size={size === "phone" ? "lg" : "md"}>
       <SegmentedControlItem value="leads" label={`Open ${openCount}`} />

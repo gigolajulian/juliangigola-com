@@ -2,7 +2,7 @@
 
 import type { CSSProperties } from "react";
 
-import { at, day, type Filter } from "@/lib/leads/lead-desk";
+import { dateTimeLabel, dayLabel, type Filter } from "@/lib/leads/lead-desk";
 import type { LeadEvent } from "@/lib/leads/leads";
 
 /** "intro-call" as "Intro call". */
@@ -63,7 +63,7 @@ function line(e: LeadEvent): string {
     case "no-deposit": return "Booked without a deposit";
     case "deposit-stuck": return `Deposit stuck${e.note ? `: ${e.note}` : ""}`;
     case "stage": return `Moved to ${e.note}`;
-    case "snooze": return e.note === "woken" ? "Unsnoozed" : `Snoozed until ${day(e.note ?? "")}`;
+    case "snooze": return e.note === "woken" ? "Unsnoozed" : `Snoozed until ${dayLabel(e.note ?? "")}`;
     case "archive": return e.note === "in" ? "Archived" : "Unarchived";
     case "trash": return e.note === "in" ? "Moved to trash" : "Recovered from trash";
     case "replied": return `You replied${e.note ? `: ${e.note}` : ""}`;
@@ -76,7 +76,7 @@ function line(e: LeadEvent): string {
     case "added": return `Added by hand${e.note ? `, from ${e.note}` : ""}`;
     case "edit": return e.note === "people" ? "People changed" : "Details changed";
     case "merge": return `Merged with another record${e.note ? ` (${e.note})` : ""}`;
-    case "remind": return e.note ? `Reminder set for ${at(e.note)}` : "Reminder cleared";
+    case "remind": return e.note ? `Reminder set for ${dateTimeLabel(e.note)}` : "Reminder cleared";
     case "quote": return e.note ? `Quote: $${Number(e.note).toLocaleString("en-US")}` : "Quote cleared";
     case "invoice": return `Invoice ${e.note ?? ""}`;
     case "payment": return `Paid $${(e.amount ?? 0).toLocaleString("en-US")}${e.note ? `, ${e.note}` : ""}`;

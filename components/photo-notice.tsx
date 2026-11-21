@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { mplan } from "@/lib/mplan";
 
 /* ── the copyright notice ─────────────────────────────────────────
  * Right-clicking a photograph says who owns it instead of offering to
@@ -158,7 +157,7 @@ export function PhotoNotice() {
     if (!shown) {
       const out = el.animate(
         [{ opacity: getComputedStyle(el).opacity, transform: "none" }, { opacity: 0, transform: "translateY(-6px)" }],
-        { duration: 220, easing: mplan("exits") ? "cubic-bezier(.23,1,.32,1)" : EASE.in }, // item 4, `?mplan=exits`
+        { duration: 220, easing: "cubic-bezier(.23,1,.32,1)" }, // MOTION-PLAN.md item 4: exits leave on `out`
       );
       el.style.opacity = "0";
       out.onfinish = () => (el.style.visibility = "hidden");

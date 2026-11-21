@@ -12,7 +12,7 @@
 
 import type { Sealer } from "./lead-crypto";
 import type { Lead, LeadEvent } from "./leads";
-import type { InboxKV as KV } from "./lead-store";
+import type { InboxKV as KV } from "./leads";
 
 export type LogEntry = LeadEvent & { m: string };
 export type MasterEntry = { lead: string; email: string; name: string; event: LeadEvent };

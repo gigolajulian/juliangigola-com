@@ -1,5 +1,8 @@
 import { balance, isPaid, namesInvoice, type Invoice } from "./invoice";
 
+/** The INBOX namespace as the lead, log, push, proof and sheet code use it. */
+export type InboxKV = Pick<NonNullable<CloudflareEnv["INBOX"]>, "get" | "put" | "list" | "delete">;
+
 /* ── leads: one record per person ─────────────────────────────────
  * Julian (2026-11-03, PLAN-lead-desk.md): every inquiry, call and booking
  * in one list, with a stage on each person. Until now one person who

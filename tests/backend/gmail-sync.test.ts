@@ -158,6 +158,15 @@ describe("syncGmail", () => {
     expect(data.get(CURSOR)).toBe("120");
   });
 
+  it("does not count a message read again that is already on the lead", async () => {
+    const e = env();
+    await recordLead(e, email, { event: { at: at(1), kind: "inquiry", ref: "msg:1" }, name: "Maya" });
+    data.set(CURSOR, "100");
+    expect(await syncGmail(e)).toBe(2);
+    data.set(CURSOR, "100");
+    expect(await syncGmail(e)).toBe(0);
+  });
+
   it("skips a lead that will not open and still moves the cursor", async () => {
     const s = await sealer(LEADS_KEY)!;
     data.set(leadStoreKey(await s.id(email)), "not a sealed lead");

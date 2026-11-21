@@ -4,10 +4,9 @@ import { sealer, type Sealer } from "./lead-crypto";
 import { notify, pushFor } from "./lead-push";
 import { appendLog, fresh } from "./activity-log";
 import { canonical } from "./lead-crypto";
-import { fold, leadStoreKey, leadSummary, type Change, type Lead, type LeadSummary, type Person, type Sent } from "./leads";
+import { fold, leadStoreKey, leadSummary, type Change, type Lead, type LeadSummary, type InboxKV, type Person, type Sent } from "./leads";
 
-/** The INBOX namespace as the lead, log, push, proof and sheet code use it. */
-export type InboxKV = Pick<NonNullable<CloudflareEnv["INBOX"]>, "get" | "put" | "list" | "delete">;
+export type { InboxKV } from "./leads";
 type KV = InboxKV;
 /** Where leads live: the INBOX namespace, sealed with LEADS_KEY. */
 export type LeadStore = { INBOX?: KV; LEADS_KEY?: string; VAPID_KEY?: string };
@@ -155,6 +154,8 @@ async function later(p: Promise<void>) {
  * shortcut: read, fold, write is not atomic, so two events for the same
  * person in the same second can lose one. Webhooks and the form for one
  * person are minutes apart; a Durable Object if that ever changes.
+ * Returns the lead as written, or null when nothing new was written (already
+ * there, no inbox, or no key).
  */
 export async function recordLead(env: LeadStore, email: string, c: Change): Promise<Lead | null> {
   const seal = sealer(env.LEADS_KEY);
@@ -168,7 +169,7 @@ export async function recordLead(env: LeadStore, email: string, c: Change): Prom
     // Mail from the art director lands on the client's lead (`findLead`).
     const { id, lead: before } = await findLead(env.INBOX, s, email);
     const after = fold(before, email, c);
-    if (after === before) return after;
+    if (after === before) return null;
     await writeLead(env.INBOX, s, id, after, before);
     // Something reached the site: ping his devices (`lib/leads/lead-push.ts`).
     const push = pushFor(after, c.event);

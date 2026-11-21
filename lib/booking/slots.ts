@@ -5,7 +5,7 @@ import { gcal } from "@/lib/booking/gcal";
  * The rules (`lib/booking/booking-rules.ts`) say when Julian works; Google's
  * freeBusy says what is already taken. A start is offered when the session and its buffer
  * after it touch nothing busy. `GET /api/slots` serves these to the picker
- * and `isSlotOpen` rechecks one before money or a booking moves.
+ * and `openNow` rechecks one before money or a booking moves.
  * ─────────────────────────────────────────────────────────────── */
 
 /** Calendars whose busy time blocks a booking. */

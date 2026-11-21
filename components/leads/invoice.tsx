@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { mailable } from "@/lib/leads/lead-crm";
 import { balance, dayB, depositOfLead, isPaid, MAX_ROWS_B, NOTE_B, usd, usdB, type Crop, type Invoice, type InvoiceB, type InvoiceFrom } from "@/lib/leads/invoice";
 import { framed, loadImage, place, shrink, toneFor } from "@/lib/leads/invoice-photo";
-import { adminCall, day, errorText, inboxCall, plusDays, ymdPT } from "@/lib/leads/lead-desk";
+import { adminCall, dayLabel, errorText, inboxCall, plusDays, ymdPT } from "@/lib/leads/lead-desk";
 import { btn, compose, field, fieldLabel, kindOf, primary } from "@/components/leads/shared";
 import type { Patch } from "@/lib/leads/lead-desk";
 
@@ -55,7 +55,7 @@ export function InvoiceRow({ inv, l, full }: { inv: Invoice; l: LeadSummary; ful
   return (
     <li className="grid gap-2 border-b border-border py-2.5">
       <p className="flex flex-wrap items-center justify-between gap-3 text-[15px]">
-        <span><b className="font-mono font-medium">{inv.no}</b> <span className="text-muted-foreground">· {day(`${inv.date}T12:00:00`)} · {isPaid(inv) ? "paid" : `${usd(balance(inv))} due`}</span></span>
+        <span><b className="font-mono font-medium">{inv.no}</b> <span className="text-muted-foreground">· {dayLabel(`${inv.date}T12:00:00`)} · {isPaid(inv) ? "paid" : `${usd(balance(inv))} due`}</span></span>
         {file ? null : (
           <button type="button" className={cn(btn, "min-h-10")} onClick={() => { setErr(null); makePdf(inv, l, full).then(setFile, (e: unknown) => setErr(errorText(e))); }}>PDF</button>
         )}

@@ -15,7 +15,7 @@ import { Heading, Text } from "@astryxdesign/core/Text";
 import { MetadataList, MetadataListItem } from "@astryxdesign/core/MetadataList";
 import { STAGES } from "@/lib/leads/leads";
 import type { Stats } from "@/lib/leads/lead-crm";
-import { type Call, errorText, money } from "@/lib/leads/lead-desk";
+import { type Call, errorText, dollarsLabel } from "@/lib/leads/lead-desk";
 
 const AdminTraffic = React.lazy(() => import("@/components/admin/admin-traffic").then((m) => ({ default: m.AdminTraffic })));
 const AdminSeo = React.lazy(() => import("@/components/admin/admin-seo").then((m) => ({ default: m.AdminSeo })));
@@ -55,10 +55,10 @@ export function StatsDesk({ call }: { call: Call }) {
           <Grid columns={{ minWidth: 160 }} gap={3}>
             {tile("Booked", s.bookedRate === null ? "None yet" : `${Math.round(s.bookedRate * 100)}%`, "of leads over a week old")}
             {tile("First reply", hours(s.replyHours), "median, inquiry to answer")}
-            {tile("Quoted, open", money(s.pipeline), "waiting on an answer")}
-            {tile("Booked value", money(s.won), "from the quotes you entered")}
+            {tile("Quoted, open", dollarsLabel(s.pipeline), "waiting on an answer")}
+            {tile("Booked value", dollarsLabel(s.won), "from the quotes you entered")}
             {tile("Repeat clients", String(s.repeat), "two or more sessions or calls")}
-            {tile("Lifetime value", s.lifetime === null ? "None yet" : money(Math.round(s.lifetime)), "average paid, less refunds")}
+            {tile("Lifetime value", s.lifetime === null ? "None yet" : dollarsLabel(Math.round(s.lifetime)), "average paid, less refunds")}
           </Grid>
           <VStack gap={2}>
             <Heading level={2}>Top clients by paid</Heading>
@@ -70,7 +70,7 @@ export function StatsDesk({ call }: { call: Call }) {
                 columns={[
                   { key: "name", header: "Client", renderCell: (c) => c.name },
                   { key: "sessions", header: "Sessions", align: "end", renderCell: (c) => String(c.sessions) },
-                  { key: "paid", header: "Paid", align: "end", renderCell: (c) => <Text type="code" weight="medium">{money(c.paid)}</Text> },
+                  { key: "paid", header: "Paid", align: "end", renderCell: (c) => <Text type="code" weight="medium">{dollarsLabel(c.paid)}</Text> },
                 ]}
               />
             ) : <Text color="secondary">No payments logged yet.</Text>}

@@ -30,9 +30,9 @@ export function MtMotionLayer() {
     const root = document.querySelector<HTMLElement>(".v3home.mt");
     if (!root || !("v3motion" in document.documentElement.dataset)) return;
     const stop = startEngine(root, [...heroDrivers, ...rowsDrivers, ...commissionsDrivers, ...aboutDrivers, ...quoteDrivers, ...footDrivers, ...depthDrivers, ...barDrivers]);
-    const hide = startReveal(root);
+    const stopReveal = startReveal(root);
     const still = matches("calm") ? heroStill(root) : null;
-    return () => (stop(), hide(), still?.());
+    return () => (stop(), stopReveal(), still?.());
   }, []);
   // Safari on a foldable, rotated with its tab strip on the left: the page is left scrolled sideways by the strip's
   // width, after both resize events (measured on the Duo, #1062). The page never scrolls sideways, so put it back.
