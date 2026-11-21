@@ -167,7 +167,7 @@ const LISTED: Record<SessionSlug, Omit<Session, "paid">> = {
     /* The master's call card shows the About portrait. */
     photo: { d: ABOUT_PHOTO, l: ABOUT_PHOTO, at: { d: "50% 85%", l: "50% 85%" } },
   },
-  /* The commission calls and events (BOOK_MENU in `lib/booking/booking.ts`, same words),
+  /* The commission calls and events (BOOK_MENU in `lib/booking/service-pages.ts`, same words),
      on the stepper but not in its tabs. */
   "music-photography": {
     slug: "music-photography",

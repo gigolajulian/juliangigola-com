@@ -19,7 +19,7 @@
 
 import { SESSION_TYPES, formatPrice, type SessionType } from "./sessions";
 import { RESPONSE_TIME } from "../site";
-import { isSession, SESSIONS as V3_SESSIONS } from "../flags/v3";
+import { isSession, SESSIONS as V3_SESSIONS } from "../photos-and-sessions";
 import { CONTENT } from "../content";
 import { getProject, projectsIn } from "../work/work";
 import type { BookingSlug } from "./booking-slugs";
@@ -96,7 +96,7 @@ export const sessionEvent = (sessionSlug?: string): string | undefined =>
 
 const session = (slug: string): SessionType => {
   const s = SESSION_TYPES.find((t) => t.slug === slug);
-  if (!s) throw new Error(`lib/booking/booking.ts: no session "${slug}" in content/site.json.`);
+  if (!s) throw new Error(`lib/booking/service-pages.ts: no session "${slug}" in content/site.json.`);
   return s;
 };
 
@@ -188,7 +188,7 @@ const framesAt = (srcs: string[]): Tile[] =>
   srcs.map((src) => {
     const p = getProject(src.split("/")[2]);
     const frame = p?.images.find((f) => f.src === src);
-    if (!p || !frame) throw new Error(`lib/booking/booking.ts: no frame "${src}" in the work data.`);
+    if (!p || !frame) throw new Error(`lib/booking/service-pages.ts: no frame "${src}" in the work data.`);
     return { frame, href: `/portfolio/${p.slug}`, caption: caption(p.name) };
   });
 

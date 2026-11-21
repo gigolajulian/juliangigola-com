@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { shareOg } from "@/lib/share";
-import { V3Inquire } from "@/components/v3/inquire";
+import { shareOg } from "@/lib/og/share";
+import { V3Inquire } from "@/components/contact/inquire";
 
 export const metadata: Metadata = {
   title: "Inquire",

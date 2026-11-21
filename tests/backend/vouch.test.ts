@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { authorised, canPush, fromWorker } from "@/lib/vouch";
+import { authorised, canPush, fromWorker, refuseAdmin } from "@/lib/vouch";
+import { AdminError, isLocked, loadError, LOCKED } from "@/lib/leads/lead-desk";
 import { SCOPED, githubToken, reply } from "./fakes";
 
 /* The gate on /api/inbox, /api/traffic and /api/seo: a token passes only
@@ -69,5 +70,23 @@ describe("authorised and fromWorker", () => {
     expect(await fromWorker(req({ authorization: "Bearer nope" }), "s3cret")).toBe(false);
     expect(await fromWorker(req({}), "s3cret")).toBe(false);
     expect(await fromWorker(req({ authorization: "Bearer s3cret" }), undefined)).toBe(false);
+  });
+});
+
+describe("refuseAdmin and the desks' lock", () => {
+  it("lets the key in, and tells a missing key from a refused token in one 401", async () => {
+    expect(await refuseAdmin(req({ "x-inbox-key": "k1" }), "k1")).toBeNull();
+    const none = (await refuseAdmin(req({}), "k1"))!;
+    expect([none.status, (await none.json()).error]).toEqual([401, "Not authorized."]);
+    vi.stubGlobal("fetch", vi.fn(async () => reply({ permissions: { push: false } }, 200, SCOPED)));
+    const bad = (await refuseAdmin(req({ authorization: `Bearer ${githubToken()}` }), "k1"))!;
+    expect([bad.status, (await bad.json()).error]).toEqual([401, "GitHub did not accept that token for this repository."]);
+  });
+
+  it("any 401 shows sign-in on a desk, whichever message the route gave", () => {
+    expect(isLocked(new AdminError("GitHub did not accept that token for this repository.", 401))).toBe(true);
+    expect(loadError(new AdminError("GitHub did not accept that token for this repository.", 401))).toBe(LOCKED);
+    expect(isLocked(new AdminError("Gone.", 404))).toBe(false);
+    expect(loadError(new AdminError("Gone.", 404))).toBe("Gone.");
   });
 });

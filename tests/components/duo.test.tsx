@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { Duo, Mark, Marks, Pick } from "@/components/v3/duo";
+import { Duo, Mark, Marks, Pick } from "@/components/site/duo";
 
 describe("duo", () => {
   it("Duo renders a dark and a light frame", () => {

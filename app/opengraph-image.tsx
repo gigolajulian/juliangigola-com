@@ -1,4 +1,4 @@
-import { CARD_SIZE, CARD_TYPE, renderCard } from "@/lib/share-card";
+import { CARD_SIZE, CARD_TYPE, renderCard } from "@/lib/og/card";
 import { PROJECTS } from "@/lib/work/work";
 
 export const size = CARD_SIZE;

@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, waitFor, within } from "@testing-library/react";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }), usePathname: () => "/" }));
-vi.mock("@/app/contact/actions", () => ({ submitEnquiry: vi.fn() }));
+vi.mock("@/lib/leads/enquiry-action", () => ({ submitEnquiry: vi.fn() }));
 vi.stubGlobal("fetch", vi.fn(() => Promise.reject(new Error("offline"))));
 // no frames: with every jsdom rect 0 the films row reads its place as NaN on the next frame
 vi.stubGlobal("requestAnimationFrame", () => 0);

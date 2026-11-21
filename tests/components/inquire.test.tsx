@@ -1,14 +1,14 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 
-vi.mock("@/app/contact/actions", () => ({ submitEnquiry: vi.fn() }));
+vi.mock("@/lib/leads/enquiry-action", () => ({ submitEnquiry: vi.fn() }));
 vi.stubGlobal("fetch", vi.fn(() => Promise.reject(new Error("offline"))));
 // ReferencePicks touches these on mount; jsdom has neither.
 Element.prototype.scrollTo = () => {};
 const emptyFiles = () => Object.assign(document.createElement("input"), { type: "file" }).files;
 vi.stubGlobal("DataTransfer", class { items = { add() {} }; files = emptyFiles(); });
 
-import { V3Commission, V3Inquire } from "@/components/v3/inquire";
+import { V3Commission, V3Inquire } from "@/components/contact/inquire";
 
 describe("V3Inquire", () => {
   it("renders the note and the call card", () => {

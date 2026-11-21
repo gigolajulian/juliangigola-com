@@ -21,7 +21,7 @@
  */
 
 import { SESSION_TYPES, formatPrice } from "./booking/sessions";
-import { pageForSession } from "./booking/booking";
+import { pageForSession } from "./booking/service-pages";
 
 export const SITE = "https://juliangigola.com";
 export const EMAIL = "hello@juliangigola.com";
@@ -68,7 +68,7 @@ const sentence = (...parts: (string | null)[]) =>
   parts.filter(Boolean).join(" ");
 
 /* ── the disciplines, at /portfolio/<slug> ───────────────────────
- * Where a booking page sells the same thing (`lib/booking/booking.ts`), the work
+ * Where a booking page sells the same thing (`lib/booking/service-pages.ts`), the work
  * here is titled as the portfolio it is, "Headshot Portfolio", and the
  * booking page takes "Headshot Photographer": two pages of one site
  * after the same search split it, and the one that should win is the one
@@ -204,7 +204,7 @@ const SESSION_SERVICE: Record<string, string> = {
 };
 
 /** The commissions, which are quoted rather than priced: at their booking
-    page where they have one (`lib/booking/booking.ts`), their work where not. */
+    page where they have one (`lib/booking/service-pages.ts`), their work where not. */
 const COMMISSIONS = [
   ["Fashion & editorial photography", "/fashion-photography"],
   ["Brand campaign photography", "/brand-photography"],

@@ -1,7 +1,7 @@
-import { CARD_SIZE, CARD_TYPE, framesOf, renderCard } from "@/lib/share-card";
-import { BOOK_MENU, pageForSession } from "@/lib/booking/booking";
+import { CARD_SIZE, CARD_TYPE, framesOf, renderCard } from "@/lib/og/card";
+import { BOOK_MENU, pageForSession } from "@/lib/booking/service-pages";
 import { FEATURED } from "@/lib/work/work";
-import { SESSIONS, isSession } from "@/lib/flags/v3";
+import { SESSIONS, isSession } from "@/lib/photos-and-sessions";
 
 export const size = CARD_SIZE;
 export const contentType = CARD_TYPE;

@@ -33,6 +33,9 @@ export type Sealer = {
   open<T>(sealed: string): Promise<T>;
 };
 
+/** Just the box: what a store of sealed records needs from a Sealer. */
+export type Seal = Pick<Sealer, "seal" | "open">;
+
 /** One person's address, however they spell it. A lead
     typed gigola.julian@gmail.com whose mail came from gigolajulian@gmail.com
     never met. Gmail ignores dots and anything after "+", so the id does too. */

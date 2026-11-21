@@ -1,5 +1,5 @@
 /* JG V3 (master v39, DESIGN.md). The master's stylesheet, scoped under
-   `.v3` (the public chrome and pages, `components/v3/chrome.tsx`) so the
+   `.v3` (the public chrome and pages, `components/site/chrome.tsx`) so the
    old screens and /admin keep theirs. Hover rules sit under
    `(hover:hover)`; master `.page` is `.v3page` here (`.page` is the page
    transition's). Imported last. */
@@ -687,7 +687,7 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .site-hdr{padding-top:max(14px,env(safe-area-inset-top,0px))}
 /* Large displays: the bar a step larger. */
 @media (min-width:1920px){.v3 .site-hdr{padding-block:18px}.v3 .site-wm{font-size:24px}.v3 .site-hdr .links{gap:36px}.v3 .site-hdr .links a{font-size:13px}}
-/* A slot's dark and light frame (components/v3/duo.tsx): the theme hides one. */
+/* A slot's dark and light frame (components/site/duo.tsx): the theme hides one. */
 :root[data-theme="light"] .v3 .v3d{display:none}
 :root:not([data-theme="light"]) .v3 .v3l{display:none}
 .v3 .a-seq .ph{position:relative;overflow:hidden}
@@ -871,7 +871,7 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 /* One-screen modes keep the screen for the photos: no footer line, tools pulled up. */
 .v3 #p-work:is(.strip-on,.color-on) .foot-line{display:none}
 .v3 #p-work:is(.strip-on,.color-on) .wtools{margin-top:8px}
-/* Service page (components/v3/service.tsx): head, sequence, rows. */
+/* Service page (components/booking/service.tsx): head, sequence, rows. */
 .v3 .sv-top{display:flex;flex-direction:column;align-items:flex-start;gap:20px;padding:96px var(--gr) 0 var(--g)}
 .v3 .sv-top .pg-t{max-width:12ch;text-wrap:balance}
 .v3 .sv-lead{margin:0;max-width:46ch;font-size:clamp(1rem,calc(1.3*var(--v3u)),1.125rem);line-height:1.55;text-wrap:pretty}
@@ -958,12 +958,12 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 /* A flow photo's phone frame (`photo.m`): it stands in for both themes' frames on phones. */
 .v3 .f-photo .v3m{display:none}
 @media (max-width:800px){.v3 .f-photo .ph:has(.v3m) :is(.v3d,.v3l){display:none}.v3 .f-photo .v3m{display:block}}
-/* A desktop-only frame (`photo.desk`, lib/flags/v3.ts), not on portrait tablets where the photo runs wide. */
+/* A desktop-only frame (`photo.desk`, lib/photos-and-sessions.ts), not on portrait tablets where the photo runs wide. */
 .v3 .f-photo .v3k{display:none}
 @media (min-width:1101px),(min-width:801px) and (orientation:landscape){.v3 .f-photo .ph:has(.v3k) :is(.v3d,.v3l){display:none}.v3 .f-photo .v3k{display:block;object-position:50% 0}}
 /* The booking under a service page's frames. */
 .v3 .sv-book{border-top:1px solid var(--line);margin-top:48px;scroll-margin-top:64px}
-/* Project page (components/v3/project.tsx): the hero (title, two verticals, a full-bleed vertical right), then the rhythm, credits, next. */
+/* Project page (components/portfolio/project.tsx): the hero (title, two verticals, a full-bleed vertical right), then the rhythm, credits, next. */
 .v3 .pj-hero{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:auto 1fr;column-gap:20px;min-height:calc(100svh - 64px)}
 .v3 .pj-hero.two{grid-template-columns:minmax(0,3fr) minmax(0,2fr)}
 .v3 .pj-top{grid-column:1/-2;display:flex;flex-direction:column;gap:20px;padding:56px 0 40px var(--g)}
@@ -1135,7 +1135,7 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 .v3 .nf-list .row:is(:hover,:focus-visible) .p{opacity:1}
 .v3 .nf-list .row:focus-visible{outline:1px solid var(--accent);outline-offset:3px}
 @media (hover:none){.v3 .nf-list .row .t{color:var(--ink)}.v3 .nf-list .row .p{opacity:1}}
-/* Video, direction C "Cinema" (components/v3/video.tsx): the reel under the title, then chapters. */
+/* Video, direction C "Cinema" (components/portfolio/video.tsx): the reel under the title, then chapters. */
 .v3 .cn-hero{position:relative;height:min(calc(100svh - 64px),900px);min-height:520px;overflow:hidden;background:var(--night)}
 .v3 .cn-hero iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 .v3 .cn-hero::after{content:"";position:absolute;inset:auto 0 0;height:50%;background:linear-gradient(to top,rgb(var(--scrim) / .38),rgb(var(--scrim) / 0));pointer-events:none}
@@ -1264,7 +1264,7 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .mo-player .pl-info .mk{color:rgb(var(--on-photo));flex:none}
 @media (prefers-reduced-motion:reduce){.mo-player .pl-bar,.mo-player .pl-info,.mo-player .pl-tint{transition:none}}
 
-/* Motion plan 01: the ink rises from the bottom on hover (180ms in, 120ms out), a press dips to .97. Only with ?v3motion; the glass Play keeps its own look. */
+/* Motion plan 01: the ink rises from the bottom on hover (180ms in, 120ms out), a press dips to .97. Off with ?v3motion=0; the glass Play keeps its own look. */
 :root[data-v3motion] .v3 .btn:not(.cn-light){background:linear-gradient(var(--btn-ink,var(--ink)),var(--btn-ink,var(--ink))) bottom/100% 0 no-repeat transparent;transition:background-size .12s cubic-bezier(.4,0,.2,1),color .12s,scale .08s}
 :root[data-v3motion] .v3 .btn.fill:not(.cn-light){background-size:100% 100%}
 @media (hover:hover){:root[data-v3motion] .v3 .btn:not(.cn-light):hover{background-size:100% 100%;color:var(--bg);transition-duration:.18s,.18s,.08s}
@@ -1413,7 +1413,7 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
     }
   }
 }
-/* Cover Art sleeves (`components/v3/sleeves.tsx`, ?sleeve=1). The record
+/* Cover Art sleeves (`components/cover/sleeves.tsx`, ?sleeve=1). The record
    slides out of the sleeve on hover and tucks under its neighbour; the
    viewer turns the sleeve over. Vinyl is black in both themes. */
 .slv{--vinyl:oklch(0.13 0 0);--groove:oklch(0.18 0 0);list-style:none;margin:48px 0 0;padding:0 var(--gr) 0 var(--g);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px 12px;overflow-x:clip}
@@ -1741,7 +1741,7 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .v3 #p-project .pj-lead .pj-r img{width:100%;height:100%;object-fit:cover}
 .v3 #p-project .pj-lead .pj-r:only-child{grid-column:1/-1}}
 
-/* The canvas view (components/v3/canvas.tsx): the drag-to-explore field. */
+/* The canvas view (components/portfolio/canvas.tsx): the drag-to-explore field. */
 /* It runs under the site header and under the page's own title and toolbar: nothing of it paints or takes a click above `--cv-top`, the toolbar's lower edge. */
 .v3 .cv{position:fixed;inset:0;z-index:20;background:var(--bg);overscroll-behavior:none;clip-path:inset(var(--cv-top,0px) 0 0 0)}
 .v3 #p-work.cv-on>.whead~*{visibility:hidden;transition:visibility 0s .45s}

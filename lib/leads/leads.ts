@@ -1,7 +1,7 @@
 import { balance, isPaid, namesInvoice, type Invoice } from "./invoice";
 
-/** The INBOX namespace as the lead, log, push, proof and sheet code use it. */
-export type InboxKV = Pick<NonNullable<CloudflareEnv["INBOX"]>, "get" | "put" | "list" | "delete">;
+/** The INBOX namespace (`lib/kv.ts`), for the leads modules that import it from here. */
+export type { InboxKV } from "@/lib/kv";
 
 /* ── leads: one record per person ─────────────────────────────────
  * Every inquiry, call and booking

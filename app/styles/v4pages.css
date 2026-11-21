@@ -5,7 +5,7 @@
 .v3 .ab-logos .a2-on,[data-v4pages~="a2"] .v3 .ab-logos .a2-off{display:none}
 [data-v4pages~="a2"] .v3 .ab-logos .a2-on{display:inline}
 
-/* s1: the phone book bar on a service page (components/v3/service-bar.tsx). V4's .mt-bar. */
+/* s1: the phone book bar on a service page (components/booking/service-bar.tsx). V4's .mt-bar. */
 @media not ((min-width:1024px) and (min-height:600px)){
   [data-v4pages~="s1"] .v3 .sv-bar{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;align-items:center;gap:12px;padding:12px max(16px,env(safe-area-inset-right)) max(30px,calc(env(safe-area-inset-bottom) + 12px)) max(16px,env(safe-area-inset-left));background:color-mix(in srgb,var(--bg) 72%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-top:1px solid var(--line);transform:translateY(100%);visibility:hidden;transition:transform .25s cubic-bezier(.23,1,.32,1),visibility 0s .25s}
   [data-v4pages~="s1"] .v3 .sv-bar[data-on]{transform:none;visibility:visible;transition-delay:0s}
@@ -37,7 +37,7 @@ html[data-theme="light"][data-v4pages~="s2"]:root #p-service{--sv-dim:color-mix(
 @keyframes v4-lit{0%,100%{color:var(--sv-dim)}35%,65%{color:var(--ink)}}
 @media (max-width:700px){[data-v4pages~="s2"] #p-service .sv-v4 li{flex-direction:row}}
 
-/* a2: About's marks as V4's band, one drifting line (components/v3/logo-band.tsx), on the page's black. */
+/* a2: About's marks as V4's band, one drifting line (components/about/logo-band.tsx), on the page's black. */
 [data-v4pages~="a2"] .v3 .ab-logos{--band-mk:var(--mute);flex-direction:row;align-items:center;gap:28px;padding:56px var(--gr) 56px var(--g);margin-bottom:72px}
 [data-v4pages~="a2"] .v3 .ab-logos h2{flex:none}
 [data-v4pages~="a2"] .v3 .lg-row{display:block;flex:1;min-width:0;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;-webkit-mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
@@ -72,9 +72,9 @@ html[data-theme="light"][data-v4pages~="s2"]:root #p-service{--sv-dim:color-mix(
 [data-v4pages~="m2p"] #p-project:has(.pj-bts) .pj-flow .pj-cr{display:none}
 
 /* Inner pages plan on trial, only under ?v4pages (lib/flags/v4pages.ts, head script in app/layout.tsx).
-   foot: the V4 ending on inner pages (components/v4/foot.tsx)
-   next: the next project as a full stage (components/v3/project.tsx, v4/project.tsx)
-   view: the frame viewer on project pages (v4/project.tsx) */
+   foot: the V4 ending on inner pages (components/site/foot.tsx)
+   next: the next project as a full stage (components/portfolio/project.tsx, components/portfolio/project-viewer.tsx)
+   view: the frame viewer on project pages (components/portfolio/project-viewer.tsx) */
 
 /* ── foot (g1). The type, columns, phrase and last line of the V4 home footer
    (mtscroll.css `.mt-foot`), in flow so it is as tall as its content: about
@@ -119,7 +119,7 @@ html[data-theme="light"][data-v4pages~="s2"]:root #p-service{--sv-dim:color-mix(
 
 /* ── next (j2). The Next link as the page's last block: the next set's cover at full width, its name large.
    It wipes up from its bottom edge and the photo settles from 1.12 to 1 as it comes up the screen (`--in`,
-   v4/project.tsx; the Book online photo of flow.css). A full screen tall, so the wipe is over before the
+   components/portfolio/project-viewer.tsx; the Book online photo of flow.css). A full screen tall, so the wipe is over before the
    footer starts to cover it. ── */
 .v3 .pj-stage{display:none}
 html[data-v4pages~="next"] .v3 .pj-next:has(.pj-stage){position:relative;display:flex;flex-wrap:wrap;align-items:flex-end;align-content:flex-end;gap:0 20px;height:max(100svh,600px);margin:40px calc(-1 * var(--gr)) -96px calc(-1 * var(--g));padding:0 var(--gr) clamp(24px,4vw,56px) var(--g);overflow:hidden;background:var(--card);color:rgb(var(--on-photo));clip-path:inset(calc((1 - clamp(0,calc(var(--in,1) * 1.7 - .15),1)) * 100%) 0 0 0)}
@@ -134,7 +134,7 @@ html[data-v4pages~="next"] .v3 .pj-next:has(.pj-stage)>b{position:relative;z-ind
 html[data-v4pages~="next"] .v3 .pj-next:has(.pj-stage)>span[aria-hidden]{position:relative;z-index:1;font:900 clamp(2rem,5vw,5rem)/1 var(--display)}
 @media (max-width:1023px),(max-height:599px){
   html[data-v4pages~="next"] .v3 .pj-next:has(.pj-stage){height:78svh}
-  /* natural scroll: the stage opens downward once when it comes into view, as the home's photos do on phones (`data-rv`, v4/project.tsx) */
+  /* natural scroll: the stage opens downward once when it comes into view, as the home's photos do on phones (`data-rv`, components/portfolio/project-viewer.tsx) */
   html[data-v4pages~="next"] .v3 .pj-next[data-rv]{clip-path:inset(0);transition:clip-path 1.1s cubic-bezier(.16,1,.3,1)}
   html[data-v4pages~="next"] .v3 .pj-next[data-rv=""]{clip-path:inset(0 0 100% 0)}
   html[data-v4pages~="next"] .v3 .pj-next[data-rv] .pj-stage img{scale:1;transition:scale 1.6s cubic-bezier(.16,1,.3,1)}
@@ -225,7 +225,7 @@ html[data-v4pages~="c1"] .cv4a .cv4b{display:flex;flex-wrap:wrap;gap:12px}
    `.ph` itself. `scale` and `translate` leave the hover `transform` (v3.css) alone.
    Travel stays inside the 9% the scale spares.
    Lag: the columns trail the scroll at their own rates (the hero wall's columns),
-   by their share of the eased scroll speed, which v4/drift.tsx writes as
+   by their share of the eased scroll speed, which components/portfolio/drift.tsx writes as
    `translate` on the tiles near the screen. Removed at
    rest, so the grid, gaps and 4px corners are the plain grid whenever it is still.
    Project covers only: a gallery's wide frames break the nth-child columns.
@@ -235,7 +235,7 @@ html[data-v4pages~="c1"] .cv4a .cv4b{display:flex;flex-wrap:wrap;gap:12px}
    grid image still with `animation: none !important`; p3 lifts that for
    the /portfolio grid photos only.
    Not the square Cover art gallery: the oversize would crop the type on the art.
-   `data-v4d` (v4/drift.tsx): only tiles near the screen move, since each moving
+   `data-v4d` (components/portfolio/drift.tsx): only tiles near the screen move, since each moving
    tile is its own compositor layer. ── */
 @supports (animation-timeline: view()) {
   @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
@@ -255,13 +255,13 @@ html[data-v4pages~="c1"] .cv4a .cv4b{display:flex;flex-wrap:wrap;gap:12px}
   from { translate: 0 calc(var(--v4k, 12%) * .5); }
   to { translate: 0 calc(var(--v4k, 12%) * -.5); }
 }
-/* tilt: no hover zoom while the page scrolls (v4/tilt.tsx sets `data-v4scroll`), in every browser */
+/* tilt: no hover zoom while the page scrolls (components/portfolio/tilt.tsx sets `data-v4scroll`), in every browser */
 @media (hover: hover) and (pointer: fine) {
   html[data-v4pages~="tilt"] .v3 #p-work [data-v4scroll] .wt:hover img { transform: none; }
 }
 @keyframes cv4-spin{to{rotate:360deg}}
 
-/* s4: a campus guide's spots held beside their photo (components/v3/campus-spots.tsx). Phones, touch, narrow
+/* s4: a campus guide's spots held beside their photo (components/booking/campus-spots.tsx). Phones, touch, narrow
    windows and reduced motion: each spot is its photo with its row under it, all lit. Wide: the rows on
    the left, the photos stacked in one held cell on the right, the one whose row is at mid screen shown.
    A hard cut: opacity with no transition, and never `display` or `visibility`, so every alt stays read.

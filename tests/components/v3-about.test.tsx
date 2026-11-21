@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { V3About } from "@/components/v3/about";
+import { V3About } from "@/components/about/about";
 
 describe("V3About", () => {
   it("renders the heading, the CTAs and the client grid", () => {

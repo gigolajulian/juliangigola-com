@@ -47,3 +47,12 @@ describe("hours", () => {
     vi.useRealTimers();
   });
 });
+
+describe("booking lock ops", () => {
+  const ask = (lock: BookingLock, op: string, arg: unknown = null) => lock.fetch(new Request("https://lock/", { method: "POST", body: JSON.stringify({ op, arg }) }));
+  it("answers its own ops and refuses any other name, inherited ones too", async () => {
+    const lock = new BookingLock({ storage: new FakeStore() }, { GCAL_OAUTH: OAUTH });
+    expect(await (await ask(lock, "get", "nope")).json()).toEqual({ record: null });
+    for (const op of ["drop", "toString", "constructor"]) expect((await ask(lock, op)).status).toBe(400);
+  });
+});

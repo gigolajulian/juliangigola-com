@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { PageFoot } from "@/components/v3/chrome";
+import { PageFoot } from "@/components/site/chrome";
 import { DOES } from "@/lib/v4-home/data";
-import { Marks } from "@/components/v3/duo";
-import { AboutGallery } from "@/components/v3/about-gallery";
-import { LogoBand } from "@/components/v3/logo-band";
+import { Marks } from "@/components/site/duo";
+import { AboutGallery } from "@/components/about/about-gallery";
+import { LogoBand } from "@/components/about/logo-band";
 
 /* JG V3 About (master v50, /about): portrait gallery, the justified bio, facts,
    What I do, the two CTAs, and the client marks as a grid. */

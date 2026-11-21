@@ -249,6 +249,9 @@ export type TrashedProject = AddedProject & {
   deletedAt: string;
 };
 
+/** The part of `projects.json` the admin's remove and recover read back from GitHub; older files may lack trash or hidden. */
+export type ManifestRead = Pick<AddedFile, "projects"> & Partial<Pick<AddedFile, "trash" | "hidden">>;
+
 /** How long a removed project is recoverable. */
 export const TRASH_DAYS = 7;
 
@@ -425,16 +428,10 @@ function parse(v: unknown): AddedFile {
     seen.add(p.slug);
   }
 
-  // Absent in files written before hiding existed, which is not an error.
-  const hidden = v.hidden === undefined ? [] : v.hidden;
-  if (!Array.isArray(hidden)) return fail("hidden", "an array", hidden);
-
-  // And the same for unlisting, which is newer still.
-  const unlisted = v.unlisted === undefined ? [] : v.unlisted;
-  if (!Array.isArray(unlisted)) return fail("unlisted", "an array", unlisted);
-
-  const rawTrash = v.trash === undefined ? [] : v.trash;
-  if (!Array.isArray(rawTrash)) return fail("trash", "an array", rawTrash);
+  // Absent in files written before hiding (and later unlisting and trash) existed, which is not an error.
+  const hidden = optArray(v.hidden, "hidden");
+  const unlisted = optArray(v.unlisted, "unlisted");
+  const rawTrash = optArray(v.trash, "trash");
 
   const trash = rawTrash.map((t, i) => {
     const p = project(t, `trash[${i}]`);

@@ -30,7 +30,7 @@ blocked. The terms name Google as the text-only exception.
 
 ## Next (code)
 
-1. Campus guides: SCU and SF State, as data in `lib/campus-guides.ts` (SJSU is done). Live before January for spring commencement. Copy needs Julian's sign-off. No photos of mine at either yet.
+1. Campus guides: SCU and SF State, as data in `lib/graduation/campus-guides.ts` (SJSU is done). Live before January for spring commencement. Copy needs Julian's sign-off. No photos of mine at either yet.
 2. After the Google Business Profile is verified: add it (and Yelp) to `sameAs` in the structured data, and a "Leave a review" link.
 3. Session links wrap under "Book a session" at 1280px wide (layout, not ranking).
 

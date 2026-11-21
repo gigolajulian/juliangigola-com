@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { MtHome } from "@/components/v4/home/home";
 import { MT } from "@/lib/v4-home/server";
-import { shareOg } from "@/lib/share";
+import { shareOg } from "@/lib/og/share";
 
 /* The v4 home from the server, for `/?mtscroll=1` (a rewrite in next.config.ts sends that address here).
    A route of its own so the default home's files stay as they are. Not for search: `/` is the page. */

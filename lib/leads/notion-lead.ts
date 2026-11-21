@@ -5,7 +5,8 @@ import type { Paper, Stage } from "@/lib/leads/leads";
  * Every enquiry and booking also lands as a row on the Business
  * Hub "Bookings" database, where the Pipeline board shows it. A copy of
  * the INBOX row, never the record: a Notion outage must not lose an
- * enquiry, so this never throws and does nothing while NOTION_TOKEN is unset.
+ * enquiry, so the mirrors (toNotion, notionStage, notionPaper) never throw and
+ * do nothing while NOTION_TOKEN is unset. `findRow` alone throws on a Notion error.
  * One row per person (by Contact Email), and a stage moved on the lead desk
  * moves that row's Status too.
  * ─────────────────────────────────────────────────────────────── */
@@ -71,7 +72,7 @@ const notion = (token: string, path: string, method: string, body: unknown) =>
 /** Finished projects keep their row as it was; a past client starts a new one. */
 const CLOSED = ["Delivered", "Complete", "Lost"];
 
-/** The newest open Bookings row for this address, or null when there is none. */
+/** The newest open Bookings row for this address, or null when there is none. Throws on a Notion error. */
 export async function findRow(token: string, email: string): Promise<string | null> {
   const res = await notion(token, `/databases/${DATABASE}/query`, "POST", {
     filter: {

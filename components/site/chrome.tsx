@@ -3,11 +3,11 @@
 import * as React from "react";
 import { mtscroll, V4_HOME } from "@/lib/v4-home/switch";
 import { useV4pages } from "@/lib/flags/v4pages";
-import { V4Foot } from "@/components/v4/foot";
+import { V4Foot } from "@/components/site/foot";
 import Link from "next/link";
 import { THEME_COLOR } from "@/lib/theme-color";
 import { usePathname } from "next/navigation";
-import { onLenisScroll, scrollTop } from "./smooth-scroll";
+import { onLenisScroll, scrollTop } from "../v3/smooth-scroll";
 import { useNavInk } from "./nav-ink";
 
 /* JG V3 chrome (master v39): the glass header, the phone menu, the theme
@@ -209,7 +209,6 @@ function useDock(dock: boolean, past: boolean, hdr: React.RefObject<HTMLElement 
 function scrubFlag() {
   try {
     const q = location.search;
-    // On by default; ?flag=0 brings back the timed flight for the session.
     if (/[?&]flag=0/.test(q)) sessionStorage.setItem("jg-scrub-off", "1");
     if (/[?&]flag=1/.test(q)) sessionStorage.removeItem("jg-scrub-off");
     return sessionStorage.getItem("jg-scrub-off") !== "1";
@@ -381,7 +380,7 @@ function SiteHeader() {
     const dx = was.right - now.right, dy = was.top - now.top;
     if (dx || dy) bar.animate({ transform: [`translate(${dx}px,${dy}px)`, "none"] }, { duration: 250, easing: "cubic-bezier(.23,1,.32,1)" });
   }, [tuck]);
-  // `?mtscroll=1`: the v4 home has no cover to wait for, the bar is there from the start.
+  // The v4 home (or its `?mtscroll=1` preview) has no cover to wait for, the bar is there from the start.
   const mt = React.useSyncExternalStore(noop, mtscroll, () => V4_HOME);
   const show = (!home || past || mt) && !tuck;
   // `?navfx=1`: the header on trial (ground off at the top, white or black words).

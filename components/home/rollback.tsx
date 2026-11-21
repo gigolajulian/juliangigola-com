@@ -4,11 +4,11 @@ import * as React from "react";
 import { getImageProps } from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CoverNav, V3Foot } from "@/components/v3/chrome";
-import { Duo, Marks, Pick } from "@/components/v3/duo";
+import { CoverNav, V3Foot } from "@/components/site/chrome";
+import { Duo, Marks, Pick } from "@/components/site/duo";
 import { shiftScroll } from "@/components/v3/smooth-scroll";
 import { useSiteTheme } from "@/lib/site-theme";
-import { COMMISSIONS, COMMISSION_TABS, DOORS, HERO, HERO_ALT, INDEX_ORDER, RECENT, SESSIONS, rate, type SessionSlug } from "@/lib/flags/v3";
+import { COMMISSIONS, COMMISSION_TABS, DOORS, HERO, HERO_ALT, INDEX_ORDER, RECENT, SESSIONS, rate, type SessionSlug } from "@/lib/photos-and-sessions";
 import { projectHref } from "@/lib/project-href";
 
 /* JG V3 homepage (master v39, section A): hero crossfade, logo strip,
@@ -458,7 +458,7 @@ function Commissions({ top }: { top: Record<string, TopWork[]> }) {
 }
 
 /* `?scrollfx=rows` prototype, phones only: the first of each booking page's
-   picks (lib/booking/booking.ts); Graduation has none and keeps its SESSIONS photo. */
+   picks (lib/booking/service-pages.ts); Graduation has none and keeps its SESSIONS photo. */
 const ROW_SAMPLES: Partial<Record<SessionSlug, string>> = {
   portraits: "/work/gilt/03.jpg",
   headshots: "/work/headshots/04.jpg",

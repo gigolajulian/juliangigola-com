@@ -13,8 +13,8 @@ import {
 import type { Frame } from "@/lib/work-types";
 import { COVER_RELEASES } from "@/lib/work/cover-art-data";
 import DATES from "@/lib/sitemap-dates.json";
-import { BOOKING_PAGES, bookingHref } from "@/lib/booking/booking";
-import { CAMPUS_GUIDES, campusHref } from "@/lib/campus-guides";
+import { BOOKING_PAGES, bookingHref } from "@/lib/booking/service-pages";
+import { CAMPUS_GUIDES, campusHref } from "@/lib/graduation/campus-guides";
 
 const SITE = "https://juliangigola.com";
 
@@ -140,7 +140,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }));
 
   /* The booking pages: above the disciplines, because a search that
-     lands on one is somebody pricing a shoot (`lib/booking/booking.ts`). Their
+     lands on one is somebody pricing a shoot (`lib/booking/service-pages.ts`). Their
      pictures are the ones they show. */
   const booking = BOOKING_PAGES.map((p) => ({
     url: `${SITE}${bookingHref(p)}`,

@@ -1,9 +1,9 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { CAMPUS_GUIDES, campusGuide, campusHref } from "@/lib/campus-guides";
+import { CAMPUS_GUIDES, campusGuide, campusHref } from "@/lib/graduation/campus-guides";
 
-/* The graduation campus guides (`lib/campus-guides.ts`). */
+/* The graduation campus guides (`lib/graduation/campus-guides.ts`). */
 
 describe("campus guides", () => {
   it("has unique slugs, found and linked under /graduation-photos", () => {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { CoverNav, MotionGate, NAV, V3Foot, V3Footer, V3Header } from "@/components/v3/chrome";
+import { CoverNav, MotionGate, NAV, V3Foot, V3Footer, V3Header } from "@/components/site/chrome";
 
 describe("chrome", () => {
   it("NAV lists the four pages", () => {
