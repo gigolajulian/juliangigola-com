@@ -18,7 +18,7 @@ import { StatusDot } from "@astryxdesign/core/StatusDot";
 import { Divider } from "@astryxdesign/core/Divider";
 import { About, about, Age, Next } from "@/components/leads/row";
 import { isLate, paperDue, shootTag, type LeadSummary } from "@/lib/leads/leads";
-import { adminCall, authed, ago, aside, dateTimeLabel, centsLabel, closed, inboxCall, needsMe, nextStep, now, inFilter, plusDays, renew, ymdPT } from "@/lib/leads/lead-desk";
+import { adminCall, authed, ago, aside, dateTimeLabel, centsLabel, closed, inboxCall, needsMe, nextStep, now, inFilter, plusDays, renew, ymdPT, type Size } from "@/lib/leads/lead-desk";
 import { balance, dayB, dueOf, overdue, usd } from "@/lib/leads/invoice";
 import type { InvoiceRow } from "@/components/leads/invoices";
 import { TZ } from "@/lib/booking/booking-rules";
@@ -56,7 +56,6 @@ export function daysOf(leads: LeadSummary[], from: string, n: number) {
 export type Spark = { visits: number; days: { key: string; n: number }[] };
 
 
-type Size = "phone" | "mid" | "wide";
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
   return <Text type="code" size="xsm" color="secondary" weight="medium">{children}</Text>;

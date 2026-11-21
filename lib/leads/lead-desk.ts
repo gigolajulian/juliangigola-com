@@ -38,6 +38,8 @@ export async function adminCall<T = Record<string, unknown>>(path: string, init:
   return out as T;
 }
 
+/** The desk's three layouts, by window width. */
+export type Size = "phone" | "mid" | "wide";
 export type Call = <T = Record<string, unknown>>(init?: RequestInit & { query?: string }) => Promise<T>;
 /** /api/inbox, with the query string beside the request. */
 export const inboxCall: Call = ({ query = "", ...init } = {}) => adminCall(`/api/inbox${query}`, init);
