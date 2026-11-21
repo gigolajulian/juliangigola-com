@@ -46,7 +46,8 @@ function useBackToCover() {
     const el = document.querySelector<HTMLElement>(".mt-covers .mt-row");
     const go = () => {
       scrollTo(0, at.y);
-      if (el) el.scrollLeft = at.x;
+      // a phone's sideways row only: held (desktop), the row follows the page's scroll, and setting it too threw the page a screen on (MAC on d82f2b75)
+      if (el && !media("held").matches) el.scrollLeft = at.x;
     };
     if (Date.now() - popAt < 2000) go();
     // taken a tick on, not now: React's dev double mount read it once and dropped it
