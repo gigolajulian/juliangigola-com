@@ -549,9 +549,9 @@ export function lockScroll() {
   const root = document.documentElement;
   const had = root.style.overflow;
   root.style.overflow = "hidden";
-  return () => {
+  return (restore = true) => {
     root.style.overflow = had;
-    window.scrollTo(x, y);
+    if (restore) window.scrollTo(x, y);
   };
 }
 
