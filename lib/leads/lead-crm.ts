@@ -7,7 +7,7 @@
  * ─────────────────────────────────────────────────────────────── */
 
 import { TZ } from "../booking/booking-rules";
-import { STAGES, type Lead, type Person, type Stage } from "./leads";
+import { STAGES, type Lead, type LeadEvent, type Person, type ShootPlan, type Stage, type Task } from "./leads";
 import { canonical } from "./lead-crypto";
 import { balance, isPaid } from "./invoice";
 import { paidTotal, type MasterEntry } from "./activity-log";
@@ -69,6 +69,105 @@ export function cleanPeople(v: unknown, own: string): Person[] | { error: string
   return out;
 }
 
+/** Frames a plan holds, tasks a lead holds, shots a list holds: a shoot's prep, not a project tracker. */
+export const REFS_MAX = 4;
+export const TASKS_MAX = 40;
+export const SHOTS_MAX = 30;
+const DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
+/** One of his own frames, as the site path: `/work/...` (or a full juliangigola.com URL to one). */
+export function framePath(v: unknown): string | undefined {
+  const s = clip(v, 300)?.replace(/^https?:\/\/(www\.)?juliangigola\.com/i, "");
+  return s && /^\/(work|hero|covers)\/[\w./-]+\.(jpe?g|png|webp|avif)$/i.test(s) && !s.includes("..") ? s : undefined;
+}
+/** A cosmos.so board link, https only; anything else is dropped. */
+export function cosmosLink(v: unknown): string | undefined {
+  const s = clip(v, 300);
+  if (!s) return undefined;
+  try {
+    const u = new URL(/^https?:\/\//i.test(s) ? s : `https://${s}`);
+    return u.protocol === "https:" && /(^|\.)cosmos\.so$/i.test(u.hostname) ? u.toString() : undefined;
+  } catch { return undefined; }
+}
+
+/** The plan from the desk, checked and cut; null when nothing is left in it. Team: only addresses of the lead's people. */
+export function cleanPlan(v: unknown, people: Person[] = []): ShootPlan | null | { error: string } {
+  if (v === null) return null;
+  if (typeof v !== "object" || Array.isArray(v)) return { error: "Bad plan." };
+  const x = v as Record<string, unknown>;
+  const refs = (Array.isArray(x.refs) ? x.refs : []).map(framePath).filter((r): r is string => !!r).slice(0, REFS_MAX);
+  if (Array.isArray(x.refs) && x.refs.some((r) => clip(r, 300) && !framePath(r))) return { error: "References are your own frames: paste a /work/ link." };
+  if (clip(x.cosmos, 300) && !cosmosLink(x.cosmos)) return { error: "That is not a cosmos.so link." };
+  const shots = (Array.isArray(x.shots) ? x.shots : []).slice(0, SHOTS_MAX).flatMap((o: Record<string, unknown>) => {
+    const text = clip(o?.text, 120);
+    return text ? [{ text, ...(o.done === true ? { done: true } : {}) }] : [];
+  });
+  const sh = (x.sheet && typeof x.sheet === "object" ? x.sheet : {}) as Record<string, unknown>;
+  const ours = new Set(people.map((p) => canonical(p.email)));
+  const team = (Array.isArray(sh.team) ? sh.team : []).filter((e): e is string => typeof e === "string" && ours.has(canonical(e))).map((e) => e.toLowerCase());
+  const sheet = { call: clip(sh.call, 20), window: clip(sh.window, 60), place: clip(sh.place, 120), bring: clip(sh.bring, 200), ...(team.length ? { team } : {}) };
+  for (const k of Object.keys(sheet) as (keyof typeof sheet)[]) if (sheet[k] === undefined) delete sheet[k];
+  const plan: ShootPlan = {
+    ...(clip(x.brief, 1000) ? { brief: clip(x.brief, 1000) } : {}),
+    ...(refs.length ? { refs } : {}),
+    ...(cosmosLink(x.cosmos) ? { cosmos: cosmosLink(x.cosmos) } : {}),
+    ...(shots.length ? { shots } : {}),
+    ...(Object.keys(sheet).length ? { sheet } : {}),
+  };
+  return Object.keys(plan).length ? plan : null;
+}
+
+/** The task list from the desk, checked. `old` keeps each done time; a task newly done gets `at` and a timeline line. */
+export function cleanTasks(v: unknown, old: Task[] = [], people: Person[] = [], at = new Date().toISOString()): { tasks: Task[]; events: LeadEvent[] } | { error: string } {
+  if (!Array.isArray(v)) return { error: "Bad task list." };
+  if (v.length > TASKS_MAX) return { error: `${TASKS_MAX} tasks at most.` };
+  const ours = new Set(people.map((p) => canonical(p.email)));
+  const seen = new Set<string>();
+  const tasks: Task[] = [];
+  const events: LeadEvent[] = [];
+  for (const x of v as Record<string, unknown>[]) {
+    const text = clip(x?.text, 80);
+    if (!text) return { error: "A task needs words." };
+    const id = clip(x.id, 24)?.replace(/[^\w-]/g, "") || Math.random().toString(36).slice(2, 10);
+    if (seen.has(id)) continue;
+    seen.add(id);
+    const due = typeof x.due === "string" && DAY_RE.test(x.due) && !isNaN(Date.parse(x.due)) ? x.due : undefined;
+    const who = typeof x.who === "string" && ours.has(canonical(x.who)) ? x.who.toLowerCase() : undefined;
+    const was = old.find((t) => t.id === id);
+    const doneAt = x.doneAt ? (was?.doneAt ?? at) : undefined;
+    if (doneAt && !was?.doneAt) events.push({ at, kind: "task", ref: `task:${id}`, note: text });
+    tasks.push({ id, text, ...(due ? { due } : {}), ...(who ? { who } : {}), ...(doneAt ? { doneAt } : {}) });
+  }
+  return { tasks, events };
+}
+
+/** The call sheet as a Gmail draft to the client and the team: short, so the link stays well under what Gmail takes. */
+export function callSheet(l: Pick<Lead, "name" | "email" | "when" | "kind" | "people" | "plan">): { to: string; subject: string; body: string } {
+  const p = l.plan ?? {};
+  const sh = p.sheet ?? {};
+  const team = (l.people ?? []).filter((x) => sh.team?.includes(x.email));
+  const day = l.when ? new Intl.DateTimeFormat("en-US", { timeZone: TZ, weekday: "long", month: "long", day: "numeric" }).format(new Date(l.when)) : "";
+  const rows = [
+    sh.call ? `Call: ${sh.call}` : "",
+    sh.window ? `Shoot: ${sh.window}` : "",
+    sh.place ? `Where: ${sh.place}` : "",
+    team.length ? `Team: ${team.map((x) => `${x.name}${x.role ? ` (${x.role})` : ""}`).join(", ")}` : "",
+    sh.bring ? `Bring: ${sh.bring}` : "",
+  ].filter(Boolean);
+  const shots = (p.shots ?? []).slice(0, 12).map((s) => `- ${s.text}`);
+  const body = [
+    "Hi all,",
+    "",
+    `Here is the call sheet${day ? ` for ${day}` : ""}.`,
+    "",
+    ...rows,
+    ...(shots.length ? ["", "Shot list:", ...shots] : []),
+    ...(p.cosmos ? ["", `Board: ${p.cosmos}`] : []),
+    "",
+    "Julian",
+  ].join("\n");
+  return { to: [l.email, ...team.map((x) => x.email)].join(","), subject: `Call sheet${day ? `: ${day}` : ""}`, body: body.slice(0, 1800) };
+}
+
 /** A lead he added by hand: read already (it is his own news), at the stage he picked. */
 export function manualLead(given: NewLead, at: string): Lead | { error: string } {
   const name = clip(given.name, 80);
@@ -120,6 +219,9 @@ export function merge(into: Lead, from: Lead, at: string): Lead {
     flags: [...new Set([...(into.flags ?? []), ...(from.flags ?? [])])],
     notes: notes.slice(0, 5000),
     invoices: [...(from.invoices ?? []), ...(into.invoices ?? [])].sort((a, b) => a.at.localeCompare(b.at)),
+    // Both records' tasks; this one's plan, or the other's when this has none.
+    tasks: [...(into.tasks ?? []), ...(from.tasks ?? []).filter((t) => !into.tasks?.some((x) => x.id === t.id))],
+    plan: into.plan ?? from.plan,
     // Both records' people, once each, never this lead's own address. The other record's address joins them, so its mail keeps landing here.
     people: [...(into.people ?? []), ...(from.people ?? []), ...(mailable(from.email) ? [{ name: from.name, email: from.email }] : [])].filter((p, i, all) => canonical(p.email) !== canonical(into.email) && all.findIndex((x) => canonical(x.email) === canonical(p.email)) === i),
     events: [...events, { at, kind: "merge" as const, note: from.name }].slice(-50),
@@ -128,6 +230,8 @@ export function merge(into: Lead, from: Lead, at: string): Lead {
   if (!out.when) delete out.when;
   if (!out.invoices?.length) delete out.invoices;
   if (!out.people?.length) delete out.people;
+  if (!out.tasks?.length) delete out.tasks;
+  if (!out.plan) delete out.plan;
   return out;
 }
 

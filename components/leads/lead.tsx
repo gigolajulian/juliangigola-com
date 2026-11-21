@@ -44,13 +44,14 @@ import { endDay } from "@/lib/leads/lead-desk";
 import type { Enquiry } from "@/lib/inbox";
 import { canonical } from "@/lib/leads/lead-crypto";
 import { isLate, NUDGES, PAPER, quoteNudge, REMIND_MAX, STAGES, trashDaysLeft, type Lead, type LeadPatch, type LeadSummary, type Stage } from "@/lib/leads/leads";
-import { fill, mailable, TEMPLATES, type Template } from "@/lib/leads/lead-crm";
+import { callSheet, fill, mailable, TEMPLATES, type Template } from "@/lib/leads/lead-crm";
 import { leadKey, typingIn } from "@/lib/leads/lead-keys";
 import { balance, depositOfLead, subtotal, usd } from "@/lib/leads/invoice";
 import { adminCall, ago, dateTimeLabel, authed, type Call, DAY, dayLabel, errorText, nextStep, now, renew, snoozed } from "@/lib/leads/lead-desk";
 import { compose, frostBar, ios, kindOf, line, mailto } from "@/components/leads/shared";
 import { People } from "@/components/leads/people";
 import { Galleries } from "@/components/leads/galleries";
+import { PlanSection, TaskSection } from "@/components/leads/plan";
 
 type Size = "phone" | "mid" | "wide";
 /** A menu row that opens in a new tab. */
@@ -104,7 +105,10 @@ const history = (log: Lead["events"] | null, own: Lead["events"]) => {
     .sort((a, b) => a.at.localeCompare(b.at));
 };
 
-export function LeadDesk({ summary, initial, call, onChange, onBack, reload, templates, others, size, toProofs }: { toProofs?: (token?: string) => void; summary: LeadSummary; initial?: Lead | null; call: Call; onChange: (l: Lead) => void; onBack: () => void; reload: () => void; templates: Template[]; others: LeadSummary[]; size: Size }) {
+/** An action asked for from the ⌘K palette; `n` makes each ask new. */
+export type LeadAsk = { do: "task" | "invoice"; n: number };
+
+export function LeadDesk({ summary, initial, call, onChange, onBack, reload, templates, others, size, toProofs, ask }: { ask?: LeadAsk | null; toProofs?: (token?: string) => void; summary: LeadSummary; initial?: Lead | null; call: Call; onChange: (l: Lead) => void; onBack: () => void; reload: () => void; templates: Template[]; others: LeadSummary[]; size: Size }) {
   // A lead added a moment ago comes in whole: KV may not serve its key yet.
   const [lead, setLead] = React.useState<Lead | null>(initial ?? null);
   const [message, setMessage] = React.useState<Enquiry | null>(null);
@@ -113,6 +117,7 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
   const [editing, setEditing] = React.useState<"contact" | "quote" | "remind" | "licence" | "snooze" | "merge" | "invoice" | null>(null);
   const [note, setNote] = React.useState<string | null>(null);
   const [proofs, setProofs] = React.useState<ProofRow[]>([]);
+  const [addingTask, setAddingTask] = React.useState(false);
   const key = `lead:${summary.id}`;
 
   const patch = React.useCallback(
@@ -159,6 +164,13 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
 
   const l = lead ?? summary;
   const full = lead;
+  // A new ask from the palette opens its form, once (state adjusted in render, not an effect).
+  const [seenAsk, setSeenAsk] = React.useState(ask?.n);
+  if (ask && ask.n !== seenAsk) {
+    setSeenAsk(ask.n);
+    if (ask.do === "task") setAddingTask(true);
+    else setEditing("invoice");
+  }
   // The client's galleries: sent to the lead's address or to any of its people (Julian 2026-11-15, Format's client page).
   const theirs = new Set([l.email, ...(full?.people ?? []).map((p) => p.email)].map(canonical));
   const galleries = proofs.filter((p) => theirs.has(canonical(p.email!)));
@@ -172,8 +184,9 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
   const renewT = templates.find((x) => x.id === "renew") ?? TEMPLATES.find((x) => x.id === "renew")!;
   const replyHref = mail(l.email, `Re: your ${l.kind ?? "shoot"} inquiry`, `Hi ${first},\n\n`);
   const bookHref = mail(l.email, "Booking a time", `Hi ${first},\n\nYou can pick a time here: https://juliangigola.com/book\n\n`);
-  // The one filled button: the nudge or renewal when one is due, else Reply.
-  const lead1 = !mailOk ? null : renew(l) ? { label: "Renew licence", win: "Keep the licence", href: mail(l.email, fill(renewT.subject, l), fill(renewT.body, l)) } : nudge && late ? { label: `Send ${nudge.name}`, win: "Land the booking", href: mail(l.email, fill(nudge.subject, l), fill(nudge.body, l)) } : null;
+  // The one filled button: the nudge or renewal when one is due, the call sheet once booked with a plan, else Reply.
+  const sheet = full?.plan && l.when && l.stage === "Confirmed" ? callSheet(full) : null;
+  const lead1 = !mailOk ? null : renew(l) ? { label: "Renew licence", win: "Keep the licence", href: mail(l.email, fill(renewT.subject, l), fill(renewT.body, l)) } : nudge && late ? { label: `Send ${nudge.name}`, win: "Land the booking", href: mail(l.email, fill(nudge.subject, l), fill(nudge.body, l)) } : sheet ? { label: "Send call sheet", win: "Set the day", href: mail(sheet.to, sheet.subject, sheet.body) } : null;
 
   const snoozeFor = (d: number) => run(patch({ snoozeUntil: new Date(now() + d * DAY).toISOString() }), "Snoozed.");
   const archive = () => run(patch({ archive: !l.archivedAt }), l.archivedAt ? "Back in the list." : "Archived.");
@@ -189,6 +202,7 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
       else if (k?.do === "snooze") setEditing((v) => (v === "snooze" ? null : "snooze"));
       else if (k?.do === "snoozeFor") snoozeFor(k.days);
       else if (k?.do === "archive" && !l.trashedAt) archive();
+      else if (k?.do === "task" && full) setAddingTask(true);
       else if (k?.do === "stage") setStage(STAGES[k.at]);
       else if (k?.do === "close" && editing) setEditing(null);
       else return;
@@ -274,7 +288,7 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
         {full?.notion ? <MetadataListItem label="Notion">Bookings row linked</MetadataListItem> : null}
       </MetadataList>
       {size === "wide" ? (
-        <Text type="supporting" color="secondary"><Kbd keys="r" /> reply · <Kbd keys="s" /> snooze · <Kbd keys="e" /> archive · <Kbd keys="1" />–<Kbd keys="9" /> stage</Text>
+        <Text type="supporting" color="secondary"><Kbd keys="r" /> reply · <Kbd keys="s" /> snooze · <Kbd keys="e" /> archive · <Kbd keys="t" /> task · <Kbd keys="1" />–<Kbd keys="9" /> stage</Text>
       ) : null}
     </VStack>
   );
@@ -425,6 +439,14 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
                 </MetadataList>
                 {editing === "remind" ? <RemindForm onSave={(iso, text) => run(patch({ remind: { at: iso, text } }), "Reminder set.")} onCancel={() => setEditing(null)} /> : null}
               </VStack>
+            </Section>
+
+            <Section>
+              <PlanSection plan={full?.plan} people={full?.people ?? []} isDisabled={!full} phone={phoneSize} onSave={(plan) => patch({ plan })} />
+            </Section>
+
+            <Section>
+              <TaskSection tasks={full?.tasks ?? []} people={full?.people ?? []} isDisabled={!full} adding={addingTask && !!full} setAdding={setAddingTask} keys={size === "wide"} onSave={(tasks) => patch({ tasks })} />
             </Section>
 
             {(["Confirmed", "Shot", "Invoiced", "Selecting", "Delivered"] as Stage[]).includes(l.stage) ? (

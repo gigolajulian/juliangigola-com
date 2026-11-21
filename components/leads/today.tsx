@@ -18,7 +18,8 @@ import { Badge } from "@astryxdesign/core/Badge";
 import { StatusDot } from "@astryxdesign/core/StatusDot";
 import { Divider } from "@astryxdesign/core/Divider";
 import { About, about, Age, Next } from "@/components/leads/row";
-import { isLate, paperDue, shootTag, type LeadSummary } from "@/lib/leads/leads";
+import { dueTasks, isLate, paperDue, shootTag, type LeadSummary, type TaskRow } from "@/lib/leads/leads";
+import { dayShort } from "@/components/leads/plan";
 import { adminCall, authed, ago, aside, dateTimeLabel, centsLabel, closed, inboxCall, needsMe, nextStep, now, inFilter, plusDays, renew, ymdPT } from "@/lib/leads/lead-desk";
 import { balance, dayB, dueOf, overdue, usd } from "@/lib/leads/invoice";
 import type { InvoiceRow } from "@/components/leads/invoices";
@@ -120,6 +121,14 @@ export function TodayDesk({ leads, size, open, show }: { leads: LeadSummary[]; s
   React.useEffect(() => {
     proofApi<{ proofs: Row[] }>({ query: "?list" }).then((o) => setActs(feed(o.proofs))).catch(() => setActs([]));
   }, []);
+  // Every lead's open tasks (`?tasks`), due within a week or late; leads put aside are left out, as Your move leaves them.
+  const [taskRows, setTaskRows] = React.useState<TaskRow[]>([]);
+  React.useEffect(() => {
+    inboxCall<{ tasks: TaskRow[] }>({ query: "?tasks" }).then((o) => setTaskRows(o.tasks ?? [])).catch(() => {});
+  }, []);
+  const due = dueTasks(taskRows.filter((t) => leads.some((l) => l.id === t.lead && !aside(l))), today);
+  const lateBy = (d: string) => Math.round((Date.parse(`${today}T12:00:00Z`) - Date.parse(`${d}T12:00:00Z`)) / 864e5);
+  const whenDue = (d: string) => (d === today ? "Today" : d === plusDays(today, 1) ? "Tomorrow" : new Date(`${d}T12:00:00Z`).toLocaleDateString("en-US", { weekday: "short", timeZone: "UTC" }));
   const m = typeof money === "object" ? money : null;
   const t = typeof traffic === "object" ? traffic : null;
 
@@ -192,8 +201,9 @@ export function TodayDesk({ leads, size, open, show }: { leads: LeadSummary[]; s
           <VStack gap={6}>
             <Text type="large" color="secondary">{line ? `${line[0].toUpperCase()}${line.slice(1)}.` : "Nothing on the books this week."}</Text>
             <Card padding={3}>
-              <Grid columns={size === "phone" ? 2 : 4} gap={2}>
+              <Grid columns={size === "phone" ? 2 : 5} gap={2}>
                 <Stat v={moves.length} sub="on you" />
+                <Stat v={due.length} sub={due.some((x) => x.late) ? `tasks due, ${due.filter((x) => x.late).length} late` : "tasks due"} />
                 <Stat v={shoots || !calls ? many(shoots, "shoot") : many(calls, "call")} sub={shoots && calls ? `and ${many(calls, "call")}` : "this week"} />
                 <Stat v={m ? centsLabel(m.available ?? 0) : "–"} sub={m ? (m.pending ? `${centsLabel(m.pending)} on the way` : "Stripe") : typeof money === "string" ? money : "Asking Stripe"} />
                 <Stat v={t ? t.visits.toLocaleString("en-US") : "–"} sub={t ? "visits, 7 d" : typeof traffic === "string" ? traffic : "Asking Cloudflare"} />
@@ -204,6 +214,18 @@ export function TodayDesk({ leads, size, open, show }: { leads: LeadSummary[]; s
               <HStack vAlign="center"><StackItem size="fill"><Title count={leadMoves.length}>Your move</Title></StackItem><Button label="All leads" variant="ghost" onClick={() => show()} /></HStack>
               {leadMoves.length ? <List hasDividers>{leadMoves.map(row)}</List> : <Text type="supporting" color="secondary">Nothing waiting on you.</Text>}
             </VStack>
+            {due.length ? (
+              <VStack gap={1}>
+                <Title count={due.length}>Tasks due</Title>
+                <List hasDividers>
+                  {due.map((x) => {
+                    const l = leads.find((y) => y.id === x.lead);
+                    return <ListItem key={`${x.lead}-${x.id}`} onClick={l ? () => open(l) : undefined} label={x.text} description={x.name}
+                      endContent={x.late ? <Badge label={lateBy(x.due!) === 1 ? "1 day late" : `${lateBy(x.due!)} days late`} variant="warning" /> : <Text type="code" size="sm" color="secondary" textWrap="nowrap">{x.due! <= plusDays(today, 6) ? whenDue(x.due!) : dayShort(x.due!)}</Text>} />;
+                  })}
+                </List>
+              </VStack>
+            ) : null}
             {pastDue.length ? (
               <VStack gap={1}>
                 <Title count={pastDue.length}>Overdue</Title>
