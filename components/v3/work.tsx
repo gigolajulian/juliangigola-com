@@ -9,12 +9,14 @@ import { createPortal } from "react-dom";
 import type { Flip as FlipT } from "gsap/Flip";
 import { PageFoot } from "@/components/v3/chrome";
 import DISC from "@/lib/discipline-order.json";
-import { GSAP_OUT } from "@/lib/mplan";
 import { V4Drift } from "@/components/v4/drift";
 import { V4Tilt } from "@/components/v4/tilt";
 // The canvas view loads only when it opens, not with every /portfolio visit.
 const V3Canvas = dynamic(() => import("@/components/v3/canvas").then((m) => m.V3Canvas), { ssr: false });
 import { launchSpeed, stepSpring, springSettled, frameDt } from "@/lib/motion/spring";
+
+/** The motion plan's `out` curve for GSAP: power4.out is cubic-bezier(.23, 1, .32, 1). */
+const GSAP_OUT = "power4.out";
 
 /* JG V3 Portfolio (master v39, /work): search, discipline chips, and the
    Grid, Strip and Color views. Best first (lib's order: the vectorscope's
