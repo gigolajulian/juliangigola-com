@@ -9,6 +9,9 @@ vi.mock("react", async (orig) => {
   return { ...r, ViewTransition: ({ children }: { children: ReactNode }) => children };
 });
 
+const nav = vi.hoisted(() => ({ path: "/" }));
+vi.mock("next/navigation", () => ({ usePathname: () => nav.path }));
+
 import { PageTransition } from "@/components/site/page-transition";
 
 describe("PageTransition", () => {
@@ -34,5 +37,30 @@ describe("PageTransition", () => {
     expect(document.documentElement.dataset.nav).toBe("in");
     document.documentElement.removeAttribute("data-v3motion");
     delete document.documentElement.dataset.nav;
+  });
+
+  it("Back from Cover art to the home slides the page off opaque, other Backs keep the fade", () => {
+    const root = document.documentElement;
+    root.setAttribute("data-v3motion", "");
+    const vt = vi.fn((cb: () => unknown) => (cb(), { finished: new Promise(() => {}) }));
+    Object.assign(document, { startViewTransition: vt });
+    const back = (from: string, to: string) => {
+      nav.path = from;
+      history.replaceState(null, "", from);
+      const r = render(<PageTransition>page</PageTransition>);
+      history.replaceState(null, "", to);
+      dispatchEvent(new PopStateEvent("popstate"));
+      const off = root.dataset.navOff;
+      r.unmount();
+      delete root.dataset.navOff;
+      return off;
+    };
+    expect(back("/portfolio/coverart", "/")).toBe("");
+    expect(back("/portfolio/editorial", "/")).toBeUndefined();
+    expect(vt).toHaveBeenCalledTimes(2);
+    Reflect.deleteProperty(document, "startViewTransition");
+    root.removeAttribute("data-v3motion");
+    delete root.dataset.nav;
+    nav.path = "/";
   });
 });
