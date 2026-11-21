@@ -8,7 +8,7 @@
  * ─────────────────────────────────────────────────────────────── */
 
 import * as React from "react";
-import { Layout, LayoutContent, LayoutHeader, VStack, Card } from "@astryxdesign/core/Layout";
+import { VStack, Card } from "@astryxdesign/core/Layout";
 import { Grid } from "@astryxdesign/core/Grid";
 import { Table } from "@astryxdesign/core/Table";
 import { Heading, Text } from "@astryxdesign/core/Text";
@@ -16,21 +16,12 @@ import { MetadataList, MetadataListItem } from "@astryxdesign/core/MetadataList"
 import { STAGES } from "@/lib/leads/leads";
 import type { Stats } from "@/lib/leads/lead-crm";
 import { type Call, errorText, dollarsLabel } from "@/lib/leads/lead-desk";
+import { Page } from "@/components/leads/lists";
 
 const AdminTraffic = React.lazy(() => import("@/components/admin/admin-traffic").then((m) => ({ default: m.AdminTraffic })));
 const AdminSeo = React.lazy(() => import("@/components/admin/admin-seo").then((m) => ({ default: m.AdminSeo })));
 const hours = (h: number | null) => (h === null ? "None yet" : h < 1 ? `${Math.round(h * 60)} min` : h < 48 ? `${Math.round(h)} h` : `${Math.round(h / 24)} d`);
 
-function Page({ eyebrow, title, children }: { eyebrow: string; title: string; children: React.ReactNode }) {
-  return (
-    <Layout
-      height="fill"
-      defaultHasDividers
-      header={<LayoutHeader><VStack gap={0}><Text type="code" size="xsm" color="secondary" weight="medium">{eyebrow}</Text><Heading level={1} weight="bold">{title}</Heading></VStack></LayoutHeader>}
-      content={<LayoutContent role="main" label={title} padding={4}>{children}</LayoutContent>}
-    />
-  );
-}
 
 export function StatsDesk({ call }: { call: Call }) {
   const [s, setS] = React.useState<Stats | null>(null);
@@ -49,7 +40,7 @@ export function StatsDesk({ call }: { call: Call }) {
   );
   const top = s ? Math.max(1, ...s.weeks.map((w) => w.inquiries)) : 1;
   return (
-    <Page eyebrow={s ? `${s.total} LEADS` : "THE NUMBERS"} title="Stats">
+    <Page bare eyebrow={s ? `${s.total} LEADS` : "THE NUMBERS"} title="Stats">
       {err ? <Text color="secondary">{err}</Text> : !s ? <Text type="code" size="sm" color="secondary">Counting</Text> : (
         <VStack gap={6} maxWidth={760}>
           <Grid columns={{ minWidth: 160 }} gap={3}>
@@ -108,7 +99,7 @@ export function StatsDesk({ call }: { call: Call }) {
 /** A shared /admin panel inside the desk. */
 export function PanelDesk({ which }: { which: "traffic" | "seo" }) {
   return (
-    <Page eyebrow={which === "traffic" ? "CLOUDFLARE" : "SEARCH"} title={which === "traffic" ? "Traffic" : "SEO"}>
+    <Page bare eyebrow={which === "traffic" ? "CLOUDFLARE" : "SEARCH"} title={which === "traffic" ? "Traffic" : "SEO"}>
       <React.Suspense fallback={<Text type="code" size="sm" color="secondary">Loading</Text>}>{which === "traffic" ? <AdminTraffic /> : <AdminSeo />}</React.Suspense>
     </Page>
   );

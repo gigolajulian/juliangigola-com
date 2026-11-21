@@ -22,13 +22,14 @@ import { type Call, dayLabel, errorText, inFilter, type Filter } from "@/lib/lea
 type Row = LeadSummary & Record<string, unknown>;
 export const ASIDE: [Filter, string][] = [["snoozed", "Snoozed"], ["archived", "Archived"], ["trash", "Trash"], ["Delivered", "Delivered"], ["Lost", "Lost"]];
 
-export function Page({ eyebrow, title, children }: { eyebrow: string; title: string; children: React.ReactNode }) {
+/** A desk page: eyebrow and title over its content, in a stack (`gap`, `maxWidth`), or as given with `bare`. */
+export function Page({ eyebrow, title, children, gap = 4, maxWidth, bare }: { eyebrow: string; title: string; children: React.ReactNode; gap?: 4 | 6; maxWidth?: number; bare?: boolean }) {
   return (
     <Layout
       height="fill"
       defaultHasDividers
       header={<LayoutHeader><VStack gap={0}><Text type="code" size="xsm" color="secondary" weight="medium">{eyebrow}</Text><Heading level={1} weight="bold">{title}</Heading></VStack></LayoutHeader>}
-      content={<LayoutContent role="main" label={title} padding={4}><VStack gap={4}>{children}</VStack></LayoutContent>}
+      content={<LayoutContent role="main" label={title} padding={4}>{bare ? children : <VStack gap={gap} maxWidth={maxWidth}>{children}</VStack>}</LayoutContent>}
     />
   );
 }
