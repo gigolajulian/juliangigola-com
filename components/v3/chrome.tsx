@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { mplan } from "@/lib/mplan";
 import { mtscroll, V4_HOME } from "@/lib/v4-home/switch";
 import { useV4pages } from "@/lib/v4pages";
 import { V4Foot } from "@/components/v4/foot";
@@ -370,11 +369,11 @@ function SiteHeader() {
     };
   }, [tucks, path]);
   React.useLayoutEffect(() => {
-    /* MOTION-PLAN.md item 12 (`?mplan=layout`): the header tools (work.tsx
+    /* MOTION-PLAN.md item 12: the header tools (work.tsx
        portals them into #hdr-tools) jump to the corner when the header tucks,
        and travel there by transform (250 on `out`). Layout effect: measured
        before a paint. */
-    const bar = mplan("layout") && !matchMedia("(prefers-reduced-motion: reduce)").matches ? document.querySelector<HTMLElement>(".v3 .htools") : null;
+    const bar = !matchMedia("(prefers-reduced-motion: reduce)").matches ? document.querySelector<HTMLElement>(".v3 .htools") : null;
     const was = bar?.getBoundingClientRect();
     document.documentElement.toggleAttribute("data-tuck", tuck);
     if (!bar || !was) return;

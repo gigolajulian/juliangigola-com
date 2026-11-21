@@ -9,12 +9,14 @@ import { createPortal } from "react-dom";
 import type { Flip as FlipT } from "gsap/Flip";
 import { PageFoot } from "@/components/v3/chrome";
 import DISC from "@/lib/discipline-order.json";
-import { mplan, GSAP_OUT } from "@/lib/mplan";
 import { V4Drift } from "@/components/v4/drift";
 import { V4Tilt } from "@/components/v4/tilt";
 // The canvas view loads only when it opens, not with every /portfolio visit.
 const V3Canvas = dynamic(() => import("@/components/v3/canvas").then((m) => m.V3Canvas), { ssr: false });
 import { launchSpeed, stepSpring, springSettled, frameDt } from "@/lib/motion/spring";
+
+/** The motion plan's `out` curve for GSAP: power4.out is cubic-bezier(.23, 1, .32, 1). */
+const GSAP_OUT = "power4.out";
 
 /* JG V3 Portfolio (master v39, /work): search, discipline chips, and the
    Grid, Strip and Color views. Best first (lib's order: the vectorscope's
@@ -223,7 +225,7 @@ export function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: 
   const G = React.useRef<typeof import("gsap").gsap | null>(null);
   // The touch in progress: where it went down, the track's x then, its axis once locked, and its speed.
   const drag = React.useRef<{ x: number; y: number; ox: number; axis: "x" | "y" | null; lx: number; lt: number; v: number; ly: number; vy: number } | null>(null);
-  /* MOTION-PLAN.md item 10 (`?mplan=touch`): a lift hands the finger's speed
+  /* MOTION-PLAN.md item 10: a lift hands the finger's speed
      to the strip's own spring (lib/motion/spring.ts), critically damped. */
   const run = React.useRef(0);
   const stop = () => void (cancelAnimationFrame(run.current), (run.current = 0));
@@ -244,7 +246,7 @@ export function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: 
   };
   const swiped = React.useRef(false); // a drag's click must not close
   const queued = React.useRef(0); // a step pressed while the track was still moving
-  /* MOTION-PLAN.md item 8 (`?mplan=keys`): a second press mid-glide takes the
+  /* MOTION-PLAN.md item 8: a second press mid-glide takes the
      track on from where it is, never waits for the first to finish. */
   const going = React.useRef(0); // the frame the glide in flight is heading to, as a step
   const carry = React.useRef<number | null>(null); // the track's x, read against the new frame
@@ -279,7 +281,7 @@ export function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: 
   const showBack = !!cur?.back && bk === cur.src;
   const still = () => !G.current || matchMedia("(prefers-reduced-motion: reduce)").matches;
   /* From frame `from`, glide the track to the frame `by` away (0 = back to it), then make that the frame. */
-  const glide = (from: number, by: number, dur = 0.55) => {
+  const glide = (from: number, by: number) => {
     const el = track.current!;
     const g = G.current;
     const done = () => (by ? onGo(wrap(from + by)) : undefined);
@@ -290,8 +292,7 @@ export function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: 
     g.killTweensOf(el);
     stop();
     going.current = by;
-    const keys = mplan("keys");
-    g.to(el, { x: -by * el.offsetWidth, y: 0, duration: keys ? 0.6 : dur, ease: keys ? "power3.inOut" : "expo.out", onComplete: done });
+    g.to(el, { x: -by * el.offsetWidth, y: 0, duration: 0.6, ease: "power3.inOut", onComplete: done });
   };
   /* A new frame: the photos keep their elements (keyed by photo), so the
      track goes back to 0 in the same paint and nothing reloads or jumps.
@@ -309,12 +310,12 @@ export function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: 
   }, [at]);
   if (at === null) return null;
   const f = list[at];
-  const settle = (by: number, dur?: number) => glide(at, by, dur);
+  const settle = (by: number) => glide(at, by);
   const step = (by: number) => {
     const g = G.current;
     if (g && track.current && g.isTweening(track.current)) {
       queued.current = by;
-      if (mplan("keys") && going.current) {
+      if (going.current) {
         // Land the frame now, keep the pose: the next layout puts the track where it is and glides on.
         const el = track.current;
         g.killTweensOf(el);
@@ -383,7 +384,7 @@ export function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: 
         /* Item 10: a flick past 0.11px per ms pages or closes whatever the
            distance; a slow drag still needs half a frame, or 90px down. The
            frame leaves at the finger's speed on `out`, never easing in. */
-        if (mplan("touch") && g && !still()) {
+        if (g && !still()) {
           const FLING = 0.11;
           if (d.axis === "y") {
             const dy = e.clientY - d.y;
@@ -404,12 +405,12 @@ export function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: 
           const back = () => delete ref.current!.dataset.drop;
           if (Math.abs(dy) < 90) return void (g ? g.to(el, { y: 0, duration: 0.45, ease: "expo.out", onComplete: back }) : back());
           if (still() || !g) return onClose();
-          return void g.to(el, { y: Math.sign(dy) * innerHeight, duration: 0.3, ease: mplan("exits") ? GSAP_OUT : "power2.in", onComplete: onClose }); // item 4, `?mplan=exits`
+          return void g.to(el, { y: Math.sign(dy) * innerHeight, duration: 0.3, ease: GSAP_OUT, onComplete: onClose }); // MOTION-PLAN.md item 4: exits leave on `out`
         }
         // Where the throw would carry the track a fifth of a second on; the nearest frame there wins.
         const x = d.ox + e.clientX - d.x + d.v * 200;
         const by = Math.max(-1, Math.min(1, Math.round(-x / el.offsetWidth)));
-        settle(by, Math.abs(d.v) > 0.5 ? 0.45 : 0.6);
+        settle(by);
       }}
       onPointerCancel={() => {
         if (!drag.current) return;
@@ -620,19 +621,18 @@ export function V3Work({
     flip.current = null;
     const w = strip.current;
     if (w) w.style.overflow = "visible"; // the strip would clip covers flying up into it
-    /* MOTION-PLAN.md item 9 (`?mplan=still`): grid and strip trade places as
+    /* MOTION-PLAN.md item 9: grid and strip trade places as
        one move, photo 600 on `move`, no stagger, new covers fade in 250, in
        both directions; a chip slides the tiles to their new places, page 400
        on `move`. */
-    const plan = mplan("still");
     const tl = F.from(st, {
       targets: seen(),
-      duration: plan ? (swap ? 0.6 : 0.4) : 0.6,
-      ease: plan ? "power3.inOut" : "expo.out",
+      duration: swap ? 0.6 : 0.4,
+      ease: "power3.inOut",
       scale: true,
       // The vectorscope (Color view) opens 40ms apart, the seventh on together.
-      stagger: plan ? (swap && view === "color" ? (i: number) => Math.min(i, 5) * 0.04 : 0) : 0.015,
-      onEnter: (els) => els.forEach((e) => e.animate({ opacity: [0, 1] }, plan ? { duration: 250, easing: "cubic-bezier(.23,1,.32,1)" } : 300)),
+      stagger: swap && view === "color" ? (i: number) => Math.min(i, 5) * 0.04 : 0,
+      onEnter: (els) => els.forEach((e) => e.animate({ opacity: [0, 1] }, { duration: 250, easing: "cubic-bezier(.23,1,.32,1)" })),
       onComplete: () => void (w && (w.style.overflow = "")),
     });
     return () => void tl.progress(1);

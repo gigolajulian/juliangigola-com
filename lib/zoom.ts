@@ -17,7 +17,6 @@
  * that mounts the viewer and one that unmounts it.
  * ─────────────────────────────────────────────────────────────── */
 
-import { mplan } from "@/lib/mplan";
 
 /** Opening: how long, and on what curve. */
 const OPEN_MS = 420;
@@ -201,8 +200,8 @@ const fade = (
   el.animate([{ opacity: from }, { opacity: to }], {
     duration: ms,
     delay,
-    // MOTION-PLAN.md item 4 (`?mplan=exits`): the chrome leaves on `out` too, never ease-in.
-    easing: to ? "ease-out" : mplan("exits") ? "cubic-bezier(.23,1,.32,1)" : "ease-in",
+    // MOTION-PLAN.md item 4: the chrome leaves on `out` too, never ease-in.
+    easing: to ? "ease-out" : "cubic-bezier(.23,1,.32,1)",
     fill: "backwards",
   });
 };
