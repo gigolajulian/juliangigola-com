@@ -223,6 +223,25 @@ describe("cover-sound", () => {
     expect(now.result.current).toBe("");
   });
 
+  it("plays the viewer's release only on Preview, and stops it on a second press", async () => {
+    const { CoverSound, useSound } = await fresh();
+    const now = renderHook(() => useSound());
+    const onPlay = vi.fn();
+    render(<CoverSound slug={PREVIEW[0]} onPlay={onPlay} />);
+    expect(now.result.current).toBe("");
+    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+    expect(onPlay).toHaveBeenCalledOnce();
+    expect(now.result.current).toBe(PREVIEW[0]);
+    fireEvent.click(screen.getByRole("button", { name: "Stop preview" }));
+    expect(now.result.current).toBe("");
+  });
+
+  it("shows no Preview for a release with no clip", async () => {
+    const { CoverSound } = await fresh();
+    render(<CoverSound slug="no-such-release" />);
+    expect(screen.queryByRole("button", { name: "Preview" })).toBeNull();
+  });
+
   it("plays a SoundCloud-only song through SoundCloud's player, and links to it", async () => {
     const sc = Object.entries(SOUND).find(([, c]) => !("preview" in c) && !("clip" in c) && "soundcloud" in c);
     if (!sc) return;

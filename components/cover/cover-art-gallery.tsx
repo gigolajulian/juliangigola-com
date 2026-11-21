@@ -45,8 +45,8 @@ export function CoverArtGallery({
   v4?: boolean;
 }) {
   const list = React.useRef<HTMLUListElement>(null);
-  /* The song on the cover (`snd`, components/cover/cover-sound.tsx): a click that opens a cover plays it, and so
-     does the pointer held on one for 4.3 seconds (Julian 2026-11-21), so crossing or browsing the grid fires nothing. */
+  /* The song on the cover (`snd`, components/cover/cover-sound.tsx): the pointer held on one for 4.3 seconds plays
+     it, so crossing or browsing the grid fires nothing, and the viewer's Preview button does (Julian 2026-11-21). */
   const snd = useV4pages("snd") && v4;
   const playing = useSound();
   /** The release whose clip a click started: the viewer's, so the pointer leaving its sleeve does not stop it. */
@@ -156,13 +156,9 @@ export function CoverArtGallery({
             <button
               type="button"
               onClick={(e) => {
-                if (snd) {
-                  // In the click itself, not after the picture has decoded: Safari only lets a gesture start sound.
-                  // shortcut: an open abandoned while the picture decodes (Escape at once) leaves the clip playing
-                  // until it ends or the next one starts. Upgrade if useLightbox ever reports an abandoned open.
-                  held.current = release.slug;
-                  playSound(release.slug);
-                }
+                // Opening plays nothing (Preview in the viewer does); a clip the hover already started keeps playing
+                // into the viewer, and ends when it closes.
+                if (snd && playing === release.slug) held.current = release.slug;
                 lightbox.show(positions.get(front.src) ?? 0, e.currentTarget.querySelector<HTMLElement>("img"));
               }}
               aria-label={`Open ${coverLabel(release.title, release.artist, release.frames)}`}
@@ -251,7 +247,7 @@ export function CoverArtGallery({
           if (!o) quiet();
           lightbox.onOpenChange(o);
         }}
-        note={snd ? <CoverSound /> : undefined}
+        note={snd ? <CoverSound slug={viewing} onPlay={() => (held.current = viewing)} /> : undefined}
       />
       {/* On the body: `main` carries a transform, and a fixed line inside it would sit at the foot of the page. */}
       {snd && !lightbox.open ? createPortal(<CoverSound className="cv4sf" />, document.body) : null}
