@@ -82,9 +82,10 @@ function cover(lay: (d: HTMLElement) => void, markup: string) {
   d.id = "jg-cover";
   d.setAttribute("aria-hidden", "true");
   d.dataset.at = String(performance.now());
-  /* iPad and desktop: over the calendar only, the steps, title and cards
-     show at once; it follows the calendar's box as it is drawn. A phone: the
-     whole screen. */
+  /* Over the calendar only, on every screen: the steps, title, photo and
+     cards show at once; it follows the calendar's box as it is drawn. A phone
+     had the whole screen until Julian, 2026-11-21: "phone cover only on
+     calendar". */
   // under the session cards (and the lines under them): where the calendar starts
   const top = (n: Element) => {
     let t = n.getBoundingClientRect().top;
@@ -94,10 +95,9 @@ function cover(lay: (d: HTMLElement) => void, markup: string) {
     }
     return t;
   };
-  /* The whole screen on an upright screen, or when the calendar starts out of view: upright, the box sits below
-     the fold and nothing would show. */
+  // the whole screen only if the calendar is not in the page yet
   const f0 = document.querySelector("#p-flow .f-body");
-  const box = innerWidth >= 768 && innerWidth > innerHeight && f0 && top(f0) < innerHeight - 240 ? (d.dataset.box = "", true) : false;
+  const box = f0 ? (d.dataset.box = "", true) : false;
   d.style.cssText = box ? "position:absolute;z-index:5;overflow:hidden" : "position:fixed;inset:0;z-index:2147483000";
   d.innerHTML = markup;
   // smaller over the calendar
