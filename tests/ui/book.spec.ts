@@ -13,7 +13,6 @@ for (const r of [...RATIOS, SHORT]) {
     if (await upright(page, r, browserName)) return ctx.close();
     const confirm = page.getByRole("button", { name: CONFIRM });
     await page.locator("[data-day]").first().waitFor({ timeout: 30_000 });
-    await page.waitForTimeout(800);
 
     // JG V3 (master stepper): it opens on the first open day and time, so
     // Continue is on from the start; a day and a time change the pick.
@@ -34,7 +33,11 @@ for (const r of [...RATIOS, SHORT]) {
 
     // Scrolled to the end: Confirm on screen, above the footer, and no time under its bar.
     await page.evaluate(() => scrollTo(0, document.documentElement.scrollHeight));
-    await page.waitForTimeout(400);
+    // at the end, and held there over two frames
+    await expect.poll(() => page.evaluate(() => new Promise<boolean>((done) => {
+      const y = scrollY;
+      requestAnimationFrame(() => requestAnimationFrame(() => done(scrollY === y && scrollY + innerHeight >= document.documentElement.scrollHeight - 1)));
+    })), { message: "scrolled to the end" }).toBe(true);
     const c = await confirm.evaluate((b) => {
       const q = b.getBoundingClientRect(), bar = b.parentElement!.getBoundingClientRect();
       const foot = document.querySelector("footer")?.getBoundingClientRect();

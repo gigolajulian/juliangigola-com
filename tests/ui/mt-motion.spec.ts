@@ -22,6 +22,15 @@ const topAt = async (page: Page, sel: string, f: number) => {
   await to(page, b.top - f * b.vh);
 };
 const bar = (page: Page, name: string) => page.locator(`[data-mt="${name}"]`).evaluate((el) => el.hasAttribute("data-bar"));
+/** The section never takes the bar: sampled every 50 ms for 400 ms, every sample false. */
+const noBar = (page: Page, name: string) =>
+  page.locator(`[data-mt="${name}"]`).evaluate(async (el) => {
+    for (let i = 0; i <= 8; i++) {
+      if (el.hasAttribute("data-bar")) return false;
+      if (i < 8) await new Promise((r) => setTimeout(r, 50));
+    }
+    return true;
+  });
 
 async function home(page: Page, q = "") {
   await page.goto(`/?intro=0&mtscroll=1${q}`, { waitUntil: "load" });
@@ -46,9 +55,9 @@ test("laptop: a held section's --p runs 0 to 1 through its hold, and no section 
 
   for (const name of ["book", "quote"]) {
     await topAt(page, `[data-mt="${name}"]`, 0.2);
-    await page.waitForTimeout(200);
-    expect(await bar(page, "book"), `book has no bar with ${name} up`).toBe(false);
-    expect(await bar(page, "quote"), `quote has no bar with ${name} up`).toBe(false);
+    const [book, quote] = await Promise.all([noBar(page, "book"), noBar(page, "quote")]);
+    expect(book, `book has no bar with ${name} up`).toBe(true);
+    expect(quote, `quote has no bar with ${name} up`).toBe(true);
   }
   expect(errors).toEqual([]);
   await ctx.close();
@@ -61,8 +70,7 @@ test("phone: no holds, and Book online and By quote take the bar once their top 
   await expect(page.locator("html[data-mt-held]")).toHaveCount(0);
 
   await topAt(page, '[data-mt="book"]', 0.8);
-  await page.waitForTimeout(200);
-  expect(await bar(page, "book"), "book low on the screen").toBe(false);
+  expect(await noBar(page, "book"), "book low on the screen").toBe(true);
 
   await topAt(page, '[data-mt="book"]', 0.2);
   await expect.poll(() => bar(page, "book"), { message: "book up" }).toBe(true);
