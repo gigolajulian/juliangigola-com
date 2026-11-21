@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { BackLink } from "@/components/site/back-link";
 import { notFound } from "next/navigation";
-import { CoverArt } from "@/components/v3/sleeves";
+import { CoverArt } from "@/components/cover/sleeves";
 import { CoverPage } from "@/components/cover/cover-page";
 import { CallToAction } from "@/components/call-to-action";
 import { SESSION_SEO } from "@/lib/seo";
 import { projectFacts, shareMeta } from "@/lib/share";
-import { V3Project } from "@/components/v3/project";
+import { V3Project } from "@/components/portfolio/project";
 import {
   LINKABLE,
   UNLISTED,
@@ -117,7 +117,7 @@ export default async function ProjectPage(props: PageProps<"/portfolio/[slug]">)
           className="mt-24"
           title="Want something like this?"
           body="Tell me what you have in mind and I'll come back with a treatment and a rate."
-          // The value /contact/form preselects on (TYPE in components/v3/inquire.tsx).
+          // The value /contact/form preselects on (TYPE in components/contact/inquire.tsx).
           type="coverart"
           detail={project.name}
           secondary={

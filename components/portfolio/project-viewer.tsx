@@ -3,7 +3,7 @@
 import * as React from "react";
 import { v4pages } from "@/lib/flags/v4pages";
 import { matches } from "@/lib/device";
-import type { FrameItem, FrameView } from "@/components/v3/work";
+import type { FrameItem, FrameView } from "@/components/portfolio/work";
 
 /* The project page's two trial pieces (inner-pages plan, `?v4pages`), kept out
    of the server component. Renders nothing until a frame is opened.
@@ -80,7 +80,7 @@ export function V4Project({ frames }: { frames: FrameItem[] }) {
         if (e.key !== "Enter" && e.key !== " ") return;
         e.preventDefault();
       }
-      void import("@/components/v3/work").then((m) => {
+      void import("@/components/portfolio/work").then((m) => {
         setView(() => m.FrameView);
         setAt(i);
       });

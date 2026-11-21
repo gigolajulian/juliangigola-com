@@ -7,7 +7,7 @@ import { GlassLight } from "@/components/effects/glass-light";
 import { PhotoFade } from "@/components/effects/photo-fade";
 import { TextCaret } from "@/components/effects/text-caret";
 import { NavMemo } from "@/components/site/back-link";
-import { PageFly } from "@/components/v3/page-fly";
+import { PageFly } from "@/components/site/page-fly";
 import { THEME_COLOR } from "@/lib/theme-color";
 import "./globals.css";
 import { ImageFallback } from "@/components/image-fallback";
@@ -19,10 +19,10 @@ import { ldJson, siteGraph } from "@/lib/seo";
 import { DebugGate } from "@/components/dev/debug-gate";
 import { VisitTrail } from "@/components/analytics/visit-trail";
 import { ClickBeacon } from "@/components/analytics/click-beacon";
-import { MotionGate, V3Footer, V3Header } from "@/components/v3/chrome";
-import { ScrollThumb } from "@/components/v3/scroll-thumb";
+import { MotionGate, V3Footer, V3Header } from "@/components/site/chrome";
+import { ScrollThumb } from "@/components/site/scroll-thumb";
 import { SmoothScroll } from "@/components/v3/smooth-scroll";
-import { ScrollReveal } from "@/components/v3/scroll-reveal";
+import { ScrollReveal } from "@/components/site/scroll-reveal";
 import { V4_HOME } from "@/lib/v4-home/switch";
 import { V4PAGES_HEAD } from "@/lib/flags/v4pages";
 
@@ -148,7 +148,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
          * It has to be inline and it has to be here: an effect runs after
          * hydration, which is several hundred milliseconds of a full-bleed
          * dark page for somebody whose system is light — the flash that
-         * makes a theme feel broken. `components/v3/chrome.tsx` keeps following the
+         * makes a theme feel broken. `components/site/chrome.tsx` keeps following the
          * system after that, until the toggle is pressed.
          *
          * It also writes the page's colour onto both `theme-color` tags. Julian,
@@ -158,7 +158,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
          * scheme — so a phone set to light with the site switched to dark got
          * the light colour over a black page. The tags stay for the visitor
          * with no JavaScript, and from here on both carry whichever theme is
-         * actually showing; `components/v3/chrome.tsx` rewrites them when it changes.
+         * actually showing; `components/site/chrome.tsx` rewrites them when it changes.
          *
          * The proof gate's wall (the default; `?proofwall=0` for the plain gate) is always dark.
          *

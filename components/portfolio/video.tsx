@@ -2,8 +2,8 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { PageFoot } from "@/components/v3/chrome";
-import { Mark } from "@/components/v3/duo";
+import { PageFoot } from "@/components/site/chrome";
+import { Mark } from "@/components/site/duo";
 import { REEL, creditOf, embedUrl, previewUrl, captionsOff, vimeoListen, vimeoPlays, posterFor, sectionName, type Video } from "@/lib/work/videos";
 
 /* JG V3 Motion (Julian): A as an index over one full-screen stage;

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { V3Home, type TopWork } from "@/components/v3/home";
+import { V3Home, type TopWork } from "@/components/home/rollback";
 import { MtGate } from "@/components/v4/home/gate";
-import { COMMISSION_TABS } from "@/lib/flags/v3";
+import { COMMISSION_TABS } from "@/lib/photos-and-sessions";
 import { PROJECTS, categoryLabel } from "@/lib/work/work";
 import { MT } from "@/lib/v4-home/server";
 import ORDER from "@/lib/portfolio-order.json";

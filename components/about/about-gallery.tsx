@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { ABOUT_PHOTO } from "@/lib/flags/v3";
+import { ABOUT_PHOTO } from "@/lib/photos-and-sessions";
 
 /* About hero gallery (master v50): a 1.2s crossfade every 6s like the cover;
    a tick or a click on the photo picks one, the caption follows. A sideways
