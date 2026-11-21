@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { reveal } from "@/components/splash/jg-cover";
 
 /* ── the booking calendar's wait: J and G fill left to right ─────────
  * Julian picked E from the loader mock (2026-11-07). The count follows
@@ -17,90 +18,8 @@ import * as React from "react";
 const CREEP = 900; // ms, how slowly the count nears 90 with no answer yet
 const FINISH = 240; // ms, from wherever it is to 100 once the times are in
 const UP = 800; // split: the cover's J and G fading in; also the least they show
-const REVEAL = 1200; // split: the cut growing until the page fills the screen
-const BIG = 60; // split: how far the cut grows; the ground is gone before that
 const noop = () => () => {};
-const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2); // in-out cubic, over the log of the scale
 
-/* The cut opens: J and G close over the middle, the cut grows from where
-   they meet while their ink fades, and the page rises into place from
-   below, straight up on every screen. It lands as the ground finishes fading, so nothing is still
-   settling once the cover is gone. Once per cover; the
-   ground is the page's own colour all the way, so no frame is black. */
-function reveal(cover: HTMLElement) {
-  if (cover.dataset.go) return;
-  cover.dataset.go = "";
-  cover.style.pointerEvents = "none";
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return cover.remove();
-  const ink = cover.querySelector<SVGGElement>(".ink");
-  const ln = cover.querySelector<HTMLElement>(".ln");
-  const mg = cover.querySelector<SVGGElement>(".mg");
-  const gr = cover.querySelector<SVGRectElement>(".gr");
-  if (!ink || !ln || !mg || !gr) return cover.remove();
-  // where J meets G, the middle of the mark, in the middle of the screen (`jg-cover.ts`)
-  const ox = Number(cover.dataset.ox) || cover.clientWidth / 2, oy = Number(cover.dataset.oy) || cover.clientHeight / 2;
-  const close = Number(cover.dataset.close) || 0;
-  const ct = mg.querySelector<SVGEllipseElement>(".ct");
-  const ctx = Number(ct?.getAttribute("cx"));
-  /* From below: the session photo's middle under the mark where the layout
-     allows (a phone, the photo on top), a fifth of the screen at least. */
-  // over the calendar only (iPad, desktop): the rest of the page is already in place and stays still
-  const page = cover.dataset.box === undefined ? document.getElementById("p-flow") : null;
-  const ph = page?.querySelector(".ph")?.getBoundingClientRect();
-  const pr = page?.getBoundingClientRect();
-  const rise = Math.max(innerHeight * 0.2, ph && ph.height > 0 ? oy - (ph.top + ph.height / 2) : 0);
-  if (page && pr) {
-    page.style.transformOrigin = `${ox - pr.left}px ${oy - pr.top}px`;
-    page.style.willChange = "transform";
-  }
-  const settle = (p: number) => {
-    if (!page) return;
-    // a touch smaller to its size, never larger: scaled up, the page scrolled sideways while it settled (QA: 147px at 1440)
-    const e = ease(Math.min(1, p / 0.85));
-    page.style.transform = e < 1 ? `translateY(${rise * (1 - e)}px) scale(${0.94 + 0.06 * e})` : "";
-  };
-  /* The ink stays in the letters until they are big enough to show the page
-     (a small window onto it reads as an empty letter), and the ground fades
-     while the cut is still a size Chrome draws: text past a few thousand px
-     stops rendering and the whole cover flashed solid. */
-  // over the calendar only, 4 times is past the box's edges and the letters never showed the page (Julian: "the cutout doesn't show what's under it")
-  const off = page ? 4 : 1.25;
-  const frame = (p: number) => {
-    const e = ease(p), k = Math.exp(Math.log(BIG) * e);
-    mg.setAttribute("transform", `translate(${ox} ${oy}) scale(${k}) translate(${-ox} ${-oy})`);
-    ink.setAttribute("transform", `translate(${ox} ${oy}) scale(${k}) translate(${-ox} ${-oy})`);
-    /* Off in one frame at 4 times its size, when the letters show a good
-       piece of the page on any screen: faded, it read as a grey veil over
-       the page (JG - MAC, Safari); empty sooner over the dark calendar. */
-    ink.style.opacity = k < off ? "1" : "0";
-    // the G's inside is cut in the same frame, so no piece of ground crosses the face as the cut grows (closing it over a few frames still showed it)
-    if (ct && k >= off && ct.getAttribute("rx") === "0") {
-      ct.setAttribute("rx", ct.dataset.rx ?? "0");
-      ct.setAttribute("ry", ct.dataset.ry ?? "0");
-    }
-    // the ground only once the ink is off, or the page showed dim behind solid letters
-    gr.style.opacity = String(Math.min(1, Math.max(0, 1 - (p - 0.47) / 0.38)));
-    settle(p);
-  };
-  ink.getAnimations().forEach((a) => a.cancel());
-  frame(0);
-  mg.querySelectorAll("text").forEach((t) => t.setAttribute("fill", "#000"));
-  ln.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 300, easing: "ease", fill: "forwards" });
-  // J and G close over the middle first, so the point the cut grows from is inside a letter, not the gap
-  const texts = [...cover.querySelectorAll<SVGTextElement>("text")].map((t) => ({ t, x: Number(t.getAttribute("x")), dir: t.classList.contains("j") ? 1 : -1 }));
-  const t0 = performance.now();
-  const step = (now: number) => {
-    const c = Math.min(1, (now - t0) / 240), ce = 1 - (1 - c) ** 3;
-    for (const { t, x, dir } of texts) t.setAttribute("x", String(x + dir * close * ce));
-    if (ct) ct.setAttribute("cx", String(ctx - close * ce)); // with the G
-    const p = Math.min(1, Math.max(0, (now - t0 - 120) / REVEAL));
-    frame(p);
-    if (p < 1) return requestAnimationFrame(step);
-    cover.remove();
-    if (page) page.style.transform = page.style.transformOrigin = page.style.willChange = "";
-  };
-  requestAnimationFrame(step);
-}
 let leaving = 0; // an unmount's reveal, held a moment in case the effect is only re-run
 
 export function JgLoad({ done, onDone, className }: { done: boolean; onDone: () => void; className?: string }) {
