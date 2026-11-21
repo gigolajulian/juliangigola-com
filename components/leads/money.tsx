@@ -15,7 +15,7 @@ import { Heading, Text } from "@astryxdesign/core/Text";
 import { Badge } from "@astryxdesign/core/Badge";
 import { Banner } from "@astryxdesign/core/Banner";
 import { Table } from "@astryxdesign/core/Table";
-import { adminCall, cash, day, errorText } from "@/lib/leads/lead-desk";
+import { adminCall, centsLabel, dayLabel, errorText } from "@/lib/leads/lead-desk";
 
 export type Txn = { id: string; at: string; type: string; amount: number; fee: number; net: number; currency: string; status: string; what: string };
 /** Stripe's types in his words. */
@@ -72,8 +72,8 @@ export function MoneyDesk() {
             {top?.test ? <Banner status="info" title="Stripe test mode" description="These are test payments." /> : null}
             {top ? (
               <Grid columns={{ minWidth: 180 }} gap={3}>
-                {tile("Available", cash(top.available), "Ready to pay out")}
-                {tile("On the way", cash(top.pending), "Not settled yet")}
+                {tile("Available", centsLabel(top.available), "Ready to pay out")}
+                {tile("On the way", centsLabel(top.pending), "Not settled yet")}
               </Grid>
             ) : null}
             {top ? (
@@ -85,11 +85,11 @@ export function MoneyDesk() {
                     idKey="id"
                     textOverflow="truncate"
                     columns={[
-                      { key: "at", header: "Date", renderCell: (t) => day(t.at) },
+                      { key: "at", header: "Date", renderCell: (t) => dayLabel(t.at) },
                       { key: "type", header: "Type", renderCell: (t) => <Badge label={kind(t)} variant={t.net < 0 ? "neutral" : t.type === "dispute" ? "error" : "teal"} /> },
                       { key: "what", header: "What", renderCell: (t) => `${t.what || kind(t)}${t.status === "pending" ? " · on the way" : ""}` },
-                      { key: "fee", header: "Stripe fee", align: "end", renderCell: (t) => (t.fee ? cash(t.fee) : "") },
-                      { key: "net", header: "Net", align: "end", renderCell: (t) => <Text type="code" weight="medium" color={t.net < 0 ? "secondary" : undefined}>{cash(t.net)}</Text> },
+                      { key: "fee", header: "Stripe fee", align: "end", renderCell: (t) => (t.fee ? centsLabel(t.fee) : "") },
+                      { key: "net", header: "Net", align: "end", renderCell: (t) => <Text type="code" weight="medium" color={t.net < 0 ? "secondary" : undefined}>{centsLabel(t.net)}</Text> },
                     ]}
                   />
                 ) : <Text type="supporting" color="secondary">Nothing yet.</Text>}

@@ -14,7 +14,7 @@ import { ScrollableArea } from "@astryxdesign/core/ScrollableArea";
 import { Button } from "@astryxdesign/core/Button";
 import { Text } from "@astryxdesign/core/Text";
 import { STAGES, shootTag, type LeadSummary, type Stage } from "@/lib/leads/leads";
-import { money, nextStep } from "@/lib/leads/lead-desk";
+import { dollarsLabel, nextStep } from "@/lib/leads/lead-desk";
 
 const COLUMNS: readonly Stage[] = STAGES.filter((s) => s !== "Lost");
 const RECENT = 30 * 864e5;
@@ -55,7 +55,7 @@ export function BoardDesk({ leads, onMove, open }: { leads: LeadSummary[]; onMov
               <VStack gap={2}>
                 <HStack vAlign="center">
                   <StackItem size="fill"><Text type="code" size="xsm" color="secondary" weight="medium">{s.toUpperCase()}{s === "Delivered" ? " · 30 D" : ""}</Text></StackItem>
-                  <Text type="code" size="xsm" color="secondary">{rows.length}{quoted ? ` · ${money(quoted)}` : ""}</Text>
+                  <Text type="code" size="xsm" color="secondary">{rows.length}{quoted ? ` · ${dollarsLabel(quoted)}` : ""}</Text>
                 </HStack>
                 {rows.map((l) => (
                   <div
@@ -68,7 +68,7 @@ export function BoardDesk({ leads, onMove, open }: { leads: LeadSummary[]; onMov
                     <Card padding={3}>
                       <VStack gap={1}>
                         <Text type="label">{l.name || l.email}</Text>
-                        <Text type="code" size="xsm" color="secondary">{[l.kind ? shootTag(l.kind)?.toUpperCase() : null, l.quote ? money(l.quote) : null].filter(Boolean).join(" · ") || " "}</Text>
+                        <Text type="code" size="xsm" color="secondary">{[l.kind ? shootTag(l.kind)?.toUpperCase() : null, l.quote ? dollarsLabel(l.quote) : null].filter(Boolean).join(" · ") || " "}</Text>
                         {nextStep(l) ? <Text type="code" size="sm" color="accent">{nextStep(l)} →</Text> : null}
                         <StackItem><Button label="Open" variant="ghost" size="sm" onClick={() => open(l)} /></StackItem>
                       </VStack>

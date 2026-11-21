@@ -19,13 +19,23 @@ export class AdminError extends Error {
   }
 }
 
-/** One authed JSON request to an admin route. A non-JSON body (an HTML 502) reads as {}, so the status still shows. */
-/** `fail` is what a failure says when the route gave no error of its own. */
+/**
+ * One authed JSON request to an admin route. `fail` is what a failure says
+ * when the route gave no error of its own. A failed answer that is not JSON
+ * (an HTML 502) reads as {}, so the status still shows; a 2xx that is not
+ * JSON throws, since there is nothing to hand back.
+ */
 export async function adminCall<T = Record<string, unknown>>(path: string, init: RequestInit = {}, fail?: string): Promise<T> {
   const res = await fetch(path, { ...init, headers: { ...authed(), "content-type": "application/json", ...init.headers }, cache: "no-store" });
-  const out = (await res.json().catch(() => ({}))) as T & { error?: string };
-  if (!res.ok) throw new AdminError(out.error ?? fail ?? `Request failed (${res.status})`, res.status);
-  return out;
+  const text = await res.text().catch(() => "");
+  let out: (T & { error?: string }) | undefined;
+  try {
+    out = JSON.parse(text);
+  } catch {
+    if (res.ok) throw new AdminError(fail ?? "The route did not answer with JSON.", res.status);
+  }
+  if (!res.ok) throw new AdminError(out?.error ?? fail ?? `Request failed (${res.status})`, res.status);
+  return out as T;
 }
 
 export type Call = <T = Record<string, unknown>>(init?: RequestInit & { query?: string }) => Promise<T>;
@@ -90,7 +100,7 @@ export function nextStep(l: LeadSummary): string | null {
   return myMove(l, now());
 }
 
-export function pass(l: LeadSummary, f: Filter) {
+export function inFilter(l: LeadSummary, f: Filter) {
   if (f === "trash") return !!l.trashedAt;
   if (f === "archived") return !!l.archivedAt && !l.trashedAt;
   if (f === "needs") return needsMe(l);
@@ -108,8 +118,8 @@ export const ago = (iso: string) => {
   if (mins < 48 * 60) return `${Math.round(mins / 60)} h`;
   return `${Math.round(mins / 1440)} d`;
 };
-export const day = (iso: string) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, month: "short", day: "numeric" }).format(new Date(iso));
-export const at = (iso: string) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(iso));
+export const dayLabel = (iso: string) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, month: "short", day: "numeric" }).format(new Date(iso));
+export const dateTimeLabel = (iso: string) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(iso));
 
-export const money = (n: number) => `$${Math.round(n).toLocaleString("en-US")}`;
-export const cash = (cents: number) => `${cents < 0 ? "−" : ""}$${(Math.abs(cents) / 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+export const dollarsLabel = (n: number) => `$${Math.round(n).toLocaleString("en-US")}`;
+export const centsLabel = (cents: number) => `${cents < 0 ? "−" : ""}$${(Math.abs(cents) / 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
