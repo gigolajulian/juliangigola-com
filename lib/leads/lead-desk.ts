@@ -48,7 +48,10 @@ export type Patch = (b: LeadPatch) => Promise<Lead>;
 export const errorText = (e: unknown) => (e instanceof Error ? e.message : String(e));
 export const OFFLINE = "Offline. The desk loads again when you are back online.";
 /** What a failed load says: offline, or the route's own words. */
-export const loadError = (e: unknown) => (navigator.onLine === false || e instanceof TypeError ? OFFLINE : errorText(e));
+/** Any 401 from the admin gate (`refuseAdmin`): a missing key or a token GitHub refused. The desks show sign-in for it. */
+export const isLocked = (e: unknown) => e instanceof AdminError && e.status === 401;
+export const LOCKED = "Not authorized.";
+export const loadError = (e: unknown) => (navigator.onLine === false || e instanceof TypeError ? OFFLINE : isLocked(e) ? LOCKED : errorText(e));
 
 /** "Nov 11, 4:05 PM" in Julian's time. */
 export const stampPT = (iso: string) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(iso));
