@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { NotFoundScene } from "@/components/not-found-scene";
-import DriftWall from "@/components/drift-wall";
+import { DriftWall } from "@/components/drift-wall";
 import { DISCIPLINES, WALL, titleCase } from "@/lib/work";
 import { wallItem } from "@/lib/wall-tile";
 

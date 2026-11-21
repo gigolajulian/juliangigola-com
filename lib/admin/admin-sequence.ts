@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { isTextRef, type FrameRef, type TextRef } from "@/lib/added";
-import { MAX_WIDTH, processImage } from "@/lib/admin/admin-image";
+import { MAX_WIDTH, prepareImage } from "@/lib/admin/admin-image";
 
 /* ── a project's sequence, as state ───────────────────────────────
  * Everything that changes the order of a project's frames and passages,
@@ -108,7 +108,7 @@ export function useSequence({
     for (const [i, file] of chosen.entries()) {
       setBusy(`Reading ${i + 1} of ${chosen.length}…`);
       try {
-        const image = await processImage(file, MAX_WIDTH);
+        const image = await prepareImage(file, MAX_WIDTH);
         made.push({
           path: uploadPath(slug, i),
           base64: image.base64,

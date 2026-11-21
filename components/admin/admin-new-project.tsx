@@ -6,7 +6,7 @@ import { commitFiles, readFile } from "@/lib/admin/admin-github";
 import {
   COVER_WIDTH,
   MAX_WIDTH,
-  processImage,
+  prepareImage,
   toSlug,
 } from "@/lib/admin/admin-image";
 import type { Credit, Frame } from "@/lib/work-types";
@@ -83,7 +83,7 @@ export function AdminNewProject({
     // browser tab runs out of memory and dies without an error.
     for (const item of incoming) {
       try {
-        const processed = await processImage(item.file, MAX_WIDTH);
+        const processed = await prepareImage(item.file, MAX_WIDTH);
         setStaged((s) =>
           s.map((x) => (x.file === item.file ? { ...x, processed } : x)),
         );
@@ -126,7 +126,7 @@ export function AdminNewProject({
       // The opening frame again at 600px. Indexes and hover previews show
       // dozens at once; pointing those at the 2500px originals costs
       // megabytes before anything is visible.
-      const cover = await processImage(ready[0].file, COVER_WIDTH);
+      const cover = await prepareImage(ready[0].file, COVER_WIDTH);
 
       const dir = `public/work/${slug}`;
       const images: Frame[] = ready.map((item, i) => ({
