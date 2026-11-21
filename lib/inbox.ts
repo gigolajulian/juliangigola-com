@@ -63,7 +63,7 @@ export type Enquiry = {
 /* ── where an inquiry came from ───────────────────────────────────
  * More to go on without more to fill in. The page
  * it was sent from, where the visit began (referrer, utm_ tags), the
- * pages read on the way (`components/visit-trail.tsx`), the device, and
+ * pages read on the way (`components/analytics/visit-trail.tsx`), the device, and
  * the city Cloudflare places the request in. Never the IP.
  * ─────────────────────────────────────────────────────────────── */
 export type VisitContext = {

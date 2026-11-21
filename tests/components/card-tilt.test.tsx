@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render } from "@testing-library/react";
-import { CardTilt } from "@/components/card-tilt";
+import { CardTilt } from "@/components/effects/card-tilt";
 
 const fine = (on: boolean) =>
   vi

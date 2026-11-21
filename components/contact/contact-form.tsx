@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import StatusMark from "@/components/vendor/status-mark";
 import { Orb, ORB_ROUND } from "@/components/effects/orb";
 import { ReferencePicks } from "@/components/reference-picks";
-import { trailContext } from "@/components/visit-trail";
+import { trailContext } from "@/components/analytics/visit-trail";
 
 /* ── the enquiry ──────────────────────────────────────────────────
  * The old form was three fields: name, email, message. Which means every

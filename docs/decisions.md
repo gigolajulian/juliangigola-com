@@ -218,7 +218,7 @@ states its rule inline. `SPEC-home-scroll.md` citations point at
 - 2026-10-20: once the orb goes the card is there whole.
 - 2026-10-17: scrolls.
 
-### components/contact-form.tsx
+### components/contact/contact-form.tsx
 - 2026-10-14: one or two taps per kind of shoot.
 - 2026-10-14: a page about one kind of shoot does not ask the kind again.
 - 2026-10-14: a simpler, shorter form. The follow-up question became the message's placeholder.
@@ -402,7 +402,7 @@ states its rule inline. `SPEC-home-scroll.md` citations point at
 ### components/v4/foot.tsx
 - 2026-11-16: the whole grid while its photos drift dropped frames.
 
-### components/visit-trail.tsx
+### components/analytics/visit-trail.tsx
 - 2026-10-14: an inquiry says where its sender came from.
 
 ### lib/booking/booking-engine.ts
@@ -572,8 +572,8 @@ it on his own devices.
 | Flag | Plan item | What it turns on | Where |
 | --- | --- | --- | --- |
 | `?debug` | 0.3 | fps, finger dots and a frame log. Nothing loads without it. | `components/dev/debug-gate.tsx`, `components/dev/debug-overlay.tsx` |
-| `?wall=slow` | 1.1 | On a screen 1600px wide or more, the Inquiries wall drifts at half speed with bigger tiles. | `components/inquire-wall.tsx` |
-| `?wall=still` | 1.1 | The wall eases to a stop while the form is in use, and the beam rests. | `components/inquire-wall.tsx`, `components/contact-beam.tsx` |
+| `?wall=slow` | 1.1 | On a screen 1600px wide or more, the Inquiries wall drifts at half speed with bigger tiles. | `components/contact/inquire-wall.tsx` |
+| `?wall=still` | 1.1 | The wall eases to a stop while the form is in use, and the beam rests. | `components/contact/inquire-wall.tsx`, `components/contact-beam.tsx` |
 | `?notch` | 1.4 | A mouse notch moves the strip by its own ease instead of Lenis. | `components/strip/shared.ts` |
 
 Older previews still in the code: `?flyout`, `?menu3d`, `?deal`, `?cards`,
@@ -720,13 +720,13 @@ reported; a quote after "Julian:" is his wording, as the comment had it.
 - `app/styles/work-view.css`: The ask at the end of the work ("Have a project in mind?") is in the section titles' Archivo. (Julian)
 - `app/styles/work-view.css`: More room before the name inside its card. (Julian)
 - `app/styles/work-view.css`: The page's own colour, and carried left across the room before it: in a slide the chapter going under showed through that room as a dark bar riding the card's edge. (Julian)
-- `components/card-tilt.tsx`: The card's own middle, from wherever its origin is: the deck (`lib/deck.ts`) moves a portfolio cell's origin to the screen's middle for its recede, and turned about that the tilt threw the card wide across its neighbours. (Julian)
+- `components/effects/card-tilt.tsx`: The card's own middle, from wherever its origin is: the deck (`lib/deck.ts`) moves a portfolio cell's origin to the screen's middle for its recede, and turned about that the tilt threw the card wide across its neighbours. (Julian)
 - `components/contact-beam.tsx`: Two laps and then rest, on every screen. (Julian)
-- `components/contact-form.tsx`: A chosen kind of shoot is inverted. (Julian)
+- `components/contact/contact-form.tsx`: A chosen kind of shoot is inverted. (Julian)
 - `components/cover-faces.tsx`: Image Transformations size it to the cell now (`image-loader.ts`); the 800px copy was stretched to 1750 device px in the tall rows and read as low resolution. (Julian)
 - `components/cover-float.tsx`: Home on the homepage's rail; a booking page keeps Cover. (Julian)
-- `components/focus-field.tsx`: Never over the inquiry form: picking a kind of shoot blurred the screen round it. (Julian)
-- `components/inquire-wall.tsx`: Scaled out so more of the work shows (1.25 to 0.85), and no more than 24 photographs loaded for it however wide the screen, so it stays light. (Julian)
+- `components/contact/focus-field.tsx`: Never over the inquiry form: picking a kind of shoot blurred the screen round it. (Julian)
+- `components/contact/inquire-wall.tsx`: Scaled out so more of the work shows (1.25 to 0.85), and no more than 24 photographs loaded for it however wide the screen, so it stays light. (Julian)
 - `components/project-strip.tsx`: On a discipline's own page too. Julian: show up next.
 - `components/reference-picks.tsx`: Four a row, three on a phone. (Julian)
 - `components/reference-picks.tsx`: A little larger under the hand: it can be picked. (Julian)
@@ -826,12 +826,12 @@ reported; a quote after "Julian:" is his wording, as the comment had it.
 - `components/admin-inbox.tsx`: Only what actually loads is shown: a broken tile, or a heading over none, says nothing. (Julian)
 - `components/contact-beam.tsx`: A white line and its glow that go round the form, never sitting still: the beam is the whole effect, wider and brighter (a static line and halo on the card were tried and taken off). (Julian)
 - `components/contact-beam.tsx`: The beam slower: a lap in six seconds, was four. (Julian)
-- `components/contact-form.tsx`: The address on the left, the button on the right, the sentence off the screen (still read out with the button). (Julian)
-- `components/contact-form.tsx`: Said, not only shown: the faint "Optional" placeholder is a look, so the label carries the fact. (Julian)
-- `components/contact-form.tsx`: Form placeholders fainter; they were 60%. (Julian)
+- `components/contact/contact-form.tsx`: The address on the left, the button on the right, the sentence off the screen (still read out with the button). (Julian)
+- `components/contact/contact-form.tsx`: Said, not only shown: the faint "Optional" placeholder is a look, so the label carries the fact. (Julian)
+- `components/contact/contact-form.tsx`: Form placeholders fainter; they were 60%. (Julian)
 - `components/contact-screen.tsx`: The questions' wall behind Inquiries is inert: not to be clicked there. (Julian)
 - `components/cover-float.tsx`: Preview (`?deal=new`, `data-deal`): the frames arrive top to bottom, as one even wave (Julian: top, then the middle, then the bottom, with harmony).
-- `components/inquire-wall.tsx`: A third slower (was 24). (Julian)
+- `components/contact/inquire-wall.tsx`: A third slower (was 24). (Julian)
 - `components/effects/liquid.tsx`: Every item measures its target as it mounts and the engine goes on measuring for thirty frames, which on a phone was a full restyle of the page in the middle of hydration. From the optimize pass.
 - `components/reference-picks.tsx`: References on the inquiry: uploads, and frames picked from the work. (Julian)
 - `components/site-header.tsx`: Both read before either is written: a write to the root's style and then a read restyled the whole page a second time, 140ms on a throttled phone. From the optimize pass.
@@ -890,13 +890,13 @@ reported; a quote after "Julian:" is his wording, as the comment had it.
 - `app/styles/strip.css`: The running head comes in from the left as the cover goes. (Julian)
 - `components/book-picker.tsx`: One window, no vertical scroll: the footer's single line and the page held to the screen, as the portfolio is (`[data-quiet-footer]`, globals.css). (Julian)
 - `components/book-picker.tsx`: As tall as Google's page is, and no taller, in what the window leaves it: only a short one makes it scroll. Julian: shorter, then a bit longer so it never scrolls inside itself.
-- `components/card-tilt.tsx`: The Commissions table's cards (`.light-cell`), and the same on the portfolio's projects. (Julian)
-- `components/contact-form.tsx`: Focus is the rule under the field darkening, to 40% ink. Julian: lower.
+- `components/effects/card-tilt.tsx`: The Commissions table's cards (`.light-cell`), and the same on the portfolio's projects. (Julian)
+- `components/contact/contact-form.tsx`: Focus is the rule under the field darkening, to 40% ink. Julian: lower.
 - `components/cover-cell.tsx`: No zoom under the pointer. Julian: none anywhere.
-- `components/focus-field.tsx`: A hover that spans the gallery. (Julian)
-- `components/focus-field.tsx`: The menu's names too, and on a phone under the finger as well as under a mouse. Julian: the press in the menu should soften the others the way the pointer does over Commissions.
-- `components/focus-field.tsx`: On the portfolio the discipline names between the runs stay sharp: each one in view is cut out of the mask. (Julian)
-- `components/focus-field.tsx`: The clearing is a little wider than the frame under the pointer, so a wide frame and a small one each come into focus whole. Julian: wider than the half it was, then wider again.
+- `components/contact/focus-field.tsx`: A hover that spans the gallery. (Julian)
+- `components/contact/focus-field.tsx`: The menu's names too, and on a phone under the finger as well as under a mouse. Julian: the press in the menu should soften the others the way the pointer does over Commissions.
+- `components/contact/focus-field.tsx`: On the portfolio the discipline names between the runs stay sharp: each one in view is cut out of the mask. (Julian)
+- `components/contact/focus-field.tsx`: The clearing is a little wider than the frame under the pointer, so a wide frame and a small one each come into focus whole. Julian: wider than the half it was, then wider again.
 - `components/hero-dials.tsx`: No swell under the pointer. Julian: no hover zoom anywhere.
 - `components/nav-fly.ts`: The name pressed in the menu, or in the bar on a desktop, should travel into the heading of the screen it opens. (Julian)
 - `components/page-transition.tsx`: Going back needs its animation too. (Julian)
@@ -966,8 +966,8 @@ reported; a quote after "Julian:" is his wording, as the comment had it.
 - `components/about-screen.tsx`: Where the window is too short for it all, these words scroll inside themselves, not the column, so the facts and the buttons under them stay on the screen.
 - `components/about-screen.tsx`: The four steps appear in order as About arrives (`.about-step`, globals.css). (Julian)
 - `components/contact-beam.tsx`: The beam brighter: full strength, the glow past the library's 1.3. (Julian)
-- `components/contact-form.tsx`: Nothing picked until the visitor picks: a private client from the nav landed on Editorial. From the critique.
-- `components/contact-form.tsx`: Book a session landed on the commission desk, the session pushed into the date field. (Julian, critique)
+- `components/contact/contact-form.tsx`: Nothing picked until the visitor picks: a private client from the nav landed on Editorial. From the critique.
+- `components/contact/contact-form.tsx`: Book a session landed on the commission desk, the session pushed into the date field. (Julian, critique)
 - `components/contact-screen.tsx`: One name for the screen, as the nav says it. (Julian)
 - `components/contact-screen.tsx`: On a phone the column dissolves into the screen's own column, so the address and the handles can follow the form rather than stand between the ask and it. From the critique: the name field was 530px down.
 - `components/contact-screen.tsx`: The homepage's head, unless the visitor came to book a session. From the critique.
@@ -1068,7 +1068,7 @@ reported; a quote after "Julian:" is his wording, as the comment had it.
 - `app/styles/strip-motion.css`: A slight shadow under a screen as it comes in, for the depth. (Julian)
 - `app/styles/strip-motion.css`: Contact's title as wide as its column, on one line (two lines at the cover's scale were too big). (Julian)
 - `app/styles/strip-motion.css`: Then: large, across, and over two lines when it is long (Julian: I WANNA BE A HUMAN in two lines).
-- `components/contact-form.tsx`: The form lives on the homepage, so it is mounted long before a session's Inquire is pressed: Graduation landed here on Editorial, asking for a publication and an issue date.
+- `components/contact/contact-form.tsx`: The form lives on the homepage, so it is mounted long before a session's Inquire is pressed: Graduation landed here on Editorial, asking for a publication and an issue date.
 - `components/contact-screen.tsx`: A sentence to a line where there is room. Where there is not, each sentence wraps balanced and set left: it was justified, and "project." stood on a line of its own. Julian: one word doesn't need a whole line.
 - `components/intro.tsx`: The lift should reveal the hero. (Julian)
 - `components/lead-window.tsx`: Past the last screen of the homepage, a peek of the portfolio, so the visitor knows it is opening. (Julian)

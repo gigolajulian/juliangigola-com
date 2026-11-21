@@ -5,7 +5,7 @@ import Link from "next/link";
 import { DialRoot, useDialKit } from "dialkit";
 import { BookTimes } from "@/components/booking/book-times";
 import { DialCopyAll } from "@/components/dev/dial-copy-all";
-import { InquireWall } from "@/components/inquire-wall";
+import { InquireWall } from "@/components/contact/inquire-wall";
 import type { WallTile } from "@/lib/wall-tile";
 import { useDialKitStyles } from "@/lib/dev/dialkit-styles";
 

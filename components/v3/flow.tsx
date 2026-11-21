@@ -1,7 +1,7 @@
 import * as React from "react";
 import Image from "next/image";
-import { INITIAL, submitOrKeep } from "@/components/contact-form";
-import { trailContext } from "@/components/visit-trail";
+import { INITIAL, submitOrKeep } from "@/components/contact/contact-form";
+import { trailContext } from "@/components/analytics/visit-trail";
 import type { ContactState } from "@/lib/inbox";
 import { looksLikeEmail } from "@/lib/inbox";
 

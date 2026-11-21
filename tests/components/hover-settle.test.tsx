@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, render } from "@testing-library/react";
-import { HoverSettle } from "@/components/hover-settle";
+import { HoverSettle } from "@/components/effects/hover-settle";
 
 afterEach(() => vi.useRealTimers());
 
