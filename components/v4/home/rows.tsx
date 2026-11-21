@@ -77,7 +77,8 @@ export function MtCovers() {
       cancelAnimationFrame(raf);
     };
   }, []);
-  React.useEffect(() => {
+  // a layout effect: with the caption, before the paint; a frame late, the told cover showed small with its art dim on a Back (MAC on 4c809fcd)
+  React.useLayoutEffect(() => {
     row.current!.querySelectorAll(".mt-item").forEach((it, i) => it.toggleAttribute("data-on", i === cur));
   }, [cur]);
   // the same scroll a cover as the five had in 1.5 screens
