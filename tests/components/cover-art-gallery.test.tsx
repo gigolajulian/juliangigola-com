@@ -26,4 +26,12 @@ describe("CoverArtGallery", () => {
     fireEvent.click(screen.getByRole("button", { name: "Open Two by Bo" }));
     expect(show).toHaveBeenCalledWith(1, expect.anything());
   });
+
+  it("arrives open on the cover a home click named (?cover=)", () => {
+    show.mockClear();
+    history.replaceState(null, "", "/portfolio/coverart?cover=two");
+    render(<CoverArtGallery releases={releases} v4 />);
+    expect(show).toHaveBeenCalledWith(1);
+    history.replaceState(null, "", "/");
+  });
 });
