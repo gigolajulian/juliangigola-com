@@ -1,3 +1,5 @@
+import { keepNames } from "@/lib/keep-names";
+
 /* ── the booking wait's cover (the default since 2026-11-19; `?loader=fill`
  * keeps the J and G that fill, `?loader=orb` the orb) ─────────────────
  * Run as the page is read (a script in the booking page's markup), so the
@@ -268,8 +270,9 @@ function drive(open: (c: HTMLElement) => void) {
 }
 
 /** The cover as the page is read (a script in the booking page's markup). */
-export const JG_COVER = `(${cover.toString()})(${place.toString()},${JSON.stringify(MARKUP)})`;
+export const JG_COVER = keepNames(`(${cover.toString()})(${place.toString()},${JSON.stringify(MARKUP)})`);
 /** The cover after a move inside the site, where React runs no script it inserts (QA on #1266). */
 export const mountCover = () => cover(place, MARKUP);
 /** The cover for a first arrival on an inner page, put up and opened as the page is read (`layout.tsx`). */
-export const JG_INNER = `${JG_COVER};(${drive.toString()})(${reveal.toString()})`;
+// `keepNames`: preview builds put `__name(...)` into these sources and the page has none (QA on #1372)
+export const JG_INNER = keepNames(`${JG_COVER};(${drive.toString()})(${reveal.toString()})`);
