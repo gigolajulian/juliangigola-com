@@ -36,13 +36,18 @@ const nameOf = (people: Person[], who?: string) => (who ? people.find((p) => p.e
 /** A save that reports its own error, as People does. */
 function useSave<T>(onSave: (v: T) => Promise<unknown>) {
   const [error, setError] = React.useState<string | null>(null);
-  const save = (v: T, then?: () => void) => onSave(v).then(() => { setError(null); then?.(); }, (e: unknown) => setError(errorText(e)));
-  return { error, save };
+  // One save at a time: each builds on the list as the server last returned it, so a second tick must wait.
+  const [pending, setPending] = React.useState(false);
+  const save = (v: T, then?: () => void) => {
+    setPending(true);
+    return onSave(v).then(() => { setError(null); then?.(); }, (e: unknown) => setError(errorText(e))).finally(() => setPending(false));
+  };
+  return { error, save, pending };
 }
 
 export function PlanSection({ plan, people, isDisabled, phone, onSave }: { plan?: ShootPlan; people: Person[]; isDisabled?: boolean; phone?: boolean; onSave: (p: ShootPlan | null) => Promise<unknown> }) {
   const [editing, setEditing] = React.useState(false);
-  const { error, save } = useSave(onSave);
+  const { error, save, pending } = useSave(onSave);
   const p = plan ?? {};
   const sh = p.sheet ?? {};
   const team = people.filter((x) => sh.team?.includes(x.email));
@@ -86,8 +91,11 @@ export function PlanSection({ plan, people, isDisabled, phone, onSave }: { plan?
                 <VStack gap={2}>
                   <Text type="label" color="secondary">Shot list</Text>
                   {p.shots.map((s, i) => (
-                    <CheckboxInput key={i} label={s.text} value={!!s.done} isDisabled={isDisabled}
-                      onChange={(on) => save({ ...p, shots: p.shots!.map((x, j) => (j === i ? { text: x.text, ...(on ? { done: true } : {}) } : x)) })} />
+                    <HStack key={i} gap={2} vAlign="center">
+                      <CheckboxInput label={s.text} isLabelHidden value={!!s.done} isDisabled={isDisabled || pending}
+                        onChange={(on) => save({ ...p, shots: p.shots!.map((x, j) => (j === i ? { text: x.text, ...(on ? { done: true } : {}) } : x)) })} />
+                      <Text color={s.done ? "secondary" : "primary"}>{s.done ? <s>{s.text}</s> : s.text}</Text>
+                    </HStack>
                   ))}
                 </VStack>
               ) : null}
@@ -130,7 +138,7 @@ function PlanForm({ plan, people, error, onSave, onClear, onCancel }: { plan: Sh
     sheet: { call: d.call, window: d.window, place: d.place, bring: d.bring, team },
   });
   return (
-    <form onSubmit={(e) => { e.preventDefault(); submit(); }}>
+    <form onSubmit={(e) => { e.preventDefault(); submit(); }} onKeyDown={(e) => { if (e.key === "Escape") { e.stopPropagation(); onCancel(); } }}>
       <VStack gap={3}>
         <TextArea label="Brief" value={d.brief} onChange={set("brief")} rows={3} placeholder="One hard light, grey seamless, red gel on the face for the cover." />
         <TextArea label="Your frames" description="Up to four, one link a line, from juliangigola.com/work/." value={d.refs} onChange={set("refs")} rows={4} placeholder="/work/sian/02.jpg" />
@@ -166,7 +174,7 @@ function PlanForm({ plan, people, error, onSave, onClear, onCancel }: { plan: Sh
 }
 
 export function TaskSection({ tasks, people, isDisabled, adding, setAdding, keys, onSave }: { tasks: Task[]; people: Person[]; isDisabled?: boolean; adding: boolean; setAdding: (on: boolean) => void; keys?: boolean; onSave: (t: Task[]) => Promise<unknown> }) {
-  const { error, save } = useSave(onSave);
+  const { error, save, pending } = useSave(onSave);
   const today = ymdPT(now());
   const done = tasks.filter((t) => t.doneAt).length;
   // Open first, by day; done ones sink to the end.
@@ -186,7 +194,7 @@ export function TaskSection({ tasks, people, isDisabled, adding, setAdding, keys
               <React.Fragment key={t.id}>
                 {i ? <Divider /> : null}
                 <HStack gap={3} vAlign="center" padding={2} style={{ paddingInline: 0, minHeight: 44 }}>
-                  <CheckboxInput label={t.text} isLabelHidden value={!!t.doneAt} isDisabled={isDisabled}
+                  <CheckboxInput label={t.text} isLabelHidden value={!!t.doneAt} isDisabled={isDisabled || pending}
                     onChange={(on) => save(tasks.map((x) => (x.id === t.id ? { ...x, doneAt: on ? new Date().toISOString() : undefined } : x)))} />
                   <StackItem size="fill"><Text color={t.doneAt ? "secondary" : "primary"}>{t.doneAt ? <s>{t.text}</s> : t.text}</Text></StackItem>
                   {/* who and when keep their width; the task's words wrap instead */}
@@ -194,7 +202,7 @@ export function TaskSection({ tasks, people, isDisabled, adding, setAdding, keys
                     <Badge label={nameOf(people, t.who)} variant="neutral" />
                     {t.due ? (late ? <Badge label={`${dayShort(t.due)}, late`} variant="warning" /> : <Text type="code" size="sm" color="secondary" textWrap="nowrap">{dayShort(t.due)}</Text>) : null}
                   </HStack>
-                  <IconButton label={`Remove ${t.text}`} variant="ghost" size="sm" isDisabled={isDisabled} icon={<Icon icon={XGlyph} />} onClick={() => save(tasks.filter((x) => x.id !== t.id))} />
+                  <IconButton label={`Remove ${t.text}`} variant="ghost" size="sm" isDisabled={isDisabled || pending} icon={<Icon icon={XGlyph} />} onClick={() => save(tasks.filter((x) => x.id !== t.id))} />
                 </HStack>
               </React.Fragment>
             );
@@ -220,8 +228,14 @@ function TaskForm({ people, onAdd, onCancel }: { people: Person[]; onAdd: (t: Ta
   const [text, setText] = React.useState("");
   const [due, setDue] = React.useState("");
   const [who, setWho] = React.useState(ME);
+  // Opened from the Cmd K palette, the palette hands focus back to the page as it closes: take it after that, and bring the form into view.
+  const form = React.useRef<HTMLFormElement>(null);
+  React.useEffect(() => {
+    const t = setTimeout(() => { form.current?.scrollIntoView({ block: "nearest" }); form.current?.querySelector("input")?.focus(); }, 80);
+    return () => clearTimeout(t);
+  }, []);
   return (
-    <form onSubmit={(e) => { e.preventDefault(); if (text.trim()) onAdd({ id: Math.random().toString(36).slice(2, 10), text: text.trim(), ...(due ? { due } : {}), ...(who !== ME ? { who } : {}) }); }}
+    <form ref={form} onSubmit={(e) => { e.preventDefault(); if (text.trim()) onAdd({ id: Math.random().toString(36).slice(2, 10), text: text.trim(), ...(due ? { due } : {}), ...(who !== ME ? { who } : {}) }); }}
       onKeyDown={(e) => { if (e.key === "Escape") { e.stopPropagation(); onCancel(); } }}>
       <HStack gap={2} vAlign="end" wrap="wrap">
         <StackItem size="fill"><TextInput label="Task" size="sm" value={text} onChange={(v) => setText(v.slice(0, 80))} placeholder="Rent red gel and snoot" autoComplete="off" hasAutoFocus /></StackItem>

@@ -441,9 +441,10 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
               </VStack>
             </Section>
 
-            <Section>
+            {/* A plan is for a shoot in sight: from the quote on, or once one exists. */}
+            {full?.plan || (["Quoted", "Confirmed", "Shot"] as Stage[]).includes(l.stage) ? <Section>
               <PlanSection plan={full?.plan} people={full?.people ?? []} isDisabled={!full} phone={phoneSize} onSave={(plan) => patch({ plan })} />
-            </Section>
+            </Section> : null}
 
             <Section>
               <TaskSection tasks={full?.tasks ?? []} people={full?.people ?? []} isDisabled={!full} adding={addingTask && !!full} setAdding={setAddingTask} keys={size === "wide"} onSave={(tasks) => patch({ tasks })} />

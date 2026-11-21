@@ -138,7 +138,7 @@ function Stage({ l }: { l: LeadSummary }) {
 /* The side nav in the order of the work: what to do, what it earns, how it is set up (Julian, 2026-11-14). */
 const NAV: [string, View[]][] = [["Work", ["leads", "calendar", "proofs"]], ["Business", ["money", "stats"]], ["Setup", ["templates"]]];
 /* The palette on a phone: the whole screen, as a sheet, with the list taking what the field leaves. */
-const SHEET_CSS = "dialog[data-jg-sheet]{inset:0;margin:0;width:100vw!important;max-width:none!important;height:100dvh!important;max-height:none!important;border:0;border-radius:0;padding-top:env(safe-area-inset-top)}dialog[data-jg-sheet]>*{height:100%;max-height:none!important}";
+const SHEET_CSS = "dialog[data-jg-sheet]{inset:0;margin:0;width:100vw!important;max-width:none!important;height:100dvh!important;max-height:none!important;border:0;border-radius:0;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}dialog[data-jg-sheet]>*{height:100%;max-height:none!important}";
 const FIND_KEY = () => (/Mac|iPhone|iPad/.test(navigator.userAgent) ? "\u2318K" : "Ctrl K");
 type Found = SearchableItem<{ group: string; words?: string[]; note?: string }>;
 const GO: Found[] = [["today", "Today"], ...SECTIONS.map(([to, label]): [View, string] => [to, label])].map(([to, label]) => ({ id: `go:${to}`, label, auxiliaryData: { group: "Go to" } }));
@@ -302,7 +302,7 @@ export function LeadsDesk() {
   const finder = React.useMemo(
     () => createStaticSource<Found>(
       [
-        ...(leads ?? []).filter((l) => !l.trashedAt && l.id).map((l) => ({ id: `lead:${l.id}`, label: l.name || l.email, auxiliaryData: { group: "Leads", words: [l.email, l.kind ?? "", l.stage], note: [l.stage, l.when ? stamp(Date.parse(l.when)) : null].filter(Boolean).join(" · ") } })),
+        ...(leads ?? []).filter((l) => !l.trashedAt && l.id).map((l) => ({ id: `lead:${l.id}`, label: l.name || l.email, auxiliaryData: { group: "Leads", words: [l.email, l.kind ?? "", l.stage], note: [l.stage, l.when ? fmt({ month: "short", day: "numeric" }).format(new Date(l.when)) : null].filter(Boolean).join(" · ") } })),
         // Actions on the lead that is open, then the ones that need none.
         ...(openName ? [{ id: "do:task", label: `Add a task to ${openName}`, auxiliaryData: { group: "Do", words: ["task", "todo"] } }, { id: "do:invoice", label: `New invoice for ${openName}`, auxiliaryData: { group: "Do", words: ["invoice", "bill"] } }] : []),
         { id: "go:new", label: "New lead", auxiliaryData: { group: "Do", words: ["add", "lead"] } },
