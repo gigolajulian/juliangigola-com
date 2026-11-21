@@ -7,7 +7,7 @@ import Link from "next/link";
 import { COVER_RELEASES } from "@/lib/cover-art-data";
 import type { CoverRelease } from "@/lib/cover-art-types";
 import { media } from "@/lib/device";
-import { scrollGoal } from "@/components/v3/smooth-scroll";
+import { jumpTo, scrollGoal } from "@/components/v3/smooth-scroll";
 import { projectHref } from "@/lib/project-href";
 import { holdEase, holdUnease } from "@/lib/motion/hold-ease";
 import { clamp, MT2, progress } from "./motion/engine";
@@ -26,13 +26,23 @@ function keepFlip(e: React.MouseEvent<HTMLElement>) {
   // The row's own scroll too: a phone's covers are a sideways row, which came back on the first cover.
   else
     try {
-      sessionStorage.setItem(BACK, JSON.stringify({ off: scrollY - coversTop(), x: e.currentTarget.closest(".mt-row")?.scrollLeft ?? 0 }));
+      sessionStorage.setItem(BACK, JSON.stringify(clickedSpot(e.currentTarget)));
       // the browser's own restore landed over ours a frame later (Safari 1440, MAC on 01ca50cb); `useBackToCover` gives it back
       history.scrollRestoration = "manual";
     } catch {}
 }
 
 const BACK = "jg-cover-back";
+/** The spot that holds the clicked cover in the middle (Julian: "Back lands on the cover you clicked"): held (desktop), the place in
+    the block's scroll that brings that cover up (the covers driver's own map, motion/rows.ts); a phone's row, that cover's snap. */
+function clickedSpot(it: HTMLElement) {
+  const sec = it.closest<HTMLElement>(".mt-covers"), row = it.closest<HTMLElement>(".mt-row");
+  const items = row ? [...row.querySelectorAll<HTMLElement>(".mt-item")] : [];
+  const i = items.indexOf(it), n = items.length;
+  if (!sec || !row || i < 0 || n < 2) return { off: scrollY - coversTop(), x: row?.scrollLeft ?? 0 };
+  if (media("held").matches) return { off: holdUnease(i / (n - 1)) * (sec.offsetHeight - innerHeight), x: 0 };
+  return { off: scrollY - coversTop(), x: i * (items[1].offsetLeft - items[0].offsetLeft) };
+}
 /** The covers block's top in the page, by layout: its box on screen moves with the blocks' lift transforms. */
 const coversTop = () => {
   let t = 0;
@@ -63,7 +73,7 @@ function useBackToCover() {
     const el = document.querySelector<HTMLElement>(".mt-covers .mt-row");
     const go = () => {
       const y = coversTop() + at.off;
-      if (Math.abs(scrollY - y) > 2) scrollTo(0, y);
+      if (Math.abs(scrollY - y) > 2 || Math.abs(scrollGoal() - y) > 2) jumpTo(y);
     };
     go();
     // a phone's sideways row only: held (desktop), the row follows the page's scroll, and setting it too threw the page a screen on (MAC on d82f2b75)
@@ -74,7 +84,7 @@ function useBackToCover() {
     const unlift = requestAnimationFrame(() => requestAnimationFrame(() => lifted.forEach((it) => (it.style.transition = ""))));
     // rAF runs before each paint, so a block above that grows is answered in the same frame
     const end = performance.now() + 900;
-    let raf = 0, done = false, goal = scrollGoal();
+    let raf = 0, done = false, goal = scrollGoal(); // after go(): Lenis's target is the restore spot
     const stop = () => ((done = true), cancelAnimationFrame(raf));
     raf = requestAnimationFrame(function hold(now) {
       // the visitor's scroll wins: Lenis heads somewhere else as soon as a wheel or touch lands, whether or not its event reached us
@@ -84,6 +94,8 @@ function useBackToCover() {
       goal = g;
       if (done || moved) return stop();
       go();
+      // a sleeve the row carried under a resting pointer lifts and turns to its back: none while the page is being put back (Safari, MAC on 983abf06)
+      for (const it of document.querySelectorAll(".mt-covers .mt-sleeve.hv")) it.classList.remove("hv");
       if (now < end) raf = requestAnimationFrame(hold);
     });
     const ev = ["wheel", "touchstart", "keydown", "pointerdown"] as const;
