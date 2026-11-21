@@ -20,36 +20,37 @@ function keepFlip(e: React.MouseEvent<HTMLElement>) {
   if (e.currentTarget.hasAttribute("data-flip") && document.documentElement.hasAttribute("data-tp-flip") && !media("fine").matches) e.preventDefault();
   // Where the home was at the click, for `useBackToCover`: Safari put back a scroll saved before the last of the held row's
   // scroll, 618px short on a Mac and on Motion on the iPhone (MAC on #1313). Session storage: the router rewrites the history entry's state.
+  // Kept as the distance into the covers block: the held blocks above take their height a frame or more after the page is back,
+  // so a page scroll put back raw landed a block's length on, on cover 08 (Safari 1440, MAC on d4a49299).
   // The row's own scroll too: a phone's covers are a sideways row, which came back on the first cover.
   else
     try {
-      sessionStorage.setItem(BACK, JSON.stringify({ y: scrollY, x: e.currentTarget.closest(".mt-row")?.scrollLeft ?? 0 }));
+      sessionStorage.setItem(BACK, JSON.stringify({ off: scrollY - coversTop(), x: e.currentTarget.closest(".mt-row")?.scrollLeft ?? 0 }));
       // the browser's own restore landed over ours a frame later (Safari 1440, MAC on 01ca50cb); `useBackToCover` gives it back
       history.scrollRestoration = "manual";
     } catch {}
 }
 
 const BACK = "jg-cover-back";
+/** The covers block's top in the page, by layout: its box on screen moves with the blocks' lift transforms. */
+const coversTop = () => {
+  let t = 0;
+  for (let n = document.querySelector<HTMLElement>(".mt-covers"); n; n = n.offsetParent as HTMLElement | null) t += n.offsetTop;
+  return t;
+};
 /** When the last Back or Forward was: the home counts as a return only when it mounts just after one. */
 let popAt = 0;
 if (typeof window !== "undefined") addEventListener("popstate", () => (popAt = Date.now()));
 
 /** Back from a cover on the Cover art page: the home's scroll and the row's as they were at the click (`keepFlip`),
-    set before the first paint so the row never shows passing the covers before it (MAC on 01ca50cb). */
+    set before the first paint so the row never shows passing the covers before it (MAC on 01ca50cb), then held there
+    each frame for a moment while the blocks above settle, until the visitor scrolls. */
 function useBackToCover() {
   React.useLayoutEffect(() => {
-    let at: { y: number; x: number } | null = null;
+    let at: { off: number; x: number } | null = null;
     try {
       at = JSON.parse(sessionStorage.getItem(BACK) ?? "null");
     } catch {}
-    if (!at) return;
-    const el = document.querySelector<HTMLElement>(".mt-covers .mt-row");
-    const go = () => {
-      scrollTo(0, at.y);
-      // a phone's sideways row only: held (desktop), the row follows the page's scroll, and setting it too threw the page a screen on (MAC on d82f2b75)
-      if (el && !media("held").matches) el.scrollLeft = at.x;
-    };
-    if (Date.now() - popAt < 2000) go();
     // taken a tick on, not now: React's dev double mount read it once and dropped it
     const t = setTimeout(() => {
       try {
@@ -57,9 +58,25 @@ function useBackToCover() {
         history.scrollRestoration = "auto";
       } catch {}
     });
-    // again once the held stages have taken their height, which can grow the page after the first frame
-    const t2 = Date.now() - popAt < 2000 ? setTimeout(() => Math.abs(scrollY - at.y) > 2 && go(), 400) : undefined;
-    return () => (clearTimeout(t), clearTimeout(t2));
+    if (!at || typeof at.off !== "number" || Date.now() - popAt > 2000) return () => clearTimeout(t);
+    const el = document.querySelector<HTMLElement>(".mt-covers .mt-row");
+    const go = () => {
+      const y = coversTop() + at.off;
+      if (Math.abs(scrollY - y) > 2) scrollTo(0, y);
+    };
+    go();
+    // a phone's sideways row only: held (desktop), the row follows the page's scroll, and setting it too threw the page a screen on (MAC on d82f2b75)
+    if (el && !media("held").matches) el.scrollLeft = at.x;
+    // rAF runs before each paint, so a block above that grows is answered in the same frame
+    const end = performance.now() + 900;
+    let raf = requestAnimationFrame(function hold(now) {
+      go();
+      if (now < end) raf = requestAnimationFrame(hold);
+    });
+    const stop = () => cancelAnimationFrame(raf);
+    const ev = ["wheel", "touchstart", "keydown", "pointerdown"] as const;
+    ev.forEach((n) => addEventListener(n, stop, { passive: true, once: true }));
+    return () => (clearTimeout(t), stop(), ev.forEach((n) => removeEventListener(n, stop)));
   }, []);
 }
 
