@@ -161,7 +161,7 @@ leave orphans behind.
 
 ### Where enquiries go
 
-`app/contact/actions.ts` stores each enquiry in the `INBOX` KV namespace,
+`lib/leads/enquiry-action.ts` stores each enquiry in the `INBOX` KV namespace,
 mails it to hello@ through Cloudflare Email Sending
 (`notifications.juliangigola.com`), files it as a lead (`lib/leads/lead-store.ts`,
 sealed with `LEADS_KEY`) and adds a row in Notion when `NOTION_TOKEN` is set.

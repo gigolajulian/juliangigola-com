@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { shareOg } from "@/lib/share";
+import { shareOg } from "@/lib/og/share";
 import { notFound } from "next/navigation";
 import { LdJson } from "@/components/local-screens";
 import { BOOKING_PAGES, bookingHref, bookingPage } from "@/lib/booking/booking";

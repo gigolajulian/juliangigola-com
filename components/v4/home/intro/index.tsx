@@ -36,6 +36,8 @@ const DEEP_PUSH = 3350; // the full canvas holds about a second before the push
 const DEEP_LAND = 4850; // the push lands here (1500ms) and holds to the end
 // the push lands and stays, with no overshoot
 const DEPTHS = [0.5, 0.28, 0.62, 0.36, 0.56, 0.22, 0.44]; // per extra column: 0 the hero's plane, 1 the lens
+const PUSH_Y = 1150; // design px below the hero's top: the point of the wall the push goes into
+const WIDE = 3300; // px: from this window width the wall's six rows draw 80 extras, not 60
 
 /* Return visits: a browser that has seen the intro in the last 30 days gets it in 3.2s. The same
    moves with less waiting: JG, the canvas comes up fast, then nearly the same push. First visits keep 5.3s.
@@ -77,7 +79,7 @@ function onScreen(hero: HTMLElement, wall: HTMLElement) {
   const W = window.innerWidth;
   const H = window.innerHeight;
   const u = (wall.querySelector(".mt-col:not(.side) figure:not(.xr) .ph")?.getBoundingClientRect().width ?? 403) / 403;
-  const cy = hero.getBoundingClientRect().top + 1150 * u; // build(): py, in screen space
+  const cy = hero.getBoundingClientRect().top + PUSH_Y * u; // build(): py, in screen space
   const hit = (r: DOMRect, l: number, t: number, rt: number, b: number) => r.width > 0 && r.right > l && r.left < rt && r.bottom > t && r.top < b;
   const imgs = [...document.querySelectorAll<HTMLImageElement>("main img")].filter((i) => i.offsetParent !== null);
   return imgs.filter((i) => {
@@ -86,18 +88,21 @@ function onScreen(hero: HTMLElement, wall: HTMLElement) {
   });
 }
 
+/** A frame's box in the wall's own space, px. */
+type Box = { x: number; y: number; w: number; h: number };
+/** A column is what moves together: the column element, or on phones (columns are `display: contents`) its figures. */
+type Col = { els: HTMLElement[]; b: Box[]; side: boolean };
+
 /** The canvas, measured from the laid-out wall: the columns, the frame and pitch, and the view at scale S0 around the point the push goes into.
     build() draws from it, and the preload hold counts from it the tiles that build() will draw. */
 function canvasOf(hero: HTMLElement, wall: HTMLElement) {
   const W = window.innerWidth;
   const H = window.innerHeight;
   const wr = wall.getBoundingClientRect();
-  const box = (el: Element) => {
+  const box = (el: Element): Box => {
     const r = el.getBoundingClientRect();
     return { x: r.left - wr.left, y: r.top - wr.top, w: r.width, h: r.height };
   };
-  // a column is what moves together: the column element, or on phones (columns are `display: contents`) its figures
-  type Col = { els: HTMLElement[]; b: ReturnType<typeof box>[]; side: boolean };
   const all = [...wall.querySelectorAll<HTMLElement>(".mt-col")];
   const lead0 = all.find((c) => !c.classList.contains("side"));
   const flat = !!lead0 && getComputedStyle(lead0).display === "contents";
@@ -118,7 +123,7 @@ function canvasOf(hero: HTMLElement, wall: HTMLElement) {
 
   // the view: scale S0 around a point of the wall that sits at the screen centre
   const px = W / 2 - wr.left;
-  const py = hero.getBoundingClientRect().top - wr.top + 1150 * u;
+  const py = hero.getBoundingClientRect().top - wr.top + PUSH_Y * u;
   const ty = H / 2 - (wr.top + py);
   const xmin = px - W / (2 * S0);
   const xmax = px + W / (2 * S0);
@@ -127,8 +132,38 @@ function canvasOf(hero: HTMLElement, wall: HTMLElement) {
   return { W, H, flat, cols, core, first, w, h, R, P, u, px, py, ty, xmin, xmax, ymin, ymax };
 }
 
+type Canvas = NonNullable<ReturnType<typeof canvasOf>>;
+/** The extras layer build() draws into: its top in the wall's space, a tile, and a column strip. */
+type Layer = { top0: number; tile: (into: HTMLElement, y: number) => void; group: (x: number, delay: number) => HTMLElement };
+type Play = (el: Element, frames: Keyframe[], o: KeyframeAnimationOptions) => Animation;
+
+// `--vis`: the rules that hide side columns once the intro is over say which ones (mtscroll.css)
+const leaves = (el: HTMLElement) => getComputedStyle(el).getPropertyValue("--vis").trim() === "hidden";
+
+/** A strip (or a column that leaves) at depth d, 0 the hero's plane and 1 the lens, through the push from `at` to `until`.
+    `ox, oy` is the wall's scale point in the element's own box. */
+function depth(play: Play, el: HTMLElement, ox: number, oy: number, d: number, at: number, until: number) {
+  el.style.transformOrigin = `${ox}px ${oy}px`;
+  el.style.zIndex = String(Math.round(d * 100));
+  const r = (1 - d * S0) / (1 - d); // how much more than the wall this plane has grown when the wall is at 1
+  const dur = until - at;
+  const blur = Math.round(5 + d * 14);
+  const gone = 0.74 - d * 0.22; // nearer planes pass the lens sooner
+  play(el, [{ scale: "1", easing: IN_OUT }, { scale: String(r) }], { duration: dur, delay: at });
+  play(
+    el,
+    [
+      { opacity: 1, filter: "blur(0px)" },
+      { opacity: 1, filter: `blur(${blur * 0.25}px)`, offset: 0.34 },
+      { opacity: 0, filter: `blur(${blur}px)`, offset: gone },
+      { opacity: 0, filter: `blur(${blur}px)` },
+    ],
+    { duration: dur, delay: at },
+  );
+}
+
 /** Extra tiles build() draws: above and below each real column, and the columns on the wall's pitch where none stands. Its loops, counted. */
-function tilesOf(g: NonNullable<ReturnType<typeof canvasOf>>) {
+function tilesOf(g: Canvas) {
   const { cols, first, w, h, R, P, xmin, xmax, ymin, ymax } = g;
   let n = 0;
   for (const { b } of cols) {
@@ -258,17 +293,9 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
         throw e;
       }
     };
-    const build = () => {
-      const short = returning();
-      pace = short ? SHORT : FULL;
-      const END = pace.end; // every time below is this run's
-      const pushAt = pace.push;
-      const land = pace.land;
-      const g = canvasOf(hero, wall);
-      if (!g) return finish(false);
-      const { W, H, flat, cols, core, first, w, h, R, P, u, px, py, ty, xmin, xmax, ymin, ymax } = g;
-
-      // extras: a layer in the wall's own space
+    // extras: a layer in the wall's own space, and what draws into it
+    const canvasLayer = (g: Canvas) => {
+      const { w, h, R, ymin, ymax } = g;
       const layer = document.createElement("div");
       layer.className = "mt-ix";
       layer.setAttribute("aria-hidden", "true");
@@ -296,38 +323,21 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
         light(v, delay);
         return g;
       };
-      // a strip (or a column that leaves) at depth d, 0 the hero's plane and 1 the lens. `ox, oy` is the wall's scale point in the element's own box.
-      const depth = (el: HTMLElement, ox: number, oy: number, d: number) => {
-        el.style.transformOrigin = `${ox}px ${oy}px`;
-        el.style.zIndex = String(Math.round(d * 100));
-        const r = (1 - d * S0) / (1 - d); // how much more than the wall this plane has grown when the wall is at 1
-        const dur = land - pushAt;
-        const blur = Math.round(5 + d * 14);
-        const gone = 0.74 - d * 0.22; // nearer planes pass the lens sooner
-        play(el, [{ scale: "1", easing: IN_OUT }, { scale: String(r) }], { duration: dur, delay: pushAt });
-        play(
-          el,
-          [
-            { opacity: 1, filter: "blur(0px)" },
-            { opacity: 1, filter: `blur(${blur * 0.25}px)`, offset: 0.34 },
-            { opacity: 0, filter: `blur(${blur}px)`, offset: gone },
-            { opacity: 0, filter: `blur(${blur}px)` },
-          ],
-          { duration: dur, delay: pushAt },
-        );
-      };
+      return { top0, tile, group };
+    };
 
-      // JG, under every photo
+    // JG, under every photo. It stays lit while the wall rises over it, and goes only once the frames have covered it.
+    const monogram = (g: Canvas) => {
+      const { W, cols, w, px } = g;
       const jg = document.createElement("div");
       jg.className = "mt-jg";
       jg.setAttribute("aria-hidden", "true");
-      jg.innerHTML = "<b>J</b><b>G</b>";
+      jg.append(...["J", "G"].map((ch) => Object.assign(document.createElement("b"), { textContent: ch })));
       hero.prepend(jg);
       made.push(jg);
       [...jg.children].forEach((b, i) => {
         play(b, [{ opacity: 0, transform: `translate3d(0,${i ? 110 : -110}px,0)`, filter: "blur(22px)" }, { opacity: 1, transform: "none", filter: "blur(0)" }], { duration: pace.jg, easing: OUT });
       });
-      // JG stays lit while the wall rises over it, and goes only once the frames have covered it
       const marks = [...jg.children] as HTMLElement[];
       const jr = jg.getBoundingClientRect();
       const jl = jr.left + Math.min(...marks.map((m) => m.offsetLeft));
@@ -338,44 +348,105 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
         const x = (c.b[0].x - px) * S0 + W / 2;
         return x < jl + jw && x + w * S0 > jl;
       });
-      const isOver = new Set(over);
       const jb = jt + Math.max(...marks.map((m) => m.offsetHeight));
+      return { jg, jt, jb, over };
+    };
 
-      // `--vis`: the rules that hide side columns once the intro is over say which ones (mtscroll.css)
-      const leaves = (el: HTMLElement) => getComputedStyle(el).getPropertyValue("--vis").trim() === "hidden";
-
-      // 1. the real columns, each with frames above and below it so the canvas has no holes
+    // 1. the real columns, each with frames above and below it so the canvas has no holes
+    const realColumns = (g: Canvas, lay: Layer, over: Set<Col>, jb: number) => {
+      const { H, flat, cols, h, R, px, py, ymin, ymax } = g;
       cols.forEach((c, i) => {
         const b = c.b;
         const delay = pace.at + i * pace.gap;
-        const pass = isOver.has(c);
+        const pass = over.has(c);
         const lit = pass ? Math.max(0, delay - pace.lead) : delay; // lit before it moves: it enters from off screen
-        const g = group(b[0].x, lit);
+        const g = lay.group(b[0].x, lit);
         let topY = b[0].y;
-        for (let y = b[0].y - R; y + h > ymin; y -= R) tile(g, (topY = y));
+        for (let y = b[0].y - R; y + h > ymin; y -= R) lay.tile(g, (topY = y));
         // its leading edge starts under the screen, or under the monogram on a tall screen
         const edge = H / 2 + (topY - py) * S0;
         const from = pass ? Math.max(WALL_FROM[i % 3], (Math.min(H, jb + 260) + 24 - edge) / S0) : WALL_FROM[i % 3];
-        for (let y = b[b.length - 1].y + R; y < ymax; y += R) tile(g, y);
+        for (let y = b[b.length - 1].y + R; y < ymax; y += R) lay.tile(g, y);
         c.els.forEach((el) => (rise(el, from, delay), light(flat ? el.querySelector(".ph")! : el, lit, "::after")));
         rise(g, from, delay);
         // a side column this screen does not keep leaves with the extras, so no sliver of it rides the push to the edge of the hero
         const out = c.side && leaves(c.els[0]);
-        depth(g, px - b[0].x, py - top0, out ? 0.4 : 0.18); // the frames above and below a column are not the hero either
-        if (out) depth(c.els[0], px - c.els[0].offsetLeft, py - c.els[0].offsetTop, 0.4);
+        depth(play, g, px - b[0].x, py - lay.top0, out ? 0.4 : 0.18, pace.push, pace.land); // the frames above and below a column are not the hero either
+        if (out) depth(play, c.els[0], px - c.els[0].offsetLeft, py - c.els[0].offsetTop, 0.4, pace.push, pace.land);
       });
-      // 2. extra columns on the wall's own pitch, wherever no real column stands
+    };
+
+    // 2. extra columns on the wall's own pitch, wherever no real column stands
+    const extraColumns = (g: Canvas, lay: Layer) => {
+      const { cols, first, w, h, R, P, px, py, xmin, xmax, ymin, ymax } = g;
       const real = cols.map((c) => c.b[0].x);
       let k = 0;
       for (let m = -16; m <= 16; m++) {
         const x = first[0].x + m * P;
         if (x + w < xmin || x > xmax || real.some((r) => Math.abs(r - x) < P * 0.5)) continue;
-        const g = group(x, pace.at + k * pace.xgap);
-        for (let y = ymin - h + (k % 2 ? R * 0.25 : 0); y < ymax; y += R) tile(g, y);
-        rise(g, X_FROM[k % X_FROM.length], pace.at + k * pace.xgap);
-        depth(g, px - x, py - top0, DEPTHS[k % DEPTHS.length]);
+        const s = lay.group(x, pace.at + k * pace.xgap);
+        for (let y = ymin - h + (k % 2 ? R * 0.25 : 0); y < ymax; y += R) lay.tile(s, y);
+        rise(s, X_FROM[k % X_FROM.length], pace.at + k * pace.xgap);
+        depth(play, s, px - x, py - lay.top0, DEPTHS[k % DEPTHS.length], pace.push, pace.land);
         k++;
       }
+    };
+
+    // JG goes once every column over it has passed its top, and before the camera moves whatever the layout
+    const watchJg = (jg: HTMLElement, over: Col[], jt: number) => {
+      let jgGone = false;
+      const hideJg = () => {
+        if (jgGone) return;
+        jgGone = true;
+        play(jg, [{ opacity: 1 }, { opacity: 0 }], { duration: 220, easing: OUT });
+      };
+      const watch = () => {
+        if (finished || jgGone) return;
+        if (over.length && over.every((c) => Math.min(...c.els.map((el) => el.getBoundingClientRect().top)) < jt - 12)) return hideJg();
+        raf = requestAnimationFrame(watch);
+      };
+      raf = requestAnimationFrame(watch);
+      timers.push(window.setTimeout(hideJg, pace.push));
+    };
+
+    // made last, so they sit on top of every other opacity animation on the same element
+    const veil = () =>
+      unseen.forEach(([el, delay]) => {
+        const at = Math.min(DRAW, delay / 2);
+        play(el, [{ opacity: 0 }, { opacity: 0 }], { duration: at, fill: "none" });
+        play(el, [{ opacity: 0.01 }, { opacity: 0.01 }], { duration: delay - at, delay: at, fill: "none" });
+        // unseen, so untouchable: a tap that hurries the intro must not open a project
+        const h = el as HTMLElement;
+        h.style.pointerEvents = "none";
+        noTap.push(h);
+        timers.push(window.setTimeout(() => (h.style.pointerEvents = ""), delay));
+      });
+
+    // nobody is made to wait: a wheel, tap or key plays the rest fast and gives the scroll back
+    const arm = (t0: number, END: number) => {
+      hurry = () => {
+        stopHurry();
+        timers.forEach(clearTimeout);
+        anims.forEach((a) => a.updatePlaybackRate(HURRY));
+        root.dataset.mtIntro = "3";
+        timers.push(window.setTimeout(() => finish(true), Math.max(0, END - (performance.now() - t0)) / HURRY + 60));
+      };
+      for (const e of INPUTS) window.addEventListener(e, hurry, { passive: true, once: true });
+    };
+
+    const build = () => {
+      const short = returning();
+      pace = short ? SHORT : FULL;
+      const END = pace.end; // every time below is this run's
+      const pushAt = pace.push;
+      const land = pace.land;
+      const g = canvasOf(hero, wall);
+      if (!g) return finish(false);
+      const { px, py, ty } = g;
+      const lay = canvasLayer(g);
+      const { jg, jt, jb, over } = monogram(g);
+      realColumns(g, lay, new Set(over), jb);
+      extraColumns(g, lay);
       // the push in, S0 to 1
       wall.style.transformOrigin = `${px}px ${py}px`;
       const far = `translate3d(0,${ty}px,0) scale(${S0})`;
@@ -390,52 +461,20 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
         ],
         { duration: END },
       );
-
-      let jgGone = false;
-      const hideJg = () => {
-        if (jgGone) return;
-        jgGone = true;
-        play(jg, [{ opacity: 1 }, { opacity: 0 }], { duration: 220, easing: OUT });
-      };
-      const watch = () => {
-        if (finished || jgGone) return;
-        if (over.length && over.every((c) => Math.min(...c.els.map((el) => el.getBoundingClientRect().top)) < jt - 12)) return hideJg();
-        raf = requestAnimationFrame(watch);
-      };
-      raf = requestAnimationFrame(watch);
-      timers.push(window.setTimeout(hideJg, pushAt)); // whatever the layout, it is gone before the camera moves
+      watchJg(jg, over, jt);
 
       // the hero's own parts arrive as the push lands
       fadeIn(".mt-hero .mt-scrim", land - 250, 700);
       fadeIn(".mt-hero h1", land - 190, 900, 24);
       fadeIn(".mt-hero .mt-cap, .mt-hero .mt-ctas, .site-hdr", land + 130, 600);
       fadeIn(".mt-hero figcaption", land - 100, 450);
-
-      // made last, so they sit on top of every other opacity animation on the same element
-      unseen.forEach(([el, delay]) => {
-        const at = Math.min(DRAW, delay / 2);
-        play(el, [{ opacity: 0 }, { opacity: 0 }], { duration: at, fill: "none" });
-        play(el, [{ opacity: 0.01 }, { opacity: 0.01 }], { duration: delay - at, delay: at, fill: "none" });
-        // unseen, so untouchable: a tap that hurries the intro must not open a project
-        const h = el as HTMLElement;
-        h.style.pointerEvents = "none";
-        noTap.push(h);
-        timers.push(window.setTimeout(() => (h.style.pointerEvents = ""), delay));
-      });
+      veil();
 
       root.dataset.mtIntro = "2";
       const t0 = performance.now();
       timers.push(window.setTimeout(() => (root.dataset.mtIntro = "3"), pushAt - 50)); // scroll unlocks as the frames land
       timers.push(window.setTimeout(() => finish(true), END + 60));
-      // nobody is made to wait: a wheel, tap or key plays the rest fast and gives the scroll back
-      hurry = () => {
-        stopHurry();
-        timers.forEach(clearTimeout);
-        anims.forEach((a) => a.updatePlaybackRate(HURRY));
-        root.dataset.mtIntro = "3";
-        timers.push(window.setTimeout(() => finish(true), Math.max(0, END - (performance.now() - t0)) / HURRY + 60));
-      };
-      for (const e of INPUTS) window.addEventListener(e, hurry, { passive: true, once: true });
+      arm(t0, END);
     };
 
     // extras are drawn only from thumbs that have arrived, so the canvas never shows an empty tile
@@ -443,7 +482,7 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
     const rows6 = !!wall.querySelector<HTMLElement>("figure.xr")?.offsetParent && pool.current.length >= 48;
     const from = rows6 ? EXTRAS.wall : EXTRAS.sides;
     const fit = preload ? fitExtras(hero, wall) : null; // the preload hold: only as many as this screen's canvas draws, at the size it draws them
-    const upto = rows6 ? (window.innerWidth >= 3300 ? 80 : 60) : 46; // ?preload=0: the old fixed set, its tiles repeat past it
+    const upto = rows6 ? (window.innerWidth >= WIDE ? 80 : 60) : 46; // ?preload=0: the old fixed set, its tiles repeat past it
     // the preload hold: one photo per drawn tile, up to the whole pool (an iPad in portrait draws 37 to 39), so no tile repeats while the pool lasts
     const want = pool.current.slice(from, fit ? from + fit.n : upto).map((f) => loader({ src: f.src, width: fit?.width ?? 640 }));
     let leadIn = false;

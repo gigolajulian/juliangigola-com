@@ -3,7 +3,7 @@ import { notFound, permanentRedirect } from "next/navigation";
 import { BOOK_MENU } from "@/lib/booking/booking";
 import { V3Book } from "@/components/v3/book";
 import { SESSIONS, isSession } from "@/lib/flags/v3";
-import { shareOg } from "@/lib/share";
+import { shareOg } from "@/lib/og/share";
 
 /* One session's booking on a page of its own, for
    book.juliangigola.com/<session>. V3's stepper for every session; a
