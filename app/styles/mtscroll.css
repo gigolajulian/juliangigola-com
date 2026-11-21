@@ -305,7 +305,7 @@
   [data-mtscroll] .mt-covers .mt-rowhead{display:contents}
   [data-mtscroll] .mt-covers .mt-rowhead>*{margin-inline:16px}
   [data-mtscroll] .mt-covers .mt-rowhead .btn{order:3;align-self:flex-start;margin:8px 16px 0}
-  [data-mtscroll] .mt-covers .mt-row{--cv:min(70vw,520px,calc((100svh - 365px) * .96));margin-top:24px;padding:0 calc((100vw - var(--cv)) / 2) 72px;scroll-padding:0}
+  [data-mtscroll] .mt-covers .mt-row{--cv:min(70vw,520px);margin-top:24px;padding:0 calc((100vw - var(--cv)) / 2) 72px;scroll-padding:0}
   [data-mtscroll] .mt-covers .mt-track{gap:16px}
   [data-mtscroll] .mt-item{scroll-snap-align:center}
   [data-mtscroll] .mt-sleeve{width:var(--cv);height:var(--cv)}
@@ -408,6 +408,12 @@
 /* T: frames by width, masonry in two columns, larger phrase. */
 @media (min-width:600px) and (max-width:1023px) and (min-height:600px){
   [data-mtscroll] .mt-photo{aspect-ratio:4/3}
+}
+/* Short wide screens (a Duo open, 951x669): Cover art's heading, row and dropped record centred under the header, the record whole.
+   The record drops 118px and grows with the focused sleeve, past rows.css's 126px of room, so the row clipped its bottom (Julian, 2026-11-21). */
+@media (min-width:600px) and (max-width:1023px) and (min-height:600px) and (orientation:landscape){
+  [data-mtscroll] .mt-covers .mt-stage{box-sizing:border-box;min-height:calc(100svh - 57px);padding:0;justify-content:center}
+  html[data-mtscroll] .mt-covers .mt-row.mt-row{--cv:min(70vw,520px,calc((100svh - 410px) * .96));padding-bottom:calc(126px + var(--cv) * .08)}
 }
 
 /* P: the phone frames (3.13), at 390 wide. */
