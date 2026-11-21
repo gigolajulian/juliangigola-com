@@ -65,8 +65,9 @@ describe("home Back spot", () => {
     expect(sec.querySelectorAll("img.back[loading=eager]").length).toBe(0);
     expect(told).toEqual([{ cur: 3, now: false }]); // the caption names cover 4 before the first paint
     const face = ims[3].parentElement!;
-    expect(face.style.background).toContain("/seen-3.jpg");
+    expect(face.style.backgroundImage).toContain("/seen-3.jpg");
+    expect(face.style.backgroundColor).toBe(""); // the card colour stays the stylesheet's
     await new Promise((r) => setTimeout(r)); // decode resolved: the sleeve's own copy is on top, the under-copy goes
-    expect(face.style.background).toBe("");
+    expect(face.style.backgroundImage).toBe("");
   });
 });
