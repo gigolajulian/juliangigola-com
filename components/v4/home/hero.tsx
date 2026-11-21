@@ -55,6 +55,12 @@ const letters = (t: string) => t.split(" ").map((word, n) => (
 const STILL = 4000; // idle wall: still this long before the first swap
 const EVERY = 2500; // then one frame at this pace
 
+/** A wall frame the idle swap may change: on screen (its middle 60%) and not already changing. */
+function inView(f: HTMLElement, was: Record<number, MtFrame>) {
+  const r = f.getBoundingClientRect();
+  return r.width && r.top < innerHeight * 0.8 && r.bottom > innerHeight * 0.2 && !was[+f.dataset.i!];
+}
+
 /* Idle wall (on by default, `?idle=0` turns it off): after 4 still seconds one of the 12 locked frames on screen changes every 2.5 seconds
    for a frame that is not on the wall. Any pointer move, scroll, key or touch holds it. Off for reduced motion and during the splash. */
 function useIdleWall(frames: MtFrame[], extras: MtFrame[]) {
@@ -73,10 +79,7 @@ function useIdleWall(frames: MtFrame[], extras: MtFrame[]) {
       const t = performance.now(), L = live.current;
       if (document.documentElement.hasAttribute("data-mt-intro")) return void (last = t); // the 4 still seconds start when the splash lifts
       if (t - last < STILL || t - swapped < EVERY || document.hidden || !L.pool.length) return;
-      const on = [...(root.current?.querySelectorAll<HTMLElement>("figure[data-i]") ?? [])].filter((f) => {
-        const r = f.getBoundingClientRect();
-        return r.width && r.top < innerHeight * 0.8 && r.bottom > innerHeight * 0.2 && !L.was[+f.dataset.i!];
-      });
+      const on = [...(root.current?.querySelectorAll<HTMLElement>("figure[data-i]") ?? [])].filter((f) => inView(f, L.was));
       if (!on.length) return;
       swapped = t;
       const i = +on[Math.floor(Math.random() * on.length)].dataset.i!;
