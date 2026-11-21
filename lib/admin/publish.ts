@@ -8,7 +8,7 @@ import { CONTENT_PATH, type SiteContent } from "@/lib/content";
 import { ADDED_PATH, isTextRef, type FrameRef } from "@/lib/work/added";
 import { adoptable, projectsFile, same, type Manifest, type ProjectsFile } from "@/lib/admin/admin-payload";
 import { commitFiles, readFile, type CommitFile, TOKEN_STORE, REPO, GITHUB_API } from "@/lib/admin/admin-github";
-import type { Bts, Copy, Credit } from "@/lib/work/work-types";
+import type { Bts, Copy, Credit } from "@/lib/work-types";
 
 /**
  * The manifest half of the draft, as the editor holds it.

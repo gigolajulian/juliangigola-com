@@ -11,8 +11,8 @@
 import {
   PROJECTS as HARVESTED,
   CATEGORIES as HARVESTED_CATEGORIES,
-} from "./work-data";
-import type { Project, Category, Frame, TextBlock } from "./work-types";
+} from "../work-data";
+import type { Project, Category, Frame, TextBlock } from "../work-types";
 import { COVER_RELEASES as RELEASES } from "./cover-art-data";
 import type { CoverRelease } from "./cover-art-types";
 import { CONTENT } from "../content";
@@ -212,7 +212,7 @@ const reslug = (project: Project): Project => {
  * Refiles a project under the discipline `/admin` chose for it.
  *
  * Applied after the merge so it reaches harvested projects as well as added
- * ones: their categories come from `lib/work/work-data.ts`, which `/admin` does
+ * ones: their categories come from `lib/work-data.ts`, which `/admin` does
  * not write.
  *
  * An unknown category slug is left alone rather than throwing. This map is
@@ -245,7 +245,7 @@ const withBts = (project: Project): Project =>
  * Replaces the credits `/admin` has rewritten.
  *
  * A map for the same reason `refile` uses one: the harvested projects keep
- * their credits in `lib/work/work-data.ts`, which `/admin` does not write.
+ * their credits in `lib/work-data.ts`, which `/admin` does not write.
  *
  * Checked with `in` rather than by truthiness, so an empty array is honoured.
  * "This project's harvested credits are wrong, publish none" is a real

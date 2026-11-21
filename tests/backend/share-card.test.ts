@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { CARD_SIZE, pickFrames } from "@/lib/share-card";
-import type { Frame } from "@/lib/work/work-types";
+import type { Frame } from "@/lib/work-types";
 
 /* Which frames a link card shows: the first always, a second only when
    it pairs: two portraits side by side, or one of the other shape. */

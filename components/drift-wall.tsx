@@ -13,7 +13,7 @@ import {
   type PointerEvent as ReactPointerEvent,
   type ReactNode
 } from 'react';
-import type { DriftWallItem } from '@/lib/work/work-types';
+import type { DriftWallItem } from '@/lib/work-types';
 
 export type { DriftWallItem };
 

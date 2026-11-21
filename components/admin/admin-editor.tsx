@@ -22,7 +22,7 @@ import { type PendingUpload } from "@/components/admin/admin-frames";
 import { CreditDesk, creditBook } from "@/components/admin/admin-credits";
 import { same, withOverride } from "@/lib/admin/admin-payload";
 import { TOKEN_STORE, REPO } from "@/lib/admin/admin-github";
-import type { Bts } from "@/lib/work/work-types";
+import type { Bts } from "@/lib/work-types";
 import { byCodeUnit, cn } from "@/lib/utils";
 
 /* ── the editor ───────────────────────────────────────────────────

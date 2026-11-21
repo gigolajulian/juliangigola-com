@@ -4,7 +4,7 @@ import { ImageResponse } from "next/og";
 import type { Sharp } from "sharp";
 import framing from "@/lib/share-framing.json";
 import picks from "@/lib/share-picks.json";
-import type { Frame } from "@/lib/work/work-types";
+import type { Frame } from "@/lib/work-types";
 
 /* The share card (1200x630): the work on the right, the name on the left.
    Two verticals when the opening frames are verticals, otherwise one

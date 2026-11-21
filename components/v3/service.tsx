@@ -8,7 +8,7 @@ import { ServiceBar } from "@/components/v3/service-bar";
 import { BOOKING_PAGES, bookingHref, type BookingPage } from "@/lib/booking/booking";
 import { CAMPUS_GUIDES, campusHref } from "@/lib/campus-guides";
 import { SESSIONS, type SessionSlug } from "@/lib/flags/v3";
-import type { Frame } from "@/lib/work/work-types";
+import type { Frame } from "@/lib/work-types";
 
 /* JG V3 service page (leftovers sheet, card A): the title on the left with
    the rate and includes as a run and the two buttons, the frames in the

@@ -8,7 +8,7 @@
  * so committing it once would make every clone pay for it for good.
  *
  * So the archive lives in an R2 bucket and the repo holds only the manifest
- * that points at it (`lib/work/work-data.ts`). Run this after `harvest.mjs`, and
+ * that points at it (`lib/work-data.ts`). Run this after `harvest.mjs`, and
  * after anything else that writes to `public/work/`.
  *
  *   node scripts/sync-r2.mjs           # upload what is missing

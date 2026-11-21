@@ -13,9 +13,9 @@ import { srcOf } from "@/lib/admin/admin-sequence";
 import { twinStats } from "@/lib/work/frame-twins";
 import { AdminCredits } from "@/components/admin/admin-credits";
 import { AdminBts } from "@/components/admin/admin-bts";
-import type { Bts } from "@/lib/work/work-types";
+import type { Bts } from "@/lib/work-types";
 import type { FrameRef } from "@/lib/work/added";
-import type { Credit } from "@/lib/work/work-types";
+import type { Credit } from "@/lib/work-types";
 import { cn } from "@/lib/utils";
 
 /* ── the project list ─────────────────────────────────────────────
@@ -30,7 +30,7 @@ import { cn } from "@/lib/utils";
  *   - **Delete** takes it off the site. For a project added here that is
  *     the bin - the entry and its photographs leave in one commit and sit
  *     in Recently deleted for a week. For a harvested one it is the
- *     `hidden` list: `lib/work/work-data.ts` is regenerated from the old site,
+ *     `hidden` list: `lib/work-data.ts` is regenerated from the old site,
  *     so deleting an entry there comes back on the next harvest with
  *     nothing to show it ever went, and unpublishing is the removal that
  *     survives. Restore puts it back, and it is published with the draft
