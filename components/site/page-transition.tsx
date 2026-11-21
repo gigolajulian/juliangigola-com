@@ -184,8 +184,12 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
           lid.append(c);
         }
         document.body.append(lid);
-        // after the paint that has the home in it, so no frame shows neither
-        const go = () => (landed === go && (landed = null), requestAnimationFrame(() => requestAnimationFrame(() => lid.remove())));
+        // after the paint that has the home in it, and once the covers row has settled in (it eased in over 60 to 90ms, MAC SSH on 476d12eb), 300ms at most
+        const settled = () => {
+          const runs = document.querySelector(".mt-covers")?.getAnimations({ subtree: true }).filter((a) => a.effect?.getTiming().iterations !== Infinity) ?? [];
+          return Promise.race([Promise.all(runs.map((a) => a.finished.catch(() => {}))), new Promise((r) => setTimeout(r, 300))]);
+        };
+        const go = () => (landed === go && (landed = null), requestAnimationFrame(() => requestAnimationFrame(() => void settled().then(() => lid.remove()))));
         landed = go;
         window.setTimeout(() => lid.isConnected && go(), 1500); // a page slower than this: off anyway
         return;
