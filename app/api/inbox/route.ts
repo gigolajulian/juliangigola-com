@@ -156,6 +156,15 @@ export async function GET(request: Request) {
     const raw = PHOTO_KEY.test(key) ? await gate.inbox.get(key) : null;
     return raw ? json({ photo: await seal.open<string>(raw) }) : json({ error: "Photo not found." }, 404);
   }
+  // Every task on every lead, for Today's Tasks due. Trashed leads are left out.
+  if (url.searchParams.has("tasks")) {
+    const seal = await gate.seal;
+    if (!seal) return noSeal();
+    const tasks = (await everyLead(gate.inbox, seal))
+      .filter((l) => !l.trashedAt)
+      .flatMap((l) => (l.tasks ?? []).filter((t) => !t.doneAt).map((t) => ({ ...t, lead: l.id, name: l.name })));
+    return json({ tasks });
+  }
   // Every invoice on every lead, newest first, for Money > Invoices and Today's overdue list. Trashed leads are left out.
   // shortcut: one KV get per lead; an invoice index if the desk ever holds thousands of leads.
   if (url.searchParams.has("invoices")) {

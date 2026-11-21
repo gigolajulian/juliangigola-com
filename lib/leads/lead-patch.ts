@@ -10,7 +10,7 @@ import { fold, PAPER, REMIND_MAX, STAGES, type Lead, type LeadPatch, type Paper,
 import { buryLead, hasPerson, linkPeople, personKey, readLead, writeLead } from "@/lib/leads/lead-store";
 import { adoptLog } from "@/lib/leads/activity-log";
 import { notionPaper, notionStage } from "@/lib/leads/notion-lead";
-import { cleanPeople, merge } from "@/lib/leads/lead-crm";
+import { cleanPeople, cleanPlan, cleanTasks, merge } from "@/lib/leads/lead-crm";
 import { balance, cleanInvoice, invoiceCountKey, invoiceNo, invoicesTaken, usd } from "@/lib/leads/invoice";
 
 /**
@@ -19,7 +19,7 @@ import { balance, cleanInvoice, invoiceCountKey, invoiceNo, invoicesTaken, usd }
  * on the timeline like everything else.
  */
 export async function patchLead(inbox: KV, seal: Sealer, given: Record<string, unknown>, notion?: string): Promise<Response> {
-  const { key, stage, snoozeUntil, seen, archive, trash, notes, remind, details, quote, lostReason, mergeFrom, invoice, licence, contract, release, invoicePaid, people } = given as LeadPatch & { key: string };
+  const { key, stage, snoozeUntil, seen, archive, trash, notes, remind, details, quote, lostReason, mergeFrom, invoice, licence, contract, release, invoicePaid, people, plan, tasks } = given as LeadPatch & { key: string };
   for (const p of [contract, release]) if (p !== undefined && !(PAPER as readonly string[]).includes(p)) return json({ error: "Unknown status." }, 400);
   const bill = invoice === undefined ? undefined : cleanInvoice(invoice);
   if (bill && "error" in bill) return json({ error: bill.error }, 400);
@@ -44,6 +44,17 @@ export async function patchLead(inbox: KV, seal: Sealer, given: Record<string, u
       if (there && hasPerson(there, p.email)) return json({ error: `${p.email} is already on another lead.` }, 409);
     }
     lead = { ...lead, people: list.length ? list : undefined, events: [...lead.events, { at: new Date().toISOString(), kind: "edit" as const, note: "people" }].slice(-50) };
+  }
+  // The shoot plan and tasks (`cleanPlan`, `cleanTasks`): whole replacements, checked against the people as they now stand.
+  if (plan !== undefined) {
+    const p = cleanPlan(plan, lead.people);
+    if (p && "error" in p) return json({ error: p.error }, 400);
+    lead = { ...lead, plan: p ?? undefined };
+  }
+  if (tasks !== undefined) {
+    const t = cleanTasks(tasks, lead.tasks, lead.people);
+    if ("error" in t) return json({ error: t.error }, 400);
+    lead = { ...lead, tasks: t.tasks.length ? t.tasks : undefined, events: [...lead.events, ...t.events].slice(-50) };
   }
   // Every 404 is decided before anything is written: a patch that fails must not move the Notion board or use up an invoice number.
   const mergeId = typeof mergeFrom === "string" && mergeFrom.startsWith("lead:") && mergeFrom !== key ? mergeFrom : undefined;

@@ -92,6 +92,7 @@ function line(e: LeadEvent): string {
     case "no-show": return `No-show${e.note ? `. ${e.note}` : ""}`;
     case "selects": return `Sent selects${e.note ? `: ${e.note}` : ""}`;
     case "invoice-paid": return `Invoice ${e.note ?? ""}`;
+    case "task": return `Task done: ${e.note ?? ""}`;
   }
 }
 
