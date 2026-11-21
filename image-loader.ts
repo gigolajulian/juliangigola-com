@@ -124,8 +124,7 @@ export default function cloudflareImageLoader({
   // and visibly sharpening mid-trip as the morph landed on the project's
   // 1920px frame. The 1080px copy exists for exactly this; hand the resizer
   // that, and it only ever scales down.
-  const picked = sizedHero(src, width) ?? src;
-  const source = picked;
+  const source = sizedHero(src, width) ?? src;
 
   if (!CDN) return source;
 

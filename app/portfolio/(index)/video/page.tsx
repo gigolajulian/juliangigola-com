@@ -26,8 +26,7 @@ export const metadata: Metadata = {
   ...shareOg("Video","Music videos and commercials directed and shot by Julian Gigola."),
 };
 
-/* JG V3 (leftovers card D): the films as 16:9 tiles. The old strip
-   (`VideoShowcase` in the work sheet) is retired, not deleted. */
+/* JG V3 (leftovers card D): the films as 16:9 tiles. */
 export default function VideoPage() {
   return <V3Video videos={CONTENT.videos} />;
 }
