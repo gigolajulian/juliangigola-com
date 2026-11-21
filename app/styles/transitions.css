@@ -206,6 +206,16 @@
   animation: jg-page-down var(--dur-xs) cubic-bezier(0.32, 0.72, 0, 1) both;
   mix-blend-mode: normal;
 }
+/* Back from Cover art to the home (`data-nav-off`, `page-transition.tsx`): the same drop, a whole screen and opaque, so the
+   home is clean as it is uncovered. A fade over it washed the cover grey for its first frames (MAC on #1351). */
+:root[data-nav-off]::view-transition-old(back-page) {
+  animation-name: jg-page-off;
+}
+@keyframes jg-page-off {
+  to {
+    transform: translateY(100vh);
+  }
+}
 ::view-transition-new(back-page) {
   animation: jg-page-settle var(--dur-lg) cubic-bezier(0.32, 0.72, 0, 1) both;
   mix-blend-mode: normal;
