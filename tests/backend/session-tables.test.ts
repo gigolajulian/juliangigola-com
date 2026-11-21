@@ -3,7 +3,7 @@ import { EVENTS } from "@/lib/booking/booking-rules";
 import { SESSION_EVENTS } from "@/lib/booking/booking";
 import { SESSION } from "@/lib/booking/deposit";
 import { DEPOSIT, PAID, isPaid } from "@/lib/booking/paid";
-import { LENGTH, SESSIONS } from "@/lib/v3";
+import { LENGTH, SESSIONS } from "@/lib/flags/v3";
 
 /* The session tables derived from `EVENTS` and `PAID` give the values they
    held when each was written by hand (2026-11-16), with Headshots and Studio

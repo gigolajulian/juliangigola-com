@@ -8,7 +8,7 @@ import { V3Foot } from "@/components/v3/chrome";
 import { CallDialog } from "@/components/v3/book";
 import { Duo } from "@/components/v3/duo";
 import { Check, Failed, Field, FlowShell, Hidden, NEED_MSG, checkYou, first, useEnquiry } from "@/components/v3/flow";
-import { CALL_CARD, DOORS } from "@/lib/v3";
+import { CALL_CARD, DOORS } from "@/lib/flags/v3";
 
 /* JG V3 Inquire (master v39, /inquire and /inquire/form). Both forms post
    through the site's enquiry action (`app/contact/actions.ts`) with its

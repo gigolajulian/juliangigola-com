@@ -35,19 +35,14 @@ import {
  * sender believes they have been in touch and waits. So:
  *
  *   - Validation happens on the server, not only in the browser.
- *   - The enquiry is written to the inbox /admin reads, which is the delivery
- *     path: no mail provider, no account, and nothing for the sender to do
- *     afterwards.
+ *   - The enquiry is written to the inbox /admin reads. The stored enquiry is
+ *     the record; nothing is left for the sender to do afterwards.
  *   - If that write cannot happen — no binding in development, or the daily
  *     ceiling reached — the action says so plainly and hands back a `mailto:`
  *     the visitor can send themselves, instead of pretending it worked.
  *
- * Mail is not sent from here at all any more. It was never configured, and
- * the branch that would have done it is gone rather than left as a switch
- * nobody will find: an enquiry that is *stored* cannot bounce, cannot land in
- * spam, and does not need a sending domain, an API key or a monthly bill. If
- * a notification to his phone is wanted later, it belongs beside this write
- * and not instead of it.
+ * A best-effort mail copy goes to Julian after the store (below). A mail
+ * failure never turns a stored enquiry into an error.
  */
 
 const TO = "contact@juliangigola.com";

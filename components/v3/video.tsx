@@ -4,7 +4,7 @@ import * as React from "react";
 import Image from "next/image";
 import { PageFoot } from "@/components/v3/chrome";
 import { Mark } from "@/components/v3/duo";
-import { REEL, creditOf, embedUrl, previewUrl, captionsOff, vimeoListen, vimeoPlays, posterFor, sectionName, type Video } from "@/lib/videos";
+import { REEL, creditOf, embedUrl, previewUrl, captionsOff, vimeoListen, vimeoPlays, posterFor, sectionName, type Video } from "@/lib/work/videos";
 
 /* JG V3 Motion (Julian): A as an index over one full-screen stage;
    scrolling swaps the film and its title, bottom left. Phones get the same

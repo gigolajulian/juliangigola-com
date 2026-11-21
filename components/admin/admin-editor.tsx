@@ -17,7 +17,7 @@ import { AdminSeo } from "@/components/admin/admin-seo";
 import { AdminVideos } from "@/components/admin/admin-videos";
 import { loadRepo, publishDraft, type Draft, type Status } from "@/lib/admin/publish";
 import { ClientFields, ContactFields, CoverArtFields, HomeFields, inputClass, QuoteFields, SessionFields } from "@/components/admin/admin-fields";
-import { isTextRef, type TrashedProject } from "@/lib/added";
+import { isTextRef, type TrashedProject } from "@/lib/work/added";
 import { type PendingUpload } from "@/components/admin/admin-frames";
 import { CreditDesk, creditBook } from "@/components/admin/admin-credits";
 import { same, withOverride } from "@/lib/admin/admin-payload";
@@ -51,13 +51,6 @@ import { byCodeUnit, cn } from "@/lib/utils";
  * which is the trade for not having to paste it every time. "Forget token"
  * clears it. */
 
-/**
- * The Content form's own sections, in the order they are set.
- *
- * Declared here rather than read off the DOM so the index can be rendered
- * before the form is, and so the numbers in the index and the numbers on the
- * headings cannot drift apart — they come from the same list.
- */
 /**
  * The tabs, in two groups.
  *
@@ -143,7 +136,7 @@ export type Overrides = Pick<Draft, "categories" | "frames" | "credits" | "copy"
  * the way out. Idempotent - once the site has deployed the rename the
  * rows wear the new slug, the old key is absent, and there is nothing to
  * move - so it runs on every publish rather than remembering whether it
- * has. `lib/work.ts` renames first in its pipeline for the same reason:
+ * has. `lib/work/work.ts` renames first in its pipeline for the same reason:
  * the new slug is the one identity, and a renamed project is never two.
  * ─────────────────────────────────────────────────────────────── */
 function remapSlugs(draft: Draft, slugs: Record<string, string>): Draft {
@@ -235,7 +228,7 @@ export function AdminEditor({
   /**
    * Disciplines the cover could show, which is not all of them.
    *
-   * `DISCIPLINES` in `lib/work.ts` drops any category with no lead project or
+   * `DISCIPLINES` in `lib/work/work.ts` drops any category with no lead project or
    * no frame, because the cover has to show a photograph for each one and
    * cannot invent it. So Video and Music video, which have no work at all,
    * are absent here rather than offered and silently ignored.
@@ -315,7 +308,7 @@ export function AdminEditor({
   const setOverride = <K extends keyof Overrides>(kind: K, next: (now: Overrides[K]) => Overrides[K]) =>
     setOverrides((o) => ({ ...o, [kind]: next(o[kind]) }));
   const { categories: recategorised, frames: reframed, credits: recredited, copy: recopied, slugs: reslugged } = overrides;
-  /** The running order of the work, by slug. Partial - see `lib/added.ts`. */
+  /** The running order of the work, by slug. Partial - see `lib/work/added.ts`. */
   const [order, setOrder] = React.useState<string[]>(initialOrder);
   /** The photograph standing for each discipline, by category slug. */
   const [covers, setCovers] =
@@ -599,7 +592,7 @@ export function AdminEditor({
    * project under its old discipline, because it read the server's label. Each
    * was a small lie in a different place and they were all the same bug.
    *
-   * Mirrors `relabel`, `withSequence` and `byRunningOrder` in `lib/work.ts`:
+   * Mirrors `relabel`, `withSequence` and `byRunningOrder` in `lib/work/work.ts`:
    * the same operations the build applies, applied here so the editor shows
    * what publishing would produce rather than what the last deploy did.
    */
@@ -612,7 +605,7 @@ export function AdminEditor({
         const filed = recategorised[p.slug] ?? p.categorySlug;
         /* The frame the gallery now opens on.
          *
-         * `withSequence` in `lib/work.ts` makes the first frame of a
+         * `withSequence` in `lib/work/work.ts` makes the first frame of a
          * resequenced gallery its cover — the card and the discipline are
          * meant to show what you actually opened on. The editor was not
          * applying that half, so dragging a frame to the front changed the

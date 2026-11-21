@@ -5,7 +5,7 @@
  * gets overwritten by `scripts/cover-art.mjs`.
  */
 
-import type { Frame } from "./work-types";
+import type { Frame } from "../work-types";
 
 /**
  * A frame of a sleeve.

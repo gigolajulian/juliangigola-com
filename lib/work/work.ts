@@ -11,13 +11,13 @@
 import {
   PROJECTS as HARVESTED,
   CATEGORIES as HARVESTED_CATEGORIES,
-} from "./work-data";
-import type { Project, Category, Frame, TextBlock } from "./work-types";
+} from "../work-data";
+import type { Project, Category, Frame, TextBlock } from "../work-types";
 import { COVER_RELEASES as RELEASES } from "./cover-art-data";
 import type { CoverRelease } from "./cover-art-types";
-import { CONTENT } from "./content";
+import { CONTENT } from "../content";
 import { ALT } from "./alt-text";
-import type { WallTile } from "./wall-tile";
+import type { WallTile } from "../wall-tile";
 import { REEL } from "./videos";
 import {
   ADDED,
@@ -60,7 +60,7 @@ export const CATEGORIES: Category[] = [
 /**
  * The cover-art gallery in Julian's order.
  *
- * `lib/cover-art-data.ts` is generated and its order is the script's; which
+ * `lib/work/cover-art-data.ts` is generated and its order is the script's; which
  * release the gallery opens on is an editorial decision and belongs in
  * /admin. Partial and stable, exactly like the work's own running order: a
  * named release takes its place, an unnamed one keeps the place the script
@@ -192,30 +192,6 @@ const fromAdded = (p: AddedProject): Project => {
 };
 
 /**
- * Every project, added work first — and including what is hidden.
- *
- * `projectsIn()` takes the first project in a category as that category's
- * lead — the frame its row shows, and what the discipline page opens with —
- * so putting new work at the front means a shoot added today is what the site
- * leads with, rather than sinking beneath a migration ordered by the old
- * site. The hand-picked cover overrides still win where they exist.
- *
- * Exported unfiltered for `/admin` only: the editor has to be able to show a
- * hidden project in order to offer to bring it back, which is the one context
- * where the filter below is wrong.
- */
-/**
- * Refiles a project under the discipline `/admin` chose for it.
- *
- * Applied after the merge so it reaches harvested projects as well as added
- * ones — their categories come from `lib/work-data.ts`, which `/admin` does
- * not write.
- *
- * An unknown category slug is left alone rather than throwing. This map is
- * keyed by project slug, and a re-harvest can retire a project entirely; a
- * stale key should not be able to fail a build that is otherwise fine.
- */
-/**
  * Gives a project the address /admin gave it.
  *
  * First in the pipeline, before anything looks a project up by slug, so
@@ -232,6 +208,17 @@ const reslug = (project: Project): Project => {
     : project;
 };
 
+/**
+ * Refiles a project under the discipline `/admin` chose for it.
+ *
+ * Applied after the merge so it reaches harvested projects as well as added
+ * ones: their categories come from `lib/work-data.ts`, which `/admin` does
+ * not write.
+ *
+ * An unknown category slug is left alone rather than throwing. This map is
+ * keyed by project slug, and a re-harvest can retire a project entirely; a
+ * stale key should not be able to fail a build that is otherwise fine.
+ */
 const refile = (project: Project): Project => {
   const wanted = RECATEGORISED[project.slug];
   if (!wanted) return project;
@@ -242,16 +229,6 @@ const refile = (project: Project): Project => {
   return { ...project, categories: [category] };
 };
 
-/**
- * Replaces the credits `/admin` has rewritten.
- *
- * A map for the same reason `refile` uses one: the harvested projects keep
- * their credits in `lib/work-data.ts`, which `/admin` does not write.
- *
- * Checked with `in` rather than by truthiness, so an empty array is honoured.
- * "This project's harvested credits are wrong, publish none" is a real
- * instruction and the only way to say it.
- */
 /** Rewritten title and intent from `/admin`; see `AddedFile.copy`. */
 const recopy = (project: Project): Project => {
   const c = RECOPIED[project.slug];
@@ -264,6 +241,16 @@ const recopy = (project: Project): Project => {
 const withBts = (project: Project): Project =>
   BTS[project.slug] ? { ...project, bts: BTS[project.slug] } : project;
 
+/**
+ * Replaces the credits `/admin` has rewritten.
+ *
+ * A map for the same reason `refile` uses one: the harvested projects keep
+ * their credits in `lib/work-data.ts`, which `/admin` does not write.
+ *
+ * Checked with `in` rather than by truthiness, so an empty array is honoured.
+ * "This project's harvested credits are wrong, publish none" is a real
+ * instruction and the only way to say it.
+ */
 const recredit = (project: Project): Project =>
   project.slug in RECREDITED
     ? { ...project, credits: RECREDITED[project.slug] }
@@ -367,31 +354,6 @@ export const categoryLabel = (category: Category): string =>
   category.name.toLowerCase().replace(/(^|\s)\S/g, (c) => c.toUpperCase());
 
 /**
- * Prints every category under its display name, once, for good.
- *
- * The labels above were only being applied where somebody remembered to call
- * `categoryLabel` — the cover index, the nav, a page heading. Everywhere that
- * printed `project.categories[0].name` got the raw manifest name instead, so
- * `/portfolio` listed "CAMPAIGNS" while the nav above it said "Brand campaigns",
- * and the homepage tiles did the same. That was true before this function
- * existed and would have been true of every future rename.
- *
- * Fixed at the one place every consumer reads from rather than at each render
- * site, because the render sites are the part that keeps growing. `withCoverArt`
- * has been doing exactly this for `coverart` alone since the rebuild; this is
- * that, generalised.
- *
- * After `refile`, so a project moved to another discipline in /admin is
- * labelled by where it now is and not where it was.
- */
-/**
- * A name for every picture. The harvest left `alt` empty on all but a
- * handful of frames, and an empty alt tells a screen reader the photograph
- * is decoration. On a photographer's site it is the content, so a frame
- * with no description of its own is named for the work it belongs to and
- * its place in it. Real descriptions written in /admin still win.
- */
-/**
  * A collaborator's face, by Instagram handle, or nothing.
  *
  * Saved with the site rather than fetched: Instagram's own picture URLs are
@@ -403,15 +365,7 @@ export const avatarFor = (
   handle: string | null | undefined,
 ): string | undefined => (handle ? AVATARS[handle.toLowerCase()] : undefined);
 
-/**
- * The face and the handle on every credit, worked out here.
- *
- * Here and not in the card that draws it, because the card is a client
- * component: reaching for the archive from there would carry the whole
- * manifest into the browser to look up one path. This runs where the
- * archive is free to read, and a credit arrives knowing who it is.
- */
-/** Julian's own photo credit goes last, after the crew (Julian, 2026-10-21 and 2026-11-15). */
+/** Julian's own photo credit goes last, after the crew. */
 const MINE = /^photo(grapher|graphy)?$/i;
 const ownLast = (project: Project): Project => ({
   ...project,
@@ -421,6 +375,14 @@ const ownLast = (project: Project): Project => ({
   ],
 });
 
+/**
+ * The face and the handle on every credit, worked out here.
+ *
+ * Here and not in the card that draws it, because the card is a client
+ * component: reaching for the archive from there would carry the whole
+ * manifest into the browser to look up one path. This runs where the
+ * archive is free to read, and a credit arrives knowing who it is.
+ */
 const withFaces = (project: Project): Project => ({
   ...project,
   credits: project.credits.map((c) => {
@@ -461,9 +423,16 @@ const altContext = (project: Project): string => {
     .join(", ");
 };
 
+/**
+ * A name for every picture. The harvest left `alt` empty on all but a
+ * handful of frames, and an empty alt tells a screen reader the photograph
+ * is decoration. On a photographer's site it is the content, so a frame
+ * with no description of its own is named for the work it belongs to and
+ * its place in it. Real descriptions written in /admin still win.
+ */
 const withAlt = (project: Project): Project => {
   const context = altContext(project);
-  /* A written description (`lib/alt-text.ts`, or one the harvest kept)
+  /* A written description (`lib/work/alt-text.ts`, or one the harvest kept)
      first, then the project's own words; without one, the project's words
      and where in the sequence the frame sits. */
   const alt = (f: Frame, i: number) => {
@@ -484,6 +453,24 @@ const withAlt = (project: Project): Project => {
   };
 };
 
+/**
+ * Prints every category under its display name, once, for good.
+ *
+ * The labels above were only being applied where somebody remembered to call
+ * `categoryLabel`: the cover index, the nav, a page heading. Everywhere that
+ * printed `project.categories[0].name` got the raw manifest name instead, so
+ * `/portfolio` listed "CAMPAIGNS" while the nav above it said "Brand campaigns",
+ * and the homepage tiles did the same. That was true before this function
+ * existed and would have been true of every future rename.
+ *
+ * Fixed at the one place every consumer reads from rather than at each render
+ * site, because the render sites are the part that keeps growing. `withCoverArt`
+ * has been doing exactly this for `coverart` alone since the rebuild; this is
+ * that, generalised.
+ *
+ * After `refile`, so a project moved to another discipline in /admin is
+ * labelled by where it now is and not where it was.
+ */
 const relabel = (project: Project): Project => ({
   ...project,
   categories: project.categories.map((c) => ({ ...c, name: categoryLabel(c) })),
@@ -507,6 +494,19 @@ const rank = new Map(ORDER.map((slug, i) => [slug, i]));
 const byRunningOrder = (a: Project, b: Project): number =>
   (rank.get(a.slug) ?? Infinity) - (rank.get(b.slug) ?? Infinity);
 
+/**
+ * Every project, added work first, and including what is hidden.
+ *
+ * `projectsIn()` takes the first project in a category as that category's
+ * lead (the frame its row shows, and what the discipline page opens with),
+ * so putting new work at the front means a shoot added today is what the site
+ * leads with, rather than sinking beneath a migration ordered by the old
+ * site. The hand-picked cover overrides still win where they exist.
+ *
+ * Exported unfiltered for `/admin` only: the editor has to be able to show a
+ * hidden project in order to offer to bring it back, which is the one context
+ * where the filter below is wrong.
+ */
 export const ALL_PROJECTS: Project[] = [
   ...ADDED.map(fromAdded),
   ...HARVESTED.map((p) =>
@@ -524,8 +524,7 @@ export const ALL_PROJECTS: Project[] = [
  * discipline pages, the homepage band, `generateStaticParams`, the sitemap
  * and the old-URL redirects — and a list that has to be remembered in six
  * places is a list that will be forgotten in one.
- */
-/**
+ *
  * Everything that has a page: the archive less what has been unpublished.
  *
  * `generateStaticParams`, `getProject` and the bare-slug redirects read this
@@ -675,7 +674,7 @@ export const categoryHref = (categorySlug: string): string => {
   if (categorySlug === "video") return "/portfolio/video";
 
   if (!isListing(categorySlug)) return "/portfolio";
-  /* Julian (2026-10-27): the discipline pages are retired. A discipline is
+  /* The discipline pages are retired. A discipline is
      /portfolio with its chip on (`components/v3/work.tsx` reads `?d=`), and
      the old `/portfolio/<discipline>` addresses redirect there
      (`next.config.ts`). Automotive, Events, Places and Cover art share their
@@ -779,7 +778,7 @@ export const WORK_CATEGORY_LINKS: CategoryLink[] = WORK_CATEGORIES.filter(
 // Relative, not `@/`: `next.config.ts` imports this module for the redirect
 // table, and Node loads that outside the bundler, where the alias does not
 // exist and an aliased import is a module-not-found on `next dev`.
-import COVER_BLUR from "../public/work/blur.json";
+import COVER_BLUR from "../../public/work/blur.json";
 
 /** The cover with its blur-up attached, when the generator made one. */
 const withBlur = (cover: Frame): Frame => {
@@ -825,6 +824,15 @@ const clean = (name: string) => name.replace(/\p{Cf}/gu, "").trim();
 /** Julian himself, under either spelling he is credited by. */
 const isJulian = (name: string) => /julian gigola|@juliangigola/i.test(name);
 
+/** Julian's line for the campaigns whose credits name no client or brand:
+    two were spec work, not commissioned. */
+const CAMPAIGN_CLIENT: Record<string, string> = {
+  ukiyosunknown: "@ukiyosunknown",
+  diesel: "Diesel spec",
+  "oakley-x-nike": "Oakley x Nike spec",
+  "kala-x-sharks": "Kala Therapy x SJ Sharks",
+};
+
 /**
  * The line under a cover's name. Julian: the model, for unity, and the
  * creative director after a slash when there is one; for brand campaigns,
@@ -837,15 +845,6 @@ const isJulian = (name: string) => /julian gigola|@juliangigola/i.test(name);
  * named: it is his site. Nothing credited, and it falls back to what was
  * there before, the billing and then the discipline.
  */
-/** Julian's line for the campaigns whose credits name no client or brand:
-    two were spec work, not commissioned. */
-const CAMPAIGN_CLIENT: Record<string, string> = {
-  ukiyosunknown: "@ukiyosunknown",
-  diesel: "Diesel spec",
-  "oakley-x-nike": "Oakley x Nike spec",
-  "kala-x-sharks": "Kala Therapy x SJ Sharks",
-};
-
 const coverCredit = (p: Project): string => {
   const credits = p.credits.map((c) => ({ ...c, name: clean(c.name) }));
   if (p.categories.some((c) => c.slug === "campaigns")) {
@@ -1002,24 +1001,12 @@ export type Client = {
 };
 
 /**
- * The client wall, as Julian confirmed it.
- *
- * Hand-ordered rather than derived, and the order is an argument: the two
- * names an art director recognises without thinking lead, and the brands he
- * shot campaigns for follow.
- *
- * `href` rather than a slug, because a client is not always a project — Pear
- * VC and Ladera Granola are films, and their work is on /work/video. Oakley x
- * Nike came off the list on his say-so.
- *
- * A project link is checked against the manifest below, so a renamed or
- * unpublished project costs that client its cell rather than publishing a row
- * that 404s.
- */
-/**
  * Every client with a mark on file, as the catalogue the editor picks from.
  * The order here is the fallback; the walls themselves follow
  * `content/site.json` — see `PRESS_HOME` and `PRESS_STUDIO`.
+ *
+ * `href` rather than a slug, because a client is not always a project: Pear
+ * VC and Ladera Granola are films, and their work is on /work/video.
  */
 export const PRESS: Client[] = [
   { name: "WIRED", slug: "wired-magazine", href: "/portfolio/wired-magazine" },

@@ -1,10 +1,10 @@
 import { existsSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { CONTENT, CONTENT_PATH } from "@/lib/content";
-import { COVER_RELEASES } from "@/lib/cover-art-data";
+import { COVER_RELEASES } from "@/lib/work/cover-art-data";
 
 /* The parsed `content/site.json` (`lib/content.ts`) and the generated
-   cover-art set it picks from (`lib/cover-art-data.ts`). */
+   cover-art set it picks from (`lib/work/cover-art-data.ts`). */
 
 describe("CONTENT", () => {
   it("reads from the path the editor writes", () => {

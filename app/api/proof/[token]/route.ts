@@ -5,7 +5,7 @@ import { checkout, checkPaid, finalize } from "@/lib/proofs/submit";
 import { PAYMENTS_DOWN, PAYMENTS_OFF } from "@/lib/stripe";
 import { checkPass, cleanSelects, device, isEmail, isTestEmail, passCookie, passValue, shut, owed, isToken, publicView, readPublic, track, viewerKey, writeProof, type Proof } from "@/lib/proofs/proof";
 import { bodyOf, json } from "@/lib/http";
-import { alertHello } from "@/lib/hello-mail";
+import { alertHello } from "@/lib/email/hello-mail";
 import { actionAlert, worthMail } from "@/lib/email/proof-mail";
 
 /* ── proofs, the client's side ────────────────────────────────────
@@ -126,7 +126,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
   if (!isEmail(b.email)) return json({ error: "Add your email first." }, 400);
   const selects = cleanSelects(b.selects, g.p.frames);
   if (!selects.length) return json({ error: "Select at least one frame." }, 400);
-  // Notes are gone from the gallery (Julian 2026-11-08); old ones are dropped with the send.
+  // Notes are gone from the gallery; old ones are dropped with the send.
   const p: Proof = { ...logged(g.p, b.email, { picks: selects }), selects, notes: {}, message: undefined, submittedBy: b.email.trim() };
 
   if (owed(p).cents === 0) return json({ done: true, ...publicView(await finalize(g.env, g.kv, g.s, p)) });

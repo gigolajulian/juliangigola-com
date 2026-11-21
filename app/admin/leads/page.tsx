@@ -3,7 +3,7 @@ import { LeadsDesk } from "@/components/leads/desk";
 import { startupImages } from "@/lib/leads/leads-startup";
 
 /* ── the lead desk, on its own ────────────────────────────────────
- * Julian (2026-11-03): "a different section, hidden from all seo". The
+ * A section of its own, hidden from search. The
  * same desk as the Leads tab in /admin, with no editor around it, so it
  * opens straight to the list and is what the installed app starts on.
  * Installable on its own (desktop Chrome, iPhone "Add to Home Screen"):

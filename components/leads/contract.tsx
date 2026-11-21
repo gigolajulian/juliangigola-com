@@ -1,7 +1,7 @@
 "use client";
 
 /* ── contracts in the desk ────────────────────────────────────────
- * Julian (2026-11-15): Format's contract, in Leads. On a lead: pick a
+ * Contracts in Leads. On a lead: pick a
  * template, the text fills from the lead, edit it, Send (mail) or Copy
  * link. Signed: who and when, and the signed copy to download. In
  * Settings: the contract templates. All through /api/contract.

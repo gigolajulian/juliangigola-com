@@ -6,7 +6,7 @@ vi.mock("dialkit", () => ({
   useDialKit: (_: string, spec: Record<string, number[]>) =>
     Object.fromEntries(Object.entries(spec).map(([k, v]) => [k, v[0]])),
 }));
-vi.mock("@/lib/dialkit-styles", () => ({ useDialKitStyles: () => {} }));
+vi.mock("@/lib/dev/dialkit-styles", () => ({ useDialKitStyles: () => {} }));
 vi.mock("@/components/booking/book-times", () => ({
   BookTimes: ({ path, title }: { path: string; title: string }) => (
     <div data-testid="cal" data-path={path}>
@@ -14,7 +14,7 @@ vi.mock("@/components/booking/book-times", () => ({
     </div>
   ),
 }));
-vi.mock("@/components/inquire-wall", () => ({ InquireWall: () => null }));
+vi.mock("@/components/contact/inquire-wall", () => ({ InquireWall: () => null }));
 vi.mock("@/components/dev/dial-copy-all", () => ({ DialCopyAll: () => null }));
 
 import { BookPicker, type Bookable } from "@/components/booking/book-picker";

@@ -38,7 +38,7 @@ async function shrink(file: File): Promise<File> {
 }
 
 /* What was added, kept for 3 minutes after the block leaves the page (Back
-   on the Commissions stepper), per page, in memory only (Julian, 2026-10-23). */
+   on the Commissions stepper), per page, in memory only. */
 const KEEP_MS = 3 * 60 * 1000;
 const kept = new Map<string, { uploads: Upload[]; picks: string[]; at: number }>();
 const fresh = () => {
@@ -118,7 +118,7 @@ export function ReferencePicks({ resync, v3 }: { resync: unknown; v3?: boolean }
 
   /* V3 (/contact, /contact/form): Upload references and Pick from my work,
      two buttons. A PNG or JPEG dragged within 30px of Upload pulls the
-     button toward it, and a drop there is taken (Julian, 2026-10-23). */
+     button toward it, and a drop there is taken. */
   const addRef = React.useRef(add);
   React.useEffect(() => {
     addRef.current = add;

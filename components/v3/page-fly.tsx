@@ -3,7 +3,7 @@
 import * as React from "react";
 import { usePathname } from "next/navigation";
 import { scrollTop } from "@/components/v3/smooth-scroll";
-import { v4pages } from "@/lib/v4pages";
+import { v4pages } from "@/lib/flags/v4pages";
 
 /* Page opening A (mock https://claude.ai/artifact/6Nbep18kL572cWznUuA66K):
    the photo you click grows into the next page's hero. Any link, or a row
@@ -12,7 +12,7 @@ import { v4pages } from "@/lib/v4pages";
    Links without a photo, or pages without a hero, open plainly. Only with
    ?v3motion, never under reduced motion. */
 const HERO = ".v3 .pj-big, .v3 .f-photo .ph";
-/* MOTION-PLAN.md item 3: the photo travels on
+/* Motion plan item 3 (docs/decisions.md): the photo travels on
    `move` in 600, the covers left behind recede, the project's other frames
    rise in as it lands, and back flies the hero home to its tile. */
 const MOVE = "cubic-bezier(.77,0,.175,1)", OUT = "cubic-bezier(.23,1,.32,1)";
@@ -41,7 +41,7 @@ const zoomOf = (img: Element | null | undefined): Zoom | undefined => {
    layer from the trip's first frame: it never fades out with the page it left, and the compositor moves
    it, not layout. It travels on `drawer`, which sets off at once, with a shadow under it while it is in the
    air (motion-plan.css).
-   A photo only becomes the hero when it is the hero (Julian, 2026-11-17). Pressed on another frame of the
+   A photo only becomes the hero when it is the hero. Pressed on another frame of the
    project, it recedes last, where it was, and the project rises in whole (`data-fly="away"`). Flying it
    to its own frame down the page was tried: a wide set holds that frame at another shape, and the crop
    stepped as it landed. */
@@ -159,7 +159,7 @@ export function PageFly() {
     /* On trial: building the next page holds the screen for 150 to 250ms after the click, and nothing started in
        the click can show until then. So the photo answers the press itself: it dips, then lifts, on the
        compositor, and is still rising when the trip takes it over.
-       A finger too (Julian, 2026-11-18). A scroll starts like a press, so under a finger the photo waits 90ms for the
+       A finger too. A scroll starts like a press, so under a finger the photo waits 90ms for the
        browser to claim the gesture (pointercancel); a tap shorter than that starts as the finger lifts. */
     let press: Animation | null = null;
     let wait = 0;

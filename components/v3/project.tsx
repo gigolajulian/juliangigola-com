@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Mark } from "@/components/v3/duo";
 import { BtsCredit, BtsPageGrid } from "@/components/bts/bts";
 import { BackLink } from "@/components/site/back-link";
-import { billing, markFor, titleCase } from "@/lib/work";
+import { billing, markFor, titleCase } from "@/lib/work/work";
 import { tailHole } from "@/lib/sheet";
 import { V4Project } from "@/components/v4/project";
 import type { Frame, Project } from "@/lib/work-types";
@@ -23,7 +23,7 @@ type Credit = Project["credits"][number];
    ("@anisajadee", "Ryan Ohaya (@carti.kun)"), else Julian's own. */
 const handleOf = (c: Credit) =>
   c.instagram ?? c.name.match(/@([\w.]+)/)?.[1] ?? (/^julian gigola$/i.test(c.name.trim()) ? "juliangigola" : null);
-/* The name leads (Julian, 2026-10-27); the @handle takes its place on hover.
+/* The name leads; the @handle takes its place on hover.
    A name typed as only a handle has no name to lead with. */
 const nameOf = (c: Credit) => {
   const n = c.name.replace(/\s*\(@[\w.]+\)/, "").trim();
@@ -46,7 +46,7 @@ export function V3Project({ project, next }: { project: Project; next?: { href: 
      the title; a set that is mostly horizontal gets one horizontal there instead. */
   const imgs = project.images;
   const across = imgs.filter(wide).length > imgs.length / 2;
-  /* A set whose cover is a horizontal opens on that cover, full bleed under the title (Julian, 2026-11-18):
+  /* A set whose cover is a horizontal opens on that cover, full bleed under the title:
      the page used to open on the first vertical, a different picture from the one pressed. */
   const bleed = !!imgs[0] && wide(imgs[0]);
   const big = bleed ? imgs[0] : (imgs.find((f) => !wide(f)) ?? imgs[0]);
@@ -63,7 +63,7 @@ export function V3Project({ project, next }: { project: Project; next?: { href: 
   const credits = (
     <section className="sv-row">
       <h2 className="lbl mute">Credits</h2>
-      {/* Two columns on a large screen, read down then across; an odd count puts the extra name on the right (Julian, 2026-11-06). Not in a one-cell hole. */}
+      {/* Two columns on a large screen, read down then across; an odd count puts the extra name on the right. Not in a one-cell hole. */}
       <ul className={hole?.span === 1 ? undefined : "cr2"}>
         {project.credits.map((c, i) => {
           const h = handleOf(c);
@@ -140,7 +140,7 @@ export function V3Project({ project, next }: { project: Project; next?: { href: 
             </div>
           ) : null}
         </div>
-        {/* The rest as a contact sheet: even rows of three verticals; a horizontal takes the whole row at its own shape (Julian, 2026-11-05). */}
+        {/* The rest as a contact sheet: even rows of three verticals; a horizontal takes the whole row at its own shape. */}
         <div className="pj-flow">
           {rest.map((f) => (
             <figure key={f.src} className={wide(f) ? "pj-r w" : "pj-r"} style={wide(f) ? ({ "--ar": `${f.width} / ${f.height}` } as React.CSSProperties) : undefined}>

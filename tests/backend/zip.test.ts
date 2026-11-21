@@ -3,7 +3,7 @@ import { execFileSync } from "node:child_process";
 import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { crc32, uniqueNames, zipLayout } from "@/lib/zip";
+import { crc32, uniqueNames, zipLayout } from "@/lib/proofs/zip";
 
 const enc = new TextEncoder();
 

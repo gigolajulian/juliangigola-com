@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { render } from "@testing-library/react";
-import { TextCaret } from "@/components/text-caret";
+import { TextCaret } from "@/components/effects/text-caret";
 
 describe("TextCaret", () => {
   it("renders a hidden caret and stays off without a fine pointer", () => {

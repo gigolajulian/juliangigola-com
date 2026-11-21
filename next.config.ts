@@ -5,7 +5,7 @@ import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 // filtered out. Redirecting from a legacy URL to a page that is no longer
 // built sends a visitor 308 → 404, which is worse than the plain 404 they
 // would have got, because it looks like the site meant to take them there.
-import { LINKABLE, CATEGORIES, LISTINGS, categoryHref } from "./lib/work";
+import { LINKABLE, CATEGORIES, LISTINGS, categoryHref } from "./lib/work/work";
 import { BOOKING_SLUGS } from "./lib/booking/booking-slugs";
 
 /**
@@ -152,40 +152,6 @@ const categoryPathRedirects = [...pageRedirects, ...disciplineRedirects]
   .flatMap((r) => ["/portfolio/category/", "/work/category/"].map((pre) => ({ ...r, source: pre + r.source.slice("/portfolio/".length) })));
 
 /**
- * Security headers.
- *
- * The site was sending none — no CSP, no framing policy, no sniff
- * protection, no referrer policy, and `x-powered-by: Next.js` naming the
- * stack to anyone who asked. Cloudflare terminates TLS and enforces HTTPS,
- * which covers transport and nothing above it.
- *
- * `script-src` keeps `'unsafe-inline'`, and that is a deliberate limit rather
- * than an oversight. Next inlines its hydration payload as `<script>` tags in
- * every prerendered page, and the theme script in `app/layout.tsx` has to run
- * before first paint — nonces need a dynamic render, which this build does
- * not do. So CSP here is not an XSS backstop; it is a boundary on *where*
- * script, frames and connections may come from, which is worth having on its
- * own. The site renders no HTML from content, so there is no injection sink
- * for the inline allowance to widen.
- *
- * The specific allowances, each for one real reason:
- *   blob:            /admin previews a chosen photograph from an object URL
- *                    before it has been uploaded anywhere.
- *   api.github.com   /admin commits through the GitHub API from the browser.
- *   youtube/vimeo    /work/video embeds films from both. Four allowances,
- *                    each narrow: the two player origins in `frame-src`, the
- *                    two thumbnail CDNs in `img-src`, and the two oEmbed
- *                    endpoints in `connect-src` — which only /admin uses, to
- *                    read a title and a poster off a pasted link.
- *
- *                    `youtube-nocookie.com` rather than `youtube.com` for the
- *                    player: the ordinary domain sets an advertising cookie
- *                    on load, and this site has no cookie banner to justify
- *                    one. Nothing from either loads until a visitor presses
- *                    play (see `components/video-grid.tsx`), so the policy is
- *                    the boundary and the click is the consent.
- */
-/**
  * A production build for this machine, not for Cloudflare.
  *
  * `JG_LOCAL=1` is set by `npm run perf` (`scripts/perf/run.mjs`) and by
@@ -224,6 +190,40 @@ const IMAGE_CDN_ORIGIN =
 const __impeccableLiveDev =
   process.env.NODE_ENV === "development" ? " http://localhost:8400" : "";
 
+/**
+ * Security headers.
+ *
+ * The site was sending none: no CSP, no framing policy, no sniff
+ * protection, no referrer policy, and `x-powered-by: Next.js` naming the
+ * stack to anyone who asked. Cloudflare terminates TLS and enforces HTTPS,
+ * which covers transport and nothing above it.
+ *
+ * `script-src` keeps `'unsafe-inline'`, and that is a deliberate limit rather
+ * than an oversight. Next inlines its hydration payload as `<script>` tags in
+ * every prerendered page, and the theme script in `app/layout.tsx` has to run
+ * before first paint; nonces need a dynamic render, which this build does
+ * not do. So CSP here is not an XSS backstop; it is a boundary on *where*
+ * script, frames and connections may come from, which is worth having on its
+ * own. The site renders no HTML from content, so there is no injection sink
+ * for the inline allowance to widen.
+ *
+ * The specific allowances, each for one real reason:
+ *   blob:            /admin previews a chosen photograph from an object URL
+ *                    before it has been uploaded anywhere.
+ *   api.github.com   /admin commits through the GitHub API from the browser.
+ *   youtube/vimeo    /work/video embeds films from both. Four allowances,
+ *                    each narrow: the two player origins in `frame-src`, the
+ *                    two thumbnail CDNs in `img-src`, and the two oEmbed
+ *                    endpoints in `connect-src`, which only /admin uses, to
+ *                    read a title and a poster off a pasted link.
+ *
+ *                    `youtube-nocookie.com` rather than `youtube.com` for the
+ *                    player: the ordinary domain sets an advertising cookie
+ *                    on load, and this site has no cookie banner to justify
+ *                    one. Nothing from either loads until a visitor presses
+ *                    play (see `components/video-grid.tsx`), so the policy is
+ *                    the boundary and the click is the consent.
+ */
 const csp = [
   "default-src 'self'",
   "base-uri 'self'",
@@ -349,13 +349,13 @@ const nextConfig: NextConfig = {
 
   /**
    * DialKit on the dev server only (Julian). A production build gets
-   * `lib/dialkit-stub.ts` in its place: the configs' defaults and no panel,
+   * `lib/dev/dialkit-stub.ts` in its place: the configs' defaults and no panel,
    * so visitors no longer download 72KB gzipped of tuning panels they never
    * saw (the audit, 2026-10-02).
    */
   turbopack: {
     resolveAlias:
-      process.env.NODE_ENV === "production" ? { dialkit: "./lib/dialkit-stub.ts" } : {},
+      process.env.NODE_ENV === "production" ? { dialkit: "./lib/dev/dialkit-stub.ts" } : {},
   },
 
   /**

@@ -1,4 +1,4 @@
-import { PROJECTS } from "@/lib/work";
+import { PROJECTS } from "@/lib/work/work";
 
 /* Every frame of every project for the canvas view
    (components/v3/canvas.tsx). A file of its own, fetched when the canvas

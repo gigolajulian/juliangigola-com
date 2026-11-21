@@ -9,7 +9,7 @@ vi.mock("@/components/drift-wall", () => ({
   DriftWall: ({ items, tileWidth }: { items: unknown[]; tileWidth: number }) => <div data-testid="wall" data-n={items.length} data-w={tileWidth} />,
 }));
 
-import { InquireWall } from "@/components/inquire-wall";
+import { InquireWall } from "@/components/contact/inquire-wall";
 
 const items = [{ src: "/work/nyx/01.jpg", title: "Nyx", href: "/portfolio/nyx" }];
 

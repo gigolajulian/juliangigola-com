@@ -7,8 +7,7 @@ import * as React from "react";
  * the real load as far as there is one: it creeps toward 90 while the
  * times are asked for, and only their arrival (`done`) takes it to 100.
  * Then `onDone`, and the picker comes up. `?loader=orb` keeps the orb.
- * The default on the booking pages (Julian, 2026-11-19, the Booking wait
- * mock, "make it the default"; `?loader=fill` keeps the fill): J and G
+ * The default on the booking pages (`?loader=fill` keeps the fill): J and G
  * side by side over the whole page (`jg-cover.ts`), a line under them
  * takes the count; on the answer the picker is drawn under the cover and
  * the cut grows from the middle of the mark until the page, standing
@@ -25,10 +24,8 @@ const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2
 
 /* The cut opens: J and G close over the middle, the cut grows from where
    they meet while their ink fades, and the page rises into place from
-   below, straight up on every screen (Julian, 2026-11-19: the phone's rise
-   "is good", the desktop's "needs to come from bottom up"; it slid in from
-   the side). It lands as the ground finishes fading, so nothing is still
-   settling once the cover is gone ("keep it steady"). Once per cover; the
+   below, straight up on every screen. It lands as the ground finishes fading, so nothing is still
+   settling once the cover is gone. Once per cover; the
    ground is the page's own colour all the way, so no frame is black. */
 function reveal(cover: HTMLElement) {
   if (cover.dataset.go) return;

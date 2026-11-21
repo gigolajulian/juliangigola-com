@@ -2,10 +2,10 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { isTextRef, type FrameRef, type TextRef } from "@/lib/added";
+import { isTextRef, type FrameRef, type TextRef } from "@/lib/work/added";
 import { useSequence, srcOf, type PendingUpload } from "@/lib/admin/admin-sequence";
 import { cn } from "@/lib/utils";
-import { backToBack, twinGroups } from "@/lib/frame-twins";
+import { backToBack, twinGroups } from "@/lib/work/frame-twins";
 
 /* ── a project's sequence ─────────────────────────────────────────
  * Photographs and writing, in one list. Sequence, trim, extend.
@@ -13,7 +13,7 @@ import { backToBack, twinGroups } from "@/lib/frame-twins";
  * The order is the edit. Julian already sequences his galleries, and the
  * first frame is load-bearing twice over — it opens the project page and it
  * is what the card on every index shows — so moving a frame to the front is
- * the same gesture as choosing a cover, and `lib/work.ts` treats it as one.
+ * the same gesture as choosing a cover, and `lib/work/work.ts` treats it as one.
  *
  * Writing lives in the same list rather than in a panel of its own, and that
  * is the whole reason a passage needs no position field: where it sits in
@@ -34,15 +34,6 @@ import { backToBack, twinGroups } from "@/lib/frame-twins";
 /** A photograph processed in the browser and waiting for Publish. */
 export type { PendingUpload };
 
-/** The path of a photograph. Empty for a passage, which has no file. */
-/**
- * A name the harvester cannot collide with.
- *
- * `harvest.mjs` writes `01.jpg`, `02.jpg`… by position and skips a file that
- * is already on disk — so a photograph added here under a numbered name would
- * either be silently adopted as one of Format's or be overwritten by it. The
- * prefix keeps the two sets of files apart for good.
- */
 export function AdminFrames({
   slug,
   original,
@@ -95,7 +86,7 @@ export function AdminFrames({
     return list.map((f) => (isTextRef(f) ? 0 : ++n));
   })();
 
-  /* Near-twins (`lib/frame-twins.ts`), read off the draft so they follow
+  /* Near-twins (`lib/work/frame-twins.ts`), read off the draft so they follow
      every move and cut. A letter per group; a line on a frame that plays
      straight after its twin. A passage between two frames breaks the run. */
   const srcs = list.map(srcOf);
@@ -178,7 +169,7 @@ export function AdminFrames({
           const mat =
             typeof f === "string" || isTextRef(f) ? undefined : f.color;
           const pending = uploads[`public${src}`];
-          // The last photograph cannot go: `lib/added.ts` refuses to build a
+          // The last photograph cannot go: `lib/work/added.ts` refuses to build a
           // gallery of pure text, and saying so here beats failing the deploy
           // an hour later. A passage is always removable.
           const locked = !text && photos.length === 1;

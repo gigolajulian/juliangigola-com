@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import type { CoverFrame } from "@/lib/cover-art-types";
+import type { CoverFrame } from "@/lib/work/cover-art-types";
 
 /* ── the two sides of a sleeve ────────────────────────────────────
  * A release fills one square cell. Where it has two sides, side A is what the

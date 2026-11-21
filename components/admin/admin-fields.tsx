@@ -53,7 +53,7 @@ export function ClientFields(p: FieldsProps & { clients: PickerItem[] }) {
 
 /* The gallery's own running order.
  *
- * `lib/cover-art-data.ts` is generated and its order is the script's, so
+ * `lib/work/cover-art-data.ts` is generated and its order is the script's, so
  * until now the only way to move a release was to edit that script and
  * re-run it. It is an editorial decision — which sleeve the gallery opens
  * on — and it belongs here, on the same picker the homepage rack uses,

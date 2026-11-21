@@ -1,4 +1,4 @@
-/* v4 homepage, static build (`?mtscroll=1`, SPEC-home-scroll.md). Every rule
+/* v4 homepage, static build (`?mtscroll=1`, docs/mt-decisions.md). Every rule
    is scoped under [data-mtscroll]; without the flag nothing here matches.
    Design unit: 1440x900 is the design, `--u` is one design px,
    min(100vw / 1440, 100svh / 900) clamped .7 to 1.6 (spec 5).
@@ -53,16 +53,16 @@
 [data-mtscroll] .mt-more{display:flex;justify-content:center;padding:calc(40 * var(--u)) 0 calc(96 * var(--u))}
 
 /* ── Commissions (3.3) ── */
-/* not pinned (Julian, 2026-11-17): the heading lies on the first photos and scrolls away with them */
+/* not pinned: the heading lies on the first photos and scrolls away with them */
 [data-mtscroll] .mt-comm-head{position:relative;z-index:2;display:flex;align-items:flex-end;gap:calc(24 * var(--u));height:calc(200 * var(--u));margin-bottom:calc(-200 * var(--u));padding:0 calc(36 * var(--u)) calc(28 * var(--u));color:rgb(var(--on-photo));background:linear-gradient(rgb(var(--scrim) / .78),transparent);pointer-events:none}
 [data-mtscroll] .mt-comm-head h2{font:900 calc(88 * var(--u))/.9 var(--display);letter-spacing:-.05em;margin:0}
 [data-mtscroll] .mt-comm-now{display:flex;flex-direction:column;gap:6px;padding-bottom:calc(6 * var(--u))}
 [data-mtscroll] .mt-count{font-size:max(11px,calc(13 * var(--u)))!important}
 [data-mtscroll] .mt-comm-head .mute{color:rgb(var(--on-photo) / .7)}
-/* "See all projects" rides the foot of the screen, bottom right, and comes to rest in the sheet's last corner (Julian, 2026-11-15).
+/* "See all projects" rides the foot of the screen, bottom right, and comes to rest in the sheet's last corner.
    It sticks inside a layer the size of the sheet, so it never rises past the sheet's top (a negative margin let it, in Safari) and adds no height. */
 [data-mtscroll] .mt-comm-pin{position:relative}
-/* the button is not pinned (Julian, 2026-11-17): it lies on the sheet's last photo, bottom right */
+/* the button is not pinned: it lies on the sheet's last photo, bottom right */
 [data-mtscroll] .mt-comm-foot{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-end;pointer-events:none}
 [data-mtscroll] .mt-comm-all{height:32px;padding:0 14px;margin:0 calc(64 * var(--u)) calc(64 * var(--u)) 0;pointer-events:auto;border-color:rgb(var(--on-photo));color:rgb(var(--on-photo));text-shadow:0 0 2px rgb(0 0 0 / .9),0 1px 10px rgb(0 0 0 / .7);box-shadow:0 0 0 1px rgb(0 0 0 / .35),inset 0 0 0 1px rgb(0 0 0 / .35)}
 /* the label and edge carry the captions' tight shadow, so they hold on a bright frame; the hover fill needs none */
@@ -479,7 +479,7 @@ html[data-mt-intro="1"]{overflow:hidden}
    a column that will not stay leaves with the extras. */
 @media (min-width:1024px) and (min-height:600px) and (max-aspect-ratio:19/10){[data-mtscroll] .mt-hero .mt-col.side{--vis:hidden}}
 @media (min-width:1024px) and (min-height:600px) and (max-aspect-ratio:29/10){[data-mtscroll] .mt-hero .mt-col.side:is([data-col="-2"],[data-col="4"]){--vis:hidden}}
-/* Big screens (Julian, 2026-11-15): more columns at about the laptop's frame size, where three would be huge with empty
+/* Big screens: more columns at about the laptop's frame size, where three would be huge with empty
    ground beside them. The wall gets its own unit, the design width of that many columns across the window; the name
    block keeps the page's unit. Julian's picks from the stills: 5 columns from 1920px wide (frames about 330px at 1920,
    440px at 2560), 7 from 3300px (about 425px at 3440). No 4 column step. motion/hero.ts measures the unit off a column. */
@@ -487,7 +487,7 @@ html[data-mt-intro="1"]{overflow:hidden}
   [data-mtscroll] .mt-hero .mt-wall{--u:min(calc(100vw / 2346),calc(100svh / 900))}
   [data-mtscroll] .mt-hero .mt-col.side{--vis:hidden}
   [data-mtscroll] .mt-hero .mt-col.side:is([data-col="-1"],[data-col="3"]){--vis:visible}
-  /* four rows here too (Julian, 2026-11-17: rows five and six out). Smaller frames make them only two screens of wall, so the hold is shorter
+  /* four rows here too. Smaller frames make them only two screens of wall, so the hold is shorter
      and the wall keeps its pace: 0.9 screens for 1.6 (six rows 1.6, five 1.25, four 0.9; motion.css reads --hold, the engine sets it inline) */
   html[data-mt-held] .mt .mt-hero[data-hold]{height:calc(1.9 * max(100svh,600px))}
 }
@@ -499,7 +499,7 @@ html:not([data-mt-intro]) .mt-hero .mt-col.side{visibility:var(--vis,visible)}
 /* What I do: two columns of three on every structure */
 @media (min-width:600px){[data-mtscroll] .mt-does ol{display:grid;grid-template-columns:1fr 1fr;grid-auto-flow:column;grid-template-rows:repeat(3,auto);column-gap:calc(20 * var(--u))}}
 @media (min-width:600px){[data-mtscroll] .mt-does li{gap:8px}[data-mtscroll] .mt-does b{font-size:max(12px,calc(17 * var(--u)));white-space:nowrap}}
-/* stacked layout (no hold) from 600px wide: the columns are wide, so the labels keep the phone's 18px (they fell to 11px, smaller than the lines around them; Julian, 2026-11-18) */
+/* stacked layout (no hold) from 600px wide: the columns are wide, so the labels keep the phone's 18px (they fell to 11px, smaller than the lines around them) */
 @media (min-width:600px) and (not ((min-width:1024px) and (min-height:600px))){[data-mtscroll] .mt-does b{font-size:18px}}
 /* phone: artist sits under the title's left edge, "See all covers" on the right, session photo square and held on the face, call link on one line */
 @media (max-width:599px){
@@ -579,7 +579,7 @@ html:not([data-mt-intro]) .mt-hero .mt-col.side{visibility:var(--vis,visible)}
 [data-mtscroll] .mt-quote>.mt-bar{justify-content:space-between}
 [data-mtscroll] .mt-quote>.mt-bar .btn{flex:none;min-height:44px;padding-inline:28px}
 /* Footer link columns sit on the photo wall: a halo in the ground colour keeps them readable over a bright frame */
-/* footer links larger on the desktop layout (Julian, 2026-11-15: 11px was too small) */
+/* footer links larger on the desktop layout, where 11px is too small */
 @media (min-width:1024px) and (min-height:600px){[data-mtscroll] .mt-fcols,[data-mtscroll] .mt-fcols :is(p,a,button){font-size:max(13px,calc(15 * var(--u)))}[data-mtscroll] .mt-fcols p{margin-bottom:calc(15 * var(--u))}}
 /* Phone and tablet footer under a finger: every link is a 44px row, Top is 44px wide */
 @media not ((min-width:1024px) and (min-height:600px)){@media (pointer:coarse){[data-mtscroll] .mt-fcols :is(a,button){display:inline-flex;align-items:center;min-height:44px;padding:0;margin:0}[data-mtscroll] .mt-fline{align-items:center}[data-mtscroll] .mt-fline .po{display:inline-flex;justify-content:flex-end;min-width:44px}}}
@@ -593,13 +593,13 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
 /* Booking (b2, q1, q2, approved mock #bq): Book online gets a real heading and stays full size; By quote is a band
    under it led by the question, its four options in one row. Flow layout, no stop. */
 [data-mtscroll] .mt-bq-h{margin:0;font:900 46px/1 var(--display);letter-spacing:-.05em}
-/* "Sessions" with "Book online" under it (Julian, 2026-11-17), like Motion's heading and its line */
+/* "Sessions" with "Book online" under it, like Motion's heading and its line */
 [data-mtscroll] .mt-bq-h .lbl{display:block;margin-top:10px}
 [data-mtscroll] .mt-next{display:none;margin:0}
 [data-mtscroll] .mt-book .mt-photo>.qp{object-fit:cover}
 @media (min-width:1024px) and (min-height:600px){
   [data-mtscroll] .mt-bq-h{font-size:calc(112 * var(--u));line-height:.9;letter-spacing:-.055em;margin-bottom:calc(30 * var(--u))}
-  /* a full screen, but never more than the 900 design px it is drawn for: a tall window left half a screen empty under it (Julian, 2026-11-15) */
+  /* a full screen, but never more than the 900 design px it is drawn for: a tall window left half a screen empty under it */
   [data-mtscroll] .mt-book .mt-frame{padding-top:calc(112 * var(--u));padding-bottom:calc(72 * var(--u));min-height:min(max(100svh,600px),calc(900 * var(--u)))}
   [data-mtscroll] .mt-book .mt-photo{top:calc(112 * var(--u));height:min(calc(792 * var(--u)),calc(max(100svh,600px) - 132 * var(--u)))}
   [data-mtscroll] .mt-book-col{margin-top:0}
@@ -608,7 +608,7 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
   [data-mtscroll] .mt-quote>.mt-frame{min-height:0;padding:0 calc(36 * var(--u)) calc(110 * var(--u))}
   [data-mtscroll] .mt-quote .mt-photo,[data-mtscroll] .mt-quote .mt-label{display:none}
   [data-mtscroll] .mt-quote-col{margin:0;width:auto;padding:calc(48 * var(--u)) 0 0;border-top:1px solid var(--hair);display:grid;grid-template-columns:minmax(0,1fr) calc(320 * var(--u));grid-template-areas:"h h" "o a" "l b";column-gap:calc(48 * var(--u));align-items:start}
-  /* smaller than the Sessions heading above it (Julian, 2026-11-15; was 112) */
+  /* smaller than the Sessions heading above it */
   [data-mtscroll] .mt-q-h{grid-area:h;font-size:calc(88 * var(--u));line-height:.9;margin:0 0 calc(30 * var(--u))}
   [data-mtscroll] .mt-qos{grid-area:o;position:relative;display:flex;column-gap:calc(44 * var(--u));border:0;padding-bottom:calc(64 * var(--u))}
   [data-mtscroll] .mt-quote :is(.mt-qo,.mt-qw){display:block;width:auto;height:auto;border:0!important;padding:0!important}
@@ -620,7 +620,7 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
   [data-mtscroll] .mt-qw .po{display:none}
   [data-mtscroll] .mt-qo-d,[data-mtscroll] .mt-qow[data-on] .mt-qo-d{position:absolute;left:0;top:calc(100% - 30 * var(--u));max-height:none;margin:0;white-space:nowrap;transition:opacity .12s ease-out}
   [data-mtscroll] .mt-qow[data-on] .mt-qo-d{transition:opacity .25s ease-out .12s}
-  /* a larger Inquire with the call line and the reply time under it (Julian, 2026-11-15; was a 131x61 button with both to its right).
+  /* a larger Inquire with the call line and the reply time under it.
      The column has a fixed width so the client name changing under it cannot move the button. */
   [data-mtscroll] .mt-q-act{grid-area:a;flex-direction:column;align-items:stretch;gap:calc(18 * var(--u));margin-top:calc(4 * var(--u))}
   [data-mtscroll] .mt-q-act .mt-big{width:100%;padding:calc(28 * var(--u)) 0;font-size:max(12px,calc(15 * var(--u)))}
@@ -646,8 +646,8 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
   [data-mtscroll] .mt-ab-ph img{object-position:24% 50%}
 }
 
-/* Cover art (elevate picks, 2026-11-14): the section is titled "Cover art" with "Design" under it, indented. v1: each
-   record is pressed in one color from its cover, black label. v2: one large count bottom left (Julian, 2026-11-15; was right); each cover is named
+/* Cover art: the section is titled "Cover art" with "Design" under it, indented. v1: each
+   record is pressed in one color from its cover, black label. v2: one large count bottom left; each cover is named
    under its sleeve and the ones not in front dim. */
 [data-mtscroll] .mt-covers .mt-rowhead h2{margin-bottom:calc(12 * var(--u))}
 [data-mtscroll] .mt-cvsub{margin:0 0 0 calc(24 * var(--u))!important}
@@ -676,7 +676,7 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
 :root[data-mtscroll]:not([data-theme="light"]) .mt-logos .mk{color:rgb(217 217 214 / .86)}
 @media (hover:hover){:root[data-mtscroll]:not([data-theme="light"]) .mt-logos a:hover .mk{color:#fff}}
 
-/* Idle wall (on by default, ?idle=0 off): a hard cut (Julian, 2026-11-16: "the develop one is too slow, try hard cuts"). The new frame waits
+/* Idle wall (on by default, ?idle=0 off): a hard cut. The new frame waits
    hidden over the old one until it has loaded, then shows whole: never dark. The one-step animation is kept because its end clears the old frame (hero.tsx). */
 [data-mtscroll] .mt-hero .ph>img.mt-dev{opacity:0}
 [data-mtscroll] .mt-hero .ph>img.mt-dev[data-on]{animation:mt-dev .01s step-end both}
@@ -697,13 +697,13 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
 @media (pointer:coarse) and (min-width:1024px) and (min-height:600px){[data-mtscroll] .mt-fcols :is(a,button){display:inline-flex;align-items:center;min-height:44px}[data-mtscroll] .mt-fcols p{margin-bottom:0}}
 /* Commissions, desktop: the count and name sit under the heading, so a long line never runs onto the next tile (was beside it) */
 @media (min-width:1024px) and (min-height:600px){[data-mtscroll] .mt-comm-head{flex-direction:column;align-items:flex-start;justify-content:flex-end;gap:calc(10 * var(--u));height:calc(246 * var(--u));margin-bottom:calc(-246 * var(--u))}}
-/* Footer, desktop: a dark photo ground in both themes with light text and no halo (Julian, 2026-11-15: the glow around the links, worst in light) */
+/* Footer, desktop: a dark photo ground in both themes with light text and no halo */
 @media (min-width:1024px) and (min-height:600px){
   :root[data-mtscroll]:root .mt-foot{--bg:var(--dark-bg);--ink:var(--dark-ink);--mute:oklch(0.78 0.005 80);--accent:var(--dark-accent);--hair:color-mix(in srgb,var(--ink) 14%,transparent);--phr:var(--grey);color:var(--ink)}
   [data-mtscroll] .mt-fscrim{background:linear-gradient(color-mix(in srgb,var(--bg) 72%,transparent),color-mix(in srgb,var(--bg) 62%,transparent) 45%,var(--bg) 94%)}
 }
 
-/* No ground behind the hero name and buttons (Julian, 2026-11-16): the photos run clear to the bottom. */
+/* No ground behind the hero name and buttons: the photos run clear to the bottom. */
 [data-mtscroll] .mt-hero .mt-scrim{background:none}
 /* In its place a soft black shadow on the words themselves; the outline button is blurred glass in white, so it holds on the light page too. In the light
    theme the name and tagline go light grey, so the black shadow carries them over the page and the photos alike. */
@@ -714,11 +714,11 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
 /* the tagline is small: a tighter, darker shadow than the name's */
 [data-mtscroll] .mt-hero .mt-cap.mt-cap.mt-cap{font-weight:500;text-shadow:0 0 2px rgb(0 0 0 / 70%),0 1px 4px rgb(0 0 0 / 60%),0 0 14px rgb(0 0 0 / 50%)}
 [data-mtscroll] .mt-hero .mt-ctas .btn:not(.fill){background:linear-gradient(#fff,#fff) right/0 100% no-repeat rgb(0 0 0 / 48%);-webkit-backdrop-filter:blur(14px) saturate(1.15);backdrop-filter:blur(14px) saturate(1.15);color:#f1f1ee;border:.5px solid #f1f1ee;box-shadow:none;text-shadow:0 0 2px rgb(0 0 0 / 70%),0 1px 4px rgb(0 0 0 / 60%),0 0 14px rgb(0 0 0 / 50%)}
-/* Book a session, hovered: white with black words, wiped in from the right at Inquire's pace (v3.css motion plan 01 times it) (Julian, 2026-11-16) */
+/* Book a session, hovered: white with black words, wiped in from the right at Inquire's pace (v3.css motion plan 01 times it) */
 @media (hover:hover) and (pointer:fine){html[data-mtscroll] .v3 .mt-hero .mt-ctas .btn:not(.fill):hover{background-size:100% 100%;color:#000;border-color:#fff;text-shadow:none}}
 @media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .v3 .mt-hero :is(.mt-name h1,.mt-cap){color:var(--dark-ink)}}
 :root[data-theme="light"] .v3 .mt-hero :is(.mt-name h1,.mt-cap){color:var(--dark-ink)}
-/* The tagline's letters change colour with what is under them (Julian, 2026-11-17: black or white, and grey over the white page). No blend: the three stacked blends
+/* The tagline's letters change colour with what is under them: black or white, and grey over the white page. No blend: the three stacked blends
    went plain white in Safari once the photos moved. tone() in motion/hero.ts reads the photo under each letter and sets data-tone: w over a dark photo, k over a
    light one, p over bare page. Without it (no script yet, or a photo it cannot read) a letter keeps the theme's own tagline colour.
    Each tone carries a thin halo of the opposite one, for mid-tone photos that suit neither (QA, #1155). */
@@ -729,13 +729,13 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
 :root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w[data-tone="k"]{color:#0b0b0c;text-shadow:none}
 @media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w[data-tone="p"]{color:color-mix(in oklab,var(--ink) 58%,var(--bg))}}
 :root[data-theme="light"] .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w[data-tone="p"]{color:color-mix(in oklab,var(--ink) 58%,var(--bg))}
-/* No wordmark in the bar while the hero, with its big name, is on screen (Julian, 2026-11-16: phones first, then every
-   size once the name stopped flying to the bar). */
+/* No wordmark in the bar while the hero, with its big name, is on screen,
+   at every size. */
 html[data-v3motion][data-mtscroll]:has(.mt-hero) .v3 .site-hdr:not(.menu-on) .site-wm{transition:opacity .25s ease-out}
 html[data-v3motion][data-mtscroll]:has(.mt-hero):not([data-mt-pasthero],[data-mt-nameout]) .v3 .site-hdr:not(.menu-on) .site-wm:not(:focus-visible){opacity:0;pointer-events:none} /* keyboard focus shows it, as navfx.css */
-/* The held stage is its own layer: the page colour behind it. (The tagline's invert blend is gone, Julian 2026-11-17: harder to read.) */
+/* The held stage is its own layer: the page colour behind it. */
 html[data-mt-held] [data-mtscroll] .mt-hero .mt-stage,html[data-mt-held][data-mtscroll] .mt-hero .mt-stage{background:var(--bg)}
-/* Phone tagline (Julian, 2026-11-18): one colour per theme over a tint of the page, in place of the per-letter photo tones, which still sank into busy photos.
+/* Phone tagline: one colour per theme over a tint of the page, in place of the per-letter photo tones, which still sank into busy photos.
    The tint is a full-bleed band along the foot of the hero: even up to the top of the small text, then it feathers out under the name. */
 @media (max-width:599px){
   :root:root .v3 .mt-hero .mt-scrim.mt-scrim.mt-scrim{--t:var(--bg);height:calc(200px + env(safe-area-inset-bottom));background:linear-gradient(to top,color-mix(in srgb,var(--t) 60%,transparent) 48%,color-mix(in srgb,var(--t) 44%,transparent) 62%,color-mix(in srgb,var(--t) 24%,transparent) 77%,color-mix(in srgb,var(--t) 8%,transparent) 90%,transparent)}
@@ -743,7 +743,7 @@ html[data-mt-held] [data-mtscroll] .mt-hero .mt-stage,html[data-mt-held][data-mt
   :root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w.w[data-tone]{color:inherit;text-shadow:none}
 }
 
-/* Light theme hero name (Julian, 2026-11-19, the default since): light theme only, dark stays as live. The name goes dark ink with no shadow, and a page-colour band
+/* Light theme hero name: light theme only, dark stays as live. The name goes dark ink with no shadow, and a page-colour band
    along the foot of the hero (the phone's, 741) holds it where it crosses a dark photo; the photos above the band run clear. The tagline sits on the band in one colour. */
 @media (prefers-color-scheme:light){
   html:root:not([data-theme="dark"]) .v3 .mt-hero .mt-name h1{color:var(--ink);text-shadow:none}
@@ -768,7 +768,7 @@ html[data-theme="light"]:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w.w[dat
   html[data-theme="light"]:root .v3 .mt-hero .mt-scrim.mt-scrim.mt-scrim{--t:var(--bg);height:calc(260px + env(safe-area-inset-bottom));background:linear-gradient(to top,color-mix(in srgb,var(--t) 56%,transparent) 42%,color-mix(in srgb,var(--t) 48%,transparent) 62%,color-mix(in srgb,var(--t) 26%,transparent) 80%,color-mix(in srgb,var(--t) 8%,transparent) 92%,transparent)}
 }
 
-/* Dark theme hero name (Julian, 2026-11-19): the light theme's treatment in dark. Light ink, no shadow, no per-letter tagline tones, on a band of the dark page colour.
+/* Dark theme hero name: the light theme's treatment in dark. Light ink, no shadow, no per-letter tagline tones, on a band of the dark page colour.
    The band is stronger than light's: a light name over bright photos needs more cover. Over the brightest 5% behind the name it holds 5.1:1 or better from 390 to 1920. */
 @media (prefers-color-scheme:dark){html:root:not([data-theme="light"]) .v3 .mt-hero .mt-name h1{color:var(--ink);text-shadow:none}}
 html[data-theme="dark"]:root .v3 .mt-hero .mt-name h1{color:var(--ink);text-shadow:none}
@@ -789,8 +789,8 @@ html[data-theme="dark"]:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w.w[data
   html[data-theme="dark"]:root .v3 .mt-hero .mt-scrim.mt-scrim.mt-scrim{height:calc(260px + env(safe-area-inset-bottom));background:linear-gradient(to top,color-mix(in srgb,var(--bg) 56%,transparent) 42%,color-mix(in srgb,var(--bg) 48%,transparent) 62%,color-mix(in srgb,var(--bg) 26%,transparent) 80%,color-mix(in srgb,var(--bg) 8%,transparent) 92%,transparent)}
 }
 
-/* Hero tagline in Geist Mono 600, larger than the labels (Julian, 2026-11-19: "I like mono but it needs to be more visible", then "BIGGER"). */
+/* Hero tagline in Geist Mono 600, larger than the labels. */
 html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap.mt-cap{font-family:var(--font-tagline),var(--mono);font-weight:600;letter-spacing:.08em;font-size:max(15px,calc(17.5 * var(--u)))!important}
 @media (max-width:599px){html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap.mt-cap{font-size:14.5px!important;letter-spacing:.06em}html:root:root .v3 .mt-hero .mt-name h1{bottom:calc(118px + env(safe-area-inset-bottom))}}
 @media (min-width:1024px){html:root:root .v3 .mt-hero .mt-name h1{bottom:calc(114 * var(--u))}}
-/* The name sits higher (phone 98 to 118px, desktop 92 to 114u) so the tagline never runs under the descenders of "Gigola" (Julian, 2026-11-19: "make sure it doesnt pass the g, if it does, take Julian Gigola higher"). */
+/* The name sits higher (phone 118px, desktop 114u) so the tagline never runs under the descenders of "Gigola". */

@@ -163,7 +163,7 @@ export async function POST(request: Request) {
     await writeProof(g.kv, g.s, sent);
     if (link !== was && p.link) await g.kv.delete(aliasKey(p.link));
     await recordLead(g.env, p.email, { event: { at: sent.deliveredAt!, kind: "mail", note: m.subject, mail: { to: "client", kind: "finals" } } });
-    // The proof's web copies go once the finals are out (Julian 2026-11-12). Only copies: never an original.
+    // The proof's web copies go once the finals are out. Only copies: never an original.
     const keys = p.frames.flatMap((f) => frameKeys(p.token, f.id));
     await dropKeys(g.r2, keys);
     return json({ proof: forDesk(sent), url: deliveryUrl(link) });

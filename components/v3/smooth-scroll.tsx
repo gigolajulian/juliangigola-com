@@ -72,13 +72,13 @@ export function SmoothScroll() {
   React.useEffect(() => {
     // Skip if reduced motion is requested
     if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    // Native scroll in proof galleries: Lenis's glide read as a delay on a Mac trackpad (Julian 2026-11-10).
+    // Native scroll in proof galleries: Lenis's glide read as a delay on a Mac trackpad.
     if (location.pathname.startsWith("/proof/") || location.pathname.startsWith("/delivery/") || location.pathname.startsWith("/contract/")) return;
 
     // A lerp follows the wheel as it moves instead of replaying a fixed
     // 1.2s glide on every event, which read as lag on a trackpad (2026-10-30).
-    // The v4 home (?mtscroll=1) glides longer: its motion is tied to the scroll, and at 0.2 each wheel notch read as a step
-    // (Julian, 2026-11-14). `?lerp=0.1` tries another value there.
+    // The v4 home (?mtscroll=1) glides longer: its motion is tied to the scroll, and at 0.2 each wheel notch read as a step.
+    // `?lerp=0.1` tries another value there.
     const v4 = "mtscroll" in document.documentElement.dataset;
     const asked = v4 ? parseFloat(new URLSearchParams(location.search).get("lerp") ?? "") : NaN;
     const lenis = new Lenis({

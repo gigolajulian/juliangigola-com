@@ -1,5 +1,5 @@
 /* ── the Google Sheet: a one-way copy of the lead desk ──────────────
- * Julian (2026-11-11): Notion retired; the site keeps a Sheet on hello@'s
+ * The site keeps a Sheet on hello@'s
  * Drive for viewing and backup. KV stays the record, nothing is read back.
  * Two tabs, rewritten whole from the desk's own CSVs: Clients (the ?csv
  * export) and Activity (?csv=events). The booking Worker's ten-minute cron

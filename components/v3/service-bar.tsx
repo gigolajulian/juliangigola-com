@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import { useV4pages } from "@/lib/v4pages";
+import { useV4pages } from "@/lib/flags/v4pages";
 
 /* ?v4pages=s1: the phone book bar on a service page. Held at the bottom once
    the hero buttons have scrolled away; gone while the booking is on screen

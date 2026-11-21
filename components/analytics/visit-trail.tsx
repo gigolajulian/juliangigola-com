@@ -4,7 +4,7 @@ import * as React from "react";
 import { usePathname } from "next/navigation";
 
 /* ── the visit trail ──────────────────────────────────────────────
- * Julian (2026-10-14): an inquiry says where its sender came from and
+ * An inquiry says where its sender came from and
  * what they read first, without asking them. Where they landed (with
  * the referrer and any utm_ tags) and the last pages and screens they
  * opened, kept for this tab only (sessionStorage) and sent with the

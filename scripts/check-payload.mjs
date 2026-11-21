@@ -146,7 +146,7 @@ const edit = {
 }
 
 // Empty passages go, and a sequence of nothing but empties leaves no entry —
-// an empty array would mean "this gallery has no frames", which `lib/added.ts`
+// an empty array would mean "this gallery has no frames", which `lib/work/added.ts`
 // rejects outright.
 {
   const out = projectsFile(null, {

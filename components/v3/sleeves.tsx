@@ -3,10 +3,9 @@
 import * as React from "react";
 import Image from "next/image";
 import { CoverArtGallery } from "@/components/cover/cover-art-gallery";
-import type { CoverRelease } from "@/lib/cover-art-types";
+import type { CoverRelease } from "@/lib/work/cover-art-types";
 
-/* JG V3 Cover Art as sleeves (Julian, 2026-10-27, from the Sleeve Viewer
-   mock): the record slides out of a sleeve on hover, a click opens the
+/* JG V3 Cover Art as sleeves: the record slides out of a sleeve on hover, a click opens the
    viewer on side A, and the viewer turns the sleeve over. A release with no
    printed back gets a typeset one. Behind `?sleeve=1` (`app/layout.tsx`)
    until Julian says yes; the old rack otherwise. */

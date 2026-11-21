@@ -104,7 +104,7 @@ const FROST_ROOM = '[data-astryx-desk][data-bars] [role="main"]::after{content:"
  * panels clear enough to show it, as LEADS DESKTOP glass.css does over its window. That shell's rules are !important and win there. */
 const GLASS = "[data-astryx-desk][data-glass]{--color-background-body:transparent;--color-background-card:rgb(255 255 255/.055);--color-background-surface:rgb(255 255 255/.055);--color-background-muted:rgb(255 255 255/.09);--leads-bar:rgb(22 22 22/.47);background:radial-gradient(120% 55% at 0% 0%,rgb(88 198 202/.15) 0,transparent 62%),radial-gradient(95% 50% at 100% 100%,rgb(88 198 202/.1) 0,transparent 66%),oklch(0.145 0.003 70)}[data-astryx-desk][data-glass] :is(dialog,[role=dialog],[role=menu],[role=listbox],[popover]){--color-background-body:oklch(0.145 0.003 70);--color-background-card:oklch(0.185 0.003 70);--color-background-surface:oklch(0.185 0.003 70);--color-background-muted:oklch(0.21 0.003 70)}";
 
-/* The win button (Julian, 2026-11-14): under a mouse the plane flies off and comes back, in a loop. */
+/* The win button: under a mouse the plane flies off and comes back, in a loop. */
 const WIN_CSS = ".jg-win:hover svg{animation:jg-fly 1.1s cubic-bezier(.5,0,.3,1) infinite}@keyframes jg-fly{0%{transform:none;opacity:1}45%{transform:translate(16px,-16px);opacity:0}46%{transform:translate(-14px,14px);opacity:0}100%{transform:none;opacity:1}}@media (prefers-reduced-motion:reduce){.jg-win:hover svg{animation:none}}";
 
 export { frostBar, FROST_ROOM, GLASS, WIN_CSS, kindOf, btn, field, fieldLabel, primary, ios, compose, mailto, badge, label, line };

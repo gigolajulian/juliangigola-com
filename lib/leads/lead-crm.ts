@@ -1,5 +1,5 @@
 /* ── the lead desk as a CRM ───────────────────────────────────────
- * Julian (2026-11-04), on what a CRM usually has: "add all of them".
+ * What a CRM usually has, all of it.
  * Leads added by hand (DMs, texts, referrals), merging two records of one
  * person, the numbers (inquiries a week, reply time, booked rate, where
  * bookings come from, quotes), an export, and reply templates.
@@ -255,8 +255,8 @@ export function stats(all: (Lead & { id?: string })[], now: number, master: Mast
   };
 }
 
-/** Every lead as CSV, for his records. Spreadsheet formulas are defused. */
-/** `paid`: dollars paid per email, from the activity log. Open balance: invoices not settled. */
+/** Every lead as CSV, for his records. Spreadsheet formulas are defused.
+ * `paid`: dollars paid per email, from the activity log. Open balance: invoices not settled. */
 export function csv(leads: Lead[], paid: Record<string, number> = {}): string {
   const cols = ["name", "email", "phone", "instagram", "company", "stage", "kind", "source", "quote", "paid total", "open balance", "lost reason", "first seen", "last activity", "booked for", "archived", "notes"] as const;
   const cell = (v: unknown) => {

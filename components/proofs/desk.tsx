@@ -1,8 +1,8 @@
 "use client";
 
 /* ── the proofs desk on Astryx, opt-in ────────────────────────────
- * Julian (2026-11-09): the same try as the leads desk, for the
- * proofs desk. /admin/proofs since 2026-11-11, so Astryx's CSS never
+ * The proofs desk on Astryx, as the leads desk. Served at /admin/proofs
+ * only, so Astryx's CSS never
  * reaches the client's proof page or the classic desk. Same API as the
  * classic desk (/api/proof): list, open one, see the picks, create,
  * send, copy the link, a new link, the link preview, and close a draft. Activity is components/proofs/activity.tsx.
@@ -34,7 +34,7 @@ import { SignIn } from "@/components/leads/setup";
 import { api, cardCrop, closed, cropAt, status, type Row } from "@/lib/proofs/desk";
 import { ActivityDesk } from "@/components/proofs/activity";
 import { Timeline } from "@/components/proofs/timeline";
-import { useClock } from "@/lib/use-clock";
+import { useClock } from "@/components/proofs/use-clock";
 import { errorText, stampPT } from "@/lib/leads/lead-desk";
 import { extras, publicId, remindState, THUMB_W, type CardCrop } from "@/lib/proofs/proof";
 
@@ -197,7 +197,7 @@ function Gallery({ p, changed, onBack, gone }: { p: Row; changed: () => void; on
   const [preview, setPreview] = React.useState<string | null>(null);
   const [email, setEmail] = React.useState(p.email ?? "");
   const [pass, setPass] = React.useState("");
-  // The mail's subject, editable before Send (Julian 2026-11-15). The server falls back to its default when empty.
+  // The mail's subject, editable before Send. The server falls back to its default when empty.
   const [subject, setSubject] = React.useState("Your proofs are ready");
   const [finalsSubject, setFinalsSubject] = React.useState("Your photos are ready");
   const [sub, setSub] = React.useState(p.subhead ?? "");
@@ -208,7 +208,7 @@ function Gallery({ p, changed, onBack, gone }: { p: Row; changed: () => void; on
   const x = extras(p.selects.length, p.included, p.price);
   const thumbs = (p.deliveredAt ? (p.finals ?? []).map((f) => f.id) : p.submittedAt ? p.selects : p.frames.map((f) => f.id)).slice(0, 6);
   const file = (id: string) => p.frames.find((f) => f.id === id)?.file ?? id;
-  // The one reminder (Julian 2026-11-15): read after mount, the window is a clock.
+  // The one reminder: read after mount, the window is a clock.
   const clock = useClock();
   const remind = clock ? remindState(p, clock) : null;
   const [reminder, setReminder] = React.useState<{ html: string; subject: string; to: string; cc: string[] } | null>(null);

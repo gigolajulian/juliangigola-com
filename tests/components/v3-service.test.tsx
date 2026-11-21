@@ -6,7 +6,7 @@ vi.stubGlobal("fetch", vi.fn(() => Promise.reject(new Error("offline"))));
 
 import { V3Service } from "@/components/v3/service";
 import { BOOKING_PAGES } from "@/lib/booking/booking";
-import { PROJECTS } from "@/lib/work";
+import { PROJECTS } from "@/lib/work/work";
 
 describe("V3Service", () => {
   it("renders a booking page with its gallery link", () => {

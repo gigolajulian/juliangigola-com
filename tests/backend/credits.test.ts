@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { CANON, isOwn } from "@/lib/credits";
-import { ALL_PROJECTS } from "@/lib/work";
+import { CANON, isOwn } from "@/lib/work/credits";
+import { ALL_PROJECTS } from "@/lib/work/work";
 
 /* Fix with `npx tsx scripts/credits.mts`, or in /admin. */
 describe("credits", () => {

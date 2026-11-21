@@ -5,9 +5,9 @@ import Link from "next/link";
 import { DialRoot, useDialKit } from "dialkit";
 import { BookTimes } from "@/components/booking/book-times";
 import { DialCopyAll } from "@/components/dev/dial-copy-all";
-import { InquireWall } from "@/components/inquire-wall";
+import { InquireWall } from "@/components/contact/inquire-wall";
 import type { WallTile } from "@/lib/wall-tile";
-import { useDialKitStyles } from "@/lib/dialkit-styles";
+import { useDialKitStyles } from "@/lib/dev/dialkit-styles";
 
 export type Bookable = {
   slug: string;
@@ -27,8 +27,8 @@ export type Bookable = {
 export function BookPicker({ sessions, start }: { sessions: Bookable[]; start?: string }) {
   const [on, setOn] = React.useState(() => Math.max(0, sessions.findIndex((s) => s.slug === start)));
   /* Stacked (a phone, an upright iPad) the card opens under the session
-     picked, not under the whole list, and the page glides down to it
-     (Julian, 2026-10-15). Side by side from lg it stays beside the list. */
+     picked, not under the whole list, and the page glides down to it.
+     Side by side from lg it stays beside the list. */
   const [stacked, setStacked] = React.useState(false);
   React.useEffect(() => {
     const mq = matchMedia("(max-width: 63.99rem)");

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { ADDED, HIDDEN, ORDER, SLUGS, instagramHandle, isTextRef } from "@/lib/added";
+import { ADDED, HIDDEN, ORDER, SLUGS, instagramHandle, isTextRef } from "@/lib/work/added";
 
-/* The projects /admin added (`lib/added.ts`): the handle rule and the
+/* The projects /admin added (`lib/work/added.ts`): the handle rule and the
    invariants of the parsed `content/projects.json`. */
 
 describe("instagramHandle", () => {

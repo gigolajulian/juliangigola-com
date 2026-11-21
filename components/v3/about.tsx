@@ -9,7 +9,7 @@ import { LogoBand } from "@/components/v3/logo-band";
    What I do, the two CTAs, and the client marks as a grid. */
 
 /* Locked copy (DESIGN.md, Bio). No soft hyphens: words stay whole, and the place names carry
-   no-break spaces so they never split (Julian, 2026-11-04). */
+   no-break spaces so they never split. */
 const BIO =
   "I photograph people, mostly for fashion, music and brands. I shoot editorials and campaigns, and help labels and musicians shape how they’re seen. I also cover the moments people want to keep: headshots, portraits, graduations and weddings across San Francisco, San Jose and the Bay Area. Growing up Assyrian American, between cultures, taught me to watch from slightly outside the frame.";
 
@@ -46,7 +46,7 @@ export function V3About() {
           </div>
         </div>
         <section className="ab-logos">
-          {/* ?v4pages=a2 swaps the label (Julian, 2026-11-15); v4pages.css shows one of the two. */}
+          {/* ?v4pages=a2 swaps the label; v4pages.css shows one of the two. */}
           <h2 className="lbl mute"><span className="a2-off">Worked with</span><span className="a2-on">Commissioned and published by</span></h2>
           <LogoBand>
             <Marks cell />

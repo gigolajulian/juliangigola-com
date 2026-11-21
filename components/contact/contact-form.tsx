@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import StatusMark from "@/components/vendor/status-mark";
 import { Orb, ORB_ROUND } from "@/components/effects/orb";
 import { ReferencePicks } from "@/components/reference-picks";
-import { trailContext } from "@/components/visit-trail";
+import { trailContext } from "@/components/analytics/visit-trail";
 
 /* ── the enquiry ──────────────────────────────────────────────────
  * The old form was three fields: name, email, message. Which means every
@@ -73,7 +73,7 @@ export const FOLLOW_UP: Record<string, { label: string; placeholder: string }> =
   },
 };
 
-/* Julian (2026-10-14): one or two taps that answer what he would ask
+/* One or two taps that answer what Julian would ask
    first, per kind of shoot, in place of typing it. Optional; the answers
    go in as the inquiry's details ("Date: 2026-11-08 · Coverage: 4 hours"). */
 type Ask = { label: string; date?: true; options?: string[]; many?: true };
@@ -253,7 +253,7 @@ export function ContactForm({
     : TYPES.filter((t) => t.value !== "session" || type === "session");
   const chosen = booking ? session : type;
   const choose = booking ? setSession : setType;
-  /* Julian (2026-10-14): on a page that is about one kind of shoot (a
+  /* On a page that is about one kind of shoot (a
      commission's card, a booking page's form) it is not asked again; the
      answer goes in unseen. */
   const fixed = !!defaults?.type && (defaults.type !== "session" || !!defaults.session);
@@ -492,7 +492,7 @@ export function ContactForm({
                    ring for somebody arriving by Tab and nobody else.
                    Julian asked. */
                 "has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-[var(--ring)]",
-                /* Chosen, in the site's teal (Julian, 2026-10-14). */
+                /* Chosen, in the site's teal. */
                 chosen === t.value
                   ? "border-accent bg-accent text-accent-foreground"
                   : "border-border text-muted-foreground hoverable:hover:border-foreground/40 hoverable:hover:text-foreground",
@@ -517,8 +517,8 @@ export function ContactForm({
       )}
       {booking ? <input type="hidden" name="type" value="session" /> : null}
 
-      {/* Julian (2026-10-14): a simpler, shorter form. The follow-up
-          question is the message's placeholder now, not a field of its
+      {/* A short form. The follow-up
+          question is the message's placeholder, not a field of its
           own; what it was filled with from a link still goes in. */}
       {ASKS[kind] ? <Asks key={kind} asks={ASKS[kind]} onChange={setAnswers} /> : null}
 
@@ -609,7 +609,7 @@ export function ContactForm({
           </p>
         ) : null}
         {/* The address is above the form on a phone already. */}
-        {/* In the labels' face, as References beside it (Julian, 2026-10-14). */}
+        {/* In the labels' face, as References beside it. */}
         <p className="label order-first text-left text-muted-foreground max-sm:hidden lying:hidden">
           Email{" "}
           <a
@@ -663,7 +663,7 @@ function Field({
       <Element
         id={id}
         name={name}
-        /* Julian (2026-10-15): the brief starts as one line, on its rule,
+        /* The brief starts as one line, on its rule,
            and grows as it is typed, up to three lines; past that it
            scrolls. Sized here rather than by `field-sizing`, which Safari
            lacks. */
@@ -709,7 +709,7 @@ function Field({
 function SentStatus() {
   const [done, setDone] = React.useState(false);
   React.useEffect(() => {
-    // One round of the orb before the check (Julian, 2026-10-14).
+    // One round of the orb before the check.
     const t = window.setTimeout(() => setDone(true), ORB_ROUND.composing);
     return () => window.clearTimeout(t);
   }, []);

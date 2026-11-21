@@ -53,7 +53,7 @@ All 74 projects and 1,131 frames were migrated off the old Format site.
 | File | What it is |
 | --- | --- |
 | `lib/work-data.ts` | The archive: every migrated project, its credits, categories and frames. First written by `scripts/harvest.mjs`; the harvester no longer runs, so this file is now edited by hand. |
-| `lib/work.ts` | The only module the app reads work from. Holds the editorial decisions: what is featured, what leads the homepage, how categories group. |
+| `lib/work/work.ts` | The only module the app reads work from. Holds the editorial decisions: what is featured, what leads the homepage, how categories group. |
 | `lib/work-types.ts` | Shapes for the above. |
 | `lib/booking/sessions.ts` | Bookable session types. `from: null` renders as "On request". |
 | `lib/site.ts` | Reply-time promise and the booking-calendar URL. |
@@ -83,7 +83,7 @@ lists it. `scripts/sync-r2.mjs` is from an earlier R2 setup and is not used.
 ### Adding a cover image
 
 Drop the full-resolution original in `PICS/` (untracked), resize it to 2500px wide at
-q82 into `public/hero/`, then add an entry to `COVER_OVERRIDES` in `lib/work.ts`. The
+q82 into `public/hero/`, then add an entry to `COVER_OVERRIDES` in `lib/work/work.ts`. The
 `color` field is the image's **mean**, not its dominant — it is the mat drawn behind an
 `object-contain` frame, and on a sunset image the dominant bucket comes back near-black.
 Measure the mean from the **written file**, not the pipeline before it: the JPEG encode
@@ -121,7 +121,7 @@ push starts a build, and the edit is live in a couple of minutes.
 
 New shoots go in `content/projects.json`, **not** `lib/work-data.ts`: that
 file is the migrated archive, and `/admin` writes only `content/projects.json`
-and its override tables. `lib/work.ts` merges the two, added work first, so a shoot uploaded today leads its
+and its override tables. `lib/work/work.ts` merges the two, added work first, so a shoot uploaded today leads its
 discipline.
 
 The photographs are resized in the browser to the same 2500px/q82 the
@@ -141,7 +141,7 @@ serving, which is the safe direction.
 `sitemap.xml`, and its own route — and is reversible. It is the only kind of
 removal a harvested project can have from `/admin`, which never edits
 `lib/work-data.ts`.
-The list lives in `hidden` in `content/projects.json`, and `lib/work.ts`
+The list lives in `hidden` in `content/projects.json`, and `lib/work/work.ts`
 filters once, where every consumer reads, rather than at each index.
 
 **Delete** is offered only for projects added through `/admin`, because only

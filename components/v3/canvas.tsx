@@ -8,7 +8,7 @@ import { isTrackpad } from "@/lib/motion/wheel";
 import { projectHref } from "@/lib/project-href";
 import type { WorkItem } from "@/components/v3/work";
 
-/* The canvas view (mock approved by Julian, 2026-11-07): every frame
+/* The canvas view: every frame
    of every project as one endless field you pan by dragging, flicking or
    scrolling. Columns loop on their own heights and starts, so the field
    repeats with no seam and no straight rows. A scale slider sets the size.
@@ -27,7 +27,7 @@ type Frames = Record<string, [string, number, string, string][]>;
 // `/canvas.json` is kept after the first open, so the next one starts on every frame.
 let kept: Frames | null = null;
 
-/* Upright frames sit as 3:4 on the field, like the grid and strip (Julian, 2026-11-07); square and wide keep theirs. The opened frame shows the whole photo. */
+/* Upright frames sit as 3:4 on the field, like the grid and strip; square and wide keep theirs. The opened frame shows the whole photo. */
 const shape = (r: number) => (r > 1.02 ? 4 / 3 : r);
 const mod = (a: number, b: number) => ((a % b) + b) % b;
 

@@ -30,7 +30,7 @@ export function ActivityDesk({ p, changed }: { p: Row; changed: () => void }) {
   const models = [...new Set((p.finals ?? []).map((f) => f.model).filter((m): m is string => !!m))].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
   const isModel = (id?: string) => !!id && models.includes(id);
   const SAID: Record<ViewerEvent["kind"], (id?: string) => string> = { open: () => "opened", pick: (id) => `picked ${num(id)}`, unpick: (id) => `unpicked ${num(id)}`, review: () => "reviewed", pay: () => "paid", send: () => "sent selects", download: (id) => (id === "all" ? "downloaded all" : isModel(id) ? `downloaded ${id} zip` : `saved ${p.finals?.find((f) => f.id === id)?.file ?? id}`) };
-  // Deliveries: every download under the address that took it, and which models went (Julian 2026-11-19).
+  // Deliveries: every download under the address that took it, and which models went.
   const dlOf = (x: (typeof people)[number][1]) => x.events.filter((e) => e.kind === "download");
   const what = (id?: string) => (id === "all" ? "all" : isModel(id) ? `${id} zip` : p.finals?.find((f) => f.id === id)?.file ?? id ?? "");
   const takenBy = (m: string) => [...new Set(people.filter(([, x]) => dlOf(x).some((e) => e.id === m || e.id === "all" || p.finals?.find((f) => f.id === e.id)?.model === m)).map(([k, x]) => x.name ?? k))];

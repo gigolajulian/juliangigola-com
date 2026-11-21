@@ -6,7 +6,7 @@ import { manageLinks, tokenOpens } from "@/lib/booking/booking-token";
 import { cancelledSubject, confirmOf, sendCancelled, sendConfirm } from "@/lib/booking/confirm";
 import { logMail, recordLead } from "@/lib/leads/lead-store";
 import { dashboardLink } from "@/lib/booking/deposit";
-import { alertAndLog } from "@/lib/hello-mail";
+import { alertAndLog } from "@/lib/email/hello-mail";
 import { stripe } from "@/lib/stripe";
 import { whenPT } from "@/lib/inbox";
 import { bodyOf, json } from "@/lib/http";
@@ -16,7 +16,7 @@ import { bodyOf, json } from "@/lib/http";
  * token from their mail opens it (`lib/booking/booking-token.ts`); the lock does
  * the change (`lib/booking/booking-engine.ts`). A cancel 48 hours or more before
  * the start refunds the deposit through Stripe, 24 hours or more refunds 70%
- * of it, under that it keeps it (`refundShare`, Julian, 2026-11-16). hello@ hears about every change.
+ * of it, under that it keeps it (`refundShare`). hello@ hears about every change.
  * ─────────────────────────────────────────────────────────────── */
 
 export const dynamic = "force-dynamic";

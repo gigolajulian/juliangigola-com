@@ -1,9 +1,9 @@
-/* Normalizes credits into content/projects.json (`credits`, per slug): roles to lib/credits.ts, Instagram
+/* Normalizes credits into content/projects.json (`credits`, per slug): roles to lib/work/credits.ts, Instagram
    handles into `instagram`, and a real name wherever the same handle is named on another project.
    `npx tsx scripts/credits.mts` writes; handles still without a name are listed. */
 import { readFileSync, writeFileSync } from "node:fs";
-import { ALL_PROJECTS } from "../lib/work";
-import { isHandle, isOwn, rolesFor } from "../lib/credits";
+import { ALL_PROJECTS } from "../lib/work/work";
+import { isHandle, isOwn, rolesFor } from "../lib/work/credits";
 import type { Credit } from "../lib/work-types";
 
 const file = "content/projects.json";

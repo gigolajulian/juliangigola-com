@@ -6,11 +6,11 @@
  * titles stuffed into alt text and zero-width spaces baked in. These are the
  * delivery files: up to 7952px, and they include a release the old site never
  * showed. So this is the source of truth for cover art, and the harvester's
- * `coverart` gallery is overridden by it (see `lib/work.ts`).
+ * `coverart` gallery is overridden by it (see `lib/work/work.ts`).
  *
  * Run:  node scripts/cover-art.mjs
  *
- * Writes `public/covers/*.jpg` and generates `lib/cover-art-data.ts`.
+ * Writes `public/covers/*.jpg` and generates `lib/work/cover-art-data.ts`.
  */
 
 import sharp from "sharp";
@@ -19,7 +19,7 @@ import path from "node:path";
 
 const SRC = "PICS/ALL COVERARTS";
 const OUT_DIR = "public/covers";
-const DATA = "lib/cover-art-data.ts";
+const DATA = "lib/work/cover-art-data.ts";
 
 /** Matches the rest of the archive. Every cover is square, so this is both edges. */
 const MAX = 2400;
