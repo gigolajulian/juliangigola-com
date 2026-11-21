@@ -1,5 +1,5 @@
 /* ── proof watermark ──────────────────────────────────────────────
- * Julian (2026-11-10): "use Julian Gigola wordmark on bottom third". The
+ * The Julian Gigola wordmark sits on the bottom third. The
  * mark is baked into the bytes, never a CSS overlay: frames are served
  * without the email gate, so an overlay would protect nothing. Cloudflare
  * Images draws it once per frame; the result is kept in R2 at `markedKey`
@@ -71,7 +71,7 @@ export async function servedFrame(env: Env, p: Pick<Proof, "token" | "watermark"
   return { body: stream(bytes), etag: put.httpEtag };
 }
 
-/* The link preview (Julian 2026-11-10: "create thumbnail automatically based off the photo and header of the page").
+/* The link preview, made from the first photo and the page's header.
    The site's share-card layout at 1800x945: `public/proof-card.png` holds the dark panel with the gallery's header
    ("Proofs", "Pick your proofs.") and the wordmark; the first frame fills the right, with the mark in its bottom third. */
 export const CARD = { src: "/proof-card.png", w: 1800, h: 945, photoLeft: 600 } as const;

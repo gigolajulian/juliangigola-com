@@ -84,7 +84,7 @@ function Cap({ p, cls }: { p: WorkItem; cls: string }) {
   const d = p.d.join(", ");
   return (
     <span className={cls}>
-      {/* --n: a long name sets smaller to stay near two lines (Julian, 2026-11-04); --w: its longest word still fits the cover's width. */}
+      {/* --n: a long name sets smaller to stay near two lines; --w: its longest word still fits the cover's width. */}
       <b style={{ "--n": p.n.length, "--w": Math.max(...p.n.split(/\s+/).map((x) => x.length)) } as React.CSSProperties}>{p.n}</b>
       {/* The space keeps "THRESHOLD Editorial" two words for screen readers and label-in-name; between blocks it draws nothing. */}
       {d.toLowerCase() !== p.n.toLowerCase() ? <>{" "}<span className="lbl">{d}</span></> : null}
@@ -123,7 +123,7 @@ function Tile({ p, swatch, first }: { p: WorkItem; swatch?: string[]; first?: bo
 
 export type FrameItem = { s: string; src: string; alt: string; wide: boolean; sq: boolean; back?: { src: string; alt: string } };
 
-/* A two-sided sleeve's Front / Back switch, on the cell and in the viewer (Julian, 2026-11-05). */
+/* A two-sided sleeve's Front / Back switch, on the cell and in the viewer. */
 function Sides({ back, onFlip }: { back: boolean; onFlip: () => void }) {
   return (
     <button type="button" className="sides lbl" aria-pressed={back} aria-label={back ? "Show front" : "Show back"} onClick={onFlip}>
@@ -133,7 +133,7 @@ function Sides({ back, onFlip }: { back: boolean; onFlip: () => void }) {
 }
 const WIDE_SIZES = "(max-width: 700px) 100vw, (max-width: 1000px) 66vw, 50vw";
 
-/* Julian (2026-11-05): the Front / Back label sits under the art, hidden until
+/* The Front / Back label sits under the art, hidden until
    a sideways swipe flips the sleeve, or a pointer or focus stays 8 seconds. */
 function useSleeve(flip: () => void) {
   const [on, setOn] = React.useState(false);
@@ -225,7 +225,7 @@ export function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: 
   const G = React.useRef<typeof import("gsap").gsap | null>(null);
   // The touch in progress: where it went down, the track's x then, its axis once locked, and its speed.
   const drag = React.useRef<{ x: number; y: number; ox: number; axis: "x" | "y" | null; lx: number; lt: number; v: number; ly: number; vy: number } | null>(null);
-  /* MOTION-PLAN.md item 10: a lift hands the finger's speed
+  /* Motion plan item 10 (docs/decisions.md): a lift hands the finger's speed
      to the strip's own spring (lib/motion/spring.ts), critically damped. */
   const run = React.useRef(0);
   const stop = () => void (cancelAnimationFrame(run.current), (run.current = 0));
@@ -246,7 +246,7 @@ export function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: 
   };
   const swiped = React.useRef(false); // a drag's click must not close
   const queued = React.useRef(0); // a step pressed while the track was still moving
-  /* MOTION-PLAN.md item 8: a second press mid-glide takes the
+  /* Motion plan item 8 (docs/decisions.md): a second press mid-glide takes the
      track on from where it is, never waits for the first to finish. */
   const going = React.useRef(0); // the frame the glide in flight is heading to, as a step
   const carry = React.useRef<number | null>(null); // the track's x, read against the new frame
@@ -405,7 +405,7 @@ export function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: 
           const back = () => delete ref.current!.dataset.drop;
           if (Math.abs(dy) < 90) return void (g ? g.to(el, { y: 0, duration: 0.45, ease: "expo.out", onComplete: back }) : back());
           if (still() || !g) return onClose();
-          return void g.to(el, { y: Math.sign(dy) * innerHeight, duration: 0.3, ease: GSAP_OUT, onComplete: onClose }); // MOTION-PLAN.md item 4: exits leave on `out`
+          return void g.to(el, { y: Math.sign(dy) * innerHeight, duration: 0.3, ease: GSAP_OUT, onComplete: onClose }); // Motion plan item 4 (docs/decisions.md): exits leave on `out`
         }
         // Where the throw would carry the track a fifth of a second on; the nearest frame there wins.
         const x = d.ox + e.clientX - d.x + d.v * 200;
@@ -489,7 +489,7 @@ export function V3Work({
   const [view, setView] = React.useState<"grid" | "strip" | "color">("grid");
   const back = React.useRef<"grid" | "strip">("grid");
   /* The canvas lies over whichever view is on, under the page's own title and
-     toolbar, which stay where they are (Julian, 2026-11-14): leaving it lands
+     toolbar, which stay where they are: leaving it lands
      where you were. `?view=canvas` opens on it. The address carries it while
      the canvas is on, so Back from a project it opened lands on the canvas again.
      `leaving` keeps it up for its fade out; `cvTop` is the toolbar's lower edge,
@@ -554,7 +554,7 @@ export function V3Work({
     } else flipped(() => setView(v));
   };
   const [q, setQ] = React.useState("");
-  /* Option 2 (Julian, 2026-11-04): once the search row scrolls under the
+  /* Option 2: once the search row scrolls under the
      header, a magnifier and the view buttons ride in the header instead of a
      second sticky bar. data-pft tells v3.css to keep them pinned when the
      header tucks on touch screens. */
@@ -621,7 +621,7 @@ export function V3Work({
     flip.current = null;
     const w = strip.current;
     if (w) w.style.overflow = "visible"; // the strip would clip covers flying up into it
-    /* MOTION-PLAN.md item 9: grid and strip trade places as
+    /* Motion plan item 9 (docs/decisions.md): grid and strip trade places as
        one move, photo 600 on `move`, no stagger, new covers fade in 250, in
        both directions; a chip slides the tiles to their new places, page 400
        on `move`. */
@@ -664,7 +664,7 @@ export function V3Work({
       ),
     [work, filter, q],
   );
-  /* The canvas always shows every frame (Julian, 2026-11-13): a chip or a
+  /* The canvas always shows every frame: a chip or a
      search sorts its projects to the front, the rest follow. */
   const field = React.useMemo(() => [...list, ...work.filter((p) => !list.includes(p))], [list, work]);
   /* A gallery chip with no search shows its frames, not its one cover. */
@@ -725,7 +725,7 @@ export function V3Work({
     const html = document.documentElement;
     html.dataset.preload = "";
     /* A cover fades in once its photo has landed and it is on screen, so it
-       never shows as an empty card that fills later (Julian, 2026-11-19). A
+       never shows as an empty card that fills later. A
        photo already there when the view mounts (cached, back from the
        strip) is shown at once, so the grid/strip flip finds it in place. */
     const reveal = () => {
@@ -735,7 +735,7 @@ export function V3Work({
         if (!im?.complete) continue;
         const r = f.getBoundingClientRect();
         const shown = (Math.max(0, Math.min(r.bottom, innerHeight) - Math.max(r.top, 0)) / r.height) * (Math.max(0, Math.min(r.right, innerWidth) - Math.max(r.left, 0)) / r.width);
-        if (first ? !shown : shown < 1 / 3) continue; // fades in once a third of it is on screen (Julian, 2026-11-19)
+        if (first ? !shown : shown < 1 / 3) continue; // fades in once a third of it is on screen
         if (first) f.dataset.up = "0";
         else {
           f.style.setProperty("--up-d", `${Math.min(n++, 5) * 70}ms`);
@@ -1252,7 +1252,7 @@ export function V3Work({
             {/* A new chip starts its own strip at the start: the frames it shares with All kept the old scroll. */}
             <div className="wstrip" key={filter} ref={strip} onScroll={stripBar}>
               {cells.map(({ f, p }, n) => {
-                /* Name, then discipline, both on the photo, as in the grid (Julian, 2026-11-04). */
+                /* Name, then discipline, both on the photo, as in the grid. */
                 const cap = p ? <Cap p={p} cls="sc-n" /> : null;
                 if (!f)
                   return (
@@ -1276,7 +1276,7 @@ export function V3Work({
                     >
                       <Image src={f.src} alt={f.alt} fill sizes={STRIP_SIZES} loading={n < 4 ? "eager" : "lazy"} />
                       {/* Hover shows the back. The strip swipes sideways, so no label
-                          here: the viewer's bar has the switch (Julian, 2026-11-05). */}
+                          here: the viewer's bar has the switch. */}
                       {f.back ? <Image className="bk" src={f.back.src} alt="" fill sizes={STRIP_SIZES} loading="lazy" /> : null}
                       {cap}
                     </a>

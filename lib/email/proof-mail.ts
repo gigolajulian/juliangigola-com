@@ -1,5 +1,5 @@
 /* ── the proof mails ──────────────────────────────────────────────
- * Julian (2026-11-06): light by default, dark where the mail app supports
+ * Light by default, dark where the mail app supports
  * it (prefers-color-scheme; Gmail ignores it and stays light). Same table layout and Plex Mono as the booking mail
  * (`lib/booking/confirm.ts`), from book@ through CLIENT_EMAIL, reply-to hello@.
  * Never sent from Lightroom: only when he hits Send in /admin Leads.
@@ -84,7 +84,7 @@ ${rows(terms)}
 
 export const deliveryUrl = (id: string) => `${SITE}/delivery/${id}`;
 
-/** The "Your photos are ready" mail at Send finals (Julian 2026-11-12). No photos inline: the finals are the client's to open. */
+/** The "Your photos are ready" mail at Send finals. No photos inline: the finals are the client's to open. */
 export function deliveryMail(p: Proof) {
   const url = deliveryUrl(publicId(p));
   const n = p.finals?.length ?? 0;
@@ -108,7 +108,7 @@ ${rows(terms)}
 
 const shortDay = (iso: string) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, month: "short", day: "numeric" }).format(new Date(iso));
 
-/** The one reminder (Julian 2026-11-15): plain, no sales voice. Proofs count the client's own picks so far; finals only say when. */
+/** The one reminder: plain, no sales voice. Proofs count the client's own picks so far; finals only say when. */
 export function reminderMail(p: Proof, stage: "proofs" | "finals") {
   const finals = stage === "finals";
   const url = (finals ? deliveryUrl : proofUrl)(publicId(p));
@@ -162,7 +162,7 @@ ${rows(summary)}
   return { subject: "Selects are in", html, text, attachments: logos() };
 }
 
-/** Julian's alert to hello@: plain lines for `alertHello()` in lib/hello-mail. */
+/** Julian's alert to hello@: plain lines for `alertHello()` in lib/email/hello-mail. */
 export function alertLines(p: Proof): { subject: string; lines: string[] } {
   const paid = p.paid ? `, $${(p.paid.amount / 100).toFixed(0)} paid${p.paid.pending ? " by bank, clearing in about 4 business days" : ""}` : "";
   return {
@@ -180,7 +180,7 @@ export function alertLines(p: Proof): { subject: string; lines: string[] } {
   };
 }
 
-/** What a client did, as it happens, for a gallery on "each" (Julian 2026-11-15). Open, send and download only. */
+/** What a client did, as it happens, for a gallery on "each". Open, send and download only. */
 export function actionAlert(p: Proof, who: string, kind: "open" | "download", id?: string): { subject: string; lines: string[] } {
   const name = p.viewers?.[who.toLowerCase()]?.name;
   const by = name ? `${name} (${who})` : who;
@@ -223,7 +223,7 @@ export function worthMail(events: ViewerEvent[], kind: "open" | "download", at: 
   return !before || Date.parse(at) - Date.parse(before.at) > gap * 60_000;
 }
 
-/** Julian's own subject for a proof or delivery mail (Julian 2026-11-15): one line, control characters out, 150 at most; empty keeps the default. */
+/** Julian's own subject for a proof or delivery mail: one line, control characters out, 150 at most; empty keeps the default. */
 export function subjectOr(given: unknown, fallback: string): string {
   const v = typeof given === "string" ? given.replace(/[\x00-\x1f\x7f]+/g, " ").replace(/\s+/g, " ").trim().slice(0, 150) : "";
   return v || fallback;
@@ -252,7 +252,7 @@ export async function sendClient(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefin
   }
 }
 
-/* ── contracts (Julian 2026-11-15): the link to sign, and the signed copy ── */
+/* ── contracts: the link to sign, and the signed copy ── */
 
 type ContractMailIn = { id: string; to: { name: string }; text: string; signed?: { name: string; at: string; hash: string; email: string } };
 const contractLink = (id: string) => `${SITE}/contract/${id}`;

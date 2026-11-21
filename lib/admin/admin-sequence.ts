@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { isTextRef, type FrameRef, type TextRef } from "@/lib/added";
+import { isTextRef, type FrameRef, type TextRef } from "@/lib/work/added";
 import { MAX_WIDTH, prepareImage } from "@/lib/admin/admin-image";
 
 /* ── a project's sequence, as state ───────────────────────────────
@@ -28,6 +28,14 @@ export type PendingUpload = {
 export const srcOf = (f: FrameRef): string =>
   typeof f === "string" ? f : isTextRef(f) ? "" : f.src;
 
+/**
+ * A name the harvester cannot collide with.
+ *
+ * `harvest.mjs` writes `01.jpg`, `02.jpg`… by position and skips a file that
+ * is already on disk, so a photograph added under a numbered name would
+ * either be silently adopted as one of Format's or be overwritten by it. The
+ * prefix keeps the two sets of files apart for good.
+ */
 const uploadPath = (slug: string, i: number) =>
   `public/work/${slug}/a${Date.now().toString(36)}-${i + 1}.jpg`;
 

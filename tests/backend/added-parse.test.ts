@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { instagramHandle } from "@/lib/added";
+import { instagramHandle } from "@/lib/work/added";
 
 /* The handle goes into an href: only Instagram's alphabet gets through. */
 describe("instagramHandle", () => {

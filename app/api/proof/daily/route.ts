@@ -3,7 +3,7 @@ import { fromWorker } from "@/lib/vouch";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { listProofs, readProof, type Proof } from "@/lib/proofs/proof";
 import { digestMail } from "@/lib/email/proof-mail";
-import { alertHello } from "@/lib/hello-mail";
+import { alertHello } from "@/lib/email/hello-mail";
 import { json } from "@/lib/http";
 
 /* ── POST /api/proof/daily: the galleries' daily summary to hello@ ─

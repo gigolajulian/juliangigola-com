@@ -9,9 +9,9 @@ import { sleeveTilt } from "./sleeve-tilt";
 import "@/components/v4/home/motion/rows.css";
 import { CoverFaces, coverLabel } from "@/components/cover/cover-faces";
 import { CoverSound, playSound, stopSound, useSound } from "@/components/cover/cover-sound";
-import type { CoverRelease } from "@/lib/cover-art-types";
+import type { CoverRelease } from "@/lib/work/cover-art-types";
 import { cn } from "@/lib/utils";
-import { useV4pages } from "@/lib/v4pages";
+import { useV4pages } from "@/lib/flags/v4pages";
 
 /* ── the cover-art sheet ──────────────────────────────────────────
  * Every release, three across.

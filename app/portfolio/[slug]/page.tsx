@@ -16,7 +16,7 @@ import {
   isDisciplineGallery,
   nextAfter,
   nextDiscipline,
-} from "@/lib/work";
+} from "@/lib/work/work";
 
 /* ── the case study ───────────────────────────────────────────────
  * The old site rendered a project as a grid of thumbnails with the credits

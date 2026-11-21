@@ -9,14 +9,8 @@ import SOURCES from "./public/work/sources.json";
  * are done by Cloudflare Image Transformations, addressed as a path prefix on
  * the zone: `/cdn-cgi/image/<options>/<source>`.
  *
- * This replaces a loader that did nothing. Under the GitHub Pages export it
- * prefixed a basePath and **ignored `width` entirely**, so every `srcSet`
- * candidate resolved to the same file and a phone downloaded the same 1600px
- * JPEG as a 5K display. The `sizes` props already written into every
- * component — `100vw` in the lightbox, `(min-width: 1024px) 45vw, 100vw` in
- * the cover — were correct all along and simply had nothing to act on.
- *
- * `format=auto` is the other half: AVIF or WebP to browsers that accept them,
+ * `width` picks the size, so each `srcSet` candidate is its own file.
+ * `format=auto` sends AVIF or WebP to browsers that accept them,
  * which is typically 30-50% off the JPEG at the same quality and the single
  * largest speed win available here.
  *

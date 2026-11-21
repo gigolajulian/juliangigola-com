@@ -1,8 +1,7 @@
 "use client";
 
 /* ── Money on Astryx ──────────────────────────────────────────────
- * Julian (2026-11-10) approved the mock (claude.ai/artifact/WWQy2jVbaeTG7sdDKgGmU5,
- * #money): his Stripe balance as tiles and what moved it as a table.
+ * His Stripe balance as tiles and what moved it as a table.
  * Same read-only /api/money as the classic MoneyView
  * (components/leads/money.tsx), paged with Show more.
  * ─────────────────────────────────────────────────────────────── */

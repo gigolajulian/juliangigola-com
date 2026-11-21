@@ -1,5 +1,5 @@
 /* ── past Stripe payments onto the activity log ────────────────────
- * Julian (2026-11-11): OK to import past Stripe deposits. Pages every
+ * Imports past Stripe deposits. Pages every
  * succeeded PaymentIntent and refund on the account and records each on the
  * payer's lead with the refs the live paths use, so nothing counts twice:
  *   payment   ref = the intent id (deposits in `lib/booking/deposit.ts`, others in `app/api/stripe/route.ts`)

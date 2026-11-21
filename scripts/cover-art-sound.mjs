@@ -1,8 +1,8 @@
 /**
- * The song preview for each cover: `node scripts/cover-art-sound.mjs` writes `lib/cover-art-sound.json`.
+ * The song preview for each cover: `node scripts/cover-art-sound.mjs` writes `lib/work/cover-art-sound.json`.
  *
  * Apple first: the public iTunes Search API (no key), matched on title AND artist
- * (`lib/cover-art-match.ts`). A release already in the file keeps its Apple track id and only has
+ * (`lib/work/cover-art-match.ts`). A release already in the file keeps its Apple track id and only has
  * its preview URL refreshed, so a hand-pinned id is never searched again. To pin one, add
  * `"<slug>": { "id": <Apple track id> }` to the file and run this.
  * Only on SoundCloud: add `"<slug>": { "soundcloud": "<track url>" }` by hand. It plays through SoundCloud's player,
@@ -15,10 +15,10 @@
  * Apple allows about 20 calls a minute, so this takes a few minutes.
  */
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { COVER_RELEASES } from "../lib/cover-art-data.ts";
-import { lead, matchSong, norm } from "../lib/cover-art-match.ts";
+import { COVER_RELEASES } from "../lib/work/cover-art-data.ts";
+import { lead, matchSong, norm } from "../lib/work/cover-art-match.ts";
 
-const OUT = new URL("../lib/cover-art-sound.json", import.meta.url);
+const OUT = new URL("../lib/work/cover-art-sound.json", import.meta.url);
 const old = existsSync(OUT) ? JSON.parse(readFileSync(OUT, "utf8")) : {};
 
 let last = 0;

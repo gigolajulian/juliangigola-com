@@ -14,7 +14,7 @@ import {
   categoryHref,
   categoryFrame,
   PRESS,
-} from "@/lib/work";
+} from "@/lib/work/work";
 import {
   ADDED,
   TRASH,
@@ -27,7 +27,7 @@ import {
   AVATARS,
   DISCIPLINE_COVERS,
   BTS,
-} from "@/lib/added";
+} from "@/lib/work/added";
 
 /* ── admin ────────────────────────────────────────────────────────
  * Unlisted, not secret. Nothing in the nav points here and no crawler is
@@ -136,7 +136,7 @@ export default function AdminPage() {
         /* Frames as paths, and nothing else about them. The sequence editor
            needs to show every frame of whichever gallery is opened, so the
            paths have to travel — but their dimensions and mat colours do not,
-           since the thumbnails sit in a fixed box and `lib/work.ts` reads the
+           since the thumbnails sit in a fixed box and `lib/work/work.ts` reads the
            real numbers back out of the archive when a sequence is applied. */
         projects={ALL_PROJECTS.map((p) => ({
           slug: p.slug,

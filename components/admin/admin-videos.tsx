@@ -8,7 +8,7 @@ import {
   youtubeStills,
   type Video,
   type VideoSection,
-} from "@/lib/videos";
+} from "@/lib/work/videos";
 import { cn } from "@/lib/utils";
 
 /* ── the video tab ────────────────────────────────────────────────

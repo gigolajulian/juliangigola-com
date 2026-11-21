@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { ADDED_PATH, type AddedProject } from "@/lib/added";
+import { ADDED_PATH, type AddedProject } from "@/lib/work/added";
 import { commitFiles, readFile } from "@/lib/admin/admin-github";
 import {
   COVER_WIDTH,

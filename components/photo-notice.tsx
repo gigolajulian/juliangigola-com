@@ -26,7 +26,7 @@ import * as React from "react";
 
 /** Long enough to read, short enough not to be in the way (Julian: 3s). */
 const DWELL_MS = 3000;
-/** Two right clicks this close together are one ask. Julian, 2026-10-19:
+/** Two right clicks this close together are one ask:
     the notice answers the second, the first only keeps the menu shut. */
 const AGAIN_MS = 500;
 /** gsap's power2.in, expo.out and power3.out, which these fades were first drawn with. */
@@ -77,7 +77,7 @@ export function PhotoNotice() {
       // and the event target is whatever sits on top of it.
       const target = e.target as HTMLElement | null;
       if (!target) return;
-      /* Julian (2026-10-19): no menu on the page around them either. Text
+      /* No menu on the page around them either. Text
          fields keep theirs for copy and paste, and a link keeps its own
          (open in a new tab). Only a photograph raises the notice. */
       if (target.closest("input, textarea, select, [contenteditable]")) return;
@@ -157,7 +157,7 @@ export function PhotoNotice() {
     if (!shown) {
       const out = el.animate(
         [{ opacity: getComputedStyle(el).opacity, transform: "none" }, { opacity: 0, transform: "translateY(-6px)" }],
-        { duration: 220, easing: "cubic-bezier(.23,1,.32,1)" }, // MOTION-PLAN.md item 4: exits leave on `out`
+        { duration: 220, easing: "cubic-bezier(.23,1,.32,1)" }, // Motion plan item 4 (docs/decisions.md): exits leave on `out`
       );
       el.style.opacity = "0";
       out.onfinish = () => (el.style.visibility = "hidden");
@@ -254,7 +254,7 @@ export function PhotoNotice() {
             Julian Gigola
           </span>
         </span>
-        {/* One line, both ends (Julian, 2026-10-20). At this width the
+        {/* One line, both ends. At this width the
             set's name never fits beside "All rights reserved", so the
             line keeps the frame's place in it; the name is read out in
             full above. */}

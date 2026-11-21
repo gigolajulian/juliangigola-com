@@ -3,7 +3,7 @@ import { lockOp, parseBooking, recordBooking, type BookResult } from "@/lib/book
 import { manageLinks } from "@/lib/booking/booking-token";
 import { confirmOf, sendConfirm } from "@/lib/booking/confirm";
 import { logMail } from "@/lib/leads/lead-store";
-import { alertHello } from "@/lib/hello-mail";
+import { alertHello } from "@/lib/email/hello-mail";
 import { whenPT } from "@/lib/inbox";
 import { bodyOf, json } from "@/lib/http";
 

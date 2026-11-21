@@ -1,5 +1,5 @@
 /* ── leads, sealed ────────────────────────────────────────────────
- * Julian (2026-11-03): the lead desk "hidden from all seo and encrypted".
+ * The lead desk is hidden from search and encrypted.
  * A lead carries a name, an email, what they want and when; KV already
  * encrypts at rest, but anyone holding a Cloudflare token could read it.
  * So every `lead:` row is sealed with AES-GCM under the Worker secret
@@ -33,7 +33,7 @@ export type Sealer = {
   open<T>(sealed: string): Promise<T>;
 };
 
-/** One person's address, however they spell it. Julian (2026-11-04): a lead
+/** One person's address, however they spell it. A lead
     typed gigola.julian@gmail.com whose mail came from gigolajulian@gmail.com
     never met. Gmail ignores dots and anything after "+", so the id does too. */
 export function canonical(email: string): string {

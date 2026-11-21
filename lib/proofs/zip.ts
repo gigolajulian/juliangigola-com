@@ -1,5 +1,5 @@
 /* ── a stored zip, streamed ──────────────────────────────────────
- * "Download all" on a delivery (Julian 2026-11-12). JPEGs do not shrink,
+ * "Download all" on a delivery. JPEGs do not shrink,
  * so entries are stored, never deflated, and every size and CRC is known
  * before the first byte: the headers are built up front, the archive's
  * length is exact, and the Worker only pipes each file's bytes from R2.

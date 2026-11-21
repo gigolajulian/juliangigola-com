@@ -4,7 +4,7 @@ import { balance, isPaid, namesInvoice, type Invoice } from "./invoice";
 export type InboxKV = Pick<NonNullable<CloudflareEnv["INBOX"]>, "get" | "put" | "list" | "delete">;
 
 /* ── leads: one record per person ─────────────────────────────────
- * Julian (2026-11-03, PLAN-lead-desk.md): every inquiry, call and booking
+ * Every inquiry, call and booking
  * in one list, with a stage on each person. Until now one person who
  * wrote, then booked a call, then paid was two or three unrelated rows.
  *
@@ -137,7 +137,7 @@ export type Lead = {
   invoices?: Invoice[];
   /** Opt-in, for commercial work: what the photos may be used for, and the day that ends (YYYY-MM-DD). */
   licence?: Licence;
-  /** More people on the job (Julian 2026-11-15): kept in the full record, never the list summary. */
+  /** More people on the job: kept in the full record, never the list summary. */
   people?: Person[];
   events: LeadEvent[];
 };
@@ -377,8 +377,8 @@ export const leadSummary = ({ events, notion, deposit, notes, remind, phone, ig,
 });
 
 /* ── the Inbox, backfilled ────────────────────────────────────────
- * Julian (2026-11-04): "add the stuff i have in my juliangigola admin inbox
- * to my leads". The `msg:` rows from before the desk, folded into leads at
+ * The old admin inbox, folded into the leads.
+ * The `msg:` rows from before the desk, folded into leads at
  * their own times. Nothing is mailed, Notion is not touched, no row deleted.
  * ─────────────────────────────────────────────────────────────── */
 

@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
-import { alertHello } from "@/lib/hello-mail";
+import { alertHello } from "@/lib/email/hello-mail";
 import { FakeEmail } from "./fakes";
 
-/* `lib/hello-mail.ts`: mail to hello@. True once sent; a mail too big with
+/* `lib/email/hello-mail.ts`: mail to hello@. True once sent; a mail too big with
    its pictures goes again without them. */
 
 const pic = { content: new ArrayBuffer(4), filename: "ref.jpg", type: "image/jpeg", disposition: "attachment" as const };

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
 import Link from "next/link";
-import { PendingLabel } from "@/components/pending-label";
+import { PendingLabel } from "@/components/contact/pending-label";
 
 describe("PendingLabel", () => {
   it("shows its words when nothing is pending", () => {

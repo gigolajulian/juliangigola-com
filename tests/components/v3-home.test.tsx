@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { Doors, V3Home } from "@/components/v3/home";
-import { INDEX_ORDER } from "@/lib/v3";
+import { INDEX_ORDER } from "@/lib/flags/v3";
 
 describe("V3Home", () => {
   it("renders the name and every section", () => {

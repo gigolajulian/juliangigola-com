@@ -2,7 +2,7 @@
    The site's tokens, so light and dark follow the system like every page. */
 /* `.rise` rests #main at translateY(0), and any transform makes #main the containing block of the
    fixed review sheet, lightbox and bar: Confirm opened a sheet pinned to the page top, a black screen
-   for anyone scrolled down (Julian 2026-11-08). Same fix as the admin tab bar. */
+   for anyone scrolled down. Same fix as the admin tab bar. */
 html:has(.proof) #main{transform:none}
 .proof{text-transform:none;--p-mono:var(--font-mono),ui-monospace,Menlo,Consolas,monospace;--p-hl:var(--border);container-type:inline-size;min-height:100svh;background:var(--background);color:var(--foreground)}
 .proof button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
@@ -38,11 +38,11 @@ html:has(.proof) #main{transform:none}
 .proof-cell[data-on]{outline-color:var(--accent)}
 .proof-cell[data-on] img{opacity:.72}
 .proof-cell:has(.proof-open:focus-visible){outline-color:var(--foreground)}
-/* Julian 2026-11-11: the photo opens, the ring in its corner picks (a 44px square around a 24px ring). */
+/* The photo opens, the ring in its corner picks (a 44px square around a 24px ring). */
 .proof .proof-open{position:absolute;inset:0;width:100%;outline:0}
 .proof .proof-mark{position:absolute;z-index:1;right:0;top:0;width:44px;height:44px;display:grid;place-items:center;outline:0}
 .proof-no{pointer-events:none}
-/* Julian 2026-11-12: hover gets a hairline on the photo's edge, and the arrow (cursor.tsx) tips 16deg clockwise. */
+/* Hover gets a hairline on the photo's edge, and the arrow (cursor.tsx) tips 16deg clockwise. */
 @media (hover:hover) and (pointer:fine){
   .proof-cell::after{content:"";position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 0 .5px rgba(255,255,255,.6);opacity:0;transition:opacity .18s cubic-bezier(.23,1,.32,1)}
   .proof-cell:hover::after{opacity:1}
@@ -131,7 +131,7 @@ html:has(.proof) #main{transform:none}
 /* above the total and the Pay buttons, read before the tap */
 .proof-lock{font:12px var(--p-mono);color:var(--foreground);margin:20px 0 -12px}
 
-/* gate: the first frames, lightly blurred, under a frosted card (Julian 2026-11-08: glass, less blur) */
+/* gate: the first frames, lightly blurred, under a frosted card */
 .proof-gate{position:relative;min-height:calc(100svh - 57px);overflow:hidden}
 .proof-wall{position:absolute;inset:0;display:grid;grid-template-columns:repeat(6,1fr);grid-auto-rows:1fr;gap:6px;padding:24px 28px;filter:blur(5px);opacity:.9;transform:scale(1.02);pointer-events:none}
 /* The rows share the gate's height, so the wall reaches the bottom at any window size. */
@@ -272,7 +272,7 @@ html:has(.proof[data-wall])::-webkit-scrollbar{display:none}
    filling as the wall's photographs come in. It lifts once they are all in, and the wall streams in under it. */
 .pw-splash{position:fixed;inset:0;z-index:20;display:grid;place-content:center;justify-items:center;gap:26px;background:var(--background);transition:opacity .8s cubic-bezier(.4,0,.2,1),visibility 0s .8s}
 .pw-splash[data-out]{opacity:0;visibility:hidden}
-/* phone: a third smaller than 13vw (Julian 2026-11-12) */
+/* phone: a third smaller than 13vw */
 .pw-splash-name{display:flex;gap:.22em;font:900 min(8.67vw,6.67rem)/.86 var(--font-display);letter-spacing:-.05em;color:var(--foreground);white-space:nowrap;transition:translate .8s cubic-bezier(.4,0,.2,1)}
 @media (min-width:700px){.pw-splash-name{font-size:min(4.33vw,3.33rem)}}
 .pw-splash[data-out] .pw-splash-name{translate:0 -10px}
@@ -311,7 +311,7 @@ html:has(.proof[data-wall])::-webkit-scrollbar{display:none}
 /* the 404's dusting of grain over its wall */
 /* No blend mode: blending over the moving wall cost a pass every frame. */
 .pw-grain{position:absolute;inset:0;pointer-events:none;opacity:.07;background-image:radial-gradient(color-mix(in oklab,var(--foreground) 50%,transparent) .5px,transparent .5px);background-size:3px 3px}
-/* compact intro (Julian 2026-11-10: the header does not have to be that big); one line, a long name wraps it to two */
+/* compact intro; one line, a long name wraps it to two */
 .proof[data-wall] .proof-intro{padding:clamp(28px,4cqi,48px) 28px clamp(20px,2.5cqi,28px);max-width:none}
 .proof[data-wall] .proof-intro h1{font:500 clamp(20px,calc((100cqi - 56px) / (var(--len,17) * .5)),44px)/1.1 var(--font-display);letter-spacing:-.025em;margin:10px 0 0;text-wrap:balance}
 /* the grid is laid out from the start; on accept its first screen flies out of the wall */
@@ -357,7 +357,7 @@ html:has(.proof[data-wall])::-webkit-scrollbar{display:none}
 .proof-gate .proof-card>.proof-btn{transition:opacity .25s ease}
 .proof-gate .proof-card>.proof-btn[data-off]{opacity:.35}
 
-/* ── /delivery/<id> gate (components/proofs/delivery.tsx), Julian 2026-11-12: the cover photo on the left half,
+/* ── /delivery/<id> gate (components/proofs/delivery.tsx): the cover photo on the left half,
    the header and email on the right; on a phone the photo takes the top two thirds and the form sits below. */
 .dlv-gate{display:grid;grid-template-columns:1fr 1fr;min-height:100svh}
 .dlv-photo{position:relative;overflow:hidden;background:#060605}
@@ -387,12 +387,12 @@ html:has(.proof[data-wall])::-webkit-scrollbar{display:none}
 .proof .proof-pass .proof-card{position:static;transform:none;box-shadow:none}
 .proof .proof-show{justify-self:start;align-self:flex-start;background:none;border:0;padding:4px 0;min-height:24px;font:11px var(--p-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted-foreground);cursor:pointer}
 .proof .proof-show:focus-visible{outline:1px solid var(--accent);outline-offset:3px}
-/* The gate's subheading (Julian 2026-11-15): the client's name or the shoot date, under the heading. */
+/* The gate's subheading: the client's name or the shoot date, under the heading. */
 .proof-sub{font:13px/1.5 var(--p-mono);color:var(--muted-foreground);margin:12px 0 0;text-transform:none}
 /* With file names on, a long one stops short of the ring. */
 .proof-no{max-width:calc(100% - 64px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
-/* /contract/<id> (Julian 2026-11-15): the delivery gate's type and fields, one reading column. */
+/* /contract/<id>: the delivery gate's type and fields, one reading column. */
 .ctr{max-width:760px;padding:0 28px 120px}
 .ctr-who{display:grid;grid-template-columns:1fr 1fr;gap:28px;padding:22px 0;border-top:1px solid var(--p-hl);border-bottom:1px solid var(--p-hl);font:13px/1.65 var(--p-mono);color:var(--muted-foreground)}
 .ctr-who p{margin:0}
@@ -413,7 +413,7 @@ html:has(.proof[data-wall])::-webkit-scrollbar{display:none}
   .ctr-who{grid-template-columns:1fr;gap:16px}
   .ctr-sign>.proof-btn{align-self:stretch}
 }
-/* Print: plain paper, black ink, no site chrome (Julian 2026-11-15). */
+/* Print: plain paper, black ink, no site chrome. */
 @media print{
   @page{margin:20mm 18mm}
   :root:has(.ctr){color-scheme:light!important;background:#fff!important}
@@ -428,7 +428,7 @@ html:has(.proof[data-wall])::-webkit-scrollbar{display:none}
   .ctr-text{font-size:10.5pt;line-height:1.6;margin:24px 0 32px}
   .ctr-mark,.ctr-done{break-inside:avoid}
 }
-/* the signature pad (Julian 2026-11-15) */
+/* the signature pad */
 .ctr-sigf{display:flex;flex-direction:column;gap:8px}
 .ctr-pad{position:relative;aspect-ratio:3/1;border:1px solid var(--p-hl);background:color-mix(in oklab,var(--foreground) 2.5%,transparent);transition:border-color .2s}
 .ctr-pad:hover,.ctr-pad:focus-within{border-color:color-mix(in oklab,var(--foreground) 40%,transparent)}
@@ -447,7 +447,7 @@ html:has(.proof[data-wall])::-webkit-scrollbar{display:none}
 .ctr-mark{width:min(300px,100%);aspect-ratio:3/1;margin-top:-12px;border-bottom:1px solid var(--foreground);margin-bottom:16px;display:flex;align-items:center}
 .ctr-mark svg{width:100%;height:100%;display:block}
 
-/* delivery by model (Julian 2026-11-19): a card per model, the number on the cover's top right, its own zip */
+/* delivery by model: a card per model, the number on the cover's top right, its own zip */
 .dlv-dl{display:flex;flex-wrap:wrap;align-items:center;gap:12px 18px}
 .dlv-dl .proof-mu{margin:0}
 .dlv-dl .proof-mu b{font-weight:500;color:var(--foreground)}
@@ -459,7 +459,7 @@ html:has(.proof[data-wall])::-webkit-scrollbar{display:none}
 .dlv-cover{position:relative;aspect-ratio:4/5;overflow:hidden;background:#111}
 .dlv-cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;transition:filter .2s ease-out;user-select:none;-webkit-user-select:none}
 @media(hover:hover){.dlv-card:hover .dlv-cover img{filter:brightness(1.12)}}
-/* Julian 2026-11-19 ("D"): numerals that invert against the photo, black on white seamless, white on a dark floor */
+/* Numerals that invert against the photo, black on white seamless, white on a dark floor */
 .dlv-cover{container-type:inline-size}
 .dlv-num{position:absolute;z-index:1;right:10px;bottom:-.08em;font:900 min(130px,40cqi)/1 var(--font-display);letter-spacing:-.06em;font-variant-numeric:tabular-nums;color:#fff;mix-blend-mode:difference;pointer-events:none}
 .dlv-mn{position:absolute;left:6px;top:4px;font:800 22px/1 var(--font-display);font-style:normal;letter-spacing:-.02em;color:#fff;mix-blend-mode:difference;pointer-events:none}

@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { AdminVideos } from "@/components/admin/admin-videos";
-import type { Video } from "@/lib/videos";
+import type { Video } from "@/lib/work/videos";
 
 afterEach(() => vi.unstubAllGlobals());
 

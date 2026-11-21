@@ -7,7 +7,7 @@ import { LdJson } from "@/components/local-screens";
 import { PageFoot } from "@/components/v3/chrome";
 import { CampusSpots } from "@/components/v3/campus-spots";
 import { CAMPUS_GUIDES, campusGuide, campusHref } from "@/lib/campus-guides";
-import { getProject } from "@/lib/work";
+import { getProject } from "@/lib/work/work";
 import { SITE } from "@/lib/seo";
 
 /* ── a campus guide ───────────────────────────────────────────────

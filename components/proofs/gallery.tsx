@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useClock } from "@/lib/use-clock";
+import { useClock } from "@/components/proofs/use-clock";
 import { cardPrice, closingSoon, lookStarts, shotOrder, THUMB_W, type PublicProof } from "@/lib/proofs/proof";
 import { looksLikeEmail } from "@/lib/inbox";
 import { ProofWall } from "@/components/proofs/wall";
@@ -18,14 +18,13 @@ import { gridwallFor } from "@/lib/proofs/gridwall";
  * JPEGs (Lightroom bakes it in), never drawn here. Theme follows the
  * site's tokens, so light or dark follows the system.
  *
- * Julian 2026-11-08 (mock https://claude.ai/artifact/4SWWESHZZ3ScWgYDPsnEnb):
- * an email gate before the frames (any address opens it, and every pick
+ * An email gate before the frames (any address opens it, and every pick
  * and look is logged under it for /admin), a review of the picks before
  * they go, and a walkthrough after Send in place of the bare receipt. No
  * notes. Time on the page and per-frame looks go out in one beacon every
  * 30 seconds and when the tab hides, never one request per frame.
  *
- * Julian 2026-11-11 (audit https://claude.ai/artifact/22rBM6N6e42kRWHcFbUjhE): a tap on a photo opens it, the ring
+ * A tap on a photo opens it, the ring
  * picks; frames in shot order, split into looks where Lightroom sent capture times; "Selects first" on one line;
  * frame numbers and the ring black on a light corner, white on a dark one.
  * ─────────────────────────────────────────────────────────────── */
@@ -35,11 +34,11 @@ const isEmail = (v: string) => looksLikeEmail(v.trim());
 
 type Step = null | "review" | "done";
 
-// The gate as the grid's own wall (components/proofs/wall.tsx), the default since Julian 2026-11-11 ("make the new gridwall
-// proof gallery default"); `?proofwall=0` for the plain gate. Read on the client only.
+// The gate as the grid's own wall (components/proofs/wall.tsx) by default;
+// `?proofwall=0` for the plain gate. Read on the client only.
 const noop = () => () => {};
 const readWall = () => new URLSearchParams(location.search).get("proofwall") !== "0";
-// The wall tuned per screen in the gridwall tuner, the default since Julian's yes (2026-11-11); `?gw=0` for the untuned wall.
+// The wall tuned per screen in the gridwall tuner by default; `?gw=0` for the untuned wall.
 // The window's size, so it compares.
 const onResize = (cb: () => void) => {
   addEventListener("resize", cb);
@@ -182,7 +181,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
 
   const post = React.useCallback((b: Record<string, unknown>) => fetch(`/api/proof/${token}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(b) }), [token]);
 
-  // Julian 2026-11-10: sign in every visit, the browser's autofill fills it. Clears the address older builds kept.
+  // Sign in every visit, the browser's autofill fills it. Clears the address older builds kept.
   // Back from Stripe in the same tab (paid, cancelled or failed): the address it left, so they are not asked again.
   React.useEffect(() => {
     localStorage.removeItem(EMAIL_STORE);
@@ -340,7 +339,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
 
   const pad = (i: number) => String(i + 1).padStart(3, "0");
   const closes = initial.closesAt ? new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: "America/Los_Angeles" }).format(new Date(initial.closesAt)) : null;
-  // The last days say so (Julian 2026-11-15). Read after mount: the server and the phone can disagree near midnight.
+  // The last days say so. Read after mount: the server and the phone can disagree near midnight.
   const clock = useClock();
   const soon = clock ? closingSoon(initial.closesAt, clock) : null;
   const until = closes ? (soon !== null ? ` · Closes ${closes} · ${soon} ${soon === 1 ? "day" : "days"} left` : ` · Open until ${closes}`) : "";
@@ -375,7 +374,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
               ))}
               {n > 5 ? <span>+{n - 5}</span> : null}
             </div>
-            {/* Opens them as a photo grid, never a list in the side column (Julian 2026-11-09). */}
+            {/* Opens them as a photo grid, never a list in the side column. */}
             <button type="button" className="proof-vs" onClick={() => setShowAll(true)}>
               View your {n} {n === 1 ? "select" : "selects"} →
             </button>
@@ -515,7 +514,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
                         if (c) setTone((t) => ({ ...t, [f.id]: c }));
                       }}
                     />
-                    {/* The photo opens; the ring picks (Julian 2026-11-11). */}
+                    {/* The photo opens; the ring picks. */}
                     <button type="button" className="proof-open" aria-label={`Open frame ${i + 1}`} onClick={() => setOpen(i)} />
                     <span className="proof-no">{pad(i)}{f.file ? ` · ${f.file}` : ""}</span>
                     <button type="button" className="proof-mark" aria-pressed={at >= 0} aria-label={`Select frame ${i + 1}`} onClick={() => toggle(f.id)}>

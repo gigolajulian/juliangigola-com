@@ -55,7 +55,7 @@ export const COMMISSIONS: Pair[] = [
   { d: { src: w("celestis", "03"), name: "Celestis 03" }, l: { src: w("i-wanna-be-a-human", "06"), name: "I Wanna Be A Human 06" } },
   { d: { src: w("gilt", "01"), name: "Gilt 01" }, l: { src: w("sago", "01"), name: "Sago 01" } },
 ];
-/* Each tab opens its discipline on /portfolio (`categoryHref` in lib/work.ts). */
+/* Each tab opens its discipline on /portfolio (`categoryHref` in lib/work/work.ts). */
 export const COMMISSION_TABS: [label: string, href: string][] = [
   ["All", "/portfolio"],
   ["Campaigns", "/portfolio?d=campaigns"],
@@ -105,7 +105,7 @@ const LISTED: Record<SessionSlug, Omit<Session, "paid">> = {
     turnaround: "1 week",
     cal: "juliangigola/portraits",
     // SIAN 01, Julian's pick for the Portraits booking card (2026-11-10). Was ZOE 16.
-    // Desktop gets sian/01 with 200px of her own backdrop added on top, so her face sits at the panel's middle (Julian, 2026-11-10).
+    // Desktop gets sian/01 with 200px of her own backdrop added on top, so her face sits at the panel's middle.
     photo: { d: w("sian", "01"), l: w("sian", "01"), desk: "/v3/portraits-sian-tall.jpg", at: { d: "50% 5%", l: "50% 5%" } },
   },
   graduation: {
@@ -138,7 +138,7 @@ const LISTED: Record<SessionSlug, Omit<Session, "paid">> = {
     cal: "juliangigola/digitals",
     photo: { d: w("abril", "03"), l: w("abril", "03"), at: { d: "50% 10%", l: "50% 10%" } },
   },
-  /* Julian, 2026-11-14: the name, an hour, a week and the $100 deposit; the rate is quoted on the call. */
+  /* The name, an hour, a week and the $100 deposit; the rate is quoted on the call. */
   "model-test": {
     slug: "model-test",
     name: "Model test",

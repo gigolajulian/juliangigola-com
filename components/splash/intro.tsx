@@ -4,7 +4,7 @@ import * as React from "react";
 import loader from "@/image-loader";
 import { burst } from "@/components/splash/burst-splash";
 import { split } from "@/components/splash/split-splash";
-import { HERO } from "@/lib/v3";
+import { HERO } from "@/lib/flags/v3";
 import { keepNames } from "@/lib/keep-names";
 
 /* `?splash=burst`: the run of frames (the portfolio's first covers,

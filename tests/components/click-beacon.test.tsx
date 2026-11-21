@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render } from "@testing-library/react";
-import { ClickBeacon } from "@/components/click-beacon";
+import { ClickBeacon } from "@/components/analytics/click-beacon";
 
 describe("ClickBeacon", () => {
   it("sends the presses once when the page view ends", () => {

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { V3Project } from "@/components/v3/project";
-import { PROJECTS } from "@/lib/work";
+import { PROJECTS } from "@/lib/work/work";
 
 describe("V3Project", () => {
   it("renders a real project with its credits and the next link", () => {

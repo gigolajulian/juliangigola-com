@@ -1,6 +1,6 @@
 "use client";
 
-/* ── the signature pad (Julian 2026-11-15) ────────────────────────
+/* ── the signature pad ────────────────────────
  * Finger, pen, trackpad or mouse. Pointer events into a 600 x 200 box,
  * smoothed with quadratic curves through the midpoints, handed up as SVG
  * path data (`isMark` in lib/contracts/contract.ts checks it again).

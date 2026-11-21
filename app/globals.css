@@ -55,7 +55,7 @@
 @import "./styles/editorial.css";
 @import "./styles/devices.css";
 @import "./styles/v3.css";
-@import "./styles/motion-plan.css"; /* MOTION-PLAN.md items */
+@import "./styles/motion-plan.css"; /* Motion plan items (docs/decisions.md) */
 @import "./styles/mtscroll.css"; /* v4 homepage, only under ?mtscroll=1 */
 @import "./styles/v4pages.css"; /* inner pages plan, only under ?v4pages */
 @import "./styles/navfx.css"; /* the new header, only under ?navfx=1 */

@@ -6,7 +6,7 @@ import type { gsap as GSAP } from "gsap";
 type G = typeof GSAP;
 
 /* ── the gather ───────────────────────────────────────────────────
- * Julian (2026-10-14): photographs come in from outside the page and
+ * Photographs come in from outside the page and
  * gather where they sit, solid all the way. Each on the line from the
  * middle of the screen out through its own place, in two waves: every
  * other one in their order (`--order` where they carry one, the page's
@@ -35,7 +35,7 @@ const radial: Path = (f, r, rank) => {
   return { x: (dx / d) * out, y: (dy / d) * out, delay: (rank % 2) * WAVE };
 };
 
-/** Julian (2026-10-14), for the walls: the photographs stream in from
+/** For the walls: the photographs stream in from
     above and below, a column at a time, every other column the other
     way (`data-col` on the tile, `drift-wall.tsx`). */
 export const streams: Path = (f, r) => {
@@ -43,7 +43,7 @@ export const streams: Path = (f, r) => {
   return { x: 0, y: (col % 2 ? 1 : -1) * (innerHeight + r.height), delay: col * 0.05 };
 };
 
-/** Julian (2026-10-15), for the 404: the wall builds up. Row by row from
+/** For the 404: the wall builds up. Row by row from
     the bottom, left to right in a row, each tile out of nowhere a short
     way under its place and up into it; hidden until its turn, no fade. */
 export const builds: Path = (f, r) => {
@@ -52,7 +52,7 @@ export const builds: Path = (f, r) => {
   return { x: 0, y: r.height * 0.35, delay: row * 0.32 + col * 0.09, duration: 0.9, ease: "power3.out" };
 };
 
-/** Julian (2026-10-14), for a project: the frames come in from past the
+/** For a project: the frames come in from past the
     right edge and run left, in order, up to the title. */
 export const slides: Path = (f, r, rank) => ({ x: innerWidth - r.left + 40, y: 0, delay: rank * 0.08 });
 

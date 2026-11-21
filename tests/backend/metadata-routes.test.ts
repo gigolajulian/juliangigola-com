@@ -5,7 +5,7 @@ import sitemap from "@/app/sitemap";
 import { GET as canvas } from "@/app/canvas.json/route";
 import { GET as visit } from "@/app/visit/route";
 import { GET as leadsWorker } from "@/app/admin/leads/sw.js/route";
-import { PROJECTS } from "@/lib/work";
+import { PROJECTS } from "@/lib/work/work";
 import { BOOKING_PAGES, bookingHref } from "@/lib/booking/booking";
 
 /* The static routes: robots.txt, the manifest, the sitemap, the canvas

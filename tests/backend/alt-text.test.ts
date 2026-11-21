@@ -1,9 +1,9 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { ALT } from "@/lib/alt-text";
+import { ALT } from "@/lib/work/alt-text";
 
-/* Written alt text by photo path (`lib/alt-text.ts`): every entry must
+/* Written alt text by photo path (`lib/work/alt-text.ts`): every entry must
    point at a photograph the site serves, or it describes nothing. */
 
 describe("ALT", () => {

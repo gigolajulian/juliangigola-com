@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { render, waitFor } from "@testing-library/react";
-import { PhotoFade } from "@/components/photo-fade";
+import { PhotoFade } from "@/components/effects/photo-fade";
 
 describe("PhotoFade", () => {
   it("renders nothing and marks a faded image once it loads", async () => {

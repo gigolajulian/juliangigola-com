@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { useV4pages } from "@/lib/v4pages";
+import { useV4pages } from "@/lib/flags/v4pages";
 
 export type HeldSpot = { name: string; note: string; src: string; alt: string; color?: string };
 

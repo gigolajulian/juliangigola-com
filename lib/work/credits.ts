@@ -1,4 +1,4 @@
-import type { Credit } from "./work-types";
+import type { Credit } from "../work-types";
 
 /* The one list of credit roles. The harvested site and years of hand edits left 79 spellings of
    about 40 jobs; a role outside this list fails lib/credits.test.ts. Compound labels split into one

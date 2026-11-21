@@ -21,7 +21,7 @@ import {
   type Provider,
   type Video,
   type VideoSection,
-} from "./videos";
+} from "./work/videos";
 
 export type Testimonial = {
   quote: string;
@@ -64,7 +64,7 @@ export type SiteContent = {
    * The running order of the cover-art gallery, as dragged in /admin.
    *
    * Partial, like the work's own order: it names only what has been moved,
-   * and anything absent keeps the place `lib/cover-art-data.ts` gave it. An
+   * and anything absent keeps the place `lib/work/cover-art-data.ts` gave it. An
    * empty list is the gallery as generated, so this costs nothing until
    * somebody decides a release should lead.
    *
@@ -81,7 +81,7 @@ export type SiteContent = {
    * without being on the cover — video, event coverage, music video and the
    * four session types.
    *
-   * Empty means the six `lib/work.ts` has always led with, so the homepage is
+   * Empty means the six `lib/work/work.ts` has always led with, so the homepage is
    * unchanged until somebody decides otherwise. A slug naming a discipline
    * with no work, or none at all, is dropped when the list is built: the
    * cover needs a photograph to show for a discipline and cannot invent one.
@@ -89,7 +89,7 @@ export type SiteContent = {
   heroDisciplines: string[];
   /**
    * The client walls, in order: the strip under the cover and the grid on
-   * /about, each its own list of slugs from the catalogue in `lib/work.ts`.
+   * /about, each its own list of slugs from the catalogue in `lib/work/work.ts`.
    * Empty means "the catalogue as written" — the state before the editor
    * could touch them; once either is set, it is authoritative, so a client
    * can be left off one wall and kept on the other.

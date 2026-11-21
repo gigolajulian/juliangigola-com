@@ -1,7 +1,7 @@
 "use client";
 
 /* ── a gallery's timeline on the desk ─────────────────────────────
- * Julian (2026-11-15, the gallery timeline mock): where a gallery stands,
+ * Where a gallery stands,
  * from Sent to Downloaded, then when it closes. The line fills up to the
  * current stage and that stage's dot pulses once a beat. The violet stretch
  * is the reminder window (`remindState`), shown while a reminder can still go.
@@ -9,7 +9,7 @@
 
 import * as React from "react";
 import { closingSoon, remindState, type Proof } from "@/lib/proofs/proof";
-import { useClock } from "@/lib/use-clock";
+import { useClock } from "@/components/proofs/use-clock";
 
 const short = (iso: string) => new Intl.DateTimeFormat("en-US", { timeZone: "America/Los_Angeles", month: "short", day: "numeric" }).format(new Date(iso));
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { render } from "@testing-library/react";
-import { FocusField } from "@/components/focus-field";
+import { FocusField } from "@/components/contact/focus-field";
 
 describe("FocusField", () => {
   it("lays its one hidden layer and cleans up", () => {

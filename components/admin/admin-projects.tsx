@@ -6,15 +6,15 @@ import {
   ADDED_PATH,
   type AddedProject,
   type TrashedProject,
-} from "@/lib/added";
+} from "@/lib/work/added";
 import { commitFiles, readFile } from "@/lib/admin/admin-github";
 import { AdminFrames, type PendingUpload } from "@/components/admin/admin-frames";
 import { srcOf } from "@/lib/admin/admin-sequence";
-import { twinStats } from "@/lib/frame-twins";
+import { twinStats } from "@/lib/work/frame-twins";
 import { AdminCredits } from "@/components/admin/admin-credits";
 import { AdminBts } from "@/components/admin/admin-bts";
 import type { Bts } from "@/lib/work-types";
-import type { FrameRef } from "@/lib/added";
+import type { FrameRef } from "@/lib/work/added";
 import type { Credit } from "@/lib/work-types";
 import { cn } from "@/lib/utils";
 
@@ -25,7 +25,7 @@ import { cn } from "@/lib/utils";
  *
  *   - **Hide** takes it off every listing and leaves its page. Julian: hide
  *     ROUGE from the pages but let me still keep a link to it. It is the
- *     `unlisted` list in `lib/added.ts`, published with the rest of the
+ *     `unlisted` list in `lib/work/added.ts`, published with the rest of the
  *     draft, and Show puts it back.
  *   - **Delete** takes it off the site. For a project added here that is
  *     the bin - the entry and its photographs leave in one commit and sit
@@ -54,7 +54,7 @@ export type AdminProject = {
    *
    * Paths and not whole frames: 1,152 of these ship with the page, and the
    * dimensions and mat colour would triple that to render thumbnails in a
-   * fixed box that needs neither. `lib/work.ts` reads the real numbers back
+   * fixed box that needs neither. `lib/work/work.ts` reads the real numbers back
    * out of the archive when the sequence is applied.
    */
   images: string[];
@@ -152,6 +152,9 @@ export function AdminProjects({
    * Owned by the editor rather than here so the sitemap can open a project
    * directly. Controlled, not mirrored: a local copy synced from a prop would
    * be two states for one fact and an effect to keep them agreeing.
+   *
+   * One at a time: each open gallery is up to thirty full-size frames, and a
+   * list where every row is open is the whole archive at once.
    */
   opened: string | null;
   onOpened: (slug: string | null) => void;
@@ -169,13 +172,6 @@ export function AdminProjects({
   const [status, setStatus] = React.useState<Status>({ kind: "idle" });
   const [confirming, setConfirming] = React.useState<string | null>(null);
   const [gone, setGone] = React.useState<Set<string>>(new Set());
-  /**
-   * Which row is expanded, if any.
-   *
-   * One at a time. Each open gallery is up to thirty full-size frames on a
-   * host that is not resizing them yet, and a list where every row is open is
-   * the whole archive at once.
-   */
   /**
    * Brings the expanded row into view.
    *
@@ -547,7 +543,7 @@ export function AdminProjects({
                     {/* Grouped, because the two kinds are not interchangeable
                         and the list is long enough to get lost in: a
                         commission and a session sit on opposite sides of the
-                        site — `lib/work.ts` splits them on exactly this — so
+                        site — `lib/work/work.ts` splits them on exactly this — so
                         filing a shoot under Graduation moves it off /work and
                         onto the session page, where it becomes one of that
                         session's sample frames. That is the point of offering

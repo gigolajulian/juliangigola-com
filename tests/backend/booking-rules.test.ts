@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { DEFAULT_HOURS, EVENTS, cleanHours, duration, refundCents, refundShare, windowOn } from "@/lib/booking/booking-rules";
 import { SESSION } from "@/lib/booking/deposit";
 import { PAID } from "@/lib/booking/paid";
-import { LENGTH, SESSIONS } from "@/lib/v3";
+import { LENGTH, SESSIONS } from "@/lib/flags/v3";
 
 /* The site's own booking rules (`lib/booking/booking-rules.ts`): hours, the
    refund window and how a length is written. */

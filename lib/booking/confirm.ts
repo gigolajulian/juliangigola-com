@@ -4,7 +4,7 @@ import { depositPaid, type BookingRecord } from "@/lib/booking/booking-engine";
 import type { manageLinks } from "@/lib/booking/booking-token";
 import { SIG_DARK, SIG_HTML, SIG_TEXT } from "@/lib/email/email-signature";
 /* ── the client's confirmation email ──────────────────────────────
- * Julian (2026-10-16): every booking gets a branded "You're in." mail from
+ * Every booking gets a branded "You're in." mail from
  * the site.
  *
  *   - Paid sessions: sent by `bookDeposit` once the lock takes the booking, with
@@ -15,7 +15,7 @@ import { SIG_DARK, SIG_HTML, SIG_TEXT } from "@/lib/email/email-signature";
  * hello@, and only from book@ (an alias of hello@). A failed send is logged, never a
  * failed booking. Look: the mock Julian approved (dark, IBM Plex Mono,
  * one accent, hairlines), table layout because mail clients need it.
- * Julian (2026-11-06): light by default, dark where the mail app supports
+ * Light by default, dark where the mail app supports
  * it (prefers-color-scheme). Gmail ignores the query and stays light.
  * ─────────────────────────────────────────────────────────────── */
 

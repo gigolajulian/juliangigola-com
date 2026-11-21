@@ -1,9 +1,8 @@
 "use client";
 
 /* ── a lead's row, as Today and the Leads list both draw it ───────
- * Julian (2026-11-14) picked the redesign mock (claude.ai/artifact/PUMDXU12eGeE8SdpsHEx7c):
- * the name, one readable line in normal case, the next step in teal.
- * The small mono capitals are gone; a late lead says so in orange.
+ * The name, one readable line in normal case, the next step in teal.
+ * A late lead says so in orange.
  * ─────────────────────────────────────────────────────────────── */
 
 import { Badge } from "@astryxdesign/core/Badge";

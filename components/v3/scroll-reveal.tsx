@@ -26,7 +26,7 @@ export function ScrollReveal() {
     const observeTargets = () => {
       const targets = document.querySelectorAll(
         ".v3 .a-seq figure, .v3 .sheet figure, .v3 .door, .v3 .wgrid .wt, .v3 .a-index .frame, .v3 .wstrip .sc, .v3 .sc-res .wt" +
-          // MOTION-PLAN.md item 7: project figures reveal once on entry.
+          // Motion plan item 7 (docs/decisions.md): project figures reveal once on entry.
           ", .v3 .pj-r"
       );
       targets.forEach((el) => observer.observe(el));
