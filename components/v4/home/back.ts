@@ -108,6 +108,13 @@ export function useBackHome() {
     // a phone's sideways covers row only: held (desktop), the row follows the page's scroll, and setting it too threw the page a screen on (MAC on d82f2b75)
     const row = coversRow();
     if (row && !media("held").matches) row.scrollLeft = spot.x;
+    // Back into Cover art: the sleeves' lazy art painted grey for up to 1.3s on an iPhone (DEPLOY, v3.0.336). Load and decode it now, with the rest.
+    const items = row && spot.b === "covers" ? [...row.querySelectorAll<HTMLElement>(".mt-item")] : [];
+    const step = items.length > 1 ? items[1].offsetLeft - items[0].offsetLeft : 0, i = step ? Math.round(spot.x / step) : 0;
+    for (const it of items.slice(Math.max(0, i - 1), i + 2)) {
+      const im = it.querySelector<HTMLImageElement>(".face img:not(.back)");
+      if (im) (im.loading = "eager"), (im.fetchPriority = "high"), im.decode().catch(() => {});
+    }
     // a sleeve still marked hovered from before the click turned to its back and then away on arrival (Safari, MAC on 23412f74): unturned at once
     const lifted = [...document.querySelectorAll<HTMLElement>(".mt-covers .mt-sleeve.hv")];
     lifted.forEach((it) => ((it.style.transition = "none"), it.classList.remove("hv")));
