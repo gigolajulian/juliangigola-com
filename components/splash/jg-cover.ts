@@ -151,14 +151,20 @@ export function reveal(cover: HTMLElement) {
   const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2); // in-out cubic, over the log of the scale
   if (cover.dataset.go) return;
   cover.dataset.go = "";
-  delete document.documentElement.dataset.coverHold; // the page under shows again as the cut opens (splash.css)
+  const unhold = () => delete document.documentElement.dataset.coverHold; // the page under shows again (splash.css)
   cover.style.pointerEvents = "none";
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return cover.remove();
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    unhold();
+    return cover.remove();
+  }
   const ink = cover.querySelector<SVGGElement>(".ink");
   const ln = cover.querySelector<HTMLElement>(".ln");
   const mg = cover.querySelector<SVGGElement>(".mg");
   const gr = cover.querySelector<SVGRectElement>(".gr");
-  if (!ink || !ln || !mg || !gr) return cover.remove();
+  if (!ink || !ln || !mg || !gr) {
+    unhold();
+    return cover.remove();
+  }
   // where J meets G, the middle of the mark, in the middle of the screen (`jg-cover.ts`)
   const ox = Number(cover.dataset.ox) || cover.clientWidth / 2, oy = Number(cover.dataset.oy) || cover.clientHeight / 2;
   const close = Number(cover.dataset.close) || 0;
@@ -195,6 +201,8 @@ export function reveal(cover: HTMLElement) {
        piece of the page on any screen: faded, it read as a grey veil over
        the page (JG - MAC, Safari); empty sooner over the dark calendar. */
     ink.style.opacity = k < off ? "1" : "0";
+    // the page shows through only once the ink is off, so it is unhidden on that frame, not as the cut starts (MAC on #1372)
+    if (k >= off) unhold();
     // the G's inside is cut in the same frame, so no piece of ground crosses the face as the cut grows (closing it over a few frames still showed it)
     if (ct && k >= off && ct.getAttribute("rx") === "0") {
       ct.setAttribute("rx", ct.dataset.rx ?? "0");
