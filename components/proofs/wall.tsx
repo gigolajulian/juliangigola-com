@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { flushSync } from "react-dom";
-import DriftWall from "@/components/drift-wall";
+import { DriftWall } from "@/components/drift-wall";
 import { GRIDWALL, wallFill, type Gridwall } from "@/lib/proofs/gridwall";
 
 /* ── the proof gate over the 404's wall (the default; ?proofwall=0 for the plain gate) ──
