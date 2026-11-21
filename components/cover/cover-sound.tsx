@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { inkGround, inkWord } from "@/components/v3/nav-ink";
-import SOUND from "@/lib/cover-art-sound.json";
+import SOUND from "@/lib/work/cover-art-sound.json";
 
 /* The song on the cover (inner pages plan, `snd`, only with `?v4pages=c1,snd`): one clip at a time, and nothing
    here runs or is fetched until the first play, so with the key off the page is untouched.

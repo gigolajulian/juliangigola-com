@@ -43,7 +43,7 @@ const asked = args.filter((a) => !a.startsWith("--")).map((a) => a.toLowerCase()
 /**
  * Every handle the site credits, once each.
  *
- * Read off the two files rather than through `lib/work.ts`, which imports
+ * Read off the two files rather than through `lib/work/work.ts`, which imports
  * by bundler resolution and cannot be loaded by Node as it stands. The
  * handles live in `content/projects.json`, where /admin writes them, and
  * six of the harvested credits carry the handle as the name — those are
@@ -66,7 +66,7 @@ for (const list of [
       collected.add(h);
   }
 }
-for (const [, name] of readFileSync("lib/work-data.ts", "utf8").matchAll(
+for (const [, name] of readFileSync("lib/work/work-data.ts", "utf8").matchAll(
   /"name": "@([A-Za-z0-9._]{1,30})"/g,
 )) {
   if (IG.test(name.toLowerCase())) collected.add(name.toLowerCase());

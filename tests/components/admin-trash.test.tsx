@@ -8,7 +8,7 @@ vi.mock("@/lib/admin/admin-github", () => ({
 }));
 
 import { AdminTrash } from "@/components/admin/admin-trash";
-import type { TrashedProject } from "@/lib/added";
+import type { TrashedProject } from "@/lib/work/added";
 
 const frame = { src: "/work/x/01.jpg", width: 10, height: 10, color: "#000", alt: "" };
 const item: TrashedProject = {

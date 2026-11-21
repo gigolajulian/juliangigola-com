@@ -7,7 +7,7 @@
  * returns the wrong eleven characters publishes a tile that plays somebody
  * else's video.
  *
- * Runs the real `lib/videos.ts`, which has no React and no imports for
+ * Runs the real `lib/work/videos.ts`, which has no React and no imports for
  * exactly this reason.
  *
  *   node --experimental-strip-types scripts/check-videos.mjs
@@ -24,7 +24,7 @@ import {
   sectionName,
   watchUrl,
   youtubeStills,
-} from "../lib/videos.ts";
+} from "../lib/work/videos.ts";
 
 let n = 0;
 const eq = (a, b, what) => {

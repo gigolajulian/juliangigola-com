@@ -101,7 +101,7 @@ local function loadSite(props)
     props.status = "Loading the site..."
     local ok, err = LrTasks.pcall(function()
       local doc = Json.decode(GitHub.read(token, "content/projects.json"))
-      SITE = Manifest.site(doc, GitHub.read(token, "lib/work-data.ts"))
+      SITE = Manifest.site(doc, GitHub.read(token, "lib/work/work-data.ts"))
     end)
     if not ok then
       props.status = tostring(err)
@@ -199,7 +199,7 @@ function provider.processRenderedPhotos(functionContext, exportContext)
   -- rendering, so a taken name or a vanished project fails straight away.
   local function resolve()
     local doc = Json.decode(GitHub.read(token, "content/projects.json"))
-    local workData = GitHub.read(token, "lib/work-data.ts")
+    local workData = GitHub.read(token, "lib/work/work-data.ts")
     local site = Manifest.site(doc, workData)
     if isNew then
       local slug, err = Manifest.checkNew(site, workData, name, props.discipline)

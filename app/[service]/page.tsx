@@ -3,7 +3,7 @@ import { shareOg } from "@/lib/share";
 import { notFound } from "next/navigation";
 import { LdJson } from "@/components/local-screens";
 import { BOOKING_PAGES, bookingHref, bookingPage } from "@/lib/booking/booking";
-import { LINKABLE, getProject, projectsIn } from "@/lib/work";
+import { LINKABLE, getProject, projectsIn } from "@/lib/work/work";
 import { serviceGraph } from "@/lib/seo";
 import { V3Service } from "@/components/v3/service";
 

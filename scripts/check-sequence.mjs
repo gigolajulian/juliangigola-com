@@ -7,7 +7,7 @@
  * it, and it is arithmetic that fails quietly — a block landing one frame late
  * looks like an editorial decision, not a bug. So it gets a test.
  *
- * Mirrors the loop in `reframe` (`lib/work.ts`) rather than importing it:
+ * Mirrors the loop in `reframe` (`lib/work/work.ts`) rather than importing it:
  * `work.ts` pulls in the generated manifest and the content JSON, which is a
  * lot of module graph to stand up for eleven lines of counting. If the shape
  * of that loop changes, this file has to change with it — the assertions below
@@ -137,7 +137,7 @@ const text = (body) => ({ kind: "text", heading: null, body });
 /* ── instagram handles ───────────────────────────────────────────
  * The other piece of this feature that takes typed input and turns it into
  * something structural — here, an `href`. Mirrors `instagramHandle` in
- * `lib/added.ts` the same way the split above mirrors `reframe`.
+ * `lib/work/added.ts` the same way the split above mirrors `reframe`.
  * ─────────────────────────────────────────────────────────────── */
 const instagramHandle = (raw) => {
   const bare = raw
@@ -198,7 +198,7 @@ const instagramHandle = (raw) => {
  * dragged in /admin, and everything else has to keep the order the manifest
  * gave it. That "everything else" is the part that fails quietly — a sort
  * that reshuffles the unnamed looks like an editorial decision, not a bug.
- * Mirrors `byRunningOrder` in `lib/work.ts`.
+ * Mirrors `byRunningOrder` in `lib/work/work.ts`.
  * ─────────────────────────────────────────────────────────────── */
 function inRunningOrder(slugs, order) {
   const rank = new Map(order.map((slug, i) => [slug, i]));

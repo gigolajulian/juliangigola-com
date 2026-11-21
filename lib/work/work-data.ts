@@ -2,7 +2,7 @@
 // Safe to edit: titles, intent copy, credits, ordering, `alt` text, and which
 // projects are featured. The Format source is retired, so the harvester no
 // longer runs; this file is now maintained by hand. /admin edits go to
-// content/projects.json, which lib/work.ts applies over this file.
+// content/projects.json, which lib/work/work.ts applies over this file.
 
 import type { Project, Category } from "./work-types";
 

@@ -2,8 +2,8 @@
  * Projects added through `/admin`, rather than harvested from the old site.
  *
  * They live in their own file because `/admin` writes JSON through the GitHub
- * API, not TypeScript: `lib/work-data.ts` is the archive the retired harvester
- * (`scripts/harvest.mjs`) wrote, now edited by hand only, and `lib/work.ts`
+ * API, not TypeScript: `lib/work/work-data.ts` is the archive the retired harvester
+ * (`scripts/harvest.mjs`) wrote, now edited by hand only, and `lib/work/work.ts`
  * merges the two.
  *
  * The frames are real files under `public/work/<slug>/`, committed alongside
@@ -19,7 +19,7 @@
 
 // Relative, not `@/`: `next.config.ts` reaches this module through `work.ts`
 // and is transpiled outside the app's path mapping.
-import raw from "../content/projects.json";
+import raw from "../../content/projects.json";
 import type { Bts, Copy, Credit, Frame, Section } from "./work-types";
 
 export type AddedProject = {
@@ -107,7 +107,7 @@ const frame = (v: unknown, path: string): Frame => {
  * A frame in a re-sequenced gallery: a path, or a whole frame.
  *
  * The path form is the common one by far — reordering a harvested gallery
- * names frames that are already in `lib/work-data.ts`, and copying their
+ * names frames that are already in `lib/work/work-data.ts`, and copying their
  * dimensions here would be duplicating numbers that the next harvest can
  * change. See `frames` on `AddedFile`.
  */
@@ -119,7 +119,7 @@ export type FrameRef = string | Frame | TextRef;
  * No position field: where it sits *is* its position. `/admin` sequences
  * photographs and text in one list, so a block's place comes free with the
  * order — and a stored index would be a second source of truth able to
- * disagree with the list it sits in. `lib/work.ts` counts the frames before
+ * disagree with the list it sits in. `lib/work/work.ts` counts the frames before
  * it and hands the render a number.
  *
  * `kind` is what tells the three arms of `FrameRef` apart. A bare string is a
@@ -259,9 +259,9 @@ export type AddedFile = {
    * Projects filed under a different discipline than they arrived with.
    *
    * A map rather than a field on the project, because it has to work for the
-   * 74 harvested projects too — their categories live in `lib/work-data.ts`,
+   * 74 harvested projects too — their categories live in `lib/work/work-data.ts`,
    * which `/admin` does not write. Keyed by slug, valued by category slug; applied in
-   * `lib/work.ts` after both sources are merged.
+   * `lib/work/work.ts` after both sources are merged.
    */
   categories: Record<string, string>;
   /**
@@ -283,7 +283,7 @@ export type AddedFile = {
    * Projects whose credits have been edited by hand.
    *
    * A map for the same reason `categories` and `frames` are maps: the 74
-   * harvested projects keep their credits in `lib/work-data.ts`, which `/admin`
+   * harvested projects keep their credits in `lib/work/work-data.ts`, which `/admin`
    * does not write. The value
    * replaces the list outright rather than merging into it — a crew changes
    * by losing people as well as gaining them, and a merge could not express
@@ -326,7 +326,7 @@ export type AddedFile = {
    * back out of the archive when it is applied, the same way `frames` does it,
    * so a re-harvest at a new resolution cannot leave a stale width behind.
    *
-   * These used to be `COVER_OVERRIDES` in `lib/work.ts` — code, so choosing
+   * These used to be `COVER_OVERRIDES` in `lib/work/work.ts` — code, so choosing
    * the picture that opens the site meant a commit by hand. That map is still
    * there and still the default; this one wins over it.
    */
@@ -357,10 +357,10 @@ export type AddedFile = {
   /**
    * Disciplines added here rather than harvested from the old site.
    *
-   * `lib/work-data.ts` holds the thirteen the old nav had, and
+   * `lib/work/work-data.ts` holds the thirteen the old nav had, and
    * `/admin` does not write that file, so a discipline invented now lives
    * here. Merged into
-   * `CATEGORIES` in `lib/work.ts`, after the harvested ones, and a slug that
+   * `CATEGORIES` in `lib/work/work.ts`, after the harvested ones, and a slug that
    * already exists there is ignored rather than duplicated.
    *
    * `section` decides where the discipline appears, and the two are not
@@ -379,7 +379,7 @@ export type AddedFile = {
    * Slugs to leave off the site.
    *
    * Harvested projects cannot be deleted from `/admin`, which does not write
-   * `lib/work-data.ts`. Suppressing them here is the only removal it has, and
+   * `lib/work/work-data.ts`. Suppressing them here is the only removal it has, and
    * it has the advantage of being reversible —
    * the work is still in the archive, it is simply not published.
    *

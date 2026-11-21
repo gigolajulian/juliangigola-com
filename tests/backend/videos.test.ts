@@ -11,7 +11,7 @@ import {
   sectionName,
   watchUrl,
   type Video,
-} from "@/lib/videos";
+} from "@/lib/work/videos";
 
 /* What Julian pastes into the video form, read as a provider and an id,
    and the URLs built from one. An id lands in an iframe's src, so only

@@ -7,7 +7,7 @@ import {
   TRASH_DAYS,
   type AddedProject,
   type TrashedProject,
-} from "@/lib/added";
+} from "@/lib/work/added";
 import {
   commitFiles,
   listDirectory,

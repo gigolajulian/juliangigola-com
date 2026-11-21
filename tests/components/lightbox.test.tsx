@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, renderHook, screen } from "@testing-library/react";
 import { Lightbox, useLightbox } from "@/components/lightbox";
-import type { Frame } from "@/lib/work-types";
+import type { Frame } from "@/lib/work/work-types";
 
 const frame = (n: number) => ({ src: `/work/s/0${n}.jpg`, width: 800, height: 1000, color: "#111", alt: "" }) as Frame;
 const frames = [frame(1), frame(2)];

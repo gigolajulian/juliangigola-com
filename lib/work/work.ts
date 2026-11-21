@@ -15,9 +15,9 @@ import {
 import type { Project, Category, Frame, TextBlock } from "./work-types";
 import { COVER_RELEASES as RELEASES } from "./cover-art-data";
 import type { CoverRelease } from "./cover-art-types";
-import { CONTENT } from "./content";
+import { CONTENT } from "../content";
 import { ALT } from "./alt-text";
-import type { WallTile } from "./wall-tile";
+import type { WallTile } from "../wall-tile";
 import { REEL } from "./videos";
 import {
   ADDED,
@@ -60,7 +60,7 @@ export const CATEGORIES: Category[] = [
 /**
  * The cover-art gallery in Julian's order.
  *
- * `lib/cover-art-data.ts` is generated and its order is the script's; which
+ * `lib/work/cover-art-data.ts` is generated and its order is the script's; which
  * release the gallery opens on is an editorial decision and belongs in
  * /admin. Partial and stable, exactly like the work's own running order: a
  * named release takes its place, an unnamed one keeps the place the script
@@ -212,7 +212,7 @@ const reslug = (project: Project): Project => {
  * Refiles a project under the discipline `/admin` chose for it.
  *
  * Applied after the merge so it reaches harvested projects as well as added
- * ones: their categories come from `lib/work-data.ts`, which `/admin` does
+ * ones: their categories come from `lib/work/work-data.ts`, which `/admin` does
  * not write.
  *
  * An unknown category slug is left alone rather than throwing. This map is
@@ -245,7 +245,7 @@ const withBts = (project: Project): Project =>
  * Replaces the credits `/admin` has rewritten.
  *
  * A map for the same reason `refile` uses one: the harvested projects keep
- * their credits in `lib/work-data.ts`, which `/admin` does not write.
+ * their credits in `lib/work/work-data.ts`, which `/admin` does not write.
  *
  * Checked with `in` rather than by truthiness, so an empty array is honoured.
  * "This project's harvested credits are wrong, publish none" is a real
@@ -432,7 +432,7 @@ const altContext = (project: Project): string => {
  */
 const withAlt = (project: Project): Project => {
   const context = altContext(project);
-  /* A written description (`lib/alt-text.ts`, or one the harvest kept)
+  /* A written description (`lib/work/alt-text.ts`, or one the harvest kept)
      first, then the project's own words; without one, the project's words
      and where in the sequence the frame sits. */
   const alt = (f: Frame, i: number) => {
@@ -778,7 +778,7 @@ export const WORK_CATEGORY_LINKS: CategoryLink[] = WORK_CATEGORIES.filter(
 // Relative, not `@/`: `next.config.ts` imports this module for the redirect
 // table, and Node loads that outside the bundler, where the alias does not
 // exist and an aliased import is a module-not-found on `next dev`.
-import COVER_BLUR from "../public/work/blur.json";
+import COVER_BLUR from "../../public/work/blur.json";
 
 /** The cover with its blur-up attached, when the generator made one. */
 const withBlur = (cover: Frame): Frame => {

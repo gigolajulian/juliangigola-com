@@ -2,11 +2,11 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { isTextRef, type FrameRef, type TextRef } from "@/lib/added";
+import { isTextRef, type FrameRef, type TextRef } from "@/lib/work/added";
 import { useSequence, srcOf, type PendingUpload } from "@/lib/admin/admin-sequence";
 import { AdminCredits } from "@/components/admin/admin-credits";
 import type { AdminProject } from "@/components/admin/admin-projects";
-import type { Copy, Credit } from "@/lib/work-types";
+import type { Copy, Credit } from "@/lib/work/work-types";
 import { cn } from "@/lib/utils";
 
 /* ── the page, editable ───────────────────────────────────────────

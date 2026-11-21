@@ -1,4 +1,4 @@
-import { WORK_CATEGORIES, projectsIn } from "@/lib/work";
+import { WORK_CATEGORIES, projectsIn } from "@/lib/work/work";
 import LOOKS from "@/lib/picker-looks.json";
 
 /* The photographs the inquiry form's picker offers (`reference-picks.tsx`),

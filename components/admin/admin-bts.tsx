@@ -1,8 +1,8 @@
 "use client";
 
 import * as React from "react";
-import type { FrameRef } from "@/lib/added";
-import type { Bts, Frame } from "@/lib/work-types";
+import type { FrameRef } from "@/lib/work/added";
+import type { Bts, Frame } from "@/lib/work/work-types";
 import { MAX_WIDTH, readClip, prepareImage } from "@/lib/admin/admin-image";
 import { useSequence, srcOf, type PendingUpload } from "@/lib/admin/admin-sequence";
 import { cn } from "@/lib/utils";

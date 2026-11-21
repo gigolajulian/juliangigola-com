@@ -539,7 +539,7 @@ states its rule inline. `SPEC-home-scroll.md` citations point at
 ### lib/wall-tile.ts
 - 2026-10-17: walls behind a frosted card take half the pixels.
 
-### lib/work.ts
+### lib/work/work.ts
 - 2026-10-21 and 2026-11-15: his own photo credit goes last.
 - 2026-10-27: the discipline pages are retired in favor of /portfolio chips.
 
@@ -803,7 +803,7 @@ reported; a quote after "Julian:" is his wording, as the comment had it.
 - `components/project-strip.tsx`: Stacked down a phone it is the foot of the page: air above and below so the name is not pressed on the footer's rule. (Julian)
 - `components/site-footer.tsx`: On a phone both lines start on the left, the legal one first. (Julian)
 - `components/site-footer.tsx`: On a phone, at the line's right end. (Julian)
-- `lib/work.ts`: A credit by role, unless it only repeats the project's own name (SAGO, credited to SAGO): under the name, that line said the same thing twice. From the polish pass.
+- `lib/work/work.ts`: A credit by role, unless it only repeats the project's own name (SAGO, credited to SAGO): under the name, that line said the same thing twice. From the polish pass.
 
 ### 2026-10-05
 
@@ -926,7 +926,7 @@ reported; a quote after "Julian:" is his wording, as the comment had it.
 - `components/work-shell.tsx`: The bar's glass, not the ground, so the work passes under it frosted. (Julian)
 - `components/work-shell.tsx`: No count beside the portfolio's title. (Julian)
 - `components/work-shell.tsx`: The lit chip's plate is back, in full ink, and its count is knocked out of it.
-- `lib/videos.ts`: The client as a credit, unless the title already names them: "Pear VC Campaign" under "Pear VC" said it twice. (Julian)
+- `lib/work/videos.ts`: The client as a credit, unless the title already names them: "Pear VC Campaign" under "Pear VC" said it twice. (Julian)
 
 ### 2026-10-03
 
@@ -996,9 +996,9 @@ reported; a quote after "Julian:" is his wording, as the comment had it.
 - `lib/booking.ts`: The frames its work screen shows, where the gallery is too large to show whole: chosen, not sampled. (Julian)
 - `lib/booking.ts`: Only the frames that read as digitals: plain ground, standing or close, no styling. (Julian)
 - `lib/content.ts`: A frame pulled from the film itself, kept with the app. Julian: Pear VC's still at 3:09.
-- `lib/videos.ts`: Julian's pick: the opening aerial over the interchange, a 1920 still from his own export of the reel, kept with the app.
-- `lib/work.ts`: The same wall for one kind of session, behind its booking page's questions: every frame of its gallery, or of every project in its discipline, each opening the project it is from. (Julian)
-- `lib/work.ts`: Julian's order for the homepage's Commissions: event coverage in, Chroma out.
+- `lib/work/videos.ts`: Julian's pick: the opening aerial over the interchange, a 1920 still from his own export of the reel, kept with the app.
+- `lib/work/work.ts`: The same wall for one kind of session, behind its booking page's questions: every frame of its gallery, or of every project in its discipline, each opening the project it is from. (Julian)
+- `lib/work/work.ts`: Julian's order for the homepage's Commissions: event coverage in, Chroma out.
 
 ### 2026-10-02
 
@@ -1045,14 +1045,14 @@ reported; a quote after "Julian:" is his wording, as the comment had it.
 - `components/strip/lenis.ts`: Lenis watches the strip's box, not how far it scrolls, so the sections that arrive after a crossing (`defer`) never reached it: the wheel stopped at the second screen. (Julian)
 - `components/strip/motion.ts`: The pull's layout is read with the rest, once a push, not on every notch of it: asked for after the pull's writes, it laid the homepage out again each notch. From the scroll-craft pass: 25ms a notch at full speed.
 - `components/strip/rack.ts`: Coming through the door into the grid, Artist Presskit and Portraits stood where Editorial belonged. (Julian)
-- `lib/alt-text.ts`: Written alt text starts with the photographs on the booking pages' covers.
+- `lib/work/alt-text.ts`: Written alt text starts with the photographs on the booking pages' covers.
 - `lib/booking.ts`: Booking pages, "no vertical pages", San Jose and San Francisco mainly, "I can travel to any of those, LA and NY too", and "I don't need separate pages for each" city. (Julian)
 - `lib/deck.ts`: The same at the other end: at a fractional width (150% zoom) a covered screen read 0.9997 covered and was never `data-buried`, and the hero's photographs showed under the footer's glass as a grey band. (Julian)
 - `lib/seo.ts`: San Francisco and San Jose carry the most searches, and are the two markets every title names. Julian: "also market in San Jose".
 - `lib/seo.ts`: The Bay Area as he means it runs to Santa Cruz. (Julian)
 - `lib/seo.ts`: "Commercial" gave way to San Jose, where a search for a music video director finds only directories.
 - `lib/seo.ts`: Structured data names LA and NY as places he travels to. Julian: "I can travel to ... LA and NY too".
-- `lib/work.ts`: What the project page says about a photograph, as a sentence for its alt: the project, its discipline, who photographed it, who is in it and who it was for. Julian: the discipline and the credits.
+- `lib/work/work.ts`: What the project page says about a photograph, as a sentence for its alt: the project, its discipline, who photographed it, who is in it and who it was for. Julian: the discipline and the credits.
 
 ### 2026-10-01
 
@@ -1092,7 +1092,7 @@ reported; a quote after "Julian:" is his wording, as the comment had it.
 - `app/styles/header.css`: The tint and the hairline are this layer's too: a tint each met where the footer's 38.19px ran into a `--foot` rounded to 38, and the sliver of both read as a line across the glass. Julian: still two panels.
 - `app/styles/strip-motion.css`: A project's title on one line, and larger. (Julian)
 - `components/page-transition.tsx`: Portfolio leads the bar, so the homepage's own screens (Sessions, About, Contact) sit to its right; only the wordmark's home is to its left. (Julian)
-- `lib/work.ts`: Cover art has one again: its rack under the filters, scrolling sideways like every other discipline, rather than a page of its own scrolling down. (Julian)
+- `lib/work/work.ts`: Cover art has one again: its rack under the filters, scrolling sideways like every other discipline, rather than a page of its own scrolling down. (Julian)
 
 ### 2026-09-29
 
@@ -1110,7 +1110,7 @@ reported; a quote after "Julian:" is his wording, as the comment had it.
 - `components/sessions-screen.tsx`: With three columns the photograph sits further right (its margin, from about 1600px wide) and larger (to 56rem tall); the list keeps the plain gap after it, half the space it had. (Julian, red boxes)
 - `components/sessions-screen.tsx`: Says what the count is, not the title again. (Julian)
 - `lib/utils.ts`: A discipline and a project are both /portfolio/<slug>, so the address cannot tell them apart; the filter drawer, mounted on every /portfolio page, marks its links that are filters (`work-filter.tsx`). (Julian)
-- `lib/work.ts`: Straight under /portfolio, like the projects, not under /portfolio/category/. (Julian)
+- `lib/work/work.ts`: Straight under /portfolio, like the projects, not under /portfolio/category/. (Julian)
 
 ### 2026-09-26
 

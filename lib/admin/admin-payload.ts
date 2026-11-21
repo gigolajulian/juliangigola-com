@@ -16,7 +16,7 @@
  * to the repository.
  * ─────────────────────────────────────────────────────────────── */
 
-/** Structurally what `lib/added.ts` accepts, kept loose on purpose. */
+/** Structurally what `lib/work/added.ts` accepts, kept loose on purpose. */
 export type ProjectsFile = {
   unlisted?: string[];
   projects: unknown[];
@@ -36,7 +36,7 @@ export type ProjectsFile = {
 /**
  * A passage, structurally.
  *
- * Inlined rather than imported from `lib/added.ts`, whose `isTextRef` this
+ * Inlined rather than imported from `lib/work/added.ts`, whose `isTextRef` this
  * duplicates: that module reads `content/projects.json` at import, and a value
  * import from it would drag the JSON in and cost this module the one property
  * that makes it testable. One line is the cheaper of the two prices.
@@ -47,7 +47,7 @@ const isText = (f: unknown): f is { body: string } =>
 /**
  * Drops passages nobody wrote anything in.
  *
- * `lib/added.ts` refuses an empty body, and rightly — it would publish as a
+ * `lib/work/added.ts` refuses an empty body, and rightly — it would publish as a
  * gap in the sequence nobody put there. But pressing "Add text" and changing
  * your mind is an ordinary thing to do, and a draft that fails the deploy over
  * it would be the editor's fault rather than Julian's. So the empties go on
@@ -112,7 +112,7 @@ export function projectsFile(
   next.categories = edit.categories;
 
   // A sequence that is nothing but dropped passages leaves no entry at all,
-  // rather than an empty array — which `lib/added.ts` rejects outright, and
+  // rather than an empty array — which `lib/work/added.ts` rejects outright, and
   // which would mean "this gallery has no frames" instead of "no override".
   next.frames = Object.fromEntries(
     Object.entries(edit.frames)
@@ -122,7 +122,7 @@ export function projectsFile(
 
   next.credits = edit.credits;
 
-  // A title cleared and left that way would fail the build in `lib/added.ts`;
+  // A title cleared and left that way would fail the build in `lib/work/added.ts`;
   // like an empty passage, it is dropped on the way out rather than
   // validated against on the way in.
   const copy = Object.fromEntries(
@@ -152,7 +152,7 @@ export function projectsFile(
   else delete next.slugs;
 
   // BTS: a shoot with every frame cleared leaves no entry, and the handle
-  // typed beside it goes with it, since `lib/added.ts` wants one frame.
+  // typed beside it goes with it, since `lib/work/added.ts` wants one frame.
   const bts = Object.fromEntries(
     Object.entries(edit.bts).filter(
       ([, b]) => isRecord(b) && Array.isArray(b.frames) && b.frames.length > 0,
@@ -247,7 +247,7 @@ export function adoptable<F, C, P, B>(
   fallback: Manifest<F, C, P, B>,
 ): Manifest<F, C, P, B> {
   /* The sequences and credit lists come back as "a list of something": this
-     module does not know what a frame is, on purpose. `lib/added.ts` is what
+     module does not know what a frame is, on purpose. `lib/work/added.ts` is what
      validates them, at build time, where a bad one fails the deploy and the
      live site keeps serving the last good build. The editor is not the last
      line of defence for a file it wrote itself. */

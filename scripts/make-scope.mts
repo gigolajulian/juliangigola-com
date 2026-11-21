@@ -22,7 +22,7 @@
 import { createRequire } from "node:module";
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { PROJECTS } from "../lib/work";
+import { PROJECTS } from "../lib/work/work";
 
 const sharp = createRequire(import.meta.url)("sharp");
 const PER_FRAME = 20;

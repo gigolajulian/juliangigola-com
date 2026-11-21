@@ -21,9 +21,9 @@ import { SESSION_TYPES, formatPrice, type SessionType } from "./sessions";
 import { RESPONSE_TIME } from "../site";
 import { isSession, SESSIONS as V3_SESSIONS } from "../v3";
 import { CONTENT } from "../content";
-import { getProject, projectsIn } from "../work";
+import { getProject, projectsIn } from "../work/work";
 import type { BookingSlug } from "./booking-slugs";
-import type { Frame } from "../work-types";
+import type { Frame } from "../work/work-types";
 
 /** `link`: words of the answer that are a link on the page (`label` is found in `a`); the answer itself stays plain text. */
 export type Faq = { q: string; a: string; link?: { href: string; label: string } };

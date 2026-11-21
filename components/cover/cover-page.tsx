@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { BackLink } from "@/components/site/back-link";
 import { CoverArtGallery } from "@/components/cover/cover-art-gallery";
-import type { CoverRelease } from "@/lib/cover-art-types";
+import type { CoverRelease } from "@/lib/work/cover-art-types";
 import { useV4pages } from "@/lib/v4pages";
 
 /* Cover art in the site's system (inner pages plan, c1), behind `?v4pages`: the page title with the

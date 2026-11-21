@@ -9,9 +9,9 @@ import {
   commissionsIn,
   projectsIn,
   isDisciplineGallery,
-} from "@/lib/work";
-import type { Frame } from "@/lib/work-types";
-import { COVER_RELEASES } from "@/lib/cover-art-data";
+} from "@/lib/work/work";
+import type { Frame } from "@/lib/work/work-types";
+import { COVER_RELEASES } from "@/lib/work/cover-art-data";
 import DATES from "@/lib/sitemap-dates.json";
 import { BOOKING_PAGES, bookingHref } from "@/lib/booking/booking";
 import { CAMPUS_GUIDES, campusHref } from "@/lib/campus-guides";

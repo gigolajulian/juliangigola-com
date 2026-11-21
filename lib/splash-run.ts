@@ -1,4 +1,4 @@
-import { PROJECTS } from "@/lib/work";
+import { PROJECTS } from "@/lib/work/work";
 import ORDER from "@/lib/portfolio-order.json";
 import { HERO } from "@/lib/v3";
 

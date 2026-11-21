@@ -12,7 +12,7 @@
  *               listings *are* the taxonomy.
  *   `gallery` — a project. Its assets are the photographs.
  *
- * Writes `public/work/<slug>/NN.jpg` and seeds `lib/work-data.ts`.
+ * Writes `public/work/<slug>/NN.jpg` and seeds `lib/work/work-data.ts`.
  *
  * Run once:  node scripts/harvest.mjs
  * Re-runs are cheap — page JSON is cached under .harvest-cache/ and images
@@ -27,7 +27,7 @@ import sharp from "sharp";
 const SITE = "https://www.juliangigola.com";
 const CACHE = ".harvest-cache";
 const OUT_IMAGES = "public/work";
-const OUT_MANIFEST = "lib/work-data.ts";
+const OUT_MANIFEST = "lib/work/work-data.ts";
 const REFRESH = process.argv.includes("--refresh");
 
 /**

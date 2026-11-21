@@ -1,6 +1,6 @@
 import { CARD_SIZE, CARD_TYPE, framesOf, renderCard } from "@/lib/share-card";
 import { BOOKING_PAGES, bookingPage } from "@/lib/booking/booking";
-import { FEATURED } from "@/lib/work";
+import { FEATURED } from "@/lib/work/work";
 
 export const size = CARD_SIZE;
 export const contentType = CARD_TYPE;

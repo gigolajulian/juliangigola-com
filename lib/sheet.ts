@@ -1,4 +1,4 @@
-import type { Frame } from "@/lib/work-types";
+import type { Frame } from "@/lib/work/work-types";
 
 /** Where the contact sheet's last row ends short: the sheet packs as CSS
     `grid-auto-flow: dense` does in three columns (a horizontal takes the

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { isTextRef, type FrameRef, type TextRef } from "@/lib/added";
+import { isTextRef, type FrameRef, type TextRef } from "@/lib/work/added";
 import { MAX_WIDTH, prepareImage } from "@/lib/admin/admin-image";
 
 /* ── a project's sequence, as state ───────────────────────────────

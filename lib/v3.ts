@@ -55,7 +55,7 @@ export const COMMISSIONS: Pair[] = [
   { d: { src: w("celestis", "03"), name: "Celestis 03" }, l: { src: w("i-wanna-be-a-human", "06"), name: "I Wanna Be A Human 06" } },
   { d: { src: w("gilt", "01"), name: "Gilt 01" }, l: { src: w("sago", "01"), name: "Sago 01" } },
 ];
-/* Each tab opens its discipline on /portfolio (`categoryHref` in lib/work.ts). */
+/* Each tab opens its discipline on /portfolio (`categoryHref` in lib/work/work.ts). */
 export const COMMISSION_TABS: [label: string, href: string][] = [
   ["All", "/portfolio"],
   ["Campaigns", "/portfolio?d=campaigns"],
