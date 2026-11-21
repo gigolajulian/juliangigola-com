@@ -33,7 +33,7 @@ import { Tab, TabList } from "@astryxdesign/core/TabList";
 import { SignIn } from "@/components/leads/setup";
 import { LeadDesk, type LeadAsk } from "@/components/leads/lead";
 import { badge, FROST_ROOM, frostBar, GLASS, WIN_CSS } from "@/components/leads/shared";
-import { ago, aside, errorText, inboxCall, loadError, LOCKED, matches, nextStep, inFilter } from "@/lib/leads/lead-desk";
+import { ago, aside, errorText, inboxCall, loadError, LOCKED, matches, nextStep, inFilter, type Size } from "@/lib/leads/lead-desk";
 import { useSiteThemeRead } from "@/lib/site-theme";
 import type { Template } from "@/lib/leads/lead-crm";
 import { TZ } from "@/lib/booking/booking-rules";
@@ -52,7 +52,6 @@ import { DeviceDesk, HoursDesk, TemplatesDesk } from "@/components/leads/setup-p
 import { type Filter } from "@/lib/leads/lead-desk";
 import { ProofsDesk } from "@/components/proofs/desk";
 
-type Size = "phone" | "mid" | "wide";
 /** Every page of the desk. */
 type View = "today" | "leads" | "new" | "calendar" | "money" | "invoices" | "licences" | "aside" | "stats" | "traffic" | "seo" | "hours" | "templates" | "device" | "more" | "proofs";
 /** One nav item per group, each with an icon; a group with more than one page gets a tab row on top. */
