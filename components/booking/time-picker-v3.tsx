@@ -159,7 +159,7 @@ export function V3Steps({ c }: { c: CardCtx & { v3: V3Book } }) {
     head: paid ? "Book a session" : v3?.name === "Consultation" ? "Book a consultation" : "Book a call",
     sub: v3sub,
     body: (
-      // Rises in once the times arrive, in place of "Loading availability" (Julian, 2026-10-27).
+      // Rises in once the times arrive, in place of "Loading availability".
       <div className="f-in">
         <Calendar
           view={view}
@@ -180,7 +180,7 @@ export function V3Steps({ c }: { c: CardCtx & { v3: V3Book } }) {
           }}
           onPick={(d) => choose(iso(d), pick.min, false)}
         />
-        {/* Option B (Julian, 2026-11-09, "build b"): the time big, stepped with
+        {/* The time big, stepped with
             the arrows, a wheel, a swipe or the arrow keys; the day's open times
             in one row under it, faded with a hint when they run past the edge. */}
         <div className="fig scrub">
@@ -209,7 +209,7 @@ export function V3Steps({ c }: { c: CardCtx & { v3: V3Book } }) {
             }} data-lenis-prevent tabIndex={0} role="spinbutton" aria-label="Time" aria-valuetext={fmt(pick.min)} data-scrub=""
               onKeyDown={(e) => { if (e.key === "ArrowLeft" || e.key === "ArrowRight") { e.preventDefault(); stepTime(e.key === "ArrowRight" ? 1 : -1); } }}
               onPointerDown={(e) => { swipeXRef.current = e.clientX; }}
-              /* One step per swipe, however long (Julian, 2026-11-10): the start clears until the finger lifts. */
+              /* One step per swipe, however long: the start clears until the finger lifts. */
               onPointerMove={(e) => { const x0 = swipeXRef.current; if (x0 != null && Math.abs(e.clientX - x0) > 36) { stepTime(e.clientX < x0 ? 1 : -1); swipeXRef.current = null; } }}
               onPointerUp={() => { swipeXRef.current = null; }}
               onPointerCancel={() => { swipeXRef.current = null; }}

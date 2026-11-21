@@ -353,7 +353,7 @@ function SiteHeader() {
     const root = document.documentElement;
     root.setAttribute("data-pf", "");
     let last = scrollY;
-    // Desktop keeps the header: it and the toolbar are one glass bar (Julian, 2026-10-28).
+    // Desktop keeps the header: it and the toolbar are one glass bar.
     const desk = matchMedia("(min-width: 701px) and (hover: hover) and (pointer: fine)");
     const sync = () => {
       const y = scrollY, d = y - last;
@@ -369,7 +369,7 @@ function SiteHeader() {
     };
   }, [tucks, path]);
   React.useLayoutEffect(() => {
-    /* MOTION-PLAN.md item 12: the header tools (work.tsx
+    /* Motion plan item 12 (docs/decisions.md): the header tools (work.tsx
        portals them into #hdr-tools) jump to the corner when the header tucks,
        and travel there by transform (250 on `out`). Layout effect: measured
        before a paint. */

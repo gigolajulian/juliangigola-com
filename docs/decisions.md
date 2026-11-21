@@ -4,6 +4,548 @@ Dated decisions about how the site is built, and why. Newest first. Code
 comments say what the code does; who asked for a change, when, and what
 it replaced belongs here.
 
+## 2026-11-20: Provenance out of the code comments
+
+Code comments state the rule in the present tense. Who asked, when, the
+quote and the mock link for each moved here, by file. Where a value is
+an owner pick, the code says so in three words.
+
+Two specs the comments cited are not in the repo. `MOTION-PLAN.md` items
+are now cited as "Motion plan item N (docs/decisions.md)"; each comment
+states its rule inline. `SPEC-home-scroll.md` citations point at
+`docs/mt-decisions.md`, and `PLAN-lead-desk.md` at this file.
+
+### app/admin/leads/page.tsx
+- 2026-11-03: the lead desk is its own section, "a different section, hidden from all seo".
+
+### app/api/booking/[id]/route.ts
+- 2026-11-16: of it, under that it keeps it (`refundShare`). hello@ hears about every change.
+
+### app/api/calendar/route.ts
+- 2026-11-04: "control the calendar, block off days, and add other calendars to read off of".
+
+### app/api/money/route.ts
+- 2026-11-06: "add my stripe balance too and show the transactions in there".
+
+### app/api/proof/[token]/route.ts
+- 2026-11-08: Notes are gone from the gallery; old ones are dropped with the send.
+
+### app/api/proof/route.ts
+- 2026-11-12: The proof's web copies go once the finals are out. Only copies: never an original.
+
+### app/book/[slug]/page.tsx
+- 2026-11-16: the session name in lowercase in the page title.
+- 2026-10-14: One session's booking on a page of its own, for
+
+### app/book/page.tsx
+- 2026-11-04: the stepper defaults to portraits. It was graduation on master `#/book`.
+
+### app/layout.tsx
+- 2026-11-19: Geist Mono for the hero tagline, "I like mono but it needs to be more visible".
+- 2026-11-07: split splash on the homepage.
+- 2026-10-28: `?splash=burst` keeps the burst.
+- 2026-10-30: other pages get the name-only splash.
+- 2026-11-09: Any other character falls through to Inter Tight.
+- 2026-11-10: The proof gate's wall (the default; `?proofwall=0` for the plain gate) is always dark.
+- 2026-11-15: `p3` is on for everyone unless the tab chose otherwise.
+
+### app/portfolio/(index)/page.tsx
+- 2026-10-27: these chips show their gallery's frames instead of one cover.
+- 2026-10-23: Off the V3 portfolio grid; the project page stays up.
+- 2026-11-05: cell with a Front / Back switch, not two squares.
+
+### app/styles/admin.css
+- 2026-11-04: in the Home Screen app the site header hid the desk's filters.
+
+### app/styles/contact.css
+- 2026-11-06: Try again is solid on desktop too.
+- 2026-10-14: air between the booking card's sections.
+- 2026-10-17: . The form keeps the deeper step.
+- 2026-10-14: Name's ran 10px into Email.
+- 2026-10-11: The picker never scrolls. A month and a day's
+- 2026-10-12: under the days with the room left below.
+- 2026-10-12: the dark ground, where 6% barely showed.
+
+### app/styles/editorial.css
+- 2026-10-16: booking card as a magazine page, from booking-editorial-mock.html.
+- 2026-10-17: /book card fill `bg-card/60`. With none it was "too transparent".
+- 2026-10-21 (via MAC): the glass matches the homepage sheet's card.
+- 2026-10-20: one face, two sizes, from the Tenebra reference.
+- 2026-10-21: field text in mono, "change written text to mono plex".
+- 2026-10-21: the inquiry card grows to the screen's padding, "grow".
+- 2026-10-18: .ed-head h2 { font: 900 2.75rem/0.9 var(--font-wordmark); letter-spacing: -0.01em; /* the page title's face */ text-transform: uppercase; display: ...
+- 2026-10-20: Bigger, legible times
+- 2026-10-20: A card 40rem wide or more: the month name and the
+- 2026-10-21: A bigger calendar on a desktop: the month takes
+- 2026-10-17: with its days cut to their names. The title over
+- 2026-10-21: like the bar at the top. `main` is transformed,
+- 2026-10-21: .
+- 2026-10-21: The inquiry's top-right lines in the navbar's mono, like the tile sub-lines.
+- 2026-10-20: Open days carry a teal line under the date; the day picked is teal.
+- 2026-10-21: Booked: the check sits on the Booked line in
+- 2026-10-21: Booked: the summary rows two across under the message.
+- 2026-10-21: what happens next.
+- 2026-10-21: Two across: wide enough that the line under each
+- 2026-10-21: Small, in the navbar's mono; `.ed.ed-inq` outranks the
+- 2026-10-21: One page: the kinds and their questions on the
+- 2026-10-21: The two on one line, a size down so both fit a phone's column.
+
+### app/styles/mtscroll.css
+- 2026-11-17: rows five and six out on big screens.
+- 2026-11-15: desktop footer links larger, "11px was too small".
+- 2026-11-15: quote heading smaller than Sessions. It was 112.
+- 2026-11-15: larger Inquire with the call line and reply time under it. It was a 131x61 button with both to its right.
+- 2026-11-14 (elevate picks): Cover art section.
+- 2026-11-15: cover count moves to bottom left. It was right.
+- 2026-11-16: idle wall uses a hard cut, "the develop one is too slow, try hard cuts".
+- 2026-11-15: dark footer ground with no halo. The glow around the links was worst in light.
+- 2026-11-17: tagline letters black or white, grey over the white page.
+- 2026-11-16: no bar wordmark while the hero shows, phones first, then every size.
+- 2026-11-17: tagline invert blend removed, harder to read.
+- 2026-11-19: light theme hero name, the default since.
+- 2026-11-19: tagline in Geist Mono 600, "I like mono but it needs to be more visible", then "BIGGER".
+- 2026-11-19: name raised (phone 98 to 118px, desktop 92 to 114u), "make sure it doesnt pass the g, if it does, take Julian Gigola higher".
+- 2026-11-17: not pinned: the heading lies on the first photos and scrolls away with them
+- 2026-11-15: "See all projects" rides the foot of the screen, bottom right, and comes to rest in the sheet's last corner.
+- 2026-11-17: the button is not pinned: it lies on the sheet's last photo, bottom right
+- 2026-11-15: Big screens: more columns at about the laptop's frame size, where three would be huge with empty
+- 2026-11-18: stacked layout (no hold) from 600px wide: the columns are wide, so the labels keep the phone's 18px (they fell to 11px, smaller than the lines ...
+- 2026-11-17: "Sessions" with "Book online" under it, like Motion's heading and its line
+- 2026-11-15: a full screen, but never more than the 900 design px it is drawn for: a tall window left half a screen empty under it
+- 2026-11-16: No ground behind the hero name and buttons: the photos run clear to the bottom.
+- 2026-11-16: Book a session, hovered: white with black words, wiped in from the right at Inquire's pace (v3.css motion plan 01 times it)
+- 2026-11-18: Phone tagline: one colour per theme over a tint of the page, in place of the per-letter photo tones, which still sank into busy photos.
+- 2026-11-19: Dark theme hero name: the light theme's treatment in dark. Light ink, no shadow, no per-letter tagline tones, on a band of the dark page colour.
+
+### app/styles/navfx.css
+- 2026-11-17: light page bar line fainter, "I don't want to almost see it".
+- 2026-11-15: Mock: https://claude.ai/artifact/BuKhy4pxdjSgbLZBXmyQTA.
+
+### app/styles/proof.css
+- 2026-11-11: the photo opens, the corner ring picks.
+- 2026-11-12: hover hairline, and the cursor tips 16deg.
+- 2026-11-08: gate is glass, with less blur.
+- 2026-11-10: compact intro, "the header does not have to be that big".
+- 2026-11-12: delivery gate layout, cover left and form right.
+- 2026-11-19: option "D", difference-blend numerals.
+- 2026-11-08: for anyone scrolled down. Same fix as the admin tab bar.
+- 2026-11-12: phone: a third smaller than 13vw
+- 2026-11-15: The gate's subheading: the client's name or the shoot date, under the heading.
+- 2026-11-15: /contract/<id>: the delivery gate's type and fields, one reading column.
+- 2026-11-15: Print: plain paper, black ink, no site chrome.
+- 2026-11-15: the signature pad
+- 2026-11-19: delivery by model: a card per model, the number on the cover's top right, its own zip
+
+### app/styles/splash.css
+- 2026-10-31: letter-spacing: -0.05em; /* set, never animated: the name stays exactly where it lands
+
+### app/styles/v3.css
+- 2026-11-09: gutter grows on /book at laptop width, "left text too close to the edge".
+- 2026-11-06: errors in the field, no box.
+- 2026-11-05: wide screens, "take advantage of the extra space". Also "in week view, the times need to be under".
+- 2026-11-11: credits right-aligned beside the last frame, mock C.
+- 2026-10-29: no step under the project title, and no crop on a horizontal opening frame.
+- 2026-11-18: bar links from 640px. It was 700. Tighter links from 480 read as packed.
+- 2026-11-05: project page, "margins should be the same".
+- 2026-11-04: 48ch: the mono lines end near even.
+- 2026-10-23: Caption A: the name and summary sit under the photo, not over it.
+- 2026-10-23: Run (`flow.tsx`): items whole, dots at item ends, no lone last item.
+- 2026-11-09: A phone on its side in the stacked layout (Duo unfolded, about 630x400 of Safari): the photo pushed "Book a session" under Continue, so it goes.
+- 2026-11-04: Phone columns where the mono lines end near even: 34ch, 40ch on the large phones.
+- 2026-11-17: Large displays: the bar a step larger.
+- 2026-11-15: Service info joined up: straight after the booking, tighter, and from 1000px the rows two abreast with the label on top, so five rows read as three.
+- 2026-11-09: Two columns on a short screen (18 Pro sideways, 874x402): the photo was a strip under its own caption. Only the picture goes; the studio line and ...
+- 2026-11-04: . Upright tablets and phones keep them in the left column.
+- 2026-10-24: The stage on every screen: phones too, with stills
+- 2026-10-27: under it are the first screen together. Phones and
+- 2026-11-04: Portfolio, option 2: the search row scrolls away with the page; past it a
+- 2026-10-28: chips and view buttons read as one glass bar the work scrolls under.
+- 2026-10-29: No crop on the hero frame: it keeps its own width, the title side takes the rest.
+- 2026-11-05: Off the art: under the cell in the row gap, hidden until
+- 2026-11-11: Phone: half the gap between frames.
+- 2026-11-11: Border-box: the hero's own top padding counts in its height, or the big frame spills 16px into the sheet and the gap under the first row closes.
+- 2026-11-17: A tall or narrow window: the big frame keeps its picture, up to 62vw, where it was cut
+- 2026-11-18: A horizontal cover: the title where it always is, the line that was under it across
+
+### app/styles/v4pages.css
+- 2026-11-16: last row as tall as the others. It held twice as long.
+- 2026-11-15: the page's own black behind the marks, no charcoal ground
+- 2026-11-15: Space between the covers, on the /portfolio grid's gutters and gap, corners square.
+- 2026-11-16: Space between the covers, on the /portfolio grid's gutters and gap, corners square.
+- 2026-11-15: Held under the pointer the record keeps turning: the disc is one flat colour, so the turn
+- 2026-11-16: The turn was hard to see: sheen .2 / .13 to .5 / .36, and a dark wedge between the two so it
+- 2026-11-16: The line sits on the right of the screen, on / off outermost: reversed, so the button is
+- 2026-11-15: the /portfolio grid photos only.
+- 2026-11-16: The photo row under the title goes: its photos are the ones beside the rows.
+
+### components/booking/book-picker.tsx
+- 2026-10-15: . Side by side from lg it stays beside the list.
+
+### components/booking/deposit-step.tsx
+- 2026-10-16: a paid session takes its deposit in the card, behind `?deposit`.
+- 2026-10-16: (the boxes they mount in). One-color brand icon.
+- 2026-10-16: . Light ink means a dark page.
+- 2026-10-16: fields; nothing otherwise.
+- 2026-10-16: What the deposit does, under the card it comes off.
+
+### components/booking/manage-booking.tsx
+- 2026-11-03: start), then asks to confirm.
+
+### components/booking/time-picker-editorial.tsx
+- 2026-10-17: a call shows its length in minutes. "15:00" read as 3 PM.
+- 2026-10-20: one face, two sizes, from the Tenebra reference.
+- 2026-10-21: the check moves to a better spot and the text is reworked ("beautified").
+- 2026-10-20: The days either side of the month, barely there.
+
+### components/booking/time-picker-v3.tsx
+- 2026-11-09: option B ("build b"), the big stepped time.
+- 2026-10-27: Rises in once the times arrive, in place of "Loading availability".
+- 2026-11-10: One step per swipe, however long: the start clears until the finger lifts.
+
+### components/booking/time-picker.tsx
+- 2026-10-14: the wait says what it is waiting for, under the orb.
+
+### components/booking/use-picker.tsx
+- 2026-10-20: goo on the card, OK'd 2026-10-21.
+- 2026-10-14: the orb goes one whole round before the days come in.
+- 2026-10-14: the check takes 1.05s. 1.4s was slow and 0.7s too fast.
+- 2026-10-17: the swipe nudge is on for everyone. The 16px spring was too much.
+- 2026-10-28: JG V3: references picked on the details step, sent with the deposit.
+- 2026-10-11: card is as tall as it needs and the page scrolls.
+- 2026-10-16: Confirm. Hidden (0) keeps the last width.
+- 2026-10-21: A wide card with room to spare: the
+- 2026-10-16: . On every week or month shown, but not the first:
+- 2026-10-20: once the orb goes the card is there whole.
+- 2026-10-17: scrolls.
+
+### components/contact-form.tsx
+- 2026-10-14: one or two taps per kind of shoot.
+- 2026-10-14: a page about one kind of shoot does not ask the kind again.
+- 2026-10-14: a simpler, shorter form. The follow-up question became the message's placeholder.
+- 2026-10-15: the brief starts as one line and grows up to three.
+- 2026-10-14: Chosen, in the site's teal.
+- 2026-10-14: In the labels' face, as References beside it.
+- 2026-10-14: One round of the orb before the check.
+
+### components/contracts/sign-pad.tsx
+- 2026-11-15: ── the signature pad ────────────────────────
+
+### components/contracts/sign.tsx
+- 2026-11-15: Format's contract, on the site.
+
+### components/cover/cover-sound.tsx
+- 2026-11-15: "fade in smoothly".
+- 2026-11-16: "lower the audio". The peak was 0.5.
+- 2026-11-16: SoundCloud's logo linking to the track.
+- 2026-11-16: No ground under the line: each part is white or black from what shows under it, by the
+
+### components/effects/orb.tsx
+- 2026-10-14: a wait the site controls lasts one round of its orb.
+
+### components/leads/board.tsx, calendar.tsx, money.tsx, new-lead.tsx, today.tsx
+- 2026-11-10: Julian approved the mock at claude.ai/artifact/WWQy2jVbaeTG7sdDKgGmU5. Sections: #board, #calendar and #availability, #money, #new, #today.
+
+### components/leads/contract.tsx
+- 2026-11-15: Format's contract, in Leads.
+
+### components/leads/desk.tsx
+- 2026-11-09: "use it to redesign leads app". Julian picked claude.ai/artifact/9TrLqxf8vV4jU4uWPLZz2W ("yes send it to backend").
+- 2026-11-11: it moved to /admin/leads when the original desk retired.
+- 2026-11-10: "simplify the left tab or group them up", "merge panels that are related", "add icon to all".
+- 2026-11-14: The side nav in the order of the work: what to do, what it earns, how it is set up.
+
+### components/leads/galleries.tsx
+- 2026-11-15: Where it stands at a glance, the same timeline as the gallery itself.
+
+### components/leads/galleries.tsx, people.tsx
+- 2026-11-15: both come from his old Format client page.
+
+### components/leads/invoice.tsx
+- 2026-11-09: "Add this invoice as my default template ... Ask for everything that is on the page and have it fill it out. They need to also be able to reframe the image so it fits nice."
+- 2026-11-10: the light template was retired ("only" this one). He also asked: "adjust the top left logo based on the photo".
+
+### components/leads/lead.tsx
+- 2026-11-10: mock approved, "looks goood push" (claude.ai/artifact/WWQy2jVbaeTG7sdDKgGmU5).
+- 2026-11-15: galleries go to the lead or its people, from Format's client page.
+- 2026-11-11: one invoice total per client.
+
+### components/leads/row.tsx
+- 2026-11-14: Julian picked the redesign mock at claude.ai/artifact/PUMDXU12eGeE8SdpsHEx7c. The small mono capitals were dropped.
+
+### components/leads/shared.tsx
+- 2026-11-14: The win button: under a mouse the plane flies off and comes back, in a loop.
+
+### components/leads/today.tsx
+- 2026-11-15: the whole week, days already past included: the card under it lists them, and a call done on Saturday is still this week's call
+- 2026-11-15: a number, so Your move and Due add up to "on you" above; each row badges its own kind
+
+### components/photo-notice.tsx
+- 2026-10-19: two right clicks count as one ask. No menu on the page around photos.
+- 2026-10-20: One line, both ends. At this width the
+
+### components/proofs/activity.tsx
+- 2026-11-19: Deliveries: every download under the address that took it, and which models went.
+
+### components/proofs/cursor.tsx
+- 2026-11-12: a drawn arrow over the grids.
+
+### components/proofs/delivery.tsx
+- 2026-11-12: the proof gallery becomes the delivery.
+- 2026-11-19: the gate is the wall. "SUBJECT02" naming. One top pick plus three.
+- 2026-11-15: The last days say so on the page. Read after mount: server and phone can disagree near midnight.
+- 2026-11-15: The 2000px copy, for posting and texting.
+
+### components/proofs/desk.tsx
+- 2026-11-09: the same try as the leads desk. At /admin/proofs since 2026-11-11.
+- 2026-11-15: The mail's subject, editable before Send. The server falls back to its default when empty.
+- 2026-11-15: The one reminder: read after mount, the window is a clock.
+
+### components/proofs/gallery.tsx
+- 2026-11-08: the email gate, from the mock at https://claude.ai/artifact/4SWWESHZZ3ScWgYDPsnEnb.
+- 2026-11-11: a tap opens the photo and the ring picks, from the audit at https://claude.ai/artifact/22rBM6N6e42kRWHcFbUjhE.
+- 2026-11-11: "make the new gridwall proof gallery default". The tuned wall became the default on his yes.
+- 2026-11-10: sign in every visit.
+- 2026-11-15: The last days say so. Read after mount: the server and the phone can disagree near midnight.
+- 2026-11-09: Opens them as a photo grid, never a list in the side column.
+- 2026-11-11: The photo opens; the ring picks.
+
+### components/proofs/pass-gate.tsx
+- 2026-11-15: galleries with a password, after Format.
+
+### components/proofs/timeline.tsx
+- 2026-11-15: from the gallery timeline mock.
+
+### components/proofs/wall.tsx
+- 2026-11-10: the 404's wall under glass. The load-up should feel premium.
+- 2026-11-11: the wall becomes the gallery from the moment of the click.
+- 2026-11-19: The card's words; the proof gate's by default. The delivery passes its own.
+
+### components/reference-picks.tsx
+- 2026-10-23: on the Commissions stepper), per page, in memory only.
+- 2026-10-23: button toward it, and a drop there is taken.
+
+### components/splash/burst-splash.ts
+- 2026-10-31: the desktop splash went from 4.7s to about 3.2s.
+- 2026-10-31: the wordmark never animates out. The first frame stacks in 3D. No opening out and no pause.
+
+### components/splash/jg-cover.ts
+- 2026-11-19: "open the booking page as a cutout and scale it smoothly", "centered", "only in the calendar", "on desktop and iPad", "make the JG smaller".
+- 2026-11-20: "ON THE WHOLE PAGE HERE".
+
+### components/splash/jg-load.tsx
+- 2026-11-19: the Booking wait mock, "make it the default". The phone's rise "is good". The desktop's "needs to come from bottom up" (it slid in from the side). "keep it steady".
+
+### components/splash/split-splash.ts
+- 2026-11-07: const UP = 800; // the monogram fading in from nothing
+
+### components/v3/about.tsx
+- 2026-11-04: no-break spaces so they never split.
+- 2026-11-15: ?v4pages=a2 swaps the label; v4pages.css shows one of the two.
+
+### components/v3/book.tsx
+- 2026-11-04: stays lit beside it while the route loads on a slow tablet.
+- 2026-11-04: tablets, as ruled rows under the photo beside the calendar.
+- 2026-11-04: on the confirmation), the turnaround, then the price.
+
+### components/v3/canvas.tsx
+- 2026-11-07: canvas mock approved.
+- 2026-11-07: Upright frames sit as 3:4 on the field, like the grid and strip; square and wide keep theirs. The opened frame shows the whole photo.
+
+### components/v3/chrome.tsx
+- 2026-10-28: Desktop keeps the header: it and the toolbar are one glass bar.
+
+### components/v3/flow.tsx
+- 2026-11-06: errors live in the field, no box.
+- 2026-11-04: ; the count stays in the label.
+
+### components/v3/home.tsx
+- 2026-10-24: "make them go in a loop" (the strip used to follow the scroll). "swipe left and right to see the rest".
+- 2026-10-27: Never the same logo twice on screen: on a strip
+
+### components/v3/nav-ink.ts
+- 2026-11-17: one ink for the whole bar.
+- 2026-11-16: 3. Page words and buttons fade out as they slide under the bar; photos do not.
+- 2026-11-15: The v4 home: the bar's wordmark waits until the hero's big name has gone, faded by hero.ts
+
+### components/v3/page-fly.tsx
+- 2026-11-17: A photo only becomes the hero when it is the hero. Pressed on another frame of the
+- 2026-11-18: A finger too. A scroll starts like a press, so under a finger the photo waits 90ms for the
+
+### components/v3/project.tsx
+- 2026-10-27: The name leads; the @handle takes its place on hover.
+- 2026-11-18: A set whose cover is a horizontal opens on that cover, full bleed under the title:
+- 2026-11-06: Two columns on a large screen, read down then across; an odd count puts the extra name on the right. Not in a one-cell hole.
+- 2026-11-05: The rest as a contact sheet: even rows of three verticals; a horizontal takes the whole row at its own shape.
+
+### components/v3/service.tsx
+- 2026-11-10: The empty side of the title, filled with this session's own frames at their own shape.
+
+### components/v3/sleeves.tsx
+- 2026-10-27: from the Sleeve Viewer mock.
+
+### components/v3/smooth-scroll.tsx
+- 2026-11-10: Native scroll in proof galleries: Lenis's glide read as a delay on a Mac trackpad.
+- 2026-11-14: . `?lerp=0.1` tries another value there.
+
+### components/v3/work.tsx
+- 2026-11-05: the Front / Back label goes under the art.
+- 2026-11-04: --n: a long name sets smaller to stay near two lines; --w: its longest word still fits the cover's width.
+- 2026-11-05: A two-sided sleeve's Front / Back switch, on the cell and in the viewer.
+- 2026-11-14: toolbar, which stay where they are: leaving it lands
+- 2026-11-04: Option 2: once the search row scrolls under the
+- 2026-11-13: The canvas always shows every frame: a chip or a
+- 2026-11-19: never shows as an empty card that fills later. A
+- 2026-11-19: if (first ? !shown : shown < 1 / 3) continue; // fades in once a third of it is on screen
+- 2026-11-04: Name, then discipline, both on the photo, as in the grid.
+- 2026-11-05: here: the viewer's bar has the switch.
+
+### components/v4/foot.tsx
+- 2026-11-16: the whole grid while its photos drift dropped frames.
+
+### components/visit-trail.tsx
+- 2026-10-14: an inquiry says where its sender came from.
+
+### lib/booking/booking-engine.ts
+- 2026-11-16: inside the last day a booking can no longer be moved.
+
+### lib/booking/booking-rules.ts
+- 2026-11-04: the last start is 7 PM. An hour of travel each side of a shoot.
+- 2026-11-16: refunds are 90% at 48h or more and 70% at 24h or more, with the 10% fee kept ("no free refunds"). A booking can be moved at most twice.
+
+### lib/booking/booking.ts
+- 2026-11-16: weddings are on location only, no studio.
+
+### lib/booking/confirm.ts
+- 2026-10-16: every booking gets a branded "You're in." mail.
+- 2026-11-06: the mail is light by default, dark where supported.
+
+### lib/booking/deposit.ts
+- 2026-10-16: paid sessions take a deposit on the site before booking, and hello@ gets a mail for each.
+- 2026-11-15: the deposit amount is set per session.
+- 2026-11-16: the Stripe description names the client and the session.
+
+### lib/booking/paid.ts
+- 2026-11-15: Headshots 200, Studio digitals 150.
+- 2026-11-16: Portraits 250, Graduation 200.
+
+### lib/booking/slots.ts
+- 2026-11-04: "add other calendars to read off of".
+- 2026-11-04: "when i work sgh, dont let them book me at all".
+
+### lib/contracts/contract.ts
+- 2026-11-15: contracts follow the Format comparison, item #14.
+
+### lib/email/proof-mail.ts
+- 2026-11-06: the mail is light by default, dark where supported.
+- 2026-11-12: The "Your photos are ready" mail at Send finals. No photos inline: the finals are the client's to open.
+- 2026-11-15: The one reminder: plain, no sales voice. Proofs count the client's own picks so far; finals only say when.
+- 2026-11-15: What a client did, as it happens, for a gallery on "each". Open, send and download only.
+- 2026-11-15: Julian's own subject for a proof or delivery mail: one line, control characters out, 150 at most; empty keeps the default.
+- 2026-11-15: ── contracts: the link to sign, and the signed copy ──
+
+### lib/gather.ts
+- 2026-10-14: photos gather in from outside the page. Walls stream by column. Project frames slide in from the right.
+- 2026-10-15: the 404 wall builds up row by row.
+
+### lib/inbox.ts
+- 2026-10-14: more to go on without more to fill in (visit trail, referrer, device, city).
+- 2026-11-10: nobody gets turned away, so a@b.c passes.
+
+### lib/leads/activity-log.ts
+- 2026-11-10: "keep a master one and separate logs per client linked to each other".
+
+### lib/leads/gmail-sync.ts
+- 2026-11-04: "your own Gmail replies on the timeline".
+
+### lib/leads/invoice-pdf.ts
+- 2026-11-06: "update the fonts to match my website" and "use my new wordmark instead".
+
+### lib/leads/invoice.ts
+- 2026-11-06: invoices from a lead (Leads plan A1).
+- 2026-11-09: design B, "Add this invoice as my default template".
+- 2026-11-11: "ok" to counting invoices made before the activity log as paid.
+
+### lib/leads/lead-crm.ts
+- 2026-11-04: on what a CRM usually has, "add all of them".
+
+### lib/leads/lead-crypto.ts
+- 2026-11-03: the lead desk is "hidden from all seo and encrypted".
+- 2026-11-04: addresses are canonicalized, after gigola.julian@ and gigolajulian@ never matched.
+
+### lib/leads/leads.ts
+- 2026-11-03: one record per person (PLAN-lead-desk.md, not in the repo).
+- 2026-11-04: "add the stuff i have in my juliangigola admin inbox to my leads".
+- 2026-11-15: more people on a job.
+- 2026-11-15: More people on the job: kept in the full record, never the list summary.
+
+### lib/leads/notion-import.ts
+- 2026-11-11: "go" on importing the Notion Business Hub rows as past leads.
+
+### lib/leads/sheet-sync.ts
+- 2026-11-11: Notion retired and the Sheet on hello@ Drive added.
+
+### lib/leads/stripe-import.ts
+- 2026-11-11: OK to import past Stripe deposits.
+
+### lib/leads/web-push.ts
+- 2026-11-04: "start push notifications next".
+
+### lib/proofs/delivery-serve.ts
+- 2026-11-15: "Save for web": the 2000px copy the lightbox shows, as `<file> web.jpg`, with its length.
+- 2026-11-19: `?m=M04`: one model's finals. Same stored bytes, so a model zip is as ready as the full one.
+
+### lib/proofs/delivery.ts
+- 2026-11-12: the proof gallery becomes the delivery.
+
+### lib/proofs/desk.ts
+- 2026-11-15: Every gallery's client activity in one list for Today: opened, picked, sent, downloaded, newest
+
+### lib/proofs/gridwall.ts
+- 2026-11-11: the wall was tuned in the gridwall tuner and is the default since his yes.
+
+### lib/proofs/proof.ts
+- 2026-11-06: a Lightroom collection becomes a private gallery.
+- 2026-11-08: pay the balance to send selects. Any email opens the gallery, and every open is logged.
+- 2026-11-12: finals make it a delivery.
+- 2026-11-15: hello@ notify modes, after Format.
+- 2026-11-11: random base62 characters, about 95 bits. New ones read
+- 2026-11-12: One finished photo for the delivery: the full-size JPEG Lightroom's Delivery service published.
+- 2026-11-19: Five stars in Lightroom: shown on the delivery's gate wall.
+- 2026-11-10: The "Julian Gigola" wordmark baked into every served frame. On for new galleries; unset reads as off.
+- 2026-11-15: Offline: the proof, the delivery, every frame and download answer "offline" at once. Unset is online.
+- 2026-11-15: A line under the gate's heading, the client's name or the shoot date. Unset: none.
+- 2026-11-15: When the one reminder per stage went out: stamped before the mail, so a second is refused.
+- 2026-11-10: full-size frames at once lagged. Made once by Cloudflare Images, then read from R2.
+- 2026-11-12: Days a delivery stays open from Send finals. Extend still adds days.
+- 2026-11-12: The shoot id: the shoot day and 8 characters from 30 that cannot be misread (no 0, 1, i, l, o, u),
+- 2026-11-09: . A discount for another way to pay is allowed in California; a card surcharge is not safe.
+- 2026-11-15: ── the one reminder ─────────────────────────
+
+### lib/proofs/submit.ts
+- 2026-11-09: bank first (ACH 0.8% capped at $5, card 2.9% + 30c).
+- 2026-11-15: "off" silences even this one; every other setting keeps it instant.
+
+### lib/proofs/watermark.ts
+- 2026-11-10: "use Julian Gigola wordmark on bottom third".
+- 2026-11-10: "create thumbnail automatically based off the photo and header of the page".
+
+### lib/theme-color.ts
+- 2026-11-16: The browser bar's colour per theme: pure white and pure black,
+
+### lib/v3.ts
+- 2026-11-14: the model test shows the name, an hour, a week and the $100 deposit, with the rate quoted on the call.
+- 2026-11-10: Desktop gets sian/01 with 200px of her own backdrop added on top, so her face sits at the panel's middle.
+
+### lib/wall-tile.ts
+- 2026-10-17: walls behind a frosted card take half the pixels.
+
+### lib/work.ts
+- 2026-10-21 and 2026-11-15: his own photo credit goes last.
+- 2026-10-27: the discipline pages are retired in favor of /portfolio chips.
+
+### lib/zip.ts
+- 2026-11-12: "Download all" on a delivery. JPEGs do not shrink,
+
 ## 2026-11-16: Cal.com is out of the code
 
 The site has booked through its own engine since 2026-11-03, in place of

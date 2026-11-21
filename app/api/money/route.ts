@@ -4,8 +4,8 @@ import { isAdmin } from "@/lib/vouch";
 import { json } from "@/lib/http";
 
 /* ── GET /api/money: his Stripe balance and what moved it ─────────
- * Julian (2026-11-06): "add my stripe balance too and show the
- * transactions in there". Read-only: the balance (available and on the
+ * The Stripe balance and its transactions.
+ * Read-only: the balance (available and on the
  * way) and the latest balance transactions, 25 a page, with who paid when
  * Stripe knows. Same gate as /api/inbox. Nothing here can move money.
  * ─────────────────────────────────────────────────────────────── */

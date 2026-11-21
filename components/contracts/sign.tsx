@@ -1,7 +1,7 @@
 "use client";
 
 /* ── /contract/<id>: the client reads and signs ───────────────────
- * Julian (2026-11-15): Format's contract, on the site. The text, who it is
+ * A contract, signed on the site. The text, who it is
  * between, then their full name, their email, a drawn signature (or the
  * typed name, for keyboard only) and "I agree". The page posts
  * back the hash of the text it showed (`lib/contracts/contract.ts`). Same

@@ -1,8 +1,7 @@
 "use client";
 
 /* ── Today on Astryx ──────────────────────────────────────────────
- * Julian (2026-11-10) approved the mock (claude.ai/artifact/WWQy2jVbaeTG7sdDKgGmU5,
- * #today): greeting and one line, four tiles (On you, This week, Stripe,
+ * Greeting and one line, four tiles (On you, This week, Stripe,
  * Visits), Your move, what falls due on paperwork, proofs and licences,
  * and the week Mon to Sun in the rail. Same numbers as the classic Today
  * (components/leads/today.tsx): lead summaries, /api/money, /api/traffic.
@@ -83,7 +82,7 @@ export function TodayDesk({ leads, size, open, show }: { leads: LeadSummary[]; s
   const week = daysOf(leads, monday, 7);
   const moves = leads.filter(needsMe).sort((a, b) => b.lastAt.localeCompare(a.lastAt));
   const late = moves.filter((l) => isLate(l, now())).length;
-  // the whole week, days already past included: the card under it lists them, and a call done on Saturday is still this week's call (Julian, 2026-11-15)
+  // the whole week, days already past included: the card under it lists them, and a call done on Saturday is still this week's call
   const booked = week.flatMap((x) => x.evs.filter((e) => !e.due && e.small !== "Reminder"));
   const calls = booked.filter((e) => isCall(e.l)).length;
   const shoots = booked.length - calls;
@@ -217,7 +216,7 @@ export function TodayDesk({ leads, size, open, show }: { leads: LeadSummary[]; s
             ) : null}
             {dueMoves.length ? (
               <VStack gap={1}>
-                {/* a number, so Your move and Due add up to "on you" above (Julian, 2026-11-15); each row badges its own kind */}
+                {/* a number, so Your move and Due add up to "on you" above; each row badges its own kind */}
                 <Title count={dueMoves.length}>Due</Title>
                 <List hasDividers>
                   {dueMoves.map((l) => (

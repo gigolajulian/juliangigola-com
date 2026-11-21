@@ -11,8 +11,8 @@ import SOUND from "@/lib/cover-art-sound.json";
    play the browser blocks are all just silence. */
 type Clip = { id?: number; preview?: string; link?: string; clip?: string; soundcloud?: string };
 const clips: Record<string, Clip> = SOUND;
-/* In over 1.4s on a curve that starts slow (Julian, 2026-11-15: fade in smoothly), out in 0.5s.
-   Peak 0.3 (Julian, 2026-11-16: lower the audio; was 0.5). */
+/* In over 1.4s on a curve that starts slow, out in 0.5s.
+   Peak 0.3 (owner pick, do not tune). */
 const KEY = "jg-cover-snd", PEAK = 0.3, IN = 1400, OUT = 500;
 
 let audio: HTMLAudioElement | null = null, now = "", raf = 0, level = 0, watching = false;
@@ -140,11 +140,11 @@ export const useSound = () => React.useSyncExternalStore(sub, () => now, () => "
 
 /* Sound on / off, kept for the tab. While one of Apple's previews plays: Apple's mark linking to the song and the
    credit, both of which its terms ask for beside a preview (Search API, Legal). While SoundCloud's player plays:
-   SoundCloud's logo linking to the track (Julian, 2026-11-16). */
+   SoundCloud's logo linking to the track. */
 export function CoverSound({ className }: { className?: string }) {
   const off = React.useSyncExternalStore(sub, muted, () => false);
   const clip = clips[useSound()];
-  /* No ground under the line (Julian, 2026-11-16): each part is white or black from what shows under it, by the
+  /* No ground under the line: each part is white or black from what shows under it, by the
      header's own measure (`inkWord`, components/v3/nav-ink.ts). Looked at again on scroll and resize, and twice a
      second, as the header does, since a cover lifts under it with no scroll. */
   const line = React.useRef<HTMLDivElement>(null);

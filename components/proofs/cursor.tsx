@@ -4,7 +4,7 @@ import * as React from "react";
 import { matches } from "@/lib/device";
 
 /* ── the proof cursor ─────────────────────────────────────────────
- * Julian (2026-11-12): over a proof or delivery grid the pointer is a
+ * Over a proof or delivery grid the pointer is a
  * drawn copy of the system arrow, so it can turn. On a photo it tips 16°
  * clockwise; on the pick ring it becomes a +, and × once picked. Off the
  * grid the real cursor is back, in the same pose. Mouse only: the class

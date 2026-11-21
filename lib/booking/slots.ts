@@ -67,7 +67,7 @@ export function startsFor(rule: Rule, busy: Busy[], from: number, to: number, no
 }
 
 /* ── calendars read, never written ─────────────────────────────────
- * Julian (2026-11-04): "add other calendars to read off of". Each is a
+ * Other calendars the open times read off. Each is a
  * Google calendar id shared to hello@ (free/busy is enough) or an ICS link,
  * kept in INBOX under `cal:extra` and edited from the Leads app's Calendar.
  * One that cannot be read is skipped and shown red there: a dead feed must
@@ -189,7 +189,7 @@ export async function busyAll(secret: string | undefined, from: number, to: numb
   return { busy: (await Promise.all(pieces)).flat(), failed: [...failed] };
 }
 
-/** Julian (2026-11-04): "when i work sgh, dont let them book me at all". Any day with an SGH event on it is busy from midnight to midnight Pacific, even when the shift itself is only the afternoon. */
+/** No bookings on a shift day. Any day with an SGH event on it is busy from midnight to midnight Pacific, even when the shift itself is only the afternoon. */
 async function shiftDays(secret: string | undefined, from: number, to: number): Promise<Busy[]> {
   type When = { date?: string; dateTime?: string };
   const q = new URLSearchParams({ q: "SGH", singleEvents: "true", maxResults: "2500", timeMin: new Date(from - 864e5).toISOString(), timeMax: new Date(to + 864e5).toISOString() });
@@ -211,8 +211,6 @@ export async function busyBetween(secret: string | undefined, from: number, to: 
   return busy;
 }
 
-/** Open starts of `slug` between `from` and `to`, as UTC ms. `mine`: a booking being moved, whose own time is not in the way. `kv`: where the extra calendars are listed. */
-/** What a slot check may know beyond the calendar: the booking being moved (`mine`), the store of extra calendars, the hours. */
 /** What `app/api/slots` answers, read by `components/booking/use-picker.tsx`. Starts are in the visitor's zone, grouped by their day there. */
 export type SlotsAnswer = {
   status: "success";
@@ -220,8 +218,10 @@ export type SlotsAnswer = {
   data: { [day: string]: { start: string; end: string }[] };
 };
 
+/** What a slot check may know beyond the calendar: the booking being moved (`mine`), the store of extra calendars, the hours. */
 export type SlotOpts = { now?: number; mine?: { start: string; end: string }; kv?: KV; hours?: Hours };
 
+/** Open starts of `slug` between `from` and `to`, as UTC ms. `mine`: a booking being moved, whose own time is not in the way. `kv`: where the extra calendars are listed. */
 export async function openStarts(secret: string | undefined, slug: string, from: number, to: number, { now = Date.now(), mine, kv, hours }: SlotOpts = {}) {
   const rule = EVENTS[slug];
   if (!rule) return [];

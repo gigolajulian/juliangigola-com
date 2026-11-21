@@ -7,7 +7,7 @@ import * as React from "react";
       as the hero shows.
    2. Each word in the bar is white or black, whichever reads better over what is under it (photo, film or page,
       with the bar's veil on top once it is on). Pixels come from a small copy of each photo, made once.
-   3. Page words and buttons fade out as they slide under the bar; photos do not (Julian, 2026-11-16). */
+   3. Page words and buttons fade out as they slide under the bar; photos do not. */
 
 export const navfx = () => typeof document !== "undefined" && "navfx" in document.documentElement.dataset;
 
@@ -280,7 +280,7 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
       boxes.clear();
       const isTop = top();
       root.toggleAttribute("data-navtop", isTop);
-      // The v4 home (Julian, 2026-11-15): the bar's wordmark waits until the hero's big name has gone, faded by hero.ts
+      // The v4 home: the bar's wordmark waits until the hero's big name has gone, faded by hero.ts
       // or scrolled under the bar, so the name never shows twice. navfx.css hides it until this is set.
       const nm = path === "/" ? document.querySelector<HTMLElement>(".mt-name h1") : null;
       const nr = nm?.getBoundingClientRect();
@@ -301,7 +301,7 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
       root.toggleAttribute("data-navdark", lum(rootBg) > 0.2 && lum(secBg) < 0.2);
       const [page] = colour(getComputedStyle(bar).getPropertyValue("--bg").trim());
       const veiled = !isTop && !root.hasAttribute("data-tuck");
-      // One ink for the whole bar (Julian, 2026-11-17: no word on its own, all of them fade to the other colour together).
+      // One ink for the whole bar: no word on its own, all of them fade to the other colour together.
       // Each word still looks under itself in stretches; the stretches vote.
       const votes = { w: 0, n: 0, els: [] as HTMLElement[] };
       for (const el of bar.querySelectorAll<HTMLElement>(WORDS)) {

@@ -38,7 +38,7 @@ export function cropAt(f: Pick<ProofFrame, "w" | "h">, c: CardCrop): number {
 export type FeedItem = { at: string; token: string; gallery: string; email: string; who: string; what: string };
 
 /**
- * Every gallery's client activity in one list for Today (Julian 2026-11-15): opened, picked, sent, downloaded, newest
+ * Every gallery's client activity in one list for Today: opened, picked, sent, downloaded, newest
  * first. A run of picks by one address in one gallery reads as one line ("picked 4"). Test addresses (QA) are left out.
  */
 export function feed(rows: Pick<Proof, "token" | "name" | "viewers" | "finals">[], n = 12): FeedItem[] {

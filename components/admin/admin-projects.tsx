@@ -152,6 +152,9 @@ export function AdminProjects({
    * Owned by the editor rather than here so the sitemap can open a project
    * directly. Controlled, not mirrored: a local copy synced from a prop would
    * be two states for one fact and an effect to keep them agreeing.
+   *
+   * One at a time: each open gallery is up to thirty full-size frames, and a
+   * list where every row is open is the whole archive at once.
    */
   opened: string | null;
   onOpened: (slug: string | null) => void;
@@ -169,13 +172,6 @@ export function AdminProjects({
   const [status, setStatus] = React.useState<Status>({ kind: "idle" });
   const [confirming, setConfirming] = React.useState<string | null>(null);
   const [gone, setGone] = React.useState<Set<string>>(new Set());
-  /**
-   * Which row is expanded, if any.
-   *
-   * One at a time. Each open gallery is up to thirty full-size frames on a
-   * host that is not resizing them yet, and a list where every row is open is
-   * the whole archive at once.
-   */
   /**
    * Brings the expanded row into view.
    *

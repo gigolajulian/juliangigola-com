@@ -249,7 +249,7 @@ export async function rescheduleOwn(store: Store, secret: string | undefined, id
   if (was.cancelled) return { ok: false, reason: "cancelled" };
   if (Date.parse(was.start) <= Date.now()) return { ok: false, reason: "past" };
   if ((was.moves ?? 0) >= MAX_MOVES) return { ok: false, reason: "moves" };
-  // Julian (2026-11-16): inside the last day a slot cannot be sold again, so it no longer moves.
+  // Inside the last day a slot cannot be sold again, so it no longer moves.
   if (Date.parse(was.start) - Date.now() < MOVE_HOURS * 36e5) return { ok: false, reason: "late" };
   const rule = EVENTS[was.slug];
   const t = Date.parse(start);

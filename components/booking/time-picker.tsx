@@ -28,7 +28,7 @@ export function TimePicker(props: Props) {
         {/* In the middle of the card, not of the room under its top line
             (QA on #143, Julian: the orb in the center of the card): lifted
             half that line (`--card-lift`). */}
-        {/* Julian (2026-10-14): what it is waiting for, under the orb. */}
+        {/* What it is waiting for, under the orb. */}
         {orb ? (
           <p role="status" className="pointer-events-none absolute inset-0 flex -translate-y-[var(--card-lift,0px)] flex-col items-center justify-center gap-4 text-muted-foreground">
             <Orb state="composing" size={64} />

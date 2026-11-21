@@ -1,5 +1,5 @@
 /* ── deliveries ───────────────────────────────────────────────────
- * Julian (2026-11-12): the proof gallery becomes the delivery. Lightroom's
+ * The proof gallery becomes the delivery. Lightroom's
  * Delivery service publishes full-size JPEGs (quality 100, no watermark)
  * into the same gallery; Send finals mails /delivery/<id>, open 60 days.
  * Finals live in `jg-proofs` under `delivery/<token>/`, with a 2000px and

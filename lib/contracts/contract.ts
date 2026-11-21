@@ -1,5 +1,5 @@
 /* ── contracts, signed online ─────────────────────────────────────
- * Julian (2026-11-15, the Format comparison, #14): a contract is a text
+ * A contract is a text
  * body, the client's name, email and address, Send or Copy URL, and the
  * client signs at /contract/<id>. Templates are plain text with fields
  * ({client}, {date}, {fee}, {deposit}, {usage}) filled from the lead; he

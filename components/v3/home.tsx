@@ -99,9 +99,8 @@ function Hero() {
   );
 }
 
-/* Logo strip: one slow, constant loop (Julian, 2026-10-24: "make them go
-   in a loop"; it used to follow the scroll), and a swipe or a trackpad
-   drag scrubs it either way ("swipe left and right to see the rest").
+/* Logo strip: one slow, constant loop, and a swipe or a trackpad
+   drag scrubs it either way.
    The set runs twice and the position wraps by one set, so the seam never
    shows. A finger holds it; on release it carries the throw and eases
    back to the drift from wherever it stopped. Only sideways intent is
@@ -148,7 +147,7 @@ function Clients() {
       last = 0;
       raf = requestAnimationFrame(tick);
     };
-    /* Never the same logo twice on screen (Julian, 2026-10-27): on a strip
+    /* Never the same logo twice on screen: on a strip
        wider than the set, the gap grows until one set is longer than the
        strip plus its widest logo, so a copy can't come in before its
        original has gone. */
@@ -301,7 +300,7 @@ function Recent() {
     const cur = cols.map(() => 0);
     let running = false;
     let raf = 0;
-    // MOTION-PLAN.md item 6: the same drift, scaled to plus or minus 32px.
+    // Motion plan item 6 (docs/decisions.md): the same drift, scaled to plus or minus 32px.
     const k = 32 / 56;
     const draw = () => {
       const r = el.getBoundingClientRect();

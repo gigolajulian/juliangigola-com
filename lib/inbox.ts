@@ -61,7 +61,7 @@ export type Enquiry = {
 };
 
 /* ── where an inquiry came from ───────────────────────────────────
- * Julian (2026-10-14): more to go on without more to fill in. The page
+ * More to go on without more to fill in. The page
  * it was sent from, where the visit began (referrer, utm_ tags), the
  * pages read on the way (`components/visit-trail.tsx`), the device, and
  * the city Cloudflare places the request in. Never the IP.
@@ -261,8 +261,8 @@ export const MAX = {
 
 /**
  * The one email rule every form and route uses. Deliberately loose: the only
- * thing worth rejecting is what cannot be an address. Julian (2026-11-10):
- * nobody gets turned away, so a one-letter ending like a@b.c passes too.
+ * thing worth rejecting is what cannot be an address.
+ * Nobody gets turned away, so a one-letter ending like a@b.c passes too.
  */
 export const looksLikeEmail = (value: string): boolean =>
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);

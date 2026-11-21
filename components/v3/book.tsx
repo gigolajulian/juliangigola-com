@@ -27,7 +27,7 @@ const keepFocus = (el: HTMLButtonElement | null) => {
 function Tabs({ at }: { at: SessionSlug }) {
   const router = useRouter();
   /* One session at a time: the tapped tile lights at once, so the old one never
-     stays lit beside it while the route loads on a slow tablet (Julian, 2026-11-04). */
+     stays lit beside it while the route loads on a slow tablet. */
   const [tap, setTap] = React.useState<{ from: SessionSlug; x: SessionSlug } | null>(null);
   const cur = tap?.from === at ? tap.x : at;
   const go = (x: SessionSlug) => {
@@ -67,7 +67,7 @@ function Tabs({ at }: { at: SessionSlug }) {
 }
 
 /** The two ways out of the session grid: under the tiles on phones and upright
-    tablets, as ruled rows under the photo beside the calendar (Julian, 2026-11-04). */
+    tablets, as ruled rows under the photo beside the calendar. */
 function More({ on, go }: { on: boolean; go: (x: SessionSlug) => void }) {
   return (
     <div className="stabs-more">
@@ -83,7 +83,7 @@ function More({ on, go }: { on: boolean; go: (x: SessionSlug) => void }) {
 }
 
 /* What the photo lists: the includes without the length line (the length is
-   on the confirmation), the turnaround, then the price (Julian, 2026-11-04). */
+   on the confirmation), the turnaround, then the price. */
 const getList = (S: (typeof SESSIONS)[SessionSlug]) => {
   const r = rate(S);
   return [...S.includes.filter((x) => !/^(one hour|\d+ minutes)\b/i.test(x)), ...(S.turnaround ? [`Ready in ${S.turnaround}`] : []), /deposit$/.test(r) ? `${r} required` : r];

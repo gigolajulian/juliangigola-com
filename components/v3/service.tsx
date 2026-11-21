@@ -38,7 +38,7 @@ export function V3Service({ page, frames }: { page: BookingPage; frames: Frame[]
             <Link className="btn" href="#work">See the work</Link>
           </div>
         </header>
-        {/* The empty side of the title, filled with this session's own frames at their own shape (Julian, 2026-11-10). */}
+        {/* The empty side of the title, filled with this session's own frames at their own shape. */}
         <div className="sv-pics" data-n={hero.length} aria-hidden="true">
           {hero.map((f) => (
             <Image key={f.src} src={f.src} alt="" width={f.width} height={f.height} sizes="(max-width: 1023px) 1px, 40vw" loading="eager" style={{ background: f.color }} />

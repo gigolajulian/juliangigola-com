@@ -1,7 +1,7 @@
 import { depositFor } from "@/lib/booking/paid";
 
 /* ── invoices from a lead ─────────────────────────────────────────
- * Julian (2026-11-06, Leads plan A1): an invoice from the lead, in the
+ * An invoice from the lead, in the
  * template of his JG INVOICE GENERATOR, numbered MMYY, a second one in the
  * same month 1126-2. It never sends: the desk makes the PDF and hands it
  * to Share or a Gmail draft. Pure functions here; `/api/inbox` stores the
@@ -13,8 +13,8 @@ export type InvoiceLine = { desc: string; qty: number; rate: number; sub?: strin
 /** Where the photo sits in B's photo column: x and y from 0 to 1 as CSS object-position, z the zoom over cover (1 to 3). */
 export type Crop = { x: number; y: number; z: number };
 /**
- * Design B, the dark page with a photo (Julian, 2026-11-09: "Add this invoice
- * as my default template"). Everything on that page that is not in the lines.
+ * Design B, the dark page with a photo, is the default template.
+ * Everything on that page that is not in the lines.
  * `photo` is the KV key of the sealed photo; `tone` is the wordmark's shade
  * over it, read from the pixels under it when the invoice was made.
  */
@@ -33,7 +33,7 @@ export type InvoiceB = {
 /** `paidAt`: when it was settled, by a matching Stripe payment or by hand. `unpaid`: marked unpaid by hand, for one made before PAID_BEFORE. */
 /** `sentAt`: when hello@ mailed it to the client, seen by the Gmail sync (`lib/leads/gmail-sync.ts`). */
 export type Invoice = { no: string; date: string; lines: InvoiceLine[]; paid: number; notes?: string; at: string; b?: InvoiceB; paidAt?: string; unpaid?: boolean; sentAt?: string };
-/** Julian (2026-11-11), "ok" to marking the invoices made before the activity log as paid: read here, no record rewritten. */
+/** Invoices made before the activity log count as paid: read here, no record rewritten. */
 export const PAID_BEFORE = "2026-11-12";
 export const isPaid = (i: Pick<Invoice, "paidAt" | "unpaid" | "at">) => !!i.paidAt || (!i.unpaid && i.at < PAID_BEFORE);
 /** Design B carries its due date; an invoice from before design B is due 14 days after its date. */
@@ -56,10 +56,10 @@ export const MAX_LINES = 8;
 /** Rows that fit on design B, the deposit row counted. */
 export const MAX_ROWS_B = 4;
 export const NOTE_B: [string, string, string] = ["Thanks for having me back.", "Always a blast with you guys.", "Can't wait for the next one!"];
-/** The photo's KV key: `invoice-photo:` and 32 hex of its SHA-256. */
 /** The KV key of his sealed invoice details (name, address, EIN): the repo is public, so they live there and nowhere in the code.
     Written by `app/api/inbox`, read by the contract (`app/api/contract`). */
 export const FROM_KEY = "leads:invoice-from";
+/** The photo's KV key: `invoice-photo:` and 32 hex of its SHA-256. */
 export const PHOTO_KEY = /^invoice-photo:[0-9a-f]{32}$/;
 
 /** "2026-11-06" as "1126". */

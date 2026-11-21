@@ -27,8 +27,8 @@ export type Bookable = {
 export function BookPicker({ sessions, start }: { sessions: Bookable[]; start?: string }) {
   const [on, setOn] = React.useState(() => Math.max(0, sessions.findIndex((s) => s.slug === start)));
   /* Stacked (a phone, an upright iPad) the card opens under the session
-     picked, not under the whole list, and the page glides down to it
-     (Julian, 2026-10-15). Side by side from lg it stays beside the list. */
+     picked, not under the whole list, and the page glides down to it.
+     Side by side from lg it stays beside the list. */
   const [stacked, setStacked] = React.useState(false);
   React.useEffect(() => {
     const mq = matchMedia("(max-width: 63.99rem)");

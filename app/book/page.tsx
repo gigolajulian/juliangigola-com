@@ -25,8 +25,8 @@ const LENGTHS: Record<string, string> = {
   weddings: "Call",
 };
 
-/* JG V3: the stepper, on portraits unless `?session=` names another (Julian, 2026-11-04; was graduation, master
-   `#/book`). `?classic` keeps the page as it was before V3. */
+/* JG V3: the stepper, on portraits unless `?session=` names another.
+   `?classic` keeps the page as it was before V3. */
 export default async function BookPage({ searchParams }: { searchParams: Promise<{ session?: string; classic?: string }> }) {
   const { session, classic } = await searchParams;
   if (classic === undefined) return <V3Book slug={isSession(session) ? session : "portraits"} />;

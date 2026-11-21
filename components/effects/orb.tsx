@@ -13,7 +13,7 @@ import { ThinkingOrb } from "thinking-orbs";
  * plain RGB, and again whenever the theme changes. Hidden from screen
  * readers: the words beside it say what is happening.
  */
-/* Julian (2026-10-14): a wait the site controls lasts one round of its
+/* A wait the site controls lasts one round of its
    orb, after the orb's 300ms wait to show. From thinking-orbs at 64px:
    shaping goes circle, triangle, square (3 × 2.3 at speed 2.405);
    composing's wave is 2π/1.7 at 2.34. Working's dots orbit at their own

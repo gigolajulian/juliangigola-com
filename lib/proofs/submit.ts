@@ -43,7 +43,7 @@ export async function finalize(env: Env, kv: KV, s: Seal, p: Proof, paid?: Proof
     }
   }
   const a = alertLines(done);
-  // "off" silences even this one (Julian 2026-11-15); every other setting keeps it instant.
+  // "off" silences even this one; every other setting keeps it instant.
   if (done.notify !== "off") await alertHello(env.EMAIL, a.subject, [...a.lines, "", proofUrl(publicId(done))], to ? { name: to, email: to } : undefined);
   return done;
 }
@@ -58,7 +58,7 @@ const lines = (items: { name: string; qty: number; cents: number }[]) =>
     ]),
   );
 
-/** Checkout for the balance and the extras: the session's URL. Bank first (Julian 2026-11-09: ACH is 0.8% capped at $5, card 2.9% + 30c); card when the client picks it. */
+/** Checkout for the balance and the extras: the session's URL. Bank first (ACH is 0.8% capped at $5, card 2.9% + 30c); card when the client picks it. */
 export async function checkout(key: string, p: Proof, method: "bank" | "card" = "bank"): Promise<{ id: string; url: string }> {
   const card = method === "card";
   const x = owed(p);

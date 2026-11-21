@@ -45,7 +45,7 @@ html[data-theme="light"][data-v4pages~="s2"]:root #p-service{--sv-dim:color-mix(
 [data-v4pages~="a2"] .v3 .ab-logos .lg{display:flex;align-items:center;width:max-content;will-change:transform;backface-visibility:hidden}
 [data-v4pages~="a2"] .v3 .ab-logos .lg>div{flex:none;height:auto;padding:13px 44px}
 [data-v4pages~="a2"] .v3 .ab-logos .lg .mk{transform:none;color:var(--band-mk)}
-/* the page's own black behind the marks, no charcoal ground (Julian, 2026-11-15) */
+/* the page's own black behind the marks, no charcoal ground */
 :root[data-v4pages~="a2"]:not([data-theme="light"]) .v3 .ab-logos{--band-mk:rgb(217 217 214 / .86)}
 :root[data-v4pages~="a2"]:not([data-theme="light"]) .v3 .ab-logos h2{color:rgb(217 217 214 / .62)}
 @media (prefers-color-scheme:light){
@@ -156,7 +156,7 @@ html[data-v4pages~="c1"] .cv4h{padding:56px var(--gr) 0 var(--g)}
 html[data-v4pages~="c1"] .cv4h>div{display:flex;flex-direction:column;align-items:flex-start;gap:20px}
 html[data-v4pages~="c1"] .cv4{--u:calc(100vw / 960);list-style:none;margin:48px 0 0;padding:0 var(--gr) 0 var(--g);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;overflow-x:clip}
 html[data-v4pages~="c1"] .cv4 .mt-sleeve{position:relative;display:block;width:100%;height:auto;aspect-ratio:1;--o:var(--hin)}
-/* Space between the covers, on the /portfolio grid's gutters and gap (Julian, 2026-11-15), corners square (Julian, 2026-11-16). */
+/* Space between the covers, on the /portfolio grid's gutters and gap, corners square. */
 html[data-v4pages~="c1"] .cv4 .mt-sleeve .face,html[data-v4pages~="c1"] .cv4 .mt-sleeve .face img{border-radius:0}
 @media (max-width:700px){html[data-v4pages~="c1"] .cv4{gap:10px}}
 /* The name: the home's cover caption (.mt-cvcap), under the sleeve. Dim at rest, full for the cover under the pointer or the focus. */
@@ -182,11 +182,11 @@ html[data-v4pages~="c1"] .cv4 .mt-sleeve .disc{display:none}
   /* The last column has no room on its right: its record comes out to the left. */
   html[data-v4pages~="c1"] .cv4 li:nth-child(3n) .mt-sleeve{--o:calc(var(--hin) * -1)}
   html[data-v4pages~="c1"] .cv4 .mt-sleeve .disc::after{transform:rotate(calc(var(--o) * -200deg))}
-  /* Held under the pointer the record keeps turning (Julian, 2026-11-15): the disc is one flat colour, so the turn
+  /* Held under the pointer the record keeps turning: the disc is one flat colour, so the turn
      shows in its sheen, one revolution in 1.8s (33 rpm), starting once the record is out. */
   /* `[data-playing]`: its clip is playing (`?v4pages=c1,snd`). The same rule, so the turn does not jump when the sound starts. */
   html[data-v4pages~="c1"] .cv4 .mt-sleeve:is(.hv,[data-playing]) .disc::after{animation:cv4-spin 1.8s linear .45s infinite}
-  /* The turn was hard to see (Julian, 2026-11-16): sheen .2 / .13 to .5 / .36, and a dark wedge between the two so it
+  /* The turn was hard to see: sheen .2 / .13 to .5 / .36, and a dark wedge between the two so it
      reads on a light pressing as well. */
   html[data-v4pages~="c1"] .cv4 .mt-sleeve .disc::after{background:radial-gradient(circle,#070707 0 1.9%,rgba(255,255,255,.3) 2% 2.4%,transparent 2.5%),conic-gradient(from 18deg,rgba(255,255,255,0) 0deg,rgba(255,255,255,.5) 14deg,rgba(255,255,255,0) 34deg,rgba(0,0,0,0) 70deg,rgba(0,0,0,.3) 100deg,rgba(0,0,0,0) 130deg,rgba(255,255,255,0) 168deg,rgba(255,255,255,.36) 192deg,rgba(255,255,255,0) 216deg,rgba(0,0,0,0) 250deg,rgba(0,0,0,.3) 280deg,rgba(0,0,0,0) 310deg,rgba(255,255,255,0) 360deg)}
 }
@@ -204,7 +204,7 @@ html[data-v4pages~="c1"] .cv4 .mt-sleeve .disc{display:none}
 .cv4s>span{opacity:.7}
 .cv4s .am-b,html[data-theme="light"] .cv4s a:not([data-ink]) .am-w,.cv4s a[data-ink="b"] .am-w{display:none}
 html[data-theme="light"] .cv4s a:not([data-ink]) .am-b,.cv4s a[data-ink="b"] .am-b{display:block}
-/* The line sits on the right of the screen, on / off outermost (Julian, 2026-11-16): reversed, so the button is
+/* The line sits on the right of the screen, on / off outermost: reversed, so the button is
    still first for the keyboard. */
 .cv4s{flex-direction:row-reverse}
 .cv4s :is(button,a):focus-visible{outline:1px solid currentColor;outline-offset:3px}
@@ -233,7 +233,7 @@ html[data-v4pages~="c1"] .cv4a .cv4b{display:flex;flex-wrap:wrap;gap:12px}
    still, unscaled tiles.
    !important: motion plan item 6 (motion-plan.css) holds every
    grid image still with `animation: none !important`; p3 lifts that for
-   the /portfolio grid photos only (Julian, 2026-11-15).
+   the /portfolio grid photos only.
    Not the square Cover art gallery: the oversize would crop the type on the art.
    `data-v4d` (v4/drift.tsx): only tiles near the screen move, since each moving
    tile is its own compositor layer. ── */
@@ -266,7 +266,7 @@ html[data-v4pages~="c1"] .cv4a .cv4b{display:flex;flex-wrap:wrap;gap:12px}
    the left, the photos stacked in one held cell on the right, the one whose row is at mid screen shown.
    A hard cut: opacity with no transition, and never `display` or `visibility`, so every alt stays read.
    A row is half the photo's height and a little more, so the photo is at rest for every cut. */
-/* The photo row under the title goes: its photos are the ones beside the rows (Julian, 2026-11-16). */
+/* The photo row under the title goes: its photos are the ones beside the rows. */
 html[data-v4pages~="s4"] .v3 #p-campus .sv-seq{display:none}
 html[data-v4pages~="s4"] .v3 #p-campus .s4-ph{position:relative;margin:28px 0 0;aspect-ratio:4/5;overflow:hidden;border-radius:4px;background:var(--card)}
 html[data-v4pages~="s4"] .v3 #p-campus .s4-row{padding:18px 0 28px;border-bottom:1px solid var(--line)}
@@ -279,6 +279,6 @@ html[data-v4pages~="s4"] .v3 #p-campus .s4-row p{margin:14px 0 0;max-width:46ch;
   html[data-v4pages~="s4"] .v3 #p-campus .s4-ph[data-on]{opacity:1}
   html[data-v4pages~="s4"] .v3 #p-campus .s4-row{grid-column:1;grid-row:var(--i);min-height:calc(var(--s4h) / 2 + 48px);box-sizing:border-box;padding:28px 0 40px;border-bottom:0;border-top:1px solid var(--line);color:color-mix(in srgb,var(--ink) 54%,var(--bg));transition:color .25s ease-out}
   html[data-v4pages~="s4"] .v3 #p-campus .s4-row:first-of-type{border-top:0}
-  /* The last row is as tall as the others (Julian, 2026-11-16: it held twice as long), so the photo leaves with it. */
+  /* The last row is as tall as the others, so the photo leaves with it. */
   html[data-v4pages~="s4"] .v3 #p-campus .s4-row[data-on]{color:var(--ink)}
 }

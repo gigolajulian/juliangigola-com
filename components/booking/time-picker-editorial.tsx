@@ -20,7 +20,7 @@ export function EditorialCard({ c }: { c: CardCtx }) {
   const tzName = zone(pick.start, tz);
   const range = `${d3(date)} ${date.getDate()} ${mon(date)}, ${t}${ap === apEnd ? "" : ` ${ap}`} to ${until} ${apEnd} ${tzName}`;
   const at = step === "done" ? -1 : STEP_AT[step];
-  /* A call (no deposit): a handset, its length in minutes (Julian, 2026-10-17: "15:00" read as 3 PM). */
+  /* A call (no deposit): a handset, its length in minutes, so it never reads as a clock time. */
   const call = !paid;
   const handset = (
     <svg aria-hidden viewBox="0 0 24 24" className="ed-handset" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round">
@@ -49,7 +49,7 @@ export function EditorialCard({ c }: { c: CardCtx }) {
       })}
     </nav>
   );
-  /* One face, two sizes (Julian, 2026-10-20, from the Tenebra reference):
+  /* One face, two sizes:
      each step opens on one huge line, small caps beside and under it. */
   const what = `${session || title} · ${timer}`;
   const dayLine = `${d3(date)} ${date.getDate()} ${mon(date)} · ${t} ${ap}`;
@@ -99,9 +99,7 @@ export function EditorialCard({ c }: { c: CardCtx }) {
       <div ref={root} aria-label={title} role="status" data-booked="" className={cn("tp ed", className)}>
         {bar}
         {/* The check (or the handset, the camera) on the Booked line, in
-            the square's place; the message a sentence over the rows
-            (Julian, 2026-10-21: the check in a better spot, the text
-            beautified). */}
+            the square's place; the message a sentence over the rows. */}
         {hero(<>You&rsquo;re in</>, <>{dayLine}<br />{what}</>, <>{call && booked.via ? (booked.via === "Video" ? camera : handset) : <svg aria-hidden viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth="1.4"><circle cx="11" cy="11" r="10" /><path d="M6.5 11.5l3 3 6-6.5" strokeLinecap="round" strokeLinejoin="round" /></svg>}{call && booked.via ? `${booked.via} call booked` : "Booked"}</>)}
         <div className="ed-body">
           <div className="ed-l ed-ok">
@@ -192,7 +190,7 @@ export function EditorialCard({ c }: { c: CardCtx }) {
                     <div className="ed-mhead label">{DAYS.map((d) => <span key={d}>{d}</span>)}</div>
                     <div className="ed-month">
                       {cells.map((d, k) => {
-                        /* The days either side of the month, barely there (Julian, 2026-10-20). */
+                        /* The days either side of the month, barely there. */
                         if (!d) {
                           const lead = month.findIndex(Boolean);
                           const n = k < lead ? new Date(anchor.getFullYear(), anchor.getMonth(), k - lead + 1).getDate() : k - month.length + 1;

@@ -1,8 +1,8 @@
 "use client";
 
 /* ── /delivery/<id>: the client's finished photos ─────────────────
- * Julian (2026-11-12): the proof gallery becomes the delivery. Its gate
- * (2026-11-19) is the proof's wall: the top picks (five stars in Lightroom,
+ * The proof gallery becomes the delivery. Its gate
+ * is the proof's wall: the top picks (five stars in Lightroom,
  * else every final) drifting under a card asking name and email; the split
  * gate stays behind `?proofwall=0`. Any email opens it and every download
  * is logged under it. Finals with a model (a delivery published from a
@@ -87,7 +87,7 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
   const total = finals.reduce((n, f) => n + f.bytes, 0);
   const sizeOf = (fs: Final[]) => size(fs.reduce((n, f) => n + f.bytes, 0));
   const closes = initial.closesAt ? new Intl.DateTimeFormat("en-US", { month: "long", day: "numeric", timeZone: "America/Los_Angeles" }).format(new Date(initial.closesAt)) : null;
-  // The last days say so on the page (Julian 2026-11-15). Read after mount: server and phone can disagree near midnight.
+  // The last days say so on the page. Read after mount: server and phone can disagree near midnight.
   const clock = useClock();
   const soon = clock ? closingSoon(initial.closesAt, clock) : null;
   // The wall's photos: the top picks, else every final. One array, so the wall is not rebuilt under its own landing.
@@ -180,7 +180,7 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
           <div className="proof-intro dlv-intro dlv-mh">
             <button type="button" className="dlv-back" onClick={() => go("models")}>&larr; All models</button>
             <p className="proof-lab">Model · {one[1].length} photos · {sizeOf(one[1])}</p>
-            {/* Julian 2026-11-19: "SUBJECT02" in the tiles' heavy face; a named model keeps its name. */}
+            {/* A numbered model reads SUBJECT02 in the tiles' heavy face; a named model keeps its name. */}
             <h1>{/^\d+$/.test(modelLabel(one[0])) ? `SUBJECT${modelLabel(one[0])}` : modelLabel(one[0])}</h1>
             <button type="button" className="proof-btn" data-done={done[one[0]] ? "" : undefined} onClick={() => download(one[0], zipHref(one[0]))}>
               {zipLabel(one[0], `Download zip · ${sizeOf(one[1])}`)}
@@ -206,7 +206,7 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
         {view === "models" ? (
           <div className="proof-grid dlv-models" ref={grid}>
             {models.map(([k, fs], i) => {
-              // Julian 2026-11-19: one top pick (five stars, else the first) with the next three under it, styling and angles.
+              // One top pick (five stars, else the first) with the next three under it, styling and angles.
               const top = fs.find((f) => f.top) ?? fs[0];
               const under = fs.filter((f) => f !== top).slice(0, 3);
               return (
@@ -287,7 +287,7 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
           <div className="proof-lf">
             <span>{shown[open].file} · {size(shown[open].bytes)}</span>
             <div className="proof-acts">
-              {/* The 2000px copy, for posting and texting (Julian 2026-11-15). */}
+              {/* The 2000px copy, for posting and texting. */}
               <button type="button" className="proof-btn ghost" onClick={() => download(shown[open].id, `/delivery/${id}/web/${shown[open].id}`)}>Save for web</button>
               <button type="button" className="proof-btn" onClick={() => download(shown[open].id, `/delivery/${id}/dl/${shown[open].id}`)}>Save</button>
             </div>

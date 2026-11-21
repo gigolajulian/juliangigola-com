@@ -52,13 +52,6 @@ import { byCodeUnit, cn } from "@/lib/utils";
  * clears it. */
 
 /**
- * The Content form's own sections, in the order they are set.
- *
- * Declared here rather than read off the DOM so the index can be rendered
- * before the form is, and so the numbers in the index and the numbers on the
- * headings cannot drift apart — they come from the same list.
- */
-/**
  * The tabs, in two groups.
  *
  * Content used to be one tab holding four sections, with an index above it to

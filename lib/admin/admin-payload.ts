@@ -57,16 +57,6 @@ export const tidySequence = <T>(list: T[]): T[] =>
   list.filter((f) => !isText(f) || f.body.trim() !== "");
 
 /**
- * The file to commit, given the file that is already there.
- *
- * `existing` is read fresh from the repo at publish time rather than trusted
- * from page load: a project may have been added or removed since, and writing
- * back a stale list would undo it. Everything this function owns is replaced
- * wholesale; everything else on `existing` — `projects`, `trash` — is carried
- * through untouched, which is what makes it safe to publish a content edit
- * without having loaded the project list at all.
- */
-/**
  * The editable half of the project list, in the shape the file is written in.
  *
  * Named because three things in the editor pass it around — the draft, the
@@ -97,6 +87,16 @@ export type Manifest<
   bts: Record<string, Bts>;
 };
 
+/**
+ * The file to commit, given the file that is already there.
+ *
+ * `existing` is read fresh from the repo at publish time rather than trusted
+ * from page load: a project may have been added or removed since, and writing
+ * back a stale list would undo it. Everything this function owns is replaced
+ * wholesale; everything else on `existing` (`projects`, `trash`) is carried
+ * through untouched, which is what makes it safe to publish a content edit
+ * without having loaded the project list at all.
+ */
 export function projectsFile(
   existing: ProjectsFile | null,
   edit: Manifest,

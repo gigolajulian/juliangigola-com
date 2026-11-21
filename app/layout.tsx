@@ -44,7 +44,7 @@ const display = localFont({
   fallback: ["Helvetica Neue", "Arial", "sans-serif"],
 });
 /* Archivo 800 at 125% width (OFL), cut to 0-9 : $ , and space, 2.4KB.
-   Any other character falls through to Inter Tight (Julian, 2026-11-09). */
+   Any other character falls through to Inter Tight. */
 const figures = localFont({
   variable: "--font-figures",
   src: "./fonts/ArchivoExpanded-Figures.woff2",
@@ -68,7 +68,7 @@ const mono = localFont({
   adjustFontFallback: false,
 });
 
-/* Geist Mono (OFL) for the hero tagline only (Julian, 2026-11-19: "I like mono but it needs to be more visible").
+/* Geist Mono (OFL) for the hero tagline only, so it reads clearly.
    Cut to A-Z, a-z, space and "|", weights 400-600, 5KB. */
 const tagline = localFont({
   variable: "--font-tagline",
@@ -160,7 +160,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
          * with no JavaScript, and from here on both carry whichever theme is
          * actually showing; `components/v3/chrome.tsx` rewrites them when it changes.
          *
-         * The proof gate's wall (the default; `?proofwall=0` for the plain gate) is always dark (Julian, 2026-11-10).
+         * The proof gate's wall (the default; `?proofwall=0` for the plain gate) is always dark.
          *
          * Storage throws outright in some privacy modes rather than
          * returning null, so the whole thing is wrapped; a failure there
@@ -179,11 +179,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             Three conditions (the first page of a visit, whichever it is,
             but not /admin; not seen yet; motion not turned down), and
             `?intro=1` to see it again on demand. On the homepage the
-            opening is J and G round a window of frames (`split-splash.ts`,
-            Julian 2026-11-07), which opens into the hero; `?splash=burst`
-            keeps the burst (2026-10-28). Other pages have no hero to land
+            opening is J and G round a window of frames (`split-splash.ts`),
+            which opens into the hero; `?splash=burst`
+            keeps the burst. Other pages have no hero to land
             on and their own photographs to show, so they get the name
-            alone (`data-splash="name"`, 2026-10-30).
+            alone (`data-splash="name"`).
             `sessionStorage` throws outright in some privacy modes rather
             than returning null, so the whole thing is wrapped and a
             failure simply means no opening. */}
@@ -196,7 +196,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             every key on for the tab, `?v4pages=s1,a2` only those, `?v4pages=0` off.
             With no choice made in the tab it follows the V4 home (`data-mtscroll`, set by the
             script above): every key but `tilt` on wherever V4 is on.
-            `p3` is on for everyone unless the tab chose otherwise (Julian, 2026-11-15). */}
+            `p3` is on for everyone unless the tab chose otherwise. */}
         <script
           dangerouslySetInnerHTML={{
             __html: V4PAGES_HEAD,

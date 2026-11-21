@@ -1,7 +1,7 @@
 "use client";
 
 /* ── more people on one lead ──────────────────────────────────────
- * Julian (2026-11-15), from his old Format client page: a brand job with an
+ * A brand job with an
  * art director, a producer and a stylist is one client, not three leads.
  * Each person here: their mail lands on this lead, and gallery and delivery
  * mail copies them while "Copy on gallery mail" is ticked.

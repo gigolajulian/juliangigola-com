@@ -200,7 +200,7 @@ const fade = (
   el.animate([{ opacity: from }, { opacity: to }], {
     duration: ms,
     delay,
-    // MOTION-PLAN.md item 4: the chrome leaves on `out` too, never ease-in.
+    // Motion plan item 4 (docs/decisions.md): the chrome leaves on `out` too, never ease-in.
     easing: to ? "ease-out" : "cubic-bezier(.23,1,.32,1)",
     fill: "backwards",
   });

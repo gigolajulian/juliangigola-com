@@ -1,6 +1,5 @@
 /* ── the activity log ─────────────────────────────────────────────
- * Julian (2026-11-10): "keep a master one and separate logs per client
- * linked to each other". A lead keeps only its last 50 events; every
+ * One master log and one log per client, linked to each other. A lead keeps only its last 50 events; every
  * event also lands here, in full, sealed with LEADS_KEY like the lead:
  *   log:<lead id>                 the client's whole log, oldest first
  *   logm:<at>:<lead id>:<rand>    one master entry per event; the sealed
@@ -103,7 +102,6 @@ export function eventsCsv(rows: MasterEntry[]): string {
   return [cols.join(","), ...body].join("\r\n") + "\r\n";
 }
 
-/** What a client has paid, from their whole log: payments less refunds. */
-/** Payments less refunds, plus invoices settled by hand (an unmark logs the amount negative). */
+/** What a client has paid, from their whole log: payments less refunds, plus invoices settled by hand (an unmark logs the amount negative). */
 export const paidTotal = (log: LeadEvent[]) =>
   log.reduce((n, e) => n + (e.kind === "payment" || e.kind === "invoice-paid" ? e.amount ?? 0 : e.kind === "refund" ? -(e.amount ?? 0) : 0), 0);

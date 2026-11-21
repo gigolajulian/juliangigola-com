@@ -67,13 +67,10 @@ export function InvoiceRow({ inv, l, full }: { inv: Invoice; l: LeadSummary; ful
 }
 
 /* ── design B: the dark invoice with a photo ────────────────────────
- * Julian (2026-11-09): "Add this invoice as my default template ... Ask
- * for everything that is on the page and have it fill it out. They need to
- * also be able to reframe the image so it fits nice." The only invoice since
- * 2026-11-10, when the light one was retired (Julian: "only" this one). Every field fills the page
+ * The only invoice template. It asks for everything on the page and the
+ * photo can be reframed to fit. Every field fills the page
  * beside it; the photo is dragged and zoomed inside its column, and the
- * wordmark on it turns light over a dark patch (Julian: "adjust the top
- * left logo based on the photo"). The PDF is drawn by `layoutB` in
+ * wordmark on it turns light over a dark patch. The PDF is drawn by `layoutB` in
  * lib/leads/invoice-pdf.ts from the same numbers. */
 
 type LineB = { desc: string; sub: string; amt: string };

@@ -10,7 +10,7 @@ import type { Status } from "@/lib/booking/deposit";
 export const goo = () => typeof location === "undefined" || new URLSearchParams(location.search).get("goo") !== "0";
 
 /* ── the deposit ─────────────────────────────────────────────────────
- * Julian (2026-10-16), behind `?deposit`: a paid session's deposit
+ * Behind `?deposit`: a paid session's deposit
  * taken in the card, after its form.
  * Stripe's card fields, dressed as the site.
  * The server side is JG - BACKEND's: POST /api/deposit makes the
@@ -81,7 +81,7 @@ function ink(el: HTMLElement) {
 }
 
 /** The card fields' type and color; their hairlines are the page's own
-    (the boxes they mount in). One-color brand icon (Julian, 2026-10-16). */
+    (the boxes they mount in). One-color brand icon. */
 function fieldStyle(el: HTMLElement) {
   const { fg, muted, accent } = ink(el);
   return {
@@ -90,8 +90,8 @@ function fieldStyle(el: HTMLElement) {
   };
 }
 
-/** The wallet button in the page's ink: black in dark, white in light
-    (Julian, 2026-10-16). Light ink means a dark page. */
+/** The wallet button in the page's ink: black in dark, white in light.
+    Light ink means a dark page. */
 function walletTheme(el: HTMLElement) {
   const dark = Number(/\d+/.exec(ink(el).fg)?.[0] ?? 0) > 128;
   return dark ? { applePay: "black", googlePay: "black" } : { applePay: "white-outline", googlePay: "white" };
@@ -509,9 +509,9 @@ export function DepositStep({
             <label className="label flex flex-col gap-2 text-muted-foreground">CVC<div ref={cvc} className="border-b border-border py-2.5 transition-colors focus-within:border-foreground" /></label>
           </div>
           {/* Apple Pay or Google Pay, where there is one, under the card
-              fields (Julian, 2026-10-16); nothing otherwise. */}
+              fields; nothing otherwise. */}
           <div ref={wallet} className={cn(!wallets && "hidden")} />
-          {/* What the deposit does, under the card it comes off (Julian, 2026-10-16). */}
+          {/* What the deposit does, under the card it comes off. */}
           <p className="text-sm normal-case leading-relaxed text-muted-foreground text-pretty">
             ${usd} holds your date. 90% refund up to 48 hours before the shoot, 70% up to 24 hours. Move it up to 24 hours before. Balance due after the shoot. By paying you agree to the <a href="/legal#terms" target="_blank" rel="noreferrer" style={{ color: "color-mix(in srgb, var(--accent) 65%, var(--foreground))", textDecoration: "underline", textUnderlineOffset: "0.2em" }}>booking terms</a>.
           </p>

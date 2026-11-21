@@ -1,7 +1,7 @@
 "use client";
 
 /* ── a gallery's timeline on the desk ─────────────────────────────
- * Julian (2026-11-15, the gallery timeline mock): where a gallery stands,
+ * Where a gallery stands,
  * from Sent to Downloaded, then when it closes. The line fills up to the
  * current stage and that stage's dot pulses once a beat. The violet stretch
  * is the reminder window (`remindState`), shown while a reminder can still go.

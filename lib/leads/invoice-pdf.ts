@@ -3,12 +3,12 @@ import { balance, dayB, subtotal, usdB, type Invoice, type InvoiceB, type Invoic
 /* ── the invoice as a PDF ─────────────────────────────────────────
  * Ported from Julian's JG INVOICE GENERATOR artifact (geometry measured
  * from his REF INVOICE.pdf): one draw list, written as a one-page vector
- * PDF in the site's faces (Julian, 2026-11-06: "update the fonts to match
- * my website"): IBM Plex Mono for labels and figures, Inter Tight for
+ * PDF in the site's faces:
+ * IBM Plex Mono for labels and figures, Inter Tight for
  * names and notes, Inter Tight Black for the wordmark and INVOICE. Light paper only. New here: a Deposit paid line
  * and Balance due when a deposit is taken off, and his wordmark as the
  * site header sets it (Inter Tight Black at -0.045em) in place of the
- * stacked mark (Julian, 2026-11-06: "use my new wordmark instead"). Runs in the browser only,
+ * stacked mark. Runs in the browser only,
  * loaded when he taps Make PDF, so the desk itself stays light. The fonts
  * come from /leads-app/invoice/ on that first tap.
  * ─────────────────────────────────────────────────────────────── */

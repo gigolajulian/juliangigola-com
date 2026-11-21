@@ -11,7 +11,7 @@ import type { clientView } from "@/lib/booking/booking-engine";
  * Opened from the links in the "You're in." mail (`app/booking/[id]`).
  * Reschedule reuses the picker; picking a time moves the booking. Cancel
  * says first whether the deposit comes back (48 hours or more before the
- * start, Julian 2026-11-03), then asks to confirm.
+ * start), then asks to confirm.
  * ─────────────────────────────────────────────────────────────── */
 
 /** What the server sends of a booking (`clientView`); a type only, so no server code reaches the bundle. */
