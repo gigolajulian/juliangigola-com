@@ -31,7 +31,7 @@ import { StatusDot } from "@astryxdesign/core/StatusDot";
 import { Badge } from "@astryxdesign/core/Badge";
 import { Tab, TabList } from "@astryxdesign/core/TabList";
 import { SignIn } from "@/components/leads/setup";
-import { LeadDesk } from "@/components/leads/lead";
+import { LeadDesk, type LeadAsk } from "@/components/leads/lead";
 import { badge, FROST_ROOM, frostBar, GLASS, WIN_CSS } from "@/components/leads/shared";
 import { ago, aside, errorText, inboxCall, loadError, LOCKED, matches, nextStep, inFilter } from "@/lib/leads/lead-desk";
 import { useSiteThemeRead } from "@/lib/site-theme";
@@ -133,9 +133,11 @@ function Stage({ l }: { l: LeadSummary }) {
 
 /* The side nav in the order of the work: what to do, what it earns, how it is set up. */
 const NAV: [string, View[]][] = [["Work", ["leads", "calendar", "proofs"]], ["Business", ["money", "stats"]], ["Setup", ["templates"]]];
+/* The palette on a phone: the whole screen, as a sheet, with the list taking what the field leaves. */
+const SHEET_CSS = "dialog[data-jg-sheet]{inset:0;margin:0;width:100vw!important;max-width:none!important;height:100dvh!important;max-height:none!important;border:0;border-radius:0;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}dialog[data-jg-sheet]>*{height:100%;max-height:none!important}";
 const FIND_KEY = () => (/Mac|iPhone|iPad/.test(navigator.userAgent) ? "\u2318K" : "Ctrl K");
-type Found = SearchableItem<{ group: string; words?: string[] }>;
-const GO: Found[] = [["new", "New lead"], ["today", "Today"], ...SECTIONS.map(([to, label]): [View, string] => [to, label])].map(([to, label]) => ({ id: `go:${to}`, label, auxiliaryData: { group: "Go to" } }));
+type Found = SearchableItem<{ group: string; words?: string[]; note?: string }>;
+const GO: Found[] = [["today", "Today"], ...SECTIONS.map(([to, label]): [View, string] => [to, label])].map(([to, label]) => ({ id: `go:${to}`, label, auxiliaryData: { group: "Go to" } }));
 
 function Nav({ needs, view, go, find }: { needs: number; view: View; go: (v: View) => void; find: () => void }) {
   return (
@@ -159,7 +161,7 @@ function Nav({ needs, view, go, find }: { needs: number; view: View; go: (v: Vie
 }
 
 /** The phone's More tab: everything the side nav holds below the four tabs. */
-function More({ go }: { go: (v: View) => void }) {
+function More({ go, find }: { go: (v: View) => void; find: () => void }) {
   return (
     <Layout
       height="fill"
@@ -168,6 +170,7 @@ function More({ go }: { go: (v: View) => void }) {
         <LayoutContent role="main" label="More" padding={4}>
           <VStack gap={5}>
             <List hasDividers>
+              <ListItem label="Jump or do" description="Find a lead or page, add a task, start an invoice" startContent={<Icon icon={FindGlyph} color="secondary" />} onClick={find} />
               <ListItem label="New lead" startContent={<Icon icon={PlusGlyph} color="secondary" />} onClick={() => go("new")} />
               {SECTIONS.filter(([to]) => to !== "leads" && to !== "calendar").map(([to, label]) => <ListItem key={to} label={label} startContent={<Icon icon={GLYPH[to]!} color="secondary" />} onClick={() => go(to)} />)}
               <ListItem label="Put aside" startContent={<Icon icon={InboxGlyph} color="secondary" />} onClick={() => go("aside")} />
@@ -280,6 +283,8 @@ export function LeadsDesk() {
   }, [call]);
   // Search and quick actions, on Ctrl or Cmd K: every lead by name, email, shoot or stage, and every page.
   const [finding, setFinding] = React.useState(false);
+  // What the palette asked the open lead to do (add a task, start an invoice).
+  const [ask, setAsk] = React.useState<LeadAsk | null>(null);
   React.useEffect(() => {
     const on = (e: KeyboardEvent) => {
       if (!(e.metaKey || e.ctrlKey) || e.key.toLowerCase() !== "k") return;
@@ -289,12 +294,19 @@ export function LeadsDesk() {
     addEventListener("keydown", on);
     return () => removeEventListener("keydown", on);
   }, []);
+  const openName = leads?.find((l) => l.id === open)?.name;
   const finder = React.useMemo(
     () => createStaticSource<Found>(
-      [...GO, ...(leads ?? []).filter((l) => !l.trashedAt && l.id).map((l) => ({ id: `lead:${l.id}`, label: l.name || l.email, auxiliaryData: { group: "Leads", words: [l.email, l.kind ?? "", l.stage] } }))],
+      [
+        ...(leads ?? []).filter((l) => !l.trashedAt && l.id).map((l) => ({ id: `lead:${l.id}`, label: l.name || l.email, auxiliaryData: { group: "Leads", words: [l.email, l.kind ?? "", l.stage], note: [l.stage, l.when ? fmt({ month: "short", day: "numeric" }).format(new Date(l.when)) : null].filter(Boolean).join(" · ") } })),
+        // Actions on the lead that is open, then the ones that need none.
+        ...(openName ? [{ id: "do:task", label: `Add a task to ${openName}`, auxiliaryData: { group: "Do", words: ["task", "todo"] } }, { id: "do:invoice", label: `New invoice for ${openName}`, auxiliaryData: { group: "Do", words: ["invoice", "bill"] } }] : []),
+        { id: "go:new", label: "New lead", auxiliaryData: { group: "Do", words: ["add", "lead"] } },
+        ...GO,
+      ],
       { keywords: (i) => i.auxiliaryData?.words ?? [] },
     ),
-    [leads],
+    [leads, openName],
   );
   // Astryx follows the site's own light/dark (html[data-theme], dark when unset), so the ink matches the page behind it.
   // Unknown until read: Astryx's root Theme writes data-theme onto <html> itself, so mounting it with a guess would lock that guess in.
@@ -496,7 +508,7 @@ export function LeadsDesk() {
 
   // The lead page: its own Astryx layout (components/leads/lead.tsx).
   const lead = current ? (
-    <LeadDesk key={current.id} summary={current} initial={fresh?.email === current.email ? fresh : null} call={call} onChange={changed} onBack={() => setOpen(null)} reload={load} templates={templates} others={live.filter((o) => o.id !== current.id)} size={size} toProofs={(token) => { show("proofs"); setProofPick(token ?? null); }} />
+    <LeadDesk key={current.id} ask={ask} summary={current} initial={fresh?.email === current.email ? fresh : null} call={call} onChange={changed} onBack={() => setOpen(null)} reload={load} templates={templates} others={live.filter((o) => o.id !== current.id)} size={size} toProofs={(token) => { show("proofs"); setProofPick(token ?? null); }} />
   ) : null;
 
   // The lead from the POST itself: KV lists lag a fresh write, so it goes in by hand and opens whole.
@@ -522,7 +534,7 @@ export function LeadsDesk() {
     hours: <HoursDesk />,
     templates: <TemplatesDesk call={call} templates={templates} saved={setTemplates} />,
     device: <DeviceDesk call={call} reload={load} signOut={signOut} />,
-    more: <More go={show} />,
+    more: <More go={show} find={() => setFinding(true)} />,
     proofs: <ProofsDesk embedded key={proofPick ?? ""} initial={proofPick ?? undefined} />,
   };
   const page = lead ?? pages[screen] ?? (screen === "money" ? <MoneyDesk /> : screen === "calendar" ? <CalendarDesk leads={live.filter((l) => !l.archivedAt)} size={size} open={(l) => setOpen(l.id ?? null)} tab={calTab} setTab={setCalTab} /> : screen === "new" ? <NewLeadDesk call={call} leads={live} size={size} done={added} open={(l) => setOpen(l.id ?? null)} cancel={() => show("leads")} /> : screen === "today" && leads ? <TodayDesk leads={live} size={size} open={(l) => setOpen(l.id ?? null)} show={() => show("leads")} /> : home);
@@ -541,7 +553,7 @@ export function LeadsDesk() {
     <Theme theme={leadsTheme} mode={mode}>
       {/* The site sets mono capitals everywhere; Astryx sets its own type inside. */}
       {/* The site's capitals are unlayered element rules, so they beat Astryx's layers; this beats them inside the desk. */}
-      <style>{`:root [data-astryx-desk][data-astryx-desk] *,:root [data-astryx-desk][data-astryx-desk] ::placeholder{text-transform:none}${FROST_ROOM}${GLASS}${WIN_CSS}`}</style>
+      <style>{`:root [data-astryx-desk][data-astryx-desk] *,:root [data-astryx-desk][data-astryx-desk] ::placeholder{text-transform:none}${FROST_ROOM}${GLASS}${WIN_CSS}${SHEET_CSS}`}</style>
       <div data-astryx-desk="" data-bars={size === "phone" ? "" : undefined} data-glass={mode === "dark" ? "" : undefined}
         // Enter takes the first result when none is marked yet: the palette marks one only after an arrow key.
         onKeyDownCapture={(e) => {
@@ -553,10 +565,19 @@ export function LeadsDesk() {
           isOpen={finding}
           onOpenChange={setFinding}
           searchSource={finder}
-          label="Search leads and pages"
+          label="Jump to a lead or page, or do something"
+          // A phone gets the whole screen, as a sheet.
+          {...(size === "phone" ? { "data-jg-sheet": "", maxHeight: "100dvh", footer: <HStack padding={3} hAlign="end"><Button label="Close" variant="secondary" onClick={() => setFinding(false)} /></HStack> } : {})}
+          renderItem={(i) => (
+            <HStack gap={3} vAlign="center">
+              <Text>{i.label}</Text>
+              {i.auxiliaryData?.note ? <Text type="supporting" color="secondary" maxLines={1}>{i.auxiliaryData.note}</Text> : null}
+            </HStack>
+          )}
           onValueChange={(id) => {
             setFinding(false);
             if (id.startsWith("go:")) show(id.slice(3) as View);
+            else if (id.startsWith("do:")) setAsk({ do: id.slice(3) as LeadAsk["do"], n: Date.now() });
             else setOpen(id.slice(5));
           }}
         />

@@ -1,0 +1,134 @@
+"use client";
+
+import * as React from "react";
+import { jumpTo, scrollGoal } from "@/components/v3/smooth-scroll";
+import { media } from "@/lib/device";
+
+/* Back to the home from any page of the site lands where the visitor left it, from the first paint.
+   Safari put back a scroll saved before the held rows' last scroll (MAC on #1313), and from /about showed that page's foot
+   for 100ms before the home's top (MAC, live). So the home keeps its own spot: the block the screen's top was in
+   (`[data-mt]`) and how far into it, since the held blocks above take their height a frame or more after the page is back;
+   and the covers row's own scroll on a phone, which is sideways. Session storage: the router rewrites the history entry's state. */
+
+const BACK = "jg-home-back";
+export type Spot = { b: string; off: number; x: number };
+
+/** An element's top in the page by layout: its box on screen moves with the blocks' lift transforms. */
+export const layoutTop = (el: HTMLElement) => {
+  let t = 0;
+  for (let n: HTMLElement | null = el; n; n = n.offsetParent as HTMLElement | null) t += n.offsetTop;
+  return t;
+};
+
+const block = (b: string) => document.querySelector<HTMLElement>(`[data-mt="${b}"]`);
+const coversRow = () => block("covers")?.querySelector<HTMLElement>(".mt-row") ?? null;
+
+/** The spot under the screen's top: the last block that starts at or above it. */
+export function spotHere(): Spot {
+  // the covers row's own scroll wherever the page is: a phone's row swiped to a cover came back on the first (MAC on d818269b)
+  const x = coversRow()?.scrollLeft ?? 0;
+  let at: Spot = { b: "", off: scrollY, x };
+  for (const el of document.querySelectorAll<HTMLElement>("[data-mt]")) {
+    const t = layoutTop(el);
+    if (t <= scrollY + 1) at = { b: el.dataset.mt!, off: scrollY - t, x };
+  }
+  return at;
+}
+
+/** Keeps `spot` for the next Back to the home, and keeps the browser's own restore from landing over it a frame later (Safari, MAC on 01ca50cb). */
+export function keepSpot(spot: Spot) {
+  try {
+    sessionStorage.setItem(BACK, JSON.stringify(spot));
+    history.scrollRestoration = "manual";
+  } catch {}
+}
+
+/** A click that kept a spot but stayed on the page (a tap that turns a sleeve over) gives the browser its own restore back. */
+export function dropSpot() {
+  try {
+    sessionStorage.removeItem(BACK);
+    history.scrollRestoration = "auto";
+  } catch {}
+}
+
+/** Where a spot is in the page now. */
+const yOf = (s: Spot) => {
+  const el = s.b ? block(s.b) : null;
+  return (el ? layoutTop(el) : 0) + s.off;
+};
+
+/** A link off the home: another page of this site, opened in this tab. */
+function leaves(e: MouseEvent) {
+  if (e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return false;
+  const a = (e.target as Element | null)?.closest?.("a[href]") as HTMLAnchorElement | null;
+  if (!a || (a.target && a.target !== "_self") || a.hasAttribute("download")) return false;
+  const u = new URL(a.href, location.href);
+  return u.origin === location.origin && u.pathname !== location.pathname;
+}
+
+/** When the last Back or Forward was: the home counts as a return only when it mounts just after one. */
+let popAt = 0;
+if (typeof window !== "undefined") addEventListener("popstate", () => (popAt = Date.now()));
+let firstMount = true;
+/** Just back: a Back or Forward inside the site, or the page itself loaded by one (a link that left the app, then Back). */
+const returned = () => {
+  const first = firstMount;
+  firstMount = false;
+  if (Date.now() - popAt < 2000) return true;
+  const nav = first ? (performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined) : undefined;
+  return nav?.type === "back_forward";
+};
+
+/** On the home: keeps the spot at every link off it (a cover keeps its own over it, rows.tsx), and puts the kept spot back
+    after a Back, before the first paint, then holds it each frame for a moment while the blocks above settle, until the visitor scrolls. */
+export function useBackHome() {
+  React.useLayoutEffect(() => {
+    // capture: before React's own click handlers, so a cover's spot (rows.tsx keepFlip) is the one kept
+    const save = (e: MouseEvent) => leaves(e) && keepSpot(spotHere());
+    document.addEventListener("click", save, true);
+    let at: Spot | null = null;
+    try {
+      at = JSON.parse(sessionStorage.getItem(BACK) ?? "null");
+    } catch {}
+    // taken a tick on, not now: React's dev double mount read it once and dropped it
+    const t = setTimeout(() => {
+      try {
+        sessionStorage.removeItem(BACK);
+        history.scrollRestoration = "auto";
+      } catch {}
+    });
+    const off = () => (clearTimeout(t), document.removeEventListener("click", save, true));
+    if (!at || typeof at.off !== "number" || !returned()) return off;
+    const spot = at;
+    const go = () => {
+      const y = yOf(spot);
+      if (Math.abs(scrollY - y) > 2 || Math.abs(scrollGoal() - y) > 2) jumpTo(y);
+    };
+    go();
+    // a phone's sideways covers row only: held (desktop), the row follows the page's scroll, and setting it too threw the page a screen on (MAC on d82f2b75)
+    const row = coversRow();
+    if (row && !media("held").matches) row.scrollLeft = spot.x;
+    // a sleeve still marked hovered from before the click turned to its back and then away on arrival (Safari, MAC on 23412f74): unturned at once
+    const lifted = [...document.querySelectorAll<HTMLElement>(".mt-covers .mt-sleeve.hv")];
+    lifted.forEach((it) => ((it.style.transition = "none"), it.classList.remove("hv")));
+    const unlift = requestAnimationFrame(() => requestAnimationFrame(() => lifted.forEach((it) => (it.style.transition = ""))));
+    // rAF runs before each paint, so a block above that grows is answered in the same frame
+    const end = performance.now() + 900;
+    let raf = 0, done = false, goal = scrollGoal(); // after go(): Lenis's target is the restore spot
+    const stop = () => ((done = true), cancelAnimationFrame(raf));
+    raf = requestAnimationFrame(function hold(now) {
+      // the visitor's scroll wins: Lenis heads somewhere else as soon as a wheel or touch lands, whether or not its event reached us
+      // (a wheel 0.3s after Back was held for 0.6s, Safari, MAC on 23412f74). Only a move of its target counts: it starts stale from the last page.
+      const g = scrollGoal(), moved = g !== goal && Math.abs(g - yOf(spot)) > 2;
+      goal = g;
+      if (done || moved) return stop();
+      go();
+      // a sleeve the row carried under a resting pointer lifts and turns to its back: none while the page is being put back (Safari, MAC on 983abf06)
+      for (const it of document.querySelectorAll(".mt-covers .mt-sleeve.hv")) it.classList.remove("hv");
+      if (now < end) raf = requestAnimationFrame(hold);
+    });
+    const ev = ["wheel", "touchstart", "keydown", "pointerdown"] as const;
+    ev.forEach((n) => addEventListener(n, stop, { passive: true, capture: true }));
+    return () => (off(), cancelAnimationFrame(unlift), stop(), ev.forEach((n) => removeEventListener(n, stop, { capture: true })));
+  }, []);
+}

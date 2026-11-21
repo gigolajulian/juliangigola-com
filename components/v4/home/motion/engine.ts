@@ -52,11 +52,11 @@ export type Driver = {
   always?: boolean;
 };
 
-/** ?mt2=1: the motion state trial (desloppify r9 stage 4). Off, the engine runs exactly as live.
+/** The motion state path (desloppify r9 stage 4), on by default since Julian approved it 2026-11-21; ?mt2=0 runs the old path.
     On: the fine query refreshes ctx, the engine's own listeners go in before the drivers' (so a driver's resize handler reads a
     measured ctx), the covers driver tells MtCovers its item instead of round-tripping it through the row's scrollLeft, and
-    hero.ts resets its module throttle per mount. Live stays on the old path until Julian approves. */
-export const MT2 = qflag("mt2", "1");
+    hero.ts resets its module throttle per mount. */
+export const MT2 = !qflag("mt2", "0");
 
 /** A title or name line coming up from under its clip (Cover art, Motion, Commissions). */
 const RISE: KeyframeAnimationOptions = { duration: 600, easing: "cubic-bezier(.16,1,.3,1)" };

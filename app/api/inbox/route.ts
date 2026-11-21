@@ -12,7 +12,7 @@ import { publicKey } from "@/lib/leads/web-push";
 import { notionPaper, notionStage } from "@/lib/leads/notion-lead";
 import { importStripe } from "@/lib/leads/stripe-import";
 import { STRIPE_UNSET } from "@/lib/stripe";
-import { cleanPeople, cleanTemplates, manualLead, merge, stats, type NewLead } from "@/lib/leads/lead-crm";
+import { cleanPeople, cleanPlan, cleanTasks, cleanTemplates, manualLead, merge, stats, type NewLead } from "@/lib/leads/lead-crm";
 import { balance, cleanFrom, cleanInvoice, FROM_KEY, invoiceNo, mmyy, PHOTO_KEY, usd, type InvoiceFrom } from "@/lib/leads/invoice";
 import { bodyOf, json, NO_STORE } from "@/lib/http";
 import { parseOr } from "@/lib/json";
@@ -160,6 +160,15 @@ export async function GET(request: Request) {
     const key = url.searchParams.get("invoicePhoto") ?? "";
     const raw = PHOTO_KEY.test(key) ? await gate.inbox.get(key) : null;
     return raw ? json({ photo: await seal.open<string>(raw) }) : json({ error: "Photo not found." }, 404);
+  }
+  // Every task on every lead, for Today's Tasks due. Trashed leads are left out.
+  if (url.searchParams.has("tasks")) {
+    const seal = await gate.seal;
+    if (!seal) return noSeal();
+    const tasks = (await everyLead(gate.inbox, seal))
+      .filter((l) => !l.trashedAt)
+      .flatMap((l) => (l.tasks ?? []).filter((t) => !t.doneAt).map((t) => ({ ...t, lead: l.id, name: l.name })));
+    return json({ tasks });
   }
   // Every invoice on every lead, newest first, for Money > Invoices and Today's overdue list. Trashed leads are left out.
   // shortcut: one KV get per lead; an invoice index if the desk ever holds thousands of leads.
@@ -429,7 +438,7 @@ export async function POST(request: Request) {
  */
 async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: Awaited<ReturnType<typeof sealer>>, given: Record<string, unknown>, notion?: string) {
   if (!seal) return noSeal();
-  const { key, stage, snoozeUntil, seen, archive, trash, notes, remind, details, quote, lostReason, mergeFrom, invoice, licence, contract, release, invoicePaid, people } = given as LeadPatch & { key: string };
+  const { key, stage, snoozeUntil, seen, archive, trash, notes, remind, details, quote, lostReason, mergeFrom, invoice, licence, contract, release, invoicePaid, people, plan, tasks } = given as LeadPatch & { key: string };
   for (const p of [contract, release]) if (p !== undefined && !(PAPER as readonly string[]).includes(p)) return json({ error: "Unknown status." }, 400);
   const bill = invoice === undefined ? undefined : cleanInvoice(invoice);
   if (bill && "error" in bill) return json({ error: bill.error }, 400);
@@ -454,6 +463,17 @@ async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: Await
       if (there && hasPerson(there, p.email)) return json({ error: `${p.email} is already on another lead.` }, 409);
     }
     lead = { ...lead, people: list.length ? list : undefined, events: [...lead.events, { at: new Date().toISOString(), kind: "edit" as const, note: "people" }].slice(-50) };
+  }
+  // The shoot plan and tasks (`cleanPlan`, `cleanTasks`): whole replacements, checked against the people as they now stand.
+  if (plan !== undefined) {
+    const p = cleanPlan(plan, lead.people);
+    if (p && "error" in p) return json({ error: p.error }, 400);
+    lead = { ...lead, plan: p ?? undefined };
+  }
+  if (tasks !== undefined) {
+    const t = cleanTasks(tasks, lead.tasks, lead.people);
+    if ("error" in t) return json({ error: t.error }, 400);
+    lead = { ...lead, tasks: t.tasks.length ? t.tasks : undefined, events: [...lead.events, ...t.events].slice(-50) };
   }
   // What the log compares against: events already logged (this lead's, and a merged record's) are not logged again.
   let from: Lead = lead;
