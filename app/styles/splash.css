@@ -300,9 +300,9 @@ html[data-sb]:is([data-intro], [data-landing])::after {
   }
 }
 
-/* A first arrival on an inner page (jg-cover.ts, `drive`): the page stays hidden under the JG cover until the cut
-   opens, so Safari's toolbar glass has nothing to show below it (QA on #1372, iPhone). The cover sits outside
-   <body>, so it is not hidden with it. */
+/* The JG cover over the whole screen (jg-cover.ts: a first arrival on an inner page, and the booking wait before
+   the calendar is in): the page stays hidden under it until the cut opens, so Safari's toolbar glass has nothing
+   to show below it (QA on #1372, iPhone). The cover sits outside <body>, so it is not hidden with it. */
 html[data-cover-hold] body {
   visibility: hidden;
 }
