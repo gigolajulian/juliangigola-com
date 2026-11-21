@@ -1,5 +1,5 @@
 import * as React from "react";
-import { gsap } from "gsap";
+import { warmGsap, withGsap } from "@/lib/gsap-lazy";
 import { iso, overflowOf, type PickedTime, type Slot, type Step } from "@/components/booking/time-picker-parts";
 
 type Layout = {
@@ -28,6 +28,7 @@ export function usePickerLayout({ step, pick, days, view, anchor, week, month, c
   const root = React.useRef<HTMLDivElement>(null);
   const v3root = React.useRef<HTMLDivElement>(null); // the V3 stepper's own, so root's slide motion stays editorial-card only
   const was = React.useRef(step);
+  React.useEffect(warmGsap, []);
   React.useLayoutEffect(() => {
     const ORDER = { pick: 0, form: 1, sending: 1, check: 1, pay: 2, done: 3 };
     const dir = Math.sign(ORDER[step] - ORDER[was.current]);
@@ -43,11 +44,11 @@ export function usePickerLayout({ step, pick, days, view, anchor, week, month, c
     if (!dir || !el || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     // Booked rises in; any other step slides in from the side it comes from.
     const up = step === "done";
-    gsap.fromTo(
+    withGsap((gsap) => gsap.fromTo(
       el.querySelectorAll(".ed-l > *, .ed-r > *, .ed-floor"),
       { autoAlpha: 0, x: up ? 0 : 28 * dir, y: up ? 14 : 0 },
       { autoAlpha: 1, x: 0, y: 0, duration: 0.5, ease: "expo.out", stagger: 0.035, clearProps: "opacity,visibility,transform" },
-    );
+    ));
   }, [step]);
   /* A day picked in a month brings its times up on a phone, where the
      card is as tall as it needs and the page scrolls. */
@@ -171,7 +172,7 @@ export function usePickerLayout({ step, pick, days, view, anchor, week, month, c
     const fresh = [...slotsBox.current.querySelectorAll("[data-slot]")].filter((b) => !seen.current.has(b));
     if (!fresh.length) return;
     fresh.forEach((b) => seen.current.add(b));
-    gsap.fromTo(fresh, { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, duration: 0.5, ease: "expo.out", stagger: 0.025, clearProps: "opacity,visibility,transform" });
+    withGsap((gsap) => gsap.fromTo(fresh, { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, duration: 0.5, ease: "expo.out", stagger: 0.025, clearProps: "opacity,visibility,transform" }));
   });
   const at = pick?.start;
   const lastPick = React.useRef(at);
@@ -180,7 +181,8 @@ export function usePickerLayout({ step, pick, days, view, anchor, week, month, c
     lastPick.current = at;
     if (!smooth || !from || !at || from === at || !big.current || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const dir = +new Date(at) > +new Date(from) ? 1 : -1;
-    gsap.fromTo(big.current, { yPercent: 18 * dir, filter: "blur(4px)" }, { yPercent: 0, filter: "blur(0px)", duration: 0.45, ease: "expo.out", clearProps: "transform,filter" });
+    const el = big.current;
+    withGsap((gsap) => gsap.fromTo(el, { yPercent: 18 * dir, filter: "blur(4px)" }, { yPercent: 0, filter: "blur(0px)", duration: 0.45, ease: "expo.out", clearProps: "transform,filter" }));
   }, [at, smooth]);
   const refit = React.useRef(() => {});
   React.useLayoutEffect(() => {
@@ -287,10 +289,17 @@ export function usePickerLayout({ step, pick, days, view, anchor, week, month, c
     if (!first.current) return void (first.current = true);
     const cells = [...box.querySelectorAll<HTMLElement>(".ed-day, .ed-cell, .ed-blank")];
     const at = (k: number) => (view === "week" ? k * 0.06 : (k % 7) * 0.03 + Math.floor(k / 7) * 0.06);
-    const tw = cells.map((c, k) =>
-      gsap.fromTo(c, { autoAlpha: 0, y: 10, rotationX: -35, transformPerspective: 500, transformOrigin: "50% 0%" }, { autoAlpha: 1, y: 0, rotationX: 0, duration: 0.45, delay: at(k), ease: "expo.out", clearProps: "opacity,visibility,transform" }),
-    );
-    return () => tw.forEach((t) => t.progress(1).kill());
+    let tw: gsap.core.Tween[] = [], gone = false;
+    withGsap((gsap) => {
+      if (gone) return;
+      tw = cells.map((c, k) =>
+        gsap.fromTo(c, { autoAlpha: 0, y: 10, rotationX: -35, transformPerspective: 500, transformOrigin: "50% 0%" }, { autoAlpha: 1, y: 0, rotationX: 0, duration: 0.45, delay: at(k), ease: "expo.out", clearProps: "opacity,visibility,transform" }),
+      );
+    });
+    return () => {
+      gone = true;
+      tw.forEach((t) => t.progress(1).kill());
+    };
   }, [step, shown, view, held, state]);
   /* The swipe nudge, on for everyone: on a touch
      screen the week eases 8px left and back after the cascade, no
@@ -302,8 +311,8 @@ export function usePickerLayout({ step, pick, days, view, anchor, week, month, c
     if (!matchMedia("(pointer: coarse)").matches || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     try { if (sessionStorage.getItem("ed-nudged")) return; } catch {}
     const seen = () => { try { sessionStorage.setItem("ed-nudged", "1"); } catch {} };
-    let tl: gsap.core.Timeline | undefined;
-    const play = () => { tl = gsap.timeline({ delay: 1.1, onStart: seen }).to(row, { x: -8, duration: 0.4, ease: "power2.out" }).to(row, { x: 0, duration: 0.5, ease: "power2.inOut" }); };
+    let tl: gsap.core.Timeline | undefined, gone = false;
+    const play = () => withGsap((gsap) => { if (!gone) tl = gsap.timeline({ delay: 1.1, onStart: seen }).to(row, { x: -8, duration: 0.4, ease: "power2.out" }).to(row, { x: 0, duration: 0.5, ease: "power2.inOut" }); });
     /* Not behind the opening splash (MAC, real iOS): the delay starts once it has lifted. */
     const root = document.documentElement;
     const watch = new MutationObserver(() => { if (!root.hasAttribute("data-intro")) { watch.disconnect(); play(); } });
@@ -312,10 +321,11 @@ export function usePickerLayout({ step, pick, days, view, anchor, week, month, c
     /* Undone without spending the visit's nudge: it only counts once it has really started. */
     return () => {
       watch.disconnect();
+      gone = true;
       if (!tl) return;
       const begun = tl.progress() > 0;
       tl.kill();
-      if (begun) gsap.set(row, { x: 0 });
+      if (begun) withGsap((gsap) => gsap.set(row, { x: 0 }));
     };
   }, [step, view, held, state]);
   /* Julian: a swipe across the days goes to the next or last week or
@@ -335,7 +345,7 @@ export function usePickerLayout({ step, pick, days, view, anchor, week, month, c
         if (Math.abs(dx) < 10 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
         s.drag = true;
         e.currentTarget.setPointerCapture(e.pointerId);
-        gsap.killTweensOf(row);
+        withGsap((gsap) => gsap.killTweensOf(row));
       }
       const dt = e.timeStamp - s.t! || 16;
       s.v = (e.clientX - s.lx!) / dt; // px per ms
@@ -343,7 +353,7 @@ export function usePickerLayout({ step, pick, days, view, anchor, week, month, c
       s.lx = e.clientX;
       const w = row.offsetWidth;
       const x = atStart && dx > 0 ? (dx * w * 0.55) / (w + 0.55 * dx) : dx;
-      gsap.set(row, { x });
+      withGsap((gsap) => gsap.set(row, { x }));
     },
     onPointerUp: (e) => {
       const s = swipe.current;
@@ -359,23 +369,25 @@ export function usePickerLayout({ step, pick, days, view, anchor, week, month, c
         /* Motion plan item 2 (docs/decisions.md): under Reduce Motion the row
            followed the finger, and on release it snaps; a turned week fades in. */
         if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
-          gsap.set(row, { clearProps: "transform" });
+          withGsap((gsap) => gsap.set(row, { clearProps: "transform" }));
           if (dir) {
             shift(dir);
             row.animate({ opacity: [0, 1] }, { duration: 150, easing: "cubic-bezier(0.23, 1, 0.32, 1)" });
           }
           return;
         }
-        if (!dir) return void gsap.to(row, { x: 0, duration: 0.5, ease: "expo.out" });
-        gsap.to(row, {
-          x: -dir * w,
-          autoAlpha: 0,
-          duration: 0.2,
-          ease: "power2.in",
-          onComplete: () => {
-            shift(dir);
-            gsap.set(row, { x: 0, autoAlpha: 1, clearProps: "transform,opacity,visibility" });
-          },
+        withGsap((gsap) => {
+          if (!dir) return void gsap.to(row, { x: 0, duration: 0.5, ease: "expo.out" });
+          gsap.to(row, {
+            x: -dir * w,
+            autoAlpha: 0,
+            duration: 0.2,
+            ease: "power2.in",
+            onComplete: () => {
+              shift(dir);
+              gsap.set(row, { x: 0, autoAlpha: 1, clearProps: "transform,opacity,visibility" });
+            },
+          });
         });
         return;
       }

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { gsap } from "gsap";
+import { warmGsap, withGsap } from "@/lib/gsap-lazy";
 import { cn } from "@/lib/utils";
 import { depositFor } from "@/lib/booking/paid";
 import type { Status } from "@/lib/booking/deposit";
@@ -165,34 +165,40 @@ export function DepositStep({
     const b = payBtn.current;
     const card = box.current?.closest<HTMLElement>("#book-card") ?? box.current;
     if (!editorial || !b || !card || calm()) return then();
-    const c = card.getBoundingClientRect();
-    const r = b.getBoundingClientRect();
-    const g = document.createElement("div");
-    g.className = "ed-grow";
-    if (no) g.dataset.bad = "";
-    card.append(g);
-    gsap.set(g, { left: r.left - c.left, top: r.top - c.top, width: r.width, height: r.height, borderRadius: 2 });
-    gsap.to(g, {
-      left: 0, top: 0, width: c.width, height: c.height, borderRadius: getComputedStyle(card).borderRadius, duration: 0.7, ease: "expo.inOut",
-      onComplete: () => {
-        then();
-        gsap.to(g, { autoAlpha: 0, duration: 0.35, delay: 0.05, onComplete: () => g.remove() });
-      },
+    withGsap((gsap) => {
+      const c = card.getBoundingClientRect();
+      const r = b.getBoundingClientRect();
+      const g = document.createElement("div");
+      g.className = "ed-grow";
+      if (no) g.dataset.bad = "";
+      card.append(g);
+      gsap.set(g, { left: r.left - c.left, top: r.top - c.top, width: r.width, height: r.height, borderRadius: 2 });
+      gsap.to(g, {
+        left: 0, top: 0, width: c.width, height: c.height, borderRadius: getComputedStyle(card).borderRadius, duration: 0.7, ease: "expo.inOut",
+        onComplete: () => {
+          then();
+          gsap.to(g, { autoAlpha: 0, duration: 0.35, delay: 0.05, onComplete: () => g.remove() });
+        },
+      });
     });
   };
   const decline = (msg: string) => {
     setError(msg);
     setBad(true);
-    if (!calm() && payBtn.current) gsap.to(payBtn.current, { keyframes: { x: [0, -6, 5, -3, 2, 0] }, duration: 0.34, ease: "power1.out", clearProps: "transform" });
-    gsap.delayedCall(calm() ? 0 : 0.6, () => grow(true, () => setStage("declined")));
+    withGsap((gsap) => {
+      if (!calm() && payBtn.current) gsap.to(payBtn.current, { keyframes: { x: [0, -6, 5, -3, 2, 0] }, duration: 0.34, ease: "power1.out", clearProps: "transform" });
+      gsap.delayedCall(calm() ? 0 : 0.6, () => grow(true, () => setStage("declined")));
+    });
   };
+  React.useEffect(warmGsap, []);
   /* The red card and back again come in as the steps do. */
   const was = React.useRef(stage);
   React.useLayoutEffect(() => {
     const from = was.current;
     was.current = stage;
     if (!editorial || calm() || !box.current || (stage !== "declined" && from !== "declined")) return;
-    gsap.fromTo(box.current.querySelectorAll(".ed-l > *, .ed-r > *, .ed-floor"), { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: 0.5, ease: "expo.out", stagger: 0.035, clearProps: "opacity,visibility,transform" });
+    const els = box.current.querySelectorAll(".ed-l > *, .ed-r > *, .ed-floor");
+    withGsap((gsap) => gsap.fromTo(els, { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: 0.5, ease: "expo.out", stagger: 0.035, clearProps: "opacity,visibility,transform" }));
   }, [stage, editorial]);
   /* Development only, to see the ends without a charge: `?sim=no` (a
      decline), `ok`, `taken`, `refunded`, `failed`, `slow`, `broken`. */
