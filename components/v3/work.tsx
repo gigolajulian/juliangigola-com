@@ -9,7 +9,7 @@ import { createPortal } from "react-dom";
 import type { Flip as FlipT } from "gsap/Flip";
 import { PageFoot } from "@/components/v3/chrome";
 import DISC from "@/lib/discipline-order.json";
-import { mplan, GSAP_OUT } from "@/lib/mplan";
+import { GSAP_OUT } from "@/lib/mplan";
 import { V4Drift } from "@/components/v4/drift";
 import { V4Tilt } from "@/components/v4/tilt";
 // The canvas view loads only when it opens, not with every /portfolio visit.
@@ -619,19 +619,18 @@ export function V3Work({
     flip.current = null;
     const w = strip.current;
     if (w) w.style.overflow = "visible"; // the strip would clip covers flying up into it
-    /* MOTION-PLAN.md item 9 (`?mplan=still`): grid and strip trade places as
+    /* MOTION-PLAN.md item 9: grid and strip trade places as
        one move, photo 600 on `move`, no stagger, new covers fade in 250, in
        both directions; a chip slides the tiles to their new places, page 400
        on `move`. */
-    const plan = mplan("still");
     const tl = F.from(st, {
       targets: seen(),
-      duration: plan ? (swap ? 0.6 : 0.4) : 0.6,
-      ease: plan ? "power3.inOut" : "expo.out",
+      duration: swap ? 0.6 : 0.4,
+      ease: "power3.inOut",
       scale: true,
       // The vectorscope (Color view) opens 40ms apart, the seventh on together.
-      stagger: plan ? (swap && view === "color" ? (i: number) => Math.min(i, 5) * 0.04 : 0) : 0.015,
-      onEnter: (els) => els.forEach((e) => e.animate({ opacity: [0, 1] }, plan ? { duration: 250, easing: "cubic-bezier(.23,1,.32,1)" } : 300)),
+      stagger: swap && view === "color" ? (i: number) => Math.min(i, 5) * 0.04 : 0,
+      onEnter: (els) => els.forEach((e) => e.animate({ opacity: [0, 1] }, { duration: 250, easing: "cubic-bezier(.23,1,.32,1)" })),
       onComplete: () => void (w && (w.style.overflow = "")),
     });
     return () => void tl.progress(1);
