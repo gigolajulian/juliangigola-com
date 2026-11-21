@@ -24,7 +24,6 @@ const clearNav = () => {
   delete root.dataset.nav;
   delete root.dataset.navBar;
   delete root.dataset.navSide;
-  delete root.dataset.navOff;
 };
 
 /* The bar's order, left to right, the wordmark first. A press in the bar
@@ -35,6 +34,11 @@ const SECTIONS = ["/", "/portfolio"];
 
 /** Ends a held pop's snapshot once the page it went to has rendered. */
 let landed: (() => void) | null = null;
+/** What the page returned to still has to paint before it is snapshotted (a Back's restored cover, v4/home/back.ts). */
+const holds: Promise<unknown>[] = [];
+export const holdLanding = (p: Promise<unknown>) => void holds.push(p);
+/** All of them, 300ms at most. */
+const settle = (all: Promise<unknown>[]) => Promise.race([Promise.all(all), new Promise((r) => setTimeout(r, 300))]);
 const sectionOf = (path: string) =>
   SECTIONS.reduce(
     (found, s, i) => (path === s || (s !== "/" && path.startsWith(`${s}/`)) ? i : found),
@@ -81,8 +85,10 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
     shown.current = path;
     // The page arriving, before it is snapshotted.
     gauge();
-    landed?.();
+    // Safari snapshotted the home before the restored cover decoded: an empty sleeve for 1 to 4 frames (MAC on 9e9dc6c9). 300ms at most.
+    const land = landed;
     landed = null;
+    if (land) settle(holds.splice(0)).then(land);
     if (document.documentElement.dataset.nav === undefined) return;
     const trip = (
       document as Document & {
@@ -167,18 +173,49 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
     let replaying = false;
     const onPop = (e: PopStateEvent) => {
       if (replaying || location.pathname === shown.current) return;
+      /* Back from Cover art (its viewer) to the home: a clean cut (Julian, #1351). A copy of the viewer holds the screen until the home is in
+         place under it with its covers decoded, then goes in one frame. Not a view transition: Safari snapshotted the home before its covers painted (MAC). */
+      const parts = location.pathname === "/" && shown.current.startsWith("/portfolio/coverart") ? document.querySelectorAll<HTMLElement>("[data-zoom-backdrop], [role=dialog][aria-modal=true]") : [];
+      if (parts.length) {
+        const lid = document.createElement("div");
+        lid.setAttribute("aria-hidden", "true");
+        lid.style.cssText = "position:fixed;inset:0;z-index:2147483647;pointer-events:none";
+        lid.innerHTML = "<style>[data-viewer-copy] *{animation:none!important;transition:none!important}</style>";
+        lid.setAttribute("data-viewer-copy", "");
+        for (const n of parts) {
+          const c = n.cloneNode(true) as HTMLElement;
+          // a copy restarts its CSS animations: the neighbours faded in again from nothing (MAC on 153ce8e1). Each element keeps where it is now, still.
+          const from = [n, ...n.querySelectorAll<HTMLElement>("*")], to = [c, ...c.querySelectorAll<HTMLElement>("*")];
+          from.forEach((e, k) => {
+            const cs = getComputedStyle(e);
+            Object.assign(to[k].style, { opacity: cs.opacity, transform: cs.transform, visibility: cs.visibility, filter: cs.filter, clipPath: cs.clipPath });
+          });
+          lid.append(c);
+        }
+        document.body.append(lid);
+        /* Off once the home is in place under it: its covers row mounted, the told cover and its neighbours decoded (back.ts holdLanding), two
+           paints, and the row's own ease-in done (60 to 90ms, MAC SSH on 476d12eb), each wait 300ms at most. By its own clock, not the landing
+           hook: on a warm Back that never came and the copy held for 2.25s (MAC on 153ce8e1). */
+        const t0 = performance.now();
+        const settled = () => settle(document.querySelector(".mt-covers")?.getAnimations?.({ subtree: true }).filter((a) => a.effect?.getTiming().iterations !== Infinity).map((a) => a.finished.catch(() => {})) ?? []);
+        const look = () => {
+          if (!document.querySelector(".mt-covers") && performance.now() - t0 < 1500) return void requestAnimationFrame(look);
+          // one 300ms clock from the row's first frame for the whole hold: the two capped waits chained ran to 407 and 417ms (MAC SSH on 53741f32)
+          const go = () => lid.remove();
+          setTimeout(go, 300);
+          Promise.all(holds.splice(0)).then(() => requestAnimationFrame(() => requestAnimationFrame(() => void settled().then(go))));
+        };
+        requestAnimationFrame(look);
+        return;
+      }
       set("out");
       const ua = (e as PopStateEvent & { hasUAVisualTransition?: boolean })
         .hasUAVisualTransition;
       if (ua || !document.startViewTransition) return;
       e.stopImmediatePropagation();
       gauge();
-      // Back from Cover art (its viewer) to the home: the page slides all the way off, opaque, so the cover under it shows clean (Julian, #1351)
-      // Not split out: the viewer is outside #main, and the home's #main group drew over it at once (MAC on 0df3ca52).
-      const off = location.pathname === "/" && shown.current.startsWith("/portfolio/coverart");
-      if (off) document.documentElement.dataset.navOff = "";
       const main = document.getElementById("main");
-      if (!off) main?.style.setProperty("view-transition-name", "back-page");
+      main?.style.setProperty("view-transition-name", "back-page");
       const trip = document.startViewTransition(
         () =>
           new Promise<void>((done) => {
