@@ -305,7 +305,7 @@
   [data-mtscroll] .mt-covers .mt-rowhead{display:contents}
   [data-mtscroll] .mt-covers .mt-rowhead>*{margin-inline:16px}
   [data-mtscroll] .mt-covers .mt-rowhead .btn{order:3;align-self:flex-start;margin:8px 16px 0}
-  [data-mtscroll] .mt-covers .mt-row{--cv:min(70vw,520px,calc((100svh - 313px) * .96));margin-top:24px;padding:0 calc((100vw - var(--cv)) / 2) 72px;scroll-padding:0}
+  [data-mtscroll] .mt-covers .mt-row{--cv:min(70vw,520px,calc((100svh - 365px) * .96));margin-top:24px;padding:0 calc((100vw - var(--cv)) / 2) 72px;scroll-padding:0}
   [data-mtscroll] .mt-covers .mt-track{gap:16px}
   [data-mtscroll] .mt-item{scroll-snap-align:center}
   [data-mtscroll] .mt-sleeve{width:var(--cv);height:var(--cv)}
