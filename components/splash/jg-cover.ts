@@ -58,7 +58,7 @@ function place(d: HTMLElement) {
   const J = ink("J"), G = ink("G");
   const jl = J.l, jr = J.r, gl = G.l, gr = G.r;
   const asc = Math.max(J.asc, G.asc), gap = fs * 0.04, under = fs * 0.2;
-  const w = jr - jl + gap + gr - gl, cx = d.clientWidth / 2, cy = d.clientHeight / 2;
+  const w = jr - jl + gap + gr - gl, cx = d.clientWidth / 2, cy = (d.dataset.box === undefined ? innerHeight : d.clientHeight) / 2; // the whole screen: centred on what shows, not under the toolbar
   const base = cy + (asc - under) / 2, xj = cx - w / 2 - jl, xg = cx - w / 2 + (jr - jl) + gap - gl;
   d.querySelectorAll("text").forEach((t) => {
     t.setAttribute("x", String(t.classList.contains("j") ? xj : xg));
@@ -100,7 +100,9 @@ function cover(lay: (d: HTMLElement) => void, markup: string) {
      the fold and nothing would show. */
   const f0 = document.querySelector("#p-flow .f-body");
   const box = innerWidth >= 768 && innerWidth > innerHeight && f0 && top(f0) < innerHeight - 240 ? (d.dataset.box = "", true) : false;
-  d.style.cssText = box ? "position:absolute;z-index:5;overflow:hidden" : "position:fixed;inset:0;z-index:2147483000";
+  /* The whole screen runs to the large viewport (lvh), under Safari's toolbar: inset:0 stopped at it, and the page
+     showed in a strip below the cover on an iPhone (QA on #1372). 100vh before it for a browser without lvh. */
+  d.style.cssText = box ? "position:absolute;z-index:5;overflow:hidden" : "position:fixed;inset:0 0 auto 0;height:100vh;height:100lvh;z-index:2147483000";
   d.innerHTML = markup;
   // smaller over the calendar
   if (box) (d.querySelector("svg") as SVGSVGElement).style.fontSize = "96px";
