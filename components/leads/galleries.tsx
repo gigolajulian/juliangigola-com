@@ -1,7 +1,7 @@
 "use client";
 
 /* ── the client's galleries on the lead ───────────────────────────
- * Julian (2026-11-15), from his old Format client page: a client's proof and
+ * A client's proof and
  * delivery galleries beside their details, each with where it stands. Sent
  * to the lead's address or to any of its people. Open takes him to that
  * gallery on the Proofs desk.
@@ -59,7 +59,7 @@ export function Galleries({ galleries, lead, open }: { galleries: Row[]; lead: s
               <Badge label={s.label} variant={s.variant} />
               <Button label="Open" variant="ghost" size="sm" onClick={() => open(p.token)} />
             </HStack>
-            {/* Where it stands at a glance (Julian 2026-11-15), the same timeline as the gallery itself. */}
+            {/* Where it stands at a glance, the same timeline as the gallery itself. */}
             {p.sentAt || p.firstViewAt || p.submittedAt || p.pulledAt || p.deliveredAt ? <Timeline p={p} /> : null}
           </React.Fragment>
         );

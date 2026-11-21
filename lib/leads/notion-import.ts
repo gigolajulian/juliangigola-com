@@ -1,5 +1,5 @@
 /* ── past Notion rows into the desk ──────────────────────────────────
- * Julian (2026-11-11, "go"): the Business Hub's Bookings and Clients CRM rows
+ * The Business Hub's Bookings and Clients CRM rows
  * become past leads. `scripts/import-notion.mjs` reads the export in
  * IMPORT/notion-archive/ and posts one record per person here. A field the
  * lead already has is never overwritten; each Notion row is one "added" line

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { shareOg } from "@/lib/share";
 import { V3Work, type FrameItem, type WorkItem } from "@/components/v3/work";
-import { CATEGORIES, PROJECTS, categoryLabel } from "@/lib/work";
+import { CATEGORIES, PROJECTS, categoryLabel } from "@/lib/work/work";
 import ORDER from "@/lib/portfolio-order.json";
 
 export const metadata: Metadata = {
@@ -18,7 +18,7 @@ const rank = (slug: string) => {
   const i = ORDER.indexOf(slug);
   return i < 0 ? ORDER.length : i;
 };
-/* Off the V3 portfolio grid (Julian, 2026-10-23); the project page stays up. */
+/* Off the V3 portfolio grid; the project page stays up. */
 const HIDDEN = ["realestate"];
 const WORK_PROJECTS = PROJECTS.filter((p) => !HIDDEN.includes(p.slug));
 const WORK: WorkItem[] = WORK_PROJECTS
@@ -36,7 +36,7 @@ const WORK: WorkItem[] = WORK_PROJECTS
 const CHIP = Object.fromEntries(CATEGORIES.map((c) => [c.slug, categoryLabel(c)]));
 
 /* A sleeve's back (`name-b`) follows its front (`name-a`) in the gallery: one
-   cell with a Front / Back switch, not two squares (Julian, 2026-11-05). */
+   cell with a Front / Back switch, not two squares. */
 function sleeves(out: FrameItem[], f: FrameItem) {
   const prev = out[out.length - 1];
   if (prev && !prev.back && /-b\.\w+$/.test(f.src) && prev.src === f.src.replace(/-b(\.\w+)$/, "-a$1")) prev.back = { src: f.src, alt: f.alt.trim() };
@@ -44,7 +44,7 @@ function sleeves(out: FrameItem[], f: FrameItem) {
   return out;
 }
 
-/* Julian (2026-10-27): these chips show their gallery's frames in the grid
+/* These chips show their gallery's frames in the grid
    instead of its one cover. */
 const FRAME_CHIPS = ["automotive", "graduation", "coverart", "events", "headshots", "places", "weddings"];
 const FRAMES = Object.fromEntries(

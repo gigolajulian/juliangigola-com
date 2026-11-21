@@ -1,7 +1,7 @@
 "use client";
 
 /* ── a gallery's password, before anything of it loads ────────────
- * Julian (2026-11-15, after Format): a gallery can carry a password. The
+ * A gallery can carry a password. The
  * server renders only this until the gate's cookie is right, so no frame
  * id or file name reaches the page first. The plain gate's card look
  * (proof.css), centered on an empty page. Paste and password managers work.

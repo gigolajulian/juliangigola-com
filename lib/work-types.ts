@@ -60,13 +60,13 @@ export type Credit = {
   instagram?: string | null;
   /**
    * The handle this credit actually links to, worked out once in
-   * `lib/work.ts`: `instagram` when there is one, and otherwise the name
+   * `lib/work/work.ts`: `instagram` when there is one, and otherwise the name
    * itself where the old site wrote the credit as "@apricotsss3".
    */
   handle?: string | null;
   /**
    * Their profile photograph, a path under `public/`, when one has been
-   * saved. Derived from `handle`; see `avatarFor` in `lib/work.ts`.
+   * saved. Derived from `handle`; see `avatarFor` in `lib/work/work.ts`.
    */
   avatar?: string | null;
 };
@@ -76,7 +76,7 @@ export type Credit = {
  *
  * Positioned rather than free-floating: `after` is how many frames precede
  * it, so `0` opens the sequence and `images.length` closes it. The number is
- * derived in `lib/work.ts` from where the block sat in the edited sequence —
+ * derived in `lib/work/work.ts` from where the block sat in the edited sequence —
  * `/admin` stores one list of photographs and text together, because moving a
  * paragraph three frames later is the same gesture as moving a photograph,
  * and asking for a separate index field would be asking Julian to count.
@@ -107,7 +107,7 @@ export type Project = {
   slug: string;
   /**
    * The slug it was harvested or added under, when `slug` is no longer
-   * that. Set by `reslug` in `lib/work.ts` from the `slugs` map in
+   * that. Set by `reslug` in `lib/work/work.ts` from the `slugs` map in
    * `content/projects.json`, and read by `next.config.ts` to keep the old
    * address answering. Absent on a project that has never been renamed.
    */

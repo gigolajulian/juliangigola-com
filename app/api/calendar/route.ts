@@ -7,8 +7,8 @@ import { isAdmin } from "@/lib/vouch";
 import { bodyOf, json } from "@/lib/http";
 
 /* ── the Leads app's Calendar ─────────────────────────────────────
- * Julian (2026-11-04): "control the calendar, block off days, and add
- * other calendars to read off of". GET shows a range of hello@'s calendar
+ * Controls the calendar: blocks off days and adds
+ * other calendars to read. GET shows a range of hello@'s calendar
  * plus the busy time of the extra calendars; POST blocks or unblocks time
  * and adds or drops an extra calendar.
  *

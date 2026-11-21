@@ -7,7 +7,7 @@ import * as React from "react";
  * (`image-loader.ts`). Content blockers match that path — it is the same
  * prefix Cloudflare uses for its beacon — so on a laptop running one, the
  * photographs are the one thing on the page that does not arrive, and the
- * site reads as broken. Julian's friend saw exactly that.
+ * site reads as broken.
  *
  * A blocked request fires `error` on the image. Resource errors do not
  * bubble, so this listens in the capture phase at the window, which is one

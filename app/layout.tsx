@@ -1,30 +1,30 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { Intro } from "@/components/splash/intro";
-import { SPLASH_RUN } from "@/lib/splash-run";
+import { SPLASH_RUN } from "@/lib/flags/splash-run";
 import { PhotoNotice } from "@/components/photo-notice";
 import { GlassLight } from "@/components/effects/glass-light";
-import { PhotoFade } from "@/components/photo-fade";
-import { TextCaret } from "@/components/text-caret";
+import { PhotoFade } from "@/components/effects/photo-fade";
+import { TextCaret } from "@/components/effects/text-caret";
 import { NavMemo } from "@/components/site/back-link";
 import { PageFly } from "@/components/v3/page-fly";
 import { THEME_COLOR } from "@/lib/theme-color";
 import "./globals.css";
 import { ImageFallback } from "@/components/image-fallback";
 import { PageTransition } from "@/components/site/page-transition";
-import { CardTilt } from "@/components/card-tilt";
-import { HoverSettle } from "@/components/hover-settle";
-import { FocusField } from "@/components/focus-field";
+import { CardTilt } from "@/components/effects/card-tilt";
+import { HoverSettle } from "@/components/effects/hover-settle";
+import { FocusField } from "@/components/contact/focus-field";
 import { ldJson, siteGraph } from "@/lib/seo";
 import { DebugGate } from "@/components/dev/debug-gate";
-import { VisitTrail } from "@/components/visit-trail";
-import { ClickBeacon } from "@/components/click-beacon";
+import { VisitTrail } from "@/components/analytics/visit-trail";
+import { ClickBeacon } from "@/components/analytics/click-beacon";
 import { MotionGate, V3Footer, V3Header } from "@/components/v3/chrome";
 import { ScrollThumb } from "@/components/v3/scroll-thumb";
 import { SmoothScroll } from "@/components/v3/smooth-scroll";
 import { ScrollReveal } from "@/components/v3/scroll-reveal";
 import { V4_HOME } from "@/lib/v4-home/switch";
-import { V4PAGES_HEAD } from "@/lib/v4pages";
+import { V4PAGES_HEAD } from "@/lib/flags/v4pages";
 
 /* JG V3 (DESIGN.md): Inter Tight for the display type and the wordmark,
    IBM Plex Mono for everything else, and Archivo Expanded for the booking
@@ -44,7 +44,7 @@ const display = localFont({
   fallback: ["Helvetica Neue", "Arial", "sans-serif"],
 });
 /* Archivo 800 at 125% width (OFL), cut to 0-9 : $ , and space, 2.4KB.
-   Any other character falls through to Inter Tight (Julian, 2026-11-09). */
+   Any other character falls through to Inter Tight. */
 const figures = localFont({
   variable: "--font-figures",
   src: "./fonts/ArchivoExpanded-Figures.woff2",
@@ -68,7 +68,7 @@ const mono = localFont({
   adjustFontFallback: false,
 });
 
-/* Geist Mono (OFL) for the hero tagline only (Julian, 2026-11-19: "I like mono but it needs to be more visible").
+/* Geist Mono (OFL) for the hero tagline only, so it reads clearly.
    Cut to A-Z, a-z, space and "|", weights 400-600, 5KB. */
 const tagline = localFont({
   variable: "--font-tagline",
@@ -160,7 +160,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
          * with no JavaScript, and from here on both carry whichever theme is
          * actually showing; `components/v3/chrome.tsx` rewrites them when it changes.
          *
-         * The proof gate's wall (the default; `?proofwall=0` for the plain gate) is always dark (Julian, 2026-11-10).
+         * The proof gate's wall (the default; `?proofwall=0` for the plain gate) is always dark.
          *
          * Storage throws outright in some privacy modes rather than
          * returning null, so the whole thing is wrapped; a failure there
@@ -179,11 +179,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             Three conditions (the first page of a visit, whichever it is,
             but not /admin; not seen yet; motion not turned down), and
             `?intro=1` to see it again on demand. On the homepage the
-            opening is J and G round a window of frames (`split-splash.ts`,
-            Julian 2026-11-07), which opens into the hero; `?splash=burst`
-            keeps the burst (2026-10-28). Other pages have no hero to land
+            opening is J and G round a window of frames (`split-splash.ts`),
+            which opens into the hero; `?splash=burst`
+            keeps the burst. Other pages have no hero to land
             on and their own photographs to show, so they get the name
-            alone (`data-splash="name"`, 2026-10-30).
+            alone (`data-splash="name"`).
             `sessionStorage` throws outright in some privacy modes rather
             than returning null, so the whole thing is wrapped and a
             failure simply means no opening. */}
@@ -192,11 +192,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             __html: `(function(){var mo=true;try{var k3="jg-v3motion-off",q3=location.search;if(/[?&]v3motion=0/.test(q3))sessionStorage.setItem(k3,"1");else if(/[?&]v3motion/.test(q3))sessionStorage.removeItem(k3);mo=!sessionStorage.getItem(k3)}catch(e){}if(mo)document.documentElement.dataset.v3motion="";try{var kb="jg-solidhdr";if(/[?&]blur=0/.test(q3))sessionStorage.setItem(kb,"1");else if(/[?&]blur/.test(q3))sessionStorage.removeItem(kb);if(sessionStorage.getItem(kb))document.documentElement.dataset.solidhdr=""}catch(e){}try{var kn="jg-navfx";if(/[?&]navfx=0/.test(q3))sessionStorage.removeItem(kn);else if(/[?&]navfx/.test(q3))sessionStorage.setItem(kn,"1");if(sessionStorage.getItem(kn))document.documentElement.dataset.navfx=""}catch(e){}try{if(!matchMedia("(prefers-reduced-motion: reduce)").matches){document.documentElement.dataset.moves=""}}catch(e){}try{var q=location.search;try{if(/[?&]sleeve=1/.test(q))sessionStorage.setItem("jg-sleeve","1");if(/[?&]sleeve=0/.test(q))sessionStorage.removeItem("jg-sleeve");if(sessionStorage.getItem("jg-sleeve"))document.documentElement.dataset.sleeve=""}catch(e){}var mt=false;try{if(/[?&]mtscroll=1/.test(q))sessionStorage.setItem("jg-mtscroll","1");if(/[?&]mtscroll=0/.test(q))sessionStorage.removeItem("jg-mtscroll");if(${V4_HOME ? "1||" : ""}sessionStorage.getItem("jg-mtscroll")){document.documentElement.dataset.mtscroll="";mt=location.pathname==="/"}}catch(e){}if(mt&&mo&&!/[?&]intro=0/.test(q)&&!matchMedia("(prefers-reduced-motion: reduce)").matches&&(/[?&]intro=1/.test(q)||!sessionStorage.getItem("jg-intro"))){var rr=document.documentElement;rr.dataset.mtIntro="1";setTimeout(function(){if(rr.dataset.mtIntro==="1"&&!("mtOwn" in rr.dataset)){delete rr.dataset.mtIntro;rr.dataset.mtLate=""}},6000)}if(/[?&]intro=0/.test(q)||!mo||mt)return;var burst=/[?&]splash=burst/.test(q);var split=/[?&]splash=split/.test(q);var force=burst||split||/[?&]intro=1/.test(q);var seen=false;try{seen=!!sessionStorage.getItem("jg-intro")}catch(e){}var calm=matchMedia("(prefers-reduced-motion: reduce)").matches;var admin=location.pathname.indexOf("/admin")===0||location.pathname.indexOf("/proof/")===0||location.pathname.indexOf("/delivery/")===0||location.pathname.indexOf("/contract/")===0||/^(admin|leads)[.]/.test(location.hostname);if(force||(!admin&&!seen&&!calm)){var r=document.documentElement;r.dataset.intro="1";if(split||(location.pathname==="/"&&!burst))r.dataset.splash="split";else if(burst)r.dataset.splash="burst";else r.dataset.splash="name";r.style.setProperty("--jg-blink-at",Math.round(100+Math.random()*160)+"ms")}}catch(e){}})()`,
           }}
         />
-        {/* `data-v4pages`: the inner-pages plan on trial (lib/v4pages.ts). `?v4pages` turns
+        {/* `data-v4pages`: the inner-pages plan on trial (lib/flags/v4pages.ts). `?v4pages` turns
             every key on for the tab, `?v4pages=s1,a2` only those, `?v4pages=0` off.
             With no choice made in the tab it follows the V4 home (`data-mtscroll`, set by the
             script above): every key but `tilt` on wherever V4 is on.
-            `p3` is on for everyone unless the tab chose otherwise (Julian, 2026-11-15). */}
+            `p3` is on for everyone unless the tab chose otherwise. */}
         <script
           dangerouslySetInnerHTML={{
             __html: V4PAGES_HEAD,

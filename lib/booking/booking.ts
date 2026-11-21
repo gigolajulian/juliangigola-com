@@ -19,11 +19,11 @@
 
 import { SESSION_TYPES, formatPrice, type SessionType } from "./sessions";
 import { RESPONSE_TIME } from "../site";
-import { isSession, SESSIONS as V3_SESSIONS } from "../v3";
+import { isSession, SESSIONS as V3_SESSIONS } from "../flags/v3";
 import { CONTENT } from "../content";
-import { getProject, projectsIn } from "../work";
+import { getProject, projectsIn } from "../work/work";
 import type { BookingSlug } from "./booking-slugs";
-import type { Frame } from "../work-types";
+import type { Frame } from "@/lib/work-types";
 
 /** `link`: words of the answer that are a link on the page (`label` is found in `a`); the answer itself stays plain text. */
 export type Faq = { q: string; a: string; link?: { href: string; label: string } };
@@ -63,8 +63,8 @@ export type BookingPage = {
   /** The frames its work screen shows, where the gallery is too large
       to show whole: chosen, not sampled. */
   picks?: string[];
-  /** Presets for the form on the Book screen. */
-  /** `cal`: the event it books ("juliangigola/event-slug"; the slug keys
+  /** Presets for the form on the Book screen.
+      `cal`: the event it books ("juliangigola/event-slug"; the slug keys
       `EVENTS` in `booking-rules.ts`), picked on the Book screen in place of the form. */
   book: { type: string; session?: string; title: string; cal?: string };
 };
@@ -464,7 +464,7 @@ export const BOOKING_PAGES: BookingPage[] = [
         body: "A few weddings a year, so each one gets the time it needs. Send the date in the form as early as you have it.",
       },
     ],
-    // Julian (2026-11-16): weddings are on location only, so no "studio" here.
+    // Weddings are on location only, so no "studio" here.
     where: SESSION_WHERE.map((p) =>
       p.name === "San Francisco"
         ? { ...p, note: "Ceremony and reception, on location anywhere in the Bay Area." }

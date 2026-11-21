@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { crc32 } from "@/lib/zip";
+import { crc32 } from "@/lib/proofs/zip";
 
 /* `lib/proofs/delivery.ts`: a final streams into R2 with its byte count
    and CRC taken on the way; its web copies are made after, and a failure

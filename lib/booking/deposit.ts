@@ -6,7 +6,7 @@ import { lockOp, parseBooking, recordBooking } from "@/lib/booking/booking-engin
 import { manageLinks } from "@/lib/booking/booking-token";
 
 /* ── the deposit ──────────────────────────────────────────────────
- * Julian (2026-10-16): the paid sessions take a deposit on the
+ * The paid sessions take a deposit on the
  * site, in the site's own card, before the time is booked. The order
  * is what keeps it honest: nothing is booked until Stripe says the money
  * arrived, so there are no unpaid holds.
@@ -23,7 +23,7 @@ import { manageLinks } from "@/lib/booking/booking-token";
  *      Stripe: KV caches a miss for up to a minute at the visitor's
  *      location, so the card read "pending" after the booking was made
  *      (QA, 2026-10-16).
- *   5. Julian (2026-10-16) hears about it: hello@ gets a mail for every
+ *   5. Julian hears about it: hello@ gets a mail for every
  *      deposit booked, refunded, or paid and stuck. The client's receipt
  *      is Stripe's, from `receipt_email`, and the site's own confirmation
  *      (`lib/booking/confirm.ts`) once the time is booked.
@@ -31,13 +31,13 @@ import { manageLinks } from "@/lib/booking/booking-token";
  * Stripe is called over its REST API with fetch, no SDK: three calls do
  * not need a dependency. Test-mode keys until Julian says live.
  *
- * Julian (2026-11-15): the deposit differs by session (`DEPOSIT` in
+ * The deposit differs by session (`DEPOSIT` in
  * `lib/booking/paid.ts`). The charge is set here from the slug, never
  * from the request. What a booking paid is read off the intent and kept
  * on its record, so a refund, a mail or a log never guesses.
  * ─────────────────────────────────────────────────────────────── */
 
-import { alertAndLog, type Attachment } from "@/lib/hello-mail";
+import { alertAndLog, type Attachment } from "@/lib/email/hello-mail";
 import { stripe } from "@/lib/stripe";
 import { DEPOSIT, LEGACY_DEPOSIT, PAID, isPaid } from "@/lib/booking/paid";
 /** The charge in cents for a session. Throws on a slug that takes no deposit: `parseBooking` lets none through. */
@@ -83,7 +83,7 @@ export function intentForm(b: Booking): { [k: string]: string } {
     // Google Pay ride on card.
     "payment_method_types[]": "card",
     receipt_email: b.email,
-    // Julian (2026-11-16): who and which session, readable in Stripe's payments list. Stripe prints it on the client's receipt too.
+    // Who and which session, readable in Stripe's payments list. Stripe prints it on the client's receipt too.
     // "Session" is the shoot's time, "Booked" the day they paid, both Pacific.
     description: `${SESSION[b.slug] ?? b.slug} deposit: ${b.name}. Session ${whenPT(b.start)}. Booked ${new Intl.DateTimeFormat("en-US", { timeZone: "America/Los_Angeles", month: "short", day: "numeric", year: "numeric" }).format(new Date())}.`,
   };
@@ -253,14 +253,14 @@ export async function bookDeposit(env: Env, intent: string, metadata: { [k: stri
       await put({ status: "booked", booking: { uid: booking.id, start: booking.start } });
       await tell(env, "booked", b, link, intent, usd);
       await recordBooking(env, booking, dashboardLink(intent, env.STRIPE_SECRET_KEY));
-      // Not `confirmOf`: this mail maps the paid Booking and adds the card Stripe charged; it carries no fee, as it always has.
+      // Not `confirmOf`: this mail maps the paid Booking and adds the card Stripe charged. The fee comes from the record, so it says 90% back.
       const confirm = {
         ...b,
         session: SESSION[b.slug] ?? b.slug,
         start: booking.start,
         end: booking.end,
         uid: booking.id,
-        deposit: { ref: intent, at: new Date().toISOString(), amount: usd, card: await cardOf(env.STRIPE_SECRET_KEY, intent) },
+        deposit: { ref: intent, at: new Date().toISOString(), amount: usd, card: await cardOf(env.STRIPE_SECRET_KEY, intent), fee: booking.fee },
         manage: await manageLinks(env.BOOKING_SECRET, booking),
       };
       const sent = await sendConfirm(env.CLIENT_EMAIL, confirm);

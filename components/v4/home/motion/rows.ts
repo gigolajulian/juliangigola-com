@@ -2,7 +2,7 @@ import { scrollGoal, settleTo, shiftScroll } from "@/components/v3/smooth-scroll
 import { matches } from "@/lib/device";
 import { qvalue } from "@/lib/v4-home/flags";
 import { holdEase as ease, holdUnease as unease } from "@/lib/motion/hold-ease";
-import { captionsOff, vimeoListen, vimeoPlays } from "@/lib/videos";
+import { captionsOff, vimeoListen, vimeoPlays } from "@/lib/work/videos";
 import { clamp, MT2, rise, smooth, tell, type Ctx, type Driver } from "./engine";
 import { sleeveTilt } from "@/components/cover/sleeve-tilt";
 import { tp } from "./touch-parity";

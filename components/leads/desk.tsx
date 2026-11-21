@@ -1,10 +1,7 @@
 "use client";
 
 /* ── the lead desk on Astryx, opt-in ──────────────────────────────
- * Julian (2026-11-09): "use it to redesign leads app", then picked the
- * Leads redesign mock (claude.ai/artifact/9TrLqxf8vV4jU4uWPLZz2W, "yes
- * send it to backend"). /admin/leads since the original desk retired (2026-11-11); Astryx's
- * CSS never reaches the site.
+ * Served at /admin/leads only, so Astryx's CSS never reaches the site.
  *
  * Home is the table-filter shape: Your move, This week, Waiting on them,
  * with the open lead beside the list when wide. Phone (≤760) gets a tab
@@ -58,8 +55,7 @@ import { ProofsDesk } from "@/components/proofs/desk";
 type Size = "phone" | "mid" | "wide";
 /** Every page of the desk. */
 type View = "today" | "leads" | "new" | "calendar" | "money" | "invoices" | "licences" | "aside" | "stats" | "traffic" | "seo" | "hours" | "templates" | "device" | "more" | "proofs";
-/** Julian (2026-11-10): "simplify the left tab or group them up", "merge panels that are related", "add icon to all".
- * One nav item per group; a group with more than one page gets a tab row on top. */
+/** One nav item per group, each with an icon; a group with more than one page gets a tab row on top. */
 const SECTIONS: [View, string, [string, View][]][] = [
   ["leads", "Leads", [["Open", "leads"], ["Put aside", "aside"]]],
   ["calendar", "Calendar", [["Calendar", "calendar"], ["Hours", "hours"]]],
@@ -135,7 +131,7 @@ function Stage({ l }: { l: LeadSummary }) {
   );
 }
 
-/* The side nav in the order of the work: what to do, what it earns, how it is set up (Julian, 2026-11-14). */
+/* The side nav in the order of the work: what to do, what it earns, how it is set up. */
 const NAV: [string, View[]][] = [["Work", ["leads", "calendar", "proofs"]], ["Business", ["money", "stats"]], ["Setup", ["templates"]]];
 /* The palette on a phone: the whole screen, as a sheet, with the list taking what the field leaves. */
 const SHEET_CSS = "dialog[data-jg-sheet]{inset:0;margin:0;width:100vw!important;max-width:none!important;height:100dvh!important;max-height:none!important;border:0;border-radius:0;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}dialog[data-jg-sheet]>*{height:100%;max-height:none!important}";

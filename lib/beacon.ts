@@ -1,7 +1,7 @@
 /* ── beacon ───────────────────────────────────────────────────────
  * What the site's own click-and-scroll beacon sends, and how the Worker
  * checks it before it goes into Analytics Engine. Shared by the beacon
- * (`components/click-beacon.tsx`), its route (`app/api/beacon`) and the
+ * (`components/analytics/click-beacon.tsx`), its route (`app/api/beacon`) and the
  * SEO tab's reader (`app/api/seo`).
  *
  * One beacon per page view, sent when the page is left: where it was, how

@@ -7,7 +7,7 @@ vi.mock("@/app/contact/actions", () => ({ submitEnquiry }));
 vi.mock("@/components/reference-picks", () => ({ ReferencePicks: () => null }));
 vi.stubGlobal("fetch", vi.fn(() => Promise.reject(new Error("no network"))));
 
-import { ContactForm, FOLLOW_UP, INITIAL, TYPES, WhenBooking, fit, submitOrKeep } from "@/components/contact-form";
+import { ContactForm, FOLLOW_UP, INITIAL, TYPES, WhenBooking, fit, submitOrKeep } from "@/components/contact/contact-form";
 
 describe("ContactForm", () => {
   it("renders the fields and a send button that is not ready yet", () => {

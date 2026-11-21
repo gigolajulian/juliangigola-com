@@ -97,7 +97,7 @@ const encode = (canvas: HTMLCanvasElement): Promise<Blob> =>
  *
  * Deliberately the mean and not the dominant: on a sunset frame the dominant
  * bucket comes back near-black, which reads as a letterbox bar rather than a
- * mount. See the note on `COVER_OVERRIDES` in `lib/work.ts`.
+ * mount. See the note on `COVER_OVERRIDES` in `lib/work/work.ts`.
  */
 const GRID = 32;
 
@@ -120,7 +120,7 @@ const meanColour = (source: ImageBitmap): string => {
 };
 
 /** Resizes to at most `maxWidth`, never up: upscaling adds bytes, not detail. */
-export async function processImage(
+export async function prepareImage(
   file: File,
   maxWidth: number,
 ): Promise<PreparedAsset> {

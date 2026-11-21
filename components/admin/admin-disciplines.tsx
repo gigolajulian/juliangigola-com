@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
  * Editorial opens with, not which six projects are Press shots, not what order
  * a visitor meets them in. Those are the editorial decisions, and none of them
  * were reachable: the running order came from the harvest and the discipline
- * covers were hand-written in `lib/work.ts`, so changing either meant a commit
+ * covers were hand-written in `lib/work/work.ts`, so changing either meant a commit
  * by somebody who could edit code.
  *
  * So the disciplines are the unit of work here. Open one and you get its
@@ -82,7 +82,7 @@ export function AdminDisciplines({
    * full list.
    *
    * Which is why this writes the whole order rather than adding to a partial
-   * one. `lib/added.ts` accepts either, and a partial list is the nicer thing
+   * one. `lib/work/added.ts` accepts either, and a partial list is the nicer thing
    * to read when nothing has been dragged — but expressing "X before Y, and
    * leave everything else" as a partial list stops being unambiguous the
    * moment two drags overlap. One explicit array is worth the extra lines in
@@ -396,7 +396,7 @@ function Ordering({
  * All of them rather than just the covers, because the frame that represents a
  * whole branch of the site is not necessarily the one that opens a project —
  * the cover column is tall and narrow, so a portrait frame from deep in a
- * gallery is often the right pick, and `COVER_OVERRIDES` in `lib/work.ts` did
+ * gallery is often the right pick, and `COVER_OVERRIDES` in `lib/work/work.ts` did
  * exactly that by hand for three of the disciplines.
  *
  * Lazily loaded: Editorial is eighteen projects and runs to a couple of

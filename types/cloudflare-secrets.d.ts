@@ -9,6 +9,9 @@
  * set, because that is exactly the case the code has to handle. `INBOX_KEY`
  * unset means /admin's Inbox refuses to open rather than serving somebody's
  * enquiries to whoever asks.
+ *
+ * Run `wrangler types` without a local `.dev.vars`: it reads that file and
+ * writes its secrets into `cloudflare-env.d.ts` as required strings.
  */
 interface CloudflareEnv {
   /**
@@ -20,6 +23,12 @@ interface CloudflareEnv {
    * `localStorage` beside the GitHub token, and sent as `x-inbox-key`.
    */
   INBOX_KEY?: string;
+
+  /** Seals leads, proofs and contracts (`lib/leads/lead-crypto.ts`). Set with `wrangler secret put LEADS_KEY`. */
+  LEADS_KEY?: string;
+
+  /** Signs Web Push for /admin's lead alerts (`app/api/inbox/route.ts`). Set with `wrangler secret put VAPID_KEY`. */
+  VAPID_KEY?: string;
 
   /**
    * Reads the site's own Cloudflare analytics for /admin's Traffic tab

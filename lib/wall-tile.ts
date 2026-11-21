@@ -15,7 +15,7 @@ export const wallItem = ({ src, title, href }: WallTile): DriftWallItem => ({
   href,
 });
 
-/* Julian (2026-10-17): the walls behind a frosted card (Inquiries, Sessions,
+/* The walls behind a frosted card (Inquiries, Sessions,
    a service's booking page) are only ever seen blurred, so they take half
    the pixels and a lower quality. The 404's wall is seen sharp and keeps
    `wallItem`. */

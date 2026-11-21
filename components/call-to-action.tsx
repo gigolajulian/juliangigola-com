@@ -2,7 +2,7 @@ import * as React from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { LiquidPair } from "@/components/effects/liquid-pair";
-import { PendingLabel } from "@/components/pending-label";
+import { PendingLabel } from "@/components/contact/pending-label";
 
 /* ── the ask ──────────────────────────────────────────────────────
  * One CTA component, used at the end of every page that a visitor can

@@ -12,7 +12,7 @@ import { AHEAD, e164, fromIso, iso, KEEP, minutesOf, noop, overflowOf, recent, r
 import { byCodeUnit } from "@/lib/utils";
 
 
-/* Goo (Julian, 2026-10-20, OKd 10-21) on the card's buttons, times and
+/* Goo on the card's buttons, times and
    open days. `?goo=0` turns it off: `goo()` in deposit-step.tsx. */
 
 /* ── the time picker ──────────────────────────────────────────────
@@ -65,7 +65,7 @@ export function usePicker({ path, title, className, fallback, v3, onPicked, star
   const [booked, setBooked] = React.useState({ name: "", email: "", where: "", phone: "", via: "" });
   const [days, setDays] = React.useState<Record<string, Slot[]> | null>(null);
   const [state, setState] = React.useState<"loading" | "ready" | "fallback">("loading");
-  /* Julian (2026-10-14): the orb goes one whole round before the days
+  /* The orb goes one whole round before the days
      come in, however fast the times arrive (`ORB_ROUND`, orb.tsx). */
   /* The picker is not drawn while held: the effects that measure it
      re-run on `held`, or they ran on nothing and the week never fitted. */
@@ -107,7 +107,7 @@ export function usePicker({ path, title, className, fallback, v3, onPicked, star
   /* A paid session, its deposit taken here (`?deposit`, deposit-step.tsx). */
   const [paid, setPaid] = React.useState(false);
   const [deposit, setDeposit] = React.useState<DepositBody | null>(null);
-  /* JG V3: references picked on the details step, sent with the deposit (Julian, 2026-10-28). */
+  /* JG V3: references picked on the details step, sent with the deposit. */
   const [refs, setRefs] = React.useState<FormData | null>(null);
   /* What was typed, put back when the deposit step goes back to the form. */
   const typed = React.useRef<Record<string, string>>({});
@@ -156,7 +156,7 @@ export function usePicker({ path, title, className, fallback, v3, onPicked, star
     handOff.current = onPicked && pick ? () => onPicked(new Date(pick.start).toISOString()) : null;
   });
   /* Nothing is waited on here, so the orbs and the check in 1.05s
-     (Julian, 2026-10-14: 1.4s was slow, 0.7s too fast). */
+     (owner pick, do not tune). */
   React.useEffect(() => {
     if (!ok) return;
     const t = window.setTimeout(() => {
@@ -262,7 +262,7 @@ export function usePicker({ path, title, className, fallback, v3, onPicked, star
   };
 
   /* A day picked in a month brings its times up on a phone, where the
-     card is as tall as it needs and the page scrolls (Julian, 2026-10-11). */
+     card is as tall as it needs and the page scrolls. */
   const showTimes = () =>
     requestAnimationFrame(() => {
       const box = slotsBox.current;
@@ -357,7 +357,7 @@ export function usePicker({ path, title, className, fallback, v3, onPicked, star
   const [slotsW, setSlotsW] = React.useState(0);
   /* Watched by whichever box is drawn now: one replaced under the old
      observer read 0 as it left, and the times stacked one to a line under
-     Confirm (Julian, 2026-10-16). Hidden (0) keeps the last width. */
+     Confirm. Hidden (0) keeps the last width. */
   const slotsRO = React.useRef<ResizeObserver | null>(null);
   const slotsRef = React.useCallback((el: HTMLDivElement | null) => {
     slotsRO.current?.disconnect();
@@ -506,7 +506,7 @@ export function usePicker({ path, title, className, fallback, v3, onPicked, star
       for (let n = 0; n <= 3; n++) {
         el.dataset.fit = String(n);
         if (over() <= 1) {
-          /* A wide card with room to spare (Julian, 2026-10-21): the
+          /* A wide card with room to spare: the
              month's cells grow into it, a quarter rem at a time. */
           if (n === 0 && view === "month" && el.clientWidth >= 640) {
             let kept = 3.125;
@@ -535,9 +535,9 @@ export function usePicker({ path, title, className, fallback, v3, onPicked, star
     const body = root.current?.querySelector<HTMLElement>(".ed-body");
     if (body) body.scrollTop = 0;
   }, [mstep]);
-  /* Editorial: the days cascade in, left to right across a week, a ripple from the top left of a month
-     (Julian, 2026-10-16). On every week or month shown, but not the first:
-     once the orb goes the card is there whole (Julian, 2026-10-20). */
+  /* Editorial: the days cascade in, left to right across a week, a ripple from the top left of a month.
+     On every week or month shown, but not the first:
+     once the orb goes the card is there whole. */
   const first = React.useRef(false);
   const shown = view === "week" ? `w${iso(week[0])}` : `m${anchor.getFullYear()}-${anchor.getMonth()}`;
   React.useLayoutEffect(() => {
@@ -551,9 +551,9 @@ export function usePicker({ path, title, className, fallback, v3, onPicked, star
     );
     return () => tw.forEach((t) => t.progress(1).kill());
   }, [step, shown, view, held, state]);
-  /* The swipe nudge (Julian, 2026-10-17, on for everyone): on a touch
+  /* The swipe nudge, on for everyone: on a touch
      screen the week eases 8px left and back after the cascade, no
-     bounce (Julian: the 16px spring was too much), so the strip reads as
+     bounce, so the strip reads as
      something that swipes. Once a visit. */
   React.useEffect(() => {
     const row = daysBox.current?.firstElementChild as HTMLElement | null;
@@ -623,7 +623,7 @@ export function usePicker({ path, title, className, fallback, v3, onPicked, star
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ engine: "own", slug, start: new Date(pick.start).toISOString(), timeZone: tz, name, email: String(form.get("email")), phone, via, ...(notes ? { notes } : {}), ...(needsWhere ? { where } : {}) }),
       });
-      const body = await res.json().catch(() => ({}));
+      const body = (await res.json().catch(() => ({}))) as { status?: string; data?: { uid: string; start: string; end: string; where?: string }; error?: string };
       // 409 is the engine saying the slot went to someone else.
       if (!res.ok || body.status !== "success") throw Object.assign(new Error(body?.error || "failed"), { status: res.status });
       }
@@ -649,7 +649,7 @@ export function usePicker({ path, title, className, fallback, v3, onPicked, star
   };
 
   /* The note: two lines, growing to five with what is typed, then it
-     scrolls (Julian, 2026-10-17). */
+     scrolls. */
   const grow = (e: React.FormEvent<HTMLTextAreaElement>) => {
     const el = e.currentTarget;
     el.style.height = "auto";
@@ -744,7 +744,7 @@ export function usePicker({ path, title, className, fallback, v3, onPicked, star
         // Where the flick was going: Apple's projection (0.998), damped to 40%.
         const ahead = dx + (s.v ?? 0) * 499 * 0.4;
         const dir = ahead < -w / 3 ? 1 : ahead > w / 3 && !atStart ? -1 : 0;
-        /* MOTION-PLAN.md item 2: under Reduce Motion the row
+        /* Motion plan item 2 (docs/decisions.md): under Reduce Motion the row
            followed the finger, and on release it snaps; a turned week fades in. */
         if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
           gsap.set(row, { clearProps: "transform" });

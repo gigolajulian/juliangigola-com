@@ -1,9 +1,9 @@
 "use client";
 
 import * as React from "react";
-import type { FrameRef } from "@/lib/added";
+import type { FrameRef } from "@/lib/work/added";
 import type { Bts, Frame } from "@/lib/work-types";
-import { MAX_WIDTH, readClip, processImage } from "@/lib/admin/admin-image";
+import { MAX_WIDTH, readClip, prepareImage } from "@/lib/admin/admin-image";
 import { useSequence, srcOf, type PendingUpload } from "@/lib/admin/admin-sequence";
 import { cn } from "@/lib/utils";
 
@@ -64,7 +64,7 @@ export function AdminBts({
         const clip = file.type === "video/mp4";
         const media = clip
           ? await readClip(file)
-          : await processImage(file, MAX_WIDTH);
+          : await prepareImage(file, MAX_WIDTH);
         const path = `public/work/${slug}/bts/b${stamp}-${i + 1}.${clip ? "mp4" : "jpg"}`;
         made.push({
           path,

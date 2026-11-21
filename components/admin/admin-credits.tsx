@@ -2,8 +2,8 @@
 
 import * as React from "react";
 import type { Credit } from "@/lib/work-types";
-import { instagramHandle } from "@/lib/added";
-import { processImage } from "@/lib/admin/admin-image";
+import { instagramHandle } from "@/lib/work/added";
+import { prepareImage } from "@/lib/admin/admin-image";
 import { cn } from "@/lib/utils";
 
 /* ── credits ──────────────────────────────────────────────────────
@@ -314,7 +314,7 @@ export function AdminCredits({
  * not: a crew member with no Instagram, or with one nobody could remember, is
  * an ordinary credit and prints as plain text. Normalised here as well as on
  * blur, because a row can be added and published without the field ever being
- * focused, and `lib/added.ts` would then refuse the build over a stray `@`.
+ * focused, and `lib/work/added.ts` would then refuse the build over a stray `@`.
  */
 export const tidyCredits = (credits: Credit[]): Credit[] =>
   credits
@@ -351,7 +351,7 @@ function Face({ desk, handle }: { desk: CreditDeskValue; handle: string }) {
     setSaid("");
     try {
       // 320px: the card draws it at 56, and a retina screen at twice that.
-      const image = await processImage(f, 320);
+      const image = await prepareImage(f, 320);
       desk.onFace(handle, {
         base64: image.base64,
         preview: `data:image/jpeg;base64,${image.base64}`,

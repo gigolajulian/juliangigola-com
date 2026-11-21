@@ -9,9 +9,9 @@ import { sleeveTilt } from "./sleeve-tilt";
 import "@/components/v4/home/motion/rows.css";
 import { CoverFaces, coverLabel } from "@/components/cover/cover-faces";
 import { CoverSound, playSound, stopSound, useSound } from "@/components/cover/cover-sound";
-import type { CoverRelease } from "@/lib/cover-art-types";
+import type { CoverRelease } from "@/lib/work/cover-art-types";
 import { cn } from "@/lib/utils";
-import { useV4pages } from "@/lib/v4pages";
+import { useV4pages } from "@/lib/flags/v4pages";
 
 /* ── the cover-art sheet ──────────────────────────────────────────
  * Every release, three across.
@@ -109,6 +109,15 @@ export function CoverArtGallery({
     () => new Map(frames.map((f, i) => [f.src, i])),
     [frames],
   );
+
+  // `?cover=<slug>`: a cover clicked on the home (components/v4/home/rows.tsx) arrives open in the viewer, on side A, with no history entry of its own: one Back goes home.
+  React.useEffect(() => {
+    const slug = new URLSearchParams(location.search).get("cover");
+    const release = slug ? releases.find((r) => r.slug === slug) : undefined;
+    if (release) lightbox.show(positions.get(release.frames[0].src) ?? 0, null, false);
+    // once, on arrival: a later change of releases is not a new arrival
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <>

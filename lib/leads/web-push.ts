@@ -1,5 +1,5 @@
 /* ── Web Push, by hand ────────────────────────────────────────────
- * Julian (2026-11-04): "start push notifications next". A new lead pings
+ * Push notifications. A new lead pings
  * the installed Leads app on his iPhone and desktop. Web Crypto only, so it
  * runs in the Worker with no dependency: the payload is encrypted for each
  * device (RFC 8291, aes128gcm) and the request signed with the site's VAPID

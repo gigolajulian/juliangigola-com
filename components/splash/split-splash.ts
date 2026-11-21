@@ -19,7 +19,7 @@ export function split(sizes: string[][], heroes: { d: [number, string][]; l: [nu
   const layer = document.querySelector<HTMLElement>("#jg-intro .jg-sheet-wrap");
   if (!layer) return;
 
-  const UP = 800; // the monogram fading in from nothing (Julian, 2026-11-07)
+  const UP = 800; // the monogram fading in from nothing
   const PART = 520; // J and G parting, the window opening
   const BEAT = 120; // one frame in the window
   const HOLD = 260; // the hero in the window before it opens

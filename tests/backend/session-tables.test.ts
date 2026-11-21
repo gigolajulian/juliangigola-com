@@ -3,7 +3,7 @@ import { EVENTS } from "@/lib/booking/booking-rules";
 import { SESSION_EVENTS } from "@/lib/booking/booking";
 import { SESSION } from "@/lib/booking/deposit";
 import { DEPOSIT, PAID, isPaid } from "@/lib/booking/paid";
-import { LENGTH, SESSIONS } from "@/lib/v3";
+import { LENGTH, SESSIONS } from "@/lib/flags/v3";
 
 /* The session tables derived from `EVENTS` and `PAID` give the values they
    held when each was written by hand (2026-11-16), with Headshots and Studio
@@ -30,5 +30,12 @@ describe("session tables", () => {
       if (ev) expect(EVENTS[ev], s.slug).toBeTruthy();
       expect(s.paid, s.slug).toBe(!!ev && isPaid(ev));
     }
+  });
+});
+
+describe("session prices", () => {
+  it("the home card shows the price set in /admin for every session it lists", async () => {
+    const { SESSION_TYPES } = await import("@/lib/booking/sessions");
+    for (const t of SESSION_TYPES) if (t.slug in SESSIONS) expect(SESSIONS[t.slug as keyof typeof SESSIONS].from).toBe(t.from);
   });
 });

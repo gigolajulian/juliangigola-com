@@ -1,5 +1,5 @@
 /* ── client proofs ────────────────────────────────────────────────
- * Julian (2026-11-06): a Lightroom collection becomes a private gallery at
+ * A Lightroom collection becomes a private gallery at
  * /proof/<token>. The client selects frames, ten are included, each extra is
  * $15 and paid through Stripe Checkout, and the selects go back to Lightroom
  * as a color label and Comments on the next Publish.
@@ -9,7 +9,7 @@
  * address. Frames live in the private R2 bucket `jg-proofs` under
  * `<token>/<frame id>.jpg`, served only through `/proof/<token>/f/<id>` while
  * the gallery is open. The token is the only secret. Older galleries: 16
- * random base62 characters, about 95 bits. New ones (Julian 2026-11-11) read
+ * random base62 characters, about 95 bits. New ones read
  * by the day they were made, Pacific: `MMDDYYYY-NN-xxxx`, a counter for that
  * day and 4 random base36 characters, about 20 bits per date and counter.
  * A renamed gallery keeps its storage token (R2 keys, Stripe metadata, the
@@ -31,14 +31,14 @@ export type ProofFrame = {
   t?: number;
 };
 
-/** One finished photo for the delivery: the full-size JPEG Lightroom's Delivery service published (Julian 2026-11-12). */
+/** One finished photo for the delivery: the full-size JPEG Lightroom's Delivery service published. */
 export type Final = ProofFrame & {
   /** Size in bytes and CRC-32 of the stored file, worked out once at upload so the zip only pipes bytes. */
   bytes: number;
   crc: number;
   /** The model this final belongs to: its published collection's name inside a delivery set ("04", "Marcus"). Unset: a delivery with no models. */
   model?: string;
-  /** Five stars in Lightroom: shown on the delivery's gate wall (Julian 2026-11-19). */
+  /** Five stars in Lightroom: shown on the delivery's gate wall. */
   top?: boolean;
 };
 
@@ -60,11 +60,11 @@ export type Proof = {
   included: number;
   /** Dollars per frame past `included`. */
   price: number;
-  /** Dollars left on the shoot, paid with the extras at Send (Julian 2026-11-08: pay the balance to send selects). */
+  /** Dollars left on the shoot, paid with the extras at Send: the balance is paid to send selects. */
   balance?: number;
   /** Days open, counted from when the email goes out (or the link is first copied). */
   days: number;
-  /** The "Julian Gigola" wordmark baked into every served frame (Julian 2026-11-10). On for new galleries; unset reads as off. */
+  /** The "Julian Gigola" wordmark baked into every served frame. On for new galleries; unset reads as off. */
   watermark?: boolean;
   /** Julian's pick for the link preview: a frame and the crop of it, in source pixels (height follows the card). Unset: the first frame, auto-cropped. */
   card?: CardCrop;
@@ -95,26 +95,26 @@ export type Proof = {
   pulledAt?: string;
   /** Who sent the selects: the address typed at the gate. */
   submittedBy?: string;
-  /** Everyone who opened the gallery, by lowercased email (Julian 2026-11-08: any email opens it, log everything). */
+  /** Everyone who opened the gallery, by lowercased email: any email opens it, and every open is logged. */
   viewers?: Record<string, Viewer>;
-  /** The finished photos (Julian 2026-11-12: the proof gallery becomes the delivery). Uploaded before Send finals; the client sees them after. */
+  /** The finished photos: the proof gallery becomes the delivery. Uploaded before Send finals; the client sees them after. */
   finals?: Final[];
   /** When Send finals went out: the gallery is a delivery from here, at /delivery/<id>, and `closesAt` counts from it. */
   deliveredAt?: string;
   /** The client's first download, one file or the zip: the lead moves to Delivered. Julian's own and test addresses do not count. */
   firstDownloadAt?: string;
-  /** Mails to hello@ (Julian 2026-11-15, after Format): "each" mails every open, send and download as it happens; "daily" one
+  /** Mails to hello@: "each" mails every open, send and download as it happens; "daily" one
       summary a day; "off" nothing, the Selects in alert included. Unset is the old way: only Selects in. */
   notify?: Notify;
-  /** Offline (Julian 2026-11-15): the proof, the delivery, every frame and download answer "offline" at once. Unset is online. */
+  /** Offline: the proof, the delivery, every frame and download answer "offline" at once. Unset is online. */
   offline?: boolean;
   /** An optional password on the gate: PBKDF2 of it, never the password. Only `hasPass` leaves the server (`forDesk`). */
   pass?: { salt: string; hash: string };
-  /** A line under the gate's heading, the client's name or the shoot date (Julian 2026-11-15). Unset: none. */
+  /** A line under the gate's heading, the client's name or the shoot date. Unset: none. */
   subhead?: string;
   /** File names on the thumbnails, proof and delivery. Unset is off: Lightroom names stay Julian's unless he turns this on. */
   labels?: boolean;
-  /** When the one reminder per stage went out (Julian 2026-11-15): stamped before the mail, so a second is refused. */
+  /** When the one reminder per stage went out: stamped before the mail, so a second is refused. */
   reminded?: { proofs?: string; finals?: string };
 };
 
@@ -208,14 +208,14 @@ export const markedKey = (token: string, id: string) => `${token}/${id}.wm1.jpg`
 /** The link-preview card made from a gallery's first frame. Keyed by that frame, so a new first frame gets a new card. */
 export const cardKey = (token: string, id: string) => `${token}/card-${id}.v1.jpg`;
 /** The smaller copy the gate's wall and the grid show (`?w=` on a frame's URL), clean or marked: a phone decoding fifty
-    full-size frames at once lagged (Julian 2026-11-10). Made once by Cloudflare Images, then read from R2. */
+    full-size frames at once lagged. Made once by Cloudflare Images, then read from R2. */
 export const THUMB_W = 800;
 export const thumbKey = (token: string, id: string, marked: boolean) => `${token}/${id}.t${THUMB_W}${marked ? ".wm1" : ""}.jpg`;
 /** A final and its two web copies, under their own prefix so a lifecycle rule could reach them alone. */
 export const finalKey = (token: string, id: string, w?: number) => `delivery/${token}/${id}${w ? `.w${w}` : ""}.jpg`;
 export const PREVIEW_W = 2000;
 export const finalKeys = (token: string, id: string) => [finalKey(token, id), finalKey(token, id, PREVIEW_W), finalKey(token, id, THUMB_W)];
-/** Days a delivery stays open from Send finals (Julian 2026-11-12). Extend still adds days. */
+/** Days a delivery stays open from Send finals. Extend still adds days. */
 export const DELIVERY_DAYS = 60;
 /** Every derived file a frame can have in R2, for deletes. */
 export const frameKeys = (token: string, id: string) => [frameKey(token, id), markedKey(token, id), cardKey(token, id), thumbKey(token, id, true), thumbKey(token, id, false)];
@@ -258,7 +258,7 @@ export function proofId(day: string, taken: Iterable<string>, rand = tail()): st
   if (n >= 99) throw new Error("99 galleries on one day already.");
   return `${day}-${String(n + 1).padStart(2, "0")}-${rand}`;
 }
-/* The shoot id (Julian 2026-11-12): the shoot day and 8 characters from 30 that cannot be misread (no 0, 1, i, l, o, u),
+/* The shoot id: the shoot day and 8 characters from 30 that cannot be misread (no 0, 1, i, l, o, u),
    about 39 random bits. One id for the whole shoot: /proof/<id> while picking, /delivery/<id> after. */
 const SHOOT = "23456789abcdefghjkmnpqrstvwxyz";
 const SHOOT_ID = /^(\d{8})-[2-9a-hjkmnp-tv-z]{8}$/;
@@ -292,11 +292,10 @@ export function extras(selected: number, included: number, price: number) {
   return { n, dollars: n * price };
 }
 
-/** Whether the client can still see the gallery. Unsent galleries are open (Julian previews them). */
 /**
  * The card price for what bank pays in full: Stripe's card fee (2.9% + 30c) on top, rounded up to the dollar,
- * so Julian keeps at least the bank amount either way. Shown as the list price; bank is the discount
- * (Julian 2026-11-09). A discount for another way to pay is allowed in California; a card surcharge is not safe.
+ * so Julian keeps at least the bank amount either way. Shown as the list price; bank is the discount.
+ * A discount for another way to pay is allowed in California; a card surcharge is not safe.
  */
 export const cardPrice = (cents: number) => (cents > 0 ? Math.ceil((cents + 30) / 0.971 / 100) * 100 : 0);
 
@@ -310,7 +309,8 @@ export function owed(p: Pick<Proof, "selects" | "included" | "price" | "paid" | 
   return { n, balance: bal, cents: bal + n * p.price * 100 };
 }
 
-export const isOpen = (p: Pick<Proof, "closesAt" | "offline">, now = Date.now()) => !p.offline && (!p.closesAt || Date.parse(p.closesAt) > now);
+/** Whether the client can still see the gallery. Unsent galleries are open (Julian previews them). */
+export const isOpen =(p: Pick<Proof, "closesAt" | "offline">, now = Date.now()) => !p.offline && (!p.closesAt || Date.parse(p.closesAt) > now);
 
 /** The gallery's cover for link previews: its first frame, the site's rule for every set. Only when watermarked and open, so a preview never carries a clean file. */
 export const coverFrame = (p: Pick<Proof, "frames" | "watermark" | "closesAt" | "card" | "offline" | "pass">): ProofFrame | null =>
@@ -319,7 +319,7 @@ export const coverFrame = (p: Pick<Proof, "frames" | "watermark" | "closesAt" | 
 
 export const closesAt = (days: number, from = Date.now()) => new Date(from + days * 864e5).toISOString();
 
-/* ── the one reminder (Julian 2026-11-15) ─────────────────────────
+/* ── the one reminder ─────────────────────────
    Only on his tap in Leads, only in the last REMIND_DAYS before the gallery closes, once per stage, never after
    the client sent selects (proofs) or downloaded (finals). A reminder never moves the close date. */
 export const REMIND_DAYS = 5;
@@ -351,7 +351,6 @@ export function closingSoon(closes: string | null | undefined, now = Date.now())
   return left > 0 && left <= REMIND_DAYS * 864e5 ? Math.ceil(left / 864e5) : null;
 }
 
-/** What the client page gets: no address, no Lightroom name. */
 /** Frames by capture time when every frame has one, else as uploaded (a frame published later went to the end). */
 export function shotOrder<F extends { t?: number }>(frames: F[]): F[] {
   return frames.every((f) => f.t) ? [...frames].sort((a, b) => a.t! - b.t!) : frames;
@@ -365,6 +364,7 @@ export function lookStarts(frames: { t?: number }[], gap = 600): number[] {
   return out.length > 1 ? out : [];
 }
 
+/** What the client page gets: no address, no Lightroom name. */
 export function publicView(p: Proof) {
   return {
     // No file name: Lightroom names are Julian's, the client sees proof numbers.

@@ -1,8 +1,7 @@
 "use client";
 
 /* ── Calendar on Astryx ───────────────────────────────────────────
- * Julian (2026-11-10) approved the mock (claude.ai/artifact/WWQy2jVbaeTG7sdDKgGmU5,
- * #calendar and #availability): one Calendar page, two tabs.
+ * One Calendar page, two tabs.
  * Bookings: the week from the picked day, his leads' calls and sessions
  * beside the rest of hello@ and the calendars it reads (as LeadUpcoming).
  * Availability: pick a day or a run of days, block them or some hours,

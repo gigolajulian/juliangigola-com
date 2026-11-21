@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { v4pages } from "@/lib/v4pages";
+import { v4pages } from "@/lib/flags/v4pages";
 
 /** `?v4pages=tilt`: the home hero's pointer depth (components/v4/home/motion/depth.ts),
     toned down, on /portfolio. The view on screen (grid, strip or canvas field)

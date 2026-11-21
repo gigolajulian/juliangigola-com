@@ -7,7 +7,7 @@
  * homepage's opening since 2026-10-28 (Julian: "make default").
  *
  * 2026-10-30: the wordmark's letters rise out of their line; the run is
- * the portfolio's first covers (`lib/splash-run.ts`) on a quickening
+ * the portfolio's first covers (`lib/flags/splash-run.ts`) on a quickening
  * beat, every one in the same 4:5 frame, which glides into the hero.
  * Every other page plays the wordmark alone (`data-splash="name"`).
  * The wordmark stays where it is and the run comes up over it.
@@ -27,15 +27,14 @@ export function burst(sizes: string[][], heroes: { d: [number, string][]; l: [nu
   if ((root.dataset.splash !== "burst" && !alone) || root.dataset.intro !== "1") return;
   // the hero at the width the page's srcset picks: the window in device pixels, rounded up the ladder
   const px = innerWidth * devicePixelRatio, rung = (l: [number, string][]) => (l.find(([w]) => w >= px) ?? l[l.length - 1])[1];
-  /* MOTION-PLAN.md item 11 (phase 3 pick b): 4 covers held 350ms each on an
+  /* Motion plan item 11 (docs/decisions.md) (phase 3 pick b): 4 covers held 350ms each on an
      even beat, drop 600, glide 1000 on `move`. Replay with ?intro=1. */
   const frames = alone ? [] : sizes.slice(0, 4).map((f) => f[big]), hero = { d: rung(heroes.d), l: rung(heroes.l) };
   // inside the sheet's HTML block, which React leaves alone when it hydrates
   const layer = document.querySelector("#jg-intro .jg-sheet-wrap");
   if (!layer) return;
 
-  /* Tightened (Julian, 2026-10-31: the desktop splash down from 4.7s to
-     about 3.2s). Same moves in the same order, each one shorter. */
+  /* About 3.2s on a desktop (owner pick, do not tune). */
   const STAGGER = 18; // between letters of the wordmark rising
   const RISE = 460; // one letter rising out of its line
   const HOLD = 80; // the wordmark whole, once everything has loaded
@@ -151,7 +150,7 @@ export function burst(sizes: string[][], heroes: { d: [number, string][]; l: [nu
     bar.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 450, easing: EASE, fill: "forwards" });
     await sleep(risen + HOLD);
     while (shownP < 0.995 && performance.now() - start < LOAD) await sleep(30);
-    /* Julian (2026-10-31): the wordmark never animates out. It stays put
+    /* The wordmark never animates out. It stays put
        and the run's frames come up over it, so it goes under the photos. */
     bar.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 300, easing: EASE, fill: "forwards" });
     filling = false;
@@ -176,7 +175,7 @@ export function burst(sizes: string[][], heroes: { d: [number, string][]; l: [nu
     if (left() > 2500)
       for (let k = 0; k < run.length; k++) {
         show(run[k]);
-        /* Julian (2026-10-31): the first frame stacks over the name in 3D,
+        /* The first frame stacks over the name in 3D,
            coming down from just in front of the camera, a little turned,
            and settling flat on top of it. No flip, no shadow. */
         if (k === 0) {
@@ -192,8 +191,8 @@ export function burst(sizes: string[][], heroes: { d: [number, string][]; l: [nu
 
     /* The hero, once it is decoded (not long: it was asked for first
        thing), cut into the run's 4:5 frame, and from there one move into
-       its place on the page (Julian, 2026-10-31: no opening out to the
-       whole photograph and no pause on the way). */
+       its place on the page, with no opening out to the
+       whole photograph and no pause on the way. */
     while (!shown.has(last) && left() > LAND + CLEAR) await sleep(30);
     const whole = shown.has(last); // if it never came, the page simply comes up
     for (; whole && left() > LAND + CLEAR; await sleep(30)) {

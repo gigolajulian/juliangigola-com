@@ -4,7 +4,7 @@
  * where to shoot on campus; commencement is in spring (SEO.md, Next 1).
  *
  * Each spot names its photographs from the graduation gallery by file, so
- * the alt text is the gallery's own (`lib/alt-text.ts`). A spot with no
+ * the alt text is the gallery's own (`lib/work/alt-text.ts`). A spot with no
  * photograph of mine is text only.
  */
 

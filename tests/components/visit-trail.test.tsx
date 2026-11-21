@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { render } from "@testing-library/react";
-import { VisitTrail, trailContext } from "@/components/visit-trail";
+import { VisitTrail, trailContext } from "@/components/analytics/visit-trail";
 
 beforeEach(() => sessionStorage.clear());
 

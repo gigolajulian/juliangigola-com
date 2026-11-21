@@ -1,7 +1,7 @@
 import { COMM_KEYS, DOES, FILM_DRESS, FILM_FILES, FILM_PICKS, HERO_KEYS, type MtData, type MtFrame } from "@/lib/v4-home/data";
-import { PROJECTS, categoryLabel, getProject } from "@/lib/work";
+import { PROJECTS, categoryLabel, getProject } from "@/lib/work/work";
 import { CONTENT } from "@/lib/content";
-import { REEL, posterFor, previewUrl } from "@/lib/videos";
+import { REEL, posterFor, previewUrl } from "@/lib/work/videos";
 import { RESPONSE_TIME } from "@/lib/site";
 
 /* `?mtscroll=1` (v4 home): the frames resolved on the server so lib/work stays out of the client. */

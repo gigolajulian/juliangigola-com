@@ -4,7 +4,7 @@ import { type Change } from "./leads";
 import { canonLeads, findLead, recordLead, type LeadStore } from "./lead-store";
 
 /* ── hello@'s Gmail on the lead timeline ─────────────────────────
- * Julian (2026-11-04): "your own Gmail replies on the timeline". Every ten
+ * His own Gmail replies show on the lead's timeline. Every ten
  * minutes the booking Worker's cron pings `app/api/leads/gmail`, which reads
  * what changed in hello@'s mailbox since last time (Gmail history, read-only
  * scope on the same `GCAL_OAUTH` token) and folds each mail into the lead it

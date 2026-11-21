@@ -2,13 +2,13 @@
 
 import * as React from "react";
 import { flushSync } from "react-dom";
-import DriftWall from "@/components/drift-wall";
+import { DriftWall } from "@/components/drift-wall";
 import { GRIDWALL, wallFill, type Gridwall } from "@/lib/proofs/gridwall";
 
 /* ── the proof gate over the 404's wall (the default; ?proofwall=0 for the plain gate) ──
- * Julian (2026-11-10): the 404's wall (`DriftWall`) under a glass card,
+ * The 404's wall (`DriftWall`) under a glass card,
  * carrying this gallery's own watermarked frames, and the move from
- * sign-in to gallery seamless. Then: the photos must not travel left or
+ * sign-in to gallery seamless. The photos never travel left or
  * right to reach the gallery. So the wall is laid out on the gallery's
  * own columns: one wall column of the grid's width for each, carrying
  * that column's frames in order, with spare columns either side for the
@@ -77,7 +77,7 @@ export function ProofWall({
   words,
 }: {
   frames: Frame[];
-  /** The card's words; the proof gate's by default. The delivery passes its own (Julian 2026-11-19). */
+  /** The card's words; the proof gate's by default. The delivery passes its own. */
   words?: { lab: string; title: string; cta: string; note: string };
   /** The gallery's subheading under the heading, when Julian set one. */
   sub?: string | null;
@@ -93,7 +93,7 @@ export function ProofWall({
   const [name, setName] = React.useState("");
   const [email, setEmail] = React.useState("");
   const [bad, setBad] = React.useState<string | null>(null);
-  // Julian (2026-11-10): the load-up should feel premium. The wall streams in sharp, every other column from above and below, then racks
+  // The wall streams in sharp, every other column from above and below, then racks
   // focus to blur as the card rises in, its lines one after another (`[data-ready]`, proof.css).
   const [ready, setReady] = React.useState(false);
   const [flat, setFlat] = React.useState(false);
@@ -213,7 +213,7 @@ export function ProofWall({
     return out;
   }
 
-  /** Julian 2026-11-11 (the wall becomes the gallery, from the moment of the click): each column's speed is
+  /** The wall becomes the gallery from the moment of the click: each column's speed is
    *  read as Open proofs is pressed and the column carries on from it, easing into the slot where its photos stand on the
    *  gallery's cells, while the wall turns flat and face on and comes sharp. The tiles that land already carry the
    *  gallery's frames (swapped while still soft, where a column stood on others); the ones above the grid fade. Once still,

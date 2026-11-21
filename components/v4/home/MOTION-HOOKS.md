@@ -1,7 +1,7 @@
 # v4 home: motion hooks
 
 The v4 home (`?mtscroll=1`) renders every screen at rest. These are the
-elements and properties the motion pass (`motion/`) drives. Spec: SPEC-home-scroll.md.
+elements and properties the motion pass (`motion/`) drives. Decisions: docs/mt-decisions.md.
 Styles: `app/styles/mtscroll.css` (design unit `--u`, structures D / T / P / L).
 
 ## Every held section

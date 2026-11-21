@@ -44,7 +44,7 @@ export function V4Foot() {
     while (sink && !sink.offsetHeight && sink.previousElementSibling) sink = sink.previousElementSibling as HTMLElement;
     let raf = 0, t0 = 0, y0 = scrollY, x = 0, v = 0, pk = 0, W = 0, out = 0, hot = false;
     // What moves: the block, or on a grid (/portfolio) only the tiles in its last screen. Sinking and dimming
-    // the whole grid while its photos drift dropped frames (Julian, 2026-11-16).
+    // the whole grid while its photos drift dropped frames.
     let parts: HTMLElement[] = [];
     const setOut = (o: number) => {
       if (!sink || o === out) return;

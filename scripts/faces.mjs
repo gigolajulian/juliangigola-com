@@ -43,7 +43,7 @@ const asked = args.filter((a) => !a.startsWith("--")).map((a) => a.toLowerCase()
 /**
  * Every handle the site credits, once each.
  *
- * Read off the two files rather than through `lib/work.ts`, which imports
+ * Read off the two files rather than through `lib/work/work.ts`, which imports
  * by bundler resolution and cannot be loaded by Node as it stands. The
  * handles live in `content/projects.json`, where /admin writes them, and
  * six of the harvested credits carry the handle as the name — those are

@@ -5,9 +5,8 @@
  * a cover over it. The cover is the ground with J and G cut out of it and
  * the ink letters over the holes (cut only once the page under is in
  * place: until then the mask letters are white, so nothing shows through);
- * `jg-load.tsx` drives the line and opens the cut when the times are in
- * (Julian, 2026-11-19: "open the booking page as a cutout and scale it
- * smoothly", then "centered"). J, G and the line are set by their ink, not
+ * `jg-load.tsx` drives the line and opens the cut when the times are in.
+ * J, G and the line are set by their ink, not
  * their boxes, so the mark sits in the middle of the screen; set again when
  * the face loads and on resize. The point where J meets G is kept for the
  * cut to grow from (`data-ox`, `data-oy`). Outside React, at the end of
@@ -84,8 +83,7 @@ function cover(lay: (d: HTMLElement) => void, markup: string) {
   d.setAttribute("aria-hidden", "true");
   d.dataset.at = String(performance.now());
   /* iPad and desktop: over the calendar only, the steps, title and cards
-     show at once (Julian, 2026-11-19: "only in the calendar", "on desktop
-     and iPad"); it follows the calendar's box as it is drawn. A phone: the
+     show at once; it follows the calendar's box as it is drawn. A phone: the
      whole screen. */
   // under the session cards (and the lines under them): where the calendar starts
   const top = (n: Element) => {
@@ -96,13 +94,13 @@ function cover(lay: (d: HTMLElement) => void, markup: string) {
     }
     return t;
   };
-  /* The whole screen on an upright screen, or when the calendar starts out of view: upright, the box sat below
-     the fold and nothing showed (Julian, 2026-11-20: "ON THE WHOLE PAGE HERE"). */
+  /* The whole screen on an upright screen, or when the calendar starts out of view: upright, the box sits below
+     the fold and nothing would show. */
   const f0 = document.querySelector("#p-flow .f-body");
   const box = innerWidth >= 768 && innerWidth > innerHeight && f0 && top(f0) < innerHeight - 240 ? (d.dataset.box = "", true) : false;
   d.style.cssText = box ? "position:absolute;z-index:5;overflow:hidden" : "position:fixed;inset:0;z-index:2147483000";
   d.innerHTML = markup;
-  // smaller over the calendar (Julian, 2026-11-19: "make the JG smaller")
+  // smaller over the calendar
   if (box) (d.querySelector("svg") as SVGSVGElement).style.fontSize = "96px";
   document.documentElement.appendChild(d);
   let el: Element | null = null;

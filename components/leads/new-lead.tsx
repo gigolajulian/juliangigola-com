@@ -1,8 +1,7 @@
 "use client";
 
 /* ── New lead on Astryx ───────────────────────────────────────────
- * Julian (2026-11-10) approved the mock (claude.ai/artifact/WWQy2jVbaeTG7sdDKgGmU5,
- * #new): how they reached him, the name, one way back to them, what they
+ * How they reached him, the name, one way back to them, what they
  * want, the stage and notes. Same POST `{ add }` as the classic
  * NewLeadForm (components/leads/setup.tsx). New here: a lead already on
  * the desk with the same name, email, Instagram or phone shows before he adds a second.

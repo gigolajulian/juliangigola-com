@@ -9,7 +9,7 @@
 
 import { sealer } from "@/lib/leads/lead-crypto";
 import { finalKey, PREVIEW_W, THUMB_W, isFrameId, isStrongId, isToken, readPublic, shotOrder, shut, type Proof } from "@/lib/proofs/proof";
-import { uniqueNames, zipLayout } from "@/lib/zip";
+import { uniqueNames, zipLayout } from "@/lib/proofs/zip";
 
 declare global {
   /** Workers' own stream with a known length (R2 and a Content-Length need it). Not in this project's DOM types; Workers only, not `next dev`. */
@@ -84,7 +84,7 @@ export async function servedPreview(env: Pick<Env, "PROOFS" | "IMAGES">, token: 
   return kept || null;
 }
 
-/** "Save for web" (Julian 2026-11-15): the 2000px copy the lightbox shows, as `<file> web.jpg`, with its length. */
+/** "Save for web": the 2000px copy the lightbox shows, as `<file> web.jpg`, with its length. */
 export async function webResponse(request: Request, env: Env, id: string, fid: string) {
   const g = isFrameId(fid) ? await openDeliveryIn(env, id, request.headers.get("cookie")) : null;
   const f = g && finalOf(g.p, fid);
@@ -105,7 +105,7 @@ export async function zipResponse(request: Request, env: Env, id: string) {
   if (!g) return notFound();
   const busy = await limited(env, request);
   if (busy) return busy;
-  // `?m=M04`: one model's finals (Julian 2026-11-19). Same stored bytes, so a model zip is as ready as the full one.
+  // `?m=M04`: one model's finals. Same stored bytes, so a model zip is as ready as the full one.
   const m = new URL(request.url).searchParams.get("m");
   const finals = shotOrder((g.p.finals ?? []).filter((f) => !m || f.model === m));
   if (!finals.length) return notFound();

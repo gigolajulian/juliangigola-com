@@ -4,13 +4,40 @@ import * as React from "react";
 import { flushSync } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
-import { COVER_RELEASES } from "@/lib/cover-art-data";
-import type { CoverRelease } from "@/lib/cover-art-types";
+import { COVER_RELEASES } from "@/lib/work/cover-art-data";
+import type { CoverRelease } from "@/lib/work/cover-art-types";
 import { media } from "@/lib/device";
+import { dropSpot, keepSpot, layoutTop } from "./back";
+import { projectHref } from "@/lib/project-href";
 import { holdEase, holdUnease } from "@/lib/motion/hold-ease";
 import { clamp, MT2, progress } from "./motion/engine";
 import { COVER_KEYS, COVER_PRESS, FILM_DRESS, pad, type MtFilm } from "@/lib/v4-home/data";
 import { qflag } from "@/lib/v4-home/flags";
+
+/** A home cover opens on the Cover art page, in that page's viewer (`?cover=`, components/cover/cover-art-gallery.tsx). */
+export const coverHref = (slug: string) => `${projectHref("coverart")}?cover=${encodeURIComponent(slug)}`;
+
+/* A tap on a two-sided sleeve turns it over on touch (?mttp=flip, motion/rows.ts), so that tap does not also leave the page. */
+function keepFlip(e: React.MouseEvent<HTMLElement>) {
+  if (e.currentTarget.hasAttribute("data-flip") && document.documentElement.hasAttribute("data-tp-flip") && !media("fine").matches) {
+    e.preventDefault();
+    dropSpot();
+  }
+  // Back lands on the cover that was clicked (Julian), over the spot the page-wide save took (back.ts)
+  else keepSpot(coverSpot(e.currentTarget));
+}
+
+/** The spot that holds the clicked cover in the middle (Julian: "Back lands on the cover you clicked"): held (desktop), the place in
+    the block's scroll that brings that cover up (the covers driver's own map, motion/rows.ts); a phone's row, that cover's snap. */
+function coverSpot(it: HTMLElement) {
+  const sec = it.closest<HTMLElement>(".mt-covers")!, row = it.closest<HTMLElement>(".mt-row");
+  const items = row ? [...row.querySelectorAll<HTMLElement>(".mt-item")] : [];
+  const i = items.indexOf(it), n = items.length;
+  const here = { b: "covers", off: scrollY - layoutTop(sec), x: row?.scrollLeft ?? 0 };
+  if (!row || i < 0 || n < 2) return here;
+  if (media("held").matches) return { ...here, off: holdUnease(i / (n - 1)) * (sec.offsetHeight - innerHeight), x: 0 };
+  return { ...here, x: i * (items[1].offsetLeft - items[0].offsetLeft) };
+}
 
 const COVERS = COVER_KEYS.map((k) => COVER_RELEASES.find((r) => r.slug === k)).filter((r): r is CoverRelease => !!r);
 
@@ -69,14 +96,14 @@ export function MtCovers() {
             {COVERS.map((c, i) => {
               const back = c.frames[1];
               return (
-                <div key={c.slug} className="mt-item mt-sleeve" data-i={i} data-flip={back ? "" : undefined} style={{ "--o": 0.5, "--press": COVER_PRESS[c.slug] } as React.CSSProperties}>
+                <Link key={c.slug} href={coverHref(c.slug)} onClick={keepFlip} className="mt-item mt-sleeve" data-i={i} data-flip={back ? "" : undefined} style={{ "--o": 0.5, "--press": COVER_PRESS[c.slug] } as React.CSSProperties}>
                   <span className="disc" aria-hidden />
                   <div className="face">
                     <Image src={c.frames[0].src} alt={`${c.title} by ${c.artist}`} fill sizes="(max-width: 599px) 92vw, 34vw" />
                     {back ? <Image className="back" src={back.src} alt={`${c.title}, back of the sleeve`} fill sizes="34vw" /> : null}
                   </div>
                   <p className="lbl mt-cvcap" aria-hidden><span>{c.title}</span><span className="mute">{c.artist}</span></p>
-                </div>
+                </Link>
               );
             })}
           </div>

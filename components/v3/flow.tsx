@@ -1,7 +1,7 @@
 import * as React from "react";
 import Image from "next/image";
-import { INITIAL, submitOrKeep } from "@/components/contact-form";
-import { trailContext } from "@/components/visit-trail";
+import { INITIAL, submitOrKeep } from "@/components/contact/contact-form";
+import { trailContext } from "@/components/analytics/visit-trail";
 import type { ContactState } from "@/lib/inbox";
 import { looksLikeEmail } from "@/lib/inbox";
 
@@ -181,7 +181,7 @@ export function Field({
           {label}
           {req ? <span className="req" aria-hidden="true"> *</span> : null}
         </span>
-        {/* Julian (2026-11-06): the error lives in the field, no box. Empty: it is the placeholder; with text: it takes the hint's place. */}
+        {/* The error lives in the field, no box. Empty: it is the placeholder; with text: it takes the hint's place. */}
         {err && value ? <span className="fe" aria-hidden="true">{err}</span> : <span>{hint}</span>}
       </label>
       {area ? (
@@ -273,8 +273,8 @@ export function Calendar({
           if (!t) return <span key={`b${k}`} />;
           const id = iso(t);
           const tg = tag(t);
-          /* Open times as up to three dots, so the tag never outgrows its square
-             (Julian, 2026-11-04); the count stays in the label. */
+          /* Open times as up to three dots, so the tag never outgrows its square;
+             the count stays in the label. */
           const open = tg && /open$/i.test(tg) ? Number(/^\d+/.exec(tg)?.[0] ?? 0) : -1;
           return (
             <button key={id} type="button" data-day={id} aria-pressed={id === picked} disabled={tg === null} aria-label={`${dlabel(t)}${tg ? `, ${tg}` : ""}`} onClick={() => onPick(t)}>

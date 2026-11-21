@@ -153,8 +153,8 @@
     box-shadow: 0 50px 90px -40px rgb(0 0 0 / 0.6);
   }
   /* The booking card stays at the hover step: a pick focuses a button
-     in it, and the second step moved the times 8px under the finger
-     (Julian, 2026-10-17). The form keeps the deeper step. */
+     in it, and the second step moved the times 8px under the finger.
+     The form keeps the deeper step. */
   .contact-card:has(.ed):focus-within {
     transform: translateX(-3rem) scale(1.042);
     box-shadow: 0 36px 70px -36px rgb(0 0 0 / 0.5);
@@ -360,7 +360,7 @@
 :root:not([data-theme="light"]) .booking-embed.times-down {
   filter: none;
 }
-/* Julian (2026-11-06): its Try again solid on desktop too, as on a phone. */
+/* Its Try again is solid on desktop too, as on a phone. */
 .times-down .action:not(:disabled, [aria-disabled="true"]) {
   background-color: var(--foreground);
 }
@@ -440,7 +440,7 @@
     gap: 1.5rem;
   }
   /* Their light splits the gap, as on the Inquiries card: at -2rem
-     Name's ran 10px into Email (Julian, 2026-10-14). */
+     Name's ran 10px into Email. */
   .book-form .contact-pair > .contact-field:first-child::before {
     inset-inline-end: -0.75rem;
   }
@@ -508,7 +508,7 @@
   border: 0;
 }
 
-/* The picker never scrolls (Julian, 2026-10-11). A month and a day's
+/* The picker never scrolls. A month and a day's
    times that do not fit together take turns: the month alone, then the
    day's times with a way back (`data-split`, time-picker.tsx). With no
    time to confirm yet, the month has the bar's room too. */
@@ -535,7 +535,7 @@
   overflow-y: auto;
   overscroll-behavior: contain;
 }
-/* Julian (2026-10-14): air between the card's sections. The day row
+/* Air between the card's sections. The day row
    off the tabs, and never less than this between the days, the time
    and the times (the spacers are the `grow basis-0` boxes). A phone's
    card is not a size container, so it gets the same by width. */
@@ -580,7 +580,7 @@
 .tp[data-tight] [data-part="times"] {
   gap: 0.5rem;
   /* In the middle of the room between the days and the footer, not
-     under the days with the room left below (Julian, 2026-10-12). */
+     under the days with the room left below. */
   margin-block: auto;
   /* The spacer's 0.75rem over it, so the room splits evenly. */
   padding-bottom: 0.75rem;
@@ -620,7 +620,7 @@
 }
 
 /* The picked session's band (`sessions-screen.tsx`): a lighter grey on
-   the dark ground, where 6% barely showed (Julian, 2026-10-12). */
+   the dark ground, where 6% barely showed. */
 :root {
   --session-pick: color-mix(in oklab, var(--foreground) 6%, transparent);
 }

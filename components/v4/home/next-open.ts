@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { SESSIONS, type SessionSlug } from "@/lib/v3";
+import { SESSIONS, type SessionSlug } from "@/lib/flags/v3";
 import { byCodeUnit } from "@/lib/utils";
 
 /* "Next open" (spec 3.4): the first open slot from the same engine /book

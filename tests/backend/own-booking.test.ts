@@ -102,6 +102,17 @@ describe("POST /api/book (a free call)", () => {
     expect(inserts[0].url).not.toContain("conferenceDataVersion");
   });
 
+  it("tells hello@ a video call by its Meet link, and a phone call by the number", async () => {
+    const text = (m: { text?: unknown }) => String(m.text);
+    await post(CALL);
+    await new Promise((go) => setTimeout(go, 20));
+    expect(text(mail.sent.at(-1)!)).toContain("Video call: https://meet.google.com/abc");
+    expect(text(mail.sent.at(-1)!)).not.toContain("ring");
+    await post({ ...CALL, via: "Phone", start: "2026-12-02T18:00:00.000Z" });
+    await new Promise((go) => setTimeout(go, 20));
+    expect(text(mail.sent.at(-1)!)).toContain("Call: ring +14085550100");
+  });
+
   it("is off without the calendar", async () => {
     delete ctx.env.GCAL_OAUTH;
     expect((await post(CALL)).status).toBe(503);

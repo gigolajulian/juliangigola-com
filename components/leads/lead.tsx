@@ -1,8 +1,7 @@
 "use client";
 
 /* ── the lead page on Astryx ──────────────────────────────────────
- * Julian (2026-11-10) approved the mock (claude.ai/artifact/WWQy2jVbaeTG7sdDKgGmU5,
- * "looks goood push"): the same lead as the classic Detail, every action
+ * The same lead as the classic Detail, every action
  * kept, laid out as header + sections + a timeline rail. Rendered only
  * inside /admin/leads, so Astryx's CSS stays off the site.
  *
@@ -171,7 +170,7 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
     if (ask.do === "task") setAddingTask(true);
     else setEditing("invoice");
   }
-  // The client's galleries: sent to the lead's address or to any of its people (Julian 2026-11-15, Format's client page).
+  // The client's galleries: sent to the lead's address or to any of its people.
   const theirs = new Set([l.email, ...(full?.people ?? []).map((p) => p.email)].map(canonical));
   const galleries = proofs.filter((p) => theirs.has(canonical(p.email!)));
   const first = l.name.split(" ")[0];
@@ -294,7 +293,7 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
   );
 
   const at0 = ROAD.indexOf(l.stage as (typeof ROAD)[number]);
-  // Julian (2026-11-11): one invoice total per client, lines as needed. Once invoiced, the balance is what the open invoices still owe.
+  // One invoice total per client, lines as needed. Once invoiced, the balance is what the open invoices still owe.
   const invoices = full?.invoices ?? [];
   const invoiced = invoices.length ? subtotal(invoices.flatMap((v) => v.lines)) : undefined;
   const owed = invoices.length ? invoices.filter((v) => !isPaid(v)).reduce((n, v) => n + balance(v), 0) : full?.quote !== undefined ? full.quote - (full.deposit ? depositOfLead(full) : 0) : undefined;

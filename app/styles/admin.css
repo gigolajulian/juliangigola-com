@@ -23,8 +23,8 @@ body:has([data-workbench]) > footer {
 }
 
 /* ── the lead desk is an app ──────────────────────────────────────
- * Julian (2026-11-04), from the Home Screen app: the site header drew over
- * the desk and hid its filters. Opened from the icon the status bar is
+ * Opened from the Home Screen, the site header would draw over
+ * the desk and hide its filters. Opened from the icon the status bar is
  * black-translucent, so the page runs under it and the fixed header sat
  * over the first row. /admin/leads is the installed Leads app: no site
  * header, and its own padding clears the status bar (`page.tsx`).

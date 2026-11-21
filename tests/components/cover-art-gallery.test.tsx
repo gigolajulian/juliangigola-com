@@ -6,7 +6,7 @@ vi.mock("@/components/lightbox", () => ({ useLightbox: () => ({ show }), Lightbo
 if (!globalThis.CSS?.escape) vi.stubGlobal("CSS", { escape: (s: string) => s });
 
 import { CoverArtGallery } from "@/components/cover/cover-art-gallery";
-import type { CoverRelease } from "@/lib/cover-art-types";
+import type { CoverRelease } from "@/lib/work/cover-art-types";
 
 const frame = (src: string) => ({ src, width: 800, height: 800, color: "#000", alt: "", thumb: src, side: null });
 const releases: CoverRelease[] = [
@@ -25,5 +25,14 @@ describe("CoverArtGallery", () => {
     render(<CoverArtGallery releases={releases} />);
     fireEvent.click(screen.getByRole("button", { name: "Open Two by Bo" }));
     expect(show).toHaveBeenCalledWith(1, expect.anything());
+  });
+
+  it("arrives open on the cover a home click named (?cover=)", () => {
+    show.mockClear();
+    history.replaceState(null, "", "/portfolio/coverart?cover=two");
+    render(<CoverArtGallery releases={releases} v4 />);
+    // no history entry of its own (null, false): one Back goes home (QA on #1313)
+    expect(show).toHaveBeenCalledWith(1, null, false);
+    history.replaceState(null, "", "/");
   });
 });
