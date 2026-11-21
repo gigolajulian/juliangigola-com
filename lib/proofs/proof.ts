@@ -421,7 +421,7 @@ export function cleanSettings(given: Record<string, unknown>): Settings {
   const out: Settings = {};
   const int = (v: unknown, lo: number, hi: number) => (typeof v === "number" || typeof v === "string") && Number.isFinite(Number(v)) ? Math.min(hi, Math.max(lo, Math.round(Number(v)))) : undefined;
   if (typeof given.name === "string" && given.name.trim()) out.name = given.name.trim().slice(0, 120);
-  if (typeof given.email === "string") out.email = looksLikeEmail(given.email.trim()) ? given.email.trim().slice(0, 200) : undefined;
+  if (typeof given.email === "string") out.email = isEmail(given.email) ? given.email.trim() : undefined;
   if (typeof given.note === "string") out.note = given.note.trim().slice(0, 600) || undefined;
   const inc = int(given.included, 0, 500), pr = int(given.price, 0, 500), d = int(given.days, 1, 90);
   if (inc !== undefined) out.included = inc;

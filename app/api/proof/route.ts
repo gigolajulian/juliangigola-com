@@ -3,7 +3,7 @@ import { refuseAdmin } from "@/lib/vouch";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { copiesFor, readLead, recordLead, writeLead } from "@/lib/leads/lead-store";
 import { leadStoreKey } from "@/lib/leads/leads";
-import { forDesk, hashPass, cardKey, closesAt, cleanSettings, DEFAULTS, DELIVERY_DAYS, finalKeys, frameKey, frameKeys, aliasKey, isDateId, isFrameId, isModel, isStrongId, isToken, listProofs, nextProofId, publicId, readProof, remindState, shootDay, viewerKey, writeProof, type Proof } from "@/lib/proofs/proof";
+import { forDesk, hashPass, cardKey, closesAt, cleanSettings, DEFAULTS, isEmail, DELIVERY_DAYS, finalKeys, frameKey, frameKeys, aliasKey, isDateId, isFrameId, isModel, isStrongId, isToken, listProofs, nextProofId, publicId, readProof, remindState, shootDay, viewerKey, writeProof, type Proof } from "@/lib/proofs/proof";
 import { deliveryMail, deliveryUrl, proofMail, proofUrl, reminderMail, sendClient, subjectOr } from "@/lib/email/proof-mail";
 import { MAX_FINAL, storeFinal } from "@/lib/proofs/delivery";
 import { recheckTransfer } from "@/lib/proofs/submit";
@@ -116,6 +116,7 @@ export async function POST(request: Request) {
   const b = ((await bodyOf(request)) ?? {});
 
   if (b.action === "create") {
+    if (badEmail(b.email)) return json({ error: "That email does not look right." }, 400);
     const set = cleanSettings(b);
     // The shoot day from Lightroom (earliest capture date) names the gallery; a plugin that sends none gets today.
     const p: Proof = { token: await nextProofId(g.kv, shootDay(b.day) ?? undefined), name: set.name ?? "Proofs", ...DEFAULTS, ...set, createdAt: new Date().toISOString(), frames: [], selects: [], notes: {}, views: 0 };
@@ -228,6 +229,9 @@ export async function POST(request: Request) {
   return json({ error: "Unknown action." }, 400);
 }
 
+/** A typed email that fails isEmail is refused, so a save never clears the stored one; a blank one still clears it. */
+const badEmail = (v: unknown) => typeof v === "string" && v.trim() !== "" && !isEmail(v);
+
 export async function PATCH(request: Request) {
   const g = await gate(request);
   if ("error" in g) return g.error;
@@ -235,6 +239,7 @@ export async function PATCH(request: Request) {
   if (!isToken(b.token)) return json({ error: "Which gallery?" }, 400);
   const p = await readProof(g.kv, g.s, b.token);
   if (!p) return json({ error: "No such gallery." }, 404);
+  if (badEmail(b.email)) return json({ error: "That email does not look right." }, 400);
   const set = cleanSettings(b);
   // The gate's password: hashed here, never stored or answered plain. An empty one takes it off.
   if (typeof b.password === "string" && b.password && (b.password.length < 4 || b.password.length > 200)) return json({ error: "A password is 4 to 200 characters." }, 400);

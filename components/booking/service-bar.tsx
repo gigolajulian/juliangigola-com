@@ -1,18 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
-import { useV4pages } from "@/lib/flags/v4pages";
 
-/* ?v4pages=s1: the phone book bar on a service page. Held at the bottom once
+/* The phone book bar on a service page. Held at the bottom once
    the hero buttons have scrolled away; gone while the booking is on screen
    (the flow has its own Continue bar, the two never stack) and on the last
    screen. A link to the page's own #book anchor, nothing more.
    Mounted on <body>: <main> carries a transform, which would pin a fixed bar
-   to the page's bottom instead of the screen's. Nothing renders without the flag. */
+   to the page's bottom instead of the screen's. Nothing renders on the server, where there is no <body>. */
+const never = () => () => {};
 export function ServiceBar({ name, rate, label, href }: { name: string; rate: string; label: string; href: string }) {
-  const on = useV4pages("s1");
+  const on = useSyncExternalStore(never, () => true, () => false);
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const el = ref.current;

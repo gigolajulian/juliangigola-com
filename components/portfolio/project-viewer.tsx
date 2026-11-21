@@ -5,11 +5,11 @@ import { v4pages } from "@/lib/flags/v4pages";
 import { matches } from "@/lib/device";
 import type { FrameItem, FrameView } from "@/components/portfolio/work";
 
-/* The project page's two trial pieces (inner-pages plan, `?v4pages`), kept out
+/* The project page's two pieces of the inner-pages plan, kept out
    of the server component. Renders nothing until a frame is opened.
    next (j2): the Next link is a full stage; this feeds its wipe (`--in`, the
      engine's meaning: 0 as its top reaches the bottom of the screen, 1 at the top).
-   view (j3): a click on a frame opens it full size in the gallery's FrameView. */
+   view (j3): a click on a frame opens it full size in the gallery's FrameView. Still on trial (`?v4pages`). */
 const FIGS = ".pj-big, .pj-lead .pj-r, .pj-flow .pj-r"; // document order = the order of `frames`
 
 export function V4Project({ frames }: { frames: FrameItem[] }) {
@@ -20,7 +20,7 @@ export function V4Project({ frames }: { frames: FrameItem[] }) {
 
   React.useEffect(() => {
     const st = document.querySelector<HTMLElement>("#p-project .pj-next");
-    if (!st || !v4pages("next") || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (!st || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const desk = matches("held");
     let raf = 0;
     const set = () => st.style.setProperty("--in", Math.min(1, Math.max(0, (innerHeight - st.getBoundingClientRect().top) / innerHeight)).toFixed(3));

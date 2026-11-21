@@ -2,7 +2,10 @@
 
 import * as React from "react";
 import { jumpTo, scrollGoal } from "@/components/v3/smooth-scroll";
+import { holdLanding } from "@/components/site/page-transition";
 import { media } from "@/lib/device";
+import { painted } from "@/lib/painted";
+import { tell } from "./motion/engine";
 
 /* Back to the home from any page of the site lands where the visitor left it, from the first paint.
    Safari put back a scroll saved before the held rows' last scroll (MAC on #1313), and from /about showed that page's foot
@@ -108,8 +111,27 @@ export function useBackHome() {
     // a phone's sideways covers row only: held (desktop), the row follows the page's scroll, and setting it too threw the page a screen on (MAC on d82f2b75)
     const row = coversRow();
     if (row && !media("held").matches) row.scrollLeft = spot.x;
+    // Back into Cover art: the sleeves' lazy art painted grey for up to 1.3s on an iPhone (MAC, v3.0.336). Load and decode it now, with the rest.
+    const items = row && spot.b === "covers" ? [...row.querySelectorAll<HTMLElement>(".mt-item")] : [];
+    const step = items.length > 1 ? items[1].offsetLeft - items[0].offsetLeft : 0, i = step ? Math.min(items.length - 1, Math.max(0, Math.round(spot.x / step))) : 0;
+    // the caption names that cover from the first paint, not the first one for a frame or two until the row's scroll event (Julian)
+    // the told sleeve takes its focus scale at once, not over the .45s scale transition (touch-parity.css): reset with the lifted ones below
+    if (items.length && !media("held").matches) items.forEach((it) => (it.style.transition = "none")), tell(row!.closest("section")!, { cur: i }, false);
+    for (const it of items.slice(Math.max(0, i - 1), i + 2)) {
+      const im = it.querySelector<HTMLImageElement>(".face img:not(.back)");
+      if (!im) continue;
+      im.loading = "eager";
+      im.fetchPriority = "high";
+      // the copy the viewer just showed goes under it, so the sleeve is never grey while its own size loads (Julian: "shouldnt cut out like that")
+      const url = painted.get(im.dataset.frame ?? ""), face = im.parentElement!;
+      // the image only: the shorthand also cleared the card colour, so the disc showed through until it decoded
+      if (url) Object.assign(face.style, { backgroundImage: `url("${url}")`, backgroundSize: "cover", backgroundPosition: "center" });
+      const shown = im.decode().catch(() => {});
+      holdLanding(shown); // the Back's snapshot of the home waits for these covers, the told one and its neighbours (page-transition.tsx)
+      shown.then(() => url && Object.assign(face.style, { backgroundImage: "", backgroundSize: "", backgroundPosition: "" }));
+    }
     // a sleeve still marked hovered from before the click turned to its back and then away on arrival (Safari, MAC on 23412f74): unturned at once
-    const lifted = [...document.querySelectorAll<HTMLElement>(".mt-covers .mt-sleeve.hv")];
+    const lifted = [...new Set([...items, ...document.querySelectorAll<HTMLElement>(".mt-covers .mt-sleeve.hv")])];
     lifted.forEach((it) => ((it.style.transition = "none"), it.classList.remove("hv")));
     const unlift = requestAnimationFrame(() => requestAnimationFrame(() => lifted.forEach((it) => (it.style.transition = ""))));
     // rAF runs before each paint, so a block above that grows is answered in the same frame

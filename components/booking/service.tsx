@@ -127,7 +127,7 @@ export function V3Service({ page, frames }: { page: BookingPage; frames: Frame[]
             </ul>
           </section>
         </div>
-        {/* ?v4pages=s1: where the last screen starts, and the phone book bar that hides there. */}
+        {/* s1: where the last screen starts, and the phone book bar that hides there. */}
         <span data-sv-end />
         <Doors />
         <PageFoot />

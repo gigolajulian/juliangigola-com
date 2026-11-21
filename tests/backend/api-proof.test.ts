@@ -69,6 +69,21 @@ describe("/api/proof", () => {
     expect((await readProof(kv as never, (await sealer(LEADS_KEY))!, token))?.name).toBe("Test");
   });
 
+  it("refuses a bad client email and keeps the stored one", async () => {
+    const { token } = await (await call(POST, req("POST", { body: json({ action: "create", name: "Test", email: "ana@example.com" }) }))).json();
+    const s = (await sealer(LEADS_KEY))!;
+    const puts = kv.puts.length;
+    for (const email of ["nope", `${"a".repeat(189)}@example.com`]) {
+      const res = await call(PATCH, req("PATCH", { body: json({ token, email }) }));
+      expect(res.status).toBe(400);
+      expect(await res.json()).toEqual({ error: "That email does not look right." });
+    }
+    expect(kv.puts.length).toBe(puts);
+    expect((await call(POST, req("POST", { body: json({ action: "create", name: "Bad", email: "nope" }) }))).status).toBe(400);
+    expect((await call(PATCH, req("PATCH", { body: json({ token, name: "Renamed" }) }))).status).toBe(200);
+    expect(await readProof(kv as never, s, token)).toMatchObject({ name: "Renamed", email: "ana@example.com" });
+  });
+
   it("forgets one visitor and keeps the rest of the gallery", async () => {
     const { token } = await (await call(POST, req("POST", { body: json({ action: "create", name: "Test" }) }))).json();
     const s = (await sealer(LEADS_KEY))!;

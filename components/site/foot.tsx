@@ -7,7 +7,7 @@ import { BOOK_ROWS, QUOTE_OPTS } from "@/lib/v4-home/data";
 import { useLocalTime } from "@/lib/local-time";
 import { media } from "@/lib/device";
 
-/* The ending of an inner page, on trial (`?v4pages=foot`, inner-pages plan g1):
+/* The ending of an inner page (inner-pages plan foot, g1):
    the V4 home footer without its photo wall, about half a screen tall. Four
    link columns with Book online first, a drifting phrase ("Book me" and its variants) as one
    plain link to /book (no card is mounted here), then the last line. On
