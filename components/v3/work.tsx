@@ -223,7 +223,7 @@ export function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: 
   const G = React.useRef<typeof import("gsap").gsap | null>(null);
   // The touch in progress: where it went down, the track's x then, its axis once locked, and its speed.
   const drag = React.useRef<{ x: number; y: number; ox: number; axis: "x" | "y" | null; lx: number; lt: number; v: number; ly: number; vy: number } | null>(null);
-  /* MOTION-PLAN.md item 10 (`?mplan=touch`): a lift hands the finger's speed
+  /* MOTION-PLAN.md item 10: a lift hands the finger's speed
      to the strip's own spring (lib/motion/spring.ts), critically damped. */
   const run = React.useRef(0);
   const stop = () => void (cancelAnimationFrame(run.current), (run.current = 0));
@@ -382,7 +382,7 @@ export function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: 
         /* Item 10: a flick past 0.11px per ms pages or closes whatever the
            distance; a slow drag still needs half a frame, or 90px down. The
            frame leaves at the finger's speed on `out`, never easing in. */
-        if (mplan("touch") && g && !still()) {
+        if (g && !still()) {
           const FLING = 0.11;
           if (d.axis === "y") {
             const dy = e.clientY - d.y;
