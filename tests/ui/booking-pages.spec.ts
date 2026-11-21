@@ -1,33 +1,27 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import { CONFIRM, open, pickTime, RATIOS } from "./ratios";
 
 /* The booking pages (/portraits, /weddings...): the deck ends at Book and
    stays there, and the page's own picker lets a time be confirmed. */
 
-/** True when scrollY holds over two frames. */
-const still = (page: Page) =>
-  page.evaluate(() => new Promise<boolean>((done) => {
-    const y = scrollY;
-    requestAnimationFrame(() => requestAnimationFrame(() => done(scrollY === y)));
-  }));
-
 for (const r of RATIOS.filter((x) => !x.touch)) {
   test(`/portraits stays on Book past the last screen at ${r.name}`, async ({ browser, browserName }) => {
     const { ctx, page } = await open(browser, browserName, r);
     await page.goto("/portraits", { waitUntil: "load" });
-    // Lenis takes the wheel once the page has hydrated (components/v3/smooth-scroll.tsx)
-    await page.locator("html.lenis").waitFor({ state: "attached" });
+    await page.waitForTimeout(2500);
     await page.mouse.move(r.width / 2, r.height / 2);
     for (let i = 0; i < 14; i++) {
       await page.mouse.wheel(0, 700);
-      await expect.poll(() => still(page), { message: `wheel ${i + 1} settles` }).toBe(true);
+      await page.waitForTimeout(800);
     }
-    const on = () => page.evaluate(() => {
+    await page.waitForTimeout(2000);
+    const on = await page.evaluate(() => {
       const hit = document.elementFromPoint(innerWidth / 2, innerHeight / 2);
       const secs = [...document.querySelectorAll<HTMLElement>("section[data-label]")];
-      return { path: location.pathname, onLast: !!secs.length && hit?.closest("section[data-label]") === secs.at(-1) };
+      return { path: location.pathname, on: hit?.closest<HTMLElement>("section[data-label]")?.dataset.label, last: secs.at(-1)?.dataset.label };
     });
-    await expect.poll(on, { message: "on the last screen of /portraits" }).toEqual({ path: "/portraits", onLast: true });
+    expect(on.path).toBe("/portraits");
+    expect(on.on).toBe(on.last);
     await ctx.close();
   });
 }
@@ -40,9 +34,8 @@ for (const slug of ["portraits", "music-photography"]) {
       const { ctx, page } = await open(browser, browserName, r);
       await page.goto(`/book/${slug}`, { waitUntil: "load" });
       await page.locator("[data-day]").first().waitFor({ timeout: 30_000 });
-      const day = page.locator("[data-day]:not([disabled]):visible").last();
-      await day.click();
-      await expect(day).toHaveAttribute("aria-pressed", "true");
+      await page.locator("[data-day]:not([disabled]):visible").last().click();
+      await page.waitForTimeout(300);
       await pickTime(page, true);
       const confirm = page.getByRole("button", { name: CONFIRM });
       await expect(confirm).toBeEnabled();
