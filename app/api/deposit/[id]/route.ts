@@ -48,7 +48,7 @@ export async function PUT(request: Request, ctx: { params: Promise<{ id: string 
   const { env } = await getCloudflareContext({ async: true });
   if (!env.STRIPE_SECRET_KEY) return json({ error: "Deposits are off." }, 503);
   const ip = request.headers.get("cf-connecting-ip") ?? "unknown";
-  if (!(await env.DEPOSIT_LIMIT.limit({ key: ip })).success) return json({ error: "Too many tries. Wait a minute." }, 429);
+  if (!(await env.DEPOSIT_LIMIT.limit({ key: `refs:${ip}` })).success) return json({ error: "Too many tries. Wait a minute." }, 429);
 
   let pi: { amount?: number; currency?: string; metadata?: { [k: string]: string } };
   try {

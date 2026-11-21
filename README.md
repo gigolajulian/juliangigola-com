@@ -55,8 +55,17 @@ All 74 projects and 1,131 frames were migrated off the old Format site.
 | `lib/work-data.ts` | The archive: every migrated project, its credits, categories and frames. First written by `scripts/harvest.mjs`; the harvester no longer runs, so this file is now edited by hand. |
 | `lib/work/work.ts` | The only module the app reads work from. Holds the editorial decisions: what is featured, what leads the homepage, how categories group. |
 | `lib/work-types.ts` | Shapes for the above. |
-| `lib/booking/sessions.ts` | Bookable session types. `from: null` renders as "On request". |
+| `lib/booking/sessions.ts` | Session types for the older booking pages. `from: null` renders as "On request". |
+| `lib/flags/v3.ts` | Photo picks and the session list the /book stepper and the homepage read. |
 | `lib/site.ts` | Reply-time promise and the booking-calendar URL. |
+
+### Front end
+
+| Folder | What it is |
+| --- | --- |
+| `components/v3/` | Site chrome, the inner pages and the /book stepper. |
+| `components/v4/home/` + `lib/v4-home/` | The homepage. It is the home when the build has `NEXT_PUBLIC_V4_HOME=1` (`lib/v4-home/switch.ts`); set it to 0 to roll back. |
+| `components/v4/` | Pieces the v4 home shares with inner pages (project, foot, drift, tilt). |
 
 ### The migration (finished)
 

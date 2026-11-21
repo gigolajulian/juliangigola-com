@@ -534,7 +534,7 @@ async function patchLead(inbox: NonNullable<CloudflareEnv["INBOX"]>, seal: Await
         invoices: lead.invoices!.map((v) => (v === inv ? { ...v, paidAt: invoicePaid.paid ? at : undefined, unpaid: invoicePaid.paid ? undefined : true } : v)),
         // Cash or Zelle is money too: the amount counts in paid total. An unmark takes off only what a hand mark added
         // (an old invoice counted as paid, or one a Stripe payment settled, was never added here).
-        events: [...lead.events, { at, kind: "invoice-paid" as const, note: `${inv.no} ${invoicePaid.paid ? `paid, ${usd(balance(inv))}` : "unpaid again"}`, amount: invoicePaid.paid ? balance(inv) : -(lastAdded ?? 0) || undefined }].slice(-50),
+        events: [...lead.events, { at, kind: "invoice-paid" as const, note: `${inv.no} ${invoicePaid.paid ? `paid, ${usd(balance(inv))}` : "unpaid again"}`, amount: invoicePaid.paid ? balance(inv) : lastAdded !== undefined ? -lastAdded : undefined }].slice(-50),
       };
     }
   }

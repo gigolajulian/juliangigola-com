@@ -1,6 +1,6 @@
 /* v4 homepage (`?mtscroll=1`, docs/mt-decisions.md): the copy and picks this
    screen owns. Client-safe: no lib/work import. Frames that need project data
-   (names, ratios) are resolved on the server in `app/page.tsx` (`mtData`). */
+   (names, ratios) are resolved on the server in `lib/v4-home/server.ts` (`MT`). */
 import { rate, SESSIONS, type SessionSlug } from "@/lib/flags/v3";
 import { DEPOSIT } from "@/lib/booking/paid";
 import type { SHOOT_TYPES } from "@/lib/inbox";
