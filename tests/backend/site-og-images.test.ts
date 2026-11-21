@@ -11,7 +11,7 @@ import * as video from "@/app/portfolio/(index)/video/opengraph-image";
 import * as project from "@/app/portfolio/[slug]/opengraph-image";
 import * as service from "@/app/[service]/opengraph-image";
 import { LINKABLE } from "@/lib/work/work";
-import { BOOKING_PAGES } from "@/lib/booking/booking";
+import { BOOKING_PAGES } from "@/lib/booking/service-pages";
 import { SESSIONS } from "@/lib/photos-and-sessions";
 
 /* Every share card is the same 1200x630 JPEG with the site's name as its

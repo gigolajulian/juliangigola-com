@@ -380,7 +380,7 @@ function SiteHeader() {
     const dx = was.right - now.right, dy = was.top - now.top;
     if (dx || dy) bar.animate({ transform: [`translate(${dx}px,${dy}px)`, "none"] }, { duration: 250, easing: "cubic-bezier(.23,1,.32,1)" });
   }, [tuck]);
-  // `?mtscroll=1`: the v4 home has no cover to wait for, the bar is there from the start.
+  // The v4 home (or its `?mtscroll=1` preview) has no cover to wait for, the bar is there from the start.
   const mt = React.useSyncExternalStore(noop, mtscroll, () => V4_HOME);
   const show = (!home || past || mt) && !tuck;
   // `?navfx=1`: the header on trial (ground off at the top, white or black words).
