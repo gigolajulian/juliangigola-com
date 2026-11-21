@@ -141,9 +141,14 @@ export const useSound = () => React.useSyncExternalStore(sub, () => now, () => "
 /* Sound on / off, kept for the tab. While one of Apple's previews plays: Apple's mark linking to the song and the
    credit, both of which its terms ask for beside a preview (Search API, Legal). While SoundCloud's player plays:
    SoundCloud's logo linking to the track. */
-export function CoverSound({ className }: { className?: string }) {
+/** The sound line. In the viewer `slug` is the release on screen: a Preview button starts its clip (Julian
+    2026-11-21: opening a cover plays nothing, the visitor asks for it), faded in as the hover's is. */
+export function CoverSound({ className, slug, onPlay }: { className?: string; slug?: string; onPlay?: () => void }) {
   const off = React.useSyncExternalStore(sub, muted, () => false);
-  const clip = clips[useSound()];
+  const playing = useSound();
+  const clip = clips[playing];
+  const own = slug ? clips[slug] : undefined;
+  const can = !!(own?.preview || own?.clip || own?.soundcloud);
   /* No ground under the line: each part is white or black from what shows under it, by the
      header's own measure (`inkWord`, components/site/nav-ink.ts). Looked at again on scroll and resize, and twice a
      second, as the header does, since a cover lifts under it with no scroll. */
@@ -171,6 +176,19 @@ export function CoverSound({ className }: { className?: string }) {
   }, [clip]);
   return (
     <div ref={line} className={className ? `cv4s ${className}` : "cv4s"}>
+      {slug && can && !off ? (
+        <button
+          type="button"
+          aria-pressed={playing === slug}
+          onClick={() => {
+            if (playing === slug) return stopSound();
+            onPlay?.();
+            playSound(slug);
+          }}
+        >
+          {playing === slug ? "Stop preview" : "Preview"}
+        </button>
+      ) : null}
       <button
         type="button"
         aria-pressed={!off}

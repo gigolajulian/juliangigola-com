@@ -198,9 +198,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           }}
         />
         {/* `data-v4pages`: what is left of the inner-pages plan on trial (lib/flags/v4pages.ts). `?v4pages` turns
-            every key on for the tab, `?v4pages=tilt` only that, `?v4pages=0` off.
+            every key on for the tab, `?v4pages=view` only that, `?v4pages=0` off.
             With no choice made in the tab it follows the V4 home (`data-mtscroll`, set by the
-            script above): every key but `tilt` on wherever V4 is on. */}
+            script above): every key on wherever V4 is on. */}
         <script
           dangerouslySetInnerHTML={{
             __html: V4PAGES_HEAD,

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { renderToString } from "react-dom/server";
 import { CoverPage } from "@/components/cover/cover-page";
 import { CampusSpots } from "@/components/booking/campus-spots";
@@ -7,7 +7,6 @@ import { ServiceBar } from "@/components/booking/service-bar";
 import { LogoBand } from "@/components/about/logo-band";
 import { V4Foot } from "@/components/site/foot";
 import { V4Project } from "@/components/portfolio/project-viewer";
-import { V4Tilt } from "@/components/portfolio/tilt";
 import { V4Drift } from "@/components/portfolio/drift";
 import { BOOK_ROWS, QUOTE_OPTS } from "@/lib/v4-home/data";
 import type { CoverRelease } from "@/lib/work/cover-art-types";
@@ -18,7 +17,7 @@ vi.mock("@/components/lightbox", () => ({ useLightbox: () => ({ show() {} }), Li
 if (!globalThis.CSS?.escape) vi.stubGlobal("CSS", { escape: (s: string) => s });
 
 /* The inner-pages plan. s1, s2, a2, m2p, foot, next, c1, s4 and p3 are folded into the pages, so they are
-   there from the server's first paint; view and tilt are still on trial (`?v4pages`) and do nothing without their key. */
+   there from the server's first paint; view is still on trial (`?v4pages`) and do nothing without their key. */
 const flag = (keys: string) => (document.documentElement.dataset.v4pages = keys);
 // Every query matches but reduced motion: a desktop mouse with motion allowed.
 const desktop = () =>
@@ -189,41 +188,6 @@ describe("V4Project (view)", () => {
     desktop();
     render(<V4Project frames={frames} />);
     expect((document.querySelector(".pj-next") as HTMLElement).style.getPropertyValue("--in")).toMatch(/^\d\.\d{3}$/);
-  });
-});
-
-describe("V4Tilt (tilt)", () => {
-  const raf = () => {
-    const q: FrameRequestCallback[] = [];
-    vi.stubGlobal("requestAnimationFrame", (f: FrameRequestCallback) => q.push(f));
-    vi.stubGlobal("cancelAnimationFrame", () => {});
-    return () => q.splice(0).forEach((f) => f(0));
-  };
-
-  it("does nothing with the key off", () => {
-    document.body.innerHTML = `<div id="p-work"><div class="wstrip"></div></div>`;
-    desktop();
-    const step = raf();
-    render(<V4Tilt k="a" />);
-    fireEvent.pointerMove(window, { pointerType: "mouse", clientX: 0, clientY: 0 });
-    step();
-    expect((document.querySelector(".wstrip") as HTMLElement).style.transform).toBe("");
-  });
-
-  it("leans the view toward the mouse and flattens it on unmount", () => {
-    document.body.innerHTML = `<div id="p-work"><div class="wstrip"></div></div>`;
-    flag("tilt");
-    desktop();
-    const step = raf();
-    const { unmount } = render(<V4Tilt k="a" />);
-    const ev = new Event("pointermove") as PointerEvent;
-    Object.assign(ev, { pointerType: "mouse", clientX: 0, clientY: 0 });
-    act(() => void window.dispatchEvent(ev));
-    step();
-    const el = document.querySelector(".wstrip") as HTMLElement;
-    expect(el.style.transform).toMatch(/^perspective\(1400px\) rotateX\(.+deg\) rotateY\(-.+deg\)$/);
-    unmount();
-    expect(el.style.transform).toBe("");
   });
 });
 
