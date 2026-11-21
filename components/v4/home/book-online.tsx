@@ -8,6 +8,7 @@ import { V3BookFlow } from "@/components/booking/book";
 import { SESSIONS } from "@/lib/photos-and-sessions";
 import { matches } from "@/lib/device";
 import { BOOK_ROWS, QUOTE_OPTS, type BookRow, type QuoteOpt } from "@/lib/v4-home/data";
+import { warmGsap } from "@/lib/gsap-lazy";
 import { useNextOpen } from "./next-open";
 import { CardsCtx } from "./ctx";
 
@@ -37,6 +38,8 @@ export function MtBookOnline({ open, opener, onClose, quotePhoto, onRowPick }: {
   const head = React.useRef<HTMLHeadingElement>(null);
   const rows = React.useRef<(HTMLButtonElement | null)[]>([]);
   const isOpen = React.useRef(false);
+  // the booking flow's gsap, fetched on idle so its first step slides on the tap's frame
+  React.useEffect(warmGsap, []);
 
   // opening or closing puts the block back at the top of the screen and moves focus with it
   React.useEffect(() => {
