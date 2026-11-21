@@ -47,7 +47,7 @@ export function V4Tilt({ k }: { k: string }) {
       tx = ty = 0;
       raf ||= requestAnimationFrame(draw);
     };
-    /* Its own scroll watch, not v4/drift.tsx's `data-v4lag`: that one needs scroll timelines, so in Safari
+    /* Its own scroll watch, not components/portfolio/drift.tsx's `data-v4lag`: that one needs scroll timelines, so in Safari
        the tilt never straightened and the hover zoom ran on (v4pages.css reads `data-v4scroll`). */
     const scroll = () => {
       hold = true;

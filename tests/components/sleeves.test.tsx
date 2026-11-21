@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { CoverArt } from "@/components/v3/sleeves";
+import { CoverArt } from "@/components/cover/sleeves";
 import { COVER_RELEASES } from "@/lib/work/cover-art-data";
 
 HTMLDialogElement.prototype.showModal ??= function (this: HTMLDialogElement) {

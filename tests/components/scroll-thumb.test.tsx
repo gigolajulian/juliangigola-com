@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { render } from "@testing-library/react";
-import { ScrollThumb } from "@/components/v3/scroll-thumb";
+import { ScrollThumb } from "@/components/site/scroll-thumb";
 
 describe("ScrollThumb", () => {
   it("renders a hidden thumb and marks the root while mounted", () => {

@@ -1,13 +1,13 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { CoverPage } from "@/components/cover/cover-page";
-import { CampusSpots } from "@/components/v3/campus-spots";
-import { ServiceBar } from "@/components/v3/service-bar";
-import { LogoBand } from "@/components/v3/logo-band";
-import { V4Foot } from "@/components/v4/foot";
-import { V4Project } from "@/components/v4/project";
-import { V4Tilt } from "@/components/v4/tilt";
-import { V4Drift } from "@/components/v4/drift";
+import { CampusSpots } from "@/components/booking/campus-spots";
+import { ServiceBar } from "@/components/booking/service-bar";
+import { LogoBand } from "@/components/about/logo-band";
+import { V4Foot } from "@/components/site/foot";
+import { V4Project } from "@/components/portfolio/project-viewer";
+import { V4Tilt } from "@/components/portfolio/tilt";
+import { V4Drift } from "@/components/portfolio/drift";
 import { BOOK_ROWS, QUOTE_OPTS } from "@/lib/v4-home/data";
 import type { CoverRelease } from "@/lib/work/cover-art-types";
 

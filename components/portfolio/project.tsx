@@ -1,11 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Mark } from "@/components/v3/duo";
+import { Mark } from "@/components/site/duo";
 import { BtsCredit, BtsPageGrid } from "@/components/bts/bts";
 import { BackLink } from "@/components/site/back-link";
 import { billing, markFor, titleCase } from "@/lib/work/work";
 import { tailHole } from "@/lib/sheet";
-import { V4Project } from "@/components/v4/project";
+import { V4Project } from "@/components/portfolio/project-viewer";
 import type { Frame, Project } from "@/lib/work-types";
 
 /* JG V3 project page (leftovers sheet, card B; Julian: vertical, with the
@@ -32,7 +32,7 @@ const nameOf = (c: Credit) => {
 const creditLabel = (c: Credit, h: string | null) =>
   ORG.test(c.role.trim()) ? c.name.replace(/^@/, "") : (nameOf(c) ?? (h ? `@${h}` : c.name));
 
-/* The commission form's types (components/v3/inquire.tsx TYPE) by discipline. */
+/* The commission form's types (components/contact/inquire.tsx TYPE) by discipline. */
 const KIND: Record<string, string> = { campaigns: "campaign", editorial: "editorial", coverart: "coverart", "artist-presskit": "presskit", "music-video": "video", events: "event" };
 const kindOf = (p: Project) => p.categories.map((c) => KIND[c.slug]).find(Boolean);
 

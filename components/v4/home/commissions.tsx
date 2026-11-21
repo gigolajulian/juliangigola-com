@@ -3,7 +3,7 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Marks } from "@/components/v3/duo";
+import { Marks } from "@/components/site/duo";
 import { projectHref } from "@/lib/project-href";
 import { pad, type MtFrame } from "@/lib/v4-home/data";
 import { useTold } from "./ctx";

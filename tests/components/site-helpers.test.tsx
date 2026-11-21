@@ -7,7 +7,7 @@ import { NAME_INK, NAME_W } from "@/lib/email/email-logo";
 import { useDialKitStyles } from "@/lib/dev/dialkit-styles";
 import { sleeveTilt } from "@/components/cover/sleeve-tilt";
 import { JG_COVER, mountCover } from "@/components/splash/jg-cover";
-import { inkGround, inkWord, navfx } from "@/components/v3/nav-ink";
+import { inkGround, inkWord, navfx } from "@/components/site/nav-ink";
 import * as coverSound from "@/components/cover/cover-sound";
 import SOUND from "@/lib/work/cover-art-sound.json";
 

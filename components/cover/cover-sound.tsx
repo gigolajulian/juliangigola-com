@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { inkGround, inkWord } from "@/components/v3/nav-ink";
+import { inkGround, inkWord } from "@/components/site/nav-ink";
 import SOUND from "@/lib/work/cover-art-sound.json";
 
 /* The song on the cover (inner pages plan, `snd`, only with `?v4pages=c1,snd`): one clip at a time, and nothing
@@ -145,7 +145,7 @@ export function CoverSound({ className }: { className?: string }) {
   const off = React.useSyncExternalStore(sub, muted, () => false);
   const clip = clips[useSound()];
   /* No ground under the line: each part is white or black from what shows under it, by the
-     header's own measure (`inkWord`, components/v3/nav-ink.ts). Looked at again on scroll and resize, and twice a
+     header's own measure (`inkWord`, components/site/nav-ink.ts). Looked at again on scroll and resize, and twice a
      second, as the header does, since a cover lifts under it with no scroll. */
   const line = React.useRef<HTMLDivElement>(null);
   React.useEffect(() => {

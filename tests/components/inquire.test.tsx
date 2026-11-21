@@ -8,7 +8,7 @@ Element.prototype.scrollTo = () => {};
 const emptyFiles = () => Object.assign(document.createElement("input"), { type: "file" }).files;
 vi.stubGlobal("DataTransfer", class { items = { add() {} }; files = emptyFiles(); });
 
-import { V3Commission, V3Inquire } from "@/components/v3/inquire";
+import { V3Commission, V3Inquire } from "@/components/contact/inquire";
 
 describe("V3Inquire", () => {
   it("renders the note and the call card", () => {
