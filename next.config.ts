@@ -389,7 +389,12 @@ const nextConfig: NextConfig = {
        the multiplier on the whole archive: 1080 went because 1280 is
        18% more pixels and nobody can see the difference, and 128 went
        because nothing on the site is drawn that small. */
-    deviceSizes: [640, 1280, 1920, 2500],
+    /* 1080 back (Julian, 2026-11-21: "add the 1080 image size"): a phone or
+       laptop at 2x that needs 641 to 1080px got the 1280, about 40% more
+       bytes than it draws. The browser still takes the smallest width that
+       covers the slot at its pixel density, so nothing is drawn softer; it
+       costs one more transformation per picture asked for at that width. */
+    deviceSizes: [640, 1080, 1280, 1920, 2500],
     /* 384 for the homepage's band: five tiles to a row makes each one
        about 254px on a laptop, and with `sizes` saying a third of the
        window every one of them was fetching the 640. */

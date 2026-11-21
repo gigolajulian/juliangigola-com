@@ -16,7 +16,7 @@ import { keepNames } from "@/lib/keep-names";
 /* At 85, not the site's 78: these are already the `-w1080` copies, so 78
    was a second pass of loss on a frame the window holds up for a second. */
 const sized = (run: string[]) => run.map((src) => [loader({ src, width: 640, quality: 85 }), loader({ src, width: 1080, quality: 85 })]);
-const LADDER = [640, 1280, 1920, 2500];
+const LADDER = [640, 1080, 1280, 1920, 2500]; // = `deviceSizes`
 const HERO_FULL = {
   d: LADDER.map((width): [number, string] => [width, loader({ src: HERO[0].d.src, width })]),
   l: LADDER.map((width): [number, string] => [width, loader({ src: HERO[0].l.src, width })]),
