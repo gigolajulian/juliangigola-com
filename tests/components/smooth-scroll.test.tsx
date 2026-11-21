@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { render } from "@testing-library/react";
 
-const lenis = vi.hoisted(() => ({ made: 0, destroyed: 0, to: [] as number[] }));
+const lenis = vi.hoisted(() => ({ made: 0, destroyed: 0, to: [] as number[], log: [] as string[] }));
 vi.mock("lenis", () => ({
   default: class {
     animatedScroll = 0;
@@ -10,9 +10,12 @@ vi.mock("lenis", () => ({
       lenis.made++;
     }
     on() {}
-    resize() {}
+    resize() {
+      lenis.log.push("resize");
+    }
     scrollTo(y: number) {
       lenis.to.push(y);
+      lenis.log.push(`to ${y}`);
     }
     destroy() {
       lenis.destroyed++;
@@ -20,7 +23,7 @@ vi.mock("lenis", () => ({
   },
 }));
 
-import { SmoothScroll, onLenisScroll, scrollTop, shiftScroll } from "@/components/v3/smooth-scroll";
+import { SmoothScroll, jumpTo, onLenisScroll, scrollTop, shiftScroll } from "@/components/v3/smooth-scroll";
 
 describe("smooth-scroll", () => {
   it("scrollTop and shiftScroll fall back to the window without Lenis", () => {
@@ -44,6 +47,10 @@ describe("smooth-scroll", () => {
     expect(lenis.made).toBe(1);
     scrollTop();
     expect(lenis.to).toEqual([0]);
+    // a Back's restore: Lenis measures the new page before it jumps, or it clamps to the last page's height
+    lenis.log.length = 0;
+    jumpTo(2220);
+    expect(lenis.log).toEqual(["resize", "to 2220"]);
     unmount();
     expect(lenis.destroyed).toBe(1);
   });
