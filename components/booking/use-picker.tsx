@@ -8,7 +8,6 @@ import type { SlotsAnswer } from "@/lib/booking/slots";
 import { Orb, ORB_ROUND } from "@/components/effects/orb";
 import { JgLoad } from "@/components/splash/jg-load";
 import { TZ } from "@/lib/booking/booking-rules";
-import { mplan } from "@/lib/mplan";
 import { AHEAD, e164, fromIso, iso, KEEP, minutesOf, noop, overflowOf, recent, recentKey, forgetTimes, WHERE, type PickedTime, type Slot, type Step, type V3Book } from "@/components/booking/time-picker-parts";
 import { byCodeUnit } from "@/lib/utils";
 
@@ -624,7 +623,7 @@ export function usePicker({ path, title, className, fallback, v3, onPicked, star
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ engine: "own", slug, start: new Date(pick.start).toISOString(), timeZone: tz, name, email: String(form.get("email")), phone, via, ...(notes ? { notes } : {}), ...(needsWhere ? { where } : {}) }),
       });
-      const body = await res.json().catch(() => ({}));
+      const body = (await res.json().catch(() => ({}))) as { status?: string; data?: { uid: string; start: string; end: string; where?: string }; error?: string };
       // 409 is the engine saying the slot went to someone else.
       if (!res.ok || body.status !== "success") throw Object.assign(new Error(body?.error || "failed"), { status: res.status });
       }
@@ -745,9 +744,9 @@ export function usePicker({ path, title, className, fallback, v3, onPicked, star
         // Where the flick was going: Apple's projection (0.998), damped to 40%.
         const ahead = dx + (s.v ?? 0) * 499 * 0.4;
         const dir = ahead < -w / 3 ? 1 : ahead > w / 3 && !atStart ? -1 : 0;
-        /* MOTION-PLAN.md item 2 (`?mplan=rm`): under Reduce Motion the row
+        /* MOTION-PLAN.md item 2: under Reduce Motion the row
            followed the finger, and on release it snaps; a turned week fades in. */
-        if (mplan("rm") && matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
           gsap.set(row, { clearProps: "transform" });
           if (dir) {
             shift(dir);

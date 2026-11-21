@@ -24,8 +24,8 @@ const TEMPLATES_KEY = "leads:contract-templates";
 
 async function gate(request: Request) {
   const { env } = await getCloudflareContext({ async: true });
-  if (!env.INBOX) return { error: json({ error: "This build has no inbox attached." }, 503) };
   if (!(await isAdmin(request, env.INBOX_KEY))) return { error: json({ error: bearer(request) ? "GitHub did not accept that token for this repository." : "Not authorized." }, 401) };
+  if (!env.INBOX) return { error: json({ error: "This build has no inbox attached." }, 503) };
   const seal = sealer(env.LEADS_KEY);
   if (!seal) return { error: json({ error: "Contracts need LEADS_KEY on the Worker." }, 503) };
   return { env, kv: env.INBOX, s: await seal };

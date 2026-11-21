@@ -1,8 +1,7 @@
 import { sendConfirm } from "@/lib/booking/confirm";
 import { enquiry, enquiryKey, summary, whenPT } from "@/lib/inbox";
 import { logMail, recordLead } from "@/lib/leads/lead-store";
-import { openNow, type KV } from "@/lib/booking/slots";
-import { EVENTS, type Booking, type Hours } from "@/lib/booking/booking-rules";
+import { EVENTS, type Booking } from "@/lib/booking/booking-rules";
 import { lockOp, parseBooking, recordBooking } from "@/lib/booking/booking-engine";
 import { manageLinks } from "@/lib/booking/booking-token";
 
@@ -38,7 +37,7 @@ import { manageLinks } from "@/lib/booking/booking-token";
  * on its record, so a refund, a mail or a log never guesses.
  * ─────────────────────────────────────────────────────────────── */
 
-import { alertHello, type Attachment } from "@/lib/hello-mail";
+import { alertAndLog, type Attachment } from "@/lib/hello-mail";
 import { stripe } from "@/lib/stripe";
 import { DEPOSIT, LEGACY_DEPOSIT, PAID, isPaid } from "@/lib/booking/paid";
 /** The charge in cents for a session. Throws on a slug that takes no deposit: `parseBooking` lets none through. */
@@ -74,14 +73,6 @@ export const recordKey = (intent: string) => `deposit:${intent}`;
 /** A reference sent with the deposit (`app/api/deposit/[id]`): `f<n>` a file, `picks` frames of mine. */
 export const refKey = (intent: string, part: string) => `dref:${intent}:${part}`;
 export const isIntentId = (s: string) => /^pi_[A-Za-z0-9]{8,64}$/.test(s);
-
-/**
- * Whether the start is still offered by hello@'s calendar.
- * `hours`: Julian's, from the lock (`liveHours`); the defaults when unset.
- */
-export function isSlotOpen(b: Booking, gcalSecret?: string, kv?: KV, hours?: Hours): Promise<boolean> {
-  return openNow(gcalSecret, b.slug, b.start, { kv, hours });
-}
 
 /** The PaymentIntent's form, with the booking in its metadata. */
 export function intentForm(b: Booking): { [k: string]: string } {
@@ -187,7 +178,7 @@ async function tell(env: Env, status: keyof typeof SAID, b: Booking | string, li
   if (refs.files.length) lines.push("", `References attached: ${refs.files.length}`);
   if (refs.picks.length) lines.push("", "Picked from my work:", ...refs.picks.map((src) => `https://juliangigola.com${src}`));
   const subject = `${SAID[status]}: ${what}`;
-  if (await alertHello(env.EMAIL, subject, lines, who, refs.files)) await logMail(env, who?.email, subject, { to: "hello@", kind: `deposit-${status}`, booking: intent });
+  await alertAndLog(env, subject, lines, who, { kind: `deposit-${status}`, booking: intent }, refs.files);
   // The money itself, on the activity log: what was paid in, and out again on a refund.
   if (who) await recordLead(env, who.email, { event: { at: new Date().toISOString(), kind: "payment", ref: intent, note: "Deposit", amount: usd } });
   if (who && status === "refunded") await recordLead(env, who.email, { event: { at: new Date().toISOString(), kind: "refund", ref: `refund-${intent}`, note: "Deposit, the time was gone", amount: usd } });
@@ -220,11 +211,11 @@ export async function bookDeposit(env: Env, intent: string, metadata: { [k: stri
       await env.INBOX.put(key, JSON.stringify({ ...r, warned: true }), { expirationTtl: 90 * 864e2 }).catch((e: unknown) => console.error("deposit record", "warned", String(e)));
       if (who) await recordLead(env, who.email, { event: { at: new Date().toISOString(), kind: "deposit-stuck", ref: intent, note: what }, name: who.name, kind: who.slug, flag: "stuck" });
       const subject = `Deposit stuck: check Stripe and the calendar: ${what}`;
-      if (await alertHello(env.EMAIL, subject, [
+      await alertAndLog(env, subject, [
         who ? `${who.name} <${who.email}>` : "Unknown client",
         `Paid, and the booking was started at ${r.at} but never finished. Check the calendar for the booking, then book or refund in Stripe by hand.`,
         `Stripe: ${dashboardLink(intent, env.STRIPE_SECRET_KEY)}`,
-      ], who)) await logMail(env, who?.email, subject, { to: "hello@", kind: "deposit-stuck", booking: intent });
+      ], who, { kind: "deposit-stuck", booking: intent });
       return "failed";
     }
     return r.status;
@@ -262,13 +253,14 @@ export async function bookDeposit(env: Env, intent: string, metadata: { [k: stri
       await put({ status: "booked", booking: { uid: booking.id, start: booking.start } });
       await tell(env, "booked", b, link, intent, usd);
       await recordBooking(env, booking, dashboardLink(intent, env.STRIPE_SECRET_KEY));
+      // Not `confirmOf`: this mail maps the paid Booking and adds the card Stripe charged. The fee comes from the record, so it says 90% back.
       const confirm = {
         ...b,
         session: SESSION[b.slug] ?? b.slug,
         start: booking.start,
         end: booking.end,
         uid: booking.id,
-        deposit: { ref: intent, at: new Date().toISOString(), amount: usd, card: await cardOf(env.STRIPE_SECRET_KEY, intent) },
+        deposit: { ref: intent, at: new Date().toISOString(), amount: usd, card: await cardOf(env.STRIPE_SECRET_KEY, intent), fee: booking.fee },
         manage: await manageLinks(env.BOOKING_SECRET, booking),
       };
       const sent = await sendConfirm(env.CLIENT_EMAIL, confirm);

@@ -14,7 +14,7 @@ import { Heading, Text } from "@astryxdesign/core/Text";
 import { Badge } from "@astryxdesign/core/Badge";
 import { Divider } from "@astryxdesign/core/Divider";
 import { canonical } from "@/lib/leads/lead-crypto";
-import { day } from "@/lib/leads/lead-desk";
+import { dayLabel } from "@/lib/leads/lead-desk";
 import { closed, type Row } from "@/lib/proofs/desk";
 import { stage } from "@/lib/proofs/proof";
 import { Timeline } from "@/components/proofs/timeline";
@@ -30,8 +30,8 @@ function state(p: Row): { label: string; variant: "success" | "blue" | "gray" } 
 function facts(p: Row, lead: string): string {
   const n = (k: number, one: string) => `${k} ${one}${k === 1 ? "" : "s"}`;
   const parts = p.deliveredAt
-    ? ["Finals", n(p.finals?.length ?? 0, "photo"), `delivered ${day(p.deliveredAt)}`, p.firstDownloadAt ? `downloaded ${day(p.firstDownloadAt)}` : null]
-    : ["Proofs", n(p.frames.length, "frame"), p.sentAt ? `sent ${day(p.sentAt)}` : "not sent", p.submittedAt ? `${n(p.selects.length, "select")} sent ${day(p.submittedAt)}` : p.views ? `opened ${n(p.views, "time")}` : null];
+    ? ["Finals", n(p.finals?.length ?? 0, "photo"), `delivered ${dayLabel(p.deliveredAt)}`, p.firstDownloadAt ? `downloaded ${dayLabel(p.firstDownloadAt)}` : null]
+    : ["Proofs", n(p.frames.length, "frame"), p.sentAt ? `sent ${dayLabel(p.sentAt)}` : "not sent", p.submittedAt ? `${n(p.selects.length, "select")} sent ${dayLabel(p.submittedAt)}` : p.views ? `opened ${n(p.views, "time")}` : null];
   if (closed(p)) parts.push("closed");
   if (p.email && canonical(p.email) !== canonical(lead)) parts.push(`to ${p.email}`);
   return parts.filter(Boolean).join(" · ");

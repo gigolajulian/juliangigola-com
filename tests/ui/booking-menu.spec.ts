@@ -81,9 +81,13 @@ test("on the home, a link to /#contact glides to the footer, then opens the card
   await page.goto("/", { waitUntil: "load" });
   await page.locator("#contact .mt-ph-btn").waitFor({ state: "attached" });
   // a fixed 1s was sometimes too early on CI (#1242, #1255: the card opened with the footer off screen);
-  // the motion engine starting is a sign the home has hydrated, then a beat for its click listener
+  // the motion engine starts in the same effect pass that adds the home's click listener;
+  // then the page height holds over two frames, so the glide aims at where the footer stays
   await page.waitForFunction(() => document.documentElement.hasAttribute("data-mt-motion"), null, { timeout: 15000 });
-  await page.waitForTimeout(500);
+  await expect.poll(() => page.evaluate(() => new Promise<boolean>((done) => {
+    const h = document.documentElement.scrollHeight;
+    requestAnimationFrame(() => requestAnimationFrame(() => done(document.documentElement.scrollHeight === h)));
+  })), { message: "page height holds" }).toBe(true);
   // no link on the home points there today: a stand-in, as any page link to /#contact would be
   await page.evaluate(() => {
     const a = Object.assign(document.createElement("a"), { href: "/#contact", id: "t-contact", textContent: "contact" });

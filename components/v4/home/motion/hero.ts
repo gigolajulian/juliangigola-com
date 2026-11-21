@@ -14,7 +14,7 @@ const FLIP = 1300; // the idle wall's card turn, ms
 
 type Part = { el: HTMLElement; lag: number; col: number; lastY: number };
 
-type State = { cols: Part[]; figs: Part[]; caps: HTMLElement[]; letters: HTMLElement[]; photos: HTMLElement[]; texts: HTMLElement[]; ctas: HTMLElement | null; more: HTMLElement | null; name: HTMLElement | null; scroll: number; mode: "" | "d" | "p" | "t"; exit: number; unit: number; sizeKey: string; wall: number; out: boolean; drop: number };
+type State = { cols: Part[]; figs: Part[]; caps: HTMLElement[]; letters: HTMLElement[]; photos: HTMLElement[]; texts: HTMLElement[]; ctas: HTMLElement | null; more: HTMLElement | null; name: HTMLElement | null; scroll: number; mode: "" | "d" | "p" | "t"; exit: number; unit: number; sizeKey: string; wallH: number; out: boolean; drop: number };
 
 const ink = (n: Node) => {
   const r = document.createRange();
@@ -88,8 +88,8 @@ function grid(im: HTMLImageElement) {
 }
 let toned = 0, tonedY = -1;
 function tone(st: Pick<State, "letters" | "photos">) {
-  const wall = st.photos[0]?.closest(".mt-wall");
-  if (!st.letters.length || !wall) return;
+  const wallEl = st.photos[0]?.closest(".mt-wall");
+  if (!st.letters.length || !wallEl) return;
   /* A pass cost 51 hit tests: 5 to 8ms at 1440, 52ms on a phone-speed CPU, and it ran every frame, idle included (measured on live).
      Now ten passes a second at most (the colour takes .15s to change anyway), and a word is hit tested at its two ends: the same photo under both
      is the photo under the whole word. Only a word that straddles two photos goes letter by letter. About 17 hit tests a pass.
@@ -104,7 +104,7 @@ function tone(st: Pick<State, "letters" | "photos">) {
      iPhone that was a photo lying under another one (MAC, #1155: a line stayed white over a pale photo). The name block takes no pointer events, so it is not in the way.
      While a swap develops, the incoming photo counts once it has cut in. Off screen there is nothing to hit: bare page. */
   const hit = (r: DOMRect) =>
-    document.elementsFromPoint(r.left + r.width / 2, r.top + r.height / 2).find((n): n is HTMLImageElement => n instanceof HTMLImageElement && wall.contains(n) && n.complete && !!n.naturalWidth && (!n.classList.contains("mt-dev") || n.hasAttribute("data-on"))) ?? null;
+    document.elementsFromPoint(r.left + r.width / 2, r.top + r.height / 2).find((n): n is HTMLImageElement => n instanceof HTMLImageElement && wallEl.contains(n) && n.complete && !!n.naturalWidth && (!n.classList.contains("mt-dev") || n.hasAttribute("data-on"))) ?? null;
   let wd: Element | null = null;
   let same: HTMLImageElement | null | undefined;
   const ts: string[] = [];
@@ -220,7 +220,7 @@ export const heroDrivers: Driver[] = [
         exit: -1,
         unit: 0,
         sizeKey: "",
-        wall: WALL,
+        wallH: WALL,
         out: false,
         drop: 0,
       };
@@ -240,9 +240,9 @@ export const heroDrivers: Driver[] = [
         due = 0;
         const top = hdr?.offsetHeight ?? 60, c = st.ctas;
         const over = el.getBoundingClientRect().bottom <= top, up = !!c && c.getBoundingClientRect().bottom <= top;
-        const wall = over || up || !!c?.hasAttribute("data-park-out");
+        const wallOff = over || up || !!c?.hasAttribute("data-park-out");
         for (const a of links()) {
-          const off = a.closest(".mt-more") ? over : wall;
+          const off = a.closest(".mt-more") ? over : wallOff;
           if ((a.getAttribute("tabindex") === "-1") !== off) off ? a.setAttribute("tabindex", "-1") : a.removeAttribute("tabindex");
         }
         park(c, over || up, "past");
@@ -306,14 +306,14 @@ function heroFrame(st: State, p: number, el: HTMLElement, ctx: Ctx) {
       const core = st.cols.filter((c) => !c.el.classList.contains("side"));
       st.unit = (core[0]?.el.offsetWidth ?? 0) / 403 || ctx.u;
       // the lowest column end plus the 46 design px under it: 2640 with four rows
-      st.wall = core.length ? Math.max(...core.map((c) => c.el.offsetTop + c.el.offsetHeight)) / st.unit + 46 : WALL;
+      st.wallH = core.length ? Math.max(...core.map((c) => c.el.offsetTop + c.el.offsetHeight)) / st.unit + 46 : WALL;
       // how far the name has to sink to clear the window: from its top at rest to the window's lower edge, and 24px,
       // so it stays in sight until the ride is nearly over
       if (st.texts[0]) st.drop = ctx.vh - (st.texts[0].getBoundingClientRect().top - Math.max(0, st.exit) * st.drop) + 24;
     }
     const u = st.unit;
     // the ground under the last row is in the page's unit, like the button that sits in it
-    const target = p * Math.max(0, st.wall * u + TAIL * ctx.u - Math.max(ctx.vh, 600));
+    const target = p * Math.max(0, st.wallH * u + TAIL * ctx.u - Math.max(ctx.vh, 600));
     // a 0.64 follow, frame-rate independent
     st.scroll = st.scroll < 0 || Math.abs(target - st.scroll) < 0.1 ? target : st.scroll + (target - st.scroll) * (1 - Math.pow(0.36, ctx.dt / 16.7));
     const S = st.scroll;
@@ -322,7 +322,7 @@ function heroFrame(st: State, p: number, el: HTMLElement, ctx: Ctx) {
        ended it the other way round. Five and seven columns already end high on the right, so they keep theirs. */
     const three = ctx.vw < 1920;
     // a share of the travel, not of the distance: a tall window travels less and must still end on the same stair
-    const share = S / Math.max(1, st.wall * u + TAIL * ctx.u - Math.max(ctx.vh, 600));
+    const share = S / Math.max(1, st.wallH * u + TAIL * ctx.u - Math.max(ctx.vh, 600));
     for (const c of st.cols) move(c, -(S - (three && c.col in END_D ? share * END_D[c.col] * u : Math.min(S, LAG_MAX * u) * c.lag * 0.5)));
     /* The name holds, then rides down out of the window, the tagline and buttons sinking ahead of it (--mt-out, hero.css).
        sink() reads the ride off See the work: it is over as the button's top edge enters the window. */

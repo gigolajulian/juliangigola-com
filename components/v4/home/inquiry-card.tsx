@@ -161,19 +161,19 @@ function Handle({ onClose }: { onClose: () => void }) {
   );
 }
 
-export function InquiryCard({ at, reply, onClose, onBack }: { at: { from: InquiryMode; opt?: QuoteOpt["key"] } | null; reply: string | null; onClose: () => void; onBack: () => void }) {
-  const opt = QUOTE_OPTS.find((o) => o.key === at?.opt);
+export function InquiryCard({ open, reply, onClose, onBack }: { open: { from: InquiryMode; opt?: QuoteOpt["key"] } | null; reply: string | null; onClose: () => void; onBack: () => void }) {
+  const opt = QUOTE_OPTS.find((o) => o.key === open?.opt);
   return (
-    <Dialog.Root open={!!at} onOpenChange={(o) => !o && onClose()}>
+    <Dialog.Root open={!!open} onOpenChange={(o) => !o && onClose()}>
       <Dialog.Portal>
         <div className="v3 contents">
           <Dialog.Overlay className="mt-dim mt-dim-q" data-lenis-prevent />
-          <Dialog.Content className="mt-card mt-inq" data-from={at?.from} data-lenis-prevent onCloseAutoFocus={(e) => { e.preventDefault(); onBack(); }}>
+          <Dialog.Content className="mt-card mt-inq" data-from={open?.from} data-lenis-prevent onCloseAutoFocus={(e) => { e.preventDefault(); onBack(); }}>
             <Handle onClose={onClose} />
             <Dialog.Close className="mt-close-t" aria-label="Close">
               <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M2 2l12 12M14 2L2 14" fill="none" stroke="currentColor" strokeWidth="1.5" /></svg>
             </Dialog.Close>
-            {at ? <Form key={`${at.from}-${at.opt}`} from={at.from} opt={opt} reply={reply} onClose={onClose} /> : null}
+            {open ? <Form key={`${open.from}-${open.opt}`} from={open.from} opt={opt} reply={reply} onClose={onClose} /> : null}
           </Dialog.Content>
         </div>
       </Dialog.Portal>

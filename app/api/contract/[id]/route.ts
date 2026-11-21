@@ -21,7 +21,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const s = await seal;
   const c = await readContract(env.INBOX, s, (await params).id);
   if (!c || !c.sentAt) return json({ error: "This contract is not available." }, 404);
-  if (!(await env.DEPOSIT_LIMIT.limit({ key: request.headers.get("cf-connecting-ip") ?? "unknown" })).success) return json({ error: "Too many tries. Wait a minute." }, 429);
+  if (!(await env.DEPOSIT_LIMIT.limit({ key: `sign:${request.headers.get("cf-connecting-ip") ?? "unknown"}` })).success) return json({ error: "Too many tries. Wait a minute." }, 429);
   const b = (await bodyOf(request)) ?? {};
   const at = new Date().toISOString();
   const done = await sign(c, { name: b.name, email: b.email, agree: b.agree, seen: b.hash, mark: b.mark, typed: b.typed, ip: request.headers.get("cf-connecting-ip") ?? "", ua: request.headers.get("user-agent") ?? "" }, at);

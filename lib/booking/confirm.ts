@@ -1,5 +1,7 @@
 import { duration, EARLY_SHARE, PART_SHARE, REFUND_HOURS, refundCents, refundShare, TZ } from "@/lib/booking/booking-rules";
 import { LEGACY_DEPOSIT } from "@/lib/booking/paid";
+import { depositPaid, type BookingRecord } from "@/lib/booking/booking-engine";
+import type { manageLinks } from "@/lib/booking/booking-token";
 import { SIG_DARK, SIG_HTML, SIG_TEXT } from "@/lib/email/email-signature";
 /* ── the client's confirmation email ──────────────────────────────
  * Julian (2026-10-16): every booking gets a branded "You're in." mail from
@@ -44,6 +46,21 @@ export type Confirm = {
   /** "reminder": the day-before mail from the lock Worker's cron. "headsup": three days ahead, while the early refund is open. */
   kind?: "reminder" | "headsup";
 };
+
+/** A stored booking as its confirm mail: the reschedule, the reminder and the heads-up. */
+export const confirmOf = (r: BookingRecord, manage: Awaited<ReturnType<typeof manageLinks>>) => ({
+  name: r.name,
+  email: r.email,
+  session: r.session,
+  call: r.call,
+  start: r.start,
+  end: r.end,
+  where: r.where,
+  uid: r.id,
+  manage,
+  firstStart: r.firstStart,
+  ...(r.intent ? { deposit: { ref: r.intent, at: r.at, amount: depositPaid(r), fee: r.fee } } : {}),
+});
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 const fmt = (o: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, ...o });

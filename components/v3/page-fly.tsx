@@ -12,12 +12,10 @@ import { v4pages } from "@/lib/v4pages";
    Links without a photo, or pages without a hero, open plainly. Only with
    ?v3motion, never under reduced motion. */
 const HERO = ".v3 .pj-big, .v3 .f-photo .ph";
-const EASE = "cubic-bezier(.16,1,.3,1)";
-/* MOTION-PLAN.md item 3 on trial (`?mplan=pages`): the photo travels on
+/* MOTION-PLAN.md item 3: the photo travels on
    `move` in 600, the covers left behind recede, the project's other frames
    rise in as it lands, and back flies the hero home to its tile. */
 const MOVE = "cubic-bezier(.77,0,.175,1)", OUT = "cubic-bezier(.23,1,.32,1)";
-const trial = () => !!document.documentElement.dataset.mplan?.split(" ").includes("pages");
 const onScreen = (r: DOMRect) => r.width > 0 && r.bottom > 0 && r.top < innerHeight;
 /** Sets a root flag for one trip; the transition's CSS reads it as it starts. */
 const flag = (k: "mpFly") => {
@@ -110,7 +108,7 @@ export function PageFly() {
       // An oversized grid photo flies from its frame, not from its own larger box.
       const z = zoomOf(img);
       fly.current = to && img ? { to, t: Date.now(), r: ((z && img.closest(".ph")) || img).getBoundingClientRect(), src: img.currentSrc || img.src, z } : null;
-      if (fly.current && img && trial()) {
+      if (fly.current && img) {
         flag("mpFly");
         const mode = carried();
         // Project pages only: a booking row swaps its photo as it is pressed, and keeps the copy.
@@ -147,7 +145,7 @@ export function PageFly() {
     /* Back from a project, read while its page is still up: the browser's
        pop, or the replay page-transition.tsx hands back inside its trip. */
     const pop = () => {
-      if (!trial() || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
       // Closing the frame viewer pops its own entry on the same page: that is not a trip back (`?v4pages=view`, project pages).
       if (v4pages("view") && location.pathname === here.current) return;
       if (back.current && Date.now() - back.current.t < 300) return;
@@ -212,7 +210,6 @@ export function PageFly() {
     if (pushed.current === path) scrollTop();
     pushed.current = null;
     here.current = path;
-    const t = trial();
     const box = (r: DOMRect) => ({ left: `${r.left}px`, top: `${r.top}px`, width: `${r.width}px`, height: `${r.height}px` });
     // A fixed copy flies from one box to the other; its box animates (not a
     // scale), so the crop never stretches. `to` is hidden until it lands.
@@ -241,7 +238,7 @@ export function PageFly() {
        page has its scroll back. */
     const b = back.current;
     back.current = null;
-    if (t && b && Date.now() - b.t < 4000) {
+    if (b && Date.now() - b.t < 4000) {
       const main = document.getElementById("main");
       if (main && !(document as Document & { activeViewTransition?: unknown }).activeViewTransition) {
         main.animate({ transform: ["translateY(-2.5vh)", "none"] }, { duration: 400, easing: "cubic-bezier(.32,.72,0,1)" });
@@ -266,10 +263,6 @@ export function PageFly() {
       const h = hero?.getBoundingClientRect();
       if (!hero || !h?.width) return void (++n < 60 && (raf = requestAnimationFrame(land)));
       if (h.bottom < 0 || h.top > innerHeight) return;
-      if (!t) {
-        hero.closest("section, .flow")?.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300, delay: 100, easing: EASE, fill: "backwards" });
-        return flyCopy(f.r, f.src, hero, 550, EASE, f.z);
-      }
       // Found in the layout phase, the hero is named before the new page is captured; found later, the copy flies as before.
       if (f.vt && !n) {
         // The page left is already captured. A frame that outlives the trip (project to project) must not hold the name too: two of one name and the browser skips the trip.

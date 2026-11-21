@@ -4,6 +4,7 @@ import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { matches } from "@/lib/device";
+import { qflag } from "@/lib/v4-home/flags";
 import { projectHref } from "@/lib/project-href";
 import { EXTRAS, type MtFrame } from "@/lib/v4-home/data";
 import { flipMs } from "./motion/root-attrs";
@@ -70,7 +71,7 @@ function useIdleWall(frames: MtFrame[], extras: MtFrame[]) {
   const live = React.useRef({ onWall, was, pool: extras.slice(16) }); // the first 16 extras are on the wall (side columns); the rest come in by the idle swap
   React.useEffect(() => void Object.assign(live.current, { onWall, was }));
   React.useEffect(() => {
-    if (/[?&]idle=0/.test(location.search) || matches("calm")) return;
+    if (qflag("idle", "0") || matches("calm")) return;
     let last = performance.now(), swapped = 0;
     const touch = () => (last = performance.now());
     const evs = ["pointermove", "pointerdown", "wheel", "scroll", "keydown", "touchstart"] as const;

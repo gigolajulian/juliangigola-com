@@ -21,7 +21,7 @@ type Foot = {
   cut: HTMLCanvasElement;
   dot: HTMLElement;
   g: CanvasRenderingContext2D;
-  bufs: { W: Buf; B: Buf; S: Buf; M: Buf };
+  bufs: { wash: Buf; blur: Buf; sharp: Buf; mask: Buf };
   clones: Node[];
   // the still's reveal
   reveal: number;
@@ -30,12 +30,12 @@ type Foot = {
   px: number;
   py: number;
   // phrase
-  W: number;
+  phraseW: number;
   pad: number;
   phraseX: number;
   phraseV: number;
-  pk: number;
-  tr: number;
+  kick: number;
+  rowX: number;
   first: boolean;
   // dot and spot
   hot: boolean;
@@ -47,8 +47,8 @@ type Foot = {
   spotAlpha: number;
   spotOut: string;
   ink: string;
-  MK: HTMLCanvasElement | null;
-  mz: number;
+  phraseMask: HTMLCanvasElement | null;
+  maskZoom: number;
 };
 
 function make<K extends keyof HTMLElementTagNameMap>(stage: HTMLElement, tag: K, cls: string) {
@@ -65,42 +65,42 @@ function buf(): Buf {
 
 function measure(f: Foot, ctx: Ctx) {
   const { row } = f;
-  f.W = (row.firstElementChild as HTMLElement).getBoundingClientRect().width;
+  f.phraseW = (row.firstElementChild as HTMLElement).getBoundingClientRect().width;
   f.pad = parseFloat(getComputedStyle(row).paddingLeft) || 0;
   // ultrawide: three copies do not span the loop, add more
-  for (let n = row.children.length; f.W > 0 && (n - 1) * f.W < ctx.vw; n++) {
+  for (let n = row.children.length; f.phraseW > 0 && (n - 1) * f.phraseW < ctx.vw; n++) {
     const last = row.lastElementChild;
     if (!last) break;
     f.clones.push(row.appendChild(last.cloneNode(true)));
   }
   // start with a copy at the resting position and one already off to its left
-  if (f.first && f.W) {
+  if (f.first && f.phraseW) {
     f.phraseX = -f.pad;
     f.first = false;
   }
-  f.MK = null;
+  f.phraseMask = null;
 }
 
 /* One phrase as a mask. Drawn at 280px or less with no canvas scale: above
    about 300px fillText punches the variable font's overlaps out as holes. */
 function mask(f: Foot, br: DOMRect) {
   const ph = f.row.firstElementChild as HTMLElement, cs = getComputedStyle(ph), fs = parseFloat(cs.fontSize), pr = ph.getBoundingClientRect();
-  const mz = (f.mz = Math.min(1, 280 / fs));
+  const zoom = (f.maskZoom = Math.min(1, 280 / fs));
   const [c, k] = buf();
-  c.width = Math.ceil(f.W * mz);
-  c.height = Math.ceil(br.height * mz);
+  c.width = Math.ceil(f.phraseW * zoom);
+  c.height = Math.ceil(br.height * zoom);
   const probe = document.createElement("b");
   probe.style.cssText = "display:inline-block;width:0;height:0";
   (ph.firstElementChild ?? ph).appendChild(probe);
-  const base = (probe.getBoundingClientRect().top - br.top) * mz;
+  const base = (probe.getBoundingClientRect().top - br.top) * zoom;
   probe.remove();
-  k.font = `${cs.fontWeight} ${fs * mz}px ${cs.fontFamily}`;
+  k.font = `${cs.fontWeight} ${fs * zoom}px ${cs.fontFamily}`;
   k.fillStyle = k.strokeStyle = "#fff";
   // a hair wider than the letters, or their grey edge shows around the photo
-  k.lineWidth = 1.5 * mz;
+  k.lineWidth = 1.5 * zoom;
   k.lineJoin = "round";
   for (const l of ph.children) {
-    const lx = (l.getBoundingClientRect().left - pr.left) * mz;
+    const lx = (l.getBoundingClientRect().left - pr.left) * zoom;
     k.fillText(l.textContent ?? "", lx, base);
     k.strokeText(l.textContent ?? "", lx, base);
   }
@@ -127,11 +127,11 @@ function grad(k: CanvasRenderingContext2D, gx: number, gy: number, r0: number, r
    spot's box inside the phrase band. */
 function draw(f: Foot, r: DOMRect, u: number) {
   const { btn, cut, g, row } = f;
-  const [Wc, w] = f.bufs.W, [Bc, b] = f.bufs.B, [Sc, s2] = f.bufs.S, [Mc, m] = f.bufs.M;
+  const [washC, wash] = f.bufs.wash, [blurC, blur] = f.bufs.blur, [sharpC, sharp] = f.bufs.sharp, [maskC, maskCtx] = f.bufs.mask;
   const br = btn.getBoundingClientRect();
-  if (!f.MK && f.W && document.fonts.status === "loaded") f.MK = mask(f, br);
-  const MK = f.MK;
-  if (!MK) return;
+  if (!f.phraseMask && f.phraseW && document.fonts.status === "loaded") f.phraseMask = mask(f, br);
+  const phraseMask = f.phraseMask;
+  if (!phraseMask) return;
   const dpr = Math.min(2, devicePixelRatio || 1), Ru = R * u, bw = 2 * Ru, bh = br.height;
   const snap = (n: number) => Math.round(n * dpr) / dpr;
   const ox = snap(f.spotX - Ru), oy = snap(br.top - r.top);
@@ -141,46 +141,46 @@ function draw(f: Foot, r: DOMRect, u: number) {
     cut.style.height = `${bh}px`;
   }
   fit(cut, cw, ch);
-  fit(Wc, cw, ch);
-  fit(Sc, cw, ch);
-  fit(Mc, cw, ch);
-  fit(Bc, Math.ceil(cw / 6), Math.ceil(ch / 6));
+  fit(washC, cw, ch);
+  fit(sharpC, cw, ch);
+  fit(maskC, cw, ch);
+  fit(blurC, Math.ceil(cw / 6), Math.ceil(ch / 6));
   cut.style.transform = `translate3d(${ox}px,${oy}px,0)`;
 
   // the resting grey over the lit letters, at full strength (the falloff is in the gradients below)
-  w.setTransform(dpr, 0, 0, dpr, 0, 0);
-  w.fillStyle = f.ink;
-  w.fillRect(0, 0, bw, bh);
+  wash.setTransform(dpr, 0, 0, dpr, 0, 0);
+  wash.fillStyle = f.ink;
+  wash.fillRect(0, 0, bw, bh);
 
   const gx = (f.spotX - ox) * dpr, gy = (f.spotY - oy) * dpr, ud = u * dpr;
   // blur without ctx.filter (Safari): down to 1/6 and back up
-  b.imageSmoothingQuality = "high";
-  b.globalCompositeOperation = "copy";
-  b.drawImage(Wc, 0, 0, Bc.width, Bc.height);
-  s2.globalCompositeOperation = "copy";
-  s2.drawImage(Wc, 0, 0);
-  s2.globalCompositeOperation = "destination-in";
-  s2.fillStyle = grad(s2, gx, gy, 40 * ud, 300 * ud, 0.35, 0.85);
-  s2.fillRect(0, 0, cw, ch);
+  blur.imageSmoothingQuality = "high";
+  blur.globalCompositeOperation = "copy";
+  blur.drawImage(washC, 0, 0, blurC.width, blurC.height);
+  sharp.globalCompositeOperation = "copy";
+  sharp.drawImage(washC, 0, 0);
+  sharp.globalCompositeOperation = "destination-in";
+  sharp.fillStyle = grad(sharp, gx, gy, 40 * ud, 300 * ud, 0.35, 0.85);
+  sharp.fillRect(0, 0, cw, ch);
   g.imageSmoothingQuality = "high";
   g.globalCompositeOperation = "copy";
-  g.drawImage(Bc, 0, 0, cw, ch);
+  g.drawImage(blurC, 0, 0, cw, ch);
   g.globalCompositeOperation = "source-over";
-  g.drawImage(Sc, 0, 0);
+  g.drawImage(sharpC, 0, 0);
 
   // letters in view, times the spot falloff
-  m.globalCompositeOperation = "source-over";
-  m.clearRect(0, 0, cw, ch);
-  const left = br.left - r.left + f.pad + f.tr - ox, mw = (MK.width / f.mz) * dpr, mh = (MK.height / f.mz) * dpr;
+  maskCtx.globalCompositeOperation = "source-over";
+  maskCtx.clearRect(0, 0, cw, ch);
+  const left = br.left - r.left + f.pad + f.rowX - ox, mw = (phraseMask.width / f.maskZoom) * dpr, mh = (phraseMask.height / f.maskZoom) * dpr;
   for (let i = 0; i < row.children.length; i++) {
-    const lx = (left + i * f.W) * dpr;
-    if (lx < cw && lx + mw > 0) m.drawImage(MK, lx, 0, mw, mh);
+    const lx = (left + i * f.phraseW) * dpr;
+    if (lx < cw && lx + mw > 0) maskCtx.drawImage(phraseMask, lx, 0, mw, mh);
   }
-  m.globalCompositeOperation = "destination-in";
-  m.fillStyle = grad(m, gx, gy, 45 * ud, R * ud, 0.45, 0.7);
-  m.fillRect(0, 0, cw, ch);
+  maskCtx.globalCompositeOperation = "destination-in";
+  maskCtx.fillStyle = grad(maskCtx, gx, gy, 45 * ud, R * ud, 0.45, 0.7);
+  maskCtx.fillRect(0, 0, cw, ch);
   g.globalCompositeOperation = "destination-in";
-  g.drawImage(Mc, 0, 0);
+  g.drawImage(maskC, 0, 0);
 }
 
 function onMove(f: Foot, e: PointerEvent) {
@@ -192,13 +192,13 @@ function onMove(f: Foot, e: PointerEvent) {
 // phrase: one speed easing toward idle plus whatever the scroll adds
 function drift(f: Foot, c: Ctx, busy: boolean) {
   const dt = c.dt, k = dt / 16.7;
-  f.pk = clamp(f.pk * Math.pow(0.94, k) + c.dy * 0.0012, -0.35, 0.35);
-  if (Math.abs(f.pk) < 0.0005) f.pk = 0;
+  f.kick = clamp(f.kick * Math.pow(0.94, k) + c.dy * 0.0012, -0.35, 0.35);
+  if (Math.abs(f.kick) < 0.0005) f.kick = 0;
   // 68 design px a second, 54 under the pointer
-  f.phraseV += ((busy ? 0 : (f.hot ? 0.054 : 0.068) * c.u) + f.pk - f.phraseV) * (1 - Math.exp(-dt / 180));
+  f.phraseV += ((busy ? 0 : (f.hot ? 0.054 : 0.068) * c.u) + f.kick - f.phraseV) * (1 - Math.exp(-dt / 180));
   f.phraseX += f.phraseV * dt;
-  f.tr = -f.pad - mod(f.phraseX, f.W || 1);
-  f.row.style.transform = `translate3d(${f.tr.toFixed(1)}px,0,0)`;
+  f.rowX = -f.pad - mod(f.phraseX, f.phraseW || 1);
+  f.row.style.transform = `translate3d(${f.rowX.toFixed(1)}px,0,0)`;
 }
 
 // dot pointer over the phrase band
@@ -289,13 +289,13 @@ function setup(el: HTMLElement) {
   const g = cut.getContext("2d")!;
   const f: Foot = {
     el, stage, wall, btn, row, mt: el.closest<HTMLElement>(".mt"), cut, dot, g,
-    bufs: { W: buf(), B: buf(), S: buf(), M: buf() },
+    bufs: { wash: buf(), blur: buf(), sharp: buf(), mask: buf() },
     clones: [],
     reveal: 0, dirty: true,
     px: -1, py: -1,
-    W: 0, pad: 0, phraseX: 0, phraseV: 0, pk: 0, tr: 0, first: true,
+    phraseW: 0, pad: 0, phraseX: 0, phraseV: 0, kick: 0, rowX: 0, first: true,
     hot: false, dotX: 0, dotY: 0, dotAlpha: 0, spotX: -1, spotY: 0, spotAlpha: 0, spotOut: "", ink: "",
-    MK: null, mz: 1,
+    phraseMask: null, maskZoom: 1,
   };
   const ac = new AbortController();
   const dirty = () => void (f.dirty = true);

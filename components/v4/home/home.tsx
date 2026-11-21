@@ -85,7 +85,7 @@ export function MtHome({ data }: { data: MtData }) {
         <MtFoot />
       </section>
       <MtMotionLayer />
-      <InquiryCard at={inq} reply={data.reply} onClose={() => setInq(null)} onBack={back} />
+      <InquiryCard open={inq} reply={data.reply} onClose={() => setInq(null)} onBack={back} />
     </CardsCtx.Provider>
   );
 }

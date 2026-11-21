@@ -32,3 +32,10 @@ describe("session tables", () => {
     }
   });
 });
+
+describe("session prices", () => {
+  it("the home card shows the price set in /admin for every session it lists", async () => {
+    const { SESSION_TYPES } = await import("@/lib/booking/sessions");
+    for (const t of SESSION_TYPES) if (t.slug in SESSIONS) expect(SESSIONS[t.slug as keyof typeof SESSIONS].from).toBe(t.from);
+  });
+});

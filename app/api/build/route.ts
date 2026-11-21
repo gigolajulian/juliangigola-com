@@ -6,8 +6,10 @@
  * repo is public.
  * ─────────────────────────────────────────────────────────────── */
 
+import { json } from "@/lib/http";
+
 export const dynamic = "force-dynamic";
 
 export function GET() {
-  return Response.json({ sha: process.env.BUILD_SHA ?? "local" }, { headers: { "cache-control": "no-store" } });
+  return json({ sha: process.env.BUILD_SHA ?? "local" });
 }

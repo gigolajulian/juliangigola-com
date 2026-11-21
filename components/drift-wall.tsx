@@ -30,14 +30,9 @@ export type DriftWallProps = {
   perspective?: number;
   depth?: number;
   speed?: number;
-  direction?: 'up' | 'down';
-  variance?: number;
-  parallax?: number;
-  lift?: number;
   fade?: number;
   dim?: number;
   overlayColor?: string;
-  eager?: boolean;
   limit?: number;
   density?: number;
   hold?: boolean;
@@ -66,12 +61,18 @@ const subscribeReduced = (cb: () => void) => {
 };
 const readReduced = () => window.matchMedia(REDUCED).matches;
 
-const columnFactor = (index: number, variance: number) => {
+// Fixed: every caller took the defaults. Columns drift up, each at its own pace.
+const VARIANCE = 0.45;
+const PARALLAX = 0.6;
+const LIFT = 16;
+const DIR_SIGN = 1;
+
+const columnFactor = (index: number) => {
   const pseudo = ((index * 0.6180339887 + 0.35) % 1) * 2 - 1;
-  return 1 + variance * pseudo;
+  return 1 + VARIANCE * pseudo;
 };
 
-const DriftWall = ({
+export function DriftWall({
   items,
   // The defaults are the site's wall (the 404 and the inquire page).
   columns = 'fill',
@@ -84,18 +85,10 @@ const DriftWall = ({
   perspective = 1200,
   depth = 120,
   speed = 42,
-  direction = 'up',
-  variance = 0.45,
-  parallax = 0.6,
-  lift = 16,
   fade = 0.6,
   dim = 0.55,
   overlayColor = '#060010',
-  // The site's additions: load the photographs at once rather than as they
-  // near the screen (the intro, where they are the whole point), and say
-  // when the wall has come up.
-  eager = false,
-  // And a ceiling on the photographs it loads, however many columns it
+  // A ceiling on the photographs it loads, however many columns it
   // takes to cover the screen: past it the columns share them.
   limit,
   // How sharp, as a share of the tile's width: under 1 the browser picks
@@ -113,7 +106,7 @@ const DriftWall = ({
   onShown,
   className = '',
   style
-}: DriftWallProps) => {
+}: DriftWallProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const planeRef = useRef<HTMLDivElement>(null);
   const trackRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -280,12 +273,11 @@ const DriftWall = ({
   }, []);
 
   const baseVelocities = useMemo(() => {
-    const dirSign = direction === 'up' ? 1 : -1;
     return columnItems.map((_, c) => {
       const altSign = c % 2 === 0 ? 1 : -1;
-      return speed * columnFactor(c, variance) * dirSign * altSign;
+      return speed * columnFactor(c) * DIR_SIGN * altSign;
     });
-  }, [columnItems, speed, direction, variance]);
+  }, [columnItems, speed]);
 
   useEffect(() => {
     offsetsRef.current = columnMeta.map((meta, c) => {
@@ -357,7 +349,7 @@ const DriftWall = ({
       last = ts;
       let busy = false;
 
-      const maxTilt = parallax * 8;
+      const maxTilt = PARALLAX * 8;
       const d = pointerDampedRef.current;
       const tx = pointerRef.current.x * maxTilt - d.x;
       const ty = -pointerRef.current.y * maxTilt - d.y;
@@ -436,7 +428,7 @@ const DriftWall = ({
         a.cancel();
       });
     };
-  }, [baseVelocities, columnMeta, parallax, reduced, applyPlaneTransform]);
+  }, [baseVelocities, columnMeta, reduced, applyPlaneTransform]);
 
   useEffect(() => {
     heldRef.current = hold || flatten !== undefined;
@@ -468,7 +460,7 @@ const DriftWall = ({
     (e: ReactPointerEvent<HTMLDivElement>) => {
       const rect = containerRef.current?.getBoundingClientRect();
       if (!rect) return;
-      if (parallax > 0 && !reduced) {
+      if (!reduced) {
         pointerRef.current = {
           x: (e.clientX - rect.left) / rect.width - 0.5,
           y: (e.clientY - rect.top) / rect.height - 0.5
@@ -485,7 +477,7 @@ const DriftWall = ({
       wakeRef.current();
       setActiveId(id);
     },
-    [parallax, reduced]
+    [reduced]
   );
 
   const handlePointerLeaveWall = useCallback(() => {
@@ -501,20 +493,20 @@ const DriftWall = ({
       '--dw-gap': `${gap}px`,
       '--dw-radius': `${radius}px`,
       '--dw-perspective': `${perspective}px`,
-      '--dw-lift': `${lift}px`,
+      '--dw-lift': `${LIFT}px`,
       '--dw-dim': dim,
       '--dw-overlay': overlayColor,
       '--dw-edge': `${Math.max(0, (1 - fade) * 100)}%`,
       ...style
     }) as CSSProperties,
-    [tileWidth, tileHeight, gap, radius, perspective, lift, dim, overlayColor, fade, style]
+    [tileWidth, tileHeight, gap, radius, perspective, dim, overlayColor, fade, style]
   );
 
   const renderTile = (item: DriftWallItem, id: string, colIndex: number): ReactNode => {
     const inner = (
       <span className="drift-wall__inner">
         {/* eslint-disable-next-line @next/next/no-img-element -- the site passes loader-sized URLs */}
-        <img src={eager || shown ? item.image : undefined} srcSet={eager || shown ? item.srcSet : undefined} data-src={item.image} data-srcset={item.srcSet} sizes={`${Math.round((containerWidth && containerWidth < 640 ? 110 : tileWidth) * density)}px`} alt={item.title ?? ''} loading={eager || seen ? 'eager' : 'lazy'} decoding="async" draggable={false} onLoad={e => e.currentTarget.classList.add('is-loaded')} />
+        <img src={shown ? item.image : undefined} srcSet={shown ? item.srcSet : undefined} data-src={item.image} data-srcset={item.srcSet} sizes={`${Math.round((containerWidth && containerWidth < 640 ? 110 : tileWidth) * density)}px`} alt={item.title ?? ''} loading={seen ? 'eager' : 'lazy'} decoding="async" draggable={false} onLoad={e => e.currentTarget.classList.add('is-loaded')} />
         <span className="drift-wall__overlay" aria-hidden="true" />
       </span>
     );
@@ -590,6 +582,4 @@ const DriftWall = ({
       </div>
     </div>
   );
-};
-
-export default DriftWall;
+}

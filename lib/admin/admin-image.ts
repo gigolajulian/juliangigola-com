@@ -120,7 +120,7 @@ const meanColour = (source: ImageBitmap): string => {
 };
 
 /** Resizes to at most `maxWidth`, never up: upscaling adds bytes, not detail. */
-export async function processImage(
+export async function prepareImage(
   file: File,
   maxWidth: number,
 ): Promise<PreparedAsset> {

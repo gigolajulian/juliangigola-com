@@ -19,7 +19,7 @@ import { StatusDot } from "@astryxdesign/core/StatusDot";
 import { Divider } from "@astryxdesign/core/Divider";
 import { About, about, Age, Next } from "@/components/leads/row";
 import { isLate, paperDue, shootTag, type LeadSummary } from "@/lib/leads/leads";
-import { adminCall, authed, ago, aside, at, cash, closed, inboxCall, needsMe, nextStep, now, pass, plusDays, renew, ymdPT } from "@/lib/leads/lead-desk";
+import { adminCall, authed, ago, aside, dateTimeLabel, centsLabel, closed, inboxCall, needsMe, nextStep, now, inFilter, plusDays, renew, ymdPT } from "@/lib/leads/lead-desk";
 import { balance, dayB, dueOf, overdue, usd } from "@/lib/leads/invoice";
 import type { InvoiceRow } from "@/components/leads/invoices";
 import { TZ } from "@/lib/booking/booking-rules";
@@ -87,7 +87,7 @@ export function TodayDesk({ leads, size, open, show }: { leads: LeadSummary[]; s
   const booked = week.flatMap((x) => x.evs.filter((e) => !e.due && e.small !== "Reminder"));
   const calls = booked.filter((e) => isCall(e.l)).length;
   const shoots = booked.length - calls;
-  const coming = leads.filter((l) => pass(l, "upcoming")).sort((a, b) => a.when!.localeCompare(b.when!));
+  const coming = leads.filter((l) => inFilter(l, "upcoming")).sort((a, b) => a.when!.localeCompare(b.when!));
   const nextShoot = coming.find((l) => l.stage !== "Call booked");
   const nextCall = coming.find((l) => l.stage === "Call booked");
   const weekday = (iso: string) => (ymdPT(Date.parse(iso)) === today ? "today" : new Intl.DateTimeFormat("en-US", { timeZone: TZ, weekday: "long" }).format(new Date(iso)));
@@ -195,7 +195,7 @@ export function TodayDesk({ leads, size, open, show }: { leads: LeadSummary[]; s
               <Grid columns={size === "phone" ? 2 : 4} gap={2}>
                 <Stat v={moves.length} sub="on you" />
                 <Stat v={shoots || !calls ? many(shoots, "shoot") : many(calls, "call")} sub={shoots && calls ? `and ${many(calls, "call")}` : "this week"} />
-                <Stat v={m ? cash(m.available ?? 0) : "–"} sub={m ? (m.pending ? `${cash(m.pending)} on the way` : "Stripe") : typeof money === "string" ? money : "Asking Stripe"} />
+                <Stat v={m ? centsLabel(m.available ?? 0) : "–"} sub={m ? (m.pending ? `${centsLabel(m.pending)} on the way` : "Stripe") : typeof money === "string" ? money : "Asking Stripe"} />
                 <Stat v={t ? t.visits.toLocaleString("en-US") : "–"} sub={t ? "visits, 7 d" : typeof traffic === "string" ? traffic : "Asking Cloudflare"} />
               </Grid>
             </Card>
@@ -221,7 +221,7 @@ export function TodayDesk({ leads, size, open, show }: { leads: LeadSummary[]; s
                 <Title count={dueMoves.length}>Due</Title>
                 <List hasDividers>
                   {dueMoves.map((l) => (
-                    <ListItem key={l.id} onClick={() => open(l)} label={nextStep(l) ?? l.stage} description={`${l.name || l.email}${l.when ? ` · ${callOrShoot(l)} ${at(l.when)}` : ""}`} endContent={<Badge label={source(l)} variant={source(l) === "Proofs" ? "blue" : "neutral"} />} />
+                    <ListItem key={l.id} onClick={() => open(l)} label={nextStep(l) ?? l.stage} description={`${l.name || l.email}${l.when ? ` · ${callOrShoot(l)} ${dateTimeLabel(l.when)}` : ""}`} endContent={<Badge label={source(l)} variant={source(l) === "Proofs" ? "blue" : "neutral"} />} />
                   ))}
                 </List>
               </VStack>
