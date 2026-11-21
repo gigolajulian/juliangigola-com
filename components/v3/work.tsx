@@ -244,7 +244,7 @@ export function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: 
   };
   const swiped = React.useRef(false); // a drag's click must not close
   const queued = React.useRef(0); // a step pressed while the track was still moving
-  /* MOTION-PLAN.md item 8 (`?mplan=keys`): a second press mid-glide takes the
+  /* MOTION-PLAN.md item 8: a second press mid-glide takes the
      track on from where it is, never waits for the first to finish. */
   const going = React.useRef(0); // the frame the glide in flight is heading to, as a step
   const carry = React.useRef<number | null>(null); // the track's x, read against the new frame
@@ -279,7 +279,7 @@ export function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: 
   const showBack = !!cur?.back && bk === cur.src;
   const still = () => !G.current || matchMedia("(prefers-reduced-motion: reduce)").matches;
   /* From frame `from`, glide the track to the frame `by` away (0 = back to it), then make that the frame. */
-  const glide = (from: number, by: number, dur = 0.55) => {
+  const glide = (from: number, by: number) => {
     const el = track.current!;
     const g = G.current;
     const done = () => (by ? onGo(wrap(from + by)) : undefined);
@@ -290,8 +290,7 @@ export function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: 
     g.killTweensOf(el);
     stop();
     going.current = by;
-    const keys = mplan("keys");
-    g.to(el, { x: -by * el.offsetWidth, y: 0, duration: keys ? 0.6 : dur, ease: keys ? "power3.inOut" : "expo.out", onComplete: done });
+    g.to(el, { x: -by * el.offsetWidth, y: 0, duration: 0.6, ease: "power3.inOut", onComplete: done });
   };
   /* A new frame: the photos keep their elements (keyed by photo), so the
      track goes back to 0 in the same paint and nothing reloads or jumps.
@@ -309,12 +308,12 @@ export function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: 
   }, [at]);
   if (at === null) return null;
   const f = list[at];
-  const settle = (by: number, dur?: number) => glide(at, by, dur);
+  const settle = (by: number) => glide(at, by);
   const step = (by: number) => {
     const g = G.current;
     if (g && track.current && g.isTweening(track.current)) {
       queued.current = by;
-      if (mplan("keys") && going.current) {
+      if (going.current) {
         // Land the frame now, keep the pose: the next layout puts the track where it is and glides on.
         const el = track.current;
         g.killTweensOf(el);
@@ -409,7 +408,7 @@ export function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: 
         // Where the throw would carry the track a fifth of a second on; the nearest frame there wins.
         const x = d.ox + e.clientX - d.x + d.v * 200;
         const by = Math.max(-1, Math.min(1, Math.round(-x / el.offsetWidth)));
-        settle(by, Math.abs(d.v) > 0.5 ? 0.45 : 0.6);
+        settle(by);
       }}
       onPointerCancel={() => {
         if (!drag.current) return;
