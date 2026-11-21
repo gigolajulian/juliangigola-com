@@ -5,6 +5,7 @@ import Image from "next/image";
 import { contextLines, replyLink, type Enquiry, type Summary } from "@/lib/inbox";
 import { cn } from "@/lib/utils";
 import { credentials, KEY_STORE, TOKEN_STORE } from "@/lib/admin/admin-github";
+import { adminCall } from "@/lib/leads/lead-desk";
 
 /* ── the inbox ────────────────────────────────────────────────────
  * Enquiries from the contact form, which now has somewhere to put them.
@@ -33,9 +34,7 @@ export async function unreadCount(): Promise<number | null> {
   const headers = credentials(window.localStorage.getItem(KEY_STORE) ?? "");
   if (!Object.keys(headers).length) return null;
   try {
-    const res = await fetch("/api/inbox", { headers, cache: "no-store" });
-    if (!res.ok) return null;
-    const { rows } = (await res.json()) as { rows: Row[] };
+    const { rows } = await adminCall<{ rows: Row[] }>("/api/inbox", { headers });
     return rows.filter((r) => !r.read).length;
   } catch {
     return null;
@@ -69,18 +68,11 @@ export function AdminInbox({
     async (
       init: RequestInit & { query?: string } = {},
       withKey?: string,
-    ): Promise<unknown> => {
-      const k = withKey ?? key;
-      const res = await fetch(`/api/inbox${init.query ?? ""}`, {
+    ): Promise<unknown> =>
+      adminCall(`/api/inbox${init.query ?? ""}`, {
         ...init,
-        headers: { ...credentials(k), "content-type": "application/json" },
-        cache: "no-store",
-      });
-      const parsed = (await res.json().catch(() => ({}))) as { error?: string };
-      if (!res.ok)
-        throw new Error(parsed.error ?? `Request failed (${res.status})`);
-      return parsed;
-    },
+        headers: credentials(withKey ?? key),
+      }),
     [key],
   );
 

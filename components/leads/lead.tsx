@@ -47,7 +47,7 @@ import { isLate, NUDGES, PAPER, quoteNudge, REMIND_MAX, STAGES, trashDaysLeft, t
 import { fill, mailable, TEMPLATES, type Template } from "@/lib/leads/lead-crm";
 import { leadKey, typingIn } from "@/lib/leads/lead-keys";
 import { balance, depositOfLead, subtotal, usd } from "@/lib/leads/invoice";
-import { adminCall, ago, at, authed, type Call, DAY, day, errorText, nextStep, now, renew, snoozed } from "@/lib/leads/lead-desk";
+import { adminCall, ago, dateTimeLabel, authed, type Call, DAY, dayLabel, errorText, nextStep, now, renew, snoozed } from "@/lib/leads/lead-desk";
 import { compose, frostBar, ios, kindOf, line, mailto } from "@/components/leads/shared";
 import { People } from "@/components/leads/people";
 import { Galleries } from "@/components/leads/galleries";
@@ -210,7 +210,7 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
   // shortcut: the latest booking only; a lead with two live bookings needs a picker here.
   const bookedEvent = l.when ? [...(full?.events ?? [])].reverse().find((e) => (e.kind === "booking" || e.kind === "call") && e.ref) : undefined;
   const booked = bookedEvent?.ref;
-  const which = `${bookedEvent?.note ?? "the booking"} on ${l.when ? at(l.when) : ""}`;
+  const which = `${bookedEvent?.note ?? "the booking"} on ${l.when ? dateTimeLabel(l.when) : ""}`;
   const ahead = !!l.when && Date.parse(l.when) > now();
   const desk = (action: "cancel-mine" | "no-show", ok: string) => run(adminCall(`/api/booking/${booked}`, { method: "POST", body: JSON.stringify({ action }) }).then(reload), ok);
   const cancelMine = () => {
@@ -259,7 +259,7 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
         <VStack gap={4}>
           {history(log, lead.events).reverse().map((e, i) => (
             <VStack key={i} gap={0}>
-              <Eyebrow>{day(e.at).toUpperCase()}</Eyebrow>
+              <Eyebrow>{dayLabel(e.at).toUpperCase()}</Eyebrow>
               <Text type="body">{line(e)}</Text>
             </VStack>
           ))}
@@ -267,8 +267,8 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
       ) : <Eyebrow>LOADING</Eyebrow>}
       <Divider />
       <MetadataList>
-        <MetadataListItem label="First seen">{at(l.firstAt)}</MetadataListItem>
-        {l.when ? <MetadataListItem label="Booked for">{at(l.when)}</MetadataListItem> : null}
+        <MetadataListItem label="First seen">{dateTimeLabel(l.firstAt)}</MetadataListItem>
+        {l.when ? <MetadataListItem label="Booked for">{dateTimeLabel(l.when)}</MetadataListItem> : null}
         {full?.source ? <MetadataListItem label="Came from">{full.source}</MetadataListItem> : null}
         {message?.context?.referrer || message?.context?.landing ? <MetadataListItem label="Landed from">{[message.context.referrer, message.context.landing].filter(Boolean).join(", ")}</MetadataListItem> : null}
         {full?.notion ? <MetadataListItem label="Notion">Bookings row linked</MetadataListItem> : null}
@@ -319,14 +319,14 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
             <HStack gap={2} vAlign="center">
               <Button label="Leads" variant="ghost" size="sm" icon={<Icon icon={BackGlyph} />} onClick={onBack} />
               <StackItem size="fill" />
-              {phoneSize ? null : <DropdownMenu button={{ label: snoozed(l) ? `Snoozed to ${day(l.snoozeUntil!)}` : "Snooze", variant: "ghost", size: "sm", icon: <Icon icon={ClockGlyph} /> }} alignment="end" items={snoozeItems} />}
+              {phoneSize ? null : <DropdownMenu button={{ label: snoozed(l) ? `Snoozed to ${dayLabel(l.snoozeUntil!)}` : "Snooze", variant: "ghost", size: "sm", icon: <Icon icon={ClockGlyph} /> }} alignment="end" items={snoozeItems} />}
               {phoneSize || l.stage === "Lost" ? null : <Button label="Mark as lost" variant="ghost" size="sm" onClick={() => setStage("Lost")} />}
               {more}
             </HStack>
             <HStack gap={4} vAlign="end" wrap="wrap">
               <StackItem size="fill">
                 <VStack gap={1}>
-                  <Text type="body" size="sm" color="secondary">{[kindOf(l.kind), l.when ? day(l.when) : null, full?.source ? `Came from ${full.source}` : null].filter(Boolean).join(" · ") || "Lead"}</Text>
+                  <Text type="body" size="sm" color="secondary">{[kindOf(l.kind), l.when ? dayLabel(l.when) : null, full?.source ? `Came from ${full.source}` : null].filter(Boolean).join(" · ") || "Lead"}</Text>
                   <Heading level={1}>{l.name}</Heading>
                   <Text type="body" color="secondary">{[mailOk ? l.email : null, ig, phone].filter(Boolean).join(" · ")}</Text>
                 </VStack>
@@ -367,7 +367,7 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
             {message ? (
               <Section>
                 <VStack gap={3}>
-                  <Head title="Their message"><Eyebrow>{at(message.at).toUpperCase()}</Eyebrow></Head>
+                  <Head title="Their message"><Eyebrow>{dateTimeLabel(message.at).toUpperCase()}</Eyebrow></Head>
                   {message.detail ? <Text type="body" color="secondary">{message.detail}</Text> : null}
                   <Text type="body">{message.message}</Text>
                   {/* Their uploads come through /api/inbox with the same key as everything here; never a public URL. */}
@@ -386,7 +386,7 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
                 <MetadataList>
                   <MetadataListItem label="Quote">{full?.quote !== undefined ? <Text type="code">{usd(full.quote)}</Text> : <Text color="secondary">None yet</Text>}</MetadataListItem>
                   <MetadataListItem label="Deposit">
-                    {full?.deposit ? <HStack gap={2} vAlign="center"><StackItem size="fill"><Text type="code">{usd(depositOfLead(full))} paid{paidAt ? `, ${day(paidAt)}` : ""}</Text></StackItem><Button label="Stripe" variant="ghost" size="sm" href={full.deposit} target="_blank" rel="noreferrer" /></HStack> : <Text color="secondary">None</Text>}
+                    {full?.deposit ? <HStack gap={2} vAlign="center"><StackItem size="fill"><Text type="code">{usd(depositOfLead(full))} paid{paidAt ? `, ${dayLabel(paidAt)}` : ""}</Text></StackItem><Button label="Stripe" variant="ghost" size="sm" href={full.deposit} target="_blank" rel="noreferrer" /></HStack> : <Text color="secondary">None</Text>}
                   </MetadataListItem>
                   {invoiced !== undefined ? <MetadataListItem label="Invoiced"><Text type="code">{usd(invoiced)}</Text></MetadataListItem> : null}
                   {owed !== undefined ? <MetadataListItem label="Balance"><Text type="code" weight="bold" color="accent">{usd(owed)}</Text></MetadataListItem> : null}
@@ -402,7 +402,7 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
                   <React.Fragment key={inv.no}>
                     <InvoiceRow inv={inv} l={l} full={full} />
                     <li style={{ listStyle: "none" }}><HStack gap={2} vAlign="center">
-                      {isPaid(inv) ? <Badge label={inv.paidAt ? `Paid ${day(inv.paidAt)}` : "Paid"} variant="success" /> : <Badge label="Unpaid" variant="neutral" />}
+                      {isPaid(inv) ? <Badge label={inv.paidAt ? `Paid ${dayLabel(inv.paidAt)}` : "Paid"} variant="success" /> : <Badge label="Unpaid" variant="neutral" />}
                       <Button label={isPaid(inv) ? "Mark unpaid" : "Mark paid"} variant="ghost" size="sm" onClick={() => run(patch({ invoicePaid: { no: inv.no, paid: !isPaid(inv) } }), isPaid(inv) ? "Unpaid again." : "Marked paid.")} />
                     </HStack></li>
                   </React.Fragment>
@@ -420,8 +420,8 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
                 </Head>
                 <MetadataList>
                   <MetadataListItem label="Shoot">{kindOf(l.kind) ?? <Text color="secondary">Not set</Text>}</MetadataListItem>
-                  <MetadataListItem label="Date">{l.when ? at(l.when) : <Text color="secondary">Not booked</Text>}</MetadataListItem>
-                  <MetadataListItem label="Reminder">{full?.remind ? `${at(full.remind.at)}${full.remind.text ? `: ${full.remind.text}` : ""}` : <Text color="secondary">None</Text>}</MetadataListItem>
+                  <MetadataListItem label="Date">{l.when ? dateTimeLabel(l.when) : <Text color="secondary">Not booked</Text>}</MetadataListItem>
+                  <MetadataListItem label="Reminder">{full?.remind ? `${dateTimeLabel(full.remind.at)}${full.remind.text ? `: ${full.remind.text}` : ""}` : <Text color="secondary">None</Text>}</MetadataListItem>
                 </MetadataList>
                 {editing === "remind" ? <RemindForm onSave={(iso, text) => run(patch({ remind: { at: iso, text } }), "Reminder set.")} onCancel={() => setEditing(null)} /> : null}
               </VStack>
