@@ -23,7 +23,7 @@ test("without the V4 home no trial is on", () => {
 });
 
 test("follows the V4 home when the tab has no choice of its own", () => {
-  expect(run("", true)).toBe(V4PAGES.replace(" tilt", "")); // tilt stays opt-in, it is still on trial
+  expect(run("", true)).toBe(V4PAGES);
 });
 
 test("?v4pages=0 keeps the inner pages off under the V4 home, and stays off for the tab", () => {
@@ -33,7 +33,7 @@ test("?v4pages=0 keeps the inner pages off under the V4 home, and stays off for 
 });
 
 test("a key list wins over the V4 home", () => {
-  expect(run("?v4pages=tilt", true)).toBe("tilt");
+  expect(run("?v4pages=snd", true)).toBe("snd");
 });
 
 test("?v4pages alone still turns every key on", () => {
