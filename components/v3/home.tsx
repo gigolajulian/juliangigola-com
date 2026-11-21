@@ -8,7 +8,7 @@ import { CoverNav, V3Foot } from "@/components/v3/chrome";
 import { Duo, Marks, Pick } from "@/components/v3/duo";
 import { shiftScroll } from "@/components/v3/smooth-scroll";
 import { useSiteTheme } from "@/lib/site-theme";
-import { COMMISSIONS, COMMISSION_TABS, DOORS, HERO, HERO_ALT, INDEX_ORDER, RECENT, SESSIONS, rate, type SessionSlug } from "@/lib/v3";
+import { COMMISSIONS, COMMISSION_TABS, DOORS, HERO, HERO_ALT, INDEX_ORDER, RECENT, SESSIONS, rate, type SessionSlug } from "@/lib/flags/v3";
 import { projectHref } from "@/lib/project-href";
 
 /* JG V3 homepage (master v39, section A): hero crossfade, logo strip,

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { v4pages } from "@/lib/v4pages";
+import { v4pages } from "@/lib/flags/v4pages";
 
 /* About's client marks. Off the flag: the grid as it was (the row wrapper is
    `display:contents`). ?v4pages=a2: one line on the charcoal band that drifts

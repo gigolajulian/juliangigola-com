@@ -3,7 +3,7 @@
 import * as React from "react";
 import { usePathname } from "next/navigation";
 import { scrollTop } from "@/components/v3/smooth-scroll";
-import { v4pages } from "@/lib/v4pages";
+import { v4pages } from "@/lib/flags/v4pages";
 
 /* Page opening A (mock https://claude.ai/artifact/6Nbep18kL572cWznUuA66K):
    the photo you click grows into the next page's hero. Any link, or a row

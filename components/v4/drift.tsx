@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { v4pages } from "@/lib/v4pages";
+import { v4pages } from "@/lib/flags/v4pages";
 import { frameDt, springSettled, stepSpring } from "@/lib/motion/spring";
 
 /** `?v4pages=p3`, the /portfolio grid's scroll motion (app/styles/v4pages.css).

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { v4pages } from "@/lib/v4pages";
+import { v4pages } from "@/lib/flags/v4pages";
 import { matches } from "@/lib/device";
 import type { FrameItem, FrameView } from "@/components/v3/work";
 

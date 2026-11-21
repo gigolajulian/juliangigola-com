@@ -7,7 +7,7 @@
  * homepage's opening since 2026-10-28 (Julian: "make default").
  *
  * 2026-10-30: the wordmark's letters rise out of their line; the run is
- * the portfolio's first covers (`lib/splash-run.ts`) on a quickening
+ * the portfolio's first covers (`lib/flags/splash-run.ts`) on a quickening
  * beat, every one in the same 4:5 frame, which glides into the hero.
  * Every other page plays the wordmark alone (`data-splash="name"`).
  * The wordmark stays where it is and the run comes up over it.

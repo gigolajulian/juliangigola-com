@@ -19,7 +19,7 @@
 
 import { SESSION_TYPES, formatPrice, type SessionType } from "./sessions";
 import { RESPONSE_TIME } from "../site";
-import { isSession, SESSIONS as V3_SESSIONS } from "../v3";
+import { isSession, SESSIONS as V3_SESSIONS } from "../flags/v3";
 import { CONTENT } from "../content";
 import { getProject, projectsIn } from "../work/work";
 import type { BookingSlug } from "./booking-slugs";

@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { V4PAGES, V4PAGES_HEAD } from "@/lib/v4pages";
+import { V4PAGES, V4PAGES_HEAD } from "@/lib/flags/v4pages";
 
 // The head script as it ships (app/layout.tsx renders it), run against a fake tab.
 const js = V4PAGES_HEAD;
@@ -14,7 +14,7 @@ function run(search: string, v4home: boolean, stored: Record<string, string> = {
   return dataset.v4pages;
 }
 
-test("the script and lib/v4pages.ts list the same keys", () => {
+test("the script and lib/flags/v4pages.ts list the same keys", () => {
   expect(js).toContain(`all="${V4PAGES}"`);
 });
 

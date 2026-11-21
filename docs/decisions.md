@@ -532,7 +532,7 @@ states its rule inline. `SPEC-home-scroll.md` citations point at
 ### lib/theme-color.ts
 - 2026-11-16: The browser bar's colour per theme: pure white and pure black,
 
-### lib/v3.ts
+### lib/flags/v3.ts
 - 2026-11-14: the model test shows the name, an hour, a week and the $100 deposit, with the rate quoted on the call.
 - 2026-11-10: Desktop gets sian/01 with 200px of her own backdrop added on top, so her face sits at the panel's middle.
 

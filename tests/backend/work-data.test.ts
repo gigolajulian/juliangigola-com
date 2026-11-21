@@ -1,8 +1,8 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { SPLASH_RUN } from "@/lib/splash-run";
-import { CALL_CARD, DOORS, HERO, INDEX_ORDER, isSession, LENGTH, rate, SESSIONS, TAB_ORDER, type Session } from "@/lib/v3";
+import { SPLASH_RUN } from "@/lib/flags/splash-run";
+import { CALL_CARD, DOORS, HERO, INDEX_ORDER, isSession, LENGTH, rate, SESSIONS, TAB_ORDER, type Session } from "@/lib/flags/v3";
 import { CATEGORIES, PROJECTS } from "@/lib/work/work-data";
 import { PROJECTS as SITE_PROJECTS } from "@/lib/work/work";
 import { byCodeUnit } from "@/lib/utils";

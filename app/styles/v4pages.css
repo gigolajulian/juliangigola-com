@@ -1,4 +1,4 @@
-/* The inner pages plan on trial (`?v4pages`, or a list: `?v4pages=s1,a2`; head script in app/layout.tsx, lib/v4pages.ts).
+/* The inner pages plan on trial (`?v4pages`, or a list: `?v4pages=s1,a2`; head script in app/layout.tsx, lib/flags/v4pages.ts).
    Everything here is off without the flag: the new markup is hidden, the old pages are untouched. */
 .v3 .sv-bar,.v3 .btn.v4-m2p,.v3 .pj-bts,.v3 .pj-cr2{display:none}
 .v3 .lg-row{display:contents}
@@ -71,7 +71,7 @@ html[data-theme="light"][data-v4pages~="s2"]:root #p-service{--sv-dim:color-mix(
 [data-v4pages~="m2p"] .v3 .pj-cr2{display:contents}
 [data-v4pages~="m2p"] #p-project:has(.pj-bts) .pj-flow .pj-cr{display:none}
 
-/* Inner pages plan on trial, only under ?v4pages (lib/v4pages.ts, head script in app/layout.tsx).
+/* Inner pages plan on trial, only under ?v4pages (lib/flags/v4pages.ts, head script in app/layout.tsx).
    foot: the V4 ending on inner pages (components/v4/foot.tsx)
    next: the next project as a full stage (components/v3/project.tsx, v4/project.tsx)
    view: the frame viewer on project pages (v4/project.tsx) */

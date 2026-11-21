@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { mtscroll, V4_HOME } from "@/lib/v4-home/switch";
-import { useV4pages } from "@/lib/v4pages";
+import { useV4pages } from "@/lib/flags/v4pages";
 import { V4Foot } from "@/components/v4/foot";
 import Link from "next/link";
 import { THEME_COLOR } from "@/lib/theme-color";
