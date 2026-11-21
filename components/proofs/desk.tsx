@@ -34,7 +34,7 @@ import { SignIn } from "@/components/leads/setup";
 import { api, cardCrop, closed, cropAt, status, type Row } from "@/lib/proofs/desk";
 import { ActivityDesk } from "@/components/proofs/activity";
 import { Timeline } from "@/components/proofs/timeline";
-import { useClock } from "@/lib/use-clock";
+import { useClock } from "@/components/proofs/use-clock";
 import { errorText, stampPT } from "@/lib/leads/lead-desk";
 import { extras, publicId, remindState, THUMB_W, type CardCrop } from "@/lib/proofs/proof";
 

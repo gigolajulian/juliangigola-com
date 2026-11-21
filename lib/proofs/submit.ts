@@ -1,4 +1,4 @@
-import { alertHello } from "@/lib/hello-mail";
+import { alertHello } from "@/lib/email/hello-mail";
 import { stripe } from "@/lib/stripe";
 import { recordLead } from "@/lib/leads/lead-store";
 import { alertLines, proofUrl, receiptMail, sendClient } from "@/lib/email/proof-mail";

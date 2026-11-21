@@ -543,7 +543,7 @@ states its rule inline. `SPEC-home-scroll.md` citations point at
 - 2026-10-21 and 2026-11-15: his own photo credit goes last.
 - 2026-10-27: the discipline pages are retired in favor of /portfolio chips.
 
-### lib/zip.ts
+### lib/proofs/zip.ts
 - 2026-11-12: "Download all" on a delivery. JPEGs do not shrink,
 
 ## 2026-11-16: Cal.com is out of the code

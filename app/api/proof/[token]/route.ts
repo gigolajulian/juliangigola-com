@@ -5,7 +5,7 @@ import { checkout, checkPaid, finalize } from "@/lib/proofs/submit";
 import { PAYMENTS_DOWN, PAYMENTS_OFF } from "@/lib/stripe";
 import { checkPass, cleanSelects, device, isEmail, isTestEmail, passCookie, passValue, shut, owed, isToken, publicView, readPublic, track, viewerKey, writeProof, type Proof } from "@/lib/proofs/proof";
 import { bodyOf, json } from "@/lib/http";
-import { alertHello } from "@/lib/hello-mail";
+import { alertHello } from "@/lib/email/hello-mail";
 import { actionAlert, worthMail } from "@/lib/email/proof-mail";
 
 /* ── proofs, the client's side ────────────────────────────────────

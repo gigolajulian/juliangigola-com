@@ -9,7 +9,7 @@
 
 import { sealer } from "@/lib/leads/lead-crypto";
 import { finalKey, PREVIEW_W, THUMB_W, isFrameId, isStrongId, isToken, readPublic, shotOrder, shut, type Proof } from "@/lib/proofs/proof";
-import { uniqueNames, zipLayout } from "@/lib/zip";
+import { uniqueNames, zipLayout } from "@/lib/proofs/zip";
 
 declare global {
   /** Workers' own stream with a known length (R2 and a Content-Length need it). Not in this project's DOM types; Workers only, not `next dev`. */

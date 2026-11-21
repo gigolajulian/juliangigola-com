@@ -9,7 +9,7 @@
 
 import * as React from "react";
 import { closingSoon, remindState, type Proof } from "@/lib/proofs/proof";
-import { useClock } from "@/lib/use-clock";
+import { useClock } from "@/components/proofs/use-clock";
 
 const short = (iso: string) => new Intl.DateTimeFormat("en-US", { timeZone: "America/Los_Angeles", month: "short", day: "numeric" }).format(new Date(iso));
 

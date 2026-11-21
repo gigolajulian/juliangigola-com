@@ -3,7 +3,7 @@ import { FakeKV, LEADS_KEY } from "./fakes";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { deliveryDownload } from "@/lib/proofs/delivery-serve";
 import { readProof, writeProof, type Proof } from "@/lib/proofs/proof";
-import { zipLayout } from "@/lib/zip";
+import { zipLayout } from "@/lib/proofs/zip";
 
 /* Delivery by model (Julian 2026-11-19): a final carries its model and five stars, and `/zip?m=<label>` takes one model. */
 

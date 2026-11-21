@@ -15,7 +15,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useClock } from "@/lib/use-clock";
+import { useClock } from "@/components/proofs/use-clock";
 import { closingSoon, isEmail, modelLabel, type PublicDelivery } from "@/lib/proofs/proof";
 import { ProofCursor } from "@/components/proofs/cursor";
 import { ProofWall } from "@/components/proofs/wall";

@@ -37,7 +37,7 @@ import { manageLinks } from "@/lib/booking/booking-token";
  * on its record, so a refund, a mail or a log never guesses.
  * ─────────────────────────────────────────────────────────────── */
 
-import { alertAndLog, type Attachment } from "@/lib/hello-mail";
+import { alertAndLog, type Attachment } from "@/lib/email/hello-mail";
 import { stripe } from "@/lib/stripe";
 import { DEPOSIT, LEGACY_DEPOSIT, PAID, isPaid } from "@/lib/booking/paid";
 /** The charge in cents for a session. Throws on a slug that takes no deposit: `parseBooking` lets none through. */

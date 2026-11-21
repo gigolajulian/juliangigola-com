@@ -3,7 +3,7 @@ import { sealer } from "@/lib/leads/lead-crypto";
 import { copyName, readContract, sign, signedCopy, writeContract } from "@/lib/contracts/contract";
 import { contractStep } from "@/lib/contracts/contract-lead";
 import { sendClient, signedMail } from "@/lib/email/proof-mail";
-import { alertHello } from "@/lib/hello-mail";
+import { alertHello } from "@/lib/email/hello-mail";
 import { bodyOf, json } from "@/lib/http";
 
 /* ── contracts, the client's side ─────────────────────────────────
