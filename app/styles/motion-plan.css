@@ -233,6 +233,10 @@
     opacity: 0;
     transform: translateY(16px);
   }
+  /* On screen when the page opened (project.tsx, OPEN_NOW): there at once. */
+  :root:root .v3 .pj-r[data-open] {
+    transition: none;
+  }
 }
 
 /* ── Item 9, `still`: what stays still ─────────────────────────────────
