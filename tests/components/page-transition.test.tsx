@@ -12,7 +12,7 @@ vi.mock("react", async (orig) => {
 const nav = vi.hoisted(() => ({ path: "/" }));
 vi.mock("next/navigation", () => ({ usePathname: () => nav.path }));
 
-import { PageTransition } from "@/components/site/page-transition";
+import { PageTransition, holdLanding } from "@/components/site/page-transition";
 
 describe("PageTransition", () => {
   it("renders its page", () => {
@@ -62,5 +62,35 @@ describe("PageTransition", () => {
     root.removeAttribute("data-v3motion");
     delete root.dataset.nav;
     nav.path = "/";
+  });
+
+  it("a held Back lands once what it waits for is done, or after 300ms", async () => {
+    vi.useFakeTimers();
+    const root = document.documentElement;
+    root.setAttribute("data-v3motion", "");
+    let done = 0;
+    Object.assign(document, {
+      startViewTransition: (cb: () => Promise<void>) => (cb().then(() => done++), { finished: new Promise(() => {}) }),
+    });
+    nav.path = "/portfolio/coverart";
+    history.replaceState(null, "", "/portfolio/coverart");
+    const r = render(<PageTransition>page</PageTransition>);
+    history.replaceState(null, "", "/");
+    dispatchEvent(new PopStateEvent("popstate"));
+    let decoded!: () => void;
+    holdLanding(new Promise<void>((res) => (decoded = res)));
+    nav.path = "/";
+    r.rerender(<PageTransition>home</PageTransition>);
+    await vi.advanceTimersByTimeAsync(100);
+    expect(done).toBe(0); // still waiting on the cover
+    decoded();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(done).toBe(1);
+    r.unmount();
+    vi.useRealTimers();
+    Reflect.deleteProperty(document, "startViewTransition");
+    root.removeAttribute("data-v3motion");
+    delete root.dataset.nav;
+    delete root.dataset.navOff;
   });
 });
