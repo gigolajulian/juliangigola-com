@@ -802,3 +802,6 @@ html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap.mt-cap{font-family:var(
 @media (max-width:599px){html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap.mt-cap{font-size:14.5px!important;letter-spacing:.06em}html:root:root .v3 .mt-hero .mt-name h1{bottom:calc(118px + env(safe-area-inset-bottom))}}
 @media (min-width:1024px){html:root:root .v3 .mt-hero .mt-name h1{bottom:calc(114 * var(--u))}}
 /* The name sits higher (phone 118px, desktop 114u) so the tagline never runs under the descenders of "Gigola". */
+/* the booking flow's first height (stepper plus the calendar wait) while its chunk is still on the way (book-online.tsx) */
+[data-mtscroll] .mt-bin-wait{min-height:calc(849px + 1.5vw)} /* measured 865-888px from 1024 to 2560 wide */
+@media not ((min-width:1024px) and (min-height:600px)){[data-mtscroll] .mt-bin-wait{min-height:761px}}
