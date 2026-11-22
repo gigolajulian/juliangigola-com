@@ -41,16 +41,6 @@ const fewest = (grounds: RGB[]) => {
   }
   return Math.min(w, b);
 };
-/** `?navink=together|word|frost`: the header ink prototype (2026-11-22), kept for the tab; empty is live. */
-const MODE = () => {
-  try {
-    const q = new URLSearchParams(location.search).get("navink");
-    if (q !== null) sessionStorage.setItem("jg-navink", q);
-    return sessionStorage.getItem("jg-navink") ?? "";
-  } catch {
-    return "";
-  }
-};
 
 let pen: CanvasRenderingContext2D | null | undefined;
 const one = () => (pen === undefined ? (pen = document.createElement("canvas").getContext("2d", { willReadFrequently: true })) : pen);
@@ -335,9 +325,9 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
       const [secBg] = sec ? colour(getComputedStyle(sec).getPropertyValue("--bg").trim()) : [rootBg];
       root.toggleAttribute("data-navdark", lum(rootBg) > 0.2 && lum(secBg) < 0.2);
       const [page] = colour(getComputedStyle(bar).getPropertyValue("--bg").trim());
-      // prototype (`?navink=together|word|frost`, kept for the tab): live behaviour without it
-      const mode = MODE();
-      const frosted = mode === "frost" && isTop && bar.hasAttribute("data-navfrost");
+      /* Over the home hero the bar has no ground, and no one ink reads on every photo: the ground comes up there
+         while a word would fall under 4.5:1 without it (Julian picked "frost" from the prototype, 2026-11-22). */
+      const frosted = isTop && bar.hasAttribute("data-navfrost");
       const veiled = (!isTop && !root.hasAttribute("data-tuck")) || frosted;
       // One ink for the whole bar: no word on its own, all of them fade to the other colour together.
       // Each word still looks under itself in stretches; the stretches vote.
@@ -349,7 +339,7 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
         const r = ((el.matches(".tbtn,.menu-btn") && el.querySelector("svg")) || el).getBoundingClientRect();
         if (!r.width || r.bottom < 0) continue;
         // a word that is not showing has no say (the v4 home hides the wordmark while the hero's name shows)
-        if (mode && +getComputedStyle(el).opacity < 0.1) continue;
+        if (+getComputedStyle(el).opacity < 0.1) continue;
         const mine: RGB[] = [];
         own.set(el, mine);
         /* One ink per stretch of about 16px, so a word that sits half on a photo and half on the page is white
@@ -387,26 +377,21 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
         votes.els.push(el);
       }
       if (votes.n) {
-        // the bar keeps the ink it has until the other one clearly leads (60% of the stretches), so it does not flip back and forth on a busy photo
+        // the one ink that fails the fewest spots (`barInk`); while every photo under the bar is loading, the stretches vote (60% to flip)
         const was = bar.getAttribute("data-ink"), share = votes.w / votes.n;
         const voted = was === "w" ? (share >= 0.4 ? "w" : "b") : was === "b" ? (share <= 0.6 ? "b" : "w") : share >= 0.5 ? "w" : "b";
-        // together and frost: the one ink that fails the fewest spots (`barInk`); the vote while the photos load
-        const ink = mode && grounds.length ? barInk(grounds, was) : voted;
+        const ink = grounds.length ? barInk(grounds, was) : voted;
         bar.setAttribute("data-ink", ink);
-        // frost: the ground comes up over the hero while the bar's ink fails anywhere without it, and goes once it would not
-        if (mode === "frost") {
-          const fails = isTop && raw.length ? fewest(raw) : 0;
-          bar.toggleAttribute("data-navfrost", frosted ? fails > 0 : fails >= 2); // on for one stretch (its two halves), off once nothing fails
-        } else bar.removeAttribute("data-navfrost");
+        // the ground comes up over the hero while the bar's ink fails anywhere without it, and goes once it would not
+        const fails = isTop && raw.length ? fewest(raw) : 0;
+        bar.toggleAttribute("data-navfrost", frosted ? fails > 0 : fails >= 2); // on for one stretch (its two halves), off once nothing fails
         for (const el of votes.els) {
-          // word: each word its own ink, from its own stretches
+          // this word's worst contrast as drawn, for QA (`data-cr`)
           const g = own.get(el) ?? [];
-          const mine = mode === "word" && g.length ? barInk(g, el.dataset.ink ?? null) : ink;
-          // the reading the prototype sheet shows: this word's worst contrast as drawn
-          el.dataset.cr = g.length ? Math.min(...g.map((c) => (mine === "w" ? 1.05 / (lum(c) + 0.05) : (lum(c) + 0.05) / 0.05))).toFixed(1) : "";
-          if (el.dataset.ink === mine) continue;
-          el.dataset.ink = mine;
-          el.style.setProperty("--nav-ink", mine === "w" ? "#fff" : "#000"); // navfx.css fades the colour
+          el.dataset.cr = g.length ? Math.min(...g.map((c) => (ink === "w" ? 1.05 / (lum(c) + 0.05) : (lum(c) + 0.05) / 0.05))).toFixed(1) : "";
+          if (el.dataset.ink === ink) continue;
+          el.dataset.ink = ink;
+          el.style.setProperty("--nav-ink", ink === "w" ? "#fff" : "#000"); // navfx.css fades the colour
         }
       }
     };
