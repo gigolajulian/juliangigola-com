@@ -592,6 +592,9 @@ export function V3Work({
       // iOS scrolls the page as the keyboard rises: with nothing typed yet, the open header bar stays (QA, 2026-11-04).
       const f = document.activeElement as HTMLInputElement | null;
       if (!on && f?.closest(".htools") && !f.value) return;
+      // Typing in the row and scrolling it away hands the field to the header, so it stays on screen
+      // with the keyboard up (MAC, iPhone, 2026-11-22); the reverse hand-back is below.
+      if (p >= 1 && f?.tagName === "INPUT" && tools.contains(f)) setHs(true);
       setPin(on);
       if (on) return;
       // A short result list brings the row back: typing carries on in its field.
