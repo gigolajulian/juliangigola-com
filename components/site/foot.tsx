@@ -123,6 +123,7 @@ export function V4Foot({ bare = false }: { bare?: boolean } = {}) {
         </div>
         <div>
           <p className="mute">Pages</p>
+          <p><Link href="/">Home</Link></p>
           <p><Link href="/portfolio">Portfolio</Link></p>
           <p><Link href="/book">Sessions</Link></p>
           <p><Link href="/about">About</Link></p>
