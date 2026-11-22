@@ -358,7 +358,7 @@ function SiteHeader() {
       if (Math.abs(d) < 6) return;
       last = y;
       // Typing in the header field: stay tucked, or a rotation's scroll untucks it and the field leaves the keyboard's view (MAC, Duo).
-      if (document.activeElement?.closest(".htools")) return;
+      if (document.activeElement?.matches(".htools input")) return;
       setTuck(d > 0 && y > 80 && !desk.matches);
     };
     addEventListener("scroll", sync, { passive: true });
