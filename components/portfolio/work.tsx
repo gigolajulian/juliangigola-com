@@ -641,7 +641,11 @@ export function V3Work({
     const vv = window.visualViewport;
     const el = document.querySelector<HTMLElement>(".htools");
     if (!hs || !pin || !vv || !el) return;
-    const set = () => el.style.setProperty("translate", `0 ${vv.offsetTop}px`);
+    const set = () => {
+      el.style.setProperty("translate", `0 ${vv.offsetTop}px`);
+      // Panned by the keyboard, the visual viewport already starts below the browser bar: no safe-area pad on top of it.
+      el.style.setProperty("padding-top", vv.offsetTop > 0 ? "0px" : "");
+    };
     set();
     vv.addEventListener("scroll", set);
     vv.addEventListener("resize", set);
@@ -649,6 +653,7 @@ export function V3Work({
       vv.removeEventListener("scroll", set);
       vv.removeEventListener("resize", set);
       el.style.removeProperty("translate");
+      el.style.removeProperty("padding-top");
     };
   }, [hs, pin]);
   React.useEffect(() => {
