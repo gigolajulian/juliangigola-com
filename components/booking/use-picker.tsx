@@ -256,7 +256,8 @@ export function usePicker({ path, title, className, fallback, v3, onPicked, star
      a second after the page on a short screen, where it is the thing at the
      foot of the view (MAC, iPhone Duo folded, 2026-11-08). */
   const heldBar = <button type="button" className="btn fill" disabled>Continue</button>;
-  const v3plain = (body: React.ReactNode, bar?: React.ReactNode) => v3!.shell({ steps: v3steps, at: 1, head: v3paid ? "Book a session" : v3!.name === "Consultation" ? "Book a consultation" : "Book a call", sub: v3sub, body, sum: [], bar });
+  // in the div `V3Steps` puts the shell in, so the shell stays one element as the times come
+  const v3plain = (body: React.ReactNode, bar?: React.ReactNode) => <div className="contents">{v3!.shell({ steps: v3steps, at: 1, head: v3paid ? "Book a session" : v3!.name === "Consultation" ? "Book a consultation" : "Book a call", sub: v3sub, body, sum: [], bar })}</div>;
   return { path, title, className, fallback, v3, onPicked, username, slug, tz, clockHere, here, setHere, length, setLength, needsWhere, setNeedsWhere, opt, setOpt, via, setVia, ask, setAsk, session, setSession, booked, setBooked, days, setDays, state, setState, held, setHeld, orb, setOrb, jg, view, setView, anchor, setAnchor, pick, setPick, arrow, chosen, setChosen, step, setStep, swipeX, wheelGate, stripEl, stripRef, more, setMore, paid, setPaid, deposit, setDeposit, refs, setRefs, typed, smooth, root, v3root, was, error, setError, bad, setBad, blank, setBlank, ok, setOk, handOff, load, lo, hi, open, steps, choose, showTimes, today, week, month, slide, setSlide, swipe, shift, daysBox, mstep, setMstep, switchView, monthGrid, big, slotsBox, gs, seen, slotsW, setSlotsW, slotsRO, slotsRef, at, lastPick, refit, first, shown, atStart, book, grow, refill, busy, okMark, swipeProps, v3paid, v3steps, v3sub, heldBar, v3plain };
 }
 
