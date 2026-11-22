@@ -1,0 +1,55 @@
+/* The new header, on trial behind `?navfx=1` (`?navfx=0` turns it off; head script in app/layout.tsx).
+   Mock: https://claude.ai/artifact/BuKhy4pxdjSgbLZBXmyQTA.
+   One ground for the bar on every screen and for the phone menu: the page colour at 47%, a 24px blur with the
+   colour under it lifted, a hairline. It is off at the top of a page and while the home hero shows
+   (`data-navtop`, set by components/site/nav-ink.ts, which also picks white or black for each word). */
+:root[data-navfx]{--nav-veil:47%;--nav-teal:oklch(.51 .09 195)}
+/* Light page: the line under the bar is barely there. Dark keeps --line. */
+@media (prefers-color-scheme:light){:root[data-navfx]:not([data-theme="dark"]){--nav-line:color-mix(in srgb,var(--line) 30%,transparent)}}
+:root[data-navfx][data-theme="light"]{--nav-line:color-mix(in srgb,var(--line) 30%,transparent)}
+
+/* The ground is on the bar itself: the bar is its own layer (view-transition-name), so a child could not blur
+   what is behind it. The tripled class outranks the portfolio and solid-bar rules without !important, which an
+   animation could not override. It fades in by animation, so the bar's own slide and dock transitions stay as they are. */
+:root[data-navfx] .v3 .site-hdr.site-hdr.site-hdr{background:color-mix(in srgb,var(--bg) var(--nav-veil),transparent);-webkit-backdrop-filter:blur(24px) saturate(1.8);backdrop-filter:blur(24px) saturate(1.8);border-bottom:.5px solid var(--nav-line,var(--line));animation:navfx-in .25s ease both}
+:root[data-navfx][data-navtop] .v3 .site-hdr.site-hdr.site-hdr,
+:root[data-navfx][data-pft][data-tuck] .v3 .site-hdr.site-hdr.site-hdr,
+:root[data-navfx] .v3 .site-hdr.site-hdr.site-hdr.menu-on{background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none;border-bottom-color:transparent;animation:none}
+/* Over a section that is dark in both themes, on a light page (`data-navdark`, nav-ink.ts): the bar's own tokens go dark. */
+:root[data-navfx][data-navdark] .v3 .site-hdr{--bg:var(--dark-bg);--ink:var(--dark-ink);--line:oklch(1 0 0 / 13%);--nav-line:var(--line)}
+@keyframes navfx-in{from{background-color:transparent;-webkit-backdrop-filter:blur(0) saturate(1);backdrop-filter:blur(0) saturate(1);border-bottom-color:transparent}}
+
+/* Words: white or black from what is under them (--nav-ink is set per word by nav-ink.ts). No teal in the bar;
+   the current page is the same ink, 4 shades (20%) toward the other one: darker when white, brighter when black.
+   Hover is 2 shades (10%). */
+:root[data-navfx] .v3 .site-hdr :is(.site-wm,.links a,.tbtn,.menu-btn){color:var(--nav-ink,var(--ink));transition:color .35s ease}
+:root[data-navfx] .v3 .site-hdr .links a{--nav-off:var(--bg)}
+:root[data-navfx] .v3 .site-hdr .links a[data-ink="w"]{--nav-off:#000}
+:root[data-navfx] .v3 .site-hdr .links a[data-ink="b"]{--nav-off:#fff}
+:root[data-navfx] .v3 .site-hdr .links a:hover{color:color-mix(in srgb,var(--nav-ink,var(--ink)) 90%,var(--nav-off))}
+:root[data-navfx] .v3 .site-hdr .links a[aria-current="page"]{color:color-mix(in srgb,var(--nav-ink,var(--ink)) 80%,var(--nav-off))}
+:root[data-navfx] .v3 .site-hdr.menu-on :is(.site-wm,.links a,.tbtn,.menu-btn){color:var(--ink)}
+/* The v4 home: no wordmark in the bar while the hero's big name shows (`data-navnamegone`, nav-ink.ts). It fades in as the name goes. */
+:root[data-navfx] .v3 .site-hdr .site-wm{transition:color .2s ease,opacity .3s ease}
+:root[data-navfx][data-mtscroll]:has(.mt-hero):not([data-navnamegone]) .v3 .site-hdr:not(.menu-on) .site-wm:not(:focus-visible){opacity:0;pointer-events:none} /* keyboard focus shows it (Mac QA v3.0.295: Tab stop 2 had no ring) */
+/* The portfolio's search and view buttons in the bar take the same white or black. */
+@media (min-width:640px){:root[data-navfx] .v3 .site-hdr .hslot{--ink:var(--nav-ink)}}
+
+@media (max-width:639.98px){
+  /* Phone menu: the same ground; the dim behind it takes the page colour so a light menu is not on a black dim. */
+  :root[data-navfx] .v3 .pmenu.drawer{background:color-mix(in srgb,var(--bg) var(--nav-veil),transparent);-webkit-backdrop-filter:blur(24px) saturate(1.8);backdrop-filter:blur(24px) saturate(1.8)}
+  :root[data-navfx] .v3 .pdim{background:color-mix(in srgb,var(--bg) 45%,transparent)}
+  :root[data-navfx] .v3 .pmenu.drawer a[aria-current="page"]{color:var(--nav-teal)}
+  :root[data-navfx] .v3 .pmenu-foot .lbl{color:var(--ink)}
+  /* Menu open: the name rides onto the menu with it and lines up with the links (the drawer's left edge plus its gutter). */
+  :root[data-navfx] .v3 .site-hdr .site-wm{transition:color .2s ease,opacity .3s ease,translate .4s cubic-bezier(.16,1,.3,1)}
+  :root[data-navfx] .v3 .site-hdr.menu-on .site-wm{translate:calc(100vw - min(86vw,380px)) 0}
+}
+@media (prefers-reduced-motion:reduce){
+  :root[data-navfx] .v3 .site-hdr.site-hdr.site-hdr{animation:none}
+  :root[data-navfx] .v3 .site-hdr .site-wm{transition:none}
+}
+/* A word over two grounds (nav-ink.ts): white and black in stretches, clipped to the letters */
+:root[data-navfx] .v3 .site-hdr:not(.menu-on) :is(.site-wm,.links a)[data-inkmix]{background:var(--nav-mix);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+/* No ground under the words (the top, the homepage hero): the ink changes at once, a .2s fade is a photo late there */
+:root[data-navfx][data-navtop] .v3 .site-hdr :is(.site-wm,.links a,.tbtn,.menu-btn){transition:none}
