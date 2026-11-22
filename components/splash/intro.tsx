@@ -7,7 +7,7 @@ import { split } from "@/components/splash/split-splash";
 import { HERO } from "@/lib/photos-and-sessions";
 import { keepNames } from "@/lib/keep-names";
 
-/* `?splash=burst`: the run of frames (the portfolio's first covers,
+/* The homepage's split splash: the run of frames (the portfolio's first covers,
    `SPLASH_RUN`, passed in from the server), then the hero's first
    photograph, each sized for a whole screen: [phone, wider]. The hero
    goes as the page's whole ladder (`deviceSizes` in next.config.ts), so
@@ -46,7 +46,7 @@ function seen() {
    only from the server's HTML, never again on a client render. */
 const sheet = (frames: string[]) =>
   '<div class="jg-sheet-ground"></div>' +
-  `<script>${keepNames(`(${seen.toString()})();(${burst.toString()})(${JSON.stringify(sized(frames))},${JSON.stringify(HERO_FULL)});(${split.toString()})(${JSON.stringify(sized(frames))},${JSON.stringify(HERO_FULL)})`)}</script>`;
+  `<script>${keepNames(`(${seen.toString()})();(${burst.toString()})();(${split.toString()})(${JSON.stringify(sized(frames))},${JSON.stringify(HERO_FULL)})`)}</script>`;
 
 export function Intro({ run: frames }: { run: string[] }) {
   return (
