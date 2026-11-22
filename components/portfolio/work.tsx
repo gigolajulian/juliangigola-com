@@ -571,6 +571,8 @@ export function V3Work({
   const refocus = React.useRef(false);
   const close = () => {
     refocus.current = true;
+    // The header x clears, as the row's x does and as the approved mock did (MAC, 7b1a0f5d).
+    setRaw("");
     setHs(false);
     // With the row back on screen the header tools must go too, not wait for the next scroll.
     dispatchEvent(new Event("scroll"));
