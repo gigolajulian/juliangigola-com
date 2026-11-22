@@ -660,7 +660,7 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
 [data-mtscroll] .mt-covers .mt-rowhead h2{margin-bottom:calc(12 * var(--u))}
 [data-mtscroll] .mt-cvsub{margin:0 0 0 calc(24 * var(--u))!important}
 [data-mtscroll] .mt-sleeve .disc,.cv4 .mt-sleeve .disc{background:radial-gradient(circle,#0b0b0b 0 16.5%,transparent 16.7%),var(--press,#222)}
-[data-mtscroll] .mt-cvcap{position:absolute;left:0;top:calc(100% + 16 * var(--u));margin:0;display:grid;gap:4px;white-space:nowrap;opacity:.6;transition:opacity .3s ease-out}
+[data-mtscroll] .mt-cvcap{position:absolute;left:0;top:calc(100% + 16 * var(--u));margin:0;display:grid;gap:4px;white-space:nowrap;opacity:.85;transition:opacity .3s ease-out}
 [data-mtscroll] .mt-sleeve[data-on] .mt-cvcap{opacity:1}
 /* Touch has no hover to lift it, so the caption sits at full there (audit 2026-11-19: the artist line was 2.9:1 at rest). */
 @media (hover:none){[data-mtscroll] .mt-cvcap{opacity:1}}
