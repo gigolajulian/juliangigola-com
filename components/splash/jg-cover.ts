@@ -238,7 +238,7 @@ export function reveal(cover: HTMLElement) {
 
 /* A first arrival on an inner page (`data-cover-intro`, `layout.tsx`, Julian 2026-11-21: "A, once per visit"): the
    cover is put up as the page is read and opened from here too, without waiting for the page's scripts. The line
-   creeps as on the booking wait; once the document is read and the pictures on screen have loaded (3s at most),
+   creeps as on the booking wait; once the page has loaded and the pictures on screen are decoded (6s at most),
    and J and G have shown their least, it fills and the cut opens (`reveal`). */
 function drive(open: (c: HTMLElement) => void) {
   const d = document.getElementById("jg-cover");
@@ -252,21 +252,34 @@ function drive(open: (c: HTMLElement) => void) {
   const bar = d.querySelector<HTMLElement>(".ln u");
   const at = Number(d.dataset.at) || performance.now();
   const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // 0 waiting, -2 the page is in and settling, -1 ready to fill, then the time the fill started
   let readyAt = 0, from = 0, shown = 0;
-  const ready = () => {
-    if (!readyAt) readyAt = -1;
-  };
-  const check = () => {
-    const on = [...document.images].filter((i) => {
+  const onScreen = () =>
+    [...document.images].filter((i) => {
       const r = i.getBoundingClientRect();
       return r.width > 0 && r.top < innerHeight && r.bottom > 0;
     });
-    if (on.every((i) => i.complete)) ready();
+  /* The cut opens onto the finished page (Julian, 2026-11-22: "the screen flashes after the monogram splash"): the
+     pictures on screen decoded, and the browser done starting the page, so the cut runs on a free thread. Opened
+     with the page still starting up, the cut dropped frames on a phone and jumped from J and G to the whole page. */
+  const ready = () => {
+    if (readyAt) return;
+    readyAt = -2;
+    const go = () => {
+      if (readyAt === -2) readyAt = -1;
+    };
+    const idle = () => ("requestIdleCallback" in window ? requestIdleCallback(go, { timeout: 600 }) : setTimeout(go, 120));
+    Promise.all(onScreen().map((i) => i.decode().catch(() => {}))).then(idle);
+    setTimeout(go, 1500); // a picture that never decodes holds it no longer
+  };
+  const check = () => {
+    if (document.readyState === "complete" && onScreen().every((i) => i.complete)) ready();
   };
   const read = () => {
     check();
     document.addEventListener("load", check, true);
-    setTimeout(ready, 3000);
+    addEventListener("load", check, { once: true });
+    setTimeout(ready, 6000); // a slow line: the page as it stands
   };
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", read, { once: true });
   else read();
