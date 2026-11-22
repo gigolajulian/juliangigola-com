@@ -31,13 +31,13 @@ export function barInk(grounds: RGB[], was: string | null): "w" | "b" {
   if (was === "b") return b - w > lead ? "w" : "b";
   return w <= b ? "w" : "b";
 }
-/** Spots the better ink still fails at 4.5:1. */
-const fewest = (grounds: RGB[]) => {
+/** Spots the better ink still fails, at 4.5:1 or the given ratio. */
+const fewest = (grounds: RGB[], min = 4.5) => {
   let w = 0, b = 0;
   for (const g of grounds) {
     const l = lum(g);
-    if (1.05 / (l + 0.05) < 4.5) w++;
-    if ((l + 0.05) / 0.05 < 4.5) b++;
+    if (1.05 / (l + 0.05) < min) w++;
+    if ((l + 0.05) / 0.05 < min) b++;
   }
   return Math.min(w, b);
 };
@@ -291,7 +291,7 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
   React.useEffect(() => {
     const bar = hdr.current, root = document.documentElement;
     if (!bar || !navfx()) return;
-    let raf = 0, timer = 0, last = 0, frostT = 0;
+    let raf = 0, timer = 0, last = 0, frostT = 0, inkAt = 0;
     const top = () => {
       // The homepage: no ground while its hero shows (the v4 hero, or the cover). Elsewhere: none at the very top.
       const hero = path === "/" ? document.querySelector(".mt-hero, .a-cover") : null;
@@ -380,17 +380,29 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
         // the one ink that fails the fewest spots (`barInk`); while every photo under the bar is loading, the stretches vote (60% to flip)
         const was = bar.getAttribute("data-ink"), share = votes.w / votes.n;
         const voted = was === "w" ? (share >= 0.4 ? "w" : "b") : was === "b" ? (share <= 0.6 ? "b" : "w") : share >= 0.5 ? "w" : "b";
-        const ink = grounds.length ? barInk(grounds, was) : voted;
+        /* Under the frost the ink is the frost's own: dark on a light page, light on a dark one, so it never sits white
+           on light frost (MAC, Safari 1440). Elsewhere the ink that fails fewest; held 300ms, so it does not flip for a
+           few frames on a busy photo (MAC, iPhone). */
+        const pick = frosted ? (lum(page) > 0.4 ? "b" : "w") : grounds.length ? barInk(grounds, was) : voted;
+        const now = performance.now();
+        const ink = was && pick !== was && !frosted && now - inkAt < 300 ? was : pick;
+        if (ink !== was) inkAt = now;
         bar.setAttribute("data-ink", ink);
         // the ground comes up over the hero while the bar's ink fails anywhere without it, and goes once it would not
-        /* On at once for any spot that fails; off only after 1.2s with none, and faded (navfx.css), never cut: switched
-           as each look found it, it flashed on and off in 1s blocks across the masonry (MAC, iPhone, #1417). */
-        const fails = isTop && raw.length ? fewest(raw) : 0;
-        if (fails) {
+        /* On at once for any spot that fails, and then it stays for the rest of the hero: switched as each look found it,
+           it flashed on and off across the masonry (MAC, iPhone, #1417). It goes only back near the top of the page,
+           after 1.2s with nothing failing, faded (navfx.css). */
+        // at 6:1, a margin over 4.5, so it is up before a word actually fails (MAC: a word on the wrong photo for 0.13s first)
+        const fails = isTop && raw.length ? fewest(raw, 6) : 0;
+        if (!isTop) {
+          clearTimeout(frostT);
+          frostT = 0;
+          bar.removeAttribute("data-navfrost");
+        } else if (fails) {
           clearTimeout(frostT);
           frostT = 0;
           if (bar.getAttribute("data-navfrost") !== "") bar.setAttribute("data-navfrost", "");
-        } else if (bar.getAttribute("data-navfrost") === "" && !frostT)
+        } else if (bar.getAttribute("data-navfrost") === "" && !frostT && scrollY < innerHeight / 4)
           frostT = window.setTimeout(() => {
             bar.setAttribute("data-navfrost", "off");
             frostT = window.setTimeout(() => {
