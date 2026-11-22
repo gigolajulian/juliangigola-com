@@ -121,7 +121,7 @@ html[data-mt-motion]:not([data-mt-held]) .mt-covers .mt-row{padding-bottom:126px
    it, the same hand-over as hero into Commissions (flow.css). Motion's film settles from a slight push-in as it arrives. */
 html[data-mt-par][data-mt-held] .mt-covers .mt-rowhead>:is(h2,p){translate:0 calc((1 - var(--in,1)) * 8svh)}
 html[data-mt-par][data-mt-held] .mt-covers .mt-row{translate:0 calc((1 - var(--in,1)) * 18svh)}
-html[data-mt-par][data-mt-held] .mt-covers .mt-cvcap{opacity:.6}
+html[data-mt-par][data-mt-held] .mt-covers .mt-cvcap{opacity:.85} /* .85 keeps the muted artist line at 4.5:1 in both themes (audit 2026-11-21; .6 was 2.7-2.9:1) */
 html[data-mt-par][data-mt-held] .mt-covers .mt-sleeve[data-on] .mt-cvcap{opacity:1}
 @media (hover:none){html[data-mt-par][data-mt-held] .mt-covers .mt-cvcap{opacity:1}} /* touch: full at rest, as mtscroll.css */
 html[data-mt-par][data-mt-held] .mt-covers .mt-stage{transform:translate3d(0,calc(var(--out,0) * 22svh),0) scale(calc(1 - var(--out,0) * .05));transform-origin:50% 100%;opacity:calc(1 - var(--out,0) * .6)}
