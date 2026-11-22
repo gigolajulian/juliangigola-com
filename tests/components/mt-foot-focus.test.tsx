@@ -22,8 +22,13 @@ describe("v4 home footer: focus comes back to the opener", () => {
     render(<MtHome data={MT} />);
     const link = foot().getByRole("button", { name: QUOTE_OPTS[0].name });
     fireEvent.click(link);
-    const card = document.querySelector<HTMLElement>(".mt-inq")!;
-    expect(card.contains(document.activeElement)).toBe(true);
+    // the card's code is imported on first use, so it mounts a moment after the click
+    const card = await waitFor(() => {
+      const c = document.querySelector<HTMLElement>(".mt-inq");
+      expect(c).not.toBeNull();
+      return c!;
+    });
+    await waitFor(() => expect(card.contains(document.activeElement)).toBe(true));
     fireEvent.keyDown(card, { key: "Escape" });
     expect(document.querySelector(".mt-inq")).toBeNull();
     // Radix hands focus back a task after the card unmounts
