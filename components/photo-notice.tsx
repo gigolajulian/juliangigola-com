@@ -229,7 +229,7 @@ export function PhotoNotice() {
       data-box=""
       onPointerEnter={() => setHeld(true)}
       onPointerLeave={() => setHeld(false)}
-      className="fixed z-50 w-[14.75rem] rounded-[4px] border border-foreground/25 bg-background/60 px-3 backdrop-blur-xl backdrop-saturate-150 [:root[data-theme=light]_&]:bg-background/70 py-2.5 text-foreground"
+      className="fixed z-50 w-[14.75rem] max-w-[calc(100vw-2rem)] rounded-[4px] border border-foreground/25 bg-background/60 px-3 backdrop-blur-xl backdrop-saturate-150 [:root[data-theme=light]_&]:bg-background/70 py-2.5 text-foreground"
     >
       {/* Said once per raise; the lines below stay through the fade out. */}
       {shown ? (

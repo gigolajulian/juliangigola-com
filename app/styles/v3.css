@@ -544,7 +544,7 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .reach-call{display:flex;flex-direction:column;gap:14px;align-self:start;padding-left:clamp(0px,3vw,40px);border-left:1px solid var(--line)}
 .v3 #p-inquire>.pg-head{padding-top:96px}
 @media (max-width:800px){.v3 #p-inquire>.pg-head{padding-top:64px}
-.v3 .reach-row{grid-template-columns:1fr;gap:14px}
+.v3 .reach-row{grid-template-columns:minmax(0,1fr);gap:14px}
 .v3 .reach{grid-template-columns:minmax(0,1fr);padding-top:48px}
 .v3 .reach-call{border-left:0;padding-left:0;border-top:1px solid var(--line);padding-top:28px}}
 .v3 .fig .cn{margin:0 .09em 0 .03em}
