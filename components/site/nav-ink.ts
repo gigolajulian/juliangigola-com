@@ -396,7 +396,7 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
         // frost: the ground comes up over the hero while the bar's ink fails anywhere without it, and goes once it would not
         if (mode === "frost") {
           const fails = isTop && raw.length ? fewest(raw) : 0;
-          bar.toggleAttribute("data-navfrost", frosted ? fails > 0 : fails > Math.max(1, raw.length * 0.1));
+          bar.toggleAttribute("data-navfrost", frosted ? fails > 0 : fails >= 2); // on for one stretch (its two halves), off once nothing fails
         } else bar.removeAttribute("data-navfrost");
         for (const el of votes.els) {
           // word: each word its own ink, from its own stretches
