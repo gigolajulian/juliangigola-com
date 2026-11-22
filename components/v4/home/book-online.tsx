@@ -18,10 +18,12 @@ import { CardsCtx } from "./ctx";
 
 /* The live flow (pickers, deposit, the orb: about 100KB) is not in the home page's first load (audit 2026-11-22). It is
    fetched once the Sessions block nears the screen, on a row's hover or focus, and after the page has loaded and gone
-   idle (for a footer link that opens a booking straight away), so the first tap never waits on it. */
-let flow: Promise<typeof import("@/components/booking/book")> | undefined;
-const warmFlow = () => void (flow ??= import("@/components/booking/book"));
-const V3BookFlow = React.lazy(() => (warmFlow(), flow!).then((m) => ({ default: m.V3BookFlow })));
+   idle (for a footer link that opens a booking straight away), so the first tap never waits on it. Not React.lazy:
+   a Suspense reveal is held about 300ms even when the module is already here. */
+type Flow = typeof import("@/components/booking/book").V3BookFlow;
+let Flow: Flow | undefined;
+let flow: Promise<unknown> | undefined;
+const warmFlow = () => (flow ??= import("@/components/booking/book").then((m) => (Flow = m.V3BookFlow), () => (flow = undefined)));
 
 function RowPhoto({ r, on, sizes }: { r: BookRow; on: boolean; sizes: string }) {
   const p = SESSIONS[r.slug].photo;
@@ -46,6 +48,8 @@ export function MtBookOnline({ open, opener, onClose, quotePhoto, onRowPick }: {
   const isOpen = React.useRef(false);
   // the booking flow's gsap, fetched on idle so its first step slides on the tap's frame
   React.useEffect(warmGsap, []);
+  const [, flowIn] = React.useReducer((n: number) => n + 1, 0);
+  React.useEffect(() => void (open && !Flow && warmFlow().then(flowIn)), [open]);
   React.useEffect(() => {
     const el = sec.current;
     const io = el && window.IntersectionObserver ? new IntersectionObserver((es) => es.some((e) => e.isIntersecting) && (warmFlow(), io?.disconnect()), { rootMargin: "100% 0px" }) : null;
@@ -93,9 +97,7 @@ export function MtBookOnline({ open, opener, onClose, quotePhoto, onRowPick }: {
               <p className="lbl mt-bin-m">{r.len} <i aria-hidden>|</i> {r.price}</p>
               <div className="mt-bin-flow">
                 {/* the live picker opens on Month; here it opens on the week */}
-                <React.Suspense fallback={null}>
-                  <V3BookFlow key={r.slug} slug={r.slug} tabs={false} startView="week" />
-                </React.Suspense>
+                {Flow ? <Flow key={r.slug} slug={r.slug} tabs={false} startView="week" /> : null}
               </div>
             </div>
           ) : (
