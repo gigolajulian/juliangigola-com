@@ -1455,6 +1455,9 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .v3 .site-wm{flex:none}
 .v3 .hslot:not(:empty){order:2;flex:0 0 calc(100% + var(--g) + var(--gr));justify-content:flex-end;margin:14px calc(-1 * var(--gr)) -14px calc(-1 * var(--g));padding:0 calc(var(--gr) - 12px) 0 var(--g);border-top:.5px solid var(--nav-line,var(--line))}
 :root[data-tuck] .v3 .hslot{border-top-color:transparent}
+/* Tucked, the tools sit on their own solid panel, so they take the page ink, not the white or black navfx
+   read for the row over the photos (MAC SSH: a white Grid icon on the light panel). Phones: #1411. */
+:root[data-navfx][data-tuck] .v3 .site-hdr .hslot{--ink:inherit;--mute:inherit}
 .v3 .htools::after{display:none}
 .v3 .htools.open{position:static;flex:1;padding:0;background:none}
 .v3 .htools.open .hsearch{flex:1;width:auto}}
