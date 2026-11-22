@@ -28,6 +28,17 @@ describe("V3Work", () => {
     if (outside) expect(container.querySelector(`.wgrid a[href="/portfolio/${outside.s}"]`)).toBeNull();
   });
 
+  it("search keeps the spaces typed, matches on the trimmed words, and Esc clears", () => {
+    const { container } = render(<V3Work work={WORK} />);
+    const input = screen.getByRole("searchbox", { name: /Search the work/ }) as HTMLInputElement;
+    const two = WORK.find((w) => w.n.includes(" "))!;
+    fireEvent.change(input, { target: { value: `${two.n.toLowerCase()} ` } });
+    expect(input.value).toBe(`${two.n.toLowerCase()} `);
+    expect(container.querySelector(`.wgrid a[href="/portfolio/${two.s}"]`)).toBeTruthy();
+    fireEvent.keyDown(input, { key: "Escape" });
+    expect(input.value).toBe("");
+  });
+
   it("the canvas is a view of its own, and `?view=canvas` opens on it", () => {
     const { unmount } = render(<V3Work work={WORK} />);
     const btn = screen.getByRole("button", { name: "Canvas view" });
