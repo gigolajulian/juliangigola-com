@@ -572,10 +572,13 @@ export function V3Work({
   const close = () => {
     refocus.current = true;
     setHs(false);
+    // With the row back on screen the header tools must go too, not wait for the next scroll.
+    dispatchEvent(new Event("scroll"));
   };
   React.useEffect(() => {
     if (!tools) return;
-    const root = document.documentElement;
+    // On the header slot, not <html>: a root custom property changing per frame restyles the whole grid.
+    const root = document.getElementById("hdr-tools") ?? document.documentElement;
     let raf = 0;
     /* The header tools join 1:1 with the scroll: --pp runs 0 to 1 while the row slides
        under the 60px header, and v3.css rises and fades them on it. No timer, so a
@@ -611,14 +614,16 @@ export function V3Work({
   React.useEffect(() => {
     const key = (e: KeyboardEvent) => {
       if (!(e.key === "/" || ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k"))) return;
-      if ((e.target as HTMLElement | null)?.closest?.("input,textarea,select,[contenteditable]")) return;
+      if (e.altKey || e.isComposing || !tools || canvas || at !== null) return;
+      if ((e.target as HTMLElement | null)?.closest?.("input,textarea,select,[contenteditable],dialog")) return;
       e.preventDefault();
-      if (pin) setHs(true);
-      else tools?.querySelector("input")?.focus();
+      if (!pin) tools.querySelector("input")?.focus();
+      else if (hs) document.querySelector<HTMLInputElement>(".htools input")?.focus();
+      else setHs(true);
     };
     addEventListener("keydown", key);
     return () => removeEventListener("keydown", key);
-  }, [pin, tools]);
+  }, [pin, hs, tools, canvas, at]);
   // An unfolded view set folds again on any tap outside it.
   React.useEffect(() => {
     if (!unfold) return;
@@ -1193,8 +1198,7 @@ export function V3Work({
         type="button"
         className="wclr"
         aria-label="Clear search"
-        aria-hidden={!raw}
-        tabIndex={-1}
+        inert={!raw}
         onPointerDown={(e) => e.preventDefault()}
         onClick={(e) => {
           setRaw("");
