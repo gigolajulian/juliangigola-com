@@ -34,6 +34,8 @@
 :root[data-navfx][data-mtscroll]:has(.mt-hero):not([data-navnamegone]) .v3 .site-hdr:not(.menu-on) .site-wm:not(:focus-visible){opacity:0;pointer-events:none} /* keyboard focus shows it (Mac QA v3.0.295: Tab stop 2 had no ring) */
 /* The portfolio's search and view buttons in the bar take the same white or black. */
 @media (min-width:640px){:root[data-navfx] .v3 .site-hdr .hslot{--ink:var(--nav-ink)}}
+/* Phones too (the search, eyedropper and view icons stayed black over dark photos, MAC on v3.0.364), but not while the search is open: it covers the bar on the page colour there. */
+@media (max-width:639.98px){:root[data-navfx] .v3 .site-hdr .hslot:not(:has(.htools.open)){--ink:var(--nav-ink)}}
 
 @media (max-width:639.98px){
   /* Phone menu: the same ground; the dim behind it takes the page colour so a light menu is not on a black dim. */
