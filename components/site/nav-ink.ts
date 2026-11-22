@@ -16,19 +16,20 @@ const VEIL = 0.47; // --nav-veil
 const lin = (v: number) => ((v /= 255) <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
 const lum = (c: RGB) => 0.2126 * lin(c[0]) + 0.7152 * lin(c[1]) + 0.0722 * lin(c[2]);
 const unlin = (v: number) => 255 * (v <= 0.0031308 ? v * 12.92 : 1.055 * v ** (1 / 2.4) - 0.055);
-/** The bar's one ink: the one whose worst word reads best, not the one most words want (audit 2026-11-22: the
-    wordmark went white on the light page, 2.2:1, because the links over a photo outvoted it). The other ink takes
-    over only once its worst is clearly better (1.25 times), so a busy photo does not flip it back and forth. */
+/** The bar's one ink: the one that leaves the fewest spots under 4.5:1 (WCAG AA) through the words, not the one
+    most stretches prefer (audit 2026-11-22, P1). The other ink takes over only once it fails clearly fewer spots,
+    so a busy photo does not flip the bar back and forth. */
 export function barInk(grounds: RGB[], was: string | null): "w" | "b" {
-  let w = Infinity, b = Infinity;
+  let w = 0, b = 0; // spots each ink fails
   for (const g of grounds) {
     const l = lum(g);
-    w = Math.min(w, 1.05 / (l + 0.05));
-    b = Math.min(b, (l + 0.05) / 0.05);
+    if (1.05 / (l + 0.05) < 4.5) w++;
+    if ((l + 0.05) / 0.05 < 4.5) b++;
   }
-  if (was === "w") return b > w * 1.25 ? "b" : "w";
-  if (was === "b") return w > b * 1.25 ? "w" : "b";
-  return w >= b ? "w" : "b";
+  const lead = Math.max(1, grounds.length * 0.1); // clearly: a tenth of the spots
+  if (was === "w") return w - b > lead ? "b" : "w";
+  if (was === "b") return b - w > lead ? "w" : "b";
+  return w <= b ? "w" : "b";
 }
 
 let pen: CanvasRenderingContext2D | null | undefined;
@@ -323,6 +324,8 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
         // an icon button is judged by its icon, not its 32px box: half the box can be on a photo the icon is clear of (MAC: the theme icon)
         const r = ((el.matches(".tbtn,.menu-btn") && el.querySelector("svg")) || el).getBoundingClientRect();
         if (!r.width || r.bottom < 0) continue;
+        // a word that is not showing has no say (the v4 home hides the wordmark while the hero's name shows)
+        if (+getComputedStyle(el).opacity < 0.1) continue;
         /* One ink per stretch of about 16px, so a word that sits half on a photo and half on the page is white
            on one and black on the other (QA: "Ju" white on light grey). And one for the upper half and one for the
            lower: a photo's top or bottom edge can run through a word (MAC: the wordmark white, 1.2:1, with only its

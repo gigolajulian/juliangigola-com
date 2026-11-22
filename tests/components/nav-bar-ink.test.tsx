@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { barInk } from "@/components/site/nav-ink";
 
+type RGB = [number, number, number];
 describe("bar ink", () => {
-  const light: [number, number, number] = [244, 244, 242], mid: [number, number, number] = [120, 110, 100];
-  it("follows the worst word, not the most words", () => {
-    // four stretches on a mid-tone photo, one on the light page: white wins the vote but fails on the page
-    expect(barInk([mid, mid, mid, mid, light], null)).toBe("b");
+  const light: RGB = [244, 244, 242], dark: RGB = [20, 25, 40], mid: RGB = [150, 140, 130];
+  it("takes the ink that fails the fewest spots", () => {
+    expect(barInk([dark, dark, dark, light], null)).toBe("w");
+    expect(barInk([light, light, mid, dark], null)).toBe("b");
   });
-  it("keeps its ink until the other is clearly better", () => {
-    const dark: [number, number, number] = [20, 20, 20];
-    expect(barInk([dark], "w")).toBe("w");
-    expect(barInk([light], "w")).toBe("b");
+  it("keeps its ink until the other fails clearly fewer spots", () => {
+    expect(barInk([dark, light], "b")).toBe("b");
+    expect(barInk([dark, dark, dark, light], "b")).toBe("w");
   });
 });
