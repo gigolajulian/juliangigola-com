@@ -642,9 +642,11 @@ export function V3Work({
     const el = document.querySelector<HTMLElement>(".htools");
     if (!hs || !pin || !vv || !el) return;
     const set = () => {
-      el.style.setProperty("translate", `0 ${vv.offsetTop}px`);
+      // Vars, not inline translate/padding: v3.css applies them only while the header is tucked, so a
+      // rotation that untucks it drops them at once (MAC, Duo, 2026-11-22).
+      el.style.setProperty("--vvy", `${vv.offsetTop}px`);
       // Panned by the keyboard, the visual viewport already starts below the browser bar: no safe-area pad on top of it.
-      el.style.setProperty("padding-top", vv.offsetTop > 0 ? "0px" : "");
+      el.style.setProperty("--vvpad", vv.offsetTop > 0 ? "0px" : "");
     };
     set();
     vv.addEventListener("scroll", set);
@@ -652,8 +654,8 @@ export function V3Work({
     return () => {
       vv.removeEventListener("scroll", set);
       vv.removeEventListener("resize", set);
-      el.style.removeProperty("translate");
-      el.style.removeProperty("padding-top");
+      el.style.removeProperty("--vvy");
+      el.style.removeProperty("--vvpad");
     };
   }, [hs, pin]);
   React.useEffect(() => {
