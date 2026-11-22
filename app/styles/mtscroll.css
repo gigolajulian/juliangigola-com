@@ -662,6 +662,9 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
 [data-mtscroll] .mt-sleeve .disc,.cv4 .mt-sleeve .disc{background:radial-gradient(circle,#0b0b0b 0 16.5%,transparent 16.7%),var(--press,#222)}
 [data-mtscroll] .mt-cvcap{position:absolute;left:0;top:calc(100% + 16 * var(--u));margin:0;display:grid;gap:4px;white-space:nowrap;opacity:.85;transition:opacity .3s ease-out}
 [data-mtscroll] .mt-sleeve[data-on] .mt-cvcap{opacity:1}
+/* The artist line is the muted ink under the caption's .85 dim, so it sat at 3.3 to 4.5:1 on the covers not in front
+   (audit 2026-11-22). A quarter toward the foreground keeps it second to the title and clears 4.5:1 dimmed. */
+[data-mtscroll] .mt-cvcap .mute{color:color-mix(in oklab,var(--muted-foreground) 72%,var(--foreground))}
 /* Touch has no hover to lift it, so the caption sits at full there (audit 2026-11-19: the artist line was 2.9:1 at rest). */
 @media (hover:none){[data-mtscroll] .mt-cvcap{opacity:1}}
 [data-mtscroll] .mt-cvn{position:absolute;left:calc(var(--fx) + 36 * var(--u));bottom:calc(40 * var(--u));margin:0;font:500 calc(64 * var(--u))/1 var(--mono);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
