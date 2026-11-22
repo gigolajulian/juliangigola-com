@@ -15,9 +15,12 @@
 :root[data-navfx][data-navtop] .v3 .site-hdr.site-hdr.site-hdr:not([data-navfrost]), /* the ground comes up over the hero while words would not read without it (data-navfrost, nav-ink.ts) */
 :root[data-navfx][data-pft][data-tuck] .v3 .site-hdr.site-hdr.site-hdr,
 :root[data-navfx] .v3 .site-hdr.site-hdr.site-hdr.menu-on{background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none;border-bottom-color:transparent;animation:none}
+/* The frost over the hero going (nav-ink.ts holds it 1.2s, then fades it out over .3s): never a hard cut. */
+:root[data-navfx][data-navtop] .v3 .site-hdr.site-hdr.site-hdr[data-navfrost="off"]:not(.menu-on){animation:navfx-out .3s ease both}
 /* Over a section that is dark in both themes, on a light page (`data-navdark`, nav-ink.ts): the bar's own tokens go dark. */
 :root[data-navfx][data-navdark] .v3 .site-hdr{--bg:var(--dark-bg);--ink:var(--dark-ink);--line:oklch(1 0 0 / 13%);--nav-line:var(--line)}
 @keyframes navfx-in{from{background-color:transparent;-webkit-backdrop-filter:blur(0) saturate(1);backdrop-filter:blur(0) saturate(1);border-bottom-color:transparent}}
+@keyframes navfx-out{to{background-color:transparent;-webkit-backdrop-filter:blur(0) saturate(1);backdrop-filter:blur(0) saturate(1);border-bottom-color:transparent}}
 
 /* Words: white or black from what is under them (--nav-ink is set per word by nav-ink.ts). No teal in the bar;
    the current page is the same ink, 4 shades (20%) toward the other one: darker when white, brighter when black.

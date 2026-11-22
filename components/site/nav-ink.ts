@@ -291,7 +291,7 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
   React.useEffect(() => {
     const bar = hdr.current, root = document.documentElement;
     if (!bar || !navfx()) return;
-    let raf = 0, timer = 0, last = 0;
+    let raf = 0, timer = 0, last = 0, frostT = 0;
     const top = () => {
       // The homepage: no ground while its hero shows (the v4 hero, or the cover). Elsewhere: none at the very top.
       const hero = path === "/" ? document.querySelector(".mt-hero, .a-cover") : null;
@@ -327,7 +327,7 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
       const [page] = colour(getComputedStyle(bar).getPropertyValue("--bg").trim());
       /* Over the home hero the bar has no ground, and no one ink reads on every photo: the ground comes up there
          while a word would fall under 4.5:1 without it (Julian picked "frost" from the prototype, 2026-11-22). */
-      const frosted = isTop && bar.hasAttribute("data-navfrost");
+      const frosted = isTop && bar.getAttribute("data-navfrost") === ""; // "off" is the frost fading out
       const veiled = (!isTop && !root.hasAttribute("data-tuck")) || frosted;
       // One ink for the whole bar: no word on its own, all of them fade to the other colour together.
       // Each word still looks under itself in stretches; the stretches vote.
@@ -383,8 +383,21 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
         const ink = grounds.length ? barInk(grounds, was) : voted;
         bar.setAttribute("data-ink", ink);
         // the ground comes up over the hero while the bar's ink fails anywhere without it, and goes once it would not
+        /* On at once for any spot that fails; off only after 1.2s with none, and faded (navfx.css), never cut: switched
+           as each look found it, it flashed on and off in 1s blocks across the masonry (MAC, iPhone, #1417). */
         const fails = isTop && raw.length ? fewest(raw) : 0;
-        bar.toggleAttribute("data-navfrost", frosted ? fails > 0 : fails >= 2); // on for one stretch (its two halves), off once nothing fails
+        if (fails) {
+          clearTimeout(frostT);
+          frostT = 0;
+          if (bar.getAttribute("data-navfrost") !== "") bar.setAttribute("data-navfrost", "");
+        } else if (bar.getAttribute("data-navfrost") === "" && !frostT)
+          frostT = window.setTimeout(() => {
+            bar.setAttribute("data-navfrost", "off");
+            frostT = window.setTimeout(() => {
+              frostT = 0;
+              if (bar.getAttribute("data-navfrost") === "off") bar.removeAttribute("data-navfrost");
+            }, 300);
+          }, 1200);
         for (const el of votes.els) {
           // this word's worst contrast as drawn, for QA (`data-cr`)
           const g = own.get(el) ?? [];
@@ -521,6 +534,8 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
       document.removeEventListener("loadeddata", loaded, true);
       watch.disconnect();
       clearTimeout(timer);
+      clearTimeout(frostT);
+      bar.removeAttribute("data-navfrost");
       clearInterval(again);
       poke = () => {};
       cancelAnimationFrame(raf);
