@@ -356,8 +356,10 @@ function SiteHeader() {
     const sync = () => {
       const y = scrollY, d = y - last;
       if (Math.abs(d) < 6) return;
-      setTuck(d > 0 && y > 80 && !desk.matches);
       last = y;
+      // Typing in the header field: stay tucked, or a rotation's scroll untucks it and the field leaves the keyboard's view (MAC, Duo).
+      if (document.activeElement?.closest(".htools")) return;
+      setTuck(d > 0 && y > 80 && !desk.matches);
     };
     addEventListener("scroll", sync, { passive: true });
     return () => {

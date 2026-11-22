@@ -486,7 +486,7 @@ export function V3Work({
     if (d) setFilter(d);
   }, [chip]);
   const [view, setView] = React.useState<"grid" | "strip" | "color">("grid");
-  const back = React.useRef<"grid" | "strip">("grid");
+  const [back, setBack] = React.useState<"grid" | "strip">("grid");
   /* The canvas lies over whichever view is on, under the page's own title and
      toolbar, which stay where they are: leaving it lands
      where you were. `?view=canvas` opens on it. The address carries it while
@@ -552,7 +552,13 @@ export function V3Work({
       setView(v);
     } else flipped(() => setView(v));
   };
-  const [q, setQ] = React.useState("");
+  // The field keeps what is typed, spaces too; only the match trims (live ate the space in "brand campaigns").
+  const [raw, setRaw] = React.useState("");
+  const q = raw.trim().toLowerCase();
+  // Touch: the field owns the row while it has focus (views step aside, the close x slides in).
+  const [rowOn, setRowOn] = React.useState(false);
+  // Phone: Grid, Strip and Canvas fold into the one that is on; a tap on it unfolds them.
+  const [unfold, setUnfold] = React.useState(false);
   /* Option 2: once the search row scrolls under the
      header, a magnifier and the view buttons ride in the header instead of a
      second sticky bar. data-pft tells v3.css to keep them pinned when the
@@ -565,41 +571,91 @@ export function V3Work({
   const refocus = React.useRef(false);
   const close = () => {
     refocus.current = true;
+    // The header x clears, as the row's x does and as the approved mock did (MAC, 7b1a0f5d).
+    setRaw("");
     setHs(false);
+    // With the row back on screen the header tools must go too, not wait for the next scroll.
+    dispatchEvent(new Event("scroll"));
   };
   React.useEffect(() => {
     if (!tools) return;
-    const io = new IntersectionObserver(
-      ([e]) => {
-        const on = !e.isIntersecting && e.boundingClientRect.top < (e.rootBounds?.top ?? 60);
-        // iOS scrolls the page as the keyboard rises: with nothing typed yet, the open header bar stays (QA, 2026-11-04).
-        const f = document.activeElement as HTMLInputElement | null;
-        if (!on && f?.closest(".htools") && !f.value) return;
-        setPin(on);
-        if (on) return;
-        // A short result list brings the row back: typing carries on in its field.
-        if ((document.activeElement as HTMLElement | null)?.closest(".htools"))
-          tools.querySelector("input")?.focus({ preventScroll: true });
-        setHs(false);
-      },
-      { rootMargin: "-60px 0px 0px 0px" },
-    );
-    io.observe(tools);
-    return () => io.disconnect();
+    // On the header slot, not <html>: a root custom property changing per frame restyles the whole grid.
+    const root = document.getElementById("hdr-tools") ?? document.documentElement;
+    let raf = 0;
+    /* The header tools join 1:1 with the scroll: --pp runs 0 to 1 while the row slides
+       under the 60px header, and v3.css rises and fades them on it. No timer, so a
+       stop half way leaves them half way and scrolling back reverses them. */
+    const sync = () => {
+      raf = 0;
+      const r = tools.getBoundingClientRect();
+      const p = Math.min(1, Math.max(0, (60 - r.top) / (r.height || 1)));
+      root.style.setProperty("--pp", p.toFixed(3));
+      const on = p > 0;
+      // iOS scrolls the page as the keyboard rises: with nothing typed yet, the open header bar stays (QA, 2026-11-04).
+      const f = document.activeElement as HTMLInputElement | null;
+      if (!on && f?.closest(".htools") && !f.value) return;
+      // Typing in the row and scrolling it away hands the field to the header, so it stays on screen
+      // with the keyboard up (MAC, iPhone, 2026-11-22); the reverse hand-back is below.
+      if (p >= 1 && f?.tagName === "INPUT" && tools.contains(f)) setHs(true);
+      setPin(on);
+      if (on) return;
+      // A short result list brings the row back: typing carries on in its field.
+      if (f?.closest(".htools")) tools.querySelector("input")?.focus({ preventScroll: true });
+      setHs(false);
+    };
+    const tick = () => void (raf ||= requestAnimationFrame(sync));
+    sync();
+    addEventListener("scroll", tick, { passive: true });
+    addEventListener("resize", tick);
+    return () => {
+      cancelAnimationFrame(raf);
+      removeEventListener("scroll", tick);
+      removeEventListener("resize", tick);
+      root.style.removeProperty("--pp");
+    };
   }, [tools]);
+  /* / or Ctrl/Cmd+K jumps to search, never while typing somewhere else; with the row
+     scrolled away it opens the header field. */
+  React.useEffect(() => {
+    const key = (e: KeyboardEvent) => {
+      if (!(e.key === "/" || ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k"))) return;
+      if (e.altKey || e.isComposing || !tools || canvas || at !== null) return;
+      if ((e.target as HTMLElement | null)?.closest?.("input,textarea,select,[contenteditable],dialog")) return;
+      e.preventDefault();
+      if (!pin) tools.querySelector("input")?.focus();
+      else if (hs) document.querySelector<HTMLInputElement>(".htools input")?.focus();
+      else setHs(true);
+    };
+    addEventListener("keydown", key);
+    return () => removeEventListener("keydown", key);
+  }, [pin, hs, tools, canvas, at]);
+  // An unfolded view set folds again on any tap outside it.
+  React.useEffect(() => {
+    if (!unfold) return;
+    const away = (e: PointerEvent) => !(e.target as HTMLElement).closest?.(".vset") && setUnfold(false);
+    addEventListener("pointerdown", away);
+    return () => removeEventListener("pointerdown", away);
+  }, [unfold]);
   // iOS pans the visual viewport as the keyboard rises, carrying a top:0 fixed bar off screen: follow the pan (QA, 2026-11-04).
   React.useEffect(() => {
     const vv = window.visualViewport;
     const el = document.querySelector<HTMLElement>(".htools");
     if (!hs || !pin || !vv || !el) return;
-    const set = () => el.style.setProperty("translate", `0 ${vv.offsetTop}px`);
+    const set = () => {
+      // Vars, not inline translate/padding: v3.css applies them only while the header is tucked, so a
+      // rotation that untucks it drops them at once (MAC, Duo, 2026-11-22).
+      el.style.setProperty("--vvy", `${vv.offsetTop}px`);
+      // Panned by the keyboard, the visual viewport already starts below the browser bar: no safe-area pad on top of it.
+      el.style.setProperty("--vvpad", vv.offsetTop > 0 ? "0px" : "");
+    };
     set();
     vv.addEventListener("scroll", set);
     vv.addEventListener("resize", set);
     return () => {
       vv.removeEventListener("scroll", set);
       vv.removeEventListener("resize", set);
-      el.style.removeProperty("translate");
+      el.style.removeProperty("--vvy");
+      el.style.removeProperty("--vvpad");
     };
   }, [hs, pin]);
   React.useEffect(() => {
@@ -1113,6 +1169,62 @@ export function V3Work({
       />
     </svg>
   );
+  const rep = canvas ? "canvas" : view === "color" ? back : view;
+  const fold = (act: () => void) => {
+    if (!unfold && matchMedia("(max-width: 700px)").matches) return setUnfold(true);
+    act();
+    setUnfold(false);
+  };
+  const CROSS = (
+    <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
+      <path d="M2 2l10 10M12 2L2 12" stroke="currentColor" strokeWidth="1.3" />
+    </svg>
+  );
+  /* One field for the row and the header: "Search" fits a 390 phone, the label says
+     the rest. Esc clears, a second Esc leaves. */
+  const searchField = (head: boolean) => (
+    <label className={head ? "hsearch" : "wsearch"} data-has={raw ? "" : undefined}>
+      {LOUPE}
+      <input
+        type="search"
+        ref={head ? (el) => el?.focus({ preventScroll: true }) : undefined}
+        placeholder="Search"
+        aria-label="Search the work by name, discipline or credit"
+        autoComplete="off"
+        enterKeyHint="search"
+        value={raw}
+        onChange={(e) => setRaw(e.target.value)}
+        onFocus={head ? undefined : () => setRowOn(true)}
+        onBlur={head ? undefined : () => setRowOn(false)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") e.currentTarget.blur();
+          if (e.key !== "Escape") return;
+          e.preventDefault();
+          if (raw) setRaw("");
+          else if (head) close();
+          else e.currentTarget.blur();
+        }}
+      />
+      {head ? null : <kbd className="wkey" aria-hidden="true">/</kbd>}
+      <button
+        type="button"
+        className="wclr"
+        aria-label="Clear search"
+        inert={!raw}
+        onPointerDown={(e) => e.preventDefault()}
+        onClick={(e) => {
+          setRaw("");
+          e.currentTarget.parentElement?.querySelector("input")?.focus();
+        }}
+      >
+        <i>
+          <svg width="8" height="8" viewBox="0 0 8 8" aria-hidden="true">
+            <path d="M1.5 1.5l5 5M6.5 1.5l-5 5" stroke="currentColor" strokeWidth="1.4" />
+          </svg>
+        </i>
+      </button>
+    </label>
+  );
   const views = (
     <div className="wviews" role="group" aria-label="View">
       {/* The vectorscope is a mode of its own: on, then off back to
@@ -1125,16 +1237,19 @@ export function V3Work({
         title={VIEWS[2][1]}
         onClick={() => {
           // Under the canvas the button is not pressed: it lands on Color, also when Color is the view lying there.
-          if (view === "color" && !canvas) go(back.current);
+          if (view === "color" && !canvas) go(back);
           else {
-            if (view !== "color") back.current = view;
+            if (view !== "color") setBack(view);
             go("color");
           }
         }}
       >
         {VIEWS[2][2]}
       </button>
-      <button type="button" aria-pressed={canvas} aria-label="Canvas view" title="Canvas view" onClick={() => go("canvas")}>
+      {/* Grid, Strip and Canvas: one set. On a phone it folds to the view that is on
+          (data-rep), and the first tap unfolds it (Julian, 2026-11-22). */}
+      <div className={unfold ? "vset open" : "vset"}>
+      <button type="button" aria-pressed={canvas} aria-label="Canvas view" title="Canvas view" data-rep={rep === "canvas" ? "" : undefined} onClick={() => fold(() => go("canvas"))}>
           <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
             {/* Two columns out of step, their ends faded: the field runs past the edge (Julian's pick, 2026-11-14). */}
             <rect x="1.5" y="1" width="5.5" height="6.5" />
@@ -1151,14 +1266,16 @@ export function V3Work({
           aria-pressed={!canvas && view === v}
           aria-label={label}
           title={label}
+          data-rep={rep === v ? "" : undefined}
           onPointerDown={v === "strip" ? () => warm(8) : undefined}
           onPointerEnter={v === "strip" ? () => warm(8) : undefined}
           onFocus={v === "strip" ? () => warm(8) : undefined}
-          onClick={() => go(v)}
+          onClick={() => fold(() => go(v))}
         >
           {icon}
         </button>
       ))}
+      </div>
     </div>
   );
 
@@ -1179,19 +1296,24 @@ export function V3Work({
         </div>
         {/* One sticky glass bar on desktop; display:contents elsewhere. */}
         <div className="whead">
-          <div className="wtools lbl" ref={setTools}>
-            <label className="wsearch">
-              {LOUPE}
-              <input
-                type="search"
-                placeholder="Search the work"
-                aria-label="Search the work by name, discipline or credit"
-                autoComplete="off"
-                value={q}
-                onChange={(e) => setQ(e.target.value.trim().toLowerCase())}
-              />
-            </label>
+          <div className={rowOn ? "wtools lbl on" : "wtools lbl"} ref={setTools}>
+            {searchField(false)}
             {views}
+            {/* Touch only (v3.css): closes the search, as Cancel does on iOS. */}
+            <button
+              type="button"
+              className="wclose"
+              aria-label="Close search"
+              tabIndex={rowOn ? 0 : -1}
+              onPointerDown={(e) => e.preventDefault()}
+              onClick={() => {
+                setRaw("");
+                (document.activeElement as HTMLElement | null)?.blur();
+                setRowOn(false);
+              }}
+            >
+              {CROSS}
+            </button>
           </div>
           <div
             className="chips lbl"
@@ -1332,23 +1454,9 @@ export function V3Work({
             <div className={hs ? "htools lbl open" : "htools lbl"}>
               {hs ? (
                 <>
-                  <label className="hsearch">
-                    {LOUPE}
-                    <input
-                      type="search"
-                      ref={(el) => el?.focus({ preventScroll: true })}
-                      placeholder="Search the work"
-                      aria-label="Search the work by name, discipline or credit"
-                      autoComplete="off"
-                      value={q}
-                      onChange={(e) => setQ(e.target.value.trim().toLowerCase())}
-                      onKeyDown={(e) => e.key === "Escape" && close()}
-                    />
-                  </label>
+                  {searchField(true)}
                   <button type="button" className="hbtn" aria-label="Close search" onClick={close}>
-                    <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
-                      <path d="M2 2l10 10M12 2L2 12" stroke="currentColor" strokeWidth="1.3" />
-                    </svg>
+                    {CROSS}
                   </button>
                 </>
               ) : (
