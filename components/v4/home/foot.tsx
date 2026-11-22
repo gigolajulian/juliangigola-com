@@ -129,7 +129,7 @@ export function MtFoot() {
         <div className="mt-fline lbl mute">
           <span>&copy; {year} Julian Gigola</span>
           {time ? <span className="mt-ftime"><span className="dk">San Jose </span><span className="t">{time}</span></span> : null}
-          <Link href="/legal" className="dk">Legal</Link>
+          <Link href="/legal">Legal</Link>
           <button type="button" className="po" onClick={() => scrollTop()}>Top <span aria-hidden>&uarr;</span></button>
         </div>
       </div>
