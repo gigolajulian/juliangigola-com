@@ -1,4 +1,4 @@
-/* The new header, on trial behind `?navfx=1` (`?navfx=0` turns it off; head script in app/layout.tsx).
+/* The new header, on for everyone since 2026-11-22 (`?navfx=0` turns it off for the tab; head script in app/layout.tsx).
    Mock: https://claude.ai/artifact/BuKhy4pxdjSgbLZBXmyQTA.
    One ground for the bar on every screen and for the phone menu: the page colour at 47%, a 24px blur with the
    colour under it lifted, a hairline. It is off at the top of a page and while the home hero shows

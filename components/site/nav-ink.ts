@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-/* `?navfx=1` (app/styles/navfx.css): two jobs for the header on trial.
+/* The header (app/styles/navfx.css), on for everyone since 2026-11-22, `?navfx=0` off for the tab:
    1. `data-navtop` on the root while the bar has no ground: the top of a page, and on the homepage for as long
       as the hero shows.
    2. Each word in the bar is white or black, whichever reads better over what is under it (photo, film or page,
