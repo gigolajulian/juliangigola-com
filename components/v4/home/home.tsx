@@ -10,11 +10,17 @@ import { MtBookOnline } from "./book-online";
 import { MtByQuote } from "./by-quote";
 import { MtAbout } from "./about";
 import { MtFoot } from "./foot";
-import { InquiryCard } from "./inquiry-card";
 import { MtIntro } from "./intro";
 import { MtMotionLayer } from "./motion";
 import { glideTo } from "@/components/v3/smooth-scroll";
 import { useBackHome } from "./back";
+
+/* The inquiry card (its dialog and form) is not in the home page's first load (audit 2026-11-22): fetched once By quote
+   or the footer nears the screen, or after the page has loaded and gone idle, so opening it never waits; mounted the
+   first time it opens and kept, so it can close with its own animation. */
+let inqMod: Promise<typeof import("./inquiry-card")> | undefined;
+const warmInq = () => void (inqMod ??= import("./inquiry-card"));
+const InquiryCard = React.lazy(() => (warmInq(), inqMod!).then((m) => ({ default: m.InquiryCard })));
 
 /* v4 homepage (the home with NEXT_PUBLIC_V4_HOME=1; `?mtscroll=1` previews it on a rollback build; docs/mt-decisions.md): the screens at their resting
    state, with MtIntro and MtMotionLayer on top. Motion hooks: MOTION-HOOKS.md. */
@@ -37,6 +43,19 @@ export function MtHome({ data }: { data: MtData }) {
     [],
   );
   const back = () => opener.current?.focus({ preventScroll: true });
+  const [inqUsed, setInqUsed] = React.useState(false);
+  if (inq && !inqUsed) setInqUsed(true);
+  React.useEffect(() => {
+    const io = window.IntersectionObserver ? new IntersectionObserver((es) => es.some((e) => e.isIntersecting) && (warmInq(), io?.disconnect()), { rootMargin: "100% 0px" }) : null;
+    document.querySelectorAll(".mt-quote, #contact").forEach((el) => io?.observe(el));
+    const idle = () => ("requestIdleCallback" in window ? requestIdleCallback(warmInq, { timeout: 3000 }) : setTimeout(warmInq, 1500));
+    if (document.readyState === "complete") idle();
+    else addEventListener("load", idle, { once: true });
+    return () => {
+      io?.disconnect();
+      removeEventListener("load", idle);
+    };
+  }, []);
   // Anchors (/sessions 308s to /#sessions; #about and #contact are linkable too): the screens take their heights after the browser's own anchor jump, so land again once they have.
   // #contact is the footer, and arriving there opens the inquiry card its "Contact me" opens; closing hands focus to that button.
   React.useEffect(() => {
@@ -87,7 +106,11 @@ export function MtHome({ data }: { data: MtData }) {
         <MtFoot />
       </section>
       <MtMotionLayer />
-      <InquiryCard open={inq} reply={data.reply} onClose={() => setInq(null)} onBack={back} />
+      {inq || inqUsed ? (
+        <React.Suspense fallback={null}>
+          <InquiryCard open={inq} reply={data.reply} onClose={() => setInq(null)} onBack={back} />
+        </React.Suspense>
+      ) : null}
     </CardsCtx.Provider>
   );
 }
