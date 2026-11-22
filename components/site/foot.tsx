@@ -136,6 +136,12 @@ export function V4Foot({ bare = false }: { bare?: boolean } = {}) {
           <p><span className="dk">San Francisco Bay Area</span><span className="po">SF Bay Area</span></p>
         </div>
       </nav>
+      {/* bare, on a phone: one row instead of the columns (Julian: "too much info" at 390) */}
+      {bare ? (
+        <nav className="v4f-short lbl" aria-label="Footer">
+          {[["Home", "/"], ["Portfolio", "/portfolio"], ["Sessions", "/book"], ["About", "/about"], ["Contact", "/contact"]].map(([t, h]) => <Link key={h} href={h}>{t}</Link>)}
+        </nav>
+      ) : null}
       {bare ? null : (
         <Link className="v4f-phrase" href="/book" aria-label={phrase}>
           {/* shortcut: five copies cover a 3440px screen; add more if the phrase gets shorter or screens wider */}
