@@ -263,3 +263,19 @@
     transition: opacity var(--dur-hover) var(--ease-out-strong);
   }
 }
+
+/* ── ?preload=1: portfolio covers fade in as they land ────────────────
+   work.tsx sets `data-up` on a grid or strip cover once its photo has
+   loaded and it is on screen: a fade, 600 on `out`, no rise (Julian), up
+   to six in a row 70ms apart. "0" is a cover that was already there: no
+   motion. On the link inside, as item 6 pins the figure itself.
+   Opacity only, no blur, no black frame. Under
+   Reduce Motion covers are simply there. */
+@media (prefers-reduced-motion: no-preference) {
+  :root[data-preload] .v3 #p-work :is(.wgrid .wt, .wstrip .sc):not([data-up]) > a {
+    opacity: 0;
+  }
+  :root[data-preload] .v3 #p-work :is(.wgrid .wt, .wstrip .sc)[data-up="1"] > a {
+    transition: opacity var(--dur-photo) var(--ease-out-strong) var(--up-d, 0ms);
+  }
+}
