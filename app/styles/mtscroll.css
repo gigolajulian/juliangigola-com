@@ -740,7 +740,7 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
 /* No wordmark in the bar while the hero, with its big name, is on screen,
    at every size. */
 html[data-v3motion][data-mtscroll]:has(.mt-hero) .v3 .site-hdr:not(.menu-on) .site-wm{transition:opacity .25s ease-out}
-html[data-v3motion][data-mtscroll]:has(.mt-hero):not([data-mt-pasthero],[data-mt-nameout]) .v3 .site-hdr:not(.menu-on) .site-wm:not(:focus-visible){opacity:0;pointer-events:none} /* keyboard focus shows it, as navfx.css */
+html[data-v3motion][data-mtscroll]:has(.mt-hero):not([data-mt-pasthero],[data-mt-nameout]) .v3 .site-hdr:not(.menu-on) .site-wm:not(:focus-visible){opacity:0;pointer-events:none} /* keyboard focus shows it */
 /* The held stage is its own layer: the page colour behind it. */
 html[data-mt-held] [data-mtscroll] .mt-hero .mt-stage,html[data-mt-held][data-mtscroll] .mt-hero .mt-stage{background:var(--bg)}
 /* Phone tagline: one colour per theme over a tint of the page, in place of the per-letter photo tones, which still sank into busy photos.
