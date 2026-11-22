@@ -439,7 +439,7 @@
   [data-mtscroll] .mt-ab-ph{aspect-ratio:390/250}
   [data-mtscroll] .mt-fcols{grid-template-columns:1fr 1fr}
   [data-mtscroll] .mt-ph{font-size:150px}
-  [data-mtscroll] .mt-fline .dk{display:none}
+  [data-mtscroll] .mt-ftime .dk{display:none}
   /* shortcut: no local time on phones, with Legal it pushed Top off the screen at 390 wide; give it its own row if Julian wants it there */
   [data-mtscroll] .mt-ftime{display:none}
   /* The cards become bottom sheets with a handle. */
