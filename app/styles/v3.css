@@ -1731,3 +1731,61 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .v3 .pj-ask h2{font-size:clamp(min(2rem,10vw),calc(4*var(--v3u)),3.75rem)}
 .v3 .ab-bio{overflow-wrap:break-word}
 }
+
+/* ---- Portfolio search, Apple pass (Julian approved mock v10, 2026-11-22) ----
+   One field for the row and the header: a filled plate (card tone, 4px, no outline at
+   rest), teal ring on focus only (One Accent Rule), an x to clear once typed, a / hint
+   for a mouse. Touch: the field owns the row while focused, the views step aside and a
+   close x slides in. Phone: Grid, Strip and Canvas fold into the one that is on; the
+   eyedropper's hairline divides them. Springs are the house --ease-spring. */
+.v3 :is(.wsearch,.hsearch){position:relative;gap:10px;height:40px;padding:0 4px 0 12px;background:var(--card);border:0;border-radius:4px;color:var(--mute);cursor:text}
+.v3 :is(.wsearch,.hsearch):focus-within,.v3 .wsearch:has(input:focus-visible){outline:1px solid var(--accent);outline-offset:-1px;color:var(--accent)}
+.v3 :is(.wsearch,.hsearch) input{letter-spacing:.02em}
+.v3 .hsearch input::placeholder{color:var(--mute)}
+.v3 :is(.wsearch,.hsearch) input::-webkit-search-cancel-button{-webkit-appearance:none;display:none}
+.v3 .wclr{display:grid;place-items:center;flex:none;width:36px;height:100%;padding:0;background:none;border:0;color:var(--mute);cursor:pointer;opacity:0;scale:.6;pointer-events:none;transition:opacity .15s,scale .5s var(--ease-spring)}
+.v3 [data-has]>.wclr{opacity:1;scale:1;pointer-events:auto}
+.v3 .wclr i{display:grid;place-items:center;width:16px;height:16px;border-radius:50%;background:var(--mute);color:var(--card)}
+@media (hover:hover){.v3 .wclr:hover i{background:var(--ink)}}
+.v3 .wkey{position:absolute;right:10px;font:400 10px/1 var(--mono);letter-spacing:0;color:var(--mute);border:1px solid var(--line);border-radius:3px;padding:3px 5px;pointer-events:none;transition:opacity .15s}
+.v3 .wsearch:is([data-has],:focus-within) .wkey{opacity:0}
+@media not all and (hover:hover) and (pointer:fine){.v3 .wkey{display:none}}
+.v3 .wclose{display:none}
+.v3 .vset{display:flex}
+@media (pointer:coarse){
+  .v3 :is(.wsearch,.hsearch){height:44px}
+  .v3 .wtools .wviews{max-width:400px;overflow:clip;transition:max-width .5s var(--ease-spring),margin .5s var(--ease-spring),opacity .2s}
+  .v3 .wclose{display:grid;place-items:center;flex:none;width:44px;height:44px;max-width:0;margin-left:-16px;padding:0;overflow:clip;background:none;border:0;color:var(--ink);opacity:0;cursor:pointer;transition:max-width .5s var(--ease-spring),margin .5s var(--ease-spring),opacity .2s}
+  .v3 .wtools.on .wviews{max-width:0;margin-left:-16px;opacity:0;pointer-events:none}
+  .v3 .wtools.on .wclose{max-width:44px;margin-left:0;opacity:1}
+  /* The close x clears too: no second x inside the field beside it. */
+  .v3 .wtools.on .wclr{display:none}
+}
+@media (max-width:700px){
+  .v3 .wviews .vset>button{width:0;min-width:0;padding:0;overflow:hidden;opacity:0;transition:width .5s var(--ease-spring),opacity .2s}
+  .v3 .wviews .vset>button[data-rep],.v3 .wviews .vset.open>button{width:44px;opacity:1}
+  .v3 .wviews .vset:not(.open)>button[data-rep]{background:none;color:var(--ink)}
+}
+/* Joining the header: work.tsx runs --pp from 0 to 1 with the scroll while the row slides
+   under the header; the tools rise 18px and fade in on it, on the line the row leaves by. */
+.v3 .htools:not(.open){opacity:var(--pp,1);transform:translateY(calc((1 - var(--pp,1)) * 18px))}
+/* The header field grows out of the magnifier it opened from. */
+.v3 .htools.open .hsearch{transition:clip-path .5s var(--ease-spring),width .5s var(--ease-spring);clip-path:inset(0 round 4px)}
+@starting-style{.v3 .htools.open .hsearch{clip-path:inset(0 0 0 calc(100% - 44px) round 4px)}}
+@media (min-width:701px){
+  @starting-style{.v3 .htools.open .hsearch{clip-path:inset(0 round 4px);width:44px}}
+}
+@media (prefers-reduced-motion:reduce){
+  .v3 .htools:not(.open){transform:none}
+  .v3 :is(.wclr,.wclose,.wtools .wviews,.wviews .vset>button,.htools.open .hsearch){transition-duration:0s}
+}
+@media (min-width:701px) and (pointer:fine){.v3 .hsearch{height:32px}}
+/* The eyedropper's hairline: a stray rule drew it as a 44px grey box on phones; pin its geometry. */
+.v3 .wviews button.wcolor::after{inset:10px -8.5px 10px auto;width:1px;height:auto;min-width:0;min-height:0;background:var(--line)}
+@media (max-width:700px){.v3 .wviews button.wcolor::after{right:-6.5px}}
+/* iPad: the field springs across the row too, not only to its 460px rest width. */
+@media (pointer:coarse){
+  .v3 .wtools .wsearch{transition:max-width .5s var(--ease-spring)}
+  .v3 .wtools.on .wsearch{max-width:100%}
+}
+@media (pointer:coarse) and (prefers-reduced-motion:reduce){.v3 .wtools .wsearch{transition:none}}
