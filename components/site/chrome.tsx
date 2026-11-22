@@ -384,7 +384,7 @@ function SiteHeader() {
   // The v4 home (or its `?mtscroll=1` preview) has no cover to wait for, the bar is there from the start.
   const mt = React.useSyncExternalStore(noop, mtscroll, () => V4_HOME);
   const show = (!home || past || mt) && !tuck;
-  // `?navfx=1`: the header on trial (ground off at the top, white or black words).
+  // The header: ground off at the top, white or black words (navfx, `?navfx=0` off).
   useNavInk(hdr, path);
   const [menu, setMenu] = React.useState(false);
   /* A route change closes it. */
