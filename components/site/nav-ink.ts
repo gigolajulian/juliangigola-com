@@ -31,6 +31,26 @@ export function barInk(grounds: RGB[], was: string | null): "w" | "b" {
   if (was === "b") return b - w > lead ? "w" : "b";
   return w <= b ? "w" : "b";
 }
+/** Spots the better ink still fails at 4.5:1. */
+const fewest = (grounds: RGB[]) => {
+  let w = 0, b = 0;
+  for (const g of grounds) {
+    const l = lum(g);
+    if (1.05 / (l + 0.05) < 4.5) w++;
+    if ((l + 0.05) / 0.05 < 4.5) b++;
+  }
+  return Math.min(w, b);
+};
+/** `?navink=together|word|frost`: the header ink prototype (2026-11-22), kept for the tab; empty is live. */
+const MODE = () => {
+  try {
+    const q = new URLSearchParams(location.search).get("navink");
+    if (q !== null) sessionStorage.setItem("jg-navink", q);
+    return sessionStorage.getItem("jg-navink") ?? "";
+  } catch {
+    return "";
+  }
+};
 
 let pen: CanvasRenderingContext2D | null | undefined;
 const one = () => (pen === undefined ? (pen = document.createElement("canvas").getContext("2d", { willReadFrequently: true })) : pen);
@@ -315,17 +335,23 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
       const [secBg] = sec ? colour(getComputedStyle(sec).getPropertyValue("--bg").trim()) : [rootBg];
       root.toggleAttribute("data-navdark", lum(rootBg) > 0.2 && lum(secBg) < 0.2);
       const [page] = colour(getComputedStyle(bar).getPropertyValue("--bg").trim());
-      const veiled = !isTop && !root.hasAttribute("data-tuck");
+      // prototype (`?navink=together|word|frost`, kept for the tab): live behaviour without it
+      const mode = MODE();
+      const frosted = mode === "frost" && isTop && bar.hasAttribute("data-navfrost");
+      const veiled = (!isTop && !root.hasAttribute("data-tuck")) || frosted;
       // One ink for the whole bar: no word on its own, all of them fade to the other colour together.
       // Each word still looks under itself in stretches; the stretches vote.
       const votes = { w: 0, n: 0, els: [] as HTMLElement[] };
-      const grounds: RGB[] = []; // what each stretch stands on, through the veil
+      const grounds: RGB[] = [], raw: RGB[] = []; // what each stretch stands on, through the veil and without it
+      const own = new Map<HTMLElement, RGB[]>(); // each word's own grounds
       for (const el of bar.querySelectorAll<HTMLElement>(WORDS)) {
         // an icon button is judged by its icon, not its 32px box: half the box can be on a photo the icon is clear of (MAC: the theme icon)
         const r = ((el.matches(".tbtn,.menu-btn") && el.querySelector("svg")) || el).getBoundingClientRect();
         if (!r.width || r.bottom < 0) continue;
         // a word that is not showing has no say (the v4 home hides the wordmark while the hero's name shows)
-        if (+getComputedStyle(el).opacity < 0.1) continue;
+        if (mode && +getComputedStyle(el).opacity < 0.1) continue;
+        const mine: RGB[] = [];
+        own.set(el, mine);
         /* One ink per stretch of about 16px, so a word that sits half on a photo and half on the page is white
            on one and black on the other (QA: "Ju" white on light grey). And one for the upper half and one for the
            lower: a photo's top or bottom edge can run through a word (MAC: the wordmark white, 1.2:1, with only its
@@ -340,7 +366,7 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
         const pick = (g: RGB, was: string, unknown?: boolean) => {
           if (unknown && was) return was; // the photo's pixels are not in yet: keep the ink until they are
           const c = veiled ? ([0, 1, 2].map((i) => g[i] * (1 - VEIL) + page[i] * VEIL) as RGB) : g;
-          if (!unknown) grounds.push(c);
+          if (!unknown) grounds.push(c), raw.push(g), mine.push(c);
           const l = lum(c), white = 1.05 / (l + 0.05), black = (l + 0.05) / 0.05;
           return was === "w" && white >= 3 && white * 1.25 >= black ? "w" : was === "b" && black >= 3 && black * 1.25 >= white ? "b" : white >= black ? "w" : "b";
         };
@@ -361,15 +387,26 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
         votes.els.push(el);
       }
       if (votes.n) {
-        // one ink for the whole bar, the one that reads best where it reads worst (`barInk`)
+        // the bar keeps the ink it has until the other one clearly leads (60% of the stretches), so it does not flip back and forth on a busy photo
         const was = bar.getAttribute("data-ink"), share = votes.w / votes.n;
-        // the stretches' votes only while every photo under the bar is still loading
-        const ink = grounds.length ? barInk(grounds, was) : was === "w" ? (share >= 0.4 ? "w" : "b") : was === "b" ? (share <= 0.6 ? "b" : "w") : share >= 0.5 ? "w" : "b";
+        const voted = was === "w" ? (share >= 0.4 ? "w" : "b") : was === "b" ? (share <= 0.6 ? "b" : "w") : share >= 0.5 ? "w" : "b";
+        // together and frost: the one ink that fails the fewest spots (`barInk`); the vote while the photos load
+        const ink = mode && grounds.length ? barInk(grounds, was) : voted;
         bar.setAttribute("data-ink", ink);
+        // frost: the ground comes up over the hero while the bar's ink fails anywhere without it, and goes once it would not
+        if (mode === "frost") {
+          const fails = isTop && raw.length ? fewest(raw) : 0;
+          bar.toggleAttribute("data-navfrost", frosted ? fails > 0 : fails > Math.max(1, raw.length * 0.1));
+        } else bar.removeAttribute("data-navfrost");
         for (const el of votes.els) {
-          if (el.dataset.ink === ink) continue;
-          el.dataset.ink = ink;
-          el.style.setProperty("--nav-ink", ink === "w" ? "#fff" : "#000"); // navfx.css fades the colour
+          // word: each word its own ink, from its own stretches
+          const g = own.get(el) ?? [];
+          const mine = mode === "word" && g.length ? barInk(g, el.dataset.ink ?? null) : ink;
+          // the reading the prototype sheet shows: this word's worst contrast as drawn
+          el.dataset.cr = g.length ? Math.min(...g.map((c) => (mine === "w" ? 1.05 / (lum(c) + 0.05) : (lum(c) + 0.05) / 0.05))).toFixed(1) : "";
+          if (el.dataset.ink === mine) continue;
+          el.dataset.ink = mine;
+          el.style.setProperty("--nav-ink", mine === "w" ? "#fff" : "#000"); // navfx.css fades the colour
         }
       }
     };
