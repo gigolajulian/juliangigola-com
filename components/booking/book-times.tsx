@@ -3,7 +3,6 @@
 import * as React from "react";
 import Link from "next/link";
 import { TimePicker, type V3Book } from "@/components/booking/time-picker";
-import { isPaid } from "@/lib/booking/paid";
 
 /* ── the booking calendar ────────────────────────────────────────
  * The site's own time picker (`time-picker.tsx`, times from
@@ -45,14 +44,10 @@ function TimesDown({ title, className, retry, again }: { title: string; classNam
 export function BookTimes({ path, title, className, v3, startView }: { path: string; title: string; className?: string; v3?: V3Book; startView?: "week" | "month" }) {
   // Try again mounts a fresh picker, which asks for the times anew.
   const [tries, setTries] = React.useState(0);
-  // The picker reads the visitor's zone and clock: it mounts on the client only.
-  const [mounted, setMounted] = React.useState(false);
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  React.useEffect(() => setMounted(true), []);
-  const paid = isPaid(path.split("/")[1]);
-  const wrap = (body: React.ReactNode, bar?: React.ReactNode) => (v3 ? v3.shell({ steps: [], at: 1, head: paid ? "Book a session" : v3.name === "Consultation" ? "Book a consultation" : "Book a call", body, sum: [], bar }) : body);
-  // The picker's Continue bar, held off, from the first paint (time-picker.tsx).
-  if (!mounted) return wrap(<div aria-label={title} className={className} />, <button type="button" className="btn fill" disabled>Continue</button>);
+  /* The picker reads the visitor's zone and clock, so until it has mounted it
+     draws its empty box (`TimePicker`). It is the one element here from the
+     server on: a <FlowShell> swapped for a <TimePicker> remounted the whole
+     shell, photo and all, at hydration (LCP on /book, 2026-11-21). */
   const down = <TimesDown title={title} className={className} retry={() => setTries((n) => n + 1)} again={tries > 0} />;
   return <TimePicker key={tries} path={path} title={title} className={className} fallback={down} v3={v3} startView={startView} />;
 }
