@@ -6,25 +6,20 @@ import { clock, DAYS, fromIso, MONTHS, type V3Book } from "@/components/booking/
 import { usePicker, type CardCtx, type Props } from "@/components/booking/use-picker";
 import { V3Steps } from "@/components/booking/time-picker-v3";
 import { EditorialCard } from "@/components/booking/time-picker-editorial";
-import { isPaid } from "@/lib/booking/paid";
 
 export type { V3Book };
 
 export function TimePicker(props: Props) {
   const c = usePicker(props);
-  const { title, className, fallback, v3, length, days, state, held, jg, pick, heldBar, v3plain, slug } = c;
+  const { title, className, fallback, v3, length, days, state, held, jg, pick, heldBar, v3plain } = c;
   /* It reads the visitor's zone and clock: until it has mounted, the empty box
      under a held Continue (from the first paint), drawn here and not by
      `BookTimes`, so the shell is never swapped for another and remounted. */
   const [mounted, setMounted] = React.useState(false);
   // eslint-disable-next-line react-hooks/set-state-in-effect
   React.useEffect(() => setMounted(true), []);
-  if (!mounted) {
-    const box = <div aria-label={title} className={className} />;
-    if (!v3) return box;
-    const head = isPaid(slug) ? "Book a session" : v3.name === "Consultation" ? "Book a consultation" : "Book a call";
-    return <div className="contents">{v3.shell({ steps: [], at: 1, head, body: box, sum: [], bar: heldBar })}</div>;
-  }
+  // the same shell the held picker draws (steps, sub, J and G), so nothing moves when it mounts (CLS 0.107 at 1440, audit 2026-11-21)
+  if (!mounted) return v3 ? v3plain(jg, heldBar) : <div aria-label={title} className={className} />;
   if (state === "fallback") return v3 ? v3plain(fallback) : <>{fallback}</>;
   const waiting = <p role="status" className="lbl mute">Loading availability</p>;
   if (v3 && (state === "loading" || !days || held)) return v3plain(jg, heldBar);
