@@ -107,6 +107,8 @@ html[data-theme="light"]:root:root #p-service{--sv-dim:color-mix(in srgb,var(--i
   .v3 .v4f-bare :is(.v4f-cols,.v4f-time){display:none}
   .v3 .v4f-bare .v4f-short{display:flex}
 }
+/* under 300px: only a phone at 200% zoom or more (WCAG 1.4.10 reflow), so nothing changes at real widths */
+@media (max-width:299.98px){.v3 .v4f-cols{grid-template-columns:minmax(0,1fr)}.v3 .v4f-line{flex-wrap:wrap}}
 @media (pointer:coarse){.v3 .v4f :is(.v4f-cols,.v4f-line,.v4f-short) a{display:flex;width:max-content;align-items:center;min-height:44px}.v3 .v4f-cols p{margin:0}}
 
 /* The hand-over, desktop: the page's last block sinks, scales to .95 and dims to .4 from its bottom edge

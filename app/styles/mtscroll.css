@@ -805,3 +805,5 @@ html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap.mt-cap{font-family:var(
 /* the booking flow's first height (stepper plus the calendar wait) while its chunk is still on the way (book-online.tsx) */
 [data-mtscroll] .mt-bin-wait{min-height:calc(849px + 1.5vw)} /* measured 865-888px from 1024 to 2560 wide */
 @media not ((min-width:1024px) and (min-height:600px)){[data-mtscroll] .mt-bin-wait{min-height:761px}}
+/* under 300px: only a phone at 200% zoom or more (WCAG 1.4.10 reflow), so nothing changes at real widths */
+@media (max-width:299.98px){[data-mtscroll] .mt-ctas{flex-wrap:wrap}[data-mtscroll] .mt-does ol{grid-template-columns:minmax(0,1fr);grid-template-rows:repeat(6,44px)}}
