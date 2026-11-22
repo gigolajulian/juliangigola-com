@@ -17,10 +17,11 @@ import { useBackHome } from "./back";
 
 /* The inquiry card (its dialog and form) is not in the home page's first load (audit 2026-11-22): fetched once By quote
    or the footer nears the screen, or after the page has loaded and gone idle, so opening it never waits; mounted the
-   first time it opens and kept, so it can close with its own animation. */
-let inqMod: Promise<typeof import("./inquiry-card")> | undefined;
-const warmInq = () => void (inqMod ??= import("./inquiry-card"));
-const InquiryCard = React.lazy(() => (warmInq(), inqMod!).then((m) => ({ default: m.InquiryCard })));
+   first time it opens and kept, so it can close with its own animation. Not React.lazy: a Suspense reveal is held about
+   300ms even when the module is already here. */
+let InquiryCard: typeof import("./inquiry-card").InquiryCard | undefined;
+let inqMod: Promise<unknown> | undefined;
+const warmInq = () => (inqMod ??= import("./inquiry-card").then((m) => (InquiryCard = m.InquiryCard), () => (inqMod = undefined)));
 
 /* v4 homepage (the home with NEXT_PUBLIC_V4_HOME=1; `?mtscroll=1` previews it on a rollback build; docs/mt-decisions.md): the screens at their resting
    state, with MtIntro and MtMotionLayer on top. Motion hooks: MOTION-HOOKS.md. */
@@ -45,6 +46,8 @@ export function MtHome({ data }: { data: MtData }) {
   const back = () => opener.current?.focus({ preventScroll: true });
   const [inqUsed, setInqUsed] = React.useState(false);
   if (inq && !inqUsed) setInqUsed(true);
+  const [, inqIn] = React.useReducer((n: number) => n + 1, 0);
+  React.useEffect(() => void (inq && !InquiryCard && warmInq().then(inqIn)), [inq]);
   React.useEffect(() => {
     const io = window.IntersectionObserver ? new IntersectionObserver((es) => es.some((e) => e.isIntersecting) && (warmInq(), io?.disconnect()), { rootMargin: "100% 0px" }) : null;
     document.querySelectorAll(".mt-quote, #contact").forEach((el) => io?.observe(el));
@@ -106,11 +109,7 @@ export function MtHome({ data }: { data: MtData }) {
         <MtFoot />
       </section>
       <MtMotionLayer />
-      {inq || inqUsed ? (
-        <React.Suspense fallback={null}>
-          <InquiryCard open={inq} reply={data.reply} onClose={() => setInq(null)} onBack={back} />
-        </React.Suspense>
-      ) : null}
+      {InquiryCard && (inq || inqUsed) ? <InquiryCard open={inq} reply={data.reply} onClose={() => setInq(null)} onBack={back} /> : null}
     </CardsCtx.Provider>
   );
 }
