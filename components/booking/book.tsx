@@ -7,6 +7,7 @@ import { getImageProps } from "next/image";
 import { JG_COVER, mountCover } from "@/components/splash/jg-cover";
 import { useRouter } from "next/navigation";
 import { BookTimes } from "@/components/booking/book-times";
+import { V4Foot } from "@/components/site/foot";
 import { Calendar, Failed, Field, FlowShell, Hidden, Run, dlabel, iso, useEnquiry, type Shell } from "@/components/booking/flow";
 import { duration } from "@/lib/booking/booking-rules";
 import { LENGTH, SESSIONS, TAB_ORDER, rate, type SessionSlug } from "@/lib/photos-and-sessions";
@@ -174,6 +175,7 @@ export function V3Book({ slug }: { slug: SessionSlug }) {
       <section className="v3page" id="p-flow">
         <V3BookFlow slug={slug} h1 />
       </section>
+      <V4Foot bare />
       {/* the booking wait's cover, up before the page paints (jg-cover.ts); only where there is a calendar to wait for; after the page, so the calendar's box is there to cover */}
       {fromServer && SESSIONS[slug].cal ? <script dangerouslySetInnerHTML={{ __html: JG_COVER }} /> : null}
     </div>

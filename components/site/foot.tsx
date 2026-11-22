@@ -27,7 +27,8 @@ const ASK: Record<string, string> = { music: "coverart", fashion: "editorial", c
 // local on purpose: importing motion/engine.ts would pull the home motion engine into every inner page
 const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 
-export function V4Foot() {
+/** `bare`: no drifting phrase and no sink, the links and the last line only (the booking pages: Julian wanted a way around and the copyright, not the big text). */
+export function V4Foot({ bare = false }: { bare?: boolean } = {}) {
   const foot = React.useRef<HTMLElement>(null);
   const row = React.useRef<HTMLSpanElement>(null);
   const time = useLocalTime();
@@ -106,7 +107,7 @@ export function V4Foot() {
   }, []);
 
   return (
-    <footer className="v4f" ref={foot}>
+    <footer className={bare ? "v4f v4f-bare" : "v4f"} ref={foot}>
       <nav className="v4f-cols lbl" aria-label="Footer">
         <div>
           <p className="mute">Book online</p>
@@ -122,6 +123,7 @@ export function V4Foot() {
         </div>
         <div>
           <p className="mute">Pages</p>
+          <p><Link href="/">Home</Link></p>
           <p><Link href="/portfolio">Portfolio</Link></p>
           <p><Link href="/book">Sessions</Link></p>
           <p><Link href="/about">About</Link></p>
@@ -134,12 +136,20 @@ export function V4Foot() {
           <p><span className="dk">San Francisco Bay Area</span><span className="po">SF Bay Area</span></p>
         </div>
       </nav>
-      <Link className="v4f-phrase" href="/book" aria-label={phrase}>
-        {/* shortcut: five copies cover a 3440px screen; add more if the phrase gets shorter or screens wider */}
-        <span className="v4f-row" ref={row} aria-hidden>
-          {[0, 1, 2, 3, 4].map((n) => <span key={n}>{phrase}</span>)}
-        </span>
-      </Link>
+      {/* bare, on a phone: one row instead of the columns (Julian: "too much info" at 390) */}
+      {bare ? (
+        <nav className="v4f-short lbl" aria-label="Footer">
+          {[["Home", "/"], ["Portfolio", "/portfolio"], ["Sessions", "/book"], ["About", "/about"], ["Contact", "/contact"]].map(([t, h]) => <Link key={h} href={h}>{t}</Link>)}
+        </nav>
+      ) : null}
+      {bare ? null : (
+        <Link className="v4f-phrase" href="/book" aria-label={phrase}>
+          {/* shortcut: five copies cover a 3440px screen; add more if the phrase gets shorter or screens wider */}
+          <span className="v4f-row" ref={row} aria-hidden>
+            {[0, 1, 2, 3, 4].map((n) => <span key={n}>{phrase}</span>)}
+          </span>
+        </Link>
+      )}
       <div className="v4f-line lbl mute">
         <span>&copy; {year} Julian Gigola</span>
         {time ? <span className="v4f-time"><span className="dk">San Jose </span><span className="t">{time}</span></span> : null}

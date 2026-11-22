@@ -505,7 +505,7 @@ export function V3Footer() {
   return (
     <div className="v3 contents">
       {/* remade per page: this footer outlives the page, and its hand-over looks up the page's last block once */}
-      {LINE_ONLY.test(path) ? <V3Foot /> : <PageFoot key={path} />}
+      {LINE_ONLY.test(path) ? <V3Foot /> : path === "/legal" ? <V4Foot bare /> : <PageFoot key={path} />}
     </div>
   );
 }

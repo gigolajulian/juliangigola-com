@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ReferencePicks } from "@/components/reference-picks";
-import { V3Foot } from "@/components/site/chrome";
+import { V4Foot } from "@/components/site/foot";
 import { CallDialog } from "@/components/booking/book";
 import { Duo } from "@/components/site/duo";
 import { Check, Failed, Field, FlowShell, Hidden, NEED_MSG, checkYou, first, useEnquiry } from "@/components/booking/flow";
@@ -117,7 +117,7 @@ export function V3Inquire() {
           <a href="mailto:hello@juliangigola.com">hello@juliangigola.com</a>
           <a href="https://instagram.com/juliangigola" rel="noopener">@juliangigola</a>
         </div>
-        <V3Foot />
+        <V4Foot bare />
       </section>
     </div>
   );
@@ -277,6 +277,7 @@ export function V3Commission() {
           />
         </form>
       </section>
+      <V4Foot bare />
     </div>
   );
 }
