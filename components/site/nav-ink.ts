@@ -16,6 +16,20 @@ const VEIL = 0.47; // --nav-veil
 const lin = (v: number) => ((v /= 255) <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
 const lum = (c: RGB) => 0.2126 * lin(c[0]) + 0.7152 * lin(c[1]) + 0.0722 * lin(c[2]);
 const unlin = (v: number) => 255 * (v <= 0.0031308 ? v * 12.92 : 1.055 * v ** (1 / 2.4) - 0.055);
+/** The bar's one ink: the one whose worst word reads best, not the one most words want (audit 2026-11-22: the
+    wordmark went white on the light page, 2.2:1, because the links over a photo outvoted it). The other ink takes
+    over only once its worst is clearly better (1.25 times), so a busy photo does not flip it back and forth. */
+export function barInk(grounds: RGB[], was: string | null): "w" | "b" {
+  let w = Infinity, b = Infinity;
+  for (const g of grounds) {
+    const l = lum(g);
+    w = Math.min(w, 1.05 / (l + 0.05));
+    b = Math.min(b, (l + 0.05) / 0.05);
+  }
+  if (was === "w") return b > w * 1.25 ? "b" : "w";
+  if (was === "b") return w > b * 1.25 ? "w" : "b";
+  return w >= b ? "w" : "b";
+}
 
 let pen: CanvasRenderingContext2D | null | undefined;
 const one = () => (pen === undefined ? (pen = document.createElement("canvas").getContext("2d", { willReadFrequently: true })) : pen);
@@ -304,6 +318,7 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
       // One ink for the whole bar: no word on its own, all of them fade to the other colour together.
       // Each word still looks under itself in stretches; the stretches vote.
       const votes = { w: 0, n: 0, els: [] as HTMLElement[] };
+      const grounds: RGB[] = []; // what each stretch stands on, through the veil
       for (const el of bar.querySelectorAll<HTMLElement>(WORDS)) {
         // an icon button is judged by its icon, not its 32px box: half the box can be on a photo the icon is clear of (MAC: the theme icon)
         const r = ((el.matches(".tbtn,.menu-btn") && el.querySelector("svg")) || el).getBoundingClientRect();
@@ -322,6 +337,7 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
         const pick = (g: RGB, was: string, unknown?: boolean) => {
           if (unknown && was) return was; // the photo's pixels are not in yet: keep the ink until they are
           const c = veiled ? ([0, 1, 2].map((i) => g[i] * (1 - VEIL) + page[i] * VEIL) as RGB) : g;
+          if (!unknown) grounds.push(c);
           const l = lum(c), white = 1.05 / (l + 0.05), black = (l + 0.05) / 0.05;
           return was === "w" && white >= 3 && white * 1.25 >= black ? "w" : was === "b" && black >= 3 && black * 1.25 >= white ? "b" : white >= black ? "w" : "b";
         };
@@ -342,9 +358,10 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
         votes.els.push(el);
       }
       if (votes.n) {
-        // the bar keeps the ink it has until the other one clearly leads (60% of the stretches), so it does not flip back and forth on a busy photo
+        // one ink for the whole bar, the one that reads best where it reads worst (`barInk`)
         const was = bar.getAttribute("data-ink"), share = votes.w / votes.n;
-        const ink = was === "w" ? (share >= 0.4 ? "w" : "b") : was === "b" ? (share <= 0.6 ? "b" : "w") : share >= 0.5 ? "w" : "b";
+        // the stretches' votes only while every photo under the bar is still loading
+        const ink = grounds.length ? barInk(grounds, was) : was === "w" ? (share >= 0.4 ? "w" : "b") : was === "b" ? (share <= 0.6 ? "b" : "w") : share >= 0.5 ? "w" : "b";
         bar.setAttribute("data-ink", ink);
         for (const el of votes.els) {
           if (el.dataset.ink === ink) continue;
