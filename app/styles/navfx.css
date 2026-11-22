@@ -17,7 +17,9 @@
 :root[data-navfx] .v3 .site-hdr.site-hdr.site-hdr.menu-on{background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none;border-bottom-color:transparent;animation:none}
 /* The frost over the hero (nav-ink.ts): fades in over .4s, a little thicker than the bar's usual ground so the words
    read on any photo; going, it fades out over .3s. Never a hard cut. */
-:root[data-navfx][data-navtop] .v3 .site-hdr.site-hdr.site-hdr[data-navfrost=""]:not(.menu-on){--nav-veil:62%;animation:navfx-in .4s ease both}
+/* It stays on past the hero once up (nav-ink.ts, the "carry"), so the ground never drops back and hands the ink to the photos;
+   not while the bar is tucked away. */
+:root[data-navfx]:not([data-tuck]) .v3 .site-hdr.site-hdr.site-hdr[data-navfrost=""]:not(.menu-on){--nav-veil:62%;animation:navfx-in .4s ease both}
 :root[data-navfx][data-navtop] .v3 .site-hdr.site-hdr.site-hdr[data-navfrost="off"]:not(.menu-on){animation:navfx-out .3s ease both}
 /* Over a section that is dark in both themes, on a light page (`data-navdark`, nav-ink.ts): the bar's own tokens go dark. */
 :root[data-navfx][data-navdark] .v3 .site-hdr{--bg:var(--dark-bg);--ink:var(--dark-ink);--line:oklch(1 0 0 / 13%);--nav-line:var(--line)}

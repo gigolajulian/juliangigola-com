@@ -291,7 +291,7 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
   React.useEffect(() => {
     const bar = hdr.current, root = document.documentElement;
     if (!bar || !navfx()) return;
-    let raf = 0, timer = 0, last = 0, frostT = 0, inkAt = 0;
+    let raf = 0, timer = 0, last = 0, frostT = 0, inkAt = 0, lastY = scrollY, down = false;
     const top = () => {
       // The homepage: no ground while its hero shows (the v4 hero, or the cover). Elsewhere: none at the very top.
       const hero = path === "/" ? document.querySelector(".mt-hero, .a-cover") : null;
@@ -327,7 +327,14 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
       const [page] = colour(getComputedStyle(bar).getPropertyValue("--bg").trim());
       /* Over the home hero the bar has no ground, and no one ink reads on every photo: the ground comes up there
          while a word would fall under 4.5:1 without it (Julian picked "frost" from the prototype, 2026-11-22). */
-      const frosted = isTop && bar.getAttribute("data-navfrost") === ""; // "off" is the frost fading out
+      /* The frost stays on past the hero once it is up (a "carry"): dropping it where the hero ends brought the bar's
+         own ground back in from transparent and handed the ink back to the photos, so it went white, black, white with
+         the wordmark and menu apart (MAC, iPhone dark, #1417). It goes only near the top of the page (below). */
+      const frosted = bar.getAttribute("data-navfrost") === ""; // "off" is the frost fading out
+      if (scrollY !== lastY) {
+        down = scrollY > lastY;
+        lastY = scrollY;
+      }
       const veiled = (!isTop && !root.hasAttribute("data-tuck")) || frosted;
       // One ink for the whole bar: no word on its own, all of them fade to the other colour together.
       // Each word still looks under itself in stretches; the stretches vote.
@@ -383,7 +390,10 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
         /* Under the frost the ink is the frost's own: dark on a light page, light on a dark one, so it never sits white
            on light frost (MAC, Safari 1440). Elsewhere the ink that fails fewest; held 300ms, so it does not flip for a
            few frames on a busy photo (MAC, iPhone). */
-        const pick = frosted ? (lum(page) > 0.4 ? "b" : "w") : grounds.length ? barInk(grounds, was) : voted;
+        /* Under the frost the theme's ink, fixed and never sampled: the frost is a 62% veil of the page colour, so black
+           on it (light) or white on it (dark) holds at least 6:1 over any photo, and both words always share it (MAC). */
+        const themeInk = root.dataset.theme === "light" ? "b" : "w";
+        const pick = frosted ? themeInk : grounds.length ? barInk(grounds, was) : voted;
         const now = performance.now();
         const ink = was && pick !== was && !frosted && now - inkAt < 300 ? was : pick;
         if (ink !== was) inkAt = now;
@@ -393,11 +403,23 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
            it flashed on and off across the masonry (MAC, iPhone, #1417). It goes only back near the top of the page,
            after 1.2s with nothing failing, faded (navfx.css). */
         // at 6:1, a margin over 4.5, so it is up before a word actually fails (MAC: a word on the wrong photo for 0.13s first)
-        const fails = isTop && raw.length ? fewest(raw, 6) : 0;
+        /* Pre-roll: while scrolling down, also look a little below the bar, at what is about to come under the words, so
+           the frost is in before a word sits on the wrong photo (MAC: the menu on a dark figure for 0.3s before the fade).
+           Only on the way down, so a page at rest at its top keeps no frost. */
+        const ahead: RGB[] = [];
+        if (isTop && down && !frosted) {
+          const bb = bar.getBoundingClientRect().bottom;
+          for (const el of votes.els) {
+            const r = ((el.matches(".tbtn,.menu-btn") && el.querySelector("svg")) || el).getBoundingClientRect();
+            for (const t of [0.15, 0.5, 0.85]) ahead.push(under(r.left + r.width * t, bb + 28, bar, page));
+          }
+        }
+        const fails = isTop && raw.length ? fewest(raw.concat(ahead), 6) : 0;
         if (!isTop) {
+          // past the hero: the frost (if up) stays, ink fixed; nothing new comes up here
           clearTimeout(frostT);
           frostT = 0;
-          bar.removeAttribute("data-navfrost");
+          if (bar.getAttribute("data-navfrost") === "off") bar.setAttribute("data-navfrost", "");
         } else if (fails) {
           clearTimeout(frostT);
           frostT = 0;
