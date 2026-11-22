@@ -16,6 +16,31 @@ const VEIL = 0.47; // --nav-veil
 const lin = (v: number) => ((v /= 255) <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
 const lum = (c: RGB) => 0.2126 * lin(c[0]) + 0.7152 * lin(c[1]) + 0.0722 * lin(c[2]);
 const unlin = (v: number) => 255 * (v <= 0.0031308 ? v * 12.92 : 1.055 * v ** (1 / 2.4) - 0.055);
+/** The bar's one ink: the one that leaves the fewest spots under 4.5:1 (WCAG AA) through the words, not the one
+    most stretches prefer (audit 2026-11-22, P1). The other ink takes over only once it fails clearly fewer spots,
+    so a busy photo does not flip the bar back and forth. */
+export function barInk(grounds: RGB[], was: string | null): "w" | "b" {
+  let w = 0, b = 0; // spots each ink fails
+  for (const g of grounds) {
+    const l = lum(g);
+    if (1.05 / (l + 0.05) < 4.5) w++;
+    if ((l + 0.05) / 0.05 < 4.5) b++;
+  }
+  const lead = Math.max(1, grounds.length * 0.1); // clearly: a tenth of the spots
+  if (was === "w") return w - b > lead ? "b" : "w";
+  if (was === "b") return b - w > lead ? "w" : "b";
+  return w <= b ? "w" : "b";
+}
+/** Spots the better ink still fails, at 4.5:1 or the given ratio. */
+const fewest = (grounds: RGB[], min = 4.5) => {
+  let w = 0, b = 0;
+  for (const g of grounds) {
+    const l = lum(g);
+    if (1.05 / (l + 0.05) < min) w++;
+    if ((l + 0.05) / 0.05 < min) b++;
+  }
+  return Math.min(w, b);
+};
 
 let pen: CanvasRenderingContext2D | null | undefined;
 const one = () => (pen === undefined ? (pen = document.createElement("canvas").getContext("2d", { willReadFrequently: true })) : pen);
@@ -266,7 +291,7 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
   React.useEffect(() => {
     const bar = hdr.current, root = document.documentElement;
     if (!bar || !navfx()) return;
-    let raf = 0, timer = 0, last = 0;
+    let raf = 0, timer = 0, last = 0, frostT = 0, inkAt = 0, lastY = scrollY, down = false;
     const top = () => {
       // The homepage: no ground while its hero shows (the v4 hero, or the cover). Elsewhere: none at the very top.
       const hero = path === "/" ? document.querySelector(".mt-hero, .a-cover") : null;
@@ -300,14 +325,30 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
       const [secBg] = sec ? colour(getComputedStyle(sec).getPropertyValue("--bg").trim()) : [rootBg];
       root.toggleAttribute("data-navdark", lum(rootBg) > 0.2 && lum(secBg) < 0.2);
       const [page] = colour(getComputedStyle(bar).getPropertyValue("--bg").trim());
-      const veiled = !isTop && !root.hasAttribute("data-tuck");
+      /* Over the home hero the bar has no ground, and no one ink reads on every photo: the ground comes up there
+         while a word would fall under 4.5:1 without it (Julian picked "frost" from the prototype, 2026-11-22). */
+      /* The frost stays on past the hero once it is up (a "carry"): dropping it where the hero ends brought the bar's
+         own ground back in from transparent and handed the ink back to the photos, so it went white, black, white with
+         the wordmark and menu apart (MAC, iPhone dark, #1417). It goes only near the top of the page (below). */
+      const frosted = bar.getAttribute("data-navfrost") === ""; // "off" is the frost fading out
+      if (scrollY !== lastY) {
+        down = scrollY > lastY;
+        lastY = scrollY;
+      }
+      const veiled = (!isTop && !root.hasAttribute("data-tuck")) || frosted;
       // One ink for the whole bar: no word on its own, all of them fade to the other colour together.
       // Each word still looks under itself in stretches; the stretches vote.
       const votes = { w: 0, n: 0, els: [] as HTMLElement[] };
+      const grounds: RGB[] = [], raw: RGB[] = []; // what each stretch stands on, through the veil and without it
+      const own = new Map<HTMLElement, RGB[]>(); // each word's own grounds
       for (const el of bar.querySelectorAll<HTMLElement>(WORDS)) {
         // an icon button is judged by its icon, not its 32px box: half the box can be on a photo the icon is clear of (MAC: the theme icon)
         const r = ((el.matches(".tbtn,.menu-btn") && el.querySelector("svg")) || el).getBoundingClientRect();
         if (!r.width || r.bottom < 0) continue;
+        // a word that is not showing has no say (the v4 home hides the wordmark while the hero's name shows)
+        if (+getComputedStyle(el).opacity < 0.1) continue;
+        const mine: RGB[] = [];
+        own.set(el, mine);
         /* One ink per stretch of about 16px, so a word that sits half on a photo and half on the page is white
            on one and black on the other (QA: "Ju" white on light grey). And one for the upper half and one for the
            lower: a photo's top or bottom edge can run through a word (MAC: the wordmark white, 1.2:1, with only its
@@ -322,6 +363,7 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
         const pick = (g: RGB, was: string, unknown?: boolean) => {
           if (unknown && was) return was; // the photo's pixels are not in yet: keep the ink until they are
           const c = veiled ? ([0, 1, 2].map((i) => g[i] * (1 - VEIL) + page[i] * VEIL) as RGB) : g;
+          if (!unknown) grounds.push(c), raw.push(g), mine.push(c);
           const l = lum(c), white = 1.05 / (l + 0.05), black = (l + 0.05) / 0.05;
           return was === "w" && white >= 3 && white * 1.25 >= black ? "w" : was === "b" && black >= 3 && black * 1.25 >= white ? "b" : white >= black ? "w" : "b";
         };
@@ -342,11 +384,58 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
         votes.els.push(el);
       }
       if (votes.n) {
-        // the bar keeps the ink it has until the other one clearly leads (60% of the stretches), so it does not flip back and forth on a busy photo
+        // the one ink that fails the fewest spots (`barInk`); while every photo under the bar is loading, the stretches vote (60% to flip)
         const was = bar.getAttribute("data-ink"), share = votes.w / votes.n;
-        const ink = was === "w" ? (share >= 0.4 ? "w" : "b") : was === "b" ? (share <= 0.6 ? "b" : "w") : share >= 0.5 ? "w" : "b";
+        const voted = was === "w" ? (share >= 0.4 ? "w" : "b") : was === "b" ? (share <= 0.6 ? "b" : "w") : share >= 0.5 ? "w" : "b";
+        /* Under the frost the ink is the frost's own: dark on a light page, light on a dark one, so it never sits white
+           on light frost (MAC, Safari 1440). Elsewhere the ink that fails fewest; held 300ms, so it does not flip for a
+           few frames on a busy photo (MAC, iPhone). */
+        /* Under the frost the theme's ink, fixed and never sampled: the frost is a 62% veil of the page colour, so black
+           on it (light) or white on it (dark) holds at least 6:1 over any photo, and both words always share it (MAC). */
+        const themeInk = root.dataset.theme === "light" ? "b" : "w";
+        const pick = frosted ? themeInk : grounds.length ? barInk(grounds, was) : voted;
+        const now = performance.now();
+        const ink = was && pick !== was && !frosted && now - inkAt < 300 ? was : pick;
+        if (ink !== was) inkAt = now;
         bar.setAttribute("data-ink", ink);
+        // the ground comes up over the hero while the bar's ink fails anywhere without it, and goes once it would not
+        /* On at once for any spot that fails, and then it stays for the rest of the hero: switched as each look found it,
+           it flashed on and off across the masonry (MAC, iPhone, #1417). It goes only back near the top of the page,
+           after 1.2s with nothing failing, faded (navfx.css). */
+        // at 6:1, a margin over 4.5, so it is up before a word actually fails (MAC: a word on the wrong photo for 0.13s first)
+        /* Pre-roll: while scrolling down, also look a little below the bar, at what is about to come under the words, so
+           the frost is in before a word sits on the wrong photo (MAC: the menu on a dark figure for 0.3s before the fade).
+           Only on the way down, so a page at rest at its top keeps no frost. */
+        const ahead: RGB[] = [];
+        if (isTop && down && !frosted) {
+          const bb = bar.getBoundingClientRect().bottom;
+          for (const el of votes.els) {
+            const r = ((el.matches(".tbtn,.menu-btn") && el.querySelector("svg")) || el).getBoundingClientRect();
+            for (const t of [0.15, 0.5, 0.85]) ahead.push(under(r.left + r.width * t, bb + 28, bar, page));
+          }
+        }
+        const fails = isTop && raw.length ? fewest(raw.concat(ahead), 6) : 0;
+        if (!isTop) {
+          // past the hero: the frost (if up) stays, ink fixed; nothing new comes up here
+          clearTimeout(frostT);
+          frostT = 0;
+          if (bar.getAttribute("data-navfrost") === "off") bar.setAttribute("data-navfrost", "");
+        } else if (fails) {
+          clearTimeout(frostT);
+          frostT = 0;
+          if (bar.getAttribute("data-navfrost") !== "") bar.setAttribute("data-navfrost", "");
+        } else if (bar.getAttribute("data-navfrost") === "" && !frostT && scrollY < innerHeight / 4)
+          frostT = window.setTimeout(() => {
+            bar.setAttribute("data-navfrost", "off");
+            frostT = window.setTimeout(() => {
+              frostT = 0;
+              if (bar.getAttribute("data-navfrost") === "off") bar.removeAttribute("data-navfrost");
+            }, 300);
+          }, 1200);
         for (const el of votes.els) {
+          // this word's worst contrast as drawn, for QA (`data-cr`)
+          const g = own.get(el) ?? [];
+          el.dataset.cr = g.length ? Math.min(...g.map((c) => (ink === "w" ? 1.05 / (lum(c) + 0.05) : (lum(c) + 0.05) / 0.05))).toFixed(1) : "";
           if (el.dataset.ink === ink) continue;
           el.dataset.ink = ink;
           el.style.setProperty("--nav-ink", ink === "w" ? "#fff" : "#000"); // navfx.css fades the colour
@@ -479,6 +568,8 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
       document.removeEventListener("loadeddata", loaded, true);
       watch.disconnect();
       clearTimeout(timer);
+      clearTimeout(frostT);
+      bar.removeAttribute("data-navfrost");
       clearInterval(again);
       poke = () => {};
       cancelAnimationFrame(raf);
