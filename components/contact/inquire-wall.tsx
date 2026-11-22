@@ -44,62 +44,9 @@ export function InquireWall({ items }: { items: WallTile[] }) {
      whole page through a view transition (`page-transition.tsx`). */
   const box = React.useRef<HTMLDivElement>(null);
   const [near, setNear] = React.useState(false);
-  /* Two ways to lighten the wall on a large screen, on trial behind
-     `?wall=` (plan 1.1; at 1920 by 1080 Inquiries and the booking page
-     ran at 4 to 12fps in WebKit). `slow`: on a screen 1600px wide or
-     more, a slower drift, bigger tiles so there are fewer columns and
-     fewer tiles, and the same small file stretched over each. `still`:
-     the wall holds while a field of the form has focus or the pointer
-     is on the card, and drifts again 2 seconds after. Read once, on the
-     first client render; the server renders the wall as it always was. */
-  const [flag] = React.useState(() => {
-    if (typeof location === "undefined") return { slow: false, still: false };
-    const q = new URLSearchParams(location.search).get("wall");
-    return { slow: q === "slow" && matchMedia("(min-width: 1600px)").matches, still: q === "still" };
-  });
-  /* The screen the wall is behind, kept from before it is built: the
-     placeholder is the only element of ours in the page until then. */
-  const scope = React.useRef<HTMLElement | null>(null);
-  const [hold, setHold] = React.useState(false);
-  React.useEffect(() => {
-    if (!flag.still || !near) return;
-    const card = (scope.current ?? document).querySelector<HTMLElement>(".contact-card");
-    if (!card) return;
-    let over = false;
-    let resume = 0;
-    const field = (el: Element | null) =>
-      !!el && card.contains(el) && el.matches("input, textarea, select, [contenteditable], iframe");
-    const update = (focused: Element | null) => {
-      clearTimeout(resume);
-      if (over || field(focused)) setHold(true);
-      else resume = window.setTimeout(() => setHold(false), 2000);
-    };
-    const enter = () => {
-      over = true;
-      update(document.activeElement);
-    };
-    const leave = () => {
-      over = false;
-      update(document.activeElement);
-    };
-    const focusIn = (e: FocusEvent) => update(e.target as Element);
-    const focusOut = (e: FocusEvent) => update(e.relatedTarget as Element | null);
-    card.addEventListener("pointerenter", enter);
-    card.addEventListener("pointerleave", leave);
-    card.addEventListener("focusin", focusIn);
-    card.addEventListener("focusout", focusOut);
-    return () => {
-      clearTimeout(resume);
-      card.removeEventListener("pointerenter", enter);
-      card.removeEventListener("pointerleave", leave);
-      card.removeEventListener("focusin", focusIn);
-      card.removeEventListener("focusout", focusOut);
-    };
-  }, [flag.still, near]);
   React.useEffect(() => {
     const el = box.current;
     if (!el || near) return;
-    scope.current = el.closest<HTMLElement>(".contact-inquire");
     const strip = el.closest<HTMLElement>(".strip-scroll");
     const root = strip && getComputedStyle(strip).overflowX !== "visible" ? strip : null;
     const scroller: EventTarget = root ?? window;
@@ -130,11 +77,6 @@ export function InquireWall({ items }: { items: WallTile[] }) {
   const tiles = React.useMemo(() => items.map(softItem), [items]);
   if (!near) return <div ref={box} className="h-full w-full" />;
 
-  // `?wall=slow` on a large screen: the tiles a third bigger, half the
-  // speed, and fewer photographs, each at a lower density so the small
-  // file still serves.
-  const k = flag.slow ? 1.35 : 1;
-
   return (
     <DriftWall
       items={tiles}
@@ -142,19 +84,18 @@ export function InquireWall({ items }: { items: WallTile[] }) {
       /* Scaled out so more of the work shows (1.25 to 0.85), and no
          more than 24 photographs loaded for it however wide the
          screen, so it stays light. */
-      limit={flag.slow ? 18 : 24}
+      limit={24}
       /* And the small copies (Julian: lower the resolution, not so it
          shows). The wall is dimmed, tilted, moving and blurred under the
          frosted card, so `softItem` offers only a 160 and a 320 at
          quality 45: at 0.4 a 255px tile takes the 160 on a 1x screen and
          the 320 on a 2x (2026-10-17, was the 320 and 640 at 70). */
-      density={flag.slow ? 0.3 : 0.4}
-      tileWidth={Math.round(300 * scale * k)}
-      tileHeight={Math.round(400 * scale * k)}
-      gap={Math.round(28 * scale * k)}
+      density={0.4}
+      tileWidth={Math.round(300 * scale)}
+      tileHeight={Math.round(400 * scale)}
+      gap={Math.round(28 * scale)}
       /* A third slower (was 24). */
-      speed={16 * scale * (flag.slow ? 0.5 : 1)}
-      hold={hold}
+      speed={16 * scale}
       fade={0}
       dim={1 - tint}
       style={{ "--dw-veil": tint * 0.7 }}

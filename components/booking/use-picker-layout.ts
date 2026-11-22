@@ -14,7 +14,6 @@ type Layout = {
   mstep: "days" | "times";
   held: boolean;
   state: "loading" | "ready" | "fallback";
-  smooth: boolean;
   atStart: boolean;
   shift: (dir: number) => void;
 };
@@ -22,7 +21,7 @@ type Layout = {
 /* The picker on the page (`use-picker.tsx`): its boxes, each card fitted
    to its room, the steps, times and days coming in, and the swipe across
    the days. The effects keep the order they had there. */
-export function usePickerLayout({ step, pick, days, view, anchor, week, month, chosen, mstep, held, state, smooth, atStart, shift }: Layout) {
+export function usePickerLayout({ step, pick, days, view, anchor, week, month, chosen, mstep, held, state, atStart, shift }: Layout) {
   const [stripEl, stripRef] = React.useState<HTMLDivElement | null>(null);
   const [more, setMore] = React.useState(false);
   const root = React.useRef<HTMLDivElement>(null);
@@ -92,10 +91,6 @@ export function usePickerLayout({ step, pick, days, view, anchor, week, month, c
     return () => ro.disconnect();
   }, [stripEl, pick?.date, pick?.min, days, step]);
   const slotsBox = React.useRef<HTMLDivElement>(null);
-  /* `?layout`: the times come in with GSAP, each one once. The CSS rise
-     replayed whenever the list re-rendered, and read as a glitch (Julian). */
-  const [gs] = React.useState(() => typeof location !== "undefined" && new URLSearchParams(location.search).has("layout"));
-  const seen = React.useRef(new WeakSet<Element>());
   const [slotsW, setSlotsW] = React.useState(0);
   /* Watched by whichever box is drawn now: one replaced under the old
      observer read 0 as it left, and the times stacked one to a line under
@@ -167,23 +162,7 @@ export function usePickerLayout({ step, pick, days, view, anchor, week, month, c
       tp.removeAttribute("data-split");
     };
   }, [view, pick?.date, days, slotsW, mstep, held]);
-  React.useLayoutEffect(() => {
-    if (!gs || !slotsBox.current || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const fresh = [...slotsBox.current.querySelectorAll("[data-slot]")].filter((b) => !seen.current.has(b));
-    if (!fresh.length) return;
-    fresh.forEach((b) => seen.current.add(b));
-    withGsap((gsap) => gsap.fromTo(fresh, { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, duration: 0.5, ease: "expo.out", stagger: 0.025, clearProps: "opacity,visibility,transform" }));
-  });
   const at = pick?.start;
-  const lastPick = React.useRef(at);
-  React.useLayoutEffect(() => {
-    const from = lastPick.current;
-    lastPick.current = at;
-    if (!smooth || !from || !at || from === at || !big.current || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const dir = +new Date(at) > +new Date(from) ? 1 : -1;
-    const el = big.current;
-    withGsap((gsap) => gsap.fromTo(el, { yPercent: 18 * dir, filter: "blur(4px)" }, { yPercent: 0, filter: "blur(0px)", duration: 0.45, ease: "expo.out", clearProps: "transform,filter" }));
-  }, [at, smooth]);
   const refit = React.useRef(() => {});
   React.useLayoutEffect(() => {
     const grid = monthGrid.current;
@@ -334,9 +313,8 @@ export function usePickerLayout({ step, pick, days, view, anchor, week, month, c
     onPointerDown: (e) => {
       if (e.pointerType !== "mouse") swipe.current = { x: e.clientX, y: e.clientY, done: false, v: 0, t: e.timeStamp, lx: e.clientX };
     },
-    /* `?smooth`: the days follow the finger once it is clearly
-       sideways, give at the start of the calendar, and a flick or
-       a third of the row turns the week; less springs back. */
+    /* The days follow the finger once it is clearly sideways, give at the start of the calendar,
+       and a flick or a third of the row turns the week; less springs back. */
     onPointerMove: (e) => {
       const s = swipe.current, row = daysBox.current?.firstElementChild as HTMLElement | null;
       if (!s || !row) return;
@@ -404,5 +382,5 @@ export function usePickerLayout({ step, pick, days, view, anchor, week, month, c
     },
   };
 
-  return { stripEl, stripRef, more, setMore, root, v3root, was, showTimes, swipe, daysBox, monthGrid, big, slotsBox, gs, seen, slotsW, setSlotsW, slotsRO, slotsRef, at, lastPick, refit, first, shown, swipeProps };
+  return { stripEl, stripRef, more, setMore, root, v3root, was, showTimes, swipe, daysBox, monthGrid, big, slotsBox, slotsW, setSlotsW, slotsRO, slotsRef, at, refit, first, shown, swipeProps };
 }

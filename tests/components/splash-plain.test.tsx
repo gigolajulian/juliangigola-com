@@ -1,5 +1,4 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { burst } from "@/components/splash/burst-splash";
 import { split } from "@/components/splash/split-splash";
 import { byCodeUnit } from "@/lib/utils";
 
@@ -10,7 +9,7 @@ const LIVE = "https://juliangigola.com/cdn-cgi/image/width=640,quality=85,format
 const frames = [[`${LIVE}/work/nyx/a-w1080.jpg`, `${LIVE}/work/nyx/a-w1080.jpg`], ["/cdn-cgi/image/width=640/work/nyx/b-w1080.jpg", "/cdn-cgi/image/width=640/work/nyx/b-w1080.jpg"]];
 const heroes = { d: [[640, `${LIVE}/work/nyx/hero.jpg`] as [number, string]], l: [[640, `${LIVE}/work/nyx/hero.jpg`] as [number, string]] };
 
-describe.each([["burst", burst], ["split", split]] as const)("%s splash", (name, play) => {
+describe.each([["split", split]] as const)("%s splash", (name, play) => {
   let decodes = 0;
   beforeEach(() => {
     vi.useFakeTimers(); // the opening itself stays parked at its first wait

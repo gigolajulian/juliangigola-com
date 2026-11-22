@@ -61,23 +61,10 @@ export function usePicker({ path, title, className, fallback, v3, onPicked, star
   /** Who booked, for the page that follows. */
   /* `via`: a call taken by video (its Google Meet link) or by phone. */
   const [booked, setBooked] = React.useState({ name: "", email: "", where: "", phone: "", via: "" });
-  /* The orb goes one whole round before the days
-     come in, however fast the times arrive (`ORB_ROUND`, orb.tsx). */
   /* The picker is not drawn while held: the effects that measure it
      re-run on `held`, or they ran on nothing and the week never fitted. */
   const [held, setHeld] = React.useState(true);
-  /* J and G fill while the times load (jg-load.tsx) and let go of the
-     picker themselves; `?loader=orb` keeps the orb and its round. */
-  const [orb, setOrb] = React.useState(false);
-  React.useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setOrb(new URLSearchParams(window.location.search).get("loader") === "orb");
-  }, []);
-  React.useEffect(() => {
-    if (!orb) return;
-    const t = window.setTimeout(() => setHeld(false), ORB_ROUND.composing);
-    return () => window.clearTimeout(t);
-  }, [orb]);
+  /* J and G fill while the times load (jg-load.tsx) and let go of the picker themselves. */
   const jg = <JgLoad done={state === "ready" && !!days} onDone={() => setHeld(false)} className="min-h-[16rem] w-full" />;
   const { view, setView, anchor, setAnchor, pick, setPick, chosen, setChosen, choose, today, week, month, slide, setSlide, shift, mstep, setMstep, switchView, atStart } = usePickerDays(days, startView);
   const arrow = arrowMark();
@@ -91,13 +78,6 @@ export function usePicker({ path, title, className, fallback, v3, onPicked, star
   const [refs, setRefs] = React.useState<FormData | null>(null);
   /* What was typed, put back when the deposit step goes back to the form. */
   const typed = React.useRef<Record<string, string>>({});
-  /* `?smooth`, while Julian looks: each step slides in from the side it
-     comes from (GSAP), the big time rolls to a new pick, and the booked
-     card turns teal. */
-  const smooth = React.useSyncExternalStore(noop, () => new URLSearchParams(location.search).has("smooth"), () => false);
-  React.useEffect(() => {
-    if (smooth) document.documentElement.dataset.smooth = "";
-  }, [smooth]);
   const [error, setError] = React.useState("");
   /* JG V3: a field's one sentence (master `check()`). */
   const [bad, setBad] = React.useState<Record<string, string>>({});
@@ -154,7 +134,7 @@ export function usePicker({ path, title, className, fallback, v3, onPicked, star
     }
   }, [days, pick, chosen, setChosen]);
 
-  const { stripEl, stripRef, more, setMore, root, v3root, was, showTimes, swipe, daysBox, monthGrid, big, slotsBox, gs, seen, slotsW, setSlotsW, slotsRO, slotsRef, at, lastPick, refit, first, shown, swipeProps } = usePickerLayout({ step, pick, days, view, anchor, week, month, chosen, mstep, held, state, smooth, atStart, shift });
+  const { stripEl, stripRef, more, setMore, root, v3root, was, showTimes, swipe, daysBox, monthGrid, big, slotsBox, slotsW, setSlotsW, slotsRO, slotsRef, at, refit, first, shown, swipeProps } = usePickerLayout({ step, pick, days, view, anchor, week, month, chosen, mstep, held, state, atStart, shift });
 
   const book = async (form: FormData) => {
     if (!pick) return;
@@ -258,7 +238,7 @@ export function usePicker({ path, title, className, fallback, v3, onPicked, star
   const heldBar = <button type="button" className="btn fill" disabled>Continue</button>;
   // in the div `V3Steps` puts the shell in, so the shell stays one element as the times come
   const v3plain = (body: React.ReactNode, bar?: React.ReactNode) => <div className="contents">{v3!.shell({ steps: v3steps, at: 1, head: v3paid ? "Book a session" : v3!.name === "Consultation" ? "Book a consultation" : "Book a call", sub: v3sub, body, sum: [], bar })}</div>;
-  return { path, title, className, fallback, v3, onPicked, username, slug, tz, clockHere, here, setHere, length, setLength, needsWhere, setNeedsWhere, opt, setOpt, via, setVia, ask, setAsk, session, setSession, booked, setBooked, days, setDays, state, setState, held, setHeld, orb, setOrb, jg, view, setView, anchor, setAnchor, pick, setPick, arrow, chosen, setChosen, step, setStep, swipeX, wheelGate, stripEl, stripRef, more, setMore, paid, setPaid, deposit, setDeposit, refs, setRefs, typed, smooth, root, v3root, was, error, setError, bad, setBad, blank, setBlank, ok, setOk, handOff, load, lo, hi, open, steps, choose, showTimes, today, week, month, slide, setSlide, swipe, shift, daysBox, mstep, setMstep, switchView, monthGrid, big, slotsBox, gs, seen, slotsW, setSlotsW, slotsRO, slotsRef, at, lastPick, refit, first, shown, atStart, book, grow, refill, busy, okMark, swipeProps, v3paid, v3steps, v3sub, heldBar, v3plain };
+  return { path, title, className, fallback, v3, onPicked, username, slug, tz, clockHere, here, setHere, length, setLength, needsWhere, setNeedsWhere, opt, setOpt, via, setVia, ask, setAsk, session, setSession, booked, setBooked, days, setDays, state, setState, held, setHeld, jg, view, setView, anchor, setAnchor, pick, setPick, arrow, chosen, setChosen, step, setStep, swipeX, wheelGate, stripEl, stripRef, more, setMore, paid, setPaid, deposit, setDeposit, refs, setRefs, typed, root, v3root, was, error, setError, bad, setBad, blank, setBlank, ok, setOk, handOff, load, lo, hi, open, steps, choose, showTimes, today, week, month, slide, setSlide, swipe, shift, daysBox, mstep, setMstep, switchView, monthGrid, big, slotsBox, slotsW, setSlotsW, slotsRO, slotsRef, at, refit, first, shown, atStart, book, grow, refill, busy, okMark, swipeProps, v3paid, v3steps, v3sub, heldBar, v3plain };
 }
 
 type Picker = ReturnType<typeof usePicker>;
