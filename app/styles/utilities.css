@@ -192,8 +192,13 @@
      a second utility or a line of JavaScript. */
   transition-delay: var(--reveal-delay, 0ms);
 
+  /* 0.01, not 0: Chrome never counts a paint at opacity 0 toward LCP, and
+     the layout's <main> is a rise, so the page's first photo did not count
+     until React drew it again. On /book at 412px on slow 4G, LCP went from
+     about 4.2s (the hydration remount) to 2.2s (the first paint). 1% reads
+     as nothing. */
   @starting-style {
-    opacity: 0;
+    opacity: 0.01;
     transform: translateY(0.75rem);
   }
 }
