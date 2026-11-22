@@ -922,6 +922,8 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 /* Two columns on a short screen (18 Pro sideways, 874x402): the photo was a strip under its own caption. Only the picture goes; the studio line and the call and Inquire links stay. Below the base .fr rule, which it has to beat. */
 @media (min-width:801px) and (orientation:landscape) and (max-height:500px){.v3 .f-photo .fr{display:none}}
 .v3 .f-foot{display:none}
+/* The booking wait holds the calendar's height (608px stacked): the Continue bar jumped 470px when it drew (audit 2026-11-22). */
+.v3 .f-wait{min-height:38rem}
 @media (min-width:801px){.v3 .f-photo.over{padding-bottom:0}
 .v3 .f-photo.over .ph{border-radius:4px 4px 0 0}
 /* The mid stop sits behind the name: 60% keeps white over the pale studio wall above 3:1 (booking critique, 2026-11-04). */
@@ -943,6 +945,7 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 .v3 .f-photo.over dl.get dt{color:oklch(1 0 0 / 92%);text-wrap:balance}
 .v3 .f-photo.over dl.get dd{display:none}
 .v3 .flow:has(.f-foot) :is(.f-head>p,.f-body .inc,.f-body .stabs-more){display:none}
+.v3 .f-wait{min-height:44.5rem} /* the calendar's own height beside the photo (713-726px), so the bar under it stays put when it draws */
 .v3 .f-foot{display:flex;flex-direction:column;padding-bottom:18px}
 .v3 .f-foot .f-where{margin:0;padding:0 0 14px;font-size:13px;line-height:1.45;color:var(--mute);text-wrap:balance}
 .v3 .f-foot .stabs-call{display:flex;justify-content:space-between;align-items:center;gap:16px;width:100%;padding:9px 0;border-top:1px solid var(--line);text-decoration:none;white-space:nowrap;font-size:.6875rem;letter-spacing:.06em}

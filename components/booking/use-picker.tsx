@@ -65,7 +65,7 @@ export function usePicker({ path, title, className, fallback, v3, onPicked, star
      re-run on `held`, or they ran on nothing and the week never fitted. */
   const [held, setHeld] = React.useState(true);
   /* J and G fill while the times load (jg-load.tsx) and let go of the picker themselves. */
-  const jg = <JgLoad done={state === "ready" && !!days} onDone={() => setHeld(false)} className="min-h-[16rem] w-full" />;
+  const jg = <JgLoad done={state === "ready" && !!days} onDone={() => setHeld(false)} className="f-wait min-h-[16rem] w-full" />;
   const { view, setView, anchor, setAnchor, pick, setPick, chosen, setChosen, choose, today, week, month, slide, setSlide, shift, mstep, setMstep, switchView, atStart } = usePickerDays(days, startView);
   const arrow = arrowMark();
   const [step, setStep] = React.useState<Step>("pick");

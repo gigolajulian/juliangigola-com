@@ -10,12 +10,17 @@ const BLOCKS = [
   ".mt-about .mt-ab-ph", ".mt-about .mt-wordmark",
 ].join(",");
 
-// in for good: a block that has come into frame stays in
-function arrived(es: IntersectionObserverEntry[], io: IntersectionObserver) {
+/* In for good once it comes into frame. Visible by default: a block is hidden only once the observer has seen it
+   below the fold, so an observer that never calls back leaves the text showing (audit 2026-11-22). */
+export function arrived(es: IntersectionObserverEntry[], io: IntersectionObserver) {
   for (const e of es) {
-    if (!e.isIntersecting) continue;
-    (e.target as HTMLElement).dataset.rv = "in";
-    io.unobserve(e.target);
+    const el = e.target as HTMLElement;
+    // the strip under the -8% margin is on screen already: in, not hidden and then shown
+    const shown = e.isIntersecting || e.boundingClientRect.top < innerHeight;
+    if (shown || el.dataset.rv === "in") {
+      el.dataset.rv = "in";
+      io.unobserve(el);
+    } else el.dataset.rv ??= "";
   }
 }
 
@@ -23,10 +28,7 @@ export function startReveal(root: HTMLElement) {
   if (matches("calm")) return () => {};
   const els = [...root.querySelectorAll<HTMLElement>(BLOCKS)];
   const io = new IntersectionObserver(arrived, { rootMargin: "0px 0px -8% 0px" });
-  for (const el of els) {
-    el.dataset.rv = "";
-    io.observe(el);
-  }
+  for (const el of els) io.observe(el);
   return () => {
     io.disconnect();
     for (const el of els) delete el.dataset.rv;
