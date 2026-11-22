@@ -42,11 +42,11 @@ function Hero() {
   }, []);
   React.useEffect(() => {
     if (calm()) return;
-    /* `?splash=sand` and `?splash=burst` land on the first frame, so the turning waits for them. */
+    /* `?splash=sand` and the split splash land on the first frame, so the turning waits for them. */
     const root = document.documentElement;
     let t: ReturnType<typeof setInterval> | undefined;
     const go = () => (t = setInterval(() => setI((n) => (n + 1) % HERO.length), 6000));
-    if (!["sand", "burst", "split"].includes(root.dataset.splash ?? "") || !root.hasAttribute("data-intro")) go();
+    if (!["sand", "split"].includes(root.dataset.splash ?? "") || !root.hasAttribute("data-intro")) go();
     const mo = new MutationObserver(() => {
       if (!t && !root.hasAttribute("data-intro")) go();
     });
