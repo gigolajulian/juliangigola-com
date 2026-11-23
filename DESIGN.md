@@ -294,19 +294,19 @@ components:
 <!-- impeccable:design-map -->
 Name: Julian Gigola
 Colors: primary: ink-dark oklch(0.955 0.004 80); secondary: accent-dark oklch(0.72 0.095 195); tertiary: live-dark oklch(0.74 0.115 152); neutral: ground-dark oklch(0.145 0.003 70) (+33 more in the sidecar)
-Fonts: Inter Tight 900 (the name, every title, the wordmark, film numbers, service rows, fitted names); IBM Plex Mono (body, labels, buttons, time slots); Geist Mono 600 (the V4 hero tagline only)
+Fonts: Inter Tight 900 (the name, every title, the wordmark, film numbers, service rows, fitted names); IBM Plex Mono (body, labels, buttons, time slots); Geist Mono 500 (the V4 hero tagline only)
 Spacing: gutter-v3 max(16px, env(safe-area-inset-left)), gutter 1.5rem, gutter-wide 2.5rem, rhythm-phone 48px, head-desktop 96px, grid-gap-desktop 72px, page-max 100rem
 Radius: none 0, hair 0.125rem, scroll-thumb 3px, photo 4px, thumb 6px, portrait 8px, card 12px, plate-inner 15px, plate 16px, pill 9999px
 North Star: "The Darkroom Wall"
-Direction: 60 ground, 30 photography, 10 ink and hairlines; teal under 1%, focus and the current step only. References still to pick. Detail and the dated decided list in Full.
+Direction: 60/40, averaged per page (not a floor per screen; the current layouts already meet it, so this guides new work and does not ask for redesigns). Photographs take 60% of a work page (home, /portfolio, projects); text on the near-black ground takes 40%. Booking, contact and legal pages may flip. All color comes from the photos; the one accent (teal, under 1%) marks state only and never fills an area. Check: hide the photos, and the page should read as near-black with type. References still to pick. Detail and the dated decided list in Full.
 Mark: the JG monogram (logo/kit/icon.svg, icon-512.png; app/icon.svg) for the tab, the share image and anything that needs a mark. The eye is retired.
 Motion: three curves (out, move, drawer), six durations (press 100ms, hover 150ms, small 250ms, page 400ms, photo 600ms, show 1000ms) in app/styles/tokens.css. Allowed one-offs: the scroll reveal (0.7s fade, 0.9s rise on cubic-bezier(.16,1,.3,1)) and the header frost (0.4s in, 0.3s out). Values in the sidecar.
-V4: the home (components/v4/home), inner pages (lib/flags/v4pages.ts), booking wait cover (components/splash/jg-cover.ts), header frost on the home (app/styles/navfx.css, components/site/nav-ink.ts); detail in Full under Components.
+V4: the home (components/v4/home), inner pages (lib/flags/v4pages.ts), booking wait cover (components/splash/jg-cover.ts), header frost on every page with a photo under the bar (app/styles/navfx.css, components/site/nav-ink.ts); detail in Full under Components.
 Rules:
 - The One Accent Rule. Teal marks focus, the current step and the picked option, never a fill, a status or decoration.
 - The Tuned Twins Rule. A color added to one theme is added to the other, re-set for that ground's contrast, not mirrored.
-- The Photo Is Always Night Rule. Anything laid on a photograph uses the on-photo set and the scrim, whatever the theme. Exceptions: the V4 hero name and tagline take the theme's ink on a page-color band (.mt-name), and the home header under its frost takes the theme's ink.
-- The Two Registers Rule. Type either shouts (Inter Tight 900, tight, large) or whispers (small mono). Exception: the V4 hero tagline in Geist Mono 600 (.mt-cap).
+- The Photo Is Always Night Rule. Anything laid on a photograph uses the on-photo set and the scrim, whatever the theme. Exceptions: the V4 hero name and tagline take the theme's ink on a page-color band (.mt-name), and the header under its frost takes the theme's ink.
+- The Two Registers Rule. Type either shouts (Inter Tight 900, tight, large) or whispers (small mono). Exception: the V4 hero tagline in Geist Mono 500 (.mt-cap).
 - The One Line Name Rule. "Julian Gigola" sits on one line wherever it appears.
 - The Fit the Line Rule. A name that must hold one line is fitted between a documented floor and ceiling, never wrapped or truncated.
 - The Flat Plate Rule. No drop shadows under content, no inner shine, no glow. Exception: the home film numbers carry a tight dark halo, with no plate behind them.
