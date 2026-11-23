@@ -233,6 +233,54 @@ function pixel(el: HTMLImageElement | HTMLVideoElement, x: number, y: number, hw
   return [unlin(R / k), unlin(G / k), unlin(B / k)];
 }
 
+/* The home intro fills the wall's edge columns with tiles of its own (`.mt-ix i`, intro/index.tsx): a CSS background
+   photo each, in a layer the pointer passes through, so asking what is at a point never finds them. Under them the
+   bar saw the page, and white words sat on a white photo at 2.9:1 (MAC SSH, #1441: home at 390, Menu at y100). So a
+   point is also looked up among those tiles by their boxes, and the tile's photo read as a photo is. */
+const tileImgs = new Map<string, HTMLImageElement>();
+function tileAt(layer: Element, x: number, y: number): HTMLElement | null {
+  for (const t of layer.querySelectorAll<HTMLElement>(":scope > div > i")) {
+    const r = box(t);
+    if (x >= r.left && x <= r.left + r.width && y >= r.top && y <= r.top + r.height) return t;
+  }
+  return null;
+}
+/** A tile's photo at a point, `background-size: cover` at its centre; null with `pending` set while it loads. */
+function tilePixel(t: HTMLElement, x: number, y: number, hw = 0, hh = 0): RGB | null {
+  pending = false;
+  const url = /url\(["']?([^"')]+)["']?\)/.exec(t.style.backgroundImage)?.[1];
+  if (!url) return null;
+  let im = tileImgs.get(url);
+  if (!im) {
+    im = new Image();
+    im.src = url; // the intro loaded these already: from the cache
+    im.decode().then(() => poke(), () => {});
+    tileImgs.set(url, im);
+  }
+  const nw = im.naturalWidth, nh = im.naturalHeight;
+  if (!im.complete || !nw || !nh) {
+    pending = true;
+    return null;
+  }
+  const data = thumb(im);
+  if (!data) return null;
+  const r = box(t), sc = Math.max(r.width / nw, r.height / nh), w = nw * sc, h = nh * sc;
+  const left = r.left + (r.width - w) / 2, top = r.top + (r.height - h) / 2;
+  const cell = (v: number) => Math.min(N - 1, Math.max(0, Math.floor(v * N)));
+  const i0 = cell((x - hw - left) / w), i1 = cell((x + hw - left) / w), j0 = cell((y - hh - top) / h), j1 = cell((y + hh - top) / h);
+  const di = Math.max(1, Math.ceil((i1 - i0 + 1) / 8)), dj = Math.max(1, Math.ceil((j1 - j0 + 1) / 8));
+  let R = 0, G = 0, B = 0, k = 0;
+  for (let j = j0; j <= j1; j += dj)
+    for (let i = i0; i <= i1; i += di) {
+      const q = (j * N + i) * 4;
+      R += lin(data[q]);
+      G += lin(data[q + 1]);
+      B += lin(data[q + 2]);
+      k++;
+    }
+  return [unlin(R / k), unlin(G / k), unlin(B / k)];
+}
+
 /** `?navdbg`: what each look saw, for `window.__navink()` (MAC reads words under 3:1 that pass on Windows). Null otherwise. */
 let dbg: unknown[] | null = null;
 /** Each photo's strength, kept for one look (cleared at the start of the next). */
@@ -242,8 +290,39 @@ type Hit = { at?: (y: number) => RGB | null; unknown?: boolean };
 /** What shows at a point, under the header: the first photo, film or painted box from the top. */
 function under(x: number, y: number, hdr: HTMLElement, page: RGB, hit?: Hit, hw = 0, hh = 0): RGB {
   const list = hits(x, y);
+  const layer = document.querySelector(".mt-ix");
   for (const el of list) {
     if (hdr.contains(el)) continue;
+    // past every photo at the point and down to what holds the intro's tiles: one of those may be painted here
+    if (layer && el.contains(layer)) {
+      const t = tileAt(layer, x, y);
+      if (t) {
+        let o = seen.get(t);
+        if (o === undefined) {
+          // its column's veil (the `b` over the strip, lifted as the intro lands) and the layers above, as for a photo
+          const veil = t.parentElement?.querySelector(":scope > b");
+          o = 1 - (veil ? +getComputedStyle(veil).opacity : 0);
+          for (let n: Element | null = t; n && n !== document.body; n = n.parentElement) o *= +getComputedStyle(n).opacity;
+          seen.set(t, o);
+        }
+        if (o >= 0.08) {
+          const p = tilePixel(t, x, y, hw, hh);
+          dbg?.push({ x: Math.round(x), y: Math.round(y), tile: t.style.backgroundImage.slice(-40, -2), o: +o.toFixed(2), rgb: p?.map(Math.round) ?? null, pending });
+          if (p) {
+            const s = o, mix = (q: RGB) => (s > 0.97 ? q : (q.map((v, i) => v * s + page[i] * (1 - s)) as RGB));
+            if (hit) {
+              const r = box(t);
+              hit.at = (yy) => {
+                const q = yy < r.top || yy > r.top + r.height ? null : tilePixel(t, x, yy, hw, hh);
+                return q && mix(q);
+              };
+            }
+            return mix(p);
+          }
+          if (pending && hit) hit.unknown = true;
+        }
+      }
+    }
     /* A photo's own frame (the .ph tile behind a portfolio or /book image) can come first in the list, through a
        pseudo-element of its own, though its photo is drawn over it: its dark tile is not the ground there (MAC SSH,
        #1431: /book's bright hero read as near black, so the frost never came up and "Book a session" sat at 3.7:1).
