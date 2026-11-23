@@ -46,13 +46,13 @@ export function amountOf(slug: string): number {
   return DEPOSIT[slug] * 100;
 }
 export const CURRENCY = "usd";
-export const KIND = "deposit";
+export const DEPOSIT_KIND = "deposit";
 
 /** Whether a paid intent is one of the site's deposits, not any other payment on the account.
     Any session's amount passes, not only its own slug's: an intent made at the old $100 just
     before a price change must still book, or it sits paid and unbooked. */
 export const isDeposit = (pi: { amount?: number; currency?: string; metadata?: { [k: string]: string } }) =>
-  pi.metadata?.kind === KIND && [...Object.values(DEPOSIT), LEGACY_DEPOSIT].some((d) => d * 100 === pi.amount) && pi.currency === CURRENCY;
+  pi.metadata?.kind === DEPOSIT_KIND && [...Object.values(DEPOSIT), LEGACY_DEPOSIT].some((d) => d * 100 === pi.amount) && pi.currency === CURRENCY;
 /** How old a webhook's timestamp may be before it is treated as a replay. */
 const TOLERANCE_S = 300;
 /** Each paid event's name, as its rule titles it. */
@@ -90,7 +90,7 @@ export function intentForm(b: Booking): { [k: string]: string } {
   for (const [k, v] of Object.entries(b)) if (v) form[`metadata[${k}]`] = v;
   // Marks the site's own intents: the webhook leaves every other payment
   // on the account (invoices, payment links) alone.
-  form["metadata[kind]"] = KIND;
+  form["metadata[kind]"] = DEPOSIT_KIND;
   return form;
 }
 

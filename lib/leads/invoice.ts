@@ -36,11 +36,11 @@ export type InvoiceB = {
 export type Invoice = { no: string; date: string; lines: InvoiceLine[]; paid: number; notes?: string; at: string; b?: InvoiceB; paidAt?: string; unpaid?: boolean; sentAt?: string };
 /** Invoices made before the activity log count as paid: read here, no record rewritten. */
 export const PAID_BEFORE = "2026-11-12";
-export const isPaid = (i: Pick<Invoice, "paidAt" | "unpaid" | "at">) => !!i.paidAt || (!i.unpaid && i.at < PAID_BEFORE);
+export const isSettled = (i: Pick<Invoice, "paidAt" | "unpaid" | "at">) => !!i.paidAt || (!i.unpaid && i.at < PAID_BEFORE);
 /** Design B carries its due date; an invoice from before design B is due 14 days after its date. */
 export const dueOf = (i: Pick<Invoice, "date" | "b">) => i.b?.due ?? new Date(Date.parse(`${i.date}T12:00:00Z`) + 14 * 864e5).toISOString().slice(0, 10);
 /** Unpaid and past its due date on `today` (YYYY-MM-DD, Pacific). */
-export const overdue = (i: Pick<Invoice, "date" | "b" | "paidAt" | "unpaid" | "at">, today: string) => !isPaid(i) && dueOf(i) < today;
+export const overdue = (i: Pick<Invoice, "date" | "b" | "paidAt" | "unpaid" | "at">, today: string) => !isSettled(i) && dueOf(i) < today;
 /** A sent mail's subject or attachment names (`text`) name invoice `no`: "Invoice 1126", "INVOICE 1126-2 - CLIENT.pdf". Never 1126 inside 1126-2 or 11260, and only beside the word invoice, so "1126 Main St" is not one. */
 export const namesInvoice = (text: string, no: string) => /invoice/i.test(text) && /^[\d-]+$/.test(no) && new RegExp(`(?<![\\d-])${no}(?!\\d|-\\d)`).test(text);
 /** His own details on every invoice. Kept sealed in KV, never in the code: the repo is public. Bank and tax lines are design B's. */

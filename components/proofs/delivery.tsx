@@ -19,10 +19,11 @@ import { useClock } from "@/components/proofs/use-clock";
 import { closingSoon, isEmail, modelLabel, type PublicDelivery } from "@/lib/proofs/proof";
 import { ProofCursor } from "@/components/proofs/cursor";
 import { ProofWall } from "@/components/proofs/wall";
-import { noSubscribe } from "@/lib/utils";
+import { noSubscribe, pad } from "@/lib/utils";
 
 const size = (b: number) => (b >= 1e9 ? `${(b / 1e9).toFixed(1)} GB` : `${Math.max(1, Math.round(b / 1e6))} MB`);
-const pad = (i: number) => String(i + 1).padStart(2, "0");
+/** A frame's place, counted from 1: index 0 is "01". */
+const ordinal = (i: number) => pad(i + 1);
 
 /** The delivery's door: the cover photo beside (or above) a header, a line and the email. */
 function SplitGate({ cover, sub, subhead, onEnter }: { cover: string; sub: string; subhead?: string | null; onEnter: (email: string) => void }) {
@@ -223,7 +224,7 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
                       <span key={f.id} className="dlv-mini">
                         {/* eslint-disable-next-line @next/next/no-img-element -- private final, 800px copy */}
                         <img src={`${src(f)}&w=800`} alt="" loading={i < 6 ? "eager" : "lazy"} draggable={false} />
-                        <i className="dlv-mn">{pad(fs.indexOf(f))}</i>
+                        <i className="dlv-mn">{ordinal(fs.indexOf(f))}</i>
                       </span>
                     ))}
                   </button>
@@ -245,7 +246,7 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
                 {/* eslint-disable-next-line @next/next/no-img-element -- private finals from the Worker, not the image CDN */}
                 <img src={`${src(f)}&w=800`} alt="" loading={i < 8 ? "eager" : "lazy"} width={f.w || undefined} height={f.h || undefined} draggable={false} />
                 <button type="button" className="proof-open" aria-label={`Open photo ${i + 1}`} onClick={() => setOpen(i)} />
-                <span className="proof-no">{pad(i)}{initial.labels ? ` · ${f.file}` : ""}</span>
+                <span className="proof-no">{ordinal(i)}{initial.labels ? ` · ${f.file}` : ""}</span>
               </div>
             ))}
           </div>
@@ -267,7 +268,7 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
       {open !== null && shown[open] ? (
         <div className="proof-lb" role="dialog" aria-modal="true" aria-label={`Photo ${open + 1}`}>
           <div className="proof-lt">
-            <span>{one ? `${modelLabel(one[0])} · ` : ""}{pad(open)} / {shown.length}</span>
+            <span>{one ? `${modelLabel(one[0])} · ` : ""}{ordinal(open)} / {shown.length}</span>
             <button type="button" className="proof-close" onClick={() => setOpen(null)}>Close</button>
           </div>
           <div

@@ -13,14 +13,14 @@ import { Badge } from "@astryxdesign/core/Badge";
 import { Selector } from "@astryxdesign/core/Selector";
 import { Text } from "@astryxdesign/core/Text";
 import { MetadataList, MetadataListItem } from "@astryxdesign/core/MetadataList";
-import { api, type Row } from "@/lib/proofs/desk";
+import { proofApi, type ProofRow } from "@/lib/proofs/desk";
 import { THUMB_W, type ViewerEvent } from "@/lib/proofs/proof";
 import { errorText, stampPT } from "@/lib/leads/lead-desk";
 
 const csvCell = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
 const secs = (n: number) => (n < 90 ? `${Math.round(n)} s` : `${Math.round(n / 60)} min`);
 
-export function ActivityDesk({ p, changed }: { p: Row; changed: () => void }) {
+export function ActivityDesk({ p, changed }: { p: ProofRow; changed: () => void }) {
   const people = Object.entries(p.viewers ?? {}).sort((a, b) => b[1].last.localeCompare(a[1].last));
   const [who, setWho] = React.useState(people[0]?.[0] ?? "");
   const [note, setNote] = React.useState<string | null>(null);
@@ -46,7 +46,7 @@ export function ActivityDesk({ p, changed }: { p: Row; changed: () => void }) {
   const forget = async () => {
     if (!confirm(`Forget ${email}'s visits to "${p.name}"? They leave this Activity and Leads. Sent selects stay.`)) return;
     try {
-      await api({ method: "POST", body: JSON.stringify({ action: "forget", token: p.token, email }) });
+      await proofApi({ method: "POST", body: JSON.stringify({ action: "forget", token: p.token, email }) });
       setNote(`${email} forgotten.`);
       changed();
     } catch (e) {

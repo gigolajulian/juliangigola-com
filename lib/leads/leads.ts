@@ -1,9 +1,9 @@
-import { balance, isPaid, namesInvoice, type Invoice } from "./invoice";
+import { balance, isSettled, namesInvoice, type Invoice } from "./invoice";
 
 /* ── leads: one record per person ─────────────────────────────────
  * Every inquiry, call and booking
- * in one list, with a stage on each person. Until now one person who
- * wrote, then booked a call, then paid was two or three unrelated rows.
+ * in one list, with a stage on each person, so one person who wrote,
+ * then booked a call, then paid is one record.
  *
  * So beside the raw rows (`msg:`, still written first and kept as the
  * log) the INBOX namespace holds one `lead:<id>` per person, sealed with
@@ -18,9 +18,9 @@ import { balance, isPaid, namesInvoice, type Invoice } from "./invoice";
  * the rest by hand (Replied, Quoted, Shot, Invoiced, Selecting, Delivered, Lost).
  *
  * The record's summary rides sealed in KV metadata, so the list costs one
- * request. Pure functions here; `recordLead` is the one place
- * that touches the binding, and it never throws: the raw row is already
- * stored, and a lead that failed to update must not fail the form.
+ * request. This file is pure functions. `recordLead` (`lib/leads/lead-store.ts`)
+ * is the one place that touches the binding, and it never throws: the raw row is
+ * already stored, and a lead that failed to update must not fail the form.
  * ─────────────────────────────────────────────────────────────── */
 
 export const STAGES = ["Inquiry", "Replied", "Call booked", "Quoted", "Confirmed", "Shot", "Invoiced", "Selecting", "Delivered", "Lost"] as const;
@@ -279,7 +279,7 @@ export function fold(lead: Lead | null, email: string, c: Change): Lead {
 
   // A payment that is not a deposit settles the invoice it names, or the one unpaid invoice of exactly that balance.
   if (event.kind === "payment" && c.settles && event.amount && next.invoices?.length) {
-    const open = next.invoices.filter((v) => !isPaid(v));
+    const open = next.invoices.filter((v) => !isSettled(v));
     const same = open.filter((v) => Math.abs(balance(v) - event.amount!) < 0.005);
     const hit = (c.invoiceNo && open.find((v) => v.no === c.invoiceNo)) || (same.length === 1 ? same[0] : undefined);
     if (hit) next.invoices = next.invoices.map((v) => (v === hit ? { ...v, paidAt: event.at, unpaid: undefined } : v));

@@ -130,11 +130,11 @@ describe("the log", () => {
 
 describe("old invoices", () => {
   it("count as paid before the cut-off unless marked unpaid; newer ones wait for a payment", async () => {
-    const { isPaid, PAID_BEFORE } = await import("@/lib/leads/invoice");
-    expect(isPaid({ at: "2026-10-01T00:00:00Z" })).toBe(true);
-    expect(isPaid({ at: "2026-10-01T00:00:00Z", unpaid: true })).toBe(false);
-    expect(isPaid({ at: `${PAID_BEFORE}T10:00:00Z` })).toBe(false);
-    expect(isPaid({ at: `${PAID_BEFORE}T10:00:00Z`, paidAt: "x" })).toBe(true);
+    const { isSettled, PAID_BEFORE } = await import("@/lib/leads/invoice");
+    expect(isSettled({ at: "2026-10-01T00:00:00Z" })).toBe(true);
+    expect(isSettled({ at: "2026-10-01T00:00:00Z", unpaid: true })).toBe(false);
+    expect(isSettled({ at: `${PAID_BEFORE}T10:00:00Z` })).toBe(false);
+    expect(isSettled({ at: `${PAID_BEFORE}T10:00:00Z`, paidAt: "x" })).toBe(true);
   });
 });
 

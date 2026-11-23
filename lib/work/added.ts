@@ -21,7 +21,7 @@
 // and is transpiled outside the app's path mapping.
 import raw from "../../content/projects.json";
 import type { Bts, Copy, Credit, Frame, Section } from "../work-types";
-import { isRecord } from "../json";
+import { contentChecks, isRecord } from "../json";
 
 export type AddedProject = {
   slug: string;
@@ -37,11 +37,7 @@ export type AddedProject = {
   images: Frame[];
 };
 
-const fail = (path: string, wanted: string, got: unknown): never => {
-  throw new Error(
-    `content/projects.json: ${path} should be ${wanted}, got ${JSON.stringify(got) ?? "undefined"}`,
-  );
-};
+const { fail, str } = contentChecks("content/projects.json");
 
 /** An optional section: absent is empty, anything else must be an object. */
 const optRecord = (v: unknown, path: string): Record<string, unknown> => {
@@ -57,11 +53,6 @@ const optArray = (v: unknown, path: string): unknown[] => {
 /** What a slug is: it goes into routes, directory names and redirects. */
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
-
-const str = (v: unknown, path: string): string =>
-  typeof v === "string" && v.trim() !== ""
-    ? v
-    : fail(path, "a non-empty string", v);
 
 /** Alt may legitimately be empty — 1,084 harvested frames have none. */
 const text = (v: unknown, path: string): string =>

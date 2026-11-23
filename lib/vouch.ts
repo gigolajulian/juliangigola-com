@@ -1,5 +1,6 @@
 import { REPO } from "@/lib/admin/admin-github";
 import { json } from "@/lib/http";
+import { sha256Hex } from "@/lib/utils";
 
 /* ── the key the editor already has ───────────────────────────────
  * Whoever can push to the repository publishes the site, so a GitHub token
@@ -21,11 +22,8 @@ import { json } from "@/lib/http";
 const VOUCHED_MS = 5 * 60 * 1000;
 const vouched = new Map<string, number>();
 
-const sha256 = async (s: string) =>
+const sha256Bytes = async (s: string) =>
   new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s)));
-
-export const digest = async (s: string) =>
-  [...(await sha256(s))].map((b) => b.toString(16).padStart(2, "0")).join("");
 
 /**
  * The two kinds of token /admin is set up with: a fine-grained one (what its
@@ -54,7 +52,7 @@ const ask = (token: string, path = "", init: RequestInit = {}) =>
 async function vouch(token: string): Promise<boolean> {
   const classic = CLASSIC.test(token);
   if (!classic && !FINE.test(token)) return false;
-  const id = await digest(token);
+  const id = await sha256Hex(token);
   const until = vouched.get(id);
   if (until && until > Date.now()) return true;
 
@@ -115,7 +113,7 @@ export function authorised(request: Request, expected?: string) {
 
 async function same(given?: string | null, expected?: string) {
   if (!expected || !given) return false;
-  const [a, b] = await Promise.all([sha256(given), sha256(expected)]);
+  const [a, b] = await Promise.all([sha256Bytes(given), sha256Bytes(expected)]);
 
   let diff = a.length ^ b.length;
   for (let i = 0; i < a.length; i++) diff |= a[i] ^ b[i];

@@ -15,19 +15,19 @@ import { Badge } from "@astryxdesign/core/Badge";
 import { Divider } from "@astryxdesign/core/Divider";
 import { canonical } from "@/lib/leads/lead-crypto";
 import { dayLabel } from "@/lib/leads/lead-desk";
-import { pastCloseDate, type Row } from "@/lib/proofs/desk";
+import { pastCloseDate, type ProofRow } from "@/lib/proofs/desk";
 import { stage } from "@/lib/proofs/proof";
 import { Timeline } from "@/components/proofs/timeline";
 
 /** Where a gallery stands, in one word, and how loud its badge is. */
-function state(p: Row): { label: string; variant: "success" | "blue" | "gray" } {
+function state(p: ProofRow): { label: string; variant: "success" | "blue" | "gray" } {
   if (p.deliveredAt) return p.firstDownloadAt ? { label: "Downloaded", variant: "success" } : { label: "Delivered", variant: "blue" };
   const s = stage(p);
   return { label: s, variant: p.submittedAt ? "blue" : "gray" };
 }
 
 /** What it is and when things happened: "Proofs · 48 frames · sent Nov 13 · opened 3 times". */
-function facts(p: Row, lead: string): string {
+function facts(p: ProofRow, lead: string): string {
   const n = (k: number, one: string) => `${k} ${one}${k === 1 ? "" : "s"}`;
   const parts = p.deliveredAt
     ? ["Finals", n(p.finals?.length ?? 0, "photo"), `delivered ${dayLabel(p.deliveredAt)}`, p.firstDownloadAt ? `downloaded ${dayLabel(p.firstDownloadAt)}` : null]
@@ -37,7 +37,7 @@ function facts(p: Row, lead: string): string {
   return parts.filter(Boolean).join(" · ");
 }
 
-export function Galleries({ galleries, lead, open }: { galleries: Row[]; lead: string; open: (token?: string) => void }) {
+export function Galleries({ galleries, lead, open }: { galleries: ProofRow[]; lead: string; open: (token?: string) => void }) {
   return (
     <VStack gap={3}>
       <HStack gap={2} vAlign="center">

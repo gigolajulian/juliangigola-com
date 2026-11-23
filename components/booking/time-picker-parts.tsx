@@ -61,18 +61,6 @@ export const clock = (m: number): [string, string] => {
   return [`${((h + 11) % 12) + 1}:${pad(m % 60)}`, h % 24 < 12 ? "AM" : "PM"];
 };
 
-/* How far the picker runs past its own padding. Its scrollHeight missed
-   the bar running into the bottom padding, and Confirm sat on the card's
-   edge (Julian). Offsets, not rects, so a zoomed page measures true. */
-export const overflowOf = (tp: HTMLElement) => {
-  const bar = tp.querySelector<HTMLElement>(":scope > .sticky");
-  const end = tp.clientHeight - parseFloat(getComputedStyle(tp).paddingBottom);
-  // Where the picker grows with its times (a service page's call), the
-  // box around it is what clips, so its overflow counts too.
-  const host = tp.parentElement;
-  return Math.max(tp.scrollHeight - tp.clientHeight, host ? host.scrollHeight - host.clientHeight : 0, bar ? Math.ceil(bar.offsetTop + bar.offsetHeight - end - 1) : 0); // 1px: offsets round
-};
-
 export type Step = "pick" | "form" | "sending" | "check" | "pay" | "done";
 /** Which of the three steps (pick, details, pay) each step is, in order; the progress marks handle "done" where they differ. */
 export const STEP_AT: Record<Step, number> = { pick: 0, form: 1, sending: 1, check: 1, pay: 2, done: 3 };

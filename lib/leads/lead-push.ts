@@ -1,6 +1,7 @@
 import { send, type Push, type Subscription } from "./web-push";
 import type { Lead, LeadEvent } from "./leads";
 import type { InboxKV as KV } from "@/lib/kv";
+import { sha256Hex } from "@/lib/utils";
 
 /* ── the lead desk's devices ──────────────────────────────────────
  * Each device that turned notifications on (`components/leads/setup-panels.tsx`)
@@ -11,8 +12,8 @@ import type { InboxKV as KV } from "@/lib/kv";
  * ─────────────────────────────────────────────────────────────── */
 
 
-const keyOf = async (endpoint: string) =>
-  `push:${[...new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(endpoint)))].slice(0, 12).map((b) => b.toString(16).padStart(2, "0")).join("")}`;
+// 12 bytes of the hash: 24 hex.
+const keyOf = async (endpoint: string) => `push:${(await sha256Hex(endpoint)).slice(0, 24)}`;
 
 export const subscribe = async (kv: KV, sub: Subscription) => kv.put(await keyOf(sub.endpoint), JSON.stringify(sub));
 export const unsubscribe = async (kv: KV, endpoint: string) => kv.delete(await keyOf(endpoint));

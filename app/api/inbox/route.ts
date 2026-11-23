@@ -17,6 +17,7 @@ import { bodyOf, json, NO_STORE } from "@/lib/http";
 import { parseOr } from "@/lib/json";
 import { patchLead } from "@/lib/leads/lead-patch";
 import { secretJson } from "@/lib/secrets";
+import { sha256Hex } from "@/lib/utils";
 
 /** Where his reply templates live: not personal data, so plain JSON. */
 const TEMPLATES_KEY = "leads:templates";
@@ -282,8 +283,7 @@ export async function PATCH(request: Request) {
     if (!seal) return noSeal();
     const photo = given.invoicePhoto;
     if (!photo.startsWith("data:image/jpeg;base64,") || photo.length > 4_000_000) return json({ error: "The photo must be a JPEG under 3 MB." }, 400);
-    const hash = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(photo)));
-    const key = `invoice-photo:${[...hash.slice(0, 16)].map((b) => b.toString(16).padStart(2, "0")).join("")}`;
+    const key = `invoice-photo:${(await sha256Hex(photo)).slice(0, 32)}`;
     if (!(await gate.inbox.get(key))) await gate.inbox.put(key, await seal.seal(photo));
     return json({ key });
   }

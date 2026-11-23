@@ -7,7 +7,7 @@
 
 import { TZ } from "../booking/booking-rules";
 import type { MasterEntry } from "./activity-log";
-import { balance, isPaid, usdB } from "./invoice";
+import { balance, isSettled, usdB } from "./invoice";
 import type { Lead, LeadEvent } from "./leads";
 
 const day = (t: number) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, month: "short", day: "numeric" }).format(new Date(t));
@@ -31,7 +31,7 @@ export function weeklyMail(all: (Lead & { id?: string })[], master: MasterEntry[
   const cancelled = of("cancel");
   const today = ymd(now);
   const stuck = leads.filter((l) => !l.archivedAt && l.flags?.includes("stuck"));
-  const overdue = leads.flatMap((l) => (l.invoices ?? []).filter((v) => !isPaid(v) && v.b?.due && v.b.due < today).map((v) => ({ l, v })));
+  const overdue = leads.flatMap((l) => (l.invoices ?? []).filter((v) => !isSettled(v) && v.b?.due && v.b.due < today).map((v) => ({ l, v })));
 
   const block = (title: string, rows: string[]) => (rows.length ? [title, ...rows, ""] : []);
   const lines = [

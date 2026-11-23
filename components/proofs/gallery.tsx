@@ -337,7 +337,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
     if (email) post({ action: "track", email, kind: "review" }).catch(() => {});
   };
 
-  const pad = (i: number) => String(i + 1).padStart(3, "0");
+  const ordinal = (i: number) => String(i + 1).padStart(3, "0");
   const closes = initial.closesAt ? new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: "America/Los_Angeles" }).format(new Date(initial.closesAt)) : null;
   // The last days say so. Read after mount: the server and the phone can disagree near midnight.
   const clock = useClock();
@@ -442,7 +442,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
                 <div key={id}>
                   {/* eslint-disable-next-line @next/next/no-img-element -- private frame */}
                   <img src={thumb(id)} alt={`Frame ${(byId.get(id) ?? 0) + 1}`} />
-                  <i>{pad(byId.get(id) ?? 0)}</i>
+                  <i>{ordinal(byId.get(id) ?? 0)}</i>
                 </div>
               ))}
             </div>
@@ -516,7 +516,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
                     />
                     {/* The photo opens; the ring picks. */}
                     <button type="button" className="proof-open" aria-label={`Open frame ${i + 1}`} onClick={() => setOpen(i)} />
-                    <span className="proof-no">{pad(i)}{f.file ? ` · ${f.file}` : ""}</span>
+                    <span className="proof-no">{ordinal(i)}{f.file ? ` · ${f.file}` : ""}</span>
                     <button type="button" className="proof-mark" aria-pressed={at >= 0} aria-label={`Select frame ${i + 1}`} onClick={() => toggle(f.id)}>
                       <i>{at >= 0 ? at + 1 : ""}</i>
                     </button>
@@ -545,7 +545,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
                     </button>
                     <div>
                       <p className="proof-fn">
-                        {pad(i)}
+                        {ordinal(i)}
                       </p>
                     </div>
                     <button type="button" className="proof-rm" aria-label={`Remove frame ${i + 1}`} onClick={() => toggle(id)}>
@@ -600,7 +600,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
         <div className="proof-lb" ref={overlay} role="dialog" aria-modal="true" aria-label={`Frame ${open + 1}`}>
           <div className="proof-lt">
             <span>
-              {pad(open)} / {frames.length}
+              {ordinal(open)} / {frames.length}
             </span>
             <button type="button" className="proof-close" onClick={() => setOpen(null)}>
               Close
@@ -695,7 +695,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
               <div key={id}>
                 {/* eslint-disable-next-line @next/next/no-img-element -- private frame */}
                 <img src={thumb(id)} alt={`Frame ${(byId.get(id) ?? 0) + 1}`} />
-                <i>{pad(byId.get(id) ?? 0)}</i>
+                <i>{ordinal(byId.get(id) ?? 0)}</i>
               </div>
             ))}
           </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { pad } from "@/lib/utils";
 
 /* ── the legal page ───────────────────────────────────────────────
  * The terms and the privacy policy. Each document reads its clauses off its
@@ -27,7 +28,6 @@ const dated = (iso: string) =>
     timeZone: "UTC",
   });
 
-const two = (n: number) => String(n).padStart(2, "0");
 
 /** One document: its contents to the left, its clauses in full to the right. Outside the page it draws nothing. */
 export function LegalColumn({
@@ -62,7 +62,7 @@ export function LegalColumn({
           {clauses.map((c) => (
             <li key={c.id}>
               <a href={`#${c.id}`}>
-                <span className="mute">{two(c.n)}</span>
+                <span className="mute">{pad(c.n)}</span>
                 {c.title}
               </a>
             </li>
@@ -74,7 +74,7 @@ export function LegalColumn({
           <article key={c.id} id={c.id} className="lg-clause">
             <p className="lbl mute">
               {c.n === 1 ? label : null /* the part's name once, over its first clause (audit 2026-11-19) */}
-              <span>{two(c.n)}</span>
+              <span>{pad(c.n)}</span>
             </p>
             <h3>{c.title}</h3>
             <div className="lg-text">{c.body}</div>

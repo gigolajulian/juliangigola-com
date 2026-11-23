@@ -208,7 +208,7 @@ export const checkYou = (name: string, email: string) => {
 
 /* Dates and times the way the master prints them. */
 export const dlabel = (t: Date) => t.toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short" });
-export const fmt = (m: number) => {
+export const clockLabel = (m: number) => {
   const h = Math.floor(m / 60) % 24;
   return `${((h + 11) % 12) + 1}:${pad(m % 60)} ${h < 12 ? "AM" : "PM"}`;
 };

@@ -31,7 +31,7 @@ import { Slider } from "@astryxdesign/core/Slider";
 import { KEY_STORE, saveAdminKey, TOKEN_STORE } from "@/lib/admin/admin-github";
 import { useSiteThemeRead } from "@/lib/site-theme";
 import { SignIn } from "@/components/leads/setup";
-import { api, cardCrop, pastCloseDate, cropAt, status, type Row } from "@/lib/proofs/desk";
+import { proofApi, cardCrop, pastCloseDate, cropAt, proofStatus, type ProofRow } from "@/lib/proofs/desk";
 import { ActivityDesk } from "@/components/proofs/activity";
 import { Timeline } from "@/components/proofs/timeline";
 import { useClock } from "@/components/proofs/use-clock";
@@ -40,8 +40,8 @@ import { extras, publicId, remindState, THUMB_W, type CardCrop } from "@/lib/pro
 
 const CLASSIC = "/admin";
 // The small copy the client's grid uses: every frame on the desk is a thumbnail. Once delivered the proof copies are gone: the finals' small copies stand in.
-const frame = (p: Row, id: string) => (p.deliveredAt ? `/delivery/${publicId(p)}/f/${id}?w=${THUMB_W}` : `/proof/${p.token}/f/${id}?w=${THUMB_W}`);
-const first = (p: Row) => (p.deliveredAt ? p.finals?.[0] : p.frames[0]);
+const frame = (p: ProofRow, id: string) => (p.deliveredAt ? `/delivery/${publicId(p)}/f/${id}?w=${THUMB_W}` : `/proof/${p.token}/f/${id}?w=${THUMB_W}`);
+const first = (p: ProofRow) => (p.deliveredAt ? p.finals?.[0] : p.frames[0]);
 
 function Tile({ k, v }: { k: string; v: string }) {
   return (
@@ -57,13 +57,13 @@ function Tile({ k, v }: { k: string; v: string }) {
 /** `embedded`: drawn inside the leads desk (its Theme and nav), with no shell of its own. */
 /** `initial`: a gallery's token to open on, from a lead's Galleries section. */
 export function ProofsDesk({ embedded = false, initial }: { embedded?: boolean; initial?: string } = {}) {
-  const [list, setList] = React.useState<Row[] | null>(null);
+  const [list, setList] = React.useState<ProofRow[] | null>(null);
   const [error, setError] = React.useState<string | null>(null);
   const [sel, setSel] = React.useState<string | null>(initial ?? null);
   const [making, setMaking] = React.useState(false);
   const [wide, setWide] = React.useState(false);
   const load = React.useCallback(() => {
-    api<{ proofs: Row[] }>({ query: "?list" }).then((o) => setList(o.proofs)).catch((e: unknown) => setError(loadError(e)));
+    proofApi<{ proofs: ProofRow[] }>({ query: "?list" }).then((o) => setList(o.proofs)).catch((e: unknown) => setError(loadError(e)));
   }, []);
   React.useEffect(load, [load]);
   // Same as the leads desk: follow html[data-theme], light only when it says light, read before Theme mounts.
@@ -129,7 +129,7 @@ export function ProofsDesk({ embedded = false, initial }: { embedded?: boolean; 
             startContent={<Thumbnail src={first(p) ? frame(p, first(p)!.id) : undefined} alt="" label={p.name} />}
             label={p.name}
             description={[`${p.frames.length} frames`, p.finals?.length ? `${p.finals.length} finals` : null, p.viewers ? ((n) => `${n} ${n === 1 ? "email" : "emails"}`)(Object.keys(p.viewers).length) : null, p.sentAt ? `sent ${stampPT(p.sentAt)}` : null].filter(Boolean).join(" · ")}
-            endContent={<Badge label={status(p)} variant={p.submittedAt && !p.pulledAt ? "blue" : "gray"} />}
+            endContent={<Badge label={proofStatus(p)} variant={p.submittedAt && !p.pulledAt ? "blue" : "gray"} />}
           />
         ))}
       </List>
@@ -170,7 +170,7 @@ function NewGallery({ done }: { done: (token?: string) => void }) {
   const [note, setNote] = React.useState<string | null>(null);
   const create = async () => {
     try {
-      const o = await api<{ token: string }>({ method: "POST", body: JSON.stringify({ action: "create", name, email }) });
+      const o = await proofApi<{ token: string }>({ method: "POST", body: JSON.stringify({ action: "create", name, email }) });
       done(o.token);
     } catch (e) {
       setNote(errorText(e));
@@ -192,7 +192,7 @@ function NewGallery({ done }: { done: (token?: string) => void }) {
   );
 }
 
-function Gallery({ p, changed, onBack, gone }: { p: Row; changed: () => void; onBack?: () => void; gone: () => void }) {
+function Gallery({ p, changed, onBack, gone }: { p: ProofRow; changed: () => void; onBack?: () => void; gone: () => void }) {
   const [note, setNote] = React.useState<string | null>(null);
   const [preview, setPreview] = React.useState<string | null>(null);
   const [email, setEmail] = React.useState(p.email ?? "");
@@ -225,7 +225,7 @@ function Gallery({ p, changed, onBack, gone }: { p: Row; changed: () => void; on
   const act = async (body: Record<string, unknown>, method = "POST", done?: string) => {
     setNote(null);
     try {
-      await api({ method, body: JSON.stringify({ token: p.token, ...body }) });
+      await proofApi({ method, body: JSON.stringify({ token: p.token, ...body }) });
       if (done) setNote(done);
       setPreview(null);
       changed();
@@ -235,7 +235,7 @@ function Gallery({ p, changed, onBack, gone }: { p: Row; changed: () => void; on
   };
   const showPreview = async () => {
     try {
-      const o = await api<{ html: string; subject: string }>({ query: `?preview=${p.token}` });
+      const o = await proofApi<{ html: string; subject: string }>({ query: `?preview=${p.token}` });
       setPreview(o.html);
       setSubject(o.subject);
     } catch (e) {
@@ -245,7 +245,7 @@ function Gallery({ p, changed, onBack, gone }: { p: Row; changed: () => void; on
   const showReminder = async () => {
     setNote(null);
     try {
-      setReminder(await api<{ html: string; subject: string; to: string; cc: string[] }>({ query: `?remind=${p.token}` }));
+      setReminder(await proofApi<{ html: string; subject: string; to: string; cc: string[] }>({ query: `?remind=${p.token}` }));
     } catch (e) {
       setNote(errorText(e));
     }
@@ -268,7 +268,7 @@ function Gallery({ p, changed, onBack, gone }: { p: Row; changed: () => void; on
   const close = async () => {
     if (!confirm(`Close the draft "${p.name}"? Its web previews are removed. Nothing in Lightroom changes.`)) return;
     try {
-      await api({ method: "DELETE", query: `?token=${p.token}` });
+      await proofApi({ method: "DELETE", query: `?token=${p.token}` });
       gone();
     } catch (e) {
       setNote(errorText(e));
@@ -281,7 +281,7 @@ function Gallery({ p, changed, onBack, gone }: { p: Row; changed: () => void; on
       <VStack gap={2}>
         <HStack gap={2} vAlign="center">
           <Heading level={2}>{p.name}</Heading>
-          <Badge label={status(p)} variant={p.submittedAt ? "blue" : "gray"} />
+          <Badge label={proofStatus(p)} variant={p.submittedAt ? "blue" : "gray"} />
         </HStack>
         <Timeline p={p} />
         {remind && remind.state !== "never" ? (
@@ -416,7 +416,7 @@ function Gallery({ p, changed, onBack, gone }: { p: Row; changed: () => void; on
 }
 
 /** The link preview (`shareCard`): which frame, and where the crop sits on it. Unset is the first frame, auto-cropped. */
-function LinkPreview({ p, save }: { p: Row; save: (card: CardCrop | null) => Promise<void> }) {
+function LinkPreview({ p, save }: { p: ProofRow; save: (card: CardCrop | null) => Promise<void> }) {
   const f = p.frames.find((x) => x.id === p.card?.id) ?? p.frames[0];
   const [at, setAt] = React.useState(() => (f && p.card?.id === f.id ? cropAt(f, p.card) : 0.5));
   // Behind a button: the card is drawn on first fetch, so nothing loads until he asks.

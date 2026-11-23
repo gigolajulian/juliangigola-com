@@ -18,3 +18,12 @@ export const byCodeUnit = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0)
 
 /** A `useSyncExternalStore` subscribe for a value that never changes after hydration: the server snapshot first, the client one after. */
 export const noSubscribe = () => () => {};
+
+/** Two digits, zero-padded: 7 is "07". */
+export const pad = (n: number) => String(n).padStart(2, "0");
+
+/** Lowercase hex SHA-256 of the text's UTF-8 bytes. crypto.subtle, so it runs in Workers, browsers and Node. */
+export async function sha256Hex(text: string): Promise<string> {
+  const d = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text)));
+  return [...d].map((b) => b.toString(16).padStart(2, "0")).join("");
+}

@@ -1,6 +1,7 @@
 import Image from "next/image";
 import type { Bts, Frame } from "@/lib/work-types";
 import { BtsClip } from "@/components/bts/bts-clip";
+import { pad } from "@/lib/utils";
 
 /* Behind the scenes: the plate that names who shot it, and the grid of
    frames. On a project page they sit after the last frame, before the end
@@ -10,7 +11,6 @@ import { BtsClip } from "@/components/bts/bts-clip";
    (the files stay in color); clips keep their color and hold on their
    poster until hovered or tapped (`bts-clip.tsx`). */
 
-const pad = (n: number) => String(n).padStart(2, "0");
 
 /** "04 frames · 01 clip": photos and clips counted apart, an empty kind left out. */
 const count = (bts: Bts) => {

@@ -8,8 +8,6 @@ import type { SHOOT_TYPES } from "@/lib/inbox";
 /** A photo with its caption: `r` is height / width. */
 export type HomeFrame = { src: string; name: string; meta: string; slug: string; r: number };
 export type HomeFilm = { id: string; title: string; kind: string; client: string; poster: string | null; href: string; preview?: string; file?: string };
-/** A count as two digits: 01, 02. */
-export const pad = (n: number) => String(n).padStart(2, "0");
 
 /** Where each run of HomeData.extras goes: 0-15 the side columns (4 a column), 16-21 rows five and six of the locked columns,
     22-29 those rows of the side columns, 30 on the intro pool. */

@@ -35,10 +35,10 @@ import { NumberInput } from "@astryxdesign/core/NumberInput";
 import { ProgressBar } from "@astryxdesign/core/ProgressBar";
 import { Kbd } from "@astryxdesign/core/Kbd";
 import { References } from "@/components/admin/admin-inbox";
-import { api as proofApi, type Row as ProofRow } from "@/lib/proofs/desk";
+import { proofApi, type ProofRow } from "@/lib/proofs/desk";
 import { InvoiceRow, InvoiceSheetB } from "@/components/leads/invoice";
 import { ContractBlock } from "@/components/leads/contract";
-import { isPaid } from "@/lib/leads/invoice";
+import { isSettled } from "@/lib/leads/invoice";
 import { endDay, type Size } from "@/lib/leads/lead-desk";
 import type { Enquiry } from "@/lib/inbox";
 import { canonical } from "@/lib/leads/lead-crypto";
@@ -291,7 +291,7 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
   // One invoice total per client, lines as needed. Once invoiced, the balance is what the open invoices still owe.
   const invoices = full?.invoices ?? [];
   const invoiced = invoices.length ? subtotal(invoices.flatMap((v) => v.lines)) : undefined;
-  const owed = invoices.length ? invoices.filter((v) => !isPaid(v)).reduce((n, v) => n + balance(v), 0) : full?.quote !== undefined ? full.quote - (full.deposit ? depositOfLead(full) : 0) : undefined;
+  const owed = invoices.length ? invoices.filter((v) => !isSettled(v)).reduce((n, v) => n + balance(v), 0) : full?.quote !== undefined ? full.quote - (full.deposit ? depositOfLead(full) : 0) : undefined;
   const paidAt = full?.deposit ? full.events.find((e) => e.kind === "booking")?.at : undefined;
 
   const [contactOpen, setContactOpen] = React.useState(false);
@@ -410,8 +410,8 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
                   <React.Fragment key={inv.no}>
                     <InvoiceRow inv={inv} l={l} full={full} />
                     <li style={{ listStyle: "none" }}><HStack gap={2} vAlign="center">
-                      {isPaid(inv) ? <Badge label={inv.paidAt ? `Paid ${dayLabel(inv.paidAt)}` : "Paid"} variant="success" /> : <Badge label="Unpaid" variant="neutral" />}
-                      <Button label={isPaid(inv) ? "Mark unpaid" : "Mark paid"} variant="ghost" size="sm" onClick={() => run(patch({ invoicePaid: { no: inv.no, paid: !isPaid(inv) } }), isPaid(inv) ? "Unpaid again." : "Marked paid.")} />
+                      {isSettled(inv) ? <Badge label={inv.paidAt ? `Paid ${dayLabel(inv.paidAt)}` : "Paid"} variant="success" /> : <Badge label="Unpaid" variant="neutral" />}
+                      <Button label={isSettled(inv) ? "Mark unpaid" : "Mark paid"} variant="ghost" size="sm" onClick={() => run(patch({ invoicePaid: { no: inv.no, paid: !isSettled(inv) } }), isSettled(inv) ? "Unpaid again." : "Marked paid.")} />
                     </HStack></li>
                   </React.Fragment>
                 ))}</ul> : null}

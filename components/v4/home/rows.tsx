@@ -11,7 +11,8 @@ import { dropSpot, keepSpot, layoutTop } from "./back";
 import { projectHref } from "@/lib/project-href";
 import { holdEase, holdUnease } from "@/lib/motion/hold-ease";
 import { clamp, MT2, progress } from "./motion/engine";
-import { COVER_KEYS, COVER_PRESS, FILM_DRESS, pad, type HomeFilm } from "@/lib/v4-home/data";
+import { COVER_KEYS, COVER_PRESS, FILM_DRESS, type HomeFilm } from "@/lib/v4-home/data";
+import { pad } from "@/lib/utils";
 import { qflag } from "@/lib/v4-home/flags";
 
 /** A home cover opens on the Cover art page, in that page's viewer (`?cover=`, components/cover/cover-art-gallery.tsx). */

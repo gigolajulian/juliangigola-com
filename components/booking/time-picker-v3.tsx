@@ -9,7 +9,7 @@ import { Calendar } from "@/components/booking/flow";
 import { dlabel } from "@/components/booking/flow";
 import { duration } from "@/lib/booking/booking-rules";
 import { depositFor } from "@/lib/booking/paid";
-import { fmt } from "@/components/booking/flow";
+import { clockLabel } from "@/components/booking/flow";
 import type { Shell } from "@/components/booking/flow";
 import { looksLikeEmail } from "@/lib/inbox";
 import { AHEAD, fromIso, iso, minutesOf, forgetTimes, STEP_AT, WHERE, clock, type V3Book } from "@/components/booking/time-picker-parts";
@@ -24,7 +24,7 @@ export function V3Steps({ c }: { c: CardCtx & { v3: V3Book } }) {
   const { v3, username, slug, tz, length, needsWhere, opt, setOpt, booked, days, view, setView, anchor, setAnchor, pick, chosen, setChosen, step, setStep, swipeX: swipeXRef, wheelGate, stripRef, more, setMore, paid, deposit, refs, v3root, error, bad, setBad, blank, setBlank, load, choose, today, book, refill, v3steps, v3sub, date } = c;
   const end = pick.min + length;
   const usd = depositFor(slug);
-  const range = `${fmt(pick.min)} to ${fmt(end)}`;
+  const range = `${clockLabel(pick.min)} to ${clockLabel(end)}`;
   const at = step === "done" ? v3steps.length : STEP_AT[step] + 1;
   const rows: [string, React.ReactNode][] = [["Day", dlabel(date)], ["Time", range], ["Length", duration(length)]];
   const shell = (p: Omit<Parameters<Shell>[0], "steps" | "at" | "sum">) => <div ref={v3root} className="contents">{v3.shell({ steps: v3steps, at, sum: rows, ...p })}</div>;
@@ -34,7 +34,7 @@ export function V3Steps({ c }: { c: CardCtx & { v3: V3Book } }) {
     return (
       <DepositStep
         v3={(p) => shell(p)}
-        head={<div className="fig"><b>${usd}</b><span className="lbl mute">Holds {dlabel(date)}, {fmt(pick.min)}</span></div>}
+        head={<div className="fig"><b>${usd}</b><span className="lbl mute">Holds {dlabel(date)}, {clockLabel(pick.min)}</span></div>}
         body={deposit}
         refs={refs}
         rows={[
@@ -111,7 +111,7 @@ export function V3Steps({ c }: { c: CardCtx & { v3: V3Book } }) {
           body: (
             <>
               {/* The photo's summary hides on phones: the day and time stay in view here (booking critique, 2026-11-04). */}
-              <p className="f-when lbl mute">{dlabel(date)} | {fmt(pick.min)} | {v3.name}</p>
+              <p className="f-when lbl mute">{dlabel(date)} | {clockLabel(pick.min)} | {v3.name}</p>
               {f("name", "Name", "text", "", "name", false, true)}
               {f("email", "Email", "email", "", "email", false, true)}
               {f("phone", "Phone", "tel", "", "tel")}
@@ -206,7 +206,7 @@ export function V3Steps({ c }: { c: CardCtx & { v3: V3Book } }) {
               };
               el.addEventListener("wheel", wheel, { passive: false });
               return () => el.removeEventListener("wheel", wheel);
-            }} data-lenis-prevent tabIndex={0} role="spinbutton" aria-label="Time" aria-valuetext={fmt(pick.min)} data-scrub=""
+            }} data-lenis-prevent tabIndex={0} role="spinbutton" aria-label="Time" aria-valuetext={clockLabel(pick.min)} data-scrub=""
               onKeyDown={(e) => { if (e.key === "ArrowLeft" || e.key === "ArrowRight") { e.preventDefault(); stepTime(e.key === "ArrowRight" ? 1 : -1); } }}
               onPointerDown={(e) => { swipeXRef.current = e.clientX; }}
               /* One step per swipe, however long: the start clears until the finger lifts. */
@@ -220,7 +220,7 @@ export function V3Steps({ c }: { c: CardCtx & { v3: V3Book } }) {
             <button type="button" className="arr" aria-label="Earlier time" disabled={at0 <= 0} onClick={() => stepTime(-1)}>←</button>
             <button type="button" className="arr" aria-label="Later time" disabled={at0 < 0 || at0 >= times.length - 1} onClick={() => stepTime(1)}>→</button>
           </div>
-          <span className="lbl mute mline">{dlabel(date)}{chosen === "time" ? ` | until ${fmt(end)}` : ""}</span>
+          <span className="lbl mute mline">{dlabel(date)}{chosen === "time" ? ` | until ${clockLabel(end)}` : ""}</span>
         </div>
         <div className={cn("strip", more && "more")}>
           <div ref={stripRef} className="idx lbl" onScroll={(e) => { const el = e.currentTarget; setMore(el.scrollLeft + el.clientWidth < el.scrollWidth - 4); }}>
@@ -228,7 +228,7 @@ export function V3Steps({ c }: { c: CardCtx & { v3: V3Book } }) {
               const m = minutesOf(x.start);
               const [h, a] = clock(m);
               return (
-                <button key={x.start} type="button" data-slot="" aria-pressed={m === pick.min} aria-label={fmt(m)} onClick={() => choose(pick.date, m, true)}>{h}<small>{a}</small></button>
+                <button key={x.start} type="button" data-slot="" aria-pressed={m === pick.min} aria-label={clockLabel(m)} onClick={() => choose(pick.date, m, true)}>{h}<small>{a}</small></button>
               );
             })}
           </div>

@@ -7,6 +7,7 @@ import { toNotion } from "@/lib/leads/notion-lead";
 import { logMail, recordLead } from "@/lib/leads/lead-store";
 import imageLoader from "@/image-loader";
 import LOOKS from "@/lib/picker-looks.json";
+import { sha256Hex } from "@/lib/utils";
 import {
   COOLDOWN_MS,
   DAILY_CAP,
@@ -66,12 +67,7 @@ async function senderHash(headers: Headers, day: string): Promise<string> {
     headers.get("x-real-ip") ??
     headers.get("user-agent") ??
     "unknown";
-  const bytes = new TextEncoder().encode(`${day}:${ip}`);
-  const digest = await crypto.subtle.digest("SHA-256", bytes);
-  return [...new Uint8Array(digest)]
-    .slice(0, 16)
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
+  return (await sha256Hex(`${day}:${ip}`)).slice(0, 32);
 }
 
 export async function submitEnquiry(

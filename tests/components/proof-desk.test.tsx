@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { api, cardCrop, pastCloseDate, cropAt, status, type Row } from "@/lib/proofs/desk";
+import { proofApi, cardCrop, pastCloseDate, cropAt, proofStatus, type ProofRow } from "@/lib/proofs/desk";
 
 afterEach(() => vi.unstubAllGlobals());
 
-const proof = (over: Partial<Row> = {}): Row => ({
+const proof = (over: Partial<ProofRow> = {}): ProofRow => ({
   token: "tk1",
   name: "Nov 1 portraits",
   email: "ana@example.com",
@@ -29,13 +29,13 @@ describe("proof helpers", () => {
   it("closed and status read the gallery state", () => {
     expect(pastCloseDate(proof({ closesAt: "2000-01-01T00:00:00Z" }))).toBe(true);
     expect(pastCloseDate(proof())).toBe(false);
-    expect(status(proof({ sentAt: "2026-11-02T00:00:00Z" }))).toBe("Sent");
-    expect(status(proof({ sentAt: "x", closesAt: "2000-01-01T00:00:00Z" }))).toBe("Sent · closed");
+    expect(proofStatus(proof({ sentAt: "2026-11-02T00:00:00Z" }))).toBe("Sent");
+    expect(proofStatus(proof({ sentAt: "x", closesAt: "2000-01-01T00:00:00Z" }))).toBe("Sent · closed");
   });
 
   it("api throws the server error", async () => {
     answer({ error: "nope" }, false);
-    await expect(api({ query: "?list" })).rejects.toThrow("nope");
+    await expect(proofApi({ query: "?list" })).rejects.toThrow("nope");
     expect(vi.mocked(fetch).mock.calls[0][0]).toBe("/api/proof?list");
   });
 });
