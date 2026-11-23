@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { createPortal } from "react-dom";
 import type { MtData, BookRow, QuoteOpt } from "@/lib/v4-home/data";
 import { CardsCtx, type Cards, type InquiryMode } from "./ctx";
 import { MtHero } from "./hero";
@@ -110,6 +111,18 @@ export function MtHome({ data }: { data: MtData }) {
       </section>
       <MtMotionLayer />
       {InquiryCard && (inq || inqUsed) ? <InquiryCard open={inq} reply={data.reply} onClose={() => setInq(null)} onBack={back} /> : null}
+      {/* a slow line: the card's frame comes up on the tap while its code is still on the way */}
+      {inq && !InquiryCard
+        ? createPortal(
+            <div className="v3 contents">
+              <div className="mt-dim mt-dim-q" onClick={() => setInq(null)} />
+              <div className="mt-card mt-inq-wait" role="status">
+                <p className="lbl mute">Loading</p>
+              </div>
+            </div>,
+            document.body,
+          )
+        : null}
     </CardsCtx.Provider>
   );
 }

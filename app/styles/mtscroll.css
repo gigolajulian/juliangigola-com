@@ -810,3 +810,6 @@ html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap.mt-cap{font-family:var(
 @media not ((min-width:1024px) and (min-height:600px)){[data-mtscroll] .mt-bin-wait{min-height:761px}}
 /* under 300px: only a phone at 200% zoom or more (WCAG 1.4.10 reflow), so nothing changes at real widths */
 @media (max-width:299.98px){[data-mtscroll] :is(.mt-ctas,.mt-br,.mt-bar){flex-wrap:wrap}[data-mtscroll] .mt-ab-foot :is(dt,dd){white-space:normal}[data-mtscroll] .mt-fcols{grid-template-columns:minmax(0,1fr)}[data-mtscroll] .mt-fline{flex-wrap:wrap}[data-mtscroll] .mt .ln{max-width:100%;white-space:normal}[data-mtscroll] .mt-masonry{grid-template-columns:repeat(2,minmax(0,1fr))}[data-mtscroll] .mt-mcol figcaption{overflow-wrap:anywhere}[data-mtscroll] .mt-ab-foot dl{grid-template-columns:minmax(0,1fr)}[data-mtscroll] .mt-comm-head h2{font-size:13vw}[data-mtscroll] .mt-does ol{grid-template-columns:minmax(0,1fr);grid-template-rows:repeat(6,44px)}}
+/* the inquiry card's frame on a slow line, held near the card's own first height (home.tsx) */
+[data-mtscroll] .mt-inq-wait{width:min(640px,calc(100vw - 32px));min-height:min(520px,calc(100svh - 32px));padding:34px 36px 30px}
+@media (max-width:599px){[data-mtscroll] .mt-inq-wait{min-height:min(600px,calc(100svh - 32px));padding:28px 16px 16px}}
