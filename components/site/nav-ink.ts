@@ -301,7 +301,7 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
   React.useEffect(() => {
     const bar = hdr.current, root = document.documentElement;
     if (!bar || !navfx()) return;
-    let raf = 0, timer = 0, last = 0, frostT = 0, inkAt = 0, lastY = scrollY, down = false;
+    let raf = 0, timer = 0, last = 0, frostT = 0, inkAt = 0, lastY = Math.max(0, scrollY), down = false;
     const top = () => {
       // The homepage: no ground while its hero shows (the v4 hero, or the cover). Elsewhere: none at the very top.
       const hero = path === "/" ? document.querySelector(".mt-hero, .a-cover") : null;
@@ -341,9 +341,14 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
          own ground back in from transparent and handed the ink back to the photos, so it went white, black, white with
          the wordmark and menu apart (MAC, iPhone dark, #1417). It goes only near the top of the page (below). */
       const frosted = bar.getAttribute("data-navfrost") === ""; // "off" is the frost fading out
-      if (scrollY !== lastY) {
-        down = scrollY > lastY;
-        lastY = scrollY;
+      /* Safari's bounce past the top runs scrollY below 0 and back (-4, -3, -2, -1, 0): read as is, the last step was
+         "down", so a page at rest at its top kept looking ahead, found the photo under the links, and the frost faded in
+         and out every 1.25s for as long as it sat there (MAC, real Safari, /portfolio/paradox at 1440, dark). Overscroll
+         is no direction: counted from 0. */
+      const sy = Math.max(0, scrollY);
+      if (sy !== lastY) {
+        down = sy > lastY;
+        lastY = sy;
       }
       const veiled = (!isTop && !root.hasAttribute("data-tuck")) || frosted;
       // One ink for the whole bar: no word on its own, all of them fade to the other colour together.
