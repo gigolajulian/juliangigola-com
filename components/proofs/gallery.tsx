@@ -8,6 +8,7 @@ import { looksLikeEmail } from "@/lib/inbox";
 import { ProofWall } from "@/components/proofs/wall";
 import { ProofCursor } from "@/components/proofs/cursor";
 import { gridwallFor } from "@/lib/proofs/gridwall";
+import { noSubscribe } from "@/lib/utils";
 
 /* ── the client's gallery ─────────────────────────────────────────
  * The look Julian approved 2026-11-06 (mock https://claude.ai/artifact/Nn3EU21DEofuLLJyXJHtcG):
@@ -36,7 +37,6 @@ type Step = null | "review" | "done";
 
 // The gate as the grid's own wall (components/proofs/wall.tsx) by default;
 // `?proofwall=0` for the plain gate. Read on the client only.
-const noop = () => () => {};
 const readWall = () => new URLSearchParams(location.search).get("proofwall") !== "0";
 // The wall tuned per screen in the gridwall tuner by default; `?gw=0` for the untuned wall.
 // The window's size, so it compares.
@@ -120,7 +120,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
   // When they sent and whether the receipt mail went out, so the done screen says only what is true.
   const [sent, setSent] = React.useState({ at: initial.submittedAt, mailed: initial.mailed });
   const [unsaved, setUnsaved] = React.useState(false);
-  const wall = React.useSyncExternalStore(noop, readWall, () => false);
+  const wall = React.useSyncExternalStore(noSubscribe, readWall, () => false);
   const gw = React.useSyncExternalStore(onResize, readGw, () => "");
   const tune = React.useMemo(() => {
     if (!gw) return null;
@@ -337,7 +337,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
     if (email) post({ action: "track", email, kind: "review" }).catch(() => {});
   };
 
-  const pad = (i: number) => String(i + 1).padStart(3, "0");
+  const ordinal = (i: number) => String(i + 1).padStart(3, "0");
   const closes = initial.closesAt ? new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: "America/Los_Angeles" }).format(new Date(initial.closesAt)) : null;
   // The last days say so. Read after mount: the server and the phone can disagree near midnight.
   const clock = useClock();
@@ -442,7 +442,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
                 <div key={id}>
                   {/* eslint-disable-next-line @next/next/no-img-element -- private frame */}
                   <img src={thumb(id)} alt={`Frame ${(byId.get(id) ?? 0) + 1}`} />
-                  <i>{pad(byId.get(id) ?? 0)}</i>
+                  <i>{ordinal(byId.get(id) ?? 0)}</i>
                 </div>
               ))}
             </div>
@@ -516,7 +516,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
                     />
                     {/* The photo opens; the ring picks. */}
                     <button type="button" className="proof-open" aria-label={`Open frame ${i + 1}`} onClick={() => setOpen(i)} />
-                    <span className="proof-no">{pad(i)}{f.file ? ` · ${f.file}` : ""}</span>
+                    <span className="proof-no">{ordinal(i)}{f.file ? ` · ${f.file}` : ""}</span>
                     <button type="button" className="proof-mark" aria-pressed={at >= 0} aria-label={`Select frame ${i + 1}`} onClick={() => toggle(f.id)}>
                       <i>{at >= 0 ? at + 1 : ""}</i>
                     </button>
@@ -545,7 +545,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
                     </button>
                     <div>
                       <p className="proof-fn">
-                        {pad(i)}
+                        {ordinal(i)}
                       </p>
                     </div>
                     <button type="button" className="proof-rm" aria-label={`Remove frame ${i + 1}`} onClick={() => toggle(id)}>
@@ -600,7 +600,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
         <div className="proof-lb" ref={overlay} role="dialog" aria-modal="true" aria-label={`Frame ${open + 1}`}>
           <div className="proof-lt">
             <span>
-              {pad(open)} / {frames.length}
+              {ordinal(open)} / {frames.length}
             </span>
             <button type="button" className="proof-close" onClick={() => setOpen(null)}>
               Close
@@ -695,7 +695,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
               <div key={id}>
                 {/* eslint-disable-next-line @next/next/no-img-element -- private frame */}
                 <img src={thumb(id)} alt={`Frame ${(byId.get(id) ?? 0) + 1}`} />
-                <i>{pad(byId.get(id) ?? 0)}</i>
+                <i>{ordinal(byId.get(id) ?? 0)}</i>
               </div>
             ))}
           </div>

@@ -226,7 +226,7 @@ export const isSession = (s?: string): s is SessionSlug => !!s && Object.hasOwn(
 export const TAB_ORDER: SessionSlug[] = ["portraits", "headshots", "studio-digitals", "model-test", "graduation", "weddings", "consultation"];
 /** The homepage index and the doors' order. */
 export const INDEX_ORDER: SessionSlug[] = ["portraits", "graduation", "headshots", "studio-digitals", "weddings"];
-export const rate = (s: Session) =>
+export const priceLabel = (s: Session) =>
   !s.paid && s.cal ? "15 min" : s.from != null ? `From $${s.from}` : s.paid ? `$${depositFor(eventOf(s))} deposit` : "On request";
 /** Session lengths in minutes: the event's own (`EVENTS`), or these where there is none or the stepper says otherwise.
     Where /api/slots answers, the event's length is the one booked. */

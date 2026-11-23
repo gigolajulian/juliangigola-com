@@ -13,7 +13,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ toke
   if (!isToken(token) || !env.INBOX || !env.PROOFS || !seal) return new Response("Not found", { status: 404 });
   const p = await findProof(env.INBOX, await seal, token);
   if (!p) return new Response("Not found", { status: 404 });
-  const c = await shareCard(env, p, request.url).catch(() => undefined);
+  const c = await shareCard(env, p, request.url).catch((e: unknown) => void console.error("proof card", String(e)));
   if (c === undefined) return new Response("Try again shortly", { status: 503, headers: { "retry-after": "5" } });
   if (!c) return new Response("Not found", { status: 404 });
   return new Response(c.body, {

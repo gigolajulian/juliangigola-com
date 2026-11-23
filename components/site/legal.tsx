@@ -1,15 +1,16 @@
 "use client";
 
 import * as React from "react";
+import { pad } from "@/lib/utils";
 
 /* ── the legal page ───────────────────────────────────────────────
  * The terms and the privacy policy. Each document reads its clauses off its
- * children (`LegalColumn`, `Clause`) and draws itself inside `V3LegalPage`. The
+ * children (`LegalColumn`, `Clause`) and draws itself inside `LegalPage`. The
  * numbering is real, because it is how a clause gets cited in an email,
  * and every clause keeps its anchor: `/legal#terms-ownership` opens on it.
  * ─────────────────────────────────────────────────────────────── */
 
-/** True inside `V3LegalPage`: a document on its own draws nothing. */
+/** True inside `LegalPage`: a document on its own draws nothing. */
 const InPage = React.createContext(false);
 
 /** A clause title as an anchor: "What you may do" becomes `what-you-may-do`. */
@@ -27,7 +28,6 @@ const dated = (iso: string) =>
     timeZone: "UTC",
   });
 
-const two = (n: number) => String(n).padStart(2, "0");
 
 /** One document: its contents to the left, its clauses in full to the right. Outside the page it draws nothing. */
 export function LegalColumn({
@@ -62,7 +62,7 @@ export function LegalColumn({
           {clauses.map((c) => (
             <li key={c.id}>
               <a href={`#${c.id}`}>
-                <span className="mute">{two(c.n)}</span>
+                <span className="mute">{pad(c.n)}</span>
                 {c.title}
               </a>
             </li>
@@ -74,7 +74,7 @@ export function LegalColumn({
           <article key={c.id} id={c.id} className="lg-clause">
             <p className="lbl mute">
               {c.n === 1 ? label : null /* the part's name once, over its first clause (audit 2026-11-19) */}
-              <span>{two(c.n)}</span>
+              <span>{pad(c.n)}</span>
             </p>
             <h3>{c.title}</h3>
             <div className="lg-text">{c.body}</div>
@@ -98,7 +98,7 @@ export function Clause(props: { title: string; children: React.ReactNode }) {
  * right at a reading measure. Every clause keeps its anchor, so
  * `/legal#terms-ownership` still lands on it.
  * ─────────────────────────────────────────────────────────────── */
-export function V3LegalPage({ children }: { children: React.ReactNode }) {
+export function LegalPage({ children }: { children: React.ReactNode }) {
   return (
     <div className="v3 contents">
       <section className="v3page" id="p-legal">

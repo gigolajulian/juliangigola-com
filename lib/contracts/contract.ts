@@ -22,6 +22,7 @@ import type { Lead } from "@/lib/leads/leads";
 import type { InboxKV as KV } from "@/lib/kv";
 import { isEmail, newToken } from "@/lib/proofs/proof";
 import type { Seal } from "@/lib/leads/lead-crypto";
+import { sha256Hex } from "@/lib/utils";
 
 export type ContractTemplate = { id: string; name: string; body: string };
 
@@ -68,12 +69,6 @@ export const contractKey = (id: string) => `contract:${id}`;
 export const leadContractKey = (lead: string) => `leadcontract:${lead}`;
 export const isContractId = (v: unknown): v is string => typeof v === "string" && /^[0-9A-Za-z]{16}$/.test(v);
 export const contractUrl = (id: string) => `https://juliangigola.com/contract/${id}`;
-
-/** Hex SHA-256 of the text as stored, byte for byte (UTF-8). */
-export async function sha256(text: string): Promise<string> {
-  const d = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text)));
-  return [...d].map((b) => b.toString(16).padStart(2, "0")).join("");
-}
 
 const usd = (n: number) => `$${n.toLocaleString("en-US")}`;
 const longDay = (iso: string) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, weekday: "long", month: "long", day: "numeric", year: "numeric" }).format(new Date(iso));
@@ -131,7 +126,7 @@ export async function sign(c: Contract, by: { name: unknown; email: unknown; agr
   if (!typed && !isMark(by.mark)) return { error: "Sign in the box.", status: 400 };
   if (!isEmail(by.email)) return { error: "That email does not look right.", status: 400 };
   if (by.agree !== true) return { error: "Tick I agree to sign.", status: 400 };
-  const hash = await sha256(c.text);
+  const hash = await sha256Hex(c.text);
   if (by.seen !== hash) return { error: "This contract changed since you opened it. Reload the page to read the new text.", status: 409 };
   return { ...c, signed: { name, email: by.email.trim(), ip: by.ip.slice(0, 64), ua: by.ua.slice(0, 400), at, hash, ...(typed ? { typed: true as const } : { mark: by.mark as string }) } };
 }
@@ -165,7 +160,7 @@ export const publicContract = async (c: Contract) => ({
   to: c.to,
   from: c.from ?? [],
   text: c.text,
-  hash: await sha256(c.text),
+  hash: await sha256Hex(c.text),
   signed: c.signed ? { name: c.signed.name, at: c.signed.at, hash: c.signed.hash, mark: c.signed.mark ?? null } : null,
 });
 export type PublicContract = Awaited<ReturnType<typeof publicContract>>;

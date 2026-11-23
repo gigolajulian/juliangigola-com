@@ -1,9 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
-import { FakeKV, LEADS_KEY } from "./fakes";
+import { FakeKV, LEADS_KEY, INBOX_KEY as KEY } from "./fakes";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { deliveryView, finalKey, readProof, writeProof, PREVIEW_W, THUMB_W, type Proof } from "@/lib/proofs/proof";
 
-const KEY = "inbox-key-for-tests";
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown>, crc: 0 }));
 vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
 const { PUT } = await import("@/app/api/proof/route");

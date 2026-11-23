@@ -4,9 +4,9 @@ import { sealer, type Sealer } from "./lead-crypto";
 import { notify, pushFor } from "./lead-push";
 import { appendLog, forgetLog, fresh } from "./activity-log";
 import { canonical } from "./lead-crypto";
-import { fold, leadStoreKey, leadSummary, type Change, type Lead, type LeadSummary, type InboxKV, type Person, type Sent } from "./leads";
+import { fold, leadStoreKey, leadSummary, type Change, type Lead, type LeadSummary, type Person, type Sent } from "./leads";
+import type { InboxKV } from "@/lib/kv";
 
-export type { InboxKV } from "./leads";
 type KV = InboxKV;
 /** Where leads live: the INBOX namespace, sealed with LEADS_KEY. */
 export type LeadStore = { INBOX?: KV; LEADS_KEY?: string; VAPID_KEY?: string };
@@ -91,12 +91,12 @@ export async function canonLeads(kv: KV, s: Sealer): Promise<number> {
   return moved;
 }
 
+/** A lead deleted for good: its record, a `gone:` tombstone, and its activity log when `seal` can open it. */
+export const buryLead = (kv: KV, seal: Sealer | undefined, id: string) =>
+  Promise.all([kv.delete(leadStoreKey(id)), kv.put(`gone:${id}`, ""), seal ? forgetLog(kv, seal, id) : null]);
+
 /** A person's address on someone else's lead (`Lead.people`) points at that lead's id. The key is the
     HMAC of the address, like a lead's own, so no address shows in a key listing. */
-/** A lead deleted for good: its record, a `gone:` tombstone, and its activity log when `seal` can open it. */
-export const buryLead = (kv: KV, key: string, seal?: Sealer) =>
-  Promise.all([kv.delete(key), kv.put(`gone:${key.slice(5)}`, ""), seal ? forgetLog(kv, seal, key.slice(5)) : null]);
-
 export const personKey = (hash: string) => `person:${hash}`;
 
 /** The lead an address belongs to: its own record first, else the lead it is a person on.

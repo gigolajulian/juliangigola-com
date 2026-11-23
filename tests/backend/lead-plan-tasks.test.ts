@@ -3,7 +3,7 @@ import { sealer } from "@/lib/leads/lead-crypto";
 import { readLead, writeLead } from "@/lib/leads/lead-store";
 import { dueTasks, fold, leadSummary, leadStoreKey, type Lead } from "@/lib/leads/leads";
 import { callSheet, cleanPlan, cleanTasks, merge } from "@/lib/leads/lead-crm";
-import { FakeKV, LEADS_KEY } from "./fakes";
+import { FakeKV, LEADS_KEY, INBOX_KEY as KEY } from "./fakes";
 
 /* The shoot plan and tasks from CRMO (Julian 2026-11-20): kept in the full record, never the list summary;
    whole-list PATCHes; a task newly ticked writes one timeline line; Today lists what falls due. */
@@ -12,7 +12,6 @@ const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
 vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
 const inbox = await import("@/app/api/inbox/route");
 
-const KEY = "inbox-key-for-tests";
 const at = (h: number) => new Date(Date.UTC(2026, 10, 20, h)).toISOString();
 const s = await sealer(LEADS_KEY)!;
 const EMAIL = "nadia@example.com";

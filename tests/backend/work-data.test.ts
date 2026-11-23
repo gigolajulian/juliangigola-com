@@ -1,8 +1,8 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { SPLASH_RUN } from "@/lib/flags/splash-run";
-import { CALL_CARD, DOORS, HERO, INDEX_ORDER, isSession, LENGTH, rate, SESSIONS, TAB_ORDER, type Session } from "@/lib/photos-and-sessions";
+import { SPLASH_RUN } from "@/lib/work/splash-run";
+import { CALL_CARD, DOORS, HERO, INDEX_ORDER, isSession, LENGTH, priceLabel, SESSIONS, TAB_ORDER, type Session } from "@/lib/photos-and-sessions";
 import { CATEGORIES, PROJECTS } from "@/lib/work-data";
 import { PROJECTS as SITE_PROJECTS } from "@/lib/work/work";
 import { byCodeUnit } from "@/lib/utils";
@@ -52,10 +52,10 @@ describe("v3", () => {
   });
   it("says the rate as the card shows it", () => {
     const s = (o: Partial<Session>) => ({ slug: "portraits", name: "", includes: [], photo: { d: "", l: "" }, from: null, paid: false, ...o }) as Session;
-    expect(rate(s({ cal: "x/y" }))).toBe("15 min");
-    expect(rate(s({ paid: true, from: 400 }))).toBe("From $400");
-    expect(rate(s({ paid: true }))).toBe("$100 deposit");
-    expect(rate(s({}))).toBe("On request");
+    expect(priceLabel(s({ cal: "x/y" }))).toBe("15 min");
+    expect(priceLabel(s({ paid: true, from: 400 }))).toBe("From $400");
+    expect(priceLabel(s({ paid: true }))).toBe("$100 deposit");
+    expect(priceLabel(s({}))).toBe("On request");
   });
 });
 

@@ -10,7 +10,7 @@ import {
   projectsIn,
   isDisciplineGallery,
 } from "@/lib/work/work";
-import type { Frame } from "@/lib/work-types";
+import type { Frame } from "@/lib/work/work-types";
 import { COVER_RELEASES } from "@/lib/work/cover-art-data";
 import DATES from "@/lib/sitemap-dates.json";
 import { BOOKING_PAGES, bookingHref } from "@/lib/booking/service-pages";

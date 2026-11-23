@@ -4,13 +4,13 @@ import { INITIAL, submitOrKeep } from "@/components/contact/contact-form";
 import { trailContext } from "@/components/analytics/visit-trail";
 import type { ContactState } from "@/lib/inbox";
 import { looksLikeEmail } from "@/lib/inbox";
+import { pad } from "@/lib/utils";
 
 /* JG V3 stepper (master v39, "one stepper" for booking and inquiry): the
    step rail, the head, the body, the action bar, and the sticky photo with
    a live summary. Each flow owns its state and fills these slots. */
 
 /** Two digits; `iso` below is a local date as "2026-11-04". The booking picker reuses both (`time-picker-parts.tsx`). */
-export const pad = (n: number) => String(n).padStart(2, "0");
 
 export const Check = () => (
   <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
@@ -208,7 +208,7 @@ export const checkYou = (name: string, email: string) => {
 
 /* Dates and times the way the master prints them. */
 export const dlabel = (t: Date) => t.toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short" });
-export const fmt = (m: number) => {
+export const clockLabel = (m: number) => {
   const h = Math.floor(m / 60) % 24;
   return `${((h + 11) % 12) + 1}:${pad(m % 60)} ${h < 12 ? "AM" : "PM"}`;
 };

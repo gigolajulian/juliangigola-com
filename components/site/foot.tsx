@@ -28,7 +28,7 @@ const ASK: Record<string, string> = { music: "coverart", fashion: "editorial", c
 const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 
 /** `bare`: no drifting phrase and no sink, the links and the last line only (the booking pages: Julian wanted a way around and the copyright, not the big text). */
-export function V4Foot({ bare = false }: { bare?: boolean } = {}) {
+export function PageFoot({ bare = false }: { bare?: boolean } = {}) {
   const foot = React.useRef<HTMLElement>(null);
   const row = React.useRef<HTMLSpanElement>(null);
   const time = useLocalTime();
@@ -158,3 +158,6 @@ export function V4Foot({ bare = false }: { bare?: boolean } = {}) {
     </footer>
   );
 }
+
+/** Old name, kept only because components/booking/book.tsx still imports it; drop once that file moves to PageFoot. */
+export const V4Foot = PageFoot;

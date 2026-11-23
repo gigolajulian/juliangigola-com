@@ -77,7 +77,7 @@ export async function searchConsole(secret: string) {
         body: JSON.stringify(body),
       },
     );
-    const r = (await res.json()) as { rows?: SearchRow[]; error?: { message: string } };
+    const r = (await res.json().catch(() => ({ error: { message: `Search Console said ${res.status}` } }))) as { rows?: SearchRow[]; error?: { message: string } };
     if (r.error) throw new Error(r.error.message);
     return r.rows ?? [];
   };

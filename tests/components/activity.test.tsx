@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { ActivityDesk } from "@/components/proofs/activity";
-import type { Row } from "@/lib/proofs/desk";
+import type { ProofRow } from "@/lib/proofs/desk";
 import type { Viewer } from "@/lib/proofs/proof";
 
 /* `components/proofs/activity.tsx`: who opened a gallery, what they did,
@@ -20,7 +20,7 @@ const viewer = (over: Partial<Viewer> = {}): Viewer => ({
   ...over,
 });
 
-const row = (over: Partial<Row> = {}) =>
+const row = (over: Partial<ProofRow> = {}) =>
   ({
     token: "t1",
     name: "Studio day",
@@ -28,7 +28,7 @@ const row = (over: Partial<Row> = {}) =>
     viewers: {},
     url: "/proof/t1",
     ...over,
-  }) as unknown as Row;
+  }) as unknown as ProofRow;
 
 afterEach(() => {
   vi.unstubAllGlobals();

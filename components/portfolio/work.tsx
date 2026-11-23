@@ -9,9 +9,9 @@ import { createPortal } from "react-dom";
 import type { Flip as FlipT } from "gsap/Flip";
 import { PageFoot } from "@/components/site/chrome";
 import DISC from "@/lib/discipline-order.json";
-import { V4Drift } from "@/components/portfolio/drift";
+import { Drift } from "@/components/portfolio/drift";
 // The canvas view loads only when it opens, not with every /portfolio visit.
-const V3Canvas = dynamic(() => import("@/components/portfolio/canvas").then((m) => m.V3Canvas), { ssr: false });
+const WorkCanvas = dynamic(() => import("@/components/portfolio/canvas").then((m) => m.WorkCanvas), { ssr: false });
 import { launchSpeed, stepSpring, springSettled, frameDt } from "@/lib/motion/spring";
 
 /** The motion plan's `out` curve for GSAP: power4.out is cubic-bezier(.23, 1, .32, 1). */
@@ -466,7 +466,7 @@ const filterUrl = (slug?: string) => {
   if (u.href !== location.href) history.replaceState(history.state, "", u);
 };
 
-export function V3Work({
+export function WorkIndex({
   work,
   chip = {},
   frames = {},
@@ -728,10 +728,10 @@ export function V3Work({
      All a gallery's project opens into its frames where it sits, its caption
      on the first. Cover Art stays one cell under All. */
   const cells = React.useMemo(
-    (): { f?: FrameItem; p?: WorkItem }[] =>
+    (): ({ f: FrameItem; p?: WorkItem } | { f?: undefined; p: WorkItem })[] =>
       shown
         ? shown.map((f) => ({ f }))
-        : list.flatMap((p): { f?: FrameItem; p?: WorkItem }[] => {
+        : list.flatMap((p): ({ f: FrameItem; p?: WorkItem } | { f?: undefined; p: WorkItem })[] => {
             const g = p.d.find((d) => d !== "Cover Art" && frames[d]);
             const own = g ? frames[g].filter((f) => f.s === p.s) : [];
             return own.length ? own.map((f, i) => ({ f, p: i ? undefined : p })) : [{ p }];
@@ -1281,7 +1281,7 @@ export function V3Work({
 
   return (
     <div className="v3 contents">
-      <V4Drift k={`${view}|${filter}|${q}|${list.length}`} />
+      <Drift k={`${view}|${filter}|${q}|${list.length}`} />
       <section
         ref={page}
         className={
@@ -1376,9 +1376,9 @@ export function V3Work({
                 const cap = p ? <Cap p={p} cls="sc-n" /> : null;
                 if (!f)
                   return (
-                    <figure key={p!.s} className="sc" data-flip-id={p!.s}>
-                      <Link href={projectHref(p!.s)} aria-label={named(p!)}>
-                        <Image src={p!.cover} alt={altOf(p!)} fill sizes={STRIP_SIZES} decoding="sync" loading={n < 4 ? "eager" : "lazy"} />
+                    <figure key={p.s} className="sc" data-flip-id={p.s}>
+                      <Link href={projectHref(p.s)} aria-label={named(p)}>
+                        <Image src={p.cover} alt={altOf(p)} fill sizes={STRIP_SIZES} decoding="sync" loading={n < 4 ? "eager" : "lazy"} />
                         {cap}
                       </Link>
                     </figure>
@@ -1485,7 +1485,7 @@ export function V3Work({
         {canvas || leaving
           ? createPortal(
               <div className="v3">
-                <V3Canvas
+                <WorkCanvas
                   list={field}
                   onClose={closeCanvas}
                   onLeave={leaveCanvas}

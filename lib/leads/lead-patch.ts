@@ -144,7 +144,8 @@ export async function patchLead(inbox: KV, seal: Sealer, given: Record<string, u
   if (people !== undefined || merged) await linkPeople(inbox, seal, id, lead.people, merged ? undefined : wasPeople);
   if (merged) {
     await adoptLog(inbox, seal, id, merged.slice(5), lead).catch((e: unknown) => console.error("activity log merge", String(e)));
-    await buryLead(inbox, merged);
+    // No seal: adoptLog above already moved the old log here.
+    await buryLead(inbox, undefined, merged.slice(5));
   }
   return json({ lead });
 }

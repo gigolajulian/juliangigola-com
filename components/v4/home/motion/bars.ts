@@ -1,9 +1,9 @@
-import type { Driver, MtSection } from "./engine";
+import type { Driver, HomeSection } from "./engine";
 
 /* Phones and tablets: Book online and By quote each get the bottom bar while
    they fill the screen. Their rows change only when one is tapped,
    never with the scroll. */
-const bar = (name: MtSection): Driver => ({
+const bar = (name: HomeSection): Driver => ({
   name,
   always: true,
   setup(el) {

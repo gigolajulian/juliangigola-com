@@ -3,9 +3,10 @@ import { GET, PATCH, POST, PUT } from "@/app/api/contract/route";
 import { POST as SIGN } from "@/app/api/contract/[id]/route";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { readLead, writeLead } from "@/lib/leads/lead-store";
-import { fillContract, readContract, sha256, signedCopy, type Contract } from "@/lib/contracts/contract";
+import { fillContract, readContract, signedCopy, type Contract } from "@/lib/contracts/contract";
+import { sha256Hex } from "@/lib/utils";
 import type { Lead } from "@/lib/leads/leads";
-import { FakeEmail, FakeKV, LEADS_KEY } from "./fakes";
+import { FakeEmail, FakeKV, LEADS_KEY, INBOX_KEY as KEY } from "./fakes";
 
 /* /api/contract (the desk) and /api/contract/[id] (the client): a contract
    made from a lead's template, sent, signed once with a hash of the exact
@@ -14,7 +15,6 @@ import { FakeEmail, FakeKV, LEADS_KEY } from "./fakes";
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
 vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
 
-const KEY = "inbox-key-for-tests";
 const LEAD = "a".repeat(32);
 let kv: FakeKV, client: FakeEmail, hello: FakeEmail;
 const seal = async () => (await sealer(LEADS_KEY))!;
@@ -98,7 +98,7 @@ describe("/api/contract", () => {
   it("wants a first and last name and a drawn mark, or the typed name by choice", async () => {
     const { contract: c } = await make();
     await send(c);
-    const hash = await sha256(c.text);
+    const hash = await sha256Hex(c.text);
     const base = { email: "sam@example.com", agree: true, hash };
     expect((await signReq(c.id, { ...base, name: "hi" })).status).toBe(400);
     expect((await signReq(c.id, { ...base, name: "Sam Rivera", mark: undefined })).status).toBe(400);
@@ -111,20 +111,20 @@ describe("/api/contract", () => {
 
   it("will not sign a draft that was never sent", async () => {
     const { contract: c } = await make();
-    const res = await signReq(c.id, { name: "Sam Rivera", email: "sam@example.com", agree: true, hash: await sha256(c.text) });
+    const res = await signReq(c.id, { name: "Sam Rivera", email: "sam@example.com", agree: true, hash: await sha256Hex(c.text) });
     expect(res.status).toBe(404);
   });
 
   it("signs once: stores who, when and the text hash, locks the text, updates the lead and mails both", async () => {
     const { contract: c } = await make();
     await send(c);
-    const hash = await sha256(c.text);
+    const hash = await sha256Hex(c.text);
     expect((await signReq(c.id, { name: "Sam Rivera", email: "sam@example.com", agree: false, hash })).status).toBe(400);
     const res = await signReq(c.id, { name: "Sam Rivera", email: "sam@example.com", agree: true, hash });
     expect(res.status).toBe(200);
     const stored = (await readContract(kv as never, await seal(), c.id))!;
     expect(stored.signed).toMatchObject({ name: "Sam Rivera", email: "sam@example.com", ip: "203.0.113.9", ua: "Test UA", hash, mark: "M40 120 Q80 60 120 110 Q160 150 200 90 L240 100" });
-    expect(stored.signed!.hash).toBe(await sha256(stored.text));
+    expect(stored.signed!.hash).toBe(await sha256Hex(stored.text));
     const l = (await readLead(kv as never, await seal(), LEAD))!;
     expect(l.contract).toBe("Signed");
     expect(l.events.at(-1)).toMatchObject({ kind: "contract", ref: `signed:${c.id}` });
@@ -143,7 +143,7 @@ describe("/api/contract", () => {
   it("refuses a signature on text that changed since the page loaded", async () => {
     const { contract: c } = await make();
     await send(c);
-    const old = await sha256(c.text);
+    const old = await sha256Hex(c.text);
     await send({ ...c, text: `${c.text} Changed.` });
     const res = await signReq(c.id, { name: "Sam Rivera", email: "sam@example.com", agree: true, hash: old });
     expect(res.status).toBe(409);
@@ -153,7 +153,7 @@ describe("/api/contract", () => {
   it("serves the signed copy as an escaped attachment", async () => {
     const { contract: c } = await make();
     await send(c);
-    await signReq(c.id, { name: "<img src=x onerror=alert(1)>", email: "sam@example.com", agree: true, hash: await sha256(c.text) });
+    await signReq(c.id, { name: "<img src=x onerror=alert(1)>", email: "sam@example.com", agree: true, hash: await sha256Hex(c.text) });
     const res = await GET(admin("GET", undefined, `?copy=${c.id}`));
     expect(res.headers.get("content-disposition")).toContain("attachment");
     expect(res.headers.get("x-content-type-options")).toBe("nosniff");

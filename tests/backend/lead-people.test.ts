@@ -4,7 +4,7 @@ import { copiesFor, findLead, personKey, readLead, recordLead, writeLead } from 
 import { fold, leadSummary, leadStoreKey, type Lead, type Person } from "@/lib/leads/leads";
 import { cleanPeople, merge, PEOPLE_MAX } from "@/lib/leads/lead-crm";
 import { readProof, writeProof } from "@/lib/proofs/proof";
-import { FakeKV, LEADS_KEY } from "./fakes";
+import { FakeKV, LEADS_KEY, INBOX_KEY as KEY } from "./fakes";
 
 /* Several people under one client (Julian 2026-11-15): the art director,
    the producer and the stylist sit on the brand's lead, their mail lands
@@ -15,7 +15,6 @@ vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ 
 const inbox = await import("@/app/api/inbox/route");
 const proof = await import("@/app/api/proof/route");
 
-const KEY = "inbox-key-for-tests";
 const at = (h: number) => new Date(Date.UTC(2026, 10, 15, h)).toISOString();
 const s = await sealer(LEADS_KEY)!;
 const BRAND = "brand@example.com";

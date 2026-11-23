@@ -1,6 +1,6 @@
 import * as React from "react";
 import { warmGsap, withGsap } from "@/lib/gsap-lazy";
-import { iso, overflowOf, type PickedTime, type Slot, type Step } from "@/components/booking/time-picker-parts";
+import { iso, STEP_AT, type PickedTime, type Slot, type Step } from "@/components/booking/time-picker-parts";
 
 type Layout = {
   step: Step;
@@ -29,8 +29,7 @@ export function usePickerLayout({ step, pick, days, view, anchor, week, month, c
   const was = React.useRef(step);
   React.useEffect(warmGsap, []);
   React.useLayoutEffect(() => {
-    const ORDER = { pick: 0, form: 1, sending: 1, check: 1, pay: 2, done: 3 };
-    const dir = Math.sign(ORDER[step] - ORDER[was.current]);
+    const dir = Math.sign(STEP_AT[step] - STEP_AT[was.current]);
     was.current = step;
     const el = root.current;
     // A step opens at its top: on an iPhone Details opened where Continue
@@ -64,13 +63,6 @@ export function usePickerLayout({ step, pick, days, view, anchor, week, month, c
      a day that was not on show fades in. Measured before the switch,
      played once the new view is laid out. */
   const daysBox = React.useRef<HTMLDivElement>(null);
-  /* A month as tall as the picker has room for: past it, the confirm bar
-     sat over the ruler (six rows, or a short window). The cells give up
-     what the picker overflows by, shared between the rows. */
-  const monthGrid = React.useRef<HTMLDivElement>(null);
-  /* And a week: its big time gives up what the picker overflows by (the
-     times in kinds took a row more, past an iPad held sideways). */
-  const big = React.useRef<HTMLDivElement>(null);
   /* The times' width: they keep to one line while every box has room for
      its time (Julian: a day of half hours was crammed). */
   /* The time picked kept in view in option B's row, and the fade and hint
@@ -103,110 +95,6 @@ export function usePickerLayout({ step, pick, days, view, anchor, week, month, c
     slotsRO.current = new ResizeObserver(() => el.clientWidth && setSlotsW(el.clientWidth));
     slotsRO.current.observe(el);
   }, []);
-  React.useLayoutEffect(() => {
-    const el = big.current;
-    const tp = el?.closest<HTMLElement>(".tp");
-    if (view !== "week" || !el || !tp) return;
-    const row = el.parentElement!;
-    const block = row.parentElement!;
-    // The spare height around it (Julian's spacers) goes with it, or its
-    // room stayed as an empty band (audit, 2026-10-11).
-    const over = block.previousElementSibling as HTMLElement | null;
-    const under = block.nextElementSibling as HTMLElement | null;
-    const fit = () => {
-      el.style.removeProperty("font-size");
-      row.style.removeProperty("display");
-      block.style.removeProperty("display");
-      over?.style.removeProperty("display");
-      under?.style.removeProperty("max-height");
-      tp.removeAttribute("data-tight");
-      tp.removeAttribute("data-split");
-      // Twice: the line it sits on does not give back all it shrinks by.
-      for (let i = 0; i < 2; i++) {
-        const over = overflowOf(tp);
-        if (over > 0) el.style.fontSize = `${Math.max(48, parseFloat(getComputedStyle(el).fontSize) - over / 0.85)}px`;
-      }
-      // Smaller than that it is not worth its row: the day over it and the
-      // time picked below say the same, as under a month.
-      if (overflowOf(tp) > 0) row.style.display = "none";
-      // Still over (a day of half hours on an iPad held sideways): the day
-      // goes too, the bar under the times says it.
-      if (overflowOf(tp) > 0) {
-        block.style.display = "none";
-        if (over) over.style.display = "none";
-        under?.style.setProperty("max-height", "var(--tp-gap, 2rem)");
-      }
-      // Still over (half-hour calls at 1280x720): the steps' names go and
-      // the times close up (`[data-tight]`, contact.css).
-      if (overflowOf(tp) > 0) tp.setAttribute("data-tight", "");
-      // Still over on a short window (a phone on its side, a laptop or an
-      // iPad at 600 tall, where the times ran under Confirm): the week, then
-      // the day's times in its place, as a month that does not fit
-      // (`data-split`). Not on a tall one: /book at 1440x900 is over too
-      // before a day is picked, and split there it lost its Confirm bar
-      // (CI on #134).
-      if (overflowOf(tp) > 0 && matchMedia("(max-height: 40rem) and (min-width: 40rem)").matches) tp.setAttribute("data-split", "");
-    };
-    fit();
-    const ro = new ResizeObserver(fit);
-    ro.observe(tp);
-    /* Back from the form (Change) the steps slide open (grid rows) and it
-       was measured mid-slide, saw room, and kept the big time full height
-       over the times: fitted again when the slide lands (Julian). */
-    const landed = (e: TransitionEvent) => e.propertyName === "grid-template-rows" && fit();
-    tp.addEventListener("transitionend", landed);
-    return () => {
-      ro.disconnect();
-      tp.removeEventListener("transitionend", landed);
-      tp.removeAttribute("data-tight");
-      tp.removeAttribute("data-split");
-    };
-  }, [view, pick?.date, days, slotsW, mstep, held]);
-  const at = pick?.start;
-  const refit = React.useRef(() => {});
-  React.useLayoutEffect(() => {
-    const grid = monthGrid.current;
-    const tp = grid?.closest<HTMLElement>(".tp");
-    if (view !== "month" || !grid || !tp) return;
-    // The fold the days sit in can shrink and hide what does not fit, so
-    // its own overflow counts as well as the picker's.
-    const fold = grid.closest<HTMLElement>(".min-h-0.overflow-hidden");
-    const overBy = () => Math.max(overflowOf(tp), fold ? fold.scrollHeight - fold.clientHeight : 0);
-    const rows = Math.ceil((grid.children.length - 7) / 7);
-    /* The cells give up what the picker is over by, down to `least`. */
-    const squeeze = (least: number) => {
-      grid.style.removeProperty("--cell-h");
-      const cell = grid.querySelector<HTMLElement>("[data-day]");
-      if (!cell?.offsetHeight) return 0;
-      // Twice, for what the first pass leaves over by rounding.
-      for (let i = 0; i < 2; i++) {
-        const over = overBy();
-        if (over <= 0) return 0;
-        grid.style.setProperty("--cell-h", `${Math.max(least, cell.offsetHeight - Math.ceil(over / rows))}px`);
-      }
-      return overBy();
-    };
-    const fit = () => {
-      /* Not while the days glide to the month (below): the box they sit in
-         is short until it lands and its hidden overflow squeezed the cells
-         to nothing. Fitted again when it lands (`refit`). */
-      if (daysBox.current?.getAnimations().length) return;
-      tp.removeAttribute("data-split");
-      // Both, while a cell keeps 2.5rem: under it they were strips.
-      if (squeeze(40) <= 0) return;
-      tp.setAttribute("data-split", "");
-      squeeze(28);
-    };
-    fit();
-    refit.current = fit;
-    const ro = new ResizeObserver(fit);
-    ro.observe(tp);
-    return () => {
-      ro.disconnect();
-      refit.current = () => {};
-      tp.removeAttribute("data-split");
-    };
-  }, [view, month, pick?.date, days, mstep, held]);
   /* Editorial: the card never scrolls. Over by anything, it closes up a
      step at a time (`data-fit`, editorial.css): a smaller time, no big
      time, then the days and the times as two screens. */
@@ -382,5 +270,5 @@ export function usePickerLayout({ step, pick, days, view, anchor, week, month, c
     },
   };
 
-  return { stripEl, stripRef, more, setMore, root, v3root, was, showTimes, swipe, daysBox, monthGrid, big, slotsBox, slotsW, setSlotsW, slotsRO, slotsRef, at, refit, first, shown, swipeProps };
+  return { stripRef, more, setMore, root, v3root, showTimes, daysBox, slotsW, slotsRef, swipeProps };
 }

@@ -10,8 +10,9 @@ import { BookTimes } from "@/components/booking/book-times";
 import { V4Foot } from "@/components/site/foot";
 import { Calendar, Failed, Field, FlowShell, Hidden, Run, dlabel, iso, useEnquiry, type Shell } from "@/components/booking/flow";
 import { duration } from "@/lib/booking/booking-rules";
-import { LENGTH, SESSIONS, TAB_ORDER, rate, type SessionSlug } from "@/lib/photos-and-sessions";
+import { LENGTH, SESSIONS, TAB_ORDER, priceLabel, type SessionSlug } from "@/lib/photos-and-sessions";
 import { looksLikeEmail } from "@/lib/inbox";
+import { noSubscribe } from "@/lib/utils";
 
 /* JG V3 booking (master v39, /book/<session>): one stepper. The sessions
    with a time book through the site's own engine and take the deposit
@@ -58,7 +59,7 @@ function Tabs({ at }: { at: SessionSlug }) {
         {TILES.map((x, k) => (
           <button key={x} type="button" role="radio" aria-checked={x === cur} ref={x === cur ? keepFocus : undefined} tabIndex={x === cur || (k === 0 && !TILES.includes(cur)) ? 0 : -1} onClick={() => go(x)}>
             <b>{SESSIONS[x].name}</b>
-            <span>{rate(SESSIONS[x])}</span>
+            <span>{priceLabel(SESSIONS[x])}</span>
           </button>
         ))}
       </div>
@@ -86,7 +87,7 @@ function More({ on, go }: { on: boolean; go: (x: SessionSlug) => void }) {
 /* What the photo lists: the includes without the length line (the length is
    on the confirmation), the turnaround, then the price. */
 const getList = (S: (typeof SESSIONS)[SessionSlug]) => {
-  const r = rate(S);
+  const r = priceLabel(S);
   return [...S.includes.filter((x) => !/^(one hour|\d+ minutes)\b/i.test(x)), ...(S.turnaround ? [`Ready in ${S.turnaround}`] : []), /deposit$/.test(r) ? `${r} required` : r];
 };
 
@@ -134,7 +135,7 @@ export function V3BookFlow({ slug, tabs = true, h1 = false, startView }: { slug:
           p.body
         )
       }
-      sum={[["Session", rate(S)], ...p.sum]}
+      sum={[["Session", priceLabel(S)], ...p.sum]}
       photo={S.photo}
       name={S.name}
       over
@@ -169,7 +170,7 @@ export function V3Book({ slug }: { slug: SessionSlug }) {
     if (SESSIONS[slug].cal && Date.now() - tabbedAt > 3000) mountCover();
   }, [slug]);
   // the script only in the server's markup: rendered on a move inside the site it would never run, and React warns
-  const fromServer = React.useSyncExternalStore(noop, () => false, () => true);
+  const fromServer = React.useSyncExternalStore(noSubscribe, () => false, () => true);
   return (
     <div className="v3 contents">
       <section className="v3page" id="p-flow">
@@ -184,12 +185,11 @@ export function V3Book({ slug }: { slug: SessionSlug }) {
 
 /* Weddings: Date, Shoot, You, Sent. Nothing is booked; the request is an
    enquiry and the date is confirmed with a quote. */
-const noop = () => () => {};
 
 /* Client only: the page is prerendered, so a date baked in at build time
    no longer matches the visitor's today and hydration fails. */
 function OnRequest(props: { slug: SessionSlug; shell: Shell }) {
-  const stamp = React.useSyncExternalStore(noop, () => new Date().toDateString(), () => "");
+  const stamp = React.useSyncExternalStore(noSubscribe, () => new Date().toDateString(), () => "");
   if (stamp) return <OnRequestFlow {...props} stamp={stamp} />;
   // on the server and until hydration: the same first step without its calendar, so the page is not empty before JS
   return props.shell({

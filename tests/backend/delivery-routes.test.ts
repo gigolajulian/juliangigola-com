@@ -12,9 +12,10 @@ const serve = vi.hoisted(() => ({
   webResponse: vi.fn(async () => new Response("web")),
   finalResponse: vi.fn(async () => new Response("dl")),
   finalOf: (p: { finals?: { id: string }[] }, id: string) => p.finals?.find((f) => f.id === id),
+  servedPreview: vi.fn(),
 }));
 vi.mock("@/lib/proofs/delivery-serve", () => serve);
-const delivery = vi.hoisted(() => ({ openDelivery: vi.fn(), servedPreview: vi.fn() }));
+const delivery = vi.hoisted(() => ({ openDelivery: vi.fn() }));
 vi.mock("@/lib/proofs/delivery", () => delivery);
 
 const { GET: zip } = await import("@/app/delivery/[id]/zip/route");
@@ -28,7 +29,7 @@ const g = { env: ENV, p: { token: "tok", finals: [{ id: "f1" }] } };
 
 beforeEach(() => {
   delivery.openDelivery.mockReset().mockResolvedValue(g);
-  delivery.servedPreview.mockReset().mockResolvedValue({ body: "jpeg", httpEtag: '"p1"' });
+  serve.servedPreview.mockReset().mockResolvedValue({ body: "jpeg", httpEtag: '"p1"' });
 });
 
 describe("/delivery/[id] downloads", () => {
@@ -53,8 +54,8 @@ describe("/delivery/[id]/f/[fid]", () => {
     expect(res.headers.get("cache-control")).toBe("private, max-age=3600");
     expect(delivery.openDelivery).toHaveBeenCalledWith(ID, "pass=1");
     await get("f1", "?w=800");
-    expect(delivery.servedPreview.mock.calls.map((c) => c[3])).toEqual([false, true]);
-    expect(delivery.servedPreview.mock.calls[0].slice(0, 3)).toEqual([ENV, "tok", "f1"]);
+    expect(serve.servedPreview.mock.calls.map((c) => c[3])).toEqual([false, true]);
+    expect(serve.servedPreview.mock.calls[0].slice(0, 3)).toEqual([ENV, "tok", "f1"]);
   });
 
   it("is a 404 for a bad id without opening the delivery, a closed delivery or an unknown final", async () => {
@@ -66,7 +67,7 @@ describe("/delivery/[id]/f/[fid]", () => {
   });
 
   it("is a 503 to retry when the copy cannot be made, and a 404 when it is gone", async () => {
-    delivery.servedPreview.mockRejectedValueOnce(new Error("down")).mockResolvedValueOnce(null);
+    serve.servedPreview.mockRejectedValueOnce(new Error("down")).mockResolvedValueOnce(null);
     expect((await get("f1")).status).toBe(503);
     expect((await get("f1")).status).toBe(404);
   });

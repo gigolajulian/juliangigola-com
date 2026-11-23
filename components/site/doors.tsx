@@ -1,0 +1,37 @@
+"use client";
+
+import Link from "next/link";
+import { Duo } from "@/components/site/duo";
+import { DOORS, INDEX_ORDER, SESSIONS } from "@/lib/photos-and-sessions";
+
+/** The two ways in, commissions and sessions: closes the home page and the booking pages. */
+export function Doors() {
+  return (
+    <div className="doors">
+      <div className="door">
+        <Duo d={DOORS.commissions.d} l={DOORS.commissions.l} alt="" sizes="(max-width: 800px) 100vw, 50vw" />
+        <span className="lbl mute">For art directors and artists</span>
+        <h3>Have something in mind?</h3>
+        <p>Campaigns, editorial, cover art and presskits. Tell me what you have in mind and I&apos;ll come back with an approach and a quote.</p>
+        <div>
+          <Link className="btn fill" href="/contact/form">Inquire</Link>
+        </div>
+      </div>
+      <div className="door">
+        <Duo d={DOORS.book.d} l={DOORS.book.l} alt="" sizes="(max-width: 800px) 100vw, 50vw" />
+        <span className="lbl mute">For private clients</span>
+        <h3>Book a session</h3>
+        <ul className="lbl">
+          {INDEX_ORDER.map((slug) => (
+            <li key={slug}>
+              <Link href={`/book/${slug}`}>
+                {SESSIONS[slug].name}
+                <span aria-hidden>→</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}

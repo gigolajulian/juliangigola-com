@@ -4,8 +4,8 @@ import * as React from "react";
 import Image from "next/image";
 import { contextLines, replyLink, type Enquiry, type Summary } from "@/lib/inbox";
 import { cn } from "@/lib/utils";
-import { credentials, KEY_STORE, TOKEN_STORE } from "@/lib/admin/admin-github";
-import { adminCall, isLocked } from "@/lib/leads/lead-desk";
+import { credentials, KEY_STORE, saveAdminKey, TOKEN_STORE } from "@/lib/admin/admin-github";
+import { adminCall, errorText, isLocked } from "@/lib/leads/lead-desk";
 
 /* ── the inbox ────────────────────────────────────────────────────
  * Enquiries from the contact form, which now has somewhere to put them.
@@ -88,7 +88,7 @@ export function AdminInbox({
           window.localStorage.setItem(KEY_STORE, withKey);
         }
       } catch (e) {
-        setError(e instanceof Error ? e.message : String(e));
+        setError(errorText(e));
         // A rejected key is not worth keeping — otherwise every visit retries
         // it and the tab looks broken rather than locked.
         if (isLocked(e)) {
@@ -132,7 +132,7 @@ export function AdminInbox({
       setBody((b) => ({ ...b, [row.key]: out.enquiry }));
       if (!row.read) void mark(row, true);
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      setError(errorText(e));
     }
   }
 
@@ -148,7 +148,7 @@ export function AdminInbox({
         body: JSON.stringify({ key: row.key, read }),
       });
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      setError(errorText(e));
       void list();
     }
   }
@@ -165,7 +165,7 @@ export function AdminInbox({
       setRows((r) => (r ? r.filter((x) => x.key !== row.key) : r));
       if (open === row.key) setOpen(null);
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      setError(errorText(e));
     }
   }
 
@@ -205,7 +205,14 @@ export function AdminInbox({
       ) : null}
 
       {rows === null ? (
-        <Unlock onUnlock={(k) => void list(k)} busy={busy} />
+        <Unlock
+          onUnlock={(k) => {
+            // A pasted GitHub token signs in as the token, the same as on the desks.
+            saveAdminKey(k);
+            void list(window.localStorage.getItem(KEY_STORE) ?? undefined);
+          }}
+          busy={busy}
+        />
       ) : rows.length === 0 ? (
         <p className="max-w-prose text-sm text-muted-foreground">
           Nothing yet. The contact form writes here the moment somebody sends

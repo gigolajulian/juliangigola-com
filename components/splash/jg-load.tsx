@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { reveal } from "@/components/splash/jg-cover";
+import { noSubscribe } from "@/lib/utils";
 
 /* ── the booking calendar's wait: J and G fill left to right ─────────
  * Julian picked E from the loader mock (2026-11-07). The count follows
@@ -18,7 +19,6 @@ import { reveal } from "@/components/splash/jg-cover";
 const CREEP = 900; // ms, how slowly the count nears 90 with no answer yet
 const FINISH = 240; // ms, from wherever it is to 100 once the times are in
 const UP = 800; // split: the cover's J and G fading in; also the least they show
-const noop = () => () => {};
 
 let leaving = 0; // an unmount's reveal, held a moment in case the effect is only re-run
 
@@ -26,7 +26,7 @@ export function JgLoad({ done, onDone, className }: { done: boolean; onDone: () 
   const fill = React.useRef<HTMLSpanElement>(null);
   const num = React.useRef<HTMLSpanElement>(null);
   // the cover is up (a booking page with a calendar, `jg-cover.ts`): it plays the wait; anywhere else, J and G fill
-  const split = React.useSyncExternalStore(noop, () => !!document.getElementById("jg-cover"), () => false);
+  const split = React.useSyncExternalStore(noSubscribe, () => !!document.getElementById("jg-cover"), () => false);
   const last = React.useRef(onDone);
   React.useEffect(() => {
     last.current = onDone;

@@ -15,7 +15,7 @@ import { CATEGORIES, DISCIPLINES, PROJECTS, WITH_BTS, categoryLabel, titleCase }
 import { COMMISSION_TABS } from "@/lib/photos-and-sessions";
 import { MOTION_SEO } from "@/lib/seo";
 import { CONTENT } from "@/lib/content";
-import { MT } from "@/lib/v4-home/server";
+import { HOME_DATA } from "@/lib/v4-home/server";
 import ORDER from "@/lib/portfolio-order.json";
 
 /* The big client views are stand-ins that keep their props, so the page's
@@ -32,13 +32,13 @@ const { got, keep } = vi.hoisted(() => {
     );
   return { got, keep };
 });
-vi.mock("@/components/portfolio/work", () => ({ V3Work: keep("V3Work") }));
+vi.mock("@/components/portfolio/work", () => ({ WorkIndex: keep("WorkIndex") }));
 vi.mock("@/components/home/rollback", () => ({ V3Home: keep("V3Home") }));
-vi.mock("@/components/v4/home/gate", () => ({ MtGate: keep("MtGate") }));
-vi.mock("@/components/v4/home/home", () => ({ MtHome: keep("MtHome") }));
-vi.mock("@/components/portfolio/video", () => ({ V3Video: keep("V3Video") }));
-vi.mock("@/components/about/about", () => ({ V3About: keep("V3About") }));
-vi.mock("@/components/contact/inquire", () => ({ V3Inquire: keep("V3Inquire"), V3Commission: keep("V3Commission") }));
+vi.mock("@/components/v4/home/gate", () => ({ HomeGate: keep("HomeGate") }));
+vi.mock("@/components/v4/home/home", () => ({ Home: keep("Home") }));
+vi.mock("@/components/portfolio/video", () => ({ VideoIndex: keep("VideoIndex") }));
+vi.mock("@/components/about/about", () => ({ About: keep("About") }));
+vi.mock("@/components/contact/inquire", () => ({ Contact: keep("Contact"), CommissionForm: keep("CommissionForm") }));
 // next/font is compiled by Next; outside it the loader is only a class name.
 vi.mock("next/font/local", () => ({ default: () => ({ variable: "font", className: "font" }) }));
 
@@ -90,8 +90,8 @@ describe("page bodies", () => {
     render(<contact.default />);
     render(<commission.default />);
     render(<video.default />);
-    for (const id of ["V3About", "V3Inquire", "V3Commission", "V3Video"]) expect(screen.getByTestId(id)).toBeTruthy();
-    expect((got.V3Video as { videos: unknown }).videos).toBe(CONTENT.videos);
+    for (const id of ["About", "Contact", "CommissionForm", "VideoIndex"]) expect(screen.getByTestId(id)).toBeTruthy();
+    expect((got.VideoIndex as { videos: unknown }).videos).toBe(CONTENT.videos);
   });
 
   it("legal sets the terms and the privacy policy on one page", () => {
@@ -121,7 +121,7 @@ describe("page bodies", () => {
 
 describe("/portfolio", () => {
   type Work = { work: { s: string; cover: string }[]; chip: Record<string, string>; frames: Record<string, { src: string; back?: { src: string } }[]> };
-  const props = () => (render(<portfolio.default />), got.V3Work as Work);
+  const props = () => (render(<portfolio.default />), got.WorkIndex as Work);
 
   it("lists every project but real estate, in Julian's order first", () => {
     const { work } = props();
@@ -145,7 +145,7 @@ describe("/portfolio", () => {
 describe("/", () => {
   it("gives each Commissions tab nine or five top projects of its discipline", async () => {
     render(await home.default());
-    expect((got.MtGate as { data: unknown }).data).toBe(MT);
+    expect((got.HomeGate as { data: unknown }).data).toBe(HOME_DATA);
     const top = (got.V3Home as { top: Record<string, { s: string; meta: string }[]> }).top;
     expect(Object.keys(top).length).toBeGreaterThan(0);
     const tabs = COMMISSION_TABS.map(([, href]) => new URLSearchParams(href.split("?")[1]).get("d")).filter(Boolean);
@@ -159,6 +159,6 @@ describe("/", () => {
 
   it("the v4 trial route renders the v4 home with the server's data", () => {
     render(<homeV4.default />);
-    expect((got.MtHome as { data: unknown }).data).toBe(MT);
+    expect((got.Home as { data: unknown }).data).toBe(HOME_DATA);
   });
 });

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { usePathname } from "next/navigation";
-import { scrollTop } from "@/components/v3/smooth-scroll";
+import { scrollTop } from "@/components/site/smooth-scroll";
 import { v4pages } from "@/lib/flags/v4pages";
 
 /* Page opening A (mock https://claude.ai/artifact/6Nbep18kL572cWznUuA66K):

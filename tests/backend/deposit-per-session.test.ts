@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { FakeEmail, FakeKV, FakeStore, fakeLock, LEADS_KEY, leadOf } from "./fakes";
+import { FakeEmail, FakeKV, FakeStore, fakeLock, LEADS_KEY, leadOf, GOOGLE_OAUTH as OAUTH } from "./fakes";
 import { forgetToken } from "@/lib/booking/gcal";
 import { clientView, depositPaid } from "@/lib/booking/booking-engine";
 import { DEPOSIT, depositFor, PAID } from "@/lib/booking/paid";
 import { amountOf, isDeposit } from "@/lib/booking/deposit";
 import { BOOK_ROWS } from "@/lib/v4-home/data";
-import { rate, SESSIONS } from "@/lib/photos-and-sessions";
+import { priceLabel, SESSIONS } from "@/lib/photos-and-sessions";
 import { BookingLock } from "@/worker/booking-lock";
 
 // Pinned clock, as in manage-booking.test.ts: hours and the 48h window must not depend on the day.
@@ -24,7 +24,6 @@ const { POST: hook } = await import("@/app/api/stripe/route");
 const { POST: change } = await import("@/app/api/booking/[id]/route");
 
 const WHSEC = "whsec_test";
-const OAUTH = JSON.stringify({ client_id: "a", client_secret: "b", refresh_token: "c" });
 const PI = "pi_TEST1234567890";
 // A Wednesday 10 AM Pacific, a week out.
 const WHEN = "2026-11-18T18:00:00.000Z";
@@ -186,13 +185,13 @@ describe("what was paid, not today's price", () => {
 
 describe("the screens read the same map", () => {
   it("prints each session's /book price on the home rows, and its deposit on the line under Book", () => {
-    // the rows show what /book shows (rate): "From" where there is a price, the deposit where the price is quoted after
+    // the rows show what /book shows (priceLabel): "From" where there is a price, the deposit where the price is quoted after
     expect(Object.fromEntries(BOOK_ROWS.map((r) => [r.slug, r.price]))).toEqual({ portraits: "$250 deposit", headshots: "From $400", graduation: "From $400", "studio-digitals": "From $300" });
     expect(Object.fromEntries(BOOK_ROWS.map((r) => [r.slug, r.dep]))).toEqual({ portraits: "$250", headshots: "$200", graduation: "$200", "studio-digitals": "$150" });
     // Every paid session's Cal.com slug is one the map knows: "studio-digitals" must never fall through to $100.
     for (const s of Object.values(SESSIONS).filter((x) => x.paid)) expect(PAID).toContain(s.cal!.split("/")[1]);
-    expect(rate({ ...SESSIONS["studio-digitals"], from: null })).toBe("$150 deposit");
-    expect(rate({ ...SESSIONS.headshots, from: null })).toBe("$200 deposit");
+    expect(priceLabel({ ...SESSIONS["studio-digitals"], from: null })).toBe("$150 deposit");
+    expect(priceLabel({ ...SESSIONS.headshots, from: null })).toBe("$200 deposit");
     expect(depositFor("digitals")).toBe(150);
   });
 });

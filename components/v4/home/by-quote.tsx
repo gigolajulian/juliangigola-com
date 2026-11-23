@@ -30,7 +30,7 @@ function ClientPhoto({ c, on, q, stills, wide }: { c: QuoteClient; on: boolean; 
   );
 }
 
-export function MtByQuote({ stills, reply, onOptionPick }: { stills: Record<string, string>; reply: string | null; onOptionPick: (k: QuoteOpt["key"]) => void }) {
+export function ByQuote({ stills, reply, onOptionPick }: { stills: Record<string, string>; reply: string | null; onOptionPick: (k: QuoteOpt["key"]) => void }) {
   const [sel, setSel] = React.useState(0);
   const [optPhoto, setOptPhoto] = React.useState(false); // the option's photo shows instead of the client's
   // the rotation (motion/quote.ts): `k` is the client shown, `name` the name shown (it follows k after a fade, `sw`)

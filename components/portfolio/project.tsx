@@ -5,8 +5,8 @@ import { BtsCredit, BtsPageGrid } from "@/components/bts/bts";
 import { BackLink } from "@/components/site/back-link";
 import { billing, markFor, titleCase } from "@/lib/work/work";
 import { tailHole } from "@/lib/sheet";
-import { V4Project } from "@/components/portfolio/project-viewer";
-import type { Frame, Project } from "@/lib/work-types";
+import { ProjectViewer } from "@/components/portfolio/project-viewer";
+import type { Frame, Project } from "@/lib/work/work-types";
 
 /* JG V3 project page (leftovers sheet, card B; Julian: vertical, with the
    client's logo where there is one). The head: back link, the set's name in
@@ -37,7 +37,7 @@ const creditLabel = (c: Credit, h: string | null) =>
 const KIND: Record<string, string> = { campaigns: "campaign", editorial: "editorial", coverart: "coverart", "artist-presskit": "presskit", "music-video": "video", events: "event" };
 const kindOf = (p: Project) => p.categories.map((c) => KIND[c.slug]).find(Boolean);
 
-export function V3Project({ project, next }: { project: Project; next?: { href: string; name: string; cover?: Frame } }) {
+export function ProjectView({ project, next }: { project: Project; next?: { href: string; name: string; cover?: Frame } }) {
   const mark = markFor(project.slug);
   const client = billing(project);
   const sub = [client, project.categories[0] && titleCase(project.categories[0].name)].filter(Boolean).join(" · ");
@@ -206,7 +206,7 @@ export function V3Project({ project, next }: { project: Project; next?: { href: 
         </div>
       </section>
       {/* The page's frames in the order they are laid out, for the viewer (`?v4pages=view`). */}
-      <V4Project frames={[...(big ? [big] : []), ...lead, ...rest].map((f) => ({ s: project.slug, src: f.src, alt: alt(f.alt), wide: wide(f), sq: f.width === f.height }))} />
+      <ProjectViewer frames={[...(big ? [big] : []), ...lead, ...rest].map((f) => ({ s: project.slug, src: f.src, alt: alt(f.alt), wide: wide(f), sq: f.width === f.height }))} />
     </div>
   );
 }

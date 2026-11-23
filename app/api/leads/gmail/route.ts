@@ -1,5 +1,5 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { fromWorker } from "@/lib/vouch";
+import { refuseWorker } from "@/lib/vouch";
 import { syncGmail } from "@/lib/leads/gmail-sync";
 import { json } from "@/lib/http";
 
@@ -14,7 +14,8 @@ export const dynamic = "force-dynamic";
 export async function POST(request: Request) {
   const { env } = await getCloudflareContext({ async: true });
   // Hashes compared, so the check takes the same time however close a guess is.
-  if (!(await fromWorker(request, env.BOOKING_SECRET))) return json({ error: "Not authorized." }, 401);
+  const denied = await refuseWorker(request, env.BOOKING_SECRET);
+  if (denied) return denied;
   if (!env.GCAL_OAUTH || !env.LEADS_KEY) return json({ error: "Not set up." }, 503);
   try {
     return json({ folded: await syncGmail(env) });

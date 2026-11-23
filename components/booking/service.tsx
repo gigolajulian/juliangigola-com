@@ -3,12 +3,12 @@ import Link from "next/link";
 import { PageFoot } from "@/components/site/chrome";
 import { V3BookFlow } from "@/components/booking/book";
 import { Run } from "@/components/booking/flow";
-import { Doors } from "@/components/home/rollback";
+import { Doors } from "@/components/site/doors";
 import { ServiceBar } from "@/components/booking/service-bar";
 import { BOOKING_PAGES, bookingHref, type BookingPage } from "@/lib/booking/service-pages";
 import { CAMPUS_GUIDES, campusHref } from "@/lib/graduation/campus-guides";
 import { SESSIONS, type SessionSlug } from "@/lib/photos-and-sessions";
-import type { Frame } from "@/lib/work-types";
+import type { Frame } from "@/lib/work/work-types";
 
 /* JG V3 service page (leftovers sheet, card A): the title on the left with
    the rate and includes as a run and the two buttons, the frames in the

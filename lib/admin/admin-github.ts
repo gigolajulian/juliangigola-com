@@ -76,7 +76,7 @@ export async function listDirectory(
     { headers: headers(token), cache: "no-store" },
   );
   if (res.status === 404) return [];
-  const body = (await res.json()) as { type: string; path: string }[] & {
+  const body = (await (res.ok ? res.json() : res.json().catch(() => ({})))) as { type: string; path: string }[] & {
     message?: string;
   };
   if (!res.ok)
@@ -221,7 +221,7 @@ export async function readFile(
     { headers: headers(token), cache: "no-store" },
   );
   if (res.status === 404) return null;
-  const body = (await res.json()) as { content?: string; message?: string };
+  const body = (await (res.ok ? res.json() : res.json().catch(() => ({})))) as { content?: string; message?: string };
   if (!res.ok)
     throw new Error(
       `GitHub said ${res.status}: ${body?.message ?? "unknown error"}`,

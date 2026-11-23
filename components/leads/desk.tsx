@@ -267,7 +267,7 @@ export function LeadsDesk() {
   const call = inboxCall;
   const load = React.useCallback(() => {
     call<{ leads: LeadSummary[] }>({ query: "?leads" })
-      .then((o) => { setLeads(o.leads); setAt(Date.now()); })
+      .then((o) => { setLeads(o.leads); setAt(Date.now()); setError(null); })
       .catch((e: unknown) => setError(loadError(e)));
   }, [call]);
   React.useEffect(load, [load]);

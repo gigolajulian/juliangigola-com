@@ -5,7 +5,7 @@ import { POST } from "@/app/api/booking/[id]/route";
 import { bookingToken } from "@/lib/booking/booking-token";
 import { forgetToken } from "@/lib/booking/gcal";
 import { BookingLock } from "@/worker/booking-lock";
-import { FakeEmail, FakeKV, FakeStore, fakeLock, LEADS_KEY } from "./fakes";
+import { FakeEmail, FakeKV, FakeStore, fakeLock, LEADS_KEY, GOOGLE_OAUTH as OAUTH } from "./fakes";
 
 /* /api/booking/[id]: the mail's signed token opens one booking; a cancel
    with no deposit takes the event off the calendar and mails both sides. */
@@ -14,7 +14,6 @@ const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
 vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
 
 const SECRET = "booking-secret-for-tests";
-const OAUTH = JSON.stringify({ client_id: "a", client_secret: "b", refresh_token: "c" });
 const ID = "AbCdEfGh12345678";
 const START = new Date(Date.now() + 7 * 864e5).toISOString();
 const END = new Date(Date.parse(START) + 36e5).toISOString();

@@ -22,7 +22,7 @@ const GAIN = 30; // px of lag per px/ms of scroll, before the band
 const BAND = 110; // px the lag approaches and never reaches
 const band = (x: number) => (x * BAND) / (BAND + Math.abs(x));
 
-export function V4Drift({ k }: { k: string }) {
+export function Drift({ k }: { k: string }) {
   React.useEffect(() => {
     if (!CSS.supports("animation-timeline: view()") || !matchMedia("(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)").matches) return;
     const grid = document.querySelector<HTMLElement>("#p-work .wgrid");

@@ -3,7 +3,7 @@ import type { AdminProject } from "@/components/admin/admin-projects";
 import type { PickerItem } from "@/components/admin/admin-picker";
 import type { Draft } from "@/lib/admin/publish";
 import type { TrashedProject } from "@/lib/work/added";
-import type { Bts } from "@/lib/work-types";
+import type { Bts } from "@/lib/work/work-types";
 
 /** The per-project overrides a build applies, one map per kind. */
 export type Overrides = Pick<Draft, "categories" | "frames" | "credits" | "copy" | "slugs">;

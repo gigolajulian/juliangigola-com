@@ -8,7 +8,6 @@
 
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { openDeliveryIn, previews } from "@/lib/proofs/delivery-serve";
-export { servedPreview } from "@/lib/proofs/delivery-serve";
 import { crc32 } from "@/lib/proofs/zip";
 import { finalKey, PREVIEW_W, THUMB_W } from "@/lib/proofs/proof";
 

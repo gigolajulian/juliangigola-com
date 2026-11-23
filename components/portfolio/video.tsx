@@ -5,6 +5,7 @@ import Image from "next/image";
 import { PageFoot } from "@/components/site/chrome";
 import { Mark } from "@/components/site/duo";
 import { REEL, creditOf, embedUrl, previewUrl, captionsOff, vimeoListen, vimeoPlays, posterFor, sectionName, type Video } from "@/lib/work/videos";
+import { noSubscribe, pad } from "@/lib/utils";
 
 /* JG V3 Motion (Julian): A as an index over one full-screen stage;
    scrolling swaps the film and its title, bottom left. Phones get the same
@@ -20,7 +21,6 @@ const rank = (v: Video) => (ORDER.indexOf(v.id) + 1 || 99);
 /* A client's logo slug; Sammy Shiblaq releases under Empire, Imanemun's
    Dide O Del under Paydar (Julian). */
 const markOf = (client: string) => (client === "Sammy Shiblaq" ? "empire" : client === "Imanemun" ? "paydar" : client.toLowerCase().replace(/\s+/g, "-"));
-const two = (n: number) => String(n).padStart(2, "0");
 const subOf = (v: Video) => (v.id === "reel" ? "Reel" : [creditOf(v), v.year ?? sectionName(v.section)].filter(Boolean).join(" · "));
 const still = () => typeof window !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -157,17 +157,17 @@ function Player({ v, list, onGo, onClose }: { v: Video | null; list: Video[]; on
           {/* Paused (Julian): the outer thirds step to the film before and after. */}
           {paused && prev ? (
             <button type="button" className="pl-step prev" onClick={() => onGo(prev)}>
-              <span className="lbl">← {two(n - 1)}</span><b>{prev.title}</b>
+              <span className="lbl">← {pad(n - 1)}</span><b>{prev.title}</b>
             </button>
           ) : null}
           {paused && next ? (
             <button type="button" className="pl-step next" onClick={() => onGo(next)}>
-              <span className="lbl">{two(n + 1)} →</span><b>{next.title}</b>
+              <span className="lbl">{pad(n + 1)} →</span><b>{next.title}</b>
             </button>
           ) : null}
           <div className="pl-bar lbl">
             <button type="button" onClick={back}>← Back</button>
-            <span>{two(n)} / {two(list.length - 1)}</span>
+            <span>{pad(n)} / {pad(list.length - 1)}</span>
           </div>
           <div className="pl-info">
             <div className="pl-meta">
@@ -194,7 +194,7 @@ function Player({ v, list, onGo, onClose }: { v: Video | null; list: Video[]; on
 function Desk({ films, onPlay }: { films: Video[]; onPlay: (v: Video) => void }) {
   const [i, setI] = React.useState(0);
   const moving = React.useSyncExternalStore(
-    () => () => {},
+    noSubscribe,
     () => !still() && matchMedia("(min-width: 801px)").matches,
     () => false,
   );
@@ -221,16 +221,16 @@ function Desk({ films, onPlay }: { films: Video[]; onPlay: (v: Video) => void })
           );
         })}
         <button type="button" className="mo-hit" onClick={() => onPlay(v)} aria-label={`Play ${v.title}`} />
-        <p className="mo-h lbl" aria-hidden>Motion · {two(films.length)} films</p>
+        <p className="mo-h lbl" aria-hidden>Motion · {pad(films.length)} films</p>
         <div className="mo-cap" key={v.id}>
-          <span className="lbl">{two(i)} · {subOf(v)}</span>
+          <span className="lbl">{pad(i)} · {subOf(v)}</span>
           <h2>{v.title}</h2>
         </div>
         <ol className="mo-index lbl">
           {films.map((f, j) => (
             <li key={f.id}>
               <button type="button" aria-current={j === i || undefined} onClick={() => steps.current[j]?.scrollIntoView({ behavior: still() ? "auto" : "smooth" })}>
-                <span>{two(j)}</span>{f.title}
+                <span>{pad(j)}</span>{f.title}
               </button>
             </li>
           ))}
@@ -283,7 +283,7 @@ function Stack({ films }: { films: Video[] }) {
   if (!open)
     return (
       <div className="mo-stack">
-        <p className="lbl mute" aria-hidden>Motion · {two(films.length)} films</p>
+        <p className="lbl mute" aria-hidden>Motion · {pad(films.length)} films</p>
         {films.map((v, i) => <Row key={v.id} v={v} i={i} onOpen={go} />)}
       </div>
     );
@@ -313,7 +313,7 @@ function Stack({ films }: { films: Video[] }) {
   );
 }
 
-export function V3Video({ videos }: { videos: Video[] }) {
+export function VideoIndex({ videos }: { videos: Video[] }) {
   const sorted = React.useMemo(() => [...videos].sort((a, b) => rank(a) - rank(b)), [videos]);
   const all = React.useMemo(() => [reel, ...sorted], [sorted]);
   const [playing, setPlaying] = React.useState<Video | null>(null);
@@ -329,7 +329,7 @@ export function V3Video({ videos }: { videos: Video[] }) {
     <div className="v3 contents">
       <section className="v3page" id="p-video">
         {/* One h1 for both layouts; their visible copies of the line are aria-hidden. */}
-        <h1 className="sr-only">Motion · {two(all.length)} films</h1>
+        <h1 className="sr-only">Motion · {pad(all.length)} films</h1>
         <Desk films={all} onPlay={setPlaying} />
         <Stack films={all} />
         <PageFoot />

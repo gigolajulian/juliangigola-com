@@ -1,5 +1,6 @@
 import { DEFAULT_HOURS, EVENTS, TZ, windowOn, type Hours, type Rule } from "@/lib/booking/booking-rules";
 import { gcal } from "@/lib/booking/gcal";
+import { sha256Hex } from "@/lib/utils";
 
 /* ── open times, from hello@'s free/busy ──────────────────────────
  * The rules (`lib/booking/booking-rules.ts`) say when Julian works; Google's
@@ -131,8 +132,7 @@ const feeds = new Map<string, { at: number; busy: Busy[] }>();
 const FEED_MS = 2500;
 const edge = () => (globalThis as { caches?: { default?: Cache } }).caches?.default;
 async function feedKey(src: string) {
-  const h = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(src)));
-  return new Request(`https://ics-cache.invalid/${[...h].map((b) => b.toString(16).padStart(2, "0")).join("")}`);
+  return new Request(`https://ics-cache.invalid/${await sha256Hex(src)}`);
 }
 /** A feed's busy spans. Throws with the status only: the link is private. */
 async function icsFeed(src: string) {

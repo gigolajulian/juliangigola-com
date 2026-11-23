@@ -18,10 +18,10 @@ import { adminCall, centsLabel, dayLabel, errorText } from "@/lib/leads/lead-des
 
 export type Txn = { id: string; at: string; type: string; amount: number; fee: number; net: number; currency: string; status: string; what: string };
 /** Stripe's types in his words. */
-export const KIND: Record<string, string> = { charge: "Payment", payment: "Payment", refund: "Refund", payment_refund: "Refund", payout: "Payout", stripe_fee: "Stripe fee", adjustment: "Adjustment", dispute: "Dispute" };
+export const TXN_LABEL: Record<string, string> = { charge: "Payment", payment: "Payment", refund: "Refund", payment_refund: "Refund", payout: "Payout", stripe_fee: "Stripe fee", adjustment: "Adjustment", dispute: "Dispute" };
 
 type Row = Txn & Record<string, unknown>;
-const kind = (t: Txn) => KIND[t.type] ?? t.type.replace(/_/g, " ");
+const kind = (t: Txn) => TXN_LABEL[t.type] ?? t.type.replace(/_/g, " ");
 
 export function MoneyDesk() {
   const [top, setTop] = React.useState<{ available: number; pending: number; test: boolean } | null>(null);

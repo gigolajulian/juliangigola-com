@@ -5,9 +5,10 @@ import { warmGsap, withGsap } from "@/lib/gsap-lazy";
 import { cn } from "@/lib/utils";
 import { depositFor } from "@/lib/booking/paid";
 import type { Status } from "@/lib/booking/deposit";
+import type { Booking } from "@/lib/booking/booking-rules";
 
 /* Goo: the cursor pours into the buttons (`time-picker.tsx`); `?goo=0` off. */
-export const goo = () => typeof location === "undefined" || new URLSearchParams(location.search).get("goo") !== "0";
+export const gooOn = () => typeof location === "undefined" || new URLSearchParams(location.search).get("goo") !== "0";
 
 /* ── the deposit ─────────────────────────────────────────────────────
  * Behind `?deposit`: a paid session's deposit
@@ -100,19 +101,11 @@ function walletTheme(el: HTMLElement) {
 const FONTS = [{ cssSrc: "https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" }];
 const PAY_FAILED = "That did not go through. Try again, or write to hello@juliangigola.com.";
 
-export type DepositBody = {
-  slug: string;
-  start: string;
-  timeZone: string;
-  name: string;
-  email: string;
+/** The booking the card posts, with the phone it always asks for. */
+export type DepositBody = Booking & {
   /** E.164; the server adds it to the notes itself. */
   phone: string;
-  notes?: string;
-  where?: string;
   session?: string;
-  /** Booked by the site's engine, through its lock. */
-  engine: "own";
 };
 
 type Stage = "loading" | "ready" | "paying" | "confirming" | "taken" | "refunded" | "failed" | "slow" | "broken" | "declined";
@@ -443,7 +436,7 @@ export function DepositStep({
             </div>
             <div className="ed-floor">
               {stage === "declined" || stage === "broken" ? <button type="button" onClick={onBack} className="label ed-quiet">Edit details</button> : <span />}
-              {end[3] ? <button type="button" onClick={end[3][1]} data-stick={goo() ? "fill" : undefined} className="ed-btn">{end[3][0]}</button> : null}
+              {end[3] ? <button type="button" onClick={end[3][1]} data-stick={gooOn() ? "fill" : undefined} className="ed-btn">{end[3][0]}</button> : null}
             </div>
           </>
         ) : (
@@ -472,7 +465,7 @@ export function DepositStep({
                 <svg aria-hidden viewBox="0 0 12 14" className="w-3 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.3"><rect x="1" y="6" width="10" height="7" rx="1" /><path d="M3.5 6V4a2.5 2.5 0 0 1 5 0v2" /></svg>
                 Secured by Stripe. I never see your card.
               </span>
-              <button ref={payBtn} type="button" onClick={pay} disabled={bad || !canPay} data-accent="" data-bad={bad ? "" : undefined} data-stick={goo() ? "fill" : undefined} className="ed-btn">
+              <button ref={payBtn} type="button" onClick={pay} disabled={bad || !canPay} data-accent="" data-bad={bad ? "" : undefined} data-stick={gooOn() ? "fill" : undefined} className="ed-btn">
                 {bad ? "Declined" : payLabel ?? `Pay $${usd}`}
               </button>
             </div>

@@ -22,6 +22,7 @@ import {
   type Video,
   type VideoSection,
 } from "./work/videos";
+import { contentChecks, isRecord } from "./json";
 
 export type Testimonial = {
   quote: string;
@@ -117,20 +118,7 @@ export type SiteContent = {
  * silent fallback would publish a page with a section quietly missing.
  * ─────────────────────────────────────────────────────────────── */
 
-const fail = (path: string, wanted: string, got: unknown): never => {
-  throw new Error(
-    `content/site.json: ${path} should be ${wanted}, got ${JSON.stringify(got) ?? typeof got}`,
-  );
-};
-
-const isRecord = (v: unknown): v is Record<string, unknown> =>
-  typeof v === "object" && v !== null && !Array.isArray(v);
-
-/** A non-empty string. Blank fields are a mistake, not a value. */
-const str = (v: unknown, path: string): string =>
-  typeof v === "string" && v.trim() !== ""
-    ? v
-    : fail(path, "a non-empty string", v);
+const { fail, str } = contentChecks("content/site.json");
 
 /** A string, or null for "not set yet" — which several fields treat as meaningful. */
 const strOrNull = (v: unknown, path: string): string | null =>

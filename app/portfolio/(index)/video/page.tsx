@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { shareOg } from "@/lib/og/share";
 import { MOTION_SEO } from "@/lib/seo";
 import { CONTENT } from "@/lib/content";
-import { V3Video } from "@/components/portfolio/video";
+import { VideoIndex } from "@/components/portfolio/video";
 
 /* ── /work/video ──────────────────────────────────────────────────
  * The moving work, as one more filter on the work index: the `(index)`
@@ -28,5 +28,5 @@ export const metadata: Metadata = {
 
 /* JG V3 (leftovers card D): the films as 16:9 tiles. */
 export default function VideoPage() {
-  return <V3Video videos={CONTENT.videos} />;
+  return <VideoIndex videos={CONTENT.videos} />;
 }
