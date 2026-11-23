@@ -804,6 +804,13 @@ html[data-theme="dark"]:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w.w[data
 html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap.mt-cap{font-family:var(--font-tagline),var(--mono);font-weight:600;letter-spacing:.08em;font-size:max(15px,calc(17.5 * var(--u)))!important}
 @media (max-width:599px){html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap.mt-cap{font-size:14.5px!important;letter-spacing:.06em}html:root:root .v3 .mt-hero .mt-name h1{bottom:calc(118px + env(safe-area-inset-bottom))}}
 @media (min-width:1024px){html:root:root .v3 .mt-hero .mt-name h1{bottom:calc(114 * var(--u))}}
+/* Name and tagline, tuned by Julian per screen shape (2026-11-22, hero tuner): phone, then desktop in three bands by shape.
+   Desktop sizes are in --u, so each band hits its tuned pixels at its sample screen (1440x900, 1920x1080, 2560x1080; --u 1, 1.2, 1.2). */
+html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap.mt-cap{font-weight:500}
+@media (max-width:599px){html:root:root .v3 .mt-hero .mt-name .mt-name-in h1{font-size:min(68.5px,calc(66 * var(--pu)));left:4px;bottom:calc(123px + env(safe-area-inset-bottom))}html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap.mt-cap{font-size:15.5px!important;left:calc(19 * var(--pu));bottom:calc(65px + env(safe-area-inset-bottom))}}
+@media (min-width:1024px) and (min-height:600px) and (max-aspect-ratio:17/10){html:root:root .v3 .mt-hero .mt-name .mt-name-in h1{font-size:calc(175.5 * var(--u));bottom:calc(92 * var(--u))}html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap.mt-cap{font-size:max(15px,calc(16.5 * var(--u)))!important;left:calc(49 * var(--u));bottom:calc(64 * var(--u))}}
+@media (min-width:1024px) and (min-height:600px) and (min-aspect-ratio:17/10) and (max-aspect-ratio:2/1){html:root:root .v3 .mt-hero .mt-name .mt-name-in h1{font-size:calc(190.4 * var(--u));left:calc(49.2 * var(--u))}html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap.mt-cap{font-size:max(15px,calc(17.9 * var(--u)))!important;left:calc(61.7 * var(--u));bottom:calc(66.7 * var(--u))}}
+@media (min-width:1024px) and (min-height:600px) and (min-aspect-ratio:2/1){html:root:root .v3 .mt-hero .mt-name .mt-name-in h1{font-size:calc(193.3 * var(--u));bottom:calc(95.8 * var(--u))}html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap.mt-cap{font-size:max(15px,calc(18.3 * var(--u)))!important;left:calc(45.8 * var(--u));bottom:calc(60.8 * var(--u))}}
 /* The name sits higher (phone 118px, desktop 114u) so the tagline never runs under the descenders of "Gigola". */
 /* the booking flow's first height (stepper plus the calendar wait) while its chunk is still on the way (book-online.tsx) */
 [data-mtscroll] .mt-bin-wait{min-height:calc(849px + 1.5vw)} /* measured 865-888px from 1024 to 2560 wide */
