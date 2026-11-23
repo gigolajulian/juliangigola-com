@@ -52,7 +52,8 @@ export function split(sizes: string[][], heroes: { d: [number, string][]; l: [nu
       if (!rest) throw e;
       if (i.dataset.plain === undefined) {
         i.dataset.plain = "";
-        i.src = rest.startsWith("http") ? rest : `/${rest}`;
+        // as plainSrc in image-loader.ts: this runs as page source and cannot import it
+        i.src = /^https?:\//.test(rest) ? rest.replace(/^(https?:)\/+/, "$1//") : `/${rest}`;
       }
       // Firefox refuses a decode() asked for in the same turn as the new src: wait for the file itself
       return new Promise((ok, no) => {

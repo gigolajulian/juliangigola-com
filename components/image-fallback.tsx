@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { plainSrc } from "@/image-loader";
 
 /* ── when the resizer is blocked, the photograph still shows ──────
  * Every picture on the site is addressed through `/cdn-cgi/image/...`
@@ -31,11 +32,11 @@ export function ImageFallback() {
       if (!(img instanceof HTMLImageElement)) return;
       if (img.dataset.plain !== undefined) return;
       const from = img.currentSrc || img.src;
-      const rest = /\/cdn-cgi\/image\/[^/]+\/(.+)$/.exec(from)?.[1];
-      if (!rest) return;
+      const plainFile = plainSrc(from);
+      if (!plainFile) return;
       img.dataset.plain = "";
       img.srcset = "";
-      img.src = rest.startsWith("http") ? rest : `/${rest}`;
+      img.src = plainFile;
     };
     const onError = (e: Event) => plain(e.target);
     window.addEventListener("error", onError, true);
