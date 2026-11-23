@@ -15,7 +15,7 @@ import { CATEGORIES, DISCIPLINES, PROJECTS, WITH_BTS, categoryLabel, titleCase }
 import { COMMISSION_TABS } from "@/lib/photos-and-sessions";
 import { MOTION_SEO } from "@/lib/seo";
 import { CONTENT } from "@/lib/content";
-import { MT } from "@/lib/v4-home/server";
+import { HOME_DATA } from "@/lib/v4-home/server";
 import ORDER from "@/lib/portfolio-order.json";
 
 /* The big client views are stand-ins that keep their props, so the page's
@@ -145,7 +145,7 @@ describe("/portfolio", () => {
 describe("/", () => {
   it("gives each Commissions tab nine or five top projects of its discipline", async () => {
     render(await home.default());
-    expect((got.HomeGate as { data: unknown }).data).toBe(MT);
+    expect((got.HomeGate as { data: unknown }).data).toBe(HOME_DATA);
     const top = (got.V3Home as { top: Record<string, { s: string; meta: string }[]> }).top;
     expect(Object.keys(top).length).toBeGreaterThan(0);
     const tabs = COMMISSION_TABS.map(([, href]) => new URLSearchParams(href.split("?")[1]).get("d")).filter(Boolean);
@@ -159,6 +159,6 @@ describe("/", () => {
 
   it("the v4 trial route renders the v4 home with the server's data", () => {
     render(<homeV4.default />);
-    expect((got.Home as { data: unknown }).data).toBe(MT);
+    expect((got.Home as { data: unknown }).data).toBe(HOME_DATA);
   });
 });

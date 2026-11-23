@@ -3,7 +3,7 @@ import { V3Home, type TopWork } from "@/components/home/rollback";
 import { HomeGate } from "@/components/v4/home/gate";
 import { COMMISSION_TABS } from "@/lib/photos-and-sessions";
 import { PROJECTS, categoryLabel } from "@/lib/work/work";
-import { MT } from "@/lib/v4-home/server";
+import { HOME_DATA } from "@/lib/v4-home/server";
 import ORDER from "@/lib/portfolio-order.json";
 import { shareOg } from "@/lib/og/share";
 
@@ -36,10 +36,10 @@ export default async function HomePage() {
   // The env test is written out here so the build drops the import when it is off: the default home must not load v4 files.
   if (process.env.NEXT_PUBLIC_V4_HOME === "1") {
     const { Home } = await import("@/components/v4/home/home");
-    return <Home data={MT} />;
+    return <Home data={HOME_DATA} />;
   }
   return (
-    <HomeGate data={MT}>
+    <HomeGate data={HOME_DATA}>
       <V3Home top={TOP} />
     </HomeGate>
   );

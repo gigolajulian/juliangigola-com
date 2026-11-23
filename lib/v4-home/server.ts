@@ -19,7 +19,7 @@ const markOf = (client: string) => (client === "Sammy Shiblaq" ? "empire" : clie
 const file = (title: string, preview?: string) => (FILM_FILES[title] ? `${FILM_FILES[title]}#t=${preview?.match(/#t=(\d+)s/)?.[1] ?? 8}` : undefined);
 const vid = (title: string) => CONTENT.videos.find((v) => v.title === title);
 const used = new Set([...HERO_KEYS, ...COMM_KEYS].map((k) => k.split("/")[0]));
-export const MT: HomeData = {
+export const HOME_DATA: HomeData = {
   hero: HERO_KEYS.map(frame),
   // Side columns on wide screens (spec 5): Commissions frames, then each project's first frame not already on the wall.
   // 70 of them: wide screens show 30 on the wall itself (side columns, rows five and six) and the intro canvas draws 30 more.

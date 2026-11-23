@@ -1,6 +1,6 @@
 /* v4 homepage (the home with NEXT_PUBLIC_V4_HOME=1, docs/mt-decisions.md): the copy and picks this
    screen owns. Client-safe: no lib/work import. Frames that need project data
-   (names, ratios) are resolved on the server in `lib/v4-home/server.ts` (`MT`). */
+   (names, ratios) are resolved on the server in `lib/v4-home/server.ts` (`HOME_DATA`). */
 import { priceLabel, SESSIONS, type SessionSlug } from "@/lib/photos-and-sessions";
 import { DEPOSIT } from "@/lib/booking/paid";
 import type { SHOOT_TYPES } from "@/lib/inbox";

@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import { type Lead, type LeadSummary } from "@/lib/leads/leads";
 import { cn } from "@/lib/utils";
 import { mailable } from "@/lib/leads/lead-crm";
-import { balance, dayB, depositOfLead, isSettled, MAX_ROWS_B, NOTE_B, usd, usdB, type Crop, type Invoice, type InvoiceB, type InvoiceFrom } from "@/lib/leads/invoice";
+import { balance, shortDate, depositOfLead, isSettled, MAX_INVOICE_ROWS, THANKS_NOTES, usd, usdTrim, type Crop, type Invoice, type InvoiceDetails, type InvoiceFrom } from "@/lib/leads/invoice";
 import { framed, loadImage, place, shrink, toneFor } from "@/lib/leads/invoice-photo";
 import { adminCall, dayLabel, errorText, inboxCall, plusDays, ymdPT } from "@/lib/leads/lead-desk";
 import { btn, compose, field, fieldLabel, kindOf, primary } from "@/components/leads/shared";
@@ -116,7 +116,7 @@ const PAGE_B_CSS = `
 `;
 
 type PageBProps = {
-  no: string; date: string; due: string; to: InvoiceB["to"]; project: string; caption: string; note: string[];
+  no: string; date: string; due: string; to: InvoiceDetails["to"]; project: string; caption: string; note: string[];
   rows: { t: string; sub: string; n: number }[]; total: number; from: InvoiceFrom | null;
   src: string | null; crop: Crop; setCrop: React.Dispatch<React.SetStateAction<Crop>>; tone: "dark" | "light";
 };
@@ -182,12 +182,12 @@ function PageB(p: PageBProps) {
           {p.to.name}{p.to.company ? <><br />{p.to.company}</> : null}{p.to.email ? <><br /><span className="dim">{p.to.email}</span></> : null}
         </div>
         <div className="items">
-          {p.rows.map((r, i) => <div key={i} className="it"><span>{r.t}{r.sub ? <small>{r.sub}</small> : null}</span><span>{usdB(r.n)}</span></div>)}
+          {p.rows.map((r, i) => <div key={i} className="it"><span>{r.t}{r.sub ? <small>{r.sub}</small> : null}</span><span>{usdTrim(r.n)}</span></div>)}
         </div>
         <div className="amount">
           <div className="l">Total due</div>
-          <div className="k">{usdB(p.total)}</div>
-          <div className="sub"><span>Issued <b>{p.date ? dayB(p.date) : ""}</b></span><span>Due <b className="v">{p.due ? dayB(p.due, true) : ""}</b></span></div>
+          <div className="k">{usdTrim(p.total)}</div>
+          <div className="sub"><span>Issued <b>{p.date ? shortDate(p.date) : ""}</b></span><span>Due <b className="v">{p.due ? shortDate(p.due, true) : ""}</b></span></div>
         </div>
         <div className="pay">
           <div className="l">Bank transfer</div>
@@ -232,12 +232,12 @@ export function InvoiceSheetB({ l, full, patch, done }: { l: LeadSummary; full: 
   const [no, setNo] = React.useState("");
   const shot = l.when ? l.when.slice(0, 10) : ymdPT();
   const [project, setProject] = React.useState(full.company ?? "");
-  const [caption, setCaption] = React.useState(`Editorial · ${dayB(shot, true)}`);
-  const [to, setTo] = React.useState<InvoiceB["to"]>({ name: l.name, company: full.company ?? "", email: mailable(l.email) ? l.email : "" });
+  const [caption, setCaption] = React.useState(`Editorial · ${shortDate(shot, true)}`);
+  const [to, setTo] = React.useState<InvoiceDetails["to"]>({ name: l.name, company: full.company ?? "", email: mailable(l.email) ? l.email : "" });
   const [lines, setLines] = React.useState<LineB[]>([{ desc: kindOf(l.kind) ?? "Photography", sub: "", amt: full.quote !== undefined ? String(full.quote) : "" }]);
   const [paid, setPaid] = React.useState(full.deposit ? String(depositOfLead(full)) : "0");
   const [depositNote, setDepositNote] = React.useState("Paid at booking");
-  const [note, setNote] = React.useState<string[]>([...NOTE_B]);
+  const [note, setNote] = React.useState<string[]>([...THANKS_NOTES]);
   const [src, setSrc] = React.useState<string | null>(null);
   const [photoKey, setPhotoKey] = React.useState<string | null>(null);
   const [crop, setCropRaw] = React.useState<Crop>({ x: 0.5, y: 0.5, z: 1 });
@@ -392,7 +392,7 @@ export function InvoiceSheetB({ l, full, patch, done }: { l: LeadSummary; full: 
                 <input aria-label={`Line ${i + 1}, what was done`} maxLength={60} value={x.sub} onChange={setLine(i, "sub")} placeholder="What was done" className={cn(field, "px-3")} />
               </div>
             ))}
-            {lines.length + (dep ? 1 : 0) < MAX_ROWS_B ? (
+            {lines.length + (dep ? 1 : 0) < MAX_INVOICE_ROWS ? (
               <button type="button" onClick={() => setLines([...lines, { desc: "", sub: "", amt: "" }])} className={cn(btn, "min-h-10 justify-self-start")}>Add a line</button>
             ) : null}
           </fieldset>

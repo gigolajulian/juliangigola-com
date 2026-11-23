@@ -20,7 +20,7 @@ import { About, about, Age, Next } from "@/components/leads/row";
 import { dueTasks, isLate, paperDue, shootTag, type LeadSummary, type TaskRow } from "@/lib/leads/leads";
 import { dayShort } from "@/components/leads/plan";
 import { adminCall, authed, ago, aside, dateTimeLabel, centsLabel, isFinishedStage, inboxCall, needsMe, nextStep, now, inFilter, plusDays, renew, ymdPT, type Size } from "@/lib/leads/lead-desk";
-import { balance, dayB, dueOf, overdue, usd } from "@/lib/leads/invoice";
+import { balance, shortDate, dueOf, overdue, usd } from "@/lib/leads/invoice";
 import type { InvoiceRow } from "@/components/leads/invoices";
 import { TZ } from "@/lib/booking/booking-rules";
 import { proofApi, feed, type FeedItem, type ProofRow } from "@/lib/proofs/desk";
@@ -231,7 +231,7 @@ export function TodayDesk({ leads, size, open, show }: { leads: LeadSummary[]; s
                 <List hasDividers>
                   {pastDue.map((i) => {
                     const l = leads.find((x) => x.id === i.lead);
-                    return <ListItem key={i.no} onClick={l ? () => open(l) : undefined} label={`${i.name}, invoice ${i.no}`} description={`${usd(balance(i))} was due ${dayB(dueOf(i), true)}${i.sentAt ? "" : " · not sent"}`} endContent={<Badge label="Overdue" variant="error" />} />;
+                    return <ListItem key={i.no} onClick={l ? () => open(l) : undefined} label={`${i.name}, invoice ${i.no}`} description={`${usd(balance(i))} was due ${shortDate(dueOf(i), true)}${i.sentAt ? "" : " · not sent"}`} endContent={<Badge label="Overdue" variant="error" />} />;
                   })}
                 </List>
               </VStack>

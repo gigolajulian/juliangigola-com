@@ -19,7 +19,7 @@ export type Crop = { x: number; y: number; z: number };
  * `photo` is the KV key of the sealed photo; `tone` is the wordmark's shade
  * over it, read from the pixels under it when the invoice was made.
  */
-export type InvoiceB = {
+export type InvoiceDetails = {
   due: string;
   to: { name: string; company: string; email: string };
   project: string;
@@ -33,7 +33,7 @@ export type InvoiceB = {
 /** One invoice as it was made. `date` is the day on it, YYYY-MM-DD. `paid` is the deposit taken off. `b` marks a design B invoice. */
 /** `paidAt`: when it was settled, by a matching Stripe payment or by hand. `unpaid`: marked unpaid by hand, for one made before PAID_BEFORE. */
 /** `sentAt`: when hello@ mailed it to the client, seen by the Gmail sync (`lib/leads/gmail-sync.ts`). */
-export type Invoice = { no: string; date: string; lines: InvoiceLine[]; paid: number; notes?: string; at: string; b?: InvoiceB; paidAt?: string; unpaid?: boolean; sentAt?: string };
+export type Invoice = { no: string; date: string; lines: InvoiceLine[]; paid: number; notes?: string; at: string; b?: InvoiceDetails; paidAt?: string; unpaid?: boolean; sentAt?: string };
 /** Invoices made before the activity log count as paid: read here, no record rewritten. */
 export const PAID_BEFORE = "2026-11-12";
 export const isSettled = (i: Pick<Invoice, "paidAt" | "unpaid" | "at">) => !!i.paidAt || (!i.unpaid && i.at < PAID_BEFORE);
@@ -55,8 +55,8 @@ export function depositOfLead(l: { kind?: string; deposit?: string; events?: { k
 /** Lines that fit above the notes block on the page. */
 export const MAX_LINES = 8;
 /** Rows that fit on design B, the deposit row counted. */
-export const MAX_ROWS_B = 4;
-export const NOTE_B: [string, string, string] = ["Thanks for having me back.", "Always a blast with you guys.", "Can't wait for the next one!"];
+export const MAX_INVOICE_ROWS = 4;
+export const THANKS_NOTES: [string, string, string] = ["Thanks for having me back.", "Always a blast with you guys.", "Can't wait for the next one!"];
 /** The KV key of his sealed invoice details (name, address, EIN): the repo is public, so they live there and nowhere in the code.
     Written by `app/api/inbox`, read by the contract (`app/api/contract`). */
 export const FROM_KEY = "leads:invoice-from";
@@ -74,9 +74,9 @@ export const balance = (i: Pick<Invoice, "lines" | "paid">) => cents(subtotal(i.
 export const usd = (n: number) => `$${n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 /** "2026-11-09" as "9 Nov", or "9 Nov 2026". */
-export const dayB = (iso: string, year = false) => { const [y, m, d] = iso.split("-").map(Number); return `${d} ${"Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec".split(" ")[m - 1]}${year ? ` ${y}` : ""}`; };
+export const shortDate = (iso: string, year = false) => { const [y, m, d] = iso.split("-").map(Number); return `${d} ${"Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec".split(" ")[m - 1]}${year ? ` ${y}` : ""}`; };
 /** Whole dollars bare, cents when there are some: $1,500 and $1,500.50. The minus is a hyphen: WinAnsi has no U+2212. */
-export const usdB = (n: number) => `${n < 0 ? "-" : ""}$${Math.abs(n).toLocaleString("en-US", { minimumFractionDigits: Number.isInteger(n) ? 0 : 2, maximumFractionDigits: 2 })}`;
+export const usdTrim = (n: number) => `${n < 0 ? "-" : ""}$${Math.abs(n).toLocaleString("en-US", { minimumFractionDigits: Number.isInteger(n) ? 0 : 2, maximumFractionDigits: 2 })}`;
 
 
 const text = (v: unknown, n: number) => (typeof v === "string" ? v.trim().slice(0, n) : "");
@@ -98,15 +98,15 @@ export function cleanInvoice(v: unknown): Omit<Invoice, "no" | "at"> | { error: 
   if (paid === null || paid < 0) return { error: "Bad deposit." };
   const notes = text(o.notes, 600);
   if (o.b === undefined) return { date, lines, paid, ...(notes ? { notes } : {}) };
-  const b = cleanB(o.b, (o.lines as Record<string, unknown>[]).map((l) => l?.sub));
+  const b = cleanDetails(o.b, (o.lines as Record<string, unknown>[]).map((l) => l?.sub));
   if ("error" in b) return b;
-  if (lines.length + (paid ? 1 : 0) > MAX_ROWS_B) return { error: `${MAX_ROWS_B} rows fit on this invoice, the deposit counted.` };
+  if (lines.length + (paid ? 1 : 0) > MAX_INVOICE_ROWS) return { error: `${MAX_INVOICE_ROWS} rows fit on this invoice, the deposit counted.` };
   lines.forEach((l, i) => { const sub = text(b.subs[i], 60); if (sub) l.sub = sub; });
   return { date, lines, paid, b: b.b };
 }
 
 const unit = (v: unknown, lo: number, hi: number) => (typeof v === "number" && Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : null);
-function cleanB(v: unknown, subs: unknown[]): { b: InvoiceB; subs: unknown[] } | { error: string } {
+function cleanDetails(v: unknown, subs: unknown[]): { b: InvoiceDetails; subs: unknown[] } | { error: string } {
   const o = (v ?? {}) as Record<string, unknown>, to = (o.to ?? {}) as Record<string, unknown>, c = (o.crop ?? {}) as Record<string, unknown>;
   const due = text(o.due, 10);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(due) || isNaN(Date.parse(due))) return { error: "Bad due date." };

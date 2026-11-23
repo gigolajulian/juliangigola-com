@@ -7,7 +7,7 @@
 
 import { TZ } from "../booking/booking-rules";
 import type { MasterEntry } from "./activity-log";
-import { balance, isSettled, usdB } from "./invoice";
+import { balance, isSettled, usdTrim } from "./invoice";
 import type { Lead, LeadEvent } from "./leads";
 
 const day = (t: number) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, month: "short", day: "numeric" }).format(new Date(t));
@@ -21,7 +21,7 @@ export function weeklyMail(all: (Lead & { id?: string })[], master: MasterEntry[
   const week = master.filter((m) => live.has(m.lead) && m.event.at >= from && m.event.at < to);
   const of = (...kinds: LeadEvent["kind"][]) => week.filter((m) => kinds.includes(m.event.kind));
   const sum = (ms: MasterEntry[]) => ms.reduce((n, m) => n + (m.event.amount ?? 0), 0);
-  const list = (ms: MasterEntry[], money = false) => ms.map((m) => `  ${m.name}${money ? `, ${usdB(m.event.amount ?? 0)}` : m.event.note ? `, ${m.event.note}` : ""}`);
+  const list = (ms: MasterEntry[], money = false) => ms.map((m) => `  ${m.name}${money ? `, ${usdTrim(m.event.amount ?? 0)}` : m.event.note ? `, ${m.event.note}` : ""}`);
 
   const fresh = leads.filter((l) => l.firstAt >= from && l.firstAt < to);
   const paid = of("payment");
@@ -40,7 +40,7 @@ export function weeklyMail(all: (Lead & { id?: string })[], master: MasterEntry[
     `New leads: ${fresh.length}`,
     ...fresh.map((l) => `  ${l.name}${l.kind ? `, ${l.kind.replace(/-/g, " ")}` : ""}${l.source ? ` (${l.source})` : ""}`),
     "",
-    `Paid in: ${usdB(sum(paid))}${refunds.length ? `, refunded ${usdB(sum(refunds))}` : ""}`,
+    `Paid in: ${usdTrim(sum(paid))}${refunds.length ? `, refunded ${usdTrim(sum(refunds))}` : ""}`,
     ...list(paid, true),
     ...(refunds.length ? ["Refunds:", ...list(refunds, true)] : []),
     "",
@@ -49,8 +49,8 @@ export function weeklyMail(all: (Lead & { id?: string })[], master: MasterEntry[
     ...block("Moved:", list(moved)),
     ...block("Cancelled:", list(cancelled)),
     ...(stuck.length || overdue.length
-      ? ["Stuck:", ...stuck.map((l) => `  ${l.name}, deposit stuck, refund or rebook`), ...overdue.map(({ l, v }) => `  ${l.name}, invoice ${v.no} due ${v.b!.due}, ${usdB(balance(v))} open`)]
+      ? ["Stuck:", ...stuck.map((l) => `  ${l.name}, deposit stuck, refund or rebook`), ...overdue.map(({ l, v }) => `  ${l.name}, invoice ${v.no} due ${v.b!.due}, ${usdTrim(balance(v))} open`)]
       : ["Nothing stuck."]),
   ];
-  return { subject: `My week: ${fresh.length} new, ${usdB(sum(paid) - sum(refunds))} in, ${booked.length} booked`, lines: lines.filter((s, i, a) => s || a[i - 1]) };
+  return { subject: `My week: ${fresh.length} new, ${usdTrim(sum(paid) - sum(refunds))} in, ${booked.length} booked`, lines: lines.filter((s, i, a) => s || a[i - 1]) };
 }

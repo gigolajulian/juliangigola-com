@@ -108,20 +108,20 @@ export const bearer = (request: Request): string | undefined =>
  * in a test under Node without a Workers shim.
  */
 export function authorised(request: Request, expected?: string) {
-  return same(request.headers.get("x-inbox-key"), expected);
+  return sameSecret(request.headers.get("x-inbox-key"), expected);
 }
 
-async function same(given?: string | null, expected?: string) {
+async function sameSecret(given?: string | null, expected?: string) {
   if (!expected || !given) return false;
   const [a, b] = await Promise.all([sha256Bytes(given), sha256Bytes(expected)]);
 
-  let diff = a.length ^ b.length;
+  let diff = 0;
   for (let i = 0; i < a.length; i++) diff |= a[i] ^ b[i];
   return diff === 0;
 }
 
 /** The booking Worker, calling with `BOOKING_SECRET` as its bearer. */
-export const fromWorker = (request: Request, secret?: string) => same(bearer(request), secret);
+export const fromWorker = (request: Request, secret?: string) => sameSecret(bearer(request), secret);
 
 /** The booking Worker's gate as a route answers it: null when let in, else the 401. */
 export async function refuseWorker(request: Request, secret?: string): Promise<Response | null> {
