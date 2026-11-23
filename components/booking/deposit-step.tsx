@@ -5,6 +5,7 @@ import { warmGsap, withGsap } from "@/lib/gsap-lazy";
 import { cn } from "@/lib/utils";
 import { depositFor } from "@/lib/booking/paid";
 import type { Status } from "@/lib/booking/deposit";
+import type { Booking } from "@/lib/booking/booking-rules";
 
 /* Goo: the cursor pours into the buttons (`time-picker.tsx`); `?goo=0` off. */
 export const goo = () => typeof location === "undefined" || new URLSearchParams(location.search).get("goo") !== "0";
@@ -100,19 +101,11 @@ function walletTheme(el: HTMLElement) {
 const FONTS = [{ cssSrc: "https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" }];
 const PAY_FAILED = "That did not go through. Try again, or write to hello@juliangigola.com.";
 
-export type DepositBody = {
-  slug: string;
-  start: string;
-  timeZone: string;
-  name: string;
-  email: string;
+/** The booking the card posts, with the phone it always asks for. */
+export type DepositBody = Booking & {
   /** E.164; the server adds it to the notes itself. */
   phone: string;
-  notes?: string;
-  where?: string;
   session?: string;
-  /** Booked by the site's engine, through its lock. */
-  engine: "own";
 };
 
 type Stage = "loading" | "ready" | "paying" | "confirming" | "taken" | "refunded" | "failed" | "slow" | "broken" | "declined";

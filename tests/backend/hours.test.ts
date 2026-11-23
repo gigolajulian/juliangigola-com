@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { FakeStore, fakeLock } from "./fakes";
+import { FakeStore, fakeLock, INBOX_KEY as KEY, GOOGLE_OAUTH as OAUTH } from "./fakes";
 import { forgetToken } from "@/lib/booking/gcal";
 import { BookingLock } from "@/worker/booking-lock";
 
@@ -13,8 +13,6 @@ const { GET: slots } = await import("@/app/api/slots/route");
 const { openNow } = await import("@/lib/booking/slots");
 const { liveHours } = await import("@/lib/booking/booking-engine");
 
-const OAUTH = JSON.stringify({ client_id: "a", client_secret: "b", refresh_token: "c" });
-const KEY = "inbox-key-for-tests";
 const req = (method: string, body?: unknown, key = KEY) =>
   new Request("https://juliangigola.com/api/booking/hours", { method, headers: { "x-inbox-key": key }, body: body === undefined ? undefined : JSON.stringify(body) });
 

@@ -7,7 +7,6 @@ export { iso, pad };
 
 /* Shared by the time picker and its cards (time-picker.tsx). */
 
-export const noop = () => () => {};
 /* An event's details and times, kept a minute, so a picker built again
    (the homepage menu builds one per row pointed at) does not ask the
    server again. A reload after a failed booking asks fresh. */
@@ -75,5 +74,5 @@ export const overflowOf = (tp: HTMLElement) => {
 };
 
 export type Step = "pick" | "form" | "sending" | "check" | "pay" | "done";
-/** Which of the three steps (pick, details, pay) the progress marks; "done" is handled where it differs. */
-export const STEP_AT: Record<Exclude<Step, "done">, number> = { pick: 0, form: 1, sending: 1, check: 1, pay: 2 };
+/** Which of the three steps (pick, details, pay) each step is, in order; the progress marks handle "done" where they differ. */
+export const STEP_AT: Record<Step, number> = { pick: 0, form: 1, sending: 1, check: 1, pay: 2, done: 3 };

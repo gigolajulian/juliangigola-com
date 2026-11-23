@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { FakeKV, FakeStore, fakeLock, reply } from "./fakes";
+import { FakeKV, FakeStore, fakeLock, reply, GOOGLE_OAUTH as OAUTH } from "./fakes";
 import { forgetToken } from "@/lib/booking/gcal";
 import { BookingLock } from "@/worker/booking-lock";
 
@@ -25,7 +25,6 @@ const PI = "pi_TEST1234567890";
 const wed = new Date(Date.now() + 7 * 864e5);
 wed.setUTCDate(wed.getUTCDate() + ((3 - wed.getUTCDay() + 7) % 7));
 const START = new Date(Date.UTC(wed.getUTCFullYear(), wed.getUTCMonth(), wed.getUTCDate(), 18)).toISOString();
-const OAUTH = JSON.stringify({ client_id: "a", client_secret: "b", refresh_token: "c" });
 const BODY = { slug: "portraits", start: START, timeZone: "America/Los_Angeles", name: "QA Test", email: "qa@example.com", phone: "+14085550100", where: "Studio", amount: 1 };
 
 type Call = { url: string; init?: RequestInit };

@@ -22,7 +22,7 @@ import { VisitTrail } from "@/components/analytics/visit-trail";
 import { ClickBeacon } from "@/components/analytics/click-beacon";
 import { MotionGate, V3Footer, V3Header } from "@/components/site/chrome";
 import { ScrollThumb } from "@/components/site/scroll-thumb";
-import { SmoothScroll } from "@/components/v3/smooth-scroll";
+import { SmoothScroll } from "@/components/site/smooth-scroll";
 import { ScrollReveal } from "@/components/site/scroll-reveal";
 import { V4_HOME } from "@/lib/v4-home/switch";
 import { V4PAGES_HEAD } from "@/lib/flags/v4pages";

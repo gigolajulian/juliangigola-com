@@ -5,6 +5,7 @@ import Image from "next/image";
 import { PageFoot } from "@/components/site/chrome";
 import { Mark } from "@/components/site/duo";
 import { REEL, creditOf, embedUrl, previewUrl, captionsOff, vimeoListen, vimeoPlays, posterFor, sectionName, type Video } from "@/lib/work/videos";
+import { noSubscribe } from "@/lib/utils";
 
 /* JG V3 Motion (Julian): A as an index over one full-screen stage;
    scrolling swaps the film and its title, bottom left. Phones get the same
@@ -194,7 +195,7 @@ function Player({ v, list, onGo, onClose }: { v: Video | null; list: Video[]; on
 function Desk({ films, onPlay }: { films: Video[]; onPlay: (v: Video) => void }) {
   const [i, setI] = React.useState(0);
   const moving = React.useSyncExternalStore(
-    () => () => {},
+    noSubscribe,
     () => !still() && matchMedia("(min-width: 801px)").matches,
     () => false,
   );

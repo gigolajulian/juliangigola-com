@@ -26,7 +26,7 @@ type Path = (
 ) => { x: number; y: number; delay: number; duration?: number; ease?: string };
 
 /** Out along the line from the middle of the screen, in two waves. */
-const radial: Path = (f, r, rank) => {
+const radial: Path = (_f, r, rank) => {
   const dx = r.left + r.width / 2 - innerWidth / 2;
   const dy = r.top + r.height / 2 - innerHeight / 2;
   const d = Math.hypot(dx, dy) || 1;
@@ -46,7 +46,7 @@ export const streams: Path = (f, r) => {
 /** For the 404: the wall builds up. Row by row from
     the bottom, left to right in a row, each tile out of nowhere a short
     way under its place and up into it; hidden until its turn, no fade. */
-export const builds: Path = (f, r) => {
+export const builds: Path = (_f, r) => {
   const row = Math.max(0, Math.floor((innerHeight - r.bottom) / r.height + 0.5));
   const col = Math.max(0, Math.floor(r.left / r.width));
   return { x: 0, y: r.height * 0.35, delay: row * 0.32 + col * 0.09, duration: 0.9, ease: "power3.out" };
@@ -54,7 +54,7 @@ export const builds: Path = (f, r) => {
 
 /** For a project: the frames come in from past the
     right edge and run left, in order, up to the title. */
-export const slides: Path = (f, r, rank) => ({ x: innerWidth - r.left + 40, y: 0, delay: rank * 0.08 });
+export const slides: Path = (_f, r, rank) => ({ x: innerWidth - r.left + 40, y: 0, delay: rank * 0.08 });
 
 /** Puts each frame outside the page and returns the flight home. */
 export function gather(frames: HTMLElement[], path: Path = radial, gsap: G) {

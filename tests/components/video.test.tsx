@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { V3Video } from "@/components/portfolio/video";
 import { CONTENT } from "@/lib/content";
 

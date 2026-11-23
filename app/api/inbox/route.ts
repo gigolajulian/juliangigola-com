@@ -210,7 +210,7 @@ export async function GET(request: Request) {
       // Trash empties itself: 30 days after it went in, the lead goes for good.
       // The list is the only reader, so it is the one place that checks.
       if (one.trashedAt && trashDaysLeft(one.trashedAt, Date.now()) <= 0) {
-        await buryLead(gate.inbox, k.name, seal);
+        await buryLead(gate.inbox, seal, k.name.slice(5));
         continue;
       }
       leads.push({ ...one, id: k.name.slice(5) });
@@ -340,7 +340,7 @@ export async function DELETE(request: Request) {
     for await (const k of everyKey<{ s?: string }>(gate.inbox, "lead:")) {
       if (k.metadata?.s && (await seal.open<LeadSummary>(k.metadata.s)).trashedAt) gone.push(k.name);
     }
-    await Promise.all(gone.map((k) => buryLead(gate.inbox, k, seal)));
+    await Promise.all(gone.map((k) => buryLead(gate.inbox, seal, k.slice(5))));
     return json({ ok: true, deleted: gone.length });
   }
   if (!key?.startsWith("msg:")) return json({ error: "Unknown." }, 400);

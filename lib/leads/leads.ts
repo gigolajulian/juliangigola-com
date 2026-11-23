@@ -1,8 +1,5 @@
 import { balance, isPaid, namesInvoice, type Invoice } from "./invoice";
 
-/** The INBOX namespace (`lib/kv.ts`), for the leads modules that import it from here. */
-export type { InboxKV } from "@/lib/kv";
-
 /* ── leads: one record per person ─────────────────────────────────
  * Every inquiry, call and booking
  * in one list, with a stage on each person. Until now one person who

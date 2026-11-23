@@ -13,7 +13,7 @@ import { MtAbout } from "./about";
 import { MtFoot } from "./foot";
 import { MtIntro } from "./intro";
 import { MtMotionLayer } from "./motion";
-import { glideTo } from "@/components/v3/smooth-scroll";
+import { glideTo } from "@/components/site/smooth-scroll";
 import { useBackHome } from "./back";
 
 /* The inquiry card (its dialog and form) is not in the home page's first load (audit 2026-11-22): fetched once By quote

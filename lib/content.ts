@@ -22,6 +22,7 @@ import {
   type Video,
   type VideoSection,
 } from "./work/videos";
+import { isRecord } from "./json";
 
 export type Testimonial = {
   quote: string;
@@ -123,8 +124,6 @@ const fail = (path: string, wanted: string, got: unknown): never => {
   );
 };
 
-const isRecord = (v: unknown): v is Record<string, unknown> =>
-  typeof v === "object" && v !== null && !Array.isArray(v);
 
 /** A non-empty string. Blank fields are a mistake, not a value. */
 const str = (v: unknown, path: string): string =>

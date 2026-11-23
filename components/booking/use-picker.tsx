@@ -6,7 +6,7 @@ import { isPaid } from "@/lib/booking/paid";
 import { ORB_ROUND } from "@/components/effects/orb";
 import { JgLoad } from "@/components/splash/jg-load";
 import { TZ } from "@/lib/booking/booking-rules";
-import { e164, fromIso, minutesOf, noop, forgetTimes, WHERE, type PickedTime, type Slot, type Step, type V3Book } from "@/components/booking/time-picker-parts";
+import { e164, fromIso, minutesOf, forgetTimes, WHERE, type PickedTime, type Slot, type Step, type V3Book } from "@/components/booking/time-picker-parts";
 import { byCodeUnit } from "@/lib/utils";
 import { clockHere, spanOf } from "@/components/booking/picker-dates";
 import { useSlots } from "@/components/booking/use-slots";
@@ -169,21 +169,21 @@ export function usePicker({ path, title, className, fallback, v3, onPicked, star
       return;
     }
     // A call (editorial): by video on its Meet link, or I ring the number.
-    const via = String(form.get("via") || "");
+    const formVia = String(form.get("via") || "");
     /* Development only: `?sim=ok` books nothing, to see the page after. */
     const sim = process.env.NODE_ENV !== "production" && new URLSearchParams(location.search).get("sim") === "ok";
     try {
       if (!sim) {
-      const res = await fetch("/api/book", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ engine: "own", slug, start: new Date(pick.start).toISOString(), timeZone: tz, name, email: String(form.get("email")), phone, via, ...(notes ? { notes } : {}), ...(needsWhere ? { where } : {}) }),
-      });
-      const body = (await res.json().catch(() => ({}))) as { status?: string; data?: { uid: string; start: string; end: string; where?: string }; error?: string };
-      // 409 is the engine saying the slot went to someone else.
-      if (!res.ok || body.status !== "success") throw Object.assign(new Error(body?.error || "failed"), { status: res.status });
+        const res = await fetch("/api/book", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ engine: "own", slug, start: new Date(pick.start).toISOString(), timeZone: tz, name, email: String(form.get("email")), phone, via: formVia, ...(notes ? { notes } : {}), ...(needsWhere ? { where } : {}) }),
+        });
+        const body = (await res.json().catch(() => ({}))) as { status?: string; data?: { uid: string; start: string; end: string; where?: string }; error?: string };
+        // 409 is the engine saying the slot went to someone else.
+        if (!res.ok || body.status !== "success") throw Object.assign(new Error(body.error || "failed"), { status: res.status, said: body.error });
       }
-      setBooked({ name: firstName, email: String(form.get("email")).trim(), where, phone, via });
+      setBooked({ name: firstName, email: String(form.get("email")).trim(), where, phone, via: formVia });
       /* The orbs get their moment even when the server answers at once, then
          turn into the check, which is shown before the page that follows. */
       // JG V3 draws no orb, so it has no moment to wait for.
@@ -196,9 +196,12 @@ export function usePicker({ path, title, className, fallback, v3, onPicked, star
       forgetTimes(username, slug, tz);
       setStep("done");
     } catch (e) {
-      const { status, message } = e as Error & { status?: number };
+      const { status, said } = e as Error & { status?: number; said?: string };
+      let why = "That did not go through. Try again, or write to hello@juliangigola.com.";
+      if (status === 409) why = "That time was just taken. Pick another.";
       // 429 and 503 carry the route's own words ("Too many tries. Wait a minute.", `app/api/book`).
-      setError(status === 409 ? "That time was just taken. Pick another." : (status === 429 || status === 503) && message !== "failed" ? message : "That did not go through. Try again, or write to hello@juliangigola.com.");
+      else if ((status === 429 || status === 503) && said) why = said;
+      setError(why);
       setStep("form");
       void load(true);
     }

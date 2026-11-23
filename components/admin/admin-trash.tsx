@@ -10,6 +10,7 @@ import {
   type CommitFile,
 } from "@/lib/admin/admin-github";
 import { cn } from "@/lib/utils";
+import { errorText } from "@/lib/leads/lead-desk";
 
 /* ── recently deleted ─────────────────────────────────────────────
  * Where removed projects wait.
@@ -91,7 +92,7 @@ export function AdminTrash({
     } catch (e) {
       setStatus({
         kind: "error",
-        message: e instanceof Error ? e.message : String(e),
+        message: errorText(e),
       });
     }
   }
@@ -144,7 +145,7 @@ export function AdminTrash({
     } catch (e) {
       setStatus({
         kind: "error",
-        message: e instanceof Error ? e.message : String(e),
+        message: errorText(e),
       });
     }
   }

@@ -13,8 +13,8 @@ export type Row = Omit<Proof, "pass"> & { url: string; hasPass?: boolean };
 
 export const api = <T = Record<string, unknown>,>({ query = "", ...init }: RequestInit & { query?: string } = {}) => adminCall<T>(`/api/proof${query}`, init);
 
-export const closed = (p: Proof) => !!p.closesAt && Date.parse(p.closesAt) < Date.now();
-export const status = (p: Proof) => p.offline ? "Offline" : p.deliveredAt ? `Delivered${p.firstDownloadAt ? ", downloaded" : ""}${closed(p) ? " · closed" : ""}` : `${stage(p)}${p.checkout && !p.submittedAt ? ", paying" : ""}${closed(p) ? " · closed" : ""}`;
+export const pastCloseDate = (p: Proof) => !!p.closesAt && Date.parse(p.closesAt) < Date.now();
+export const status = (p: Proof) => p.offline ? "Offline" : p.deliveredAt ? `Delivered${p.firstDownloadAt ? ", downloaded" : ""}${pastCloseDate(p) ? " · closed" : ""}` : `${stage(p)}${p.checkout && !p.submittedAt ? ", paying" : ""}${pastCloseDate(p) ? " · closed" : ""}`;
 
 /** The widest box of the share card's photo shape that fits a frame. */
 const cardBox = (f: Pick<ProofFrame, "w" | "h">) => {

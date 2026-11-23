@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { CoverNav, V3Foot } from "@/components/site/chrome";
 import { Duo, Marks, Pick } from "@/components/site/duo";
 import { useSiteTheme } from "@/lib/site-theme";
-import { COMMISSIONS, COMMISSION_TABS, DOORS, HERO, HERO_ALT, INDEX_ORDER, RECENT, SESSIONS, rate } from "@/lib/photos-and-sessions";
+import { COMMISSIONS, COMMISSION_TABS, DOORS, HERO, HERO_ALT, INDEX_ORDER, RECENT, SESSIONS, priceLabel } from "@/lib/photos-and-sessions";
 import { projectHref } from "@/lib/project-href";
 
 /* JG V3 homepage (master v39, section A): hero crossfade, logo strip,
@@ -483,7 +483,7 @@ function SessionsIndex() {
               >
                 <span className="n lbl">{String(n + 1).padStart(2, "0")}</span>
                 <span className="t">{s.name}</span>
-                <span className="p lbl">{rate(s)}</span>
+                <span className="p lbl">{priceLabel(s)}</span>
               </button>
             );
           })}

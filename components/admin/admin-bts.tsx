@@ -6,6 +6,7 @@ import type { Bts, Frame } from "@/lib/work-types";
 import { MAX_WIDTH, readClip, prepareImage } from "@/lib/admin/admin-image";
 import { useSequence, srcOf, type PendingUpload } from "@/lib/admin/admin-sequence";
 import { cn } from "@/lib/utils";
+import { errorText } from "@/lib/leads/lead-desk";
 
 /* ── a project's BTS ──────────────────────────────────────────────
  * The behind-the-scenes frames under a gallery: who shot them, then
@@ -80,7 +81,7 @@ export function AdminBts({
           alt: "",
         });
       } catch (e) {
-        setError(e instanceof Error ? e.message : String(e));
+        setError(errorText(e));
       }
     }
 

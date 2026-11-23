@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { FakeKV, LEADS_KEY } from "./fakes";
+import { FakeKV, LEADS_KEY, INBOX_KEY as KEY } from "./fakes";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { deliveryDownload } from "@/lib/proofs/delivery-serve";
 import { readProof, writeProof, type Proof } from "@/lib/proofs/proof";
@@ -7,7 +7,6 @@ import { zipLayout } from "@/lib/proofs/zip";
 
 /* Delivery by model (Julian 2026-11-19): a final carries its model and five stars, and `/zip?m=<label>` takes one model. */
 
-const KEY = "inbox-key-for-tests";
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
 vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
 const { PUT } = await import("@/app/api/proof/route");

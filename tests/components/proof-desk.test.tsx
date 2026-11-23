@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { api, cardCrop, closed, cropAt, status, type Row } from "@/lib/proofs/desk";
+import { api, cardCrop, pastCloseDate, cropAt, status, type Row } from "@/lib/proofs/desk";
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -27,8 +27,8 @@ const answer = (body: unknown, ok = true) =>
 
 describe("proof helpers", () => {
   it("closed and status read the gallery state", () => {
-    expect(closed(proof({ closesAt: "2000-01-01T00:00:00Z" }))).toBe(true);
-    expect(closed(proof())).toBe(false);
+    expect(pastCloseDate(proof({ closesAt: "2000-01-01T00:00:00Z" }))).toBe(true);
+    expect(pastCloseDate(proof())).toBe(false);
     expect(status(proof({ sentAt: "2026-11-02T00:00:00Z" }))).toBe("Sent");
     expect(status(proof({ sentAt: "x", closesAt: "2000-01-01T00:00:00Z" }))).toBe("Sent · closed");
   });

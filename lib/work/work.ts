@@ -945,6 +945,9 @@ export const FEATURED: Project[] = FEATURED_SLUGS.map((s) =>
   bySlug.get(s),
 ).filter((p): p is Project => Boolean(p));
 
+export type { WallTile };
+const wallTile = (src: string, title: string, href: string): WallTile => ({ src, title, href });
+
 /**
  * The drifting wall on the intro and the 404: the featured work first, then
  * every other project in the site's order. Julian: fill the page with work,
@@ -953,9 +956,6 @@ export const FEATURED: Project[] = FEATURED_SLUGS.map((s) =>
  * server, so a client component is handed three strings a tile and never
  * the projects; its image URLs are made where it is drawn (`wall-tile.ts`).
  */
-/** `src` is the frame itself, so a page can leave out what it already shows. */
-export type { WallTile };
-const wallTile = (src: string, title: string, href: string): WallTile => ({ src, title, href });
 export const WALL: WallTile[] = [
   ...FEATURED,
   ...PROJECTS.filter((p) => !FEATURED.includes(p)),

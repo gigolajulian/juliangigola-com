@@ -3,7 +3,7 @@ import { recordLead } from "@/lib/leads/lead-store";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { fold, type Lead } from "@/lib/leads/leads";
 import { fresh, readLog, readMaster } from "@/lib/leads/activity-log";
-import { FakeKV, LEADS_KEY } from "./fakes";
+import { FakeKV, LEADS_KEY, INBOX_KEY as KEY } from "./fakes";
 import { byCodeUnit } from "@/lib/utils";
 
 /* The activity log (`lib/leads/activity-log.ts`): every event in full, per
@@ -13,7 +13,6 @@ const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
 vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
 const { GET, PATCH, DELETE } = await import("@/app/api/inbox/route");
 
-const KEY = "inbox-key-for-tests";
 const req = (method: string, { body, query = "" }: { body?: string; query?: string } = {}) =>
   new Request("https://juliangigola.com/api/inbox" + query, { method, body, headers: { "x-inbox-key": KEY } });
 

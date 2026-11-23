@@ -1,5 +1,5 @@
-import { openDelivery, servedPreview } from "@/lib/proofs/delivery";
-import { finalOf } from "@/lib/proofs/delivery-serve";
+import { openDelivery } from "@/lib/proofs/delivery";
+import { finalOf, servedPreview } from "@/lib/proofs/delivery-serve";
 import { isFrameId } from "@/lib/proofs/proof";
 
 /* A final's web copy: 2000px, or 800px with `?w=800`. Never the full file; that is /dl. */

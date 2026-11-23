@@ -21,6 +21,7 @@
 // and is transpiled outside the app's path mapping.
 import raw from "../../content/projects.json";
 import type { Bts, Copy, Credit, Frame, Section } from "../work-types";
+import { isRecord } from "../json";
 
 export type AddedProject = {
   slug: string;
@@ -56,8 +57,6 @@ const optArray = (v: unknown, path: string): unknown[] => {
 /** What a slug is: it goes into routes, directory names and redirects. */
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
-const isRecord = (v: unknown): v is Record<string, unknown> =>
-  typeof v === "object" && v !== null && !Array.isArray(v);
 
 const str = (v: unknown, path: string): string =>
   typeof v === "string" && v.trim() !== ""

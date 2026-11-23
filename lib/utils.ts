@@ -15,3 +15,6 @@ export const rubberband = (over: number, dim: number, c = 0.55) =>
 
 /** The default sort order for strings (UTF-16 code units), spelled out. Not `localeCompare`: that reorders case and accents. */
 export const byCodeUnit = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
+
+/** A `useSyncExternalStore` subscribe for a value that never changes after hydration: the server snapshot first, the client one after. */
+export const noSubscribe = () => () => {};

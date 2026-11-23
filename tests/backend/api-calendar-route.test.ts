@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { GET, POST } from "@/app/api/calendar/route";
 import { forgetToken } from "@/lib/booking/gcal";
-import { FakeKV } from "./fakes";
+import { FakeKV, INBOX_KEY as KEY, GOOGLE_OAUTH as OAUTH } from "./fakes";
 
 /* /api/calendar: the Leads app's calendar. Off without INBOX or GCAL_OAUTH,
    behind the inbox key, refuses a bad range or block, lists and blocks. */
@@ -9,8 +9,6 @@ import { FakeKV } from "./fakes";
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
 vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
 
-const OAUTH = JSON.stringify({ client_id: "a", client_secret: "b", refresh_token: "c" });
-const KEY = "inbox-key-for-tests";
 const req = (method: string, { body, query = "", key = KEY }: { body?: unknown; query?: string; key?: string } = {}) =>
   new Request(`https://juliangigola.com/api/calendar${query}`, { method, headers: { "x-inbox-key": key }, body: body === undefined ? undefined : JSON.stringify(body) });
 

@@ -8,6 +8,7 @@ import { looksLikeEmail } from "@/lib/inbox";
 import { ProofWall } from "@/components/proofs/wall";
 import { ProofCursor } from "@/components/proofs/cursor";
 import { gridwallFor } from "@/lib/proofs/gridwall";
+import { noSubscribe } from "@/lib/utils";
 
 /* ── the client's gallery ─────────────────────────────────────────
  * The look Julian approved 2026-11-06 (mock https://claude.ai/artifact/Nn3EU21DEofuLLJyXJHtcG):
@@ -36,7 +37,6 @@ type Step = null | "review" | "done";
 
 // The gate as the grid's own wall (components/proofs/wall.tsx) by default;
 // `?proofwall=0` for the plain gate. Read on the client only.
-const noop = () => () => {};
 const readWall = () => new URLSearchParams(location.search).get("proofwall") !== "0";
 // The wall tuned per screen in the gridwall tuner by default; `?gw=0` for the untuned wall.
 // The window's size, so it compares.
@@ -120,7 +120,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
   // When they sent and whether the receipt mail went out, so the done screen says only what is true.
   const [sent, setSent] = React.useState({ at: initial.submittedAt, mailed: initial.mailed });
   const [unsaved, setUnsaved] = React.useState(false);
-  const wall = React.useSyncExternalStore(noop, readWall, () => false);
+  const wall = React.useSyncExternalStore(noSubscribe, readWall, () => false);
   const gw = React.useSyncExternalStore(onResize, readGw, () => "");
   const tune = React.useMemo(() => {
     if (!gw) return null;

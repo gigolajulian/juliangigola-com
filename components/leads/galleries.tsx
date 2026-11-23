@@ -15,7 +15,7 @@ import { Badge } from "@astryxdesign/core/Badge";
 import { Divider } from "@astryxdesign/core/Divider";
 import { canonical } from "@/lib/leads/lead-crypto";
 import { dayLabel } from "@/lib/leads/lead-desk";
-import { closed, type Row } from "@/lib/proofs/desk";
+import { pastCloseDate, type Row } from "@/lib/proofs/desk";
 import { stage } from "@/lib/proofs/proof";
 import { Timeline } from "@/components/proofs/timeline";
 
@@ -32,7 +32,7 @@ function facts(p: Row, lead: string): string {
   const parts = p.deliveredAt
     ? ["Finals", n(p.finals?.length ?? 0, "photo"), `delivered ${dayLabel(p.deliveredAt)}`, p.firstDownloadAt ? `downloaded ${dayLabel(p.firstDownloadAt)}` : null]
     : ["Proofs", n(p.frames.length, "frame"), p.sentAt ? `sent ${dayLabel(p.sentAt)}` : "not sent", p.submittedAt ? `${n(p.selects.length, "select")} sent ${dayLabel(p.submittedAt)}` : p.views ? `opened ${n(p.views, "time")}` : null];
-  if (closed(p)) parts.push("closed");
+  if (pastCloseDate(p)) parts.push("closed");
   if (p.email && canonical(p.email) !== canonical(lead)) parts.push(`to ${p.email}`);
   return parts.filter(Boolean).join(" · ");
 }

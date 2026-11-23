@@ -1,7 +1,7 @@
 /* v4 homepage (the home with NEXT_PUBLIC_V4_HOME=1, docs/mt-decisions.md): the copy and picks this
    screen owns. Client-safe: no lib/work import. Frames that need project data
    (names, ratios) are resolved on the server in `lib/v4-home/server.ts` (`MT`). */
-import { rate, SESSIONS, type SessionSlug } from "@/lib/photos-and-sessions";
+import { priceLabel, SESSIONS, type SessionSlug } from "@/lib/photos-and-sessions";
 import { DEPOSIT } from "@/lib/booking/paid";
 import type { SHOOT_TYPES } from "@/lib/inbox";
 
@@ -64,7 +64,7 @@ export type BookRow = {
   slug: Extract<SessionSlug, "portraits" | "headshots" | "graduation" | "studio-digitals">;
   name: string;
   len: string;
-  /** What /book shows for it: "From $400", or "$250 deposit" where the price is quoted after (`rate`, lib/photos-and-sessions). */
+  /** What /book shows for it: "From $400", or "$250 deposit" where the price is quoted after (`priceLabel`, lib/photos-and-sessions). */
   price: string;
   /** The deposit that books it. */
   dep: string;
@@ -73,10 +73,10 @@ export type BookRow = {
   pos: string;
 };
 export const BOOK_ROWS: BookRow[] = [
-  { slug: "portraits", name: "Portraits", len: "60 min", price: rate(SESSIONS["portraits"]), dep: `$${DEPOSIT.portraits}`, btn: "Book portraits", pos: "50% 50%" },
-  { slug: "headshots", name: "Headshots", len: "30 min", price: rate(SESSIONS["headshots"]), dep: `$${DEPOSIT.headshots}`, btn: "Book headshots", pos: "50% 40%" },
-  { slug: "graduation", name: "Graduation", len: "90 min", price: rate(SESSIONS["graduation"]), dep: `$${DEPOSIT.graduation}`, btn: "Book graduation", pos: "50% 18%" },
-  { slug: "studio-digitals", name: "Studio digitals", len: "45 min", price: rate(SESSIONS["studio-digitals"]), dep: `$${DEPOSIT.digitals}`, btn: "Book digitals", pos: "50% 50%" },
+  { slug: "portraits", name: "Portraits", len: "60 min", price: priceLabel(SESSIONS["portraits"]), dep: `$${DEPOSIT.portraits}`, btn: "Book portraits", pos: "50% 50%" },
+  { slug: "headshots", name: "Headshots", len: "30 min", price: priceLabel(SESSIONS["headshots"]), dep: `$${DEPOSIT.headshots}`, btn: "Book headshots", pos: "50% 40%" },
+  { slug: "graduation", name: "Graduation", len: "90 min", price: priceLabel(SESSIONS["graduation"]), dep: `$${DEPOSIT.graduation}`, btn: "Book graduation", pos: "50% 18%" },
+  { slug: "studio-digitals", name: "Studio digitals", len: "45 min", price: priceLabel(SESSIONS["studio-digitals"]), dep: `$${DEPOSIT.digitals}`, btn: "Book digitals", pos: "50% 50%" },
 ];
 
 /* ── By quote (spec 3.5, SZQ) ── */

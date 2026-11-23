@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { FakeEmail, FakeKV, FakeStore, fakeLock, LEADS_KEY, leadOf } from "./fakes";
+import { FakeEmail, FakeKV, FakeStore, fakeLock, LEADS_KEY, leadOf, INBOX_KEY as KEY, GOOGLE_OAUTH as OAUTH } from "./fakes";
 import { forgetToken } from "@/lib/booking/gcal";
 import { bookingToken, manageLinks, tokenOpens } from "@/lib/booking/booking-token";
 import { BookingLock } from "@/worker/booking-lock";
@@ -22,7 +22,6 @@ const { POST: change } = await import("@/app/api/booking/[id]/route");
 const { bookDeposit } = await import("@/lib/booking/deposit");
 
 const SECRET = "booking-secret-for-tests";
-const OAUTH = JSON.stringify({ client_id: "a", client_secret: "b", refresh_token: "c" });
 /** A Wednesday 10 AM Pacific at least `days` out. */
 const wednesday = (days: number) => {
   const d = new Date(Date.now() + days * 864e5);
@@ -35,7 +34,6 @@ let busy: { start: string; end: string; id: string }[];
 let calls: { method: string; url: string; form?: string; body?: { start: { dateTime: string }; end: { dateTime: string } } }[];
 let refundOk: boolean;
 let store: FakeStore;
-const KEY = "inbox-key-for-tests";
 let client: FakeEmail;
 let mail: FakeEmail;
 

@@ -6,19 +6,19 @@ import { V4Foot } from "@/components/site/foot";
 import Link from "next/link";
 import { THEME_COLOR } from "@/lib/theme-color";
 import { usePathname } from "next/navigation";
-import { onLenisScroll, scrollTop } from "../v3/smooth-scroll";
+import { onLenisScroll, scrollTop } from "./smooth-scroll";
 import { useNavInk } from "./nav-ink";
+import { noSubscribe } from "@/lib/utils";
 
 /* JG V3 chrome (master v39): the glass header, the phone menu, the theme
    toggle and the footer line. Every route uses it, /admin included (2026-10-31). */
 
-const noop = () => () => {};
 
 /* Motion that is not in the master (the splash, the page zoom, the pointer
    mark, tilt, glass light, fades) stays off unless `?v3motion` is on for
    the tab (`app/layout.tsx` sets `data-v3motion`). */
 export function MotionGate({ children, fallback = null }: { children: React.ReactNode; fallback?: React.ReactNode }) {
-  const on = React.useSyncExternalStore(noop, () => document.documentElement.hasAttribute("data-v3motion"), () => false);
+  const on = React.useSyncExternalStore(noSubscribe, () => document.documentElement.hasAttribute("data-v3motion"), () => false);
   return <>{on ? children : fallback}</>;
 }
 
@@ -325,7 +325,7 @@ function SiteHeader() {
   /* ?v3motion (mock https://claude.ai/artifact/VDtydGRZFjpd4W1kibeqBm, 4b):
      it starts as the name's top reaches it, the name shrinks into the
      wordmark and the bar unrolls from its top edge. */
-  const dock = React.useSyncExternalStore(noop, () => home && !mtscroll() && document.documentElement.hasAttribute("data-v3motion") && !matchMedia("(prefers-reduced-motion: reduce)").matches, () => false);
+  const dock = React.useSyncExternalStore(noSubscribe, () => home && !mtscroll() && document.documentElement.hasAttribute("data-v3motion") && !matchMedia("(prefers-reduced-motion: reduce)").matches, () => false);
   const [landed, setLanded] = React.useState(false);
   React.useEffect(() => {
     const on = dock;
@@ -338,7 +338,7 @@ function SiteHeader() {
     sync();
     return () => removeEventListener("scroll", sync);
   }, [home, dock]);
-  const flag = React.useSyncExternalStore(noop, scrubFlag, () => false);
+  const flag = React.useSyncExternalStore(noSubscribe, scrubFlag, () => false);
   const scrub = useScrub(dock && flag, hdr, setLanded);
   useDock(dock && !scrub, past, hdr, setLanded);
   /* Portfolio: the header steps away while you scroll down into the work and
@@ -382,7 +382,7 @@ function SiteHeader() {
     if (dx || dy) bar.animate({ transform: [`translate(${dx}px,${dy}px)`, "none"] }, { duration: 250, easing: "cubic-bezier(.23,1,.32,1)" });
   }, [tuck]);
   // The v4 home (or its `?mtscroll=1` preview) has no cover to wait for, the bar is there from the start.
-  const mt = React.useSyncExternalStore(noop, mtscroll, () => V4_HOME);
+  const mt = React.useSyncExternalStore(noSubscribe, mtscroll, () => V4_HOME);
   const show = (!home || past || mt) && !tuck;
   // The header: ground off at the top, white or black words (navfx, `?navfx=0` off).
   useNavInk(hdr, path);
@@ -492,7 +492,7 @@ export function V3Foot() {
    the pages restyled by tokens only get it here, after `main`. */
 const OWN_FOOT = /^\/($|portfolio(\/video)?$|bts$|about$|contact(\/form)?$|book(\/|$)|portraits$|headshots$|graduation-photos(\/|$)|model-digitals$|weddings$|music-photography$|fashion-photography$|brand-photography$|admin(\/|$)|proof\/)/;
 
-/** An inner page's ending: the V4 footer (v4/foot.tsx). */
+/** An inner page's ending: the V4 footer (`site/foot.tsx`). */
 export function PageFoot() {
   return <V4Foot />;
 }

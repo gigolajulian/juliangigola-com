@@ -31,7 +31,7 @@ import { Slider } from "@astryxdesign/core/Slider";
 import { KEY_STORE, saveAdminKey, TOKEN_STORE } from "@/lib/admin/admin-github";
 import { useSiteThemeRead } from "@/lib/site-theme";
 import { SignIn } from "@/components/leads/setup";
-import { api, cardCrop, closed, cropAt, status, type Row } from "@/lib/proofs/desk";
+import { api, cardCrop, pastCloseDate, cropAt, status, type Row } from "@/lib/proofs/desk";
 import { ActivityDesk } from "@/components/proofs/activity";
 import { Timeline } from "@/components/proofs/timeline";
 import { useClock } from "@/components/proofs/use-clock";
@@ -89,7 +89,7 @@ export function ProofsDesk({ embedded = false, initial }: { embedded?: boolean; 
     );
 
   const all = list ?? [];
-  const open = all.filter((p) => !closed(p));
+  const open = all.filter((p) => !pastCloseDate(p));
   const waiting = open.filter((p) => p.sentAt && !p.submittedAt).length;
   const toPull = all.filter((p) => p.submittedAt && !p.pulledAt).length;
   const cur = all.find((p) => p.token === sel) ?? (wide ? all[0] : undefined);
@@ -429,7 +429,7 @@ function LinkPreview({ p, save }: { p: Row; save: (card: CardCrop | null) => Pro
   return (
     <VStack gap={2}>
       <Text type="supporting">Link preview</Text>
-      {p.watermark && !p.hasPass && !closed(p) ? (
+      {p.watermark && !p.hasPass && !pastCloseDate(p) ? (
         // eslint-disable-next-line @next/next/no-img-element -- the gallery's share card from the Worker
         <img src={`/proof/${p.token}/card?v=${v}`} alt="Link preview" style={{ width: "100%", aspectRatio: "1800 / 945", objectFit: "cover", borderRadius: 4 }} />
       ) : <Text type="supporting">Drawn while the gallery is open, watermarked and without a password.</Text>}

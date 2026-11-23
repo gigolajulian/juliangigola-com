@@ -5,7 +5,7 @@ import { sealer } from "@/lib/leads/lead-crypto";
 import { readLead, writeLead } from "@/lib/leads/lead-store";
 import { fillContract, readContract, sha256, signedCopy, type Contract } from "@/lib/contracts/contract";
 import type { Lead } from "@/lib/leads/leads";
-import { FakeEmail, FakeKV, LEADS_KEY } from "./fakes";
+import { FakeEmail, FakeKV, LEADS_KEY, INBOX_KEY as KEY } from "./fakes";
 
 /* /api/contract (the desk) and /api/contract/[id] (the client): a contract
    made from a lead's template, sent, signed once with a hash of the exact
@@ -14,7 +14,6 @@ import { FakeEmail, FakeKV, LEADS_KEY } from "./fakes";
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
 vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
 
-const KEY = "inbox-key-for-tests";
 const LEAD = "a".repeat(32);
 let kv: FakeKV, client: FakeEmail, hello: FakeEmail;
 const seal = async () => (await sealer(LEADS_KEY))!;

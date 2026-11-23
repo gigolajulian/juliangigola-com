@@ -19,7 +19,7 @@ import { Divider } from "@astryxdesign/core/Divider";
 import { About, about, Age, Next } from "@/components/leads/row";
 import { dueTasks, isLate, paperDue, shootTag, type LeadSummary, type TaskRow } from "@/lib/leads/leads";
 import { dayShort } from "@/components/leads/plan";
-import { adminCall, authed, ago, aside, dateTimeLabel, centsLabel, closed, inboxCall, needsMe, nextStep, now, inFilter, plusDays, renew, ymdPT, type Size } from "@/lib/leads/lead-desk";
+import { adminCall, authed, ago, aside, dateTimeLabel, centsLabel, isFinishedStage, inboxCall, needsMe, nextStep, now, inFilter, plusDays, renew, ymdPT, type Size } from "@/lib/leads/lead-desk";
 import { balance, dayB, dueOf, overdue, usd } from "@/lib/leads/invoice";
 import type { InvoiceRow } from "@/components/leads/invoices";
 import { TZ } from "@/lib/booking/booking-rules";
@@ -43,7 +43,7 @@ export function daysOf(leads: LeadSummary[], from: string, n: number) {
   for (const l of leads) {
     if (aside(l)) continue;
     const who = l.name || l.email;
-    if (l.when && !closed(l.stage)) {
+    if (l.when && !isFinishedStage(l.stage)) {
       const ms = Date.parse(l.when);
       put(ymdPT(ms), { small: `${clock(ms)} ${callOrShoot(l)}`, text: who, l });
     }

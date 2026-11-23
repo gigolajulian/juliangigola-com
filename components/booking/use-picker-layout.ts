@@ -1,6 +1,6 @@
 import * as React from "react";
 import { warmGsap, withGsap } from "@/lib/gsap-lazy";
-import { iso, overflowOf, type PickedTime, type Slot, type Step } from "@/components/booking/time-picker-parts";
+import { iso, overflowOf, STEP_AT, type PickedTime, type Slot, type Step } from "@/components/booking/time-picker-parts";
 
 type Layout = {
   step: Step;
@@ -29,8 +29,7 @@ export function usePickerLayout({ step, pick, days, view, anchor, week, month, c
   const was = React.useRef(step);
   React.useEffect(warmGsap, []);
   React.useLayoutEffect(() => {
-    const ORDER = { pick: 0, form: 1, sending: 1, check: 1, pay: 2, done: 3 };
-    const dir = Math.sign(ORDER[step] - ORDER[was.current]);
+    const dir = Math.sign(STEP_AT[step] - STEP_AT[was.current]);
     was.current = step;
     const el = root.current;
     // A step opens at its top: on an iPhone Details opened where Continue

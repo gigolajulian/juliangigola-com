@@ -43,8 +43,7 @@ export type BookingRecord = {
   /** The address for a shoot, or the Meet link for a video call. */
   where?: string;
   notes?: string;
-  /** "Phone" or "Video", for a call. */
-  via?: string;
+  via?: CallVia;
   /** The deposit's PaymentIntent. */
   intent?: string;
   /** What the deposit was, in dollars. Unset on a record made before 2026-11-15: $100 then (`depositPaid`). */
@@ -97,7 +96,9 @@ export function parseBooking(raw: unknown, call = false): Parsed {
   return { ok: true, booking };
 }
 
-export type BookInput = Booking & { via?: string; intent?: string; deposit?: number };
+/** How a free call is held: by video on its Meet link, or I ring the number. */
+export type CallVia = "Phone" | "Video";
+export type BookInput = Booking & { via?: CallVia; intent?: string; deposit?: number };
 /** What a booking's deposit was, in dollars: as stored, or the $100 every earlier one paid. Nothing if it took none. */
 export const depositPaid = (r: { intent?: string; deposit?: number }) => (r.intent ? (r.deposit ?? LEGACY_DEPOSIT) : undefined);
 export type BookResult = { ok: true; record: BookingRecord } | { ok: false; reason: "taken" | "unknown" };

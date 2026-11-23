@@ -2,7 +2,12 @@ import imageLoader from "@/image-loader";
 import type { DriftWallItem } from "@/lib/work-types";
 
 /** One wall photograph as the page sends it: the frame, its project and where it opens. */
-export type WallTile = { src: string; title: string; href: string };
+export type WallTile = {
+  /** The frame itself, so a page can leave out what it already shows. */
+  src: string;
+  title: string;
+  href: string;
+};
 
 /* Its two small copies (640px, a 300px tile on a retina screen, and a 320
    a phone's 80px tile takes at three times) are worked out where the wall

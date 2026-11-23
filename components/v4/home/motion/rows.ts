@@ -1,4 +1,4 @@
-import { scrollGoal, settleTo, shiftScroll } from "@/components/v3/smooth-scroll";
+import { scrollGoal, settleTo, shiftScroll } from "@/components/site/smooth-scroll";
 import { matches } from "@/lib/device";
 import { qvalue } from "@/lib/v4-home/flags";
 import { holdEase as ease, holdUnease as unease } from "@/lib/motion/hold-ease";

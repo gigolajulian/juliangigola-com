@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { FakeKV, LEADS_KEY } from "./fakes";
+import { FakeKV, LEADS_KEY, INBOX_KEY as KEY } from "./fakes";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { recordLead } from "@/lib/leads/lead-store";
 import { csv, fill, identity, manualLead, merge, stats } from "@/lib/leads/lead-crm";
@@ -13,7 +13,6 @@ const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
 vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
 const { GET, PATCH, POST } = await import("@/app/api/inbox/route");
 
-const KEY = "inbox-key-for-tests";
 const req = (method: string, { body, query = "" }: { body?: unknown; query?: string } = {}) =>
   new Request(`https://juliangigola.com/api/inbox${query}`, { method, body: body === undefined ? undefined : JSON.stringify(body), headers: { "x-inbox-key": KEY } });
 let kv: FakeKV;
