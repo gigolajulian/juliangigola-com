@@ -241,8 +241,18 @@ const seen = new Map<Element, number>();
 type Hit = { at?: (y: number) => RGB | null; unknown?: boolean };
 /** What shows at a point, under the header: the first photo, film or painted box from the top. */
 function under(x: number, y: number, hdr: HTMLElement, page: RGB, hit?: Hit, hw = 0, hh = 0): RGB {
-  for (const el of hits(x, y)) {
+  const list = hits(x, y);
+  for (const el of list) {
     if (hdr.contains(el)) continue;
+    /* A photo's own frame (the .ph tile behind a portfolio or /book image) can come first in the list, through a
+       pseudo-element of its own, though its photo is drawn over it: its dark tile is not the ground there (MAC SSH,
+       #1431: /book's bright hero read as near black, so the frost never came up and "Book a session" sat at 3.7:1).
+       Only while that photo's pixels can be read: until then the tile is what shows, and the safer guess. */
+    if (
+      !(el instanceof HTMLImageElement || el instanceof HTMLVideoElement) &&
+      list.some((o) => o !== el && el.contains(o) && (o instanceof HTMLImageElement || o instanceof HTMLVideoElement) && getComputedStyle(o).visibility !== "hidden" && pixel(o, x, y, hw, hh))
+    )
+      continue;
     if (el instanceof HTMLImageElement || el instanceof HTMLVideoElement) {
       const cs = getComputedStyle(el);
       if (cs.visibility === "hidden") continue;
@@ -411,17 +421,21 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
           const bb = bar.getBoundingClientRect().bottom;
           for (const el of votes.els) {
             const r = ((el.matches(".tbtn,.menu-btn") && el.querySelector("svg")) || el).getBoundingClientRect();
-            for (const t of [0.15, 0.5, 0.85]) {
-              const g = under(r.left + r.width * t, bb + 28, bar, page);
-              ahead.push(isTop ? g : ([0, 1, 2].map((i) => g[i] * (1 - VEIL) + page[i] * VEIL) as RGB));
-            }
+            for (const t of [0.15, 0.5, 0.85])
+              for (const dy of [28, 64]) {
+                const g = under(r.left + r.width * t, bb + dy, bar, page);
+                ahead.push(isTop ? g : ([0, 1, 2].map((i) => g[i] * (1 - VEIL) + page[i] * VEIL) as RGB));
+              }
           }
         }
         /* Every page, not only the home hero (MAC SSH, live v3.0.369: /portfolio/paradox at 1440 had 18 words under 4.5:1
            through the bar's usual 47% ground, and dark /book at 390 a black menu at 3.3:1 over its bright hero). Past the
            top, the bar already has that ground, so a word is judged through it: where it would still fall under 6:1, the
            frost comes up there too and the ink becomes the theme's. A plain page ground never fails, so it never shows there. */
-        const fails = isTop ? (raw.length ? fewest(raw.concat(ahead), 6) : 0) : veiled && !frosted && grounds.length ? fewest(grounds.concat(ahead), 6) : 0;
+        /* Past the top the bar's blur (24px) and saturate (1.8) pull light in from around each point, so the ground as drawn
+           can sit well above the one a look samples: judged there at 7.5:1, not 6 (MAC SSH, a4e718dd: words at 4.0 just
+           past the top of a project page, and /book's current link at 3.7). The look ahead reaches 64px below the bar. */
+        const fails = isTop ? (raw.length ? fewest(raw.concat(ahead), 6) : 0) : veiled && !frosted && grounds.length ? fewest(grounds.concat(ahead), 7.5) : 0;
         if (!isTop) {
           // past the top: comes up where a word fails through the usual ground, and once up it stays, ink fixed
           clearTimeout(frostT);
