@@ -27,7 +27,7 @@ describe("v4 home footer: focus comes back to the opener", () => {
       const c = document.querySelector<HTMLElement>(".mt-inq");
       expect(c).not.toBeNull();
       return c!;
-    });
+    }, { timeout: 5000 }); // a cold import under the test runner can pass 1s
     await waitFor(() => expect(card.contains(document.activeElement)).toBe(true));
     fireEvent.keyDown(card, { key: "Escape" });
     expect(document.querySelector(".mt-inq")).toBeNull();

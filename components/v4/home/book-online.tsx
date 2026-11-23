@@ -98,7 +98,7 @@ export function MtBookOnline({ open, opener, onClose, quotePhoto, onRowPick }: {
               <div className="mt-bin-flow">
                 {/* the live picker opens on Month; here it opens on the week */}
                 {/* on a slow line the slot keeps the flow's first height until it lands, so By quote below never jumps */}
-                {Flow ? <Flow key={r.slug} slug={r.slug} tabs={false} startView="week" /> : <div className="mt-bin-wait" aria-busy="true" />}
+                {Flow ? <Flow key={r.slug} slug={r.slug} tabs={false} startView="week" /> : <div className="mt-bin-wait" aria-busy="true"><p className="lbl mute" role="status">Loading times</p></div>}
               </div>
             </div>
           ) : (
