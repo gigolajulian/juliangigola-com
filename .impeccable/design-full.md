@@ -300,7 +300,7 @@ components:
 **Creative North Star: "The Darkroom Wall"**
 
 **Direction**
-- **Palette, 60/40 (Julian, 2026-11-22):** photographs take 60% of every work page (home, /portfolio, projects); text on the ground (Warm Charcoal / Cold Paper) takes 40%. Booking, contact and legal pages may flip. All color comes from the photos. Teal stays under 1%, marks state only (focus, the current step) and never fills an area. Check: hide the photos, and the page should read as near-black with type.
+- **Palette, 60/40 (Julian, 2026-11-22), averaged per page:** not a floor per screen; today's layouts already meet it on average, so it guides new work and is not a reason to redesign. Photographs take 60% of a work page (home, /portfolio, projects); text on the ground (Warm Charcoal / Cold Paper) takes 40%. Booking, contact and legal pages may flip. All color comes from the photos. Teal stays under 1%, marks state only (focus, the current step) and never fills an area. Check: hide the photos, and the page should read as near-black with type.
 - **Type:** Inter Tight 900 shouts, IBM Plex Mono whispers. Geist Mono for the hero tagline only.
 - **Layout:** full bleed, held stages on the home, square UI.
 - **References:** to pick, 3 to 5 of Julian's own frames.
