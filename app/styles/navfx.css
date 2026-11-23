@@ -26,15 +26,17 @@
 @keyframes navfx-in{from{background-color:transparent;-webkit-backdrop-filter:blur(0) saturate(1);backdrop-filter:blur(0) saturate(1);border-bottom-color:transparent}}
 @keyframes navfx-out{to{background-color:transparent;-webkit-backdrop-filter:blur(0) saturate(1);backdrop-filter:blur(0) saturate(1);border-bottom-color:transparent}}
 
-/* Words: white or black from what is under them (--nav-ink is set per word by nav-ink.ts). No teal in the bar;
-   the current page is the same ink, 4 shades (20%) toward the other one: darker when white, brighter when black.
-   Hover is 2 shades (10%). */
+/* Words: white or black from what is under them (--nav-ink is set per word by nav-ink.ts). The current page is the
+   same ink with a teal hairline under it (below). Hover is 2 shades (10%) toward the other ink. */
 :root[data-navfx] .v3 .site-hdr :is(.site-wm,.links a,.tbtn,.menu-btn){color:var(--nav-ink,var(--ink));transition:color .35s ease}
 :root[data-navfx] .v3 .site-hdr .links a{--nav-off:var(--bg)}
 :root[data-navfx] .v3 .site-hdr .links a[data-ink="w"]{--nav-off:#000}
 :root[data-navfx] .v3 .site-hdr .links a[data-ink="b"]{--nav-off:#fff}
 :root[data-navfx] .v3 .site-hdr .links a:hover{color:color-mix(in srgb,var(--nav-ink,var(--ink)) 90%,var(--nav-off))}
-:root[data-navfx] .v3 .site-hdr .links a[aria-current="page"]{color:color-mix(in srgb,var(--nav-ink,var(--ink)) 80%,var(--nav-off))}
+/* The current page keeps the full ink and takes the one accent as a hairline under it: the 20% mix toward the other ink
+   cost it contrast over a photo (MAC SSH, #1431: "Portfolio" 2.1 to 2.9:1 under the frost in dark). The accent marks
+   state only (DESIGN.md). */
+:root[data-navfx] .v3 .site-hdr .links a[aria-current="page"]{color:var(--nav-ink,var(--ink));text-decoration:underline 1px var(--nav-teal);text-underline-offset:6px}
 :root[data-navfx] .v3 .site-hdr.menu-on :is(.site-wm,.links a,.tbtn,.menu-btn){color:var(--ink)}
 /* The v4 home: no wordmark in the bar while the hero's big name shows (`data-navnamegone`, nav-ink.ts). It fades in as the name goes. */
 :root[data-navfx] .v3 .site-hdr .site-wm{transition:color .2s ease,opacity .3s ease}
