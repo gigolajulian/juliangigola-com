@@ -350,6 +350,7 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
       // Each word still looks under itself in stretches; the stretches vote.
       const votes = { w: 0, n: 0, els: [] as HTMLElement[] };
       const grounds: RGB[] = [], raw: RGB[] = []; // what each stretch stands on, through the veil and without it
+      let unseen = false; // a photo under a word whose pixels are not in yet
       const own = new Map<HTMLElement, RGB[]>(); // each word's own grounds
       for (const el of bar.querySelectorAll<HTMLElement>(WORDS)) {
         // an icon button is judged by its icon, not its 32px box: half the box can be on a photo the icon is clear of (MAC: the theme icon)
@@ -371,6 +372,7 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
         const [pa = "", pb = ""] = prev.split("/");
         dbg?.push({ word: el.textContent?.trim().slice(0, 12) || el.className, prev, isTop, veiled });
         const pick = (g: RGB, was: string, unknown?: boolean) => {
+          if (unknown) unseen = true;
           if (unknown && was) return was; // the photo's pixels are not in yet: keep the ink until they are
           const c = veiled ? ([0, 1, 2].map((i) => g[i] * (1 - VEIL) + page[i] * VEIL) as RGB) : g;
           if (!unknown) grounds.push(c), raw.push(g), mine.push(c);
@@ -435,7 +437,11 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
         /* Past the top the bar's blur (24px) and saturate (1.8) pull light in from around each point, so the ground as drawn
            can sit well above the one a look samples: judged there at 7.5:1, not 6 (MAC SSH, a4e718dd: words at 4.0 just
            past the top of a project page, and /book's current link at 3.7). The look ahead reaches 64px below the bar. */
-        const fails = isTop ? (raw.length ? fewest(raw.concat(ahead), 6) : 0) : veiled && !frosted && grounds.length ? fewest(grounds.concat(ahead), 7.5) : 0;
+/* Past the top, a photo under a word whose pixels are still on their way counts as failing: the first time one slides
+           under the bar its small copy takes a few frames, and the frost waited for it (MAC SSH, 6756ca22: four words at
+           4.0 to 4.1 for about 0.2s at the hero edge of a project page). The frost latches, so this only brings it up
+           sooner; a plain page has no photo, so it never fires there. */
+        const fails = isTop ? (raw.length ? fewest(raw.concat(ahead), 6) : 0) : veiled && !frosted && (grounds.length || unseen) ? (unseen ? 1 : 0) || fewest(grounds.concat(ahead), 7.5) : 0;
         if (!isTop) {
           // past the top: comes up where a word fails through the usual ground, and once up it stays, ink fixed
           clearTimeout(frostT);
