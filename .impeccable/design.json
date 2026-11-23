@@ -1,0 +1,1069 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-23T03:32:52.863Z",
+  "title": "Design System: Julian Gigola",
+  "extensions": {
+    "colorMeta": {
+      "ground-dark": {
+        "role": "neutral",
+        "displayName": "Warm Charcoal",
+        "canonical": "oklch(0.145 0.003 70)",
+        "tonalRamp": [
+          "oklch(0.15 0.003 70)",
+          "oklch(0.25 0.003 70)",
+          "oklch(0.35 0.003 70)",
+          "oklch(0.45 0.003 70)",
+          "oklch(0.55 0.003 70)",
+          "oklch(0.65 0.003 70)",
+          "oklch(0.8 0.003 70)",
+          "oklch(0.95 0.003 70)"
+        ]
+      },
+      "ink-dark": {
+        "role": "primary",
+        "displayName": "Gallery Ink (dark theme)",
+        "canonical": "oklch(0.955 0.004 80)",
+        "tonalRamp": [
+          "oklch(0.15 0.004 80)",
+          "oklch(0.25 0.004 80)",
+          "oklch(0.35 0.004 80)",
+          "oklch(0.45 0.004 80)",
+          "oklch(0.55 0.004 80)",
+          "oklch(0.65 0.004 80)",
+          "oklch(0.8 0.004 80)",
+          "oklch(0.95 0.004 80)"
+        ]
+      },
+      "card-dark": {
+        "role": "neutral",
+        "displayName": "Lifted Plate (dark)",
+        "canonical": "oklch(0.185 0.003 70)",
+        "tonalRamp": [
+          "oklch(0.15 0.003 70)",
+          "oklch(0.25 0.003 70)",
+          "oklch(0.35 0.003 70)",
+          "oklch(0.45 0.003 70)",
+          "oklch(0.55 0.003 70)",
+          "oklch(0.65 0.003 70)",
+          "oklch(0.8 0.003 70)",
+          "oklch(0.95 0.003 70)"
+        ]
+      },
+      "popover-dark": {
+        "role": "neutral",
+        "displayName": "Lifted Plate (dark theme)",
+        "canonical": "oklch(0.2 0.003 70)",
+        "tonalRamp": [
+          "oklch(0.15 0.003 70)",
+          "oklch(0.25 0.003 70)",
+          "oklch(0.35 0.003 70)",
+          "oklch(0.45 0.003 70)",
+          "oklch(0.55 0.003 70)",
+          "oklch(0.65 0.003 70)",
+          "oklch(0.8 0.003 70)",
+          "oklch(0.95 0.003 70)"
+        ]
+      },
+      "secondary-dark": {
+        "role": "neutral",
+        "displayName": "Lifted Plate (dark theme)",
+        "canonical": "oklch(0.245 0.003 70)",
+        "tonalRamp": [
+          "oklch(0.15 0.003 70)",
+          "oklch(0.25 0.003 70)",
+          "oklch(0.35 0.003 70)",
+          "oklch(0.45 0.003 70)",
+          "oklch(0.55 0.003 70)",
+          "oklch(0.65 0.003 70)",
+          "oklch(0.8 0.003 70)",
+          "oklch(0.95 0.003 70)"
+        ]
+      },
+      "muted-dark": {
+        "role": "neutral",
+        "displayName": "Lifted Plate (dark theme)",
+        "canonical": "oklch(0.235 0.003 70)",
+        "tonalRamp": [
+          "oklch(0.15 0.003 70)",
+          "oklch(0.25 0.003 70)",
+          "oklch(0.35 0.003 70)",
+          "oklch(0.45 0.003 70)",
+          "oklch(0.55 0.003 70)",
+          "oklch(0.65 0.003 70)",
+          "oklch(0.8 0.003 70)",
+          "oklch(0.95 0.003 70)"
+        ]
+      },
+      "muted-ink-dark": {
+        "role": "neutral",
+        "displayName": "Muted Ink (dark)",
+        "canonical": "oklch(0.655 0.005 80)",
+        "tonalRamp": [
+          "oklch(0.15 0.005 80)",
+          "oklch(0.25 0.005 80)",
+          "oklch(0.35 0.005 80)",
+          "oklch(0.45 0.005 80)",
+          "oklch(0.55 0.005 80)",
+          "oklch(0.65 0.005 80)",
+          "oklch(0.8 0.005 80)",
+          "oklch(0.95 0.005 80)"
+        ]
+      },
+      "line-dark": {
+        "role": "neutral",
+        "displayName": "Line (dark)",
+        "canonical": "oklch(1 0 0 / 13%)",
+        "tonalRamp": [
+          "oklch(1 0 0 / 4%)",
+          "oklch(1 0 0 / 7%)",
+          "oklch(1 0 0 / 10%)",
+          "oklch(1 0 0 / 13%)",
+          "oklch(1 0 0 / 20%)",
+          "oklch(1 0 0 / 30%)",
+          "oklch(1 0 0 / 45%)",
+          "oklch(1 0 0 / 60%)"
+        ]
+      },
+      "hairline-dark": {
+        "role": "neutral",
+        "displayName": "Line (dark theme)",
+        "canonical": "oklch(1 0 0 / 11%)"
+      },
+      "accent-dark": {
+        "role": "secondary",
+        "displayName": "Darkroom Teal (dark)",
+        "canonical": "oklch(0.72 0.095 195)",
+        "tonalRamp": [
+          "oklch(0.15 0.095 195)",
+          "oklch(0.25 0.095 195)",
+          "oklch(0.35 0.095 195)",
+          "oklch(0.45 0.095 195)",
+          "oklch(0.55 0.095 195)",
+          "oklch(0.65 0.095 195)",
+          "oklch(0.8 0.095 195)",
+          "oklch(0.95 0.095 195)"
+        ]
+      },
+      "live-dark": {
+        "role": "tertiary",
+        "displayName": "Live Green (dark)",
+        "canonical": "oklch(0.74 0.115 152)",
+        "tonalRamp": [
+          "oklch(0.15 0.115 152)",
+          "oklch(0.25 0.115 152)",
+          "oklch(0.35 0.115 152)",
+          "oklch(0.45 0.115 152)",
+          "oklch(0.55 0.115 152)",
+          "oklch(0.65 0.115 152)",
+          "oklch(0.8 0.115 152)",
+          "oklch(0.95 0.115 152)"
+        ]
+      },
+      "destructive-dark": {
+        "role": "tertiary",
+        "displayName": "Signal Red (dark)",
+        "canonical": "oklch(0.62 0.2 25)",
+        "tonalRamp": [
+          "oklch(0.15 0.2 25)",
+          "oklch(0.25 0.2 25)",
+          "oklch(0.35 0.2 25)",
+          "oklch(0.45 0.2 25)",
+          "oklch(0.55 0.2 25)",
+          "oklch(0.65 0.2 25)",
+          "oklch(0.8 0.2 25)",
+          "oklch(0.95 0.2 25)"
+        ]
+      },
+      "ground-light": {
+        "role": "neutral",
+        "displayName": "Cold Paper",
+        "canonical": "oklch(0.945 0.003 250)",
+        "tonalRamp": [
+          "oklch(0.15 0.003 250)",
+          "oklch(0.25 0.003 250)",
+          "oklch(0.35 0.003 250)",
+          "oklch(0.45 0.003 250)",
+          "oklch(0.55 0.003 250)",
+          "oklch(0.65 0.003 250)",
+          "oklch(0.8 0.003 250)",
+          "oklch(0.95 0.003 250)"
+        ]
+      },
+      "ink-light": {
+        "role": "primary",
+        "displayName": "Gallery Ink (light theme)",
+        "canonical": "oklch(0.185 0.003 70)",
+        "tonalRamp": [
+          "oklch(0.15 0.003 70)",
+          "oklch(0.25 0.003 70)",
+          "oklch(0.35 0.003 70)",
+          "oklch(0.45 0.003 70)",
+          "oklch(0.55 0.003 70)",
+          "oklch(0.65 0.003 70)",
+          "oklch(0.8 0.003 70)",
+          "oklch(0.95 0.003 70)"
+        ]
+      },
+      "card-light": {
+        "role": "neutral",
+        "displayName": "Lifted Plate (light)",
+        "canonical": "oklch(0.915 0.003 250)",
+        "tonalRamp": [
+          "oklch(0.15 0.003 250)",
+          "oklch(0.25 0.003 250)",
+          "oklch(0.35 0.003 250)",
+          "oklch(0.45 0.003 250)",
+          "oklch(0.55 0.003 250)",
+          "oklch(0.65 0.003 250)",
+          "oklch(0.8 0.003 250)",
+          "oklch(0.95 0.003 250)"
+        ]
+      },
+      "popover-light": {
+        "role": "neutral",
+        "displayName": "Lifted Plate (light theme)",
+        "canonical": "oklch(0.902 0.003 250)",
+        "tonalRamp": [
+          "oklch(0.15 0.003 250)",
+          "oklch(0.25 0.003 250)",
+          "oklch(0.35 0.003 250)",
+          "oklch(0.45 0.003 250)",
+          "oklch(0.55 0.003 250)",
+          "oklch(0.65 0.003 250)",
+          "oklch(0.8 0.003 250)",
+          "oklch(0.95 0.003 250)"
+        ]
+      },
+      "secondary-light": {
+        "role": "neutral",
+        "displayName": "Lifted Plate (light theme)",
+        "canonical": "oklch(0.872 0.003 250)",
+        "tonalRamp": [
+          "oklch(0.15 0.003 250)",
+          "oklch(0.25 0.003 250)",
+          "oklch(0.35 0.003 250)",
+          "oklch(0.45 0.003 250)",
+          "oklch(0.55 0.003 250)",
+          "oklch(0.65 0.003 250)",
+          "oklch(0.8 0.003 250)",
+          "oklch(0.95 0.003 250)"
+        ]
+      },
+      "muted-light": {
+        "role": "neutral",
+        "displayName": "Lifted Plate (light theme)",
+        "canonical": "oklch(0.884 0.003 250)",
+        "tonalRamp": [
+          "oklch(0.15 0.003 250)",
+          "oklch(0.25 0.003 250)",
+          "oklch(0.35 0.003 250)",
+          "oklch(0.45 0.003 250)",
+          "oklch(0.55 0.003 250)",
+          "oklch(0.65 0.003 250)",
+          "oklch(0.8 0.003 250)",
+          "oklch(0.95 0.003 250)"
+        ]
+      },
+      "muted-ink-light": {
+        "role": "neutral",
+        "displayName": "Muted Ink (light)",
+        "canonical": "oklch(0.44 0.003 250)",
+        "tonalRamp": [
+          "oklch(0.15 0.003 250)",
+          "oklch(0.25 0.003 250)",
+          "oklch(0.35 0.003 250)",
+          "oklch(0.45 0.003 250)",
+          "oklch(0.55 0.003 250)",
+          "oklch(0.65 0.003 250)",
+          "oklch(0.8 0.003 250)",
+          "oklch(0.95 0.003 250)"
+        ]
+      },
+      "hairline-light": {
+        "role": "neutral",
+        "displayName": "Line (light theme)",
+        "canonical": "oklch(0 0 0 / 13%)"
+      },
+      "accent-light": {
+        "role": "secondary",
+        "displayName": "Darkroom Teal (light)",
+        "canonical": "oklch(0.47 0.1 195)",
+        "tonalRamp": [
+          "oklch(0.15 0.1 195)",
+          "oklch(0.25 0.1 195)",
+          "oklch(0.35 0.1 195)",
+          "oklch(0.45 0.1 195)",
+          "oklch(0.55 0.1 195)",
+          "oklch(0.65 0.1 195)",
+          "oklch(0.8 0.1 195)",
+          "oklch(0.95 0.1 195)"
+        ]
+      },
+      "live-light": {
+        "role": "tertiary",
+        "displayName": "Live Green (light)",
+        "canonical": "oklch(0.5 0.115 152)",
+        "tonalRamp": [
+          "oklch(0.15 0.115 152)",
+          "oklch(0.25 0.115 152)",
+          "oklch(0.35 0.115 152)",
+          "oklch(0.45 0.115 152)",
+          "oklch(0.55 0.115 152)",
+          "oklch(0.65 0.115 152)",
+          "oklch(0.8 0.115 152)",
+          "oklch(0.95 0.115 152)"
+        ]
+      },
+      "destructive-light": {
+        "role": "tertiary",
+        "displayName": "Signal Red (light)",
+        "canonical": "oklch(0.51 0.2 25)",
+        "tonalRamp": [
+          "oklch(0.15 0.2 25)",
+          "oklch(0.25 0.2 25)",
+          "oklch(0.35 0.2 25)",
+          "oklch(0.45 0.2 25)",
+          "oklch(0.55 0.2 25)",
+          "oklch(0.65 0.2 25)",
+          "oklch(0.8 0.2 25)",
+          "oklch(0.95 0.2 25)"
+        ]
+      },
+      "on-photo": {
+        "role": "neutral",
+        "displayName": "On Photo",
+        "canonical": "#f2f1ee",
+        "tonalRamp": [
+          "oklch(0.15 0.004 80)",
+          "oklch(0.25 0.004 80)",
+          "oklch(0.35 0.004 80)",
+          "oklch(0.45 0.004 80)",
+          "oklch(0.55 0.004 80)",
+          "oklch(0.65 0.004 80)",
+          "oklch(0.8 0.004 80)",
+          "oklch(0.95 0.004 80)"
+        ]
+      },
+      "mute-on-photo": {
+        "role": "neutral",
+        "displayName": "Muted On Photo",
+        "canonical": "oklch(0.78 0.005 80)",
+        "tonalRamp": [
+          "oklch(0.15 0.005 80)",
+          "oklch(0.25 0.005 80)",
+          "oklch(0.35 0.005 80)",
+          "oklch(0.45 0.005 80)",
+          "oklch(0.55 0.005 80)",
+          "oklch(0.65 0.005 80)",
+          "oklch(0.8 0.005 80)",
+          "oklch(0.95 0.005 80)"
+        ]
+      },
+      "line-on-photo": {
+        "role": "neutral",
+        "displayName": "Line On Photo",
+        "canonical": "oklch(1 0 0 / 20%)",
+        "tonalRamp": [
+          "oklch(1 0 0 / 5%)",
+          "oklch(1 0 0 / 10%)",
+          "oklch(1 0 0 / 15%)",
+          "oklch(1 0 0 / 20%)",
+          "oklch(1 0 0 / 30%)",
+          "oklch(1 0 0 / 40%)",
+          "oklch(1 0 0 / 55%)",
+          "oklch(1 0 0 / 70%)"
+        ]
+      },
+      "scrim": {
+        "role": "neutral",
+        "displayName": "Scrim",
+        "canonical": "#0a0a09",
+        "tonalRamp": [
+          "oklch(0.15 0.003 70)",
+          "oklch(0.25 0.003 70)",
+          "oklch(0.35 0.003 70)",
+          "oklch(0.45 0.003 70)",
+          "oklch(0.55 0.003 70)",
+          "oklch(0.65 0.003 70)",
+          "oklch(0.8 0.003 70)",
+          "oklch(0.95 0.003 70)"
+        ]
+      },
+      "night": {
+        "role": "neutral",
+        "displayName": "Night",
+        "canonical": "#0b0a09",
+        "tonalRamp": [
+          "oklch(0.15 0.003 70)",
+          "oklch(0.25 0.003 70)",
+          "oklch(0.35 0.003 70)",
+          "oklch(0.45 0.003 70)",
+          "oklch(0.55 0.003 70)",
+          "oklch(0.65 0.003 70)",
+          "oklch(0.8 0.003 70)",
+          "oklch(0.95 0.003 70)"
+        ]
+      },
+      "rail-ink-dark": {
+        "role": "neutral",
+        "displayName": "Rail Ink (dark theme)",
+        "canonical": "oklch(0.98 0.003 60)",
+        "tonalRamp": [
+          "oklch(0.15 0.003 60)",
+          "oklch(0.25 0.003 60)",
+          "oklch(0.35 0.003 60)",
+          "oklch(0.45 0.003 60)",
+          "oklch(0.55 0.003 60)",
+          "oklch(0.65 0.003 60)",
+          "oklch(0.8 0.003 60)",
+          "oklch(0.95 0.003 60)"
+        ]
+      },
+      "rail-ink-light": {
+        "role": "neutral",
+        "displayName": "Rail Ink (light theme)",
+        "canonical": "oklch(0.16 0.004 60)",
+        "tonalRamp": [
+          "oklch(0.15 0.004 60)",
+          "oklch(0.25 0.004 60)",
+          "oklch(0.35 0.004 60)",
+          "oklch(0.45 0.004 60)",
+          "oklch(0.55 0.004 60)",
+          "oklch(0.65 0.004 60)",
+          "oklch(0.8 0.004 60)",
+          "oklch(0.95 0.004 60)"
+        ]
+      },
+      "cover-tone-motion": {
+        "role": "neutral",
+        "displayName": "Cover Tone (Motion)",
+        "canonical": "#80888B",
+        "tonalRamp": [
+          "oklch(0.15 0.01 222)",
+          "oklch(0.25 0.01 222)",
+          "oklch(0.35 0.01 222)",
+          "oklch(0.45 0.01 222)",
+          "oklch(0.55 0.01 222)",
+          "oklch(0.65 0.01 222)",
+          "oklch(0.8 0.01 222)",
+          "oklch(0.95 0.01 222)"
+        ]
+      },
+      "cover-tone-coverart": {
+        "role": "neutral",
+        "displayName": "Cover Tone (Cover art)",
+        "canonical": "#65696A",
+        "tonalRamp": [
+          "oklch(0.15 0.005 214)",
+          "oklch(0.25 0.005 214)",
+          "oklch(0.35 0.005 214)",
+          "oklch(0.45 0.005 214)",
+          "oklch(0.55 0.005 214)",
+          "oklch(0.65 0.005 214)",
+          "oklch(0.8 0.005 214)",
+          "oklch(0.95 0.005 214)"
+        ]
+      },
+      "nav-teal": {
+        "role": "secondary",
+        "displayName": "Nav Teal",
+        "canonical": "oklch(0.51 0.09 195)",
+        "tonalRamp": [
+          "oklch(0.15 0.09 195)",
+          "oklch(0.25 0.09 195)",
+          "oklch(0.35 0.09 195)",
+          "oklch(0.45 0.09 195)",
+          "oklch(0.55 0.09 195)",
+          "oklch(0.65 0.09 195)",
+          "oklch(0.8 0.09 195)",
+          "oklch(0.95 0.09 195)"
+        ]
+      },
+      "artist-line-dark": {
+        "role": "neutral",
+        "displayName": "Artist Line (dark)",
+        "canonical": "color-mix(in oklab, oklch(0.655 0.005 80) 72%, oklch(0.955 0.004 80))"
+      },
+      "artist-line-light": {
+        "role": "neutral",
+        "displayName": "Artist Line (light)",
+        "canonical": "color-mix(in oklab, oklch(0.44 0.003 250) 72%, oklch(0.185 0.003 70))"
+      },
+      "service-dim-dark": {
+        "role": "neutral",
+        "displayName": "Service Dim (dark)",
+        "canonical": "color-mix(in srgb, oklch(0.955 0.004 80) 54%, oklch(0.145 0.003 70))"
+      },
+      "service-dim-light": {
+        "role": "neutral",
+        "displayName": "Service Dim (light)",
+        "canonical": "color-mix(in srgb, oklch(0.185 0.003 70) 64%, oklch(0.945 0.003 250))"
+      }
+    },
+    "typographyMeta": {
+      "hero-name": {
+        "displayName": "Hero Name",
+        "purpose": "See DESIGN.md Typography."
+      },
+      "page-title": {
+        "displayName": "Page Title",
+        "purpose": "Portfolio, About me, Get in touch."
+      },
+      "section-title": {
+        "displayName": "Section Title",
+        "purpose": "homepage and page sections."
+      },
+      "project-title": {
+        "displayName": "Project Title",
+        "purpose": "a project page's name."
+      },
+      "index-row": {
+        "displayName": "Index Row",
+        "purpose": "the Sessions index names."
+      },
+      "reach-title": {
+        "displayName": "Reach Title",
+        "purpose": "the two Inquire columns, the note form and the call card."
+      },
+      "menu-name": {
+        "displayName": "Menu Name",
+        "purpose": "names in the phone menu drawer."
+      },
+      "tile-name": {
+        "displayName": "Tile Name",
+        "purpose": "the stepper's kind tiles and the Commissions chapter heads."
+      },
+      "headline-phone": {
+        "displayName": "Headline Phone",
+        "purpose": "See DESIGN.md Typography."
+      },
+      "wordmark": {
+        "displayName": "Wordmark",
+        "purpose": "the name in the glass header. In the copyright notice it is fitted to the 14.75rem plate (**Wordmark notice**, 1.67rem)."
+      },
+      "wordmark-notice": {
+        "displayName": "Wordmark Notice",
+        "purpose": "See DESIGN.md Typography."
+      },
+      "display": {
+        "displayName": "display",
+        "purpose": "Legacy step for pre-V3 surfaces; not for new work.",
+        "legacy": true,
+        "fontFamily": "Inter Tight, Helvetica Neue, Arial, sans-serif",
+        "fontWeight": 900,
+        "fontSize": "clamp(2.75rem, 8vw, 7rem)",
+        "lineHeight": 0.92,
+        "letterSpacing": "-0.04em"
+      },
+      "title": {
+        "displayName": "title",
+        "purpose": "Legacy step for pre-V3 surfaces; not for new work.",
+        "legacy": true,
+        "fontFamily": "Inter Tight, Helvetica Neue, Arial, sans-serif",
+        "fontWeight": 900,
+        "fontSize": "clamp(1.875rem, 4.5vw, 3.5rem)",
+        "lineHeight": 1,
+        "letterSpacing": "-0.04em"
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "all running UI text."
+      },
+      "lead": {
+        "displayName": "Lead",
+        "purpose": "the paragraph under a service title."
+      },
+      "bio": {
+        "displayName": "Bio",
+        "purpose": "the About bio."
+      },
+      "note": {
+        "displayName": "Note",
+        "purpose": "errors, small paragraphs."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "nav, captions, counts, steps."
+      },
+      "button": {
+        "displayName": "Button",
+        "purpose": "every button."
+      },
+      "caption": {
+        "displayName": "Caption",
+        "purpose": "See DESIGN.md Typography."
+      },
+      "micro": {
+        "displayName": "Micro",
+        "purpose": "See DESIGN.md Typography."
+      },
+      "nav": {
+        "displayName": "nav",
+        "purpose": "Legacy step for pre-V3 surfaces; not for new work.",
+        "legacy": true,
+        "fontFamily": "IBM Plex Mono, ui-monospace, monospace",
+        "fontSize": "0.9375rem",
+        "fontWeight": 400,
+        "lineHeight": 1,
+        "letterSpacing": "0.08em"
+      },
+      "cal-month-phone": {
+        "displayName": "Cal Month Phone",
+        "purpose": "See DESIGN.md Typography."
+      },
+      "time-slot": {
+        "displayName": "Time Slot",
+        "purpose": "See DESIGN.md Typography."
+      },
+      "time-slot-phone": {
+        "displayName": "Time Slot Phone",
+        "purpose": "See DESIGN.md Typography."
+      },
+      "confirm-note": {
+        "displayName": "Confirm Note",
+        "purpose": "See DESIGN.md Typography."
+      },
+      "fitted-strip": {
+        "displayName": "Fitted strip",
+        "purpose": "Fitted to the name's own length, never wrapped: floor to ceiling 1rem to 5rem.",
+        "fitRange": "1rem to 5rem"
+      },
+      "fitted-strip-grid": {
+        "displayName": "Fitted strip grid",
+        "purpose": "Fitted to the name's own length, never wrapped: floor to ceiling 0.875rem to 2.5rem.",
+        "fitRange": "0.875rem to 2.5rem"
+      },
+      "fitted-cover": {
+        "displayName": "Fitted cover",
+        "purpose": "Fitted to the name's own length, never wrapped: floor to ceiling 1.25rem to 3rem.",
+        "fitRange": "1.25rem to 3rem"
+      },
+      "fitted-chapter": {
+        "displayName": "Fitted chapter",
+        "purpose": "Fitted to the name's own length, never wrapped: floor to ceiling 1rem to 3rem.",
+        "fitRange": "1rem to 3rem"
+      },
+      "fitted-chapter-grid": {
+        "displayName": "Fitted chapter grid",
+        "purpose": "Fitted to the name's own length, never wrapped: floor to ceiling 0.75rem to 1.5rem.",
+        "fitRange": "0.75rem to 1.5rem"
+      },
+      "fitted-title": {
+        "displayName": "Fitted title",
+        "purpose": "Fitted to the name's own length, never wrapped: floor to ceiling 2.25rem to 6rem.",
+        "fitRange": "2.25rem to 6rem"
+      },
+      "fitted-title-phone": {
+        "displayName": "Fitted Title Phone",
+        "purpose": "See DESIGN.md Typography."
+      },
+      "card-name": {
+        "displayName": "card-name",
+        "purpose": "Legacy step for pre-V3 surfaces; not for new work.",
+        "legacy": true,
+        "fontFamily": "Inter Tight, Helvetica Neue, Arial, sans-serif",
+        "fontWeight": 900,
+        "fontSize": "1.375rem",
+        "lineHeight": 0.9
+      },
+      "stamp": {
+        "displayName": "stamp",
+        "purpose": "Legacy step for pre-V3 surfaces; not for new work.",
+        "legacy": true,
+        "fontFamily": "Inter Tight, Helvetica Neue, Arial, sans-serif",
+        "fontWeight": 900,
+        "fontSize": "2rem",
+        "lineHeight": 1
+      },
+      "stamp-short": {
+        "displayName": "stamp-short",
+        "purpose": "Legacy step for pre-V3 surfaces; not for new work.",
+        "legacy": true,
+        "fontFamily": "Inter Tight, Helvetica Neue, Arial, sans-serif",
+        "fontWeight": 900,
+        "fontSize": "1.625rem"
+      },
+      "splash": {
+        "displayName": "splash",
+        "purpose": "Legacy step for pre-V3 surfaces; not for new work.",
+        "legacy": true,
+        "fontFamily": "Inter Tight, Helvetica Neue, Arial, sans-serif",
+        "fontWeight": 900,
+        "fontSize": "clamp(3rem, 10vw, 9rem)"
+      },
+      "not-found": {
+        "displayName": "Not Found",
+        "purpose": "See DESIGN.md Typography."
+      },
+      "film-number": {
+        "displayName": "Film numbers",
+        "purpose": "The 01 to 03 pager on the home film: full ink, tight dark halo, large text 3:1."
+      },
+      "service-row": {
+        "displayName": "Service rows",
+        "purpose": "A V4 service page's list rows, dim until pointed at."
+      },
+      "hero-tagline": {
+        "displayName": "Hero tagline",
+        "purpose": "The line under the V4 hero name only; 14.5px and 0.06em on a phone."
+      }
+    },
+    "shadows": [
+      {
+        "name": "tab-current",
+        "value": "inset 0 -2px var(--accent)",
+        "purpose": "The 2px accent line under a current tab."
+      },
+      {
+        "name": "field-focus",
+        "value": "0 1px 0 var(--accent)",
+        "purpose": "The accent underline under a focused field."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out-strong",
+        "value": "cubic-bezier(0.23, 1, 0.32, 1)",
+        "purpose": "Default for every state transition and entrance."
+      },
+      {
+        "name": "ease-in-out-strong",
+        "value": "cubic-bezier(0.77, 0, 0.175, 1)",
+        "purpose": "Moves that start and end at rest."
+      },
+      {
+        "name": "ease-spring",
+        "value": "var(--ease-spring)",
+        "purpose": "linear() spring, about 0.8% overshoot; rise entrances (620ms transform)."
+      },
+      {
+        "name": "ease-bounce",
+        "value": "var(--ease-bounce)",
+        "purpose": "linear() bounce, about 5% overshoot; press release."
+      },
+      {
+        "name": "button-flood",
+        "value": "560ms cubic-bezier(0.33, 0, 0.2, 1)",
+        "purpose": "The button hover circle flooding in from the pointer."
+      },
+      {
+        "name": "state",
+        "value": "200ms var(--ease-out-strong)",
+        "purpose": "Button color, border and stroke changes."
+      },
+      {
+        "name": "press-down",
+        "value": "90ms ease-out",
+        "purpose": "Scale down on :active."
+      },
+      {
+        "name": "hero-crossfade",
+        "value": "opacity 1.2s ease, every 6s",
+        "purpose": "The four hero frames."
+      },
+      {
+        "name": "header-arrive",
+        "value": "transform .25s ease, opacity .2s ease",
+        "purpose": "The glass header sliding in."
+      },
+      {
+        "name": "ease-in-strong",
+        "value": "cubic-bezier(0.4, 0, 1, 1)",
+        "purpose": "Declared; the motion plan allows no ease-in.",
+        "source": "app/styles/tokens.css:79"
+      },
+      {
+        "name": "ease-drawer",
+        "value": "cubic-bezier(0.32, 0.72, 0, 1)",
+        "purpose": "`drawer`: page and sheet slides. With out and move, one of the three curves.",
+        "source": "app/styles/tokens.css:84"
+      },
+      {
+        "name": "ease-rubber",
+        "value": "cubic-bezier(0.2, 1.7, 0.4, 1)",
+        "purpose": "A strip's rubber band on release past an end (560ms). Never under the hand.",
+        "source": "app/styles/tokens.css:115"
+      },
+      {
+        "name": "dur-press",
+        "value": "100ms",
+        "purpose": "Button and slot press.",
+        "source": "app/styles/tokens.css:236"
+      },
+      {
+        "name": "dur-hover",
+        "value": "150ms",
+        "purpose": "Color and opacity on hover or focus.",
+        "source": "app/styles/tokens.css:237"
+      },
+      {
+        "name": "dur-small",
+        "value": "250ms",
+        "purpose": "Menus, notices, chips, every exit.",
+        "source": "app/styles/tokens.css:238"
+      },
+      {
+        "name": "dur-page",
+        "value": "400ms",
+        "purpose": "Page slide, sheets, drawer.",
+        "source": "app/styles/tokens.css:239"
+      },
+      {
+        "name": "dur-photo",
+        "value": "600ms",
+        "purpose": "A photo travelling: tile to hero, open, lightbox step.",
+        "source": "app/styles/tokens.css:240"
+      },
+      {
+        "name": "dur-show",
+        "value": "1000ms",
+        "purpose": "Splash and hero crossfade only.",
+        "source": "app/styles/tokens.css:241"
+      },
+      {
+        "name": "reveal",
+        "value": "opacity .7s ease-out, transform .9s cubic-bezier(.16,1,.3,1)",
+        "purpose": "Allowed one-off: phone and tablet scroll reveal, 28px rise, once, visible by default."
+      },
+      {
+        "name": "frost-in",
+        "value": ".4s ease",
+        "purpose": "Allowed one-off: the home header frost coming up."
+      },
+      {
+        "name": "frost-out",
+        "value": ".3s ease",
+        "purpose": "Allowed one-off: the home header frost leaving, after 1.2s clear near the top."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "zoom-200",
+        "value": "299.98px"
+      },
+      {
+        "name": "phone",
+        "value": "700px"
+      },
+      {
+        "name": "tablet",
+        "value": "801px"
+      },
+      {
+        "name": "portrait-tablet",
+        "value": "1100px"
+      },
+      {
+        "name": "big",
+        "value": "1600px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Square 44px mono button, the default action.",
+      "html": "<button class=\"ds-btn\">See the work</button>",
+      "css": ".ds-btn{display:inline-flex;align-items:center;height:44px;padding:0 20px;border:1px solid oklch(0.955 0.004 80);font:500 11px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;border-radius:0;cursor:pointer;transition:background .15s,color .15s;background:transparent;color:oklch(0.955 0.004 80)}.ds-btn:hover{background:oklch(0.955 0.004 80);color:oklch(0.145 0.003 70)}.ds-btn:focus-visible{outline:1px solid oklch(0.72 0.095 195);outline-offset:3px}"
+    },
+    {
+      "name": "Filled Button",
+      "kind": "button",
+      "refersTo": "button-fill",
+      "description": "The one primary per view.",
+      "html": "<button class=\"ds-btn-fill\">Inquire</button>",
+      "css": ".ds-btn-fill{display:inline-flex;align-items:center;height:44px;padding:0 20px;border:1px solid oklch(0.955 0.004 80);font:500 11px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;border-radius:0;cursor:pointer;transition:background .15s,color .15s;background:oklch(0.955 0.004 80);color:oklch(0.145 0.003 70)}.ds-btn-fill:hover{background:transparent;color:oklch(0.955 0.004 80)}.ds-btn-fill:focus-visible{outline:1px solid oklch(0.72 0.095 195);outline-offset:3px}"
+    },
+    {
+      "name": "Filter Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "The only V3 pill: discipline filters with counts.",
+      "html": "<div class=\"ds-chips\"><button class=\"ds-chip\" aria-pressed=\"true\">Editorial<span>24</span></button><button class=\"ds-chip\">Portraits<span>12</span></button></div>",
+      "css": ".ds-chips{display:flex;gap:6px}.ds-chip{height:36px;padding:0 14px;background:none;border:1px solid oklch(1 0 0 / 13%);border-radius:999px;color:oklch(0.655 0.005 80);font:400 11px/1.2 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;cursor:pointer}.ds-chip span{margin-left:6px}.ds-chip[aria-pressed=true]{border-color:oklch(0.955 0.004 80);color:oklch(0.955 0.004 80)}.ds-chip:focus-visible{outline:1px solid oklch(0.72 0.095 195);outline-offset:3px}"
+    },
+    {
+      "name": "Underline Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Underline only; teal on focus.",
+      "html": "<label class=\"ds-fld\"><span>Email</span><input placeholder=\"you@studio.com\"></label>",
+      "css": ".ds-fld{display:flex;flex-direction:column;gap:6px;font:400 11px/1.2 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;color:oklch(0.655 0.005 80)}.ds-fld input{background:transparent;border:0;border-bottom:1px solid color-mix(in srgb,oklch(0.955 0.004 80) 22%,transparent);color:oklch(0.955 0.004 80);font:400 14px/1.6 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:0;text-transform:none;padding:10px 0;border-radius:0}.ds-fld input:focus{outline:0;border-bottom-color:oklch(0.72 0.095 195)}"
+    },
+    {
+      "name": "Glass Header",
+      "kind": "nav",
+      "refersTo": "",
+      "description": "Fixed glass bar: wordmark left, links and theme toggle right. On the home it frosts to 62% over the hero, ink the theme's own.",
+      "html": "<header class=\"ds-hdr\"><span class=\"ds-wm\">Julian Gigola</span><nav><a>Portfolio</a><a>Sessions</a><a>About</a><a>Inquire</a></nav></header>",
+      "css": ".ds-hdr{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:color-mix(in srgb,oklch(0.145 0.003 70) 47%,transparent);backdrop-filter:blur(24px) saturate(1.8);border-bottom:.5px solid oklch(1 0 0 / 13%);color:oklch(0.955 0.004 80)}.ds-wm{font:900 1rem/1 'Inter Tight','Helvetica Neue',Arial,sans-serif;letter-spacing:-.045em}.ds-hdr nav{display:flex;gap:28px;font:400 11px/1.2 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase}.ds-hdr a{cursor:pointer}.ds-hdr a:hover{color:oklch(0.72 0.095 195)}"
+    },
+    {
+      "name": "Photo Tile",
+      "kind": "card",
+      "refersTo": "photo-tile",
+      "description": "4:5 cover at 4px with name and discipline under it.",
+      "html": "<figure class=\"ds-tile\"><div class=\"ds-ph\"></div><figcaption><b>Valgur</b><span>Editorial</span></figcaption></figure>",
+      "css": ".ds-tile{margin:0;width:200px}.ds-ph{aspect-ratio:4/5;border-radius:4px;background:oklch(0.185 0.003 70)}.ds-tile figcaption{display:flex;justify-content:space-between;margin-top:10px;font:400 11px/1.2 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;color:oklch(0.655 0.005 80)}.ds-tile b{color:oklch(0.955 0.004 80);font-weight:400}"
+    },
+    {
+      "name": "Contact Sheet Cell",
+      "kind": "card",
+      "refersTo": "photo",
+      "description": "A square photograph at a 4px corner that presses and opens the viewer.",
+      "html": "<button class=\"ds-frame\" aria-label=\"Open frame 01 of 12\"></button>",
+      "css": ".ds-frame{display:block;width:160px;aspect-ratio:1;border:0;border-radius:4px;background:var(--card);cursor:pointer;transition:scale 300ms cubic-bezier(0.23,1,0.32,1)}.ds-frame:active{scale:0.98;transition-duration:90ms}.ds-frame:focus-visible{outline:2px solid var(--ring);outline-offset:2px}"
+    },
+    {
+      "name": "Portfolio Rail",
+      "kind": "custom",
+      "refersTo": "portfolio-rail",
+      "description": "The All portfolio ruler under the pointer: disciplines in colors borrowed from their photographs, blended, a neutral thumb on the one you are in.",
+      "html": "<div class=\"ds-rail\"><span class=\"is-lit\">Editorial</span><span style=\"--c:oklch(0.55 0.12 240)\">Brand</span><span style=\"--c:oklch(0.55 0.11 185)\">Presskit</span><span style=\"--c:oklch(0.55 0.12 40)\">Chroma</span><span style=\"--c:oklch(0.5 0.14 275)\">Events</span><span style=\"--c:oklch(0.55 0.13 25)\">Cover art</span><span style=\"--c:oklch(0.55 0.1 300)\">Motion</span></div>",
+      "css": ".ds-rail { display: flex; height: 22px; border-radius: 9999px; overflow: hidden; background: color-mix(in oklab, var(--foreground) 11%, var(--background)); } .ds-rail span { flex: 1; display: grid; place-items: center; font-family: 'IBM Plex Mono', monospace; font-size: 0.5625rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(0.98 0.003 60); background: color-mix(in oklab, var(--c) 75%, var(--background)); transition: background-color 420ms cubic-bezier(0.23, 1, 0.32, 1); } .ds-rail span.is-lit { margin: 2px; border-radius: 9999px; background: color-mix(in oklab, var(--foreground) 24%, var(--background)); color: var(--foreground); }"
+    },
+    {
+      "name": "Header Frost",
+      "kind": "nav",
+      "refersTo": "",
+      "description": "Home only: the bar over the hero at a 62% veil, ink the theme's own.",
+      "html": "<header class=\"ds-frost\"><span class=\"ds-frost-wm\">Julian Gigola</span><nav><a>Portfolio</a><a>About</a><a>Inquire</a></nav></header>",
+      "css": ".ds-frost{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:color-mix(in srgb,oklch(0.145 0.003 70) 62%,transparent);backdrop-filter:blur(24px) saturate(1.8);border-bottom:.5px solid oklch(1 0 0 / 13%);color:oklch(0.955 0.004 80);animation:ds-frost-in .4s ease both}.ds-frost-wm{font:900 1rem/1 'Inter Tight','Helvetica Neue',Arial,sans-serif;letter-spacing:-.045em}.ds-frost nav{display:flex;gap:28px;font:400 11px/1.2 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase}.ds-frost a:focus-visible{outline:1px solid oklch(0.72 0.095 195);outline-offset:3px}@keyframes ds-frost-in{from{background-color:transparent;backdrop-filter:blur(0) saturate(1)}}"
+    },
+    {
+      "name": "Film Pager",
+      "kind": "custom",
+      "refersTo": "",
+      "description": "The 01 to 03 numbers on the home film: 900 display, tight dark halo, the current one leads by its rule.",
+      "html": "<ol class=\"ds-fp\"><li class=\"on\">01</li><li>02</li><li>03</li></ol>",
+      "css": ".ds-fp{list-style:none;margin:0;padding:16px;display:flex;flex-direction:column;gap:10px;align-items:flex-end;background:#9aa0a2;color:#f2f1ee}.ds-fp li{display:flex;flex-direction:row-reverse;align-items:center;gap:12px;font:900 24px/1 'Inter Tight','Helvetica Neue',Arial,sans-serif;letter-spacing:-.03em;font-variant-numeric:tabular-nums;text-shadow:0 0 2px rgb(0 0 0/.95),0 0 3px rgb(0 0 0/.9),0 0 5px rgb(0 0 0/.8),0 0 10px rgb(0 0 0/.5);cursor:pointer}.ds-fp li::after{content:'';width:40px;height:1px;background:currentColor;box-shadow:0 0 2px rgb(0 0 0/.8);transform-origin:100% 50%;transform:scaleX(0);transition:transform .4s cubic-bezier(.23,1,.32,1)}.ds-fp li.on::after,.ds-fp li:hover::after{transform:scaleX(1)}"
+    },
+    {
+      "name": "Service Row",
+      "kind": "custom",
+      "refersTo": "",
+      "description": "A V4 service page row: dim until pointed at, numbered in mono.",
+      "html": "<ol class=\"ds-sv\"><li>Concept and moodboard</li><li>Shoot day</li></ol>",
+      "css": ".ds-sv{list-style:none;margin:0;padding:0;counter-reset:r;color:color-mix(in srgb,oklch(0.955 0.004 80) 54%,oklch(0.145 0.003 70))}.ds-sv li{counter-increment:r;display:flex;gap:14px;align-items:baseline;padding:14px 0;border-bottom:1px solid oklch(1 0 0 / 13%);font:900 1.25rem/1.15 'Inter Tight','Helvetica Neue',Arial,sans-serif;letter-spacing:-.04em;transition:color .15s}.ds-sv li::before{content:counter(r,decimal-leading-zero);font:400 11px/1 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.14em}.ds-sv li:hover{color:oklch(0.955 0.004 80)}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Darkroom Wall",
+    "overview": "**Creative North Star: \"The Darkroom Wall\"**\n\nThe photographs are the room's only color and its only spectacle. Everything else is the wall they hang on: a near-neutral ground, hairlines instead of boxes, and type in two registers. Titles shout once in Inter Tight Black, set tight; everything else speaks in small IBM Plex Mono. The interface is a quiet frame for reaching an inquiry or a booking.\n\nDark is the default and light is a second world, each tuned on its own terms and never inverted. The theme follows the visitor's system, and the half-disc toggle overrides it for the session. Type and scrims laid over a photograph stay light in both themes.\n\nV3 is square. UI corners are 0, photographs take 4px, the About portrait 8px, and the only pill is the filter chip. Motion is a few authored moments (the hero crossfade, the logo strip drift, the glass header arriving), all off under reduced motion. Several pre-V3 surfaces still ship (the discipline strips with their rail, the commission booking card at /book/<commission>, the contact plate); they keep their own corners and are described under Components so they are not mistaken for drift.\n\n**Motion tokens** (app/styles/tokens.css on origin/next): three curves only. `out` is `--ease-out-strong` (enter, leave, answer a click), `move` is `--ease-in-out-strong` (something travelling), `drawer` is `--ease-drawer` (page and sheet slides, line 84). No ease-in. Six durations, each with one job (lines 236 to 241): press 100ms, hover 150ms, small 250ms (menus, notices, chips, every exit), page 400ms, photo 600ms (a photo travelling), show 1000ms (splash and hero crossfade only). An exit takes about two thirds of its entrance. `--ease-rubber` (line 115) is only for a strip's release past an end. Values are in the sidecar's `extensions.motion`.",
+    "keyCharacteristics": [
+      "Photographs lead; the interface recedes.",
+      "Two faces only: Inter Tight 900 for the name and every title, IBM Plex Mono for everything else. The V4 hero tagline in Geist Mono is the one exception.",
+      "The name is always one line, \"Julian Gigola\" in title case.",
+      "Small text is uppercase mono at 0.14em; prose is sentence case.",
+      "Square UI. Filled means primary, one filled button per view.",
+      "One chromatic accent (teal), for focus, the current step and the picked option. Never decoration."
+    ],
+    "rules": [
+      {
+        "name": "The One Accent Rule",
+        "body": "Teal marks focus, the current step and the picked option, never a fill, a status or decoration.",
+        "section": "colors"
+      },
+      {
+        "name": "The Tuned Twins Rule",
+        "body": "A color added to one theme is added to the other, re-set for that ground's contrast, not mirrored.",
+        "section": "colors"
+      },
+      {
+        "name": "The Photo Is Always Night Rule",
+        "body": "Anything laid on a photograph uses the on-photo set and the scrim, whatever the theme. Two exceptions ship. The V4 hero name and its tagline take the theme's own ink, no shadow, on a band of the page color along the foot of the hero, in both themes (.mt-name); the bands are the lightest that keep the name at 4.5:1. The home header under its frost takes the theme's ink too: the frost is a 62% veil of the page color, so dark ink in light and light ink in dark hold at least 6:1 over any photo, and every word shares it.",
+        "section": "colors"
+      },
+      {
+        "name": "The Two Registers Rule",
+        "body": "Type either shouts (Inter Tight 900, tight, large) or whispers (small mono). No third family, no weight in between. One exception ships: the V4 hero tagline in Geist Mono 600. It is a mono, so it stays in the whisper register.",
+        "section": "typography"
+      },
+      {
+        "name": "The One Line Name Rule",
+        "body": "\"Julian Gigola\" sits on one line wherever it appears. Size it down before letting it wrap.",
+        "section": "typography"
+      },
+      {
+        "name": "The Fit the Line Rule",
+        "body": "A name that must hold one line is fitted between a documented floor and ceiling, never wrapped or truncated.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat Plate Rule",
+        "body": "No drop shadows under content, no inner shine, no glow. One exception ships: the home film numbers carry a tight dark halo (stacked text-shadows from 2px to 10px) with no plate or patch behind them, so they read on the palest frame.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Pill Means Filter Rule",
+        "body": "In V3 a pill is a filter chip and nothing else. Buttons are square.",
+        "section": "shapes"
+      },
+      {
+        "name": "The Fail Open Rule",
+        "body": "Content is visible by default. A block hides for its reveal only after the observer has seen it, so a failed observer, a crawler or an old WebView still shows everything.",
+        "section": "overview"
+      },
+      {
+        "name": "The 200% Zoom Rule",
+        "body": "Under max-width: 299.98px (a phone at 200% zoom) rows wrap, grids drop to one column (the home masonry to two), long lines wrap and nothing truncates or leaves the screen. No link hides by width or pointer alone; only a decorative label may (the footer's San Jose label). Legal shows at every width.",
+        "section": "layout"
+      }
+    ],
+    "dos": [
+      "Do let the photograph carry the color; keep chrome within chroma 0.005 except the teal accent and the two statuses.",
+      "Do set every title in Inter Tight 900 at -0.05em on a role from the ramp, and keep the name on one line.",
+      "Do use the label style (11px mono, 0.14em, uppercase) for small text, numbers in tabular figures.",
+      "Do keep one filled button per view; pair it with outline buttons.",
+      "Do use the on-photo set and the scrim for anything on a photograph, in both themes.",
+      "Do design each new surface in both themes before calling it done.",
+      "Do turn motion off under `prefers-reduced-motion`.",
+      "Do keep content visible by default; hide a block for its reveal only after the observer has seen it.",
+      "Do use the JG monogram from `logo/kit/` wherever a mark is needed."
+    ],
+    "donts": [
+      "Don't use a pill for anything but a filter chip in V3.",
+      "Don't use glow, neon, gradients as decoration, or shadows under cards.",
+      "Don't put a decorative eyebrow or kicker above a title; only the audience lines over the doors and the service-page keyword line stay. They are not decoration (Julian, 2026-11-11): the audience line over each door (\"For art directors and artists\", \"For private clients\", \"Published and commissioned by\" over the client strip), and the keyword line over a service page's h1 (`kicker` in `lib/booking/booking.ts`, it carries search terms).",
+      "Don't add a third type family or a weight between the 900 titles and the mono. The V4 hero tagline's Geist Mono 600 is the one exception.",
+      "Don't set type below 9px.",
+      "Don't use the teal accent as a fill or for status.",
+      "Don't make logos react to hover.",
+      "Don't outline a surface to lift it; step its lightness instead.",
+      "Don't hide a link by width or pointer; only a decorative label may hide.",
+      "Don't hide content until a script shows it.",
+      "Don't use the eye mark."
+    ],
+    "standingChecks": [
+      "Text holds 4.5:1 over photos in both themes, header words included (large display text 3:1). The header reports each word's worst contrast in `data-cr`.",
+      "At 200% zoom on a phone (300px wide) nothing is cut off, hidden or scrolls sideways.",
+      "With scroll observers off, every block is visible.",
+      "Both themes and reduced motion pass before a surface is done."
+    ],
+    "direction": [
+      "Palette, 60/30/10: 60 ground (Warm Charcoal / Cold Paper), 30 photography, 10 ink and hairlines. Teal stays under 1%, for focus and the current step only.",
+      "Type: Inter Tight 900 shouts, IBM Plex Mono whispers. Geist Mono for the hero tagline only.",
+      "Layout: full bleed, held stages on the home, square UI.",
+      "References: to pick, 3 to 5 of Julian's own frames.",
+      "Never: glow, neon, decorative gradients, shadows under cards, a second accent, the eye mark.",
+      "Standing checks: see Do's and Don'ts."
+    ],
+    "decided": [
+      "Rejected: a black blink or black frames on photo or film swaps on the home; plain hard cuts are fine (2026-11-14).",
+      "Rejected: homepage screen transitions (build-up, swap, photo-led, curtain, parallax, 2026-10-20), the scroll deck rebuild (2026-10-22), the name dock and cover settle (2026-10-24).",
+      "Rejected: blending between hero layouts by aspect; layouts stay discrete and hand-placed (2026-10-07).",
+      "Rejected: staggered masonry on /portfolio (2026-11-07) and the `?pf=row` strip row with hover cycling (2026-11-19); the full-height strip stays.",
+      "Rejected: booking card restyles (typeform, `?type`, `?sheet`, 2026-10-16) and a ticket after booking (2026-10-15).",
+      "Rejected: the Inquire to Sent liquid morph; a liquid fill is always opaque.",
+      "Rejected: the homepage doors screen and two lanes (2026-09-30), Inquire on the cover (2026-10-15).",
+      "Kept: cover doors See the work + Book a session; cover captions dim at mouse rest on desktop, full on touch (2026-11-19).",
+      "Kept: Confirm timing 450/600ms (2026-10-14); the booking card opens on a default day and 10:00 (2026-10-17).",
+      "Kept: every set's cover is its first frame; long text at tracking -0.015em, leading 1.55, only city names held whole (2026-10-22).",
+      "Kept: the Commissions logo landing, the editorial duo hinge, and scrolling back past /portfolio's start opening the home.",
+      "Verified detector false positives: the vinyl groove gradient, the search spring curve, the \"By quote\" kicker, numbered labels on /legal, tile names on their scrim.",
+      "Process: a big motion change ships behind an opt-in flag until Julian says yes."
+    ]
+  }
+}
