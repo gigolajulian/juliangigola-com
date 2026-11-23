@@ -405,7 +405,7 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
         const themeInk = root.dataset.theme === "light" ? "b" : "w";
         const pick = frosted ? themeInk : grounds.length ? barInk(grounds, was) : voted;
         const now = performance.now();
-        const ink = was && pick !== was && !frosted && now - inkAt < 300 ? was : pick;
+        let ink = was && pick !== was && !frosted && now - inkAt < 300 ? was : pick;
         if (ink !== was) inkAt = now;
         bar.setAttribute("data-ink", ink);
         // the ground comes up over the hero while the bar's ink fails anywhere without it, and goes once it would not
@@ -453,6 +453,13 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
               if (bar.getAttribute("data-navfrost") === "off") bar.removeAttribute("data-navfrost");
             }, 300);
           }, 1200);
+        /* The paint that brings the frost up takes the theme's ink at once: the ink above was picked before the frost
+           was decided, so for one frame it was the photos' (MAC SSH, 79e286a3: black over the dark hero, then white). */
+        if (!frosted && bar.getAttribute("data-navfrost") === "" && ink !== themeInk) {
+          ink = themeInk;
+          inkAt = now;
+          bar.setAttribute("data-ink", ink);
+        }
         for (const el of votes.els) {
           // this word's worst contrast as drawn, for QA (`data-cr`)
           const g = own.get(el) ?? [];
