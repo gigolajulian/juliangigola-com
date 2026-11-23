@@ -4,7 +4,7 @@ import * as React from "react";
 import Image from "next/image";
 import { contextLines, replyLink, type Enquiry, type Summary } from "@/lib/inbox";
 import { cn } from "@/lib/utils";
-import { credentials, KEY_STORE, TOKEN_STORE } from "@/lib/admin/admin-github";
+import { credentials, KEY_STORE, saveAdminKey, TOKEN_STORE } from "@/lib/admin/admin-github";
 import { adminCall, errorText, isLocked } from "@/lib/leads/lead-desk";
 
 /* ── the inbox ────────────────────────────────────────────────────
@@ -205,7 +205,14 @@ export function AdminInbox({
       ) : null}
 
       {rows === null ? (
-        <Unlock onUnlock={(k) => void list(k)} busy={busy} />
+        <Unlock
+          onUnlock={(k) => {
+            // A pasted GitHub token signs in as the token, the same as on the desks.
+            saveAdminKey(k);
+            void list(window.localStorage.getItem(KEY_STORE) ?? undefined);
+          }}
+          busy={busy}
+        />
       ) : rows.length === 0 ? (
         <p className="max-w-prose text-sm text-muted-foreground">
           Nothing yet. The contact form writes here the moment somebody sends

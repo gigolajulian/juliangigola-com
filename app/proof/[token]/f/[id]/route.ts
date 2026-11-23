@@ -18,7 +18,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ toke
   // The watermark, when on, is in the bytes. If it cannot be drawn the frame is not served at all.
   // `?w=800`: the smaller copy for the wall and the grid (THUMB_W). Any other width gets the whole frame.
   const small = new URL(request.url).searchParams.get("w") === String(THUMB_W);
-  const o = await servedSize(env, p, id, request.url, small).catch(() => undefined);
+  const o = await servedSize(env, p, id, request.url, small).catch((e: unknown) => void console.error("proof frame", String(e)));
   if (o === undefined) return new Response("Try again shortly", { status: 503, headers: { "retry-after": "5" } });
   if (!o) return new Response("Not found", { status: 404 });
   return new Response(o.body, {
