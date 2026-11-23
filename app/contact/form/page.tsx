@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { shareOg } from "@/lib/og/share";
-import { V3Commission } from "@/components/contact/inquire";
+import { CommissionForm } from "@/components/contact/inquire";
 
 export const metadata: Metadata = {
   title: "Commissions",
@@ -10,5 +10,5 @@ export const metadata: Metadata = {
 };
 
 export default function CommissionPage() {
-  return <V3Commission />;
+  return <CommissionForm />;
 }

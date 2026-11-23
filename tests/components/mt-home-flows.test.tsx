@@ -5,7 +5,7 @@ vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }), usePat
 vi.mock("@/lib/leads/enquiry-action", () => ({ submitEnquiry: vi.fn() }));
 vi.stubGlobal("fetch", vi.fn(() => Promise.reject(new Error("offline"))));
 
-import { MtHome } from "@/components/v4/home/home";
+import { Home } from "@/components/v4/home/home";
 import { BOOK_ROWS, QUOTE_OPTS } from "@/lib/v4-home/data";
 import { MT } from "@/lib/v4-home/server";
 
@@ -27,7 +27,7 @@ describe("v4 home: Book online and By quote", () => {
 
   it("touch: the first tap on a row selects it, the second opens the booking", () => {
     pointer(false);
-    render(<MtHome data={MT} />);
+    render(<Home data={MT} />);
     fireEvent.click(row(1));
     expect(row(1).getAttribute("aria-pressed")).toBe("true");
     expect(book().hasAttribute("data-open")).toBe(false);
@@ -38,7 +38,7 @@ describe("v4 home: Book online and By quote", () => {
 
   it("mouse: one click on a row opens the booking", () => {
     pointer(true);
-    render(<MtHome data={MT} />);
+    render(<Home data={MT} />);
     fireEvent.click(row(2));
     expect(book().hasAttribute("data-open")).toBe(true);
     expect(book().dataset.on).toBe(BOOK_ROWS[2].slug);
@@ -46,7 +46,7 @@ describe("v4 home: Book online and By quote", () => {
 
   it("picking a By quote option shows its photo in Book online; touching a Book online row takes it back", () => {
     pointer(false);
-    render(<MtHome data={MT} />);
+    render(<Home data={MT} />);
     expect(quotePhoto()).toBe(-1);
     // pressed: false leaves out the Inquire buttons, which have no aria-pressed
     fireEvent.click(within(quote()).getByRole("button", { name: new RegExp(QUOTE_OPTS[1].name), pressed: false }));

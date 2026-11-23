@@ -6,7 +6,7 @@ import Link from "next/link";
 import { matches } from "@/lib/device";
 import { qflag } from "@/lib/v4-home/flags";
 import { projectHref } from "@/lib/project-href";
-import { EXTRAS, type MtFrame } from "@/lib/v4-home/data";
+import { EXTRAS, type HomeFrame } from "@/lib/v4-home/data";
 import { flipMs } from "./motion/root-attrs";
 
 /* Spec 3.2: the wall of 12 frames is the hero. Three locked columns, two
@@ -27,7 +27,7 @@ const SIZES = "(max-width: 599px) 50vw, (min-width: 1920px) 18vw, 30vw";
 const EDGE = 0.479;
 
 /* `was`: the frame this one replaced (idle wall). It stays under the new one until that has loaded and cut in, so the swap never passes through dark. */
-function Fig({ f, was, onDone, i, eager, xr, idle }: { f: MtFrame; was?: MtFrame; onDone?: () => void; i: number; eager?: boolean; xr?: boolean; idle?: boolean }) {
+function Fig({ f, was, onDone, i, eager, xr, idle }: { f: HomeFrame; was?: HomeFrame; onDone?: () => void; i: number; eager?: boolean; xr?: boolean; idle?: boolean }) {
   // the caption changes with the photo: the new frame's name waits until its image has loaded and cut in (it led by about 170ms)
   const [shown, setShown] = React.useState(f.src);
   const cap = was && shown !== f.src ? was : f;
@@ -57,17 +57,17 @@ const STILL = 4000; // idle wall: still this long before the first swap
 const EVERY = 2500; // then one frame at this pace
 
 /** A wall frame the idle swap may change: on screen (its middle 60%) and not already changing. */
-function inView(f: HTMLElement, was: Record<number, MtFrame>) {
+function inView(f: HTMLElement, was: Record<number, HomeFrame>) {
   const r = f.getBoundingClientRect();
   return r.width && r.top < innerHeight * 0.8 && r.bottom > innerHeight * 0.2 && !was[+f.dataset.i!];
 }
 
 /* Idle wall (on by default, `?idle=0` turns it off): after 4 still seconds one of the 12 locked frames on screen changes every 2.5 seconds
    for a frame that is not on the wall. Any pointer move, scroll, key or touch holds it. Off for reduced motion and during the splash. */
-function useIdleWall(frames: MtFrame[], extras: MtFrame[]) {
+function useIdleWall(frames: HomeFrame[], extras: HomeFrame[]) {
   const root = React.useRef<HTMLElement>(null);
   const [onWall, setOnWall] = React.useState(frames);
-  const [was, setWas] = React.useState<Record<number, MtFrame>>({});
+  const [was, setWas] = React.useState<Record<number, HomeFrame>>({});
   const live = React.useRef({ onWall, was, pool: extras.slice(16) }); // the first 16 extras are on the wall (side columns); the rest come in by the idle swap
   React.useEffect(() => void Object.assign(live.current, { onWall, was }));
   React.useEffect(() => {
@@ -95,7 +95,7 @@ function useIdleWall(frames: MtFrame[], extras: MtFrame[]) {
   return { root, onWall, was, done };
 }
 
-export function MtHero({ frames: first, extras }: { frames: MtFrame[]; extras: MtFrame[] }) {
+export function HomeHero({ frames: first, extras }: { frames: HomeFrame[]; extras: HomeFrame[] }) {
   const { root, onWall: frames, was, done } = useIdleWall(first, extras);
   // extras: the ranges are EXTRAS (lib/v4-home/data.ts)
   const cols = [0, 1, 2].map((c) => ({ c, list: [...[0, 1, 2, 3].map((r) => ({ f: frames[c + r * 3], i: c + r * 3, xr: false })), ...XR.map((r) => ({ f: extras[EXTRAS.sides + (r - 4) * 3 + c], i: c + r * 3, xr: true }))].filter((x) => x.f) }));

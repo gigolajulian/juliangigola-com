@@ -4,15 +4,13 @@ import * as React from "react";
 import type { DepositBody } from "@/components/booking/deposit-step";
 import { isPaid } from "@/lib/booking/paid";
 import { ORB_ROUND } from "@/components/effects/orb";
-import { JgLoad } from "@/components/splash/jg-load";
 import { TZ } from "@/lib/booking/booking-rules";
 import { e164, fromIso, minutesOf, forgetTimes, WHERE, type PickedTime, type Slot, type Step, type V3Book } from "@/components/booking/time-picker-parts";
 import { byCodeUnit } from "@/lib/utils";
-import { clockHere, spanOf } from "@/components/booking/picker-dates";
+import { clockHere } from "@/components/booking/picker-dates";
 import { useSlots } from "@/components/booking/use-slots";
 import { usePickerDays } from "@/components/booking/use-picker-days";
 import { usePickerLayout } from "@/components/booking/use-picker-layout";
-import { arrowMark, busyMark, okMarkOf } from "@/components/booking/picker-marks";
 
 
 /* Goo on the card's buttons, times and
@@ -44,7 +42,7 @@ export type Props = {
 };
 
 /* The picker's state, times and motion; the cards below only draw it. */
-export function usePicker({ path, title, className, fallback, v3, onPicked, startView }: Props) {
+export function usePicker({ path, title, className, v3, onPicked, startView }: Props): Picker {
   const [username, slug] = path.split("/");
   const [tz] = React.useState(() => Intl.DateTimeFormat().resolvedOptions().timeZone || TZ);
   const [here, setHere] = React.useState(clockHere);
@@ -52,7 +50,7 @@ export function usePicker({ path, title, className, fallback, v3, onPicked, star
     const t = setInterval(() => setHere(clockHere()), 15000);
     return () => clearInterval(t);
   }, []);
-  const { length, setLength, needsWhere, setNeedsWhere, session, setSession, days, setDays, state, setState, paid, setPaid, load } = useSlots(username, slug, tz);
+  const { length, needsWhere, session, days, state, paid, load } = useSlots(username, slug, tz);
   const [opt, setOpt] = React.useState("");
   /* A call, editorial: by video (its Meet link) or phone, I ring them. */
   const [via, setVia] = React.useState<"Video" | "Phone">("Video");
@@ -64,10 +62,7 @@ export function usePicker({ path, title, className, fallback, v3, onPicked, star
   /* The picker is not drawn while held: the effects that measure it
      re-run on `held`, or they ran on nothing and the week never fitted. */
   const [held, setHeld] = React.useState(true);
-  /* J and G fill while the times load (jg-load.tsx) and let go of the picker themselves. */
-  const jg = <JgLoad done={state === "ready" && !!days} onDone={() => setHeld(false)} className="f-wait min-h-[16rem] w-full" />;
-  const { view, setView, anchor, setAnchor, pick, setPick, chosen, setChosen, choose, today, week, month, slide, setSlide, shift, mstep, setMstep, switchView, atStart } = usePickerDays(days, startView);
-  const arrow = arrowMark();
+  const { view, setView, anchor, setAnchor, pick, setPick, chosen, setChosen, choose, today, week, month, shift, mstep, setMstep, switchView, atStart } = usePickerDays(days, startView);
   const [step, setStep] = React.useState<Step>("pick");
   /* Option B's row of times (v3): where a swipe on the big number began, and
      whether the row runs past its edge, which fades it and shows the hint. */
@@ -109,11 +104,7 @@ export function usePicker({ path, title, className, fallback, v3, onPicked, star
     void load();
   }, [load]);
 
-  /* The ruler's span, from every open time loaded, to the hour. */
-  const { lo, hi } = React.useMemo(() => spanOf(days, length), [days, length]);
-
   const open = (date: string) => new Set((days?.[date] ?? []).map((s) => minutesOf(s.start)));
-  const steps = React.useMemo(() => Array.from({ length: Math.max(1, Math.round((hi - lo) / length)) }, (_, i) => lo + i * length), [lo, hi, length]);
 
   /* First open day and time, once there are any. */
   React.useEffect(() => {
@@ -134,7 +125,7 @@ export function usePicker({ path, title, className, fallback, v3, onPicked, star
     }
   }, [days, pick, chosen, setChosen]);
 
-  const { stripEl, stripRef, more, setMore, root, v3root, was, showTimes, swipe, daysBox, monthGrid, big, slotsBox, slotsW, setSlotsW, slotsRO, slotsRef, at, refit, first, shown, swipeProps } = usePickerLayout({ step, pick, days, view, anchor, week, month, chosen, mstep, held, state, atStart, shift });
+  const { stripRef, more, setMore, root, v3root, showTimes, daysBox, slotsW, slotsRef, swipeProps } = usePickerLayout({ step, pick, days, view, anchor, week, month, chosen, mstep, held, state, atStart, shift });
 
   const book = async (form: FormData) => {
     if (!pick) return;
@@ -226,24 +217,71 @@ export function usePicker({ path, title, className, fallback, v3, onPicked, star
       if ((el instanceof HTMLInputElement && el.type !== "radio") || el instanceof HTMLTextAreaElement) el.value = v;
     }
   }, []);
-  /* Booking: the orb, then the ring and its check, over the card. */
-  const busy = busyMark(step);
-  /* Confirm's words turn into the orbs, then a check. */
-  const okMark = okMarkOf(ok);
   /* JG V3: the steps around anything that is not the picker itself. */
   const v3paid = paid || isPaid(slug);
   const v3steps = v3paid ? ["Time", "You", "Deposit", "Booked"] : ["Time", "You", "Booked"];
   // The same subtitle as the picker, so nothing below it jumps when the times arrive.
   const v3sub = v3paid ? "Studio in San Jose. I travel across the Bay Area." : "15 minutes, phone or video. Bring your dates and references.";
-  /* While the times load the bar is already there, held off: it popped in
-     a second after the page on a short screen, where it is the thing at the
-     foot of the view (MAC, iPhone Duo folded, 2026-11-08). */
-  const heldBar = <button type="button" className="btn fill" disabled>Continue</button>;
-  // in the div `V3Steps` puts the shell in, so the shell stays one element as the times come
-  const v3plain = (body: React.ReactNode, bar?: React.ReactNode) => <div className="contents">{v3!.shell({ steps: v3steps, at: 1, head: v3paid ? "Book a session" : v3!.name === "Consultation" ? "Book a consultation" : "Book a call", sub: v3sub, body, sum: [], bar })}</div>;
-  return { path, title, className, fallback, v3, onPicked, username, slug, tz, clockHere, here, setHere, length, setLength, needsWhere, setNeedsWhere, opt, setOpt, via, setVia, ask, setAsk, session, setSession, booked, setBooked, days, setDays, state, setState, held, setHeld, jg, view, setView, anchor, setAnchor, pick, setPick, arrow, chosen, setChosen, step, setStep, swipeX, wheelGate, stripEl, stripRef, more, setMore, paid, setPaid, deposit, setDeposit, refs, setRefs, typed, root, v3root, was, error, setError, bad, setBad, blank, setBlank, ok, setOk, handOff, load, lo, hi, open, steps, choose, showTimes, today, week, month, slide, setSlide, swipe, shift, daysBox, mstep, setMstep, switchView, monthGrid, big, slotsBox, slotsW, setSlotsW, slotsRO, slotsRef, at, refit, first, shown, atStart, book, grow, refill, busy, okMark, swipeProps, v3paid, v3steps, v3sub, heldBar, v3plain };
+  return {
+    title, className, v3, username, slug, tz, here,
+    length, needsWhere, session, days, state, paid, load,
+    held, unhold: () => setHeld(false),
+    view, setView, anchor, setAnchor, pick, chosen, setChosen, choose, today, week, month, shift, mstep, setMstep, switchView, atStart,
+    stripRef, more, setMore, root, v3root, showTimes, daysBox, slotsW, slotsRef, swipeProps,
+    opt, setOpt, via, setVia, ask, setAsk, booked, step, setStep, swipeX, wheelGate, deposit, refs, error, bad, setBad, blank, setBlank, ok, setOk,
+    open, book, grow, refill, v3paid, v3steps, v3sub,
+  };
 }
 
-type Picker = ReturnType<typeof usePicker>;
+type Setter<T> = React.Dispatch<React.SetStateAction<T>>;
+type Slots = ReturnType<typeof useSlots>;
+type Days = ReturnType<typeof usePickerDays>;
+type Layout = ReturnType<typeof usePickerLayout>;
+/** What the picker hands its cards: data and callbacks only, its setters and refs for the rest kept inside. */
+export type Picker = Pick<Props, "title" | "className" | "v3"> &
+  /* the times as loaded */
+  Pick<Slots, "length" | "needsWhere" | "session" | "days" | "state" | "paid" | "load"> &
+  /* the days on show and the pick */
+  Pick<Days, "view" | "setView" | "anchor" | "setAnchor" | "pick" | "chosen" | "setChosen" | "choose" | "today" | "week" | "month" | "shift" | "mstep" | "setMstep" | "switchView" | "atStart"> &
+  /* the boxes the cards hang refs and gestures on */
+  Pick<Layout, "stripRef" | "more" | "setMore" | "root" | "v3root" | "showTimes" | "daysBox" | "slotsW" | "slotsRef" | "swipeProps"> & {
+    username: string;
+    slug: string;
+    tz: string;
+    here: ReturnType<typeof clockHere>;
+    /** True until J and G let go; `unhold` is theirs to call. */
+    held: boolean;
+    unhold: () => void;
+    /* the steps and the form */
+    opt: string;
+    setOpt: Setter<string>;
+    via: "Video" | "Phone";
+    setVia: Setter<"Video" | "Phone">;
+    ask: string;
+    setAsk: Setter<string>;
+    booked: { name: string; email: string; where: string; phone: string; via: string };
+    step: Step;
+    setStep: Setter<Step>;
+    swipeX: React.RefObject<number | null>;
+    wheelGate: React.RefObject<{ at: number; owned: boolean }>;
+    deposit: DepositBody | null;
+    refs: FormData | null;
+    error: string;
+    bad: Record<string, string>;
+    setBad: Setter<Record<string, string>>;
+    blank: Record<string, boolean>;
+    setBlank: Setter<Record<string, boolean>>;
+    ok: "" | "spin" | "tick";
+    setOk: Setter<"" | "spin" | "tick">;
+    open: (date: string) => Set<number>;
+    book: (form: FormData) => Promise<void>;
+    grow: (e: React.FormEvent<HTMLTextAreaElement>) => void;
+    refill: (f: HTMLFormElement | null) => void;
+    /* JG V3's steps and subtitle */
+    v3paid: boolean;
+    v3steps: string[];
+    v3sub: string;
+  };
+
 /** What a card draws from: the picker, with a time on show. */
-export type CardCtx = Omit<Picker, "pick" | "days"> & { pick: PickedTime; days: Record<string, Slot[]>; t: string; ap: string; until: string; date: Date; sum: string; waiting: React.ReactElement };
+export type CardCtx = Omit<Picker, "pick" | "days"> & { pick: PickedTime; days: Record<string, Slot[]>; t: string; ap: string; until: string; date: Date; sum: string };

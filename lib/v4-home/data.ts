@@ -6,16 +6,16 @@ import { DEPOSIT } from "@/lib/booking/paid";
 import type { SHOOT_TYPES } from "@/lib/inbox";
 
 /** A photo with its caption: `r` is height / width. */
-export type MtFrame = { src: string; name: string; meta: string; slug: string; r: number };
-export type MtFilm = { id: string; title: string; kind: string; client: string; poster: string | null; href: string; preview?: string; file?: string };
+export type HomeFrame = { src: string; name: string; meta: string; slug: string; r: number };
+export type HomeFilm = { id: string; title: string; kind: string; client: string; poster: string | null; href: string; preview?: string; file?: string };
 /** A count as two digits: 01, 02. */
 export const pad = (n: number) => String(n).padStart(2, "0");
 
-/** Where each run of MtData.extras goes: 0-15 the side columns (4 a column), 16-21 rows five and six of the locked columns,
+/** Where each run of HomeData.extras goes: 0-15 the side columns (4 a column), 16-21 rows five and six of the locked columns,
     22-29 those rows of the side columns, 30 on the intro pool. */
 export const EXTRAS = { perCol: 4, sides: 16, xrSides: 22, wall: 30 } as const;
 
-export type MtData = { hero: MtFrame[]; extras: MtFrame[]; comm: MtFrame[]; films: MtFilm[]; does: string[]; reply: string | null; stills: Record<string, string> };
+export type HomeData = { hero: HomeFrame[]; extras: HomeFrame[]; comm: HomeFrame[]; films: HomeFilm[]; does: string[]; reply: string | null; stills: Record<string, string> };
 
 /* Julian's arranger save (save.json), in order. Key `<slug>/<NN>`. */
 export const HERO_KEYS = ["threshold/05", "i-wanna-be-a-human/01", "wired-magazine/01", "wrapped-up/02", "sago/01", "valgur/02", "vigil/05", "ukiyosunknown/01", "nyx/06", "oakley-x-nike/01", "astral-allure/04", "liminal/01"];

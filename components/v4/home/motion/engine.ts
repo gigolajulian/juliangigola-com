@@ -38,14 +38,14 @@ export type Ctx = {
 };
 
 /** Every `data-mt` section name in components/v4/home. */
-export type MtSection = "hero" | "covers" | "motion" | "comm" | "about" | "quote" | "foot" | "book";
+export type HomeSection = "hero" | "covers" | "motion" | "comm" | "about" | "quote" | "foot" | "book";
 
 /** every frame while the section is within one screen of the viewport (it carries `data-mt-near` then) */
 export type Frame = (p: number, el: HTMLElement, ctx: Ctx) => void;
 
 export type Driver = {
   /** the section's `data-mt` name */
-  name: MtSection;
+  name: HomeSection;
   /** once per section, after it is in the DOM. Returns a cleanup, or the section's frame and cleanup, so state lives in the closure. */
   setup?: (el: HTMLElement, ctx: Ctx) => void | (() => void) | { frame?: Frame; off?: () => void };
   /** run `frame` on every structure. Default: only when holds are on (D). */
@@ -54,7 +54,7 @@ export type Driver = {
 
 /** The motion state path (desloppify r9 stage 4), on by default since Julian approved it 2026-11-21; ?mt2=0 runs the old path.
     On: the fine query refreshes ctx, the engine's own listeners go in before the drivers' (so a driver's resize handler reads a
-    measured ctx), the covers driver tells MtCovers its item instead of round-tripping it through the row's scrollLeft, and
+    measured ctx), the covers driver tells HomeCovers its item instead of round-tripping it through the row's scrollLeft, and
     hero.ts resets its module throttle per mount. */
 export const MT2 = !qflag("mt2", "0");
 

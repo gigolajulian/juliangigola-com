@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Marks } from "@/components/site/duo";
 import { projectHref } from "@/lib/project-href";
-import { pad, type MtFrame } from "@/lib/v4-home/data";
+import { pad, type HomeFrame } from "@/lib/v4-home/data";
 import { useTold } from "./ctx";
 
 /* Spec 3.3: the gapless sheet with its heading row held on top, a counter
@@ -13,9 +13,9 @@ import { useTold } from "./ctx";
    Phone: two-column masonry, each frame at its own ratio in the shorter column. */
 
 /** Each frame to the shorter of two columns (heights by ratio; the right one starts 56/171 of a frame lower). */
-export const masonry = (frames: MtFrame[]) => {
+export const masonry = (frames: HomeFrame[]) => {
   const h = [0, 56 / 171];
-  const cols: { f: MtFrame; i: number }[][] = [[], []];
+  const cols: { f: HomeFrame; i: number }[][] = [[], []];
   frames.forEach((f, i) => {
     const c = h[0] <= h[1] ? 0 : 1;
     cols[c].push({ f, i });
@@ -24,7 +24,7 @@ export const masonry = (frames: MtFrame[]) => {
   return cols;
 };
 
-export function MtCommissions({ frames }: { frames: MtFrame[] }) {
+export function HomeCommissions({ frames }: { frames: HomeFrame[] }) {
   // the frame named in the head: the first as served, then the one under the screen's centre (motion/commissions.ts tells it)
   const [{ cur }, setCur] = React.useState({ cur: 0 });
   const ref = React.useRef<HTMLElement>(null);

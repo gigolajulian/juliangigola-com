@@ -4,7 +4,7 @@ import * as React from "react";
 import { getImageProps } from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CoverNav, V3Foot } from "@/components/site/chrome";
+import { CoverNav, FootLine } from "@/components/site/chrome";
 import { Duo, Marks, Pick } from "@/components/site/duo";
 import { useSiteTheme } from "@/lib/site-theme";
 import { COMMISSIONS, COMMISSION_TABS, DOORS, HERO, HERO_ALT, INDEX_ORDER, RECENT, SESSIONS, priceLabel } from "@/lib/photos-and-sessions";
@@ -540,7 +540,7 @@ export function V3Home({ top }: { top: Record<string, TopWork[]> }) {
       <Commissions top={top} />
       <SessionsIndex />
       <Doors />
-      <V3Foot />
+      <FootLine />
     </section>
   );
 }

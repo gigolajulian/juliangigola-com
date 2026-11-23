@@ -34,7 +34,7 @@ const mod = (a: number, b: number) => ((a % b) + b) % b;
 /** `onLeave`: Open project takes the canvas down. The canvas runs under the page's own title
     and toolbar: it is cut off above `top` px, comes in once its frames are laid out, and fades
     out while `out`. */
-export function V3Canvas({ list, onClose, onLeave, out, top = 0 }: { list: WorkItem[]; onClose: () => void; onLeave: () => void; out?: boolean; top?: number }) {
+export function WorkCanvas({ list, onClose, onLeave, out, top = 0 }: { list: WorkItem[]; onClose: () => void; onLeave: () => void; out?: boolean; top?: number }) {
   const field = React.useRef<HTMLDivElement>(null);
   /* Covers until `/canvas.json` lands, then every frame, projects in the page's order. */
   const [all, setAll] = React.useState<Frames | null>(kept);

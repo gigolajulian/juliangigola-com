@@ -22,7 +22,7 @@ function uncoverOnFocus(e: React.FocusEvent<HTMLAnchorElement>) {
   });
 }
 
-export function MtAbout({ does }: { does: string[] }) {
+export function HomeAbout({ does }: { does: string[] }) {
   const words = ABOUT_SENTENCE.split(" ");
   return (
     <section id="about" className="mt-about" aria-label="About" data-mt="about">

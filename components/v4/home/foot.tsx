@@ -71,7 +71,7 @@ function Phrase({ copy }: { copy?: boolean }) {
   );
 }
 
-export function MtFoot() {
+export function HomeFoot() {
   const cards = React.useContext(CardsCtx);
   const wall = React.useRef<HTMLDivElement>(null);
   const stills = useStills(wall);

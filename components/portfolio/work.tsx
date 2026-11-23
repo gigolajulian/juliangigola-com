@@ -9,9 +9,9 @@ import { createPortal } from "react-dom";
 import type { Flip as FlipT } from "gsap/Flip";
 import { PageFoot } from "@/components/site/chrome";
 import DISC from "@/lib/discipline-order.json";
-import { V4Drift } from "@/components/portfolio/drift";
+import { Drift } from "@/components/portfolio/drift";
 // The canvas view loads only when it opens, not with every /portfolio visit.
-const V3Canvas = dynamic(() => import("@/components/portfolio/canvas").then((m) => m.V3Canvas), { ssr: false });
+const WorkCanvas = dynamic(() => import("@/components/portfolio/canvas").then((m) => m.WorkCanvas), { ssr: false });
 import { launchSpeed, stepSpring, springSettled, frameDt } from "@/lib/motion/spring";
 
 /** The motion plan's `out` curve for GSAP: power4.out is cubic-bezier(.23, 1, .32, 1). */
@@ -466,7 +466,7 @@ const filterUrl = (slug?: string) => {
   if (u.href !== location.href) history.replaceState(history.state, "", u);
 };
 
-export function V3Work({
+export function WorkIndex({
   work,
   chip = {},
   frames = {},
@@ -1281,7 +1281,7 @@ export function V3Work({
 
   return (
     <div className="v3 contents">
-      <V4Drift k={`${view}|${filter}|${q}|${list.length}`} />
+      <Drift k={`${view}|${filter}|${q}|${list.length}`} />
       <section
         ref={page}
         className={
@@ -1485,7 +1485,7 @@ export function V3Work({
         {canvas || leaving
           ? createPortal(
               <div className="v3">
-                <V3Canvas
+                <WorkCanvas
                   list={field}
                   onClose={closeCanvas}
                   onLeave={leaveCanvas}

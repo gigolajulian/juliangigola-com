@@ -5,7 +5,7 @@ vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }), usePat
 vi.mock("@/lib/leads/enquiry-action", () => ({ submitEnquiry: vi.fn() }));
 vi.stubGlobal("fetch", vi.fn(() => Promise.reject(new Error("offline"))));
 
-import { MtHome } from "@/components/v4/home/home";
+import { Home } from "@/components/v4/home/home";
 import { tell } from "@/components/v4/home/motion/engine";
 import { QUOTE_CLIENTS } from "@/lib/v4-home/data";
 import { MT } from "@/lib/v4-home/server";
@@ -13,7 +13,7 @@ import { MT } from "@/lib/v4-home/server";
 /* The drivers tell the screens what to show (motion/engine.ts `tell`); React renders it in the same call. */
 describe("motion drivers tell, React renders", () => {
   it("By quote: the client first, the name after its fade", () => {
-    const { container } = render(<MtHome data={MT} />);
+    const { container } = render(<Home data={MT} />);
     const s = container.querySelector<HTMLElement>('[data-mt="quote"]')!;
     const q = () => [".mt-photo", ".mt-photo-w"].map((f) => [...s.querySelectorAll(`${f} > .cl`)].findIndex((c) => c.hasAttribute("data-q")));
     const nm = s.querySelector(".mt-by .nm")!;
@@ -31,7 +31,7 @@ describe("motion drivers tell, React renders", () => {
   });
 
   it("Commissions: the head names the frame it is told", () => {
-    const { container } = render(<MtHome data={MT} />);
+    const { container } = render(<Home data={MT} />);
     const s = container.querySelector<HTMLElement>('[data-mt="comm"]')!;
     const head = () => ["[data-mt-count]", ".mt-cur [data-mt-name]", ".mt-cur .mute"].map((x) => s.querySelector(x)!.textContent);
     expect(head()).toEqual(["01", MT.comm[0].name, MT.comm[0].meta]);

@@ -1,4 +1,4 @@
-import { COMM_KEYS, DOES, FILM_DRESS, FILM_FILES, FILM_PICKS, HERO_KEYS, type MtData, type MtFrame } from "@/lib/v4-home/data";
+import { COMM_KEYS, DOES, FILM_DRESS, FILM_FILES, FILM_PICKS, HERO_KEYS, type HomeData, type HomeFrame } from "@/lib/v4-home/data";
 import { PROJECTS, categoryLabel, getProject } from "@/lib/work/work";
 import { CONTENT } from "@/lib/content";
 import { REEL, posterFor, previewUrl } from "@/lib/work/videos";
@@ -7,7 +7,7 @@ import { RESPONSE_TIME } from "@/lib/site";
 /* The v4 home: the frames resolved on the server so lib/work stays out of the client. */
 // the home's own start second for a film's preview, where one was picked (FILM_DRESS.startSec)
 const at = (title: string) => (FILM_DRESS[title]?.startSec === undefined ? {} : { previewAt: FILM_DRESS[title]?.startSec });
-const frame = (key: string): MtFrame => {
+const frame = (key: string): HomeFrame => {
   const [slug, n] = key.split("/");
   const p = getProject(slug);
   const src = `/work/${slug}/${n}.jpg`;
@@ -19,7 +19,7 @@ const markOf = (client: string) => (client === "Sammy Shiblaq" ? "empire" : clie
 const file = (title: string, preview?: string) => (FILM_FILES[title] ? `${FILM_FILES[title]}#t=${preview?.match(/#t=(\d+)s/)?.[1] ?? 8}` : undefined);
 const vid = (title: string) => CONTENT.videos.find((v) => v.title === title);
 const used = new Set([...HERO_KEYS, ...COMM_KEYS].map((k) => k.split("/")[0]));
-export const MT: MtData = {
+export const MT: HomeData = {
   hero: HERO_KEYS.map(frame),
   // Side columns on wide screens (spec 5): Commissions frames, then each project's first frame not already on the wall.
   // 70 of them: wide screens show 30 on the wall itself (side columns, rows five and six) and the intro canvas draws 30 more.

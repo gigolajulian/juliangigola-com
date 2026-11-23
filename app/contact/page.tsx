@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { shareOg } from "@/lib/og/share";
-import { V3Inquire } from "@/components/contact/inquire";
+import { Contact } from "@/components/contact/inquire";
 
 export const metadata: Metadata = {
   title: "Inquire",
@@ -10,5 +10,5 @@ export const metadata: Metadata = {
 };
 
 export default function ContactPage() {
-  return <V3Inquire />;
+  return <Contact />;
 }

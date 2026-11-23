@@ -24,6 +24,7 @@ vi.mock("@/components/reference-picks", () => ({ ReferencePicks: () => null }));
 import { usePicker, type CardCtx, type Props } from "@/components/booking/use-picker";
 import { EditorialCard } from "@/components/booking/time-picker-editorial";
 import { V3Steps } from "@/components/booking/time-picker-v3";
+import { JgLoad } from "@/components/splash/jg-load";
 import { clock, DAYS, fromIso, MONTHS, recent, type V3Book } from "@/components/booking/time-picker-parts";
 
 const slots = {
@@ -47,12 +48,12 @@ function stubFetch(book: () => Response = () => Response.json({ status: "success
 function Card(props: Props) {
   const c = usePicker(props);
   if (c.state === "fallback") return <>{props.fallback}</>;
-  if (!c.days || !c.pick || c.held) return <p role="status">Loading{c.jg}</p>;
+  if (!c.days || !c.pick || c.held) return <p role="status">Loading<JgLoad done={c.state === "ready" && !!c.days} onDone={c.unhold} /></p>;
   const [t, ap] = clock(c.pick.min);
   const [until] = clock(c.pick.min + c.length);
   const date = fromIso(c.pick.date);
   const sum = `${DAYS[date.getDay()]} ${date.getDate()} ${MONTHS[date.getMonth()].slice(0, 3)} · ${t} ${ap}`;
-  const ctx: CardCtx = { ...c, pick: c.pick, days: c.days, t, ap, until, date, sum, waiting: <p /> };
+  const ctx: CardCtx = { ...c, pick: c.pick, days: c.days, t, ap, until, date, sum };
   return props.v3 ? <V3Steps c={{ ...ctx, v3: props.v3 }} /> : <EditorialCard c={ctx} />;
 }
 

@@ -20,7 +20,7 @@ import { ldJson, siteGraph } from "@/lib/seo";
 import { DebugGate } from "@/components/dev/debug-gate";
 import { VisitTrail } from "@/components/analytics/visit-trail";
 import { ClickBeacon } from "@/components/analytics/click-beacon";
-import { MotionGate, V3Footer, V3Header } from "@/components/site/chrome";
+import { MotionGate, SiteFooter, SiteHeader } from "@/components/site/chrome";
 import { ScrollThumb } from "@/components/site/scroll-thumb";
 import { SmoothScroll } from "@/components/site/smooth-scroll";
 import { ScrollReveal } from "@/components/site/scroll-reveal";
@@ -234,7 +234,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             script above sets `data-intro` on a first arrival unless `?v3motion=0`. */}
         <Intro run={SPLASH_RUN} />
 
-        <V3Header />
+        <SiteHeader />
         <ScrollThumb />
         <SmoothScroll />
         <ScrollReveal />
@@ -260,7 +260,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               rebuilt the whole page. It gates its own motion. */}
           <PageTransition>{children}</PageTransition>
         </main>
-        <V3Footer />
+        <SiteFooter />
         {/* Focus round the pointer over a gallery: `focus-field.tsx`. */}
         <MotionGate>
           <FocusField />

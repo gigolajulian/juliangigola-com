@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { MtHome } from "@/components/v4/home/home";
+import { Home } from "@/components/v4/home/home";
 import { MT } from "@/lib/v4-home/server";
 import { shareOg } from "@/lib/og/share";
 
@@ -17,5 +17,5 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default function HomeV4() {
-  return <MtHome data={MT} />;
+  return <Home data={MT} />;
 }

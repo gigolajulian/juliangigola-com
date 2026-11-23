@@ -4,12 +4,12 @@ import * as React from "react";
 
 /* ── the legal page ───────────────────────────────────────────────
  * The terms and the privacy policy. Each document reads its clauses off its
- * children (`LegalColumn`, `Clause`) and draws itself inside `V3LegalPage`. The
+ * children (`LegalColumn`, `Clause`) and draws itself inside `LegalPage`. The
  * numbering is real, because it is how a clause gets cited in an email,
  * and every clause keeps its anchor: `/legal#terms-ownership` opens on it.
  * ─────────────────────────────────────────────────────────────── */
 
-/** True inside `V3LegalPage`: a document on its own draws nothing. */
+/** True inside `LegalPage`: a document on its own draws nothing. */
 const InPage = React.createContext(false);
 
 /** A clause title as an anchor: "What you may do" becomes `what-you-may-do`. */
@@ -98,7 +98,7 @@ export function Clause(props: { title: string; children: React.ReactNode }) {
  * right at a reading measure. Every clause keeps its anchor, so
  * `/legal#terms-ownership` still lands on it.
  * ─────────────────────────────────────────────────────────────── */
-export function V3LegalPage({ children }: { children: React.ReactNode }) {
+export function LegalPage({ children }: { children: React.ReactNode }) {
   return (
     <div className="v3 contents">
       <section className="v3page" id="p-legal">

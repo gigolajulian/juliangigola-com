@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { V3LegalPage } from "@/components/site/legal";
+import { LegalPage } from "@/components/site/legal";
 import { TermsColumn } from "@/components/site/terms";
 
 describe("TermsColumn", () => {
@@ -10,9 +10,9 @@ describe("TermsColumn", () => {
 
   it("shelves its clauses for the legal page", async () => {
     render(
-      <V3LegalPage>
+      <LegalPage>
         <TermsColumn />
-      </V3LegalPage>,
+      </LegalPage>,
     );
     expect((await screen.findAllByText("Definitions")).length).toBeGreaterThan(0);
   });

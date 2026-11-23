@@ -314,7 +314,7 @@ function Stack({ films }: { films: Video[] }) {
   );
 }
 
-export function V3Video({ videos }: { videos: Video[] }) {
+export function VideoIndex({ videos }: { videos: Video[] }) {
   const sorted = React.useMemo(() => [...videos].sort((a, b) => rank(a) - rank(b)), [videos]);
   const all = React.useMemo(() => [reel, ...sorted], [sorted]);
   const [playing, setPlaying] = React.useState<Video | null>(null);

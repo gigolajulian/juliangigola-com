@@ -99,8 +99,8 @@ function coverFrame(s: Covers, p: number) {
   p = ease(p);
   const i = Math.round(p * (n - 1)), x = p * (n - 1) * step;
   if (i !== s.cur) {
-    // The row's own scroll steps item by item so MtCovers (rows.tsx) names the current one; the transform carries the rest.
-    if (MT2) tell(s.el, { cur: i }); // ?mt2=1: tell MtCovers the item; the row's scroll stays at 0 and the transform carries all of it
+    // The row's own scroll steps item by item so HomeCovers (rows.tsx) names the current one; the transform carries the rest.
+    if (MT2) tell(s.el, { cur: i }); // ?mt2=1: tell HomeCovers the item; the row's scroll stays at 0 and the transform carries all of it
     else s.row.scrollLeft = i * step;
     s.base = s.row.scrollLeft;
     s.cur = i;
@@ -111,7 +111,7 @@ function coverFrame(s: Covers, p: number) {
   discs(s, x, step * (420 / 520), k);
 }
 
-// The title line rises when MtCovers (rows.tsx) commits the new item (on touch too with ?mttp=covers). A turned sleeve turns back.
+// The title line rises when HomeCovers (rows.tsx) commits the new item (on touch too with ?mttp=covers). A turned sleeve turns back.
 function coverTold(s: Covers) {
   for (const it of s.items) it.removeAttribute("data-tp-fl");
   if (s.ctx.held || tp("covers")) rise(s.el.querySelector(".mt-ttl .ln > span"));

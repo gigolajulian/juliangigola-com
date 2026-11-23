@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { mtscroll, V4_HOME } from "@/lib/v4-home/switch";
-import { V4Foot } from "@/components/site/foot";
+import { PageFoot } from "@/components/site/foot";
 import Link from "next/link";
 import { THEME_COLOR } from "@/lib/theme-color";
 import { usePathname } from "next/navigation";
@@ -310,12 +310,12 @@ function useScrub(on: boolean, hdr: React.RefObject<HTMLElement | null>, setLand
 }
 
 /** Client proof galleries carry their own bar (`components/proofs/gallery.tsx`). */
-export function V3Header() {
+export function SiteHeader() {
   const path = usePathname();
-  return path.startsWith("/proof/") || path.startsWith("/delivery/") || path.startsWith("/contract/") ? null : <SiteHeader />;
+  return path.startsWith("/proof/") || path.startsWith("/delivery/") || path.startsWith("/contract/") ? null : <HeaderBar />;
 }
 
-function SiteHeader() {
+function HeaderBar() {
   const path = usePathname();
   const home = path === "/";
   const hdr = React.useRef<HTMLElement>(null);
@@ -476,7 +476,7 @@ function SiteHeader() {
 }
 
 /** The footer line, as the master puts it: the last row inside each page. */
-export function V3Foot() {
+export function FootLine() {
   return (
     <footer className="foot-line lbl mute">
       <span className="foot-c">© 2026 Julian Gigola</span>
@@ -488,26 +488,24 @@ export function V3Foot() {
   );
 }
 
-/* Screens built from the master carry their own footer line (`V3Foot`);
+/* Screens built from the master carry their own footer line (`FootLine`);
    the pages restyled by tokens only get it here, after `main`. */
 const OWN_FOOT = /^\/($|portfolio(\/video)?$|bts$|about$|contact(\/form)?$|book(\/|$)|portraits$|headshots$|graduation-photos(\/|$)|model-digitals$|weddings$|music-photography$|fashion-photography$|brand-photography$|admin(\/|$)|proof\/)/;
 
-/** An inner page's ending: the V4 footer (`site/foot.tsx`). */
-export function PageFoot() {
-  return <V4Foot />;
-}
+/** An inner page's ending (`site/foot.tsx`), re-exported because callers import it from here. */
+export { PageFoot };
 
 /* The line stays on the private pages and the forms (booking, contract, delivery, proof, contact). */
 const LINE_ONLY = /^\/(booking|contract|delivery|proof|contact|book|admin)(\/|$)/;
 
-export function V3Footer() {
+export function SiteFooter() {
   const path = usePathname();
   // A campus guide carries its own footer inside the page, so this second line goes.
   if (OWN_FOOT.test(path) || path.startsWith("/graduation-photos/")) return null;
   return (
     <div className="v3 contents">
       {/* remade per page: this footer outlives the page, and its hand-over looks up the page's last block once */}
-      {LINE_ONLY.test(path) ? <V3Foot /> : path === "/legal" ? <V4Foot bare /> : <PageFoot key={path} />}
+      {LINE_ONLY.test(path) ? <FootLine /> : path === "/legal" ? <PageFoot bare /> : <PageFoot key={path} />}
     </div>
   );
 }

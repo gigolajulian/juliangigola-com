@@ -1,8 +1,8 @@
-import { sendConfirm } from "@/lib/booking/confirm";
+import { afterBooked, cancelledSubject, sendCancelled } from "@/lib/booking/confirm";
 import { enquiry, enquiryKey, summary, whenPT } from "@/lib/inbox";
 import { logMail, recordLead } from "@/lib/leads/lead-store";
 import { EVENTS, type Booking } from "@/lib/booking/booking-rules";
-import { lockOp, parseBooking, recordBooking } from "@/lib/booking/booking-engine";
+import { lockOp, parseBooking, type BookingRecord } from "@/lib/booking/booking-engine";
 import { manageLinks } from "@/lib/booking/booking-token";
 
 /* ── the deposit ──────────────────────────────────────────────────
@@ -252,9 +252,8 @@ export async function bookDeposit(env: Env, intent: string, metadata: { [k: stri
       const booking = own.record;
       await put({ status: "booked", booking: { uid: booking.id, start: booking.start } });
       await tell(env, "booked", b, link, intent, usd);
-      await recordBooking(env, booking, dashboardLink(intent, env.STRIPE_SECRET_KEY));
       // Not `confirmOf`: this mail maps the paid Booking and adds the card Stripe charged. The fee comes from the record, so it says 90% back.
-      const confirm = {
+      await afterBooked(env, booking, async () => ({
         ...b,
         session: SESSION[b.slug] ?? b.slug,
         start: booking.start,
@@ -262,9 +261,7 @@ export async function bookDeposit(env: Env, intent: string, metadata: { [k: stri
         uid: booking.id,
         deposit: { ref: intent, at: new Date().toISOString(), amount: usd, card: await cardOf(env.STRIPE_SECRET_KEY, intent), fee: booking.fee },
         manage: await manageLinks(env.BOOKING_SECRET, booking),
-      };
-      const sent = await sendConfirm(env.CLIENT_EMAIL, confirm);
-      if (sent) await logMail(env, b.email, sent, { to: "client", kind: "confirm", booking: booking.id });
+      }), { deposit: dashboardLink(intent, env.STRIPE_SECRET_KEY), email: b.email });
       return "booked";
     }
   }
@@ -298,4 +295,42 @@ export async function bookDeposit(env: Env, intent: string, metadata: { [k: stri
     await tell(env, "failed", b, link, intent, usd);
     return "failed";
   }
+}
+
+/** After a cancel has taken a booking off the calendar: the refund through Stripe if `refund` is given and
+    there is a deposit and a key, a cancel line on the lead, a refund line if it went, a mail to hello@, the
+    client's note and its log. The client's cancel and the desk's each pass their own words and figures.
+    `oneStamp`: the desk's two lead lines share one time; the client's each take their own. Whether it refunded. */
+export async function cancelBooking(
+  env: Parameters<typeof alertAndLog>[0] & { CLIENT_EMAIL?: CloudflareEnv["CLIENT_EMAIL"]; STRIPE_SECRET_KEY?: string },
+  r: BookingRecord,
+  was: BookingRecord,
+  o: {
+    refund?: { form: { [k: string]: string }; ref: string };
+    note: string;
+    refundNote: string;
+    amount: number;
+    oneStamp?: boolean;
+    subject: string;
+    line: string;
+    money: (refunded: boolean | undefined) => string;
+    mail: (refunded: boolean | undefined) => Parameters<typeof sendCancelled>[2];
+    usd: number | undefined;
+    back: number;
+  },
+) {
+  const who = { name: r.name, email: r.email };
+  const key = env.STRIPE_SECRET_KEY;
+  const refund = r.intent && key ? o.refund : undefined;
+  let refunded: boolean | undefined;
+  if (refund && key) refunded = await stripe(key, "/refunds", refund.form, refund.ref).then(() => true, () => false);
+  const at = o.oneStamp ? new Date().toISOString() : undefined;
+  await recordLead(env, r.email, { event: { at: at ?? new Date().toISOString(), kind: "cancel", ref: `cancel:${r.id}`, note: o.note } });
+  // What went back, off this booking's record, so the log says what Stripe did.
+  if (refunded && refund) await recordLead(env, r.email, { event: { at: at ?? new Date().toISOString(), kind: "refund", ref: refund.ref, note: o.refundNote, amount: o.amount } });
+  await alertAndLog(env, o.subject, [`${r.name} <${r.email}>`, o.line, o.money(refunded), ...(r.intent && key ? [`Stripe: ${dashboardLink(r.intent, key)}`] : [])], who, { kind: "cancelled", booking: r.id });
+  const gone = { ...who, session: r.session, start: was.start, end: was.end };
+  if (await sendCancelled(env.CLIENT_EMAIL, gone, o.mail(refunded), o.usd, o.back))
+    await logMail(env, r.email, cancelledSubject(gone), { to: "client", kind: "cancelled", booking: r.id });
+  return refunded;
 }

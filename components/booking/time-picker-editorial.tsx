@@ -9,10 +9,16 @@ import { TZ } from "@/lib/booking/booking-rules";
 import { depositFor } from "@/lib/booking/paid";
 import { AHEAD, DAYS, iso, minutesOf, MONTHS, forgetTimes, STEP_AT, WEEKDAYS, WHERE, clock, zone } from "@/components/booking/time-picker-parts";
 import type { CardCtx } from "@/components/booking/use-picker";
+import { arrowMark, busyMark, okMarkOf } from "@/components/booking/picker-marks";
 
 /* The card as a magazine page (editorial.css), the default since 2026-10-17. */
 export function EditorialCard({ c }: { c: CardCtx }) {
-  const { title, className, username, slug, tz, here, length, needsWhere, opt, setOpt, via, setVia, ask, setAsk, session, booked, days, view, anchor, pick, arrow, chosen, step, setStep, paid, deposit, root, error, ok, setOk, load, open, choose, showTimes, today, week, month, shift, daysBox, mstep, setMstep, switchView, slotsW, slotsRef, atStart, book, grow, refill, busy, okMark, swipeProps, t, ap, until, date, sum } = c;
+  const { title, className, username, slug, tz, here, length, needsWhere, opt, setOpt, via, setVia, ask, setAsk, session, booked, days, view, anchor, pick, chosen, step, setStep, paid, deposit, root, error, ok, setOk, load, open, choose, showTimes, today, week, month, shift, daysBox, mstep, setMstep, switchView, slotsW, slotsRef, atStart, book, grow, refill, swipeProps, t, ap, until, date, sum } = c;
+  const arrow = arrowMark();
+  /* Booking: the orb, then the ring and its check, over the card. */
+  const busy = busyMark(step);
+  /* Confirm's words turn into the orbs, then a check. */
+  const okMark = okMarkOf(ok);
   const usd = depositFor(slug);
   const d3 = (d: Date) => DAYS[d.getDay()][0] + DAYS[d.getDay()].slice(1).toLowerCase();
   const mon = (d: Date) => MONTHS[d.getMonth()].slice(0, 3);

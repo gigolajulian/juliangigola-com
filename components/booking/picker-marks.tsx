@@ -2,7 +2,7 @@ import * as React from "react";
 import { Orb } from "@/components/effects/orb";
 import type { Step } from "@/components/booking/time-picker-parts";
 
-/* The picker's drawn marks (`use-picker.tsx`): plain elements, no state. */
+/* The editorial card's drawn marks: plain elements, no state. */
 
 /* Julian: the arrows more defined, larger. Drawn, not the font's. */
 export const arrowMark = () => (

@@ -4,7 +4,7 @@ import * as React from "react";
 import loader from "@/image-loader";
 import { matches } from "@/lib/device";
 import { qflag } from "@/lib/v4-home/flags";
-import { EXTRAS, type MtFrame } from "@/lib/v4-home/data";
+import { EXTRAS, type HomeFrame } from "@/lib/v4-home/data";
 import "./intro.css";
 
 /* v4 home intro, "The canvas" (spec 3.1): JG inks in alone, the whole wall and
@@ -190,7 +190,7 @@ function fitExtras(hero: HTMLElement, wall: HTMLElement) {
   return { n: Math.max(1, tilesOf(g)), width: px <= 256 ? 256 : px <= 384 ? 384 : 640 };
 }
 
-export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
+export function HomeIntro({ extras = [] }: { extras?: HomeFrame[] }) {
   const pool = React.useRef(extras);
   React.useEffect(() => {
     pool.current = extras;

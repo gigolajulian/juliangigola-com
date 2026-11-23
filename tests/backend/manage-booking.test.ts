@@ -334,6 +334,17 @@ describe("the desk", () => {
     expect(calls.filter((c) => c.url.endsWith("/refunds"))).toHaveLength(1);
   });
 
+  it("Julian cancels and the refund fails: hello@ gets the figure to refund by hand, the client hears it goes by hand, no refund line", async () => {
+    const { id } = await paid(wednesday(7));
+    refundOk = false;
+    expect(await (await post(id, { action: "cancel-mine" }, KEY)).json()).toMatchObject({ refunded: false, back: 0, record: { cancelled: true } });
+    expect(String(mail.sent.at(-1)!.text)).toContain("The refund FAILED: refund $250 by hand in Stripe.");
+    expect(String(client.sent.at(-1)!.text)).toContain("I'll send it by hand");
+    const events = (await leadOf(ctx.env.INBOX as FakeKV, "qa@example.com"))!.events;
+    expect(events.some((e) => e.kind === "refund")).toBe(false);
+    expect(events.some((e) => e.kind === "cancel" && String(e.note).endsWith("by Julian"))).toBe(true);
+  });
+
   it("a no-show: only after the start, a line on the lead, a mail to hello@, nothing refunded, the client not mailed, once", async () => {
     const start = wednesday(7);
     const { id } = await paid(start);

@@ -6,12 +6,22 @@ import { clock, DAYS, fromIso, MONTHS, type V3Book } from "@/components/booking/
 import { usePicker, type CardCtx, type Props } from "@/components/booking/use-picker";
 import { V3Steps } from "@/components/booking/time-picker-v3";
 import { EditorialCard } from "@/components/booking/time-picker-editorial";
+import { JgLoad } from "@/components/splash/jg-load";
 
 export type { V3Book };
 
 export function TimePicker(props: Props) {
   const c = usePicker(props);
-  const { title, className, fallback, v3, length, days, state, held, jg, pick, heldBar, v3plain } = c;
+  const { fallback } = props;
+  const { title, className, v3, length, days, state, held, unhold, pick, v3paid, v3steps, v3sub } = c;
+  /* J and G fill while the times load (jg-load.tsx) and let go of the picker themselves. */
+  const jg = <JgLoad done={state === "ready" && !!days} onDone={unhold} className="f-wait min-h-[16rem] w-full" />;
+  /* While the times load the bar is already there, held off: it popped in
+     a second after the page on a short screen, where it is the thing at the
+     foot of the view (MAC, iPhone Duo folded, 2026-11-08). */
+  const heldBar = <button type="button" className="btn fill" disabled>Continue</button>;
+  // in the div `V3Steps` puts the shell in, so the shell stays one element as the times come
+  const v3plain = (body: React.ReactNode, bar?: React.ReactNode) => <div className="contents">{v3!.shell({ steps: v3steps, at: 1, head: v3paid ? "Book a session" : v3!.name === "Consultation" ? "Book a consultation" : "Book a call", sub: v3sub, body, sum: [], bar })}</div>;
   /* It reads the visitor's zone and clock: until it has mounted, the empty box
      under a held Continue (from the first paint), drawn here and not by
      `BookTimes`, so the shell is never swapped for another and remounted. */
@@ -47,7 +57,7 @@ export function TimePicker(props: Props) {
   const date = fromIso(pick.date);
   const sum = `${DAYS[date.getDay()]} ${date.getDate()} ${MONTHS[date.getMonth()].slice(0, 3)} · ${t} ${ap}`;
 
-  const ctx: CardCtx = { ...c, pick, days, t, ap, until, date, sum, waiting };
+  const ctx: CardCtx = { ...c, pick, days, t, ap, until, date, sum };
   /* ── JG V3 (master v39 stepper): Time, You, (Deposit), Booked. The same
      times, booking and deposit as the cards below; only the look is new. */
   /* Called, not mounted: as an element it was a new component in the shell's
