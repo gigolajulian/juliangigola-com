@@ -300,7 +300,7 @@ components:
 **Creative North Star: "The Darkroom Wall"**
 
 **Direction**
-- **Palette, 60/30/10:** 60 ground (Warm Charcoal / Cold Paper), 30 photography, 10 ink and hairlines. Teal stays under 1%, for focus and the current step only.
+- **Palette, 60/40 (Julian, 2026-11-22), averaged per page:** not a floor per screen; today's layouts already meet it on average, so it guides new work and is not a reason to redesign. Photographs take 60% of a work page (home, /portfolio, projects); text on the ground (Warm Charcoal / Cold Paper) takes 40%. Booking, contact and legal pages may flip. All color comes from the photos. Teal stays under 1%, marks state only (focus, the current step) and never fills an area. Check: hide the photos, and the page should read as near-black with type.
 - **Type:** Inter Tight 900 shouts, IBM Plex Mono whispers. Geist Mono for the hero tagline only.
 - **Layout:** full bleed, held stages on the home, square UI.
 - **References:** to pick, 3 to 5 of Julian's own frames.
@@ -359,7 +359,7 @@ A near-achromatic ground (chroma 0.003 to 0.005) in two tuned themes, with a sin
 
 **The Tuned Twins Rule.** A color added to one theme is added to the other, re-set for that ground's contrast, not mirrored.
 
-**The Photo Is Always Night Rule.** Anything laid on a photograph uses the on-photo set and the scrim, whatever the theme. Two exceptions ship. The V4 hero name and its tagline take the theme's own ink, no shadow, on a band of the page color along the foot of the hero, in both themes (`.mt-name` in app/styles/mtscroll.css); the bands are the lightest that keep the name at 4.5:1. The home header under its frost takes the theme's ink too: the frost is a 62% veil of the page color, so dark ink in light and light ink in dark hold at least 6:1 over any photo, and every word shares it.
+**The Photo Is Always Night Rule.** Anything laid on a photograph uses the on-photo set and the scrim, whatever the theme. Two exceptions ship. The V4 hero name and its tagline take the theme's own ink, no shadow, on a band of the page color along the foot of the hero, in both themes (`.mt-name` in app/styles/mtscroll.css); the bands are the lightest that keep the name at 4.5:1. The header under its frost takes the theme's ink too: the frost is a 62% veil of the page color, so dark ink in light and light ink in dark hold at least 6:1 over any photo, and every word shares it.
 
 ## Typography
 
@@ -387,13 +387,13 @@ A near-achromatic ground (chroma 0.003 to 0.005) in two tuned themes, with a sin
 - **Caption** (10px) and **Micro** (9px, the floor): the hero frame label on a phone, legacy rail names.
 - **Booking calendar** (`time-picker`): the month heading drops to 2.125rem in a phone-width card; time boxes are Plex Mono 500 at 1.0625rem, 1.125rem when they swipe in one row on a phone; the booked confirmation note is 1.0625rem sentence case.
 - **Fitted** (900, sized from the name's own length between a floor and a ceiling): legacy discipline strip names (1rem to 5rem; grid 0.875rem to 2.5rem), covers (1.25rem to 3rem), chapters (1rem to 3rem; grid 0.75rem to 1.5rem) and titles (2.25rem to 6rem; 2.7rem on a phone). The frontmatter carries face and weight only; the floor and ceiling live here.
-- **Hero tagline** (Geist Mono 600, `max(15px, 17.5u)`, 0.08em; 14.5px and 0.06em on a phone): the line under the V4 hero name only (`.mt-cap` in app/styles/mtscroll.css, face loaded in app/layout.tsx, cut to letters, space and "|").
+- **Hero tagline** (Geist Mono 500, `max(15px, 17.5u)`, 0.08em; 15.5px on a phone; desktop sizes set per screen-shape band, up to 17/10, 17/10 to 2/1, 2/1 and wider, #1430): the line under the V4 hero name only (`.mt-cap` in app/styles/mtscroll.css, face loaded in app/layout.tsx, cut to letters, space and "|").
 - **Service rows** (V4 inner pages, 900, `clamp(1.125rem, 1.6u, 1.5rem)`, 1.15, -0.04em): a service page's list rows, numbered in 11px mono, dim until pointed at (`.sv-v4` in app/styles/v4pages.css).
 - **Film numbers** (900, `max(19px, 24u)`, 1, -0.03em, tabular figures): the 01 to 03 pager on the home film. All at full ink with a tight dark halo, so they pass as large text (3:1) on the palest frame. The current one leads by its rule, not by weight.
 - **Legacy steps** (`display`, `title`, `card-name`, `stamp`, `stamp-short`, `nav`, `splash`): still declared in tokens.css for pre-V3 surfaces, now in Inter Tight. Their values moved to the sidecar's `typographyMeta`; don't use them on new work. `not-found` stays in the frontmatter for the 404.
 
 ### Named Rules
-**The Two Registers Rule.** Type either shouts (Inter Tight 900, tight, large) or whispers (small mono). No third family, no weight in between. One exception ships: the V4 hero tagline in Geist Mono 600. It is a mono, so it stays in the whisper register.
+**The Two Registers Rule.** Type either shouts (Inter Tight 900, tight, large) or whispers (small mono). No third family, no weight in between. One exception ships: the V4 hero tagline in Geist Mono 500. It is a mono, so it stays in the whisper register.
 
 **The One Line Name Rule.** "Julian Gigola" sits on one line wherever it appears. Size it down before letting it wrap.
 
@@ -409,9 +409,9 @@ Pages are full-bleed columns with a side gutter of `max(16px, safe-area)`. Photo
 
 ## Elevation & Depth
 
-Flat. Surfaces lift by a few points of lightness, not by shadows. The one floating material is the glass header: the ground at 47% over a 24px backdrop blur at 1.8 saturation, a 0.5px line under it, appearing once the hero name scrolls under it (always on inner pages). On the home it frosts to 62% over the hero (below). Shadows in V3 are only line work drawn with `box-shadow`: the 2px inset accent under a current tab, the 1px accent under a focused field. The film numbers' halo is the one other shadow.
+Flat. Surfaces lift by a few points of lightness, not by shadows. The one floating material is the glass header: the ground at 47% over a 24px backdrop blur at 1.8 saturation, a 0.5px line under it, appearing once the hero name scrolls under it (always on inner pages). Over a photo it frosts to 62% (below). Shadows in V3 are only line work drawn with `box-shadow`: the 2px inset accent under a current tab, the 1px accent under a focused field. The film numbers' halo is the one other shadow.
 
-**Header frost (home only).** Over the home hero the bar has no ground of its own, and no one ink reads on every photo. The frost comes up (62% veil, 0.4s in) while any header word would fall under 4.5:1 without it, checked at 6:1 for margin and a little below the bar on the way down. Under frost the ink is the theme's ink, fixed and never sampled. Once up it stays past the hero; it leaves only back near the top, after 1.2s with nothing failing, fading out over 0.3s. Inner pages keep the sampled ink for now.
+**Header frost (every page with a photo under the bar).** Over a photo the bar has no ground of its own, and no one ink reads on every photo. The frost comes up (62% veil, 0.4s in) while any header word would fall under 4.5:1 without it, checked at 6:1 for margin and a little below the bar on the way down. Under frost the ink is the theme's ink, fixed and never sampled. Once up it stays past the hero; it leaves only back near the top, after 1.2s with nothing failing, fading out over 0.3s.
 
 ### Named Rules
 **The Flat Plate Rule.** No drop shadows under content, no inner shine, no glow. One exception ships: the home film numbers carry a tight dark halo (stacked text-shadows from 2px to 10px) with no plate or patch behind them, so they read on the palest frame.
@@ -445,7 +445,7 @@ Grid, Strip, Color icons on the tools row. The selected one sits on a soft card 
 - **Error:** a square box under the field, 1px border at 55% signal red, one sentence at 13px naming the fix.
 
 ### Navigation
-The glass header: wordmark left; links, then the half-disc theme toggle behind a faint 1px divider, right. On a phone: wordmark, Menu, theme toggle; Menu opens a drawer of 2.5rem names. The toggle spins to land straight and flips the theme. The bar picks the one ink that leaves the fewest spots under 4.5:1 across its words and keeps it until the other clearly leads, held 300ms so a busy photo does not flip it. On the home the frost takes over (Elevation & Depth).
+The glass header: wordmark left; links, then the half-disc theme toggle behind a faint 1px divider, right. On a phone: wordmark, Menu, theme toggle; Menu opens a drawer of 2.5rem names. The toggle spins to land straight and flips the theme. The bar picks the one ink that leaves the fewest spots under 4.5:1 across its words and keeps it until the other clearly leads, held 300ms so a busy photo does not flip it. Over a photo the frost takes over (Elevation & Depth).
 
 ### Stepper rail
 A 1px hairline per step; done steps in ink, the current step a 2px accent line, named; the rest numbered.
@@ -497,7 +497,7 @@ Dev and admin surfaces are not part of the visual system and their values are no
 - **Don't** use a pill for anything but a filter chip in V3.
 - **Don't** use glow, neon, gradients as decoration, or shadows under cards.
 - **Don't** put a decorative eyebrow or kicker above a title; only the audience lines over the doors and the service-page keyword line stay. They are not decoration (Julian, 2026-11-11): the audience line over each door ("For art directors and artists", "For private clients", "Published and commissioned by" over the client strip), and the keyword line over a service page's h1 (`kicker` in `lib/booking/booking.ts`, it carries search terms).
-- **Don't** add a third type family or a weight between the 900 titles and the mono. The V4 hero tagline's Geist Mono 600 is the one exception.
+- **Don't** add a third type family or a weight between the 900 titles and the mono. The V4 hero tagline's Geist Mono 500 is the one exception.
 - **Don't** set type below 9px.
 - **Don't** use the teal accent as a fill or for status.
 - **Don't** make logos react to hover.
