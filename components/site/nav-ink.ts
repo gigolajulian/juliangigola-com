@@ -407,19 +407,26 @@ export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string
            the frost is in before a word sits on the wrong photo (MAC: the menu on a dark figure for 0.3s before the fade).
            Only on the way down, so a page at rest at its top keeps no frost. */
         const ahead: RGB[] = [];
-        if (isTop && down && !frosted) {
+        if (down && !frosted && (isTop || veiled)) {
           const bb = bar.getBoundingClientRect().bottom;
           for (const el of votes.els) {
             const r = ((el.matches(".tbtn,.menu-btn") && el.querySelector("svg")) || el).getBoundingClientRect();
-            for (const t of [0.15, 0.5, 0.85]) ahead.push(under(r.left + r.width * t, bb + 28, bar, page));
+            for (const t of [0.15, 0.5, 0.85]) {
+              const g = under(r.left + r.width * t, bb + 28, bar, page);
+              ahead.push(isTop ? g : ([0, 1, 2].map((i) => g[i] * (1 - VEIL) + page[i] * VEIL) as RGB));
+            }
           }
         }
-        const fails = isTop && raw.length ? fewest(raw.concat(ahead), 6) : 0;
+        /* Every page, not only the home hero (MAC SSH, live v3.0.369: /portfolio/paradox at 1440 had 18 words under 4.5:1
+           through the bar's usual 47% ground, and dark /book at 390 a black menu at 3.3:1 over its bright hero). Past the
+           top, the bar already has that ground, so a word is judged through it: where it would still fall under 6:1, the
+           frost comes up there too and the ink becomes the theme's. A plain page ground never fails, so it never shows there. */
+        const fails = isTop ? (raw.length ? fewest(raw.concat(ahead), 6) : 0) : veiled && !frosted && grounds.length ? fewest(grounds.concat(ahead), 6) : 0;
         if (!isTop) {
-          // past the hero: the frost (if up) stays, ink fixed; nothing new comes up here
+          // past the top: comes up where a word fails through the usual ground, and once up it stays, ink fixed
           clearTimeout(frostT);
           frostT = 0;
-          if (bar.getAttribute("data-navfrost") === "off") bar.setAttribute("data-navfrost", "");
+          if (fails || bar.getAttribute("data-navfrost") === "off") bar.setAttribute("data-navfrost", "");
         } else if (fails) {
           clearTimeout(frostT);
           frostT = 0;
