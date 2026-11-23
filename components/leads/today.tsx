@@ -19,11 +19,11 @@ import { Divider } from "@astryxdesign/core/Divider";
 import { About, about, Age, Next } from "@/components/leads/row";
 import { dueTasks, isLate, paperDue, shootTag, type LeadSummary, type TaskRow } from "@/lib/leads/leads";
 import { dayShort } from "@/components/leads/plan";
-import { adminCall, authed, ago, aside, dateTimeLabel, centsLabel, closed, inboxCall, needsMe, nextStep, now, inFilter, plusDays, renew, ymdPT, type Size } from "@/lib/leads/lead-desk";
-import { balance, dayB, dueOf, overdue, usd } from "@/lib/leads/invoice";
+import { adminCall, authed, ago, aside, dateTimeLabel, centsLabel, isFinishedStage, inboxCall, needsMe, nextStep, now, inFilter, plusDays, renew, ymdPT, type Size } from "@/lib/leads/lead-desk";
+import { balance, shortDate, dueOf, overdue, usd } from "@/lib/leads/invoice";
 import type { InvoiceRow } from "@/components/leads/invoices";
 import { TZ } from "@/lib/booking/booking-rules";
-import { api as proofApi, feed, type FeedItem, type Row } from "@/lib/proofs/desk";
+import { proofApi, feed, type FeedItem, type ProofRow } from "@/lib/proofs/desk";
 
 /* Today's helpers, from the retired classic desk. */
 const clock = (ms: number) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit" }).format(ms);
@@ -43,7 +43,7 @@ export function daysOf(leads: LeadSummary[], from: string, n: number) {
   for (const l of leads) {
     if (aside(l)) continue;
     const who = l.name || l.email;
-    if (l.when && !closed(l.stage)) {
+    if (l.when && !isFinishedStage(l.stage)) {
       const ms = Date.parse(l.when);
       put(ymdPT(ms), { small: `${clock(ms)} ${callOrShoot(l)}`, text: who, l });
     }
@@ -117,7 +117,7 @@ export function TodayDesk({ leads, size, open, show }: { leads: LeadSummary[]; s
   // Gallery activity across every gallery, from the proofs list (never `?token=`, which marks selects as pulled).
   const [acts, setActs] = React.useState<FeedItem[] | null>(null);
   React.useEffect(() => {
-    proofApi<{ proofs: Row[] }>({ query: "?list" }).then((o) => setActs(feed(o.proofs))).catch(() => setActs([]));
+    proofApi<{ proofs: ProofRow[] }>({ query: "?list" }).then((o) => setActs(feed(o.proofs))).catch(() => setActs([]));
   }, []);
   // Every lead's open tasks (`?tasks`), due within a week or late; leads put aside are left out, as Your move leaves them.
   const [taskRows, setTaskRows] = React.useState<TaskRow[] | string | null>(null);
@@ -231,7 +231,7 @@ export function TodayDesk({ leads, size, open, show }: { leads: LeadSummary[]; s
                 <List hasDividers>
                   {pastDue.map((i) => {
                     const l = leads.find((x) => x.id === i.lead);
-                    return <ListItem key={i.no} onClick={l ? () => open(l) : undefined} label={`${i.name}, invoice ${i.no}`} description={`${usd(balance(i))} was due ${dayB(dueOf(i), true)}${i.sentAt ? "" : " · not sent"}`} endContent={<Badge label="Overdue" variant="error" />} />;
+                    return <ListItem key={i.no} onClick={l ? () => open(l) : undefined} label={`${i.name}, invoice ${i.no}`} description={`${usd(balance(i))} was due ${shortDate(dueOf(i), true)}${i.sentAt ? "" : " · not sent"}`} endContent={<Badge label="Overdue" variant="error" />} />;
                   })}
                 </List>
               </VStack>

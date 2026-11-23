@@ -49,10 +49,10 @@ export type Patch = (b: LeadPatch) => Promise<Lead>;
 
 export const errorText = (e: unknown) => (e instanceof Error ? e.message : String(e));
 export const OFFLINE = "Offline. The desk loads again when you are back online.";
-/** What a failed load says: offline, or the route's own words. */
 /** Any 401 from the admin gate (`refuseAdmin`): a missing key or a token GitHub refused. The desks show sign-in for it. */
 export const isLocked = (e: unknown) => e instanceof AdminError && e.status === 401;
 export const LOCKED = "Not authorized.";
+/** What a failed load says: offline, or the route's own words. */
 export const loadError = (e: unknown) => (navigator.onLine === false || e instanceof TypeError ? OFFLINE : isLocked(e) ? LOCKED : errorText(e));
 
 /** "Nov 11, 4:05 PM" in Julian's time. */
@@ -74,7 +74,7 @@ export const plusDays = (iso: string, n: number) => {
 };
 
 export const snoozed = (l: LeadSummary) => !!l.snoozeUntil && Date.parse(l.snoozeUntil) > now();
-export const closed = (s: Stage) => s === "Delivered" || s === "Lost";
+export const isFinishedStage = (s: Stage) => s === "Delivered" || s === "Lost";
 /** Archived or in the trash: out of every list but its own. */
 export const aside = (l: LeadSummary) => !!(l.archivedAt || l.trashedAt);
 /** His reminder has come round: it beats a snooze. */
@@ -85,7 +85,7 @@ export const matches = (l: LeadSummary, words: string) => !words || [l.name, l.e
 export const renew = (l: LeadSummary) => !snoozed(l) && renewDue(l, now());
 export function needsMe(l: LeadSummary) {
   if (renew(l)) return true;
-  if (aside(l) || closed(l.stage)) return false;
+  if (aside(l) || isFinishedStage(l.stage)) return false;
   if (due(l)) return true;
   if (snoozed(l)) return false;
   return l.unread || isLate(l, now()) || !!l.flags?.length || !!paperDue(l, now()) || !!myMove(l, now());
@@ -110,10 +110,10 @@ export function inFilter(l: LeadSummary, f: Filter) {
   if (f === "archived") return !!l.archivedAt && !l.trashedAt;
   if (f === "needs") return needsMe(l);
   if (aside(l)) return false;
-  if (f === "upcoming") return !!l.when && Date.parse(l.when) > now() - 2 * 3600e3 && !closed(l.stage);
+  if (f === "upcoming") return !!l.when && Date.parse(l.when) > now() - 2 * 3600e3 && !isFinishedStage(l.stage);
   if (f === "more" || f === "hours" || f === "proofs" || f === "licences") return false;
   if (f === "snoozed") return snoozed(l);
-  if (f === "open") return !closed(l.stage);
+  if (f === "open") return !isFinishedStage(l.stage);
   return l.stage === f && !snoozed(l);
 }
 

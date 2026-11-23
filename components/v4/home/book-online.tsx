@@ -34,7 +34,7 @@ function RowPhoto({ r, on, sizes }: { r: BookRow; on: boolean; sizes: string }) 
   );
 }
 
-export function MtBookOnline({ open, opener, onClose, quotePhoto, onRowPick }: { open: BookRow["slug"] | null; opener?: React.RefObject<HTMLElement | null>; onClose: () => void; quotePhoto: QuoteOpt["key"] | null; onRowPick: () => void }) {
+export function BookOnline({ open, opener, onClose, quotePhoto, onRowPick }: { open: BookRow["slug"] | null; opener?: React.RefObject<HTMLElement | null>; onClose: () => void; quotePhoto: QuoteOpt["key"] | null; onRowPick: () => void }) {
   const cards = React.useContext(CardsCtx);
   const [sel, setSelRaw] = React.useState(0);
   const setSel = (i: number) => (setSelRaw(i), onRowPick());

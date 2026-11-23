@@ -1,5 +1,5 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { fromWorker } from "@/lib/vouch";
+import { refuseWorker } from "@/lib/vouch";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { listProofs, readProof, type Proof } from "@/lib/proofs/proof";
 import { digestMail } from "@/lib/email/proof-mail";
@@ -19,7 +19,8 @@ const LAST = "proofdigest:last";
 
 export async function POST(request: Request) {
   const { env } = await getCloudflareContext({ async: true });
-  if (!(await fromWorker(request, env.BOOKING_SECRET))) return json({ error: "Not authorized." }, 401);
+  const denied = await refuseWorker(request, env.BOOKING_SECRET);
+  if (denied) return denied;
   const seal = await sealer(env.LEADS_KEY);
   if (!env.INBOX || !seal) return json({ error: "Not set up." }, 503);
   const until = new Date().toISOString();

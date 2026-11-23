@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { CoverPage } from "@/components/cover/cover-page";
 import { SESSION_SEO } from "@/lib/seo";
 import { projectFacts, shareMeta } from "@/lib/og/share";
-import { V3Project } from "@/components/portfolio/project";
+import { ProjectView } from "@/components/portfolio/project";
 import {
   LINKABLE,
   UNLISTED,
@@ -103,5 +103,5 @@ export default async function ProjectPage(props: PageProps<"/portfolio/[slug]">)
   }
 
   /* JG V3 (leftovers card B): a vertical page, the client's logo in the head. */
-  return <V3Project project={project} next={onwards} />;
+  return <ProjectView project={project} next={onwards} />;
 }

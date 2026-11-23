@@ -1,4 +1,4 @@
-import { balance, dayB, subtotal, usdB, type Invoice, type InvoiceB, type InvoiceFrom } from "./invoice";
+import { balance, shortDate, subtotal, usdTrim, type Invoice, type InvoiceDetails, type InvoiceFrom } from "./invoice";
 
 /* ── the invoice as a PDF ─────────────────────────────────────────
  * Ported from Julian's JG INVOICE GENERATOR artifact (geometry measured
@@ -199,7 +199,7 @@ function layoutB(d: InvoiceDoc, F: Record<Face, Font>) {
 
 /** `k` scales the gaps between blocks and the padding in the rows; type sizes never change. */
 function layoutBAt({ from: s, inv }: InvoiceDoc, F: Record<Face, Font>, k: number) {
-  const b = inv.b as InvoiceB;
+  const b = inv.b as InvoiceDetails;
   const T: Text[] = [], rects: { x: number; y: number; w: number; h: number; fill: string }[] = [], lines: { x1: number; y: number; x2: number; c: string }[] = [];
   const t = (x: number, y: number, size: number, fill: string, text: string, font: Face, anchor: "start" | "end" = "start", tc?: number) => T.push({ x, y, size, fill, text, font, anchor, tc });
   /** Advance with tracking, as the writer lays it. */
@@ -242,7 +242,7 @@ function layoutBAt({ from: s, inv }: InvoiceDoc, F: Record<Face, Font>, k: numbe
   const IT = 2.1 * U, SUB = 1.75 * U, AMT = 1.95 * U;
   const rows = [...inv.lines.map((l) => ({ t: l.desc, sub: l.sub ?? "", n: l.qty * l.rate })), ...(inv.paid ? [{ t: "Deposit received", sub: b.depositNote, n: -inv.paid }] : [])];
   for (const r of rows) {
-    const top = y + 2.2 * U * k, amt = usdB(r.n), room = colW - adv(amt, AMT, "sb") - 3 * U;
+    const top = y + 2.2 * U * k, amt = usdTrim(r.n), room = colW - adv(amt, AMT, "sb") - 3 * U;
     t(X0, base(top, IT, "r4", 1.4), fit(r.t, IT, "r4", room), B.FG, r.t, "r4");
     t(XR, base(top, AMT, "sb"), AMT, B.FG, amt, "sb", "end");
     let h = box(IT, "r4", 1.4);
@@ -254,12 +254,12 @@ function layoutBAt({ from: s, inv }: InvoiceDoc, F: Record<Face, Font>, k: numbe
 
   y += 6 * U * k;
   y += lab(X0, y, "Total due", B.VIO) + 2.4 * U;
-  const K = 10.5 * U, total = usdB(balance(inv));
+  const K = 10.5 * U, total = usdTrim(balance(inv));
   t(X0, base(y, K, "ar", 0.82), fit(total, K, "ar", colW, -0.035), B.FG, total, "ar", "start", -0.035);
   y += box(K, "ar", 0.82) + 3.4 * U;
   const SM = 1.6 * U, sb = base(y, SM, "sb");
   let x = X0;
-  for (const [k, v, c] of [["ISSUED ", dayB(inv.date), B.FG], ["DUE ", dayB(b.due, true), B.VIO]] as const) {
+  for (const [k, v, c] of [["ISSUED ", shortDate(inv.date), B.FG], ["DUE ", shortDate(b.due, true), B.VIO]] as const) {
     t(x, sb, SM, B.MUTE, k, "sb", "start", 0.06); x += adv(k, SM, "sb", 0.06);
     t(x, sb, SM, c, v.toUpperCase(), "sb", "start", 0.06); x += adv(v.toUpperCase(), SM, "sb", 0.06) + 5 * U;
   }

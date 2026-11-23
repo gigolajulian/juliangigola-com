@@ -555,15 +555,6 @@ export function lockScroll() {
   };
 }
 
-/** Viewer entries in the history right now. */
-let entries = 0;
-/** Whether a popstate belongs to the viewer. An entry counts until the pop
-    that takes it off has been heard by every listener (the count drops a
-    task later), so a back-navigation listener never takes a
-    viewer close for a back navigation, whichever listener runs first. */
-export const viewerPop = () => entries > 0;
-const release = () => setTimeout(() => entries--);
-
 /** An entry in the history for the open viewer, so the back button (and a
     phone's back gesture) closes it the same way the close button does
     instead of leaving the page. Returns a function to call when the
@@ -579,11 +570,9 @@ export function pushHistory(onBack: () => void) {
   window.history.scrollRestoration = "manual";
   window.history.pushState({ ...(window.history.state ?? {}), zoom: key }, "");
   let live = true;
-  entries++;
   const onPop = () => {
     if (!live) return;
     live = false;
-    release();
     window.removeEventListener("popstate", onPop);
     window.history.scrollRestoration = restoration;
     onBack();
@@ -595,9 +584,7 @@ export function pushHistory(onBack: () => void) {
     window.removeEventListener("popstate", onPop);
     window.history.scrollRestoration = restoration;
     if ((window.history.state as { zoom?: string } | null)?.zoom === key) {
-      // Our own back: the entry counts until its pop has gone round.
-      window.addEventListener("popstate", release, { once: true });
       window.history.back();
-    } else entries--;
+    }
   };
 }

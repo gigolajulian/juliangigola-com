@@ -23,7 +23,7 @@ vi.mock("lenis", () => ({
   },
 }));
 
-import { SmoothScroll, jumpTo, onLenisScroll, scrollTop, shiftScroll } from "@/components/v3/smooth-scroll";
+import { SmoothScroll, jumpTo, onLenisScroll, scrollTop, shiftScroll } from "@/components/site/smooth-scroll";
 
 describe("smooth-scroll", () => {
   it("scrollTop and shiftScroll fall back to the window without Lenis", () => {

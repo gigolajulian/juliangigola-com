@@ -4,15 +4,21 @@ import * as React from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { DepositStep } from "@/components/booking/deposit-step";
-import { goo } from "@/components/booking/deposit-step";
+import { gooOn } from "@/components/booking/deposit-step";
 import { TZ } from "@/lib/booking/booking-rules";
 import { depositFor } from "@/lib/booking/paid";
 import { AHEAD, DAYS, iso, minutesOf, MONTHS, forgetTimes, STEP_AT, WEEKDAYS, WHERE, clock, zone } from "@/components/booking/time-picker-parts";
 import type { CardCtx } from "@/components/booking/use-picker";
+import { arrowMark, busyMark, okMarkOf } from "@/components/booking/picker-marks";
 
 /* The card as a magazine page (editorial.css), the default since 2026-10-17. */
 export function EditorialCard({ c }: { c: CardCtx }) {
-  const { title, className, username, slug, tz, here, length, needsWhere, opt, setOpt, via, setVia, ask, setAsk, session, booked, days, view, anchor, pick, arrow, chosen, step, setStep, paid, deposit, root, error, ok, setOk, load, open, choose, showTimes, today, week, month, shift, daysBox, mstep, setMstep, switchView, slotsW, slotsRef, atStart, book, grow, refill, busy, okMark, swipeProps, t, ap, until, date, sum } = c;
+  const { title, className, username, slug, tz, here, length, needsWhere, opt, setOpt, via, setVia, ask, setAsk, session, booked, days, view, anchor, pick, chosen, step, setStep, paid, deposit, root, error, ok, setOk, load, open, choose, showTimes, today, week, month, shift, daysBox, mstep, setMstep, switchView, slotsW, slotsRef, atStart, book, grow, refill, swipeProps, t, ap, until, date, sum } = c;
+  const arrow = arrowMark();
+  /* Booking: the orb, then the ring and its check, over the card. */
+  const busy = busyMark(step);
+  /* Confirm's words turn into the orbs, then a check. */
+  const okMark = okMarkOf(ok);
   const usd = depositFor(slug);
   const d3 = (d: Date) => DAYS[d.getDay()][0] + DAYS[d.getDay()].slice(1).toLowerCase();
   const mon = (d: Date) => MONTHS[d.getMonth()].slice(0, 3);
@@ -64,7 +70,7 @@ export function EditorialCard({ c }: { c: CardCtx }) {
       <div ref={root} className="contents">
         <DepositStep
           editorial
-          head={<>{bar}{hero(`$${usd}`, `Deposit. Holds ${dayLine}`, "Balance due after the shoot", <button type="button" data-stick={goo() ? "fill" : undefined} className="ed-box" onClick={() => setStep("form")}>Change</button>)}</>}
+          head={<>{bar}{hero(`$${usd}`, `Deposit. Holds ${dayLine}`, "Balance due after the shoot", <button type="button" data-stick={gooOn() ? "fill" : undefined} className="ed-box" onClick={() => setStep("form")}>Change</button>)}</>}
           className={className}
           body={deposit}
           rows={[
@@ -153,7 +159,7 @@ export function EditorialCard({ c }: { c: CardCtx }) {
       {bar}
       {step === "pick"
         ? hero(`${d3(date)} ${date.getDate()} ${mon(date)}`, <>{chosen === "time" ? `${t}${ap === apEnd ? "" : ` ${ap}`} to ${until} ${apEnd}` : "Pick a time"}<br />{what}</>, chosen === "time" ? "Then your details" : "Pick a day, then a time")
-        : hero("Details", <>{dayLine}<br />{what}</>, "Who and where", <button type="button" data-stick={goo() ? "fill" : undefined} className="ed-box" onClick={() => setStep("pick")}>Change</button>)}
+        : hero("Details", <>{dayLine}<br />{what}</>, "Who and where", <button type="button" data-stick={gooOn() ? "fill" : undefined} className="ed-box" onClick={() => setStep("pick")}>Change</button>)}
       {step === "pick" ? (
         <>
           <div className="ed-body">
@@ -167,8 +173,8 @@ export function EditorialCard({ c }: { c: CardCtx }) {
                   {(["week", "month"] as const).map((v) => (
                     <button key={v} type="button" aria-pressed={view === v} onClick={() => switchView(v)}>{v}</button>
                   ))}
-                  <button type="button" data-stick={goo() ? "" : undefined} className="ed-arrow" aria-label="Earlier" disabled={atStart} onClick={() => shift(-1)}>{arrow}</button>
-                  <button type="button" data-stick={goo() ? "" : undefined} className="ed-arrow" aria-label="Later" disabled={atEnd} onClick={() => shift(1)}><span className="flex rotate-180">{arrow}</span></button>
+                  <button type="button" data-stick={gooOn() ? "" : undefined} className="ed-arrow" aria-label="Earlier" disabled={atStart} onClick={() => shift(-1)}>{arrow}</button>
+                  <button type="button" data-stick={gooOn() ? "" : undefined} className="ed-arrow" aria-label="Later" disabled={atEnd} onClick={() => shift(1)}><span className="flex rotate-180">{arrow}</span></button>
                 </div>
               </div>
               <div ref={daysBox} className="touch-pan-y overflow-hidden" {...swipeProps}>
@@ -198,7 +204,7 @@ export function EditorialCard({ c }: { c: CardCtx }) {
                         }
                         const id = iso(d);
                         return (
-                          <button key={id} data-day={id} type="button" disabled={!open(id).size} aria-pressed={pick.date === id} aria-label={`${WEEKDAYS[d.getDay()]}, ${MONTHS[d.getMonth()]} ${d.getDate()}`} onClick={() => dayPick(id)} data-stick={goo() && open(id).size ? "fill" : undefined} className="ed-cell">
+                          <button key={id} data-day={id} type="button" disabled={!open(id).size} aria-pressed={pick.date === id} aria-label={`${WEEKDAYS[d.getDay()]}, ${MONTHS[d.getMonth()]} ${d.getDate()}`} onClick={() => dayPick(id)} data-stick={gooOn() && open(id).size ? "fill" : undefined} className="ed-cell">
                             <span className="ed-n">{d.getDate()}</span>
                             <i />
                           </button>
@@ -221,7 +227,7 @@ export function EditorialCard({ c }: { c: CardCtx }) {
                     const m = minutesOf(x.start);
                     const [h, a] = clock(m);
                     return (
-                      <button key={x.start} data-slot="" type="button" aria-pressed={chosen === "time" && m === pick.min} aria-label={`${h} ${a}`} onClick={() => choose(pick.date, m, true)} data-stick={goo() ? "fill" : undefined} className="ed-slot">{h} {a}</button>
+                      <button key={x.start} data-slot="" type="button" aria-pressed={chosen === "time" && m === pick.min} aria-label={`${h} ${a}`} onClick={() => choose(pick.date, m, true)} data-stick={gooOn() ? "fill" : undefined} className="ed-slot">{h} {a}</button>
                     );
                   })}
                 </div>
@@ -234,7 +240,7 @@ export function EditorialCard({ c }: { c: CardCtx }) {
             <span className="label flex flex-col gap-1">
               {chosen === "time" ? `${sum} ${tzName}` : `San Jose, CA · ${here}${tz === TZ ? "" : ` · times in ${tzName}`}`}
             </span>
-            <button type="button" data-stick={goo() ? "fill" : undefined} className="ed-btn" onClick={() => setOk("spin")} disabled={chosen !== "time"} aria-busy={!!ok}>
+            <button type="button" data-stick={gooOn() ? "fill" : undefined} className="ed-btn" onClick={() => setOk("spin")} disabled={chosen !== "time"} aria-busy={!!ok}>
               <span className={cn("transition-opacity duration-200", ok && "opacity-0")}>Continue</span>
               {okMark}
             </button>
@@ -256,7 +262,7 @@ export function EditorialCard({ c }: { c: CardCtx }) {
                   <span className="label">Call</span>
                   <div className="ed-opts">
                     {(["Video", "Phone"] as const).map((v) => (
-                      <label key={v} data-stick={goo() ? "fill" : undefined}>
+                      <label key={v} data-stick={gooOn() ? "fill" : undefined}>
                         <input type="radio" name="via" value={v} checked={via === v} onChange={() => setVia(v)} className="sr-only" />
                         <span className="ed-via">{v === "Video" ? camera : handset}{v} call</span>
                       </label>
@@ -278,7 +284,7 @@ export function EditorialCard({ c }: { c: CardCtx }) {
                   <span className="label">Location</span>
                   <div className="ed-opts">
                     {opts.map(([label, q]) => (
-                      <label key={label} data-stick={goo() ? "fill" : undefined}>
+                      <label key={label} data-stick={gooOn() ? "fill" : undefined}>
                         <input type="radio" name="opt" value={label} required checked={opt === label} onChange={() => { setOpt(label); if (q) setAsk(q); }} className="sr-only" />
                         <span>{label}</span>
                       </label>
@@ -294,7 +300,7 @@ export function EditorialCard({ c }: { c: CardCtx }) {
           </div>
           <div className="ed-floor">
             <span className="label">{paid ? `Next: $${usd} deposit` : `${sum} ${tzName}`}</span>
-            <button type="submit" data-stick={goo() ? "fill" : undefined} className="ed-btn" disabled={step === "sending"}>{paid ? "Continue" : step === "sending" ? "Booking" : "Book it"}</button>
+            <button type="submit" data-stick={gooOn() ? "fill" : undefined} className="ed-btn" disabled={step === "sending"}>{paid ? "Continue" : step === "sending" ? "Booking" : "Book it"}</button>
           </div>
         </form>
       )}

@@ -5,9 +5,9 @@ import { CoverPage } from "@/components/cover/cover-page";
 import { CampusSpots } from "@/components/booking/campus-spots";
 import { ServiceBar } from "@/components/booking/service-bar";
 import { LogoBand } from "@/components/about/logo-band";
-import { V4Foot } from "@/components/site/foot";
-import { V4Project } from "@/components/portfolio/project-viewer";
-import { V4Drift } from "@/components/portfolio/drift";
+import { PageFoot } from "@/components/site/foot";
+import { ProjectViewer } from "@/components/portfolio/project-viewer";
+import { Drift } from "@/components/portfolio/drift";
 import { BOOK_ROWS, QUOTE_OPTS } from "@/lib/v4-home/data";
 import type { CoverRelease } from "@/lib/work/cover-art-types";
 
@@ -133,9 +133,9 @@ describe("LogoBand (a2)", () => {
   });
 });
 
-describe("V4Foot", () => {
+describe("PageFoot", () => {
   it("lists the sessions, the inquiry types, the pages and the ways to reach me", () => {
-    render(<V4Foot />);
+    render(<PageFoot />);
     const nav = screen.getByRole("navigation", { name: "Footer" });
     for (const b of BOOK_ROWS) expect(screen.getByRole("link", { name: b.name }).getAttribute("href")).toBe(`/book/${b.slug}`);
     const types: Record<string, string> = { Music: "/contact/form?type=coverart", Fashion: "/contact/form?type=editorial", Commercial: "/contact/form?type=campaign", Weddings: "/contact/form" };
@@ -146,18 +146,18 @@ describe("V4Foot", () => {
   });
 
   it("says Book me off a project page and the same line on every visit to one", () => {
-    render(<V4Foot />);
+    render(<PageFoot />);
     expect(screen.getByRole("link", { name: "Book me" }).getAttribute("href")).toBe("/book");
     cleanup();
     nav.path = "/portfolio/paradox";
-    const a = render(<V4Foot />).container.querySelector(".v4f-phrase")!.getAttribute("aria-label");
-    const b = render(<V4Foot />).container.querySelectorAll(".v4f-phrase")[0].getAttribute("aria-label");
+    const a = render(<PageFoot />).container.querySelector(".v4f-phrase")!.getAttribute("aria-label");
+    const b = render(<PageFoot />).container.querySelectorAll(".v4f-phrase")[0].getAttribute("aria-label");
     expect(a).toBe(b);
     expect(a).toBeTruthy();
   });
 });
 
-describe("V4Project (view)", () => {
+describe("ProjectViewer (view)", () => {
   const frames = [
     { s: "x", src: "/x/01.jpg", alt: "", wide: false, sq: false },
     { s: "x", src: "/x/02.jpg", alt: "", wide: false, sq: false },
@@ -168,14 +168,14 @@ describe("V4Project (view)", () => {
 
   it("leaves the frames alone with the key off", () => {
     page();
-    render(<V4Project frames={frames} />);
+    render(<ProjectViewer frames={frames} />);
     expect(document.querySelector(".pj-big")!.getAttribute("role")).toBeNull();
   });
 
   it("makes each frame a button that names its place, and undoes it on unmount", () => {
     page();
     flag("view");
-    const { unmount } = render(<V4Project frames={frames} />);
+    const { unmount } = render(<ProjectViewer frames={frames} />);
     const figs = document.querySelectorAll("#p-project figure");
     expect([...figs].map((f) => f.getAttribute("aria-label"))).toEqual(["Open frame 1 of 2", "Open frame 2 of 2"]);
     expect(figs[0].getAttribute("role")).toBe("button");
@@ -186,12 +186,12 @@ describe("V4Project (view)", () => {
   it("feeds the Next stage's wipe on desktop", () => {
     document.body.innerHTML = `<div id="p-project"><a class="pj-next"></a></div>`;
     desktop();
-    render(<V4Project frames={frames} />);
+    render(<ProjectViewer frames={frames} />);
     expect((document.querySelector(".pj-next") as HTMLElement).style.getPropertyValue("--in")).toMatch(/^\d\.\d{3}$/);
   });
 });
 
-describe("V4Drift (p3)", () => {
+describe("Drift (p3)", () => {
   const grid = () => (document.body.innerHTML = `<div id="p-work"><div class="wgrid"><a class="wt"></a><a class="wt"></a></div></div>`);
 
   it("marks nothing where scroll timelines do not run", () => {
@@ -199,7 +199,7 @@ describe("V4Drift (p3)", () => {
     desktop();
     onScreen();
     vi.stubGlobal("CSS", { supports: () => false, escape: (s: string) => s });
-    render(<V4Drift k="a" />);
+    render(<Drift k="a" />);
     expect(document.querySelectorAll("[data-v4d]")).toHaveLength(0);
   });
 
@@ -208,7 +208,7 @@ describe("V4Drift (p3)", () => {
     desktop();
     onScreen();
     vi.stubGlobal("CSS", { supports: () => true, escape: (s: string) => s });
-    render(<V4Drift k="a" />);
+    render(<Drift k="a" />);
     expect(document.querySelectorAll(".wt[data-v4d]")).toHaveLength(2);
     fireEvent.scroll(window);
     expect(document.querySelector(".wgrid")!.hasAttribute("data-v4lag")).toBe(true);

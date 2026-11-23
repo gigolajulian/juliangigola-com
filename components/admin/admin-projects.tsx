@@ -9,10 +9,11 @@ import { srcOf } from "@/lib/admin/admin-sequence";
 import { twinStats } from "@/lib/work/frame-twins";
 import { AdminCredits } from "@/components/admin/admin-credits";
 import { AdminBts } from "@/components/admin/admin-bts";
-import type { Bts } from "@/lib/work-types";
+import type { Bts } from "@/lib/work/work-types";
 import type { FrameRef } from "@/lib/work/added";
-import type { Credit } from "@/lib/work-types";
+import type { Credit } from "@/lib/work/work-types";
 import { cn } from "@/lib/utils";
+import { errorText } from "@/lib/leads/lead-desk";
 
 /* ── the project list ─────────────────────────────────────────────
  * Everything on the site, and what can be done to it.
@@ -333,7 +334,7 @@ export function AdminProjects({
     } catch (e) {
       setStatus({
         kind: "error",
-        message: e instanceof Error ? e.message : String(e),
+        message: errorText(e),
       });
     }
   }

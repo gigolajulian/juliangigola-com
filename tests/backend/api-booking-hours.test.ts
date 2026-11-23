@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { GET, PUT } from "@/app/api/booking/hours/route";
 import { BookingLock } from "@/worker/booking-lock";
-import { FakeStore, fakeLock, githubToken, reply } from "./fakes";
+import { FakeStore, fakeLock, githubToken, reply, INBOX_KEY as KEY, GOOGLE_OAUTH as OAUTH } from "./fakes";
 
 /* /api/booking/hours: the inbox key or a GitHub token that can push opens
    it; a malformed week is refused; a good one is read back. */
@@ -9,8 +9,6 @@ import { FakeStore, fakeLock, githubToken, reply } from "./fakes";
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
 vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
 
-const OAUTH = JSON.stringify({ client_id: "a", client_secret: "b", refresh_token: "c" });
-const KEY = "inbox-key-for-tests";
 const req = (method: string, body?: unknown, headers: Record<string, string> = { "x-inbox-key": KEY }) =>
   new Request("https://juliangigola.com/api/booking/hours", { method, headers, body: body === undefined ? undefined : JSON.stringify(body) });
 

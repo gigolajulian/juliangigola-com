@@ -1,16 +1,16 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { Clause, LegalColumn, V3LegalPage } from "@/components/site/legal";
+import { Clause, LegalColumn, LegalPage } from "@/components/site/legal";
 
-describe("V3LegalPage", () => {
+describe("LegalPage", () => {
   it("lays out each document with its contents and anchored clauses", async () => {
     render(
-      <V3LegalPage>
+      <LegalPage>
         <LegalColumn id="terms" title="Terms of use" label="Terms" effective="2026-10-01">
           <Clause title="Ownership">All photos are mine.</Clause>
           <Clause title="What you may do">Look.</Clause>
         </LegalColumn>
-      </V3LegalPage>,
+      </LegalPage>,
     );
     expect(screen.getByRole("heading", { level: 1, name: "Legal" })).toBeTruthy();
     expect(await screen.findByRole("heading", { level: 2, name: "Terms of use" })).toBeTruthy();

@@ -224,6 +224,7 @@ export const same = (a: unknown, b: unknown): boolean =>
  * keep a stale value there than to silently blank something real.
  * ─────────────────────────────────────────────────────────────── */
 
+// Its own copy of `lib/json.ts` isRecord: scripts/check-payload.mjs runs this file under Node, with no imports.
 const isRecord = (v: unknown): v is Record<string, unknown> =>
   typeof v === "object" && v !== null && !Array.isArray(v);
 

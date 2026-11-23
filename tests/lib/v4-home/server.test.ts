@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { COMM_KEYS, COVER_KEYS, COVER_PRESS, FILM_DRESS, FILM_PICKS, HERO_KEYS } from "@/lib/v4-home/data";
 import { getProject } from "@/lib/work/work";
-import { MT } from "@/lib/v4-home/server";
+import { HOME_DATA } from "@/lib/v4-home/server";
 
 /* The v4 home picks its photos, covers and films by hand-kept keys. A renamed project or film
    fails quietly (a fallback ratio, a film with no poster), so the keys are checked against the content here. */
@@ -15,7 +15,7 @@ describe("v4 home picks", () => {
   });
 
   it("every film has a poster", () => {
-    expect(MT.films.filter((f) => !f.poster).map((f) => f.title)).toEqual([]);
+    expect(HOME_DATA.films.filter((f) => !f.poster).map((f) => f.title)).toEqual([]);
   });
 
   it("every dressed film is one of the picks", () => {
@@ -28,6 +28,6 @@ describe("v4 home picks", () => {
   });
 
   it("every By quote film still resolves", () => {
-    expect(Object.entries(MT.stills).filter(([, src]) => !src).map(([k]) => k)).toEqual([]);
+    expect(Object.entries(HOME_DATA.stills).filter(([, src]) => !src).map(([k]) => k)).toEqual([]);
   });
 });

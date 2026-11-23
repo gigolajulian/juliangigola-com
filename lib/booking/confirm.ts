@@ -1,6 +1,7 @@
 import { duration, EARLY_SHARE, PART_SHARE, REFUND_HOURS, refundCents, refundShare, TZ } from "@/lib/booking/booking-rules";
 import { LEGACY_DEPOSIT } from "@/lib/booking/paid";
-import { depositPaid, type BookingRecord } from "@/lib/booking/booking-engine";
+import { depositPaid, recordBooking, type BookingRecord } from "@/lib/booking/booking-engine";
+import { logMail } from "@/lib/leads/lead-store";
 import type { manageLinks } from "@/lib/booking/booking-token";
 import { SIG_DARK, SIG_HTML, SIG_TEXT } from "@/lib/email/email-signature";
 /* ── the client's confirmation email ──────────────────────────────
@@ -221,4 +222,23 @@ export async function sendCancelled(mailer: CloudflareEnv["CLIENT_EMAIL"] | unde
     console.error("cancel mail", String(e));
     return false;
   }
+}
+
+/** After a booking: file it on the lead desk, mail the client their "You're in.", log that mail on the lead.
+    `defer` (the free call's `ctx.waitUntil`) runs the filing and the log in the background, the log after the
+    filing so the mail lands on its row; without it each step is awaited in turn. `confirm` is built after the filing starts. */
+export async function afterBooked(
+  env: Parameters<typeof recordBooking>[0] & { CLIENT_EMAIL?: CloudflareEnv["CLIENT_EMAIL"] },
+  r: BookingRecord,
+  confirm: () => Promise<Confirm>,
+  o: { deposit?: string; email?: string; defer?: (p: Promise<unknown>) => void } = {},
+) {
+  const filed = recordBooking(env, r, o.deposit);
+  if (o.defer) o.defer(filed);
+  else await filed;
+  const sent = await sendConfirm(env.CLIENT_EMAIL, await confirm());
+  if (!sent) return;
+  const log = () => logMail(env, o.email ?? r.email, sent, { to: "client", kind: "confirm", booking: r.id });
+  if (o.defer) o.defer(filed.then(log));
+  else await log();
 }

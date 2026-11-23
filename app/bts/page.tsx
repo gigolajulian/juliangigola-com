@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { WITH_BTS, titleCase } from "@/lib/work/work";
 import { PageFoot } from "@/components/site/chrome";
 import { BtsCredit, BtsPageGrid } from "@/components/bts/bts";
+import { pad } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Behind the scenes",
@@ -13,7 +14,6 @@ export const metadata: Metadata = {
   alternates: { canonical: "/bts" },
 };
 
-const pad = (n: number) => String(n).padStart(2, "0");
 
 /* Every shoot that has BTS, in the running order, one row each: the name
    and who shot it on the left, the frames in a grid on the right. Linked

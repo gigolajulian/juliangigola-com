@@ -4,7 +4,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { ALL_PROJECTS } from "../lib/work/work";
 import { isHandle, isOwn, rolesFor } from "../lib/work/credits";
-import type { Credit } from "../lib/work-types";
+import type { Credit } from "../lib/work/work-types";
 
 const file = "content/projects.json";
 const raw = readFileSync(file, "utf8");

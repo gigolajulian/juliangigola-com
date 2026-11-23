@@ -1,3 +1,5 @@
+import { isRecord } from "./json";
+
 /** Every API answer: never cached, never indexed. Route files may only export handlers, so the helper lives here. */
 export const NO_STORE = { "cache-control": "no-store", "x-robots-tag": "noindex, nofollow" } as const;
 
@@ -11,7 +13,7 @@ export const json = (body: unknown, status = 200) => Response.json(body, { statu
 export async function bodyOf(request: Request): Promise<Record<string, unknown> | null> {
   try {
     const b: unknown = await request.json();
-    return b && typeof b === "object" && !Array.isArray(b) ? (b as Record<string, unknown>) : null;
+    return isRecord(b) ? b : null;
   } catch {
     return null;
   }

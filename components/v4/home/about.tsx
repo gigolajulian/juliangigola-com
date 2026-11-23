@@ -3,7 +3,8 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ABOUT_FACTS, ABOUT_SENTENCE, pad } from "@/lib/v4-home/data";
+import { ABOUT_FACTS, ABOUT_SENTENCE } from "@/lib/v4-home/data";
+import { pad } from "@/lib/utils";
 
 /* Spec 3.9: one screen. The sentence is one paragraph; the per-word spans
    (`--w`) and the wordmark's per-letter spans (`--j`) are for the motion pass. */
@@ -22,7 +23,7 @@ function uncoverOnFocus(e: React.FocusEvent<HTMLAnchorElement>) {
   });
 }
 
-export function MtAbout({ does }: { does: string[] }) {
+export function HomeAbout({ does }: { does: string[] }) {
   const words = ABOUT_SENTENCE.split(" ");
   return (
     <section id="about" className="mt-about" aria-label="About" data-mt="about">

@@ -116,3 +116,8 @@ export const fakeLock = (lock: { fetch(r: Request): Promise<Response> }) => ({
   idFromName: (name: string) => name,
   get: () => ({ fetch: (url: string, init: RequestInit) => lock.fetch(new Request(url, init)) }),
 });
+
+/** The inbox key the backend tests sign in with. */
+export const INBOX_KEY = "inbox-key-for-tests";
+/** A Google OAuth secret in the shape `GCAL_OAUTH` holds. */
+export const GOOGLE_OAUTH = JSON.stringify({ client_id: "a", client_secret: "b", refresh_token: "c" });

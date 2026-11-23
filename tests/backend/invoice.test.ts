@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { DEPOSIT as BY_SESSION } from "@/lib/booking/paid";
-import { balance, cleanInvoice, dayB, depositOfLead, dueOf, invoiceNo, MAX_ROWS_B, mmyy, namesInvoice, overdue, usdB, type InvoiceB } from "@/lib/leads/invoice";
+import { balance, cleanInvoice, shortDate, depositOfLead, dueOf, invoiceNo, MAX_INVOICE_ROWS, mmyy, namesInvoice, overdue, usdTrim, type InvoiceDetails } from "@/lib/leads/invoice";
 
 describe("invoice", () => {
   it("numbers by month: 1126, 1126-2, 1126-3", () => {
@@ -34,14 +34,14 @@ describe("invoice", () => {
       expect(got).toMatchObject({ lines: [{ desc: "L0", sub: "s0" }], b: { crop: { x: 1, y: 0, z: 3 }, tone: "dark" } });
     });
     it("counts the deposit as a row, and needs a photo and a name", () => {
-      expect(cleanInvoice({ date: "2026-11-09", lines: one(MAX_ROWS_B), paid: 0, b })).not.toHaveProperty("error");
-      expect(cleanInvoice({ date: "2026-11-09", lines: one(MAX_ROWS_B), paid: 100, b })).toHaveProperty("error");
+      expect(cleanInvoice({ date: "2026-11-09", lines: one(MAX_INVOICE_ROWS), paid: 0, b })).not.toHaveProperty("error");
+      expect(cleanInvoice({ date: "2026-11-09", lines: one(MAX_INVOICE_ROWS), paid: 100, b })).toHaveProperty("error");
       expect(cleanInvoice({ date: "2026-11-09", lines: one(1), b: { ...b, photo: "invoice-photo:../x" } })).toHaveProperty("error");
       expect(cleanInvoice({ date: "2026-11-09", lines: one(1), b: { ...b, to: { name: " " } } })).toHaveProperty("error");
     });
     it("writes money and days as the page does", () => {
-      expect([usdB(1500), usdB(1500.5), usdB(-100)]).toEqual(["$1,500", "$1,500.50", "-$100"]);
-      expect([dayB("2026-11-09"), dayB("2026-11-16", true)]).toEqual(["9 Nov", "16 Nov 2026"]);
+      expect([usdTrim(1500), usdTrim(1500.5), usdTrim(-100)]).toEqual(["$1,500", "$1,500.50", "-$100"]);
+      expect([shortDate("2026-11-09"), shortDate("2026-11-16", true)]).toEqual(["9 Nov", "16 Nov 2026"]);
     });
   });
 });
@@ -50,11 +50,11 @@ describe("overdue", () => {
   // Made after PAID_BEFORE, so unpaid until something settles it.
   const inv = { date: "2026-11-12", at: "2026-11-12T20:00:00Z" };
   it("design B is due on its own date; one without B, 14 days after its date", () => {
-    expect(dueOf({ ...inv, b: { due: "2026-11-19" } as InvoiceB })).toBe("2026-11-19");
+    expect(dueOf({ ...inv, b: { due: "2026-11-19" } as InvoiceDetails })).toBe("2026-11-19");
     expect(dueOf(inv)).toBe("2026-11-26");
   });
   it("is unpaid and past due, never on the due day itself", () => {
-    const b = { ...inv, b: { due: "2026-11-19" } as InvoiceB };
+    const b = { ...inv, b: { due: "2026-11-19" } as InvoiceDetails };
     expect([overdue(b, "2026-11-19"), overdue(b, "2026-11-20")]).toEqual([false, true]);
     expect(overdue({ ...b, paidAt: "2026-11-18T10:00:00Z" }, "2026-12-01")).toBe(false);
     // Made before the log: read as paid, so never overdue unless marked unpaid by hand.

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { Doors, V3Home } from "@/components/home/rollback";
+import { V3Home } from "@/components/home/rollback";
+import { Doors } from "@/components/site/doors";
 import { INDEX_ORDER } from "@/lib/photos-and-sessions";
 
 describe("V3Home", () => {

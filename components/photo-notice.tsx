@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { pad } from "@/lib/utils";
 
 /* ── the copyright notice ─────────────────────────────────────────
  * Right-clicking a photograph says who owns it instead of offering to
@@ -44,7 +45,6 @@ function slugOf(target: HTMLElement) {
   );
   const n = frames.indexOf(cell);
   if (n < 0) return "";
-  const pad = (v: number) => String(v).padStart(2, "0");
   return `${title} · ${pad(n + 1)} / ${pad(frames.length)}`;
 }
 

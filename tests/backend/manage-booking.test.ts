@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { FakeEmail, FakeKV, FakeStore, fakeLock, LEADS_KEY, leadOf } from "./fakes";
+import { FakeEmail, FakeKV, FakeStore, fakeLock, LEADS_KEY, leadOf, INBOX_KEY as KEY, GOOGLE_OAUTH as OAUTH } from "./fakes";
 import { forgetToken } from "@/lib/booking/gcal";
 import { bookingToken, manageLinks, tokenOpens } from "@/lib/booking/booking-token";
 import { BookingLock } from "@/worker/booking-lock";
@@ -22,7 +22,6 @@ const { POST: change } = await import("@/app/api/booking/[id]/route");
 const { bookDeposit } = await import("@/lib/booking/deposit");
 
 const SECRET = "booking-secret-for-tests";
-const OAUTH = JSON.stringify({ client_id: "a", client_secret: "b", refresh_token: "c" });
 /** A Wednesday 10 AM Pacific at least `days` out. */
 const wednesday = (days: number) => {
   const d = new Date(Date.now() + days * 864e5);
@@ -35,7 +34,6 @@ let busy: { start: string; end: string; id: string }[];
 let calls: { method: string; url: string; form?: string; body?: { start: { dateTime: string }; end: { dateTime: string } } }[];
 let refundOk: boolean;
 let store: FakeStore;
-const KEY = "inbox-key-for-tests";
 let client: FakeEmail;
 let mail: FakeEmail;
 
@@ -334,6 +332,17 @@ describe("the desk", () => {
     // A second click does nothing more.
     expect((await post(id, { action: "cancel-mine" }, KEY)).status).toBe(409);
     expect(calls.filter((c) => c.url.endsWith("/refunds"))).toHaveLength(1);
+  });
+
+  it("Julian cancels and the refund fails: hello@ gets the figure to refund by hand, the client hears it goes by hand, no refund line", async () => {
+    const { id } = await paid(wednesday(7));
+    refundOk = false;
+    expect(await (await post(id, { action: "cancel-mine" }, KEY)).json()).toMatchObject({ refunded: false, back: 0, record: { cancelled: true } });
+    expect(String(mail.sent.at(-1)!.text)).toContain("The refund FAILED: refund $250 by hand in Stripe.");
+    expect(String(client.sent.at(-1)!.text)).toContain("I'll send it by hand");
+    const events = (await leadOf(ctx.env.INBOX as FakeKV, "qa@example.com"))!.events;
+    expect(events.some((e) => e.kind === "refund")).toBe(false);
+    expect(events.some((e) => e.kind === "cancel" && String(e.note).endsWith("by Julian"))).toBe(true);
   });
 
   it("a no-show: only after the start, a line on the lead, a mail to hello@, nothing refunded, the client not mailed, once", async () => {

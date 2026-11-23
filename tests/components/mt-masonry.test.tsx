@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { masonry } from "@/components/v4/home/commissions";
-import type { MtFrame } from "@/lib/v4-home/data";
+import type { HomeFrame } from "@/lib/v4-home/data";
 
 /* The phone sheet's two columns (`components/v4/home/commissions.tsx`): each
    frame goes to the shorter column by its ratio, the right column starting
    56/171 of a frame lower, and every frame keeps its index once. */
 
-const frame = (r: number, i: number): MtFrame => ({ src: `/work/x/${i}.jpg`, name: `F${i}`, meta: "", slug: "x", r });
+const frame = (r: number, i: number): HomeFrame => ({ src: `/work/x/${i}.jpg`, name: `F${i}`, meta: "", slug: "x", r });
 
 describe("masonry", () => {
   it("starts on the left, then fills whichever column is shorter", () => {

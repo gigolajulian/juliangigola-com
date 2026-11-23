@@ -1,7 +1,7 @@
 /* The editor's tabs, and which tab each field lives on (`admin-editor.tsx`). */
 
 /**
- * The tabs, in two groups.
+ * The tabs, in three groups.
  *
  * Content used to be one tab holding four sections, with an index above it to
  * get between them. That is two mechanisms doing one job — a tab strip and a
@@ -11,10 +11,10 @@
  *
  * One tab per area instead, and the index goes: the tabs *are* the index.
  *
- * Grouped because the two halves are different kinds of thing. The first four
- * are pages — a fixed set of fields, edited a few times a year. The last two
- * are the work — seventy-three projects that change constantly. Running all
- * six together would suggest they are the same kind of visit.
+ * Grouped because they are different kinds of thing. The first five are
+ * pages: a fixed set of fields, edited a few times a year. The next four are
+ * the work: the projects, which change constantly. Running them all together
+ * would suggest they are the same kind of visit.
  */
 export const TABS = [
   [
@@ -36,7 +36,7 @@ export const TABS = [
   ],
   /* Its own group, because it is not the same kind of visit at all.
    *
-   * The first four tabs are pages and the next two are the work — both of
+   * The first five tabs are pages and the next four are the work: both of
    * them things you go in to change. This one is post: you go in to read it,
    * and what you do afterwards happens in your mail. It also has nothing to
    * publish, which is the one thing every other tab has in common. */

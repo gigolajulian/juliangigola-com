@@ -3,7 +3,7 @@ import { DELETE, GET, PATCH, POST, PUT } from "@/app/api/proof/route";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { readProof, writeProof } from "@/lib/proofs/proof";
 import { readLead, writeLead } from "@/lib/leads/lead-store";
-import { FakeKV, LEADS_KEY } from "./fakes";
+import { FakeKV, LEADS_KEY, INBOX_KEY as KEY } from "./fakes";
 
 /* /api/proof: Julian's side of proof galleries. Off without its bindings,
    behind the inbox key, refuses bad input, and creates, uploads to and
@@ -12,7 +12,6 @@ import { FakeKV, LEADS_KEY } from "./fakes";
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
 vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
 
-const KEY = "inbox-key-for-tests";
 const req = (method: string, { body, query = "", key = KEY, type }: { body?: BodyInit; query?: string; key?: string; type?: string } = {}) =>
   new Request(`https://juliangigola.com/api/proof${query}`, { method, body, headers: { "x-inbox-key": key, ...(type ? { "content-type": type } : {}) } });
 const json = (o: unknown) => JSON.stringify(o);

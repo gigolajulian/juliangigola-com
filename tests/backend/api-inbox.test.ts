@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { summary, enquiry, enquiryKey } from "@/lib/inbox";
 import { recordLead } from "@/lib/leads/lead-store";
-import { FakeKV, LEADS_KEY, SCOPED, githubToken, reply } from "./fakes";
+import { FakeKV, LEADS_KEY, SCOPED, githubToken, reply, INBOX_KEY as KEY } from "./fakes";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { byCodeUnit } from "@/lib/utils";
 
@@ -14,7 +14,6 @@ vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ 
 
 const { GET, PATCH, POST, DELETE } = await import("@/app/api/inbox/route");
 
-const KEY = "inbox-key-for-tests";
 const URL_ = "https://juliangigola.com/api/inbox";
 const req = (method: string, { key = KEY, token, body, query = "" }: { key?: string | null; token?: string; body?: string; query?: string } = {}) =>
   new Request(URL_ + query, {

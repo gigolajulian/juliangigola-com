@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { MtHome } from "@/components/v4/home/home";
-import { MT } from "@/lib/v4-home/server";
+import { Home } from "@/components/v4/home/home";
+import { HOME_DATA } from "@/lib/v4-home/server";
 import { shareOg } from "@/lib/og/share";
 
 /* The v4 home from the server, for `/?mtscroll=1` (a rewrite in next.config.ts sends that address here).
@@ -17,5 +17,5 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default function HomeV4() {
-  return <MtHome data={MT} />;
+  return <Home data={HOME_DATA} />;
 }

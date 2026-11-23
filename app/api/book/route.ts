@@ -1,8 +1,7 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { lockOp, parseBooking, recordBooking, type BookResult } from "@/lib/booking/booking-engine";
+import { lockOp, parseBooking, type BookResult } from "@/lib/booking/booking-engine";
 import { manageLinks } from "@/lib/booking/booking-token";
-import { confirmOf, sendConfirm } from "@/lib/booking/confirm";
-import { logMail } from "@/lib/leads/lead-store";
+import { afterBooked, confirmOf } from "@/lib/booking/confirm";
 import { alertHello } from "@/lib/email/hello-mail";
 import { whenPT } from "@/lib/inbox";
 import { bodyOf, json } from "@/lib/http";
@@ -49,12 +48,7 @@ export async function POST(request: Request) {
   if (!out.ok) return json({ error: "That time is already booked." }, 409);
 
   const r = out.record;
-  const filed = recordBooking(env, r);
-  ctx.waitUntil(filed);
-  const confirm = { ...confirmOf(r, await manageLinks(env.BOOKING_SECRET, r)), call: true };
-  // Logged after the lead is filed, so the mail lands on its row.
-  const sent = await sendConfirm(env.CLIENT_EMAIL, confirm);
-  if (sent) ctx.waitUntil(filed.then(() => logMail(env, r.email, sent, { to: "client", kind: "confirm", booking: r.id })));
+  await afterBooked(env, r, async () => ({ ...confirmOf(r, await manageLinks(env.BOOKING_SECRET, r)), call: true }), { defer: (p) => ctx.waitUntil(p) });
   ctx.waitUntil(alertHello(env.EMAIL, `Booked: ${[r.session, whenPT(r.start), r.name].join(", ")}`, [`${r.name} <${r.email}>`, ...(r.phone ? [`Phone: ${r.phone}`] : []), callLine(r), ...(r.notes ? ["", r.notes] : [])], { name: r.name, email: r.email }));
   return json({ status: "success", data: { uid: r.id, start: r.start, end: r.end, where: r.where } });
 }

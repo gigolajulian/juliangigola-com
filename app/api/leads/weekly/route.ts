@@ -1,5 +1,5 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { fromWorker } from "@/lib/vouch";
+import { refuseWorker } from "@/lib/vouch";
 import { readMaster } from "@/lib/leads/activity-log";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { everyLead } from "@/lib/leads/lead-store";
@@ -17,7 +17,8 @@ export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   const { env } = await getCloudflareContext({ async: true });
-  if (!(await fromWorker(request, env.BOOKING_SECRET))) return json({ error: "Not authorized." }, 401);
+  const denied = await refuseWorker(request, env.BOOKING_SECRET);
+  if (denied) return denied;
   const seal = await sealer(env.LEADS_KEY);
   if (!env.INBOX || !seal) return json({ error: "Not set up." }, 503);
   const { subject, lines } = weeklyMail(await everyLead(env.INBOX, seal), await readMaster(env.INBOX, seal), Date.now());

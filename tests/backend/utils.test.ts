@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cn, rubberband } from "@/lib/utils";
+import { createHash } from "node:crypto";
+import { cn, pad, rubberband, sha256Hex } from "@/lib/utils";
 import { softItem, wallItem } from "@/lib/wall-tile";
 
 /* Small shared helpers and tuned values. */
@@ -21,6 +22,15 @@ describe("rubberband", () => {
 describe("cn", () => {
   it("joins classes and drops falsy ones", () => {
     expect(cn("a", false, null, "b")).toBe("a b");
+  });
+});
+
+describe("pad and sha256Hex", () => {
+  it("pads to two digits", () => {
+    expect([pad(7), pad(12), pad(0)]).toEqual(["07", "12", "00"]);
+  });
+  it("matches Node's hex SHA-256 on UTF-8 text", async () => {
+    for (const s of ["", "abc", "Signé · 署名 ok"]) expect(await sha256Hex(s)).toBe(createHash("sha256").update(s, "utf8").digest("hex"));
   });
 });
 

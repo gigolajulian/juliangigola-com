@@ -1,21 +1,19 @@
 /* v4 homepage (the home with NEXT_PUBLIC_V4_HOME=1, docs/mt-decisions.md): the copy and picks this
    screen owns. Client-safe: no lib/work import. Frames that need project data
-   (names, ratios) are resolved on the server in `lib/v4-home/server.ts` (`MT`). */
-import { rate, SESSIONS, type SessionSlug } from "@/lib/photos-and-sessions";
+   (names, ratios) are resolved on the server in `lib/v4-home/server.ts` (`HOME_DATA`). */
+import { priceLabel, SESSIONS, type SessionSlug } from "@/lib/photos-and-sessions";
 import { DEPOSIT } from "@/lib/booking/paid";
 import type { SHOOT_TYPES } from "@/lib/inbox";
 
 /** A photo with its caption: `r` is height / width. */
-export type MtFrame = { src: string; name: string; meta: string; slug: string; r: number };
-export type MtFilm = { id: string; title: string; kind: string; client: string; poster: string | null; href: string; preview?: string; file?: string };
-/** A count as two digits: 01, 02. */
-export const pad = (n: number) => String(n).padStart(2, "0");
+export type HomeFrame = { src: string; name: string; meta: string; slug: string; r: number };
+export type HomeFilm = { id: string; title: string; kind: string; client: string; poster: string | null; href: string; preview?: string; file?: string };
 
-/** Where each run of MtData.extras goes: 0-15 the side columns (4 a column), 16-21 rows five and six of the locked columns,
+/** Where each run of HomeData.extras goes: 0-15 the side columns (4 a column), 16-21 rows five and six of the locked columns,
     22-29 those rows of the side columns, 30 on the intro pool. */
 export const EXTRAS = { perCol: 4, sides: 16, xrSides: 22, wall: 30 } as const;
 
-export type MtData = { hero: MtFrame[]; extras: MtFrame[]; comm: MtFrame[]; films: MtFilm[]; does: string[]; reply: string | null; stills: Record<string, string> };
+export type HomeData = { hero: HomeFrame[]; extras: HomeFrame[]; comm: HomeFrame[]; films: HomeFilm[]; does: string[]; reply: string | null; stills: Record<string, string> };
 
 /* Julian's arranger save (save.json), in order. Key `<slug>/<NN>`. */
 export const HERO_KEYS = ["threshold/05", "i-wanna-be-a-human/01", "wired-magazine/01", "wrapped-up/02", "sago/01", "valgur/02", "vigil/05", "ukiyosunknown/01", "nyx/06", "oakley-x-nike/01", "astral-allure/04", "liminal/01"];
@@ -64,7 +62,7 @@ export type BookRow = {
   slug: Extract<SessionSlug, "portraits" | "headshots" | "graduation" | "studio-digitals">;
   name: string;
   len: string;
-  /** What /book shows for it: "From $400", or "$250 deposit" where the price is quoted after (`rate`, lib/photos-and-sessions). */
+  /** What /book shows for it: "From $400", or "$250 deposit" where the price is quoted after (`priceLabel`, lib/photos-and-sessions). */
   price: string;
   /** The deposit that books it. */
   dep: string;
@@ -73,10 +71,10 @@ export type BookRow = {
   pos: string;
 };
 export const BOOK_ROWS: BookRow[] = [
-  { slug: "portraits", name: "Portraits", len: "60 min", price: rate(SESSIONS["portraits"]), dep: `$${DEPOSIT.portraits}`, btn: "Book portraits", pos: "50% 50%" },
-  { slug: "headshots", name: "Headshots", len: "30 min", price: rate(SESSIONS["headshots"]), dep: `$${DEPOSIT.headshots}`, btn: "Book headshots", pos: "50% 40%" },
-  { slug: "graduation", name: "Graduation", len: "90 min", price: rate(SESSIONS["graduation"]), dep: `$${DEPOSIT.graduation}`, btn: "Book graduation", pos: "50% 18%" },
-  { slug: "studio-digitals", name: "Studio digitals", len: "45 min", price: rate(SESSIONS["studio-digitals"]), dep: `$${DEPOSIT.digitals}`, btn: "Book digitals", pos: "50% 50%" },
+  { slug: "portraits", name: "Portraits", len: "60 min", price: priceLabel(SESSIONS["portraits"]), dep: `$${DEPOSIT.portraits}`, btn: "Book portraits", pos: "50% 50%" },
+  { slug: "headshots", name: "Headshots", len: "30 min", price: priceLabel(SESSIONS["headshots"]), dep: `$${DEPOSIT.headshots}`, btn: "Book headshots", pos: "50% 40%" },
+  { slug: "graduation", name: "Graduation", len: "90 min", price: priceLabel(SESSIONS["graduation"]), dep: `$${DEPOSIT.graduation}`, btn: "Book graduation", pos: "50% 18%" },
+  { slug: "studio-digitals", name: "Studio digitals", len: "45 min", price: priceLabel(SESSIONS["studio-digitals"]), dep: `$${DEPOSIT.digitals}`, btn: "Book digitals", pos: "50% 50%" },
 ];
 
 /* ── By quote (spec 3.5, SZQ) ── */

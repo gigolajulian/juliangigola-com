@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { shareOg } from "@/lib/og/share";
-import { V3LegalPage } from "@/components/site/legal";
+import { LegalPage } from "@/components/site/legal";
 import { TermsColumn } from "@/components/site/terms";
 import { PrivacyColumn } from "@/components/site/privacy";
 
@@ -19,9 +19,9 @@ export const metadata: Metadata = {
    strip handles now, so the old `OpenOnHash` is not needed here. */
 export default function LegalPage_() {
   return (
-    <V3LegalPage>
+    <LegalPage>
       <TermsColumn />
       <PrivacyColumn />
-    </V3LegalPage>
+    </LegalPage>
   );
 }

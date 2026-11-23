@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ReferencePicks } from "@/components/reference-picks";
-import { V4Foot } from "@/components/site/foot";
+import { PageFoot } from "@/components/site/foot";
 import { CallDialog } from "@/components/booking/book";
 import { Duo } from "@/components/site/duo";
 import { Check, Failed, Field, FlowShell, Hidden, NEED_MSG, checkYou, first, useEnquiry } from "@/components/booking/flow";
@@ -72,7 +72,7 @@ function Note() {
   );
 }
 
-export function V3Inquire() {
+export function Contact() {
   return (
     <div className="v3 contents">
       <section className="v3page" id="p-inquire">
@@ -117,7 +117,7 @@ export function V3Inquire() {
           <a href="mailto:hello@juliangigola.com">hello@juliangigola.com</a>
           <a href="https://instagram.com/juliangigola" rel="noopener">@juliangigola</a>
         </div>
-        <V4Foot bare />
+        <PageFoot bare />
       </section>
     </div>
   );
@@ -137,7 +137,7 @@ const BUDGET = ["Under $2k", "$2k to $5k", "$5k to $10k", "$10k and up", "Not su
 /* The inbox's shoot types (lib/inbox.ts SHOOT_TYPES). */
 const TYPE: Record<string, string> = { "Brand campaign": "campaign", Editorial: "editorial", "Cover art": "coverart", "Artist presskit": "presskit", "Music video": "video", "Event coverage": "event" };
 
-export function V3Commission() {
+export function CommissionForm() {
   const router = useRouter();
   const { state, pending, sent, send } = useEnquiry();
   const [k, setK] = React.useState(1);
@@ -277,7 +277,7 @@ export function V3Commission() {
           />
         </form>
       </section>
-      <V4Foot bare />
+      <PageFoot bare />
     </div>
   );
 }

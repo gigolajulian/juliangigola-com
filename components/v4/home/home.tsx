@@ -2,18 +2,18 @@
 
 import * as React from "react";
 import { createPortal } from "react-dom";
-import type { MtData, BookRow, QuoteOpt } from "@/lib/v4-home/data";
+import type { HomeData, BookRow, QuoteOpt } from "@/lib/v4-home/data";
 import { CardsCtx, type Cards, type InquiryMode } from "./ctx";
-import { MtHero } from "./hero";
-import { MtCommissions } from "./commissions";
-import { MtCovers, MtFilms } from "./rows";
-import { MtBookOnline } from "./book-online";
-import { MtByQuote } from "./by-quote";
-import { MtAbout } from "./about";
-import { MtFoot } from "./foot";
-import { MtIntro } from "./intro";
-import { MtMotionLayer } from "./motion";
-import { glideTo } from "@/components/v3/smooth-scroll";
+import { HomeHero } from "./hero";
+import { HomeCommissions } from "./commissions";
+import { HomeCovers, HomeFilms } from "./rows";
+import { BookOnline } from "./book-online";
+import { ByQuote } from "./by-quote";
+import { HomeAbout } from "./about";
+import { HomeFoot } from "./foot";
+import { HomeIntro } from "./intro";
+import { MotionLayer } from "./motion";
+import { glideTo } from "@/components/site/smooth-scroll";
 import { useBackHome } from "./back";
 
 /* The inquiry card (its dialog and form) is not in the home page's first load (audit 2026-11-22): fetched once By quote
@@ -25,9 +25,9 @@ let inqMod: Promise<unknown> | undefined;
 const warmInq = () => (inqMod ??= import("./inquiry-card").then((m) => (InquiryCard = m.InquiryCard), () => (inqMod = undefined)));
 
 /* v4 homepage (the home with NEXT_PUBLIC_V4_HOME=1; `?mtscroll=1` previews it on a rollback build; docs/mt-decisions.md): the screens at their resting
-   state, with MtIntro and MtMotionLayer on top. Motion hooks: MOTION-HOOKS.md. */
+   state, with HomeIntro and MotionLayer on top. Motion hooks: MOTION-HOOKS.md. */
 
-export function MtHome({ data }: { data: MtData }) {
+export function Home({ data }: { data: HomeData }) {
   useBackHome();
   const [book, setBook] = React.useState<BookRow["slug"] | null>(null);
   const [inq, setInq] = React.useState<{ from: InquiryMode; opt?: QuoteOpt["key"] } | null>(null);
@@ -97,19 +97,19 @@ export function MtHome({ data }: { data: MtData }) {
   }, []);
   return (
     <CardsCtx.Provider value={cards}>
-      <MtIntro extras={data.extras} />
+      <HomeIntro extras={data.extras} />
       <section className="v3 v3home mt" data-cards={inq ? "open" : undefined}>
-        <MtHero frames={data.hero} extras={data.extras} />
+        <HomeHero frames={data.hero} extras={data.extras} />
         {/* order: Motion, Cover art, About, Sessions, By quote, then Commissions */}
-        <MtFilms films={data.films} />
-        <MtCovers />
-        <MtAbout does={data.does} />
-        <MtBookOnline open={book} opener={bookOpener} onClose={() => setBook(null)} quotePhoto={quotePhoto} onRowPick={() => setQuotePhoto(null)} />
-        <MtByQuote stills={data.stills} reply={data.reply} onOptionPick={setQuotePhoto} />
-        <MtCommissions frames={data.comm} />
-        <MtFoot />
+        <HomeFilms films={data.films} />
+        <HomeCovers />
+        <HomeAbout does={data.does} />
+        <BookOnline open={book} opener={bookOpener} onClose={() => setBook(null)} quotePhoto={quotePhoto} onRowPick={() => setQuotePhoto(null)} />
+        <ByQuote stills={data.stills} reply={data.reply} onOptionPick={setQuotePhoto} />
+        <HomeCommissions frames={data.comm} />
+        <HomeFoot />
       </section>
-      <MtMotionLayer />
+      <MotionLayer />
       {InquiryCard && (inq || inqUsed) ? <InquiryCard open={inq} reply={data.reply} onClose={() => setInq(null)} onBack={back} /> : null}
       {/* a slow line: the card's frame comes up on the tap while its code is still on the way */}
       {inq && !InquiryCard

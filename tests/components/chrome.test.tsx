@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { CoverNav, MotionGate, NAV, V3Foot, V3Footer, V3Header } from "@/components/site/chrome";
+import { CoverNav, MotionGate, NAV, FootLine, SiteFooter, SiteHeader } from "@/components/site/chrome";
 
 describe("chrome", () => {
   it("NAV lists the four pages", () => {
@@ -19,19 +19,19 @@ describe("chrome", () => {
     for (const n of NAV) expect(nav.querySelector(`a[href="${n.href}"]`)?.textContent).toBe(n.label);
   });
 
-  it("V3Foot has the legal link", () => {
-    render(<V3Foot />);
+  it("FootLine has the legal link", () => {
+    render(<FootLine />);
     expect(screen.getByRole("link", { name: "Legal" }).getAttribute("href")).toBe("/legal");
     expect(screen.getByText("© 2026 Julian Gigola")).toBeTruthy();
   });
 
-  it("V3Footer stays out on the homepage, which has its own", () => {
-    const { container } = render(<V3Footer />);
+  it("SiteFooter stays out on the homepage, which has its own", () => {
+    const { container } = render(<SiteFooter />);
     expect(container.innerHTML).toBe("");
   });
 
-  it("V3Header renders on the homepage", () => {
-    const { container } = render(<V3Header />);
+  it("SiteHeader renders on the homepage", () => {
+    const { container } = render(<SiteHeader />);
     expect(container.querySelector("header")).toBeTruthy();
   });
 });

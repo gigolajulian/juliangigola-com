@@ -11,7 +11,8 @@ import { dropSpot, keepSpot, layoutTop } from "./back";
 import { projectHref } from "@/lib/project-href";
 import { holdEase, holdUnease } from "@/lib/motion/hold-ease";
 import { clamp, MT2, progress } from "./motion/engine";
-import { COVER_KEYS, COVER_PRESS, FILM_DRESS, pad, type MtFilm } from "@/lib/v4-home/data";
+import { COVER_KEYS, COVER_PRESS, FILM_DRESS, type HomeFilm } from "@/lib/v4-home/data";
+import { pad } from "@/lib/utils";
 import { qflag } from "@/lib/v4-home/flags";
 
 /** A home cover opens on the Cover art page, in that page's viewer (`?cover=`, components/cover/cover-art-gallery.tsx). */
@@ -46,7 +47,7 @@ const COVERS = COVER_KEYS.map((k) => COVER_RELEASES.find((r) => r.slug === k)).f
    A held block that names the current cover over one sideways row. Static form: a native scroll row with snap,
    which is also its touch and reduced-motion form. The current cover follows the row's own scroll (snap step),
    `data-cur` on the section. The motion pass (motion/rows.ts covers()) drives `--p` and transforms `.mt-track`. */
-export function MtCovers() {
+export function HomeCovers() {
   const row = React.useRef<HTMLDivElement>(null);
   const [cur, setCur] = React.useState(0);
   // a layout effect: listening before the home's Back restore (back.ts) tells the cover, so the caption is right from the first paint
@@ -117,11 +118,11 @@ export function MtCovers() {
   );
 }
 
-/* Spec 3.8. Phones and tablets: the same native snap row as MtCovers. Desktop
+/* Spec 3.8. Phones and tablets: the same native snap row as HomeCovers. Desktop
    structure: the films stack one under another in natural scroll (motion/rows.ts
    opens the one at the middle of the screen). The current film is read here, so
    the head stays in step with the engine off too. */
-export function MtFilms({ films }: { films: MtFilm[] }) {
+export function HomeFilms({ films }: { films: HomeFilm[] }) {
   const row = React.useRef<HTMLDivElement>(null);
   const [cur, setCur] = React.useState(0);
   React.useEffect(() => {

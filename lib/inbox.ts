@@ -186,10 +186,10 @@ export const contextLines = (e: Enquiry): string[] => {
  * hits a wall immediately rather than getting a few hundred through before a
  * daily cap notices.
  */
+export const COOLDOWN_MS = 5 * 60 * 1000;
+
 /** References one enquiry may carry, uploads and picks together. */
 export const MAX_REFS = 8;
-
-export const COOLDOWN_MS = 5 * 60 * 1000;
 
 /**
  * How many enquiries may be stored in a day, across everybody.

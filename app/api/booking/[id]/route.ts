@@ -3,11 +3,10 @@ import { lockOp, clientView, depositPaid, type ChangeResult } from "@/lib/bookin
 import { EARLY_SHARE, PART_SHARE, refundCents, refundShare } from "@/lib/booking/booking-rules";
 import { refuseAdmin } from "@/lib/vouch";
 import { manageLinks, tokenOpens } from "@/lib/booking/booking-token";
-import { cancelledSubject, confirmOf, sendCancelled, sendConfirm } from "@/lib/booking/confirm";
+import { confirmOf, sendConfirm } from "@/lib/booking/confirm";
 import { logMail, recordLead } from "@/lib/leads/lead-store";
-import { dashboardLink } from "@/lib/booking/deposit";
+import { cancelBooking } from "@/lib/booking/deposit";
 import { alertAndLog } from "@/lib/email/hello-mail";
-import { stripe } from "@/lib/stripe";
 import { whenPT } from "@/lib/inbox";
 import { bodyOf, json } from "@/lib/http";
 
@@ -49,7 +48,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const { record: r, was } = out;
   const who = { name: r.name, email: r.email };
   const what = [r.session, whenPT(was.start), r.name].join(", ");
-  const key = env.STRIPE_SECRET_KEY;
 
   if (body.action === "reschedule") {
     await recordLead(env, r.email, { event: { at: new Date().toISOString(), kind: "reschedule", ref: `${r.id}:${r.start}`, note: whenPT(r.start) }, when: r.start });
@@ -68,21 +66,18 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const back = cents / 100;
   const pct = Math.round(share * 100);
   const ref = share === 1 ? `refund-${r.intent}` : `refund-${r.intent}-${cents}`;
-  let refunded: boolean | undefined;
-  if (r.intent && share && key) {
-    refunded = await stripe(key, "/refunds", { payment_intent: r.intent, ...(share === 1 ? {} : { amount: String(cents) }) }, ref).then(
-      () => true,
-      () => false,
-    );
-  }
-  await recordLead(env, r.email, { event: { at: new Date().toISOString(), kind: "cancel", ref: `cancel:${r.id}`, note: [r.session, whenPT(was.start)].join(", ") } });
-  // What went back, off this booking's record, so the log says what Stripe did.
-  if (refunded) await recordLead(env, r.email, { event: { at: new Date().toISOString(), kind: "refund", ref, note: share === 1 ? "Deposit, cancelled 48 hours or more ahead" : `${pct}% of the deposit, cancelled ${share === EARLY_SHARE ? "48 hours or more" : "24 to 48 hours"} ahead`, amount: back } });
-  const money = !r.intent ? "No deposit." : refunded ? (share === 1 ? `Deposit refunded: $${back}.` : `Refunded $${back} of the $${paid} deposit (${pct}%). $${paid - back} kept.`) : refunded === false ? `The refund FAILED: refund $${back} by hand in Stripe.` : "Under 24 hours: the deposit is kept.";
-  await alertAndLog(env, `Cancelled: ${what}`, [`${r.name} <${r.email}>`, "Cancelled by the client. The event is off the calendar.", money, ...(r.intent && key ? [`Stripe: ${dashboardLink(r.intent, key)}`] : [])], who, { kind: "cancelled", booking: r.id });
-  const gone = { ...who, session: r.session, start: was.start, end: was.end };
-  if (await sendCancelled(env.CLIENT_EMAIL, gone, !r.intent ? "none" : refunded ? (share === 1 ? "refunded" : share === EARLY_SHARE ? "early" : "part") : refunded === false ? "late" : "kept", depositPaid(r), back))
-    await logMail(env, r.email, cancelledSubject(gone), { to: "client", kind: "cancelled", booking: r.id });
+  const refunded = await cancelBooking(env, r, was, {
+    refund: share ? { form: { payment_intent: r.intent ?? "", ...(share === 1 ? {} : { amount: String(cents) }) }, ref } : undefined,
+    note: [r.session, whenPT(was.start)].join(", "),
+    refundNote: share === 1 ? "Deposit, cancelled 48 hours or more ahead" : `${pct}% of the deposit, cancelled ${share === EARLY_SHARE ? "48 hours or more" : "24 to 48 hours"} ahead`,
+    amount: back,
+    subject: `Cancelled: ${what}`,
+    line: "Cancelled by the client. The event is off the calendar.",
+    money: (refunded) => (!r.intent ? "No deposit." : refunded ? (share === 1 ? `Deposit refunded: $${back}.` : `Refunded $${back} of the $${paid} deposit (${pct}%). $${paid - back} kept.`) : refunded === false ? `The refund FAILED: refund $${back} by hand in Stripe.` : "Under 24 hours: the deposit is kept."),
+    mail: (refunded) => (!r.intent ? "none" : refunded ? (share === 1 ? "refunded" : share === EARLY_SHARE ? "early" : "part") : refunded === false ? "late" : "kept"),
+    usd: depositPaid(r),
+    back,
+  });
   return json({ record: clientView(r), refunded: refunded ?? null, back: refunded ? back : 0 });
 }
 
@@ -100,21 +95,22 @@ async function cancelMine(env: DeskEnv, id: string) {
   }
   if (!out.ok) return json({ error: SAY[out.reason][1] }, SAY[out.reason][0]);
   const { record: r, was } = out;
-  const who = { name: r.name, email: r.email };
   const what = [r.session, whenPT(was.start), r.name].join(", ");
-  const key = env.STRIPE_SECRET_KEY;
   const paid = depositPaid(r) ?? 0;
   // The whole charge, with no amount, under the ref Stripe's webhook logs a full refund by.
-  let refunded: boolean | undefined;
-  if (r.intent && key) refunded = await stripe(key, "/refunds", { payment_intent: r.intent }, `refund-${r.intent}`).then(() => true, () => false);
-  const at = new Date().toISOString();
-  await recordLead(env, r.email, { event: { at, kind: "cancel", ref: `cancel:${r.id}`, note: [r.session, whenPT(was.start), "by Julian"].join(", ") } });
-  if (refunded) await recordLead(env, r.email, { event: { at, kind: "refund", ref: `refund-${r.intent}`, note: "Deposit, cancelled by Julian", amount: paid } });
-  const money = !r.intent ? "No deposit." : refunded ? `Deposit refunded in full: $${paid}.` : `The refund FAILED: refund $${paid} by hand in Stripe.`;
-  await alertAndLog(env, `Cancelled by you: ${what}`, [`${r.name} <${r.email}>`, "Cancelled from the lead desk. The event is off the calendar and the client is told.", money, ...(r.intent && key ? [`Stripe: ${dashboardLink(r.intent, key)}`] : [])], who, { kind: "cancelled", booking: r.id });
-  const gone = { ...who, session: r.session, start: was.start, end: was.end };
-  if (await sendCancelled(env.CLIENT_EMAIL, gone, !r.intent ? "mineFree" : refunded ? "mine" : "late", paid, paid))
-    await logMail(env, r.email, cancelledSubject(gone), { to: "client", kind: "cancelled", booking: r.id });
+  const refunded = await cancelBooking(env, r, was, {
+    refund: { form: { payment_intent: r.intent ?? "" }, ref: `refund-${r.intent}` },
+    note: [r.session, whenPT(was.start), "by Julian"].join(", "),
+    refundNote: "Deposit, cancelled by Julian",
+    amount: paid,
+    oneStamp: true,
+    subject: `Cancelled by you: ${what}`,
+    line: "Cancelled from the lead desk. The event is off the calendar and the client is told.",
+    money: (refunded) => (!r.intent ? "No deposit." : refunded ? `Deposit refunded in full: $${paid}.` : `The refund FAILED: refund $${paid} by hand in Stripe.`),
+    mail: (refunded) => (!r.intent ? "mineFree" : refunded ? "mine" : "late"),
+    usd: paid,
+    back: paid,
+  });
   return json({ record: clientView(r), refunded: refunded ?? null, back: refunded ? paid : 0 });
 }
 

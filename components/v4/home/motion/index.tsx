@@ -25,7 +25,7 @@ import "./reveal.css";
 import "./flow.css";
 
 /** The v4 home's motion, on top of the static screens. Mounted once, after them. */
-export function MtMotionLayer() {
+export function MotionLayer() {
   React.useEffect(() => {
     const root = document.querySelector<HTMLElement>(".v3home.mt");
     if (!root || !("v3motion" in document.documentElement.dataset)) return;

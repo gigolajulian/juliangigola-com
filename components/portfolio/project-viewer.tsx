@@ -12,7 +12,7 @@ import type { FrameItem, FrameView } from "@/components/portfolio/work";
    view (j3): a click on a frame opens it full size in the gallery's FrameView. Still on trial (`?v4pages`). */
 const FIGS = ".pj-big, .pj-lead .pj-r, .pj-flow .pj-r"; // document order = the order of `frames`
 
-export function V4Project({ frames }: { frames: FrameItem[] }) {
+export function ProjectViewer({ frames }: { frames: FrameItem[] }) {
   const [at, setAt] = React.useState<number | null>(null);
   // work.tsx is loaded on the first open, so the project page does not carry the gallery
   const [View, setView] = React.useState<typeof FrameView | null>(null);

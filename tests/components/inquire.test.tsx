@@ -8,18 +8,18 @@ Element.prototype.scrollTo = () => {};
 const emptyFiles = () => Object.assign(document.createElement("input"), { type: "file" }).files;
 vi.stubGlobal("DataTransfer", class { items = { add() {} }; files = emptyFiles(); });
 
-import { V3Commission, V3Inquire } from "@/components/contact/inquire";
+import { CommissionForm, Contact } from "@/components/contact/inquire";
 
-describe("V3Inquire", () => {
+describe("Contact", () => {
   it("renders the note and the call card", () => {
-    render(<V3Inquire />);
+    render(<Contact />);
     expect(screen.getByRole("heading", { level: 1, name: "Get in touch" })).toBeTruthy();
     expect(screen.getByRole("heading", { name: "Book a consultation" })).toBeTruthy();
     expect(screen.getByRole("link", { name: "Schedule a call" }).getAttribute("href")).toBe("/book/consultation");
   });
 
   it("an empty note shows its errors instead of sending", () => {
-    render(<V3Inquire />);
+    render(<Contact />);
     fireEvent.click(screen.getByRole("button", { name: "Send note" }));
     const alerts = screen.getAllByRole("alert").map((a) => a.textContent);
     expect(alerts).toContain("Add your name");
@@ -27,9 +27,9 @@ describe("V3Inquire", () => {
   });
 });
 
-describe("V3Commission", () => {
+describe("CommissionForm", () => {
   it("starts on the Project step", () => {
-    render(<V3Commission />);
+    render(<CommissionForm />);
     expect(screen.getByRole("list", { name: "Steps" }).querySelector('[aria-current="step"]')?.textContent).toContain("Project");
     expect(screen.getByRole("button", { name: "Continue" })).toBeTruthy();
   });

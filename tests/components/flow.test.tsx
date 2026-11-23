@@ -4,13 +4,13 @@ import { fireEvent, render, screen } from "@testing-library/react";
 vi.mock("@/lib/leads/enquiry-action", () => ({ submitEnquiry: vi.fn() }));
 vi.stubGlobal("fetch", vi.fn(() => Promise.reject(new Error("offline"))));
 
-import { Calendar, Failed, Field, FlowShell, Hidden, Run, checkYou, first, fmt, iso, monthCells, weekCells } from "@/components/booking/flow";
+import { Calendar, Failed, Field, FlowShell, Hidden, Run, checkYou, first, clockLabel, iso, monthCells, weekCells } from "@/components/booking/flow";
 
 describe("flow helpers", () => {
   it("formats dates and times", () => {
     expect(iso(new Date(2026, 0, 5))).toBe("2026-01-05");
-    expect(fmt(0)).toBe("12:00 AM");
-    expect(fmt(13 * 60 + 5)).toBe("1:05 PM");
+    expect(clockLabel(0)).toBe("12:00 AM");
+    expect(clockLabel(13 * 60 + 5)).toBe("1:05 PM");
     expect(first("  Ana Maria ")).toBe("Ana");
   });
 

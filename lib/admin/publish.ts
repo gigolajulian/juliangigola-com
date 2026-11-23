@@ -8,7 +8,7 @@ import { CONTENT_PATH, type SiteContent } from "@/lib/content";
 import { ADDED_PATH, isTextRef, type FrameRef } from "@/lib/work/added";
 import { adoptable, projectsFile, same, type Manifest, type ProjectsFile } from "@/lib/admin/admin-payload";
 import { commitFiles, readFile, type CommitFile, TOKEN_STORE, REPO, GITHUB_API } from "@/lib/admin/admin-github";
-import type { Bts, Copy, Credit } from "@/lib/work-types";
+import type { Bts, Copy, Credit } from "@/lib/work/work-types";
 
 /**
  * The manifest half of the draft, as the editor holds it.
@@ -59,7 +59,7 @@ export async function loadRepo(
 ): Promise<{ error: string } | { sha: string; content: SiteContent; repo: Draft }> {
   try {
     const res = await fetch(contentUrl, { headers: headers(t), cache: "no-store" });
-    const body = (await res.json()) as { content: string; sha: string; message?: string };
+    const body = (await (res.ok ? res.json() : res.json().catch(() => ({})))) as { content: string; sha: string; message?: string };
     if (!res.ok) {
       // A rejected token is not worth keeping, otherwise every visit
       // retries it and the page looks broken rather than logged out.
@@ -149,7 +149,7 @@ export async function publishDraft({
   onStatus({ kind: "working", message: "Checking for newer content…" });
   try {
     const check = await fetch(contentUrl, { headers: headers(token), cache: "no-store" });
-    const checkBody = (await check.json()) as { content: string; sha: string; message?: string };
+    const checkBody = (await (check.ok ? check.json() : check.json().catch(() => ({})))) as { content: string; sha: string; message?: string };
     if (!check.ok) {
       return { error: `GitHub said ${check.status}: ${checkBody?.message ?? "unknown error"}` };
     }

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { jumpTo, scrollGoal } from "@/components/v3/smooth-scroll";
+import { jumpTo, scrollGoal } from "@/components/site/smooth-scroll";
 import { holdLanding } from "@/components/site/page-transition";
 import { media } from "@/lib/device";
 import { painted } from "@/lib/painted";

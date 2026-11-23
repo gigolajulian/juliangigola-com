@@ -3,7 +3,7 @@ import { recordLead } from "@/lib/leads/lead-store";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { fold, type Lead } from "@/lib/leads/leads";
 import { fresh, readLog, readMaster } from "@/lib/leads/activity-log";
-import { FakeKV, LEADS_KEY } from "./fakes";
+import { FakeKV, LEADS_KEY, INBOX_KEY as KEY } from "./fakes";
 import { byCodeUnit } from "@/lib/utils";
 
 /* The activity log (`lib/leads/activity-log.ts`): every event in full, per
@@ -13,7 +13,6 @@ const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
 vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
 const { GET, PATCH, DELETE } = await import("@/app/api/inbox/route");
 
-const KEY = "inbox-key-for-tests";
 const req = (method: string, { body, query = "" }: { body?: string; query?: string } = {}) =>
   new Request("https://juliangigola.com/api/inbox" + query, { method, body, headers: { "x-inbox-key": KEY } });
 
@@ -131,11 +130,11 @@ describe("the log", () => {
 
 describe("old invoices", () => {
   it("count as paid before the cut-off unless marked unpaid; newer ones wait for a payment", async () => {
-    const { isPaid, PAID_BEFORE } = await import("@/lib/leads/invoice");
-    expect(isPaid({ at: "2026-10-01T00:00:00Z" })).toBe(true);
-    expect(isPaid({ at: "2026-10-01T00:00:00Z", unpaid: true })).toBe(false);
-    expect(isPaid({ at: `${PAID_BEFORE}T10:00:00Z` })).toBe(false);
-    expect(isPaid({ at: `${PAID_BEFORE}T10:00:00Z`, paidAt: "x" })).toBe(true);
+    const { isSettled, PAID_BEFORE } = await import("@/lib/leads/invoice");
+    expect(isSettled({ at: "2026-10-01T00:00:00Z" })).toBe(true);
+    expect(isSettled({ at: "2026-10-01T00:00:00Z", unpaid: true })).toBe(false);
+    expect(isSettled({ at: `${PAID_BEFORE}T10:00:00Z` })).toBe(false);
+    expect(isSettled({ at: `${PAID_BEFORE}T10:00:00Z`, paidAt: "x" })).toBe(true);
   });
 });
 

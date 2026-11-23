@@ -3,8 +3,8 @@
 import * as React from "react";
 import { ViewTransition } from "react";
 import { usePathname } from "next/navigation";
+import { noSubscribe } from "@/lib/utils";
 
-const noop = () => () => {};
 
 /* ── one page becomes the next by zooming ─────────────────────────
  * Julian asked for it: opening a page should read as zooming into it, and
@@ -79,7 +79,7 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
   const path = usePathname();
   /* Off unless V3 motion is on for the tab (`data-v3motion`, `app/layout.tsx`).
      The boundary stays mounted either way so the page is never rebuilt. */
-  const on = React.useSyncExternalStore(noop, () => document.documentElement.hasAttribute("data-v3motion"), () => false);
+  const on = React.useSyncExternalStore(noSubscribe, () => document.documentElement.hasAttribute("data-v3motion"), () => false);
   const shown = React.useRef(path);
   React.useLayoutEffect(() => {
     shown.current = path;

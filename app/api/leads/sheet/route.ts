@@ -1,5 +1,5 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { fromWorker } from "@/lib/vouch";
+import { refuseWorker } from "@/lib/vouch";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { syncSheet } from "@/lib/leads/sheet-sync";
 import { json } from "@/lib/http";
@@ -14,7 +14,8 @@ export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   const { env } = await getCloudflareContext({ async: true });
-  if (!(await fromWorker(request, env.BOOKING_SECRET))) return json({ error: "Not authorized." }, 401);
+  const denied = await refuseWorker(request, env.BOOKING_SECRET);
+  if (denied) return denied;
   const seal = await sealer(env.LEADS_KEY);
   if (!env.GCAL_OAUTH || !env.INBOX || !seal) return json({ error: "Not set up." }, 503);
   try {

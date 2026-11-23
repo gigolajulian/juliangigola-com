@@ -383,7 +383,7 @@ states its rule inline. `SPEC-home-scroll.md` citations point at
 ### components/cover/sleeves.tsx
 - 2026-10-27: from the Sleeve Viewer mock.
 
-### components/v3/smooth-scroll.tsx
+### components/site/smooth-scroll.tsx
 - 2026-11-10: Native scroll in proof galleries: Lenis's glide read as a delay on a Mac trackpad.
 - 2026-11-14: . `?lerp=0.1` tries another value there.
 

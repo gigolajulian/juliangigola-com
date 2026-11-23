@@ -2,7 +2,7 @@
 
 /* ── Money > Invoices on Astryx ───────────────────────────────────
  * Every invoice across leads, from `/api/inbox?invoices` (invoices live
- * on full leads, never in the list's summaries). Paid by `isPaid`, Sent
+ * on full leads, never in the list's summaries). Paid by `isSettled`, Sent
  * when the Gmail sync saw hello@ mail it. New invoice picks the lead and
  * opens the same design B sheet the lead page uses (InvoiceSheetB), whose
  * page sits beside the form once the content is 760 wide.
@@ -18,7 +18,7 @@ import { Table } from "@astryxdesign/core/Table";
 import { Page } from "@/components/leads/lists";
 import { Deliver, InvoiceSheetB, makePdf } from "@/components/leads/invoice";
 import { kindOf } from "@/components/leads/shared";
-import { balance, isPaid, subtotal, usd, type Invoice } from "@/lib/leads/invoice";
+import { balance, isSettled, subtotal, usd, type Invoice } from "@/lib/leads/invoice";
 import { type Call, dayLabel, errorText, type Patch } from "@/lib/leads/lead-desk";
 import type { Lead, LeadSummary } from "@/lib/leads/leads";
 
@@ -26,7 +26,7 @@ import type { Lead, LeadSummary } from "@/lib/leads/leads";
 export type InvoiceRow = Invoice & { lead: string; name: string };
 type Row = InvoiceRow & Record<string, unknown>;
 
-export const status = (i: Invoice) => (isPaid(i) ? "Paid" : i.sentAt ? "Sent" : "Unpaid");
+export const status = (i: Invoice) => (isSettled(i) ? "Paid" : i.sentAt ? "Sent" : "Unpaid");
 
 export function InvoicesDesk({ leads, call, open, changed }: { leads: LeadSummary[]; call: Call; open: (l: LeadSummary) => void; changed: (l: Lead) => void }) {
   const [rows, setRows] = React.useState<InvoiceRow[] | null>(null);
@@ -60,7 +60,7 @@ export function InvoicesDesk({ leads, call, open, changed }: { leads: LeadSummar
     return next;
   };
 
-  const owed = (rows ?? []).filter((r) => !isPaid(r)).reduce((n, r) => n + balance(r), 0);
+  const owed = (rows ?? []).filter((r) => !isSettled(r)).reduce((n, r) => n + balance(r), 0);
   const picked = making ? byId(making) : undefined;
   return (
     <Page eyebrow={rows ? `${rows.length} ON THE DESK · ${usd(owed)} UNPAID` : "LOADING"} title="Invoices">
@@ -97,7 +97,7 @@ export function InvoicesDesk({ leads, call, open, changed }: { leads: LeadSummar
             { key: "shoot", header: "Shoot", renderCell: (r) => kindOf(byId(r.lead)?.kind) ?? "" },
             { key: "date", header: "Date", renderCell: (r) => dayLabel(`${r.date}T12:00:00`) },
             { key: "total", header: "Total", renderCell: (r) => <Text type="code">{usd(subtotal(r.lines))}</Text> },
-            { key: "balance", header: "Balance", renderCell: (r) => <Text type="code">{usd(isPaid(r) ? 0 : balance(r))}</Text> },
+            { key: "balance", header: "Balance", renderCell: (r) => <Text type="code">{usd(isSettled(r) ? 0 : balance(r))}</Text> },
             { key: "status", header: "Status", renderCell: (r) => <Badge label={status(r)} variant={status(r) === "Paid" ? "success" : status(r) === "Sent" ? "blue" : "neutral"} /> },
             {
               key: "do", header: "", renderCell: (r) => (
