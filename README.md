@@ -54,7 +54,7 @@ All 74 projects and 1,131 frames were migrated off the old Format site.
 | --- | --- |
 | `lib/work-data.ts` | The archive: every migrated project, its credits, categories and frames. First written by `scripts/harvest.mjs`; the harvester no longer runs, so this file is now edited by hand. |
 | `lib/work/work.ts` | The only module the app reads work from. Holds the editorial decisions: what is featured, what leads the homepage, how categories group. |
-| `lib/work-types.ts` | Shapes for the above. |
+| `lib/work/work-types.ts` | Shapes for the above. |
 | `lib/booking/sessions.ts` | Session types for the older booking pages. `from: null` renders as "On request". |
 | `lib/photos-and-sessions.ts` | Photo picks and the session list the /book stepper and the homepage read. |
 | `lib/site.ts` | Reply-time promise and the booking-calendar URL. |

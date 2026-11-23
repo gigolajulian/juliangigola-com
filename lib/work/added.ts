@@ -20,7 +20,7 @@
 // Relative, not `@/`: `next.config.ts` reaches this module through `work.ts`
 // and is transpiled outside the app's path mapping.
 import raw from "../../content/projects.json";
-import type { Bts, Copy, Credit, Frame, Section } from "../work-types";
+import type { Bts, Copy, Credit, Frame, Section } from "./work-types";
 import { contentChecks, isRecord } from "../json";
 
 export type AddedProject = {

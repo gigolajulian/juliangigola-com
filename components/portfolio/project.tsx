@@ -6,7 +6,7 @@ import { BackLink } from "@/components/site/back-link";
 import { billing, markFor, titleCase } from "@/lib/work/work";
 import { tailHole } from "@/lib/sheet";
 import { ProjectViewer } from "@/components/portfolio/project-viewer";
-import type { Frame, Project } from "@/lib/work-types";
+import type { Frame, Project } from "@/lib/work/work-types";
 
 /* JG V3 project page (leftovers sheet, card B; Julian: vertical, with the
    client's logo where there is one). The head: back link, the set's name in

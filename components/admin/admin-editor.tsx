@@ -21,7 +21,7 @@ import { type PendingUpload } from "@/components/admin/admin-frames";
 import { CreditDesk, creditBook } from "@/components/admin/admin-credits";
 import { same, withOverride } from "@/lib/admin/admin-payload";
 import { TOKEN_STORE } from "@/lib/admin/admin-github";
-import type { Bts } from "@/lib/work-types";
+import type { Bts } from "@/lib/work/work-types";
 import { byCodeUnit, cn } from "@/lib/utils";
 import { FIELD_TAB, TABS, type View } from "@/components/admin/admin-tabs";
 import { remapSlugs } from "@/components/admin/admin-remap-slugs";

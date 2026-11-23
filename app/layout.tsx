@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { Intro } from "@/components/splash/intro";
 import { JG_INNER } from "@/components/splash/jg-cover";
-import { SPLASH_RUN } from "@/lib/flags/splash-run";
+import { SPLASH_RUN } from "@/lib/work/splash-run";
 import { PhotoNotice } from "@/components/photo-notice";
 import { GlassLight } from "@/components/effects/glass-light";
 import { PhotoFade } from "@/components/effects/photo-fade";

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { BtsCredit, BtsPageGrid, BtsStripGrid } from "@/components/bts/bts";
-import type { Bts } from "@/lib/work-types";
+import type { Bts } from "@/lib/work/work-types";
 
 const bts: Bts = {
   by: "someone",

@@ -4,7 +4,7 @@
 // longer runs; this file is now maintained by hand. /admin edits go to
 // content/projects.json, which lib/work.ts applies over this file.
 
-import type { Project, Category } from "./work-types";
+import type { Project, Category } from "./work/work-types";
 
 export const CATEGORIES: Category[] = [
   {

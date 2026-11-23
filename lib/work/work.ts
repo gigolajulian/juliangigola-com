@@ -12,7 +12,7 @@ import {
   PROJECTS as HARVESTED,
   CATEGORIES as HARVESTED_CATEGORIES,
 } from "../work-data";
-import type { Project, Category, Frame, TextBlock } from "../work-types";
+import type { Project, Category, Frame, TextBlock } from "./work-types";
 import { COVER_RELEASES as RELEASES } from "./cover-art-data";
 import type { CoverRelease } from "./cover-art-types";
 import { CONTENT } from "../content";

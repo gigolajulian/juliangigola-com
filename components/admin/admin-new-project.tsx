@@ -9,7 +9,7 @@ import {
   prepareImage,
   toSlug,
 } from "@/lib/admin/admin-image";
-import type { Credit, Frame } from "@/lib/work-types";
+import type { Credit, Frame } from "@/lib/work/work-types";
 import { AdminCredits, tidyCredits } from "@/components/admin/admin-credits";
 import { cn } from "@/lib/utils";
 import { errorText } from "@/lib/leads/lead-desk";

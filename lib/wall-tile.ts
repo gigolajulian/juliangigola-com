@@ -1,5 +1,5 @@
 import imageLoader from "@/image-loader";
-import type { DriftWallItem } from "@/lib/work-types";
+import type { DriftWallItem } from "@/lib/work/work-types";
 
 /** One wall photograph as the page sends it: the frame, its project and where it opens. */
 export type WallTile = {

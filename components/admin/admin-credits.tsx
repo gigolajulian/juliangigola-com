@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import type { Credit } from "@/lib/work-types";
+import type { Credit } from "@/lib/work/work-types";
 import { instagramHandle } from "@/lib/work/added";
 import { prepareImage } from "@/lib/admin/admin-image";
 import { cn } from "@/lib/utils";
