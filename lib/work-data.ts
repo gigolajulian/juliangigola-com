@@ -183,13 +183,13 @@ export const PROJECTS: Project[] = [
         "instagram": "leena_kema"
       },
       {
-        "role": "Photo",
-        "name": "@juliangigola"
-      },
-      {
         "role": "Wardrobe",
         "name": "Starcase Vintage",
         "instagram": "starcasevintage"
+      },
+      {
+        "role": "Photo",
+        "name": "@juliangigola"
       }
     ],
     "categories": [
@@ -293,13 +293,13 @@ export const PROJECTS: Project[] = [
     "intent": null,
     "credits": [
       {
-        "role": "Photographer",
-        "name": "Julian Gigola"
-      },
-      {
         "role": "Model",
         "name": "Abril Alvarez",
         "instagram": "abril.alvz"
+      },
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola"
       }
     ],
     "categories": [
@@ -354,13 +354,13 @@ export const PROJECTS: Project[] = [
     "intent": null,
     "credits": [
       {
-        "role": "Photographer",
-        "name": "Julian Gigola"
-      },
-      {
         "role": "Model",
         "name": "Iris Zhangy",
         "instagram": "iriszhangy"
+      },
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola"
       }
     ],
     "categories": [
@@ -464,12 +464,12 @@ export const PROJECTS: Project[] = [
     "intent": null,
     "credits": [
       {
-        "role": "Photographer",
-        "name": "Julian Gigola"
-      },
-      {
         "role": "Model",
         "name": "@phoebe2phly"
+      },
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola"
       }
     ],
     "categories": [
@@ -692,13 +692,13 @@ export const PROJECTS: Project[] = [
     "intent": null,
     "credits": [
       {
-        "role": "Photographer",
-        "name": "Julian Gigola"
-      },
-      {
         "role": "Model",
         "name": "Anisa Jadee",
         "instagram": "anisajadee"
+      },
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola"
       }
     ],
     "categories": [
@@ -865,10 +865,6 @@ export const PROJECTS: Project[] = [
     "intent": null,
     "credits": [
       {
-        "role": "Photographer",
-        "name": "Julian Gigola"
-      },
-      {
         "role": "Model",
         "name": "@iaiupo"
       },
@@ -876,6 +872,10 @@ export const PROJECTS: Project[] = [
         "role": "MUA & Styling",
         "name": "Brie Amana",
         "instagram": "amana_mana11"
+      },
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola"
       }
     ],
     "categories": [
@@ -979,12 +979,12 @@ export const PROJECTS: Project[] = [
     "intent": null,
     "credits": [
       {
-        "role": "Photographer",
-        "name": "Julian Gigola"
-      },
-      {
         "role": "Model",
         "name": "@symphonypascal"
+      },
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola"
       }
     ],
     "categories": [
@@ -1053,13 +1053,13 @@ export const PROJECTS: Project[] = [
     "intent": null,
     "credits": [
       {
-        "role": "Photographer",
-        "name": "Julian Gigola"
-      },
-      {
         "role": "Model",
         "name": "Anisa Jadee",
         "instagram": "anisajadee"
+      },
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola"
       }
     ],
     "categories": [
@@ -1170,12 +1170,12 @@ export const PROJECTS: Project[] = [
     "intent": null,
     "credits": [
       {
-        "role": "Photographer",
-        "name": "Julian Gigola"
-      },
-      {
         "role": "Model",
         "name": "@tamakgo"
+      },
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola"
       }
     ],
     "categories": [
@@ -1251,13 +1251,13 @@ export const PROJECTS: Project[] = [
     "intent": null,
     "credits": [
       {
-        "role": "Photographer",
-        "name": "Julian Gigola"
-      },
-      {
         "role": "Model",
         "name": "kniiivess",
         "instagram": "kniiivess"
+      },
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola"
       }
     ],
     "categories": [
@@ -1340,12 +1340,12 @@ export const PROJECTS: Project[] = [
     "intent": null,
     "credits": [
       {
-        "role": "Photographer",
-        "name": "Julian Gigola"
-      },
-      {
         "role": "Model",
         "name": "@phoebe2phly"
+      },
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola"
       }
     ],
     "categories": [
@@ -1414,13 +1414,13 @@ export const PROJECTS: Project[] = [
     "intent": null,
     "credits": [
       {
-        "role": "Photographer",
-        "name": "Julian Gigola"
-      },
-      {
         "role": "Model",
         "name": "Constance",
         "instagram": "kissedbyconstance"
+      },
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola"
       }
     ],
     "categories": [
@@ -4528,10 +4528,6 @@ export const PROJECTS: Project[] = [
         "name": "@rice666s"
       },
       {
-        "role": "Photographer",
-        "name": "@juliangigola"
-      },
-      {
         "role": "Lighting",
         "name": "Seydina Seck",
         "instagram": "thisguysdope_disguise"
@@ -4539,6 +4535,10 @@ export const PROJECTS: Project[] = [
       {
         "role": "BTS",
         "name": "@lightbender_mark"
+      },
+      {
+        "role": "Photographer",
+        "name": "@juliangigola"
       }
     ],
     "categories": [
@@ -7782,10 +7782,6 @@ export const PROJECTS: Project[] = [
     "intent": null,
     "credits": [
       {
-        "role": "Photographer",
-        "name": "Julian Gigola"
-      },
-      {
         "role": "Light Assist",
         "name": "Mark Tsui"
       },
@@ -7793,6 +7789,10 @@ export const PROJECTS: Project[] = [
         "role": "Client",
         "name": "Wired",
         "instagram": "wired"
+      },
+      {
+        "role": "Photographer",
+        "name": "Julian Gigola"
       }
     ],
     "categories": [
