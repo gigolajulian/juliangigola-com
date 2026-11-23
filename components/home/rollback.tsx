@@ -7,7 +7,8 @@ import { useRouter } from "next/navigation";
 import { CoverNav, FootLine } from "@/components/site/chrome";
 import { Duo, Marks, Pick } from "@/components/site/duo";
 import { useSiteTheme } from "@/lib/site-theme";
-import { COMMISSIONS, COMMISSION_TABS, DOORS, HERO, HERO_ALT, INDEX_ORDER, RECENT, SESSIONS, priceLabel } from "@/lib/photos-and-sessions";
+import { Doors } from "@/components/site/doors";
+import { COMMISSIONS, COMMISSION_TABS, HERO, HERO_ALT, INDEX_ORDER, RECENT, SESSIONS, priceLabel } from "@/lib/photos-and-sessions";
 import { projectHref } from "@/lib/project-href";
 
 /* JG V3 homepage (master v39, section A): hero crossfade, logo strip,
@@ -495,37 +496,6 @@ function SessionsIndex() {
             <Duo key={slug} d={SESSIONS[slug].photo.d} l={SESSIONS[slug].photo.l} alt={`${SESSIONS[slug].name} sample`} sizes="(max-width: 800px) 100vw, 44vw" className={slug === on ? "on" : "off"} />
           ))}
         </figure>
-      </div>
-    </div>
-  );
-}
-
-export function Doors() {
-  return (
-    <div className="doors">
-      <div className="door">
-        <Duo d={DOORS.commissions.d} l={DOORS.commissions.l} alt="" sizes="(max-width: 800px) 100vw, 50vw" />
-        <span className="lbl mute">For art directors and artists</span>
-        <h3>Have something in mind?</h3>
-        <p>Campaigns, editorial, cover art and presskits. Tell me what you have in mind and I&apos;ll come back with an approach and a quote.</p>
-        <div>
-          <Link className="btn fill" href="/contact/form">Inquire</Link>
-        </div>
-      </div>
-      <div className="door">
-        <Duo d={DOORS.book.d} l={DOORS.book.l} alt="" sizes="(max-width: 800px) 100vw, 50vw" />
-        <span className="lbl mute">For private clients</span>
-        <h3>Book a session</h3>
-        <ul className="lbl">
-          {INDEX_ORDER.map((slug) => (
-            <li key={slug}>
-              <Link href={`/book/${slug}`}>
-                {SESSIONS[slug].name}
-                <span aria-hidden>→</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
       </div>
     </div>
   );

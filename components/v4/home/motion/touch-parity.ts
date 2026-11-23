@@ -5,7 +5,7 @@ import { qvalue } from "@/lib/v4-home/flags";
 export const TP = ["sink", "covers", "flip", "films", "drift", "about", "sheet", "press"] as const;
 export type TpItem = (typeof TP)[number];
 
-export const tp = (k: TpItem) => {
+export const touchParityOn = (k: TpItem) => {
   if (typeof location === "undefined") return false;
   const m = qvalue("mttp", "[\\w,-]+");
   if (!m || m === "all") return true;
@@ -15,7 +15,7 @@ export const tp = (k: TpItem) => {
 };
 
 export function touchParity() {
-  const html = document.documentElement, on = TP.filter(tp);
+  const html = document.documentElement, on = TP.filter(touchParityOn);
   for (const k of on) html.setAttribute("data-tp-" + k, "");
   // iOS Safari only shows :active on a page with a touchstart listener
   const noop = () => {};

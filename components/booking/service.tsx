@@ -3,7 +3,7 @@ import Link from "next/link";
 import { PageFoot } from "@/components/site/chrome";
 import { V3BookFlow } from "@/components/booking/book";
 import { Run } from "@/components/booking/flow";
-import { Doors } from "@/components/home/rollback";
+import { Doors } from "@/components/site/doors";
 import { ServiceBar } from "@/components/booking/service-bar";
 import { BOOKING_PAGES, bookingHref, type BookingPage } from "@/lib/booking/service-pages";
 import { CAMPUS_GUIDES, campusHref } from "@/lib/graduation/campus-guides";

@@ -123,6 +123,12 @@ async function same(given?: string | null, expected?: string) {
 /** The booking Worker, calling with `BOOKING_SECRET` as its bearer. */
 export const fromWorker = (request: Request, secret?: string) => same(bearer(request), secret);
 
+/** The booking Worker's gate as a route answers it: null when let in, else the 401. */
+export async function refuseWorker(request: Request, secret?: string): Promise<Response | null> {
+  if (await fromWorker(request, secret)) return null;
+  return json({ error: "Not authorized." }, 401);
+}
+
 /** The admin gate: the inbox key, or a GitHub token that can push. */
 export async function isAdmin(request: Request, key?: string) {
   if (await authorised(request, key)) return true;

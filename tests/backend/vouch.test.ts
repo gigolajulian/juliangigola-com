@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { authorised, canPush, fromWorker, refuseAdmin } from "@/lib/vouch";
+import { authorised, canPush, fromWorker, refuseAdmin, refuseWorker } from "@/lib/vouch";
 import { AdminError, isLocked, loadError, LOCKED } from "@/lib/leads/lead-desk";
 import { SCOPED, githubToken, reply } from "./fakes";
 
@@ -70,6 +70,12 @@ describe("authorised and fromWorker", () => {
     expect(await fromWorker(req({ authorization: "Bearer nope" }), "s3cret")).toBe(false);
     expect(await fromWorker(req({}), "s3cret")).toBe(false);
     expect(await fromWorker(req({ authorization: "Bearer s3cret" }), undefined)).toBe(false);
+  });
+
+  it("refuseWorker lets the booking secret in and answers anything else with the plain 401", async () => {
+    expect(await refuseWorker(req({ authorization: "Bearer s3cret" }), "s3cret")).toBeNull();
+    const no = (await refuseWorker(req({ authorization: "Bearer nope" }), "s3cret"))!;
+    expect([no.status, await no.json()]).toEqual([401, { error: "Not authorized." }]);
   });
 });
 

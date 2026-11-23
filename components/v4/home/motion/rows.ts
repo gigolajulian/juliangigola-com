@@ -5,7 +5,7 @@ import { holdEase as ease, holdUnease as unease } from "@/lib/motion/hold-ease";
 import { captionsOff, vimeoListen, vimeoPlays } from "@/lib/work/videos";
 import { clamp, MT2, rise, smooth, tell, type Ctx, type Driver } from "./engine";
 import { sleeveTilt } from "@/components/cover/sleeve-tilt";
-import { tp } from "./touch-parity";
+import { touchParityOn } from "./touch-parity";
 
 
 /* Snap (?mtsnap=0 turns it off): a hold never rests between two items. When the scroll stops inside the hold, the page glides to the
@@ -114,7 +114,7 @@ function coverFrame(s: Covers, p: number) {
 // The title line rises when HomeCovers (rows.tsx) commits the new item (on touch too with ?mttp=covers). A turned sleeve turns back.
 function coverTold(s: Covers) {
   for (const it of s.items) it.removeAttribute("data-tp-fl");
-  if (s.ctx.held || tp("covers")) rise(s.el.querySelector(".mt-ttl .ln > span"));
+  if (s.ctx.held || touchParityOn("covers")) rise(s.el.querySelector(".mt-ttl .ln > span"));
 }
 
 /* Sideways drag moves the page scroll, so the two never disagree. */
@@ -229,7 +229,7 @@ function covers(): Driver {
       row.addEventListener("scroll", () => loose(s), { passive: true, signal: ac.signal });
       snap(el, ctx, n, (p) => ease(p) * (n - 1), (i) => unease(i / (n - 1)), () => s.down !== null, ac.signal);
 
-      if (tp("flip")) for (const it of items) if (it.hasAttribute("data-flip")) it.addEventListener("click", () => flip(s, it), opts);
+      if (touchParityOn("flip")) for (const it of items) if (it.hasAttribute("data-flip")) it.addEventListener("click", () => flip(s, it), opts);
 
       /* Hover lift (fine pointers): tilt toward the pointer, up to 9deg each way. rows.css does the rest. */
       for (const it of items) sleeveTilt(it, () => ctx.held && ctx.fine && !s.dragged, opts);
@@ -435,7 +435,7 @@ function films(): Driver {
       snap(el, ctx, n, (p) => ease(p) * n - 0.5, (i) => unease((i + 0.5) / n), () => false, ac.signal);
       row.addEventListener("keydown", (e) => filmKey(s, e), opts);
       addEventListener("scroll", () => (s.movedAt = performance.now()), { passive: true, signal: ac.signal });
-      s.touchFilms = tp("films") && !(navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
+      s.touchFilms = touchParityOn("films") && !(navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
       addEventListener("message", (e) => heard(s, e), opts);
       // a screen early, so the first film is already playing when the section arrives
       const io = new IntersectionObserver(([e]) => ((s.seen = e.isIntersecting), preview(s)), { rootMargin: "100% 0px" });

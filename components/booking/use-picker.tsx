@@ -14,7 +14,7 @@ import { usePickerLayout } from "@/components/booking/use-picker-layout";
 
 
 /* Goo on the card's buttons, times and
-   open days. `?goo=0` turns it off: `goo()` in deposit-step.tsx. */
+   open days. `?goo=0` turns it off: `gooOn()` in deposit-step.tsx. */
 
 /* ── the time picker ──────────────────────────────────────────────
  * The open times, in two plain steps: a day, then a time. Days
