@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { plainSrc } from "@/image-loader";
 
 /* The header (app/styles/navfx.css), on for everyone since 2026-11-22, `?navfx=0` off for the tab:
    1. `data-navtop` on the root while the bar has no ground: the top of a page, and on the homepage for as long
@@ -89,7 +90,7 @@ function read(src: CanvasImageSource): Uint8ClampedArray | null {
 }
 /* A photo from another host with no CORS mode cannot be read, and Safari logs an error for the try even when it is
    caught (QA: 10 to 12 a load on previews). So it is not tried: such a photo goes straight to its same-host copy. */
-const foreign = (src: string, el: HTMLImageElement | HTMLVideoElement) => {
+export const foreign = (src: string, el: HTMLImageElement | HTMLVideoElement) => {
   if (!src || /^(data|blob):/.test(src)) return false;
   try {
     return new URL(src, location.href).origin !== location.origin && el.crossOrigin === null;
@@ -122,12 +123,14 @@ function thumb(el: HTMLImageElement | HTMLVideoElement): Uint8ClampedArray | nul
   if (data || film) return data;
   /* Unreadable: the same file from this host, without the resizer (`/cdn-cgi/image/<options>/<path>` on another
      host becomes `/<path>` here). Asked for once; the word keeps its ink until it lands. */
-  const m = /^https?:\/\/[^/]+\/cdn-cgi\/image\/[^/]+\/(.+)$/.exec(src);
-  if (m && !copies.has(src)) {
+  const plainFile = plainSrc(src);
+  if (plainFile && !copies.has(src)) {
     copied = true;
     copies.set(src, null);
     const im = new Image();
-    im.src = "/" + m[1];
+    // a provider still stays on its host, which answers CORS: asked for in that mode it can be read
+    if (!plainFile.startsWith("/")) im.crossOrigin = "anonymous";
+    im.src = plainFile;
     // decoded off the main thread first: the copy is the full-size original, and drawing it undecoded took the
     // frame (MAC, previews: 218 to 311ms frames on the first pass as new photos came under the bar)
     im.decode().then(() => (copies.set(src, read(im) ?? false), poke()), () => copies.set(src, false));

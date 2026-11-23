@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import loader from "@/image-loader";
+import loader, { plainSrc } from "@/image-loader";
 import { matches } from "@/lib/device";
 import { qflag } from "@/lib/v4-home/flags";
 import { EXTRAS, type MtFrame } from "@/lib/v4-home/data";
@@ -495,8 +495,8 @@ export function MtIntro({ extras = [] }: { extras?: MtFrame[] }) {
       // the resizer blocked (a content blocker, a preview host): the plain file, as ImageFallback does for pictures in the page.
       // These images are not in the page, so its listener never hears them. shortcut: 18 originals at most, enough to start; they repeat across the canvas.
       im.onerror = () => {
-        const rest = /\/cdn-cgi\/image\/[^/]+\/(.+)$/.exec(im.src)?.[1];
-        if (rest && plain++ < 18) im.src = rest.startsWith("http") ? rest : `/${rest}`;
+        const rest = plainSrc(im.src);
+        if (rest && plain++ < 18) im.src = rest;
         else dead++;
       };
       im.src = src;

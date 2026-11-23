@@ -1,4 +1,5 @@
 import { qflag } from "@/lib/v4-home/flags";
+import { foreign } from "@/components/site/nav-ink";
 import { clamp, MT2, type Ctx, type Driver } from "./engine";
 
 /* Hero wall travel (spec 3.2). Held (D): the wall travels up through the hold,
@@ -68,6 +69,8 @@ function grid(im: HTMLImageElement) {
   const src = im.currentSrc || im.src;
   const had = LUM.get(im);
   if (had && had.src === src) return had.g;
+  // another host with no CORS mode (a preview reads live's resizer): unreadable, and WebKit logs the try even when caught
+  if (foreign(src, im)) return LUM.set(im, { src, g: null }), null;
   let g: Uint8ClampedArray | null = null;
   try {
     const c = document.createElement("canvas");
