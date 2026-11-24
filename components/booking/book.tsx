@@ -8,7 +8,7 @@ import { JG_COVER, mountCover } from "@/components/splash/jg-cover";
 import { useRouter } from "next/navigation";
 import { BookTimes } from "@/components/booking/book-times";
 import { PageFoot } from "@/components/site/foot";
-import { Calendar, DotList, dlabel, iso } from "@/components/booking/flow";
+import { Calendar, DotList, dlabel, localDayKey } from "@/components/booking/flow";
 import { Failed, Field, FlowShell, Hidden, useEnquiry, type Shell } from "@/components/enquiry/flow";
 import { duration } from "@/lib/booking/rules";
 import { LENGTH, SESSIONS, TAB_ORDER, priceLabel, type SessionSlug } from "@/lib/booking/catalog";
@@ -246,7 +246,7 @@ function OnRequestFlow({ slug, shell, stamp }: { slug: SessionSlug; shell: Shell
               setAnchor(d);
             }}
             canBack={canBack}
-            picked={iso(day)}
+            picked={localDayKey(day)}
             tag={(d) => (d > today ? "Open" : null)}
             onPick={setDay}
           />

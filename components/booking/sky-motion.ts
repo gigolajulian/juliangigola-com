@@ -1,7 +1,7 @@
 import * as React from "react";
 import type { gsap as G } from "gsap";
 import type { Flip as F } from "gsap/Flip";
-import { loadGsap } from "@/lib/motion/gsap-lazy";
+import { loadFlip, loadGsap } from "@/lib/motion/gsap-lazy";
 
 /* The sky picker's motion (?sky): Week and Month morph into each other
    (GSAP Flip, the days keep their boxes and travel to their new place), the
@@ -11,10 +11,9 @@ import { loadGsap } from "@/lib/motion/gsap-lazy";
 let gsap: typeof G | undefined;
 let flip: typeof F | undefined;
 const warm = () =>
-  void Promise.all([loadGsap(), import("gsap/Flip")]).then(([g, m]) => {
-    g.registerPlugin(m.Flip);
+  void Promise.all([loadGsap(), loadFlip()]).then(([g, F]) => {
     gsap = g;
-    flip = m.Flip;
+    flip = F;
   });
 const calm = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 

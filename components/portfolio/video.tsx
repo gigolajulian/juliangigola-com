@@ -63,7 +63,7 @@ function Loop({ v }: { v: Video }) {
    players over postMessage. A clear layer over the film takes every move
    and click (an iframe would swallow them): a move brings the bars back,
    a click plays or pauses. Paused, the film dims and the bars stay up. */
-const clock = (s: number) => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+const clock = (s: number) => `${pad(Math.floor(s / 60))}:${pad(Math.floor(s % 60))}`;
 const playerSrc = (v: Video) => embedUrl(v) + (v.provider === "youtube" ? "&controls=0&enablejsapi=1&iv_load_policy=3&cc_load_policy=0" : "&controls=0&api=1");
 
 function Player({ v, list, onGo, onClose }: { v: Video | null; list: Video[]; onGo: (v: Video) => void; onClose: () => void }) {

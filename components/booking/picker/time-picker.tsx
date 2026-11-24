@@ -2,13 +2,11 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { clock, DAYS, fromIso, MONTHS, type StepsSkin } from "@/components/booking/time-picker-parts";
-import { usePicker, type CardCtx, type Props } from "@/components/booking/use-picker";
-import { BookSteps, stepsCopy, useStepsLayout } from "@/components/booking/time-picker-steps";
-import { EditorialCard } from "@/components/booking/time-picker-editorial";
+import { clock, DAYS, fromIso, MONTHS } from "@/components/booking/picker/parts";
+import { usePicker, type CardCtx, type Props } from "@/components/booking/picker/use-picker";
+import { BookSteps, stepsCopy, useStepsLayout } from "@/components/booking/picker/steps";
+import { EditorialCard } from "@/components/booking/picker/editorial";
 import { JgLoad } from "@/components/splash/jg-load";
-
-export type { StepsSkin };
 
 export function TimePicker(props: Props) {
   const c = usePicker(props);

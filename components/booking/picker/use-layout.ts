@@ -1,7 +1,8 @@
 import * as React from "react";
 import { withGsap } from "@/lib/motion/gsap-lazy";
-import { iso, STEP_AT, type PickedTime, type Step } from "@/components/booking/time-picker-parts";
-import { sessionGet, sessionSet } from "@/lib/utils";
+import { STEP_AT, type PickedTime, type Step } from "@/components/booking/picker/parts";
+import { localDayKey } from "@/components/booking/flow";
+import { sessionGet, sessionSet } from "@/lib/storage";
 
 type Layout = {
   step: Step;
@@ -19,7 +20,7 @@ type Layout = {
   shift: (dir: number) => void;
 };
 
-/* The editorial card's own layout (`time-picker-editorial.tsx`): its boxes,
+/* The editorial card's own layout (`editorial.tsx`): its boxes,
    the card fitted to its room, the steps, times and days coming in, and the
    swipe across the days. The effects keep the order they had. */
 export function usePickerLayout({ step, pick, days, view, anchor, week, month, chosen, mstep, held, state, atStart, shift }: Layout) {
@@ -122,7 +123,7 @@ export function usePickerLayout({ step, pick, days, view, anchor, week, month, c
      On every week or month shown, but not the first:
      once the orb goes the card is there whole. */
   const first = React.useRef(false);
-  const shown = view === "week" ? `w${iso(week[0])}` : `m${anchor.getFullYear()}-${anchor.getMonth()}`;
+  const shown = view === "week" ? `w${localDayKey(week[0])}` : `m${anchor.getFullYear()}-${anchor.getMonth()}`;
   React.useLayoutEffect(() => {
     const box = daysBox.current;
     if (step !== "pick" || !box || matchMedia("(prefers-reduced-motion: reduce)").matches) return;

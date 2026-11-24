@@ -1,6 +1,6 @@
 import * as React from "react";
-import { clockLabel } from "@/components/booking/flow";
-import { clock, minutesOf } from "@/components/booking/time-picker-parts";
+import { clockLabel } from "@/lib/booking/clock";
+import { clock, minutesOf } from "@/components/booking/picker/parts";
 import { PARTS, pacific, partOf, sunHint, tone, weatherAt, type Hourly } from "@/lib/booking/sky";
 import { useSkyTimesIn } from "@/components/booking/sky-motion";
 

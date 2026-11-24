@@ -2,8 +2,6 @@ import * as React from "react";
 import { pad } from "@/lib/utils";
 import { useSkyCalendar } from "@/components/booking/sky-motion";
 
-/** Two digits; `iso` below is a local date as "2026-11-04". The booking picker reuses both (`time-picker-parts.tsx`). */
-
 /** A run of short items (the session's includes): each item stays whole,
     a dot rides at the end of every item but the last, so a line may end on
     a dot but never starts with one or splits an item, and `.run` keeps the
@@ -23,12 +21,9 @@ export function DotList({ items, className = "" }: { items: string[]; className?
 
 /* Dates and times the way the master prints them. */
 export const dlabel = (t: Date) => t.toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short" });
-export const clockLabel = (m: number) => {
-  const h = Math.floor(m / 60) % 24;
-  return `${((h + 11) % 12) + 1}:${pad(m % 60)} ${h < 12 ? "AM" : "PM"}`;
-};
 export const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-export const iso = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+/** A day on the visitor's own calendar as "2026-11-04" (local, not UTC). The picker shares it. */
+export const localDayKey = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 /** The month's cells, Monday first, blanks before the 1st. */
 export const monthCells = (base: Date) => {
   const first = new Date(base.getFullYear(), base.getMonth(), 1);
@@ -95,7 +90,7 @@ export function Calendar({
         ))}
         {cells.map((t, k) => {
           if (!t) return <span key={`b${k}`} />;
-          const id = iso(t);
+          const id = localDayKey(t);
           const tg = tag(t);
           /* Open times as up to three dots, so the tag never outgrows its square;
              the count stays in the label. */

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { TimePicker } from "@/components/booking/time-picker";
+import { TimePicker } from "@/components/booking/picker/time-picker";
 
 afterEach(() => vi.unstubAllGlobals());
 

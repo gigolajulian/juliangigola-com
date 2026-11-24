@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { clock, e164, iso, minutesOf } from "@/components/booking/time-picker-parts";
+import { clock, e164, minutesOf } from "@/components/booking/picker/parts";
+import { localDayKey } from "@/components/booking/flow";
 
-/* The picker's pure helpers (`components/booking/time-picker-parts.tsx`):
+/* The picker's pure helpers (`components/booking/picker/parts.tsx`):
    the phone number sent to /api/book, and the clock it prints. */
 
 describe("e164", () => {
@@ -37,9 +38,9 @@ describe("clock", () => {
   });
 });
 
-describe("iso and minutesOf", () => {
+describe("localDayKey and minutesOf", () => {
   it("reads a local date and a start's minutes", () => {
-    expect(iso(new Date(2026, 10, 4))).toBe("2026-11-04");
+    expect(localDayKey(new Date(2026, 10, 4))).toBe("2026-11-04");
     expect(minutesOf("2026-11-04T19:30:00-08:00")).toBe(1170);
   });
 });

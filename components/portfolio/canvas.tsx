@@ -5,8 +5,8 @@ import Link from "next/link";
 import { getImageProps } from "next/image";
 import { DECEL } from "@/lib/motion/throw";
 import { isTrackpad } from "@/lib/motion/wheel";
-import { projectHref } from "@/lib/project-href";
-import type { WorkItem } from "@/components/portfolio/work";
+import { projectHref } from "@/lib/work/project-href";
+import type { WorkItem } from "@/components/portfolio/work-tiles";
 
 /* The canvas view: every frame
    of every project as one endless field you pan by dragging, flicking or

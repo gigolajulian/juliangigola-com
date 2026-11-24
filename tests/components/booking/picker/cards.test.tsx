@@ -21,11 +21,12 @@ vi.mock("@/components/booking/deposit-step", async (orig) => ({
 }));
 vi.mock("@/components/reference-picks", () => ({ ReferencePicks: () => null }));
 
-import { usePicker, type CardCtx, type Props } from "@/components/booking/use-picker";
-import { EditorialCard } from "@/components/booking/time-picker-editorial";
-import { BookSteps, useStepsLayout } from "@/components/booking/time-picker-steps";
+import { usePicker, type CardCtx, type Props } from "@/components/booking/picker/use-picker";
+import { EditorialCard } from "@/components/booking/picker/editorial";
+import { BookSteps, useStepsLayout } from "@/components/booking/picker/steps";
 import { JgLoad } from "@/components/splash/jg-load";
-import { clock, DAYS, fromIso, MONTHS, recent, type StepsSkin } from "@/components/booking/time-picker-parts";
+import { clock, DAYS, fromIso, MONTHS, type StepsSkin } from "@/components/booking/picker/parts";
+import { forgetAllTimes } from "@/components/booking/picker/use-slots";
 
 const slots = {
   "2026-11-19": ["10:00", "11:00", "12:00"],
@@ -75,7 +76,7 @@ const skin: StepsSkin = {
 beforeEach(() => {
   vi.useFakeTimers({ toFake: ["Date"] });
   vi.setSystemTime(new Date(2026, 10, 18, 12)); // Wed 18 Nov 2026, noon
-  recent.clear();
+  forgetAllTimes();
   // Reduced motion: the steps land at once instead of sliding in hidden (GSAP).
   const mm = window.matchMedia;
   vi.spyOn(window, "matchMedia").mockImplementation((q) => ({ ...mm(q), matches: q.includes("prefers-reduced-motion") }));

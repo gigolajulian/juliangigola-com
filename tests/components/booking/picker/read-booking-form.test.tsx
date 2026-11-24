@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { readBookingForm } from "@/components/booking/use-picker";
-import { shortDuration } from "@/components/booking/time-picker-editorial";
+import { readBookingForm } from "@/components/booking/picker/use-picker";
+import { shortDuration } from "@/components/booking/picker/editorial";
 import { duration } from "@/lib/booking/rules";
 
 const form = (fields: Record<string, string>) => {

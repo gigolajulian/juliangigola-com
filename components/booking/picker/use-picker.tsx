@@ -4,11 +4,11 @@ import * as React from "react";
 import type { DepositBody } from "@/components/booking/deposit-step";
 import { ORB_ROUND } from "@/components/effects/orb";
 import { TZ } from "@/lib/time-zone";
-import { e164, fromIso, minutesOf, forgetTimes, WHERE, type PickedTime, type Step, type StepsSkin } from "@/components/booking/time-picker-parts";
+import { e164, fromIso, minutesOf, WHERE, type PickedTime, type Step, type StepsSkin } from "@/components/booking/picker/parts";
 import { byCodeUnit } from "@/lib/utils";
-import { clockHere } from "@/components/booking/picker-dates";
-import { useSlots } from "@/components/booking/use-slots";
-import { usePickerDays } from "@/components/booking/use-picker-days";
+import { clockHere } from "@/components/booking/picker/dates";
+import { forgetTimes, useSlots } from "@/components/booking/picker/use-slots";
+import { usePickerDays } from "@/components/booking/picker/use-days";
 import { warmGsap } from "@/lib/motion/gsap-lazy";
 import { postJson } from "@/lib/http";
 

@@ -5,17 +5,18 @@ import Link from "next/link";
 import { cn, looksLikeEmail } from "@/lib/utils";
 import { DepositStep } from "@/components/booking/deposit-step";
 import { ReferencePicks } from "@/components/reference-picks";
-import { Calendar } from "@/components/booking/flow";
-import { dlabel } from "@/components/booking/flow";
+import { Calendar, dlabel, localDayKey } from "@/components/booking/flow";
 import { duration } from "@/lib/booking/rules";
 import { depositFor, takesDeposit } from "@/lib/booking/paid";
-import { clockLabel } from "@/components/booking/flow";
+import { clockLabel } from "@/lib/booking/clock";
 import type { Shell } from "@/components/enquiry/flow";
-import { AHEAD, fromIso, iso, minutesOf, forgetTimes, STEP_AT, WHERE, clock, type PickedTime, type Step, type StepsSkin } from "@/components/booking/time-picker-parts";
-import type { CardCtx } from "@/components/booking/use-picker";
-import { SkyTimes, SkyWeather } from "@/components/booking/sky-times";
+import { AHEAD, fromIso, minutesOf, STEP_AT, WHERE, clock, type PickedTime, type Step, type StepsSkin } from "@/components/booking/picker/parts";
+import type { CardCtx } from "@/components/booking/picker/use-picker";
+import { forgetTimes } from "@/components/booking/picker/use-slots";
+import { SkyTimes, SkyWeather } from "@/components/booking/picker/sky-times";
 import { skyOn } from "@/lib/flags/sky";
 import { partOf, pacific, sunsetLabel, tone } from "@/lib/booking/sky";
+import { DAY_MS } from "@/lib/time-zone";
 
 /** The quiet that ends a trackpad flick: events closer than this are still the same push. */
 const GESTURE_GAP_MS = 120;
@@ -207,10 +208,10 @@ export function BookSteps({ c, l }: { c: CardCtx & { skin: StepsSkin }; l: Retur
   const sky = skyOn();
   /* Sky week: the next five days with a time, paged from the earliest, so the week follows my calendar as it is. */
   const open = Object.keys(days).filter((k) => days[k]?.length).sort();
-  const first = open.findIndex((k) => k >= iso(anchor));
+  const first = open.findIndex((k) => k >= localDayKey(anchor));
   const page = sky && view === "week" && open.length ? Math.floor((first < 0 ? open.length - 1 : first) / 5) * 5 : -1;
   const canBack = page >= 0 ? page > 0 : view === "week" ? +monday(anchor) > +monday(today) : anchor.getFullYear() * 12 + anchor.getMonth() > today.getFullYear() * 12 + today.getMonth();
-  const canNext = page >= 0 ? page + 5 < open.length : +(view === "week" ? monday(anchor) : new Date(anchor.getFullYear(), anchor.getMonth() + 1, 0)) < +today + AHEAD * 864e5;
+  const canNext = page >= 0 ? page + 5 < open.length : +(view === "week" ? monday(anchor) : new Date(anchor.getFullYear(), anchor.getMonth() + 1, 0)) < +today + AHEAD * DAY_MS;
   const times = days[pick.date] ?? [];
   const [hh, mm] = clock(pick.min)[0].split(":");
   const at0 = times.findIndex((x) => minutesOf(x) === pick.min);
@@ -241,13 +242,13 @@ export function BookSteps({ c, l }: { c: CardCtx & { skin: StepsSkin }; l: Retur
           canNext={canNext}
           picked={pick.date}
           tag={(d) => {
-            const n = days[iso(d)]?.length ?? 0;
+            const n = days[localDayKey(d)]?.length ?? 0;
             return n ? `${n} open` : null;
           }}
-          onPick={(d) => choose(iso(d), pick.min, false)}
+          onPick={(d) => choose(localDayKey(d), pick.min, false)}
           strip={page >= 0 ? open.slice(page, page + 5).map(fromIso) : undefined}
           parts={sky ? (d) => {
-            const l = days[iso(d)];
+            const l = days[localDayKey(d)];
             if (!l?.length) return null;
             const p = [false, false, false];
             for (const x of l) p[partOf(Math.round(pacific(Date.parse(x)).hour * 60))] = true;

@@ -3,6 +3,7 @@
 import { loadGsap } from "@/lib/motion/gsap-lazy";
 import * as React from "react";
 import Image from "next/image";
+import { pad } from "@/lib/utils";
 import { launchSpeed, stepSpring, springSettled, frameDt } from "@/lib/motion/spring";
 import { GRID_SIZES } from "@/components/portfolio/work-tiles";
 
@@ -326,7 +327,7 @@ export function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: 
         })}
       </div>
       <div className="fv-bar lbl">
-        <span>{String(at + 1).padStart(2, "0")} / {String(n).padStart(2, "0")}</span>
+        <span>{pad(at + 1)} / {pad(n)}</span>
         {cur?.back ? <Sides back={showBack} onFlip={() => setBk(showBack ? null : cur.src)} /> : null}
         <button type="button" onClick={onClose}>Close</button>
       </div>

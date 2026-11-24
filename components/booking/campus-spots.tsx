@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
+import { pad } from "@/lib/utils";
 
 export type HeldSpot = { name: string; note: string; src: string; alt: string; color?: string };
 
@@ -29,7 +30,7 @@ export function CampusSpots({ spots }: { spots: HeldSpot[] }) {
             <Image src={s.src} alt={s.alt} fill sizes="(max-width: 1023px) 100vw, 40vw" style={{ objectFit: "cover", background: s.color }} />
           </figure>
           <section className="s4-row" data-i={i} data-on={i === cur || undefined} style={{ "--i": i + 1 } as React.CSSProperties}>
-            <h2><span className="lbl mute">{String(i + 1).padStart(2, "0")}</span> {s.name}</h2>
+            <h2><span className="lbl mute">{pad(i + 1)}</span> {s.name}</h2>
             <p>{s.note}</p>
           </section>
         </React.Fragment>

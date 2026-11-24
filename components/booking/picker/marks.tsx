@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Orb } from "@/components/effects/orb";
-import type { Step } from "@/components/booking/time-picker-parts";
+import type { Step } from "@/components/booking/picker/parts";
 
 /* The editorial card's drawn marks: plain elements, no state. */
 

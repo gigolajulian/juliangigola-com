@@ -1,6 +1,6 @@
 import * as React from "react";
-import { fromIso, minutesOf, type PickedTime } from "@/components/booking/time-picker-parts";
-import { monthCells, startOfToday, weekFrom } from "@/components/booking/picker-dates";
+import { fromIso, minutesOf, type PickedTime } from "@/components/booking/picker/parts";
+import { monthCells, startOfToday, weekFrom } from "@/components/booking/picker/dates";
 
 /* The day and the time picked, and the week or month on show
    (`use-picker.tsx`, which keeps the effects that set them). */

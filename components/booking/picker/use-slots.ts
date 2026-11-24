@@ -1,8 +1,27 @@
 import * as React from "react";
 import { takesDeposit } from "@/lib/booking/paid";
 import type { SlotsAnswer } from "@/lib/booking/slots";
-import { AHEAD, iso, KEEP, recent, recentKey } from "@/components/booking/time-picker-parts";
+import { AHEAD } from "@/components/booking/picker/parts";
+import { localDayKey } from "@/components/booking/flow";
 import { getJson } from "@/lib/http";
+import { DAY_MS } from "@/lib/time-zone";
+
+/* An event's details and times, kept a minute, so a picker built again
+   (the homepage menu builds one per row pointed at) does not ask the
+   server again. A reload after a failed booking asks fresh. */
+const KEEP = 60_000;
+const recent = new Map<string, { at: number; got: Promise<SlotsAnswer> }>();
+/** The key an event's times are kept under. */
+const recentKey = (username: string, slug: string, tz: string) => `${username}/${slug}/${tz}`;
+/** Forget an event's kept times, so the next picker asks fresh (a time just taken). */
+export const forgetTimes = (username: string, slug: string, tz: string) => void recent.delete(recentKey(username, slug, tz));
+/** Forget every kept answer (tests start each case fresh). */
+export const forgetAllTimes = () => recent.clear();
+/** An event's kept answer while it is under a minute old, else undefined. */
+const peek = (key: string) => {
+  const hit = recent.get(key);
+  return hit && Date.now() - hit.at < KEEP ? hit.got : undefined;
+};
 
 /* The picker's open times and its event, fetched from `/api/slots`
    (`use-picker.tsx` loads them once it mounts). */
@@ -20,18 +39,18 @@ export function useSlots(username: string, slug: string, tz: string) {
     const key = recentKey(username, slug, tz);
     try {
       const from = new Date();
-      const to = new Date(Date.now() + AHEAD * 864e5);
+      const to = new Date(Date.now() + AHEAD * DAY_MS);
       // No answer at all left "Loading times" up for good: past
       // 8 seconds the fallback takes over, as for any other failure.
       const signal = AbortSignal.timeout?.(8000);
-      const hit = recent.get(key);
+      const kept = fresh ? undefined : peek(key);
       // The event and its times in one (`app/api/slots`); a failed answer is a failure like no answer.
-      const got = !fresh && hit && Date.now() - hit.at < KEEP ? hit.got : getJson<SlotsAnswer>(`/api/slots?slug=${slug}&start=${iso(from)}&end=${iso(to)}&timeZone=${encodeURIComponent(tz)}${fresh ? "&fresh" : ""}`, { signal })
+      const got = kept ?? getJson<SlotsAnswer>(`/api/slots?slug=${slug}&start=${localDayKey(from)}&end=${localDayKey(to)}&timeZone=${encodeURIComponent(tz)}${fresh ? "&fresh" : ""}`, { signal })
         .then((r) => {
           if (!r.ok) throw new Error(r.error ?? "no times");
           return r.data;
         });
-      if (got !== hit?.got) recent.set(key, { at: Date.now(), got });
+      if (got !== kept) recent.set(key, { at: Date.now(), got });
       const slots = await got;
       // An answer with no times (or no body) is a failure too.
       if (!slots?.slots) throw new Error("no times");

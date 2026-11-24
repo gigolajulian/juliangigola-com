@@ -1,7 +1,7 @@
 import * as React from "react";
 import { expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { SkyTimes } from "@/components/booking/sky-times";
+import { SkyTimes } from "@/components/booking/picker/sky-times";
 import { Calendar } from "@/components/booking/flow";
 
 const day = ["10:00", "11:00", "14:00", "16:00", "17:00", "19:00"].map((t) => `2026-11-26T${t}:00-08:00`);

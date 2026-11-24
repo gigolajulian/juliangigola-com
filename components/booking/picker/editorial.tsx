@@ -4,12 +4,14 @@ import * as React from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { DepositStep } from "@/components/booking/deposit-step";
-import { TZ } from "@/lib/time-zone";
+import { TZ, DAY_MS } from "@/lib/time-zone";
 import { depositFor } from "@/lib/booking/paid";
-import { AHEAD, DAYS, iso, minutesOf, MONTHS, forgetTimes, STEP_AT, WEEKDAYS, WHERE, clock, zoneAbbr } from "@/components/booking/time-picker-parts";
-import type { CardCtx } from "@/components/booking/use-picker";
-import { usePickerLayout } from "@/components/booking/use-picker-layout";
-import { arrowMark, busyMark, okMarkOf } from "@/components/booking/picker-marks";
+import { AHEAD, DAYS, minutesOf, MONTHS, STEP_AT, WEEKDAYS, WHERE, clock, zoneAbbr } from "@/components/booking/picker/parts";
+import type { CardCtx } from "@/components/booking/picker/use-picker";
+import { forgetTimes } from "@/components/booking/picker/use-slots";
+import { localDayKey } from "@/components/booking/flow";
+import { usePickerLayout } from "@/components/booking/picker/use-layout";
+import { arrowMark, busyMark, okMarkOf } from "@/components/booking/picker/marks";
 
 /* A call (no deposit) shows its kind: a handset, or a camera for a video call. */
 const HANDSET = (
@@ -160,7 +162,7 @@ export function EditorialCard({ c }: { c: CardCtx }) {
   const year = (view === "week" ? week[6] : anchor).getFullYear();
   const last = view === "week" ? week[6] : new Date(anchor.getFullYear(), anchor.getMonth() + 1, 0);
   // Nothing to go on to past the times asked for.
-  const atEnd = +last >= +today + AHEAD * 864e5;
+  const atEnd = +last >= +today + AHEAD * DAY_MS;
   const dayPick = (id: string) => {
     choose(id, pick.min, false);
     if (root.current?.dataset.fit === "3") setMstep("times");
@@ -202,7 +204,7 @@ export function EditorialCard({ c }: { c: CardCtx }) {
                 {view === "week" ? (
                   <div className="ed-week">
                     {week.map((d) => {
-                      const id = iso(d);
+                      const id = localDayKey(d);
                       return (
                         <button key={id} data-day={id} type="button" disabled={!open(id).size} aria-pressed={pick.date === id} aria-label={`${WEEKDAYS[d.getDay()]}, ${MONTHS[d.getMonth()]} ${d.getDate()}`} onClick={() => dayPick(id)} className="ed-day">
                           <span className="label">{DAYS[d.getDay()]}</span>
@@ -223,7 +225,7 @@ export function EditorialCard({ c }: { c: CardCtx }) {
                           const n = k < lead ? new Date(anchor.getFullYear(), anchor.getMonth(), k - lead + 1).getDate() : k - month.length + 1;
                           return <span key={`b${k}`} aria-hidden className="ed-blank">{n}</span>;
                         }
-                        const id = iso(d);
+                        const id = localDayKey(d);
                         return (
                           <button key={id} data-day={id} type="button" disabled={!open(id).size} aria-pressed={pick.date === id} aria-label={`${WEEKDAYS[d.getDay()]}, ${MONTHS[d.getMonth()]} ${d.getDate()}`} onClick={() => dayPick(id)} data-stick={open(id).size ? "fill" : undefined} className="ed-cell">
                             <span className="ed-n">{d.getDate()}</span>

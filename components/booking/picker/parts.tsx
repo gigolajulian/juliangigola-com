@@ -1,23 +1,10 @@
 "use client";
 
-import { iso } from "@/components/booking/flow";
 import type { Shell } from "@/components/enquiry/flow";
-import { pad } from "@/lib/utils";
-import type { SlotsAnswer } from "@/lib/booking/slots";
-
-export { iso, pad };
+import { clockLabel } from "@/lib/booking/clock";
 
 /* Shared by the time picker and its cards (time-picker.tsx). */
 
-/* An event's details and times, kept a minute, so a picker built again
-   (the homepage menu builds one per row pointed at) does not ask the
-   server again. A reload after a failed booking asks fresh. */
-export const KEEP = 60_000;
-export const recent = new Map<string, { at: number; got: Promise<SlotsAnswer> }>();
-/** The key an event's times are kept under. */
-export const recentKey = (username: string, slug: string, tz: string) => `${username}/${slug}/${tz}`;
-/** Forget an event's kept times, so the next picker asks fresh (a time just taken). */
-export const forgetTimes = (username: string, slug: string, tz: string) => void recent.delete(recentKey(username, slug, tz));
 export const DAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 export const WEEKDAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 export const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -57,10 +44,8 @@ export const e164 = (raw: string) => {
   if (digits.length === 11 && digits[0] === "1") return `+${digits}`;
   return "";
 };
-export const clock = (m: number): [string, string] => {
-  const h = Math.floor(m / 60);
-  return [`${((h + 11) % 12) + 1}:${pad(m % 60)}`, h % 24 < 12 ? "AM" : "PM"];
-};
+/** `clockLabel` split in two: ["1:05", "PM"]. */
+export const clock = (m: number) => clockLabel(m).split(" ") as [string, string];
 
 export type Step = "pick" | "form" | "sending" | "check" | "pay" | "done";
 /** Which of the three steps (pick, details, pay) each step is, in order; the progress marks handle "done" where they differ. */
