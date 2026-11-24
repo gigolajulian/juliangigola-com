@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { Orb } from "@/components/effects/orb";
 import { type SiteContent } from "@/lib/content";
 import { AdminNewProject } from "@/components/admin/admin-new-project";
 import { AdminProjects } from "@/components/admin/admin-projects";
@@ -16,9 +15,9 @@ import { AdminSeo } from "@/components/admin/admin-seo";
 import { AdminVideos } from "@/components/admin/admin-videos";
 import { loadRepo, publishDraft, type Draft, type Status } from "@/lib/admin/publish";
 import { ClientFields, ContactFields, CoverArtFields, HomeFields, QuoteFields, SessionFields } from "@/components/admin/admin-fields";
-import { isTextRef, type TrashedProject } from "@/lib/work/added";
+import { type TrashedProject } from "@/lib/work/added";
 import { type PendingUpload } from "@/components/admin/admin-frames";
-import { CreditDesk, creditBook } from "@/components/admin/admin-credits";
+import { CreditDesk } from "@/components/admin/admin-credits";
 import { sameJson, withOverride } from "@/lib/admin/admin-payload";
 import { TOKEN_STORE } from "@/lib/admin/admin-github";
 import type { Bts } from "@/lib/work/work-types";
@@ -29,6 +28,10 @@ import { Connect, StatusLine } from "@/components/admin/admin-connect";
 import type { AdminEditorProps, Overrides } from "@/components/admin/admin-editor-props";
 import { useDeployWatch } from "@/components/admin/use-deploy-watch";
 
+import { changedSlugs, draftProjects, movedTabs, type Baseline } from "@/components/admin/editor/draft";
+import { useFoundField } from "@/components/admin/editor/use-found-field";
+import { useCreditDesk } from "@/components/admin/editor/use-credit-desk";
+import { EditorBar, FullSwitch } from "@/components/admin/editor/chrome";
 /** The per-project overrides a build applies, one map per kind. */
 export type { Overrides };
 
@@ -117,19 +120,7 @@ export function AdminEditor({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [full]);
-  /** The switch at the head of a column. Only where there are columns. */
-  const whole = (which: "map" | "work" | "preview") => (
-    <div className="sticky top-0 z-10 flex justify-end bg-background pb-2 max-xl:hidden">
-      <button
-        type="button"
-        onClick={() => setFull(full === which ? null : which)}
-        aria-pressed={full === which}
-        className="label text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
-      >
-        {full === which ? "Close full screen" : "Full screen"}
-      </button>
-    </div>
-  );
+  const whole = (which: "map" | "work" | "preview") => <FullSwitch which={which} full={full} setFull={setFull} />;
   /** Which discipline is expanded in the Disciplines view. */
   const [openDiscipline, setOpenDiscipline] = React.useState<string | null>(
     null,
@@ -260,10 +251,7 @@ export function AdminEditor({
    * to and what the next build is made from, and it is where a publish from
    * another browser shows up.
    */
-  const [baseline, setBaseline] = React.useState<{
-    content: SiteContent;
-    manifest: Draft;
-  }>(() => ({
+  const [baseline, setBaseline] = React.useState<Baseline>(() => ({
     content: initial,
     manifest: {
       hidden: [...initialHidden].sort(byCodeUnit),
@@ -296,34 +284,11 @@ export function AdminEditor({
      this says where, one field at a time with the same comparison, so a
      draft can be reviewed before it is published without a tour of nine
      tabs. The manifest's fields belong to the two work tabs. */
-  const moved = React.useMemo(() => {
-    const tabs = new Set<View>();
-    for (const key of Object.keys(draft) as (keyof SiteContent)[])
-      if (!sameJson(draft[key], baseline.content[key]))
-        tabs.add(FIELD_TAB[key] ?? "home");
-    for (const key of Object.keys(manifest) as (keyof Draft)[])
-      if (!sameJson(manifest[key], baseline.manifest[key]))
-        tabs.add(key === "order" || key === "covers" ? "disciplines" : "projects");
-    return tabs;
-  }, [draft, manifest, baseline]);
+  const moved = React.useMemo(() => movedTabs(draft, manifest, baseline), [draft, manifest, baseline]);
 
   /** The rows with unpublished edits, for the Projects filter. */
-  const changed = React.useMemo(() => {
-    const out = new Set<string>();
-    const maps = ["categories", "frames", "credits", "copy", "slugs", "bts"] as const;
-    for (const key of maps) {
-      const a = manifest[key] as Record<string, unknown>;
-      const b = baseline.manifest[key] as Record<string, unknown>;
-      for (const slug of new Set([...Object.keys(a), ...Object.keys(b)]))
-        if (!sameJson(a[slug], b[slug])) out.add(slug);
-    }
-    for (const key of ["hidden", "unlisted"] as const) {
-      const a = new Set(manifest[key]);
-      const b = new Set(baseline.manifest[key]);
-      for (const slug of [...a, ...b]) if (a.has(slug) !== b.has(slug)) out.add(slug);
-    }
-    return out;
-  }, [manifest, baseline]);
+  const changed = React.useMemo(() => changedSlugs(manifest, baseline), [manifest, baseline]);
+
 
   /**
    * Where "Open live" points. Read after mount, because the server has no
@@ -341,73 +306,12 @@ export function AdminEditor({
 
   const known = React.useMemo(() => new Set(slugs), [slugs]);
 
-  /**
-   * The projects as the draft has them: refiled, and in running order.
-   *
-   * One derivation, because there were three and they disagreed. `projects`
-   * arrives as the last build published it, and the draft can move a project
-   * two ways — refiling it into another discipline, and dragging it to another
-   * position — so every view that groups or orders projects has to apply both
-   * or contradict the ones that do.
-   *
-   * They did contradict. The select said Editorial while the row beside it
-   * said Unfiled; filing a project left the row stale; and the sitemap — whose
-   * own job is to show "the draft as it would publish" — kept a refiled
-   * project under its old discipline, because it read the server's label. Each
-   * was a small lie in a different place and they were all the same bug.
-   *
-   * Mirrors `relabel`, `withSequence` and `byRunningOrder` in `lib/work/work.ts`:
-   * the same operations the build applies, applied here so the editor shows
-   * what publishing would produce rather than what the last deploy did.
-   */
-  const orderedProjects = React.useMemo(() => {
-    const rank = new Map(order.map((slug, i) => [slug, i]));
-    const named = new Map(categories.map((c) => [c.slug, c.name]));
+  /** The projects as the draft has them: refiled, and in running order (see `draftProjects`). */
+  const orderedProjects = React.useMemo(
+    () => draftProjects(projects, order, recategorised, categories, reframed),
+    [projects, order, recategorised, categories, reframed],
+  );
 
-    return [...projects]
-      .map((p) => {
-        const filed = recategorised[p.slug] ?? p.categorySlug;
-        /* The frame the gallery now opens on.
-         *
-         * `withSequence` in `lib/work/work.ts` makes the first frame of a
-         * resequenced gallery its cover — the card and the discipline are
-         * meant to show what you actually opened on. The editor was not
-         * applying that half, so dragging a frame to the front changed the
-         * published cover and nothing here moved: the sitemap, the project
-         * row and the discipline all kept drawing the old opener, which reads
-         * as the edit not having taken. */
-        const opener = reframed[p.slug]?.flatMap((f) =>
-          // A passage is not a photograph, so it cannot be the opener.
-          isTextRef(f) ? [] : [typeof f === "string" ? f : f.src],
-        )[0];
-
-        if (filed === p.categorySlug && (!opener || opener === p.images[0]))
-          return p;
-
-        return {
-          ...p,
-          categorySlug: filed,
-          // "Unfiled" is the same string `app/admin/page.tsx` uses for a
-          // project the manifest gives no category at all, so the sitemap can
-          // group both kinds under one heading.
-          category: named.get(filed) ?? "Unfiled",
-          /* Dimensions and mat carried over from the old cover rather than
-             looked up. The archive's numbers do not travel to the browser
-             (see `app/admin/page.tsx`), every thumbnail in here sits in a
-             fixed box under `object-cover`, and the mat is only what shows
-             for the instant before the frame paints. The build reads the
-             real frame. */
-          cover:
-            opener && opener !== p.images[0]
-              ? { ...p.cover, src: opener }
-              : p.cover,
-        };
-      })
-      .sort(
-        (a, b) =>
-          (rank.get(a.slug) ?? Infinity) - (rank.get(b.slug) ?? Infinity),
-      );
-  }, [projects, order, recategorised, categories, reframed]);
 
   /**
    * Sends the editor to a project, from anywhere that can name one.
@@ -439,44 +343,8 @@ export function AdminEditor({
     setWanted((w) => ({ anchor: target.anchor, nonce: (w?.nonce ?? 0) + 1 }));
   }, []);
 
-  /**
-   * Brings a requested Content field into view.
-   *
-   * DOM only — nothing here sets state, so it is the kind of work an effect is
-   * actually for. After a paint, because switching to the Content view is
-   * what renders the field in the first place.
-   */
-  React.useEffect(() => {
-    if (!wanted) return;
-    const id = requestAnimationFrame(() => {
-      const el = document.getElementById(`field-${wanted.anchor}`);
-      if (!el) return;
-      // At most one field is ever the one you asked for. The listener below
-      // normally clears it, but it is attached to a node React is free to
-      // replace, so this is what actually guarantees it.
-      document
-        .querySelectorAll("[data-found]")
-        .forEach((n) => n.removeAttribute("data-found"));
-      el.scrollIntoView({ block: "start", behavior: "smooth" });
-      // An attribute, not a class. `className` on these elements is React's —
-      // it rewrites it on the next render and takes the highlight with it,
-      // and arriving from the sitemap re-renders by definition because it
-      // changes the tab. React leaves attributes it never set alone.
-      //
-      // Cleared first so it can fire twice: an animation does not restart
-      // because the attribute was set again while it was already there, which
-      // is exactly what clicking the same row twice does.
-      el.removeAttribute("data-found");
-      void el.offsetWidth;
-      el.setAttribute("data-found", "");
-      el.addEventListener(
-        "animationend",
-        () => el.removeAttribute("data-found"),
-        { once: true },
-      );
-    });
-    return () => cancelAnimationFrame(id);
-  }, [wanted]);
+  useFoundField(wanted);
+
 
   // Reconnect on mount if a token is already stored, so the usual visit is a
   // page that is simply ready.
@@ -581,64 +449,8 @@ export function AdminEditor({
     (s) => s.trim() !== "" && !known.has(s),
   );
 
-  /* ── the credit desk ────────────────────────────────────────────
-     Everyone ever credited, and the faces on file, handed to the credit
-     rows wherever they are drawn — the project list, the page editor, the
-     new project form. A context, because none of the three panels in
-     between has any business carrying it. */
-  const people = React.useMemo(
-    () =>
-      creditBook([
-        ...projects.map((p) => recredited[p.slug] ?? p.credits),
-        ...Object.values(recredited),
-      ]),
-    [projects, recredited],
-  );
-  /* What a circle draws: the picture staged in this session if there is
-     one, and otherwise the copy the last build published. */
-  const faces = React.useMemo(() => {
-    const out: Record<string, string> = {};
-    for (const [handle, path] of Object.entries(avatars)) {
-      out[handle] = uploads[`public${path}`]?.preview ?? path;
-    }
-    return out;
-  }, [avatars, uploads]);
-  const desk = React.useMemo(
-    () => ({
-      people,
-      faces,
-      onFace: (
-        handle: string,
-        picture: { base64: string; preview: string; bytes: number } | null,
-      ) => {
-        const path = `/people/${handle}.jpg`;
-        if (!picture) {
-          setAvatars((a) => {
-            const next = { ...a };
-            delete next[handle];
-            return next;
-          });
-          setUploads((u) => {
-            const next = { ...u };
-            delete next[`public${path}`];
-            return next;
-          });
-          return;
-        }
-        setUploads((u) => ({
-          ...u,
-          [`public${path}`]: {
-            path: `public${path}`,
-            base64: picture.base64,
-            preview: picture.preview,
-            bytes: picture.bytes,
-          },
-        }));
-        setAvatars((a) => ({ ...a, [handle]: path }));
-      },
-    }),
-    [people, faces],
-  );
+  const desk = useCreditDesk(projects, recredited, avatars, uploads, setAvatars, setUploads);
+
 
   /* Three columns from `xl`: the site on the left, the work in the middle,
   the result on the right. Below that they stack in the same order. At `2xl`
@@ -752,213 +564,18 @@ export function AdminEditor({
             short, which is 13px of form scrolling through the gap between
             them. Nested inside one pinned container they simply sit together
             and nothing has to be measured. */}
-          <div className="sticky top-0 z-20 bg-background">
-            {/* The bar, on the edge of the chrome rather than in the flow.
-             *
-             * Absolutely positioned on the header's own bottom border, the way
-             * a browser puts its loading bar on the edge of the toolbar: it
-             * appears and disappears without moving a single thing on the page,
-             * which a bar occupying a row cannot do — and a form that jumps two
-             * pixels every time you publish is worse than no bar at all.
-             *
-             * Proportional while committing, because that is countable. A sweep
-             * while the deploy runs, because it is not: Cloudflare cannot be
-             * asked how far along it is, and a bar creeping to 80% of nothing
-             * is a lie in the shape of the truth. */}
-            {status.kind === "working" || awaitingDeploy ? (
-              <div
-                role="progressbar"
-                aria-label={
-                  awaitingDeploy ? "Waiting for the deploy" : "Publishing"
-                }
-                aria-valuenow={
-                  status.kind === "working" && status.total
-                    ? status.done
-                    : undefined
-                }
-                aria-valuemax={
-                  status.kind === "working" && status.total
-                    ? status.total
-                    : undefined
-                }
-                className="pointer-events-none absolute inset-x-0 -bottom-px z-30 h-px overflow-hidden bg-border"
-              >
-                {status.kind === "working" && status.total ? (
-                  <span
-                    // `scaleX` from the left rather than `width`: a width
-                    // change lays the row out again on every tick, a scale is
-                    // a compositor-only move. Linear, because progress is a
-                    // constant rate and an ease on it reads as stalling.
-                    className="block h-full w-full origin-left bg-foreground transition-transform duration-300 ease-linear"
-                    style={{
-                      transform: `scaleX(${(status.done ?? 0) / status.total})`,
-                    }}
-                  />
-                ) : (
-                  <span className="sweep block h-full w-1/4 bg-foreground" />
-                )}
-              </div>
-            ) : null}
-            {/* Wraps, and the publish group never shrinks.
-             *
-             * This row was one unwrapping line of six shrink-0 tab groups
-             * followed by Publish, and Publish is the thing that gave. In the
-             * three-column workbench the middle column is 609px at 1440x900
-             * and this row wants 691, so the button sat from x=953 to x=1043
-             * against a column ending at 961: eighty-two pixels of it outside
-             * its own box, clipped, with no scrollbar to reach it. "I make a
-             * change and Publish doesn't show up" was exactly that, and the
-             * flag beside it was fine all along.
-             *
-             * Wrapping rather than scrolling the tabs. A scroller hides tabs
-             * behind a gesture nobody knows is available; a second line costs
-             * 36px on a tool that has the room, and everything stays visible
-             * and in the same place. */}
-            <nav
-              className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-border py-2"
-              aria-label="Editor sections"
-            >
-              {/* A segmented control rather than three underlined words.
-               *
-               * These are the three halves of the tool and the one thing you
-               * press most, so they get a surface: an underline on a lowercase
-               * word reads as a link among links, and at this size the selected
-               * one was legible only by a 2px rule. Filled, the current view is
-               * obvious from across the desk — which is the same argument the
-               * hero index makes for `bg-secondary` on its current row. */}
-              {TABS.map((group, g) => (
-                <span
-                  key={g}
-                  className="flex max-w-full flex-wrap border border-border p-0.5"
-                >
-                  {group.map((t) => (
-                    <button
-                      key={t.id}
-                      type="button"
-                      onClick={() => setView(t.id)}
-                      aria-current={view === t.id ? "true" : undefined}
-                      className={cn(
-                        "label px-3 py-1.5 transition-colors duration-200",
-                        view === t.id
-                          ? "bg-foreground text-background"
-                          : "text-muted-foreground hoverable:hover:bg-card hoverable:hover:text-foreground",
-                      )}
-                    >
-                      {t.label}
-                      {t.id === "inbox" && unread > 0 ? (
-                        <span className="ml-1.5 inline-block bg-live px-1 tabular-nums text-background">
-                          {unread}
-                          <span className="sr-only"> unread</span>
-                        </span>
-                      ) : null}
-                      {moved.has(t.id) ? (
-                        <span
-                          aria-label=", unpublished edits"
-                          className="ml-1.5 inline-block h-1 w-1 bg-current align-middle"
-                        />
-                      ) : null}
-                    </button>
-                  ))}
-                </span>
-              ))}
-              {/* Publish, where the work is.
-               *
-               * There is a second one at the foot of the column, and that is the
-               * point: the middle column is its own scroller now, so the bottom
-               * bar is only sticky to the bottom of a panel you may be nowhere
-               * near. An edit made near the top — dragging a frame, refiling a
-               * shoot — had no way to be committed without scrolling back down
-               * to look for the button.
-               *
-               * Always present and disabled rather than appearing when it has
-               * something to do: a control that materialises shifts the row it is
-               * in and has to be noticed before it can be used, whereas a greyed
-               * one is a permanent answer to "where do I publish this". The
-               * `title` says which of the two reasons it is grey. */}
-              {/* `shrink-0`, so if anything in this row has to give it is not
-              the one control the row exists for. */}
-              <span className="ml-auto flex shrink-0 items-center gap-3 self-center">
-                {/* Three states, because there are three.
-                 *
-                 * "Unpublished" and "live" are not opposites with nothing in
-                 * between: committing to GitHub and the change reaching the
-                 * public site are a couple of minutes apart, and that gap is
-                 * the one the editor used to say nothing about. So the middle
-                 * state is its own — published, not yet live — and it is the
-                 * one carrying the sweep.
-                 *
-                 * A dot as well as the words. The state that decides whether
-                 * Publish does anything should be readable without reading, and
-                 * at `label` size six words of grey text beside a grey button
-                 * is not. Green only for live, never for committed: "your work
-                 * is safe" and "the world can see it" are different promises
-                 * and only one of them is what green means here.
-                 *
-                 * `aria-live` so the change is announced rather than only
-                 * coloured — the whole point of this label is a state change you
-                 * are not necessarily watching for. */}
-                <span
-                  aria-live="polite"
-                  className="label flex items-center gap-2"
-                >
-                  {/* Julian: a thinking orb while it works, and while
-                      the deploy is watched for; the dot otherwise. */}
-                  {status.kind === "working" || awaitingDeploy ? (
-                    <Orb
-                      state={awaitingDeploy ? "searching" : "working"}
-                      size={20}
-                    />
-                  ) : (
-                    <span
-                      aria-hidden
-                      className={cn(
-                        "block size-1.5 rounded-full",
-                        dirty || committed ? "bg-foreground" : "bg-live",
-                      )}
-                    />
-                  )}
-                  {/* Each word is a new node when the state changes, so
-                    `emerge` fades it in — "published" is the one completion
-                    moment the workbench has, and it used to swap in as text. */}
-                  {dirty ? (
-                    <span className="emerge text-foreground">unpublished</span>
-                  ) : awaitingDeploy ? (
-                    <span className="emerge text-muted-foreground">
-                      published &middot; going live
-                    </span>
-                  ) : committed ? (
-                    // The watch gave up, or there was no `/BUILD_ID` to watch.
-                    // The commit happened; whether it landed is unknown, and
-                    // green would claim otherwise.
-                    <span className="emerge text-muted-foreground">
-                      published
-                    </span>
-                  ) : (
-                    // Nothing pending. Either a deploy was seen landing, or this
-                    // page has published nothing — and it was itself served by
-                    // the current build, so what is on screen is what the public
-                    // site has.
-                    <span className="emerge text-live">live</span>
-                  )}
-                </span>
-                <button
-                  type="button"
-                  onClick={publish}
-                  disabled={!sha || !dirty || status.kind === "working"}
-                  title={
-                    !sha
-                      ? "Connect the GitHub token at the foot of this column first"
-                      : !dirty
-                        ? "Nothing to publish: the draft matches the live site"
-                        : undefined
-                  }
-                  className="label border border-foreground bg-foreground px-4 py-2 text-background press hoverable:hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:border-border disabled:bg-transparent disabled:text-muted-foreground disabled:opacity-50"
-                >
-                  {status.kind === "working" ? "Publishing…" : "Publish"}
-                </button>
-              </span>
-            </nav>
-          </div>
+          <EditorBar
+            status={status}
+            awaitingDeploy={awaitingDeploy}
+            view={view}
+            setView={setView}
+            unread={unread}
+            moved={moved}
+            dirty={dirty}
+            committed={committed}
+            sha={sha}
+            publish={publish}
+          />
 
           {page
             ? (() => {
