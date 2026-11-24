@@ -69,6 +69,19 @@ describe("/api/proof", () => {
     expect((await readProof(kv as never, (await sealer(LEADS_KEY))!, token))?.name).toBe("Test");
   });
 
+  it("stamps pulledAt only on the plugin's POST pulled, once, and only for sent selects", async () => {
+    const s = (await sealer(LEADS_KEY))!;
+    const { token } = await (await call(POST, req("POST", { body: json({ action: "create", name: "Test" }) }))).json();
+    const pulled = async () => (await (await call(POST, req("POST", { body: json({ action: "pulled", token }) }))).json()).pulledAt;
+    expect(await pulled()).toBeNull(); // nothing sent yet
+    await writeProof(kv as never, s, { ...(await readProof(kv as never, s, token))!, submittedAt: "2026-11-20T10:00:00.000Z" });
+    await call(GET, req("GET", { query: `?token=${token}` }));
+    expect((await readProof(kv as never, s, token))!.pulledAt).toBeUndefined(); // a read stamps nothing
+    const first = await pulled();
+    expect(first).toMatch(/^\d{4}-/);
+    expect(await pulled()).toBe(first);
+  });
+
   it("readProof: null for a gallery that is not there, a throw for one it cannot open", async () => {
     const s = (await sealer(LEADS_KEY))!;
     expect(await readProof(kv as never, s, "nothere")).toBeNull();

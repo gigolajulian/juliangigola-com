@@ -98,18 +98,20 @@ export async function GET(request: Request) {
   }
   const token = q.get("token");
   if (!isToken(token)) return json({ error: "Which gallery?" }, 400);
-  let p = await readProof(g.kv, g.s, token);
+  const p = await readProof(g.kv, g.s, token);
   if (!p) return json({ error: "No such gallery." }, 404);
-  // Only the Lightroom plugin reads one gallery: once it has the sent selects, they are back in Lightroom.
-  if (p.submittedAt && !p.pulledAt) {
-    p = { ...p, pulledAt: new Date().toISOString() };
-    await writeProof(g.kv, g.s, p);
-  }
   return json({ proof: forDesk(p), url: proofUrl(publicId(p)) });
 }
 
 /** POST on one gallery, by `action`: each answers the request on its own. */
 const ACTIONS: Record<string, (g: Gated, p: Proof, b: Record<string, unknown>, request: Request) => Promise<Response>> = {
+  /** The Lightroom plugin has the sent selects: they are back in Lightroom. Stamped once; a gallery not sent yet stays unstamped. */
+  async pulled(g, p) {
+    if (!p.submittedAt || p.pulledAt) return json({ pulledAt: p.pulledAt ?? null });
+    const pulledAt = new Date().toISOString();
+    await writeProof(g.kv, g.s, { ...p, pulledAt });
+    return json({ pulledAt });
+  },
   async send(g, p, b, request) {
     if (!p.email) return json({ error: "Add the client's email first." }, 400);
     if (!p.frames.length) return json({ error: "Publish frames from Lightroom first." }, 400);
