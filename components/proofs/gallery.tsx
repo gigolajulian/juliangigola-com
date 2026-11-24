@@ -39,13 +39,12 @@ type Step = null | "review" | "done";
 // The gate as the grid's own wall (components/proofs/wall.tsx) by default;
 // `?proofwall=0` for the plain gate. Read on the client only.
 const readWall = () => !qflag("proofwall", "0");
-// The wall tuned per screen in the gridwall tuner by default; `?gw=0` for the untuned wall.
-// The window's size, so it compares.
+// The wall tuned per screen in the gridwall tuner. The window's size, so it compares; empty on the server.
 const onResize = (cb: () => void) => {
   addEventListener("resize", cb);
   return () => removeEventListener("resize", cb);
 };
-const readGw = () => (new URLSearchParams(location.search).get("gw") !== "0" ? `${innerWidth}x${innerHeight}` : "");
+const readGw = () => `${innerWidth}x${innerHeight}`;
 
 /** A full-screen sheet: focus moves in, Tab stays inside, Escape closes, focus goes back to what opened it. */
 function useDialog(active: boolean, close: () => void) {

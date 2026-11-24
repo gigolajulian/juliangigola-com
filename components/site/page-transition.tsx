@@ -53,18 +53,12 @@ const sectionOf = (path: string) =>
    transitions.css) and crossfades with the screen instead. The homepage
    (~100MB) keeps its zoom.
    On for everyone since Julian tried it on his iPhone ("ITS GOOD",
-   2026-10-18); `?vt=full` snapshots every page whole again, for testing. */
+   2026-10-18). */
 const SNAPSHOT_BUDGET = 192 * 2 ** 20;
 const gauge = () => {
-  let on = true;
-  try {
-    const q = new URLSearchParams(location.search).get("vt");
-    if (q) sessionStorage.setItem("jg-vt", q);
-    on = sessionStorage.getItem("jg-vt") !== "full";
-  } catch {}
   const m = document.getElementById("main");
   const d = window.devicePixelRatio || 1;
-  const tall = on && !!m && m.scrollHeight * m.clientWidth * d * d * 4 > SNAPSHOT_BUDGET;
+  const tall = !!m && m.scrollHeight * m.clientWidth * d * d * 4 > SNAPSHOT_BUDGET;
   /* On #main and its children, not the root: a root attribute over
      `#main > *` restyled every element on the page as it landed, about
      1,220 on /portfolio (audit 2026-11-11). */
@@ -77,9 +71,8 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
      than the clock (a cold Worker, a route compiling on dev) lost its
      way halfway and fell back to the browser's own crossfade. */
   const path = usePathname();
-  /* Off when the tab turned V3 motion off with `?v3motion=0`; on by default (`data-v3motion`, `app/layout.tsx`).
-     The boundary stays mounted either way so the page is never rebuilt. */
-  const on = React.useSyncExternalStore(noSubscribe, () => document.documentElement.hasAttribute("data-v3motion"), () => false);
+  /* Off on the server and the first paint. The boundary stays mounted either way so the page is never rebuilt. */
+  const on = React.useSyncExternalStore(noSubscribe, () => true, () => false);
   const shown = React.useRef(path);
   React.useLayoutEffect(() => {
     shown.current = path;

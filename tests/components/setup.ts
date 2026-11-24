@@ -28,6 +28,9 @@ if (!window.matchMedia) {
     }) as MediaQueryList;
 }
 window.scrollTo = () => {};
+// The home's motion engine and the header's ink run on every client mount.
+if (!document.fonts) Object.defineProperty(document, "fonts", { value: { ready: Promise.resolve() }, configurable: true });
+if (!document.elementsFromPoint) document.elementsFromPoint = () => [];
 HTMLCanvasElement.prototype.getContext = (() => null) as never;
 
 vi.mock("next/navigation", () => ({

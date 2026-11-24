@@ -155,8 +155,6 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .foot-line{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:20px var(--gr) 28px var(--g);border-top:1px solid var(--line)}
 .v3 .foot-p{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
 @media (max-width:700px){.v3 .foot-line{align-items:flex-end}.v3 .foot-p{order:-1;align-items:flex-start}}
-/* ?blur=0: solid header, no backdrop blur (Chrome scroll cost). */
-[data-solidhdr] .v3 .site-hdr{background:var(--bg);-webkit-backdrop-filter:none;backdrop-filter:none}
 /* Julian: on desktop and iPad the footer is one line, the place bottom
    left, Legal then the copyright bottom right. */
 @media (min-width:701px){.v3 .foot-line{flex-wrap:nowrap;align-items:baseline;gap:28px}
@@ -1269,7 +1267,7 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .mo-player .pl-info .mk{color:rgb(var(--on-photo));flex:none}
 @media (prefers-reduced-motion:reduce){.mo-player .pl-bar,.mo-player .pl-info,.mo-player .pl-tint{transition:none}}
 
-/* Motion plan 01: the ink rises from the bottom on hover (180ms in, 120ms out), a press dips to .97. Off with ?v3motion=0; the glass Play keeps its own look. */
+/* Motion plan 01: the ink rises from the bottom on hover (180ms in, 120ms out), a press dips to .97; the glass Play keeps its own look. */
 :root[data-v3motion] .v3 .btn:not(.cn-light){background:linear-gradient(var(--btn-ink,var(--ink)),var(--btn-ink,var(--ink))) bottom/100% 0 no-repeat transparent;transition:background-size .12s cubic-bezier(.4,0,.2,1),color .12s,scale .08s}
 :root[data-v3motion] .v3 .btn.fill:not(.cn-light){background-size:100% 100%}
 @media (hover:hover){:root[data-v3motion] .v3 .btn:not(.cn-light):hover{background-size:100% 100%;color:var(--bg);transition-duration:.18s,.18s,.08s}

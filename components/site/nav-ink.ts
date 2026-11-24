@@ -3,14 +3,12 @@
 import * as React from "react";
 import { plainSrc } from "@/image-loader";
 
-/* The header (app/styles/navfx.css), on for everyone since 2026-11-22, `?navfx=0` off for the tab:
+/* The header (app/styles/navfx.css):
    1. `data-navtop` on the root while the bar has no ground: the top of a page, and on the homepage for as long
       as the hero shows.
    2. Each word in the bar is white or black, whichever reads better over what is under it (photo, film or page,
       with the bar's veil on top once it is on). Pixels come from a small copy of each photo, made once.
    3. Page words and buttons fade out as they slide under the bar; photos do not. */
-
-export const navfx = () => typeof document !== "undefined" && "navfx" in document.documentElement.dataset;
 
 type RGB = [number, number, number];
 const VEIL = 0.47; // --nav-veil
@@ -382,7 +380,7 @@ const WORDS = ".site-wm,.links a,.tbtn,.menu-btn,.hslot";
 export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string) {
   React.useEffect(() => {
     const bar = hdr.current, root = document.documentElement;
-    if (!bar || !navfx()) return;
+    if (!bar) return;
     let raf = 0, timer = 0, last = 0, frostT = 0, inkAt = 0, lastY = Math.max(0, scrollY), down = false;
     const top = () => {
       // The homepage: no ground while its hero shows (the v4 hero, or the cover). Elsewhere: none at the very top.
