@@ -86,7 +86,7 @@ beforeEach(() => {
 
 /** A paid portraits session through the webhook; its id and token from the client's mail. */
 async function paid(start: string) {
-  const meta = { kind: "deposit", engine: "own", slug: "portraits", start, timeZone: "America/Los_Angeles", name: "QA Test", email: "qa@example.com" };
+  const meta = { kind: "deposit", slug: "portraits", start, timeZone: "America/Los_Angeles", name: "QA Test", email: "qa@example.com" };
   expect(await bookDeposit(ctx.env as never, "pi_TEST1234567890", meta)).toBe("booked");
   const link = String(client.sent.at(-1)!.text).match(/\/booking\/(\w+)\?t=([\w.-]+)&do=cancel/)!;
   return { id: link[1], t: link[2] };
@@ -232,9 +232,9 @@ describe("cancel", () => {
 
   it("a free call cancels with no money", async () => {
     const res = await book(new Request("https://juliangigola.com/api/book", { method: "POST", body: JSON.stringify({ slug: "music-call", start: wednesday(7), timeZone: "America/Los_Angeles", name: "QA", email: "qa@example.com", via: "Phone" }) }));
-    const { data } = await res.json();
+    const { id } = await res.json();
     const t = String(client.sent[0].text).match(/t=([\w.-]+)&do=cancel/)![1];
-    expect(await (await post(data.uid, { t, action: "cancel" })).json()).toMatchObject({ refunded: null, record: { paid: false } });
+    expect(await (await post(id, { t, action: "cancel" })).json()).toMatchObject({ refunded: null, record: { paid: false } });
   });
 });
 

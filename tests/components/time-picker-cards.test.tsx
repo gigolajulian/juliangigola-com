@@ -41,7 +41,7 @@ const answer = (length = 60) => ({
 
 type Call = [string, RequestInit | undefined];
 const calls = () => (fetch as unknown as { mock: { calls: Call[] } }).mock.calls;
-function stubFetch(book: () => Response = () => Response.json({ status: "success", data: {} })) {
+function stubFetch(book: () => Response = () => Response.json({ id: "b1" })) {
   vi.stubGlobal("fetch", vi.fn(async (url: string) => (url.startsWith("/api/slots") ? Response.json(answer()) : book())));
 }
 
@@ -181,7 +181,7 @@ describe("EditorialCard", () => {
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
 
     const step = await screen.findByTestId("deposit");
-    expect(JSON.parse(step.dataset.body!)).toMatchObject({ engine: "own", slug: "portraits", name: "Ana Lee", email: "ana@example.com", phone: "+14085550134", start: "2026-11-19T18:00:00.000Z" });
+    expect(JSON.parse(step.dataset.body!)).toMatchObject({ slug: "portraits", name: "Ana Lee", email: "ana@example.com", phone: "+14085550134", start: "2026-11-19T18:00:00.000Z" });
     expect(screen.getByText("$250")).toBeTruthy();
     expect(screen.getByText("Session: Session, 60 min")).toBeTruthy();
     expect(calls().some(([u]) => u === "/api/book")).toBe(false);

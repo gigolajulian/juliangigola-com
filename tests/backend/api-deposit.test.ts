@@ -121,7 +121,7 @@ describe("POST /api/deposit", () => {
     expect(form.get("metadata[start]")).toBe(START);
     expect(form.get("metadata[amount]")).toBeNull();
     expect(form.get("metadata[kind]")).toBe("deposit");
-    expect(form.get("metadata[engine]")).toBe("own");
+    expect(form.get("metadata[engine]")).toBeNull();
     expect(kv().puts).toEqual([]);
   });
 });

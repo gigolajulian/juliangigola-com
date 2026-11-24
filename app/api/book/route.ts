@@ -6,7 +6,7 @@ import { alertHello } from "@/lib/email/hello-mail";
 import { whenPT } from "@/lib/inbox";
 import { bodyOf, json, limited, upstreamError } from "@/lib/http";
 
-// Errors answer { error: string }, as every other booking route does.
+// A booked call answers { id, start, end, where }; errors answer { error: string }, as every other booking route does.
 
 /* ── a free call, booked by the site's own engine ─────────────────
  * The picker posts a call here. The lock rechecks the time and inserts
@@ -48,5 +48,5 @@ export async function POST(request: Request) {
   const r = out.record;
   await afterBooked(env, r, async () => ({ ...confirmOf(r, await manageLinks(env.BOOKING_SECRET, r)), call: true }), { defer: (p) => ctx.waitUntil(p) });
   ctx.waitUntil(alertHello(env.EMAIL, `Booked: ${[r.session, whenPT(r.start), r.name].join(", ")}`, [`${r.name} <${r.email}>`, ...(r.phone ? [`Phone: ${r.phone}`] : []), callLine(r), ...(r.notes ? ["", r.notes] : [])], { name: r.name, email: r.email }));
-  return json({ status: "success", data: { uid: r.id, start: r.start, end: r.end, where: r.where } });
+  return json({ id: r.id, start: r.start, end: r.end, where: r.where });
 }
