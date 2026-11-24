@@ -1,6 +1,7 @@
 import { refuseWorker } from "@/lib/vouch";
 import { sealedStore } from "@/lib/kv";
-import { listProofs, readProof, type Proof } from "@/lib/proofs/proof";
+import type { Proof } from "@/lib/proofs/proof-model";
+import { listProofs, readProof } from "@/lib/proofs/proof-store";
 import { digestMail } from "@/lib/email/proof-mail";
 import { alertHello } from "@/lib/email/hello-mail";
 import { json } from "@/lib/http";

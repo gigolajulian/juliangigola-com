@@ -3,7 +3,7 @@ import { sealer } from "@/lib/leads/lead-crypto";
 import { copiesFor, findLead, personKey, readLead, recordLead, writeLead } from "@/lib/leads/lead-store";
 import { fold, leadSummary, leadStoreKey, type Lead, type Person } from "@/lib/leads/leads";
 import { cleanPeople, merge, PEOPLE_MAX } from "@/lib/leads/lead-crm";
-import { readProof, writeProof } from "@/lib/proofs/proof";
+import { readProof, writeProof } from "@/lib/proofs/proof-store";
 import { FakeKV, LEADS_KEY, INBOX_KEY as KEY } from "./fakes";
 
 /* Several people under one client (Julian 2026-11-15): the art director,

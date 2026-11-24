@@ -1,6 +1,6 @@
 import { openDelivery } from "@/lib/proofs/delivery";
 import { finalOf, servedPreview } from "@/lib/proofs/delivery-serve";
-import { isFrameId } from "@/lib/proofs/proof";
+import { isFrameId } from "@/lib/proofs/proof-model";
 
 /* A final's web copy: 2000px, or 800px with `?w=800`. Never the full file; that is /dl. */
 export const dynamic = "force-dynamic";

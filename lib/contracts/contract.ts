@@ -20,7 +20,7 @@ import { TZ } from "@/lib/booking/rules";
 import { depositOfLead, type InvoiceFrom } from "@/lib/leads/invoice";
 import type { Lead } from "@/lib/leads/leads";
 import type { InboxKV as KV } from "@/lib/kv";
-import { isEmail, newToken } from "@/lib/proofs/proof";
+import { isEmail, newToken } from "@/lib/proofs/proof-model";
 import type { Seal } from "@/lib/leads/lead-crypto";
 import { sha256Hex } from "@/lib/utils";
 

@@ -1,5 +1,6 @@
 import { sealedStore } from "@/lib/kv";
-import { isToken, readPublic } from "@/lib/proofs/proof";
+import { isToken } from "@/lib/proofs/proof-model";
+import { readPublic } from "@/lib/proofs/proof-store";
 import { shareCard } from "@/lib/proofs/watermark";
 
 /* The gallery's link-preview card (`shareCard`). Only while the gallery is open and watermarked. */
