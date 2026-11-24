@@ -44,7 +44,7 @@ export type LeadEvent = {
     | "no-show"
     // The client's first download of their finals: Delivered.
     | "download"
-    // The client signed a contract online (2026-11-15, `lib/contracts/contract.ts`), ref = "signed:<contract id>".
+    // The client signed a contract online (`lib/contracts/contract.ts`), ref = "signed:<contract id>".
     | "contract"
     // A task on the lead ticked done, ref = "task:<task id>".
     | "task";

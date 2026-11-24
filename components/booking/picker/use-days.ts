@@ -10,8 +10,8 @@ export function usePickerDays(days: Record<string, string[]> | null, startView?:
   const [anchor, setAnchor] = React.useState(() => new Date()); // the week or month on show
   const [pick, setPick] = React.useState<PickedTime | null>(null);
   /* What has been picked by hand: nothing (the first open time is only
-     on show), a day, or a day and its time. A day alone keeps Confirm off:
-     clicking one used to pick its time as well, skipping step two. */
+     on show), a day, or a day and its time. A day alone keeps Confirm off,
+     so clicking one never skips step two. */
   const [chosen, setChosen] = React.useState<false | "day" | "time">(false);
 
   /* A time button picks the time; a day keeps the time already picked

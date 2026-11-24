@@ -398,14 +398,9 @@ export function AdminEditor({
           )}
         >
           {whole("work")}
-          {/* Not a gate any more. The editor used to be hidden entirely until a
-            token proved itself, which meant arriving at /admin — or clicking
-            a project in the sitemap — showed a read-only index and a password
-            box. Everything on this page can be worked out from what the last
-            build published, so the form is the page and the token is only
-            asked for at the point it is actually needed: the commit. The
-            usual visit does not see this at all, because a stored token
-            reconnects on mount. */}
+          {/* Not a gate: the form works from what the last build published,
+            so the token is asked for only at the commit. A stored token
+            reconnects on mount, so the usual visit never sees this. */}
           {/* Not on the lead desk: it publishes nothing, and above it the box
             pushed the desk off the screen. */}
           {!sha && !leadsWide ? (
@@ -466,7 +461,7 @@ export function AdminEditor({
                 );
               })()
             : null}
-          {/* The lead and proofs desks are their own pages since 2026-11-11: Astryx stays out of the editor. */}
+          {/* The lead and proofs desks are their own pages: Astryx stays out of the editor. */}
           {!page && view === "leads" ? (
             <ul className="grid max-w-md gap-1 py-6">
               {([["Leads", "/admin/leads"], ["Proofs", "/admin/proofs"]] as const).map(([t, href]) => (

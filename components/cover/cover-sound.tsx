@@ -47,7 +47,7 @@ function scPlay(url: string) {
     frame.tabIndex = -1;
     frame.setAttribute("aria-hidden", "true");
     // A real size, off the screen: at 1px SoundCloud's player draws its waveform on an empty canvas, which throws
-    // in WebKit ("The object is in an invalid state", createPattern) and the track never starts (JG - MAC, #1086).
+    // in WebKit ("The object is in an invalid state", createPattern) and the track never starts.
     frame.style.cssText = "position:fixed;left:-9999px;bottom:0;width:320px;height:166px;border:0;opacity:0;pointer-events:none";
     addEventListener("message", (e) => {
       if (e.origin !== SC || e.source !== frame?.contentWindow) return;

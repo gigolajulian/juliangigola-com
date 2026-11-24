@@ -3,9 +3,8 @@
 import * as React from "react";
 
 /* ── pictures arrive, they do not pop ─────────────────────────────
- * A lazily loaded photograph used to appear the instant its bytes did: one
- * frame the placeholder colour, the next the picture. Every `<img
- * data-fade>` now starts transparent and fades up over 480ms once it has
+ * A lazily loaded photograph would appear the instant its bytes did. Every
+ * `<img data-fade>` starts transparent and fades up over 480ms once it has
  * loaded — see the rule in `globals.css`.
  *
  * "Once it has loaded" is the one thing CSS cannot know, so this listens

@@ -57,8 +57,8 @@ const categoryRedirects = CATEGORIES.map((c) => ({
 }));
 
 /**
- * Julian (2026-10-27): the discipline pages are retired for /portfolio with
- * the chip on. Where a discipline shares its slug with its one gallery
+ * The discipline pages are retired for /portfolio with the chip on
+ * (Julian's call). Where a discipline shares its slug with its one gallery
  * (Automotive, Events, Places, Cover art) the project page answers instead.
  */
 const disciplineRedirects = [
@@ -71,18 +71,16 @@ const disciplineRedirects = [
 ];
 
 /**
- * Julian: Portfolio at /portfolio. The work lived at /work, and every
- * address under it is in the index, in his Instagram and in inboxes, so
- * each one answers with a permanent redirect to the same place under
+ * Portfolio at /portfolio (Julian's call). Every old /work address is in
+ * the index, in his Instagram and in inboxes, so each one answers with a permanent redirect to the same place under
  * /portfolio. Last, so a rename above sends an old slug straight to its new
  * one. Pages only: the photographs are still filed under `/work/`
  * (`image-loader.ts`), so nothing here matches a path with a dot in it or
  * one folder deeper than a project.
  */
 const workRedirects = [
-  // Julian (2026-09-29): the disciplines moved up beside the projects, so
-  // /portfolio/category/editorial is /portfolio/editorial (and cover art
-  // its project page) from here on.
+  // The disciplines sit beside the projects: /portfolio/category/editorial
+  // is /portfolio/editorial (and cover art its project page).
   {
     source: "/portfolio/category/:slug([a-z0-9-]+)",
     destination: "/portfolio/:slug",
@@ -104,28 +102,24 @@ const workRedirects = [
 
 /** Pages that moved or were retired. */
 const pageRedirects = [
-  // Julian (2026-10-03): a session gallery small enough to be all there
-  // is a screen of the page that books it (`contact-sheet.tsx`).
-  // Permanent since 2026-11-09 (Julian), so Google drops the old addresses.
+  // A session gallery small enough to be all there is a screen of the page
+  // that books it (Julian's call). Permanent, so Google drops the old addresses.
   { source: "/portfolio/headshots", destination: "/headshots#work", permanent: true },
   { source: "/portfolio/graduation", destination: "/graduation-photos#work", permanent: true },
-  // /studio (to /about) and /links (to /contact) are Cloudflare redirect rules since
-  // 2026-11-15 ("studio to about", "links to contact", 308, juliangigola.com only), not code.
-  // /rates never got written — it still served the Format demo's biography.
-  // Sessions is where a rate question actually gets answered now.
+  // /studio (to /about) and /links (to /contact) are Cloudflare redirect rules
+  // ("studio to about", "links to contact", 308, juliangigola.com only), not code.
+  // Sessions is where a rate question gets answered.
   { source: "/rates", destination: "/#sessions", permanent: true },
-  // Julian: Sessions is a homepage screen now, and the page is gone.
+  // Sessions is a homepage screen, not a page (Julian's call).
   { source: "/sessions", destination: "/#sessions", permanent: true },
-  // There was a cart in the header but nothing behind it.
+  // No store.
   { source: "/store", destination: "/", permanent: true },
-  // "Wedding" (33 frames) was folded into the Weddings gallery; the project
-  // is hidden now and its frames live in the gallery's sequence.
+  // "Wedding" is hidden; its frames live in the Weddings gallery's sequence.
   { source: "/work/bridal", destination: "/portfolio/weddings", permanent: true },
   { source: "/portfolio/bridal", destination: "/portfolio/weddings", permanent: true },
-  // The terms and the privacy policy were two pages for a day; they are two
-  // columns of one now, and the footer links straight to the anchors.
-  // GISELLE was at its full gallery name and is at its own now. Both of
-  // the old URLs are in the index and in Julian's own links.
+  // The terms and the privacy policy are two columns of one page, and the
+  // footer links straight to the anchors. GISELLE's old full gallery name is
+  // in the index and in Julian's own links.
   {
     source: "/work/giselle-studio-digitals",
     destination: "/portfolio/giselle",
@@ -211,7 +205,7 @@ const __impeccableLiveDev =
  *   blob:            /admin previews a chosen photograph from an object URL
  *                    before it has been uploaded anywhere.
  *   api.github.com   /admin commits through the GitHub API from the browser.
- *   youtube/vimeo    /work/video embeds films from both. Four allowances,
+ *   youtube/vimeo    /portfolio/video embeds films from both. Four allowances,
  *                    each narrow: the two player origins in `frame-src`, the
  *                    two thumbnail CDNs in `img-src`, and the two oEmbed
  *                    endpoints in `connect-src`, which only /admin uses, to
@@ -220,9 +214,8 @@ const __impeccableLiveDev =
  *                    `youtube-nocookie.com` rather than `youtube.com` for the
  *                    player: the ordinary domain sets an advertising cookie
  *                    on load, and this site has no cookie banner to justify
- *                    one. Nothing from either loads until a visitor presses
- *                    play (see `components/video-grid.tsx`), so the policy is
- *                    the boundary and the click is the consent.
+ *                    one. The previews play muted as each film comes into
+ *                    frame (`components/portfolio/video.tsx`).
  */
 const csp = [
   "default-src 'self'",
@@ -232,7 +225,7 @@ const csp = [
   // rule, because `frame-ancestors` is the real one and `X-Frame-Options`
   // below is what older browsers read. 'self' rather than 'none' for one
   // frame: /admin's SEO tab shows a page live under its click map
-  // (`admin-seo.tsx`). Julian chose this over a per-URL exception, 2026-10-14.
+  // (`admin-seo.tsx`). Julian's call over a per-URL exception.
   "frame-ancestors 'self'",
   "form-action 'self'",
   // The provider stills for the video page, which are 16:9 thumbnails on
@@ -265,7 +258,7 @@ const csp = [
   // is the other direction and still says no other site may frame this one.
   // 'self' is the SEO tab's frame of the site's own pages.
   // And the booking calendars on /book and the session pages (Google Calendar
-  // appointment schedules, `components/booking/book-picker.tsx`, `components/contact-screen.tsx`).
+  // appointment schedules, `components/booking/book-picker.tsx`).
   // Stripe's Payment Element for the $100 deposit (`lib/booking/deposit.ts`): its
   // script and frames from js.stripe.com, 3D Secure from hooks.stripe.com,
   // and its calls to api.stripe.com.
@@ -350,8 +343,7 @@ const nextConfig: NextConfig = {
   /**
    * DialKit on the dev server only (Julian). A production build gets
    * `lib/dev/dialkit-stub.ts` in its place: the configs' defaults and no panel,
-   * so visitors no longer download 72KB gzipped of tuning panels they never
-   * saw (the audit, 2026-10-02).
+   * so visitors never download 72KB gzipped of tuning panels.
    */
   turbopack: {
     resolveAlias:
@@ -364,43 +356,25 @@ const nextConfig: NextConfig = {
    * The site runs on Workers, where Next's own optimizer is not available —
    * and would be the wrong tool anyway. The archive (public/work) ships from
    * git and is served from this origin. The loader rewrites every frame onto
-   * Cloudflare Image Transformations, which is what finally makes the `sizes`
-   * props in the components mean something: under the old static export the
-   * loader ignored `width` entirely and every device downloaded the same
-   * 1600px file. See `image-loader.ts`.
+   * Cloudflare Image Transformations, so the `sizes` props in the components
+   * pick a file per width. See `image-loader.ts`.
    */
   images: {
     loader: "custom",
     loaderFile: "./image-loader.ts",
-    /* Three widths, not Next's eight. Every width a browser can ask for is
-       a separate transformation, billed per unique source-and-size and
-       counted against 5,000 a month included. 640 covers a phone, 1080 a
-       laptop and a phone at 2x, 1920 everything else; the loader rounds a
-       request up to the next one. `imageSizes` is kept for the small slots
-       — the index panel, a picker thumbnail. */
-    /* 1280 for a phone at 2.6x to 3x: a 100vw tile there needs 1050 to
-       1170px and was rounding up to 1920, on every tile of / and /work.
-       2500, the masters' own width, for a big dense screen: a 4K monitor
-       at 150% shows a landscape frame 1907css wide and needs 2861px, and
-       at 1920 it was drawn at two thirds density, which Julian saw as
-       pixelated. */
-    /* Five rungs, not eight. Every unique source-and-width is a
-       transformation Cloudflare counts for the month, so the ladder is
-       the multiplier on the whole archive: 1080 went because 1280 is
-       18% more pixels and nobody can see the difference, and 128 went
-       because nothing on the site is drawn that small. */
-    /* 1080 back (Julian, 2026-11-21: "add the 1080 image size"): a phone or
-       laptop at 2x that needs 641 to 1080px got the 1280, about 40% more
-       bytes than it draws. The browser still takes the smallest width that
-       covers the slot at its pixel density, so nothing is drawn softer; it
-       costs one more transformation per picture asked for at that width. */
+    /* Five rungs, not Next's eight. Every unique source-and-width is a
+       transformation Cloudflare counts against 5,000 a month, so the
+       ladder is the multiplier on the whole archive; the loader rounds a
+       request up to the next rung. 640 for a phone, 1080 for a laptop or a
+       phone at 2x (Julian's call: the 1280 would be about 40% more bytes),
+       1280 for a phone at 2.6x to 3x, 1920 for most else, and 2500, the
+       masters' own width, for a 4K screen, which at 1920 pixelates. */
     deviceSizes: [640, 1080, 1280, 1920, 2500],
     /* 384 for the homepage's band: five tiles to a row makes each one
-       about 254px on a laptop, and with `sizes` saying a third of the
-       window every one of them was fetching the 640. */
+       about 254px on a laptop, where the 640 would be twice the pixels. */
     imageSizes: [384],
     /* 78 everywhere a photograph is shown: about 15% lighter than the
-       harvester's 82 and not a difference Julian could see at 1:1. 82
+       harvester's 82 and not a visible difference at 1:1. 82
        only for the full-size copy the viewer swaps in to be zoomed.
        Next 16 coerces any quality not listed here to the nearest one. */
     qualities: [78, 82],

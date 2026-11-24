@@ -26,8 +26,7 @@ export function useStripScroll(
     /* A finger from 768px up moves the row one to one, so on lift it has
        to carry on the way iOS's own scroll does: the speed of the last
        tenth of a second, run down at iOS's normal rate (0.998 a ms).
-       Without it a flick stopped dead on lift, a cover's width for a fast
-       swipe (MAC, iPhone Duo open and iPad). A finger back on
+       Without it a flick stops dead on lift. A finger back on
        the glass catches it. */
     let ty: [number, number] | null = null;
     let moves: { t: number; d: number }[] = [];

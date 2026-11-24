@@ -103,7 +103,7 @@ export async function checkout(key: string, p: Proof, method: "bank" | "card" = 
 
 /** A Checkout session that is paid, for this gallery, for at least what the selects cost now. */
 export async function paidFor(key: string, p: Proof, session: string): Promise<Proof["paid"] | null> {
-  // A session already counted in `paid` never pays again (QA 2026-11-07: replayed after a reopen).
+  // A session already counted in `paid` never pays again, even replayed after a reopen.
   if (!/^cs_(test|live)_[A-Za-z0-9]+$/.test(session) || session === p.paid?.session) return null;
   const s = await stripe(key, `/checkout/sessions/${session}`);
   const meta = s.metadata as Record<string, string> | undefined;

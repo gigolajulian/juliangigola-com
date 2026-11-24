@@ -43,8 +43,7 @@ const CDN = process.env.NEXT_PUBLIC_IMAGE_CDN === "1";
  * `/cdn-cgi/image/` on its own origin. `https://juliangigola.com` on a
  * branch preview (`next.config.ts` sets it from Workers Builds' branch), so
  * a preview decodes the same sized pictures live does and not the 2500px
- * originals, which made scrolling and intros look slower in review than
- * they are.
+ * originals.
  */
 const ORIGIN = process.env.NEXT_PUBLIC_IMAGE_CDN_ORIGIN ?? "";
 
@@ -73,9 +72,8 @@ function sizedHero(src: string, width: number): string | null {
   /* Wider than the widest copy. A hero has nothing bigger and takes its
      widest; a cover is the same picture as a full-size frame
      (`sources.json`, written by `make-cards`), so it takes that frame at
-     its 2500px; a scrub frame is its own master. Serving the 1080 copy
-     for a 2700px slot was a browser upscale, which Julian saw as
-     pixelated covers on a 4K monitor. */
+     its 2500px; a scrub frame is its own master. The 1080 copy in a
+     2700px slot is a browser upscale and pixelates on a 4K screen. */
   if (m) return src.replace(/\.jpg$/i, `-w${widths[widths.length - 1]}.jpg`);
   return (SOURCES as Record<string, string>)[src] ?? src;
 }
@@ -95,7 +93,7 @@ const POSTER_HOSTS = /^https:\/\/i\.(?:ytimg|vimeocdn)\.com\//;
  * The plain file a resized address stands for, or null when `url` is not one.
  * A picture of ours comes back as `/<path>`; a provider still comes back as
  * its own `https://` URL, never glued onto this host as `/https://...`, which
- * 404s (MAC). A slash a proxy merged (`https:/`) is put back.
+ * 404s. A slash a proxy merged (`https:/`) is put back.
  */
 export function plainSrc(url: string): string | null {
   const rest = /\/cdn-cgi\/image\/[^/]+\/(.+)$/.exec(url)?.[1];
@@ -111,7 +109,7 @@ export default function cloudflareImageLoader({
   const options = [
     `width=${width}`,
     // 78 for every picture that is looked at rather than inspected: a
-    // step under the harvester's 82 that Julian could not see at 1:1. The
+    // step under the harvester's 82 that does not show at 1:1. The
     // viewer's zoomable copy asks for 82 (next.config.ts, `qualities`).
     `quality=${quality ?? 78}`,
     "format=auto",
@@ -125,17 +123,9 @@ export default function cloudflareImageLoader({
       : src;
   }
 
-  // The sized copy when there is one, with or without the resizer.
-  //
-  // Without transformations it is the whole answer: the archive's bare path
-  // and `width` unused, except for the pictures `make-hero` and `make-cards`
-  // sized at build. *With* them it still matters, and this was missed: the
-  // resizer never upscales, and every project's `cover.jpg` is a 600px
-  // harvest from the old site. Fed the original, a 769px tile on a 1.5x
-  // screen got a 600px picture stretched to 1150 — soft on the homepage,
-  // and visibly sharpening mid-trip as the morph landed on the project's
-  // 1920px frame. The 1080px copy exists for exactly this; hand the resizer
-  // that, and it only ever scales down.
+  // The sized copy when there is one, with or without the resizer. The
+  // resizer never upscales and each `cover.jpg` is a 600px harvest, so it
+  // gets the larger copy and only ever scales down.
   const source = sizedHero(src, width) ?? src;
 
   if (!CDN) return source;

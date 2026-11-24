@@ -38,7 +38,7 @@ Measured or traced and kept on purpose. Skip these unless the reason below stops
 | 4 | P1 | Strip view lets browser zoom through | `components/portfolio/work.tsx` strip `wheel` returns on `e.ctrlKey` | fixed in #675 |
 | 5 | P2 | Proof lightbox and menu drawer hold focus | focus moves in on open, back to the trigger on close, page behind is `inert` (`proof-gallery.tsx`, `v3/chrome.tsx`) | fixed in #677 (proof), #704 (drawer) |
 | 6 | P2 | Proof page targets 44px | `app/styles/proof.css` close, tabs, zoom at least 44px tall on touch | fixed in #677 |
-| 7 | P2 | Lightbox cancel only resets | `components/cover/lightbox.tsx`: `onPointerCancel` does not run the step/dismiss logic (needs a device recording first) | open |
+| 7 | P2 | Lightbox cancel only resets | `components/cover/lightbox/use-swipe.ts`: `onPointerCancel` does not run the step/dismiss logic (needs a device recording first) | open |
 | 8 | P2 | Calendar bars do not animate height | `components/time-picker.tsx`: no `transition-[height]` | fixed in #678 |
 | 9 | P2 | No full-screen blur over the moving wall | see By design | by design |
 | 10 | P2 | Strip progress bar uses no width | `components/portfolio/work.tsx` `stripBar` sets a transform or clip, not `style.width` | fixed in #678 |

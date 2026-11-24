@@ -14,10 +14,8 @@ import { cn } from "@/lib/utils";
 /* ── the video tab ────────────────────────────────────────────────
  * Paste a link. Everything else is filled in or picked.
  *
- * The alternative — a form with provider, id, title and poster URL as four
- * fields — asks Julian to know that a YouTube id is the eleven characters
- * after `v=`, and to find a thumbnail URL by hand. He has the link in his
- * clipboard; that is the whole input.
+ * The link is the whole input: nobody should need to know that a YouTube id
+ * is the eleven characters after `v=`, or find a thumbnail URL by hand.
  *
  * The title comes from the provider's oEmbed endpoint, which is also where
  * Vimeo's poster comes from: Vimeo does not publish stills at a guessable

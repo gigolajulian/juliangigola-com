@@ -80,7 +80,7 @@ export function Contact() {
         <div className="reach">
           <Note />
           <div className="reach-call">
-            <Duo d={CALL_CARD.d} l={CALL_CARD.l} alt="" sizes="(max-width: 800px) 100vw, 40vw" />
+            <Duo dark={CALL_CARD.d} light={CALL_CARD.l} alt="" sizes="(max-width: 800px) 100vw, 40vw" />
             <div className="rc-in">
               <h2>Book a consultation</h2>
               <p>15 minutes, phone or video. Pick a time on my calendar.</p>
@@ -98,14 +98,14 @@ export function Contact() {
         </div>
         <div className="doors ch-doors">
           <Link className="door" href="/contact/form">
-            <Duo d={DOORS.commissions.d} l={DOORS.commissions.l} alt="" sizes="(max-width: 800px) 100vw, 50vw" />
+            <Duo dark={DOORS.commissions.d} light={DOORS.commissions.l} alt="" sizes="(max-width: 800px) 100vw, 50vw" />
             <span className="lbl mute">For art directors and artists</span>
             <h3>Commissions</h3>
             <p>Campaigns, editorial, cover art and presskits. Three short steps.</p>
             <div><span className="btn fill">Start an inquiry</span></div>
           </Link>
           <Link className="door" href="/book">
-            <Duo d={DOORS.book.d} l={DOORS.book.l} alt="" sizes="(max-width: 800px) 100vw, 50vw" />
+            <Duo dark={DOORS.book.d} light={DOORS.book.l} alt="" sizes="(max-width: 800px) 100vw, 50vw" />
             <span className="lbl mute">For private clients</span>
             <h3>Book a session</h3>
             <p>Portraits, graduation, headshots, studio digitals and weddings.</p>

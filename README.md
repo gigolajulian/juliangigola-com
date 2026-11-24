@@ -55,7 +55,6 @@ All 74 projects and 1,131 frames were migrated off the old Format site.
 | `lib/work/work-data.ts` | The archive: every migrated project, its credits, categories and frames. First written by `scripts/harvest.mjs`; the harvester no longer runs, so this file is now edited by hand. |
 | `lib/work/work.ts` | The only module the app reads work from. Holds the editorial decisions: what is featured, what leads the homepage, how categories group. |
 | `lib/work/work-types.ts` | Shapes for the above. |
-| `lib/booking/sessions.ts` | Session types for the older booking pages. `from: null` renders as "On request". |
 | `lib/booking/catalog.ts` | The session list the /book stepper, the homepage and the service pages read. |
 | `lib/photos.ts` | Photo picks for the hero, the doors, the call card and About. |
 | `lib/site.ts` | Reply-time promise and the booking-calendar URL. |
@@ -68,9 +67,22 @@ All 74 projects and 1,131 frames were migrated off the old Format site.
 | `components/site/` | Site chrome: header, foot, page transitions, smooth scroll, the legal pages. |
 | `components/portfolio/` | /portfolio, the project pages and the motion page. |
 | `components/booking/` | The /book stepper, session pages and booking management. |
+| `components/booking/picker/` | The date and time picker inside the stepper. |
+| `components/enquiry/` | The enquiry stepper and its submit. |
 | `components/about/`, `contact/`, `cover/`, `bts/`, `splash/` | The inner pages and the intro splash. |
 | `components/effects/`, `components/vendor/` | Shared effects (tilt, liquid, photo fade) and vendored components. |
 | `components/admin/`, `leads/`, `proofs/`, `contracts/` | /admin, the Leads desk, client proof galleries and signed contracts. |
+| `components/desk/` | Chrome the private desks share: icons, sign-in, references. |
+| `components/dev/` | The `?debug` overlay and the DialKit copy button. Dev only. |
+| `lib/motion/` | Shared motion: the lazy GSAP loader, springs, throws, wheel and rubberband. |
+| `lib/flags/` | Query-string and session flags for features on trial. |
+| `lib/og/` | Share cards and share metadata. |
+| `lib/email/` | Mail to clients and to the studio inbox, with the logo and signature. |
+| `lib/seal.ts` | AES-GCM sealing for leads, proofs, contracts and the activity log in KV. |
+| `lib/storage.ts` | Browser storage that never throws. |
+| `lib/token.ts` | SHA-256 and random ids from Web Crypto. |
+| `lib/later.ts` | Work that runs after the response (`waitUntil` in the Worker). |
+| `lib/time-zone.ts` | The studio time zone (`TZ`), `whenPT`, `DAY_MS` and `WEEK_MS`. |
 
 ### The migration (finished)
 

@@ -1,12 +1,8 @@
 /* ── beacon ───────────────────────────────────────────────────────
- * What the site's own click-and-scroll beacon sends, and how the Worker
- * checks it before it goes into Analytics Engine. Shared by the beacon
- * (`components/analytics/click-beacon.tsx`), its route (`app/api/beacon`) and the
- * SEO tab's reader (`app/api/seo`).
- *
- * One beacon per page view, sent when the page is left: where it was, how
- * far down it got, and up to MAX_CLICKS presses as fractions of the window.
- * No cookie, no id, no IP: nothing in it says who.
+ * The site's click-and-scroll beacon and the Worker's check on it, for
+ * `components/analytics/click-beacon.tsx`, `app/api/beacon` and `app/api/seo`.
+ * Sent when the page is left: the path, the scroll depth and up to
+ * MAX_CLICKS presses. No cookie, no id, no IP.
  *
  * Analytics Engine columns:
  *   blob1 path · blob2 'view' | 'click' · blob3 what was pressed · blob4 device

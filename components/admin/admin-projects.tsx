@@ -451,8 +451,7 @@ export function AdminProjects({
                         filing a shoot under Graduation moves it off /work and
                         onto the session page, where it becomes one of that
                         session's sample frames. That is the point of offering
-                        them, and also the reason for the heading above them.
-                        Sessions used to be filtered out here entirely. */}
+                        them, and also the reason for the heading above them. */}
                     {[...new Set(disciplines.map((d) => d.group))].map(
                       (group) => (
                         <optgroup key={group} label={group}>

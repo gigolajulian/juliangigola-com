@@ -28,7 +28,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const contract = await sign(draft, { name: b.name, email: b.email, agree: b.agree, seen: b.hash, mark: b.mark, typed: b.typed, ip: request.headers.get("cf-connecting-ip") ?? "", ua: request.headers.get("user-agent") ?? "" }, at);
   if ("error" in contract) return json({ error: contract.error }, contract.status);
   await writeContract(kv, s, contract);
-  const sig = contract.signed!;
+  const sig = contract.signed;
   await contractStep(kv, s, contract.lead, "Signed", { at, kind: "contract", ref: `signed:${contract.id}`, note: sig.name }, env.NOTION_TOKEN);
   const [mailed] = await Promise.all([
     sendClient(env.CLIENT_EMAIL, sig.email, signedMail(contract, { html: signedCopy(contract), filename: copyName(contract) })),

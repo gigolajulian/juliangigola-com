@@ -63,7 +63,7 @@ export function NotFoundScene({ children }: { children: React.ReactNode }) {
       return () => window.removeEventListener("keydown", onKey);
     }
 
-    // Out of focus to begin with, only now that we know a hand can fix it.
+    // Out of focus to begin with, only once a hand can fix it.
     numerals.style.filter = `blur(${MAX_BLUR}px)`;
     numerals.style.opacity = "0.78";
     let last = -1;

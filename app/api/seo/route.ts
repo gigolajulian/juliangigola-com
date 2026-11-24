@@ -41,6 +41,19 @@ export async function GET(request: Request) {
   }
 
   const days = [7, 28, 90].includes(Number(url.searchParams.get("days"))) ? Number(url.searchParams.get("days")) : 28;
+  try {
+    return json(await windowStats(key, env.GSC_OAUTH, days));
+  } catch (e) {
+    return upstreamError("seo", e, errorText(e));
+  }
+}
+
+type Rum = Awaited<ReturnType<typeof rumVisits>>;
+type Search = Awaited<ReturnType<typeof searchStats>>;
+
+/* The last `days` days: visits against the window before, pages, sources,
+   Google, and what the beacon saw. */
+async function windowStats(key: string, gsc: string | undefined, days: number) {
   const now = Date.now();
   const iso = (ms: number) => new Date(ms).toISOString();
   const date = (ms: number) => iso(ms).slice(0, 10);
@@ -49,64 +62,66 @@ export async function GET(request: Request) {
   const rum = (dims: string, from: number, to: number, limit: number) => rumVisits(key, dims, iso(from), iso(to), limit);
 
   const start = now - days * DAY_MS;
-  try {
-    const [byPageDay, prior, sources, google, tracked] = await Promise.all([
-      rum("requestPath date", start, now, 5000),
-      rum("date", start - days * DAY_MS, start, 100),
-      rum("refererHost", start, now, 12),
-      searchStats(env.GSC_OAUTH, days),
-      engineSql<{ path: string; views: number }>(
-        key,
-        `SELECT blob1 AS path, SUM(_sample_interval) AS views FROM ${BEACON_DATASET} WHERE blob2 = 'view' AND timestamp > NOW() - INTERVAL '${days}' DAY GROUP BY path ORDER BY views DESC LIMIT 12`,
-      ).catch((e: Error) => ({ error: /unknown|not found|does not exist/i.test(e.message) ? "No beacon data yet." : e.message })),
-    ]);
+  const [byPageDay, prior, sources, google, tracked] = await Promise.all([
+    rum("requestPath date", start, now, 5000),
+    rum("date", start - days * DAY_MS, start, 100),
+    rum("refererHost", start, now, 12),
+    searchStats(gsc, days),
+    engineSql<{ path: string; views: number }>(
+      key,
+      `SELECT blob1 AS path, SUM(_sample_interval) AS views FROM ${BEACON_DATASET} WHERE blob2 = 'view' AND timestamp > NOW() - INTERVAL '${days}' DAY GROUP BY path ORDER BY views DESC LIMIT 12`,
+    ).catch((e: Error) => ({ error: /unknown|not found|does not exist/i.test(e.message) ? "No beacon data yet." : e.message })),
+  ]);
 
-    const pages = new Map<string, { path: string; visits: number; byDay: number[]; clicksByDay: number[]; imprByDay: number[]; clicks: number; impressions: number; position: number | null }>();
-    const page = (path: string) => {
-      let p = pages.get(path);
-      if (!p) {
-        const zero = () => dates.map(() => 0);
-        p = { path, visits: 0, byDay: zero(), clicksByDay: zero(), imprByDay: zero(), clicks: 0, impressions: 0, position: null };
-        pages.set(path, p);
-      }
-      return p;
-    };
-    for (const g of byPageDay) {
-      const p = page(g.dimensions.requestPath || "/");
-      p.visits += g.sum.visits;
-      const i = dates.indexOf(g.dimensions.date);
-      if (i >= 0) p.byDay[i] += g.sum.visits;
-    }
-    if (!("error" in google)) {
-      for (const r of google.pages) Object.assign(page(r.path), { clicks: r.clicks, impressions: r.impressions, position: r.position });
-      for (const r of google.pageDays) {
-        const i = dates.indexOf(r.date);
-        if (i >= 0) {
-          page(r.path).clicksByDay[i] += r.clicks;
-          page(r.path).imprByDay[i] += r.impressions;
-        }
-      }
-    }
-    const visits = byPageDay.reduce((s, g) => s + g.sum.visits, 0);
-    const sourceTotal = sources.reduce((s, g) => s + g.sum.visits, 0) || 1;
+  const visits = byPageDay.reduce((s, g) => s + g.sum.visits, 0);
+  const sourceTotal = sources.reduce((s, g) => s + g.sum.visits, 0) || 1;
 
-    return json({
-      at: iso(now),
-      days,
-      dates,
-      visits,
-      prevVisits: prior.reduce((s, g) => s + g.sum.visits, 0),
-      pages: [...pages.values()].sort((a, b) => b.visits - a.visits || b.impressions - a.impressions).slice(0, MAX_PAGES),
-      sources: sources.map((g) => ({
-        key: g.dimensions.refererHost && g.dimensions.refererHost !== SITE_HOST ? g.dimensions.refererHost : "direct / Instagram app",
-        share: g.sum.visits / sourceTotal,
-      })),
-      google,
-      tracked,
-    });
-  } catch (e) {
-    return upstreamError("seo", e, errorText(e));
+  return {
+    at: iso(now),
+    days,
+    dates,
+    visits,
+    prevVisits: prior.reduce((s, g) => s + g.sum.visits, 0),
+    pages: pageTable(dates, byPageDay, google),
+    sources: sources.map((g) => ({
+      key: g.dimensions.refererHost && g.dimensions.refererHost !== SITE_HOST ? g.dimensions.refererHost : "direct / Instagram app",
+      share: g.sum.visits / sourceTotal,
+    })),
+    google,
+    tracked,
+  };
+}
+
+/* Each page's Cloudflare visits and Google clicks and impressions, in total
+   and by day along `dates`, busiest first. */
+function pageTable(dates: string[], byPageDay: Rum, google: Search) {
+  const pages = new Map<string, { path: string; visits: number; byDay: number[]; clicksByDay: number[]; imprByDay: number[]; clicks: number; impressions: number; position: number | null }>();
+  const page = (path: string) => {
+    let p = pages.get(path);
+    if (!p) {
+      const zero = () => dates.map(() => 0);
+      p = { path, visits: 0, byDay: zero(), clicksByDay: zero(), imprByDay: zero(), clicks: 0, impressions: 0, position: null };
+      pages.set(path, p);
+    }
+    return p;
+  };
+  for (const g of byPageDay) {
+    const p = page(g.dimensions.requestPath || "/");
+    p.visits += g.sum.visits;
+    const i = dates.indexOf(g.dimensions.date);
+    if (i >= 0) p.byDay[i] += g.sum.visits;
   }
+  if (!("error" in google)) {
+    for (const r of google.pages) Object.assign(page(r.path), { clicks: r.clicks, impressions: r.impressions, position: r.position });
+    for (const r of google.pageDays) {
+      const i = dates.indexOf(r.date);
+      if (i >= 0) {
+        page(r.path).clicksByDay[i] += r.clicks;
+        page(r.path).imprByDay[i] += r.impressions;
+      }
+    }
+  }
+  return [...pages.values()].sort((a, b) => b.visits - a.visits || b.impressions - a.impressions).slice(0, MAX_PAGES);
 }
 
 /* Google over the same window and the one before, by page, by page and day,

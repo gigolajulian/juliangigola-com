@@ -44,13 +44,12 @@ body:has([data-lead-app])::before {
 }
 /* The phone tab bar is `position: fixed`, but `.rise` rests #main at
    translateY(0), and any transform makes #main the bar's containing block:
-   the bar sat at the foot of #main, not the screen (MAC, iOS sim). */
+   without this the bar sits at the foot of #main, not the screen. */
 html:has([data-lead-app]) #main {
   transform: none;
 }
-/* Julian's iPhone, v3.0.91: on lists too short to scroll the bar sat one
-   status-bar height (62pt) above the screen foot; on More, which scrolls,
-   it sat right. iOS places fixed boxes differently when the page cannot
+/* On an iPhone, a list too short to scroll puts the bar one status-bar
+   height (62pt) above the screen foot. iOS places fixed boxes differently when the page cannot
    scroll, so the page is always one pixel taller than the screen. */
 @media (max-width: 63.999rem) {
   body:has([data-lead-app]) {

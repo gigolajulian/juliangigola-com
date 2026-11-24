@@ -20,7 +20,7 @@ export const masonry = (frames: HomeFrame[]) => {
   frames.forEach((f, i) => {
     const c = h[0] <= h[1] ? 0 : 1;
     cols[c].push({ f, i });
-    h[c] += f.r + 0.2;
+    h[c] += f.ratio + 0.2;
   });
   return cols;
 };
@@ -60,7 +60,7 @@ export function HomeCommissions({ frames }: { frames: HomeFrame[] }) {
             {col.map(({ f, i }) => (
               <figure key={f.src} data-i={i}>
                 <Link href={projectHref(f.slug)} className="fig">
-                  <div className="ph" style={{ aspectRatio: `1 / ${f.r}` }}>
+                  <div className="ph" style={{ aspectRatio: `1 / ${f.ratio}` }}>
                     <Image src={f.src} alt={f.name} fill sizes="50vw" />
                   </div>
                   <figcaption className="lbl">

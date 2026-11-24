@@ -35,7 +35,7 @@ export type ClientMarkData = VectorMark | RasterMark;
 
 /** By the client's key. Absent means that client keeps its wordmark. */
 export const CLIENT_MARKS: Record<string, ClientMarkData> = {
-  /* Paydar: Imanemun's label (Dide O Del). Julian's file, 2026-10-24. */
+  /* Paydar: Imanemun's label (Dide O Del). Julian's file. */
   "paydar": {
     kind: "mask",
     src: "/clients/paydar.webp",

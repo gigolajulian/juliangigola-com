@@ -18,7 +18,7 @@
  * ─────────────────────────────────────────────────────────────── */
 
 import { isEmail } from "@/lib/utils";
-import { DAY_MS } from "@/lib/time-zone";
+import { DAY_MS, TZ } from "@/lib/time-zone";
 
 export type ProofFrame = {
   /** Short id, stable across publishes: the Lightroom photo's remote id. */
@@ -232,7 +232,7 @@ export function randomIdTail(): string {
 }
 /** `MMDDYYYY` for a moment, in Pacific time. */
 export const proofDay = (t: Date | number = new Date()) => {
-  const [y, m, d] = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Los_Angeles" }).format(t).split("-");
+  const [y, m, d] = new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(t).split("-");
   return `${m}${d}${y}`;
 };
 const DATE_ID = /^(\d{8})-(\d{2})-[0-9a-z]{4}$/;

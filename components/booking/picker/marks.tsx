@@ -20,8 +20,8 @@ export const busyMark = (step: Step) => step === "sending" || step === "check" ?
           <div className="sticky top-0 flex h-full max-h-[100svh] flex-col items-center justify-center">
             <div className="relative -translate-y-[var(--card-lift,0px)]">
             <div className="tp-status relative size-28" data-ok={step === "check" ? "" : undefined}>
-              {/* Julian: the solving orb while it books (2026-10-14, was
-                  working); the ring and tick once it is booked. */}
+              {/* Julian: the solving orb while it books; the ring and
+                  tick once it is booked. */}
               {step === "sending" ? (
                 <span className="absolute inset-0 grid place-items-center text-foreground">
                   <Orb state="solving" size={64} />

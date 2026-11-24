@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { PageFoot } from "@/components/site/chrome";
-import { DOES } from "@/lib/home/data";
+import { DISCIPLINES } from "@/lib/home/data";
 import { Marks } from "@/components/site/duo";
 import { AboutGallery } from "@/components/about/about-gallery";
 import { LogoBand } from "@/components/about/logo-band";
@@ -32,7 +32,7 @@ export function About() {
             <div className="ab-block">
               <h2 className="lbl mute">What I do</h2>
               <ol className="svc">
-                {DOES.map((d, i) => (
+                {DISCIPLINES.map((d, i) => (
                   <li key={d}><span className="lbl mute">{String(i + 1).padStart(2, "0")}</span>{d}</li>
                 ))}
               </ol>

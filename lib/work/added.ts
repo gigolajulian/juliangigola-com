@@ -319,9 +319,8 @@ export type AddedFile = {
    * back out of the archive when it is applied, the same way `frames` does it,
    * so an edit to a frame there cannot leave a stale width behind.
    *
-   * These used to be `COVER_OVERRIDES` in `lib/work/work.ts` — code, so choosing
-   * the picture that opens the site meant a commit by hand. That map is still
-   * there and still the default; this one wins over it.
+   * `COVER_OVERRIDES` in `lib/work/disciplines.ts` is the default; this one
+   * wins over it.
    */
   covers: Record<string, string>;
   /**
@@ -340,7 +339,7 @@ export type AddedFile = {
    * A project's address, changed: the slug it was harvested or added
    * under, to the slug it answers at now.
    *
-   * Julian asked to change the link to a page from /admin. The frames do
+   * The link to a page, changed from /admin. The frames do
    * not move - their paths are literal in the manifest and nothing derives
    * them from the slug - and the old address keeps answering, because
    * `next.config.ts` reads this map into a redirect. Keyed by the original
@@ -385,8 +384,8 @@ export type AddedFile = {
    * Off every listing, but still a page.
    *
    * `hidden` is unpublished: the route is not built and the URL is a 404,
-   * which is right for work that should not exist any more. Julian asked
-   * for the other thing - ROUGE off the pages, with a link to it that
+   * which is right for work that should not exist any more. This is the
+   * other thing (Julian's call): ROUGE off the pages, with a link to it that
    * still opens. So this takes a project out of the work index, the
    * discipline pages, the homepage band, the running order, the prev/next
    * chain and the sitemap, and leaves `/portfolio/<slug>` answering for anybody
@@ -538,8 +537,6 @@ function parse(v: unknown): AddedFile {
     // the thing it has just been validated to be.
     const section = str(d.section, `${at}.section`) as Section;
     if (section !== "WORK" && section !== "SESSIONS") {
-      // MUSIC exists in the type but no longer in the nav, and inventing one
-      // here would file work into a section nothing renders.
       return fail(`${at}.section`, '"WORK" or "SESSIONS"', section);
     }
     return { slug, name: str(d.name, `${at}.name`), section };

@@ -55,17 +55,17 @@ export const CATEGORIES: Category[] = [
   {
     "slug": "artist-presskit",
     "name": "ARTIST PRESSKIT",
-    "section": "MUSIC"
+    "section": "WORK"
   },
   {
     "slug": "events",
     "name": "EVENT COVERAGE",
-    "section": "MUSIC"
+    "section": "WORK"
   },
   {
     "slug": "coverart",
     "name": "COVERART",
-    "section": "MUSIC"
+    "section": "WORK"
   }
 ];
 
@@ -367,7 +367,7 @@ export const PROJECTS: Project[] = [
       {
         "slug": "artist-presskit",
         "name": "ARTIST PRESSKIT",
-        "section": "MUSIC"
+        "section": "WORK"
       }
     ],
     "cover": {
@@ -2096,7 +2096,7 @@ export const PROJECTS: Project[] = [
       {
         "slug": "coverart",
         "name": "COVERART",
-        "section": "MUSIC"
+        "section": "WORK"
       }
     ],
     "cover": {
@@ -2359,7 +2359,7 @@ export const PROJECTS: Project[] = [
       {
         "slug": "artist-presskit",
         "name": "ARTIST PRESSKIT",
-        "section": "MUSIC"
+        "section": "WORK"
       }
     ],
     "cover": {
@@ -2820,7 +2820,7 @@ export const PROJECTS: Project[] = [
       {
         "slug": "events",
         "name": "EVENT COVERAGE",
-        "section": "MUSIC"
+        "section": "WORK"
       }
     ],
     "cover": {
@@ -3995,7 +3995,7 @@ export const PROJECTS: Project[] = [
       {
         "slug": "artist-presskit",
         "name": "ARTIST PRESSKIT",
-        "section": "MUSIC"
+        "section": "WORK"
       }
     ],
     "cover": {
@@ -5846,7 +5846,7 @@ export const PROJECTS: Project[] = [
       {
         "slug": "artist-presskit",
         "name": "ARTIST PRESSKIT",
-        "section": "MUSIC"
+        "section": "WORK"
       }
     ],
     "cover": {
@@ -6060,7 +6060,7 @@ export const PROJECTS: Project[] = [
       {
         "slug": "artist-presskit",
         "name": "ARTIST PRESSKIT",
-        "section": "MUSIC"
+        "section": "WORK"
       }
     ],
     "cover": {
@@ -6742,7 +6742,7 @@ export const PROJECTS: Project[] = [
       {
         "slug": "artist-presskit",
         "name": "ARTIST PRESSKIT",
-        "section": "MUSIC"
+        "section": "WORK"
       }
     ],
     "cover": {
@@ -7266,7 +7266,7 @@ export const PROJECTS: Project[] = [
       {
         "slug": "artist-presskit",
         "name": "ARTIST PRESSKIT",
-        "section": "MUSIC"
+        "section": "WORK"
       }
     ],
     "cover": {

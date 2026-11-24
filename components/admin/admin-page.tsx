@@ -11,15 +11,13 @@ import type { AdminProject, Overrides } from "@/components/admin/editor/props";
 import { useEditorStaging } from "@/components/admin/editor/editor-context";
 
 /* ── the page, editable ───────────────────────────────────────────
- * A project drawn the way /work/<slug> draws it — the title, the meta
- * row, the intent, the frames in the same paired rows, the passages
- * between them, the credits at the end — with the editing on the page
- * itself. Julian asked for it: the thumbnail grid tells you the order,
- * this tells you what the order looks like.
+ * A project drawn the way its page draws it (the title, the meta row, the
+ * intent, the frames in paired rows, the passages, the credits) with the
+ * editing on the page itself. Julian's call: the thumbnail grid tells you
+ * the order, this tells you what the order looks like.
  *
- * Same markup and the same classes as `app/work/[slug]/page.tsx` and
- * `gallery.tsx`, minus what is not content: the scroll reveal, the
- * lightbox, the morph, the call to action. Every change goes through the
+ * Modelled on `app/portfolio/[slug]/page.tsx`, minus what is not content:
+ * the scroll reveal, the lightbox, the call to action. Every change goes through the
  * sequence hook the grid uses, so nothing here can publish anything the
  * grid could not — and Undo, Publish and the "edited" marks all agree.
  * ─────────────────────────────────────────────────────────────── */

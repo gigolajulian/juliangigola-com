@@ -127,12 +127,13 @@ const ACTIONS: Record<string, (g: Gated, p: Proof, b: Record<string, unknown>, r
       .catch(() => null);
     if (!strip) return json({ error: "The watermark could not be drawn. Try again." }, 502);
     const now = Date.now();
-    const sent: Proof = { ...p, sentAt: new Date(now).toISOString(), closesAt: closesAt(p.days, now) };
+    const sentAt = new Date(now).toISOString();
+    const sent: Proof = { ...p, sentAt, closesAt: closesAt(p.days, now) };
     const mail = proofMail(sent, strip);
     const m = { ...mail, subject: subjectOr(b.subject, mail.subject) };
     if (!(await mailClient(g, p.email, m))) return json({ error: "The mail did not go out. Try again." }, 502);
     await writeProof(g.kv, g.s, sent);
-    await recordLead(g.env, p.email, { event: { at: sent.sentAt!, kind: "mail", note: m.subject, mail: { to: "client", kind: "proofs" } } });
+    await recordLead(g.env, p.email, { event: { at: sentAt, kind: "mail", note: m.subject, mail: { to: "client", kind: "proofs" } } });
     return json({ proof: forDesk(sent) });
   },
   async deliver(g, p, b) {
@@ -143,13 +144,14 @@ const ACTIONS: Record<string, (g: Gated, p: Proof, b: Record<string, unknown>, r
     const link = isStrongId(was) ? was : await nextProofId(g.kv, isDateId(was) ? was.slice(0, 8) : undefined);
     if (link !== was) await g.kv.put(aliasKey(link), p.token);
     const now = Date.now();
-    const sent: Proof = { ...p, ...(link !== p.token ? { link } : {}), deliveredAt: new Date(now).toISOString(), closesAt: closesAt(DELIVERY_DAYS, now) };
+    const deliveredAt = new Date(now).toISOString();
+    const sent: Proof = { ...p, ...(link !== p.token ? { link } : {}), deliveredAt, closesAt: closesAt(DELIVERY_DAYS, now) };
     const mail = deliveryMail(sent);
     const m = { ...mail, subject: subjectOr(b.subject, mail.subject) };
     if (!(await mailClient(g, p.email, m))) return json({ error: "The mail did not go out. Try again." }, 502);
     await writeProof(g.kv, g.s, sent);
     if (link !== was && p.link) await g.kv.delete(aliasKey(p.link));
-    await recordLead(g.env, p.email, { event: { at: sent.deliveredAt!, kind: "mail", note: m.subject, mail: { to: "client", kind: "finals" } } });
+    await recordLead(g.env, p.email, { event: { at: deliveredAt, kind: "mail", note: m.subject, mail: { to: "client", kind: "finals" } } });
     // The proof's web copies go once the finals are out. Only copies: never an original.
     const keys = p.frames.flatMap((f) => frameKeys(p.token, f.id));
     await dropKeys(g.r2, keys);
@@ -160,18 +162,20 @@ const ACTIONS: Record<string, (g: Gated, p: Proof, b: Record<string, unknown>, r
     if (r.state === "sent") return json({ error: "Already reminded for this stage." }, 409);
     if (r.state === "locked") return json({ error: "The reminder opens in the last 5 days before the gallery closes." }, 409);
     if (r.state !== "ready") return json({ error: r.why }, 409);
+    // Unreachable today: a gallery with no email is never "ready".
+    if (!p.email) return json({ error: "Add the client's email first." }, 400);
     // Stamped before the mail: a double tap or a retry can never send a second. The close date stays.
     const at = new Date().toISOString();
     const stamped: Proof = { ...p, reminded: { ...p.reminded, [r.stage]: at } };
     await writeProof(g.kv, g.s, stamped);
     const m = reminderMail(p, r.stage);
-    if (!(await mailClient(g, p.email!, m))) {
+    if (!(await mailClient(g, p.email, m))) {
       // Undo the stamp so he can try again. KV allows one write per key per second, so wait that out first.
       await new Promise((ok) => setTimeout(ok, 1100));
       const undone = await writeProof(g.kv, g.s, p).then(() => true, () => false);
       return json({ error: undone ? "The mail did not go out. Try again." : "The mail did not go out, and the reminder is still marked as sent. Tell Claude." }, 502);
     }
-    await recordLead(g.env, p.email!, { event: { at, kind: "mail", note: m.subject, mail: { to: "client", kind: r.stage } } });
+    await recordLead(g.env, p.email, { event: { at, kind: "mail", note: m.subject, mail: { to: "client", kind: r.stage } } });
     return json({ proof: forDesk(stamped) });
   },
   async relink(g, p) {

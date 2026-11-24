@@ -30,8 +30,8 @@ export function usePickerLayout({ step, pick, days, view, anchor, week, month, c
     const dir = Math.sign(STEP_AT[step] - STEP_AT[was.current]);
     was.current = step;
     const el = root.current;
-    // A step opens at its top: on an iPhone Details opened where Continue
-    // had been, Name and Email above the screen (JG - MAC).
+    // A step opens at its top, or on an iPhone Details opens where Continue
+    // had been, with Name and Email above the screen.
     const card = el?.matches(".ed") ? el : el?.querySelector<HTMLElement>(".ed");
     if (dir && card && card.getBoundingClientRect().top < 0) card.scrollIntoView({ block: "start" });
     if (!dir || !el || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -78,8 +78,8 @@ export function usePickerLayout({ step, pick, days, view, anchor, week, month, c
     if (step !== "pick" || !el || !body) return;
     const fit = () => {
       el.removeAttribute("data-scroll");
-      /* Measured two ways: WebKit reported no scroll while the month's
-         last week sat under the floor (MAC on #279), so the
+      /* Measured two ways: WebKit can report no scroll while the month's
+         last week sits under the floor, so the
          month's own bottom is checked against the body's as well. */
       const over = () => {
         const month = body.querySelector(".ed-month, .ed-days");
@@ -154,7 +154,7 @@ export function usePickerLayout({ step, pick, days, view, anchor, week, month, c
     const seen = () => sessionSet("ed-nudged", "1");
     let tl: gsap.core.Timeline | undefined, gone = false;
     const play = () => withGsap((gsap) => { if (!gone) tl = gsap.timeline({ delay: 1.1, onStart: seen }).to(row, { x: -8, duration: 0.4, ease: "power2.out" }).to(row, { x: 0, duration: 0.5, ease: "power2.inOut" }); });
-    /* Not behind the opening splash (MAC, real iOS): the delay starts once it has lifted. */
+    /* Not behind the opening splash: the delay starts once it has lifted. */
     const root = document.documentElement;
     const watch = new MutationObserver(() => { if (!root.hasAttribute("data-intro")) { watch.disconnect(); play(); } });
     if (root.hasAttribute("data-intro")) watch.observe(root, { attributes: true, attributeFilter: ["data-intro"] });

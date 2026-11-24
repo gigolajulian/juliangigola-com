@@ -48,7 +48,7 @@ export function useHeaderSearch(canvas: boolean, at: number | null) {
       const f = document.activeElement as HTMLInputElement | null;
       if (!on && f?.closest(".htools") && !f.value) return;
       // Typing in the row and scrolling it away hands the field to the header, so it stays on screen
-      // with the keyboard up (MAC, iPhone); the reverse hand-back is below.
+      // with the keyboard up on an iPhone; the reverse hand-back is below.
       if (p >= 1 && f?.tagName === "INPUT" && tools.contains(f)) setHs(true);
       setPin(on);
       if (on) return;
@@ -96,7 +96,7 @@ export function useHeaderSearch(canvas: boolean, at: number | null) {
     if (!hs || !pin || !vv || !el) return;
     const set = () => {
       // Vars, not inline translate/padding: v3.css applies them only while the header is tucked, so a
-      // rotation that untucks it drops them at once (MAC, Duo).
+      // rotation that untucks it drops them at once (iPhone Duo).
       el.style.setProperty("--vvy", `${vv.offsetTop}px`);
       // Panned by the keyboard, the visual viewport already starts below the browser bar: no safe-area pad on top of it.
       el.style.setProperty("--vvpad", vv.offsetTop > 0 ? "0px" : "");

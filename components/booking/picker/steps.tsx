@@ -272,7 +272,7 @@ export function BookSteps({ c, l }: { c: CardCtx & { skin: StepsSkin }; l: Retur
                 const g = wheelGate.current;
                 const fresh = e.timeStamp - g.at > GESTURE_GAP_MS;
                 g.at = e.timeStamp;
-                // Any pixel stream is one gesture: fast trackpad events pass NOTCH_PX on 2x screens (MAC, #741).
+                // Any pixel stream is one gesture: fast trackpad events pass NOTCH_PX on 2x screens.
                 const pad = e.deltaMode === 0;
                 const dir = e.deltaY > 0 ? 1 : -1;
                 if (fresh || !pad) g.owned = !!times[at0 + dir];

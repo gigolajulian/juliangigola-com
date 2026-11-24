@@ -7,8 +7,8 @@ import { projectHref } from "@/lib/work/project-href";
    theme hides one (`.v3d` / `.v3l` in styles/v3.css), so a theme switch
    needs no script and no flash; a hidden lazy picture is never fetched. */
 export function Duo({
-  d,
-  l,
+  dark,
+  light,
   alt,
   altL,
   sizes,
@@ -16,8 +16,8 @@ export function Duo({
   fetchPriority,
   className,
 }: {
-  d: string;
-  l: string;
+  dark: string;
+  light: string;
   alt: string;
   altL?: string;
   sizes: string;
@@ -28,20 +28,20 @@ export function Duo({
 }) {
   return (
     <>
-      <Image src={d} alt={alt} fill sizes={sizes} priority={priority} fetchPriority={fetchPriority} className={className ? `v3d ${className}` : "v3d"} />
-      <Image src={l} alt={altL ?? alt} fill sizes={sizes} fetchPriority={fetchPriority} className={className ? `v3l ${className}` : "v3l"} />
+      <Image src={dark} alt={alt} fill sizes={sizes} priority={priority} fetchPriority={fetchPriority} className={className ? `v3d ${className}` : "v3d"} />
+      <Image src={light} alt={altL ?? alt} fill sizes={sizes} fetchPriority={fetchPriority} className={className ? `v3l ${className}` : "v3l"} />
     </>
   );
 }
 
 /** Text that changes with the theme (a caption under a Duo). */
-export function Pick({ d, l }: { d: string; l: string }) {
-  return d === l ? (
-    <>{d}</>
+export function ThemeText({ dark, light }: { dark: string; light: string }) {
+  return dark === light ? (
+    <>{dark}</>
   ) : (
     <>
-      <span className="v3d">{d}</span>
-      <span className="v3l">{l}</span>
+      <span className="v3d">{dark}</span>
+      <span className="v3l">{light}</span>
     </>
   );
 }

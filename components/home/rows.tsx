@@ -185,7 +185,7 @@ export function HomeFilms({ films }: { films: HomeFilm[] }) {
         onFocus={(e) => {
           // a film taking keyboard focus before the block is held: bring the stage up, so the film and its focus mark are whole on screen
           const top = e.currentTarget.getBoundingClientRect().top;
-          // straight to the first film's resting place in the hold, so the snap (motion/rows.ts) has nothing left to move (MAC, #1209)
+          // straight to the first film's resting place in the hold, so the snap (motion/rows.ts) has nothing left to move
           const sec = e.currentTarget.parentElement!, rest = !media("fine").matches ? 0 : holdUnease(0.5 / films.length) * (sec.offsetHeight - innerHeight);
           if (top > 0 && document.documentElement.hasAttribute("data-mt-held") && (e.target as Element).matches(".mt-film:focus-visible")) scrollBy({ top: top + rest });
         }}

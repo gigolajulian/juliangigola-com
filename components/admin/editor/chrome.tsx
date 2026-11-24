@@ -177,8 +177,7 @@ export function EditorBar({
            * "Unpublished" and "live" are not opposites with nothing in
            * between: committing to GitHub and the change reaching the
            * public site are a couple of minutes apart, and that gap is
-           * the one the editor used to say nothing about. So the middle
-           * state is its own, published, not yet live, and it is the
+           * the one that needs saying. So the middle state is its own, published, not yet live, and it is the
            * one carrying the sweep.
            *
            * A dot as well as the words. The state that decides whether
@@ -213,7 +212,7 @@ export function EditorBar({
             )}
             {/* Each word is a new node when the state changes, so
               `emerge` fades it in, "published" is the one completion
-              moment the workbench has, and it used to swap in as text. */}
+              moment the workbench has. */}
             {dirty ? (
               <span className="emerge text-foreground">unpublished</span>
             ) : awaitingDeploy ? (

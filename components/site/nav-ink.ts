@@ -129,8 +129,8 @@ function thumb(el: HTMLImageElement | HTMLVideoElement): Thumb {
     // a provider still stays on its host, which answers CORS: asked for in that mode it can be read
     if (!plainFile.startsWith("/")) im.crossOrigin = "anonymous";
     im.src = plainFile;
-    // decoded off the main thread first: the copy is the full-size original, and drawing it undecoded took the
-    // frame (MAC, previews: 218 to 311ms frames on the first pass as new photos came under the bar)
+    // decoded off the main thread first: the copy is the full-size original, and drawing it undecoded takes the
+    // frame (200 to 300ms frames as new photos come under the bar)
     im.decode().then(() => (copies.set(src, read(im) ?? false), poke()), () => copies.set(src, false));
   }
   return { data: copies.get(src) || null, pending: copies.get(src) === null };
@@ -138,15 +138,15 @@ function thumb(el: HTMLImageElement | HTMLVideoElement): Thumb {
 
 /* Where a photo is painted. The v4 hero's columns sit 48 and 80px forward under `.mt-stage`'s perspective. Chromium
    and Firefox paint them in perspective and report the box that way. WebKit paints them flat: on Windows it reports
-   the flat box too, on a Mac it reports the projected one, so a look read a row of the photo 30px off the one under
-   the word (MAC, 2026-11-16: black words at 1.2:1). Asking what is at a point does not help, on a Mac that follows
+   the flat box too, on a Mac it reports the projected one, so a look would read a row of the photo 30px off the one
+   under the word. Asking what is at a point does not help, on a Mac that follows
    the report. So in WebKit a box that comes back scaled by the perspective is put back: flat = O + (reported - O) / S,
    O the perspective origin. Kept for one look, as `seen` is. */
 const boxes = new Map<Element, { left: number; top: number; width: number; height: number }>();
 const webkit = () => navigator.vendor.startsWith("Apple");
 /** The perspectives a box was put back from: each stage and the scales under it. Safari's answer to "what is at this
-    point" follows the reported box too, so `under` also asks at the point each of these would report (MAC: at 1180
-    a photo whose painted bottom edge is 15px under the words was never found, white words at 1.75:1).
+    point" follows the reported box too, so `under` also asks at the point each of these would report, or a
+    photo whose painted bottom edge is 15px under the words is never found.
     shortcut: a scale is only known once a photo at that depth was looked at, which the top of the hero does. */
 const stages = new Map<Element, Set<number>>();
 function hits(x: number, y: number) {
@@ -241,7 +241,7 @@ function pixel(el: HTMLImageElement | HTMLVideoElement, x: number, y: number, hw
 
 /* The home intro fills the wall's edge columns with tiles of its own (`.mt-ix i`, intro/index.tsx): a CSS background
    photo each, in a layer the pointer passes through, so asking what is at a point never finds them. Under them the
-   bar saw the page, and white words sat on a white photo at 2.9:1 (MAC SSH, #1441: home at 390, Menu at y100). So a
+   bar would see the page and put white words on a white photo. So a
    point is also looked up among those tiles by their boxes, and the tile's photo read as a photo is. */
 const tileImgs = new Map<string, HTMLImageElement>();
 function tileAt(layer: Element, x: number, y: number): HTMLElement | null {
@@ -271,7 +271,7 @@ function tilePixel(t: HTMLElement, x: number, y: number, hw = 0, hh = 0): Sample
   return { rgb: patchMean(data, left, top, w, h, x, y, hw, hh), pending: false };
 }
 
-/** `?navdbg`: what each look saw, for `window.__navink()` (MAC reads words under 3:1 that pass on Windows). Null otherwise. */
+/** `?navdbg`: what each look saw, for `window.__navink()` (a Mac reads words under 3:1 that pass on Windows). Null otherwise. */
 let dbg: unknown[] | null = null;
 /** Each photo's strength, kept for one look (cleared at the start of the next). */
 const seen = new Map<Element, number>();
@@ -339,8 +339,8 @@ function under(x: number, y: number, hdr: HTMLElement, page: RGB, hit?: Hit, hw 
       }
     }
     /* A photo's own frame (the .ph tile behind a portfolio or /book image) can come first in the list, through a
-       pseudo-element of its own, though its photo is drawn over it: its dark tile is not the ground there (MAC SSH,
-       #1431: /book's bright hero read as near black, so the frost never came up and "Book a session" sat at 3.7:1).
+       pseudo-element of its own, though its photo is drawn over it: its dark tile is not the ground there
+       (/book's bright hero would read as near black and the frost would never come up).
        Only while that photo's pixels can be read: until then the tile is what shows, and the safer guess. */
     if (
       !(el instanceof HTMLImageElement || el instanceof HTMLVideoElement) &&
@@ -408,7 +408,7 @@ type Bar = {
   down: boolean;
 };
 
-/** The word's box as judged: an icon button by its icon, not its 32px box, half of which can be on a photo the icon is clear of (MAC: the theme icon). */
+/** The word's box as judged: an icon button by its icon, not its 32px box, half of which can be on a photo the icon is clear of. */
 const wordBox = (el: HTMLElement) => ((el.matches(".tbtn,.menu-btn") && el.querySelector("svg")) || el).getBoundingClientRect();
 /** A ground seen through the bar's veil. */
 const veil = (g: RGB, page: RGB) => [0, 1, 2].map((i) => g[i] * (1 - VEIL) + page[i] * VEIL) as RGB;
@@ -424,9 +424,9 @@ function atTop(b: Bar) {
    or scrolled under the bar, so the name never shows twice. navfx.css hides it until this is set.
    Only once the name is fully gone, so the two never show together: faded out, hidden by hero.ts at the end
    of its exit, or wholly out of the window:
-   on phones it scrolls up through the bar, and the wordmark came on while it was still passing under it (MAC)
-   The whole block, tagline and buttons too, and 80px clear of the top: on an iPhone a ghost of the name still
-   showed behind the status bar when the wordmark came on, and Inquire then rose through it (MAC, sim). */
+   on phones it scrolls up through the bar, and the wordmark must not come on while it is still passing under it.
+   The whole block, tagline and buttons too, and 80px clear of the top: on an iPhone a ghost of the name can
+   still show behind the status bar, with Inquire rising through it. */
 function markNameGone(b: Bar) {
   const nm = b.path === "/" ? document.querySelector<HTMLElement>(".mt-name h1") : null;
   const nr = nm?.getBoundingClientRect();
@@ -461,8 +461,8 @@ function lookUnder(b: Bar, page: RGB, isTop: boolean, veiled: boolean): Looks {
     out.own.set(el, mine);
     /* One ink per stretch of about 16px, so a word that sits half on a photo and half on the page is white
        on one and black on the other (QA: "Ju" white on light grey). And one for the upper half and one for the
-       lower: a photo's top or bottom edge can run through a word (MAC: the wordmark white, 1.2:1, with only its
-       lower half on a photo; the one look along the middle line called the whole word). A stretch keeps its
+       lower: a photo's top or bottom edge can run through a word, and one look along the middle line would
+       call the whole word. A stretch keeps its
        ink unless the other is clearly better, so it does not flicker on a busy photo, but never below 3:1.
        `data-inks` is the upper row, a slash, the lower row. */
     const n = Math.max(1, Math.round(r.width / 16));
@@ -498,7 +498,7 @@ function lookUnder(b: Bar, page: RGB, isTop: boolean, veiled: boolean): Looks {
 }
 
 /* Pre-roll: while scrolling down, also look a little below the bar, at what is about to come under the words, so
-   the frost is in before a word sits on the wrong photo (MAC: the menu on a dark figure for 0.3s before the fade).
+   the frost is in before a word sits on the wrong photo (otherwise the menu sits on a dark figure for 0.3s before the fade).
    Only on the way down, so a page at rest at its top keeps no frost. */
 function lookAhead(b: Bar, els: HTMLElement[], page: RGB, isTop: boolean) {
   const ahead: RGB[] = [];
@@ -516,7 +516,7 @@ function lookAhead(b: Bar, els: HTMLElement[], page: RGB, isTop: boolean) {
 
 /* The ground comes up over the hero while the bar's ink fails anywhere without it, and goes once it would not.
    On at once for any spot that fails, and then it stays for the rest of the hero: switched as each look found it,
-   it flashed on and off across the masonry (MAC, iPhone, #1417). It goes only back near the top of the page,
+   it would flash on and off across the masonry. It goes only back near the top of the page,
    after 1.2s with nothing failing, faded (navfx.css). */
 function setFrost(b: Bar, fails: number, isTop: boolean) {
   const { bar } = b;
@@ -564,13 +564,12 @@ function paint(b: Bar) {
   const [page] = colour(getComputedStyle(bar).getPropertyValue("--bg").trim());
   /* Over the home hero the bar has no ground, and no one ink reads on every photo: the ground comes up there
      while a word would fall under 4.5:1 without it (Julian picked "frost" from the prototype). */
-  /* The frost stays on past the hero once it is up (a "carry"): dropping it where the hero ends brought the bar's
-     own ground back in from transparent and handed the ink back to the photos, so it went white, black, white with
-     the wordmark and menu apart (MAC, iPhone dark, #1417). It goes only near the top of the page (setFrost). */
+  /* The frost stays on past the hero once it is up (a "carry"): dropping it where the hero ends would bring the
+     bar's own ground back in from transparent and hand the ink back to the photos, flipping white, black, white with
+     the wordmark and menu apart. It goes only near the top of the page (setFrost). */
   const frosted = bar.getAttribute("data-navfrost") === ""; // "off" is the frost fading out
-  /* Safari's bounce past the top runs scrollY below 0 and back (-4, -3, -2, -1, 0): read as is, the last step was
-     "down", so a page at rest at its top kept looking ahead, found the photo under the links, and the frost faded in
-     and out every 1.25s for as long as it sat there (MAC, real Safari, /portfolio/paradox at 1440, dark). Overscroll
+  /* Safari's bounce past the top runs scrollY below 0 and back (-4, -3, -2, -1, 0): read as is, the last step is
+     "down", so a page at rest at its top would keep looking ahead and fade the frost in and out every 1.25s. Overscroll
      is no direction: counted from 0. */
   const sy = Math.max(0, scrollY);
   if (sy !== b.lastY) {
@@ -584,18 +583,18 @@ function paint(b: Bar) {
   const was = bar.getAttribute("data-ink"), share = looks.w / looks.n;
   const voted = was === "w" ? (share >= 0.4 ? "w" : "b") : was === "b" ? (share <= 0.6 ? "b" : "w") : share >= 0.5 ? "w" : "b";
   /* Under the frost the theme's ink, fixed and never sampled: the frost is a 62% veil of the page colour, so black
-     on it (light) or white on it (dark) holds at least 6:1 over any photo, and both words always share it (MAC).
-     Elsewhere the ink that fails fewest; held 300ms, so it does not flip for a few frames on a busy photo (MAC, iPhone). */
+     on it (light) or white on it (dark) holds at least 6:1 over any photo, and both words always share it.
+     Elsewhere the ink that fails fewest; held 300ms, so it does not flip for a few frames on a busy photo. */
   const themeInk = root.dataset.theme === "light" ? "b" : "w";
   const pick = frosted ? themeInk : looks.grounds.length ? barInk(looks.grounds, was) : voted;
   const now = performance.now();
   let ink = was && pick !== was && !frosted && now - b.inkAt < 300 ? was : pick;
   if (ink !== was) b.inkAt = now;
   bar.setAttribute("data-ink", ink);
-  // at 6:1, a margin over 4.5, so it is up before a word actually fails (MAC: a word on the wrong photo for 0.13s first)
+  // at 6:1, a margin over 4.5, so it is up before a word actually fails
   const ahead = b.down && !frosted && (isTop || veiled) ? lookAhead(b, looks.els, page, isTop) : [];
-  /* Every page, not only the home hero (MAC SSH, live v3.0.369: /portfolio/paradox at 1440 had 18 words under 4.5:1
-     through the bar's usual 47% ground, and dark /book at 390 a black menu at 3.3:1 over its bright hero). Past the
+  /* Every page, not only the home hero: words fall under 4.5:1 through the bar's usual 47% ground over a bright
+     photo. Past the
      top, the bar already has that ground, so a word is judged through it: where it would still fall under 6:1, the
      frost comes up there too and the ink becomes the theme's. A plain page ground never fails, so it never shows there.
      Past the top the bar's blur (24px) and saturate (1.8) pull light in from around each point, so the ground as drawn

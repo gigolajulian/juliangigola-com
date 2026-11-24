@@ -12,12 +12,9 @@ export type Client = {
   /**
    * An override on how much of the row's height this mark takes.
    *
-   * Nothing sets it, and that is the point: evening the row out used to be
-   * hand-tuned numbers here, and it is now measured in
-   * `scripts/make-clients.mjs` — each mark's alpha is summed to find how much
-   * of its box is ink, and the *ink area* is levelled across the set. Equal
-   * height gives a wide wordmark four times the area of a compact glyph,
-   * which is what the hand-tuning was chasing.
+   * Nothing sets it: `scripts/make-clients.mjs` levels each mark's *ink
+   * area* across the set, since equal height gives a wide wordmark four
+   * times the area of a compact glyph.
    *
    * This stays for the judgement the pixels cannot make: a logo that should
    * dominate, or one whose trademark rules dictate a size.
@@ -42,8 +39,8 @@ export const PRESS: Client[] = [
   { name: "GOOD CULT", slug: "goodcult", href: "/portfolio/goodcult" },
   { name: "PARADOX", slug: "paradox", href: "/portfolio/paradox" },
   { name: "HUA", slug: "hua", href: "/portfolio/hua" },
-  /* No project of its own on the site, so the mark leads to EMPIRE itself.
-     Julian asked. */
+  /* No project of its own on the site, so the mark leads to EMPIRE itself
+     (Julian's call). */
   { name: "EMPIRE", slug: "empire", href: "https://www.empi.re/" },
 ];
 

@@ -10,7 +10,7 @@ export function Doors() {
   return (
     <div className="doors">
       <div className="door">
-        <Duo d={DOORS.commissions.d} l={DOORS.commissions.l} alt="" sizes="(max-width: 800px) 100vw, 50vw" />
+        <Duo dark={DOORS.commissions.d} light={DOORS.commissions.l} alt="" sizes="(max-width: 800px) 100vw, 50vw" />
         <span className="lbl mute">For art directors and artists</span>
         <h3>Have something in mind?</h3>
         <p>Campaigns, editorial, cover art and presskits. Tell me what you have in mind and I&apos;ll come back with an approach and a quote.</p>
@@ -19,7 +19,7 @@ export function Doors() {
         </div>
       </div>
       <div className="door">
-        <Duo d={DOORS.book.d} l={DOORS.book.l} alt="" sizes="(max-width: 800px) 100vw, 50vw" />
+        <Duo dark={DOORS.book.d} light={DOORS.book.l} alt="" sizes="(max-width: 800px) 100vw, 50vw" />
         <span className="lbl mute">For private clients</span>
         <h3>Book a session</h3>
         <ul className="lbl">

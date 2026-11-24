@@ -73,7 +73,7 @@ img[data-fade][data-loaded] {
 
 /* ── the colour panel ─────────────────────────────────────────────
  * While it is out the page is the work in its colour
- * (`components/vectorscope.tsx`), and the rack under it, discipline
+ * (`components/portfolio/use-scope-draw.ts`), and the rack under it, discipline
  * titles and all, steps away. Hidden rather than removed: which projects
  * the lit chip puts on the page is read from it.
  * ─────────────────────────────────────────────────────────────── */
@@ -117,7 +117,7 @@ img[data-fade][data-loaded] {
   }
 }
 
-/* The 404 is one screen and never scrolls: Julian asked. The document is
+/* The 404 is one screen and never scrolls (Julian's call). The document is
    held to the window and the site footer, whose one useful line the page
    already carries in its own foot, is left out. */
 html:has([data-fit-page]),
@@ -130,8 +130,8 @@ body:has([data-fit-page]) footer {
 }
 
 /* ── changing view on /work ─────────────────────────────────────────
- * Julian: something dope. `morphView` in `lib/work-view.ts` names every
- * cover in sight, and each flies from its place in one view to its place
+ * Julian's call. Every cover in sight carries the `view` transition class,
+ * and each flies from its place in one view to its place
  * in the next, a beat behind the one to its left. The strong in-out curve
  * the site keeps for things moving on screen, long enough to follow, and
  * the blur mid-flight the covers use when they open a project.
@@ -255,9 +255,9 @@ h2:not(.label) {
   }
 }
 
-/* Preview (`?cards`, `work-shell.tsx`): each discipline one card, its
+/* Preview (`data-cards` on the root): each discipline one card, its
    name and its projects on one panel. The panel is the name cell's own
-   `::before`, as long as the chapter (`--chapter-w`, `lib/deck.ts`): the
+   `::before`, as long as the chapter (`--chapter-w`): the
    name cell lies under every cell after it, so the panel does too. */
 @media (min-width: 40rem) {
   :root[data-cards] .portfolio-arrive .strip-scroll > .strip-cell[data-deck] {
@@ -291,7 +291,7 @@ h2:not(.label) {
 }
 
 /* A short discipline's room, painted from its name cell so the chapter
-   it covers does not show through (`data-fill`, `lib/deck.ts`). */
+   it covers does not show through (`data-fill`). */
 @media (min-width: 40rem) {
   :root:not([data-cards]) .portfolio-arrive .strip-scroll > .strip-cell[data-fill] {
     overflow: visible;

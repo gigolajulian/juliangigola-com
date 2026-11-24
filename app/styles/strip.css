@@ -1,10 +1,9 @@
 /* A page that is exactly one window (`data-quiet-footer`), and glass on a touch screen. */
 
-/* And the page is exactly the window, with that one line on it. A strip page
-   had a vertical wobble of precisely the footer's height — 62px — because
-   the sequence is `h-dvh` and the footer sits under it, so the one thing
-   below the photographs was the one thing you could not see. Julian asked
-   for a horizontal page that does not scroll vertically at all.
+/* And the page is exactly the window, with that one line on it: the
+   sequence is `h-dvh` and the footer sits under it, so without this a strip
+   page scrolls by the footer's height. A horizontal page never scrolls
+   vertically (Julian's call).
 
    Only from 40rem up. On a phone the nav takes 93px and the footer 83px out
    of 844, and squeezing the photographs into what is left to save one short

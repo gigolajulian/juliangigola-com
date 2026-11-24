@@ -16,9 +16,9 @@ export function TimePicker(props: Props) {
   const { v3paid, v3steps, v3sub } = stepsCopy(c.paid, c.slug);
   /* J and G fill while the times load (jg-load.tsx) and let go of the picker themselves. */
   const jg = <JgLoad done={state === "ready" && !!days} onDone={unhold} className="f-wait min-h-[16rem] w-full" />;
-  /* While the times load the bar is already there, held off: it popped in
-     a second after the page on a short screen, where it is the thing at the
-     foot of the view (MAC, iPhone Duo folded). */
+  /* While the times load the bar is already there, held off, so it does not
+     pop in late on a short screen, where it is the thing at the foot of
+     the view (iPhone Duo folded). */
   const heldBar = <button type="button" className="btn fill" disabled>Continue</button>;
   // in the div `BookSteps` puts the shell in, so the shell stays one element as the times come
   const v3plain = (body: React.ReactNode, bar?: React.ReactNode) => <div className="contents">{skin!.shell({ steps: v3steps, at: 1, head: v3paid ? "Book a session" : skin!.name === "Consultation" ? "Book a consultation" : "Book a call", sub: v3sub, body, sum: [], bar })}</div>;

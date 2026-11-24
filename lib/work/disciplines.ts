@@ -65,12 +65,10 @@ export type Discipline = {
 /**
  * An override that names a frame already in the archive.
  *
- * Dimensions are read from the manifest rather than written here, because
- * these two entries used to carry their own copy of them and a re-harvest
- * silently invalidated it: raising the archive to 2500px turned every
- * hardcoded `1600` into a lie, and a wrong `width`/`height` on a `fill` image
- * is a wrong aspect ratio reserved before the picture loads — the cover
- * column jumping the moment it arrives.
+ * Dimensions are read from the manifest rather than written here, so a
+ * re-harvest cannot leave a stale copy: a wrong `width`/`height` on a `fill`
+ * image reserves the wrong aspect ratio, and the cover column jumps when the
+ * picture arrives.
  *
  * Only `alt` is stated, because that is the one thing the harvest genuinely
  * does not know: 1,084 frames came across with none.
@@ -181,11 +179,9 @@ export const categoryFrame = (categorySlug: string): Frame | null => {
 /**
  * The project a frame belongs to, read off the frame's own path.
  *
- * An override changes which photograph stands for a discipline, but it used to
- * leave the credit pointing at whatever project led the category: the cover
- * showed a UKIYOSUNKNOWN frame under CAMPAIGNS and captioned it "JUBO", which
- * is the first project filed there. Deriving the owner from the path means the
- * caption cannot disagree with the picture — for this override or the next one.
+ * An override changes which photograph stands for a discipline, so the
+ * credit is derived from the path rather than from the project that leads
+ * the category: the caption cannot disagree with the picture.
  *
  * Frames outside `/work/<slug>/` — the hand-made ones in `/hero/` — have no
  * project, and the caller falls back to the category's lead.

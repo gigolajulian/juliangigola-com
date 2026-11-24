@@ -88,10 +88,6 @@ export default function AdminPage() {
       data-workbench
       className="w-full px-6 pb-24 pt-20 sm:px-10 xl:flex xl:h-dvh xl:flex-col xl:overflow-hidden xl:pb-0"
     >
-      {/* One line. The paragraph that used to be here said where edits are
-          committed, which matters at the moment you publish and not at the
-          moment you arrive — so it lives beside Publish now, where it is
-          actually load-bearing. */}
       <header className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b border-border pb-3 xl:shrink-0">
         <h1 className="font-display text-xl uppercase tracking-[0]">Content</h1>
         <p className="label text-muted-foreground">
@@ -111,15 +107,9 @@ export default function AdminPage() {
           cover: { src: markSrc(CLIENT_MARKS[c.slug]), color: "#111111" },
         }))}
         slugs={PROJECTS.map((p) => p.slug)}
-        /* Every category a shoot can be, sessions included. `WORK` and
-           `MUSIC` both file under Work in the new nav, so they are one group
-           here; `SESSIONS` is its own, because filing a project there moves
-           it off /work and onto the session page as one of its samples.
-
-           Sessions used to be excluded on the grounds that a commissioned
-           project does not belong in one. True, but it is not the editor's
-           place to decide which of the two a given shoot was — a graduation
-           set is a real thing to have shot, and there was no way to say so. */
+        /* Every category a shoot can be, sessions included. Filing a
+           project under `SESSIONS` moves it off /work and onto the session
+           page as one of its samples. */
         categories={CATEGORIES.map((c) => ({
           slug: c.slug,
           name: categoryLabel(c),
@@ -229,10 +219,7 @@ export default function AdminPage() {
           },
         }))}
         /* Every discipline, with the branch of the site it hangs off.
-           This used to filter SESSIONS out, which was right while the
-           sitemap was a flat list of links — the sessions are samples inside
-           one page rather than pages of their own. Drawn as a tree they have
-           somewhere to be: under /sessions, which is exactly what they are. */
+           Sessions are samples inside one page, so they hang off /#sessions. */
         categoryLinks={CATEGORIES.map((c) => ({
           slug: c.slug,
           name: categoryLabel(c),

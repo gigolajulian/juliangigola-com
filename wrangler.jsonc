@@ -42,8 +42,8 @@
   //
   // KV rather than D1 because nothing here is relational: an enquiry is
   // written once, read a few times and deleted. It is also the one store on
-  // the free plan whose limits are nowhere near what a photographer receives
-  // — and the cooldown and the daily cap in `lib/inbox.ts` exist to keep
+  // the free plan whose limits are nowhere near what a photographer receives,
+  // and the cooldown and the daily cap in `lib/leads/enquiry.ts` exist to keep
   // somebody else's script from spending that allowance.
   /* Cloudflare Email Sending. Each enquiry the form stores is also mailed
      to Julian, from `enquiries@notifications.juliangigola.com` — a sending
@@ -53,7 +53,7 @@
      and deposit alerts to hello@, both the same Workspace mailbox. */
   "send_email": [
     { "name": "EMAIL", "allowed_destination_addresses": ["hello@juliangigola.com", "contact@juliangigola.com"] },
-    // The client's booking confirmation (`lib/confirm.ts`): any recipient, one sender.
+    // The client's booking confirmation (`lib/booking/confirm.ts`): any recipient, one sender.
     { "name": "CLIENT_EMAIL", "allowed_sender_addresses": ["book@juliangigola.com"] }
   ],
 
@@ -73,9 +73,9 @@
 
   // Worker logs, so `wrangler tail` has something to show when a Server
   // Action fails in production.
-  /* Client proof frames (`lib/proofs/proof.ts`): private, no public URL. The
+  /* Client proof frames (keys in `lib/proofs/proof-model.ts`): private, no public URL. The
      Worker serves them at /proof/<token>/f/<id> only while the gallery is
-     open. Created 2026-11-06. */
+     open. */
   "r2_buckets": [
     { "binding": "PROOFS", "bucket_name": "jg-proofs" }
   ],

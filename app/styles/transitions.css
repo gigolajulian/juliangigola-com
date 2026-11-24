@@ -103,13 +103,12 @@
 /* The page underneath is whole from the first frame and the page leaving
    sits on top of it and fades off: two pages each at half strength met
    in the middle as a dip to dark, measured on a recording as a frame
-   where neither page could be read. Now one page is always solid. */
+   where neither page could be read. One page is always solid. */
 ::view-transition-old(.page) {
   z-index: 1;
   /* Off in half the time the new page takes to arrive: both pages hold
      their words at full strength through a straight crossfade, and two
-     headlines written over each other is the one thing the scale used to
-     keep apart. Gone by 200ms, the rest of the trip is the new page
+     headlines must never be written over each other. Gone by 200ms, the rest of the trip is the new page
      alone. */
   animation: jg-page-away var(--dur-xs) cubic-bezier(0.32, 0.72, 0, 1) both;
   mix-blend-mode: normal;
@@ -119,16 +118,11 @@
   mix-blend-mode: normal;
   opacity: 1;
 }
-/* From the bar, a beat first. Julian asked for it: a press in the header
-   is a jump across the site rather than a step through it, so the page
-   being left has the trip to itself before the next one comes up. The
-   delay is the old page's whole fade and a beat past it.
-
-   A delay on `jg-page-up` alone was no wait at all, which is what Julian
-   saw: that keyframe moves the page and nothing else, so the new one sat
-   there in full view, 2.5vh low, for the whole of it. The incoming page
-   comes up from nothing instead, and the screen is the site's own ground
-   in between. */
+/* From the bar, a beat first (Julian's call): a press in the header is a
+   jump across the site, so the page being left has the trip to itself.
+   The delay is the old page's whole fade and a beat past it. The new page
+   fades up from nothing: `jg-page-up` only moves, and with a delay would
+   sit in full view, 2.5vh low, for the whole wait. */
 :root[data-nav-bar]::view-transition-new(.page) {
   animation: jg-page-in var(--dur-lg) cubic-bezier(0.32, 0.72, 0, 1) var(--dur-md) both;
 }
@@ -144,17 +138,10 @@
 :root[data-nav="out"]::view-transition-new(.page) {
   animation-name: jg-page-settle;
 }
-/* Out by way of the bar: the wordmark, which is home. The
-   beat the bar asks for above is a delay on a keyframe that also fades
-   the page up; swapping in `jg-page-settle`, which only moves it, left
-   the new page in full view under the old one for the whole wait, and
-   the work index ghosted over the homepage at 500ms on a recording. The
-   settle with the fade back in, so the wait is a wait.
-
-   Not on a deal. This selector outweighed `[data-nav-side="left"]`, so
-   the wordmark, the one bar link that is a way out, faded the homepage
-   up through the page it left instead of dealing it in from the left.
-   Julian saw the two pages ghost over each other. */
+/* Out by way of the bar: the wordmark, which is home. The settle with
+   the fade back in, so the new page is not in full view under the old one
+   for the whole wait. Not on a deal: this selector would outweigh
+   `[data-nav-side="left"]` and ghost the two pages over each other. */
 :root[data-nav-bar][data-nav="out"]:not([data-nav-side])::view-transition-new(.page) {
   animation-name: jg-page-settle-in;
 }
@@ -241,16 +228,15 @@
   z-index: 2;
   /* A card is solid. The snapshot is the page's own element, and a page
      that leaves its ground to the body (Contact) came in as glass, with
-     the page it covered showing through it. Julian saw it. The wash, not
+     the page it covered showing through it. The wash, not
      the flat ground, or the card lands flat and the wash pops in under it
      when the snapshot goes. */
   background: var(--ground);
 }
 /* No cover flies on a deal. The homepage's selected work and the work
    index share the covers' names (`cover-${slug}`, the morph into a
-   project), so dealing one into the other flew the band's covers, pinned
-   under the later screens, out over both pages. Julian saw it as a grid
-   flashing up. The morph is for a press on a cover, not a page dealt. */
+   project), so dealing one into the other would fly the band's covers out
+   over both pages as a flashing grid. The morph is for a press on a cover, not a page dealt. */
 /* By `data-morph` (each thing that carries a cover's name), never by the
    style it is named in: a root attribute over `[style*=…]` sent every
    element with a style attribute through a restyle each time

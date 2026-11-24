@@ -423,7 +423,7 @@
   [data-mtscroll] .mt-col{display:contents}
   [data-mtscroll] .mt-col figure{position:absolute;left:calc((16 + var(--c2) * 187) * var(--pu));top:calc((68 + var(--r2) * 250 + var(--c2) * 64) * var(--pu));width:calc(171 * var(--pu));height:calc(214 * var(--pu))}
   [data-mtscroll] .mt-col figcaption{padding-top:2px;gap:0;font-size:11px;line-height:1.05}
-  /* Julian's arrange (2026-11-18, iPhone 390x664): name bigger and lower, line and buttons lower, a 39% ground back under them. The three share the safe-area lift, so they never close up on each other. */
+  /* Julian's arrange (iPhone 390x664): name bigger and lower, line and buttons lower, a 39% ground back under them. The three share the safe-area lift, so they never close up on each other. */
   [data-mtscroll] .mt-name h1{font-size:min(68px,calc(65.5 * var(--pu)));line-height:.9;left:8px;bottom:calc(98px + env(safe-area-inset-bottom))}
   [data-mtscroll] .mt-cap{font-size:min(12px,calc(9.8 * var(--pu)))!important;left:calc(16 * var(--pu));bottom:calc(60px + env(safe-area-inset-bottom));letter-spacing:.09em}
   [data-mtscroll] .mt-ctas{bottom:calc(2px + env(safe-area-inset-bottom))}
@@ -450,8 +450,8 @@
   [data-mtscroll] .mt-inq[data-from="footer"] .mt-two{grid-template-columns:1fr}
 }
 
-/* A short window under 600 wide (iPhone Duo unfolded on its side: 594x368). The name block was laid out for a 600px tall screen, so the name sat at the
-   window's lower edge under Safari's bar and the tagline and buttons were off screen (MAC). It takes the window's own height here. */
+/* A short window under 600 wide (iPhone Duo unfolded on its side: 594x368). The name block is laid out for a 600px tall screen, which would put the
+   tagline and buttons off screen here, so it takes the window's own height. */
 @media (max-width:599px) and (max-height:599px) and (orientation:landscape){[data-mtscroll] .mt-name{height:100svh}}
 /* L: phone on its side. Four wall columns, the name on one line with the buttons beside it. */
 @media (max-height:599px) and (min-width:600px){
@@ -463,8 +463,7 @@
   /* the wall runs on under the name here, so the ground fades out below it too: no hard edge */
   [data-mtscroll] .mt-scrim{bottom:-24%;height:84%;background:linear-gradient(to top,transparent,color-mix(in srgb,var(--bg) 92%,transparent) 30%,color-mix(in srgb,var(--bg) 80%,transparent) 52%,transparent)}
   [data-mtscroll] .mt-cap{bottom:calc(env(safe-area-inset-bottom) + 26px);left:max(16px,env(safe-area-inset-left))}
-  /* every section clears the Dynamic Island and the rounded corners on a phone on its side, as the header does (MAC, #1214: the island covered the C of Cover art,
-     then the lines under it). The hero and the footer already place their words by the safe area; the sticky bar inside a section drops its own. */
+  /* every section clears the Dynamic Island and the rounded corners on a phone on its side, as the header does, so the island never covers a line. The hero and the footer already place their words by the safe area; the sticky bar inside a section drops its own. */
   [data-mtscroll] .mt>section:not(.mt-hero,.mt-foot){padding-inline:env(safe-area-inset-left) env(safe-area-inset-right)}
   [data-mtscroll] .mt>section:not(.mt-hero,.mt-foot) .mt-bar{padding-inline:16px}
   [data-mtscroll] .mt-cap .pl{display:inline;margin:0}
@@ -663,7 +662,7 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
 /* The artist line is the muted ink under the caption's .85 dim, so it sat at 3.3 to 4.5:1 on the covers not in front
    (audit). A quarter toward the foreground keeps it second to the title and clears 4.5:1 dimmed. */
 [data-mtscroll] .mt-cvcap .mute{color:color-mix(in oklab,var(--muted-foreground) 72%,var(--foreground))}
-/* Touch has no hover to lift it, so the caption sits at full there (audit 2026-11-19: the artist line was 2.9:1 at rest). */
+/* Touch has no hover to lift it, so the caption sits at full there (the artist line would be 2.9:1 at rest). */
 @media (hover:none){[data-mtscroll] .mt-cvcap{opacity:1}}
 [data-mtscroll] .mt-cvn{position:absolute;left:calc(var(--fx) + 36 * var(--u));bottom:calc(40 * var(--u));margin:0;font:500 calc(64 * var(--u))/1 var(--mono);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 [data-mtscroll] .mt-cvn span{font-size:.3em;letter-spacing:.14em;color:var(--mute);margin-left:.4em}
@@ -716,7 +715,7 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
 [data-mtscroll] .mt-hero .mt-scrim{background:none}
 /* In its place a soft black shadow on the words themselves; the outline button is blurred glass in white, so it holds on the light page too. In the light
    theme the name and tagline go light grey, so the black shadow carries them over the page and the photos alike. */
-/* 2026-11-17: two tighter layers under the wide one. Over a pale photo or the light page the wide shadow alone left the letter edges washed out (MAC). */
+/* Two tighter layers under the wide one: over a pale photo or the light page the wide shadow alone leaves the letter edges washed out. */
 [data-mtscroll] .mt-hero :is(.mt-name h1,.mt-cap){text-shadow:0 0 1px rgb(0 0 0 / 60%),0 2px 6px rgb(0 0 0 / 55%),0 3px 14px rgb(0 0 0 / 50%),0 4px 28px rgb(0 0 0 / 70%)}
 /* and the two buttons lift off the photos the same way */
 [data-mtscroll] .mt-hero .mt-ctas .btn{box-shadow:0 1px 2px rgb(0 0 0 / 35%),0 6px 24px rgb(0 0 0 / 40%)}

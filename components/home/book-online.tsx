@@ -29,7 +29,7 @@ function RowPhoto({ r, on, sizes }: { r: BookRow; on: boolean; sizes: string }) 
   const p = SESSIONS[r.slug].photo;
   return (
     <span className={on ? "duo on" : "duo"} style={{ "--at": r.pos } as React.CSSProperties}>
-      <Duo d={p.d} l={p.l} alt={`${r.name} sample`} sizes={sizes} />
+      <Duo dark={p.d} light={p.l} alt={`${r.name} sample`} sizes={sizes} />
     </span>
   );
 }

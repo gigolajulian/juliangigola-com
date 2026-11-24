@@ -41,7 +41,7 @@ const grow = (e: React.FormEvent<HTMLTextAreaElement>) => {
   el.style.height = `${Math.min(el.scrollHeight + el.offsetHeight - el.clientHeight, line * 5 + frame)}px`;
 };
 
-/* The card as a magazine page (editorial.css), the default since 2026-10-17. */
+/* The card as a magazine page (editorial.css), the default. */
 export function EditorialCard({ c }: { c: CardCtx }) {
   const { title, className, username, slug, tz, here, length, needsWhere, opt, setOpt, session, booked, days, view, anchor, pick, chosen, step, setStep, paid, deposit, error, ok, setOk, load, open, choose, today, week, month, shift, mstep, setMstep, switchView, atStart, book, refill, t, ap, until, date, sum } = c;
   const { root, showTimes, daysBox, slotsW, slotsRef, swipeProps } = usePickerLayout({ step, pick, days, view, anchor, week, month, chosen, mstep, held: c.held, state: c.state, atStart, shift });
@@ -168,7 +168,7 @@ export function EditorialCard({ c }: { c: CardCtx }) {
     if (root.current?.dataset.fit === "3") setMstep("times");
     showTimes();
   };
-  /* Julian (via MAC): the day's times in a line or two, no
+  /* Julian: the day's times in a line or two, no
      morning, afternoon or evening. One line when they fit at 5.75rem,
      else two even rows. */
   const dayTimes = days[pick.date] ?? [];
