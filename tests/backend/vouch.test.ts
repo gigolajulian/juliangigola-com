@@ -3,7 +3,7 @@ import { authorised, canPush, fromWorker, refuseAdmin, refuseWorker } from "@/li
 import { AdminError, isLocked, loadErrorText, LOCKED } from "@/lib/leads/lead-desk";
 import { SCOPED, githubToken, reply } from "./fakes";
 
-/* The gate on /api/inbox, /api/traffic and /api/seo: a token passes only
+/* The gate on /api/inbox and /api/leads, /api/traffic and /api/seo: a token passes only
    when its owner can push AND the token itself was granted the write. No
    real GitHub call: fetch is a stub. */
 
@@ -59,10 +59,10 @@ const req = (headers: Record<string, string>) => new Request("https://x.test/api
 
 describe("authorised and fromWorker", () => {
   it("authorised matches only the exact inbox key, and nothing when it is unset", async () => {
-    expect(await authorised(req({ "x-inbox-key": "k1" }), "k1")).toBe(true);
-    expect(await authorised(req({ "x-inbox-key": "k2" }), "k1")).toBe(false);
+    expect(await authorised(req({ "x-admin-key": "k1" }), "k1")).toBe(true);
+    expect(await authorised(req({ "x-admin-key": "k2" }), "k1")).toBe(false);
     expect(await authorised(req({}), "k1")).toBe(false);
-    expect(await authorised(req({ "x-inbox-key": "k1" }), undefined)).toBe(false);
+    expect(await authorised(req({ "x-admin-key": "k1" }), undefined)).toBe(false);
   });
 
   it("fromWorker matches only the booking secret as the bearer", async () => {
@@ -81,7 +81,7 @@ describe("authorised and fromWorker", () => {
 
 describe("refuseAdmin and the desks' lock", () => {
   it("lets the key in, and tells a missing key from a refused token in one 401", async () => {
-    expect(await refuseAdmin(req({ "x-inbox-key": "k1" }), "k1")).toBeNull();
+    expect(await refuseAdmin(req({ "x-admin-key": "k1" }), "k1")).toBeNull();
     const none = (await refuseAdmin(req({}), "k1"))!;
     expect([none.status, (await none.json()).error]).toEqual([401, "Not authorized."]);
     vi.stubGlobal("fetch", vi.fn(async () => reply({ permissions: { push: false } }, 200, SCOPED)));

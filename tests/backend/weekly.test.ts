@@ -73,7 +73,7 @@ describe("POST /api/leads/weekly", () => {
     await kv.put("lead:ben", await seal.seal(mk("Ben Sample", { firstAt: at })));
     await appendLog(kv, seal, "ben", { email: "ben@example.com", name: "Ben Sample" }, [{ at, kind: "payment", amount: 100 }]);
     const sent: { subject: string; text: string }[] = [];
-    ctx.env = { INBOX: kv, LEADS_KEY, BOOKING_SECRET: "s", EMAIL: { send: async (m: { subject: string; text: string }) => void sent.push(m) } };
+    ctx.env = { INBOX: kv, LEADS_KEY, WORKER_KEY: "s", EMAIL: { send: async (m: { subject: string; text: string }) => void sent.push(m) } };
     const call = (q = "", auth = "Bearer s") => POST(new Request(`https://juliangigola.com/api/leads/weekly${q}`, { method: "POST", headers: { authorization: auth } }));
     expect((await call("", "Bearer no")).status).toBe(401);
     const dry = await (await call("?dry")).json();
@@ -87,7 +87,7 @@ describe("POST /api/leads/weekly", () => {
 describe("worker weekly", () => {
   it("asks the site only at 9 AM Pacific", async () => {
     const hits: string[] = [];
-    const env = { BOOKING_SECRET: "s", SITE: { fetch: async (u: string) => (hits.push(u), Response.json({})) } } as never;
+    const env = { WORKER_KEY: "s", SITE: { fetch: async (u: string) => (hits.push(u), Response.json({})) } } as never;
     await weekly(env, new Date("2026-11-09T16:00:00Z")); // 8 AM PST
     await weekly(env, new Date("2026-11-09T17:00:00Z")); // 9 AM PST
     await weekly(env, new Date("2026-06-01T16:00:00Z")); // 9 AM PDT

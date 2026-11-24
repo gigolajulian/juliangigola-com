@@ -3,7 +3,7 @@
 import * as React from "react";
 import { frameDt, springSettled, stepSpring, type SpringState } from "@/lib/motion/spring";
 
-/* The page's own scrollbar (`?sb=0` turns it off, `?sb=1` back on):
+/* The page's own scrollbar:
    a hairline thumb that trails the scroll on the lift's spring, so it
    glides and settles instead of jumping. Drag it to scroll, mouse or
    finger. */
@@ -12,14 +12,7 @@ export function ScrollThumb() {
 
   React.useEffect(() => {
     const el = ref.current;
-    let on = false;
-    try {
-      const q = location.search;
-      if (/[?&]sb=0/.test(q)) sessionStorage.setItem("jg-sb-off", "1");
-      else if (/[?&]sb=1/.test(q)) sessionStorage.removeItem("jg-sb-off");
-      on = !sessionStorage.getItem("jg-sb-off");
-    } catch {}
-    if (!on || !el) return;
+    if (!el) return;
     const root = document.documentElement;
     root.dataset.sb = "";
     const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;

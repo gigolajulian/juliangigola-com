@@ -3,6 +3,7 @@
 import * as React from "react";
 import { jumpTo, scrollGoal } from "@/components/site/smooth-scroll";
 import { holdLanding } from "@/components/site/page-transition";
+import { lastPopAt } from "@/components/site/back-link";
 import { media } from "@/lib/device";
 import { painted } from "@/lib/painted";
 import { tell } from "./motion/engine";
@@ -69,15 +70,13 @@ function leaves(e: MouseEvent) {
   return u.origin === location.origin && u.pathname !== location.pathname;
 }
 
-/** When the last Back or Forward was: the home counts as a return only when it mounts just after one. */
-let popAt = 0;
-if (typeof window !== "undefined") addEventListener("popstate", () => (popAt = Date.now()));
 let firstMount = true;
 /** Just back: a Back or Forward inside the site, or the page itself loaded by one (a link that left the app, then Back). */
 const returned = () => {
   const first = firstMount;
   firstMount = false;
-  if (Date.now() - popAt < 2000) return true;
+  // the home counts as a return only when it mounts just after a Back or Forward (NavMemo hears them)
+  if (Date.now() - lastPopAt() < 2000) return true;
   const nav = first ? (performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined) : undefined;
   return nav?.type === "back_forward";
 };

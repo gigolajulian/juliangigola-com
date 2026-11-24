@@ -51,7 +51,7 @@ beforeEach(() => {
     EMAIL: mail,
     STRIPE_SECRET_KEY: "sk_test_x",
     STRIPE_WEBHOOK_SECRET: WHSEC,
-    DEPOSIT_LIMIT: { limit: async () => ({ success: true }) },
+    PUBLIC_WRITE_LIMIT: { limit: async () => ({ success: true }) },
   };
   vi.stubGlobal("fetch", async (url: string, init?: RequestInit) => {
     if (url.includes("oauth2")) return Response.json({ access_token: "t", expires_in: 3600 });
@@ -79,7 +79,7 @@ const open = (slug: string) => start(new Request("https://juliangigola.com/api/d
 
 /** Stripe's signed `payment_intent.succeeded` for the intent the site just made, at `cents`. */
 async function pay(slug: string, cents: number) {
-  const metadata = { kind: "deposit", engine: "own", slug, start: WHEN, timeZone: "America/Los_Angeles", name: "QA Test", email: "qa@example.com" };
+  const metadata = { kind: "deposit", slug, start: WHEN, timeZone: "America/Los_Angeles", name: "QA Test", email: "qa@example.com" };
   const raw = JSON.stringify({ type: "payment_intent.succeeded", data: { object: { id: PI, amount: cents, amount_received: cents, currency: "usd", metadata } } });
   const at = Math.floor(Date.now() / 1000);
   const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(WHSEC), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);

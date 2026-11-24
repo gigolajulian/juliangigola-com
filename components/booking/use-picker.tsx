@@ -11,10 +11,8 @@ import { clockHere } from "@/components/booking/picker-dates";
 import { useSlots } from "@/components/booking/use-slots";
 import { usePickerDays } from "@/components/booking/use-picker-days";
 import { usePickerLayout } from "@/components/booking/use-picker-layout";
+import { postJson } from "@/lib/http";
 
-
-/* Goo on the card's buttons, times and
-   open days. `?goo=0` turns it off: `gooOn()` in deposit-step.tsx. */
 
 /* ── the time picker ──────────────────────────────────────────────
  * The open times, in two plain steps: a day, then a time. Days
@@ -151,7 +149,7 @@ export function usePicker({ path, title, className, skin, onPicked, startView }:
     const firstName = name.split(/\s+/)[0];
     if (paid) {
       setBooked({ name: firstName, email: String(form.get("email")).trim(), where, phone, via: "" });
-      setDeposit({ engine: "own", slug, start: new Date(pick.start).toISOString(), timeZone: tz, name, email: String(form.get("email")), phone, ...(notes ? { notes } : {}), ...(needsWhere ? { where } : {}), session });
+      setDeposit({ slug, start: new Date(pick.start).toISOString(), timeZone: tz, name, email: String(form.get("email")), phone, ...(notes ? { notes } : {}), ...(needsWhere ? { where } : {}), session });
       const sent = new FormData();
       form.getAll("refs").forEach((f) => f instanceof File && f.size && sent.append("refs", f));
       if (form.get("picks")) sent.append("picks", String(form.get("picks")));
@@ -165,14 +163,8 @@ export function usePicker({ path, title, className, skin, onPicked, startView }:
     const sim = process.env.NODE_ENV !== "production" && new URLSearchParams(location.search).get("sim") === "ok";
     try {
       if (!sim) {
-        const res = await fetch("/api/book", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ engine: "own", slug, start: new Date(pick.start).toISOString(), timeZone: tz, name, email: String(form.get("email")), phone, via: formVia, ...(notes ? { notes } : {}), ...(needsWhere ? { where } : {}) }),
-        });
-        const body = (await res.json().catch(() => ({}))) as { status?: string; data?: { uid: string; start: string; end: string; where?: string }; error?: string };
-        // 409 is the engine saying the slot went to someone else.
-        if (!res.ok || body.status !== "success") throw Object.assign(new Error(body.error || "failed"), { status: res.status, said: body.error });
+        const r = await postJson("/api/book", { slug, start: new Date(pick.start).toISOString(), timeZone: tz, name, email: String(form.get("email")), phone, via: formVia, ...(notes ? { notes } : {}), ...(needsWhere ? { where } : {}) });
+        if (!r.ok) throw Object.assign(new Error(r.error || "failed"), { status: r.status, said: r.error, code: r.code });
       }
       setBooked({ name: firstName, email: String(form.get("email")).trim(), where, phone, via: formVia });
       /* The orbs get their moment even when the server answers at once, then
@@ -187,9 +179,9 @@ export function usePicker({ path, title, className, skin, onPicked, startView }:
       forgetTimes(username, slug, tz);
       setStep("done");
     } catch (e) {
-      const { status, said } = e as Error & { status?: number; said?: string };
+      const { status, said, code } = e as Error & { status?: number; said?: string; code?: string };
       let why = "That did not go through. Try again, or write to hello@juliangigola.com.";
-      if (status === 409) why = "That time was just taken. Pick another.";
+      if (code === "taken") why = "That time was just taken. Pick another.";
       // 429 and 503 carry the route's own words ("Too many tries. Wait a minute.", `app/api/book`).
       else if ((status === 429 || status === 503) && said) why = said;
       setError(why);

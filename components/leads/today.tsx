@@ -19,7 +19,7 @@ import { Divider } from "@astryxdesign/core/Divider";
 import { About, joinParts, Age, Next } from "@/components/leads/row";
 import { dueTasks, isLate, paperDue, shootTag, type LeadSummary, type TaskRow } from "@/lib/leads/leads";
 import { dayShort } from "@/components/leads/plan";
-import { adminCall, authed, ago, isSetAside, dateTimeLabel, centsLabel, isFinishedStage, inboxCall, needsMe, nextStep, now, inFilter, plusDays, needsRenewal, ymdPT, type Size } from "@/lib/leads/lead-desk";
+import { adminCall, authed, ago, isSetAside, dateTimeLabel, centsLabel, isFinishedStage, deskCall, needsMe, nextStep, now, inFilter, plusDays, needsRenewal, ymdPT, type Size } from "@/lib/leads/lead-desk";
 import { balance, shortDate, dueOf, overdue, usd } from "@/lib/leads/invoice";
 import type { InvoiceRow } from "@/components/leads/invoices";
 import { TZ } from "@/lib/booking/rules";
@@ -101,7 +101,7 @@ export function TodayDesk({ leads, size, open, show }: { leads: LeadSummary[]; s
   React.useEffect(() => {
     adminCall<{ available?: number; pending?: number }>("/api/money").then(setMoney).catch(() => setMoney("Not connected"));
   }, []);
-  // Traffic answers to the inbox key or the GitHub token, like the other admin routes.
+  // Traffic answers to the admin key or the GitHub token, like the other admin routes.
   const [traffic, setTraffic] = React.useState<Spark | string | null>(null);
   React.useEffect(() => {
     if (!Object.keys(authed()).length) return queueMicrotask(() => setTraffic("Inbox key or GitHub token needed"));
@@ -110,7 +110,7 @@ export function TodayDesk({ leads, size, open, show }: { leads: LeadSummary[]; s
   // Unpaid invoices past their due date, oldest due first.
   const [pastDue, setPastDue] = React.useState<InvoiceRow[]>([]);
   React.useEffect(() => {
-    inboxCall<{ invoices: InvoiceRow[] }>({ query: "?invoices" })
+    deskCall<{ invoices: InvoiceRow[] }>({ path: "/invoices" })
       .then((o) => setPastDue(o.invoices.filter((i) => overdue(i, today)).sort((a, b) => dueOf(a).localeCompare(dueOf(b)))))
       .catch(() => {});
   }, [today]);
@@ -122,7 +122,7 @@ export function TodayDesk({ leads, size, open, show }: { leads: LeadSummary[]; s
   // Every lead's open tasks (`?tasks`), due within a week or late; leads put aside are left out, as Your move leaves them.
   const [taskRows, setTaskRows] = React.useState<TaskRow[] | string | null>(null);
   React.useEffect(() => {
-    inboxCall<{ tasks: TaskRow[] }>({ query: "?tasks" }).then((o) => setTaskRows(o.tasks ?? [])).catch(() => setTaskRows("Tasks did not load"));
+    deskCall<{ tasks: TaskRow[] }>({ path: "/tasks" }).then((o) => setTaskRows(o.tasks ?? [])).catch(() => setTaskRows("Tasks did not load"));
   }, []);
   const due = dueTasks((Array.isArray(taskRows) ? taskRows : []).filter((t) => leads.some((l) => l.id === t.lead && !isSetAside(l))), today);
   const lateBy = (d: string) => Math.round((Date.parse(`${today}T12:00:00Z`) - Date.parse(`${d}T12:00:00Z`)) / 864e5);

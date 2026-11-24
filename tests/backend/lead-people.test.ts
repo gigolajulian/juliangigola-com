@@ -5,6 +5,7 @@ import { applyLeadEvent, leadSummary, leadStoreKey, type Lead, type Person } fro
 import { cleanPeople, merge, PEOPLE_MAX } from "@/lib/leads/lead-crm";
 import { readProof, writeProof } from "@/lib/proofs/proof-store";
 import { FakeKV, LEADS_KEY, INBOX_KEY as KEY } from "./fakes";
+import { desk } from "./desk-routes";
 
 /* Several people under one client (Julian 2026-11-15): the art director,
    the producer and the stylist sit on the brand's lead, their mail lands
@@ -12,7 +13,6 @@ import { FakeKV, LEADS_KEY, INBOX_KEY as KEY } from "./fakes";
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
 vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));
-const inbox = await import("@/app/api/inbox/route");
 const proof = await import("@/app/api/proof/route");
 
 const at = (h: number) => new Date(Date.UTC(2026, 10, 15, h)).toISOString();
@@ -35,7 +35,7 @@ async function brand(people: Person[] = [AD]) {
   return { id, key: `lead:${id}` };
 }
 const patch = (body: object) =>
-  inbox.PATCH(new Request("https://juliangigola.com/api/inbox", { method: "PATCH", body: JSON.stringify(body), headers: { "x-inbox-key": KEY } }));
+  desk("PATCH", "", { body });
 
 describe("findLead", () => {
   it("finds a person's lead, prefers an address's own lead, and ignores an alias whose lead is gone", async () => {
@@ -138,7 +138,7 @@ describe("gallery mail", () => {
     const sent: { to: string; cc?: string[] }[] = [];
     const r2 = { put: vi.fn(async () => {}), get: vi.fn(async () => null), delete: vi.fn(async () => {}) };
     ctx.env = { ...ctx.env, PROOFS: r2, CLIENT_EMAIL: { send: async (m: { to: string; cc?: string[] }) => void sent.push(m) } };
-    const post = (body: object) => proof.POST(new Request("https://juliangigola.com/api/proof", { method: "POST", body: JSON.stringify(body), headers: { "x-inbox-key": KEY } }));
+    const post = (body: object) => proof.POST(new Request("https://juliangigola.com/api/proof", { method: "POST", body: JSON.stringify(body), headers: { "x-admin-key": KEY } }));
     const { token } = await (await post({ action: "create", name: "Brand Co" }))!.json();
     const p = (await readProof(kv as never, s, token))!;
     await writeProof(kv as never, s, { ...p, email: BRAND, finals: [{ id: "a1", file: "a.jpg", w: 10, h: 10, bytes: 1, crc: 1 }] });

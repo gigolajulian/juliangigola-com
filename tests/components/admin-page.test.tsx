@@ -22,16 +22,10 @@ const project: AdminProject = {
 const props = () => ({
   project,
   disciplines: [{ slug: "editorial", name: "Editorial", group: "Work" }],
-  filedAs: "editorial",
-  onRecategorise: vi.fn(),
-  frames: null,
+  overrides: { categories: {}, frames: {}, credits: { x: [{ role: "Client", name: "Acme", instagram: null }] }, copy: {}, slugs: {} },
+  onOverride: vi.fn(),
   uploads: {},
-  onReframe: vi.fn(),
   onUpload: vi.fn(),
-  credits: [{ role: "Client", name: "Acme", instagram: null }],
-  onCredits: vi.fn(),
-  copy: null,
-  onCopy: vi.fn(),
   onClose: vi.fn(),
 });
 
@@ -50,6 +44,6 @@ describe("AdminPage", () => {
     fireEvent.click(screen.getByRole("button", { name: /Projects/ }));
     expect(p.onClose).toHaveBeenCalled();
     fireEvent.change(screen.getByLabelText("Title"), { target: { value: "New title" } });
-    expect(p.onCopy).toHaveBeenCalledWith({ title: "New title", intent: "A night shoot." });
+    expect(p.onOverride).toHaveBeenCalledWith("copy", "x", { title: "New title", intent: "A night shoot." });
   });
 });

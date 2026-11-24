@@ -13,7 +13,7 @@ const full: Lead = { ...summary, events: [{ at: iso, kind: "inquiry", text: "Fro
 function setup() {
   // The proofs list goes through fetch; the lead through `call`.
   vi.stubGlobal("fetch", vi.fn(() => Promise.resolve(new Response(JSON.stringify({ proofs: [] }), { status: 200 }))));
-  const call = vi.fn(async (init?: RequestInit & { query?: string }) => {
+  const call = vi.fn(async (init?: RequestInit & { path?: string }) => {
     if (init?.method === "PATCH") return { lead: { ...full, ...JSON.parse(String(init.body)) } };
     return { lead: full };
   }) as unknown as Call & ReturnType<typeof vi.fn>;

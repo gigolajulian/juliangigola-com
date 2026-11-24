@@ -15,19 +15,21 @@
  */
 interface CloudflareEnv {
   /**
-   * Opens the inbox. Set with:
+   * The admin key: opens /admin and the desks (`refuseAdmin` in `lib/vouch.ts`). Set with:
    *
    *   wrangler secret put INBOX_KEY
    *
    * Any long random string. Pasted into /admin once, kept in that browser's
-   * `localStorage` beside the GitHub token, and sent as `x-inbox-key`.
+   * `localStorage` beside the GitHub token, and sent as `x-admin-key`.
+   * The secret keeps its old name: a Worker secret cannot be read back, so a
+   * rename to ADMIN_KEY needs Julian to paste the value again.
    */
   INBOX_KEY?: string;
 
   /** Seals leads, proofs and contracts (`lib/leads/lead-crypto.ts`). Set with `wrangler secret put LEADS_KEY`. */
   LEADS_KEY?: string;
 
-  /** Signs Web Push for /admin's lead alerts (`app/api/inbox/route.ts`). Set with `wrangler secret put VAPID_KEY`. */
+  /** Signs Web Push for /admin's lead alerts (`app/api/leads/push/route.ts`). Set with `wrangler secret put VAPID_KEY`. */
   VAPID_KEY?: string;
 
   /**
@@ -90,4 +92,13 @@ interface CloudflareEnv {
    *   wrangler versions secret put BOOKING_SECRET
    */
   BOOKING_SECRET?: string;
+
+  /**
+   * The booking Worker's bearer on its calls to the site (`worker/index.ts` over SITE; `refuseWorker` in
+   * `lib/vouch.ts` checks it). Its own value, set on both Workers, never BOOKING_SECRET's:
+   *
+   *   wrangler secret put WORKER_KEY
+   *   wrangler secret put WORKER_KEY -c worker/wrangler.jsonc
+   */
+  WORKER_KEY?: string;
 }

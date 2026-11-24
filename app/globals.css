@@ -58,7 +58,7 @@
 @import "./styles/motion-plan.css"; /* Motion plan items (docs/decisions.md) */
 @import "./styles/mtscroll.css"; /* v4 homepage (html[data-mtscroll], static in app/layout.tsx) */
 @import "./styles/v4pages.css"; /* inner pages plan (lib/flags/v4pages.ts) */
-@import "./styles/navfx.css"; /* the header: on for everyone, off with ?navfx=0 */
+@import "./styles/navfx.css"; /* the header */
 
 /* Time picker (components/booking/time-picker.tsx): a digit rolls in when it changes. */
 @keyframes tp-roll {

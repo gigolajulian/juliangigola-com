@@ -1,20 +1,18 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FakeKV, LEADS_KEY, INBOX_KEY as KEY } from "./fakes";
+import { desk } from "./desk-routes";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { recordLead } from "@/lib/leads/lead-store";
 import { csv, fillTemplate, identity, manualLead, merge, stats } from "@/lib/leads/lead-crm";
 import type { Lead } from "@/lib/leads/leads";
 
-/* The desk as a CRM (`lib/leads/lead-crm.ts`, `app/api/inbox/route.ts`): leads
+/* The desk as a CRM (`lib/leads/lead-crm.ts`, the routes under `app/api/leads`): leads
    added by hand, notes, reminders, details, quotes, merges, templates, the
    numbers and the export. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
 vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));
-const { GET, PATCH, POST } = await import("@/app/api/inbox/route");
 
-const req = (method: string, { body, query = "" }: { body?: unknown; query?: string } = {}) =>
-  new Request(`https://juliangigola.com/api/inbox${query}`, { method, body: body === undefined ? undefined : JSON.stringify(body), headers: { "x-inbox-key": KEY } });
 let kv: FakeKV;
 beforeEach(() => {
   kv = new FakeKV();
@@ -87,11 +85,11 @@ describe("templates, numbers, export", () => {
 
 describe("the API", () => {
   it("adds a lead by hand, once, and lists it", async () => {
-    const res = await POST(req("POST", { body: { add: { name: "Ana", ig: "ana.k", stage: "Replied", source: "Referral" } } }));
+    const res = await desk("POST", "", { body: { name: "Ana", ig: "ana.k", stage: "Replied", source: "Referral" } });
     expect(res.status).toBe(200);
-    expect((await POST(req("POST", { body: { add: { name: "Ana again", ig: "@ANA.K" } } }))).status).toBe(409);
-    expect((await POST(req("POST", { body: { add: { name: "" } } }))).status).toBe(400);
-    const { leads } = await (await GET(req("GET", { query: "?leads" }))).json();
+    expect((await desk("POST", "", { body: { name: "Ana again", ig: "@ANA.K" } })).status).toBe(409);
+    expect((await desk("POST", "", { body: { name: "" } })).status).toBe(400);
+    const { leads } = await (await desk("GET")).json();
     expect(leads).toHaveLength(1);
     expect(leads[0]).toMatchObject({ name: "Ana", stage: "Replied", unread: false });
     expect(leads[0]).not.toHaveProperty("source");
@@ -100,7 +98,7 @@ describe("the API", () => {
   it("keeps notes, a reminder, details, a quote and a lost reason, with the reminder in the list", async () => {
     await recordLead({ INBOX: kv as never, LEADS_KEY }, "m@x.com", { event: { at: "2026-11-01T00:00:00Z", kind: "inquiry", ref: "msg:1" }, name: "Maya" });
     const key = `lead:${await idOf("m@x.com")}`;
-    const patch = async (body: object) => (await PATCH(req("PATCH", { body: { key, ...body } }))).json();
+    const patch = async (body: object) => (await desk("PATCH", "", { body: { key, ...body } })).json();
     expect((await patch({ notes: "Wants red light" })).lead.notes).toBe("Wants red light");
     // Capped like the field, so the row shows it whole.
     expect((await patch({ remind: { at: "2026-11-06T17:00:00Z", text: "Send invoice, then send photos to select" } })).lead.remind.text).toHaveLength(28);
@@ -108,9 +106,9 @@ describe("the API", () => {
     expect((await patch({ details: { name: "Maya Okafor", phone: "408 555 0101", ig: "maya", company: "" } })).lead).toMatchObject({ name: "Maya Okafor", phone: "408 555 0101", ig: "@maya" });
     expect((await patch({ quote: 1200 })).lead.quote).toBe(1200);
     expect((await patch({ stage: "Lost", lostReason: "Dates" })).lead).toMatchObject({ stage: "Lost", lostReason: "Dates" });
-    expect((await PATCH(req("PATCH", { body: { key, quote: -5 } }))).status).toBe(400);
-    expect((await PATCH(req("PATCH", { body: { key, remind: { at: "soon" } } }))).status).toBe(400);
-    const { leads } = await (await GET(req("GET", { query: "?leads" }))).json();
+    expect((await desk("PATCH", "", { body: { key, quote: -5 } })).status).toBe(400);
+    expect((await desk("PATCH", "", { body: { key, remind: { at: "soon" } } })).status).toBe(400);
+    const { leads } = await (await desk("GET")).json();
     expect(leads[0]).toMatchObject({ due: "2026-11-06T17:00:00.000Z", dueText: "Send the quote", quote: 1200 });
     expect(leads[0]).not.toHaveProperty("notes");
     expect((await patch({ remind: null })).lead).not.toHaveProperty("remind");
@@ -121,25 +119,25 @@ describe("the API", () => {
     await recordLead({ INBOX: kv as never, LEADS_KEY }, "a@work.com", { event: { at: "2026-11-02T00:00:00Z", kind: "call", ref: "cal:1" }, name: "A" });
     const [a, b] = [`lead:${await idOf("a@x.com")}`, `lead:${await idOf("a@work.com")}`];
     // A merge whose patch fails keeps the other record.
-    expect((await PATCH(req("PATCH", { body: { key: a, mergeFrom: b, invoicePaid: { no: "0000", paid: true } } }))).status).toBe(404);
+    expect((await desk("PATCH", "", { body: { key: a, mergeFrom: b, invoicePaid: { no: "0000", paid: true } } })).status).toBe(404);
     expect(await kv.get(b)).not.toBeNull();
     expect(await kv.get(`log:${b.slice(5)}`)).not.toBeNull();
-    const { lead } = await (await PATCH(req("PATCH", { body: { key: a, mergeFrom: b } }))).json();
+    const { lead } = await (await desk("PATCH", "", { body: { key: a, mergeFrom: b } })).json();
     expect(lead).toMatchObject({ stage: "Call booked" });
     expect(await kv.get(b)).toBeNull();
     expect(await kv.get(`gone:${b.slice(5)}`)).not.toBeNull();
   });
 
   it("saves templates, serves the defaults until then, and answers stats and CSV", async () => {
-    expect((await (await GET(req("GET", { query: "?templates" }))).json()).templates.length).toBeGreaterThan(2);
-    const saved = await (await PATCH(req("PATCH", { body: { templates: [{ name: "Hi", subject: "S", body: "B" }, { bad: 1 }] } }))).json();
+    expect((await (await desk("GET", "/templates")).json()).templates.length).toBeGreaterThan(2);
+    const saved = await (await desk("PUT", "/templates", { body: { templates: [{ name: "Hi", subject: "S", body: "B" }, { bad: 1 }] } })).json();
     // The quote nudges ride along, so a list saved before them still has them.
     expect(saved.templates[0]).toEqual({ id: "t0", name: "Hi", subject: "S", body: "B" });
     expect(saved.templates.map((t: { id: string }) => t.id)).toEqual(["t0", "nudge1", "nudge2", "nudge3"]);
-    expect((await (await GET(req("GET", { query: "?templates" }))).json()).templates).toHaveLength(4);
+    expect((await (await desk("GET", "/templates")).json()).templates).toHaveLength(4);
     await recordLead({ INBOX: kv as never, LEADS_KEY }, "m@x.com", { event: { at: "2026-11-01T00:00:00Z", kind: "inquiry", ref: "msg:1" }, name: "Maya", source: "instagram.com" });
-    expect((await (await GET(req("GET", { query: "?stats" }))).json()).stats.sources).toEqual([{ source: "instagram.com", leads: 1, booked: 0 }]);
-    const file = await GET(req("GET", { query: "?csv" }));
+    expect((await (await desk("GET", "/stats")).json()).stats.sources).toEqual([{ source: "instagram.com", leads: 1, booked: 0 }]);
+    const file = await desk("GET", "/csv");
     expect(file.headers.get("content-type")).toContain("text/csv");
     expect(file.headers.get("cache-control")).toContain("no-store");
     expect(await file.text()).toContain("m@x.com");

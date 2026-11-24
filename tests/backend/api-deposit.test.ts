@@ -50,7 +50,7 @@ beforeEach(() => {
   mails = [];
   sent = [];
   allowed = true;
-  ctx.env = { INBOX: new FakeKV(), DEPOSIT_LIMIT: { limit: async () => ({ success: allowed }) }, STRIPE_SECRET_KEY: "sk_test_x", STRIPE_WEBHOOK_SECRET: WHSEC, EMAIL: { send: async (m: Mail) => void mails.push(m) }, CLIENT_EMAIL: { send: async (m: ClientMail) => void sent.push(m) }, GCAL_OAUTH: OAUTH, BOOKING_LOCK: fakeLock(new BookingLock({ storage: new FakeStore() }, { GCAL_OAUTH: OAUTH })), BOOKING_SECRET: "test-secret" };
+  ctx.env = { INBOX: new FakeKV(), PUBLIC_WRITE_LIMIT: { limit: async () => ({ success: allowed }) }, STRIPE_SECRET_KEY: "sk_test_x", STRIPE_WEBHOOK_SECRET: WHSEC, EMAIL: { send: async (m: Mail) => void mails.push(m) }, CLIENT_EMAIL: { send: async (m: ClientMail) => void sent.push(m) }, GCAL_OAUTH: OAUTH, BOOKING_LOCK: fakeLock(new BookingLock({ storage: new FakeStore() }, { GCAL_OAUTH: OAUTH })), BOOKING_SECRET: "test-secret" };
   vi.stubGlobal("fetch", async (url: string, init?: RequestInit) => {
     calls.push({ url, init });
     if (url.includes("oauth2")) return reply({ access_token: "t", expires_in: 3600 });
@@ -107,7 +107,7 @@ describe("POST /api/deposit", () => {
     open = false;
     const res = await post(BODY);
     expect(res.status).toBe(409);
-    expect(await res.json()).toEqual({ error: "taken" });
+    expect(await res.json()).toEqual({ error: "That time was just taken. Pick another.", code: "taken" });
     expect(calls.some((c) => c.url.includes("stripe"))).toBe(false);
   });
 
@@ -121,7 +121,7 @@ describe("POST /api/deposit", () => {
     expect(form.get("metadata[start]")).toBe(START);
     expect(form.get("metadata[amount]")).toBeNull();
     expect(form.get("metadata[kind]")).toBe("deposit");
-    expect(form.get("metadata[engine]")).toBe("own");
+    expect(form.get("metadata[engine]")).toBeNull();
     expect(kv().puts).toEqual([]);
   });
 });

@@ -81,7 +81,7 @@ export function ProofWall({
   words?: { lab: string; title: string; cta: string; note: string };
   /** The gallery's subheading under the heading, when Julian set one. */
   sub?: string | null;
-  /** The wall tuned per screen (lib/proofs/gridwall.ts); null with `?gw=0`. */
+  /** The wall tuned per screen (lib/proofs/gridwall.ts); null before the client knows its size. */
   tune?: Gridwall | null;
   grid: React.RefObject<HTMLDivElement | null>;
   isEmail: (v: string) => boolean;

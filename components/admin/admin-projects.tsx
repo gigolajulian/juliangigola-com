@@ -13,6 +13,8 @@ import type { Bts } from "@/lib/work/work-types";
 import type { FrameRef } from "@/lib/work/added";
 import type { Credit } from "@/lib/work/work-types";
 import { cn, errorText } from "@/lib/utils";
+import type { Overrides } from "@/components/admin/admin-editor-props";
+import type { SetOverride } from "@/components/admin/editor/draft";
 
 /* ── the project list ─────────────────────────────────────────────
  * Everything on the site, and what can be done to it.
@@ -85,22 +87,16 @@ export function AdminProjects({
   onHiddenChange,
   unlisted,
   onUnlistedChange,
-  slugs,
-  onSlug,
   changed,
   onRemoved,
   disciplines,
-  recategorised,
-  onRecategorise,
-  reframed,
-  onReframe,
+  overrides,
+  onOverride,
   bts,
   publishedBts,
   onBts,
   uploads,
   onUpload,
-  credits,
-  onCredits,
   opened,
   onOpened,
   onOpenPage,
@@ -115,22 +111,16 @@ export function AdminProjects({
   /** Slugs off the listings but still paged, as the draft has them. */
   unlisted: Set<string>;
   onUnlistedChange: (next: Set<string>) => void;
-  /** Renamed addresses in the draft, original slug to current. */
-  slugs: Record<string, string>;
-  /** A new address for a project, by its original slug. */
-  onSlug: (origin: string, next: string) => void;
   /** Slugs with unpublished edits, as the editor measures them. */
   changed: Set<string>;
   /** Handed the new bin contents after a removal, so the panel below updates. */
   onRemoved?: (trash: TrashedProject[]) => void;
   /** Disciplines a project can be refiled under. */
   disciplines: { slug: string; name: string; group: string }[];
-  /** Draft refilings, slug → category slug. */
-  recategorised: Record<string, string>;
-  onRecategorise: (slug: string, categorySlug: string) => void;
-  /** Draft galleries, slug → sequence. Absent while it is the original. */
-  reframed: Record<string, FrameRef[]>;
-  onReframe: (slug: string, frames: FrameRef[] | null) => void;
+  /** The draft's per-project overrides: refilings, galleries (absent while original), credits (absent while harvested),
+      copy and renamed addresses (original slug to current). Null to `onOverride` is back to what is published. */
+  overrides: Overrides;
+  onOverride: SetOverride;
   /** Draft BTS, slug → `{ by, frames }`, and what the repo holds. */
   bts: Record<string, Bts>;
   publishedBts: Record<string, Bts>;
@@ -138,10 +128,6 @@ export function AdminProjects({
   /** Photographs staged for this publish, by repo path. */
   uploads: Record<string, PendingUpload>;
   onUpload: (added: PendingUpload[]) => void;
-  /** Draft credits, slug → list. Absent while they are the harvested ones. */
-  credits: Record<string, Credit[]>;
-  /** Null puts a project back to the credits it arrived with. */
-  onCredits: (slug: string, next: Credit[] | null) => void;
   /**
    * The expanded row, or null.
    *
@@ -165,6 +151,7 @@ export function AdminProjects({
   query: string;
   onQuery: (next: string) => void;
 }) {
+  const { slugs, categories: recategorised, frames: reframed, credits } = overrides;
   const [status, setStatus] = React.useState<Status>({ kind: "idle" });
   const [confirming, setConfirming] = React.useState<string | null>(null);
   const [gone, setGone] = React.useState<Set<string>>(new Set());
@@ -267,7 +254,7 @@ export function AdminProjects({
     const taken = projects.some((q) => q !== p && addressOf(q) === next);
     if (!SLUG.test(next) || taken) return setBadSlug(p.origin);
     setBadSlug(null);
-    onSlug(p.origin, next);
+    onOverride("slugs", p.origin, next);
   };
   /** Delete, for a harvested project: unpublished, reversibly. */
   const toggleHidden = (slug: string) => {
@@ -493,7 +480,7 @@ export function AdminProjects({
                       until the next harvest and no longer. */}
                   <select
                     value={filedAs}
-                    onChange={(e) => onRecategorise(p.slug, e.target.value)}
+                    onChange={(e) => onOverride("categories", p.slug, e.target.value)}
                     aria-label={`Discipline for ${p.name}`}
                     className={cn(
                       // `bg-background`, not `bg-transparent`. The popup list takes
@@ -652,7 +639,7 @@ export function AdminProjects({
                     original={p.images}
                     frames={frames}
                     uploads={uploads}
-                    onChange={(next) => onReframe(p.slug, next)}
+                    onChange={(next) => onOverride("frames", p.slug, next)}
                     onUpload={onUpload}
                   />
                   <AdminBts
@@ -717,7 +704,7 @@ export function AdminProjects({
                       {credits[p.slug] ? (
                         <button
                           type="button"
-                          onClick={() => onCredits(p.slug, null)}
+                          onClick={() => onOverride("credits", p.slug, null)}
                           className="label border border-border px-3 py-1.5 press hoverable:hover:bg-card"
                         >
                           Undo changes
@@ -731,7 +718,7 @@ export function AdminProjects({
                     <AdminCredits
                       title={null}
                       credits={credits[p.slug] ?? p.credits}
-                      onChange={(next) => onCredits(p.slug, next)}
+                      onChange={(next) => onOverride("credits", p.slug, next)}
                     />
                   </div>
                 </>

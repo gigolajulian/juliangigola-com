@@ -10,6 +10,8 @@
   // Secrets, set once each (the same values as on `juliangigola`):
   //   npx wrangler secret put GCAL_OAUTH -c worker/wrangler.jsonc
   //   npx wrangler secret put BOOKING_SECRET -c worker/wrangler.jsonc
+  // and its bearer on calls to the site, the same value as WORKER_KEY on `juliangigola`:
+  //   npx wrangler secret put WORKER_KEY -c worker/wrangler.jsonc
   "name": "juliangigola-booking",
   "main": "index.ts",
   "compatibility_date": "2026-09-11",

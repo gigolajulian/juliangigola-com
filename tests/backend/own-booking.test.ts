@@ -27,7 +27,7 @@ const now = Date.now();
 const wed = new Date(now + 7 * 864e5);
 wed.setUTCDate(wed.getUTCDate() + ((3 - wed.getUTCDay() + 7) % 7));
 const START = new Date(Date.UTC(wed.getUTCFullYear(), wed.getUTCMonth(), wed.getUTCDate(), 18)).toISOString();
-const CALL = { engine: "own", slug: "editorial", start: START, timeZone: "America/Los_Angeles", name: "QA Test", email: "qa@example.com", phone: "+14085550100", via: "Video" };
+const CALL = { slug: "editorial", start: START, timeZone: "America/Los_Angeles", name: "QA Test", email: "qa@example.com", phone: "+14085550100", via: "Video" };
 
 let busy: { start: string; end: string }[];
 let inserts: { url: string; body: Record<string, unknown> }[];
@@ -53,7 +53,7 @@ beforeEach(() => {
     CLIENT_EMAIL: client,
     EMAIL: mail,
     STRIPE_SECRET_KEY: "sk_test_x",
-    DEPOSIT_LIMIT: { limit: async () => ({ success: true }) },
+    PUBLIC_WRITE_LIMIT: { limit: async () => ({ success: true }) },
   };
   vi.stubGlobal("fetch", async (url: string, init?: RequestInit) => {
     if (url.includes("oauth2")) return Response.json({ access_token: "t", expires_in: 3600 });
@@ -82,12 +82,12 @@ describe("POST /api/book (a free call)", () => {
     const res = await post(CALL);
     expect(res.status).toBe(200);
     const out = await res.json();
-    expect(out).toMatchObject({ status: "success", data: { start: START, where: "https://meet.google.com/abc" } });
+    expect(out).toMatchObject({ start: START, where: "https://meet.google.com/abc" });
     expect(inserts).toHaveLength(1);
     expect(inserts[0].url).toContain("sendUpdates=none");
     expect(inserts[0].url).toContain("conferenceDataVersion=1");
     expect(inserts[0].body).toMatchObject({ summary: "Editorial call: QA Test", attendees: [{ email: "qa@example.com" }] });
-    expect(store.data.get(`b:${out.data.uid}`)).toMatchObject({ eventId: "ev1", email: "qa@example.com", call: true });
+    expect(store.data.get(`b:${out.id}`)).toMatchObject({ eventId: "ev1", email: "qa@example.com", call: true });
     expect(kv.json(kv.puts[0])).toMatchObject({ type: "booking", name: "QA Test" });
     expect(client.sent).toHaveLength(1);
     expect(String(client.sent[0].html)).not.toContain("cal.com");
@@ -96,6 +96,7 @@ describe("POST /api/book (a free call)", () => {
   it("gives one of two tabs on the same time the booking, the other a 409", async () => {
     const [a, b] = await Promise.all([post(CALL), post(CALL)]);
     expect([a.status, b.status].sort((x, y) => x - y)).toEqual([200, 409]);
+    expect(await (a.status === 409 ? a : b).json()).toEqual({ error: "That time was just taken. Pick another.", code: "taken" });
     expect(inserts).toHaveLength(1);
   });
 
@@ -123,7 +124,7 @@ describe("POST /api/book (a free call)", () => {
 });
 
 describe("bookDeposit (a paid session on the site's engine)", () => {
-  const META = { kind: "deposit", engine: "own", slug: "portraits", start: START, timeZone: "America/Los_Angeles", name: "QA Test", email: "qa@example.com" };
+  const META = { kind: "deposit", slug: "portraits", start: START, timeZone: "America/Los_Angeles", name: "QA Test", email: "qa@example.com" };
   const env = () => ctx.env as unknown as Parameters<typeof bookDeposit>[0];
 
   it("books through the lock, files the deposit, and books once however often Stripe delivers", async () => {

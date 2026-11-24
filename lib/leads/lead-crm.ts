@@ -3,7 +3,7 @@
  * Leads added by hand (DMs, texts, referrals), merging two records of one
  * person, the numbers (inquiries a week, reply time, booked rate, where
  * bookings come from, quotes), an export, and reply templates.
- * Pure functions: `app/api/inbox/route.ts` reads and writes, these decide.
+ * Pure functions: `app/api/leads` reads and writes, these decide.
  * ─────────────────────────────────────────────────────────────── */
 
 import { TZ } from "../booking/rules";

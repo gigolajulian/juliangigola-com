@@ -63,7 +63,7 @@ describe("POST remind", () => {
   let kv: FakeKV;
   let sent: { to: string; subject: string }[];
   let fail = false;
-  const req = (method: string, body?: unknown, query = "") => new Request(`https://juliangigola.com/api/proof${query}`, { method, body: body ? JSON.stringify(body) : undefined, headers: { "x-inbox-key": "k" } });
+  const req = (method: string, body?: unknown, query = "") => new Request(`https://juliangigola.com/api/proof${query}`, { method, body: body ? JSON.stringify(body) : undefined, headers: { "x-admin-key": "k" } });
   const seal = async () => (await sealer(LEADS_KEY))!;
   beforeEach(async () => {
     kv = new FakeKV();

@@ -28,7 +28,7 @@ import "./flow.css";
 export function MotionLayer() {
   React.useEffect(() => {
     const root = document.querySelector<HTMLElement>(".v3home.mt");
-    if (!root || !("v3motion" in document.documentElement.dataset)) return;
+    if (!root) return;
     const stop = startEngine(root, [...heroDrivers, ...rowsDrivers, ...commissionsDrivers, ...aboutDrivers, ...quoteDrivers, ...footDrivers, ...depthDrivers, ...barDrivers]);
     const stopReveal = startReveal(root);
     const still = matches("calm") ? heroStill(root) : null;
