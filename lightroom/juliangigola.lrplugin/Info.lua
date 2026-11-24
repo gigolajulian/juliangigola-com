@@ -34,5 +34,5 @@ return {
   -- Updates itself from the repo at each start (Update.lua).
   LrInitPlugin = "Init.lua",
   -- Bump revision with every plugin change: Update.lua only installs a higher version.
-  VERSION = { major = 1, minor = 2, revision = 12, build = 0 },
+  VERSION = { major = 1, minor = 2, revision = 13, build = 0 },
 }

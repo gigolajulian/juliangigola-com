@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { ProofGallery } from "@/components/proofs/gallery";
-import type { PublicProof } from "@/lib/proofs/proof";
+import type { PublicProof } from "@/lib/proofs/proof-model";
 
 const proof = (over: Partial<PublicProof> = {}): PublicProof => ({
   frames: [

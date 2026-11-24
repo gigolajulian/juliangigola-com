@@ -187,7 +187,7 @@ describe("DELETE", () => {
 describe("leads", () => {
   const idOf = async (email: string) => (await sealer(LEADS_KEY)!).id(email);
   const lead = async (email: string, at: string) =>
-    (await recordLead({ INBOX: kv as never, LEADS_KEY }, email, { event: { at, kind: "inquiry", ref: `msg:${email}` }, name: email.split("@")[0] }))!;
+    recordLead({ INBOX: kv as never, LEADS_KEY }, email, { event: { at, kind: "inquiry", ref: `msg:${email}` }, name: email.split("@")[0] });
 
   it("lists people newest first, opened from sealed metadata, behind the same gate", async () => {
     await lead("a@example.com", "2026-11-01T10:00:00Z");

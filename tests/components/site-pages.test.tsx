@@ -4,7 +4,6 @@ import * as about from "@/app/about/page";
 import * as bts from "@/app/bts/page";
 import * as contact from "@/app/contact/page";
 import * as commission from "@/app/contact/form/page";
-import * as homeV4 from "@/app/home-v4/page";
 import * as legal from "@/app/legal/page";
 import * as notFound from "@/app/not-found";
 import * as home from "@/app/page";
@@ -12,7 +11,6 @@ import * as portfolio from "@/app/portfolio/(index)/page";
 import * as video from "@/app/portfolio/(index)/video/page";
 import * as layout from "@/app/layout";
 import { CATEGORIES, DISCIPLINES, PROJECTS, WITH_BTS, categoryLabel, titleCase } from "@/lib/work/work";
-import { COMMISSION_TABS } from "@/lib/photos-and-sessions";
 import { MOTION_SEO } from "@/lib/seo";
 import { CONTENT } from "@/lib/content";
 import { HOME_DATA } from "@/lib/home/server";
@@ -33,8 +31,6 @@ const { got, keep } = vi.hoisted(() => {
   return { got, keep };
 });
 vi.mock("@/components/portfolio/work", () => ({ WorkIndex: keep("WorkIndex") }));
-vi.mock("@/components/home/rollback", () => ({ V3Home: keep("V3Home") }));
-vi.mock("@/components/home/gate", () => ({ HomeGate: keep("HomeGate") }));
 vi.mock("@/components/home/home", () => ({ Home: keep("Home") }));
 vi.mock("@/components/portfolio/video", () => ({ VideoIndex: keep("VideoIndex") }));
 vi.mock("@/components/about/about", () => ({ About: keep("About") }));
@@ -65,10 +61,8 @@ describe("static page metadata", () => {
     if (share) expect(m).toMatchObject(og(share));
   });
 
-  it("keeps the 404 and the v4 home trial out of the index", () => {
+  it("keeps the 404 out of the index", () => {
     expect(notFound.metadata).toMatchObject({ robots: { index: false, follow: true }, alternates: { canonical: null } });
-    expect(homeV4.metadata).toMatchObject({ robots: { index: false }, alternates: { canonical: "/" } });
-    expect(homeV4.dynamic).toBe("force-dynamic");
     expect(home.metadata).toMatchObject(og("Photographer and creative director"));
   });
 
@@ -143,22 +137,8 @@ describe("/portfolio", () => {
 });
 
 describe("/", () => {
-  it("gives each Commissions tab nine or five top projects of its discipline", async () => {
-    render(await home.default());
-    expect((got.HomeGate as { data: unknown }).data).toBe(HOME_DATA);
-    const top = (got.V3Home as { top: Record<string, { s: string; meta: string }[]> }).top;
-    expect(Object.keys(top).length).toBeGreaterThan(0);
-    const tabs = COMMISSION_TABS.map(([, href]) => new URLSearchParams(href.split("?")[1]).get("d")).filter(Boolean);
-    for (const [d, list] of Object.entries(top)) {
-      expect(tabs).toContain(d);
-      expect([5, 9]).toContain(list.length);
-      for (const w of list) expect(PROJECTS.find((p) => p.slug === w.s)!.categories.some((c) => c.slug === d)).toBe(true);
-      expect(list.map((w) => w.s)).not.toContain("realestate");
-    }
-  });
-
-  it("the v4 trial route renders the v4 home with the server's data", () => {
-    render(<homeV4.default />);
+  it("renders the v4 home with the server's data", () => {
+    render(home.default());
     expect((got.Home as { data: unknown }).data).toBe(HOME_DATA);
   });
 });

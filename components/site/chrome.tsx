@@ -1,12 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { mtscroll, V4_HOME } from "@/lib/home/switch";
 import { PageFoot } from "@/components/site/foot";
 import Link from "next/link";
 import { THEME_COLOR } from "@/lib/theme-color";
 import { usePathname } from "next/navigation";
-import { onLenisScroll, scrollTop } from "./smooth-scroll";
+import { scrollTop } from "./smooth-scroll";
 import { useNavInk } from "./nav-ink";
 import { noSubscribe } from "@/lib/utils";
 
@@ -15,8 +14,8 @@ import { noSubscribe } from "@/lib/utils";
 
 
 /* Motion that is not in the master (the splash, the page zoom, the pointer
-   mark, tilt, glass light, fades) stays off unless `?v3motion` is on for
-   the tab (`app/layout.tsx` sets `data-v3motion`). */
+   mark, tilt, glass light, fades) runs by default and stays off when `?v3motion=0`
+   turned it off for the tab (`app/layout.tsx` sets `data-v3motion`). */
 export function MotionGate({ children, fallback = null }: { children: React.ReactNode; fallback?: React.ReactNode }) {
   const on = React.useSyncExternalStore(noSubscribe, () => document.documentElement.hasAttribute("data-v3motion"), () => false);
   return <>{on ? children : fallback}</>;
@@ -101,214 +100,6 @@ export const NAV = [
 ];
 const current = (path: string, href: string) => path === href || path.startsWith(`${href}/`);
 
-/** The cover's own nav on the homepage: the links and the toggle over the photo. */
-export function CoverNav() {
-  return (
-    <nav className="nav lbl" aria-label="Cover">
-      {NAV.map((n) => (
-        <Link key={n.href} href={n.href}>{n.label}</Link>
-      ))}
-      <ThemeButton />
-      {/* Under 350px the four words ran off the left edge (audit v3.0.92):
-          there the cover shows the inner pages' Menu instead. */}
-      <button className="menu-btn burger-btn cover-burger" type="button" aria-controls="pmenu" aria-label="Menu" onClick={() => dispatchEvent(new Event("v3:menu"))}>
-        <i aria-hidden />
-        <i aria-hidden />
-      </button>
-    </nav>
-  );
-}
-
-/** The text's own box, without line-height or tap padding. */
-function ink(el: Node) {
-  const r = document.createRange();
-  r.selectNodeContents(el);
-  return r.getBoundingClientRect();
-}
-
-/* Flies a copy of the cover name to the wordmark (450ms) or back (350ms),
-   then crossfades into the real one, so the hand-over never pops. */
-function useDock(dock: boolean, past: boolean, hdr: React.RefObject<HTMLElement | null>, setLanded: (b: boolean) => void) {
-  const was = React.useRef(false);
-  const fly = React.useRef<HTMLElement | null>(null);
-  React.useEffect(() => {
-    if (!dock || past === was.current) return;
-    was.current = past;
-    const root = document.documentElement;
-    const h1 = document.querySelector<HTMLElement>(".a-cover h1");
-    const wm = hdr.current?.querySelector(".site-wm");
-    fly.current?.remove();
-    setLanded(false);
-    if (past) root.setAttribute("data-dock", "");
-    const a = h1 && ink(h1), b = wm && ink(wm), cs = h1 && getComputedStyle(h1);
-    // Off screen, or wrapped on a phone: no flight, it just lands.
-    if (!h1 || !a || !b || !cs || a.bottom < 0 || a.height > parseFloat(cs.fontSize) * 1.3) {
-      if (past) setLanded(true);
-      else root.removeAttribute("data-dock");
-      return;
-    }
-    /* The copy holds both spellings: the cover's (caps) and the wordmark's,
-       sized so the scaled copy lands exactly on the real wordmark. They
-       crossfade over the second half of the flight. */
-    const ws = getComputedStyle(wm), k = b.width / a.width;
-    const f = document.createElement("div");
-    f.setAttribute("aria-hidden", "");
-    f.innerHTML = "<span>Julian Gigola</span><span>Julian Gigola</span>";
-    const [big, small] = f.children as unknown as [HTMLElement, HTMLElement];
-    Object.assign(f.style, { position: "fixed", left: "0", top: "0", margin: "0", zIndex: "31", pointerEvents: "none", whiteSpace: "nowrap", transformOrigin: "0 0", willChange: "transform", fontFamily: cs.fontFamily, fontWeight: cs.fontWeight, fontSize: cs.fontSize, lineHeight: cs.lineHeight, letterSpacing: cs.letterSpacing, textTransform: cs.textTransform });
-    Object.assign(small.style, { position: "absolute", left: "0", top: "0", fontFamily: ws.fontFamily, fontWeight: ws.fontWeight, fontSize: `${parseFloat(ws.fontSize) / k}px`, lineHeight: "1", letterSpacing: `${parseFloat(ws.letterSpacing) / k}px`, textTransform: ws.textTransform });
-    document.body.append(f);
-    const o = ink(big), fl = a.left - o.left, ft = a.top - o.top;
-    f.style.left = `${fl}px`;
-    f.style.top = `${ft}px`;
-    // the wordmark spelling sits centred on the caps, in the copy's own coordinates
-    const sb = ink(small);
-    small.style.left = `${a.left - sb.left}px`;
-    small.style.top = `${a.top + a.height / 2 - (sb.top + sb.height / 2)}px`;
-    const s2 = ink(small), sx = s2.left - fl, sy = s2.top - ft;
-    fly.current = f;
-    big.style.color = cs.color;
-    small.style.color = ws.color;
-    const up = { transform: "translate(0,0) scale(1)" };
-    const down = { transform: `translate(${b.left - fl - sx * k}px,${b.top - ft - sy * k}px) scale(${k})` };
-    // Docking eases out; the way back eases in and out so it reads as the same move reversed.
-    const t = { duration: 550, easing: past ? "cubic-bezier(0.16, 1, 0.3, 1)" : "cubic-bezier(0.65, 0, 0.35, 1)", fill: "forwards" as const };
-    const caps = [{ opacity: 1 }, { opacity: 0.6, offset: 0.5 }, { opacity: 0 }];
-    big.animate(past ? caps : [...caps].reverse().map((x, n) => ({ ...x, offset: [0, 0.5, 1][n] })), t);
-    small.animate(past ? [{ opacity: 0 }, { opacity: 0.4, offset: 0.5 }, { opacity: 1 }] : [{ opacity: 1 }, { opacity: 0.4, offset: 0.5 }, { opacity: 0 }], t);
-    /* On the way back Lenis keeps the page gliding, so the copy is pinned
-       to the page, not the screen: it scrolls with the cover name for free,
-       and the flight only covers the fixed distance in the page from where
-       the wordmark was (screen position plus scroll, taken now) to the name. */
-    if (!past) {
-      f.style.position = "absolute";
-      f.style.left = `${fl + scrollX}px`;
-      f.style.top = `${ft + scrollY}px`;
-    }
-    f.animate(past ? [up, down] : [down, up], t).finished.then(() => {
-      if (fly.current !== f) return;
-      fly.current = null;
-      if (!past) {
-        root.removeAttribute("data-dock");
-        f.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 150, easing: "ease-out", fill: "forwards" }).finished.then(() => f.remove());
-        return;
-      }
-      setLanded(true);
-      f.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 180, easing: "ease-out", fill: "forwards" }).finished.then(() => f.remove());
-    }, () => {});
-  }, [dock, past, hdr, setLanded]);
-  React.useEffect(() => () => {
-    fly.current?.remove();
-    document.documentElement.removeAttribute("data-dock");
-  }, []);
-}
-
-/* By default the name rides the scroll instead of a timed flight.
-   ?flag=0 (kept for the tab, ?flag=1 clears it) brings the timed flight back. */
-function scrubFlag() {
-  try {
-    const q = location.search;
-    if (/[?&]flag=0/.test(q)) sessionStorage.setItem("jg-scrub-off", "1");
-    if (/[?&]flag=1/.test(q)) sessionStorage.removeItem("jg-scrub-off");
-    return sessionStorage.getItem("jg-scrub-off") !== "1";
-  } catch {
-    return true;
-  }
-}
-
-/* Scroll-tied dock (behind ?flag=1). One value p, 0 to 1, from the scroll
-   position alone: 0 as the cover name's top reaches the header's bottom
-   edge (the old dock point), 1 once the page has moved one more name
-   height. A single copy of the big spelling is placed on screen between
-   the name's live box and the wordmark, x, y and scale all from the same
-   smoothstep of p, so it is continuous at both ends and reverses exactly.
-   At p = 0 the real name shows, at p = 1 the real wordmark (at that size
-   the two spellings differ by well under a pixel). Boxes are measured on
-   mount and resize; each scroll event (Lenis writes the window scroll
-   every frame) only does arithmetic. Returns false where it does not
-   apply, such as a name that wraps on a phone, so the old path runs. */
-function useScrub(on: boolean, hdr: React.RefObject<HTMLElement | null>, setLanded: (b: boolean) => void) {
-  const [active, setActive] = React.useState(false);
-  React.useLayoutEffect(() => {
-    const h1 = document.querySelector<HTMLElement>(".a-cover h1");
-    const header = hdr.current, wm = header?.querySelector<HTMLElement>(".site-wm");
-    if (!on || !h1 || !header || !wm) return;
-    const root = document.documentElement;
-    const f = document.createElement("div");
-    f.setAttribute("aria-hidden", "");
-    const big = document.createElement("span");
-    big.textContent = "Julian Gigola";
-    f.append(big);
-    Object.assign(f.style, { position: "fixed", left: "0", top: "0", margin: "0", zIndex: "31", pointerEvents: "none", whiteSpace: "nowrap", transformOrigin: "0 0", willChange: "transform", visibility: "hidden" });
-    document.body.append(f);
-    let m: { docTop: number; left: number; h: number; w: number; ox: number; oy: number; bx: number; by: number; k: number; range: number; edge: number } | null = null;
-    let last = -1;
-    const measure = () => {
-      const cs = getComputedStyle(h1), a = ink(h1);
-      if (a.height > parseFloat(cs.fontSize) * 1.3) { m = null; return; }
-      Object.assign(f.style, { transform: "none", fontFamily: cs.fontFamily, fontWeight: cs.fontWeight, fontSize: cs.fontSize, lineHeight: cs.lineHeight, letterSpacing: cs.letterSpacing, textTransform: cs.textTransform, color: cs.color });
-      const o = ink(big), b = ink(wm), k = b.width / o.width;
-      m = { docTop: a.top + scrollY, left: a.left, h: a.height, w: a.width, ox: o.left, oy: o.top, bx: b.left, by: b.top + b.height / 2 - (a.height * k) / 2, k, range: a.height, edge: header.offsetHeight };
-      last = -1;
-    };
-    const at = (sy: number) => (m ? Math.min(1, Math.max(0, (m.edge - (m.docTop - sy)) / m.range)) : 0);
-    const paint = (sy = scrollY) => {
-      if (!m) return;
-      // Near the range while nothing of this shows yet: measure again, so late
-      // fonts or layout above the cover can never put the copy off its mark.
-      if (last <= 0 && (m.edge - (m.docTop - sy)) / m.range > -0.5) measure();
-      if (!m) return;
-      const top = m.docTop - sy;
-      const p = at(sy);
-      if (p === last) return;
-      last = p;
-      const e = p * p * (3 - 2 * p);
-      const s = 1 + (m.k - 1) * e;
-      const x = m.left + (m.bx - m.left) * e, y = top + (m.by - top) * e;
-      f.style.transform = `translate(${x - m.ox * s}px,${y - m.oy * s}px) scale(${s})`;
-      const mid = p > 0 && p < 1;
-      f.style.visibility = mid ? "visible" : "hidden";
-      if (p > 0) root.setAttribute("data-dock", "");
-      else root.removeAttribute("data-dock");
-      wm.style.opacity = p >= 1 ? "1" : "0";
-      header.style.setProperty("opacity", String(e));
-      setLanded(p >= 1);
-    };
-    // The bar follows p, so it is measured where it rests, not mid fade.
-    Object.assign(header.style, { transition: "none", transform: "none" });
-    wm.style.transition = "none";
-    measure();
-    if (!m) {
-      header.removeAttribute("style");
-      wm.style.cssText = "";
-      return () => f.remove();
-    }
-    // Whether it applies is only known after measuring the laid out name.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setActive(true);
-    const onResize = () => { measure(); paint(); };
-    document.fonts?.ready.then(onResize, () => {});
-    // Lenis drives p in the same frame it moves the page; the native event
-    // (a frame later, and a no-op by then) covers keys, the scrollbar, no Lenis.
-    const onScroll = () => paint();
-    const offLenis = onLenisScroll(paint);
-    addEventListener("scroll", onScroll, { passive: true });
-    addEventListener("resize", onResize);
-    paint();
-    return () => {
-      offLenis();
-      removeEventListener("scroll", onScroll);
-      removeEventListener("resize", onResize);
-      f.remove();
-      header.removeAttribute("style");
-      wm.style.cssText = "";
-      root.removeAttribute("data-dock");
-      setActive(false);
-    };
-  }, [on, hdr, setLanded]);
-  return active;
-}
-
 /** Client proof galleries carry their own bar (`components/proofs/gallery.tsx`). */
 export function SiteHeader() {
   const path = usePathname();
@@ -317,30 +108,7 @@ export function SiteHeader() {
 
 function HeaderBar() {
   const path = usePathname();
-  const home = path === "/";
   const hdr = React.useRef<HTMLElement>(null);
-  /* Over the homepage cover it waits until the big name has scrolled under
-     it; on every other page it is there from the start. */
-  const [past, setPast] = React.useState(false);
-  /* ?v3motion (mock https://claude.ai/artifact/VDtydGRZFjpd4W1kibeqBm, 4b):
-     it starts as the name's top reaches it, the name shrinks into the
-     wordmark and the bar unrolls from its top edge. */
-  const dock = React.useSyncExternalStore(noSubscribe, () => home && !mtscroll() && document.documentElement.hasAttribute("data-v3motion") && !matchMedia("(prefers-reduced-motion: reduce)").matches, () => false);
-  const [landed, setLanded] = React.useState(false);
-  React.useEffect(() => {
-    const on = dock;
-    if (!home) return;
-    const sync = () => {
-      const r = document.querySelector(".a-cover h1")?.getBoundingClientRect();
-      setPast(!!r && (on ? r.top : r.bottom) < (hdr.current?.offsetHeight ?? 0));
-    };
-    addEventListener("scroll", sync, { passive: true });
-    sync();
-    return () => removeEventListener("scroll", sync);
-  }, [home, dock]);
-  const flag = React.useSyncExternalStore(noSubscribe, scrubFlag, () => false);
-  const scrub = useScrub(dock && flag, hdr, setLanded);
-  useDock(dock && !scrub, past, hdr, setLanded);
   /* Portfolio: the header steps away while you scroll down into the work and
      comes back when you scroll up; the view buttons stay pinned in the corner (Julian,
      2026-10-27). The root attributes drive the search bar's ride in v3.css. */
@@ -381,9 +149,8 @@ function HeaderBar() {
     const dx = was.right - now.right, dy = was.top - now.top;
     if (dx || dy) bar.animate({ transform: [`translate(${dx}px,${dy}px)`, "none"] }, { duration: 250, easing: "cubic-bezier(.23,1,.32,1)" });
   }, [tuck]);
-  // The v4 home (or its `?mtscroll=1` preview) has no cover to wait for, the bar is there from the start.
-  const mt = React.useSyncExternalStore(noSubscribe, mtscroll, () => V4_HOME);
-  const show = (!home || past || mt) && !tuck;
+  // The v4 home has no cover to wait for, the bar is there from the start.
+  const show = !tuck;
   // The header: ground off at the top, white or black words (navfx, `?navfx=0` off).
   useNavInk(hdr, path);
   const [menu, setMenu] = React.useState(false);
@@ -433,7 +200,7 @@ function HeaderBar() {
   return (
     <div className="v3 contents">
       {/* Inert per part, not the whole bar: the portfolio's tools stay live in it while it tucks. */}
-      <header ref={hdr} className={`site-hdr${show || menu ? " show" : ""}${dock ? " dock" : ""}${landed || menu ? " landed" : ""}${menu ? " menu-on" : ""}`}>
+      <header ref={hdr} className={`site-hdr${show || menu ? " show" : ""}${menu ? " landed" : ""}${menu ? " menu-on" : ""}`}>
         {/* On the homepage it glides back up to the hero (a jump under Reduce Motion); elsewhere page-fly.tsx opens Home at its top. */}
         <Link className="wm site-wm" href="/" inert={!(show || menu)} onClick={(e) => {
           if (path !== "/" || e.metaKey || e.ctrlKey || e.shiftKey) return;

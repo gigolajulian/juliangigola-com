@@ -52,7 +52,7 @@ All 74 projects and 1,131 frames were migrated off the old Format site.
 
 | File | What it is |
 | --- | --- |
-| `lib/work-data.ts` | The archive: every migrated project, its credits, categories and frames. First written by `scripts/harvest.mjs`; the harvester no longer runs, so this file is now edited by hand. |
+| `lib/work/work-data.ts` | The archive: every migrated project, its credits, categories and frames. First written by `scripts/harvest.mjs`; the harvester no longer runs, so this file is now edited by hand. |
 | `lib/work/work.ts` | The only module the app reads work from. Holds the editorial decisions: what is featured, what leads the homepage, how categories group. |
 | `lib/work/work-types.ts` | Shapes for the above. |
 | `lib/booking/sessions.ts` | Session types for the older booking pages. `from: null` renders as "On request". |
@@ -63,8 +63,7 @@ All 74 projects and 1,131 frames were migrated off the old Format site.
 
 | Folder | What it is |
 | --- | --- |
-| `components/home/` + `lib/home/` | The homepage. It is the home when the build has `NEXT_PUBLIC_V4_HOME=1` (`lib/home/switch.ts`); set it to 0 to roll back. |
-| `components/home/rollback.tsx` | The rollback homepage (`V3Home`), served when `NEXT_PUBLIC_V4_HOME` is not 1. |
+| `components/home/` + `lib/home/` | The homepage (the v4 home). |
 | `components/site/` | Site chrome: header, foot, page transitions, smooth scroll, the legal pages. |
 | `components/portfolio/` | /portfolio, the project pages and the motion page. |
 | `components/booking/` | The /book stepper, session pages and booking management. |
@@ -91,7 +90,7 @@ pixels on a 1440px retina screen. Cloudflare cuts each one down per device at re
 time, so a larger source costs a visitor nothing.
 
 **The archive is in this repo.** `public/work/` is tracked in git and served from this
-origin, like `public/hero/` and `public/covers/`. `lib/work-data.ts` is the manifest that
+origin, like `public/hero/` and `public/covers/`. `lib/work/work-data.ts` is the manifest that
 lists it. `scripts/sync-r2.mjs` is from an earlier R2 setup and is not used.
 
 ### Adding a cover image
@@ -133,7 +132,7 @@ push starts a build, and the edit is live in a couple of minutes.
 
 ### Adding a project from /admin
 
-New shoots go in `content/projects.json`, **not** `lib/work-data.ts`: that
+New shoots go in `content/projects.json`, **not** `lib/work/work-data.ts`: that
 file is the migrated archive, and `/admin` writes only `content/projects.json`
 and its override tables. `lib/work/work.ts` merges the two, added work first, so a shoot uploaded today leads its
 discipline.
@@ -154,7 +153,7 @@ serving, which is the safe direction.
 **Hide** removes a project from the site — every index, the discipline pages,
 `sitemap.xml`, and its own route — and is reversible. It is the only kind of
 removal a harvested project can have from `/admin`, which never edits
-`lib/work-data.ts`.
+`lib/work/work-data.ts`.
 The list lives in `hidden` in `content/projects.json`, and `lib/work/work.ts`
 filters once, where every consumer reads, rather than at each index.
 

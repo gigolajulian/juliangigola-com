@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FakeKV, LEADS_KEY, INBOX_KEY as KEY } from "./fakes";
 import { sealer } from "@/lib/leads/lead-crypto";
-import { readProof, writeProof, type Proof } from "@/lib/proofs/proof";
+import type { Proof } from "@/lib/proofs/proof-model";
+import { readProof, writeProof } from "@/lib/proofs/proof-store";
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
 vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));

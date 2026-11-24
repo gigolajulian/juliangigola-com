@@ -158,29 +158,31 @@ async function later(p: Promise<void>) {
  * shortcut: read, fold, write is not atomic, so two events for the same
  * person in the same second can lose one. Webhooks and the form for one
  * person are minutes apart; a Durable Object if that ever changes.
- * Returns the lead as written, or null when nothing new was written (already
- * there, no inbox, or no key).
+ * Never throws (the enquiry form calls it without waiting). Says what happened:
+ * written (with the lead as stored), same (already there), skipped (no inbox
+ * or no address), or failed (no key, or the read or write threw; logged).
  */
-export async function recordLead(env: LeadStore, email: string, c: Change): Promise<Lead | null> {
+export type Recorded = { status: "written"; lead: Lead } | { status: "same" | "skipped" | "failed" };
+export async function recordLead(env: LeadStore, email: string, c: Change): Promise<Recorded> {
   const seal = sealer(env.LEADS_KEY);
-  if (!env.INBOX || !email.includes("@")) return null;
+  if (!env.INBOX || !email.includes("@")) return { status: "skipped" };
   if (!seal) {
     console.error("lead", "LEADS_KEY unset or malformed, not recorded");
-    return null;
+    return { status: "failed" };
   }
   try {
     const s = await seal;
     // Mail from the art director lands on the client's lead (`findLead`).
     const { id, lead: before } = await findLead(env.INBOX, s, email);
     const after = fold(before, email, c);
-    if (after === before) return null;
+    if (after === before) return { status: "same" };
     await writeLead(env.INBOX, s, id, after, before);
     // Something reached the site: ping his devices (`lib/leads/lead-push.ts`).
     const push = pushFor(after, c.event);
     if (push && env.VAPID_KEY) await later(notify(env.INBOX, env.VAPID_KEY, push));
-    return after;
+    return { status: "written", lead: after };
   } catch (e) {
     console.error("lead", String(e));
-    return null;
+    return { status: "failed" };
   }
 }

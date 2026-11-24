@@ -16,7 +16,7 @@ import { Divider } from "@astryxdesign/core/Divider";
 import { canonical } from "@/lib/leads/lead-crypto";
 import { dayLabel } from "@/lib/leads/lead-desk";
 import { pastCloseDate, type ProofRow } from "@/lib/proofs/desk";
-import { stage } from "@/lib/proofs/proof";
+import { stage } from "@/lib/proofs/proof-model";
 import { Timeline } from "@/components/proofs/timeline";
 
 /** Where a gallery stands, in one word, and how loud its badge is. */

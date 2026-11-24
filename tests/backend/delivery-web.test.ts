@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { deliveryDownload, webName } from "@/lib/proofs/delivery-serve";
 import { sealer } from "@/lib/leads/lead-crypto";
-import { finalKey, PREVIEW_W, writeProof, type Proof } from "@/lib/proofs/proof";
+import { finalKey, PREVIEW_W, type Proof } from "@/lib/proofs/proof-model";
+import { writeProof } from "@/lib/proofs/proof-store";
 import { FakeKV, LEADS_KEY } from "./fakes";
 
 /* Save for web (Julian 2026-11-15): the 2000px copy as `<file> web.jpg`, with its length, through worker.ts. */

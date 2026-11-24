@@ -15,13 +15,10 @@ export const MEDIA = {
   fine: "(hover: hover) and (pointer: fine)",
   /** A touch screen with room: an iPad, either way up. */
   tablet: "(pointer: coarse) and (min-width: 40rem)",
-  /** The same, held upright. */
   tabletUpright: "(pointer: coarse) and (min-width: 40rem) and (orientation: portrait)",
-  /** The same, held sideways. */
   tabletSideways: "(pointer: coarse) and (min-width: 40rem) and (orientation: landscape)",
   /** A phone, either way up (the older spelling, as the rules that match it). */
   phone: "(max-width: 39.99rem)",
-  /** A phone held upright. */
   phoneUpright: "(max-width: 39.99rem) and (orientation: portrait)",
   /** Tablet and up: the `sm` breakpoint, where a strip becomes a strip. */
   wide: "(min-width: 40rem)",
@@ -31,16 +28,13 @@ export const MEDIA = {
   desk: "(min-aspect-ratio: 5 / 4) and (min-width: 48rem)",
   /** The V4 desktop structure (D in components/home/motion/engine.ts), written as app/styles/mtscroll.css writes it. */
   held: "(min-width:1024px) and (min-height:600px)",
-  /** The visitor asked for less motion. */
   calm: "(prefers-reduced-motion: reduce)",
 } as const;
 
 export type Device = keyof typeof MEDIA;
 
-/** The MediaQueryList for a query, to listen to. */
 export const media = (name: Device) => window.matchMedia(MEDIA[name]);
 
-/** Whether the query matches now. */
 export const matches = (name: Device) => media(name).matches;
 
 /* One subscribe function per query, so `useSyncExternalStore` sees the

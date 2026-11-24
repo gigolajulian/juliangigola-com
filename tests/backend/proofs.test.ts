@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { paidFor } from "@/lib/proofs/submit";
-import { cardPrice, cleanNotes, coverFrame, cleanSelects, cleanSettings, extras, isOpen, isStrongId, isToken, lookStarts, newToken, nextProofId, proofDay, proofId, owed, shootDay, shotOrder, stage } from "@/lib/proofs/proof";
+import { cardPrice, cleanNotes, coverFrame, cleanSelects, cleanSettings, extras, isOpen, isStrongId, isToken, lookStarts, newToken, proofDay, proofId, owed, shootDay, shotOrder, stage } from "@/lib/proofs/proof-model";
+import { nextProofId } from "@/lib/proofs/proof-store";
 
 const frames = ["a", "b", "c"].map((id) => ({ id, file: `${id}.jpg`, w: 1, h: 1 }));
 
@@ -114,7 +115,7 @@ describe("proofs", () => {
 
 describe("proof activity log", () => {
   it("logs opens once per device and diffs picks into pick and unpick", async () => {
-    const { track, device } = await import("@/lib/proofs/proof");
+    const { track, device } = await import("@/lib/proofs/proof-model");
     let v = track(undefined, "t1", { kind: "open", device: "iPhone · Safari", place: "San Jose, CA, US", name: "Maya" });
     expect(v.name).toBe("Maya");
     v = track(v, "t2", { picks: ["a", "b"] });

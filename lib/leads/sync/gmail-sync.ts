@@ -96,7 +96,7 @@ export async function syncGmail(env: LeadStore & { GCAL_OAUTH?: string }): Promi
           try {
             // Only people already on the desk, as a lead or one of its people: a newsletter is not a lead.
             if (!(await findLead(kv, s, email)).lead) continue;
-            if (await recordLead(env, email, c)) folded++;
+            if ((await recordLead(env, email, c)).status === "written") folded++;
           } catch (e) {
             console.error("gmail sync lead", String(e));
           }

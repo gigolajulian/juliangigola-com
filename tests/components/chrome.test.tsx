@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { CoverNav, MotionGate, NAV, FootLine, SiteFooter, SiteHeader } from "@/components/site/chrome";
+import { MotionGate, NAV, FootLine, SiteFooter, SiteHeader } from "@/components/site/chrome";
 
 describe("chrome", () => {
   it("NAV lists the four pages", () => {
@@ -11,12 +11,6 @@ describe("chrome", () => {
     render(<MotionGate fallback={<span>still</span>}><span>moving</span></MotionGate>);
     expect(screen.getByText("still")).toBeTruthy();
     expect(screen.queryByText("moving")).toBeNull();
-  });
-
-  it("CoverNav links every page", () => {
-    render(<CoverNav />);
-    const nav = screen.getByRole("navigation", { name: "Cover" });
-    for (const n of NAV) expect(nav.querySelector(`a[href="${n.href}"]`)?.textContent).toBe(n.label);
   });
 
   it("FootLine has the legal link", () => {

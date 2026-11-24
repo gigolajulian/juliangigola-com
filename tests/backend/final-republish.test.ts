@@ -1,7 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 import { FakeKV, LEADS_KEY, INBOX_KEY as KEY } from "./fakes";
 import { sealer } from "@/lib/leads/lead-crypto";
-import { deliveryView, finalKey, readProof, writeProof, PREVIEW_W, THUMB_W, type Proof } from "@/lib/proofs/proof";
+import { deliveryView, finalKey, PREVIEW_W, THUMB_W, type Proof } from "@/lib/proofs/proof-model";
+import { readProof, writeProof } from "@/lib/proofs/proof-store";
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown>, crc: 0 }));
 vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));

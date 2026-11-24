@@ -16,7 +16,7 @@
  */
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { COVER_RELEASES } from "../lib/work/cover-art-data.ts";
-import { lead, matchSong, norm } from "../lib/work/cover-art-match.ts";
+import { leadArtist, matchSong, norm } from "../lib/work/cover-art-match.ts";
 
 const OUT = new URL("../lib/work/cover-art-sound.json", import.meta.url);
 const old = existsSync(OUT) ? JSON.parse(readFileSync(OUT, "utf8")) : {};
@@ -34,7 +34,7 @@ const songs = (rows) => rows.filter((x) => x.wrapperType === "track" && x.kind =
 const entry = (x) => ({ id: x.trackId, preview: x.previewUrl, link: x.trackViewUrl.replace(/[?&]uo=\d+/, "") });
 
 async function find(release) {
-  const first = lead(release.artist);
+  const first = leadArtist(release.artist);
   const pools = [
     () => apple("search", { term: `${release.title} ${first}`, entity: "song", limit: "25" }),
     () => apple("search", { term: release.title, entity: "song", limit: "200" }),

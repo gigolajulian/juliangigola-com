@@ -1,0 +1,113 @@
+import type { SiteContent } from "@/lib/content";
+import type { Draft } from "@/lib/admin/publish";
+import { sameJson } from "@/lib/admin/admin-payload";
+import { isTextRef } from "@/lib/work/added";
+import { FIELD_TAB, type View } from "@/components/admin/admin-tabs";
+import type { AdminEditorProps, Overrides } from "@/components/admin/admin-editor-props";
+
+/** What the repository holds, as far as the editor knows: the content and the manifest. */
+export type Baseline = { content: SiteContent; manifest: Draft };
+
+/** Which tabs hold unpublished edits, one field at a time. */
+export function movedTabs(draft: SiteContent, manifest: Draft, baseline: Baseline) {
+  const tabs = new Set<View>();
+  for (const key of Object.keys(draft) as (keyof SiteContent)[])
+    if (!sameJson(draft[key], baseline.content[key]))
+      tabs.add(FIELD_TAB[key] ?? "home");
+  for (const key of Object.keys(manifest) as (keyof Draft)[])
+    if (!sameJson(manifest[key], baseline.manifest[key]))
+      tabs.add(key === "order" || key === "covers" ? "disciplines" : "projects");
+  return tabs;
+}
+
+/** The rows with unpublished edits, for the Projects filter. */
+export function changedSlugs(manifest: Draft, baseline: Baseline) {
+  const out = new Set<string>();
+  const maps = ["categories", "frames", "credits", "copy", "slugs", "bts"] as const;
+  for (const key of maps) {
+    const a = manifest[key] as Record<string, unknown>;
+    const b = baseline.manifest[key] as Record<string, unknown>;
+    for (const slug of new Set([...Object.keys(a), ...Object.keys(b)]))
+      if (!sameJson(a[slug], b[slug])) out.add(slug);
+  }
+  for (const key of ["hidden", "unlisted"] as const) {
+    const a = new Set(manifest[key]);
+    const b = new Set(baseline.manifest[key]);
+    for (const slug of [...a, ...b]) if (a.has(slug) !== b.has(slug)) out.add(slug);
+  }
+  return out;
+}
+
+/**
+ * The projects as the draft has them: refiled, and in running order.
+ *
+ * One derivation, because there were three and they disagreed. `projects`
+ * arrives as the last build published it, and the draft can move a project
+ * two ways, refiling it into another discipline, and dragging it to another
+ * position, so every view that groups or orders projects has to apply both
+ * or contradict the ones that do.
+ *
+ * They did contradict. The select said Editorial while the row beside it
+ * said Unfiled; filing a project left the row stale; and the sitemap, whose
+ * own job is to show "the draft as it would publish", kept a refiled
+ * project under its old discipline, because it read the server's label. Each
+ * was a small lie in a different place and they were all the same bug.
+ *
+ * Mirrors `relabel`, `withSequence` and `byRunningOrder` in `lib/work/work.ts`:
+ * the same operations the build applies, applied here so the editor shows
+ * what publishing would produce rather than what the last deploy did.
+ */
+export function draftProjects(
+  projects: AdminEditorProps["projects"],
+  order: string[],
+  recategorised: Overrides["categories"],
+  categories: AdminEditorProps["categories"],
+  reframed: Overrides["frames"],
+) {
+  const rank = new Map(order.map((slug, i) => [slug, i]));
+  const named = new Map(categories.map((c) => [c.slug, c.name]));
+
+  return [...projects]
+    .map((p) => {
+      const filed = recategorised[p.slug] ?? p.categorySlug;
+      /* The frame the gallery now opens on.
+       *
+       * `withSequence` in `lib/work/work.ts` makes the first frame of a
+       * resequenced gallery its cover, the card and the discipline are
+       * meant to show what you actually opened on. The editor was not
+       * applying that half, so dragging a frame to the front changed the
+       * published cover and nothing here moved: the sitemap, the project
+       * row and the discipline all kept drawing the old opener, which reads
+       * as the edit not having taken. */
+      const opener = reframed[p.slug]?.flatMap((f) =>
+        // A passage is not a photograph, so it cannot be the opener.
+        isTextRef(f) ? [] : [typeof f === "string" ? f : f.src],
+      )[0];
+
+      if (filed === p.categorySlug && (!opener || opener === p.images[0]))
+        return p;
+
+      return {
+        ...p,
+        categorySlug: filed,
+        // "Unfiled" is the same string `app/admin/page.tsx` uses for a
+        // project the manifest gives no category at all, so the sitemap can
+        // group both kinds under one heading.
+        category: named.get(filed) ?? "Unfiled",
+        /* Dimensions and mat carried over from the old cover rather than
+           looked up. The archive's numbers do not travel to the browser
+           (see `app/admin/page.tsx`), every thumbnail in here sits in a
+           fixed box under `object-cover`, and the mat is only what shows
+           for the instant before the frame paints. The build reads the
+           real frame. */
+        cover:
+          opener && opener !== p.images[0]
+            ? { ...p.cover, src: opener }
+            : p.cover,
+      };
+    })
+    .sort(
+      (a, b) =>
+        (rank.get(a.slug) ?? Infinity) - (rank.get(b.slug) ?? Infinity),
+    );
+}

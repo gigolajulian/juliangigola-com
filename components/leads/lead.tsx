@@ -44,7 +44,7 @@ import { errorText } from "@/lib/utils";
 import type { Enquiry } from "@/lib/inbox";
 import { canonical } from "@/lib/leads/lead-crypto";
 import { isLate, NUDGES, PAPER, quoteNudge, REMIND_MAX, STAGES, trashDaysLeft, type Lead, type LeadPatch, type LeadSummary, type Stage } from "@/lib/leads/leads";
-import { callSheet, fill, mailable, TEMPLATES, type Template } from "@/lib/leads/lead-crm";
+import { callSheet, fillTemplate, mailable, TEMPLATES, type Template } from "@/lib/leads/lead-crm";
 import { leadKey, typingIn } from "@/lib/leads/lead-keys";
 import { balance, depositOfLead, subtotal, usd } from "@/lib/leads/invoice";
 import { adminCall, ago, dateTimeLabel, authed, type Call, DAY, dayLabel, nextStep, now, renew, snoozed } from "@/lib/leads/lead-desk";
@@ -181,7 +181,7 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
   const bookHref = mail(l.email, "Booking a time", `Hi ${first},\n\nYou can pick a time here: https://juliangigola.com/book\n\n`);
   // The one filled button: the nudge or renewal when one is due, the call sheet once booked with a plan, else Reply.
   const sheet = full?.plan && l.when && l.stage === "Confirmed" ? callSheet(full) : null;
-  const lead1 = !mailOk ? null : renew(l) ? { label: "Renew licence", win: "Keep the licence", href: mail(l.email, fill(renewT.subject, l), fill(renewT.body, l)) } : nudge && late ? { label: `Send ${nudge.name}`, win: "Land the booking", href: mail(l.email, fill(nudge.subject, l), fill(nudge.body, l)) } : sheet ? { label: "Send call sheet", win: "Set the day", href: mail(sheet.to, sheet.subject, sheet.body) } : null;
+  const lead1 = !mailOk ? null : renew(l) ? { label: "Renew licence", win: "Keep the licence", href: mail(l.email, fillTemplate(renewT.subject, l), fillTemplate(renewT.body, l)) } : nudge && late ? { label: `Send ${nudge.name}`, win: "Land the booking", href: mail(l.email, fillTemplate(nudge.subject, l), fillTemplate(nudge.body, l)) } : sheet ? { label: "Send call sheet", win: "Set the day", href: mail(sheet.to, sheet.subject, sheet.body) } : null;
 
   const snoozeFor = (d: number) => run(patch({ snoozeUntil: new Date(now() + d * DAY).toISOString() }), "Snoozed.");
   const archive = () => run(patch({ archive: !l.archivedAt }), l.archivedAt ? "Back in the list." : "Archived.");
@@ -253,7 +253,7 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
       <DropdownMenu
         button={{ label: "Template", variant: "secondary" }}
         items={[
-          ...(usable.length ? [{ type: "section" as const, title: "Reply with a template", items: usable.map((t) => ({ label: t.name, href: mail(l.email, fill(t.subject, l), fill(t.body, l)), ...NEW_TAB, onClick: () => setAsked(true) })) }, { type: "divider" as const }] : []),
+          ...(usable.length ? [{ type: "section" as const, title: "Reply with a template", items: usable.map((t) => ({ label: t.name, href: mail(l.email, fillTemplate(t.subject, l), fillTemplate(t.body, l)), ...NEW_TAB, onClick: () => setAsked(true) })) }, { type: "divider" as const }] : []),
           ...(ios() ? [{ label: "Reply in Mail", href: mailto(l.email, `Re: your ${l.kind ?? "shoot"} inquiry`, `Hi ${first},\n\n`, message ? { name: message.name, at: message.at, text: message.message } : undefined), onClick: () => setAsked(true) }] : []),
           { label: "Send booking link", href: bookHref, ...NEW_TAB },
         ]}

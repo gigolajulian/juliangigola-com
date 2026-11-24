@@ -77,7 +77,7 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
      than the clock (a cold Worker, a route compiling on dev) lost its
      way halfway and fell back to the browser's own crossfade. */
   const path = usePathname();
-  /* Off unless V3 motion is on for the tab (`data-v3motion`, `app/layout.tsx`).
+  /* Off when the tab turned V3 motion off with `?v3motion=0`; on by default (`data-v3motion`, `app/layout.tsx`).
      The boundary stays mounted either way so the page is never rebuilt. */
   const on = React.useSyncExternalStore(noSubscribe, () => document.documentElement.hasAttribute("data-v3motion"), () => false);
   const shown = React.useRef(path);

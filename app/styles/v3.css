@@ -387,7 +387,7 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .f-photo dd{margin:0;text-align:right}
 /* Step 2's day and time line: only where the photo's summary is hidden. */
 .v3 .f-when{display:none;margin:0}
-/* Run (`flow.tsx`): items whole, dots at item ends, no lone last item.
+/* DotList (`components/booking/flow.tsx`): items whole, dots at item ends, no lone last item.
    Under 360px an item may break, so nothing runs past the column. */
 .v3 .run{margin:0;text-wrap:pretty}
 .v3 .run>span{white-space:nowrap}

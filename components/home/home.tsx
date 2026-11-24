@@ -24,7 +24,7 @@ let InquiryCard: typeof import("./inquiry-card").InquiryCard | undefined;
 let inqMod: Promise<unknown> | undefined;
 const warmInq = () => (inqMod ??= import("./inquiry-card").then((m) => (InquiryCard = m.InquiryCard), () => (inqMod = undefined)));
 
-/* v4 homepage (the home with NEXT_PUBLIC_V4_HOME=1; `?mtscroll=1` previews it on a rollback build; docs/mt-decisions.md): the screens at their resting
+/* v4 homepage (docs/mt-decisions.md): the screens at their resting
    state, with HomeIntro and MotionLayer on top. Motion hooks: MOTION-HOOKS.md. */
 
 export function Home({ data }: { data: HomeData }) {
