@@ -25,6 +25,7 @@ import { ScrollThumb } from "@/components/site/scroll-thumb";
 import { SmoothScroll } from "@/components/site/smooth-scroll";
 import { ScrollReveal } from "@/components/site/scroll-reveal";
 import { V4PAGES_HEAD } from "@/lib/flags/v4pages";
+import { BOOT_HEAD } from "@/lib/flags/boot";
 
 /* JG V3 (DESIGN.md): Inter Tight for the display type and the wordmark,
    IBM Plex Mono for everything else, and Archivo Expanded for the booking
@@ -183,17 +184,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             instead, once a visit on its own key (`jg-cover-intro`), so the
             homepage's opening still plays when the visitor gets there
             (Julian, 2026-11-21: "A, once per visit"). Not on /book, which
-            puts up its own. On the homepage the
-            opening is J and G round a window of frames (`split-splash.ts`),
-            which opens into the hero. Other pages have no hero to land
-            on and their own photographs to show, so they get the name
-            alone (`data-splash="name"`).
+            puts up its own. `?splash=split` plays J and G round a window
+            of frames (`split-splash.ts`) on an inner page.
             `sessionStorage` throws outright in some privacy modes rather
-            than returning null, so the whole thing is wrapped and a
-            failure simply means no opening. */}
+            than returning null, so each part is wrapped and a failure
+            simply means no opening. Each flag is listed in `lib/flags/boot.ts`. */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){var mo=true;try{var k3="jg-v3motion-off",q3=location.search;if(/[?&]v3motion=0/.test(q3))sessionStorage.setItem(k3,"1");else if(/[?&]v3motion/.test(q3))sessionStorage.removeItem(k3);mo=!sessionStorage.getItem(k3)}catch(e){}if(mo)document.documentElement.dataset.v3motion="";try{var kb="jg-solidhdr";if(/[?&]blur=0/.test(q3))sessionStorage.setItem(kb,"1");else if(/[?&]blur/.test(q3))sessionStorage.removeItem(kb);if(sessionStorage.getItem(kb))document.documentElement.dataset.solidhdr=""}catch(e){}try{var kn="jg-navfx-off";if(/[?&]navfx=0/.test(q3))sessionStorage.setItem(kn,"1");else if(/[?&]navfx/.test(q3))sessionStorage.removeItem(kn);if(!sessionStorage.getItem(kn))document.documentElement.dataset.navfx=""}catch(e){document.documentElement.dataset.navfx=""}try{if(!matchMedia("(prefers-reduced-motion: reduce)").matches){document.documentElement.dataset.moves=""}}catch(e){}try{var q=location.search;var mt=location.pathname==="/";if(mt&&mo&&!/[?&]intro=0/.test(q)&&!matchMedia("(prefers-reduced-motion: reduce)").matches&&(/[?&]intro=1/.test(q)||!sessionStorage.getItem("jg-intro"))){var rr=document.documentElement;rr.dataset.mtIntro="1";setTimeout(function(){if(rr.dataset.mtIntro==="1"&&!("mtOwn" in rr.dataset)){delete rr.dataset.mtIntro;rr.dataset.mtLate=""}},6000)}if(/[?&]intro=0/.test(q)||!mo||mt)return;var split=/[?&]splash=split/.test(q);var force=split||(/[?&]intro=1/.test(q)&&location.pathname==="/");var seen=false;try{seen=!!sessionStorage.getItem("jg-intro")}catch(e){}var calm=matchMedia("(prefers-reduced-motion: reduce)").matches;var admin=location.pathname.indexOf("/admin")===0||location.pathname.indexOf("/proof/")===0||location.pathname.indexOf("/delivery/")===0||location.pathname.indexOf("/contract/")===0||/^(admin|leads)[.]/.test(location.hostname);if(location.pathname!=="/"&&location.pathname.indexOf("/book")!==0&&!admin&&!calm){var kc="jg-cover-intro",sc=false;try{sc=!!sessionStorage.getItem(kc);sessionStorage.setItem(kc,"1")}catch(e){sc=true}if(!sc||/[?&]intro=1/.test(q))document.documentElement.dataset.coverIntro=""}if(force||(!admin&&!seen&&!calm&&location.pathname==="/")){var r=document.documentElement;r.dataset.intro="1";if(split||location.pathname==="/")r.dataset.splash="split";else r.dataset.splash="name";r.style.setProperty("--jg-blink-at",Math.round(100+Math.random()*160)+"ms")}}catch(e){}})()`,
+            __html: BOOT_HEAD,
           }}
         />
         {/* `data-v4pages`: what is left of the inner-pages plan on trial (lib/flags/v4pages.ts). `?v4pages` turns
