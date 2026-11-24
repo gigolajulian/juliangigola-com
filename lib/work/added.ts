@@ -397,6 +397,13 @@ export type AddedFile = {
   unlisted: string[];
 };
 
+/** An optional section read entry by entry: `read` takes each value and its key, and fails on a bad one. */
+function recordOf<T>(v: unknown, path: string, read: (value: unknown, key: string) => T): Record<string, T> {
+  const out: Record<string, T> = {};
+  for (const [key, value] of Object.entries(optRecord(v, path))) out[key] = read(value, key);
+  return out;
+}
+
 function parse(v: unknown): AddedFile {
   if (!isRecord(v)) return fail("the file", "an object", v);
   const list = v.projects;
@@ -448,11 +455,7 @@ function parse(v: unknown): AddedFile {
     }
   }
 
-  const rawCategories = optRecord(v.categories, "categories");
-  const categories: Record<string, string> = {};
-  for (const [slug, category] of Object.entries(rawCategories)) {
-    categories[slug] = str(category, `categories["${slug}"]`);
-  }
+  const categories = recordOf(v.categories, "categories", (category, slug) => str(category, `categories["${slug}"]`));
 
   const rawFrames = optRecord(v.frames, "frames");
   const frames: Record<string, FrameRef[]> = {};
@@ -478,26 +481,21 @@ function parse(v: unknown): AddedFile {
     frames[slug] = sequence;
   }
 
-  const rawCredits = optRecord(v.credits, "credits");
-  const credits: Record<string, Credit[]> = {};
-  for (const [slug, list] of Object.entries(rawCredits)) {
-    if (!Array.isArray(list))
-      return fail(`credits["${slug}"]`, "an array", list);
-    credits[slug] = list.map((c, i) => credit(c, `credits["${slug}"][${i}]`));
-  }
+  const credits = recordOf(v.credits, "credits", (list, slug): Credit[] => {
+    if (!Array.isArray(list)) return fail(`credits["${slug}"]`, "an array", list);
+    return list.map((c, i) => credit(c, `credits["${slug}"][${i}]`));
+  });
 
-  const rawCopy = optRecord(v.copy, "copy");
-  const copy: Record<string, Copy> = {};
-  for (const [slug, c] of Object.entries(rawCopy)) {
+  const copy = recordOf(v.copy, "copy", (c, slug): Copy => {
     if (!isRecord(c)) return fail(`copy["${slug}"]`, "an object", c);
-    copy[slug] = {
+    return {
       title: str(c.title, `copy["${slug}"].title`),
       intent:
         c.intent === null || c.intent === undefined
           ? null
           : text(c.intent, `copy["${slug}"].intent`),
     };
-  }
+  });
 
   const rawBts = optRecord(v.bts, "bts");
   const bts: Record<string, Bts> = {};
@@ -555,11 +553,7 @@ function parse(v: unknown): AddedFile {
       avatars[handle] = path;
   }
 
-  const rawCovers = optRecord(v.covers, "covers");
-  const covers: Record<string, string> = {};
-  for (const [category, src] of Object.entries(rawCovers)) {
-    covers[category] = str(src, `covers["${category}"]`);
-  }
+  const covers = recordOf(v.covers, "covers", (src, category) => str(src, `covers["${category}"]`));
 
   const rawSlugs = optRecord(v.slugs, "slugs");
   const slugs: Record<string, string> = {};

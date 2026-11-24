@@ -5,7 +5,7 @@ import Link from "next/link";
 import { TimePicker } from "@/components/booking/picker/time-picker";
 import { EARLY_SHARE, MAX_MOVES, MOVE_HOURS, PART_HOURS, REFUND_HOURS, refundCents, refundShare } from "@/lib/booking/rules";
 import { TZ } from "@/lib/time-zone";
-import { LEGACY_DEPOSIT } from "@/lib/booking/paid";
+import { LEGACY_DEPOSIT } from "@/lib/leads/deposit-terms";
 import type { clientView } from "@/lib/booking/engine";
 import { postJson } from "@/lib/http";
 

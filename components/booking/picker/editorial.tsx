@@ -5,7 +5,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { DepositStep } from "@/components/booking/deposit-step";
 import { TZ, DAY_MS } from "@/lib/time-zone";
-import { depositFor } from "@/lib/booking/paid";
+import { depositFor } from "@/lib/leads/deposit-terms";
 import { AHEAD, DAYS, minutesOf, MONTHS, STEP_AT, WEEKDAYS, WHERE, clock, zoneAbbr } from "@/components/booking/picker/parts";
 import type { CardCtx } from "@/components/booking/picker/use-picker";
 import { forgetTimes } from "@/components/booking/picker/use-slots";

@@ -4,7 +4,7 @@ import * as React from "react";
 import { type SiteContent } from "@/lib/content";
 import { AdminNewProject } from "@/components/admin/admin-new-project";
 import { AdminProjects } from "@/components/admin/admin-projects";
-import { AdminSitemap, type SitemapTarget } from "@/components/admin/admin-sitemap";
+import { AdminSitemap } from "@/components/admin/admin-sitemap";
 import { AdminDisciplines } from "@/components/admin/admin-disciplines";
 import { AdminPreview } from "@/components/admin/admin-preview";
 import { AdminPage } from "@/components/admin/admin-page";
@@ -15,24 +15,25 @@ import { AdminSeo } from "@/components/admin/admin-seo";
 import { AdminVideos } from "@/components/admin/admin-videos";
 import type { Draft } from "@/lib/admin/publish";
 import { ClientFields, ContactFields, CoverArtFields, HomeFields, QuoteFields, SessionFields } from "@/components/admin/editor/fields";
-import { type TrashedProject } from "@/lib/work/added";
 import type { PendingUpload } from "@/lib/admin/admin-sequence";
 import { CreditDesk } from "@/components/admin/admin-credits";
 import { byCodeUnit, cn } from "@/lib/utils";
-import { FIELD_TAB, TABS, type View } from "@/components/admin/editor/tabs";
 import { remapSlugs } from "@/components/admin/editor/remap-slugs";
 import { Connect, PublishStatus } from "@/components/admin/editor/connect";
-import type { AdminEditorProps, ListDraft, Overrides } from "@/components/admin/editor/props";
+import type { AdminEditorProps } from "@/components/admin/editor/props";
 import { useDeployWatch } from "@/components/admin/editor/use-deploy-watch";
 
 import { changedSlugs, draftProjects, movedTabs, withListDraft, withProjectOverride, type SetListDraft, type SetOverride } from "@/components/admin/editor/draft";
 import { useFoundField } from "@/components/admin/editor/use-found-field";
-import { useCreditDesk } from "@/components/admin/editor/use-credit-desk";
-import { EditorBar, FullSwitch } from "@/components/admin/editor/chrome";
-import { useUnread } from "@/components/admin/editor/use-unread";
+import { useCreditDesk } from "@/components/admin/use-credit-desk";
+import { EditorBar, FullSwitch } from "@/components/admin/chrome";
+import { useUnread } from "@/components/admin/use-unread";
 import { useFullView, type FullView } from "@/components/admin/editor/use-full-view";
 import { useContentSession } from "@/components/admin/editor/use-content-session";
 import { EditorStagingProvider, type EditorStaging } from "@/components/admin/editor/editor-context";
+import { useManifestDraft } from "@/components/admin/use-manifest-draft";
+import { useEditorNav } from "@/components/admin/use-editor-nav";
+import { moveBefore } from "@/lib/admin/move-before";
 
 /* ── the editor ───────────────────────────────────────────────────
  * Edits `content/site.json` and commits it to the repo. The deploy does the
@@ -56,9 +57,6 @@ import { EditorStagingProvider, type EditorStaging } from "@/components/admin/ed
  * The session itself (token, SHA, status, baseline) is `useContentSession`.
  * ─────────────────────────────────────────────────────────────── */
 
-/** The five per-project override maps out of a manifest. */
-const overridesOf = (m: Draft): Overrides => ({ categories: m.categories, frames: m.frames, credits: m.credits, copy: m.copy, slugs: m.slugs });
-
 export function AdminEditor({
   initial,
   slugs,
@@ -73,12 +71,7 @@ export function AdminEditor({
   clients,
 }: AdminEditorProps) {
   const [draft, setDraft] = React.useState<SiteContent>(initial);
-  const [view, setView] = React.useState<View>("home");
-  // `?view=projects`: the One Desk's Site links land on their tab. After hydration, so the first paint matches.
-  React.useEffect(() => {
-    const v = new URLSearchParams(location.search).get("view");
-    if (TABS.flat().some((x) => x.id === v)) queueMicrotask(() => setView(v as View));
-  }, []);
+  const { view, setView, opened, setOpened, filter, setFilter, wanted, go } = useEditorNav();
   const [unread, setUnread] = useUnread();
   const [full, setFull] = useFullView();
   const whole = (which: FullView) => <FullSwitch which={which} full={full} setFull={setFull} />;
@@ -87,53 +80,13 @@ export function AdminEditor({
     null,
   );
 
-  /** Hidden and unlisted slugs and BTS, as one draft with one setter (`withListDraft`). */
-  const [listDraft, setListDraft] = React.useState<ListDraft>(() => ({
-    hidden: new Set(published.hidden),
-    unlisted: new Set(published.unlisted),
-    bts: published.bts,
-  }));
+  const manifestDraft = useManifestDraft(published, initialTrash);
+  const { listDraft, setListDraft, trash, setTrash, overrides, setOverrides, order, setOrder, covers, setCovers, avatars, setAvatars } = manifestDraft;
   const { hidden, unlisted, bts } = listDraft;
-  const [trash, setTrash] = React.useState<TrashedProject[]>(initialTrash);
-  /** The five per-project override maps, as one draft with one setter (`withProjectOverride`). */
-  const [overrides, setOverrides] = React.useState<Overrides>(() => overridesOf(published));
   const { categories: recategorised, frames: reframed, credits: recredited, copy: recopied, slugs: reslugged } = overrides;
-  /** The running order of the work, by slug. Partial - see `lib/work/added.ts`. */
-  const [order, setOrder] = React.useState<string[]>(published.order);
-  /** The photograph standing for each discipline, by category slug. */
-  const [covers, setCovers] =
-    React.useState<Record<string, string>>(published.covers);
-  /** A collaborator's profile photograph, by Instagram handle. One person,
-      one picture, however many shoots they are credited on. */
-  const [avatars, setAvatars] =
-    React.useState<Record<string, string>>(published.avatars);
-  /**
-   * The project whose row is expanded, if any.
-   *
-   * Held here rather than in `AdminProjects` so the sitemap can open one. The
-   * sitemap is the index of the site and is on screen at all times, which
-   * makes it the natural way in to a project — clicking a cover there opens
-   * that project's row instead of sending you to the published page and
-   * abandoning the draft.
-   */
-  const [opened, setOpened] = React.useState<string | null>(null);
   /** The project open in the page-shaped editor, which replaces the tabs
       and the preview while it is up. */
   const [page, setPage] = React.useState<string | null>(null);
-  /** The project list's filter, held here so a discipline row can set it. */
-  const [filter, setFilter] = React.useState("");
-
-  /**
-   * A Content field the sitemap has asked for, cleared once it is reached.
-   *
-   * Held as a counter alongside the anchor so clicking the same row twice
-   * scrolls twice — an anchor compared by value would look unchanged the
-   * second time and do nothing.
-   */
-  const [wanted, setWanted] = React.useState<{
-    anchor: string;
-    nonce: number;
-  } | null>(null);
   /**
    * Photographs added to a gallery, processed and waiting, by repo path.
    *
@@ -217,36 +170,6 @@ export function AdminEditor({
   );
 
 
-  /**
-   * Sends the editor to a project, from anywhere that can name one.
-   *
-   * Switches to the Projects view first, because the sitemap is on screen in
-   * both and clicking a cover while the content form is showing would open a
-   * row nobody can see.
-   */
-  const go = React.useCallback((target: SitemapTarget) => {
-    if (target.kind === "project") {
-      setView("projects");
-      setFilter("");
-      setOpened(target.slug);
-      return;
-    }
-    if (target.kind === "projects") {
-      setView("projects");
-      setOpened(null);
-      // The list already filters on name, slug and discipline, so the
-      // discipline's own label is the filter — no second mechanism needed.
-      setFilter(target.discipline ?? "");
-      return;
-    }
-    // A field is behind a tab now, so a jump is two moves: switch to the tab
-    // that holds it, then scroll to it. Unmapped anchors fall back to Home
-    // rather than leaving you on whatever tab you were on, which would look
-    // like the click did nothing.
-    setView(FIELD_TAB[target.anchor] ?? "home");
-    setWanted((w) => ({ anchor: target.anchor, nonce: (w?.nonce ?? 0) + 1 }));
-  }, []);
-
   useFoundField(wanted);
 
   const { token, setToken, sha, status, baseline, dirty, load, publish, forget } = useContentSession({
@@ -263,11 +186,7 @@ export function AdminEditor({
     onRepo: (content, repo) => {
       setDraft(content);
       if (!repo) return;
-      setListDraft({ hidden: new Set(repo.hidden), unlisted: new Set(repo.unlisted), bts: repo.bts });
-      setOverrides(overridesOf(repo));
-      setOrder(repo.order);
-      setCovers(repo.covers);
-      setAvatars(repo.avatars);
+      manifestDraft.reset(repo);
     },
     onPublished: (written) => {
       /* The draft takes back what was actually written, so the tidying
@@ -302,14 +221,8 @@ export function AdminEditor({
      projects as currently displayed, since `order` may name only some of
      them — and written back whole for the same reason it is there. */
   const reorderSlugs = (from: string, to: string) => {
-    if (from === to) return;
-    const full = orderedProjects.map((p) => p.slug);
-    const at = full.indexOf(from);
-    const onto = full.indexOf(to);
-    if (at === -1 || onto === -1) return;
-    full.splice(at, 1);
-    full.splice(full.indexOf(to) + (onto > at ? 1 : 0), 0, from);
-    setOrder(full);
+    const full = moveBefore(orderedProjects.map((p) => p.slug), from, to, (s) => s);
+    if (full) setOrder(full);
   };
 
   const set = <K extends keyof SiteContent>(key: K, value: SiteContent[K]) =>
@@ -549,7 +462,7 @@ export function AdminEditor({
 
           {/* One area at a time, so switching tabs is not a scroll and the
             widest column holds only the fields you came for. The panels are
-            top-level components (components/admin/editor/fields.tsx), so their type
+            top-level components (`components/admin/editor/fields.tsx`), so their type
             is stable across renders and the pickers inside keep their state. */}
           {!page && view === "home" ? <HomeFields draft={draft} set={set} releases={releases} releaseLimit={releaseLimit} slugs={slugs} unknownSlugs={unknownSlugs} projects={projects} hidden={hidden} heroChoices={heroChoices} /> : null}
           {!page && view === "clients" ? <ClientFields draft={draft} set={set} clients={clients} /> : null}

@@ -3,7 +3,7 @@ import { TZ, DAY_MS } from "@/lib/time-zone";
 import { gcal } from "@/lib/google";
 import { bookingEnquiry, enquiryKey, summary } from "@/lib/leads/enquiry";
 import { looksLikeEmail } from "@/lib/utils";
-import { takesDeposit, LEGACY_DEPOSIT } from "@/lib/booking/paid";
+import { takesDeposit, LEGACY_DEPOSIT } from "@/lib/leads/deposit-terms";
 import { recordLead, type LeadStore } from "@/lib/leads/lead-store";
 import { toNotion } from "@/lib/leads/sync/notion-lead";
 import { openNow, type HoursKV } from "@/lib/booking/slots";
@@ -70,7 +70,7 @@ export type Store = {
 const cap = (s: unknown, n = 500) => (typeof s === "string" ? s.trim().slice(0, n) : "");
 
 /** The visitor's booking, checked, or the reason it is not one. `call`: a free call (`app/api/book`), not a paid session. */
-export type Parsed = { ok: true; booking: Booking } | { ok: false; reason: string };
+export type Parsed = { ok: true; booking: Booking & { via?: CallVia } } | { ok: false; reason: string };
 export function parseBooking(raw: unknown, call = false): Parsed {
   const b = (raw ?? {}) as { [k: string]: unknown };
   const slug = cap(b.slug);
@@ -98,6 +98,8 @@ export function parseBooking(raw: unknown, call = false): Parsed {
     where: cap(b.where) || undefined,
     notes: cap(b.notes) || undefined,
   };
+  // A free call also says how it is held; anything else there is no choice.
+  if (call) return { ok: true, booking: { ...booking, via: b.via === "Phone" || b.via === "Video" ? b.via : undefined } };
   return { ok: true, booking };
 }
 

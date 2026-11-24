@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { shareOg } from "@/lib/og/share";
 import { WorkIndex } from "@/components/portfolio/work";
-import type { WorkItem } from "@/components/portfolio/work-tiles";
+import type { WorkPayload } from "@/components/portfolio/work-tiles";
 import type { FrameItem } from "@/components/portfolio/frame-view";
 import { CATEGORIES, PROJECTS, categoryLabel } from "@/lib/work/work";
 import ORDER from "@/lib/work/portfolio-order.json";
@@ -23,7 +23,7 @@ const rank = (slug: string) => {
 /* Off the V3 portfolio grid; the project page stays up. */
 const HIDDEN = ["realestate"];
 const WORK_PROJECTS = PROJECTS.filter((p) => !HIDDEN.includes(p.slug));
-const WORK: WorkItem[] = WORK_PROJECTS
+const WORK: WorkPayload[] = WORK_PROJECTS
   .map((p, i) => [p, i] as const)
   .sort((a, b) => rank(a[0].slug) - rank(b[0].slug) || a[1] - b[1])
   .map(([p]) => ({

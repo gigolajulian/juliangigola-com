@@ -21,13 +21,19 @@ export function withGsap(fn: (g: typeof G) => void) {
   else void loadGsap().then(fn);
 }
 
+/** gsap if it has loaded, else undefined: for code that only moves once it is there. */
+export const gsapNow = () => gsap;
+
+let flip: typeof F | undefined;
 let flipping: Promise<typeof F> | undefined;
+/** Flip if it has loaded and registered, else undefined. */
+export const flipNow = () => flip;
 /** gsap's Flip plugin, fetched with gsap and registered once. A failed fetch is asked again next time. */
 export const loadFlip = () =>
   (flipping ??= Promise.all([loadGsap(), import("gsap/Flip")]).then(
     ([g, m]) => {
       g.registerPlugin(m.Flip);
-      return m.Flip;
+      return (flip = m.Flip);
     },
     (e: unknown) => {
       flipping = undefined;

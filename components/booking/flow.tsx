@@ -20,7 +20,7 @@ export function DotList({ items, className = "" }: { items: string[]; className?
 }
 
 /* Dates and times the way the master prints them. */
-export const dlabel = (t: Date) => t.toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short" });
+export const weekdayDateLabel = (t: Date) => t.toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short" });
 export const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 /** A day on the visitor's own calendar as "2026-11-04" (local, not UTC). The picker shares it. */
 export const localDayKey = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -97,7 +97,7 @@ export function Calendar({
           const open = tg && /open$/i.test(tg) ? Number(/^\d+/.exec(tg)?.[0] ?? 0) : -1;
           const sky = parts?.(t);
           return (
-            <button key={id} type="button" data-day={id} aria-pressed={id === picked} disabled={tg === null} aria-label={`${dlabel(t)}${tg ? `, ${tg}` : ""}`} onClick={() => onPick(t)}>
+            <button key={id} type="button" data-day={id} aria-pressed={id === picked} disabled={tg === null} aria-label={`${weekdayDateLabel(t)}${tg ? `, ${tg}` : ""}`} onClick={() => onPick(t)}>
               <b>{t.getDate()}</b>
               {sky ? (
                 <span className="dots sky" aria-hidden="true">

@@ -81,7 +81,7 @@ function blend(stops: Stop[], hour: number) {
 }
 
 /** The two colors of the light at an instant: on the dark ground and on the light one. */
-export function tone(ms: number) {
+export function skyColors(ms: number) {
   const { ymd, hour } = pacific(ms);
   const w = warp(hour, ymd);
   return { dark: blend(DARK, w), light: blend(LIGHT, w) };

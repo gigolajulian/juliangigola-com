@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { PageFoot } from "@/components/site/chrome";
+import { PageFoot } from "@/components/site/foot";
 import { Mark } from "@/components/site/duo";
 import { REEL, creditOf, embedUrl, previewUrl, captionsOff, vimeoListen, vimeoPlays, posterFor, sectionName, type Video } from "@/lib/work/videos";
 import { noSubscribe, pad } from "@/lib/utils";

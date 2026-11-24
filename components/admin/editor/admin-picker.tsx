@@ -3,6 +3,7 @@
 import * as React from "react";
 import Image from "next/image";
 import { cn, pad } from "@/lib/utils";
+import type { PickerItem } from "@/components/admin/editor/props";
 
 /* ── a picker ─────────────────────────────────────────────────────
  * Which things lead a section of the homepage, and in what order.
@@ -17,14 +18,6 @@ import { cn, pad } from "@/lib/utils";
  * Callers map their own data down to `PickerItem`; nothing in here knows what
  * a project or a release is.
  * ─────────────────────────────────────────────────────────────── */
-
-export type PickerItem = {
-  slug: string;
-  name: string;
-  /** The second line: a discipline, or an artist. */
-  detail: string;
-  cover: { src: string; color: string };
-};
 
 export function AdminPicker({
   chosen,

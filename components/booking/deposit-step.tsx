@@ -3,7 +3,7 @@
 import * as React from "react";
 import { warmGsap, withGsap } from "@/lib/motion/gsap-lazy";
 import { cn } from "@/lib/utils";
-import { depositFor } from "@/lib/booking/paid";
+import { depositFor } from "@/lib/leads/deposit-terms";
 import type { Status } from "@/lib/booking/deposit";
 import type { Booking } from "@/lib/booking/rules";
 import { getJson, postJson } from "@/lib/http";

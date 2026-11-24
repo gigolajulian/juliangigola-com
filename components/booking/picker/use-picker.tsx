@@ -142,10 +142,23 @@ export function usePicker({ path, title, className, skin, onPicked, startView }:
     }
     /* Development only: `?sim=ok` books nothing, to see the page after. */
     const sim = process.env.NODE_ENV !== "production" && new URLSearchParams(location.search).get("sim") === "ok";
+    /* Back to the form with a line on why: the route's refusal when there is one, else the general one. */
+    const failed = (r?: { status: number; error?: string; code?: string }) => {
+      let why = "That did not go through. Try again, or write to hello@juliangigola.com.";
+      if (r?.code === "taken") why = "That time was just taken. Pick another.";
+      // 429 and 503 carry the route's own words ("Too many tries. Wait a minute.", `app/api/book`).
+      else if ((r?.status === 429 || r?.status === 503) && r.error) why = r.error;
+      setError(why);
+      setStep("form");
+      void load(true);
+    };
     try {
       if (!sim) {
         const r = await postJson("/api/book", { slug, start, timeZone: tz, name: f.name, email: f.email, phone: f.phone, via: f.via, ...extra });
-        if (!r.ok) throw Object.assign(new Error(r.error || "failed"), { status: r.status, said: r.error, code: r.code });
+        if (!r.ok) {
+          failed(r);
+          return;
+        }
       }
       setBooked({ name: f.firstName, email: f.email.trim(), where: f.where, phone: f.phone, via: f.via });
       /* The orbs get their moment even when the server answers at once, then
@@ -158,15 +171,8 @@ export function usePicker({ path, title, className, skin, onPicked, startView }:
       // The time is taken now: the next picker asks again.
       forgetTimes(username, slug, tz);
       setStep("done");
-    } catch (e) {
-      const { status, said, code } = e as Error & { status?: number; said?: string; code?: string };
-      let why = "That did not go through. Try again, or write to hello@juliangigola.com.";
-      if (code === "taken") why = "That time was just taken. Pick another.";
-      // 429 and 503 carry the route's own words ("Too many tries. Wait a minute.", `app/api/book`).
-      else if ((status === 429 || status === 503) && said) why = said;
-      setError(why);
-      setStep("form");
-      void load(true);
+    } catch {
+      failed();
     }
   };
 
