@@ -1,5 +1,6 @@
 import { alertHello } from "@/lib/email/hello-mail";
 import { stripe } from "@/lib/stripe";
+import { statusOf } from "@/lib/http";
 import { recordLead } from "@/lib/leads/lead-store";
 import { alertLines, proofUrl, receiptMail, sendClient } from "@/lib/proofs/proof-mail";
 import { cardPrice, amountOwed, publicId, viewerKey, type Proof } from "@/lib/proofs/proof-model";
@@ -119,7 +120,10 @@ export async function paidFor(key: string, p: Proof, session: string): Promise<P
 
 /** paidFor, with Stripe's silence told apart: a refused session (4xx) is null, no answer or a 5xx is "down". */
 export const checkPaid = (key: string, p: Proof, session: string) =>
-  paidFor(key, p, session).catch((e: { status?: number }) => (e.status && e.status < 500 ? null : ("down" as const)));
+  paidFor(key, p, session).catch((e: unknown) => {
+    const s = statusOf(e);
+    return s && s < 500 ? null : ("down" as const);
+  });
 
 /** A settling bank payment, checked again: cleared, bounced, or still on its way. Null when nothing changed. */
 export async function recheckTransfer(key: string, p: Proof): Promise<Proof | null> {

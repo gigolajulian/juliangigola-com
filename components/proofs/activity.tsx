@@ -47,7 +47,7 @@ export function ActivityDesk({ p, changed }: { p: ProofRow; changed: () => void 
   const forget = async () => {
     if (!confirm(`Forget ${email}'s visits to "${p.name}"? They leave this Activity and Leads. Sent selects stay.`)) return;
     try {
-      await proofApi({ method: "POST", body: JSON.stringify({ action: "forget", token: p.token, email }) });
+      await proofApi({ method: "POST", path: "/action", body: JSON.stringify({ action: "forget", token: p.token, email }) });
       setNote(`${email} forgotten.`);
       changed();
     } catch (e) {

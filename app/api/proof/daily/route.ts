@@ -6,6 +6,7 @@ import { digestMail } from "@/lib/proofs/proof-mail";
 import { alertHello } from "@/lib/email/hello-mail";
 import { json } from "@/lib/http";
 import { DAY_MS } from "@/lib/time-zone";
+import { logged } from "@/lib/utils";
 
 /* ── POST /api/proof/daily: the galleries' daily summary to hello@ ─
  * Called by the booking Worker's hourly cron (`worker/index.ts`) at 9 AM
@@ -25,7 +26,8 @@ export async function POST(request: Request) {
   if (!kv || !seal) return json({ error: "Not set up." }, 503);
   const until = new Date().toISOString();
   const since = (await kv.get(LAST)) ?? new Date(Date.now() - DAY_MS).toISOString();
-  const proofs = (await Promise.all((await listProofs(kv)).map((x) => readProof(kv, seal, x.token)))).filter((p): p is Proof => p?.notify === "daily");
+  // A gallery that will not open is logged and left out: one bad record never stops the summary.
+  const proofs = (await Promise.all((await listProofs(kv)).map((x) => readProof(kv, seal, x.token).catch(logged("proof digest", x.token))))).filter((p): p is Proof => p?.notify === "daily");
   const m = digestMail(proofs, since, until);
   if (new URL(request.url).searchParams.has("dry")) return json({ since, until, subject: m?.subject ?? null, text: m?.lines.join("\n") ?? null });
   const sent = m ? await alertHello(env.EMAIL, m.subject, m.lines) : false;

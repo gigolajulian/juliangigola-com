@@ -68,7 +68,7 @@ export function ProofsDesk({ embedded = false, initial }: { embedded?: boolean; 
   const [making, setMaking] = React.useState(false);
   const [wide, setWide] = React.useState(false);
   const load = React.useCallback(() => {
-    proofApi<{ proofs: ProofRow[] }>({ path: "?list" }).then((o) => setList(o.proofs)).catch((e: unknown) => setError(loadErrorText(e)));
+    proofApi<{ proofs: ProofRow[] }>({ path: "/list" }).then((o) => setList(o.proofs)).catch((e: unknown) => setError(loadErrorText(e)));
   }, []);
   React.useEffect(load, [load]);
   // Same as the leads desk: follow html[data-theme], light only when it says light, read before Theme mounts.
@@ -192,7 +192,7 @@ function NewGallery({ done }: { done: (token?: string) => void }) {
   const [note, setNote] = React.useState<string | null>(null);
   const create = async () => {
     try {
-      const o = await proofApi<{ token: string }>({ method: "POST", body: JSON.stringify({ action: "create", name, email }) });
+      const o = await proofApi<{ token: string }>({ method: "POST", path: "/gallery", body: JSON.stringify({ name, email }) });
       done(o.token);
     } catch (e) {
       setNote(errorText(e));
@@ -247,7 +247,7 @@ function Gallery({ p, changed, onBack, gone }: { p: ProofRow; changed: () => voi
   const act = async (body: Record<string, unknown>, method = "POST", done?: string) => {
     setNote(null);
     try {
-      await proofApi({ method, body: JSON.stringify({ token: p.token, ...body }) });
+      await proofApi({ method, path: method === "PATCH" ? "/gallery" : "/action", body: JSON.stringify({ token: p.token, ...body }) });
       if (done) setNote(done);
       setPreview(null);
       changed();
@@ -257,7 +257,7 @@ function Gallery({ p, changed, onBack, gone }: { p: ProofRow; changed: () => voi
   };
   const showPreview = async () => {
     try {
-      const o = await proofApi<{ html: string; subject: string }>({ path: `?preview=${p.token}` });
+      const o = await proofApi<{ html: string; subject: string }>({ path: `/preview?token=${p.token}` });
       setPreview(o.html);
       setSubject(o.subject);
     } catch (e) {
@@ -267,7 +267,7 @@ function Gallery({ p, changed, onBack, gone }: { p: ProofRow; changed: () => voi
   const showReminder = async () => {
     setNote(null);
     try {
-      setReminder(await proofApi<{ html: string; subject: string; to: string; cc: string[] }>({ path: `?remind=${p.token}` }));
+      setReminder(await proofApi<{ html: string; subject: string; to: string; cc: string[] }>({ path: `/remind?token=${p.token}` }));
     } catch (e) {
       setNote(errorText(e));
     }
@@ -296,7 +296,7 @@ function Gallery({ p, changed, onBack, gone }: { p: ProofRow; changed: () => voi
   const close = async () => {
     if (!confirm(`Close the draft "${p.name}"? Its web previews are removed. Nothing in Lightroom changes.`)) return;
     try {
-      await proofApi({ method: "DELETE", path: `?token=${p.token}` });
+      await proofApi({ method: "DELETE", path: `/gallery?token=${p.token}` });
       gone();
     } catch (e) {
       setNote(errorText(e));

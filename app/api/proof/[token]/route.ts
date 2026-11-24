@@ -1,11 +1,12 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { later } from "@/lib/later";
-import { sealedStore } from "@/lib/kv";
+import { sealedStore, type InboxKV } from "@/lib/kv";
+import type { Seal } from "@/lib/seal";
 import { recordLead } from "@/lib/leads/lead-store";
 import { checkout, checkPaid, finalize } from "@/lib/proofs/submit";
 import { PAYMENTS_DOWN, PAYMENTS_OFF } from "@/lib/stripe";
 import { cleanSelects, device, isTestEmail, amountOwed, isToken, publicView, withViewerEvent, viewerKey, type Proof } from "@/lib/proofs/proof-model";
-import { isEmail } from "@/lib/utils";
+import { isEmail, logged } from "@/lib/utils";
 import { checkPass, passCookie, passValue, shutReason, readPublic, writeProof } from "@/lib/proofs/proof-store";
 import { bodyOf, json, limited, upstreamError } from "@/lib/http";
 import { alertHello } from "@/lib/email/hello-mail";
@@ -22,19 +23,27 @@ import { actionAlert, worthMail } from "@/lib/proofs/proof-mail";
 
 export const dynamic = "force-dynamic";
 
+/** A gallery that is there but will not open (a rotated LEADS_KEY): JSON, like every other answer. */
+const unopenable = () => json({ error: "This gallery cannot be opened right now." }, 500);
+
+/** A gallery by its public id: null when there is none, undefined when it will not open (logged). */
+const openPublic = (kv: InboxKV, s: Seal, token: string) => readPublic(kv, s, token).catch(logged("proof open", token));
+
 /** The gallery for this request: open, online, and past its password when it has one (the gate's cookie). */
 async function load(token: string, request: Request) {
-  const { env, seal: s, kv } = await sealedStore();
-  if (!kv || !s || !isToken(token)) return null;
-  const p = await readPublic(kv, s, token);
-  return p && !(await shutReason(p, request.headers.get("cookie"), env.LEADS_KEY)) ? { env, kv, s, p } : null;
+  const { env, seal, kv } = await sealedStore();
+  if (!kv || !seal || !isToken(token)) return null;
+  const proof = await openPublic(kv, seal, token);
+  if (proof === undefined) return unopenable();
+  return proof && !(await shutReason(proof, request.headers.get("cookie"), env.LEADS_KEY)) ? { env, kv, seal, proof } : null;
 }
 
 /** The gate's password: rate-limited per address, and a right one answers with the cookie every later call needs. */
 async function unlock(token: string, request: Request, password: unknown) {
   const { env, seal, kv } = await sealedStore();
   if (!kv || !seal || !isToken(token)) return json({ error: "This gallery closed." }, 404);
-  const p = await readPublic(kv, seal, token);
+  const p = await openPublic(kv, seal, token);
+  if (p === undefined) return unopenable();
   const why = await shutReason(p, null, env.LEADS_KEY);
   if (!p || (why && why !== "locked")) return json({ error: why === "offline" ? "This gallery is offline." : "This gallery closed." }, 404);
   if (!p.pass) return json({ ok: true });
@@ -48,7 +57,7 @@ async function unlock(token: string, request: Request, password: unknown) {
 }
 
 /** The gallery with one visitor's record updated. shortcut: read, change, write is not atomic, so two people picking in the same second can drop one log line; a Durable Object if that ever matters. */
-function logged(p: Proof, email: string, e: Parameters<typeof withViewerEvent>[2]): Proof {
+function withVisit(p: Proof, email: string, e: Parameters<typeof withViewerEvent>[2]): Proof {
   const k = viewerKey(email);
   return { ...p, viewers: { ...p.viewers, [k]: withViewerEvent(p.viewers?.[k], new Date().toISOString(), e) } };
 }
@@ -62,12 +71,16 @@ async function where() {
 export async function PATCH(request: Request, { params }: { params: Promise<{ token: string }> }) {
   const g = await load((await params).token, request);
   if (!g) return json({ error: "This gallery closed." }, 404);
-  if (g.p.submittedAt) return json({ error: "Selects are already in." }, 409);
+  if (g instanceof Response) return g;
+  // Autosave writes a beat after each change, more often than the five a minute of PUBLIC_WRITE_LIMIT: its own kind on the download limiter (60 a minute).
+  const slow = await limited(g.env.DOWNLOAD_LIMIT, "selects", request);
+  if (slow) return slow;
+  if (g.proof.submittedAt) return json({ error: "Selects are already in." }, 409);
   const b = ((await bodyOf(request)) ?? {});
   if (typeof b.email !== "string" || !isEmail(b.email)) return json({ error: "Add your email first." }, 400);
-  const selects = cleanSelects(b.selects, g.p.frames);
-  const next = { ...logged(g.p, b.email, { picks: selects }), selects, firstSelectAt: g.p.firstSelectAt ?? (selects.length && g.p.sentAt ? new Date().toISOString() : undefined) };
-  await writeProof(g.kv, g.s, next);
+  const selects = cleanSelects(b.selects, g.proof.frames);
+  const next = { ...withVisit(g.proof, b.email, { picks: selects }), selects, firstSelectAt: g.proof.firstSelectAt ?? (selects.length && g.proof.sentAt ? new Date().toISOString() : undefined) };
+  await writeProof(g.kv, g.seal, next);
   return json({ ok: true });
 }
 
@@ -77,58 +90,59 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
   if (b.action === "unlock") return unlock(token, request, b.password);
   const g = await load(token, request);
   if (!g) return json({ error: "This gallery closed." }, 404);
+  if (g instanceof Response) return g;
 
   if (b.action === "track") {
     if (typeof b.email !== "string" || !isEmail(b.email)) return json({ error: "Add your email first." }, 400);
     // "download" (a delivery's Save or Download all) names the final, "all" for the zip, or a model ("M04") for its zip.
-    const dl = b.kind === "download" && g.p.finals?.length && (b.id === "all" || g.p.finals.some((f) => f.id === b.id || f.model === b.id)) ? (b.id as string) : undefined;
+    const dl = b.kind === "download" && g.proof.finals?.length && (b.id === "all" || g.proof.finals.some((f) => f.id === b.id || f.model === b.id)) ? (b.id as string) : undefined;
     const kind = b.kind === "open" || b.kind === "review" ? b.kind : dl ? "download" : undefined;
-    const looks = b.looks && typeof b.looks === "object" ? Object.fromEntries(Object.entries(b.looks as Record<string, unknown>).filter(([id, ms]) => g.p.frames.some((f) => f.id === id) && typeof ms === "number")) as Record<string, number> : undefined;
+    const looks = b.looks && typeof b.looks === "object" ? Object.fromEntries(Object.entries(b.looks as Record<string, unknown>).filter(([id, ms]) => g.proof.frames.some((f) => f.id === id) && typeof ms === "number")) as Record<string, number> : undefined;
     const open = kind === "open" ? { device: device(request.headers.get("user-agent") ?? ""), place: await where() } : {};
     // The name from the gate, sent with the open only.
     const name = kind === "open" && typeof b.name === "string" && b.name.trim() ? b.name.trim().replace(/\s+/g, " ").slice(0, 80) : undefined;
-    let next = logged(g.p, b.email, { kind, id: dl, looks, seconds: Number(b.seconds) || 0, ...open, name });
+    let next = withVisit(g.proof, b.email, { kind, id: dl, looks, seconds: Number(b.seconds) || 0, ...open, name });
     // The client's first download of the finals moves their lead to Delivered. Against the gallery's address, so the right lead moves.
-    const first = dl && g.p.deliveredAt && !g.p.firstDownloadAt && !isTestEmail(b.email);
+    const first = dl && g.proof.deliveredAt && !g.proof.firstDownloadAt && !isTestEmail(b.email);
     if (first) next = { ...next, firstDownloadAt: new Date().toISOString() };
-    await writeProof(g.kv, g.s, next);
-    if (first) await recordLead(g.env, g.p.email ?? b.email, { event: { at: next.firstDownloadAt!, kind: "download", ref: g.p.token, note: g.p.name } });
+    await writeProof(g.kv, g.seal, next);
+    if (first) await recordLead(g.env, g.proof.email ?? b.email, { event: { at: next.firstDownloadAt!, kind: "download", ref: g.proof.token, note: g.proof.name } });
     // "each": hello@ hears of an open or a download as it happens, once per address per half hour (opens) or ten minutes (downloads).
     const mailed = kind === "open" || kind === "download" ? kind : null;
-    if (mailed && g.p.notify === "each" && (g.p.sentAt || g.p.deliveredAt) && !isTestEmail(b.email) && worthMail(g.p.viewers?.[viewerKey(b.email)]?.events ?? [], mailed, new Date().toISOString(), mailed === "open" ? 30 : 10)) {
+    if (mailed && g.proof.notify === "each" && (g.proof.sentAt || g.proof.deliveredAt) && !isTestEmail(b.email) && worthMail(g.proof.viewers?.[viewerKey(b.email)]?.events ?? [], mailed, new Date().toISOString(), mailed === "open" ? 30 : 10)) {
       const a = actionAlert(next, viewerKey(b.email), mailed, dl);
       await later(alertHello(g.env.EMAIL, a.subject, a.lines));
     }
     // A test address opening the gate (QA) stays in the gallery's own log, not on the desk as a lead.
-    if (kind === "open" && !isTestEmail(b.email)) await recordLead(g.env, b.email, { event: { at: new Date().toISOString(), kind: "proofs", ref: g.p.token, note: g.p.deliveredAt ? `${g.p.name}, finals` : g.p.name }, name });
+    if (kind === "open" && !isTestEmail(b.email)) await recordLead(g.env, b.email, { event: { at: new Date().toISOString(), kind: "proofs", ref: g.proof.token, note: g.proof.deliveredAt ? `${g.proof.name}, finals` : g.proof.name }, name });
     // An address coming back gets its own picks; once sent, everyone sees what was sent.
-    return json({ picks: g.p.submittedAt ? g.p.selects : (next.viewers?.[viewerKey(b.email)]?.picks ?? []) });
+    return json({ picks: g.proof.submittedAt ? g.proof.selects : (next.viewers?.[viewerKey(b.email)]?.picks ?? []) });
   }
 
   const slow = await limited(g.env.PUBLIC_WRITE_LIMIT, "picks", request);
   if (slow) return slow;
-  if (g.p.submittedAt) return json({ done: true, ...publicView(g.p) });
+  if (g.proof.submittedAt) return json({ done: true, ...publicView(g.proof) });
   const key = g.env.STRIPE_SECRET_KEY;
 
   if (typeof b.confirm === "string") {
     if (!key) return json({ error: PAYMENTS_OFF }, 503);
-    const paid = await checkPaid(key, g.p, b.confirm);
+    const paid = await checkPaid(key, g.proof, b.confirm);
     if (paid === "down") return json({ error: PAYMENTS_DOWN }, 502);
     if (!paid) return json({ error: "That payment did not go through." }, 402);
-    return json({ done: true, ...publicView(await finalize(g.env, g.kv, g.s, g.p, paid)) });
+    return json({ done: true, ...publicView(await finalize(g.env, g.kv, g.seal, g.proof, paid)) });
   }
 
   if (typeof b.email !== "string" || !isEmail(b.email)) return json({ error: "Add your email first." }, 400);
-  const selects = cleanSelects(b.selects, g.p.frames);
+  const selects = cleanSelects(b.selects, g.proof.frames);
   if (!selects.length) return json({ error: "Select at least one frame." }, 400);
   // Notes are gone from the gallery; old ones are dropped with the send.
-  const p: Proof = { ...logged(g.p, b.email, { picks: selects }), selects, notes: {}, message: undefined, submittedBy: b.email.trim() };
+  const p: Proof = { ...withVisit(g.proof, b.email, { picks: selects }), selects, notes: {}, message: undefined, submittedBy: b.email.trim() };
 
-  if (amountOwed(p).cents === 0) return json({ done: true, ...publicView(await finalize(g.env, g.kv, g.s, p)) });
+  if (amountOwed(p).cents === 0) return json({ done: true, ...publicView(await finalize(g.env, g.kv, g.seal, p)) });
   if (!key) return json({ error: PAYMENTS_OFF }, 503);
   try {
     const c = await checkout(key, p, b.method === "card" ? "card" : "bank");
-    await writeProof(g.kv, g.s, { ...p, checkout: c.id });
+    await writeProof(g.kv, g.seal, { ...p, checkout: c.id });
     return json({ checkout: c.url });
   } catch (e) {
     return upstreamError("proof checkout", e, PAYMENTS_DOWN);

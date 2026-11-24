@@ -7,8 +7,7 @@ import { adminCall } from "@/lib/admin/admin-call";
 import { isTestEmail, stage, type CardCrop, type Proof, type ProofFrame } from "@/lib/proofs/proof-model";
 import { CARD } from "@/lib/proofs/watermark";
 
-/** A gallery as `/api/proof?list` answers it, with its client link. */
-/** No password hash ever reaches the desk: only whether there is one. */
+/** A gallery as `/api/proof/list` answers it, with its client link. No password hash ever reaches the desk: only whether there is one. */
 export type ProofRow = Omit<Proof, "pass"> & { url: string; hasPass?: boolean };
 
 export const proofApi = <T = Record<string, unknown>,>({ path = "", ...init }: RequestInit & { path?: string } = {}) => adminCall<T>(`/api/proof${path}`, init);

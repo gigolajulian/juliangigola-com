@@ -90,12 +90,14 @@ export async function writeProof(kv: KV, s: Seal, p: Proof): Promise<void> {
 
 export type ProofSummary = { token: string; name: string; frames: number; selects: number; sentAt: string | null; submittedAt: string | null; closesAt: string | null };
 
+/** Its own paging, not `everyKey`: `lib/kv.ts` loads OpenNext, which the delivery downloads in `worker.ts` must not. */
 export async function listProofs(kv: KV): Promise<ProofSummary[]> {
+  const prefix = proofKey("");
   const out: ProofSummary[] = [];
   let cursor: string | undefined;
   do {
-    const page = await kv.list<Omit<ProofSummary, "token">>({ prefix: "proof:", cursor });
-    for (const k of page.keys) if (k.metadata) out.push({ token: k.name.slice(6), ...k.metadata });
+    const page = await kv.list<Omit<ProofSummary, "token">>({ prefix, cursor });
+    for (const k of page.keys) if (k.metadata) out.push({ token: k.name.slice(prefix.length), ...k.metadata });
     cursor = page.list_complete ? undefined : page.cursor;
   } while (cursor);
   return out;

@@ -97,6 +97,20 @@ describe("daily summary", () => {
     expect((await readProof(kv as never, await seal(), TOKEN))!.viewers).toBeDefined();
   });
 
+  it("the summary leaves out a gallery it cannot open and still covers the rest", async () => {
+    const { POST: run } = await import("@/app/api/proof/daily/route");
+    const errors = vi.spyOn(console, "error").mockImplementation(() => {});
+    const recent = new Date(Date.now() - 36e5).toISOString();
+    await writeProof(kv as never, await seal(), base({ notify: "daily", viewers: { "ana@gmail.com": viewer([ev(recent, "open")]) } }));
+    await writeProof(kv as never, await seal(), base({ token: "ZyXwVuTs98765432", notify: "daily" }));
+    kv.data.get("proof:ZyXwVuTs98765432")!.value = "not-sealed";
+    const res = await run(new Request("https://juliangigola.com/api/proof/daily?dry", { method: "POST", headers: { authorization: "Bearer s" } }));
+    expect(res.status).toBe(200);
+    expect((await res.json()).subject).toBe("Galleries today: 1 visitor");
+    expect(errors).toHaveBeenCalledWith("proof digest", "ZyXwVuTs98765432", expect.any(String));
+    errors.mockRestore();
+  });
+
   it("the worker asks only at 9 AM Pacific and never throws", async () => {
     const hits: string[] = [];
     const env = { WORKER_KEY: "s", SITE: { fetch: async (u: string) => (hits.push(u), Response.json({})) } } as never;
