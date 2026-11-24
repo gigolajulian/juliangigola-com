@@ -3,8 +3,7 @@
 import { sealer, type Sealer } from "./lead-crypto";
 import { notify, pushFor } from "./lead-push";
 import { appendLog, forgetLog, fresh } from "./activity-log";
-import { canonical } from "./lead-crypto";
-import { fold, leadStoreKey, leadSummary, type Change, type Lead, type LeadSummary, type Person, type Sent } from "./leads";
+import { canonical, fold,leadStoreKey, leadSummary, type Change, type Lead, type LeadSummary, type Person, type Sent } from "./leads";
 import type { InboxKV } from "@/lib/kv";
 
 type KV = InboxKV;
@@ -65,7 +64,7 @@ export async function writeLead(kv: KV, s: Sealer, id: string, lead: Lead, from?
 const CANON = "leads:canon";
 /**
  * Once: moves each lead stored before ids ignored Gmail dots and "+tags"
- * (`canonical` in lib/leads/lead-crypto.ts, 2026-11-04) to its new id. A lead whose
+ * (`canonical` in lib/leads/leads.ts, 2026-11-04) to its new id. A lead whose
  * new id is already taken stays put, for Merge on the desk. Returns how many moved.
  */
 export async function canonLeads(kv: KV, s: Sealer): Promise<number> {

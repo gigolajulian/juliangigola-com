@@ -7,8 +7,7 @@
  * ─────────────────────────────────────────────────────────────── */
 
 import { TZ } from "../booking/rules";
-import { STAGES, type Lead, type LeadEvent, type Person, type ShootPlan, type Stage, type Task } from "./leads";
-import { canonical } from "./lead-crypto";
+import { canonical, STAGES, type Lead, type LeadEvent, type Person, type ShootPlan, type Stage, type Task } from "./leads";
 import { balance, isSettled } from "./invoice";
 import { cell, paidTotal, type MasterEntry } from "./activity-log";
 import { byCodeUnit } from "@/lib/utils";
