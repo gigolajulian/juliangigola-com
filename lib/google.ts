@@ -16,7 +16,10 @@ export const CALENDAR = "https://www.googleapis.com/calendar/v3";
 const cached = new Map<string, { token: string; until: number }>();
 
 /** Forgets the access token for `secret`, or every one when none is given, so the next call asks Google again (a 401, tests). */
-export const forgetToken = (secret?: string) => void (secret === undefined ? cached.clear() : cached.delete(secret));
+export const forgetToken = (secret?: string) => {
+  if (secret === undefined) cached.clear();
+  else cached.delete(secret);
+};
 
 /** An access token for hello@'s calendar. Throws while `GCAL_OAUTH` is unset or refused. */
 export async function gcalToken(secret: string | undefined, now = Date.now()): Promise<string> {

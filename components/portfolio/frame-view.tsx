@@ -143,7 +143,10 @@ export function FrameView({
   /* Motion plan item 10 (docs/decisions.md): a lift hands the finger's speed
      to the strip's own spring (lib/motion/spring.ts), critically damped. */
   const run = React.useRef(0);
-  const stop = () => void (cancelAnimationFrame(run.current), (run.current = 0));
+  const stop = () => {
+    cancelAnimationFrame(run.current);
+    run.current = 0;
+  };
   const spring = (axis: "x" | "y", to: number, fv: number, done: () => void) => {
     const el = track.current!,
       g = G.current!;
@@ -154,7 +157,12 @@ export function FrameView({
     const tick = (now: number) => {
       s = stepSpring(s, to, 1, frameDt(now, prev));
       prev = now;
-      if (springSettled(s, to)) return void (g.set(el, { [axis]: to }), (run.current = 0), done());
+      if (springSettled(s, to)) {
+        g.set(el, { [axis]: to });
+        run.current = 0;
+        done();
+        return;
+      }
       g.set(el, { [axis]: s.x });
       run.current = requestAnimationFrame(tick);
     };
@@ -319,7 +327,11 @@ export function FrameView({
         if (d.axis === "y") {
           const dy = e.clientY - d.y;
           const back = () => delete ref.current!.dataset.drop;
-          if (Math.abs(dy) < 90) return void (g ? g.to(el, { y: 0, duration: 0.45, ease: "expo.out", onComplete: back }) : back());
+          if (Math.abs(dy) < 90) {
+            if (g) g.to(el, { y: 0, duration: 0.45, ease: "expo.out", onComplete: back });
+            else back();
+            return;
+          }
           if (still() || !g) return onClose();
           return void g.to(el, { y: Math.sign(dy) * innerHeight, duration: 0.3, ease: GSAP_OUT, onComplete: onClose }); // Motion plan item 4 (docs/decisions.md): exits leave on `out`
         }

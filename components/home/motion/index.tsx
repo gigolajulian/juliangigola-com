@@ -48,7 +48,9 @@ export function MotionLayer() {
   // shortcut: the cause on this page is not found, drop this once it is.
   React.useEffect(() => {
     const vv = window.visualViewport;
-    const fix = () => void (scrollX && scrollTo(0, scrollY));
+    const fix = () => {
+      if (scrollX) scrollTo(0, scrollY);
+    };
     vv?.addEventListener("scroll", fix);
     return () => vv?.removeEventListener("scroll", fix);
   }, []);

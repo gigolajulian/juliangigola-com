@@ -182,7 +182,9 @@ export function WorkIndex({
       // The vectorscope (Color view) opens 40ms apart, the seventh on together.
       stagger: swap && view === "color" ? (i: number) => Math.min(i, 5) * 0.04 : 0,
       onEnter: (els) => els.forEach((e) => e.animate({ opacity: [0, 1] }, { duration: 250, easing: "cubic-bezier(.23,1,.32,1)" })),
-      onComplete: () => void (w && (w.style.overflow = "")),
+      onComplete: () => {
+        if (w) w.style.overflow = "";
+      },
     });
     return () => void tl.progress(1);
   }, [view, filter]);

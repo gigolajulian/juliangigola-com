@@ -70,7 +70,9 @@ export function BookOnline({
   // the booking flow's gsap, fetched on idle so its first step slides on the tap's frame
   React.useEffect(warmGsap, []);
   const [, flowIn] = React.useReducer((n: number) => n + 1, 0);
-  React.useEffect(() => void (open && !Flow && warmFlow().then(flowIn)), [open]);
+  React.useEffect(() => {
+    if (open && !Flow) void warmFlow().then(flowIn);
+  }, [open]);
   React.useEffect(() => {
     const el = sec.current;
     const io =

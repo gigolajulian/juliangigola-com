@@ -165,14 +165,14 @@ export function AdminTrash({
         {trash.length > 0 ? (
           <button
             type="button"
-            onClick={() =>
-              confirming === "*"
-                ? void destroy(
-                    trash.map((t) => t.slug),
-                    "everything in Recently deleted",
-                  )
-                : setConfirming("*")
-            }
+            onClick={() => {
+              if (confirming === "*")
+                void destroy(
+                  trash.map((t) => t.slug),
+                  "everything in Recently deleted",
+                );
+              else setConfirming("*");
+            }}
             className={cn(
               "label border px-3 py-2 press",
               confirming === "*"

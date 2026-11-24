@@ -26,8 +26,15 @@ export function scrollTop(glide = false) {
 /** Glides to `y` with the same 1.2s ease as the wordmark's trip to the top, then calls `done` (once, also if the glide is cut short). */
 export function glideTo(y: number, done: () => void) {
   let over = false;
-  const end = () => void (over || ((over = true), done()));
-  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return (scrollTo({ top: y, behavior: "instant" }), end());
+  const end = () => {
+    if (over) return;
+    over = true;
+    done();
+  };
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    scrollTo({ top: y, behavior: "instant" });
+    return end();
+  }
   if (live)
     live.scrollTo(y, { duration: 1.2, easing: (t) => (t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2), force: true, onComplete: end });
   else {

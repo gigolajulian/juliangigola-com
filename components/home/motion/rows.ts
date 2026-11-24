@@ -254,7 +254,13 @@ function covers(): Driver {
       row.addEventListener("pointerup", () => void (s.down = null), opts);
       row.addEventListener("pointercancel", () => dragCancel(s), opts);
       row.addEventListener("click", (e) => dragClick(s, e), { capture: true, signal: ac.signal });
-      row.addEventListener("dragstart", (e) => void (ctx.held && e.preventDefault()), opts);
+      row.addEventListener(
+        "dragstart",
+        (e) => {
+          if (ctx.held) e.preventDefault();
+        },
+        opts,
+      );
       row.addEventListener("focusin", (e) => coverFocus(s, e), opts);
       row.addEventListener("keydown", (e) => coverKey(s, e), opts);
       row.addEventListener("scroll", () => loose(s), { passive: true, signal: ac.signal });

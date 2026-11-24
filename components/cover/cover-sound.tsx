@@ -72,7 +72,10 @@ function scPlay(url: string) {
     });
     document.body.append(frame);
   }
-  if (scUrl === url) return void (scReady && scGo());
+  if (scUrl === url) {
+    if (scReady) scGo();
+    return;
+  }
   scReady = false;
   scUrl = url;
   frame.src = `${SC}/player/?url=${encodeURIComponent(url)}&auto_play=false&show_artwork=false`;

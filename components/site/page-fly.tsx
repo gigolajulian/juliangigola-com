@@ -290,7 +290,10 @@ export function PageFly() {
       const home = () => {
         const tile = document.querySelector<HTMLElement>(`[data-flip-id="${CSS.escape(go.slug)}"]`);
         const r = tile?.getBoundingClientRect();
-        if (!tile || !r?.width) return void (++n < 30 && (raf = requestAnimationFrame(home)));
+        if (!tile || !r?.width) {
+          if (++n < 30) raf = requestAnimationFrame(home);
+          return;
+        }
         if (onScreen(r)) flyCopy(go.r, go.src, tile, 600, MOVE, undefined, zoomOf(tile.querySelector("img")));
       };
       raf = requestAnimationFrame(home);
@@ -302,7 +305,10 @@ export function PageFly() {
     const land = () => {
       const hero = document.querySelector<HTMLElement>(HERO);
       const h = hero?.getBoundingClientRect();
-      if (!hero || !h?.width) return void (++n < 60 && (raf = requestAnimationFrame(land)));
+      if (!hero || !h?.width) {
+        if (++n < 60) raf = requestAnimationFrame(land);
+        return;
+      }
       if (h.bottom < 0 || h.top > innerHeight) return;
       // Found in the layout phase, the hero is named before the new page is captured; found later, the copy flies as before.
       if (f.vt && !n) {

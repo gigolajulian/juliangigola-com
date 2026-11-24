@@ -52,7 +52,9 @@ export function Home({ data }: { data: HomeData }) {
   const [inqUsed, setInqUsed] = React.useState(false);
   if (inq && !inqUsed) setInqUsed(true);
   const [, inqIn] = React.useReducer((n: number) => n + 1, 0);
-  React.useEffect(() => void (inq && !InquiryCard && warmInq().then(inqIn)), [inq]);
+  React.useEffect(() => {
+    if (inq && !InquiryCard) void warmInq().then(inqIn);
+  }, [inq]);
   React.useEffect(() => {
     const io = window.IntersectionObserver
       ? new IntersectionObserver((es) => es.some((e) => e.isIntersecting) && (warmInq(), io?.disconnect()), { rootMargin: "100% 0px" })
