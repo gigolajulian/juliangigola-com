@@ -3,9 +3,9 @@
 import * as React from "react";
 import Link from "next/link";
 import { TimePicker } from "@/components/booking/time-picker";
-import { EARLY_SHARE, MAX_MOVES, MOVE_HOURS, PART_HOURS, REFUND_HOURS, refundCents, refundShare, TZ } from "@/lib/booking/booking-rules";
+import { EARLY_SHARE, MAX_MOVES, MOVE_HOURS, PART_HOURS, REFUND_HOURS, refundCents, refundShare, TZ } from "@/lib/booking/rules";
 import { LEGACY_DEPOSIT } from "@/lib/booking/paid";
-import type { clientView } from "@/lib/booking/booking-engine";
+import type { clientView } from "@/lib/booking/engine";
 
 /* ── a client's own booking: reschedule or cancel ─────────────────
  * Opened from the links in the "You're in." mail (`app/booking/[id]`).

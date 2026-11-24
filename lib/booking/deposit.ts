@@ -1,9 +1,9 @@
 import { afterBooked, cancelledSubject, sendCancelled } from "@/lib/booking/confirm";
 import { enquiry, enquiryKey, summary, whenPT } from "@/lib/inbox";
 import { logMail, recordLead } from "@/lib/leads/lead-store";
-import { EVENTS, type Booking } from "@/lib/booking/booking-rules";
-import { lockOp, parseBooking, type BookingRecord } from "@/lib/booking/booking-engine";
-import { manageLinks } from "@/lib/booking/booking-token";
+import { EVENTS, type Booking } from "@/lib/booking/rules";
+import { lockOp, parseBooking, type BookingRecord } from "@/lib/booking/engine";
+import { manageLinks } from "@/lib/booking/token";
 
 /* ── the deposit ──────────────────────────────────────────────────
  * The paid sessions take a deposit on the
@@ -16,7 +16,7 @@ import { manageLinks } from "@/lib/booking/booking-token";
  *      abandoned card costs no KV write.
  *   2. The visitor pays in the Stripe Payment Element.
  *   3. Stripe's signed webhook (`/api/stripe`) books the time through the
- *      lock (`lib/booking/booking-engine.ts`). If the time went in the meantime,
+ *      lock (`lib/booking/engine.ts`). If the time went in the meantime,
  *      the deposit is refunded at once. If even the refund fails, the Inbox gets a row saying so.
  *   4. The card polls GET /api/deposit/<id> for the outcome. The webhook
  *      copies it onto the intent's metadata and the poll reads it from

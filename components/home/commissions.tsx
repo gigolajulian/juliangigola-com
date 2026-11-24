@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Marks } from "@/components/site/duo";
 import { projectHref } from "@/lib/project-href";
-import type { HomeFrame } from "@/lib/v4-home/data";
+import type { HomeFrame } from "@/lib/home/data";
 import { pad } from "@/lib/utils";
 import { useTold } from "./ctx";
 

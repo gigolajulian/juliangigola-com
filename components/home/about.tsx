@@ -3,7 +3,7 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ABOUT_FACTS, ABOUT_SENTENCE } from "@/lib/v4-home/data";
+import { ABOUT_FACTS, ABOUT_SENTENCE } from "@/lib/home/data";
 import { pad } from "@/lib/utils";
 
 /* Spec 3.9: one screen. The sentence is one paragraph; the per-word spans

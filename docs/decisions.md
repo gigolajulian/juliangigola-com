@@ -405,10 +405,10 @@ states its rule inline. `SPEC-home-scroll.md` citations point at
 ### components/analytics/visit-trail.tsx
 - 2026-10-14: an inquiry says where its sender came from.
 
-### lib/booking/booking-engine.ts
+### lib/booking/engine.ts
 - 2026-11-16: inside the last day a booking can no longer be moved.
 
-### lib/booking/booking-rules.ts
+### lib/booking/rules.ts
 - 2026-11-04: the last start is 7 PM. An hour of travel each side of a shoot.
 - 2026-11-16: refunds are 90% at 48h or more and 70% at 24h or more, with the 10% fee kept ("no free refunds"). A booking can be moved at most twice.
 

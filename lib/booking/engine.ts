@@ -1,4 +1,4 @@
-import { BOOKING_FEE, DEFAULT_HOURS, EVENTS, HEADS_UP_HOURS, MAX_MOVES, MOVE_HOURS, REFUND_HOURS, TZ, type Booking, type Hours } from "@/lib/booking/booking-rules";
+import { BOOKING_FEE, DEFAULT_HOURS, EVENTS, HEADS_UP_HOURS, MAX_MOVES, MOVE_HOURS, REFUND_HOURS, TZ, type Booking, type Hours } from "@/lib/booking/rules";
 import { gcal } from "@/lib/booking/gcal";
 import { bookingEnquiry, enquiryKey, looksLikeEmail, summary } from "@/lib/inbox";
 import { isPaid, LEGACY_DEPOSIT } from "@/lib/booking/paid";

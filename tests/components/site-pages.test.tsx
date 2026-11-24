@@ -15,7 +15,7 @@ import { CATEGORIES, DISCIPLINES, PROJECTS, WITH_BTS, categoryLabel, titleCase }
 import { COMMISSION_TABS } from "@/lib/photos-and-sessions";
 import { MOTION_SEO } from "@/lib/seo";
 import { CONTENT } from "@/lib/content";
-import { HOME_DATA } from "@/lib/v4-home/server";
+import { HOME_DATA } from "@/lib/home/server";
 import ORDER from "@/lib/portfolio-order.json";
 
 /* The big client views are stand-ins that keep their props, so the page's
@@ -34,8 +34,8 @@ const { got, keep } = vi.hoisted(() => {
 });
 vi.mock("@/components/portfolio/work", () => ({ WorkIndex: keep("WorkIndex") }));
 vi.mock("@/components/home/rollback", () => ({ V3Home: keep("V3Home") }));
-vi.mock("@/components/v4/home/gate", () => ({ HomeGate: keep("HomeGate") }));
-vi.mock("@/components/v4/home/home", () => ({ Home: keep("Home") }));
+vi.mock("@/components/home/gate", () => ({ HomeGate: keep("HomeGate") }));
+vi.mock("@/components/home/home", () => ({ Home: keep("Home") }));
 vi.mock("@/components/portfolio/video", () => ({ VideoIndex: keep("VideoIndex") }));
 vi.mock("@/components/about/about", () => ({ About: keep("About") }));
 vi.mock("@/components/contact/inquire", () => ({ Contact: keep("Contact"), CommissionForm: keep("CommissionForm") }));

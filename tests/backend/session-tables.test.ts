@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { EVENTS } from "@/lib/booking/booking-rules";
+import { EVENTS } from "@/lib/booking/rules";
 import { SESSION_EVENTS } from "@/lib/booking/service-pages";
 import { SESSION } from "@/lib/booking/deposit";
 import { DEPOSIT, PAID, isPaid } from "@/lib/booking/paid";

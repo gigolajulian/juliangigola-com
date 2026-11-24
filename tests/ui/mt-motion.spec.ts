@@ -1,7 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { errorsOn, open, RATIOS } from "./ratios";
 
-/* The v4 home's motion layer (components/v4/home/motion), as it runs today. On the
+/* The v4 home's motion layer (components/home/motion), as it runs today. On the
    desktop structure every held section gets --p, 0 to 1 through its hold
    (engine.ts); on a phone Book online and By quote take the bottom bar
    (data-bar, bars.ts) once their top is above 0.45 of the screen. Each section

@@ -4,7 +4,7 @@
    min(100vw / 1440, 100svh / 900) clamped .7 to 1.6 (spec 5).
    Structures: D desktop (>=1024 wide and >=600 tall), T tablet portrait
    (600-1023 wide), P phone (<600 wide), L on its side (<600 tall).
-   Motion hooks the second builder drives: components/v4/home/MOTION-HOOKS.md. */
+   Motion hooks the second builder drives: components/home/MOTION-HOOKS.md. */
 
 /* The live home waits hidden while the flag swaps the v4 tree in (gate.tsx). */
 [data-mtscroll] .v3home:not(.mt){visibility:hidden}
@@ -479,7 +479,7 @@
   [data-mtscroll] .mt-ab-ph{aspect-ratio:auto;height:80svh}
   [data-mtscroll] .mt-ph{font-size:120px}
 }
-/* intro waiting state, set by the head script before first paint (the rest lives in components/v4/home/intro/intro.css) */
+/* intro waiting state, set by the head script before first paint (the rest lives in components/home/intro/intro.css) */
 html[data-mt-intro="1"] .site-hdr{opacity:0!important}
 html[data-mt-intro="1"]{overflow:hidden}
 /* side columns only where a real part of one fits: below about 1.9:1 just a 15px sliver shows at each edge. The intro still uses them. */

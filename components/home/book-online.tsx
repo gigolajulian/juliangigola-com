@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Duo } from "@/components/site/duo";
 import { SESSIONS } from "@/lib/photos-and-sessions";
 import { matches } from "@/lib/device";
-import { BOOK_ROWS, QUOTE_OPTS, type BookRow, type QuoteOpt } from "@/lib/v4-home/data";
+import { BOOK_ROWS, QUOTE_OPTS, type BookRow, type QuoteOpt } from "@/lib/home/data";
 import { warmGsap } from "@/lib/gsap-lazy";
 import { useNextOpen } from "./next-open";
 import { CardsCtx } from "./ctx";

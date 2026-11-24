@@ -1,8 +1,8 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { lockOp, clientView, depositPaid, type ChangeResult } from "@/lib/booking/booking-engine";
-import { EARLY_SHARE, PART_SHARE, refundCents, refundShare } from "@/lib/booking/booking-rules";
+import { lockOp, clientView, depositPaid, type ChangeResult } from "@/lib/booking/engine";
+import { EARLY_SHARE, PART_SHARE, refundCents, refundShare } from "@/lib/booking/rules";
 import { refuseAdmin } from "@/lib/vouch";
-import { manageLinks, tokenOpens } from "@/lib/booking/booking-token";
+import { manageLinks, tokenOpens } from "@/lib/booking/token";
 import { confirmOf, sendConfirm } from "@/lib/booking/confirm";
 import { logMail, recordLead } from "@/lib/leads/lead-store";
 import { cancelBooking } from "@/lib/booking/deposit";
@@ -12,8 +12,8 @@ import { bodyOf, json } from "@/lib/http";
 
 /* ── a client reschedules or cancels (`/booking/<id>`) ────────────
  * POST {t, action: "cancel"} or {t, action: "reschedule", start}. The
- * token from their mail opens it (`lib/booking/booking-token.ts`); the lock does
- * the change (`lib/booking/booking-engine.ts`). A cancel 48 hours or more before
+ * token from their mail opens it (`lib/booking/token.ts`); the lock does
+ * the change (`lib/booking/engine.ts`). A cancel 48 hours or more before
  * the start refunds the deposit through Stripe, 24 hours or more refunds 70%
  * of it, under that it keeps it (`refundShare`). hello@ hears about every change.
  * ─────────────────────────────────────────────────────────────── */

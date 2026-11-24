@@ -7,7 +7,7 @@ import { DepositStep } from "@/components/booking/deposit-step";
 import { ReferencePicks } from "@/components/reference-picks";
 import { Calendar } from "@/components/booking/flow";
 import { dlabel } from "@/components/booking/flow";
-import { duration } from "@/lib/booking/booking-rules";
+import { duration } from "@/lib/booking/rules";
 import { depositFor } from "@/lib/booking/paid";
 import { clockLabel } from "@/components/booking/flow";
 import type { Shell } from "@/components/booking/flow";

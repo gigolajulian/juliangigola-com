@@ -1,4 +1,4 @@
-import { COMM_KEYS, DOES, FILM_DRESS, FILM_FILES, FILM_PICKS, HERO_KEYS, type HomeData, type HomeFrame } from "@/lib/v4-home/data";
+import { COMM_KEYS, DOES, FILM_DRESS, FILM_FILES, FILM_PICKS, HERO_KEYS, type HomeData, type HomeFrame } from "@/lib/home/data";
 import { PROJECTS, categoryLabel, getProject } from "@/lib/work/work";
 import { CONTENT } from "@/lib/content";
 import { REEL, posterFor, previewUrl } from "@/lib/work/videos";

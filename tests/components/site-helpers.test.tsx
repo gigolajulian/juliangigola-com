@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, cleanup, fireEvent, render, renderHook, screen } from "@testing-library/react";
 import { projectHref } from "@/lib/project-href";
 import { THEME_COLOR } from "@/lib/theme-color";
-import { V4_HOME, mtscroll } from "@/lib/v4-home/switch";
+import { V4_HOME, mtscroll } from "@/lib/home/switch";
 import { NAME_INK, NAME_W } from "@/lib/email/email-logo";
 import { useDialKitStyles } from "@/lib/dev/dialkit-styles";
 import { sleeveTilt } from "@/components/cover/sleeve-tilt";
@@ -52,10 +52,10 @@ describe("v4 home switch", () => {
     expect(V4_HOME).toBe(process.env.NEXT_PUBLIC_V4_HOME === "1");
     vi.stubEnv("NEXT_PUBLIC_V4_HOME", "1");
     vi.resetModules();
-    expect((await import("@/lib/v4-home/switch")).V4_HOME).toBe(true);
+    expect((await import("@/lib/home/switch")).V4_HOME).toBe(true);
     vi.stubEnv("NEXT_PUBLIC_V4_HOME", "0");
     vi.resetModules();
-    expect((await import("@/lib/v4-home/switch")).V4_HOME).toBe(false);
+    expect((await import("@/lib/home/switch")).V4_HOME).toBe(false);
   });
 });
 

@@ -11,7 +11,7 @@ vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ 
 const { GET, PUT } = await import("@/app/api/booking/hours/route");
 const { GET: slots } = await import("@/app/api/slots/route");
 const { openNow } = await import("@/lib/booking/slots");
-const { liveHours } = await import("@/lib/booking/booking-engine");
+const { liveHours } = await import("@/lib/booking/engine");
 
 const req = (method: string, body?: unknown, key = KEY) =>
   new Request("https://juliangigola.com/api/booking/hours", { method, headers: { "x-inbox-key": key }, body: body === undefined ? undefined : JSON.stringify(body) });

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { returning, shouldPlay } from "@/components/v4/home/intro";
+import { returning, shouldPlay } from "@/components/home/intro";
 
 /* The v4 home intro's play rules, as they stand: which timing a visitor gets (returning)
    and whether it plays at all (shouldPlay). Read from the URL,

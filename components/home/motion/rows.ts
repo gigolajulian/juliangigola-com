@@ -1,6 +1,6 @@
 import { scrollGoal, settleTo, shiftScroll } from "@/components/site/smooth-scroll";
 import { matches } from "@/lib/device";
-import { qvalue } from "@/lib/v4-home/flags";
+import { qvalue } from "@/lib/home/flags";
 import { holdEase as ease, holdUnease as unease } from "@/lib/motion/hold-ease";
 import { captionsOff, vimeoListen, vimeoPlays } from "@/lib/work/videos";
 import { clamp, MT2, rise, smooth, tell, type Ctx, type Driver } from "./engine";
@@ -282,7 +282,7 @@ function drop(s: Films) {
   for (const i of [...s.pool.keys()]) kill(s, i);
 }
 
-/* The site's own file (lib/v4-home/data.ts FILM_FILES): a plain video, no player to wait for. It says "playing" itself. */
+/* The site's own file (lib/home/data.ts FILM_FILES): a plain video, no player to wait for. It says "playing" itself. */
 function mountFile(s: Films, i: number, film: HTMLElement, file: string) {
   const f = document.createElement("video");
   const v: Pv = { f, yt: false, played: false, at: performance.now(), t: 0 };

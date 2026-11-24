@@ -20,7 +20,7 @@ import { List, ListItem } from "@astryxdesign/core/List";
 import { Calendar, type DateRange, type ISODateString } from "@astryxdesign/core/Calendar";
 import { Token } from "@astryxdesign/core/Token";
 import { Divider } from "@astryxdesign/core/Divider";
-import { EVENTS, HOURS, TZ } from "@/lib/booking/booking-rules";
+import { EVENTS, HOURS, TZ } from "@/lib/booking/rules";
 import { startsFor, zoned } from "@/lib/booking/slots";
 import type { LeadSummary } from "@/lib/leads/leads";
 import { adminCall, errorText, type Size } from "@/lib/leads/lead-desk";

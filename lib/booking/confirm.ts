@@ -1,8 +1,8 @@
-import { duration, EARLY_SHARE, PART_SHARE, REFUND_HOURS, refundCents, refundShare, TZ } from "@/lib/booking/booking-rules";
+import { duration, EARLY_SHARE, PART_SHARE, REFUND_HOURS, refundCents, refundShare, TZ } from "@/lib/booking/rules";
 import { LEGACY_DEPOSIT } from "@/lib/booking/paid";
-import { depositPaid, recordBooking, type BookingRecord } from "@/lib/booking/booking-engine";
+import { depositPaid, recordBooking, type BookingRecord } from "@/lib/booking/engine";
 import { logMail } from "@/lib/leads/lead-store";
-import type { manageLinks } from "@/lib/booking/booking-token";
+import type { manageLinks } from "@/lib/booking/token";
 import { SIG_DARK, SIG_HTML, SIG_TEXT } from "@/lib/email/email-signature";
 /* ── the client's confirmation email ──────────────────────────────
  * Every booking gets a branded "You're in." mail from
@@ -105,7 +105,7 @@ export function confirmMail(c: Confirm) {
   const usd = c.deposit?.amount ?? LEGACY_DEPOSIT;
   const paid = c.deposit && {
     rows: [["Paid", fmt({ month: "short", day: "numeric", year: "numeric" }).format(new Date(c.deposit.at))], ...(c.deposit.card ? [["Card", c.deposit.card]] : []), ["Ref", c.deposit.ref.slice(0, 11)]] as [string, string][],
-    // The site's own engine refunds by Julian's rule (`refundShare`, `lib/booking/booking-rules.ts`).
+    // The site's own engine refunds by Julian's rule (`refundShare`, `lib/booking/rules.ts`).
     note: remind
       ? "It is under 24 hours now, so the session can no longer be moved and a cancel keeps the deposit."
       : soon

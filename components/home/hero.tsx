@@ -4,9 +4,9 @@ import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { matches } from "@/lib/device";
-import { qflag } from "@/lib/v4-home/flags";
+import { qflag } from "@/lib/home/flags";
 import { projectHref } from "@/lib/project-href";
-import { EXTRAS, type HomeFrame } from "@/lib/v4-home/data";
+import { EXTRAS, type HomeFrame } from "@/lib/home/data";
 import { flipMs } from "./motion/root-attrs";
 
 /* Spec 3.2: the wall of 12 frames is the hero. Three locked columns, two
@@ -97,7 +97,7 @@ function useIdleWall(frames: HomeFrame[], extras: HomeFrame[]) {
 
 export function HomeHero({ frames: first, extras }: { frames: HomeFrame[]; extras: HomeFrame[] }) {
   const { root, onWall: frames, was, done } = useIdleWall(first, extras);
-  // extras: the ranges are EXTRAS (lib/v4-home/data.ts)
+  // extras: the ranges are EXTRAS (lib/home/data.ts)
   const cols = [0, 1, 2].map((c) => ({ c, list: [...[0, 1, 2, 3].map((r) => ({ f: frames[c + r * 3], i: c + r * 3, xr: false })), ...XR.map((r) => ({ f: extras[EXTRAS.sides + (r - 4) * 3 + c], i: c + r * 3, xr: true }))].filter((x) => x.f) }));
   const sides = SIDES.map((c, k) => ({ c, list: [...[0, 1, 2, 3].map((r) => ({ f: extras[k * EXTRAS.perCol + r], i: -1, xr: false })), ...XR.map((r) => ({ f: extras[EXTRAS.xrSides + k * 2 + (r - 4)], i: -1, xr: true }))].filter((x) => x.f) }));
   return (

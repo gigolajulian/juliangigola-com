@@ -3,7 +3,7 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { BOOK_ROWS, QUOTE_OPTS } from "@/lib/v4-home/data";
+import { BOOK_ROWS, QUOTE_OPTS } from "@/lib/home/data";
 import { CardsCtx } from "./ctx";
 import { scrollTop } from "@/components/site/smooth-scroll";
 import { matches } from "@/lib/device";

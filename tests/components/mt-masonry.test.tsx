@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { masonry } from "@/components/v4/home/commissions";
-import type { HomeFrame } from "@/lib/v4-home/data";
+import { masonry } from "@/components/home/commissions";
+import type { HomeFrame } from "@/lib/home/data";
 
-/* The phone sheet's two columns (`components/v4/home/commissions.tsx`): each
+/* The phone sheet's two columns (`components/home/commissions.tsx`): each
    frame goes to the shorter column by its ratio, the right column starting
    56/171 of a frame lower, and every frame keeps its index once. */
 

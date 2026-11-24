@@ -1,4 +1,4 @@
-import { TZ } from "@/lib/booking/booking-rules";
+import { TZ } from "@/lib/booking/rules";
 
 /* The picker's pure date helpers (`use-picker.tsx`). */
 

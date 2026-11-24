@@ -6,7 +6,7 @@
    depth.ts adds a second hero driver and bars.ts drives book and quote. */
 
 import { matches, media } from "@/lib/device";
-import { qflag } from "@/lib/v4-home/flags";
+import { qflag } from "@/lib/home/flags";
 import { touchParity } from "./touch-parity";
 
 export type Ctx = {
@@ -37,7 +37,7 @@ export type Ctx = {
   fresh: boolean;
 };
 
-/** Every `data-mt` section name in components/v4/home. */
+/** Every `data-mt` section name in components/home. */
 export type HomeSection = "hero" | "covers" | "motion" | "comm" | "about" | "quote" | "foot" | "book";
 
 /** every frame while the section is within one screen of the viewport (it carries `data-mt-near` then) */

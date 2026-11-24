@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FakeEmail, FakeKV, FakeStore, fakeLock, LEADS_KEY, leadOf, INBOX_KEY as KEY, GOOGLE_OAUTH as OAUTH } from "./fakes";
 import { forgetToken } from "@/lib/booking/gcal";
-import { bookingToken, manageLinks, tokenOpens } from "@/lib/booking/booking-token";
+import { bookingToken, manageLinks, tokenOpens } from "@/lib/booking/token";
 import { BookingLock } from "@/worker/booking-lock";
-import { findBooking, saveBooking } from "@/lib/booking/booking-engine";
+import { findBooking, saveBooking } from "@/lib/booking/engine";
 
 // Pinned clock: weekday hours, DST and the 48h refund window must not depend on the day the suite runs.
 vi.useFakeTimers({ toFake: ["Date"] });

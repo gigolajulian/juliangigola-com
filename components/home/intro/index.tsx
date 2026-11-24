@@ -3,8 +3,8 @@
 import * as React from "react";
 import loader, { plainSrc } from "@/image-loader";
 import { matches } from "@/lib/device";
-import { qflag } from "@/lib/v4-home/flags";
-import { EXTRAS, type HomeFrame } from "@/lib/v4-home/data";
+import { qflag } from "@/lib/home/flags";
+import { EXTRAS, type HomeFrame } from "@/lib/home/data";
 import "./intro.css";
 
 /* v4 home intro, "The canvas" (spec 3.1): JG inks in alone, the whole wall and

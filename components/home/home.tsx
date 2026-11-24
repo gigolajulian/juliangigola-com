@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { createPortal } from "react-dom";
-import type { HomeData, BookRow, QuoteOpt } from "@/lib/v4-home/data";
+import type { HomeData, BookRow, QuoteOpt } from "@/lib/home/data";
 import { CardsCtx, type Cards, type InquiryMode } from "./ctx";
 import { HomeHero } from "./hero";
 import { HomeCommissions } from "./commissions";

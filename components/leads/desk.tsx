@@ -36,7 +36,7 @@ import { badge, FROST_ROOM, frostBar, GLASS, WIN_CSS, glyph } from "@/components
 import { ago, aside, errorText, inboxCall, loadError, LOCKED, matches, nextStep, inFilter, type Size } from "@/lib/leads/lead-desk";
 import { useSiteThemeRead } from "@/lib/site-theme";
 import type { Template } from "@/lib/leads/lead-crm";
-import { TZ } from "@/lib/booking/booking-rules";
+import { TZ } from "@/lib/booking/rules";
 import { KEY_STORE, saveAdminKey, TOKEN_STORE } from "@/lib/admin/admin-github";
 import { leadSummary, shootTag, STAGES, type Lead, type LeadPatch, type LeadSummary, type Stage as StageName } from "@/lib/leads/leads";
 import { TodayDesk } from "@/components/leads/today";

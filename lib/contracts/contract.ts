@@ -16,7 +16,7 @@
  * Once signed the text is locked and a second signature is refused.
  * ─────────────────────────────────────────────────────────────── */
 
-import { TZ } from "@/lib/booking/booking-rules";
+import { TZ } from "@/lib/booking/rules";
 import { depositOfLead, type InvoiceFrom } from "@/lib/leads/invoice";
 import type { Lead } from "@/lib/leads/leads";
 import type { InboxKV as KV } from "@/lib/kv";

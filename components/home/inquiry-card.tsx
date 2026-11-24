@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Dialog } from "radix-ui";
 import { Check, Failed, Hidden, NEED_MSG, checkYou, first, useEnquiry } from "@/components/booking/flow";
-import { CHIP_TYPE, QUOTE_OPTS, type QuoteOpt } from "@/lib/v4-home/data";
+import { CHIP_TYPE, QUOTE_OPTS, type QuoteOpt } from "@/lib/home/data";
 import type { InquiryMode } from "./ctx";
 import { touchParityOn } from "./motion/touch-parity";
 

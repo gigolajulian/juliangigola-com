@@ -113,7 +113,7 @@ export const MAX_MOVES = 2;
 // shortcut: the mails and screens print the dollars raw, whole only while every deposit divides by 10; format cents if one stops.
 export const refundCents = (usd: number, share: number) => Math.round(usd * 100 * share);
 
-/** A visitor's booking, checked by `parseBooking` in `lib/booking/booking-engine.ts`. */
+/** A visitor's booking, checked by `parseBooking` in `lib/booking/engine.ts`. */
 export type Booking = {
   slug: string;
   /** ISO 8601, UTC. */
@@ -124,6 +124,6 @@ export type Booking = {
   phone?: string;
   where?: string;
   notes?: string;
-  /** Booked by the site's engine (`lib/booking/booking-engine.ts`), through its lock. */
+  /** Booked by the site's engine (`lib/booking/engine.ts`), through its lock. */
   engine: "own";
 };

@@ -4,9 +4,9 @@ import * as React from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import { Lightbox, useLightbox } from "@/components/lightbox";
-import { COVER_PRESS } from "@/lib/v4-home/data";
+import { COVER_PRESS } from "@/lib/home/data";
 import { sleeveTilt } from "./sleeve-tilt";
-import "@/components/v4/home/motion/rows.css";
+import "@/components/home/motion/rows.css";
 import { CoverFaces, coverLabel } from "@/components/cover/cover-faces";
 import { CoverSound, playSound, stopSound, useSound } from "@/components/cover/cover-sound";
 import type { CoverRelease } from "@/lib/work/cover-art-types";
@@ -110,7 +110,7 @@ export function CoverArtGallery({
     [frames],
   );
 
-  // `?cover=<slug>`: a cover clicked on the home (components/v4/home/rows.tsx) arrives open in the viewer, on side A, with no history entry of its own: one Back goes home.
+  // `?cover=<slug>`: a cover clicked on the home (components/home/rows.tsx) arrives open in the viewer, on side A, with no history entry of its own: one Back goes home.
   React.useEffect(() => {
     const slug = new URLSearchParams(location.search).get("cover");
     const release = slug ? releases.find((r) => r.slug === slug) : undefined;

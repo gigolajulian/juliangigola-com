@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
 import { V3Home, type TopWork } from "@/components/home/rollback";
-import { HomeGate } from "@/components/v4/home/gate";
+import { HomeGate } from "@/components/home/gate";
 import { COMMISSION_TABS } from "@/lib/photos-and-sessions";
 import { PROJECTS, categoryLabel } from "@/lib/work/work";
-import { HOME_DATA } from "@/lib/v4-home/server";
+import { HOME_DATA } from "@/lib/home/server";
 import ORDER from "@/lib/portfolio-order.json";
 import { shareOg } from "@/lib/og/share";
 
 export const metadata: Metadata = shareOg("Photographer and creative director","Fashion editorial, campaigns and portraits in the San Francisco Bay Area. Available worldwide.");
 
-/* The homepage. With NEXT_PUBLIC_V4_HOME=1 (production) it is the v4 home (`Home`, components/v4/home/home.tsx).
+/* The homepage. With NEXT_PUBLIC_V4_HOME=1 (production) it is the v4 home (`Home`, components/home/home.tsx).
    With 0 it is the rollback: V3Home (master v39), behind HomeGate for a `?mtscroll=1` preview of v4. */
 /* Each Commissions tab's top projects in Julian's portfolio order, as
    /portfolio shows them: nine, or five, the counts that fill the sheet
@@ -35,7 +35,7 @@ export default async function HomePage() {
   // Rendered directly, not through the gate: next/dynamic would leave it in a hidden Suspense block until scripts run.
   // The env test is written out here so the build drops the import when it is off: the default home must not load v4 files.
   if (process.env.NEXT_PUBLIC_V4_HOME === "1") {
-    const { Home } = await import("@/components/v4/home/home");
+    const { Home } = await import("@/components/home/home");
     return <Home data={HOME_DATA} />;
   }
   return (

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { PageFoot } from "@/components/site/chrome";
-import { DOES } from "@/lib/v4-home/data";
+import { DOES } from "@/lib/home/data";
 import { Marks } from "@/components/site/duo";
 import { AboutGallery } from "@/components/about/about-gallery";
 import { LogoBand } from "@/components/about/logo-band";

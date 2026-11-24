@@ -22,7 +22,7 @@ import { SW_URL, swScope } from "@/components/leads/setup";
 import { ContractTemplatesDesk } from "@/components/leads/contract";
 import { adminCall, authed, type Call, errorText, ymdPT } from "@/lib/leads/lead-desk";
 import type { Template } from "@/lib/leads/lead-crm";
-import type { Hours, Window } from "@/lib/booking/booking-rules";
+import type { Hours, Window } from "@/lib/booking/rules";
 import type { Stage } from "@/lib/leads/leads";
 
 import { byCodeUnit } from "@/lib/utils";

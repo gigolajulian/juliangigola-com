@@ -1,6 +1,6 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { lockOp } from "@/lib/booking/booking-engine";
-import { cleanHours, TZ, type Hours } from "@/lib/booking/booking-rules";
+import { lockOp } from "@/lib/booking/engine";
+import { cleanHours, TZ, type Hours } from "@/lib/booking/rules";
 import { refuseAdmin } from "@/lib/vouch";
 import { bodyOf, json } from "@/lib/http";
 

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { cleanHours, EVENTS } from "@/lib/booking/booking-rules";
+import { cleanHours, EVENTS } from "@/lib/booking/rules";
 import { forgetToken } from "@/lib/booking/gcal";
 import { localIso, startsFor, zoned } from "@/lib/booking/slots";
 

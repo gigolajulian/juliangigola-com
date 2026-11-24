@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { BookTimes } from "@/components/booking/book-times";
 import { V4Foot } from "@/components/site/foot";
 import { Calendar, Failed, Field, FlowShell, Hidden, Run, dlabel, iso, useEnquiry, type Shell } from "@/components/booking/flow";
-import { duration } from "@/lib/booking/booking-rules";
+import { duration } from "@/lib/booking/rules";
 import { LENGTH, SESSIONS, TAB_ORDER, priceLabel, type SessionSlug } from "@/lib/photos-and-sessions";
 import { looksLikeEmail } from "@/lib/inbox";
 import { noSubscribe } from "@/lib/utils";
