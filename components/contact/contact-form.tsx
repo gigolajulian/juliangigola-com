@@ -587,7 +587,7 @@ export function ContactForm({
 }
 
 /** A textarea as tall as what is in it; `max-h` stops it at three lines. */
-export const fit = (el: HTMLTextAreaElement | HTMLInputElement | null) => {
+export const fitTextareaHeight = (el: HTMLTextAreaElement | HTMLInputElement | null) => {
   if (!el) return;
   el.style.height = "auto";
   el.style.height = `${el.scrollHeight + el.offsetHeight - el.clientHeight}px`;
@@ -629,8 +629,8 @@ function Field({
            scrolls. Sized here rather than by `field-sizing`, which Safari
            lacks. */
         rows={as === "textarea" ? 1 : undefined}
-        ref={as === "textarea" ? fit : undefined}
-        onInput={as === "textarea" ? (e: { currentTarget: HTMLTextAreaElement | HTMLInputElement }) => fit(e.currentTarget) : undefined}
+        ref={as === "textarea" ? fitTextareaHeight : undefined}
+        onInput={as === "textarea" ? (e: { currentTarget: HTMLTextAreaElement | HTMLInputElement }) => fitTextareaHeight(e.currentTarget) : undefined}
         aria-invalid={error ? true : undefined}
         // Points a screen reader at the message rather than only colouring
         // the border, which says nothing to anyone not looking at it.

@@ -60,7 +60,7 @@ export const tell = (el: HTMLElement, detail: object, now = true) => el.dispatch
 export const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 export const smooth = (v: number) => v * v * (3 - 2 * v);
 /** 0 to 1 as v goes from a to b, clamped */
-export const span = (v: number, a: number, b: number) => clamp((v - a) / (b - a));
+export const progressBetween = (v: number, a: number, b: number) => clamp((v - a) / (b - a));
 /** A section's `--p`, 0 to 1. Held: through its hold, as its top edge travels the height it has beyond one screen.
    Not held: as it crosses the screen, from its top edge at the bottom of the screen to its bottom edge at the top. */
 export const progress = (top: number, h: number, vh: number, hold: boolean) =>

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { CHIP_TYPE, QUOTE_OPTS } from "@/lib/home/data";
-import { clamp, progress, smooth, span } from "@/components/home/motion/engine";
+import { clamp, progress, smooth, progressBetween } from "@/components/home/motion/engine";
 import { SHOOT_TYPES } from "@/lib/inbox";
 
 /* The server files any type it does not know as "other" without a word, so a renamed chip or a mistyped
@@ -26,11 +26,11 @@ describe("v4 motion math", () => {
   });
 
   it("span runs the other way when a is above b", () => {
-    expect([span(1.2, 1, 0), span(1, 1, 0), span(0.5, 1, 0), span(-1, 1, 0)]).toEqual([0, 0, 0.5, 1]);
+    expect([progressBetween(1.2, 1, 0), progressBetween(1, 1, 0), progressBetween(0.5, 1, 0), progressBetween(-1, 1, 0)]).toEqual([0, 0, 0.5, 1]);
   });
 
   it("span maps a to b onto 0 to 1 and clamps outside it", () => {
-    expect([span(0.2, 0.25, 1), span(0.25, 0.25, 1), span(0.625, 0.25, 1), span(2, 0.25, 1)]).toEqual([0, 0, 0.5, 1]);
+    expect([progressBetween(0.2, 0.25, 1), progressBetween(0.25, 0.25, 1), progressBetween(0.625, 0.25, 1), progressBetween(2, 0.25, 1)]).toEqual([0, 0, 0.5, 1]);
   });
 
   it("progress runs a held section 0 to 1 through its hold", () => {
