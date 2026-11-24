@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { POST } from "@/app/api/stripe/route";
 import { FakeKV, LEADS_KEY } from "./fakes";
 import { readLog } from "@/lib/leads/activity-log";
-import { sealer } from "@/lib/leads/lead-crypto";
+import { sealer } from "@/lib/seal";
 const logOf = async (kv: unknown, email: string) => { const s = (await sealer(LEADS_KEY))!; return readLog(kv as never, s, await s.id(email)); };
 
 

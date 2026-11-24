@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FakeEmail, FakeKV, FakeStore, fakeLock, LEADS_KEY } from "./fakes";
 import { readLog } from "@/lib/leads/activity-log";
-import { sealer } from "@/lib/leads/lead-crypto";
+import { sealer } from "@/lib/seal";
 import { forgetToken } from "@/lib/google";
 import { BookingLock } from "@/worker/booking-lock";
 

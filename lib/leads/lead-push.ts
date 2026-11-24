@@ -1,7 +1,7 @@
 import { send, type Push, type Subscription } from "./web-push";
 import type { Lead, LeadEvent } from "./leads";
 import type { InboxKV as KV } from "@/lib/kv";
-import { sha256Hex } from "@/lib/utils";
+import { sha256Hex } from "@/lib/token";
 
 /* ── the lead desk's devices ──────────────────────────────────────
  * Each device that turned notifications on (`components/leads/setup-panels.tsx`)

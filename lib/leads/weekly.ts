@@ -5,7 +5,7 @@
  * `app/api/leads/weekly/route.ts`. Pure: no KV, no mail.
  * ─────────────────────────────────────────────────────────────── */
 
-import { TZ } from "@/lib/time-zone";
+import { TZ, WEEK_MS } from "@/lib/time-zone";
 import type { MasterEntry } from "./activity-log";
 import { balance, isSettled, usdTrim } from "./invoice";
 import type { Lead, LeadEvent } from "./leads";
@@ -14,7 +14,7 @@ const day = (t: number) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, mont
 const ymd = (t: number) => new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(new Date(t));
 
 export function weeklyMail(all: (Lead & { id?: string })[], master: MasterEntry[], now: number): { subject: string; lines: string[] } {
-  const from = new Date(now - 7 * 864e5).toISOString();
+  const from = new Date(now - WEEK_MS).toISOString();
   const to = new Date(now).toISOString();
   const leads = all.filter((l) => !l.trashedAt);
   const live = new Set(leads.map((l) => l.id));
@@ -35,7 +35,7 @@ export function weeklyMail(all: (Lead & { id?: string })[], master: MasterEntry[
 
   const block = (title: string, rows: string[]) => (rows.length ? [title, ...rows, ""] : []);
   const lines = [
-    `My week on the desk, ${day(now - 7 * 864e5)} to ${day(now)}.`,
+    `My week on the desk, ${day(now - WEEK_MS)} to ${day(now)}.`,
     "",
     `New leads: ${fresh.length}`,
     ...fresh.map((l) => `  ${l.name}${l.kind ? `, ${l.kind.replace(/-/g, " ")}` : ""}${l.source ? ` (${l.source})` : ""}`),

@@ -8,8 +8,13 @@ const MAIL_FROM = "enquiries@notifications.juliangigola.com";
 export type Attachment = { content: ArrayBuffer; filename: string; type: string; disposition: "attachment" };
 
 
-/** True once hello@ has it. */
-export async function alertHello(email: CloudflareEnv["EMAIL"] | undefined, subject: string, lines: string[], who?: { name: string; email: string }, attachments: Attachment[] = []): Promise<boolean> {
+/** True once hello@ has it. `who`, the client it is about, is the reply-to. */
+export async function alertHello(
+  email: CloudflareEnv["EMAIL"] | undefined,
+  subject: string,
+  lines: string[],
+  { who, attachments = [] }: { who?: { name: string; email: string }; attachments?: Attachment[] } = {},
+): Promise<boolean> {
   if (!email) return false;
   try {
     await email.send({
@@ -24,7 +29,7 @@ export async function alertHello(email: CloudflareEnv["EMAIL"] | undefined, subj
   } catch (e) {
     console.error("hello mail", subject.split(":")[0], String(e));
     // Images can push a mail past the size limit: the mail matters more, so it goes again without them.
-    if (attachments.length) return alertHello(email, subject, [...lines, "", `${attachments.length} reference image(s) were too large to attach. Ask the client to email them.`], who);
+    if (attachments.length) return alertHello(email, subject, [...lines, "", `${attachments.length} reference image(s) were too large to attach. Ask the client to email them.`], { who });
     return false;
   }
 }
@@ -36,5 +41,5 @@ export async function alertAndLog(
   lines: string[],
   { who, log, attachments }: { who?: { name: string; email: string }; log: { kind: string; booking: string }; attachments?: Attachment[] },
 ) {
-  if (await alertHello(env.EMAIL, subject, lines, who, attachments)) await logMail(env, who?.email, subject, { to: "hello@", ...log });
+  if (await alertHello(env.EMAIL, subject, lines, { who, attachments })) await logMail(env, who?.email, subject, { to: "hello@", ...log });
 }

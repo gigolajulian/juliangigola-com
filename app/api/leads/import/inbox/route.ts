@@ -1,7 +1,8 @@
 import { backfillLead, type InboxRow, type Lead, type Stage } from "@/lib/leads/leads";
 import { readLead, writeLead } from "@/lib/leads/lead-store";
 import type { Summary } from "@/lib/leads/enquiry";
-import { everyKey, sealedGate } from "@/lib/leads/desk-route";
+import { sealedGate } from "@/lib/leads/desk-route";
+import { everyKey } from "@/lib/kv";
 import { bodyOf, json } from "@/lib/http";
 
 /**

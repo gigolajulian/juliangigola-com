@@ -9,7 +9,7 @@
  * Server only.
  * ─────────────────────────────────────────────────────────────── */
 
-import type { Sealer } from "./lead-crypto";
+import type { Sealer } from "@/lib/seal";
 import type { Lead, LeadEvent } from "./leads";
 import type { InboxKV as KV } from "@/lib/kv";
 

@@ -1,5 +1,6 @@
 import { SAFE_IMAGE, summary, type Enquiry, type Summary } from "@/lib/leads/enquiry";
-import { everyKey, gate } from "@/lib/leads/desk-route";
+import { gate } from "@/lib/leads/desk-route";
+import { everyKey } from "@/lib/kv";
 import { bodyOf, json, NO_STORE } from "@/lib/http";
 import { parseOr } from "@/lib/json";
 

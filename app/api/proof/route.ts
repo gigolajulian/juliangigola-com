@@ -1,4 +1,4 @@
-import { gate as deskGate } from "@/lib/leads/desk-route";
+import { gate } from "@/lib/leads/desk-route";
 import { copiesFor, dropProofOpens, recordLead } from "@/lib/leads/lead-store";
 import { cardKey, closesAt, cleanSettings, DEFAULTS, DELIVERY_DAYS, finalKeys, frameKey, frameKeys, aliasKey, isDateId, isFrameId, isModel, isStrongId, isToken, publicId, remindState, shootDay, viewerKey, type Proof } from "@/lib/proofs/proof-model";
 import { isEmail } from "@/lib/utils";
@@ -40,14 +40,14 @@ const MAX_FRAME = 8 * 1024 * 1024;
 const UNBOUND = "Proofs need INBOX, PROOFS and LEADS_KEY on this build.";
 
 /** The desk's gate with this route's message, then PROOFS and LEADS_KEY. */
-async function gate(request: Request) {
-  const g = await deskGate(request, UNBOUND);
+async function proofGate(request: Request) {
+  const g = await gate(request, UNBOUND);
   if (g.error) return g;
   if (!g.env.PROOFS || !g.s) return { error: json({ error: UNBOUND }, 503) };
   return { ...g, r2: g.env.PROOFS, s: g.s };
 }
 
-type Gated = Exclude<Awaited<ReturnType<typeof gate>>, { error: Response }>;
+type Gated = Exclude<Awaited<ReturnType<typeof proofGate>>, { error: Response }>;
 
 /** R2 deletes at most 1000 keys a call. */
 async function dropKeys(r2: Gated["r2"], keys: string[]) {
@@ -59,7 +59,7 @@ const mailClient = async (g: Gated, to: string, m: Parameters<typeof sendClient>
   sendClient(g.env.CLIENT_EMAIL, to, m, await copiesFor(g.kv, g.s, to).catch(() => []));
 
 export async function GET(request: Request) {
-  const g = await gate(request);
+  const g = await proofGate(request);
   if ("error" in g) return g.error;
   const q = new URL(request.url).searchParams;
   if (q.has("list")) {
@@ -209,7 +209,7 @@ const ACTIONS: Record<string, (g: Gated, p: Proof, b: Record<string, unknown>, r
 };
 
 export async function POST(request: Request) {
-  const g = await gate(request);
+  const g = await proofGate(request);
   if ("error" in g) return g.error;
   const b = ((await bodyOf(request)) ?? {});
 
@@ -234,7 +234,7 @@ export async function POST(request: Request) {
 const badEmail = (v: unknown) => typeof v === "string" && v.trim() !== "" && !isEmail(v);
 
 export async function PATCH(request: Request) {
-  const g = await gate(request);
+  const g = await proofGate(request);
   if ("error" in g) return g.error;
   const b = ((await bodyOf(request)) ?? {});
   if (!isToken(b.token)) return json({ error: "Which gallery?" }, 400);
@@ -254,7 +254,7 @@ export async function PATCH(request: Request) {
 
 /** One frame from Lightroom. shortcut: read, add, write is not atomic, so the plugin uploads one frame at a time; a Durable Object if uploads ever run in parallel. */
 export async function PUT(request: Request) {
-  const g = await gate(request);
+  const g = await proofGate(request);
   if ("error" in g) return g.error;
   const q = new URL(request.url).searchParams;
   const token = q.get("token"), id = q.get("id"), file = (q.get("file") ?? "").slice(0, 120);
@@ -295,7 +295,7 @@ export async function PUT(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  const g = await gate(request);
+  const g = await proofGate(request);
   if ("error" in g) return g.error;
   const q = new URL(request.url).searchParams;
   const token = q.get("token");

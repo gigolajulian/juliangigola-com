@@ -1,4 +1,4 @@
-import { gate as deskGate } from "@/lib/leads/desk-route";
+import { gate } from "@/lib/leads/desk-route";
 import { mailable } from "@/lib/leads/lead-crm";
 import type { InboxKV } from "@/lib/kv";
 import { readLead } from "@/lib/leads/lead-store";
@@ -27,8 +27,8 @@ const TEMPLATES_KEY = "leads:contract-templates";
 const broken = () => json({ error: "That contract cannot be opened. LEADS_KEY may have changed." }, 500);
 
 /** The desk's gate with this route's INBOX message, then LEADS_KEY. */
-async function gate(request: Request) {
-  const g = await deskGate(request, "This build has no inbox attached.");
+async function contractGate(request: Request) {
+  const g = await gate(request, "This build has no inbox attached.");
   if (g.error) return g;
   if (!g.s) return { error: json({ error: "Contracts need LEADS_KEY on the Worker." }, 503) };
   return { ...g, s: g.s };
@@ -40,7 +40,7 @@ const templates = async (kv: InboxKV) => {
 };
 
 export async function GET(request: Request) {
-  const g = await gate(request);
+  const g = await contractGate(request);
   if (g.error) return g.error;
   const q = new URL(request.url).searchParams;
   if (q.has("templates")) return json({ templates: await templates(g.kv) });
@@ -60,7 +60,7 @@ export async function GET(request: Request) {
 }
 
 export async function PUT(request: Request) {
-  const g = await gate(request);
+  const g = await contractGate(request);
   if (g.error) return g.error;
   const b = await bodyOf(request);
   if (!b || !Array.isArray(b.templates)) return json({ error: "Not JSON." }, 400);
@@ -71,7 +71,7 @@ export async function PUT(request: Request) {
 
 /** A contract from a template, filled from the lead. Replaces an unsigned one; a signed one stays and a new one starts. */
 export async function POST(request: Request) {
-  const g = await gate(request);
+  const g = await contractGate(request);
   if (g.error) return g.error;
   const b = await bodyOf(request);
   if (typeof b?.lead !== "string") return json({ error: "Not JSON." }, 400);
@@ -90,7 +90,7 @@ export async function POST(request: Request) {
 }
 
 export async function PATCH(request: Request) {
-  const g = await gate(request);
+  const g = await contractGate(request);
   if (g.error) return g.error;
   const b = await bodyOf(request);
   if (!b) return json({ error: "Not JSON." }, 400);

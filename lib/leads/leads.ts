@@ -1,4 +1,5 @@
 import { balance, isSettled, namesInvoice, type Invoice } from "./invoice";
+import { DAY_MS } from "@/lib/time-zone";
 
 /* ── leads: one record per person ─────────────────────────────────
  * Every inquiry, call and booking
@@ -7,7 +8,7 @@ import { balance, isSettled, namesInvoice, type Invoice } from "./invoice";
  *
  * So beside the raw rows (`msg:`, still written first and kept as the
  * log) the INBOX namespace holds one `lead:<id>` per person, sealed with
- * LEADS_KEY (`lib/leads/lead-crypto.ts`). Each event
+ * LEADS_KEY (`lib/seal.ts`). Each event
  * that reaches the site (the form, a booking, a deposit in
  * trouble) is folded into it here. KV is the source of truth; Notion and the
  * Google Sheet (`lib/leads/sync/sheet-sync.ts`) are copies of it, never the other way.
@@ -18,13 +19,13 @@ import { balance, isSettled, namesInvoice, type Invoice } from "./invoice";
  * the rest by hand (Replied, Quoted, Shot, Invoiced, Selecting, Delivered, Lost).
  *
  * The record's summary rides sealed in KV metadata, so the list costs one
- * request. This file is pure functions. `recordLead` (`lib/leads/lead-store.ts`)
- * is the one place that touches the binding, and it never throws: the raw row is
- * already stored, and a lead that failed to update must not fail the form.
+ * request. This file is pure functions; reading and writing leads lives in
+ * `lib/leads/lead-store.ts`. There `recordLead` is the path for events from the
+ * site, and it never throws: the raw row is already stored, and a lead that
+ * failed to update must not fail the form.
  * ─────────────────────────────────────────────────────────────── */
 
 /** One day in milliseconds. */
-const DAY = 864e5;
 
 export const STAGES =["Inquiry", "Replied", "Call booked", "Quoted", "Confirmed", "Shot", "Invoiced", "Selecting", "Delivered", "Lost"] as const;
 export type Stage = (typeof STAGES)[number];
@@ -128,6 +129,7 @@ export type Task = { id: string; text: string; due?: string; who?: string; doneA
 export type Person = { name: string; email: string; role?: string; phone?: string; /** Copied on gallery and delivery mail; unset reads as on. */ cc?: boolean };
 
 export type Lead = {
+  /** An email address, or `ig:@handle` / `tel:+n` for a lead added by hand without one. Check `mailable()` before mailing it. */
   email: string;
   name: string;
   stage: Stage;
@@ -196,8 +198,12 @@ export type LeadSummary = Omit<Lead, "events" | "notion" | "deposit" | "notes" |
 /** Events kept per lead: the timeline needs the recent ones, KV values stay small. */
 const KEEP = 50;
 
-/** A lead's KV key: its id (an HMAC of the address, `lib/leads/lead-crypto.ts`), never the address. */
-export const leadStoreKey = (id: string) => `lead:${id}`;
+/** The KV prefix every lead's key starts with. */
+export const LEAD_PREFIX = "lead:";
+/** A lead's KV key: its id (an HMAC of the address, `lib/seal.ts`), never the address. */
+export const leadStoreKey = (id: string) => `${LEAD_PREFIX}${id}`;
+/** The id in a lead's KV key, `leadStoreKey` undone. */
+export const leadIdOf = (key: string) => key.slice(LEAD_PREFIX.length);
 
 const rank = (s: Stage) => STAGES.indexOf(s);
 const closed = (s: Stage) => s === "Delivered" || s === "Lost";
@@ -266,7 +272,8 @@ export function applyLeadEvent(lead: Lead | null, email: string, c: Change): Lea
   // Opening proofs is a line too. The name they typed fills a lead that only had the address.
   if (event.kind === "proofs") {
     if (c.name && next.name.toLowerCase() === next.email) next.name = c.name;
-    return tidy(lead ? next : { ...next, unread: false });
+    if (!lead) next.unread = false;
+    return tidy(next);
   }
   // His own reply from Gmail answers the inquiry: Replied, and off Needs me.
   if (event.kind === "replied") {
@@ -277,7 +284,8 @@ export function applyLeadEvent(lead: Lead | null, email: string, c: Change): Lea
       next.invoices = next.invoices!.map((v) => (sent.includes(v) ? { ...v, sentAt: event.at } : v));
       next.events = [...next.events, ...sent.map((v) => ({ at: event.at, kind: "invoice" as const, ref: event.ref, note: `${v.no} sent` }))].slice(-KEEP);
     }
-    return tidy({ ...next, unread: false });
+    next.unread = false;
+    return tidy(next);
   }
   if (event.kind === "snooze") {
     next.snoozeUntil = c.snoozeUntil || undefined;
@@ -295,8 +303,14 @@ export function applyLeadEvent(lead: Lead | null, email: string, c: Change): Lea
   }
   // A cancelled session is no longer booked.
   if (event.kind === "cancel") next.when = undefined;
-  if (event.kind === "archive") return tidy({ ...next, archivedAt: c.on ? event.at : undefined });
-  if (event.kind === "trash") return tidy({ ...next, trashedAt: c.on ? event.at : undefined });
+  if (event.kind === "archive") {
+    next.archivedAt = c.on ? event.at : undefined;
+    return tidy(next);
+  }
+  if (event.kind === "trash") {
+    next.trashedAt = c.on ? event.at : undefined;
+    return tidy(next);
+  }
 
   // Something arrived from outside: it is news, and out of Archived. The
   // trash keeps it: what he threw out (spam, mostly) stays there.
@@ -316,21 +330,23 @@ export function applyLeadEvent(lead: Lead | null, email: string, c: Change): Lea
   return tidy(next);
 }
 
+/** A copy of the lead without its empty optional fields, so the stored record never carries them. */
 const tidy = (l: Lead): Lead => {
-  if (!l.flags?.length) delete l.flags;
-  if (!l.snoozeUntil) delete l.snoozeUntil;
-  if (!l.archivedAt) delete l.archivedAt;
-  if (!l.trashedAt) delete l.trashedAt;
-  if (!l.snippet) delete l.snippet;
-  if (!l.refs) delete l.refs;
-  if (!l.when) delete l.when;
-  return l;
+  const out = { ...l };
+  if (!out.flags?.length) delete out.flags;
+  if (!out.snoozeUntil) delete out.snoozeUntil;
+  if (!out.archivedAt) delete out.archivedAt;
+  if (!out.trashedAt) delete out.trashedAt;
+  if (!out.snippet) delete out.snippet;
+  if (!out.refs) delete out.refs;
+  if (!out.when) delete out.when;
+  return out;
 };
 
 /** Julian: "yes, empty trash after 30 days". Days a lead keeps in the trash. */
 export const TRASH_DAYS = 30;
 /** Whole days before a trashed lead is deleted for good; 0 or less means due. */
-export const trashDaysLeft = (trashedAt: string, now: number) => Math.ceil((Date.parse(trashedAt) + TRASH_DAYS * DAY - now) / DAY);
+export const trashDaysLeft = (trashedAt: string, now: number) => Math.ceil((Date.parse(trashedAt) + TRASH_DAYS * DAY_MS - now) / DAY_MS);
 
 /** Hours Julian promises to answer in; the site says "within a day". */
 export const REPLY_HOURS = 24;
@@ -350,7 +366,7 @@ export function quoteTrail(l: Pick<Lead, "stage" | "stageAt" | "events">): Quote
   const at = (e: LeadEvent) => Date.parse(e.at);
   const wrote = Math.max(0, ...l.events.filter((e) => e.kind === "wrote").map(at));
   const from = Math.max(Date.parse(l.stageAt), wrote);
-  const sent = l.events.filter((e) => e.kind === "replied" && at(e) >= from + DAY).map(at).sort((a, b) => a - b);
+  const sent = l.events.filter((e) => e.kind === "replied" && at(e) >= from + DAY_MS).map(at).sort((a, b) => a - b);
   return { from: new Date(from).toISOString(), n: sent.length, ...(sent.length ? { last: new Date(sent[sent.length - 1]).toISOString() } : {}) };
 }
 
@@ -361,16 +377,16 @@ export function quoteNudge(l: Quoted, now: number): (typeof NUDGES)[number] | "M
   if (l.stage !== "Quoted" || (l.snoozeUntil && Date.parse(l.snoozeUntil) > now)) return null;
   const t = (l.events ? quoteTrail({ stage: l.stage, stageAt: l.stageAt, events: l.events }) : l.quiet) ?? { from: l.stageAt, n: 0 };
   const last = t.last ? Date.parse(t.last) : 0;
-  if (t.n >= NUDGES.length) return now > last + LOST_DAYS * DAY ? "Mark as lost?" : null;
+  if (t.n >= NUDGES.length) return now > last + LOST_DAYS * DAY_MS ? "Mark as lost?" : null;
   // Three days between nudges at least, so a late first one does not bring the second straight after.
-  return now > Math.max(Date.parse(t.from) + NUDGE_DAYS[t.n] * DAY, last + 3 * DAY) ? NUDGES[t.n] : null;
+  return now > Math.max(Date.parse(t.from) + NUDGE_DAYS[t.n] * DAY_MS, last + 3 * DAY_MS) ? NUDGES[t.n] : null;
 }
 
 /** Days before a licence ends that the lead comes back to Your move. */
 export const LICENCE_DAYS = 60;
 /** Whether a licence is ending within LICENCE_DAYS (or has ended): time to offer a renewal. Archived leads count, trashed ones never. */
 export const renewDue = (l: Pick<Lead, "licence" | "trashedAt">, now: number) =>
-  !!l.licence && !l.trashedAt && Date.parse(`${l.licence.end}T12:00:00Z`) - LICENCE_DAYS * DAY <= now;
+  !!l.licence && !l.trashedAt && Date.parse(`${l.licence.end}T12:00:00Z`) - LICENCE_DAYS * DAY_MS <= now;
 
 /** Whether a lead has waited past what was promised. Snoozed leads never are. */
 export function isLate(l: Quoted, now: number, replyHours = REPLY_HOURS): boolean {
@@ -394,7 +410,7 @@ export const PAPER_DAYS = 7;
 export function paperDue(l: Pick<Lead, "stage" | "when" | "contract" | "release">, now: number): "contract" | "release" | null {
   if (l.stage !== "Confirmed" || !l.when) return null;
   const left = Date.parse(l.when) - now;
-  if (!(left >= 0 && left <= PAPER_DAYS * DAY)) return null;
+  if (!(left >= 0 && left <= PAPER_DAYS * DAY_MS)) return null;
   const open = (p?: Paper) => p !== "Signed" && p !== "Not needed";
   return open(l.contract) ? "contract" : open(l.release) ? "release" : null;
 }
@@ -494,7 +510,7 @@ export type TaskRow = Task & { lead: string; name: string };
 export const TASK_DAYS = 7;
 /** Open tasks due within TASK_DAYS of `today` (YYYY-MM-DD, Pacific), late ones included, soonest first. */
 export function dueTasks<T extends Task>(tasks: T[], today: string): (T & { late: boolean })[] {
-  const end = new Date(Date.parse(`${today}T12:00:00Z`) + TASK_DAYS * DAY).toISOString().slice(0, 10);
+  const end = new Date(Date.parse(`${today}T12:00:00Z`) + TASK_DAYS * DAY_MS).toISOString().slice(0, 10);
   return tasks
     .filter((t) => !t.doneAt && t.due && t.due <= end)
     .map((t) => ({ ...t, late: t.due! < today }))

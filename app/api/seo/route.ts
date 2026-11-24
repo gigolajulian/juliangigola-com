@@ -4,6 +4,7 @@ import { refuseAdmin } from "@/lib/vouch";
 import { SITE_HOST, engineSql, rumVisits, searchConsole, sitePath } from "@/lib/analytics";
 import { BEACON_DATASET } from "@/lib/beacon";
 import { json, upstreamError } from "@/lib/http";
+import { DAY_MS } from "@/lib/time-zone";
 
 /* ── seo ──────────────────────────────────────────────────────────
  * The numbers behind /admin's SEO tab. Same gate and same two keys as
@@ -43,15 +44,15 @@ export async function GET(request: Request) {
   const now = Date.now();
   const iso = (ms: number) => new Date(ms).toISOString();
   const date = (ms: number) => iso(ms).slice(0, 10);
-  const dates = Array.from({ length: days }, (_, i) => date(now - (days - 1 - i) * 864e5));
+  const dates = Array.from({ length: days }, (_, i) => date(now - (days - 1 - i) * DAY_MS));
 
   const rum = (dims: string, from: number, to: number, limit: number) => rumVisits(key, dims, iso(from), iso(to), limit);
 
-  const start = now - days * 864e5;
+  const start = now - days * DAY_MS;
   try {
     const [byPageDay, prior, sources, google, tracked] = await Promise.all([
       rum("requestPath date", start, now, 5000),
-      rum("date", start - days * 864e5, start, 100),
+      rum("date", start - days * DAY_MS, start, 100),
       rum("refererHost", start, now, 12),
       searchStats(env.GSC_OAUTH, days),
       engineSql<{ path: string; views: number }>(
@@ -116,7 +117,7 @@ async function searchStats(secret: string | undefined, days: number) {
   if (!secret) return { error: "Search Console not connected yet." };
   try {
     const ask = await searchConsole(secret);
-    const day = (n: number) => new Date(Date.now() - n * 864e5).toISOString().slice(0, 10);
+    const day = (n: number) => new Date(Date.now() - n * DAY_MS).toISOString().slice(0, 10);
     const range = { startDate: day(days + 1), endDate: day(2) };
     const prev = { startDate: day(days * 2 + 1), endDate: day(days + 2) };
     const [total, before, pages, pageDays, queries] = await Promise.all([

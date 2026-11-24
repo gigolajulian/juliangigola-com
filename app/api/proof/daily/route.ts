@@ -5,6 +5,7 @@ import { listProofs, readProof } from "@/lib/proofs/proof-store";
 import { digestMail } from "@/lib/email/proof-mail";
 import { alertHello } from "@/lib/email/hello-mail";
 import { json } from "@/lib/http";
+import { DAY_MS } from "@/lib/time-zone";
 
 /* ── POST /api/proof/daily: the galleries' daily summary to hello@ ─
  * Called by the booking Worker's hourly cron (`worker/index.ts`) at 9 AM
@@ -23,7 +24,7 @@ export async function POST(request: Request) {
   if (denied) return denied;
   if (!kv || !seal) return json({ error: "Not set up." }, 503);
   const until = new Date().toISOString();
-  const since = (await kv.get(LAST)) ?? new Date(Date.now() - 864e5).toISOString();
+  const since = (await kv.get(LAST)) ?? new Date(Date.now() - DAY_MS).toISOString();
   const proofs = (await Promise.all((await listProofs(kv)).map((x) => readProof(kv, seal, x.token)))).filter((p): p is Proof => p?.notify === "daily");
   const m = digestMail(proofs, since, until);
   if (new URL(request.url).searchParams.has("dry")) return json({ since, until, subject: m?.subject ?? null, text: m?.lines.join("\n") ?? null });

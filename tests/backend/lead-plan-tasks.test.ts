@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { sealer } from "@/lib/leads/lead-crypto";
+import { sealer } from "@/lib/seal";
 import { readLead, writeLead } from "@/lib/leads/lead-store";
 import { dueTasks, applyLeadEvent, leadSummary, leadStoreKey, type Lead } from "@/lib/leads/leads";
 import { callSheet, cleanPlan, cleanTasks, merge } from "@/lib/leads/lead-crm";

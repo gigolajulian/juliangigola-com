@@ -3,7 +3,7 @@ import { CURSOR, mailChanges, syncGmail, type Msg } from "@/lib/leads/sync/gmail
 import { forgetToken } from "@/lib/google";
 import { applyLeadEvent, leadStoreKey, type Lead } from "@/lib/leads/leads";
 import { recordLead, writeLead } from "@/lib/leads/lead-store";
-import { canonical, sealer } from "@/lib/leads/lead-crypto";
+import { sealer } from "@/lib/seal";
 
 const at = (h: number) => new Date(Date.UTC(2026, 10, 2, h)).toISOString();
 const email = "maya@example.com";
@@ -89,13 +89,6 @@ describe("invoice sent", () => {
     const [{ c }] = mailChanges(sent("Re: portraits"));
     expect(c.mailed).toBeUndefined();
     expect(applyLeadEvent(billed(), email, c).invoices!.every((v) => !v.sentAt)).toBe(true);
-  });
-});
-
-describe("canonical", () => {
-  it("drops Gmail dots and +tags, leaves other domains as typed", () => {
-    expect(canonical(" Gigola.Julian+site@GoogleMail.com ")).toBe("gigolajulian@gmail.com");
-    expect(canonical("a.b+c@example.com")).toBe("a.b+c@example.com");
   });
 });
 
