@@ -3,11 +3,11 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
 import { type Lead, type LeadSummary } from "@/lib/leads/leads";
-import { cn } from "@/lib/utils";
+import { cn, errorText } from "@/lib/utils";
 import { mailable } from "@/lib/leads/lead-crm";
 import { balance, shortDate, depositOfLead, isSettled, MAX_INVOICE_ROWS, THANKS_NOTES, usd, usdTrim, type Crop, type Invoice, type InvoiceDetails, type InvoiceFrom } from "@/lib/leads/invoice";
 import { framed, loadImage, place, shrink, toneFor } from "@/lib/leads/invoice-photo";
-import { adminCall, dayLabel, errorText, inboxCall, plusDays, ymdPT } from "@/lib/leads/lead-desk";
+import { adminCall, dayLabel, inboxCall, plusDays, ymdPT } from "@/lib/leads/lead-desk";
 import { btn, compose, field, fieldLabel, kindOf, primary } from "@/components/leads/shared";
 import type { Patch } from "@/lib/leads/lead-desk";
 

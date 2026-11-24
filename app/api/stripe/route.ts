@@ -1,7 +1,7 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { isDeposit, isIntentId, bookDeposit, verifyStripe } from "@/lib/booking/deposit";
 import { recordLead } from "@/lib/leads/lead-store";
-import { logPayment } from "@/lib/leads/stripe-payment";
+import { logPayment } from "@/lib/leads/sync/stripe-payment";
 import { NO_STORE } from "@/lib/http";
 
 /* ── Stripe's webhook ──────────────────────────────────────────────

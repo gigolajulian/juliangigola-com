@@ -16,7 +16,7 @@ import { TextInput } from "@astryxdesign/core/TextInput";
 import { CheckboxInput } from "@astryxdesign/core/CheckboxInput";
 import { Divider } from "@astryxdesign/core/Divider";
 import type { Person } from "@/lib/leads/leads";
-import { errorText } from "@/lib/leads/lead-desk";
+import { errorText } from "@/lib/utils";
 
 const BLANK: Person = { name: "", email: "", role: "", phone: "" };
 

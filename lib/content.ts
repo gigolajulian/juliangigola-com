@@ -138,9 +138,12 @@ const money = (v: unknown, path: string): number | null => {
     : fail(path, "a price in dollars or null", v);
 };
 
+/** Absent, null or "": an optional field left out. */
+const blank = (v: unknown) => v === undefined || v === null || v === "";
+
 /** An optional string field: absent, or present and real. Blank is dropped. */
 const optional = (v: unknown, path: string): string | undefined => {
-  if (v === undefined || v === null || v === "") return undefined;
+  if (blank(v)) return undefined;
   return str(v, path);
 };
 
@@ -226,7 +229,7 @@ const VIDEO_SECTIONS: VideoSection[] = ["music", "commercial"];
 const POSTER_HOSTS = ["i.ytimg.com", "i.vimeocdn.com"];
 
 function posterOrUndefined(value: unknown, path: string): string | undefined {
-  if (value === undefined || value === null || value === "") return undefined;
+  if (blank(value)) return undefined;
   const url = str(value, path);
   // A frame pulled from the film itself, kept with the app. In /films/,
   // not /covers/: that folder is cover art, which globals.css draws
@@ -247,7 +250,7 @@ function posterOrUndefined(value: unknown, path: string): string | undefined {
 }
 
 function year(value: unknown, path: string): number | undefined {
-  if (value === undefined || value === null || value === "") return undefined;
+  if (blank(value)) return undefined;
   return typeof value === "number" &&
     Number.isInteger(value) &&
     value >= 1990 &&

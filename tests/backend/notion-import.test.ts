@@ -2,10 +2,10 @@ import { describe, expect, it } from "vitest";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { readLead, recordLead } from "@/lib/leads/lead-store";
 import { readLog } from "@/lib/leads/activity-log";
-import { importNotion } from "@/lib/leads/notion-import";
+import { importNotion } from "@/lib/leads/sync/notion-import";
 import { FakeKV, LEADS_KEY } from "./fakes";
 
-/* Past Notion rows (`lib/leads/notion-import.ts`): quiet, fill only what is empty, once. */
+/* Past Notion rows (`lib/leads/sync/notion-import.ts`): quiet, fill only what is empty, once. */
 
 const row = (ref: string, at = "2026-04-23") => ({ ref, at, note: `Notion booking: ${ref}` });
 

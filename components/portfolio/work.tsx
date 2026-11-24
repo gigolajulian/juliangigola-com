@@ -1,5 +1,6 @@
 "use client";
 
+import { loadGsap } from "@/lib/gsap-lazy";
 import * as React from "react";
 import { projectHref } from "@/lib/project-href";
 import Image, { getImageProps } from "next/image";
@@ -256,7 +257,7 @@ export function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: 
     history.pushState({ frame: 1 }, "");
     const pop = () => onClose();
     addEventListener("popstate", pop);
-    void import("gsap").then((g) => (G.current = g.gsap));
+    void loadGsap().then((g) => (G.current = g));
     return () => {
       removeEventListener("popstate", pop);
       if (d.open) d.close();

@@ -1,5 +1,6 @@
 "use client";
 
+import { errorText } from "@/lib/utils";
 import * as React from "react";
 import { adminCall, authed } from "@/lib/leads/lead-desk";
 
@@ -89,7 +90,7 @@ export function AdminSeo() {
       setData({ at: "", days: d, dates: [], visits: 0, prevVisits: 0, pages: [], sources: [], google: { error: "None" }, tracked: [], ...body });
       setError("");
     } catch (e) {
-      setError((e as Error).message);
+      setError(errorText(e));
     }
     setBusy(false);
   }, []);

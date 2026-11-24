@@ -3,7 +3,7 @@ import { POST } from "@/app/api/leads/sheet/route";
 import { forgetToken } from "@/lib/booking/gcal";
 import { recordLead } from "@/lib/leads/lead-store";
 import { SHEET_DIRTY } from "@/lib/leads/activity-log";
-import { SHEET_ID } from "@/lib/leads/sheet-sync";
+import { SHEET_ID } from "@/lib/leads/sync/sheet-sync";
 import { FakeKV, LEADS_KEY } from "./fakes";
 
 /* /api/leads/sheet: the booking Worker's cron copies the desk to hello@'s Sheet.

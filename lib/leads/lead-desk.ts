@@ -3,6 +3,7 @@
  * screens): the admin fetch, the list filters and the
  * small formatters. Browser only: the fetch reads the key from localStorage.
  */
+import { errorText } from "@/lib/utils";
 import { credentials, KEY_STORE } from "@/lib/admin/admin-github";
 import { TZ } from "@/lib/booking/rules";
 import { isLate, myMove, paperDue, quoteNudge, renewDue, type Lead, type LeadPatch, type LeadSummary, type Stage } from "@/lib/leads/leads";
@@ -47,7 +48,6 @@ export const inboxCall: Call = ({ query = "", ...init } = {}) => adminCall(`/api
 /** A change to the open lead; answers with the lead as stored. */
 export type Patch = (b: LeadPatch) => Promise<Lead>;
 
-export const errorText = (e: unknown) => (e instanceof Error ? e.message : String(e));
 export const OFFLINE = "Offline. The desk loads again when you are back online.";
 /** Any 401 from the admin gate (`refuseAdmin`): a missing key or a token GitHub refused. The desks show sign-in for it. */
 export const isLocked = (e: unknown) => e instanceof AdminError && e.status === 401;

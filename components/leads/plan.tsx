@@ -26,7 +26,8 @@ import { Divider } from "@astryxdesign/core/Divider";
 import { Kbd } from "@astryxdesign/core/Kbd";
 import { MetadataList, MetadataListItem } from "@astryxdesign/core/MetadataList";
 import type { Person, ShootPlan, Task } from "@/lib/leads/leads";
-import { errorText, now, ymdPT } from "@/lib/leads/lead-desk";
+import { now, ymdPT } from "@/lib/leads/lead-desk";
+import { errorText } from "@/lib/utils";
 
 const XGlyph = (p: React.SVGProps<SVGSVGElement>) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" aria-hidden="true" {...p}><path d="M6 6l12 12M18 6L6 18" /></svg>;
 /** "2026-12-02" as "Dec 2". */

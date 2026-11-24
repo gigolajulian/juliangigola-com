@@ -6,9 +6,9 @@
  * (ref `notion:<row>`), so a second run adds nothing. Quiet: never unread,
  * never a push. A person he deleted for good (`gone:`) stays gone.
  * ─────────────────────────────────────────────────────────────── */
-import type { Sealer } from "./lead-crypto";
-import { readLead, writeLead } from "./lead-store";
-import { PAPER, STAGES, type Lead, type LeadEvent, type Paper, type Stage } from "./leads";
+import type { Sealer } from "../lead-crypto";
+import { readLead, writeLead } from "../lead-store";
+import { PAPER, STAGES, type Lead, type LeadEvent, type Paper, type Stage } from "../leads";
 import type { InboxKV as KV } from "@/lib/kv";
 
 

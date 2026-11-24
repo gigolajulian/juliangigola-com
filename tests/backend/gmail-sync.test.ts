@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { CURSOR, mailChanges, syncGmail, type Msg } from "@/lib/leads/gmail-sync";
+import { CURSOR, mailChanges, syncGmail, type Msg } from "@/lib/leads/sync/gmail-sync";
 import { forgetToken } from "@/lib/booking/gcal";
 import { fold, leadStoreKey, type Lead } from "@/lib/leads/leads";
 import { recordLead, writeLead } from "@/lib/leads/lead-store";

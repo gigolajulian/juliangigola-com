@@ -1,7 +1,7 @@
-import { gcal } from "../booking/gcal";
-import { sealer } from "./lead-crypto";
-import { type Change } from "./leads";
-import { canonLeads, findLead, recordLead, type LeadStore } from "./lead-store";
+import { gcal } from "../../booking/gcal";
+import { sealer } from "../lead-crypto";
+import { type Change } from "../leads";
+import { canonLeads, findLead, recordLead, type LeadStore } from "../lead-store";
 
 /* ── hello@'s Gmail on the lead timeline ─────────────────────────
  * His own Gmail replies show on the lead's timeline. Every ten

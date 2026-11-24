@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { tailHole } from "@/lib/sheet";
+import { tailHole } from "@/lib/work/sheet";
 import type { Frame } from "@/lib/work/work-types";
 
 const v = { width: 3, height: 4 } as Frame;

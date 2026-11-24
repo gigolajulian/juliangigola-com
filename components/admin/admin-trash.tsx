@@ -9,8 +9,7 @@ import {
   readFile,
   type CommitFile,
 } from "@/lib/admin/admin-github";
-import { cn } from "@/lib/utils";
-import { errorText } from "@/lib/leads/lead-desk";
+import { cn, errorText } from "@/lib/utils";
 
 /* ── recently deleted ─────────────────────────────────────────────
  * Where removed projects wait.

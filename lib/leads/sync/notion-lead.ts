@@ -84,7 +84,7 @@ export async function findRow(token: string, email: string): Promise<string | nu
     sorts: [{ timestamp: "created_time", direction: "descending" }],
     page_size: 1,
   });
-  if (!res.ok) throw new Error(`notion query ${res.status}`);
+  if (!res.ok) throw Object.assign(new Error(`notion query ${res.status}`), { status: res.status });
   return ((await res.json()) as { results: { id: string }[] }).results[0]?.id ?? null;
 }
 

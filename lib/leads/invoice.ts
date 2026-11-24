@@ -32,7 +32,7 @@ export type InvoiceDetails = {
 };
 /** One invoice as it was made. `date` is the day on it, YYYY-MM-DD. `paid` is the deposit taken off. `b` marks a design B invoice. */
 /** `paidAt`: when it was settled, by a matching Stripe payment or by hand. `unpaid`: marked unpaid by hand, for one made before PAID_BEFORE. */
-/** `sentAt`: when hello@ mailed it to the client, seen by the Gmail sync (`lib/leads/gmail-sync.ts`). */
+/** `sentAt`: when hello@ mailed it to the client, seen by the Gmail sync (`lib/leads/sync/gmail-sync.ts`). */
 export type Invoice = { no: string; date: string; lines: InvoiceLine[]; paid: number; notes?: string; at: string; b?: InvoiceDetails; paidAt?: string; unpaid?: boolean; sentAt?: string };
 /** Invoices made before the activity log count as paid: read here, no record rewritten. */
 export const PAID_BEFORE = "2026-11-12";

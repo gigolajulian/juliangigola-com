@@ -1,12 +1,12 @@
 import { refuseWorker } from "@/lib/vouch";
 import { sealedStore } from "@/lib/kv";
-import { syncSheet } from "@/lib/leads/sheet-sync";
+import { syncSheet } from "@/lib/leads/sync/sheet-sync";
 import { json } from "@/lib/http";
 
 /* ── POST /api/leads/sheet: copy the lead desk to the Google Sheet ──
  * Called every ten minutes by the booking Worker's cron (`worker/index.ts`)
  * over its SITE service binding, with BOOKING_SECRET as the bearer. Anyone
- * else gets a 401. See `lib/leads/sheet-sync.ts`.
+ * else gets a 401. See `lib/leads/sync/sheet-sync.ts`.
  * ─────────────────────────────────────────────────────────────── */
 
 export const dynamic = "force-dynamic";

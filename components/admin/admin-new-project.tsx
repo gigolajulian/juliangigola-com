@@ -11,8 +11,7 @@ import {
 } from "@/lib/admin/admin-image";
 import type { Credit, Frame } from "@/lib/work/work-types";
 import { AdminCredits, tidyCredits } from "@/components/admin/admin-credits";
-import { cn } from "@/lib/utils";
-import { errorText } from "@/lib/leads/lead-desk";
+import { cn, errorText } from "@/lib/utils";
 
 /* ── adding a project ─────────────────────────────────────────────
  * Names a shoot, files it under a discipline, and commits the photographs.

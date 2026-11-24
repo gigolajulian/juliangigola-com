@@ -10,10 +10,10 @@
 
 import { stripe } from "@/lib/stripe";
 import { isDeposit } from "@/lib/booking/deposit";
-import { readLead, recordLead, type LeadStore } from "./lead-store";
-import { readLog } from "./activity-log";
-import { sealer } from "./lead-crypto";
-import type { Change } from "./leads";
+import { readLead, recordLead, type LeadStore } from "../lead-store";
+import { readLog } from "../activity-log";
+import { sealer } from "../lead-crypto";
+import type { Change } from "../leads";
 
 type Intent = {
   id: string;

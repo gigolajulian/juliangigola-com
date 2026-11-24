@@ -35,7 +35,8 @@ import { proofApi, cardCrop, pastCloseDate, cropAt, proofStatus, type ProofRow }
 import { ActivityDesk } from "@/components/proofs/activity";
 import { Timeline } from "@/components/proofs/timeline";
 import { useClock } from "@/components/proofs/use-clock";
-import { errorText, loadError, LOCKED, stampPT } from "@/lib/leads/lead-desk";
+import { loadError, LOCKED, stampPT } from "@/lib/leads/lead-desk";
+import { errorText } from "@/lib/utils";
 import { extras, publicId, remindState, THUMB_W, type CardCrop } from "@/lib/proofs/proof";
 
 const CLASSIC = "/admin";

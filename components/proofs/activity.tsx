@@ -15,7 +15,8 @@ import { Text } from "@astryxdesign/core/Text";
 import { MetadataList, MetadataListItem } from "@astryxdesign/core/MetadataList";
 import { proofApi, type ProofRow } from "@/lib/proofs/desk";
 import { THUMB_W, type ViewerEvent } from "@/lib/proofs/proof";
-import { errorText, stampPT } from "@/lib/leads/lead-desk";
+import { stampPT } from "@/lib/leads/lead-desk";
+import { errorText } from "@/lib/utils";
 
 const csvCell = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
 const secs = (n: number) => (n < 90 ? `${Math.round(n)} s` : `${Math.round(n / 60)} min`);

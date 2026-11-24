@@ -18,7 +18,7 @@ export type MasterEntry = { lead: string; email: string; name: string; event: Le
 
 // shortcut: one sealed blob per client, capped; a paged log if a client ever passes it.
 export const LOG_MAX = 5000;
-/** Set when the log changes, so the next cron copies the desk to the Sheet (`lib/leads/sheet-sync.ts`). */
+/** Set when the log changes, so the next cron copies the desk to the Sheet (`lib/leads/sync/sheet-sync.ts`). */
 export const SHEET_DIRTY = "sheet:dirty";
 /** KV metadata holds 1024 bytes; a longer note is cut in the master entry only. */
 const META_MAX = 1000;

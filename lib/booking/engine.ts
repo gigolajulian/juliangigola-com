@@ -3,7 +3,7 @@ import { gcal } from "@/lib/booking/gcal";
 import { bookingEnquiry, enquiryKey, looksLikeEmail, summary } from "@/lib/inbox";
 import { isPaid, LEGACY_DEPOSIT } from "@/lib/booking/paid";
 import { recordLead, type LeadStore } from "@/lib/leads/lead-store";
-import { toNotion } from "@/lib/leads/notion-lead";
+import { toNotion } from "@/lib/leads/sync/notion-lead";
 import { openNow, type KV } from "@/lib/booking/slots";
 
 /* ── the site's own booking engine ────────────────────────────────
