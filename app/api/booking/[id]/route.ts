@@ -1,6 +1,6 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { lockOp, clientView, depositPaid, type ChangeResult } from "@/lib/booking/engine";
-import { EARLY_SHARE, PART_SHARE, refundCents, refundShare } from "@/lib/booking/rules";
+import { PART_SHARE, refundShare } from "@/lib/booking/rules";
 import { refuseAdmin } from "@/lib/vouch";
 import { manageLinks, tokenOpens } from "@/lib/booking/token";
 import { confirmOf, sendConfirm } from "@/lib/booking/confirm";
@@ -8,7 +8,7 @@ import { logMail, recordLead } from "@/lib/leads/lead-store";
 import { cancelBooking } from "@/lib/booking/deposit";
 import { alertAndLog } from "@/lib/email/hello-mail";
 import { whenPT } from "@/lib/inbox";
-import { bodyOf, json } from "@/lib/http";
+import { bodyOf, json, upstreamError } from "@/lib/http";
 
 /* ── a client reschedules or cancels (`/booking/<id>`) ────────────
  * POST {t, action: "cancel"} or {t, action: "reschedule", start}. The
@@ -40,8 +40,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     else if (body.action === "reschedule" && typeof body.start === "string") out = await lockOp(env, "reschedule", { id, start: body.start });
     else return json({ error: "Nothing to do." }, 400);
   } catch (e) {
-    console.error("booking change", String(e));
-    return json({ error: "Could not reach the calendar. Try again." }, 502);
+    return upstreamError("booking change", e, "Could not reach the calendar. Try again.");
   }
   if (!out.ok) return json({ error: SAY[out.reason][1] }, SAY[out.reason][0]);
 
@@ -57,26 +56,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return json({ record: clientView(r) });
   }
 
-  // The rule is read against the time it was booked for, at the moment of the cancel.
-  // A whole refund is sent as before, with no amount; a part one names its cents and shares the ref
-  // Stripe's webhook logs it under (`refund-<intent>-<cents so far>`), so the log never counts it twice.
-  const share = r.intent ? refundShare(was) : 0;
-  const paid = depositPaid(r) ?? 0;
-  const cents = refundCents(paid, share);
-  const back = cents / 100;
-  const pct = Math.round(share * 100);
-  const ref = share === 1 ? `refund-${r.intent}` : `refund-${r.intent}-${cents}`;
-  const refunded = await cancelBooking(env, r, was, {
-    refund: share ? { form: { payment_intent: r.intent ?? "", ...(share === 1 ? {} : { amount: String(cents) }) }, ref } : undefined,
-    note: [r.session, whenPT(was.start)].join(", "),
-    refundNote: share === 1 ? "Deposit, cancelled 48 hours or more ahead" : `${pct}% of the deposit, cancelled ${share === EARLY_SHARE ? "48 hours or more" : "24 to 48 hours"} ahead`,
-    subject: `Cancelled: ${what}`,
-    line: "Cancelled by the client. The event is off the calendar.",
-    money: (refunded) => (!r.intent ? "No deposit." : refunded ? (share === 1 ? `Deposit refunded: $${back}.` : `Refunded $${back} of the $${paid} deposit (${pct}%). $${paid - back} kept.`) : refunded === false ? `The refund FAILED: refund $${back} by hand in Stripe.` : "Under 24 hours: the deposit is kept."),
-    mail: (refunded) => (!r.intent ? "none" : refunded ? (share === 1 ? "refunded" : share === EARLY_SHARE ? "early" : "part") : refunded === false ? "late" : "kept"),
-    usd: depositPaid(r),
-    back,
-  });
+  const { refunded, back } = await cancelBooking(env, r, was, "client");
   return json({ record: clientView(r), refunded: refunded ?? null, back: refunded ? back : 0 });
 }
 
@@ -89,27 +69,12 @@ async function cancelMine(env: DeskEnv, id: string) {
   try {
     out = await lockOp(env, "cancel", id);
   } catch (e) {
-    console.error("desk cancel", String(e));
-    return json({ error: "Could not reach the calendar. Try again." }, 502);
+    return upstreamError("desk cancel", e, "Could not reach the calendar. Try again.");
   }
   if (!out.ok) return json({ error: SAY[out.reason][1] }, SAY[out.reason][0]);
   const { record: r, was } = out;
-  const what = [r.session, whenPT(was.start), r.name].join(", ");
-  const paid = depositPaid(r) ?? 0;
-  // The whole charge, with no amount, under the ref Stripe's webhook logs a full refund by.
-  const refunded = await cancelBooking(env, r, was, {
-    refund: { form: { payment_intent: r.intent ?? "" }, ref: `refund-${r.intent}` },
-    note: [r.session, whenPT(was.start), "by Julian"].join(", "),
-    refundNote: "Deposit, cancelled by Julian",
-    oneStamp: true,
-    subject: `Cancelled by you: ${what}`,
-    line: "Cancelled from the lead desk. The event is off the calendar and the client is told.",
-    money: (refunded) => (!r.intent ? "No deposit." : refunded ? `Deposit refunded in full: $${paid}.` : `The refund FAILED: refund $${paid} by hand in Stripe.`),
-    mail: (refunded) => (!r.intent ? "mineFree" : refunded ? "mine" : "late"),
-    usd: paid,
-    back: paid,
-  });
-  return json({ record: clientView(r), refunded: refunded ?? null, back: refunded ? paid : 0 });
+  const { refunded, back } = await cancelBooking(env, r, was, "julian");
+  return json({ record: clientView(r), refunded: refunded ?? null, back: refunded ? back : 0 });
 }
 
 /** Julian marks a no-show from the desk (2026-11-16): a line on the lead and a mail to hello@. Nothing is

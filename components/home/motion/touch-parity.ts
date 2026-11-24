@@ -1,6 +1,6 @@
 /* Phones and tablets get the desktop's motion. On by default.
    `?mttp=0` turns all of it off, `?mttp=-flip,-sink` the listed items, `?mttp=flip,sink` keeps only those. engine.ts sets html[data-tp-<item>] for touch-parity.css. */
-import { qvalue } from "@/lib/home/flags";
+import { qvalue } from "@/lib/flags/query";
 
 export const TP = ["sink", "covers", "flip", "films", "drift", "about", "sheet", "press"] as const;
 export type TpItem = (typeof TP)[number];

@@ -7,9 +7,9 @@ import { THEME_COLOR } from "@/lib/theme-color";
 import { usePathname } from "next/navigation";
 import { scrollTop } from "./smooth-scroll";
 import { useNavInk } from "./nav-ink";
-import { noSubscribe } from "@/lib/utils";
+import { noSubscribe, sessionGet, sessionSet } from "@/lib/utils";
 
-/* JG V3 chrome (master v39): the glass header, the phone menu, the theme
+/* JG V3 chrome: the glass header, the phone menu, the theme
    toggle and the footer line. Every route uses it, /admin included (2026-10-31). */
 
 
@@ -48,10 +48,7 @@ function ThemeButton() {
     const watch = new MutationObserver(() => setTheme(read()));
     watch.observe(document.documentElement, { attributeFilter: ["data-theme"] });
     /* Follows the system until the toggle is pressed (a choice lasts the visit). */
-    let chosen: string | null = null;
-    try {
-      chosen = sessionStorage.getItem(KEY);
-    } catch {}
+    const chosen = sessionGet(KEY);
     const mq = matchMedia("(prefers-color-scheme: light)");
     const follow = () => set(mq.matches ? "light" : "dark");
     if (chosen !== "light" && chosen !== "dark") mq.addEventListener("change", follow);
@@ -65,9 +62,7 @@ function ThemeButton() {
   const flip = () => {
     const next: Theme = read() === "light" ? "dark" : "light";
     set(next);
-    try {
-      sessionStorage.setItem(KEY, next);
-    } catch {}
+    sessionSet(KEY, next);
     /* iPhone Safari keeps the old colour in the bars above and below the
        page until it loads again (Julian): reload, and the head script
        paints the chosen theme from the first frame. */
@@ -160,11 +155,6 @@ function HeaderBar() {
     setWas(path);
     setMenu(false);
   }
-  React.useEffect(() => {
-    const open = () => setMenu(true);
-    addEventListener("v3:menu", open);
-    return () => removeEventListener("v3:menu", open);
-  }, []);
   /* Focus goes into the drawer on open and back to the button that opened it
      on close; the page and footer behind it are inert, the header (its close
      button) stays live. Read in a layout effect, before inert drops focus. */

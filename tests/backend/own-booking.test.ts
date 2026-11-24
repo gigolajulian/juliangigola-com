@@ -15,7 +15,10 @@ vi.setSystemTime(new Date("2026-11-11T20:00:00Z")); // a Wednesday, noon in San 
    Stripe's webhook, and both file the Inbox row and the client's mail. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
-vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx, (p) => p));
+// The route's ctx.waitUntil work (hello@'s alert), kept so a test can wait for it.
+const background = vi.hoisted(() => [] as Promise<unknown>[]);
+vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx, (p) => background.push(p)));
+const settled = () => Promise.all(background.splice(0));
 const { POST: book } = await import("@/app/api/book/route");
 const { bookDeposit } = await import("@/lib/booking/deposit");
 
@@ -105,11 +108,11 @@ describe("POST /api/book (a free call)", () => {
   it("tells hello@ a video call by its Meet link, and a phone call by the number", async () => {
     const text = (m: { text?: unknown }) => String(m.text);
     await post(CALL);
-    await new Promise((go) => setTimeout(go, 20));
+    await settled();
     expect(text(mail.sent.at(-1)!)).toContain("Video call: https://meet.google.com/abc");
     expect(text(mail.sent.at(-1)!)).not.toContain("ring");
     await post({ ...CALL, via: "Phone", start: "2026-12-02T18:00:00.000Z" });
-    await new Promise((go) => setTimeout(go, 20));
+    await settled();
     expect(text(mail.sent.at(-1)!)).toContain("Call: ring +14085550100");
   });
 

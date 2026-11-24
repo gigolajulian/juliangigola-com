@@ -5,7 +5,7 @@ import { Marks } from "@/components/site/duo";
 import { AboutGallery } from "@/components/about/about-gallery";
 import { LogoBand } from "@/components/about/logo-band";
 
-/* JG V3 About (master v50, /about): portrait gallery, the justified bio, facts,
+/* JG V3 About (/about): portrait gallery, the justified bio, facts,
    What I do, the two CTAs, and the client marks as a grid. */
 
 /* Locked copy (DESIGN.md, Bio). No soft hyphens: words stay whole, and the place names carry

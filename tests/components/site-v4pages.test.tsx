@@ -13,7 +13,7 @@ import type { CoverRelease } from "@/lib/work/cover-art-types";
 
 const nav = vi.hoisted(() => ({ path: "/" }));
 vi.mock("next/navigation", () => ({ usePathname: () => nav.path, useRouter: () => ({ push() {}, back() {} }), useSearchParams: () => new URLSearchParams() }));
-vi.mock("@/components/lightbox", () => ({ useLightbox: () => ({ show() {} }), Lightbox: () => null }));
+vi.mock("@/components/cover/lightbox", () => ({ useLightbox: () => ({ show() {} }), Lightbox: () => null }));
 if (!globalThis.CSS?.escape) vi.stubGlobal("CSS", { escape: (s: string) => s });
 
 /* The inner-pages plan. s1, s2, a2, m2p, foot, next, c1, s4 and p3 are folded into the pages, so they are

@@ -4,7 +4,7 @@ import * as React from "react";
 import loader from "@/image-loader";
 import { burst } from "@/components/splash/burst-splash";
 import { split } from "@/components/splash/split-splash";
-import { HERO } from "@/lib/photos-and-sessions";
+import { HERO } from "@/lib/home/photos";
 import { keepNames } from "@/lib/keep-names";
 
 /* The homepage's split splash: the run of frames (the portfolio's first covers,
@@ -32,7 +32,8 @@ const HERO_FULL = {
  * curtain that cannot lift.
  * ─────────────────────────────────────────────────────────────── */
 
-/* Once a visit: `sessionStorage` remembers the splash has played. */
+/* Once a visit: `sessionStorage` remembers the splash has played.
+   Inlined via toString(), so it may not call imported helpers. */
 function seen() {
   if (document.documentElement.dataset.intro !== "1") return;
   try {

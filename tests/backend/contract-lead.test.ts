@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { contractStep } from "@/lib/contracts/contract-lead";
 import { readLead, writeLead } from "@/lib/leads/lead-store";
 import { sealer } from "@/lib/leads/lead-crypto";
-import { fold } from "@/lib/leads/leads";
+import { applyLeadEvent } from "@/lib/leads/leads";
 import { FakeKV, LEADS_KEY } from "./fakes";
 
 /* A contract's step on its lead (`lib/contracts/contract-lead.ts`): the
@@ -16,7 +16,7 @@ async function withLead() {
   const kv = new FakeKV();
   const s = (await sealer(LEADS_KEY))!;
   const id = await s.id("ana@example.com");
-  await writeLead(kv as never, s, id, fold(null, "ana@example.com", { event: { at, kind: "inquiry", ref: "msg:1" }, name: "Ana" }));
+  await writeLead(kv as never, s, id, applyLeadEvent(null, "ana@example.com", { event: { at, kind: "inquiry", ref: "msg:1" }, name: "Ana" }));
   return { kv, s, id };
 }
 

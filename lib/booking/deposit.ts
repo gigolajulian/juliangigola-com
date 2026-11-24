@@ -1,8 +1,8 @@
 import { afterBooked, cancelledSubject, sendCancelled } from "@/lib/booking/confirm";
 import { enquiry, enquiryKey, summary, whenPT } from "@/lib/inbox";
 import { logMail, recordLead } from "@/lib/leads/lead-store";
-import { EVENTS, type Booking } from "@/lib/booking/rules";
-import { lockOp, parseBooking, type BookingRecord } from "@/lib/booking/engine";
+import { EARLY_SHARE, EVENTS, refundCents, refundShare, type Booking } from "@/lib/booking/rules";
+import { depositPaid, lockOp, parseBooking, type BookingRecord } from "@/lib/booking/engine";
 import { manageLinks } from "@/lib/booking/token";
 
 /* ── the deposit ──────────────────────────────────────────────────
@@ -224,7 +224,7 @@ export async function bookDeposit(env: Env, intent: string, metadata: { [k: stri
     // "Still confirming"; it must never turn a booking into a refund.
     const form: { [k: string]: string } = { "metadata[outcome]": r.status };
     if (r.booking) Object.assign(form, { "metadata[cal_uid]": r.booking.uid, "metadata[cal_start]": r.booking.start });
-    await stripe(env.STRIPE_SECRET_KEY, `/payment_intents/${intent}`, form).catch(() => {});
+    await stripe(env.STRIPE_SECRET_KEY, `/payment_intents/${intent}`, form).catch((e: unknown) => console.error("deposit metadata", r.status, String(e)));
   };
   await put({ status: "booking" });
 
@@ -290,28 +290,18 @@ export async function bookDeposit(env: Env, intent: string, metadata: { [k: stri
   }
 }
 
-/** After a cancel has taken a booking off the calendar: the refund through Stripe if `refund` is given and
-    there is a deposit and a key, a cancel line on the lead, a refund line if it went, a mail to hello@, the
-    client's note and its log. The client's cancel and the desk's each pass their own words and figures.
-    `oneStamp`: the desk's two lead lines share one time; the client's each take their own. Whether it refunded. */
+/** After a cancel has taken a booking off the calendar: the refund through Stripe when there is a deposit and a
+    key, a cancel line on the lead, a refund line if it went, a mail to hello@, the client's note and its log.
+    `by`: the client cancels under the refund rule, read against the time it was booked for at the moment of the
+    cancel (`refundShare`); Julian cancels from the desk with the whole deposit back whatever the hour, and his two
+    lead lines share one time. Whether it refunded, and the dollars that went back if it did. */
 export async function cancelBooking(
   env: Parameters<typeof alertAndLog>[0] & { CLIENT_EMAIL?: CloudflareEnv["CLIENT_EMAIL"]; STRIPE_SECRET_KEY?: string },
   r: BookingRecord,
   was: BookingRecord,
-  o: {
-    refund?: { form: { [k: string]: string }; ref: string };
-    note: string;
-    refundNote: string;
-    oneStamp?: boolean;
-    subject: string;
-    line: string;
-    money: (refunded: boolean | undefined) => string;
-    mail: (refunded: boolean | undefined) => Parameters<typeof sendCancelled>[2];
-    usd: number | undefined;
-    /** Dollars going back: the refund log line and the client's mail. */
-    back: number;
-  },
-) {
+  by: "client" | "julian",
+): Promise<{ refunded: boolean | undefined; back: number }> {
+  const o = (by === "julian" ? deskCancel : clientCancel)(r, was);
   const who = { name: r.name, email: r.email };
   const key = env.STRIPE_SECRET_KEY;
   const refund = r.intent && key && o.refund ? { ...o.refund, key } : undefined;
@@ -325,5 +315,64 @@ export async function cancelBooking(
   const gone = { ...who, session: r.session, start: was.start, end: was.end };
   if (await sendCancelled(env.CLIENT_EMAIL, gone, o.mail(refunded), o.usd, o.back))
     await logMail(env, r.email, cancelledSubject(gone), { to: "client", kind: "cancelled", booking: r.id });
-  return refunded;
+  return { refunded, back: o.back };
+}
+
+/** What a cancel refunds and says: the lead lines, hello@'s mail and the client's. */
+type CancelTerms = {
+  refund?: { form: { [k: string]: string }; ref: string };
+  note: string;
+  refundNote: string;
+  /** The two lead lines share one time. */
+  oneStamp: boolean;
+  subject: string;
+  line: string;
+  money: (refunded: boolean | undefined) => string;
+  mail: (refunded: boolean | undefined) => Parameters<typeof sendCancelled>[2];
+  usd: number | undefined;
+  /** Dollars going back: the refund log line and the client's mail. */
+  back: number;
+};
+
+const cancelled = (r: BookingRecord, was: BookingRecord) => [r.session, whenPT(was.start), r.name].join(", ");
+
+/** The client's cancel. A whole refund is sent as before, with no amount; a part one names its cents and shares
+    the ref Stripe's webhook logs it under (`refund-<intent>-<cents so far>`), so the log never counts it twice. */
+function clientCancel(r: BookingRecord, was: BookingRecord): CancelTerms {
+  const share = r.intent ? refundShare(was) : 0;
+  const paid = depositPaid(r) ?? 0;
+  const cents = refundCents(paid, share);
+  const back = cents / 100;
+  const pct = Math.round(share * 100);
+  const ref = share === 1 ? `refund-${r.intent}` : `refund-${r.intent}-${cents}`;
+  return {
+    refund: share ? { form: { payment_intent: r.intent ?? "", ...(share === 1 ? {} : { amount: String(cents) }) }, ref } : undefined,
+    note: [r.session, whenPT(was.start)].join(", "),
+    refundNote: share === 1 ? "Deposit, cancelled 48 hours or more ahead" : `${pct}% of the deposit, cancelled ${share === EARLY_SHARE ? "48 hours or more" : "24 to 48 hours"} ahead`,
+    oneStamp: false,
+    subject: `Cancelled: ${cancelled(r, was)}`,
+    line: "Cancelled by the client. The event is off the calendar.",
+    money: (refunded) => (!r.intent ? "No deposit." : refunded ? (share === 1 ? `Deposit refunded: $${back}.` : `Refunded $${back} of the $${paid} deposit (${pct}%). $${paid - back} kept.`) : refunded === false ? `The refund FAILED: refund $${back} by hand in Stripe.` : "Under 24 hours: the deposit is kept."),
+    mail: (refunded) => (!r.intent ? "none" : refunded ? (share === 1 ? "refunded" : share === EARLY_SHARE ? "early" : "part") : refunded === false ? "late" : "kept"),
+    usd: depositPaid(r),
+    back,
+  };
+}
+
+/** Julian's cancel from the desk: the whole charge, with no amount, under the ref Stripe's webhook logs a full
+    refund by. */
+function deskCancel(r: BookingRecord, was: BookingRecord): CancelTerms {
+  const paid = depositPaid(r) ?? 0;
+  return {
+    refund: { form: { payment_intent: r.intent ?? "" }, ref: `refund-${r.intent}` },
+    note: [r.session, whenPT(was.start), "by Julian"].join(", "),
+    refundNote: "Deposit, cancelled by Julian",
+    oneStamp: true,
+    subject: `Cancelled by you: ${cancelled(r, was)}`,
+    line: "Cancelled from the lead desk. The event is off the calendar and the client is told.",
+    money: (refunded) => (!r.intent ? "No deposit." : refunded ? `Deposit refunded in full: $${paid}.` : `The refund FAILED: refund $${paid} by hand in Stripe.`),
+    mail: (refunded) => (!r.intent ? "mineFree" : refunded ? "mine" : "late"),
+    usd: paid,
+    back: paid,
+  };
 }

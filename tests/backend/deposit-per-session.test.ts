@@ -5,7 +5,7 @@ import { clientView, depositPaid } from "@/lib/booking/engine";
 import { DEPOSIT, depositFor, DEPOSIT_SESSIONS, isDeposit } from "@/lib/booking/paid";
 import { amountOf } from "@/lib/booking/deposit";
 import { BOOK_ROWS } from "@/lib/home/data";
-import { priceLabel, SESSIONS } from "@/lib/photos-and-sessions";
+import { priceLabel, SESSIONS } from "@/lib/booking/catalog";
 import { BookingLock } from "@/worker/booking-lock";
 
 // Pinned clock, as in manage-booking.test.ts: hours and the 48h window must not depend on the day.

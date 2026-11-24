@@ -13,7 +13,7 @@ import { Button } from "@astryxdesign/core/Button";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Badge } from "@astryxdesign/core/Badge";
 import { Divider } from "@astryxdesign/core/Divider";
-import { canonical } from "@/lib/leads/lead-crypto";
+import { canonical } from "@/lib/leads/leads";
 import { dayLabel } from "@/lib/leads/lead-desk";
 import { pastCloseDate, type ProofRow } from "@/lib/proofs/desk";
 import { stage } from "@/lib/proofs/proof-model";

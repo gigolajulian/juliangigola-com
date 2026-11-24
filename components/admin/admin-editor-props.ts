@@ -52,7 +52,7 @@ export type AdminEditorProps = {
   /**
    * Disciplines the cover could show, which is not all of them.
    *
-   * `DISCIPLINES` in `lib/work/work.ts` drops any category with no lead project or
+   * `DISCIPLINES` in `lib/work/disciplines.ts` drops any category with no lead project or
    * no frame, because the cover has to show a photograph for each one and
    * cannot invent it. So Video and Music video, which have no work at all,
    * are absent here rather than offered and silently ignored.

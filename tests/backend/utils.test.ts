@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createHash } from "node:crypto";
 import { cn, pad, rubberband, sha256Hex } from "@/lib/utils";
-import { softItem, wallItem } from "@/lib/wall-tile";
+import { softItem, wallItem } from "@/lib/work/wall-tile";
 
 /* Small shared helpers and tuned values. */
 

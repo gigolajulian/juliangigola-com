@@ -13,13 +13,12 @@ import "@astryxdesign/theme-neutral/theme.css";
 import * as React from "react";
 import { Theme } from "@astryxdesign/core/theme";
 import { neutralTheme } from "@astryxdesign/theme-neutral/built";
-import { Layout, LayoutContent, LayoutPanel } from "@astryxdesign/core/Layout";
+import { Layout, LayoutContent, LayoutPanel, HStack, VStack } from "@astryxdesign/core/Layout";
 import { SideNav, SideNavHeading, SideNavItem, SideNavSection } from "@astryxdesign/core/SideNav";
 import { Button } from "@astryxdesign/core/Button";
 import { Badge } from "@astryxdesign/core/Badge";
 import { List, ListItem } from "@astryxdesign/core/List";
 import { Heading, Text } from "@astryxdesign/core/Text";
-import { HStack, VStack } from "@astryxdesign/core/Stack";
 import { Tab, TabList } from "@astryxdesign/core/TabList";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { Switch } from "@astryxdesign/core/Switch";
@@ -35,7 +34,7 @@ import { proofApi, cardCrop, pastCloseDate, cropAt, proofStatus, type ProofRow }
 import { ActivityDesk } from "@/components/proofs/activity";
 import { Timeline } from "@/components/proofs/timeline";
 import { useClock } from "@/components/proofs/use-clock";
-import { loadError, LOCKED, stampPT } from "@/lib/leads/lead-desk";
+import { loadErrorText, LOCKED, stampPT } from "@/lib/leads/lead-desk";
 import { errorText } from "@/lib/utils";
 import { extras, publicId, remindState, THUMB_W, type CardCrop } from "@/lib/proofs/proof-model";
 
@@ -64,7 +63,7 @@ export function ProofsDesk({ embedded = false, initial }: { embedded?: boolean; 
   const [making, setMaking] = React.useState(false);
   const [wide, setWide] = React.useState(false);
   const load = React.useCallback(() => {
-    proofApi<{ proofs: ProofRow[] }>({ query: "?list" }).then((o) => setList(o.proofs)).catch((e: unknown) => setError(loadError(e)));
+    proofApi<{ proofs: ProofRow[] }>({ query: "?list" }).then((o) => setList(o.proofs)).catch((e: unknown) => setError(loadErrorText(e)));
   }, []);
   React.useEffect(load, [load]);
   // Same as the leads desk: follow html[data-theme], light only when it says light, read before Theme mounts.

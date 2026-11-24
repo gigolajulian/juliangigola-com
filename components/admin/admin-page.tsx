@@ -3,7 +3,7 @@
 import * as React from "react";
 import Image from "next/image";
 import { isTextRef, type FrameRef, type TextRef } from "@/lib/work/added";
-import { useSequence, srcOf, type PendingUpload } from "@/lib/admin/admin-sequence";
+import { useSequence, srcOf, type DragProps, type PendingUpload } from "@/lib/admin/admin-sequence";
 import { AdminCredits } from "@/components/admin/admin-credits";
 import type { AdminProject } from "@/components/admin/admin-projects";
 import type { Copy, Credit } from "@/lib/work/work-types";
@@ -371,7 +371,7 @@ function FrameCell({
   dims: Dims;
   last: boolean;
   locked: boolean;
-  dragProps: ReturnType<ReturnType<typeof useSequence>["dragProps"]>;
+  dragProps: DragProps;
   dragging: boolean;
   over: boolean;
   onMeasured: (w: number, h: number) => void;
@@ -471,7 +471,7 @@ function Passage({
   index: number;
   block: TextRef;
   last: boolean;
-  dragProps: ReturnType<ReturnType<typeof useSequence>["dragProps"]>;
+  dragProps: DragProps;
   dragging: boolean;
   over: boolean;
   onChange: (patch: Partial<TextRef>) => void;

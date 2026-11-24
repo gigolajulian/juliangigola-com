@@ -186,3 +186,6 @@ export function useSequence({
     dragProps,
   };
 }
+
+/** What dragProps(i) spreads onto one cell of the sequence. */
+export type DragProps = ReturnType<ReturnType<typeof useSequence>["dragProps"]>;

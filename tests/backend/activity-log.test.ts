@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { recordLead } from "@/lib/leads/lead-store";
 import { sealer } from "@/lib/leads/lead-crypto";
-import { fold, type Lead } from "@/lib/leads/leads";
+import { applyLeadEvent, type Lead } from "@/lib/leads/leads";
 import { fresh, readLog, readMaster } from "@/lib/leads/activity-log";
 import { FakeKV, LEADS_KEY, INBOX_KEY as KEY } from "./fakes";
 import { byCodeUnit } from "@/lib/utils";
@@ -25,29 +25,29 @@ const s = async () => (await sealer(LEADS_KEY))!;
 const env = () => ({ INBOX: kv as never, LEADS_KEY });
 const t = (m: number) => new Date(Date.UTC(2026, 10, 1, 10, m)).toISOString();
 
-describe("fold, money", () => {
+describe("applyLeadEvent, money", () => {
   // Made after the cut-off (PAID_BEFORE), so only a payment settles them.
   const inv = (no: string, rate: number) => ({ no, date: "2026-12-01", lines: [{ desc: "Session", qty: 1, rate }], paid: 0, at: "2026-12-01T10:00:00Z" });
-  const withInvoices = (...invoices: ReturnType<typeof inv>[]): Lead => ({ ...fold(null, "a@example.com", { event: { at: t(0), kind: "inquiry" } }), invoices });
+  const withInvoices = (...invoices: ReturnType<typeof inv>[]): Lead => ({ ...applyLeadEvent(null, "a@example.com", { event: { at: t(0), kind: "inquiry" } }), invoices });
 
   it("settles the one invoice a non-deposit payment matches, and never on a deposit", () => {
     const l = withInvoices(inv("1126", 1700), inv("1126-2", 400));
-    const deposit = fold(l, l.email, { event: { at: t(1), kind: "payment", ref: "pi_1", note: "Deposit", amount: 1700 } });
+    const deposit = applyLeadEvent(l, l.email, { event: { at: t(1), kind: "payment", ref: "pi_1", note: "Deposit", amount: 1700 } });
     expect(deposit.invoices!.every((v) => !v.paidAt)).toBe(true);
-    const paid = fold(l, l.email, { event: { at: t(2), kind: "payment", ref: "pi_2", amount: 1700 }, settles: true });
+    const paid = applyLeadEvent(l, l.email, { event: { at: t(2), kind: "payment", ref: "pi_2", amount: 1700 }, settles: true });
     expect(paid.invoices!.map((v) => !!v.paidAt)).toEqual([true, false]);
   });
 
   it("leaves two invoices of the same balance alone unless the payment names one", () => {
     const l = withInvoices(inv("1126", 500), inv("1126-2", 500));
-    expect(fold(l, l.email, { event: { at: t(2), kind: "payment", ref: "pi_3", amount: 500 }, settles: true }).invoices!.some((v) => v.paidAt)).toBe(false);
-    const named = fold(l, l.email, { event: { at: t(2), kind: "payment", ref: "pi_4", amount: 500 }, settles: true, invoiceNo: "1126-2" });
+    expect(applyLeadEvent(l, l.email, { event: { at: t(2), kind: "payment", ref: "pi_3", amount: 500 }, settles: true }).invoices!.some((v) => v.paidAt)).toBe(false);
+    const named = applyLeadEvent(l, l.email, { event: { at: t(2), kind: "payment", ref: "pi_4", amount: 500 }, settles: true, invoiceNo: "1126-2" });
     expect(named.invoices!.map((v) => !!v.paidAt)).toEqual([false, true]);
   });
 
   it("a cancel clears the booked time", () => {
-    const l = fold(null, "a@example.com", { event: { at: t(0), kind: "booking", ref: "b1" }, when: t(600) });
-    expect(fold(l, l.email, { event: { at: t(1), kind: "cancel", ref: "cancel:b1" } }).when).toBeUndefined();
+    const l = applyLeadEvent(null, "a@example.com", { event: { at: t(0), kind: "booking", ref: "b1" }, when: t(600) });
+    expect(applyLeadEvent(l, l.email, { event: { at: t(1), kind: "cancel", ref: "cancel:b1" } }).when).toBeUndefined();
   });
 });
 

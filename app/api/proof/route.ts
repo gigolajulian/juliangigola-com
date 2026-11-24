@@ -1,7 +1,6 @@
 import { refuseAdmin } from "@/lib/vouch";
 import { sealedStore } from "@/lib/kv";
-import { copiesFor, readLead, recordLead, writeLead } from "@/lib/leads/lead-store";
-import { leadStoreKey } from "@/lib/leads/leads";
+import { copiesFor, dropProofOpens, recordLead } from "@/lib/leads/lead-store";
 import { cardKey, closesAt, cleanSettings, DEFAULTS, isEmail, DELIVERY_DAYS, finalKeys, frameKey, frameKeys, aliasKey, isDateId, isFrameId, isModel, isStrongId, isToken, publicId, remindState, shootDay, viewerKey, type Proof } from "@/lib/proofs/proof-model";
 import { forDesk, hashPass, listProofs, nextProofId, readProof, writeProof } from "@/lib/proofs/proof-store";
 import { deliveryMail, deliveryUrl, proofMail, proofUrl, reminderMail, sendClient, subjectOr } from "@/lib/email/proof-mail";
@@ -109,25 +108,9 @@ export async function GET(request: Request) {
   return json({ proof: forDesk(p), url: proofUrl(publicId(p)) });
 }
 
-export async function POST(request: Request) {
-  const g = await gate(request);
-  if ("error" in g) return g.error;
-  const b = ((await bodyOf(request)) ?? {});
-
-  if (b.action === "create") {
-    if (badEmail(b.email)) return json({ error: "That email does not look right." }, 400);
-    const set = cleanSettings(b);
-    // The shoot day from Lightroom (earliest capture date) names the gallery; a plugin that sends none gets today.
-    const p: Proof = { token: await nextProofId(g.kv, shootDay(b.day) ?? undefined), name: set.name ?? "Proofs", ...DEFAULTS, ...set, createdAt: new Date().toISOString(), frames: [], selects: [], notes: {}, views: 0 };
-    await writeProof(g.kv, g.s, p);
-    return json({ token: p.token, url: proofUrl(p.token) }, 201);
-  }
-
-  if (!isToken(b.token)) return json({ error: "Which gallery?" }, 400);
-  const p = await readProof(g.kv, g.s, b.token);
-  if (!p) return json({ error: "No such gallery." }, 404);
-
-  if (b.action === "send") {
+/** POST on one gallery, by `action`: each answers the request on its own. */
+const ACTIONS: Record<string, (g: Gated, p: Proof, b: Record<string, unknown>, request: Request) => Promise<Response>> = {
+  async send(g, p, b, request) {
     if (!p.email) return json({ error: "Add the client's email first." }, 400);
     if (!p.frames.length) return json({ error: "Publish frames from Lightroom first." }, 400);
     // The strip in the mail carries the watermark too, when it is on.
@@ -148,8 +131,8 @@ export async function POST(request: Request) {
     await writeProof(g.kv, g.s, sent);
     await recordLead(g.env, p.email, { event: { at: sent.sentAt!, kind: "mail", note: m.subject, mail: { to: "client", kind: "proofs" } } });
     return json({ proof: forDesk(sent) });
-  }
-  if (b.action === "deliver") {
+  },
+  async deliver(g, p, b) {
     if (!p.email) return json({ error: "Add the client's email first." }, 400);
     if (!p.finals?.length) return json({ error: "Publish the finals from Lightroom first." }, 400);
     // A Nov 11 id is too short to front full-size files: the finals go out on a new shoot id and the old link closes.
@@ -168,8 +151,8 @@ export async function POST(request: Request) {
     const keys = p.frames.flatMap((f) => frameKeys(p.token, f.id));
     await dropKeys(g.r2, keys);
     return json({ proof: forDesk(sent), url: deliveryUrl(link) });
-  }
-  if (b.action === "remind") {
+  },
+  async remind(g, p) {
     const r = remindState(p);
     if (r.state === "sent") return json({ error: "Already reminded for this stage." }, 409);
     if (r.state === "locked") return json({ error: "The reminder opens in the last 5 days before the gallery closes." }, 409);
@@ -187,8 +170,8 @@ export async function POST(request: Request) {
     }
     await recordLead(g.env, p.email!, { event: { at, kind: "mail", note: m.subject, mail: { to: "client", kind: r.stage } } });
     return json({ proof: forDesk(stamped) });
-  }
-  if (b.action === "relink") {
+  },
+  async relink(g, p) {
     // Storage stays put (R2, Stripe metadata, Lightroom's remote id); only the public id moves.
     const link = await nextProofId(g.kv);
     await g.kv.put(aliasKey(link), p.token);
@@ -196,36 +179,52 @@ export async function POST(request: Request) {
     await writeProof(g.kv, g.s, next);
     if (p.link) await g.kv.delete(aliasKey(p.link));
     return json({ proof: forDesk(next), url: proofUrl(link) });
-  }
-  if (b.action === "forget") {
+  },
+  async forget(g, p, b) {
     const who = typeof b.email === "string" ? viewerKey(b.email) : "";
     if (!who || !p.viewers?.[who]) return json({ error: "No visit from that address." }, 404);
-    const { [who]: _gone, ...viewers } = p.viewers;
+    const viewers = { ...p.viewers };
+    delete viewers[who];
     const next: Proof = { ...p, viewers };
     await writeProof(g.kv, g.s, next);
-    // The open also put a "proofs" line on their lead. A lead made only of this gallery's opens, with nothing of his on it, goes with it.
-    const id = await g.s.id(who);
-    const lead = await readLead(g.kv, g.s, id);
-    const events = lead?.events.filter((e) => !(e.kind === "proofs" && e.ref === p.token));
-    if (lead && events && events.length < lead.events.length) {
-      if (events.length || lead.notes || lead.remind || lead.invoices?.length || lead.deposit || lead.notion) await writeLead(g.kv, g.s, id, { ...lead, events });
-      else await g.kv.delete(leadStoreKey(id));
-    }
+    // The open also put a "proofs" line on their lead.
+    await dropProofOpens(g.kv, g.s, who, p.token);
     return json({ proof: forDesk(next) });
-  }
-  if (b.action === "reopen") {
+  },
+  async reopen(g, p) {
     const next: Proof = { ...p, submittedAt: undefined, pulledAt: undefined };
     await writeProof(g.kv, g.s, next);
     return json({ proof: forDesk(next) });
-  }
-  if (b.action === "extend") {
+  },
+  async extend(g, p, b) {
     const days = Math.min(90, Math.max(1, Math.round(Number(b.days) || 7)));
     const from = Math.max(Date.now(), p.closesAt ? Date.parse(p.closesAt) : Date.now());
     const next: Proof = { ...p, closesAt: closesAt(days, from) };
     await writeProof(g.kv, g.s, next);
     return json({ proof: forDesk(next) });
+  },
+};
+
+export async function POST(request: Request) {
+  const g = await gate(request);
+  if ("error" in g) return g.error;
+  const b = ((await bodyOf(request)) ?? {});
+
+  if (b.action === "create") {
+    if (badEmail(b.email)) return json({ error: "That email does not look right." }, 400);
+    const set = cleanSettings(b);
+    // The shoot day from Lightroom (earliest capture date) names the gallery; a plugin that sends none gets today.
+    const p: Proof = { token: await nextProofId(g.kv, shootDay(b.day) ?? undefined), name: set.name ?? "Proofs", ...DEFAULTS, ...set, createdAt: new Date().toISOString(), frames: [], selects: [], notes: {}, views: 0 };
+    await writeProof(g.kv, g.s, p);
+    return json({ token: p.token, url: proofUrl(p.token) }, 201);
   }
-  return json({ error: "Unknown action." }, 400);
+
+  if (!isToken(b.token)) return json({ error: "Which gallery?" }, 400);
+  const p = await readProof(g.kv, g.s, b.token);
+  if (!p) return json({ error: "No such gallery." }, 404);
+
+  const act = typeof b.action === "string" && Object.hasOwn(ACTIONS, b.action) ? ACTIONS[b.action] : undefined;
+  return act ? act(g, p, b, request) : json({ error: "Unknown action." }, 400);
 }
 
 /** A typed email that fails isEmail is refused, so a save never clears the stored one; a blank one still clears it. */

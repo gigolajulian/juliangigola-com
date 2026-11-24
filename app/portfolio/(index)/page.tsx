@@ -56,7 +56,7 @@ const FRAMES = Object.fromEntries(
   ]),
 );
 
-/* JG V3 Portfolio (master v39). The old strip of disciplines is retired. */
+/* The old strip of disciplines is retired. */
 export default function WorkPage() {
   return <WorkIndex work={WORK} chip={CHIP} frames={FRAMES} />;
 }

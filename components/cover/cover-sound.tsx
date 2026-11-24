@@ -3,8 +3,9 @@
 import * as React from "react";
 import { inkGround, inkWord } from "@/components/site/nav-ink";
 import SOUND from "@/lib/work/cover-art-sound.json";
+import { sessionGet, sessionSet } from "@/lib/utils";
 
-/* The song on the cover (inner pages plan, `snd`, only with `?v4pages=c1,snd`): one clip at a time, and nothing
+/* The song on the cover (`snd` in lib/flags/v4pages.ts: on by default, `?v4pages=view` turns it off): one clip at a time, and nothing
    here runs or is fetched until the first play, so with the key off the page is untouched.
    The clip is Apple's preview where `scripts/cover-art-sound.mjs` matched one, Julian's own file otherwise, and for
    a song that is only on SoundCloud, SoundCloud's own player. A release with none, a clip that fails to load and a
@@ -21,13 +22,7 @@ let out: "audio" | "sc" = "audio";
 const subs = new Set<() => void>();
 const emit = () => subs.forEach((f) => f());
 const sub = (f: () => void) => (subs.add(f), () => void subs.delete(f));
-const muted = () => {
-  try {
-    return sessionStorage.getItem(KEY) === "0";
-  } catch {
-    return false;
-  }
-};
+const muted = () => sessionGet(KEY) === "0";
 const ended = () => {
   now = "";
   emit();
@@ -193,9 +188,7 @@ export function CoverSound({ className, slug, onPlay }: { className?: string; sl
         type="button"
         aria-pressed={!off}
         onClick={() => {
-          try {
-            sessionStorage.setItem(KEY, off ? "1" : "0");
-          } catch {}
+          sessionSet(KEY, off ? "1" : "0");
           if (!off) stopSound();
           emit();
         }}

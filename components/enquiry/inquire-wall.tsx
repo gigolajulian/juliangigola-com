@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useDialKit } from "dialkit";
 import { DriftWall } from "@/components/drift-wall";
-import { softItem, type WallTile } from "@/lib/wall-tile";
+import { softItem, type WallTile } from "@/lib/work/wall-tile";
 
 /* The photo wall behind the homepage's last page, on its own DialKit
    panel. Julian: a dial for its scale. 1 is the wall at its full size

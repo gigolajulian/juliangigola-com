@@ -28,5 +28,21 @@ export async function sha256Hex(text: string): Promise<string> {
   return [...d].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
+/** sessionStorage that never throws (private mode, storage off, a sandboxed frame): null when it cannot read. */
+export const sessionGet = (key: string): string | null => {
+  try {
+    return sessionStorage.getItem(key);
+  } catch {
+    return null;
+  }
+};
+
+/** sessionStorage that never throws: a write it cannot make is dropped. */
+export const sessionSet = (key: string, value: string) => {
+  try {
+    sessionStorage.setItem(key, value);
+  } catch {}
+};
+
 /** An error's message, or the thrown value as text when it is not an Error. */
 export const errorText = (e: unknown) => (e instanceof Error ? e.message : String(e));

@@ -18,7 +18,7 @@ import type { CardCtx } from "@/components/booking/use-picker";
 /** The quiet that ends a trackpad flick: events closer than this are still the same push. */
 const GESTURE_GAP_MS = 120;
 
-/* JG V3 (master v39 stepper): Time, You, (Deposit), Booked. The same
+/* The V3 stepper: Time, You, (Deposit), Booked. The same
    times, booking and deposit as the cards; only the look is new. */
 export function BookSteps({ c }: { c: CardCtx & { skin: StepsSkin } }) {
   const { skin, username, slug, tz, length, needsWhere, opt, setOpt, booked, days, view, setView, anchor, setAnchor, pick, chosen, setChosen, step, setStep, swipeX: swipeXRef, wheelGate, stripRef, more, setMore, paid, deposit, refs, v3root, error, bad, setBad, blank, setBlank, load, choose, today, book, refill, v3steps, v3sub, date } = c;

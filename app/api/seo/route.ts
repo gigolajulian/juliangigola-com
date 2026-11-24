@@ -3,7 +3,7 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { refuseAdmin } from "@/lib/vouch";
 import { ACCOUNT, SITE_HOST, cloudflare, engineSql, searchConsole, sitePath } from "@/lib/analytics";
 import { BEACON_DATASET } from "@/lib/beacon";
-import { json } from "@/lib/http";
+import { json, upstreamError } from "@/lib/http";
 
 /* ── seo ──────────────────────────────────────────────────────────
  * The numbers behind /admin's SEO tab. Same gate and same two keys as
@@ -39,7 +39,7 @@ export async function GET(request: Request) {
     try {
       return json(await clickMap(key, map));
     } catch (e) {
-      return json({ error: errorText(e) }, 502);
+      return upstreamError("seo map", e, errorText(e));
     }
   }
 
@@ -115,7 +115,7 @@ export async function GET(request: Request) {
       tracked,
     });
   } catch (e) {
-    return json({ error: errorText(e) }, 502);
+    return upstreamError("seo", e, errorText(e));
   }
 }
 

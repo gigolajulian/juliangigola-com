@@ -1,4 +1,4 @@
-import { span, type Driver, type Frame } from "./engine";
+import { progressBetween, type Driver, type Frame } from "./engine";
 
 /* About (spec 3.9). The desktop beats are pure CSS on a timer (about.css, `data-seen`). Without a hold the sentence and the rows light as they scroll
    through the screen: this writes their progress as --sp and --rp. */
@@ -12,12 +12,12 @@ export const aboutDrivers: Driver[] = [
       const frame: Frame = (_p, el, ctx) => {
         if (ctx.held) return;
         const top = ctx.top;
-        const sp = span(top + m.say, 0.8 * ctx.vh, 0.35 * ctx.vh).toFixed(3);
-        const rp = span(top + m.ol, 0.72 * ctx.vh, 0.48 * ctx.vh).toFixed(3);
+        const sp = progressBetween(top + m.say, 0.8 * ctx.vh, 0.35 * ctx.vh).toFixed(3);
+        const rp = progressBetween(top + m.ol, 0.72 * ctx.vh, 0.48 * ctx.vh).toFixed(3);
         if (sp !== m.sp) el.style.setProperty("--sp", (m.sp = sp));
         if (rp !== m.rp) el.style.setProperty("--rp", (m.rp = rp));
         // ?mttp=about: the facts and the button come up as the foot of the column reaches the lower part of the screen
-        const ep = span(top + m.ft, 0.92 * ctx.vh, 0.55 * ctx.vh).toFixed(3);
+        const ep = progressBetween(top + m.ft, 0.92 * ctx.vh, 0.55 * ctx.vh).toFixed(3);
         if (ep !== m.ep) el.style.setProperty("--ep", (m.ep = ep));
       };
       const say = el.querySelector<HTMLElement>(".mt-say");

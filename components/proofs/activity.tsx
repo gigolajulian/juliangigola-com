@@ -7,7 +7,7 @@
  * ─────────────────────────────────────────────────────────────── */
 
 import * as React from "react";
-import { HStack, VStack } from "@astryxdesign/core/Stack";
+import { HStack, VStack } from "@astryxdesign/core/Layout";
 import { Button } from "@astryxdesign/core/Button";
 import { Badge } from "@astryxdesign/core/Badge";
 import { Selector } from "@astryxdesign/core/Selector";

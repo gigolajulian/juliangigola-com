@@ -3,7 +3,7 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
-import { Lightbox, useLightbox } from "@/components/lightbox";
+import { Lightbox, useLightbox } from "@/components/cover/lightbox";
 import { COVER_PRESS } from "@/lib/home/data";
 import { sleeveTilt } from "./sleeve-tilt";
 import "@/components/home/motion/rows.css";

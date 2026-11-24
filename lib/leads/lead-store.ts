@@ -3,8 +3,7 @@
 import { sealer, type Sealer } from "./lead-crypto";
 import { notify, pushFor } from "./lead-push";
 import { appendLog, forgetLog, fresh } from "./activity-log";
-import { canonical } from "./lead-crypto";
-import { fold, leadStoreKey, leadSummary, type Change, type Lead, type LeadSummary, type Person, type Sent } from "./leads";
+import { canonical, applyLeadEvent, leadStoreKey, leadSummary, type Change, type Lead, type LeadSummary, type Person, type Sent } from "./leads";
 import type { InboxKV } from "@/lib/kv";
 
 type KV = InboxKV;
@@ -65,7 +64,7 @@ export async function writeLead(kv: KV, s: Sealer, id: string, lead: Lead, from?
 const CANON = "leads:canon";
 /**
  * Once: moves each lead stored before ids ignored Gmail dots and "+tags"
- * (`canonical` in lib/leads/lead-crypto.ts, 2026-11-04) to its new id. A lead whose
+ * (`canonical` in lib/leads/leads.ts, 2026-11-04) to its new id. A lead whose
  * new id is already taken stays put, for Merge on the desk. Returns how many moved.
  */
 export async function canonLeads(kv: KV, s: Sealer): Promise<number> {
@@ -174,7 +173,7 @@ export async function recordLead(env: LeadStore, email: string, c: Change): Prom
     const s = await seal;
     // Mail from the art director lands on the client's lead (`findLead`).
     const { id, lead: before } = await findLead(env.INBOX, s, email);
-    const after = fold(before, email, c);
+    const after = applyLeadEvent(before, email, c);
     if (after === before) return { status: "same" };
     await writeLead(env.INBOX, s, id, after, before);
     // Something reached the site: ping his devices (`lib/leads/lead-push.ts`).
@@ -184,5 +183,17 @@ export async function recordLead(env: LeadStore, email: string, c: Change): Prom
   } catch (e) {
     console.error("lead", String(e));
     return { status: "failed" };
+  }
+}
+
+/** A gallery's "proofs" opens taken off a person's lead (a visit he forgot, his own test). A lead made only of
+    this gallery's opens, with nothing of his on it, goes with them. */
+export async function dropProofOpens(kv: InboxKV, s: Sealer, email: string, token: string) {
+  const id = await s.id(email);
+  const lead = await readLead(kv, s, id);
+  const events = lead?.events.filter((e) => !(e.kind === "proofs" && e.ref === token));
+  if (lead && events && events.length < lead.events.length) {
+    if (events.length || lead.notes || lead.remind || lead.invoices?.length || lead.deposit || lead.notion) await writeLead(kv, s, id, { ...lead, events });
+    else await kv.delete(leadStoreKey(id));
   }
 }

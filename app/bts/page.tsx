@@ -21,7 +21,7 @@ export const metadata: Metadata = {
    `content/projects.json` are here. */
 export default function BtsPage() {
   if (!WITH_BTS.length) notFound();
-  /* JG V3 (leftovers card I): the V3 head, a row per shoot, the V3 foot. */
+  /* The V3 head, a row per shoot, the V3 foot. */
   return (
     <div className="v3 contents">
       <section className="v3page" id="p-bts">

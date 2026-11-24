@@ -23,7 +23,18 @@ import { balance, isSettled, namesInvoice, type Invoice } from "./invoice";
  * already stored, and a lead that failed to update must not fail the form.
  * ─────────────────────────────────────────────────────────────── */
 
-export const STAGES = ["Inquiry", "Replied", "Call booked", "Quoted", "Confirmed", "Shot", "Invoiced", "Selecting", "Delivered", "Lost"] as const;
+/** One person's address, however they spell it. A lead
+    typed gigola.julian@gmail.com whose mail came from gigolajulian@gmail.com
+    never met. Gmail ignores dots and anything after "+", so the id does too. */
+export function canonical(email: string): string {
+  const e = email.trim().toLowerCase();
+  const at = e.lastIndexOf("@");
+  const [user, domain] = [e.slice(0, at), e.slice(at + 1)];
+  if (at < 1 || (domain !== "gmail.com" && domain !== "googlemail.com")) return e;
+  return `${user.split("+")[0].replaceAll(".", "")}@gmail.com`;
+}
+
+export const STAGES =["Inquiry", "Replied", "Call booked", "Quoted", "Confirmed", "Shot", "Invoiced", "Selecting", "Delivered", "Lost"] as const;
 export type Stage = (typeof STAGES)[number];
 
 /** What happened, as it reached the site. `stage` is Julian's own move. */
@@ -60,6 +71,10 @@ export type Sent = { to: "client" | "hello@"; kind: string; booking?: string };
 /** Contract and model release, tracked from Confirmed on. */
 export const PAPER = ["Not sent", "Sent", "Signed", "Not needed"] as const;
 export type Paper = (typeof PAPER)[number];
+
+/** A stage or paper status from outside (a request, Notion), checked against the lists. */
+export const isStage = (v: unknown): v is Stage => (STAGES as readonly unknown[]).includes(v);
+export const isPaper = (v: unknown): v is Paper => (PAPER as readonly unknown[]).includes(v);
 
 /** Something on the lead that needs him, beyond its stage. */
 export type Flag = "stuck" | "no-deposit";
@@ -230,7 +245,7 @@ export type Change = {
 
 /** One event folded into a lead. Returns the lead unchanged when the event
     was already folded in (a webhook retry carries the same ref). */
-export function fold(lead: Lead | null, email: string, c: Change): Lead {
+export function applyLeadEvent(lead: Lead | null, email: string, c: Change): Lead {
   const { event } = c;
   if (lead && event.ref && lead.events.some((e) => e.kind === event.kind && e.ref === event.ref)) return lead;
 
@@ -448,7 +463,7 @@ export function backfillLead(lead: Lead | null, email: string, rows: InboxRow[])
   if (!add.length) return null;
   if (!lead) {
     let built: Lead | null = null;
-    for (const c of add) built = fold(built, email, c);
+    for (const c of add) built = applyLeadEvent(built, email, c);
     const unread = sorted.some((r) => !r.read);
     // Julian: "import read ones as replied". All read means he dealt with it.
     return { ...built!, unread, ...(!unread && built!.stage === "Inquiry" ? { stage: "Replied" as const } : {}) };

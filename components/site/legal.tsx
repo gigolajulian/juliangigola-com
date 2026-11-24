@@ -92,7 +92,7 @@ export function Clause(props: { title: string; children: React.ReactNode }) {
   return null;
 }
 
-/* ── JG V3 (leftovers card G) ─────────────────────────────────────
+/* ── legal documents ──────────────────────────────────────────────
  * The same documents in the V3 page: the page head, then each document
  * with its contents held to the left while the clauses run in full on the
  * right at a reading measure. Every clause keeps its anchor, so

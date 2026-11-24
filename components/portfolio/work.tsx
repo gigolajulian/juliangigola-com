@@ -25,7 +25,7 @@ export type { WorkItem, FrameItem };
 // project-viewer.tsx loads the viewer from here.
 export { FrameView };
 
-/* JG V3 Portfolio (master v39, /work): search, discipline chips, and the
+/* JG V3 Portfolio (/portfolio): search, discipline chips, and the
    Grid, Strip and Color views. Best first (lib's order: the vectorscope's
    DOPE list, then the site's running order). */
 

@@ -1,17 +1,15 @@
-/* v4 homepage, static build (`?mtscroll=1`, docs/mt-decisions.md). Every rule
-   is scoped under [data-mtscroll]; without the flag nothing here matches.
+/* The live home's styles (docs/mt-decisions.md). Every rule is scoped under
+   [data-mtscroll], which app/layout.tsx sets on every page.
    Design unit: 1440x900 is the design, `--u` is one design px,
    min(100vw / 1440, 100svh / 900) clamped .7 to 1.6 (spec 5).
    Structures: D desktop (>=1024 wide and >=600 tall), T tablet portrait
    (600-1023 wide), P phone (<600 wide), L on its side (<600 tall).
    Motion hooks the second builder drives: components/home/MOTION-HOOKS.md. */
 
-/* The live home waits hidden while the flag swaps the v4 tree in (gate.tsx). */
-[data-mtscroll] .v3home:not(.mt){visibility:hidden}
 /* On the home's desktop layout the header wordmark waits hidden until motion/hero.ts sets data-mtdock ("off") and takes over
-   the bar, so a load never flashes it. .mt-wait is gate.tsx's stand-in while the v4 code loads. */
+   the bar, so a load never flashes it. */
 @media (min-width:1024px) and (min-height:600px) and (prefers-reduced-motion:no-preference){
-  html[data-v3motion][data-mtscroll]:not([data-mtdock]):has(.v3home,.mt-wait) .v3 .site-wm{visibility:hidden}
+  html[data-v3motion][data-mtscroll]:not([data-mtdock]):has(.v3home) .v3 .site-wm{visibility:hidden}
 }
 
 /* One grey for unpicked rows, deposit lines and the footer phrase (was #8a8a8a written out 7 times). */

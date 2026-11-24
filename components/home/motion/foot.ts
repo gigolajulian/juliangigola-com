@@ -1,4 +1,4 @@
-import { clamp, smooth, span, type Ctx, type Driver } from "./engine";
+import { clamp, smooth, progressBetween, type Ctx, type Driver } from "./engine";
 
 /* Footer, spec 3.10: the still's reveal, phrase drift, dot pointer and hover
    spot. The wall is one still (foot.tsx), so the column drift, the frame lift
@@ -259,7 +259,7 @@ function tick(f: Foot, c: Ctx) {
   if (!c.held) return;
 
   // the still's reveal
-  f.reveal += (smooth(span(clamp((c.vh - r.top) / r.height), 0.25, 1)) - f.reveal) * Math.min(1, sec * 5);
+  f.reveal += (smooth(progressBetween(clamp((c.vh - r.top) / r.height), 0.25, 1)) - f.reveal) * Math.min(1, sec * 5);
   f.wall.style.opacity = f.reveal.toFixed(3);
 
   if (!c.fine) return;

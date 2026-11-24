@@ -3,7 +3,7 @@ import { isIntentId, refKey, type Status } from "@/lib/booking/deposit";
 import { isDeposit } from "@/lib/booking/paid";
 import { PAYMENTS_DOWN, stripe } from "@/lib/stripe";
 import { MAX_REFS, takePicks, takeUploads } from "@/lib/inbox";
-import { json } from "@/lib/http";
+import { json, limited, statusOf } from "@/lib/http";
 
 /* ── how a deposit ended ───────────────────────────────────────────
  * The card polls this after paying: "pending" until Stripe's webhook has
@@ -24,7 +24,7 @@ async function loadIntent(key: string, id: string): Promise<Intent | "missing" |
     const pi: Intent = await stripe(key, `/payment_intents/${id}`);
     return isDeposit(pi) ? pi : "missing";
   } catch (e) {
-    return (e as { status?: number }).status === 404 ? "missing" : "down";
+    return statusOf(e) === 404 ? "missing" : "down";
   }
 }
 
@@ -54,8 +54,8 @@ export async function PUT(request: Request, ctx: { params: Promise<{ id: string 
   if (!isIntentId(id)) return json({ error: "Unknown deposit." }, 404);
   const { env } = await getCloudflareContext({ async: true });
   if (!env.STRIPE_SECRET_KEY) return json({ error: "Deposits are off." }, 503);
-  const ip = request.headers.get("cf-connecting-ip") ?? "unknown";
-  if (!(await env.DEPOSIT_LIMIT.limit({ key: `refs:${ip}` })).success) return json({ error: "Too many tries. Wait a minute." }, 429);
+  const slow = await limited(env.DEPOSIT_LIMIT, "refs", request);
+  if (slow) return slow;
 
   const pi = await loadIntent(env.STRIPE_SECRET_KEY, id);
   if (pi === "down") return json({ error: PAYMENTS_DOWN }, 502);
