@@ -8,7 +8,7 @@ import { zipLayout } from "@/lib/proofs/zip";
 /* Delivery by model (Julian 2026-11-19): a final carries its model and five stars, and `/zip?m=<label>` takes one model. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
-vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
+vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));
 const { PUT } = await import("@/app/api/proof/route");
 
 const ID = "11192026-k7m2q9xd";

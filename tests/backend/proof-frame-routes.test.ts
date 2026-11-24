@@ -9,7 +9,7 @@ import { FakeKV, LEADS_KEY } from "./fakes";
    stand-in that says what it was asked for. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
-vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
+vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));
 const mark = vi.hoisted(() => ({ servedSize: vi.fn(), shareCard: vi.fn() }));
 vi.mock("@/lib/proofs/watermark", () => mark);
 

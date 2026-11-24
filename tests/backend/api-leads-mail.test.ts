@@ -6,7 +6,7 @@ import { FakeKV, LEADS_KEY, leadOf } from "./fakes";
    BOOKING_SECRET as bearer; it lands on the person's lead. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
-vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
+vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));
 
 const SECRET = "booking-secret-for-tests";
 const MAIL = { email: "client@example.com", subject: "See you tomorrow", kind: "reminder", booking: "bk_1" };

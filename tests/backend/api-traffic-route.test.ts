@@ -7,7 +7,7 @@ import { SCOPED, githubToken, reply } from "./fakes";
    bots counted apart and Google and Bing not connected. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
-vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
+vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));
 
 const get = (token?: string) => GET(new Request("https://juliangigola.com/api/traffic", { headers: token ? { authorization: `Bearer ${token}` } : {} }));
 

@@ -12,7 +12,7 @@ const logOf = async (kv: unknown, email: string) => { const s = (await sealer(LE
    api-deposit.test.ts. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
-vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
+vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));
 
 const WHSEC = "whsec_test";
 async function signed(body: string, at = Math.floor(Date.now() / 1000)) {

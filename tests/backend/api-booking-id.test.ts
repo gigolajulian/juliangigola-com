@@ -11,7 +11,7 @@ import { FakeEmail, FakeKV, FakeStore, fakeLock, LEADS_KEY, GOOGLE_OAUTH as OAUT
    with no deposit takes the event off the calendar and mails both sides. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
-vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
+vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));
 
 const SECRET = "booking-secret-for-tests";
 const ID = "AbCdEfGh12345678";

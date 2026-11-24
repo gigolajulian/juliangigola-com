@@ -16,7 +16,7 @@ vi.setSystemTime(PIN);
    and mails a new confirmation. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
-vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env, ctx: { waitUntil: (p: Promise<unknown>) => p } }) }));
+vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx, (p) => p));
 const { POST: book } = await import("@/app/api/book/route");
 const { POST: change } = await import("@/app/api/booking/[id]/route");
 const { bookDeposit } = await import("@/lib/booking/deposit");

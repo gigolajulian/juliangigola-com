@@ -11,7 +11,7 @@ import { fold } from "@/lib/leads/leads";
    The first run only records where Gmail's history stands. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
-vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
+vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));
 
 const SECRET = "booking-secret-for-tests";
 const OAUTH = JSON.stringify({ client_id: "c", client_secret: "s", refresh_token: "r" });

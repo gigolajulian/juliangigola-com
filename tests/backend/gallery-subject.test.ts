@@ -8,7 +8,7 @@ import { FakeKV, LEADS_KEY } from "./fakes";
 /* The mail's subject, edited on the desk before Send (Julian 2026-11-15). */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
-vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
+vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));
 
 const ID = "11152026-k7m2q9xd";
 let kv: FakeKV;

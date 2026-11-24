@@ -5,7 +5,7 @@ import { SCOPED, githubToken, reply } from "./fakes";
    token never leaves the Worker) and /picks.json (the inquiry form's picker). */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
-vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
+vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));
 
 afterEach(() => vi.unstubAllGlobals());
 

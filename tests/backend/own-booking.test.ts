@@ -15,7 +15,7 @@ vi.setSystemTime(new Date("2026-11-11T20:00:00Z")); // a Wednesday, noon in San 
    Stripe's webhook, and both file the Inbox row and the client's mail. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
-vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env, ctx: { waitUntil: (p: Promise<unknown>) => p } }) }));
+vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx, (p) => p));
 const { POST: book } = await import("@/app/api/book/route");
 const { bookDeposit } = await import("@/lib/booking/deposit");
 

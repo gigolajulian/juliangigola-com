@@ -7,7 +7,7 @@ import { FakeKV, INBOX_KEY as KEY, GOOGLE_OAUTH as OAUTH } from "./fakes";
    behind the inbox key, refuses a bad range or block, lists and blocks. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
-vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
+vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));
 
 const req = (method: string, { body, query = "", key = KEY }: { body?: unknown; query?: string; key?: string } = {}) =>
   new Request(`https://juliangigola.com/api/calendar${query}`, { method, headers: { "x-inbox-key": key }, body: body === undefined ? undefined : JSON.stringify(body) });

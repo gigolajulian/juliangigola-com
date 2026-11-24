@@ -10,7 +10,7 @@ import { FakeKV, LEADS_KEY } from "./fakes";
    Only when the log changed or a day passed; KV is never written from Google. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
-vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
+vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));
 
 const SECRET = "booking-secret-for-tests";
 const OAUTH = JSON.stringify({ client_id: "c", client_secret: "s", refresh_token: "r" });

@@ -1,7 +1,7 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { isDeposit, isIntentId, bookDeposit, verifyStripe } from "@/lib/booking/deposit";
 import { recordLead } from "@/lib/leads/lead-store";
-import { stripe } from "@/lib/stripe";
+import { logPayment } from "@/lib/leads/stripe-payment";
 import { NO_STORE } from "@/lib/http";
 
 /* ── Stripe's webhook ──────────────────────────────────────────────
@@ -39,20 +39,8 @@ export async function POST(request: Request) {
 
   const pi = event.data?.object;
   if (!pi?.id || !isIntentId(pi.id)) return text("No intent.", 400);
-  // Every other payment on the account (invoices, payment links) is never refunded here, only logged on the client's lead
-  // and matched to an invoice. Proof checkouts log themselves (`lib/proofs/submit.ts`), with the client's address.
-  // The address: `receipt_email`, else the charge's billing details (Checkout and Payment Links keep it there).
-  // A payer who is not a lead yet becomes one: they are a client now.
   if (!isDeposit(pi)) {
-    const email = pi.metadata?.proof ? null : pi.receipt_email || (pi.latest_charge ? await stripe(env.STRIPE_SECRET_KEY, `/charges/${pi.latest_charge}`).then((c) => (c as { billing_details?: { email?: string | null } }).billing_details?.email ?? null, () => null) : null);
-    if (email) {
-      const said = `${pi.description ?? ""} ${pi.metadata?.invoice ?? ""}`;
-      await recordLead(env, email, {
-        event: { at: new Date().toISOString(), kind: "payment", ref: pi.id, note: pi.description ?? "Stripe", amount: (pi.amount_received ?? pi.amount ?? 0) / 100 },
-        settles: true,
-        invoiceNo: said.match(/\b\d{4}(?:-\d+)?\b/)?.[0],
-      });
-    }
+    await logPayment(env, env.STRIPE_SECRET_KEY, { ...pi, id: pi.id });
     return text("ok", 200);
   }
   // The whole env: a hand-picked copy once dropped LEADS_KEY, so no deposit reached the lead's log.

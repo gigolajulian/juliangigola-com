@@ -6,7 +6,7 @@ import { forgetToken } from "@/lib/booking/gcal";
    a bad range and an unknown zone, and answers slots by day. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
-vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
+vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));
 
 const get = (q: string) => GET(new Request(`https://juliangigola.com/api/slots?${q}`));
 const OK = "slug=portraits&start=2026-11-18&end=2026-11-18&timeZone=America/Los_Angeles";

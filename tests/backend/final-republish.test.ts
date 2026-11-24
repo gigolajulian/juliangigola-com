@@ -4,7 +4,7 @@ import { sealer } from "@/lib/leads/lead-crypto";
 import { deliveryView, finalKey, readProof, writeProof, PREVIEW_W, THUMB_W, type Proof } from "@/lib/proofs/proof";
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown>, crc: 0 }));
-vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
+vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));
 const { PUT } = await import("@/app/api/proof/route");
 const TOKEN = "AbCdEfGh12345678";
 

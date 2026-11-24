@@ -7,7 +7,7 @@ import { FakeKV, LEADS_KEY, leadOf } from "./fakes";
 
 const SECRET = "booking-secret-for-tests";
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
-vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
+vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));
 const { POST: mailPost } = await import("@/app/api/leads/mail/route");
 const { POST: gmailPost } = await import("@/app/api/leads/gmail/route");
 
