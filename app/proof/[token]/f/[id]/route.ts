@@ -1,5 +1,4 @@
-import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { sealer } from "@/lib/leads/lead-crypto";
+import { sealedStore } from "@/lib/kv";
 import { isFrameId, isToken, findProof, shutReason, THUMB_W } from "@/lib/proofs/proof";
 import { servedSize } from "@/lib/proofs/watermark";
 
@@ -10,10 +9,9 @@ export const dynamic = "force-dynamic";
 
 export async function GET(request: Request, { params }: { params: Promise<{ token: string; id: string }> }) {
   const { token, id } = await params;
-  const { env } = await getCloudflareContext({ async: true });
-  const seal = sealer(env.LEADS_KEY);
-  if (!isToken(token) || !isFrameId(id) || !env.INBOX || !env.PROOFS || !seal) return new Response("Not found", { status: 404 });
-  const p = await findProof(env.INBOX, await seal, token);
+  const { env, seal, kv } = await sealedStore();
+  if (!isToken(token) || !isFrameId(id) || !kv || !env.PROOFS || !seal) return new Response("Not found", { status: 404 });
+  const p = await findProof(kv, await seal, token);
   if (!p || (await shutReason(p, request.headers.get("cookie"), env.LEADS_KEY)) || !p.frames.some((f) => f.id === id)) return new Response("Not found", { status: 404 });
   // The watermark, when on, is in the bytes. If it cannot be drawn the frame is not served at all.
   // `?w=800`: the smaller copy for the wall and the grid (THUMB_W). Any other width gets the whole frame.

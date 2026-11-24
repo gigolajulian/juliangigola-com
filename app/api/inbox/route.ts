@@ -6,7 +6,7 @@ import { buryLead, everyLead, findLead, readLead, writeLead } from "@/lib/leads/
 import { clientsCsv } from "@/lib/leads/sheet-sync";
 import { importNotion } from "@/lib/leads/notion-import";
 import { eventsCsv, readLog, readMaster } from "@/lib/leads/activity-log";
-import { sealer } from "@/lib/leads/lead-crypto";
+import { sealedStore } from "@/lib/kv";
 import { notify, subscribe, unsubscribe } from "@/lib/leads/lead-push";
 import { publicKey } from "@/lib/leads/web-push";
 import { importStripe } from "@/lib/leads/stripe-import";
@@ -72,8 +72,8 @@ export const dynamic = "force-dynamic";
 
 /** The binding and the secret, or `null` when this build has neither. */
 async function wired() {
-  const { env } = await getCloudflareContext({ async: true });
-  return env.INBOX ? { inbox: env.INBOX, seal: sealer(env.LEADS_KEY), notion: env.NOTION_TOKEN, vapid: env.VAPID_KEY, env } : null;
+  const { env, seal, kv } = await sealedStore();
+  return kv ? { inbox: kv, seal, notion: env.NOTION_TOKEN, vapid: env.VAPID_KEY, env } : null;
 }
 
 async function guard(request: Request) {

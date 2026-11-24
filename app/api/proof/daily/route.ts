@@ -1,6 +1,5 @@
-import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { refuseWorker } from "@/lib/vouch";
-import { sealer } from "@/lib/leads/lead-crypto";
+import { sealedStore } from "@/lib/kv";
 import { listProofs, readProof, type Proof } from "@/lib/proofs/proof";
 import { digestMail } from "@/lib/email/proof-mail";
 import { alertHello } from "@/lib/email/hello-mail";
@@ -18,18 +17,18 @@ export const dynamic = "force-dynamic";
 const LAST = "proofdigest:last";
 
 export async function POST(request: Request) {
-  const { env } = await getCloudflareContext({ async: true });
+  const { env, seal: sealing, kv } = await sealedStore();
   const denied = await refuseWorker(request, env.BOOKING_SECRET);
   if (denied) return denied;
-  const seal = await sealer(env.LEADS_KEY);
-  if (!env.INBOX || !seal) return json({ error: "Not set up." }, 503);
+  const seal = await sealing;
+  if (!kv || !seal) return json({ error: "Not set up." }, 503);
   const until = new Date().toISOString();
-  const since = (await env.INBOX.get(LAST)) ?? new Date(Date.now() - 864e5).toISOString();
-  const proofs = (await Promise.all((await listProofs(env.INBOX)).map((x) => readProof(env.INBOX!, seal, x.token)))).filter((p): p is Proof => p?.notify === "daily");
+  const since = (await kv.get(LAST)) ?? new Date(Date.now() - 864e5).toISOString();
+  const proofs = (await Promise.all((await listProofs(kv)).map((x) => readProof(kv, seal, x.token)))).filter((p): p is Proof => p?.notify === "daily");
   const m = digestMail(proofs, since, until);
   if (new URL(request.url).searchParams.has("dry")) return json({ since, until, subject: m?.subject ?? null, text: m?.lines.join("\n") ?? null });
   const sent = m ? await alertHello(env.EMAIL, m.subject, m.lines) : false;
   // A failed send keeps the old mark, so tomorrow's summary still covers today.
-  if (sent || !m) await env.INBOX.put(LAST, until);
+  if (sent || !m) await kv.put(LAST, until);
   return json({ sent });
 }
