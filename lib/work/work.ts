@@ -686,12 +686,6 @@ export const categoryHref = (categorySlug: string): string => {
     listing addresses redirect to the filtered index (`next.config.ts`). */
 export const LISTINGS: Category[] = WORK_CATEGORIES.filter((c) => isListing(c.slug));
 
-/** The pages a strip leads on to once its own sequence has run out: the
-    site's order, in the shape the strip takes (`Lead` in `strip.tsx`). */
-export const WORK_PAGE = { href: "/portfolio", name: "Portfolio" };
-export const SESSIONS_PAGE = { href: "/#sessions", name: "Sessions" };
-export const CONTACT = { href: "/contact/form", name: "Contact" };
-
 /** A category as the index renders it: name plus where it goes. */
 export type CategoryLink = {
   slug: string;
@@ -801,76 +795,6 @@ export const credited = (p: Project, role: RegExp): string | undefined => {
 export const billing = (p: Project): string | undefined =>
   credited(p, /client|model|artist/i);
 
-/** One row of the /work index: a name, a cover for the panel, a credit. */
-export type IndexRow = {
-  slug: string;
-  name: string;
-  cover: Frame;
-  /** The credit shown against the name; the discipline when there is none. */
-  credit: string;
-  /**
-   * How many frames are behind the cover.
-   *
-   * A cover is one photograph and a project is a body of work, and nothing
-   * on the index said which of the two you were about to open. Left off
-   * where the credit is already a count: the disciplines that are one
-   * gallery say "24 releases" there and would otherwise say it twice.
-   */
-  frames?: number;
-};
-
-/** A credited name without the zero-width marks pasted in with some. */
-const clean = (name: string) => name.replace(/\p{Cf}/gu, "").trim();
-/** Julian himself, under either spelling he is credited by. */
-const isJulian = (name: string) => /julian gigola|@juliangigola/i.test(name);
-
-/** Julian's line for the campaigns whose credits name no client or brand:
-    two were spec work, not commissioned. */
-const CAMPAIGN_CLIENT: Record<string, string> = {
-  ukiyosunknown: "@ukiyosunknown",
-  diesel: "Diesel spec",
-  "oakley-x-nike": "Oakley x Nike spec",
-  "kala-x-sharks": "Kala Therapy x SJ Sharks",
-};
-
-/**
- * The line under a cover's name. Julian: the model, for unity, and the
- * creative director after a slash when there is one; for brand campaigns,
- * the client or brand instead.
- *
- * The model is whoever is credited in front of the lens, under whatever
- * the credit calls them: Model, Muse, In frame, Talent, or Artist on a
- * presskit (never a 3D or CG artist, whose role names a craft). The first
- * one, where there are several. A creative director who is Julian is not
- * named: it is his site. Nothing credited, and it falls back to what was
- * there before, the billing and then the discipline.
- */
-const coverCredit = (p: Project): string => {
-  const credits = p.credits.map((c) => ({ ...c, name: clean(c.name) }));
-  if (p.categories.some((c) => c.slug === "campaigns")) {
-    const client = credited({ ...p, credits }, /client|brand/i);
-    return client ?? CAMPAIGN_CLIENT[p.slug] ?? p.categories[0]?.name ?? "";
-  }
-  const model = credits.find(
-    (c) =>
-      /\b(model|muse|in frame|talent)\b/i.test(c.role) ||
-      /^artist$/i.test(c.role),
-  )?.name;
-  const director = credits.find(
-    (c) => /creative direct/i.test(c.role) && !isJulian(c.name),
-  )?.name;
-  const lead = model ?? billing(p) ?? p.categories[0]?.name ?? "";
-  return director && director !== lead ? `${lead} / ${director}` : lead;
-};
-
-export const indexRow = (p: Project): IndexRow => ({
-  slug: p.slug,
-  name: p.name,
-  cover: withBlur(p.cover),
-  credit: coverCredit(p),
-  frames: p.images.length || undefined,
-});
-
 /**
  * One tile of the homepage band: the cover, the three frames it scrubs
  * through, and the words on its plate.
@@ -901,22 +825,6 @@ export type BandTile = {
   /** Where the tile goes, when not its project: a homepage discipline
       tile opens the portfolio on that discipline (Julian). */
   href?: string;
-};
-
-export const bandTile = (p: Project): BandTile => {
-  /* The same line as the cover's on /work, bar the discipline fallback:
-     the tile prints the discipline beside it already. */
-  const credit = coverCredit(p);
-  const client = credit === p.categories[0]?.name ? undefined : credit;
-  return {
-    slug: p.slug,
-    name: p.name,
-    cover: withBlur(p.cover),
-    frames: p.images.slice(1, 4),
-    total: p.images.length,
-    ...(client ? { client } : {}),
-    discipline: p.categories[0]?.name ?? "Project",
-  };
 };
 
 /**
@@ -974,112 +882,6 @@ export const wallOf = (slug: string): WallTile[] => {
 };
 
 /**
- * The press strip on the homepage. The old site buried these as plain text at
- * the bottom of /about; they are the reason an art director keeps reading, so
- * they move up and each links into the work it refers to.
- */
-export type Client = {
-  name: string;
-  /** The key a logo file is named for, in `assets/clients/`. */
-  slug: string;
-  /** Where the mark goes. Not always a project — two of these are films. */
-  href: string;
-  /**
-   * An override on how much of the row's height this mark takes.
-   *
-   * Nothing sets it, and that is the point: evening the row out used to be
-   * hand-tuned numbers here, and it is now measured in
-   * `scripts/make-clients.mjs` — each mark's alpha is summed to find how much
-   * of its box is ink, and the *ink area* is levelled across the set. Equal
-   * height gives a wide wordmark four times the area of a compact glyph,
-   * which is what the hand-tuning was chasing.
-   *
-   * This stays for the judgement the pixels cannot make: a logo that should
-   * dominate, or one whose trademark rules dictate a size.
-   */
-  scale?: number;
-};
-
-/**
- * Every client with a mark on file, as the catalogue the editor picks from.
- * The order here is the fallback; the walls themselves follow
- * `content/site.json` — see `PRESS_HOME` and `PRESS_STUDIO`.
- *
- * `href` rather than a slug, because a client is not always a project: Pear
- * VC and Ladera Granola are films, and their work is on /work/video.
- */
-export const PRESS: Client[] = [
-  { name: "WIRED", slug: "wired-magazine", href: "/portfolio/wired-magazine" },
-  { name: "Pear VC", slug: "pear-vc", href: "/portfolio/video#pear-vc" },
-  { name: "Ladera Granola", slug: "ladera-granola", href: "/portfolio/video#ladera-granola" },
-  { name: "SOLSWEAR", slug: "sols", href: "/portfolio/sols" },
-  { name: "UKIYOSUNKNOWN", slug: "ukiyosunknown", href: "/portfolio/ukiyosunknown" },
-  { name: "JUBO", slug: "jubo", href: "/portfolio/jubo" },
-  { name: "SAGO", slug: "sago", href: "/portfolio/sago" },
-  { name: "GOOD CULT", slug: "goodcult", href: "/portfolio/goodcult" },
-  { name: "PARADOX", slug: "paradox", href: "/portfolio/paradox" },
-  { name: "HUA", slug: "hua", href: "/portfolio/hua" },
-  /* No project of its own on the site, so the mark leads to EMPIRE itself.
-     Julian asked. */
-  { name: "EMPIRE", slug: "empire", href: "https://www.empi.re/" },
-].filter((c) => {
-  const project = /^\/work\/([a-z0-9-]+)$/.exec(c.href)?.[1];
-  return !project || project === "video" || bySlug.has(project);
-});
-
-/**
- * The mark of the client a project was shot for, if that client has one.
- *
- * Eight do. The strip shows it in the panel as the cover it belongs to comes
- * to the middle: a credential stated where it was earned, rather than a wall
- * of logos somewhere else. Julian: the client logos need to be more
- * integrated.
- */
-export const markFor = (slug: string): Client | undefined =>
-  PRESS.find((c) => c.href === `/portfolio/${slug}`);
-
-/**
- * A wall in the editor's order. An order that names nothing is the state
- * before the editor existed and means the whole catalogue; one that names
- * anything is exactly what appears, so a client can be dropped from one
- * wall and kept on the other. A slug the catalogue does not know is skipped
- * rather than rendered as a hole — a mark that was removed from the repo
- * should not leave a gap in the row.
- */
-const wall = (order: string[]): Client[] =>
-  order.length === 0
-    ? PRESS
-    : order.flatMap((slug) => PRESS.filter((c) => c.slug === slug));
-
-/** The strip under the cover on the homepage. */
-export const PRESS_HOME: Client[] = wall(CONTENT.clientsHome);
-/** The grid on /about. */
-export const PRESS_STUDIO: Client[] = wall(CONTENT.clientsStudio);
-
-/**
- * Which contact-form branch a project should pre-select.
- *
- * The point is that someone who has just looked at a campaign and wants one
- * arrives at the form with "Campaign" already chosen and the usage-rights
- * question already asked. Every question they do not have to answer from a
- * cold start is a chance they do not abandon the form.
- */
-export const enquiryTypeFor = (p: Project): string => {
-  const slugs = p.categories.map((c) => c.slug);
-
-  if (
-    slugs.some((s) =>
-      ["artist-presskit", "music-video", "coverart", "events"].includes(s),
-    )
-  )
-    return "music";
-  if (slugs.includes("campaigns")) return "campaign";
-  if (slugs.includes("editorial")) return "editorial";
-  if (p.categories.some((c) => c.section === "SESSIONS")) return "session";
-  return "other";
-};
-
-/**
  * The discipline after this one, for a page that *is* a discipline.
  *
  * A gallery published under its own slug has no sibling project to go to —
@@ -1108,7 +910,7 @@ export const nextDiscipline = (
  * seventy-three carry exactly one category, so this is a tie-break rather
  * than a policy.
  */
-export const disciplineOf = (p: Project): string | undefined =>
+const disciplineOf = (p: Project): string | undefined =>
   (
     p.categories.find((c) =>
       WORK_CATEGORY_LINKS.some((l) => l.slug === c.slug),
@@ -1177,7 +979,6 @@ const neighbour = (p: Project, dir: 1 | -1): Project | undefined => {
   return COMMISSIONS[0];
 };
 export const nextAfter = (p: Project) => neighbour(p, 1);
-export const prevBefore = (p: Project) => neighbour(p, -1);
 
 /**
  * The disciplines the homepage cycles through, each with a frame to show for

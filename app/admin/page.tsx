@@ -13,8 +13,8 @@ import {
   categoryLabel,
   categoryHref,
   categoryFrame,
-  PRESS,
 } from "@/lib/work/work";
+import { PRESS } from "@/lib/work/press";
 import {
   ADDED,
   TRASH,
