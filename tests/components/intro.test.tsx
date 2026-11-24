@@ -12,4 +12,19 @@ describe("Intro", () => {
     // Scripts set through innerHTML never run, so the opening itself does not play in jsdom.
     expect(layer.querySelector("script")?.textContent).toContain("jg-intro");
   });
+
+  it("its inline script stands alone: no imported helper is referenced once stringified", () => {
+    const { container } = render(<Intro run={["/work/nyx/cover.jpg"]} />);
+    document.documentElement.dataset.intro = "1";
+    sessionStorage.removeItem("jg-intro");
+    const code = container.querySelector("#jg-intro script")!.textContent!;
+    try {
+      new Function(code)();
+    } catch (e) {
+      expect(e).not.toBeInstanceOf(ReferenceError);
+    } finally {
+      delete document.documentElement.dataset.intro;
+    }
+    expect(sessionStorage.getItem("jg-intro")).toBe("1");
+  });
 });
