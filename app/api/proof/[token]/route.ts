@@ -134,7 +134,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
     const c = await checkout(key, p, b.method === "card" ? "card" : "bank");
     await writeProof(g.kv, g.s, { ...p, checkout: c.id });
     return json({ checkout: c.url });
-  } catch {
+  } catch (e) {
+    console.error("proof checkout", String(e));
     return json({ error: PAYMENTS_DOWN }, 502);
   }
 }
