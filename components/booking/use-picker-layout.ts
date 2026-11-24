@@ -1,6 +1,7 @@
 import * as React from "react";
 import { warmGsap, withGsap } from "@/lib/gsap-lazy";
 import { iso, STEP_AT, type PickedTime, type Step } from "@/components/booking/time-picker-parts";
+import { sessionGet, sessionSet } from "@/lib/utils";
 
 type Layout = {
   step: Step;
@@ -172,8 +173,8 @@ export function usePickerLayout({ step, pick, days, view, anchor, week, month, c
     const row = daysBox.current?.firstElementChild as HTMLElement | null;
     if (step !== "pick" || view !== "week" || !row) return;
     if (!matchMedia("(pointer: coarse)").matches || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    try { if (sessionStorage.getItem("ed-nudged")) return; } catch {}
-    const seen = () => { try { sessionStorage.setItem("ed-nudged", "1"); } catch {} };
+    if (sessionGet("ed-nudged")) return;
+    const seen = () => sessionSet("ed-nudged", "1");
     let tl: gsap.core.Timeline | undefined, gone = false;
     const play = () => withGsap((gsap) => { if (!gone) tl = gsap.timeline({ delay: 1.1, onStart: seen }).to(row, { x: -8, duration: 0.4, ease: "power2.out" }).to(row, { x: 0, duration: 0.5, ease: "power2.inOut" }); });
     /* Not behind the opening splash (MAC, real iOS): the delay starts once it has lifted. */

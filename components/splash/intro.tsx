@@ -6,6 +6,7 @@ import { burst } from "@/components/splash/burst-splash";
 import { split } from "@/components/splash/split-splash";
 import { HERO } from "@/lib/home/photos";
 import { keepNames } from "@/lib/keep-names";
+import { sessionSet } from "@/lib/utils";
 
 /* The homepage's split splash: the run of frames (the portfolio's first covers,
    `SPLASH_RUN`, passed in from the server), then the hero's first
@@ -35,9 +36,7 @@ const HERO_FULL = {
 /* Once a visit: `sessionStorage` remembers the splash has played. */
 function seen() {
   if (document.documentElement.dataset.intro !== "1") return;
-  try {
-    sessionStorage.setItem("jg-intro", "1");
-  } catch {}
+  sessionSet("jg-intro", "1");
 }
 
 /* The sheet and its script go in as HTML: React leaves the inside of
