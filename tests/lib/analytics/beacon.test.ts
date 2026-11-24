@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { MAX_CLICKS, parseBeacon } from "@/lib/beacon";
+import { MAX_CLICKS, parseBeacon } from "@/lib/analytics/beacon";
 
-/* What the click-and-scroll beacon may carry (`lib/beacon.ts`). */
+/* What the click-and-scroll beacon may carry (`lib/analytics/beacon.ts`). */
 
 const ok = { p: "/portfolio", v: true, d: 0.5, dev: "desktop", c: [[0.2, 1.5, "See the work"]] };
 

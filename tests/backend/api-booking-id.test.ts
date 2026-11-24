@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { readLog } from "@/lib/leads/activity-log";
 import { sealer } from "@/lib/seal";
 import { POST } from "@/app/api/booking/[id]/route";
-import { bookingToken } from "@/lib/booking/token";
+import { bookingToken } from "@/lib/booking/manage-link";
 import { forgetToken } from "@/lib/google";
 import { BookingLock } from "@/worker/booking-lock";
 import { FakeEmail, FakeKV, FakeStore, fakeLock, LEADS_KEY, GOOGLE_OAUTH as OAUTH } from "./fakes";

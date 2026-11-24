@@ -36,7 +36,7 @@ export type BookingPage = {
   /** The service in a word, for the rail, the crumb and the cross links. */
   name: string;
   /** `<title>` before the template's " | Julian Gigola", and the meta
-      description. Titled for the search; see `lib/seo.ts`. */
+      description. Titled for the search; see `lib/og/seo.ts`. */
   title: string;
   description: string;
   h1: string;

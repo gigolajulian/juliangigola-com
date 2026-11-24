@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { GET, POST } from "@/app/api/proof/route";
 import { sealer } from "@/lib/seal";
-import { subjectOr } from "@/lib/email/proof-mail";
+import { subjectOr } from "@/lib/proofs/proof-mail";
 import type { Proof } from "@/lib/proofs/proof-model";
 import { writeProof } from "@/lib/proofs/proof-store";
 import { FakeKV, LEADS_KEY } from "./fakes";

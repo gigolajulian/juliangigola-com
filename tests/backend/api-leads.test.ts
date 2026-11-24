@@ -6,7 +6,7 @@ import { sealer } from "@/lib/seal";
 import { desk } from "./desk-routes";
 
 /* The lead desk's routes under /api/leads: the leads, their invoices, push, and the imports. The gate is
-   /api/inbox's (`lib/leads/desk-route.ts`), tested there. */
+   /api/inbox's (`lib/admin/gate.ts`), tested there. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
 vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));

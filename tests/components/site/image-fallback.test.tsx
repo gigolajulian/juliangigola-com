@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { render } from "@testing-library/react";
-import { ImageFallback } from "@/components/image-fallback";
+import { ImageFallback } from "@/components/site/image-fallback";
 
 describe("ImageFallback", () => {
   it("swaps a blocked resized picture for the plain file, once", () => {

@@ -1,5 +1,5 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { refuseWorker } from "@/lib/vouch";
+import { refuseWorker } from "@/lib/admin/vouch";
 import { syncGmail } from "@/lib/leads/sync/gmail-sync";
 import { json, upstreamError } from "@/lib/http";
 

@@ -30,6 +30,15 @@ describe("gcal", () => {
     expect(await gcalToken(SECRET, now + 56 * 60e3)).toBe("at-2");
   });
 
+  it("keeps one token per secret, and forgets only the one asked", async () => {
+    const other = JSON.stringify({ client_id: "id2", client_secret: "shh2", refresh_token: "rt-2" });
+    expect(await gcalToken(SECRET)).toBe("at-1");
+    expect(await gcalToken(other)).toBe("at-2");
+    forgetToken(other);
+    expect(await gcalToken(SECRET)).toBe("at-1");
+    expect(await gcalToken(other)).toBe("at-3");
+  });
+
   it("retries a 401 once with a fresh token", async () => {
     reject401 = 1;
     expect(await gcal(SECRET, "/freeBusy", { body: {} })).toEqual({ ok: true });

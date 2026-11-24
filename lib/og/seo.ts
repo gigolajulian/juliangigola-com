@@ -20,8 +20,8 @@
  * price in /admin updates the description and the structured data with it.
  */
 
-import { SESSION_TYPES, formatPrice } from "./booking/catalog";
-import { pageForSession } from "./booking/service-pages";
+import { SESSION_TYPES, formatPrice } from "@/lib/booking/catalog";
+import { pageForSession } from "@/lib/booking/service-pages";
 
 export const SITE = "https://juliangigola.com";
 export const EMAIL = "hello@juliangigola.com";

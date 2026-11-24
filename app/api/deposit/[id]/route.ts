@@ -1,6 +1,6 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { isIntentId, refKey, type Status } from "@/lib/booking/deposit";
-import { isDeposit } from "@/lib/booking/paid";
+import { isDeposit } from "@/lib/leads/deposit-terms";
 import { PAYMENTS_DOWN, stripe } from "@/lib/stripe";
 import { MAX_REFS, takePicks, takeUploads } from "@/lib/leads/enquiry";
 import { json, limited, statusOf } from "@/lib/http";

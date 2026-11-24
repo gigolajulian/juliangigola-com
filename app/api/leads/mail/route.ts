@@ -1,6 +1,6 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { logMail } from "@/lib/leads/lead-store";
-import { refuseWorker } from "@/lib/vouch";
+import { refuseWorker } from "@/lib/admin/vouch";
 import { bodyOf, json } from "@/lib/http";
 
 /* ── POST /api/leads/mail: log a mail the booking Worker sent ─────

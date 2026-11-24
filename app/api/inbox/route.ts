@@ -1,5 +1,5 @@
 import { SAFE_IMAGE, summary, type Enquiry, type Summary } from "@/lib/leads/enquiry";
-import { gate } from "@/lib/leads/desk-route";
+import { gate } from "@/lib/admin/gate";
 import { everyKey } from "@/lib/kv";
 import { bodyOf, json, NO_STORE } from "@/lib/http";
 import { parseOr } from "@/lib/json";
@@ -9,7 +9,7 @@ import { parseOr } from "@/lib/json";
  * - GET: the list, `?key=msg:...` one message, `?key=ref:msg:...` an image it came with.
  * - PATCH `{ key, read }`: a message read or unread.
  * - DELETE `{ key }`: a message and its images, for good.
- * The leads themselves are under /api/leads. Behind the /admin gate (`gate`, `lib/leads/desk-route.ts`).
+ * The leads themselves are under /api/leads. Behind the /admin gate (`gate`, `lib/admin/gate.ts`).
  *
  * Not cached, anywhere, ever. `no-store` on every response and no
  * revalidation: this is somebody else's personal data and a shared cache is

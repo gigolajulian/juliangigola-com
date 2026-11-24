@@ -15,20 +15,18 @@
 import { isRecord } from "@/lib/json";
 import { HttpError } from "@/lib/http";
 import { localGet, localRemove, localSet } from "@/lib/storage";
+import { GITHUB_API, isGithubToken, REPO } from "@/lib/admin/github-repo";
 
 /**
  * Where the editor keeps the GitHub token in the browser. Named here, not
  * in the editor, because the inbox reads it too — the token proves the
  * caller can push to this repository, which is the one thing that should
- * open the inbox. See `isAdmin` in `lib/vouch.ts`.
+ * open the inbox. See `isAdmin` in `lib/admin/vouch.ts`.
  */
 export const TOKEN_STORE = "jg-admin-token";
 
 /** Where the admin key is kept between visits, beside the GitHub token. The old name stays, so keys already pasted still work. */
 export const KEY_STORE = "jg-inbox-key";
-
-/** Whether a pasted key looks like one of the two GitHub token kinds /admin is set up with: classic or fine-grained. */
-export const isGithubToken = (k: string) => /^(ghp_|github_pat_)/.test(k);
 
 /** Keeps a key pasted into a desk's sign-in: a GitHub token replaces the token and drops any admin key, anything else is the admin key. */
 export function saveAdminKey(k: string) {
@@ -40,21 +38,13 @@ export function saveAdminKey(k: string) {
 
 /**
  * What to send: the admin key if one was pasted, else the GitHub token the
- * editor signed in with. The API takes either: see `isAdmin` in `lib/vouch.ts`.
+ * editor signed in with. The API takes either: see `isAdmin` in `lib/admin/vouch.ts`.
  */
 export const credentials = (key: string): Record<string, string> => {
   if (key) return { "x-admin-key": key };
   const token = localGet(TOKEN_STORE);
   return token ? { authorization: `Bearer ${token}` } : {};
 };
-
-export const REPO = {
-  owner: "gigolajulian",
-  repo: "juliangigola-com",
-  branch: "main",
-};
-/** GitHub's REST API, for the reads and commits /admin makes. */
-export const GITHUB_API = "https://api.github.com";
 
 export type CommitFile = {
   /** Repo-relative, e.g. `public/work/new-thing/01.jpg`. */

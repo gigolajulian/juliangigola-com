@@ -1,5 +1,5 @@
 import { cleanFrom, FROM_KEY, invoiceNo, invoicesTaken, type InvoiceFrom } from "@/lib/leads/invoice";
-import { gate, noSeal, sealedGate } from "@/lib/leads/desk-route";
+import { gate, noSeal, sealedGate } from "@/lib/admin/gate";
 import { bodyOf, json } from "@/lib/http";
 
 /* His details for invoices, sealed: GET them, with `?no=<YYYY-MM-DD>` also the number the next invoice on

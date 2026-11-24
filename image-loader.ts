@@ -19,7 +19,7 @@ import SOURCES from "./public/work/sources.json";
  *   - `/cdn-cgi/image/` exists only on a Cloudflare **zone**. On
  *     `*.workers.dev` these URLs 404, so a branch preview asks the live zone
  *     instead (`ORIGIN` below). A photograph that exists only on the branch
- *     404s there and `components/image-fallback.tsx` shows the original. One
+ *     404s there and `components/site/image-fallback.tsx` shows the original. One
  *     replaced in place on a branch shows the live copy on its preview.
  *   - A custom loader bypasses `remotePatterns`; Next will not check the R2
  *     origin and neither will it allow it. The bucket's domain has to be

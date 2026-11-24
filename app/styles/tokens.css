@@ -497,7 +497,7 @@
   /* The half of the copyright notice that JavaScript cannot do.
      `touch-callout` is the long-press "Save Image" sheet on iOS, which never
      raises a contextmenu event; `user-drag` is Safari's own drag-the-file-out,
-     which ignores a prevented `dragstart`. See `components/photo-notice.tsx`
+     which ignores a prevented `dragstart`. See `components/site/photo-notice.tsx`
      — and the note there about what this is and is not. */
   img {
     -webkit-touch-callout: none;

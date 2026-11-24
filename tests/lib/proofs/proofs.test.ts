@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { paidFor } from "@/lib/proofs/submit";
-import { cardPrice, cleanNotes, coverFrame, cleanSelects, cleanSettings, extras, isOpen, isStrongId, isToken, lookStarts, proofDay, proofId, amountOwed, shootDay, shotOrder, stage } from "@/lib/proofs/proof-model";
+import { cardPrice, cleanNotes, coverFrame, cleanSelects, cleanSettings, extraFrames, isOpen, isStrongId, isToken, lookStarts, proofDay, proofId, amountOwed, shootDay, shotOrder, stage } from "@/lib/proofs/proof-model";
 import { newToken } from "@/lib/token";
 import { nextProofId } from "@/lib/proofs/proof-store";
 
@@ -16,8 +16,8 @@ describe("proofs", () => {
     expect(lookStarts([{ t: 1 }, {}])).toEqual([]);
   });
   it("prices only the frames past the included ones", () => {
-    expect(extras(12, 10, 15)).toEqual({ n: 2, dollars: 30 });
-    expect(extras(4, 10, 15)).toEqual({ n: 0, dollars: 0 });
+    expect(extraFrames(12, 10, 15)).toEqual({ n: 2, dollars: 30 });
+    expect(extraFrames(4, 10, 15)).toEqual({ n: 0, dollars: 0 });
   });
   it("charges a reopened gallery only for new extras", () => {
     const base = { included: 10, price: 15, selects: Array.from({ length: 13 }, (_, i) => String(i)) };
@@ -116,12 +116,12 @@ describe("proofs", () => {
 
 describe("proof activity log", () => {
   it("logs opens once per device and diffs picks into pick and unpick", async () => {
-    const { track, device } = await import("@/lib/proofs/proof-model");
-    let v = track(undefined, "t1", { kind: "open", device: "iPhone · Safari", place: "San Jose, CA, US", name: "Maya" });
+    const { withViewerEvent, device } = await import("@/lib/proofs/proof-model");
+    let v = withViewerEvent(undefined, "t1", { kind: "open", device: "iPhone · Safari", place: "San Jose, CA, US", name: "Maya" });
     expect(v.name).toBe("Maya");
-    v = track(v, "t2", { picks: ["a", "b"] });
-    v = track(v, "t3", { picks: ["b", "c"] });
-    v = track(v, "t4", { kind: "open", device: "iPhone · Safari", looks: { a: 500_000 }, seconds: 9999 });
+    v = withViewerEvent(v, "t2", { picks: ["a", "b"] });
+    v = withViewerEvent(v, "t3", { picks: ["b", "c"] });
+    v = withViewerEvent(v, "t4", { kind: "open", device: "iPhone · Safari", looks: { a: 500_000 }, seconds: 9999 });
     expect(v.visits).toBe(2);
     expect(v.devices).toEqual(["iPhone · Safari"]);
     expect(v.picks).toEqual(["b", "c"]);

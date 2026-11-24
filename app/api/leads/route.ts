@@ -2,7 +2,7 @@ import { LEAD_PREFIX } from "@/lib/leads/leads";
 import { buryLead, findLead, leadSummaries, readLead, trashedIds, writeLead } from "@/lib/leads/lead-store";
 import { manualLead } from "@/lib/leads/lead-crm";
 import { patchLead } from "@/lib/leads/lead-patch";
-import { gate, noSeal, sealedGate } from "@/lib/leads/desk-route";
+import { gate, noSeal, sealedGate } from "@/lib/admin/gate";
 import { bodyOf, json } from "@/lib/http";
 
 /* ── the leads ───────────────────────────────────────────────────
@@ -14,7 +14,7 @@ import { bodyOf, json } from "@/lib/http";
  * - DELETE: the trash emptied, every lead in it deleted for good.
  * The rest of the desk's data sits beside this route: push, templates,
  * invoices, invoice-from, invoice-photo, tasks, log, stats, csv, import.
- * Behind the /admin gate (`lib/leads/desk-route.ts`), never cached.
+ * Behind the /admin gate (`lib/admin/gate.ts`), never cached.
  * ─────────────────────────────────────────────────────────────── */
 
 export const dynamic = "force-dynamic";

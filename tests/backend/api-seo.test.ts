@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi, beforeEach } from "vitest";
 import { SCOPED, githubToken, reply } from "./fakes";
-import { parseBeacon } from "@/lib/beacon";
+import { parseBeacon } from "@/lib/analytics/beacon";
 
 /* /api/seo (behind the GitHub gate, like /api/traffic) and the public
    click-and-scroll beacon that feeds its map. */

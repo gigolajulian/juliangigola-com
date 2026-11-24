@@ -1,9 +1,9 @@
 /* Reading, writing and pushing leads (KV, LEADS_KEY, web push). Server only: the
  * desk's components import the pure model from `lib/leads/leads.ts`. */
-import { canonical } from "@/lib/leads/canonical";
+import { canonical } from "@/lib/seal";
 import { sealer, type Sealer } from "@/lib/seal";
 import { notify, pushFor } from "./lead-push";
-import { appendLog, forgetLog, fresh } from "./activity-log";
+import { appendLog, forgetLog, newEvents } from "./activity-log";
 import { applyLeadEvent, LEAD_PREFIX, leadIdOf, leadStoreKey, leadSummary, trashDaysLeft, type Change, type Lead, type LeadSummary, type Person, type Sent } from "./leads";
 import { mailable } from "./lead-crm";
 import { everyKey, type InboxKV as KV } from "@/lib/kv";
@@ -55,13 +55,13 @@ export async function writeLead(kv: KV, s: Sealer, id: string, lead: Lead, from?
   }
   await kv.put(leadStoreKey(id), await s.seal(lead), { metadata: { s: meta } });
   // The log never blocks the lead: it is already stored.
-  if (from !== undefined) await appendLog(kv, s, id, lead, fresh(from?.events, lead.events)).catch(logged("activity log"));
+  if (from !== undefined) await appendLog(kv, s, id, lead, newEvents(from?.events, lead.events)).catch(logged("activity log"));
 }
 
 const CANON = "leads:canon";
 /**
  * Once: moves each lead stored before ids ignored Gmail dots and "+tags"
- * (`canonical` in lib/leads/canonical.ts) to its new id. A lead whose
+ * (`canonical` in lib/seal.ts) to its new id. A lead whose
  * new id is already taken stays put, for Merge on the desk. Returns how many moved.
  */
 export async function canonLeads(kv: KV, s: Sealer): Promise<number> {

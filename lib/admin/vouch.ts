@@ -1,4 +1,4 @@
-import { isGithubToken, REPO } from "@/lib/admin/admin-github";
+import { isGithubToken, REPO } from "@/lib/admin/github-repo";
 import { json } from "@/lib/http";
 import { sha256Hex } from "@/lib/token";
 
@@ -13,7 +13,7 @@ import { sha256Hex } from "@/lib/token";
  * Two gates, one copy each, so a change to how the site trusts a request is
  * a change in one place:
  * - `isAdmin`: every /admin data route checks it, directly or through `gate()`
- *   in `lib/leads/desk-route.ts`.
+ *   in `lib/admin/gate.ts`.
  *   The admin key (`x-admin-key`, checked against the `INBOX_KEY` secret) or a GitHub token that can push. `refuseAdmin` is
  *   the same gate as the 401 every one of those routes answers.
  * - `fromWorker`: the booking Worker calling the site (leads/gmail,

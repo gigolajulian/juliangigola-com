@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { WITH_BTS, titleCase } from "@/lib/work/work";
-import { PageFoot } from "@/components/site/chrome";
+import { PageFoot } from "@/components/site/foot";
 import { BtsCredit, BtsPageGrid } from "@/components/bts/bts";
 import { pad } from "@/lib/utils";
 

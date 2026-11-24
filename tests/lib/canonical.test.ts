@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { canonical } from "@/lib/leads/canonical";
+import { canonical } from "@/lib/seal";
 
 describe("canonical", () => {
   it("drops Gmail dots and +tags, leaves other domains as typed", () => {

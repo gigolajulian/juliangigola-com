@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { usePathname } from "next/navigation";
-import { MAX_CLICKS, type Beacon } from "@/lib/beacon";
+import { MAX_CLICKS, type Beacon } from "@/lib/analytics/beacon";
 
 /* ── click beacon ─────────────────────────────────────────────────
  * Feeds /admin's SEO tab its click and scroll map. Per page view it keeps

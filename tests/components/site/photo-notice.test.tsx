@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element -- a plain img is the fixture */
 import { beforeAll, describe, expect, it } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { PhotoNotice } from "@/components/photo-notice";
+import { PhotoNotice } from "@/components/site/photo-notice";
 
 beforeAll(() => {
   // jsdom has no Web Animations.

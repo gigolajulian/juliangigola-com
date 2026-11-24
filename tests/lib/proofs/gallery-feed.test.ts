@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { feed } from "@/lib/proofs/desk";
+import { feed } from "@/lib/proofs/proof-desk";
 import type { Viewer, ViewerEvent } from "@/lib/proofs/proof-model";
 
 /* Today's gallery activity (Julian 2026-11-15): every gallery's opens, picks, sends and downloads, newest first. */

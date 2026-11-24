@@ -7,10 +7,10 @@
  * ─────────────────────────────────────────────────────────────── */
 
 import { DAY_MS, TZ, WEEK_MS } from "@/lib/time-zone";
-import { canonical } from "@/lib/leads/canonical";
+import { canonical } from "@/lib/seal";
 import { isStage, STAGES, WON, type Lead, type LeadEvent, type Person, type ShootPlan, type Stage, type Task } from "./leads";
 import { balance, isSettled } from "./invoice";
-import { cell, paidTotal, type MasterEntry } from "./activity-log";
+import { csvCell, paidTotal, type MasterEntry } from "./activity-log";
 import { byCodeUnit } from "@/lib/utils";
 import { asRecord, isRecord } from "@/lib/json";
 
@@ -354,7 +354,7 @@ export function stats(all: (Lead & { id?: string })[], now: number, master: Mast
 export function leadsCsv(leads: Lead[], paid: Record<string, number> = {}): string {
   const cols = ["name", "email", "phone", "instagram", "company", "stage", "kind", "source", "quote", "paid total", "open balance", "lost reason", "first seen", "last activity", "booked for", "archived", "notes"] as const;
   const rows = leads.map((l) =>
-    [l.name, mailable(l.email) ? l.email : "", l.phone, l.ig, l.company, l.stage, l.kind, l.source, l.quote, paid[l.email] ?? 0, (l.invoices ?? []).filter((v) => !isSettled(v)).reduce((n, v) => n + balance(v), 0), l.lostReason, l.firstAt, l.lastAt, l.when, l.archivedAt ? "yes" : "", l.notes].map(cell).join(","),
+    [l.name, mailable(l.email) ? l.email : "", l.phone, l.ig, l.company, l.stage, l.kind, l.source, l.quote, paid[l.email] ?? 0, (l.invoices ?? []).filter((v) => !isSettled(v)).reduce((n, v) => n + balance(v), 0), l.lostReason, l.firstAt, l.lastAt, l.when, l.archivedAt ? "yes" : "", l.notes].map(csvCell).join(","),
   );
   return [cols.join(","), ...rows].join("\r\n") + "\r\n";
 }

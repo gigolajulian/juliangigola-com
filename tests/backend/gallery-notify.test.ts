@@ -3,7 +3,7 @@ import { POST } from "@/app/api/proof/[token]/route";
 import { sealer } from "@/lib/seal";
 import { cleanSettings, type Proof } from "@/lib/proofs/proof-model";
 import { readProof, writeProof } from "@/lib/proofs/proof-store";
-import { digestMail, worthMail } from "@/lib/email/proof-mail";
+import { digestMail, worthMail } from "@/lib/proofs/proof-mail";
 import { finalize } from "@/lib/proofs/submit";
 import { daily } from "@/worker/index";
 import { FakeKV, LEADS_KEY } from "./fakes";

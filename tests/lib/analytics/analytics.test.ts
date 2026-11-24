@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { reply } from "../backend/fakes";
+import { reply } from "../../backend/fakes";
 import { ACCOUNT, cloudflare, engineSql, rumVisits, searchConsole, sitePath } from "@/lib/analytics";
 
-/* The admin's read-only doors to Cloudflare analytics (`lib/analytics.ts`). */
+/* The admin's read-only doors to Cloudflare analytics (`lib/analytics/index.ts`). */
 
 afterEach(() => vi.unstubAllGlobals());
 

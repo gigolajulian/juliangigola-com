@@ -1,9 +1,9 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { CLIENT_MARKS } from "@/lib/clients-data";
+import { CLIENT_MARKS } from "@/lib/work/clients-data";
 
-/* The generated client marks (`lib/clients-data.ts`). */
+/* The generated client marks (`lib/work/clients-data.ts`). */
 
 describe("CLIENT_MARKS", () => {
   it("gives every mark a positive scale and something to draw", () => {

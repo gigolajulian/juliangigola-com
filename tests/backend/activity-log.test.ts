@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { recordLead } from "@/lib/leads/lead-store";
 import { sealer } from "@/lib/seal";
 import { applyLeadEvent, type Lead } from "@/lib/leads/leads";
-import { fresh, readLog, readMaster } from "@/lib/leads/activity-log";
+import { newEvents, readLog, readMaster } from "@/lib/leads/activity-log";
 import { FakeKV, LEADS_KEY, INBOX_KEY as KEY } from "./fakes";
 import { desk } from "./desk-routes";
 import { byCodeUnit } from "@/lib/utils";
@@ -136,11 +136,11 @@ describe("old invoices", () => {
   });
 });
 
-describe("fresh", () => {
+describe("newEvents", () => {
   it("returns only the events the earlier copy did not have", () => {
     const a = { at: t(0), kind: "inquiry" as const };
     const b = { at: t(1), kind: "stage" as const, note: "Quoted" };
-    expect(fresh([a], [a, b])).toEqual([b]);
-    expect(fresh(undefined, [a])).toEqual([a]);
+    expect(newEvents([a], [a, b])).toEqual([b]);
+    expect(newEvents(undefined, [a])).toEqual([a]);
   });
 });

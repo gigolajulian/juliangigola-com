@@ -7,7 +7,7 @@ import { LINKABLE, UNLISTED } from "@/lib/work/work";
 import { BOOK_MENU, BOOKING_PAGES } from "@/lib/booking/service-pages";
 import { SESSIONS } from "@/lib/booking/catalog";
 import { CAMPUS_GUIDES } from "@/lib/graduation/campus-guides";
-import { SESSION_SEO } from "@/lib/seo";
+import { SESSION_SEO } from "@/lib/og/seo";
 
 /* The dynamic pages' static params and metadata: which addresses are
    prerendered, the canonical each one claims, and an empty answer (the

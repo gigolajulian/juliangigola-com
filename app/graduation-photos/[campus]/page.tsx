@@ -3,11 +3,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { shareOg } from "@/lib/og/share";
 import { LdJson } from "@/components/site/ld-json";
-import { PageFoot } from "@/components/site/chrome";
+import { PageFoot } from "@/components/site/foot";
 import { CampusSpots } from "@/components/booking/campus-spots";
 import { CAMPUS_GUIDES, campusGuide, campusHref } from "@/lib/graduation/campus-guides";
 import { getProject } from "@/lib/work/work";
-import { SITE } from "@/lib/seo";
+import { SITE } from "@/lib/og/seo";
 
 /* ── a campus guide ───────────────────────────────────────────────
  * Where I shoot grad photos on one campus, under the graduation

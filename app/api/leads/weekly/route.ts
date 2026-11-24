@@ -1,4 +1,4 @@
-import { refuseWorker } from "@/lib/vouch";
+import { refuseWorker } from "@/lib/admin/vouch";
 import { readMaster } from "@/lib/leads/activity-log";
 import { sealedStore } from "@/lib/kv";
 import { everyLead } from "@/lib/leads/lead-store";

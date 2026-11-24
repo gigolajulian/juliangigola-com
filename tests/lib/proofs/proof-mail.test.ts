@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { alertLines, proofMail, proofUrl, receiptMail, sendClient, webImages } from "@/lib/email/proof-mail";
+import { alertLines, proofMail, proofUrl, receiptMail, sendClient, webImages } from "@/lib/proofs/proof-mail";
 import type { Proof } from "@/lib/proofs/proof-model";
 
 /* The proof mails: what the client and Julian read, and the send that

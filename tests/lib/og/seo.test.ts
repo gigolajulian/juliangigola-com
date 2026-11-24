@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { DISCIPLINE_SEO, ldJson, serviceGraph, siteGraph, SITE } from "@/lib/seo";
+import { DISCIPLINE_SEO, ldJson, serviceGraph, siteGraph, SITE } from "@/lib/og/seo";
 import { formatPrice, SESSION_TYPES } from "@/lib/booking/catalog";
 import { projectFacts, shareMeta, shareOg } from "@/lib/og/share";
 import { BOOKING_URL, RESPONSE_TIME } from "@/lib/site";

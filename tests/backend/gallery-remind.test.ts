@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { GET, POST } from "@/app/api/proof/route";
 import { sealer } from "@/lib/seal";
-import { reminderMail } from "@/lib/email/proof-mail";
+import { reminderMail } from "@/lib/proofs/proof-mail";
 import { pushFor } from "@/lib/leads/lead-push";
 import { closingSoon, remindState, type Proof } from "@/lib/proofs/proof-model";
 import { readProof, writeProof } from "@/lib/proofs/proof-store";

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { authorised, canPush, fromWorker, refuseAdmin, refuseWorker } from "@/lib/vouch";
+import { authorised, canPush, fromWorker, refuseAdmin, refuseWorker } from "@/lib/admin/vouch";
 import { AdminError, isLocked, loadErrorText, LOCKED } from "@/lib/admin/admin-call";
-import { SCOPED, githubToken, reply } from "../backend/fakes";
+import { SCOPED, githubToken, reply } from "../../backend/fakes";
 
 /* The gate on /api/inbox and /api/leads, /api/traffic and /api/seo: a token passes only
    when its owner can push AND the token itself was granted the write. No

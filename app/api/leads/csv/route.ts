@@ -1,6 +1,6 @@
 import { clientsCsv } from "@/lib/leads/sync/sheet-sync";
 import { eventsCsv, readMaster } from "@/lib/leads/activity-log";
-import { sealedGate } from "@/lib/leads/desk-route";
+import { sealedGate } from "@/lib/admin/gate";
 import { NO_STORE } from "@/lib/http";
 
 /* GET every lead as CSV, or with `?events` every event on the activity log. Behind the /admin gate. */

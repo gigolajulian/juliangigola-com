@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { partOf, sunsetLabel, sunHint, tone, weatherAt, weatherWord } from "@/lib/booking/sky";
+import { partOf, sunsetLabel, sunHint, skyColors, weatherAt, weatherWord } from "@/lib/booking/sky";
 
 // Pacific wall time to an instant: the offsets are the real ones for these dates.
 const at = (ymd: string, hhmm: string, off: string) => Date.parse(`${ymd}T${hhmm}:00${off}`);
@@ -14,12 +14,12 @@ test("sunset in San Jose follows the season and DST", () => {
 });
 
 test("the hours run gold, coral, cobalt, and never purple", () => {
-  expect(hue(tone(at("2026-11-26", "10:00", "-08:00")).dark)).toBeGreaterThan(60); // gold
-  expect(hue(tone(at("2026-11-26", "17:00", "-08:00")).dark)).toBeLessThan(45); // coral
-  expect(hue(tone(at("2026-11-26", "19:00", "-08:00")).dark)).toBeGreaterThan(240); // cobalt
+  expect(hue(skyColors(at("2026-11-26", "10:00", "-08:00")).dark)).toBeGreaterThan(60); // gold
+  expect(hue(skyColors(at("2026-11-26", "17:00", "-08:00")).dark)).toBeLessThan(45); // coral
+  expect(hue(skyColors(at("2026-11-26", "19:00", "-08:00")).dark)).toBeGreaterThan(240); // cobalt
   for (const ymd of ["2026-01-15", "2026-03-09", "2026-06-21", "2026-11-02"]) {
     for (let h = 10; h <= 20; h += 0.25) {
-      const c = tone(Date.parse(`${ymd}T12:00:00Z`) + (h - 12) * 36e5 + 8 * 36e5);
+      const c = skyColors(Date.parse(`${ymd}T12:00:00Z`) + (h - 12) * 36e5 + 8 * 36e5);
       const hh = hue(c.dark);
       expect(hh > 285 && hh < 345, `${ymd} ${h}: ${c.dark}`).toBe(false);
     }
@@ -27,12 +27,12 @@ test("the hours run gold, coral, cobalt, and never purple", () => {
 });
 
 test("a June evening is still warm where November's is blue", () => {
-  expect(hue(tone(at("2026-06-21", "19:00", "-07:00")).dark)).toBeLessThan(80);
-  expect(hue(tone(at("2026-11-26", "19:00", "-08:00")).dark)).toBeGreaterThan(240);
+  expect(hue(skyColors(at("2026-06-21", "19:00", "-07:00")).dark)).toBeLessThan(80);
+  expect(hue(skyColors(at("2026-11-26", "19:00", "-08:00")).dark)).toBeGreaterThan(240);
 });
 
 test("the light ground gets the darker set", () => {
-  const t = tone(at("2026-11-26", "10:00", "-08:00"));
+  const t = skyColors(at("2026-11-26", "10:00", "-08:00"));
   expect(light(t.light)).toBeLessThanOrEqual(0.5);
   expect(light(t.dark)).toBeGreaterThan(0.8);
 });

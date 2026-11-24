@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { DEPOSIT as BY_SESSION } from "@/lib/booking/paid";
+import { DEPOSIT as BY_SESSION } from "@/lib/leads/deposit-terms";
 import { balance, cleanInvoice, shortDate, depositOfLead, dueOf, invoiceNo, MAX_INVOICE_ROWS, mmyy, namesInvoice, overdue, usdTrim, type InvoiceDetails } from "@/lib/leads/invoice";
 
 describe("invoice", () => {

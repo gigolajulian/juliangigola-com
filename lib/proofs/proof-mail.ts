@@ -8,7 +8,7 @@
 import { TZ } from "@/lib/time-zone";
 import { NAME_INK, NAME_W } from "@/lib/email/email-logo";
 import { SIG_DARK, SIG_HTML, SIG_TEXT } from "@/lib/email/email-signature";
-import { extras, isTestEmail, publicId, shotOrder, type Proof, type ViewerEvent } from "@/lib/proofs/proof-model";
+import { extraFrames, isTestEmail, publicId, shotOrder, type Proof, type ViewerEvent } from "@/lib/proofs/proof-model";
 import { byCodeUnit } from "@/lib/utils";
 
 const FROM = { name: "Julian Gigola", email: "book@juliangigola.com" };
@@ -144,7 +144,7 @@ const fileList = (p: Proof) => p.selects.map((id) => {
 
 /** The receipt the client gets when they send. */
 export function receiptMail(p: Proof) {
-  const x = extras(p.selects.length, p.included, p.price);
+  const x = extraFrames(p.selects.length, p.included, p.price);
   const files = numberList(p);
   const paid = p.paid ? `$${(p.paid.amount / 100).toFixed(2)}` : "";
   const summary: [string, string][] = [["Selected", String(p.selects.length)], ["Included", String(p.included)], ["Extra", String(x.n)], ...(paid ? [["Paid", paid] as [string, string]] : [])];
@@ -162,7 +162,7 @@ ${rows(summary)}
   return { subject: "Selects are in", html, text, attachments: logos() };
 }
 
-/** Julian's alert to hello@: plain lines for `alertHello()` in lib/email/hello-mail. */
+/** Julian's alert to hello@: plain lines for `alertHello()` in `lib/email/hello-mail.ts`. */
 export function alertLines(p: Proof): { subject: string; lines: string[] } {
   const paid = p.paid ? `, $${(p.paid.amount / 100).toFixed(0)} paid${p.paid.pending ? " by bank, clearing in about 4 business days" : ""}` : "";
   return {

@@ -2,7 +2,7 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { lockOp } from "@/lib/booking/engine";
 import { cleanHours, type Hours } from "@/lib/booking/rules";
 import { TZ } from "@/lib/time-zone";
-import { refuseAdmin } from "@/lib/vouch";
+import { refuseAdmin } from "@/lib/admin/vouch";
 import { bodyOf, json, upstreamError } from "@/lib/http";
 
 /* ── Julian's open hours, from the lead desk (Hours) ──────────────

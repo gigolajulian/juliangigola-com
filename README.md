@@ -56,6 +56,7 @@ All 74 projects and 1,131 frames were migrated off the old Format site.
 | `lib/work/work.ts` | The only module the app reads work from. Holds the editorial decisions: what is featured, what leads the homepage, how categories group. |
 | `lib/work/work-types.ts` | Shapes for the above. |
 | `lib/booking/catalog.ts` | The session list the /book stepper, the homepage and the service pages read. |
+| `lib/leads/deposit-terms.ts` | Which sessions take a deposit and how much. Client-safe; booking, the invoices and the Stripe import read it. |
 | `lib/photos.ts` | Photo picks for the hero, the doors, the call card and About. |
 | `lib/site.ts` | Reply-time promise and the booking-calendar URL. |
 
@@ -76,9 +77,11 @@ All 74 projects and 1,131 frames were migrated off the old Format site.
 | `components/dev/` | The `?debug` overlay and the DialKit copy button. Dev only. |
 | `lib/motion/` | Shared motion: the lazy GSAP loader, springs, throws, wheel and rubberband. |
 | `lib/flags/` | Query-string and session flags for features on trial. |
-| `lib/og/` | Share cards and share metadata. |
-| `lib/email/` | Mail to clients and to the studio inbox, with the logo and signature. |
-| `lib/seal.ts` | AES-GCM sealing for leads, proofs, contracts and the activity log in KV. |
+| `lib/og/` | Share cards, share metadata and search metadata with the JSON-LD graph (`lib/og/seo.ts`). |
+| `lib/admin/` | The /admin gate (`lib/admin/gate.ts`, `lib/admin/vouch.ts`), the GitHub calls the editor makes and the admin fetch. |
+| `lib/analytics/` | The Cloudflare and Search Console reads for /admin, and the click-and-scroll beacon. |
+| `lib/email/` | Mail to the studio inbox, with the logo and signature. Imports no domain code; the proof mails are in `lib/proofs/proof-mail.ts`. |
+| `lib/seal.ts` | AES-GCM sealing for leads, proofs, contracts and the activity log in KV, and `canonical()`, the one spelling of an address the sealed id is made from. |
 | `lib/storage.ts` | Browser storage that never throws. |
 | `lib/token.ts` | SHA-256 and random ids from Web Crypto. |
 | `lib/later.ts` | Work that runs after the response (`waitUntil` in the Worker). |
@@ -184,7 +187,7 @@ mails it to hello@ through Cloudflare Email Sending
 sealed with `LEADS_KEY`) and adds a row in Notion when `NOTION_TOKEN` is set.
 The store comes first: a failed mail or Notion call never loses the enquiry.
 
-`/admin` reads it with either credential in `lib/vouch.ts`: the admin key
+`/admin` reads it with either credential in `lib/admin/vouch.ts`: the admin key
 (the `x-admin-key` header, checked against the `INBOX_KEY` Worker secret) or a
 GitHub token that can push. With neither, every read is refused.
 
@@ -287,6 +290,7 @@ portfolio behind a login — it is the wrong tool here.
 | --- | --- |
 | `wrangler.jsonc` | Worker name, `nodejs_compat`, and the static asset directory. |
 | `open-next.config.ts` | Deliberately bare — the defaults cover this site. |
+| `book/` | `book.juliangigola.com`, the old booking address, as a Worker of its own (`juliangigola-book`). `book/worker.js` 302s every page to `juliangigola.com/book` (the old session paths to their `/book/<slug>` page) and serves only the images in `book/public/` that old link cards point at. Not built with the site: deploy it by hand with `npx wrangler deploy -c book/wrangler.jsonc`. |
 | `image-loader.ts` | Rewrites every frame onto Cloudflare Image Transformations. Off unless `NEXT_PUBLIC_IMAGE_CDN=1`, because `/cdn-cgi/` exists only on a real zone. |
 | `.env.example` | Every variable by name, which are secrets, and where each is set. No values. |
 

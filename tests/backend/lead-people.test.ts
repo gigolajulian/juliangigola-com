@@ -147,7 +147,7 @@ describe("gallery mail", () => {
   });
 
   it("still reaches the client when a copy address is refused", async () => {
-    const { sendClient } = await import("@/lib/email/proof-mail");
+    const { sendClient } = await import("@/lib/proofs/proof-mail");
     const tries: { cc?: string[] }[] = [];
     const mailer = { send: async (m: { cc?: string[] }) => { tries.push(m); if (m.cc) throw new Error("bad cc"); } };
     expect(await sendClient(mailer as never, BRAND, { subject: "s", html: "<p>", text: "t", attachments: [] }, ["bad@x.co"])).toBe(true);
