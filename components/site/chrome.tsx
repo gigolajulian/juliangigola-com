@@ -15,8 +15,8 @@ import { noSubscribe } from "@/lib/utils";
 
 
 /* Motion that is not in the master (the splash, the page zoom, the pointer
-   mark, tilt, glass light, fades) stays off unless `?v3motion` is on for
-   the tab (`app/layout.tsx` sets `data-v3motion`). */
+   mark, tilt, glass light, fades) runs by default and stays off when `?v3motion=0`
+   turned it off for the tab (`app/layout.tsx` sets `data-v3motion`). */
 export function MotionGate({ children, fallback = null }: { children: React.ReactNode; fallback?: React.ReactNode }) {
   const on = React.useSyncExternalStore(noSubscribe, () => document.documentElement.hasAttribute("data-v3motion"), () => false);
   return <>{on ? children : fallback}</>;
@@ -322,7 +322,7 @@ function HeaderBar() {
   /* Over the homepage cover it waits until the big name has scrolled under
      it; on every other page it is there from the start. */
   const [past, setPast] = React.useState(false);
-  /* ?v3motion (mock https://claude.ai/artifact/VDtydGRZFjpd4W1kibeqBm, 4b):
+  /* With V3 motion on (mock https://claude.ai/artifact/VDtydGRZFjpd4W1kibeqBm, 4b):
      it starts as the name's top reaches it, the name shrinks into the
      wordmark and the bar unrolls from its top edge. */
   const dock = React.useSyncExternalStore(noSubscribe, () => home && !mtscroll() && document.documentElement.hasAttribute("data-v3motion") && !matchMedia("(prefers-reduced-motion: reduce)").matches, () => false);
