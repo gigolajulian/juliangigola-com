@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Draft } from "@/lib/admin/publish";
-import { reply } from "./fakes";
+import { reply } from "../../backend/fakes";
 
 /* `lib/admin/publish.ts`: the editor reading the repo and committing its
    draft. GitHub's Git Data calls (`commitFiles`, `readFile`) are stood in;

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { FakeEmail } from "./fakes";
+import { FakeEmail } from "../../backend/fakes";
 import { cancelledSubject, confirmMail, confirmOf, sendCancelled, sendConfirm, timeRange, type Confirm } from "@/lib/booking/confirm";
 import { depositPaid, type BookingRecord } from "@/lib/booking/engine";
 import { SIG_DARK, SIG_HTML, SIG_TEXT } from "@/lib/email/email-signature";

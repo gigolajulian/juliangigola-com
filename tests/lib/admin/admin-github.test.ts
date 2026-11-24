@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { reply } from "./fakes";
+import { reply } from "../../backend/fakes";
 import { TOKEN_STORE, credentials, listDirectory, readFile } from "@/lib/admin/admin-github";
 
 /* The GitHub calls /admin makes (`lib/admin/admin-github.ts`), against a stubbed fetch. */

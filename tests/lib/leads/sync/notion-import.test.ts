@@ -3,7 +3,7 @@ import { sealer } from "@/lib/leads/lead-crypto";
 import { readLead, recordLead } from "@/lib/leads/lead-store";
 import { readLog } from "@/lib/leads/activity-log";
 import { importNotion } from "@/lib/leads/sync/notion-import";
-import { FakeKV, LEADS_KEY } from "./fakes";
+import { FakeKV, LEADS_KEY } from "../../../backend/fakes";
 
 /* Past Notion rows (`lib/leads/sync/notion-import.ts`): quiet, fill only what is empty, once. */
 

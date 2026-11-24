@@ -3,7 +3,7 @@ import { contractStep } from "@/lib/contracts/contract-lead";
 import { readLead, writeLead } from "@/lib/leads/lead-store";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { applyLeadEvent } from "@/lib/leads/leads";
-import { FakeKV, LEADS_KEY } from "./fakes";
+import { FakeKV, LEADS_KEY } from "../../backend/fakes";
 
 /* A contract's step on its lead (`lib/contracts/contract-lead.ts`): the
    Contract paper and a timeline line, and never a throw, because the

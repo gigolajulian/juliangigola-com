@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { FakeStore } from "./fakes";
+import { FakeStore } from "../../backend/fakes";
 import {
   bookOwn,
   cancelOwn,

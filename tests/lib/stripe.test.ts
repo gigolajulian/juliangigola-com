@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { stripe } from "@/lib/stripe";
-import { reply } from "./fakes";
+import { reply } from "../backend/fakes";
 
 /* `lib/stripe.ts`: one call to Stripe's API. A form makes it a POST with a
    pinned API version; a refusal throws with Stripe's status attached. */

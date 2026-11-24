@@ -14,10 +14,12 @@
  *
  * The suites:
  *   backend   tests/backend (Vitest, request-level: the API routes, the
- *             contact action, the book Worker, with fake KV and email),
- *             then the scripts/check-*.mjs self-checks. Seconds.
- *   frontend  route types, tsc, eslint and the lib unit tests. About a
- *             minute. The browser checks (tests/ui at the six ratios and the
+ *             contact action, the book Worker, with fake KV and email) and
+ *             the server-side lib unit tests in tests/lib, then the
+ *             scripts/check-*.mjs self-checks. Seconds.
+ *   frontend  route types, tsc, eslint, the client-side lib unit tests,
+ *             then the component tests (tests/components, jsdom). A few
+ *             minutes. The browser checks (tests/ui at the six ratios and the
  *             perf suite's layout, `scripts/perf/run.mjs --ui --rebuild`) run
  *             in CI on every pull request, not here (Julian, 2026-10-12).
  *
@@ -45,8 +47,10 @@ const RULES = [
   ["none", /^(docs\/|\.claude\/|\.github\/|\.githooks\/)|^HANDOFF[\w-]*\.md$|\.md$|^[^/]+\.png$|^\.gitignore$/],
   // Both: what every part of the site is built from.
   ["both", /^(package(-lock)?\.json|next\.config\.ts|tsconfig\.json|vitest\.config\.ts|eslint\.config\.mjs|proxy\.ts|middleware\.ts|open-next\.config\.ts|scripts\/test\/)/],
-  // Server lib: the booking, leads, admin, email and proofs folders and the root server modules. tests/backend covers them.
+  // Server lib: the booking, leads, admin, email and proofs folders and the root server modules. tests/lib and tests/backend cover them.
   ["both", /^lib\/(booking|leads|admin|email|proofs)\/|^lib\/(proofs?|proof-[\w-]+|stripe|hello-mail|http|vouch|inbox|sheet|analytics)\.ts$/],
+  // The lib unit tests: the backend project runs most, the frontend project the client-side few.
+  ["both", /^tests\/lib\//],
   // The server side: API routes, the contact action, the book Worker,
   // the inbox and the /admin plumbing, and their tests.
   ["backend", /^(app\/api\/|app\/contact\/actions\.ts$|app\/[\w.-]+\/route\.ts$|book\/|wrangler\.jsonc?$|tests\/backend\/|scripts\/check-)/],
@@ -95,6 +99,7 @@ const FRONTEND = [
   ["npx", "tsc", "--noEmit"],
   ["npx", "eslint"],
   ["npx", "vitest", "run", "--project", "frontend"],
+  ["npx", "vitest", "run", "--project", "components"],
 ];
 // Backend first: it takes seconds.
 const failed = (backend && steps("backend", BACKEND)) || (frontend && steps("frontend", FRONTEND));

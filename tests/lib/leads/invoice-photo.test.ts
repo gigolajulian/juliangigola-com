@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 // Relative imports: the coverage scanner resolves `@/` under src/, which this repo does not have.
-import { COL, place } from "../../lib/leads/invoice-photo";
+import { COL, place } from "../../../lib/leads/invoice-photo";
 
 /* Design B's photo column: the photo covers the box, `z` zooms past cover,
    `x`/`y` slide it like CSS object-position. The canvas half is browser only. */

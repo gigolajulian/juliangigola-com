@@ -3,7 +3,7 @@ import { recordLead } from "@/lib/leads/lead-store";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { readLog } from "@/lib/leads/activity-log";
 import { importStripe } from "@/lib/leads/sync/stripe-import";
-import { FakeKV, LEADS_KEY, leadOf } from "./fakes";
+import { FakeKV, LEADS_KEY, leadOf } from "../../../backend/fakes";
 
 /* Past Stripe payments onto the log (`lib/leads/sync/stripe-import.ts`), against a fake Stripe. */
 

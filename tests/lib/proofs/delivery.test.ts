@@ -1,18 +1,18 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 // Relative imports: the coverage scanner resolves `@/` under src/, which this repo does not have.
-import { openDelivery, storeFinal } from "../../lib/proofs/delivery";
-import { crc32 } from "../../lib/proofs/zip";
-import { sealer } from "../../lib/leads/lead-crypto";
-import { finalKey, PREVIEW_W, THUMB_W, type Proof } from "../../lib/proofs/proof-model";
-import { writeProof } from "../../lib/proofs/proof-store";
-import { FakeKV, LEADS_KEY } from "./fakes";
+import { openDelivery, storeFinal } from "../../../lib/proofs/delivery";
+import { crc32 } from "../../../lib/proofs/zip";
+import { sealer } from "../../../lib/leads/lead-crypto";
+import { finalKey, PREVIEW_W, THUMB_W, type Proof } from "../../../lib/proofs/proof-model";
+import { writeProof } from "../../../lib/proofs/proof-store";
+import { FakeKV, LEADS_KEY } from "../../backend/fakes";
 
 /* lib/proofs/delivery: a final streamed into R2 with its byte count and
    CRC, its web copies made after, dropped when Images fails; and
    openDelivery reading the request's bindings. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
-vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx, () => {}));
+vi.mock("@opennextjs/cloudflare", async () => (await import("../../backend/fakes")).cloudflareMock(ctx, () => {}));
 
 // The Workers runtime's FixedLengthStream: a pass-through here, its length checked.
 class FixedLengthStream extends TransformStream<Uint8Array, Uint8Array> {

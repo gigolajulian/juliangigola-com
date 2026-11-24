@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { alertHello } from "@/lib/email/hello-mail";
-import { FakeEmail } from "./fakes";
+import { FakeEmail } from "../../backend/fakes";
 
 /* `lib/email/hello-mail.ts`: mail to hello@. True once sent; a mail too big with
    its pictures goes again without them. */

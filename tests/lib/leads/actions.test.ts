@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { COOLDOWN_MS, DAILY_CAP, dayKey } from "@/lib/leads/enquiry";
-import { FakeEmail, FakeKV, reply } from "./fakes";
+import { FakeEmail, FakeKV, reply } from "../../backend/fakes";
 import { byCodeUnit } from "@/lib/utils";
 
 /* The contact form's server action (`lib/leads/enquiry-action.ts`). Its one

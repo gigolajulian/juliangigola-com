@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 // Relative import: the coverage scanner resolves `@/` under src/, which this repo does not have.
-import { burst } from "../../components/splash/burst-splash";
+import { burst } from "../../../components/splash/burst-splash";
 
 /* The name splash on every page but the homepage: it builds the wordmark
    and loader in the sheet, runs only when asked, and hands the page over

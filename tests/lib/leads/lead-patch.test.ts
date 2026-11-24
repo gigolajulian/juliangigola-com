@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 // Relative imports: the coverage scanner resolves `@/` under src/, which this repo does not have.
-import { patchLead } from "../../lib/leads/lead-patch";
-import { sealer } from "../../lib/leads/lead-crypto";
-import { readLead, writeLead } from "../../lib/leads/lead-store";
-import { applyLeadEvent, type Lead } from "../../lib/leads/leads";
-import { FakeKV, LEADS_KEY } from "./fakes";
+import { patchLead } from "../../../lib/leads/lead-patch";
+import { sealer } from "../../../lib/leads/lead-crypto";
+import { readLead, writeLead } from "../../../lib/leads/lead-store";
+import { applyLeadEvent, type Lead } from "../../../lib/leads/leads";
+import { FakeKV, LEADS_KEY } from "../../backend/fakes";
 
 /* patchLead called directly: what each field does to the stored lead, what
    it refuses, and that a refused patch writes nothing. Fake people only. */
