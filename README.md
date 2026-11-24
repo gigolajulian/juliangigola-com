@@ -172,8 +172,9 @@ mails it to hello@ through Cloudflare Email Sending
 sealed with `LEADS_KEY`) and adds a row in Notion when `NOTION_TOKEN` is set.
 The store comes first: a failed mail or Notion call never loses the enquiry.
 
-`/admin` reads it with either credential in `lib/vouch.ts`: the `INBOX_KEY`
-header or a GitHub token that can push. With neither, every read is refused.
+`/admin` reads it with either credential in `lib/vouch.ts`: the admin key
+(the `x-admin-key` header, checked against the `INBOX_KEY` Worker secret) or a
+GitHub token that can push. With neither, every read is refused.
 
 Cloudflare Access in front of `/admin` is still worth having, but it is not
 what protects this.

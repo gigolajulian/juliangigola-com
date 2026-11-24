@@ -101,7 +101,7 @@ export function TodayDesk({ leads, size, open, show }: { leads: LeadSummary[]; s
   React.useEffect(() => {
     adminCall<{ available?: number; pending?: number }>("/api/money").then(setMoney).catch(() => setMoney("Not connected"));
   }, []);
-  // Traffic answers to the inbox key or the GitHub token, like the other admin routes.
+  // Traffic answers to the admin key or the GitHub token, like the other admin routes.
   const [traffic, setTraffic] = React.useState<Spark | string | null>(null);
   React.useEffect(() => {
     if (!Object.keys(authed()).length) return queueMicrotask(() => setTraffic("Inbox key or GitHub token needed"));

@@ -14,7 +14,7 @@ const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
 vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));
 
 const req = (method: string, { body, query = "", key = KEY, type }: { body?: BodyInit; query?: string; key?: string; type?: string } = {}) =>
-  new Request(`https://juliangigola.com/api/proof${query}`, { method, body, headers: { "x-inbox-key": key, ...(type ? { "content-type": type } : {}) } });
+  new Request(`https://juliangigola.com/api/proof${query}`, { method, body, headers: { "x-admin-key": key, ...(type ? { "content-type": type } : {}) } });
 const json = (o: unknown) => JSON.stringify(o);
 // The handlers are typed as maybe answering nothing; they always answer.
 const call = async (h: (r: Request) => Promise<Response | undefined>, r: Request) => (await h(r))!;

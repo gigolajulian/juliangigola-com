@@ -107,7 +107,7 @@ const key = process.env.INBOX_KEY;
 if (!key) throw new Error("Set INBOX_KEY in this shell first (the Worker secret). Nothing was sent.");
 const res = await fetch(`${SITE}/api/leads/import/notion`, {
   method: "POST",
-  headers: { "x-inbox-key": key, "content-type": "application/json" },
+  headers: { "x-admin-key": key, "content-type": "application/json" },
   body: JSON.stringify({ people: body, dry: flag !== "--go" }),
 });
 console.log(res.status, JSON.stringify(await res.json()));

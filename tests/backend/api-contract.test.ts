@@ -29,7 +29,7 @@ beforeEach(async () => {
 });
 
 const admin = (method: string, body?: unknown, query = "") =>
-  new Request(`https://juliangigola.com/api/contract${query}`, { method, headers: { "x-inbox-key": KEY }, ...(body ? { body: JSON.stringify(body) } : {}) });
+  new Request(`https://juliangigola.com/api/contract${query}`, { method, headers: { "x-admin-key": KEY }, ...(body ? { body: JSON.stringify(body) } : {}) });
 const made = async () => (await (await POST(admin("POST", { lead: LEAD }))).json()) as { contract: Contract; url: string };
 // The desk fills the "to be set" lines before sending; the tests do the same.
 const make = async () => { const o = await made(); return { ...o, contract: { ...o.contract, text: o.contract.text.replace(/to be set/gi, "agreed") } }; };

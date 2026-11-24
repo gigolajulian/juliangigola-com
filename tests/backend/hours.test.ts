@@ -14,7 +14,7 @@ const { openNow } = await import("@/lib/booking/slots");
 const { liveHours } = await import("@/lib/booking/engine");
 
 const req = (method: string, body?: unknown, key = KEY) =>
-  new Request("https://juliangigola.com/api/booking/hours", { method, headers: { "x-inbox-key": key }, body: body === undefined ? undefined : JSON.stringify(body) });
+  new Request("https://juliangigola.com/api/booking/hours", { method, headers: { "x-admin-key": key }, body: body === undefined ? undefined : JSON.stringify(body) });
 
 beforeEach(() => {
   forgetToken();

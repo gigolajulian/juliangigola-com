@@ -7,7 +7,7 @@ import { bodyOf, json, upstreamError } from "@/lib/http";
 /* ── Julian's open hours, from the lead desk (Hours) ──────────────
  * GET the week and the dates that differ; PUT the whole thing back. Kept
  * in the booking lock, which every booking rechecks against. Opens with
- * the /admin gate: the inbox key or a GitHub token
+ * the /admin gate: the admin key or a GitHub token
  * that can push to the repository.
  * ─────────────────────────────────────────────────────────────── */
 

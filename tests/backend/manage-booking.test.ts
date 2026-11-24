@@ -92,7 +92,7 @@ async function paid(start: string) {
   return { id: link[1], t: link[2] };
 }
 const post = (id: string, body: unknown, key?: string) =>
-  change(new Request(`https://juliangigola.com/api/booking/${id}`, { method: "POST", body: JSON.stringify(body), headers: key ? { "x-inbox-key": key } : {} }), { params: Promise.resolve({ id }) });
+  change(new Request(`https://juliangigola.com/api/booking/${id}`, { method: "POST", body: JSON.stringify(body), headers: key ? { "x-admin-key": key } : {} }), { params: Promise.resolve({ id }) });
 
 describe("the link", () => {
   it("opens its own booking until a day after it, and nothing else", async () => {

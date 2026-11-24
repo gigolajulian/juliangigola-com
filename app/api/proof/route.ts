@@ -11,7 +11,7 @@ import { bodyOf, json } from "@/lib/http";
 
 /* ── proofs, Julian's side ────────────────────────────────────────
  * Lightroom (the publish service) and /admin Leads both call this, with the
- * same credentials as the Inbox: the INBOX_KEY header or a GitHub token that
+ * same credentials as the Inbox: the admin key header or a GitHub token that
  * can push to the repo. The client's side is `/api/proof/[token]`.
  *
  *   GET    ?list                       every gallery, from KV metadata

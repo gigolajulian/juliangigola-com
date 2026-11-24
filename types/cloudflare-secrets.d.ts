@@ -15,12 +15,14 @@
  */
 interface CloudflareEnv {
   /**
-   * Opens the inbox. Set with:
+   * The admin key: opens /admin and the desks (`refuseAdmin` in `lib/vouch.ts`). Set with:
    *
    *   wrangler secret put INBOX_KEY
    *
    * Any long random string. Pasted into /admin once, kept in that browser's
-   * `localStorage` beside the GitHub token, and sent as `x-inbox-key`.
+   * `localStorage` beside the GitHub token, and sent as `x-admin-key`.
+   * The secret keeps its old name: a Worker secret cannot be read back, so a
+   * rename to ADMIN_KEY needs Julian to paste the value again.
    */
   INBOX_KEY?: string;
 

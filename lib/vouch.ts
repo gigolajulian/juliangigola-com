@@ -14,7 +14,7 @@ import { sha256Hex } from "@/lib/utils";
  * a change in one place:
  * - `isAdmin`: /admin routes (inbox, calendar, contract, money, proof, booking
  *   hours and a booking's admin actions, seo, traffic).
- *   The `INBOX_KEY` header or a GitHub token that can push. `refuseAdmin` is
+ *   The admin key (`x-admin-key`, checked against the `INBOX_KEY` secret) or a GitHub token that can push. `refuseAdmin` is
  *   the same gate as the 401 every one of those routes answers.
  * - `fromWorker`: the booking Worker calling the site (leads/gmail,
  *   leads/mail, leads/sheet, leads/weekly, proof/daily), with `WORKER_KEY` as the bearer.
@@ -108,7 +108,7 @@ export const bearer = (request: Request): string | undefined =>
  * in a test under Node without a Workers shim.
  */
 export function authorised(request: Request, expected?: string) {
-  return sameSecret(request.headers.get("x-inbox-key"), expected);
+  return sameSecret(request.headers.get("x-admin-key"), expected);
 }
 
 async function sameSecret(given?: string | null, expected?: string) {
@@ -129,7 +129,7 @@ export async function refuseWorker(request: Request, secret?: string): Promise<R
   return json({ error: "Not authorized." }, 401);
 }
 
-/** The admin gate: the inbox key, or a GitHub token that can push. */
+/** The admin gate: the admin key, or a GitHub token that can push. */
 export async function isAdmin(request: Request, key?: string) {
   if (await authorised(request, key)) return true;
   const token = bearer(request);

@@ -17,7 +17,7 @@ const req = (method: string, { key = KEY, token, body, query = "" }: { key?: str
   new Request(URL_ + query, {
     method,
     body,
-    headers: { ...(key ? { "x-inbox-key": key } : {}), ...(token ? { authorization: `Bearer ${token}` } : {}) },
+    headers: { ...(key ? { "x-admin-key": key } : {}), ...(token ? { authorization: `Bearer ${token}` } : {}) },
   });
 
 let kv: FakeKV;
@@ -185,7 +185,7 @@ describe("DELETE", () => {
 describe("/api/inbox: the gate on every verb and bad bodies", () => {
   const KEY = "inbox-key-for-tests";
   const req = (method: string, body?: string, key: string | null = KEY, query = "") =>
-    new Request(`https://juliangigola.com/api/inbox${query}`, { method, body, headers: key ? { "x-inbox-key": key } : {} });
+    new Request(`https://juliangigola.com/api/inbox${query}`, { method, body, headers: key ? { "x-admin-key": key } : {} });
 
   let kv: FakeKV;
   let k: string;

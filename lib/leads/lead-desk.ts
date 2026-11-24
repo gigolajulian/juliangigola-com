@@ -10,7 +10,7 @@ import { isLate, myMove, paperDue, quoteNudge, renewDue, type Lead, type LeadPat
 
 export type Filter = "today" | "traffic" | "seo" | "site" | "device" | "needs" | "open" | "upcoming" | Stage | "snoozed" | "archived" | "trash" | "more" | "new" | "stats" | "money" | "templates" | "hours" | "proofs" | "licences";
 
-/** The inbox key if one was pasted, else the /admin GitHub token. */
+/** The admin key if one was pasted, else the /admin GitHub token. */
 export const authed = () => credentials(window.localStorage.getItem(KEY_STORE) ?? "");
 
 /** A failed admin request, with the status the route answered. */

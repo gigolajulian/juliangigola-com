@@ -22,7 +22,7 @@ export async function* everyKey<M>(inbox: NonNullable<CloudflareEnv["INBOX"]>, p
  * The admin gate, then the binding: `kv`, the opened sealer `s` (null without LEADS_KEY, refused per
  * route with `noSeal`, since push and templates need none), Notion and VAPID.
  *
- * Opens with the /admin credentials in `lib/vouch.ts`: the `INBOX_KEY` header, compared in constant time,
+ * Opens with the /admin credentials in `lib/vouch.ts`: the admin key (`x-admin-key`, the `INBOX_KEY` secret), compared in constant time,
  * or a GitHub token that can push. With neither set, it refuses everything: an enquiry or a lead carries
  * somebody's name, their email and what they want.
  */

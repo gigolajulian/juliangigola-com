@@ -16,7 +16,7 @@ import { bodyOf, json, upstreamError } from "@/lib/http";
  * site's engine stops offering it at once, and it shows in
  * Google Calendar too. Only events with that mark can be unblocked here:
  * this route never deletes a booking. Extras live in INBOX (`lib/booking/slots.ts`).
- * The /admin gate: the inbox key or a GitHub token that can push.
+ * The /admin gate: the admin key or a GitHub token that can push.
  * ─────────────────────────────────────────────────────────────── */
 
 export const dynamic = "force-dynamic";

@@ -138,7 +138,7 @@ describe("gallery mail", () => {
     const sent: { to: string; cc?: string[] }[] = [];
     const r2 = { put: vi.fn(async () => {}), get: vi.fn(async () => null), delete: vi.fn(async () => {}) };
     ctx.env = { ...ctx.env, PROOFS: r2, CLIENT_EMAIL: { send: async (m: { to: string; cc?: string[] }) => void sent.push(m) } };
-    const post = (body: object) => proof.POST(new Request("https://juliangigola.com/api/proof", { method: "POST", body: JSON.stringify(body), headers: { "x-inbox-key": KEY } }));
+    const post = (body: object) => proof.POST(new Request("https://juliangigola.com/api/proof", { method: "POST", body: JSON.stringify(body), headers: { "x-admin-key": KEY } }));
     const { token } = await (await post({ action: "create", name: "Brand Co" }))!.json();
     const p = (await readProof(kv as never, s, token))!;
     await writeProof(kv as never, s, { ...p, email: BRAND, finals: [{ id: "a1", file: "a.jpg", w: 10, h: 10, bytes: 1, crc: 1 }] });

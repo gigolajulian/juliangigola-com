@@ -18,7 +18,7 @@ beforeEach(async () => {
   const p = { token: TOKEN, name: "Test", frames: ["a", "b", "c"].map((id) => ({ id, file: `${id}.jpg`, w: 1, h: 1 })), selects: ["a", "c"], notes: { a: "keep", b: "x" } };
   await writeProof(kv as never, (await sealer(LEADS_KEY))!, p as unknown as Proof);
 });
-const del = async (query: string) => (await DELETE(new Request(`https://juliangigola.com/api/proof${query}`, { method: "DELETE", headers: { "x-inbox-key": KEY } })))!;
+const del = async (query: string) => (await DELETE(new Request(`https://juliangigola.com/api/proof${query}`, { method: "DELETE", headers: { "x-admin-key": KEY } })))!;
 
 describe("DELETE /api/proof", () => {
   it("drops several frames in one write, and one frame the old way", async () => {
