@@ -10,7 +10,7 @@
  * at the hand-over. The homepage's opening since 2026-11-07 (Julian: "deploy").
  *
  * Written into the page as source and run as the document is read, like
- * the burst (`intro.tsx`): it touches nothing but the browser and its
+ * the intro (`intro.tsx`): it touches nothing but the browser and its
  * arguments. A frame that has not decoded by its turn is left out.
  * ─────────────────────────────────────────────────────────────── */
 export function split(sizes: string[][], heroes: { d: [number, string][]; l: [number, string][] }) {
@@ -172,7 +172,7 @@ export function split(sizes: string[][], heroes: { d: [number, string][]; l: [nu
        transform and clip-path on the photograph at its final size, never
        its box: animating left/top/width/height left Safari painting it a
        frame behind, a 1 to 2px sliver at the edge (JG - MAC, v3.0.111).
-       Sampled, and the one easing runs over the samples, as the burst. */
+       Sampled, and the one easing runs over the samples. */
     const real = [...document.querySelectorAll<HTMLImageElement>(".a-cover .slides img.on")].find((i) => i.offsetWidth > 0);
     const r = (real ?? document.querySelector(".a-cover .slides"))?.getBoundingClientRect();
     if (r && ready.has(hero) && hero.naturalWidth > 0) {

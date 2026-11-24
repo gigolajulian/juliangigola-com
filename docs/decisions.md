@@ -60,6 +60,7 @@ states its rule inline. `SPEC-home-scroll.md` citations point at
 - 2026-11-07: split splash on the homepage.
 - 2026-10-28: `?splash=burst` keeps the burst.
 - 2026-10-30: other pages get the name-only splash.
+- 2026-11-24: the name splash goes (unreachable since the homepage intro took "/"); `?splash=split` stays as a test link (Julian: "yes both").
 - 2026-11-09: Any other character falls through to Inter Tight.
 - 2026-11-10: The proof gate's wall (the default; `?proofwall=0` for the plain gate) is always dark.
 - 2026-11-15: `p3` is on for everyone unless the tab chose otherwise.
@@ -339,7 +340,7 @@ states its rule inline. `SPEC-home-scroll.md` citations point at
 - 2026-10-23: on the Commissions stepper), per page, in memory only.
 - 2026-10-23: button toward it, and a drop there is taken.
 
-### components/splash/burst-splash.ts
+### components/splash/burst-splash.ts (removed 2026-11-24)
 - 2026-10-31: the desktop splash went from 4.7s to about 3.2s.
 - 2026-10-31: the wordmark never animates out. The first frame stacks in 3D. No opening out and no pause.
 
