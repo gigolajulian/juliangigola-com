@@ -16,7 +16,9 @@ vi.setSystemTime(PIN);
    and mails a new confirmation. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
-vi.mock("@opennextjs/cloudflare", async () => (await import("../fakes")).cloudflareMock(ctx, (p) => p));
+// The free call's ctx.waitUntil work (the client's mail among it), kept so a test can wait for it.
+const background = vi.hoisted(() => [] as Promise<unknown>[]);
+vi.mock("@opennextjs/cloudflare", async () => (await import("../fakes")).cloudflareMock(ctx, (p) => background.push(p)));
 const { POST: book } = await import("@/app/api/book/route");
 const { POST: change } = await import("@/app/api/booking/[id]/route");
 const { bookDeposit } = await import("@/lib/booking/deposit");
@@ -233,6 +235,7 @@ describe("cancel", () => {
   it("a free call cancels with no money", async () => {
     const res = await book(new Request("https://juliangigola.com/api/book", { method: "POST", body: JSON.stringify({ slug: "music-call", start: wednesday(7), timeZone: "America/Los_Angeles", name: "QA", email: "qa@example.com", via: "Phone" }) }));
     const { id } = await res.json();
+    await Promise.all(background.splice(0));
     const t = String(client.sent[0].text).match(/t=([\w.-]+)&do=cancel/)![1];
     expect(await (await post(id, { t, action: "cancel" })).json()).toMatchObject({ refunded: null, record: { paid: false } });
   });

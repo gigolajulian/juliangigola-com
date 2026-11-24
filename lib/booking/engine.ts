@@ -7,7 +7,8 @@ import { takesDeposit, LEGACY_DEPOSIT } from "@/lib/leads/deposit-terms";
 import { recordLead, type LeadStore } from "@/lib/leads/lead-store";
 import { toNotion } from "@/lib/leads/sync/notion-lead";
 import { openNow, type HoursKV } from "@/lib/booking/slots";
-import { statusOf } from "@/lib/http";
+import { HttpError, statusOf } from "@/lib/http";
+import { asRecord } from "@/lib/json";
 
 const MINUTE_MS = 6e4;
 const HOUR_MS = 36e5;
@@ -72,7 +73,7 @@ const cap = (s: unknown, n = 500) => (typeof s === "string" ? s.trim().slice(0, 
 /** The visitor's booking, checked, or the reason it is not one. `call`: a free call (`app/api/book`), not a paid session. */
 export type Parsed = { ok: true; booking: Booking & { via?: CallVia } } | { ok: false; reason: string };
 export function parseBooking(raw: unknown, call = false): Parsed {
-  const b = (raw ?? {}) as { [k: string]: unknown };
+  const b = asRecord(raw);
   const slug = cap(b.slug);
   if (call ? !EVENTS[slug]?.call : !takesDeposit(slug)) return { ok: false, reason: call ? "Not a call." : "Not a paid session." };
   const start = cap(b.start);
@@ -120,8 +121,15 @@ export const clientView = (r: BookingRecord) => ({ id: r.id, slug: r.slug, sessi
 /** The record by its id. */
 export const findBooking = (store: Store, id: string) => store.get<BookingRecord>(recKey(id));
 export const saveBooking = (store: Store, r: BookingRecord) => store.put(recKey(r.id), r);
-/** Julian's hours as set from the lead desk, or the defaults. */
-export const readHours = async (store: Store) => (await store.get<Hours>("hours")) ?? DEFAULT_HOURS;
+/** Today's date in Julian's zone, "2026-11-24": the hours drop the dates before it. */
+export const todayPT = (now = Date.now()) => new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(now);
+/** Julian's hours as set from the lead desk, or the defaults. Dates before today are dropped: they can never be booked again. */
+export const readHours = async (store: Store, now = Date.now()): Promise<Hours> => {
+  const h = (await store.get<Hours>("hours")) ?? DEFAULT_HOURS;
+  if (!h.days) return h;
+  const today = todayPT(now);
+  return { ...h, days: Object.fromEntries(Object.entries(h.days).filter(([d]) => d >= today)) };
+};
 export const writeHours = (store: Store, h: Hours) => store.put("hours", h);
 export const allBookings = async (store: Store) => [...(await store.list<BookingRecord>({ prefix: "b:" })).values()];
 
@@ -356,7 +364,7 @@ export async function lockOp<K extends keyof LockOps>(env: LockEnv, op: K, arg: 
   if (!res.ok) {
     // A failing lock may answer plain text: keep the status when the body is not JSON.
     const out = (await res.json().catch(() => ({}))) as { error?: string };
-    throw new Error(`booking lock ${op}: ${out.error ?? res.status}`);
+    throw new HttpError(`booking lock ${op}: ${out.error ?? res.status}`, res.status);
   }
   return (await res.json()) as LockOps[K][1];
 }

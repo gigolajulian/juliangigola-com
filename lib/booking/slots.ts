@@ -136,6 +136,8 @@ export function icsBusy(text: string): Busy[] {
 /* A feed's spans by link, and a feed still being read (`at` Infinity), so
    callers at the same moment share one read. */
 const feeds = new Map<string, { at: number; busy: Promise<Busy[]> }>();
+/** Empties this isolate's feed cache, for tests. */
+export const forgetFeeds = () => feeds.clear();
 /* QA (#562): /api/slots is public and waits on every feed, so a feed gets
    2.5 seconds and its spans are kept five minutes, in this isolate and in
    the colo's cache (keyed by a hash: the link is private). */
@@ -178,7 +180,7 @@ async function readFeed(src: string) {
   return busy;
 }
 
-/** What is busy between `from` and `to` on hello@ and every extra calendar, each span tagged with its calendar's label; `failed` lists extras that could not be read. */
+/** What is busy between `from` and `to` on hello@, every extra calendar, and whole SGH shift days (fails closed like hello@), each span tagged with its calendar's label; `failed` lists extras that could not be read. */
 export async function busyAll(secret: string | undefined, from: number, to: number, extras: Extra[] = []) {
   const failed = new Set<string>();
   const google = extras.filter((x) => !isIcs(x.src));
@@ -228,7 +230,7 @@ async function shiftDays(secret: string | undefined, from: number, to: number): 
     .map((e) => ({ start: midnight(e.start!, false), end: midnight(e.end!, true) }));
 }
 
-/** What is busy between `from` and `to`, on hello@ and the extras in `kv`. */
+/** What is busy between `from` and `to`, on hello@, the extras in `kv`, and whole SGH shift days (fails closed like hello@). */
 export async function busyBetween(secret: string | undefined, from: number, to: number, kv?: HoursKV): Promise<Busy[]> {
   const { busy, failed } = await busyAll(secret, from, to, await readExtras(kv));
   if (failed.length) console.error("calendars skipped", failed.length);

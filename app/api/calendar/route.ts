@@ -1,9 +1,8 @@
-import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { TZ, DAY_MS } from "@/lib/time-zone";
 import { gcal } from "@/lib/google";
 import { looksLikeEmail } from "@/lib/utils";
 import { busyAll, EXTRA_KEY, isIcs, readExtras, instantIn, type Extra } from "@/lib/booking/slots";
-import { refuseAdmin } from "@/lib/admin/vouch";
+import { gate } from "@/lib/admin/gate";
 import { bodyOf, json, statusOf, upstreamError } from "@/lib/http";
 
 /* ── the Leads app's Calendar ─────────────────────────────────────
@@ -25,14 +24,12 @@ const DAY = /^\d{4}-\d{2}-\d{2}$/;
 const TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
 const MAX_EXTRAS = 10;
 
+/** The desk's admin gate and INBOX (`lib/admin/gate.ts`), then the calendar's own binding. */
 async function calendarGate(request: Request) {
-  const { env } = await getCloudflareContext({ async: true });
-  // Who is asking first: what this build is missing is for /admin only.
-  const denied = await refuseAdmin(request, env.INBOX_KEY);
-  if (denied) return { error: denied };
-  if (!env.INBOX) return { error: json({ error: "No INBOX bound." }, 503) };
-  if (!env.GCAL_OAUTH) return { error: json({ error: "The calendar is not connected (GCAL_OAUTH)." }, 503) };
-  return { env };
+  const g = await gate(request, "No INBOX bound.");
+  if (g.error) return { error: g.error };
+  if (!g.env.GCAL_OAUTH) return { error: json({ error: "The calendar is not connected (GCAL_OAUTH)." }, 503) };
+  return { env: g.env };
 }
 
 type GEvent = {

@@ -12,8 +12,10 @@ vi.mock("@opennextjs/cloudflare", async () => (await import("../fakes")).cloudfl
 const req = (method: string, body?: unknown, headers: Record<string, string> = { "x-admin-key": KEY }) =>
   new Request("https://juliangigola.com/api/booking/hours", { method, headers, body: body === undefined ? undefined : JSON.stringify(body) });
 
+let storage: FakeStore;
 beforeEach(() => {
-  ctx.env = { GCAL_OAUTH: OAUTH, INBOX_KEY: KEY, BOOKING_LOCK: fakeLock(new BookingLock({ storage: new FakeStore() }, { GCAL_OAUTH: OAUTH })) };
+  storage = new FakeStore();
+  ctx.env = { GCAL_OAUTH: OAUTH, INBOX_KEY: KEY, BOOKING_LOCK: fakeLock(new BookingLock({ storage }, { GCAL_OAUTH: OAUTH })) };
 });
 afterEach(() => vi.unstubAllGlobals());
 
@@ -36,5 +38,18 @@ describe("/api/booking/hours", () => {
     expect(res.status).toBe(200);
     expect(res.headers.get("cache-control")).toBe("no-store");
     expect((await (await GET(req("GET"))).json()).hours.week).toEqual(week);
+  });
+
+  it("drops dates already past when it reads them back", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(Date.parse("2026-11-24T20:00:00Z"));
+    try {
+      const week = [null, null, null, null, null, null, null];
+      // Stored on an earlier day, before 2026-11-20 had passed.
+      await storage.put("hours", { week, days: { "2026-11-20": null, "2026-11-24": [600, 720], "2026-12-01": null } });
+      expect((await (await GET(req("GET"))).json()).hours).toEqual({ week, days: { "2026-11-24": [600, 720], "2026-12-01": null } });
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

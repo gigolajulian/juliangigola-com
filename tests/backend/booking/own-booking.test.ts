@@ -15,7 +15,7 @@ vi.setSystemTime(new Date("2026-11-11T20:00:00Z")); // a Wednesday, noon in San 
    Stripe's webhook, and both file the Inbox row and the client's mail. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
-// The route's ctx.waitUntil work (hello@'s alert), kept so a test can wait for it.
+// The route's ctx.waitUntil work (the filing, the client's mail, hello@'s alert), kept so a test can wait for it.
 const background = vi.hoisted(() => [] as Promise<unknown>[]);
 vi.mock("@opennextjs/cloudflare", async () => (await import("../fakes")).cloudflareMock(ctx, (p) => background.push(p)));
 const settled = () => Promise.all(background.splice(0));
@@ -88,6 +88,9 @@ describe("POST /api/book (a free call)", () => {
     expect(inserts[0].url).toContain("conferenceDataVersion=1");
     expect(inserts[0].body).toMatchObject({ summary: "Editorial call: QA Test", attendees: [{ email: "qa@example.com" }] });
     expect(store.data.get(`b:${out.id}`)).toMatchObject({ eventId: "ev1", email: "qa@example.com", call: true });
+    // The visitor's answer does not wait on the filing or the mail.
+    expect(client.sent).toHaveLength(0);
+    await settled();
     expect(kv.json(kv.puts[0])).toMatchObject({ type: "booking", name: "QA Test" });
     expect(client.sent).toHaveLength(1);
     expect(String(client.sent[0].html)).not.toContain("cal.com");

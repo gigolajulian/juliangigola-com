@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- fakes of Google's JSON */
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { forgetToken } from "@/lib/google";
-import { busyAll, EXTRA_KEY, icsBusy, readExtras } from "@/lib/booking/slots";
+import { busyAll, EXTRA_KEY, forgetFeeds, icsBusy, readExtras } from "@/lib/booking/slots";
 import { FakeKV } from "../fakes";
 import { byCodeUnit } from "@/lib/utils";
 
@@ -27,6 +27,7 @@ let freebusy: unknown;
 
 beforeEach(() => {
   forgetToken();
+  forgetFeeds();
   kv = new FakeKV();
   ctx.env = { INBOX: kv, INBOX_KEY: KEY, GCAL_OAUTH: SECRET };
   calls = [];

@@ -233,22 +233,12 @@ export async function sendCancelled(
 }
 
 /** After a booking: file it on the lead desk, mail the client their "You're in.", log that mail on the lead.
-    `defer` (the free call's `ctx.waitUntil`) runs the filing and the log in the background, the log after the
-    filing so the mail lands on its row; without it each step is awaited in turn. `confirm` is built after the filing starts. */
-export async function afterBooked(
-  env: BookingEnv,
-  r: BookingRecord,
-  confirm: () => Promise<Confirm>,
-  o: { deposit?: string; email?: string; defer?: (p: Promise<unknown>) => void } = {},
-) {
-  const filed = recordBooking(env, r, o.deposit);
-  if (o.defer) o.defer(filed);
-  else await filed;
+    Each step is awaited in turn, the log after the filing so the mail lands on its row. A caller that must not
+    wait (the free call) hands the whole of it to `waitUntil`. `confirm` is built once the filing is done. */
+export async function afterBooked(env: BookingEnv, r: BookingRecord, confirm: () => Promise<Confirm>, o: { deposit?: string; email?: string } = {}) {
+  await recordBooking(env, r, o.deposit);
   const sent = await sendConfirm(env.CLIENT_EMAIL, await confirm());
-  if (!sent) return;
-  const log = () => logMail(env, o.email ?? r.email, sent, { to: "client", kind: "confirm", booking: r.id });
-  if (o.defer) o.defer(filed.then(log));
-  else await log();
+  if (sent) await logMail(env, o.email ?? r.email, sent, { to: "client", kind: "confirm", booking: r.id });
 }
 
 /** After a client moves a booking: a line on the lead, a mail to hello@ (with the refund it now earns when that
