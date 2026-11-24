@@ -2,12 +2,13 @@
 
 import * as React from "react";
 import loader from "@/image-loader";
+import { burst } from "@/components/splash/burst-splash";
 import { split } from "@/components/splash/split-splash";
 import { HERO } from "@/lib/home/photos";
 import { keepNames } from "@/lib/keep-names";
 import { sessionSet } from "@/lib/utils";
 
-/* The split splash: the run of frames (the portfolio's first covers,
+/* The homepage's split splash: the run of frames (the portfolio's first covers,
    `SPLASH_RUN`, passed in from the server), then the hero's first
    photograph, each sized for a whole screen: [phone, wider]. The hero
    goes as the page's whole ladder (`deviceSizes` in next.config.ts), so
@@ -25,8 +26,8 @@ const HERO_FULL = {
 /* ── the opening ──────────────────────────────────────────────────
  * The splash is decided by the inline script in `layout.tsx` before the
  * first paint (a first visit, not admin, no reduced motion, unless
- * `?v3motion=0`; only `?splash=split` sets it, see `lib/flags/boot.ts`) and played by
- * `split-splash.ts`, run as the document is read. The
+ * `?v3motion=0`) and played by `split-splash.ts` on the homepage and
+ * `burst-splash.ts` elsewhere, both run as the document is read. The
  * stylesheet keeps this layer hidden unless that script has set
  * `data-intro`, so a visitor with no JavaScript is never shut behind a
  * curtain that cannot lift.
@@ -44,7 +45,7 @@ function seen() {
    only from the server's HTML, never again on a client render. */
 const sheet = (frames: string[]) =>
   '<div class="jg-sheet-ground"></div>' +
-  `<script>${keepNames(`(${seen.toString()})();(${split.toString()})(${JSON.stringify(sized(frames))},${JSON.stringify(HERO_FULL)})`)}</script>`;
+  `<script>${keepNames(`(${seen.toString()})();(${burst.toString()})();(${split.toString()})(${JSON.stringify(sized(frames))},${JSON.stringify(HERO_FULL)})`)}</script>`;
 
 export function Intro({ run: frames }: { run: string[] }) {
   return (

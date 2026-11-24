@@ -65,7 +65,7 @@ export function HomeCovers() {
     };
     const onScroll = () => (raf ||= requestAnimationFrame(read));
     el.addEventListener("scroll", onScroll, { passive: true });
-    // on D the covers driver tells the item (motion/engine.ts tell) instead of moving the row's scroll
+    // ?mt2=1: on D the covers driver tells the item (motion/engine.ts tell) instead of moving the row's scroll
     const sec = el.closest("section")!;
     const told = (e: Event) => {
       const { cur: i, now } = (e as CustomEvent<{ cur?: number; now: boolean }>).detail;

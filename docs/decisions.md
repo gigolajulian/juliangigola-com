@@ -327,7 +327,6 @@ states its rule inline. `SPEC-home-scroll.md` citations point at
 ### components/splash/burst-splash.ts
 - 2026-10-31: the desktop splash went from 4.7s to about 3.2s.
 - 2026-10-31: the wordmark never animates out. The first frame stacks in 3D. No opening out and no pause.
-- 2026-11-24: deleted. The head script never set `data-splash="name"` once the homepage opening moved to components/home/intro.
 
 ### components/splash/jg-cover.ts
 - 2026-11-19: "open the booking page as a cutout and scale it smoothly", "centered", "only in the calendar", "on desktop and iPad", "make the JG smaller".
