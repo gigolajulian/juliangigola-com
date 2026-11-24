@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useSyncExternalStore } from "react";
+import * as React from "react";
 import { createPortal } from "react-dom";
 import { noSubscribe } from "@/lib/utils";
 
@@ -12,9 +12,9 @@ import { noSubscribe } from "@/lib/utils";
    Mounted on <body>: <main> carries a transform, which would pin a fixed bar
    to the page's bottom instead of the screen's. Nothing renders on the server, where there is no <body>. */
 export function ServiceBar({ name, rate, label, href }: { name: string; rate: string; label: string; href: string }) {
-  const on = useSyncExternalStore(noSubscribe, () => true, () => false);
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
+  const on = React.useSyncExternalStore(noSubscribe, () => true, () => false);
+  const ref = React.useRef<HTMLDivElement>(null);
+  React.useEffect(() => {
     const el = ref.current;
     if (!on || !el) return;
     const hero = document.querySelector("#p-service .sv-top .ctas");

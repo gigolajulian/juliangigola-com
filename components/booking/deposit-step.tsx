@@ -156,7 +156,7 @@ export function DepositStep({
   const calm = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
   const grow = (no: boolean, then: () => void) => {
     const b = payBtn.current;
-    const card = box.current?.closest<HTMLElement>("#book-card") ?? box.current;
+    const card = box.current;
     if (!editorial || !b || !card || calm()) return then();
     withGsap((gsap) => {
       const c = card.getBoundingClientRect();

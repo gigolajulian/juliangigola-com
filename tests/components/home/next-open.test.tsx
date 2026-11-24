@@ -61,4 +61,24 @@ describe("v4 next open", () => {
     const { nextOpenLabel } = await load();
     expect(nextOpenLabel("2026-11-20T17:00:00Z", "America/Los_Angeles")).toBe("Fri Nov 20");
   });
+
+  it("asks from today in Pacific time, so an evening still finds today's times", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-11-24T01:30:00Z")); // 5:30 PM Pacific on Nov 23, already Nov 24 in UTC
+    try {
+      const { slotWindow } = await load();
+      expect(slotWindow("America/Los_Angeles")).toEqual({ start: "2026-11-23", end: "2027-01-22" });
+      expect(slotWindow("Asia/Tokyo").start).toBe("2026-11-23"); // a zone ahead still starts at Julian's today
+      // 1:30 AM Pacific on Nov 24 is still Nov 23 in Honolulu: the visitor's earlier day wins
+      expect(slotWindow("Pacific/Honolulu", new Date("2026-11-24T09:30:00Z")).start).toBe("2026-11-23");
+      fetchMock.mockResolvedValue(slots({}));
+      const { useNextOpen } = await load();
+      renderHook(() => useNextOpen("portraits"));
+      await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+      const q = new URL(String(fetchMock.mock.calls[0][0]), "http://x").searchParams;
+      expect(q.get("start")! <= "2026-11-23").toBe(true); // never the UTC day
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });

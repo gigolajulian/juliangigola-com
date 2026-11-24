@@ -8,7 +8,8 @@ import { JG_COVER, mountCover } from "@/components/splash/jg-cover";
 import { useRouter } from "next/navigation";
 import { BookTimes } from "@/components/booking/book-times";
 import { PageFoot } from "@/components/site/foot";
-import { Calendar, DotList, weekdayDateLabel, localDayKey } from "@/components/booking/flow";
+import { Calendar, DotList } from "@/components/booking/flow";
+import { weekdayDateLabel, localDayKey } from "@/components/booking/picker/dates";
 import { Failed, Field, FlowShell, Hidden, useEnquiry, type Shell } from "@/components/enquiry/flow";
 import { duration } from "@/lib/booking/rules";
 import { LENGTH, SESSIONS, TAB_ORDER, priceLabel, type SessionSlug } from "@/lib/booking/catalog";
@@ -20,11 +21,15 @@ import { looksLikeEmail, noSubscribe } from "@/lib/utils";
    through the enquiry action. */
 
 const TILES: SessionSlug[] = TAB_ORDER.filter((x) => x !== "consultation");
-/* The route change remounts the tiles; the one picked by key takes focus back on mount. */
-let keyedAt = 0;
-const keepFocus = (el: HTMLButtonElement | null) => {
-  if (el && Date.now() - keyedAt < 3000) el.focus();
-};
+/* The session picked by key: the route change remounts the tiles, and the
+   first one drawn on that session's page takes the focus back and clears it. */
+let keyed: SessionSlug | null = null;
+/** Whether the tiles drawn for `at` are the ones a key pick opened; true once. */
+function takeKeyed(at: SessionSlug) {
+  if (keyed !== at) return false;
+  keyed = null;
+  return true;
+}
 
 function Tabs({ at }: { at: SessionSlug }) {
   const router = useRouter();
@@ -32,8 +37,14 @@ function Tabs({ at }: { at: SessionSlug }) {
      stays lit beside it while the route loads on a slow tablet. */
   const [tap, setTap] = React.useState<{ from: SessionSlug; x: SessionSlug } | null>(null);
   const cur = tap?.from === at ? tap.x : at;
+  const keepFocus = React.useCallback(
+    (el: HTMLButtonElement | null) => {
+      if (el && takeKeyed(at)) el.focus();
+    },
+    [at],
+  );
   const go = (x: SessionSlug) => {
-    markTab();
+    markTab(x);
     setTap({ from: at, x });
     router.replace(`/book/${x}`, { scroll: false });
   };
@@ -52,8 +63,8 @@ function Tabs({ at }: { at: SessionSlug }) {
           if (n < 0) return;
           e.preventDefault();
           (e.currentTarget.children[n] as HTMLElement).focus();
-          keyedAt = Date.now();
           go(TILES[n]);
+          markKeyed(TILES[n]);
         }}
       >
         {TILES.map((x, k) => (
@@ -143,7 +154,7 @@ export function BookFlow({ slug, tabs = true, h1 = false, startView }: { slug: S
         p.at === 1 ? (
           <>
             {p.sub ? <p className="f-where">{p.sub}</p> : null}
-            {more ? <More on={slug === "consultation"} go={(x) => (markTab(), router.replace(`/book/${x}`, { scroll: false }))} /> : null}
+            {more ? <More on={slug === "consultation"} go={(x) => (markTab(x), router.replace(`/book/${x}`, { scroll: false }))} /> : null}
           </>
         ) : undefined
       }
@@ -153,20 +164,32 @@ export function BookFlow({ slug, tabs = true, h1 = false, startView }: { slug: S
   return <BookTimes key={slug} path={S.cal} title={`Pick a time for ${S.name}`} skin={{ shell, name: S.name, from: S.from }} startView={startView} />;
 }
 
-/* When a session tab was last picked: the next booking page is the same
-   visit, and keeps the J and G that fill instead of the cover again. */
-let tabbedAt = 0;
-function markTab() {
-  tabbedAt = Date.now();
+/* A session tab was picked: the next booking page is the same visit, and
+   keeps the J and G that fill instead of the cover again. Set only when the
+   pick opens another page, which reads the flag once and clears it. */
+let tabbed = false;
+function markTab(x: SessionSlug) {
+  tabbed = location.pathname !== `/book/${x}`;
+  keyed = null;
+}
+/** The tab just picked was picked by key: its page's tiles take the focus. */
+function markKeyed(x: SessionSlug) {
+  if (tabbed) keyed = x;
 }
 
 export function SessionBook({ slug }: { slug: SessionSlug }) {
+  // the tab flag as read for this slug: a ref, since React's dev double effect would read it twice
+  const fromTab = React.useRef<{ slug: SessionSlug; tab: boolean } | null>(null);
   /* Reached by a move inside the site (the header's Book a session), the
      cover's script never runs: React runs no script it inserts. So it goes
      up here too, before the page paints; on a full load the script has put
      it up already and this does nothing. */
   React.useLayoutEffect(() => {
-    if (SESSIONS[slug].cal && Date.now() - tabbedAt > 3000) mountCover();
+    if (fromTab.current?.slug !== slug) {
+      fromTab.current = { slug, tab: tabbed };
+      tabbed = false;
+    }
+    if (SESSIONS[slug].cal && !fromTab.current.tab) mountCover();
   }, [slug]);
   // the script only in the server's markup: rendered on a move inside the site it would never run, and React warns
   const fromServer = React.useSyncExternalStore(noSubscribe, () => false, () => true);

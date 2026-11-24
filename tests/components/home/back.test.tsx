@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { render, renderHook } from "@testing-library/react";
+import { renderHook } from "@testing-library/react";
 import { dropSpot, keepSpot, spotHere, useBackHome } from "@/components/home/back";
 import { rememberPainted, resetPainted } from "@/components/cover/lightbox/painted";
-import { NavMemo } from "@/components/site/back-link";
+import { notePath } from "@/lib/nav-memo";
 
 /* The home keeps its own spot for Back from any page (components/home/back.ts): the block under the screen's top and
    how far into it, so a held block above that takes its height late cannot throw the page off. */
@@ -61,7 +61,8 @@ describe("home Back spot", () => {
     const told: unknown[] = [];
     sec.addEventListener("mt-tell", (e) => told.push((e as CustomEvent).detail));
     keepSpot({ b: "covers", off: 0, x: 900 });
-    render(<NavMemo />); // the root layout's: it hears the Back
+    notePath("/"); // the root layout's NavMemo: the home, then a page off it, then Back
+    notePath("/about");
     dispatchEvent(new PopStateEvent("popstate"));
     renderHook(() => useBackHome());
     expect(ims.map((im) => im.loading ?? im.getAttribute("loading"))).toEqual(["lazy", "lazy", "eager", "eager", "eager"]); // cover 4 of 5 and the two beside it
@@ -72,5 +73,29 @@ describe("home Back spot", () => {
     expect(face.style.backgroundColor).toBe(""); // the card colour stays the stylesheet's
     await new Promise((r) => setTimeout(r)); // decode resolved: the sleeve's own copy is on top, the under-copy goes
     expect(face.style.backgroundImage).toBe("");
+  });
+
+  it("a Back counts for the one home it brings back, not for a later one", () => {
+    block("hero", 0);
+    block("about", 3000);
+    const scrolls: number[] = [];
+    const scrollTo = window.scrollTo;
+    window.scrollTo = ((_x: unknown, y?: number) => void scrolls.push(Number(y))) as typeof window.scrollTo;
+    try {
+      notePath("/");
+      notePath("/about");
+      keepSpot({ b: "about", off: 40, x: 0 });
+      dispatchEvent(new PopStateEvent("popstate")); // Back to the home
+      const a = renderHook(() => useBackHome());
+      a.unmount();
+      expect(scrolls).toContain(3040); // put back on the kept spot
+      keepSpot({ b: "about", off: 40, x: 0 }); // left again by a link
+      const before = scrolls.length;
+      notePath("/");
+      renderHook(() => useBackHome()); // back by a link: the top, not the spot
+      expect(scrolls.length).toBe(before);
+    } finally {
+      window.scrollTo = scrollTo;
+    }
   });
 });

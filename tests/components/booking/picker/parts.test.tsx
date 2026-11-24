@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { clock, e164, minutesOf } from "@/components/booking/picker/parts";
-import { localDayKey } from "@/components/booking/flow";
+import { localDayKey } from "@/components/booking/picker/dates";
 
 /* The picker's pure helpers (`components/booking/picker/parts.tsx`):
    the phone number sent to /api/book, and the clock it prints. */

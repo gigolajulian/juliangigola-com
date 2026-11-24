@@ -49,8 +49,7 @@ export function usePicker({ path, title, className, skin, onPicked, startView }:
   }, []);
   const { length, needsWhere, session, days, state, paid, load } = useSlots(username, slug, tz);
   const [opt, setOpt] = React.useState("");
-  /** Who booked, for the page that follows. */
-  /* `via`: a call taken by video (its Google Meet link) or by phone. */
+  /* Who booked, for the page that follows; `via` is video (its Meet link) or phone. */
   const [booked, setBooked] = React.useState({ name: "", email: "", where: "", phone: "", via: "" });
   /* The picker is not drawn while held: the effects that measure it
      re-run on `held`, or they ran on nothing and the week never fitted. */

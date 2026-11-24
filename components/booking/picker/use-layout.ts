@@ -1,7 +1,7 @@
 import * as React from "react";
 import { withGsap } from "@/lib/motion/gsap-lazy";
 import { STEP_AT, type PickedTime, type Step } from "@/components/booking/picker/parts";
-import { localDayKey } from "@/components/booking/flow";
+import { localDayKey } from "@/components/booking/picker/dates";
 import { sessionGet, sessionSet } from "@/lib/storage";
 
 type Layout = {

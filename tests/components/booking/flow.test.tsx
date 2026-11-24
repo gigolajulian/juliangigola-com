@@ -4,7 +4,8 @@ import { fireEvent, render, screen } from "@testing-library/react";
 vi.mock("@/lib/leads/enquiry-action", () => ({ submitEnquiry: vi.fn() }));
 vi.stubGlobal("fetch", vi.fn(() => Promise.reject(new Error("offline"))));
 
-import { Calendar, DotList, localDayKey, monthCells, weekCells } from "@/components/booking/flow";
+import { Calendar, DotList } from "@/components/booking/flow";
+import { localDayKey, monthCells, weekCells } from "@/components/booking/picker/dates";
 import { clockLabel } from "@/lib/booking/clock";
 import { Failed, Field, FlowShell, Hidden, checkYou, first } from "@/components/enquiry/flow";
 

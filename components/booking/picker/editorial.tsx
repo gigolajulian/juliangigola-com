@@ -9,7 +9,7 @@ import { depositFor } from "@/lib/leads/deposit-terms";
 import { AHEAD, DAYS, minutesOf, MONTHS, STEP_AT, WEEKDAYS, WHERE, clock, zoneAbbr } from "@/components/booking/picker/parts";
 import type { CardCtx } from "@/components/booking/picker/use-picker";
 import { forgetTimes } from "@/components/booking/picker/use-slots";
-import { localDayKey } from "@/components/booking/flow";
+import { localDayKey } from "@/components/booking/picker/dates";
 import { usePickerLayout } from "@/components/booking/picker/use-layout";
 import { arrowMark, busyMark, okMarkOf } from "@/components/booking/picker/marks";
 
@@ -40,6 +40,9 @@ const grow = (e: React.FormEvent<HTMLTextAreaElement>) => {
   const frame = el.offsetHeight - el.clientHeight + parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
   el.style.height = `${Math.min(el.scrollHeight + el.offsetHeight - el.clientHeight, line * 5 + frame)}px`;
 };
+
+/* The month's weekday heads, Monday first, as its cells (`monthCells`). */
+const MONTH_HEAD = [...DAYS.slice(1), DAYS[0]];
 
 /* The card as a magazine page (editorial.css), the default. */
 export function EditorialCard({ c }: { c: CardCtx }) {
@@ -216,7 +219,7 @@ export function EditorialCard({ c }: { c: CardCtx }) {
                   </div>
                 ) : (
                   <div>
-                    <div className="ed-mhead label">{DAYS.map((d) => <span key={d}>{d}</span>)}</div>
+                    <div className="ed-mhead label">{MONTH_HEAD.map((d) => <span key={d}>{d}</span>)}</div>
                     <div className="ed-month">
                       {cells.map((d, k) => {
                         /* The days either side of the month, barely there. */

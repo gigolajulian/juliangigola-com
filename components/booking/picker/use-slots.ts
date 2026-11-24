@@ -2,7 +2,7 @@ import * as React from "react";
 import { takesDeposit } from "@/lib/leads/deposit-terms";
 import type { SlotsAnswer } from "@/lib/booking/slots";
 import { AHEAD } from "@/components/booking/picker/parts";
-import { localDayKey } from "@/components/booking/flow";
+import { localDayKey } from "@/components/booking/picker/dates";
 import { getJson } from "@/lib/http";
 import { DAY_MS } from "@/lib/time-zone";
 

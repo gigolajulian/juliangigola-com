@@ -9,7 +9,7 @@ export type { SessionType };
     `from` stays null until a price is set there. */
 export const SESSION_TYPES: SessionType[] = CONTENT.sessions;
 
-/** A starting price as the service pages, /book?classic and the structured data print it: null is "On request".
+/** A starting price as the service pages and the structured data print it: null is "On request".
     The session cards print `priceLabel` instead, which reads differently (no thousands comma, a call's length, a deposit). */
 export const formatPrice = (from: number | null): string =>
   from === null ? "On request" : `From $${from.toLocaleString("en-US")}`;
