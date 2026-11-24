@@ -34,7 +34,7 @@ import { TimeInput } from "@astryxdesign/core/TimeInput";
 import { NumberInput } from "@astryxdesign/core/NumberInput";
 import { ProgressBar } from "@astryxdesign/core/ProgressBar";
 import { Kbd } from "@astryxdesign/core/Kbd";
-import { References } from "@/components/admin/admin-inbox";
+import { References } from "@/components/desk/references";
 import { proofApi, type ProofRow } from "@/lib/proofs/desk";
 import { InvoiceRow, InvoiceSheetB } from "@/components/leads/invoice";
 import { ContractBlock } from "@/components/leads/contract";
