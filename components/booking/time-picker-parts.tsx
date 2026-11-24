@@ -1,6 +1,7 @@
 "use client";
 
-import { iso, type Shell } from "@/components/booking/flow";
+import { iso } from "@/components/booking/flow";
+import type { Shell } from "@/components/enquiry/flow";
 import { pad } from "@/lib/utils";
 import type { SlotsAnswer } from "@/lib/booking/slots";
 

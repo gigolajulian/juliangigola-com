@@ -14,7 +14,7 @@ vi.mock("@/components/booking/book-times", () => ({
     </div>
   ),
 }));
-vi.mock("@/components/contact/inquire-wall", () => ({ InquireWall: () => null }));
+vi.mock("@/components/enquiry/inquire-wall", () => ({ InquireWall: () => null }));
 vi.mock("@/components/dev/dial-copy-all", () => ({ DialCopyAll: () => null }));
 
 import { BookPicker, type Bookable } from "@/components/booking/book-picker";

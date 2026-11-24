@@ -10,7 +10,7 @@ import { dlabel } from "@/components/booking/flow";
 import { duration } from "@/lib/booking/rules";
 import { depositFor } from "@/lib/booking/paid";
 import { clockLabel } from "@/components/booking/flow";
-import type { Shell } from "@/components/booking/flow";
+import type { Shell } from "@/components/enquiry/flow";
 import { looksLikeEmail } from "@/lib/inbox";
 import { AHEAD, fromIso, iso, minutesOf, forgetTimes, STEP_AT, WHERE, clock, type StepsSkin } from "@/components/booking/time-picker-parts";
 import type { CardCtx } from "@/components/booking/use-picker";

@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Dialog } from "radix-ui";
-import { Check, Failed, Hidden, NEED_MSG, checkYou, first, useEnquiry } from "@/components/booking/flow";
+import { Check, Failed, Hidden, NEED_MSG, checkYou, first, useEnquiry } from "@/components/enquiry/flow";
 import { CHIP_TYPE, QUOTE_OPTS, type QuoteOpt } from "@/lib/home/data";
 import type { InquiryMode } from "./ctx";
 import { touchParityOn } from "./motion/touch-parity";
