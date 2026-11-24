@@ -148,12 +148,18 @@ async function feedKey(src: string) {
 function icsFeed(src: string): Promise<Busy[]> {
   const hit = feeds.get(src);
   if (hit && Date.now() - hit.at < 3e5) return hit.busy;
-  const pending = { at: Infinity, busy: readFeed(src) };
+  const pending = { at: Infinity, busy: capped(readFeed(src)) };
   feeds.set(src, pending);
   pending.busy.catch(() => {
     if (feeds.get(src) === pending) feeds.delete(src);
   });
   return pending.busy;
+}
+/* The whole read, the edge cache's match and put included, gets twice a fetch's time:
+   callers share the read in flight, so one that never settles would stall every one after it. */
+function capped<T>(read: Promise<T>): Promise<T> {
+  const limit = AbortSignal.timeout(FEED_MS * 2);
+  return Promise.race([read, new Promise<never>((_, no) => limit.addEventListener("abort", () => no(new Error("ICS timed out")), { once: true }))]);
 }
 async function readFeed(src: string) {
   const cache = edge();
