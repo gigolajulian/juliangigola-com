@@ -11,6 +11,23 @@ import { AHEAD, DAYS, iso, minutesOf, MONTHS, forgetTimes, STEP_AT, WEEKDAYS, WH
 import type { CardCtx } from "@/components/booking/use-picker";
 import { arrowMark, busyMark, okMarkOf } from "@/components/booking/picker-marks";
 
+/* A call (no deposit) shows its kind: a handset, or a camera for a video call. */
+const HANDSET = (
+  <svg aria-hidden viewBox="0 0 24 24" className="ed-handset" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round">
+    <path d="M5 3h3.5l1.5 4.5-2.25 1.5a11 11 0 0 0 5.25 5.25l1.5-2.25L19 13.5V17a2 2 0 0 1-2 2A16 16 0 0 1 3 5a2 2 0 0 1 2-2z" />
+  </svg>
+);
+const CAMERA = (
+  <svg aria-hidden viewBox="0 0 24 24" className="ed-handset" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round">
+    <rect x="2.5" y="6" width="13" height="12" rx="1.5" />
+    <path d="M15.5 10.5 21.5 7v10l-6-3.5z" />
+  </svg>
+);
+/** A session's length in words: "45 min", "1 hr 30 min". */
+const duration = (length: number) => (length >= 60 ? `${Math.floor(length / 60)} hr${length % 60 ? ` ${length % 60} min` : ""}` : `${length} min`);
+/** A US number as it is read out, (408) 555 0100; anything else as given. */
+const tel = (n: string) => (/^\+1\d{10}$/.test(n) ? `(${n.slice(2, 5)}) ${n.slice(5, 8)} ${n.slice(8)}` : n);
+
 /* The card as a magazine page (editorial.css), the default since 2026-10-17. */
 export function EditorialCard({ c }: { c: CardCtx }) {
   const { title, className, username, slug, tz, here, length, needsWhere, opt, setOpt, via, setVia, ask, setAsk, session, booked, days, view, anchor, pick, chosen, step, setStep, paid, deposit, root, error, ok, setOk, load, open, choose, showTimes, today, week, month, shift, daysBox, mstep, setMstep, switchView, slotsW, slotsRef, atStart, book, grow, refill, swipeProps, t, ap, until, date, sum } = c;
@@ -28,22 +45,10 @@ export function EditorialCard({ c }: { c: CardCtx }) {
   const at = step === "done" ? -1 : STEP_AT[step];
   /* A call (no deposit): a handset, its length in minutes, so it never reads as a clock time. */
   const call = !paid;
-  const handset = (
-    <svg aria-hidden viewBox="0 0 24 24" className="ed-handset" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round">
-      <path d="M5 3h3.5l1.5 4.5-2.25 1.5a11 11 0 0 0 5.25 5.25l1.5-2.25L19 13.5V17a2 2 0 0 1-2 2A16 16 0 0 1 3 5a2 2 0 0 1 2-2z" />
-    </svg>
-  );
-  const camera = (
-    <svg aria-hidden viewBox="0 0 24 24" className="ed-handset" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round">
-      <rect x="2.5" y="6" width="13" height="12" rx="1.5" />
-      <path d="M15.5 10.5 21.5 7v10l-6-3.5z" />
-    </svg>
-  );
-  const timer = length >= 60 ? `${Math.floor(length / 60)} hr${length % 60 ? ` ${length % 60} min` : ""}` : `${length} min`;
-  const tel = (n: string) => (/^\+1\d{10}$/.test(n) ? `(${n.slice(2, 5)}) ${n.slice(5, 8)} ${n.slice(8)}` : n);
+  const timer = duration(length);
   const bar = (
     <nav aria-label="Steps" className="ed-steps label">
-      {call ? <span className="ed-call">{step !== "pick" && (booked.via || via) === "Video" ? camera : handset}{step === "pick" ? "Call" : `${step === "done" ? booked.via || via : via} call`} · {timer}</span> : null}
+      {call ? <span className="ed-call">{step !== "pick" && (booked.via || via) === "Video" ? CAMERA : HANDSET}{step === "pick" ? "Call" : `${step === "done" ? booked.via || via : via} call`} · {timer}</span> : null}
       {(paid ? ["Date", "Details", "Deposit"] : ["Date", "Details"]).map((s, i) => {
         const back = at > i ? () => setStep(i ? "form" : "pick") : undefined;
         return (
@@ -93,20 +98,18 @@ export function EditorialCard({ c }: { c: CardCtx }) {
   if (step === "done") {
     const first = booked.name.split(/\s+/)[0];
     const ring = call && booked.via === "Phone";
-    const rows: [string, string][] = [
-      ["When", range],
-      ...(call && booked.via ? ([["Call", ring ? `Phone call, ${length} min` : `Video call on Google Meet, ${length} min`]] as [string, string][]) : []),
-      ...(ring ? ([["Number", tel(booked.phone)]] as [string, string][]) : []),
-      ...(booked.where ? ([["Where", booked.where]] as [string, string][]) : []),
-      ...(deposit ? ([["Deposit", `$${usd} paid`]] as [string, string][]) : []),
-      ["Sent to", booked.email],
-    ];
+    const rows: [string, string][] = [["When", range]];
+    if (call && booked.via) rows.push(["Call", ring ? `Phone call, ${length} min` : `Video call on Google Meet, ${length} min`]);
+    if (ring) rows.push(["Number", tel(booked.phone)]);
+    if (booked.where) rows.push(["Where", booked.where]);
+    if (deposit) rows.push(["Deposit", `$${usd} paid`]);
+    rows.push(["Sent to", booked.email]);
     return (
       <div ref={root} aria-label={title} role="status" data-booked="" className={cn("tp ed", className)}>
         {bar}
         {/* The check (or the handset, the camera) on the Booked line, in
             the square's place; the message a sentence over the rows. */}
-        {hero(<>You&rsquo;re in</>, <>{dayLine}<br />{what}</>, <>{call && booked.via ? (booked.via === "Video" ? camera : handset) : <svg aria-hidden viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth="1.4"><circle cx="11" cy="11" r="10" /><path d="M6.5 11.5l3 3 6-6.5" strokeLinecap="round" strokeLinejoin="round" /></svg>}{call && booked.via ? `${booked.via} call booked` : "Booked"}</>)}
+        {hero(<>You&rsquo;re in</>, <>{dayLine}<br />{what}</>, <>{call && booked.via ? (booked.via === "Video" ? CAMERA : HANDSET) : <svg aria-hidden viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth="1.4"><circle cx="11" cy="11" r="10" /><path d="M6.5 11.5l3 3 6-6.5" strokeLinecap="round" strokeLinejoin="round" /></svg>}{call && booked.via ? `${booked.via} call booked` : "Booked"}</>)}
         <div className="ed-body">
           <div className="ed-l ed-ok">
             {call && booked.via ? (
@@ -264,7 +267,7 @@ export function EditorialCard({ c }: { c: CardCtx }) {
                     {(["Video", "Phone"] as const).map((v) => (
                       <label key={v} data-stick={gooOn() ? "fill" : undefined}>
                         <input type="radio" name="via" value={v} checked={via === v} onChange={() => setVia(v)} className="sr-only" />
-                        <span className="ed-via">{v === "Video" ? camera : handset}{v} call</span>
+                        <span className="ed-via">{v === "Video" ? CAMERA : HANDSET}{v} call</span>
                       </label>
                     ))}
                   </div>
