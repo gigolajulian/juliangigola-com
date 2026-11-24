@@ -74,7 +74,7 @@ function colour(css: string): [RGB, number] {
 }
 
 /** A photo or film frame, shrunk to N by N. `null`: its pixels cannot be read. */
-const N = 128; // 24, then 48: a thin dark strip in a photo (a shadow the links sat on, MAC) blurred into the bright ground around it
+const N = 128; // 24, then 48: a thin dark strip in a photo (a shadow the links sat on) blurred into the bright ground around it
 const thumbs = new WeakMap<Element, { at: number; src: string; data: Uint8ClampedArray | null }>();
 /* A canvas of its own each time: a photo from a host that does not allow reading taints the canvas it is drawn
    on for good, and on the shared one every later read threw (a preview serves its photos from the live host). */
@@ -563,7 +563,7 @@ function paint(b: Bar) {
   markDark(b);
   const [page] = colour(getComputedStyle(bar).getPropertyValue("--bg").trim());
   /* Over the home hero the bar has no ground, and no one ink reads on every photo: the ground comes up there
-     while a word would fall under 4.5:1 without it (Julian picked "frost" from the prototype, 2026-11-22). */
+     while a word would fall under 4.5:1 without it (Julian picked "frost" from the prototype). */
   /* The frost stays on past the hero once it is up (a "carry"): dropping it where the hero ends brought the bar's
      own ground back in from transparent and handed the ink back to the photos, so it went white, black, white with
      the wordmark and menu apart (MAC, iPhone dark, #1417). It goes only near the top of the page (setFrost). */
@@ -599,17 +599,17 @@ function paint(b: Bar) {
      top, the bar already has that ground, so a word is judged through it: where it would still fall under 6:1, the
      frost comes up there too and the ink becomes the theme's. A plain page ground never fails, so it never shows there.
      Past the top the bar's blur (24px) and saturate (1.8) pull light in from around each point, so the ground as drawn
-     can sit well above the one a look samples: judged there at 7.5:1, not 6 (MAC SSH, a4e718dd: words at 4.0 just
+     can sit well above the one a look samples: judged there at 7.5:1, not 6 (words at 4.0 just
      past the top of a project page, and /book's current link at 3.7). The look ahead reaches 64px below the bar.
      Past the top, a photo under a word whose pixels are still on their way counts as failing: the first time one slides
-     under the bar its small copy takes a few frames, and the frost waited for it (MAC SSH, 6756ca22: four words at
+     under the bar its small copy takes a few frames, and the frost waited for it (four words at
      4.0 to 4.1 for about 0.2s at the hero edge of a project page). The frost latches, so this only brings it up
      sooner; a plain page has no photo, so it never fires there. */
   const { grounds, raw, unseen } = looks;
   const fails = isTop ? (raw.length ? fewest(raw.concat(ahead), 6) : 0) : veiled && !frosted && (grounds.length || unseen) ? (unseen ? 1 : 0) || fewest(grounds.concat(ahead), 7.5) : 0;
   setFrost(b, fails, isTop);
   /* The paint that brings the frost up takes the theme's ink at once: the ink above was picked before the frost
-     was decided, so for one frame it was the photos' (MAC SSH, 79e286a3: black over the dark hero, then white). */
+     was decided, so for one frame it was the photos' (black over the dark hero, then white). */
   if (!frosted && bar.getAttribute("data-navfrost") === "" && ink !== themeInk) {
     ink = themeInk;
     b.inkAt = now;

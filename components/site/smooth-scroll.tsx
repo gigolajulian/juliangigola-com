@@ -33,7 +33,7 @@ export function glideTo(y: number, done: () => void) {
 
 /** Puts the page at `y` now, and Lenis with it: a glide it still had from the last page otherwise carried on over a restored scroll (#1313). */
 export function jumpTo(y: number) {
-  // resize first: Lenis clamps to the limit it measured, which is still the last page's on a Back (row below the fold for 20 frames, MAC on e1287880)
+  // resize first: Lenis clamps to the limit it measured, which is still the last page's on a Back (row below the fold for 20 frames)
   if (live) live.resize(), live.scrollTo(y, { immediate: true, force: true });
   else scrollTo(0, y);
 }
@@ -83,7 +83,7 @@ export function SmoothScroll() {
     if (location.pathname.startsWith("/proof/") || location.pathname.startsWith("/delivery/") || location.pathname.startsWith("/contract/")) return;
 
     // A lerp follows the wheel as it moves instead of replaying a fixed
-    // 1.2s glide on every event, which read as lag on a trackpad (2026-10-30).
+    // 1.2s glide on every event, which read as lag on a trackpad.
     // 0.13, not 0.2: the v4 home's motion is tied to the scroll, and at 0.2 each wheel notch read as a step.
     // `?lerp=0.1` tries another value.
     const asked = parseFloat(new URLSearchParams(location.search).get("lerp") ?? "");

@@ -55,7 +55,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   return json({ record: clientView(r), refunded: refunded ?? null, back });
 }
 
-/** Julian cancels from the desk (2026-11-16): off the calendar, the whole deposit back whatever the hour
+/** Julian cancels from the desk: off the calendar, the whole deposit back whatever the hour
     (it is not the client's doing), the client told, a line on the lead and a mail to hello@. */
 async function cancelMine(env: BookingEnv, id: string) {
   let out: ChangeResult;
@@ -70,7 +70,7 @@ async function cancelMine(env: BookingEnv, id: string) {
   return json({ record: clientView(r), refunded: refunded ?? null, back });
 }
 
-/** Julian marks a no-show from the desk (2026-11-16): a line on the lead and a mail to hello@. Nothing is
+/** Julian marks a no-show from the desk: a line on the lead and a mail to hello@. Nothing is
     refunded and the client is not mailed. Only once the session has started, on a live booking; a second click adds nothing. */
 async function noShow(env: BookingEnv, id: string) {
   const r = await lockOp(env, "get", id).then((x) => x.record, () => null);

@@ -47,7 +47,7 @@ export function BookTimes({ path, title, className, skin, startView }: { path: s
   /* The picker reads the visitor's zone and clock, so until it has mounted it
      draws its empty box (`TimePicker`). It is the one element here from the
      server on: a <FlowShell> swapped for a <TimePicker> remounted the whole
-     shell, photo and all, at hydration (LCP on /book, 2026-11-21). */
+     shell, photo and all, at hydration (LCP on /book). */
   const down = <TimesDown title={title} className={className} retry={() => setTries((n) => n + 1)} again={tries > 0} />;
   return <TimePicker key={tries} path={path} title={title} className={className} fallback={down} skin={skin} startView={startView} />;
 }

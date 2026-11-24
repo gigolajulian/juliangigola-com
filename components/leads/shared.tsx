@@ -99,7 +99,7 @@ const frostBar: CSSProperties = {
 };
 const FROST_ROOM = '[data-astryx-desk][data-bars] [role="main"]::after{content:"";display:block;flex:none;height:calc(72px + env(safe-area-inset-bottom))}';
 
-/* Glass on a phone and an iPad, dark only (Julian picked "soft" in the mock, 2026-11-14): a teal glow behind the page, and
+/* Glass on a phone and an iPad, dark only (Julian picked "soft" in the mock): a teal glow behind the page, and
  * panels clear enough to show it, as LEADS DESKTOP glass.css does over its window. That shell's rules are !important and win there. */
 const GLASS = "[data-astryx-desk][data-glass]{--color-background-body:transparent;--color-background-card:rgb(255 255 255/.055);--color-background-surface:rgb(255 255 255/.055);--color-background-muted:rgb(255 255 255/.09);--leads-bar:rgb(22 22 22/.47);background:radial-gradient(120% 55% at 0% 0%,rgb(88 198 202/.15) 0,transparent 62%),radial-gradient(95% 50% at 100% 100%,rgb(88 198 202/.1) 0,transparent 66%),oklch(0.145 0.003 70)}[data-astryx-desk][data-glass] :is(dialog,[role=dialog],[role=menu],[role=listbox],[popover]){--color-background-body:oklch(0.145 0.003 70);--color-background-card:oklch(0.185 0.003 70);--color-background-surface:oklch(0.185 0.003 70);--color-background-muted:oklch(0.21 0.003 70)}";
 

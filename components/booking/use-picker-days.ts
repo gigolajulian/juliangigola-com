@@ -5,7 +5,7 @@ import { monthCells, startOfToday, weekFrom } from "@/components/booking/picker-
 /* The day and the time picked, and the week or month on show
    (`use-picker.tsx`, which keeps the effects that set them). */
 export function usePickerDays(days: Record<string, string[]> | null, startView?: "week" | "month") {
-  // The card opens on its month (2026-10-20), or on startView.
+  // The card opens on its month, or on startView.
   const [view, setView] = React.useState<"week" | "month">(startView ?? "month");
   const [anchor, setAnchor] = React.useState(() => new Date()); // the week or month on show
   const [pick, setPick] = React.useState<PickedTime | null>(null);
@@ -39,7 +39,7 @@ export function usePickerDays(days: Record<string, string[]> | null, startView?:
   };
   /* Where a month and a day's times do not fit together (`data-fit="3"`,
      editorial.css): the month, then the day's times in its place. Julian, no
-     scroll in the card, ever (2026-10-11). */
+     scroll in the card, ever. */
   const [mstep, setMstep] = React.useState<"days" | "times">("days");
   const switchView = (v: "week" | "month") => {
     if (v === view) return;

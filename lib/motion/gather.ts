@@ -103,7 +103,7 @@ export function gatherWhenSeen(box: HTMLElement, pick: (box: HTMLElement) => Ite
     return () => {};
   }
   // The 404 is drawn in the browser and never runs the head script that
-  // sets this (QA, 2026-10-15): set here, before the paint, when called
+  // sets this (QA): set here, before the paint, when called
   // from a layout effect.
   document.documentElement.dataset.moves = "";
   let frames: HTMLElement[] = [];
@@ -119,7 +119,7 @@ export function gatherWhenSeen(box: HTMLElement, pick: (box: HTMLElement) => Ite
     // Julian: the photographs that come in are loaded first. Capped, so a
     // slow connection still gets the wall. Asked for now and eagerly: once
     // a frame is moved off the page to come in, lazy loading never fetched
-    // it (QA, /book/headshots with slow images, 2026-10-15).
+    // it (QA, /book/headshots with slow images).
     const imgs = frames.flatMap((f) => [...f.querySelectorAll("img")]);
     for (const i of imgs) i.loading = "eager";
     // The box stays hidden (no `data-gathered`) until GSAP is in and the frames are parked.

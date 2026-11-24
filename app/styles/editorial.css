@@ -77,7 +77,7 @@
 .ed-day[aria-pressed="true"] i, .ed-cell[aria-pressed="true"] i { background: var(--background); }
 @keyframes ed-bt-in { from { opacity: 0; transform: translateY(0.35em); filter: blur(6px); } }
 @media (prefers-reduced-motion: reduce) { @keyframes ed-fade-in { from { opacity: 0; } } }
-/* A phone month shows the time picked too, as the week does (MAC, 2026-10-20). */
+/* A phone month shows the time picked too, as the week does (MAC). */
 
 /* the times, a kind to a row */
 .ed-times { margin-top: 1.5rem; }
@@ -200,7 +200,7 @@ fieldset.ed-row > legend { float: left; padding: 0; }
   .ed-cell { padding: 0.375rem 0 0 0.3125rem; }
   .ed-cell .ed-n { font-size: 1rem; }
   .ed-cell i { left: 0.3125rem; width: 0.75rem; }
-  /* One line that swipes on a phone (Julian, via MAC, 2026-10-20). The
+  /* One line that swipes on a phone (Julian). The
      fade says there are more; the end padding lets the last clear it. */
   .ed-slots { display: flex; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x proximity; scrollbar-width: none; padding-right: 2.5rem; mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent); }
   .ed-slots::-webkit-scrollbar { display: none; }
@@ -218,7 +218,7 @@ fieldset.ed-row > legend { float: left; padding: 0; }
 
 /* touch: every target 44px, 8px apart */
 /* The step bar, the month arrows and the small links keep their drawn
-   size; an unseen box gives a mouse 24px (WCAG 2.2, audit 2026-10-21)
+   size; an unseen box gives a mouse 24px (WCAG 2.2, audit)
    and a thumb 2.75rem. */
 :is(.ed-steps button, .ed-ctl button, .ed-when > button, .ed-opts label, .ed-quiet, .ed-back)::before { content: ""; position: absolute; left: 50%; top: 50%; width: max(100%, 1.5rem); height: max(100%, 1.5rem); translate: -50% -50%; }
 @media (pointer: coarse) {
@@ -294,7 +294,7 @@ fieldset.ed-row > legend { float: left; padding: 0; }
   --ed-f: "neue-haas-grotesk-text", "Helvetica Neue", Arial, sans-serif;
   --ed-mu: color-mix(in oklab, var(--foreground) 50%, transparent);
   --ed-line: color-mix(in oklab, var(--foreground) 18%, transparent);
-  /* Light: 50% of near-black on the pale card read 3.4:1 (audit, 2026-10-21);
+  /* Light: 50% of near-black on the pale card read 3.4:1 (audit);
      62% clears 4.5 at 12px. Dark keeps 50%, which already does. */
   &:where(:root[data-theme="light"] *) { --ed-mu: color-mix(in oklab, var(--foreground) 62%, transparent); }
   --ed-line2: var(--ed-line);

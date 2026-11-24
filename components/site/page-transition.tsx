@@ -72,7 +72,7 @@ const gauge = () => {
   const tall = !!m && m.scrollHeight * m.clientWidth * d * d * 4 > SNAPSHOT_BUDGET;
   /* On #main and its children, not the root: a root attribute over
      `#main > *` restyled every element on the page as it landed, about
-     1,220 on /portfolio (audit 2026-11-11). */
+     1,220 on /portfolio (audit). */
   for (const el of m ? [m, ...m.children] : []) el.toggleAttribute("data-page-tall", tall);
 };
 
@@ -89,7 +89,7 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
     shown.current = path;
     // The page arriving, before it is snapshotted.
     gauge();
-    // Safari snapshotted the home before the restored cover decoded: an empty sleeve for 1 to 4 frames (MAC on 9e9dc6c9). 300ms at most.
+    // Safari snapshotted the home before the restored cover decoded: an empty sleeve for 1 to 4 frames. 300ms at most.
     const land = landed;
     landed = null;
     if (land) settle(takeHolds()).then(land);
@@ -188,7 +188,7 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
         lid.setAttribute("data-viewer-copy", "");
         for (const n of parts) {
           const c = n.cloneNode(true) as HTMLElement;
-          // a copy restarts its CSS animations: the neighbours faded in again from nothing (MAC on 153ce8e1). Each element keeps where it is now, still.
+          // a copy restarts its CSS animations: the neighbours faded in again from nothing. Each element keeps where it is now, still.
           const from = [n, ...n.querySelectorAll<HTMLElement>("*")], to = [c, ...c.querySelectorAll<HTMLElement>("*")];
           from.forEach((e, k) => {
             const cs = getComputedStyle(e);
@@ -198,13 +198,13 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
         }
         document.body.append(lid);
         /* Off once the home is in place under it: its covers row mounted, the told cover and its neighbours decoded (back.ts holdLanding), two
-           paints, and the row's own ease-in done (60 to 90ms, MAC SSH on 476d12eb), each wait 300ms at most. By its own clock, not the landing
-           hook: on a warm Back that never came and the copy held for 2.25s (MAC on 153ce8e1). */
+           paints, and the row's own ease-in done (60 to 90ms), each wait 300ms at most. By its own clock, not the landing
+           hook: on a warm Back that never came and the copy held for 2.25s. */
         const t0 = performance.now();
         const settled = () => settle(document.querySelector(".mt-covers")?.getAnimations?.({ subtree: true }).filter((a) => a.effect?.getTiming().iterations !== Infinity).map((a) => a.finished.catch(() => {})) ?? []);
         const look = () => {
           if (!document.querySelector(".mt-covers") && performance.now() - t0 < 1500) return void requestAnimationFrame(look);
-          // one 300ms clock from the row's first frame for the whole hold: the two capped waits chained ran to 407 and 417ms (MAC SSH on 53741f32)
+          // one 300ms clock from the row's first frame for the whole hold: the two capped waits chained ran to 407 and 417ms
           const go = () => lid.remove();
           setTimeout(go, 300);
           Promise.all(takeHolds()).then(() => requestAnimationFrame(() => requestAnimationFrame(() => void settled().then(go))));

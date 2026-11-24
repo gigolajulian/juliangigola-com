@@ -49,7 +49,7 @@ export async function generateMetadata(
   return {
     title,
     description,
-    // the weddings gallery is the same subject as /weddings, which is the page to rank (audit R1, 2026-11-16)
+    // the weddings gallery is the same subject as /weddings, which is the page to rank (audit R1)
     alternates: { canonical: project.slug === "weddings" ? "/weddings" : `/portfolio/${project.slug}` },
     /* Unlisted means unlisted. The sitemap already leaves it out, but a
        page off every index that Google still holds is a page Julian took

@@ -30,7 +30,7 @@ export function usePickerLayout({ step, pick, days, view, anchor, week, month, c
     was.current = step;
     const el = root.current;
     // A step opens at its top: on an iPhone Details opened where Continue
-    // had been, Name and Email above the screen (JG - MAC, 2026-10-17).
+    // had been, Name and Email above the screen (JG - MAC).
     const card = el?.matches(".ed") ? el : el?.querySelector<HTMLElement>(".ed");
     if (dir && card && card.getBoundingClientRect().top < 0) card.scrollIntoView({ block: "start" });
     if (!dir || !el || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -78,7 +78,7 @@ export function usePickerLayout({ step, pick, days, view, anchor, week, month, c
     const fit = () => {
       el.removeAttribute("data-scroll");
       /* Measured two ways: WebKit reported no scroll while the month's
-         last week sat under the floor (MAC on #279, 2026-10-21), so the
+         last week sat under the floor (MAC on #279), so the
          month's own bottom is checked against the body's as well. */
       const over = () => {
         const month = body.querySelector(".ed-month, .ed-days");

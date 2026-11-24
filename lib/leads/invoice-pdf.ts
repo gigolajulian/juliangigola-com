@@ -181,7 +181,7 @@ function layout({ from: s, to, inv }: InvoiceDoc, SB: Font, RG: Font) {
 }
 
 /* ── design B: dark, the photo column on the left ──────────────────
- * Julian's approved B (prototypes/invoice-b, 2026-11-09), its CSS turned
+ * Julian's approved B (prototypes/invoice-b), its CSS turned
  * into points: 1cqw is a hundredth of the page width, line boxes as CSS
  * builds them from each face's hhea metrics. The flow runs down from the
  * top; the sign-off and the footer sit on the foot. The photo comes in as

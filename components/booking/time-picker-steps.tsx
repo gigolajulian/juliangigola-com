@@ -168,7 +168,7 @@ export function BookSteps({ c, l }: { c: CardCtx & { skin: StepsSkin }; l: Retur
           sub: "Your confirmation goes to this email.",
           body: (
             <>
-              {/* The photo's summary hides on phones: the day and time stay in view here (booking critique, 2026-11-04). */}
+              {/* The photo's summary hides on phones: the day and time stay in view here (booking critique). */}
               <p className="f-when lbl mute">{dlabel(date)} | {clockLabel(pick.min)} | {skin.name}</p>
               {f("name", "Name", "text", "", "name", false, true)}
               {f("email", "Email", "email", "", "email", false, true)}

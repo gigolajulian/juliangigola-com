@@ -37,15 +37,15 @@ export type LeadEvent = {
   kind: "inquiry" | "call" | "booking" | "no-deposit" | "deposit-stuck" | "stage" | "snooze" | "mail" | "replied" | "wrote" | "archive" | "trash" | "proofs"
     // Julian's own hand (`lib/leads/lead-crm.ts`): added, details changed, merged, a reminder, a quote.
     | "added" | "edit" | "merge" | "remind" | "quote" | "invoice"
-    // From outside or by hand (2026-11-10): Stripe payments and refunds, a client moving or cancelling, selects sent, an invoice settled.
+    // From outside or by hand: Stripe payments and refunds, a client moving or cancelling, selects sent, an invoice settled.
     | "payment" | "refund" | "reschedule" | "cancel" | "selects" | "invoice-paid"
-    // Julian marked it on the desk (2026-11-16), ref = "no-show:<booking id>".
+    // Julian marked it on the desk, ref = "no-show:<booking id>".
     | "no-show"
-    // The client's first download of their finals (2026-11-12): Delivered.
+    // The client's first download of their finals: Delivered.
     | "download"
     // The client signed a contract online (2026-11-15, `lib/contracts/contract.ts`), ref = "signed:<contract id>".
     | "contract"
-    // A task on the lead ticked done (2026-11-20), ref = "task:<task id>".
+    // A task on the lead ticked done, ref = "task:<task id>".
     | "task";
   /* "proofs": they opened a proof gallery, ref = its token so each gallery is one line. */
   /* "replied" / "wrote": mail between hello@ and them in Gmail, ref = the Gmail message id (`lib/leads/sync/gmail-sync.ts`). */
@@ -100,7 +100,7 @@ export type LeadPatch = {
   tasks?: Task[];
 };
 
-/* ── the shoot plan and tasks (from CRMO, Julian 2026-11-20) ──────
+/* ── the shoot plan and tasks (from CRMO, Julian) ──────
  * The desk knew the client and the date but not the shoot. A plan holds
  * the brief, up to four of his own frames as references, the Cosmos board
  * (a link, never fetched), the shot list and the call sheet. Tasks are the

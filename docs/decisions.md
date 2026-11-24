@@ -653,7 +653,7 @@ asked and the wording of the ask are here.
 
 - Undated attributions ("Julian: ...") are still in about 700 comment
   lines. They have no date to file under, so they were left for now.
-- `components/admin-editor.tsx` keeps "As of 2026-09-12": it is a warning
+- `components/admin/editor/editor.tsx` keeps "As of 2026-09-12": it is a warning
   about the current Cloudflare Access policy, not history.
 - Many comments still name `globals.css` for rules that now live in
   `app/styles/*.css`. `globals.css` is still the entry point, so they were

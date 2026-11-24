@@ -46,7 +46,7 @@ const LISTED: Record<SessionSlug, Omit<Session, "paid">> = {
     includes: ["One hour, studio or location", "Two looks", "Retouched selects", "Crops for web and print"],
     turnaround: "1 week",
     cal: "juliangigola/portraits",
-    // SIAN 01, Julian's pick for the Portraits booking card (2026-11-10). Was ZOE 16.
+    // SIAN 01, Julian's pick for the Portraits booking card. Was ZOE 16.
     // Desktop gets sian/01 with 200px of her own backdrop added on top, so her face sits at the panel's middle.
     photo: { d: w("sian", "01"), l: w("sian", "01"), desk: "/v3/portraits-sian-tall.jpg", at: { d: "50% 5%", l: "50% 5%" } },
   },

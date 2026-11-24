@@ -30,7 +30,7 @@ const coversRow = () => block("covers")?.querySelector<HTMLElement>(".mt-row") ?
 
 /** The spot under the screen's top: the last block that starts at or above it. */
 export function spotHere(): Spot {
-  // the covers row's own scroll wherever the page is: a phone's row swiped to a cover came back on the first (MAC on d818269b)
+  // the covers row's own scroll wherever the page is: a phone's row swiped to a cover came back on the first
   const x = coversRow()?.scrollLeft ?? 0;
   let at: Spot = { b: "", off: scrollY, x };
   for (const el of document.querySelectorAll<HTMLElement>("[data-mt]")) {
@@ -40,7 +40,7 @@ export function spotHere(): Spot {
   return at;
 }
 
-/** Keeps `spot` for the next Back to the home, and keeps the browser's own restore from landing over it a frame later (Safari, MAC on 01ca50cb). */
+/** Keeps `spot` for the next Back to the home, and keeps the browser's own restore from landing over it a frame later (Safari). */
 export function keepSpot(spot: Spot) {
   try {
     sessionStorage.setItem(BACK, JSON.stringify(spot));
@@ -105,7 +105,7 @@ export function useBackHome() {
       if (Math.abs(scrollY - y) > 2 || Math.abs(scrollGoal() - y) > 2) jumpTo(y);
     };
     go();
-    // a phone's sideways covers row only: held (desktop), the row follows the page's scroll, and setting it too threw the page a screen on (MAC on d82f2b75)
+    // a phone's sideways covers row only: held (desktop), the row follows the page's scroll, and setting it too threw the page a screen on
     const row = coversRow();
     if (row && !media("held").matches) row.scrollLeft = spot.x;
     // Back into Cover art: the sleeves' lazy art painted grey for up to 1.3s on an iPhone (MAC, v3.0.336). Load and decode it now, with the rest.
@@ -127,7 +127,7 @@ export function useBackHome() {
       holdLanding(shown); // the Back's snapshot of the home waits for these covers, the told one and its neighbours (page-transition.tsx)
       shown.then(() => url && Object.assign(face.style, { backgroundImage: "", backgroundSize: "", backgroundPosition: "" }));
     }
-    // a sleeve still marked hovered from before the click turned to its back and then away on arrival (Safari, MAC on 23412f74): unturned at once
+    // a sleeve still marked hovered from before the click turned to its back and then away on arrival (Safari): unturned at once
     const lifted = [...new Set([...items, ...document.querySelectorAll<HTMLElement>(".mt-covers .mt-sleeve.hv")])];
     lifted.forEach((it) => ((it.style.transition = "none"), it.classList.remove("hv")));
     const unlift = requestAnimationFrame(() => requestAnimationFrame(() => lifted.forEach((it) => (it.style.transition = ""))));
@@ -137,12 +137,12 @@ export function useBackHome() {
     const stop = () => ((done = true), cancelAnimationFrame(raf));
     raf = requestAnimationFrame(function hold(now) {
       // the visitor's scroll wins: Lenis heads somewhere else as soon as a wheel or touch lands, whether or not its event reached us
-      // (a wheel 0.3s after Back was held for 0.6s, Safari, MAC on 23412f74). Only a move of its target counts: it starts stale from the last page.
+      // (a wheel 0.3s after Back was held for 0.6s, Safari). Only a move of its target counts: it starts stale from the last page.
       const g = scrollGoal(), moved = g !== goal && Math.abs(g - yOf(spot)) > 2;
       goal = g;
       if (done || moved) return stop();
       go();
-      // a sleeve the row carried under a resting pointer lifts and turns to its back: none while the page is being put back (Safari, MAC on 983abf06)
+      // a sleeve the row carried under a resting pointer lifts and turns to its back: none while the page is being put back (Safari)
       for (const it of document.querySelectorAll(".mt-covers .mt-sleeve.hv")) it.classList.remove("hv");
       if (now < end) raf = requestAnimationFrame(hold);
     });

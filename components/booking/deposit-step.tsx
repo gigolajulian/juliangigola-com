@@ -305,7 +305,7 @@ export function DepositStep({
       mo.disconnect();
       /* Stripe destroys an element itself when it fails to load (the
          wallet with no Apple or Google Pay, a key the account rejects);
-         destroying it again throws and took the page down (MAC, 2026-10-21). */
+         destroying it again throws and took the page down (MAC). */
       made.forEach((f) => { try { f.destroy(); } catch {} });
       els.current = null;
     };
@@ -425,7 +425,7 @@ export function DepositStep({
       ) : (
         <>
           <div className="ed-body">
-            {/* What the deposit is for; the amount is the heading over it (2026-10-20). */}
+            {/* What the deposit is for; the amount is the heading over it. */}
             <div className="ed-l">
               {rows.map(([k, v]) => (
                 <div key={k} className="ed-row"><span className="label">{k}</span><span className="ed-v break-words">{v}</span></div>

@@ -23,7 +23,7 @@ import { manageLinks } from "@/lib/booking/token";
  *      copies it onto the intent's metadata and the poll reads it from
  *      Stripe: KV caches a miss for up to a minute at the visitor's
  *      location, so the card read "pending" after the booking was made
- *      (QA, 2026-10-16).
+ *      (QA).
  *   5. Julian hears about it: hello@ gets a mail for every
  *      deposit booked, refunded, or paid and stuck. The client's receipt
  *      is Stripe's, from `receipt_email`, and the site's own confirmation

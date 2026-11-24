@@ -24,7 +24,7 @@ export function useHeaderSearch(canvas: boolean, at: number | null) {
   const refocus = React.useRef(false);
   const close = () => {
     refocus.current = true;
-    // The header x clears, as the row's x does and as the approved mock did (MAC, 7b1a0f5d).
+    // The header x clears, as the row's x does and as the approved mock did.
     setRaw("");
     setHs(false);
     // With the row back on screen the header tools must go too, not wait for the next scroll.
@@ -44,11 +44,11 @@ export function useHeaderSearch(canvas: boolean, at: number | null) {
       const p = Math.min(1, Math.max(0, (60 - r.top) / (r.height || 1)));
       root.style.setProperty("--pp", p.toFixed(3));
       const on = p > 0;
-      // iOS scrolls the page as the keyboard rises: with nothing typed yet, the open header bar stays (QA, 2026-11-04).
+      // iOS scrolls the page as the keyboard rises: with nothing typed yet, the open header bar stays (QA).
       const f = document.activeElement as HTMLInputElement | null;
       if (!on && f?.closest(".htools") && !f.value) return;
       // Typing in the row and scrolling it away hands the field to the header, so it stays on screen
-      // with the keyboard up (MAC, iPhone, 2026-11-22); the reverse hand-back is below.
+      // with the keyboard up (MAC, iPhone); the reverse hand-back is below.
       if (p >= 1 && f?.tagName === "INPUT" && tools.contains(f)) setHs(true);
       setPin(on);
       if (on) return;
@@ -89,14 +89,14 @@ export function useHeaderSearch(canvas: boolean, at: number | null) {
     addEventListener("pointerdown", away);
     return () => removeEventListener("pointerdown", away);
   }, [unfold]);
-  // iOS pans the visual viewport as the keyboard rises, carrying a top:0 fixed bar off screen: follow the pan (QA, 2026-11-04).
+  // iOS pans the visual viewport as the keyboard rises, carrying a top:0 fixed bar off screen: follow the pan (QA).
   React.useEffect(() => {
     const vv = window.visualViewport;
     const el = document.querySelector<HTMLElement>(".htools");
     if (!hs || !pin || !vv || !el) return;
     const set = () => {
       // Vars, not inline translate/padding: v3.css applies them only while the header is tucked, so a
-      // rotation that untucks it drops them at once (MAC, Duo, 2026-11-22).
+      // rotation that untucks it drops them at once (MAC, Duo).
       el.style.setProperty("--vvy", `${vv.offsetTop}px`);
       // Panned by the keyboard, the visual viewport already starts below the browser bar: no safe-area pad on top of it.
       el.style.setProperty("--vvpad", vv.offsetTop > 0 ? "0px" : "");

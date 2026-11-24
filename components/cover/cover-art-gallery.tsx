@@ -30,7 +30,7 @@ export function coverLabel(title: string, artist: string, frames: CoverRelease["
 export function CoverArtGallery({ releases }: { releases: CoverRelease[] }) {
   const list = React.useRef<HTMLUListElement>(null);
   /* The song on the cover (`snd`, components/cover/cover-sound.tsx): the pointer held on one for 4.3 seconds plays
-     it, so crossing or browsing the grid fires nothing, and the viewer's Preview button does (Julian 2026-11-21). */
+     it, so crossing or browsing the grid fires nothing, and the viewer's Preview button does (Julian). */
   const snd = useV4pages("snd");
   const playing = useSound();
   /** The release whose clip a click started: the viewer's, so the pointer leaving its sleeve does not stop it. */

@@ -118,7 +118,7 @@ const FREE_MAIL = /^(gmail|googlemail|yahoo|ymail|outlook|hotmail|live|msn|iclou
 /* JPEG, PNG and HEIC only (Julian), pictures that never run.
    `image/` alone let an SVG in, and an SVG carries script: opened from
    /admin's Inbox it ran on this site, where the GitHub token lives
-   (security review, 2026-10-15). A visitor's photo is a JPEG already,
+   (security review). A visitor's photo is a JPEG already,
    re-drawn in their browser (`reference-picks.tsx`), unless it is a
    HEIC the browser cannot draw (anything but Safari): taken as is. Checked on the way
    in (`lib/leads/enquiry-action.ts`) and on the way out

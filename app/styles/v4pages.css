@@ -1,4 +1,4 @@
-/* The inner pages plan. s1, s2, a2, m2p, foot, next, c1, s4 and p3 are live for everyone (folded 2026-11-21);
+/* The inner pages plan. s1, s2, a2, m2p, foot, next, c1, s4 and p3 are live for everyone (folded);
    `:root` stands where `[data-v4pages~=key]` was, so every rule keeps the weight it had.
    Still on trial behind `?v4pages` (lib/flags/v4pages.ts): view and snd. */
 .v3 .sv-bar{display:none}

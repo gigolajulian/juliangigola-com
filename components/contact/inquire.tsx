@@ -184,7 +184,7 @@ export function CommissionForm() {
             );
           })}
         </div>
-        {/* Every Inquire lands here now (critique, 2026-10-29); the call and the email stay one tap away. */}
+        {/* Every Inquire lands here now (critique); the call and the email stay one tap away. */}
         <p className="lbl mute in-alt">Prefer to talk? <Link href="/book/consultation">15 min call</Link> <span aria-hidden>·</span> <a href="mailto:hello@juliangigola.com">hello@juliangigola.com</a></p>
       </>
     );

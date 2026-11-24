@@ -103,7 +103,7 @@ html[data-mt-held] .mt-motion .mt-mofoot h3{font-size:calc(104 * var(--u));margi
 html[data-mt-held] .mt-motion .mt-mofoot .btn{position:static;margin-top:calc(22 * var(--u));pointer-events:auto;border-color:rgb(var(--on-photo));color:rgb(var(--on-photo))}
 /* on the right, small and close to the edge */
 html[data-mt-held] .mt-motion .mt-mopg{position:absolute;z-index:4;right:calc(var(--fx) + 20 * var(--u));top:50%;transform:translateY(-50%);margin:0;padding:0;list-style:none;display:grid;justify-items:end;gap:calc(10 * var(--u));pointer-events:none;font-size:max(11px,calc(13 * var(--u)))}
-/* The numbers sit on the film with no ground of their own. Julian (2026-11-22): set them bold in the display face, like the
+/* The numbers sit on the film with no ground of their own. Julian: set them bold in the display face, like the
    site's headings, so they read as large text on any frame (WCAG large text, 3:1), with a close dark halo for the palest
    frames. No plate or patch behind them (MAC: a soft patch showed as a grey oval). All at full; the current one leads by
    its rule. */

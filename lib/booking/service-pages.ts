@@ -427,7 +427,7 @@ export const BOOKING_PAGES: BookingPage[] = [
       },
     ],
     tiles: coversOf("portraits"),
-    // Julian's six (2026-10-24): faces in frame, from his other sets.
+    // Julian's six: faces in frame, from his other sets.
     picks: [
       "/work/sian/01.jpg",
       "/work/gilt/03.jpg",
@@ -608,7 +608,7 @@ export const BOOKING_PAGES: BookingPage[] = [
         a: "Usage is part of the quote: where the images run, for how long and in which territories. Say what you need in the brief.",
       },
     ],
-    // Julian's six, in his order (2026-11-15); the first is the frame beside the title.
+    // Julian's six, in his order; the first is the frame beside the title.
     tiles: framesAt([
       "/work/i-wanna-be-a-human/02.jpg",
       "/work/i-wanna-be-a-human/09.jpg",

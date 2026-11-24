@@ -65,7 +65,7 @@ export async function writeLead(kv: KV, s: Sealer, id: string, lead: Lead, from?
 const CANON = "leads:canon";
 /**
  * Once: moves each lead stored before ids ignored Gmail dots and "+tags"
- * (`canonical` in lib/leads/lead-crypto.ts, 2026-11-04) to its new id. A lead whose
+ * (`canonical` in lib/leads/lead-crypto.ts) to its new id. A lead whose
  * new id is already taken stays put, for Merge on the desk. Returns how many moved.
  */
 export async function canonLeads(kv: KV, s: Sealer): Promise<number> {

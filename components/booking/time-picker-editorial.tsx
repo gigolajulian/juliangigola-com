@@ -166,7 +166,7 @@ export function EditorialCard({ c }: { c: CardCtx }) {
     if (root.current?.dataset.fit === "3") setMstep("times");
     showTimes();
   };
-  /* Julian (via MAC, 2026-10-20): the day's times in a line or two, no
+  /* Julian (via MAC): the day's times in a line or two, no
      morning, afternoon or evening. One line when they fit at 5.75rem,
      else two even rows. */
   const dayTimes = days[pick.date] ?? [];

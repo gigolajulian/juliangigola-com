@@ -182,7 +182,7 @@
 }
 /* A short window with a mouse: a laptop at 150% scaling is about 620px
    tall, and the form ran 44px past its card, the Inquire button out of
-   sight under it (2026-10-09). Up closer under the bar, the fields
+   sight under it. Up closer under the bar, the fields
    closer together and two lines of message, so it all fits. */
 @media (min-width: 40rem) and (pointer: fine) and (max-height: 48rem) {
   .contact-inquire {
@@ -555,7 +555,7 @@
 .tp-notes::-webkit-scrollbar-track { background: transparent; }
 .tp-notes::-webkit-scrollbar-thumb { background: color-mix(in oklab, var(--foreground) 35%, transparent); border-radius: 3px; }
 
-/* Preview (`?cross=1`, Julian's mock of 2026-10-18): a card opened in
+/* Preview (`?cross=1`, Julian's mock of): a card opened in
    place (`book-sheet.tsx`, `chrome`). The wall runs full bleed, no edge
    fade and no pale wash over it, oversized so its blur has no rim. The
    bar stays over it at half, the strip's panel and the footer clear over

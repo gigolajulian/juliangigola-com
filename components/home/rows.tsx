@@ -77,7 +77,7 @@ export function HomeCovers() {
       cancelAnimationFrame(raf);
     };
   }, []);
-  // a layout effect: with the caption, before the paint; a frame late, the told cover showed small with its art dim on a Back (MAC on 4c809fcd)
+  // a layout effect: with the caption, before the paint; a frame late, the told cover showed small with its art dim on a Back
   React.useLayoutEffect(() => {
     row.current!.querySelectorAll(".mt-item").forEach((it, i) => it.toggleAttribute("data-on", i === cur));
   }, [cur]);

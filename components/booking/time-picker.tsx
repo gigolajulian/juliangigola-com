@@ -20,7 +20,7 @@ export function TimePicker(props: Props) {
   const jg = <JgLoad done={state === "ready" && !!days} onDone={unhold} className="f-wait min-h-[16rem] w-full" />;
   /* While the times load the bar is already there, held off: it popped in
      a second after the page on a short screen, where it is the thing at the
-     foot of the view (MAC, iPhone Duo folded, 2026-11-08). */
+     foot of the view (MAC, iPhone Duo folded). */
   const heldBar = <button type="button" className="btn fill" disabled>Continue</button>;
   // in the div `BookSteps` puts the shell in, so the shell stays one element as the times come
   const v3plain = (body: React.ReactNode, bar?: React.ReactNode) => <div className="contents">{skin!.shell({ steps: v3steps, at: 1, head: v3paid ? "Book a session" : skin!.name === "Consultation" ? "Book a consultation" : "Book a call", sub: v3sub, body, sum: [], bar })}</div>;
@@ -30,7 +30,7 @@ export function TimePicker(props: Props) {
   const [mounted, setMounted] = React.useState(false);
   // eslint-disable-next-line react-hooks/set-state-in-effect
   React.useEffect(() => setMounted(true), []);
-  // the same shell the held picker draws (steps, sub, J and G), so nothing moves when it mounts (CLS 0.107 at 1440, audit 2026-11-21)
+  // the same shell the held picker draws (steps, sub, J and G), so nothing moves when it mounts (CLS 0.107 at 1440, audit)
   if (!mounted) return skin ? v3plain(jg, heldBar) : <div aria-label={title} className={className} />;
   if (state === "fallback") return skin ? v3plain(fallback) : <>{fallback}</>;
   const waiting = <p role="status" className="lbl mute">Loading availability</p>;
