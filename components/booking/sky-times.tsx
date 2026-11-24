@@ -56,9 +56,7 @@ export function SkyTimes({ times, picked, length, ruler: month, choose }: { time
   );
 }
 
-/* San Jose's forecast (app/api/weather), fetched once per tab and shared by every mount.
-   shortcut: the route is only browser-cached, so each visitor's first load calls Open-Meteo; add the
-   `caches.default` pattern from app/api/slots before ?sky comes off. */
+/* San Jose's forecast (app/api/weather), fetched once per tab and shared by every mount. */
 let forecast: Promise<Hourly | null> | undefined;
 
 /** The details list's weather row for a start: "Clear, 62°". Absent past the forecast's reach or when the fetch fails. */
