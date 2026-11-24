@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { NotFoundScene } from "@/components/not-found-scene";
+import { NotFoundScene } from "@/components/site/not-found-scene";
 
 describe("NotFoundScene", () => {
   it("fills in the path and locks focus without a fine pointer", () => {

@@ -17,7 +17,7 @@ import { COVER_RELEASES as RELEASES } from "./cover-art-data";
 import type { CoverRelease } from "./cover-art-types";
 import { CONTENT } from "../content";
 import { ALT } from "./alt-text";
-import type { WallTile } from "../wall-tile";
+import type { WallTile } from "./wall-tile";
 import { REEL } from "./videos";
 import {
   ADDED,

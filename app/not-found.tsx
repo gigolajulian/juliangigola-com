@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { NotFoundScene } from "@/components/not-found-scene";
+import { NotFoundScene } from "@/components/site/not-found-scene";
 import { DriftWall } from "@/components/drift-wall";
 import { DISCIPLINES, WALL, titleCase } from "@/lib/work/work";
-import { wallItem } from "@/lib/wall-tile";
+import { wallItem } from "@/lib/work/wall-tile";
 
 /* ── 404 ──────────────────────────────────────────────────────────
  * From a design Julian made in Claude Design and asked to have on the site,

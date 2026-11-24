@@ -976,7 +976,7 @@ reported; a quote after "Julian:" is his wording, as the comment had it.
 - `components/contact-sheet.tsx`: Beside the words from a laptop up; under them on an upright tablet, where side by side left the sheet a postage stamp (the live QA, iPad).
 - `components/cover-cell.tsx`: The films' slate on every project. (Julian)
 - `components/credit-card.tsx`: Who they are, a weight under bold, the role on a line of its own ("Julian Gigola · Phot…" was cut), then the handle, a weight lighter, right over the way out to it. (Julian)
-- `components/lightbox.tsx`: Whole, never cropped, the 3D made elite, and not crowding the picture ("too close"). (Julian)
+- `components/cover/lightbox.tsx`: Whole, never cropped, the 3D made elite, and not crowding the picture ("too close"). (Julian)
 - `components/local-questions.tsx`: Behind it, the session's own photographs on the drifting wall the homepage's ask has. (Julian)
 - `components/local-questions.tsx`: A rack focus, as a lens pulls it: with the pointer on the words the wall behind them is soft; off the words, over the photographs, the wall comes sharp and up and the words go soft. (Julian, delight)
 - `components/services-screen.tsx`: A preview of the portfolio, not the whole of it. (Julian)

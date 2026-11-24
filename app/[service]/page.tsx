@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { shareOg } from "@/lib/og/share";
 import { notFound } from "next/navigation";
-import { LdJson } from "@/components/local-screens";
+import { LdJson } from "@/components/site/ld-json";
 import { BOOKING_PAGES, bookingHref, bookingPage } from "@/lib/booking/service-pages";
 import { LINKABLE, getProject, projectsIn } from "@/lib/work/work";
 import { serviceGraph } from "@/lib/seo";
