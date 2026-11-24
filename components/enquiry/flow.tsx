@@ -203,7 +203,7 @@ export function Failed({ state }: { state: ContactState }) {
   );
 }
 
-/** The enquiry, posted the way `contact-form.tsx` posts it. */
+/** The enquiry: the trail goes in `context`, then the form posts to the server action. */
 export function useEnquiry() {
   const [state, act, pending] = React.useActionState(submitOrKeep, INITIAL);
   const [sim, setSim] = React.useState(false);
@@ -219,7 +219,7 @@ export function useEnquiry() {
 
 export const Hidden = ({ type, detail }: { type: string; detail?: string }) => (
   <>
-    {/* The honeypot (`contact-form.tsx`). */}
+    {/* The honeypot: `lib/leads/enquiry-action.ts` drops a post that fills `company`. */}
     <input type="text" name="company" tabIndex={-1} autoComplete="off" aria-hidden="true" hidden />
     <input type="hidden" name="context" />
     <input type="hidden" name="type" value={type} />

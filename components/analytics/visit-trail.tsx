@@ -8,7 +8,7 @@ import { usePathname } from "next/navigation";
  * what they read first, without asking them. Where they landed (with
  * the referrer and any utm_ tags) and the last pages and screens they
  * opened, kept for this tab only (sessionStorage) and sent with the
- * form (`contact-form.tsx`, `trailContext`). Nothing leaves the browser
+ * form (`components/enquiry/flow.tsx`, `trailContext`). Nothing leaves the browser
  * unless they send an inquiry.
  * ─────────────────────────────────────────────────────────────── */
 
