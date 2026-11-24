@@ -30,6 +30,6 @@ describe("NewLeadDesk", () => {
     fireEvent.change(screen.getByLabelText(/Instagram/), { target: { value: "@ana" } });
     fireEvent.click(add);
     await waitFor(() => expect(done).toHaveBeenCalledWith("n1", { email: "ig:ana" }));
-    expect(JSON.parse(String(call.mock.calls[0][0].body)).add).toMatchObject({ name: "Ana", ig: "@ana", stage: "Inquiry", source: "Instagram DM" });
+    expect(JSON.parse(String(call.mock.calls[0][0].body))).toMatchObject({ name: "Ana", ig: "@ana", stage: "Inquiry", source: "Instagram DM" });
   });
 });

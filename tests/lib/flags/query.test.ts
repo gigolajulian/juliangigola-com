@@ -1,17 +1,17 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
-import { qflag, qvalue } from "@/lib/flags/query";
+import { qflag } from "@/lib/flags/query";
 
 const at = (search: string) => vi.stubGlobal("location", { search });
 afterEach(() => vi.unstubAllGlobals());
 
 describe("qflag", () => {
   test.each([
-    ["?mtpin=0", "mtpin", "0", true],
-    ["?a=1&mtpin=0", "mtpin", "0", true],
-    ["", "mtpin", "0", false],
-    ["?mtpin=1", "mtpin", "0", false],
-    ["?mtpin=05", "mtpin", "0", true],
-    ["?xmtpin=0", "mtpin", "0", false],
+    ["?proofwall=0", "proofwall", "0", true],
+    ["?a=1&proofwall=0", "proofwall", "0", true],
+    ["", "proofwall", "0", false],
+    ["?proofwall=1", "proofwall", "0", false],
+    ["?intro=05", "intro", "0", true],
+    ["?xintro=0", "intro", "0", false],
     ["?intro=2", "intro", "[12]", true],
     ["?intro=0", "intro", "[12]", false],
   ])("%s: %s=%s is %s", (search, name, value, want) => {
@@ -20,23 +20,7 @@ describe("qflag", () => {
   });
 });
 
-describe("qvalue", () => {
-  test("a pattern", () => {
-    at("?mttp=-flip,-sink");
-    expect(qvalue("mttp", "[\\w,-]+")).toBe("-flip,-sink");
-  });
-  test("the default word", () => {
-    at("?mtsnap=near&x");
-    expect(qvalue("mtsnap")).toBe("near");
-  });
-  test("absent", () => {
-    at("?a=1");
-    expect(qvalue("mtsnap")).toBeUndefined();
-  });
-});
-
-test("no location: false and undefined", () => {
+test("no location: false", () => {
   expect(typeof location).toBe("undefined");
-  expect(qflag("mtpin", "0")).toBe(false);
-  expect(qvalue("mtsnap")).toBeUndefined();
+  expect(qflag("intro", "0")).toBe(false);
 });

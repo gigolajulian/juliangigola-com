@@ -10,7 +10,7 @@ const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
 vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));
 
 const req = (method: string, { body, query = "", key = KEY }: { body?: unknown; query?: string; key?: string } = {}) =>
-  new Request(`https://juliangigola.com/api/calendar${query}`, { method, headers: { "x-inbox-key": key }, body: body === undefined ? undefined : JSON.stringify(body) });
+  new Request(`https://juliangigola.com/api/calendar${query}`, { method, headers: { "x-admin-key": key }, body: body === undefined ? undefined : JSON.stringify(body) });
 
 let posted: unknown[];
 beforeEach(() => {

@@ -2,10 +2,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FakeKV, LEADS_KEY, leadOf } from "./fakes";
 
 /* The booking Worker's two calls into leads: /api/leads/mail logs a mail it
-   sent, /api/leads/gmail folds hello@'s new mail in. Both take BOOKING_SECRET
+   sent, /api/leads/gmail folds hello@'s new mail in. Both take WORKER_KEY
    as the bearer and nothing else. */
 
-const SECRET = "booking-secret-for-tests";
+const SECRET = "worker-key-for-tests";
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
 vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));
 const { POST: mailPost } = await import("@/app/api/leads/mail/route");
@@ -14,7 +14,7 @@ const { POST: gmailPost } = await import("@/app/api/leads/gmail/route");
 let kv: FakeKV;
 beforeEach(() => {
   kv = new FakeKV();
-  ctx.env = { INBOX: kv, LEADS_KEY, BOOKING_SECRET: SECRET, GCAL_OAUTH: JSON.stringify({ client_id: "c", client_secret: "s", refresh_token: "r" }) };
+  ctx.env = { INBOX: kv, LEADS_KEY, WORKER_KEY: SECRET, GCAL_OAUTH: JSON.stringify({ client_id: "c", client_secret: "s", refresh_token: "r" }) };
   vi.unstubAllGlobals();
 });
 

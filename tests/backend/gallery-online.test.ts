@@ -25,7 +25,7 @@ beforeEach(() => {
   ctx.env = {
     INBOX: kv, LEADS_KEY, INBOX_KEY: "k",
     PROOFS: { get: async () => ({ body: new Response("abc").body, size: 3 }) },
-    DEPOSIT_LIMIT: { limit: async () => ({ success: ++tries <= 5 }) },
+    PUBLIC_WRITE_LIMIT: { limit: async () => ({ success: ++tries <= 5 }) },
     DOWNLOAD_LIMIT: { limit: async () => ({ success: true }) },
   };
 });
@@ -85,7 +85,7 @@ describe("the gate's password", () => {
 
   it("the desk stores it hashed and only ever sees hasPass", async () => {
     await put(gallery());
-    const patch = async (b: unknown) => (await adminPATCH(new Request("https://juliangigola.com/api/proof", { method: "PATCH", body: JSON.stringify({ token: ID, ...(b as object) }), headers: { "x-inbox-key": "k" } })))!;
+    const patch = async (b: unknown) => (await adminPATCH(new Request("https://juliangigola.com/api/proof", { method: "PATCH", body: JSON.stringify({ token: ID, ...(b as object) }), headers: { "x-admin-key": "k" } })))!;
     expect((await patch({ password: "ab" })).status).toBe(400);
     const res = await (await patch({ password: "blue moon", offline: true })).json();
     expect(res.proof.hasPass).toBe(true);
@@ -93,7 +93,7 @@ describe("the gate's password", () => {
     expect(res.proof.offline).toBe(true);
     const stored = (await readProof(kv as never, await seal(), ID))!;
     expect(await checkPass(stored.pass!, "blue moon")).toBe(true);
-    const list = await (await adminGET(new Request("https://juliangigola.com/api/proof?list", { headers: { "x-inbox-key": "k" } })))!.json();
+    const list = await (await adminGET(new Request("https://juliangigola.com/api/proof?list", { headers: { "x-admin-key": "k" } })))!.json();
     expect(JSON.stringify(list)).not.toContain(stored.pass!.hash);
     await patch({ password: "" });
     expect((await readProof(kv as never, await seal(), ID))!.pass).toBeUndefined();

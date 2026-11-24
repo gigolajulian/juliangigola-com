@@ -12,7 +12,7 @@ import { FakeKV, LEADS_KEY } from "./fakes";
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
 vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));
 
-const SECRET = "booking-secret-for-tests";
+const SECRET = "worker-key-for-tests";
 const OAUTH = JSON.stringify({ client_id: "c", client_secret: "s", refresh_token: "r" });
 const call = (auth = `Bearer ${SECRET}`) => POST(new Request("https://juliangigola.com/api/leads/sheet", { method: "POST", headers: { authorization: auth } }));
 
@@ -24,7 +24,7 @@ beforeEach(() => {
   kv = new FakeKV();
   sent = [];
   status = 200;
-  ctx.env = { INBOX: kv, LEADS_KEY, BOOKING_SECRET: SECRET, GCAL_OAUTH: OAUTH };
+  ctx.env = { INBOX: kv, LEADS_KEY, WORKER_KEY: SECRET, GCAL_OAUTH: OAUTH };
   vi.stubGlobal("fetch", async (url: string, init?: RequestInit) => {
     if (url.includes("oauth2")) return Response.json({ access_token: "t", expires_in: 3600 });
     sent.push({ url, body: String(init?.body) });

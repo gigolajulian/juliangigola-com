@@ -4,6 +4,7 @@ import { sealer } from "@/lib/leads/lead-crypto";
 import { applyLeadEvent, type Lead } from "@/lib/leads/leads";
 import { fresh, readLog, readMaster } from "@/lib/leads/activity-log";
 import { FakeKV, LEADS_KEY, INBOX_KEY as KEY } from "./fakes";
+import { desk } from "./desk-routes";
 import { byCodeUnit } from "@/lib/utils";
 
 /* The activity log (`lib/leads/activity-log.ts`): every event in full, per
@@ -11,10 +12,7 @@ import { byCodeUnit } from "@/lib/utils";
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
 vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));
-const { GET, PATCH, DELETE } = await import("@/app/api/inbox/route");
 
-const req = (method: string, { body, query = "" }: { body?: string; query?: string } = {}) =>
-  new Request("https://juliangigola.com/api/inbox" + query, { method, body, headers: { "x-inbox-key": KEY } });
 
 let kv: FakeKV;
 beforeEach(() => {
@@ -73,8 +71,8 @@ describe("the log", () => {
     await recordLead(env(), "a2@example.com", { event: { at: t(1), kind: "inquiry", ref: "msg:a2" }, name: "Ana" });
     const seal = await s();
     const [a, a2] = [await seal.id("a@example.com"), await seal.id("a2@example.com")];
-    await PATCH(req("PATCH", { body: JSON.stringify({ key: `lead:${a}`, stage: "Quoted", quote: 1200 }) }));
-    await PATCH(req("PATCH", { body: JSON.stringify({ key: `lead:${a}`, mergeFrom: `lead:${a2}` }) }));
+    await desk("PATCH", "", { body: JSON.stringify({ key: `lead:${a}`, stage: "Quoted", quote: 1200 }) });
+    await desk("PATCH", "", { body: JSON.stringify({ key: `lead:${a}`, mergeFrom: `lead:${a2}` }) });
     const log = await readLog(kv as never, seal, a);
     expect(log.map((e) => e.kind)).toEqual(["inquiry", "inquiry", "stage", "quote", "merge"]);
     expect(kv.data.has(`log:${a2}`)).toBe(false);
@@ -87,20 +85,20 @@ describe("the log", () => {
     await recordLead(env(), "a@example.com", { event: { at: t(0), kind: "inquiry", ref: "msg:a" }, name: "Ana" });
     const seal = await s();
     const key = `lead:${await seal.id("a@example.com")}`;
-    const made = await (await PATCH(req("PATCH", { body: JSON.stringify({ key, invoice: { date: "2026-11-02", lines: [{ desc: "Session", qty: 1, rate: 900 }], paid: 100 } }) }))).json();
+    const made = await (await desk("PATCH", "", { body: JSON.stringify({ key, invoice: { date: "2026-11-02", lines: [{ desc: "Session", qty: 1, rate: 900 }], paid: 100 } }) })).json();
     const no = made.lead.invoices[0].no;
-    const paid = await (await PATCH(req("PATCH", { body: JSON.stringify({ key, invoicePaid: { no, paid: true } }) }))).json();
+    const paid = await (await desk("PATCH", "", { body: JSON.stringify({ key, invoicePaid: { no, paid: true } }) })).json();
     expect(paid.lead.invoices[0].paidAt).toBeTruthy();
     expect((await readLog(kv as never, seal, key.slice(5))).at(-1)).toMatchObject({ kind: "invoice-paid", amount: 800 });
     // Cash counts as money in the export; unmarking takes it off again.
-    const paidCol = async () => { const [h, r] = (await (await GET(req("GET", { query: "?csv" }))).text()).trim().split("\r\n"); return r.split(",")[h.split(",").indexOf("paid total")]; };
+    const paidCol = async () => { const [h, r] = (await (await desk("GET", "/csv")).text()).trim().split("\r\n"); return r.split(",")[h.split(",").indexOf("paid total")]; };
     expect(await paidCol()).toBe("800");
     // A double tap counts once.
-    await PATCH(req("PATCH", { body: JSON.stringify({ key, invoicePaid: { no, paid: true } }) }));
+    await desk("PATCH", "", { body: JSON.stringify({ key, invoicePaid: { no, paid: true } }) });
     expect(await paidCol()).toBe("800");
-    await PATCH(req("PATCH", { body: JSON.stringify({ key, invoicePaid: { no, paid: false } }) }));
+    await desk("PATCH", "", { body: JSON.stringify({ key, invoicePaid: { no, paid: false } }) });
     expect(await paidCol()).toBe("0");
-    await PATCH(req("PATCH", { body: JSON.stringify({ key, invoicePaid: { no, paid: false } }) }));
+    await desk("PATCH", "", { body: JSON.stringify({ key, invoicePaid: { no, paid: false } }) });
     expect(await paidCol()).toBe("0");
   });
 
@@ -108,20 +106,20 @@ describe("the log", () => {
     await recordLead(env(), "gone@example.com", { event: { at: t(0), kind: "inquiry", ref: "msg:g" } });
     const seal = await s();
     const key = `lead:${await seal.id("gone@example.com")}`;
-    await PATCH(req("PATCH", { body: JSON.stringify({ key, trash: true }) }));
-    await DELETE(req("DELETE", { body: JSON.stringify({ emptyTrash: true }) }));
+    await desk("PATCH", "", { body: JSON.stringify({ key, trash: true }) });
+    await desk("DELETE");
     expect([...kv.data.keys()].filter((k) => k.startsWith("log"))).toEqual([]);
   });
 
   it("exports both CSVs: clients with paid and open balance, every event", async () => {
     await recordLead(env(), "a@example.com", { event: { at: t(0), kind: "inquiry", ref: "msg:a" }, name: "Ana" });
     await recordLead(env(), "a@example.com", { event: { at: t(1), kind: "payment", ref: "pi_1", note: "Deposit", amount: 100 } });
-    const clients = await (await GET(req("GET", { query: "?csv" }))).text();
+    const clients = await (await desk("GET", "/csv")).text();
     const [head, row] = clients.trim().split("\r\n");
     const cols = head.split(",");
     expect(row.split(",")[cols.indexOf("paid total")]).toBe("100");
     expect(cols).toContain("open balance");
-    const events = (await (await GET(req("GET", { query: "?csv=events" }))).text()).trim().split("\r\n");
+    const events = (await (await desk("GET", "/csv?events")).text()).trim().split("\r\n");
     expect(events[0]).toBe("time,client,email,kind,detail,amount,lead id");
     expect(events).toHaveLength(3);
     expect(events[2]).toContain("payment");

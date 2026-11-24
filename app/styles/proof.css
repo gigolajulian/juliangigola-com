@@ -292,7 +292,7 @@ html:has(.proof[data-wall])::-webkit-scrollbar{display:none}
 .proof .pw-layer[data-flat][data-leave]{--dw-flat:1.6s}
 :root .proof .pw-layer[data-flat][data-leave]>.drift-wall{scale:none;transition:scale 1.6s cubic-bezier(.45,0,.2,1)}
 .pw-layer[data-flat][data-leave] .drift-wall__inner{opacity:1;filter:none;transition:filter .9s cubic-bezier(.4,0,.2,1) .6s,opacity .9s ease .3s}
-/* The tuned wall (`data-gw`, off with `?gw=0`): sharpening every tile's own blur at once dropped up to 100 frames of 330 in the 2.3s of Open proofs (144Hz, GPU on,
+/* The tuned wall (`data-gw`): sharpening every tile's own blur at once dropped up to 100 frames of 330 in the 2.3s of Open proofs (144Hz, GPU on,
    the gridwall tuner, 2026-11-11). The tiles hand their blur to one on the whole wall, and that one comes sharp: 0 frames over
    25ms. The drift keeps the blur on each tile (a blur over the moving wall was redrawn every frame). */
 .pw-layer[data-gw][data-flat][data-leave] .drift-wall__inner{filter:none;transition:opacity .9s ease .3s}

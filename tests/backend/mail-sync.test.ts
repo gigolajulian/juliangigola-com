@@ -7,7 +7,7 @@ it("syncMail logs a network failure instead of throwing, so the Sheet copy still
   vi.spyOn(console, "error").mockImplementation(() => {});
   const hits: string[] = [];
   const env = {
-    BOOKING_SECRET: "s",
+    WORKER_KEY: "s",
     SITE: { fetch: async (url: string) => (hits.push(url), url.endsWith("/gmail") ? Promise.reject(new Error("network")) : new Response("ok")) },
   } as never;
   await syncMail(env).then(() => copySheet(env));

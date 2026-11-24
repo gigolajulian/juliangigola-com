@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { renderHook } from "@testing-library/react";
+import { render, renderHook } from "@testing-library/react";
 import { dropSpot, keepSpot, spotHere, useBackHome } from "@/components/home/back";
 import { painted } from "@/lib/painted";
+import { NavMemo } from "@/components/site/back-link";
 
 /* The home keeps its own spot for Back from any page (components/home/back.ts): the block under the screen's top and
    how far into it, so a held block above that takes its height late cannot throw the page off. */
@@ -59,6 +60,7 @@ describe("home Back spot", () => {
     const told: unknown[] = [];
     sec.addEventListener("mt-tell", (e) => told.push((e as CustomEvent).detail));
     keepSpot({ b: "covers", off: 0, x: 900 });
+    render(<NavMemo />); // the root layout's: it hears the Back
     dispatchEvent(new PopStateEvent("popstate"));
     renderHook(() => useBackHome());
     expect(ims.map((im) => im.loading ?? im.getAttribute("loading"))).toEqual(["lazy", "lazy", "eager", "eager", "eager"]); // cover 4 of 5 and the two beside it

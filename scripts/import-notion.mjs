@@ -6,7 +6,7 @@
 //
 // <export folder>: the unzipped Notion export (IMPORT/notion-archive/). Reads
 // the `_all.csv` of each database, skips test rows, groups rows by person
-// (email, else Instagram, else phone) and posts them to /api/inbox on the live
+// (email, else Instagram, else phone) and posts them to /api/leads/import/notion on the live
 // site with the INBOX_KEY Worker secret, read from your environment
 // (`$env:INBOX_KEY`), never printed. The desk refuses gh's OAuth token. Only fields
 // the lead lacks are filled; a second run adds nothing. Prints counts only.
@@ -105,9 +105,9 @@ console.log(`Read: ${body.length} people, ${body.reduce((n, p) => n + p.rows.len
 
 const key = process.env.INBOX_KEY;
 if (!key) throw new Error("Set INBOX_KEY in this shell first (the Worker secret). Nothing was sent.");
-const res = await fetch(`${SITE}/api/inbox`, {
+const res = await fetch(`${SITE}/api/leads/import/notion`, {
   method: "POST",
-  headers: { "x-inbox-key": key, "content-type": "application/json" },
-  body: JSON.stringify({ importNotion: body, dry: flag !== "--go" }),
+  headers: { "x-admin-key": key, "content-type": "application/json" },
+  body: JSON.stringify({ people: body, dry: flag !== "--go" }),
 });
 console.log(res.status, JSON.stringify(await res.json()));

@@ -3,9 +3,9 @@
 /* ── Hours, Templates and This device on Astryx ───────────────────
  * The classic LeadHours, TemplatesEditor
  * and the device block (setup.tsx: push, import from the
- * Inbox, sign out, plus Export CSV) rebuilt. Same endpoints and bodies:
- * /api/booking/hours GET and PUT, PATCH `{ templates }`, PATCH `{ push }`,
- * POST `{ backfill, dry }` and `{ importStripe, dry }`, GET /api/inbox?csv.
+ * Inbox, sign out, plus Export CSV) rebuilt. Endpoints:
+ * /api/booking/hours GET and PUT, /api/leads/templates PUT, /api/leads/push,
+ * /api/leads/import/inbox and /import/stripe POST `{ dry }`, GET /api/leads/csv.
  * ─────────────────────────────────────────────────────────────── */
 
 import * as React from "react";
@@ -121,7 +121,7 @@ export function TemplatesDesk({ call, templates, saved }: { call: Call; template
   const [note, setNote] = React.useState<string | null>(null);
   const edit = (i: number, k: keyof Template) => (v: string) => setList(list.map((t, j) => (j === i ? { ...t, [k]: v } : t)));
   const save = () =>
-    call<{ templates: Template[] }>({ method: "PATCH", body: JSON.stringify({ templates: list }) })
+    call<{ templates: Template[] }>({ path: "/templates", method: "PUT", body: JSON.stringify({ templates: list }) })
       .then((o) => { saved(o.templates); setList(o.templates); setNote("Saved."); })
       .catch((e: unknown) => setNote(errorText(e)));
   return (
@@ -150,7 +150,7 @@ export function TemplatesDesk({ call, templates, saved }: { call: Call; template
 
 /** Every lead as a CSV file, through the same key as the rest of the desk. */
 async function exportCsv(what: "leads" | "activity" = "leads") {
-  const res = await fetch(what === "activity" ? "/api/inbox?csv=events" : "/api/inbox?csv", { headers: authed(), cache: "no-store" });
+  const res = await fetch(what === "activity" ? "/api/leads/csv?events" : "/api/leads/csv", { headers: authed(), cache: "no-store" });
   if (!res.ok) throw new Error(`Export failed (${res.status})`);
   const url = URL.createObjectURL(await res.blob());
   const a = Object.assign(document.createElement("a"), { href: url, download: `${what}-${new Date().toISOString().slice(0, 10)}.csv` });
@@ -182,10 +182,10 @@ export function DeviceDesk({ call, reload, signOut }: { call: Call; reload: () =
       if ((await Notification.requestPermission()) !== "granted") return setNote("Notifications are blocked for this app in Settings.");
       const reg = await navigator.serviceWorker.register(SW_URL, { scope: swScope() });
       await navigator.serviceWorker.ready;
-      const { key } = await call<{ key: string }>({ query: "?vapid" });
+      const { key } = await call<{ key: string }>({ path: "/push" });
       const raw = Uint8Array.from(atob(key.replace(/-/g, "+").replace(/_/g, "/")), (c) => c.charCodeAt(0));
       const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: raw });
-      await call({ method: "PATCH", body: JSON.stringify({ push: sub.toJSON() }) });
+      await call({ path: "/push", method: "PUT", body: JSON.stringify(sub.toJSON()) });
       try { localStorage.setItem(PUSH_FLAG, "1"); } catch {}
       setOn(true);
     } catch (e) { setNote(errorText(e)); }
@@ -194,7 +194,7 @@ export function DeviceDesk({ call, reload, signOut }: { call: Call; reload: () =
     try {
       const sub = await (await navigator.serviceWorker.getRegistration(swScope()))?.pushManager.getSubscription();
       if (sub) {
-        await call({ method: "PATCH", body: JSON.stringify({ push: { endpoint: sub.endpoint }, off: true }) });
+        await call({ path: "/push", method: "DELETE", body: JSON.stringify({ endpoint: sub.endpoint }) });
         await sub.unsubscribe();
       }
       setOn(false);
@@ -203,7 +203,7 @@ export function DeviceDesk({ call, reload, signOut }: { call: Call; reload: () =
   const sendTest = async () => {
     setNote("Sending.");
     try {
-      const { devices } = await call<{ devices: number }>({ method: "PATCH", body: JSON.stringify({ test: true }) });
+      const { devices } = await call<{ devices: number }>({ path: "/push", method: "POST" });
       setNote(devices ? `Arrives in 10 seconds on ${devices} ${devices === 1 ? "device" : "devices"}. Lock the phone now: no banner shows while the app is open.` : "No device is subscribed. Turn notifications off and on again here.");
     } catch (e) { setNote(errorText(e)); }
   };
@@ -211,7 +211,7 @@ export function DeviceDesk({ call, reload, signOut }: { call: Call; reload: () =
   const backfill = (dry: boolean) => {
     setBusy(true);
     setSaid(null);
-    call<Count>({ method: "POST", body: JSON.stringify({ backfill: true, dry }) })
+    call<Count>({ path: "/import/inbox", method: "POST", body: JSON.stringify({ dry }) })
       .then((c) => {
         if (dry) return c.added + c.updated ? setCount(c) : setSaid("Everything in the Inbox is already here.");
         setCount(null);
@@ -227,7 +227,7 @@ export function DeviceDesk({ call, reload, signOut }: { call: Call; reload: () =
   const fromStripe = (dry: boolean) => {
     setBusy(true);
     setPaidSaid(null);
-    call<StripeCount>({ method: "POST", body: JSON.stringify({ importStripe: true, dry }) })
+    call<StripeCount>({ path: "/import/stripe", method: "POST", body: JSON.stringify({ dry }) })
       .then((c) => {
         if (dry) return c.payments + c.refunds ? setMoney(c) : setPaidSaid(`Every Stripe payment is already here (${c.already}).`);
         setMoney(null);

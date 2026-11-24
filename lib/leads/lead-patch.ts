@@ -1,5 +1,5 @@
 /* ── a lead changed by hand ───────────────────────────────────────
- * The lead desk's PATCH on one lead (`app/api/inbox` routes `key: "lead:..."`
+ * The lead desk's PATCH on one lead (`app/api/leads/route.ts` hands `key: "lead:..."`
  * here): every field checked, every 404 decided before anything is written,
  * then folded onto the record and its log. The route turns the answer into a Response.
  * ─────────────────────────────────────────────────────────────── */

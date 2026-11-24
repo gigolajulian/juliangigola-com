@@ -66,7 +66,7 @@ export function AsideDesk({ leads, call, open, done, tab, setTab, top }: { leads
   const rows = leads.filter((l) => inFilter(l, tab)) as Row[];
   const empty = () => {
     setBusy(true);
-    call({ method: "DELETE", body: JSON.stringify({ emptyTrash: true }) })
+    call({ method: "DELETE" })
       .then(done)
       .catch((e: unknown) => setNote(errorText(e)))
       .finally(() => { setBusy(false); setSure(false); });

@@ -6,9 +6,7 @@ import { cn } from "@/lib/utils";
 import { depositFor } from "@/lib/booking/paid";
 import type { Status } from "@/lib/booking/deposit";
 import type { Booking } from "@/lib/booking/rules";
-
-/* Goo: the cursor pours into the buttons (`time-picker.tsx`); `?goo=0` off. */
-export const gooOn = () => typeof location === "undefined" || new URLSearchParams(location.search).get("goo") !== "0";
+import { getJson, postJson } from "@/lib/http";
 
 /* ── the deposit ─────────────────────────────────────────────────────
  * Behind `?deposit`: a paid session's deposit
@@ -202,15 +200,15 @@ export function DepositStep({
   const usd = depositFor(body.slug);
   const payLabel = stage === "paying" ? "Paying" : stage === "confirming" ? "Confirming" : error ? `Try again · $${usd}` : null;
 
-  /* The intent, made on Pay (409: the time has gone). */
+  /* The intent, made on Pay (409 `taken`: the time has gone). */
   const make = async (): Promise<{ clientSecret: string; intentId: string } | null> => {
-    const res = await fetch("/api/deposit", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-    if (res.status === 409) {
+    const r = await postJson<{ clientSecret: string; intentId: string }>("/api/deposit", body);
+    if (!r.ok && r.code === "taken") {
       setStage("taken");
       return null;
     }
-    if (!res.ok) throw new Error(String(res.status));
-    const made: { clientSecret: string; intentId: string } = await res.json();
+    if (!r.ok) throw new Error(r.error ?? String(r.status));
+    const made = r.data;
     // References ride beside the intent before the charge, so the "Deposit paid" mail finds them. Never in the way of paying.
     if (refs) await fetch(`/api/deposit/${encodeURIComponent(made.intentId)}`, { method: "PUT", body: refs }).catch(() => {});
     return made;
@@ -226,12 +224,10 @@ export function DepositStep({
     setStage("confirming");
     for (let n = 0; n < 20; n++) {
       await new Promise((go) => setTimeout(go, 1000));
-      try {
-        const r = await fetch(`/api/deposit/${encodeURIComponent(intentId)}`);
-        const { status } = (await r.json()) as { status: Status };
-        if (status === "booked") return grow(false, onBooked);
-        if (status === "refunded" || status === "failed") return setStage(status);
-      } catch {}
+      const r = await getJson<{ status: Status }>(`/api/deposit/${encodeURIComponent(intentId)}`);
+      const status = r.ok ? r.data?.status : undefined;
+      if (status === "booked") return grow(false, onBooked);
+      if (status === "refunded" || status === "failed") return setStage(status);
     }
     setStage("slow");
   };
@@ -436,7 +432,7 @@ export function DepositStep({
             </div>
             <div className="ed-floor">
               {stage === "declined" || stage === "broken" ? <button type="button" onClick={onBack} className="label ed-quiet">Edit details</button> : <span />}
-              {end[3] ? <button type="button" onClick={end[3][1]} data-stick={gooOn() ? "fill" : undefined} className="ed-btn">{end[3][0]}</button> : null}
+              {end[3] ? <button type="button" onClick={end[3][1]} data-stick="fill" className="ed-btn">{end[3][0]}</button> : null}
             </div>
           </>
         ) : (
@@ -465,7 +461,7 @@ export function DepositStep({
                 <svg aria-hidden viewBox="0 0 12 14" className="w-3 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.3"><rect x="1" y="6" width="10" height="7" rx="1" /><path d="M3.5 6V4a2.5 2.5 0 0 1 5 0v2" /></svg>
                 Secured by Stripe. I never see your card.
               </span>
-              <button ref={payBtn} type="button" onClick={pay} disabled={bad || !canPay} data-accent="" data-bad={bad ? "" : undefined} data-stick={gooOn() ? "fill" : undefined} className="ed-btn">
+              <button ref={payBtn} type="button" onClick={pay} disabled={bad || !canPay} data-accent="" data-bad={bad ? "" : undefined} data-stick="fill" className="ed-btn">
                 {bad ? "Declined" : payLabel ?? `Pay $${usd}`}
               </button>
             </div>

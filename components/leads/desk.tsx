@@ -30,7 +30,7 @@ import { Tab, TabList } from "@astryxdesign/core/TabList";
 import { SignIn } from "@/components/admin/sign-in";
 import { LeadDesk, type LeadAsk } from "@/components/leads/lead";
 import { badge, FROST_ROOM, frostBar, GLASS, WIN_CSS } from "@/components/leads/shared";
-import { isSetAside, inboxCall, loadErrorText, LOCKED, matches, inFilter, type Size } from "@/lib/leads/lead-desk";
+import { isSetAside, deskCall, loadErrorText, LOCKED, matches, inFilter, type Size } from "@/lib/leads/lead-desk";
 import { errorText } from "@/lib/utils";
 import { useSiteThemeRead } from "@/lib/site-theme";
 import type { Template } from "@/lib/leads/lead-crm";
@@ -107,9 +107,9 @@ export function LeadsDesk() {
   const railed = useMediaQuery("(max-width: 1279px)");
   const size: Size = isPhone ? "phone" : isMid ? "mid" : "wide";
 
-  const call = inboxCall;
+  const call = deskCall;
   const load = React.useCallback(() => {
-    call<{ leads: LeadSummary[] }>({ query: "?leads" })
+    call<{ leads: LeadSummary[] }>()
       .then((o) => { setLeads(o.leads); setAt(Date.now()); setError(null); })
       .catch((e: unknown) => setError(loadErrorText(e)));
   }, [call]);
@@ -117,7 +117,7 @@ export function LeadsDesk() {
   // The installed app's badge: unread leads not put aside, as on the original desk.
   React.useEffect(() => { if (leads) badge(leads.filter((l) => l.unread && !isSetAside(l)).length); }, [leads]);
   React.useEffect(() => {
-    call<{ templates: Template[] }>({ query: "?templates" }).then((o) => setTemplates(o.templates)).catch(() => {});
+    call<{ templates: Template[] }>({ path: "/templates" }).then((o) => setTemplates(o.templates)).catch(() => {});
   }, [call]);
   // Search and quick actions, on Ctrl or Cmd K: every lead by name, email, shoot or stage, and every page.
   const [finding, setFinding] = React.useState(false);

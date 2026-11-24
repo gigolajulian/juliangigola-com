@@ -14,7 +14,7 @@ vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudfla
 const ID = "11152026-k7m2q9xd";
 let kv: FakeKV;
 let sent: { subject: string }[];
-const req = (method: string, body?: unknown, query = "") => new Request(`https://juliangigola.com/api/proof${query}`, { method, body: body ? JSON.stringify(body) : undefined, headers: { "x-inbox-key": "k" } });
+const req = (method: string, body?: unknown, query = "") => new Request(`https://juliangigola.com/api/proof${query}`, { method, body: body ? JSON.stringify(body) : undefined, headers: { "x-admin-key": "k" } });
 beforeEach(async () => {
   kv = new FakeKV();
   sent = [];

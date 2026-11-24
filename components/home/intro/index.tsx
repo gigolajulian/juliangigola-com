@@ -60,7 +60,7 @@ export function returning() {
 
 export function shouldPlay() {
   const root = document.documentElement;
-  if (qflag("intro", "0") || !("v3motion" in root.dataset)) return false;
+  if (qflag("intro", "0")) return false;
   if (matches("calm")) return false;
   if (window.scrollY > 4) return false;
   // the head script already gave the page back at 6s (a slow CPU hydrates later than that): starting now would blank the hero the visitor is looking at
@@ -240,7 +240,6 @@ export function HomeIntro({ extras = [] }: { extras?: HomeFrame[] }) {
     const stopHurry = () => INPUTS.forEach((e) => window.removeEventListener(e, hurry));
     const origin = wall.style.transformOrigin;
     const ready: string[] = [];
-    const preload = !qflag("preload", "0"); // on by default; ?preload=0 is the old 6 + 18 start
     const parked: [HTMLImageElement, string | null, string | null][] = [];
 
     const finish = (seen: boolean) => {
@@ -479,13 +478,13 @@ export function HomeIntro({ extras = [] }: { extras?: HomeFrame[] }) {
     // where rows five and six show (wide screens) the wall itself uses extras up to 29, so the canvas draws from the ones after
     const rows6 = !!wall.querySelector<HTMLElement>("figure.xr")?.offsetParent && pool.current.length >= 48;
     const from = rows6 ? EXTRAS.wall : EXTRAS.sides;
-    const fit = preload ? fitExtras(hero, wall) : null; // the preload hold: only as many as this screen's canvas draws, at the size it draws them
-    const upto = rows6 ? (window.innerWidth >= WIDE ? 80 : 60) : 46; // ?preload=0: the old fixed set, its tiles repeat past it
+    const fit = fitExtras(hero, wall); // the preload hold: only as many as this screen's canvas draws, at the size it draws them
+    const upto = rows6 ? (window.innerWidth >= WIDE ? 80 : 60) : 46; // no canvas to fit: the old fixed set, its tiles repeat past it
     // the preload hold: one photo per drawn tile, up to the whole pool (an iPad in portrait draws 37 to 39), so no tile repeats while the pool lasts
     const want = pool.current.slice(from, fit ? from + fit.n : upto).map((f) => loader({ src: f.src, width: fit?.width ?? 640 }));
     let leadIn = false;
     let dead = 0; // extras that failed for good: they count as settled, so one dead file never holds the splash
-    const go = () => leadIn && (preload ? ready.length + dead >= want.length : ready.length >= Math.min(18, want.length)) && run();
+    const go = () => leadIn && ready.length + dead >= want.length && run();
     let plain = 0;
     want.forEach((src) => {
       const im = new Image();
@@ -499,21 +498,19 @@ export function HomeIntro({ extras = [] }: { extras?: HomeFrame[] }) {
       };
       im.src = src;
     });
-    // ?preload=0: start once the first wall frames and enough extras can paint, or after 1500ms regardless.
     // the preload hold: every photo the splash will show, on the canvas or on the first screen after it, and the extras this screen draws, by 6s at the latest.
-    const lead = preload ? onScreen(hero, wall) : [...wall.querySelectorAll<HTMLImageElement>(".mt-col:not(.side) figure:not(.xr) img")].slice(0, 6);
-    if (preload) lead.forEach((i) => (i.loading = "eager")); // lazy frames off the first screen would wait for a scroll that is locked
+    const lead = onScreen(hero, wall);
+    lead.forEach((i) => (i.loading = "eager")); // lazy frames off the first screen would wait for a scroll that is locked
     // the preload hold: lazy pictures further down (film posters at full width) start inside the browser's own look-ahead and take the splash's
     // bandwidth. Nothing scrolls until the splash ends, so they wait for it: both attributes off (no request, no error event), back in finish().
-    if (preload)
-      for (const i of document.querySelectorAll<HTMLImageElement>("main img[loading=lazy]")) {
-        if (i.complete || lead.includes(i)) continue;
-        parked.push([i, i.getAttribute("srcset"), i.getAttribute("src")]);
-        i.removeAttribute("srcset");
-        i.removeAttribute("src");
-      }
+    for (const i of document.querySelectorAll<HTMLImageElement>("main img[loading=lazy]")) {
+      if (i.complete || lead.includes(i)) continue;
+      parked.push([i, i.getAttribute("srcset"), i.getAttribute("src")]);
+      i.removeAttribute("srcset");
+      i.removeAttribute("src");
+    }
     Promise.all(lead.map((i) => i.decode().catch(() => {}))).then(() => ((leadIn = true), go()));
-    timers.push(window.setTimeout(run, preload ? Math.max(1500, CAP_AT - performance.now()) : 1500));
+    timers.push(window.setTimeout(run, Math.max(1500, CAP_AT - performance.now())));
     return () => finish(false);
   }, []);
 

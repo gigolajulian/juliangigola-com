@@ -10,7 +10,7 @@ describe("credentials", () => {
   it("prefers a pasted inbox key, else the stored GitHub token, else nothing", () => {
     const stored = new Map<string, string>();
     vi.stubGlobal("window", { localStorage: { getItem: (k: string) => stored.get(k) ?? null } });
-    expect(credentials("k1")).toEqual({ "x-inbox-key": "k1" });
+    expect(credentials("k1")).toEqual({ "x-admin-key": "k1" });
     expect(credentials("")).toEqual({});
     stored.set(TOKEN_STORE, "ghp_x");
     expect(credentials("")).toEqual({ authorization: "Bearer ghp_x" });

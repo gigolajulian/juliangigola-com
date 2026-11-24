@@ -8,7 +8,7 @@ import { logMail, recordLead } from "@/lib/leads/lead-store";
 import { cancelBooking } from "@/lib/booking/deposit";
 import { alertAndLog } from "@/lib/email/hello-mail";
 import { whenPT } from "@/lib/inbox";
-import { bodyOf, json, upstreamError } from "@/lib/http";
+import { bodyOf, json, taken, upstreamError } from "@/lib/http";
 
 /* ── a client reschedules or cancels (`/booking/<id>`) ────────────
  * POST {t, action: "cancel"} or {t, action: "reschedule", start}. The
@@ -20,7 +20,9 @@ import { bodyOf, json, upstreamError } from "@/lib/http";
 
 export const dynamic = "force-dynamic";
 
-const SAY = { missing: [404, "No such booking."], cancelled: [409, "This booking is already cancelled."], past: [409, "This session has started."], taken: [409, "taken"], moves: [403, "This booking has been moved twice already. It can still be cancelled."], late: [403, "It's under 24 hours before your session, so it can no longer be moved."] } as const;
+const SAY = { missing: [404, "No such booking."], cancelled: [409, "This booking is already cancelled."], past: [409, "This session has started."], moves: [403, "This booking has been moved twice already. It can still be cancelled."], late: [403, "It's under 24 hours before your session, so it can no longer be moved."] } as const;
+
+const refuse = (reason: Exclude<ChangeResult, { ok: true }>["reason"]) => (reason === "taken" ? taken() : json({ error: SAY[reason][1] }, SAY[reason][0]));
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { env } = await getCloudflareContext({ async: true });
@@ -42,7 +44,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   } catch (e) {
     return upstreamError("booking change", e, "Could not reach the calendar. Try again.");
   }
-  if (!out.ok) return json({ error: SAY[out.reason][1] }, SAY[out.reason][0]);
+  if (!out.ok) return refuse(out.reason);
 
   const { record: r, was } = out;
   const who = { name: r.name, email: r.email };
@@ -71,7 +73,7 @@ async function cancelMine(env: DeskEnv, id: string) {
   } catch (e) {
     return upstreamError("desk cancel", e, "Could not reach the calendar. Try again.");
   }
-  if (!out.ok) return json({ error: SAY[out.reason][1] }, SAY[out.reason][0]);
+  if (!out.ok) return refuse(out.reason);
   const { record: r, was } = out;
   const { refunded, back } = await cancelBooking(env, r, was, "julian");
   return json({ record: clientView(r), refunded: refunded ?? null, back: refunded ? back : 0 });

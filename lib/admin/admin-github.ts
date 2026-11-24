@@ -20,10 +20,10 @@
  */
 export const TOKEN_STORE = "jg-admin-token";
 
-/** Where the key is kept between visits. Beside the GitHub token. */
+/** Where the admin key is kept between visits, beside the GitHub token. The old name stays, so keys already pasted still work. */
 export const KEY_STORE = "jg-inbox-key";
 
-/** Keeps a key pasted into a desk's sign-in: a GitHub token replaces the token and drops any inbox key, anything else is the inbox key. */
+/** Keeps a key pasted into a desk's sign-in: a GitHub token replaces the token and drops any admin key, anything else is the admin key. */
 export function saveAdminKey(k: string) {
   if (/^(ghp_|github_pat_)/.test(k)) {
     localStorage.setItem(TOKEN_STORE, k);
@@ -32,11 +32,11 @@ export function saveAdminKey(k: string) {
 }
 
 /**
- * What to send: the inbox key if one was pasted, else the GitHub token the
+ * What to send: the admin key if one was pasted, else the GitHub token the
  * editor signed in with. The API takes either: see `isAdmin` in `lib/vouch.ts`.
  */
 export const credentials = (key: string): Record<string, string> => {
-  if (key) return { "x-inbox-key": key };
+  if (key) return { "x-admin-key": key };
   const token = window.localStorage.getItem(TOKEN_STORE);
   return token ? { authorization: `Bearer ${token}` } : {};
 };

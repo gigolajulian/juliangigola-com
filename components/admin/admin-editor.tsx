@@ -18,7 +18,7 @@ import { ClientFields, ContactFields, CoverArtFields, HomeFields, QuoteFields, S
 import { type TrashedProject } from "@/lib/work/added";
 import { type PendingUpload } from "@/components/admin/admin-frames";
 import { CreditDesk } from "@/components/admin/admin-credits";
-import { sameJson, withOverride } from "@/lib/admin/admin-payload";
+import { sameJson } from "@/lib/admin/admin-payload";
 import { TOKEN_STORE } from "@/lib/admin/admin-github";
 import type { Bts } from "@/lib/work/work-types";
 import { byCodeUnit, cn } from "@/lib/utils";
@@ -28,7 +28,7 @@ import { Connect, StatusLine } from "@/components/admin/admin-connect";
 import type { AdminEditorProps, Overrides } from "@/components/admin/admin-editor-props";
 import { useDeployWatch } from "@/components/admin/use-deploy-watch";
 
-import { changedSlugs, draftProjects, movedTabs, type Baseline } from "@/components/admin/editor/draft";
+import { changedSlugs, draftProjects, movedTabs, withProjectOverride, type Baseline, type SetOverride } from "@/components/admin/editor/draft";
 import { useFoundField } from "@/components/admin/editor/use-found-field";
 import { useCreditDesk } from "@/components/admin/editor/use-credit-desk";
 import { EditorBar, FullSwitch } from "@/components/admin/editor/chrome";
@@ -133,10 +133,8 @@ export function AdminEditor({
     () => new Set(initialUnlisted),
   );
   const [trash, setTrash] = React.useState<TrashedProject[]>(initialTrash);
-  /** The five per-project override maps, as one state: one setter keyed by kind. */
+  /** The five per-project override maps, as one draft with one setter (`withProjectOverride`). */
   const [overrides, setOverrides] = React.useState<Overrides>(initialOverrides);
-  const setOverride = <K extends keyof Overrides>(kind: K, next: (now: Overrides[K]) => Overrides[K]) =>
-    setOverrides((o) => ({ ...o, [kind]: next(o[kind]) }));
   const { categories: recategorised, frames: reframed, credits: recredited, copy: recopied, slugs: reslugged } = overrides;
   /** The running order of the work, by slug. Partial - see `lib/work/added.ts`. */
   const [order, setOrder] = React.useState<string[]>(initialOrder);
@@ -263,6 +261,11 @@ export function AdminEditor({
       bts: initialBts,
     },
   }));
+
+  /** One project's override changed, from the project list or the page editor. */
+  const override: SetOverride = (kind, slug, next) => setOverrides((o) => withProjectOverride(o, kind, slug, next, baseline.manifest));
+  /** Photographs processed for a gallery, staged for this publish. */
+  const stage = (added: PendingUpload[]) => setUploads((u) => ({ ...u, ...Object.fromEntries(added.map((a) => [a.path, a])) }));
 
   /** Whether the project list has moved — the second file, written only if so. */
   const manifestMoved = !sameJson(manifest, baseline.manifest);
@@ -585,43 +588,10 @@ export function AdminEditor({
                   <AdminPage
                     project={p}
                     disciplines={categories}
-                    filedAs={recategorised[p.slug] ?? p.categorySlug}
-                    onRecategorise={(categorySlug) =>
-                      setOverride("categories", (r) => ({
-                        ...r,
-                        [p.slug]: categorySlug,
-                      }))
-                    }
-                    frames={reframed[p.slug] ?? null}
+                    overrides={overrides}
+                    onOverride={override}
                     uploads={uploads}
-                    onReframe={(next) =>
-                      setOverride("frames", (r) =>
-                        withOverride(r, p.slug, next, baseline.manifest.frames),
-                      )
-                    }
-                    onUpload={(added) =>
-                      setUploads((u) => ({
-                        ...u,
-                        ...Object.fromEntries(added.map((a) => [a.path, a])),
-                      }))
-                    }
-                    credits={recredited[p.slug] ?? p.credits}
-                    onCredits={(next) =>
-                      setOverride("credits", (c) =>
-                        withOverride(
-                          c,
-                          p.slug,
-                          next,
-                          baseline.manifest.credits,
-                        ),
-                      )
-                    }
-                    copy={recopied[p.slug] ?? null}
-                    onCopy={(next) =>
-                      setOverride("copy", (c) =>
-                        withOverride(c, p.slug, next, baseline.manifest.copy),
-                      )
-                    }
+                    onUpload={stage}
                     onClose={() => {
                       setPage(null);
                       setView("projects");
@@ -690,25 +660,13 @@ export function AdminEditor({
                 onHiddenChange={setHidden}
                 unlisted={unlisted}
                 onUnlistedChange={setUnlisted}
-                slugs={reslugged}
                 changed={changed}
-                onSlug={(origin, next) =>
-                  setOverride("slugs", (m) => {
-                    const out = { ...m };
-                    // Back to the original is no rename at all, and leaves
-                    // no entry behind to publish.
-                    if (next === origin) delete out[origin];
-                    else out[origin] = next;
-                    return out;
-                  })
-                }
                 onRemoved={setTrash}
                 disciplines={categories}
-                recategorised={recategorised}
-                onRecategorise={(slug, categorySlug) =>
-                  setOverride("categories", (r) => ({ ...r, [slug]: categorySlug }))
-                }
-                reframed={reframed}
+                /* Null from a panel is its draft back the way it found it: `withProjectOverride` puts the published
+                 override back rather than dropping it, so Undo never discards an earlier publish. */
+                overrides={overrides}
+                onOverride={override}
                 bts={bts}
                 publishedBts={baseline.manifest.bts}
                 onBts={(slug, next) =>
@@ -720,31 +678,8 @@ export function AdminEditor({
                     return copy;
                   })
                 }
-                /* `null` is the sequence editor saying the frames are back in
-                 the order it found them — which is the published order, and
-                 that may itself be an override. `withOverride` puts that
-                 back rather than dropping it; see the note there. */
-                onReframe={(slug, frames) =>
-                  setOverride("frames", (r) =>
-                    withOverride(r, slug, frames, baseline.manifest.frames),
-                  )
-                }
                 uploads={uploads}
-                onUpload={(added) =>
-                  setUploads((u) => ({
-                    ...u,
-                    ...Object.fromEntries(added.map((a) => [a.path, a])),
-                  }))
-                }
-                credits={recredited}
-                /* Same as the sequences: "Undo changes" means back to what is
-                 published, and an intentionally empty list is a different
-                 thing which `withOverride` keeps. */
-                onCredits={(slug, next) =>
-                  setOverride("credits", (c) =>
-                    withOverride(c, slug, next, baseline.manifest.credits),
-                  )
-                }
+                onUpload={stage}
                 opened={opened}
                 onOpened={setOpened}
                 onOpenPage={(slug) => {

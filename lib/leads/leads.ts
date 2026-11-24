@@ -79,7 +79,7 @@ export const isPaper = (v: unknown): v is Paper => (PAPER as readonly unknown[])
 /** Something on the lead that needs him, beyond its stage. */
 export type Flag = "stuck" | "no-deposit";
 
-/** A hand edit the lead desk sends to PATCH /api/inbox, beside the lead's key. */
+/** A hand edit the lead desk sends to PATCH /api/leads, beside the lead's key. */
 export type LeadPatch = {
   stage?: string;
   snoozeUntil?: string;

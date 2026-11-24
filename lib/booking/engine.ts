@@ -92,7 +92,6 @@ export function parseBooking(raw: unknown, call = false): Parsed {
     phone: cap(b.phone, 20) || undefined,
     where: cap(b.where) || undefined,
     notes: cap(b.notes) || undefined,
-    engine: "own",
   };
   return { ok: true, booking };
 }

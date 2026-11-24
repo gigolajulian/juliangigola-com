@@ -22,6 +22,6 @@ describe("AsideDesk", () => {
     expect(call).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole("button", { name: "Delete for good" }));
     await waitFor(() => expect(done).toHaveBeenCalled());
-    expect(JSON.parse(String(call.mock.calls[0][0].body))).toEqual({ emptyTrash: true });
+    expect(call.mock.calls[0][0]).toEqual({ method: "DELETE" });
   });
 });

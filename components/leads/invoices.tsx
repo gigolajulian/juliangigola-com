@@ -1,7 +1,7 @@
 "use client";
 
 /* ── Money > Invoices on Astryx ───────────────────────────────────
- * Every invoice across leads, from `/api/inbox?invoices` (invoices live
+ * Every invoice across leads, from `/api/leads/invoices` (invoices live
  * on full leads, never in the list's summaries). Paid by `isSettled`, Sent
  * when the Gmail sync saw hello@ mail it. New invoice picks the lead and
  * opens the same design B sheet the lead page uses (InvoiceSheetB), whose
@@ -37,12 +37,12 @@ export function InvoicesDesk({ leads, call, open, changed }: { leads: LeadSummar
   const [making, setMaking] = React.useState<string | null>(null);
   const [full, setFull] = React.useState<Lead | null>(null);
   const load = React.useCallback(() => {
-    call<{ invoices: InvoiceRow[] }>({ query: "?invoices" }).then((o) => setRows(o.invoices)).catch((e: unknown) => setNote(errorText(e)));
+    call<{ invoices: InvoiceRow[] }>({ path: "/invoices" }).then((o) => setRows(o.invoices)).catch((e: unknown) => setNote(errorText(e)));
   }, [call]);
   React.useEffect(load, [load]);
 
   const byId = (id: string) => leads.find((l) => l.id === id);
-  const lead = (id: string) => call<{ lead: Lead }>({ query: `?key=${encodeURIComponent(`lead:${id}`)}` }).then((o) => o.lead);
+  const lead = (id: string) => call<{ lead: Lead }>({ path: `?id=${encodeURIComponent(id)}` }).then((o) => o.lead);
   const pdf = (r: InvoiceRow) => {
     const l = byId(r.lead);
     if (!l) return;

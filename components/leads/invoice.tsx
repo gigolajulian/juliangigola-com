@@ -7,18 +7,18 @@ import { cn, errorText } from "@/lib/utils";
 import { mailable } from "@/lib/leads/lead-crm";
 import { balance, shortDate, depositOfLead, isSettled, MAX_INVOICE_ROWS, THANKS_NOTES, usd, usdTrim, type Crop, type Invoice, type InvoiceDetails, type InvoiceFrom } from "@/lib/leads/invoice";
 import { framed, loadImage, place, shrink, toneFor } from "@/lib/leads/invoice-photo";
-import { adminCall, dayLabel, inboxCall, plusDays, ymdPT } from "@/lib/leads/lead-desk";
+import { adminCall, dayLabel, deskCall, plusDays, ymdPT } from "@/lib/leads/lead-desk";
 import { btn, compose, field, fieldLabel, kindOf, primary } from "@/components/leads/shared";
 import type { Patch } from "@/lib/leads/lead-desk";
 
 /** The PDF of one invoice. Loaded on the tap, fonts and all. A design B one fetches its sealed photo unless `src` is in hand. */
 export async function makePdf(inv: Invoice, l: LeadSummary, full: Lead, src?: string) {
-  const { from } = await inboxCall<{ from: InvoiceFrom | null }>({ query: "?invoiceFrom" });
+  const { from } = await deskCall<{ from: InvoiceFrom | null }>({ path: "/invoice-from" });
   if (!from?.name) throw new Error("Add your details for invoices first.");
   let photo;
   if (inv.b) {
     if (!src) {
-      src = (await inboxCall<{ photo?: string }>({ query: `?invoicePhoto=${inv.b.photo}` })).photo;
+      src = (await deskCall<{ photo?: string }>({ path: `/invoice-photo?key=${inv.b.photo}` })).photo;
       if (!src) throw new Error("This invoice's photo is gone.");
     }
     photo = await framed(src, inv.b.crop);
@@ -248,7 +248,7 @@ export function InvoiceSheetB({ l, full, patch, done }: { l: LeadSummary; full: 
   const img = React.useRef<HTMLImageElement | null>(null);
 
   React.useEffect(() => {
-    inboxCall<{ from: InvoiceFrom | null; no?: string }>({ query: `?invoiceNo=${date}` })
+    deskCall<{ from: InvoiceFrom | null; no?: string }>({ path: `/invoice-from?no=${date}` })
       .then((o) => {
         setNo(o.no ?? "");
         setFrom((f) => f ?? { ...EMPTY_FROM, ...o.from });
@@ -261,7 +261,7 @@ export function InvoiceSheetB({ l, full, patch, done }: { l: LeadSummary; full: 
   React.useEffect(() => {
     const last = [...(full.invoices ?? [])].reverse().find((i) => i.b)?.b;
     if (!last) return;
-    inboxCall<{ photo?: string }>({ query: `?invoicePhoto=${last.photo}` })
+    deskCall<{ photo?: string }>({ path: `/invoice-photo?key=${last.photo}` })
       .then((o) => { if (o.photo) { setSrc(o.photo); setPhotoKey(last.photo); setCropRaw(last.crop); setTone(last.tone); } })
       // Only a head start: without it the sheet opens empty, as a first invoice does.
       .catch(() => {});
@@ -297,7 +297,7 @@ export function InvoiceSheetB({ l, full, patch, done }: { l: LeadSummary; full: 
     try {
       let key = photoKey;
       if (!key) {
-        const o = await adminCall<{ key?: string }>("/api/inbox", { method: "PATCH", body: JSON.stringify({ invoicePhoto: src }) }, "Could not save the photo.");
+        const o = await adminCall<{ key?: string }>("/api/leads/invoice-photo", { method: "POST", body: JSON.stringify({ photo: src }) }, "Could not save the photo.");
         if (!o.key) throw new Error("Could not save the photo.");
         setPhotoKey((key = o.key));
       }
@@ -427,7 +427,7 @@ function FromForm({ from, saved }: { from: InvoiceFrom; saved: (f: InvoiceFrom) 
   const [f, setF] = React.useState(from);
   const [err, setErr] = React.useState<string | null>(null);
   const save = () =>
-    adminCall<{ from?: InvoiceFrom }>("/api/inbox", { method: "PATCH", body: JSON.stringify({ invoiceFrom: f }) }, "Could not save.")
+    adminCall<{ from?: InvoiceFrom }>("/api/leads/invoice-from", { method: "PUT", body: JSON.stringify({ from: f }) }, "Could not save.")
       .then((o) => {
         if (!o.from) throw new Error("Could not save.");
         saved(o.from);
