@@ -3,7 +3,7 @@ import { isIntentId, refKey, type Status } from "@/lib/booking/deposit";
 import { isDeposit } from "@/lib/booking/paid";
 import { PAYMENTS_DOWN, stripe } from "@/lib/stripe";
 import { MAX_REFS, takePicks, takeUploads } from "@/lib/inbox";
-import { json } from "@/lib/http";
+import { json, statusOf } from "@/lib/http";
 
 /* ── how a deposit ended ───────────────────────────────────────────
  * The card polls this after paying: "pending" until Stripe's webhook has
@@ -24,7 +24,7 @@ async function loadIntent(key: string, id: string): Promise<Intent | "missing" |
     const pi: Intent = await stripe(key, `/payment_intents/${id}`);
     return isDeposit(pi) ? pi : "missing";
   } catch (e) {
-    return (e as { status?: number }).status === 404 ? "missing" : "down";
+    return statusOf(e) === 404 ? "missing" : "down";
   }
 }
 

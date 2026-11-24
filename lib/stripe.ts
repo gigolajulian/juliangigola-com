@@ -1,3 +1,5 @@
+import { HttpError } from "@/lib/http";
+
 const STRIPE = "https://api.stripe.com/v1";
 
 /** What a visitor reads when Stripe cannot answer. */
@@ -24,7 +26,7 @@ export async function stripe(key: string, path: string, form?: { [k: string]: st
   if (!res.ok) {
     const err = out.error as { type?: string; code?: string; message?: string } | undefined;
     console.error("stripe", path, res.status, err?.type, err?.code, err?.message);
-    throw Object.assign(new Error(`Stripe ${path} ${res.status}`), { status: res.status });
+    throw new HttpError(`Stripe ${path} ${res.status}`, res.status);
   }
   return out;
 }

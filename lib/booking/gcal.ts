@@ -7,6 +7,7 @@
  * Nothing here logs a token or a secret, only Google's error codes.
  * ─────────────────────────────────────────────────────────────── */
 import { secretJson } from "@/lib/secrets";
+import { HttpError } from "@/lib/http";
 
 const TOKEN = "https://oauth2.googleapis.com/token";
 export const CALENDAR = "https://www.googleapis.com/calendar/v3";
@@ -50,6 +51,6 @@ export async function gcal<T = { [k: string]: unknown }>(secret: string | undefi
   }
   if (res.status === 204) return {} as T;
   const out = (await res.json().catch(() => ({}))) as T & { error?: { message?: string } };
-  if (!res.ok) throw Object.assign(new Error(`Google ${path.split("?")[0]} ${res.status}: ${out.error?.message ?? ""}`.trim()), { status: res.status });
+  if (!res.ok) throw new HttpError(`Google ${path.split("?")[0]} ${res.status}: ${out.error?.message ?? ""}`.trim(), res.status);
   return out;
 }

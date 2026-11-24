@@ -5,6 +5,19 @@ export const NO_STORE = { "cache-control": "no-store", "x-robots-tag": "noindex,
 
 export const json = (body: unknown, status = 200) => Response.json(body, { status, headers: NO_STORE });
 
+/** An upstream answered with an error status (Stripe, Google): the status rides on the error, read back with `statusOf`. */
+export class HttpError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+  ) {
+    super(message);
+  }
+}
+
+/** The upstream status a thrown error carries, or undefined for any other failure (a network error, a bug). */
+export const statusOf = (e: unknown) => (e instanceof HttpError ? e.status : undefined);
+
 /** An upstream call failed: log it under `label`, answer 502 with `error`. */
 export function upstreamError(label: string, e: unknown, error: string) {
   console.error(label, String(e));
