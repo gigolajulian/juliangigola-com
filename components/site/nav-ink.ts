@@ -377,321 +377,379 @@ function under(x: number, y: number, hdr: HTMLElement, page: RGB, hit?: Hit, hw 
 
 const WORDS = ".site-wm,.links a,.tbtn,.menu-btn,.hslot";
 
+/** One header's ink and frost, between paints. */
+type Bar = {
+  bar: HTMLElement;
+  root: HTMLElement;
+  path: string;
+  raf: number;
+  timer: number;
+  /** When the last paint ran. */
+  last: number;
+  frostT: number;
+  /** When the ink last changed. */
+  inkAt: number;
+  lastY: number;
+  /** The last scroll went down. */
+  down: boolean;
+};
+
+/** The word's box as judged: an icon button by its icon, not its 32px box, half of which can be on a photo the icon is clear of (MAC: the theme icon). */
+const wordBox = (el: HTMLElement) => ((el.matches(".tbtn,.menu-btn") && el.querySelector("svg")) || el).getBoundingClientRect();
+/** A ground seen through the bar's veil. */
+const veil = (g: RGB, page: RGB) => [0, 1, 2].map((i) => g[i] * (1 - VEIL) + page[i] * VEIL) as RGB;
+
+/** The bar has no ground: the homepage while its hero shows (the v4 hero, or the cover), elsewhere the very top. */
+function atTop(b: Bar) {
+  const hero = b.path === "/" ? document.querySelector(".mt-hero, .a-cover") : null;
+  // `data-mt-pasthero` is the v4 hero's own "the hero is over" (hero.ts, where it is set); the measure covers a build without it.
+  return hero ? hero.getBoundingClientRect().bottom > b.bar.offsetHeight && !b.root.hasAttribute("data-mt-pasthero") : scrollY <= 8;
+}
+
+/* The v4 home: the bar's wordmark waits until the hero's big name has gone, faded by hero.ts
+   or scrolled under the bar, so the name never shows twice. navfx.css hides it until this is set.
+   Only once the name is fully gone, so the two never show together: faded out, hidden by hero.ts at the end
+   of its exit, or wholly out of the window:
+   on phones it scrolls up through the bar, and the wordmark came on while it was still passing under it (MAC)
+   The whole block, tagline and buttons too, and 80px clear of the top: on an iPhone a ghost of the name still
+   showed behind the status bar when the wordmark came on, and Inquire then rose through it (MAC, sim). */
+function markNameGone(b: Bar) {
+  const nm = b.path === "/" ? document.querySelector<HTMLElement>(".mt-name h1") : null;
+  const nr = nm?.getBoundingClientRect();
+  const blk = nm?.closest<HTMLElement>("[data-mt-name]");
+  const br = blk?.getBoundingClientRect() ?? nr;
+  const shows = !!br && br.bottom > -80 && br.top < innerHeight && blk?.style.visibility !== "hidden" && parseFloat(blk?.style.opacity || "1") > 0.02;
+  b.root.toggleAttribute("data-navnamegone", !shows);
+}
+
+/* A section that is dark in both themes (the v4 footer sets its own --bg) under a light page: the bar takes
+   the dark ground there (navfx.css), or its light veil over it would be a mid grey nothing reads on. */
+function markDark(b: Bar) {
+  const [rootBg] = colour(getComputedStyle(b.root).getPropertyValue("--bg").trim());
+  const sec = document.elementsFromPoint(innerWidth / 2, b.bar.getBoundingClientRect().bottom - 1).find((el) => !b.bar.contains(el));
+  const [secBg] = sec ? colour(getComputedStyle(sec).getPropertyValue("--bg").trim()) : [rootBg];
+  b.root.toggleAttribute("data-navdark", lum(rootBg) > 0.2 && lum(secBg) < 0.2);
+}
+
+/** What the words stand on: each stretch's ink as `data-inks`, the vote, and the grounds through the veil and without it. */
+type Looks = { w: number; n: number; els: HTMLElement[]; grounds: RGB[]; raw: RGB[]; unseen: boolean; own: Map<HTMLElement, RGB[]> };
+
+/* One ink for the whole bar: no word on its own, all of them fade to the other colour together.
+   Each word still looks under itself in stretches; the stretches vote. */
+function lookUnder(b: Bar, page: RGB, isTop: boolean, veiled: boolean): Looks {
+  const out: Looks = { w: 0, n: 0, els: [], grounds: [], raw: [], unseen: false, own: new Map() };
+  for (const el of b.bar.querySelectorAll<HTMLElement>(WORDS)) {
+    const r = wordBox(el);
+    if (!r.width || r.bottom < 0) continue;
+    // a word that is not showing has no say (the v4 home hides the wordmark while the hero's name shows)
+    if (+getComputedStyle(el).opacity < 0.1) continue;
+    const mine: RGB[] = [];
+    out.own.set(el, mine);
+    /* One ink per stretch of about 16px, so a word that sits half on a photo and half on the page is white
+       on one and black on the other (QA: "Ju" white on light grey). And one for the upper half and one for the
+       lower: a photo's top or bottom edge can run through a word (MAC: the wordmark white, 1.2:1, with only its
+       lower half on a photo; the one look along the middle line called the whole word). A stretch keeps its
+       ink unless the other is clearly better, so it does not flicker on a busy photo, but never below 3:1.
+       `data-inks` is the upper row, a slash, the lower row. */
+    const n = Math.max(1, Math.round(r.width / 16));
+    const ya = r.top + r.height * 0.25, yb = r.top + r.height * 0.75; // the middle of each half
+    const prev = el.dataset.inks ?? "";
+    const [pa = "", pb = ""] = prev.split("/");
+    dbg?.push({ word: el.textContent?.trim().slice(0, 12) || el.className, prev, isTop, veiled });
+    const pick = (g: RGB, was: string, unknown?: boolean) => {
+      if (unknown) out.unseen = true;
+      if (unknown && was) return was; // the photo's pixels are not in yet: keep the ink until they are
+      const c = veiled ? veil(g, page) : g;
+      if (!unknown) out.grounds.push(c), out.raw.push(g), mine.push(c);
+      const l = lum(c), white = 1.05 / (l + 0.05), black = (l + 0.05) / 0.05;
+      return was === "w" && white >= 3 && white * 1.25 >= black ? "w" : was === "b" && black >= 3 && black * 1.25 >= white ? "b" : white >= black ? "w" : "b";
+    };
+    let ra = "", rb = "";
+    for (let k = 0; k < n; k++) {
+      const x = r.left + (r.width * (k + 0.5)) / n, hit: Hit = {}, low: Hit = {};
+      const hw = r.width / n / 2, hh = r.height / 4; // the patch each look stands for: one stretch, half the height
+      const ca = under(x, ya, b.bar, page, hit, hw, hh);
+      // the lower half is usually on the same photo or box: a second look only where that one ends
+      const cb = hit.at?.(yb) ?? under(x, yb, b.bar, page, low, hw, hh);
+      ra += pick(ca, pa.length === n ? pa[k] : "", hit.unknown);
+      rb += pick(cb, pb.length === n ? pb[k] : "", hit.at ? false : low.unknown || hit.unknown);
+    }
+    const inks = ra + "/" + rb;
+    el.dataset.inks = inks;
+    out.w += inks.split("w").length - 1;
+    out.n += 2 * n;
+    out.els.push(el);
+  }
+  return out;
+}
+
+/* Pre-roll: while scrolling down, also look a little below the bar, at what is about to come under the words, so
+   the frost is in before a word sits on the wrong photo (MAC: the menu on a dark figure for 0.3s before the fade).
+   Only on the way down, so a page at rest at its top keeps no frost. */
+function lookAhead(b: Bar, els: HTMLElement[], page: RGB, isTop: boolean) {
+  const ahead: RGB[] = [];
+  const bb = b.bar.getBoundingClientRect().bottom;
+  for (const el of els) {
+    const r = wordBox(el);
+    for (const t of [0.15, 0.5, 0.85])
+      for (const dy of [28, 64]) {
+        const g = under(r.left + r.width * t, bb + dy, b.bar, page);
+        ahead.push(isTop ? g : veil(g, page));
+      }
+  }
+  return ahead;
+}
+
+/* The ground comes up over the hero while the bar's ink fails anywhere without it, and goes once it would not.
+   On at once for any spot that fails, and then it stays for the rest of the hero: switched as each look found it,
+   it flashed on and off across the masonry (MAC, iPhone, #1417). It goes only back near the top of the page,
+   after 1.2s with nothing failing, faded (navfx.css). */
+function setFrost(b: Bar, fails: number, isTop: boolean) {
+  const { bar } = b;
+  if (!isTop) {
+    // past the top: comes up where a word fails through the usual ground, and once up it stays, ink fixed
+    clearTimeout(b.frostT);
+    b.frostT = 0;
+    if (fails || bar.getAttribute("data-navfrost") === "off") bar.setAttribute("data-navfrost", "");
+  } else if (fails) {
+    clearTimeout(b.frostT);
+    b.frostT = 0;
+    if (bar.getAttribute("data-navfrost") !== "") bar.setAttribute("data-navfrost", "");
+  } else if (bar.getAttribute("data-navfrost") === "" && !b.frostT && scrollY < innerHeight / 4)
+    b.frostT = window.setTimeout(() => {
+      bar.setAttribute("data-navfrost", "off");
+      b.frostT = window.setTimeout(() => {
+        b.frostT = 0;
+        if (bar.getAttribute("data-navfrost") === "off") bar.removeAttribute("data-navfrost");
+      }, 300);
+    }, 1200);
+}
+
+/** Every word takes the bar's ink; `data-cr` is each word's worst contrast as drawn, for QA. */
+function inkWords(els: HTMLElement[], own: Map<HTMLElement, RGB[]>, ink: string) {
+  for (const el of els) {
+    const g = own.get(el) ?? [];
+    el.dataset.cr = g.length ? Math.min(...g.map((c) => (ink === "w" ? 1.05 / (lum(c) + 0.05) : (lum(c) + 0.05) / 0.05))).toFixed(1) : "";
+    if (el.dataset.ink === ink) continue;
+    el.dataset.ink = ink;
+    el.style.setProperty("--nav-ink", ink === "w" ? "#fff" : "#000"); // navfx.css fades the colour
+  }
+}
+
+/** One look at the bar: whether it has a ground, the name, the dark section, the ink, and the frost. */
+function paint(b: Bar) {
+  const { bar, root } = b;
+  b.raf = 0;
+  b.last = performance.now();
+  seen.clear();
+  boxes.clear();
+  const isTop = atTop(b);
+  root.toggleAttribute("data-navtop", isTop);
+  markNameGone(b);
+  markDark(b);
+  const [page] = colour(getComputedStyle(bar).getPropertyValue("--bg").trim());
+  /* Over the home hero the bar has no ground, and no one ink reads on every photo: the ground comes up there
+     while a word would fall under 4.5:1 without it (Julian picked "frost" from the prototype, 2026-11-22). */
+  /* The frost stays on past the hero once it is up (a "carry"): dropping it where the hero ends brought the bar's
+     own ground back in from transparent and handed the ink back to the photos, so it went white, black, white with
+     the wordmark and menu apart (MAC, iPhone dark, #1417). It goes only near the top of the page (setFrost). */
+  const frosted = bar.getAttribute("data-navfrost") === ""; // "off" is the frost fading out
+  /* Safari's bounce past the top runs scrollY below 0 and back (-4, -3, -2, -1, 0): read as is, the last step was
+     "down", so a page at rest at its top kept looking ahead, found the photo under the links, and the frost faded in
+     and out every 1.25s for as long as it sat there (MAC, real Safari, /portfolio/paradox at 1440, dark). Overscroll
+     is no direction: counted from 0. */
+  const sy = Math.max(0, scrollY);
+  if (sy !== b.lastY) {
+    b.down = sy > b.lastY;
+    b.lastY = sy;
+  }
+  const veiled = (!isTop && !root.hasAttribute("data-tuck")) || frosted;
+  const looks = lookUnder(b, page, isTop, veiled);
+  if (!looks.n) return;
+  // the one ink that fails the fewest spots (`barInk`); while every photo under the bar is loading, the stretches vote (60% to flip)
+  const was = bar.getAttribute("data-ink"), share = looks.w / looks.n;
+  const voted = was === "w" ? (share >= 0.4 ? "w" : "b") : was === "b" ? (share <= 0.6 ? "b" : "w") : share >= 0.5 ? "w" : "b";
+  /* Under the frost the theme's ink, fixed and never sampled: the frost is a 62% veil of the page colour, so black
+     on it (light) or white on it (dark) holds at least 6:1 over any photo, and both words always share it (MAC).
+     Elsewhere the ink that fails fewest; held 300ms, so it does not flip for a few frames on a busy photo (MAC, iPhone). */
+  const themeInk = root.dataset.theme === "light" ? "b" : "w";
+  const pick = frosted ? themeInk : looks.grounds.length ? barInk(looks.grounds, was) : voted;
+  const now = performance.now();
+  let ink = was && pick !== was && !frosted && now - b.inkAt < 300 ? was : pick;
+  if (ink !== was) b.inkAt = now;
+  bar.setAttribute("data-ink", ink);
+  // at 6:1, a margin over 4.5, so it is up before a word actually fails (MAC: a word on the wrong photo for 0.13s first)
+  const ahead = b.down && !frosted && (isTop || veiled) ? lookAhead(b, looks.els, page, isTop) : [];
+  /* Every page, not only the home hero (MAC SSH, live v3.0.369: /portfolio/paradox at 1440 had 18 words under 4.5:1
+     through the bar's usual 47% ground, and dark /book at 390 a black menu at 3.3:1 over its bright hero). Past the
+     top, the bar already has that ground, so a word is judged through it: where it would still fall under 6:1, the
+     frost comes up there too and the ink becomes the theme's. A plain page ground never fails, so it never shows there.
+     Past the top the bar's blur (24px) and saturate (1.8) pull light in from around each point, so the ground as drawn
+     can sit well above the one a look samples: judged there at 7.5:1, not 6 (MAC SSH, a4e718dd: words at 4.0 just
+     past the top of a project page, and /book's current link at 3.7). The look ahead reaches 64px below the bar.
+     Past the top, a photo under a word whose pixels are still on their way counts as failing: the first time one slides
+     under the bar its small copy takes a few frames, and the frost waited for it (MAC SSH, 6756ca22: four words at
+     4.0 to 4.1 for about 0.2s at the hero edge of a project page). The frost latches, so this only brings it up
+     sooner; a plain page has no photo, so it never fires there. */
+  const { grounds, raw, unseen } = looks;
+  const fails = isTop ? (raw.length ? fewest(raw.concat(ahead), 6) : 0) : veiled && !frosted && (grounds.length || unseen) ? (unseen ? 1 : 0) || fewest(grounds.concat(ahead), 7.5) : 0;
+  setFrost(b, fails, isTop);
+  /* The paint that brings the frost up takes the theme's ink at once: the ink above was picked before the frost
+     was decided, so for one frame it was the photos' (MAC SSH, 79e286a3: black over the dark hero, then white). */
+  if (!frosted && bar.getAttribute("data-navfrost") === "" && ink !== themeInk) {
+    ink = themeInk;
+    b.inkAt = now;
+    bar.setAttribute("data-ink", ink);
+  }
+  inkWords(looks.els, looks.own, ink);
+}
+
+/* Words and buttons under the bar. An observer on the band at the top of the window names the few that are in
+   it; only those are measured, and each gets a mask cut along a line just under the bar. It follows anything
+   that moves, by scroll or by transform (the v4 hero), and nothing outside the band carries a mask. */
+const EDGE = 20, SOFT = 28; // the line sits this far under the bar; the fade is this deep above it
+function underBarMasks(bar: HTMLElement) {
+  const live = new Set<HTMLElement>(), watched = new WeakSet<Element>(), cuts = new WeakMap<HTMLElement, string>();
+  let cutRaf = 0, still = 0, count = -1;
+  const mask = (el: HTMLElement, m: string) => {
+    if ((cuts.get(el) ?? "") === m) return false;
+    cuts.set(el, m);
+    el.style.setProperty("-webkit-mask-image", m);
+    el.style.maskImage = m;
+    return true;
+  };
+  const cut = () => {
+    cutRaf = 0;
+    const bottom = bar.getBoundingClientRect().bottom, line = bottom > 0 ? Math.round(bottom) + EDGE : 0; // the bar can slide away
+    let moved = false;
+    for (const el of live) {
+      const t = Math.round(el.getBoundingClientRect().top);
+      if (mask(el, line && t < line ? `linear-gradient(#0000 ${line - t - SOFT}px,#000 ${line - t}px)` : "")) moved = true;
+    }
+    still = moved ? 0 : still + 1;
+    // keeps going while things still move with no scroll event (a glide after the wheel stops), then rests
+    if (live.size && still < 30) cutRaf = requestAnimationFrame(cut);
+  };
+  const kick = () => {
+    still = 0;
+    if (live.size && !cutRaf) cutRaf = requestAnimationFrame(cut);
+  };
+  const band = () =>
+    new IntersectionObserver(
+      (es) => {
+        for (const e of es) {
+          const el = e.target as HTMLElement;
+          // one that already wears a mask of its own (the client marks) keeps it
+          if (e.isIntersecting) {
+            if (getComputedStyle(el).maskImage === "none") live.add(el);
+          } else if (live.delete(el)) mask(el, "");
+        }
+        kick();
+      },
+      { rootMargin: `0px 0px -${Math.max(0, innerHeight - bar.offsetHeight - EDGE - 8)}px 0px` },
+    );
+  let io = band();
+  // every element that holds text of its own, and every control: never one that only wraps a photo
+  const scan = () => {
+    const main = document.getElementById("main");
+    if (!main) return;
+    const n = main.getElementsByTagName("*").length;
+    if (n === count) return;
+    count = n;
+    const walk = document.createTreeWalker(main, NodeFilter.SHOW_TEXT);
+    for (let t = walk.nextNode(); t; t = walk.nextNode()) {
+      const el = t.parentElement;
+      if (el && !watched.has(el) && t.nodeValue?.trim()) {
+        watched.add(el);
+        io.observe(el);
+      }
+    }
+    for (const el of main.querySelectorAll("button,input,select,textarea"))
+      if (!watched.has(el)) {
+        watched.add(el);
+        io.observe(el);
+      }
+  };
+  const rebind = () => {
+    io.disconnect();
+    for (const el of live) mask(el, "");
+    live.clear();
+    io = band();
+    count = -1;
+    const main = document.getElementById("main");
+    // the old observer's elements go to the new one
+    if (main) for (const el of main.querySelectorAll<HTMLElement>("*")) watched.delete(el);
+    scan();
+  };
+  const stop = () => {
+    io.disconnect();
+    cancelAnimationFrame(cutRaf);
+    for (const el of live) mask(el, "");
+  };
+  scan();
+  return { kick, scan, rebind, stop };
+}
+
+/* On a preview, where photos need a same-host copy: ask for the ones near the window before they reach the bar. */
+function copyAhead() {
+  if (!copied) return;
+  for (const im of document.querySelectorAll<HTMLImageElement>("#main img")) {
+    const q = im.getBoundingClientRect();
+    if (q.width && q.bottom > -innerHeight / 2 && q.top < innerHeight * 2) thumb(im);
+  }
+}
+
 export function useNavInk(hdr: React.RefObject<HTMLElement | null>, path: string) {
   React.useEffect(() => {
     const bar = hdr.current, root = document.documentElement;
     if (!bar) return;
-    let raf = 0, timer = 0, last = 0, frostT = 0, inkAt = 0, lastY = Math.max(0, scrollY), down = false;
-    const top = () => {
-      // The homepage: no ground while its hero shows (the v4 hero, or the cover). Elsewhere: none at the very top.
-      const hero = path === "/" ? document.querySelector(".mt-hero, .a-cover") : null;
-      // `data-mt-pasthero` is the v4 hero's own "the hero is over" (hero.ts, where it is set); the measure covers a build without it.
-      return hero ? hero.getBoundingClientRect().bottom > bar.offsetHeight && !root.hasAttribute("data-mt-pasthero") : scrollY <= 8;
-    };
-    const paint = () => {
-      raf = 0;
-      last = performance.now();
-      seen.clear();
-      boxes.clear();
-      const isTop = top();
-      root.toggleAttribute("data-navtop", isTop);
-      // The v4 home: the bar's wordmark waits until the hero's big name has gone, faded by hero.ts
-      // or scrolled under the bar, so the name never shows twice. navfx.css hides it until this is set.
-      const nm = path === "/" ? document.querySelector<HTMLElement>(".mt-name h1") : null;
-      const nr = nm?.getBoundingClientRect();
-      const blk = nm?.closest<HTMLElement>("[data-mt-name]");
-      // only once the name is fully gone, so the two never show together: faded out, hidden by hero.ts at the end
-      // of its exit, or wholly out of the window:
-      // on phones it scrolls up through the bar, and the wordmark came on while it was still passing under it (MAC)
-      // The whole block, tagline and buttons too, and 80px clear of the top: on an iPhone a ghost of the name still
-      // showed behind the status bar when the wordmark came on, and Inquire then rose through it (MAC, sim).
-      const br = blk?.getBoundingClientRect() ?? nr;
-      const shows = !!br && br.bottom > -80 && br.top < innerHeight && blk?.style.visibility !== "hidden" && parseFloat(blk?.style.opacity || "1") > 0.02;
-      root.toggleAttribute("data-navnamegone", !shows);
-      // A section that is dark in both themes (the v4 footer sets its own --bg) under a light page: the bar takes
-      // the dark ground there (navfx.css), or its light veil over it would be a mid grey nothing reads on.
-      const [rootBg] = colour(getComputedStyle(root).getPropertyValue("--bg").trim());
-      const sec = document.elementsFromPoint(innerWidth / 2, bar.getBoundingClientRect().bottom - 1).find((el) => !bar.contains(el));
-      const [secBg] = sec ? colour(getComputedStyle(sec).getPropertyValue("--bg").trim()) : [rootBg];
-      root.toggleAttribute("data-navdark", lum(rootBg) > 0.2 && lum(secBg) < 0.2);
-      const [page] = colour(getComputedStyle(bar).getPropertyValue("--bg").trim());
-      /* Over the home hero the bar has no ground, and no one ink reads on every photo: the ground comes up there
-         while a word would fall under 4.5:1 without it (Julian picked "frost" from the prototype, 2026-11-22). */
-      /* The frost stays on past the hero once it is up (a "carry"): dropping it where the hero ends brought the bar's
-         own ground back in from transparent and handed the ink back to the photos, so it went white, black, white with
-         the wordmark and menu apart (MAC, iPhone dark, #1417). It goes only near the top of the page (below). */
-      const frosted = bar.getAttribute("data-navfrost") === ""; // "off" is the frost fading out
-      /* Safari's bounce past the top runs scrollY below 0 and back (-4, -3, -2, -1, 0): read as is, the last step was
-         "down", so a page at rest at its top kept looking ahead, found the photo under the links, and the frost faded in
-         and out every 1.25s for as long as it sat there (MAC, real Safari, /portfolio/paradox at 1440, dark). Overscroll
-         is no direction: counted from 0. */
-      const sy = Math.max(0, scrollY);
-      if (sy !== lastY) {
-        down = sy > lastY;
-        lastY = sy;
-      }
-      const veiled = (!isTop && !root.hasAttribute("data-tuck")) || frosted;
-      // One ink for the whole bar: no word on its own, all of them fade to the other colour together.
-      // Each word still looks under itself in stretches; the stretches vote.
-      const votes = { w: 0, n: 0, els: [] as HTMLElement[] };
-      const grounds: RGB[] = [], raw: RGB[] = []; // what each stretch stands on, through the veil and without it
-      let unseen = false; // a photo under a word whose pixels are not in yet
-      const own = new Map<HTMLElement, RGB[]>(); // each word's own grounds
-      for (const el of bar.querySelectorAll<HTMLElement>(WORDS)) {
-        // an icon button is judged by its icon, not its 32px box: half the box can be on a photo the icon is clear of (MAC: the theme icon)
-        const r = ((el.matches(".tbtn,.menu-btn") && el.querySelector("svg")) || el).getBoundingClientRect();
-        if (!r.width || r.bottom < 0) continue;
-        // a word that is not showing has no say (the v4 home hides the wordmark while the hero's name shows)
-        if (+getComputedStyle(el).opacity < 0.1) continue;
-        const mine: RGB[] = [];
-        own.set(el, mine);
-        /* One ink per stretch of about 16px, so a word that sits half on a photo and half on the page is white
-           on one and black on the other (QA: "Ju" white on light grey). And one for the upper half and one for the
-           lower: a photo's top or bottom edge can run through a word (MAC: the wordmark white, 1.2:1, with only its
-           lower half on a photo; the one look along the middle line called the whole word). A stretch keeps its
-           ink unless the other is clearly better, so it does not flicker on a busy photo, but never below 3:1.
-           `data-inks` is the upper row, a slash, the lower row. */
-        const n = Math.max(1, Math.round(r.width / 16));
-        const ya = r.top + r.height * 0.25, yb = r.top + r.height * 0.75; // the middle of each half
-        const prev = el.dataset.inks ?? "";
-        const [pa = "", pb = ""] = prev.split("/");
-        dbg?.push({ word: el.textContent?.trim().slice(0, 12) || el.className, prev, isTop, veiled });
-        const pick = (g: RGB, was: string, unknown?: boolean) => {
-          if (unknown) unseen = true;
-          if (unknown && was) return was; // the photo's pixels are not in yet: keep the ink until they are
-          const c = veiled ? ([0, 1, 2].map((i) => g[i] * (1 - VEIL) + page[i] * VEIL) as RGB) : g;
-          if (!unknown) grounds.push(c), raw.push(g), mine.push(c);
-          const l = lum(c), white = 1.05 / (l + 0.05), black = (l + 0.05) / 0.05;
-          return was === "w" && white >= 3 && white * 1.25 >= black ? "w" : was === "b" && black >= 3 && black * 1.25 >= white ? "b" : white >= black ? "w" : "b";
-        };
-        let ra = "", rb = "";
-        for (let k = 0; k < n; k++) {
-          const x = r.left + (r.width * (k + 0.5)) / n, hit: Hit = {}, low: Hit = {};
-          const hw = r.width / n / 2, hh = r.height / 4; // the patch each look stands for: one stretch, half the height
-          const ca = under(x, ya, bar, page, hit, hw, hh);
-          // the lower half is usually on the same photo or box: a second look only where that one ends
-          const cb = hit.at?.(yb) ?? under(x, yb, bar, page, low, hw, hh);
-          ra += pick(ca, pa.length === n ? pa[k] : "", hit.unknown);
-          rb += pick(cb, pb.length === n ? pb[k] : "", hit.at ? false : low.unknown || hit.unknown);
-        }
-        const inks = ra + "/" + rb;
-        el.dataset.inks = inks;
-        votes.w += inks.split("w").length - 1;
-        votes.n += 2 * n;
-        votes.els.push(el);
-      }
-      if (votes.n) {
-        // the one ink that fails the fewest spots (`barInk`); while every photo under the bar is loading, the stretches vote (60% to flip)
-        const was = bar.getAttribute("data-ink"), share = votes.w / votes.n;
-        const voted = was === "w" ? (share >= 0.4 ? "w" : "b") : was === "b" ? (share <= 0.6 ? "b" : "w") : share >= 0.5 ? "w" : "b";
-        /* Under the frost the ink is the frost's own: dark on a light page, light on a dark one, so it never sits white
-           on light frost (MAC, Safari 1440). Elsewhere the ink that fails fewest; held 300ms, so it does not flip for a
-           few frames on a busy photo (MAC, iPhone). */
-        /* Under the frost the theme's ink, fixed and never sampled: the frost is a 62% veil of the page colour, so black
-           on it (light) or white on it (dark) holds at least 6:1 over any photo, and both words always share it (MAC). */
-        const themeInk = root.dataset.theme === "light" ? "b" : "w";
-        const pick = frosted ? themeInk : grounds.length ? barInk(grounds, was) : voted;
-        const now = performance.now();
-        let ink = was && pick !== was && !frosted && now - inkAt < 300 ? was : pick;
-        if (ink !== was) inkAt = now;
-        bar.setAttribute("data-ink", ink);
-        // the ground comes up over the hero while the bar's ink fails anywhere without it, and goes once it would not
-        /* On at once for any spot that fails, and then it stays for the rest of the hero: switched as each look found it,
-           it flashed on and off across the masonry (MAC, iPhone, #1417). It goes only back near the top of the page,
-           after 1.2s with nothing failing, faded (navfx.css). */
-        // at 6:1, a margin over 4.5, so it is up before a word actually fails (MAC: a word on the wrong photo for 0.13s first)
-        /* Pre-roll: while scrolling down, also look a little below the bar, at what is about to come under the words, so
-           the frost is in before a word sits on the wrong photo (MAC: the menu on a dark figure for 0.3s before the fade).
-           Only on the way down, so a page at rest at its top keeps no frost. */
-        const ahead: RGB[] = [];
-        if (down && !frosted && (isTop || veiled)) {
-          const bb = bar.getBoundingClientRect().bottom;
-          for (const el of votes.els) {
-            const r = ((el.matches(".tbtn,.menu-btn") && el.querySelector("svg")) || el).getBoundingClientRect();
-            for (const t of [0.15, 0.5, 0.85])
-              for (const dy of [28, 64]) {
-                const g = under(r.left + r.width * t, bb + dy, bar, page);
-                ahead.push(isTop ? g : ([0, 1, 2].map((i) => g[i] * (1 - VEIL) + page[i] * VEIL) as RGB));
-              }
-          }
-        }
-        /* Every page, not only the home hero (MAC SSH, live v3.0.369: /portfolio/paradox at 1440 had 18 words under 4.5:1
-           through the bar's usual 47% ground, and dark /book at 390 a black menu at 3.3:1 over its bright hero). Past the
-           top, the bar already has that ground, so a word is judged through it: where it would still fall under 6:1, the
-           frost comes up there too and the ink becomes the theme's. A plain page ground never fails, so it never shows there. */
-        /* Past the top the bar's blur (24px) and saturate (1.8) pull light in from around each point, so the ground as drawn
-           can sit well above the one a look samples: judged there at 7.5:1, not 6 (MAC SSH, a4e718dd: words at 4.0 just
-           past the top of a project page, and /book's current link at 3.7). The look ahead reaches 64px below the bar. */
-/* Past the top, a photo under a word whose pixels are still on their way counts as failing: the first time one slides
-           under the bar its small copy takes a few frames, and the frost waited for it (MAC SSH, 6756ca22: four words at
-           4.0 to 4.1 for about 0.2s at the hero edge of a project page). The frost latches, so this only brings it up
-           sooner; a plain page has no photo, so it never fires there. */
-        const fails = isTop ? (raw.length ? fewest(raw.concat(ahead), 6) : 0) : veiled && !frosted && (grounds.length || unseen) ? (unseen ? 1 : 0) || fewest(grounds.concat(ahead), 7.5) : 0;
-        if (!isTop) {
-          // past the top: comes up where a word fails through the usual ground, and once up it stays, ink fixed
-          clearTimeout(frostT);
-          frostT = 0;
-          if (fails || bar.getAttribute("data-navfrost") === "off") bar.setAttribute("data-navfrost", "");
-        } else if (fails) {
-          clearTimeout(frostT);
-          frostT = 0;
-          if (bar.getAttribute("data-navfrost") !== "") bar.setAttribute("data-navfrost", "");
-        } else if (bar.getAttribute("data-navfrost") === "" && !frostT && scrollY < innerHeight / 4)
-          frostT = window.setTimeout(() => {
-            bar.setAttribute("data-navfrost", "off");
-            frostT = window.setTimeout(() => {
-              frostT = 0;
-              if (bar.getAttribute("data-navfrost") === "off") bar.removeAttribute("data-navfrost");
-            }, 300);
-          }, 1200);
-        /* The paint that brings the frost up takes the theme's ink at once: the ink above was picked before the frost
-           was decided, so for one frame it was the photos' (MAC SSH, 79e286a3: black over the dark hero, then white). */
-        if (!frosted && bar.getAttribute("data-navfrost") === "" && ink !== themeInk) {
-          ink = themeInk;
-          inkAt = now;
-          bar.setAttribute("data-ink", ink);
-        }
-        for (const el of votes.els) {
-          // this word's worst contrast as drawn, for QA (`data-cr`)
-          const g = own.get(el) ?? [];
-          el.dataset.cr = g.length ? Math.min(...g.map((c) => (ink === "w" ? 1.05 / (lum(c) + 0.05) : (lum(c) + 0.05) / 0.05))).toFixed(1) : "";
-          if (el.dataset.ink === ink) continue;
-          el.dataset.ink = ink;
-          el.style.setProperty("--nav-ink", ink === "w" ? "#fff" : "#000"); // navfx.css fades the colour
-        }
-      }
-    };
-    if (/[?&]navdbg/.test(location.search)) (window as unknown as { __navink: () => unknown[] }).__navink = () => ((dbg = []), paint(), [dbg, (dbg = null)][0] as unknown[]);
-    /* Words and buttons under the bar. An observer on the band at the top of the window names the few that are in
-       it; only those are measured, and each gets a mask cut along a line just under the bar. It follows anything
-       that moves, by scroll or by transform (the v4 hero), and nothing outside the band carries a mask. */
-    const EDGE = 20, SOFT = 28; // the line sits this far under the bar; the fade is this deep above it
-    const live = new Set<HTMLElement>(), watched = new WeakSet<Element>(), cuts = new WeakMap<HTMLElement, string>();
-    let cutRaf = 0, still = 0, count = -1;
-    const mask = (el: HTMLElement, m: string) => {
-      if ((cuts.get(el) ?? "") === m) return false;
-      cuts.set(el, m);
-      el.style.setProperty("-webkit-mask-image", m);
-      el.style.maskImage = m;
-      return true;
-    };
-    const cut = () => {
-      cutRaf = 0;
-      const bottom = bar.getBoundingClientRect().bottom, line = bottom > 0 ? Math.round(bottom) + EDGE : 0; // the bar can slide away
-      let moved = false;
-      for (const el of live) {
-        const t = Math.round(el.getBoundingClientRect().top);
-        if (mask(el, line && t < line ? `linear-gradient(#0000 ${line - t - SOFT}px,#000 ${line - t}px)` : "")) moved = true;
-      }
-      still = moved ? 0 : still + 1;
-      // keeps going while things still move with no scroll event (a glide after the wheel stops), then rests
-      if (live.size && still < 30) cutRaf = requestAnimationFrame(cut);
-    };
-    const kick = () => {
-      still = 0;
-      if (live.size && !cutRaf) cutRaf = requestAnimationFrame(cut);
-    };
-    const band = () =>
-      new IntersectionObserver(
-        (es) => {
-          for (const e of es) {
-            const el = e.target as HTMLElement;
-            // one that already wears a mask of its own (the client marks) keeps it
-            if (e.isIntersecting) {
-              if (getComputedStyle(el).maskImage === "none") live.add(el);
-            } else if (live.delete(el)) mask(el, "");
-          }
-          kick();
-        },
-        { rootMargin: `0px 0px -${Math.max(0, innerHeight - bar.offsetHeight - EDGE - 8)}px 0px` },
-      );
-    let io = band();
-    // every element that holds text of its own, and every control: never one that only wraps a photo
-    const scan = () => {
-      const main = document.getElementById("main");
-      if (!main) return;
-      const n = main.getElementsByTagName("*").length;
-      if (n === count) return;
-      count = n;
-      const walk = document.createTreeWalker(main, NodeFilter.SHOW_TEXT);
-      for (let t = walk.nextNode(); t; t = walk.nextNode()) {
-        const el = t.parentElement;
-        if (el && !watched.has(el) && t.nodeValue?.trim()) {
-          watched.add(el);
-          io.observe(el);
-        }
-      }
-      for (const el of main.querySelectorAll("button,input,select,textarea"))
-        if (!watched.has(el)) {
-          watched.add(el);
-          io.observe(el);
-        }
-    };
-    const rebind = () => {
-      io.disconnect();
-      for (const el of live) mask(el, "");
-      live.clear();
-      io = band();
-      count = -1;
-      const main = document.getElementById("main");
-      // the old observer's elements go to the new one
-      if (main) for (const el of main.querySelectorAll<HTMLElement>("*")) watched.delete(el);
-      scan();
-    };
-    scan();
+    const b: Bar = { bar, root, path, raf: 0, timer: 0, last: 0, frostT: 0, inkAt: 0, lastY: Math.max(0, scrollY), down: false };
+    const look = () => paint(b);
+    if (/[?&]navdbg/.test(location.search)) (window as unknown as { __navink: () => unknown[] }).__navink = () => ((dbg = []), look(), [dbg, (dbg = null)][0] as unknown[]);
+    const masks = underBarMasks(bar);
 
     /* At most every 50ms while scrolling. The v4 hero's wall glides on for about a second after the last scroll
        event, so it keeps looking through that second too: one look at 120ms left the ink a photo behind (QA). */
     let until = 0;
     const tail = () => {
-      raf ||= requestAnimationFrame(paint);
+      b.raf ||= requestAnimationFrame(look);
       // over the homepage hero the words sit on moving photos with no ground: every frame there, 60ms elsewhere
-      if (performance.now() < until) timer = window.setTimeout(tail, root.hasAttribute("data-navtop") ? 16 : 60);
+      if (performance.now() < until) b.timer = window.setTimeout(tail, root.hasAttribute("data-navtop") ? 16 : 60);
     };
     const ask = () => {
       until = performance.now() + 1100;
-      clearTimeout(timer);
-      timer = window.setTimeout(tail, 60);
-      if (!raf && performance.now() - last > (root.hasAttribute("data-navtop") ? 12 : 50)) raf = requestAnimationFrame(paint);
+      clearTimeout(b.timer);
+      b.timer = window.setTimeout(tail, 60);
+      if (!b.raf && performance.now() - b.last > (root.hasAttribute("data-navtop") ? 12 : 50)) b.raf = requestAnimationFrame(look);
     };
     poke = ask;
     const loaded = (e: Event) => (e.target instanceof HTMLImageElement || e.target instanceof HTMLVideoElement) && ask();
     addEventListener("scroll", ask, { passive: true });
-    addEventListener("scroll", kick, { passive: true });
+    addEventListener("scroll", masks.kick, { passive: true });
     addEventListener("resize", ask);
-    addEventListener("resize", rebind);
+    addEventListener("resize", masks.rebind);
     document.addEventListener("load", loaded, true);
     document.addEventListener("loadeddata", loaded, true);
     const watch = new MutationObserver(ask);
     watch.observe(root, { attributeFilter: ["data-theme", "data-tuck", "data-mt-intro", "data-mt-pasthero"] });
-    paint();
+    look();
     // Photos also move with no scroll event (the v4 hero glides on after the wheel stops, films play): look again twice a second.
-    // On a preview, where photos need a same-host copy: ask for the ones near the window before they reach the bar.
-    const ahead = () => {
-      if (!copied) return;
-      for (const im of document.querySelectorAll<HTMLImageElement>("#main img")) {
-        const q = im.getBoundingClientRect();
-        if (q.width && q.bottom > -innerHeight / 2 && q.top < innerHeight * 2) thumb(im);
-      }
-    };
-    const again = window.setInterval(() => document.hidden || (ask(), scan(), kick(), ahead()), 500);
+    const again = window.setInterval(() => document.hidden || (ask(), masks.scan(), masks.kick(), copyAhead()), 500);
     return () => {
       removeEventListener("scroll", ask);
-      removeEventListener("scroll", kick);
+      removeEventListener("scroll", masks.kick);
       removeEventListener("resize", ask);
-      removeEventListener("resize", rebind);
-      io.disconnect();
-      cancelAnimationFrame(cutRaf);
-      for (const el of live) mask(el, "");
+      removeEventListener("resize", masks.rebind);
+      masks.stop();
       document.removeEventListener("load", loaded, true);
       document.removeEventListener("loadeddata", loaded, true);
       watch.disconnect();
-      clearTimeout(timer);
-      clearTimeout(frostT);
+      clearTimeout(b.timer);
+      clearTimeout(b.frostT);
       bar.removeAttribute("data-navfrost");
       clearInterval(again);
       poke = () => {};
-      cancelAnimationFrame(raf);
+      cancelAnimationFrame(b.raf);
       root.removeAttribute("data-navtop");
       root.removeAttribute("data-navdark");
       root.removeAttribute("data-navnamegone");
