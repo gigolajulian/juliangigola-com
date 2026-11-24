@@ -23,9 +23,9 @@ vi.mock("@/components/reference-picks", () => ({ ReferencePicks: () => null }));
 
 import { usePicker, type CardCtx, type Props } from "@/components/booking/use-picker";
 import { EditorialCard } from "@/components/booking/time-picker-editorial";
-import { V3Steps } from "@/components/booking/time-picker-v3";
+import { BookSteps } from "@/components/booking/time-picker-steps";
 import { JgLoad } from "@/components/splash/jg-load";
-import { clock, DAYS, fromIso, MONTHS, recent, type V3Book } from "@/components/booking/time-picker-parts";
+import { clock, DAYS, fromIso, MONTHS, recent, type StepsSkin } from "@/components/booking/time-picker-parts";
 
 const slots = {
   "2026-11-19": ["10:00", "11:00", "12:00"],
@@ -54,10 +54,10 @@ function Card(props: Props) {
   const date = fromIso(c.pick.date);
   const sum = `${DAYS[date.getDay()]} ${date.getDate()} ${MONTHS[date.getMonth()].slice(0, 3)} · ${t} ${ap}`;
   const ctx: CardCtx = { ...c, pick: c.pick, days: c.days, t, ap, until, date, sum };
-  return props.v3 ? <V3Steps c={{ ...ctx, v3: props.v3 }} /> : <EditorialCard c={ctx} />;
+  return props.skin ? <BookSteps c={{ ...ctx, skin: props.skin }} /> : <EditorialCard c={ctx} />;
 }
 
-const v3: V3Book = {
+const skin: StepsSkin = {
   name: "Call",
   from: null,
   shell: ({ head, ok, body, bar }) => (
@@ -187,10 +187,10 @@ describe("EditorialCard", () => {
   });
 });
 
-describe("V3Steps", () => {
+describe("BookSteps", () => {
   it("steps the time with the arrows and keys, within the day's open times", async () => {
     stubFetch();
-    render(<Card path="julian/call" title="Pick a time" fallback={null} v3={v3} />);
+    render(<Card path="julian/call" title="Pick a time" fallback={null} skin={skin} />);
     const time = await screen.findByRole("spinbutton", { name: "Time" });
     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("Book a call");
     expect(time.getAttribute("aria-valuetext")).toBe("10:00 AM");
@@ -207,7 +207,7 @@ describe("V3Steps", () => {
 
   it("checks the details, then books the call", async () => {
     stubFetch();
-    render(<Card path="julian/call" title="Pick a time" fallback={null} v3={v3} />);
+    render(<Card path="julian/call" title="Pick a time" fallback={null} skin={skin} />);
     fireEvent.click(await screen.findByRole("button", { name: "11:00 AM" }));
     fireEvent.click(day("Continue"));
     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("About you");

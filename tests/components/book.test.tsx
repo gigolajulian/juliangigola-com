@@ -8,17 +8,17 @@ HTMLDialogElement.prototype.showModal ??= function (this: HTMLDialogElement) {
   this.open = true;
 };
 
-import { CallDialog, V3Book, V3BookFlow } from "@/components/booking/book";
+import { CallDialog, SessionBook, BookFlow } from "@/components/booking/book";
 
-describe("V3Book", () => {
+describe("SessionBook", () => {
   it("weddings is on request: the date step with the page's own heading", () => {
-    render(<V3Book slug="weddings" />);
+    render(<SessionBook slug="weddings" />);
     expect(screen.getByRole("heading", { level: 1, name: "Book a session" })).toBeTruthy();
     expect(screen.getByRole("list", { name: "Steps" }).textContent).toContain("Shoot");
   });
 
   it("a Cal session mounts the time picker shell", () => {
-    const { container } = render(<V3BookFlow slug="portraits" tabs={false} />);
+    const { container } = render(<BookFlow slug="portraits" tabs={false} />);
     expect(container.firstChild).toBeTruthy();
   });
 });

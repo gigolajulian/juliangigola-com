@@ -12,7 +12,7 @@ import { depositFor } from "@/lib/booking/paid";
 import { clockLabel } from "@/components/booking/flow";
 import type { Shell } from "@/components/booking/flow";
 import { looksLikeEmail } from "@/lib/inbox";
-import { AHEAD, fromIso, iso, minutesOf, forgetTimes, STEP_AT, WHERE, clock, type V3Book } from "@/components/booking/time-picker-parts";
+import { AHEAD, fromIso, iso, minutesOf, forgetTimes, STEP_AT, WHERE, clock, type StepsSkin } from "@/components/booking/time-picker-parts";
 import type { CardCtx } from "@/components/booking/use-picker";
 
 /** The quiet that ends a trackpad flick: events closer than this are still the same push. */
@@ -20,17 +20,17 @@ const GESTURE_GAP_MS = 120;
 
 /* JG V3 (master v39 stepper): Time, You, (Deposit), Booked. The same
    times, booking and deposit as the cards; only the look is new. */
-export function V3Steps({ c }: { c: CardCtx & { v3: V3Book } }) {
-  const { v3, username, slug, tz, length, needsWhere, opt, setOpt, booked, days, view, setView, anchor, setAnchor, pick, chosen, setChosen, step, setStep, swipeX: swipeXRef, wheelGate, stripRef, more, setMore, paid, deposit, refs, v3root, error, bad, setBad, blank, setBlank, load, choose, today, book, refill, v3steps, v3sub, date } = c;
+export function BookSteps({ c }: { c: CardCtx & { skin: StepsSkin } }) {
+  const { skin, username, slug, tz, length, needsWhere, opt, setOpt, booked, days, view, setView, anchor, setAnchor, pick, chosen, setChosen, step, setStep, swipeX: swipeXRef, wheelGate, stripRef, more, setMore, paid, deposit, refs, v3root, error, bad, setBad, blank, setBlank, load, choose, today, book, refill, v3steps, v3sub, date } = c;
   const end = pick.min + length;
   const usd = depositFor(slug);
   const range = `${clockLabel(pick.min)} to ${clockLabel(end)}`;
   const at = step === "done" ? v3steps.length : STEP_AT[step] + 1;
   const rows: [string, React.ReactNode][] = [["Day", dlabel(date)], ["Time", range], ["Length", duration(length)]];
-  const shell = (p: Omit<Parameters<Shell>[0], "steps" | "at" | "sum">) => <div ref={v3root} className="contents">{v3.shell({ steps: v3steps, at, sum: rows, ...p })}</div>;
+  const shell = (p: Omit<Parameters<Shell>[0], "steps" | "at" | "sum">) => <div ref={v3root} className="contents">{skin.shell({ steps: v3steps, at, sum: rows, ...p })}</div>;
   const back = (to: typeof step) => <button type="button" className="btn" onClick={() => { setBad({}); setStep(to); }}>Back</button>;
   if (step === "pay" && deposit) {
-    const price = v3.from != null ? `$${v3.from}` : "Quoted";
+    const price = skin.from != null ? `$${skin.from}` : "Quoted";
     return (
       <DepositStep
         v3={(p) => shell(p)}
@@ -38,9 +38,9 @@ export function V3Steps({ c }: { c: CardCtx & { v3: V3Book } }) {
         body={deposit}
         refs={refs}
         rows={[
-          [`${v3.name}, ${duration(length)}`, price],
+          [`${skin.name}, ${duration(length)}`, price],
           ["Deposit today", `$${usd}`],
-          ["Balance after the shoot", v3.from != null ? `$${v3.from - usd}` : "Rest of the quote"],
+          ["Balance after the shoot", skin.from != null ? `$${skin.from - usd}` : "Rest of the quote"],
         ]}
         onBooked={() => {
           forgetTimes(username, slug, tz);
@@ -61,7 +61,7 @@ export function V3Steps({ c }: { c: CardCtx & { v3: V3Book } }) {
       : [`${dlabel(date)}, ${range}, ${duration(length)}.`, "I call the number you gave, or send a video link the day before.", "Need to move it? Reply to the confirmation."];
     const stamp = (ms: number) => new Date(ms).toISOString().replace(/[-:]|\.\d{3}/g, "");
     const s0 = +new Date(pick.start);
-    const ics = ["BEGIN:VCALENDAR", "VERSION:2.0", "BEGIN:VEVENT", `UID:${s0}@juliangigola.com`, `DTSTAMP:${stamp(s0)}`, `DTSTART:${stamp(s0)}`, `DTEND:${stamp(s0 + length * 6e4)}`, `SUMMARY:${v3.name} with Julian Gigola`, "END:VEVENT", "END:VCALENDAR"].join("\r\n");
+    const ics = ["BEGIN:VCALENDAR", "VERSION:2.0", "BEGIN:VEVENT", `UID:${s0}@juliangigola.com`, `DTSTAMP:${stamp(s0)}`, `DTSTART:${stamp(s0)}`, `DTEND:${stamp(s0 + length * 6e4)}`, `SUMMARY:${skin.name} with Julian Gigola`, "END:VEVENT", "END:VCALENDAR"].join("\r\n");
     return shell({
       ok: "Booked",
       head: `${booked.name}, you're in.`,
@@ -111,7 +111,7 @@ export function V3Steps({ c }: { c: CardCtx & { v3: V3Book } }) {
           body: (
             <>
               {/* The photo's summary hides on phones: the day and time stay in view here (booking critique, 2026-11-04). */}
-              <p className="f-when lbl mute">{dlabel(date)} | {clockLabel(pick.min)} | {v3.name}</p>
+              <p className="f-when lbl mute">{dlabel(date)} | {clockLabel(pick.min)} | {skin.name}</p>
               {f("name", "Name", "text", "", "name", false, true)}
               {f("email", "Email", "email", "", "email", false, true)}
               {f("phone", "Phone", "tel", "", "tel")}
@@ -156,7 +156,7 @@ export function V3Steps({ c }: { c: CardCtx & { v3: V3Book } }) {
     if (next) choose(pick.date, minutesOf(next.start), true);
   };
   return shell({
-    head: paid ? "Book a session" : v3?.name === "Consultation" ? "Book a consultation" : "Book a call",
+    head: paid ? "Book a session" : skin?.name === "Consultation" ? "Book a consultation" : "Book a call",
     sub: v3sub,
     body: (
       // Rises in once the times arrive, in place of "Loading availability".

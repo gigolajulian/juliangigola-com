@@ -24,7 +24,7 @@ export const MONTHS = ["January", "February", "March", "April", "May", "June", "
 export const AHEAD = 120;
 
 export type Slot = { start: string; end: string };
-export type V3Book = { shell: Shell; name: string; from: number | null };
+export type StepsSkin = { shell: Shell; name: string; from: number | null };
 /** The time picked: its day, minutes after midnight, and the start as sent. */
 export type PickedTime = { date: string; min: number; start: string };
 

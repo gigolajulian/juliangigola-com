@@ -197,7 +197,7 @@ states its rule inline. `SPEC-home-scroll.md` citations point at
 - 2026-10-21: the check moves to a better spot and the text is reworked ("beautified").
 - 2026-10-20: The days either side of the month, barely there.
 
-### components/booking/time-picker-v3.tsx
+### components/booking/time-picker-steps.tsx
 - 2026-11-09: option B ("build b"), the big stepped time.
 - 2026-10-27: Rises in once the times arrive, in place of "Loading availability".
 - 2026-11-10: One step per swipe, however long: the start clears until the finger lifts.

@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { PageFoot } from "@/components/site/chrome";
-import { V3BookFlow } from "@/components/booking/book";
+import { BookFlow } from "@/components/booking/book";
 import { Run } from "@/components/booking/flow";
 import { Doors } from "@/components/site/doors";
 import { ServiceBar } from "@/components/booking/service-bar";
@@ -15,7 +15,7 @@ import type { Frame } from "@/lib/work/work-types";
    home's three-column sequence, the details and questions as rows, then
    the two doors. The words are `lib/booking/service-pages.ts`'s, unchanged. */
 
-export function V3Service({ page, frames }: { page: BookingPage; frames: Frame[] }) {
+export function ServiceBook({ page, frames }: { page: BookingPage; frames: Frame[] }) {
   /* Its booking on the V3 stepper: the same slug, or the session that books the same event. */
   const s = SESSIONS[page.slug as SessionSlug] ?? Object.values(SESSIONS).find((x) => x.cal === page.book.cal);
   const includes = page.blocks.find((b) => b.heading === "What's included")?.items ?? [];
@@ -65,7 +65,7 @@ export function V3Service({ page, frames }: { page: BookingPage; frames: Frame[]
         </div>
         {s ? (
           <section className="sv-book" id="book">
-            <V3BookFlow slug={s.slug} tabs={false} />
+            <BookFlow slug={s.slug} tabs={false} />
           </section>
         ) : null}
         <div className="sv-info">

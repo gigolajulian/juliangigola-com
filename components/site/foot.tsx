@@ -159,5 +159,3 @@ export function PageFoot({ bare = false }: { bare?: boolean } = {}) {
   );
 }
 
-/** Old name, kept only because components/booking/book.tsx still imports it; drop once that file moves to PageFoot. */
-export const V4Foot = PageFoot;

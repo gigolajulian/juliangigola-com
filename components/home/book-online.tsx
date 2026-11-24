@@ -13,17 +13,17 @@ import { CardsCtx } from "./ctx";
 
 /* Book online: four sessions, one line each. A row is picked by hover (fine
    pointers), focus or tap, and the photo follows it. Booking finishes here:
-   the list gives way to the LIVE flow (`V3BookFlow`: its own picker, the site's
+   the list gives way to the LIVE flow (`BookFlow`: its own picker, the site's
    events, Stripe deposit and copy, untouched) and the photo stays. */
 
 /* The live flow (pickers, deposit, the orb: about 100KB) is not in the home page's first load (audit 2026-11-22). It is
    fetched once the Sessions block nears the screen, on a row's hover or focus, and after the page has loaded and gone
    idle (for a footer link that opens a booking straight away), so the first tap never waits on it. Not React.lazy:
    a Suspense reveal is held about 300ms even when the module is already here. */
-type Flow = typeof import("@/components/booking/book").V3BookFlow;
+type Flow = typeof import("@/components/booking/book").BookFlow;
 let Flow: Flow | undefined;
 let flow: Promise<unknown> | undefined;
-const warmFlow = () => (flow ??= import("@/components/booking/book").then((m) => (Flow = m.V3BookFlow), () => (flow = undefined)));
+const warmFlow = () => (flow ??= import("@/components/booking/book").then((m) => (Flow = m.BookFlow), () => (flow = undefined)));
 
 function RowPhoto({ r, on, sizes }: { r: BookRow; on: boolean; sizes: string }) {
   const p = SESSIONS[r.slug].photo;
