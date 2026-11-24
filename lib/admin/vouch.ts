@@ -21,6 +21,8 @@ import { sha256Hex } from "@/lib/token";
  * ─────────────────────────────────────────────────────────────── */
 const VOUCHED_MS = 5 * 60 * 1000;
 const vouched = new Map<string, number>();
+/** Drops every remembered token, so a test starts from a cold isolate. */
+export const forgetVouches = () => vouched.clear();
 
 const sha256Bytes = async (s: string) =>
   new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s)));

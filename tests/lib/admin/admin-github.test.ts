@@ -7,7 +7,7 @@ import { TOKEN_STORE, credentials, listDirectory, readFile } from "@/lib/admin/a
 afterEach(() => vi.unstubAllGlobals());
 
 describe("credentials", () => {
-  it("prefers a pasted inbox key, else the stored GitHub token, else nothing", () => {
+  it("prefers a pasted admin key, else the stored GitHub token, else nothing", () => {
     const stored = new Map<string, string>();
     vi.stubGlobal("localStorage", { getItem: (k: string) => stored.get(k) ?? null });
     expect(credentials("k1")).toEqual({ "x-admin-key": "k1" });

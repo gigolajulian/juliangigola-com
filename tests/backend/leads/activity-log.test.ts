@@ -71,8 +71,8 @@ describe("the log", () => {
     await recordLead(env(), "a2@example.com", { event: { at: t(1), kind: "inquiry", ref: "msg:a2" }, name: "Ana" });
     const seal = await s();
     const [a, a2] = [await seal.id("a@example.com"), await seal.id("a2@example.com")];
-    await desk("PATCH", "", { body: JSON.stringify({ key: `lead:${a}`, stage: "Quoted", quote: 1200 }) });
-    await desk("PATCH", "", { body: JSON.stringify({ key: `lead:${a}`, mergeFrom: `lead:${a2}` }) });
+    await desk("PATCH", "", { body: JSON.stringify({ id: a, stage: "Quoted", quote: 1200 }) });
+    await desk("PATCH", "", { body: JSON.stringify({ id: a, mergeFrom: a2 }) });
     const log = await readLog(kv as never, seal, a);
     expect(log.map((e) => e.kind)).toEqual(["inquiry", "inquiry", "stage", "quote", "merge"]);
     expect(kv.data.has(`log:${a2}`)).toBe(false);
@@ -84,29 +84,29 @@ describe("the log", () => {
   it("Mark paid settles an invoice by hand and lands on the log", async () => {
     await recordLead(env(), "a@example.com", { event: { at: t(0), kind: "inquiry", ref: "msg:a" }, name: "Ana" });
     const seal = await s();
-    const key = `lead:${await seal.id("a@example.com")}`;
-    const made = await (await desk("PATCH", "", { body: JSON.stringify({ key, invoice: { date: "2026-11-02", lines: [{ desc: "Session", qty: 1, rate: 900 }], paid: 100 } }) })).json();
+    const id = await seal.id("a@example.com");
+    const made = await (await desk("PATCH", "", { body: JSON.stringify({ id, invoice: { date: "2026-11-02", lines: [{ desc: "Session", qty: 1, rate: 900 }], paid: 100 } }) })).json();
     const no = made.lead.invoices[0].no;
-    const paid = await (await desk("PATCH", "", { body: JSON.stringify({ key, invoicePaid: { no, paid: true } }) })).json();
+    const paid = await (await desk("PATCH", "", { body: JSON.stringify({ id, invoicePaid: { no, paid: true } }) })).json();
     expect(paid.lead.invoices[0].paidAt).toBeTruthy();
-    expect((await readLog(kv as never, seal, key.slice(5))).at(-1)).toMatchObject({ kind: "invoice-paid", amount: 800 });
+    expect((await readLog(kv as never, seal, id)).at(-1)).toMatchObject({ kind: "invoice-paid", amount: 800 });
     // Cash counts as money in the export; unmarking takes it off again.
     const paidCol = async () => { const [h, r] = (await (await desk("GET", "/csv")).text()).trim().split("\r\n"); return r.split(",")[h.split(",").indexOf("paid total")]; };
     expect(await paidCol()).toBe("800");
     // A double tap counts once.
-    await desk("PATCH", "", { body: JSON.stringify({ key, invoicePaid: { no, paid: true } }) });
+    await desk("PATCH", "", { body: JSON.stringify({ id, invoicePaid: { no, paid: true } }) });
     expect(await paidCol()).toBe("800");
-    await desk("PATCH", "", { body: JSON.stringify({ key, invoicePaid: { no, paid: false } }) });
+    await desk("PATCH", "", { body: JSON.stringify({ id, invoicePaid: { no, paid: false } }) });
     expect(await paidCol()).toBe("0");
-    await desk("PATCH", "", { body: JSON.stringify({ key, invoicePaid: { no, paid: false } }) });
+    await desk("PATCH", "", { body: JSON.stringify({ id, invoicePaid: { no, paid: false } }) });
     expect(await paidCol()).toBe("0");
   });
 
   it("emptying the trash deletes the log and its master entries too", async () => {
     await recordLead(env(), "gone@example.com", { event: { at: t(0), kind: "inquiry", ref: "msg:g" } });
     const seal = await s();
-    const key = `lead:${await seal.id("gone@example.com")}`;
-    await desk("PATCH", "", { body: JSON.stringify({ key, trash: true }) });
+    const id = await seal.id("gone@example.com");
+    await desk("PATCH", "", { body: JSON.stringify({ id, trash: true }) });
     await desk("DELETE");
     expect([...kv.data.keys()].filter((k) => k.startsWith("log"))).toEqual([]);
   });

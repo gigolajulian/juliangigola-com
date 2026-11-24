@@ -3,7 +3,7 @@ import { FakeKV, LEADS_KEY, INBOX_KEY as KEY } from "../fakes";
 import { desk } from "../desk-routes";
 import { sealer } from "@/lib/seal";
 import { recordLead } from "@/lib/leads/lead-store";
-import { fillTemplate, leadsCsv, identity, manualLead, merge, stats } from "@/lib/leads/lead-crm";
+import { eventsCsv, fillTemplate, leadsCsv, identity, manualLead, merge, stats } from "@/lib/leads/lead-crm";
 import type { Lead } from "@/lib/leads/leads";
 
 /* The desk as a CRM (`lib/leads/lead-crm.ts`, the routes under `app/api/leads`): leads
@@ -81,6 +81,16 @@ describe("templates, numbers, export", () => {
     expect(out).toContain('"say ""hi"",\nthen"');
     expect(out).not.toContain("ig:@a");
   });
+
+  it("leaves events of a lead with no address to mail out of the activity CSV", () => {
+    const ev = { at: "2026-11-01T00:00:00Z", kind: "inquiry" as const };
+    const out = eventsCsv([
+      { lead: "a", email: "a@x.com", name: "Ana", event: ev },
+      { lead: "b", email: "ig:@bo", name: "Bo", event: ev },
+      { lead: "c", email: "tel:+14155550100", name: "Cy", event: ev },
+    ]).trim().split("\r\n");
+    expect(out).toEqual(["time,client,email,kind,detail,amount,lead id", "2026-11-01T00:00:00Z,Ana,a@x.com,inquiry,,,a"]);
+  });
 });
 
 describe("the API", () => {
@@ -98,7 +108,7 @@ describe("the API", () => {
   it("keeps notes, a reminder, details, a quote and a lost reason, with the reminder in the list", async () => {
     await recordLead({ INBOX: kv as never, LEADS_KEY }, "m@x.com", { event: { at: "2026-11-01T00:00:00Z", kind: "inquiry", ref: "msg:1" }, name: "Maya" });
     const key = `lead:${await idOf("m@x.com")}`;
-    const patch = async (body: object) => (await desk("PATCH", "", { body: { key, ...body } })).json();
+    const patch = async (body: object) => (await desk("PATCH", "", { body: { id: key.slice(5), ...body } })).json();
     expect((await patch({ notes: "Wants red light" })).lead.notes).toBe("Wants red light");
     // Capped like the field, so the row shows it whole.
     expect((await patch({ remind: { at: "2026-11-06T17:00:00Z", text: "Send invoice, then send photos to select" } })).lead.remind.text).toHaveLength(28);
@@ -106,8 +116,8 @@ describe("the API", () => {
     expect((await patch({ details: { name: "Maya Okafor", phone: "408 555 0101", ig: "maya", company: "" } })).lead).toMatchObject({ name: "Maya Okafor", phone: "408 555 0101", ig: "@maya" });
     expect((await patch({ quote: 1200 })).lead.quote).toBe(1200);
     expect((await patch({ stage: "Lost", lostReason: "Dates" })).lead).toMatchObject({ stage: "Lost", lostReason: "Dates" });
-    expect((await desk("PATCH", "", { body: { key, quote: -5 } })).status).toBe(400);
-    expect((await desk("PATCH", "", { body: { key, remind: { at: "soon" } } })).status).toBe(400);
+    expect((await desk("PATCH", "", { body: { id: key.slice(5), quote: -5 } })).status).toBe(400);
+    expect((await desk("PATCH", "", { body: { id: key.slice(5), remind: { at: "soon" } } })).status).toBe(400);
     const { leads } = await (await desk("GET")).json();
     expect(leads[0]).toMatchObject({ due: "2026-11-06T17:00:00.000Z", dueText: "Send the quote", quote: 1200 });
     expect(leads[0]).not.toHaveProperty("notes");
@@ -119,10 +129,10 @@ describe("the API", () => {
     await recordLead({ INBOX: kv as never, LEADS_KEY }, "a@work.com", { event: { at: "2026-11-02T00:00:00Z", kind: "call", ref: "cal:1" }, name: "A" });
     const [a, b] = [`lead:${await idOf("a@x.com")}`, `lead:${await idOf("a@work.com")}`];
     // A merge whose patch fails keeps the other record.
-    expect((await desk("PATCH", "", { body: { key: a, mergeFrom: b, invoicePaid: { no: "0000", paid: true } } })).status).toBe(404);
+    expect((await desk("PATCH", "", { body: { id: a.slice(5), mergeFrom: b.slice(5), invoicePaid: { no: "0000", paid: true } } })).status).toBe(404);
     expect(await kv.get(b)).not.toBeNull();
     expect(await kv.get(`log:${b.slice(5)}`)).not.toBeNull();
-    const { lead } = await (await desk("PATCH", "", { body: { key: a, mergeFrom: b } })).json();
+    const { lead } = await (await desk("PATCH", "", { body: { id: a.slice(5), mergeFrom: b.slice(5) } })).json();
     expect(lead).toMatchObject({ stage: "Call booked" });
     expect(await kv.get(b)).toBeNull();
     expect(await kv.get(`gone:${b.slice(5)}`)).not.toBeNull();

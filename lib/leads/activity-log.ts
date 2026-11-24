@@ -73,14 +73,14 @@ export async function forgetLog(kv: KV, s: Sealer, id: string): Promise<void> {
   await kv.put(SHEET_DIRTY, "1");
 }
 
-/** Every master entry, oldest first: one list call per 1000 events. Entries that will not open are left out, so totals can be partial. */
+/** Every master entry, oldest first: one list call per 1000 events. Entries that will not open are logged and left out, so totals can be partial. */
 export async function readMaster(kv: KV, s: Sealer): Promise<MasterEntry[]> {
   const out: MasterEntry[] = [];
   let cursor: string | undefined;
   for (;;) {
     const listed = await kv.list<{ s?: string }>({ prefix: "logm:", cursor });
     for (const k of listed.keys as { name: string; metadata?: { s?: string } }[]) {
-      const e = k.metadata?.s ? await s.open<MasterEntry>(k.metadata.s).catch(() => null) : null;
+      const e = k.metadata?.s ? await s.open<MasterEntry>(k.metadata.s).catch((err: unknown) => (console.error("log entry skipped", k.name, String(err)), null)) : null;
       if (e) out.push(e);
     }
     if (listed.list_complete || !listed.cursor) break;
@@ -95,13 +95,6 @@ export const csvCell = (v: unknown) => {
   if (/^[=+\-@]/.test(s)) s = `'${s}`;
   return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 };
-
-/** The master log as a CSV: one row per event. */
-export function eventsCsv(rows: MasterEntry[]): string {
-  const cols = ["time", "client", "email", "kind", "detail", "amount", "lead id"];
-  const body = rows.map((r) => [r.event.at, r.name, r.email.includes("@") ? r.email : "", r.event.kind, r.event.note ?? r.event.mail?.kind ?? "", r.event.amount ?? "", r.lead].map(csvCell).join(","));
-  return [cols.join(","), ...body].join("\r\n") + "\r\n";
-}
 
 /** What a client has paid, from their whole log: payments less refunds, plus invoices settled by hand (an unmark logs the amount negative). */
 export const paidTotal = (log: LeadEvent[]) =>

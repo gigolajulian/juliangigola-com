@@ -358,3 +358,10 @@ export function leadsCsv(leads: Lead[], paid: Record<string, number> = {}): stri
   );
   return [cols.join(","), ...rows].join("\r\n") + "\r\n";
 }
+
+/** The master log as CSV, one row per event, beside `leadsCsv`. Events on a lead with no address to mail (an Instagram or phone identity) are left out. */
+export function eventsCsv(rows: MasterEntry[]): string {
+  const cols = ["time", "client", "email", "kind", "detail", "amount", "lead id"];
+  const body = rows.filter((r) => mailable(r.email)).map((r) => [r.event.at, r.name, r.email, r.event.kind, r.event.note ?? r.event.mail?.kind ?? "", r.event.amount ?? "", r.lead].map(csvCell).join(","));
+  return [cols.join(","), ...body].join("\r\n") + "\r\n";
+}

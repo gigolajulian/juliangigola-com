@@ -4,7 +4,7 @@ import * as React from "react";
 import { isTextRef, type FrameRef } from "@/lib/work/added";
 import type { Bts, Frame } from "@/lib/work/work-types";
 import { MAX_WIDTH, readClip, prepareImage } from "@/lib/admin/admin-image";
-import { useSequence, srcOf, type PendingUpload } from "@/lib/admin/admin-sequence";
+import { useSequence, srcOf, type PendingUpload } from "@/components/admin/use-sequence";
 import { useEditorStaging } from "@/components/admin/editor/editor-context";
 import { cn, errorText, pad } from "@/lib/utils";
 

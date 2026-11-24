@@ -2,8 +2,7 @@
 
 /* ── the board on Astryx ──────────────────────────────────────────
  * One column per stage, Inquiry to Delivered, a card per lead.
- * The drag is the classic LeadBoard's:
- * a card dropped on a column sends the same stage PATCH. Delivered keeps
+ * A card dropped on a column sends the stage PATCH the lead page sends. Delivered keeps
  * the last 30 days. The lead page's stage picker is the keyboard way.
  * ─────────────────────────────────────────────────────────────── */
 

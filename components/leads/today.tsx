@@ -3,8 +3,8 @@
 /* ── Today on Astryx ──────────────────────────────────────────────
  * Greeting and one line, four tiles (On you, This week, Stripe,
  * Visits), Your move, what falls due on paperwork, proofs and licences,
- * and the week Mon to Sun in the rail. Same numbers as the classic Today
- * (components/leads/today.tsx): lead summaries, /api/money, /api/traffic.
+ * and the week Mon to Sun in the rail. Read from the lead summaries,
+ * /api/money, /api/traffic, the invoices, tasks and the proofs list.
  * ─────────────────────────────────────────────────────────────── */
 
 import * as React from "react";
@@ -27,7 +27,7 @@ import { TZ, DAY_MS } from "@/lib/time-zone";
 import { proofApi, feed, type FeedItem, type ProofRow } from "@/lib/proofs/proof-desk";
 import type { MoneyAnswer } from "@/lib/leads/money";
 
-/* Today's helpers, from the retired classic desk. */
+/* Today's helpers: times, where a move comes from, the week in the rail. */
 const clock = (ms: number) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit" }).format(ms);
 /** Where a move comes from, as the mock tags it. */
 export const source = (l: LeadSummary) => (needsRenewal(l) ? "Licence" : paperDue(l, now()) ? "Paperwork" : l.stage === "Invoiced" || l.stage === "Selecting" ? "Proofs" : "Leads");
@@ -106,20 +106,20 @@ export function TodayDesk({ leads, size, open, show }: { leads: LeadSummary[]; s
   // Traffic answers to the admin key or the GitHub token, like the other admin routes.
   const [traffic, setTraffic] = React.useState<Spark | string | null>(null);
   React.useEffect(() => {
-    if (!Object.keys(authed()).length) return queueMicrotask(() => setTraffic("Inbox key or GitHub token needed"));
+    if (!Object.keys(authed()).length) return queueMicrotask(() => setTraffic("Admin key or GitHub token needed"));
     adminCall<Spark>("/api/traffic").then(setTraffic).catch(() => setTraffic("Cloudflare did not answer"));
   }, []);
-  // Unpaid invoices past their due date, oldest due first.
-  const [pastDue, setPastDue] = React.useState<InvoiceRow[]>([]);
+  // Unpaid invoices past their due date, oldest due first; a line when they did not load.
+  const [pastDue, setPastDue] = React.useState<InvoiceRow[] | string>([]);
   React.useEffect(() => {
     deskCall<{ invoices: InvoiceRow[] }>({ path: "/invoices" })
       .then((o) => setPastDue(o.invoices.filter((i) => overdue(i, today)).sort((a, b) => dueOf(a).localeCompare(dueOf(b)))))
-      .catch(() => {});
+      .catch(() => setPastDue("Overdue invoices did not load."));
   }, [today]);
   // Gallery activity across every gallery, from the proofs list (never `?token=`, which marks selects as pulled).
-  const [acts, setActs] = React.useState<FeedItem[] | null>(null);
+  const [acts, setActs] = React.useState<FeedItem[] | string | null>(null);
   React.useEffect(() => {
-    proofApi<{ proofs: ProofRow[] }>({ path: "?list" }).then((o) => setActs(feed(o.proofs))).catch(() => setActs([]));
+    proofApi<{ proofs: ProofRow[] }>({ path: "/list" }).then((o) => setActs(feed(o.proofs))).catch(() => setActs("Gallery activity did not load."));
   }, []);
   // Every lead's open tasks (`?tasks`), due within a week or late; leads put aside are left out, as Your move leaves them.
   const [taskRows, setTaskRows] = React.useState<TaskRow[] | string | null>(null);
@@ -227,7 +227,7 @@ export function TodayDesk({ leads, size, open, show }: { leads: LeadSummary[]; s
               <HStack vAlign="center"><StackItem size="fill"><Title count={leadMoves.length}>Your move</Title></StackItem><Button label="All leads" variant="ghost" onClick={() => show()} /></HStack>
               {leadMoves.length ? <List hasDividers>{leadMoves.map(row)}</List> : <Text type="supporting" color="secondary">Nothing waiting on you.</Text>}
             </VStack>
-            {pastDue.length ? (
+            {typeof pastDue === "string" ? <Text type="supporting" color="secondary">{pastDue}</Text> : pastDue.length ? (
               <VStack gap={1}>
                 <Title count={pastDue.length}>Overdue</Title>
                 <List hasDividers>
@@ -251,14 +251,14 @@ export function TodayDesk({ leads, size, open, show }: { leads: LeadSummary[]; s
             ) : null}
             <VStack gap={1}>
               <Eyebrow>GALLERY ACTIVITY</Eyebrow>
-              {acts?.length ? (
+              {Array.isArray(acts) && acts.length ? (
                 <List hasDividers>
                   {acts.map((a, i) => {
                     const l = leads.find((x) => x.email.toLowerCase() === a.email);
                     return <ListItem key={`${a.token}-${a.email}-${a.at}-${i}`} onClick={l ? () => open(l) : undefined} label={`${a.who} ${a.what}`} description={`${a.gallery} · ${ago(a.at)}`} />;
                   })}
                 </List>
-              ) : <Text type="supporting" color="secondary">{acts ? "No gallery activity yet." : "Loading galleries"}</Text>}
+              ) : <Text type="supporting" color="secondary">{typeof acts === "string" ? acts : acts ? "No gallery activity yet." : "Loading galleries"}</Text>}
             </VStack>
           </VStack>
         </LayoutContent>

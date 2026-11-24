@@ -1,9 +1,8 @@
 "use client";
 
 /* ── Hours, Templates and This device on Astryx ───────────────────
- * The classic LeadHours, TemplatesEditor
- * and the device block (setup.tsx: push, import from the
- * Inbox, sign out, plus Export CSV) rebuilt. Endpoints:
+ * Booking hours, the saved replies, and this device (push, import from the
+ * Inbox, sign out, Export CSV). Endpoints:
  * /api/booking/hours GET and PUT, /api/leads/templates PUT, /api/leads/push,
  * /api/leads/import/inbox and /import/stripe POST `{ dry }`, GET /api/leads/csv.
  * ─────────────────────────────────────────────────────────────── */
@@ -118,7 +117,8 @@ export function HoursDesk() {
   );
 }
 
-export function TemplatesDesk({ templates, saved }: { templates: Template[]; saved: (t: Template[]) => void }) {
+/** The saved replies. `error`: why the list did not load, shown above it. */
+export function TemplatesDesk({ templates, saved, error }: { templates: Template[]; saved: (t: Template[]) => void; error?: string | null }) {
   const [list, setList] = React.useState(templates);
   const [note, setNote] = React.useState<string | null>(null);
   const edit = (i: number, k: keyof Template) => (v: string) => setList(list.map((t, j) => (j === i ? { ...t, [k]: v } : t)));
@@ -129,6 +129,7 @@ export function TemplatesDesk({ templates, saved }: { templates: Template[]; sav
   return (
     <Page gap={6} maxWidth={640} eyebrow="SAVED REPLIES" title="Templates">
       <Text color="secondary">{"{first}, {name}, {kind} and {when} fill in for each lead."}</Text>
+      {error ? <Text type="code" size="sm" color="secondary" role="status">{error}</Text> : null}
       {list.map((t, i) => (
         <Card key={t.id + i} padding={4}>
           <VStack gap={3}>

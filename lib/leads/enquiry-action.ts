@@ -3,7 +3,7 @@
 import { headers } from "next/headers";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import type { ContactState } from "@/lib/leads/enquiry";
-import { toNotion } from "@/lib/leads/sync/notion-lead";
+import { toNotion } from "@/lib/leads/notion-lead";
 import { logMail, recordLead } from "@/lib/leads/lead-store";
 import { later } from "@/lib/later";
 import imageLoader from "@/image-loader";

@@ -19,9 +19,9 @@ import { Page } from "@/components/leads/lists";
 import { Deliver, InvoiceSheetB, makePdf } from "@/components/leads/invoice";
 import { kindOf } from "@/components/leads/shared";
 import { balance, isSettled, subtotal, usd, type Invoice } from "@/lib/leads/invoice";
-import { dayLabel, deskCall, type Patch } from "@/lib/leads/lead-desk";
+import { dayLabel, deskCall, sendLeadPatch, type Patch } from "@/lib/leads/lead-desk";
 import { errorText } from "@/lib/utils";
-import { leadStoreKey, type Lead, type LeadSummary } from "@/lib/leads/leads";
+import type { Lead, LeadSummary } from "@/lib/leads/leads";
 
 /** One invoice as `?invoices` answers it: the invoice, its lead's id and name. */
 export type InvoiceRow = Invoice & { lead: string; name: string };
@@ -55,7 +55,7 @@ export function InvoicesDesk({ leads, open, changed }: { leads: LeadSummary[]; o
     lead(id).then(setFull, (e: unknown) => setNote(errorText(e)));
   };
   const patch: Patch = async (body) => {
-    const { lead: next } = await deskCall<{ lead: Lead }>({ method: "PATCH", body: JSON.stringify({ key: leadStoreKey(making!), ...body }) });
+    const next = await sendLeadPatch(making!, body);
     setFull(next);
     changed(next);
     return next;

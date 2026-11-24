@@ -15,7 +15,7 @@ import { AdminSeo } from "@/components/admin/admin-seo";
 import { AdminVideos } from "@/components/admin/admin-videos";
 import type { Draft } from "@/lib/admin/publish";
 import { ClientFields, ContactFields, CoverArtFields, HomeFields, QuoteFields, SessionFields } from "@/components/admin/editor/fields";
-import type { PendingUpload } from "@/lib/admin/admin-sequence";
+import type { PendingUpload } from "@/components/admin/use-sequence";
 import { CreditDesk } from "@/components/admin/admin-credits";
 import { byCodeUnit, cn } from "@/lib/utils";
 import { remapSlugs } from "@/components/admin/editor/remap-slugs";

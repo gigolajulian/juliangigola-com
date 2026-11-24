@@ -62,6 +62,15 @@ describe("ContractBlock", () => {
   });
 });
 
+describe("ContractBlock templates", () => {
+  it("says the templates did not load under Make contract", async () => {
+    vi.stubGlobal("fetch", vi.fn((url: string) => (url.endsWith("?templates") ? json({ error: "Down." }, 500) : json({ contract: null, url: null }))));
+    render(<ContractBlock leadId="a" changed={() => {}} />);
+    expect(await screen.findByText("Contract templates did not load.")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Make contract" })).toBeTruthy();
+  });
+});
+
 describe("ContractTemplatesDesk", () => {
   it("adds a template and saves the list with PUT", async () => {
     const fetch = vi.fn((_: string, init: RequestInit = {}) => (init.method === "PUT" ? json(JSON.parse(String(init.body))) : json({ templates: [{ id: "shoot", name: "Shoot", body: "x" }] })));

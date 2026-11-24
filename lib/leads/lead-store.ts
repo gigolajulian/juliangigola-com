@@ -19,16 +19,27 @@ export async function readLead(kv: KV, s: Sealer, id: string): Promise<Lead | nu
   return raw ? s.open<Lead>(raw) : null;
 }
 
+/** What a route answers, with status 500, for a lead that is there but will not open (a rotated LEADS_KEY). */
+export const UNOPENABLE = "That lead cannot be opened. LEADS_KEY may have changed.";
+
+/** `readLead` for a route: a lead that will not open is logged under `label` and reads as undefined, so the route answers JSON. */
+export const openLead = (kv: KV, s: Sealer, id: string, label = "lead open"): Promise<Lead | null | undefined> =>
+  readLead(kv, s, id).catch(logged(label, id));
+
 /** Every lead, opened in full: for the numbers and the export, never the list.
-    Throws if any one lead cannot be opened (a rotated LEADS_KEY), like `readLead`. */
+    A lead that will not open (a rotated LEADS_KEY) is logged and left out, so one bad record never fails the rest. */
 export async function everyLead(inbox: KV, seal: Sealer) {
   const out: (Lead & { id: string })[] = [];
   for await (const k of everyKey(inbox, LEAD_PREFIX)) {
-    const l = await readLead(inbox, seal, leadIdOf(k.name));
+    const l = await openLead(inbox, seal, leadIdOf(k.name), "lead skipped");
     if (l) out.push(Object.assign(l, { id: leadIdOf(k.name) }));
   }
   return out;
 }
+
+/** A summary from the list's metadata, or null (logged) when it will not open. */
+const openSummary = (seal: Sealer, name: string, sealed: string) =>
+  seal.open<LeadSummary>(sealed).catch((e: unknown) => (console.error("lead summary skipped", name, String(e)), null));
 
 /** Bytes the sealed summary may take: KV metadata holds 1024, as JSON. */
 const META_MAX = 1000;
@@ -83,12 +94,12 @@ export async function canonLeads(kv: KV, s: Sealer): Promise<number> {
 
 /** Every lead's summary from the list's metadata, newest first, each with its id.
     Trash empties itself: 30 days after it went in, a lead goes for good.
-    The list is the only reader, so it is the one place that checks. */
+    The list is the only reader, so it is the one place that checks. A summary that will not open is logged and left out. */
 export async function leadSummaries(kv: KV, seal: Sealer, now: number): Promise<LeadSummary[]> {
   const leads: LeadSummary[] = [];
   for await (const k of everyKey<{ s?: string }>(kv, LEAD_PREFIX)) {
-    if (!k.metadata?.s) continue;
-    const one = await seal.open<LeadSummary>(k.metadata.s);
+    const one = k.metadata?.s ? await openSummary(seal, k.name, k.metadata.s) : null;
+    if (!one) continue;
     if (one.trashedAt && trashDaysLeft(one.trashedAt, now) <= 0) {
       await buryLead(kv, seal, leadIdOf(k.name));
       continue;
@@ -102,7 +113,7 @@ export async function leadSummaries(kv: KV, seal: Sealer, now: number): Promise<
 export async function trashedIds(kv: KV, seal: Sealer): Promise<string[]> {
   const ids: string[] = [];
   for await (const k of everyKey<{ s?: string }>(kv, LEAD_PREFIX)) {
-    if (k.metadata?.s && (await seal.open<LeadSummary>(k.metadata.s)).trashedAt) ids.push(leadIdOf(k.name));
+    if (k.metadata?.s && (await openSummary(seal, k.name, k.metadata.s))?.trashedAt) ids.push(leadIdOf(k.name));
   }
   return ids;
 }
@@ -191,11 +202,11 @@ export async function recordLead(env: LeadStore, email: string, c: Change): Prom
 /** A gallery's "proofs" opens taken off a person's lead (a visit he forgot, his own test). A lead made only of
     this gallery's opens, with nothing of his on it, goes with them. */
 export async function dropProofOpens(kv: KV, s: Sealer, email: string, token: string) {
-  const id = await s.id(email);
-  const lead = await readLead(kv, s, id);
+  // Through `findLead`, like `recordLead`: an open from a person's other address landed on the lead that lists it.
+  const { id, lead } = await findLead(kv, s, email);
   const events = lead?.events.filter((e) => !(e.kind === "proofs" && e.ref === token));
   if (lead && events && events.length < lead.events.length) {
-    if (events.length || lead.notes || lead.remind || lead.invoices?.length || lead.deposit || lead.notion) await writeLead(kv, s, id, { ...lead, events });
+    if (events.length || lead.notes || lead.remind || lead.invoices?.length || lead.deposit || lead.notion || lead.people?.length) await writeLead(kv, s, id, { ...lead, events });
     else await kv.delete(leadStoreKey(id));
   }
 }

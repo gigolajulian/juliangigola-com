@@ -1,15 +1,15 @@
 "use client";
 
 /* ── the lead page on Astryx ──────────────────────────────────────
- * The same lead as the classic Detail, every action
- * kept, laid out as header + sections + a timeline rail. Rendered only
+ * One lead with every action on it, laid out as header,
+ * sections and a timeline rail. Rendered only
  * inside /admin/leads, so Astryx's CSS stays off the site.
  *
  * Header: back, snooze, lost, the rest under ⋯; the next step as the one
  * filled button beside Reply and the templates. Sections: message,
  * session, money, paperwork, proofs, contact, notes. Wide: the timeline
  * in the end panel; narrower: last section. The invoice sheet (design B)
- * and their uploads stay the classic components they are.
+ * and their uploads are plain components of their own, not Astryx.
  * ─────────────────────────────────────────────────────────────── */
 
 import * as React from "react";
@@ -44,11 +44,11 @@ import { errorText } from "@/lib/utils";
 import type { Enquiry } from "@/lib/leads/enquiry";
 import { canonical } from "@/lib/seal";
 import { leadView, type LeadView } from "@/lib/leads/lead-view";
-import { isStage, leadStoreKey, PAPER, REMIND_MAX, STAGES, trashDaysLeft, WON, type Lead, type LeadPatch, type LeadSummary, type Stage } from "@/lib/leads/leads";
+import { isStage, PAPER, REMIND_MAX, STAGES, trashDaysLeft, WON, type Lead, type LeadPatch, type LeadSummary, type Stage } from "@/lib/leads/leads";
 import { fillTemplate, mailable, type Template } from "@/lib/leads/lead-crm";
 import { leadKey, typingIn } from "@/lib/leads/lead-keys";
 import { depositOfLead, usd } from "@/lib/leads/invoice";
-import { ago, dateTimeLabel, dayLabel, deskCall, now, needsRenewal, isSnoozed } from "@/lib/leads/lead-desk";
+import { ago, dateTimeLabel, dayLabel, deskCall, now, needsRenewal, isSnoozed, sendLeadPatch } from "@/lib/leads/lead-desk";
 import { DAY_MS } from "@/lib/time-zone";
 import { adminCall, authed } from "@/lib/admin/admin-call";
 import { glyph } from "@/components/desk/chrome";
@@ -112,27 +112,32 @@ function useLeadDetail({ summary, initial, onChange, reload, onLoadError }: { su
   const [message, setMessage] = React.useState<Enquiry | null>(null);
   const [msgKey, setMsgKey] = React.useState<string | null>(null);
   const [proofs, setProofs] = React.useState<ProofRow[]>([]);
-  const key = leadStoreKey(summary.id!);
+  const id = summary.id!;
+  // The parts that did not load, named on one line: a failed load never reads as an empty section.
+  const [missed, setMissed] = React.useState<string[]>([]);
+  const loaded = React.useCallback((what: string, ok: boolean) => setMissed((m) => (ok ? m.filter((x) => x !== what) : m.includes(what) ? m : [...m, what])), []);
 
   const patch = React.useCallback(
     async (body: LeadPatch) => {
-      const { lead: next } = await deskCall<{ lead: Lead }>({ method: "PATCH", body: JSON.stringify({ key, ...body }) });
+      const next = await sendLeadPatch(id, body);
       setLead(next);
       onChange(next);
       // A merge deletes the other record; the list has to drop it.
       if (body.mergeFrom) reload();
       return next;
     },
-    [key, onChange, reload],
+    [id, onChange, reload],
   );
   // The whole activity log (`lib/leads/activity-log.ts`); the lead itself keeps only its last 50 events.
   const [log, setLog] = React.useState<Lead["events"] | null>(null);
   const newest = lead?.events.at(-1)?.at ?? "";
   React.useEffect(() => {
     let live = true;
-    deskCall<{ log: Lead["events"] }>({ path: `/log?id=${encodeURIComponent(summary.id ?? "")}` }).then((o) => live && setLog(o.log)).catch(() => {});
+    deskCall<{ log: Lead["events"] }>({ path: `/log?id=${encodeURIComponent(summary.id ?? "")}` })
+      .then((o) => { if (live) { setLog(o.log); loaded("the full timeline", true); } })
+      .catch(() => live && loaded("the full timeline", false));
     return () => { live = false; };
-  }, [summary.id, newest]);
+  }, [summary.id, newest, loaded]);
 
   React.useEffect(() => {
     let live = true;
@@ -144,23 +149,23 @@ function useLeadDetail({ summary, initial, onChange, reload, onLoadError }: { su
       if (ref)
         adminCall<{ enquiry: Enquiry }>(`/api/inbox?key=${encodeURIComponent(ref)}`)
           .then((m) => live && (setMessage(m.enquiry), setMsgKey(ref)))
-          .catch(() => {});
+          .catch(() => live && loaded("their message", false));
       if (l.unread) patch({ seen: true }).catch(() => {});
     }).catch((e: unknown) => live && !initial && onLoadError(errorText(e)));
-    proofApi<{ proofs: ProofRow[] }>({ path: "?list" })
+    proofApi<{ proofs: ProofRow[] }>({ path: "/list" })
       .then((o) => live && setProofs(o.proofs.filter((p) => p.email)))
-      .catch(() => {});
+      .catch(() => live && loaded("galleries", false));
     return () => void (live = false);
-    // Once per lead: `patch` is stable for the same key.
+    // Once per lead: `patch` is stable for the same id.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key]);
+  }, [id]);
 
-  return { lead, message, msgKey, proofs, log, patch };
+  return { lead, message, msgKey, proofs, log, missed, patch };
 }
 
 type Editing = "contact" | "quote" | "remind" | "licence" | "snooze" | "merge" | "invoice" | null;
 
-/** The lead page's actions that do more than one PATCH: snooze, archive and stage (also on the classic desk's keys:
+/** The lead page's actions that do more than one PATCH: snooze, archive and stage (also on keys:
     R reply, S snooze, E archive, T task, 1 to 9 stage), and cancelling or marking a no-show on the booking the site made.
     It owns which form is open; `run` reports a promise in the note, and the `run` it hands back also closes the form once it lands. */
 function useLeadActions({ view, lead, patch, run: report, reload }: { view: LeadView; lead: Lead | null; patch: (b: LeadPatch) => Promise<Lead>; run: (p: Promise<unknown>, ok?: string) => unknown; reload: () => void }) {
@@ -195,7 +200,7 @@ function useLeadActions({ view, lead, patch, run: report, reload }: { view: Lead
     return () => removeEventListener("keydown", on);
   });
 
-  const desk = (action: "cancel-mine" | "no-show", ok: string) => run(adminCall(`/api/booking/${booked}`, { method: "POST", body: JSON.stringify({ action }) }).then(reload), ok);
+  const desk = (action: "cancel-mine" | "no-show", ok: string) => run(adminCall(`/api/booking/${booked}/desk`, { method: "POST", body: JSON.stringify({ action }) }).then(reload), ok);
   const cancelMine = () => {
     if (window.confirm(`Cancel ${which}? The event leaves the calendar, the deposit is refunded in full through Stripe, and ${first} is emailed.`)) desk("cancel-mine", "Cancelled and refunded.");
   };
@@ -314,7 +319,7 @@ export type LeadAsk = { do: "task" | "invoice"; n: number };
 export function LeadDesk({ summary, initial, onChange, onBack, reload, templates, others, size, toProofs, ask }: { ask?: LeadAsk | null; toProofs?: (token?: string) => void; summary: LeadSummary; initial?: Lead | null; onChange: (l: Lead) => void; onBack: () => void; reload: () => void; templates: Template[]; others: LeadSummary[]; size: Size }) {
   const [asked, setAsked] = React.useState(false);
   const [note, setNote] = React.useState<string | null>(null);
-  const { lead, message, msgKey, proofs, log, patch } = useLeadDetail({ summary, initial, onChange, reload, onLoadError: setNote });
+  const { lead, message, msgKey, proofs, log, missed, patch } = useLeadDetail({ summary, initial, onChange, reload, onLoadError: setNote });
   const view = leadView(lead, summary, templates, now());
   const actions = useLeadActions({ view, lead, patch, run: (p, ok) => p.then(() => setNote(ok ?? null)).catch((e: unknown) => setNote(errorText(e))), reload });
   const { editing, setEditing, addingTask, setAddingTask, run, snoozeFor, setStage, replyLink } = actions;
@@ -382,6 +387,7 @@ export function LeadDesk({ summary, initial, onChange, onBack, reload, templates
           <VStack gap={4}>
             {nextCard}
             {note ? <Text type="code" size="sm" color="secondary" role="status">{note}</Text> : null}
+            {missed.length ? <Text type="code" size="sm" color="secondary" role="status">{`Did not load: ${missed.join(", ")}.`}</Text> : null}
             {l.trashedAt ? <Banner status="warning" title="In the trash" description={`Deleted for good in ${Math.max(1, trashDaysLeft(l.trashedAt, now()))} days unless recovered.`} endContent={<Button label="Recover" variant="secondary" size="sm" onClick={() => run(patch({ trash: false }), "Recovered.")} />} /> : null}
             {l.flags?.includes("stuck") ? <Banner status="error" title="A deposit was paid but not booked" description="Refund or rebook it in Stripe, or send the booking link." endContent={lead?.deposit ? <Button label="Open Stripe" variant="secondary" size="sm" href={lead.deposit} target="_blank" rel="noreferrer" /> : undefined} /> : null}
             {needsRenewal(l) && l.licence ? <Banner status="info" title={`Licence ends ${endDay(l.licence.end)}`} description={l.licence.use} /> : null}
@@ -390,7 +396,7 @@ export function LeadDesk({ summary, initial, onChange, onBack, reload, templates
               <Banner status="info" title="Snooze until" isDismissable onDismiss={() => setEditing(null)}
                 endContent={<DateInput label="Snooze until" isLabelHidden size="sm" min={new Date(now() + DAY_MS).toISOString().slice(0, 10) as never} onChange={(v) => v && run(patch({ snoozeUntil: new Date(`${v}T09:00:00`).toISOString() }), "Snoozed.")} />} />
             ) : null}
-            {editing === "merge" ? <Merge others={others} onMerge={(id) => run(patch({ mergeFrom: leadStoreKey(id) }), "Merged.")} onClose={() => setEditing(null)} /> : null}
+            {editing === "merge" ? <Merge others={others} onMerge={(other) => run(patch({ mergeFrom: other }), "Merged.")} onClose={() => setEditing(null)} /> : null}
 
             <Section>
               <HStack gap={4} vAlign="end" wrap="wrap">
@@ -438,7 +444,7 @@ export function LeadDesk({ summary, initial, onChange, onBack, reload, templates
                   </MetadataListItem>
                 </MetadataList>
                 {editing === "licence" ? <LicenceForm has={lead?.licence} onSave={(v) => run(patch({ licence: v }), v ? "Licence saved." : "Licence cleared.")} onCancel={() => setEditing(null)} /> : null}
-                {/* The invoice rows and design B stay the classic components: the sheet is its own page. */}
+                {/* The invoice rows and design B are plain components: the sheet is its own page. */}
                 {lead?.invoices?.length ? <ul>{[...lead.invoices].reverse().map((inv) => (
                   <React.Fragment key={inv.no}>
                     <InvoiceRow inv={inv} l={l} full={lead} />
@@ -604,7 +610,7 @@ function ContactForm({ l, full, onSave, onCancel }: { l: LeadSummary; full: Lead
   );
 }
 
-/** Saved when he leaves the box, as on the classic desk. */
+/** Saved when he leaves the box. */
 function Notes({ value, onSave }: { value: string; onSave: (v: string) => void }) {
   const [v, setV] = React.useState(value);
   return <TextArea label="Notes" isLabelHidden description="Only you see these. Saved when you leave the box." value={v} onChange={setV} onBlur={() => v !== value && onSave(v)} rows={5} placeholder="Anything worth remembering" />;

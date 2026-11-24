@@ -7,7 +7,7 @@ import Image from "next/image";
 import { ADDED_PATH, type TrashedProject, type ManifestRead } from "@/lib/work/added";
 import { commitFiles, readFile } from "@/lib/admin/admin-github";
 import { AdminFrames } from "@/components/admin/admin-frames";
-import { srcOf } from "@/lib/admin/admin-sequence";
+import { srcOf } from "@/components/admin/use-sequence";
 import { twinStats } from "@/lib/work/frame-twins";
 import { AdminCredits } from "@/components/admin/admin-credits";
 import { AdminBts } from "@/components/admin/admin-bts";

@@ -1,5 +1,6 @@
 import { clientsCsv } from "@/lib/leads/sync/sheet-sync";
-import { eventsCsv, readMaster } from "@/lib/leads/activity-log";
+import { readMaster } from "@/lib/leads/activity-log";
+import { eventsCsv } from "@/lib/leads/lead-crm";
 import { sealedGate } from "@/lib/admin/gate";
 import { NO_STORE } from "@/lib/http";
 

@@ -3,7 +3,7 @@
 import * as React from "react";
 import Image from "next/image";
 import { isTextRef, type FrameRef, type TextRef } from "@/lib/work/added";
-import { useSequence, srcOf } from "@/lib/admin/admin-sequence";
+import { useSequence, srcOf } from "@/components/admin/use-sequence";
 import { useEditorStaging } from "@/components/admin/editor/editor-context";
 import { cn, pad } from "@/lib/utils";
 import { backToBack, twinGroups } from "@/lib/work/frame-twins";

@@ -13,19 +13,17 @@ const s = (await sealer(LEADS_KEY))!;
 const EMAIL = "maya@example.com";
 let kv: FakeKV;
 let id: string;
-let key: string;
 
 beforeEach(async () => {
   kv = new FakeKV();
   id = await s.id(EMAIL);
-  key = `lead:${id}`;
   const lead: Lead = applyLeadEvent(null, EMAIL, { event: { at: "2026-11-01T10:00:00Z", kind: "inquiry", ref: "msg:1" }, name: "Maya Ortiz" });
   await writeLead(kv as never, s, id, lead);
   kv.puts = [];
 });
 
 const patch = async (body: Record<string, unknown>): Promise<{ status: number; body: { lead?: Lead; error?: string } }> => {
-  const r = await patchLead(kv as never, s, { key, ...body });
+  const r = await patchLead(kv as never, s, { id, ...body });
   return "error" in r ? { status: r.status, body: { error: r.error } } : { status: 200, body: { lead: r.lead } };
 };
 const stored = async () => (await readLead(kv as never, s, id))!;
@@ -43,7 +41,7 @@ describe("patchLead: refusals", () => {
     [{ licence: { use: "Web", end: "2027-13-40" } }, 400, "Bad date."],
     [{ invoice: { date: "2026-11-06", lines: [] } }, 400, "One to"],
     [{ invoicePaid: { no: "0999", paid: true } }, 404, "No such invoice."],
-    [{ mergeFrom: "lead:nobody" }, 404, "Gone."],
+    [{ mergeFrom: "nobody" }, 404, "Gone."],
   ])("%j answers %i and writes nothing", async (body, status, error) => {
     const r = await patch(body);
     expect(r.status).toBe(status);
@@ -52,8 +50,20 @@ describe("patchLead: refusals", () => {
   });
 
   it("404s a lead that is not there", async () => {
-    const res = await patchLead(kv as never, s, { key: "lead:0000", seen: true });
+    const res = await patchLead(kv as never, s, { id: "0000", seen: true });
     expect(res).toEqual({ error: "Gone.", status: 404 });
+  });
+
+  it("answers 500 for a lead that will not open, and a merge from one, writing nothing", async () => {
+    const err = vi.spyOn(console, "error").mockImplementation(() => {});
+    const other = await s.id("other@example.com");
+    kv.data.set(`lead:${other}`, { value: "not a sealed lead" } as never);
+    kv.puts = [];
+    expect(await patchLead(kv as never, s, { id: other, seen: true })).toEqual({ error: "That lead cannot be opened. LEADS_KEY may have changed.", status: 500 });
+    expect((await patch({ mergeFrom: other })).status).toBe(500);
+    expect(kv.puts).toEqual([]);
+    expect(err).toHaveBeenCalled();
+    err.mockRestore();
   });
 });
 

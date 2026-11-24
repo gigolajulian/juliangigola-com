@@ -95,7 +95,7 @@ const headers = (token: string) => ({
 });
 
 /**
- * One request, with GitHub's error message surfaced rather than a status code.
+ * One request, with GitHub's error message surfaced and its status on the `HttpError`.
  *
  * A 409 here is not a conflict to retry blindly: it means someone — or another
  * tab — moved the branch since this page loaded, and the safe move is to start
@@ -115,12 +115,13 @@ async function gh<T>(
 
   if (!res.ok) {
     const detail = await failureMessage(res);
-    throw new Error(
+    throw new HttpError(
       res.status === 401
         ? "GitHub rejected the token. It has probably expired."
         : res.status === 403
           ? `GitHub refused: ${detail}. The token needs Contents: read and write on this repo.`
           : `GitHub said ${res.status}: ${detail}`,
+      res.status,
     );
   }
   return (await res.json().catch(() => null)) as T;

@@ -3,7 +3,7 @@
 import * as React from "react";
 import Image from "next/image";
 import { isTextRef, type FrameRef, type TextRef } from "@/lib/work/added";
-import { useSequence, srcOf, type DragProps } from "@/lib/admin/admin-sequence";
+import { useSequence, srcOf, type DragProps } from "@/components/admin/use-sequence";
 import { AdminCredits } from "@/components/admin/admin-credits";
 import type { Copy, Credit } from "@/lib/work/work-types";
 import { cn, pad } from "@/lib/utils";

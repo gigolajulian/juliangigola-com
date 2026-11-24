@@ -5,7 +5,7 @@ import { bookingEnquiry, enquiryKey, summary } from "@/lib/leads/enquiry";
 import { looksLikeEmail } from "@/lib/utils";
 import { takesDeposit, LEGACY_DEPOSIT } from "@/lib/leads/deposit-terms";
 import { recordLead, type LeadStore } from "@/lib/leads/lead-store";
-import { toNotion } from "@/lib/leads/sync/notion-lead";
+import { toNotion } from "@/lib/leads/notion-lead";
 import { openNow, type HoursKV } from "@/lib/booking/slots";
 import { HttpError, statusOf } from "@/lib/http";
 import { asRecord } from "@/lib/json";

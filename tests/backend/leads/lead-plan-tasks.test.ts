@@ -27,7 +27,7 @@ async function seed(extra: Partial<Lead> = {}) {
   const id = await s.id(EMAIL);
   const lead: Lead = { ...applyLeadEvent(null, EMAIL, { event: { at: at(1), kind: "inquiry", ref: "msg:1" }, name: "Nadia Okafor" }), people: [RIO], ...extra };
   await writeLead(kv as never, s, id, lead);
-  return { id, key: `lead:${id}` };
+  return { id };
 }
 const patch = (body: object) =>
   desk("PATCH", "", { body });
@@ -104,19 +104,19 @@ describe("plan and tasks in the record", () => {
   });
 
   it("PATCH saves the plan and tasks, a tick lands on the timeline, ?tasks lists the open ones", async () => {
-    const { id, key } = await seed();
-    let res = await patch({ key, plan: { brief: "Album cover", sheet: { team: [RIO.email] } } });
+    const { id } = await seed();
+    let res = await patch({ id, plan: { brief: "Album cover", sheet: { team: [RIO.email] } } });
     expect(res.status).toBe(200);
-    res = await patch({ key, tasks: [{ id: "a", text: "Confirm MUA", due: "2026-11-28" }, { id: "b", text: "Rent gel", due: "2026-12-02", who: RIO.email }] });
+    res = await patch({ id, tasks: [{ id: "a", text: "Confirm MUA", due: "2026-11-28" }, { id: "b", text: "Rent gel", due: "2026-12-02", who: RIO.email }] });
     expect(res.status).toBe(200);
-    res = await patch({ key, tasks: [{ id: "a", text: "Confirm MUA", due: "2026-11-28", doneAt: "now" }, { id: "b", text: "Rent gel", due: "2026-12-02", who: RIO.email }] });
+    res = await patch({ id, tasks: [{ id: "a", text: "Confirm MUA", due: "2026-11-28", doneAt: "now" }, { id: "b", text: "Rent gel", due: "2026-12-02", who: RIO.email }] });
     const { lead } = (await res.json()) as { lead: Lead };
     expect(lead.plan).toEqual({ brief: "Album cover", sheet: { team: [RIO.email] } });
     expect(lead.events.filter((e) => e.kind === "task").map((e) => e.note)).toEqual(["Confirm MUA"]);
     const { tasks } = (await (await desk("GET", "/tasks")).json()) as { tasks: { id: string; lead: string; name: string }[] };
     expect(tasks).toEqual([{ id: "b", text: "Rent gel", due: "2026-12-02", who: RIO.email, lead: id, name: "Nadia Okafor" }]);
-    expect((await patch({ key, plan: { cosmos: "https://example.com" } })).status).toBe(400);
-    expect((await patch({ key, plan: null })).status).toBe(200);
+    expect((await patch({ id, plan: { cosmos: "https://example.com" } })).status).toBe(400);
+    expect((await patch({ id, plan: null })).status).toBe(200);
     expect((await readLead(kv as never, s, id))!.plan).toBeUndefined();
   });
 

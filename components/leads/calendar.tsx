@@ -28,7 +28,7 @@ import { type Size } from "@/lib/leads/lead-desk";
 import { adminCall } from "@/lib/admin/admin-call";
 import { errorText } from "@/lib/utils";
 
-/* The calendar's data and day maths, from the retired classic desk. */
+/* The calendar's data and day maths. */
 export type Ev = { id: string; title: string; start: string; end: string; allDay: boolean; block: boolean; booking: boolean; free: boolean };
 export type Busy = { label: string; start: string; end: string };
 export type Extra = { label: string; src: string; ics: boolean; failed: boolean };

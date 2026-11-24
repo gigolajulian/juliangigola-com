@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { authorised, canPush, fromWorker, refuseAdmin, refuseWorker } from "@/lib/admin/vouch";
+import { authorised, canPush, forgetVouches, fromWorker, refuseAdmin, refuseWorker } from "@/lib/admin/vouch";
 import { AdminError, isLocked, loadErrorText, LOCKED } from "@/lib/admin/admin-call";
 import { SCOPED, githubToken, reply } from "../../backend/fakes";
 
@@ -11,7 +11,10 @@ let n = 0;
 const fine = () => `github_pat_${"f".repeat(30)}${String(++n).padStart(6, "0")}`;
 const PUSH = { permissions: { push: true } };
 
-beforeEach(() => vi.unstubAllGlobals());
+beforeEach(() => {
+  vi.unstubAllGlobals();
+  forgetVouches();
+});
 
 describe("canPush", () => {
   it("lets a classic token through only with repo or public_repo scope", async () => {
@@ -58,7 +61,7 @@ describe("canPush", () => {
 const req = (headers: Record<string, string>) => new Request("https://x.test/api", { headers });
 
 describe("authorised and fromWorker", () => {
-  it("authorised matches only the exact inbox key, and nothing when it is unset", async () => {
+  it("authorised matches only the exact admin key, and nothing when it is unset", async () => {
     expect(await authorised(req({ "x-admin-key": "k1" }), "k1")).toBe(true);
     expect(await authorised(req({ "x-admin-key": "k2" }), "k1")).toBe(false);
     expect(await authorised(req({}), "k1")).toBe(false);

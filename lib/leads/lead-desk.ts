@@ -19,6 +19,10 @@ export type Size = "phone" | "mid" | "wide";
 /** A request to the lead desk's routes: `path` is under /api/leads ("" the leads themselves, "/templates", "/log?id=..."). */
 export const deskCall = <T = Record<string, unknown>>({ path = "", ...init }: RequestInit & { path?: string } = {}) => adminCall<T>(`/api/leads${path}`, init);
 
+/** One hand change to a lead, sent by its plain id (never its KV key); answers with the lead as stored. */
+export const sendLeadPatch = (id: string, body: LeadPatch) =>
+  deskCall<{ lead: Lead }>({ method: "PATCH", body: JSON.stringify({ id, ...body }) }).then((o) => o.lead);
+
 /** A change to the open lead; answers with the lead as stored. */
 export type Patch = (b: LeadPatch) => Promise<Lead>;
 

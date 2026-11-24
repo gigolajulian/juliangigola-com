@@ -72,7 +72,7 @@ const change = (now: number, before: number) =>
 // Async so the signed-out throw below rejects, as the callers' .catch expects.
 async function ask<T>(url: string): Promise<T> {
   const headers = authed();
-  if (!Object.keys(headers).length) throw new Error("Sign in with the inbox key or the GitHub token first.");
+  if (!Object.keys(headers).length) throw new Error("Sign in with the admin key or the GitHub token first.");
   return adminCall<T>(url, {}, "The site did not answer.");
 }
 

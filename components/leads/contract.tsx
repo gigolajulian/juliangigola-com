@@ -38,11 +38,13 @@ export function ContractBlock({ leadId, changed }: { leadId: string; changed: ()
   const [pick, setPick] = React.useState<string>("");
   const [edit, setEdit] = React.useState<Pick<Contract, "to" | "text"> | null>(null);
   const [note, setNote] = React.useState<string | null>(null);
+  // Said under Make contract: without the list, a new contract would go out on no template.
+  const [noTemplates, setNoTemplates] = React.useState(false);
 
   React.useEffect(() => {
     let live = true;
     api<Got>({ path: `?lead=${encodeURIComponent(leadId)}` }).then((o) => live && setGot(o)).catch((e: unknown) => live && setNote(errorText(e)));
-    api<{ templates: ContractTemplate[] }>({ path: "?templates" }).then((o) => { if (live) { setTemplates(o.templates); setPick(o.templates[0]?.id ?? ""); } }).catch(() => {});
+    api<{ templates: ContractTemplate[] }>({ path: "?templates" }).then((o) => { if (live) { setTemplates(o.templates); setPick(o.templates[0]?.id ?? ""); } }).catch(() => live && setNoTemplates(true));
     return () => { live = false; };
   }, [leadId]);
 
@@ -113,6 +115,7 @@ export function ContractBlock({ leadId, changed }: { leadId: string; changed: ()
           </>
         )}
       </HStack>
+      {!c && noTemplates ? <Text size="sm" color="secondary">Contract templates did not load.</Text> : null}
       {note ? <Text size="sm" color="secondary" role="status">{note}</Text> : null}
     </VStack>
   );

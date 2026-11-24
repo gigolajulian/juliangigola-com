@@ -32,7 +32,7 @@ async function brand(people: Person[] = [AD]) {
   const lead: Lead = { ...applyLeadEvent(null, BRAND, { event: { at: at(1), kind: "inquiry", ref: "msg:1" }, name: "Brand Co" }), people };
   await writeLead(kv as never, s, id, lead);
   for (const p of people) await kv.put(personKey(await s.id(p.email)), id);
-  return { id, key: `lead:${id}` };
+  return { id };
 }
 const patch = (body: object) =>
   desk("PATCH", "", { body });
@@ -94,34 +94,34 @@ describe("people in the record", () => {
 
 describe("PATCH people", () => {
   it("saves the list, points each address at the lead, and drops the alias of someone taken off", async () => {
-    const { id, key } = await brand([]);
-    const res = await patch({ key, people: [AD, { name: "Sam", email: "sam@x.co", cc: false }] });
+    const { id } = await brand([]);
+    const res = await patch({ id, people: [AD, { name: "Sam", email: "sam@x.co", cc: false }] });
     expect(res.status).toBe(200);
     expect((await res.json()).lead.people).toEqual([AD, { name: "Sam", email: "sam@x.co", cc: false }]);
     expect(await kv.get(personKey(await s.id("sam@x.co")))).toBe(id);
-    await patch({ key, people: [AD] });
+    await patch({ id, people: [AD] });
     expect(await kv.get(personKey(await s.id("sam@x.co")))).toBeNull();
     expect(await kv.get(personKey(await s.id(AD.email)))).toBe(id);
     expect(JSON.stringify([...kv.data.keys()])).not.toContain("agency.com");
-    await patch({ key, people: [] });
+    await patch({ id, people: [] });
     expect(await readLead(kv as never, s, id)).not.toHaveProperty("people");
   });
 
   it("refuses a bad address, one with its own lead, and one already on another lead", async () => {
-    const { key } = await brand([]);
-    expect((await patch({ key, people: [{ email: "nope" }] })).status).toBe(400);
+    const { id } = await brand([]);
+    expect((await patch({ id, people: [{ email: "nope" }] })).status).toBe(400);
     await writeLead(kv as never, s, await s.id("own@x.co"), applyLeadEvent(null, "own@x.co", { event: { at: at(2), kind: "inquiry" } }));
-    const own = await patch({ key, people: [{ email: "own@x.co" }] });
+    const own = await patch({ id, people: [{ email: "own@x.co" }] });
     expect(own.status).toBe(409);
     expect((await own.json()).error).toMatch(/Merge/);
     const other = await s.id("other@x.co");
     await writeLead(kv as never, s, other, { ...applyLeadEvent(null, "other@x.co", { event: { at: at(2), kind: "inquiry" } }), people: [{ name: "T", email: "taken@x.co" }] });
     await kv.put(personKey(await s.id("taken@x.co")), other);
-    expect((await patch({ key, people: [{ email: "taken@x.co" }] })).status).toBe(409);
+    expect((await patch({ id, people: [{ email: "taken@x.co" }] })).status).toBe(409);
     // An alias left behind by a lead that no longer lists the address blocks nothing and routes nothing.
     await kv.put(personKey(await s.id("stale@x.co")), other);
     expect((await findLead(kv as never, s, "stale@x.co")).lead).toBeNull();
-    expect((await patch({ key, people: [{ email: "stale@x.co" }] })).status).toBe(200);
+    expect((await patch({ id, people: [{ email: "stale@x.co" }] })).status).toBe(200);
   });
 });
 

@@ -3,6 +3,7 @@
  * Browser only: the key comes from localStorage.
  */
 import { credentials, KEY_STORE } from "@/lib/admin/admin-github";
+import { HttpError } from "@/lib/http";
 import { localGet } from "@/lib/storage";
 import { TZ } from "@/lib/time-zone";
 import { errorText } from "@/lib/utils";
@@ -10,12 +11,8 @@ import { errorText } from "@/lib/utils";
 /** The admin key if one was pasted, else the /admin GitHub token. */
 export const authed = () => credentials(localGet(KEY_STORE) ?? "");
 
-/** A failed admin request, with the status the route answered. */
-export class AdminError extends Error {
-  constructor(message: string, readonly status: number) {
-    super(message);
-  }
-}
+/** A failed admin request, with the status the route answered; an `HttpError`, so `statusOf` reads it too. */
+export class AdminError extends HttpError {}
 
 /**
  * One authed JSON request to an admin route. `fail` is what a failure says
@@ -38,13 +35,16 @@ export async function adminCall<T = Record<string, unknown>>(path: string, init:
 
 /**
  * One authed file from an admin route (a CSV, a signed copy, a reference).
- * A failed answer throws a plain Error, `fail` and the status, so a 401 reads
- * like any other failure and does not send the desk to sign-in.
+ * A failed answer throws an `AdminError` like `adminCall`: a 401 carries the
+ * gate's own words, so an expired sign-in reads as one; any other failure is
+ * `fail` and the status.
  */
 export async function adminBlob(path: string, fail: string, headers: Record<string, string> = authed()): Promise<Blob> {
   const res = await fetch(path, { headers, cache: "no-store" });
-  if (!res.ok) throw new Error(`${fail} (${res.status})`);
-  return res.blob();
+  if (res.ok) return res.blob();
+  let said: unknown;
+  if (res.status === 401) said = await res.json().then((b: { error?: unknown }) => b?.error, () => undefined);
+  throw new AdminError(typeof said === "string" && said ? said : `${fail} (${res.status})`, res.status);
 }
 
 export const OFFLINE = "Offline. The desk loads again when you are back online.";

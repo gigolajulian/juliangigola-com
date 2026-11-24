@@ -30,7 +30,7 @@ import { Tab, TabList } from "@astryxdesign/core/TabList";
 import { LockedGate } from "@/components/desk/sign-in";
 import { LeadDesk, type LeadAsk } from "@/components/leads/lead";
 import { FROST_ROOM, frostBar, GLASS, setUnreadBadge, WIN_CSS } from "@/components/leads/shared";
-import { deskCall, inFilter, isSetAside, matches, type Size } from "@/lib/leads/lead-desk";
+import { deskCall, inFilter, isSetAside, matches, sendLeadPatch, type Size } from "@/lib/leads/lead-desk";
 import { loadErrorText, LOCKED } from "@/lib/admin/admin-call";
 import { errorText } from "@/lib/utils";
 import { useSiteThemeRead } from "@/lib/site-theme";
@@ -165,6 +165,7 @@ export function LeadsDesk() {
   // The gallery a lead's Galleries section opened the Proofs desk on; the side nav opens it on the list.
   const [proofPick, setProofPick] = React.useState<string | null>(null);
   const [templates, setTemplates] = React.useState<Template[]>([]);
+  const [templatesError, setTemplatesError] = React.useState<string | null>(null);
   // When the list was loaded: groups by date without reading the clock during render.
   const [at, setAt] = React.useState(0);
   // Search and quick actions, on Ctrl or Cmd K.
@@ -186,7 +187,9 @@ export function LeadsDesk() {
   // The installed app's badge: unread leads not put aside.
   React.useEffect(() => { if (leads) setUnreadBadge(leads.filter((l) => l.unread && !isSetAside(l)).length); }, [leads]);
   React.useEffect(() => {
-    deskCall<{ templates: Template[] }>({ path: "/templates" }).then((o) => setTemplates(o.templates)).catch(() => {});
+    deskCall<{ templates: Template[] }>({ path: "/templates" })
+      .then((o) => { setTemplates(o.templates); setTemplatesError(null); })
+      .catch(() => setTemplatesError("Templates did not load. Saving now would replace them."));
   }, []);
   React.useEffect(() => {
     const on = (e: KeyboardEvent) => {
@@ -238,8 +241,8 @@ export function LeadsDesk() {
   const changed = (l: Lead) => setLeads((rs) => rs?.map((r) => (r.email === l.email ? { ...r, ...leadSummary(l), id: r.id } : r)) ?? null);
   /** A swipe or a button here: the same PATCH the lead's own Snooze, Archive and stage buttons send. */
   const act = (l: LeadSummary, body: LeadPatch) =>
-    deskCall<{ lead: Lead }>({ method: "PATCH", body: JSON.stringify({ key: leadStoreKey(l.id!), ...body }) })
-      .then((o) => changed(o.lead))
+    sendLeadPatch(l.id!, body)
+      .then(changed)
       .catch((e: unknown) => { alert(errorText(e)); load(); });
   const tomorrow = (l: LeadSummary) => act(l, { snoozeUntil: dayOn() });
   // The board is for a laptop: a phone keeps the list.
@@ -372,7 +375,7 @@ export function LeadsDesk() {
     traffic: <PanelDesk which="traffic" />,
     seo: <PanelDesk which="seo" />,
     hours: <HoursDesk />,
-    templates: <TemplatesDesk templates={templates} saved={setTemplates} />,
+    templates: <TemplatesDesk templates={templates} saved={setTemplates} error={templatesError} />,
     device: <DeviceDesk reload={load} signOut={signOut} />,
     more: <More go={show} find={() => setFinding(true)} />,
     proofs: <ProofsDesk embedded key={proofPick ?? ""} initial={proofPick ?? undefined} />,

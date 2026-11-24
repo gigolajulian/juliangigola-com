@@ -1,10 +1,9 @@
 "use client";
 
 /* ── Licences and Put aside on Astryx ─────────────────────────────
- * The classic desk's LicenceList and
- * its Put aside lists (Snoozed, Archived, Trash, Delivered, Lost) as
- * tables. Same filters (`inFilter` in lib/leads/lead-desk.ts), same Empty
- * trash DELETE, asked twice as before.
+ * Licences, and the Put aside lists (Snoozed, Archived, Trash, Delivered,
+ * Lost), as tables. Filtered by `inFilter` in lib/leads/lead-desk.ts; Empty
+ * trash sends the DELETE and asks twice first.
  * ─────────────────────────────────────────────────────────────── */
 
 import * as React from "react";

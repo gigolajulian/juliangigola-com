@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { summary, enquiry, enquiryKey } from "@/lib/leads/enquiry";
 import { recordLead } from "@/lib/leads/lead-store";
+import { leadIdOf } from "@/lib/leads/leads";
 import { FakeKV, LEADS_KEY, INBOX_KEY as KEY } from "../fakes";
 import { sealer } from "@/lib/seal";
 import { desk } from "../desk-routes";
@@ -52,12 +53,12 @@ describe("leads", () => {
     const key = `lead:${await idOf("a@example.com")}`;
     const one = await (await desk("GET", `?id=${key.slice(5)}`)).json();
     expect(one.lead.events).toHaveLength(1);
-    const res = await desk("PATCH", "", { body: JSON.stringify({ key, stage: "Quoted", snoozeUntil: "2026-12-01T00:00:00Z", seen: true }) });
+    const res = await desk("PATCH", "", { body: JSON.stringify({ id: leadIdOf(key), stage: "Quoted", snoozeUntil: "2026-12-01T00:00:00Z", seen: true }) });
     expect((await res.json()).lead).toMatchObject({ stage: "Quoted", snoozeUntil: "2026-12-01T00:00:00Z", unread: false });
     const { leads } = await (await desk("GET")).json();
     expect(leads[0]).toMatchObject({ stage: "Quoted", unread: false });
     // Marked unread again by hand.
-    const again = await desk("PATCH", "", { body: JSON.stringify({ key, seen: false }) });
+    const again = await desk("PATCH", "", { body: JSON.stringify({ id: leadIdOf(key), seen: false }) });
     expect((await again.json()).lead).toMatchObject({ unread: true });
   });
 
@@ -66,7 +67,7 @@ describe("leads", () => {
     await lead("a@example.com", "2026-11-01T10:00:00Z");
     await lead("b@example.com", "2026-11-02T10:00:00Z");
     const [a, b] = [`lead:${await idOf("a@example.com")}`, `lead:${await idOf("b@example.com")}`];
-    const patch = async (key: string, body: object) => (await (await desk("PATCH", "", { body: JSON.stringify({ key, ...body }) })).json()).lead;
+    const patch = async (key: string, body: object) => (await (await desk("PATCH", "", { body: JSON.stringify({ id: leadIdOf(key), ...body }) })).json()).lead;
     expect(await patch(a, { archive: true })).toHaveProperty("archivedAt");
     expect(await patch(a, { archive: false })).not.toHaveProperty("archivedAt");
     expect(await patch(a, { trash: true })).toHaveProperty("trashedAt");
@@ -87,7 +88,7 @@ describe("leads", () => {
     const post = async () => (await desk("POST", "/import/inbox", { body: { dry: false } })).json();
     expect(await post()).toMatchObject({ added: 2 });
     const spam = `lead:${await idOf("spam@example.com")}`;
-    await desk("PATCH", "", { body: JSON.stringify({ key: spam, trash: true }) });
+    await desk("PATCH", "", { body: JSON.stringify({ id: leadIdOf(spam), trash: true }) });
     await desk("DELETE");
     expect(kv.data.has(spam)).toBe(false);
     expect(await post()).toMatchObject({ added: 0, updated: 0 });
@@ -111,7 +112,7 @@ describe("leads", () => {
     const post = async () => (await desk("POST", "/import/inbox", { body: { dry: false } })).json();
     expect(await post()).toMatchObject({ added: 1 });
     const key = `lead:${await idOf("old@example.com")}`;
-    await desk("PATCH", "", { body: JSON.stringify({ key, trash: true }) });
+    await desk("PATCH", "", { body: JSON.stringify({ id: leadIdOf(key), trash: true }) });
     vi.useFakeTimers({ now: Date.now() + 31 * 864e5, toFake: ["Date"] });
     expect((await (await desk("GET")).json()).leads).toHaveLength(0);
     vi.useRealTimers();
@@ -125,10 +126,10 @@ describe("leads", () => {
     await lead("a@example.com", "2026-11-01T10:00:00Z");
     await lead("b@example.com", "2026-11-02T10:00:00Z");
     const [a, b] = [`lead:${await idOf("a@example.com")}`, `lead:${await idOf("b@example.com")}`];
-    for (const k of [a, b]) await desk("PATCH", "", { body: JSON.stringify({ key: k, trash: true }) });
+    for (const k of [a, b]) await desk("PATCH", "", { body: JSON.stringify({ id: leadIdOf(k), trash: true }) });
     vi.useFakeTimers({ now: Date.now() + 29 * 864e5, toFake: ["Date"] });
     expect((await (await desk("GET")).json()).leads).toHaveLength(2);
-    await desk("PATCH", "", { body: JSON.stringify({ key: b, trash: false }) });
+    await desk("PATCH", "", { body: JSON.stringify({ id: leadIdOf(b), trash: false }) });
     vi.setSystemTime(Date.now() + 2 * 864e5);
     const { leads } = await (await desk("GET")).json();
     vi.useRealTimers();
@@ -183,8 +184,8 @@ describe("leads", () => {
     ctx.env = { ...ctx.env, NOTION_TOKEN: "test" };
     await lead("a@example.com", "2026-11-01T10:00:00Z");
     const key = `lead:${await idOf("a@example.com")}`;
-    await desk("PATCH", "", { body: JSON.stringify({ key, stage: "Quoted" }) });
-    await desk("PATCH", "", { body: JSON.stringify({ key, stage: "Shot" }) });
+    await desk("PATCH", "", { body: JSON.stringify({ id: leadIdOf(key), stage: "Quoted" }) });
+    await desk("PATCH", "", { body: JSON.stringify({ id: leadIdOf(key), stage: "Shot" }) });
     expect(calls).toEqual([
       expect.stringMatching(/^POST \/databases\/.+\/query .*a@example\.com/),
       'PATCH /pages/row-1 {"properties":{"Status":{"select":{"name":"Quoted"}}}}',
@@ -232,13 +233,36 @@ describe("leads", () => {
   it("refuses an unknown stage, a bad time and a missing lead, and says when LEADS_KEY is unset", async () => {
     await lead("a@example.com", "2026-11-01T10:00:00Z");
     const key = `lead:${await idOf("a@example.com")}`;
-    const patch = (b: object) => desk("PATCH", "", { body: JSON.stringify({ key, ...b }) });
+    const patch = (b: object) => desk("PATCH", "", { body: JSON.stringify({ id: leadIdOf(key), ...b }) });
     expect((await patch({ stage: "Won" })).status).toBe(400);
     expect((await patch({ snoozeUntil: "soon" })).status).toBe(400);
-    expect((await desk("PATCH", "", { body: JSON.stringify({ key: "lead:0000", seen: true }) })).status).toBe(404);
+    expect((await desk("PATCH", "", { body: JSON.stringify({ id: "0000", seen: true }) })).status).toBe(404);
+    // The wire carries the plain id; a KV key or no id at all is refused.
+    expect((await desk("PATCH", "", { body: JSON.stringify({ key, seen: true }) })).status).toBe(400);
+    expect((await desk("PATCH", "", { body: JSON.stringify({ id: "", seen: true }) })).status).toBe(400);
     ctx.env = { INBOX: kv, INBOX_KEY: KEY };
     expect((await desk("GET")).status).toBe(503);
     expect(await (await desk("GET", "/tasks")).json()).toEqual({ error: "Leads need LEADS_KEY on the Worker." });
+  });
+
+  it("answers a JSON 500 for a lead that will not open, and the list leaves it out", async () => {
+    await lead("a@example.com", "2026-11-01T10:00:00Z");
+    await lead("b@example.com", "2026-11-02T10:00:00Z");
+    const bad = await idOf("b@example.com");
+    const row = kv.data.get(`lead:${bad}`)!;
+    kv.data.set(`lead:${bad}`, { ...row, value: "not a sealed lead", metadata: { s: "not sealed either" } });
+    const err = vi.spyOn(console, "error").mockImplementation(() => {});
+    const one = await desk("GET", `?id=${bad}`);
+    expect(one.status).toBe(500);
+    expect(await one.json()).toEqual({ error: "That lead cannot be opened. LEADS_KEY may have changed." });
+    const patched = await desk("PATCH", "", { body: JSON.stringify({ id: bad, seen: true }) });
+    expect(patched.status).toBe(500);
+    expect((await patched.json()).error).toMatch(/cannot be opened/);
+    const { leads } = await (await desk("GET")).json();
+    expect(leads.map((l: { email: string }) => l.email)).toEqual(["a@example.com"]);
+    expect((await desk("GET", "/tasks")).status).toBe(200);
+    expect(err).toHaveBeenCalled();
+    err.mockRestore();
   });
 
   it("answers 400, not a crash, for a lead added by hand with a non-string address", async () => {
@@ -252,7 +276,7 @@ describe("invoices", () => {
     return `lead:${await (await sealer(LEADS_KEY)!).id(email)}`;
   };
   const bill = (key: string, date = "2026-11-06") =>
-    desk("PATCH", "", { body: JSON.stringify({ key, invoice: { date, lines: [{ desc: "Portraits, Nov 19", qty: 1, rate: 450 }], paid: 100 } }) });
+    desk("PATCH", "", { body: JSON.stringify({ id: leadIdOf(key), invoice: { date, lines: [{ desc: "Portraits, Nov 19", qty: 1, rate: 450 }], paid: 100 } }) });
 
   it("numbers MMYY, then 1126-2 for a second one that month on any lead, and logs it", async () => {
     const a = await make("a@example.com"), b = await make("b@example.com");
@@ -274,7 +298,7 @@ describe("invoices", () => {
     const { invoices } = await (await desk("GET", "/invoices")).json();
     expect(invoices.map((i: { no: string; lead: string; name: string; paid: number }) => [i.no, `lead:${i.lead}`, i.name, i.paid])).toEqual([["1226", b, "Maya Ortiz", 100], ["1126", a, "Maya Ortiz", 100]]);
     // A trashed lead's invoices leave the list.
-    await desk("PATCH", "", { body: JSON.stringify({ key: b, trash: true }) });
+    await desk("PATCH", "", { body: JSON.stringify({ id: leadIdOf(b), trash: true }) });
     expect((await (await desk("GET", "/invoices")).json()).invoices).toHaveLength(1);
     expect((await desk("GET", "/invoices", { key: null })).status).toBe(401);
   });
@@ -284,10 +308,10 @@ describe("invoices", () => {
     vi.stubGlobal("fetch", async (url: string) => (calls.push(url), Response.json({ results: [], id: "row-1" })));
     ctx.env = { ...ctx.env, NOTION_TOKEN: "test" };
     const a = await make("a@example.com");
-    const gone = await desk("PATCH", "", { body: JSON.stringify({ key: a, stage: "Quoted", mergeFrom: "lead:nobody" }) });
+    const gone = await desk("PATCH", "", { body: JSON.stringify({ id: leadIdOf(a), stage: "Quoted", mergeFrom: "nobody" }) });
     expect(gone.status).toBe(404);
     const unknown = { date: "2026-11-06", lines: [{ desc: "Portraits", qty: 1, rate: 450 }] };
-    const none = await desk("PATCH", "", { body: JSON.stringify({ key: a, stage: "Quoted", invoice: unknown, invoicePaid: { no: "0999", paid: true } }) });
+    const none = await desk("PATCH", "", { body: JSON.stringify({ id: leadIdOf(a), stage: "Quoted", invoice: unknown, invoicePaid: { no: "0999", paid: true } }) });
     expect(none.status).toBe(404);
     expect(calls).toEqual([]);
     expect((await (await desk("GET", "/invoice-from?no=2026-11-06")).json()).no).toBe("1126");
@@ -295,9 +319,9 @@ describe("invoices", () => {
 
   it("refuses a bad invoice and stays behind the gate", async () => {
     const a = await make("a@example.com");
-    const bad = await desk("PATCH", "", { body: JSON.stringify({ key: a, invoice: { date: "2026-11-06", lines: [] } }) });
+    const bad = await desk("PATCH", "", { body: JSON.stringify({ id: leadIdOf(a), invoice: { date: "2026-11-06", lines: [] } }) });
     expect(bad.status).toBe(400);
-    expect((await desk("PATCH", "", { key: null, body: JSON.stringify({ key: a, invoice: {} }) })).status).toBe(401);
+    expect((await desk("PATCH", "", { key: null, body: JSON.stringify({ id: leadIdOf(a), invoice: {} }) })).status).toBe(401);
     expect([...kv.data.keys()].some((k) => k.startsWith("invoices:"))).toBe(false);
   });
 
@@ -343,6 +367,12 @@ describe("invoice photo, activity log and Notion import", () => {
     expect((await (await desk("GET", `/log?id=lead:${id}`)).json()).log).toEqual(log);
     expect(await (await desk("GET", "/log?id=nobody")).json()).toEqual({ log: [] });
     expect((await desk("GET", `/log?id=${id}`, { key: null })).status).toBe(401);
+    const err = vi.spyOn(console, "error").mockImplementation(() => {});
+    kv.data.set(`log:${id}`, { value: "not a sealed log" } as never);
+    const broken = await desk("GET", `/log?id=${id}`);
+    expect(broken.status).toBe(500);
+    expect((await broken.json()).error).toMatch(/cannot be opened/);
+    err.mockRestore();
   });
 
   it("/import/notion only counts unless dry is false", async () => {

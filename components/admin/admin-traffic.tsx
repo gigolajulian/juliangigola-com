@@ -40,7 +40,7 @@ export function AdminTraffic() {
 
   const pull = React.useCallback(async () => {
     const headers = authed();
-    if (!Object.keys(headers).length) return setError("Sign in with the inbox key or the GitHub token first.");
+    if (!Object.keys(headers).length) return setError("Sign in with the admin key or the GitHub token first.");
     setBusy(true);
     try {
       const body = await adminCall<Partial<Data>>("/api/traffic", {}, "Cloudflare did not answer.");
