@@ -6,7 +6,7 @@ import type { ContactState } from "@/lib/inbox";
 import { looksLikeEmail } from "@/lib/inbox";
 import { pad } from "@/lib/utils";
 
-/* JG V3 stepper (master v39, "one stepper" for booking and inquiry): the
+/* JG V3 stepper ("one stepper" for booking and inquiry): the
    step rail, the head, the body, the action bar, and the sticky photo with
    a live summary. Each flow owns its state and fills these slots. */
 

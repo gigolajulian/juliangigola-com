@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { render } from "@testing-library/react";
-import { LdJson } from "@/components/local-screens";
+import { LdJson } from "@/components/site/ld-json";
 
 describe("LdJson", () => {
   it("inlines the graph as a JSON-LD script", () => {

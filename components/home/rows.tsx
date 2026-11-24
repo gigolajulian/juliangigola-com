@@ -10,10 +10,10 @@ import { media } from "@/lib/device";
 import { dropSpot, keepSpot, layoutTop } from "./back";
 import { projectHref } from "@/lib/project-href";
 import { holdEase, holdUnease } from "@/lib/motion/hold-ease";
-import { clamp, MT2, progress } from "./motion/engine";
+import { clamp, progress } from "./motion/engine";
 import { COVER_KEYS, COVER_PRESS, FILM_DRESS, type HomeFilm } from "@/lib/home/data";
 import { pad } from "@/lib/utils";
-import { qflag } from "@/lib/home/flags";
+import { qflag } from "@/lib/flags/query";
 
 /** A home cover opens on the Cover art page, in that page's viewer (`?cover=`, components/cover/cover-art-gallery.tsx). */
 export const coverHref = (slug: string) => `${projectHref("coverart")}?cover=${encodeURIComponent(slug)}`;
@@ -57,7 +57,7 @@ export function HomeCovers() {
     const held = media("held");
     const read = () => {
       raf = 0;
-      if (MT2 && held.matches) return; // ?mt2=1: held, the driver tells the item; a stray row scroll (Tab into a cover) must not reset it
+      if (held.matches) return; // held, the driver tells the item; a stray row scroll (Tab into a cover) must not reset it
       const items = el.querySelectorAll<HTMLElement>(".mt-item");
       if (items.length < 2) return;
       const step = items[1].offsetLeft - items[0].offsetLeft;

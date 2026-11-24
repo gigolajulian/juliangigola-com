@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { patchLead } from "../../lib/leads/lead-patch";
 import { sealer } from "../../lib/leads/lead-crypto";
 import { readLead, writeLead } from "../../lib/leads/lead-store";
-import { fold, type Lead } from "../../lib/leads/leads";
+import { applyLeadEvent, type Lead } from "../../lib/leads/leads";
 import { FakeKV, LEADS_KEY } from "./fakes";
 
 /* patchLead called directly: what each field does to the stored lead, what
@@ -19,14 +19,14 @@ beforeEach(async () => {
   kv = new FakeKV();
   id = await s.id(EMAIL);
   key = `lead:${id}`;
-  const lead: Lead = fold(null, EMAIL, { event: { at: "2026-11-01T10:00:00Z", kind: "inquiry", ref: "msg:1" }, name: "Maya Ortiz" });
+  const lead: Lead = applyLeadEvent(null, EMAIL, { event: { at: "2026-11-01T10:00:00Z", kind: "inquiry", ref: "msg:1" }, name: "Maya Ortiz" });
   await writeLead(kv as never, s, id, lead);
   kv.puts = [];
 });
 
-const patch = async (body: Record<string, unknown>) => {
-  const res = await patchLead(kv as never, s, { key, ...body });
-  return { status: res.status, body: (await res.json()) as { lead?: Lead; error?: string } };
+const patch = async (body: Record<string, unknown>): Promise<{ status: number; body: { lead?: Lead; error?: string } }> => {
+  const r = await patchLead(kv as never, s, { key, ...body });
+  return "error" in r ? { status: r.status, body: { error: r.error } } : { status: 200, body: { lead: r.lead } };
 };
 const stored = async () => (await readLead(kv as never, s, id))!;
 const BILL = { date: "2026-11-06", lines: [{ desc: "Portraits", qty: 1, rate: 450 }], paid: 100 };
@@ -53,7 +53,7 @@ describe("patchLead: refusals", () => {
 
   it("404s a lead that is not there", async () => {
     const res = await patchLead(kv as never, s, { key: "lead:0000", seen: true });
-    expect(res.status).toBe(404);
+    expect(res).toEqual({ error: "Gone.", status: 404 });
   });
 });
 

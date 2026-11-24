@@ -3,9 +3,10 @@
 import * as React from "react";
 import loader, { plainSrc } from "@/image-loader";
 import { matches } from "@/lib/device";
-import { qflag } from "@/lib/home/flags";
+import { qflag } from "@/lib/flags/query";
 import { EXTRAS, type HomeFrame } from "@/lib/home/data";
 import "./intro.css";
+import { sessionGet } from "@/lib/utils";
 
 /* v4 home intro, "The canvas" (spec 3.1): JG inks in alone, the whole wall and
    a field of extra frames glide up at S0 scale and cover it, then the view
@@ -65,10 +66,7 @@ export function shouldPlay() {
   // the head script already gave the page back at 6s (a slow CPU hydrates later than that): starting now would blank the hero the visitor is looking at
   if ("mtLate" in root.dataset) return false;
   if (qflag("intro", "[12]")) return true;
-  try {
-    if (sessionStorage.getItem("jg-intro")) return false;
-  } catch {}
-  return true;
+  return !sessionGet("jg-intro");
 }
 
 /* the preload hold: the splash holds until these have loaded and decoded. CAP_AT: a dead or slow photo never strands the visitor. It starts by

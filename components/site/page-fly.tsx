@@ -191,6 +191,8 @@ export function PageFly() {
     document.addEventListener("pointercancel", up, true);
     document.addEventListener("dragstart", up, true);
     document.addEventListener("click", click, true);
+    // PageTransition mounts first (app/layout.tsx), so its capture listener runs before this one: it stops a Back and
+    // dispatches it again inside its view transition, and this listener acts on that replay.
     window.addEventListener("popstate", pop, true);
     return () => {
       document.removeEventListener("pointerdown", down, true);
@@ -240,7 +242,7 @@ export function PageFly() {
     back.current = null;
     if (b && Date.now() - b.t < 4000) {
       const main = document.getElementById("main");
-      // not the home: it puts back its own spot (v4/home/back.ts) and lands at rest, a 2.5vh settle there read as the row arriving late (Julian, #1351)
+      // not the home: it puts back its own spot (components/home/back.ts) and lands at rest, a 2.5vh settle there read as the row arriving late (Julian, #1351)
       if (main && path !== "/" && !(document as Document & { activeViewTransition?: unknown }).activeViewTransition) {
         main.animate({ transform: ["translateY(-2.5vh)", "none"] }, { duration: 400, easing: "cubic-bezier(.32,.72,0,1)" });
         main.animate({ opacity: [0, 1] }, { duration: 400, easing: OUT });

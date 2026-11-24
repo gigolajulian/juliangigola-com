@@ -1,7 +1,7 @@
 /* v4 homepage (docs/mt-decisions.md): the copy and picks this
    screen owns. Client-safe: no lib/work import. Frames that need project data
    (names, ratios) are resolved on the server in `lib/home/server.ts` (`HOME_DATA`). */
-import { priceLabel, SESSIONS, type SessionSlug } from "@/lib/photos-and-sessions";
+import { priceLabel, SESSIONS, type SessionSlug } from "@/lib/booking/catalog";
 import { DEPOSIT } from "@/lib/booking/paid";
 import type { SHOOT_TYPES } from "@/lib/inbox";
 
@@ -62,7 +62,7 @@ export type BookRow = {
   slug: Extract<SessionSlug, "portraits" | "headshots" | "graduation" | "studio-digitals">;
   name: string;
   len: string;
-  /** What /book shows for it: "From $400", or "$250 deposit" where the price is quoted after (`priceLabel`, lib/photos-and-sessions). */
+  /** What /book shows for it: "From $400", or "$250 deposit" where the price is quoted after (`priceLabel`, lib/booking/catalog). */
   price: string;
   /** The deposit that books it. */
   dep: string;

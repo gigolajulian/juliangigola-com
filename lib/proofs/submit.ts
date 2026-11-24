@@ -2,7 +2,7 @@ import { alertHello } from "@/lib/email/hello-mail";
 import { stripe } from "@/lib/stripe";
 import { recordLead } from "@/lib/leads/lead-store";
 import { alertLines, proofUrl, receiptMail, sendClient } from "@/lib/email/proof-mail";
-import { cardPrice, owed, publicId, viewerKey, type Proof } from "@/lib/proofs/proof-model";
+import { cardPrice, amountOwed, publicId, viewerKey, type Proof } from "@/lib/proofs/proof-model";
 import { writeProof } from "@/lib/proofs/proof-store";
 import type { InboxKV as KV } from "@/lib/kv";
 import type { Seal } from "@/lib/leads/lead-crypto";
@@ -62,7 +62,7 @@ const lines = (items: { name: string; qty: number; cents: number }[]) =>
 /** Checkout for the balance and the extras: the session's URL. Bank first (ACH is 0.8% capped at $5, card 2.9% + 30c); card when the client picks it. */
 export async function checkout(key: string, p: Proof, method: "bank" | "card" = "bank"): Promise<{ id: string; url: string }> {
   const card = method === "card";
-  const x = owed(p);
+  const x = amountOwed(p);
   const back = proofUrl(publicId(p));
   const list = cardPrice(x.cents);
   const what = [x.balance ? "Shoot balance" : "", x.n ? `${x.n} extra retouched ${x.n === 1 ? "frame" : "frames"}` : ""].filter(Boolean).join(" + ");
@@ -111,10 +111,10 @@ export async function paidFor(key: string, p: Proof, session: string): Promise<P
   const bank = s.status === "complete" && s.payment_status === "unpaid";
   // No amount is no payment: NaN would pass the `<` check and be stored as paid.
   const total = s.amount_total;
-  if ((s.payment_status !== "paid" && !bank) || meta?.proof !== p.token || typeof total !== "number" || total < owed(p).cents) return null;
+  if ((s.payment_status !== "paid" && !bank) || meta?.proof !== p.token || typeof total !== "number" || total < amountOwed(p).cents) return null;
   // Added to anything paid before the gallery was reopened.
   // A card payment carries Stripe's fee on top: only what was owed counts toward the balance and extras.
-  return { session, amount: (p.paid?.amount ?? 0) + Math.min(total, owed(p).cents), at: new Date().toISOString(), ...(bank ? { pending: true } : {}) };
+  return { session, amount: (p.paid?.amount ?? 0) + Math.min(total, amountOwed(p).cents), at: new Date().toISOString(), ...(bank ? { pending: true } : {}) };
 }
 
 /** paidFor, with Stripe's silence told apart: a refused session (4xx) is null, no answer or a 5xx is "down". */

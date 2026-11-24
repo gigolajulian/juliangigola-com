@@ -1,4 +1,5 @@
 import * as React from "react";
+import { noSubscribe } from "@/lib/utils";
 
 /** The inner-pages plan. s1, s2, a2, m2p, foot, next, c1, s4 and p3 went live for everyone and are folded into the
     pages (2026-11-21). What is left is on trial: `?v4pages` turns every key on for the tab, `?v4pages=view` only
@@ -14,6 +15,5 @@ export const V4PAGES_HEAD = `(function(){try{var k="jg-v4pages",v=(location.sear
 export const v4pages = (key: string) =>
   typeof document !== "undefined" && !!document.documentElement.dataset.v4pages?.split(" ").includes(key);
 
-const never = () => () => {};
 /** The flag for rendering: false on the server and the first paint, so a page with the flag off keeps its markup. */
-export const useV4pages = (key: string) => React.useSyncExternalStore(never, () => v4pages(key), () => false);
+export const useV4pages = (key: string) => React.useSyncExternalStore(noSubscribe, () => v4pages(key), () => false);

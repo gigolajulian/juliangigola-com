@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { About, about, Next } from "@/components/leads/row";
+import { About, joinParts, Next } from "@/components/leads/row";
 import { lead } from "./leads-fixtures";
 
 describe("row", () => {
   it("joins only the parts there are", () => {
-    expect(about(["Consultation", null, "", "Call booked", undefined, false])).toBe("Consultation · Call booked");
-    render(<About>{about(["Portraits", "Quoted"])}</About>);
+    expect(joinParts(["Consultation", null, "", "Call booked", undefined, false])).toBe("Consultation · Call booked");
+    render(<About>{joinParts(["Portraits", "Quoted"])}</About>);
     expect(screen.getByText("Portraits · Quoted")).toBeTruthy();
   });
 

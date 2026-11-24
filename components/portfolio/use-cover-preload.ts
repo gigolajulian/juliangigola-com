@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { getImageProps } from "next/image";
+import { qflag } from "@/lib/flags/query";
 import { GRID_SIZES, STRIP_SIZES, type WorkItem } from "@/components/portfolio/work-tiles";
 
 /** Covers ahead of the eye: the other view's first covers warmed, and the lazy photos near the scroll asked for in order. */
@@ -45,7 +46,7 @@ export function useCoverPreload(
      promotes the real <img>, so each file is fetched once at its own width. */
   React.useEffect(() => {
     const net = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
-    if (/[?&]preload=0/.test(location.search) || view === "color" || net?.saveData || /2g|3g/.test(net?.effectiveType ?? "")) return;
+    if (qflag("preload", "0") || view === "color" || net?.saveData || /2g|3g/.test(net?.effectiveType ?? "")) return;
     const LOOK_CAP = 3;
     let busy = 0;
     let raf = 0;

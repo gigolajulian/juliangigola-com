@@ -4,7 +4,7 @@ import { manageLinks } from "@/lib/booking/token";
 import { afterBooked, confirmOf } from "@/lib/booking/confirm";
 import { alertHello } from "@/lib/email/hello-mail";
 import { whenPT } from "@/lib/inbox";
-import { bodyOf, json } from "@/lib/http";
+import { bodyOf, json, limited, upstreamError } from "@/lib/http";
 
 // Errors answer { error: string }, as every other booking route does.
 
@@ -27,9 +27,8 @@ export async function POST(request: Request) {
   const { env, ctx } = await getCloudflareContext({ async: true });
   if (!env.GCAL_OAUTH || !env.BOOKING_LOCK) return json({ error: "Booking is off." }, 503);
 
-  const ip = request.headers.get("cf-connecting-ip") ?? "unknown";
-  if (!(await env.DEPOSIT_LIMIT.limit({ key: `book:${ip}` })).success)
-    return json({ error: "Too many tries. Wait a minute." }, 429);
+  const slow = await limited(env.DEPOSIT_LIMIT, "book", request);
+  if (slow) return slow;
 
   const raw = await bodyOf(request);
   const parsed = parseBooking(raw, true);
@@ -41,8 +40,7 @@ export async function POST(request: Request) {
   try {
     out = await lockOp(env, "book", { ...b, via });
   } catch (e) {
-    console.error("book", String(e));
-    return json({ error: "Could not reach the calendar." }, 502);
+    return upstreamError("book", e, "Could not reach the calendar.");
   }
   if (!out.ok && out.reason === "unknown") return json({ error: "Unknown session." }, 400);
   if (!out.ok) return json({ error: "That time is already booked." }, 409);

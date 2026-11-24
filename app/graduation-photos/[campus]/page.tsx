@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { shareOg } from "@/lib/og/share";
-import { LdJson } from "@/components/local-screens";
+import { LdJson } from "@/components/site/ld-json";
 import { PageFoot } from "@/components/site/chrome";
 import { CampusSpots } from "@/components/booking/campus-spots";
 import { CAMPUS_GUIDES, campusGuide, campusHref } from "@/lib/graduation/campus-guides";

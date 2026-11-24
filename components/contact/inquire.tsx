@@ -8,9 +8,9 @@ import { PageFoot } from "@/components/site/foot";
 import { CallDialog } from "@/components/booking/book";
 import { Duo } from "@/components/site/duo";
 import { Check, Failed, Field, FlowShell, Hidden, NEED_MSG, checkYou, first, useEnquiry } from "@/components/enquiry/flow";
-import { CALL_CARD, DOORS } from "@/lib/photos-and-sessions";
+import { CALL_CARD, DOORS } from "@/lib/home/photos";
 
-/* JG V3 Inquire (master v39, /inquire and /inquire/form). Both forms post
+/* JG V3 Inquire (/inquire and /inquire/form). Both forms post
    through the site's enquiry action (`lib/leads/enquiry-action.ts`) with its
    honeypot and visit context; `?sim=sent` (dev only) shows Sent without
    sending, as `?sim` does on the deposit. */

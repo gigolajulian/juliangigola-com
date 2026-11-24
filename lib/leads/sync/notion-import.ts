@@ -8,7 +8,7 @@
  * ─────────────────────────────────────────────────────────────── */
 import type { Sealer } from "../lead-crypto";
 import { readLead, writeLead } from "../lead-store";
-import { PAPER, STAGES, type Lead, type LeadEvent, type Paper, type Stage } from "../leads";
+import { isPaper, isStage, type Lead, type LeadEvent } from "../leads";
 import type { InboxKV as KV } from "@/lib/kv";
 
 
@@ -52,7 +52,7 @@ export async function importNotion(kv: KV, s: Sealer, people: unknown, dry: bool
       .filter((r) => !before?.events.some((e) => e.kind === "added" && e.ref === `notion:${r.ref}`))
       .map((r) => ({ at: r.at, kind: "added", ref: `notion:${r.ref}`, note: r.note }));
     const first = [...rows].sort((a, b) => a.at.localeCompare(b.at))[0].at;
-    const stage = (STAGES as readonly string[]).includes(raw.stage ?? "") ? (raw.stage as Stage) : "Inquiry";
+    const stage = isStage(raw.stage) ? raw.stage : "Inquiry";
     const lead: Lead = before
       ? { ...before }
       : { email, name: email, stage, stageAt: first, firstAt: first, lastAt: first, unread: false, events: [] };
@@ -64,7 +64,7 @@ export async function importNotion(kv: KV, s: Sealer, people: unknown, dry: bool
       if (v && empty) { lead[f] = v; changed = true; }
     }
     if (lead.quote === undefined && typeof raw.quote === "number" && raw.quote > 0 && raw.quote < 1e7) { lead.quote = raw.quote; changed = true; }
-    if (!lead.contract && (PAPER as readonly string[]).includes(raw.contract ?? "")) { lead.contract = raw.contract as Paper; changed = true; }
+    if (!lead.contract && isPaper(raw.contract)) { lead.contract = raw.contract; changed = true; }
     if (!changed) { count.unchanged++; continue; }
     lead.events = [...lead.events, ...fresh].sort((a, b) => a.at.localeCompare(b.at)).slice(-50);
     if (first < lead.firstAt) lead.firstAt = first;

@@ -69,6 +69,7 @@ const fmt = (n: number) => n.toLocaleString("en-US");
 const change = (now: number, before: number) =>
   before ? `${now >= before ? "+" : ""}${Math.round(((now - before) / before) * 100)}%` : "new";
 
+// Async so the signed-out throw below rejects, as the callers' .catch expects.
 async function ask<T>(url: string): Promise<T> {
   const headers = authed();
   if (!Object.keys(headers).length) throw new Error("Sign in with the inbox key or the GitHub token first.");

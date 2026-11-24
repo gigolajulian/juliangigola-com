@@ -396,7 +396,7 @@ function Ordering({
  * All of them rather than just the covers, because the frame that represents a
  * whole branch of the site is not necessarily the one that opens a project —
  * the cover column is tall and narrow, so a portrait frame from deep in a
- * gallery is often the right pick, and `COVER_OVERRIDES` in `lib/work/work.ts` did
+ * gallery is often the right pick, and `COVER_OVERRIDES` in `lib/work/disciplines.ts` did
  * exactly that by hand for three of the disciplines.
  *
  * Lazily loaded: Editorial is eighteen projects and runs to a couple of

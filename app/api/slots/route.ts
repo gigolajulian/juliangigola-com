@@ -3,7 +3,7 @@ import { liveHours } from "@/lib/booking/engine";
 import { EVENTS } from "@/lib/booking/rules";
 import { localIso, openStarts, type SlotsAnswer } from "@/lib/booking/slots";
 import { TZ } from "@/lib/booking/rules";
-import { json } from "@/lib/http";
+import { json, upstreamError } from "@/lib/http";
 
 /* ── open times for the picker, from the site's own engine ────────
  * GET /api/slots?slug=portraits&start=2026-11-04&end=2027-03-04&timeZone=...
@@ -51,8 +51,7 @@ export async function GET(request: Request) {
   try {
     starts = await openStarts(env.GCAL_OAUTH, slug, from, to, { kv: env.INBOX, hours: await liveHours(env) });
   } catch (e) {
-    console.error("slots", String(e));
-    return json({ error: "Could not reach the calendar." }, 502);
+    return upstreamError("slots", e, "Could not reach the calendar.");
   }
   const slots: SlotsAnswer["slots"] = {};
   for (const s of starts) {

@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 
 const show = vi.hoisted(() => vi.fn());
-vi.mock("@/components/lightbox", () => ({ useLightbox: () => ({ show }), Lightbox: () => null }));
+vi.mock("@/components/cover/lightbox", () => ({ useLightbox: () => ({ show }), Lightbox: () => null }));
 if (!globalThis.CSS?.escape) vi.stubGlobal("CSS", { escape: (s: string) => s });
 
 import { CoverArtGallery } from "@/components/cover/cover-art-gallery";

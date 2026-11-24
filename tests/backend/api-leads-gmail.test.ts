@@ -5,7 +5,7 @@ import { CURSOR } from "@/lib/leads/sync/gmail-sync";
 import { FakeKV, LEADS_KEY } from "./fakes";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { personKey, readLead, writeLead } from "@/lib/leads/lead-store";
-import { fold } from "@/lib/leads/leads";
+import { applyLeadEvent } from "@/lib/leads/leads";
 
 /* /api/leads/gmail: the booking Worker's cron, BOOKING_SECRET as bearer.
    The first run only records where Gmail's history stands. */
@@ -66,7 +66,7 @@ describe("POST /api/leads/gmail", () => {
   it("folds mail from a person on a lead into that lead, and skips a stranger", async () => {
     const s = await sealer(LEADS_KEY)!;
     const id = await s.id("brand@example.com");
-    await writeLead(kv as never, s, id, { ...fold(null, "brand@example.com", { event: { at: "2026-11-15T10:00:00Z", kind: "inquiry" } }), people: [{ name: "Ana", email: "ana@agency.com" }] });
+    await writeLead(kv as never, s, id, { ...applyLeadEvent(null, "brand@example.com", { event: { at: "2026-11-15T10:00:00Z", kind: "inquiry" } }), people: [{ name: "Ana", email: "ana@agency.com" }] });
     await kv.put(personKey(await s.id("ana@agency.com")), id);
     await kv.put(CURSOR, "100");
     const msg = (mid: string, from: string) => ({ id: mid, labelIds: ["INBOX"], internalDate: String(Date.UTC(2026, 10, 15, 12)), payload: { headers: [{ name: "From", value: from }, { name: "Subject", value: "Shot list" }] } });

@@ -2,7 +2,7 @@ import { errorText } from "@/lib/utils";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { refuseAdmin } from "@/lib/vouch";
 import { ACCOUNT, SITE_HOST, ZONE, cloudflare, searchConsole as gsc, sitePath } from "@/lib/analytics";
-import { json } from "@/lib/http";
+import { json, upstreamError } from "@/lib/http";
 
 /* ── traffic ──────────────────────────────────────────────────────
  * The numbers behind /admin's Traffic tab, from Cloudflare's own analytics:
@@ -85,7 +85,7 @@ export async function GET(request: Request) {
       bing,
     });
   } catch (e) {
-    return json({ error: errorText(e) }, 502);
+    return upstreamError("traffic", e, errorText(e));
   }
 }
 

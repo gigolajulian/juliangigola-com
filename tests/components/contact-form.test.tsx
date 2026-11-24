@@ -7,7 +7,7 @@ vi.mock("@/lib/leads/enquiry-action", () => ({ submitEnquiry }));
 vi.mock("@/components/reference-picks", () => ({ ReferencePicks: () => null }));
 vi.stubGlobal("fetch", vi.fn(() => Promise.reject(new Error("no network"))));
 
-import { ContactForm, FOLLOW_UP, TYPES, WhenBooking, fit } from "@/components/contact/contact-form";
+import { ContactForm, FOLLOW_UP, TYPES, WhenBooking, fitTextareaHeight } from "@/components/contact/contact-form";
 import { INITIAL, submitOrKeep } from "@/components/enquiry/submit";
 
 describe("ContactForm", () => {
@@ -45,7 +45,7 @@ describe("ContactForm", () => {
     expect(screen.getByText("contact")).toBeTruthy();
   });
 
-  it("fit ignores null", () => {
-    expect(() => fit(null)).not.toThrow();
+  it("fitTextareaHeight ignores null", () => {
+    expect(() => fitTextareaHeight(null)).not.toThrow();
   });
 });

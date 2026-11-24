@@ -4,7 +4,7 @@ import { MOTION_SEO } from "@/lib/seo";
 import { CONTENT } from "@/lib/content";
 import { VideoIndex } from "@/components/portfolio/video";
 
-/* ── /work/video ──────────────────────────────────────────────────
+/* ── /portfolio/video ─────────────────────────────────────────────
  * The moving work, as one more filter on the work index: the `(index)`
  * layout draws the head and the chip row with Motion lit, and the films
  * run across the strip under the chips where a discipline's covers would.
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   ...shareOg("Video","Music videos and commercials directed and shot by Julian Gigola."),
 };
 
-/* JG V3 (leftovers card D): the films as 16:9 tiles. */
+/* The films as 16:9 tiles. */
 export default function VideoPage() {
   return <VideoIndex videos={CONTENT.videos} />;
 }

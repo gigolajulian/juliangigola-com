@@ -3,9 +3,9 @@ import { sealedStore } from "@/lib/kv";
 import { recordLead } from "@/lib/leads/lead-store";
 import { checkout, checkPaid, finalize } from "@/lib/proofs/submit";
 import { PAYMENTS_DOWN, PAYMENTS_OFF } from "@/lib/stripe";
-import { cleanSelects, device, isEmail, isTestEmail, owed, isToken, publicView, track, viewerKey, type Proof } from "@/lib/proofs/proof-model";
+import { cleanSelects, device, isEmail, isTestEmail, amountOwed, isToken, publicView, track, viewerKey, type Proof } from "@/lib/proofs/proof-model";
 import { checkPass, passCookie, passValue, shutReason, readPublic, writeProof } from "@/lib/proofs/proof-store";
-import { bodyOf, json } from "@/lib/http";
+import { bodyOf, json, upstreamError } from "@/lib/http";
 import { alertHello } from "@/lib/email/hello-mail";
 import { actionAlert, worthMail } from "@/lib/email/proof-mail";
 
@@ -128,14 +128,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
   // Notes are gone from the gallery; old ones are dropped with the send.
   const p: Proof = { ...logged(g.p, b.email, { picks: selects }), selects, notes: {}, message: undefined, submittedBy: b.email.trim() };
 
-  if (owed(p).cents === 0) return json({ done: true, ...publicView(await finalize(g.env, g.kv, g.s, p)) });
+  if (amountOwed(p).cents === 0) return json({ done: true, ...publicView(await finalize(g.env, g.kv, g.s, p)) });
   if (!key) return json({ error: PAYMENTS_OFF }, 503);
   try {
     const c = await checkout(key, p, b.method === "card" ? "card" : "bank");
     await writeProof(g.kv, g.s, { ...p, checkout: c.id });
     return json({ checkout: c.url });
   } catch (e) {
-    console.error("proof checkout", String(e));
-    return json({ error: PAYMENTS_DOWN }, 502);
+    return upstreamError("proof checkout", e, PAYMENTS_DOWN);
   }
 }

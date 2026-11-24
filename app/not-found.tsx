@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { NotFoundScene } from "@/components/not-found-scene";
+import { NotFoundScene } from "@/components/site/not-found-scene";
 import { DriftWall } from "@/components/drift-wall";
-import { DISCIPLINES, WALL, titleCase } from "@/lib/work/work";
-import { wallItem } from "@/lib/wall-tile";
+import { WALL, titleCase } from "@/lib/work/work";
+import { DISCIPLINES } from "@/lib/work/disciplines";
+import { wallItem } from "@/lib/work/wall-tile";
 
 /* ── 404 ──────────────────────────────────────────────────────────
  * From a design Julian made in Claude Design and asked to have on the site,
@@ -72,7 +73,7 @@ export default function NotFound() {
           }}
         />
 
-        {/* JG V3 (leftovers card H): the master's type, buttons and rows over the same wall. */}
+        {/* The V3 type, buttons and rows over the same wall. */}
         <section className="v3 nf pointer-events-none relative [&_a]:pointer-events-auto">
           <div className="rise nf-slate lbl mute">
             <span>

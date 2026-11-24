@@ -11,11 +11,11 @@ import { PageFoot } from "@/components/site/foot";
 import { Calendar, DotList, dlabel, iso } from "@/components/booking/flow";
 import { Failed, Field, FlowShell, Hidden, useEnquiry, type Shell } from "@/components/enquiry/flow";
 import { duration } from "@/lib/booking/rules";
-import { LENGTH, SESSIONS, TAB_ORDER, priceLabel, type SessionSlug } from "@/lib/photos-and-sessions";
+import { LENGTH, SESSIONS, TAB_ORDER, priceLabel, type SessionSlug } from "@/lib/booking/catalog";
 import { looksLikeEmail } from "@/lib/inbox";
 import { noSubscribe } from "@/lib/utils";
 
-/* JG V3 booking (master v39, /book/<session>): one stepper. The sessions
+/* JG V3 booking (/book/<session>): one stepper. The sessions
    with a time book through the site's own engine and take the deposit
    (`time-picker.tsx`, `deposit-step.tsx`); weddings are on request and post
    through the enquiry action. */

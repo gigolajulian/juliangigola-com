@@ -1,6 +1,7 @@
 import { CARD_SIZE, CARD_TYPE, clientMark, renderCard } from "@/lib/og/card";
 import { projectFacts } from "@/lib/og/share";
-import { LINKABLE, getProject, markFor } from "@/lib/work/work";
+import { LINKABLE, getProject } from "@/lib/work/work";
+import { markFor } from "@/lib/work/press";
 import { readdir } from "node:fs/promises";
 import { join } from "node:path";
 

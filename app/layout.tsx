@@ -273,6 +273,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             so every gallery and strip shares it and none carries its own. */}
         <TextCaret />
         <NavMemo />
+        {/* After PageTransition: it holds a Back and replays the popstate, which PageFly's own listener then sees. */}
         <PageFly />
         {/* fps, finger dots and a frame log, only with `?debug`. The
             overlay itself loads only then: `debug-gate.tsx`. */}
