@@ -28,7 +28,7 @@ export function StatsDesk({ call }: { call: Call }) {
   const [s, setS] = React.useState<Stats | null>(null);
   const [err, setErr] = React.useState<string | null>(null);
   React.useEffect(() => {
-    call<{ stats: Stats }>({ query: "?stats" }).then((o) => setS(o.stats)).catch((e: unknown) => setErr(errorText(e)));
+    call<{ stats: Stats }>({ path: "/stats" }).then((o) => setS(o.stats)).catch((e: unknown) => setErr(errorText(e)));
   }, [call]);
   const tile = (k: string, v: string, hint: string) => (
     <Card padding={4}>

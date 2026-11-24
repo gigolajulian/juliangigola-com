@@ -5,6 +5,7 @@ import { applyLeadEvent, leadSummary, leadStoreKey, type Lead, type Person } fro
 import { cleanPeople, merge, PEOPLE_MAX } from "@/lib/leads/lead-crm";
 import { readProof, writeProof } from "@/lib/proofs/proof-store";
 import { FakeKV, LEADS_KEY, INBOX_KEY as KEY } from "./fakes";
+import { desk } from "./desk-routes";
 
 /* Several people under one client (Julian 2026-11-15): the art director,
    the producer and the stylist sit on the brand's lead, their mail lands
@@ -12,7 +13,6 @@ import { FakeKV, LEADS_KEY, INBOX_KEY as KEY } from "./fakes";
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
 vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));
-const inbox = await import("@/app/api/inbox/route");
 const proof = await import("@/app/api/proof/route");
 
 const at = (h: number) => new Date(Date.UTC(2026, 10, 15, h)).toISOString();
@@ -35,7 +35,7 @@ async function brand(people: Person[] = [AD]) {
   return { id, key: `lead:${id}` };
 }
 const patch = (body: object) =>
-  inbox.PATCH(new Request("https://juliangigola.com/api/inbox", { method: "PATCH", body: JSON.stringify(body), headers: { "x-inbox-key": KEY } }));
+  desk("PATCH", "", { body });
 
 describe("findLead", () => {
   it("finds a person's lead, prefers an address's own lead, and ignores an alias whose lead is gone", async () => {

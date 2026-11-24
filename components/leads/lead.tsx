@@ -126,19 +126,19 @@ function useLeadDetail({ summary, initial, call, onChange, reload, onLoadError }
   const newest = lead?.events.at(-1)?.at ?? "";
   React.useEffect(() => {
     let live = true;
-    call<{ log: Lead["events"] }>({ query: `?log=${encodeURIComponent(summary.id ?? "")}` }).then((o) => live && setLog(o.log)).catch(() => {});
+    call<{ log: Lead["events"] }>({ path: `/log?id=${encodeURIComponent(summary.id ?? "")}` }).then((o) => live && setLog(o.log)).catch(() => {});
     return () => { live = false; };
   }, [call, summary.id, newest]);
 
   React.useEffect(() => {
     let live = true;
-    call<{ lead: Lead }>({ query: `?key=${encodeURIComponent(key)}` }).then(({ lead: l }) => {
+    call<{ lead: Lead }>({ path: `?id=${encodeURIComponent(summary.id ?? "")}` }).then(({ lead: l }) => {
       if (!live) return;
       setLead(l);
       // Their latest words, from the raw row the form stored.
       const ref = [...l.events].reverse().find((e) => e.kind === "inquiry" && e.ref)?.ref;
       if (ref)
-        call<{ enquiry: Enquiry }>({ query: `?key=${encodeURIComponent(ref)}` })
+        adminCall<{ enquiry: Enquiry }>(`/api/inbox?key=${encodeURIComponent(ref)}`)
           .then((m) => live && (setMessage(m.enquiry), setMsgKey(ref)))
           .catch(() => {});
       if (l.unread) patch({ seen: true }).catch(() => {});

@@ -10,7 +10,7 @@ import { bodyOf, json, NO_STORE } from "@/lib/http";
 import { parseOr } from "@/lib/json";
 
 /* ── contracts, Julian's side ─────────────────────────────────────
- * Behind the /admin gate like /api/inbox. GET ?templates, ?lead=<lead id>
+ * Behind the /admin gate. GET ?templates, ?lead=<lead id>
  * (its contract), ?copy=<contract id> (the signed copy as an HTML file).
  * PUT {templates}. POST {lead, template}: a contract filled from the lead.
  * PATCH {id, to, text, send?: "mail" | "link"}: the draft saved, then sent

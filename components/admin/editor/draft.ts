@@ -1,12 +1,31 @@
 import type { SiteContent } from "@/lib/content";
 import type { Draft } from "@/lib/admin/publish";
-import { sameJson } from "@/lib/admin/admin-payload";
+import { sameJson, withOverride } from "@/lib/admin/admin-payload";
 import { isTextRef } from "@/lib/work/added";
 import { FIELD_TAB, type View } from "@/components/admin/admin-tabs";
 import type { AdminEditorProps, Overrides } from "@/components/admin/admin-editor-props";
 
 /** What the repository holds, as far as the editor knows: the content and the manifest. */
 export type Baseline = { content: SiteContent; manifest: Draft };
+
+/** One project's entry in one override map. */
+export type OverrideOf<K extends keyof Overrides> = Overrides[K][string];
+/** The editor's one setter for the override maps, handed to the project list and the page editor. */
+export type SetOverride = <K extends keyof Overrides>(kind: K, slug: string, next: OverrideOf<K> | null) => void;
+
+/** The overrides with one project's entry changed. Null is no edit: frames, credits and copy fall back to what is
+    published (`withOverride`), a category drops its entry. A slug renamed back to its original is no rename at all. */
+export function withProjectOverride<K extends keyof Overrides>(o: Overrides, kind: K, slug: string, next: OverrideOf<K> | null, published: Overrides): Overrides {
+  const now = o[kind] as Record<string, OverrideOf<K>>;
+  let out: Record<string, OverrideOf<K>>;
+  if (kind === "frames" || kind === "credits" || kind === "copy") out = withOverride(now, slug, next, published[kind] as Record<string, OverrideOf<K>>);
+  else {
+    out = { ...now };
+    if (next === null || (kind === "slugs" && next === slug)) delete out[slug];
+    else out[slug] = next;
+  }
+  return { ...o, [kind]: out };
+}
 
 /** Which tabs hold unpublished edits, one field at a time. */
 export function movedTabs(draft: SiteContent, manifest: Draft, baseline: Baseline) {

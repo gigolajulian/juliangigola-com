@@ -5,7 +5,7 @@ import type { InboxKV as KV } from "@/lib/kv";
  * An invoice from the lead, in the
  * template of his JG INVOICE GENERATOR, numbered MMYY, a second one in the
  * same month 1126-2. It never sends: the desk makes the PDF and hands it
- * to Share or a Gmail draft. Pure functions here; `/api/inbox` stores the
+ * to Share or a Gmail draft. Pure functions here; `/api/leads` stores the
  * invoice on the lead (sealed) and `lib/leads/invoice-pdf.ts` draws it.
  * ─────────────────────────────────────────────────────────────── */
 
@@ -58,7 +58,7 @@ export const MAX_LINES = 8;
 export const MAX_INVOICE_ROWS = 4;
 export const THANKS_NOTES: [string, string, string] = ["Thanks for having me back.", "Always a blast with you guys.", "Can't wait for the next one!"];
 /** The KV key of his sealed invoice details (name, address, EIN): the repo is public, so they live there and nowhere in the code.
-    Written by `app/api/inbox`, read by the contract (`app/api/contract`). */
+    Written by `app/api/leads/invoice-from`, read by the contract (`app/api/contract`). */
 export const FROM_KEY = "leads:invoice-from";
 /** The photo's KV key: `invoice-photo:` and 32 hex of its SHA-256. */
 export const PHOTO_KEY = /^invoice-photo:[0-9a-f]{32}$/;

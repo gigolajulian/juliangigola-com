@@ -3,7 +3,7 @@ import { authorised, canPush, fromWorker, refuseAdmin, refuseWorker } from "@/li
 import { AdminError, isLocked, loadErrorText, LOCKED } from "@/lib/leads/lead-desk";
 import { SCOPED, githubToken, reply } from "./fakes";
 
-/* The gate on /api/inbox, /api/traffic and /api/seo: a token passes only
+/* The gate on /api/inbox and /api/leads, /api/traffic and /api/seo: a token passes only
    when its owner can push AND the token itself was granted the write. No
    real GitHub call: fetch is a stub. */
 
