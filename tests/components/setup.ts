@@ -1,8 +1,11 @@
 // jsdom lacks the browser APIs the site's components touch on mount.
-import { afterEach, vi } from "vitest";
+import { afterAll, afterEach, vi } from "vitest";
 import { cleanup } from "@testing-library/react";
+import { loadGsap } from "@/lib/gsap-lazy";
 
 afterEach(cleanup);
+// The picker warms gsap with a dynamic import; settle it before jsdom is torn down, or CI fails with EnvironmentTeardownError.
+afterAll(() => loadGsap());
 
 class Observer {
   observe() {}
