@@ -676,17 +676,21 @@ scrolls and while its group is off screen (`patches/liquid-gooey+0.2.2.patch`).
 - 2026-11-24: retired. Its last consumers went in r15, so the package, the
   patch and its test went in r17.
 
-## 2026-11-24: motion stays a devDependency
+## 2026-11-24: motion stays a devDependency, for dialkit only
 
-`motion` ships in the browser bundle through one vendored widget,
-`components/vendor/tilted-card.jsx` (the lightbox tilt). It sits in
-`devDependencies` on purpose: the Worker runs only the built bundle, never
-`node_modules`, and the build installs devDependencies, so the split in
-`package.json` says what the deployed Worker needs at runtime (nothing from
-either list). `dialkit` is the same: the dev dial panel.
+The lightbox tilt (`components/vendor/tilted-card.tsx`) is on gsap now,
+through `lib/motion/gsap-lazy.ts`, so `motion` no longer ships in the browser
+bundle. It stays in `devDependencies` because dialkit, the dev dial panel,
+imports `motion/react` as an optional peer, and npm does not install an
+optional peer that nothing else asks for. A production build swaps dialkit
+for `lib/dev/dialkit-stub.ts`, so neither reaches the deployed Worker.
 
-- **Not chosen:** porting the tilt to gsap to drop `motion`. The widget is
-  vendored as it came, and a port is a visible change to its spring.
+- **Not chosen:** dropping `motion` from `package.json`. The current lockfile
+  would still install it for dialkit, but a lockfile built from scratch
+  would not, and `next dev` would fail on the booking and enquiry pages.
+- 2026-11-24: the tilt's springs became a power2.out tween over 1.2 s, which
+  passes half way and 99% about when the old spring did (Julian approved the
+  small change in feel).
 
 ## 2026-10-09: globals.css split by area; device queries listed, not custom media
 

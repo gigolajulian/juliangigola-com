@@ -276,14 +276,10 @@ export function Stage({
                 } as React.CSSProperties}
               >
                 <TiltedCard
-                  imageSrc={f.src}
-                  altText=""
                   containerHeight="100%"
                   imageHeight="100%"
                   imageWidth="100%"
                   scaleOnHover={1.04}
-                  showMobileWarning={false}
-                  showTooltip={false}
                 >
                   {/* Not keyed: the card stays through a step and moves
                       (above). The picture is, so a new one is never the old

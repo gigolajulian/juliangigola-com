@@ -32,7 +32,7 @@
     translate: none !important;
   }
   /* The lightbox side photo's tilt follows the mouse; it holds still. */
-  :root:root :is(.tilted-card-inner, .tilted-card-img) {
+  :root:root .tilted-card-inner {
     transform: none !important;
   }
 }
