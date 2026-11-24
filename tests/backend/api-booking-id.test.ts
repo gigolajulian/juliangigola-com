@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { readLog } from "@/lib/leads/activity-log";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { POST } from "@/app/api/booking/[id]/route";
-import { bookingToken } from "@/lib/booking/booking-token";
+import { bookingToken } from "@/lib/booking/token";
 import { forgetToken } from "@/lib/booking/gcal";
 import { BookingLock } from "@/worker/booking-lock";
 import { FakeEmail, FakeKV, FakeStore, fakeLock, LEADS_KEY, GOOGLE_OAUTH as OAUTH } from "./fakes";
@@ -11,7 +11,7 @@ import { FakeEmail, FakeKV, FakeStore, fakeLock, LEADS_KEY, GOOGLE_OAUTH as OAUT
    with no deposit takes the event off the calendar and mails both sides. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
-vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
+vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));
 
 const SECRET = "booking-secret-for-tests";
 const ID = "AbCdEfGh12345678";

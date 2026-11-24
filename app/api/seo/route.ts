@@ -1,3 +1,4 @@
+import { errorText } from "@/lib/utils";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { refuseAdmin } from "@/lib/vouch";
 import { ACCOUNT, SITE_HOST, cloudflare, engineSql, searchConsole, sitePath } from "@/lib/analytics";
@@ -38,7 +39,7 @@ export async function GET(request: Request) {
     try {
       return json(await clickMap(key, map));
     } catch (e) {
-      return json({ error: (e as Error).message }, 502);
+      return json({ error: errorText(e) }, 502);
     }
   }
 
@@ -114,7 +115,7 @@ export async function GET(request: Request) {
       tracked,
     });
   } catch (e) {
-    return json({ error: (e as Error).message }, 502);
+    return json({ error: errorText(e) }, 502);
   }
 }
 
@@ -154,7 +155,7 @@ async function searchStats(secret: string | undefined, days: number) {
       nearPageOne: q.filter((r) => r.position > 10 && r.position <= 20).sort((x, y) => y.impressions - x.impressions).slice(0, 6),
     };
   } catch (e) {
-    return { error: (e as Error).message };
+    return { error: errorText(e) };
   }
 }
 

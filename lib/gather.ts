@@ -1,4 +1,5 @@
 import type { gsap as GSAP } from "gsap";
+import { loadGsap } from "@/lib/gsap-lazy";
 
 /* GSAP loads with the first gather (`gatherWhenSeen`), never up front: the
    root 404 draws a wall, so anything it imports statically ships with every
@@ -122,7 +123,7 @@ export function gatherWhenSeen(box: HTMLElement, pick: (box: HTMLElement) => Ite
     const imgs = frames.flatMap((f) => [...f.querySelectorAll("img")]);
     for (const i of imgs) i.loading = "eager";
     // The box stays hidden (no `data-gathered`) until GSAP is in and the frames are parked.
-    void import("gsap").then(({ gsap }) => {
+    void loadGsap().then((gsap) => {
       if (gone) return;
       tweens = gsap;
       run(gather(frames, path, gsap));

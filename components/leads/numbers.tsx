@@ -15,7 +15,8 @@ import { Heading, Text } from "@astryxdesign/core/Text";
 import { MetadataList, MetadataListItem } from "@astryxdesign/core/MetadataList";
 import { STAGES } from "@/lib/leads/leads";
 import type { Stats } from "@/lib/leads/lead-crm";
-import { type Call, errorText, dollarsLabel } from "@/lib/leads/lead-desk";
+import { type Call, dollarsLabel } from "@/lib/leads/lead-desk";
+import { errorText } from "@/lib/utils";
 import { Page } from "@/components/leads/lists";
 
 const AdminTraffic = React.lazy(() => import("@/components/admin/admin-traffic").then((m) => ({ default: m.AdminTraffic })));

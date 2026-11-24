@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { FakeEmail } from "./fakes";
 import { cancelledSubject, confirmMail, confirmOf, sendCancelled, sendConfirm, timeRange, type Confirm } from "@/lib/booking/confirm";
-import { depositPaid, type BookingRecord } from "@/lib/booking/booking-engine";
+import { depositPaid, type BookingRecord } from "@/lib/booking/engine";
 import { SIG_DARK, SIG_HTML, SIG_TEXT } from "@/lib/email/email-signature";
 
 /* The client's "You're in." mail and the cancel note (`lib/booking/confirm.ts`),

@@ -8,7 +8,7 @@ import { looksLikeEmail } from "@/lib/inbox";
 import { ProofWall } from "@/components/proofs/wall";
 import { ProofCursor } from "@/components/proofs/cursor";
 import { gridwallFor } from "@/lib/proofs/gridwall";
-import { noSubscribe } from "@/lib/utils";
+import { noSubscribe, errorText } from "@/lib/utils";
 
 /* ── the client's gallery ─────────────────────────────────────────
  * The look Julian approved 2026-11-06 (mock https://claude.ai/artifact/Nn3EU21DEofuLLJyXJHtcG):
@@ -326,7 +326,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
       setStep("done");
       scrollTo({ top: 0 });
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      setError(errorText(e));
     } finally {
       setBusy(false);
     }

@@ -5,10 +5,10 @@ vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }), usePat
 vi.mock("@/lib/leads/enquiry-action", () => ({ submitEnquiry: vi.fn() }));
 vi.stubGlobal("fetch", vi.fn(() => Promise.reject(new Error("offline"))));
 
-import { Home } from "@/components/v4/home/home";
-import { tell } from "@/components/v4/home/motion/engine";
-import { QUOTE_CLIENTS } from "@/lib/v4-home/data";
-import { HOME_DATA } from "@/lib/v4-home/server";
+import { Home } from "@/components/home/home";
+import { tell } from "@/components/home/motion/engine";
+import { QUOTE_CLIENTS } from "@/lib/home/data";
+import { HOME_DATA } from "@/lib/home/server";
 
 /* The drivers tell the screens what to show (motion/engine.ts `tell`); React renders it in the same call. */
 describe("motion drivers tell, React renders", () => {

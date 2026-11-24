@@ -1,5 +1,6 @@
 "use client";
 
+import { errorText } from "@/lib/utils";
 import * as React from "react";
 import { isTextRef, type FrameRef, type TextRef } from "@/lib/work/added";
 import { MAX_WIDTH, prepareImage } from "@/lib/admin/admin-image";
@@ -124,7 +125,7 @@ export function useSequence({
           bytes: image.bytes,
         });
       } catch (e) {
-        setError(e instanceof Error ? e.message : String(e));
+        setError(errorText(e));
       }
     }
 

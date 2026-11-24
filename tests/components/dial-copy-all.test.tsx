@@ -7,7 +7,7 @@ vi.mock("dialkit", () => ({
     getValues: () => ({ width: 2.2, "width.__mode": "x" }),
   },
 }));
-vi.mock("@/lib/arrange-notes", () => ({ notesText: () => "" }));
+vi.mock("@/lib/dev/arrange-notes", () => ({ notesText: () => "" }));
 
 import { DialCopyAll, copyText } from "@/components/dev/dial-copy-all";
 

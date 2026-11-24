@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FakeEmail, FakeKV, FakeStore, fakeLock, LEADS_KEY, leadOf, INBOX_KEY as KEY, GOOGLE_OAUTH as OAUTH } from "./fakes";
 import { forgetToken } from "@/lib/booking/gcal";
-import { bookingToken, manageLinks, tokenOpens } from "@/lib/booking/booking-token";
+import { bookingToken, manageLinks, tokenOpens } from "@/lib/booking/token";
 import { BookingLock } from "@/worker/booking-lock";
-import { findBooking, saveBooking } from "@/lib/booking/booking-engine";
+import { findBooking, saveBooking } from "@/lib/booking/engine";
 
 // Pinned clock: weekday hours, DST and the 48h refund window must not depend on the day the suite runs.
 vi.useFakeTimers({ toFake: ["Date"] });
@@ -16,7 +16,7 @@ vi.setSystemTime(PIN);
    and mails a new confirmation. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
-vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env, ctx: { waitUntil: (p: Promise<unknown>) => p } }) }));
+vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx, (p) => p));
 const { POST: book } = await import("@/app/api/book/route");
 const { POST: change } = await import("@/app/api/booking/[id]/route");
 const { bookDeposit } = await import("@/lib/booking/deposit");

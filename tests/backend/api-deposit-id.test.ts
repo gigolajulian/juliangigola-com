@@ -6,7 +6,7 @@ import { FakeKV, reply } from "./fakes";
    sent with a live deposit. A made-up id or a settled intent is a 404. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
-vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
+vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));
 
 const PI = "pi_TEST1234567890";
 const params = (id: string) => ({ params: Promise.resolve({ id }) });

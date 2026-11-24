@@ -10,7 +10,7 @@ import { FakeKV, LEADS_KEY } from "./fakes";
    once; a password is stored hashed, checked on the gate with a rate limit, and every later call needs its cookie. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
-vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
+vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));
 
 const ID = "11152026-k7m2q9xd";
 let kv: FakeKV;

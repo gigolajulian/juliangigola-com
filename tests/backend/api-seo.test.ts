@@ -6,7 +6,7 @@ import { parseBeacon } from "@/lib/beacon";
    click-and-scroll beacon that feeds its map. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
-vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
+vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));
 
 afterEach(() => vi.unstubAllGlobals());
 

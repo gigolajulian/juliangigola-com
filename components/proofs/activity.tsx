@@ -14,8 +14,9 @@ import { Selector } from "@astryxdesign/core/Selector";
 import { Text } from "@astryxdesign/core/Text";
 import { MetadataList, MetadataListItem } from "@astryxdesign/core/MetadataList";
 import { proofApi, type ProofRow } from "@/lib/proofs/desk";
-import { THUMB_W, type ViewerEvent } from "@/lib/proofs/proof";
-import { errorText, stampPT } from "@/lib/leads/lead-desk";
+import { publicId, THUMB_W, type ViewerEvent } from "@/lib/proofs/proof";
+import { stampPT } from "@/lib/leads/lead-desk";
+import { errorText } from "@/lib/utils";
 
 const csvCell = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
 const secs = (n: number) => (n < 90 ? `${Math.round(n)} s` : `${Math.round(n / 60)} min`);
@@ -97,7 +98,7 @@ export function ActivityDesk({ p, changed }: { p: ProofRow; changed: () => void 
             {top.map(([id, c]) => (
               <VStack key={id} gap={0} hAlign="center">
                 {/* eslint-disable-next-line @next/next/no-img-element -- private proof frame */}
-                <img src={`/proof/${p.token}/f/${id}?w=${THUMB_W}`} alt={num(id)} style={{ width: 48, aspectRatio: "3 / 4", objectFit: "cover" }} />
+                <img src={`/proof/${publicId(p)}/f/${id}?w=${THUMB_W}`} alt={num(id)} style={{ width: 48, aspectRatio: "3 / 4", objectFit: "cover" }} />
                 <Badge label={String(c)} variant="neutral" />
               </VStack>
             ))}

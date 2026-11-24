@@ -5,7 +5,7 @@ import { warmGsap, withGsap } from "@/lib/gsap-lazy";
 import { cn } from "@/lib/utils";
 import { depositFor } from "@/lib/booking/paid";
 import type { Status } from "@/lib/booking/deposit";
-import type { Booking } from "@/lib/booking/booking-rules";
+import type { Booking } from "@/lib/booking/rules";
 
 /* Goo: the cursor pours into the buttons (`time-picker.tsx`); `?goo=0` off. */
 export const gooOn = () => typeof location === "undefined" || new URLSearchParams(location.search).get("goo") !== "0";

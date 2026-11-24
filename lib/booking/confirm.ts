@@ -1,8 +1,8 @@
-import { duration, EARLY_SHARE, PART_SHARE, REFUND_HOURS, refundCents, refundShare, TZ } from "@/lib/booking/booking-rules";
+import { duration, EARLY_SHARE, PART_SHARE, REFUND_HOURS, refundCents, refundShare, TZ } from "@/lib/booking/rules";
 import { LEGACY_DEPOSIT } from "@/lib/booking/paid";
-import { depositPaid, recordBooking, type BookingRecord } from "@/lib/booking/booking-engine";
+import { depositPaid, recordBooking, type BookingRecord } from "@/lib/booking/engine";
 import { logMail } from "@/lib/leads/lead-store";
-import type { manageLinks } from "@/lib/booking/booking-token";
+import type { manageLinks } from "@/lib/booking/token";
 import { SIG_DARK, SIG_HTML, SIG_TEXT } from "@/lib/email/email-signature";
 /* ── the client's confirmation email ──────────────────────────────
  * Every booking gets a branded "You're in." mail from
@@ -105,7 +105,7 @@ export function confirmMail(c: Confirm) {
   const usd = c.deposit?.amount ?? LEGACY_DEPOSIT;
   const paid = c.deposit && {
     rows: [["Paid", fmt({ month: "short", day: "numeric", year: "numeric" }).format(new Date(c.deposit.at))], ...(c.deposit.card ? [["Card", c.deposit.card]] : []), ["Ref", c.deposit.ref.slice(0, 11)]] as [string, string][],
-    // The site's own engine refunds by Julian's rule (`refundShare`, `lib/booking/booking-rules.ts`).
+    // The site's own engine refunds by Julian's rule (`refundShare`, `lib/booking/rules.ts`).
     note: remind
       ? "It is under 24 hours now, so the session can no longer be moved and a cancel keeps the deposit."
       : soon
@@ -202,7 +202,7 @@ export async function sendConfirm(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefi
 export const cancelledSubject = (c: { session: string; start: string; end?: string }) => `Cancelled: ${c.session}, ${timeRange(c.start, c.end)}`;
 
 /** The client's note that a booking is cancelled, plain, from book@. A failed send is logged, never a failed cancel. Whether it went out. */
-export async function sendCancelled(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefined, c: { name: string; email: string; session: string; start: string; end?: string }, refund: "refunded" | "early" | "part" | "kept" | "none" | "late" | "mine" | "mineFree", usd = LEGACY_DEPOSIT, back = refundCents(usd, 0.7) / 100): Promise<boolean> {
+export async function sendCancelled(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefined, c: { name: string; email: string; session: string; start: string; end?: string }, refund: "refunded" | "early" | "part" | "kept" | "none" | "late" | "mine" | "mineFree", usd = LEGACY_DEPOSIT, back = refundCents(usd, PART_SHARE) / 100): Promise<boolean> {
   if (!mailer || !c.email) return false;
   const money = {
     refunded: `Your $${usd} deposit is refunded to your card. Banks take 5 to 10 days to show it.`,

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { shareOg } from "@/lib/og/share";
 import { BookPicker, type Bookable } from "@/components/booking/book-picker";
-import { V3Book } from "@/components/booking/book";
+import { SessionBook } from "@/components/booking/book";
 import { sessionEvent, pageForSession } from "@/lib/booking/service-pages";
 import { isSession } from "@/lib/photos-and-sessions";
 import { wallOf } from "@/lib/work/work";
@@ -29,7 +29,7 @@ const LENGTHS: Record<string, string> = {
    `?classic` keeps the page as it was before V3. */
 export default async function BookPage({ searchParams }: { searchParams: Promise<{ session?: string; classic?: string }> }) {
   const { session, classic } = await searchParams;
-  if (classic === undefined) return <V3Book slug={isSession(session) ? session : "portraits"} />;
+  if (classic === undefined) return <SessionBook slug={isSession(session) ? session : "portraits"} />;
   const sessions: Bookable[] = SESSION_TYPES.flatMap((s) => {
     const cal = sessionEvent(s.slug) ?? pageForSession(s.slug)?.book.cal;
     // Its wall, as its own booking page has (`/book/[slug]`).

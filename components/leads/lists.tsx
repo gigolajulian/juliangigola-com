@@ -16,8 +16,9 @@ import { Banner } from "@astryxdesign/core/Banner";
 import { Table } from "@astryxdesign/core/Table";
 import { Tab, TabList } from "@astryxdesign/core/TabList";
 import { endDay } from "@/lib/leads/lead-desk";
+import { errorText } from "@/lib/utils";
 import { renewDue, type LeadSummary } from "@/lib/leads/leads";
-import { type Call, dayLabel, errorText, inFilter, type Filter } from "@/lib/leads/lead-desk";
+import { type Call, dayLabel, inFilter, type Filter } from "@/lib/leads/lead-desk";
 
 type Row = LeadSummary & Record<string, unknown>;
 export const ASIDE: [Filter, string][] = [["snoozed", "Snoozed"], ["archived", "Archived"], ["trash", "Trash"], ["Delivered", "Delivered"], ["Lost", "Lost"]];

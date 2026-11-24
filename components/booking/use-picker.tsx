@@ -4,8 +4,8 @@ import * as React from "react";
 import type { DepositBody } from "@/components/booking/deposit-step";
 import { isPaid } from "@/lib/booking/paid";
 import { ORB_ROUND } from "@/components/effects/orb";
-import { TZ } from "@/lib/booking/booking-rules";
-import { e164, fromIso, minutesOf, forgetTimes, WHERE, type PickedTime, type Slot, type Step, type V3Book } from "@/components/booking/time-picker-parts";
+import { TZ } from "@/lib/booking/rules";
+import { e164, fromIso, minutesOf, forgetTimes, WHERE, type PickedTime, type Slot, type Step, type StepsSkin } from "@/components/booking/time-picker-parts";
 import { byCodeUnit } from "@/lib/utils";
 import { clockHere } from "@/components/booking/picker-dates";
 import { useSlots } from "@/components/booking/use-slots";
@@ -34,7 +34,7 @@ export type Props = {
   className?: string;
   fallback: React.ReactNode;
   /** JG V3: the booking as the master's stepper, inside the page's shell. */
-  v3?: V3Book;
+  skin?: StepsSkin;
   /** A time picked and confirmed: handed here instead of opening the form (a reschedule). */
   onPicked?: (start: string) => void;
   /** The days the card opens on: the month unless asked (the home opens on the week). */
@@ -42,7 +42,7 @@ export type Props = {
 };
 
 /* The picker's state, times and motion; the cards below only draw it. */
-export function usePicker({ path, title, className, v3, onPicked, startView }: Props): Picker {
+export function usePicker({ path, title, className, skin, onPicked, startView }: Props): Picker {
   const [username, slug] = path.split("/");
   const [tz] = React.useState(() => Intl.DateTimeFormat().resolvedOptions().timeZone || TZ);
   const [here, setHere] = React.useState(clockHere);
@@ -140,7 +140,7 @@ export function usePicker({ path, title, className, v3, onPicked, startView }: P
     const raw = String(form.get("phone") || "").trim();
     const phone = e164(raw);
     // JG V3: the phone is optional; one typed has to be a number.
-    if (!phone && (!v3 || raw)) {
+    if (!phone && (!skin || raw)) {
       setError("Check your phone number. Add the country code if it is not a US number.");
       setStep("form");
       return;
@@ -178,7 +178,7 @@ export function usePicker({ path, title, className, v3, onPicked, startView }: P
       /* The orbs get their moment even when the server answers at once, then
          turn into the check, which is shown before the page that follows. */
       // JG V3 draws no orb, so it has no moment to wait for.
-      if (!v3) {
+      if (!skin) {
         await new Promise((go) => setTimeout(go, Math.max(0, ORB_ROUND.solving - (Date.now() - began))));
         setStep("check");
         await new Promise((go) => setTimeout(go, 1500));
@@ -223,7 +223,7 @@ export function usePicker({ path, title, className, v3, onPicked, startView }: P
   // The same subtitle as the picker, so nothing below it jumps when the times arrive.
   const v3sub = v3paid ? "Studio in San Jose. I travel across the Bay Area." : "15 minutes, phone or video. Bring your dates and references.";
   return {
-    title, className, v3, username, slug, tz, here,
+    title, className, skin, username, slug, tz, here,
     length, needsWhere, session, days, state, paid, load,
     held, unhold: () => setHeld(false),
     view, setView, anchor, setAnchor, pick, chosen, setChosen, choose, today, week, month, shift, mstep, setMstep, switchView, atStart,
@@ -238,7 +238,7 @@ type Slots = ReturnType<typeof useSlots>;
 type Days = ReturnType<typeof usePickerDays>;
 type Layout = ReturnType<typeof usePickerLayout>;
 /** What the picker hands its cards: data and callbacks only, its setters and refs for the rest kept inside. */
-export type Picker = Pick<Props, "title" | "className" | "v3"> &
+export type Picker = Pick<Props, "title" | "className" | "skin"> &
   /* the times as loaded */
   Pick<Slots, "length" | "needsWhere" | "session" | "days" | "state" | "paid" | "load"> &
   /* the days on show and the pick */

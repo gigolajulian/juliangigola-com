@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { notesText, readNotes, writeNote } from "@/lib/arrange-notes";
+import { notesText, readNotes, writeNote } from "@/lib/dev/arrange-notes";
 
-/* Julian's notes from the cover's arrange inspector (`lib/arrange-notes.ts`),
+/* Julian's notes from the cover's arrange inspector (`lib/dev/arrange-notes.ts`),
    kept in sessionStorage. */
 
 let store: Map<string, string>;

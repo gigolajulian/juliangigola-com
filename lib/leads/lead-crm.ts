@@ -6,7 +6,7 @@
  * Pure functions: `app/api/inbox/route.ts` reads and writes, these decide.
  * ─────────────────────────────────────────────────────────────── */
 
-import { TZ } from "../booking/booking-rules";
+import { TZ } from "../booking/rules";
 import { STAGES, type Lead, type LeadEvent, type Person, type ShootPlan, type Stage, type Task } from "./leads";
 import { canonical } from "./lead-crypto";
 import { balance, isSettled } from "./invoice";

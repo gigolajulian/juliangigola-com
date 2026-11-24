@@ -5,9 +5,9 @@ vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }), usePat
 vi.mock("@/lib/leads/enquiry-action", () => ({ submitEnquiry: vi.fn() }));
 vi.stubGlobal("fetch", vi.fn(() => Promise.reject(new Error("offline"))));
 
-import { Home } from "@/components/v4/home/home";
-import { BOOK_ROWS, QUOTE_OPTS } from "@/lib/v4-home/data";
-import { HOME_DATA } from "@/lib/v4-home/server";
+import { Home } from "@/components/home/home";
+import { BOOK_ROWS, QUOTE_OPTS } from "@/lib/home/data";
+import { HOME_DATA } from "@/lib/home/server";
 
 /* The two lists on the v4 home that talk to each other: Book online and By quote. Read through the DOM only,
    so a rename inside the components cannot hide a change in what the visitor gets. */

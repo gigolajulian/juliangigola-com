@@ -1,20 +1,9 @@
 /* The editor's tabs, and which tab each field lives on (`admin-editor.tsx`). */
 
 /**
- * The tabs, in three groups.
- *
- * Content used to be one tab holding four sections, with an index above it to
- * get between them. That is two mechanisms doing one job — a tab strip and a
- * section strip, stacked — and it left the widest part of the tool as a long
- * scroll of unrelated forms: the reply-time promise and the session prices
- * have nothing to do with each other and were two screens apart.
- *
- * One tab per area instead, and the index goes: the tabs *are* the index.
- *
- * Grouped because they are different kinds of thing. The first five are
- * pages: a fixed set of fields, edited a few times a year. The next four are
- * the work: the projects, which change constantly. Running them all together
- * would suggest they are the same kind of visit.
+ * The tabs, in three groups: pages (a fixed set of fields, edited a few times
+ * a year), the work (projects and disciplines, which change constantly), and
+ * the post (Leads, Inbox, Traffic, SEO: read, with nothing to publish).
  */
 export const TABS = [
   [
@@ -34,12 +23,6 @@ export const TABS = [
     // a page whose copy is written.
     { id: "coverart", label: "Cover art" },
   ],
-  /* Its own group, because it is not the same kind of visit at all.
-   *
-   * The first five tabs are pages and the next four are the work: both of
-   * them things you go in to change. This one is post: you go in to read it,
-   * and what you do afterwards happens in your mail. It also has nothing to
-   * publish, which is the one thing every other tab has in common. */
   [
     // One row per person, with a stage (`components/leads/desk.tsx`). The Inbox stays the raw log.
     { id: "leads", label: "Leads" },

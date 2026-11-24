@@ -197,7 +197,7 @@ states its rule inline. `SPEC-home-scroll.md` citations point at
 - 2026-10-21: the check moves to a better spot and the text is reworked ("beautified").
 - 2026-10-20: The days either side of the month, barely there.
 
-### components/booking/time-picker-v3.tsx
+### components/booking/time-picker-steps.tsx
 - 2026-11-09: option B ("build b"), the big stepped time.
 - 2026-10-27: Rises in once the times arrive, in place of "Loading availability".
 - 2026-11-10: One step per swipe, however long: the start clears until the finger lifts.
@@ -405,10 +405,10 @@ states its rule inline. `SPEC-home-scroll.md` citations point at
 ### components/analytics/visit-trail.tsx
 - 2026-10-14: an inquiry says where its sender came from.
 
-### lib/booking/booking-engine.ts
+### lib/booking/engine.ts
 - 2026-11-16: inside the last day a booking can no longer be moved.
 
-### lib/booking/booking-rules.ts
+### lib/booking/rules.ts
 - 2026-11-04: the last start is 7 PM. An hour of travel each side of a shoot.
 - 2026-11-16: refunds are 90% at 48h or more and 70% at 24h or more, with the 10% fee kept ("no free refunds"). A booking can be moved at most twice.
 
@@ -454,7 +454,7 @@ states its rule inline. `SPEC-home-scroll.md` citations point at
 ### lib/leads/activity-log.ts
 - 2026-11-10: "keep a master one and separate logs per client linked to each other".
 
-### lib/leads/gmail-sync.ts
+### lib/leads/sync/gmail-sync.ts
 - 2026-11-04: "your own Gmail replies on the timeline".
 
 ### lib/leads/invoice-pdf.ts
@@ -478,13 +478,13 @@ states its rule inline. `SPEC-home-scroll.md` citations point at
 - 2026-11-15: more people on a job.
 - 2026-11-15: More people on the job: kept in the full record, never the list summary.
 
-### lib/leads/notion-import.ts
+### lib/leads/sync/notion-import.ts
 - 2026-11-11: "go" on importing the Notion Business Hub rows as past leads.
 
-### lib/leads/sheet-sync.ts
+### lib/leads/sync/sheet-sync.ts
 - 2026-11-11: Notion retired and the Sheet on hello@ Drive added.
 
-### lib/leads/stripe-import.ts
+### lib/leads/sync/stripe-import.ts
 - 2026-11-11: OK to import past Stripe deposits.
 
 ### lib/leads/web-push.ts

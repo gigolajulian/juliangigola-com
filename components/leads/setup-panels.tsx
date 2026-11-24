@@ -20,12 +20,12 @@ import { DateInput } from "@astryxdesign/core/DateInput";
 import { Divider } from "@astryxdesign/core/Divider";
 import { SW_URL, swScope } from "@/components/leads/setup";
 import { ContractTemplatesDesk } from "@/components/leads/contract";
-import { adminCall, authed, type Call, errorText, ymdPT } from "@/lib/leads/lead-desk";
+import { adminCall, authed, type Call, ymdPT } from "@/lib/leads/lead-desk";
 import type { Template } from "@/lib/leads/lead-crm";
-import type { Hours, Window } from "@/lib/booking/booking-rules";
+import type { Hours, Window } from "@/lib/booking/rules";
 import type { Stage } from "@/lib/leads/leads";
 
-import { byCodeUnit } from "@/lib/utils";
+import { byCodeUnit, errorText } from "@/lib/utils";
 import { Page } from "@/components/leads/lists";
 
 const PUSH_FLAG = "jg-leads-push";
@@ -58,7 +58,7 @@ export function HoursDesk() {
     if (!hours) throw new Error(lock);
     return hours;
   }, []);
-  React.useEffect(() => { call().then(setHours, (e) => setNote(String(e.message))); }, [call]);
+  React.useEffect(() => { call().then(setHours, (e) => setNote(errorText(e))); }, [call]);
 
   if (!hours) return <Page gap={6} maxWidth={640} eyebrow="WHEN PEOPLE CAN BOOK" title="Hours"><Text type="code" size="sm" color="secondary">{note || "Loading hours"}</Text></Page>;
   const edit = (h: Hours) => { setHours(h); setNote("Not saved"); };
@@ -66,7 +66,7 @@ export function HoursDesk() {
   const save = async () => {
     setBusy(true);
     try { setHours(await call({ method: "PUT", body: JSON.stringify(hours) })); setNote("Saved. The booking page uses it now."); }
-    catch (e) { setNote((e as Error).message); }
+    catch (e) { setNote(errorText(e)); }
     finally { setBusy(false); }
   };
 

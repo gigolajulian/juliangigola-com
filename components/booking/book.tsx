@@ -7,9 +7,9 @@ import { getImageProps } from "next/image";
 import { JG_COVER, mountCover } from "@/components/splash/jg-cover";
 import { useRouter } from "next/navigation";
 import { BookTimes } from "@/components/booking/book-times";
-import { V4Foot } from "@/components/site/foot";
+import { PageFoot } from "@/components/site/foot";
 import { Calendar, Failed, Field, FlowShell, Hidden, Run, dlabel, iso, useEnquiry, type Shell } from "@/components/booking/flow";
-import { duration } from "@/lib/booking/booking-rules";
+import { duration } from "@/lib/booking/rules";
 import { LENGTH, SESSIONS, TAB_ORDER, priceLabel, type SessionSlug } from "@/lib/photos-and-sessions";
 import { looksLikeEmail } from "@/lib/inbox";
 import { noSubscribe } from "@/lib/utils";
@@ -92,7 +92,7 @@ const getList = (S: (typeof SESSIONS)[SessionSlug]) => {
 };
 
 /** `tabs`: false where the page is already about one booking (the service pages). */
-export function V3BookFlow({ slug, tabs = true, h1 = false, startView }: { slug: SessionSlug; tabs?: boolean; h1?: boolean; startView?: "week" | "month" }) {
+export function BookFlow({ slug, tabs = true, h1 = false, startView }: { slug: SessionSlug; tabs?: boolean; h1?: boolean; startView?: "week" | "month" }) {
   const S = SESSIONS[slug];
   const router = useRouter();
   const more = tabs && TAB_ORDER.includes(slug);
@@ -151,7 +151,7 @@ export function V3BookFlow({ slug, tabs = true, h1 = false, startView }: { slug:
     />
   );
   if (!S.cal) return <OnRequest key={slug} slug={slug} shell={shell} />;
-  return <BookTimes key={slug} path={S.cal} title={`Pick a time for ${S.name}`} v3={{ shell, name: S.name, from: S.from }} startView={startView} />;
+  return <BookTimes key={slug} path={S.cal} title={`Pick a time for ${S.name}`} skin={{ shell, name: S.name, from: S.from }} startView={startView} />;
 }
 
 /* When a session tab was last picked: the next booking page is the same
@@ -161,7 +161,7 @@ function markTab() {
   tabbedAt = Date.now();
 }
 
-export function V3Book({ slug }: { slug: SessionSlug }) {
+export function SessionBook({ slug }: { slug: SessionSlug }) {
   /* Reached by a move inside the site (the header's Book a session), the
      cover's script never runs: React runs no script it inserts. So it goes
      up here too, before the page paints; on a full load the script has put
@@ -174,9 +174,9 @@ export function V3Book({ slug }: { slug: SessionSlug }) {
   return (
     <div className="v3 contents">
       <section className="v3page" id="p-flow">
-        <V3BookFlow slug={slug} h1 />
+        <BookFlow slug={slug} h1 />
       </section>
-      <V4Foot bare />
+      <PageFoot bare />
       {/* the booking wait's cover, up before the page paints (jg-cover.ts); only where there is a calendar to wait for; after the page, so the calendar's box is there to cover */}
       {fromServer && SESSIONS[slug].cal ? <script dangerouslySetInnerHTML={{ __html: JG_COVER }} /> : null}
     </div>
@@ -369,7 +369,7 @@ export function CallDialog() {
                 <div className="dlg-x">
                   <button type="button" onClick={() => dlg.current?.close()}>Close</button>
                 </div>
-                <V3BookFlow slug="consultation" />
+                <BookFlow slug="consultation" />
               </dialog>
             </div>,
             document.body,

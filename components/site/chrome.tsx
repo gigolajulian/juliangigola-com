@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { mtscroll, V4_HOME } from "@/lib/v4-home/switch";
+import { mtscroll, V4_HOME } from "@/lib/home/switch";
 import { PageFoot } from "@/components/site/foot";
 import Link from "next/link";
 import { THEME_COLOR } from "@/lib/theme-color";

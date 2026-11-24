@@ -1,8 +1,8 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { liveHours } from "@/lib/booking/booking-engine";
-import { EVENTS } from "@/lib/booking/booking-rules";
+import { liveHours } from "@/lib/booking/engine";
+import { EVENTS } from "@/lib/booking/rules";
 import { localIso, openStarts, type SlotsAnswer } from "@/lib/booking/slots";
-import { TZ } from "@/lib/booking/booking-rules";
+import { TZ } from "@/lib/booking/rules";
 import { json } from "@/lib/http";
 
 /* ── open times for the picker, from the site's own engine ────────

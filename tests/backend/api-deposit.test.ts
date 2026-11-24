@@ -13,7 +13,7 @@ vi.setSystemTime(new Date("2026-11-11T20:00:00Z")); // a Wednesday, noon in San 
    personal data. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
-vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
+vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));
 
 const { POST: start } = await import("@/app/api/deposit/route");
 const { GET: status, PUT: putRefs } = await import("@/app/api/deposit/[id]/route");

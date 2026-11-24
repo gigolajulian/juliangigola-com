@@ -7,7 +7,7 @@ import { forgetToken } from "@/lib/booking/gcal";
    and creates the session's fixed intent for an open time. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
-vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
+vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));
 
 const PI = "pi_TEST1234567890";
 // Wednesday 10 AM Pacific, a week out: inside Julian's hours (as in api-deposit.test.ts).

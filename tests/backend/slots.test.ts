@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { cleanHours, EVENTS } from "@/lib/booking/booking-rules";
+import { cleanHours, EVENTS } from "@/lib/booking/rules";
 import { forgetToken } from "@/lib/booking/gcal";
 import { localIso, startsFor, zoned } from "@/lib/booking/slots";
 
@@ -8,7 +8,7 @@ import { localIso, startsFor, zoned } from "@/lib/booking/slots";
    zone, grouped by day. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
-vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
+vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));
 const { GET } = await import("@/app/api/slots/route");
 
 // Wednesday 2026-11-18, 10 AM Pacific (PST, UTC-8).

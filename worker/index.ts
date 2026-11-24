@@ -11,8 +11,8 @@
  * Pacific run asks for the galleries' daily summary (`app/api/proof/daily`).
  * ─────────────────────────────────────────────────────────────── */
 
-import { lockOp } from "../lib/booking/booking-engine";
-import { manageLinks } from "../lib/booking/booking-token";
+import { lockOp } from "../lib/booking/engine";
+import { manageLinks } from "../lib/booking/token";
 import { confirmOf, sendConfirm } from "../lib/booking/confirm";
 
 export { BookingLock } from "./booking-lock";

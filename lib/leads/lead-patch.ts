@@ -9,7 +9,7 @@ import type { Sealer } from "@/lib/leads/lead-crypto";
 import { fold, PAPER, REMIND_MAX, STAGES, type Lead, type LeadPatch, type Paper, type Stage } from "@/lib/leads/leads";
 import { buryLead, hasPerson, linkPeople, personKey, readLead, writeLead } from "@/lib/leads/lead-store";
 import { adoptLog } from "@/lib/leads/activity-log";
-import { notionPaper, notionStage } from "@/lib/leads/notion-lead";
+import { notionPaper, notionStage } from "@/lib/leads/sync/notion-lead";
 import { cleanPeople, cleanPlan, cleanTasks, merge } from "@/lib/leads/lead-crm";
 import { balance, cleanInvoice, invoiceCountKey, invoiceNo, invoicesTaken, usd } from "@/lib/leads/invoice";
 

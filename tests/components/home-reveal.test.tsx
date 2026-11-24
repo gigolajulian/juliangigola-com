@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { arrived } from "@/components/v4/home/motion/reveal";
+import { arrived } from "@/components/home/motion/reveal";
 
 const entry = (el: HTMLElement, isIntersecting: boolean, top: number) =>
   ({ target: el, isIntersecting, boundingClientRect: { top } }) as unknown as IntersectionObserverEntry;

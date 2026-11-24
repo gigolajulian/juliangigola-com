@@ -9,7 +9,7 @@ import { FakeKV, LEADS_KEY } from "./fakes";
 /* The one reminder per stage, on Julian's tap (2026-11-15), and the client page's "Closes" line. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
-vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
+vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));
 
 const ID = "11152026-k7m2q9xd";
 const DAY = 864e5;

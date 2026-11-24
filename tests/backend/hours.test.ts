@@ -7,11 +7,11 @@ import { BookingLock } from "@/worker/booking-lock";
    them, malformed ones are refused, and the picker follows them at once. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
-vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
+vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));
 const { GET, PUT } = await import("@/app/api/booking/hours/route");
 const { GET: slots } = await import("@/app/api/slots/route");
 const { openNow } = await import("@/lib/booking/slots");
-const { liveHours } = await import("@/lib/booking/booking-engine");
+const { liveHours } = await import("@/lib/booking/engine");
 
 const req = (method: string, body?: unknown, key = KEY) =>
   new Request("https://juliangigola.com/api/booking/hours", { method, headers: { "x-inbox-key": key }, body: body === undefined ? undefined : JSON.stringify(body) });

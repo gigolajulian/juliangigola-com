@@ -1,6 +1,5 @@
-import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { refuseAdmin } from "@/lib/vouch";
-import { sealer } from "@/lib/leads/lead-crypto";
+import { sealedStore } from "@/lib/kv";
 import { readLead } from "@/lib/leads/lead-store";
 import { FROM_KEY, type InvoiceFrom } from "@/lib/leads/invoice";
 import { cleanContractTemplates, cleanDraft, contractOf, contractUrl, copyName, draft, fillContract, fromLines, readContract, signedCopy, writeContract, CONTRACT_TEMPLATES, UNSET } from "@/lib/contracts/contract";
@@ -23,13 +22,12 @@ export const dynamic = "force-dynamic";
 const TEMPLATES_KEY = "leads:contract-templates";
 
 async function gate(request: Request) {
-  const { env } = await getCloudflareContext({ async: true });
+  const { env, seal, kv } = await sealedStore();
   const denied = await refuseAdmin(request, env.INBOX_KEY);
   if (denied) return { error: denied };
-  if (!env.INBOX) return { error: json({ error: "This build has no inbox attached." }, 503) };
-  const seal = sealer(env.LEADS_KEY);
+  if (!kv) return { error: json({ error: "This build has no inbox attached." }, 503) };
   if (!seal) return { error: json({ error: "Contracts need LEADS_KEY on the Worker." }, 503) };
-  return { env, kv: env.INBOX, s: await seal };
+  return { env, kv, s: await seal };
 }
 
 const templates = async (kv: NonNullable<CloudflareEnv["INBOX"]>) => {

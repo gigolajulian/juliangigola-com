@@ -10,7 +10,7 @@ import { balance, isSettled, namesInvoice, type Invoice } from "./invoice";
  * LEADS_KEY (`lib/leads/lead-crypto.ts`). Each event
  * that reaches the site (the form, a booking, a deposit in
  * trouble) is folded into it here. KV is the source of truth; Notion and the
- * Google Sheet (`lib/leads/sheet-sync.ts`) are copies of it, never the other way.
+ * Google Sheet (`lib/leads/sync/sheet-sync.ts`) are copies of it, never the other way.
  *
  * Automatic events only move a lead forward: a second inquiry from a
  * client already Confirmed must not drop them back to Inquiry. A new
@@ -43,7 +43,7 @@ export type LeadEvent = {
     // A task on the lead ticked done (2026-11-20), ref = "task:<task id>".
     | "task";
   /* "proofs": they opened a proof gallery, ref = its token so each gallery is one line. */
-  /* "replied" / "wrote": mail between hello@ and them in Gmail, ref = the Gmail message id (`lib/leads/gmail-sync.ts`). */
+  /* "replied" / "wrote": mail between hello@ and them in Gmail, ref = the Gmail message id (`lib/leads/sync/gmail-sync.ts`). */
   /** The raw row (`msg:` key), booking id or Stripe intent, so a retry folds in once. */
   ref?: string;
   /** Booking time, session, new stage, a mail's subject: a short line for the timeline. */
@@ -224,7 +224,7 @@ export type Change = {
   invoiceNo?: string;
   /** Kind "replied": the sent mail's subject and attachment names, for the invoice it carries. */
   mailed?: string;
-  /** Imported from before (`lib/leads/stripe-import.ts`): a line on the log, never news, never out of Archived. */
+  /** Imported from before (`lib/leads/sync/stripe-import.ts`): a line on the log, never news, never out of Archived. */
   past?: boolean;
 };
 

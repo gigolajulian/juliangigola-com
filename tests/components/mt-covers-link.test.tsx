@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { render } from "@testing-library/react";
-import { coverHref, HomeCovers } from "@/components/v4/home/rows";
-import { COVER_KEYS } from "@/lib/v4-home/data";
+import { coverHref, HomeCovers } from "@/components/home/rows";
+import { COVER_KEYS } from "@/lib/home/data";
 
-/* The home's Cover art row (`components/v4/home/rows.tsx`): every sleeve is a
+/* The home's Cover art row (`components/home/rows.tsx`): every sleeve is a
    link to the Cover art page, which opens that cover in its viewer. */
 
 describe("HomeCovers", () => {

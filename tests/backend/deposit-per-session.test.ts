@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FakeEmail, FakeKV, FakeStore, fakeLock, LEADS_KEY, leadOf, GOOGLE_OAUTH as OAUTH } from "./fakes";
 import { forgetToken } from "@/lib/booking/gcal";
-import { clientView, depositPaid } from "@/lib/booking/booking-engine";
+import { clientView, depositPaid } from "@/lib/booking/engine";
 import { DEPOSIT, depositFor, PAID } from "@/lib/booking/paid";
 import { amountOf, isDeposit } from "@/lib/booking/deposit";
-import { BOOK_ROWS } from "@/lib/v4-home/data";
+import { BOOK_ROWS } from "@/lib/home/data";
 import { priceLabel, SESSIONS } from "@/lib/photos-and-sessions";
 import { BookingLock } from "@/worker/booking-lock";
 
@@ -18,7 +18,7 @@ vi.setSystemTime(new Date("2026-11-11T20:00:00Z"));
    books it, every mail and log says what was paid, and a cancel returns it. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
-vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env, ctx: { waitUntil: (p: Promise<unknown>) => p } }) }));
+vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx, (p) => p));
 const { POST: start } = await import("@/app/api/deposit/route");
 const { POST: hook } = await import("@/app/api/stripe/route");
 const { POST: change } = await import("@/app/api/booking/[id]/route");

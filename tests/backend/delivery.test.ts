@@ -11,7 +11,7 @@ import { FakeKV, LEADS_KEY } from "./fakes";
    openDelivery reading the request's bindings. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
-vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env, ctx: { waitUntil() {} } }) }));
+vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx, () => {}));
 
 // The Workers runtime's FixedLengthStream: a pass-through here, its length checked.
 class FixedLengthStream extends TransformStream<Uint8Array, Uint8Array> {

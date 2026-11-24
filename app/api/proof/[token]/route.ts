@@ -1,5 +1,5 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { sealer } from "@/lib/leads/lead-crypto";
+import { sealedStore } from "@/lib/kv";
 import { recordLead } from "@/lib/leads/lead-store";
 import { checkout, checkPaid, finalize } from "@/lib/proofs/submit";
 import { PAYMENTS_DOWN, PAYMENTS_OFF } from "@/lib/stripe";
@@ -21,20 +21,18 @@ export const dynamic = "force-dynamic";
 
 /** The gallery for this request: open, online, and past its password when it has one (the gate's cookie). */
 async function load(token: string, request: Request) {
-  const { env } = await getCloudflareContext({ async: true });
-  const seal = sealer(env.LEADS_KEY);
-  if (!env.INBOX || !seal || !isToken(token)) return null;
+  const { env, seal, kv } = await sealedStore();
+  if (!kv || !seal || !isToken(token)) return null;
   const s = await seal;
-  const p = await readPublic(env.INBOX, s, token);
-  return p && !(await shutReason(p, request.headers.get("cookie"), env.LEADS_KEY)) ? { env, kv: env.INBOX, s, p } : null;
+  const p = await readPublic(kv, s, token);
+  return p && !(await shutReason(p, request.headers.get("cookie"), env.LEADS_KEY)) ? { env, kv, s, p } : null;
 }
 
 /** The gate's password: rate-limited per address, and a right one answers with the cookie every later call needs. */
 async function unlock(token: string, request: Request, password: unknown) {
-  const { env } = await getCloudflareContext({ async: true });
-  const seal = sealer(env.LEADS_KEY);
-  if (!env.INBOX || !seal || !isToken(token)) return json({ error: "This gallery closed." }, 404);
-  const p = await readPublic(env.INBOX, await seal, token);
+  const { env, seal, kv } = await sealedStore();
+  if (!kv || !seal || !isToken(token)) return json({ error: "This gallery closed." }, 404);
+  const p = await readPublic(kv, await seal, token);
   const why = await shutReason(p, null, env.LEADS_KEY);
   if (!p || (why && why !== "locked")) return json({ error: why === "offline" ? "This gallery is offline." : "This gallery closed." }, 404);
   if (!p.pass) return json({ ok: true });

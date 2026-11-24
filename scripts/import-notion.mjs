@@ -1,5 +1,5 @@
 // One-time: the Notion Business Hub's Bookings and Clients CRM rows into the
-// lead desk as quiet past leads (`lib/leads/notion-import.ts`).
+// lead desk as quiet past leads (`lib/leads/sync/notion-import.ts`).
 //
 //   node scripts/import-notion.mjs <export folder>          dry run: counts only
 //   node scripts/import-notion.mjs <export folder> --go     writes

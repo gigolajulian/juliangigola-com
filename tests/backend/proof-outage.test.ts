@@ -7,7 +7,7 @@ import { readProof, writeProof, type Proof } from "@/lib/proofs/proof";
    are down (502), not that their payment failed, and nothing is locked. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
-vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
+vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));
 vi.mock("next/headers", () => ({ headers: async () => new Headers() }));
 const { POST } = await import("@/app/api/proof/[token]/route");
 
