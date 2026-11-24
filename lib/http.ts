@@ -5,6 +5,9 @@ export const NO_STORE = { "cache-control": "no-store", "x-robots-tag": "noindex,
 
 export const json = (body: unknown, status = 200) => Response.json(body, { status, headers: NO_STORE });
 
+/** A time someone else took first, on every booking route: 409 with `code: "taken"`, which the clients match. */
+export const taken = () => json({ error: "That time was just taken. Pick another.", code: "taken" }, 409);
+
 /** An upstream answered with an error status (Stripe, Google): the status rides on the error, read back with `statusOf`. */
 export class HttpError extends Error {
   constructor(

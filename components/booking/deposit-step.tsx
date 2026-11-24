@@ -199,10 +199,10 @@ export function DepositStep({
   const usd = depositFor(body.slug);
   const payLabel = stage === "paying" ? "Paying" : stage === "confirming" ? "Confirming" : error ? `Try again · $${usd}` : null;
 
-  /* The intent, made on Pay (409: the time has gone). */
+  /* The intent, made on Pay (409 `taken`: the time has gone). */
   const make = async (): Promise<{ clientSecret: string; intentId: string } | null> => {
     const res = await fetch("/api/deposit", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-    if (res.status === 409) {
+    if (res.status === 409 && ((await res.clone().json().catch(() => null)) as { code?: string } | null)?.code === "taken") {
       setStage("taken");
       return null;
     }

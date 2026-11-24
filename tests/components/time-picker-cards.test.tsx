@@ -147,7 +147,7 @@ describe("EditorialCard", () => {
   });
 
   it("opens the details after Continue and says when the time was taken", async () => {
-    stubFetch(() => Response.json({ status: "error" }, { status: 409 }));
+    stubFetch(() => Response.json({ error: "That time was just taken. Pick another.", code: "taken" }, { status: 409 }));
     render(<Card path="julian/call" title="Pick a time" fallback={null} />);
     fireEvent.click(await screen.findByRole("button", { name: "11:00 AM" }));
     fireEvent.click(day("Continue"));

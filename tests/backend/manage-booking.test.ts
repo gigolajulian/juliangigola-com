@@ -295,7 +295,9 @@ describe("reschedule", () => {
     const start = wednesday(7);
     const { id, t } = await paid(start);
     busy.push({ start: plus(start, 3), end: plus(start, 4), id: "other" });
-    expect((await post(id, { t, action: "reschedule", start: plus(start, 3) })).status).toBe(409);
+    const refused = await post(id, { t, action: "reschedule", start: plus(start, 3) });
+    expect(refused.status).toBe(409);
+    expect(await refused.json()).toEqual({ error: "That time was just taken. Pick another.", code: "taken" });
     // One hour on: its own 10 to 11 plus buffer would be in the way if it were not its own.
     expect((await post(id, { t, action: "reschedule", start: plus(start, 1) })).status).toBe(200);
   });

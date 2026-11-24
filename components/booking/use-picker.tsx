@@ -167,9 +167,8 @@ export function usePicker({ path, title, className, skin, onPicked, startView }:
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ slug, start: new Date(pick.start).toISOString(), timeZone: tz, name, email: String(form.get("email")), phone, via: formVia, ...(notes ? { notes } : {}), ...(needsWhere ? { where } : {}) }),
         });
-        const body = (await res.json().catch(() => ({}))) as { error?: string };
-        // 409 is the engine saying the slot went to someone else.
-        if (!res.ok) throw Object.assign(new Error(body.error || "failed"), { status: res.status, said: body.error });
+        const body = (await res.json().catch(() => ({}))) as { error?: string; code?: string };
+        if (!res.ok) throw Object.assign(new Error(body.error || "failed"), { status: res.status, said: body.error, code: body.code });
       }
       setBooked({ name: firstName, email: String(form.get("email")).trim(), where, phone, via: formVia });
       /* The orbs get their moment even when the server answers at once, then
@@ -184,9 +183,9 @@ export function usePicker({ path, title, className, skin, onPicked, startView }:
       forgetTimes(username, slug, tz);
       setStep("done");
     } catch (e) {
-      const { status, said } = e as Error & { status?: number; said?: string };
+      const { status, said, code } = e as Error & { status?: number; said?: string; code?: string };
       let why = "That did not go through. Try again, or write to hello@juliangigola.com.";
-      if (status === 409) why = "That time was just taken. Pick another.";
+      if (code === "taken") why = "That time was just taken. Pick another.";
       // 429 and 503 carry the route's own words ("Too many tries. Wait a minute.", `app/api/book`).
       else if ((status === 429 || status === 503) && said) why = said;
       setError(why);

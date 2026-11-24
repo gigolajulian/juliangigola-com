@@ -4,7 +4,7 @@ import { amountOf, intentForm } from "@/lib/booking/deposit";
 import { CURRENCY } from "@/lib/booking/paid";
 import { openNow } from "@/lib/booking/slots";
 import { PAYMENTS_DOWN, stripe } from "@/lib/stripe";
-import { bodyOf, json, limited, upstreamError } from "@/lib/http";
+import { bodyOf, json, limited, taken, upstreamError } from "@/lib/http";
 
 /* ── a deposit starts ──────────────────────────────────────────────
  * The card posts the booking it wants; this checks the time is still
@@ -27,7 +27,7 @@ export async function POST(request: Request) {
   const b = parsed.booking;
 
   try {
-    if (!(await openNow(env.GCAL_OAUTH, b.slug, b.start, { kv: env.INBOX, hours: await liveHours(env) }))) return json({ error: "taken" }, 409);
+    if (!(await openNow(env.GCAL_OAUTH, b.slug, b.start, { kv: env.INBOX, hours: await liveHours(env) }))) return taken();
   } catch (e) {
     return upstreamError("deposit calendar", e, "Could not reach the calendar. Try again.");
   }

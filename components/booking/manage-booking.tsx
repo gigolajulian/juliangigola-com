@@ -43,11 +43,11 @@ export function ManageBooking({ booking, token, open }: { booking: Managed; toke
     setState("busy");
     setError("");
     const res = await fetch(`/api/booking/${b.id}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ t: token, ...body }) }).catch(() => null);
-    const out = (await res?.json().catch(() => null)) as { record?: Managed; refunded?: boolean; back?: number; error?: string } | null;
+    const out = (await res?.json().catch(() => null)) as { record?: Managed; refunded?: boolean; back?: number; error?: string; code?: string } | null;
     if (!res?.ok || !out?.record) {
       setState("");
-      // 409 is also "already cancelled" and "has started": only the taken time is rewritten, the rest says what the server said.
-      setError(out?.error === "taken" ? "That time was just taken. Pick another." : (out?.error ?? "That did not go through. Try again, or reply to your confirmation email."));
+      // 409 is also "already cancelled" and "has started": only the taken time has its own words, the rest says what the server said.
+      setError(out?.code === "taken" ? "That time was just taken. Pick another." : (out?.error ?? "That did not go through. Try again, or reply to your confirmation email."));
       return;
     }
     setB(out.record);

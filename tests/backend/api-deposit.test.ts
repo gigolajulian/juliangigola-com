@@ -107,7 +107,7 @@ describe("POST /api/deposit", () => {
     open = false;
     const res = await post(BODY);
     expect(res.status).toBe(409);
-    expect(await res.json()).toEqual({ error: "taken" });
+    expect(await res.json()).toEqual({ error: "That time was just taken. Pick another.", code: "taken" });
     expect(calls.some((c) => c.url.includes("stripe"))).toBe(false);
   });
 

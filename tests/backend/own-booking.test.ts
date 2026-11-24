@@ -96,6 +96,7 @@ describe("POST /api/book (a free call)", () => {
   it("gives one of two tabs on the same time the booking, the other a 409", async () => {
     const [a, b] = await Promise.all([post(CALL), post(CALL)]);
     expect([a.status, b.status].sort((x, y) => x - y)).toEqual([200, 409]);
+    expect(await (a.status === 409 ? a : b).json()).toEqual({ error: "That time was just taken. Pick another.", code: "taken" });
     expect(inserts).toHaveLength(1);
   });
 

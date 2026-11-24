@@ -4,7 +4,7 @@ import { manageLinks } from "@/lib/booking/token";
 import { afterBooked, confirmOf } from "@/lib/booking/confirm";
 import { alertHello } from "@/lib/email/hello-mail";
 import { whenPT } from "@/lib/inbox";
-import { bodyOf, json, limited, upstreamError } from "@/lib/http";
+import { bodyOf, json, limited, taken, upstreamError } from "@/lib/http";
 
 // A booked call answers { id, start, end, where }; errors answer { error: string }, as every other booking route does.
 
@@ -43,7 +43,7 @@ export async function POST(request: Request) {
     return upstreamError("book", e, "Could not reach the calendar.");
   }
   if (!out.ok && out.reason === "unknown") return json({ error: "Unknown session." }, 400);
-  if (!out.ok) return json({ error: "That time is already booked." }, 409);
+  if (!out.ok) return taken();
 
   const r = out.record;
   await afterBooked(env, r, async () => ({ ...confirmOf(r, await manageLinks(env.BOOKING_SECRET, r)), call: true }), { defer: (p) => ctx.waitUntil(p) });
