@@ -33,7 +33,7 @@ const noBar = (page: Page, name: string) =>
   });
 
 async function home(page: Page, q = "") {
-  await page.goto(`/?intro=0&mtscroll=1${q}`, { waitUntil: "load" });
+  await page.goto(`/?intro=0${q}`, { waitUntil: "load" });
   await expect(page.locator("html[data-mt-motion]")).toBeAttached();
 }
 

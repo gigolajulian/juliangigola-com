@@ -84,12 +84,11 @@ export function SmoothScroll() {
 
     // A lerp follows the wheel as it moves instead of replaying a fixed
     // 1.2s glide on every event, which read as lag on a trackpad (2026-10-30).
-    // The v4 home (data-mtscroll) glides longer: its motion is tied to the scroll, and at 0.2 each wheel notch read as a step.
-    // `?lerp=0.1` tries another value there.
-    const v4 = "mtscroll" in document.documentElement.dataset;
-    const asked = v4 ? parseFloat(new URLSearchParams(location.search).get("lerp") ?? "") : NaN;
+    // 0.13, not 0.2: the v4 home's motion is tied to the scroll, and at 0.2 each wheel notch read as a step.
+    // `?lerp=0.1` tries another value.
+    const asked = parseFloat(new URLSearchParams(location.search).get("lerp") ?? "");
     const lenis = new Lenis({
-      lerp: asked > 0.02 && asked <= 1 ? asked : v4 ? 0.13 : 0.2,
+      lerp: asked > 0.02 && asked <= 1 ? asked : 0.13,
       orientation: "vertical",
       gestureOrientation: "vertical",
       smoothWheel: true,
