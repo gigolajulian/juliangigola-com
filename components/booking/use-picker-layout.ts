@@ -58,13 +58,7 @@ export function usePickerLayout({ step, pick, days, view, anchor, week, month, c
       if (r.top > innerHeight * 0.6) scrollBy({ top: r.top - innerHeight * 0.25, behavior: "smooth" });
     });
   const swipe = React.useRef<{ x: number; y: number; done: boolean; drag?: boolean; v?: number; t?: number; lx?: number } | null>(null);
-  /* Week and month trade places as one set of cards: each day glides from
-     where it stood to where it lands and the box eases to its new height,
-     a day that was not on show fades in. Measured before the switch,
-     played once the new view is laid out. */
   const daysBox = React.useRef<HTMLDivElement>(null);
-  /* The times' width: they keep to one line while every box has room for
-     its time (Julian: a day of half hours was crammed). */
   /* The time picked kept in view in option B's row, and the fade and hint
      only while times run past its edge. */
   React.useEffect(() => {
@@ -82,6 +76,8 @@ export function usePickerLayout({ step, pick, days, view, anchor, week, month, c
     void document.fonts?.ready.then(fit);
     return () => ro.disconnect();
   }, [stripEl, pick?.date, pick?.min, days, step]);
+  /* The times' width: they keep to one line while every box has room for
+     its time (Julian: a day of half hours was crammed). */
   const slotsBox = React.useRef<HTMLDivElement>(null);
   const [slotsW, setSlotsW] = React.useState(0);
   /* Watched by whichever box is drawn now: one replaced under the old
