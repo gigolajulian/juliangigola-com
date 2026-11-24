@@ -11,7 +11,7 @@
  *   node scripts/prose-check.mjs [base] [engines]
  *   base: default http://localhost:3000; engines: chromium,firefox,webkit
  * Exits 1 on any failure, after listing them all. */
-import { chromium, firefox, webkit } from "playwright-core";
+import { chromium, firefox, webkit } from "@playwright/test";
 
 const BASE = process.argv[2] || "http://localhost:3000";
 const ENGINES = (process.argv[3] || "chromium,firefox,webkit").split(",");

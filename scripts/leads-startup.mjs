@@ -3,7 +3,7 @@
  * Icons: 192, 512, the maskable 512 (the JG already sits inside the safe zone) and the
  * 180 apple-touch. Startup screens (lib/leads/leads-startup.ts): black, the icon centered.
  * Run: node scripts/leads-startup.mjs */
-import { chromium } from "playwright";
+import { chromium } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import { STARTUP_SCREENS } from "../lib/leads/leads-startup.ts";
 
