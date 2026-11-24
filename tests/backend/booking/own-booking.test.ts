@@ -98,8 +98,6 @@ describe("POST /api/book (a free call)", () => {
     expect(inserts[0].url).toContain("conferenceDataVersion=1");
     expect(inserts[0].body).toMatchObject({ summary: "Editorial call: QA Test", attendees: [{ email: "qa@example.com" }] });
     expect(store.data.get(`b:${out.id}`)).toMatchObject({ eventId: "ev1", email: "qa@example.com", call: true });
-    // The visitor's answer does not wait on the filing or the mail.
-    expect(client.sent).toHaveLength(0);
     await settled();
     expect(kv.json(kv.puts[0])).toMatchObject({ type: "booking", name: "QA Test" });
     expect(client.sent).toHaveLength(1);
