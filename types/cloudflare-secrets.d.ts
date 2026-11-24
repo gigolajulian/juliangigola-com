@@ -90,4 +90,13 @@ interface CloudflareEnv {
    *   wrangler versions secret put BOOKING_SECRET
    */
   BOOKING_SECRET?: string;
+
+  /**
+   * The booking Worker's bearer on its calls to the site (`worker/index.ts` over SITE; `refuseWorker` in
+   * `lib/vouch.ts` checks it). Its own value, set on both Workers, never BOOKING_SECRET's:
+   *
+   *   wrangler secret put WORKER_KEY
+   *   wrangler secret put WORKER_KEY -c worker/wrangler.jsonc
+   */
+  WORKER_KEY?: string;
 }

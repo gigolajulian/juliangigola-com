@@ -17,7 +17,7 @@ import { confirmOf, sendConfirm } from "../lib/booking/confirm";
 
 export { BookingLock } from "./booking-lock";
 
-type Env = Parameters<typeof lockOp>[0] & { CLIENT_EMAIL?: CloudflareEnv["CLIENT_EMAIL"]; BOOKING_SECRET?: string; SITE?: CloudflareEnv["ASSETS"] };
+type Env = Parameters<typeof lockOp>[0] & { CLIENT_EMAIL?: CloudflareEnv["CLIENT_EMAIL"]; BOOKING_SECRET?: string; WORKER_KEY?: string; SITE?: CloudflareEnv["ASSETS"] };
 
 /** Mails every reminder and heads-up due now, then marks it, so the next hour skips it. A failed send is marked too, so a
     flaky binding never mails anyone twice. Returns how many went out. */
@@ -40,10 +40,10 @@ async function mailDue(env: Env, due: "due" | "dueHeads", mark: "reminded" | "he
 
 /** Tells the site's lead desk a reminder went out (the lead key lives there). Never throws. */
 async function logSent(env: Env, email: string, subject: string, booking: string, kind: string) {
-  if (!env.SITE || !env.BOOKING_SECRET) return;
+  if (!env.SITE || !env.WORKER_KEY) return;
   const res = await env.SITE.fetch("https://juliangigola.com/api/leads/mail", {
     method: "POST",
-    headers: { authorization: `Bearer ${env.BOOKING_SECRET}`, "content-type": "application/json" },
+    headers: { authorization: `Bearer ${env.WORKER_KEY}`, "content-type": "application/json" },
     body: JSON.stringify({ email, subject, kind, booking }),
   }).catch((e: unknown) => (console.error("lead log", String(e)), null));
   if (res && !res.ok) console.error("lead log", res.status);
@@ -51,8 +51,8 @@ async function logSent(env: Env, email: string, subject: string, booking: string
 
 /** Asks the site to read hello@'s new mail into leads. Logs Google's failure, never throws. */
 export async function syncMail(env: Env) {
-  if (!env.SITE || !env.BOOKING_SECRET) return;
-  const res = await env.SITE.fetch("https://juliangigola.com/api/leads/gmail", { method: "POST", headers: { authorization: `Bearer ${env.BOOKING_SECRET}` } }).catch(
+  if (!env.SITE || !env.WORKER_KEY) return;
+  const res = await env.SITE.fetch("https://juliangigola.com/api/leads/gmail", { method: "POST", headers: { authorization: `Bearer ${env.WORKER_KEY}` } }).catch(
     (e: unknown) => (console.error("gmail sync", String(e)), null),
   );
   if (res && !res.ok) console.error("gmail sync", res.status);
@@ -60,8 +60,8 @@ export async function syncMail(env: Env) {
 
 /** Asks the site to copy the lead desk to the Sheet; it skips when nothing changed. Never throws. */
 export async function copySheet(env: Env) {
-  if (!env.SITE || !env.BOOKING_SECRET) return;
-  const res = await env.SITE.fetch("https://juliangigola.com/api/leads/sheet", { method: "POST", headers: { authorization: `Bearer ${env.BOOKING_SECRET}` } }).catch(
+  if (!env.SITE || !env.WORKER_KEY) return;
+  const res = await env.SITE.fetch("https://juliangigola.com/api/leads/sheet", { method: "POST", headers: { authorization: `Bearer ${env.WORKER_KEY}` } }).catch(
     (e: unknown) => (console.error("sheet sync", String(e)), null),
   );
   if (res && !res.ok) console.error("sheet sync", res.status);
@@ -69,9 +69,9 @@ export async function copySheet(env: Env) {
 
 /** Asks the site to mail hello@ the week, at 9 AM Pacific only (the cron fires at both UTC hours DST can put it on). Never throws. */
 export async function weekly(env: Env, now = new Date()) {
-  if (!env.SITE || !env.BOOKING_SECRET) return;
+  if (!env.SITE || !env.WORKER_KEY) return;
   if (Number(new Intl.DateTimeFormat("en-US", { timeZone: "America/Los_Angeles", hour: "numeric", hourCycle: "h23" }).format(now)) !== 9) return;
-  const res = await env.SITE.fetch("https://juliangigola.com/api/leads/weekly", { method: "POST", headers: { authorization: `Bearer ${env.BOOKING_SECRET}` } }).catch(
+  const res = await env.SITE.fetch("https://juliangigola.com/api/leads/weekly", { method: "POST", headers: { authorization: `Bearer ${env.WORKER_KEY}` } }).catch(
     (e: unknown) => (console.error("weekly mail", String(e)), null),
   );
   if (res && !res.ok) console.error("weekly mail", res.status);
@@ -79,9 +79,9 @@ export async function weekly(env: Env, now = new Date()) {
 
 /** Asks the site for the galleries' daily summary, at 9 AM Pacific only. Never throws, so the reminders beside it always run. */
 export async function daily(env: Env, now = new Date()) {
-  if (!env.SITE || !env.BOOKING_SECRET) return;
+  if (!env.SITE || !env.WORKER_KEY) return;
   if (Number(new Intl.DateTimeFormat("en-US", { timeZone: "America/Los_Angeles", hour: "numeric", hourCycle: "h23" }).format(now)) !== 9) return;
-  const res = await env.SITE.fetch("https://juliangigola.com/api/proof/daily", { method: "POST", headers: { authorization: `Bearer ${env.BOOKING_SECRET}` } }).catch(
+  const res = await env.SITE.fetch("https://juliangigola.com/api/proof/daily", { method: "POST", headers: { authorization: `Bearer ${env.WORKER_KEY}` } }).catch(
     (e: unknown) => (console.error("gallery summary", String(e)), null),
   );
   if (res && !res.ok) console.error("gallery summary", res.status);

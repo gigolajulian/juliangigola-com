@@ -17,7 +17,7 @@ import { sha256Hex } from "@/lib/utils";
  *   The `INBOX_KEY` header or a GitHub token that can push. `refuseAdmin` is
  *   the same gate as the 401 every one of those routes answers.
  * - `fromWorker`: the booking Worker calling the site (leads/gmail,
- *   leads/mail, leads/sheet, leads/weekly, proof/daily), with `BOOKING_SECRET` as the bearer.
+ *   leads/mail, leads/sheet, leads/weekly, proof/daily), with `WORKER_KEY` as the bearer.
  * ─────────────────────────────────────────────────────────────── */
 const VOUCHED_MS = 5 * 60 * 1000;
 const vouched = new Map<string, number>();
@@ -120,7 +120,7 @@ async function sameSecret(given?: string | null, expected?: string) {
   return diff === 0;
 }
 
-/** The booking Worker, calling with `BOOKING_SECRET` as its bearer. */
+/** The booking Worker, calling with `WORKER_KEY` as its bearer. */
 export const fromWorker = (request: Request, secret?: string) => sameSecret(bearer(request), secret);
 
 /** The booking Worker's gate as a route answers it: null when let in, else the 401. */

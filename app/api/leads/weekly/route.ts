@@ -8,7 +8,7 @@ import { json } from "@/lib/http";
 
 /* ── POST /api/leads/weekly: the Monday mail to hello@ ────────────
  * Called by the booking Worker's cron (`worker/index.ts`), Monday 9 AM
- * Pacific, with BOOKING_SECRET as the bearer. `?dry` answers with the mail
+ * Pacific, with WORKER_KEY as the bearer. `?dry` answers with the mail
  * and sends nothing. See `lib/leads/weekly.ts`.
  * ─────────────────────────────────────────────────────────────── */
 
@@ -16,7 +16,7 @@ export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   const { env, seal: sealing, kv } = await sealedStore();
-  const denied = await refuseWorker(request, env.BOOKING_SECRET);
+  const denied = await refuseWorker(request, env.WORKER_KEY);
   if (denied) return denied;
   const seal = await sealing;
   if (!kv || !seal) return json({ error: "Not set up." }, 503);

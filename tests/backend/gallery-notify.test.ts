@@ -23,7 +23,7 @@ const base = (over: Partial<Proof> = {}): Proof => ({ token: TOKEN, name: "Ana p
 beforeEach(() => {
   kv = new FakeKV();
   sent = [];
-  ctx.env = { INBOX: kv, LEADS_KEY, BOOKING_SECRET: "s", PUBLIC_WRITE_LIMIT: { limit: async () => ({ success: true }) }, EMAIL: { send: async (m: { subject: string; text: string }) => void sent.push(m) } };
+  ctx.env = { INBOX: kv, LEADS_KEY, WORKER_KEY: "s", PUBLIC_WRITE_LIMIT: { limit: async () => ({ success: true }) }, EMAIL: { send: async (m: { subject: string; text: string }) => void sent.push(m) } };
 });
 const open = (email = "ana@gmail.com") => POST(new Request("https://juliangigola.com/api/proof/x", { method: "POST", body: JSON.stringify({ action: "track", email, kind: "open" }) }), { params: Promise.resolve({ token: TOKEN }) });
 
@@ -99,10 +99,10 @@ describe("daily summary", () => {
 
   it("the worker asks only at 9 AM Pacific and never throws", async () => {
     const hits: string[] = [];
-    const env = { BOOKING_SECRET: "s", SITE: { fetch: async (u: string) => (hits.push(u), Response.json({})) } } as never;
+    const env = { WORKER_KEY: "s", SITE: { fetch: async (u: string) => (hits.push(u), Response.json({})) } } as never;
     await daily(env, new Date("2026-11-15T16:00:00Z"));
     await daily(env, new Date("2026-11-15T17:00:00Z"));
     expect(hits).toEqual(["https://juliangigola.com/api/proof/daily"]);
-    await expect(daily({ BOOKING_SECRET: "s", SITE: { fetch: async () => { throw new Error("down"); } } } as never, new Date("2026-11-15T17:00:00Z"))).resolves.toBeUndefined();
+    await expect(daily({ WORKER_KEY: "s", SITE: { fetch: async () => { throw new Error("down"); } } } as never, new Date("2026-11-15T17:00:00Z"))).resolves.toBeUndefined();
   });
 });

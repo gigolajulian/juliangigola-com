@@ -3,12 +3,12 @@ import { POST } from "@/app/api/leads/mail/route";
 import { FakeKV, LEADS_KEY, leadOf } from "./fakes";
 
 /* /api/leads/mail: the booking Worker reports a mail it sent, with
-   BOOKING_SECRET as bearer; it lands on the person's lead. */
+   WORKER_KEY as bearer; it lands on the person's lead. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
 vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));
 
-const SECRET = "booking-secret-for-tests";
+const SECRET = "worker-key-for-tests";
 const MAIL = { email: "client@example.com", subject: "See you tomorrow", kind: "reminder", booking: "bk_1" };
 const call = (body: unknown, auth?: string) =>
   POST(new Request("https://juliangigola.com/api/leads/mail", { method: "POST", body: JSON.stringify(body), headers: auth ? { authorization: auth } : {} }));
@@ -16,13 +16,15 @@ const call = (body: unknown, auth?: string) =>
 let kv: FakeKV;
 beforeEach(() => {
   kv = new FakeKV();
-  ctx.env = { INBOX: kv, LEADS_KEY, BOOKING_SECRET: SECRET };
+  ctx.env = { INBOX: kv, LEADS_KEY, WORKER_KEY: SECRET, BOOKING_SECRET: "the-link-secret" };
 });
 
 describe("POST /api/leads/mail", () => {
   it("refuses no bearer and a wrong one", async () => {
     expect((await call(MAIL)).status).toBe(401);
     expect((await call(MAIL, "Bearer nope")).status).toBe(401);
+    // the link secret is not the Worker's bearer
+    expect((await call(MAIL, "Bearer the-link-secret")).status).toBe(401);
     expect(kv.puts).toEqual([]);
   });
 
