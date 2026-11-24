@@ -63,8 +63,7 @@ All 74 projects and 1,131 frames were migrated off the old Format site.
 
 | Folder | What it is |
 | --- | --- |
-| `components/home/` + `lib/home/` | The homepage. It is the home when the build has `NEXT_PUBLIC_V4_HOME=1` (`lib/home/switch.ts`); set it to 0 to roll back. |
-| `components/home/rollback.tsx` | The rollback homepage (`V3Home`), served when `NEXT_PUBLIC_V4_HOME` is not 1. |
+| `components/home/` + `lib/home/` | The homepage (the v4 home). |
 | `components/site/` | Site chrome: header, foot, page transitions, smooth scroll, the legal pages. |
 | `components/portfolio/` | /portfolio, the project pages and the motion page. |
 | `components/booking/` | The /book stepper, session pages and booking management. |

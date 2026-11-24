@@ -4,8 +4,8 @@ import { V4PAGES, V4PAGES_HEAD } from "@/lib/flags/v4pages";
 // The head script as it ships (app/layout.tsx renders it), run against a fake tab.
 const js = V4PAGES_HEAD;
 
-function run(search: string, v4home: boolean, stored: Record<string, string> = {}) {
-  const dataset: Record<string, string> = v4home ? { mtscroll: "" } : {};
+function run(search: string, stored: Record<string, string> = {}) {
+  const dataset: Record<string, string> = {};
   const sessionStorage = {
     getItem: (k: string) => (k in stored ? stored[k] : null),
     setItem: (k: string, v: string) => void (stored[k] = v),
@@ -18,24 +18,20 @@ test("the script and lib/flags/v4pages.ts list the same keys", () => {
   expect(js).toContain(`all="${V4PAGES}"`);
 });
 
-test("without the V4 home no trial is on", () => {
-  expect(run("", false)).toBeUndefined();
+test("every key is on when the tab has no choice of its own", () => {
+  expect(run("")).toBe(V4PAGES);
 });
 
-test("follows the V4 home when the tab has no choice of its own", () => {
-  expect(run("", true)).toBe(V4PAGES);
-});
-
-test("?v4pages=0 keeps the inner pages off under the V4 home, and stays off for the tab", () => {
+test("?v4pages=0 keeps the inner pages off, and stays off for the tab", () => {
   const stored: Record<string, string> = {};
-  expect(run("?v4pages=0", true, stored)).toBeUndefined();
-  expect(run("", true, stored)).toBeUndefined();
+  expect(run("?v4pages=0", stored)).toBeUndefined();
+  expect(run("", stored)).toBeUndefined();
 });
 
-test("a key list wins over the V4 home", () => {
-  expect(run("?v4pages=snd", true)).toBe("snd");
+test("a key list wins", () => {
+  expect(run("?v4pages=snd")).toBe("snd");
 });
 
-test("?v4pages alone still turns every key on", () => {
-  expect(run("?v4pages", false)).toBe(V4PAGES);
+test("?v4pages alone turns every key on", () => {
+  expect(run("?v4pages")).toBe(V4PAGES);
 });
