@@ -66,7 +66,7 @@ for (const list of [
       collected.add(h);
   }
 }
-for (const [, name] of readFileSync("lib/work-data.ts", "utf8").matchAll(
+for (const [, name] of readFileSync("lib/work/work-data.ts", "utf8").matchAll(
   /"name": "@([A-Za-z0-9._]{1,30})"/g,
 )) {
   if (IG.test(name.toLowerCase())) collected.add(name.toLowerCase());
