@@ -24,8 +24,7 @@ const HERO_FULL = {
 
 /* ── the opening ──────────────────────────────────────────────────
  * The splash is decided by the inline script in `layout.tsx` before the
- * first paint (a first visit, not admin, no reduced motion, unless
- * `?v3motion=0`) and played by `split-splash.ts` on the homepage and
+ * first paint (a first visit, not admin, no reduced motion) and played by `split-splash.ts` on the homepage and
  * `burst-splash.ts` elsewhere, both run as the document is read. The
  * stylesheet keeps this layer hidden unless that script has set
  * `data-intro`, so a visitor with no JavaScript is never shut behind a

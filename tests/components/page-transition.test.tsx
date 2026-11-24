@@ -24,8 +24,7 @@ describe("PageTransition", () => {
     expect(screen.getByRole("heading", { name: "Page" })).toBeTruthy();
   });
 
-  it("marks a press into another page when V3 motion is on", () => {
-    document.documentElement.setAttribute("data-v3motion", "");
+  it("marks a press into another page", () => {
     render(
       <PageTransition>
         <a href="/portfolio/x" onClick={(e) => e.preventDefault()}>
@@ -35,14 +34,12 @@ describe("PageTransition", () => {
     );
     fireEvent.click(screen.getByRole("link", { name: "Open" }));
     expect(document.documentElement.dataset.nav).toBe("in");
-    document.documentElement.removeAttribute("data-v3motion");
     delete document.documentElement.dataset.nav;
   });
 
   it("Back from the Cover art viewer to the home holds a copy of the viewer until the home lands, then cuts, with no view transition", async () => {
     vi.useFakeTimers();
     const root = document.documentElement;
-    root.setAttribute("data-v3motion", "");
     const vt = vi.fn();
     Object.assign(document, { startViewTransition: vt });
     const viewer = document.createElement("div");
@@ -75,14 +72,12 @@ describe("PageTransition", () => {
     viewer.remove();
     vi.useRealTimers();
     Reflect.deleteProperty(document, "startViewTransition");
-    root.removeAttribute("data-v3motion");
     nav.path = "/";
   });
 
   it("a held Back lands once what it waits for is done, or after 300ms", async () => {
     vi.useFakeTimers();
     const root = document.documentElement;
-    root.setAttribute("data-v3motion", "");
     let done = 0;
     Object.assign(document, {
       startViewTransition: (cb: () => Promise<void>) => (cb().then(() => done++), { finished: new Promise(() => {}) }),
@@ -104,7 +99,6 @@ describe("PageTransition", () => {
     r.unmount();
     vi.useRealTimers();
     Reflect.deleteProperty(document, "startViewTransition");
-    root.removeAttribute("data-v3motion");
     delete root.dataset.nav;
   });
 });

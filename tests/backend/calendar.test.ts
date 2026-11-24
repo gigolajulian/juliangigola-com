@@ -16,7 +16,7 @@ const { GET, POST } = await import("@/app/api/calendar/route");
 const SECRET = JSON.stringify({ client_id: "a", client_secret: "b", refresh_token: "c" });
 const KEY = "k";
 const req = (method: string, body?: unknown, query = "") =>
-  new Request(`https://juliangigola.com/api/calendar${query}`, { method, headers: { "x-inbox-key": KEY }, body: body ? JSON.stringify(body) : undefined });
+  new Request(`https://juliangigola.com/api/calendar${query}`, { method, headers: { "x-admin-key": KEY }, body: body ? JSON.stringify(body) : undefined });
 
 type Call = { url: string; method: string; body?: { [k: string]: unknown } };
 let kv: FakeKV;

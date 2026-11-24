@@ -4,7 +4,7 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { btn, primary } from "@/components/leads/shared";
 
-/** The inbox key, pasted once per device. On the iPhone the installed app keeps
+/** The admin key, pasted once per device. On the iPhone the installed app keeps
     its own storage apart from Safari, so it asks once there too. A password
     field, so a password manager can fill it. */
 export function SignIn({ onKey, wrong }: { onKey: (k: string) => void; wrong: boolean }) {

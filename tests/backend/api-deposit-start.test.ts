@@ -24,7 +24,7 @@ beforeEach(() => {
   allowed = true;
   intents = [];
   // Since #767 an open time is read from hello@'s Google Calendar.
-  ctx.env = { INBOX: new FakeKV(), DEPOSIT_LIMIT: { limit: async () => ({ success: allowed }) }, STRIPE_SECRET_KEY: "sk_test_x", GCAL_OAUTH: JSON.stringify({ client_id: "a", client_secret: "b", refresh_token: "c" }) };
+  ctx.env = { INBOX: new FakeKV(), PUBLIC_WRITE_LIMIT: { limit: async () => ({ success: allowed }) }, STRIPE_SECRET_KEY: "sk_test_x", GCAL_OAUTH: JSON.stringify({ client_id: "a", client_secret: "b", refresh_token: "c" }) };
   vi.stubGlobal("fetch", async (url: string, init?: RequestInit) => {
     if (url.includes("oauth2")) return reply({ access_token: "t", expires_in: 3600 });
     if (url.includes("/freeBusy")) return reply({ calendars: { primary: { busy: [] } } });

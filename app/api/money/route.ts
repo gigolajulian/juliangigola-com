@@ -7,7 +7,7 @@ import { json } from "@/lib/http";
  * The Stripe balance and its transactions.
  * Read-only: the balance (available and on the
  * way) and the latest balance transactions, 25 a page, with who paid when
- * Stripe knows. Same gate as /api/inbox. Nothing here can move money.
+ * Stripe knows. Behind the /admin gate. Nothing here can move money.
  * ─────────────────────────────────────────────────────────────── */
 
 export const dynamic = "force-dynamic";

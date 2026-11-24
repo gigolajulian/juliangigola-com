@@ -15,7 +15,6 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  delete root.dataset.v3motion;
   delete root.dataset.mtLate;
 });
 
@@ -44,21 +43,12 @@ describe("returning: the short intro for a browser that saw it in the last 30 da
 });
 
 describe("shouldPlay: whether the intro runs on this load", () => {
-  beforeEach(() => {
-    root.dataset.v3motion = "";
-  });
-
   it("plays by default", () => {
     expect(shouldPlay()).toBe(true);
   });
 
   it("?intro=0 turns it off", () => {
     at("?intro=0");
-    expect(shouldPlay()).toBe(false);
-  });
-
-  it("does not play without the v3 motion flag", () => {
-    delete root.dataset.v3motion;
     expect(shouldPlay()).toBe(false);
   });
 

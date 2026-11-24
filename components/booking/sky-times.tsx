@@ -2,6 +2,7 @@ import * as React from "react";
 import { clockLabel } from "@/components/booking/flow";
 import { clock, minutesOf } from "@/components/booking/time-picker-parts";
 import { PARTS, pacific, partOf, sunHint, tone, weatherAt, type Hourly } from "@/lib/booking/sky";
+import { useSkyTimesIn } from "@/components/booking/sky-motion";
 
 /* The day's open times in the hour's light (?sky, lib/booking/sky.ts), in place of the swipe strip.
    Week view: one time per row, where it sits against the sun on the right. Month view: a ruler, the
@@ -14,6 +15,8 @@ export function SkyTimes({ times, picked, length, ruler: month, choose }: { time
   const groups = PARTS.map((p, k) => ({ name: away ? `${p.name} in San Jose` : p.name, list: times.filter((x) => pt(x) === k) })).filter((g) => g.list.length);
   // past a dozen times (the 30 minute calls) a ruler's columns get too narrow to read or tap: rows instead
   const ruler = month && times.length <= 12;
+  const box = React.useRef<HTMLDivElement>(null);
+  useSkyTimesIn(box, times[0]?.slice(0, 10) ?? "");
   const slot = (x: string, i: number) => {
     const m = minutesOf(x), ms = Date.parse(x), t = tone(ms);
     const [h, a] = clock(m);
@@ -37,7 +40,7 @@ export function SkyTimes({ times, picked, length, ruler: month, choose }: { time
   };
   if (ruler) {
     return (
-      <div className="sky-ruler lbl" style={{ "--n": times.length } as React.CSSProperties}>
+      <div ref={box} className="sky-ruler lbl" style={{ "--n": times.length } as React.CSSProperties}>
         {times.map(slot)}
         {groups.map((g) => <span key={g.name} className="rl" style={{ gridColumn: `span ${g.list.length}` }}>{g.name}</span>)}
       </div>
@@ -45,7 +48,7 @@ export function SkyTimes({ times, picked, length, ruler: month, choose }: { time
   }
   let i = 0;
   return (
-    <div className="sky-rows lbl">
+    <div ref={box} className="sky-rows lbl">
       {groups.map((g) => (
         <div key={g.name} role="group" aria-label={g.name}>
           <p className="grp mute">{g.name}</p>

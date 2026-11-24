@@ -56,7 +56,7 @@ describe("a model's zip", () => {
 
 describe("publishing a final with its model", () => {
   const put = (q: string) =>
-    PUT(new Request(`https://juliangigola.com/api/proof?token=${ID}&file=x.jpg&w=2&h=3&final=1&${q}`, { method: "PUT", body: "xy", headers: { "x-inbox-key": KEY, "content-type": "image/jpeg", "content-length": "2" }, duplex: "half" } as RequestInit));
+    PUT(new Request(`https://juliangigola.com/api/proof?token=${ID}&file=x.jpg&w=2&h=3&final=1&${q}`, { method: "PUT", body: "xy", headers: { "x-admin-key": KEY, "content-type": "image/jpeg", "content-length": "2" }, duplex: "half" } as RequestInit));
 
   it("keeps the collection name as the label and five stars, and drops a label past 40 characters", async () => {
     ctx.env = { ...env, PROOFS: { put: async (_k: string, b: ReadableStream) => void (await new Response(b).arrayBuffer()), get: async () => null, delete: async () => {} }, IMAGES: { input: () => { throw new Error("off"); } } };

@@ -18,7 +18,7 @@ let kv: FakeKV;
 const seal = async () => (await sealer(LEADS_KEY))!;
 beforeEach(async () => {
   kv = new FakeKV();
-  ctx.env = { INBOX: kv, LEADS_KEY, DEPOSIT_LIMIT: { limit: async () => ({ success: true }) } };
+  ctx.env = { INBOX: kv, LEADS_KEY, PUBLIC_WRITE_LIMIT: { limit: async () => ({ success: true }) } };
   const p = { token: TOKEN, name: "Test", included: 2, price: 15, days: 14, createdAt: new Date().toISOString(), frames: ["a", "b", "c"].map((id) => ({ id, file: `${id}.jpg`, w: 1, h: 1 })), selects: [], notes: {}, views: 0 };
   await writeProof(kv as never, await seal(), p as Proof);
 });

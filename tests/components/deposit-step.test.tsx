@@ -19,7 +19,6 @@ const body: DepositBody = {
   name: "Ana",
   email: "ana@example.com",
   phone: "+14085550100",
-  engine: "own",
 };
 const rows: [string, string][] = [
   ["Session", "Portraits"],

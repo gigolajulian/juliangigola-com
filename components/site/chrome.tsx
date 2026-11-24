@@ -14,10 +14,10 @@ import { noSubscribe, sessionGet, sessionSet } from "@/lib/utils";
 
 
 /* Motion that is not in the master (the splash, the page zoom, the pointer
-   mark, tilt, glass light, fades) runs by default and stays off when `?v3motion=0`
-   turned it off for the tab (`app/layout.tsx` sets `data-v3motion`). */
+   mark, tilt, glass light, fades): on the client only, so the server and the
+   first paint render the fallback. */
 export function MotionGate({ children, fallback = null }: { children: React.ReactNode; fallback?: React.ReactNode }) {
-  const on = React.useSyncExternalStore(noSubscribe, () => document.documentElement.hasAttribute("data-v3motion"), () => false);
+  const on = React.useSyncExternalStore(noSubscribe, () => true, () => false);
   return <>{on ? children : fallback}</>;
 }
 
@@ -146,7 +146,7 @@ function HeaderBar() {
   }, [tuck]);
   // The v4 home has no cover to wait for, the bar is there from the start.
   const show = !tuck;
-  // The header: ground off at the top, white or black words (navfx, `?navfx=0` off).
+  // The header: ground off at the top, white or black words (navfx.css).
   useNavInk(hdr, path);
   const [menu, setMenu] = React.useState(false);
   /* A route change closes it. */

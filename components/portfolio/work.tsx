@@ -119,11 +119,10 @@ export function WorkIndex({
   const leaveCanvas = React.useCallback(() => setCanvas(false), []);
   /* Grid, strip and color views, and the discipline chips: the covers on
      screen fly from where they were to where they land, new ones fade in
-     (GSAP Flip). Only while V3 motion is on: the default, `?v3motion=0` turns it off. */
+     (GSAP Flip). */
   const flip = React.useRef<ReturnType<typeof FlipT.getState> | null>(null);
   const Flip = React.useRef<typeof FlipT | null>(null);
   React.useEffect(() => {
-    if (!document.documentElement.hasAttribute("data-v3motion")) return;
     void Promise.all([import("gsap"), import("gsap/Flip")]).then(([g, f]) => { g.gsap.registerPlugin(f.Flip); Flip.current = f.Flip; });
   }, []);
   const flipped = (set: () => void) => {

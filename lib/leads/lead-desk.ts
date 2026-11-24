@@ -10,7 +10,7 @@ import { isLate, myMove, paperDue, quoteNudge, renewDue, type Lead, type LeadPat
 
 export type Filter = "today" | "traffic" | "seo" | "site" | "device" | "needs" | "open" | "upcoming" | Stage | "snoozed" | "archived" | "trash" | "more" | "new" | "stats" | "money" | "templates" | "hours" | "proofs" | "licences";
 
-/** The inbox key if one was pasted, else the /admin GitHub token. */
+/** The admin key if one was pasted, else the /admin GitHub token. */
 export const authed = () => credentials(window.localStorage.getItem(KEY_STORE) ?? "");
 
 /** A failed admin request, with the status the route answered. */
@@ -41,9 +41,9 @@ export async function adminCall<T = Record<string, unknown>>(path: string, init:
 
 /** The desk's three layouts, by window width. */
 export type Size = "phone" | "mid" | "wide";
-export type Call = <T = Record<string, unknown>>(init?: RequestInit & { query?: string }) => Promise<T>;
-/** /api/inbox, with the query string beside the request. */
-export const inboxCall: Call = ({ query = "", ...init } = {}) => adminCall(`/api/inbox${query}`, init);
+/** A request to the lead desk's routes: `path` is under /api/leads ("" the leads themselves, "/templates", "/log?id=..."). */
+export type Call = <T = Record<string, unknown>>(init?: RequestInit & { path?: string }) => Promise<T>;
+export const deskCall: Call = ({ path = "", ...init } = {}) => adminCall(`/api/leads${path}`, init);
 
 /** A change to the open lead; answers with the lead as stored. */
 export type Patch = (b: LeadPatch) => Promise<Lead>;

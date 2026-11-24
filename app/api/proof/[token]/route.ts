@@ -38,7 +38,7 @@ async function unlock(token: string, request: Request, password: unknown) {
   if (!p || (why && why !== "locked")) return json({ error: why === "offline" ? "This gallery is offline." : "This gallery closed." }, 404);
   if (!p.pass) return json({ ok: true });
   // Its own key prefix: wrong passwords never use up the pay attempts on the same limiter.
-  if (!(await env.DEPOSIT_LIMIT.limit({ key: `pass:${request.headers.get("cf-connecting-ip") ?? "unknown"}` })).success) return json({ error: "Too many tries. Wait a minute." }, 429);
+  if (!(await env.PUBLIC_WRITE_LIMIT.limit({ key: `pass:${request.headers.get("cf-connecting-ip") ?? "unknown"}` })).success) return json({ error: "Too many tries. Wait a minute." }, 429);
   if (typeof password !== "string" || password.length > 200 || !(await checkPass(p.pass, password))) return json({ error: "That password is not right." }, 403);
   const res = json({ ok: true });
   res.headers.append("set-cookie", `${passCookie(p)}=${await passValue(p, env.LEADS_KEY!)}; Path=/; Max-Age=${60 * 864e2}; HttpOnly; Secure; SameSite=Lax`);
@@ -110,7 +110,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
     return json({ picks: g.p.submittedAt ? g.p.selects : (next.viewers?.[viewerKey(b.email)]?.picks ?? []) });
   }
 
-  if (!(await g.env.DEPOSIT_LIMIT.limit({ key: `picks:${request.headers.get("cf-connecting-ip") ?? "unknown"}` })).success) return json({ error: "Too many tries. Wait a minute." }, 429);
+  if (!(await g.env.PUBLIC_WRITE_LIMIT.limit({ key: `picks:${request.headers.get("cf-connecting-ip") ?? "unknown"}` })).success) return json({ error: "Too many tries. Wait a minute." }, 429);
   if (g.p.submittedAt) return json({ done: true, ...publicView(g.p) });
   const key = g.env.STRIPE_SECRET_KEY;
 

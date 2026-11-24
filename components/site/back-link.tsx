@@ -28,6 +28,10 @@ const cameFromSite = () => {
   return at > 0 || (history.length > 1 && document.referrer.startsWith(location.origin + "/"));
 };
 
+let popAt = 0;
+/** When the last Back or Forward was, as NavMemo heard it. */
+export const lastPopAt = () => popAt;
+
 /** Mounted once in the root layout: follows client navigations. */
 export function NavMemo() {
   const path = usePathname();
@@ -38,7 +42,10 @@ export function NavMemo() {
   }, [path]);
   React.useEffect(() => {
     // Back or Forward to another page; a hash or query step on the same page is not a move.
-    const pop = () => void (popped = location.pathname !== pages[at]);
+    const pop = () => {
+      popAt = Date.now();
+      popped = location.pathname !== pages[at];
+    };
     addEventListener("popstate", pop);
     return () => removeEventListener("popstate", pop);
   }, []);

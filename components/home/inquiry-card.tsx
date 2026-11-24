@@ -7,7 +7,6 @@ import { Dialog } from "radix-ui";
 import { Check, Failed, Hidden, NEED_MSG, checkYou, first, useEnquiry } from "@/components/enquiry/flow";
 import { CHIP_TYPE, QUOTE_OPTS, type QuoteOpt } from "@/lib/home/data";
 import type { InquiryMode } from "./ctx";
-import { touchParityOn } from "./motion/touch-parity";
 
 /* Spec 3.11: the quick note over a dim layer (a bottom sheet on phones),
    posted through the site's enquiry action (`useEnquiry`, the same one
@@ -135,7 +134,7 @@ function Handle({ onClose }: { onClose: () => void }) {
       className="mt-handle"
       aria-hidden
       onPointerDown={(e) => {
-        if (!touchParityOn("sheet") || !matchMedia("(max-width: 599px)").matches) return;
+        if (!matchMedia("(max-width: 599px)").matches) return;
         e.currentTarget.setPointerCapture(e.pointerId);
         drag.current = { y: e.clientY, t: performance.now() };
         const c = card(e);

@@ -8,8 +8,9 @@ import { errorsOn, open, RATIOS } from "./ratios";
    keeps its own bar while it is up there, so book and quote can carry it at once.
    Scrolled by script, not the wheel: Lenis would ease a wheel.
    On a fine pointer a held row glides to its nearest item once the scroll stops
-   (motion/rows.ts, snap), so the --p check turns that off with ?mtsnap=0 to read
-   --p at the exact scroll it set. */
+   (motion/rows.ts, snap), and --p eases toward the scroll, so the --p check waits
+   for --p to match the hold's progress where the scroll came to rest. The two
+   ends are resting places of their own, so the snap leaves them at 0 and 1. */
 
 const at = (name: string) => RATIOS.find((r) => r.name === name)!;
 const to = (page: Page, y: number) => page.evaluate((top) => scrollTo({ top, behavior: "instant" }), y);
@@ -40,17 +41,21 @@ async function home(page: Page, q = "") {
 test("laptop: a held section's --p runs 0 to 1 through its hold, and no section takes the bar", async ({ browser, browserName }) => {
   const { ctx, page } = await open(browser, browserName, at("laptop"));
   const errors = errorsOn(page);
-  await home(page, "&mtsnap=0");
+  await home(page);
   await expect(page.locator("html[data-mt-held]")).toBeAttached();
 
   const covers = page.locator('[data-mt="covers"]');
   await expect(covers).toHaveAttribute("data-hold");
-  const p = () => covers.evaluate((el) => parseFloat(el.style.getPropertyValue("--p")));
   const { top, h, vh } = await boxOf(page, '[data-mt="covers"]');
   expect(h, "the hold makes the section taller than the screen").toBeGreaterThan(vh);
-  for (const [y, want] of [[top, 0], [top + (h - vh) / 2, 0.5], [top + h - vh, 1]] as const) {
+  /** --p, and the hold's progress at the scroll as it is now. */
+  const read = () =>
+    covers.evaluate((el, [t, run]) => ({ p: parseFloat(el.style.getPropertyValue("--p")), at: Math.min(1, Math.max(0, (scrollY - t) / run)) }), [top, h - vh] as const);
+  // the middle last: the snap glides from there to an item, and a jump made mid-glide is taken back by the glide
+  for (const [y, want] of [[top, 0], [top + h - vh, 1], [top + (h - vh) / 2, null]] as const) {
     await to(page, y);
-    await expect.poll(p, { message: `--p at ${want}` }).toBeCloseTo(want, 1);
+    await expect.poll(async () => { const r = await read(); return Math.abs(r.p - r.at); }, { message: `--p follows the scroll from ${Math.round(y)}` }).toBeLessThan(0.05);
+    if (want !== null) expect((await read()).p, `--p at ${want}`).toBeCloseTo(want, 1);
   }
 
   for (const name of ["book", "quote"]) {

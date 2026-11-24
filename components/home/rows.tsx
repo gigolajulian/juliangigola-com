@@ -13,7 +13,6 @@ import { holdEase, holdUnease } from "@/lib/motion/hold-ease";
 import { clamp, progress } from "./motion/engine";
 import { COVER_KEYS, COVER_PRESS, FILM_DRESS, type HomeFilm } from "@/lib/home/data";
 import { pad } from "@/lib/utils";
-import { qflag } from "@/lib/flags/query";
 
 /** A home cover opens on the Cover art page, in that page's viewer (`?cover=`, components/cover/cover-art-gallery.tsx). */
 export const coverHref = (slug: string) => `${projectHref("coverart")}?cover=${encodeURIComponent(slug)}`;
@@ -146,8 +145,8 @@ export function HomeFilms({ films }: { films: HomeFilm[] }) {
       if (mq.matches && document.documentElement.hasAttribute("data-mt-held")) {
         const r = sec.getBoundingClientRect();
         const p = Math.min(0.9999, progress(r.top, r.height, innerHeight, true));
-        // the hold eases in and out like Cover art's, so the first and last film take more of the scroll (?mtsnap=0: even shares)
-        return setCur(Math.floor((qflag("mtsnap", "0") ? p : holdEase(p)) * items.length));
+        // the hold eases in and out like Cover art's, so the first and last film take more of the scroll
+        return setCur(Math.floor(holdEase(p) * items.length));
       }
       const a = items[0].getBoundingClientRect(), b = items[1].getBoundingClientRect();
       const at = mq.matches ? (innerHeight / 2 - a.top - a.height / 2) / (b.top - a.top) : el.scrollLeft / (b.left - a.left);
@@ -187,7 +186,7 @@ export function HomeFilms({ films }: { films: HomeFilm[] }) {
           // a film taking keyboard focus before the block is held: bring the stage up, so the film and its focus mark are whole on screen
           const top = e.currentTarget.getBoundingClientRect().top;
           // straight to the first film's resting place in the hold, so the snap (motion/rows.ts) has nothing left to move (MAC, #1209)
-          const sec = e.currentTarget.parentElement!, rest = qflag("mtsnap", "0") || !media("fine").matches ? 0 : holdUnease(0.5 / films.length) * (sec.offsetHeight - innerHeight);
+          const sec = e.currentTarget.parentElement!, rest = !media("fine").matches ? 0 : holdUnease(0.5 / films.length) * (sec.offsetHeight - innerHeight);
           if (top > 0 && document.documentElement.hasAttribute("data-mt-held") && (e.target as Element).matches(".mt-film:focus-visible")) scrollBy({ top: top + rest });
         }}
       >

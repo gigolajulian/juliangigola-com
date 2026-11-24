@@ -8,6 +8,8 @@ import { AdminCredits } from "@/components/admin/admin-credits";
 import type { AdminProject } from "@/components/admin/admin-projects";
 import type { Copy, Credit } from "@/lib/work/work-types";
 import { cn } from "@/lib/utils";
+import type { Overrides } from "@/components/admin/admin-editor-props";
+import type { SetOverride } from "@/components/admin/editor/draft";
 
 /* ── the page, editable ───────────────────────────────────────────
  * A project drawn the way /work/<slug> draws it — the title, the meta
@@ -28,33 +30,29 @@ type Dims = { width: number; height: number; color?: string };
 export function AdminPage({
   project,
   disciplines,
-  filedAs,
-  onRecategorise,
-  frames,
+  overrides,
+  onOverride,
   uploads,
-  onReframe,
   onUpload,
-  credits,
-  onCredits,
-  copy,
-  onCopy,
   onClose,
 }: {
   project: AdminProject;
   disciplines: { slug: string; name: string; group: string }[];
-  filedAs: string;
-  onRecategorise: (categorySlug: string) => void;
-  frames: FrameRef[] | null;
+  /** The draft's per-project overrides; this page reads and edits its own project's entries. */
+  overrides: Overrides;
+  onOverride: SetOverride;
   uploads: Record<string, PendingUpload>;
-  onReframe: (next: FrameRef[] | null) => void;
   onUpload: (added: PendingUpload[]) => void;
-  credits: Credit[];
-  onCredits: (next: Credit[] | null) => void;
-  /** The rewritten title and intent, or null while they match what is published. */
-  copy: Copy | null;
-  onCopy: (next: Copy | null) => void;
   onClose: () => void;
 }) {
+  const filedAs = overrides.categories[project.slug] ?? project.categorySlug;
+  const frames = overrides.frames[project.slug] ?? null;
+  const credits = overrides.credits[project.slug] ?? project.credits;
+  /** The rewritten title and intent, or null while they match what is published. */
+  const copy = overrides.copy[project.slug] ?? null;
+  const onReframe = (next: FrameRef[] | null) => onOverride("frames", project.slug, next);
+  const onCredits = (next: Credit[] | null) => onOverride("credits", project.slug, next);
+  const onCopy = (next: Copy | null) => onOverride("copy", project.slug, next);
   const seq = useSequence({
     slug: project.slug,
     original: project.images,
@@ -228,7 +226,7 @@ export function AdminPage({
                   the list row has, dressed as the value it replaces. */}
               <select
                 value={filedAs}
-                onChange={(e) => onRecategorise(e.target.value)}
+                onChange={(e) => onOverride("categories", project.slug, e.target.value)}
                 aria-label="Category"
                 className="-ml-1 cursor-pointer border-b border-border bg-transparent px-1 py-0.5 text-sm text-foreground outline-none focus-visible:border-foreground"
               >

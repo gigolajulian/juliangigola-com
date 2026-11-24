@@ -4,6 +4,21 @@ Dated decisions about how the site is built, and why. Newest first. Code
 comments say what the code does; who asked for a change, when, and what
 it replaced belongs here.
 
+## 2026-11-24: Settled rollback flags removed
+
+Julian approved dropping the query flags whose new behavior had shipped:
+`?mtpin=0`, `?mtsnap=0` and `?mtsnap=near`, `?preload=0` (the splash's
+preload hold and the portfolio cover preload), `?gw=0`, `?goo=0`,
+`?v3motion=0`, `?navfx=0`, `?blur=0`, `?sb=0` and `?sb=1`, `?vt=full`,
+`?idle=0` and `?mttp`. Each section now has one code path. The head script
+sets `data-v3motion` and `data-navfx` on every visit; they stay as the
+mark that scripts run, so a visitor with no JavaScript keeps the static
+styles. The dated entries in `docs/mt-decisions.md` that name the flags are
+history. Flags still read on purpose: `?intro`, `?splash`, `?loader`,
+`?debug`, `?navdbg`, `?lerp`, `?v4pages` (a trial, not a rollback) and
+`?proofwall=0` (the plain gate is also what the server renders before the
+wall can measure the window).
+
 ## 2026-11-20: Provenance out of the code comments
 
 Code comments state the rule in the present tense. Who asked, when, the

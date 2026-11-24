@@ -6,7 +6,7 @@ import { NAME_INK, NAME_W } from "@/lib/email/email-logo";
 import { useDialKitStyles } from "@/lib/dev/dialkit-styles";
 import { sleeveTilt } from "@/components/cover/sleeve-tilt";
 import { JG_COVER, mountCover } from "@/components/splash/jg-cover";
-import { inkGround, inkWord, navfx } from "@/components/site/nav-ink";
+import { inkGround, inkWord } from "@/components/site/nav-ink";
 import * as coverSound from "@/components/cover/cover-sound";
 import SOUND from "@/lib/work/cover-art-sound.json";
 
@@ -19,7 +19,6 @@ afterEach(() => {
   vi.unstubAllGlobals();
   vi.unstubAllEnvs();
   vi.useRealTimers();
-  delete document.documentElement.dataset.navfx;
   document.getElementById("jg-cover")?.remove();
   sessionStorage.clear();
   history.replaceState(null, "", "/");
@@ -136,12 +135,6 @@ describe("jg-cover", () => {
 });
 
 describe("nav-ink", () => {
-  it("reads the trial from the root's dataset", () => {
-    expect(navfx()).toBe(false);
-    document.documentElement.dataset.navfx = "";
-    expect(navfx()).toBe(true);
-  });
-
   it("inks a word white over a dark page and black over a light one", () => {
     // nothing painted under the word: the page's own colour decides
     document.elementsFromPoint = () => [];

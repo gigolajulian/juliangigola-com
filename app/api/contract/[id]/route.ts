@@ -21,7 +21,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   // Same words to the client either way; the status says it is broken, not missing.
   if (draft === undefined) return json({ error: "This contract is not available." }, 500);
   if (!draft || !draft.sentAt) return json({ error: "This contract is not available." }, 404);
-  if (!(await env.DEPOSIT_LIMIT.limit({ key: `sign:${request.headers.get("cf-connecting-ip") ?? "unknown"}` })).success) return json({ error: "Too many tries. Wait a minute." }, 429);
+  if (!(await env.PUBLIC_WRITE_LIMIT.limit({ key: `sign:${request.headers.get("cf-connecting-ip") ?? "unknown"}` })).success) return json({ error: "Too many tries. Wait a minute." }, 429);
   const b = (await bodyOf(request)) ?? {};
   const at = new Date().toISOString();
   const contract = await sign(draft, { name: b.name, email: b.email, agree: b.agree, seen: b.hash, mark: b.mark, typed: b.typed, ip: request.headers.get("cf-connecting-ip") ?? "", ua: request.headers.get("user-agent") ?? "" }, at);
