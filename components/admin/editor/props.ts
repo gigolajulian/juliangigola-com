@@ -1,14 +1,53 @@
 import type { SiteContent } from "@/lib/content";
-import type { AdminProject } from "@/components/admin/admin-projects";
 import type { PickerItem } from "@/components/admin/admin-picker";
 import type { Draft } from "@/lib/admin/publish";
 import type { TrashedProject } from "@/lib/work/added";
-import type { Bts } from "@/lib/work/work-types";
+import type { Bts, Credit } from "@/lib/work/work-types";
+
+/** A project as the editor lists it. */
+export type AdminProject = {
+  slug: string;
+  /** What it was harvested or added as: the key of a rename. */
+  origin: string;
+  name: string;
+  /** Display name of its discipline, for the row and the filter. */
+  category: string;
+  /** Its discipline's slug, for the refiling dropdown. */
+  categorySlug: string;
+  /**
+   * Every frame in the gallery, in order — paths only.
+   *
+   * Paths and not whole frames: 1,152 of these ship with the page, and the
+   * dimensions and mat colour would triple that to render thumbnails in a
+   * fixed box that needs neither. `lib/work/work.ts` reads the real numbers back
+   * out of the archive when the sequence is applied.
+   */
+  images: string[];
+  /**
+   * The same frames with their dimensions and mat colour, for the page
+   * view — which lays them out at the page's own sizes and shapes, and so
+   * needs both. It is the tripling the note above declined, accepted now
+   * that there is a view that draws the frames as frames. Admin only.
+   */
+  frames: { src: string; width: number; height: number; color: string }[];
+  cover: { src: string; width: number; height: number; color: string };
+  /** The paragraph under the meta row, when the project has one. */
+  intent: string | null;
+  /** The heading the page shows — `headline ?? name`, as published. */
+  title: string;
+  /** Added through this editor, so its files are ours to remove. */
+  added: boolean;
+  /** As the last build has them, so an override can be compared and undone. */
+  credits: Credit[];
+};
 
 /** The per-project overrides a build applies, one map per kind. */
 export type Overrides = Pick<Draft, "categories" | "frames" | "credits" | "copy" | "slugs">;
 
-/** What the editor is handed by `app/admin/page.tsx` (`admin-editor.tsx`). */
+/** The project list's other half of the draft: hidden and unlisted slugs, and BTS by slug. */
+export type ListDraft = { hidden: Set<string>; unlisted: Set<string>; bts: Record<string, Bts> };
+
+/** What the editor is handed by `app/admin/page.tsx` (`editor.tsx`). */
 export type AdminEditorProps = {
   /** The content as it was at build time — what the live site is serving. */
   initial: SiteContent;

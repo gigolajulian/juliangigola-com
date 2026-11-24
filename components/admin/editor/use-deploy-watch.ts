@@ -1,6 +1,6 @@
 import * as React from "react";
 
-/* The deploy after a publish, watched until it lands (`admin-editor.tsx`). */
+/* The deploy after a publish, watched until it lands (`editor.tsx`). */
 export function useDeployWatch() {
   /** The build the site was running at mount, from `/BUILD_ID` (a static asset Next emits); null where it
       cannot be read, as under `next dev`, so the indicator never claims live. A new id after a publish means it landed. */

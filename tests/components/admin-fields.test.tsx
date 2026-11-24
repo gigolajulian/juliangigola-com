@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { ContactFields, QuoteFields, SessionFields } from "@/components/admin/admin-fields";
+import { ContactFields, QuoteFields, SessionFields } from "@/components/admin/editor/fields";
 import { CONTENT, type SiteContent } from "@/lib/content";
 
-/* `components/admin/admin-fields.tsx`: the editor's text panels write the
+/* `components/admin/editor/fields.tsx`: the editor's text panels write the
    draft through `set`, in the draft's own shape. */
 
 const draft = (over: Partial<SiteContent> = {}): SiteContent => ({ ...CONTENT, ...over });

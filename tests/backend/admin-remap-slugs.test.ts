@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 // Relative imports: the coverage scanner resolves `@/` under src/, which this repo does not have.
-import { remapSlugs } from "../../components/admin/admin-remap-slugs";
+import { remapSlugs } from "../../components/admin/editor/remap-slugs";
 import type { Draft } from "../../lib/admin/publish";
 
 /* A rename carried through on publish: every slug-keyed override moves to

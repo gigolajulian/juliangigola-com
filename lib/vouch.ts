@@ -1,4 +1,4 @@
-import { REPO } from "@/lib/admin/admin-github";
+import { isGithubToken, REPO } from "@/lib/admin/admin-github";
 import { json } from "@/lib/http";
 import { sha256Hex } from "@/lib/utils";
 
@@ -12,8 +12,8 @@ import { sha256Hex } from "@/lib/utils";
  *
  * Two gates, one copy each, so a change to how the site trusts a request is
  * a change in one place:
- * - `isAdmin`: /admin routes (inbox, calendar, contract, money, proof, booking
- *   hours and a booking's admin actions, seo, traffic).
+ * - `isAdmin`: every /admin data route checks it, directly or through `gate()`
+ *   in `lib/leads/desk-route.ts`.
  *   The admin key (`x-admin-key`, checked against the `INBOX_KEY` secret) or a GitHub token that can push. `refuseAdmin` is
  *   the same gate as the 401 every one of those routes answers.
  * - `fromWorker`: the booking Worker calling the site (leads/gmail,
@@ -50,6 +50,7 @@ const ask = (token: string, path = "", init: RequestInit = {}) =>
   });
 
 async function vouch(token: string): Promise<boolean> {
+  if (!isGithubToken(token)) return false;
   const classic = CLASSIC.test(token);
   if (!classic && !FINE.test(token)) return false;
   const id = await sha256Hex(token);

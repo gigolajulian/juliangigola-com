@@ -1,4 +1,4 @@
-/* The editor's tabs, and which tab each field lives on (`admin-editor.tsx`). */
+/* The editor's tabs, and which tab each field lives on (`editor.tsx`). */
 
 /**
  * The tabs, in three groups: pages (a fixed set of fields, edited a few times

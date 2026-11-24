@@ -1,11 +1,11 @@
 import * as React from "react";
 import { Orb } from "@/components/effects/orb";
 import type { Status } from "@/lib/admin/publish";
-import { inputClass } from "@/components/admin/admin-fields";
+import { inputClass } from "@/components/admin/editor/fields";
 import { REPO } from "@/lib/admin/admin-github";
 import { cn } from "@/lib/utils";
 
-/* The token box and the status line under the editor (`admin-editor.tsx`). */
+/* The token box and the status line under the editor (`editor.tsx`). */
 
 export function Connect({
   token,
@@ -70,13 +70,14 @@ export function Connect({
         >
           {status.kind === "working" ? "Connecting…" : "Connect"}
         </button>
-        <StatusLine status={status} />
+        <PublishStatus status={status} />
       </form>
     </div>
   );
 }
 
-export function StatusLine({ status }: { status: Status }) {
+/** The editor's status line: connecting, publishing, and the link to watch the deploy once saved. */
+export function PublishStatus({ status }: { status: Status }) {
   if (status.kind === "idle") return null;
 
   return (

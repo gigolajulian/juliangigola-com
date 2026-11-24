@@ -14,21 +14,20 @@ import { AdminTraffic } from "@/components/admin/admin-traffic";
 import { AdminSeo } from "@/components/admin/admin-seo";
 import { AdminVideos } from "@/components/admin/admin-videos";
 import { loadRepo, publishDraft, type Draft, type Status } from "@/lib/admin/publish";
-import { ClientFields, ContactFields, CoverArtFields, HomeFields, QuoteFields, SessionFields } from "@/components/admin/admin-fields";
+import { ClientFields, ContactFields, CoverArtFields, HomeFields, QuoteFields, SessionFields } from "@/components/admin/editor/fields";
 import { type TrashedProject } from "@/lib/work/added";
 import { type PendingUpload } from "@/components/admin/admin-frames";
 import { CreditDesk } from "@/components/admin/admin-credits";
 import { sameJson } from "@/lib/admin/admin-payload";
 import { TOKEN_STORE } from "@/lib/admin/admin-github";
-import type { Bts } from "@/lib/work/work-types";
 import { byCodeUnit, cn } from "@/lib/utils";
-import { FIELD_TAB, TABS, type View } from "@/components/admin/admin-tabs";
-import { remapSlugs } from "@/components/admin/admin-remap-slugs";
-import { Connect, StatusLine } from "@/components/admin/admin-connect";
-import type { AdminEditorProps, Overrides } from "@/components/admin/admin-editor-props";
-import { useDeployWatch } from "@/components/admin/use-deploy-watch";
+import { FIELD_TAB, TABS, type View } from "@/components/admin/editor/tabs";
+import { remapSlugs } from "@/components/admin/editor/remap-slugs";
+import { Connect, PublishStatus } from "@/components/admin/editor/connect";
+import type { AdminEditorProps, ListDraft, Overrides } from "@/components/admin/editor/props";
+import { useDeployWatch } from "@/components/admin/editor/use-deploy-watch";
 
-import { changedSlugs, draftProjects, movedTabs, withProjectOverride, type Baseline, type SetOverride } from "@/components/admin/editor/draft";
+import { changedSlugs, draftProjects, movedTabs, withListDraft, withProjectOverride, type Baseline, type SetListDraft, type SetOverride } from "@/components/admin/editor/draft";
 import { useFoundField } from "@/components/admin/editor/use-found-field";
 import { useCreditDesk } from "@/components/admin/editor/use-credit-desk";
 import { EditorBar, FullSwitch } from "@/components/admin/editor/chrome";
@@ -126,12 +125,13 @@ export function AdminEditor({
     null,
   );
 
-  const [hidden, setHidden] = React.useState<Set<string>>(
-    () => new Set(initialHidden),
-  );
-  const [unlisted, setUnlisted] = React.useState<Set<string>>(
-    () => new Set(initialUnlisted),
-  );
+  /** Hidden and unlisted slugs and BTS, as one draft with one setter (`withListDraft`). */
+  const [listDraft, setListDraft] = React.useState<ListDraft>(() => ({
+    hidden: new Set(initialHidden),
+    unlisted: new Set(initialUnlisted),
+    bts: initialBts,
+  }));
+  const { hidden, unlisted, bts } = listDraft;
   const [trash, setTrash] = React.useState<TrashedProject[]>(initialTrash);
   /** The five per-project override maps, as one draft with one setter (`withProjectOverride`). */
   const [overrides, setOverrides] = React.useState<Overrides>(initialOverrides);
@@ -145,7 +145,6 @@ export function AdminEditor({
       one picture, however many shoots they are credited on. */
   const [avatars, setAvatars] =
     React.useState<Record<string, string>>(initialAvatars);
-  const [bts, setBts] = React.useState<Record<string, Bts>>(initialBts);
   /**
    * The project whose row is expanded, if any.
    *
@@ -264,6 +263,8 @@ export function AdminEditor({
 
   /** One project's override changed, from the project list or the page editor. */
   const override: SetOverride = (kind, slug, next) => setOverrides((o) => withProjectOverride(o, kind, slug, next, baseline.manifest));
+  /** One project's hidden, unlisted or BTS entry changed, from the project list. */
+  const listEdit: SetListDraft = (kind, slug, next) => setListDraft((d) => withListDraft(d, kind, slug, next));
   /** Photographs processed for a gallery, staged for this publish. */
   const stage = (added: PendingUpload[]) => setUploads((u) => ({ ...u, ...Object.fromEntries(added.map((a) => [a.path, a])) }));
 
@@ -387,13 +388,11 @@ export function AdminEditor({
     setDraft(r.content);
     if (!dirty) {
       const repo = r.repo;
-      setHidden(new Set(repo.hidden));
-      setUnlisted(new Set(repo.unlisted));
+      setListDraft({ hidden: new Set(repo.hidden), unlisted: new Set(repo.unlisted), bts: repo.bts });
       setOverrides({ categories: repo.categories, frames: repo.frames, credits: repo.credits, copy: repo.copy, slugs: repo.slugs });
       setOrder(repo.order);
       setCovers(repo.covers);
       setAvatars(repo.avatars);
-      setBts(repo.bts);
       setBaseline({ content: r.content, manifest: repo });
     } else {
       // The edits stay, and so does the baseline they are measured against
@@ -432,7 +431,7 @@ export function AdminEditor({
     /* And the draft takes back what was actually written, so the tidying
        is visible rather than hiding behind a diff that will not clear. */
     setOverrides((o) => ({ ...o, frames: written.frames, credits: written.credits, copy: written.copy, slugs: written.slugs }));
-    setBts(written.bts);
+    setListDraft((d) => ({ ...d, bts: written.bts }));
 
     // A fresh publish is not live yet by definition, whatever the last one
     // was, so the green is dropped before the wait begins.
@@ -656,10 +655,8 @@ export function AdminEditor({
                  one in an order the other has already changed is how you
                  stop trusting either. */
                 projects={orderedProjects}
-                hidden={hidden}
-                onHiddenChange={setHidden}
-                unlisted={unlisted}
-                onUnlistedChange={setUnlisted}
+                listDraft={listDraft}
+                onListDraft={listEdit}
                 changed={changed}
                 onRemoved={setTrash}
                 disciplines={categories}
@@ -667,17 +664,7 @@ export function AdminEditor({
                  override back rather than dropping it, so Undo never discards an earlier publish. */
                 overrides={overrides}
                 onOverride={override}
-                bts={bts}
                 publishedBts={baseline.manifest.bts}
-                onBts={(slug, next) =>
-                  setBts((b) => {
-                    const copy = { ...b };
-                    // Nothing left to say: no entry, rather than an empty one.
-                    if (!next.frames.length && !next.by) delete copy[slug];
-                    else copy[slug] = next;
-                    return copy;
-                  })
-                }
                 uploads={uploads}
                 onUpload={stage}
                 opened={opened}
@@ -706,7 +693,7 @@ export function AdminEditor({
 
           {/* One area at a time, so switching tabs is not a scroll and the
             widest column holds only the fields you came for. The panels are
-            top-level components (components/admin/admin-fields.tsx), so their type
+            top-level components (components/admin/editor/fields.tsx), so their type
             is stable across renders and the pickers inside keep their state. */}
           {!page && view === "home" ? <HomeFields draft={draft} set={set} releases={releases} releaseLimit={releaseLimit} slugs={slugs} unknownSlugs={unknownSlugs} projects={projects} hidden={hidden} heroChoices={heroChoices} /> : null}
           {!page && view === "clients" ? <ClientFields draft={draft} set={set} clients={clients} /> : null}
@@ -730,7 +717,7 @@ export function AdminEditor({
           <div className="sticky bottom-0 mt-12 flex flex-wrap items-center gap-4 border-t border-border bg-background py-6">
             {sha ? (
               <>
-                <StatusLine status={status} />
+                <PublishStatus status={status} />
                 <button
                   type="button"
                   onClick={() => {

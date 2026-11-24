@@ -6,7 +6,8 @@ vi.mock("@/lib/admin/admin-github", () => ({
   readFile: vi.fn(async () => null),
 }));
 
-import { AdminProjects, type AdminProject } from "@/components/admin/admin-projects";
+import { AdminProjects } from "@/components/admin/admin-projects";
+import type { AdminProject } from "@/components/admin/editor/props";
 
 const frame = { src: "/work/x/01.jpg", width: 100, height: 150, color: "#111" };
 const project = (slug: string, name: string): AdminProject => ({
@@ -27,15 +28,11 @@ const project = (slug: string, name: string): AdminProject => ({
 const props = (query = "") => ({
   token: "t",
   projects: [project("valgur", "VALGUR"), project("cyber", "CYBER1A")],
-  hidden: new Set<string>(),
-  onHiddenChange: vi.fn(),
-  unlisted: new Set<string>(),
-  onUnlistedChange: vi.fn(),
+  listDraft: { hidden: new Set<string>(), unlisted: new Set<string>(), bts: {} },
+  onListDraft: vi.fn(),
   changed: new Set<string>(),
   disciplines: [{ slug: "editorial", name: "Editorial", group: "Work" }],
-  bts: {},
   publishedBts: {},
-  onBts: vi.fn(),
   uploads: {},
   onUpload: vi.fn(),
   overrides: { categories: {}, frames: {}, credits: {}, copy: {}, slugs: {} },

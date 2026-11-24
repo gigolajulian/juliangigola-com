@@ -1,6 +1,8 @@
 "use client";
 
 import * as React from "react";
+import type { Status } from "@/lib/admin/publish";
+import { StatusLine } from "@/components/admin/status-line";
 import Image from "next/image";
 import { ADDED_PATH, type TrashedProject, type ManifestRead } from "@/lib/work/added";
 import { commitFiles, readFile } from "@/lib/admin/admin-github";
@@ -10,11 +12,9 @@ import { twinStats } from "@/lib/work/frame-twins";
 import { AdminCredits } from "@/components/admin/admin-credits";
 import { AdminBts } from "@/components/admin/admin-bts";
 import type { Bts } from "@/lib/work/work-types";
-import type { FrameRef } from "@/lib/work/added";
-import type { Credit } from "@/lib/work/work-types";
 import { cn, errorText } from "@/lib/utils";
-import type { Overrides } from "@/components/admin/admin-editor-props";
-import type { SetOverride } from "@/components/admin/editor/draft";
+import type { AdminProject, ListDraft, Overrides } from "@/components/admin/editor/props";
+import type { SetListDraft, SetOverride } from "@/components/admin/editor/draft";
 
 /* ── the project list ─────────────────────────────────────────────
  * Everything on the site, and what can be done to it.
@@ -38,63 +38,17 @@ import type { SetOverride } from "@/components/admin/editor/draft";
  * somewhere you can send somebody; a deleted one is not.
  * ─────────────────────────────────────────────────────────────── */
 
-export type AdminProject = {
-  slug: string;
-  /** What it was harvested or added as: the key of a rename. */
-  origin: string;
-  name: string;
-  /** Display name of its discipline, for the row and the filter. */
-  category: string;
-  /** Its discipline's slug, for the refiling dropdown. */
-  categorySlug: string;
-  /**
-   * Every frame in the gallery, in order — paths only.
-   *
-   * Paths and not whole frames: 1,152 of these ship with the page, and the
-   * dimensions and mat colour would triple that to render thumbnails in a
-   * fixed box that needs neither. `lib/work/work.ts` reads the real numbers back
-   * out of the archive when the sequence is applied.
-   */
-  images: string[];
-  /**
-   * The same frames with their dimensions and mat colour, for the page
-   * view — which lays them out at the page's own sizes and shapes, and so
-   * needs both. It is the tripling the note above declined, accepted now
-   * that there is a view that draws the frames as frames. Admin only.
-   */
-  frames: { src: string; width: number; height: number; color: string }[];
-  cover: { src: string; width: number; height: number; color: string };
-  /** The paragraph under the meta row, when the project has one. */
-  intent: string | null;
-  /** The heading the page shows — `headline ?? name`, as published. */
-  title: string;
-  /** Added through this editor, so its files are ours to remove. */
-  added: boolean;
-  /** As the last build has them, so an override can be compared and undone. */
-  credits: Credit[];
-};
-
-type Status =
-  | { kind: "idle" }
-  | { kind: "working"; message: string }
-  | { kind: "error"; message: string }
-  | { kind: "done"; message: string };
-
 export function AdminProjects({
   token,
   projects,
-  hidden,
-  onHiddenChange,
-  unlisted,
-  onUnlistedChange,
+  listDraft,
+  onListDraft,
   changed,
   onRemoved,
   disciplines,
   overrides,
   onOverride,
-  bts,
   publishedBts,
-  onBts,
   uploads,
   onUpload,
   opened,
@@ -105,12 +59,10 @@ export function AdminProjects({
 }: {
   token: string;
   projects: AdminProject[];
-  /** Slugs currently hidden, as the draft has them. */
-  hidden: Set<string>;
-  onHiddenChange: (next: Set<string>) => void;
-  /** Slugs off the listings but still paged, as the draft has them. */
-  unlisted: Set<string>;
-  onUnlistedChange: (next: Set<string>) => void;
+  /** The draft's hidden slugs, its unlisted ones (off the listings but still paged) and its BTS, slug to
+      `{ by, frames }`. `onListDraft` sets one project's entry; a BTS left empty drops it. */
+  listDraft: ListDraft;
+  onListDraft: SetListDraft;
   /** Slugs with unpublished edits, as the editor measures them. */
   changed: Set<string>;
   /** Handed the new bin contents after a removal, so the panel below updates. */
@@ -121,10 +73,8 @@ export function AdminProjects({
       copy and renamed addresses (original slug to current). Null to `onOverride` is back to what is published. */
   overrides: Overrides;
   onOverride: SetOverride;
-  /** Draft BTS, slug → `{ by, frames }`, and what the repo holds. */
-  bts: Record<string, Bts>;
+  /** BTS as the repo holds it. */
   publishedBts: Record<string, Bts>;
-  onBts: (slug: string, next: Bts) => void;
   /** Photographs staged for this publish, by repo path. */
   uploads: Record<string, PendingUpload>;
   onUpload: (added: PendingUpload[]) => void;
@@ -152,6 +102,7 @@ export function AdminProjects({
   onQuery: (next: string) => void;
 }) {
   const { slugs, categories: recategorised, frames: reframed, credits } = overrides;
+  const { hidden, unlisted, bts } = listDraft;
   const [status, setStatus] = React.useState<Status>({ kind: "idle" });
   const [confirming, setConfirming] = React.useState<string | null>(null);
   const [gone, setGone] = React.useState<Set<string>>(new Set());
@@ -225,18 +176,8 @@ export function AdminProjects({
             .includes(query.toLowerCase()))),
   );
 
-  const toggle = (
-    set: Set<string>,
-    slug: string,
-    emit: (next: Set<string>) => void,
-  ) => {
-    const next = new Set(set);
-    if (next.has(slug)) next.delete(slug);
-    else next.add(slug);
-    emit(next);
-  };
   const toggleUnlisted = (slug: string) =>
-    toggle(unlisted, slug, onUnlistedChange);
+    onListDraft("unlisted", slug, !unlisted.has(slug));
 
   /** The address a row answers at, as the draft has it. */
   const addressOf = (p: AdminProject) => slugs[p.origin] ?? p.slug;
@@ -259,7 +200,7 @@ export function AdminProjects({
   /** Delete, for a harvested project: unpublished, reversibly. */
   const toggleHidden = (slug: string) => {
     setConfirming(null);
-    toggle(hidden, slug, onHiddenChange);
+    onListDraft("hidden", slug, !hidden.has(slug));
   };
 
   /**
@@ -311,10 +252,10 @@ export function AdminProjects({
       });
 
       setGone((g) => new Set(g).add(slug));
-      onHiddenChange(new Set([...hidden].filter((s) => s !== slug)));
+      onListDraft("hidden", slug, false);
       onRemoved?.(parsed.trash);
       setStatus({
-        kind: "done",
+        kind: "saved",
         message: `${entry.name} moved to Recently deleted. Its photographs are kept for a week.`,
       });
     } catch (e) {
@@ -386,18 +327,7 @@ export function AdminProjects({
         })}
       </div>
 
-      {status.kind !== "idle" ? (
-        <p
-          className={cn(
-            "label mt-4",
-            status.kind === "error"
-              ? "text-destructive"
-              : "text-muted-foreground",
-          )}
-        >
-          {status.message}
-        </p>
-      ) : null}
+      <StatusLine status={status} className="mt-4" />
 
       <ul className="mt-6 border-t border-border">
         {visible.map((p) => {
@@ -647,7 +577,7 @@ export function AdminProjects({
                     published={publishedBts[p.slug]}
                     value={bts[p.slug]}
                     uploads={uploads}
-                    onChange={(next) => onBts(p.slug, next)}
+                    onChange={(next) => onListDraft("bts", p.slug, next)}
                     onUpload={onUpload}
                   />
                   <div className="border-t border-border bg-card/40 p-5">

@@ -6,7 +6,7 @@
 
 import * as React from "react";
 import { AdminPicker, type PickerItem } from "@/components/admin/admin-picker";
-import type { AdminProject } from "@/components/admin/admin-projects";
+import type { AdminProject } from "@/components/admin/editor/props";
 import type { SiteContent, Testimonial } from "@/lib/content";
 
 export type FieldsProps = {
