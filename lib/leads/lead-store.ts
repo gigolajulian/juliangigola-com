@@ -4,7 +4,19 @@ import { canonical } from "@/lib/seal";
 import { sealer, type Sealer } from "@/lib/seal";
 import { notify, pushFor } from "./lead-push";
 import { appendLog, forgetLog, newEvents } from "./activity-log";
-import { applyLeadEvent, LEAD_PREFIX, leadIdOf, leadStoreKey, leadSummary, trashDaysLeft, type Change, type Lead, type LeadSummary, type Person, type Sent } from "./leads";
+import {
+  applyLeadEvent,
+  LEAD_PREFIX,
+  leadIdOf,
+  leadStoreKey,
+  leadSummary,
+  trashDaysLeft,
+  type Change,
+  type Lead,
+  type LeadSummary,
+  type Person,
+  type Sent,
+} from "./leads";
 import { mailable } from "./lead-crm";
 import { everyKey, type InboxKV as KV } from "@/lib/kv";
 import { logged } from "@/lib/utils";
@@ -206,7 +218,8 @@ export async function dropProofOpens(kv: KV, s: Sealer, email: string, token: st
   const { id, lead } = await findLead(kv, s, email);
   const events = lead?.events.filter((e) => !(e.kind === "proofs" && e.ref === token));
   if (lead && events && events.length < lead.events.length) {
-    if (events.length || lead.notes || lead.remind || lead.invoices?.length || lead.deposit || lead.notion || lead.people?.length) await writeLead(kv, s, id, { ...lead, events });
+    if (events.length || lead.notes || lead.remind || lead.invoices?.length || lead.deposit || lead.notion || lead.people?.length)
+      await writeLead(kv, s, id, { ...lead, events });
     else await kv.delete(leadStoreKey(id));
   }
 }

@@ -58,7 +58,9 @@ beforeEach(() => {
     const method = init?.method ?? "GET";
     if (url.startsWith("https://api.stripe.com")) {
       stripeCalls.push({ url, form: new URLSearchParams(String(init?.body ?? "")) });
-      return Response.json(url.endsWith("/payment_intents") ? { id: PI, client_secret: `${PI}_secret_x` } : { id: "x", status: "succeeded" });
+      return Response.json(
+        url.endsWith("/payment_intents") ? { id: PI, client_secret: `${PI}_secret_x` } : { id: "x", status: "succeeded" },
+      );
     }
     if (url.includes("/freeBusy")) return Response.json({ calendars: { primary: { busy } } });
     if (method === "POST" && url.includes("/events")) {
@@ -74,26 +76,48 @@ beforeEach(() => {
   });
 });
 
-const body = (slug: string) => ({ slug, start: WHEN, timeZone: "America/Los_Angeles", name: "QA Test", email: "qa@example.com", phone: "+14085550100", where: "Studio", amount: 1 });
-const open = (slug: string) => start(new Request("https://juliangigola.com/api/deposit", { method: "POST", body: JSON.stringify(body(slug)) }));
+const body = (slug: string) => ({
+  slug,
+  start: WHEN,
+  timeZone: "America/Los_Angeles",
+  name: "QA Test",
+  email: "qa@example.com",
+  phone: "+14085550100",
+  where: "Studio",
+  amount: 1,
+});
+const open = (slug: string) =>
+  start(new Request("https://juliangigola.com/api/deposit", { method: "POST", body: JSON.stringify(body(slug)) }));
 
 /** Stripe's signed `payment_intent.succeeded` for the intent the site just made, at `cents`. */
 async function pay(slug: string, cents: number) {
   const metadata = { kind: "deposit", slug, start: WHEN, timeZone: "America/Los_Angeles", name: "QA Test", email: "qa@example.com" };
-  const raw = JSON.stringify({ type: "payment_intent.succeeded", data: { object: { id: PI, amount: cents, amount_received: cents, currency: "usd", metadata } } });
+  const raw = JSON.stringify({
+    type: "payment_intent.succeeded",
+    data: { object: { id: PI, amount: cents, amount_received: cents, currency: "usd", metadata } },
+  });
   const at = Math.floor(Date.now() / 1000);
   const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(WHSEC), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
-  const sig = [...new Uint8Array(await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(`${at}.${raw}`)))].map((b) => b.toString(16).padStart(2, "0")).join("");
-  return hook(new Request("https://juliangigola.com/api/stripe", { method: "POST", body: raw, headers: { "stripe-signature": `t=${at},v1=${sig}` } }));
+  const sig = [...new Uint8Array(await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(`${at}.${raw}`)))]
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+  return hook(
+    new Request("https://juliangigola.com/api/stripe", { method: "POST", body: raw, headers: { "stripe-signature": `t=${at},v1=${sig}` } }),
+  );
 }
 
 /** A change through the client's own link, a week ahead: refundable. */
 async function act(body: { action: "cancel" } | { action: "reschedule"; start: string }) {
   const [, id, t] = String(client.sent.at(-1)!.text).match(/\/booking\/(\w+)\?t=([\w.-]+)&do=cancel/)!;
-  return change(new Request(`https://juliangigola.com/api/booking/${id}`, { method: "POST", body: JSON.stringify({ t, ...body }) }), { params: Promise.resolve({ id }) });
+  return change(new Request(`https://juliangigola.com/api/booking/${id}`, { method: "POST", body: JSON.stringify({ t, ...body }) }), {
+    params: Promise.resolve({ id }),
+  });
 }
 const cancel = () => act({ action: "cancel" });
-const money = async () => (await leadOf(ctx.env.INBOX as FakeKV, "qa@example.com"))!.events.filter((e) => e.kind === "payment" || e.kind === "refund").map((e) => [e.kind, e.amount]);
+const money = async () =>
+  (await leadOf(ctx.env.INBOX as FakeKV, "qa@example.com"))!.events
+    .filter((e) => e.kind === "payment" || e.kind === "refund")
+    .map((e) => [e.kind, e.amount]);
 
 describe("the amount is the session's, set on the server", () => {
   it.each([
@@ -161,8 +185,13 @@ describe.each([
     const refund = stripeCalls.find((c) => c.url.endsWith("/refunds"))!;
     expect(refund.form.get("payment_intent")).toBe(PI);
     expect(refund.form.get("amount")).toBe(String(usd * 90));
-    expect(String(client.sent.at(-1)!.text)).toContain(`$${usd * 0.9} of your $${usd} deposit is refunded to your card. $${usd * 0.1} is kept as the booking fee.`);
-    expect(await money()).toEqual([["payment", usd], ["refund", usd * 0.9]]);
+    expect(String(client.sent.at(-1)!.text)).toContain(
+      `$${usd * 0.9} of your $${usd} deposit is refunded to your card. $${usd * 0.1} is kept as the booking fee.`,
+    );
+    expect(await money()).toEqual([
+      ["payment", usd],
+      ["refund", usd * 0.9],
+    ]);
   });
 });
 
@@ -172,22 +201,38 @@ describe("what was paid, not today's price", () => {
     expect(String(client.sent.at(-1)!.text)).toContain("Deposit paid: $100.00");
     await cancel();
     expect(String(client.sent.at(-1)!.text)).toContain("$90 of your $100 deposit is refunded to your card.");
-    expect(await money()).toEqual([["payment", 100], ["refund", 90]]);
+    expect(await money()).toEqual([
+      ["payment", 100],
+      ["refund", 90],
+    ]);
   });
 
   it("reads a record from before amounts were stored as $100", () => {
     expect(depositPaid({ intent: PI })).toBe(100);
     expect(depositPaid({ intent: PI, deposit: 200 })).toBe(200);
     expect(depositPaid({})).toBeUndefined();
-    expect(clientView({ id: "a", slug: "headshots", session: "Headshots", start: WHEN, end: WHEN, intent: PI } as never)).toMatchObject({ paid: true, deposit: 100 });
+    expect(clientView({ id: "a", slug: "headshots", session: "Headshots", start: WHEN, end: WHEN, intent: PI } as never)).toMatchObject({
+      paid: true,
+      deposit: 100,
+    });
   });
 });
 
 describe("the screens read the same map", () => {
   it("prints each session's /book price on the home rows, and its deposit on the line under Book", () => {
     // the rows show what /book shows (priceLabel): "From" where there is a price, the deposit where the price is quoted after
-    expect(Object.fromEntries(BOOK_ROWS.map((r) => [r.slug, r.price]))).toEqual({ portraits: "$250 deposit", headshots: "From $400", graduation: "From $400", "studio-digitals": "From $300" });
-    expect(Object.fromEntries(BOOK_ROWS.map((r) => [r.slug, r.dep]))).toEqual({ portraits: "$250", headshots: "$200", graduation: "$200", "studio-digitals": "$150" });
+    expect(Object.fromEntries(BOOK_ROWS.map((r) => [r.slug, r.price]))).toEqual({
+      portraits: "$250 deposit",
+      headshots: "From $400",
+      graduation: "From $400",
+      "studio-digitals": "From $300",
+    });
+    expect(Object.fromEntries(BOOK_ROWS.map((r) => [r.slug, r.dep]))).toEqual({
+      portraits: "$250",
+      headshots: "$200",
+      graduation: "$200",
+      "studio-digitals": "$150",
+    });
     // Every paid session's Cal.com slug is one the map knows: "studio-digitals" must never fall through to $100.
     for (const s of Object.values(SESSIONS).filter((x) => x.paid)) expect(DEPOSIT_SESSIONS).toContain(s.cal!.split("/")[1]);
     expect(priceLabel({ ...SESSIONS["studio-digitals"], from: null })).toBe("$150 deposit");
@@ -208,12 +253,39 @@ describe("a cancel between 48 and 24 hours ahead", () => {
     expect(String(client.sent.at(-1)!.text)).toContain("$140 of your $200 deposit is refunded to your card and $60 is kept");
 
     // Stripe then reports the same refund: `charge.refunded`, keyed by the cents refunded so far.
-    const raw = JSON.stringify({ type: "charge.refunded", data: { object: { id: "ch_1", payment_intent: PI, amount: 20000, amount_refunded: 14000, receipt_email: "qa@example.com", refunds: { data: [{ amount: 14000 }] } } } });
+    const raw = JSON.stringify({
+      type: "charge.refunded",
+      data: {
+        object: {
+          id: "ch_1",
+          payment_intent: PI,
+          amount: 20000,
+          amount_refunded: 14000,
+          receipt_email: "qa@example.com",
+          refunds: { data: [{ amount: 14000 }] },
+        },
+      },
+    });
     const at = Math.floor(Date.now() / 1000);
     const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(WHSEC), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
-    const sig = [...new Uint8Array(await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(`${at}.${raw}`)))].map((b) => b.toString(16).padStart(2, "0")).join("");
-    expect((await hook(new Request("https://juliangigola.com/api/stripe", { method: "POST", body: raw, headers: { "stripe-signature": `t=${at},v1=${sig}` } }))).status).toBe(200);
+    const sig = [...new Uint8Array(await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(`${at}.${raw}`)))]
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+    expect(
+      (
+        await hook(
+          new Request("https://juliangigola.com/api/stripe", {
+            method: "POST",
+            body: raw,
+            headers: { "stripe-signature": `t=${at},v1=${sig}` },
+          }),
+        )
+      ).status,
+    ).toBe(200);
     vi.setSystemTime(new Date("2026-11-11T20:00:00Z"));
-    expect(await money()).toEqual([["payment", 200], ["refund", 140]]);
+    expect(await money()).toEqual([
+      ["payment", 200],
+      ["refund", 140],
+    ]);
   });
 });

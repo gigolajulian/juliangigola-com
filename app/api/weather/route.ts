@@ -9,7 +9,8 @@ import { HttpError, upstreamError } from "@/lib/http";
 
 export const dynamic = "force-dynamic";
 
-const SOURCE = "https://api.open-meteo.com/v1/forecast?latitude=37.34&longitude=-121.89&hourly=temperature_2m,weather_code&temperature_unit=fahrenheit&timezone=America%2FLos_Angeles&forecast_days=16";
+const SOURCE =
+  "https://api.open-meteo.com/v1/forecast?latitude=37.34&longitude=-121.89&hourly=temperature_2m,weather_code&temperature_unit=fahrenheit&timezone=America%2FLos_Angeles&forecast_days=16";
 
 const HEADERS = { "cache-control": "public, max-age=3600", "x-robots-tag": "noindex, nofollow" };
 const edge = () => (globalThis as { caches?: { default?: Cache } }).caches?.default;

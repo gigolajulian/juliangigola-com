@@ -11,8 +11,21 @@ const call = deskCall as unknown as Mock;
 afterEach(() => vi.unstubAllGlobals());
 
 const iso = new Date().toISOString();
-const summary: LeadSummary = { id: "a", email: "ana@x.com", name: "Ana Ruiz", stage: "Inquiry", stageAt: iso, firstAt: iso, lastAt: iso } as LeadSummary;
-const full: Lead = { ...summary, events: [{ at: iso, kind: "inquiry", text: "From the form" }], notes: "Bring a stylist", quote: 1800 } as unknown as Lead;
+const summary: LeadSummary = {
+  id: "a",
+  email: "ana@x.com",
+  name: "Ana Ruiz",
+  stage: "Inquiry",
+  stageAt: iso,
+  firstAt: iso,
+  lastAt: iso,
+} as LeadSummary;
+const full: Lead = {
+  ...summary,
+  events: [{ at: iso, kind: "inquiry", text: "From the form" }],
+  notes: "Bring a stylist",
+  quote: 1800,
+} as unknown as Lead;
 
 function setup({ proofs = true, log = true } = {}) {
   // The proofs list and the PATCH go through fetch; the lead and its log through `deskCall`.

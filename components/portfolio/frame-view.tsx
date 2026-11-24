@@ -83,7 +83,12 @@ export function FrameTile({ f, first, onOpen }: { f: FrameItem; first?: boolean;
   const [back, setBack] = React.useState(false);
   const sleeve = useSleeve(() => setBack((b) => !b));
   return (
-    <figure className={f.wide ? "wt wide" : "wt"} data-back={back || undefined} data-sides={(f.back && sleeve.on) || undefined} {...(f.back ? sleeve.props : null)}>
+    <figure
+      className={f.wide ? "wt wide" : "wt"}
+      data-back={back || undefined}
+      data-sides={(f.back && sleeve.on) || undefined}
+      {...(f.back ? sleeve.props : null)}
+    >
       {/* A gallery's frame opens full size here, not its project: Graduation
           and Headshots have none, and their address leads to the booking page.
           Ctrl and cmd click open the viewer too (Julian); a middle click opens
@@ -106,7 +111,17 @@ export function FrameTile({ f, first, onOpen }: { f: FrameItem; first?: boolean;
 }
 
 /** A gallery's frames full size over the page: arrows step, Escape or Back closes. */
-export function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: number | null; onGo: (n: number) => void; onClose: () => void }) {
+export function FrameView({
+  list,
+  at,
+  onGo,
+  onClose,
+}: {
+  list: FrameItem[];
+  at: number | null;
+  onGo: (n: number) => void;
+  onClose: () => void;
+}) {
   const ref = React.useRef<HTMLDialogElement>(null);
   /* The frame and its two neighbours sit side by side on one track, the
      neighbours loading quietly behind it, so a step is the track gliding
@@ -114,13 +129,24 @@ export function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: 
   const track = React.useRef<HTMLDivElement>(null);
   const G = React.useRef<typeof import("gsap").gsap | null>(null);
   // The touch in progress: where it went down, the track's x then, its axis once locked, and its speed.
-  const drag = React.useRef<{ x: number; y: number; ox: number; axis: "x" | "y" | null; lx: number; lt: number; v: number; ly: number; vy: number } | null>(null);
+  const drag = React.useRef<{
+    x: number;
+    y: number;
+    ox: number;
+    axis: "x" | "y" | null;
+    lx: number;
+    lt: number;
+    v: number;
+    ly: number;
+    vy: number;
+  } | null>(null);
   /* Motion plan item 10 (docs/decisions.md): a lift hands the finger's speed
      to the strip's own spring (lib/motion/spring.ts), critically damped. */
   const run = React.useRef(0);
   const stop = () => void (cancelAnimationFrame(run.current), (run.current = 0));
   const spring = (axis: "x" | "y", to: number, fv: number, done: () => void) => {
-    const el = track.current!, g = G.current!;
+    const el = track.current!,
+      g = G.current!;
     stop();
     let s = { x: Number(g.getProperty(el, axis)), v: 0 };
     s.v = launchSpeed(fv, to - s.x, 1);
@@ -321,20 +347,39 @@ export function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: 
           const side = n === 2 && k === 1 ? (at === 0 ? 1 : -1) : k;
           return (
             <div className="fv-ph" key={g.src} style={{ translate: `${side * 100}% 0` }} aria-hidden={k !== 0}>
-              <Image src={!k && showBack ? g.back!.src : g.src} alt={k ? "" : showBack ? g.back!.alt : g.alt} fill sizes="100vw" loading="eager" fetchPriority={k ? "low" : "high"} />
+              <Image
+                src={!k && showBack ? g.back!.src : g.src}
+                alt={k ? "" : showBack ? g.back!.alt : g.alt}
+                fill
+                sizes="100vw"
+                loading="eager"
+                fetchPriority={k ? "low" : "high"}
+              />
             </div>
           );
         })}
       </div>
       <div className="fv-bar lbl">
-        <span>{pad(at + 1)} / {pad(n)}</span>
+        <span>
+          {pad(at + 1)} / {pad(n)}
+        </span>
         {cur?.back ? <Sides back={showBack} onFlip={() => setBk(showBack ? null : cur.src)} /> : null}
-        <button type="button" onClick={onClose}>Close</button>
+        <button type="button" onClick={onClose}>
+          Close
+        </button>
       </div>
       {n > 1 ? (
         <>
-          <button type="button" className="fv-step prev lbl" aria-label="Previous frame" onClick={() => step(-1)}><svg width="36" height="20" viewBox="0 0 36 20" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden><path d="M35 10H2M10 2L2 10l8 8" /></svg></button>
-          <button type="button" className="fv-step next lbl" aria-label="Next frame" onClick={() => step(1)}><svg width="36" height="20" viewBox="0 0 36 20" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden><path d="M1 10h33M26 2l8 8-8 8" /></svg></button>
+          <button type="button" className="fv-step prev lbl" aria-label="Previous frame" onClick={() => step(-1)}>
+            <svg width="36" height="20" viewBox="0 0 36 20" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
+              <path d="M35 10H2M10 2L2 10l8 8" />
+            </svg>
+          </button>
+          <button type="button" className="fv-step next lbl" aria-label="Next frame" onClick={() => step(1)}>
+            <svg width="36" height="20" viewBox="0 0 36 20" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
+              <path d="M1 10h33M26 2l8 8-8 8" />
+            </svg>
+          </button>
         </>
       ) : null}
     </dialog>

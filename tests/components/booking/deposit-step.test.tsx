@@ -3,7 +3,10 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { DepositStep, type DepositBody } from "@/components/booking/deposit-step";
 
-vi.stubGlobal("fetch", vi.fn(() => Promise.reject(new Error("no network"))));
+vi.stubGlobal(
+  "fetch",
+  vi.fn(() => Promise.reject(new Error("no network"))),
+);
 afterEach(() => {
   delete window.Stripe;
   // jsdom never loads Stripe.js: fail a load left pending, so the module drops it and the next test starts fresh.

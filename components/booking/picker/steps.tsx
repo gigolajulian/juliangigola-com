@@ -11,7 +11,17 @@ import { duration } from "@/lib/booking/rules";
 import { depositFor, takesDeposit } from "@/lib/leads/deposit-terms";
 import { clockLabel } from "@/lib/booking/clock";
 import type { Shell } from "@/components/enquiry/flow";
-import { AHEAD, fromIso, minutesOf, STEP_AT, WHERE, clock, type PickedTime, type Step, type StepsSkin } from "@/components/booking/picker/parts";
+import {
+  AHEAD,
+  fromIso,
+  minutesOf,
+  STEP_AT,
+  WHERE,
+  clock,
+  type PickedTime,
+  type Step,
+  type StepsSkin,
+} from "@/components/booking/picker/parts";
 import type { CardCtx } from "@/components/booking/picker/use-picker";
 import { forgetTimes } from "@/components/booking/picker/use-slots";
 import { SkyTimes, SkyWeather } from "@/components/booking/picker/sky-times";
@@ -62,7 +72,8 @@ export function useStepsLayout({ step, pick, days }: { step: Step; pick: PickedT
     const ix = stripEl;
     if (!ix) return;
     const on = ix.querySelector<HTMLElement>('[aria-pressed="true"]');
-    if (on && (on.offsetLeft < ix.scrollLeft || on.offsetLeft + on.offsetWidth > ix.scrollLeft + ix.clientWidth)) ix.scrollTo({ left: Math.max(0, on.offsetLeft - on.offsetWidth) });
+    if (on && (on.offsetLeft < ix.scrollLeft || on.offsetLeft + on.offsetWidth > ix.scrollLeft + ix.clientWidth))
+      ix.scrollTo({ left: Math.max(0, on.offsetLeft - on.offsetWidth) });
     const fit = () => setMore(ix.scrollLeft + ix.clientWidth < ix.scrollWidth - 4);
     fit();
     // The row's own box keeps its width as the times grow or the fonts land: watch the buttons too.
@@ -78,23 +89,79 @@ export function useStepsLayout({ step, pick, days }: { step: Step; pick: PickedT
 /* The V3 stepper: Time, You, (Deposit), Booked. The same
    times, booking and deposit as the cards; only the look is new. */
 export function BookSteps({ c, l }: { c: CardCtx & { skin: StepsSkin }; l: ReturnType<typeof useStepsLayout> }) {
-  const { skin, username, slug, tz, length, needsWhere, opt, setOpt, booked, days, view, setView, anchor, setAnchor, pick, chosen, setChosen, step, setStep, paid, deposit, refs, error, load, choose, today, book, refill, date } = c;
+  const {
+    skin,
+    username,
+    slug,
+    tz,
+    length,
+    needsWhere,
+    opt,
+    setOpt,
+    booked,
+    days,
+    view,
+    setView,
+    anchor,
+    setAnchor,
+    pick,
+    chosen,
+    setChosen,
+    step,
+    setStep,
+    paid,
+    deposit,
+    refs,
+    error,
+    load,
+    choose,
+    today,
+    book,
+    refill,
+    date,
+  } = c;
   const { swipeX: swipeXRef, wheelGate, stripRef, more, setMore, v3root, bad, setBad, blank, setBlank } = l;
   const { v3steps, v3sub } = stepsCopy(paid, slug);
   const end = pick.min + length;
   const usd = depositFor(slug);
   const range = `${clockLabel(pick.min)} to ${clockLabel(end)}`;
   const at = step === "done" ? v3steps.length : STEP_AT[step] + 1;
-  const rows: [string, React.ReactNode][] = [["Day", weekdayDateLabel(date)], ["Time", range], ["Length", duration(length)]];
-  const shell = (p: Omit<Parameters<Shell>[0], "steps" | "at" | "sum">) => <div ref={v3root} className="contents">{skin.shell({ steps: v3steps, at, sum: rows, ...p })}</div>;
-  const back = (to: typeof step) => <button type="button" className="btn" onClick={() => { setBad({}); setStep(to); }}>Back</button>;
+  const rows: [string, React.ReactNode][] = [
+    ["Day", weekdayDateLabel(date)],
+    ["Time", range],
+    ["Length", duration(length)],
+  ];
+  const shell = (p: Omit<Parameters<Shell>[0], "steps" | "at" | "sum">) => (
+    <div ref={v3root} className="contents">
+      {skin.shell({ steps: v3steps, at, sum: rows, ...p })}
+    </div>
+  );
+  const back = (to: typeof step) => (
+    <button
+      type="button"
+      className="btn"
+      onClick={() => {
+        setBad({});
+        setStep(to);
+      }}
+    >
+      Back
+    </button>
+  );
   if (step === "pay" && deposit) {
     const price = skin.from != null ? `$${skin.from}` : "Quoted";
     return (
       <DepositStep
         skin="v3"
         shell={(p) => shell(p)}
-        head={<div className="fig"><b>${usd}</b><span className="lbl mute">Holds {weekdayDateLabel(date)}, {clockLabel(pick.min)}</span></div>}
+        head={
+          <div className="fig">
+            <b>${usd}</b>
+            <span className="lbl mute">
+              Holds {weekdayDateLabel(date)}, {clockLabel(pick.min)}
+            </span>
+          </div>
+        }
         body={deposit}
         refs={refs}
         rows={[
@@ -117,20 +184,49 @@ export function BookSteps({ c, l }: { c: CardCtx & { skin: StepsSkin }; l: Retur
   if (step === "done") {
     const studio = !booked.where || /studio/i.test(booked.where);
     const lines = paid
-      ? [`${weekdayDateLabel(date)}, ${range}, ${duration(length)}.`, studio ? "San Jose studio. I send the address the day before." : `${booked.where}.`, "Need to move it? Use the link in the confirmation, up to 24 hours before."]
-      : [`${weekdayDateLabel(date)}, ${range}, ${duration(length)}.`, "I call the number you gave, or send a video link the day before.", "Need to move it? Reply to the confirmation."];
+      ? [
+          `${weekdayDateLabel(date)}, ${range}, ${duration(length)}.`,
+          studio ? "San Jose studio. I send the address the day before." : `${booked.where}.`,
+          "Need to move it? Use the link in the confirmation, up to 24 hours before.",
+        ]
+      : [
+          `${weekdayDateLabel(date)}, ${range}, ${duration(length)}.`,
+          "I call the number you gave, or send a video link the day before.",
+          "Need to move it? Reply to the confirmation.",
+        ];
     const stamp = (ms: number) => new Date(ms).toISOString().replace(/[-:]|\.\d{3}/g, "");
     const s0 = +new Date(pick.start);
-    const ics = ["BEGIN:VCALENDAR", "VERSION:2.0", "BEGIN:VEVENT", `UID:${s0}@juliangigola.com`, `DTSTAMP:${stamp(s0)}`, `DTSTART:${stamp(s0)}`, `DTEND:${stamp(s0 + length * 6e4)}`, `SUMMARY:${skin.name} with Julian Gigola`, "END:VEVENT", "END:VCALENDAR"].join("\r\n");
+    const ics = [
+      "BEGIN:VCALENDAR",
+      "VERSION:2.0",
+      "BEGIN:VEVENT",
+      `UID:${s0}@juliangigola.com`,
+      `DTSTAMP:${stamp(s0)}`,
+      `DTSTART:${stamp(s0)}`,
+      `DTEND:${stamp(s0 + length * 6e4)}`,
+      `SUMMARY:${skin.name} with Julian Gigola`,
+      "END:VEVENT",
+      "END:VCALENDAR",
+    ].join("\r\n");
     return shell({
       ok: "Booked",
       head: `${booked.name}, you're in.`,
       sub: `Your confirmation is on its way to ${booked.email}.`,
-      body: <div className="done-lines">{lines.map((l) => <p key={l}>{l}</p>)}</div>,
+      body: (
+        <div className="done-lines">
+          {lines.map((l) => (
+            <p key={l}>{l}</p>
+          ))}
+        </div>
+      ),
       bar: (
         <>
-          <a className="btn" href={`data:text/calendar;charset=utf-8,${encodeURIComponent(ics)}`} download="julian-gigola.ics">Add to calendar</a>
-          <Link className="btn fill" href="/portfolio">See the work</Link>
+          <a className="btn" href={`data:text/calendar;charset=utf-8,${encodeURIComponent(ics)}`} download="julian-gigola.ics">
+            Add to calendar
+          </a>
+          <Link className="btn fill" href="/portfolio">
+            See the work
+          </Link>
         </>
       ),
     });
@@ -138,13 +234,59 @@ export function BookSteps({ c, l }: { c: CardCtx & { skin: StepsSkin }; l: Retur
   if (step !== "pick") {
     const opts = needsWhere ? WHERE[slug] : undefined;
     const asking = opts?.find(([label]) => label === (opt || opts[0][0]))?.[1];
-    const f = (k: string, label: string, { type = "text", ac = "off", area = false, req = false }: { type?: string; ac?: string; area?: boolean; req?: boolean } = {}) => {
+    const f = (
+      k: string,
+      label: string,
+      { type = "text", ac = "off", area = false, req = false }: { type?: string; ac?: string; area?: boolean; req?: boolean } = {},
+    ) => {
       const id = `f-${k}`;
       return (
         <div className={bad[k] ? "fld bad" : "fld"}>
-          <label className="lbl mute" htmlFor={id}><span>{label}{req ? <span className="req" aria-hidden="true"> *</span> : null}</span>{bad[k] && !blank[k] ? <span className="fe" aria-hidden="true">{bad[k]}</span> : <span />}</label>
-          {area ? <textarea id={id} name={k} rows={3} placeholder={bad[k] && blank[k] ? bad[k] : undefined} aria-invalid={!!bad[k] || undefined} aria-describedby={bad[k] ? `${id}-err` : undefined} aria-required={req || undefined} /> : <input id={id} name={k} type={type} autoComplete={ac} placeholder={bad[k] && blank[k] ? bad[k] : undefined} aria-invalid={!!bad[k] || undefined} aria-describedby={bad[k] ? `${id}-err` : undefined} aria-required={req || undefined} />}
-          {bad[k] ? <p className="sr-only" id={`${id}-err`} role="alert">{bad[k]}</p> : null}
+          <label className="lbl mute" htmlFor={id}>
+            <span>
+              {label}
+              {req ? (
+                <span className="req" aria-hidden="true">
+                  {" "}
+                  *
+                </span>
+              ) : null}
+            </span>
+            {bad[k] && !blank[k] ? (
+              <span className="fe" aria-hidden="true">
+                {bad[k]}
+              </span>
+            ) : (
+              <span />
+            )}
+          </label>
+          {area ? (
+            <textarea
+              id={id}
+              name={k}
+              rows={3}
+              placeholder={bad[k] && blank[k] ? bad[k] : undefined}
+              aria-invalid={!!bad[k] || undefined}
+              aria-describedby={bad[k] ? `${id}-err` : undefined}
+              aria-required={req || undefined}
+            />
+          ) : (
+            <input
+              id={id}
+              name={k}
+              type={type}
+              autoComplete={ac}
+              placeholder={bad[k] && blank[k] ? bad[k] : undefined}
+              aria-invalid={!!bad[k] || undefined}
+              aria-describedby={bad[k] ? `${id}-err` : undefined}
+              aria-required={req || undefined}
+            />
+          )}
+          {bad[k] ? (
+            <p className="sr-only" id={`${id}-err`} role="alert">
+              {bad[k]}
+            </p>
+          ) : null}
         </div>
       );
     };
@@ -171,7 +313,9 @@ export function BookSteps({ c, l }: { c: CardCtx & { skin: StepsSkin }; l: Retur
           body: (
             <>
               {/* The photo's summary hides on phones: the day and time stay in view here (booking critique). */}
-              <p className="f-when lbl mute">{weekdayDateLabel(date)} | {clockLabel(pick.min)} | {skin.name}</p>
+              <p className="f-when lbl mute">
+                {weekdayDateLabel(date)} | {clockLabel(pick.min)} | {skin.name}
+              </p>
               {f("name", "Name", { ac: "name", req: true })}
               {f("email", "Email", { type: "email", ac: "email", req: true })}
               {f("phone", "Phone", { type: "tel", ac: "tel" })}
@@ -181,7 +325,15 @@ export function BookSteps({ c, l }: { c: CardCtx & { skin: StepsSkin }; l: Retur
                   <input type="hidden" name="opt" value={opt || opts[0][0]} />
                   <div className="wrapopts lbl">
                     {opts.map(([label]) => (
-                      <button key={label} type="button" className="opt" aria-pressed={(opt || opts[0][0]) === label} onClick={() => setOpt(label)}>{label}</button>
+                      <button
+                        key={label}
+                        type="button"
+                        className="opt"
+                        aria-pressed={(opt || opts[0][0]) === label}
+                        onClick={() => setOpt(label)}
+                      >
+                        {label}
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -190,15 +342,26 @@ export function BookSteps({ c, l }: { c: CardCtx & { skin: StepsSkin }; l: Retur
               {needsWhere && !WHERE[slug] ? f("where", "Where") : null}
               {f("notes", "Anything I should know")}
               {paid ? <ReferencePicks resync={null} v3 /> : null}
-              {error ? <p className="err" role="alert">{error}</p> : null}
+              {error ? (
+                <p className="err" role="alert">
+                  {error}
+                </p>
+              ) : null}
               {/* The deposit terms before the commit, in deposit-step's wording. */}
-              {paid ? <p className="lbl mute">90% refund up to 48 hours before the shoot, 70% up to 24 hours. Move it up to 24 hours before. The balance is due after the shoot.</p> : null}
+              {paid ? (
+                <p className="lbl mute">
+                  90% refund up to 48 hours before the shoot, 70% up to 24 hours. Move it up to 24 hours before. The balance is due after
+                  the shoot.
+                </p>
+              ) : null}
             </>
           ),
           bar: (
             <>
               {back("pick")}
-              <button type="submit" className="btn fill" disabled={step === "sending" || step === "check"}>{paid ? `Continue to $${usd} deposit` : "Book the call"}</button>
+              <button type="submit" className="btn fill" disabled={step === "sending" || step === "check"}>
+                {paid ? `Continue to $${usd} deposit` : "Book the call"}
+              </button>
             </>
           ),
         })}
@@ -208,11 +371,21 @@ export function BookSteps({ c, l }: { c: CardCtx & { skin: StepsSkin }; l: Retur
   const monday = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate() - ((d.getDay() + 6) % 7));
   const sky = skyOn();
   /* Sky week: the next five days with a time, paged from the earliest, so the week follows my calendar as it is. */
-  const open = Object.keys(days).filter((k) => days[k]?.length).sort();
+  const open = Object.keys(days)
+    .filter((k) => days[k]?.length)
+    .sort();
   const first = open.findIndex((k) => k >= localDayKey(anchor));
   const page = sky && view === "week" && open.length ? Math.floor((first < 0 ? open.length - 1 : first) / 5) * 5 : -1;
-  const canBack = page >= 0 ? page > 0 : view === "week" ? +monday(anchor) > +monday(today) : anchor.getFullYear() * 12 + anchor.getMonth() > today.getFullYear() * 12 + today.getMonth();
-  const canNext = page >= 0 ? page + 5 < open.length : +(view === "week" ? monday(anchor) : new Date(anchor.getFullYear(), anchor.getMonth() + 1, 0)) < +today + AHEAD * DAY_MS;
+  const canBack =
+    page >= 0
+      ? page > 0
+      : view === "week"
+        ? +monday(anchor) > +monday(today)
+        : anchor.getFullYear() * 12 + anchor.getMonth() > today.getFullYear() * 12 + today.getMonth();
+  const canNext =
+    page >= 0
+      ? page + 5 < open.length
+      : +(view === "week" ? monday(anchor) : new Date(anchor.getFullYear(), anchor.getMonth() + 1, 0)) < +today + AHEAD * DAY_MS;
   const times = days[pick.date] ?? [];
   const [hh, mm] = clock(pick.min)[0].split(":");
   const at0 = times.findIndex((x) => minutesOf(x) === pick.min);
@@ -221,7 +394,11 @@ export function BookSteps({ c, l }: { c: CardCtx & { skin: StepsSkin }; l: Retur
     if (next) choose(pick.date, minutesOf(next), true);
   };
   /* ?sky (lib/flags/sky-flag.ts): the times in the hour's light, the readout under them, the day's dots by part of day. */
-  const zone = new Intl.DateTimeFormat("en-US", { timeZone: tz, timeZoneName: "longGeneric" }).formatToParts(0).find((p) => p.type === "timeZoneName")?.value.replace(/ Time$/, "") ?? tz;
+  const zone =
+    new Intl.DateTimeFormat("en-US", { timeZone: tz, timeZoneName: "longGeneric" })
+      .formatToParts(0)
+      .find((p) => p.type === "timeZoneName")
+      ?.value.replace(/ Time$/, "") ?? tz;
   return shell({
     head: paid ? "Book a session" : skin?.name === "Consultation" ? "Book a consultation" : "Book a call",
     sub: v3sub,
@@ -230,7 +407,10 @@ export function BookSteps({ c, l }: { c: CardCtx & { skin: StepsSkin }; l: Retur
       <div className="f-in">
         <Calendar
           view={view}
-          setView={(v) => { setView(v); setAnchor(fromIso(pick.date)); }}
+          setView={(v) => {
+            setView(v);
+            setAnchor(fromIso(pick.date));
+          }}
           anchor={anchor}
           shift={(dir) => {
             if (page >= 0) return setAnchor(fromIso(open[Math.max(0, page + 5 * dir)]));
@@ -248,78 +428,172 @@ export function BookSteps({ c, l }: { c: CardCtx & { skin: StepsSkin }; l: Retur
           }}
           onPick={(d) => choose(localDayKey(d), pick.min, false)}
           strip={page >= 0 ? open.slice(page, page + 5).map(fromIso) : undefined}
-          parts={sky ? (d) => {
-            const l = days[localDayKey(d)];
-            if (!l?.length) return null;
-            const p = [false, false, false];
-            for (const x of l) p[partOf(Math.round(pacific(Date.parse(x)).hour * 60))] = true;
-            return p;
-          } : undefined}
+          parts={
+            sky
+              ? (d) => {
+                  const l = days[localDayKey(d)];
+                  if (!l?.length) return null;
+                  const p = [false, false, false];
+                  for (const x of l) p[partOf(Math.round(pacific(Date.parse(x)).hour * 60))] = true;
+                  return p;
+                }
+              : undefined
+          }
         />
-        {sky ? <SkyTimes times={times} picked={pick.min} length={length} ruler={view === "month"} choose={(m) => choose(pick.date, m, true)} /> : null}
+        {sky ? (
+          <SkyTimes times={times} picked={pick.min} length={length} ruler={view === "month"} choose={(m) => choose(pick.date, m, true)} />
+        ) : null}
         {/* The time big, stepped with
             the arrows, a wheel, a swipe or the arrow keys; the day's open times
             in one row under it, faded with a hint when they run past the edge. */}
-        <div className="fig scrub" style={sky ? (({ dark, light }) => ({ "--tc": dark, "--tcl": light }) as React.CSSProperties)(skyColors(Date.parse(pick.start))) : undefined}>
+        <div
+          className="fig scrub"
+          style={
+            sky
+              ? (({ dark, light }) => ({ "--tc": dark, "--tcl": light }) as React.CSSProperties)(skyColors(Date.parse(pick.start)))
+              : undefined
+          }
+        >
           <div className="num">
-            <b ref={(el) => {
-              if (!el) return;
-              /* A wheel over the number steps the time: a mouse once a notch, a
+            <b
+              ref={(el) => {
+                if (!el) return;
+                /* A wheel over the number steps the time: a mouse once a notch, a
                  trackpad once a flick (its stream of events, until a gap of
                  GESTURE_GAP_MS, read as one). A flick that starts at
                  the first or last time is the page's. React's onWheel is passive. */
-              const wheel = (e: WheelEvent) => {
-                if (e.ctrlKey || !e.deltaY) return;
-                const g = wheelGate.current;
-                const fresh = e.timeStamp - g.at > GESTURE_GAP_MS;
-                g.at = e.timeStamp;
-                // Any pixel stream is one gesture: fast trackpad events pass NOTCH_PX on 2x screens.
-                const pad = e.deltaMode === 0;
-                const dir = e.deltaY > 0 ? 1 : -1;
-                if (fresh || !pad) g.owned = !!times[at0 + dir];
-                if (!g.owned) return;
-                e.preventDefault();
-                if (fresh || !pad) stepTime(dir);
-              };
-              el.addEventListener("wheel", wheel, { passive: false });
-              return () => el.removeEventListener("wheel", wheel);
-            }} data-lenis-prevent tabIndex={0} role="spinbutton" aria-label="Time" aria-valuetext={clockLabel(pick.min)} data-scrub=""
-              onKeyDown={(e) => { if (e.key === "ArrowLeft" || e.key === "ArrowRight") { e.preventDefault(); stepTime(e.key === "ArrowRight" ? 1 : -1); } }}
-              onPointerDown={(e) => { swipeXRef.current = e.clientX; }}
+                const wheel = (e: WheelEvent) => {
+                  if (e.ctrlKey || !e.deltaY) return;
+                  const g = wheelGate.current;
+                  const fresh = e.timeStamp - g.at > GESTURE_GAP_MS;
+                  g.at = e.timeStamp;
+                  // Any pixel stream is one gesture: fast trackpad events pass NOTCH_PX on 2x screens.
+                  const pad = e.deltaMode === 0;
+                  const dir = e.deltaY > 0 ? 1 : -1;
+                  if (fresh || !pad) g.owned = !!times[at0 + dir];
+                  if (!g.owned) return;
+                  e.preventDefault();
+                  if (fresh || !pad) stepTime(dir);
+                };
+                el.addEventListener("wheel", wheel, { passive: false });
+                return () => el.removeEventListener("wheel", wheel);
+              }}
+              data-lenis-prevent
+              tabIndex={0}
+              role="spinbutton"
+              aria-label="Time"
+              aria-valuetext={clockLabel(pick.min)}
+              data-scrub=""
+              onKeyDown={(e) => {
+                if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+                  e.preventDefault();
+                  stepTime(e.key === "ArrowRight" ? 1 : -1);
+                }
+              }}
+              onPointerDown={(e) => {
+                swipeXRef.current = e.clientX;
+              }}
               /* One step per swipe, however long: the start clears until the finger lifts. */
-              onPointerMove={(e) => { const x0 = swipeXRef.current; if (x0 != null && Math.abs(e.clientX - x0) > 36) { stepTime(e.clientX < x0 ? 1 : -1); swipeXRef.current = null; } }}
-              onPointerUp={() => { swipeXRef.current = null; }}
-              onPointerCancel={() => { swipeXRef.current = null; }}
-            >{hh}<span className="cn">:</span>{mm}</b>
+              onPointerMove={(e) => {
+                const x0 = swipeXRef.current;
+                if (x0 != null && Math.abs(e.clientX - x0) > 36) {
+                  stepTime(e.clientX < x0 ? 1 : -1);
+                  swipeXRef.current = null;
+                }
+              }}
+              onPointerUp={() => {
+                swipeXRef.current = null;
+              }}
+              onPointerCancel={() => {
+                swipeXRef.current = null;
+              }}
+            >
+              {hh}
+              <span className="cn">:</span>
+              {mm}
+            </b>
             <span className="lbl mute ap">{pick.min < 720 ? "AM" : "PM"}</span>
           </div>
           <div className="arrs">
-            <button type="button" className="arr" aria-label="Earlier time" disabled={at0 <= 0} onClick={() => stepTime(-1)}>←</button>
-            <button type="button" className="arr" aria-label="Later time" disabled={at0 < 0 || at0 >= times.length - 1} onClick={() => stepTime(1)}>→</button>
+            <button type="button" className="arr" aria-label="Earlier time" disabled={at0 <= 0} onClick={() => stepTime(-1)}>
+              ←
+            </button>
+            <button
+              type="button"
+              className="arr"
+              aria-label="Later time"
+              disabled={at0 < 0 || at0 >= times.length - 1}
+              onClick={() => stepTime(1)}
+            >
+              →
+            </button>
           </div>
-          <span className="lbl mute mline">{weekdayDateLabel(date)}{chosen === "time" ? ` | until ${clockLabel(end)}` : ""}</span>
+          <span className="lbl mute mline">
+            {weekdayDateLabel(date)}
+            {chosen === "time" ? ` | until ${clockLabel(end)}` : ""}
+          </span>
           {sky ? (
             <dl className="sky-meta lbl">
-              <div><dt className="mute">Time zone</dt><dd>{zone}</dd></div>
-              {paid ? <div><dt className="mute">Sunset, San Jose</dt><dd>{sunsetLabel(pacific(Date.parse(pick.start)).ymd)}</dd></div> : null}
+              <div>
+                <dt className="mute">Time zone</dt>
+                <dd>{zone}</dd>
+              </div>
+              {paid ? (
+                <div>
+                  <dt className="mute">Sunset, San Jose</dt>
+                  <dd>{sunsetLabel(pacific(Date.parse(pick.start)).ymd)}</dd>
+                </div>
+              ) : null}
               <SkyWeather ms={Date.parse(pick.start)} />
             </dl>
           ) : null}
         </div>
-        {sky ? null : <div className={cn("strip", more && "more")}>
-          <div ref={stripRef} className="idx lbl" onScroll={(e) => { const el = e.currentTarget; setMore(el.scrollLeft + el.clientWidth < el.scrollWidth - 4); }}>
-            {times.map((x) => {
-              const m = minutesOf(x);
-              const [h, a] = clock(m);
-              return (
-                <button key={x} type="button" data-slot="" aria-pressed={m === pick.min} aria-label={clockLabel(m)} onClick={() => choose(pick.date, m, true)}>{h}<small>{a}</small></button>
-              );
-            })}
+        {sky ? null : (
+          <div className={cn("strip", more && "more")}>
+            <div
+              ref={stripRef}
+              className="idx lbl"
+              onScroll={(e) => {
+                const el = e.currentTarget;
+                setMore(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
+              }}
+            >
+              {times.map((x) => {
+                const m = minutesOf(x);
+                const [h, a] = clock(m);
+                return (
+                  <button
+                    key={x}
+                    type="button"
+                    data-slot=""
+                    aria-pressed={m === pick.min}
+                    aria-label={clockLabel(m)}
+                    onClick={() => choose(pick.date, m, true)}
+                  >
+                    {h}
+                    <small>{a}</small>
+                  </button>
+                );
+              })}
+            </div>
+            <p className="lbl mute swipe" aria-hidden>
+              Swipe for more times →
+            </p>
           </div>
-          <p className="lbl mute swipe" aria-hidden>Swipe for more times →</p>
-        </div>}
+        )}
       </div>
     ),
-    bar: <button type="button" className="btn fill" onClick={() => { setChosen("time"); setStep("form"); }}>Continue</button>,
+    bar: (
+      <button
+        type="button"
+        className="btn fill"
+        onClick={() => {
+          setChosen("time");
+          setStep("form");
+        }}
+      >
+        Continue
+      </button>
+    ),
   });
 }

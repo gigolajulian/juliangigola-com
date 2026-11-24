@@ -14,9 +14,16 @@ type Clip = { id?: number; preview?: string; link?: string; clip?: string; sound
 const clips: Record<string, Clip> = SOUND;
 /* In over 1.4s on a curve that starts slow, out in 0.5s.
    Peak 0.3 (owner pick, do not tune). */
-const KEY = "jg-cover-snd", PEAK = 0.3, IN = 1400, OUT = 500;
+const KEY = "jg-cover-snd",
+  PEAK = 0.3,
+  IN = 1400,
+  OUT = 500;
 
-let audio: HTMLAudioElement | null = null, now = "", raf = 0, level = 0, watching = false;
+let audio: HTMLAudioElement | null = null,
+  now = "",
+  raf = 0,
+  level = 0,
+  watching = false;
 /** What the clip plays through: the audio element, or SoundCloud's player. */
 let out: "audio" | "sc" = "audio";
 const subs = new Set<() => void>();
@@ -31,7 +38,9 @@ const ended = () => {
 /* SoundCloud gives a page no clip to play itself, only its player: one frame kept off the screen, driven by the
    player's own messages (play, pause, setVolume 0 to 100, seekTo; it answers `ready` and `finish`). */
 const SC = "https://w.soundcloud.com";
-let frame: HTMLIFrameElement | null = null, scReady = false, scUrl = "";
+let frame: HTMLIFrameElement | null = null,
+  scReady = false,
+  scUrl = "";
 const post = (method: string, value?: unknown) => frame?.contentWindow?.postMessage(JSON.stringify({ method, value }), SC);
 function scGo() {
   post("setVolume", 0);
@@ -78,7 +87,8 @@ const pause = () => (out === "sc" ? post("pause") : audio?.pause());
 
 function fade(to: number, ms: number, done?: () => void) {
   cancelAnimationFrame(raf);
-  const from = level, t0 = performance.now();
+  const from = level,
+    t0 = performance.now();
   const tick = (t: number) => {
     const k = Math.min(1, Math.max(0, (t - t0) / ms));
     // Squared on the way up: loudness is heard on a curve, and a straight ramp arrives all at once.
@@ -101,7 +111,9 @@ export function stopSound(slug?: string, hard = false) {
 }
 
 export function playSound(slug: string) {
-  const c = clips[slug], src = c?.preview ?? c?.clip, sc = src ? undefined : c?.soundcloud;
+  const c = clips[slug],
+    src = c?.preview ?? c?.clip,
+    sc = src ? undefined : c?.soundcloud;
   if ((!src && !sc) || slug === now || muted()) return;
   if (!watching) {
     watching = true;
@@ -131,7 +143,12 @@ export function playSound(slug: string) {
 }
 
 /** The slug whose clip is playing, "" when none. */
-export const useSound = () => React.useSyncExternalStore(sub, () => now, () => "");
+export const useSound = () =>
+  React.useSyncExternalStore(
+    sub,
+    () => now,
+    () => "",
+  );
 
 /* Sound on / off, kept for the tab. While one of Apple's previews plays: Apple's mark linking to the song and the
    credit, both of which its terms ask for beside a preview (Search API, Legal). While SoundCloud's player plays:

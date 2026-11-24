@@ -66,10 +66,7 @@ export function AdminInbox({
 
   /** Every call to the route, with the key attached: `path` is the query ("?key=..."). */
   const call = React.useCallback(
-    <T = Record<string, unknown>,>(
-      { path = "", ...init }: RequestInit & { path?: string } = {},
-      withKey?: string,
-    ) =>
+    <T = Record<string, unknown>,>({ path = "", ...init }: RequestInit & { path?: string } = {}, withKey?: string) =>
       adminCall<T>(`/api/inbox${path}`, {
         ...init,
         headers: credentials(withKey ?? key),
@@ -140,9 +137,7 @@ export function AdminInbox({
   async function mark(row: Row, read: boolean) {
     // Optimistic: the row is the only thing that changes and a failed write
     // is reported, so there is nothing to be wrong about for long.
-    setRows((r) =>
-      r ? r.map((x) => (x.key === row.key ? { ...x, read } : x)) : r,
-    );
+    setRows((r) => (r ? r.map((x) => (x.key === row.key ? { ...x, read } : x)) : r));
     try {
       await call({
         method: "PATCH",
@@ -155,12 +150,7 @@ export function AdminInbox({
   }
 
   async function remove(row: Row) {
-    if (
-      !window.confirm(
-        `Delete the inquiry from ${row.name}? This cannot be undone.`,
-      )
-    )
-      return;
+    if (!window.confirm(`Delete the inquiry from ${row.name}? This cannot be undone.`)) return;
     try {
       await call({ method: "DELETE", body: JSON.stringify({ key: row.key }) });
       setRows((r) => (r ? r.filter((x) => x.key !== row.key) : r));
@@ -199,11 +189,7 @@ export function AdminInbox({
         ) : null}
       </div>
 
-      {error ? (
-        <p className="label border border-border bg-card px-4 py-3 text-foreground">
-          {error}
-        </p>
-      ) : null}
+      {error ? <p className="label border border-border bg-card px-4 py-3 text-foreground">{error}</p> : null}
 
       {rows === null ? (
         <Unlock
@@ -216,9 +202,8 @@ export function AdminInbox({
         />
       ) : rows.length === 0 ? (
         <p className="max-w-prose text-sm text-muted-foreground">
-          Nothing yet. The contact form writes here the moment somebody sends
-          something. They do not need a mail app, and you do not need to be told
-          twice.
+          Nothing yet. The contact form writes here the moment somebody sends something. They do not need a mail app, and you do not need to
+          be told twice.
         </p>
       ) : (
         <ul className="border-t border-border">
@@ -240,18 +225,9 @@ export function AdminInbox({
                 >
                   {/* Unread is a dot, not bold type: the row is already set in
                       one weight and a second one is a second thing to learn. */}
+                  <span aria-hidden className={cn("block size-1.5 shrink-0 rounded-full", row.read ? "bg-transparent" : "bg-live")} />
                   <span
-                    aria-hidden
-                    className={cn(
-                      "block size-1.5 shrink-0 rounded-full",
-                      row.read ? "bg-transparent" : "bg-live",
-                    )}
-                  />
-                  <span
-                    className={cn(
-                      "font-display text-base uppercase tracking-[0]",
-                      row.read ? "text-muted-foreground" : "text-foreground",
-                    )}
+                    className={cn("font-display text-base uppercase tracking-[0]", row.read ? "text-muted-foreground" : "text-foreground")}
                   >
                     {row.name}
                   </span>
@@ -260,9 +236,7 @@ export function AdminInbox({
                   {row.type === "booking" ? (
                     <span className="label">
                       <span className="text-accent">Booking</span>
-                      {row.detail ? (
-                        <span className="text-foreground"> {row.detail}</span>
-                      ) : null}
+                      {row.detail ? <span className="text-foreground"> {row.detail}</span> : null}
                       {row.deposit ? (
                         <span className="text-accent"> · Deposit paid · ${row.depositUsd ?? 100}</span>
                       ) : row.noDeposit ? (
@@ -270,17 +244,13 @@ export function AdminInbox({
                       ) : null}
                     </span>
                   ) : (
-                    <span className="label text-muted-foreground">
-                      {row.type}
-                    </span>
+                    <span className="label text-muted-foreground">{row.type}</span>
                   )}
                   <span className="label ml-auto shrink-0 text-muted-foreground">
                     {timeAgo(row.at)}
                     {row.country ? ` · ${row.country}` : ""}
                   </span>
-                  <span className="sr-only">
-                    {row.read ? "Read" : "Unread"}
-                  </span>
+                  <span className="sr-only">{row.read ? "Read" : "Unread"}</span>
                 </button>
 
                 {open === row.key ? (
@@ -299,16 +269,10 @@ export function AdminInbox({
                             </a>
                           </dd>
                           <dt className="label text-muted-foreground">Kind</dt>
-                          <dd className="text-sm">
-                            {full.type === "booking" ? "Booking" : full.type}
-                          </dd>
+                          <dd className="text-sm">{full.type === "booking" ? "Booking" : full.type}</dd>
                           {full.detail ? (
                             <>
-                              <dt className="label text-muted-foreground">
-                                {full.type === "booking"
-                                  ? "Booked for"
-                                  : "When / where"}
-                              </dt>
+                              <dt className="label text-muted-foreground">{full.type === "booking" ? "Booked for" : "When / where"}</dt>
                               <dd className="text-sm">{full.detail}</dd>
                             </>
                           ) : null}
@@ -334,19 +298,23 @@ export function AdminInbox({
                               </dd>
                             </>
                           ) : null}
-                          <dt className="label text-muted-foreground">
-                            Arrived
-                          </dt>
-                          <dd className="text-sm">
-                            {new Date(full.at).toLocaleString()}
-                          </dd>
+                          <dt className="label text-muted-foreground">Arrived</dt>
+                          <dd className="text-sm">{new Date(full.at).toLocaleString()}</dd>
                           {/* Where it came from, unasked (`visitContext`). */}
                           {contextLines(full).map((line) => {
                             const [k, v] = [line.slice(0, line.indexOf(":")), line.slice(line.indexOf(":") + 2)];
                             return (
                               <React.Fragment key={k}>
                                 <dt className="label text-muted-foreground">{k}</dt>
-                                <dd className="break-words text-sm">{k === "Company" ? <a href={v} target="_blank" rel="noreferrer" className="underline decoration-border underline-offset-4">{v}</a> : v}</dd>
+                                <dd className="break-words text-sm">
+                                  {k === "Company" ? (
+                                    <a href={v} target="_blank" rel="noreferrer" className="underline decoration-border underline-offset-4">
+                                      {v}
+                                    </a>
+                                  ) : (
+                                    v
+                                  )}
+                                </dd>
                               </React.Fragment>
                             );
                           })}
@@ -354,16 +322,10 @@ export function AdminInbox({
 
                         {/* Their words, as typed. `whitespace-pre-wrap` because
                             paragraphs somebody wrote are paragraphs. */}
-                        <p className="max-w-prose whitespace-pre-wrap text-sm leading-relaxed">
-                          {full.message}
-                        </p>
+                        <p className="max-w-prose whitespace-pre-wrap text-sm leading-relaxed">{full.message}</p>
 
                         {full.files?.length || full.picks?.length ? (
-                          <References
-                            msgKey={row.key}
-                            enquiry={full}
-                            auth={credentials(key)}
-                          />
+                          <References msgKey={row.key} enquiry={full} auth={credentials(key)} />
                         ) : null}
 
                         <div className="flex flex-wrap items-center gap-3">
@@ -410,13 +372,7 @@ export function AdminInbox({
  * here without the key tells you what this is and what to do, rather than
  * looking broken.
  */
-function Unlock({
-  onUnlock,
-  busy,
-}: {
-  onUnlock: (key: string) => void;
-  busy: boolean;
-}) {
+function Unlock({ onUnlock, busy }: { onUnlock: (key: string) => void; busy: boolean }) {
   const [value, setValue] = React.useState("");
 
   return (
@@ -428,11 +384,9 @@ function Unlock({
       className="flex max-w-prose flex-col gap-3 border border-border bg-card p-5"
     >
       <p className="text-sm text-muted-foreground">
-        Inquiries are kept on this site rather than emailed. The inbox opens
-        with the GitHub token you signed in with, so normally there is nothing
-        to do here. If you would rather it use a key of its own, set one with{" "}
-        <code className="text-foreground">wrangler secret put INBOX_KEY</code>{" "}
-        and paste it below; it stays in this browser.
+        Inquiries are kept on this site rather than emailed. The inbox opens with the GitHub token you signed in with, so normally there is
+        nothing to do here. If you would rather it use a key of its own, set one with{" "}
+        <code className="text-foreground">wrangler secret put INBOX_KEY</code> and paste it below; it stays in this browser.
       </p>
       <input
         type="password"

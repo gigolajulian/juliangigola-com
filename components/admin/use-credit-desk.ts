@@ -19,11 +19,7 @@ export function useCreditDesk(
      new project form. A context, because none of the three panels in
      between has any business carrying it. */
   const people = React.useMemo(
-    () =>
-      creditBook([
-        ...projects.map((p) => recredited[p.slug] ?? p.credits),
-        ...Object.values(recredited),
-      ]),
+    () => creditBook([...projects.map((p) => recredited[p.slug] ?? p.credits), ...Object.values(recredited)]),
     [projects, recredited],
   );
   /* What a circle draws: the picture staged in this session if there is
@@ -39,10 +35,7 @@ export function useCreditDesk(
     () => ({
       people,
       faces,
-      onFace: (
-        handle: string,
-        picture: { base64: string; preview: string; bytes: number } | null,
-      ) => {
+      onFace: (handle: string, picture: { base64: string; preview: string; bytes: number } | null) => {
         const path = `/people/${handle}.jpg`;
         if (!picture) {
           setAvatars((a) => {

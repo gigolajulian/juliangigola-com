@@ -29,7 +29,16 @@ export function MotionLayer() {
   React.useEffect(() => {
     const root = document.querySelector<HTMLElement>(".v3home.mt");
     if (!root) return;
-    const stop = startEngine(root, [...heroDrivers, ...rowsDrivers, ...commissionsDrivers, ...aboutDrivers, ...quoteDrivers, ...footDrivers, ...depthDrivers, ...barDrivers]);
+    const stop = startEngine(root, [
+      ...heroDrivers,
+      ...rowsDrivers,
+      ...commissionsDrivers,
+      ...aboutDrivers,
+      ...quoteDrivers,
+      ...footDrivers,
+      ...depthDrivers,
+      ...barDrivers,
+    ]);
     const stopReveal = startReveal(root);
     const still = matches("calm") ? heroStill(root) : null;
     return () => (stop(), stopReveal(), still?.());

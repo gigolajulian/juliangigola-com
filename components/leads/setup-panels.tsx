@@ -35,15 +35,33 @@ const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", 
 const TIMES = Array.from({ length: 33 }, (_, i) => 360 + i * 30);
 const TIME_OPTS = TIMES.map((t) => ({ value: String(t), label: clockLabel(t) }));
 const DEFAULT_WINDOW: Window = [600, 1140];
-const dateLabel = (d: string) => new Intl.DateTimeFormat("en-US", { timeZone: "UTC", weekday: "short", month: "short", day: "numeric" }).format(new Date(`${d}T00:00:00Z`));
-
+const dateLabel = (d: string) =>
+  new Intl.DateTimeFormat("en-US", { timeZone: "UTC", weekday: "short", month: "short", day: "numeric" }).format(
+    new Date(`${d}T00:00:00Z`),
+  );
 
 function Times({ w, set, label }: { w: Window; set: (w: Window) => void; label: string }) {
   return (
     <HStack gap={2} vAlign="center">
-      <Selector label={`${label}, first start`} isLabelHidden size="sm" value={String(w[0])} options={TIME_OPTS} onChange={(v) => set([+v, Math.max(+v, w[1])])} />
-      <Text type="code" size="sm" color="secondary">to</Text>
-      <Selector label={`${label}, last start`} isLabelHidden size="sm" value={String(w[1])} options={TIME_OPTS} onChange={(v) => set([Math.min(w[0], +v), +v])} />
+      <Selector
+        label={`${label}, first start`}
+        isLabelHidden
+        size="sm"
+        value={String(w[0])}
+        options={TIME_OPTS}
+        onChange={(v) => set([+v, Math.max(+v, w[1])])}
+      />
+      <Text type="code" size="sm" color="secondary">
+        to
+      </Text>
+      <Selector
+        label={`${label}, last start`}
+        isLabelHidden
+        size="sm"
+        value={String(w[1])}
+        options={TIME_OPTS}
+        onChange={(v) => set([Math.min(w[0], +v), +v])}
+      />
     </HStack>
   );
 }
@@ -59,16 +77,35 @@ export function HoursDesk() {
     if (!hours) throw new Error(lock);
     return hours;
   }, []);
-  React.useEffect(() => { call().then(setHours, (e) => setNote(errorText(e))); }, [call]);
+  React.useEffect(() => {
+    call().then(setHours, (e) => setNote(errorText(e)));
+  }, [call]);
 
-  if (!hours) return <Page gap={6} maxWidth={640} eyebrow="WHEN PEOPLE CAN BOOK" title="Hours"><Text type="code" size="sm" color="secondary">{note || "Loading hours"}</Text></Page>;
-  const edit = (h: Hours) => { setHours(h); setNote("Not saved"); };
-  const days = Object.entries(hours.days ?? {}).filter(([d]) => d >= ymdPT()).sort(([a], [b]) => byCodeUnit(a, b));
+  if (!hours)
+    return (
+      <Page gap={6} maxWidth={640} eyebrow="WHEN PEOPLE CAN BOOK" title="Hours">
+        <Text type="code" size="sm" color="secondary">
+          {note || "Loading hours"}
+        </Text>
+      </Page>
+    );
+  const edit = (h: Hours) => {
+    setHours(h);
+    setNote("Not saved");
+  };
+  const days = Object.entries(hours.days ?? {})
+    .filter(([d]) => d >= ymdPT())
+    .sort(([a], [b]) => byCodeUnit(a, b));
   const save = async () => {
     setBusy(true);
-    try { setHours(await call({ method: "PUT", body: JSON.stringify(hours) })); setNote("Saved. The booking page uses it now."); }
-    catch (e) { setNote(errorText(e)); }
-    finally { setBusy(false); }
+    try {
+      setHours(await call({ method: "PUT", body: JSON.stringify(hours) }));
+      setNote("Saved. The booking page uses it now.");
+    } catch (e) {
+      setNote(errorText(e));
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -80,8 +117,16 @@ export function HoursDesk() {
           const set = (x: Window | null) => edit({ ...hours, week: hours.week.map((y, j) => (j === i ? x : y)) });
           return (
             <HStack key={i} gap={3} vAlign="center" wrap="wrap">
-              <StackItem size="fill"><Switch label={DAYS[i]} value={!!w} onChange={(on) => set(on ? DEFAULT_WINDOW : null)} /></StackItem>
-              {w ? <Times w={w} set={set} label={DAYS[i]} /> : <Text type="code" size="sm" color="secondary">Closed</Text>}
+              <StackItem size="fill">
+                <Switch label={DAYS[i]} value={!!w} onChange={(on) => set(on ? DEFAULT_WINDOW : null)} />
+              </StackItem>
+              {w ? (
+                <Times w={w} set={set} label={DAYS[i]} />
+              ) : (
+                <Text type="code" size="sm" color="secondary">
+                  Closed
+                </Text>
+              )}
             </HStack>
           );
         })}
@@ -92,59 +137,116 @@ export function HoursDesk() {
         {days.map(([d, w]) => (
           <VStack key={d} gap={1}>
             <HStack gap={2} vAlign="center">
-              <StackItem size="fill"><Text>{dateLabel(d)}{w ? "" : " · Closed"}</Text></StackItem>
-              <Button label={w ? "Close" : "Open"} variant="ghost" size="sm" onClick={() => edit({ ...hours, days: { ...hours.days, [d]: w ? null : DEFAULT_WINDOW } })} />
-              <Button label="Reset" variant="ghost" size="sm" onClick={() => edit({ ...hours, days: Object.fromEntries(days.filter(([x]) => x !== d)) })} />
+              <StackItem size="fill">
+                <Text>
+                  {dateLabel(d)}
+                  {w ? "" : " · Closed"}
+                </Text>
+              </StackItem>
+              <Button
+                label={w ? "Close" : "Open"}
+                variant="ghost"
+                size="sm"
+                onClick={() => edit({ ...hours, days: { ...hours.days, [d]: w ? null : DEFAULT_WINDOW } })}
+              />
+              <Button
+                label="Reset"
+                variant="ghost"
+                size="sm"
+                onClick={() => edit({ ...hours, days: Object.fromEntries(days.filter(([x]) => x !== d)) })}
+              />
             </HStack>
             {w ? <Times w={w} set={(x) => edit({ ...hours, days: { ...hours.days, [d]: x } })} label={dateLabel(d)} /> : null}
           </VStack>
         ))}
         <HStack gap={2} vAlign="end">
-          <DateInput label="A date to change" size="sm" min={ymdPT() as never} value={(pick || undefined) as never} onChange={(v) => setPick(v ?? "")} />
-          <Button label="Change this date" variant="secondary" size="sm" isDisabled={!pick} onClick={() => {
-            const w = hours.week[new Date(`${pick}T00:00:00Z`).getUTCDay()];
-            edit({ ...hours, days: { ...hours.days, [pick]: w ? null : DEFAULT_WINDOW } });
-            setPick("");
-          }} />
+          <DateInput
+            label="A date to change"
+            size="sm"
+            min={ymdPT() as never}
+            value={(pick || undefined) as never}
+            onChange={(v) => setPick(v ?? "")}
+          />
+          <Button
+            label="Change this date"
+            variant="secondary"
+            size="sm"
+            isDisabled={!pick}
+            onClick={() => {
+              const w = hours.week[new Date(`${pick}T00:00:00Z`).getUTCDay()];
+              edit({ ...hours, days: { ...hours.days, [pick]: w ? null : DEFAULT_WINDOW } });
+              setPick("");
+            }}
+          />
         </HStack>
-        <Text type="supporting" color="secondary">A day you work turns closed; a day off opens 10 AM to 7 PM. Adjust after.</Text>
+        <Text type="supporting" color="secondary">
+          A day you work turns closed; a day off opens 10 AM to 7 PM. Adjust after.
+        </Text>
       </VStack>
       <HStack gap={3} vAlign="center">
         <Button label={busy ? "Saving" : "Save hours"} variant="primary" isDisabled={busy || note !== "Not saved"} onClick={save} />
-        <Text type="code" size="sm" color="secondary" role="status">{note}</Text>
+        <Text type="code" size="sm" color="secondary" role="status">
+          {note}
+        </Text>
       </HStack>
     </Page>
   );
 }
 
 /** The saved replies. `error`: why the list did not load, shown above it. */
-export function TemplatesDesk({ templates, saved, error }: { templates: Template[]; saved: (t: Template[]) => void; error?: string | null }) {
+export function TemplatesDesk({
+  templates,
+  saved,
+  error,
+}: {
+  templates: Template[];
+  saved: (t: Template[]) => void;
+  error?: string | null;
+}) {
   const [list, setList] = React.useState(templates);
   const [note, setNote] = React.useState<string | null>(null);
   const edit = (i: number, k: keyof Template) => (v: string) => setList(list.map((t, j) => (j === i ? { ...t, [k]: v } : t)));
   const save = () =>
     deskCall<{ templates: Template[] }>({ path: "/templates", method: "PUT", body: JSON.stringify({ templates: list }) })
-      .then((o) => { saved(o.templates); setList(o.templates); setNote("Saved."); })
+      .then((o) => {
+        saved(o.templates);
+        setList(o.templates);
+        setNote("Saved.");
+      })
       .catch((e: unknown) => setNote(errorText(e)));
   return (
     <Page gap={6} maxWidth={640} eyebrow="SAVED REPLIES" title="Templates">
       <Text color="secondary">{"{first}, {name}, {kind} and {when} fill in for each lead."}</Text>
-      {error ? <Text type="code" size="sm" color="secondary" role="status">{error}</Text> : null}
+      {error ? (
+        <Text type="code" size="sm" color="secondary" role="status">
+          {error}
+        </Text>
+      ) : null}
       {list.map((t, i) => (
         <Card key={t.id + i} padding={4}>
           <VStack gap={3}>
             <TextInput label="Name" value={t.name} onChange={edit(i, "name")} />
             <TextInput label="Subject" value={t.subject} onChange={edit(i, "subject")} />
             <TextArea label="Message" value={t.body} onChange={edit(i, "body")} rows={6} />
-            <HStack><Button label="Remove" variant="ghost" size="sm" onClick={() => setList(list.filter((_, j) => j !== i))} /></HStack>
+            <HStack>
+              <Button label="Remove" variant="ghost" size="sm" onClick={() => setList(list.filter((_, j) => j !== i))} />
+            </HStack>
           </VStack>
         </Card>
       ))}
       <HStack gap={2}>
-        <Button label="Add a template" variant="secondary" onClick={() => setList([...list, { id: `t${Date.now()}`, name: "New template", subject: "", body: "Hi {first},\n\n\n\nJulian" }])} />
+        <Button
+          label="Add a template"
+          variant="secondary"
+          onClick={() => setList([...list, { id: `t${Date.now()}`, name: "New template", subject: "", body: "Hi {first},\n\n\n\nJulian" }])}
+        />
         <Button label="Save templates" variant="primary" onClick={save} />
       </HStack>
-      {note ? <Text type="code" size="sm" color="secondary" role="status">{note}</Text> : null}
+      {note ? (
+        <Text type="code" size="sm" color="secondary" role="status">
+          {note}
+        </Text>
+      ) : null}
       <Divider />
       <ContractTemplatesDesk />
     </Page>
@@ -168,14 +270,22 @@ export function DeviceDesk({ reload, signOut }: { reload: () => void; signOut: (
   const able = typeof navigator !== "undefined" && "serviceWorker" in navigator && "PushManager" in window;
   const [on, setOn] = React.useState<boolean | null>(null);
   const [note, setNote] = React.useState<string | null>(() =>
-    able ? null : /iPhone|iPad/.test(navigator.userAgent) ? "Open the installed Leads app to turn these on." : "This browser cannot do notifications.",
+    able
+      ? null
+      : /iPhone|iPad/.test(navigator.userAgent)
+        ? "Open the installed Leads app to turn these on."
+        : "This browser cannot do notifications.",
   );
   const [count, setCount] = React.useState<Count | null>(null);
   const [busy, setBusy] = React.useState(false);
   const [said, setSaid] = React.useState<string | null>(null);
   React.useEffect(() => {
     if (!able) return;
-    navigator.serviceWorker.getRegistration(swScope()).then((r) => r?.pushManager.getSubscription()).then((s) => setOn(!!s)).catch(() => setOn(false));
+    navigator.serviceWorker
+      .getRegistration(swScope())
+      .then((r) => r?.pushManager.getSubscription())
+      .then((s) => setOn(!!s))
+      .catch(() => setOn(false));
   }, [able]);
 
   const turnOn = async () => {
@@ -190,7 +300,9 @@ export function DeviceDesk({ reload, signOut }: { reload: () => void; signOut: (
       await deskCall({ path: "/push", method: "PUT", body: JSON.stringify(sub.toJSON()) });
       localSet(PUSH_FLAG, "1");
       setOn(true);
-    } catch (e) { setNote(errorText(e)); }
+    } catch (e) {
+      setNote(errorText(e));
+    }
   };
   const turnOff = async () => {
     try {
@@ -200,14 +312,22 @@ export function DeviceDesk({ reload, signOut }: { reload: () => void; signOut: (
         await sub.unsubscribe();
       }
       setOn(false);
-    } catch (e) { setNote(errorText(e)); }
+    } catch (e) {
+      setNote(errorText(e));
+    }
   };
   const sendTest = async () => {
     setNote("Sending.");
     try {
       const { devices } = await deskCall<{ devices: number }>({ path: "/push", method: "POST" });
-      setNote(devices ? `Arrives in 10 seconds on ${devices} ${devices === 1 ? "device" : "devices"}. Lock the phone now: no banner shows while the app is open.` : "No device is subscribed. Turn notifications off and on again here.");
-    } catch (e) { setNote(errorText(e)); }
+      setNote(
+        devices
+          ? `Arrives in 10 seconds on ${devices} ${devices === 1 ? "device" : "devices"}. Lock the phone now: no banner shows while the app is open.`
+          : "No device is subscribed. Turn notifications off and on again here.",
+      );
+    } catch (e) {
+      setNote(errorText(e));
+    }
   };
   /** Counts first (a dry run), imports only on the second press. */
   const backfill = (dry: boolean) => {
@@ -239,42 +359,99 @@ export function DeviceDesk({ reload, signOut }: { reload: () => void; signOut: (
       .catch((e: unknown) => setPaidSaid(errorText(e)))
       .finally(() => setBusy(false));
   };
-  const by = count ? Object.entries(count.stages).map(([s, n]) => `${s} ${n}`).join(", ") : "";
+  const by = count
+    ? Object.entries(count.stages)
+        .map(([s, n]) => `${s} ${n}`)
+        .join(", ")
+    : "";
 
   return (
     <Page gap={6} maxWidth={640} eyebrow="THIS PHONE OR LAPTOP" title="This device">
       <VStack gap={2}>
         <Heading level={2}>Notifications</Heading>
         {on === null ? null : <Switch label="A new lead pings this device" value={on} onChange={(v) => (v ? turnOn() : turnOff())} />}
-        {on ? <HStack><Button label="Send a test" variant="ghost" size="sm" onClick={sendTest} /></HStack> : null}
-        {note ? <Text type="code" size="sm" color="secondary">{note}</Text> : null}
+        {on ? (
+          <HStack>
+            <Button label="Send a test" variant="ghost" size="sm" onClick={sendTest} />
+          </HStack>
+        ) : null}
+        {note ? (
+          <Text type="code" size="sm" color="secondary">
+            {note}
+          </Text>
+        ) : null}
       </VStack>
       <Divider />
       <VStack gap={2}>
         <Heading level={2}>Import from the Inbox</Heading>
         {count ? (
           <>
-            <Text>{count.added} new{by ? ` (${by})` : ""}, {count.updated} updated, from {count.people} {count.people === 1 ? "person" : "people"} in the Inbox.</Text>
-            <HStack gap={2}><Button label="Import" variant="primary" size="sm" isDisabled={busy} onClick={() => backfill(false)} /><Button label="Cancel" variant="ghost" size="sm" isDisabled={busy} onClick={() => setCount(null)} /></HStack>
+            <Text>
+              {count.added} new{by ? ` (${by})` : ""}, {count.updated} updated, from {count.people}{" "}
+              {count.people === 1 ? "person" : "people"} in the Inbox.
+            </Text>
+            <HStack gap={2}>
+              <Button label="Import" variant="primary" size="sm" isDisabled={busy} onClick={() => backfill(false)} />
+              <Button label="Cancel" variant="ghost" size="sm" isDisabled={busy} onClick={() => setCount(null)} />
+            </HStack>
           </>
-        ) : <HStack><Button label={busy ? "Counting" : "Count what is new"} variant="secondary" size="sm" isDisabled={busy} onClick={() => backfill(true)} /></HStack>}
-        {said ? <Text type="code" size="sm" color="secondary">{said}</Text> : null}
+        ) : (
+          <HStack>
+            <Button
+              label={busy ? "Counting" : "Count what is new"}
+              variant="secondary"
+              size="sm"
+              isDisabled={busy}
+              onClick={() => backfill(true)}
+            />
+          </HStack>
+        )}
+        {said ? (
+          <Text type="code" size="sm" color="secondary">
+            {said}
+          </Text>
+        ) : null}
       </VStack>
       <Divider />
       <VStack gap={2}>
         <Heading level={2}>Import past Stripe payments</Heading>
         {money ? (
           <>
-            <Text>{money.payments} payments and {money.refunds} refunds to add, for {money.people} {money.people === 1 ? "person" : "people"}. {money.already} already here{money.noEmail ? `, ${money.noEmail} with no address skipped` : ""}.</Text>
-            <HStack gap={2}><Button label="Import" variant="primary" size="sm" isDisabled={busy} onClick={() => fromStripe(false)} /><Button label="Cancel" variant="ghost" size="sm" isDisabled={busy} onClick={() => setMoney(null)} /></HStack>
+            <Text>
+              {money.payments} payments and {money.refunds} refunds to add, for {money.people} {money.people === 1 ? "person" : "people"}.{" "}
+              {money.already} already here{money.noEmail ? `, ${money.noEmail} with no address skipped` : ""}.
+            </Text>
+            <HStack gap={2}>
+              <Button label="Import" variant="primary" size="sm" isDisabled={busy} onClick={() => fromStripe(false)} />
+              <Button label="Cancel" variant="ghost" size="sm" isDisabled={busy} onClick={() => setMoney(null)} />
+            </HStack>
           </>
-        ) : <HStack><Button label={busy ? "Counting" : "Count what is new"} variant="secondary" size="sm" isDisabled={busy} onClick={() => fromStripe(true)} /></HStack>}
-        {paidSaid ? <Text type="code" size="sm" color="secondary">{paidSaid}</Text> : null}
+        ) : (
+          <HStack>
+            <Button
+              label={busy ? "Counting" : "Count what is new"}
+              variant="secondary"
+              size="sm"
+              isDisabled={busy}
+              onClick={() => fromStripe(true)}
+            />
+          </HStack>
+        )}
+        {paidSaid ? (
+          <Text type="code" size="sm" color="secondary">
+            {paidSaid}
+          </Text>
+        ) : null}
       </VStack>
       <Divider />
       <HStack gap={2}>
         <Button label="Clients CSV" variant="secondary" size="sm" onClick={() => exportCsv().catch((e: unknown) => alert(errorText(e)))} />
-        <Button label="Activity CSV" variant="secondary" size="sm" onClick={() => exportCsv("activity").catch((e: unknown) => alert(errorText(e)))} />
+        <Button
+          label="Activity CSV"
+          variant="secondary"
+          size="sm"
+          onClick={() => exportCsv("activity").catch((e: unknown) => alert(errorText(e)))}
+        />
         <Button label="Sign out on this device" variant="ghost" size="sm" onClick={signOut} />
       </HStack>
     </Page>

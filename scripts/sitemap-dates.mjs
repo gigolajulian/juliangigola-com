@@ -28,12 +28,7 @@ import { writeFileSync } from "node:fs";
 
 const OUT = "lib/sitemap-dates.json";
 /** The legal page is words in components, not photographs. */
-const LEGAL = [
-  "app/legal/page.tsx",
-  "components/site/legal.tsx",
-  "components/site/terms.tsx",
-  "components/site/privacy.tsx",
-];
+const LEGAL = ["app/legal/page.tsx", "components/site/legal.tsx", "components/site/terms.tsx", "components/site/privacy.tsx"];
 
 const git = (...args) =>
   execFileSync("git", ["-c", "core.quotePath=false", ...args], {
@@ -49,10 +44,7 @@ try {
   const dates = {};
   let date;
   // Newest commit first, so the first date a key meets is its latest.
-  const log = git(
-    "log", "--format=%cI", "--name-only", "--",
-    "public/work", "public/hero", "public/covers", ...LEGAL,
-  );
+  const log = git("log", "--format=%cI", "--name-only", "--", "public/work", "public/hero", "public/covers", ...LEGAL);
   for (const line of log.split("\n")) {
     if (/^\d{4}-\d\d-\d\dT/.test(line)) date = line;
     else if (line) {

@@ -2,10 +2,12 @@ import { describe, expect, it, vi } from "vitest";
 import { act, fireEvent, render } from "@testing-library/react";
 
 // gsap stands in with a quickTo that lands at once, so the test reads where each move ends.
-const quickTo = vi.fn((target: Record<string, number>, key: string, vars: { duration: number; ease: string; onUpdate: () => void }) => (v: number) => {
-  target[key] = v;
-  vars.onUpdate();
-});
+const quickTo = vi.fn(
+  (target: Record<string, number>, key: string, vars: { duration: number; ease: string; onUpdate: () => void }) => (v: number) => {
+    target[key] = v;
+    vars.onUpdate();
+  },
+);
 vi.mock("@/lib/motion/gsap-lazy", () => ({
   loadGsap: () => Promise.resolve({ quickTo, killTweensOf: vi.fn() }),
 }));

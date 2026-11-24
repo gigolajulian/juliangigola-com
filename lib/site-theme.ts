@@ -16,8 +16,7 @@ export function useSiteThemeRead(): "dark" | "light" | null {
   const [theme, setTheme] = React.useState<"dark" | "light" | null>(null);
   React.useEffect(() => {
     const root = document.documentElement;
-    const read = () =>
-      setTheme(root.dataset.theme === "light" ? "light" : "dark");
+    const read = () => setTheme(root.dataset.theme === "light" ? "light" : "dark");
     read();
     const watch = new MutationObserver(read);
     watch.observe(root, { attributes: true, attributeFilter: ["data-theme"] });

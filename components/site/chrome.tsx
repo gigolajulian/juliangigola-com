@@ -13,12 +13,15 @@ import { sessionGet, sessionSet } from "@/lib/storage";
 /* JG V3 chrome: the glass header, the phone menu, the theme
    toggle and the footer line. Every route uses it, /admin included. */
 
-
 /* Motion that is not in the master (the splash, the page zoom, the pointer
    mark, tilt, glass light, fades): on the client only, so the server and the
    first paint render the fallback. */
 export function MotionGate({ children, fallback = null }: { children: React.ReactNode; fallback?: React.ReactNode }) {
-  const on = React.useSyncExternalStore(noSubscribe, () => true, () => false);
+  const on = React.useSyncExternalStore(
+    noSubscribe,
+    () => true,
+    () => false,
+  );
   return <>{on ? children : fallback}</>;
 }
 
@@ -118,7 +121,8 @@ function HeaderBar() {
     // Desktop keeps the header: it and the toolbar are one glass bar.
     const desk = matchMedia("(min-width: 701px) and (hover: hover) and (pointer: fine)");
     const sync = () => {
-      const y = scrollY, d = y - last;
+      const y = scrollY,
+        d = y - last;
       if (Math.abs(d) < 6) return;
       last = y;
       // Typing in the header field: stay tucked, or a rotation's scroll untucks it and the field leaves the keyboard's view (iPhone Duo).
@@ -142,8 +146,10 @@ function HeaderBar() {
     document.documentElement.toggleAttribute("data-tuck", tuck);
     if (!bar || !was) return;
     const now = bar.getBoundingClientRect();
-    const dx = was.right - now.right, dy = was.top - now.top;
-    if (dx || dy) bar.animate({ transform: [`translate(${dx}px,${dy}px)`, "none"] }, { duration: 250, easing: "cubic-bezier(.23,1,.32,1)" });
+    const dx = was.right - now.right,
+      dy = was.top - now.top;
+    if (dx || dy)
+      bar.animate({ transform: [`translate(${dx}px,${dy}px)`, "none"] }, { duration: 250, easing: "cubic-bezier(.23,1,.32,1)" });
   }, [tuck]);
   // The v4 home has no cover to wait for, the bar is there from the start.
   const show = !tuck;
@@ -193,18 +199,34 @@ function HeaderBar() {
       {/* Inert per part, not the whole bar: the portfolio's tools stay live in it while it tucks. */}
       <header ref={hdr} className={`site-hdr${show || menu ? " show" : ""}${menu ? " landed" : ""}${menu ? " menu-on" : ""}`}>
         {/* On the homepage it glides back up to the hero (a jump under Reduce Motion); elsewhere page-fly.tsx opens Home at its top. */}
-        <Link className="wm site-wm" href="/" inert={!(show || menu)} onClick={(e) => {
-          if (path !== "/" || e.metaKey || e.ctrlKey || e.shiftKey) return;
-          e.preventDefault();
-          setMenu(false);
-          scrollTop(!matchMedia("(prefers-reduced-motion: reduce)").matches);
-        }}>Julian Gigola</Link>
+        <Link
+          className="wm site-wm"
+          href="/"
+          inert={!(show || menu)}
+          onClick={(e) => {
+            if (path !== "/" || e.metaKey || e.ctrlKey || e.shiftKey) return;
+            e.preventDefault();
+            setMenu(false);
+            scrollTop(!matchMedia("(prefers-reduced-motion: reduce)").matches);
+          }}
+        >
+          Julian Gigola
+        </Link>
         <div id="hdr-tools" className="hslot" />
         <nav className="links lbl burger" aria-label="Main" inert={!(show || menu)}>
           {NAV.map((n) => (
-            <Link key={n.href} href={n.href} aria-current={current(path, n.href) ? "page" : undefined}>{n.label}</Link>
+            <Link key={n.href} href={n.href} aria-current={current(path, n.href) ? "page" : undefined}>
+              {n.label}
+            </Link>
           ))}
-          <button className={menu ? "menu-btn burger-btn open" : "menu-btn burger-btn"} type="button" aria-expanded={menu} aria-controls="pmenu" aria-label={menu ? "Close menu" : "Menu"} onClick={() => setMenu(!menu)}>
+          <button
+            className={menu ? "menu-btn burger-btn open" : "menu-btn burger-btn"}
+            type="button"
+            aria-expanded={menu}
+            aria-controls="pmenu"
+            aria-label={menu ? "Close menu" : "Menu"}
+            onClick={() => setMenu(!menu)}
+          >
             <i aria-hidden />
             <i aria-hidden />
           </button>
@@ -218,14 +240,24 @@ function HeaderBar() {
           right edge (Julian's iPhone). */}
       <div className="pwrap">
         <div className={menu ? "pdim open" : "pdim"} aria-hidden onClick={() => setMenu(false)} />
-        <nav className={menu ? "pmenu drawer open" : "pmenu drawer"} id="pmenu" aria-label="Menu" inert={!menu} onClick={(e) => (e.target as HTMLElement).closest("a") && setMenu(false)}>
+        <nav
+          className={menu ? "pmenu drawer open" : "pmenu drawer"}
+          id="pmenu"
+          aria-label="Menu"
+          inert={!menu}
+          onClick={(e) => (e.target as HTMLElement).closest("a") && setMenu(false)}
+        >
           <Link href="/">Home</Link>
           {NAV.map((n) => (
-            <Link key={n.href} href={n.href} aria-current={current(path, n.href) ? "page" : undefined}>{n.label}</Link>
+            <Link key={n.href} href={n.href} aria-current={current(path, n.href) ? "page" : undefined}>
+              {n.label}
+            </Link>
           ))}
           <div className="pmenu-foot">
             <ThemeButton />
-            <a className="lbl mute" href="mailto:hello@juliangigola.com">hello@juliangigola.com</a>
+            <a className="lbl mute" href="mailto:hello@juliangigola.com">
+              hello@juliangigola.com
+            </a>
           </div>
         </nav>
       </div>
@@ -248,7 +280,8 @@ export function FootLine() {
 
 /* Screens built from the master carry their own footer line (`FootLine`);
    the pages restyled by tokens only get it here, after `main`. */
-const OWN_FOOT = /^\/($|portfolio(\/video)?$|bts$|about$|contact(\/form)?$|book(\/|$)|portraits$|headshots$|graduation-photos(\/|$)|model-digitals$|weddings$|music-photography$|fashion-photography$|brand-photography$|admin(\/|$)|proof\/)/;
+const OWN_FOOT =
+  /^\/($|portfolio(\/video)?$|bts$|about$|contact(\/form)?$|book(\/|$)|portraits$|headshots$|graduation-photos(\/|$)|model-digitals$|weddings$|music-photography$|fashion-photography$|brand-photography$|admin(\/|$)|proof\/)/;
 
 /* The line stays on the private pages and the forms (booking, contract, delivery, proof, contact). */
 const LINE_ONLY = /^\/(booking|contract|delivery|proof|contact|book|admin)(\/|$)/;

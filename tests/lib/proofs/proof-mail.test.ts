@@ -53,7 +53,9 @@ describe("receiptMail", () => {
 describe("alertLines", () => {
   it("does the extras sum and says a bank payment is still clearing", () => {
     const sel = Array.from({ length: 12 }, (_, i) => `f${i}`);
-    const a = alertLines(proof({ selects: sel, submittedBy: "kai@x.co", balance: 200, paid: { session: "s", amount: 25000, at: "", pending: true } }));
+    const a = alertLines(
+      proof({ selects: sel, submittedBy: "kai@x.co", balance: 200, paid: { session: "s", amount: 25000, at: "", pending: true } }),
+    );
     expect(a.subject).toBe("Selects in: Nov 1 portraits (12, $250 paid by bank, clearing in about 4 business days)");
     expect(a.lines).toContain("Shoot balance: $200.");
     expect(a.lines).toContain("10 included · 2 extra × $25 = $50.");
@@ -61,7 +63,12 @@ describe("alertLines", () => {
 });
 
 describe("sendClient", () => {
-  const m = { subject: "S", text: "t", html: '<img src="cid:name-ink"><tr><td style="padding-bottom:30px"><table>frames</table></td></tr>', attachments: [] };
+  const m = {
+    subject: "S",
+    text: "t",
+    html: '<img src="cid:name-ink"><tr><td style="padding-bottom:30px"><table>frames</table></td></tr>',
+    attachments: [],
+  };
 
   it("is false with no mailer", async () => {
     expect(await sendClient(undefined, "a@b.c", m)).toBe(false);

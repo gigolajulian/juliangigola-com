@@ -19,13 +19,7 @@ const SLOP = 10;
 
 type Sample = { t: number; x: number; y: number };
 
-export function useSwipe({
-  onStep,
-  onDismiss,
-}: {
-  onStep: (delta: 1 | -1) => void;
-  onDismiss: () => void;
-}) {
+export function useSwipe({ onStep, onDismiss }: { onStep: (delta: 1 | -1) => void; onDismiss: () => void }) {
   const ref = React.useRef<HTMLDivElement>(null);
   const drag = React.useRef<{
     id: number;
@@ -38,24 +32,12 @@ export function useSwipe({
   // not also close the lightbox.
   const moved = React.useRef(false);
 
-  const place = (
-    x: number,
-    y: number,
-    scale: number,
-    opacity: number,
-    settle: boolean,
-  ) => {
+  const place = (x: number, y: number, scale: number, opacity: number, settle: boolean) => {
     const el = ref.current;
     if (!el) return;
     const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    el.style.transition =
-      settle && !still
-        ? "transform 360ms var(--ease-spring), opacity 200ms var(--ease-out-strong)"
-        : "none";
-    el.style.transform =
-      x || y || scale !== 1
-        ? `translate(${x}px, ${y}px) scale(${scale})`
-        : "";
+    el.style.transition = settle && !still ? "transform 360ms var(--ease-spring), opacity 200ms var(--ease-out-strong)" : "none";
+    el.style.transform = x || y || scale !== 1 ? `translate(${x}px, ${y}px) scale(${scale})` : "";
     el.style.opacity = opacity === 1 ? "" : String(opacity);
   };
 
@@ -113,8 +95,7 @@ export function useSwipe({
     const vy = (last.y - first.y) / dt;
 
     if (d.axis === "x") {
-      const commit =
-        Math.abs(dx) > el.clientWidth * 0.3 || Math.abs(vx) > FLICK;
+      const commit = Math.abs(dx) > el.clientWidth * 0.3 || Math.abs(vx) > FLICK;
       // Sign, not position: a flick back the way it came reverses.
       const dir: 1 | -1 = (Math.abs(vx) > FLICK ? vx : dx) < 0 ? 1 : -1;
       if (commit) {

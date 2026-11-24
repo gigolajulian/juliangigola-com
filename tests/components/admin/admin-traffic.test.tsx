@@ -21,10 +21,9 @@ describe("AdminTraffic", () => {
     window.localStorage.setItem(TOKEN_STORE, "tok");
     const fetchMock = vi.fn(
       async () =>
-        new Response(
-          JSON.stringify({ visits: 42, sources: [{ key: "google", n: 10 }], devices: [{ key: "mobile", n: 21 }] }),
-          { status: 200 },
-        ),
+        new Response(JSON.stringify({ visits: 42, sources: [{ key: "google", n: 10 }], devices: [{ key: "mobile", n: 21 }] }), {
+          status: 200,
+        }),
     );
     vi.stubGlobal("fetch", fetchMock);
     render(<AdminTraffic />);

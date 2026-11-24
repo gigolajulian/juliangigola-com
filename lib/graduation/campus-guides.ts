@@ -82,9 +82,10 @@ export const CAMPUS_GUIDES: CampusGuide[] = [
       },
       {
         q: "How much are graduation photos at SJSU?",
-        a: grad.from === null
-          ? "I quote it when you get in touch, and there's no travel fee for SJSU."
-          : `It's $${grad.from.toLocaleString("en-US")} for 90 minutes on campus. That covers two outfit changes, an edited gallery and a print release, and there's no travel fee for SJSU.`,
+        a:
+          grad.from === null
+            ? "I quote it when you get in touch, and there's no travel fee for SJSU."
+            : `It's $${grad.from.toLocaleString("en-US")} for 90 minutes on campus. That covers two outfit changes, an edited gallery and a print release, and there's no travel fee for SJSU.`,
       },
       {
         q: "When should I book my SJSU grad photos?",

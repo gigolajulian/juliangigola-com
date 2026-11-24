@@ -9,15 +9,22 @@ import { pacificFormat } from "@/lib/time-zone";
 import { shootTag, STAGES, type LeadSummary, type Stage as StageName } from "@/lib/leads/leads";
 
 const ROAD: readonly StageName[] = STAGES.filter((s) => s !== "Lost");
-export const date = (iso: string) => pacificFormat({ weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(iso));
+export const date = (iso: string) =>
+  pacificFormat({ weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(iso));
 
 function Stage({ l }: { l: LeadSummary }) {
   const at = ROAD.indexOf(l.stage);
   return (
     <VStack gap={1}>
       <HStack gap={2} vAlign="center">
-        <StackItem size="fill"><Text type="label">{l.stage}</Text></StackItem>
-        {at >= 0 ? <Text type="code" size="xsm" color="secondary">{at + 1} of {ROAD.length}</Text> : null}
+        <StackItem size="fill">
+          <Text type="label">{l.stage}</Text>
+        </StackItem>
+        {at >= 0 ? (
+          <Text type="code" size="xsm" color="secondary">
+            {at + 1} of {ROAD.length}
+          </Text>
+        ) : null}
       </HStack>
       {at >= 0 ? <ProgressBar label="Stage" isLabelHidden value={at + 1} max={ROAD.length} /> : null}
     </VStack>
@@ -25,12 +32,24 @@ function Stage({ l }: { l: LeadSummary }) {
 }
 
 /** The lead picked in the list, with its stage, its next step and its last words. */
-export function OpenLeadPanel({ sel, waiting, open, snooze }: { sel: LeadSummary; waiting: boolean; open: () => void; snooze: () => void }) {
+export function OpenLeadPanel({
+  sel,
+  waiting,
+  open,
+  snooze,
+}: {
+  sel: LeadSummary;
+  waiting: boolean;
+  open: () => void;
+  snooze: () => void;
+}) {
   return (
     <LayoutPanel width={400} hasDivider label="Open lead">
       <VStack gap={5}>
         <VStack gap={1}>
-          <Eyebrow>{[sel.kind ? shootTag(sel.kind)?.toUpperCase() : null, sel.when ? date(sel.when) : null].filter(Boolean).join(" · ") || "LEAD"}</Eyebrow>
+          <Eyebrow>
+            {[sel.kind ? shootTag(sel.kind)?.toUpperCase() : null, sel.when ? date(sel.when) : null].filter(Boolean).join(" · ") || "LEAD"}
+          </Eyebrow>
           <Heading level={2}>{sel.name}</Heading>
         </VStack>
         <Stage l={sel} />

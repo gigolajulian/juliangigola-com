@@ -25,22 +25,40 @@ export function About() {
           <div className="ab-text">
             <p className="ab-bio">{BIO}</p>
             <dl className="facts">
-              <div><dt className="lbl mute">Based in</dt><dd>SF Bay Area</dd></div>
-              <div><dt className="lbl mute">Shooting</dt><dd>12 years</dd></div>
-              <div><dt className="lbl mute">Travel</dt><dd>Worldwide</dd></div>
+              <div>
+                <dt className="lbl mute">Based in</dt>
+                <dd>SF Bay Area</dd>
+              </div>
+              <div>
+                <dt className="lbl mute">Shooting</dt>
+                <dd>12 years</dd>
+              </div>
+              <div>
+                <dt className="lbl mute">Travel</dt>
+                <dd>Worldwide</dd>
+              </div>
             </dl>
             <div className="ab-block">
               <h2 className="lbl mute">What I do</h2>
               <ol className="svc">
                 {DISCIPLINES.map((d, i) => (
-                  <li key={d}><span className="lbl mute">{String(i + 1).padStart(2, "0")}</span>{d}</li>
+                  <li key={d}>
+                    <span className="lbl mute">{String(i + 1).padStart(2, "0")}</span>
+                    {d}
+                  </li>
                 ))}
               </ol>
             </div>
             <div className="ctas">
-              <Link className="btn fill" href="/contact/form">Inquire</Link>
-              <Link className="btn" href="/portfolio">See the work</Link>
-              <Link className="btn v4-m2p" href="/bts">Behind the scenes</Link>
+              <Link className="btn fill" href="/contact/form">
+                Inquire
+              </Link>
+              <Link className="btn" href="/portfolio">
+                See the work
+              </Link>
+              <Link className="btn v4-m2p" href="/bts">
+                Behind the scenes
+              </Link>
             </div>
           </div>
         </div>

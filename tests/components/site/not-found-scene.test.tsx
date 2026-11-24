@@ -17,4 +17,3 @@ describe("NotFoundScene", () => {
     expect(document.documentElement.dataset.theme).toBe("dark");
   });
 });
-

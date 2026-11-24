@@ -13,7 +13,10 @@ vi.mock("@opennextjs/cloudflare", async () => (await import("../fakes")).cloudfl
 const { GET, PATCH, DELETE } = await import("@/app/api/inbox/route");
 
 const URL_ = "https://juliangigola.com/api/inbox";
-const req = (method: string, { key = KEY, token, body, query = "" }: { key?: string | null; token?: string; body?: string; query?: string } = {}) =>
+const req = (
+  method: string,
+  { key = KEY, token, body, query = "" }: { key?: string | null; token?: string; body?: string; query?: string } = {},
+) =>
   new Request(URL_ + query, {
     method,
     body,
@@ -71,11 +74,22 @@ describe("the gate", () => {
   });
 
   it("refuses a token that cannot push, one GitHub rejects, and GitHub being down", async () => {
-    vi.stubGlobal("fetch", vi.fn(async () => reply({ permissions: { push: false } })));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => reply({ permissions: { push: false } })),
+    );
     expect((await GET(req("GET", { key: null, token: githubToken() }))).status).toBe(401);
-    vi.stubGlobal("fetch", vi.fn(async () => reply({ message: "Bad credentials" }, 401)));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => reply({ message: "Bad credentials" }, 401)),
+    );
     expect((await GET(req("GET", { key: null, token: githubToken() }))).status).toBe(401);
-    vi.stubGlobal("fetch", vi.fn(async () => { throw new Error("network"); }));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => {
+        throw new Error("network");
+      }),
+    );
     expect((await GET(req("GET", { key: null, token: githubToken() }))).status).toBe(401);
   });
 
@@ -131,7 +145,9 @@ describe("GET", () => {
 
   it("serves anything stored that is not a JPEG or PNG as a download that cannot run", async () => {
     const k = await seed(1_000, "aaaaaaaa");
-    await kv.put(`ref:${k}:0`, new TextEncoder().encode("<svg><script>alert(1)</script></svg>").buffer, { metadata: { type: "image/svg+xml" } });
+    await kv.put(`ref:${k}:0`, new TextEncoder().encode("<svg><script>alert(1)</script></svg>").buffer, {
+      metadata: { type: "image/svg+xml" },
+    });
     const res = await GET(req("GET", { query: `?key=ref:${k}:0` }));
     expect(res.headers.get("content-type")).toBe("application/octet-stream");
     expect(res.headers.get("content-disposition")).toBe("attachment");
@@ -207,7 +223,11 @@ describe("/api/inbox: the gate on every verb and bad bodies", () => {
     });
 
     it("refuses every verb without the key", async () => {
-      for (const res of [await GET(req("GET", undefined, null)), await PATCH(req("PATCH", "{}", null)), await DELETE(req("DELETE", "{}", null))])
+      for (const res of [
+        await GET(req("GET", undefined, null)),
+        await PATCH(req("PATCH", "{}", null)),
+        await DELETE(req("DELETE", "{}", null)),
+      ])
         expect(res.status).toBe(401);
       expect(kv.puts).toEqual([]);
     });
@@ -222,7 +242,7 @@ describe("/api/inbox: the gate on every verb and bad bodies", () => {
       const list = await GET(req("GET"));
       expect(list.headers.get("cache-control")).toContain("no-store");
       expect((await list.json()).rows).toEqual([expect.objectContaining({ key: k, name: "QA Test", read: false })]);
-      expect((await (await GET(req("GET", undefined, KEY, `?key=${k}`))).json())).toMatchObject({ enquiry: { message: "Hello" } });
+      expect(await (await GET(req("GET", undefined, KEY, `?key=${k}`))).json()).toMatchObject({ enquiry: { message: "Hello" } });
       expect((await PATCH(req("PATCH", JSON.stringify({ key: k, read: true })))).status).toBe(200);
       expect((await (await GET(req("GET"))).json()).rows[0].read).toBe(true);
     });

@@ -1,15 +1,7 @@
 "use client";
 
 import * as React from "react";
-import {
-  SECTIONS,
-  lookupVideo,
-  parseVideoUrl,
-  posterFor,
-  youtubeStills,
-  type Video,
-  type VideoSection,
-} from "@/lib/work/videos";
+import { SECTIONS, lookupVideo, parseVideoUrl, posterFor, youtubeStills, type Video, type VideoSection } from "@/lib/work/videos";
 import { cn } from "@/lib/utils";
 import { moveBefore } from "@/lib/admin/move-before";
 
@@ -28,13 +20,7 @@ import { moveBefore } from "@/lib/admin/move-before";
  * that matters; the title is then typed instead of fetched.
  * ─────────────────────────────────────────────────────────────── */
 
-export function AdminVideos({
-  videos,
-  onChange,
-}: {
-  videos: Video[];
-  onChange: (next: Video[]) => void;
-}) {
+export function AdminVideos({ videos, onChange }: { videos: Video[]; onChange: (next: Video[]) => void }) {
   const [url, setUrl] = React.useState("");
   const [busy, setBusy] = React.useState(false);
   const [problem, setProblem] = React.useState<string | null>(null);
@@ -44,9 +30,7 @@ export function AdminVideos({
   async function add() {
     const parsed = parseVideoUrl(url);
     if (!parsed) {
-      setProblem(
-        "That is not a YouTube or Vimeo link I can read. A watch link, a share link or youtu.be all work.",
-      );
+      setProblem("That is not a YouTube or Vimeo link I can read. A watch link, a share link or youtu.be all work.");
       return;
     }
     if (videos.some((v) => v.videoId === parsed.videoId)) {
@@ -76,8 +60,7 @@ export function AdminVideos({
     setBusy(false);
   }
 
-  const patch = (id: string, next: Partial<Video>) =>
-    onChange(videos.map((v) => (v.id === id ? { ...v, ...next } : v)));
+  const patch = (id: string, next: Partial<Video>) => onChange(videos.map((v) => (v.id === id ? { ...v, ...next } : v)));
 
   /** Lift and insert, like every other list in here. */
   const reorder = (from: string, to: string) => {
@@ -90,9 +73,8 @@ export function AdminVideos({
       <div className="flex flex-col gap-3">
         <h2 className="font-display text-xl uppercase tracking-[0]">Motion</h2>
         <p className="max-w-prose text-sm leading-relaxed text-muted-foreground">
-          Paste a YouTube or Vimeo link. The title comes across on its own and
-          the cover is picked from the stills below. Nothing loads from either
-          site on the public page until a visitor presses play.
+          Paste a YouTube or Vimeo link. The title comes across on its own and the cover is picked from the stills below. Nothing loads from
+          either site on the public page until a visitor presses play.
         </p>
 
         <div className="flex flex-wrap items-center gap-3">
@@ -132,11 +114,7 @@ export function AdminVideos({
           </button>
         </div>
 
-        {problem ? (
-          <p className="label border border-border bg-card px-4 py-3">
-            {problem}
-          </p>
-        ) : null}
+        {problem ? <p className="label border border-border bg-card px-4 py-3">{problem}</p> : null}
       </div>
 
       {SECTIONS.map((s) => {
@@ -151,9 +129,7 @@ export function AdminVideos({
             </div>
 
             {rows.length === 0 ? (
-              <p className="mt-3 text-sm text-muted-foreground">
-                Nothing here yet.
-              </p>
+              <p className="mt-3 text-sm text-muted-foreground">Nothing here yet.</p>
             ) : (
               <ul>
                 {rows.map((video) => (
@@ -172,23 +148,15 @@ export function AdminVideos({
                       // `dataTransfer` where the browser allows it, and the
                       // state as the fallback — protected mode makes `getData`
                       // return "" for a synthetic drag.
-                      reorder(
-                        e.dataTransfer.getData("text/plain") || dragging || "",
-                        video.id,
-                      );
+                      reorder(e.dataTransfer.getData("text/plain") || dragging || "", video.id);
                       setDragging(null);
                     }}
-                    className={cn(
-                      "flex cursor-grab flex-col gap-3 border-b border-border py-4",
-                      dragging === video.id && "opacity-50",
-                    )}
+                    className={cn("flex cursor-grab flex-col gap-3 border-b border-border py-4", dragging === video.id && "opacity-50")}
                   >
                     <div className="flex flex-wrap items-center gap-3">
                       <input
                         value={video.title}
-                        onChange={(e) =>
-                          patch(video.id, { title: e.target.value })
-                        }
+                        onChange={(e) => patch(video.id, { title: e.target.value })}
                         className="min-w-0 flex-1 border border-border bg-background px-3 py-2 text-sm"
                       />
                       <input
@@ -206,8 +174,7 @@ export function AdminVideos({
                         onChange={(e) => {
                           const n = Number(e.target.value);
                           patch(video.id, {
-                            year:
-                              Number.isInteger(n) && n > 1989 ? n : undefined,
+                            year: Number.isInteger(n) && n > 1989 ? n : undefined,
                           });
                         }}
                         placeholder="Year"
@@ -231,9 +198,7 @@ export function AdminVideos({
                       </select>
                       <button
                         type="button"
-                        onClick={() =>
-                          onChange(videos.filter((v) => v.id !== video.id))
-                        }
+                        onClick={() => onChange(videos.filter((v) => v.id !== video.id))}
                         aria-label={`Remove ${video.title}`}
                         className="label px-2 text-muted-foreground press hoverable:hover:text-foreground"
                       >
@@ -262,13 +227,7 @@ export function AdminVideos({
  * Vimeo gives one, looked up when the link was pasted, so there is nothing to
  * choose between and the row says so rather than showing an empty strip.
  */
-function Posters({
-  video,
-  onPick,
-}: {
-  video: Video;
-  onPick: (id: string, next: Partial<Video>) => void;
-}) {
+function Posters({ video, onPick }: { video: Video; onPick: (id: string, next: Partial<Video>) => void }) {
   const current = posterFor(video);
 
   if (video.provider === "vimeo") {
@@ -278,15 +237,9 @@ function Posters({
           // Not `next/image`: these are third-party thumbnails in a fixed
           // box, and the loader in this project rewrites archive paths.
           // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={current}
-            alt=""
-            className="h-16 w-28 border border-border object-cover"
-          />
+          <img src={current} alt="" className="h-16 w-28 border border-border object-cover" />
         ) : null}
-        <p className="label text-muted-foreground">
-          Vimeo publishes one still, and this is it.
-        </p>
+        <p className="label text-muted-foreground">Vimeo publishes one still, and this is it.</p>
       </div>
     );
   }
@@ -302,10 +255,7 @@ function Posters({
             type="button"
             onClick={() => onPick(video.id, { poster: src })}
             aria-pressed={chosen}
-            className={cn(
-              "border p-0.5 press",
-              chosen ? "border-foreground" : "border-border",
-            )}
+            className={cn("border p-0.5 press", chosen ? "border-foreground" : "border-border")}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img

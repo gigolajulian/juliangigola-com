@@ -40,7 +40,7 @@ export async function open(browser: Browser, browserName: string, r: Ratio): Pro
     for (; day <= end; day.setUTCDate(day.getUTCDate() + 1)) {
       if (day.getUTCDay() === 1 || day.getUTCDay() === 2) continue;
       const date = day.toISOString().slice(0, 10);
-      const at = (m: number) => `${date}T${String(m / 60 | 0).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}:00.000-07:00`;
+      const at = (m: number) => `${date}T${String((m / 60) | 0).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}:00.000-07:00`;
       data[date] = Array.from({ length: 16 }, (_, i) => at(600 + i * 30));
     }
     return data;

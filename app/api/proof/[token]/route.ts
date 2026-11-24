@@ -5,7 +5,17 @@ import type { Seal } from "@/lib/seal";
 import { recordLead } from "@/lib/leads/lead-store";
 import { checkout, checkPaid, finalize } from "@/lib/proofs/submit";
 import { PAYMENTS_DOWN, PAYMENTS_OFF } from "@/lib/stripe";
-import { cleanSelects, device, isTestEmail, amountOwed, isToken, publicView, withViewerEvent, viewerKey, type Proof } from "@/lib/proofs/proof-model";
+import {
+  cleanSelects,
+  device,
+  isTestEmail,
+  amountOwed,
+  isToken,
+  publicView,
+  withViewerEvent,
+  viewerKey,
+  type Proof,
+} from "@/lib/proofs/proof-model";
 import { isEmail, logged } from "@/lib/utils";
 import { checkPass, passCookie, passValue, shutReason, readPublic, writeProof } from "@/lib/proofs/proof-store";
 import { bodyOf, json, limited, upstreamError } from "@/lib/http";
@@ -50,9 +60,13 @@ async function unlock(token: string, request: Request, password: unknown) {
   // Its own key prefix: wrong passwords never use up the pay attempts on the same limiter.
   const slow = await limited(env.PUBLIC_WRITE_LIMIT, "pass", request);
   if (slow) return slow;
-  if (typeof password !== "string" || password.length > 200 || !(await checkPass(p.pass, password))) return json({ error: "That password is not right." }, 403);
+  if (typeof password !== "string" || password.length > 200 || !(await checkPass(p.pass, password)))
+    return json({ error: "That password is not right." }, 403);
   const res = json({ ok: true });
-  res.headers.append("set-cookie", `${passCookie(p)}=${await passValue(p, env.LEADS_KEY!)}; Path=/; Max-Age=${60 * 864e2}; HttpOnly; Secure; SameSite=Lax`);
+  res.headers.append(
+    "set-cookie",
+    `${passCookie(p)}=${await passValue(p, env.LEADS_KEY!)}; Path=/; Max-Age=${60 * 864e2}; HttpOnly; Secure; SameSite=Lax`,
+  );
   return res;
 }
 
@@ -76,17 +90,21 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ to
   const slow = await limited(g.env.DOWNLOAD_LIMIT, "selects", request);
   if (slow) return slow;
   if (g.proof.submittedAt) return json({ error: "Selects are already in." }, 409);
-  const b = ((await bodyOf(request)) ?? {});
+  const b = (await bodyOf(request)) ?? {};
   if (typeof b.email !== "string" || !isEmail(b.email)) return json({ error: "Add your email first." }, 400);
   const selects = cleanSelects(b.selects, g.proof.frames);
-  const next = { ...withVisit(g.proof, b.email, { picks: selects }), selects, firstSelectAt: g.proof.firstSelectAt ?? (selects.length && g.proof.sentAt ? new Date().toISOString() : undefined) };
+  const next = {
+    ...withVisit(g.proof, b.email, { picks: selects }),
+    selects,
+    firstSelectAt: g.proof.firstSelectAt ?? (selects.length && g.proof.sentAt ? new Date().toISOString() : undefined),
+  };
   await writeProof(g.kv, g.seal, next);
   return json({ ok: true });
 }
 
 export async function POST(request: Request, { params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
-  const b = ((await bodyOf(request)) ?? {});
+  const b = (await bodyOf(request)) ?? {};
   if (b.action === "unlock") return unlock(token, request, b.password);
   const g = await load(token, request);
   if (!g) return json({ error: "This gallery closed." }, 404);
@@ -95,26 +113,55 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
   if (b.action === "track") {
     if (typeof b.email !== "string" || !isEmail(b.email)) return json({ error: "Add your email first." }, 400);
     // "download" (a delivery's Save or Download all) names the final, "all" for the zip, or a model ("M04") for its zip.
-    const dl = b.kind === "download" && g.proof.finals?.length && (b.id === "all" || g.proof.finals.some((f) => f.id === b.id || f.model === b.id)) ? (b.id as string) : undefined;
+    const dl =
+      b.kind === "download" && g.proof.finals?.length && (b.id === "all" || g.proof.finals.some((f) => f.id === b.id || f.model === b.id))
+        ? (b.id as string)
+        : undefined;
     const kind = b.kind === "open" || b.kind === "review" ? b.kind : dl ? "download" : undefined;
-    const looks = b.looks && typeof b.looks === "object" ? Object.fromEntries(Object.entries(b.looks as Record<string, unknown>).filter(([id, ms]) => g.proof.frames.some((f) => f.id === id) && typeof ms === "number")) as Record<string, number> : undefined;
+    const looks =
+      b.looks && typeof b.looks === "object"
+        ? (Object.fromEntries(
+            Object.entries(b.looks as Record<string, unknown>).filter(
+              ([id, ms]) => g.proof.frames.some((f) => f.id === id) && typeof ms === "number",
+            ),
+          ) as Record<string, number>)
+        : undefined;
     const open = kind === "open" ? { device: device(request.headers.get("user-agent") ?? ""), place: await where() } : {};
     // The name from the gate, sent with the open only.
-    const name = kind === "open" && typeof b.name === "string" && b.name.trim() ? b.name.trim().replace(/\s+/g, " ").slice(0, 80) : undefined;
+    const name =
+      kind === "open" && typeof b.name === "string" && b.name.trim() ? b.name.trim().replace(/\s+/g, " ").slice(0, 80) : undefined;
     let next = withVisit(g.proof, b.email, { kind, id: dl, looks, seconds: Number(b.seconds) || 0, ...open, name });
     // The client's first download of the finals moves their lead to Delivered. Against the gallery's address, so the right lead moves.
     const first = dl && g.proof.deliveredAt && !g.proof.firstDownloadAt && !isTestEmail(b.email);
     if (first) next = { ...next, firstDownloadAt: new Date().toISOString() };
     await writeProof(g.kv, g.seal, next);
-    if (first) await recordLead(g.env, g.proof.email ?? b.email, { event: { at: next.firstDownloadAt!, kind: "download", ref: g.proof.token, note: g.proof.name } });
+    if (first)
+      await recordLead(g.env, g.proof.email ?? b.email, {
+        event: { at: next.firstDownloadAt!, kind: "download", ref: g.proof.token, note: g.proof.name },
+      });
     // "each": hello@ hears of an open or a download as it happens, once per address per half hour (opens) or ten minutes (downloads).
     const mailed = kind === "open" || kind === "download" ? kind : null;
-    if (mailed && g.proof.notify === "each" && (g.proof.sentAt || g.proof.deliveredAt) && !isTestEmail(b.email) && worthMail(g.proof.viewers?.[viewerKey(b.email)]?.events ?? [], mailed, new Date().toISOString(), mailed === "open" ? 30 : 10)) {
+    if (
+      mailed &&
+      g.proof.notify === "each" &&
+      (g.proof.sentAt || g.proof.deliveredAt) &&
+      !isTestEmail(b.email) &&
+      worthMail(g.proof.viewers?.[viewerKey(b.email)]?.events ?? [], mailed, new Date().toISOString(), mailed === "open" ? 30 : 10)
+    ) {
       const a = actionAlert(next, viewerKey(b.email), mailed, dl);
       await later(alertHello(g.env.EMAIL, a.subject, a.lines));
     }
     // A test address opening the gate (QA) stays in the gallery's own log, not on the desk as a lead.
-    if (kind === "open" && !isTestEmail(b.email)) await recordLead(g.env, b.email, { event: { at: new Date().toISOString(), kind: "proofs", ref: g.proof.token, note: g.proof.deliveredAt ? `${g.proof.name}, finals` : g.proof.name }, name });
+    if (kind === "open" && !isTestEmail(b.email))
+      await recordLead(g.env, b.email, {
+        event: {
+          at: new Date().toISOString(),
+          kind: "proofs",
+          ref: g.proof.token,
+          note: g.proof.deliveredAt ? `${g.proof.name}, finals` : g.proof.name,
+        },
+        name,
+      });
     // An address coming back gets its own picks; once sent, everyone sees what was sent.
     return json({ picks: g.proof.submittedAt ? g.proof.selects : (next.viewers?.[viewerKey(b.email)]?.picks ?? []) });
   }
@@ -136,7 +183,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
   const selects = cleanSelects(b.selects, g.proof.frames);
   if (!selects.length) return json({ error: "Select at least one frame." }, 400);
   // Notes are gone from the gallery; old ones are dropped with the send.
-  const p: Proof = { ...withVisit(g.proof, b.email, { picks: selects }), selects, notes: {}, message: undefined, submittedBy: b.email.trim() };
+  const p: Proof = {
+    ...withVisit(g.proof, b.email, { picks: selects }),
+    selects,
+    notes: {},
+    message: undefined,
+    submittedBy: b.email.trim(),
+  };
 
   if (amountOwed(p).cents === 0) return json({ done: true, ...publicView(await finalize(g.env, g.kv, g.seal, p)) });
   if (!key) return json({ error: PAYMENTS_OFF }, 503);

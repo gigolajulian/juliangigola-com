@@ -34,7 +34,6 @@ describe("wall tiles", () => {
   });
 });
 
-
 describe("logged", () => {
   it("logs the labels and the error as text, then gives undefined", async () => {
     const err = vi.spyOn(console, "error").mockImplementation(() => {});

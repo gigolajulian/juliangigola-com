@@ -18,9 +18,7 @@ describe("AdminSeo", () => {
 
   it("pulls the range and switches it", async () => {
     window.localStorage.setItem(TOKEN_STORE, "tok");
-    const fetchMock = vi.fn(
-      async () => new Response(JSON.stringify({ visits: 7, google: { error: "not linked" } }), { status: 200 }),
-    );
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify({ visits: 7, google: { error: "not linked" } }), { status: 200 }));
     vi.stubGlobal("fetch", fetchMock);
     render(<AdminSeo />);
     expect(await screen.findByText("Google: not linked")).toBeTruthy();

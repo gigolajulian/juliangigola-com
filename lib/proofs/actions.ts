@@ -3,7 +3,17 @@
    `lib/proofs/desk-api.ts` gates, parses and answers. */
 
 import { copiesFor, recordLead } from "@/lib/leads/lead-store";
-import { aliasKey, closesAt, DELIVERY_DAYS, frameKeys, isDateId, isStrongId, publicId, remindState, type Proof } from "@/lib/proofs/proof-model";
+import {
+  aliasKey,
+  closesAt,
+  DELIVERY_DAYS,
+  frameKeys,
+  isDateId,
+  isStrongId,
+  publicId,
+  remindState,
+  type Proof,
+} from "@/lib/proofs/proof-model";
 import { nextProofId, writeProof } from "@/lib/proofs/proof-store";
 import { deliveryMail, deliveryUrl, proofMail, proofUrl, reminderMail, sendClient, subjectOr } from "@/lib/proofs/proof-mail";
 import { servedFrame } from "@/lib/proofs/watermark";
@@ -71,7 +81,10 @@ export async function deliverFinals(d: ProofBindings, p: Proof, subject: unknown
   if (link !== was && p.link) await d.kv.delete(aliasKey(p.link));
   await recordLead(d.env, p.email, { event: { at: deliveredAt, kind: "mail", note: m.subject, mail: { to: "client", kind: "finals" } } });
   // Only web copies: never an original.
-  await dropKeys(d.r2, p.frames.flatMap((f) => frameKeys(p.token, f.id)));
+  await dropKeys(
+    d.r2,
+    p.frames.flatMap((f) => frameKeys(p.token, f.id)),
+  );
   return { proof: sent, url: deliveryUrl(link) };
 }
 
@@ -91,7 +104,10 @@ export async function sendReminder(d: ProofBindings, p: Proof): Promise<{ proof:
   if (!(await mailClient(d, p.email, m))) {
     // Undo the stamp so he can try again. KV allows one write per key per second, so wait that out first.
     await new Promise((ok) => setTimeout(ok, 1100));
-    const undone = await writeProof(d.kv, d.s, p).then(() => true, () => false);
+    const undone = await writeProof(d.kv, d.s, p).then(
+      () => true,
+      () => false,
+    );
     return undone ? NOT_SENT : { error: "The mail did not go out, and the reminder is still marked as sent. Tell Claude.", status: 502 };
   }
   await recordLead(d.env, p.email, { event: { at, kind: "mail", note: m.subject, mail: { to: "client", kind: r.stage } } });

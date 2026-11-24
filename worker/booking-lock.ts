@@ -1,6 +1,19 @@
 import type { HoursKV } from "../lib/booking/slots";
 import { asRecord } from "../lib/json";
-import { bookOwn, cancelOwn, dueHeadsUp, dueReminders, findBooking, markHeadsUp, markReminded, readHours, rescheduleOwn, writeHours, type LockOps, type Store } from "../lib/booking/engine";
+import {
+  bookOwn,
+  cancelOwn,
+  dueHeadsUp,
+  dueReminders,
+  findBooking,
+  markHeadsUp,
+  markReminded,
+  readHours,
+  rescheduleOwn,
+  writeHours,
+  type LockOps,
+  type Store,
+} from "../lib/booking/engine";
 
 /* ── the booking lock: one Durable Object for hello@'s calendar ─────
  * Every booking passes through `serial`, so a recheck and its insert

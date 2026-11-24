@@ -24,14 +24,16 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const body = (await bodyOf(request)) ?? {};
   // A desk tab loaded before the desk route existed still posts its two here: the admin gate, never the token.
   if (isDeskAction(body.action)) return (await refuseAdmin(request, env.INBOX_KEY)) ?? deskAction(env, id, body.action);
-  if (!(await tokenOpens(env.BOOKING_SECRET, id, typeof body.t === "string" ? body.t : undefined))) return json({ error: "This link has expired. Reply to your confirmation email." }, 401);
+  if (!(await tokenOpens(env.BOOKING_SECRET, id, typeof body.t === "string" ? body.t : undefined)))
+    return json({ error: "This link has expired. Reply to your confirmation email." }, 401);
   const slow = await limited(env.PUBLIC_WRITE_LIMIT, "booking", request);
   if (slow) return slow;
 
   let out: ChangeResult;
   try {
     if (body.action === "cancel") out = await lockOp(env, "cancel", id);
-    else if (body.action === "reschedule" && typeof body.start === "string") out = await lockOp(env, "reschedule", { id, start: body.start });
+    else if (body.action === "reschedule" && typeof body.start === "string")
+      out = await lockOp(env, "reschedule", { id, start: body.start });
     else return json({ error: "Nothing to do." }, 400);
   } catch (e) {
     return upstreamError("booking change", e, "Could not reach the calendar. Try again.");

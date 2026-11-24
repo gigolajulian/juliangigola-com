@@ -55,9 +55,7 @@ for (const path of SPLASH_PAGES) {
           const page = await ctx.newPage();
           await page.bringToFront();
           await page.goto(path, { waitUntil: "commit" });
-          await page
-            .waitForFunction(() => window.__splash.off >= 0, null, { timeout: 10_000 })
-            .catch(() => {});
+          await page.waitForFunction(() => window.__splash.off >= 0, null, { timeout: 10_000 }).catch(() => {});
           const s = await page.evaluate(() => window.__splash);
           const valid = await awake(page);
           const st = frameStats(s.frames);

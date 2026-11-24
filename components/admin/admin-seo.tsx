@@ -64,7 +64,9 @@ const seg = (on: boolean) =>
   `label -ml-px border px-3 py-1.5 press first:ml-0 ${on ? "relative border-foreground text-foreground" : "border-border text-muted-foreground"}`;
 // One hue, stronger with more: the accent over nothing.
 const cell = (t: number) =>
-  t <= 0 ? "color-mix(in oklch, var(--foreground) 5%, transparent)" : `color-mix(in oklch, var(--accent) ${Math.round(14 + t * 86)}%, transparent)`;
+  t <= 0
+    ? "color-mix(in oklch, var(--foreground) 5%, transparent)"
+    : `color-mix(in oklch, var(--accent) ${Math.round(14 + t * 86)}%, transparent)`;
 const countLabel = (n: number) => n.toLocaleString("en-US");
 const change = (now: number, before: number) =>
   before ? `${now >= before ? "+" : ""}${Math.round(((now - before) / before) * 100)}%` : "new";
@@ -88,7 +90,18 @@ export function AdminSeo() {
     try {
       // A partial body shows as empty or "None", not a crash.
       const body = await ask<Partial<Data>>(`/api/seo?days=${d}`);
-      setData({ at: "", days: d, dates: [], visits: 0, prevVisits: 0, pages: [], sources: [], google: { error: "None" }, tracked: [], ...body });
+      setData({
+        at: "",
+        days: d,
+        dates: [],
+        visits: 0,
+        prevVisits: 0,
+        pages: [],
+        sources: [],
+        google: { error: "None" },
+        tracked: [],
+        ...body,
+      });
       setError("");
     } catch (e) {
       setError(errorText(e));
@@ -139,7 +152,9 @@ export function AdminSeo() {
               [
                 "Avg position",
                 g?.position ?? "–",
-                g?.position && g.prevPosition ? `${g.position <= g.prevPosition ? "up" : "down"} ${Math.abs(g.prevPosition - g.position).toFixed(1)}` : "",
+                g?.position && g.prevPosition
+                  ? `${g.position <= g.prevPosition ? "up" : "down"} ${Math.abs(g.prevPosition - g.position).toFixed(1)}`
+                  : "",
               ],
             ].map(([label, value, delta]) => (
               <div key={label} className="border-border p-4 max-sm:border-t sm:border-l sm:first:border-l-0">
@@ -304,7 +319,9 @@ function ClickMapBlock({ tracked }: { tracked: Data["tracked"] }) {
     ctx.clearRect(0, 0, w, h);
     for (const [x, y, n] of map.grid) {
       if (y >= 30) continue;
-      const cx = ((x + 0.5) / 48) * w, cy = ((y + 0.5) / 30) * h, r = w / 24;
+      const cx = ((x + 0.5) / 48) * w,
+        cy = ((y + 0.5) / 30) * h,
+        r = w / 24;
       const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
       g.addColorStop(0, `color-mix(in oklch, ${accent} ${Math.round(25 + (n / top) * 75)}%, transparent)`);
       g.addColorStop(1, "transparent");
@@ -320,7 +337,13 @@ function ClickMapBlock({ tracked }: { tracked: Data["tracked"] }) {
         <h3 className="font-display text-lg uppercase tracking-[0]">Clicks and scroll</h3>
         <div className="flex flex-wrap" role="group" aria-label="Page">
           {paths.slice(0, 8).map((p) => (
-            <button key={p.path} type="button" aria-pressed={current === p.path} onClick={() => setPath(p.path)} className={seg(current === p.path)}>
+            <button
+              key={p.path}
+              type="button"
+              aria-pressed={current === p.path}
+              onClick={() => setPath(p.path)}
+              className={seg(current === p.path)}
+            >
               {p.path}
             </button>
           ))}
@@ -345,7 +368,10 @@ function ClickMapBlock({ tracked }: { tracked: Data["tracked"] }) {
               />
               <canvas ref={canvas} className="absolute inset-0 size-full" aria-label={`Where presses land on ${current}`} />
             </div>
-            <ol className="label relative w-12 shrink-0 border-l border-border text-center text-muted-foreground" aria-label="Share of views that got this far down">
+            <ol
+              className="label relative w-12 shrink-0 border-l border-border text-center text-muted-foreground"
+              aria-label="Share of views that got this far down"
+            >
               {(map?.depth ?? [0, 0, 0, 0]).map((d, i) => (
                 <li key={i} className="absolute inset-x-0 border-t border-border pt-1" style={{ top: `${i * 25}%` }}>
                   {Math.round(d * 100)}%
@@ -362,7 +388,10 @@ function ClickMapBlock({ tracked }: { tracked: Data["tracked"] }) {
                 <li key={label} className="flex gap-3 border-b border-border px-4 py-2 text-sm last:border-b-0">
                   <span className="min-w-0 flex-1">
                     <span className="block truncate">{label}</span>
-                    <i className="mt-1 block h-px" style={{ width: `${(n / (map!.targets[0][1] || 1)) * 100}%`, background: "var(--accent)" }} />
+                    <i
+                      className="mt-1 block h-px"
+                      style={{ width: `${(n / (map!.targets[0][1] || 1)) * 100}%`, background: "var(--accent)" }}
+                    />
                   </span>
                   <span className="tabular-nums">{n}</span>
                 </li>

@@ -1,5 +1,18 @@
 import { isToken } from "@/lib/proofs/proof-model";
-import { bodyIn, createGallery, dropFiles, dropQuery, galleryAction, gated, listGalleries, oneGallery, previewMail, putFrame, remindPreview, saveSettings } from "@/lib/proofs/desk-api";
+import {
+  bodyIn,
+  createGallery,
+  dropFiles,
+  dropQuery,
+  galleryAction,
+  gated,
+  listGalleries,
+  oneGallery,
+  previewMail,
+  putFrame,
+  remindPreview,
+  saveSettings,
+} from "@/lib/proofs/desk-api";
 
 /* ── proofs, every job on one path ────────────────────────────────
  * Lightroom (the publish service) calls this; the /admin desk calls the
@@ -24,7 +37,8 @@ export const dynamic = "force-dynamic";
 export const GET = gated(async (g, request) => {
   const q = new URL(request.url).searchParams;
   if (q.has("list")) return listGalleries(g);
-  const preview = q.get("preview"), remind = q.get("remind");
+  const preview = q.get("preview"),
+    remind = q.get("remind");
   if (isToken(preview)) return previewMail(g, preview);
   if (isToken(remind)) return remindPreview(g, remind);
   return oneGallery(g, q.get("token"));

@@ -33,7 +33,10 @@ function TimesDown({ title, retry, again }: { title: string; retry: () => void; 
         >
           Inquire
         </Link>
-        <a href={`mailto:${EMAIL}`} className="text-sm normal-case text-muted-foreground underline decoration-border underline-offset-4 hoverable:hover:decoration-current">
+        <a
+          href={`mailto:${EMAIL}`}
+          className="text-sm normal-case text-muted-foreground underline decoration-border underline-offset-4 hoverable:hover:decoration-current"
+        >
           {EMAIL}
         </a>
       </div>
@@ -42,7 +45,17 @@ function TimesDown({ title, retry, again }: { title: string; retry: () => void; 
 }
 
 /** The site's own time picker for `path`. `skin`: the JG V3 stepper. */
-export function BookTimes({ path, title, skin, startView }: { path: string; title: string; skin?: StepsSkin; startView?: "week" | "month" }) {
+export function BookTimes({
+  path,
+  title,
+  skin,
+  startView,
+}: {
+  path: string;
+  title: string;
+  skin?: StepsSkin;
+  startView?: "week" | "month";
+}) {
   // Try again mounts a fresh picker, which asks for the times anew.
   const [tries, setTries] = React.useState(0);
   /* The picker reads the visitor's zone and clock, so until it has mounted it

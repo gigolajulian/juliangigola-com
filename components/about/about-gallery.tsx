@@ -10,8 +10,22 @@ import { ABOUT_PHOTO } from "@/lib/photos";
    carousel and a swipe that did nothing felt broken (iPhone simulator,
    2026-11-02). `pan-y` (v3.css) leaves the page's own scroll alone. */
 const FRAMES = [
-  { src: ABOUT_PHOTO, w: 960, h: 1280, alt: "Julian Gigola sitting on stone steps under a tree", cap: "Julian Gigola, San Jose", pos: undefined },
-  { src: "/about/julian-studio.jpg", w: 2048, h: 1365, alt: "Julian Gigola at a monitor on set in a studio", cap: "Julian Gigola, on set", pos: "30% 50%" },
+  {
+    src: ABOUT_PHOTO,
+    w: 960,
+    h: 1280,
+    alt: "Julian Gigola sitting on stone steps under a tree",
+    cap: "Julian Gigola, San Jose",
+    pos: undefined,
+  },
+  {
+    src: "/about/julian-studio.jpg",
+    w: 2048,
+    h: 1365,
+    alt: "Julian Gigola at a monitor on set in a studio",
+    cap: "Julian Gigola, on set",
+    pos: "30% 50%",
+  },
 ];
 
 export function AboutGallery() {
@@ -36,15 +50,32 @@ export function AboutGallery() {
     from.current = null;
     if (!f) return;
     const t = e.changedTouches[0];
-    const dx = t.clientX - f.x, dy = t.clientY - f.y;
+    const dx = t.clientX - f.x,
+      dy = t.clientY - f.y;
     if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
     pick((i + (dx < 0 ? 1 : FRAMES.length - 1)) % FRAMES.length);
   };
   return (
     <figure className="ab-photo">
-      <div className="ab-frame" onClick={() => pick((i + 1) % FRAMES.length)} onTouchStart={start} onTouchEnd={end} onTouchCancel={() => (from.current = null)}>
+      <div
+        className="ab-frame"
+        onClick={() => pick((i + 1) % FRAMES.length)}
+        onTouchStart={start}
+        onTouchEnd={end}
+        onTouchCancel={() => (from.current = null)}
+      >
         {FRAMES.map((f, n) => (
-          <Image key={f.src} src={f.src} alt={f.alt} width={f.w} height={f.h} sizes="(max-width: 800px) 100vw, 40vw" priority={n === 0} className={n === i ? "on" : undefined} style={f.pos ? { objectPosition: f.pos } : undefined} />
+          <Image
+            key={f.src}
+            src={f.src}
+            alt={f.alt}
+            width={f.w}
+            height={f.h}
+            sizes="(max-width: 800px) 100vw, 40vw"
+            priority={n === 0}
+            className={n === i ? "on" : undefined}
+            style={f.pos ? { objectPosition: f.pos } : undefined}
+          />
         ))}
       </div>
       <figcaption className="lbl mute">

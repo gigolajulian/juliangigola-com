@@ -27,11 +27,9 @@ type Data = {
 };
 type SearchRow = { key: string; clicks: number; impressions: number; position: number };
 type Google =
-  | { error: string }
-  | { clicks: number; impressions: number; position: number | null; queries: SearchRow[]; pages: SearchRow[] };
+  { error: string } | { clicks: number; impressions: number; position: number | null; queries: SearchRow[]; pages: SearchRow[] };
 
-const SEARCH_CONSOLE =
-  "https://search.google.com/u/1/search-console/performance/search-analytics?resource_id=sc-domain%3Ajuliangigola.com";
+const SEARCH_CONSOLE = "https://search.google.com/u/1/search-console/performance/search-analytics?resource_id=sc-domain%3Ajuliangigola.com";
 
 export function AdminTraffic() {
   const [data, setData] = React.useState<Data | null>(null);
@@ -56,8 +54,7 @@ export function AdminTraffic() {
   // After the render, not inside it: `pull` sets state before it awaits.
   React.useEffect(() => queueMicrotask(() => void pull()), [pull]);
 
-  const sum = (rows: Row[], re: RegExp) =>
-    rows.filter((r) => re.test(r.key)).reduce((s, r) => s + r.n, 0);
+  const sum = (rows: Row[], re: RegExp) => rows.filter((r) => re.test(r.key)).reduce((s, r) => s + r.n, 0);
   const peak = data ? Math.max(1, ...data.days.map((d) => d.n)) : 1;
 
   const list = (title: string, rows: Row[]) => (
@@ -109,11 +106,7 @@ export function AdminTraffic() {
         </div>
       </div>
 
-      {error ? (
-        <p className="label border border-border bg-card px-4 py-3 text-foreground">
-          {error}
-        </p>
-      ) : null}
+      {error ? <p className="label border border-border bg-card px-4 py-3 text-foreground">{error}</p> : null}
 
       {data ? (
         <>
@@ -184,9 +177,7 @@ function SearchBlock({ name, source, data: google }: { name: string; source: str
           ))}
         </ul>
       ) : (
-        <p className="text-sm text-muted-foreground">
-          None yet. {name} hides searches it has seen only a few times.
-        </p>
+        <p className="text-sm text-muted-foreground">None yet. {name} hides searches it has seen only a few times.</p>
       )}
     </div>
   );
@@ -197,9 +188,7 @@ function SearchBlock({ name, source, data: google }: { name: string; source: str
         <span className="label ml-3 text-muted-foreground">last 28 days · {source}</span>
       </h2>
       {!google || "error" in google ? (
-        <p className="label border border-border bg-card px-4 py-3 text-foreground">
-          {google?.error ?? `${source} not connected yet.`}
-        </p>
+        <p className="label border border-border bg-card px-4 py-3 text-foreground">{google?.error ?? `${source} not connected yet.`}</p>
       ) : (
         <>
           <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">

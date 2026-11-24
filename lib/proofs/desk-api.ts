@@ -18,7 +18,25 @@
 
 import { gate } from "@/lib/admin/gate";
 import { copiesFor, dropProofOpens } from "@/lib/leads/lead-store";
-import { cardKey, closesAt, cleanSettings, DEFAULTS, finalKeys, frameKey, frameKeys, aliasKey, isFrameId, isModel, isToken, proofKey, publicId, remindState, shootDay, viewerKey, type Proof } from "@/lib/proofs/proof-model";
+import {
+  cardKey,
+  closesAt,
+  cleanSettings,
+  DEFAULTS,
+  finalKeys,
+  frameKey,
+  frameKeys,
+  aliasKey,
+  isFrameId,
+  isModel,
+  isToken,
+  proofKey,
+  publicId,
+  remindState,
+  shootDay,
+  viewerKey,
+  type Proof,
+} from "@/lib/proofs/proof-model";
 import { isEmail, logged } from "@/lib/utils";
 import { forDesk, hashPass, listProofs, nextProofId, readProof, writeProof } from "@/lib/proofs/proof-store";
 import { deliveryUrl, proofMail, proofUrl, reminderMail, webImages } from "@/lib/proofs/proof-mail";
@@ -81,7 +99,12 @@ export async function listGalleries(g: Gated) {
       return moved ?? p;
     }),
   );
-  return json({ proofs: all.filter((p): p is Proof => !!p).map((p) => ({ ...forDesk(p), url: (p.deliveredAt ? deliveryUrl : proofUrl)(publicId(p)) })).sort((a, b) => b.createdAt.localeCompare(a.createdAt)) });
+  return json({
+    proofs: all
+      .filter((p): p is Proof => !!p)
+      .map((p) => ({ ...forDesk(p), url: (p.deliveredAt ? deliveryUrl : proofUrl)(publicId(p)) }))
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
+  });
 }
 
 /** One gallery in full, selects included. */
@@ -100,7 +123,10 @@ export async function previewMail(g: Gated, token: unknown) {
   if (p instanceof Response) return p;
   if (!p) return noGallery();
   const sent = p.sentAt ? p : { ...p, closesAt: closesAt(p.days) };
-  const m = proofMail(sent, p.frames.slice(0, 4).map((f) => ({ id: f.id, bytes: new Uint8Array() })));
+  const m = proofMail(
+    sent,
+    p.frames.slice(0, 4).map((f) => ({ id: f.id, bytes: new Uint8Array() })),
+  );
   const { subject } = m;
   const html = webImages(m.html).replace(/cid:f-([0-9A-Za-z_-]+)/g, (_, id) => `/proof/${publicId(p)}/f/${id}`);
   return json({ html, subject, to: p.email ?? null });
@@ -116,7 +142,13 @@ export async function remindPreview(g: Gated, token: unknown) {
   if (!r.stage) return json({ error: "Not sent yet." }, 409);
   const m = reminderMail(p, r.stage);
   const html = webImages(m.html);
-  return json({ html, subject: m.subject, to: p.email ?? null, cc: p.email ? await copiesFor(g.kv, g.s, p.email).catch(() => []) : [], remind: r });
+  return json({
+    html,
+    subject: m.subject,
+    to: p.email ?? null,
+    cc: p.email ? await copiesFor(g.kv, g.s, p.email).catch(() => []) : [],
+    remind: r,
+  });
 }
 
 /** A typed email that fails isEmail is refused, so a save never clears the stored one; a blank one still clears it. */
@@ -126,7 +158,17 @@ const badEmail = (v: unknown) => typeof v === "string" && v.trim() !== "" && !is
 export async function createGallery(g: Gated, b: Record<string, unknown>) {
   if (badEmail(b.email)) return json({ error: "That email does not look right." }, 400);
   const set = cleanSettings(b);
-  const p: Proof = { token: await nextProofId(g.kv, shootDay(b.day) ?? undefined), name: set.name ?? "Proofs", ...DEFAULTS, ...set, createdAt: new Date().toISOString(), frames: [], selects: [], notes: {}, views: 0 };
+  const p: Proof = {
+    token: await nextProofId(g.kv, shootDay(b.day) ?? undefined),
+    name: set.name ?? "Proofs",
+    ...DEFAULTS,
+    ...set,
+    createdAt: new Date().toISOString(),
+    frames: [],
+    selects: [],
+    notes: {},
+    views: 0,
+  };
   await writeProof(g.kv, g.s, p);
   return json({ token: p.token, url: proofUrl(p.token) }, 201);
 }
@@ -200,11 +242,15 @@ export async function saveSettings(g: Gated, b: Record<string, unknown>) {
   if (badEmail(b.email)) return json({ error: "That email does not look right." }, 400);
   const set = cleanSettings(b);
   // The gate's password: hashed here, never stored or answered plain. An empty one takes it off.
-  if (typeof b.password === "string" && b.password && (b.password.length < 4 || b.password.length > 200)) return json({ error: "A password is 4 to 200 characters." }, 400);
+  if (typeof b.password === "string" && b.password && (b.password.length < 4 || b.password.length > 200))
+    return json({ error: "A password is 4 to 200 characters." }, 400);
   const pass = typeof b.password === "string" ? { pass: b.password ? await hashPass(b.password) : undefined } : {};
   const next: Proof = { ...p, ...set, ...pass };
   // A new preview pick redraws the card of the frame it leaves and the one it lands on.
-  if ("card" in set) await g.r2.delete([...new Set([p.card?.id, next.card?.id, p.frames[0]?.id])].filter((id): id is string => !!id).map((id) => cardKey(token, id)));
+  if ("card" in set)
+    await g.r2.delete(
+      [...new Set([p.card?.id, next.card?.id, p.frames[0]?.id])].filter((id): id is string => !!id).map((id) => cardKey(token, id)),
+    );
   await writeProof(g.kv, g.s, next);
   return json({ proof: forDesk(next) });
 }
@@ -215,8 +261,11 @@ export async function saveSettings(g: Gated, b: Record<string, unknown>) {
  */
 export async function putFrame(g: Gated, request: Request) {
   const q = new URL(request.url).searchParams;
-  const token = q.get("token"), id = q.get("id"), file = (q.get("file") ?? "").slice(0, 120);
-  const w = Number(q.get("w")) || 0, h = Number(q.get("h")) || 0;
+  const token = q.get("token"),
+    id = q.get("id"),
+    file = (q.get("file") ?? "").slice(0, 120);
+  const w = Number(q.get("w")) || 0,
+    h = Number(q.get("h")) || 0;
   // Capture time from Lightroom, Unix seconds; anything implausible is dropped, not refused.
   const t = Math.round(Number(q.get("t")));
   if (!isToken(token) || !isFrameId(id) || !file) return json({ error: "token, id and file are required." }, 400);
@@ -235,7 +284,17 @@ export async function putFrame(g: Gated, request: Request) {
     if (p instanceof Response) return p;
     if (!p) return noGallery();
     const model = q.get("model")?.trim().replace(/\s+/g, " ");
-    const final = { id, file, w, h, bytes, crc, ...(t > 0 && t < 4e9 ? { t } : {}), ...(isModel(model) ? { model } : {}), ...(q.get("top") === "1" ? { top: true } : {}) };
+    const final = {
+      id,
+      file,
+      w,
+      h,
+      bytes,
+      crc,
+      ...(t > 0 && t < 4e9 ? { t } : {}),
+      ...(isModel(model) ? { model } : {}),
+      ...(q.get("top") === "1" ? { top: true } : {}),
+    };
     const finals = [...(p.finals ?? []).filter((f) => f.id !== id), final];
     await writeProof(g.kv, g.s, { ...p, finals });
     return json({ ok: true, finals: finals.length, url: deliveryUrl(publicId(p)) });
@@ -281,7 +340,8 @@ export async function dropFiles(g: Gated, { token, ids, final }: { token: string
     return json({ ok: true });
   }
   // Unpublishing the proof collection must not take the client's finals with it.
-  if (p.deliveredAt) return json({ error: "This gallery was delivered. Its finals stay until you remove them from the Delivery collection." }, 409);
+  if (p.deliveredAt)
+    return json({ error: "This gallery was delivered. Its finals stay until you remove them from the Delivery collection." }, 409);
   if (ids) {
     if (!ids.length || ids.length > 1000 || !ids.every(isFrameId)) return json({ error: "Bad frame id." }, 400);
     const keys = ids.flatMap((id) => frameKeys(token, id));
@@ -289,7 +349,12 @@ export async function dropFiles(g: Gated, { token, ids, final }: { token: string
     const gone = new Set(ids);
     const notes = { ...p.notes };
     for (const id of ids) delete notes[id];
-    await writeProof(g.kv, g.s, { ...p, frames: p.frames.filter((f) => !gone.has(f.id)), selects: p.selects.filter((s) => !gone.has(s)), notes });
+    await writeProof(g.kv, g.s, {
+      ...p,
+      frames: p.frames.filter((f) => !gone.has(f.id)),
+      selects: p.selects.filter((s) => !gone.has(s)),
+      notes,
+    });
     return json({ ok: true });
   }
   // Finals published but not sent yet: dropping the record would orphan them in R2 and lose the delivery.

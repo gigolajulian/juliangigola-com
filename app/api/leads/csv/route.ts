@@ -13,7 +13,14 @@ export async function GET(request: Request) {
   if (g.error) return g.error;
   const seal = g.s;
   const day = new Date().toISOString().slice(0, 10);
-  const file = (body: string, name: string) => new Response(body, { headers: { ...NO_STORE, "content-type": "text/csv; charset=utf-8", "content-disposition": `attachment; filename="${name}-${day}.csv"` } });
+  const file = (body: string, name: string) =>
+    new Response(body, {
+      headers: {
+        ...NO_STORE,
+        "content-type": "text/csv; charset=utf-8",
+        "content-disposition": `attachment; filename="${name}-${day}.csv"`,
+      },
+    });
   const master = await readMaster(g.kv, seal);
   if (new URL(request.url).searchParams.has("events")) return file(eventsCsv(master), "activity");
   return file(await clientsCsv(g.kv, seal, master), "leads");

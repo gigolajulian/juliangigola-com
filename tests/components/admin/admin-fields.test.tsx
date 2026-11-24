@@ -29,7 +29,10 @@ describe("SessionFields", () => {
 });
 
 describe("QuoteFields", () => {
-  const quotes = [{ quote: "Fast.", name: "Ana" }, { quote: "Sharp.", name: "Bo", role: "AD" }];
+  const quotes = [
+    { quote: "Fast.", name: "Ana" },
+    { quote: "Sharp.", name: "Bo", role: "AD" },
+  ];
 
   it("Add a quote appends an empty one, Remove drops that one only", () => {
     const set = vi.fn();

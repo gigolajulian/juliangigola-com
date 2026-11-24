@@ -14,7 +14,7 @@ import type { Draft } from "@/lib/admin/publish";
 export function remapSlugs(draft: Draft, slugs: Record<string, string>): Draft {
   const renames = Object.entries(slugs).filter(([from, to]) => from !== to);
   if (!renames.length) return draft;
-  const moveKeys = <T,>(map: Record<string, T>): Record<string, T> => {
+  const moveKeys = <T>(map: Record<string, T>): Record<string, T> => {
     const next = { ...map };
     for (const [from, to] of renames) {
       if (from in next && !(to in next)) {
@@ -24,8 +24,7 @@ export function remapSlugs(draft: Draft, slugs: Record<string, string>): Draft {
     }
     return next;
   };
-  const moveList = (list: string[]): string[] =>
-    list.map((s) => slugs[s] && slugs[s] !== s ? slugs[s] : s);
+  const moveList = (list: string[]): string[] => list.map((s) => (slugs[s] && slugs[s] !== s ? slugs[s] : s));
   return {
     ...draft,
     hidden: moveList(draft.hidden),

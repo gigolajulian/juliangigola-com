@@ -13,14 +13,41 @@ const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
 vi.mock("@opennextjs/cloudflare", async () => (await import("../fakes")).cloudflareMock(ctx));
 
 const NOW = Date.parse("2026-11-09T17:00:00Z"); // Monday 9 AM Pacific
-const mk = (id: string, o: Partial<Lead> = {}): Lead & { id: string } => ({ id, email: `${id}@example.com`, name: id, stage: "Confirmed", stageAt: "2026-10-01T00:00:00Z", firstAt: "2026-10-01T00:00:00Z", lastAt: "2026-10-01T00:00:00Z", unread: false, events: [], ...o });
-const ev = (lead: string, at: string, kind: LeadEvent["kind"], o: Partial<LeadEvent> = {}): MasterEntry => ({ lead, email: `${lead}@example.com`, name: lead, event: { at, kind, ...o } });
+const mk = (id: string, o: Partial<Lead> = {}): Lead & { id: string } => ({
+  id,
+  email: `${id}@example.com`,
+  name: id,
+  stage: "Confirmed",
+  stageAt: "2026-10-01T00:00:00Z",
+  firstAt: "2026-10-01T00:00:00Z",
+  lastAt: "2026-10-01T00:00:00Z",
+  unread: false,
+  events: [],
+  ...o,
+});
+const ev = (lead: string, at: string, kind: LeadEvent["kind"], o: Partial<LeadEvent> = {}): MasterEntry => ({
+  lead,
+  email: `${lead}@example.com`,
+  name: lead,
+  event: { at, kind, ...o },
+});
 
 const leads = [
   mk("Ana Test"),
   mk("Ben Sample", { firstAt: "2026-11-05T00:00:00Z", kind: "intro-call", source: "Booking page" }),
   mk("Cy Example", { flags: ["stuck"] }),
-  mk("Dee Fake", { invoices: [{ no: "1026", date: "2026-10-20", lines: [{ desc: "Shoot", qty: 1, rate: 800 }], paid: 100, at: "2026-11-15T00:00:00Z", b: { due: "2026-11-01" } as never }] }),
+  mk("Dee Fake", {
+    invoices: [
+      {
+        no: "1026",
+        date: "2026-10-20",
+        lines: [{ desc: "Shoot", qty: 1, rate: 800 }],
+        paid: 100,
+        at: "2026-11-15T00:00:00Z",
+        b: { due: "2026-11-01" } as never,
+      },
+    ],
+  }),
   mk("Gone Trash", { trashedAt: "2026-11-01T00:00:00Z" }),
 ];
 const master = [
@@ -74,7 +101,8 @@ describe("POST /api/leads/weekly", () => {
     await appendLog(kv, seal, "ben", { email: "ben@example.com", name: "Ben Sample" }, [{ at, kind: "payment", amount: 100 }]);
     const sent: { subject: string; text: string }[] = [];
     ctx.env = { INBOX: kv, LEADS_KEY, WORKER_KEY: "s", EMAIL: { send: async (m: { subject: string; text: string }) => void sent.push(m) } };
-    const call = (q = "", auth = "Bearer s") => POST(new Request(`https://juliangigola.com/api/leads/weekly${q}`, { method: "POST", headers: { authorization: auth } }));
+    const call = (q = "", auth = "Bearer s") =>
+      POST(new Request(`https://juliangigola.com/api/leads/weekly${q}`, { method: "POST", headers: { authorization: auth } }));
     expect((await call("", "Bearer no")).status).toBe(401);
     const dry = await (await call("?dry")).json();
     expect(dry.text).toContain("Paid in: $100\n  Ben Sample, $100");

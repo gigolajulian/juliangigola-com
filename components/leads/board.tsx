@@ -18,7 +18,15 @@ import { DAY_MS } from "@/lib/time-zone";
 const COLUMNS: readonly Stage[] = STAGES.filter((s) => s !== "Lost");
 const RECENT = 30 * DAY_MS;
 
-export function BoardDesk({ leads, onMove, open }: { leads: LeadSummary[]; onMove: (l: LeadSummary, stage: Stage) => void; open: (l: LeadSummary) => void }) {
+export function BoardDesk({
+  leads,
+  onMove,
+  open,
+}: {
+  leads: LeadSummary[];
+  onMove: (l: LeadSummary, stage: Stage) => void;
+  open: (l: LeadSummary) => void;
+}) {
   const [over, setOver] = React.useState<Stage | null>(null);
   const dragged = React.useRef<LeadSummary | null>(null);
   // Read once: "the last 30 days" does not need to move while the board is open.
@@ -41,7 +49,9 @@ export function BoardDesk({ leads, onMove, open }: { leads: LeadSummary[]; onMov
                 e.dataTransfer.dropEffect = "move";
                 if (over !== s) setOver(s);
               }}
-              onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setOver((o) => (o === s ? null : o)); }}
+              onDragLeave={(e) => {
+                if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setOver((o) => (o === s ? null : o));
+              }}
               onDrop={(e) => {
                 e.preventDefault();
                 const l = dragged.current;
@@ -49,32 +59,67 @@ export function BoardDesk({ leads, onMove, open }: { leads: LeadSummary[]; onMov
                 setOver(null);
                 if (l && l.stage !== s) onMove(l, s);
               }}
-              style={{ width: 210, flexShrink: 0, borderRadius: 10, outline: over === s ? "1px solid var(--color-accent)" : "none", outlineOffset: 2 }}
+              style={{
+                width: 210,
+                flexShrink: 0,
+                borderRadius: 10,
+                outline: over === s ? "1px solid var(--color-accent)" : "none",
+                outlineOffset: 2,
+              }}
             >
               <VStack gap={2}>
                 <HStack vAlign="center">
-                  <StackItem size="fill"><Text type="code" size="xsm" color="secondary" weight="medium">{s.toUpperCase()}{s === "Delivered" ? " · 30 D" : ""}</Text></StackItem>
-                  <Text type="code" size="xsm" color="secondary">{rows.length}{quoted ? ` · ${dollarsLabel(quoted)}` : ""}</Text>
+                  <StackItem size="fill">
+                    <Text type="code" size="xsm" color="secondary" weight="medium">
+                      {s.toUpperCase()}
+                      {s === "Delivered" ? " · 30 D" : ""}
+                    </Text>
+                  </StackItem>
+                  <Text type="code" size="xsm" color="secondary">
+                    {rows.length}
+                    {quoted ? ` · ${dollarsLabel(quoted)}` : ""}
+                  </Text>
                 </HStack>
                 {rows.map((l) => (
                   <div
                     key={l.id}
                     draggable
-                    onDragStart={(e) => { dragged.current = l; e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", l.name); }}
-                    onDragEnd={() => { dragged.current = null; setOver(null); }}
+                    onDragStart={(e) => {
+                      dragged.current = l;
+                      e.dataTransfer.effectAllowed = "move";
+                      e.dataTransfer.setData("text/plain", l.name);
+                    }}
+                    onDragEnd={() => {
+                      dragged.current = null;
+                      setOver(null);
+                    }}
                     style={{ cursor: "grab" }}
                   >
                     <Card padding={3}>
                       <VStack gap={1}>
                         <Text type="label">{l.name || l.email}</Text>
-                        <Text type="code" size="xsm" color="secondary">{[l.kind ? shootTag(l.kind)?.toUpperCase() : null, l.quote ? dollarsLabel(l.quote) : null].filter(Boolean).join(" · ") || " "}</Text>
-                        {nextStep(l) ? <Text type="code" size="sm" color="accent">{nextStep(l)} →</Text> : null}
-                        <StackItem><Button label="Open" variant="ghost" size="sm" onClick={() => open(l)} /></StackItem>
+                        <Text type="code" size="xsm" color="secondary">
+                          {[l.kind ? shootTag(l.kind)?.toUpperCase() : null, l.quote ? dollarsLabel(l.quote) : null]
+                            .filter(Boolean)
+                            .join(" · ") || " "}
+                        </Text>
+                        {nextStep(l) ? (
+                          <Text type="code" size="sm" color="accent">
+                            {nextStep(l)} →
+                          </Text>
+                        ) : null}
+                        <StackItem>
+                          <Button label="Open" variant="ghost" size="sm" onClick={() => open(l)} />
+                        </StackItem>
                       </VStack>
                     </Card>
                   </div>
                 ))}
-                {rows.length ? null : <Text type="supporting" color="secondary">Drop here</Text>}
+                {rows.length ? null : (
+                  <Text type="supporting" color="secondary">
+                    Drop here
+                  </Text>
+                )}
               </VStack>
             </section>
           );

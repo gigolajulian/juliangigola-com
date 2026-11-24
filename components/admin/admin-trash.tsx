@@ -5,12 +5,7 @@ import type { Status } from "@/lib/admin/publish";
 import { StatusLine } from "@/components/admin/status-line";
 import Image from "next/image";
 import { ADDED_PATH, TRASH_DAYS, type TrashedProject, type ManifestRead } from "@/lib/work/added";
-import {
-  commitFiles,
-  listDirectory,
-  readFile,
-  type CommitFile,
-} from "@/lib/admin/admin-github";
+import { commitFiles, listDirectory, readFile, type CommitFile } from "@/lib/admin/admin-github";
 import { cn, errorText } from "@/lib/utils";
 import { DAY_MS } from "@/lib/time-zone";
 
@@ -29,9 +24,7 @@ import { DAY_MS } from "@/lib/time-zone";
  * be undone.
  * ─────────────────────────────────────────────────────────────── */
 
-
-const daysLeft = (deletedAt: string): number =>
-  Math.ceil((Date.parse(deletedAt) + TRASH_DAYS * DAY_MS - Date.now()) / DAY_MS);
+const daysLeft = (deletedAt: string): number => Math.ceil((Date.parse(deletedAt) + TRASH_DAYS * DAY_MS - Date.now()) / DAY_MS);
 
 export function AdminTrash({
   token,
@@ -60,8 +53,7 @@ export function AdminTrash({
       setStatus({ kind: "working", message: `Recovering ${slug}…` });
       const m = await readManifest();
       const entry = (m.trash ?? []).find((t) => t.slug === slug);
-      if (!entry)
-        throw new Error(`"${slug}" is no longer in Recently deleted.`);
+      if (!entry) throw new Error(`"${slug}" is no longer in Recently deleted.`);
 
       const { deletedAt: _deletedAt, ...project } = entry;
       m.projects = [project, ...m.projects];
@@ -155,19 +147,11 @@ export function AdminTrash({
    */
   React.useEffect(() => {
     if (purged.current) return;
-    const expired = trash
-      .filter((t) => daysLeft(t.deletedAt) <= 0)
-      .map((t) => t.slug);
+    const expired = trash.filter((t) => daysLeft(t.deletedAt) <= 0).map((t) => t.slug);
     if (!expired.length) return;
     purged.current = true;
     // After the render, not inside it: `destroy` sets state before it awaits.
-    queueMicrotask(
-      () =>
-        void destroy(
-          expired,
-          `${expired.length} expired ${expired.length === 1 ? "project" : "projects"}`,
-        ),
-    );
+    queueMicrotask(() => void destroy(expired, `${expired.length} expired ${expired.length === 1 ? "project" : "projects"}`));
     // Once, against the list this page loaded with.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -202,10 +186,8 @@ export function AdminTrash({
       </div>
 
       <p className="mt-3 max-w-prose text-sm leading-relaxed text-muted-foreground">
-        Removed projects are already off the site. Their photographs stay in the
-        repository for {TRASH_DAYS} days so they can be brought back, then go
-        for good, cleaned up the next time you open this page, since nothing
-        runs on a schedule here.
+        Removed projects are already off the site. Their photographs stay in the repository for {TRASH_DAYS} days so they can be brought
+        back, then go for good, cleaned up the next time you open this page, since nothing runs on a schedule here.
       </p>
 
       <StatusLine status={status} className="mt-4" />
@@ -214,31 +196,15 @@ export function AdminTrash({
         {trash.map((t) => {
           const left = daysLeft(t.deletedAt);
           return (
-            <li
-              key={t.slug}
-              className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-border py-3"
-            >
-              <span
-                className="relative block h-14 w-11 shrink-0 overflow-hidden opacity-60"
-                style={{ backgroundColor: t.cover.color }}
-              >
-                <Image
-                  src={t.cover.src}
-                  alt=""
-                  fill
-                  sizes="44px"
-                  loading="lazy"
-                  className="object-cover"
-                />
+            <li key={t.slug} className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-border py-3">
+              <span className="relative block h-14 w-11 shrink-0 overflow-hidden opacity-60" style={{ backgroundColor: t.cover.color }}>
+                <Image src={t.cover.src} alt="" fill sizes="44px" loading="lazy" className="object-cover" />
               </span>
 
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-sm">{t.name}</span>
                 <span className="label block truncate text-muted-foreground">
-                  {t.images.length} frames ·{" "}
-                  {left > 0
-                    ? `${left} ${left === 1 ? "day" : "days"} left`
-                    : "past its week, clearing now"}
+                  {t.images.length} frames · {left > 0 ? `${left} ${left === 1 ? "day" : "days"} left` : "past its week, clearing now"}
                 </span>
               </span>
 

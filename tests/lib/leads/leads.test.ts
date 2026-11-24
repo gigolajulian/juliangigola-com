@@ -1,5 +1,24 @@
 import { describe, expect, it } from "vitest";
-import { NUDGES, REMIND_MAX, shootTag, backfillLead, applyLeadEvent, isLate, paperDue, quoteNudge, leadStoreKey, leadIdOf, LEAD_PREFIX, myMove, leadSummary, renewDue, trashDaysLeft, type InboxRow, type Lead, type LeadSummary } from "@/lib/leads/leads";
+import {
+  NUDGES,
+  REMIND_MAX,
+  shootTag,
+  backfillLead,
+  applyLeadEvent,
+  isLate,
+  paperDue,
+  quoteNudge,
+  leadStoreKey,
+  leadIdOf,
+  LEAD_PREFIX,
+  myMove,
+  leadSummary,
+  renewDue,
+  trashDaysLeft,
+  type InboxRow,
+  type Lead,
+  type LeadSummary,
+} from "@/lib/leads/leads";
 import { recordLead, writeLead } from "@/lib/leads/lead-store";
 import { sealer } from "@/lib/seal";
 
@@ -16,7 +35,9 @@ describe("applyLeadEvent", () => {
     // A later event without a message keeps them; a message with no pictures drops the count.
     const call = applyLeadEvent(l, email, { event: { at: at(2), kind: "call", ref: "cal:1" } });
     expect(call).toMatchObject({ refs: 2 });
-    expect(applyLeadEvent(call, email, { event: { at: at(3), kind: "inquiry", ref: "msg:2" }, snippet: "Again", refs: 0 })).not.toHaveProperty("refs");
+    expect(
+      applyLeadEvent(call, email, { event: { at: at(3), kind: "inquiry", ref: "msg:2" }, snippet: "Again", refs: 0 }),
+    ).not.toHaveProperty("refs");
   });
 
   it("logs a proofs open once per gallery, fills a bare name, and is not news", () => {
@@ -24,14 +45,22 @@ describe("applyLeadEvent", () => {
     const l = applyLeadEvent(bare, email, { event: { at: at(2), kind: "proofs", ref: "tok", note: "Nov 1" }, name: "Maya" });
     expect(l).toMatchObject({ name: "Maya", unread: bare.unread, lastAt: bare.lastAt });
     expect(applyLeadEvent(l, email, { event: { at: at(3), kind: "proofs", ref: "tok" }, name: "M" })).toBe(l);
-    expect(applyLeadEvent({ ...l, name: "Maya R" }, email, { event: { at: at(4), kind: "proofs", ref: "tok2" }, name: "M" }).name).toBe("Maya R");
-    expect(applyLeadEvent(null, email, { event: { at: at(1), kind: "proofs", ref: "tok" }, name: "Maya" })).toMatchObject({ name: "Maya", unread: false });
+    expect(applyLeadEvent({ ...l, name: "Maya R" }, email, { event: { at: at(4), kind: "proofs", ref: "tok2" }, name: "M" }).name).toBe(
+      "Maya R",
+    );
+    expect(applyLeadEvent(null, email, { event: { at: at(1), kind: "proofs", ref: "tok" }, name: "Maya" })).toMatchObject({
+      name: "Maya",
+      unread: false,
+    });
   });
 
   it("moves to Delivered on the first download of the finals, from any earlier stage", () => {
     const l = applyLeadEvent(null, email, { event: { at: at(1), kind: "booking", ref: "cal:9" } });
     const sel = applyLeadEvent(l, email, { event: { at: at(2), kind: "stage" }, stage: "Selecting" });
-    expect(applyLeadEvent(sel, email, { event: { at: at(3), kind: "download", ref: "tok", note: "Nov 1" } })).toMatchObject({ stage: "Delivered", stageAt: at(3) });
+    expect(applyLeadEvent(sel, email, { event: { at: at(3), kind: "download", ref: "tok", note: "Nov 1" } })).toMatchObject({
+      stage: "Delivered",
+      stageAt: at(3),
+    });
   });
   it("starts a lead at Inquiry from a form, keyed by the lowercased address", () => {
     const l = applyLeadEvent(null, email, { event: { at: at(1), kind: "inquiry", ref: "msg:1" }, name: "Maya", kind: "portrait" });
@@ -86,7 +115,9 @@ describe("applyLeadEvent", () => {
   it("logs a mail on the timeline without making it news or moving the stage", () => {
     let l = applyLeadEvent(null, email, { event: { at: at(1), kind: "call", ref: "c1" } });
     l = { ...l, unread: false };
-    l = applyLeadEvent(l, email, { event: { at: at(2), kind: "mail", note: "Booked: Call", mail: { to: "client", kind: "confirm", booking: "c1" } } });
+    l = applyLeadEvent(l, email, {
+      event: { at: at(2), kind: "mail", note: "Booked: Call", mail: { to: "client", kind: "confirm", booking: "c1" } },
+    });
     expect(l).toMatchObject({ stage: "Call booked", unread: false, lastAt: at(1) });
     expect(l.events.at(-1)).toMatchObject({ kind: "mail", note: "Booked: Call", mail: { to: "client" } });
   });
@@ -225,7 +256,14 @@ describe("recordLead", () => {
     const meta = async (name: string, snippet: string) => {
       const store = kv();
       const who = `${name.length}@example.com`;
-      await recordLead({ INBOX: store as never, LEADS_KEY }, who, { event: { at: at(1), kind: "inquiry", ref: "msg:1" }, name, snippet, refs: 3, when: at(40), flag: "stuck" });
+      await recordLead({ INBOX: store as never, LEADS_KEY }, who, {
+        event: { at: at(1), kind: "inquiry", ref: "msg:1" },
+        name,
+        snippet,
+        refs: 3,
+        when: at(40),
+        flag: "stuck",
+      });
       const id = leadStoreKey(await s.id(who));
       // Snoozed and trashed too: every optional field set.
       const lead = await s.open<Lead>(store.data.get(id)!.v);
@@ -241,9 +279,18 @@ describe("recordLead", () => {
   });
 
   it("never throws, skips a booking with no address, and records nothing without LEADS_KEY", async () => {
-    const broken = { get: async () => { throw new Error("down"); }, put: async () => {} };
-    expect(await recordLead({ INBOX: broken as never, LEADS_KEY }, email, { event: { at: at(1), kind: "inquiry" } })).toEqual({ status: "failed" });
-    expect(await recordLead({ INBOX: kv() as never, LEADS_KEY }, "", { event: { at: at(1), kind: "call" } })).toEqual({ status: "skipped" });
+    const broken = {
+      get: async () => {
+        throw new Error("down");
+      },
+      put: async () => {},
+    };
+    expect(await recordLead({ INBOX: broken as never, LEADS_KEY }, email, { event: { at: at(1), kind: "inquiry" } })).toEqual({
+      status: "failed",
+    });
+    expect(await recordLead({ INBOX: kv() as never, LEADS_KEY }, "", { event: { at: at(1), kind: "call" } })).toEqual({
+      status: "skipped",
+    });
     const plain = kv();
     expect(await recordLead({ INBOX: plain as never }, email, { event: { at: at(1), kind: "inquiry" } })).toEqual({ status: "failed" });
     expect(plain.data.size).toBe(0);
@@ -277,7 +324,11 @@ describe("sealer", () => {
 describe("leadSummary", () => {
   it("keeps a sealed summary under KV's 1024-byte metadata cap, however long the name", async () => {
     const s = await sealer(btoa(String.fromCharCode(...new Uint8Array(32).fill(7))))!;
-    const l = applyLeadEvent(null, `${"a".repeat(300)}@example.com`, { event: { at: "2026-11-03T00:00:00Z", kind: "call" }, name: "N".repeat(600), kind: "intro-call" });
+    const l = applyLeadEvent(null, `${"a".repeat(300)}@example.com`, {
+      event: { at: "2026-11-03T00:00:00Z", kind: "call" },
+      name: "N".repeat(600),
+      kind: "intro-call",
+    });
     expect(JSON.stringify({ s: await s.seal(leadSummary(l)) }).length).toBeLessThan(1024);
   });
 });
@@ -309,7 +360,15 @@ describe("trashDaysLeft", () => {
 });
 
 describe("backfillLead", () => {
-  const row = (h: number, extra: Partial<InboxRow> = {}): InboxRow => ({ key: `msg:${h}`, at: at(h), type: "portrait", name: "Maya", email: "maya@example.com", read: true, ...extra });
+  const row = (h: number, extra: Partial<InboxRow> = {}): InboxRow => ({
+    key: `msg:${h}`,
+    at: at(h),
+    type: "portrait",
+    name: "Maya",
+    email: "maya@example.com",
+    read: true,
+    ...extra,
+  });
 
   it("builds a new lead in time order at the rows' own times, unread only if a row was", () => {
     const l = backfillLead(null, "maya@example.com", [row(5, { type: "booking", detail: "Headshots · Sat" }), row(1)])!;
@@ -325,13 +384,20 @@ describe("backfillLead", () => {
   });
 
   it("tells a call and a stuck deposit from a booking", () => {
-    const l = backfillLead(null, "maya@example.com", [row(1, { type: "booking", detail: "Intro call · Mon" }), row(2, { key: "msg:x", type: "booking", detail: "Deposit paid, not booked, not refunded" })])!;
+    const l = backfillLead(null, "maya@example.com", [
+      row(1, { type: "booking", detail: "Intro call · Mon" }),
+      row(2, { key: "msg:x", type: "booking", detail: "Deposit paid, not booked, not refunded" }),
+    ])!;
     expect(l.events.map((e) => e.kind)).toEqual(["call", "deposit-stuck"]);
   });
 
   it("adds old rows to an existing lead without touching its stage, snooze or unread, and changes nothing the second time", () => {
     let l = applyLeadEvent(null, "maya@example.com", { event: { at: at(10), kind: "inquiry", ref: "msg:10" } });
-    l = { ...applyLeadEvent(l, "maya@example.com", { event: { at: at(11), kind: "stage" }, stage: "Quoted" }), unread: false, snoozeUntil: at(40) };
+    l = {
+      ...applyLeadEvent(l, "maya@example.com", { event: { at: at(11), kind: "stage" }, stage: "Quoted" }),
+      unread: false,
+      snoozeUntil: at(40),
+    };
     const once = backfillLead(l, "maya@example.com", [row(1), row(10)])!;
     expect(once).toMatchObject({ stage: "Quoted", unread: false, snoozeUntil: at(40), firstAt: at(1) });
     expect(once.events.map((e) => e.at)).toEqual([at(1), at(10), at(11)]);

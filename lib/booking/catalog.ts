@@ -11,13 +11,24 @@ export const SESSION_TYPES: SessionType[] = CONTENT.sessions;
 
 /** A starting price as the service pages and the structured data print it: null is "On request".
     The session cards print `priceLabel` instead, which reads differently (no thousands comma, a call's length, a deposit). */
-export const formatPrice = (from: number | null): string =>
-  from === null ? "On request" : `From $${from.toLocaleString("en-US")}`;
+export const formatPrice = (from: number | null): string => (from === null ? "On request" : `From $${from.toLocaleString("en-US")}`);
 
 const w = (slug: string, n: string) => `/work/${slug}/${n}.jpg`;
 
 /* ── the session catalog: what /book, the homepage and the service pages offer (deposits from lib/leads/deposit-terms.ts) ── */
-export type SessionSlug = "portraits" | "headshots" | "studio-digitals" | "model-test" | "graduation" | "weddings" | "consultation" | "music-photography" | "fashion-photography" | "brand-photography" | "editorial" | "events";
+export type SessionSlug =
+  | "portraits"
+  | "headshots"
+  | "studio-digitals"
+  | "model-test"
+  | "graduation"
+  | "weddings"
+  | "consultation"
+  | "music-photography"
+  | "fashion-photography"
+  | "brand-photography"
+  | "editorial"
+  | "events";
 export type Session = {
   slug: SessionSlug;
   name: string;
@@ -53,7 +64,8 @@ const LISTED: Record<SessionSlug, Omit<Session, "paid">> = {
   graduation: {
     slug: "graduation",
     name: "Graduation",
-    blurb: "Cap and gown, on campus or in studio. Enough coverage for the family frame and the announcement. Studio located in San Jose, available to travel across the SF Bay Area. On campus at SJSU or SCU; a travel fee applies further out.",
+    blurb:
+      "Cap and gown, on campus or in studio. Enough coverage for the family frame and the announcement. Studio located in San Jose, available to travel across the SF Bay Area. On campus at SJSU or SCU; a travel fee applies further out.",
     from: 400,
     includes: ["90 minutes on location", "Two outfit changes", "Edited gallery", "Print release"],
     turnaround: "1 week",
@@ -63,7 +75,8 @@ const LISTED: Record<SessionSlug, Omit<Session, "paid">> = {
   headshots: {
     slug: "headshots",
     name: "Headshots",
-    blurb: "Clean, current and usable everywhere: LinkedIn, press, casting, a company about page. Studio located in San Jose, available to travel across the SF Bay Area.",
+    blurb:
+      "Clean, current and usable everywhere: LinkedIn, press, casting, a company about page. Studio located in San Jose, available to travel across the SF Bay Area.",
     from: 400,
     includes: ["Studio lighting", "Multiple backgrounds", "Retouched selects", "Crops for web and print"],
     turnaround: "3 business days",
@@ -162,10 +175,23 @@ const LISTED: Record<SessionSlug, Omit<Session, "paid">> = {
 const eventOf = (s: { cal?: string }) => s.cal?.split("/")[1] ?? "";
 // The price set in /admin (content/site.json) wins, so the home card and /book never disagree.
 const ADMIN_FROM = new Map(SESSION_TYPES.map((t) => [t.slug, t.from]));
-export const SESSIONS = Object.fromEntries(Object.entries(LISTED).map(([k, s]) => [k, { ...s, from: ADMIN_FROM.has(k) ? ADMIN_FROM.get(k)! : s.from, paid: takesDeposit(eventOf(s)) }])) as Record<SessionSlug, Session>;
+export const SESSIONS = Object.fromEntries(
+  Object.entries(LISTED).map(([k, s]) => [
+    k,
+    { ...s, from: ADMIN_FROM.has(k) ? ADMIN_FROM.get(k)! : s.from, paid: takesDeposit(eventOf(s)) },
+  ]),
+) as Record<SessionSlug, Session>;
 export const isSession = (s?: string): s is SessionSlug => !!s && Object.hasOwn(SESSIONS, s);
 /** The session tabs' order (DESIGN.md, Stepper). */
-export const TAB_ORDER: SessionSlug[] = ["portraits", "headshots", "studio-digitals", "model-test", "graduation", "weddings", "consultation"];
+export const TAB_ORDER: SessionSlug[] = [
+  "portraits",
+  "headshots",
+  "studio-digitals",
+  "model-test",
+  "graduation",
+  "weddings",
+  "consultation",
+];
 /** The homepage index and the doors' order. */
 export const INDEX_ORDER: SessionSlug[] = ["portraits", "graduation", "headshots", "studio-digitals", "weddings"];
 export const priceLabel = (s: Session) =>
@@ -176,4 +202,6 @@ const OWN_LENGTH: Partial<Record<SessionSlug, number>> = {
   weddings: 480,
   events: 0,
 };
-export const LENGTH = Object.fromEntries(Object.values(SESSIONS).map((s) => [s.slug, OWN_LENGTH[s.slug] ?? EVENTS[eventOf(s)]?.length ?? 0])) as Record<SessionSlug, number>;
+export const LENGTH = Object.fromEntries(
+  Object.values(SESSIONS).map((s) => [s.slug, OWN_LENGTH[s.slug] ?? EVENTS[eventOf(s)]?.length ?? 0]),
+) as Record<SessionSlug, number>;

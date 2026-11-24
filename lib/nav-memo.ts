@@ -11,7 +11,12 @@ export function walk(pages: string[], at: number, path: string, popped: boolean)
   return [pages, at]; // a history entry from before this document: place unknown, so not counted
 }
 
-let pages: string[] = [], at = 0, popped = false, popAt = 0, listening = false, poppedTo = "";
+let pages: string[] = [],
+  at = 0,
+  popped = false,
+  popAt = 0,
+  listening = false,
+  poppedTo = "";
 
 // Back or Forward to another page; a hash or query step on the same page is not a move.
 const pop = () => {

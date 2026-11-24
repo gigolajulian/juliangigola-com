@@ -13,7 +13,6 @@ import { byCodeUnit } from "@/lib/utils";
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
 vi.mock("@opennextjs/cloudflare", async () => (await import("../fakes")).cloudflareMock(ctx));
 
-
 let kv: FakeKV;
 beforeEach(() => {
   kv = new FakeKV();
@@ -25,8 +24,17 @@ const t = (m: number) => new Date(Date.UTC(2026, 10, 1, 10, m)).toISOString();
 
 describe("applyLeadEvent, money", () => {
   // Made after the cut-off (PAID_BEFORE), so only a payment settles them.
-  const inv = (no: string, rate: number) => ({ no, date: "2026-12-01", lines: [{ desc: "Session", qty: 1, rate }], paid: 0, at: "2026-12-01T10:00:00Z" });
-  const withInvoices = (...invoices: ReturnType<typeof inv>[]): Lead => ({ ...applyLeadEvent(null, "a@example.com", { event: { at: t(0), kind: "inquiry" } }), invoices });
+  const inv = (no: string, rate: number) => ({
+    no,
+    date: "2026-12-01",
+    lines: [{ desc: "Session", qty: 1, rate }],
+    paid: 0,
+    at: "2026-12-01T10:00:00Z",
+  });
+  const withInvoices = (...invoices: ReturnType<typeof inv>[]): Lead => ({
+    ...applyLeadEvent(null, "a@example.com", { event: { at: t(0), kind: "inquiry" } }),
+    invoices,
+  });
 
   it("settles the one invoice a non-deposit payment matches, and never on a deposit", () => {
     const l = withInvoices(inv("1126", 1700), inv("1126-2", 400));
@@ -38,8 +46,16 @@ describe("applyLeadEvent, money", () => {
 
   it("leaves two invoices of the same balance alone unless the payment names one", () => {
     const l = withInvoices(inv("1126", 500), inv("1126-2", 500));
-    expect(applyLeadEvent(l, l.email, { event: { at: t(2), kind: "payment", ref: "pi_3", amount: 500 }, settles: true }).invoices!.some((v) => v.paidAt)).toBe(false);
-    const named = applyLeadEvent(l, l.email, { event: { at: t(2), kind: "payment", ref: "pi_4", amount: 500 }, settles: true, invoiceNo: "1126-2" });
+    expect(
+      applyLeadEvent(l, l.email, { event: { at: t(2), kind: "payment", ref: "pi_3", amount: 500 }, settles: true }).invoices!.some(
+        (v) => v.paidAt,
+      ),
+    ).toBe(false);
+    const named = applyLeadEvent(l, l.email, {
+      event: { at: t(2), kind: "payment", ref: "pi_4", amount: 500 },
+      settles: true,
+      invoiceNo: "1126-2",
+    });
     expect(named.invoices!.map((v) => !!v.paidAt)).toEqual([false, true]);
   });
 
@@ -85,13 +101,20 @@ describe("the log", () => {
     await recordLead(env(), "a@example.com", { event: { at: t(0), kind: "inquiry", ref: "msg:a" }, name: "Ana" });
     const seal = await s();
     const id = await seal.id("a@example.com");
-    const made = await (await desk("PATCH", "", { body: JSON.stringify({ id, invoice: { date: "2026-11-02", lines: [{ desc: "Session", qty: 1, rate: 900 }], paid: 100 } }) })).json();
+    const made = await (
+      await desk("PATCH", "", {
+        body: JSON.stringify({ id, invoice: { date: "2026-11-02", lines: [{ desc: "Session", qty: 1, rate: 900 }], paid: 100 } }),
+      })
+    ).json();
     const no = made.lead.invoices[0].no;
     const paid = await (await desk("PATCH", "", { body: JSON.stringify({ id, invoicePaid: { no, paid: true } }) })).json();
     expect(paid.lead.invoices[0].paidAt).toBeTruthy();
     expect((await readLog(kv as never, seal, id)).at(-1)).toMatchObject({ kind: "invoice-paid", amount: 800 });
     // Cash counts as money in the export; unmarking takes it off again.
-    const paidCol = async () => { const [h, r] = (await (await desk("GET", "/csv")).text()).trim().split("\r\n"); return r.split(",")[h.split(",").indexOf("paid total")]; };
+    const paidCol = async () => {
+      const [h, r] = (await (await desk("GET", "/csv")).text()).trim().split("\r\n");
+      return r.split(",")[h.split(",").indexOf("paid total")];
+    };
     expect(await paidCol()).toBe("800");
     // A double tap counts once.
     await desk("PATCH", "", { body: JSON.stringify({ id, invoicePaid: { no, paid: true } }) });

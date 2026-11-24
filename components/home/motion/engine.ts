@@ -56,7 +56,8 @@ const RISE: KeyframeAnimationOptions = { duration: 600, easing: "cubic-bezier(.1
 export const rise = (n: Element | null | undefined) => n?.animate([{ transform: "translateY(110%)" }, { transform: "none" }], RISE);
 /** Hands a section's React screen what to show (by-quote.tsx and commissions.tsx read it with `useTold`, ctx.ts).
     `now`: React commits it before this returns, so the change lands in this frame, as a direct DOM write would. */
-export const tell = (el: HTMLElement, detail: object, now = true) => el.dispatchEvent(new CustomEvent("mt-tell", { detail: { ...detail, now } }));
+export const tell = (el: HTMLElement, detail: object, now = true) =>
+  el.dispatchEvent(new CustomEvent("mt-tell", { detail: { ...detail, now } }));
 export const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 export const smooth = (v: number) => v * v * (3 - 2 * v);
 /** 0 to 1 as v goes from a to b, clamped */
@@ -65,7 +66,6 @@ export const progressBetween = (v: number, a: number, b: number) => clamp((v - a
    Not held: as it crosses the screen, from its top edge at the bottom of the screen to its bottom edge at the top. */
 export const progress = (top: number, h: number, vh: number, hold: boolean) =>
   hold ? clamp(-top / Math.max(1, h - vh)) : clamp((vh - top) / (h + vh));
-
 
 const DESIGN_W = 1440; // the design frame `u` scales from
 const DESIGN_H = 900;
@@ -131,7 +131,10 @@ function frameSection(e: Engine, s: HTMLElement) {
   const r = { top: b.top - ctx.y, bottom: b.top - ctx.y + b.h, height: b.h };
   const on = !(r.bottom < -ctx.vh || r.top > 2 * ctx.vh);
   // layers (will-change in the motion css) only for sections near the screen
-  if (e.near.get(s) !== on) { e.near.set(s, on); s.toggleAttribute("data-mt-near", on); }
+  if (e.near.get(s) !== on) {
+    e.near.set(s, on);
+    s.toggleAttribute("data-mt-near", on);
+  }
   if (!on) return;
   ctx.top = r.top;
   ctx.h = r.height;
@@ -184,7 +187,12 @@ function stopEngine(e: Engine, measure: () => void, ro: ResizeObserver, offs: (v
   html.removeAttribute("data-mt-motion");
   tpOff();
   html.removeAttribute("data-mt-scrolling");
-  for (const s of e.secs) { s.style.removeProperty("--p"); s.style.removeProperty("--in"); s.style.removeProperty("--out"); s.removeAttribute("data-mt-near"); }
+  for (const s of e.secs) {
+    s.style.removeProperty("--p");
+    s.style.removeProperty("--in");
+    s.style.removeProperty("--out");
+    s.removeAttribute("data-mt-near");
+  }
 }
 
 export function startEngine(root: HTMLElement, drivers: Driver[]) {
@@ -192,9 +200,38 @@ export function startEngine(root: HTMLElement, drivers: Driver[]) {
   if (matches("calm")) return () => {};
   const mqD = media("held");
   const mqFine = media("fine");
-  const ctx: Ctx = { vw: innerWidth, vh: innerHeight, y: scrollY, dy: 0, t: performance.now(), dt: 16, held: mqD.matches, fine: mqFine.matches, u: 1, top: 0, h: 0, fresh: true };
+  const ctx: Ctx = {
+    vw: innerWidth,
+    vh: innerHeight,
+    y: scrollY,
+    dy: 0,
+    t: performance.now(),
+    dt: 16,
+    held: mqD.matches,
+    fine: mqFine.matches,
+    u: 1,
+    top: 0,
+    h: 0,
+    fresh: true,
+  };
   const secs = [...root.querySelectorAll<HTMLElement>("[data-mt]")];
-  const e: Engine = { ctx, html, secs, mqD, mqFine, boxes: new Map(), near: new Map(), last: new Map(), lastIn: new Map(), lastOut: new Map(), runs: new Map(), stale: true, boxedAt: 0, raf: 0, moved: -1e9 };
+  const e: Engine = {
+    ctx,
+    html,
+    secs,
+    mqD,
+    mqFine,
+    boxes: new Map(),
+    near: new Map(),
+    last: new Map(),
+    lastIn: new Map(),
+    lastOut: new Map(),
+    runs: new Map(),
+    stale: true,
+    boxedAt: 0,
+    raf: 0,
+    moved: -1e9,
+  };
   const ro = new ResizeObserver(() => (e.stale = true));
   ro.observe(root);
   for (const s of secs) ro.observe(s);

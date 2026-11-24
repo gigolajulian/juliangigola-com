@@ -52,14 +52,14 @@ describe("v3", () => {
     expect(isSession(undefined)).toBe(false);
   });
   it("says the rate as the card shows it", () => {
-    const s = (o: Partial<Session>) => ({ slug: "portraits", name: "", includes: [], photo: { d: "", l: "" }, from: null, paid: false, ...o }) as Session;
+    const s = (o: Partial<Session>) =>
+      ({ slug: "portraits", name: "", includes: [], photo: { d: "", l: "" }, from: null, paid: false, ...o }) as Session;
     expect(priceLabel(s({ cal: "x/y" }))).toBe("15 min");
     expect(priceLabel(s({ paid: true, from: 400 }))).toBe("From $400");
     expect(priceLabel(s({ paid: true }))).toBe("$100 deposit");
     expect(priceLabel(s({}))).toBe("On request");
   });
 });
-
 
 describe("credits", () => {
   it("puts Julian's own photo credit last on every page", () => {
@@ -68,7 +68,10 @@ describe("credits", () => {
     expect(live.length).toBeGreaterThan(10);
     for (const p of live) {
       const last = p.credits.findIndex((c) => photo.test(c.role.trim()));
-      expect(p.credits.slice(last).every((c) => photo.test(c.role.trim())), p.slug).toBe(true);
+      expect(
+        p.credits.slice(last).every((c) => photo.test(c.role.trim())),
+        p.slug,
+      ).toBe(true);
     }
   });
 });

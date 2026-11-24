@@ -46,8 +46,7 @@ export function AdminBts({
     original: (published?.frames ?? []).map((f) => f.src),
     frames,
     // `null` is the sequence back in its published order.
-    onChange: (next) =>
-      onChange({ by, frames: next ? next.filter(isFrame) : (published?.frames ?? []) }),
+    onChange: (next) => onChange({ by, frames: next ? next.filter(isFrame) : (published?.frames ?? []) }),
     onUpload,
   });
 
@@ -63,9 +62,7 @@ export function AdminBts({
       setBusy(`Reading ${i + 1} of ${chosen.length}…`);
       try {
         const clip = file.type === "video/mp4";
-        const media = clip
-          ? await readClip(file)
-          : await prepareImage(file, MAX_WIDTH);
+        const media = clip ? await readClip(file) : await prepareImage(file, MAX_WIDTH);
         const path = `public/work/${slug}/bts/b${stamp}-${i + 1}.${clip ? "mp4" : "jpg"}`;
         made.push({
           path,
@@ -99,8 +96,7 @@ export function AdminBts({
         <label className="label flex flex-wrap items-baseline gap-1 text-muted-foreground">
           <span className="text-foreground">BTS</span>
           <span>
-            · {pad(list.length)}{" "}
-            {list.length === 1 ? "frame" : "frames"} · by @
+            · {pad(list.length)} {list.length === 1 ? "frame" : "frames"} · by @
           </span>
           <input
             type="text"
@@ -133,13 +129,7 @@ export function AdminBts({
               className="sr-only"
             />
           </label>
-          <button
-            type="button"
-            onClick={() => setHelp((h) => !h)}
-            aria-expanded={help}
-            aria-label="Help"
-            className={ctl}
-          >
+          <button type="button" onClick={() => setHelp((h) => !h)} aria-expanded={help} aria-label="Help" className={ctl}>
             ?
           </button>
         </div>
@@ -147,18 +137,12 @@ export function AdminBts({
 
       {help ? (
         <p className="label mt-3 text-muted-foreground">
-          Photographs or MP4 clips under 25 MB. They show in two rows on the
-          project page and on /bts, in this order. Drag or use the arrows.
-          The handle links to Instagram. Removing every frame takes the
-          project off /bts on publish. Nothing is live until Publish.
+          Photographs or MP4 clips under 25 MB. They show in two rows on the project page and on /bts, in this order. Drag or use the
+          arrows. The handle links to Instagram. Removing every frame takes the project off /bts on publish. Nothing is live until Publish.
         </p>
       ) : null}
 
-      {busy || error ? (
-        <p className={cn("label mt-3", error && "text-destructive")}>
-          {error || busy}
-        </p>
-      ) : null}
+      {busy || error ? <p className={cn("label mt-3", error && "text-destructive")}>{error || busy}</p> : null}
 
       {list.length ? (
         <ol className="mt-5 grid grid-cols-3 gap-3 sm:grid-cols-5 lg:grid-cols-6">
@@ -173,10 +157,7 @@ export function AdminBts({
                 className={cn(
                   "cursor-grab active:cursor-grabbing",
                   dragging === i && "opacity-30",
-                  over === i &&
-                    dragging !== null &&
-                    dragging !== i &&
-                    "outline outline-2 outline-offset-2 outline-foreground",
+                  over === i && dragging !== null && dragging !== i && "outline outline-2 outline-offset-2 outline-foreground",
                 )}
               >
                 <span
@@ -194,13 +175,7 @@ export function AdminBts({
                     />
                   ) : (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={shown}
-                      alt=""
-                      loading="lazy"
-                      draggable={false}
-                      className="absolute inset-0 h-full w-full object-cover"
-                    />
+                    <img src={shown} alt="" loading="lazy" draggable={false} className="absolute inset-0 h-full w-full object-cover" />
                   )}
                   <span className="label absolute left-0 top-0 bg-background/80 px-2 py-1 tabular-nums">
                     {pad(i + 1)}

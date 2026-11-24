@@ -5,7 +5,8 @@ import { TZ } from "@/lib/time-zone";
    and the picker (`use-picker.tsx`). Weeks run Monday to Sunday everywhere. */
 
 /* Julian: the time where I am, with the place, before a time is picked. */
-export const clockHere = () => new Intl.DateTimeFormat("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit", timeZoneName: "short" }).format(new Date());
+export const clockHere = () =>
+  new Intl.DateTimeFormat("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit", timeZoneName: "short" }).format(new Date());
 
 /* Dates the way the master prints them. */
 export const weekdayDateLabel = (t: Date) => t.toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short" });
@@ -37,7 +38,10 @@ export function weekFrom(anchor: Date, today: Date) {
 export function monthCells(base: Date) {
   const first = new Date(base.getFullYear(), base.getMonth(), 1);
   const n = new Date(base.getFullYear(), base.getMonth() + 1, 0).getDate();
-  return [...Array<Date | null>(mondayIndex(first)).fill(null), ...Array.from({ length: n }, (_, i) => new Date(base.getFullYear(), base.getMonth(), i + 1))];
+  return [
+    ...Array<Date | null>(mondayIndex(first)).fill(null),
+    ...Array.from({ length: n }, (_, i) => new Date(base.getFullYear(), base.getMonth(), i + 1)),
+  ];
 }
 
 /** The Monday-to-Sunday week holding `d`. */

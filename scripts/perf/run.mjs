@@ -59,10 +59,7 @@ const freePort = async () => {
 /** A build in `.next` made with JG_LOCAL=1 has the image proxy in its routes. */
 const localBuild = () => {
   try {
-    return (
-      existsSync(".next/BUILD_ID") &&
-      readFileSync(".next/routes-manifest.json", "utf8").includes("/cdn-cgi/image/")
-    );
+    return existsSync(".next/BUILD_ID") && readFileSync(".next/routes-manifest.json", "utf8").includes("/cdn-cgi/image/");
   } catch {
     return false;
   }
@@ -93,7 +90,10 @@ try {
     });
     const t0 = Date.now();
     for (;;) {
-      const up = await fetch(`${base}/legal`).then((r) => r.ok, () => false);
+      const up = await fetch(`${base}/legal`).then(
+        (r) => r.ok,
+        () => false,
+      );
       if (up) break;
       if (Date.now() - t0 > 60_000) throw new Error(`server did not start on ${base}`);
       await new Promise((r) => setTimeout(r, 300));
@@ -113,16 +113,11 @@ try {
     );
     code = ui || layout;
   } else {
-    const motion = await run(
-      "npx",
-      ["playwright", "test", "--grep", "@motion", "--workers", "1", ...passThrough],
-      { ...env, PERF_PHASE: "motion" },
-    );
-    const rest = await run(
-      "npx",
-      ["playwright", "test", "--grep-invert", "@motion", ...passThrough],
-      { ...env, PERF_PHASE: "static" },
-    );
+    const motion = await run("npx", ["playwright", "test", "--grep", "@motion", "--workers", "1", ...passThrough], {
+      ...env,
+      PERF_PHASE: "motion",
+    });
+    const rest = await run("npx", ["playwright", "test", "--grep-invert", "@motion", ...passThrough], { ...env, PERF_PHASE: "static" });
     code = motion || rest;
   }
 } catch (err) {

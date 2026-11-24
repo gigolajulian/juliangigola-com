@@ -22,7 +22,16 @@ type Busy = { start: number; end: number; label?: string };
 /** How far `tz` is ahead of UTC at `ms`, in ms. */
 function offset(ms: number, tz: string) {
   const p = Object.fromEntries(
-    new Intl.DateTimeFormat("en-US", { timeZone: tz, hourCycle: "h23", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit" })
+    new Intl.DateTimeFormat("en-US", {
+      timeZone: tz,
+      hourCycle: "h23",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    })
       .formatToParts(ms)
       .map((x) => [x.type, +x.value]),
   );
@@ -161,7 +170,10 @@ function icsFeed(src: string): Promise<Busy[]> {
    callers share the read in flight, so one that never settles would stall every one after it. */
 function capped<T>(read: Promise<T>): Promise<T> {
   const limit = AbortSignal.timeout(FEED_MS * 2);
-  return Promise.race([read, new Promise<never>((_, no) => limit.addEventListener("abort", () => no(new Error("ICS timed out")), { once: true }))]);
+  return Promise.race([
+    read,
+    new Promise<never>((_, no) => limit.addEventListener("abort", () => no(new Error("ICS timed out")), { once: true })),
+  ]);
 }
 async function readFeed(src: string) {
   const cache = edge();
@@ -190,7 +202,11 @@ export async function busyAll(secret: string | undefined, from: number, to: numb
     const b = Math.min(to, a + PIECE);
     pieces.push(
       gcal<{ calendars?: { [id: string]: { busy?: { start: string; end: string }[]; errors?: unknown[] } } }>(secret, "/freeBusy", {
-        body: { timeMin: new Date(a).toISOString(), timeMax: new Date(b).toISOString(), items: [...CALENDARS, ...label.keys()].map((id) => ({ id })) },
+        body: {
+          timeMin: new Date(a).toISOString(),
+          timeMax: new Date(b).toISOString(),
+          items: [...CALENDARS, ...label.keys()].map((id) => ({ id })),
+        },
       }).then((r) =>
         Object.entries(r.calendars ?? {}).flatMap(([id, c]) => {
           if (c.errors?.length) {
@@ -218,8 +234,17 @@ export async function busyAll(secret: string | undefined, from: number, to: numb
 /** No bookings on a shift day. Any day with an SGH event on it is busy from midnight to midnight Pacific, even when the shift itself is only the afternoon. */
 async function shiftDays(secret: string | undefined, from: number, to: number): Promise<Busy[]> {
   type When = { date?: string; dateTime?: string };
-  const q = new URLSearchParams({ q: "SGH", singleEvents: "true", maxResults: "2500", timeMin: new Date(from - DAY_MS).toISOString(), timeMax: new Date(to + DAY_MS).toISOString() });
-  const r = await gcal<{ items?: { summary?: string; status?: string; start?: When; end?: When }[] }>(secret, `/calendars/primary/events?${q}`);
+  const q = new URLSearchParams({
+    q: "SGH",
+    singleEvents: "true",
+    maxResults: "2500",
+    timeMin: new Date(from - DAY_MS).toISOString(),
+    timeMax: new Date(to + DAY_MS).toISOString(),
+  });
+  const r = await gcal<{ items?: { summary?: string; status?: string; start?: When; end?: When }[] }>(
+    secret,
+    `/calendars/primary/events?${q}`,
+  );
   // The Pacific midnight of the day `w` falls on; an all-day end date is already the day after.
   const midnight = (w: When, after: boolean) => {
     const [y, m, d] = (w.date ?? new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(Date.parse(w.dateTime!))).split("-").map(Number);
@@ -245,13 +270,19 @@ export type SlotsAnswer = { title: string; length: number; where: boolean; slots
 export type SlotOpts = { now?: number; mine?: { start: string; end: string }; kv?: HoursKV; hours?: Hours };
 
 /** Open starts of `slug` between `from` and `to`, as UTC ms. `mine`: a booking being moved, whose own time is not in the way. `kv`: where the extra calendars are listed. */
-export async function openStarts(secret: string | undefined, slug: string, from: number, to: number, { now = Date.now(), mine, kv, hours }: SlotOpts = {}) {
+export async function openStarts(
+  secret: string | undefined,
+  slug: string,
+  from: number,
+  to: number,
+  { now = Date.now(), mine, kv, hours }: SlotOpts = {},
+) {
   const rule = EVENTS[slug];
   if (!rule) return [];
   // The buffer after a session reaches past `to`.
-  const busy = (await busyBetween(secret, Math.max(from, now) - (rule.before ?? 0) * 6e4, to + (rule.length + rule.after) * 6e4, kv)).filter(
-    (b) => !mine || b.start !== Date.parse(mine.start) || b.end !== Date.parse(mine.end),
-  );
+  const busy = (
+    await busyBetween(secret, Math.max(from, now) - (rule.before ?? 0) * 6e4, to + (rule.length + rule.after) * 6e4, kv)
+  ).filter((b) => !mine || b.start !== Date.parse(mine.start) || b.end !== Date.parse(mine.end));
   return startsFor(rule, busy, from, to, now, hours);
 }
 

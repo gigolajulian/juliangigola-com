@@ -21,7 +21,11 @@ export class AdminError extends HttpError {}
  * JSON throws, since there is nothing to hand back.
  */
 export async function adminCall<T = Record<string, unknown>>(path: string, init: RequestInit = {}, fail?: string): Promise<T> {
-  const res = await fetch(path, { ...init, headers: { ...authed(), "content-type": "application/json", ...init.headers }, cache: "no-store" });
+  const res = await fetch(path, {
+    ...init,
+    headers: { ...authed(), "content-type": "application/json", ...init.headers },
+    cache: "no-store",
+  });
   const text = await res.text().catch(() => "");
   let out: (T & { error?: string }) | undefined;
   try {
@@ -43,7 +47,11 @@ export async function adminBlob(path: string, fail: string, headers: Record<stri
   const res = await fetch(path, { headers, cache: "no-store" });
   if (res.ok) return res.blob();
   let said: unknown;
-  if (res.status === 401) said = await res.json().then((b: { error?: unknown }) => b?.error, () => undefined);
+  if (res.status === 401)
+    said = await res.json().then(
+      (b: { error?: unknown }) => b?.error,
+      () => undefined,
+    );
   throw new AdminError(typeof said === "string" && said ? said : `${fail} (${res.status})`, res.status);
 }
 
@@ -52,7 +60,11 @@ export const OFFLINE = "Offline. The desk loads again when you are back online."
 export const isLocked = (e: unknown) => e instanceof AdminError && e.status === 401;
 export const LOCKED = "Not authorized.";
 /** What a failed load says: offline, or the route's own words. */
-export const loadErrorText = (e: unknown) => (navigator.onLine === false || e instanceof TypeError ? OFFLINE : isLocked(e) ? LOCKED : errorText(e));
+export const loadErrorText = (e: unknown) =>
+  navigator.onLine === false || e instanceof TypeError ? OFFLINE : isLocked(e) ? LOCKED : errorText(e);
 
 /** "Nov 11, 4:05 PM" in Julian's time. */
-export const stampPT = (iso: string) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(iso));
+export const stampPT = (iso: string) =>
+  new Intl.DateTimeFormat("en-US", { timeZone: TZ, month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(
+    new Date(iso),
+  );

@@ -37,7 +37,12 @@ export async function readLog(kv: KV, s: Sealer, id: string): Promise<LogEntry[]
 
 async function putMaster(kv: KV, s: Sealer, key: string, entry: MasterEntry) {
   let sealed = await s.seal(entry);
-  if (JSON.stringify({ s: sealed }).length > META_MAX) sealed = await s.seal({ ...entry, name: entry.name.slice(0, 24), event: { ...entry.event, note: entry.event.note?.slice(0, 60), mail: undefined } });
+  if (JSON.stringify({ s: sealed }).length > META_MAX)
+    sealed = await s.seal({
+      ...entry,
+      name: entry.name.slice(0, 24),
+      event: { ...entry.event, note: entry.event.note?.slice(0, 60), mail: undefined },
+    });
   await kv.put(key, "", { metadata: { s: sealed } });
 }
 
@@ -80,7 +85,9 @@ export async function readMaster(kv: KV, s: Sealer): Promise<MasterEntry[]> {
   for (;;) {
     const listed = await kv.list<{ s?: string }>({ prefix: "logm:", cursor });
     for (const k of listed.keys as { name: string; metadata?: { s?: string } }[]) {
-      const e = k.metadata?.s ? await s.open<MasterEntry>(k.metadata.s).catch((err: unknown) => (console.error("log entry skipped", k.name, String(err)), null)) : null;
+      const e = k.metadata?.s
+        ? await s.open<MasterEntry>(k.metadata.s).catch((err: unknown) => (console.error("log entry skipped", k.name, String(err)), null))
+        : null;
       if (e) out.push(e);
     }
     if (listed.list_complete || !listed.cursor) break;
@@ -98,4 +105,7 @@ export const csvCell = (v: unknown) => {
 
 /** What a client has paid, from their whole log: payments less refunds, plus invoices settled by hand (an unmark logs the amount negative). */
 export const paidTotal = (log: LeadEvent[]) =>
-  log.reduce((n, e) => n + (e.kind === "payment" || e.kind === "invoice-paid" ? e.amount ?? 0 : e.kind === "refund" ? -(e.amount ?? 0) : 0), 0);
+  log.reduce(
+    (n, e) => n + (e.kind === "payment" || e.kind === "invoice-paid" ? (e.amount ?? 0) : e.kind === "refund" ? -(e.amount ?? 0) : 0),
+    0,
+  );

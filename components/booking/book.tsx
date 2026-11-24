@@ -59,7 +59,8 @@ function Tabs({ at }: { at: SessionSlug }) {
         onKeyDown={(e) => {
           const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
           const i = TILES.indexOf(cur);
-          const n = e.key === "Home" ? 0 : e.key === "End" ? TILES.length - 1 : step ? (Math.max(i, 0) + step + TILES.length) % TILES.length : -1;
+          const n =
+            e.key === "Home" ? 0 : e.key === "End" ? TILES.length - 1 : step ? (Math.max(i, 0) + step + TILES.length) % TILES.length : -1;
           if (n < 0) return;
           e.preventDefault();
           (e.currentTarget.children[n] as HTMLElement).focus();
@@ -68,7 +69,15 @@ function Tabs({ at }: { at: SessionSlug }) {
         }}
       >
         {TILES.map((x, k) => (
-          <button key={x} type="button" role="radio" aria-checked={x === cur} ref={x === cur ? keepFocus : undefined} tabIndex={x === cur || (k === 0 && !TILES.includes(cur)) ? 0 : -1} onClick={() => go(x)}>
+          <button
+            key={x}
+            type="button"
+            role="radio"
+            aria-checked={x === cur}
+            ref={x === cur ? keepFocus : undefined}
+            tabIndex={x === cur || (k === 0 && !TILES.includes(cur)) ? 0 : -1}
+            onClick={() => go(x)}
+          >
             <b>{SESSIONS[x].name}</b>
             <span>{priceLabel(SESSIONS[x])}</span>
           </button>
@@ -85,11 +94,17 @@ function More({ on, go }: { on: boolean; go: (x: SessionSlug) => void }) {
   return (
     <div className="stabs-more">
       <button type="button" className="stabs-call lbl" aria-pressed={on} onClick={() => go("consultation")}>
-        <span className="q">Not sure what you need?</span> <span className="a">Book a 15 min call <i aria-hidden="true">&rarr;</i></span>
+        <span className="q">Not sure what you need?</span>{" "}
+        <span className="a">
+          Book a 15 min call <i aria-hidden="true">&rarr;</i>
+        </span>
       </button>
       {/* The art director's way out of the session flow (booking critique). */}
       <Link href="/contact/form" prefetch={false} className="stabs-call lbl">
-        <span className="q">Commission or campaign?</span> <span className="a">Inquire <i aria-hidden="true">&rarr;</i></span>
+        <span className="q">Commission or campaign?</span>{" "}
+        <span className="a">
+          Inquire <i aria-hidden="true">&rarr;</i>
+        </span>
       </Link>
     </div>
   );
@@ -99,11 +114,25 @@ function More({ on, go }: { on: boolean; go: (x: SessionSlug) => void }) {
    on the confirmation), the turnaround, then the price. */
 const getList = (S: (typeof SESSIONS)[SessionSlug]) => {
   const r = priceLabel(S);
-  return [...S.includes.filter((x) => !/^(one hour|\d+ minutes)\b/i.test(x)), ...(S.turnaround ? [`Ready in ${S.turnaround}`] : []), /deposit$/.test(r) ? `${r} required` : r];
+  return [
+    ...S.includes.filter((x) => !/^(one hour|\d+ minutes)\b/i.test(x)),
+    ...(S.turnaround ? [`Ready in ${S.turnaround}`] : []),
+    /deposit$/.test(r) ? `${r} required` : r,
+  ];
 };
 
 /** `tabs`: false where the page is already about one booking (the service pages). */
-export function BookFlow({ slug, tabs = true, h1 = false, startView }: { slug: SessionSlug; tabs?: boolean; h1?: boolean; startView?: "week" | "month" }) {
+export function BookFlow({
+  slug,
+  tabs = true,
+  h1 = false,
+  startView,
+}: {
+  slug: SessionSlug;
+  tabs?: boolean;
+  h1?: boolean;
+  startView?: "week" | "month";
+}) {
   const S = SESSIONS[slug];
   const router = useRouter();
   const more = tabs && TAB_ORDER.includes(slug);
@@ -161,7 +190,15 @@ export function BookFlow({ slug, tabs = true, h1 = false, startView }: { slug: S
     />
   );
   if (!S.cal) return <OnRequest key={slug} slug={slug} shell={shell} />;
-  return <BookTimes key={slug} path={S.cal} title={`Pick a time for ${S.name}`} skin={{ shell, name: S.name, from: S.from }} startView={startView} />;
+  return (
+    <BookTimes
+      key={slug}
+      path={S.cal}
+      title={`Pick a time for ${S.name}`}
+      skin={{ shell, name: S.name, from: S.from }}
+      startView={startView}
+    />
+  );
 }
 
 /* A session tab was picked: the next booking page is the same visit, and
@@ -192,7 +229,11 @@ export function SessionBook({ slug }: { slug: SessionSlug }) {
     if (SESSIONS[slug].cal && !fromTab.current.tab) mountCover();
   }, [slug]);
   // the script only in the server's markup: rendered on a move inside the site it would never run, and React warns
-  const fromServer = React.useSyncExternalStore(noSubscribe, () => false, () => true);
+  const fromServer = React.useSyncExternalStore(
+    noSubscribe,
+    () => false,
+    () => true,
+  );
   return (
     <div className="v3 contents">
       <section className="v3page" id="p-flow">
@@ -211,7 +252,11 @@ export function SessionBook({ slug }: { slug: SessionSlug }) {
 /* Client only: the page is prerendered, so a date baked in at build time
    no longer matches the visitor's today and hydration fails. */
 function OnRequest(props: { slug: SessionSlug; shell: Shell }) {
-  const stamp = React.useSyncExternalStore(noSubscribe, () => new Date().toDateString(), () => "");
+  const stamp = React.useSyncExternalStore(
+    noSubscribe,
+    () => new Date().toDateString(),
+    () => "",
+  );
   if (stamp) return <OnRequestFlow {...props} stamp={stamp} />;
   // on the server and until hydration: the same first step without its calendar, so the page is not empty before JS
   return props.shell({
@@ -219,7 +264,9 @@ function OnRequest(props: { slug: SessionSlug; shell: Shell }) {
     at: 1,
     head: "Book a session",
     sub: "My studio is in San Jose, and I travel across the Bay Area.",
-    body: <p className="lbl mute">{SESSIONS[props.slug].name} is on request. Pick a preferred date and I&apos;ll confirm it with a quote.</p>,
+    body: (
+      <p className="lbl mute">{SESSIONS[props.slug].name} is on request. Pick a preferred date and I&apos;ll confirm it with a quote.</p>
+    ),
     sum: [],
   });
 }
@@ -245,9 +292,15 @@ function OnRequestFlow({ slug, shell, stamp }: { slug: SessionSlug; shell: Shell
     scrollTo(0, 0);
   };
   const place = where === "studio" ? "Studio in San Jose" : "On location";
-  const sum: [string, React.ReactNode][] = [["Date", weekdayDateLabel(day)], ...(LENGTH[slug] ? [["Length", duration(LENGTH[slug])] as [string, string]] : [])];
+  const sum: [string, React.ReactNode][] = [
+    ["Date", weekdayDateLabel(day)],
+    ...(LENGTH[slug] ? [["Length", duration(LENGTH[slug])] as [string, string]] : []),
+  ];
   const monday = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate() - ((d.getDay() + 6) % 7));
-  const canBack = view === "week" ? +monday(anchor) > +monday(today) : anchor.getFullYear() * 12 + anchor.getMonth() > today.getFullYear() * 12 + today.getMonth();
+  const canBack =
+    view === "week"
+      ? +monday(anchor) > +monday(today)
+      : anchor.getFullYear() * 12 + anchor.getMonth() > today.getFullYear() * 12 + today.getMonth();
   const steps = ["Date", "Shoot", "You", "Sent"];
 
   let parts: Omit<Parameters<Shell>[0], "steps" | "at" | "sum">;
@@ -259,7 +312,10 @@ function OnRequestFlow({ slug, shell, stamp }: { slug: SessionSlug; shell: Shell
         <>
           <Calendar
             view={view}
-            setView={(x) => { setView(x); setAnchor(day); }}
+            setView={(x) => {
+              setView(x);
+              setAnchor(day);
+            }}
             anchor={anchor}
             shift={(dir) => {
               const d = new Date(anchor);
@@ -275,7 +331,11 @@ function OnRequestFlow({ slug, shell, stamp }: { slug: SessionSlug; shell: Shell
           <p className="lbl mute">{S.name} is on request. Pick a preferred date and I&apos;ll confirm it with a quote.</p>
         </>
       ),
-      bar: <button type="button" className="btn fill" onClick={() => go(2)}>Continue</button>,
+      bar: (
+        <button type="button" className="btn fill" onClick={() => go(2)}>
+          Continue
+        </button>
+      ),
     };
   } else if (at === 2) {
     parts = {
@@ -287,7 +347,9 @@ function OnRequestFlow({ slug, shell, stamp }: { slug: SessionSlug; shell: Shell
             <span className="lbl mute">Where</span>
             <div className="times lbl" style={{ gridTemplateColumns: "1fr 1fr" }}>
               {(["studio", "location"] as const).map((x) => (
-                <button key={x} type="button" className="opt" aria-pressed={x === where} onClick={() => setWhere(x)}>{x === "studio" ? "Studio in San Jose" : "On location"}</button>
+                <button key={x} type="button" className="opt" aria-pressed={x === where} onClick={() => setWhere(x)}>
+                  {x === "studio" ? "Studio in San Jose" : "On location"}
+                </button>
               ))}
             </div>
           </div>
@@ -296,8 +358,12 @@ function OnRequestFlow({ slug, shell, stamp }: { slug: SessionSlug; shell: Shell
       ),
       bar: (
         <>
-          <button type="button" className="btn" onClick={() => go(1)}>Back</button>
-          <button type="button" className="btn fill" onClick={() => go(3)}>Continue</button>
+          <button type="button" className="btn" onClick={() => go(1)}>
+            Back
+          </button>
+          <button type="button" className="btn fill" onClick={() => go(3)}>
+            Continue
+          </button>
         </>
       ),
     };
@@ -316,8 +382,12 @@ function OnRequestFlow({ slug, shell, stamp }: { slug: SessionSlug; shell: Shell
       ),
       bar: (
         <>
-          <button type="button" className="btn" onClick={() => go(2)}>Back</button>
-          <button type="submit" className="btn fill" disabled={pending}>Send request</button>
+          <button type="button" className="btn" onClick={() => go(2)}>
+            Back
+          </button>
+          <button type="submit" className="btn fill" disabled={pending}>
+            Send request
+          </button>
         </>
       ),
     };
@@ -328,15 +398,27 @@ function OnRequestFlow({ slug, shell, stamp }: { slug: SessionSlug; shell: Shell
       sub: "I'll reply with a quote.",
       body: (
         <div className="done-lines">
-          {[`${S.name}, around ${weekdayDateLabel(day)}${where === "studio" ? ", in the San Jose studio." : ", on location."}`, "A copy of your request is in your inbox.", "Nothing is charged until you accept the quote."].map((l) => <p key={l}>{l}</p>)}
+          {[
+            `${S.name}, around ${weekdayDateLabel(day)}${where === "studio" ? ", in the San Jose studio." : ", on location."}`,
+            "A copy of your request is in your inbox.",
+            "Nothing is charged until you accept the quote.",
+          ].map((l) => (
+            <p key={l}>{l}</p>
+          ))}
         </div>
       ),
-      bar: <Link className="btn fill" href="/portfolio">See the work</Link>,
+      bar: (
+        <Link className="btn fill" href="/portfolio">
+          See the work
+        </Link>
+      ),
     };
   }
 
   /* The enquiry needs a message; the date stands in when nothing is written. */
-  const message = [v.idea.trim(), v.phone.trim() && `Phone: ${v.phone.trim()}`, v.note.trim()].filter(Boolean).join("\n\n") || `${S.name}, preferred date ${weekdayDateLabel(day)}.`;
+  const message =
+    [v.idea.trim(), v.phone.trim() && `Phone: ${v.phone.trim()}`, v.note.trim()].filter(Boolean).join("\n\n") ||
+    `${S.name}, preferred date ${weekdayDateLabel(day)}.`;
   return (
     <form
       noValidate
@@ -389,7 +471,9 @@ export function CallDialog() {
                 onClick={(e) => e.target === e.currentTarget && e.currentTarget.close()}
               >
                 <div className="dlg-x">
-                  <button type="button" onClick={() => dlg.current?.close()}>Close</button>
+                  <button type="button" onClick={() => dlg.current?.close()}>
+                    Close
+                  </button>
                 </div>
                 <BookFlow slug="consultation" />
               </dialog>

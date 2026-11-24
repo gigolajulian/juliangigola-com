@@ -77,15 +77,21 @@ export function cosmosLink(v: unknown): string | undefined {
   try {
     const u = new URL(/^https?:\/\//i.test(s) ? s : `https://${s}`);
     return u.protocol === "https:" && /(^|\.)cosmos\.so$/i.test(u.hostname) ? u.toString() : undefined;
-  } catch { return undefined; }
+  } catch {
+    return undefined;
+  }
 }
 
 /** The plan from the desk, checked and cut; null when nothing is left in it. Team: only addresses of the lead's people. */
 export function cleanPlan(x: unknown, people: Person[] = []): ShootPlan | null | { error: string } {
   if (x === null) return null;
   if (!isRecord(x)) return { error: "Bad plan." };
-  const refs = (Array.isArray(x.refs) ? x.refs : []).map(framePath).filter((r): r is string => !!r).slice(0, REFS_MAX);
-  if (Array.isArray(x.refs) && x.refs.some((r) => clip(r, 300) && !framePath(r))) return { error: "References are your own frames: paste a /work/ link." };
+  const refs = (Array.isArray(x.refs) ? x.refs : [])
+    .map(framePath)
+    .filter((r): r is string => !!r)
+    .slice(0, REFS_MAX);
+  if (Array.isArray(x.refs) && x.refs.some((r) => clip(r, 300) && !framePath(r)))
+    return { error: "References are your own frames: paste a /work/ link." };
   if (clip(x.cosmos, 300) && !cosmosLink(x.cosmos)) return { error: "That is not a cosmos.so link." };
   const shots = (Array.isArray(x.shots) ? x.shots : []).slice(0, SHOTS_MAX).flatMap((raw) => {
     const o = asRecord(raw);
@@ -94,8 +100,16 @@ export function cleanPlan(x: unknown, people: Person[] = []): ShootPlan | null |
   });
   const sh = asRecord(x.sheet);
   const ours = new Set(people.map((p) => canonical(p.email)));
-  const team = (Array.isArray(sh.team) ? sh.team : []).filter((e): e is string => typeof e === "string" && ours.has(canonical(e))).map((e) => e.toLowerCase());
-  const sheet = { call: clip(sh.call, 20), window: clip(sh.window, 60), place: clip(sh.place, 120), bring: clip(sh.bring, 200), ...(team.length ? { team } : {}) };
+  const team = (Array.isArray(sh.team) ? sh.team : [])
+    .filter((e): e is string => typeof e === "string" && ours.has(canonical(e)))
+    .map((e) => e.toLowerCase());
+  const sheet = {
+    call: clip(sh.call, 20),
+    window: clip(sh.window, 60),
+    place: clip(sh.place, 120),
+    bring: clip(sh.bring, 200),
+    ...(team.length ? { team } : {}),
+  };
   for (const k of Object.keys(sheet) as (keyof typeof sheet)[]) if (sheet[k] === undefined) delete sheet[k];
   const plan: ShootPlan = {
     ...(clip(x.brief, 1000) ? { brief: clip(x.brief, 1000) } : {}),
@@ -108,7 +122,12 @@ export function cleanPlan(x: unknown, people: Person[] = []): ShootPlan | null |
 }
 
 /** The task list from the desk, checked. `old` keeps each done time; a task newly done gets `at` and a timeline line. */
-export function cleanTasks(v: unknown, old: Task[] = [], people: Person[] = [], at = new Date().toISOString()): { tasks: Task[]; events: LeadEvent[] } | { error: string } {
+export function cleanTasks(
+  v: unknown,
+  old: Task[] = [],
+  people: Person[] = [],
+  at = new Date().toISOString(),
+): { tasks: Task[]; events: LeadEvent[] } | { error: string } {
   if (!Array.isArray(v)) return { error: "Bad task list." };
   if (v.length > TASKS_MAX) return { error: `${TASKS_MAX} tasks at most.` };
   const ours = new Set(people.map((p) => canonical(p.email)));
@@ -133,11 +152,17 @@ export function cleanTasks(v: unknown, old: Task[] = [], people: Person[] = [], 
 }
 
 /** The call sheet as a Gmail draft to the client and the team: short, so the link stays well under what Gmail takes. */
-export function callSheet(l: Pick<Lead, "name" | "email" | "when" | "kind" | "people" | "plan">): { to: string; subject: string; body: string } {
+export function callSheet(l: Pick<Lead, "name" | "email" | "when" | "kind" | "people" | "plan">): {
+  to: string;
+  subject: string;
+  body: string;
+} {
   const p = l.plan ?? {};
   const sh = p.sheet ?? {};
   const team = (l.people ?? []).filter((x) => sh.team?.includes(x.email));
-  const day = l.when ? new Intl.DateTimeFormat("en-US", { timeZone: TZ, weekday: "long", month: "long", day: "numeric" }).format(new Date(l.when)) : "";
+  const day = l.when
+    ? new Intl.DateTimeFormat("en-US", { timeZone: TZ, weekday: "long", month: "long", day: "numeric" }).format(new Date(l.when))
+    : "";
   const rows = [
     sh.call ? `Call: ${sh.call}` : "",
     sh.window ? `Shoot: ${sh.window}` : "",
@@ -207,7 +232,10 @@ export function merge(into: Lead, from: Lead, at: string): Lead {
     firstAt: into.firstAt < from.firstAt ? into.firstAt : from.firstAt,
     lastAt: into.lastAt > from.lastAt ? into.lastAt : from.lastAt,
     unread: into.unread || from.unread,
-    when: [into.when, from.when].filter((w): w is string => !!w).sort(byCodeUnit).pop(),
+    when: [into.when, from.when]
+      .filter((w): w is string => !!w)
+      .sort(byCodeUnit)
+      .pop(),
     flags: [...new Set([...(into.flags ?? []), ...(from.flags ?? [])])],
     notes: notes.slice(0, 5000),
     invoices: [...(from.invoices ?? []), ...(into.invoices ?? [])].sort((a, b) => a.at.localeCompare(b.at)),
@@ -215,7 +243,13 @@ export function merge(into: Lead, from: Lead, at: string): Lead {
     tasks: [...(into.tasks ?? []), ...(from.tasks ?? []).filter((t) => !into.tasks?.some((x) => x.id === t.id))],
     plan: into.plan ?? from.plan,
     // Both records' people, once each, never this lead's own address. The other record's address joins them, so its mail keeps landing here.
-    people: [...(into.people ?? []), ...(from.people ?? []), ...(mailable(from.email) ? [{ name: from.name, email: from.email }] : [])].filter((p, i, all) => canonical(p.email) !== canonical(into.email) && all.findIndex((x) => canonical(x.email) === canonical(p.email)) === i),
+    people: [
+      ...(into.people ?? []),
+      ...(from.people ?? []),
+      ...(mailable(from.email) ? [{ name: from.name, email: from.email }] : []),
+    ].filter(
+      (p, i, all) => canonical(p.email) !== canonical(into.email) && all.findIndex((x) => canonical(x.email) === canonical(p.email)) === i,
+    ),
     events: [...events, { at, kind: "merge" as const, note: from.name }].slice(-50),
   };
   if (!out.flags?.length) delete out.flags;
@@ -230,14 +264,54 @@ export function merge(into: Lead, from: Lead, at: string): Lead {
 /** "Hi {first}" and friends, filled for one lead. */
 export type Template = { id: string; name: string; subject: string; body: string };
 export const TEMPLATES: Template[] = [
-  { id: "quote", name: "Quote", subject: "Your {kind} quote", body: "Hi {first},\n\nThanks for the details. Here is what I would suggest for the {kind} shoot, and what it costs:\n\n\n\nIf that works, I will hold a date for you.\n\nJulian" },
-  { id: "book", name: "Booking link", subject: "Booking a time", body: "Hi {first},\n\nYou can pick a time here: https://juliangigola.com/book\n\nJulian" },
-  { id: "follow", name: "Follow up", subject: "Checking in", body: "Hi {first},\n\nChecking in on the {kind} shoot. Happy to answer anything, or hold a date while you decide.\n\nJulian" },
-  { id: "nudge1", name: "Nudge 1", subject: "Your {kind} quote", body: "Hi {first},\n\nChecking in on the quote I sent for the {kind} shoot. Any questions, just ask.\n\nJulian" },
-  { id: "nudge2", name: "Nudge 2", subject: "Your {kind} quote", body: "Hi {first},\n\nI still have a few dates open this month if you want one held. Here is a recent shoot close to what you described:\n\n\n\nJulian" },
-  { id: "nudge3", name: "Last nudge", subject: "Your {kind} quote", body: "Hi {first},\n\nI haven't heard back, so I'll close this out unless you want to keep going. If the timing changes, write any time.\n\nJulian" },
-  { id: "renew", name: "Renew licence", subject: "Renewing your licence", body: "Hi {first},\n\nThe licence on the photos ({licence}) ends on {ends}. If you still need them after that, I can renew it. Same terms, or tell me what changed and I will quote it.\n\nJulian" },
-  { id: "decline", name: "Not a fit", subject: "Your {kind} inquiry", body: "Hi {first},\n\nThank you for thinking of me. This one is not a fit for my schedule right now, but I hope it goes well.\n\nJulian" },
+  {
+    id: "quote",
+    name: "Quote",
+    subject: "Your {kind} quote",
+    body: "Hi {first},\n\nThanks for the details. Here is what I would suggest for the {kind} shoot, and what it costs:\n\n\n\nIf that works, I will hold a date for you.\n\nJulian",
+  },
+  {
+    id: "book",
+    name: "Booking link",
+    subject: "Booking a time",
+    body: "Hi {first},\n\nYou can pick a time here: https://juliangigola.com/book\n\nJulian",
+  },
+  {
+    id: "follow",
+    name: "Follow up",
+    subject: "Checking in",
+    body: "Hi {first},\n\nChecking in on the {kind} shoot. Happy to answer anything, or hold a date while you decide.\n\nJulian",
+  },
+  {
+    id: "nudge1",
+    name: "Nudge 1",
+    subject: "Your {kind} quote",
+    body: "Hi {first},\n\nChecking in on the quote I sent for the {kind} shoot. Any questions, just ask.\n\nJulian",
+  },
+  {
+    id: "nudge2",
+    name: "Nudge 2",
+    subject: "Your {kind} quote",
+    body: "Hi {first},\n\nI still have a few dates open this month if you want one held. Here is a recent shoot close to what you described:\n\n\n\nJulian",
+  },
+  {
+    id: "nudge3",
+    name: "Last nudge",
+    subject: "Your {kind} quote",
+    body: "Hi {first},\n\nI haven't heard back, so I'll close this out unless you want to keep going. If the timing changes, write any time.\n\nJulian",
+  },
+  {
+    id: "renew",
+    name: "Renew licence",
+    subject: "Renewing your licence",
+    body: "Hi {first},\n\nThe licence on the photos ({licence}) ends on {ends}. If you still need them after that, I can renew it. Same terms, or tell me what changed and I will quote it.\n\nJulian",
+  },
+  {
+    id: "decline",
+    name: "Not a fit",
+    subject: "Your {kind} inquiry",
+    body: "Hi {first},\n\nThank you for thinking of me. This one is not a fit for my schedule right now, but I hope it goes well.\n\nJulian",
+  },
 ];
 export function fillTemplate(text: string, l: Pick<Lead, "name" | "kind" | "when" | "licence">): string {
   const when = l.when
@@ -249,15 +323,33 @@ export function fillTemplate(text: string, l: Pick<Lead, "name" | "kind" | "when
     .replace(/\{kind\}/g, (l.kind ?? "shoot").replace(/-/g, " "))
     .replace(/\{when\}/g, when)
     .replace(/\{licence\}/g, l.licence?.use ?? "")
-    .replace(/\{ends\}/g, l.licence ? new Date(`${l.licence.end}T12:00:00Z`).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "UTC" }) : "");
+    .replace(
+      /\{ends\}/g,
+      l.licence
+        ? new Date(`${l.licence.end}T12:00:00Z`).toLocaleDateString("en-US", {
+            month: "long",
+            day: "numeric",
+            year: "numeric",
+            timeZone: "UTC",
+          })
+        : "",
+    );
 }
 /** Templates as he saved them, or the defaults; anything malformed is dropped. */
 export function cleanTemplates(v: unknown): Template[] {
   if (!Array.isArray(v)) return TEMPLATES;
   const saved = v
-    .filter((t): t is Template => !!t && typeof t === "object" && typeof t.name === "string" && typeof t.subject === "string" && typeof t.body === "string")
+    .filter(
+      (t): t is Template =>
+        !!t && typeof t === "object" && typeof t.name === "string" && typeof t.subject === "string" && typeof t.body === "string",
+    )
     .slice(0, 30)
-    .map((t, i) => ({ id: typeof t.id === "string" && t.id ? t.id.slice(0, 40) : `t${i}`, name: t.name.slice(0, 60), subject: t.subject.slice(0, 200), body: t.body.slice(0, 5000) }));
+    .map((t, i) => ({
+      id: typeof t.id === "string" && t.id ? t.id.slice(0, 40) : `t${i}`,
+      name: t.name.slice(0, 60),
+      subject: t.subject.slice(0, 200),
+      body: t.body.slice(0, 5000),
+    }));
   // Quote nudges came after his first save: added to a saved list, so a deleted one comes back.
   return [...saved, ...TEMPLATES.filter((t) => t.id.startsWith("nudge") && !saved.some((s) => s.id === t.id))];
 }
@@ -303,7 +395,11 @@ export function stats(all: (Lead & { id?: string })[], now: number, master: Mast
     return d.getTime() - ((d.getUTCDay() + 6) % 7) * DAY_MS;
   };
   const start = monday(now) - 11 * WEEK_MS;
-  const weeks = Array.from({ length: 12 }, (_, i) => ({ start: new Date(start + i * WEEK_MS).toISOString().slice(0, 10), inquiries: 0, booked: 0 }));
+  const weeks = Array.from({ length: 12 }, (_, i) => ({
+    start: new Date(start + i * WEEK_MS).toISOString().slice(0, 10),
+    inquiries: 0,
+    booked: 0,
+  }));
   const at = (iso: string) => Math.floor((Date.parse(iso) - start) / WEEK_MS);
   for (const l of leads) {
     const i = at(l.firstAt);
@@ -330,7 +426,8 @@ export function stats(all: (Lead & { id?: string })[], now: number, master: Mast
     src.set(k, s);
   }
   const lost = new Map<string, number>();
-  for (const l of leads) if (l.stage === "Lost") lost.set(l.lostReason || "No reason given", (lost.get(l.lostReason || "No reason given") ?? 0) + 1);
+  for (const l of leads)
+    if (l.stage === "Lost") lost.set(l.lostReason || "No reason given", (lost.get(l.lostReason || "No reason given") ?? 0) + 1);
   const stages: Partial<Record<Stage, number>> = {};
   for (const l of leads) stages[l.stage] = (stages[l.stage] ?? 0) + 1;
   return {
@@ -352,9 +449,47 @@ export function stats(all: (Lead & { id?: string })[], now: number, master: Mast
 /** Every lead as CSV, for his records. Spreadsheet formulas are defused.
  * `paid`: dollars paid per email, from the activity log. Open balance: invoices not settled. */
 export function leadsCsv(leads: Lead[], paid: Record<string, number> = {}): string {
-  const cols = ["name", "email", "phone", "instagram", "company", "stage", "kind", "source", "quote", "paid total", "open balance", "lost reason", "first seen", "last activity", "booked for", "archived", "notes"] as const;
+  const cols = [
+    "name",
+    "email",
+    "phone",
+    "instagram",
+    "company",
+    "stage",
+    "kind",
+    "source",
+    "quote",
+    "paid total",
+    "open balance",
+    "lost reason",
+    "first seen",
+    "last activity",
+    "booked for",
+    "archived",
+    "notes",
+  ] as const;
   const rows = leads.map((l) =>
-    [l.name, mailable(l.email) ? l.email : "", l.phone, l.ig, l.company, l.stage, l.kind, l.source, l.quote, paid[l.email] ?? 0, (l.invoices ?? []).filter((v) => !isSettled(v)).reduce((n, v) => n + balance(v), 0), l.lostReason, l.firstAt, l.lastAt, l.when, l.archivedAt ? "yes" : "", l.notes].map(csvCell).join(","),
+    [
+      l.name,
+      mailable(l.email) ? l.email : "",
+      l.phone,
+      l.ig,
+      l.company,
+      l.stage,
+      l.kind,
+      l.source,
+      l.quote,
+      paid[l.email] ?? 0,
+      (l.invoices ?? []).filter((v) => !isSettled(v)).reduce((n, v) => n + balance(v), 0),
+      l.lostReason,
+      l.firstAt,
+      l.lastAt,
+      l.when,
+      l.archivedAt ? "yes" : "",
+      l.notes,
+    ]
+      .map(csvCell)
+      .join(","),
   );
   return [cols.join(","), ...rows].join("\r\n") + "\r\n";
 }
@@ -362,6 +497,12 @@ export function leadsCsv(leads: Lead[], paid: Record<string, number> = {}): stri
 /** The master log as CSV, one row per event, beside `leadsCsv`. Events on a lead with no address to mail (an Instagram or phone identity) are left out. */
 export function eventsCsv(rows: MasterEntry[]): string {
   const cols = ["time", "client", "email", "kind", "detail", "amount", "lead id"];
-  const body = rows.filter((r) => mailable(r.email)).map((r) => [r.event.at, r.name, r.email, r.event.kind, r.event.note ?? r.event.mail?.kind ?? "", r.event.amount ?? "", r.lead].map(csvCell).join(","));
+  const body = rows
+    .filter((r) => mailable(r.email))
+    .map((r) =>
+      [r.event.at, r.name, r.email, r.event.kind, r.event.note ?? r.event.mail?.kind ?? "", r.event.amount ?? "", r.lead]
+        .map(csvCell)
+        .join(","),
+    );
   return [cols.join(","), ...body].join("\r\n") + "\r\n";
 }

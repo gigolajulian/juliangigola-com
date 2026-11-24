@@ -62,7 +62,9 @@ export function useCoverPreload(
         const im = f.querySelector<HTMLImageElement>("img:not(.bk)");
         if (!im?.complete) continue;
         const r = f.getBoundingClientRect();
-        const shown = (Math.max(0, Math.min(r.bottom, innerHeight) - Math.max(r.top, 0)) / r.height) * (Math.max(0, Math.min(r.right, innerWidth) - Math.max(r.left, 0)) / r.width);
+        const shown =
+          (Math.max(0, Math.min(r.bottom, innerHeight) - Math.max(r.top, 0)) / r.height) *
+          (Math.max(0, Math.min(r.right, innerWidth) - Math.max(r.left, 0)) / r.width);
         if (first ? !shown : shown < 1 / 3) continue; // fades in once a third of it is on screen
         if (first) f.dataset.up = "0";
         else {

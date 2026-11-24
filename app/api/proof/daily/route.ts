@@ -27,9 +27,12 @@ export async function POST(request: Request) {
   const until = new Date().toISOString();
   const since = (await kv.get(LAST)) ?? new Date(Date.now() - DAY_MS).toISOString();
   // A gallery that will not open is logged and left out: one bad record never stops the summary.
-  const proofs = (await Promise.all((await listProofs(kv)).map((x) => readProof(kv, seal, x.token).catch(logged("proof digest", x.token))))).filter((p): p is Proof => p?.notify === "daily");
+  const proofs = (
+    await Promise.all((await listProofs(kv)).map((x) => readProof(kv, seal, x.token).catch(logged("proof digest", x.token))))
+  ).filter((p): p is Proof => p?.notify === "daily");
   const m = digestMail(proofs, since, until);
-  if (new URL(request.url).searchParams.has("dry")) return json({ since, until, subject: m?.subject ?? null, text: m?.lines.join("\n") ?? null });
+  if (new URL(request.url).searchParams.has("dry"))
+    return json({ since, until, subject: m?.subject ?? null, text: m?.lines.join("\n") ?? null });
   const sent = m ? await alertHello(env.EMAIL, m.subject, m.lines) : false;
   // A failed send keeps the old mark, so tomorrow's summary still covers today.
   if (sent || !m) await kv.put(LAST, until);

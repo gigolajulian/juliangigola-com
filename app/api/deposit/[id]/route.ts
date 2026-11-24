@@ -67,7 +67,9 @@ export async function PUT(request: Request, ctx: { params: Promise<{ id: string 
   const files = await takeUploads(form.getAll("refs"), MAX_REFS - picks.length);
   const ttl = { expirationTtl: 30 * 864e2 };
   await Promise.all([
-    ...files.map(async (f, n) => env.INBOX.put(refKey(id, `f${n}`), await f.arrayBuffer(), { ...ttl, metadata: { name: f.name.slice(0, 80), type: f.type } })),
+    ...files.map(async (f, n) =>
+      env.INBOX.put(refKey(id, `f${n}`), await f.arrayBuffer(), { ...ttl, metadata: { name: f.name.slice(0, 80), type: f.type } }),
+    ),
     ...(picks.length ? [env.INBOX.put(refKey(id, "picks"), picks.join("\n"), ttl)] : []),
   ]);
   return json({ files: files.length, picks: picks.length });

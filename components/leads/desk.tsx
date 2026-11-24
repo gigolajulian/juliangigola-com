@@ -50,7 +50,21 @@ import { PanelDesk, StatsDesk } from "@/components/leads/numbers";
 import { DeviceDesk, HoursDesk, TemplatesDesk } from "@/components/leads/setup-panels";
 import { type Filter } from "@/lib/leads/lead-desk";
 import { ProofsDesk } from "@/components/proofs/desk";
-import { Eyebrow, FIND_KEY, FindGlyph, GO, isView, Nav, More, PlusGlyph, Rail, sectionOf, TabBar, type Found, type View } from "@/components/leads/desk-nav";
+import {
+  Eyebrow,
+  FIND_KEY,
+  FindGlyph,
+  GO,
+  isView,
+  Nav,
+  More,
+  PlusGlyph,
+  Rail,
+  sectionOf,
+  TabBar,
+  type Found,
+  type View,
+} from "@/components/leads/desk-nav";
 import { date, OpenLeadPanel } from "@/components/leads/lead-panel";
 import { DAY_MS, pacificFormat, WEEK_MS } from "@/lib/time-zone";
 
@@ -73,14 +87,20 @@ const leadsTheme = defineTheme({
   },
 });
 
-const GROUPS: [Group, string][] = [["now", "Your move"], ["week", "This week"], ["waiting", "Waiting on them"]];
+const GROUPS: [Group, string][] = [
+  ["now", "Your move"],
+  ["week", "This week"],
+  ["waiting", "Waiting on them"],
+];
 /** A day from the moment of the swipe or press. */
 const dayOn = () => new Date(Date.now() + DAY_MS).toISOString();
 const BOARD_STORE = "jg-leads-board";
-const stamp = (t: number) => pacificFormat({ weekday: "short", month: "short", day: "numeric" }).format(new Date(t)).toUpperCase().replace(",", "");
+const stamp = (t: number) =>
+  pacificFormat({ weekday: "short", month: "short", day: "numeric" }).format(new Date(t)).toUpperCase().replace(",", "");
 
 /* The palette on a phone: the whole screen, as a sheet, with the list taking what the field leaves. */
-const SHEET_CSS = "dialog[data-jg-sheet]{inset:0;margin:0;width:100vw!important;max-width:none!important;height:100dvh!important;max-height:none!important;border:0;border-radius:0;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}dialog[data-jg-sheet]>*{height:100%;max-height:none!important}";
+const SHEET_CSS =
+  "dialog[data-jg-sheet]{inset:0;margin:0;width:100vw!important;max-width:none!important;height:100dvh!important;max-height:none!important;border:0;border-radius:0;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}dialog[data-jg-sheet]>*{height:100%;max-height:none!important}";
 const PULL = 72; // px of pull, at the top of the page, that refreshes on release
 
 /**
@@ -92,8 +112,13 @@ function usePullRefresh(onPull: () => void, enabled: React.RefObject<boolean>): 
   const [tick, setTick] = React.useState(0);
   const [pull, setPull] = React.useState(0);
   React.useEffect(() => {
-    let x0 = 0, y0 = -1, d = 0;
-    const atTop = (el: Element | null) => { for (; el; el = el.parentElement) if (el.scrollTop > 0) return false; return true; };
+    let x0 = 0,
+      y0 = -1,
+      d = 0;
+    const atTop = (el: Element | null) => {
+      for (; el; el = el.parentElement) if (el.scrollTop > 0) return false;
+      return true;
+    };
     const start = (e: TouchEvent) => {
       d = 0;
       y0 = enabled.current && e.touches.length === 1 && atTop(e.target as Element) ? e.touches[0].clientY : -1;
@@ -103,11 +128,17 @@ function usePullRefresh(onPull: () => void, enabled: React.RefObject<boolean>): 
       if (y0 < 0) return;
       d = e.touches[0].clientY - y0;
       // a sideways swipe (the week strip, a tab row) is not a pull
-      if (Math.abs(e.touches[0].clientX - x0) > Math.max(24, d)) { y0 = -1; d = 0; }
+      if (Math.abs(e.touches[0].clientX - x0) > Math.max(24, d)) {
+        y0 = -1;
+        d = 0;
+      }
       setPull(Math.max(0, d));
     };
     const end = (e: TouchEvent) => {
-      if (e.type === "touchend" && y0 >= 0 && d > PULL) { onPull(); setTick((t) => t + 1); }
+      if (e.type === "touchend" && y0 >= 0 && d > PULL) {
+        onPull();
+        setTick((t) => t + 1);
+      }
       y0 = -1;
       setPull(0);
     };
@@ -115,7 +146,12 @@ function usePullRefresh(onPull: () => void, enabled: React.RefObject<boolean>): 
     addEventListener("touchmove", move, { passive: true });
     addEventListener("touchend", end);
     addEventListener("touchcancel", end);
-    return () => { removeEventListener("touchstart", start); removeEventListener("touchmove", move); removeEventListener("touchend", end); removeEventListener("touchcancel", end); };
+    return () => {
+      removeEventListener("touchstart", start);
+      removeEventListener("touchmove", move);
+      removeEventListener("touchend", end);
+      removeEventListener("touchcancel", end);
+    };
   }, [onPull, enabled]);
   return [pull, tick];
 }
@@ -133,21 +169,40 @@ function useStoredFlag(key: string): [boolean, (on: boolean) => void] {
 /** What the Ctrl or Cmd K palette offers: every lead by name, email, shoot or stage, actions on the open lead, then every page. */
 function finderItems(leads: LeadSummary[] | null, openName: string | undefined): Found[] {
   return [
-    ...(leads ?? []).filter((l) => !l.trashedAt && l.id).map((l) => ({ id: leadStoreKey(l.id!), label: l.name || l.email, auxiliaryData: { group: "Leads", words: [l.email, l.kind ?? "", l.stage], note: [l.stage, l.when ? pacificFormat({ month: "short", day: "numeric" }).format(new Date(l.when)) : null].filter(Boolean).join(" · ") } })),
+    ...(leads ?? [])
+      .filter((l) => !l.trashedAt && l.id)
+      .map((l) => ({
+        id: leadStoreKey(l.id!),
+        label: l.name || l.email,
+        auxiliaryData: {
+          group: "Leads",
+          words: [l.email, l.kind ?? "", l.stage],
+          note: [l.stage, l.when ? pacificFormat({ month: "short", day: "numeric" }).format(new Date(l.when)) : null]
+            .filter(Boolean)
+            .join(" · "),
+        },
+      })),
     // Actions on the lead that is open, then the ones that need none.
-    ...(openName ? [{ id: "do:task", label: `Add a task to ${openName}`, auxiliaryData: { group: "Do", words: ["task", "todo"] } }, { id: "do:invoice", label: `New invoice for ${openName}`, auxiliaryData: { group: "Do", words: ["invoice", "bill"] } }] : []),
+    ...(openName
+      ? [
+          { id: "do:task", label: `Add a task to ${openName}`, auxiliaryData: { group: "Do", words: ["task", "todo"] } },
+          { id: "do:invoice", label: `New invoice for ${openName}`, auxiliaryData: { group: "Do", words: ["invoice", "bill"] } },
+        ]
+      : []),
     { id: "go:new", label: "New lead", auxiliaryData: { group: "Do", words: ["add", "lead"] } },
     ...GO,
   ];
 }
 
 /** Where a lead sits on the home list, or null when it is not open. `at` is when the list loaded. */
-const groupAt = (at: number) => (l: LeadSummary): Group | null => {
-  if (inFilter(l, "needs")) return "now";
-  if (!inFilter(l, "open")) return null;
-  if (inFilter(l, "upcoming") && Date.parse(l.when!) < at + WEEK_MS) return "week";
-  return "waiting";
-};
+const groupAt =
+  (at: number) =>
+  (l: LeadSummary): Group | null => {
+    if (inFilter(l, "needs")) return "now";
+    if (!inFilter(l, "open")) return null;
+    if (inFilter(l, "upcoming") && Date.parse(l.when!) < at + WEEK_MS) return "week";
+    return "waiting";
+  };
 
 export function LeadsDesk() {
   const [leads, setLeads] = React.useState<LeadSummary[] | null>(null);
@@ -180,15 +235,24 @@ export function LeadsDesk() {
 
   const load = React.useCallback(() => {
     deskCall<{ leads: LeadSummary[] }>()
-      .then((o) => { setLeads(o.leads); setAt(Date.now()); setError(null); })
+      .then((o) => {
+        setLeads(o.leads);
+        setAt(Date.now());
+        setError(null);
+      })
       .catch((e: unknown) => setError(loadErrorText(e)));
   }, []);
   React.useEffect(load, [load]);
   // The installed app's badge: unread leads not put aside.
-  React.useEffect(() => { if (leads) setUnreadBadge(leads.filter((l) => l.unread && !isSetAside(l)).length); }, [leads]);
+  React.useEffect(() => {
+    if (leads) setUnreadBadge(leads.filter((l) => l.unread && !isSetAside(l)).length);
+  }, [leads]);
   React.useEffect(() => {
     deskCall<{ templates: Template[] }>({ path: "/templates" })
-      .then((o) => { setTemplates(o.templates); setTemplatesError(null); })
+      .then((o) => {
+        setTemplates(o.templates);
+        setTemplatesError(null);
+      })
       .catch(() => setTemplatesError("Templates did not load. Saving now would replace them."));
   }, []);
   React.useEffect(() => {
@@ -218,12 +282,29 @@ export function LeadsDesk() {
   const { live, groupOf, rows, grouped } = React.useMemo(() => {
     const live = (leads ?? []).filter((l) => !l.trashedAt);
     const groupOf = groupAt(at);
-    const rows = live.filter((l) => matches(l, words)).map((l) => [l, groupOf(l)] as const).filter((r): r is readonly [LeadSummary, Group] => r[1] !== null);
-    const grouped = GROUPS.map(([g, name]) => [g, name, rows.filter(([, gg]) => gg === g).map(([l]) => l).sort((a, b) => (g === "week" ? a.when!.localeCompare(b.when!) : b.lastAt.localeCompare(a.lastAt)))] as const);
+    const rows = live
+      .filter((l) => matches(l, words))
+      .map((l) => [l, groupOf(l)] as const)
+      .filter((r): r is readonly [LeadSummary, Group] => r[1] !== null);
+    const grouped = GROUPS.map(
+      ([g, name]) =>
+        [
+          g,
+          name,
+          rows
+            .filter(([, gg]) => gg === g)
+            .map(([l]) => l)
+            .sort((a, b) => (g === "week" ? a.when!.localeCompare(b.when!) : b.lastAt.localeCompare(a.lastAt))),
+        ] as const,
+    );
     return { live, groupOf, rows, grouped };
   }, [leads, at, words]);
 
-  const show = (v: View) => { setScreen(v); setOpen(null); setProofPick(null); };
+  const show = (v: View) => {
+    setScreen(v);
+    setOpen(null);
+    setProofPick(null);
+  };
 
   if (error === LOCKED)
     return (
@@ -243,21 +324,42 @@ export function LeadsDesk() {
   const act = (l: LeadSummary, body: LeadPatch) =>
     sendLeadPatch(l.id!, body)
       .then(changed)
-      .catch((e: unknown) => { alert(errorText(e)); load(); });
+      .catch((e: unknown) => {
+        alert(errorText(e));
+        load();
+      });
   const tomorrow = (l: LeadSummary) => act(l, { snoozeUntil: dayOn() });
   // The board is for a laptop: a phone keeps the list.
   const boarding = board && size !== "phone";
   const eyebrow = `${at ? stamp(at) : ""} · ${needs} NEED YOU`;
 
-  const newLead = size === "phone"
-    ? <IconButton label="New lead" variant="secondary" onClick={() => show("new")} icon={<Icon icon={PlusGlyph} />} />
-    : <Button label="New lead" variant="secondary" size="sm" onClick={() => show("new")} icon={<Icon icon={PlusGlyph} />} />;
-  const search = <TextInput value={query} onChange={setQuery} label="Find a lead" isLabelHidden placeholder="Name, email, shoot" size={size === "phone" ? "lg" : "sm"} />;
+  const newLead =
+    size === "phone" ? (
+      <IconButton label="New lead" variant="secondary" onClick={() => show("new")} icon={<Icon icon={PlusGlyph} />} />
+    ) : (
+      <Button label="New lead" variant="secondary" size="sm" onClick={() => show("new")} icon={<Icon icon={PlusGlyph} />} />
+    );
+  const search = (
+    <TextInput
+      value={query}
+      onChange={setQuery}
+      label="Find a lead"
+      isLabelHidden
+      placeholder="Name, email, shoot"
+      size={size === "phone" ? "lg" : "sm"}
+    />
+  );
   // Open or Put aside, under the title and search on both pages (it was a tab row above the title).
   const openCount = live.filter((l) => groupOf(l) !== null).length;
   const asideCount = (leads ?? []).filter((l) => ASIDE.some(([f]) => inFilter(l, f))).length;
   const switcher = (
-    <SegmentedControl label="Open or put aside" value={screen === "aside" ? "aside" : "leads"} onChange={(v) => isView(v) && show(v)} layout={size === "wide" ? "hug" : "fill"} size={size === "phone" ? "lg" : "md"}>
+    <SegmentedControl
+      label="Open or put aside"
+      value={screen === "aside" ? "aside" : "leads"}
+      onChange={(v) => isView(v) && show(v)}
+      layout={size === "wide" ? "hug" : "fill"}
+      size={size === "phone" ? "lg" : "md"}
+    >
       <SegmentedControlItem value="leads" label={`Open ${openCount}`} />
       <SegmentedControlItem value="aside" label={`Put aside ${asideCount}`} />
     </SegmentedControl>
@@ -271,7 +373,9 @@ export function LeadsDesk() {
   const title = (
     <VStack gap={0}>
       <Eyebrow>{eyebrow}</Eyebrow>
-      <Heading level={1} weight="bold">Leads</Heading>
+      <Heading level={1} weight="bold">
+        Leads
+      </Heading>
     </VStack>
   );
 
@@ -285,14 +389,30 @@ export function LeadsDesk() {
             <HStack gap={3} vAlign="center">
               <StackItem size="fill">{title}</StackItem>
               <StackItem>{switcher}</StackItem>
-              {railed ? search : <Button label={`Search ${FIND_KEY()}`} variant="secondary" size="sm" icon={<Icon icon={FindGlyph} />} onClick={() => setFinding(true)} />}
+              {railed ? (
+                search
+              ) : (
+                <Button
+                  label={`Search ${FIND_KEY()}`}
+                  variant="secondary"
+                  size="sm"
+                  icon={<Icon icon={FindGlyph} />}
+                  onClick={() => setFinding(true)}
+                />
+              )}
               {view}
               {newLead}
             </HStack>
           ) : (
             <VStack gap={3}>
-              <HStack gap={2} vAlign="center"><StackItem size="fill">{title}</StackItem>{newLead}</HStack>
-              <HStack gap={3} vAlign="center"><StackItem size="fill">{search}</StackItem>{size === "mid" ? view : null}</HStack>
+              <HStack gap={2} vAlign="center">
+                <StackItem size="fill">{title}</StackItem>
+                {newLead}
+              </HStack>
+              <HStack gap={3} vAlign="center">
+                <StackItem size="fill">{search}</StackItem>
+                {size === "mid" ? view : null}
+              </HStack>
               {switcher}
             </VStack>
           )}
@@ -304,53 +424,104 @@ export function LeadsDesk() {
             {error ? <Text color="secondary">{error}</Text> : null}
             {!leads && !error ? <Eyebrow>LOADING LEADS</Eyebrow> : null}
             {boarding ? (
-              <BoardDesk leads={live.filter((l) => !l.archivedAt && l.stage !== "Lost" && matches(l, words))} onMove={(l, stage) => act(l, { stage })} open={(l) => setOpen(l.id ?? null)} />
-            ) : grouped.map(([g, name, these]) => {
-              if (!these.length) return null;
-              return (
-                <VStack key={g} gap={1}>
-                  <HStack gap={2} vAlign="center"><Text type="label" weight="semibold">{name}</Text><Text type="supporting">{these.length}</Text></HStack>
-                  <List hasDividers>
-                    {these.map((l) => (
-                      <ListItem
-                        key={l.id}
-                        align="first-line"
-                        isSelected={size === "wide" && l.id === sel?.id}
-                        onClick={() => (size === "wide" ? setPick(l.id ?? null) : setOpen(l.id ?? null))}
-                        startContent={<StatusDot variant={l.unread ? "accent" : "neutral"} label={l.unread ? "New" : "Read"} />}
-                        label={<HStack gap={2} vAlign="center"><StackItem size="fill"><Text type="large" weight="semibold">{l.name}</Text></StackItem><Age l={l} /></HStack>}
-                        description={
-                          <VStack gap={1}>
-                            <About>{joinParts([l.kind ? shootTag(l.kind) : null, l.stage, l.when ? date(l.when) : null])}</About>
-                            {/* Their last words stay beside the list on wider screens; a phone row is three lines. */}
-                            {size !== "phone" && l.snippet ? <Text type="body" color="secondary" maxLines={1}>{l.snippet}</Text> : null}
-                            <Next l={l} waiting={g === "waiting"} />
-                          </VStack>
-                        }
-                        // Julian: swipe on the iPhone. Right: later, a day; left: archive.
-                        swipeActions={{
-                          leading: [{ id: "later", label: "Tomorrow", variant: "neutral", hasRemoval: true, onActivate: () => tomorrow(l) }],
-                          trailing: [{ id: "archive", label: "Archived", variant: "accent", hasRemoval: true, onActivate: () => act(l, { archive: true }) }],
-                        }}
-                      />
-                    ))}
-                  </List>
-                </VStack>
-              );
-            })}
+              <BoardDesk
+                leads={live.filter((l) => !l.archivedAt && l.stage !== "Lost" && matches(l, words))}
+                onMove={(l, stage) => act(l, { stage })}
+                open={(l) => setOpen(l.id ?? null)}
+              />
+            ) : (
+              grouped.map(([g, name, these]) => {
+                if (!these.length) return null;
+                return (
+                  <VStack key={g} gap={1}>
+                    <HStack gap={2} vAlign="center">
+                      <Text type="label" weight="semibold">
+                        {name}
+                      </Text>
+                      <Text type="supporting">{these.length}</Text>
+                    </HStack>
+                    <List hasDividers>
+                      {these.map((l) => (
+                        <ListItem
+                          key={l.id}
+                          align="first-line"
+                          isSelected={size === "wide" && l.id === sel?.id}
+                          onClick={() => (size === "wide" ? setPick(l.id ?? null) : setOpen(l.id ?? null))}
+                          startContent={<StatusDot variant={l.unread ? "accent" : "neutral"} label={l.unread ? "New" : "Read"} />}
+                          label={
+                            <HStack gap={2} vAlign="center">
+                              <StackItem size="fill">
+                                <Text type="large" weight="semibold">
+                                  {l.name}
+                                </Text>
+                              </StackItem>
+                              <Age l={l} />
+                            </HStack>
+                          }
+                          description={
+                            <VStack gap={1}>
+                              <About>{joinParts([l.kind ? shootTag(l.kind) : null, l.stage, l.when ? date(l.when) : null])}</About>
+                              {/* Their last words stay beside the list on wider screens; a phone row is three lines. */}
+                              {size !== "phone" && l.snippet ? (
+                                <Text type="body" color="secondary" maxLines={1}>
+                                  {l.snippet}
+                                </Text>
+                              ) : null}
+                              <Next l={l} waiting={g === "waiting"} />
+                            </VStack>
+                          }
+                          // Julian: swipe on the iPhone. Right: later, a day; left: archive.
+                          swipeActions={{
+                            leading: [
+                              { id: "later", label: "Tomorrow", variant: "neutral", hasRemoval: true, onActivate: () => tomorrow(l) },
+                            ],
+                            trailing: [
+                              {
+                                id: "archive",
+                                label: "Archived",
+                                variant: "accent",
+                                hasRemoval: true,
+                                onActivate: () => act(l, { archive: true }),
+                              },
+                            ],
+                          }}
+                        />
+                      ))}
+                    </List>
+                  </VStack>
+                );
+              })
+            )}
             {leads && !rows.length && !boarding ? <Text type="supporting">Nothing here.</Text> : null}
           </VStack>
         </LayoutContent>
       }
-      end={size !== "wide" || !sel || boarding ? undefined : (
-        <OpenLeadPanel sel={sel} waiting={groupOf(sel) === "waiting"} open={() => setOpen(sel.id ?? null)} snooze={() => tomorrow(sel)} />
-      )}
+      end={
+        size !== "wide" || !sel || boarding ? undefined : (
+          <OpenLeadPanel sel={sel} waiting={groupOf(sel) === "waiting"} open={() => setOpen(sel.id ?? null)} snooze={() => tomorrow(sel)} />
+        )
+      }
     />
   );
 
   // The lead page: its own Astryx layout (components/leads/lead.tsx).
   const lead = current ? (
-    <LeadDesk key={current.id} ask={ask} summary={current} initial={fresh?.email === current.email ? fresh : null} onChange={changed} onBack={() => setOpen(null)} reload={load} templates={templates} others={live.filter((o) => o.id !== current.id)} size={size} toProofs={(token) => { show("proofs"); setProofPick(token ?? null); }} />
+    <LeadDesk
+      key={current.id}
+      ask={ask}
+      summary={current}
+      initial={fresh?.email === current.email ? fresh : null}
+      onChange={changed}
+      onBack={() => setOpen(null)}
+      reload={load}
+      templates={templates}
+      others={live.filter((o) => o.id !== current.id)}
+      size={size}
+      toProofs={(token) => {
+        show("proofs");
+        setProofPick(token ?? null);
+      }}
+    />
   ) : null;
 
   // The lead from the POST itself: KV lists lag a fresh write, so it goes in by hand and opens whole.
@@ -370,7 +541,19 @@ export function LeadsDesk() {
   const pages: Partial<Record<View, React.ReactNode>> = {
     invoices: <InvoicesDesk leads={live} open={openLead} changed={changed} />,
     licences: <LicencesDesk leads={live} open={openLead} />,
-    aside: <AsideDesk leads={leads ?? []} open={openLead} done={() => { setOpen(null); load(); }} tab={asideTab} setTab={setAsideTab} top={switcher} />,
+    aside: (
+      <AsideDesk
+        leads={leads ?? []}
+        open={openLead}
+        done={() => {
+          setOpen(null);
+          load();
+        }}
+        tab={asideTab}
+        setTab={setAsideTab}
+        top={switcher}
+      />
+    ),
     stats: <StatsDesk />,
     traffic: <PanelDesk which="traffic" />,
     seo: <PanelDesk which="seo" />,
@@ -388,25 +571,57 @@ export function LeadsDesk() {
   const page = lead ?? pages[screen] ?? home;
   const section = lead ? null : sectionOf(screen);
   // Leads carries its own Open / Put aside switch under the title; the other groups keep the tab row.
-  const shown = section && section[2].length > 1 && section[0] !== "leads" ? (
-    <Layout
-      height="fill"
-      header={<LayoutHeader><TabList value={screen} onChange={(v) => isView(v) && show(v)} hasDivider layout="hug">{section[2].map(([label, v]) => <Tab key={v} value={v} label={label} />)}</TabList></LayoutHeader>}
-      content={page}
-    />
-  ) : page;
+  const shown =
+    section && section[2].length > 1 && section[0] !== "leads" ? (
+      <Layout
+        height="fill"
+        header={
+          <LayoutHeader>
+            <TabList value={screen} onChange={(v) => isView(v) && show(v)} hasDivider layout="hug">
+              {section[2].map(([label, v]) => (
+                <Tab key={v} value={v} label={label} />
+              ))}
+            </TabList>
+          </LayoutHeader>
+        }
+        content={page}
+      />
+    ) : (
+      page
+    );
   // eslint-disable-next-line react-hooks/refs -- only the touch handlers read it; set after the sign-in return, so no hook can
   pullOk.current = !lead;
   if (!mode) return null;
   // A phone: the pull-to-refresh note, the page, and the tab bar unless a lead brings its own action bar.
-  const pullNote = pull > 12 ? (
-    <div role="status" style={{ position: "absolute", zIndex: 5, top: "calc(env(safe-area-inset-top) + 10px)", left: 0, right: 0, textAlign: "center", pointerEvents: "none", fontSize: 12, color: "var(--color-text-secondary)", opacity: Math.min(1, pull / PULL) }}>{pull > PULL ? "Release to refresh" : "Pull to refresh"}</div>
-  ) : null;
+  const pullNote =
+    pull > 12 ? (
+      <div
+        role="status"
+        style={{
+          position: "absolute",
+          zIndex: 5,
+          top: "calc(env(safe-area-inset-top) + 10px)",
+          left: 0,
+          right: 0,
+          textAlign: "center",
+          pointerEvents: "none",
+          fontSize: 12,
+          color: "var(--color-text-secondary)",
+          opacity: Math.min(1, pull / PULL),
+        }}
+      >
+        {pull > PULL ? "Release to refresh" : "Pull to refresh"}
+      </div>
+    ) : null;
   const phoneShell = (
     <>
       {pullNote}
       <Layout height="fill" content={<React.Fragment key={tick}>{shown}</React.Fragment>} />
-      {lead ? null : <div style={frostBar}><TabBar view={screen} go={show} needs={needs} /></div>}
+      {lead ? null : (
+        <div style={frostBar}>
+          <TabBar view={screen} go={show} needs={needs} />
+        </div>
+      )}
     </>
   );
   return (
@@ -414,24 +629,49 @@ export function LeadsDesk() {
       {/* The site sets mono capitals everywhere; Astryx sets its own type inside. */}
       {/* The site's capitals are unlayered element rules, so they beat Astryx's layers; this beats them inside the desk. */}
       <style>{`:root [data-astryx-desk][data-astryx-desk] *,:root [data-astryx-desk][data-astryx-desk] ::placeholder{text-transform:none}${FROST_ROOM}${GLASS}${WIN_CSS}${SHEET_CSS}`}</style>
-      <div data-astryx-desk="" data-bars={size === "phone" ? "" : undefined} data-glass={mode === "dark" ? "" : undefined}
+      <div
+        data-astryx-desk=""
+        data-bars={size === "phone" ? "" : undefined}
+        data-glass={mode === "dark" ? "" : undefined}
         // Enter takes the first result when none is marked yet: the palette marks one only after an arrow key.
         onKeyDownCapture={(e) => {
           if (e.key !== "Enter" || !finding) return;
           const rows = e.currentTarget.querySelectorAll<HTMLElement>(".astryx-command-palette-item");
-          if (rows.length && ![...rows].some((r) => r.hasAttribute("data-highlighted") && r.dataset.highlighted !== "false")) rows[0].click();
-        }} /* the page pads the status bar above the desk (page.tsx), so the desk is the screen less that: at a full 100dvh the phone tab bar sat that far under the screen */ style={{ position: "relative", height: "calc(100dvh - env(safe-area-inset-top))", textTransform: "none", letterSpacing: "normal" }}>
+          if (rows.length && ![...rows].some((r) => r.hasAttribute("data-highlighted") && r.dataset.highlighted !== "false"))
+            rows[0].click();
+        }}
+        /* the page pads the status bar above the desk (page.tsx), so the desk is the screen less that: at a full 100dvh the phone tab bar sat that far under the screen */ style={{
+          position: "relative",
+          height: "calc(100dvh - env(safe-area-inset-top))",
+          textTransform: "none",
+          letterSpacing: "normal",
+        }}
+      >
         <CommandPalette
           isOpen={finding}
           onOpenChange={setFinding}
           searchSource={finder}
           label="Jump to a lead or page, or do something"
           // A phone gets the whole screen, as a sheet.
-          {...(size === "phone" ? { "data-jg-sheet": "", maxHeight: "100dvh", footer: <HStack padding={3} hAlign="end"><Button label="Close" variant="secondary" onClick={() => setFinding(false)} /></HStack> } : {})}
+          {...(size === "phone"
+            ? {
+                "data-jg-sheet": "",
+                maxHeight: "100dvh",
+                footer: (
+                  <HStack padding={3} hAlign="end">
+                    <Button label="Close" variant="secondary" onClick={() => setFinding(false)} />
+                  </HStack>
+                ),
+              }
+            : {})}
           renderItem={(i) => (
             <HStack gap={3} vAlign="center">
               <Text>{i.label}</Text>
-              {i.auxiliaryData?.note ? <Text type="supporting" color="secondary" maxLines={1}>{i.auxiliaryData.note}</Text> : null}
+              {i.auxiliaryData?.note ? (
+                <Text type="supporting" color="secondary" maxLines={1}>
+                  {i.auxiliaryData.note}
+                </Text>
+              ) : null}
             </HStack>
           )}
           onValueChange={(id) => {
@@ -443,11 +683,29 @@ export function LeadsDesk() {
             else setOpen(leadIdOf(id));
           }}
         />
-        {size === "phone"
-          ? phoneShell
-          : <Layout height="fill" start={railed
-              ? <LayoutPanel width={84} padding={0} hasDivider label="Desk"><Rail needs={needs} view={screen} go={show} /></LayoutPanel>
-              : <LayoutPanel width={260} padding={0} label="Desk" /* SideNav draws 260 wide by default; a narrower panel clipped the counts. */><Nav needs={needs} view={screen} go={show} find={() => setFinding(true)} /></LayoutPanel>} content={shown} />}
+        {size === "phone" ? (
+          phoneShell
+        ) : (
+          <Layout
+            height="fill"
+            start={
+              railed ? (
+                <LayoutPanel width={84} padding={0} hasDivider label="Desk">
+                  <Rail needs={needs} view={screen} go={show} />
+                </LayoutPanel>
+              ) : (
+                <LayoutPanel
+                  width={260}
+                  padding={0}
+                  label="Desk" /* SideNav draws 260 wide by default; a narrower panel clipped the counts. */
+                >
+                  <Nav needs={needs} view={screen} go={show} find={() => setFinding(true)} />
+                </LayoutPanel>
+              )
+            }
+            content={shown}
+          />
+        )}
       </div>
     </Theme>
   );

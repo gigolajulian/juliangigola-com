@@ -24,105 +24,74 @@ const EMAIL = "hello@juliangigola.com";
 
 export function PrivacyColumn() {
   return (
-    <LegalColumn
-      id="privacy"
-      title="Privacy Policy"
-      label="Privacy"
-      effective="2026-11-16"
-    >
+    <LegalColumn id="privacy" title="Privacy Policy" label="Privacy" effective="2026-11-16">
       <Clause title="What is collected, and when">
         <p>
-          <strong>If you send an inquiry.</strong> The form collects your name,
-          your email address, the kind of shoot you are asking about, your
-          answers to its optional short questions such as a date or how many
-          hours, and your message. On submission the Site also records the date
-          and time and the city, region and country Cloudflare derives from your
-          connection. With the inquiry it sends a short note of that visit: the
-          page you sent it from, the page you arrived on, the site that linked
-          you here, any campaign tags on that link, the last twelve pages you
-          opened, and whether you were on a phone, a tablet or a desktop. That
-          note is kept in your browser for that tab only and leaves it only with
-          an inquiry you send. That is the complete list. Your IP address is not
-          stored with your inquiry.
+          <strong>If you send an inquiry.</strong> The form collects your name, your email address, the kind of shoot you are asking about,
+          your answers to its optional short questions such as a date or how many hours, and your message. On submission the Site also
+          records the date and time and the city, region and country Cloudflare derives from your connection. With the inquiry it sends a
+          short note of that visit: the page you sent it from, the page you arrived on, the site that linked you here, any campaign tags on
+          that link, the last twelve pages you opened, and whether you were on a phone, a tablet or a desktop. That note is kept in your
+          browser for that tab only and leaves it only with an inquiry you send. That is the complete list. Your IP address is not stored
+          with your inquiry.
         </p>
         <p>
-          <strong>If you book a session or a call.</strong> The booking card
-          collects your name, your email address, the session and the time you
-          picked, your time zone, and what you choose to add: a phone number,
-          the address for the shoot, and a note. The Site records when the
-          booking was made and keeps it so I can confirm it, remind you, and let
-          you move or cancel it from the link in your confirmation email.
+          <strong>If you book a session or a call.</strong> The booking card collects your name, your email address, the session and the
+          time you picked, your time zone, and what you choose to add: a phone number, the address for the shoot, and a note. The Site
+          records when the booking was made and keeps it so I can confirm it, remind you, and let you move or cancel it from the link in
+          your confirmation email.
         </p>
         <p>
-          <strong>If you pay a deposit or a balance.</strong> Payment is taken
-          by Stripe. Your card or bank details go from your browser straight to
-          Stripe; the Site never sees or stores them. The Site keeps the amount,
-          the date, Stripe&rsquo;s reference for the payment, and whether it was
-          refunded.
+          <strong>If you pay a deposit or a balance.</strong> Payment is taken by Stripe. Your card or bank details go from your browser
+          straight to Stripe; the Site never sees or stores them. The Site keeps the amount, the date, Stripe&rsquo;s reference for the
+          payment, and whether it was refunded.
         </p>
         <p>
-          <strong>If you sign a contract online.</strong> The Site keeps the
-          text you signed, the name you typed, your email address, the date and
-          time, your IP address and your browser type, as the record of the
-          signature.
+          <strong>If you sign a contract online.</strong> The Site keeps the text you signed, the name you typed, your email address, the
+          date and time, your IP address and your browser type, as the record of the signature.
         </p>
         <p>
-          <strong>If you email me directly.</strong> Your address and whatever
-          you put in the message, held in Google Workspace, my email provider.
+          <strong>If you email me directly.</strong> Your address and whatever you put in the message, held in Google Workspace, my email
+          provider.
         </p>
         <p>
-          <strong>Just by visiting.</strong> As with every website, the servers
-          that deliver the Site see your IP address, your browser type, the
-          pages you request and the page you came from. Cloudflare processes
-          that to deliver pages and to protect the Site from abuse. The Site
-          itself keeps one derived value: for five minutes after an inquiry is
-          sent it stores a salted one-way hash of the sender&rsquo;s IP address,
-          so the form cannot be fired again from the same connection inside that
-          window. The hash cannot be turned back into an address, the salt
-          changes daily so it cannot be matched across days, and it deletes
-          itself after five minutes.
+          <strong>Just by visiting.</strong> As with every website, the servers that deliver the Site see your IP address, your browser
+          type, the pages you request and the page you came from. Cloudflare processes that to deliver pages and to protect the Site from
+          abuse. The Site itself keeps one derived value: for five minutes after an inquiry is sent it stores a salted one-way hash of the
+          sender&rsquo;s IP address, so the form cannot be fired again from the same connection inside that window. The hash cannot be
+          turned back into an address, the salt changes daily so it cannot be matched across days, and it deletes itself after five minutes.
         </p>
         <p>
-          <strong>Your preferences.</strong> Switching the Site to its light
-          theme stores that choice in your browser under the key{" "}
+          <strong>Your preferences.</strong> Switching the Site to its light theme stores that choice in your browser under the key{" "}
           <code>theme</code>. It never leaves your device.
         </p>
         <p>
-          <strong>What is not collected.</strong> No account, no card or
-          bank numbers, no location request, no fingerprint, and nothing bought from
-          or matched against a third party.
+          <strong>What is not collected.</strong> No account, no card or bank numbers, no location request, no fingerprint, and nothing
+          bought from or matched against a third party.
         </p>
       </Clause>
 
       <Clause title="Why, and on what legal basis">
         <ul>
           <li>
-            <strong>
-              To answer you and, if we work together, to do the work.
-            </strong>{" "}
-            Basis: the steps you have asked me to take before entering a
-            contract, and then the contract itself (GDPR Article 6(1)(b)).
+            <strong>To answer you and, if we work together, to do the work.</strong> Basis: the steps you have asked me to take before
+            entering a contract, and then the contract itself (GDPR Article 6(1)(b)).
           </li>
           <li>
-            <strong>To keep the Site up, secure and free of abuse</strong>,
-            which is what the five-minute cooldown and the daily ceiling on
-            inquiries are for. Basis: my legitimate interest in running a
-            working site (Article 6(1)(f)). The intrusion is minimal and the
+            <strong>To keep the Site up, secure and free of abuse</strong>, which is what the five-minute cooldown and the daily ceiling on
+            inquiries are for. Basis: my legitimate interest in running a working site (Article 6(1)(f)). The intrusion is minimal and the
             data is hashed or aggregate.
           </li>
           <li>
-            <strong>To see how the Site is used</strong>, in aggregate only: how
-            many visits, which pages, from which countries. Basis: the same
-            legitimate interest. Nobody is identified.
+            <strong>To see how the Site is used</strong>, in aggregate only: how many visits, which pages, from which countries. Basis: the
+            same legitimate interest. Nobody is identified.
           </li>
           <li>
-            <strong>To keep records and meet legal obligations</strong>, such as
-            the tax and accounting rules that apply to commissioned work. Basis:
-            legal obligation (Article 6(1)(c)) and legitimate interest.
+            <strong>To keep records and meet legal obligations</strong>, such as the tax and accounting rules that apply to commissioned
+            work. Basis: legal obligation (Article 6(1)(c)) and legitimate interest.
           </li>
           <li>
-            <strong>To establish, exercise or defend legal claims</strong>,
-            including enforcing the{" "}
+            <strong>To establish, exercise or defend legal claims</strong>, including enforcing the{" "}
             <a href="#terms" className="underline underline-offset-4">
               Terms of Service
             </a>
@@ -130,272 +99,195 @@ export function PrivacyColumn() {
           </li>
         </ul>
         <p>
-          Your information is never used for advertising, never sold, never
-          shared for anybody else&rsquo;s marketing, and never used to train any
-          automated system. No decision about you is made by automated means,
-          and there is no profiling.
+          Your information is never used for advertising, never sold, never shared for anybody else&rsquo;s marketing, and never used to
+          train any automated system. No decision about you is made by automated means, and there is no profiling.
         </p>
       </Clause>
 
       <Clause title="Cookies, storage and analytics">
         <p>
-          <strong>The Site sets no cookies of its own.</strong> Cloudflare,
-          which delivers it, may set strictly necessary cookies for security and
-          traffic management. Those are essential to delivering the Site and
-          need no consent, and they carry nothing about you beyond what is
-          needed to tell one connection from another.
+          <strong>The Site sets no cookies of its own.</strong> Cloudflare, which delivers it, may set strictly necessary cookies for
+          security and traffic management. Those are essential to delivering the Site and need no consent, and they carry nothing about you
+          beyond what is needed to tell one connection from another.
         </p>
         <p>
-          When you reach the payment step, Stripe&rsquo;s payment form loads
-          from Stripe and may set its own cookies to prevent fraud. Nothing from
-          Stripe loads before that step.
+          When you reach the payment step, Stripe&rsquo;s payment form loads from Stripe and may set its own cookies to prevent fraud.
+          Nothing from Stripe loads before that step.
         </p>
         <p>
-          <strong>There is no third-party analytics on the Site.</strong> No tag
-          manager, no pixel, no advertising or third-party beacon. What I see is
-          the aggregate traffic Cloudflare counts from
-          requests it is already handling to deliver the pages, such as how many
-          requests arrived, for which paths, and from which countries. It is
-          aggregate from the moment it is recorded, it does not identify you, it
-          cannot follow you to another site, and it goes to no advertiser.
+          <strong>There is no third-party analytics on the Site.</strong> No tag manager, no pixel, no advertising or third-party beacon.
+          What I see is the aggregate traffic Cloudflare counts from requests it is already handling to deliver the pages, such as how many
+          requests arrived, for which paths, and from which countries. It is aggregate from the moment it is recorded, it does not identify
+          you, it cannot follow you to another site, and it goes to no advertiser.
         </p>
         <p>
-          <strong>One first-party measurement of my own.</strong> When you leave
-          a page, the Site sends one short note to its own server: which page it
-          was, how far down you scrolled, roughly what kind of screen it was
-          (phone, tablet or desktop), and where on the screen you clicked, with
-          the text of the link or button. It sets no cookie, carries no
-          identifier, does not record your IP address, and cannot connect one
-          visit to another. I use it only to see which parts of a page get used,
-          so I can make the Site easier to use. It is stored with Cloudflare and
-          read only by me.
+          <strong>One first-party measurement of my own.</strong> When you leave a page, the Site sends one short note to its own server:
+          which page it was, how far down you scrolled, roughly what kind of screen it was (phone, tablet or desktop), and where on the
+          screen you clicked, with the text of the link or button. It sets no cookie, carries no identifier, does not record your IP
+          address, and cannot connect one visit to another. I use it only to see which parts of a page get used, so I can make the Site
+          easier to use. It is stored with Cloudflare and read only by me.
         </p>
         <p>
-          <strong>Local storage</strong> holds your theme choice. While a tab is
-          open, its session storage also keeps the visit note described under{" "}
-          <em>What is collected, and when</em>: the page you arrived on, the site
-          that linked you here, any campaign tags and the last twelve pages you
-          opened. It is sent only with an inquiry and is gone when you close the
-          tab. On the private editing pages that only I use it also holds my
-          own credentials; those pages do nothing for anybody else.
+          <strong>Local storage</strong> holds your theme choice. While a tab is open, its session storage also keeps the visit note
+          described under <em>What is collected, and when</em>: the page you arrived on, the site that linked you here, any campaign tags
+          and the last twelve pages you opened. It is sent only with an inquiry and is gone when you close the tab. On the private editing
+          pages that only I use it also holds my own credentials; those pages do nothing for anybody else.
         </p>
         <p>
-          <strong>Do Not Track and Global Privacy Control.</strong> If your
-          browser sends either signal, the measurement above is not sent at
-          all, and an inquiry goes without the visit note. There is no other tracking here to switch off. Where the law treats such a
-          signal as an opt-out of sale or sharing, it is honored: there is no
-          sale and no sharing.
+          <strong>Do Not Track and Global Privacy Control.</strong> If your browser sends either signal, the measurement above is not sent
+          at all, and an inquiry goes without the visit note. There is no other tracking here to switch off. Where the law treats such a
+          signal as an opt-out of sale or sharing, it is honored: there is no sale and no sharing.
         </p>
-        <p>
-          You can clear local storage and cookies whenever you like. The Site
-          will carry on working.
-        </p>
+        <p>You can clear local storage and cookies whenever you like. The Site will carry on working.</p>
       </Clause>
 
       <Clause title="Who receives your information">
-        <p>
-          Nobody receives it for their own purposes. These providers process it
-          on my behalf, under contracts that hold them to that:
-        </p>
+        <p>Nobody receives it for their own purposes. These providers process it on my behalf, under contracts that hold them to that:</p>
         <ul>
           <li>
-            <strong>Cloudflare, Inc.</strong> (San&nbsp;Francisco, USA): hosts and
-            delivers the Site, stores inquiries, bookings and signed contracts,
-            derives the country code, sends the email copy of each inquiry to my
-            mailbox, and sends the confirmation and reminder emails for a
-            booking. Cloudflare runs a global network and your request is
-            handled at the location nearest you.
+            <strong>Cloudflare, Inc.</strong> (San&nbsp;Francisco, USA): hosts and delivers the Site, stores inquiries, bookings and signed
+            contracts, derives the country code, sends the email copy of each inquiry to my mailbox, and sends the confirmation and reminder
+            emails for a booking. Cloudflare runs a global network and your request is handled at the location nearest you.
           </li>
           <li>
-            <strong>Google LLC</strong> (Google Workspace): my email, calendar
-            and files. A copy of each inquiry is delivered to my mailbox there,
-            any email you send me is stored there, each booking is an event on
-            my calendar, and a list of clients and bookings is kept in a
-            spreadsheet on my Drive.
+            <strong>Google LLC</strong> (Google Workspace): my email, calendar and files. A copy of each inquiry is delivered to my mailbox
+            there, any email you send me is stored there, each booking is an event on my calendar, and a list of clients and bookings is
+            kept in a spreadsheet on my Drive.
           </li>
           <li>
-            <strong>Stripe, Inc.</strong> (San&nbsp;Francisco, USA): takes
-            deposits and other payments. It receives your card or bank details
-            directly, along with your name, email address and the details of the
-            booking the payment is for, and sends your receipt. Stripe also uses
-            that information to prevent fraud, under its own privacy policy.
+            <strong>Stripe, Inc.</strong> (San&nbsp;Francisco, USA): takes deposits and other payments. It receives your card or bank
+            details directly, along with your name, email address and the details of the booking the payment is for, and sends your receipt.
+            Stripe also uses that information to prevent fraud, under its own privacy policy.
           </li>
           <li>
-            <strong>Notion Labs, Inc.</strong>: my project board. Each inquiry
-            and booking is copied there with your name, email address, the kind
-            of shoot, your message and the date.
+            <strong>Notion Labs, Inc.</strong>: my project board. Each inquiry and booking is copied there with your name, email address,
+            the kind of shoot, your message and the date.
           </li>
           <li>
-            <strong>GitHub, Inc.</strong>: hosts the code and the published
-            photographs. It receives no visitor information.
+            <strong>GitHub, Inc.</strong>: hosts the code and the published photographs. It receives no visitor information.
           </li>
         </ul>
         <p>
-          <strong>Embedded films.</strong> The video page embeds films from
-          Vimeo and YouTube. Nothing from either loads until you press play.
-          Once you do, your browser connects to their servers and their privacy
-          policies govern that playback. YouTube embeds use the
-          youtube-nocookie.com domain, which is YouTube&rsquo;s reduced-tracking
-          mode.
+          <strong>Embedded films.</strong> The video page embeds films from Vimeo and YouTube. Nothing from either loads until you press
+          play. Once you do, your browser connects to their servers and their privacy policies govern that playback. YouTube embeds use the
+          youtube-nocookie.com domain, which is YouTube&rsquo;s reduced-tracking mode.
         </p>
         <p>
-          I may also disclose information where the law requires it, where it is
-          needed to enforce the Terms of Service, or to protect the rights,
-          property or safety of myself, the people in my photographs, or others.
-          A demand from a public authority is answered only so far as the law
-          obliges me, and I will tell you about it unless I am forbidden to. If
-          the business is ever transferred, your information may pass to the
-          successor under this policy.
+          I may also disclose information where the law requires it, where it is needed to enforce the Terms of Service, or to protect the
+          rights, property or safety of myself, the people in my photographs, or others. A demand from a public authority is answered only
+          so far as the law obliges me, and I will tell you about it unless I am forbidden to. If the business is ever transferred, your
+          information may pass to the successor under this policy.
         </p>
       </Clause>
 
       <Clause title="International transfers">
         <p>
-          I am in the United States and my providers are US companies with
-          global infrastructure, so if you are outside the US your information
-          is transferred to and processed in the US and wherever those providers
-          operate. For visitors in the European Economic Area, the United
-          Kingdom or Switzerland, those transfers rely on the providers&rsquo;
-          standard contractual clauses and, where the provider is certified, on
-          the EU-US Data Privacy Framework and its UK and Swiss extensions. Ask
-          me at {EMAIL} for the details.
+          I am in the United States and my providers are US companies with global infrastructure, so if you are outside the US your
+          information is transferred to and processed in the US and wherever those providers operate. For visitors in the European Economic
+          Area, the United Kingdom or Switzerland, those transfers rely on the providers&rsquo; standard contractual clauses and, where the
+          provider is certified, on the EU-US Data Privacy Framework and its UK and Swiss extensions. Ask me at {EMAIL} for the details.
         </p>
         <p>
-          I have not appointed a representative in the European Union or the
-          United Kingdom. My processing of information about people there is
-          occasional, is limited to the categories above, includes no special
-          category data, and is unlikely to result in a risk to anybody&rsquo;s
-          rights and freedoms, which is the exemption in Article 27(2)(a) of the
-          GDPR and its UK equivalent. Write to me directly at {EMAIL}; I answer
-          the same requests a representative would take.
+          I have not appointed a representative in the European Union or the United Kingdom. My processing of information about people there
+          is occasional, is limited to the categories above, includes no special category data, and is unlikely to result in a risk to
+          anybody&rsquo;s rights and freedoms, which is the exemption in Article 27(2)(a) of the GDPR and its UK equivalent. Write to me
+          directly at {EMAIL}; I answer the same requests a representative would take.
         </p>
       </Clause>
 
       <Clause title="How long it is kept">
         <ul>
           <li>
-            <strong>Inquiries and bookings</strong> are kept in the Site&rsquo;s
-            client records for as long as we are in contact or working together,
-            and afterwards for as long as the record of commissioned work must
-            be kept, generally seven years. Ask me to delete yours sooner and I
-            will, unless the law obliges me to keep it. The email copy in
-            my mailbox is kept as long as ordinary business correspondence, and
-            longer where it forms part of the record of commissioned work that
-            tax and accounting rules oblige me to keep, generally seven years.
+            <strong>Inquiries and bookings</strong> are kept in the Site&rsquo;s client records for as long as we are in contact or working
+            together, and afterwards for as long as the record of commissioned work must be kept, generally seven years. Ask me to delete
+            yours sooner and I will, unless the law obliges me to keep it. The email copy in my mailbox is kept as long as ordinary business
+            correspondence, and longer where it forms part of the record of commissioned work that tax and accounting rules oblige me to
+            keep, generally seven years.
           </li>
           <li>
-            <strong>Payment records</strong> are kept by Stripe for the periods
-            its own obligations set, and by me for seven years for tax and
-            accounting. <strong>Signed contracts</strong> are kept for the life
-            of the contract and seven years after.
+            <strong>Payment records</strong> are kept by Stripe for the periods its own obligations set, and by me for seven years for tax
+            and accounting. <strong>Signed contracts</strong> are kept for the life of the contract and seven years after.
           </li>
           <li>
-            <strong>The cooldown hash</strong> deletes itself five minutes after
-            the inquiry. <strong>The daily inquiry counter</strong>, which holds
-            a number and nothing else, deletes itself after two days.
+            <strong>The cooldown hash</strong> deletes itself five minutes after the inquiry. <strong>The daily inquiry counter</strong>,
+            which holds a number and nothing else, deletes itself after two days.
           </li>
           <li>
-            <strong>Server logs</strong> are held by Cloudflare for its own
-            operational periods, which are short, and are not exported to me.
+            <strong>Server logs</strong> are held by Cloudflare for its own operational periods, which are short, and are not exported to
+            me.
           </li>
           <li>
-            <strong>Aggregate traffic figures</strong> hold nothing about an
-            individual to delete.
+            <strong>Aggregate traffic figures</strong> hold nothing about an individual to delete.
           </li>
           <li>
-            <strong>Page measurements</strong> (page, scroll depth, screen type
-            and click positions) are kept for three months and then deleted
-            automatically. They hold nothing that identifies you.
+            <strong>Page measurements</strong> (page, scroll depth, screen type and click positions) are kept for three months and then
+            deleted automatically. They hold nothing that identifies you.
           </li>
         </ul>
       </Clause>
 
       <Clause title="Security">
         <p>
-          The Site is served only over HTTPS, with strict transport security and
-          a content security policy. Inquiries, bookings and contracts are held
-          in encrypted storage
-          that only the Site&rsquo;s own code and I can read, behind a
-          credential that is not shared. The form has a hidden field that
-          catches automated submissions, a per-sender cooldown, and a daily
-          ceiling.
+          The Site is served only over HTTPS, with strict transport security and a content security policy. Inquiries, bookings and
+          contracts are held in encrypted storage that only the Site&rsquo;s own code and I can read, behind a credential that is not
+          shared. The form has a hidden field that catches automated submissions, a per-sender cooldown, and a daily ceiling.
         </p>
         <p>
-          No system is perfectly secure, and I do not claim this one is. If I
-          learn of a breach affecting your information I will tell you, and any
-          authority the law requires, without undue delay.
+          No system is perfectly secure, and I do not claim this one is. If I learn of a breach affecting your information I will tell you,
+          and any authority the law requires, without undue delay.
         </p>
       </Clause>
 
       <Clause title="Your rights">
         <p>
-          Wherever you are, you can ask me what I hold about you, ask me to
-          correct it, ask me to delete it, object to my using it, or ask for a
-          copy in a portable form. Write to {EMAIL}. I answer within thirty
-          days, or within the shorter period your local law sets, and I will
-          need enough to be sure the request comes from you: ordinarily, that it
-          comes from the address the inquiry came from.
+          Wherever you are, you can ask me what I hold about you, ask me to correct it, ask me to delete it, object to my using it, or ask
+          for a copy in a portable form. Write to {EMAIL}. I answer within thirty days, or within the shorter period your local law sets,
+          and I will need enough to be sure the request comes from you: ordinarily, that it comes from the address the inquiry came from.
         </p>
         <p>
-          <strong>If you are in the EEA, the UK or Switzerland</strong>, you
-          have the rights of access, rectification, erasure, restriction,
-          portability and objection under the GDPR and its UK equivalent, the
-          right to withdraw consent at any time, and the right to complain to
-          your supervisory authority. Where I rely on legitimate interest you
-          may object, and I will stop unless there are compelling grounds to
-          carry on.
+          <strong>If you are in the EEA, the UK or Switzerland</strong>, you have the rights of access, rectification, erasure, restriction,
+          portability and objection under the GDPR and its UK equivalent, the right to withdraw consent at any time, and the right to
+          complain to your supervisory authority. Where I rely on legitimate interest you may object, and I will stop unless there are
+          compelling grounds to carry on.
         </p>
         <p>
-          <strong>If you are in California</strong>, the California Consumer
-          Privacy Act gives you the right to know what personal information is
-          collected, used and disclosed; to delete it; to correct it; to opt out
-          of its sale or sharing; to limit the use of sensitive personal
-          information; and not to be discriminated against for exercising any of
-          them. For the record: I collect only the categories set out in{" "}
-          <em>What is collected, and when</em>, which are identifiers and the
-          content of your message; I do not sell or share personal information
-          and have not done so in the preceding twelve months; I collect no
-          sensitive personal information; and I use nothing beyond the purposes
-          in <em>Why, and on what legal basis</em>. You may use an authorized
-          agent, and I will ask that agent to prove your authorization.
-          California&rsquo;s Shine the Light law lets you ask which third
-          parties received your personal information for their own direct
-          marketing: the answer is none.
+          <strong>If you are in California</strong>, the California Consumer Privacy Act gives you the right to know what personal
+          information is collected, used and disclosed; to delete it; to correct it; to opt out of its sale or sharing; to limit the use of
+          sensitive personal information; and not to be discriminated against for exercising any of them. For the record: I collect only the
+          categories set out in <em>What is collected, and when</em>, which are identifiers and the content of your message; I do not sell
+          or share personal information and have not done so in the preceding twelve months; I collect no sensitive personal information;
+          and I use nothing beyond the purposes in <em>Why, and on what legal basis</em>. You may use an authorized agent, and I will ask
+          that agent to prove your authorization. California&rsquo;s Shine the Light law lets you ask which third parties received your
+          personal information for their own direct marketing: the answer is none.
         </p>
         <p>
-          <strong>If you are elsewhere</strong>, including in another US state
-          with a privacy law of its own, you are offered the same rights as a
-          matter of course and exercise them the same way.
+          <strong>If you are elsewhere</strong>, including in another US state with a privacy law of its own, you are offered the same
+          rights as a matter of course and exercise them the same way.
         </p>
       </Clause>
 
       <Clause title="Children">
         <p>
-          The Site is not directed to children and I do not knowingly collect
-          personal information from anybody under sixteen, which covers the
-          thirteen-year threshold that United States law sets as well. If you
-          believe a child has sent an inquiry, write to {EMAIL} and it will be
-          deleted.
+          The Site is not directed to children and I do not knowingly collect personal information from anybody under sixteen, which covers
+          the thirteen-year threshold that United States law sets as well. If you believe a child has sent an inquiry, write to {EMAIL} and
+          it will be deleted.
         </p>
       </Clause>
 
       <Clause title="People in the photographs">
         <p>
-          The photographs show people who agreed to be photographed for the work
-          they appear in. If you are one of them and have a question about a
-          photograph, or believe one should not be shown, write to {EMAIL} and
-          say which one. Photographs are never used to identify anybody, are
-          never put through facial recognition, and, as the Terms of Service
-          say, may not be used to train any automated system.
+          The photographs show people who agreed to be photographed for the work they appear in. If you are one of them and have a question
+          about a photograph, or believe one should not be shown, write to {EMAIL} and say which one. Photographs are never used to identify
+          anybody, are never put through facial recognition, and, as the Terms of Service say, may not be used to train any automated
+          system.
         </p>
       </Clause>
 
       <Clause title="Changes">
         <p>
-          When this policy changes, the new version is published here with a new
-          effective date. If a change would materially reduce your rights or
-          widen what is collected, I will say so on this page in advance and,
-          where I have your address from an open inquiry, tell you directly.
+          When this policy changes, the new version is published here with a new effective date. If a change would materially reduce your
+          rights or widen what is collected, I will say so on this page in advance and, where I have your address from an open inquiry, tell
+          you directly.
         </p>
       </Clause>
 
@@ -405,8 +297,7 @@ export function PrivacyColumn() {
           <a href={`mailto:${EMAIL}`} data-ring="Email" className="underline underline-offset-4">
             {EMAIL}
           </a>
-          . For anything about your information, put Privacy in the subject line
-          and it goes to the top of the pile.
+          . For anything about your information, put Privacy in the subject line and it goes to the top of the pile.
         </p>
       </Clause>
     </LegalColumn>

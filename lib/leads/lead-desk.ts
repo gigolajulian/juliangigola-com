@@ -5,7 +5,18 @@
  */
 import { adminCall } from "@/lib/admin/admin-call";
 import { TZ } from "@/lib/time-zone";
-import { isLate, isStage, myMove, paperDue, quoteNudge, renewDue, type Lead, type LeadPatch, type LeadSummary, type Stage } from "@/lib/leads/leads";
+import {
+  isLate,
+  isStage,
+  myMove,
+  paperDue,
+  quoteNudge,
+  renewDue,
+  type Lead,
+  type LeadPatch,
+  type LeadSummary,
+  type Stage,
+} from "@/lib/leads/leads";
 
 /** The desk's own lists, beside the stages. */
 const LISTS = ["needs", "open", "upcoming", "snoozed", "archived", "trash"] as const;
@@ -17,7 +28,8 @@ export const isFilter = (v: unknown): v is Filter => isStage(v) || (LISTS as rea
 /** The desk's three layouts, by window width. */
 export type Size = "phone" | "mid" | "wide";
 /** A request to the lead desk's routes: `path` is under /api/leads ("" the leads themselves, "/templates", "/log?id=..."). */
-export const deskCall = <T = Record<string, unknown>>({ path = "", ...init }: RequestInit & { path?: string } = {}) => adminCall<T>(`/api/leads${path}`, init);
+export const deskCall = <T = Record<string, unknown>>({ path = "", ...init }: RequestInit & { path?: string } = {}) =>
+  adminCall<T>(`/api/leads${path}`, init);
 
 /** One hand change to a lead, sent by its plain id (never its KV key); answers with the lead as stored. */
 export const sendLeadPatch = (id: string, body: LeadPatch) =>
@@ -27,7 +39,8 @@ export const sendLeadPatch = (id: string, body: LeadPatch) =>
 export type Patch = (b: LeadPatch) => Promise<Lead>;
 
 /** A licence's end date, "Mar 4, 2027". */
-export const endDay = (end: string) => new Date(`${end}T12:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
+export const endDay = (end: string) =>
+  new Date(`${end}T12:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
 
 /** Date.now behind a call: the desk reads the clock in render, which the React compiler lint refuses for a bare Date.now(). */
 export const now = () => Date.now();
@@ -48,7 +61,8 @@ export const isSetAside = (l: LeadSummary) => !!(l.archivedAt || l.trashedAt);
 /** His reminder has come round: it beats a snooze. */
 const due = (l: LeadSummary) => !!l.due && Date.parse(l.due) <= now();
 /** The desk's search: name, email, type of shoot or their message. */
-export const matches = (l: LeadSummary, words: string) => !words || [l.name, l.email, l.kind, l.snippet].some((v) => v?.toLowerCase().includes(words));
+export const matches = (l: LeadSummary, words: string) =>
+  !words || [l.name, l.email, l.kind, l.snippet].some((v) => v?.toLowerCase().includes(words));
 /** A licence ending soon brings back even a Delivered lead; a snooze holds it off. */
 export const needsRenewal = (l: LeadSummary) => !isSnoozed(l) && renewDue(l, now());
 export function needsMe(l: LeadSummary) {
@@ -90,8 +104,18 @@ export const ago = (iso: string) => {
   if (mins < 48 * 60) return `${Math.round(mins / 60)} h`;
   return `${Math.round(mins / 1440)} d`;
 };
-export const dayLabel = (iso: string) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, month: "short", day: "numeric" }).format(new Date(iso));
-export const dateTimeLabel = (iso: string) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(iso));
+export const dayLabel = (iso: string) =>
+  new Intl.DateTimeFormat("en-US", { timeZone: TZ, month: "short", day: "numeric" }).format(new Date(iso));
+export const dateTimeLabel = (iso: string) =>
+  new Intl.DateTimeFormat("en-US", {
+    timeZone: TZ,
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(new Date(iso));
 
 export const dollarsLabel = (n: number) => `$${Math.round(n).toLocaleString("en-US")}`;
-export const centsLabel = (cents: number) => `${cents < 0 ? "−" : ""}$${(Math.abs(cents) / 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+export const centsLabel = (cents: number) =>
+  `${cents < 0 ? "−" : ""}$${(Math.abs(cents) / 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;

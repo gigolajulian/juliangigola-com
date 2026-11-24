@@ -9,7 +9,6 @@ import { inkGround, inkWord } from "@/components/site/nav-ink";
 import * as coverSound from "@/components/cover/cover-sound";
 import SOUND from "@/lib/work/cover-art-sound.json";
 
-
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();

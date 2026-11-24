@@ -19,13 +19,36 @@ const TOKEN = "AbCdEfGh12345678";
 let kv: FakeKV;
 let sent: { subject: string; text: string }[];
 const seal = async () => (await sealer(LEADS_KEY))!;
-const base = (over: Partial<Proof> = {}): Proof => ({ token: TOKEN, name: "Ana portraits", included: 2, price: 15, days: 14, createdAt: "2026-11-01T00:00:00Z", sentAt: "2026-11-01T00:00:00Z", frames: [{ id: "a", file: "a.jpg", w: 1, h: 1 }], selects: [], notes: {}, views: 0, ...over });
+const base = (over: Partial<Proof> = {}): Proof => ({
+  token: TOKEN,
+  name: "Ana portraits",
+  included: 2,
+  price: 15,
+  days: 14,
+  createdAt: "2026-11-01T00:00:00Z",
+  sentAt: "2026-11-01T00:00:00Z",
+  frames: [{ id: "a", file: "a.jpg", w: 1, h: 1 }],
+  selects: [],
+  notes: {},
+  views: 0,
+  ...over,
+});
 beforeEach(() => {
   kv = new FakeKV();
   sent = [];
-  ctx.env = { INBOX: kv, LEADS_KEY, WORKER_KEY: "s", PUBLIC_WRITE_LIMIT: { limit: async () => ({ success: true }) }, EMAIL: { send: async (m: { subject: string; text: string }) => void sent.push(m) } };
+  ctx.env = {
+    INBOX: kv,
+    LEADS_KEY,
+    WORKER_KEY: "s",
+    PUBLIC_WRITE_LIMIT: { limit: async () => ({ success: true }) },
+    EMAIL: { send: async (m: { subject: string; text: string }) => void sent.push(m) },
+  };
 });
-const open = (email = "ana@gmail.com") => POST(new Request("https://juliangigola.com/api/proof/x", { method: "POST", body: JSON.stringify({ action: "track", email, kind: "open" }) }), { params: Promise.resolve({ token: TOKEN }) });
+const open = (email = "ana@gmail.com") =>
+  POST(
+    new Request("https://juliangigola.com/api/proof/x", { method: "POST", body: JSON.stringify({ action: "track", email, kind: "open" }) }),
+    { params: Promise.resolve({ token: TOKEN }) },
+  );
 
 describe("notify setting", () => {
   it("takes the three choices, clears on selects or null, ignores the rest", () => {
@@ -69,10 +92,35 @@ describe("instant mails", () => {
 
 describe("daily summary", () => {
   const ev = (at: string, kind: "open" | "pick" | "send" | "download") => ({ at, kind });
-  const viewer = (events: ReturnType<typeof ev>[]) => ({ first: events[0].at, last: events.at(-1)!.at, visits: 1, seconds: 0, devices: [], places: [], picks: [], looks: {}, events });
+  const viewer = (events: ReturnType<typeof ev>[]) => ({
+    first: events[0].at,
+    last: events.at(-1)!.at,
+    visits: 1,
+    seconds: 0,
+    devices: [],
+    places: [],
+    picks: [],
+    looks: {},
+    events,
+  });
 
   it("counts each daily gallery's window, skips test addresses, and is null on a quiet day", () => {
-    const p = base({ notify: "daily", viewers: { "ana@gmail.com": { ...viewer([ev("2026-11-14T18:00:00Z", "open"), ev("2026-11-14T18:01:00Z", "pick"), ev("2026-11-14T18:02:00Z", "pick"), ev("2026-11-14T18:03:00Z", "send"), ev("2026-11-13T01:00:00Z", "open")]), name: "Ana" }, "qa@example.com": viewer([ev("2026-11-14T18:00:00Z", "open")]) } });
+    const p = base({
+      notify: "daily",
+      viewers: {
+        "ana@gmail.com": {
+          ...viewer([
+            ev("2026-11-14T18:00:00Z", "open"),
+            ev("2026-11-14T18:01:00Z", "pick"),
+            ev("2026-11-14T18:02:00Z", "pick"),
+            ev("2026-11-14T18:03:00Z", "send"),
+            ev("2026-11-13T01:00:00Z", "open"),
+          ]),
+          name: "Ana",
+        },
+        "qa@example.com": viewer([ev("2026-11-14T18:00:00Z", "open")]),
+      },
+    });
     const other = base({ name: "Not daily", viewers: { "x@gmail.com": viewer([ev("2026-11-14T18:00:00Z", "open")]) } });
     const m = digestMail([p, other], "2026-11-14T16:00:00Z", "2026-11-15T16:00:00Z")!;
     expect(m.subject).toBe("Galleries today: 1 visitor");
@@ -86,7 +134,8 @@ describe("daily summary", () => {
     const { POST: run } = await import("@/app/api/proof/daily/route");
     const recent = new Date(Date.now() - 36e5).toISOString();
     await writeProof(kv as never, await seal(), base({ notify: "daily", viewers: { "ana@gmail.com": viewer([ev(recent, "open")]) } }));
-    const call = (q = "", auth = "Bearer s") => run(new Request(`https://juliangigola.com/api/proof/daily${q}`, { method: "POST", headers: { authorization: auth } }));
+    const call = (q = "", auth = "Bearer s") =>
+      run(new Request(`https://juliangigola.com/api/proof/daily${q}`, { method: "POST", headers: { authorization: auth } }));
     expect((await call("", "Bearer no")).status).toBe(401);
     expect((await (await call("?dry")).json()).subject).toBe("Galleries today: 1 visitor");
     expect(sent).toEqual([]);
@@ -104,7 +153,9 @@ describe("daily summary", () => {
     await writeProof(kv as never, await seal(), base({ notify: "daily", viewers: { "ana@gmail.com": viewer([ev(recent, "open")]) } }));
     await writeProof(kv as never, await seal(), base({ token: "ZyXwVuTs98765432", notify: "daily" }));
     kv.data.get("proof:ZyXwVuTs98765432")!.value = "not-sealed";
-    const res = await run(new Request("https://juliangigola.com/api/proof/daily?dry", { method: "POST", headers: { authorization: "Bearer s" } }));
+    const res = await run(
+      new Request("https://juliangigola.com/api/proof/daily?dry", { method: "POST", headers: { authorization: "Bearer s" } }),
+    );
     expect(res.status).toBe(200);
     expect((await res.json()).subject).toBe("Galleries today: 1 visitor");
     expect(errors).toHaveBeenCalledWith("proof digest", "ZyXwVuTs98765432", expect.any(String));
@@ -117,6 +168,18 @@ describe("daily summary", () => {
     await daily(env, new Date("2026-11-15T16:00:00Z"));
     await daily(env, new Date("2026-11-15T17:00:00Z"));
     expect(hits).toEqual(["https://juliangigola.com/api/proof/daily"]);
-    await expect(daily({ WORKER_KEY: "s", SITE: { fetch: async () => { throw new Error("down"); } } } as never, new Date("2026-11-15T17:00:00Z"))).resolves.toBeUndefined();
+    await expect(
+      daily(
+        {
+          WORKER_KEY: "s",
+          SITE: {
+            fetch: async () => {
+              throw new Error("down");
+            },
+          },
+        } as never,
+        new Date("2026-11-15T17:00:00Z"),
+      ),
+    ).resolves.toBeUndefined();
   });
 });

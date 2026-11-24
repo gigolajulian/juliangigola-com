@@ -17,12 +17,18 @@ describe("GET /api/seo", async () => {
 
   it("refuses without a token that can push", async () => {
     expect((await get()).status).toBe(401);
-    vi.stubGlobal("fetch", vi.fn(async () => reply({ permissions: { push: false } })));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => reply({ permissions: { push: false } })),
+    );
     expect((await get("", githubToken())).status).toBe(401);
   });
 
   it("answers 503 without CF_ANALYTICS_TOKEN, and refuses a map path that is not a page", async () => {
-    vi.stubGlobal("fetch", vi.fn(async () => reply({ permissions: { push: true } }, 200, SCOPED)));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => reply({ permissions: { push: true } }, 200, SCOPED)),
+    );
     ctx.env = {};
     expect((await get("", githubToken())).status).toBe(503);
     ctx.env = { CF_ANALYTICS_TOKEN: "k" };
@@ -60,7 +66,8 @@ describe("the beacon", async () => {
 
 describe("/api/seo: the gate, the token and the map path", async () => {
   const { GET } = await import("@/app/api/seo/route");
-  const get = (q = "", token?: string) => GET(new Request(`https://juliangigola.com/api/seo${q}`, { headers: token ? { authorization: `Bearer ${token}` } : {} }));
+  const get = (q = "", token?: string) =>
+    GET(new Request(`https://juliangigola.com/api/seo${q}`, { headers: token ? { authorization: `Bearer ${token}` } : {} }));
   const today = new Date().toISOString().slice(0, 10);
 
   beforeEach(() => {
@@ -68,7 +75,19 @@ describe("/api/seo: the gate, the token and the map path", async () => {
     vi.stubGlobal("fetch", async (url: string) => {
       if (url.startsWith("https://api.github.com/")) return reply({ permissions: { push: true } }, 200, SCOPED);
       if (url.endsWith("/graphql"))
-        return reply({ data: { viewer: { accounts: [{ rumPageloadEventsAdaptiveGroups: [{ sum: { visits: 3 }, dimensions: { requestPath: "/portfolio", date: today, refererHost: "" } }] }] } } });
+        return reply({
+          data: {
+            viewer: {
+              accounts: [
+                {
+                  rumPageloadEventsAdaptiveGroups: [
+                    { sum: { visits: 3 }, dimensions: { requestPath: "/portfolio", date: today, refererHost: "" } },
+                  ],
+                },
+              ],
+            },
+          },
+        });
       if (url.includes("/analytics_engine/sql")) return reply({ data: [{ path: "/portfolio", views: 3 }] });
       return reply({}, 404);
     });

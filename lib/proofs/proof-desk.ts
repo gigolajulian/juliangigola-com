@@ -10,14 +10,21 @@ import { CARD } from "@/lib/proofs/watermark";
 /** A gallery as `/api/proof/list` answers it, with its client link. No password hash ever reaches the desk: only whether there is one. */
 export type ProofRow = Omit<Proof, "pass"> & { url: string; hasPass?: boolean };
 
-export const proofApi = <T = Record<string, unknown>,>({ path = "", ...init }: RequestInit & { path?: string } = {}) => adminCall<T>(`/api/proof${path}`, init);
+export const proofApi = <T = Record<string, unknown>>({ path = "", ...init }: RequestInit & { path?: string } = {}) =>
+  adminCall<T>(`/api/proof${path}`, init);
 
 export const pastCloseDate = (p: Proof) => !!p.closesAt && Date.parse(p.closesAt) < Date.now();
-export const proofStatus = (p: Proof) => p.offline ? "Offline" : p.deliveredAt ? `Delivered${p.firstDownloadAt ? ", downloaded" : ""}${pastCloseDate(p) ? " · closed" : ""}` : `${stage(p)}${p.checkout && !p.submittedAt ? ", paying" : ""}${pastCloseDate(p) ? " · closed" : ""}`;
+export const proofStatus = (p: Proof) =>
+  p.offline
+    ? "Offline"
+    : p.deliveredAt
+      ? `Delivered${p.firstDownloadAt ? ", downloaded" : ""}${pastCloseDate(p) ? " · closed" : ""}`
+      : `${stage(p)}${p.checkout && !p.submittedAt ? ", paying" : ""}${pastCloseDate(p) ? " · closed" : ""}`;
 
 /** The widest box of the share card's photo shape that fits a frame. */
 const cardBox = (f: Pick<ProofFrame, "w" | "h">) => {
-  const shape = (CARD.w - CARD.photoLeft) / CARD.h, w = Math.min(f.w, Math.round(f.h * shape));
+  const shape = (CARD.w - CARD.photoLeft) / CARD.h,
+    w = Math.min(f.w, Math.round(f.h * shape));
   return { w, h: Math.round(w / shape) };
 };
 
@@ -46,7 +53,8 @@ export function feed(rows: Pick<Proof, "token" | "name" | "viewers" | "finals">[
     for (const [email, v] of Object.entries(p.viewers ?? {})) {
       if (isTestEmail(email)) continue;
       const who = v.name ?? email;
-      let run: FeedItem | null = null, picks = 0;
+      let run: FeedItem | null = null,
+        picks = 0;
       for (const e of v.events) {
         if (e.kind === "pick") {
           picks++;
@@ -57,7 +65,14 @@ export function feed(rows: Pick<Proof, "token" | "name" | "viewers" | "finals">[
         if (e.kind === "unpick" || e.kind === "review" || e.kind === "pay") continue;
         run = null;
         picks = 0;
-        const what = e.kind === "open" ? "opened" : e.kind === "send" ? "sent selects" : e.id === "all" ? "downloaded all" : `saved ${p.finals?.find((f) => f.id === e.id)?.file ?? "a photo"}`;
+        const what =
+          e.kind === "open"
+            ? "opened"
+            : e.kind === "send"
+              ? "sent selects"
+              : e.id === "all"
+                ? "downloaded all"
+                : `saved ${p.finals?.find((f) => f.id === e.id)?.file ?? "a photo"}`;
         out.push({ at: e.at, token: p.token, gallery: p.name, email, who, what });
       }
     }

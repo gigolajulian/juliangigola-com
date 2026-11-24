@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   title: MOTION_SEO.title,
   description: MOTION_SEO.description,
   alternates: { canonical: "/portfolio/video" },
-  ...shareOg("Video","Music videos and commercials directed and shot by Julian Gigola."),
+  ...shareOg("Video", "Music videos and commercials directed and shot by Julian Gigola."),
 };
 
 /* The films as 16:9 tiles. */

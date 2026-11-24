@@ -12,7 +12,6 @@ import { usePickerDays } from "@/components/booking/picker/use-days";
 import { warmGsap } from "@/lib/motion/gsap-lazy";
 import { postJson } from "@/lib/http";
 
-
 /* ── the time picker ──────────────────────────────────────────────
  * The open times, in two plain steps: a day, then a time. Days
  * are cards (a week, or the month) with how open each is; the open times
@@ -54,7 +53,25 @@ export function usePicker({ path, title, className, skin, onPicked, startView }:
   /* The picker is not drawn while held: the effects that measure it
      re-run on `held`, or they ran on nothing and the week never fitted. */
   const [held, setHeld] = React.useState(true);
-  const { view, setView, anchor, setAnchor, pick, setPick, chosen, setChosen, choose, today, week, month, shift, mstep, setMstep, switchView, atStart } = usePickerDays(days, startView);
+  const {
+    view,
+    setView,
+    anchor,
+    setAnchor,
+    pick,
+    setPick,
+    chosen,
+    setChosen,
+    choose,
+    today,
+    week,
+    month,
+    shift,
+    mstep,
+    setMstep,
+    switchView,
+    atStart,
+  } = usePickerDays(days, startView);
   const [step, setStep] = React.useState<Step>("pick");
   const [deposit, setDeposit] = React.useState<DepositBody | null>(null);
   /* JG V3: references picked on the details step, sent with the deposit. */
@@ -74,15 +91,17 @@ export function usePicker({ path, title, className, skin, onPicked, startView }:
      (owner pick, do not tune). */
   React.useEffect(() => {
     if (!ok) return;
-    const t = window.setTimeout(() => {
-      if (ok === "spin") return setOk("tick");
-      setOk("");
-      if (handOff.current) handOff.current();
-      else setStep("form");
-    }, ok === "spin" ? 450 : 600);
+    const t = window.setTimeout(
+      () => {
+        if (ok === "spin") return setOk("tick");
+        setOk("");
+        if (handOff.current) handOff.current();
+        else setStep("form");
+      },
+      ok === "spin" ? 450 : 600,
+    );
     return () => window.clearTimeout(t);
   }, [ok]);
-
 
   React.useEffect(() => {
     void load();
@@ -93,7 +112,9 @@ export function usePicker({ path, title, className, skin, onPicked, startView }:
   /* First open day and time, once there are any. */
   React.useEffect(() => {
     if (state !== "ready" || !days || pick) return;
-    const date = Object.keys(days).filter((d) => days[d].length).sort(byCodeUnit)[0];
+    const date = Object.keys(days)
+      .filter((d) => days[d].length)
+      .sort(byCodeUnit)[0];
     if (!date) return;
     const s = days[date][0];
     setPick({ date, min: minutesOf(s), start: s });
@@ -153,7 +174,16 @@ export function usePicker({ path, title, className, skin, onPicked, startView }:
     };
     try {
       if (!sim) {
-        const r = await postJson("/api/book", { slug, start, timeZone: tz, name: f.name, email: f.email, phone: f.phone, via: f.via, ...extra });
+        const r = await postJson("/api/book", {
+          slug,
+          start,
+          timeZone: tz,
+          name: f.name,
+          email: f.email,
+          phone: f.phone,
+          via: f.via,
+          ...extra,
+        });
         if (!r.ok) {
           failed(r);
           return;
@@ -185,12 +215,51 @@ export function usePicker({ path, title, className, skin, onPicked, startView }:
     }
   }, []);
   return {
-    title, className, skin, username, slug, tz, here,
-    length, needsWhere, session, days, state, paid, load,
-    held, unhold: () => setHeld(false),
-    view, setView, anchor, setAnchor, pick, chosen, setChosen, choose, today, week, month, shift, mstep, setMstep, switchView, atStart,
-    opt, setOpt, booked, step, setStep, deposit, refs, error, ok, setOk,
-    open, book, refill,
+    title,
+    className,
+    skin,
+    username,
+    slug,
+    tz,
+    here,
+    length,
+    needsWhere,
+    session,
+    days,
+    state,
+    paid,
+    load,
+    held,
+    unhold: () => setHeld(false),
+    view,
+    setView,
+    anchor,
+    setAnchor,
+    pick,
+    chosen,
+    setChosen,
+    choose,
+    today,
+    week,
+    month,
+    shift,
+    mstep,
+    setMstep,
+    switchView,
+    atStart,
+    opt,
+    setOpt,
+    booked,
+    step,
+    setStep,
+    deposit,
+    refs,
+    error,
+    ok,
+    setOk,
+    open,
+    book,
+    refill,
   };
 }
 
@@ -201,7 +270,9 @@ export function readBookingForm(form: FormData, slug: string) {
   const opts = WHERE[slug];
   const picked = opts?.length === 1 ? opts[0][0] : String(form.get("opt") || "");
   const asked = opts?.find(([label]) => label === picked)?.[1];
-  const where = opts ? [picked, asked ? String(form.get("detail") || "").trim() : ""].filter(Boolean).join(": ") : String(form.get("where") || "").trim();
+  const where = opts
+    ? [picked, asked ? String(form.get("detail") || "").trim() : ""].filter(Boolean).join(": ")
+    : String(form.get("where") || "").trim();
   const phoneRaw = String(form.get("phone") || "").trim();
   const name = String(form.get("name") ?? `${String(form.get("first")).trim()} ${String(form.get("last")).trim()}`).trim();
   const refs = new FormData();
@@ -232,7 +303,25 @@ export type Picker = Pick<Props, "title" | "className" | "skin"> &
   /* the times as loaded */
   Pick<Slots, "length" | "needsWhere" | "session" | "days" | "state" | "paid" | "load"> &
   /* the days on show and the pick */
-  Pick<Days, "view" | "setView" | "anchor" | "setAnchor" | "pick" | "chosen" | "setChosen" | "choose" | "today" | "week" | "month" | "shift" | "mstep" | "setMstep" | "switchView" | "atStart"> & {
+  Pick<
+    Days,
+    | "view"
+    | "setView"
+    | "anchor"
+    | "setAnchor"
+    | "pick"
+    | "chosen"
+    | "setChosen"
+    | "choose"
+    | "today"
+    | "week"
+    | "month"
+    | "shift"
+    | "mstep"
+    | "setMstep"
+    | "switchView"
+    | "atStart"
+  > & {
     username: string;
     slug: string;
     tz: string;
@@ -257,4 +346,12 @@ export type Picker = Pick<Props, "title" | "className" | "skin"> &
   };
 
 /** What a card draws from: the picker, with a time on show. */
-export type CardCtx = Omit<Picker, "pick" | "days"> & { pick: PickedTime; days: Record<string, string[]>; t: string; ap: string; until: string; date: Date; sum: string };
+export type CardCtx = Omit<Picker, "pick" | "days"> & {
+  pick: PickedTime;
+  days: Record<string, string[]>;
+  t: string;
+  ap: string;
+  until: string;
+  date: Date;
+  sum: string;
+};

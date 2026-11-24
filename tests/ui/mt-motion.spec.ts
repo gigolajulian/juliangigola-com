@@ -16,7 +16,9 @@ const at = (name: string) => RATIOS.find((r) => r.name === name)!;
 const to = (page: Page, y: number) => page.evaluate((top) => scrollTo({ top, behavior: "instant" }), y);
 /** A section's top in page coordinates, its height, and the screen height. */
 const boxOf = (page: Page, sel: string) =>
-  page.locator(sel).evaluate((el) => ({ top: el.getBoundingClientRect().top + scrollY, h: (el as HTMLElement).offsetHeight, vh: innerHeight }));
+  page
+    .locator(sel)
+    .evaluate((el) => ({ top: el.getBoundingClientRect().top + scrollY, h: (el as HTMLElement).offsetHeight, vh: innerHeight }));
 /** Scrolls until the section's top sits at f of the screen height. */
 const topAt = async (page: Page, sel: string, f: number) => {
   const b = await boxOf(page, sel);
@@ -50,11 +52,26 @@ test("laptop: a held section's --p runs 0 to 1 through its hold, and no section 
   expect(h, "the hold makes the section taller than the screen").toBeGreaterThan(vh);
   /** --p, and the hold's progress at the scroll as it is now. */
   const read = () =>
-    covers.evaluate((el, [t, run]) => ({ p: parseFloat(el.style.getPropertyValue("--p")), at: Math.min(1, Math.max(0, (scrollY - t) / run)) }), [top, h - vh] as const);
+    covers.evaluate(
+      (el, [t, run]) => ({ p: parseFloat(el.style.getPropertyValue("--p")), at: Math.min(1, Math.max(0, (scrollY - t) / run)) }),
+      [top, h - vh] as const,
+    );
   // the middle last: the snap glides from there to an item, and a jump made mid-glide is taken back by the glide
-  for (const [y, want] of [[top, 0], [top + h - vh, 1], [top + (h - vh) / 2, null]] as const) {
+  for (const [y, want] of [
+    [top, 0],
+    [top + h - vh, 1],
+    [top + (h - vh) / 2, null],
+  ] as const) {
     await to(page, y);
-    await expect.poll(async () => { const r = await read(); return Math.abs(r.p - r.at); }, { message: `--p follows the scroll from ${Math.round(y)}` }).toBeLessThan(0.05);
+    await expect
+      .poll(
+        async () => {
+          const r = await read();
+          return Math.abs(r.p - r.at);
+        },
+        { message: `--p follows the scroll from ${Math.round(y)}` },
+      )
+      .toBeLessThan(0.05);
     if (want !== null) expect((await read()).p, `--p at ${want}`).toBeCloseTo(want, 1);
   }
 
@@ -68,7 +85,10 @@ test("laptop: a held section's --p runs 0 to 1 through its hold, and no section 
   await ctx.close();
 });
 
-test("phone: no holds, and Book online and By quote take the bar once their top is above 0.45 of the screen", async ({ browser, browserName }) => {
+test("phone: no holds, and Book online and By quote take the bar once their top is above 0.45 of the screen", async ({
+  browser,
+  browserName,
+}) => {
   const { ctx, page } = await open(browser, browserName, at("phone"));
   const errors = errorsOn(page);
   await home(page);

@@ -7,7 +7,8 @@ const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
 vi.mock("@opennextjs/cloudflare", async () => (await import("../fakes")).cloudflareMock(ctx));
 const { GET } = await import("@/app/api/money/route");
 
-const req = (query = "", key: string | null = KEY) => new Request(`https://juliangigola.com/api/money${query}`, { headers: key ? { "x-admin-key": key } : {} });
+const req = (query = "", key: string | null = KEY) =>
+  new Request(`https://juliangigola.com/api/money${query}`, { headers: key ? { "x-admin-key": key } : {} });
 const calls: string[] = [];
 
 beforeEach(() => {
@@ -15,10 +16,23 @@ beforeEach(() => {
   calls.length = 0;
   vi.stubGlobal("fetch", async (url: string, init?: RequestInit) => {
     calls.push(`${init?.method} ${url}`);
-    if (url.endsWith("/balance")) return Response.json({ available: [{ amount: 35000, currency: "usd" }], pending: [{ amount: 10000, currency: "usd" }] });
+    if (url.endsWith("/balance"))
+      return Response.json({ available: [{ amount: 35000, currency: "usd" }], pending: [{ amount: 10000, currency: "usd" }] });
     return Response.json({
       has_more: true,
-      data: [{ id: "txn_1234567890", created: 1793900000, type: "charge", amount: 10000, fee: 320, net: 9680, currency: "usd", status: "available", source: { billing_details: { name: "Maya Ortiz" } } }],
+      data: [
+        {
+          id: "txn_1234567890",
+          created: 1793900000,
+          type: "charge",
+          amount: 10000,
+          fee: 320,
+          net: 9680,
+          currency: "usd",
+          status: "available",
+          source: { billing_details: { name: "Maya Ortiz" } },
+        },
+      ],
     });
   });
 });
@@ -52,7 +66,8 @@ describe("GET /api/money", () => {
 
 describe("/api/money: the gate and the cursor", () => {
   const KEY = "inbox-key-for-tests";
-  const get = (query = "", key: string | null = KEY) => GET(new Request(`https://juliangigola.com/api/money${query}`, { headers: key ? { "x-admin-key": key } : {} }));
+  const get = (query = "", key: string | null = KEY) =>
+    GET(new Request(`https://juliangigola.com/api/money${query}`, { headers: key ? { "x-admin-key": key } : {} }));
 
   let calls: string[];
   beforeEach(() => {

@@ -28,9 +28,7 @@ const projectRedirects = LINKABLE.map((p) => ({
  * and both land on the page as it is now. Generated from the manifest so
  * a rename cannot be made without its redirect.
  */
-const renameRedirects = LINKABLE.filter(
-  (p): p is typeof p & { origin: string } => !!p.origin,
-).flatMap((p) => [
+const renameRedirects = LINKABLE.filter((p): p is typeof p & { origin: string } => !!p.origin).flatMap((p) => [
   {
     source: `/work/${p.origin}`,
     destination: `/portfolio/${p.slug}`,
@@ -176,13 +174,10 @@ const LOCAL = process.env.JG_LOCAL === "1";
  * Setting the variable by hand wins, for a local build that wants the same.
  */
 const CI_BRANCH = process.env.WORKERS_CI_BRANCH;
-const IMAGE_CDN_ORIGIN =
-  process.env.NEXT_PUBLIC_IMAGE_CDN_ORIGIN ??
-  (CI_BRANCH && CI_BRANCH !== "main" ? "https://juliangigola.com" : "");
+const IMAGE_CDN_ORIGIN = process.env.NEXT_PUBLIC_IMAGE_CDN_ORIGIN ?? (CI_BRANCH && CI_BRANCH !== "main" ? "https://juliangigola.com" : "");
 
 // Dev-only allowance so impeccable live mode can load. Guarded by NODE_ENV.
-const __impeccableLiveDev =
-  process.env.NODE_ENV === "development" ? " http://localhost:8400" : "";
+const __impeccableLiveDev = process.env.NODE_ENV === "development" ? " http://localhost:8400" : "";
 
 /**
  * Security headers.
@@ -461,13 +456,11 @@ const nextConfig: NextConfig = {
       ...categoryPathRedirects,
       ...workRedirects,
       ...disciplineRedirects,
-    ].filter(
-      (r) => {
-        if (seen.has(r.source)) return false;
-        seen.add(r.source);
-        return true;
-      },
-    );
+    ].filter((r) => {
+      if (seen.has(r.source)) return false;
+      seen.add(r.source);
+      return true;
+    });
   },
 };
 

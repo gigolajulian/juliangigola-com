@@ -26,7 +26,8 @@ const CAMERA = (
   </svg>
 );
 /** A session's length, short: "45 min", "1 hr 30 min". Not `duration` (`lib/booking/rules.ts`), which writes "45 minutes", "2 hours". */
-export const shortDuration = (length: number) => (length >= 60 ? `${Math.floor(length / 60)} hr${length % 60 ? ` ${length % 60} min` : ""}` : `${length} min`);
+export const shortDuration = (length: number) =>
+  length >= 60 ? `${Math.floor(length / 60)} hr${length % 60 ? ` ${length % 60} min` : ""}` : `${length} min`;
 /** A US number as it is read out, (408) 555 0100; anything else as given. */
 const tel = (n: string) => (/^\+1\d{10}$/.test(n) ? `(${n.slice(2, 5)}) ${n.slice(5, 8)} ${n.slice(8)}` : n);
 
@@ -46,8 +47,65 @@ const MONTH_HEAD = [...DAYS.slice(1), DAYS[0]];
 
 /* The card as a magazine page (editorial.css), the default. */
 export function EditorialCard({ c }: { c: CardCtx }) {
-  const { title, className, username, slug, tz, here, length, needsWhere, opt, setOpt, session, booked, days, view, anchor, pick, chosen, step, setStep, paid, deposit, error, ok, setOk, load, open, choose, today, week, month, shift, mstep, setMstep, switchView, atStart, book, refill, t, ap, until, date, sum } = c;
-  const { root, showTimes, daysBox, slotsW, slotsRef, swipeProps } = usePickerLayout({ step, pick, days, view, anchor, week, month, chosen, mstep, held: c.held, state: c.state, atStart, shift });
+  const {
+    title,
+    className,
+    username,
+    slug,
+    tz,
+    here,
+    length,
+    needsWhere,
+    opt,
+    setOpt,
+    session,
+    booked,
+    days,
+    view,
+    anchor,
+    pick,
+    chosen,
+    step,
+    setStep,
+    paid,
+    deposit,
+    error,
+    ok,
+    setOk,
+    load,
+    open,
+    choose,
+    today,
+    week,
+    month,
+    shift,
+    mstep,
+    setMstep,
+    switchView,
+    atStart,
+    book,
+    refill,
+    t,
+    ap,
+    until,
+    date,
+    sum,
+  } = c;
+  const { root, showTimes, daysBox, slotsW, slotsRef, swipeProps } = usePickerLayout({
+    step,
+    pick,
+    days,
+    view,
+    anchor,
+    week,
+    month,
+    chosen,
+    mstep,
+    held: c.held,
+    state: c.state,
+    atStart,
+    shift,
+  });
   /* A call: by video (its Meet link) or phone, I ring them. */
   const [via, setVia] = React.useState<"Video" | "Phone">("Video");
   /** The follow-up question, kept while it folds shut so its text does not vanish first. */
@@ -71,11 +129,23 @@ export function EditorialCard({ c }: { c: CardCtx }) {
   const kind = step === "pick" ? null : step === "done" ? booked.via || via : via;
   const bar = (
     <nav aria-label="Steps" className="ed-steps label">
-      {call ? <span className="ed-call">{kind === "Video" ? CAMERA : HANDSET}{kind ? `${kind} call` : "Call"} · {timer}</span> : null}
+      {call ? (
+        <span className="ed-call">
+          {kind === "Video" ? CAMERA : HANDSET}
+          {kind ? `${kind} call` : "Call"} · {timer}
+        </span>
+      ) : null}
       {(paid ? ["Date", "Details", "Deposit"] : ["Date", "Details"]).map((s, i) => {
         const back = at > i ? () => setStep(i ? "form" : "pick") : undefined;
         return (
-          <button key={s} type="button" disabled={!back} onClick={back} aria-current={at === i ? "step" : undefined} data-done={at > i || at < 0 ? "" : undefined}>
+          <button
+            key={s}
+            type="button"
+            disabled={!back}
+            onClick={back}
+            aria-current={at === i ? "step" : undefined}
+            data-done={at > i || at < 0 ? "" : undefined}
+          >
             <b>{`0${i + 1}`}</b>
             {s}
           </button>
@@ -89,8 +159,15 @@ export function EditorialCard({ c }: { c: CardCtx }) {
   const dayLine = `${d3(date)} ${date.getDate()} ${mon(date)} · ${t} ${ap}`;
   const hero = (big: React.ReactNode, side: React.ReactNode, mark: React.ReactNode, act?: React.ReactNode) => (
     <div className="ed-hero">
-      <h2>{big}<small>{side}</small></h2>
-      <p className="ed-mk"><i />{mark}{act}</p>
+      <h2>
+        {big}
+        <small>{side}</small>
+      </h2>
+      <p className="ed-mk">
+        <i />
+        {mark}
+        {act}
+      </p>
     </div>
   );
   if (step === "pay" && deposit) {
@@ -98,7 +175,19 @@ export function EditorialCard({ c }: { c: CardCtx }) {
       <div ref={root} className="contents">
         <DepositStep
           skin="editorial"
-          head={<>{bar}{hero(`$${usd}`, `Deposit. Holds ${dayLine}`, "Balance due after the shoot", <button type="button" data-stick="fill" className="ed-box" onClick={() => setStep("form")}>Change</button>)}</>}
+          head={
+            <>
+              {bar}
+              {hero(
+                `$${usd}`,
+                `Deposit. Holds ${dayLine}`,
+                "Balance due after the shoot",
+                <button type="button" data-stick="fill" className="ed-box" onClick={() => setStep("form")}>
+                  Change
+                </button>,
+              )}
+            </>
+          }
           className={className}
           body={deposit}
           rows={[
@@ -132,19 +221,54 @@ export function EditorialCard({ c }: { c: CardCtx }) {
         {bar}
         {/* The check (or the handset, the camera) on the Booked line, in
             the square's place; the message a sentence over the rows. */}
-        {hero(<>You&rsquo;re in</>, <>{dayLine}<br />{what}</>, <>{call && booked.via ? (booked.via === "Video" ? CAMERA : HANDSET) : <svg aria-hidden viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth="1.4"><circle cx="11" cy="11" r="10" /><path d="M6.5 11.5l3 3 6-6.5" strokeLinecap="round" strokeLinejoin="round" /></svg>}{call && booked.via ? `${booked.via} call booked` : "Booked"}</>)}
+        {hero(
+          <>You&rsquo;re in</>,
+          <>
+            {dayLine}
+            <br />
+            {what}
+          </>,
+          <>
+            {call && booked.via ? (
+              booked.via === "Video" ? (
+                CAMERA
+              ) : (
+                HANDSET
+              )
+            ) : (
+              <svg aria-hidden viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth="1.4">
+                <circle cx="11" cy="11" r="10" />
+                <path d="M6.5 11.5l3 3 6-6.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            )}
+            {call && booked.via ? `${booked.via} call booked` : "Booked"}
+          </>,
+        )}
         <div className="ed-body">
           <div className="ed-l ed-ok">
             {call && booked.via ? (
               /* Julian: a call reads as a call, the number I ring. */
-              <p className="ed-why">{first ? `${first}, ` : ""}{ring ? <>I&rsquo;ll call you at {tel(booked.phone)}.</> : <>see you on Google Meet. The link is in your confirmation email.</>}</p>
+              <p className="ed-why">
+                {first ? `${first}, ` : ""}
+                {ring ? (
+                  <>I&rsquo;ll call you at {tel(booked.phone)}.</>
+                ) : (
+                  <>see you on Google Meet. The link is in your confirmation email.</>
+                )}
+              </p>
             ) : (
-              <p className="ed-why">{first ? `${first}, a` : "A"} confirmation is on its way to <span className="ed-nb">{booked.email}</span>. I&rsquo;ll contact you with the further details before the day.</p>
+              <p className="ed-why">
+                {first ? `${first}, a` : "A"} confirmation is on its way to <span className="ed-nb">{booked.email}</span>. I&rsquo;ll
+                contact you with the further details before the day.
+              </p>
             )}
           </div>
           <div className="ed-r">
             {rows.map(([k, v]) => (
-              <div key={k} className="ed-row"><span className="label">{k}</span><span className="ed-v break-words">{v}</span></div>
+              <div key={k} className="ed-row">
+                <span className="label">{k}</span>
+                <span className="ed-v break-words">{v}</span>
+              </div>
             ))}
             <div className="ed-next">
               <span className="label">Next</span>
@@ -155,7 +279,9 @@ export function EditorialCard({ c }: { c: CardCtx }) {
         </div>
         <div className="ed-floor">
           <span className="label">San Jose, CA · {tzName}</span>
-          <Link href="/portfolio" className="label ed-quiet text-foreground">See the work &rarr;</Link>
+          <Link href="/portfolio" className="label ed-quiet text-foreground">
+            See the work &rarr;
+          </Link>
         </div>
       </div>
     );
@@ -184,8 +310,27 @@ export function EditorialCard({ c }: { c: CardCtx }) {
       {busy}
       {bar}
       {step === "pick"
-        ? hero(`${d3(date)} ${date.getDate()} ${mon(date)}`, <>{chosen === "time" ? `${t}${ap === apEnd ? "" : ` ${ap}`} to ${until} ${apEnd}` : "Pick a time"}<br />{what}</>, chosen === "time" ? "Then your details" : "Pick a day, then a time")
-        : hero("Details", <>{dayLine}<br />{what}</>, "Who and where", <button type="button" data-stick="fill" className="ed-box" onClick={() => setStep("pick")}>Change</button>)}
+        ? hero(
+            `${d3(date)} ${date.getDate()} ${mon(date)}`,
+            <>
+              {chosen === "time" ? `${t}${ap === apEnd ? "" : ` ${ap}`} to ${until} ${apEnd}` : "Pick a time"}
+              <br />
+              {what}
+            </>,
+            chosen === "time" ? "Then your details" : "Pick a day, then a time",
+          )
+        : hero(
+            "Details",
+            <>
+              {dayLine}
+              <br />
+              {what}
+            </>,
+            "Who and where",
+            <button type="button" data-stick="fill" className="ed-box" onClick={() => setStep("pick")}>
+              Change
+            </button>,
+          )}
       {step === "pick" ? (
         <>
           <div className="ed-body">
@@ -197,10 +342,23 @@ export function EditorialCard({ c }: { c: CardCtx }) {
                 </h2>
                 <div className="ed-ctl label">
                   {(["week", "month"] as const).map((v) => (
-                    <button key={v} type="button" aria-pressed={view === v} onClick={() => switchView(v)}>{v}</button>
+                    <button key={v} type="button" aria-pressed={view === v} onClick={() => switchView(v)}>
+                      {v}
+                    </button>
                   ))}
-                  <button type="button" data-stick="" className="ed-arrow" aria-label="Earlier" disabled={atStart} onClick={() => shift(-1)}>{arrow}</button>
-                  <button type="button" data-stick="" className="ed-arrow" aria-label="Later" disabled={atEnd} onClick={() => shift(1)}><span className="flex rotate-180">{arrow}</span></button>
+                  <button
+                    type="button"
+                    data-stick=""
+                    className="ed-arrow"
+                    aria-label="Earlier"
+                    disabled={atStart}
+                    onClick={() => shift(-1)}
+                  >
+                    {arrow}
+                  </button>
+                  <button type="button" data-stick="" className="ed-arrow" aria-label="Later" disabled={atEnd} onClick={() => shift(1)}>
+                    <span className="flex rotate-180">{arrow}</span>
+                  </button>
                 </div>
               </div>
               <div ref={daysBox} className="touch-pan-y overflow-hidden" {...swipeProps}>
@@ -209,7 +367,16 @@ export function EditorialCard({ c }: { c: CardCtx }) {
                     {week.map((d) => {
                       const id = localDayKey(d);
                       return (
-                        <button key={id} data-day={id} type="button" disabled={!open(id).size} aria-pressed={pick.date === id} aria-label={`${WEEKDAYS[d.getDay()]}, ${MONTHS[d.getMonth()]} ${d.getDate()}`} onClick={() => dayPick(id)} className="ed-day">
+                        <button
+                          key={id}
+                          data-day={id}
+                          type="button"
+                          disabled={!open(id).size}
+                          aria-pressed={pick.date === id}
+                          aria-label={`${WEEKDAYS[d.getDay()]}, ${MONTHS[d.getMonth()]} ${d.getDate()}`}
+                          onClick={() => dayPick(id)}
+                          className="ed-day"
+                        >
                           <span className="label">{DAYS[d.getDay()]}</span>
                           <span className="ed-n">{d.getDate()}</span>
                           <i />
@@ -219,18 +386,37 @@ export function EditorialCard({ c }: { c: CardCtx }) {
                   </div>
                 ) : (
                   <div>
-                    <div className="ed-mhead label">{MONTH_HEAD.map((d) => <span key={d}>{d}</span>)}</div>
+                    <div className="ed-mhead label">
+                      {MONTH_HEAD.map((d) => (
+                        <span key={d}>{d}</span>
+                      ))}
+                    </div>
                     <div className="ed-month">
                       {cells.map((d, k) => {
                         /* The days either side of the month, barely there. */
                         if (!d) {
                           const lead = month.findIndex(Boolean);
-                          const n = k < lead ? new Date(anchor.getFullYear(), anchor.getMonth(), k - lead + 1).getDate() : k - month.length + 1;
-                          return <span key={`b${k}`} aria-hidden className="ed-blank">{n}</span>;
+                          const n =
+                            k < lead ? new Date(anchor.getFullYear(), anchor.getMonth(), k - lead + 1).getDate() : k - month.length + 1;
+                          return (
+                            <span key={`b${k}`} aria-hidden className="ed-blank">
+                              {n}
+                            </span>
+                          );
                         }
                         const id = localDayKey(d);
                         return (
-                          <button key={id} data-day={id} type="button" disabled={!open(id).size} aria-pressed={pick.date === id} aria-label={`${WEEKDAYS[d.getDay()]}, ${MONTHS[d.getMonth()]} ${d.getDate()}`} onClick={() => dayPick(id)} data-stick={open(id).size ? "fill" : undefined} className="ed-cell">
+                          <button
+                            key={id}
+                            data-day={id}
+                            type="button"
+                            disabled={!open(id).size}
+                            aria-pressed={pick.date === id}
+                            aria-label={`${WEEKDAYS[d.getDay()]}, ${MONTHS[d.getMonth()]} ${d.getDate()}`}
+                            onClick={() => dayPick(id)}
+                            data-stick={open(id).size ? "fill" : undefined}
+                            className="ed-cell"
+                          >
                             <span className="ed-n">{d.getDate()}</span>
                             <i />
                           </button>
@@ -253,7 +439,18 @@ export function EditorialCard({ c }: { c: CardCtx }) {
                     const m = minutesOf(x);
                     const [h, a] = clock(m);
                     return (
-                      <button key={x} data-slot="" type="button" aria-pressed={chosen === "time" && m === pick.min} aria-label={`${h} ${a}`} onClick={() => choose(pick.date, m, true)} data-stick="fill" className="ed-slot">{h} {a}</button>
+                      <button
+                        key={x}
+                        data-slot=""
+                        type="button"
+                        aria-pressed={chosen === "time" && m === pick.min}
+                        aria-label={`${h} ${a}`}
+                        onClick={() => choose(pick.date, m, true)}
+                        data-stick="fill"
+                        className="ed-slot"
+                      >
+                        {h} {a}
+                      </button>
                     );
                   })}
                 </div>
@@ -266,7 +463,14 @@ export function EditorialCard({ c }: { c: CardCtx }) {
             <span className="label flex flex-col gap-1">
               {chosen === "time" ? `${sum} ${tzName}` : `San Jose, CA · ${here}${tz === TZ ? "" : ` · times in ${tzName}`}`}
             </span>
-            <button type="button" data-stick="fill" className="ed-btn" onClick={() => setOk("spin")} disabled={chosen !== "time"} aria-busy={!!ok}>
+            <button
+              type="button"
+              data-stick="fill"
+              className="ed-btn"
+              onClick={() => setOk("spin")}
+              disabled={chosen !== "time"}
+              aria-busy={!!ok}
+            >
               <span className={cn("transition-opacity duration-200", ok && "opacity-0")}>Continue</span>
               {okMark}
             </button>
@@ -290,7 +494,10 @@ export function EditorialCard({ c }: { c: CardCtx }) {
                     {(["Video", "Phone"] as const).map((v) => (
                       <label key={v} data-stick="fill">
                         <input type="radio" name="via" value={v} checked={via === v} onChange={() => setVia(v)} className="sr-only" />
-                        <span className="ed-via">{v === "Video" ? CAMERA : HANDSET}{v} call</span>
+                        <span className="ed-via">
+                          {v === "Video" ? CAMERA : HANDSET}
+                          {v} call
+                        </span>
                       </label>
                     ))}
                   </div>
@@ -299,34 +506,76 @@ export function EditorialCard({ c }: { c: CardCtx }) {
               <div className="ed-row">
                 <span className="label">Name</span>
                 <span className="ed-pair">
-                  <label><span className="sr-only">First name</span><input name="first" required autoComplete="given-name" placeholder="First" /></label>
-                  <label><span className="sr-only">Last name</span><input name="last" required autoComplete="family-name" placeholder="Last" /></label>
+                  <label>
+                    <span className="sr-only">First name</span>
+                    <input name="first" required autoComplete="given-name" placeholder="First" />
+                  </label>
+                  <label>
+                    <span className="sr-only">Last name</span>
+                    <input name="last" required autoComplete="family-name" placeholder="Last" />
+                  </label>
                 </span>
               </div>
-              <label className="ed-row"><span className="label">Email</span><input name="email" type="email" required autoComplete="email" /></label>
-              <label className="ed-row"><span className="label">{call && via === "Phone" ? "Call me at" : "Phone"}</span><input name="phone" type="tel" required autoComplete="tel" inputMode="tel" placeholder="(408) 555 0134" /></label>
+              <label className="ed-row">
+                <span className="label">Email</span>
+                <input name="email" type="email" required autoComplete="email" />
+              </label>
+              <label className="ed-row">
+                <span className="label">{call && via === "Phone" ? "Call me at" : "Phone"}</span>
+                <input name="phone" type="tel" required autoComplete="tel" inputMode="tel" placeholder="(408) 555 0134" />
+              </label>
               {opts && opts.length > 1 ? (
                 <div className="ed-row" role="radiogroup" aria-label="Location">
                   <span className="label">Location</span>
                   <div className="ed-opts">
                     {opts.map(([label, q]) => (
                       <label key={label} data-stick="fill">
-                        <input type="radio" name="opt" value={label} required checked={opt === label} onChange={() => { setOpt(label); if (q) setAsk(q); }} className="sr-only" />
+                        <input
+                          type="radio"
+                          name="opt"
+                          value={label}
+                          required
+                          checked={opt === label}
+                          onChange={() => {
+                            setOpt(label);
+                            if (q) setAsk(q);
+                          }}
+                          className="sr-only"
+                        />
                         <span>{label}</span>
                       </label>
                     ))}
                   </div>
                 </div>
               ) : null}
-              {asking ? <label className="ed-row"><span className="label">{ask}</span><input name="detail" required /></label> : null}
-              {needsWhere && !opts ? <label className="ed-row"><span className="label">Where</span><input name="where" required placeholder="The studio, or an address" /></label> : null}
-              <label className="ed-row"><span className="label">Notes</span><textarea name="notes" rows={2} autoComplete="off" onInput={grow} placeholder="Optional" className="tp-notes" /></label>
-              {error ? <p role="alert" className="ed-err">{error}</p> : null}
+              {asking ? (
+                <label className="ed-row">
+                  <span className="label">{ask}</span>
+                  <input name="detail" required />
+                </label>
+              ) : null}
+              {needsWhere && !opts ? (
+                <label className="ed-row">
+                  <span className="label">Where</span>
+                  <input name="where" required placeholder="The studio, or an address" />
+                </label>
+              ) : null}
+              <label className="ed-row">
+                <span className="label">Notes</span>
+                <textarea name="notes" rows={2} autoComplete="off" onInput={grow} placeholder="Optional" className="tp-notes" />
+              </label>
+              {error ? (
+                <p role="alert" className="ed-err">
+                  {error}
+                </p>
+              ) : null}
             </div>
           </div>
           <div className="ed-floor">
             <span className="label">{paid ? `Next: $${usd} deposit` : `${sum} ${tzName}`}</span>
-            <button type="submit" data-stick="fill" className="ed-btn" disabled={step === "sending"}>{paid ? "Continue" : step === "sending" ? "Booking" : "Book it"}</button>
+            <button type="submit" data-stick="fill" className="ed-btn" disabled={step === "sending"}>
+              {paid ? "Continue" : step === "sending" ? "Booking" : "Book it"}
+            </button>
           </div>
         </form>
       )}

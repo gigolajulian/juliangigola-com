@@ -676,6 +676,15 @@ scrolls and while its group is off screen (`patches/liquid-gooey+0.2.2.patch`).
 - 2026-11-24: retired. Its last consumers went in r15, so the package, the
   patch and its test went in r17.
 
+## 2026-11-24: one formatter, Prettier at 140 columns
+
+The admin files were wrapped at about 80 columns and the rest of the code ran
+long single lines, with nothing to settle it. `.prettierrc.json` sets one
+print width (140) and `npm run format` applies it. It covers code only: CSS,
+Markdown and JSON keep their hand layout (`.prettierignore`), and so do
+`components/splash/` and `app/layout.tsx`, whose inline scripts are left as
+they are. The whole code base was formatted once, in its own commit.
+
 ## 2026-11-24: motion and dialkit are gone
 
 The lightbox tilt (`components/vendor/tilted-card.tsx`) runs on gsap,

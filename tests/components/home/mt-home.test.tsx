@@ -3,7 +3,10 @@ import { render, screen } from "@testing-library/react";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }), usePathname: () => "/" }));
 vi.mock("@/lib/leads/enquiry-action", () => ({ submitEnquiry: vi.fn() }));
-vi.stubGlobal("fetch", vi.fn(() => Promise.reject(new Error("offline"))));
+vi.stubGlobal(
+  "fetch",
+  vi.fn(() => Promise.reject(new Error("offline"))),
+);
 
 import { Home } from "@/components/home/home";
 import { BOOK_ROWS, COVER_KEYS, QUOTE_OPTS } from "@/lib/home/data";

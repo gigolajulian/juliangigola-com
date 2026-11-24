@@ -37,9 +37,7 @@ export function PhotoFade() {
     };
     document.addEventListener("load", onLoad, true);
     const sweep = () =>
-      document
-        .querySelectorAll<HTMLImageElement>("img[data-fade]")
-        .forEach((img) => img.complete && img.naturalWidth > 0 && mark(img));
+      document.querySelectorAll<HTMLImageElement>("img[data-fade]").forEach((img) => img.complete && img.naturalWidth > 0 && mark(img));
     sweep();
     // Client-side navigation mounts new pictures without a load event
     // reaching a listener that was attached earlier — some are cached and

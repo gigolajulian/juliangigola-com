@@ -24,9 +24,7 @@ export function generateStaticParams() {
   return BOOKING_PAGES.map((p) => ({ service: p.slug }));
 }
 
-export async function generateMetadata(
-  props: PageProps<"/[service]">,
-): Promise<Metadata> {
+export async function generateMetadata(props: PageProps<"/[service]">): Promise<Metadata> {
   const { service } = await props.params;
   const page = bookingPage(service);
   if (!page) return {};
@@ -68,14 +66,12 @@ export default async function BookingPage(props: PageProps<"/[service]">) {
       ? /* A pick may come from any set (Portraits). */
         page.picks.flatMap((src) => [...all, ...LINKABLE.flatMap((p) => p.images)].filter((f) => f.src === src).slice(0, 1))
       : total <= 19
-      ? all
-      : sets.length === 1
-        ? Array.from({ length: 14 }, (_, i) => sets[0][Math.floor((i * total) / 14)])
-        : Array.from({ length: Math.max(...sets.map((s) => s.length)) }, (_, k) =>
-            sets.flatMap((s) => (s[k] ? [s[k]] : [])),
-          )
-            .flat()
-            .slice(0, 14);
+        ? all
+        : sets.length === 1
+          ? Array.from({ length: 14 }, (_, i) => sets[0][Math.floor((i * total) / 14)])
+          : Array.from({ length: Math.max(...sets.map((s) => s.length)) }, (_, k) => sets.flatMap((s) => (s[k] ? [s[k]] : [])))
+              .flat()
+              .slice(0, 14);
   const graph = (
     <LdJson
       data={serviceGraph({

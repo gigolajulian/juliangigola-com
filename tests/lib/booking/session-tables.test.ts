@@ -11,16 +11,44 @@ import { LENGTH, SESSIONS } from "@/lib/booking/catalog";
 
 describe("session tables", () => {
   it("names each deposit the way it always did", () => {
-    expect(SESSION).toEqual({ portraits: "Portraits", headshots: "Headshots", graduation: "Graduation photos", digitals: "Studio digitals", "model-test": "Model test" });
+    expect(SESSION).toEqual({
+      portraits: "Portraits",
+      headshots: "Headshots",
+      graduation: "Graduation photos",
+      digitals: "Studio digitals",
+      "model-test": "Model test",
+    });
   });
   it("books the same events from /book", () => {
-    expect(SESSION_EVENTS).toEqual({ portraits: "juliangigola/portraits", graduation: "juliangigola/graduation", headshots: "juliangigola/headshots", "studio-digitals": "juliangigola/digitals" });
+    expect(SESSION_EVENTS).toEqual({
+      portraits: "juliangigola/portraits",
+      graduation: "juliangigola/graduation",
+      headshots: "juliangigola/headshots",
+      "studio-digitals": "juliangigola/digitals",
+    });
   });
   it("keeps the V3 lengths", () => {
-    expect(LENGTH).toEqual({ portraits: 60, graduation: 90, headshots: 45, "studio-digitals": 45, "model-test": 60, weddings: 480, consultation: 15, "music-photography": 15, "fashion-photography": 15, "brand-photography": 15, editorial: 15, events: 0 });
+    expect(LENGTH).toEqual({
+      portraits: 60,
+      graduation: 90,
+      headshots: 45,
+      "studio-digitals": 45,
+      "model-test": 60,
+      weddings: 480,
+      consultation: 15,
+      "music-photography": 15,
+      "fashion-photography": 15,
+      "brand-photography": 15,
+      editorial: 15,
+      events: 0,
+    });
   });
   it("takes a deposit on the same sessions", () => {
-    expect(Object.values(SESSIONS).filter((s) => s.paid).map((s) => s.slug)).toEqual(["portraits", "graduation", "headshots", "studio-digitals", "model-test"]);
+    expect(
+      Object.values(SESSIONS)
+        .filter((s) => s.paid)
+        .map((s) => s.slug),
+    ).toEqual(["portraits", "graduation", "headshots", "studio-digitals", "model-test"]);
     expect(DEPOSIT_SESSIONS).toEqual(["portraits", "headshots", "graduation", "digitals", "model-test"]);
     expect(DEPOSIT).toEqual({ portraits: 250, headshots: 200, graduation: 200, digitals: 150, "model-test": 100 });
   });

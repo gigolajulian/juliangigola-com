@@ -53,15 +53,11 @@ const optArray = (v: unknown, path: string): unknown[] => {
 /** What a slug is: it goes into routes, directory names and redirects. */
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
-
 /** Alt may legitimately be empty — 1,084 harvested frames have none. */
-const text = (v: unknown, path: string): string =>
-  typeof v === "string" ? v : fail(path, "a string", v);
+const text = (v: unknown, path: string): string => (typeof v === "string" ? v : fail(path, "a string", v));
 
 const num = (v: unknown, path: string): number =>
-  typeof v === "number" && Number.isFinite(v) && v > 0
-    ? v
-    : fail(path, "a positive number", v);
+  typeof v === "number" && Number.isFinite(v) && v > 0 ? v : fail(path, "a positive number", v);
 
 /**
  * A path under `public/`, and nothing else.
@@ -78,9 +74,7 @@ const src = (v: unknown, path: string): string => {
 };
 
 const colour = (v: unknown, path: string): string =>
-  typeof v === "string" && /^#[0-9a-fA-F]{6}$/.test(v)
-    ? v
-    : fail(path, "a #rrggbb colour", v);
+  typeof v === "string" && /^#[0-9a-fA-F]{6}$/.test(v) ? v : fail(path, "a #rrggbb colour", v);
 
 const frame = (v: unknown, path: string): Frame => {
   if (!isRecord(v)) return fail(path, "an object", v);
@@ -122,8 +116,7 @@ export type TextRef = {
   body: string;
 };
 
-export const isTextRef = (f: FrameRef): f is TextRef =>
-  typeof f !== "string" && "kind" in f && f.kind === "text";
+export const isTextRef = (f: FrameRef): f is TextRef => typeof f !== "string" && "kind" in f && f.kind === "text";
 
 /** Optional prose: absent and empty both mean "no heading". */
 const maybe = (v: unknown, path: string): string | null => {
@@ -182,8 +175,7 @@ const credit = (v: unknown, path: string): Credit => {
     // Absent and unusable are the same answer here, and both mean "print the
     // name as text". A handle is a nicety on a credit, not a reason to fail a
     // build that is otherwise fine.
-    instagram:
-      typeof v.instagram === "string" ? instagramHandle(v.instagram) : null,
+    instagram: typeof v.instagram === "string" ? instagramHandle(v.instagram) : null,
   };
 };
 
@@ -202,19 +194,14 @@ const project = (v: unknown, path: string): AddedProject => {
     : fail(`${path}.images`, "an array", v.images);
 
   // A project with no frames renders as a title over nothing.
-  if (!images.length)
-    return fail(`${path}.images`, "at least one frame", images);
+  if (!images.length) return fail(`${path}.images`, "at least one frame", images);
 
   return {
     slug,
     name: str(v.name, `${path}.name`),
-    ...(v.headline === undefined
-      ? {}
-      : { headline: str(v.headline, `${path}.headline`) }),
+    ...(v.headline === undefined ? {} : { headline: str(v.headline, `${path}.headline`) }),
     categorySlug: str(v.categorySlug, `${path}.categorySlug`),
-    credits: Array.isArray(v.credits)
-      ? v.credits.map((c, i) => credit(c, `${path}.credits[${i}]`))
-      : [],
+    credits: Array.isArray(v.credits) ? v.credits.map((c, i) => credit(c, `${path}.credits[${i}]`)) : [],
     cover: frame(v.cover, `${path}.cover`),
     images,
   };
@@ -415,12 +402,7 @@ function parse(v: unknown): AddedFile {
   // whichever lost would simply never appear.
   const seen = new Set<string>();
   for (const p of projects) {
-    if (seen.has(p.slug))
-      return fail(
-        "projects",
-        `unique slugs; "${p.slug}" appears twice`,
-        p.slug,
-      );
+    if (seen.has(p.slug)) return fail("projects", `unique slugs; "${p.slug}" appears twice`, p.slug);
     seen.add(p.slug);
   }
 
@@ -435,10 +417,7 @@ function parse(v: unknown): AddedFile {
     // A removed project with no timestamp would never age out and would sit
     // in the bin for good, so an unparseable date is treated as "just now"
     // rather than as a reason to fail the build.
-    const when =
-      typeof at === "string" && !Number.isNaN(Date.parse(at))
-        ? at
-        : new Date().toISOString();
+    const when = typeof at === "string" && !Number.isNaN(Date.parse(at)) ? at : new Date().toISOString();
     return { ...p, deletedAt: when };
   });
 
@@ -447,11 +426,7 @@ function parse(v: unknown): AddedFile {
   const live = new Set(projects.map((p) => p.slug));
   for (const t of trash) {
     if (live.has(t.slug)) {
-      return fail(
-        "trash",
-        `slugs not also in projects; "${t.slug}" is in both`,
-        t.slug,
-      );
+      return fail("trash", `slugs not also in projects; "${t.slug}" is in both`, t.slug);
     }
   }
 
@@ -460,23 +435,17 @@ function parse(v: unknown): AddedFile {
   const rawFrames = optRecord(v.frames, "frames");
   const frames: Record<string, FrameRef[]> = {};
   for (const [slug, list] of Object.entries(rawFrames)) {
-    if (!Array.isArray(list))
-      return fail(`frames["${slug}"]`, "an array", list);
+    if (!Array.isArray(list)) return fail(`frames["${slug}"]`, "an array", list);
     // An empty override would publish a project as a title over nothing, and
     // it is indistinguishable from "I removed every frame and meant it" — so
     // it fails here rather than on the page.
-    if (!list.length)
-      return fail(`frames["${slug}"]`, "at least one frame", list);
+    if (!list.length) return fail(`frames["${slug}"]`, "at least one frame", list);
     const sequence = list.map((f, i) => frameRef(f, `frames["${slug}"][${i}]`));
     // Text alone is an essay, not a project, and `reframe` would discard the
     // whole override rather than publish one — better to say so at the build
     // than to silently restore the original sequence.
     if (sequence.every(isTextRef)) {
-      return fail(
-        `frames["${slug}"]`,
-        "at least one photograph, not only text",
-        list,
-      );
+      return fail(`frames["${slug}"]`, "at least one photograph, not only text", list);
     }
     frames[slug] = sequence;
   }
@@ -490,18 +459,14 @@ function parse(v: unknown): AddedFile {
     if (!isRecord(c)) return fail(`copy["${slug}"]`, "an object", c);
     return {
       title: str(c.title, `copy["${slug}"].title`),
-      intent:
-        c.intent === null || c.intent === undefined
-          ? null
-          : text(c.intent, `copy["${slug}"].intent`),
+      intent: c.intent === null || c.intent === undefined ? null : text(c.intent, `copy["${slug}"].intent`),
     };
   });
 
   const rawBts = optRecord(v.bts, "bts");
   const bts: Record<string, Bts> = {};
   for (const [slug, b] of Object.entries(rawBts)) {
-    if (!isRecord(b) || !Array.isArray(b.frames) || !b.frames.length)
-      return fail(`bts["${slug}"]`, "{ by, frames: [at least one] }", b);
+    if (!isRecord(b) || !Array.isArray(b.frames) || !b.frames.length) return fail(`bts["${slug}"]`, "{ by, frames: [at least one] }", b);
     bts[slug] = {
       by: b.by == null ? null : str(b.by, `bts["${slug}"].by`).replace(/^@/, ""),
       frames: b.frames.map((f, i) => frame(f, `bts["${slug}"].frames[${i}]`)),
@@ -514,8 +479,7 @@ function parse(v: unknown): AddedFile {
   // the sort — so it is a mistake to catch here rather than a tie to break.
   const seenInOrder = new Set<string>();
   for (const slug of order) {
-    if (seenInOrder.has(slug))
-      return fail("order", `each slug at most once; "${slug}" is twice`, slug);
+    if (seenInOrder.has(slug)) return fail("order", `each slug at most once; "${slug}" is twice`, slug);
     seenInOrder.add(slug);
   }
 
@@ -549,8 +513,7 @@ function parse(v: unknown): AddedFile {
        card without a circle, and the path goes into a `src`. */
     const handle = instagramHandle(who);
     const path = typeof src === "string" ? src : "";
-    if (handle && /^\/people\/[a-z0-9._-]+\.(jpe?g|png|webp)$/i.test(path))
-      avatars[handle] = path;
+    if (handle && /^\/people\/[a-z0-9._-]+\.(jpe?g|png|webp)$/i.test(path)) avatars[handle] = path;
   }
 
   const covers = recordOf(v.covers, "covers", (src, category) => str(src, `covers["${category}"]`));
@@ -561,8 +524,7 @@ function parse(v: unknown): AddedFile {
     const next = str(to, `slugs["${from}"]`);
     // A slug goes into a route and a redirect, so it is held to what a
     // slug is. One that is not fails the build rather than the site.
-    if (!SLUG.test(next))
-      return fail(`slugs["${from}"]`, "a lower-case slug", next);
+    if (!SLUG.test(next)) return fail(`slugs["${from}"]`, "a lower-case slug", next);
     if (next !== from) slugs[from] = next;
   }
 

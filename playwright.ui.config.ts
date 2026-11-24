@@ -15,7 +15,7 @@ const projects = [
   { name: "firefox", use: { browserName: "firefox" as const }, exe: firefox },
   ...(process.env.UI_WEBKIT ? [{ name: "webkit", use: { browserName: "webkit" as const }, exe: webkit }] : []),
 ]
-  .filter((p) => process.env.PERF_CHROME && p.name === "chromium" ? true : existsSync(p.exe.executablePath()))
+  .filter((p) => (process.env.PERF_CHROME && p.name === "chromium" ? true : existsSync(p.exe.executablePath())))
   .map(({ name, use }) => ({ name, use }));
 
 export default defineConfig({

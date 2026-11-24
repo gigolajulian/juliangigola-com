@@ -47,14 +47,20 @@ const RULES = [
   // Nothing to run: notes, docs, contact sheets, editor and CI settings.
   ["none", /^(docs\/|\.claude\/|\.github\/|\.githooks\/)|^HANDOFF[\w-]*\.md$|\.md$|^[^/]+\.png$|^\.gitignore$/],
   // Both: what every part of the site is built from.
-  ["both", /^(package(-lock)?\.json|next\.config\.ts|tsconfig\.json|vitest\.config\.ts|eslint\.config\.mjs|proxy\.ts|middleware\.ts|open-next\.config\.ts|scripts\/test\/)/],
+  [
+    "both",
+    /^(package(-lock)?\.json|next\.config\.ts|tsconfig\.json|vitest\.config\.ts|eslint\.config\.mjs|proxy\.ts|middleware\.ts|open-next\.config\.ts|scripts\/test\/)/,
+  ],
   // Server lib: the booking, leads, admin, email, proofs and analytics folders and the root server modules. tests/lib and tests/backend cover them.
   ["both", /^lib\/(booking|leads|admin|email|proofs|analytics)\/|^lib\/(proofs?|proof-[\w-]+|stripe|hello-mail|http|inbox|sheet)\.ts$/],
   // The lib unit tests: the backend project runs most, the frontend project the client-side few.
   ["both", /^tests\/lib\//],
   // The server side: API routes, the contact action, the book Worker,
   // the inbox and the /admin plumbing, and their tests.
-  ["backend", /^(app\/api\/|app\/contact\/actions\.ts$|app\/[\w.-]+\/route\.ts$|book\/|wrangler\.jsonc?$|tests\/backend\/|scripts\/check-)/],
+  [
+    "backend",
+    /^(app\/api\/|app\/contact\/actions\.ts$|app\/[\w.-]+\/route\.ts$|book\/|wrangler\.jsonc?$|tests\/backend\/|scripts\/check-)/,
+  ],
   // Everything else is the site people see.
   ["frontend", /./],
 ];

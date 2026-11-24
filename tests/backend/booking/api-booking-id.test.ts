@@ -36,8 +36,29 @@ beforeEach(async () => {
   mail = new FakeEmail();
   deleted = [];
   const storage = new FakeStore();
-  await storage.put(`b:${ID}`, { id: ID, eventId: "ev1", slug: "portraits", session: "Portraits", start: START, end: END, timeZone: "America/Los_Angeles", name: "QA Test", email: "qa@example.com", at: new Date().toISOString() });
-  ctx.env = { GCAL_OAUTH: OAUTH, BOOKING_SECRET: SECRET, BOOKING_LOCK: fakeLock(new BookingLock({ storage }, { GCAL_OAUTH: OAUTH })), INBOX: new FakeKV(), LEADS_KEY, CLIENT_EMAIL: client, EMAIL: mail, INBOX_KEY: KEY, PUBLIC_WRITE_LIMIT: { limit: async () => ({ success: allowed }) } };
+  await storage.put(`b:${ID}`, {
+    id: ID,
+    eventId: "ev1",
+    slug: "portraits",
+    session: "Portraits",
+    start: START,
+    end: END,
+    timeZone: "America/Los_Angeles",
+    name: "QA Test",
+    email: "qa@example.com",
+    at: new Date().toISOString(),
+  });
+  ctx.env = {
+    GCAL_OAUTH: OAUTH,
+    BOOKING_SECRET: SECRET,
+    BOOKING_LOCK: fakeLock(new BookingLock({ storage }, { GCAL_OAUTH: OAUTH })),
+    INBOX: new FakeKV(),
+    LEADS_KEY,
+    CLIENT_EMAIL: client,
+    EMAIL: mail,
+    INBOX_KEY: KEY,
+    PUBLIC_WRITE_LIMIT: { limit: async () => ({ success: allowed }) },
+  };
   vi.stubGlobal("fetch", async (url: string, init?: RequestInit) => {
     if (url.includes("oauth2")) return Response.json({ access_token: "t", expires_in: 3600 });
     if (init?.method === "DELETE") {
@@ -49,10 +70,20 @@ beforeEach(async () => {
 });
 afterEach(() => vi.useRealTimers());
 
-const post = (body: unknown, id = ID) => POST(new Request(`https://juliangigola.com/api/booking/${id}`, { method: "POST", body: JSON.stringify(body) }), { params: Promise.resolve({ id }) });
+const post = (body: unknown, id = ID) =>
+  POST(new Request(`https://juliangigola.com/api/booking/${id}`, { method: "POST", body: JSON.stringify(body) }), {
+    params: Promise.resolve({ id }),
+  });
 const token = () => bookingToken(SECRET, ID, Date.parse(START) + 864e5);
 const desk = (body: unknown, key?: string) =>
-  DESK(new Request(`https://juliangigola.com/api/booking/${ID}/desk`, { method: "POST", body: typeof body === "string" ? body : JSON.stringify(body), headers: key ? { "x-admin-key": key } : {} }), { params: Promise.resolve({ id: ID }) });
+  DESK(
+    new Request(`https://juliangigola.com/api/booking/${ID}/desk`, {
+      method: "POST",
+      body: typeof body === "string" ? body : JSON.stringify(body),
+      headers: key ? { "x-admin-key": key } : {},
+    }),
+    { params: Promise.resolve({ id: ID }) },
+  );
 
 describe("POST /api/booking/[id]", () => {
   it("refuses no token, a wrong one, and a token for another booking", async () => {
@@ -93,7 +124,18 @@ describe("POST /api/booking/[id]", () => {
 
   it("still takes the desk's two actions behind the admin gate, for a desk tab loaded before the desk route", async () => {
     expect((await post({ action: "cancel-mine", t: await token() })).status).toBe(401);
-    expect((await POST(new Request(`https://juliangigola.com/api/booking/${ID}`, { method: "POST", body: JSON.stringify({ action: "cancel-mine" }), headers: { "x-admin-key": KEY } }), { params: Promise.resolve({ id: ID }) })).status).toBe(200);
+    expect(
+      (
+        await POST(
+          new Request(`https://juliangigola.com/api/booking/${ID}`, {
+            method: "POST",
+            body: JSON.stringify({ action: "cancel-mine" }),
+            headers: { "x-admin-key": KEY },
+          }),
+          { params: Promise.resolve({ id: ID }) },
+        )
+      ).status,
+    ).toBe(200);
     expect(deleted).toHaveLength(1);
   });
 });

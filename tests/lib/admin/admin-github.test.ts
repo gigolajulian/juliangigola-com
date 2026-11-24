@@ -19,7 +19,12 @@ describe("credentials", () => {
 
 describe("listDirectory", () => {
   it("lists only files, and nothing for a missing folder", async () => {
-    vi.stubGlobal("fetch", async () => reply([{ type: "file", path: "public/a.jpg" }, { type: "dir", path: "public/x" }]));
+    vi.stubGlobal("fetch", async () =>
+      reply([
+        { type: "file", path: "public/a.jpg" },
+        { type: "dir", path: "public/x" },
+      ]),
+    );
     expect(await listDirectory("t", "public")).toEqual(["public/a.jpg"]);
     vi.stubGlobal("fetch", async () => reply({ message: "Not Found" }, 404));
     expect(await listDirectory("t", "nope")).toEqual([]);

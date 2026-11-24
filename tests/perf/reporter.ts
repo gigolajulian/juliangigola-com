@@ -53,7 +53,14 @@ export default class PerfReporter implements Reporter {
     }
     if (!ok && result.status !== "skipped") {
       const why = result.errors
-        .map((e) => (e.message ?? "").replace(/\u001b\[[0-9;]*m/g, "").split("\n").filter(Boolean).slice(0, 12).join(" | "))
+        .map((e) =>
+          (e.message ?? "")
+            .replace(/\u001b\[[0-9;]*m/g, "")
+            .split("\n")
+            .filter(Boolean)
+            .slice(0, 12)
+            .join(" | "),
+        )
         .join(" || ");
       this.failures.push(`${browser} ${test.titlePath().slice(2).join(" > ")}: ${why.slice(0, 1200)}`);
     }
@@ -77,7 +84,10 @@ export default class PerfReporter implements Reporter {
     }
     console.log(`\n${this.passed} passed, ${this.failures.length} failed, ${this.skipped} skipped: ${result.status}`);
     mkdirSync("test-results", { recursive: true });
-    writeFileSync(`test-results/perf${process.env.PERF_PHASE ? "-" + process.env.PERF_PHASE : ""}.json`, JSON.stringify(this.rows, null, 1));
+    writeFileSync(
+      `test-results/perf${process.env.PERF_PHASE ? "-" + process.env.PERF_PHASE : ""}.json`,
+      JSON.stringify(this.rows, null, 1),
+    );
   }
 
   printsToStdio() {

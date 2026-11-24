@@ -10,15 +10,13 @@ import type { SwipeHandlers } from "./use-swipe";
 import { useZoom } from "./use-zoom";
 
 /** The page's own picture of a frame, by its source. */
-export const pictureFor = (src: string): HTMLElement | null =>
-  document.querySelector<HTMLElement>(`img[data-frame="${CSS.escape(src)}"]`);
+export const pictureFor = (src: string): HTMLElement | null => document.querySelector<HTMLElement>(`img[data-frame="${CSS.escape(src)}"]`);
 
 /* Every copy of a frame the viewer has painted, by frame. A step moves
    the middle picture to a side and a side one to the middle, each a new
    element that paints a frame late; the copy already painted goes under
    it, so nothing is blank for that frame. */
-const notePainted = (src: string) => (e: React.SyntheticEvent<HTMLImageElement>) =>
-  rememberPainted(src, e.currentTarget.currentSrc);
+const notePainted = (src: string) => (e: React.SyntheticEvent<HTMLImageElement>) => rememberPainted(src, e.currentTarget.currentSrc);
 /** The best copy of a frame already decoded: the viewer's, or the page's. */
 const decodedCopy = (src: string) => {
   const el = pictureFor(src);
@@ -83,8 +81,7 @@ export function swingStep(area: HTMLElement, dir: number) {
   const stage = area.getBoundingClientRect();
   for (const side of area.querySelectorAll<HTMLElement>(".lightbox-side")) {
     const turn = getComputedStyle(side).getPropertyValue("--turn").trim() || "0deg";
-    const at = (x: string, z: string, r: string) =>
-      `perspective(1400px) translateX(${x}) translateZ(${z}) rotateY(${r})`;
+    const at = (x: string, z: string, r: string) => `perspective(1400px) translateX(${x}) translateZ(${z}) rotateY(${r})`;
     const rest = at("0px", "-160px", turn);
     const behind = (side.dataset.side === "prev") === dir > 0;
     if (behind) {
@@ -96,7 +93,10 @@ export function swingStep(area: HTMLElement, dir: number) {
       });
     } else {
       side.animate(
-        [{ transform: at(`${dir * 60}%`, "-160px", turn), opacity: 0 }, { transform: rest, opacity: 1 }],
+        [
+          { transform: at(`${dir * 60}%`, "-160px", turn), opacity: 0 },
+          { transform: rest, opacity: 1 },
+        ],
         { duration: STEP_MS, easing: STEP_EASE },
       );
     }
@@ -199,50 +199,45 @@ export function Stage({
           style={{
             ...(size ? { width: size.w, height: size.h } : { width: 0, height: 0 }),
             backgroundColor: zoom.scale === 1 ? frame.color : "transparent",
-            ...(under && zoom.scale === 1
-              ? { backgroundImage: `url("${under}")` }
-              : null),
+            ...(under && zoom.scale === 1 ? { backgroundImage: `url("${under}")` } : null),
           }}
         >
           <div style={zoom.style} className="relative h-full w-full">
-          <Image
-            key={frame.src}
-            data-lightbox-picture
-            src={frame.src}
-            alt={alt}
-            width={frame.width}
-            height={frame.height}
-            sizes="100vw"
-            priority
-            draggable={false}
-            onLoad={(e) => {
-              notePainted(frame.src)(e);
-              setShown(frame.src);
-            }}
-            className="block h-full w-full object-contain"
-          />
-          {/* The zoomable copy: the master's full width at 82, laid exactly
+            <Image
+              key={frame.src}
+              data-lightbox-picture
+              src={frame.src}
+              alt={alt}
+              width={frame.width}
+              height={frame.height}
+              sizes="100vw"
+              priority
+              draggable={false}
+              onLoad={(e) => {
+                notePainted(frame.src)(e);
+                setShown(frame.src);
+              }}
+              className="block h-full w-full object-contain"
+            />
+            {/* The zoomable copy: the master's full width at 82, laid exactly
               over the fitted picture once it has decoded, so the swap is
               invisible until a wheel goes in on it. The fitted picture is
               screen sized, and at three times it was soft. */}
-          {sharp ? (
-            <Image
-              key={`sharp-${frame.src}`}
-              src={frame.src}
-              alt=""
-              aria-hidden
-              width={frame.width}
-              height={frame.height}
-              sizes="2500px"
-              quality={82}
-              draggable={false}
-              onLoad={() => setSharpDone(frame.src)}
-              className={cn(
-                "absolute inset-0 block h-full w-full object-contain",
-                sharpDone === frame.src ? "opacity-100" : "opacity-0",
-              )}
-            />
-          ) : null}
+            {sharp ? (
+              <Image
+                key={`sharp-${frame.src}`}
+                src={frame.src}
+                alt=""
+                aria-hidden
+                width={frame.width}
+                height={frame.height}
+                sizes="2500px"
+                quality={82}
+                draggable={false}
+                onLoad={() => setSharpDone(frame.src)}
+                className={cn("absolute inset-0 block h-full w-full object-contain", sharpDone === frame.src ? "opacity-100" : "opacity-0")}
+              />
+            ) : null}
           </div>
         </div>
       </div>
@@ -255,7 +250,12 @@ export function Stage({
           are the controls for that. They fade in on their own
           (`.lightbox-peek`), since one can arrive after a step. */}
       {size && zoom.scale === 1
-        ? ([[-1, prev, "Prev"], [1, next, "Next"]] as const).map(([d, f, word]) => {
+        ? (
+            [
+              [-1, prev, "Prev"],
+              [1, next, "Next"],
+            ] as const
+          ).map(([d, f, word]) => {
             if (!f) return null;
             const box = sideSize(size, f);
             if (!box) return null;
@@ -269,18 +269,15 @@ export function Stage({
                 data-side={d < 0 ? "prev" : "next"}
                 onClick={() => onStep(d)}
                 className="lightbox-side absolute top-1/2 z-10 -translate-y-1/2 max-sm:hidden"
-                style={{
-                  width: box.w,
-                  height: box.h,
-                  [d < 0 ? "right" : "left"]: `calc(50% + ${Math.round(size.w / 2 + SIDE_GAP)}px)`,
-                } as React.CSSProperties}
+                style={
+                  {
+                    width: box.w,
+                    height: box.h,
+                    [d < 0 ? "right" : "left"]: `calc(50% + ${Math.round(size.w / 2 + SIDE_GAP)}px)`,
+                  } as React.CSSProperties
+                }
               >
-                <TiltedCard
-                  containerHeight="100%"
-                  imageHeight="100%"
-                  imageWidth="100%"
-                  scaleOnHover={1.04}
-                >
+                <TiltedCard containerHeight="100%" imageHeight="100%" imageWidth="100%" scaleOnHover={1.04}>
                   {/* Not keyed: the card stays through a step and moves
                       (above). The picture is, so a new one is never the old
                       one for a frame, and the copy the page already has is

@@ -142,8 +142,7 @@ export function useContentSession({
     onPublished(written);
     setStatus({
       kind: "saved",
-      message:
-        "Committed. The site rebuilds and goes live in a couple of minutes.",
+      message: "Committed. The site rebuilds and goes live in a couple of minutes.",
     });
   }
 

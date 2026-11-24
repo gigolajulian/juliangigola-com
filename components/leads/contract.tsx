@@ -43,14 +43,35 @@ export function ContractBlock({ leadId, changed }: { leadId: string; changed: ()
 
   React.useEffect(() => {
     let live = true;
-    api<Got>({ path: `?lead=${encodeURIComponent(leadId)}` }).then((o) => live && setGot(o)).catch((e: unknown) => live && setNote(errorText(e)));
-    api<{ templates: ContractTemplate[] }>({ path: "?templates" }).then((o) => { if (live) { setTemplates(o.templates); setPick(o.templates[0]?.id ?? ""); } }).catch(() => live && setNoTemplates(true));
-    return () => { live = false; };
+    api<Got>({ path: `?lead=${encodeURIComponent(leadId)}` })
+      .then((o) => live && setGot(o))
+      .catch((e: unknown) => live && setNote(errorText(e)));
+    api<{ templates: ContractTemplate[] }>({ path: "?templates" })
+      .then((o) => {
+        if (live) {
+          setTemplates(o.templates);
+          setPick(o.templates[0]?.id ?? "");
+        }
+      })
+      .catch(() => live && setNoTemplates(true));
+    return () => {
+      live = false;
+    };
   }, [leadId]);
 
   const c = got?.contract ?? null;
-  const shown = (o: Got) => { setGot(o); setEdit(null); };
-  const make = () => api<Got>({ method: "POST", body: JSON.stringify({ lead: leadId, template: pick }) }).then((o) => { setGot(o); setEdit({ to: o.contract!.to, text: o.contract!.text }); setNote(null); }).catch((e: unknown) => setNote(errorText(e)));
+  const shown = (o: Got) => {
+    setGot(o);
+    setEdit(null);
+  };
+  const make = () =>
+    api<Got>({ method: "POST", body: JSON.stringify({ lead: leadId, template: pick }) })
+      .then((o) => {
+        setGot(o);
+        setEdit({ to: o.contract!.to, text: o.contract!.text });
+        setNote(null);
+      })
+      .catch((e: unknown) => setNote(errorText(e)));
   const save = (send?: "mail" | "link") => {
     if (!c || !edit) return;
     api<Got>({ method: "PATCH", body: JSON.stringify({ id: c.id, ...edit, send }) })
@@ -63,19 +84,37 @@ export function ContractBlock({ leadId, changed }: { leadId: string; changed: ()
       .catch((e: unknown) => setNote(errorText(e)));
   };
 
-  if (!got) return note ? <Text size="sm" color="secondary">{note}</Text> : null;
+  if (!got)
+    return note ? (
+      <Text size="sm" color="secondary">
+        {note}
+      </Text>
+    ) : null;
 
   if (c?.signed) {
     return (
       <VStack gap={2}>
-        <Text>Signed by {c.signed.name}, {stampPT(c.signed.at)}</Text>
-        <Text type="code" size="xsm" color="secondary">SHA-256 {c.signed.hash.slice(0, 16)}</Text>
+        <Text>
+          Signed by {c.signed.name}, {stampPT(c.signed.at)}
+        </Text>
+        <Text type="code" size="xsm" color="secondary">
+          SHA-256 {c.signed.hash.slice(0, 16)}
+        </Text>
         <HStack gap={2} wrap="wrap">
-          <Button label="Download signed copy" variant="secondary" size="sm" onClick={() => downloadCopy(c).catch((e: unknown) => setNote(errorText(e)))} />
+          <Button
+            label="Download signed copy"
+            variant="secondary"
+            size="sm"
+            onClick={() => downloadCopy(c).catch((e: unknown) => setNote(errorText(e)))}
+          />
           {got.url ? <Button label="Open" variant="ghost" size="sm" onClick={() => open(got.url!, "_blank", "noreferrer")} /> : null}
           <Button label="New contract" variant="ghost" size="sm" onClick={make} />
         </HStack>
-        {note ? <Text size="sm" color="secondary" role="status">{note}</Text> : null}
+        {note ? (
+          <Text size="sm" color="secondary" role="status">
+            {note}
+          </Text>
+        ) : null}
       </VStack>
     );
   }
@@ -94,7 +133,11 @@ export function ContractBlock({ leadId, changed }: { leadId: string; changed: ()
           <Button label="Save" variant="ghost" size="sm" onClick={() => save()} />
           <Button label="Cancel" variant="ghost" size="sm" onClick={() => setEdit(null)} />
         </HStack>
-        {note ? <Text size="sm" color="secondary" role="status">{note}</Text> : null}
+        {note ? (
+          <Text size="sm" color="secondary" role="status">
+            {note}
+          </Text>
+        ) : null}
       </VStack>
     );
   }
@@ -106,17 +149,47 @@ export function ContractBlock({ leadId, changed }: { leadId: string; changed: ()
         {c ? (
           <>
             <Button label="Edit" variant="secondary" size="sm" onClick={() => setEdit({ to: c.to, text: c.text })} />
-            {c.sentAt && got.url ? <Button label="Copy link" variant="ghost" size="sm" onClick={() => navigator.clipboard.writeText(got.url!).then(() => setNote("Link copied."), () => setNote(got.url))} /> : null}
+            {c.sentAt && got.url ? (
+              <Button
+                label="Copy link"
+                variant="ghost"
+                size="sm"
+                onClick={() =>
+                  navigator.clipboard.writeText(got.url!).then(
+                    () => setNote("Link copied."),
+                    () => setNote(got.url),
+                  )
+                }
+              />
+            ) : null}
           </>
         ) : (
           <>
-            {templates.length > 1 ? <Selector label="Template" isLabelHidden size="sm" variant="secondary" value={pick} onChange={(v) => setPick(String(v))} options={templates.map((t) => ({ value: t.id, label: t.name }))} /> : null}
+            {templates.length > 1 ? (
+              <Selector
+                label="Template"
+                isLabelHidden
+                size="sm"
+                variant="secondary"
+                value={pick}
+                onChange={(v) => setPick(String(v))}
+                options={templates.map((t) => ({ value: t.id, label: t.name }))}
+              />
+            ) : null}
             <Button label="Make contract" variant="secondary" size="sm" onClick={make} />
           </>
         )}
       </HStack>
-      {!c && noTemplates ? <Text size="sm" color="secondary">Contract templates did not load.</Text> : null}
-      {note ? <Text size="sm" color="secondary" role="status">{note}</Text> : null}
+      {!c && noTemplates ? (
+        <Text size="sm" color="secondary">
+          Contract templates did not load.
+        </Text>
+      ) : null}
+      {note ? (
+        <Text size="sm" color="secondary" role="status">
+          {note}
+        </Text>
+      ) : null}
     </VStack>
   );
 }
@@ -126,12 +199,17 @@ export function ContractTemplatesDesk() {
   const [list, setList] = React.useState<ContractTemplate[] | null>(null);
   const [note, setNote] = React.useState<string | null>(null);
   React.useEffect(() => {
-    api<{ templates: ContractTemplate[] }>({ path: "?templates" }).then((o) => setList(o.templates)).catch((e: unknown) => setNote(errorText(e)));
+    api<{ templates: ContractTemplate[] }>({ path: "?templates" })
+      .then((o) => setList(o.templates))
+      .catch((e: unknown) => setNote(errorText(e)));
   }, []);
   const edit = (i: number, k: keyof ContractTemplate) => (v: string) => setList(list!.map((t, j) => (j === i ? { ...t, [k]: v } : t)));
   const save = () =>
     api<{ templates: ContractTemplate[] }>({ method: "PUT", body: JSON.stringify({ templates: list }) })
-      .then((o) => { setList(o.templates); setNote("Saved."); })
+      .then((o) => {
+        setList(o.templates);
+        setNote("Saved.");
+      })
       .catch((e: unknown) => setNote(errorText(e)));
   return (
     <VStack gap={4}>
@@ -142,17 +220,29 @@ export function ContractTemplatesDesk() {
           <VStack gap={3}>
             <TextInput label="Name" value={t.name} onChange={edit(i, "name")} />
             <TextArea label="Contract" value={t.body} onChange={edit(i, "body")} rows={12} />
-            <HStack><Button label="Remove" variant="ghost" size="sm" onClick={() => setList(list!.filter((_, j) => j !== i))} /></HStack>
+            <HStack>
+              <Button label="Remove" variant="ghost" size="sm" onClick={() => setList(list!.filter((_, j) => j !== i))} />
+            </HStack>
           </VStack>
         </Card>
       ))}
       {list ? (
         <HStack gap={2}>
-          <Button label="Add a contract" variant="secondary" onClick={() => setList([...list, { id: `c${Date.now()}`, name: "New contract", body: "Between Julian Gigola and {client}.\n\n" }])} />
+          <Button
+            label="Add a contract"
+            variant="secondary"
+            onClick={() =>
+              setList([...list, { id: `c${Date.now()}`, name: "New contract", body: "Between Julian Gigola and {client}.\n\n" }])
+            }
+          />
           <Button label="Save contracts" variant="primary" onClick={save} />
         </HStack>
       ) : null}
-      {note ? <Text type="code" size="sm" color="secondary" role="status">{note}</Text> : null}
+      {note ? (
+        <Text type="code" size="sm" color="secondary" role="status">
+          {note}
+        </Text>
+      ) : null}
     </VStack>
   );
 }

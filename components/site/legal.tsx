@@ -28,7 +28,6 @@ const dated = (iso: string) =>
     timeZone: "UTC",
   });
 
-
 /** One document: its contents to the left, its clauses in full to the right. Outside the page it draws nothing. */
 export function LegalColumn({
   id,

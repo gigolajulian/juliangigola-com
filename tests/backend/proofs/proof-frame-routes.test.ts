@@ -19,8 +19,19 @@ const { GET: card } = await import("@/app/proof/[token]/card/route");
 
 const TOKEN = "AbCdEfGh12345678";
 let kv: FakeKV;
-const base = { token: TOKEN, name: "Test", included: 2, price: 15, days: 14, frames: [{ id: "a", file: "a.jpg", w: 1, h: 1 }], selects: [], notes: {}, views: 0 };
-const store = async (p: Partial<Proof> = {}) => writeProof(kv as never, (await sealer(LEADS_KEY))!, { ...base, createdAt: new Date().toISOString(), ...p } as Proof);
+const base = {
+  token: TOKEN,
+  name: "Test",
+  included: 2,
+  price: 15,
+  days: 14,
+  frames: [{ id: "a", file: "a.jpg", w: 1, h: 1 }],
+  selects: [],
+  notes: {},
+  views: 0,
+};
+const store = async (p: Partial<Proof> = {}) =>
+  writeProof(kv as never, (await sealer(LEADS_KEY))!, { ...base, createdAt: new Date().toISOString(), ...p } as Proof);
 
 beforeEach(async () => {
   kv = new FakeKV();
@@ -32,7 +43,8 @@ beforeEach(async () => {
 
 const getFrame = (id: string, query = "", token = TOKEN) =>
   frame(new Request(`https://juliangigola.com/proof/${token}/f/${id}${query}`), { params: Promise.resolve({ token, id }) });
-const getCard = (token = TOKEN) => card(new Request(`https://juliangigola.com/proof/${token}/card`), { params: Promise.resolve({ token }) });
+const getCard = (token = TOKEN) =>
+  card(new Request(`https://juliangigola.com/proof/${token}/card`), { params: Promise.resolve({ token }) });
 
 describe("/proof/[token]/f/[id]", () => {
   it("serves a frame of an open gallery, privately cached and never indexed", async () => {

@@ -37,7 +37,11 @@ export async function gcalToken(secret: string | undefined, now = Date.now()): P
 }
 
 /** A Google API call as hello@: a Calendar path, or a full URL (Gmail). JSON in, JSON out; a non-2xx throws with Google's status. */
-export async function gcal<T = { [k: string]: unknown }>(secret: string | undefined, path: string, init: { method?: string; body?: unknown } = {}): Promise<T> {
+export async function gcal<T = { [k: string]: unknown }>(
+  secret: string | undefined,
+  path: string,
+  init: { method?: string; body?: unknown } = {},
+): Promise<T> {
   const call = async () =>
     fetch(path.startsWith("https:") ? path : `${CALENDAR}${path}`, {
       method: init.method ?? (init.body ? "POST" : "GET"),

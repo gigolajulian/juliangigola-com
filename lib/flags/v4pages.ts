@@ -16,4 +16,9 @@ export const v4pages = (key: string) =>
   typeof document !== "undefined" && !!document.documentElement.dataset.v4pages?.split(" ").includes(key);
 
 /** The flag for rendering: false on the server and the first paint, so a page with the flag off keeps its markup. */
-export const useV4pages = (key: string) => React.useSyncExternalStore(noSubscribe, () => v4pages(key), () => false);
+export const useV4pages = (key: string) =>
+  React.useSyncExternalStore(
+    noSubscribe,
+    () => v4pages(key),
+    () => false,
+  );

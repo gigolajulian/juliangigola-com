@@ -17,21 +17,42 @@ const ID = "11152026-k7m2q9xd";
 let kv: FakeKV;
 let tries: number;
 const seal = async () => (await sealer(LEADS_KEY))!;
-const gallery = (over: Partial<Proof> = {}): Proof => ({ token: ID, name: "Ana", included: 2, price: 15, days: 14, createdAt: "2026-11-01T00:00:00Z", frames: [{ id: "a", file: "a.jpg", w: 1, h: 1 }], finals: [{ id: "a", file: "a.jpg", w: 1, h: 1, bytes: 3, crc: 0 }], selects: [], notes: {}, views: 0, watermark: true, ...over });
+const gallery = (over: Partial<Proof> = {}): Proof => ({
+  token: ID,
+  name: "Ana",
+  included: 2,
+  price: 15,
+  days: 14,
+  createdAt: "2026-11-01T00:00:00Z",
+  frames: [{ id: "a", file: "a.jpg", w: 1, h: 1 }],
+  finals: [{ id: "a", file: "a.jpg", w: 1, h: 1, bytes: 3, crc: 0 }],
+  selects: [],
+  notes: {},
+  views: 0,
+  watermark: true,
+  ...over,
+});
 const put = async (p: Proof) => writeProof(kv as never, await seal(), p);
 beforeEach(() => {
   kv = new FakeKV();
   tries = 0;
   ctx.env = {
-    INBOX: kv, LEADS_KEY, INBOX_KEY: "k",
+    INBOX: kv,
+    LEADS_KEY,
+    INBOX_KEY: "k",
     PROOFS: { get: async () => ({ body: new Response("abc").body, size: 3 }) },
     PUBLIC_WRITE_LIMIT: { limit: async () => ({ success: ++tries <= 5 }) },
     DOWNLOAD_LIMIT: { limit: async () => ({ success: true }) },
   };
 });
-const post = (body: unknown, cookie?: string) => POST(new Request("https://juliangigola.com/api/proof/x", { method: "POST", body: JSON.stringify(body), headers: cookie ? { cookie } : {} }), { params: Promise.resolve({ token: ID }) });
+const post = (body: unknown, cookie?: string) =>
+  POST(
+    new Request("https://juliangigola.com/api/proof/x", { method: "POST", body: JSON.stringify(body), headers: cookie ? { cookie } : {} }),
+    { params: Promise.resolve({ token: ID }) },
+  );
 const track = (cookie?: string) => post({ action: "track", email: "ana@gmail.com", kind: "open" }, cookie);
-const save = (cookie?: string) => finalResponse(new Request(`https://x/delivery/${ID}/dl/a`, { headers: cookie ? { cookie } : {} }), ctx.env as never, ID, "a");
+const save = (cookie?: string) =>
+  finalResponse(new Request(`https://x/delivery/${ID}/dl/a`, { headers: cookie ? { cookie } : {} }), ctx.env as never, ID, "a");
 
 describe("password hashing", () => {
   it("checks the right one, refuses the rest, and keeps no plain text", async () => {
@@ -85,7 +106,14 @@ describe("the gate's password", () => {
 
   it("the desk stores it hashed and only ever sees hasPass", async () => {
     await put(gallery());
-    const patch = async (b: unknown) => (await adminPATCH(new Request("https://juliangigola.com/api/proof", { method: "PATCH", body: JSON.stringify({ token: ID, ...(b as object) }), headers: { "x-admin-key": "k" } })))!;
+    const patch = async (b: unknown) =>
+      (await adminPATCH(
+        new Request("https://juliangigola.com/api/proof", {
+          method: "PATCH",
+          body: JSON.stringify({ token: ID, ...(b as object) }),
+          headers: { "x-admin-key": "k" },
+        }),
+      ))!;
     expect((await patch({ password: "ab" })).status).toBe(400);
     const res = await (await patch({ password: "blue moon", offline: true })).json();
     expect(res.proof.hasPass).toBe(true);
@@ -93,7 +121,9 @@ describe("the gate's password", () => {
     expect(res.proof.offline).toBe(true);
     const stored = (await readProof(kv as never, await seal(), ID))!;
     expect(await checkPass(stored.pass!, "blue moon")).toBe(true);
-    const list = await (await adminGET(new Request("https://juliangigola.com/api/proof?list", { headers: { "x-admin-key": "k" } })))!.json();
+    const list = await (await adminGET(
+      new Request("https://juliangigola.com/api/proof?list", { headers: { "x-admin-key": "k" } }),
+    ))!.json();
     expect(JSON.stringify(list)).not.toContain(stored.pass!.hash);
     await patch({ password: "" });
     expect((await readProof(kv as never, await seal(), ID))!.pass).toBeUndefined();

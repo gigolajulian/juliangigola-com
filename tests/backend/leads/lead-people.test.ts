@@ -34,8 +34,7 @@ async function brand(people: Person[] = [AD]) {
   for (const p of people) await kv.put(personKey(await s.id(p.email)), id);
   return { id };
 }
-const patch = (body: object) =>
-  desk("PATCH", "", { body });
+const patch = (body: object) => desk("PATCH", "", { body });
 
 describe("findLead", () => {
   it("finds a person's lead, prefers an address's own lead, and ignores an alias whose lead is gone", async () => {
@@ -54,7 +53,10 @@ describe("findLead", () => {
   it("folds a person's mail, booking or proof open into the client's lead instead of a new one", async () => {
     const { id } = await brand();
     await recordLead({ INBOX: kv as never, LEADS_KEY }, AD.email, { event: { at: at(3), kind: "wrote", ref: "gm-1", note: "Shot list" } });
-    await recordLead({ INBOX: kv as never, LEADS_KEY }, AD.email, { event: { at: at(4), kind: "proofs", ref: "tok", note: "Nov 15" }, name: "Ana" });
+    await recordLead({ INBOX: kv as never, LEADS_KEY }, AD.email, {
+      event: { at: at(4), kind: "proofs", ref: "tok", note: "Nov 15" },
+      name: "Ana",
+    });
     const lead = await readLead(kv as never, s, id);
     expect(lead?.events.map((e) => e.kind)).toEqual(["inquiry", "wrote", "proofs"]);
     expect(lead?.name).toBe("Brand Co");
@@ -64,7 +66,12 @@ describe("findLead", () => {
 
 describe("people in the record", () => {
   it("stay out of the list summary, so a lead with the most people still fits KV metadata", async () => {
-    const people = Array.from({ length: PEOPLE_MAX }, (_, i) => ({ name: "X".repeat(80), email: `${"p".repeat(100)}${i}@example.com`, role: "R".repeat(40), phone: "1".repeat(40) }));
+    const people = Array.from({ length: PEOPLE_MAX }, (_, i) => ({
+      name: "X".repeat(80),
+      email: `${"p".repeat(100)}${i}@example.com`,
+      role: "R".repeat(40),
+      phone: "1".repeat(40),
+    }));
     const { id } = await brand(people);
     const row = kv.data.get(leadStoreKey(id))!;
     expect(JSON.stringify(row.metadata).length).toBeLessThan(1024);
@@ -72,7 +79,16 @@ describe("people in the record", () => {
   });
 
   it("are checked: real addresses, none twice, never the lead's own, copy on unless unticked", () => {
-    expect(cleanPeople([{ name: "Ana", email: "Ana@Agency.com", role: " AD ", cc: true }, { email: "ana@agency.com" }, { name: "Sam", email: "sam@x.co", cc: false }], BRAND)).toEqual([
+    expect(
+      cleanPeople(
+        [
+          { name: "Ana", email: "Ana@Agency.com", role: " AD ", cc: true },
+          { email: "ana@agency.com" },
+          { name: "Sam", email: "sam@x.co", cc: false },
+        ],
+        BRAND,
+      ),
+    ).toEqual([
       { name: "Ana", email: "ana@agency.com", role: "AD" },
       { name: "Sam", email: "sam@x.co", cc: false },
     ]);
@@ -80,13 +96,25 @@ describe("people in the record", () => {
     expect(cleanPeople([{ email: "" }], BRAND)).toHaveProperty("error");
     expect(cleanPeople([{ email: "b.rand@example.com" }], "brand@example.com")).toEqual([{ name: "b.rand", email: "b.rand@example.com" }]);
     expect(cleanPeople([{ email: "b.r.a.n.d+x@gmail.com" }], "brand@gmail.com")).toHaveProperty("error");
-    expect(cleanPeople(Array.from({ length: PEOPLE_MAX + 1 }, (_, i) => ({ email: `p${i}@x.co` })), BRAND)).toHaveProperty("error");
+    expect(
+      cleanPeople(
+        Array.from({ length: PEOPLE_MAX + 1 }, (_, i) => ({ email: `p${i}@x.co` })),
+        BRAND,
+      ),
+    ).toHaveProperty("error");
     expect(cleanPeople("nope", BRAND)).toHaveProperty("error");
   });
 
   it("join on a merge, once each, and never as the lead's own address", () => {
     const a = { ...applyLeadEvent(null, BRAND, { event: { at: at(1), kind: "inquiry" } }), people: [AD] };
-    const b = { ...applyLeadEvent(null, "other@x.co", { event: { at: at(2), kind: "inquiry" } }), people: [{ ...AD, role: "AD" }, { name: "B", email: BRAND }, { name: "Sam", email: "sam@x.co" }] };
+    const b = {
+      ...applyLeadEvent(null, "other@x.co", { event: { at: at(2), kind: "inquiry" } }),
+      people: [
+        { ...AD, role: "AD" },
+        { name: "B", email: BRAND },
+        { name: "Sam", email: "sam@x.co" },
+      ],
+    };
     // The merged record's own address joins too, so its mail keeps landing here.
     expect(merge(a, b, at(3)).people).toEqual([AD, { name: "Sam", email: "sam@x.co" }, { name: "other@x.co", email: "other@x.co" }]);
   });
@@ -115,7 +143,10 @@ describe("PATCH people", () => {
     expect(own.status).toBe(409);
     expect((await own.json()).error).toMatch(/Merge/);
     const other = await s.id("other@x.co");
-    await writeLead(kv as never, s, other, { ...applyLeadEvent(null, "other@x.co", { event: { at: at(2), kind: "inquiry" } }), people: [{ name: "T", email: "taken@x.co" }] });
+    await writeLead(kv as never, s, other, {
+      ...applyLeadEvent(null, "other@x.co", { event: { at: at(2), kind: "inquiry" } }),
+      people: [{ name: "T", email: "taken@x.co" }],
+    });
     await kv.put(personKey(await s.id("taken@x.co")), other);
     expect((await patch({ id, people: [{ email: "taken@x.co" }] })).status).toBe(409);
     // An alias left behind by a lead that no longer lists the address blocks nothing and routes nothing.
@@ -138,7 +169,10 @@ describe("gallery mail", () => {
     const sent: { to: string; cc?: string[] }[] = [];
     const r2 = { put: vi.fn(async () => {}), get: vi.fn(async () => null), delete: vi.fn(async () => {}) };
     ctx.env = { ...ctx.env, PROOFS: r2, CLIENT_EMAIL: { send: async (m: { to: string; cc?: string[] }) => void sent.push(m) } };
-    const post = (body: object) => proof.POST(new Request("https://juliangigola.com/api/proof", { method: "POST", body: JSON.stringify(body), headers: { "x-admin-key": KEY } }));
+    const post = (body: object) =>
+      proof.POST(
+        new Request("https://juliangigola.com/api/proof", { method: "POST", body: JSON.stringify(body), headers: { "x-admin-key": KEY } }),
+      );
     const { token } = await (await post({ action: "create", name: "Brand Co" }))!.json();
     const p = (await readProof(kv as never, s, token))!;
     await writeProof(kv as never, s, { ...p, email: BRAND, finals: [{ id: "a1", file: "a.jpg", w: 10, h: 10, bytes: 1, crc: 1 }] });
@@ -149,7 +183,12 @@ describe("gallery mail", () => {
   it("still reaches the client when a copy address is refused", async () => {
     const { sendClient } = await import("@/lib/proofs/proof-mail");
     const tries: { cc?: string[] }[] = [];
-    const mailer = { send: async (m: { cc?: string[] }) => { tries.push(m); if (m.cc) throw new Error("bad cc"); } };
+    const mailer = {
+      send: async (m: { cc?: string[] }) => {
+        tries.push(m);
+        if (m.cc) throw new Error("bad cc");
+      },
+    };
     expect(await sendClient(mailer as never, BRAND, { subject: "s", html: "<p>", text: "t", attachments: [] }, ["bad@x.co"])).toBe(true);
     expect(tries.map((t) => !!t.cc)).toEqual([true, true, false]);
   });

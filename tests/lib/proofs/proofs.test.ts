@@ -1,6 +1,23 @@
 import { describe, expect, it, vi } from "vitest";
 import { paidFor } from "@/lib/proofs/submit";
-import { cardPrice, cleanNotes, coverFrame, cleanSelects, cleanSettings, extraFrames, isOpen, isStrongId, isToken, lookStarts, proofDay, proofId, amountOwed, shootDay, shotOrder, stage } from "@/lib/proofs/proof-model";
+import {
+  cardPrice,
+  cleanNotes,
+  coverFrame,
+  cleanSelects,
+  cleanSettings,
+  extraFrames,
+  isOpen,
+  isStrongId,
+  isToken,
+  lookStarts,
+  proofDay,
+  proofId,
+  amountOwed,
+  shootDay,
+  shotOrder,
+  stage,
+} from "@/lib/proofs/proof-model";
 import { newToken } from "@/lib/token";
 import { nextProofId } from "@/lib/proofs/proof-store";
 
@@ -8,7 +25,12 @@ const frames = ["a", "b", "c"].map((id) => ({ id, file: `${id}.jpg`, w: 1, h: 1 
 
 describe("proofs", () => {
   it("orders by capture time only when every frame has one, and splits looks on a 10 minute gap", () => {
-    const f = [{ id: "c", t: 1300 }, { id: "a", t: 100 }, { id: "b", t: 400 }, { id: "d", t: 1400 }];
+    const f = [
+      { id: "c", t: 1300 },
+      { id: "a", t: 100 },
+      { id: "b", t: 400 },
+      { id: "d", t: 1400 },
+    ];
     expect(shotOrder(f).map((x) => x.id)).toEqual(["a", "b", "c", "d"]);
     expect(shotOrder([{ id: "x" }, { id: "y", t: 1 }]).map((x) => x.id)).toEqual(["x", "y"]);
     expect(lookStarts(shotOrder(f))).toEqual([0, 2]);
@@ -28,7 +50,11 @@ describe("proofs", () => {
     const base = { included: 10, price: 15, balance: 200, selects: Array.from({ length: 12 }, (_, i) => String(i)) };
     expect(amountOwed({ ...base, paid: undefined })).toEqual({ n: 2, balance: 20000, cents: 23000 });
     expect(amountOwed({ ...base, paid: { session: "s", amount: 23000, at: "" } })).toEqual({ n: 0, balance: 0, cents: 0 });
-    expect(amountOwed({ ...base, selects: [...base.selects, "x"], paid: { session: "s", amount: 23000, at: "" } })).toEqual({ n: 1, balance: 0, cents: 1500 });
+    expect(amountOwed({ ...base, selects: [...base.selects, "x"], paid: { session: "s", amount: 23000, at: "" } })).toEqual({
+      n: 1,
+      balance: 0,
+      cents: 1500,
+    });
   });
   it("reads the pipeline stage", () => {
     expect(stage({})).toBe("Draft");
@@ -39,7 +65,19 @@ describe("proofs", () => {
   });
   it("never takes a Checkout session that was already counted", async () => {
     const fetch = vi.spyOn(globalThis, "fetch");
-    const p = { token: "t", name: "n", included: 10, price: 15, days: 14, createdAt: "", frames: [], selects: Array.from({ length: 12 }, (_, i) => String(i)), notes: {}, views: 0, paid: { session: "cs_test_A", amount: 1500, at: "" } };
+    const p = {
+      token: "t",
+      name: "n",
+      included: 10,
+      price: 15,
+      days: 14,
+      createdAt: "",
+      frames: [],
+      selects: Array.from({ length: 12 }, (_, i) => String(i)),
+      notes: {},
+      views: 0,
+      paid: { session: "cs_test_A", amount: 1500, at: "" },
+    };
     expect(await paidFor("sk_test_x", p, "cs_test_A")).toBeNull();
     expect(fetch).not.toHaveBeenCalled();
     fetch.mockRestore();
@@ -53,7 +91,9 @@ describe("proofs", () => {
     // 2026-11-07 06:30 UTC is still Nov 6 in San Jose.
     expect(proofDay(Date.UTC(2026, 10, 7, 6, 30))).toBe("11062026");
     expect(proofId("11062026", [], "k7q2")).toBe("11062026-01-k7q2");
-    expect(proofId("11062026", ["11062026-01-aaaa", "11062026-03-bbbb", "11052026-07-cccc", "Ab3dEf6hJk9mNp2q"], "zz00")).toBe("11062026-04-zz00");
+    expect(proofId("11062026", ["11062026-01-aaaa", "11062026-03-bbbb", "11052026-07-cccc", "Ab3dEf6hJk9mNp2q"], "zz00")).toBe(
+      "11062026-04-zz00",
+    );
     const t = proofId("11062026", []);
     expect(isToken(t)).toBe(true);
   });
@@ -73,7 +113,19 @@ describe("proofs", () => {
   it("accepts both token formats and nothing looser", () => {
     expect(isToken("Ab3dEf6hJk9mNp2q")).toBe(true);
     expect(isToken("11062026-01-k7q2")).toBe(true);
-    for (const bad of ["11062026-01", "11062026-01-K7Q2", "11062026-1-k7q2", "11062026-01-k7q", "1106202-01-k7q2", "11062026-01-k7q2x", "Ab3dEf6hJk9mNp2", "../11062026-01-k7q2", 42, null]) expect(isToken(bad)).toBe(false);
+    for (const bad of [
+      "11062026-01",
+      "11062026-01-K7Q2",
+      "11062026-1-k7q2",
+      "11062026-01-k7q",
+      "1106202-01-k7q2",
+      "11062026-01-k7q2x",
+      "Ab3dEf6hJk9mNp2",
+      "../11062026-01-k7q2",
+      42,
+      null,
+    ])
+      expect(isToken(bad)).toBe(false);
   });
   it("keeps selects to real frames, once each, in pick order", () => {
     expect(cleanSelects(["c", "x", "a", "c", 3], frames)).toEqual(["c", "a"]);
@@ -83,7 +135,12 @@ describe("proofs", () => {
     expect(cleanNotes({ a: " warmer ", b: "x", c: "  " }, ["a", "c"])).toEqual({ a: "warmer" });
   });
   it("clamps settings", () => {
-    expect(cleanSettings({ price: 15000, included: -2, days: "14", email: "nope" })).toEqual({ price: 500, included: 0, days: 14, email: undefined });
+    expect(cleanSettings({ price: 15000, included: -2, days: "14", email: "nope" })).toEqual({
+      price: 500,
+      included: 0,
+      days: 14,
+      email: undefined,
+    });
   });
   it("takes the watermark switch as a boolean, ignores anything else", () => {
     expect(cleanSettings({ email: `${"a".repeat(189)}@example.com` })).toEqual({ email: undefined });
@@ -98,7 +155,9 @@ describe("proofs", () => {
     expect(coverFrame({ frames: [], watermark: true })).toBeNull();
   });
   it("takes a preview pick as a frame and a crop, or null to clear it", () => {
-    expect(cleanSettings({ card: { id: "86612442", x: 0, y: "170", w: 1334 } })).toEqual({ card: { id: "86612442", x: 0, y: 170, w: 1334 } });
+    expect(cleanSettings({ card: { id: "86612442", x: 0, y: "170", w: 1334 } })).toEqual({
+      card: { id: "86612442", x: 0, y: 170, w: 1334 },
+    });
     expect(cleanSettings({ card: null })).toEqual({ card: undefined });
     expect(cleanSettings({ card: { id: "@/x", x: 0, y: 0, w: 100 } })).toEqual({});
     expect(cleanSettings({ card: { id: "a", x: 0, y: 0 } })).toEqual({});
@@ -128,12 +187,25 @@ describe("proof activity log", () => {
     expect(v.events.map((e) => `${e.kind}${e.id ?? ""}`)).toEqual(["open", "picka", "pickb", "pickc", "unpicka", "open"]);
     expect(v.looks.a).toBe(120_000);
     expect(v.seconds).toBe(120);
-    expect(device("Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Version/18.0 Mobile/15E148 Safari/604.1")).toBe("iPhone · Safari");
+    expect(
+      device("Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Version/18.0 Mobile/15E148 Safari/604.1"),
+    ).toBe("iPhone · Safari");
   });
 });
 
 describe("bank payments", () => {
-  const p = { token: "t", name: "n", included: 10, price: 15, days: 14, createdAt: "", frames: [], selects: Array.from({ length: 12 }, (_, i) => String(i)), notes: {}, views: 0 };
+  const p = {
+    token: "t",
+    name: "n",
+    included: 10,
+    price: 15,
+    days: 14,
+    createdAt: "",
+    frames: [],
+    selects: Array.from({ length: 12 }, (_, i) => String(i)),
+    notes: {},
+    views: 0,
+  };
   const reply = (body: unknown) => vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(JSON.stringify(body)));
   it("locks on an accepted bank payment and marks it settling", async () => {
     const f = reply({ status: "complete", payment_status: "unpaid", amount_total: 3000, metadata: { proof: "t" } });

@@ -72,7 +72,10 @@ beforeEach(() => {
       return Response.json({ id: busy.at(-1)!.id });
     }
     if (method === "PATCH" && ev) {
-      Object.assign(busy.find((x) => x.id === ev)!, { start: body.start.dateTime, end: body.end.dateTime });
+      Object.assign(
+        busy.find((x) => x.id === ev)!,
+        { start: body.start.dateTime, end: body.end.dateTime },
+      );
       return Response.json({ id: ev });
     }
     if (method === "DELETE" && ev) {
@@ -94,7 +97,14 @@ async function paid(start: string) {
   return { id: link[1], t: link[2] };
 }
 const post = (id: string, body: unknown, key?: string) =>
-  change(new Request(`https://juliangigola.com/api/booking/${id}`, { method: "POST", body: JSON.stringify(body), headers: key ? { "x-admin-key": key } : {} }), { params: Promise.resolve({ id }) });
+  change(
+    new Request(`https://juliangigola.com/api/booking/${id}`, {
+      method: "POST",
+      body: JSON.stringify(body),
+      headers: key ? { "x-admin-key": key } : {},
+    }),
+    { params: Promise.resolve({ id }) },
+  );
 
 describe("the link", () => {
   it("opens its own booking until a day after it, and nothing else", async () => {
@@ -104,7 +114,13 @@ describe("the link", () => {
     expect(await tokenOpens("other", "abc", t)).toBe(false);
     expect(await tokenOpens(undefined, "abc", t)).toBe(false);
     // The first signature character: all 6 bits count (the last one carries 2 padding bits, so A to D decode alike).
-    expect(await tokenOpens(SECRET, "abc", t.replace(/\.(.)/, (_, c) => "." + (c === "A" ? "B" : "A")))).toBe(false);
+    expect(
+      await tokenOpens(
+        SECRET,
+        "abc",
+        t.replace(/\.(.)/, (_, c) => "." + (c === "A" ? "B" : "A")),
+      ),
+    ).toBe(false);
     expect(await tokenOpens(SECRET, "abc", await bookingToken(SECRET, "abc", Date.now() - 1000))).toBe(false);
     expect(await manageLinks(undefined, { id: "abc", start: new Date().toISOString() })).toBeNull();
   });
@@ -127,7 +143,9 @@ describe("cancel", () => {
     expect(calls.some((c) => c.method === "DELETE" && c.url.includes("sendUpdates=none"))).toBe(true);
     expect(calls.filter((c) => c.url.endsWith("/refunds"))).toHaveLength(1);
     expect(calls.find((c) => c.url.endsWith("/refunds"))!.form).toContain("amount=22500");
-    expect(String(client.sent.at(-1)!.text)).toContain("$225 of your $250 deposit is refunded to your card. $25 is kept as the booking fee.");
+    expect(String(client.sent.at(-1)!.text)).toContain(
+      "$225 of your $250 deposit is refunded to your card. $25 is kept as the booking fee.",
+    );
     expect(mail.sent.at(-1)!.subject).toMatch(/^Cancelled: /);
     expect(String(client.sent.at(-1)!.text)).toContain("refunded to your card");
     // A second click does nothing more.
@@ -233,7 +251,19 @@ describe("cancel", () => {
   });
 
   it("a free call cancels with no money", async () => {
-    const res = await book(new Request("https://juliangigola.com/api/book", { method: "POST", body: JSON.stringify({ slug: "music-call", start: wednesday(7), timeZone: "America/Los_Angeles", name: "QA", email: "qa@example.com", via: "Phone" }) }));
+    const res = await book(
+      new Request("https://juliangigola.com/api/book", {
+        method: "POST",
+        body: JSON.stringify({
+          slug: "music-call",
+          start: wednesday(7),
+          timeZone: "America/Los_Angeles",
+          name: "QA",
+          email: "qa@example.com",
+          via: "Phone",
+        }),
+      }),
+    );
     const { id } = await res.json();
     await Promise.all(background.splice(0));
     const t = String(client.sent[0].text).match(/t=([\w.-]+)&do=cancel/)![1];
@@ -250,7 +280,9 @@ describe("the lead desk", () => {
     const lead = (await leadOf(ctx.env.INBOX as FakeKV, "qa@example.com"))!;
     expect(lead.events.find((e) => e.kind === "booking")).toMatchObject({ ref: id, note: "Portraits" });
     const mails = lead.events.filter((e) => e.kind === "mail").map((e) => `${e.mail?.to} ${e.mail?.kind}`);
-    expect(mails).toEqual(expect.arrayContaining(["client confirm", "hello@ reschedule", "client reschedule", "hello@ cancelled", "client cancelled"]));
+    expect(mails).toEqual(
+      expect.arrayContaining(["client confirm", "hello@ reschedule", "client reschedule", "hello@ cancelled", "client cancelled"]),
+    );
   });
 });
 
@@ -342,7 +374,11 @@ describe("the desk", () => {
   it("Julian cancels and the refund fails: hello@ gets the figure to refund by hand, the client hears it goes by hand, no refund line", async () => {
     const { id } = await paid(wednesday(7));
     refundOk = false;
-    expect(await (await post(id, { action: "cancel-mine" }, KEY)).json()).toMatchObject({ refunded: false, back: 0, record: { cancelled: true } });
+    expect(await (await post(id, { action: "cancel-mine" }, KEY)).json()).toMatchObject({
+      refunded: false,
+      back: 0,
+      record: { cancelled: true },
+    });
     expect(String(mail.sent.at(-1)!.text)).toContain("The refund FAILED: refund $250 by hand in Stripe.");
     expect(String(client.sent.at(-1)!.text)).toContain("I'll send it by hand");
     const events = (await leadOf(ctx.env.INBOX as FakeKV, "qa@example.com"))!.events;

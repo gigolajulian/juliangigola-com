@@ -29,7 +29,10 @@ afterEach(() => vi.unstubAllGlobals());
 describe("leads", () => {
   const idOf = async (email: string) => (await sealer(LEADS_KEY)!).id(email);
   const lead = async (email: string, at: string) =>
-    recordLead({ INBOX: kv as never, LEADS_KEY }, email, { event: { at, kind: "inquiry", ref: `msg:${email}` }, name: email.split("@")[0] });
+    recordLead({ INBOX: kv as never, LEADS_KEY }, email, {
+      event: { at, kind: "inquiry", ref: `msg:${email}` },
+      name: email.split("@")[0],
+    });
 
   it("lists people newest first, opened from sealed metadata, behind the same gate", async () => {
     await lead("a@example.com", "2026-11-01T10:00:00Z");
@@ -53,7 +56,9 @@ describe("leads", () => {
     const key = `lead:${await idOf("a@example.com")}`;
     const one = await (await desk("GET", `?id=${key.slice(5)}`)).json();
     expect(one.lead.events).toHaveLength(1);
-    const res = await desk("PATCH", "", { body: JSON.stringify({ id: leadIdOf(key), stage: "Quoted", snoozeUntil: "2026-12-01T00:00:00Z", seen: true }) });
+    const res = await desk("PATCH", "", {
+      body: JSON.stringify({ id: leadIdOf(key), stage: "Quoted", snoozeUntil: "2026-12-01T00:00:00Z", seen: true }),
+    });
     expect((await res.json()).lead).toMatchObject({ stage: "Quoted", snoozeUntil: "2026-12-01T00:00:00Z", unread: false });
     const { leads } = await (await desk("GET")).json();
     expect(leads[0]).toMatchObject({ stage: "Quoted", unread: false });
@@ -67,13 +72,19 @@ describe("leads", () => {
     await lead("a@example.com", "2026-11-01T10:00:00Z");
     await lead("b@example.com", "2026-11-02T10:00:00Z");
     const [a, b] = [`lead:${await idOf("a@example.com")}`, `lead:${await idOf("b@example.com")}`];
-    const patch = async (key: string, body: object) => (await (await desk("PATCH", "", { body: JSON.stringify({ id: leadIdOf(key), ...body }) })).json()).lead;
+    const patch = async (key: string, body: object) =>
+      (await (await desk("PATCH", "", { body: JSON.stringify({ id: leadIdOf(key), ...body }) })).json()).lead;
     expect(await patch(a, { archive: true })).toHaveProperty("archivedAt");
     expect(await patch(a, { archive: false })).not.toHaveProperty("archivedAt");
     expect(await patch(a, { trash: true })).toHaveProperty("trashedAt");
     const back = await patch(a, { trash: false });
     expect(back).not.toHaveProperty("trashedAt");
-    expect(back.events.map((e: { kind: string; note: string }) => `${e.kind} ${e.note}`).slice(-4)).toEqual(["archive in", "archive out", "trash in", "trash out"]);
+    expect(back.events.map((e: { kind: string; note: string }) => `${e.kind} ${e.note}`).slice(-4)).toEqual([
+      "archive in",
+      "archive out",
+      "trash in",
+      "trash out",
+    ]);
     await patch(b, { trash: true });
     expect((await desk("DELETE", "", { key: null })).status).toBe(401);
     expect(await (await desk("DELETE")).json()).toEqual({ ok: true, deleted: 1 });
@@ -165,7 +176,19 @@ describe("leads", () => {
   it("imports Stripe only on an explicit dry: false", async () => {
     vi.stubGlobal("fetch", async (input: string) => {
       const list = new URL(input).pathname.endsWith("/payment_intents")
-        ? [{ id: "pi_dep000001", status: "succeeded", created: 1_780_000_000, amount: 10000, amount_received: 10000, currency: "usd", receipt_email: "ana@example.com", metadata: { kind: "deposit", email: "ana@example.com", name: "Ana Test" }, latest_charge: null }]
+        ? [
+            {
+              id: "pi_dep000001",
+              status: "succeeded",
+              created: 1_780_000_000,
+              amount: 10000,
+              amount_received: 10000,
+              currency: "usd",
+              receipt_email: "ana@example.com",
+              metadata: { kind: "deposit", email: "ana@example.com", name: "Ana Test" },
+              latest_charge: null,
+            },
+          ]
         : [];
       return Response.json({ data: list, has_more: false });
     });
@@ -203,7 +226,10 @@ describe("leads", () => {
 
     const ua = (await crypto.subtle.generateKey({ name: "ECDH", namedCurve: "P-256" }, true, ["deriveBits"])) as CryptoKeyPair;
     const b64 = (u: ArrayBuffer | Uint8Array) => Buffer.from(u as ArrayBuffer).toString("base64url");
-    const sub = { endpoint: "https://web.push.apple.com/dev-1", keys: { p256dh: b64(await crypto.subtle.exportKey("raw", ua.publicKey)), auth: b64(crypto.getRandomValues(new Uint8Array(16))) } };
+    const sub = {
+      endpoint: "https://web.push.apple.com/dev-1",
+      keys: { p256dh: b64(await crypto.subtle.exportKey("raw", ua.publicKey)), auth: b64(crypto.getRandomValues(new Uint8Array(16))) },
+    };
     const put = (body: object) => desk("PUT", "/push", { body });
     const test = () => desk("POST", "/push");
     expect((await put({ endpoint: "http://nope" })).status).toBe(400);
@@ -212,15 +238,23 @@ describe("leads", () => {
 
     const sent: { url: string; init: RequestInit }[] = [];
     vi.stubGlobal("fetch", async (url: string, init: RequestInit) => (sent.push({ url, init }), new Response(null, { status: 201 })));
-    await recordLead({ INBOX: kv as never, LEADS_KEY, VAPID_KEY }, "maya@example.com", { event: { at: "2026-11-04T10:00:00Z", kind: "inquiry", ref: "msg:p1" }, name: "Maya" });
-    await recordLead({ INBOX: kv as never, LEADS_KEY, VAPID_KEY }, "maya@example.com", { event: { at: "2026-11-04T10:01:00Z", kind: "mail", note: "x" } });
+    await recordLead({ INBOX: kv as never, LEADS_KEY, VAPID_KEY }, "maya@example.com", {
+      event: { at: "2026-11-04T10:00:00Z", kind: "inquiry", ref: "msg:p1" },
+      name: "Maya",
+    });
+    await recordLead({ INBOX: kv as never, LEADS_KEY, VAPID_KEY }, "maya@example.com", {
+      event: { at: "2026-11-04T10:01:00Z", kind: "mail", note: "x" },
+    });
     expect(sent.map((x) => x.url)).toEqual(["https://web.push.apple.com/dev-1"]);
     expect(sent[0].init.headers).toMatchObject({ "content-encoding": "aes128gcm" });
     expect(await (await test()).json()).toEqual({ devices: 1 });
     expect(sent).toHaveLength(2);
 
     vi.stubGlobal("fetch", async () => new Response(null, { status: 410 }));
-    await recordLead({ INBOX: kv as never, LEADS_KEY, VAPID_KEY }, "noor@example.com", { event: { at: "2026-11-04T11:00:00Z", kind: "booking", ref: "cal-9" }, name: "Noor" });
+    await recordLead({ INBOX: kv as never, LEADS_KEY, VAPID_KEY }, "noor@example.com", {
+      event: { at: "2026-11-04T11:00:00Z", kind: "booking", ref: "cal-9" },
+      name: "Noor",
+    });
     expect([...kv.data.keys()].filter((k) => k.startsWith("push:"))).toHaveLength(0);
 
     await put(sub);
@@ -272,14 +306,20 @@ describe("leads", () => {
 
 describe("invoices", () => {
   const make = async (email: string) => {
-    await recordLead({ INBOX: kv as never, LEADS_KEY }, email, { event: { at: "2026-11-01T10:00:00Z", kind: "inquiry", ref: `msg:${email}` }, name: "Maya Ortiz" });
+    await recordLead({ INBOX: kv as never, LEADS_KEY }, email, {
+      event: { at: "2026-11-01T10:00:00Z", kind: "inquiry", ref: `msg:${email}` },
+      name: "Maya Ortiz",
+    });
     return `lead:${await (await sealer(LEADS_KEY)!).id(email)}`;
   };
   const bill = (key: string, date = "2026-11-06") =>
-    desk("PATCH", "", { body: JSON.stringify({ id: leadIdOf(key), invoice: { date, lines: [{ desc: "Portraits, Nov 19", qty: 1, rate: 450 }], paid: 100 } }) });
+    desk("PATCH", "", {
+      body: JSON.stringify({ id: leadIdOf(key), invoice: { date, lines: [{ desc: "Portraits, Nov 19", qty: 1, rate: 450 }], paid: 100 } }),
+    });
 
   it("numbers MMYY, then 1126-2 for a second one that month on any lead, and logs it", async () => {
-    const a = await make("a@example.com"), b = await make("b@example.com");
+    const a = await make("a@example.com"),
+      b = await make("b@example.com");
     expect((await (await desk("GET", "/invoice-from?no=2026-11-06")).json()).no).toBe("1126");
     const one = (await (await bill(a)).json()).lead;
     expect(one.invoices[0]).toMatchObject({ no: "1126", paid: 100, date: "2026-11-06" });
@@ -292,11 +332,17 @@ describe("invoices", () => {
   });
 
   it("/invoices lists every invoice with its lead's id and name, newest first, behind the gate", async () => {
-    const a = await make("a@example.com"), b = await make("b@example.com");
+    const a = await make("a@example.com"),
+      b = await make("b@example.com");
     await bill(a);
     await bill(b, "2026-12-01");
     const { invoices } = await (await desk("GET", "/invoices")).json();
-    expect(invoices.map((i: { no: string; lead: string; name: string; paid: number }) => [i.no, `lead:${i.lead}`, i.name, i.paid])).toEqual([["1226", b, "Maya Ortiz", 100], ["1126", a, "Maya Ortiz", 100]]);
+    expect(invoices.map((i: { no: string; lead: string; name: string; paid: number }) => [i.no, `lead:${i.lead}`, i.name, i.paid])).toEqual(
+      [
+        ["1226", b, "Maya Ortiz", 100],
+        ["1126", a, "Maya Ortiz", 100],
+      ],
+    );
     // A trashed lead's invoices leave the list.
     await desk("PATCH", "", { body: JSON.stringify({ id: leadIdOf(b), trash: true }) });
     expect((await (await desk("GET", "/invoices")).json()).invoices).toHaveLength(1);
@@ -311,7 +357,9 @@ describe("invoices", () => {
     const gone = await desk("PATCH", "", { body: JSON.stringify({ id: leadIdOf(a), stage: "Quoted", mergeFrom: "nobody" }) });
     expect(gone.status).toBe(404);
     const unknown = { date: "2026-11-06", lines: [{ desc: "Portraits", qty: 1, rate: 450 }] };
-    const none = await desk("PATCH", "", { body: JSON.stringify({ id: leadIdOf(a), stage: "Quoted", invoice: unknown, invoicePaid: { no: "0999", paid: true } }) });
+    const none = await desk("PATCH", "", {
+      body: JSON.stringify({ id: leadIdOf(a), stage: "Quoted", invoice: unknown, invoicePaid: { no: "0999", paid: true } }),
+    });
     expect(none.status).toBe(404);
     expect(calls).toEqual([]);
     expect((await (await desk("GET", "/invoice-from?no=2026-11-06")).json()).no).toBe("1126");
@@ -335,7 +383,8 @@ describe("invoices", () => {
 });
 
 describe("invoice photo, activity log and Notion import", () => {
-  const JPEG = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/";
+  const JPEG =
+    "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/";
 
   it("keeps an invoice photo once under its hash, sealed, and opens it by key", async () => {
     const first = await desk("POST", "/invoice-photo", { body: { photo: JPEG } });
@@ -360,7 +409,10 @@ describe("invoice photo, activity log and Notion import", () => {
   });
 
   it("/log opens one client's activity log by id, with or without the lead: prefix", async () => {
-    await recordLead({ INBOX: kv as never, LEADS_KEY }, "a@example.com", { event: { at: "2026-11-01T10:00:00Z", kind: "inquiry", ref: "msg:a" }, name: "Ana" });
+    await recordLead({ INBOX: kv as never, LEADS_KEY }, "a@example.com", {
+      event: { at: "2026-11-01T10:00:00Z", kind: "inquiry", ref: "msg:a" },
+      name: "Ana",
+    });
     const id = await (await sealer(LEADS_KEY)!).id("a@example.com");
     const { log } = await (await desk("GET", `/log?id=${id}`)).json();
     expect(log.map((e: { kind: string }) => e.kind)).toEqual(["inquiry"]);
@@ -376,7 +428,15 @@ describe("invoice photo, activity log and Notion import", () => {
   });
 
   it("/import/notion only counts unless dry is false", async () => {
-    expect(await (await desk("POST", "/import/notion", { body: { people: [] } })).json()).toEqual({ dry: true, created: 0, filled: 0, unchanged: 0, gone: 0, skipped: 0, lines: 0 });
+    expect(await (await desk("POST", "/import/notion", { body: { people: [] } })).json()).toEqual({
+      dry: true,
+      created: 0,
+      filled: 0,
+      unchanged: 0,
+      gone: 0,
+      skipped: 0,
+      lines: 0,
+    });
     const people = [{ email: "n@example.com", rows: [{ ref: "r1", at: "2026-01-02", note: "Portraits" }] }];
     expect(await (await desk("POST", "/import/notion", { body: { people } })).json()).toMatchObject({ dry: true, created: 1, lines: 1 });
     expect(kv.puts).toEqual([]);

@@ -5,21 +5,34 @@ import { captionsOff, vimeoListen, vimeoPlays } from "@/lib/work/videos";
 import { clamp, rise, smooth, tell, type Ctx, type Driver } from "./engine";
 import { sleeveTilt } from "@/components/cover/sleeve-tilt";
 
-
 /* Snap: a hold never rests between two items. When the scroll stops inside the hold, the page glides to the
    nearest one. Within a step of the item it rested on it leans 0.44 of a step the way the scroll went, so one wheel notch (100px, a small part of a step) moves on instead of
    falling back. `at`: the hold's share as an item position; `share`: an item's resting share of the hold. */
 const LEAN = 0.44;
-function snap(el: HTMLElement, ctx: Ctx, n: number, at: (p: number) => number, share: (i: number) => number, busy: () => boolean, signal: AbortSignal) {
+function snap(
+  el: HTMLElement,
+  ctx: Ctx,
+  n: number,
+  at: (p: number) => number,
+  share: (i: number) => number,
+  busy: () => boolean,
+  signal: AbortSignal,
+) {
   if (matches("calm")) return;
-  let t = 0, rest = NaN; // the item position the page last settled on; NaN outside the hold, so arriving is plain nearest
+  let t = 0,
+    rest = NaN; // the item position the page last settled on; NaN outside the hold, so arriving is plain nearest
   const settle = () => {
     // fine pointers only: a finger's own momentum is left alone, on an iPad too
     if (!ctx.held || !ctx.fine || busy()) return;
-    const top = el.getBoundingClientRect().top + scrollY, range = el.offsetHeight - innerHeight, y = scrollGoal(), p = (y - top) / range;
+    const top = el.getBoundingClientRect().top + scrollY,
+      range = el.offsetHeight - innerHeight,
+      y = scrollGoal(),
+      p = (y - top) / range;
     // the two ends are items too: resting exactly there keeps `rest`, a pixel past them the page is free
     if (y < top - 1 || y > top + range + 1) return void (rest = NaN);
-    const f = at(p), i = clamp(Math.round(f + (Math.abs(f - rest) < 1 ? Math.sign(f - rest) * LEAN : 0)), 0, n - 1), to = top + share(i) * range;
+    const f = at(p),
+      i = clamp(Math.round(f + (Math.abs(f - rest) < 1 ? Math.sign(f - rest) * LEAN : 0)), 0, n - 1),
+      to = top + share(i) * range;
     rest = i;
     // 1px: scrollY is fractional, an exact compare would glide forever
     if (Math.abs(to - y) > 1) settleTo(to);
@@ -94,7 +107,8 @@ function coverFrame(s: Covers, p: number) {
   // the first record starts inside its sleeve and comes out over the first 5% of the hold
   const k = smooth(clamp(p / 0.05));
   p = ease(p);
-  const i = Math.round(p * (n - 1)), x = p * (n - 1) * step;
+  const i = Math.round(p * (n - 1)),
+    x = p * (n - 1) * step;
   if (i !== s.cur) {
     // HomeCovers (rows.tsx) is told the item; the row's scroll stays at 0 and the transform carries all of it.
     tell(s.el, { cur: i });
@@ -150,7 +164,9 @@ function dragClick(s: Covers, e: MouseEvent) {
 
 // Tab to a cover: the browser scrolls the hidden row to show it. Put that back and move the page there instead.
 function coverFocus(s: Covers, e: FocusEvent) {
-  const t = e.target as Element, it = t.closest<HTMLElement>(".mt-item"), i = it ? s.items.indexOf(it) : -1;
+  const t = e.target as Element,
+    it = t.closest<HTMLElement>(".mt-item"),
+    i = it ? s.items.indexOf(it) : -1;
   if (!s.ctx.held || i < 0 || !t.matches(":focus-visible")) return;
   s.row.scrollLeft = s.base;
   shiftScroll(coverTop(s) + unease(i / (s.n - 1)) * s.range - scrollY);
@@ -160,7 +176,8 @@ function coverFocus(s: Covers, e: FocusEvent) {
 function coverKey(s: Covers, e: KeyboardEvent) {
   if (!s.ctx.held || (e.key !== "ArrowRight" && e.key !== "ArrowLeft")) return;
   e.preventDefault();
-  const at = Math.max(0, s.cur), i = clamp(at + (e.key === "ArrowRight" ? 1 : -1), 0, s.n - 1);
+  const at = Math.max(0, s.cur),
+    i = clamp(at + (e.key === "ArrowRight" ? 1 : -1), 0, s.n - 1);
   if (i !== at) scrollTo({ top: coverTop(s) + unease(i / (s.n - 1)) * s.range, behavior: "smooth" });
 }
 
@@ -204,7 +221,25 @@ function covers(): Driver {
       if (n < 2) return;
       const ac = new AbortController();
       const opts = { signal: ac.signal };
-      const s: Covers = { el, ctx, row, track, items, n, o: Array(n).fill(-1), step: 1, c0: 0, mid: 0, range: 0, cur: -1, base: 0, lastX: NaN, down: null, downY: 0, dragged: false };
+      const s: Covers = {
+        el,
+        ctx,
+        row,
+        track,
+        items,
+        n,
+        o: Array(n).fill(-1),
+        step: 1,
+        c0: 0,
+        mid: 0,
+        range: 0,
+        cur: -1,
+        base: 0,
+        lastX: NaN,
+        down: null,
+        downY: 0,
+        dragged: false,
+      };
 
       /* Parallax: the heading and the row ride up at their own rates and the stage hands over to Motion (rows.css). */
       document.documentElement.setAttribute("data-mt-par", "");
@@ -223,7 +258,15 @@ function covers(): Driver {
       row.addEventListener("focusin", (e) => coverFocus(s, e), opts);
       row.addEventListener("keydown", (e) => coverKey(s, e), opts);
       row.addEventListener("scroll", () => loose(s), { passive: true, signal: ac.signal });
-      snap(el, ctx, n, (p) => ease(p) * (n - 1), (i) => unease(i / (n - 1)), () => s.down !== null, ac.signal);
+      snap(
+        el,
+        ctx,
+        n,
+        (p) => ease(p) * (n - 1),
+        (i) => unease(i / (n - 1)),
+        () => s.down !== null,
+        ac.signal,
+      );
 
       for (const it of items) if (it.hasAttribute("data-flip")) it.addEventListener("click", () => flip(s, it), opts);
 
@@ -264,7 +307,9 @@ type PlayerMsg = { event?: string; info?: number | { playerState?: number }; dat
 
 const win = (v: Pv) => (v.player instanceof HTMLIFrameElement ? v.player.contentWindow : null);
 const say = (v: Pv, yt: string, vimeo: string) =>
-  v.player instanceof HTMLVideoElement ? void (vimeo === "play" ? v.player.play().catch(() => {}) : v.player.pause()) : v.player.contentWindow?.postMessage(JSON.stringify(v.isYoutube ? { event: "command", func: yt, args: [] } : { method: vimeo }), "*");
+  v.player instanceof HTMLVideoElement
+    ? void (vimeo === "play" ? v.player.play().catch(() => {}) : v.player.pause())
+    : v.player.contentWindow?.postMessage(JSON.stringify(v.isYoutube ? { event: "command", func: yt, args: [] } : { method: vimeo }), "*");
 
 function kill(s: Films, i: number) {
   const v = s.pool.get(i);
@@ -295,7 +340,8 @@ function mountFile(s: Films, i: number, film: HTMLElement, file: string) {
 }
 
 function mount(s: Films, i: number) {
-  const film = s.items[i], src = film.dataset.preview ?? "";
+  const film = s.items[i],
+    src = film.dataset.preview ?? "";
   if (film.dataset.file) return mountFile(s, i, film, film.dataset.file);
   const yt = src.includes("youtube");
   const f = document.createElement("iframe");
@@ -365,7 +411,12 @@ function heard(s: Films, e: MessageEvent) {
   const { m } = got;
   // Vimeo: the poster lifts only when the player says frames are moving
   if (m?.event === "ready") return void vimeoListen(win(v));
-  const state = m?.event === "onStateChange" ? m.info : m?.event === "infoDelivery" && m.info && typeof m.info === "object" ? m.info.playerState : undefined;
+  const state =
+    m?.event === "onStateChange"
+      ? m.info
+      : m?.event === "infoDelivery" && m.info && typeof m.info === "object"
+        ? m.info.playerState
+        : undefined;
   const plays = vimeoPlays(m) || state === 1;
   if (!plays && typeof state !== "number") return;
   if (plays) {
@@ -427,9 +478,29 @@ function films(): Driver {
       const ac = new AbortController();
       const opts = { signal: ac.signal };
       // phones and tablets play the current film's preview too, unless the visitor asked to save data
-      const s: Films = { el, ctx, row, items, n, cur: +(el.dataset.cur ?? 0), pool: new Map(), pvT: 0, seen: false, movedAt: 0, touchFilms: false };
+      const s: Films = {
+        el,
+        ctx,
+        row,
+        items,
+        n,
+        cur: +(el.dataset.cur ?? 0),
+        pool: new Map(),
+        pvT: 0,
+        seen: false,
+        movedAt: 0,
+        touchFilms: false,
+      };
       // each film rests at the middle of its share of the hold; the shares are eased like Cover art's (rows.tsx)
-      snap(el, ctx, n, (p) => ease(p) * n - 0.5, (i) => unease((i + 0.5) / n), () => false, ac.signal);
+      snap(
+        el,
+        ctx,
+        n,
+        (p) => ease(p) * n - 0.5,
+        (i) => unease((i + 0.5) / n),
+        () => false,
+        ac.signal,
+      );
       row.addEventListener("keydown", (e) => filmKey(s, e), opts);
       addEventListener("scroll", () => (s.movedAt = performance.now()), { passive: true, signal: ac.signal });
       s.touchFilms = !navigator.connection?.saveData;

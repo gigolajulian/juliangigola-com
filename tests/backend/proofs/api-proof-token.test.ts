@@ -21,8 +21,24 @@ beforeEach(async () => {
   kv = new FakeKV();
   saves = [];
   // Autosave's own limit: the first five saves go through here, the rest are refused.
-  ctx.env = { INBOX: kv, LEADS_KEY, PUBLIC_WRITE_LIMIT: { limit: async () => ({ success: true }) }, DOWNLOAD_LIMIT: { limit: async ({ key }: { key: string }) => ({ success: saves.push(key) <= 5 }) } };
-  const p = { token: TOKEN, name: "Test", included: 2, price: 15, days: 14, createdAt: new Date().toISOString(), frames: ["a", "b", "c"].map((id) => ({ id, file: `${id}.jpg`, w: 1, h: 1 })), selects: [], notes: {}, views: 0 };
+  ctx.env = {
+    INBOX: kv,
+    LEADS_KEY,
+    PUBLIC_WRITE_LIMIT: { limit: async () => ({ success: true }) },
+    DOWNLOAD_LIMIT: { limit: async ({ key }: { key: string }) => ({ success: saves.push(key) <= 5 }) },
+  };
+  const p = {
+    token: TOKEN,
+    name: "Test",
+    included: 2,
+    price: 15,
+    days: 14,
+    createdAt: new Date().toISOString(),
+    frames: ["a", "b", "c"].map((id) => ({ id, file: `${id}.jpg`, w: 1, h: 1 })),
+    selects: [],
+    notes: {},
+    views: 0,
+  };
   await writeProof(kv as never, await seal(), p as Proof);
 });
 
@@ -42,7 +58,11 @@ describe("/api/proof/[token]", () => {
   it("answers JSON when the gallery will not open", async () => {
     const errors = vi.spyOn(console, "error").mockImplementation(() => {});
     kv.data.get(proofKey(TOKEN))!.value = "not-sealed";
-    for (const res of [await patch({ email: "a@example.com", selects: ["a"] }), await post({ action: "track", email: "a@example.com" }), await post({ action: "unlock", password: "x" })]) {
+    for (const res of [
+      await patch({ email: "a@example.com", selects: ["a"] }),
+      await post({ action: "track", email: "a@example.com" }),
+      await post({ action: "unlock", password: "x" }),
+    ]) {
       expect(res.status).toBe(500);
       expect(await res.json()).toEqual({ error: "This gallery cannot be opened right now." });
     }
@@ -72,7 +92,9 @@ describe("/api/proof/[token]", () => {
     expect((await patch({ email: "a@example.com", selects: ["c"] })).status).toBe(409);
     // On the client's activity log: the selects, with the frame count.
     const s = await seal();
-    expect((await readLog(kv as never, s, await s.id("a@example.com"))).find((e) => e.kind === "selects")).toMatchObject({ note: "2 frames, Test" });
+    expect((await readLog(kv as never, s, await s.id("a@example.com"))).find((e) => e.kind === "selects")).toMatchObject({
+      note: "2 frames, Test",
+    });
   });
 
   it("records a gate open as a lead, but not from a reserved test address", async () => {

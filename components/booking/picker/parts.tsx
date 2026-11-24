@@ -7,7 +7,20 @@ import { clockLabel } from "@/lib/booking/clock";
 
 export const DAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 export const WEEKDAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-export const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+export const MONTHS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
 /** How far ahead times are asked for. */
 export const AHEAD = 120;
 

@@ -3,7 +3,10 @@ import { render } from "@testing-library/react";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }), usePathname: () => "/" }));
 vi.mock("@/lib/leads/enquiry-action", () => ({ submitEnquiry: vi.fn() }));
-vi.stubGlobal("fetch", vi.fn(() => Promise.reject(new Error("offline"))));
+vi.stubGlobal(
+  "fetch",
+  vi.fn(() => Promise.reject(new Error("offline"))),
+);
 
 import { Home } from "@/components/home/home";
 import { tell } from "@/components/home/motion/engine";
@@ -15,7 +18,8 @@ describe("motion drivers tell, React renders", () => {
   it("By quote: the client first, the name after its fade", () => {
     const { container } = render(<Home data={HOME_DATA} />);
     const s = container.querySelector<HTMLElement>('[data-mt="quote"]')!;
-    const q = () => [".mt-photo", ".mt-photo-w"].map((f) => [...s.querySelectorAll(`${f} > .cl`)].findIndex((c) => c.hasAttribute("data-q")));
+    const q = () =>
+      [".mt-photo", ".mt-photo-w"].map((f) => [...s.querySelectorAll(`${f} > .cl`)].findIndex((c) => c.hasAttribute("data-q")));
     const nm = s.querySelector(".mt-by .nm")!;
     expect(q()).toEqual([0, 0]);
     expect(s.dataset.client).toBe("0");

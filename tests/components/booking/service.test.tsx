@@ -2,7 +2,10 @@ import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 
 vi.mock("@/lib/leads/enquiry-action", () => ({ submitEnquiry: vi.fn() }));
-vi.stubGlobal("fetch", vi.fn(() => Promise.reject(new Error("offline"))));
+vi.stubGlobal(
+  "fetch",
+  vi.fn(() => Promise.reject(new Error("offline"))),
+);
 
 import { ServiceBook } from "@/components/booking/service";
 import { BOOKING_PAGES } from "@/lib/booking/service-pages";

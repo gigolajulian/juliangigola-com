@@ -108,7 +108,8 @@ export function useBackHome() {
     if (row && !media("held").matches) row.scrollLeft = spot.x;
     // Back into Cover art: the sleeves' lazy art painted grey for up to 1.3s on an iPhone. Load and decode it now, with the rest.
     const items = row && spot.b === "covers" ? [...row.querySelectorAll<HTMLElement>(".mt-item")] : [];
-    const step = items.length > 1 ? items[1].offsetLeft - items[0].offsetLeft : 0, i = step ? Math.min(items.length - 1, Math.max(0, Math.round(spot.x / step))) : 0;
+    const step = items.length > 1 ? items[1].offsetLeft - items[0].offsetLeft : 0,
+      i = step ? Math.min(items.length - 1, Math.max(0, Math.round(spot.x / step))) : 0;
     // the caption names that cover from the first paint, not the first one for a frame or two until the row's scroll event (Julian)
     // the told sleeve takes its focus scale at once, not over the .45s scale transition (touch-parity.css): reset with the lifted ones below
     if (items.length && !media("held").matches) {
@@ -121,7 +122,8 @@ export function useBackHome() {
       im.loading = "eager";
       im.fetchPriority = "high";
       // the copy the viewer just showed goes under it, so the sleeve is never grey while its own size loads (Julian: "shouldnt cut out like that")
-      const url = paintedCopy(im.dataset.frame ?? ""), face = im.parentElement!;
+      const url = paintedCopy(im.dataset.frame ?? ""),
+        face = im.parentElement!;
       // the image only: the shorthand also cleared the card colour, so the disc showed through until it decoded
       if (url) Object.assign(face.style, { backgroundImage: `url("${url}")`, backgroundSize: "cover", backgroundPosition: "center" });
       const shown = im.decode().catch(() => {});
@@ -134,12 +136,15 @@ export function useBackHome() {
     const unlift = requestAnimationFrame(() => requestAnimationFrame(() => lifted.forEach((it) => (it.style.transition = ""))));
     // rAF runs before each paint, so a block above that grows is answered in the same frame
     const end = performance.now() + 900;
-    let raf = 0, done = false, goal = scrollGoal(); // after go(): Lenis's target is the restore spot
+    let raf = 0,
+      done = false,
+      goal = scrollGoal(); // after go(): Lenis's target is the restore spot
     const stop = () => ((done = true), cancelAnimationFrame(raf));
     raf = requestAnimationFrame(function hold(now) {
       // the visitor's scroll wins: Lenis heads somewhere else as soon as a wheel or touch lands, whether or not its event reached us
       // (a wheel 0.3s after Back was held for 0.6s, Safari). Only a move of its target counts: it starts stale from the last page.
-      const g = scrollGoal(), moved = g !== goal && Math.abs(g - yOf(spot)) > 2;
+      const g = scrollGoal(),
+        moved = g !== goal && Math.abs(g - yOf(spot)) > 2;
       goal = g;
       if (done || moved) return stop();
       go();

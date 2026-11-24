@@ -10,7 +10,11 @@ const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
 vi.mock("@opennextjs/cloudflare", async () => (await import("../fakes")).cloudflareMock(ctx));
 
 const req = (method: string, body?: unknown, headers: Record<string, string> = { "x-admin-key": KEY }) =>
-  new Request("https://juliangigola.com/api/booking/hours", { method, headers, body: body === undefined ? undefined : JSON.stringify(body) });
+  new Request("https://juliangigola.com/api/booking/hours", {
+    method,
+    headers,
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
 
 let storage: FakeStore;
 beforeEach(() => {
@@ -23,7 +27,10 @@ describe("/api/booking/hours", () => {
   it("refuses no credential, a wrong key, and a token that cannot push", async () => {
     expect((await GET(req("GET", undefined, {}))).status).toBe(401);
     expect((await GET(req("GET", undefined, { "x-admin-key": "wrong" }))).status).toBe(401);
-    vi.stubGlobal("fetch", vi.fn(async () => reply({ permissions: { push: false } })));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => reply({ permissions: { push: false } })),
+    );
     expect((await PUT(req("PUT", { week: [] }, { authorization: `Bearer ${githubToken()}` }))).status).toBe(401);
   });
 

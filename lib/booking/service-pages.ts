@@ -69,14 +69,7 @@ export type BookingPage = {
 };
 
 /** Every city the pages name, for the structured data's service area. */
-export const PLACES = [
-  "San Francisco",
-  "San Jose",
-  "Oakland",
-  "Santa Cruz",
-  "Los Angeles",
-  "New York",
-];
+export const PLACES = ["San Francisco", "San Jose", "Oakland", "Santa Cruz", "Los Angeles", "New York"];
 
 /* ── bookable events ────────────────────────────────────────────── */
 
@@ -84,12 +77,14 @@ export const PLACES = [
     `content/site.json`: "juliangigola/event-slug", a stored key, kept as is. The picker on /book reads these. Weddings, music
     and brand have a call, set on their own pages (`book.cal`). */
 export const SESSION_EVENTS: Record<string, string> = Object.fromEntries(
-  SESSION_TYPES.flatMap((t) => { const cal = isSession(t.slug) && SESSIONS[t.slug].cal; return cal ? [[t.slug, cal]] : []; }),
+  SESSION_TYPES.flatMap((t) => {
+    const cal = isSession(t.slug) && SESSIONS[t.slug].cal;
+    return cal ? [[t.slug, cal]] : [];
+  }),
 );
 
 /** A session's event, or nothing where it has none yet. */
-export const sessionEvent = (sessionSlug?: string): string | undefined =>
-  (sessionSlug && SESSION_EVENTS[sessionSlug]) || undefined;
+export const sessionEvent = (sessionSlug?: string): string | undefined => (sessionSlug && SESSION_EVENTS[sessionSlug]) || undefined;
 
 /* ── shared wording ─────────────────────────────────────────────── */
 
@@ -153,8 +148,7 @@ const PORTFOLIO = { href: "/portfolio", label: "Portfolio" };
 
 /* ── the photographs ────────────────────────────────────────────── */
 
-const caption = (name: string) =>
-  name.toLowerCase().replace(/(^|\s)\S/g, (c) => c.toUpperCase());
+const caption = (name: string) => name.toLowerCase().replace(/(^|\s)\S/g, (c) => c.toUpperCase());
 
 /** A one-gallery session's frames, each opening the gallery. */
 const framesOf = (slug: string, n = Infinity): Tile[] => {
@@ -170,16 +164,12 @@ const framesOf = (slug: string, n = Infinity): Tile[] => {
 /** A discipline's projects, a frame each, each opening its project. */
 const coversOf = (category: string, n = Infinity, prefer: string[] = []): Tile[] => {
   const all = projectsIn(category);
-  const first = prefer
-    .map((s) => all.find((p) => p.slug === s))
-    .filter((p) => p !== undefined);
-  return [...first, ...all.filter((p) => !first.includes(p))]
-    .slice(0, n)
-    .map((p) => ({
-      frame: p.images[0] ?? p.cover,
-      href: `/portfolio/${p.slug}`,
-      caption: caption(p.name),
-    }));
+  const first = prefer.map((s) => all.find((p) => p.slug === s)).filter((p) => p !== undefined);
+  return [...first, ...all.filter((p) => !first.includes(p))].slice(0, n).map((p) => ({
+    frame: p.images[0] ?? p.cover,
+    href: `/portfolio/${p.slug}`,
+    caption: caption(p.name),
+  }));
 };
 
 /** Chosen frames by address, in the order given, each opening its project. */
@@ -192,9 +182,7 @@ const framesAt = (srcs: string[]): Tile[] =>
   });
 
 /** The music videos, by title, from the Motion page's list. */
-const MUSIC_VIDEOS = CONTENT.videos
-  .filter((v) => v.section === "music")
-  .map((v) => (v.client ? `${v.title} (${v.client})` : v.title));
+const MUSIC_VIDEOS = CONTENT.videos.filter((v) => v.section === "music").map((v) => (v.client ? `${v.title} (${v.client})` : v.title));
 
 /* ── the pages ──────────────────────────────────────────────────── */
 
@@ -529,9 +517,7 @@ export const BOOKING_PAGES: BookingPage[] = [
         ],
       },
       PROCESS,
-      ...(MUSIC_VIDEOS.length
-        ? [{ heading: "Music videos", items: MUSIC_VIDEOS.slice(0, 4) }]
-        : []),
+      ...(MUSIC_VIDEOS.length ? [{ heading: "Music videos", items: MUSIC_VIDEOS.slice(0, 4) }] : []),
     ],
     where: COMMISSION_WHERE,
     faqs: [
@@ -638,14 +624,7 @@ export const BOOKING_PAGES: BookingPage[] = [
       {
         // About's list, in its order.
         heading: "Services",
-        items: [
-          "Creative direction",
-          "Art direction",
-          "Photography",
-          "Camera operating",
-          "Producing",
-          "Post-production",
-        ],
+        items: ["Creative direction", "Art direction", "Photography", "Camera operating", "Producing", "Post-production"],
       },
     ],
     where: COMMISSION_WHERE,
@@ -677,12 +656,10 @@ export const BOOKING_PAGES: BookingPage[] = [
   },
 ];
 
-export const bookingPage = (slug: string) =>
-  BOOKING_PAGES.find((p) => p.slug === slug);
+export const bookingPage = (slug: string) => BOOKING_PAGES.find((p) => p.slug === slug);
 export const bookingHref = (p: BookingPage) => `/${p.slug}`;
 /** The page that books a session in `content/site.json`, if there is one. */
-export const pageForSession = (sessionSlug: string) =>
-  BOOKING_PAGES.find((p) => p.session === sessionSlug);
+export const pageForSession = (sessionSlug: string) => BOOKING_PAGES.find((p) => p.session === sessionSlug);
 
 /* ── the homepage booking menu (`?bookhere`) ──────────────────────── */
 
@@ -703,7 +680,15 @@ export type MenuItem = {
 
 const callOf = (slug: BookingSlug, name: string, blurb: string): MenuItem => {
   const p = BOOKING_PAGES.find((x) => x.slug === slug)!;
-  return { slug, name, blurb, group: "commission", page: bookingHref(p), cal: p.book.cal, form: { type: p.book.type, session: p.book.session } };
+  return {
+    slug,
+    name,
+    blurb,
+    group: "commission",
+    page: bookingHref(p),
+    cal: p.book.cal,
+    form: { type: p.book.type, session: p.book.session },
+  };
 };
 
 export const BOOK_MENU: MenuItem[] = [
@@ -713,9 +698,20 @@ export const BOOK_MENU: MenuItem[] = [
     return cal ? [{ slug: s.slug, name: s.name, blurb: s.blurb, group: "time", cal, page: page && bookingHref(page) }] : [];
   }),
   callOf("weddings", "Weddings", session("weddings").blurb),
-  callOf("music-photography", "Music & artists", "Press photos, cover art and music videos for a release, planned together so it reads as one thing."),
+  callOf(
+    "music-photography",
+    "Music & artists",
+    "Press photos, cover art and music videos for a release, planned together so it reads as one thing.",
+  ),
   callOf("fashion-photography", "Fashion & Editorial", "Editorials, lookbooks and campaign images, shot and art-directed as one story."),
   callOf("brand-photography", "Brand campaigns", "Campaign imagery from the concept and the art direction to the shoot and the retouch."),
   // ponytail: no call yet; add `cal: "juliangigola/event-call"` once the event exists in `EVENTS` (`lib/booking/rules.ts`).
-  { slug: "events", name: "Event coverage", blurb: "Launches, brand events, concerts and parties, shot as they happen.", group: "commission", page: "/portfolio/events", form: { type: "event" } },
+  {
+    slug: "events",
+    name: "Event coverage",
+    blurb: "Launches, brand events, concerts and parties, shot as they happen.",
+    group: "commission",
+    page: "/portfolio/events",
+    form: { type: "event" },
+  },
 ];

@@ -5,5 +5,11 @@ export const contentType = CARD_TYPE;
 export const alt = "Julian Gigola";
 
 export default function Image() {
-  return renderCard({ kicker: "Legal", title: "Terms and privacy", byline: "The site, the photographs and your data", oneLine: true, frames: [] });
+  return renderCard({
+    kicker: "Legal",
+    title: "Terms and privacy",
+    byline: "The site, the photographs and your data",
+    oneLine: true,
+    frames: [],
+  });
 }

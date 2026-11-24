@@ -20,7 +20,9 @@ export function SignIn({ onKey, wrong }: { onKey: (k: string) => void; wrong: bo
       className="grid max-w-md gap-4 py-10 normal-case"
     >
       <h1 className="sr-only">Leads</h1>
-      <label htmlFor="lead-key" className="text-[15px]">Admin key or GitHub token</label>
+      <label htmlFor="lead-key" className="text-[15px]">
+        Admin key or GitHub token
+      </label>
       <input
         id="lead-key"
         type="password"
@@ -31,17 +33,21 @@ export function SignIn({ onKey, wrong }: { onKey: (k: string) => void; wrong: bo
       />
       {wrong ? <p className="text-[15px] text-destructive">That was not accepted. Paste it again.</p> : null}
       <details className="text-[15px] text-muted-foreground">
-        <summary className="flex size-11 cursor-pointer list-none items-center font-mono text-[15px]" aria-label="How to get one">?</summary>
+        <summary className="flex size-11 cursor-pointer list-none items-center font-mono text-[15px]" aria-label="How to get one">
+          ?
+        </summary>
         <div className="grid gap-2 pt-2 leading-[1.55]">
           <p>Easiest: paste the same GitHub token I use for /admin on desktop.</p>
           <p>
-            To make one on this phone: github.com, Settings, Developer settings, Fine-grained tokens, Generate new token.
-            Repository access: only gigolajulian/juliangigola-com. Permissions: Contents, Read and write.
+            To make one on this phone: github.com, Settings, Developer settings, Fine-grained tokens, Generate new token. Repository access:
+            only gigolajulian/juliangigola-com. Permissions: Contents, Read and write.
           </p>
           <p>It stays on this device only.</p>
         </div>
       </details>
-      <button type="submit" className={cn(btn, primary, "justify-self-start")}>Open leads</button>
+      <button type="submit" className={cn(btn, primary, "justify-self-start")}>
+        Open leads
+      </button>
     </form>
   );
 }

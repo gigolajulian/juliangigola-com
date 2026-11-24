@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any -- fakes of Google's JSON */
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { forgetToken } from "@/lib/google";
 import { busyAll, EXTRA_KEY, forgetFeeds, icsBusy, readExtras } from "@/lib/booking/slots";
@@ -16,7 +15,11 @@ const { GET, POST } = await import("@/app/api/calendar/route");
 const SECRET = JSON.stringify({ client_id: "a", client_secret: "b", refresh_token: "c" });
 const KEY = "k";
 const req = (method: string, body?: unknown, query = "") =>
-  new Request(`https://juliangigola.com/api/calendar${query}`, { method, headers: { "x-admin-key": KEY }, body: body ? JSON.stringify(body) : undefined });
+  new Request(`https://juliangigola.com/api/calendar${query}`, {
+    method,
+    headers: { "x-admin-key": KEY },
+    body: body ? JSON.stringify(body) : undefined,
+  });
 
 type Call = { url: string; method: string; body?: { [k: string]: unknown } };
 let kv: FakeKV;
@@ -52,12 +55,31 @@ describe("icsBusy", () => {
   it("reads UTC, TZID, all-day and DURATION, skips cancelled and free", () => {
     const text = [
       "BEGIN:VCALENDAR",
-      "BEGIN:VEVENT", "DTSTART:20261120T200000Z", "DTEND:20261121T040000Z", "END:VEVENT",
-      "BEGIN:VEVENT", "DTSTART;TZID=America/Los_Angeles:20261122T120000", "DTEND;TZID=America/Los_Angeles:20261122T210000", "END:VEVENT",
-      "BEGIN:VEVENT", "DTSTART;VALUE=DATE:20261125", "END:VEVENT",
-      "BEGIN:VEVENT", "DTSTART;TZID=Pacific Standard Time:20261126T090000", "DURATION:PT8H", "END:VEVENT",
-      "BEGIN:VEVENT", "DTSTART:20261127T200000Z", "DTEND:20261127T210000Z", "STATUS:CANCELLED", "END:VEVENT",
-      "BEGIN:VEVENT", "DTSTART:20261128T200000Z", "DTEND:20261128T210000Z", "TRANSP:TRANSPARENT", "END:VEVENT",
+      "BEGIN:VEVENT",
+      "DTSTART:20261120T200000Z",
+      "DTEND:20261121T040000Z",
+      "END:VEVENT",
+      "BEGIN:VEVENT",
+      "DTSTART;TZID=America/Los_Angeles:20261122T120000",
+      "DTEND;TZID=America/Los_Angeles:20261122T210000",
+      "END:VEVENT",
+      "BEGIN:VEVENT",
+      "DTSTART;VALUE=DATE:20261125",
+      "END:VEVENT",
+      "BEGIN:VEVENT",
+      "DTSTART;TZID=Pacific Standard Time:20261126T090000",
+      "DURATION:PT8H",
+      "END:VEVENT",
+      "BEGIN:VEVENT",
+      "DTSTART:20261127T200000Z",
+      "DTEND:20261127T210000Z",
+      "STATUS:CANCELLED",
+      "END:VEVENT",
+      "BEGIN:VEVENT",
+      "DTSTART:20261128T200000Z",
+      "DTEND:20261128T210000Z",
+      "TRANSP:TRANSPARENT",
+      "END:VEVENT",
       "END:VCALENDAR",
     ].join("\r\n");
     expect(icsBusy(text).map((b) => [new Date(b.start).toISOString(), new Date(b.end).toISOString()])).toEqual([
@@ -88,8 +110,13 @@ describe("busyAll", () => {
 
   it("adds Google extras to freeBusy and ICS spans, labelled", async () => {
     ics = "BEGIN:VEVENT\nDTSTART:20261121T200000Z\nDTEND:20261121T220000Z\nEND:VEVENT";
-    freebusy = { calendars: { primary: { busy: [] }, "me@gmail.com": { busy: [{ start: "2026-11-22T20:00:00Z", end: "2026-11-22T21:00:00Z" }] } } };
-    const out = await busyAll(SECRET, A, B, [{ label: "Personal", src: "me@gmail.com" }, { label: "SGH", src: "https://shifts.example.com/a.ics" }]);
+    freebusy = {
+      calendars: { primary: { busy: [] }, "me@gmail.com": { busy: [{ start: "2026-11-22T20:00:00Z", end: "2026-11-22T21:00:00Z" }] } },
+    };
+    const out = await busyAll(SECRET, A, B, [
+      { label: "Personal", src: "me@gmail.com" },
+      { label: "SGH", src: "https://shifts.example.com/a.ics" },
+    ]);
     expect(calls[0].body?.items).toEqual([{ id: "primary" }, { id: "me@gmail.com" }]);
     expect(out.busy.map((b) => String(b.label)).sort(byCodeUnit)).toEqual(["Personal", "SGH"]);
     expect(out.failed).toEqual([]);
@@ -132,7 +159,10 @@ describe("busyAll", () => {
 
   it("skips an extra it cannot read, but never hello@ itself", async () => {
     freebusy = { calendars: { primary: { busy: [] }, "x@gmail.com": { errors: [{ reason: "notFound" }] } } };
-    const out = await busyAll(SECRET, A, B, [{ label: "X", src: "x@gmail.com" }, { label: "Dead", src: "https://gone.example.com/b.ics" }]);
+    const out = await busyAll(SECRET, A, B, [
+      { label: "X", src: "x@gmail.com" },
+      { label: "Dead", src: "https://gone.example.com/b.ics" },
+    ]);
     expect(out.failed.sort(byCodeUnit)).toEqual(["Dead", "X"]);
     freebusy = { calendars: { primary: { errors: [{ reason: "x" }] } } };
     await expect(busyAll(SECRET, A, B, [])).rejects.toThrow();
@@ -148,7 +178,13 @@ describe("/api/calendar", () => {
   it("blocks whole days as an opaque, marked, all-day event", async () => {
     expect((await POST(req("POST", { block: { from: "2026-11-20", to: "2026-11-22" } }))).status).toBe(200);
     expect(inserted().url).toContain("sendUpdates=none");
-    expect(inserted().body).toMatchObject({ summary: "Blocked", transparency: "opaque", start: { date: "2026-11-20" }, end: { date: "2026-11-23" }, extendedProperties: { private: { jgBlock: "1" } } });
+    expect(inserted().body).toMatchObject({
+      summary: "Blocked",
+      transparency: "opaque",
+      start: { date: "2026-11-20" },
+      end: { date: "2026-11-23" },
+      extendedProperties: { private: { jgBlock: "1" } },
+    });
   });
 
   it("blocks a time range on one day in Pacific", async () => {
@@ -170,7 +206,11 @@ describe("/api/calendar", () => {
   it("an unblock on a missing event is not a block, a calendar that is down is a 502", async () => {
     vi.spyOn(console, "error").mockImplementation(() => {});
     const answer = (status: number) =>
-      vi.stubGlobal("fetch", async (url: string) => (url.includes("oauth2") ? Response.json({ access_token: "t", expires_in: 3600 }) : Response.json({ error: { message: "x" } }, { status })));
+      vi.stubGlobal("fetch", async (url: string) =>
+        url.includes("oauth2")
+          ? Response.json({ access_token: "t", expires_in: 3600 })
+          : Response.json({ error: { message: "x" } }, { status }),
+      );
     answer(404);
     expect((await POST(req("POST", { unblock: "e1" }))).status).toBe(400);
     answer(503);

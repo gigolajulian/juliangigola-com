@@ -64,22 +64,15 @@ export type CommitFile = {
 };
 
 /** Lists file paths under a directory at the branch head. Empty if absent. */
-export async function listDirectory(
-  token: string,
-  path: string,
-): Promise<string[]> {
-  const res = await fetch(
-    `${GITHUB_API}/repos/${REPO.owner}/${REPO.repo}/contents/${path}?ref=${REPO.branch}`,
-    { headers: headers(token), cache: "no-store" },
-  );
+export async function listDirectory(token: string, path: string): Promise<string[]> {
+  const res = await fetch(`${GITHUB_API}/repos/${REPO.owner}/${REPO.repo}/contents/${path}?ref=${REPO.branch}`, {
+    headers: headers(token),
+    cache: "no-store",
+  });
   if (res.status === 404) return [];
   if (!res.ok) throw new HttpError(`GitHub said ${res.status}: ${await failureMessage(res)}`, res.status);
   const body = (await res.json()) as { type: string; path: string }[];
-  return Array.isArray(body)
-    ? body
-        .filter((e) => e.type === "file")
-        .map((e) => e.path)
-    : [];
+  return Array.isArray(body) ? body.filter((e) => e.type === "file").map((e) => e.path) : [];
 }
 
 /** GitHub's message on a failed response, or "unknown error" when it sent none. */
@@ -101,11 +94,7 @@ const headers = (token: string) => ({
  * tab — moved the branch since this page loaded, and the safe move is to start
  * again from the new head.
  */
-async function gh<T>(
-  token: string,
-  path: string,
-  init?: { method?: string; body?: unknown },
-): Promise<T> {
+async function gh<T>(token: string, path: string, init?: { method?: string; body?: unknown }): Promise<T> {
   const res = await fetch(`${GITHUB_API}/repos/${REPO.owner}/${REPO.repo}${path}`, {
     method: init?.method ?? "GET",
     headers: { ...headers(token), "Content-Type": "application/json" },
@@ -148,15 +137,9 @@ export async function commitFiles({
   if (!files.length) throw new Error("Nothing to commit.");
 
   // Where the branch is *now*, not where it was when the page loaded.
-  const ref = await gh<{ object: { sha: string } }>(
-    token,
-    `/git/ref/heads/${REPO.branch}`,
-  );
+  const ref = await gh<{ object: { sha: string } }>(token, `/git/ref/heads/${REPO.branch}`);
   const parent = ref.object.sha;
-  const base = await gh<{ tree: { sha: string } }>(
-    token,
-    `/git/commits/${parent}`,
-  );
+  const base = await gh<{ tree: { sha: string } }>(token, `/git/commits/${parent}`);
 
   // Sequential, not parallel. A dozen simultaneous multi-megabyte uploads
   // compete for the same upstream bandwidth and make the progress meaningless;
@@ -209,20 +192,15 @@ export async function commitFiles({
 }
 
 /** Reads a text file at the branch head. `null` when it does not exist yet. */
-export async function readFile(
-  token: string,
-  path: string,
-): Promise<string | null> {
-  const res = await fetch(
-    `${GITHUB_API}/repos/${REPO.owner}/${REPO.repo}/contents/${path}?ref=${REPO.branch}`,
-    { headers: headers(token), cache: "no-store" },
-  );
+export async function readFile(token: string, path: string): Promise<string | null> {
+  const res = await fetch(`${GITHUB_API}/repos/${REPO.owner}/${REPO.repo}/contents/${path}?ref=${REPO.branch}`, {
+    headers: headers(token),
+    cache: "no-store",
+  });
   if (res.status === 404) return null;
   if (!res.ok) throw new HttpError(`GitHub said ${res.status}: ${await failureMessage(res)}`, res.status);
   const body = (await res.json()) as { content?: string };
 
   const binary = atob(String(body.content).replace(/\s/g, ""));
-  return new TextDecoder().decode(
-    Uint8Array.from(binary, (c) => c.charCodeAt(0)),
-  );
+  return new TextDecoder().decode(Uint8Array.from(binary, (c) => c.charCodeAt(0)));
 }

@@ -11,7 +11,19 @@ const gh = vi.hoisted(() => ({ readFile: vi.fn(), commitFiles: vi.fn() }));
 vi.mock("@/lib/admin/admin-github", async (real) => ({ ...(await real<object>()), ...gh }));
 const { loadRepo, publishDraft } = await import("@/lib/admin/publish");
 
-const empty = (): Draft => ({ hidden: [], unlisted: [], categories: {}, frames: {}, credits: {}, copy: {}, order: [], covers: {}, avatars: {}, slugs: {}, bts: {} });
+const empty = (): Draft => ({
+  hidden: [],
+  unlisted: [],
+  categories: {},
+  frames: {},
+  credits: {},
+  copy: {},
+  order: [],
+  covers: {},
+  avatars: {},
+  slugs: {},
+  bts: {},
+});
 const b64 = (s: string) => btoa(String.fromCharCode(...new TextEncoder().encode(s)));
 const site = { featured: ["café"] };
 const contents = (sha: string) => reply({ sha, content: b64(JSON.stringify(site)).replace(/(.{60})/g, "$1\n") });

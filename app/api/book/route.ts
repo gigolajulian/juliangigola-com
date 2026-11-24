@@ -20,8 +20,12 @@ export const dynamic = "force-dynamic";
 /** The alert's call line: the Meet link for a video call, the number for a phone call, the place otherwise. */
 const callLine = (r: { via?: string; where?: string; phone?: string }) =>
   r.via === "Video"
-    ? r.where?.startsWith("http") ? `Video call: ${r.where}` : "Video call: no Meet link was made, add one in Calendar"
-    : r.via === "Phone" || !r.where ? `Call: ring ${r.phone ?? "(no phone)"}` : `Where: ${r.where}`;
+    ? r.where?.startsWith("http")
+      ? `Video call: ${r.where}`
+      : "Video call: no Meet link was made, add one in Calendar"
+    : r.via === "Phone" || !r.where
+      ? `Call: ring ${r.phone ?? "(no phone)"}`
+      : `Where: ${r.where}`;
 
 export async function POST(request: Request) {
   const { env, ctx } = await getCloudflareContext({ async: true });
@@ -54,7 +58,8 @@ async function bookCall(env: CloudflareEnv, raw: unknown): Promise<BookingRecord
 }
 
 /** The lead desk's row, the client's "You're in." with its links, and that mail's log. */
-const afterCall = (env: CloudflareEnv, r: BookingRecord) => afterBooked(env, r, async () => ({ ...confirmOf(r, await manageLinks(env.BOOKING_SECRET, r)), call: true }));
+const afterCall = (env: CloudflareEnv, r: BookingRecord) =>
+  afterBooked(env, r, async () => ({ ...confirmOf(r, await manageLinks(env.BOOKING_SECRET, r)), call: true }));
 
 /** hello@'s alert: who, how to reach them for the call, and their notes. */
 function alertBooked(env: CloudflareEnv, r: BookingRecord) {

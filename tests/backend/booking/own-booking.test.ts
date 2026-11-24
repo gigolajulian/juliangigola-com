@@ -27,7 +27,15 @@ const now = Date.now();
 const wed = new Date(now + 7 * 864e5);
 wed.setUTCDate(wed.getUTCDate() + ((3 - wed.getUTCDay() + 7) % 7));
 const START = new Date(Date.UTC(wed.getUTCFullYear(), wed.getUTCMonth(), wed.getUTCDate(), 18)).toISOString();
-const CALL = { slug: "editorial", start: START, timeZone: "America/Los_Angeles", name: "QA Test", email: "qa@example.com", phone: "+14085550100", via: "Video" };
+const CALL = {
+  slug: "editorial",
+  start: START,
+  timeZone: "America/Los_Angeles",
+  name: "QA Test",
+  email: "qa@example.com",
+  phone: "+14085550100",
+  via: "Video",
+};
 
 let busy: { start: string; end: string }[];
 let inserts: { url: string; body: Record<string, unknown> }[];
@@ -48,7 +56,9 @@ beforeEach(() => {
   mail = new FakeEmail();
   ctx.env = {
     GCAL_OAUTH: JSON.stringify({ client_id: "a", client_secret: "b", refresh_token: "c" }),
-    BOOKING_LOCK: fakeLock(new BookingLock({ storage: store }, { GCAL_OAUTH: JSON.stringify({ client_id: "a", client_secret: "b", refresh_token: "c" }) })),
+    BOOKING_LOCK: fakeLock(
+      new BookingLock({ storage: store }, { GCAL_OAUTH: JSON.stringify({ client_id: "a", client_secret: "b", refresh_token: "c" }) }),
+    ),
     INBOX: kv,
     CLIENT_EMAIL: client,
     EMAIL: mail,
@@ -127,14 +137,24 @@ describe("POST /api/book (a free call)", () => {
 });
 
 describe("bookDeposit (a paid session on the site's engine)", () => {
-  const META = { kind: "deposit", slug: "portraits", start: START, timeZone: "America/Los_Angeles", name: "QA Test", email: "qa@example.com" };
+  const META = {
+    kind: "deposit",
+    slug: "portraits",
+    start: START,
+    timeZone: "America/Los_Angeles",
+    name: "QA Test",
+    email: "qa@example.com",
+  };
   const env = () => ctx.env as unknown as Parameters<typeof bookDeposit>[0];
 
   it("books through the lock, files the deposit, and books once however often Stripe delivers", async () => {
     expect(await bookDeposit(env(), "pi_TEST1234567890", META)).toBe("booked");
     expect(inserts).toHaveLength(1);
     expect(inserts[0].body.description).toContain("pi_TEST1234567890");
-    expect(kv.json(kv.puts.find((k) => k.startsWith("msg:"))!)).toMatchObject({ type: "booking", deposit: expect.stringContaining("pi_TEST1234567890") });
+    expect(kv.json(kv.puts.find((k) => k.startsWith("msg:"))!)).toMatchObject({
+      type: "booking",
+      deposit: expect.stringContaining("pi_TEST1234567890"),
+    });
     expect(client.sent).toHaveLength(1);
     // A second delivery whose KV record was lost: the lock still knows the intent.
     await bookDeposit({ ...env(), INBOX: new FakeKV() as never }, "pi_TEST1234567890", META);
@@ -145,7 +165,10 @@ describe("bookDeposit (a paid session on the site's engine)", () => {
     ctx.env = { ...ctx.env, LEADS_KEY };
     expect(await bookDeposit(env(), "pi_TEST1234567890", META)).toBe("booked");
     const s = (await sealer(LEADS_KEY))!;
-    expect((await readLog(kv as never, s, await s.id("qa@example.com"))).find((e) => e.kind === "payment")).toMatchObject({ amount: 250, note: "Deposit" });
+    expect((await readLog(kv as never, s, await s.id("qa@example.com"))).find((e) => e.kind === "payment")).toMatchObject({
+      amount: 250,
+      note: "Deposit",
+    });
   });
 
   it("refunds when the time is gone", async () => {
@@ -157,7 +180,14 @@ describe("bookDeposit (a paid session on the site's engine)", () => {
   });
 
   it("refunds on a booking error and says what broke, not that the time was gone", async () => {
-    const broken = { idFromName: (n: string) => n, get: () => ({ fetch: async () => { throw new Error("lock down"); } }) };
+    const broken = {
+      idFromName: (n: string) => n,
+      get: () => ({
+        fetch: async () => {
+          throw new Error("lock down");
+        },
+      }),
+    };
     expect(await bookDeposit({ ...env(), BOOKING_LOCK: broken as never }, "pi_TEST1234567890", META)).toBe("refunded");
     expect(stripeCalls.some((u) => u.endsWith("/refunds"))).toBe(true);
     const text = String(mail.sent[0].text);

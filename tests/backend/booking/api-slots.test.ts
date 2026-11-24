@@ -17,7 +17,11 @@ beforeEach(() => {
   vi.setSystemTime(Date.parse("2026-11-11T18:00:00Z"));
   ctx.env = { GCAL_OAUTH: JSON.stringify({ client_id: "a", client_secret: "b", refresh_token: "c" }) };
   vi.stubGlobal("fetch", async (url: string) =>
-    url.includes("oauth2") ? Response.json({ access_token: "t", expires_in: 3600 }) : url.includes("/events?") ? Response.json({ items: [] }) : Response.json({ calendars: { primary: { busy: [] } } }),
+    url.includes("oauth2")
+      ? Response.json({ access_token: "t", expires_in: 3600 })
+      : url.includes("/events?")
+        ? Response.json({ items: [] })
+        : Response.json({ calendars: { primary: { busy: [] } } }),
   );
 });
 afterEach(() => {

@@ -33,7 +33,9 @@ function lookup(slug: SessionSlug) {
       .then((r) => {
         const slots = r.ok ? r.data?.slots : undefined;
         if (!slots) return null;
-        const day = Object.keys(slots).filter((d) => slots[d]?.length).sort(byCodeUnit)[0];
+        const day = Object.keys(slots)
+          .filter((d) => slots[d]?.length)
+          .sort(byCodeUnit)[0];
         return day ? nextOpenLabel(slots[day][0], tz) : null;
       })
       .catch(() => null);

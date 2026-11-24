@@ -8,7 +8,10 @@ export const metadata: Metadata = {
   description:
     "Pick a session and a time: portraits, graduation, headshots, studio digitals, model tests and weddings in the San Francisco Bay Area.",
   alternates: { canonical: "/book" },
-...shareOg("Book a session","Portraits, graduation, headshots, studio digitals, model tests and weddings in the San Francisco Bay Area. Pick a time on my calendar."),
+  ...shareOg(
+    "Book a session",
+    "Portraits, graduation, headshots, studio digitals, model tests and weddings in the San Francisco Bay Area. Pick a time on my calendar.",
+  ),
 };
 
 /* The stepper, on portraits unless `?session=` names another. */

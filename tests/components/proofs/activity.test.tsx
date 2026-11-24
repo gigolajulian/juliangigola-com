@@ -24,7 +24,10 @@ const row = (over: Partial<ProofRow> = {}) =>
   ({
     token: "t1",
     name: "Studio day",
-    frames: [{ id: "a", file: "A.jpg" }, { id: "b", file: "B.jpg" }],
+    frames: [
+      { id: "a", file: "A.jpg" },
+      { id: "b", file: "B.jpg" },
+    ],
     viewers: {},
     url: "/proof/t1",
     ...over,

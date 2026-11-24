@@ -31,4 +31,3 @@ export async function sealedGate(request: Request) {
   if (!g.s) return { error: noSeal() };
   return { ...g, s: g.s };
 }
-

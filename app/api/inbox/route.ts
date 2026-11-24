@@ -78,8 +78,7 @@ export async function PATCH(request: Request) {
   if (!given) return json({ error: "Not JSON." }, 400);
   const key = typeof given.key === "string" ? given.key : "";
   const read = given.read;
-  if (!key.startsWith("msg:") || typeof read !== "boolean")
-    return json({ error: "Unknown." }, 400);
+  if (!key.startsWith("msg:") || typeof read !== "boolean") return json({ error: "Unknown." }, 400);
 
   const body = await g.kv.get(key);
   if (body === null) return json({ error: "Gone." }, 404);

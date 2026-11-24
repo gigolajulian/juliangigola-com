@@ -80,7 +80,11 @@ export function FlowShell({
         {steps.length ? (
           <ol ref={rail} className="rail lbl" aria-label="Steps">
             {steps.map((n, i) => (
-              <li key={n} className={i + 1 === at ? "cur" : i + 1 < at || last ? "done" : undefined} aria-current={i + 1 === at ? "step" : undefined}>
+              <li
+                key={n}
+                className={i + 1 === at ? "cur" : i + 1 < at || last ? "done" : undefined}
+                aria-current={i + 1 === at ? "step" : undefined}
+              >
                 {pad(i + 1)} <span className="nm">{n}</span>
               </li>
             ))}
@@ -94,7 +98,13 @@ export function FlowShell({
             </span>
           ) : null}
           {/* keyed by step so a new heading mounts and rises (v3.css, motion plan 03) */}
-          {React.createElement(h1 ? "h1" : "h2", null, <span key={at} className="rh">{head}</span>)}
+          {React.createElement(
+            h1 ? "h1" : "h2",
+            null,
+            <span key={at} className="rh">
+              {head}
+            </span>,
+          )}
           {sub ? <p>{sub}</p> : null}
         </div>
         <div className="f-body">{body}</div>
@@ -104,10 +114,31 @@ export function FlowShell({
         <div className="in">
           <div className="fr">
             <div className="ph">
-              <Image className="v3d" src={photo.d} alt={`${name} sample frame`} fill sizes="(max-width: 800px) 100vw, 44vw" loading="eager" fetchPriority="high" decoding="sync" style={photo.at?.d ? ({ "--at": photo.at.d } as React.CSSProperties) : undefined} />
-              <Image className="v3l" src={photo.l} alt={`${name} sample frame`} fill sizes="(max-width: 800px) 100vw, 44vw" loading="eager" decoding="sync" style={photo.at?.l ? ({ "--at": photo.at.l } as React.CSSProperties) : undefined} />
+              <Image
+                className="v3d"
+                src={photo.d}
+                alt={`${name} sample frame`}
+                fill
+                sizes="(max-width: 800px) 100vw, 44vw"
+                loading="eager"
+                fetchPriority="high"
+                decoding="sync"
+                style={photo.at?.d ? ({ "--at": photo.at.d } as React.CSSProperties) : undefined}
+              />
+              <Image
+                className="v3l"
+                src={photo.l}
+                alt={`${name} sample frame`}
+                fill
+                sizes="(max-width: 800px) 100vw, 44vw"
+                loading="eager"
+                decoding="sync"
+                style={photo.at?.l ? ({ "--at": photo.at.l } as React.CSSProperties) : undefined}
+              />
               {photo.desk ? <Image className="v3k" src={photo.desk} alt={`${name} sample frame`} fill sizes="44vw" /> : null}
-              {photo.m ? <Image className="v3m" src={photo.m} alt={`${name} sample frame`} fill sizes="100vw" loading="eager" decoding="sync" /> : null}
+              {photo.m ? (
+                <Image className="v3m" src={photo.m} alt={`${name} sample frame`} fill sizes="100vw" loading="eager" decoding="sync" />
+              ) : null}
             </div>
             <div className="cap">
               <b>{name}</b>
@@ -159,15 +190,47 @@ export function Field({
       <label className="lbl mute" htmlFor={id}>
         <span>
           {label}
-          {req ? <span className="req" aria-hidden="true"> *</span> : null}
+          {req ? (
+            <span className="req" aria-hidden="true">
+              {" "}
+              *
+            </span>
+          ) : null}
         </span>
         {/* The error lives in the field, no box. Empty: it is the placeholder; with text: it takes the hint's place. */}
-        {err && value ? <span className="fe" aria-hidden="true">{err}</span> : <span>{hint}</span>}
+        {err && value ? (
+          <span className="fe" aria-hidden="true">
+            {err}
+          </span>
+        ) : (
+          <span>{hint}</span>
+        )}
       </label>
       {area ? (
-        <textarea id={id} name={k} rows={3} placeholder={err && !value ? err : undefined} value={value} onChange={(e) => onChange(e.target.value)} aria-invalid={!!err || undefined} aria-describedby={err ? `${id}-err` : undefined} aria-required={req || undefined} />
+        <textarea
+          id={id}
+          name={k}
+          rows={3}
+          placeholder={err && !value ? err : undefined}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          aria-invalid={!!err || undefined}
+          aria-describedby={err ? `${id}-err` : undefined}
+          aria-required={req || undefined}
+        />
       ) : (
-        <input id={id} name={k} type={type} autoComplete={ac} placeholder={err && !value ? err : undefined} value={value} onChange={(e) => onChange(e.target.value)} aria-invalid={!!err || undefined} aria-describedby={err ? `${id}-err` : undefined} aria-required={req || undefined} />
+        <input
+          id={id}
+          name={k}
+          type={type}
+          autoComplete={ac}
+          placeholder={err && !value ? err : undefined}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          aria-invalid={!!err || undefined}
+          aria-describedby={err ? `${id}-err` : undefined}
+          aria-required={req || undefined}
+        />
       )}
       {err ? (
         <p className="sr-only" id={`${id}-err`} role="alert">
@@ -197,7 +260,12 @@ export function Failed({ state }: { state: ContactState }) {
   return (
     <p className="err" role="alert">
       {state.message}
-      {state.mailto ? <> <a href={state.mailto}>Open in your mail app</a></> : null}
+      {state.mailto ? (
+        <>
+          {" "}
+          <a href={state.mailto}>Open in your mail app</a>
+        </>
+      ) : null}
     </p>
   );
 }

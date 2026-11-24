@@ -170,10 +170,7 @@ async function main() {
         fit: square ? "cover" : "inside",
         withoutEnlargement: true,
       });
-      const { width, height } = await pipeline
-        .clone()
-        .jpeg({ quality: QUALITY, mozjpeg: true })
-        .toFile(path.join(OUT_DIR, name));
+      const { width, height } = await pipeline.clone().jpeg({ quality: QUALITY, mozjpeg: true }).toFile(path.join(OUT_DIR, name));
 
       const thumbName = `${slug}${suffix}-${THUMB}.jpg`;
       await sharp(src)

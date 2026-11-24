@@ -26,8 +26,7 @@ export type PendingUpload = {
 };
 
 /** The path a ref points at; empty for a passage. */
-export const srcOf = (f: FrameRef): string =>
-  typeof f === "string" ? f : isTextRef(f) ? "" : f.src;
+export const srcOf = (f: FrameRef): string => (typeof f === "string" ? f : isTextRef(f) ? "" : f.src);
 
 /**
  * A name that cannot collide with the archive's own files.
@@ -36,8 +35,7 @@ export const srcOf = (f: FrameRef): string =>
  * photograph added under a numbered name could take the place of one of
  * them. The prefix keeps the two sets of files apart for good.
  */
-const uploadPath = (slug: string, i: number) =>
-  `public/work/${slug}/a${Date.now().toString(36)}-${i + 1}.jpg`;
+const uploadPath = (slug: string, i: number) => `public/work/${slug}/a${Date.now().toString(36)}-${i + 1}.jpg`;
 
 export function useSequence({
   slug,
@@ -63,9 +61,7 @@ export function useSequence({
   // Back to `null` the moment the draft matches what is published, so
   // "edited" means edited and Undo has something to undo.
   const commit = (next: FrameRef[]) => {
-    const same =
-      next.length === original.length &&
-      next.every((f, i) => !isTextRef(f) && srcOf(f) === original[i]);
+    const same = next.length === original.length && next.every((f, i) => !isTextRef(f) && srcOf(f) === original[i]);
     onChange(same ? null : next);
   };
 
@@ -76,17 +72,7 @@ export function useSequence({
     next.splice(to, 0, held);
     commit(next);
     // The passage being written follows its own tile.
-    setEditing((at) =>
-      at === null
-        ? null
-        : at === from
-          ? to
-          : from < at && at <= to
-            ? at - 1
-            : to <= at && at < from
-              ? at + 1
-              : at,
-    );
+    setEditing((at) => (at === null ? null : at === from ? to : from < at && at <= to ? at - 1 : to <= at && at < from ? at + 1 : at));
   };
 
   const drop = (i: number) => {
@@ -102,10 +88,7 @@ export function useSequence({
     setEditing(at);
   };
 
-  const setText = (i: number, patch: Partial<TextRef>) =>
-    commit(
-      list.map((f, n) => (n === i && isTextRef(f) ? { ...f, ...patch } : f)),
-    );
+  const setText = (i: number, patch: Partial<TextRef>) => commit(list.map((f, n) => (n === i && isTextRef(f) ? { ...f, ...patch } : f)));
 
   async function add(files: FileList | null) {
     if (!files?.length) return;
