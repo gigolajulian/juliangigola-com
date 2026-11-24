@@ -5,7 +5,7 @@ import { alertLines, proofUrl, receiptMail, sendClient } from "@/lib/email/proof
 import { cardPrice, amountOwed, publicId, viewerKey, type Proof } from "@/lib/proofs/proof-model";
 import { writeProof } from "@/lib/proofs/proof-store";
 import type { InboxKV as KV } from "@/lib/kv";
-import type { Seal } from "@/lib/leads/lead-crypto";
+import type { Seal } from "@/lib/seal";
 
 /* ── a client sends their selects ─────────────────────────────────
  * Nothing to pay: locked and mailed at once. A shoot balance or extras: a Stripe Checkout session
@@ -45,7 +45,7 @@ export async function finalize(env: Env, kv: KV, s: Seal, p: Proof, paid?: Proof
   }
   const a = alertLines(done);
   // "off" silences even this one; every other setting keeps it instant.
-  if (done.notify !== "off") await alertHello(env.EMAIL, a.subject, [...a.lines, "", proofUrl(publicId(done))], to ? { name: to, email: to } : undefined);
+  if (done.notify !== "off") await alertHello(env.EMAIL, a.subject, [...a.lines, "", proofUrl(publicId(done))], { who: to ? { name: to, email: to } : undefined });
   return done;
 }
 

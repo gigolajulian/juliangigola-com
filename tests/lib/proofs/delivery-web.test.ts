@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { deliveryDownload, webName } from "@/lib/proofs/delivery-serve";
-import { sealer } from "@/lib/leads/lead-crypto";
+import { sealer } from "@/lib/seal";
 import { finalKey, PREVIEW_W, type Proof } from "@/lib/proofs/proof-model";
 import { writeProof } from "@/lib/proofs/proof-store";
 import { FakeKV, LEADS_KEY } from "../../backend/fakes";

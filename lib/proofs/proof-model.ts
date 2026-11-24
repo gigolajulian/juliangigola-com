@@ -18,6 +18,7 @@
  * ─────────────────────────────────────────────────────────────── */
 
 import { isEmail } from "@/lib/utils";
+import { DAY_MS } from "@/lib/time-zone";
 
 export type ProofFrame = {
   /** Short id, stable across publishes: the Lightroom photo's remote id. */
@@ -304,7 +305,7 @@ export const coverFrame = (p: Pick<Proof, "frames" | "watermark" | "closesAt" | 
   // A password gallery shows nothing to a link preview, which never has the cookie.
   (p.watermark && !p.pass && isOpen(p) && (p.frames.find((f) => f.id === p.card?.id) ?? p.frames[0])) || null;
 
-export const closesAt = (days: number, from = Date.now()) => new Date(from + days * 864e5).toISOString();
+export const closesAt = (days: number, from = Date.now()) => new Date(from + days * DAY_MS).toISOString();
 
 /* ── the one reminder ─────────────────────────
    Only on his tap in Leads, only in the last REMIND_DAYS before the gallery closes, once per stage, never after
@@ -327,7 +328,7 @@ export function remindState(p: Pick<Proof, "email" | "sentAt" | "submittedAt" | 
   if (!p.email) return { stage, state: "never", why: "No client email." };
   if (p.offline) return { stage, state: "never", why: "Offline." };
   if (!p.closesAt || Date.parse(p.closesAt) <= now) return { stage, state: "never", why: "Closed." };
-  const opens = Date.parse(p.closesAt) - REMIND_DAYS * 864e5;
+  const opens = Date.parse(p.closesAt) - REMIND_DAYS * DAY_MS;
   return opens > now ? { stage, state: "locked", opensAt: new Date(opens).toISOString() } : { stage, state: "ready" };
 }
 
@@ -335,7 +336,7 @@ export function remindState(p: Pick<Proof, "email" | "sentAt" | "submittedAt" | 
 export function closingSoon(closes: string | null | undefined, now = Date.now()): number | null {
   if (!closes) return null;
   const left = Date.parse(closes) - now;
-  return left > 0 && left <= REMIND_DAYS * 864e5 ? Math.ceil(left / 864e5) : null;
+  return left > 0 && left <= REMIND_DAYS * DAY_MS ? Math.ceil(left / DAY_MS) : null;
 }
 
 /** Frames by capture time when every frame has one, else as uploaded (a frame published later went to the end). */

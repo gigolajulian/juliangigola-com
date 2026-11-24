@@ -15,7 +15,7 @@ import { DISCIPLINES } from "@/lib/work/disciplines";
 import { MOTION_SEO } from "@/lib/seo";
 import { CONTENT } from "@/lib/content";
 import { HOME_DATA } from "@/lib/home/server";
-import ORDER from "@/lib/portfolio-order.json";
+import ORDER from "@/lib/work/portfolio-order.json";
 
 /* The big client views are stand-ins that keep their props, so the page's
    own work (which projects, in which order, which frames) is what is checked. */

@@ -3,6 +3,8 @@
  * Browser only: the key comes from localStorage.
  */
 import { credentials, KEY_STORE } from "@/lib/admin/admin-github";
+import { TZ } from "@/lib/time-zone";
+import { errorText } from "@/lib/utils";
 
 /** The admin key if one was pasted, else the /admin GitHub token. */
 export const authed = () => credentials(window.localStorage.getItem(KEY_STORE) ?? "");
@@ -32,3 +34,13 @@ export async function adminCall<T = Record<string, unknown>>(path: string, init:
   if (!res.ok) throw new AdminError(out?.error ?? fail ?? `Request failed (${res.status})`, res.status);
   return out as T;
 }
+
+export const OFFLINE = "Offline. The desk loads again when you are back online.";
+/** Any 401 from the admin gate (`refuseAdmin`): a missing key or a token GitHub refused. The desks show sign-in for it. */
+export const isLocked = (e: unknown) => e instanceof AdminError && e.status === 401;
+export const LOCKED = "Not authorized.";
+/** What a failed load says: offline, or the route's own words. */
+export const loadErrorText = (e: unknown) => (navigator.onLine === false || e instanceof TypeError ? OFFLINE : isLocked(e) ? LOCKED : errorText(e));
+
+/** "Nov 11, 4:05 PM" in Julian's time. */
+export const stampPT = (iso: string) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(iso));

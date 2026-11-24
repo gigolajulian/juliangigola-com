@@ -1,10 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { returning, shouldPlay } from "@/components/home/intro";
+import { DAY_MS } from "@/lib/time-zone";
 
 /* The v4 home intro's play rules, as they stand: which timing a visitor gets (returning)
    and whether it plays at all (shouldPlay). Read from the URL,
    local storage and session storage, so each case sets those and nothing else. */
-const DAY = 864e5;
 const at = (q: string) => history.replaceState(null, "", `/${q}`);
 const root = document.documentElement;
 
@@ -24,9 +24,9 @@ describe("returning: the short intro for a browser that saw it in the last 30 da
   });
 
   it("is true for a stamp from 29 days ago and false for one from 31 days ago", () => {
-    localStorage.setItem("jg-intro-at", String(Date.now() - 29 * DAY));
+    localStorage.setItem("jg-intro-at", String(Date.now() - 29 * DAY_MS));
     expect(returning()).toBe(true);
-    localStorage.setItem("jg-intro-at", String(Date.now() - 31 * DAY));
+    localStorage.setItem("jg-intro-at", String(Date.now() - 31 * DAY_MS));
     expect(returning()).toBe(false);
   });
 

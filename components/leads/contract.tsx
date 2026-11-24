@@ -14,8 +14,7 @@ import { Heading, Text } from "@astryxdesign/core/Text";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { TextArea } from "@astryxdesign/core/TextArea";
 import { Selector } from "@astryxdesign/core/Selector";
-import { stampPT } from "@/lib/leads/lead-desk";
-import { adminCall, authed } from "@/lib/admin/admin-call";
+import { adminCall, authed, stampPT } from "@/lib/admin/admin-call";
 import { errorText } from "@/lib/utils";
 import type { Contract, ContractTemplate } from "@/lib/contracts/contract";
 

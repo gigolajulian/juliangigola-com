@@ -13,6 +13,7 @@
  */
 
 import { isRecord } from "@/lib/json";
+import { HttpError } from "@/lib/http";
 
 /**
  * Where the editor keeps the GitHub token in the browser. Named here, not
@@ -81,7 +82,7 @@ export async function listDirectory(
     { headers: headers(token), cache: "no-store" },
   );
   if (res.status === 404) return [];
-  if (!res.ok) throw new Error(`GitHub said ${res.status}: ${await failureMessage(res)}`);
+  if (!res.ok) throw new HttpError(`GitHub said ${res.status}: ${await failureMessage(res)}`, res.status);
   const body = (await res.json()) as { type: string; path: string }[];
   return Array.isArray(body)
     ? body
@@ -225,7 +226,7 @@ export async function readFile(
     { headers: headers(token), cache: "no-store" },
   );
   if (res.status === 404) return null;
-  if (!res.ok) throw new Error(`GitHub said ${res.status}: ${await failureMessage(res)}`);
+  if (!res.ok) throw new HttpError(`GitHub said ${res.status}: ${await failureMessage(res)}`, res.status);
   const body = (await res.json()) as { content?: string };
 
   const binary = atob(String(body.content).replace(/\s/g, ""));

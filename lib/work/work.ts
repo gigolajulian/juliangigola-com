@@ -36,7 +36,6 @@ import {
   type AddedProject,
 } from "./added";
 
-export type { Project, Category, Frame, TextBlock };
 /**
  * Every discipline: the ones the old nav had, plus any added in /admin.
  *
@@ -852,7 +851,6 @@ export const FEATURED: Project[] = FEATURED_SLUGS.map((s) =>
   bySlug.get(s),
 ).filter((p): p is Project => Boolean(p));
 
-export type { WallTile };
 const wallTile = (src: string, title: string, href: string): WallTile => ({ src, title, href });
 
 /**

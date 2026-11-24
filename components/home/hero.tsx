@@ -4,7 +4,7 @@ import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { matches } from "@/lib/device";
-import { projectHref } from "@/lib/project-href";
+import { projectHref } from "@/lib/work/project-href";
 import { EXTRAS, type HomeFrame } from "@/lib/home/data";
 import { flipMs } from "./motion/root-attrs";
 

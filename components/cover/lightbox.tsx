@@ -5,7 +5,8 @@ import { Orb } from "@/components/effects/orb";
 import { flushSync } from "react-dom";
 import Image from "next/image";
 import { Dialog, VisuallyHidden } from "radix-ui";
-import { cn, rubberband } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { rubberband } from "@/lib/motion/rubberband";
 import TiltedCard from "@/components/vendor/tilted-card";
 import type { Frame } from "@/lib/work/work-types";
 import {

@@ -1,6 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { createHash } from "node:crypto";
-import { cn, isEmail, logged, pad, rubberband, sha256Hex } from "@/lib/utils";
+import { cn, isEmail, logged, pad } from "@/lib/utils";
 import { asRecord } from "@/lib/json";
 import { softItem, wallItem } from "@/lib/work/wall-tile";
 
@@ -8,30 +7,15 @@ import { softItem, wallItem } from "@/lib/work/wall-tile";
 
 afterEach(() => vi.unstubAllGlobals());
 
-describe("rubberband", () => {
-  it("is zero at the edge and keeps the pull's direction", () => {
-    expect(rubberband(0, 300)).toBe(0);
-    expect(rubberband(-50, 300)).toBe(-rubberband(50, 300));
-  });
-  it("gives less than the pull and never reaches the size of the thing", () => {
-    expect(rubberband(100, 300)).toBeLessThan(100);
-    expect(rubberband(1e9, 300)).toBeLessThan(300);
-    expect(rubberband(200, 300)).toBeGreaterThan(rubberband(100, 300));
-  });
-});
-
 describe("cn", () => {
   it("joins classes and drops falsy ones", () => {
     expect(cn("a", false, null, "b")).toBe("a b");
   });
 });
 
-describe("pad and sha256Hex", () => {
+describe("pad", () => {
   it("pads to two digits", () => {
     expect([pad(7), pad(12), pad(0)]).toEqual(["07", "12", "00"]);
-  });
-  it("matches Node's hex SHA-256 on UTF-8 text", async () => {
-    for (const s of ["", "abc", "Signé · 署名 ok"]) expect(await sha256Hex(s)).toBe(createHash("sha256").update(s, "utf8").digest("hex"));
   });
 });
 

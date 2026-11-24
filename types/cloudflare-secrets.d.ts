@@ -26,7 +26,7 @@ interface CloudflareEnv {
    */
   INBOX_KEY?: string;
 
-  /** Seals leads, proofs and contracts (`lib/leads/lead-crypto.ts`). Set with `wrangler secret put LEADS_KEY`. */
+  /** Seals leads, proofs and contracts (`lib/seal.ts`). Set with `wrangler secret put LEADS_KEY`. */
   LEADS_KEY?: string;
 
   /** Signs Web Push for /admin's lead alerts (`app/api/leads/push/route.ts`). Set with `wrangler secret put VAPID_KEY`. */

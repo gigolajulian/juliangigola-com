@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { shareOg } from "@/lib/og/share";
-import { WorkIndex, type FrameItem, type WorkItem } from "@/components/portfolio/work";
+import { WorkIndex } from "@/components/portfolio/work";
+import type { WorkItem } from "@/components/portfolio/work-tiles";
+import type { FrameItem } from "@/components/portfolio/frame-view";
 import { CATEGORIES, PROJECTS, categoryLabel } from "@/lib/work/work";
-import ORDER from "@/lib/portfolio-order.json";
+import ORDER from "@/lib/work/portfolio-order.json";
 
 export const metadata: Metadata = {
   title: "Photography Portfolio, San Francisco Bay Area",

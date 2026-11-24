@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { CLIENT_MARKS } from "@/lib/clients-data";
-import { projectHref } from "@/lib/project-href";
+import { projectHref } from "@/lib/work/project-href";
 
 /* A photo slot with its dark and light frame. Both are rendered and the
    theme hides one (`.v3d` / `.v3l` in styles/v3.css), so a theme switch

@@ -27,13 +27,13 @@ import type { Hours, Window } from "@/lib/booking/rules";
 import type { Stage } from "@/lib/leads/leads";
 
 import { byCodeUnit, errorText } from "@/lib/utils";
+import { clockLabel } from "@/lib/booking/clock";
 import { Page } from "@/components/leads/lists";
 
 const PUSH_FLAG = "jg-leads-push";
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const TIMES = Array.from({ length: 33 }, (_, i) => 360 + i * 30);
-const clock = (m: number) => `${((Math.floor(m / 60) + 11) % 12) + 1}:${String(m % 60).padStart(2, "0")} ${m < 720 ? "AM" : "PM"}`;
-const TIME_OPTS = TIMES.map((t) => ({ value: String(t), label: clock(t) }));
+const TIME_OPTS = TIMES.map((t) => ({ value: String(t), label: clockLabel(t) }));
 const DEFAULT_WINDOW: Window = [600, 1140];
 const dateLabel = (d: string) => new Intl.DateTimeFormat("en-US", { timeZone: "UTC", weekday: "short", month: "short", day: "numeric" }).format(new Date(`${d}T00:00:00Z`));
 

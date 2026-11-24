@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Dialog } from "radix-ui";
 import { Check, Failed, Hidden, NEED_MSG, checkYou, first, useEnquiry } from "@/components/enquiry/flow";
 import { CHIP_TYPE, QUOTE_OPTS, type QuoteOpt } from "@/lib/home/data";
-import { sessionJson, sessionRemove, sessionSet } from "@/lib/utils";
+import { sessionJson, sessionRemove, sessionSet } from "@/lib/storage";
 import type { InquiryMode } from "./ctx";
 
 /* Spec 3.11: the quick note over a dim layer (a bottom sheet on phones),

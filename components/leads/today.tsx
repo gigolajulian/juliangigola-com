@@ -23,7 +23,7 @@ import { ago, isSetAside, dateTimeLabel, centsLabel, isFinishedStage, deskCall, 
 import { adminCall, authed } from "@/lib/admin/admin-call";
 import { balance, shortDate, dueOf, overdue, usd } from "@/lib/leads/invoice";
 import type { InvoiceRow } from "@/components/leads/invoices";
-import { TZ } from "@/lib/time-zone";
+import { TZ, DAY_MS } from "@/lib/time-zone";
 import { proofApi, feed, type FeedItem, type ProofRow } from "@/lib/proofs/desk";
 
 /* Today's helpers, from the retired classic desk. */
@@ -126,7 +126,7 @@ export function TodayDesk({ leads, size, open, show }: { leads: LeadSummary[]; s
     deskCall<{ tasks: TaskRow[] }>({ path: "/tasks" }).then((o) => setTaskRows(o.tasks ?? [])).catch(() => setTaskRows("Tasks did not load"));
   }, []);
   const due = dueTasks((Array.isArray(taskRows) ? taskRows : []).filter((t) => leads.some((l) => l.id === t.lead && !isSetAside(l))), today);
-  const lateBy = (d: string) => Math.round((Date.parse(`${today}T12:00:00Z`) - Date.parse(`${d}T12:00:00Z`)) / 864e5);
+  const lateBy = (d: string) => Math.round((Date.parse(`${today}T12:00:00Z`) - Date.parse(`${d}T12:00:00Z`)) / DAY_MS);
   const whenDue = (d: string) => (d === today ? "Today" : d === plusDays(today, 1) ? "Tomorrow" : new Date(`${d}T12:00:00Z`).toLocaleDateString("en-US", { weekday: "short", timeZone: "UTC" }));
   const m = typeof money === "object" ? money : null;
   const t = typeof traffic === "object" ? traffic : null;

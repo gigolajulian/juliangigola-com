@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Duo } from "@/components/site/duo";
-import { DOORS } from "@/lib/home/photos";
+import { DOORS } from "@/lib/photos";
 import { INDEX_ORDER, SESSIONS } from "@/lib/booking/catalog";
 
 /** The two ways in, commissions and sessions: closes the home page and the booking pages. */

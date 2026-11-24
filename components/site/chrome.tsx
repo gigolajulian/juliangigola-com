@@ -7,7 +7,8 @@ import { THEME_COLOR } from "@/lib/theme-color";
 import { usePathname } from "next/navigation";
 import { scrollTop } from "./smooth-scroll";
 import { useNavInk } from "./nav-ink";
-import { noSubscribe, sessionGet, sessionSet } from "@/lib/utils";
+import { noSubscribe } from "@/lib/utils";
+import { sessionGet, sessionSet } from "@/lib/storage";
 
 /* JG V3 chrome: the glass header, the phone menu, the theme
    toggle and the footer line. Every route uses it, /admin included. */

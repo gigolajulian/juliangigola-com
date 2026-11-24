@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { usePathname } from "next/navigation";
-import { sessionJson, sessionSet } from "@/lib/utils";
+import { sessionJson, sessionSet } from "@/lib/storage";
 
 /* ── the visit trail ──────────────────────────────────────────────
  * An inquiry says where its sender came from and

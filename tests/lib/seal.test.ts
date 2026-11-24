@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { sealer } from "@/lib/leads/lead-crypto";
+import { sealer } from "@/lib/seal";
 
 describe("sealer", () => {
   it("seals and opens a photo-sized payload without overflowing the stack", async () => {

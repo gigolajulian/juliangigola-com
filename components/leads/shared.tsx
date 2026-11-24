@@ -49,7 +49,7 @@ function badge(n: number) {
   } catch {}
 }
 
-const LABEL: Partial<Record<Filter, string>> = { today: "Today", traffic: "Traffic", seo: "SEO", site: "Site", device: "This device", needs: "Your move", open: "All open", upcoming: "Upcoming", snoozed: "Snoozed", archived: "Archived", trash: "Trash", more: "More", new: "New lead", stats: "Stats", money: "Money", templates: "Templates", hours: "Hours", proofs: "Proofs", licences: "Licences" };
+const LABEL: Partial<Record<Filter, string>> = { needs: "Your move", open: "All open", upcoming: "Upcoming", snoozed: "Snoozed", archived: "Archived", trash: "Trash" };
 const label = (f: Filter) => LABEL[f] ?? f;
 
 /** One timeline line, in words. */

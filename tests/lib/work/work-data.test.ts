@@ -2,7 +2,7 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { SPLASH_RUN } from "@/lib/work/splash-run";
-import { CALL_CARD, DOORS, HERO } from "@/lib/home/photos";
+import { CALL_CARD, DOORS, HERO } from "@/lib/photos";
 import { INDEX_ORDER, isSession, LENGTH, priceLabel, SESSIONS, TAB_ORDER, type Session } from "@/lib/booking/catalog";
 import { CATEGORIES, PROJECTS } from "@/lib/work/work-data";
 import { PROJECTS as SITE_PROJECTS } from "@/lib/work/work";

@@ -4,7 +4,7 @@ import * as React from "react";
 import { flushSync } from "react-dom";
 import { DriftWall } from "@/components/drift-wall";
 import { GRIDWALL, wallFill, type Gridwall } from "@/lib/proofs/gridwall";
-import { localGet, localSet } from "@/lib/utils";
+import { localGet, localSet } from "@/lib/storage";
 
 /* ── the proof gate over the 404's wall (the default; ?proofwall=0 for the plain gate) ──
  * The 404's wall (`DriftWall`) under a glass card,

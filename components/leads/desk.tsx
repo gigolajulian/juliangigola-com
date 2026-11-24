@@ -30,12 +30,13 @@ import { Tab, TabList } from "@astryxdesign/core/TabList";
 import { SignIn } from "@/components/desk/sign-in";
 import { LeadDesk, type LeadAsk } from "@/components/leads/lead";
 import { badge, FROST_ROOM, frostBar, GLASS, WIN_CSS } from "@/components/leads/shared";
-import { isSetAside, deskCall, loadErrorText, LOCKED, matches, inFilter, type Size } from "@/lib/leads/lead-desk";
+import { deskCall, inFilter, isSetAside, matches, type Size } from "@/lib/leads/lead-desk";
+import { loadErrorText, LOCKED } from "@/lib/admin/admin-call";
 import { errorText } from "@/lib/utils";
 import { useSiteThemeRead } from "@/lib/site-theme";
 import type { Template } from "@/lib/leads/lead-crm";
 import { KEY_STORE, saveAdminKey, TOKEN_STORE } from "@/lib/admin/admin-github";
-import { leadSummary, shootTag, type Lead, type LeadPatch, type LeadSummary } from "@/lib/leads/leads";
+import { leadIdOf, leadStoreKey, leadSummary, shootTag, type Lead, type LeadPatch, type LeadSummary } from "@/lib/leads/leads";
 import { TodayDesk } from "@/components/leads/today";
 import { NewLeadDesk } from "@/components/leads/new-lead";
 import { BoardDesk } from "@/components/leads/board";
@@ -50,6 +51,7 @@ import { type Filter } from "@/lib/leads/lead-desk";
 import { ProofsDesk } from "@/components/proofs/desk";
 import { Eyebrow, FIND_KEY, FindGlyph, GO, Nav, More, PlusGlyph, Rail, sectionOf, TabBar, type Found, type View } from "@/components/leads/desk-nav";
 import { date, fmt, OpenLeadPanel } from "@/components/leads/lead-panel";
+import { DAY_MS, WEEK_MS } from "@/lib/time-zone";
 
 type Group = "now" | "week" | "waiting";
 
@@ -72,9 +74,8 @@ const leadsTheme = defineTheme({
 
 const GROUPS: [Group, string][] = [["now", "Your move"], ["week", "This week"], ["waiting", "Waiting on them"]];
 /** A day from the moment of the swipe or press. */
-const dayOn = () => new Date(Date.now() + 864e5).toISOString();
+const dayOn = () => new Date(Date.now() + DAY_MS).toISOString();
 const BOARD_STORE = "jg-leads-board";
-const WEEK = 7 * 864e5;
 const stamp = (t: number) => fmt({ weekday: "short", month: "short", day: "numeric" }).format(new Date(t)).toUpperCase().replace(",", "");
 
 /* The palette on a phone: the whole screen, as a sheet, with the list taking what the field leaves. */
@@ -172,7 +173,7 @@ export function LeadsDesk() {
   const finder = React.useMemo(
     () => createStaticSource<Found>(
       [
-        ...(leads ?? []).filter((l) => !l.trashedAt && l.id).map((l) => ({ id: `lead:${l.id}`, label: l.name || l.email, auxiliaryData: { group: "Leads", words: [l.email, l.kind ?? "", l.stage], note: [l.stage, l.when ? fmt({ month: "short", day: "numeric" }).format(new Date(l.when)) : null].filter(Boolean).join(" · ") } })),
+        ...(leads ?? []).filter((l) => !l.trashedAt && l.id).map((l) => ({ id: leadStoreKey(l.id!), label: l.name || l.email, auxiliaryData: { group: "Leads", words: [l.email, l.kind ?? "", l.stage], note: [l.stage, l.when ? fmt({ month: "short", day: "numeric" }).format(new Date(l.when)) : null].filter(Boolean).join(" · ") } })),
         // Actions on the lead that is open, then the ones that need none.
         ...(openName ? [{ id: "do:task", label: `Add a task to ${openName}`, auxiliaryData: { group: "Do", words: ["task", "todo"] } }, { id: "do:invoice", label: `New invoice for ${openName}`, auxiliaryData: { group: "Do", words: ["invoice", "bill"] } }] : []),
         { id: "go:new", label: "New lead", auxiliaryData: { group: "Do", words: ["add", "lead"] } },
@@ -207,7 +208,7 @@ export function LeadsDesk() {
   const groupOf = (l: LeadSummary): Group | null => {
     if (inFilter(l, "needs")) return "now";
     if (!inFilter(l, "open")) return null;
-    if (inFilter(l, "upcoming") && Date.parse(l.when!) < at + WEEK) return "week";
+    if (inFilter(l, "upcoming") && Date.parse(l.when!) < at + WEEK_MS) return "week";
     return "waiting";
   };
   const rows = live.filter((l) => matches(l, words)).map((l) => [l, groupOf(l)] as const).filter((r): r is readonly [LeadSummary, Group] => r[1] !== null);
@@ -217,7 +218,7 @@ export function LeadsDesk() {
   const changed = (l: Lead) => setLeads((rs) => rs?.map((r) => (r.email === l.email ? { ...r, ...leadSummary(l), id: r.id } : r)) ?? null);
   /** A swipe or a button here: the same PATCH the lead's own Snooze, Archive and stage buttons send. */
   const act = (l: LeadSummary, body: LeadPatch) =>
-    deskCall<{ lead: Lead }>({ method: "PATCH", body: JSON.stringify({ key: `lead:${l.id}`, ...body }) })
+    deskCall<{ lead: Lead }>({ method: "PATCH", body: JSON.stringify({ key: leadStoreKey(l.id!), ...body }) })
       .then((o) => changed(o.lead))
       .catch((e: unknown) => { alert(errorText(e)); load(); });
   const tomorrow = (l: LeadSummary) => act(l, { snoozeUntil: dayOn() });
@@ -398,7 +399,7 @@ export function LeadsDesk() {
             setFinding(false);
             if (id.startsWith("go:")) show(id.slice(3) as View);
             else if (id.startsWith("do:")) setAsk({ do: id.slice(3) as LeadAsk["do"], n: Date.now() });
-            else setOpen(id.slice(5));
+            else setOpen(leadIdOf(id));
           }}
         />
         {size === "phone"

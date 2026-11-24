@@ -4,7 +4,7 @@ import * as React from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { matches } from "@/lib/device";
 import { THEME_COLOR } from "@/lib/theme-color";
-import { sessionGet } from "@/lib/utils";
+import { sessionGet } from "@/lib/storage";
 
 /* ── the numerals, and the hand that focuses them ──────────────────
  * The 404 opens out of focus: the numerals sit under 16px of blur at 78%,

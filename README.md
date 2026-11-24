@@ -57,7 +57,7 @@ All 74 projects and 1,131 frames were migrated off the old Format site.
 | `lib/work/work-types.ts` | Shapes for the above. |
 | `lib/booking/sessions.ts` | Session types for the older booking pages. `from: null` renders as "On request". |
 | `lib/booking/catalog.ts` | The session list the /book stepper, the homepage and the service pages read. |
-| `lib/home/photos.ts` | Photo picks for the hero, the doors, the call card and About. |
+| `lib/photos.ts` | Photo picks for the hero, the doors, the call card and About. |
 | `lib/site.ts` | Reply-time promise and the booking-calendar URL. |
 
 ### Front end

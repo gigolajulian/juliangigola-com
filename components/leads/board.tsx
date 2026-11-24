@@ -14,9 +14,10 @@ import { Button } from "@astryxdesign/core/Button";
 import { Text } from "@astryxdesign/core/Text";
 import { STAGES, shootTag, type LeadSummary, type Stage } from "@/lib/leads/leads";
 import { dollarsLabel, nextStep } from "@/lib/leads/lead-desk";
+import { DAY_MS } from "@/lib/time-zone";
 
 const COLUMNS: readonly Stage[] = STAGES.filter((s) => s !== "Lost");
-const RECENT = 30 * 864e5;
+const RECENT = 30 * DAY_MS;
 
 export function BoardDesk({ leads, onMove, open }: { leads: LeadSummary[]; onMove: (l: LeadSummary, stage: Stage) => void; open: (l: LeadSummary) => void }) {
   const [over, setOver] = React.useState<Stage | null>(null);

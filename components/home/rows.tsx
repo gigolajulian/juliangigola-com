@@ -8,7 +8,7 @@ import { COVER_RELEASES } from "@/lib/work/cover-art-data";
 import type { CoverRelease } from "@/lib/work/cover-art-types";
 import { media } from "@/lib/device";
 import { dropSpot, keepSpot, layoutTop } from "./back";
-import { projectHref } from "@/lib/project-href";
+import { projectHref } from "@/lib/work/project-href";
 import { holdEase, holdUnease } from "@/lib/motion/hold-ease";
 import { clamp, progress } from "./motion/engine";
 import { COVER_KEYS, COVER_PRESS, FILM_DRESS, type HomeFilm } from "@/lib/home/data";

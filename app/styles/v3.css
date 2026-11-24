@@ -1810,7 +1810,7 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
   .v3 .wviews .vset:not(.open)>button:not([data-rep]){visibility:hidden;transition:width .5s var(--ease-spring),opacity .2s,visibility 0s .5s}
 }
 
-/* ── ?sky: the time picker in the hour's light (lib/booking/sky.ts, components/booking/sky-times.tsx) ──
+/* ── ?sky: the time picker in the hour's light (lib/booking/sky.ts, components/booking/picker/sky-times.tsx) ──
    Each time carries its color for both grounds (--tc dark, --tcl light); --tone picks the one showing.
    DESIGN.md: the one scoped exception to the One Accent Rule. */
 :root[data-sky]{--sky-m:oklch(0.8 0.143 70);--sky-a:oklch(0.68 0.18 35);--sky-e:oklch(0.66 0.11 253)}

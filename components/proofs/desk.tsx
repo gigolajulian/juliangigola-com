@@ -34,9 +34,10 @@ import { proofApi, cardCrop, pastCloseDate, cropAt, proofStatus, type ProofRow }
 import { ActivityDesk } from "@/components/proofs/activity";
 import { Timeline } from "@/components/proofs/timeline";
 import { useClock } from "@/components/proofs/use-clock";
-import { loadErrorText, LOCKED, stampPT } from "@/lib/leads/lead-desk";
+import { loadErrorText, LOCKED, stampPT } from "@/lib/admin/admin-call";
 import { errorText } from "@/lib/utils";
 import { extras, publicId, remindState, THUMB_W, type CardCrop } from "@/lib/proofs/proof-model";
+import { DAY_MS } from "@/lib/time-zone";
 
 const CLASSIC = "/admin";
 // The small copy the client's grid uses: every frame on the desk is a thumbnail. Once delivered the proof copies are gone: the finals' small copies stand in.
@@ -214,7 +215,7 @@ function Gallery({ p, changed, onBack, gone }: { p: ProofRow; changed: () => voi
   const [reminder, setReminder] = React.useState<{ html: string; subject: string; to: string; cc: string[] } | null>(null);
   const viewer = p.email ? p.viewers?.[p.email.trim().toLowerCase()]?.name : undefined;
   const who = viewer?.split(/\s+/)[0] || "client";
-  const left = clock && p.closesAt ? Math.max(1, Math.ceil((Date.parse(p.closesAt) - clock) / 864e5)) : 0;
+  const left = clock && p.closesAt ? Math.max(1, Math.ceil((Date.parse(p.closesAt) - clock) / DAY_MS)) : 0;
   const closesIn = `closes in ${left} ${left === 1 ? "day" : "days"}`;
   const nextLine = !remind ? "" : remind.state === "sent" ? `Reminded ${stampPT(remind.at)}. No more reminders for this stage.`
     : remind.state === "locked" ? `The reminder opens ${stampPT(remind.opensAt)}, in the last 5 days.`

@@ -1,7 +1,7 @@
 /* Example leads in the local INBOX, for working on the lead desk in
  * `next dev` (/admin/leads). Writes only to wrangler's local state
  * (.wrangler/), never to the real namespace. Names are made up. Sealed
- * like the real ones (`lib/leads/lead-crypto.ts`), with LEADS_KEY from .dev.vars.
+ * like the real ones (`lib/seal.ts`), with LEADS_KEY from .dev.vars.
  *
  *   node scripts/seed-leads.mjs
  */
@@ -10,7 +10,7 @@ import { getPlatformProxy } from "wrangler";
 const { env, dispose } = await getPlatformProxy();
 if (!env.LEADS_KEY) throw new Error("Put a LEADS_KEY (32 random bytes, base64) in .dev.vars first.");
 
-// The same two derived keys as lib/lead-crypto.ts.
+// The same two derived keys as lib/seal.ts.
 const enc = new TextEncoder();
 const raw = Uint8Array.from(atob(env.LEADS_KEY.trim()), (c) => c.charCodeAt(0));
 const derive = async (label) => new Uint8Array(await crypto.subtle.digest("SHA-256", new Uint8Array([...enc.encode(label), ...raw])));

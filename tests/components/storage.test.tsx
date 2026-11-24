@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { localGet, localRemove, localSet, sessionJson, sessionRemove, sessionSet } from "@/lib/utils";
+import { localGet, localRemove, localSet, sessionJson, sessionRemove, sessionSet } from "@/lib/storage";
 
 afterEach(() => {
   vi.restoreAllMocks();

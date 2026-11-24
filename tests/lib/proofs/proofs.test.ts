@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { paidFor } from "@/lib/proofs/submit";
 import { cardPrice, cleanNotes, coverFrame, cleanSelects, cleanSettings, extras, isOpen, isStrongId, isToken, lookStarts, proofDay, proofId, amountOwed, shootDay, shotOrder, stage } from "@/lib/proofs/proof-model";
-import { newToken } from "@/lib/utils";
+import { newToken } from "@/lib/token";
 import { nextProofId } from "@/lib/proofs/proof-store";
 
 const frames = ["a", "b", "c"].map((id) => ({ id, file: `${id}.jpg`, w: 1, h: 1 }));

@@ -6,7 +6,7 @@ import { holdLanding } from "@/components/site/page-transition";
 import { lastPopAt } from "@/components/site/back-link";
 import { media } from "@/lib/device";
 import { painted } from "@/lib/painted";
-import { sessionJson } from "@/lib/utils";
+import { sessionJson } from "@/lib/storage";
 import { tell } from "./motion/engine";
 
 /* Back to the home from any page of the site lands where the visitor left it, from the first paint.

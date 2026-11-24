@@ -42,12 +42,13 @@ import { isSettled } from "@/lib/leads/invoice";
 import { endDay, type Size } from "@/lib/leads/lead-desk";
 import { errorText } from "@/lib/utils";
 import type { Enquiry } from "@/lib/leads/enquiry";
-import { canonical } from "@/lib/leads/lead-crypto";
-import { isLate,NUDGES, PAPER, quoteNudge, REMIND_MAX, STAGES, trashDaysLeft, WON, type Lead, type LeadPatch, type LeadSummary, type Stage } from "@/lib/leads/leads";
+import { canonical } from "@/lib/leads/canonical";
+import { isLate, leadStoreKey, NUDGES, PAPER, quoteNudge, REMIND_MAX, STAGES, trashDaysLeft, WON, type Lead, type LeadPatch, type LeadSummary, type Stage } from "@/lib/leads/leads";
 import { callSheet, fillTemplate, mailable, TEMPLATES, type Template } from "@/lib/leads/lead-crm";
 import { leadKey, typingIn } from "@/lib/leads/lead-keys";
 import { balance, depositOfLead, subtotal, usd } from "@/lib/leads/invoice";
-import { ago, dateTimeLabel, type Call, DAY, dayLabel, nextStep, now, needsRenewal, isSnoozed } from "@/lib/leads/lead-desk";
+import { ago, dateTimeLabel, type Call, dayLabel, nextStep, now, needsRenewal, isSnoozed } from "@/lib/leads/lead-desk";
+import { DAY_MS } from "@/lib/time-zone";
 import { adminCall, authed } from "@/lib/admin/admin-call";
 import { glyph } from "@/components/desk/chrome";
 import { compose, frostBar, ios, kindOf, line, mailto } from "@/components/leads/shared";
@@ -110,7 +111,7 @@ function useLeadDetail({ summary, initial, call, onChange, reload, onLoadError }
   const [message, setMessage] = React.useState<Enquiry | null>(null);
   const [msgKey, setMsgKey] = React.useState<string | null>(null);
   const [proofs, setProofs] = React.useState<ProofRow[]>([]);
-  const key = `lead:${summary.id}`;
+  const key = leadStoreKey(summary.id!);
 
 
   const patch = React.useCallback(
@@ -194,7 +195,7 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
   const sheet = full?.plan && l.when && l.stage === "Confirmed" ? callSheet(full) : null;
   const primaryAction = !mailOk ? null : needsRenewal(l) ? { label: "Renew licence", win: "Keep the licence", href: mail(l.email, fillTemplate(renewTemplate.subject, l), fillTemplate(renewTemplate.body, l)) } : nudge && late ? { label: `Send ${nudge.name}`, win: "Land the booking", href: mail(l.email, fillTemplate(nudge.subject, l), fillTemplate(nudge.body, l)) } : sheet ? { label: "Send call sheet", win: "Set the day", href: mail(sheet.to, sheet.subject, sheet.body) } : null;
 
-  const snoozeFor = (d: number) => run(patch({ snoozeUntil: new Date(now() + d * DAY).toISOString() }), "Snoozed.");
+  const snoozeFor = (d: number) => run(patch({ snoozeUntil: new Date(now() + d * DAY_MS).toISOString() }), "Snoozed.");
   const archive = () => run(patch({ archive: !l.archivedAt }), l.archivedAt ? "Back in the list." : "Archived.");
   const setStage = (s: Stage) => l.stage !== s && run(patch({ stage: s }));
 
@@ -367,9 +368,9 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
             {asked && l.stage === "Inquiry" ? <Banner status="info" title="Sent it?" endContent={<Button label="Mark as Replied" variant="secondary" size="sm" onClick={() => run(patch({ stage: "Replied" }).then(() => setAsked(false)))} />} /> : null}
             {editing === "snooze" ? (
               <Banner status="info" title="Snooze until" isDismissable onDismiss={() => setEditing(null)}
-                endContent={<DateInput label="Snooze until" isLabelHidden size="sm" min={new Date(now() + DAY).toISOString().slice(0, 10) as never} onChange={(v) => v && run(patch({ snoozeUntil: new Date(`${v}T09:00:00`).toISOString() }), "Snoozed.")} />} />
+                endContent={<DateInput label="Snooze until" isLabelHidden size="sm" min={new Date(now() + DAY_MS).toISOString().slice(0, 10) as never} onChange={(v) => v && run(patch({ snoozeUntil: new Date(`${v}T09:00:00`).toISOString() }), "Snoozed.")} />} />
             ) : null}
-            {editing === "merge" ? <Merge others={others} onMerge={(id) => run(patch({ mergeFrom: `lead:${id}` }), "Merged.")} onClose={() => setEditing(null)} /> : null}
+            {editing === "merge" ? <Merge others={others} onMerge={(id) => run(patch({ mergeFrom: leadStoreKey(id) }), "Merged.")} onClose={() => setEditing(null)} /> : null}
 
             <Section>
               <HStack gap={4} vAlign="end" wrap="wrap">
@@ -528,7 +529,7 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
 }
 
 function RemindForm({ onSave, onCancel }: { onSave: (iso: string, text: string) => void; onCancel: () => void }) {
-  const [d0, t0] = localParts(new Date(now() + DAY).toISOString());
+  const [d0, t0] = localParts(new Date(now() + DAY_MS).toISOString());
   const [d, setD] = React.useState(d0);
   const [t, setT] = React.useState(t0);
   const [text, setText] = React.useState("");

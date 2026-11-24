@@ -7,7 +7,7 @@
  * The Next routes call the same functions, for `next dev`.
  * ─────────────────────────────────────────────────────────────── */
 
-import { sealer } from "@/lib/leads/lead-crypto";
+import { sealer } from "@/lib/seal";
 import { finalKey, PREVIEW_W, THUMB_W, isFrameId, isStrongId, isToken, shotOrder, type Proof } from "@/lib/proofs/proof-model";
 import { readPublic, shutReason } from "@/lib/proofs/proof-store";
 import { uniqueNames, zipLayout } from "@/lib/proofs/zip";

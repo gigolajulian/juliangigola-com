@@ -8,7 +8,8 @@ import { ProofWall } from "@/components/proofs/wall";
 import { ProofCursor } from "@/components/proofs/cursor";
 import { gridwallFor } from "@/lib/proofs/gridwall";
 import { qflag } from "@/lib/flags/query";
-import { localRemove, looksLikeEmail, noSubscribe, sessionGet, sessionRemove, sessionSet } from "@/lib/utils";
+import { looksLikeEmail, noSubscribe } from "@/lib/utils";
+import { localRemove, sessionGet, sessionRemove, sessionSet } from "@/lib/storage";
 import { postJson } from "@/lib/http";
 
 /* ── the client's gallery ─────────────────────────────────────────
