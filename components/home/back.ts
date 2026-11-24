@@ -6,6 +6,7 @@ import { holdLanding } from "@/components/site/page-transition";
 import { lastPopAt } from "@/components/site/back-link";
 import { media } from "@/lib/device";
 import { painted } from "@/lib/painted";
+import { sessionJson } from "@/lib/utils";
 import { tell } from "./motion/engine";
 
 /* Back to the home from any page of the site lands where the visitor left it, from the first paint.
@@ -88,10 +89,7 @@ export function useBackHome() {
     // capture: before React's own click handlers, so a cover's spot (rows.tsx keepFlip) is the one kept
     const save = (e: MouseEvent) => leaves(e) && keepSpot(spotHere());
     document.addEventListener("click", save, true);
-    let at: Spot | null = null;
-    try {
-      at = JSON.parse(sessionStorage.getItem(BACK) ?? "null");
-    } catch {}
+    const at = sessionJson<Spot>(BACK);
     // taken a tick on, not now: React's dev double mount read it once and dropped it
     const t = setTimeout(() => {
       try {

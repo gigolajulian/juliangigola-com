@@ -9,6 +9,7 @@ import { GRID_SIZES } from "@/components/portfolio/work-tiles";
 /** The motion plan's `out` curve for GSAP: power4.out is cubic-bezier(.23, 1, .32, 1). */
 const GSAP_OUT = "power4.out";
 
+/** One frame in a chip's grid. `s` is its project's slug and `sq` whether it is square: short because the RSC payload carries them once per frame. */
 export type FrameItem = { s: string; src: string; alt: string; wide: boolean; sq: boolean; back?: { src: string; alt: string } };
 
 /* A two-sided sleeve's Front / Back switch, on the cell and in the viewer. */

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Dialog } from "radix-ui";
 import { Check, Failed, Hidden, NEED_MSG, checkYou, first, useEnquiry } from "@/components/enquiry/flow";
 import { CHIP_TYPE, QUOTE_OPTS, type QuoteOpt } from "@/lib/home/data";
+import { sessionJson, sessionRemove, sessionSet } from "@/lib/utils";
 import type { InquiryMode } from "./ctx";
 
 /* Spec 3.11: the quick note over a dim layer (a bottom sheet on phones),
@@ -18,13 +19,7 @@ const CALL_CHIP = "Music video";
 /* The typed fields last the visit, through a full close and reopen; a send clears them. */
 const DRAFT = "mt-inq-draft";
 const EMPTY = { name: "", email: "", when: "", message: "" };
-const readDraft = (): typeof EMPTY => {
-  try {
-    return { ...EMPTY, ...JSON.parse(sessionStorage.getItem(DRAFT) ?? "{}") };
-  } catch {
-    return EMPTY;
-  }
-};
+const readDraft = (): typeof EMPTY => ({ ...EMPTY, ...sessionJson<Partial<typeof EMPTY>>(DRAFT) });
 
 function Form({ from, opt, reply, onClose }: { from: InquiryMode; opt?: QuoteOpt; reply: string | null; onClose: () => void }) {
   const router = useRouter();
@@ -33,10 +28,8 @@ function Form({ from, opt, reply, onClose }: { from: InquiryMode; opt?: QuoteOpt
   const [v, setV] = React.useState(readDraft);
   const [err, setErr] = React.useState<Record<string, string>>({});
   React.useEffect(() => {
-    try {
-      if (sent) sessionStorage.removeItem(DRAFT);
-      else sessionStorage.setItem(DRAFT, JSON.stringify(v));
-    } catch {}
+    if (sent) sessionRemove(DRAFT);
+    else sessionSet(DRAFT, JSON.stringify(v));
   }, [v, sent]);
   const quote = from === "quote" && opt;
   const call = quote && chip === CALL_CHIP;
@@ -119,7 +112,7 @@ function Form({ from, opt, reply, onClose }: { from: InquiryMode; opt?: QuoteOpt
   );
 }
 
-/* ?mttp=sheet, phones: the handle drags the sheet down. Past 110px, or a quick flick, it closes; shorter, it springs back, so a half-typed note survives a slip.
+/* Phones: the handle drags the sheet down. Past 110px, or a quick flick, it closes; shorter, it springs back, so a half-typed note survives a slip.
    Only the handle drags: the card's own scroll is left alone. */
 function Handle({ onClose }: { onClose: () => void }) {
   const drag = React.useRef<{ y: number; t: number } | null>(null);

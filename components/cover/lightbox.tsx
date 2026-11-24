@@ -854,7 +854,7 @@ function useZoom(
    the middle picture to a side and a side one to the middle, each a new
    element that paints a frame late; the copy already painted goes under
    it, so nothing is blank for that frame. */
-const paint = (src: string) => (e: React.SyntheticEvent<HTMLImageElement>) =>
+const notePainted = (src: string) => (e: React.SyntheticEvent<HTMLImageElement>) =>
   painted.set(src, e.currentTarget.currentSrc);
 /** The best copy of a frame already decoded: the viewer's, or the page's. */
 const decodedCopy = (src: string) => {
@@ -1026,7 +1026,7 @@ function Stage({
             priority
             draggable={false}
             onLoad={(e) => {
-              paint(frame.src)(e);
+              notePainted(frame.src)(e);
               setShown(frame.src);
             }}
             className="block h-full w-full object-contain"
@@ -1129,7 +1129,7 @@ function Stage({
                       width={f.width}
                       height={f.height}
                       sizes="50vw"
-                      onLoad={paint(f.src)}
+                      onLoad={notePainted(f.src)}
                       draggable={false}
                       className="absolute inset-0 block h-full w-full object-cover"
                     />

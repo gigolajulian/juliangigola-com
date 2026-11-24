@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { usePathname } from "next/navigation";
+import { sessionJson, sessionSet } from "@/lib/utils";
 
 /* ── the visit trail ──────────────────────────────────────────────
  * An inquiry says where its sender came from and
@@ -14,30 +15,19 @@ import { usePathname } from "next/navigation";
 
 const KEEP = 12;
 
-const read = <T,>(key: string): T | null => {
-  try {
-    return JSON.parse(sessionStorage.getItem(key) ?? "null") as T | null;
-  } catch {
-    return null;
-  }
-};
-const write = (key: string, value: unknown) => {
-  try {
-    sessionStorage.setItem(key, JSON.stringify(value));
-  } catch {}
-};
+const write = (key: string, value: unknown) => sessionSet(key, JSON.stringify(value));
 
 export function VisitTrail() {
   const pathname = usePathname();
   React.useEffect(() => {
-    if (!read("jg-landing")) {
+    if (!sessionJson("jg-landing")) {
       const q = new URLSearchParams(location.search);
       const utm = [...q].filter(([k]) => k.startsWith("utm_")).map(([k, v]) => `${k.slice(4)}=${v}`).join(" ");
       write("jg-landing", { path: location.pathname + location.hash, referrer: document.referrer, utm });
     }
     const note = () => {
       const here = location.pathname + location.hash;
-      const trail = read<string[]>("jg-trail") ?? [];
+      const trail = sessionJson<string[]>("jg-trail") ?? [];
       if (trail[trail.length - 1] !== here) write("jg-trail", [...trail, here].slice(-KEEP));
     };
     note();
@@ -51,12 +41,12 @@ export function VisitTrail() {
     began, the trail, and the kind of device. */
 export function trailContext(): string {
   // Do Not Track or Global Privacy Control: nothing of the visit goes (privacy.tsx says so).
-  if (navigator.doNotTrack === "1" || (navigator as Navigator & { globalPrivacyControl?: boolean }).globalPrivacyControl) return "";
+  if (navigator.doNotTrack === "1" || navigator.globalPrivacyControl) return "";
   const device = matchMedia("(max-width: 39.99rem)").matches ? "phone" : matchMedia("(pointer: coarse)").matches ? "tablet" : "desktop";
   return JSON.stringify({
     page: location.pathname + location.hash,
-    ...(read<object>("jg-landing") ?? {}),
-    trail: read<string[]>("jg-trail") ?? [],
+    ...(sessionJson<object>("jg-landing") ?? {}),
+    trail: sessionJson<string[]>("jg-trail") ?? [],
     device,
   });
 }

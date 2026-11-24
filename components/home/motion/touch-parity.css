@@ -1,58 +1,58 @@
-/* Desktop motion brought to phones and tablets (touch-parity.ts), one block per item. */
+/* Desktop motion brought to phones and tablets, one block per item. touch-parity.ts sets html[data-tp] while the engine runs. */
 
 /* sink: the hero hands over to Commissions the desktop way, the stage sinks and dims while Motion, the next section on touch, slides over it.
    Smaller than desktop's 22svh: touch scrolls natively and a long scroll-driven move can trail the finger. See the work keeps a ground over it. */
-html[data-mt-motion][data-tp-sink]:not([data-mt-held]) .mt-hero .mt-stage { transform: translate3d(0, calc(var(--out, 0) * 12svh), 0) scale(calc(1 - var(--out, 0) * .04)); transform-origin: 50% 100%; opacity: calc(1 - var(--out, 0) * .6); }
-html[data-mt-motion][data-tp-sink]:not([data-mt-held]) .mt-hero .mt-more { position: relative; z-index: 1; background: var(--bg); }
-html[data-mt-motion][data-tp-sink]:not([data-mt-held]) .mt-motion { position: relative; z-index: 2; background: var(--bg); }
+html[data-mt-motion][data-tp]:not([data-mt-held]) .mt-hero .mt-stage { transform: translate3d(0, calc(var(--out, 0) * 12svh), 0) scale(calc(1 - var(--out, 0) * .04)); transform-origin: 50% 100%; opacity: calc(1 - var(--out, 0) * .6); }
+html[data-mt-motion][data-tp]:not([data-mt-held]) .mt-hero .mt-more { position: relative; z-index: 1; background: var(--bg); }
+html[data-mt-motion][data-tp]:not([data-mt-held]) .mt-motion { position: relative; z-index: 2; background: var(--bg); }
 
 /* covers: Cover art rides in (the heading ahead of the row), sinks and dims as About slides over it, and the cover in focus is larger.
    No lid: that needs the desktop hold. The title line rise is in rows.ts. */
-html[data-mt-motion][data-tp-covers]:not([data-mt-held]) .mt-covers .mt-rowhead > :is(h2, p) { translate: 0 calc((1 - var(--in, 1)) * 6svh); }
-html[data-mt-motion][data-tp-covers]:not([data-mt-held]) .mt-covers .mt-row { translate: 0 calc((1 - var(--in, 1)) * 10svh); }
-html[data-mt-motion][data-tp-covers]:not([data-mt-held]) .mt-covers .mt-stage { transform: translate3d(0, calc(var(--out, 0) * 12svh), 0) scale(calc(1 - var(--out, 0) * .04)); transform-origin: 50% 100%; opacity: calc(1 - var(--out, 0) * .6); }
-html[data-mt-motion][data-tp-covers]:not([data-mt-held]) .mt-about { position: relative; z-index: 2; background: var(--bg); }
-html[data-mt-motion][data-tp-covers]:not([data-mt-held]) .mt-covers .mt-sleeve { transition: scale .45s cubic-bezier(.23, 1, .32, 1); }
-html[data-mt-motion][data-tp-covers]:not([data-mt-held]) .mt-covers .mt-sleeve[data-on] { scale: 1.06; }
+html[data-mt-motion][data-tp]:not([data-mt-held]) .mt-covers .mt-rowhead > :is(h2, p) { translate: 0 calc((1 - var(--in, 1)) * 6svh); }
+html[data-mt-motion][data-tp]:not([data-mt-held]) .mt-covers .mt-row { translate: 0 calc((1 - var(--in, 1)) * 10svh); }
+html[data-mt-motion][data-tp]:not([data-mt-held]) .mt-covers .mt-stage { transform: translate3d(0, calc(var(--out, 0) * 12svh), 0) scale(calc(1 - var(--out, 0) * .04)); transform-origin: 50% 100%; opacity: calc(1 - var(--out, 0) * .6); }
+html[data-mt-motion][data-tp]:not([data-mt-held]) .mt-about { position: relative; z-index: 2; background: var(--bg); }
+html[data-mt-motion][data-tp]:not([data-mt-held]) .mt-covers .mt-sleeve { transition: scale .45s cubic-bezier(.23, 1, .32, 1); }
+html[data-mt-motion][data-tp]:not([data-mt-held]) .mt-covers .mt-sleeve[data-on] { scale: 1.06; }
 
 /* flip: a tap turns a sleeve to its back and a second tap turns it back (rows.ts sets data-tp-fl). Mouse pointers keep their hover flip (rows.css). */
 @media not ((hover: hover) and (pointer: fine)) {
-  html[data-mt-motion][data-tp-flip] .mt-sleeve[data-flip] { cursor: pointer; transition: --fl 1.05s cubic-bezier(.62, -.04, .18, 1.06), scale .45s cubic-bezier(.23, 1, .32, 1); }
-  html[data-mt-motion][data-tp-flip] .mt-sleeve[data-flip][data-tp-fl] { --fl: 1; }
-  html[data-mt-motion][data-tp-flip] .mt-sleeve[data-flip] .face { overflow: visible; background: none; }
-  html[data-mt-motion][data-tp-flip] .mt-sleeve[data-flip] .face img { border-radius: calc(4 * var(--u)); background: var(--card); backface-visibility: hidden; -webkit-backface-visibility: hidden; transform: perspective(1500px) rotateY(calc(var(--fl) * 180deg)); }
-  html[data-mt-motion][data-tp-flip] .mt-sleeve[data-flip] .face .back { opacity: 1; transform: perspective(1500px) rotateY(calc(180deg + var(--fl) * 180deg)); }
-  html[data-mt-motion][data-tp-flip] .mt-sleeve[data-flip][data-tp-fl] .disc { opacity: 0; }
+  html[data-mt-motion][data-tp] .mt-sleeve[data-flip] { cursor: pointer; transition: --fl 1.05s cubic-bezier(.62, -.04, .18, 1.06), scale .45s cubic-bezier(.23, 1, .32, 1); }
+  html[data-mt-motion][data-tp] .mt-sleeve[data-flip][data-tp-fl] { --fl: 1; }
+  html[data-mt-motion][data-tp] .mt-sleeve[data-flip] .face { overflow: visible; background: none; }
+  html[data-mt-motion][data-tp] .mt-sleeve[data-flip] .face img { border-radius: calc(4 * var(--u)); background: var(--card); backface-visibility: hidden; -webkit-backface-visibility: hidden; transform: perspective(1500px) rotateY(calc(var(--fl) * 180deg)); }
+  html[data-mt-motion][data-tp] .mt-sleeve[data-flip] .face .back { opacity: 1; transform: perspective(1500px) rotateY(calc(180deg + var(--fl) * 180deg)); }
+  html[data-mt-motion][data-tp] .mt-sleeve[data-flip][data-tp-fl] .disc { opacity: 0; }
 }
 
 /* films: the film in the row gets its muted preview (rows.ts). The player is drawn over the poster, so the film is its box. */
-html[data-mt-motion][data-tp-films]:not([data-mt-held]) .mt-motion .mt-film { position: relative; }
+html[data-mt-motion][data-tp]:not([data-mt-held]) .mt-motion .mt-film { position: relative; }
 
 /* drift: each Commissions column's photos drift inside their frames at their own rate, as the desktop sheet does */
-html[data-mt-motion][data-tp-drift]:not([data-mt-held]) .mt-masonry .mt-mcol .ph img { scale: 1.12; translate: 0 calc((var(--p, .5) - .5) * var(--k, -9%)); }
-html[data-mt-motion][data-tp-drift]:not([data-mt-held]) .mt-masonry .mt-mcol:nth-child(2) { --k: -3%; }
+html[data-mt-motion][data-tp]:not([data-mt-held]) .mt-masonry .mt-mcol .ph img { scale: 1.12; translate: 0 calc((var(--p, .5) - .5) * var(--k, -9%)); }
+html[data-mt-motion][data-tp]:not([data-mt-held]) .mt-masonry .mt-mcol:nth-child(2) { --k: -3%; }
 
 /* about: the sentence's words rise and sharpen as they light (desktop's beat, on the scroll), and the facts and the button come up after the rows (about.ts writes --ep).
    The photo holds while the text slides over it on tablets too, not only phones (flow.css). */
-html[data-mt-motion][data-tp-about]:not([data-mt-held]) .mt-say span { transform: translateY(calc((1 - var(--v)) * .16em)); filter: blur(calc((1 - var(--v)) * 4px)); }
-html[data-mt-motion][data-tp-about]:not([data-mt-held]) .mt-about :is(.mt-ab-foot dl > div, .mt-facts, .mt-more-me) { opacity: var(--ep, 1); translate: 0 calc((1 - var(--ep, 1)) * 14px); }
+html[data-mt-motion][data-tp]:not([data-mt-held]) .mt-say span { transform: translateY(calc((1 - var(--v)) * .16em)); filter: blur(calc((1 - var(--v)) * 4px)); }
+html[data-mt-motion][data-tp]:not([data-mt-held]) .mt-about :is(.mt-ab-foot dl > div, .mt-facts, .mt-more-me) { opacity: var(--ep, 1); translate: 0 calc((1 - var(--ep, 1)) * 14px); }
 @media (min-width: 600px) and (max-width: 1023px) {
-  html[data-mt-motion][data-tp-about]:not([data-mt-held]) .mt-about .mt-ab-ph { position: sticky; top: 57px; z-index: 0; }
-  html[data-mt-motion][data-tp-about]:not([data-mt-held]) .mt-about :is(.mt-wordmark, .mt-frame, .mt-more-me) { position: relative; z-index: 1; }
-  html[data-mt-motion][data-tp-about]:not([data-mt-held]) .mt-about .mt-frame { background: var(--bg); }
+  html[data-mt-motion][data-tp]:not([data-mt-held]) .mt-about .mt-ab-ph { position: sticky; top: 57px; z-index: 0; }
+  html[data-mt-motion][data-tp]:not([data-mt-held]) .mt-about :is(.mt-wordmark, .mt-frame, .mt-more-me) { position: relative; z-index: 1; }
+  html[data-mt-motion][data-tp]:not([data-mt-held]) .mt-about .mt-frame { background: var(--bg); }
 }
 
 /* sheet: on phones the note slides up from the bottom and back down, and the handle drags it (inquiry-card.tsx) */
 @keyframes tp-up { from { transform: translateY(100%); } }
 @media (max-width: 599px) {
-  html[data-tp-sheet] .mt-inq.mt-card[data-state="open"] { animation: tp-up .42s cubic-bezier(.32, .72, 0, 1); }
-  html[data-tp-sheet] .mt-inq.mt-card[data-state="closed"] { animation: tp-up .28s cubic-bezier(.32, .72, 0, 1) reverse; }
-  html[data-tp-sheet] .mt-inq .mt-handle { touch-action: none; }
-  html[data-tp-sheet] .mt-inq .mt-handle::before { content: ""; position: absolute; inset: -16px -72px; }
+  html[data-tp] .mt-inq.mt-card[data-state="open"] { animation: tp-up .42s cubic-bezier(.32, .72, 0, 1); }
+  html[data-tp] .mt-inq.mt-card[data-state="closed"] { animation: tp-up .28s cubic-bezier(.32, .72, 0, 1) reverse; }
+  html[data-tp] .mt-inq .mt-handle { touch-action: none; }
+  html[data-tp] .mt-inq .mt-handle::before { content: ""; position: absolute; inset: -16px -72px; }
 }
 
 /* press: a finger on a photo dips it, the press feedback a mouse gets from the hover lift */
 @media (pointer: coarse) {
-  html[data-mt-motion][data-tp-press] :is(.mt-hero a.fig, .mt-mcol a) .ph { transition: scale .16s cubic-bezier(.23, 1, .32, 1); }
-  html[data-mt-motion][data-tp-press] :is(.mt-hero a.fig, .mt-mcol a):active .ph { scale: .97; }
+  html[data-mt-motion][data-tp] :is(.mt-hero a.fig, .mt-mcol a) .ph { transition: scale .16s cubic-bezier(.23, 1, .32, 1); }
+  html[data-mt-motion][data-tp] :is(.mt-hero a.fig, .mt-mcol a):active .ph { scale: .97; }
 }

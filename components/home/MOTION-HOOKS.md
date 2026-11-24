@@ -19,7 +19,7 @@ Typed readers live in `motion/root-attrs.ts` (`flipMs`); everything else reads t
 | `data-mt-held` | engine.ts `measure()` | rows.tsx | every `motion/*.css`, mtscroll.css | engine start, resize, the held media change (on while held) | engine stop |
 | `data-mt-motion` | engine.ts | tests/ui (booking-menu, mt-motion) | every `motion/*.css` | engine start | engine stop |
 | `data-mt-scrolling` | engine.ts tick | | hero.css | while the page scrolls, until 180ms after the last scroll | then, and on engine stop |
-| `data-tp-<item>` | touch-parity.ts | | touch-parity.css | engine start | engine stop |
+| `data-tp` | touch-parity.ts | rows.tsx | touch-parity.css | engine start | engine stop |
 | `data-mtdock="off"` | motion/hero.ts setup | | mtscroll.css | hero setup | hero cleanup |
 | `data-mt-pasthero` | motion/hero.ts on scroll | nav-ink.ts | hero.css, mtscroll.css | the hero is above the header | hero cleanup |
 | `data-mt-flip` and `--mt-flip` | motion/hero.ts setup | hero.tsx (`flipMs`) | hero.css | hero setup; missing means the driver is not running | hero cleanup |

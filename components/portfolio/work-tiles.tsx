@@ -3,10 +3,16 @@ import Image from "next/image";
 import Link from "next/link";
 import { projectHref } from "@/lib/project-href";
 
+/** One project on /portfolio. The server page hands every one to the client WorkIndex, so the keys that repeat
+    per project are one letter: they ride in the RSC payload once per project. */
 export type WorkItem = {
+  /** The project's slug. */
   s: string;
+  /** The project's name. */
   n: string;
+  /** Its disciplines, as their chip labels. */
   d: string[];
+  /** Its credits as one line of @handles and names, for the search. */
   c: string;
   cover: string;
 };

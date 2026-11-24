@@ -3,12 +3,12 @@
 import * as React from "react";
 import Link from "next/link";
 import { useClock } from "@/components/proofs/use-clock";
-import { cardPrice, closingSoon, lookStarts, shotOrder, THUMB_W, type PublicProof } from "@/lib/proofs/proof-model";
+import { amountOwed, cardPrice, closingSoon, lookStarts, shotOrder, THUMB_W, type PublicProof } from "@/lib/proofs/proof-model";
 import { ProofWall } from "@/components/proofs/wall";
 import { ProofCursor } from "@/components/proofs/cursor";
 import { gridwallFor } from "@/lib/proofs/gridwall";
 import { qflag } from "@/lib/flags/query";
-import { looksLikeEmail, noSubscribe } from "@/lib/utils";
+import { localRemove, looksLikeEmail, noSubscribe, sessionGet, sessionRemove, sessionSet } from "@/lib/utils";
 import { postJson } from "@/lib/http";
 
 /* ── the client's gallery ─────────────────────────────────────────
@@ -96,6 +96,103 @@ function lightCorners(img: HTMLImageElement): { no: boolean; ring: boolean } | n
   }
 }
 
+/** Save as they go, a beat after the last change. Skips the first render after the gate fills them in. */
+function useAutosave(token: string, email: string | null, selects: string[], locked: boolean, ready: boolean, setUnsaved: (v: boolean) => void) {
+  const saved = React.useRef<string | null>(null);
+  React.useEffect(() => {
+    if (!ready || !email || locked) return;
+    const key = selects.join(",");
+    if (saved.current === null || saved.current === key) {
+      saved.current = key;
+      return;
+    }
+    // A failed save says so in the bar and tries again on the next change.
+    const t = setTimeout(() => {
+      void postJson(`/api/proof/${token}`, { email, selects }, "PATCH").then((r) => {
+        if (r.ok) saved.current = key;
+        setUnsaved(!r.ok);
+      });
+    }, 600);
+    return () => clearTimeout(t);
+  }, [selects, email, token, locked, ready, setUnsaved]);
+}
+
+/** Looks: ms each frame spends mostly on screen or open big; flushed with the seconds on the page. The lightbox counts as a long look. */
+function useLookTracking({ token, email, ready, post, view, step, open, frames }: {
+  token: string;
+  email: string | null;
+  ready: boolean;
+  post: (b: Record<string, unknown>) => Promise<unknown>;
+  view: "all" | "selects";
+  step: Step;
+  open: number | null;
+  frames: { id: string }[];
+}) {
+  const looks = React.useRef<Record<string, number>>({});
+  const since = React.useRef<Map<string, number>>(new Map());
+  const shown = React.useRef(0);
+  const big = React.useRef<{ id: string; at: number } | null>(null);
+  React.useEffect(() => {
+    if (!ready || !email) return;
+    // Time on the page counts from signing in, not from the gate.
+    shown.current = Date.now();
+    const add = (id: string, ms: number) => (looks.current[id] = (looks.current[id] ?? 0) + ms);
+    const flush = (beacon = false) => {
+      const now = Date.now();
+      for (const [id, at] of since.current) {
+        add(id, now - at);
+        since.current.set(id, now);
+      }
+      if (big.current) {
+        add(big.current.id, now - big.current.at);
+        big.current.at = now;
+      }
+      const seconds = document.visibilityState === "visible" || beacon ? (now - shown.current) / 1000 : 0;
+      shown.current = now;
+      const body = { action: "track", email, looks: looks.current, seconds };
+      looks.current = {};
+      if (!seconds && !Object.keys(body.looks).length) return;
+      if (beacon) navigator.sendBeacon?.(`/api/proof/${token}`, JSON.stringify(body));
+      else void post(body);
+    };
+    const io = new IntersectionObserver(
+      (es) => {
+        const now = Date.now();
+        for (const e of es) {
+          const id = (e.target as HTMLElement).dataset.id!;
+          if (e.isIntersecting) since.current.set(id, now);
+          else if (since.current.has(id)) {
+            add(id, now - since.current.get(id)!);
+            since.current.delete(id);
+          }
+        }
+      },
+      { threshold: 0.6 },
+    );
+    document.querySelectorAll<HTMLElement>(".proof-cell[data-id]").forEach((el) => io.observe(el));
+    const hide = () => (document.visibilityState === "hidden" ? flush(true) : (shown.current = Date.now()));
+    const t = setInterval(() => flush(), 30_000);
+    document.addEventListener("visibilitychange", hide);
+    return () => {
+      io.disconnect();
+      clearInterval(t);
+      document.removeEventListener("visibilitychange", hide);
+      flush(true);
+    };
+  }, [ready, email, token, post, view, step]);
+
+  // The lightbox counts as a long look at that frame.
+  React.useEffect(() => {
+    if (open === null) return;
+    const id = frames[open].id;
+    big.current = { id, at: Date.now() };
+    return () => {
+      if (big.current?.id === id) looks.current[id] = (looks.current[id] ?? 0) + Date.now() - big.current.at;
+      big.current = null;
+    };
+  }, [open, frames]);
+}
+
 /** `notice`: Stripe could not answer on the way back from Checkout; it opens on the review step with the message. */
 export function ProofGallery({ token, initial, notice }: { token: string; initial: PublicProof; notice?: string }) {
   const { included, price, balance } = initial;
@@ -160,10 +257,10 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
 
   const n = selects.length;
   const extra = Math.max(0, n - included);
-  // Same sums as amountOwed() in lib/proofs: the shoot balance first, then extras; a reopened gallery owes only what is new.
-  const balDue = Math.max(0, balance * 100 - initial.paid) / 100;
-  const paidPastBal = Math.max(0, initial.paid - balance * 100);
-  const due = balDue + Math.max(0, extra - (price ? Math.floor(paidPastBal / (price * 100)) : 0)) * price;
+  // The shoot balance first, then extras; a reopened gallery owes only what is new. Dollars, summed here as before.
+  const owed = amountOwed({ selects, included, price, balance, paid: { amount: initial.paid } });
+  const balDue = owed.balance / 100;
+  const due = balDue + owed.n * price;
   const byId = React.useMemo(() => new Map(frames.map((f, i) => [f.id, i])), [frames]);
   // Frame indexes in the order the grid shows them; the lightbox steps through the same order.
   const seq = React.useMemo(() => {
@@ -184,9 +281,9 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
   // Sign in every visit, the browser's autofill fills it. Clears the address older builds kept.
   // Back from Stripe in the same tab (paid, cancelled or failed): the address it left, so they are not asked again.
   React.useEffect(() => {
-    localStorage.removeItem(EMAIL_STORE);
-    const back = sessionStorage.getItem(`${EMAIL_STORE}:${token}`);
-    sessionStorage.removeItem(`${EMAIL_STORE}:${token}`);
+    localRemove(EMAIL_STORE);
+    const back = sessionGet(`${EMAIL_STORE}:${token}`);
+    sessionRemove(`${EMAIL_STORE}:${token}`);
     if (back && !initial.submitted) void enter(back);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- once, on arrival
   }, []);
@@ -198,89 +295,9 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
     setReady(true);
   }
 
-  // Save as they go, a beat after the last change. Skips the first render after the gate fills them in.
-  const saved = React.useRef<string | null>(null);
-  React.useEffect(() => {
-    if (!ready || !email || locked) return;
-    const key = selects.join(",");
-    if (saved.current === null || saved.current === key) {
-      saved.current = key;
-      return;
-    }
-    // A failed save says so in the bar and tries again on the next change.
-    const t = setTimeout(() => {
-      void postJson(`/api/proof/${token}`, { email, selects }, "PATCH").then((r) => {
-        if (r.ok) saved.current = key;
-        setUnsaved(!r.ok);
-      });
-    }, 600);
-    return () => clearTimeout(t);
-  }, [selects, email, token, locked, ready]);
+  useAutosave(token, email, selects, locked, ready, setUnsaved);
 
-  // Looks: ms each frame spends mostly on screen or open big; flushed with the seconds on the page.
-  const looks = React.useRef<Record<string, number>>({});
-  const since = React.useRef<Map<string, number>>(new Map());
-  const shown = React.useRef(0);
-  const big = React.useRef<{ id: string; at: number } | null>(null);
-  React.useEffect(() => {
-    if (!ready || !email) return;
-    // Time on the page counts from signing in, not from the gate.
-    shown.current = Date.now();
-    const add = (id: string, ms: number) => (looks.current[id] = (looks.current[id] ?? 0) + ms);
-    const flush = (beacon = false) => {
-      const now = Date.now();
-      for (const [id, at] of since.current) {
-        add(id, now - at);
-        since.current.set(id, now);
-      }
-      if (big.current) {
-        add(big.current.id, now - big.current.at);
-        big.current.at = now;
-      }
-      const seconds = document.visibilityState === "visible" || beacon ? (now - shown.current) / 1000 : 0;
-      shown.current = now;
-      const body = { action: "track", email, looks: looks.current, seconds };
-      looks.current = {};
-      if (!seconds && !Object.keys(body.looks).length) return;
-      if (beacon) navigator.sendBeacon?.(`/api/proof/${token}`, JSON.stringify(body));
-      else void post(body);
-    };
-    const io = new IntersectionObserver(
-      (es) => {
-        const now = Date.now();
-        for (const e of es) {
-          const id = (e.target as HTMLElement).dataset.id!;
-          if (e.isIntersecting) since.current.set(id, now);
-          else if (since.current.has(id)) {
-            add(id, now - since.current.get(id)!);
-            since.current.delete(id);
-          }
-        }
-      },
-      { threshold: 0.6 },
-    );
-    document.querySelectorAll<HTMLElement>(".proof-cell[data-id]").forEach((el) => io.observe(el));
-    const hide = () => (document.visibilityState === "hidden" ? flush(true) : (shown.current = Date.now()));
-    const t = setInterval(() => flush(), 30_000);
-    document.addEventListener("visibilitychange", hide);
-    return () => {
-      io.disconnect();
-      clearInterval(t);
-      document.removeEventListener("visibilitychange", hide);
-      flush(true);
-    };
-  }, [ready, email, token, post, view, step]);
-
-  // The lightbox counts as a long look at that frame.
-  React.useEffect(() => {
-    if (open === null) return;
-    const id = frames[open].id;
-    big.current = { id, at: Date.now() };
-    return () => {
-      if (big.current?.id === id) looks.current[id] = (looks.current[id] ?? 0) + Date.now() - big.current.at;
-      big.current = null;
-    };
-  }, [open, frames]);
+  useLookTracking({ token, email, ready, post, view, step, open, frames });
 
   const toggle = (id: string) => {
     if (locked) return;
@@ -312,7 +329,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
     const out = r.ok ? r.data : null;
     setBusy(false);
     if (out?.checkout) {
-      if (email) sessionStorage.setItem(`${EMAIL_STORE}:${token}`, email);
+      if (email) sessionSet(`${EMAIL_STORE}:${token}`, email);
       return void (location.href = out.checkout);
     }
     if (!out?.done) return setError((!r.ok && r.error) || "That did not go through. Try again.");
