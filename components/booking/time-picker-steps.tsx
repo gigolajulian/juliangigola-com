@@ -149,8 +149,13 @@ export function BookSteps({ c }: { c: CardCtx & { skin: StepsSkin } }) {
     );
   }
   const monday = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate() - ((d.getDay() + 6) % 7));
-  const canBack = view === "week" ? +monday(anchor) > +monday(today) : anchor.getFullYear() * 12 + anchor.getMonth() > today.getFullYear() * 12 + today.getMonth();
-  const canNext = +(view === "week" ? monday(anchor) : new Date(anchor.getFullYear(), anchor.getMonth() + 1, 0)) < +today + AHEAD * 864e5;
+  const sky = skyOn();
+  /* Sky week: the next five days with a time, paged from the earliest, so the week follows my calendar as it is. */
+  const open = Object.keys(days).filter((k) => days[k]?.length).sort();
+  const first = open.findIndex((k) => k >= iso(anchor));
+  const page = sky && view === "week" && open.length ? Math.floor((first < 0 ? open.length - 1 : first) / 5) * 5 : -1;
+  const canBack = page >= 0 ? page > 0 : view === "week" ? +monday(anchor) > +monday(today) : anchor.getFullYear() * 12 + anchor.getMonth() > today.getFullYear() * 12 + today.getMonth();
+  const canNext = page >= 0 ? page + 5 < open.length : +(view === "week" ? monday(anchor) : new Date(anchor.getFullYear(), anchor.getMonth() + 1, 0)) < +today + AHEAD * 864e5;
   const times = days[pick.date] ?? [];
   const [hh, mm] = clock(pick.min)[0].split(":");
   const at0 = times.findIndex((x) => minutesOf(x) === pick.min);
@@ -159,7 +164,6 @@ export function BookSteps({ c }: { c: CardCtx & { skin: StepsSkin } }) {
     if (next) choose(pick.date, minutesOf(next), true);
   };
   /* ?sky (lib/flags/sky.ts): the times in the hour's light, the readout under them, the day's dots by part of day. */
-  const sky = skyOn();
   const zone = new Intl.DateTimeFormat("en-US", { timeZone: tz, timeZoneName: "longGeneric" }).formatToParts(0).find((p) => p.type === "timeZoneName")?.value.replace(/ Time$/, "") ?? tz;
   return shell({
     head: paid ? "Book a session" : skin?.name === "Consultation" ? "Book a consultation" : "Book a call",
@@ -172,6 +176,7 @@ export function BookSteps({ c }: { c: CardCtx & { skin: StepsSkin } }) {
           setView={(v) => { setView(v); setAnchor(fromIso(pick.date)); }}
           anchor={anchor}
           shift={(dir) => {
+            if (page >= 0) return setAnchor(fromIso(open[Math.max(0, page + 5 * dir)]));
             const d = new Date(anchor);
             if (view === "week") d.setDate(d.getDate() + 7 * dir);
             else d.setMonth(d.getMonth() + dir, 1);
@@ -185,6 +190,7 @@ export function BookSteps({ c }: { c: CardCtx & { skin: StepsSkin } }) {
             return n ? `${n} open` : null;
           }}
           onPick={(d) => choose(iso(d), pick.min, false)}
+          strip={page >= 0 ? open.slice(page, page + 5).map(fromIso) : undefined}
           parts={sky ? (d) => {
             const l = days[iso(d)];
             if (!l?.length) return null;
