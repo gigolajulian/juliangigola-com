@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { reply } from "./fakes";
-import { ACCOUNT, cloudflare, engineSql, searchConsole, sitePath } from "@/lib/analytics";
+import { ACCOUNT, cloudflare, engineSql, rumVisits, searchConsole, sitePath } from "@/lib/analytics";
 
 /* The admin's read-only doors to Cloudflare analytics (`lib/analytics.ts`). */
 
@@ -33,6 +33,21 @@ describe("cloudflare", () => {
     const err = await cloudflare("secret-key")("q").catch((e: Error) => e.message);
     expect(err).toContain("key is 10 characters");
     expect(err).not.toContain("secret-key");
+  });
+});
+
+describe("rumVisits", () => {
+  it("asks for the account's visits in the window, without headless Chrome, and returns the groups", async () => {
+    const queries: string[] = [];
+    const groups = [{ sum: { visits: 3 }, dimensions: { date: "2026-11-09" } }];
+    vi.stubGlobal("fetch", async (_url: string, init: RequestInit) => {
+      queries.push((JSON.parse(String(init.body)) as { query: string }).query);
+      return reply({ data: { viewer: { accounts: [{ rumPageloadEventsAdaptiveGroups: groups }] } } });
+    });
+    expect(await rumVisits("k", "date", "2026-11-01T00:00:00.000Z", "2026-11-08T00:00:00.000Z", 8)).toEqual(groups);
+    expect(queries[0]).toBe(
+      `{viewer{accounts(filter:{accountTag:"${ACCOUNT}"}){rumPageloadEventsAdaptiveGroups(limit:8,filter:{datetime_geq:"2026-11-01T00:00:00.000Z",datetime_lt:"2026-11-08T00:00:00.000Z",userAgentBrowser_neq:"ChromeHeadless"},orderBy:[sum_visits_DESC]){sum{visits} dimensions{date}}}}}`,
+    );
   });
 });
 

@@ -2,9 +2,9 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { TZ } from "@/lib/time-zone";
 import { gcal } from "@/lib/google";
 import { looksLikeEmail } from "@/lib/utils";
-import { busyAll, EXTRA_KEY, isIcs, readExtras, zoned, type Extra } from "@/lib/booking/slots";
+import { busyAll, EXTRA_KEY, isIcs, readExtras, instantIn, type Extra } from "@/lib/booking/slots";
 import { refuseAdmin } from "@/lib/vouch";
-import { bodyOf, json, upstreamError } from "@/lib/http";
+import { bodyOf, json, statusOf, upstreamError } from "@/lib/http";
 
 /* ── the Leads app's Calendar ─────────────────────────────────────
  * Controls the calendar: blocks off days and adds
@@ -25,7 +25,7 @@ const DAY = /^\d{4}-\d{2}-\d{2}$/;
 const TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
 const MAX_EXTRAS = 10;
 
-async function gate(request: Request) {
+async function calendarGate(request: Request) {
   const { env } = await getCloudflareContext({ async: true });
   // Who is asking first: what this build is missing is for /admin only.
   const denied = await refuseAdmin(request, env.INBOX_KEY);
@@ -48,17 +48,17 @@ type GEvent = {
 const at = (t: { date?: string; dateTime?: string }) => {
   if (t.dateTime) return new Date(t.dateTime).toISOString();
   const [y, m, d] = t.date!.split("-").map(Number);
-  return new Date(zoned(y, m, d, 0)).toISOString();
+  return new Date(instantIn(y, m, d, 0)).toISOString();
 };
 /** What the app shows of a source: a Google id in full, an ICS link by its host only, since the link is the password. */
 const shown = (src: string) => (isIcs(src) ? new URL(src.replace(/^webcal:/i, "https:")).host : src);
 const dayMs = (day: string) => {
   const [y, m, d] = day.split("-").map(Number);
-  return zoned(y, m, d, 0);
+  return instantIn(y, m, d, 0);
 };
 
 export async function GET(request: Request) {
-  const g = await gate(request);
+  const g = await calendarGate(request);
   if (g.error) return g.error;
   const q = new URL(request.url).searchParams;
   const [from, to] = [q.get("from") ?? "", q.get("to") ?? ""];
@@ -101,7 +101,7 @@ type Body = {
 };
 
 async function post(request: Request) {
-  const g = await gate(request);
+  const g = await calendarGate(request);
   if (g.error) return g.error;
   const body = (await bodyOf(request)) as Body | null;
   if (!body) return json({ error: "Bad request." }, 400);
@@ -129,8 +129,9 @@ async function post(request: Request) {
   if (typeof body.unblock === "string") {
     const path = `/calendars/primary/events/${encodeURIComponent(body.unblock)}`;
     // Only a missing event is "not a block"; a calendar that is down answers 502 like every other call here.
-    const ev = await gcal<GEvent>(env.GCAL_OAUTH, path).catch((e: { status?: number }) => {
-      if (e.status === 404 || e.status === 410) return null;
+    const ev = await gcal<GEvent>(env.GCAL_OAUTH, path).catch((e: unknown) => {
+      const status = statusOf(e);
+      if (status === 404 || status === 410) return null;
       throw e;
     });
     // Only a block made here: a booking or anything else on hello@ stays.

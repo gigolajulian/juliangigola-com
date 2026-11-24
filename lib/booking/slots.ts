@@ -28,7 +28,7 @@ function offset(ms: number, tz: string) {
 }
 
 /** The instant of `min` minutes after midnight on `y-m-d` in `tz`. */
-export function zoned(y: number, m: number, d: number, min: number, tz = TZ) {
+export function instantIn(y: number, m: number, d: number, min: number, tz = TZ) {
   const guess = Date.UTC(y, m - 1, d, 0, min);
   const first = guess - offset(guess, tz);
   // Across a clock change the second guess is the right side of it.
@@ -54,12 +54,12 @@ export function startsFor(rule: Rule, busy: Busy[], from: number, to: number, no
   for (let i = 0; ; i++) {
     const day = new Date(Date.UTC(y, m - 1, d + i));
     const open = windowOn(hours, day.toISOString().slice(0, 10), day.getUTCDay());
-    const midnight = zoned(day.getUTCFullYear(), day.getUTCMonth() + 1, day.getUTCDate(), 0);
+    const midnight = instantIn(day.getUTCFullYear(), day.getUTCMonth() + 1, day.getUTCDate(), 0);
     if (midnight > latest) break;
     if (!open) continue;
     // The window's end is the last start, not the session's end.
-    const close = zoned(day.getUTCFullYear(), day.getUTCMonth() + 1, day.getUTCDate(), open[1]);
-    for (let s = zoned(day.getUTCFullYear(), day.getUTCMonth() + 1, day.getUTCDate(), open[0]); s <= close; s += step) {
+    const close = instantIn(day.getUTCFullYear(), day.getUTCMonth() + 1, day.getUTCDate(), open[1]);
+    for (let s = instantIn(day.getUTCFullYear(), day.getUTCMonth() + 1, day.getUTCDate(), open[0]); s <= close; s += step) {
       if (s < earliest || s >= latest) continue;
       const end = s + (rule.length + rule.after) * 6e4;
       if (!busy.some((b) => b.start < end && b.end > s - (rule.before ?? 0) * 6e4)) out.push(s);
@@ -78,8 +78,13 @@ export function startsFor(rule: Rule, busy: Busy[], from: number, to: number, no
 
 export type Extra = { label: string; src: string };
 export const EXTRA_KEY = "cal:extra";
-export type KV = { get(key: string, type: "json"): Promise<unknown> };
-export const readExtras = async (kv?: KV) => ((await kv?.get(EXTRA_KEY, "json")) as Extra[] | null) ?? [];
+export type HoursKV = { get(key: string, type: "json"): Promise<unknown> };
+/** The extras as stored; an entry without a string label and source is dropped. */
+export async function readExtras(kv?: HoursKV): Promise<Extra[]> {
+  const v = await kv?.get(EXTRA_KEY, "json");
+  if (!Array.isArray(v)) return [];
+  return v.filter((x): x is Extra => !!x && typeof x === "object" && typeof x.label === "string" && typeof x.src === "string");
+}
 export const isIcs = (src: string) => /^(https|webcal):\/\//i.test(src);
 
 /** An ICS time: UTC with Z, else in its TZID (Pacific when none or unknown). */
@@ -89,10 +94,10 @@ function icsTime(v: string, params: string) {
   const [y, mo, d, h, mi] = m.slice(1, 6).map((x) => +(x ?? 0));
   if (m[6]) return Date.UTC(y, mo - 1, d, h, mi);
   try {
-    return zoned(y, mo, d, h * 60 + mi, /TZID="?([^;":]+)/.exec(params)?.[1] ?? TZ);
+    return instantIn(y, mo, d, h * 60 + mi, /TZID="?([^;":]+)/.exec(params)?.[1] ?? TZ);
   } catch {
     // Outlook writes Windows zone names Intl does not know.
-    return zoned(y, mo, d, h * 60 + mi);
+    return instantIn(y, mo, d, h * 60 + mi);
   }
 }
 
@@ -198,7 +203,7 @@ async function shiftDays(secret: string | undefined, from: number, to: number): 
   // The Pacific midnight of the day `w` falls on; an all-day end date is already the day after.
   const midnight = (w: When, after: boolean) => {
     const [y, m, d] = (w.date ?? new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(Date.parse(w.dateTime!))).split("-").map(Number);
-    return zoned(y, m, d + (after && !w.date ? 1 : 0), 0);
+    return instantIn(y, m, d + (after && !w.date ? 1 : 0), 0);
   };
   return (r.items ?? [])
     .filter((e) => e.status !== "cancelled" && /\bSGH\b/i.test(e.summary ?? "") && e.start && e.end)
@@ -206,7 +211,7 @@ async function shiftDays(secret: string | undefined, from: number, to: number): 
 }
 
 /** What is busy between `from` and `to`, on hello@ and the extras in `kv`. */
-export async function busyBetween(secret: string | undefined, from: number, to: number, kv?: KV): Promise<Busy[]> {
+export async function busyBetween(secret: string | undefined, from: number, to: number, kv?: HoursKV): Promise<Busy[]> {
   const { busy, failed } = await busyAll(secret, from, to, await readExtras(kv));
   if (failed.length) console.error("calendars skipped", failed.length);
   return busy;
@@ -217,7 +222,7 @@ export async function busyBetween(secret: string | undefined, from: number, to: 
 export type SlotsAnswer = { title: string; length: number; where: boolean; slots: Record<string, string[]> };
 
 /** What a slot check may know beyond the calendar: the booking being moved (`mine`), the store of extra calendars, the hours. */
-export type SlotOpts = { now?: number; mine?: { start: string; end: string }; kv?: KV; hours?: Hours };
+export type SlotOpts = { now?: number; mine?: { start: string; end: string }; kv?: HoursKV; hours?: Hours };
 
 /** Open starts of `slug` between `from` and `to`, as UTC ms. `mine`: a booking being moved, whose own time is not in the way. `kv`: where the extra calendars are listed. */
 export async function openStarts(secret: string | undefined, slug: string, from: number, to: number, { now = Date.now(), mine, kv, hours }: SlotOpts = {}) {

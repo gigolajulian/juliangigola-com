@@ -3,7 +3,7 @@ import { enquiry, enquiryKey, summary } from "@/lib/leads/enquiry";
 import { whenPT } from "@/lib/time-zone";
 import { logMail, recordLead } from "@/lib/leads/lead-store";
 import { EARLY_SHARE, EVENTS, refundCents, refundShare, type Booking } from "@/lib/booking/rules";
-import { depositPaid, lockOp, parseBooking, type BookingRecord } from "@/lib/booking/engine";
+import { depositPaid, lockOp, parseBooking, type BookingEnv, type BookingRecord } from "@/lib/booking/engine";
 import { manageLinks } from "@/lib/booking/token";
 
 /* ── the deposit ──────────────────────────────────────────────────
@@ -41,6 +41,7 @@ import { manageLinks } from "@/lib/booking/token";
 import { alertAndLog, type Attachment } from "@/lib/email/hello-mail";
 import { stripe } from "@/lib/stripe";
 import { CURRENCY, DEPOSIT, DEPOSIT_KIND, DEPOSIT_SESSIONS, LEGACY_DEPOSIT, takesDeposit } from "@/lib/booking/paid";
+import { logged } from "@/lib/utils";
 /** The charge in cents for a session. Throws on a slug that takes no deposit: `parseBooking` lets none through. */
 export function amountOf(slug: string): number {
   if (!takesDeposit(slug)) throw new Error("Not a paid session.");
@@ -108,17 +109,8 @@ export async function verifyStripe(body: string, header: string, secret: string,
   return sigs.some((s) => s.length === want.length && [...s].reduce((d, c, i) => d | (c.charCodeAt(0) ^ want.charCodeAt(i)), 0) === 0);
 }
 
-type Env = {
-  INBOX: NonNullable<CloudflareEnv["INBOX"]>;
-  LEADS_KEY?: string;
-  STRIPE_SECRET_KEY: string;
-  EMAIL?: CloudflareEnv["EMAIL"];
-  CLIENT_EMAIL?: CloudflareEnv["CLIENT_EMAIL"];
-  GCAL_OAUTH?: string;
-  BOOKING_LOCK?: CloudflareEnv["BOOKING_LOCK"];
-  NOTION_TOKEN?: string;
-  BOOKING_SECRET?: string;
-};
+/** The webhook's env: the booking flow's, with the inbox and the Stripe key it cannot run without. */
+type Env = BookingEnv & { INBOX: NonNullable<CloudflareEnv["INBOX"]>; STRIPE_SECRET_KEY: string; GCAL_OAUTH?: string };
 
 /** "Visa ending 4242", from the charge; nothing if Stripe will not say. */
 async function cardOf(key: string, intent: string) {
@@ -171,7 +163,7 @@ async function tell(env: Env, status: keyof typeof SAID, b: Booking | string, li
   if (refs.files.length) lines.push("", `References attached: ${refs.files.length}`);
   if (refs.picks.length) lines.push("", "Picked from my work:", ...refs.picks.map((src) => `https://juliangigola.com${src}`));
   const subject = `${SAID[status]}: ${what}`;
-  await alertAndLog(env, subject, lines, who, { kind: `deposit-${status}`, booking: intent }, refs.files);
+  await alertAndLog(env, subject, lines, { who, log: { kind: `deposit-${status}`, booking: intent }, attachments: refs.files });
   // The money itself, on the activity log: what was paid in, and out again on a refund.
   if (who) await recordLead(env, who.email, { event: { at: new Date().toISOString(), kind: "payment", ref: intent, note: "Deposit", amount: usd } });
   if (who && status === "refunded") await recordLead(env, who.email, { event: { at: new Date().toISOString(), kind: "refund", ref: `refund-${intent}`, note: "Deposit, the time was gone", amount: usd } });
@@ -201,14 +193,14 @@ export async function bookDeposit(env: Env, intent: string, metadata: { [k: stri
     if (r.status === "booking" && Date.now() - Date.parse(r.at) > STUCK_MS) {
       const who = parsed.ok ? parsed.booking : undefined;
       const what = who ? [SESSION[who.slug] ?? who.slug, whenPT(who.start), who.name, `$${usd}`].join(", ") : `$${usd}`;
-      await env.INBOX.put(key, JSON.stringify({ ...r, warned: true }), { expirationTtl: 90 * 864e2 }).catch((e: unknown) => console.error("deposit record", "warned", String(e)));
+      await env.INBOX.put(key, JSON.stringify({ ...r, warned: true }), { expirationTtl: 90 * 864e2 }).catch(logged("deposit record", "warned"));
       if (who) await recordLead(env, who.email, { event: { at: new Date().toISOString(), kind: "deposit-stuck", ref: intent, note: what }, name: who.name, kind: who.slug, flag: "stuck" });
       const subject = `Deposit stuck: check Stripe and the calendar: ${what}`;
       await alertAndLog(env, subject, [
         who ? `${who.name} <${who.email}>` : "Unknown client",
         `Paid, and the booking was started at ${r.at} but never finished. Check the calendar for the booking, then book or refund in Stripe by hand.`,
         `Stripe: ${dashboardLink(intent, env.STRIPE_SECRET_KEY)}`,
-      ], who, { kind: "deposit-stuck", booking: intent });
+      ], { who, log: { kind: "deposit-stuck", booking: intent } });
       return "failed";
     }
     return r.status;
@@ -220,12 +212,12 @@ export async function bookDeposit(env: Env, intent: string, metadata: { [k: stri
     // record, and KV refuses a second write to a key within a second: a
     // failed one must never turn a booking into a refund.
     if (r.status === "booking") return write;
-    await write.catch((e: unknown) => console.error("deposit record", r.status, String(e)));
+    await write.catch(logged("deposit record", r.status));
     // The card's copy (see 4. above). A failed copy only leaves the card on
     // "Still confirming"; it must never turn a booking into a refund.
     const form: { [k: string]: string } = { "metadata[outcome]": r.status };
     if (r.booking) Object.assign(form, { "metadata[cal_uid]": r.booking.uid, "metadata[cal_start]": r.booking.start });
-    await stripe(env.STRIPE_SECRET_KEY, `/payment_intents/${intent}`, form).catch((e: unknown) => console.error("deposit metadata", r.status, String(e)));
+    await stripe(env.STRIPE_SECRET_KEY, `/payment_intents/${intent}`, form).catch(logged("deposit metadata", r.status));
   };
   await put({ status: "booking" });
 
@@ -295,9 +287,9 @@ export async function bookDeposit(env: Env, intent: string, metadata: { [k: stri
     key, a cancel line on the lead, a refund line if it went, a mail to hello@, the client's note and its log.
     `by`: the client cancels under the refund rule, read against the time it was booked for at the moment of the
     cancel (`refundShare`); Julian cancels from the desk with the whole deposit back whatever the hour, and his two
-    lead lines share one time. Whether it refunded, and the dollars that went back if it did. */
+    lead lines share one time. Whether it refunded, and the dollars that went back (0 when none did). */
 export async function cancelBooking(
-  env: Parameters<typeof alertAndLog>[0] & { CLIENT_EMAIL?: CloudflareEnv["CLIENT_EMAIL"]; STRIPE_SECRET_KEY?: string },
+  env: BookingEnv,
   r: BookingRecord,
   was: BookingRecord,
   by: "client" | "julian",
@@ -312,11 +304,11 @@ export async function cancelBooking(
   await recordLead(env, r.email, { event: { at: at ?? new Date().toISOString(), kind: "cancel", ref: `cancel:${r.id}`, note: o.note } });
   // What went back, off this booking's record, so the log says what Stripe did.
   if (refunded && refund) await recordLead(env, r.email, { event: { at: at ?? new Date().toISOString(), kind: "refund", ref: refund.ref, note: o.refundNote, amount: o.back } });
-  await alertAndLog(env, o.subject, [`${r.name} <${r.email}>`, o.line, o.money(refunded), ...(r.intent && key ? [`Stripe: ${dashboardLink(r.intent, key)}`] : [])], who, { kind: "cancelled", booking: r.id });
+  await alertAndLog(env, o.subject, [`${r.name} <${r.email}>`, o.line, o.money(refunded), ...(r.intent && key ? [`Stripe: ${dashboardLink(r.intent, key)}`] : [])], { who, log: { kind: "cancelled", booking: r.id } });
   const gone = { ...who, session: r.session, start: was.start, end: was.end };
   if (await sendCancelled(env.CLIENT_EMAIL, gone, o.mail(refunded), o.usd, o.back))
     await logMail(env, r.email, cancelledSubject(gone), { to: "client", kind: "cancelled", booking: r.id });
-  return { refunded, back: o.back };
+  return { refunded, back: refunded ? o.back : 0 };
 }
 
 /** What a cancel refunds and says: the lead lines, hello@'s mail and the client's. */
@@ -330,7 +322,8 @@ type CancelTerms = {
   line: string;
   money: (refunded: boolean | undefined) => string;
   mail: (refunded: boolean | undefined) => Parameters<typeof sendCancelled>[2];
-  usd: number | undefined;
+  /** The deposit in dollars, 0 when none. */
+  usd: number;
   /** Dollars going back: the refund log line and the client's mail. */
   back: number;
 };
@@ -355,7 +348,7 @@ function clientCancel(r: BookingRecord, was: BookingRecord): CancelTerms {
     line: "Cancelled by the client. The event is off the calendar.",
     money: (refunded) => (!r.intent ? "No deposit." : refunded ? (share === 1 ? `Deposit refunded: $${back}.` : `Refunded $${back} of the $${paid} deposit (${pct}%). $${paid - back} kept.`) : refunded === false ? `The refund FAILED: refund $${back} by hand in Stripe.` : "Under 24 hours: the deposit is kept."),
     mail: (refunded) => (!r.intent ? "none" : refunded ? (share === 1 ? "refunded" : share === EARLY_SHARE ? "early" : "part") : refunded === false ? "late" : "kept"),
-    usd: depositPaid(r),
+    usd: paid,
     back,
   };
 }

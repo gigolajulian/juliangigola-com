@@ -1,10 +1,9 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { lockOp, clientView, depositPaid, type ChangeResult } from "@/lib/booking/engine";
-import { PART_SHARE, refundShare } from "@/lib/booking/rules";
+import { lockOp, clientView, depositPaid, type BookingEnv, type ChangeResult } from "@/lib/booking/engine";
 import { refuseAdmin } from "@/lib/vouch";
-import { manageLinks, tokenOpens } from "@/lib/booking/token";
-import { confirmOf, sendConfirm } from "@/lib/booking/confirm";
-import { logMail, recordLead } from "@/lib/leads/lead-store";
+import { tokenOpens } from "@/lib/booking/token";
+import { afterRescheduled } from "@/lib/booking/confirm";
+import { recordLead } from "@/lib/leads/lead-store";
 import { cancelBooking } from "@/lib/booking/deposit";
 import { alertAndLog } from "@/lib/email/hello-mail";
 import { whenPT } from "@/lib/time-zone";
@@ -47,26 +46,18 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   if (!out.ok) return refuse(out.reason);
 
   const { record: r, was } = out;
-  const who = { name: r.name, email: r.email };
-  const what = [r.session, whenPT(was.start), r.name].join(", ");
-
   if (body.action === "reschedule") {
-    await recordLead(env, r.email, { event: { at: new Date().toISOString(), kind: "reschedule", ref: `${r.id}:${r.start}`, note: whenPT(r.start) }, when: r.start });
-    await alertAndLog(env, `Rescheduled: ${what}`, [`${r.name} <${r.email}>`, `Moved to ${whenPT(r.start)} by the client. The calendar is updated.`, ...(r.intent && refundShare(r) <= PART_SHARE ? [refundShare(r) ? `A cancel now refunds 70% of the deposit: first booked for ${whenPT(r.firstStart ?? r.start)}, under 48 hours away.` : `The deposit is no longer refundable: first booked for ${whenPT(r.firstStart ?? r.start)}, under 24 hours away.`] : [])], who, { kind: "reschedule", booking: r.id });
-    const sent = await sendConfirm(env.CLIENT_EMAIL, confirmOf(r, await manageLinks(env.BOOKING_SECRET, r)));
-    if (sent) await logMail(env, r.email, sent, { to: "client", kind: "reschedule", booking: r.id });
+    await afterRescheduled(env, r, was);
     return json({ record: clientView(r) });
   }
 
   const { refunded, back } = await cancelBooking(env, r, was, "client");
-  return json({ record: clientView(r), refunded: refunded ?? null, back: refunded ? back : 0 });
+  return json({ record: clientView(r), refunded: refunded ?? null, back });
 }
-
-type DeskEnv = Parameters<typeof lockOp>[0] & Parameters<typeof recordLead>[0] & { EMAIL?: CloudflareEnv["EMAIL"]; CLIENT_EMAIL?: CloudflareEnv["CLIENT_EMAIL"]; STRIPE_SECRET_KEY?: string };
 
 /** Julian cancels from the desk (2026-11-16): off the calendar, the whole deposit back whatever the hour
     (it is not the client's doing), the client told, a line on the lead and a mail to hello@. */
-async function cancelMine(env: DeskEnv, id: string) {
+async function cancelMine(env: BookingEnv, id: string) {
   let out: ChangeResult;
   try {
     out = await lockOp(env, "cancel", id);
@@ -76,12 +67,12 @@ async function cancelMine(env: DeskEnv, id: string) {
   if (!out.ok) return refuse(out.reason);
   const { record: r, was } = out;
   const { refunded, back } = await cancelBooking(env, r, was, "julian");
-  return json({ record: clientView(r), refunded: refunded ?? null, back: refunded ? back : 0 });
+  return json({ record: clientView(r), refunded: refunded ?? null, back });
 }
 
 /** Julian marks a no-show from the desk (2026-11-16): a line on the lead and a mail to hello@. Nothing is
     refunded and the client is not mailed. Only once the session has started, on a live booking; a second click adds nothing. */
-async function noShow(env: DeskEnv, id: string) {
+async function noShow(env: BookingEnv, id: string) {
   const r = await lockOp(env, "get", id).then((x) => x.record, () => null);
   if (!r) return json({ error: "No such booking." }, 404);
   if (r.cancelled) return json({ error: "This booking is already cancelled." }, 409);
@@ -89,6 +80,6 @@ async function noShow(env: DeskEnv, id: string) {
   const what = [r.session, whenPT(r.start), r.name].join(", ");
   const paid = depositPaid(r);
   await recordLead(env, r.email, { event: { at: new Date().toISOString(), kind: "no-show", ref: `no-show:${r.id}`, note: [r.session, whenPT(r.start)].join(", ") } });
-  await alertAndLog(env, `No-show: ${what}`, [`${r.name} <${r.email}>`, "Marked a no-show from the lead desk.", paid ? `The $${paid} deposit is kept.` : "No deposit."], { name: r.name, email: r.email }, { kind: "no-show", booking: r.id });
+  await alertAndLog(env, `No-show: ${what}`, [`${r.name} <${r.email}>`, "Marked a no-show from the lead desk.", paid ? `The $${paid} deposit is kept.` : "No deposit."], { who: { name: r.name, email: r.email }, log: { kind: "no-show", booking: r.id } });
   return json({ ok: true });
 }

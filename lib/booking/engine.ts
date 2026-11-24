@@ -6,7 +6,7 @@ import { looksLikeEmail } from "@/lib/utils";
 import { takesDeposit, LEGACY_DEPOSIT } from "@/lib/booking/paid";
 import { recordLead, type LeadStore } from "@/lib/leads/lead-store";
 import { toNotion } from "@/lib/leads/sync/notion-lead";
-import { openNow, type KV } from "@/lib/booking/slots";
+import { openNow, type HoursKV } from "@/lib/booking/slots";
 import { statusOf } from "@/lib/http";
 
 /* ── the site's own booking engine ────────────────────────────────
@@ -136,7 +136,7 @@ function description(b: BookInput, id: string) {
 }
 
 /** Books `b` if its time is still open. Call it only through the lock. Throws when Google fails. */
-export async function bookOwn(store: Store, secret: string | undefined, b: BookInput, kv?: KV): Promise<BookResult> {
+export async function bookOwn(store: Store, secret: string | undefined, b: BookInput, kv?: HoursKV): Promise<BookResult> {
   const rule = EVENTS[b.slug];
   if (!rule) return { ok: false, reason: "unknown" };
   // A deposit books once, however often Stripe delivers it.
@@ -197,7 +197,7 @@ export async function bookOwn(store: Store, secret: string | undefined, b: BookI
  * `deposit` is the Stripe link. Never
  * throws: the booking is made, a failed copy must not undo it.
  */
-export async function recordBooking(env: LeadStore & { INBOX?: CloudflareEnv["INBOX"]; NOTION_TOKEN?: string }, r: BookingRecord, deposit?: string) {
+export async function recordBooking(env: BookingEnv, r: BookingRecord, deposit?: string) {
   const now = Date.now();
   const id = crypto.randomUUID();
   const stored = bookingEnquiry(
@@ -246,7 +246,7 @@ export async function cancelOwn(store: Store, secret: string | undefined, id: st
 }
 
 /** Moves booking `id` to `start` if that time is open. Call it only through the lock. */
-export async function rescheduleOwn(store: Store, secret: string | undefined, id: string, start: string, kv?: KV): Promise<ChangeResult> {
+export async function rescheduleOwn(store: Store, secret: string | undefined, id: string, start: string, kv?: HoursKV): Promise<ChangeResult> {
   const was = await findBooking(store, id);
   if (!was) return { ok: false, reason: "missing" };
   if (was.cancelled) return { ok: false, reason: "cancelled" };
@@ -307,6 +307,17 @@ export async function markReminded(store: Store, id: string, now = Date.now()) {
 /* ── reaching the lock from a route ───────────────────────────── */
 
 type LockEnv = { BOOKING_LOCK?: { idFromName(name: string): unknown; get(id: unknown): { fetch(url: string, init: RequestInit): Promise<Response> } } };
+
+/** What the booking flow reads off the Worker's env: the lock, the lead store, the mailers, Stripe and the link secret. */
+export type BookingEnv = LeadStore &
+  LockEnv & {
+    INBOX?: CloudflareEnv["INBOX"];
+    NOTION_TOKEN?: string;
+    EMAIL?: CloudflareEnv["EMAIL"];
+    CLIENT_EMAIL?: CloudflareEnv["CLIENT_EMAIL"];
+    STRIPE_SECRET_KEY?: string;
+    BOOKING_SECRET?: string;
+  };
 
 /** Julian's hours from the lock, or the defaults when it cannot answer (the lock rechecks every booking anyway). */
 export const liveHours = (env: LockEnv) => lockOp(env, "hours", null).then((x) => x.hours, () => DEFAULT_HOURS);

@@ -39,6 +39,21 @@ export function cloudflare(key: string) {
   };
 }
 
+/** One Web Analytics row: its visits and the dimensions asked for. */
+export type RumGroup = { sum: { visits: number }; dimensions: Record<string, string> };
+
+/**
+ * Web Analytics visits between two ISO times, grouped by `dims` (space-separated
+ * field names), most first. Headless Chrome is the automated test runs on
+ * Julian's PC, so it is left out.
+ */
+export async function rumVisits(key: string, dims: string, from: string, to: string, limit: number): Promise<RumGroup[]> {
+  const v = await cloudflare(key)<{ accounts: { rumPageloadEventsAdaptiveGroups: RumGroup[] }[] }>(
+    `{viewer{accounts(filter:{accountTag:"${ACCOUNT}"}){rumPageloadEventsAdaptiveGroups(limit:${limit},filter:{datetime_geq:"${from}",datetime_lt:"${to}",userAgentBrowser_neq:"ChromeHeadless"},orderBy:[sum_visits_DESC]){sum{visits} dimensions{${dims}}}}}}`,
+  );
+  return v.accounts[0].rumPageloadEventsAdaptiveGroups;
+}
+
 /** Analytics Engine SQL with the same token (Account Analytics Read covers it). */
 export async function engineSql<T>(key: string, sql: string): Promise<T[]> {
   const res = await fetch(`https://api.cloudflare.com/client/v4/accounts/${ACCOUNT}/analytics_engine/sql`, {

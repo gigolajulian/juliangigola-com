@@ -64,7 +64,7 @@ async function reply<T>(sent: Promise<Response>): Promise<Reply<T>> {
   return { ok: false, status: res.status, error: typeof b.error === "string" ? b.error : undefined, code: typeof b.code === "string" ? b.code : undefined };
 }
 
-export const getJson = <T>(url: string) => reply<T>(fetch(url));
+export const getJson = <T>(url: string, init?: RequestInit) => reply<T>(fetch(url, init));
 
 export const postJson = <T>(url: string, body: unknown, method: "POST" | "PATCH" = "POST") =>
   reply<T>(fetch(url, { method, headers: { "content-type": "application/json" }, body: JSON.stringify(body) }));
