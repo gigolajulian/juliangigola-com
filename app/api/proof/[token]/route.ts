@@ -4,12 +4,12 @@ import { sealedStore } from "@/lib/kv";
 import { recordLead } from "@/lib/leads/lead-store";
 import { checkout, checkPaid, finalize } from "@/lib/proofs/submit";
 import { PAYMENTS_DOWN, PAYMENTS_OFF } from "@/lib/stripe";
-import { cleanSelects, device, isTestEmail, amountOwed, isToken, publicView, track, viewerKey, type Proof } from "@/lib/proofs/proof-model";
+import { cleanSelects, device, isTestEmail, amountOwed, isToken, publicView, withViewerEvent, viewerKey, type Proof } from "@/lib/proofs/proof-model";
 import { isEmail } from "@/lib/utils";
 import { checkPass, passCookie, passValue, shutReason, readPublic, writeProof } from "@/lib/proofs/proof-store";
 import { bodyOf, json, limited, upstreamError } from "@/lib/http";
 import { alertHello } from "@/lib/email/hello-mail";
-import { actionAlert, worthMail } from "@/lib/email/proof-mail";
+import { actionAlert, worthMail } from "@/lib/proofs/proof-mail";
 
 /* ── proofs, the client's side ────────────────────────────────────
  * The token in the path is the only key; the email typed at the gate (any
@@ -48,9 +48,9 @@ async function unlock(token: string, request: Request, password: unknown) {
 }
 
 /** The gallery with one visitor's record updated. shortcut: read, change, write is not atomic, so two people picking in the same second can drop one log line; a Durable Object if that ever matters. */
-function logged(p: Proof, email: string, e: Parameters<typeof track>[2]): Proof {
+function logged(p: Proof, email: string, e: Parameters<typeof withViewerEvent>[2]): Proof {
   const k = viewerKey(email);
-  return { ...p, viewers: { ...p.viewers, [k]: track(p.viewers?.[k], new Date().toISOString(), e) } };
+  return { ...p, viewers: { ...p.viewers, [k]: withViewerEvent(p.viewers?.[k], new Date().toISOString(), e) } };
 }
 
 async function where() {

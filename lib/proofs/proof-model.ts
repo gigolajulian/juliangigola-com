@@ -157,7 +157,7 @@ export function device(ua: string): string {
 }
 
 /** One visitor's record with an event added; picks diffed into pick and unpick events. */
-export function track(
+export function withViewerEvent(
   v: Viewer | undefined,
   at: string,
   e: { kind?: ViewerEvent["kind"]; id?: string; picks?: string[]; looks?: Record<string, number>; seconds?: number; device?: string; place?: string; name?: string },
@@ -275,7 +275,7 @@ export const isToken = (t: unknown): t is string => typeof t === "string" && (/^
 export const isFrameId = (t: unknown): t is string => typeof t === "string" && /^[0-9A-Za-z_-]{1,64}$/.test(t);
 
 /** How many frames are past the included ones, and what they cost in dollars. */
-export function extras(selected: number, included: number, price: number) {
+export function extraFrames(selected: number, included: number, price: number) {
   const n = Math.max(0, selected - included);
   return { n, dollars: n * price };
 }
@@ -293,7 +293,7 @@ export function amountOwed(p: Pick<Proof, "selects" | "included" | "price" | "ba
   const bal = Math.max(0, (p.balance ?? 0) * 100 - left);
   left = Math.max(0, left - (p.balance ?? 0) * 100);
   const already = p.price ? Math.floor(left / (p.price * 100)) : 0;
-  const n = Math.max(0, extras(p.selects.length, p.included, p.price).n - already);
+  const n = Math.max(0, extraFrames(p.selects.length, p.included, p.price).n - already);
   return { n, balance: bal, cents: bal + n * p.price * 100 };
 }
 

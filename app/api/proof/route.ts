@@ -1,12 +1,12 @@
-import { gate } from "@/lib/leads/desk-route";
-import { copiesFor, dropProofOpens, recordLead } from "@/lib/leads/lead-store";
-import { cardKey, closesAt, cleanSettings, DEFAULTS, DELIVERY_DAYS, finalKeys, frameKey, frameKeys, aliasKey, isDateId, isFrameId, isModel, isStrongId, isToken, publicId, remindState, shootDay, viewerKey, type Proof } from "@/lib/proofs/proof-model";
+import { gate } from "@/lib/admin/gate";
+import { copiesFor, dropProofOpens } from "@/lib/leads/lead-store";
+import { cardKey, closesAt, cleanSettings, DEFAULTS, finalKeys, frameKey, frameKeys, aliasKey, isFrameId, isModel, isToken, publicId, remindState, shootDay, viewerKey, type Proof } from "@/lib/proofs/proof-model";
 import { isEmail } from "@/lib/utils";
 import { forDesk, hashPass, listProofs, nextProofId, readProof, writeProof } from "@/lib/proofs/proof-store";
-import { deliveryMail, deliveryUrl, proofMail, proofUrl, reminderMail, sendClient, subjectOr, webImages } from "@/lib/email/proof-mail";
+import { deliveryUrl, proofMail, proofUrl, reminderMail, webImages } from "@/lib/proofs/proof-mail";
 import { MAX_FINAL, storeFinal } from "@/lib/proofs/delivery";
 import { recheckTransfer } from "@/lib/proofs/submit";
-import { servedFrame } from "@/lib/proofs/watermark";
+import { deliverFinals, dropKeys, relinkProof, sendProofs, sendReminder, type Refused } from "@/lib/proofs/actions";
 import { bodyOf, json } from "@/lib/http";
 
 /* ── proofs, Julian's side ────────────────────────────────────────
@@ -49,14 +49,9 @@ async function proofGate(request: Request) {
 
 type Gated = Exclude<Awaited<ReturnType<typeof proofGate>>, { error: Response }>;
 
-/** R2 deletes at most 1000 keys a call. */
-async function dropKeys(r2: Gated["r2"], keys: string[]) {
-  for (let i = 0; i < keys.length; i += 1000) await r2.delete(keys.slice(i, i + 1000));
-}
-
-/** A mail to the client, copied to the lead's other addresses when they can be read. */
-const mailClient = async (g: Gated, to: string, m: Parameters<typeof sendClient>[2]) =>
-  sendClient(g.env.CLIENT_EMAIL, to, m, await copiesFor(g.kv, g.s, to).catch(() => []));
+/** A workflow's outcome as the answer: the refusal with its status, or the record (for the desk) and the rest. */
+const answer = (r: { proof: Proof; url?: string } | Refused) =>
+  "error" in r ? json({ error: r.error }, r.status) : json({ ...r, proof: forDesk(r.proof) });
 
 export async function GET(request: Request) {
   const g = await proofGate(request);
@@ -114,78 +109,16 @@ const ACTIONS: Record<string, (g: Gated, p: Proof, b: Record<string, unknown>, r
     return json({ pulledAt });
   },
   async send(g, p, b, request) {
-    if (!p.email) return json({ error: "Add the client's email first." }, 400);
-    if (!p.frames.length) return json({ error: "Publish frames from Lightroom first." }, 400);
-    // The strip in the mail carries the watermark too, when it is on.
-    const strip = await Promise.all(
-      p.frames.slice(0, 4).map(async (f) => {
-        const o = await servedFrame(g.env, p, f.id, request.url);
-        return o ? { id: f.id, bytes: new Uint8Array(await new Response(o.body).arrayBuffer()) } : null;
-      }),
-    )
-      .then((all) => all.filter((x) => x !== null))
-      .catch(() => null);
-    if (!strip) return json({ error: "The watermark could not be drawn. Try again." }, 502);
-    const now = Date.now();
-    const sentAt = new Date(now).toISOString();
-    const sent: Proof = { ...p, sentAt, closesAt: closesAt(p.days, now) };
-    const mail = proofMail(sent, strip);
-    const m = { ...mail, subject: subjectOr(b.subject, mail.subject) };
-    if (!(await mailClient(g, p.email, m))) return json({ error: "The mail did not go out. Try again." }, 502);
-    await writeProof(g.kv, g.s, sent);
-    await recordLead(g.env, p.email, { event: { at: sentAt, kind: "mail", note: m.subject, mail: { to: "client", kind: "proofs" } } });
-    return json({ proof: forDesk(sent) });
+    return answer(await sendProofs(g, p, b.subject, request.url));
   },
   async deliver(g, p, b) {
-    if (!p.email) return json({ error: "Add the client's email first." }, 400);
-    if (!p.finals?.length) return json({ error: "Publish the finals from Lightroom first." }, 400);
-    // A Nov 11 id is too short to front full-size files: the finals go out on a new shoot id and the old link closes.
-    const was = publicId(p);
-    const link = isStrongId(was) ? was : await nextProofId(g.kv, isDateId(was) ? was.slice(0, 8) : undefined);
-    if (link !== was) await g.kv.put(aliasKey(link), p.token);
-    const now = Date.now();
-    const deliveredAt = new Date(now).toISOString();
-    const sent: Proof = { ...p, ...(link !== p.token ? { link } : {}), deliveredAt, closesAt: closesAt(DELIVERY_DAYS, now) };
-    const mail = deliveryMail(sent);
-    const m = { ...mail, subject: subjectOr(b.subject, mail.subject) };
-    if (!(await mailClient(g, p.email, m))) return json({ error: "The mail did not go out. Try again." }, 502);
-    await writeProof(g.kv, g.s, sent);
-    if (link !== was && p.link) await g.kv.delete(aliasKey(p.link));
-    await recordLead(g.env, p.email, { event: { at: deliveredAt, kind: "mail", note: m.subject, mail: { to: "client", kind: "finals" } } });
-    // The proof's web copies go once the finals are out. Only copies: never an original.
-    const keys = p.frames.flatMap((f) => frameKeys(p.token, f.id));
-    await dropKeys(g.r2, keys);
-    return json({ proof: forDesk(sent), url: deliveryUrl(link) });
+    return answer(await deliverFinals(g, p, b.subject));
   },
   async remind(g, p) {
-    const r = remindState(p);
-    if (r.state === "sent") return json({ error: "Already reminded for this stage." }, 409);
-    if (r.state === "locked") return json({ error: "The reminder opens in the last 5 days before the gallery closes." }, 409);
-    if (r.state !== "ready") return json({ error: r.why }, 409);
-    // Unreachable today: a gallery with no email is never "ready".
-    if (!p.email) return json({ error: "Add the client's email first." }, 400);
-    // Stamped before the mail: a double tap or a retry can never send a second. The close date stays.
-    const at = new Date().toISOString();
-    const stamped: Proof = { ...p, reminded: { ...p.reminded, [r.stage]: at } };
-    await writeProof(g.kv, g.s, stamped);
-    const m = reminderMail(p, r.stage);
-    if (!(await mailClient(g, p.email, m))) {
-      // Undo the stamp so he can try again. KV allows one write per key per second, so wait that out first.
-      await new Promise((ok) => setTimeout(ok, 1100));
-      const undone = await writeProof(g.kv, g.s, p).then(() => true, () => false);
-      return json({ error: undone ? "The mail did not go out. Try again." : "The mail did not go out, and the reminder is still marked as sent. Tell Claude." }, 502);
-    }
-    await recordLead(g.env, p.email, { event: { at, kind: "mail", note: m.subject, mail: { to: "client", kind: r.stage } } });
-    return json({ proof: forDesk(stamped) });
+    return answer(await sendReminder(g, p));
   },
   async relink(g, p) {
-    // Storage stays put (R2, Stripe metadata, Lightroom's remote id); only the public id moves.
-    const link = await nextProofId(g.kv);
-    await g.kv.put(aliasKey(link), p.token);
-    const next: Proof = { ...p, link };
-    await writeProof(g.kv, g.s, next);
-    if (p.link) await g.kv.delete(aliasKey(p.link));
-    return json({ proof: forDesk(next), url: proofUrl(link) });
+    return answer(await relinkProof(g, p));
   },
   async forget(g, p, b) {
     const who = typeof b.email === "string" ? viewerKey(b.email) : "";
