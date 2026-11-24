@@ -13,7 +13,7 @@ import { importStripe } from "@/lib/leads/sync/stripe-import";
 import { STRIPE_UNSET } from "@/lib/stripe";
 import { cleanTemplates, manualLead, stats, type NewLead } from "@/lib/leads/lead-crm";
 import { cleanFrom, FROM_KEY, invoiceNo, invoicesTaken, PHOTO_KEY, type InvoiceFrom } from "@/lib/leads/invoice";
-import { bodyOf, json, NO_STORE } from "@/lib/http";
+import { bodyOf, json, NO_STORE, upstreamError } from "@/lib/http";
 import { parseOr } from "@/lib/json";
 import { patchLead } from "@/lib/leads/lead-patch";
 import { secretJson } from "@/lib/secrets";
@@ -48,7 +48,7 @@ async function* everyKey<M>(inbox: NonNullable<CloudflareEnv["INBOX"]>, prefix: 
  *
  * Opens with the /admin credentials in `lib/vouch.ts`: the `INBOX_KEY`
  * header, compared in constant time, or a GitHub token that can push. Its
- * own guard keeps a separate message for a token GitHub refused. With
+ * own gate keeps a separate message for a token GitHub refused. With
  * neither set, it refuses everything: an enquiry carries somebody's name,
  * their email and what they want, and the failure to get wrong is the one
  * where that is readable by whoever asks. Cloudflare Access in front of
@@ -70,31 +70,16 @@ export const dynamic = "force-dynamic";
  * starts a fresh lead.
  */
 
-/** The binding and the secret, or `null` when this build has neither. */
-async function wired() {
+/** The admin gate, then the binding: `kv`, the opened sealer `s` (null without LEADS_KEY, refused per
+    branch with `noSeal`, since push and templates need none), Notion and VAPID. */
+async function gate(request: Request) {
   const { env, seal, kv } = await sealedStore();
-  return kv ? { inbox: kv, seal, notion: env.NOTION_TOKEN, vapid: env.VAPID_KEY, env } : null;
-}
-
-async function guard(request: Request) {
-  const { env } = await getCloudflareContext({ async: true });
   // Who is asking first: what this build is missing is for /admin only.
   // The admin gate (`isAdmin`): the inbox key, or a GitHub token that can push.
   const denied = await refuseAdmin(request, env.INBOX_KEY);
   if (denied) return { error: denied };
-  const rig = await wired();
-  if (!rig) {
-    return {
-      error: json(
-        {
-          error:
-            "This build has no inbox attached. Deploy with the INBOX namespace bound.",
-        },
-        503,
-      ),
-    };
-  }
-  return { inbox: rig.inbox, seal: rig.seal, notion: rig.notion, vapid: rig.vapid, env: rig.env };
+  if (!kv) return { error: json({ error: "This build has no inbox attached. Deploy with the INBOX namespace bound." }, 503) };
+  return { env, kv, s: seal ? await seal : null, notion: env.NOTION_TOKEN, vapid: env.VAPID_KEY };
 }
 
 /**
@@ -105,15 +90,15 @@ async function guard(request: Request) {
  * the only time the value itself is needed.
  */
 export async function GET(request: Request) {
-  const gate = await guard(request);
-  if (gate.error) return gate.error;
+  const g = await gate(request);
+  if (g.error) return g.error;
 
   const url = new URL(request.url);
   const wanted = url.searchParams.get("key");
 
   // One of the images an enquiry arrived with (`lib/leads/enquiry-action.ts`).
   if (wanted?.startsWith("ref:msg:")) {
-    const got = await gate.inbox.getWithMetadata<{ type?: string }>(wanted, "arrayBuffer");
+    const got = await g.kv.getWithMetadata<{ type?: string }>(wanted, "arrayBuffer");
     if (got.value === null) return json({ error: "Gone." }, 404);
     // Anything stored before the check, or not a plain picture, goes out
     // as a download that cannot run (`SAFE_IMAGE`, lib/inbox.ts).
@@ -131,37 +116,37 @@ export async function GET(request: Request) {
 
   // The key a device subscribes to pushes with. Public by nature, still gated.
   if (url.searchParams.has("vapid")) {
-    if (!gate.vapid) return json({ error: "Push needs VAPID_KEY on the Worker." }, 503);
-    return json({ key: publicKey(secretJson<JsonWebKey>(gate.vapid, "VAPID_KEY")) });
+    if (!g.vapid) return json({ error: "Push needs VAPID_KEY on the Worker." }, 503);
+    return json({ key: publicKey(secretJson<JsonWebKey>(g.vapid, "VAPID_KEY")) });
   }
 
   // His reply templates, or the defaults.
   if (url.searchParams.has("templates")) {
-    const saved = await gate.inbox.get(TEMPLATES_KEY);
+    const saved = await g.kv.get(TEMPLATES_KEY);
     return json({ templates: cleanTemplates(parseOr(saved, undefined)) });
   }
   // His details for invoices, and the number the next one on a date would get.
   if (url.searchParams.has("invoiceFrom") || url.searchParams.has("invoiceNo")) {
-    const seal = await gate.seal;
+    const seal = g.s;
     if (!seal) return noSeal();
-    const raw = await gate.inbox.get(FROM_KEY);
+    const raw = await g.kv.get(FROM_KEY);
     const from = raw ? cleanFrom(await seal.open<InvoiceFrom>(raw)) : null;
     const date = url.searchParams.get("invoiceNo") ?? "";
-    return json({ from, ...(/^\d{4}-\d{2}-\d{2}$/.test(date) ? { no: invoiceNo(date, await invoicesTaken(gate.inbox, date)) } : {}) });
+    return json({ from, ...(/^\d{4}-\d{2}-\d{2}$/.test(date) ? { no: invoiceNo(date, await invoicesTaken(g.kv, date)) } : {}) });
   }
   // A design B invoice's photo, sealed like the lead it belongs to.
   if (url.searchParams.has("invoicePhoto")) {
-    const seal = await gate.seal;
+    const seal = g.s;
     if (!seal) return noSeal();
     const key = url.searchParams.get("invoicePhoto") ?? "";
-    const raw = PHOTO_KEY.test(key) ? await gate.inbox.get(key) : null;
+    const raw = PHOTO_KEY.test(key) ? await g.kv.get(key) : null;
     return raw ? json({ photo: await seal.open<string>(raw) }) : json({ error: "Photo not found." }, 404);
   }
   // Every task on every lead, for Today's Tasks due. Trashed leads are left out.
   if (url.searchParams.has("tasks")) {
-    const seal = await gate.seal;
+    const seal = g.s;
     if (!seal) return noSeal();
-    const tasks = (await everyLead(gate.inbox, seal))
+    const tasks = (await everyLead(g.kv, seal))
       .filter((l) => !l.trashedAt)
       .flatMap((l) => (l.tasks ?? []).filter((t) => !t.doneAt).map((t) => ({ ...t, lead: l.id, name: l.name })));
     return json({ tasks });
@@ -169,9 +154,9 @@ export async function GET(request: Request) {
   // Every invoice on every lead, newest first, for Money > Invoices and Today's overdue list. Trashed leads are left out.
   // shortcut: one KV get per lead; an invoice index if the desk ever holds thousands of leads.
   if (url.searchParams.has("invoices")) {
-    const seal = await gate.seal;
+    const seal = g.s;
     if (!seal) return noSeal();
-    const invoices = (await everyLead(gate.inbox, seal))
+    const invoices = (await everyLead(g.kv, seal))
       .filter((l) => !l.trashedAt)
       .flatMap((l) => (l.invoices ?? []).map((i) => ({ ...i, lead: l.id, name: l.name })))
       .sort((a, b) => b.at.localeCompare(a.at));
@@ -179,39 +164,39 @@ export async function GET(request: Request) {
   }
   // One client's whole activity log (`lib/leads/activity-log.ts`).
   if (url.searchParams.has("log")) {
-    const seal = await gate.seal;
+    const seal = g.s;
     if (!seal) return noSeal();
-    return json({ log: await readLog(gate.inbox, seal, (url.searchParams.get("log") ?? "").replace(/^lead:/, "")) });
+    return json({ log: await readLog(g.kv, seal, (url.searchParams.get("log") ?? "").replace(/^lead:/, "")) });
   }
   // The numbers, every lead as CSV (`lib/leads/lead-crm.ts`), or every event as CSV (`?csv=events`).
   if (url.searchParams.has("stats") || url.searchParams.has("csv")) {
-    const seal = await gate.seal;
+    const seal = g.s;
     if (!seal) return noSeal();
     const day = new Date().toISOString().slice(0, 10);
     const file = (body: string, name: string) => new Response(body, { headers: { ...NO_STORE, "content-type": "text/csv; charset=utf-8", "content-disposition": `attachment; filename="${name}-${day}.csv"` } });
-    if (url.searchParams.get("csv") === "events") return file(eventsCsv(await readMaster(gate.inbox, seal)), "activity");
-    const master = await readMaster(gate.inbox, seal);
-    if (url.searchParams.has("stats")) return json({ stats: stats(await everyLead(gate.inbox, seal), Date.now(), master) });
-    return file(await clientsCsv(gate.inbox, seal, master), "leads");
+    if (url.searchParams.get("csv") === "events") return file(eventsCsv(await readMaster(g.kv, seal)), "activity");
+    const master = await readMaster(g.kv, seal);
+    if (url.searchParams.has("stats")) return json({ stats: stats(await everyLead(g.kv, seal), Date.now(), master) });
+    return file(await clientsCsv(g.kv, seal, master), "leads");
   }
 
   // The lead desk (`components/leads/desk.tsx`): one record per person.
   // Sealed with LEADS_KEY (`lib/leads/lead-crypto.ts`), opened here and only here.
   if (wanted?.startsWith("lead:") || url.searchParams.has("leads")) {
-    const seal = await gate.seal;
+    const seal = g.s;
     if (!seal) return noSeal();
     if (wanted) {
-      const lead = await readLead(gate.inbox, seal, wanted.slice(5));
+      const lead = await readLead(g.kv, seal, wanted.slice(5));
       return lead ? json({ lead }) : json({ error: "Gone." }, 404);
     }
     const leads: LeadSummary[] = [];
-    for await (const k of everyKey<{ s?: string }>(gate.inbox, "lead:")) {
+    for await (const k of everyKey<{ s?: string }>(g.kv, "lead:")) {
       if (!k.metadata?.s) continue;
       const one = await seal.open<LeadSummary>(k.metadata.s);
       // Trash empties itself: 30 days after it went in, the lead goes for good.
       // The list is the only reader, so it is the one place that checks.
       if (one.trashedAt && trashDaysLeft(one.trashedAt, Date.now()) <= 0) {
-        await buryLead(gate.inbox, seal, k.name.slice(5));
+        await buryLead(g.kv, seal, k.name.slice(5));
         continue;
       }
       leads.push({ ...one, id: k.name.slice(5) });
@@ -221,7 +206,7 @@ export async function GET(request: Request) {
 
   if (wanted) {
     if (!wanted.startsWith("msg:")) return json({ error: "Unknown." }, 400);
-    const body = await gate.inbox.get(wanted);
+    const body = await g.kv.get(wanted);
     if (body === null) return json({ error: "Gone." }, 404);
     const enquiry = parseOr<Enquiry | null>(body, null);
     if (!enquiry) return json({ error: "Unreadable." }, 500);
@@ -232,7 +217,7 @@ export async function GET(request: Request) {
   // page of 400 kept the oldest and dropped the newest: read every page,
   // then the inbox reads the other way round.
   const keys: { name: string; metadata?: Summary }[] = [];
-  for await (const k of everyKey<Summary>(gate.inbox, "msg:")) keys.push(k);
+  for await (const k of everyKey<Summary>(g.kv, "msg:")) keys.push(k);
   const rows = keys.map((k) => ({ key: k.name, ...k.metadata })).reverse();
 
   return json({ rows });
@@ -244,8 +229,8 @@ export async function GET(request: Request) {
     patch, `patchLead`), `templates` (the reply templates), then `key: "msg:..."` with `read` (an enquiry
     read or unread). Anything else is a 400. */
 export async function PATCH(request: Request) {
-  const gate = await guard(request);
-  if (gate.error) return gate.error;
+  const g = await gate(request);
+  if (g.error) return g.error;
 
   const given = await bodyOf(request);
   if (!given) return json({ error: "Not JSON." }, 400);
@@ -253,17 +238,17 @@ export async function PATCH(request: Request) {
   if (given.push !== undefined) {
     const sub = given.push as { endpoint?: unknown; keys?: { p256dh?: unknown; auth?: unknown } };
     if (typeof sub?.endpoint !== "string" || !sub.endpoint.startsWith("https://")) return json({ error: "Bad subscription." }, 400);
-    if (given.off === true) await unsubscribe(gate.inbox, sub.endpoint);
+    if (given.off === true) await unsubscribe(g.kv, sub.endpoint);
     else if (typeof sub.keys?.p256dh === "string" && typeof sub.keys.auth === "string")
-      await subscribe(gate.inbox, { endpoint: sub.endpoint, keys: { p256dh: sub.keys.p256dh, auth: sub.keys.auth } });
+      await subscribe(g.kv, { endpoint: sub.endpoint, keys: { p256dh: sub.keys.p256dh, auth: sub.keys.auth } });
     else return json({ error: "Bad subscription." }, 400);
     return json({ ok: true });
   }
   // The desk's "Send a test": one ping to every device that turned these on.
   if (given.test === true) {
-    if (!gate.vapid) return json({ error: "Push needs VAPID_KEY on the Worker." }, 503);
-    const devices = (await gate.inbox.list({ prefix: "push:" })).keys.length;
-    const send = () => notify(gate.inbox, gate.vapid!, { title: "Test notification", body: "Leads can reach this device.", url: "/admin/leads" });
+    if (!g.vapid) return json({ error: "Push needs VAPID_KEY on the Worker." }, 503);
+    const devices = (await g.kv.list({ prefix: "push:" })).keys.length;
+    const send = () => notify(g.kv, g.vapid!, { title: "Test notification", body: "Leads can reach this device.", url: "/admin/leads" });
     // 10 seconds later, so he can lock the phone: iOS shows no banner while the app is open.
     const { ctx } = (await getCloudflareContext({ async: true })) as { ctx?: { waitUntil(p: Promise<unknown>): void } };
     if (devices && ctx?.waitUntil) ctx.waitUntil(new Promise((r) => setTimeout(r, 10_000)).then(send));
@@ -271,39 +256,39 @@ export async function PATCH(request: Request) {
     return json({ devices });
   }
   if (given.invoiceFrom !== undefined) {
-    const seal = await gate.seal;
+    const seal = g.s;
     if (!seal) return noSeal();
     const from = cleanFrom(given.invoiceFrom);
-    await gate.inbox.put(FROM_KEY, await seal.seal(from));
+    await g.kv.put(FROM_KEY, await seal.seal(from));
     return json({ from });
   }
   // A design B photo, already framed down by the desk: stored under its own hash, so the same photo is kept once.
   if (typeof given.invoicePhoto === "string") {
-    const seal = await gate.seal;
+    const seal = g.s;
     if (!seal) return noSeal();
     const photo = given.invoicePhoto;
     if (!photo.startsWith("data:image/jpeg;base64,") || photo.length > 4_000_000) return json({ error: "The photo must be a JPEG under 3 MB." }, 400);
     const key = `invoice-photo:${(await sha256Hex(photo)).slice(0, 32)}`;
-    if (!(await gate.inbox.get(key))) await gate.inbox.put(key, await seal.seal(photo));
+    if (!(await g.kv.get(key))) await g.kv.put(key, await seal.seal(photo));
     return json({ key });
   }
   if (typeof given.key === "string" && given.key.startsWith("lead:")) {
-    const seal = await gate.seal;
+    const seal = g.s;
     if (!seal) return noSeal();
-    const r = await patchLead(gate.inbox, seal, given, gate.notion);
+    const r = await patchLead(g.kv, seal, given, g.notion);
     return "error" in r ? json({ error: r.error }, r.status) : json({ lead: r.lead });
   }
   // His reply templates, saved whole.
   if (given.templates !== undefined) {
     const templates = cleanTemplates(given.templates);
-    await gate.inbox.put(TEMPLATES_KEY, JSON.stringify(templates));
+    await g.kv.put(TEMPLATES_KEY, JSON.stringify(templates));
     return json({ templates });
   }
   const { key, read } = given as { key?: string; read?: boolean };
   if (!key?.startsWith("msg:") || typeof read !== "boolean")
     return json({ error: "Unknown." }, 400);
 
-  const body = await gate.inbox.get(key);
+  const body = await g.kv.get(key);
   if (body === null) return json({ error: "Gone." }, 404);
   const was = parseOr<Enquiry | null>(body, null);
   // Unreadable stays as it is: a put of `{ read }` alone would wipe the enquiry.
@@ -313,7 +298,7 @@ export async function PATCH(request: Request) {
   // Written back with its metadata, because a put without it drops what the
   // list reads — the row would go blank while the message stayed perfectly
   // intact, which is a confusing way to lose an enquiry.
-  await gate.inbox.put(key, JSON.stringify(next), { metadata: summary(next) });
+  await g.kv.put(key, JSON.stringify(next), { metadata: summary(next) });
   return json({ ok: true });
 }
 
@@ -327,8 +312,8 @@ export async function PATCH(request: Request) {
  * shape of this inbox.
  */
 export async function DELETE(request: Request) {
-  const gate = await guard(request);
-  if (gate.error) return gate.error;
+  const g = await gate(request);
+  if (g.error) return g.error;
 
   const given = await bodyOf(request);
   if (!given) return json({ error: "Not JSON." }, 400);
@@ -336,21 +321,21 @@ export async function DELETE(request: Request) {
   // The lead desk's "Empty trash": every lead in the trash, deleted for good.
   // Their Inbox rows stay; the Inbox has its own trash.
   if (emptyTrash === true) {
-    const seal = await gate.seal;
+    const seal = g.s;
     if (!seal) return noSeal();
     const gone: string[] = [];
-    for await (const k of everyKey<{ s?: string }>(gate.inbox, "lead:")) {
+    for await (const k of everyKey<{ s?: string }>(g.kv, "lead:")) {
       if (k.metadata?.s && (await seal.open<LeadSummary>(k.metadata.s)).trashedAt) gone.push(k.name);
     }
-    await Promise.all(gone.map((k) => buryLead(gate.inbox, seal, k.slice(5))));
+    await Promise.all(gone.map((k) => buryLead(g.kv, seal, k.slice(5))));
     return json({ ok: true, deleted: gone.length });
   }
   if (!key?.startsWith("msg:")) return json({ error: "Unknown." }, 400);
 
-  await gate.inbox.delete(key);
+  await g.kv.delete(key);
   // And the images it arrived with.
-  const refs = await gate.inbox.list({ prefix: `ref:${key}:` });
-  await Promise.all(refs.keys.map((k: { name: string }) => gate.inbox.delete(k.name)));
+  const refs = await g.kv.list({ prefix: `ref:${key}:` });
+  await Promise.all(refs.keys.map((k: { name: string }) => g.kv.delete(k.name)));
   return json({ ok: true });
 }
 
@@ -361,50 +346,50 @@ export async function DELETE(request: Request) {
  * Notion is not touched. A second run finds nothing to add.
  */
 export async function POST(request: Request) {
-  const gate = await guard(request);
-  if (gate.error) return gate.error;
+  const g = await gate(request);
+  if (g.error) return g.error;
   const given = await bodyOf(request);
   // One rule for every import: only an explicit `dry: false` writes.
   const dry = given?.dry !== false;
   // A lead he adds by hand: a DM, a text, a referral.
   if (given?.add && typeof given.add === "object") {
-    const seal = await gate.seal;
+    const seal = g.s;
     if (!seal) return noSeal();
     const lead = manualLead(given.add as NewLead, new Date().toISOString());
     if ("error" in lead) return json(lead, 400);
     const id = await seal.id(lead.email);
-    if (await readLead(gate.inbox, seal, id)) return json({ error: "That person is already a lead.", id }, 409);
-    const on = lead.email.includes("@") ? await findLead(gate.inbox, seal, lead.email) : null;
+    if (await readLead(g.kv, seal, id)) return json({ error: "That person is already a lead.", id }, 409);
+    const on = lead.email.includes("@") ? await findLead(g.kv, seal, lead.email) : null;
     if (on?.lead) return json({ error: `That address is on ${on.lead.name}'s lead.`, id: on.id }, 409);
-    await Promise.all((await seal.ids(lead.email)).map((i) => gate.inbox.delete(`gone:${i}`)));
-    await writeLead(gate.inbox, seal, id, lead, null);
+    await Promise.all((await seal.ids(lead.email)).map((i) => g.kv.delete(`gone:${i}`)));
+    await writeLead(g.kv, seal, id, lead, null);
     return json({ lead, id });
   }
   // Past Notion rows as quiet leads (`lib/leads/sync/notion-import.ts`, `scripts/import-notion.mjs`). Dry, it only counts.
   if (given && "importNotion" in given) {
-    const seal = await gate.seal;
+    const seal = g.s;
     if (!seal) return noSeal();
     try {
-      return json(await importNotion(gate.inbox, seal, given.importNotion, dry));
+      return json(await importNotion(g.kv, seal, given.importNotion, dry));
     } catch (e) {
       return json({ error: errorText(e) }, 400);
     }
   }
   // Past Stripe payments and refunds onto the log (`lib/leads/sync/stripe-import.ts`). Dry, it only counts.
   if (given?.importStripe === true) {
-    if (!gate.env.STRIPE_SECRET_KEY) return json({ error: STRIPE_UNSET }, 503);
+    if (!g.env.STRIPE_SECRET_KEY) return json({ error: STRIPE_UNSET }, 503);
     try {
-      return json(await importStripe(gate.env, gate.env.STRIPE_SECRET_KEY, dry));
+      return json(await importStripe(g.env, g.env.STRIPE_SECRET_KEY, dry));
     } catch (e) {
-      return json({ error: errorText(e) }, 502);
+      return upstreamError("stripe import", e, errorText(e));
     }
   }
   if (given?.backfill !== true) return json({ error: "Unknown." }, 400);
-  const seal = await gate.seal;
+  const seal = g.s;
   if (!seal) return noSeal();
 
   const people = new Map<string, InboxRow[]>();
-  for await (const k of everyKey<Summary>(gate.inbox, "msg:")) {
+  for await (const k of everyKey<Summary>(g.kv, "msg:")) {
     const m = k.metadata;
     const email = m?.email?.trim().toLowerCase();
     if (!m || !email?.includes("@")) continue;
@@ -416,9 +401,9 @@ export async function POST(request: Request) {
   let updated = 0;
   for (const [email, rows] of people) {
     const id = await seal.id(email);
-    const gone = await Promise.all((await seal.ids(email)).map((i) => gate.inbox.get(`gone:${i}`)));
+    const gone = await Promise.all((await seal.ids(email)).map((i) => g.kv.get(`gone:${i}`)));
     if (gone.some((g: string | null) => g !== null)) continue;
-    const before = await readLead(gate.inbox, seal, id);
+    const before = await readLead(g.kv, seal, id);
     const after: Lead | null = backfillLead(before, email, rows);
     if (!after) continue;
     if (before) updated++;
@@ -426,7 +411,7 @@ export async function POST(request: Request) {
       added++;
       stages[after.stage] = (stages[after.stage] ?? 0) + 1;
     }
-    if (!dry) await writeLead(gate.inbox, seal, id, after);
+    if (!dry) await writeLead(g.kv, seal, id, after);
   }
   return json({ dry, people: people.size, added, updated, stages });
 }
