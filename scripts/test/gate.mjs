@@ -17,9 +17,10 @@
  *             contact action, the book Worker, with fake KV and email) and
  *             the server-side lib unit tests in tests/lib, then the
  *             scripts/check-*.mjs self-checks. Seconds.
- *   frontend  route types, tsc, eslint, the client-side lib unit tests,
- *             then the component tests (tests/components, jsdom). A few
- *             minutes. The browser checks (tests/ui at the six ratios and the
+ *   frontend  route types, tsc, eslint and the client-side lib unit tests.
+ *             About a minute. The component tests (tests/components, jsdom)
+ *             take about 5 minutes, so CI's components job runs them on every
+ *             pull request, not this gate. The browser checks (tests/ui at the six ratios and the
  *             perf suite's layout, `scripts/perf/run.mjs --ui --rebuild`) run
  *             in CI on every pull request, not here (Julian, 2026-10-12).
  *
@@ -99,7 +100,6 @@ const FRONTEND = [
   ["npx", "tsc", "--noEmit"],
   ["npx", "eslint"],
   ["npx", "vitest", "run", "--project", "frontend"],
-  ["npx", "vitest", "run", "--project", "components"],
 ];
 // Backend first: it takes seconds.
 const failed = (backend && steps("backend", BACKEND)) || (frontend && steps("frontend", FRONTEND));
