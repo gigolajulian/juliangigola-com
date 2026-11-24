@@ -507,14 +507,14 @@ export async function readProof(kv: KV, s: Seal, token: string): Promise<Proof |
   }
 }
 
-/** A gallery by its storage token or a renamed gallery's date id. Frames and cards read this, so the desk's thumbnails keep working. */
+/** A gallery by its storage token or a renamed gallery's date id. */
 export async function findProof(kv: KV, s: Seal, id: string): Promise<Proof | null> {
   const p = await readProof(kv, s, id);
   if (p) return p;
   const token = isDateId(id) ? await kv.get(aliasKey(id)) : null;
   return token ? readProof(kv, s, token) : null;
 }
-/** The gallery a client link opens: only by its public id, so a renamed gallery's old link closes. */
+/** The gallery a link opens (page, frames, card): only by its public id, so a renamed gallery's old link closes. */
 export async function readPublic(kv: KV, s: Seal, id: string): Promise<Proof | null> {
   const p = await findProof(kv, s, id);
   return p && publicId(p) === id ? p : null;

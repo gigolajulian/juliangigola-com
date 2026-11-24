@@ -83,7 +83,7 @@ export async function GET(request: Request) {
     const sent = p.sentAt ? p : { ...p, closesAt: closesAt(p.days) };
     const m = proofMail(sent, p.frames.slice(0, 4).map((f) => ({ id: f.id, bytes: new Uint8Array() })));
     const { subject } = m;
-    const html = m.html.replace("cid:name-ink", "/email-name-ink.png").replace("cid:name-w", "/email-name-w.png").replace(/cid:f-([0-9A-Za-z_-]+)/g, (_, id) => `/proof/${p.token}/f/${id}`);
+    const html = m.html.replace("cid:name-ink", "/email-name-ink.png").replace("cid:name-w", "/email-name-w.png").replace(/cid:f-([0-9A-Za-z_-]+)/g, (_, id) => `/proof/${publicId(p)}/f/${id}`);
     return json({ html, subject, to: p.email ?? null });
   }
   const remind = q.get("remind");

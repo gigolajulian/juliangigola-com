@@ -36,7 +36,8 @@ export function mailChanges(m: Msg): { email: string; c: Change }[] {
   const labels = m.labelIds ?? [];
   if (labels.some((l) => SKIP.includes(l))) return [];
   const h = (n: string) => m.payload?.headers?.find((x) => x.name.toLowerCase() === n)?.value ?? "";
-  const event = { at: new Date(Number(m.internalDate)).toISOString(), ref: m.id, note: h("subject").slice(0, 120) || undefined };
+  // no internalDate would make an Invalid Date and throw outside the per-lead guard, stalling the cursor
+  const event = { at: new Date(Number(m.internalDate) || Date.now()).toISOString(), ref: m.id, note: h("subject").slice(0, 120) || undefined };
   if (labels.includes("SENT")) {
     const mailed = [h("subject"), ...files(m.payload?.parts)].join(" | ");
     return people(`${h("to")},${h("cc")}`).map((email) => ({ email, c: { event: { ...event, kind: "replied" as const }, ...(/invoice/i.test(mailed) ? { mailed } : {}) } }));

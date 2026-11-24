@@ -39,6 +39,11 @@ describe("fold, Gmail kinds", () => {
 });
 
 describe("mailChanges", () => {
+  it("a message with no internalDate still maps, dated now", () => {
+    const [{ c }] = mailChanges({ ...msg("g9", ["INBOX"], email, "desk@juliangigola.com"), internalDate: undefined });
+    expect(Number.isNaN(Date.parse(c.event.at))).toBe(false);
+  });
+
   it("reads sent mail as replied to each outside recipient", () => {
     const out = mailChanges(msg("g1", ["SENT"], "Julian <hello@juliangigola.com>", "Maya <Maya@Example.com>, book@juliangigola.com"));
     expect(out).toEqual([{ email, c: { event: { at: at(5), ref: "g1", note: "Re: portraits", kind: "replied" } } }]);

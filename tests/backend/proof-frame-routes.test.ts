@@ -67,6 +67,16 @@ describe("/proof/[token]/f/[id]", () => {
     expect((await getFrame("a")).status).toBe(404);
   });
 
+  it("serves a renamed gallery by its new link only", async () => {
+    const link = "20261101-abcdefgh";
+    await store({ link });
+    await kv.put(`proofalias:${link}`, TOKEN);
+    expect((await getFrame("a", "", link)).status).toBe(200);
+    expect((await getFrame("a")).status).toBe(404);
+    expect((await getCard(link)).status).toBe(200);
+    expect((await getCard()).status).toBe(404);
+  });
+
   it("is a 404 without the bindings", async () => {
     ctx.env = { INBOX: kv, LEADS_KEY };
     expect((await getFrame("a")).status).toBe(404);
