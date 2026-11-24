@@ -24,6 +24,12 @@ export function upstreamError(label: string, e: unknown, error: string) {
   return json({ error }, 502);
 }
 
+/** The public-write limiter (`DEPOSIT_LIMIT`, five a minute per address and `kind`): the 429 to answer, or null to go on. */
+export async function limited(limiter: { limit(o: { key: string }): Promise<{ success: boolean }> }, kind: string, request: Request) {
+  const ip = request.headers.get("cf-connecting-ip") ?? "unknown";
+  return (await limiter.limit({ key: `${kind}:${ip}` })).success ? null : json({ error: "Too many tries. Wait a minute." }, 429);
+}
+
 /**
  * The request body as an object, or null when it is not one. `request.json()`
  * throws on a malformed body, and a throw out of a handler is the Worker's
