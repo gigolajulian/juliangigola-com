@@ -56,7 +56,9 @@ export function SkyTimes({ times, picked, length, ruler: month, choose }: { time
   );
 }
 
-/* San Jose's forecast (app/api/weather), fetched once per tab and shared by every mount. */
+/* San Jose's forecast (app/api/weather), fetched once per tab and shared by every mount.
+   shortcut: the route is only browser-cached, so each visitor's first load calls Open-Meteo; add the
+   `caches.default` pattern from app/api/slots before ?sky comes off. */
 let forecast: Promise<Hourly | null> | undefined;
 
 /** The details list's weather row for a start: "Clear, 62°". Absent past the forecast's reach or when the fetch fails. */
@@ -64,7 +66,7 @@ export function SkyWeather({ ms }: { ms: number }) {
   const [hourly, setHourly] = React.useState<Hourly | null>(null);
   React.useEffect(() => {
     let live = true;
-    (forecast ??= fetch("/api/weather").then((r) => (r.ok ? r.json() : null)).catch(() => null)).then((h) => { if (live) setHourly(h); });
+    (forecast ??= fetch("/api/weather").then((r) => (r.ok ? r.json() : null)).catch(() => null)).then((h) => { if (!h) forecast = undefined; if (live) setHourly(h); }); // a failure is tried again on the next mount
     return () => { live = false; };
   }, []);
   const w = weatherAt(hourly, ms);
