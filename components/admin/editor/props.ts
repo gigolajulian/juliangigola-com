@@ -62,9 +62,6 @@ export type AdminEditorProps = {
   }[];
   /** Every project, hidden ones included, for the list and the preview. */
   projects: AdminProject[];
-  /** Which slugs the last build was hiding. */
-  initialHidden: string[];
-  initialUnlisted: string[];
   /** Disciplines for the sitemap, each under the page it hangs off. */
   categoryLinks: {
     slug: string;
@@ -74,18 +71,13 @@ export type AdminEditorProps = {
   }[];
   /** Removed projects awaiting their week. */
   initialTrash: TrashedProject[];
-  /** The per-project overrides the last build applied, each slug-keyed:
-      refilings (category slug), re-sequenced galleries, rewritten credits,
-      rewritten titles and intents, and renamed slugs. */
-  initialOverrides: Overrides;
-  /** The running order the last build applied, by slug. */
-  initialOrder: string[];
-  /** Discipline covers the last build applied, category slug to frame path. */
-  initialCovers: Record<string, string>;
-  /** Collaborators' faces the last build applied, handle to picture path. */
-  initialAvatars: Record<string, string>;
-  /** BTS the last build applied, slug → `{ by, frames }`. */
-  initialBts: Record<string, Bts>;
+  /**
+   * The manifest the last build applied, in the draft's shape: hidden and
+   * unlisted slugs, the per-project overrides (refilings, re-sequenced
+   * galleries, rewritten credits, titles and intents, renamed slugs), the
+   * running order, discipline covers, collaborators' faces and BTS.
+   */
+  published: Draft;
   /** Every cover-art release, for the homepage rack picker. */
   releases: PickerItem[];
   /**

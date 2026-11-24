@@ -8,6 +8,7 @@ vi.mock("@/lib/admin/admin-github", () => ({
 
 import { AdminProjects } from "@/components/admin/admin-projects";
 import type { AdminProject } from "@/components/admin/editor/props";
+import { staging, underStaging } from "./staging";
 
 const frame = { src: "/work/x/01.jpg", width: 100, height: 150, color: "#111" };
 const project = (slug: string, name: string): AdminProject => ({
@@ -33,10 +34,7 @@ const props = (query = "") => ({
   changed: new Set<string>(),
   disciplines: [{ slug: "editorial", name: "Editorial", group: "Work" }],
   publishedBts: {},
-  uploads: {},
-  onUpload: vi.fn(),
   overrides: { categories: {}, frames: {}, credits: {}, copy: {}, slugs: {} },
-  onOverride: vi.fn(),
   opened: null,
   onOpened: vi.fn(),
   onOpenPage: vi.fn(),
@@ -46,7 +44,7 @@ const props = (query = "") => ({
 
 describe("AdminProjects", () => {
   it("lists projects with the show filters", () => {
-    render(<AdminProjects {...props()} />);
+    render(<AdminProjects {...props()} />, { wrapper: underStaging(staging()) });
     expect(screen.getByText("VALGUR")).toBeTruthy();
     expect(screen.getByText("CYBER1A")).toBeTruthy();
     expect(screen.getByRole("group", { name: "Show" })).toBeTruthy();
@@ -55,7 +53,7 @@ describe("AdminProjects", () => {
 
   it("narrows by the controlled query and reports typing", () => {
     const p = props("valgur");
-    render(<AdminProjects {...p} />);
+    render(<AdminProjects {...p} />, { wrapper: underStaging(staging()) });
     expect(screen.queryByText("CYBER1A")).toBeNull();
     fireEvent.change(screen.getByPlaceholderText("Filter by name, slug or discipline"), {
       target: { value: "x" },

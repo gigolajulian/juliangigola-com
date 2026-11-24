@@ -17,7 +17,20 @@ import type { Bts, Copy, Credit } from "@/lib/work/work-types";
  * credit are: that module deliberately knows only that a sequence is a list,
  * which is what lets the check script run it. Here they are the real things.
  */
-export type Draft = Manifest<FrameRef, Credit, Copy, Bts>;
+export type Draft = Omit<Manifest, "frames" | "credits" | "copy" | "bts"> & {
+  frames: Record<string, FrameRef[]>;
+  credits: Record<string, Credit[]>;
+  copy: Record<string, Copy>;
+  bts: Record<string, Bts>;
+};
+
+/**
+ * `adoptable` taken as the editor's types, the one place the loose manifest is
+ * narrowed. Not checked here: `lib/work/added.ts` validates the file at build
+ * time, where a bad one fails the deploy (see `adoptable`).
+ */
+const adoptDraft = (file: ProjectsFile, fallback: Draft): Draft =>
+  adoptable(file, fallback) as Draft;
 
 export type Status =
   | { kind: "idle" }
@@ -96,7 +109,7 @@ export async function loadRepo(
      * having them thrown away. */
     const manifestJson = await readFile(t, ADDED_PATH);
     const repo = manifestJson
-      ? adoptable(JSON.parse(manifestJson) as ProjectsFile, baseline)
+      ? adoptDraft(JSON.parse(manifestJson) as ProjectsFile, baseline)
       : baseline;
 
     return { sha: body.sha, content, repo };
@@ -196,7 +209,7 @@ export async function publishDraft({
        * costs work, silently, and nobody finds out until they look at a
        * page that used to name three people. */
       const live = current
-        ? adoptable(JSON.parse(current) as ProjectsFile, baseline)
+        ? adoptDraft(JSON.parse(current) as ProjectsFile, baseline)
         : baseline;
       if (!sameJson(live, baseline)) {
         return {
@@ -217,7 +230,7 @@ export async function publishDraft({
       // the baseline is what was actually written rather than what was
       // sent; otherwise a tidied-away passage reads as an edit still
       // waiting to publish, for ever.
-      written = adoptable(parsed, manifest);
+      written = adoptDraft(parsed, manifest);
       files.push({
         path: ADDED_PATH,
         content: `${JSON.stringify(parsed, null, 2)}\n`,

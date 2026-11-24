@@ -5,8 +5,7 @@ import { contextLines, replyLink, type Enquiry, type Summary } from "@/lib/leads
 import { References } from "@/components/desk/references";
 import { cn, errorText } from "@/lib/utils";
 import { credentials, KEY_STORE, saveAdminKey, TOKEN_STORE } from "@/lib/admin/admin-github";
-import { isLocked } from "@/lib/leads/lead-desk";
-import { adminCall } from "@/lib/admin/admin-call";
+import { adminCall, isLocked } from "@/lib/admin/admin-call";
 
 /* ── the inbox ────────────────────────────────────────────────────
  * Enquiries from the contact form, which now has somewhere to put them.

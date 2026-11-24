@@ -3,8 +3,7 @@ import { Orb } from "@/components/effects/orb";
 import type { Status } from "@/lib/admin/publish";
 import { cn } from "@/lib/utils";
 import { TABS, type View } from "@/components/admin/editor/tabs";
-
-type Column = "map" | "work" | "preview";
+import type { FullView as Column } from "@/components/admin/editor/use-full-view";
 
 /** The switch at the head of a column. Only where there are columns. */
 export function FullSwitch({ which, full, setFull }: { which: Column; full: Column | null; setFull: (c: Column | null) => void }) {

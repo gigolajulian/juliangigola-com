@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { cn } from "@/lib/utils";
+import { cn, pad } from "@/lib/utils";
 
 /* ── a picker ─────────────────────────────────────────────────────
  * Which things lead a section of the homepage, and in what order.
@@ -177,7 +177,7 @@ export function AdminPicker({
               )}
             >
               <span className="label w-6 shrink-0 tabular-nums text-muted-foreground">
-                {String(i + 1).padStart(2, "0")}
+                {pad(i + 1)}
               </span>
 
               {item ? (

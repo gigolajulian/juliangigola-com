@@ -174,18 +174,24 @@ export default function AdminPage() {
           // and offer to put an edit back.
           credits: p.credits,
         }))}
-        initialHidden={[...HIDDEN]}
-        initialUnlisted={[...UNLISTED]}
         initialTrash={TRASH}
-        initialOverrides={{ categories: RECATEGORISED, frames: REFRAMED, credits: RECREDITED, copy: RECOPIED, slugs: SLUGS }}
-        /* The running order and the picked discipline covers, as the last
-           build applied them. Spread rather than passed through, because
-           both are frozen reads of the content file and the editor holds
-           them as ordinary state it can edit. */
-        initialOrder={[...ORDER]}
-        initialCovers={{ ...DISCIPLINE_COVERS }}
-        initialAvatars={{ ...AVATARS }}
-        initialBts={{ ...BTS }}
+        /* The manifest as the last build applied it. The lists and the
+           running order, covers, faces and BTS are spread rather than passed
+           through, because they are frozen reads of the content file and the
+           editor holds them as ordinary state it can edit. */
+        published={{
+          hidden: [...HIDDEN],
+          unlisted: [...UNLISTED],
+          categories: RECATEGORISED,
+          frames: REFRAMED,
+          credits: RECREDITED,
+          copy: RECOPIED,
+          slugs: SLUGS,
+          order: [...ORDER],
+          covers: { ...DISCIPLINE_COVERS },
+          avatars: { ...AVATARS },
+          bts: { ...BTS },
+        }}
         /* Imported from the section itself rather than restated, so the
            picker's limit cannot drift away from the number the grid is
            actually built around. */

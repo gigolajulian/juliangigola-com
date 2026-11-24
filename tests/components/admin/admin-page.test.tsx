@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { AdminPage } from "@/components/admin/admin-page";
 import type { AdminProject } from "@/components/admin/editor/props";
+import { staging, underStaging } from "./staging";
 
 const frame = { src: "/work/x/01.jpg", width: 100, height: 150, color: "#111" };
 const project: AdminProject = {
@@ -23,15 +24,12 @@ const props = () => ({
   project,
   disciplines: [{ slug: "editorial", name: "Editorial", group: "Work" }],
   overrides: { categories: {}, frames: {}, credits: { x: [{ role: "Client", name: "Acme", instagram: null }] }, copy: {}, slugs: {} },
-  onOverride: vi.fn(),
-  uploads: {},
-  onUpload: vi.fn(),
   onClose: vi.fn(),
 });
 
 describe("AdminPage", () => {
   it("renders the page header from the project", () => {
-    render(<AdminPage {...props()} />);
+    render(<AdminPage {...props()} />, { wrapper: underStaging(staging()) });
     expect(screen.getByText("/work/x")).toBeTruthy();
     expect((screen.getByLabelText("Title") as HTMLTextAreaElement).value).toBe("Project X");
     expect(screen.getByText("Acme")).toBeTruthy();
@@ -40,10 +38,11 @@ describe("AdminPage", () => {
 
   it("closes and edits the title", () => {
     const p = props();
-    render(<AdminPage {...p} />);
+    const s = staging();
+    render(<AdminPage {...p} />, { wrapper: underStaging(s) });
     fireEvent.click(screen.getByRole("button", { name: /Projects/ }));
     expect(p.onClose).toHaveBeenCalled();
     fireEvent.change(screen.getByLabelText("Title"), { target: { value: "New title" } });
-    expect(p.onOverride).toHaveBeenCalledWith("copy", "x", { title: "New title", intent: "A night shoot." });
+    expect(s.onOverride).toHaveBeenCalledWith("copy", "x", { title: "New title", intent: "A night shoot." });
   });
 });

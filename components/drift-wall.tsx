@@ -15,8 +15,6 @@ import {
 } from 'react';
 import type { DriftWallItem } from '@/lib/work/work-types';
 
-export type { DriftWallItem };
-
 
 export type DriftWallProps = {
   items: DriftWallItem[];

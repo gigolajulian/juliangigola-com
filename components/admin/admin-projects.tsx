@@ -6,7 +6,7 @@ import { StatusLine } from "@/components/admin/status-line";
 import Image from "next/image";
 import { ADDED_PATH, type TrashedProject, type ManifestRead } from "@/lib/work/added";
 import { commitFiles, readFile } from "@/lib/admin/admin-github";
-import { AdminFrames, type PendingUpload } from "@/components/admin/admin-frames";
+import { AdminFrames } from "@/components/admin/admin-frames";
 import { srcOf } from "@/lib/admin/admin-sequence";
 import { twinStats } from "@/lib/work/frame-twins";
 import { AdminCredits } from "@/components/admin/admin-credits";
@@ -14,7 +14,8 @@ import { AdminBts } from "@/components/admin/admin-bts";
 import type { Bts } from "@/lib/work/work-types";
 import { cn, errorText } from "@/lib/utils";
 import type { AdminProject, ListDraft, Overrides } from "@/components/admin/editor/props";
-import type { SetListDraft, SetOverride } from "@/components/admin/editor/draft";
+import type { SetListDraft } from "@/components/admin/editor/draft";
+import { useEditorStaging } from "@/components/admin/editor/editor-context";
 
 /* ── the project list ─────────────────────────────────────────────
  * Everything on the site, and what can be done to it.
@@ -28,10 +29,9 @@ import type { SetListDraft, SetOverride } from "@/components/admin/editor/draft"
  *   - **Delete** takes it off the site. For a project added here that is
  *     the bin - the entry and its photographs leave in one commit and sit
  *     in Recently deleted for a week. For a harvested one it is the
- *     `hidden` list: `lib/work/work-data.ts` is regenerated from the old site,
- *     so deleting an entry there comes back on the next harvest with
- *     nothing to show it ever went, and unpublishing is the removal that
- *     survives. Restore puts it back, and it is published with the draft
+ *     `hidden` list: `lib/work/work-data.ts` is TypeScript maintained by
+ *     hand and /admin commits JSON, so unpublishing is the removal it can
+ *     make. Restore puts it back, and it is published with the draft
  *     like Hide is, so it does not commit on its own.
  *
  * The two are not one control with two strengths. A hidden project is
@@ -47,10 +47,7 @@ export function AdminProjects({
   onRemoved,
   disciplines,
   overrides,
-  onOverride,
   publishedBts,
-  uploads,
-  onUpload,
   opened,
   onOpened,
   onOpenPage,
@@ -70,14 +67,11 @@ export function AdminProjects({
   /** Disciplines a project can be refiled under. */
   disciplines: { slug: string; name: string; group: string }[];
   /** The draft's per-project overrides: refilings, galleries (absent while original), credits (absent while harvested),
-      copy and renamed addresses (original slug to current). Null to `onOverride` is back to what is published. */
+      copy and renamed addresses (original slug to current). Set through `onOverride` (`useEditorStaging`), where null
+      is back to what is published. */
   overrides: Overrides;
-  onOverride: SetOverride;
   /** BTS as the repo holds it. */
   publishedBts: Record<string, Bts>;
-  /** Photographs staged for this publish, by repo path. */
-  uploads: Record<string, PendingUpload>;
-  onUpload: (added: PendingUpload[]) => void;
   /**
    * The expanded row, or null.
    *
@@ -101,6 +95,7 @@ export function AdminProjects({
   query: string;
   onQuery: (next: string) => void;
 }) {
+  const { onOverride } = useEditorStaging();
   const { slugs, categories: recategorised, frames: reframed, credits } = overrides;
   const { hidden, unlisted, bts } = listDraft;
   const [status, setStatus] = React.useState<Status>({ kind: "idle" });
@@ -406,8 +401,8 @@ export function AdminProjects({
                 <span className="flex min-w-0 flex-wrap items-center gap-2">
                   {/* Refiling works on migrated projects too, which is why it
                       is an override map rather than a field: their categories
-                      come from the generated manifest, where an edit would last
-                      until the next harvest and no longer. */}
+                      live in `lib/work/work-data.ts`, TypeScript maintained by
+                      hand, and /admin commits JSON. */}
                   <select
                     value={filedAs}
                     onChange={(e) => onOverride("categories", p.slug, e.target.value)}
@@ -568,17 +563,13 @@ export function AdminProjects({
                     slug={p.slug}
                     original={p.images}
                     frames={frames}
-                    uploads={uploads}
                     onChange={(next) => onOverride("frames", p.slug, next)}
-                    onUpload={onUpload}
                   />
                   <AdminBts
                     slug={p.slug}
                     published={publishedBts[p.slug]}
                     value={bts[p.slug]}
-                    uploads={uploads}
                     onChange={(next) => onListDraft("bts", p.slug, next)}
-                    onUpload={onUpload}
                   />
                   <div className="border-t border-border bg-card/40 p-5">
                     {/* Julian: "Edit page" beside "Edit" on every closed row

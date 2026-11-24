@@ -3,7 +3,7 @@
 import * as React from "react";
 import Image from "next/image";
 import type { AdminProject } from "@/components/admin/editor/props";
-import { cn } from "@/lib/utils";
+import { cn, pad } from "@/lib/utils";
 
 /* ── the disciplines ──────────────────────────────────────────────
  * Each branch of the site, its work in order, and the photograph that stands
@@ -361,7 +361,7 @@ function Ordering({
           )}
         >
           <span className="label w-6 shrink-0 tabular-nums text-muted-foreground">
-            {String(i + 1).padStart(2, "0")}
+            {pad(i + 1)}
           </span>
           <span
             className="relative block h-12 w-10 shrink-0 overflow-hidden"

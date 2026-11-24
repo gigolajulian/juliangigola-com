@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { AdminBts } from "@/components/admin/admin-bts";
+import { staging, underStaging } from "./staging";
 
 const bts = {
   by: "crew",
@@ -13,7 +14,7 @@ const bts = {
 describe("AdminBts", () => {
   it("counts frames and edits the handle", () => {
     const onChange = vi.fn();
-    render(<AdminBts slug="x" published={bts} value={bts} uploads={{}} onChange={onChange} onUpload={() => {}} />);
+    render(<AdminBts slug="x" published={bts} value={bts} onChange={onChange} />, { wrapper: underStaging(staging()) });
     expect(screen.getByText(/02\s+frames/)).toBeTruthy();
     expect(screen.getByText(/CLIP/)).toBeTruthy();
     fireEvent.change(screen.getByLabelText("BTS by, Instagram handle"), { target: { value: "@new" } });
@@ -22,7 +23,7 @@ describe("AdminBts", () => {
 
   it("removes a frame", () => {
     const onChange = vi.fn();
-    render(<AdminBts slug="x" published={bts} value={bts} uploads={{}} onChange={onChange} onUpload={() => {}} />);
+    render(<AdminBts slug="x" published={bts} value={bts} onChange={onChange} />, { wrapper: underStaging(staging()) });
     fireEvent.click(screen.getByLabelText("Remove BTS 1"));
     expect(onChange).toHaveBeenCalled();
   });

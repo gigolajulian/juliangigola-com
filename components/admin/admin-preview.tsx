@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { cn } from "@/lib/utils";
+import { cn, pad } from "@/lib/utils";
 import type { SiteContent } from "@/lib/content";
 import type { AdminProject } from "@/components/admin/editor/props";
 
@@ -82,7 +82,7 @@ export function AdminPreview({
                   <li key={p.slug} className="relative">
                     <Thumb project={p} className="aspect-[4/5] w-full" />
                     <span className="label absolute left-2 top-2 tabular-nums text-foreground drop-shadow">
-                      {String(i + 1).padStart(2, "0")}
+                      {pad(i + 1)}
                     </span>
                     <p className="label mt-1 truncate text-muted-foreground">
                       {p.name}
