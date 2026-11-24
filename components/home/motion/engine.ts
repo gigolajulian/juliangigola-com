@@ -6,13 +6,12 @@
    depth.ts adds a second hero driver and bars.ts drives book and quote. */
 
 import { matches, media } from "@/lib/device";
-import { qflag } from "@/lib/home/flags";
 import { touchParity } from "./touch-parity";
 
 export type Ctx = {
   // Liveness, for listeners in a setup closure that read ctx outside frame:
   // vw, vh, held, fine, u: written by measure() on resize and on the held media change, so they are current
-  // (fine is refreshed only by those two events, and with ?mt2=1 by the fine query's own change too).
+  // (and on the fine query's own change).
   // y, dy, t, dt, fresh: written once per tick, so outside frame they hold the last frame's values.
   // top, h: overwritten for each section in the tick, valid only inside that section's frame.
   /** viewport width and height, px */
@@ -51,12 +50,6 @@ export type Driver = {
   /** run `frame` on every structure. Default: only when holds are on (D). */
   always?: boolean;
 };
-
-/** The motion state path (desloppify r9 stage 4), on by default since Julian approved it 2026-11-21; ?mt2=0 runs the old path.
-    On: the fine query refreshes ctx, the engine's own listeners go in before the drivers' (so a driver's resize handler reads a
-    measured ctx), the covers driver tells HomeCovers its item instead of round-tripping it through the row's scrollLeft, and
-    hero.ts resets its module throttle per mount. */
-export const MT2 = !qflag("mt2", "0");
 
 /** A title or name line coming up from under its clip (Cover art, Motion, Commissions). */
 const RISE: KeyframeAnimationOptions = { duration: 600, easing: "cubic-bezier(.16,1,.3,1)" };
@@ -207,11 +200,10 @@ export function startEngine(root: HTMLElement, drivers: Driver[]) {
   for (const s of secs) ro.observe(s);
   const measure = () => measureCtx(e);
   measure();
-  if (MT2) {
-    addEventListener("resize", measure);
-    mqD.addEventListener("change", measure);
-    mqFine.addEventListener("change", measure);
-  }
+  // the engine's own listeners go in before the drivers', so a driver's resize handler reads a measured ctx
+  addEventListener("resize", measure);
+  mqD.addEventListener("change", measure);
+  mqFine.addEventListener("change", measure);
   html.setAttribute("data-mt-motion", "");
   const tpOff = touchParity();
   const offs: (void | (() => void))[] = [];
@@ -221,9 +213,5 @@ export function startEngine(root: HTMLElement, drivers: Driver[]) {
     step(e, now);
   };
   e.raf = requestAnimationFrame(tick);
-  if (!MT2) {
-    addEventListener("resize", measure);
-    mqD.addEventListener("change", measure);
-  }
   return () => stopEngine(e, measure, ro, offs, tpOff);
 }

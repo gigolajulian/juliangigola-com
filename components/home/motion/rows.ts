@@ -3,7 +3,7 @@ import { matches } from "@/lib/device";
 import { qvalue } from "@/lib/home/flags";
 import { holdEase as ease, holdUnease as unease } from "@/lib/motion/hold-ease";
 import { captionsOff, vimeoListen, vimeoPlays } from "@/lib/work/videos";
-import { clamp, MT2, rise, smooth, tell, type Ctx, type Driver } from "./engine";
+import { clamp, rise, smooth, tell, type Ctx, type Driver } from "./engine";
 import { sleeveTilt } from "@/components/cover/sleeve-tilt";
 import { touchParityOn } from "./touch-parity";
 
@@ -99,9 +99,8 @@ function coverFrame(s: Covers, p: number) {
   p = ease(p);
   const i = Math.round(p * (n - 1)), x = p * (n - 1) * step;
   if (i !== s.cur) {
-    // The row's own scroll steps item by item so HomeCovers (rows.tsx) names the current one; the transform carries the rest.
-    if (MT2) tell(s.el, { cur: i }); // ?mt2=1: tell HomeCovers the item; the row's scroll stays at 0 and the transform carries all of it
-    else s.row.scrollLeft = i * step;
+    // HomeCovers (rows.tsx) is told the item; the row's scroll stays at 0 and the transform carries all of it.
+    tell(s.el, { cur: i });
     s.base = s.row.scrollLeft;
     s.cur = i;
   } else if (x === s.lastX) return;
@@ -180,7 +179,7 @@ function coverResize(s: Covers) {
   const was = s.cur; // measureCovers() resets it
   measureCovers(s);
   if (s.ctx.held) return;
-  if (MT2 && was > 0) s.row.scrollLeft = was * s.step; // ?mt2=1: the row rested at 0 while held; land it on the told item
+  if (was > 0) s.row.scrollLeft = was * s.step; // the row rested at 0 while held; land it on the told item
   s.track.style.transform = "";
   loose(s);
 }
