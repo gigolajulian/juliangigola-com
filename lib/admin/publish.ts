@@ -1,5 +1,5 @@
 /* ── reading and publishing the editor's draft ────────────────────
- * The network half of `components/admin/editor/editor.tsx`: read the repo
+ * The network half of `components/admin/editor.tsx`: read the repo
  * when a token is pasted in, and commit the draft back. The editor keeps
  * its state; these take what they need and return what it should adopt.
  * ─────────────────────────────────────────────────────────────── */
@@ -7,7 +7,8 @@
 import { CONTENT_PATH, type SiteContent } from "@/lib/content";
 import { ADDED_PATH, isTextRef, type FrameRef } from "@/lib/work/added";
 import { adoptable, projectsFile, sameJson, type Manifest, type ProjectsFile } from "@/lib/admin/admin-payload";
-import { commitFiles, failureMessage, readFile, type CommitFile, TOKEN_STORE, REPO, GITHUB_API } from "@/lib/admin/admin-github";
+import { commitFiles, failureMessage, readFile, type CommitFile, TOKEN_STORE } from "@/lib/admin/admin-github";
+import { GITHUB_API, REPO } from "@/lib/admin/github-repo";
 import type { Bts, Copy, Credit } from "@/lib/work/work-types";
 import { localRemove } from "@/lib/storage";
 

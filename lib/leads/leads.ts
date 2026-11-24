@@ -25,9 +25,7 @@ import { DAY_MS } from "@/lib/time-zone";
  * failed to update must not fail the form.
  * ─────────────────────────────────────────────────────────────── */
 
-/** One day in milliseconds. */
-
-export const STAGES =["Inquiry", "Replied", "Call booked", "Quoted", "Confirmed", "Shot", "Invoiced", "Selecting", "Delivered", "Lost"] as const;
+export const STAGES = ["Inquiry", "Replied", "Call booked", "Quoted", "Confirmed", "Shot", "Invoiced", "Selecting", "Delivered", "Lost"] as const;
 export type Stage = (typeof STAGES)[number];
 /** The stages of a booked job: confirmed and after, not lost. */
 export const WON: readonly Stage[] = ["Confirmed", "Shot", "Invoiced", "Selecting", "Delivered"];

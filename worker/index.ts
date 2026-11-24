@@ -12,7 +12,7 @@
  * ─────────────────────────────────────────────────────────────── */
 
 import { lockOp, type BookingEnv } from "../lib/booking/engine";
-import { manageLinks } from "../lib/booking/token";
+import { manageLinks } from "../lib/booking/manage-link";
 import { confirmOf, sendConfirm } from "../lib/booking/confirm";
 import { TZ } from "../lib/time-zone";
 

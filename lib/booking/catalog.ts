@@ -1,5 +1,5 @@
 import { EVENTS } from "@/lib/booking/rules";
-import { depositFor, takesDeposit } from "@/lib/booking/paid";
+import { depositFor, takesDeposit } from "@/lib/leads/deposit-terms";
 import { ABOUT_PHOTO } from "@/lib/photos";
 import { CONTENT, type SessionType } from "@/lib/content";
 
@@ -16,7 +16,7 @@ export const formatPrice = (from: number | null): string =>
 
 const w = (slug: string, n: string) => `/work/${slug}/${n}.jpg`;
 
-/* ── the session catalog: what /book, the homepage and the service pages offer (deposits from lib/booking/paid.ts) ── */
+/* ── the session catalog: what /book, the homepage and the service pages offer (deposits from lib/leads/deposit-terms.ts) ── */
 export type SessionSlug = "portraits" | "headshots" | "studio-digitals" | "model-test" | "graduation" | "weddings" | "consultation" | "music-photography" | "fashion-photography" | "brand-photography" | "editorial" | "events";
 export type Session = {
   slug: SessionSlug;
@@ -27,7 +27,7 @@ export type Session = {
   turnaround?: string;
   /** The event it books, "juliangigola/event-slug" (a stored key; the slug keys `EVENTS`); none for an on-request session. */
   cal?: string;
-  /** Takes a deposit: its event is in `DEPOSIT_SESSIONS` (`lib/booking/paid.ts`). */
+  /** Takes a deposit: its event is in `DEPOSIT_SESSIONS` (`lib/leads/deposit-terms.ts`). */
   paid: boolean;
   /** `m`: a horizontal frame for the phone banner, where the tall one crops badly.
       `at`: where the phone and portrait-tablet banner sits on each frame (an

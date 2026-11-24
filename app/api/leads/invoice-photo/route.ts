@@ -1,5 +1,5 @@
 import { PHOTO_KEY } from "@/lib/leads/invoice";
-import { gate, noSeal, sealedGate } from "@/lib/leads/desk-route";
+import { gate, noSeal, sealedGate } from "@/lib/admin/gate";
 import { bodyOf, json } from "@/lib/http";
 import { sha256Hex } from "@/lib/token";
 

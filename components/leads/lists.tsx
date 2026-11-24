@@ -18,7 +18,7 @@ import { Tab, TabList } from "@astryxdesign/core/TabList";
 import { endDay } from "@/lib/leads/lead-desk";
 import { errorText } from "@/lib/utils";
 import { renewDue, type LeadSummary } from "@/lib/leads/leads";
-import { type Call, dayLabel, inFilter, isFilter, type Filter } from "@/lib/leads/lead-desk";
+import { dayLabel, deskCall, inFilter, isFilter, type Filter } from "@/lib/leads/lead-desk";
 
 type Row = LeadSummary & Record<string, unknown>;
 export const ASIDE: [Filter, string][] = [["snoozed", "Snoozed"], ["archived", "Archived"], ["trash", "Trash"], ["Delivered", "Delivered"], ["Lost", "Lost"]];
@@ -59,14 +59,14 @@ export function LicencesDesk({ leads, open }: { leads: LeadSummary[]; open: (l: 
 }
 
 /** `top`: the desk's Open / Put aside switch, above the page's own tabs. */
-export function AsideDesk({ leads, call, open, done, tab, setTab, top }: { leads: LeadSummary[]; call: Call; open: (l: LeadSummary) => void; done: () => void; tab: Filter; setTab: (f: Filter) => void; top?: React.ReactNode }) {
+export function AsideDesk({ leads, open, done, tab, setTab, top }: { leads: LeadSummary[]; open: (l: LeadSummary) => void; done: () => void; tab: Filter; setTab: (f: Filter) => void; top?: React.ReactNode }) {
   const [sure, setSure] = React.useState(false);
   const [busy, setBusy] = React.useState(false);
   const [note, setNote] = React.useState<string | null>(null);
   const rows = leads.filter((l) => inFilter(l, tab)) as Row[];
   const empty = () => {
     setBusy(true);
-    call({ method: "DELETE" })
+    deskCall({ method: "DELETE" })
       .then(done)
       .catch((e: unknown) => setNote(errorText(e)))
       .finally(() => { setBusy(false); setSure(false); });

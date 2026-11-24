@@ -3,6 +3,7 @@
 import * as React from "react";
 import {
   SECTIONS,
+  lookupVideo,
   parseVideoUrl,
   posterFor,
   youtubeStills,
@@ -10,6 +11,7 @@ import {
   type VideoSection,
 } from "@/lib/work/videos";
 import { cn } from "@/lib/utils";
+import { moveBefore } from "@/lib/admin/move-before";
 
 /* ── the video tab ────────────────────────────────────────────────
  * Paste a link. Everything else is filled in or picked.
@@ -55,41 +57,9 @@ export function AdminVideos({
     setBusy(true);
     setProblem(null);
 
-    /* oEmbed, for the title and — where the provider keeps its stills to
-       itself — the poster. Both endpoints are public, take no key, and are
-       named in `connect-src`; a failure here is caught and the row is added
-       anyway with the title left to type. */
-    let title = "";
-    let poster: string | undefined;
-    try {
-      const endpoint =
-        parsed.provider === "youtube"
-          ? `https://www.youtube.com/oembed?format=json&url=${encodeURIComponent(
-              `https://www.youtube.com/watch?v=${parsed.videoId}`,
-            )}`
-          : `https://vimeo.com/api/oembed.json?url=${encodeURIComponent(
-              `https://vimeo.com/${parsed.videoId}`,
-            )}`;
-      const res = await fetch(endpoint, { cache: "no-store" });
-      if (res.ok) {
-        const body = (await res.json()) as {
-          title?: string;
-          thumbnail_url?: string;
-        };
-        title = typeof body.title === "string" ? body.title : "";
-        // Only Vimeo's is kept: YouTube's oEmbed hands back the small
-        // `hqdefault`, which `posterFor` already derives, and storing it
-        // would pin the tile to the one still rather than leaving the choice
-        // open below.
-        if (
-          parsed.provider === "vimeo" &&
-          body.thumbnail_url?.startsWith("https://i.vimeocdn.com/")
-        )
-          poster = body.thumbnail_url;
-      }
-    } catch {
-      // Offline, or the provider is having a day. The link is still good.
-    }
+    // The title, and Vimeo's poster. A failed lookup still adds the row,
+    // with the title left to type.
+    const { title, poster } = await lookupVideo(parsed);
 
     onChange([
       ...videos,
@@ -111,18 +81,8 @@ export function AdminVideos({
 
   /** Lift and insert, like every other list in here. */
   const reorder = (from: string, to: string) => {
-    if (from === to) return;
-    const next = [...videos];
-    const at = next.findIndex((v) => v.id === from);
-    const onto = next.findIndex((v) => v.id === to);
-    if (at === -1 || onto === -1) return;
-    const [held] = next.splice(at, 1);
-    next.splice(
-      next.findIndex((v) => v.id === to) + (onto > at ? 1 : 0),
-      0,
-      held,
-    );
-    onChange(next);
+    const next = moveBefore(videos, from, to, (v) => v.id);
+    if (next) onChange(next);
   };
 
   return (

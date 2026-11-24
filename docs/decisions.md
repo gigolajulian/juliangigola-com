@@ -294,7 +294,7 @@ states its rule inline. `SPEC-home-scroll.md` citations point at
 - 2026-11-15: the whole week, days already past included: the card under it lists them, and a call done on Saturday is still this week's call
 - 2026-11-15: a number, so Your move and Due add up to "on you" above; each row badges its own kind
 
-### components/photo-notice.tsx
+### components/site/photo-notice.tsx
 - 2026-10-19: two right clicks count as one ask. No menu on the page around photos.
 - 2026-10-20: One line, both ends. At this width the
 
@@ -439,7 +439,7 @@ states its rule inline. `SPEC-home-scroll.md` citations point at
 - 2026-11-15: the deposit amount is set per session.
 - 2026-11-16: the Stripe description names the client and the session.
 
-### lib/booking/paid.ts
+### lib/leads/deposit-terms.ts
 - 2026-11-15: Headshots 200, Studio digitals 150.
 - 2026-11-16: Portraits 250, Graduation 200.
 
@@ -450,7 +450,7 @@ states its rule inline. `SPEC-home-scroll.md` citations point at
 ### lib/contracts/contract.ts
 - 2026-11-15: contracts follow the Format comparison, item #14.
 
-### lib/email/proof-mail.ts
+### lib/proofs/proof-mail.ts
 - 2026-11-06: the mail is light by default, dark where supported.
 - 2026-11-12: The "Your photos are ready" mail at Send finals. No photos inline: the finals are the client's to open.
 - 2026-11-15: The one reminder: plain, no sales voice. Proofs count the client's own picks so far; finals only say when.
@@ -483,10 +483,8 @@ states its rule inline. `SPEC-home-scroll.md` citations point at
 ### lib/leads/lead-crm.ts
 - 2026-11-04: on what a CRM usually has, "add all of them".
 
-### lib/leads/canonical.ts
-- 2026-11-04: addresses are canonicalized, after gigola.julian@ and gigolajulian@ never matched.
-
 ### lib/seal.ts
+- 2026-11-04: addresses are canonicalized, after gigola.julian@ and gigolajulian@ never matched.
 - 2026-11-03: the lead desk is "hidden from all seo and encrypted".
 
 ### lib/leads/leads.ts
@@ -514,7 +512,7 @@ states its rule inline. `SPEC-home-scroll.md` citations point at
 ### lib/proofs/delivery.ts
 - 2026-11-12: the proof gallery becomes the delivery.
 
-### lib/proofs/desk.ts
+### lib/proofs/proof-desk.ts
 - 2026-11-15: Every gallery's client activity in one list for Today: opened, picked, sent, downloaded, newest
 
 ### lib/proofs/gridwall.ts
@@ -655,7 +653,7 @@ asked and the wording of the ask are here.
 
 - Undated attributions ("Julian: ...") are still in about 700 comment
   lines. They have no date to file under, so they were left for now.
-- `components/admin/editor/editor.tsx` keeps "As of 2026-09-12": it is a warning
+- `components/admin/editor.tsx` keeps "As of 2026-09-12": it is a warning
   about the current Cloudflare Access policy, not history.
 - Many comments still name `globals.css` for rules that now live in
   `app/styles/*.css`. `globals.css` is still the entry point, so they were
@@ -1061,7 +1059,7 @@ reported; a quote after "Julian:" is his wording, as the comment had it.
 - `components/local-questions.tsx`: The session's price and turnaround, and what was the Details screen, beside the questions: one screen for both. (Julian)
 - `components/local-questions.tsx`: The old Details screen, folded the way the questions are and opened by pointing. (Julian)
 - `components/local-questions.tsx`: A mouse opens it by pointing. (Julian)
-- `components/photo-notice.tsx`: The photo notice set smaller. (Julian)
+- `components/site/photo-notice.tsx`: The photo notice set smaller. (Julian)
 - `components/pointer-mark.tsx`: The pointer dot has momentum, not lag. (Julian)
 - `components/project-strip.tsx`: The role a shade under the name, and both readable: the role at the muted grey (4.5:1 and up), the name lifted above it. (Julian)
 - `components/sessions-screen.tsx`: Anywhere in the row goes to the booking page, bar its own links: a click on the row is a click on its name, the link a keyboard and a reader get, so it goes the way every link on the site goes. (Julian)
@@ -1079,10 +1077,10 @@ reported; a quote after "Julian:" is his wording, as the comment had it.
 - `lib/work/alt-text.ts`: Written alt text starts with the photographs on the booking pages' covers.
 - `lib/booking.ts`: Booking pages, "no vertical pages", San Jose and San Francisco mainly, "I can travel to any of those, LA and NY too", and "I don't need separate pages for each" city. (Julian)
 - `lib/deck.ts`: The same at the other end: at a fractional width (150% zoom) a covered screen read 0.9997 covered and was never `data-buried`, and the hero's photographs showed under the footer's glass as a grey band. (Julian)
-- `lib/seo.ts`: San Francisco and San Jose carry the most searches, and are the two markets every title names. Julian: "also market in San Jose".
-- `lib/seo.ts`: The Bay Area as he means it runs to Santa Cruz. (Julian)
-- `lib/seo.ts`: "Commercial" gave way to San Jose, where a search for a music video director finds only directories.
-- `lib/seo.ts`: Structured data names LA and NY as places he travels to. Julian: "I can travel to ... LA and NY too".
+- `lib/og/seo.ts`: San Francisco and San Jose carry the most searches, and are the two markets every title names. Julian: "also market in San Jose".
+- `lib/og/seo.ts`: The Bay Area as he means it runs to Santa Cruz. (Julian)
+- `lib/og/seo.ts`: "Commercial" gave way to San Jose, where a search for a music video director finds only directories.
+- `lib/og/seo.ts`: Structured data names LA and NY as places he travels to. Julian: "I can travel to ... LA and NY too".
 - `lib/work/work.ts`: What the project page says about a photograph, as a sentence for its alt: the project, its discipline, who photographed it, who is in it and who it was for. Julian: the discipline and the credits.
 
 ### 2026-10-01
@@ -1114,7 +1112,7 @@ reported; a quote after "Julian:" is his wording, as the comment had it.
 - `lib/deck.ts`: A preview at `?flyout=1`: the deck the other way round. (Julian)
 - `lib/deck.ts`: A slight shadow under a screen as it comes in (`deal-shade`).
 - `lib/gl-warm.ts`: Except the shaders' own logs: asking for one still waited 53ms in Chrome, mid page crossing, so OGL is told they are empty.
-- `lib/seo.ts`: The site should turn searches into bookings, in Google and Bing and in ChatGPT, Claude, Gemini and Perplexity. (Julian)
+- `lib/og/seo.ts`: The site should turn searches into bookings, in Google and Bing and in ChatGPT, Claude, Gemini and Perplexity. (Julian)
 - `lib/work-view.ts`: The strip, for everybody who has not said otherwise; it is what the homepage's window shows (`lead-window.tsx`). (Julian)
 
 ### 2026-09-30

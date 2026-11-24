@@ -1,5 +1,5 @@
 import { everyLead } from "@/lib/leads/lead-store";
-import { sealedGate } from "@/lib/leads/desk-route";
+import { sealedGate } from "@/lib/admin/gate";
 import { json } from "@/lib/http";
 
 /* GET every open task on every lead, for Today's Tasks due. Trashed leads are left out. Behind the /admin gate. */

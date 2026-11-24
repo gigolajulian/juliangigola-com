@@ -1,5 +1,5 @@
 import { cleanTemplates } from "@/lib/leads/lead-crm";
-import { gate } from "@/lib/leads/desk-route";
+import { gate } from "@/lib/admin/gate";
 import { bodyOf, json } from "@/lib/http";
 import { parseOr } from "@/lib/json";
 

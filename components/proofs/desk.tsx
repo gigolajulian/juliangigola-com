@@ -29,19 +29,24 @@ import { Selector } from "@astryxdesign/core/Selector";
 import { Slider } from "@astryxdesign/core/Slider";
 import { useSiteThemeRead } from "@/lib/site-theme";
 import { LockedGate } from "@/components/desk/sign-in";
-import { proofApi, cardCrop, pastCloseDate, cropAt, proofStatus, type ProofRow } from "@/lib/proofs/desk";
+import { proofApi, cardCrop, pastCloseDate, cropAt, proofStatus, type ProofRow } from "@/lib/proofs/proof-desk";
 import { ActivityDesk } from "@/components/proofs/activity";
 import { Timeline } from "@/components/proofs/timeline";
 import { useClock } from "@/components/proofs/use-clock";
 import { loadErrorText, LOCKED, stampPT } from "@/lib/admin/admin-call";
 import { errorText } from "@/lib/utils";
-import { extras, publicId, remindState, THUMB_W, type CardCrop } from "@/lib/proofs/proof-model";
+import { extraFrames, publicId, remindState, THUMB_W, type CardCrop } from "@/lib/proofs/proof-model";
 import { DAY_MS } from "@/lib/time-zone";
 
 const CLASSIC = "/admin";
 // The small copy the client's grid uses: every frame on the desk is a thumbnail. Once delivered the proof copies are gone: the finals' small copies stand in.
 const frame = (p: ProofRow, id: string) => (p.deliveredAt ? `/delivery/${publicId(p)}/f/${id}?w=${THUMB_W}` : `/proof/${publicId(p)}/f/${id}?w=${THUMB_W}`);
 const first = (p: ProofRow) => (p.deliveredAt ? p.finals?.[0] : p.frames[0]);
+/** A gallery row's line: frames, finals, addresses seen and when it was sent. */
+const rowLine = (p: ProofRow) => {
+  const n = p.viewers ? Object.keys(p.viewers).length : 0;
+  return [`${p.frames.length} frames`, p.finals?.length ? `${p.finals.length} finals` : null, p.viewers ? `${n} ${n === 1 ? "email" : "emails"}` : null, p.sentAt ? `sent ${stampPT(p.sentAt)}` : null].filter(Boolean).join(" · ");
+};
 
 function Tile({ k, v }: { k: string; v: string }) {
   return (
@@ -91,9 +96,28 @@ export function ProofsDesk({ embedded = false, initial }: { embedded?: boolean; 
   const waiting = open.filter((p) => p.sentAt && !p.submittedAt).length;
   const toPull = all.filter((p) => p.submittedAt && !p.pulledAt).length;
   const cur = all.find((p) => p.token === sel) ?? (wide ? all[0] : undefined);
+  const startNew = () => {
+    setMaking(true);
+    setSel(null);
+  };
+  const made = (t?: string) => {
+    setMaking(false);
+    if (t) {
+      setSel(t);
+      load();
+    }
+  };
+  const pick = (token: string) => {
+    setSel(token);
+    setMaking(false);
+  };
+  const closed = () => {
+    setSel(null);
+    load();
+  };
 
   const nav = (
-    <SideNav header={<SideNavHeading heading="Proofs" subheading="Julian Gigola" />} topContent={<Button label="New gallery" variant="primary" width="100%" onClick={() => { setMaking(true); setSel(null); }} />}>
+    <SideNav header={<SideNavHeading heading="Proofs" subheading="Julian Gigola" />} topContent={<Button label="New gallery" variant="primary" width="100%" onClick={startNew} />}>
       <SideNavSection title="Desk" isHeaderHidden>
         <SideNavItem label="Galleries" isSelected endContent={<Text type="supporting" hasTabularNumbers>{open.length}</Text>} />
         <SideNavItem label="Leads" href="/admin/leads" />
@@ -117,16 +141,16 @@ export function ProofsDesk({ embedded = false, initial }: { embedded?: boolean; 
         <Tile k="To pull" v={String(toPull)} />
       </HStack>
       {!wide ? <Button label="New gallery" variant="primary" width="100%" onClick={() => setMaking(true)} /> : null}
-      {making ? <NewGallery done={(t) => { setMaking(false); if (t) { setSel(t); load(); } }} /> : null}
+      {making ? <NewGallery done={made} /> : null}
       <List hasDividers edge="outset">
         {all.map((p) => (
           <ListItem
             key={p.token}
             isSelected={p.token === cur?.token}
-            onClick={() => { setSel(p.token); setMaking(false); }}
+            onClick={() => pick(p.token)}
             startContent={<Thumbnail src={first(p) ? frame(p, first(p)!.id) : undefined} alt="" label={p.name} />}
             label={p.name}
-            description={[`${p.frames.length} frames`, p.finals?.length ? `${p.finals.length} finals` : null, p.viewers ? ((n) => `${n} ${n === 1 ? "email" : "emails"}`)(Object.keys(p.viewers).length) : null, p.sentAt ? `sent ${stampPT(p.sentAt)}` : null].filter(Boolean).join(" · ")}
+            description={rowLine(p)}
             endContent={<Badge label={proofStatus(p)} variant={p.submittedAt && !p.pulledAt ? "blue" : "gray"} />}
           />
         ))}
@@ -135,7 +159,7 @@ export function ProofsDesk({ embedded = false, initial }: { embedded?: boolean; 
     </VStack>
   );
 
-  const detail = cur ? <Gallery key={cur.token} p={cur} changed={load} onBack={wide ? undefined : () => setSel(null)} gone={() => { setSel(null); load(); }} /> : null;
+  const detail = cur ? <Gallery key={cur.token} p={cur} changed={load} onBack={wide ? undefined : () => setSel(null)} gone={closed} /> : null;
 
   const body = wide ? (
     <Layout
@@ -203,7 +227,7 @@ function Gallery({ p, changed, onBack, gone }: { p: ProofRow; changed: () => voi
   const [set, setSet] = React.useState({ balance: String(p.balance ?? 0), included: String(p.included), price: String(p.price), days: String(p.days) });
   const changedSet = set.balance !== String(p.balance ?? 0) || set.included !== String(p.included) || set.price !== String(p.price) || set.days !== String(p.days);
   const people = Object.keys(p.viewers ?? {}).length;
-  const x = extras(p.selects.length, p.included, p.price);
+  const x = extraFrames(p.selects.length, p.included, p.price);
   const thumbs = (p.deliveredAt ? (p.finals ?? []).map((f) => f.id) : p.submittedAt ? p.selects : p.frames.map((f) => f.id)).slice(0, 6);
   const file = (id: string) => p.frames.find((f) => f.id === id)?.file ?? id;
   // The one reminder: read after mount, the window is a clock.
@@ -262,6 +286,12 @@ function Gallery({ p, changed, onBack, gone }: { p: ProofRow; changed: () => voi
   const relink = () => {
     if (confirm(`Give "${p.name}" a new link? The old link stops working. Nothing is mailed: send the new one yourself.`)) return act({ action: "relink" }, "POST", "New link made. Copy it to send.");
   };
+  const sendReminder = () => act({ action: "remind" }, "POST", "Reminder sent.").then(() => setReminder(null));
+  const saveSettings = () => act({ balance: set.balance, included: set.included, price: set.price, days: set.days }, "PATCH", "Saved.");
+  const savePass = () => act({ password: pass }, "PATCH", "Password saved.").then(() => setPass(""));
+  const send = () => act({ action: "send", subject }, "POST", "Sent.");
+  const sendFinals = () =>
+    confirm(`Send ${p.finals!.length} finals to ${p.email}? The gallery becomes the delivery, open 60 days, and the proof previews are removed.`) ? act({ action: "deliver", subject: finalsSubject }, "POST", "Finals sent.") : undefined;
   // Close: only a draft nobody has been sent, so a client's gallery can never vanish from here. Frames are web previews, never originals.
   const close = async () => {
     if (!confirm(`Close the draft "${p.name}"? Its web previews are removed. Nothing in Lightroom changes.`)) return;
@@ -296,7 +326,7 @@ function Gallery({ p, changed, onBack, gone }: { p: ProofRow; changed: () => voi
               <Text weight="semibold">{reminder.subject}</Text>
               <iframe title="Reminder preview" srcDoc={reminder.html} sandbox="" style={{ height: 380, width: "100%", border: 0, borderRadius: 8, background: "#fff" }} />
               <HStack gap={2}>
-                <Button label="Send reminder" variant="primary" clickAction={() => act({ action: "remind" }, "POST", "Reminder sent.").then(() => setReminder(null))} />
+                <Button label="Send reminder" variant="primary" clickAction={sendReminder} />
                 <Button label="Cancel" variant="ghost" onClick={() => setReminder(null)} />
               </HStack>
             </VStack>
@@ -344,11 +374,11 @@ function Gallery({ p, changed, onBack, gone }: { p: ProofRow; changed: () => voi
               <TextInput key={k} label={label} value={set[k]} isDisabled={k === "days" && !!p.sentAt} onChange={(v) => setSet((o) => ({ ...o, [k]: v }))} />
             ))}
           </div>
-          {changedSet ? <Button label="Save" clickAction={() => act({ balance: set.balance, included: set.included, price: set.price, days: set.days }, "PATCH", "Saved.")} /> : null}
+          {changedSet ? <Button label="Save" clickAction={saveSettings} /> : null}
           <Switch label="Online" description="Off: the gallery, its photos and downloads say offline at once" value={!p.offline} onChange={(on) => act({ offline: !on }, "PATCH", on ? "Online." : "Offline.")} />
           <HStack gap={2} vAlign="end">
             <TextInput label={p.hasPass ? "Password, set" : "Password"} isOptional type="password" value={pass} onChange={setPass} placeholder={p.hasPass ? "Type a new one to change it" : "None: anyone with the link"} />
-            {pass ? <Button label="Save" clickAction={() => act({ password: pass }, "PATCH", "Password saved.").then(() => setPass(""))} /> : null}
+            {pass ? <Button label="Save" clickAction={savePass} /> : null}
             {p.hasPass && !pass ? <Button label="Remove" variant="ghost" clickAction={() => act({ password: "" }, "PATCH", "Password removed.")} /> : null}
           </HStack>
           <HStack gap={2} vAlign="end">
@@ -398,8 +428,8 @@ function Gallery({ p, changed, onBack, gone }: { p: ProofRow; changed: () => voi
       {p.finals?.length && !p.deliveredAt ? <TextInput label="Finals mail subject" value={finalsSubject} onChange={setFinalsSubject} /> : null}
       <HStack gap={2} wrap="wrap">
         {!p.sentAt && !preview ? <Button label="Preview email" variant="primary" isDisabled={!p.email || !p.frames.length} clickAction={showPreview} /> : null}
-        {!p.sentAt && preview ? <Button label={`Send to ${p.email}`} variant="primary" clickAction={() => act({ action: "send", subject }, "POST", "Sent.")} /> : null}
-        {p.finals?.length && !p.deliveredAt ? <Button label={`Send finals to ${p.email ?? "…"}`} variant="primary" isDisabled={!p.email} clickAction={() => (confirm(`Send ${p.finals!.length} finals to ${p.email}? The gallery becomes the delivery, open 60 days, and the proof previews are removed.`) ? act({ action: "deliver", subject: finalsSubject }, "POST", "Finals sent.") : undefined)} /> : null}
+        {!p.sentAt && preview ? <Button label={`Send to ${p.email}`} variant="primary" clickAction={send} /> : null}
+        {p.finals?.length && !p.deliveredAt ? <Button label={`Send finals to ${p.email ?? "…"}`} variant="primary" isDisabled={!p.email} clickAction={sendFinals} /> : null}
         {(p.sentAt && !p.submittedAt) || p.deliveredAt ? <Button label="Extend 7 days" clickAction={() => act({ action: "extend", days: 7 }, "POST", "Seven more days.")} /> : null}
         {p.submittedAt ? <Button label="Copy file names" onClick={() => copy(p.selects.map(file).join("\n"), "File names")} /> : null}
         {p.submittedAt ? <Button label="Reopen for changes" clickAction={reopen} /> : null}
@@ -424,6 +454,19 @@ function LinkPreview({ p, save }: { p: ProofRow; save: (card: CardCrop | null) =
   const sized = p.frames.filter((x) => x.w && x.h);
   // The card is cached an hour: a new crop is a new address.
   const v = p.card ? `${p.card.id}-${p.card.x}-${p.card.y}-${p.card.w}` : f.id;
+  const pickFrame = (id: string) => {
+    const c = cardCrop(sized.find((x) => x.id === id) ?? f, 0.5);
+    setAt(0.5);
+    if (c) void save(c);
+  };
+  const auto = () => {
+    setAt(0.5);
+    return save(null);
+  };
+  const cropDone = (n: number) => {
+    const c = cardCrop(f, n / 100);
+    if (c) void save(c);
+  };
   return (
     <VStack gap={2}>
       <Text type="supporting">Link preview</Text>
@@ -433,12 +476,12 @@ function LinkPreview({ p, save }: { p: ProofRow; save: (card: CardCrop | null) =
       ) : <Text type="supporting">Drawn while the gallery is open, watermarked and without a password.</Text>}
       <HStack gap={2} vAlign="end">
         <Selector label="Frame" size="sm" value={f.id} isDisabled={!sized.length}
-          onChange={(id) => { const c = cardCrop(sized.find((x) => x.id === id) ?? f, 0.5); setAt(0.5); if (c) void save(c); }}
+          onChange={pickFrame}
           options={(sized.includes(f) ? sized : [f, ...sized]).map((x) => ({ value: x.id, label: `#${p.frames.indexOf(x) + 1} · ${x.file}` }))} />
-        {p.card ? <Button label="Auto" size="sm" variant="ghost" clickAction={() => { setAt(0.5); return save(null); }} /> : null}
+        {p.card ? <Button label="Auto" size="sm" variant="ghost" clickAction={auto} /> : null}
       </HStack>
       <Slider label="Crop" min={0} max={100} value={Math.round(at * 100)} valueDisplay="none" isDisabled={!f.w || !f.h}
-        onChange={(n: number) => setAt(n / 100)} onChangeEnd={(n: number) => { const c = cardCrop(f, n / 100); if (c) void save(c); }} />
+        onChange={(n: number) => setAt(n / 100)} onChangeEnd={cropDone} />
     </VStack>
   );
 }

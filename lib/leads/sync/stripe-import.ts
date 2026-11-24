@@ -9,7 +9,7 @@
  * ─────────────────────────────────────────────────────────────── */
 
 import { stripe } from "@/lib/stripe";
-import { isDeposit } from "@/lib/booking/paid";
+import { isDeposit } from "@/lib/leads/deposit-terms";
 import { readLead, recordLead, type LeadStore } from "../lead-store";
 import { readLog } from "../activity-log";
 import { sealer } from "@/lib/seal";

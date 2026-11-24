@@ -1,7 +1,7 @@
 import * as React from "react";
 import { clockLabel } from "@/lib/booking/clock";
 import { clock, minutesOf } from "@/components/booking/picker/parts";
-import { PARTS, pacific, partOf, sunHint, tone, weatherAt, type Hourly } from "@/lib/booking/sky";
+import { PARTS, pacific, partOf, sunHint, skyColors, weatherAt, type Hourly } from "@/lib/booking/sky";
 import { useSkyTimesIn } from "@/components/booking/sky-motion";
 
 /* The day's open times in the hour's light (?sky, lib/booking/sky.ts), in place of the swipe strip.
@@ -18,7 +18,7 @@ export function SkyTimes({ times, picked, length, ruler: month, choose }: { time
   const box = React.useRef<HTMLDivElement>(null);
   useSkyTimesIn(box, times[0]?.slice(0, 10) ?? "");
   const slot = (x: string, i: number) => {
-    const m = minutesOf(x), ms = Date.parse(x), t = tone(ms);
+    const m = minutesOf(x), ms = Date.parse(x), t = skyColors(ms);
     const [h, a] = clock(m);
     return (
       <button

@@ -4,7 +4,8 @@ import { configDefaults, defineConfig } from "vitest/config";
 // Three suites, named rather than found, so the copies of the repo under
 // `.claude/worktrees` are not run as well. The test folders mirror the source:
 // `tests/lib/<domain>` for `lib/<domain>`, `tests/components/<domain>` for
-// `components/<domain>`.
+// `components/<domain>`, `tests/backend/<route family>` for the routes a family
+// serves, with the shared fakes at the top of `tests/backend`.
 //   frontend:   the client-side lib unit tests (motion, flags, home data,
 //               keep-names), the files in FRONTEND_LIB
 //   backend:    every other lib unit test (leads, proofs, booking, admin,

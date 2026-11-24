@@ -2,7 +2,7 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { notify, subscribe, unsubscribe } from "@/lib/leads/lead-push";
 import { publicKey } from "@/lib/leads/web-push";
 import { secretJson } from "@/lib/secrets";
-import { gate } from "@/lib/leads/desk-route";
+import { gate } from "@/lib/admin/gate";
 import { bodyOf, json } from "@/lib/http";
 
 /* The desk's notifications (`lib/leads/lead-push.ts`): GET the key a device subscribes with, PUT a

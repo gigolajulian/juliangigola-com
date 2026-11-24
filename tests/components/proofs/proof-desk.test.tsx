@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { proofApi, cardCrop, pastCloseDate, cropAt, proofStatus, type ProofRow } from "@/lib/proofs/desk";
+import { proofApi, cardCrop, pastCloseDate, cropAt, proofStatus, type ProofRow } from "@/lib/proofs/proof-desk";
 
 afterEach(() => vi.unstubAllGlobals());
 

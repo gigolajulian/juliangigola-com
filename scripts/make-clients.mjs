@@ -20,7 +20,7 @@
  * a black logo would be invisible on the dark theme — which is the default
  * here. Two routes to that:
  *
- *   SVG  inlined into `lib/clients-data.ts` with every fill and stroke
+ *   SVG  inlined into `lib/work/clients-data.ts` with every fill and stroke
  *        rewritten to `currentColor`. Needs a single-colour source: a two-tone
  *        mark comes out flat.
  *
@@ -48,7 +48,7 @@ import sharp from "sharp";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const from = join(root, "assets/clients");
 const served = join(root, "public/clients");
-const to = join(root, "lib/clients-data.ts");
+const to = join(root, "lib/work/clients-data.ts");
 
 mkdirSync(served, { recursive: true });
 

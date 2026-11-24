@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { PageFoot } from "@/components/site/chrome";
+import { PageFoot } from "@/components/site/foot";
 import { DISCIPLINES } from "@/lib/home/data";
 import { Marks } from "@/components/site/duo";
 import { AboutGallery } from "@/components/about/about-gallery";

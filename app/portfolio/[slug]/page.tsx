@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { CoverPage } from "@/components/cover/cover-page";
-import { SESSION_SEO } from "@/lib/seo";
+import { SESSION_SEO } from "@/lib/og/seo";
 import { projectFacts, shareMeta } from "@/lib/og/share";
 import { ProjectView } from "@/components/portfolio/project";
 import {
@@ -39,7 +39,7 @@ export async function generateMetadata(
   if (!project) return {};
 
   /* A bookable session's gallery (Headshots, Graduation, Weddings) keeps the
-     title `lib/seo.ts` gives it for the search; its share card is unified. */
+     title `lib/og/seo.ts` gives it for the search; its share card is unified. */
   const session = SESSION_SEO[project.slug];
   const facts = projectFacts(project);
   const card = shareMeta(project.name, facts.description);

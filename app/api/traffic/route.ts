@@ -1,6 +1,6 @@
 import { errorText } from "@/lib/utils";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { refuseAdmin } from "@/lib/vouch";
+import { refuseAdmin } from "@/lib/admin/vouch";
 import { SITE_HOST, ZONE, cloudflare, rumVisits, searchConsole as gsc, sitePath } from "@/lib/analytics";
 import { HttpError, json, upstreamError } from "@/lib/http";
 import { DAY_MS } from "@/lib/time-zone";

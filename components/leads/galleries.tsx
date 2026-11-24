@@ -13,9 +13,9 @@ import { Button } from "@astryxdesign/core/Button";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Badge } from "@astryxdesign/core/Badge";
 import { Divider } from "@astryxdesign/core/Divider";
-import { canonical } from "@/lib/leads/canonical";
+import { canonical } from "@/lib/seal";
 import { dayLabel } from "@/lib/leads/lead-desk";
-import { pastCloseDate, type ProofRow } from "@/lib/proofs/desk";
+import { pastCloseDate, type ProofRow } from "@/lib/proofs/proof-desk";
 import { stage } from "@/lib/proofs/proof-model";
 import { Timeline } from "@/components/proofs/timeline";
 

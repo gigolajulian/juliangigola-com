@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { WorkIndex } from "@/components/portfolio/work";
-import type { WorkItem } from "@/components/portfolio/work-tiles";
+import type { WorkPayload } from "@/components/portfolio/work-tiles";
 import { PROJECTS, categoryLabel } from "@/lib/work/work";
 
-const WORK: WorkItem[] = PROJECTS.filter((p) => p.slug !== "realestate").map((p) => ({
+const WORK: WorkPayload[] = PROJECTS.filter((p) => p.slug !== "realestate").map((p) => ({
   s: p.slug,
   n: p.name,
   d: p.categories.map(categoryLabel),

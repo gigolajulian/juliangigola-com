@@ -6,7 +6,7 @@ import { type Lead, type LeadSummary } from "@/lib/leads/leads";
 import { cn, errorText } from "@/lib/utils";
 import { mailable } from "@/lib/leads/lead-crm";
 import { balance, shortDate, depositOfLead, isSettled, MAX_INVOICE_ROWS, THANKS_NOTES, usd, usdTrim, type Crop, type Invoice, type InvoiceDetails, type InvoiceFrom } from "@/lib/leads/invoice";
-import { framed, loadImage, place, shrink, toneFor } from "@/lib/leads/invoice-photo";
+import { framed, loadImage, coverFit, shrink, toneFor } from "@/lib/leads/invoice-photo";
 import { dayLabel, deskCall, plusDays, ymdPT } from "@/lib/leads/lead-desk";
 import { adminCall } from "@/lib/admin/admin-call";
 import { btn, primary } from "@/components/desk/chrome";
@@ -149,7 +149,7 @@ function PageB(p: PageBProps) {
       if (sign.getBoundingClientRect().top - pay.getBoundingClientRect().bottom >= clear) break;
     }
   });
-  const at = nat.w && box.w ? place(nat.w, nat.h, box.w, box.h, p.crop) : null;
+  const at = nat.w && box.w ? coverFit(nat.w, nat.h, box.w, box.h, p.crop) : null;
   const clamp = (v: number) => Math.min(1, Math.max(0, v));
   const move = (dx: number, dy: number, from: Crop) => at && p.setCrop({ ...from, x: at.w > box.w ? clamp(from.x - dx / (at.w - box.w)) : 0.5, y: at.h > box.h ? clamp(from.y - dy / (at.h - box.h)) : 0.5 });
   const f = p.from;

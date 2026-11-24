@@ -1,4 +1,4 @@
-import { depositFor } from "@/lib/booking/paid";
+import { depositFor } from "@/lib/leads/deposit-terms";
 import type { InboxKV as KV } from "@/lib/kv";
 import { asRecord } from "@/lib/json";
 import { DAY_MS } from "@/lib/time-zone";
@@ -48,7 +48,7 @@ export const namesInvoice = (text: string, no: string) => /invoice/i.test(text) 
 /** His own details on every invoice. Kept sealed in KV, never in the code: the repo is public. Bank and tax lines are design B's. */
 export type InvoiceFrom = { name: string; a1: string; a2: string; a3: string; email: string; phone: string; ein: string; signoff: string; notes: string; bank: string; routing: string; account: string; late: string; tax: string };
 
-/** A lead's deposit in dollars: what the site logged as paid (`tell` in lib/booking/deposit.ts), else their session's (`lib/booking/paid.ts`), else the $100 every deposit was before 2026-11-15. */
+/** A lead's deposit in dollars: what the site logged as paid (`tell` in lib/booking/deposit.ts), else their session's (`lib/leads/deposit-terms.ts`), else the $100 every deposit was before 2026-11-15. */
 export function depositOfLead(l: { kind?: string; deposit?: string; events?: { kind: string; ref?: string; note?: string; amount?: number }[] }) {
   const paid = (l.events ?? []).filter((e) => e.kind === "payment" && e.note === "Deposit");
   // The one the lead's Stripe link names, else the latest: a returning client has an older deposit on the log too.

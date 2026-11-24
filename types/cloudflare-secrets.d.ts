@@ -15,7 +15,7 @@
  */
 interface CloudflareEnv {
   /**
-   * The admin key: opens /admin and the desks (`refuseAdmin` in `lib/vouch.ts`). Set with:
+   * The admin key: opens /admin and the desks (`refuseAdmin` in `lib/admin/vouch.ts`). Set with:
    *
    *   wrangler secret put INBOX_KEY
    *
@@ -86,7 +86,7 @@ interface CloudflareEnv {
   GCAL_OAUTH?: string;
 
   /**
-   * Signs the client's reschedule and cancel links (`lib/booking/token.ts`).
+   * Signs the client's reschedule and cancel links (`lib/booking/manage-link.ts`).
    * Any long random string. Unset, the mail carries no links. Set with:
    *
    *   wrangler versions secret put BOOKING_SECRET
@@ -95,7 +95,7 @@ interface CloudflareEnv {
 
   /**
    * The booking Worker's bearer on its calls to the site (`worker/index.ts` over SITE; `refuseWorker` in
-   * `lib/vouch.ts` checks it). Its own value, set on both Workers, never BOOKING_SECRET's:
+   * `lib/admin/vouch.ts` checks it). Its own value, set on both Workers, never BOOKING_SECRET's:
    *
    *   wrangler secret put WORKER_KEY
    *   wrangler secret put WORKER_KEY -c worker/wrangler.jsonc

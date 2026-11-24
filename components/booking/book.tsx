@@ -8,7 +8,7 @@ import { JG_COVER, mountCover } from "@/components/splash/jg-cover";
 import { useRouter } from "next/navigation";
 import { BookTimes } from "@/components/booking/book-times";
 import { PageFoot } from "@/components/site/foot";
-import { Calendar, DotList, dlabel, localDayKey } from "@/components/booking/flow";
+import { Calendar, DotList, weekdayDateLabel, localDayKey } from "@/components/booking/flow";
 import { Failed, Field, FlowShell, Hidden, useEnquiry, type Shell } from "@/components/enquiry/flow";
 import { duration } from "@/lib/booking/rules";
 import { LENGTH, SESSIONS, TAB_ORDER, priceLabel, type SessionSlug } from "@/lib/booking/catalog";
@@ -222,7 +222,7 @@ function OnRequestFlow({ slug, shell, stamp }: { slug: SessionSlug; shell: Shell
     scrollTo(0, 0);
   };
   const place = where === "studio" ? "Studio in San Jose" : "On location";
-  const sum: [string, React.ReactNode][] = [["Date", dlabel(day)], ...(LENGTH[slug] ? [["Length", duration(LENGTH[slug])] as [string, string]] : [])];
+  const sum: [string, React.ReactNode][] = [["Date", weekdayDateLabel(day)], ...(LENGTH[slug] ? [["Length", duration(LENGTH[slug])] as [string, string]] : [])];
   const monday = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate() - ((d.getDay() + 6) % 7));
   const canBack = view === "week" ? +monday(anchor) > +monday(today) : anchor.getFullYear() * 12 + anchor.getMonth() > today.getFullYear() * 12 + today.getMonth();
   const steps = ["Date", "Shoot", "You", "Sent"];
@@ -305,7 +305,7 @@ function OnRequestFlow({ slug, shell, stamp }: { slug: SessionSlug; shell: Shell
       sub: "I'll reply with a quote.",
       body: (
         <div className="done-lines">
-          {[`${S.name}, around ${dlabel(day)}${where === "studio" ? ", in the San Jose studio." : ", on location."}`, "A copy of your request is in your inbox.", "Nothing is charged until you accept the quote."].map((l) => <p key={l}>{l}</p>)}
+          {[`${S.name}, around ${weekdayDateLabel(day)}${where === "studio" ? ", in the San Jose studio." : ", on location."}`, "A copy of your request is in your inbox.", "Nothing is charged until you accept the quote."].map((l) => <p key={l}>{l}</p>)}
         </div>
       ),
       bar: <Link className="btn fill" href="/portfolio">See the work</Link>,
@@ -313,7 +313,7 @@ function OnRequestFlow({ slug, shell, stamp }: { slug: SessionSlug; shell: Shell
   }
 
   /* The enquiry needs a message; the date stands in when nothing is written. */
-  const message = [v.idea.trim(), v.phone.trim() && `Phone: ${v.phone.trim()}`, v.note.trim()].filter(Boolean).join("\n\n") || `${S.name}, preferred date ${dlabel(day)}.`;
+  const message = [v.idea.trim(), v.phone.trim() && `Phone: ${v.phone.trim()}`, v.note.trim()].filter(Boolean).join("\n\n") || `${S.name}, preferred date ${weekdayDateLabel(day)}.`;
   return (
     <form
       noValidate
@@ -327,7 +327,7 @@ function OnRequestFlow({ slug, shell, stamp }: { slug: SessionSlug; shell: Shell
         send(e.currentTarget);
       }}
     >
-      <Hidden type={S.type ?? "session"} detail={`${dlabel(day)} · ${place}`} />
+      <Hidden type={S.type ?? "session"} detail={`${weekdayDateLabel(day)} · ${place}`} />
       <input type="hidden" name="session" value={S.name} />
       <input type="hidden" name="message" value={message} />
       {shell({ steps, at, sum, ...parts })}

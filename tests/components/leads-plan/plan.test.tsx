@@ -1,7 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { LeadDesk } from "@/components/leads/lead";
-import { deskCall } from "@/lib/leads/lead-desk";
 import { cleanTasks } from "@/lib/leads/lead-crm";
 import type { Lead, Task } from "@/lib/leads/leads";
 import { lead } from "../leads/leads-fixtures";
@@ -41,7 +40,7 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllGlobals());
 
 const renderDesk = () =>
-  render(<LeadDesk summary={summary} call={deskCall} onChange={() => {}} onBack={() => {}} reload={() => {}} templates={[]} others={[]} size="wide" />);
+  render(<LeadDesk summary={summary} onChange={() => {}} onBack={() => {}} reload={() => {}} templates={[]} others={[]} size="wide" />);
 
 describe("the plan and tasks on a lead", () => {
   it("shows the brief and the open task", async () => {

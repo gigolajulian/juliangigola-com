@@ -1,20 +1,14 @@
 import * as React from "react";
-import type { gsap as G } from "gsap";
-import type { Flip as F } from "gsap/Flip";
-import { loadFlip, loadGsap } from "@/lib/motion/gsap-lazy";
+import { flipNow, gsapNow, loadFlip, loadGsap } from "@/lib/motion/gsap-lazy";
 
 /* The sky picker's motion (?sky): Week and Month morph into each other
    (GSAP Flip, the days keep their boxes and travel to their new place), the
    arrows slide the next week or month in from their side, and a day's times
    come up one after another. Off under reduced motion; before gsap and Flip
    have loaded, the change just happens. */
-let gsap: typeof G | undefined;
-let flip: typeof F | undefined;
-const warm = () =>
-  void Promise.all([loadGsap(), loadFlip()]).then(([g, F]) => {
-    gsap = g;
-    flip = F;
-  });
+const warm = () => void Promise.all([loadGsap(), loadFlip()]);
+/** gsap once Flip is in too: the sky moves with both or not at all. */
+const both = () => (flipNow() ? gsapNow() : undefined);
 const calm = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /** For the calendar: call `before(dir)` right before a view switch (dir 0) or an arrow (dir ±1). */
@@ -29,12 +23,15 @@ export function useSkyCalendar(on: boolean, cal: React.RefObject<HTMLDivElement 
     return [...(cal.current?.children ?? []), ...(body?.querySelectorAll(".cal-top, .sky-ruler, .sky-rows, .fig.scrub") ?? [])] as HTMLElement[];
   };
   const before = (dir: number) => {
+    const flip = flipNow();
     if (!on || !flip || calm()) return;
     pending.current = { state: dir ? null : flip.getState(parts()), dir };
   };
   React.useLayoutEffect(() => {
     const p = pending.current;
     const el = cal.current;
+    const gsap = both();
+    const flip = flipNow();
     if (!p || !el || !gsap || !flip) return;
     pending.current = null;
     const days = [...el.querySelectorAll<HTMLElement>("button[data-day]")];
@@ -78,6 +75,7 @@ export function useSkyTimesIn(box: React.RefObject<HTMLDivElement | null>, day: 
   React.useLayoutEffect(() => {
     if (first.current) return void (first.current = false);
     const el = box.current;
+    const gsap = both();
     if (!el || !gsap || calm()) return;
     gsap.fromTo(el.querySelectorAll("[data-slot], .rl, .grp"), { autoAlpha: 0, y: 10 }, { autoAlpha: 1, y: 0, duration: 0.45, ease: "expo.out", stagger: 0.025, clearProps: "opacity,visibility,transform" });
   }, [day, box]);

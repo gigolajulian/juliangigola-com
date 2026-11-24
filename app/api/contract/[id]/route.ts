@@ -1,7 +1,7 @@
 import { sealedStore } from "@/lib/kv";
 import { copyName, readContract, sign, signedCopy, writeContract } from "@/lib/contracts/contract";
 import { contractStep } from "@/lib/contracts/contract-lead";
-import { sendClient, signedMail } from "@/lib/email/proof-mail";
+import { sendClient, signedMail } from "@/lib/proofs/proof-mail";
 import { alertHello } from "@/lib/email/hello-mail";
 import { bodyOf, json, limited } from "@/lib/http";
 import { logged } from "@/lib/utils";
@@ -14,13 +14,21 @@ import { logged } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
+/** Same words to the client either way; the status says it is broken, not missing. */
+const UNAVAILABLE = "This contract is not available.";
+
+/** A sealed read: its value (null when missing), or the 500 when it is there but will not open, logged under `label`. */
+async function openOr<T>(label: string, read: Promise<T>): Promise<T | Response> {
+  const v = await read.catch(logged(label));
+  return v === undefined ? json({ error: UNAVAILABLE }, 500) : v;
+}
+
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { env, seal: s, kv } = await sealedStore();
-  if (!kv || !s) return json({ error: "This contract is not available." }, 404);
-  const draft = await readContract(kv, s, (await params).id).catch(logged("contract sign open"));
-  // Same words to the client either way; the status says it is broken, not missing.
-  if (draft === undefined) return json({ error: "This contract is not available." }, 500);
-  if (!draft || !draft.sentAt) return json({ error: "This contract is not available." }, 404);
+  if (!kv || !s) return json({ error: UNAVAILABLE }, 404);
+  const draft = await openOr("contract sign open", readContract(kv, s, (await params).id));
+  if (draft instanceof Response) return draft;
+  if (!draft || !draft.sentAt) return json({ error: UNAVAILABLE }, 404);
   const slow = await limited(env.PUBLIC_WRITE_LIMIT, "sign", request);
   if (slow) return slow;
   const b = (await bodyOf(request)) ?? {};

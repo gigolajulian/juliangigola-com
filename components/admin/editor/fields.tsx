@@ -5,8 +5,8 @@
    `set`, both passed down from AdminEditor. */
 
 import * as React from "react";
-import { AdminPicker, type PickerItem } from "@/components/admin/admin-picker";
-import type { AdminProject } from "@/components/admin/editor/props";
+import { AdminPicker } from "@/components/admin/editor/admin-picker";
+import type { AdminProject, PickerItem } from "@/components/admin/editor/props";
 import type { SiteContent, Testimonial } from "@/lib/content";
 import { pad } from "@/lib/utils";
 

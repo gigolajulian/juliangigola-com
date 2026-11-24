@@ -7,7 +7,7 @@ import dynamic from "next/dynamic";
 import { createPortal } from "react-dom";
 import type { Flip as FlipT } from "gsap/Flip";
 import { loadFlip } from "@/lib/motion/gsap-lazy";
-import { PageFoot } from "@/components/site/chrome";
+import { PageFoot } from "@/components/site/foot";
 import DISC from "@/lib/work/discipline-order.json";
 import { Drift } from "@/components/portfolio/drift";
 import { useColorScope, type PickAt } from "@/components/portfolio/use-color-scope";
@@ -15,7 +15,7 @@ import { useStripScroll } from "@/components/portfolio/use-strip-scroll";
 // The canvas view loads only when it opens, not with every /portfolio visit.
 const WorkCanvas = dynamic(() => import("@/components/portfolio/canvas").then((m) => m.WorkCanvas), { ssr: false });
 import { projectHref } from "@/lib/work/project-href";
-import { Cap, STRIP_SIZES, Tile, altOf, named, type WorkItem } from "@/components/portfolio/work-tiles";
+import { Cap, STRIP_SIZES, Tile, altOf, named, workItem, type WorkItem, type WorkPayload } from "@/components/portfolio/work-tiles";
 import { FrameTile, FrameView, type FrameItem } from "@/components/portfolio/frame-view";
 import { useScopeDraw } from "@/components/portfolio/use-scope-draw";
 import { useHeaderSearch } from "@/components/portfolio/use-header-search";
@@ -55,14 +55,16 @@ const filterUrl = (slug?: string) => {
 };
 
 export function WorkIndex({
-  work,
+  work: payload,
   chip = {},
   frames = {},
 }: {
-  work: WorkItem[];
+  work: WorkPayload[];
   chip?: Record<string, string>;
   frames?: Record<string, FrameItem[]>;
 }) {
+  /* The payload's one-letter keys as names, once: everything below reads `WorkItem`. */
+  const work = React.useMemo(() => payload.map(workItem), [payload]);
   const [filter, setFilter] = React.useState("All");
   const [at, setAt] = React.useState<number | null>(null);
   const closeView = React.useCallback(() => setAt(null), []);
@@ -175,7 +177,7 @@ export function WorkIndex({
 
   const counts = React.useMemo(() => {
     const c: Record<string, number> = {};
-    for (const p of work) for (const d of p.d) c[d] = (c[d] ?? 0) + 1;
+    for (const p of work) for (const d of p.disciplines) c[d] = (c[d] ?? 0) + 1;
     return c;
   }, [work]);
   const order = React.useMemo(
@@ -190,8 +192,8 @@ export function WorkIndex({
     () =>
       work.filter(
         (p) =>
-          (filter === "All" || p.d.includes(filter)) &&
-          (!q || `${p.n} ${p.d.join(" ")} ${p.c}`.toLowerCase().includes(q)),
+          (filter === "All" || p.disciplines.includes(filter)) &&
+          (!q || `${p.name} ${p.disciplines.join(" ")} ${p.credits}`.toLowerCase().includes(q)),
       ),
     [work, filter, q],
   );
@@ -208,8 +210,8 @@ export function WorkIndex({
       shown
         ? shown.map((f) => ({ f }))
         : list.flatMap((p): ({ f: FrameItem; p?: WorkItem } | { f?: undefined; p: WorkItem })[] => {
-            const g = p.d.find((d) => d !== "Cover Art" && frames[d]);
-            const own = g ? frames[g].filter((f) => f.s === p.s) : [];
+            const g = p.disciplines.find((d) => d !== "Cover Art" && frames[d]);
+            const own = g ? frames[g].filter((f) => f.s === p.slug) : [];
             return own.length ? own.map((f, i) => ({ f, p: i ? undefined : p })) : [{ p }];
           }),
     [shown, list, frames],
@@ -221,7 +223,7 @@ export function WorkIndex({
   const res =
     view === "color" && pick
       ? list
-          .map((p) => [p, scoreSet(p.s)] as const)
+          .map((p) => [p, scoreSet(p.slug)] as const)
           .filter(([, sc]) => sc > 0.12)
           .sort((a, b) => b[1] - a[1])
           .map(([p]) => p)
@@ -366,7 +368,7 @@ export function WorkIndex({
         {view === "grid" && !shown ? (
           <div className="wgrid">
             {list.map((p, n) => (
-              <Tile key={p.s} p={p} first={n < 12} />
+              <Tile key={p.slug} p={p} first={n < 12} />
             ))}
           </div>
         ) : null}
@@ -379,8 +381,8 @@ export function WorkIndex({
                 const cap = p ? <Cap p={p} cls="sc-n" /> : null;
                 if (!f)
                   return (
-                    <figure key={p.s} className="sc" data-flip-id={p.s}>
-                      <Link href={projectHref(p.s)} aria-label={named(p)}>
+                    <figure key={p.slug} className="sc" data-flip-id={p.slug}>
+                      <Link href={projectHref(p.slug)} aria-label={named(p)}>
                         <Image src={p.cover} alt={altOf(p)} fill sizes={STRIP_SIZES} decoding="sync" loading={n < 4 ? "eager" : "lazy"} />
                         {cap}
                       </Link>
@@ -443,7 +445,7 @@ export function WorkIndex({
             </div>
             <div className="sc-res">
               {res.slice(0, 8).map((p) => (
-                <Tile key={p.s} p={p} swatch={scope?.[p.s]?.w} />
+                <Tile key={p.slug} p={p} swatch={scope?.[p.slug]?.w} />
               ))}
               {!res.length ? (
                 <p className="mute">Nothing in this color yet.</p>

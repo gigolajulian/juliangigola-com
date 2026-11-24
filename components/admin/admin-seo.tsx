@@ -65,7 +65,7 @@ const seg = (on: boolean) =>
 // One hue, stronger with more: the accent over nothing.
 const cell = (t: number) =>
   t <= 0 ? "color-mix(in oklch, var(--foreground) 5%, transparent)" : `color-mix(in oklch, var(--accent) ${Math.round(14 + t * 86)}%, transparent)`;
-const fmt = (n: number) => n.toLocaleString("en-US");
+const countLabel = (n: number) => n.toLocaleString("en-US");
 const change = (now: number, before: number) =>
   before ? `${now >= before ? "+" : ""}${Math.round(((now - before) / before) * 100)}%` : "new";
 
@@ -132,9 +132,9 @@ export function AdminSeo() {
         <>
           <dl className="grid grid-cols-2 border border-border sm:grid-cols-5">
             {[
-              ["Visits", fmt(data.visits), change(data.visits, data.prevVisits)],
-              ["Search clicks", g ? fmt(g.clicks) : "–", g ? change(g.clicks, g.prevClicks) : ""],
-              ["Impressions", g ? fmt(g.impressions) : "–", g ? change(g.impressions, g.prevImpressions) : ""],
+              ["Visits", countLabel(data.visits), change(data.visits, data.prevVisits)],
+              ["Search clicks", g ? countLabel(g.clicks) : "–", g ? change(g.clicks, g.prevClicks) : ""],
+              ["Impressions", g ? countLabel(g.impressions) : "–", g ? change(g.impressions, g.prevImpressions) : ""],
               ["CTR", g && g.impressions ? `${((g.clicks / g.impressions) * 100).toFixed(1)}%` : "–", ""],
               [
                 "Avg position",
@@ -212,9 +212,9 @@ export function AdminSeo() {
                           ))}
                         </span>
                       </td>
-                      <td className="px-2 text-right text-sm">{fmt(p.visits)}</td>
+                      <td className="px-2 text-right text-sm">{countLabel(p.visits)}</td>
                       <td className="px-2 text-right text-sm">{p.clicks}</td>
-                      <td className="px-2 text-right text-sm text-muted-foreground">{fmt(p.impressions)}</td>
+                      <td className="px-2 text-right text-sm text-muted-foreground">{countLabel(p.impressions)}</td>
                       <td className="px-2 text-right text-sm text-muted-foreground">
                         {p.impressions ? `${((p.clicks / p.impressions) * 100).toFixed(1)}%` : "–"}
                       </td>
@@ -355,7 +355,7 @@ function ClickMapBlock({ tracked }: { tracked: Data["tracked"] }) {
           </div>
           <div className="border border-border">
             <h4 className="label border-b border-border px-4 py-3 text-muted-foreground">
-              Most pressed · {map ? `${fmt(map.clicks)} presses, ${fmt(map.views)} views` : "…"}
+              Most pressed · {map ? `${countLabel(map.clicks)} presses, ${countLabel(map.views)} views` : "…"}
             </h4>
             <ol>
               {(map?.targets ?? []).map(([label, n]) => (

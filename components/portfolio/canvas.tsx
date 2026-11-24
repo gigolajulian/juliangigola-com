@@ -67,9 +67,9 @@ export function WorkCanvas({ list, onClose, onLeave, out, top = 0 }: { list: Wor
   const frames = React.useMemo<Frame[]>(
     () =>
       list.flatMap((w, p) =>
-        all?.[w.s]?.length
-          ? all[w.s].map(([src, r, alt, color]) => ({ p, src, r, alt, color }))
-          : [{ p, src: w.cover, r: 4 / 3, alt: w.n }],
+        all?.[w.slug]?.length
+          ? all[w.slug].map(([src, r, alt, color]) => ({ p, src, r, alt, color }))
+          : [{ p, src: w.cover, r: 4 / 3, alt: w.name }],
       ),
     [list, all],
   );
@@ -163,7 +163,7 @@ export function WorkCanvas({ list, onClose, onLeave, out, top = 0 }: { list: Wor
               }
               p.img.alt = fr.alt;
               p.f.style.backgroundColor = fr.color ?? "";
-              p.cap.textContent = `${w.n} · ${w.d.join(", ")}`;
+              p.cap.textContent = `${w.name} · ${w.disciplines.join(", ")}`;
               p.f.dataset.i = String(it.i);
             }
             p.f.style.width = `${W}px`;
@@ -409,11 +409,11 @@ export function WorkCanvas({ list, onClose, onLeave, out, top = 0 }: { list: Wor
             <img {...getImageProps({ src: fr.src, alt: fr.alt, fill: true, sizes: "80vh" }).props} />
           </figure>
           <div className="cv-meta">
-            <div className="lbl mute">{p.d.join(", ")}</div>
-            <h2>{p.n}</h2>
+            <div className="lbl mute">{p.disciplines.join(", ")}</div>
+            <h2>{p.name}</h2>
             {/* The canvas comes down before the page crossing: WebKit crashed snapshotting the
                 live field into the view transition (4 of 4, iPhone, iPad and desktop). */}
-            <Link className="lbl" href={projectHref(p.s)} onClick={onLeave}>
+            <Link className="lbl" href={projectHref(p.slug)} onClick={onLeave}>
               Open project
             </Link>
           </div>

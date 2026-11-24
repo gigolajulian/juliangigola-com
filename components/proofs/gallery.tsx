@@ -47,6 +47,11 @@ const onResize = (cb: () => void) => {
   return () => removeEventListener("resize", cb);
 };
 const readGw = () => `${innerWidth}x${innerHeight}`;
+/** A frame's address at full size, and the 800px copy the grid and the walls use. */
+const frameSrc = (token: string, id: string) => `/proof/${token}/f/${encodeURIComponent(id)}`;
+const thumbOf = (token: string, id: string) => `${frameSrc(token, id)}?w=${THUMB_W}`;
+const ordinal = (i: number) => String(i + 1).padStart(3, "0");
+
 
 /** A full-screen sheet: focus moves in, Tab stays inside, Escape closes, focus goes back to what opened it. */
 function useDialog(active: boolean, close: () => void) {
@@ -99,7 +104,14 @@ function lightCorners(img: HTMLImageElement): { no: boolean; ring: boolean } | n
 }
 
 /** Save as they go, a beat after the last change. Skips the first render after the gate fills them in. */
-function useAutosave(token: string, email: string | null, selects: string[], locked: boolean, ready: boolean, setUnsaved: (v: boolean) => void) {
+function useAutosave({ token, email, selects, locked, ready, setUnsaved }: {
+  token: string;
+  email: string | null;
+  selects: string[];
+  locked: boolean;
+  ready: boolean;
+  setUnsaved: (v: boolean) => void;
+}) {
   const saved = React.useRef<string | null>(null);
   React.useEffect(() => {
     if (!ready || !email || locked) return;
@@ -117,6 +129,66 @@ function useAutosave(token: string, email: string | null, selects: string[], loc
     }, 600);
     return () => clearTimeout(t);
   }, [selects, email, token, locked, ready, setUnsaved]);
+}
+
+/** The picks: what is selected (saved as it changes, never once sent), the grid's order, and "Selects first". */
+function useProofSelection({ token, frames, initial, email, ready, locked }: {
+  token: string;
+  frames: { id: string }[];
+  initial: string[];
+  email: string | null;
+  ready: boolean;
+  locked: boolean;
+}) {
+  const [selects, setSelects] = React.useState<string[]>(initial);
+  const [sort, setSort] = React.useState<"shot" | "picks">("shot");
+  // "Selects first" holds the picks it opened with, so a frame does not jump to the top under the finger.
+  const [pinned, setPinned] = React.useState<string[]>([]);
+  const [unsaved, setUnsaved] = React.useState(false);
+  const byId = React.useMemo(() => new Map(frames.map((f, i) => [f.id, i])), [frames]);
+  // Frame indexes in the order the grid shows them; the lightbox steps through the same order.
+  const seq = React.useMemo(() => {
+    const all = frames.map((_, i) => i);
+    if (sort !== "picks") return all;
+    const top = new Set(pinned);
+    return [...all.filter((i) => top.has(frames[i].id)), ...all.filter((i) => !top.has(frames[i].id))];
+  }, [frames, sort, pinned]);
+  const ordered = [...selects].sort((a, b) => (byId.get(a) ?? 0) - (byId.get(b) ?? 0));
+
+  useAutosave({ token, email, selects, locked, ready, setUnsaved });
+
+  const toggle = (id: string) => {
+    if (locked) return;
+    setSelects((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
+  };
+  const selectsFirst = () => {
+    setPinned(ordered);
+    setSort("picks");
+  };
+  return { selects, setSelects, sort, setSort, selectsFirst, unsaved, byId, seq, ordered, toggle };
+}
+
+/** Which frame is open big (an index into `frames`), stepping through the grid's order `seq`, and its keys. */
+function useLightbox({ frames, seq, toggle }: { frames: { id: string }[]; seq: number[]; toggle: (id: string) => void }) {
+  const [open, setOpen] = React.useState<number | null>(null);
+  const nextOf = (i: number, d: 1 | -1) => seq[(seq.indexOf(i) + d + seq.length) % seq.length];
+  // Lightbox keys.
+  React.useEffect(() => {
+    if (open === null) return;
+    const k = (e: KeyboardEvent) => {
+      if ((e.target as HTMLElement).tagName === "INPUT") return;
+      if (e.key === "Escape") setOpen(null);
+      if (e.key === "ArrowLeft") setOpen((i) => (i === null ? i : nextOf(i, -1)));
+      if (e.key === "ArrowRight") setOpen((i) => (i === null ? i : nextOf(i, 1)));
+      if (e.key === " ") {
+        e.preventDefault();
+        toggle(frames[open].id);
+      }
+    };
+    addEventListener("keydown", k);
+    return () => removeEventListener("keydown", k);
+  });
+  return { open, setOpen, nextOf };
 }
 
 /** Looks: ms each frame spends mostly on screen or open big; flushed with the seconds on the page. The lightbox counts as a long look. */
@@ -200,25 +272,18 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
   const { included, price, balance } = initial;
   const frames = React.useMemo(() => shotOrder(initial.frames), [initial.frames]);
   const starts = React.useMemo(() => lookStarts(frames), [frames]);
-  const [selects, setSelects] = React.useState<string[]>(initial.selects);
   const [email, setEmail] = React.useState<string | null>(null);
   const [ready, setReady] = React.useState(initial.submitted);
   const [view, setView] = React.useState<"all" | "selects">("all");
-  const [sort, setSort] = React.useState<"shot" | "picks">("shot");
-  // "Selects first" holds the picks it opened with, so a frame does not jump to the top under the finger.
-  const [pinned, setPinned] = React.useState<string[]>([]);
   const [tone, setTone] = React.useState<Record<string, { no: boolean; ring: boolean }>>({});
-  const [open, setOpen] = React.useState<number | null>(null);
   const [step, setStep] = React.useState<Step>(initial.submitted ? "done" : notice ? "review" : null);
+  const locked = step === "done";
   const [showAll, setShowAll] = React.useState(false);
   const gridRef = useDialog(showAll, () => setShowAll(false));
-  const [busy, setBusy] = React.useState(false);
-  const [via, setVia] = React.useState<"bank" | "card">("bank");
-  const [error, setError] = React.useState<string | null>(notice ?? null);
-  const [paid, setPaid] = React.useState(initial.paid);
-  // When they sent and whether the receipt mail went out, so the done screen says only what is true.
-  const [sent, setSent] = React.useState({ at: initial.submittedAt, mailed: initial.mailed });
-  const [unsaved, setUnsaved] = React.useState(false);
+  const { selects, setSelects, sort, setSort, selectsFirst, unsaved, byId, seq, ordered, toggle } = useProofSelection({ token, frames, initial: initial.selects, email, ready, locked });
+  const { open, setOpen, nextOf } = useLightbox({ frames, seq, toggle });
+  // When they sent, whether the receipt mail went out and what was paid, so the done screen says only what is true.
+  const [sent, setSent] = React.useState<Sent>({ at: initial.submittedAt, mailed: initial.mailed, paid: initial.paid });
   const wall = React.useSyncExternalStore(noSubscribe, readWall, () => false);
   const gw = React.useSyncExternalStore(onResize, readGw, () => "");
   const tune = React.useMemo(() => {
@@ -232,8 +297,6 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
   const gridEl = React.useRef<HTMLDivElement>(null);
   // The wall stays up from the gate until it has landed, whatever the track call is doing meanwhile.
   const walling = wall && !opened && (!ready || hello !== null);
-  const locked = step === "done";
-  const swipe = React.useRef<number | null>(null);
   // An overlay takes focus on open and gives it back on close; the page under it is inert.
   const overlay = React.useRef<HTMLDivElement>(null);
   const covered = open !== null || step === "review";
@@ -249,13 +312,6 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
     opener.current.focus();
     opener.current = null;
   }, [covered]);
-  // Escape leaves the review sheet, as it closes the lightbox.
-  React.useEffect(() => {
-    if (step !== "review" || busy) return;
-    const k = (e: KeyboardEvent) => e.key === "Escape" && setStep(null);
-    addEventListener("keydown", k);
-    return () => removeEventListener("keydown", k);
-  }, [step, busy]);
 
   const n = selects.length;
   const extra = Math.max(0, n - included);
@@ -263,20 +319,10 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
   const owed = amountOwed({ selects, included, price, balance, paid: { amount: initial.paid } });
   const balDue = owed.balance / 100;
   const due = balDue + owed.n * price;
-  const byId = React.useMemo(() => new Map(frames.map((f, i) => [f.id, i])), [frames]);
-  // Frame indexes in the order the grid shows them; the lightbox steps through the same order.
-  const seq = React.useMemo(() => {
-    const all = frames.map((_, i) => i);
-    if (sort !== "picks") return all;
-    const top = new Set(pinned);
-    return [...all.filter((i) => top.has(frames[i].id)), ...all.filter((i) => !top.has(frames[i].id))];
-  }, [frames, sort, pinned]);
-  const nextOf = (i: number, d: 1 | -1) => seq[(seq.indexOf(i) + d + seq.length) % seq.length];
-  const src = (id: string) => `/proof/${token}/f/${encodeURIComponent(id)}`;
   // The 800px copy for the grid and the walls; the lightbox keeps the whole frame.
-  const thumb = (id: string) => `${src(id)}?w=${THUMB_W}`;
+  const thumb = (id: string) => thumbOf(token, id);
   // One array for the wall: a new one every render rebuilt the wall under its own landing (its columns and fades reset).
-  const wallFrames = React.useMemo(() => frames.map((f) => ({ src: `/proof/${token}/f/${encodeURIComponent(f.id)}?w=${THUMB_W}`, w: f.w, h: f.h })), [frames, token]);
+  const wallFrames = React.useMemo(() => frames.map((f) => ({ src: thumbOf(token, f.id), w: f.w, h: f.h })), [frames, token]);
 
   const post = React.useCallback(<T,>(b: Record<string, unknown>) => postJson<T>(`/api/proof/${token}`, b), [token]);
 
@@ -297,62 +343,28 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
     setReady(true);
   }
 
-  useAutosave(token, email, selects, locked, ready, setUnsaved);
-
   useLookTracking({ token, email, ready, post, view, step, open, frames });
-
-  const toggle = (id: string) => {
-    if (locked) return;
-    setSelects((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
-  };
-
-  // Lightbox keys.
-  React.useEffect(() => {
-    if (open === null) return;
-    const k = (e: KeyboardEvent) => {
-      if ((e.target as HTMLElement).tagName === "INPUT") return;
-      if (e.key === "Escape") setOpen(null);
-      if (e.key === "ArrowLeft") setOpen((i) => (i === null ? i : nextOf(i, -1)));
-      if (e.key === "ArrowRight") setOpen((i) => (i === null ? i : nextOf(i, 1)));
-      if (e.key === " ") {
-        e.preventDefault();
-        toggle(frames[open].id);
-      }
-    };
-    addEventListener("keydown", k);
-    return () => removeEventListener("keydown", k);
-  });
-
-  async function send(method: "bank" | "card" = "bank") {
-    setBusy(true);
-    setVia(method);
-    setError(null);
-    const r = await post<{ checkout?: string; done?: boolean; paid?: number; submittedAt?: string | null; mailed?: boolean }>({ email, selects, method });
-    const out = r.ok ? r.data : null;
-    setBusy(false);
-    if (out?.checkout) {
-      if (email) sessionSet(`${EMAIL_STORE}:${token}`, email);
-      return void (location.href = out.checkout);
-    }
-    if (!out?.done) return setError((!r.ok && r.error) || "That did not go through. Try again.");
-    setPaid(out.paid ?? 0);
-    setSent({ at: out.submittedAt ?? new Date().toISOString(), mailed: !!out.mailed });
-    setStep("done");
-    scrollTo({ top: 0 });
-  }
 
   const review = () => {
     setStep("review");
     if (email) void post({ action: "track", email, kind: "review" });
   };
+  const finish = (done: Sent) => {
+    setSent(done);
+    setStep("done");
+    scrollTo({ top: 0 });
+  };
+  // The review sheet: its Escape works from the first render, the plain gate included.
+  const checkout = (shown: boolean) => (
+    <Checkout open={step === "review"} shown={shown} overlay={overlay} setStep={setStep} post={post} token={token} email={email} selects={selects} notice={notice} onSent={finish}
+      n={n} included={included} price={price} extra={extra} balDue={balDue} due={due} ordered={ordered} byId={byId} />
+  );
 
-  const ordinal = (i: number) => String(i + 1).padStart(3, "0");
   const closes = initial.closesAt ? new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: TZ }).format(new Date(initial.closesAt)) : null;
   // The last days say so. Read after mount: the server and the phone can disagree near midnight.
   const clock = useClock();
   const soon = clock ? closingSoon(initial.closesAt, clock) : null;
   const until = closes ? (soon !== null ? ` · Closes ${closes} · ${soon} ${soon === 1 ? "day" : "days"} left` : ` · Open until ${closes}`) : "";
-  const ordered = [...selects].sort((a, b) => (byId.get(a) ?? 0) - (byId.get(b) ?? 0));
 
   if (!ready && !wall)
     return (
@@ -362,10 +374,12 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
             setHello(name.split(/\s+/)[0]);
             enter(address, name);
           }} />
+        {checkout(false)}
       </div>
     );
 
   if (step === "done") {
+    const { paid } = sent;
     const sentOn = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(sent.at ? new Date(sent.at) : new Date());
     return (
       <div className="proof">
@@ -461,6 +475,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
     );
   }
 
+
   return (
     <div className="proof" data-wall={wall ? (!walling ? "on" : hello === null ? "gate" : "settle") : undefined}>
       <ProofCursor />
@@ -490,7 +505,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
             <button type="button" aria-pressed={sort === "shot"} onClick={() => setSort("shot")}>
               {starts.length ? "Looks" : "In order"}
             </button>
-            <button type="button" aria-pressed={sort === "picks"} disabled={!n} onClick={() => { setPinned(ordered); setSort("picks"); }}>
+            <button type="button" aria-pressed={sort === "picks"} disabled={!n} onClick={selectsFirst}>
               Selects first
             </button>
           </nav>
@@ -605,114 +620,190 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
         />
       ) : null}
 
-      {open !== null ? (
-        <div className="proof-lb" ref={overlay} role="dialog" aria-modal="true" aria-label={`Frame ${open + 1}`}>
-          <div className="proof-lt">
-            <span>
-              {ordinal(open)} / {frames.length}
-            </span>
-            <button type="button" className="proof-close" onClick={() => setOpen(null)}>
-              Close
-            </button>
-          </div>
-          <div
-            className="proof-li"
-            onTouchStart={(e) => (swipe.current = e.touches[0].clientX)}
-            onTouchEnd={(e) => {
-              const dx = e.changedTouches[0].clientX - (swipe.current ?? e.changedTouches[0].clientX);
-              if (Math.abs(dx) > 50) setOpen(nextOf(open, dx < 0 ? 1 : -1));
-              swipe.current = null;
-            }}
-          >
-            <button type="button" className="proof-arr l" aria-label="Previous" onClick={() => setOpen(nextOf(open, -1))}>
-              &larr;
-            </button>
-            {/* eslint-disable-next-line @next/next/no-img-element -- private frame */}
-            <img src={src(frames[open].id)} alt={`Frame ${open + 1}`} />
-            <button type="button" className="proof-arr r" aria-label="Next" onClick={() => setOpen(nextOf(open, 1))}>
-              &rarr;
-            </button>
-          </div>
-          <div className="proof-lf">
-            <span>{n} / {included} selected</span>
-            <button type="button" className={`proof-btn${selects.includes(frames[open].id) ? " ghost" : ""}`} onClick={() => toggle(frames[open].id)}>
-              {selects.includes(frames[open].id) ? "Selected ✓" : "Select"}
-            </button>
-          </div>
-        </div>
-      ) : null}
 
-      {step === "review" ? (
-        <div className="proof-over" ref={overlay} role="dialog" aria-modal="true" aria-label="Review your selects">
-          <div className="proof-rhead">
-            <div>
-              <p className="proof-lab">Your selects</p>
-              <h1>{n} {n === 1 ? "frame" : "frames"}.</h1>
-            </div>
-            <div className="proof-acts">
-              <button type="button" className="proof-btn ghost" onClick={() => setStep(null)}>
-                Back to frames
-              </button>
-              {due ? null : (
-                <button type="button" className="proof-btn" disabled={busy} onClick={() => send()}>
-                  {busy ? "Sending" : `Send ${n} ${n === 1 ? "select" : "selects"}`}
-                </button>
-              )}
-            </div>
-          </div>
-          <p className="proof-lock">Selects lock once you send.</p>
-          <p className="proof-rsum">
-            {balDue ? <span>Shoot balance ${balDue}</span> : null}
-            <span>{Math.min(n, included)} included</span>
-            {extra ? <span>{extra} extra × ${price}</span> : null}
-            <b>{due ? `$${due}` : "Nothing to pay"}</b>
-          </p>
-          {due ? (
-            <div className="proof-pay">
-              <button type="button" className="proof-opt" data-main disabled={busy} onClick={() => send("bank")}>
-                <span>
-                  <b>{busy && via === "bank" ? "Opening Stripe" : "Pay by bank"}</b>
-                  <small>Sign in to your bank on Stripe. Clears in about 4 business days.</small>
-                </span>
-                <span className="proof-amt">
-                  <s>${cardPrice(due * 100) / 100}</s> ${due}
-                  <i>Save ${cardPrice(due * 100) / 100 - due} · No card processing cost</i>
-                </span>
-              </button>
-              <button type="button" className="proof-opt" disabled={busy} onClick={() => send("card")}>
-                <span>
-                  <b>{busy && via === "card" ? "Opening Stripe" : "Pay by card"}</b>
-                  <small>Visa, Mastercard, Amex or Apple Pay.</small>
-                </span>
-                <span className="proof-amt">
-                  ${cardPrice(due * 100) / 100}
-                  <i data-mu>Includes card processing</i>
-                </span>
-              </button>
-              <p className="proof-secure">
-                <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true">
-                  <rect x="3" y="7" width="10" height="7.5" rx="1.5" fill="none" stroke="currentColor" strokeWidth="1.3" />
-                  <path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" fill="none" stroke="currentColor" strokeWidth="1.3" />
-                </svg>
-                Checkout on Stripe. I never see your card or bank details.
-              </p>
-            </div>
-          ) : null}
-          {error ? <p className="proof-err" role="alert">{error}</p> : null}
-          <div className="proof-rgrid">
-            {ordered.map((id) => (
-              <div key={id}>
-                {/* eslint-disable-next-line @next/next/no-img-element -- private frame */}
-                <img src={thumb(id)} alt={`Frame ${(byId.get(id) ?? 0) + 1}`} />
-                <i>{ordinal(byId.get(id) ?? 0)}</i>
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : null}
+      <Lightbox open={open} setOpen={setOpen} nextOf={nextOf} frames={frames} token={token} selects={selects} toggle={toggle} n={n} included={included} overlay={overlay} />
+
+      {checkout(true)}
     </div>
   );
 }
+
+/** The open frame at full size: arrows, keys and a swipe step through the grid's order; the button picks it. */
+function Lightbox({ open, setOpen, nextOf, frames, token, selects, toggle, n, included, overlay }: {
+  open: number | null;
+  setOpen: (i: number | null) => void;
+  nextOf: (i: number, d: 1 | -1) => number;
+  frames: { id: string }[];
+  token: string;
+  selects: string[];
+  toggle: (id: string) => void;
+  n: number;
+  included: number;
+  overlay: React.RefObject<HTMLDivElement | null>;
+}) {
+  const swipe = React.useRef<number | null>(null);
+  if (open === null) return null;
+  return (
+    <div className="proof-lb" ref={overlay} role="dialog" aria-modal="true" aria-label={`Frame ${open + 1}`}>
+      <div className="proof-lt">
+        <span>
+          {ordinal(open)} / {frames.length}
+        </span>
+        <button type="button" className="proof-close" onClick={() => setOpen(null)}>
+          Close
+        </button>
+      </div>
+      <div
+        className="proof-li"
+        onTouchStart={(e) => (swipe.current = e.touches[0].clientX)}
+        onTouchEnd={(e) => {
+          const dx = e.changedTouches[0].clientX - (swipe.current ?? e.changedTouches[0].clientX);
+          if (Math.abs(dx) > 50) setOpen(nextOf(open, dx < 0 ? 1 : -1));
+          swipe.current = null;
+        }}
+      >
+        <button type="button" className="proof-arr l" aria-label="Previous" onClick={() => setOpen(nextOf(open, -1))}>
+          &larr;
+        </button>
+        {/* eslint-disable-next-line @next/next/no-img-element -- private frame */}
+        <img src={frameSrc(token, frames[open].id)} alt={`Frame ${open + 1}`} />
+        <button type="button" className="proof-arr r" aria-label="Next" onClick={() => setOpen(nextOf(open, 1))}>
+          &rarr;
+        </button>
+      </div>
+      <div className="proof-lf">
+        <span>{n} / {included} selected</span>
+        <button type="button" className={`proof-btn${selects.includes(frames[open].id) ? " ghost" : ""}`} onClick={() => toggle(frames[open].id)}>
+          {selects.includes(frames[open].id) ? "Selected ✓" : "Select"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+type Sent = { at: string | null; mailed: boolean; paid: number };
+
+/** The review sheet before Send: the total, bank or card on Stripe, and the picks. Holds the payment's state while it is closed. */
+function Checkout({ open, shown, overlay, setStep, post, token, email, selects, notice, onSent, n, included, price, extra, balDue, due, ordered, byId }: {
+  /** The review step, which Escape leaves. */
+  open: boolean;
+  /** False behind the plain gate: the sheet waits for the grid. */
+  shown: boolean;
+  overlay: React.RefObject<HTMLDivElement | null>;
+  setStep: (s: Step) => void;
+  post: <T>(b: Record<string, unknown>) => ReturnType<typeof postJson<T>>;
+  token: string;
+  email: string | null;
+  selects: string[];
+  notice?: string;
+  onSent: (s: Sent) => void;
+  n: number;
+  included: number;
+  price: number;
+  extra: number;
+  balDue: number;
+  due: number;
+  ordered: string[];
+  byId: Map<string, number>;
+}) {
+  const [busy, setBusy] = React.useState(false);
+  const [via, setVia] = React.useState<"bank" | "card">("bank");
+  const [error, setError] = React.useState<string | null>(notice ?? null);
+  // Escape leaves the review sheet, as it closes the lightbox.
+  React.useEffect(() => {
+    if (!open || busy) return;
+    const k = (e: KeyboardEvent) => e.key === "Escape" && setStep(null);
+    addEventListener("keydown", k);
+    return () => removeEventListener("keydown", k);
+  }, [open, busy, setStep]);
+
+  async function send(method: "bank" | "card" = "bank") {
+    setBusy(true);
+    setVia(method);
+    setError(null);
+    const r = await post<{ checkout?: string; done?: boolean; paid?: number; submittedAt?: string | null; mailed?: boolean }>({ email, selects, method });
+    const out = r.ok ? r.data : null;
+    setBusy(false);
+    if (out?.checkout) {
+      if (email) sessionSet(`${EMAIL_STORE}:${token}`, email);
+      return void (location.href = out.checkout);
+    }
+    if (!out?.done) return setError((!r.ok && r.error) || "That did not go through. Try again.");
+    onSent({ paid: out.paid ?? 0, at: out.submittedAt ?? new Date().toISOString(), mailed: !!out.mailed });
+  }
+
+  if (!open || !shown) return null;
+  const thumb = (id: string) => thumbOf(token, id);
+  return (
+    <div className="proof-over" ref={overlay} role="dialog" aria-modal="true" aria-label="Review your selects">
+      <div className="proof-rhead">
+        <div>
+          <p className="proof-lab">Your selects</p>
+          <h1>{n} {n === 1 ? "frame" : "frames"}.</h1>
+        </div>
+        <div className="proof-acts">
+          <button type="button" className="proof-btn ghost" onClick={() => setStep(null)}>
+            Back to frames
+          </button>
+          {due ? null : (
+            <button type="button" className="proof-btn" disabled={busy} onClick={() => send()}>
+              {busy ? "Sending" : `Send ${n} ${n === 1 ? "select" : "selects"}`}
+            </button>
+          )}
+        </div>
+      </div>
+      <p className="proof-lock">Selects lock once you send.</p>
+      <p className="proof-rsum">
+        {balDue ? <span>Shoot balance ${balDue}</span> : null}
+        <span>{Math.min(n, included)} included</span>
+        {extra ? <span>{extra} extra × ${price}</span> : null}
+        <b>{due ? `$${due}` : "Nothing to pay"}</b>
+      </p>
+      {due ? (
+        <div className="proof-pay">
+          <button type="button" className="proof-opt" data-main disabled={busy} onClick={() => send("bank")}>
+            <span>
+              <b>{busy && via === "bank" ? "Opening Stripe" : "Pay by bank"}</b>
+              <small>Sign in to your bank on Stripe. Clears in about 4 business days.</small>
+            </span>
+            <span className="proof-amt">
+              <s>${cardPrice(due * 100) / 100}</s> ${due}
+              <i>Save ${cardPrice(due * 100) / 100 - due} · No card processing cost</i>
+            </span>
+          </button>
+          <button type="button" className="proof-opt" disabled={busy} onClick={() => send("card")}>
+            <span>
+              <b>{busy && via === "card" ? "Opening Stripe" : "Pay by card"}</b>
+              <small>Visa, Mastercard, Amex or Apple Pay.</small>
+            </span>
+            <span className="proof-amt">
+              ${cardPrice(due * 100) / 100}
+              <i data-mu>Includes card processing</i>
+            </span>
+          </button>
+          <p className="proof-secure">
+            <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true">
+              <rect x="3" y="7" width="10" height="7.5" rx="1.5" fill="none" stroke="currentColor" strokeWidth="1.3" />
+              <path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" fill="none" stroke="currentColor" strokeWidth="1.3" />
+            </svg>
+            Checkout on Stripe. I never see your card or bank details.
+          </p>
+        </div>
+      ) : null}
+      {error ? <p className="proof-err" role="alert">{error}</p> : null}
+      <div className="proof-rgrid">
+        {ordered.map((id) => (
+          <div key={id}>
+            {/* eslint-disable-next-line @next/next/no-img-element -- private frame */}
+            <img src={thumb(id)} alt={`Frame ${(byId.get(id) ?? 0) + 1}`} />
+            <i>{ordinal(byId.get(id) ?? 0)}</i>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 
 function Top({ view, setView, n, included, due, hideTabs }: { view: "all" | "selects"; setView: (v: "all" | "selects") => void; n: number; included: number; due: number; hideTabs?: boolean }) {
   return (

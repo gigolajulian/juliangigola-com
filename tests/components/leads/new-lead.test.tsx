@@ -1,8 +1,12 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi, type Mock } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { NewLeadDesk, sameAs } from "@/components/leads/new-lead";
-import type { Call } from "@/lib/leads/lead-desk";
+import { deskCall } from "@/lib/leads/lead-desk";
 import type { LeadSummary } from "@/lib/leads/leads";
+
+vi.mock("@/lib/leads/lead-desk", async (actual) => ({ ...(await actual<typeof import("@/lib/leads/lead-desk")>()), deskCall: vi.fn() }));
+// The desk fetch, faked per test.
+const call = deskCall as unknown as Mock;
 
 const iso = new Date().toISOString();
 const on = (email: string, name = "Someone") => ({ id: email, email, name, stage: "Inquiry", stageAt: iso, firstAt: iso, lastAt: iso }) as LeadSummary;
@@ -21,9 +25,9 @@ describe("sameAs", () => {
 
 describe("NewLeadDesk", () => {
   it("adds only with a name and a way back, through the classic POST", async () => {
-    const call = vi.fn(async () => ({ id: "n1", lead: { email: "ig:ana" } })) as unknown as Call & ReturnType<typeof vi.fn>;
+    call.mockImplementation(async () => ({ id: "n1", lead: { email: "ig:ana" } }));
     const done = vi.fn();
-    render(<NewLeadDesk call={call} leads={[]} size="wide" done={done} open={() => {}} cancel={() => {}} />);
+    render(<NewLeadDesk leads={[]} size="wide" done={done} open={() => {}} cancel={() => {}} />);
     const add = screen.getByRole("button", { name: "Add lead" });
     fireEvent.change(screen.getByLabelText(/Name/), { target: { value: "Ana" } });
     expect(add.getAttribute("aria-disabled") === "true" || (add as HTMLButtonElement).disabled).toBe(true);

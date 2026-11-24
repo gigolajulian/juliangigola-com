@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanFrom, type Invoice } from "@/lib/leads/invoice";
 import { fileName, invoicePdf, type InvoiceDoc } from "@/lib/leads/invoice-pdf";
-import { COL, place } from "@/lib/leads/invoice-photo";
+import { COL, coverFit } from "@/lib/leads/invoice-photo";
 
 /* The invoice PDF's name and bytes, and design B's photo placement. The
    faces it fetches come from public/ through a stubbed fetch. */
@@ -47,15 +47,15 @@ describe("invoicePdf", () => {
   });
 });
 
-describe("place", () => {
+describe("coverFit", () => {
   it("covers the box, centred at 0.5", () => {
-    const p = place(2000, 1000, 100, 200, { x: 0.5, y: 0.5, z: 1 });
+    const p = coverFit(2000, 1000, 100, 200, { x: 0.5, y: 0.5, z: 1 });
     expect(p).toEqual({ w: 400, h: 200, left: -150, top: -0 });
   });
   it("slides like object-position and zooms past cover", () => {
-    expect(place(2000, 1000, 100, 200, { x: 0, y: 0, z: 1 }).left).toBe(-0);
-    expect(place(2000, 1000, 100, 200, { x: 1, y: 0, z: 1 }).left).toBe(-300);
-    const z = place(1000, 1000, 100, 100, { x: 0.5, y: 0.5, z: 2 });
+    expect(coverFit(2000, 1000, 100, 200, { x: 0, y: 0, z: 1 }).left).toBe(-0);
+    expect(coverFit(2000, 1000, 100, 200, { x: 1, y: 0, z: 1 }).left).toBe(-300);
+    const z = coverFit(1000, 1000, 100, 100, { x: 0.5, y: 0.5, z: 2 });
     expect([z.w, z.left, z.top]).toEqual([200, -50, -50]);
   });
   it("frames the column at 41% of A4", () => {

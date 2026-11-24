@@ -5,17 +5,17 @@ import Link from "next/link";
 import { cn, looksLikeEmail } from "@/lib/utils";
 import { DepositStep } from "@/components/booking/deposit-step";
 import { ReferencePicks } from "@/components/reference-picks";
-import { Calendar, dlabel, localDayKey } from "@/components/booking/flow";
+import { Calendar, weekdayDateLabel, localDayKey } from "@/components/booking/flow";
 import { duration } from "@/lib/booking/rules";
-import { depositFor, takesDeposit } from "@/lib/booking/paid";
+import { depositFor, takesDeposit } from "@/lib/leads/deposit-terms";
 import { clockLabel } from "@/lib/booking/clock";
 import type { Shell } from "@/components/enquiry/flow";
 import { AHEAD, fromIso, minutesOf, STEP_AT, WHERE, clock, type PickedTime, type Step, type StepsSkin } from "@/components/booking/picker/parts";
 import type { CardCtx } from "@/components/booking/picker/use-picker";
 import { forgetTimes } from "@/components/booking/picker/use-slots";
 import { SkyTimes, SkyWeather } from "@/components/booking/picker/sky-times";
-import { skyOn } from "@/lib/flags/sky";
-import { partOf, pacific, sunsetLabel, tone } from "@/lib/booking/sky";
+import { skyOn } from "@/lib/flags/sky-flag";
+import { partOf, pacific, sunsetLabel, skyColors } from "@/lib/booking/sky";
 import { DAY_MS } from "@/lib/time-zone";
 
 /** The quiet that ends a trackpad flick: events closer than this are still the same push. */
@@ -84,7 +84,7 @@ export function BookSteps({ c, l }: { c: CardCtx & { skin: StepsSkin }; l: Retur
   const usd = depositFor(slug);
   const range = `${clockLabel(pick.min)} to ${clockLabel(end)}`;
   const at = step === "done" ? v3steps.length : STEP_AT[step] + 1;
-  const rows: [string, React.ReactNode][] = [["Day", dlabel(date)], ["Time", range], ["Length", duration(length)]];
+  const rows: [string, React.ReactNode][] = [["Day", weekdayDateLabel(date)], ["Time", range], ["Length", duration(length)]];
   const shell = (p: Omit<Parameters<Shell>[0], "steps" | "at" | "sum">) => <div ref={v3root} className="contents">{skin.shell({ steps: v3steps, at, sum: rows, ...p })}</div>;
   const back = (to: typeof step) => <button type="button" className="btn" onClick={() => { setBad({}); setStep(to); }}>Back</button>;
   if (step === "pay" && deposit) {
@@ -93,7 +93,7 @@ export function BookSteps({ c, l }: { c: CardCtx & { skin: StepsSkin }; l: Retur
       <DepositStep
         skin="v3"
         shell={(p) => shell(p)}
-        head={<div className="fig"><b>${usd}</b><span className="lbl mute">Holds {dlabel(date)}, {clockLabel(pick.min)}</span></div>}
+        head={<div className="fig"><b>${usd}</b><span className="lbl mute">Holds {weekdayDateLabel(date)}, {clockLabel(pick.min)}</span></div>}
         body={deposit}
         refs={refs}
         rows={[
@@ -116,8 +116,8 @@ export function BookSteps({ c, l }: { c: CardCtx & { skin: StepsSkin }; l: Retur
   if (step === "done") {
     const studio = !booked.where || /studio/i.test(booked.where);
     const lines = paid
-      ? [`${dlabel(date)}, ${range}, ${duration(length)}.`, studio ? "San Jose studio. I send the address the day before." : `${booked.where}.`, "Need to move it? Use the link in the confirmation, up to 24 hours before."]
-      : [`${dlabel(date)}, ${range}, ${duration(length)}.`, "I call the number you gave, or send a video link the day before.", "Need to move it? Reply to the confirmation."];
+      ? [`${weekdayDateLabel(date)}, ${range}, ${duration(length)}.`, studio ? "San Jose studio. I send the address the day before." : `${booked.where}.`, "Need to move it? Use the link in the confirmation, up to 24 hours before."]
+      : [`${weekdayDateLabel(date)}, ${range}, ${duration(length)}.`, "I call the number you gave, or send a video link the day before.", "Need to move it? Reply to the confirmation."];
     const stamp = (ms: number) => new Date(ms).toISOString().replace(/[-:]|\.\d{3}/g, "");
     const s0 = +new Date(pick.start);
     const ics = ["BEGIN:VCALENDAR", "VERSION:2.0", "BEGIN:VEVENT", `UID:${s0}@juliangigola.com`, `DTSTAMP:${stamp(s0)}`, `DTSTART:${stamp(s0)}`, `DTEND:${stamp(s0 + length * 6e4)}`, `SUMMARY:${skin.name} with Julian Gigola`, "END:VEVENT", "END:VCALENDAR"].join("\r\n");
@@ -137,11 +137,11 @@ export function BookSteps({ c, l }: { c: CardCtx & { skin: StepsSkin }; l: Retur
   if (step !== "pick") {
     const opts = needsWhere ? WHERE[slug] : undefined;
     const asking = opts?.find(([label]) => label === (opt || opts[0][0]))?.[1];
-    const f = (k: string, label: string, type = "text", hint = "", ac = "off", area = false, req = false) => {
+    const f = (k: string, label: string, { type = "text", ac = "off", area = false, req = false }: { type?: string; ac?: string; area?: boolean; req?: boolean } = {}) => {
       const id = `f-${k}`;
       return (
         <div className={bad[k] ? "fld bad" : "fld"}>
-          <label className="lbl mute" htmlFor={id}><span>{label}{req ? <span className="req" aria-hidden="true"> *</span> : null}</span>{bad[k] && !blank[k] ? <span className="fe" aria-hidden="true">{bad[k]}</span> : <span>{hint}</span>}</label>
+          <label className="lbl mute" htmlFor={id}><span>{label}{req ? <span className="req" aria-hidden="true"> *</span> : null}</span>{bad[k] && !blank[k] ? <span className="fe" aria-hidden="true">{bad[k]}</span> : <span />}</label>
           {area ? <textarea id={id} name={k} rows={3} placeholder={bad[k] && blank[k] ? bad[k] : undefined} aria-invalid={!!bad[k] || undefined} aria-describedby={bad[k] ? `${id}-err` : undefined} aria-required={req || undefined} /> : <input id={id} name={k} type={type} autoComplete={ac} placeholder={bad[k] && blank[k] ? bad[k] : undefined} aria-invalid={!!bad[k] || undefined} aria-describedby={bad[k] ? `${id}-err` : undefined} aria-required={req || undefined} />}
           {bad[k] ? <p className="sr-only" id={`${id}-err`} role="alert">{bad[k]}</p> : null}
         </div>
@@ -170,10 +170,10 @@ export function BookSteps({ c, l }: { c: CardCtx & { skin: StepsSkin }; l: Retur
           body: (
             <>
               {/* The photo's summary hides on phones: the day and time stay in view here (booking critique). */}
-              <p className="f-when lbl mute">{dlabel(date)} | {clockLabel(pick.min)} | {skin.name}</p>
-              {f("name", "Name", "text", "", "name", false, true)}
-              {f("email", "Email", "email", "", "email", false, true)}
-              {f("phone", "Phone", "tel", "", "tel")}
+              <p className="f-when lbl mute">{weekdayDateLabel(date)} | {clockLabel(pick.min)} | {skin.name}</p>
+              {f("name", "Name", { ac: "name", req: true })}
+              {f("email", "Email", { type: "email", ac: "email", req: true })}
+              {f("phone", "Phone", { type: "tel", ac: "tel" })}
               {opts && opts.length > 1 ? (
                 <div className="fld" role="group" aria-label="Where">
                   <span className="lbl mute">Where</span>
@@ -219,7 +219,7 @@ export function BookSteps({ c, l }: { c: CardCtx & { skin: StepsSkin }; l: Retur
     const next = times[at0 + dir];
     if (next) choose(pick.date, minutesOf(next), true);
   };
-  /* ?sky (lib/flags/sky.ts): the times in the hour's light, the readout under them, the day's dots by part of day. */
+  /* ?sky (lib/flags/sky-flag.ts): the times in the hour's light, the readout under them, the day's dots by part of day. */
   const zone = new Intl.DateTimeFormat("en-US", { timeZone: tz, timeZoneName: "longGeneric" }).formatToParts(0).find((p) => p.type === "timeZoneName")?.value.replace(/ Time$/, "") ?? tz;
   return shell({
     head: paid ? "Book a session" : skin?.name === "Consultation" ? "Book a consultation" : "Book a call",
@@ -259,7 +259,7 @@ export function BookSteps({ c, l }: { c: CardCtx & { skin: StepsSkin }; l: Retur
         {/* The time big, stepped with
             the arrows, a wheel, a swipe or the arrow keys; the day's open times
             in one row under it, faded with a hint when they run past the edge. */}
-        <div className="fig scrub" style={sky ? (({ dark, light }) => ({ "--tc": dark, "--tcl": light }) as React.CSSProperties)(tone(Date.parse(pick.start))) : undefined}>
+        <div className="fig scrub" style={sky ? (({ dark, light }) => ({ "--tc": dark, "--tcl": light }) as React.CSSProperties)(skyColors(Date.parse(pick.start))) : undefined}>
           <div className="num">
             <b ref={(el) => {
               if (!el) return;
@@ -296,7 +296,7 @@ export function BookSteps({ c, l }: { c: CardCtx & { skin: StepsSkin }; l: Retur
             <button type="button" className="arr" aria-label="Earlier time" disabled={at0 <= 0} onClick={() => stepTime(-1)}>←</button>
             <button type="button" className="arr" aria-label="Later time" disabled={at0 < 0 || at0 >= times.length - 1} onClick={() => stepTime(1)}>→</button>
           </div>
-          <span className="lbl mute mline">{dlabel(date)}{chosen === "time" ? ` | until ${clockLabel(end)}` : ""}</span>
+          <span className="lbl mute mline">{weekdayDateLabel(date)}{chosen === "time" ? ` | until ${clockLabel(end)}` : ""}</span>
           {sky ? (
             <dl className="sky-meta lbl">
               <div><dt className="mute">Time zone</dt><dd>{zone}</dd></div>

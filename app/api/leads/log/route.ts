@@ -1,5 +1,5 @@
 import { readLog } from "@/lib/leads/activity-log";
-import { sealedGate } from "@/lib/leads/desk-route";
+import { sealedGate } from "@/lib/admin/gate";
 import { json } from "@/lib/http";
 
 /* GET `?id=<lead id>`: one client's whole activity log (`lib/leads/activity-log.ts`). Behind the /admin gate. */

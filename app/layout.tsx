@@ -3,7 +3,7 @@ import localFont from "next/font/local";
 import { Intro } from "@/components/splash/intro";
 import { JG_INNER } from "@/components/splash/jg-cover";
 import { SPLASH_RUN } from "@/lib/work/splash-run";
-import { PhotoNotice } from "@/components/photo-notice";
+import { PhotoNotice } from "@/components/site/photo-notice";
 import { GlassLight } from "@/components/effects/glass-light";
 import { PhotoFade } from "@/components/effects/photo-fade";
 import { TextCaret } from "@/components/effects/text-caret";
@@ -11,12 +11,12 @@ import { NavMemo } from "@/components/site/back-link";
 import { PageFly } from "@/components/site/page-fly";
 import { THEME_COLOR } from "@/lib/theme-color";
 import "./globals.css";
-import { ImageFallback } from "@/components/image-fallback";
+import { ImageFallback } from "@/components/site/image-fallback";
 import { PageTransition } from "@/components/site/page-transition";
 import { CardTilt } from "@/components/effects/card-tilt";
 import { HoverSettle } from "@/components/effects/hover-settle";
 import { FocusField } from "@/components/contact/focus-field";
-import { ldJson, siteGraph } from "@/lib/seo";
+import { ldJson, siteGraph } from "@/lib/og/seo";
 import { DebugGate } from "@/components/dev/debug-gate";
 import { VisitTrail } from "@/components/analytics/visit-trail";
 import { ClickBeacon } from "@/components/analytics/click-beacon";
@@ -25,7 +25,7 @@ import { ScrollThumb } from "@/components/site/scroll-thumb";
 import { SmoothScroll } from "@/components/site/smooth-scroll";
 import { ScrollReveal } from "@/components/site/scroll-reveal";
 import { V4PAGES_HEAD } from "@/lib/flags/v4pages";
-import { SKY_HEAD } from "@/lib/flags/sky";
+import { SKY_HEAD } from "@/lib/flags/sky-flag";
 
 /* JG V3 (DESIGN.md): Inter Tight for the display type and the wordmark,
    IBM Plex Mono for everything else, and Archivo Expanded for the booking
@@ -105,7 +105,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
   title: {
-    /* The region only: the cities are in JSON-LD `areaServed` (lib/seo.ts), and San Jose has its own
+    /* The region only: the cities are in JSON-LD `areaServed` (lib/og/seo.ts), and San Jose has its own
        pages now, which own that search. */
     default: "Julian Gigola | Photographer & Creative Director, SF Bay Area",
     // Project and section pages set only their own name; this frames it.
@@ -202,7 +202,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             __html: V4PAGES_HEAD,
           }}
         />
-        {/* `data-sky`: the time picker in the hour's light, on trial (lib/flags/sky.ts). */}
+        {/* `data-sky`: the time picker in the hour's light, on trial (lib/flags/sky-flag.ts). */}
         <script dangerouslySetInnerHTML={{ __html: SKY_HEAD }} />
       </head>
       <body className="min-h-full flex flex-col">
@@ -211,7 +211,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <script dangerouslySetInnerHTML={{ __html: `if("coverIntro" in document.documentElement.dataset){${JG_INNER}}` }} />
         {/* Who Julian is, where he works and what can be booked, for
             search engines and AI answers to read rather than infer. One
-            graph on every page; see `lib/seo.ts`. */}
+            graph on every page; see `lib/og/seo.ts`. */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: ldJson(siteGraph()) }}

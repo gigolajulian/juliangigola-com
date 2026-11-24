@@ -1,13 +1,17 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi, type Mock } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { TemplatesDesk } from "@/components/leads/setup-panels";
-import type { Call } from "@/lib/leads/lead-desk";
+import { deskCall } from "@/lib/leads/lead-desk";
+
+vi.mock("@/lib/leads/lead-desk", async (actual) => ({ ...(await actual<typeof import("@/lib/leads/lead-desk")>()), deskCall: vi.fn() }));
+// The desk fetch, faked per test.
+const call = deskCall as unknown as Mock;
 
 describe("TemplatesDesk", () => {
   it("saves the edited list with a PUT to /templates", async () => {
-    const call = vi.fn(async (o: { body?: string }) => JSON.parse(o.body!)) as unknown as Call & ReturnType<typeof vi.fn>;
+    call.mockImplementation(async (o: { body?: string }) => JSON.parse(o.body!));
     const saved = vi.fn();
-    render(<TemplatesDesk call={call} templates={[]} saved={saved} />);
+    render(<TemplatesDesk templates={[]} saved={saved} />);
     fireEvent.click(screen.getByRole("button", { name: "Add a template" }));
     fireEvent.click(screen.getByRole("button", { name: "Save templates" }));
     await waitFor(() => expect(saved).toHaveBeenCalled());

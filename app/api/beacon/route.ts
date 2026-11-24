@@ -1,5 +1,5 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { parseBeacon } from "@/lib/beacon";
+import { parseBeacon } from "@/lib/analytics/beacon";
 import { NO_STORE } from "@/lib/http";
 
 /* ── beacon ───────────────────────────────────────────────────────
