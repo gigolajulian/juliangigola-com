@@ -11,6 +11,7 @@ import { clockHere } from "@/components/booking/picker-dates";
 import { useSlots } from "@/components/booking/use-slots";
 import { usePickerDays } from "@/components/booking/use-picker-days";
 import { usePickerLayout } from "@/components/booking/use-picker-layout";
+import { postJson } from "@/lib/http";
 
 
 /* ── the time picker ──────────────────────────────────────────────
@@ -162,13 +163,8 @@ export function usePicker({ path, title, className, skin, onPicked, startView }:
     const sim = process.env.NODE_ENV !== "production" && new URLSearchParams(location.search).get("sim") === "ok";
     try {
       if (!sim) {
-        const res = await fetch("/api/book", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ slug, start: new Date(pick.start).toISOString(), timeZone: tz, name, email: String(form.get("email")), phone, via: formVia, ...(notes ? { notes } : {}), ...(needsWhere ? { where } : {}) }),
-        });
-        const body = (await res.json().catch(() => ({}))) as { error?: string; code?: string };
-        if (!res.ok) throw Object.assign(new Error(body.error || "failed"), { status: res.status, said: body.error, code: body.code });
+        const r = await postJson("/api/book", { slug, start: new Date(pick.start).toISOString(), timeZone: tz, name, email: String(form.get("email")), phone, via: formVia, ...(notes ? { notes } : {}), ...(needsWhere ? { where } : {}) });
+        if (!r.ok) throw Object.assign(new Error(r.error || "failed"), { status: r.status, said: r.error, code: r.code });
       }
       setBooked({ name: firstName, email: String(form.get("email")).trim(), where, phone, via: formVia });
       /* The orbs get their moment even when the server answers at once, then

@@ -13,6 +13,7 @@ import Link from "next/link";
 import { isEmail } from "@/lib/proofs/proof-model";
 import { isFullName, type PublicContract } from "@/lib/contracts/contract";
 import { SignPad } from "@/components/contracts/sign-pad";
+import { postJson } from "@/lib/http";
 
 const when = (iso: string) => new Intl.DateTimeFormat("en-US", { timeZone: "America/Los_Angeles", dateStyle: "long", timeStyle: "short" }).format(new Date(iso));
 
@@ -33,16 +34,11 @@ export function ContractSign({ id, initial }: { id: string; initial: PublicContr
     if (!ready || busy) return setErr(!full ? "Type your first and last name." : !typed && !mark ? "Sign in the box." : !isEmail(email) ? "That email does not look right." : "Tick I agree to sign.");
     setBusy(true);
     setErr(null);
-    try {
-      const r = await fetch(`/api/contract/${id}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name: name.trim(), email: email.trim(), agree, hash: initial.hash, ...(typed ? { typed: true } : { mark }) }) });
-      const o = (await r.json().catch(() => ({}))) as { signed?: PublicContract["signed"]; error?: string };
-      if (o.signed) setSigned(o.signed);
-      else setErr(o.error ?? "That did not go through. Try again.");
-    } catch {
-      setErr("You look offline. Try again when you are back online.");
-    } finally {
-      setBusy(false);
-    }
+    const r = await postJson<{ signed?: PublicContract["signed"] }>(`/api/contract/${id}`, { name: name.trim(), email: email.trim(), agree, hash: initial.hash, ...(typed ? { typed: true } : { mark }) });
+    if (r.ok && r.data?.signed) setSigned(r.data.signed);
+    else if (r.status === 0) setErr("You look offline. Try again when you are back online.");
+    else setErr((!r.ok && r.error) || "That did not go through. Try again.");
+    setBusy(false);
   };
 
   return (

@@ -6,6 +6,7 @@ import { TimePicker } from "@/components/booking/time-picker";
 import { EARLY_SHARE, MAX_MOVES, MOVE_HOURS, PART_HOURS, REFUND_HOURS, refundCents, refundShare, TZ } from "@/lib/booking/rules";
 import { LEGACY_DEPOSIT } from "@/lib/booking/paid";
 import type { clientView } from "@/lib/booking/engine";
+import { postJson } from "@/lib/http";
 
 /* ── a client's own booking: reschedule or cancel ─────────────────
  * Opened from the links in the "You're in." mail (`app/booking/[id]`).
@@ -42,12 +43,12 @@ export function ManageBooking({ booking, token, open }: { booking: Managed; toke
   const act = async (body: { action: "cancel" } | { action: "reschedule"; start: string }) => {
     setState("busy");
     setError("");
-    const res = await fetch(`/api/booking/${b.id}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ t: token, ...body }) }).catch(() => null);
-    const out = (await res?.json().catch(() => null)) as { record?: Managed; refunded?: boolean; back?: number; error?: string; code?: string } | null;
-    if (!res?.ok || !out?.record) {
+    const r = await postJson<{ record?: Managed; refunded?: boolean; back?: number }>(`/api/booking/${b.id}`, { t: token, ...body });
+    const out = r.ok ? r.data : null;
+    if (!out?.record) {
       setState("");
       // 409 is also "already cancelled" and "has started": only the taken time has its own words, the rest says what the server said.
-      setError(out?.code === "taken" ? "That time was just taken. Pick another." : (out?.error ?? "That did not go through. Try again, or reply to your confirmation email."));
+      setError(!r.ok && r.code === "taken" ? "That time was just taken. Pick another." : ((!r.ok && r.error) || "That did not go through. Try again, or reply to your confirmation email."));
       return;
     }
     setB(out.record);

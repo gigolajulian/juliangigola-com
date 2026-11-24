@@ -46,3 +46,25 @@ export async function bodyOf(request: Request): Promise<Record<string, unknown> 
     return null;
   }
 }
+
+/** A public client's answer from one of our routes: the body when it is ok, else the route's `{ error, code }` and the
+    status. Status 0 is no answer at all (offline). It never throws, so every client reads a failure the same way. */
+export type Reply<T> = { ok: true; status: number; data: T } | { ok: false; status: number; error?: string; code?: string };
+
+async function reply<T>(sent: Promise<Response>): Promise<Reply<T>> {
+  let res: Response;
+  try {
+    res = await sent;
+  } catch {
+    return { ok: false, status: 0 };
+  }
+  const body: unknown = await res.json().catch(() => null);
+  if (res.ok) return { ok: true, status: res.status, data: body as T };
+  const b = isRecord(body) ? body : {};
+  return { ok: false, status: res.status, error: typeof b.error === "string" ? b.error : undefined, code: typeof b.code === "string" ? b.code : undefined };
+}
+
+export const getJson = <T>(url: string) => reply<T>(fetch(url));
+
+export const postJson = <T>(url: string, body: unknown, method: "POST" | "PATCH" = "POST") =>
+  reply<T>(fetch(url, { method, headers: { "content-type": "application/json" }, body: JSON.stringify(body) }));

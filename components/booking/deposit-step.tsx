@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { depositFor } from "@/lib/booking/paid";
 import type { Status } from "@/lib/booking/deposit";
 import type { Booking } from "@/lib/booking/rules";
+import { getJson, postJson } from "@/lib/http";
 
 /* ── the deposit ─────────────────────────────────────────────────────
  * Behind `?deposit`: a paid session's deposit
@@ -201,13 +202,13 @@ export function DepositStep({
 
   /* The intent, made on Pay (409 `taken`: the time has gone). */
   const make = async (): Promise<{ clientSecret: string; intentId: string } | null> => {
-    const res = await fetch("/api/deposit", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-    if (res.status === 409 && ((await res.clone().json().catch(() => null)) as { code?: string } | null)?.code === "taken") {
+    const r = await postJson<{ clientSecret: string; intentId: string }>("/api/deposit", body);
+    if (!r.ok && r.code === "taken") {
       setStage("taken");
       return null;
     }
-    if (!res.ok) throw new Error(String(res.status));
-    const made: { clientSecret: string; intentId: string } = await res.json();
+    if (!r.ok) throw new Error(r.error ?? String(r.status));
+    const made = r.data;
     // References ride beside the intent before the charge, so the "Deposit paid" mail finds them. Never in the way of paying.
     if (refs) await fetch(`/api/deposit/${encodeURIComponent(made.intentId)}`, { method: "PUT", body: refs }).catch(() => {});
     return made;
@@ -223,12 +224,10 @@ export function DepositStep({
     setStage("confirming");
     for (let n = 0; n < 20; n++) {
       await new Promise((go) => setTimeout(go, 1000));
-      try {
-        const r = await fetch(`/api/deposit/${encodeURIComponent(intentId)}`);
-        const { status } = (await r.json()) as { status: Status };
-        if (status === "booked") return grow(false, onBooked);
-        if (status === "refunded" || status === "failed") return setStage(status);
-      } catch {}
+      const r = await getJson<{ status: Status }>(`/api/deposit/${encodeURIComponent(intentId)}`);
+      const status = r.ok ? r.data?.status : undefined;
+      if (status === "booked") return grow(false, onBooked);
+      if (status === "refunded" || status === "failed") return setStage(status);
     }
     setStage("slow");
   };
