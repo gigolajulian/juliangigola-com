@@ -1,0 +1,24 @@
+# Dependency updates go to `next` and ship with the normal release, never straight to main.
+# Security updates always target the default branch, so they are off for this repo;
+# alerts stay on and the weekly group below picks up the fixes.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    target-branch: next
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 3
+    groups:
+      minor-and-patch:
+        patterns: ["*"]
+        update-types: [minor, patch]
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+  - package-ecosystem: github-actions
+    directory: /
+    target-branch: next
+    schedule:
+      interval: monthly
