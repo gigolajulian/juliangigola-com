@@ -19,6 +19,7 @@ import { useClock } from "@/components/proofs/use-clock";
 import { closingSoon, isEmail, modelLabel, type PublicDelivery } from "@/lib/proofs/proof-model";
 import { ProofCursor } from "@/components/proofs/cursor";
 import { ProofWall } from "@/components/proofs/wall";
+import { qflag } from "@/lib/flags/query";
 import { noSubscribe, pad } from "@/lib/utils";
 
 const size = (b: number) => (b >= 1e9 ? `${(b / 1e9).toFixed(1)} GB` : `${Math.max(1, Math.round(b / 1e6))} MB`);
@@ -62,7 +63,7 @@ function SplitGate({ cover, sub, subhead, onEnter }: { cover: string; sub: strin
 }
 
 type Final = PublicDelivery["finals"][number];
-const readWall = () => new URLSearchParams(location.search).get("proofwall") !== "0";
+const readWall = () => !qflag("proofwall", "0");
 const day = (s: string) => new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: "America/Los_Angeles" }).format(new Date(s));
 
 export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDelivery }) {
