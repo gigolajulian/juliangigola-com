@@ -3,7 +3,7 @@
 import * as React from "react";
 import loader, { plainSrc } from "@/image-loader";
 import { matches } from "@/lib/device";
-import { qflag } from "@/lib/home/flags";
+import { qflag } from "@/lib/flags/query";
 import { EXTRAS, type HomeFrame } from "@/lib/home/data";
 import "./intro.css";
 

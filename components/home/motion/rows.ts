@@ -1,6 +1,6 @@
 import { scrollGoal, settleTo, shiftScroll } from "@/components/site/smooth-scroll";
 import { matches } from "@/lib/device";
-import { qvalue } from "@/lib/home/flags";
+import { qvalue } from "@/lib/flags/query";
 import { holdEase as ease, holdUnease as unease } from "@/lib/motion/hold-ease";
 import { captionsOff, vimeoListen, vimeoPlays } from "@/lib/work/videos";
 import { clamp, rise, smooth, tell, type Ctx, type Driver } from "./engine";

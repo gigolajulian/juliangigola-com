@@ -13,7 +13,7 @@ import { holdEase, holdUnease } from "@/lib/motion/hold-ease";
 import { clamp, progress } from "./motion/engine";
 import { COVER_KEYS, COVER_PRESS, FILM_DRESS, type HomeFilm } from "@/lib/home/data";
 import { pad } from "@/lib/utils";
-import { qflag } from "@/lib/home/flags";
+import { qflag } from "@/lib/flags/query";
 
 /** A home cover opens on the Cover art page, in that page's viewer (`?cover=`, components/cover/cover-art-gallery.tsx). */
 export const coverHref = (slug: string) => `${projectHref("coverart")}?cover=${encodeURIComponent(slug)}`;

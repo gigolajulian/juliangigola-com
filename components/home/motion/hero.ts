@@ -1,4 +1,4 @@
-import { qflag } from "@/lib/home/flags";
+import { qflag } from "@/lib/flags/query";
 import { foreign } from "@/components/site/nav-ink";
 import { clamp, type Ctx, type Driver } from "./engine";
 
