@@ -6,8 +6,9 @@ import { cn } from "@/lib/utils";
 import { DepositStep } from "@/components/booking/deposit-step";
 import { TZ } from "@/lib/time-zone";
 import { depositFor } from "@/lib/booking/paid";
-import { AHEAD, DAYS, iso, minutesOf, MONTHS, forgetTimes, STEP_AT, WEEKDAYS, WHERE, clock, zone } from "@/components/booking/time-picker-parts";
+import { AHEAD, DAYS, iso, minutesOf, MONTHS, forgetTimes, STEP_AT, WEEKDAYS, WHERE, clock, zoneAbbr } from "@/components/booking/time-picker-parts";
 import type { CardCtx } from "@/components/booking/use-picker";
+import { usePickerLayout } from "@/components/booking/use-picker-layout";
 import { arrowMark, busyMark, okMarkOf } from "@/components/booking/picker-marks";
 
 /* A call (no deposit) shows its kind: a handset, or a camera for a video call. */
@@ -22,14 +23,30 @@ const CAMERA = (
     <path d="M15.5 10.5 21.5 7v10l-6-3.5z" />
   </svg>
 );
-/** A session's length in words: "45 min", "1 hr 30 min". */
-const duration = (length: number) => (length >= 60 ? `${Math.floor(length / 60)} hr${length % 60 ? ` ${length % 60} min` : ""}` : `${length} min`);
+/** A session's length, short: "45 min", "1 hr 30 min". Not `duration` (`lib/booking/rules.ts`), which writes "45 minutes", "2 hours". */
+export const shortDuration = (length: number) => (length >= 60 ? `${Math.floor(length / 60)} hr${length % 60 ? ` ${length % 60} min` : ""}` : `${length} min`);
 /** A US number as it is read out, (408) 555 0100; anything else as given. */
 const tel = (n: string) => (/^\+1\d{10}$/.test(n) ? `(${n.slice(2, 5)}) ${n.slice(5, 8)} ${n.slice(8)}` : n);
 
+/* The note: two lines, growing to five with what is typed, then it
+   scrolls. */
+const grow = (e: React.FormEvent<HTMLTextAreaElement>) => {
+  const el = e.currentTarget;
+  el.style.height = "auto";
+  const cs = getComputedStyle(el);
+  const line = parseFloat(cs.lineHeight) || 24;
+  const frame = el.offsetHeight - el.clientHeight + parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+  el.style.height = `${Math.min(el.scrollHeight + el.offsetHeight - el.clientHeight, line * 5 + frame)}px`;
+};
+
 /* The card as a magazine page (editorial.css), the default since 2026-10-17. */
 export function EditorialCard({ c }: { c: CardCtx }) {
-  const { title, className, username, slug, tz, here, length, needsWhere, opt, setOpt, via, setVia, ask, setAsk, session, booked, days, view, anchor, pick, chosen, step, setStep, paid, deposit, root, error, ok, setOk, load, open, choose, showTimes, today, week, month, shift, daysBox, mstep, setMstep, switchView, slotsW, slotsRef, atStart, book, grow, refill, swipeProps, t, ap, until, date, sum } = c;
+  const { title, className, username, slug, tz, here, length, needsWhere, opt, setOpt, session, booked, days, view, anchor, pick, chosen, step, setStep, paid, deposit, error, ok, setOk, load, open, choose, today, week, month, shift, mstep, setMstep, switchView, atStart, book, refill, t, ap, until, date, sum } = c;
+  const { root, showTimes, daysBox, slotsW, slotsRef, swipeProps } = usePickerLayout({ step, pick, days, view, anchor, week, month, chosen, mstep, held: c.held, state: c.state, atStart, shift });
+  /* A call: by video (its Meet link) or phone, I ring them. */
+  const [via, setVia] = React.useState<"Video" | "Phone">("Video");
+  /** The follow-up question, kept while it folds shut so its text does not vanish first. */
+  const [ask, setAsk] = React.useState("");
   const arrow = arrowMark();
   /* Booking: the orb, then the ring and its check, over the card. */
   const busy = busyMark(step);
@@ -39,15 +56,17 @@ export function EditorialCard({ c }: { c: CardCtx }) {
   const d3 = (d: Date) => DAYS[d.getDay()][0] + DAYS[d.getDay()].slice(1).toLowerCase();
   const mon = (d: Date) => MONTHS[d.getMonth()].slice(0, 3);
   const [, apEnd] = clock(pick.min + length);
-  const tzName = zone(pick.start, tz);
+  const tzName = zoneAbbr(pick.start, tz);
   const range = `${d3(date)} ${date.getDate()} ${mon(date)}, ${t}${ap === apEnd ? "" : ` ${ap}`} to ${until} ${apEnd} ${tzName}`;
   const at = step === "done" ? -1 : STEP_AT[step];
   /* A call (no deposit): a handset, its length in minutes, so it never reads as a clock time. */
   const call = !paid;
-  const timer = duration(length);
+  const timer = shortDuration(length);
+  /* The call's kind once it is asked: what was booked, once it is. */
+  const kind = step === "pick" ? null : step === "done" ? booked.via || via : via;
   const bar = (
     <nav aria-label="Steps" className="ed-steps label">
-      {call ? <span className="ed-call">{step !== "pick" && (booked.via || via) === "Video" ? CAMERA : HANDSET}{step === "pick" ? "Call" : `${step === "done" ? booked.via || via : via} call`} · {timer}</span> : null}
+      {call ? <span className="ed-call">{kind === "Video" ? CAMERA : HANDSET}{kind ? `${kind} call` : "Call"} · {timer}</span> : null}
       {(paid ? ["Date", "Details", "Deposit"] : ["Date", "Details"]).map((s, i) => {
         const back = at > i ? () => setStep(i ? "form" : "pick") : undefined;
         return (
@@ -73,7 +92,7 @@ export function EditorialCard({ c }: { c: CardCtx }) {
     return (
       <div ref={root} className="contents">
         <DepositStep
-          editorial
+          skin="editorial"
           head={<>{bar}{hero(`$${usd}`, `Deposit. Holds ${dayLine}`, "Balance due after the shoot", <button type="button" data-stick="fill" className="ed-box" onClick={() => setStep("form")}>Change</button>)}</>}
           className={className}
           body={deposit}

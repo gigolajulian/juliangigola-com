@@ -1,7 +1,18 @@
 import { EVENTS } from "@/lib/booking/rules";
 import { depositFor, takesDeposit } from "@/lib/booking/paid";
-import { SESSION_TYPES } from "@/lib/booking/sessions";
 import { ABOUT_PHOTO } from "@/lib/home/photos";
+import { CONTENT, type SessionType } from "@/lib/content";
+
+export type { SessionType };
+
+/** The sessions as /admin sets them (`content/site.json`), in its order; it may list one the catalog below does not.
+    `from` stays null until a price is set there. */
+export const SESSION_TYPES: SessionType[] = CONTENT.sessions;
+
+/** A starting price as the service pages, /book?classic and the structured data print it: null is "On request".
+    The session cards print `priceLabel` instead, which reads differently (no thousands comma, a call's length, a deposit). */
+export const formatPrice = (from: number | null): string =>
+  from === null ? "On request" : `From $${from.toLocaleString("en-US")}`;
 
 const w = (slug: string, n: string) => `/work/${slug}/${n}.jpg`;
 

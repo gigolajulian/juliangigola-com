@@ -3,6 +3,7 @@
 import * as React from "react";
 import { SESSIONS, type SessionSlug } from "@/lib/booking/catalog";
 import { byCodeUnit } from "@/lib/utils";
+import { getJson } from "@/lib/http";
 
 /* "Next open" (spec 3.4): the first open slot from the same engine /book
    reads (`app/api/slots`). Nothing on failure, slowness or no slots: the
@@ -20,10 +21,9 @@ function lookup(slug: SessionSlug) {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const now = new Date();
     const q = new URLSearchParams({ slug: ev, start: ymd(now), end: ymd(new Date(+now + 60 * 864e5)), timeZone: tz });
-    const p = fetch(`/api/slots?${q}`, { signal: AbortSignal.timeout?.(5000) })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((j: { slots?: Record<string, string[]> } | null) => {
-        const slots = j?.slots;
+    const p = getJson<{ slots?: Record<string, string[]> } | null>(`/api/slots?${q}`, { signal: AbortSignal.timeout?.(5000) })
+      .then((r) => {
+        const slots = r.ok ? r.data?.slots : undefined;
         if (!slots) return null;
         const day = Object.keys(slots).filter((d) => slots[d]?.length).sort(byCodeUnit)[0];
         return day ? nextOpenLabel(slots[day][0], tz) : null;

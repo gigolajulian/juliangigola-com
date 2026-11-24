@@ -108,6 +108,12 @@ export type DepositBody = Booking & {
 
 type Stage = "loading" | "ready" | "paying" | "confirming" | "taken" | "refunded" | "failed" | "slow" | "broken" | "declined";
 
+/** The look it is drawn in: JG V3's stepper hands its shell (`head` is the deposit figure, `rows` the bill, the
+    "Deposit today" row the live one); the editorial card (editorial.css) has its step bar and heading in `head`. */
+type Skin =
+  | { skin: "v3"; shell: (p: { head: string; sub?: string; body: React.ReactNode; bar: React.ReactNode }) => React.ReactNode }
+  | { skin: "editorial"; shell?: never };
+
 export function DepositStep({
   body,
   rows,
@@ -115,19 +121,14 @@ export function DepositStep({
   onTaken,
   onBack,
   className,
-  editorial,
+  skin,
+  shell,
   head,
-  v3,
   refs,
-}: {
+}: Skin & {
   className?: string;
   /** The card's References (`refs` files, `picks`), sent once the intent exists. */
   refs?: FormData | null;
-  /** JG V3: the step's parts for the page's stepper; `head` is the deposit
-      figure, `rows` the bill (the "Deposit today" row is the live one). */
-  v3?: (p: { head: string; sub?: string; body: React.ReactNode; bar: React.ReactNode }) => React.ReactNode;
-  /** `?editorial` (editorial.css): its step bar and heading over it. */
-  editorial?: boolean;
   head?: React.ReactNode;
   body: DepositBody;
   rows: [string, string][];
@@ -137,6 +138,7 @@ export function DepositStep({
   /** Back to the form, what was typed still in it. */
   onBack: () => void;
 }) {
+  const editorial = skin === "editorial";
   const box = React.useRef<HTMLDivElement>(null);
   const number = React.useRef<HTMLDivElement>(null);
   const expiry = React.useRef<HTMLDivElement>(null);
@@ -343,16 +345,18 @@ export function DepositStep({
     setTries((t) => t + 1);
   };
 
-  const after: Partial<Record<Stage, string>> = {
-    taken: "That time was just taken. Nothing was charged. Pick another.",
-    refunded: "That time was just taken. Your deposit is on its way back.",
-    failed: "Payment received. I’ll email you to set the time.",
-    slow: "Still confirming. You’ll get an email.",
-    broken: "The payment form did not load.",
+  /* The ends, both looks: a headline, what happened, and the way on (`edit`: Edit details beside it). */
+  const ends: Partial<Record<Stage, { line: string; why: string; on?: [string, () => void]; edit?: true }>> = {
+    declined: { line: "Card declined.", why: `${error} Nothing was charged, and the time isn’t held yet.`, on: [`Try again · $${usd}`, retry], edit: true },
+    taken: { line: "Time taken.", why: "That time was just taken. Nothing was charged. Pick another.", on: ["Pick another time", onTaken] },
+    refunded: { line: "Time taken.", why: "That time was just taken. Your deposit is on its way back.", on: ["Pick another time", onTaken] },
+    failed: { line: "Paid.", why: "Payment received. I’ll email you to set the time." },
+    slow: { line: "Confirming.", why: "Still confirming. You’ll get an email." },
+    broken: { line: "Not loaded.", why: "The payment form did not load.", on: ["Try again", retry], edit: true },
   };
-  const said = after[stage];
+  const end = ends[stage];
 
-  if (v3) {
+  if (skin === "v3") {
     const bill = (
       <div className="bill lbl">
         {rows.map(([k, v]) => (
@@ -360,22 +364,16 @@ export function DepositStep({
         ))}
       </div>
     );
-    /* The ends in the master's error box, with the way on. */
-    const ends: Partial<Record<Stage, [line: string, why: string, acts: [string, () => void][]]>> = {
-      declined: ["Card declined.", `${error} Nothing was charged, and the time isn’t held yet.`, [["Edit details", onBack], [`Try again · $${usd}`, retry]]],
-      taken: ["Time taken.", after.taken!, [["Pick another time", onTaken]]],
-      refunded: ["Time taken.", after.refunded!, [["Pick another time", onTaken]]],
-      failed: ["Paid.", after.failed!, []],
-      slow: ["Confirming.", after.slow!, []],
-      broken: ["Not loaded.", after.broken!, [["Edit details", onBack], ["Try again", retry]]],
-    };
-    const end = ends[stage];
     const btns = (acts: [string, () => void][]) =>
       acts.map(([label, go], i) => (
         <button key={label} type="button" className={i === acts.length - 1 ? "btn fill" : "btn"} onClick={go}>{label}</button>
       ));
-    if (end) return v3({ head: end[0], body: <div ref={box} className="f-stack" role="region" aria-label="Deposit"><p className="err" role="alert">{end[1]}</p>{bill}</div>, bar: btns(end[2]) });
-    return v3({
+    /* The ends in the master's error box, with the way on. */
+    if (end) {
+      const acts: [string, () => void][] = [...(end.edit ? [["Edit details", onBack] as [string, () => void]] : []), ...(end.on ? [end.on] : [])];
+      return shell({ head: end.line, body: <div ref={box} className="f-stack" role="region" aria-label="Deposit"><p className="err" role="alert">{end.why}</p>{bill}</div>, bar: btns(acts) });
+    }
+    return shell({
       head: "Hold the date",
       sub: `$${usd} holds your date. The balance is due after the shoot.`,
       body: (
@@ -403,122 +401,55 @@ export function DepositStep({
     });
   }
 
-  if (editorial) {
-    /* The ends: a word, a headline, what happened, and the way on. */
-    const ends: Partial<Record<Stage, [mark: string, line: string, why: string, act?: [string, () => void]]>> = {
-      declined: ["Not paid", "Card declined.", `${error} Nothing was charged, and the time isn’t held yet.`, [`Try again · $${usd}`, retry]],
-      taken: ["Not paid", "Time taken.", after.taken!, ["Pick another time", onTaken]],
-      refunded: ["Refunded", "Time taken.", after.refunded!, ["Pick another time", onTaken]],
-      failed: ["Paid", "Paid.", after.failed!],
-      slow: ["Paid", "Confirming.", after.slow!],
-      broken: ["Not paid", "Not loaded.", after.broken!, ["Try again", retry]],
-    };
-    const end = ends[stage];
-    return (
-      <div ref={box} aria-label="Deposit" role="region" data-declined={stage === "declined" ? "" : undefined} className={cn("tp ed", className)}>
-        {head}
-        {end ? (
-          <>
-            <div className="ed-body" role="status">
-              <div className="ed-l">
-                <p className="ed-said"><b>{end[1]}</b> {end[2]}</p>
-              </div>
-              <div className="ed-r">
-                {rows.map(([k, v]) => (
-                  <div key={k} className="ed-row"><span className="label">{k}</span><span className="ed-v break-words">{v}</span></div>
-                ))}
-                <div className="ed-row"><span className="label">Help</span><a href="mailto:hello@juliangigola.com" className="ed-v break-words">hello@juliangigola.com</a></div>
-              </div>
-            </div>
-            <div className="ed-floor">
-              {stage === "declined" || stage === "broken" ? <button type="button" onClick={onBack} className="label ed-quiet">Edit details</button> : <span />}
-              {end[3] ? <button type="button" onClick={end[3][1]} data-stick="fill" className="ed-btn">{end[3][0]}</button> : null}
-            </div>
-          </>
-        ) : (
-          <>
-            <div className="ed-body">
-              {/* What the deposit is for; the amount is the heading over it (2026-10-20). */}
-              <div className="ed-l">
-                {rows.map(([k, v]) => (
-                  <div key={k} className="ed-row"><span className="label">{k}</span><span className="ed-v break-words">{v}</span></div>
-                ))}
-                <div className="ed-row"><span className="label">Due now</span><span className="ed-v">${usd}</span></div>
-              </div>
-              <div className="ed-r" aria-busy={stage === "loading"}>
-                <label className="ed-row"><span className="label">Card</span><div ref={number} className="ed-field" /></label>
-                <div className="ed-exp">
-                  <label className="ed-row"><span className="label">Expiry</span><div ref={expiry} className="ed-field" /></label>
-                  <label className="ed-row"><span className="label">CVC</span><div ref={cvc} className="ed-field" /></label>
-                </div>
-                <div ref={wallet} className={cn("ed-wallet", !wallets && "hidden")} />
-                <p className="ed-copy">${usd} holds your date. 90% refund up to 48 hours before the shoot, 70% up to 24 hours. Move it up to 24 hours before. Balance due after the shoot. By paying you agree to the <a href="/legal#terms" target="_blank" rel="noreferrer" style={{ color: "color-mix(in srgb, var(--accent) 65%, var(--foreground))", textDecoration: "underline", textUnderlineOffset: "0.2em" }}>booking terms</a>.</p>
-                {error && !bad ? <p role="alert" className="ed-err">{error}</p> : null}
-              </div>
-            </div>
-            <div className="ed-floor">
-              <span className="label ed-lock">
-                <svg aria-hidden viewBox="0 0 12 14" className="w-3 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.3"><rect x="1" y="6" width="10" height="7" rx="1" /><path d="M3.5 6V4a2.5 2.5 0 0 1 5 0v2" /></svg>
-                Secured by Stripe. I never see your card.
-              </span>
-              <button ref={payBtn} type="button" onClick={pay} disabled={bad || !canPay} data-accent="" data-bad={bad ? "" : undefined} data-stick="fill" className="ed-btn">
-                {bad ? "Declined" : payLabel ?? `Pay $${usd}`}
-              </button>
-            </div>
-          </>
-        )}
-      </div>
-    );
-  }
-
   return (
-    <div ref={box} aria-label="Deposit" role="region" className={cn("tp !flex flex-col gap-6 p-6 sm:gap-8 sm:p-10 [&>*]:shrink-0", className)}>
-      <div className="flex items-center justify-between gap-4">
-        <p className="label tp-roll text-muted-foreground">Reserve your date</p>
-        {stage === "ready" || stage === "loading" || stage === "broken" ? (
-          <button type="button" onClick={onBack} className="label text-muted-foreground hoverable:hover:text-foreground">Edit details</button>
-        ) : null}
-      </div>
-      <dl className="grid gap-x-10 gap-y-4 sm:grid-cols-2">
-        {rows.map(([k, v], n) => (
-          <div key={k} className="tp-roll flex min-w-0 flex-col gap-1.5" style={{ animationDelay: `${140 + n * 70}ms` }}>
-            <dt className="label text-muted-foreground">{k}</dt>
-            <dd className="whitespace-pre-line break-words text-base normal-case leading-snug">{v}</dd>
+    <div ref={box} aria-label="Deposit" role="region" data-declined={stage === "declined" ? "" : undefined} className={cn("tp ed", className)}>
+      {head}
+      {end ? (
+        <>
+          <div className="ed-body" role="status">
+            <div className="ed-l">
+              <p className="ed-said"><b>{end.line}</b> {end.why}</p>
+            </div>
+            <div className="ed-r">
+              {rows.map(([k, v]) => (
+                <div key={k} className="ed-row"><span className="label">{k}</span><span className="ed-v break-words">{v}</span></div>
+              ))}
+              <div className="ed-row"><span className="label">Help</span><a href="mailto:hello@juliangigola.com" className="ed-v break-words">hello@juliangigola.com</a></div>
+            </div>
           </div>
-        ))}
-      </dl>
-      {said ? (
-        <div role="status" className="flex flex-col items-start gap-4">
-          <p className="text-base normal-case leading-relaxed">{said}</p>
-          {stage === "taken" || stage === "refunded" ? (
-            <button type="button" onClick={onTaken} className="label border-b border-border hoverable:hover:border-foreground">Pick another time</button>
-          ) : stage === "broken" ? (
-            <button type="button" onClick={() => { setStage("loading"); setTries((t) => t + 1); }} className="label border-b border-border hoverable:hover:border-foreground">Try again</button>
-          ) : null}
-        </div>
+          <div className="ed-floor">
+            {end.edit ? <button type="button" onClick={onBack} className="label ed-quiet">Edit details</button> : <span />}
+            {end.on ? <button type="button" onClick={end.on[1]} data-stick="fill" className="ed-btn">{end.on[0]}</button> : null}
+          </div>
+        </>
       ) : (
         <>
-          <div aria-busy={stage === "loading"} className="grid grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-4">
-            <label className="label flex flex-col gap-2 text-muted-foreground col-span-2">Card number<div ref={number} className="border-b border-border py-2.5 transition-colors focus-within:border-foreground" /></label>
-            <label className="label flex flex-col gap-2 text-muted-foreground">Expiry<div ref={expiry} className="border-b border-border py-2.5 transition-colors focus-within:border-foreground" /></label>
-            <label className="label flex flex-col gap-2 text-muted-foreground">CVC<div ref={cvc} className="border-b border-border py-2.5 transition-colors focus-within:border-foreground" /></label>
+          <div className="ed-body">
+            {/* What the deposit is for; the amount is the heading over it (2026-10-20). */}
+            <div className="ed-l">
+              {rows.map(([k, v]) => (
+                <div key={k} className="ed-row"><span className="label">{k}</span><span className="ed-v break-words">{v}</span></div>
+              ))}
+              <div className="ed-row"><span className="label">Due now</span><span className="ed-v">${usd}</span></div>
+            </div>
+            <div className="ed-r" aria-busy={stage === "loading"}>
+              <label className="ed-row"><span className="label">Card</span><div ref={number} className="ed-field" /></label>
+              <div className="ed-exp">
+                <label className="ed-row"><span className="label">Expiry</span><div ref={expiry} className="ed-field" /></label>
+                <label className="ed-row"><span className="label">CVC</span><div ref={cvc} className="ed-field" /></label>
+              </div>
+              <div ref={wallet} className={cn("ed-wallet", !wallets && "hidden")} />
+              <p className="ed-copy">${usd} holds your date. 90% refund up to 48 hours before the shoot, 70% up to 24 hours. Move it up to 24 hours before. Balance due after the shoot. By paying you agree to the <a href="/legal#terms" target="_blank" rel="noreferrer" style={{ color: "color-mix(in srgb, var(--accent) 65%, var(--foreground))", textDecoration: "underline", textUnderlineOffset: "0.2em" }}>booking terms</a>.</p>
+              {error && !bad ? <p role="alert" className="ed-err">{error}</p> : null}
+            </div>
           </div>
-          {/* Apple Pay or Google Pay, where there is one, under the card
-              fields; nothing otherwise. */}
-          <div ref={wallet} className={cn(!wallets && "hidden")} />
-          {/* What the deposit does, under the card it comes off. */}
-          <p className="text-sm normal-case leading-relaxed text-muted-foreground text-pretty">
-            ${usd} holds your date. 90% refund up to 48 hours before the shoot, 70% up to 24 hours. Move it up to 24 hours before. Balance due after the shoot. By paying you agree to the <a href="/legal#terms" target="_blank" rel="noreferrer" style={{ color: "color-mix(in srgb, var(--accent) 65%, var(--foreground))", textDecoration: "underline", textUnderlineOffset: "0.2em" }}>booking terms</a>.
-          </p>
-          {error ? <p role="alert" className="text-sm normal-case text-foreground">{error}</p> : null}
-          <div className="flex flex-col gap-4 border-t border-border pt-5 sm:flex-row sm:items-center sm:justify-between">
-            {/* The card goes to Stripe's own fields, never to this site (Julian). */}
-            <span className="label flex items-center gap-2 whitespace-nowrap text-muted-foreground">
+          <div className="ed-floor">
+            <span className="label ed-lock">
               <svg aria-hidden viewBox="0 0 12 14" className="w-3 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.3"><rect x="1" y="6" width="10" height="7" rx="1" /><path d="M3.5 6V4a2.5 2.5 0 0 1 5 0v2" /></svg>
               Secured by Stripe. I never see your card.
             </span>
-            <button type="button" onClick={pay} data-stick="fill" disabled={!canPay} className="label shrink-0 rounded-[2px] border border-accent bg-accent px-6 py-4 text-accent-foreground transition-[opacity,scale] duration-300 hoverable:hover:opacity-85 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50">
-              {payLabel ?? `Pay $${usd} deposit`}
+            <button ref={payBtn} type="button" onClick={pay} disabled={bad || !canPay} data-accent="" data-bad={bad ? "" : undefined} data-stick="fill" className="ed-btn">
+              {bad ? "Declined" : payLabel ?? `Pay $${usd}`}
             </button>
           </div>
         </>

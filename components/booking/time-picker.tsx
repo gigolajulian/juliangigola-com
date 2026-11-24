@@ -4,7 +4,7 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { clock, DAYS, fromIso, MONTHS, type StepsSkin } from "@/components/booking/time-picker-parts";
 import { usePicker, type CardCtx, type Props } from "@/components/booking/use-picker";
-import { BookSteps } from "@/components/booking/time-picker-steps";
+import { BookSteps, stepsCopy, useStepsLayout } from "@/components/booking/time-picker-steps";
 import { EditorialCard } from "@/components/booking/time-picker-editorial";
 import { JgLoad } from "@/components/splash/jg-load";
 
@@ -12,8 +12,10 @@ export type { StepsSkin };
 
 export function TimePicker(props: Props) {
   const c = usePicker(props);
+  const steps = useStepsLayout(c);
   const { fallback } = props;
-  const { title, className, skin, length, days, state, held, unhold, pick, v3paid, v3steps, v3sub } = c;
+  const { title, className, skin, length, days, state, held, unhold, pick } = c;
+  const { v3paid, v3steps, v3sub } = stepsCopy(c.paid, c.slug);
   /* J and G fill while the times load (jg-load.tsx) and let go of the picker themselves. */
   const jg = <JgLoad done={state === "ready" && !!days} onDone={unhold} className="f-wait min-h-[16rem] w-full" />;
   /* While the times load the bar is already there, held off: it popped in
@@ -62,6 +64,6 @@ export function TimePicker(props: Props) {
      times, booking and deposit as the cards below; only the look is new. */
   /* Called, not mounted: as an element it was a new component in the shell's
      place, and the shell remounted when the first time came. It has no hooks. */
-  if (skin) return BookSteps({ c: { ...ctx, skin } });
+  if (skin) return BookSteps({ c: { ...ctx, skin }, l: steps });
   return <EditorialCard c={ctx} />;
 }

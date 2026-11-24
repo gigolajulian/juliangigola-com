@@ -42,7 +42,7 @@ export const WHERE: Record<string, [label: string, ask?: string][]> = {
 
 /** The zone's short name ("PDT", or PST by the date); no city (Julian,
     2026-10-16). */
-export const zone = (start: string, tz: string) => {
+export const zoneAbbr = (start: string, tz: string) => {
   return (
     new Intl.DateTimeFormat("en-US", { timeZone: tz, timeZoneName: "short" })
       .formatToParts(new Date(start))

@@ -23,7 +23,7 @@ vi.mock("@/components/reference-picks", () => ({ ReferencePicks: () => null }));
 
 import { usePicker, type CardCtx, type Props } from "@/components/booking/use-picker";
 import { EditorialCard } from "@/components/booking/time-picker-editorial";
-import { BookSteps } from "@/components/booking/time-picker-steps";
+import { BookSteps, useStepsLayout } from "@/components/booking/time-picker-steps";
 import { JgLoad } from "@/components/splash/jg-load";
 import { clock, DAYS, fromIso, MONTHS, recent, type StepsSkin } from "@/components/booking/time-picker-parts";
 
@@ -48,6 +48,7 @@ function stubFetch(book: () => Response = () => Response.json({ id: "b1" })) {
 /* The same wiring as TimePicker: the hook, then the card for the time on show. */
 function Card(props: Props) {
   const c = usePicker(props);
+  const steps = useStepsLayout(c);
   if (c.state === "fallback") return <>{props.fallback}</>;
   if (!c.days || !c.pick || c.held) return <p role="status">Loading<JgLoad done={c.state === "ready" && !!c.days} onDone={c.unhold} /></p>;
   const [t, ap] = clock(c.pick.min);
@@ -55,7 +56,7 @@ function Card(props: Props) {
   const date = fromIso(c.pick.date);
   const sum = `${DAYS[date.getDay()]} ${date.getDate()} ${MONTHS[date.getMonth()].slice(0, 3)} · ${t} ${ap}`;
   const ctx: CardCtx = { ...c, pick: c.pick, days: c.days, t, ap, until, date, sum };
-  return props.skin ? <BookSteps c={{ ...ctx, skin: props.skin }} /> : <EditorialCard c={ctx} />;
+  return props.skin ? <BookSteps c={{ ...ctx, skin: props.skin }} l={steps} /> : <EditorialCard c={ctx} />;
 }
 
 const skin: StepsSkin = {

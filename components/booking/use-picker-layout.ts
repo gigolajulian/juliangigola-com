@@ -1,5 +1,5 @@
 import * as React from "react";
-import { warmGsap, withGsap } from "@/lib/motion/gsap-lazy";
+import { withGsap } from "@/lib/motion/gsap-lazy";
 import { iso, STEP_AT, type PickedTime, type Step } from "@/components/booking/time-picker-parts";
 import { sessionGet, sessionSet } from "@/lib/utils";
 
@@ -19,16 +19,12 @@ type Layout = {
   shift: (dir: number) => void;
 };
 
-/* The picker on the page (`use-picker.tsx`): its boxes, each card fitted
-   to its room, the steps, times and days coming in, and the swipe across
-   the days. The effects keep the order they had there. */
+/* The editorial card's own layout (`time-picker-editorial.tsx`): its boxes,
+   the card fitted to its room, the steps, times and days coming in, and the
+   swipe across the days. The effects keep the order they had. */
 export function usePickerLayout({ step, pick, days, view, anchor, week, month, chosen, mstep, held, state, atStart, shift }: Layout) {
-  const [stripEl, stripRef] = React.useState<HTMLDivElement | null>(null);
-  const [more, setMore] = React.useState(false);
   const root = React.useRef<HTMLDivElement>(null);
-  const v3root = React.useRef<HTMLDivElement>(null); // the V3 stepper's own, so root's slide motion stays editorial-card only
   const was = React.useRef(step);
-  React.useEffect(warmGsap, []);
   React.useLayoutEffect(() => {
     const dir = Math.sign(STEP_AT[step] - STEP_AT[was.current]);
     was.current = step;
@@ -37,9 +33,6 @@ export function usePickerLayout({ step, pick, days, view, anchor, week, month, c
     // had been, Name and Email above the screen (JG - MAC, 2026-10-17).
     const card = el?.matches(".ed") ? el : el?.querySelector<HTMLElement>(".ed");
     if (dir && card && card.getBoundingClientRect().top < 0) card.scrollIntoView({ block: "start" });
-    // Back to the taller Time step keeps You's scroll too; FlowShell only sees forward steps.
-    const rail = v3root.current?.querySelector<HTMLElement>(".rail");
-    if (dir < 0 && rail && rail.getBoundingClientRect().top < 64) rail.scrollIntoView({ block: "start" });
     if (!dir || !el || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     // Booked rises in; any other step slides in from the side it comes from.
     const up = step === "done";
@@ -60,23 +53,6 @@ export function usePickerLayout({ step, pick, days, view, anchor, week, month, c
     });
   const swipe = React.useRef<{ x: number; y: number; done: boolean; drag?: boolean; v?: number; t?: number; lx?: number } | null>(null);
   const daysBox = React.useRef<HTMLDivElement>(null);
-  /* The time picked kept in view in option B's row, and the fade and hint
-     only while times run past its edge. */
-  React.useEffect(() => {
-    // The row mounts after the times arrive (a state ref, not useRef, so this runs then).
-    const ix = stripEl;
-    if (!ix) return;
-    const on = ix.querySelector<HTMLElement>('[aria-pressed="true"]');
-    if (on && (on.offsetLeft < ix.scrollLeft || on.offsetLeft + on.offsetWidth > ix.scrollLeft + ix.clientWidth)) ix.scrollTo({ left: Math.max(0, on.offsetLeft - on.offsetWidth) });
-    const fit = () => setMore(ix.scrollLeft + ix.clientWidth < ix.scrollWidth - 4);
-    fit();
-    // The row's own box keeps its width as the times grow or the fonts land: watch the buttons too.
-    const ro = new ResizeObserver(fit);
-    ro.observe(ix);
-    for (const b of ix.children) ro.observe(b);
-    void document.fonts?.ready.then(fit);
-    return () => ro.disconnect();
-  }, [stripEl, pick?.date, pick?.min, days, step]);
   /* The times' width: they keep to one line while every box has room for
      its time (Julian: a day of half hours was crammed). */
   const slotsBox = React.useRef<HTMLDivElement>(null);
@@ -267,5 +243,5 @@ export function usePickerLayout({ step, pick, days, view, anchor, week, month, c
     },
   };
 
-  return { stripRef, more, setMore, root, v3root, showTimes, daysBox, slotsW, slotsRef, swipeProps };
+  return { root, showTimes, daysBox, slotsW, slotsRef, swipeProps };
 }

@@ -17,9 +17,8 @@
  * book) are written as advice, not as policy.
  */
 
-import { SESSION_TYPES, formatPrice, type SessionType } from "./sessions";
 import { RESPONSE_TIME } from "../site";
-import { isSession, SESSIONS as V3_SESSIONS } from "@/lib/booking/catalog";
+import { formatPrice, isSession, SESSION_TYPES, SESSIONS, type SessionType } from "@/lib/booking/catalog";
 import { CONTENT } from "../content";
 import { getProject, projectsIn } from "../work/work";
 import type { BookingSlug } from "./slugs";
@@ -85,7 +84,7 @@ export const PLACES = [
     `content/site.json`: "juliangigola/event-slug", a stored key, kept as is. The picker on /book reads these. Weddings, music
     and brand have a call, set on their own pages (`book.cal`). */
 export const SESSION_EVENTS: Record<string, string> = Object.fromEntries(
-  SESSION_TYPES.flatMap((t) => { const cal = isSession(t.slug) && V3_SESSIONS[t.slug].cal; return cal ? [[t.slug, cal]] : []; }),
+  SESSION_TYPES.flatMap((t) => { const cal = isSession(t.slug) && SESSIONS[t.slug].cal; return cal ? [[t.slug, cal]] : []; }),
 );
 
 /** A session's event, or nothing where it has none yet. */
@@ -149,7 +148,7 @@ const costAnswer = (s: SessionType, priced: string) =>
     ? `Quoted on request, depending on what you need. Send the details through the booking form. ${reply}`.trim()
     : priced.replace("{price}", formatPrice(s.from));
 
-const SESSIONS = { href: "/#sessions", label: "Sessions" };
+const SESSIONS_LINK = { href: "/#sessions", label: "Sessions" };
 const PORTFOLIO = { href: "/portfolio", label: "Portfolio" };
 
 /* ── the photographs ────────────────────────────────────────────── */
@@ -216,7 +215,7 @@ export const BOOKING_PAGES: BookingPage[] = [
     lead: `Clean, current and usable everywhere: LinkedIn, press, casting, a company about page. Studio lighting, more than one background and retouched selects back in ${heads.turnaround}.`,
     ...sessionFacts(heads),
     service: "Headshot photography",
-    back: SESSIONS,
+    back: SESSIONS_LINK,
     blocks: [
       { heading: "What's included", items: heads.includes },
       {
@@ -271,7 +270,7 @@ export const BOOKING_PAGES: BookingPage[] = [
     lead: "Cap and gown on campus or in the studio, at SJSU and Santa Clara University or anywhere else in the Bay Area. 90 minutes, two outfit changes and enough coverage for the family frame and the announcement.",
     ...sessionFacts(grad),
     service: "Graduation photography",
-    back: SESSIONS,
+    back: SESSIONS_LINK,
     blocks: [
       { heading: "What's included", items: grad.includes },
       {
@@ -336,7 +335,7 @@ export const BOOKING_PAGES: BookingPage[] = [
     lead: "Agency-standard digitals: clean light, no retouching, accurate to how you actually look. Everything an agency asks for, in one short session.",
     ...sessionFacts(digitals),
     service: "Model digitals",
-    back: SESSIONS,
+    back: SESSIONS_LINK,
     blocks: [
       { heading: "What's included", items: digitals.includes },
       {
@@ -400,7 +399,7 @@ export const BOOKING_PAGES: BookingPage[] = [
     lead: "One hour in the studio or on location, with direction, lighting and edited selects.",
     ...sessionFacts(portraits),
     service: "Portrait photography",
-    back: SESSIONS,
+    back: SESSIONS_LINK,
     blocks: [
       { heading: "What's included", items: portraits.includes },
       {
@@ -452,7 +451,7 @@ export const BOOKING_PAGES: BookingPage[] = [
     lead: weddings.blurb,
     ...sessionFacts(weddings),
     service: "Wedding photography",
-    back: SESSIONS,
+    back: SESSIONS_LINK,
     blocks: [
       { heading: "What's included", items: weddings.includes },
       {

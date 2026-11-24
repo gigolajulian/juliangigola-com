@@ -104,7 +104,7 @@ export function BookFlow({ slug, tabs = true, h1 = false, startView }: { slug: S
   React.useEffect(() => {
     /* Save-Data or a slow line skips it, as the portfolio's warm does: the
        five photos are ~550 KB on a 3x phone (audit 2026-11-11). */
-    const net = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
+    const net = navigator.connection;
     if (!more || net?.saveData || /2g|3g/.test(net?.effectiveType ?? "")) return;
     const warm = () => {
       const light = document.documentElement.dataset.theme === "light";
