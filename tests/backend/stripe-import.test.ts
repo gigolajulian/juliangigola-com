@@ -2,10 +2,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { recordLead } from "@/lib/leads/lead-store";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { readLog } from "@/lib/leads/activity-log";
-import { importStripe } from "@/lib/leads/stripe-import";
+import { importStripe } from "@/lib/leads/sync/stripe-import";
 import { FakeKV, LEADS_KEY, leadOf } from "./fakes";
 
-/* Past Stripe payments onto the log (`lib/leads/stripe-import.ts`), against a fake Stripe. */
+/* Past Stripe payments onto the log (`lib/leads/sync/stripe-import.ts`), against a fake Stripe. */
 
 vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: () => { throw new Error("no worker"); } }));
 

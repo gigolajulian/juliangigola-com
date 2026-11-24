@@ -1,6 +1,5 @@
-import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { refuseAdmin } from "@/lib/vouch";
-import { sealer } from "@/lib/leads/lead-crypto";
+import { sealedStore } from "@/lib/kv";
 import { copiesFor, readLead, recordLead, writeLead } from "@/lib/leads/lead-store";
 import { leadStoreKey } from "@/lib/leads/leads";
 import { forDesk, hashPass, cardKey, closesAt, cleanSettings, DEFAULTS, isEmail, DELIVERY_DAYS, finalKeys, frameKey, frameKeys, aliasKey, isDateId, isFrameId, isModel, isStrongId, isToken, listProofs, nextProofId, publicId, readProof, remindState, shootDay, viewerKey, writeProof, type Proof } from "@/lib/proofs/proof";
@@ -39,13 +38,12 @@ export const dynamic = "force-dynamic";
 const MAX_FRAME = 8 * 1024 * 1024;
 
 async function gate(request: Request) {
-  const { env } = await getCloudflareContext({ async: true });
-  const seal = sealer(env.LEADS_KEY);
+  const { env, seal, kv } = await sealedStore();
   // Who is asking first: what this build is missing is for /admin only.
   const denied = await refuseAdmin(request, env.INBOX_KEY);
   if (denied) return { error: denied };
-  if (!env.INBOX || !env.PROOFS || !seal) return { error: json({ error: "Proofs need INBOX, PROOFS and LEADS_KEY on this build." }, 503) };
-  return { env, kv: env.INBOX, r2: env.PROOFS, s: await seal };
+  if (!kv || !env.PROOFS || !seal) return { error: json({ error: "Proofs need INBOX, PROOFS and LEADS_KEY on this build." }, 503) };
+  return { env, kv, r2: env.PROOFS, s: await seal };
 }
 
 type Gated = Exclude<Awaited<ReturnType<typeof gate>>, { error: Response }>;
@@ -85,7 +83,7 @@ export async function GET(request: Request) {
     const sent = p.sentAt ? p : { ...p, closesAt: closesAt(p.days) };
     const m = proofMail(sent, p.frames.slice(0, 4).map((f) => ({ id: f.id, bytes: new Uint8Array() })));
     const { subject } = m;
-    const html = m.html.replace("cid:name-ink", "/email-name-ink.png").replace("cid:name-w", "/email-name-w.png").replace(/cid:f-([0-9A-Za-z_-]+)/g, (_, id) => `/proof/${p.token}/f/${id}`);
+    const html = m.html.replace("cid:name-ink", "/email-name-ink.png").replace("cid:name-w", "/email-name-w.png").replace(/cid:f-([0-9A-Za-z_-]+)/g, (_, id) => `/proof/${publicId(p)}/f/${id}`);
     return json({ html, subject, to: p.email ?? null });
   }
   const remind = q.get("remind");

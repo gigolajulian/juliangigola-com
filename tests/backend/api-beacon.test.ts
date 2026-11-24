@@ -5,7 +5,7 @@ import { POST } from "@/app/api/beacon/route";
    Engine; junk, an oversize body or a refused path writes nothing. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
-vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
+vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));
 
 const post = (body: string) => POST(new Request("https://juliangigola.com/api/beacon", { method: "POST", body }));
 const ok = { p: "/portfolio", v: true, d: 0.4, dev: "phone", c: [[0.5, 0.5, "See the work"]] };

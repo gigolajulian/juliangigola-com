@@ -22,7 +22,7 @@ import { dayShort } from "@/components/leads/plan";
 import { adminCall, authed, ago, aside, dateTimeLabel, centsLabel, isFinishedStage, inboxCall, needsMe, nextStep, now, inFilter, plusDays, renew, ymdPT, type Size } from "@/lib/leads/lead-desk";
 import { balance, shortDate, dueOf, overdue, usd } from "@/lib/leads/invoice";
 import type { InvoiceRow } from "@/components/leads/invoices";
-import { TZ } from "@/lib/booking/booking-rules";
+import { TZ } from "@/lib/booking/rules";
 import { proofApi, feed, type FeedItem, type ProofRow } from "@/lib/proofs/desk";
 
 /* Today's helpers, from the retired classic desk. */

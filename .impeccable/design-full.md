@@ -313,9 +313,9 @@ Dark is the default and light is a second world, each tuned on its own terms and
 
 V3 is square. UI corners are 0, photographs take 4px, the About portrait 8px, and the only pill is the filter chip. Motion is a few authored moments (the hero crossfade, the logo strip drift, the glass header arriving), all off under reduced motion. Several pre-V3 surfaces still ship (the discipline strips with their rail, the commission booking card at /book/<commission>, the contact plate); they keep their own corners and are described under Components so they are not mistaken for drift.
 
-**Motion tokens** (app/styles/tokens.css on origin/next): three curves only. `out` is `--ease-out-strong` (enter, leave, answer a click), `move` is `--ease-in-out-strong` (something travelling), `drawer` is `--ease-drawer` (page and sheet slides, line 84). No ease-in. Six durations, each with one job (lines 236 to 241): press 100ms, hover 150ms, small 250ms (menus, notices, chips, every exit), page 400ms, photo 600ms (a photo travelling), show 1000ms (splash and hero crossfade only). An exit takes about two thirds of its entrance. `--ease-rubber` (line 115) is only for a strip's release past an end. Two one-offs are allowed outside the tokens: the scroll reveal on phone and tablet (0.7s fade, 0.9s rise on cubic-bezier(.16,1,.3,1), components/v4/home/motion/reveal.css) and the header frost (0.4s in, 0.3s out, app/styles/navfx.css). Values are in the sidecar's `extensions.motion`.
+**Motion tokens** (app/styles/tokens.css on origin/next): three curves only. `out` is `--ease-out-strong` (enter, leave, answer a click), `move` is `--ease-in-out-strong` (something travelling), `drawer` is `--ease-drawer` (page and sheet slides, line 84). No ease-in. Six durations, each with one job (lines 236 to 241): press 100ms, hover 150ms, small 250ms (menus, notices, chips, every exit), page 400ms, photo 600ms (a photo travelling), show 1000ms (splash and hero crossfade only). An exit takes about two thirds of its entrance. `--ease-rubber` (line 115) is only for a strip's release past an end. Two one-offs are allowed outside the tokens: the scroll reveal on phone and tablet (0.7s fade, 0.9s rise on cubic-bezier(.16,1,.3,1), components/home/motion/reveal.css) and the header frost (0.4s in, 0.3s out, app/styles/navfx.css). Values are in the sidecar's `extensions.motion`.
 
-**The Fail Open Rule.** Content is visible by default. A block hides for its reveal only after the observer has seen it (components/v4/home/motion/reveal.ts), so a failed observer, a crawler or an old WebView still shows everything.
+**The Fail Open Rule.** Content is visible by default. A block hides for its reveal only after the observer has seen it (components/home/motion/reveal.ts), so a failed observer, a crawler or an old WebView still shows everything.
 
 **Mark:** the JG monogram (`logo/kit/icon.svg`, `icon-512.png`; `app/icon.svg`) is the tab icon, the share image and the mark anywhere one is needed. The eye is retired.
 
@@ -454,10 +454,10 @@ A 1px hairline per step; done steps in ink, the current step a 2px accent line, 
 The site's own picker (`components/booking/time-picker.tsx` and its `-v3`, `-editorial` and `-parts` files), measuring its container, never the window. Week and Month views, days as hairline-joined square cells, times as Plex Mono boxes grouped Morning, Afternoon, Evening, the picked day and time filled with ink.
 
 ### V4 home (signature)
-The home since v3.0.282 (`components/v4/home`). Held stages, one per screen: the hero, then the rows.
+The home since v3.0.282 (`components/home`). Held stages, one per screen: the hero, then the rows.
 - **Hero wall:** a wall of photos. Once the page has been still, one frame in view swaps for another from the pool (`hero.tsx`).
 - **Hero name band:** the name and tagline in the theme's ink over a feathered band of the page color at the hero's foot (`.mt-name`). The tagline is one color per theme, no per-letter photo tones.
-- **Row heads stay full:** a row's heading and labels never take the scroll fade; only the row and its names dim (`.mt-rowhead` in components/v4/home/motion/rows.css; faded they fell to 3.2:1).
+- **Row heads stay full:** a row's heading and labels never take the scroll fade; only the row and its names dim (`.mt-rowhead` in components/home/motion/rows.css; faded they fell to 3.2:1).
 - **Film pager:** the numbers 01 to 03 in Film numbers type with their halo; the current one draws a 1px rule beside it on the out curve.
 - **Back cover caption:** the title in ink, the artist line in Artist Line.
 - **Reveal:** on phone and tablet each block rises in once as it enters, visible by default (The Fail Open Rule).

@@ -63,7 +63,7 @@ All 74 projects and 1,131 frames were migrated off the old Format site.
 
 | Folder | What it is |
 | --- | --- |
-| `components/v4/home/` + `lib/v4-home/` | The homepage. It is the home when the build has `NEXT_PUBLIC_V4_HOME=1` (`lib/v4-home/switch.ts`); set it to 0 to roll back. |
+| `components/home/` + `lib/home/` | The homepage. It is the home when the build has `NEXT_PUBLIC_V4_HOME=1` (`lib/home/switch.ts`); set it to 0 to roll back. |
 | `components/home/rollback.tsx` | The rollback homepage (`V3Home`), served when `NEXT_PUBLIC_V4_HOME` is not 1. |
 | `components/site/` | Site chrome: header, foot, page transitions, smooth scroll, the legal pages. |
 | `components/portfolio/` | /portfolio, the project pages and the motion page. |
@@ -204,7 +204,7 @@ and a rule is enforced before it gets there.
 
 ### Where bookings go
 
-The site books its own sessions: `lib/booking/booking-engine.ts`, with Google
+The site books its own sessions: `lib/booking/engine.ts`, with Google
 Calendar holding the time.
 
 - `/api/slots` lists the open starts for a session (`lib/booking/slots.ts`,

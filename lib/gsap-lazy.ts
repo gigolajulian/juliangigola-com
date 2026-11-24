@@ -8,13 +8,14 @@ import type { gsap as G } from "gsap";
    there and the motion starts on the same frame; before that, it waits. */
 let gsap: typeof G | undefined;
 let loading: Promise<typeof G> | undefined;
-const load = () => (loading ??= import("gsap").then((m) => (gsap = m.gsap)));
+/** gsap, fetched once and shared by every caller. */
+export const loadGsap = () => (loading ??= import("gsap").then((m) => (gsap = m.gsap)));
 
 export function warmGsap() {
-  void load();
+  void loadGsap();
 }
 
 export function withGsap(fn: (g: typeof G) => void) {
   if (gsap) fn(gsap);
-  else void load().then(fn);
+  else void loadGsap().then(fn);
 }

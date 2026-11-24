@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { sealer } from "@/lib/leads/lead-crypto";
+import { sealedStore } from "@/lib/kv";
 import { publicContract, readContract } from "@/lib/contracts/contract";
 import { ContractSign } from "@/components/contracts/sign";
 
@@ -20,9 +19,8 @@ export const metadata: Metadata = {
 
 export default async function ContractPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const { env } = await getCloudflareContext({ async: true });
-  const seal = sealer(env.LEADS_KEY);
-  const c = env.INBOX && seal ? await readContract(env.INBOX, await seal, id) : null;
+  const { seal, kv } = await sealedStore();
+  const c = kv && seal ? await readContract(kv, await seal, id) : null;
   if (!c?.sentAt) {
     return (
       <main className="grid min-h-svh place-items-center px-6 font-mono text-[13px] text-muted-foreground">

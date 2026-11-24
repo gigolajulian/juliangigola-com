@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import { BOOK_MENU } from "@/lib/booking/service-pages";
-import { V3Book } from "@/components/booking/book";
+import { SessionBook } from "@/components/booking/book";
 import { SESSIONS, isSession } from "@/lib/photos-and-sessions";
 import { shareOg } from "@/lib/og/share";
 
@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function BookSession({ params }: { params: Promise<{ slug: string }> }) {
   const slug = (await params).slug;
-  if (isSession(slug)) return <V3Book slug={slug} />;
+  if (isSession(slug)) return <SessionBook slug={slug} />;
   // The pre-V3 card is gone: a commission's old /book address lands on its page.
   const m = item(slug);
   if (!m) notFound();

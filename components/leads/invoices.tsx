@@ -19,7 +19,8 @@ import { Page } from "@/components/leads/lists";
 import { Deliver, InvoiceSheetB, makePdf } from "@/components/leads/invoice";
 import { kindOf } from "@/components/leads/shared";
 import { balance, isSettled, subtotal, usd, type Invoice } from "@/lib/leads/invoice";
-import { type Call, dayLabel, errorText, type Patch } from "@/lib/leads/lead-desk";
+import { type Call, dayLabel, type Patch } from "@/lib/leads/lead-desk";
+import { errorText } from "@/lib/utils";
 import type { Lead, LeadSummary } from "@/lib/leads/leads";
 
 /** One invoice as `?invoices` answers it: the invoice, its lead's id and name. */

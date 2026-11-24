@@ -10,7 +10,7 @@ import { byCodeUnit } from "@/lib/utils";
    token that can push opens it; nothing is ever cacheable. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
-vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
+vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));
 
 const { GET, PATCH, POST, DELETE } = await import("@/app/api/inbox/route");
 

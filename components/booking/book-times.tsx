@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { TimePicker, type V3Book } from "@/components/booking/time-picker";
+import { TimePicker, type StepsSkin } from "@/components/booking/time-picker";
 
 /* ── the booking calendar ────────────────────────────────────────
  * The site's own time picker (`time-picker.tsx`, times from
@@ -40,8 +40,8 @@ function TimesDown({ title, className, retry, again }: { title: string; classNam
 }
 
 /** The site's own time picker for `path`. `className` sizes the box.
-    `v3`: the JG V3 stepper. */
-export function BookTimes({ path, title, className, v3, startView }: { path: string; title: string; className?: string; v3?: V3Book; startView?: "week" | "month" }) {
+    `skin`: the JG V3 stepper. */
+export function BookTimes({ path, title, className, skin, startView }: { path: string; title: string; className?: string; skin?: StepsSkin; startView?: "week" | "month" }) {
   // Try again mounts a fresh picker, which asks for the times anew.
   const [tries, setTries] = React.useState(0);
   /* The picker reads the visitor's zone and clock, so until it has mounted it
@@ -49,5 +49,5 @@ export function BookTimes({ path, title, className, v3, startView }: { path: str
      server on: a <FlowShell> swapped for a <TimePicker> remounted the whole
      shell, photo and all, at hydration (LCP on /book, 2026-11-21). */
   const down = <TimesDown title={title} className={className} retry={() => setTries((n) => n + 1)} again={tries > 0} />;
-  return <TimePicker key={tries} path={path} title={title} className={className} fallback={down} v3={v3} startView={startView} />;
+  return <TimePicker key={tries} path={path} title={title} className={className} fallback={down} skin={skin} startView={startView} />;
 }

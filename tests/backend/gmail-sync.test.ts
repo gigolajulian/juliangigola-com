@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { CURSOR, mailChanges, syncGmail, type Msg } from "@/lib/leads/gmail-sync";
+import { CURSOR, mailChanges, syncGmail, type Msg } from "@/lib/leads/sync/gmail-sync";
 import { forgetToken } from "@/lib/booking/gcal";
 import { fold, leadStoreKey, type Lead } from "@/lib/leads/leads";
 import { recordLead, writeLead } from "@/lib/leads/lead-store";
@@ -39,6 +39,11 @@ describe("fold, Gmail kinds", () => {
 });
 
 describe("mailChanges", () => {
+  it("a message with no internalDate still maps, dated now", () => {
+    const [{ c }] = mailChanges({ ...msg("g9", ["INBOX"], email, "desk@juliangigola.com"), internalDate: undefined });
+    expect(Number.isNaN(Date.parse(c.event.at))).toBe(false);
+  });
+
   it("reads sent mail as replied to each outside recipient", () => {
     const out = mailChanges(msg("g1", ["SENT"], "Julian <hello@juliangigola.com>", "Maya <Maya@Example.com>, book@juliangigola.com"));
     expect(out).toEqual([{ email, c: { event: { at: at(5), ref: "g1", note: "Re: portraits", kind: "replied" } } }]);

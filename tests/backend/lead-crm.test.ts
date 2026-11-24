@@ -10,7 +10,7 @@ import type { Lead } from "@/lib/leads/leads";
    numbers and the export. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
-vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
+vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));
 const { GET, PATCH, POST } = await import("@/app/api/inbox/route");
 
 const req = (method: string, { body, query = "" }: { body?: unknown; query?: string } = {}) =>

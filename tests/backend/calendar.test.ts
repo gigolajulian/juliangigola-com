@@ -10,7 +10,7 @@ import { byCodeUnit } from "@/lib/utils";
    read, and one that fails is skipped, never the whole calendar. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
-vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
+vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));
 const { GET, POST } = await import("@/app/api/calendar/route");
 
 const SECRET = JSON.stringify({ client_id: "a", client_secret: "b", refresh_token: "c" });

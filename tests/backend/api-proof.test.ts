@@ -10,7 +10,7 @@ import { FakeKV, LEADS_KEY, INBOX_KEY as KEY } from "./fakes";
    reads back a gallery. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
-vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
+vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));
 
 const req = (method: string, { body, query = "", key = KEY, type }: { body?: BodyInit; query?: string; key?: string; type?: string } = {}) =>
   new Request(`https://juliangigola.com/api/proof${query}`, { method, body, headers: { "x-inbox-key": key, ...(type ? { "content-type": type } : {}) } });

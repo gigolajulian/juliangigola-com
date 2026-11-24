@@ -9,13 +9,13 @@ import { BookingLock } from "@/worker/booking-lock";
 vi.useFakeTimers({ toFake: ["Date"] });
 vi.setSystemTime(new Date("2026-11-11T20:00:00Z")); // a Wednesday, noon in San Jose
 
-/* The site's own engine (`lib/booking/booking-engine.ts`, `worker/booking-lock.ts`):
+/* The site's own engine (`lib/booking/engine.ts`, `worker/booking-lock.ts`):
    a time is rechecked and inserted inside the lock, so two tabs on one slot
    get one booking; a free call books from `/api/book`, a paid session from
    Stripe's webhook, and both file the Inbox row and the client's mail. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
-vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env, ctx: { waitUntil: (p: Promise<unknown>) => p } }) }));
+vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx, (p) => p));
 const { POST: book } = await import("@/app/api/book/route");
 const { bookDeposit } = await import("@/lib/booking/deposit");
 

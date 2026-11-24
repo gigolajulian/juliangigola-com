@@ -8,7 +8,7 @@ import { LogoBand } from "@/components/about/logo-band";
 import { PageFoot } from "@/components/site/foot";
 import { ProjectViewer } from "@/components/portfolio/project-viewer";
 import { Drift } from "@/components/portfolio/drift";
-import { BOOK_ROWS, QUOTE_OPTS } from "@/lib/v4-home/data";
+import { BOOK_ROWS, QUOTE_OPTS } from "@/lib/home/data";
 import type { CoverRelease } from "@/lib/work/cover-art-types";
 
 const nav = vi.hoisted(() => ({ path: "/" }));

@@ -1,3 +1,4 @@
+import { errorText } from "@/lib/utils";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { refuseAdmin } from "@/lib/vouch";
 import { ACCOUNT, SITE_HOST, ZONE, cloudflare, searchConsole as gsc, sitePath } from "@/lib/analytics";
@@ -84,7 +85,7 @@ export async function GET(request: Request) {
       bing,
     });
   } catch (e) {
-    return json({ error: (e as Error).message }, 502);
+    return json({ error: errorText(e) }, 502);
   }
 }
 
@@ -111,7 +112,7 @@ async function searchConsole(secret?: string) {
       pages: rows(pages),
     };
   } catch (e) {
-    return { error: (e as Error).message };
+    return { error: errorText(e) };
   }
 }
 
@@ -172,7 +173,7 @@ async function bingWebmaster(key?: string) {
   } catch (e) {
     // Bing refuses Cloudflare's shared servers outright, so the Agentic OS
     // dashboard on Julian's PC asks it instead.
-    const message = (e as Error).message;
+    const message = errorText(e);
     return {
       error: /ThrottleIP/.test(message)
         ? "Bing blocks requests from Cloudflare's servers. Bing's numbers are on the Agentic OS dashboard on the PC."

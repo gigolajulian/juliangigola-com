@@ -220,7 +220,7 @@ html:root .cv4a .cv4b{display:flex;flex-wrap:wrap;gap:12px}
 
 /* ── p3. Two moves, both from the V4 home, both gone at rest.
    Drift: each grid photo sits a little oversized in its frame and travels as the
-   frame crosses the screen (the Commissions sheet, components/v4/home/motion/flow.css),
+   frame crosses the screen (the Commissions sheet, components/home/motion/flow.css),
    on the scroll timeline so no script runs. `.ph` clips, so it is a scroll
    container: the timeline is named on it, a bare view() on the img would track
    `.ph` itself. `scale` and `translate` leave the hover `transform` (v3.css) alone.

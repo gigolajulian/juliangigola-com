@@ -22,7 +22,7 @@ import { RESPONSE_TIME } from "../site";
 import { isSession, SESSIONS as V3_SESSIONS } from "../photos-and-sessions";
 import { CONTENT } from "../content";
 import { getProject, projectsIn } from "../work/work";
-import type { BookingSlug } from "./booking-slugs";
+import type { BookingSlug } from "./slugs";
 import type { Frame } from "@/lib/work/work-types";
 
 /** `link`: words of the answer that are a link on the page (`label` is found in `a`); the answer itself stays plain text. */

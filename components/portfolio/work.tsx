@@ -1,5 +1,6 @@
 "use client";
 
+import { loadGsap } from "@/lib/gsap-lazy";
 import * as React from "react";
 import { projectHref } from "@/lib/project-href";
 import Image, { getImageProps } from "next/image";
@@ -10,6 +11,8 @@ import type { Flip as FlipT } from "gsap/Flip";
 import { PageFoot } from "@/components/site/chrome";
 import DISC from "@/lib/discipline-order.json";
 import { Drift } from "@/components/portfolio/drift";
+import { ang, useColorScope, type PickAt } from "@/components/portfolio/use-color-scope";
+import { useStripScroll } from "@/components/portfolio/use-strip-scroll";
 // The canvas view loads only when it opens, not with every /portfolio visit.
 const WorkCanvas = dynamic(() => import("@/components/portfolio/canvas").then((m) => m.WorkCanvas), { ssr: false });
 import { launchSpeed, stepSpring, springSettled, frameDt } from "@/lib/motion/spring";
@@ -28,14 +31,10 @@ export type WorkItem = {
   c: string;
   cover: string;
 };
-type Scope = Record<string, { w: string[]; p: number[] }>;
 
 const plural = (n: number) => `${n} ${n === 1 ? "project" : "projects"}`;
 /* Vectorscope: Cb across, Cr up, as a broadcast scope draws it. */
 const R = 128;
-const ang = (u: number, v: number) => Math.atan2(v, u);
-const dAng = (a: number, b: number) =>
-  Math.abs(Math.atan2(Math.sin(a - b), Math.cos(a - b)));
 const rgb = (u: number, v: number) =>
   [140 + 1.402 * v, 140 - 0.344 * u - 0.714 * v, 140 + 1.772 * u].map((x) =>
     Math.max(0, Math.min(255, x | 0)),
@@ -57,7 +56,6 @@ const TARGETS = (
       0.5 * r - 0.4187 * g - 0.0813 * b,
     ] as const,
 );
-type PickAt = { a: number; c: number };
 
 const STRIP_SIZES = "(max-width: 767px) 82vw, 50vh";
 const GRID_SIZES = "(max-width: 700px) 50vw, (max-width: 1000px) 33vw, 25vw";
@@ -259,7 +257,7 @@ export function FrameView({ list, at, onGo, onClose }: { list: FrameItem[]; at: 
     history.pushState({ frame: 1 }, "");
     const pop = () => onClose();
     addEventListener("popstate", pop);
-    void import("gsap").then((g) => (G.current = g.gsap));
+    void loadGsap().then((g) => (G.current = g));
     return () => {
       removeEventListener("popstate", pop);
       if (d.open) d.close();
@@ -664,7 +662,6 @@ export function WorkIndex({
     return () => root.removeAttribute("data-pft");
   }, [pin]);
   const [pick, setPick] = React.useState<PickAt | null>(null);
-  const [scope, setScope] = React.useState<Scope | null>(null);
   const page = React.useRef<HTMLElement>(null);
   const strip = React.useRef<HTMLDivElement>(null);
   const lastView = React.useRef(view);
@@ -837,32 +834,7 @@ export function WorkIndex({
     };
   }, [view, cells, list, shown]);
 
-  /* The scope's points arrive with the Color view, not with the page. A
-     failed load leaves it unset, so the next visit to Color asks again. */
-  React.useEffect(() => {
-    if (view !== "color" || scope) return;
-    void fetch("/v3/work-scope.json")
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`scope ${r.status}`))))
-      .then(setScope)
-      .catch(() => {});
-  }, [view, scope]);
-
-  const scoreSet = React.useCallback(
-    (s: string) => {
-      const pts = scope?.[s]?.p ?? [];
-      if (!pick) return 0;
-      let hit = 0;
-      const n = pts.length / 2 || 1;
-      const minC = Math.max(10, pick.c * 0.45);
-      for (let i = 0; i < pts.length; i += 2) {
-        const u = pts[i],
-          v = pts[i + 1];
-        if (Math.hypot(u, v) > minC && dAng(ang(u, v), pick.a) < 0.38) hit++;
-      }
-      return hit / n;
-    },
-    [scope, pick],
-  );
+  const { scope, scoreSet } = useColorScope(view, pick);
   const res =
     view === "color" && pick
       ? list
@@ -970,103 +942,7 @@ export function WorkIndex({
     const m = s.scrollWidth - s.clientWidth;
     b.style.transform = `scaleX(${m > 0 ? s.scrollLeft / m : 1})`; // a scale, not a width: no layout per scroll frame
   }, []);
-  React.useEffect(() => {
-    if (view !== "strip") return;
-    const s = strip.current!;
-    s.scrollLeft = 0;
-    requestAnimationFrame(stripBar);
-    /* From 768px up a vertical scroll (wheel, trackpad or finger) moves the
-       row and the page stays still; below it, a native swipe with snap. */
-    const wide = matchMedia("(min-width: 768px)");
-    const wheel = (e: WheelEvent) => {
-      if (!wide.matches || e.ctrlKey) return; // Ctrl+wheel and pinch are zoom (WCAG 1.4.4)
-      e.preventDefault();
-      s.scrollLeft +=
-        Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
-    };
-    /* A finger from 768px up moves the row one to one, so on lift it has
-       to carry on the way iOS's own scroll does: the speed of the last
-       tenth of a second, run down at iOS's normal rate (0.998 a ms).
-       Without it a flick stopped dead on lift, a cover's width for a fast
-       swipe (MAC, iPhone Duo open and iPad, 2026-11-08). A finger back on
-       the glass catches it. */
-    let ty: [number, number] | null = null;
-    let moves: { t: number; d: number }[] = [];
-    let glide = 0;
-    // A tap that stopped a glide only stops it, as on iOS: no cover opens.
-    let caught = false;
-    const halt = () => {
-      cancelAnimationFrame(glide);
-      glide = 0;
-    };
-    const start = (e: TouchEvent) => {
-      caught = glide !== 0;
-      halt();
-      moves = [];
-      ty = [e.touches[0].clientX, e.touches[0].clientY];
-    };
-    const click = (e: MouseEvent) => {
-      if (!caught) return;
-      caught = false;
-      e.preventDefault();
-      e.stopPropagation();
-    };
-    const move = (e: TouchEvent) => {
-      if (!wide.matches || !ty) return;
-      e.preventDefault();
-      const t = e.touches[0],
-        dx = ty[0] - t.clientX,
-        dy = ty[1] - t.clientY;
-      ty = [t.clientX, t.clientY];
-      const d = Math.abs(dy) > Math.abs(dx) ? dy : dx;
-      s.scrollLeft += d;
-      moves.push({ t: e.timeStamp, d });
-      moves = moves.filter((m) => e.timeStamp - m.t <= 100);
-    };
-    const end = (e: TouchEvent) => {
-      ty = null;
-      // A swipe that began on a glide is not a tap; let the next click through.
-      if (moves.length > 1) caught = false;
-      if (!wide.matches || e.touches.length || moves.length < 2) return;
-      const last = moves[moves.length - 1];
-      // Held still before lifting: no throw.
-      if (e.timeStamp - last.t > 80) return;
-      const span = Math.max(16, last.t - moves[0].t);
-      let v = moves.slice(1).reduce((a, m) => a + m.d, 0) / span;
-      v = Math.max(-6, Math.min(6, v));
-      if (Math.abs(v) < 0.2) return;
-      let at = 0;
-      const step = (now: number) => {
-        const dt = at ? Math.min(32, now - at) : 16;
-        at = now;
-        const before = s.scrollLeft;
-        s.scrollLeft += v * dt;
-        v *= Math.pow(0.998, dt);
-        // Run out, or stopped by an end.
-        if (Math.abs(v) < 0.02 || s.scrollLeft === before) {
-          glide = 0;
-          return;
-        }
-        glide = requestAnimationFrame(step);
-      };
-      glide = requestAnimationFrame(step);
-    };
-    addEventListener("wheel", wheel, { passive: false });
-    s.addEventListener("touchstart", start, { passive: true });
-    s.addEventListener("touchmove", move, { passive: false });
-    s.addEventListener("touchend", end, { passive: true });
-    s.addEventListener("touchcancel", halt, { passive: true });
-    s.addEventListener("click", click, true);
-    return () => {
-      halt();
-      removeEventListener("wheel", wheel);
-      s.removeEventListener("touchstart", start);
-      s.removeEventListener("touchmove", move);
-      s.removeEventListener("touchend", end);
-      s.removeEventListener("touchcancel", halt);
-      s.removeEventListener("click", click, true);
-    };
-  }, [view, cells, stripBar]);
+  useStripScroll(view, cells, strip, stripBar);
 
   /* Chips: one row at every width, a fade on the cut chip, and a progress
      line up to tablets. */

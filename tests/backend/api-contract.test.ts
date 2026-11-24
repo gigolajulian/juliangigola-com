@@ -13,7 +13,7 @@ import { FakeEmail, FakeKV, LEADS_KEY, INBOX_KEY as KEY } from "./fakes";
    text, then locked. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
-vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
+vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));
 
 const LEAD = "a".repeat(32);
 let kv: FakeKV, client: FakeEmail, hello: FakeEmail;

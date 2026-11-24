@@ -1,8 +1,8 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { lockOp, clientView, depositPaid, type ChangeResult } from "@/lib/booking/booking-engine";
-import { EARLY_SHARE, PART_SHARE, refundCents, refundShare } from "@/lib/booking/booking-rules";
+import { lockOp, clientView, depositPaid, type ChangeResult } from "@/lib/booking/engine";
+import { EARLY_SHARE, PART_SHARE, refundCents, refundShare } from "@/lib/booking/rules";
 import { refuseAdmin } from "@/lib/vouch";
-import { manageLinks, tokenOpens } from "@/lib/booking/booking-token";
+import { manageLinks, tokenOpens } from "@/lib/booking/token";
 import { confirmOf, sendConfirm } from "@/lib/booking/confirm";
 import { logMail, recordLead } from "@/lib/leads/lead-store";
 import { cancelBooking } from "@/lib/booking/deposit";
@@ -12,8 +12,8 @@ import { bodyOf, json } from "@/lib/http";
 
 /* ── a client reschedules or cancels (`/booking/<id>`) ────────────
  * POST {t, action: "cancel"} or {t, action: "reschedule", start}. The
- * token from their mail opens it (`lib/booking/booking-token.ts`); the lock does
- * the change (`lib/booking/booking-engine.ts`). A cancel 48 hours or more before
+ * token from their mail opens it (`lib/booking/token.ts`); the lock does
+ * the change (`lib/booking/engine.ts`). A cancel 48 hours or more before
  * the start refunds the deposit through Stripe, 24 hours or more refunds 70%
  * of it, under that it keeps it (`refundShare`). hello@ hears about every change.
  * ─────────────────────────────────────────────────────────────── */
@@ -70,7 +70,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     refund: share ? { form: { payment_intent: r.intent ?? "", ...(share === 1 ? {} : { amount: String(cents) }) }, ref } : undefined,
     note: [r.session, whenPT(was.start)].join(", "),
     refundNote: share === 1 ? "Deposit, cancelled 48 hours or more ahead" : `${pct}% of the deposit, cancelled ${share === EARLY_SHARE ? "48 hours or more" : "24 to 48 hours"} ahead`,
-    amount: back,
     subject: `Cancelled: ${what}`,
     line: "Cancelled by the client. The event is off the calendar.",
     money: (refunded) => (!r.intent ? "No deposit." : refunded ? (share === 1 ? `Deposit refunded: $${back}.` : `Refunded $${back} of the $${paid} deposit (${pct}%). $${paid - back} kept.`) : refunded === false ? `The refund FAILED: refund $${back} by hand in Stripe.` : "Under 24 hours: the deposit is kept."),
@@ -102,7 +101,6 @@ async function cancelMine(env: DeskEnv, id: string) {
     refund: { form: { payment_intent: r.intent ?? "" }, ref: `refund-${r.intent}` },
     note: [r.session, whenPT(was.start), "by Julian"].join(", "),
     refundNote: "Deposit, cancelled by Julian",
-    amount: paid,
     oneStamp: true,
     subject: `Cancelled by you: ${what}`,
     line: "Cancelled from the lead desk. The event is off the calendar and the client is told.",

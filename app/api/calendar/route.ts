@@ -1,5 +1,5 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { TZ } from "@/lib/booking/booking-rules";
+import { TZ } from "@/lib/booking/rules";
 import { gcal } from "@/lib/booking/gcal";
 import { looksLikeEmail } from "@/lib/inbox";
 import { busyAll, EXTRA_KEY, isIcs, readExtras, zoned, type Extra } from "@/lib/booking/slots";

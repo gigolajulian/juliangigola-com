@@ -97,7 +97,7 @@ export async function leadOf(kv: FakeKV, email: string) {
   return typeof raw === "string" ? s.open<import("@/lib/leads/leads").Lead>(raw) : undefined;
 }
 
-/** A Durable Object's storage, as `lib/booking/booking-engine.ts` uses it. */
+/** A Durable Object's storage, as `lib/booking/engine.ts` uses it. */
 export class FakeStore {
   data = new Map<string, unknown>();
   async get<T>(key: string) {
@@ -121,3 +121,10 @@ export const fakeLock = (lock: { fetch(r: Request): Promise<Response> }) => ({
 export const INBOX_KEY = "inbox-key-for-tests";
 /** A Google OAuth secret in the shape `GCAL_OAUTH` holds. */
 export const GOOGLE_OAUTH = JSON.stringify({ client_id: "a", client_secret: "b", refresh_token: "c" });
+
+/** The `@opennextjs/cloudflare` module for vi.mock: env read from the test's
+ * hoisted ctx on every call, so a beforeEach can swap it.
+ * `vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx))` */
+export const cloudflareMock = (ctx: { env: unknown }, waitUntil?: (p: Promise<unknown>) => unknown) => ({
+  getCloudflareContext: async () => ({ env: ctx.env, ...(waitUntil && { ctx: { waitUntil } }) }),
+});

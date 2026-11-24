@@ -9,7 +9,7 @@ import { FakeKV, LEADS_KEY } from "./fakes";
    stand-in that says what it was asked for. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
-vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
+vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));
 const mark = vi.hoisted(() => ({ servedSize: vi.fn(), shareCard: vi.fn() }));
 vi.mock("@/lib/proofs/watermark", () => mark);
 
@@ -65,6 +65,16 @@ describe("/proof/[token]/f/[id]", () => {
     expect(busy.status).toBe(503);
     expect(busy.headers.get("retry-after")).toBe("5");
     expect((await getFrame("a")).status).toBe(404);
+  });
+
+  it("serves a renamed gallery by its new link only", async () => {
+    const link = "20261101-abcdefgh";
+    await store({ link });
+    await kv.put(`proofalias:${link}`, TOKEN);
+    expect((await getFrame("a", "", link)).status).toBe(200);
+    expect((await getFrame("a")).status).toBe(404);
+    expect((await getCard(link)).status).toBe(200);
+    expect((await getCard()).status).toBe(404);
   });
 
   it("is a 404 without the bindings", async () => {

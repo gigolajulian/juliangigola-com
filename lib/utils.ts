@@ -27,3 +27,6 @@ export async function sha256Hex(text: string): Promise<string> {
   const d = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text)));
   return [...d].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
+
+/** An error's message, or the thrown value as text when it is not an Error. */
+export const errorText = (e: unknown) => (e instanceof Error ? e.message : String(e));

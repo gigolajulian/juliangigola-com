@@ -24,7 +24,7 @@ import { MotionGate, SiteFooter, SiteHeader } from "@/components/site/chrome";
 import { ScrollThumb } from "@/components/site/scroll-thumb";
 import { SmoothScroll } from "@/components/site/smooth-scroll";
 import { ScrollReveal } from "@/components/site/scroll-reveal";
-import { V4_HOME } from "@/lib/v4-home/switch";
+import { V4_HOME } from "@/lib/home/switch";
 import { V4PAGES_HEAD } from "@/lib/flags/v4pages";
 
 /* JG V3 (DESIGN.md): Inter Tight for the display type and the wordmark,

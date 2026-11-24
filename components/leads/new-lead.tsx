@@ -18,7 +18,8 @@ import { Selector } from "@astryxdesign/core/Selector";
 import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/SegmentedControl";
 import { Banner } from "@astryxdesign/core/Banner";
 import { STAGES, type Lead, type LeadSummary, type Stage } from "@/lib/leads/leads";
-import { type Call, errorText, type Size } from "@/lib/leads/lead-desk";
+import { type Call, type Size } from "@/lib/leads/lead-desk";
+import { errorText } from "@/lib/utils";
 
 const SOURCES = ["Instagram DM", "Referral", "Text", "Phone call", "Email", "In person", "Other"];
 const norm = (s: string) => s.trim().toLowerCase().replace(/^@/, "");

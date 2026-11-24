@@ -7,7 +7,7 @@ import { FakeStore, fakeLock, githubToken, reply, INBOX_KEY as KEY, GOOGLE_OAUTH
    it; a malformed week is refused; a good one is read back. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
-vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
+vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));
 
 const req = (method: string, body?: unknown, headers: Record<string, string> = { "x-inbox-key": KEY }) =>
   new Request("https://juliangigola.com/api/booking/hours", { method, headers, body: body === undefined ? undefined : JSON.stringify(body) });

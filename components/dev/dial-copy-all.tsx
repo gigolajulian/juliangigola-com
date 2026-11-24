@@ -3,7 +3,7 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
 import { DialStore } from "dialkit";
-import { notesText } from "@/lib/arrange-notes";
+import { notesText } from "@/lib/dev/arrange-notes";
 
 /* Julian: "copy all" on DialKit, every page. One button in the panel's
    header that copies every panel on the page at once (each one's own copy

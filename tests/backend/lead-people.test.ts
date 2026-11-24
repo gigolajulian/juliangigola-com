@@ -11,7 +11,7 @@ import { FakeKV, LEADS_KEY, INBOX_KEY as KEY } from "./fakes";
    there, and gallery mail copies the ones he ticked. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
-vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
+vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));
 const inbox = await import("@/app/api/inbox/route");
 const proof = await import("@/app/api/proof/route");
 

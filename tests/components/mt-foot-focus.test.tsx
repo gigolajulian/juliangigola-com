@@ -7,9 +7,9 @@ vi.stubGlobal("fetch", vi.fn(() => Promise.reject(new Error("offline"))));
 // no frames: with every jsdom rect 0 the films row reads its place as NaN on the next frame
 vi.stubGlobal("requestAnimationFrame", () => 0);
 
-import { Home } from "@/components/v4/home/home";
-import { BOOK_ROWS, QUOTE_OPTS } from "@/lib/v4-home/data";
-import { HOME_DATA } from "@/lib/v4-home/server";
+import { Home } from "@/components/home/home";
+import { BOOK_ROWS, QUOTE_OPTS } from "@/lib/home/data";
+import { HOME_DATA } from "@/lib/home/server";
 
 /* A card opened from a footer link hands focus back to that link when it closes.
    fireEvent.click does not focus the button, like a click in Safari, so the link is not the active element at open. */

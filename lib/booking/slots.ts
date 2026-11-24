@@ -1,9 +1,9 @@
-import { DEFAULT_HOURS, EVENTS, TZ, windowOn, type Hours, type Rule } from "@/lib/booking/booking-rules";
+import { DEFAULT_HOURS, EVENTS, TZ, windowOn, type Hours, type Rule } from "@/lib/booking/rules";
 import { gcal } from "@/lib/booking/gcal";
 import { sha256Hex } from "@/lib/utils";
 
 /* ── open times, from hello@'s free/busy ──────────────────────────
- * The rules (`lib/booking/booking-rules.ts`) say when Julian works; Google's
+ * The rules (`lib/booking/rules.ts`) say when Julian works; Google's
  * freeBusy says what is already taken. A start is offered when the session and its buffer
  * after it touch nothing busy. `GET /api/slots` serves these to the picker
  * and `openNow` rechecks one before money or a booking moves.

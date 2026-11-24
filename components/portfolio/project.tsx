@@ -4,7 +4,7 @@ import { Mark } from "@/components/site/duo";
 import { BtsCredit, BtsPageGrid } from "@/components/bts/bts";
 import { BackLink } from "@/components/site/back-link";
 import { billing, markFor, titleCase } from "@/lib/work/work";
-import { tailHole } from "@/lib/sheet";
+import { tailHole } from "@/lib/work/sheet";
 import { ProjectViewer } from "@/components/portfolio/project-viewer";
 import type { Frame, Project } from "@/lib/work/work-types";
 

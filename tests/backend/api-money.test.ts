@@ -4,7 +4,7 @@ import { INBOX_KEY as KEY } from "./fakes";
 /* /api/money: his Stripe balance and transactions, read-only, behind the inbox gate. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
-vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
+vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));
 const { GET } = await import("@/app/api/money/route");
 
 const req = (query = "", key: string | null = KEY) => new Request(`https://juliangigola.com/api/money${query}`, { headers: key ? { "x-inbox-key": key } : {} });

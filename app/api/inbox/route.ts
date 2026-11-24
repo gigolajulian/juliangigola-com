@@ -3,13 +3,13 @@ import { refuseAdmin } from "@/lib/vouch";
 import { SAFE_IMAGE, summary, type Enquiry, type Summary } from "@/lib/inbox";
 import { backfillLead, trashDaysLeft, type InboxRow, type Lead, type LeadSummary, type Stage } from "@/lib/leads/leads";
 import { buryLead, everyLead, findLead, readLead, writeLead } from "@/lib/leads/lead-store";
-import { clientsCsv } from "@/lib/leads/sheet-sync";
-import { importNotion } from "@/lib/leads/notion-import";
+import { clientsCsv } from "@/lib/leads/sync/sheet-sync";
+import { importNotion } from "@/lib/leads/sync/notion-import";
 import { eventsCsv, readLog, readMaster } from "@/lib/leads/activity-log";
-import { sealer } from "@/lib/leads/lead-crypto";
+import { sealedStore } from "@/lib/kv";
 import { notify, subscribe, unsubscribe } from "@/lib/leads/lead-push";
 import { publicKey } from "@/lib/leads/web-push";
-import { importStripe } from "@/lib/leads/stripe-import";
+import { importStripe } from "@/lib/leads/sync/stripe-import";
 import { STRIPE_UNSET } from "@/lib/stripe";
 import { cleanTemplates, manualLead, stats, type NewLead } from "@/lib/leads/lead-crm";
 import { cleanFrom, FROM_KEY, invoiceNo, invoicesTaken, PHOTO_KEY, type InvoiceFrom } from "@/lib/leads/invoice";
@@ -17,7 +17,7 @@ import { bodyOf, json, NO_STORE } from "@/lib/http";
 import { parseOr } from "@/lib/json";
 import { patchLead } from "@/lib/leads/lead-patch";
 import { secretJson } from "@/lib/secrets";
-import { sha256Hex } from "@/lib/utils";
+import { sha256Hex, errorText } from "@/lib/utils";
 
 /** Where his reply templates live: not personal data, so plain JSON. */
 const TEMPLATES_KEY = "leads:templates";
@@ -72,8 +72,8 @@ export const dynamic = "force-dynamic";
 
 /** The binding and the secret, or `null` when this build has neither. */
 async function wired() {
-  const { env } = await getCloudflareContext({ async: true });
-  return env.INBOX ? { inbox: env.INBOX, seal: sealer(env.LEADS_KEY), notion: env.NOTION_TOKEN, vapid: env.VAPID_KEY, env } : null;
+  const { env, seal, kv } = await sealedStore();
+  return kv ? { inbox: kv, seal, notion: env.NOTION_TOKEN, vapid: env.VAPID_KEY, env } : null;
 }
 
 async function guard(request: Request) {
@@ -378,23 +378,23 @@ export async function POST(request: Request) {
     await writeLead(gate.inbox, seal, id, lead, null);
     return json({ lead, id });
   }
-  // Past Notion rows as quiet leads (`lib/leads/notion-import.ts`, `scripts/import-notion.mjs`). Dry, it only counts.
+  // Past Notion rows as quiet leads (`lib/leads/sync/notion-import.ts`, `scripts/import-notion.mjs`). Dry, it only counts.
   if (given && "importNotion" in given) {
     const seal = await gate.seal;
     if (!seal) return noSeal();
     try {
       return json(await importNotion(gate.inbox, seal, given.importNotion, dry));
     } catch (e) {
-      return json({ error: String(e instanceof Error ? e.message : e) }, 400);
+      return json({ error: errorText(e) }, 400);
     }
   }
-  // Past Stripe payments and refunds onto the log (`lib/leads/stripe-import.ts`). Dry, it only counts.
+  // Past Stripe payments and refunds onto the log (`lib/leads/sync/stripe-import.ts`). Dry, it only counts.
   if (given?.importStripe === true) {
     if (!gate.env.STRIPE_SECRET_KEY) return json({ error: STRIPE_UNSET }, 503);
     try {
       return json(await importStripe(gate.env, gate.env.STRIPE_SECRET_KEY, dry));
     } catch (e) {
-      return json({ error: String(e instanceof Error ? e.message : e) }, 502);
+      return json({ error: errorText(e) }, 502);
     }
   }
   if (given?.backfill !== true) return json({ error: "Unknown." }, 400);

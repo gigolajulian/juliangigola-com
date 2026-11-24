@@ -1,25 +1,24 @@
-import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { refuseWorker } from "@/lib/vouch";
-import { sealer } from "@/lib/leads/lead-crypto";
-import { syncSheet } from "@/lib/leads/sheet-sync";
+import { sealedStore } from "@/lib/kv";
+import { syncSheet } from "@/lib/leads/sync/sheet-sync";
 import { json } from "@/lib/http";
 
 /* ── POST /api/leads/sheet: copy the lead desk to the Google Sheet ──
  * Called every ten minutes by the booking Worker's cron (`worker/index.ts`)
  * over its SITE service binding, with BOOKING_SECRET as the bearer. Anyone
- * else gets a 401. See `lib/leads/sheet-sync.ts`.
+ * else gets a 401. See `lib/leads/sync/sheet-sync.ts`.
  * ─────────────────────────────────────────────────────────────── */
 
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
-  const { env } = await getCloudflareContext({ async: true });
+  const { env, seal: sealing, kv } = await sealedStore();
   const denied = await refuseWorker(request, env.BOOKING_SECRET);
   if (denied) return denied;
-  const seal = await sealer(env.LEADS_KEY);
-  if (!env.GCAL_OAUTH || !env.INBOX || !seal) return json({ error: "Not set up." }, 503);
+  const seal = await sealing;
+  if (!env.GCAL_OAUTH || !kv || !seal) return json({ error: "Not set up." }, 503);
   try {
-    return json({ sheet: await syncSheet(env.INBOX, seal, env.GCAL_OAUTH) });
+    return json({ sheet: await syncSheet(kv, seal, env.GCAL_OAUTH) });
   } catch (e) {
     // Google's status only, never a token (`lib/booking/gcal.ts`).
     console.error("sheet", String(e));

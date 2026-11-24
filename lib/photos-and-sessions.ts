@@ -1,4 +1,4 @@
-import { EVENTS } from "@/lib/booking/booking-rules";
+import { EVENTS } from "@/lib/booking/rules";
 import { depositFor, isPaid } from "@/lib/booking/paid";
 import { SESSION_TYPES } from "@/lib/booking/sessions";
 

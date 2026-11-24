@@ -2,25 +2,8 @@ import * as React from "react";
 
 /* The deploy after a publish, watched until it lands (`admin-editor.tsx`). */
 export function useDeployWatch() {
-  /**
-   * Whether the deploy carrying the last publish has landed.
-   *
-   * Committing to GitHub and the change being on the site are a couple of
-   * minutes apart, and until now the editor said nothing about that gap —
-   * "Committed" was the last word, and whether the public site had caught up
-   * was something to go and check by hand.
-   *
-   * `/BUILD_ID` is a file Next emits and the Worker serves as a static asset,
-   * so the build the site is running has a name this page can read. Recorded
-   * on mount, polled after a publish, and when it differs the deploy has
-   * landed. Strictly it means *a* new build is live rather than specifically
-   * yours — but the only thing that triggers a build is a commit to `main`,
-   * and you just made one.
-   *
-   * Null where it cannot be read at all. `next dev` does not serve the file,
-   * so locally this stays null and the indicator simply never claims to be
-   * live, which is better than claiming it wrongly.
-   */
+  /** The build the site was running at mount, from `/BUILD_ID` (a static asset Next emits); null where it
+      cannot be read, as under `next dev`, so the indicator never claims live. A new id after a publish means it landed. */
   const built = React.useRef<string | null>(null);
   /** Set the moment a publish succeeds, so the wait has something to watch. */
   const [awaitingDeploy, setAwaitingDeploy] = React.useState(false);

@@ -10,7 +10,7 @@ import { FakeKV, LEADS_KEY } from "./fakes";
 /* Repeat clients and lifetime value in Stats, and the Monday mail to hello@. Fake people only. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
-vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
+vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));
 
 const NOW = Date.parse("2026-11-09T17:00:00Z"); // Monday 9 AM Pacific
 const mk = (id: string, o: Partial<Lead> = {}): Lead & { id: string } => ({ id, email: `${id}@example.com`, name: id, stage: "Confirmed", stageAt: "2026-10-01T00:00:00Z", firstAt: "2026-10-01T00:00:00Z", lastAt: "2026-10-01T00:00:00Z", unread: false, events: [], ...o });

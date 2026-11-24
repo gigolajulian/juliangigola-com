@@ -5,7 +5,7 @@ import { LdJson } from "@/components/local-screens";
 import { BOOKING_PAGES, bookingHref, bookingPage } from "@/lib/booking/service-pages";
 import { LINKABLE, getProject, projectsIn } from "@/lib/work/work";
 import { serviceGraph } from "@/lib/seo";
-import { V3Service } from "@/components/booking/service";
+import { ServiceBook } from "@/components/booking/service";
 
 /* ── a booking page ───────────────────────────────────────────────
  * One service, at the root: /headshots, /graduation-photos. Built from
@@ -94,7 +94,7 @@ export default async function BookingPage(props: PageProps<"/[service]">) {
   return (
     <>
       {graph}
-      <V3Service page={page} frames={sheet ?? work.map((p) => p.cover)} />
+      <ServiceBook page={page} frames={sheet ?? work.map((p) => p.cover)} />
     </>
   );
 }

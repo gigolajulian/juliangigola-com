@@ -14,7 +14,8 @@ import { Heading, Text } from "@astryxdesign/core/Text";
 import { Badge } from "@astryxdesign/core/Badge";
 import { Banner } from "@astryxdesign/core/Banner";
 import { Table } from "@astryxdesign/core/Table";
-import { adminCall, centsLabel, dayLabel, errorText } from "@/lib/leads/lead-desk";
+import { adminCall, centsLabel, dayLabel } from "@/lib/leads/lead-desk";
+import { errorText } from "@/lib/utils";
 
 export type Txn = { id: string; at: string; type: string; amount: number; fee: number; net: number; currency: string; status: string; what: string };
 /** Stripe's types in his words. */

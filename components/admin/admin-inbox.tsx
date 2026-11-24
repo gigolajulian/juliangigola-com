@@ -3,9 +3,9 @@
 import * as React from "react";
 import Image from "next/image";
 import { contextLines, replyLink, type Enquiry, type Summary } from "@/lib/inbox";
-import { cn } from "@/lib/utils";
+import { cn, errorText } from "@/lib/utils";
 import { credentials, KEY_STORE, saveAdminKey, TOKEN_STORE } from "@/lib/admin/admin-github";
-import { adminCall, errorText, isLocked } from "@/lib/leads/lead-desk";
+import { adminCall, isLocked } from "@/lib/leads/lead-desk";
 
 /* ── the inbox ────────────────────────────────────────────────────
  * Enquiries from the contact form, which now has somewhere to put them.

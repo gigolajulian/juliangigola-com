@@ -35,12 +35,13 @@ import { proofApi, cardCrop, pastCloseDate, cropAt, proofStatus, type ProofRow }
 import { ActivityDesk } from "@/components/proofs/activity";
 import { Timeline } from "@/components/proofs/timeline";
 import { useClock } from "@/components/proofs/use-clock";
-import { errorText, loadError, LOCKED, stampPT } from "@/lib/leads/lead-desk";
+import { loadError, LOCKED, stampPT } from "@/lib/leads/lead-desk";
+import { errorText } from "@/lib/utils";
 import { extras, publicId, remindState, THUMB_W, type CardCrop } from "@/lib/proofs/proof";
 
 const CLASSIC = "/admin";
 // The small copy the client's grid uses: every frame on the desk is a thumbnail. Once delivered the proof copies are gone: the finals' small copies stand in.
-const frame = (p: ProofRow, id: string) => (p.deliveredAt ? `/delivery/${publicId(p)}/f/${id}?w=${THUMB_W}` : `/proof/${p.token}/f/${id}?w=${THUMB_W}`);
+const frame = (p: ProofRow, id: string) => (p.deliveredAt ? `/delivery/${publicId(p)}/f/${id}?w=${THUMB_W}` : `/proof/${publicId(p)}/f/${id}?w=${THUMB_W}`);
 const first = (p: ProofRow) => (p.deliveredAt ? p.finals?.[0] : p.frames[0]);
 
 function Tile({ k, v }: { k: string; v: string }) {
@@ -431,7 +432,7 @@ function LinkPreview({ p, save }: { p: ProofRow; save: (card: CardCrop | null) =
       <Text type="supporting">Link preview</Text>
       {p.watermark && !p.hasPass && !pastCloseDate(p) ? (
         // eslint-disable-next-line @next/next/no-img-element -- the gallery's share card from the Worker
-        <img src={`/proof/${p.token}/card?v=${v}`} alt="Link preview" style={{ width: "100%", aspectRatio: "1800 / 945", objectFit: "cover", borderRadius: 4 }} />
+        <img src={`/proof/${publicId(p)}/card?v=${v}`} alt="Link preview" style={{ width: "100%", aspectRatio: "1800 / 945", objectFit: "cover", borderRadius: 4 }} />
       ) : <Text type="supporting">Drawn while the gallery is open, watermarked and without a password.</Text>}
       <HStack gap={2} vAlign="end">
         <Selector label="Frame" size="sm" value={f.id} isDisabled={!sized.length}

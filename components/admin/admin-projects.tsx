@@ -12,8 +12,7 @@ import { AdminBts } from "@/components/admin/admin-bts";
 import type { Bts } from "@/lib/work/work-types";
 import type { FrameRef } from "@/lib/work/added";
 import type { Credit } from "@/lib/work/work-types";
-import { cn } from "@/lib/utils";
-import { errorText } from "@/lib/leads/lead-desk";
+import { cn, errorText } from "@/lib/utils";
 
 /* ── the project list ─────────────────────────────────────────────
  * Everything on the site, and what can be done to it.

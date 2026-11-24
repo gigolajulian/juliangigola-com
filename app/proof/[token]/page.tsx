@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { sealer } from "@/lib/leads/lead-crypto";
+import { sealedStore } from "@/lib/kv";
 import { checkPaid, finalize, recheckTransfer } from "@/lib/proofs/submit";
 import { PAYMENTS_DOWN } from "@/lib/stripe";
 import { headers } from "next/headers";
@@ -28,9 +27,8 @@ const base: Metadata = {
 /** The link preview when the gallery is pasted into a text, DM or email: a card of the page's header and its first frame, watermarked. Never the client's name or address. */
 export async function generateMetadata({ params }: { params: Promise<{ token: string }> }): Promise<Metadata> {
   const { token } = await params;
-  const { env } = await getCloudflareContext({ async: true });
-  const seal = sealer(env.LEADS_KEY);
-  const p = isToken(token) && env.INBOX && seal ? await readPublic(env.INBOX, await seal, token) : null;
+  const { seal, kv } = await sealedStore();
+  const p = isToken(token) && kv && seal ? await readPublic(kv, await seal, token) : null;
   const f = p && coverFrame(p);
   if (!f) return base;
   // The URL carries the frame and crop, so a new pick is a new URL and no app shows a stale preview.
@@ -42,11 +40,10 @@ export async function generateMetadata({ params }: { params: Promise<{ token: st
 export default async function ProofPage({ params, searchParams }: { params: Promise<{ token: string }>; searchParams: Promise<{ paid?: string }> }) {
   const { token } = await params;
   const { paid } = await searchParams;
-  const { env } = await getCloudflareContext({ async: true });
-  const seal = sealer(env.LEADS_KEY);
-  if (!isToken(token) || !env.INBOX || !seal) return <Shut />;
+  const { env, seal, kv } = await sealedStore();
+  if (!isToken(token) || !kv || !seal) return <Shut />;
   const s = await seal;
-  let p = await readPublic(env.INBOX, s, token);
+  let p = await readPublic(kv, s, token);
   // Delivered: the same shoot id now opens the finals.
   if (p?.deliveredAt) redirect(`/delivery/${token}`);
   // Offline or behind a password: nothing of the gallery is rendered until the gate's cookie is right.
@@ -59,14 +56,14 @@ export default async function ProofPage({ params, searchParams }: { params: Prom
   if (!p.submittedAt && session && env.STRIPE_SECRET_KEY) {
     const ok = await checkPaid(env.STRIPE_SECRET_KEY, p, session);
     if (ok === "down") notice = PAYMENTS_DOWN;
-    else if (ok) p = await finalize(env, env.INBOX, s, p, ok);
+    else if (ok) p = await finalize(env, kv, s, p, ok);
   }
   if (p.paid?.pending && env.STRIPE_SECRET_KEY) {
     const moved = await recheckTransfer(env.STRIPE_SECRET_KEY, p).catch(() => null);
-    if (moved) await writeProof(env.INBOX, s, (p = moved));
+    if (moved) await writeProof(kv, s, (p = moved));
   }
   // Julian's own look before sending is not a client view.
-  if (!paid && p.sentAt) await writeProof(env.INBOX, s, { ...p, views: p.views + 1, firstViewAt: p.firstViewAt ?? new Date().toISOString() });
+  if (!paid && p.sentAt) await writeProof(kv, s, { ...p, views: p.views + 1, firstViewAt: p.firstViewAt ?? new Date().toISOString() });
 
   return <ProofGallery token={token} initial={publicView(p)} notice={notice} />;
 }

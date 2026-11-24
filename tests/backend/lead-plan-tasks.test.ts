@@ -9,7 +9,7 @@ import { FakeKV, LEADS_KEY, INBOX_KEY as KEY } from "./fakes";
    whole-list PATCHes; a task newly ticked writes one timeline line; Today lists what falls due. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
-vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env }) }));
+vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));
 const inbox = await import("@/app/api/inbox/route");
 
 const at = (h: number) => new Date(Date.UTC(2026, 10, 20, h)).toISOString();

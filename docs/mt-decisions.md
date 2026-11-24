@@ -1,11 +1,11 @@
 # v4 home motion: decisions
 
-The dated notes that used to sit in `components/v4/home` code comments. The
+The dated notes that used to sit in `components/home` code comments. The
 comments now state the current rule; who asked, when, and what it replaced is
 here. Grouped by file, newest first. Site-wide decisions are in
 `docs/decisions.md`.
 
-## lib/v4-home/data.ts (was data.ts)
+## lib/home/data.ts (was data.ts)
 
 - 2026-11-19: the home's eight covers, in Julian's order from Home Picks.
 - 2026-11-17: Director's Reel and Ladera Granola are hosted by the site (public/films). Vimeo refused its player (401) and could not be preloaded; Julian sent the files.

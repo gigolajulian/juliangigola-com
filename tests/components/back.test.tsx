@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { renderHook } from "@testing-library/react";
-import { dropSpot, keepSpot, spotHere, useBackHome } from "@/components/v4/home/back";
+import { dropSpot, keepSpot, spotHere, useBackHome } from "@/components/home/back";
 import { painted } from "@/lib/painted";
 
-/* The home keeps its own spot for Back from any page (components/v4/home/back.ts): the block under the screen's top and
+/* The home keeps its own spot for Back from any page (components/home/back.ts): the block under the screen's top and
    how far into it, so a held block above that takes its height late cannot throw the page off. */
 
 const block = (name: string, top: number) => {
