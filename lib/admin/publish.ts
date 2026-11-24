@@ -6,7 +6,7 @@
 
 import { CONTENT_PATH, type SiteContent } from "@/lib/content";
 import { ADDED_PATH, isTextRef, type FrameRef } from "@/lib/work/added";
-import { adoptable, projectsFile, same, type Manifest, type ProjectsFile } from "@/lib/admin/admin-payload";
+import { adoptable, projectsFile, sameJson, type Manifest, type ProjectsFile } from "@/lib/admin/admin-payload";
 import { commitFiles, readFile, type CommitFile, TOKEN_STORE, REPO, GITHUB_API } from "@/lib/admin/admin-github";
 import type { Bts, Copy, Credit } from "@/lib/work/work-types";
 
@@ -197,7 +197,7 @@ export async function publishDraft({
       const live = current
         ? adoptable(JSON.parse(current) as ProjectsFile, baseline)
         : baseline;
-      if (!same(live, baseline)) {
+      if (!sameJson(live, baseline)) {
         return {
           error:
             "The project list changed in the repo since this page loaded, so publishing now would undo it. Reload /admin and make the edit again.",

@@ -1,7 +1,7 @@
 import * as React from "react";
-import { isPaid } from "@/lib/booking/paid";
+import { takesDeposit } from "@/lib/booking/paid";
 import type { SlotsAnswer } from "@/lib/booking/slots";
-import { AHEAD, iso, KEEP, recent, recentKey, type Slot } from "@/components/booking/time-picker-parts";
+import { AHEAD, iso, KEEP, recent, recentKey } from "@/components/booking/time-picker-parts";
 
 /* The picker's open times and its event, fetched from `/api/slots`
    (`use-picker.tsx` loads them once it mounts). */
@@ -10,7 +10,7 @@ export function useSlots(username: string, slug: string, tz: string) {
   /** The event takes its place from the visitor (a studio session or their own address). */
   const [needsWhere, setNeedsWhere] = React.useState(false);
   const [session, setSession] = React.useState("");
-  const [days, setDays] = React.useState<Record<string, Slot[]> | null>(null);
+  const [days, setDays] = React.useState<Record<string, string[]> | null>(null);
   const [state, setState] = React.useState<"loading" | "ready" | "fallback">("loading");
   /* A paid session, its deposit taken here (`?deposit`, deposit-step.tsx). */
   const [paid, setPaid] = React.useState(false);
@@ -29,21 +29,21 @@ export function useSlots(username: string, slug: string, tz: string) {
         .then((r) => r.json() as Promise<SlotsAnswer>);
       if (got !== hit?.got) recent.set(key, { at: Date.now(), got });
       const slots = await got;
-      if (slots.status !== "success") throw new Error("no times");
-      const ev = slots.event;
+      // A failure answers { error }, with no times.
+      if (!slots.slots) throw new Error("no times");
       // A paid event's deposit is taken here (deposit-step.tsx) where the
       // build has Stripe's key; without it, the fallback.
       // Paid by the site's list (lib/booking/paid.ts).
-      const owes = isPaid(slug);
+      const owes = takesDeposit(slug);
       if (owes && !process.env.NEXT_PUBLIC_STRIPE_PK) {
         setState("fallback");
         return;
       }
       setPaid(owes);
-      setLength(ev.lengthInMinutes);
-      setSession(ev.title);
-      setNeedsWhere(ev.locations.some((l) => l.type === "attendeeDefined"));
-      setDays(slots.data);
+      setLength(slots.length);
+      setSession(slots.title);
+      setNeedsWhere(slots.where);
+      setDays(slots.slots);
       setState("ready");
     } catch {
       recent.delete(key);

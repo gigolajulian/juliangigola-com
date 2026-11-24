@@ -2,8 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FakeEmail, FakeKV, FakeStore, fakeLock, LEADS_KEY, leadOf, GOOGLE_OAUTH as OAUTH } from "./fakes";
 import { forgetToken } from "@/lib/booking/gcal";
 import { clientView, depositPaid } from "@/lib/booking/engine";
-import { DEPOSIT, depositFor, PAID } from "@/lib/booking/paid";
-import { amountOf, isDeposit } from "@/lib/booking/deposit";
+import { DEPOSIT, depositFor, DEPOSIT_SESSIONS, isDeposit } from "@/lib/booking/paid";
+import { amountOf } from "@/lib/booking/deposit";
 import { BOOK_ROWS } from "@/lib/home/data";
 import { priceLabel, SESSIONS } from "@/lib/photos-and-sessions";
 import { BookingLock } from "@/worker/booking-lock";
@@ -118,7 +118,7 @@ describe("the amount is the session's, set on the server", () => {
   });
 
   it("has a figure for every paid slug, and refuses any other", () => {
-    for (const slug of PAID) expect(amountOf(slug)).toBe(DEPOSIT[slug] * 100);
+    for (const slug of DEPOSIT_SESSIONS) expect(amountOf(slug)).toBe(DEPOSIT[slug] * 100);
     expect(() => amountOf("studio-digitals")).toThrow();
     expect(() => amountOf("wedding-call")).toThrow();
   });
@@ -189,7 +189,7 @@ describe("the screens read the same map", () => {
     expect(Object.fromEntries(BOOK_ROWS.map((r) => [r.slug, r.price]))).toEqual({ portraits: "$250 deposit", headshots: "From $400", graduation: "From $400", "studio-digitals": "From $300" });
     expect(Object.fromEntries(BOOK_ROWS.map((r) => [r.slug, r.dep]))).toEqual({ portraits: "$250", headshots: "$200", graduation: "$200", "studio-digitals": "$150" });
     // Every paid session's Cal.com slug is one the map knows: "studio-digitals" must never fall through to $100.
-    for (const s of Object.values(SESSIONS).filter((x) => x.paid)) expect(PAID).toContain(s.cal!.split("/")[1]);
+    for (const s of Object.values(SESSIONS).filter((x) => x.paid)) expect(DEPOSIT_SESSIONS).toContain(s.cal!.split("/")[1]);
     expect(priceLabel({ ...SESSIONS["studio-digitals"], from: null })).toBe("$150 deposit");
     expect(priceLabel({ ...SESSIONS.headshots, from: null })).toBe("$200 deposit");
     expect(depositFor("digitals")).toBe(150);

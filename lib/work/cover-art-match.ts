@@ -10,13 +10,13 @@ export const norm = (s: string) =>
   s.toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g, "").replace(/&/g, " and ").replace(/[^a-z0-9]+/g, " ").trim();
 const title = (s: string) => norm(s.replace(feat, ""));
 /** The first-named artist: "The Szns ft. Swavie" is The Szns, "Imanemun × Pooyan Ardalan" is Imanemun. */
-export const lead = (artist: string) => artist.split(/\s+(?:ft\.?|feat\.?|×|x)\s+/i)[0];
+export const leadArtist = (artist: string) => artist.split(/\s+(?:ft\.?|feat\.?|×|x)\s+/i)[0];
 
 export type Song = { trackName: string; artistName: string };
 
 export function matchSong(release: { title: string; artist: string }, song: Song): "match" | "confirm" | null {
   if (title(release.title) !== title(song.trackName)) return null;
-  const want = [norm(release.artist), norm(lead(release.artist))];
+  const want = [norm(release.artist), norm(leadArtist(release.artist))];
   if (want.includes(norm(song.artistName))) return "match";
   return song.artistName.split(/\s*(?:,|&)\s*/).some((a) => want.includes(norm(a))) ? "confirm" : null;
 }

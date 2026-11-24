@@ -228,11 +228,18 @@ describe("recordLead", () => {
 
   it("never throws, skips a booking with no address, and records nothing without LEADS_KEY", async () => {
     const broken = { get: async () => { throw new Error("down"); }, put: async () => {} };
-    expect(await recordLead({ INBOX: broken as never, LEADS_KEY }, email, { event: { at: at(1), kind: "inquiry" } })).toBeNull();
-    expect(await recordLead({ INBOX: kv() as never, LEADS_KEY }, "", { event: { at: at(1), kind: "call" } })).toBeNull();
+    expect(await recordLead({ INBOX: broken as never, LEADS_KEY }, email, { event: { at: at(1), kind: "inquiry" } })).toEqual({ status: "failed" });
+    expect(await recordLead({ INBOX: kv() as never, LEADS_KEY }, "", { event: { at: at(1), kind: "call" } })).toEqual({ status: "skipped" });
     const plain = kv();
-    expect(await recordLead({ INBOX: plain as never }, email, { event: { at: at(1), kind: "inquiry" } })).toBeNull();
+    expect(await recordLead({ INBOX: plain as never }, email, { event: { at: at(1), kind: "inquiry" } })).toEqual({ status: "failed" });
     expect(plain.data.size).toBe(0);
+  });
+
+  it("says same when the event is already on the lead", async () => {
+    const store = kv();
+    const c = { event: { at: at(1), kind: "inquiry" as const, ref: "msg:1" } };
+    expect((await recordLead({ INBOX: store as never, LEADS_KEY }, email, c)).status).toBe("written");
+    expect(await recordLead({ INBOX: store as never, LEADS_KEY }, email, c)).toEqual({ status: "same" });
   });
 });
 

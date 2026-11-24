@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { DEFAULT_HOURS, EVENTS, cleanHours, duration, refundCents, refundShare, windowOn } from "@/lib/booking/rules";
 import { SESSION } from "@/lib/booking/deposit";
-import { PAID } from "@/lib/booking/paid";
+import { DEPOSIT_SESSIONS } from "@/lib/booking/paid";
 import { LENGTH, SESSIONS } from "@/lib/photos-and-sessions";
 
 /* The site's own booking rules (`lib/booking/rules.ts`): hours, the
@@ -86,7 +86,7 @@ describe("EVENTS", () => {
     }
   });
   it("has a rule and a name for every session that takes the deposit, and a V3 session that books it", () => {
-    for (const slug of PAID) {
+    for (const slug of DEPOSIT_SESSIONS) {
       expect(EVENTS[slug], slug).toBeTruthy();
       expect(EVENTS[slug].call, slug).toBeFalsy();
       expect(SESSION[slug], slug).toBe(EVENTS[slug].title);

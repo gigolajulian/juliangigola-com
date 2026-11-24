@@ -1,7 +1,7 @@
 import { refuseWorker } from "@/lib/vouch";
 import { sealedStore } from "@/lib/kv";
 import { syncSheet } from "@/lib/leads/sync/sheet-sync";
-import { json } from "@/lib/http";
+import { json, upstreamError } from "@/lib/http";
 
 /* ── POST /api/leads/sheet: copy the lead desk to the Google Sheet ──
  * Called every ten minutes by the booking Worker's cron (`worker/index.ts`)
@@ -21,7 +21,6 @@ export async function POST(request: Request) {
     return json({ sheet: await syncSheet(kv, seal, env.GCAL_OAUTH) });
   } catch (e) {
     // Google's status only, never a token (`lib/booking/gcal.ts`).
-    console.error("sheet", String(e));
-    return json({ error: "Sheet sync failed." }, 502);
+    return upstreamError("sheet", e, "Sheet sync failed.");
   }
 }

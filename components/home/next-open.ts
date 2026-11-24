@@ -22,10 +22,11 @@ function lookup(slug: SessionSlug) {
     const q = new URLSearchParams({ slug: ev, start: ymd(now), end: ymd(new Date(+now + 60 * 864e5)), timeZone: tz });
     const p = fetch(`/api/slots?${q}`, { signal: AbortSignal.timeout?.(5000) })
       .then((r) => (r.ok ? r.json() : null))
-      .then((j: { status?: string; data?: Record<string, { start: string }[]> } | null) => {
-        if (j?.status !== "success" || !j.data) return null;
-        const day = Object.keys(j.data).filter((d) => j.data![d]?.length).sort(byCodeUnit)[0];
-        return day ? nextOpenLabel(j.data[day][0].start, tz) : null;
+      .then((j: { slots?: Record<string, string[]> } | null) => {
+        const slots = j?.slots;
+        if (!slots) return null;
+        const day = Object.keys(slots).filter((d) => slots[d]?.length).sort(byCodeUnit)[0];
+        return day ? nextOpenLabel(slots[day][0], tz) : null;
       })
       .catch(() => null);
     seen.set(ev, p);

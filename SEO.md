@@ -22,7 +22,7 @@ blocked. The terms name Google as the text-only exception.
 - About: sessions sentence in Julian's words (c9d43ad)
 - Client logos: the company name as text in each logo link (975e7f4)
 - Video stills: "Still from <title>" alt text (PR #13, 04551d1)
-- Written alt text for every gallery frame, in `lib/work-data.ts` (jg-CONTENT) and `lib/work/alt-text.ts`, neutral wording, reviewed frame by frame (#104, #107, #108). Live check 2026-10-10: 109 /portfolio/ pages plus /headshots, 0 empty alts, 0 gendered words. Rules: one sentence, 8 to 18 words, what the frame shows only (the site appends project, discipline and credits), no skin or body.
+- Written alt text for every gallery frame, in `lib/work/work-data.ts` (jg-CONTENT) and `lib/work/alt-text.ts`, neutral wording, reviewed frame by frame (#104, #107, #108). Live check 2026-10-10: 109 /portfolio/ pages plus /headshots, 0 empty alts, 0 gendered words. Rules: one sentence, 8 to 18 words, what the frame shows only (the site appends project, discipline and credits), no skin or body.
 - Live check 2026-10-02: 119 sitemap URLs all 200; www and http 301 to apex; real 404s; one h1, canonical and description on every checked page; no empty alts on home, booking pages or /portfolio
 - Footer's hidden city text gone; the site description names only the SF Bay Area, the cities live in JSON-LD `areaServed` (lib/seo.ts) and San Jose has its own pages (checked 2026-11-21)
 - Search numbers in /admin Traffic (Google) and the Agentic OS dashboard (Google and Bing), 2026-10-05

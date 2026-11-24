@@ -211,12 +211,9 @@ export async function busyBetween(secret: string | undefined, from: number, to: 
   return busy;
 }
 
-/** What `app/api/slots` answers, read by `components/booking/use-picker.tsx`. Starts are in the visitor's zone, grouped by their day there. */
-export type SlotsAnswer = {
-  status: "success";
-  event: { title: string; lengthInMinutes: number; price: number; locations: { type: "integration" | "attendeeDefined" }[] };
-  data: { [day: string]: { start: string; end: string }[] };
-};
+/** What `app/api/slots` answers, read by `components/booking/use-slots.ts`. `where`: the visitor gives the place (no call link).
+    Starts are in the visitor's zone, grouped by their day there. */
+export type SlotsAnswer = { title: string; length: number; where: boolean; slots: Record<string, string[]> };
 
 /** What a slot check may know beyond the calendar: the booking being moved (`mine`), the store of extra calendars, the hours. */
 export type SlotOpts = { now?: number; mine?: { start: string; end: string }; kv?: KV; hours?: Hours };

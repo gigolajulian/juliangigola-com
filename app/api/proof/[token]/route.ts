@@ -3,7 +3,8 @@ import { sealedStore } from "@/lib/kv";
 import { recordLead } from "@/lib/leads/lead-store";
 import { checkout, checkPaid, finalize } from "@/lib/proofs/submit";
 import { PAYMENTS_DOWN, PAYMENTS_OFF } from "@/lib/stripe";
-import { checkPass, cleanSelects, device, isEmail, isTestEmail, passCookie, passValue, shutReason, owed, isToken, publicView, readPublic, track, viewerKey, writeProof, type Proof } from "@/lib/proofs/proof";
+import { cleanSelects, device, isEmail, isTestEmail, owed, isToken, publicView, track, viewerKey, type Proof } from "@/lib/proofs/proof-model";
+import { checkPass, passCookie, passValue, shutReason, readPublic, writeProof } from "@/lib/proofs/proof-store";
 import { bodyOf, json } from "@/lib/http";
 import { alertHello } from "@/lib/email/hello-mail";
 import { actionAlert, worthMail } from "@/lib/email/proof-mail";
@@ -133,7 +134,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
     const c = await checkout(key, p, b.method === "card" ? "card" : "bank");
     await writeProof(g.kv, g.s, { ...p, checkout: c.id });
     return json({ checkout: c.url });
-  } catch {
+  } catch (e) {
+    console.error("proof checkout", String(e));
     return json({ error: PAYMENTS_DOWN }, 502);
   }
 }

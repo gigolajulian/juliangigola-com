@@ -8,7 +8,8 @@ import { JG_COVER, mountCover } from "@/components/splash/jg-cover";
 import { useRouter } from "next/navigation";
 import { BookTimes } from "@/components/booking/book-times";
 import { PageFoot } from "@/components/site/foot";
-import { Calendar, Failed, Field, FlowShell, Hidden, Run, dlabel, iso, useEnquiry, type Shell } from "@/components/booking/flow";
+import { Calendar, DotList, dlabel, iso } from "@/components/booking/flow";
+import { Failed, Field, FlowShell, Hidden, useEnquiry, type Shell } from "@/components/enquiry/flow";
 import { duration } from "@/lib/booking/rules";
 import { LENGTH, SESSIONS, TAB_ORDER, priceLabel, type SessionSlug } from "@/lib/photos-and-sessions";
 import { looksLikeEmail } from "@/lib/inbox";
@@ -128,7 +129,7 @@ export function BookFlow({ slug, tabs = true, h1 = false, startView }: { slug: S
         p.at === 1 ? (
           <>
             {more ? <Tabs at={slug} /> : null}
-            <Run className="inc lbl" items={[...S.includes, ...(S.turnaround ? [`Ready in ${S.turnaround}`] : [])]} />
+            <DotList className="inc lbl" items={[...S.includes, ...(S.turnaround ? [`Ready in ${S.turnaround}`] : [])]} />
             {p.body}
           </>
         ) : (

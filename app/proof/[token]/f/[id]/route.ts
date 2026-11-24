@@ -1,5 +1,6 @@
 import { sealedStore } from "@/lib/kv";
-import { isFrameId, isToken, readPublic, shutReason, THUMB_W } from "@/lib/proofs/proof";
+import { isFrameId, isToken, THUMB_W } from "@/lib/proofs/proof-model";
+import { readPublic, shutReason } from "@/lib/proofs/proof-store";
 import { servedSize } from "@/lib/proofs/watermark";
 
 /* One proof frame from the private bucket, only while its gallery is open.

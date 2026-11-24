@@ -1,5 +1,5 @@
 import { EVENTS } from "@/lib/booking/rules";
-import { depositFor, isPaid } from "@/lib/booking/paid";
+import { depositFor, takesDeposit } from "@/lib/booking/paid";
 import { SESSION_TYPES } from "@/lib/booking/sessions";
 
 /* JG V3 (master v39, DESIGN.md "Photos"): what each screen shows, per theme.
@@ -85,7 +85,7 @@ export type Session = {
   turnaround?: string;
   /** The event it books, "juliangigola/event-slug" (a stored key; the slug keys `EVENTS`); none for an on-request session. */
   cal?: string;
-  /** Takes a deposit: its event is in `PAID` (`lib/booking/paid.ts`). */
+  /** Takes a deposit: its event is in `DEPOSIT_SESSIONS` (`lib/booking/paid.ts`). */
   paid: boolean;
   /** `m`: a horizontal frame for the phone banner, where the tall one crops badly.
       `at`: where the phone and portrait-tablet banner sits on each frame (an
@@ -220,7 +220,7 @@ const LISTED: Record<SessionSlug, Omit<Session, "paid">> = {
 const eventOf = (s: { cal?: string }) => s.cal?.split("/")[1] ?? "";
 // The price set in /admin (content/site.json) wins, so the home card and /book never disagree.
 const ADMIN_FROM = new Map(SESSION_TYPES.map((t) => [t.slug, t.from]));
-export const SESSIONS = Object.fromEntries(Object.entries(LISTED).map(([k, s]) => [k, { ...s, from: ADMIN_FROM.has(k) ? ADMIN_FROM.get(k)! : s.from, paid: isPaid(eventOf(s)) }])) as Record<SessionSlug, Session>;
+export const SESSIONS = Object.fromEntries(Object.entries(LISTED).map(([k, s]) => [k, { ...s, from: ADMIN_FROM.has(k) ? ADMIN_FROM.get(k)! : s.from, paid: takesDeposit(eventOf(s)) }])) as Record<SessionSlug, Session>;
 export const isSession = (s?: string): s is SessionSlug => !!s && Object.hasOwn(SESSIONS, s);
 /** The session tabs' order (DESIGN.md, Stepper). */
 export const TAB_ORDER: SessionSlug[] = ["portraits", "headshots", "studio-digitals", "model-test", "graduation", "weddings", "consultation"];

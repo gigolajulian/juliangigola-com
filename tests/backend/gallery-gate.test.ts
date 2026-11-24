@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cleanSettings, deliveryView, publicView, type Proof } from "@/lib/proofs/proof";
+import { cleanSettings, deliveryView, publicView, type Proof } from "@/lib/proofs/proof-model";
 
 /* Gate polish (Julian 2026-11-15): a subheading under the gate's heading, and file names on thumbnails only when he turns them on. */
 

@@ -30,14 +30,14 @@ import { Selector } from "@astryxdesign/core/Selector";
 import { Slider } from "@astryxdesign/core/Slider";
 import { KEY_STORE, saveAdminKey, TOKEN_STORE } from "@/lib/admin/admin-github";
 import { useSiteThemeRead } from "@/lib/site-theme";
-import { SignIn } from "@/components/leads/setup";
+import { SignIn } from "@/components/admin/sign-in";
 import { proofApi, cardCrop, pastCloseDate, cropAt, proofStatus, type ProofRow } from "@/lib/proofs/desk";
 import { ActivityDesk } from "@/components/proofs/activity";
 import { Timeline } from "@/components/proofs/timeline";
 import { useClock } from "@/components/proofs/use-clock";
 import { loadError, LOCKED, stampPT } from "@/lib/leads/lead-desk";
 import { errorText } from "@/lib/utils";
-import { extras, publicId, remindState, THUMB_W, type CardCrop } from "@/lib/proofs/proof";
+import { extras, publicId, remindState, THUMB_W, type CardCrop } from "@/lib/proofs/proof-model";
 
 const CLASSIC = "/admin";
 // The small copy the client's grid uses: every frame on the desk is a thumbnail. Once delivered the proof copies are gone: the finals' small copies stand in.

@@ -1,10 +1,10 @@
 import * as React from "react";
-import { fromIso, minutesOf, type PickedTime, type Slot } from "@/components/booking/time-picker-parts";
+import { fromIso, minutesOf, type PickedTime } from "@/components/booking/time-picker-parts";
 import { monthCells, startOfToday, weekFrom } from "@/components/booking/picker-dates";
 
 /* The day and the time picked, and the week or month on show
    (`use-picker.tsx`, which keeps the effects that set them). */
-export function usePickerDays(days: Record<string, Slot[]> | null, startView?: "week" | "month") {
+export function usePickerDays(days: Record<string, string[]> | null, startView?: "week" | "month") {
   // The card opens on its month (2026-10-20), or on startView.
   const [view, setView] = React.useState<"week" | "month">(startView ?? "month");
   const [anchor, setAnchor] = React.useState(() => new Date()); // the week or month on show
@@ -19,10 +19,10 @@ export function usePickerDays(days: Record<string, Slot[]> | null, startView?: "
   const choose = (date: string, min: number, time: boolean) => {
     const list = days?.[date];
     if (!list?.length) return;
-    const s = list.find((x) => minutesOf(x.start) === min);
+    const s = list.find((x) => minutesOf(x) === min);
     setChosen(time || (s && chosen === "time") ? "time" : "day");
     const t = s ?? list[0];
-    setPick({ date, min: minutesOf(t.start), start: t.start });
+    setPick({ date, min: minutesOf(t), start: t });
   };
 
   /* The week or month under the cards. A week is the seven days from the

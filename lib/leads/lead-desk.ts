@@ -62,6 +62,7 @@ export const stampPT = (iso: string) => new Intl.DateTimeFormat("en-US", { timeZ
 export const endDay = (end: string) => new Date(`${end}T12:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
 
 export const DAY = 864e5;
+/** Date.now behind a call: the desk reads the clock in render, which the React compiler lint refuses for a bare Date.now(). */
 export const now = () => Date.now();
 
 /** A day in Pacific time as YYYY-MM-DD, today by default. */

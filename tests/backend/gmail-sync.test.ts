@@ -172,6 +172,16 @@ describe("syncGmail", () => {
     expect(await syncGmail(e)).toBe(0);
   });
 
+  it("does not count a lead whose write fails", async () => {
+    const e = env();
+    await recordLead(e, email, { event: { at: at(1), kind: "inquiry", ref: "msg:1" } });
+    data.set(CURSOR, "100");
+    const down = { ...kv(), put: async (k: string, v: string) => { if (k.startsWith("lead:")) throw new Error("down"); data.set(k, v); } };
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    expect(await syncGmail({ ...e, INBOX: down as never })).toBe(0);
+    expect(data.get(CURSOR)).toBe("120");
+  });
+
   it("skips a lead that will not open and still moves the cursor", async () => {
     const s = await sealer(LEADS_KEY)!;
     data.set(leadStoreKey(await s.id(email)), "not a sealed lead");

@@ -1,5 +1,6 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { isDeposit, isIntentId, bookDeposit, verifyStripe } from "@/lib/booking/deposit";
+import { isIntentId, bookDeposit, verifyStripe } from "@/lib/booking/deposit";
+import { isDeposit } from "@/lib/booking/paid";
 import { recordLead } from "@/lib/leads/lead-store";
 import { logPayment } from "@/lib/leads/sync/stripe-payment";
 import { NO_STORE } from "@/lib/http";

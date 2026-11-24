@@ -19,7 +19,7 @@ import { ClientFields, ContactFields, CoverArtFields, HomeFields, QuoteFields, S
 import { isTextRef, type TrashedProject } from "@/lib/work/added";
 import { type PendingUpload } from "@/components/admin/admin-frames";
 import { CreditDesk, creditBook } from "@/components/admin/admin-credits";
-import { same, withOverride } from "@/lib/admin/admin-payload";
+import { sameJson, withOverride } from "@/lib/admin/admin-payload";
 import { TOKEN_STORE } from "@/lib/admin/admin-github";
 import type { Bts } from "@/lib/work/work-types";
 import { byCodeUnit, cn } from "@/lib/utils";
@@ -277,7 +277,7 @@ export function AdminEditor({
   }));
 
   /** Whether the project list has moved — the second file, written only if so. */
-  const manifestMoved = !same(manifest, baseline.manifest);
+  const manifestMoved = !sameJson(manifest, baseline.manifest);
 
   /**
    * Whether anything is unpublished.
@@ -290,7 +290,7 @@ export function AdminEditor({
    * with the file's own key order while `lib/content.ts` builds its object
    * field by field, and comparing the two strings called that a change.
    */
-  const dirty = manifestMoved || !same(draft, baseline.content);
+  const dirty = manifestMoved || !sameJson(draft, baseline.content);
 
   /* Julian: which tab holds the change. `dirty` says there is a draft;
      this says where, one field at a time with the same comparison, so a
@@ -299,10 +299,10 @@ export function AdminEditor({
   const moved = React.useMemo(() => {
     const tabs = new Set<View>();
     for (const key of Object.keys(draft) as (keyof SiteContent)[])
-      if (!same(draft[key], baseline.content[key]))
+      if (!sameJson(draft[key], baseline.content[key]))
         tabs.add(FIELD_TAB[key] ?? "home");
     for (const key of Object.keys(manifest) as (keyof Draft)[])
-      if (!same(manifest[key], baseline.manifest[key]))
+      if (!sameJson(manifest[key], baseline.manifest[key]))
         tabs.add(key === "order" || key === "covers" ? "disciplines" : "projects");
     return tabs;
   }, [draft, manifest, baseline]);
@@ -315,7 +315,7 @@ export function AdminEditor({
       const a = manifest[key] as Record<string, unknown>;
       const b = baseline.manifest[key] as Record<string, unknown>;
       for (const slug of new Set([...Object.keys(a), ...Object.keys(b)]))
-        if (!same(a[slug], b[slug])) out.add(slug);
+        if (!sameJson(a[slug], b[slug])) out.add(slug);
     }
     for (const key of ["hidden", "unlisted"] as const) {
       const a = new Set(manifest[key]);

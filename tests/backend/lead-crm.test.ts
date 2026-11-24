@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FakeKV, LEADS_KEY, INBOX_KEY as KEY } from "./fakes";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { recordLead } from "@/lib/leads/lead-store";
-import { csv, fill, identity, manualLead, merge, stats } from "@/lib/leads/lead-crm";
+import { csv, fillTemplate, identity, manualLead, merge, stats } from "@/lib/leads/lead-crm";
 import type { Lead } from "@/lib/leads/leads";
 
 /* The desk as a CRM (`lib/leads/lead-crm.ts`, `app/api/inbox/route.ts`): leads
@@ -52,7 +52,7 @@ describe("merge", () => {
 
 describe("templates, numbers, export", () => {
   it("fills a template for one lead", () => {
-    expect(fill("Hi {first}, the {kind} on {when}.", { name: "Maya Okafor", kind: "intro-call", when: "2026-11-05T18:00:00Z" })).toBe("Hi Maya, the intro call on Thursday, November 5.");
+    expect(fillTemplate("Hi {first}, the {kind} on {when}.", { name: "Maya Okafor", kind: "intro-call", when: "2026-11-05T18:00:00Z" })).toBe("Hi Maya, the intro call on Thursday, November 5.");
   });
 
   it("counts inquiries and bookings by week, the reply time, the booked rate, sources and lost reasons", () => {

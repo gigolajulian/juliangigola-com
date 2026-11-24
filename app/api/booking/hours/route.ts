@@ -2,7 +2,7 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { lockOp } from "@/lib/booking/engine";
 import { cleanHours, TZ, type Hours } from "@/lib/booking/rules";
 import { refuseAdmin } from "@/lib/vouch";
-import { bodyOf, json } from "@/lib/http";
+import { bodyOf, json, upstreamError } from "@/lib/http";
 
 /* ── Julian's open hours, from the lead desk (Hours) ──────────────
  * GET the week and the dates that differ; PUT the whole thing back. Kept
@@ -18,8 +18,7 @@ async function held(ask: () => Promise<{ hours: Hours }>) {
   try {
     return json(await ask());
   } catch (e) {
-    console.error("hours", String(e));
-    return json({ error: "Could not reach the booking lock. Try again." }, 502);
+    return upstreamError("hours", e, "Could not reach the booking lock. Try again.");
   }
 }
 

@@ -1,7 +1,7 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { refuseWorker } from "@/lib/vouch";
 import { syncGmail } from "@/lib/leads/sync/gmail-sync";
-import { json } from "@/lib/http";
+import { json, upstreamError } from "@/lib/http";
 
 /* ── POST /api/leads/gmail: fold hello@'s new mail into leads ─────
  * Called every ten minutes by the booking Worker's cron (`worker/index.ts`)
@@ -21,7 +21,6 @@ export async function POST(request: Request) {
     return json({ folded: await syncGmail(env) });
   } catch (e) {
     // Google's status and message only, never a token (`lib/booking/gcal.ts`).
-    console.error("gmail", String(e));
-    return json({ error: "Gmail sync failed." }, 502);
+    return upstreamError("gmail", e, "Gmail sync failed.");
   }
 }

@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { PageFoot } from "@/components/site/chrome";
 import { BookFlow } from "@/components/booking/book";
-import { Run } from "@/components/booking/flow";
+import { DotList } from "@/components/booking/flow";
 import { Doors } from "@/components/site/doors";
 import { ServiceBar } from "@/components/booking/service-bar";
 import { BOOKING_PAGES, bookingHref, type BookingPage } from "@/lib/booking/service-pages";
@@ -32,7 +32,7 @@ export function ServiceBook({ page, frames }: { page: BookingPage; frames: Frame
           <p className="lbl mute">{page.kicker}</p>
           <h1 className="pg-t">{page.h1.replace(/San (Francisco|Jose)/g, "San $1")}</h1>
           <p className="sv-lead">{page.lead}</p>
-          <Run className="inc lbl" items={[page.rate, ...includes, ...(page.turnaround ? [`Ready in ${page.turnaround}`] : [])]} />
+          <DotList className="inc lbl" items={[page.rate, ...includes, ...(page.turnaround ? [`Ready in ${page.turnaround}`] : [])]} />
           <div className="ctas">
             <Link className="btn fill" href={s ? "#book" : "/contact/form"}>{page.book.title}</Link>
             <Link className="btn" href="#work">See the work</Link>

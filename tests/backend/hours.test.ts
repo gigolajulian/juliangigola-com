@@ -37,7 +37,7 @@ describe("hours", () => {
     expect((await (await GET(req("GET"))).json()).hours.days).toEqual({ "2026-11-23": [480, 540] });
 
     const r = await (await slots(new Request("https://juliangigola.com/api/slots?slug=portraits&start=2026-11-23&end=2026-11-23&timeZone=America/Los_Angeles"))).json();
-    expect(r.data["2026-11-23"].map((x: { start: string }) => x.start.slice(11, 16))).toEqual(["08:00", "09:00"]);
+    expect(r.slots["2026-11-23"].map((x: string) => x.slice(11, 16))).toEqual(["08:00", "09:00"]);
     // The deposit's pre-check reads the same hours: the opened Monday passes, a default Monday would not.
     const b = { engine: "own" as const, slug: "portraits", start: "2026-11-23T16:00:00.000Z", timeZone: "America/Los_Angeles", name: "QA", email: "qa@example.com" };
     expect(await openNow(OAUTH, b.slug, b.start, { hours: await liveHours(ctx.env as never) })).toBe(true);

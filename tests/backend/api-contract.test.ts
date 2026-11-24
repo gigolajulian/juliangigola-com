@@ -70,6 +70,27 @@ describe("/api/contract", () => {
     expect((await POST(admin("POST", { lead: "nobody" }))).status).toBe(404);
   });
 
+  it("says a contract it cannot open is broken, not gone, everywhere it is read", async () => {
+    const { contract: c } = await make();
+    expect(await readContract(kv as never, await seal(), "B".repeat(16))).toBeNull();
+    kv.data.get(`contract:${c.id}`)!.value = "not-sealed";
+    await expect(readContract(kv as never, await seal(), c.id)).rejects.toThrow();
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    for (const res of [
+      await GET(admin("GET", undefined, `?lead=${LEAD}`)),
+      await GET(admin("GET", undefined, `?copy=${c.id}`)),
+      await POST(admin("POST", { lead: LEAD })),
+      await send(c),
+    ]) {
+      expect(res.status).toBe(500);
+      expect((await res.json()).error).toContain("cannot be opened");
+    }
+    const signed = await signReq(c.id, { name: "Sam Rivera", email: "sam@example.com", agree: true, hash: "x" });
+    expect(signed.status).toBe(500);
+    expect((await signed.json()).error).toBe("This contract is not available.");
+    expect(log).toHaveBeenCalledTimes(5);
+  });
+
   it("uses his saved templates", async () => {
     await PUT(admin("PUT", { templates: [{ id: "x", name: "Short", body: "{client} pays {fee}." }] }));
     const { contract: c } = await make();

@@ -81,7 +81,8 @@ describe("importStripe", () => {
   });
 
   it("leaves an archived lead archived", async () => {
-    const l = await recordLead(env(), "ana@example.com", { event: { at: new Date().toISOString(), kind: "archive" }, on: true });
+    const out = await recordLead(env(), "ana@example.com", { event: { at: new Date().toISOString(), kind: "archive" }, on: true });
+    const l = out.status === "written" ? out.lead : null;
     expect(l!.archivedAt).toBeTruthy();
     intents = [deposit(1, "ana@example.com")];
     await importStripe(env(), "sk_test_fake", false);

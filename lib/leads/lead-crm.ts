@@ -247,7 +247,7 @@ export const TEMPLATES: Template[] = [
   { id: "renew", name: "Renew licence", subject: "Renewing your licence", body: "Hi {first},\n\nThe licence on the photos ({licence}) ends on {ends}. If you still need them after that, I can renew it. Same terms, or tell me what changed and I will quote it.\n\nJulian" },
   { id: "decline", name: "Not a fit", subject: "Your {kind} inquiry", body: "Hi {first},\n\nThank you for thinking of me. This one is not a fit for my schedule right now, but I hope it goes well.\n\nJulian" },
 ];
-export function fill(text: string, l: Pick<Lead, "name" | "kind" | "when" | "licence">): string {
+export function fillTemplate(text: string, l: Pick<Lead, "name" | "kind" | "when" | "licence">): string {
   const when = l.when
     ? new Intl.DateTimeFormat("en-US", { timeZone: TZ, weekday: "long", month: "long", day: "numeric" }).format(new Date(l.when))
     : "";

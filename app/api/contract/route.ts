@@ -21,6 +21,10 @@ export const dynamic = "force-dynamic";
 
 const TEMPLATES_KEY = "leads:contract-templates";
 
+/** A contract that is there but will not open (a rotated LEADS_KEY): logged, then `broken()`, never "Gone". */
+const unopened = (label: string) => (e: unknown) => (console.error(label, String(e)), undefined);
+const broken = () => json({ error: "That contract cannot be opened. LEADS_KEY may have changed." }, 500);
+
 async function gate(request: Request) {
   const { env, seal, kv } = await sealedStore();
   const denied = await refuseAdmin(request, env.INBOX_KEY);
@@ -42,14 +46,16 @@ export async function GET(request: Request) {
   if (q.has("templates")) return json({ templates: await templates(g.kv) });
   const copy = q.get("copy");
   if (copy) {
-    const c = await readContract(g.kv, g.s, copy);
+    const c = await readContract(g.kv, g.s, copy).catch(unopened("contract copy"));
+    if (c === undefined) return broken();
     if (!c) return json({ error: "Gone." }, 404);
     // An attachment that cannot run on this origin: the client's typed name is in it.
     return new Response(signedCopy(c), { headers: { ...NO_STORE, "content-type": "text/html; charset=utf-8", "content-disposition": attachment(copyName(c)), "x-content-type-options": "nosniff", "content-security-policy": "default-src 'none'; style-src 'unsafe-inline'" } });
   }
   const lead = q.get("lead");
   if (!lead) return json({ error: "Unknown." }, 400);
-  const c = await contractOf(g.kv, g.s, lead);
+  const c = await contractOf(g.kv, g.s, lead).catch(unopened("contract of lead"));
+  if (c === undefined) return broken();
   return json({ contract: c, url: c ? contractUrl(c.id) : null });
 }
 
@@ -74,7 +80,8 @@ export async function POST(request: Request) {
   if (!lead) return json({ error: "Gone." }, 404);
   const t = (await templates(g.kv)).find((x) => x.id === b.template) ?? (await templates(g.kv))[0];
   if (!t) return json({ error: "Add a contract template first." }, 400);
-  const before = await contractOf(g.kv, g.s, b.lead);
+  const before = await contractOf(g.kv, g.s, b.lead).catch(unopened("contract before new"));
+  if (before === undefined) return broken();
   const email = lead.email.includes("@") && !lead.email.startsWith("ig:") && !lead.email.startsWith("tel:") ? lead.email : "";
   const c = draft(before?.signed ? null : before, b.lead, { to: { name: lead.name, email }, text: fillContract(t.body, lead), template: t.id }, new Date().toISOString());
   if ("error" in c) return json(c, 409);
@@ -87,7 +94,8 @@ export async function PATCH(request: Request) {
   if (g.error) return g.error;
   const b = await bodyOf(request);
   if (!b) return json({ error: "Not JSON." }, 400);
-  const before = typeof b.id === "string" ? await readContract(g.kv, g.s, b.id) : null;
+  const before = typeof b.id === "string" ? await readContract(g.kv, g.s, b.id).catch(unopened("contract save")) : null;
+  if (before === undefined) return broken();
   if (!before) return json({ error: "Gone." }, 404);
   const d = cleanDraft(b);
   if ("error" in d) return json(d, 400);

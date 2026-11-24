@@ -7,7 +7,7 @@ import { ReferencePicks } from "@/components/reference-picks";
 import { PageFoot } from "@/components/site/foot";
 import { CallDialog } from "@/components/booking/book";
 import { Duo } from "@/components/site/duo";
-import { Check, Failed, Field, FlowShell, Hidden, NEED_MSG, checkYou, first, useEnquiry } from "@/components/booking/flow";
+import { Check, Failed, Field, FlowShell, Hidden, NEED_MSG, checkYou, first, useEnquiry } from "@/components/enquiry/flow";
 import { CALL_CARD, DOORS } from "@/lib/photos-and-sessions";
 
 /* JG V3 Inquire (master v39, /inquire and /inquire/form). Both forms post
