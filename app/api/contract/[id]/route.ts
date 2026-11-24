@@ -3,7 +3,8 @@ import { copyName, readContract, sign, signedCopy, writeContract } from "@/lib/c
 import { contractStep } from "@/lib/contracts/contract-lead";
 import { sendClient, signedMail } from "@/lib/email/proof-mail";
 import { alertHello } from "@/lib/email/hello-mail";
-import { bodyOf, json } from "@/lib/http";
+import { bodyOf, json, limited } from "@/lib/http";
+import { logged } from "@/lib/utils";
 
 /* ── contracts, the client's side ─────────────────────────────────
  * POST {name, email, agree, hash, mark | typed}: the signature. The id in the path is the
@@ -14,14 +15,14 @@ import { bodyOf, json } from "@/lib/http";
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { env, seal, kv } = await sealedStore();
-  if (!kv || !seal) return json({ error: "This contract is not available." }, 404);
-  const s = await seal;
-  const draft = await readContract(kv, s, (await params).id).catch((e: unknown) => (console.error("contract sign open", String(e)), undefined));
+  const { env, seal: s, kv } = await sealedStore();
+  if (!kv || !s) return json({ error: "This contract is not available." }, 404);
+  const draft = await readContract(kv, s, (await params).id).catch(logged("contract sign open"));
   // Same words to the client either way; the status says it is broken, not missing.
   if (draft === undefined) return json({ error: "This contract is not available." }, 500);
   if (!draft || !draft.sentAt) return json({ error: "This contract is not available." }, 404);
-  if (!(await env.PUBLIC_WRITE_LIMIT.limit({ key: `sign:${request.headers.get("cf-connecting-ip") ?? "unknown"}` })).success) return json({ error: "Too many tries. Wait a minute." }, 429);
+  const slow = await limited(env.PUBLIC_WRITE_LIMIT, "sign", request);
+  if (slow) return slow;
   const b = (await bodyOf(request)) ?? {};
   const at = new Date().toISOString();
   const contract = await sign(draft, { name: b.name, email: b.email, agree: b.agree, seen: b.hash, mark: b.mark, typed: b.typed, ip: request.headers.get("cf-connecting-ip") ?? "", ua: request.headers.get("user-agent") ?? "" }, at);

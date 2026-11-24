@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createHash } from "node:crypto";
-import { cn, pad, rubberband, sha256Hex } from "@/lib/utils";
+import { cn, isEmail, logged, pad, rubberband, sha256Hex } from "@/lib/utils";
+import { asRecord } from "@/lib/json";
 import { softItem, wallItem } from "@/lib/work/wall-tile";
 
 /* Small shared helpers and tuned values. */
@@ -49,3 +50,24 @@ describe("wall tiles", () => {
   });
 });
 
+
+describe("logged", () => {
+  it("logs the labels and the error as text, then gives undefined", async () => {
+    const err = vi.spyOn(console, "error").mockImplementation(() => {});
+    expect(await Promise.reject(new Error("boom")).catch(logged("a", "b"))).toBeUndefined();
+    expect(err).toHaveBeenCalledWith("a", "b", "Error: boom");
+    err.mockRestore();
+  });
+});
+
+describe("isEmail and asRecord", () => {
+  it("checks an address string, and reads anything else as an empty record", () => {
+    expect(isEmail(" kai@x.co ")).toBe(true);
+    expect(isEmail("kai")).toBe(false);
+    expect(isEmail(`${"a".repeat(200)}@x.co`)).toBe(false);
+    expect(asRecord({ a: 1 })).toEqual({ a: 1 });
+    expect(asRecord(null)).toEqual({});
+    expect(asRecord(["a"])).toEqual({});
+    expect(asRecord("a")).toEqual({});
+  });
+});

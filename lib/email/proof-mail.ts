@@ -229,6 +229,9 @@ export function subjectOr(given: unknown, fallback: string): string {
   return v || fallback;
 }
 
+/** The wordmark's inline parts (`cid:name-ink`, `cid:name-w`) as the site's files, under `base`. */
+export const webImages = (html: string, base = "") => html.replace("cid:name-ink", `${base}/email-name-ink.png`).replace("cid:name-w", `${base}/email-name-w.png`);
+
 /** `cc`: the other people on the lead with "copy on gallery mail" ticked (`copiesFor` in lib/leads/lead-store). */
 export async function sendClient(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefined, to: string, m: { subject: string; html: string; text: string; attachments: (Inline | Attached)[] }, cc: string[] = []): Promise<boolean> {
   if (!mailer) return false;
@@ -241,7 +244,7 @@ export async function sendClient(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefin
     console.error("proof mail", m.subject, String(e));
     // Inline parts refused: send without the frames, the logo linked.
     try {
-      await mailer.send({ ...head, subject: m.subject, text: m.text, html: m.html.replace(/<tr><td style="padding-bottom:30px"><table[\s\S]*?<\/table><\/td><\/tr>/, "").replace("cid:name-ink", `${SITE}/email-name-ink.png`).replace("cid:name-w", `${SITE}/email-name-w.png`) });
+      await mailer.send({ ...head, subject: m.subject, text: m.text, html: webImages(m.html.replace(/<tr><td style="padding-bottom:30px"><table[\s\S]*?<\/table><\/td><\/tr>/, ""), SITE) });
       return true;
     } catch (e2) {
       console.error("proof mail, plain", String(e2));

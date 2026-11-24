@@ -29,7 +29,7 @@ const base: Metadata = {
 export async function generateMetadata({ params }: { params: Promise<{ token: string }> }): Promise<Metadata> {
   const { token } = await params;
   const { seal, kv } = await sealedStore();
-  const p = isToken(token) && kv && seal ? await readPublic(kv, await seal, token) : null;
+  const p = isToken(token) && kv && seal ? await readPublic(kv, seal, token) : null;
   const f = p && coverFrame(p);
   if (!f) return base;
   // The URL carries the frame and crop, so a new pick is a new URL and no app shows a stale preview.
@@ -41,9 +41,8 @@ export async function generateMetadata({ params }: { params: Promise<{ token: st
 export default async function ProofPage({ params, searchParams }: { params: Promise<{ token: string }>; searchParams: Promise<{ paid?: string }> }) {
   const { token } = await params;
   const { paid } = await searchParams;
-  const { env, seal, kv } = await sealedStore();
-  if (!isToken(token) || !kv || !seal) return <Shut />;
-  const s = await seal;
+  const { env, seal: s, kv } = await sealedStore();
+  if (!isToken(token) || !kv || !s) return <Shut />;
   let p = await readPublic(kv, s, token);
   // Delivered: the same shoot id now opens the finals.
   if (p?.deliveredAt) redirect(`/delivery/${token}`);

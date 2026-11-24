@@ -73,7 +73,7 @@ export async function forgetLog(kv: KV, s: Sealer, id: string): Promise<void> {
   await kv.put(SHEET_DIRTY, "1");
 }
 
-/** Every master entry, oldest first: one list call per 1000 events. */
+/** Every master entry, oldest first: one list call per 1000 events. Entries that will not open are left out, so totals can be partial. */
 export async function readMaster(kv: KV, s: Sealer): Promise<MasterEntry[]> {
   const out: MasterEntry[] = [];
   let cursor: string | undefined;

@@ -22,6 +22,7 @@ import type { Lead } from "@/lib/leads/leads";
 import type { InboxKV as KV } from "@/lib/kv";
 import type { Seal } from "@/lib/leads/lead-crypto";
 import { isEmail, newToken, sha256Hex } from "@/lib/utils";
+import { asRecord } from "@/lib/json";
 
 export type ContractTemplate = { id: string; name: string; body: string };
 
@@ -41,7 +42,7 @@ export const UNSET = /\bto be set\b/i;
 export type Signature = { name: string; email: string; ip: string; ua: string; at: string; hash: string; mark?: string; typed?: true };
 
 /** Path data from the pad: M, L and Q with plain numbers, nothing that could run or link. */
-export const isMark = (v: unknown): v is string => typeof v === "string" && v.length >= 8 && v.length <= 40000 && /^M[\d\s.,MLQ-]+$/.test(v) && (v.match(/\d+(\.\d+)?/g)?.length ?? 0) >= 4;
+export const isMark = (v: string): boolean => v.length >= 8 && v.length <= 40000 && /^M[\d\s.,MLQ-]+$/.test(v) && (v.match(/\d+(\.\d+)?/g)?.length ?? 0) >= 4;
 /** First and last name at least: two words with letters in them. */
 export const isFullName = (n: string) => n.split(/\s+/).filter((w) => /\p{L}/u.test(w)).length >= 2;
 /** The drawn mark as an inline SVG. Only ever given path data that passed `isMark`. */
@@ -66,7 +67,7 @@ export type Contract = {
 
 export const contractKey = (id: string) => `contract:${id}`;
 export const leadContractKey = (lead: string) => `leadcontract:${lead}`;
-export const isContractId = (v: unknown): v is string => typeof v === "string" && /^[0-9A-Za-z]{16}$/.test(v);
+export const isContractId = (v: string): boolean => /^[0-9A-Za-z]{16}$/.test(v);
 export const contractUrl = (id: string) => `https://juliangigola.com/contract/${id}`;
 
 const usd = (n: number) => `$${n.toLocaleString("en-US")}`;
@@ -100,7 +101,7 @@ const clip = (v: unknown, n: number) => (typeof v === "string" ? v.trim().slice(
 
 /** What the desk may set on a contract, checked. */
 export function cleanDraft(given: Record<string, unknown>): { to: Contract["to"]; text: string; template?: string } | { error: string } {
-  const to = (given.to ?? {}) as Record<string, unknown>;
+  const to = asRecord(given.to);
   const text = typeof given.text === "string" ? given.text.replace(/\r\n/g, "\n").slice(0, 20000) : "";
   if (!text.trim()) return { error: "The contract has no text." };
   const name = clip(to.name, 120);
@@ -122,8 +123,8 @@ export async function sign(c: Contract, by: { name: unknown; email: unknown; agr
   const name = clip(by.name, 120);
   if (!isFullName(name)) return { error: "Type your first and last name.", status: 400 };
   const typed = by.typed === true;
-  if (!typed && !isMark(by.mark)) return { error: "Sign in the box.", status: 400 };
-  if (!isEmail(by.email)) return { error: "That email does not look right.", status: 400 };
+  if (!typed && (typeof by.mark !== "string" || !isMark(by.mark))) return { error: "Sign in the box.", status: 400 };
+  if (typeof by.email !== "string" || !isEmail(by.email)) return { error: "That email does not look right.", status: 400 };
   if (by.agree !== true) return { error: "Tick I agree to sign.", status: 400 };
   const hash = await sha256Hex(c.text);
   if (by.seen !== hash) return { error: "This contract changed since you opened it. Reload the page to read the new text.", status: 409 };

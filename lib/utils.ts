@@ -48,8 +48,8 @@ export function newToken(): string {
 export const looksLikeEmail = (value: string): boolean =>
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
-/** An address a server keeps: a string, at most 200 characters, that `looksLikeEmail` once trimmed. */
-export const isEmail = (v: unknown): v is string => typeof v === "string" && v.length <= 200 && looksLikeEmail(v.trim());
+/** An address a server keeps: at most 200 characters, and `looksLikeEmail` once trimmed. Check `typeof` first on unknown input. */
+export const isEmail = (v: string): boolean => v.length <= 200 && looksLikeEmail(v.trim());
 
 /** sessionStorage that never throws (private mode, storage off, a sandboxed frame): null when it cannot read. */
 export const sessionGet = (key: string): string | null => {
@@ -67,5 +67,49 @@ export const sessionSet = (key: string, value: string) => {
   } catch {}
 };
 
+/** sessionStorage that never throws: a removal it cannot make is dropped. */
+export const sessionRemove = (key: string) => {
+  try {
+    sessionStorage.removeItem(key);
+  } catch {}
+};
+
+/** A JSON value kept in sessionStorage: null when missing, unreadable or not JSON. */
+export const sessionJson = <T>(key: string): T | null => {
+  try {
+    return JSON.parse(sessionStorage.getItem(key) ?? "null") as T | null;
+  } catch {
+    return null;
+  }
+};
+
+/** localStorage that never throws: null when it cannot read. */
+export const localGet = (key: string): string | null => {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+};
+
+/** localStorage that never throws: a write it cannot make is dropped. */
+export const localSet = (key: string, value: string) => {
+  try {
+    localStorage.setItem(key, value);
+  } catch {}
+};
+
+/** localStorage that never throws: a removal it cannot make is dropped. */
+export const localRemove = (key: string) => {
+  try {
+    localStorage.removeItem(key);
+  } catch {}
+};
+
 /** An error's message, or the thrown value as text when it is not an Error. */
 export const errorText = (e: unknown) => (e instanceof Error ? e.message : String(e));
+
+/** A `.catch` handler that logs the labels and the error as text, then gives undefined. */
+export const logged =
+  (...label: string[]) =>
+  (e: unknown) => (console.error(...label, String(e)), undefined);

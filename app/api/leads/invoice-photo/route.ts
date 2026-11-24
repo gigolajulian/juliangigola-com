@@ -1,5 +1,5 @@
 import { PHOTO_KEY } from "@/lib/leads/invoice";
-import { gate, noSeal } from "@/lib/leads/desk-route";
+import { gate, noSeal, sealedGate } from "@/lib/leads/desk-route";
 import { bodyOf, json } from "@/lib/http";
 import { sha256Hex } from "@/lib/utils";
 
@@ -9,10 +9,9 @@ import { sha256Hex } from "@/lib/utils";
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
-  const g = await gate(request);
+  const g = await sealedGate(request);
   if (g.error) return g.error;
   const seal = g.s;
-  if (!seal) return noSeal();
   const key = new URL(request.url).searchParams.get("key") ?? "";
   const raw = PHOTO_KEY.test(key) ? await g.kv.get(key) : null;
   return raw ? json({ photo: await seal.open<string>(raw) }) : json({ error: "Photo not found." }, 404);

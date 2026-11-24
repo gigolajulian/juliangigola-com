@@ -6,7 +6,7 @@ import { PAYMENTS_DOWN, PAYMENTS_OFF } from "@/lib/stripe";
 import { cleanSelects, device, isTestEmail, amountOwed, isToken, publicView, track, viewerKey, type Proof } from "@/lib/proofs/proof-model";
 import { isEmail } from "@/lib/utils";
 import { checkPass, passCookie, passValue, shutReason, readPublic, writeProof } from "@/lib/proofs/proof-store";
-import { bodyOf, json, upstreamError } from "@/lib/http";
+import { bodyOf, json, limited, upstreamError } from "@/lib/http";
 import { alertHello } from "@/lib/email/hello-mail";
 import { actionAlert, worthMail } from "@/lib/email/proof-mail";
 
@@ -23,9 +23,8 @@ export const dynamic = "force-dynamic";
 
 /** The gallery for this request: open, online, and past its password when it has one (the gate's cookie). */
 async function load(token: string, request: Request) {
-  const { env, seal, kv } = await sealedStore();
-  if (!kv || !seal || !isToken(token)) return null;
-  const s = await seal;
+  const { env, seal: s, kv } = await sealedStore();
+  if (!kv || !s || !isToken(token)) return null;
   const p = await readPublic(kv, s, token);
   return p && !(await shutReason(p, request.headers.get("cookie"), env.LEADS_KEY)) ? { env, kv, s, p } : null;
 }
@@ -34,12 +33,13 @@ async function load(token: string, request: Request) {
 async function unlock(token: string, request: Request, password: unknown) {
   const { env, seal, kv } = await sealedStore();
   if (!kv || !seal || !isToken(token)) return json({ error: "This gallery closed." }, 404);
-  const p = await readPublic(kv, await seal, token);
+  const p = await readPublic(kv, seal, token);
   const why = await shutReason(p, null, env.LEADS_KEY);
   if (!p || (why && why !== "locked")) return json({ error: why === "offline" ? "This gallery is offline." : "This gallery closed." }, 404);
   if (!p.pass) return json({ ok: true });
   // Its own key prefix: wrong passwords never use up the pay attempts on the same limiter.
-  if (!(await env.PUBLIC_WRITE_LIMIT.limit({ key: `pass:${request.headers.get("cf-connecting-ip") ?? "unknown"}` })).success) return json({ error: "Too many tries. Wait a minute." }, 429);
+  const slow = await limited(env.PUBLIC_WRITE_LIMIT, "pass", request);
+  if (slow) return slow;
   if (typeof password !== "string" || password.length > 200 || !(await checkPass(p.pass, password))) return json({ error: "That password is not right." }, 403);
   const res = json({ ok: true });
   res.headers.append("set-cookie", `${passCookie(p)}=${await passValue(p, env.LEADS_KEY!)}; Path=/; Max-Age=${60 * 864e2}; HttpOnly; Secure; SameSite=Lax`);
@@ -70,7 +70,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ to
   if (!g) return json({ error: "This gallery closed." }, 404);
   if (g.p.submittedAt) return json({ error: "Selects are already in." }, 409);
   const b = ((await bodyOf(request)) ?? {});
-  if (!isEmail(b.email)) return json({ error: "Add your email first." }, 400);
+  if (typeof b.email !== "string" || !isEmail(b.email)) return json({ error: "Add your email first." }, 400);
   const selects = cleanSelects(b.selects, g.p.frames);
   const next = { ...logged(g.p, b.email, { picks: selects }), selects, firstSelectAt: g.p.firstSelectAt ?? (selects.length && g.p.sentAt ? new Date().toISOString() : undefined) };
   await writeProof(g.kv, g.s, next);
@@ -85,7 +85,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
   if (!g) return json({ error: "This gallery closed." }, 404);
 
   if (b.action === "track") {
-    if (!isEmail(b.email)) return json({ error: "Add your email first." }, 400);
+    if (typeof b.email !== "string" || !isEmail(b.email)) return json({ error: "Add your email first." }, 400);
     // "download" (a delivery's Save or Download all) names the final, "all" for the zip, or a model ("M04") for its zip.
     const dl = b.kind === "download" && g.p.finals?.length && (b.id === "all" || g.p.finals.some((f) => f.id === b.id || f.model === b.id)) ? (b.id as string) : undefined;
     const kind = b.kind === "open" || b.kind === "review" ? b.kind : dl ? "download" : undefined;
@@ -111,7 +111,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
     return json({ picks: g.p.submittedAt ? g.p.selects : (next.viewers?.[viewerKey(b.email)]?.picks ?? []) });
   }
 
-  if (!(await g.env.PUBLIC_WRITE_LIMIT.limit({ key: `picks:${request.headers.get("cf-connecting-ip") ?? "unknown"}` })).success) return json({ error: "Too many tries. Wait a minute." }, 429);
+  const slow = await limited(g.env.PUBLIC_WRITE_LIMIT, "picks", request);
+  if (slow) return slow;
   if (g.p.submittedAt) return json({ done: true, ...publicView(g.p) });
   const key = g.env.STRIPE_SECRET_KEY;
 
@@ -123,7 +124,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
     return json({ done: true, ...publicView(await finalize(g.env, g.kv, g.s, g.p, paid)) });
   }
 
-  if (!isEmail(b.email)) return json({ error: "Add your email first." }, 400);
+  if (typeof b.email !== "string" || !isEmail(b.email)) return json({ error: "Add your email first." }, 400);
   const selects = cleanSelects(b.selects, g.p.frames);
   if (!selects.length) return json({ error: "Select at least one frame." }, 400);
   // Notes are gone from the gallery; old ones are dropped with the send.

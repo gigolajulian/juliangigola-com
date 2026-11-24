@@ -75,8 +75,9 @@ export async function PATCH(request: Request) {
 
   const given = await bodyOf(request);
   if (!given) return json({ error: "Not JSON." }, 400);
-  const { key, read } = given as { key?: string; read?: boolean };
-  if (!key?.startsWith("msg:") || typeof read !== "boolean")
+  const key = typeof given.key === "string" ? given.key : "";
+  const read = given.read;
+  if (!key.startsWith("msg:") || typeof read !== "boolean")
     return json({ error: "Unknown." }, 400);
 
   const body = await g.kv.get(key);
@@ -108,8 +109,8 @@ export async function DELETE(request: Request) {
 
   const given = await bodyOf(request);
   if (!given) return json({ error: "Not JSON." }, 400);
-  const { key } = given as { key?: string };
-  if (!key?.startsWith("msg:")) return json({ error: "Unknown." }, 400);
+  const key = typeof given.key === "string" ? given.key : "";
+  if (!key.startsWith("msg:")) return json({ error: "Unknown." }, 400);
 
   await g.kv.delete(key);
   // And the images it arrived with.

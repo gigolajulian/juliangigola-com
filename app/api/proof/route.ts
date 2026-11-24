@@ -1,10 +1,9 @@
-import { refuseAdmin } from "@/lib/vouch";
-import { sealedStore } from "@/lib/kv";
+import { gate as deskGate } from "@/lib/leads/desk-route";
 import { copiesFor, dropProofOpens, recordLead } from "@/lib/leads/lead-store";
 import { cardKey, closesAt, cleanSettings, DEFAULTS, DELIVERY_DAYS, finalKeys, frameKey, frameKeys, aliasKey, isDateId, isFrameId, isModel, isStrongId, isToken, publicId, remindState, shootDay, viewerKey, type Proof } from "@/lib/proofs/proof-model";
 import { isEmail } from "@/lib/utils";
 import { forDesk, hashPass, listProofs, nextProofId, readProof, writeProof } from "@/lib/proofs/proof-store";
-import { deliveryMail, deliveryUrl, proofMail, proofUrl, reminderMail, sendClient, subjectOr } from "@/lib/email/proof-mail";
+import { deliveryMail, deliveryUrl, proofMail, proofUrl, reminderMail, sendClient, subjectOr, webImages } from "@/lib/email/proof-mail";
 import { MAX_FINAL, storeFinal } from "@/lib/proofs/delivery";
 import { recheckTransfer } from "@/lib/proofs/submit";
 import { servedFrame } from "@/lib/proofs/watermark";
@@ -38,13 +37,14 @@ export const dynamic = "force-dynamic";
 /** A Lightroom export at ~2000px is well under this. */
 const MAX_FRAME = 8 * 1024 * 1024;
 
+const UNBOUND = "Proofs need INBOX, PROOFS and LEADS_KEY on this build.";
+
+/** The desk's gate with this route's message, then PROOFS and LEADS_KEY. */
 async function gate(request: Request) {
-  const { env, seal, kv } = await sealedStore();
-  // Who is asking first: what this build is missing is for /admin only.
-  const denied = await refuseAdmin(request, env.INBOX_KEY);
-  if (denied) return { error: denied };
-  if (!kv || !env.PROOFS || !seal) return { error: json({ error: "Proofs need INBOX, PROOFS and LEADS_KEY on this build." }, 503) };
-  return { env, kv, r2: env.PROOFS, s: await seal };
+  const g = await deskGate(request, UNBOUND);
+  if (g.error) return g;
+  if (!g.env.PROOFS || !g.s) return { error: json({ error: UNBOUND }, 503) };
+  return { ...g, r2: g.env.PROOFS, s: g.s };
 }
 
 type Gated = Exclude<Awaited<ReturnType<typeof gate>>, { error: Response }>;
@@ -84,7 +84,7 @@ export async function GET(request: Request) {
     const sent = p.sentAt ? p : { ...p, closesAt: closesAt(p.days) };
     const m = proofMail(sent, p.frames.slice(0, 4).map((f) => ({ id: f.id, bytes: new Uint8Array() })));
     const { subject } = m;
-    const html = m.html.replace("cid:name-ink", "/email-name-ink.png").replace("cid:name-w", "/email-name-w.png").replace(/cid:f-([0-9A-Za-z_-]+)/g, (_, id) => `/proof/${publicId(p)}/f/${id}`);
+    const html = webImages(m.html).replace(/cid:f-([0-9A-Za-z_-]+)/g, (_, id) => `/proof/${publicId(p)}/f/${id}`);
     return json({ html, subject, to: p.email ?? null });
   }
   const remind = q.get("remind");
@@ -94,7 +94,7 @@ export async function GET(request: Request) {
     const r = remindState(p);
     if (!r.stage) return json({ error: "Not sent yet." }, 409);
     const m = reminderMail(p, r.stage);
-    const html = m.html.replace("cid:name-ink", "/email-name-ink.png").replace("cid:name-w", "/email-name-w.png");
+    const html = webImages(m.html);
     return json({ html, subject: m.subject, to: p.email ?? null, cc: p.email ? await copiesFor(g.kv, g.s, p.email).catch(() => []) : [], remind: r });
   }
   const token = q.get("token");

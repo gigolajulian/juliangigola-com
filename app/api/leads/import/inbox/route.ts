@@ -1,7 +1,7 @@
 import { backfillLead, type InboxRow, type Lead, type Stage } from "@/lib/leads/leads";
 import { readLead, writeLead } from "@/lib/leads/lead-store";
 import type { Summary } from "@/lib/leads/enquiry";
-import { everyKey, gate, noSeal } from "@/lib/leads/desk-route";
+import { everyKey, sealedGate } from "@/lib/leads/desk-route";
 import { bodyOf, json } from "@/lib/http";
 
 /**
@@ -16,11 +16,10 @@ import { bodyOf, json } from "@/lib/http";
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
-  const g = await gate(request);
+  const g = await sealedGate(request);
   if (g.error) return g.error;
   const dry = (await bodyOf(request))?.dry !== false;
   const seal = g.s;
-  if (!seal) return noSeal();
 
   const people = new Map<string, InboxRow[]>();
   for await (const k of everyKey<Summary>(g.kv, "msg:")) {

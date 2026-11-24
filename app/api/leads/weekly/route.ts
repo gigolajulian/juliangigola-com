@@ -15,10 +15,9 @@ import { json } from "@/lib/http";
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
-  const { env, seal: sealing, kv } = await sealedStore();
+  const { env, seal, kv } = await sealedStore();
   const denied = await refuseWorker(request, env.WORKER_KEY);
   if (denied) return denied;
-  const seal = await sealing;
   if (!kv || !seal) return json({ error: "Not set up." }, 503);
   const { subject, lines } = weeklyMail(await everyLead(kv, seal), await readMaster(kv, seal), Date.now());
   if (new URL(request.url).searchParams.has("dry")) return json({ subject, text: lines.join("\n") });

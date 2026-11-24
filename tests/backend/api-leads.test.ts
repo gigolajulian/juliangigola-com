@@ -238,6 +238,11 @@ describe("leads", () => {
     expect((await desk("PATCH", "", { body: JSON.stringify({ key: "lead:0000", seen: true }) })).status).toBe(404);
     ctx.env = { INBOX: kv, INBOX_KEY: KEY };
     expect((await desk("GET")).status).toBe(503);
+    expect(await (await desk("GET", "/tasks")).json()).toEqual({ error: "Leads need LEADS_KEY on the Worker." });
+  });
+
+  it("answers 400, not a crash, for a lead added by hand with a non-string address", async () => {
+    expect((await desk("POST", "", { body: { name: "Ana", email: 5 } })).status).toBe(400);
   });
 });
 

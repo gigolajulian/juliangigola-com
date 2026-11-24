@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { alertLines, proofMail, proofUrl, receiptMail, sendClient } from "@/lib/email/proof-mail";
+import { alertLines, proofMail, proofUrl, receiptMail, sendClient, webImages } from "@/lib/email/proof-mail";
 import type { Proof } from "@/lib/proofs/proof-model";
 
 /* The proof mails: what the client and Julian read, and the send that
@@ -79,5 +79,13 @@ describe("sendClient", () => {
     const send = vi.fn().mockRejectedValue(new Error("down"));
     expect(await sendClient({ send } as never, "a@b.c", m)).toBe(false);
     expect(send).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("webImages", () => {
+  it("points the wordmark's inline parts at the site, under a base when given", () => {
+    const html = '<img src="cid:name-ink"><img src="cid:name-w"><img src="cid:f-a">';
+    expect(webImages(html)).toBe('<img src="/email-name-ink.png"><img src="/email-name-w.png"><img src="cid:f-a">');
+    expect(webImages(html, "https://x.co")).toContain('src="https://x.co/email-name-ink.png"');
   });
 });

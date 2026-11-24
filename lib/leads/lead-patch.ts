@@ -11,6 +11,7 @@ import { adoptLog } from "@/lib/leads/activity-log";
 import { notionPaper, notionStage } from "@/lib/leads/sync/notion-lead";
 import { cleanPeople, cleanPlan, cleanTasks, merge } from "@/lib/leads/lead-crm";
 import { balance, cleanInvoice, invoiceCountKey, invoiceNo, invoicesTaken, usd } from "@/lib/leads/invoice";
+import { logged } from "@/lib/utils";
 
 /** The changed lead, or why not and with which status. */
 export type PatchResult = { lead: Lead } | { error: string; status: number };
@@ -146,7 +147,7 @@ export async function patchLead(inbox: KV, seal: Sealer, given: Record<string, u
   // Their mail finds this lead from now on; a merged record's people now point here too.
   if (people !== undefined || merged) await linkPeople(inbox, seal, id, lead.people, merged ? undefined : wasPeople);
   if (merged) {
-    await adoptLog(inbox, seal, id, merged.slice(5), lead).catch((e: unknown) => console.error("activity log merge", String(e)));
+    await adoptLog(inbox, seal, id, merged.slice(5), lead).catch(logged("activity log merge"));
     // No seal: adoptLog above already moved the old log here.
     await buryLead(inbox, undefined, merged.slice(5));
   }

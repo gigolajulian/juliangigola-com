@@ -1,5 +1,5 @@
 import { importNotion } from "@/lib/leads/sync/notion-import";
-import { gate, noSeal } from "@/lib/leads/desk-route";
+import { sealedGate } from "@/lib/leads/desk-route";
 import { bodyOf, json } from "@/lib/http";
 import { errorText } from "@/lib/utils";
 
@@ -9,11 +9,10 @@ import { errorText } from "@/lib/utils";
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
-  const g = await gate(request);
+  const g = await sealedGate(request);
   if (g.error) return g.error;
   const given = await bodyOf(request);
   const seal = g.s;
-  if (!seal) return noSeal();
   try {
     return json(await importNotion(g.kv, seal, given?.people, given?.dry !== false));
   } catch (e) {
