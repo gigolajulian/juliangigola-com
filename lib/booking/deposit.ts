@@ -240,10 +240,11 @@ export async function bookDeposit(env: Env, intent: string, metadata: { [k: stri
   let broke = "";
   // What tell() and the stuck row read: the booking, or why the metadata is not one.
   const b = parsed.ok ? parsed.booking : parsed.reason;
-  if (typeof b !== "string") {
+  if (parsed.ok) {
+    const want = parsed.booking;
     // The site's engine rechecks and books in one step, inside its lock.
     // Only the booking itself may end in a refund: a step after it never undoes a booked time.
-    const own = await lockOp(env, "book", { ...b, intent, deposit: usd }).catch((e: unknown) => {
+    const own = await lockOp(env, "book", { ...want, intent, deposit: usd }).catch((e: unknown) => {
       broke = String(e);
       console.error("deposit book", broke);
       return null;
@@ -251,17 +252,17 @@ export async function bookDeposit(env: Env, intent: string, metadata: { [k: stri
     if (own?.ok) {
       const booking = own.record;
       await put({ status: "booked", booking: { uid: booking.id, start: booking.start } });
-      await tell(env, "booked", b, link, intent, usd);
+      await tell(env, "booked", want, link, intent, usd);
       // Not `confirmOf`: this mail maps the paid Booking and adds the card Stripe charged. The fee comes from the record, so it says 90% back.
       await afterBooked(env, booking, async () => ({
-        ...b,
-        session: SESSION[b.slug] ?? b.slug,
+        ...want,
+        session: SESSION[want.slug] ?? want.slug,
         start: booking.start,
         end: booking.end,
         uid: booking.id,
         deposit: { ref: intent, at: new Date().toISOString(), amount: usd, card: await cardOf(env.STRIPE_SECRET_KEY, intent), fee: booking.fee },
         manage: await manageLinks(env.BOOKING_SECRET, booking),
-      }), { deposit: dashboardLink(intent, env.STRIPE_SECRET_KEY), email: b.email });
+      }), { deposit: link, email: want.email });
       return "booked";
     }
   }
@@ -309,25 +310,25 @@ export async function cancelBooking(
     refund?: { form: { [k: string]: string }; ref: string };
     note: string;
     refundNote: string;
-    amount: number;
     oneStamp?: boolean;
     subject: string;
     line: string;
     money: (refunded: boolean | undefined) => string;
     mail: (refunded: boolean | undefined) => Parameters<typeof sendCancelled>[2];
     usd: number | undefined;
+    /** Dollars going back: the refund log line and the client's mail. */
     back: number;
   },
 ) {
   const who = { name: r.name, email: r.email };
   const key = env.STRIPE_SECRET_KEY;
-  const refund = r.intent && key ? o.refund : undefined;
+  const refund = r.intent && key && o.refund ? { ...o.refund, key } : undefined;
   let refunded: boolean | undefined;
-  if (refund && key) refunded = await stripe(key, "/refunds", refund.form, refund.ref).then(() => true, () => false);
+  if (refund) refunded = await stripe(refund.key, "/refunds", refund.form, refund.ref).then(() => true, () => false);
   const at = o.oneStamp ? new Date().toISOString() : undefined;
   await recordLead(env, r.email, { event: { at: at ?? new Date().toISOString(), kind: "cancel", ref: `cancel:${r.id}`, note: o.note } });
   // What went back, off this booking's record, so the log says what Stripe did.
-  if (refunded && refund) await recordLead(env, r.email, { event: { at: at ?? new Date().toISOString(), kind: "refund", ref: refund.ref, note: o.refundNote, amount: o.amount } });
+  if (refunded && refund) await recordLead(env, r.email, { event: { at: at ?? new Date().toISOString(), kind: "refund", ref: refund.ref, note: o.refundNote, amount: o.back } });
   await alertAndLog(env, o.subject, [`${r.name} <${r.email}>`, o.line, o.money(refunded), ...(r.intent && key ? [`Stripe: ${dashboardLink(r.intent, key)}`] : [])], who, { kind: "cancelled", booking: r.id });
   const gone = { ...who, session: r.session, start: was.start, end: was.end };
   if (await sendCancelled(env.CLIENT_EMAIL, gone, o.mail(refunded), o.usd, o.back))

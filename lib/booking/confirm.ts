@@ -202,7 +202,7 @@ export async function sendConfirm(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefi
 export const cancelledSubject = (c: { session: string; start: string; end?: string }) => `Cancelled: ${c.session}, ${timeRange(c.start, c.end)}`;
 
 /** The client's note that a booking is cancelled, plain, from book@. A failed send is logged, never a failed cancel. Whether it went out. */
-export async function sendCancelled(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefined, c: { name: string; email: string; session: string; start: string; end?: string }, refund: "refunded" | "early" | "part" | "kept" | "none" | "late" | "mine" | "mineFree", usd = LEGACY_DEPOSIT, back = refundCents(usd, 0.7) / 100): Promise<boolean> {
+export async function sendCancelled(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefined, c: { name: string; email: string; session: string; start: string; end?: string }, refund: "refunded" | "early" | "part" | "kept" | "none" | "late" | "mine" | "mineFree", usd = LEGACY_DEPOSIT, back = refundCents(usd, PART_SHARE) / 100): Promise<boolean> {
   if (!mailer || !c.email) return false;
   const money = {
     refunded: `Your $${usd} deposit is refunded to your card. Banks take 5 to 10 days to show it.`,
