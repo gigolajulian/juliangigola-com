@@ -15,9 +15,8 @@ import { configDefaults, defineConfig } from "vitest/config";
 const alias = { "@": fileURLToPath(new URL(".", import.meta.url)) };
 
 const FRONTEND_LIB = [
-  "tests/lib/cover-art-match.test.ts",
   "tests/lib/flags/**/*.test.ts",
-  "tests/lib/grad-year.test.ts",
+  "tests/lib/graduation/grad-year.test.ts",
   "tests/lib/home/**/*.test.ts",
   "tests/lib/json.test.ts",
   "tests/lib/keep-names.test.ts",
@@ -26,7 +25,7 @@ const FRONTEND_LIB = [
   "tests/lib/motion/throw.test.ts",
   "tests/lib/motion/wheel.test.ts",
   "tests/lib/plain-src.test.ts",
-  "tests/lib/v4pages.test.ts",
+  "tests/lib/work/cover-art-match.test.ts",
 ];
 
 export default defineConfig({

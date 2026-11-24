@@ -14,7 +14,7 @@ const EMAIL = "hello@juliangigola.com";
  * requests it is already handling. The new wording says that, which is
  * both accurate and a stronger position.
  *
- * Since 2026-10-14 the Site has one first-party beacon of its own
+ * The Site has one first-party beacon of its own
  * (`click-beacon.tsx`, for /admin's SEO tab), so "Cookies, storage and
  * analytics" and the retention list describe exactly what it sends.
  *

@@ -3,7 +3,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import type * as React from "react";
 
 const seen = vi.hoisted(() => ({ mounts: 0 }));
-vi.mock("@/components/booking/time-picker", () => ({
+vi.mock("@/components/booking/picker/time-picker", () => ({
   TimePicker: ({ path, fallback }: { path: string; fallback: React.ReactNode }) => {
     seen.mounts++;
     return (

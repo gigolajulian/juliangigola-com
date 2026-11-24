@@ -14,20 +14,18 @@ import { Heading, Text } from "@astryxdesign/core/Text";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { TextArea } from "@astryxdesign/core/TextArea";
 import { Selector } from "@astryxdesign/core/Selector";
-import { stampPT } from "@/lib/leads/lead-desk";
-import { adminCall, authed } from "@/lib/admin/admin-call";
+import { adminBlob, adminCall, stampPT } from "@/lib/admin/admin-call";
 import { errorText } from "@/lib/utils";
 import type { Contract, ContractTemplate } from "@/lib/contracts/contract";
 
 type Got = { contract: Contract | null; url: string | null; error?: string };
-const api = <T,>(init: RequestInit & { query?: string } = {}) => adminCall<T>(`/api/contract${init.query ?? ""}`, init);
+const api = <T,>({ path = "", ...init }: RequestInit & { path?: string } = {}) => adminCall<T>(`/api/contract${path}`, init);
 
 /** The signed copy, through the desk's key: a file, never opened on this origin. */
 async function downloadCopy(c: Contract) {
-  const res = await fetch(`/api/contract?copy=${c.id}`, { headers: authed(), cache: "no-store" });
-  if (!res.ok) throw new Error(`Download failed (${res.status})`);
+  const blob = await adminBlob(`/api/contract?copy=${c.id}`, "Download failed");
   const a = document.createElement("a");
-  a.href = URL.createObjectURL(await res.blob());
+  a.href = URL.createObjectURL(blob);
   a.download = `Contract - ${c.to.name}.html`;
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
@@ -43,8 +41,8 @@ export function ContractBlock({ leadId, changed }: { leadId: string; changed: ()
 
   React.useEffect(() => {
     let live = true;
-    api<Got>({ query: `?lead=${encodeURIComponent(leadId)}` }).then((o) => live && setGot(o)).catch((e: unknown) => live && setNote(errorText(e)));
-    api<{ templates: ContractTemplate[] }>({ query: "?templates" }).then((o) => { if (live) { setTemplates(o.templates); setPick(o.templates[0]?.id ?? ""); } }).catch(() => {});
+    api<Got>({ path: `?lead=${encodeURIComponent(leadId)}` }).then((o) => live && setGot(o)).catch((e: unknown) => live && setNote(errorText(e)));
+    api<{ templates: ContractTemplate[] }>({ path: "?templates" }).then((o) => { if (live) { setTemplates(o.templates); setPick(o.templates[0]?.id ?? ""); } }).catch(() => {});
     return () => { live = false; };
   }, [leadId]);
 
@@ -125,7 +123,7 @@ export function ContractTemplatesDesk() {
   const [list, setList] = React.useState<ContractTemplate[] | null>(null);
   const [note, setNote] = React.useState<string | null>(null);
   React.useEffect(() => {
-    api<{ templates: ContractTemplate[] }>({ query: "?templates" }).then((o) => setList(o.templates)).catch((e: unknown) => setNote(errorText(e)));
+    api<{ templates: ContractTemplate[] }>({ path: "?templates" }).then((o) => setList(o.templates)).catch((e: unknown) => setNote(errorText(e)));
   }, []);
   const edit = (i: number, k: keyof ContractTemplate) => (v: string) => setList(list!.map((t, j) => (j === i ? { ...t, [k]: v } : t)));
   const save = () =>

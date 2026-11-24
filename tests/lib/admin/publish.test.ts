@@ -21,7 +21,7 @@ const removeItem = vi.fn();
 beforeEach(() => {
   fetch = vi.fn(async () => contents("sha1"));
   vi.stubGlobal("fetch", fetch);
-  vi.stubGlobal("window", { localStorage: { removeItem } });
+  vi.stubGlobal("localStorage", { removeItem });
   gh.readFile.mockReset().mockResolvedValue(null);
   gh.commitFiles.mockReset().mockResolvedValue(undefined);
   removeItem.mockReset();

@@ -1,5 +1,5 @@
 import { WORK_CATEGORIES, projectsIn } from "@/lib/work/work";
-import LOOKS from "@/lib/picker-looks.json";
+import LOOKS from "@/lib/booking/picker-looks.json";
 
 /* The photographs the inquiry form's picker offers (`reference-picks.tsx`),
    by discipline. A file of its own, fetched when the picker opens, so the
@@ -30,7 +30,7 @@ function varied<T extends { color?: string }>(items: T[], ahead = 6): T[] {
 
 /* The picker by look rather than discipline. Each photograph's look was
    sorted by its light and colour and then corrected by eye
-   (`lib/picker-looks.json`); a photograph added since lands in "More"
+   (`lib/booking/picker-looks.json`); a photograph added since lands in "More"
    until it is given one. Events and Cover art are kinds of work rather
    than looks, and are kept whole. */
 const ORDER = ["Chroma", "Night", "White studio", "Gray studio", "Daylight", "Events", "Cover art", "More"];

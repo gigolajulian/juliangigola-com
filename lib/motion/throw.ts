@@ -1,6 +1,6 @@
 /* ── where a throw lands ──────────────────────────────────────────
- * The projection a paged strip makes when a finger lifts
- * (`onTouchEnd` in `components/strip/touch.ts`): iOS's own scroll
+ * The projection a flick makes when a finger lifts
+ * (`components/portfolio/canvas.tsx`): iOS's own scroll
  * deceleration, run out to the end.
  * ─────────────────────────────────────────────────────────────── */
 

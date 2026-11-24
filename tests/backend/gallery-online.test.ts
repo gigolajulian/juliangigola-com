@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { POST } from "@/app/api/proof/[token]/route";
 import { GET as adminGET, PATCH as adminPATCH } from "@/app/api/proof/route";
 import { finalResponse } from "@/lib/proofs/delivery-serve";
-import { sealer } from "@/lib/leads/lead-crypto";
+import { sealer } from "@/lib/seal";
 import { coverFrame, type Proof } from "@/lib/proofs/proof-model";
 import { checkPass, hashPass, passOk, passValue, readProof, writeProof } from "@/lib/proofs/proof-store";
 import { FakeKV, LEADS_KEY } from "./fakes";

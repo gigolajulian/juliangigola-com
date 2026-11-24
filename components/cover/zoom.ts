@@ -41,7 +41,7 @@ const NAME = "zoom-picture";
 /* Which engine draws the trip where the browser offers both.
    Measured on Chrome 140: with the page snapshotted, the browser's engine
    spent about 105ms of GPU time rasterising the page for the first frame
-   of every open (the stall Julian saw); with only the pictures snapshotted
+   of every open (a visible stall); with only the pictures snapshotted
    (`view-transition-name: none` on the root) Chrome composited the moving
    picture over a second, larger ghost of itself for the first frames, and
    the live viewer under the pseudo tree could not be hidden without

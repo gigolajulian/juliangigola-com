@@ -23,7 +23,7 @@ function uncoverOnFocus(e: React.FocusEvent<HTMLAnchorElement>) {
   });
 }
 
-export function HomeAbout({ does }: { does: string[] }) {
+export function HomeAbout({ disciplines }: { disciplines: string[] }) {
   const words = ABOUT_SENTENCE.split(" ");
   return (
     <section id="about" className="mt-about" aria-label="About" data-mt="about">
@@ -47,7 +47,7 @@ export function HomeAbout({ does }: { does: string[] }) {
             <div className="mt-does">
               <h2 className="lbl mute">What I do</h2>
               <ol>
-                {does.map((d, j) => (
+                {disciplines.map((d, j) => (
                   <li key={d} style={{ "--j": j } as React.CSSProperties}>
                     <span className="lbl mute">{pad(j + 1)}</span>
                     <b>{d}</b>

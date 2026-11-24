@@ -235,7 +235,7 @@ export const webImages = (html: string, base = "") => html.replace("cid:name-ink
 /** `cc`: the other people on the lead with "copy on gallery mail" ticked (`copiesFor` in lib/leads/lead-store). */
 export async function sendClient(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefined, to: string, m: { subject: string; html: string; text: string; attachments: (Inline | Attached)[] }, cc: string[] = []): Promise<boolean> {
   if (!mailer) return false;
-  // Plain addresses: Cloudflare refuses an EmailAddress without a name (live 2026-11-11, every client mail failed).
+  // Plain addresses: Cloudflare refuses an EmailAddress without a name, which fails every client mail.
   const head = { to, from: FROM, replyTo: REPLY_TO, ...(cc.length ? { cc } : {}) };
   try {
     await mailer.send({ ...head, ...m });

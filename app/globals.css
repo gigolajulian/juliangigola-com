@@ -60,7 +60,7 @@
 @import "./styles/v4pages.css"; /* inner pages plan (lib/flags/v4pages.ts) */
 @import "./styles/navfx.css"; /* the header */
 
-/* Time picker (components/booking/time-picker.tsx): a digit rolls in when it changes. */
+/* Time picker (components/booking/picker/time-picker.tsx): a digit rolls in when it changes. */
 @keyframes tp-roll {
   from {
     opacity: 0;

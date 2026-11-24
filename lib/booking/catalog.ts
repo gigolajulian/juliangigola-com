@@ -1,6 +1,6 @@
 import { EVENTS } from "@/lib/booking/rules";
 import { depositFor, takesDeposit } from "@/lib/booking/paid";
-import { ABOUT_PHOTO } from "@/lib/home/photos";
+import { ABOUT_PHOTO } from "@/lib/photos";
 import { CONTENT, type SessionType } from "@/lib/content";
 
 export type { SessionType };

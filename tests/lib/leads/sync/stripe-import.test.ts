@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { recordLead } from "@/lib/leads/lead-store";
-import { sealer } from "@/lib/leads/lead-crypto";
+import { sealer } from "@/lib/seal";
 import { readLog } from "@/lib/leads/activity-log";
 import { importStripe } from "@/lib/leads/sync/stripe-import";
 import { FakeKV, LEADS_KEY, leadOf } from "../../../backend/fakes";

@@ -3,7 +3,7 @@
    "Copy all" (`dial-copy-all.tsx`), so a paste brings them with the
    values. Dev server only. Kept for the tab's life in sessionStorage, as
    the layout panels' values are, so a reload keeps them. */
-import { sessionJson, sessionSet } from "@/lib/utils";
+import { sessionJson, sessionSet } from "@/lib/storage";
 
 const KEY = "jg-arrange-notes";
 

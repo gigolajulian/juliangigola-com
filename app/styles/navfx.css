@@ -34,17 +34,17 @@
 :root[data-navfx] .v3 .site-hdr .links a[data-ink="b"]{--nav-off:#fff}
 :root[data-navfx] .v3 .site-hdr .links a:hover{color:color-mix(in srgb,var(--nav-ink,var(--ink)) 90%,var(--nav-off))}
 /* The current page keeps the full ink and takes the one accent as a hairline under it: the 20% mix toward the other ink
-   cost it contrast over a photo (MAC SSH, #1431: "Portfolio" 2.1 to 2.9:1 under the frost in dark). The accent marks
+   costs it contrast over a photo (under 3:1 under the frost in dark). The accent marks
    state only (DESIGN.md). */
 :root[data-navfx] .v3 .site-hdr .links a[aria-current="page"]{color:var(--nav-ink,var(--ink));text-decoration:underline 1px var(--nav-teal);text-underline-offset:6px}
 :root[data-navfx] .v3 .site-hdr.menu-on :is(.site-wm,.links a,.tbtn,.menu-btn){color:var(--ink)}
 /* The v4 home: no wordmark in the bar while the hero's big name shows (`data-navnamegone`, nav-ink.ts). It fades in as the name goes. */
 :root[data-navfx] .v3 .site-hdr .site-wm{transition:color .2s ease,opacity .3s ease}
-:root[data-navfx][data-mtscroll]:has(.mt-hero):not([data-navnamegone]) .v3 .site-hdr:not(.menu-on) .site-wm:not(:focus-visible){opacity:0;pointer-events:none} /* keyboard focus shows it (Mac QA v3.0.295: Tab stop 2 had no ring) */
+:root[data-navfx][data-mtscroll]:has(.mt-hero):not([data-navnamegone]) .v3 .site-hdr:not(.menu-on) .site-wm:not(:focus-visible){opacity:0;pointer-events:none} /* keyboard focus shows it */
 /* The portfolio's search and view buttons in the bar take the same white or black. */
-/* Not while tucked, at any width: the tools sit on their own solid panel there (MAC on #1411). */
+/* Not while tucked, at any width: the tools sit on their own solid panel there. */
 @media (min-width:640px){:root[data-navfx]:not([data-tuck]) .v3 .site-hdr .hslot{--ink:var(--nav-ink)}}
-/* Phones too, idle icons (--mute) included (the search, eyedropper and view icons stayed black over dark photos, MAC on v3.0.364), but not while the search is open: it covers the bar on the page colour there, nor tucked, where the tools sit on their own solid panel. */
+/* Phones too, idle icons (--mute) included (so the search, eyedropper and view icons are not black over dark photos), but not while the search is open: it covers the bar on the page colour there, nor tucked, where the tools sit on their own solid panel. */
 @media (max-width:639.98px){:root[data-navfx]:not([data-tuck]) .v3 .site-hdr .hslot:not(:has(.htools.open)){--ink:var(--nav-ink);--mute:color-mix(in srgb,var(--nav-ink) 72%,transparent)}}
 
 @media (max-width:639.98px){

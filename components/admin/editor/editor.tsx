@@ -9,17 +9,15 @@ import { AdminDisciplines } from "@/components/admin/admin-disciplines";
 import { AdminPreview } from "@/components/admin/admin-preview";
 import { AdminPage } from "@/components/admin/admin-page";
 import { AdminTrash } from "@/components/admin/admin-trash";
-import { AdminInbox, unreadCount } from "@/components/admin/admin-inbox";
+import { AdminInbox } from "@/components/admin/admin-inbox";
 import { AdminTraffic } from "@/components/admin/admin-traffic";
 import { AdminSeo } from "@/components/admin/admin-seo";
 import { AdminVideos } from "@/components/admin/admin-videos";
-import { loadRepo, publishDraft, type Draft, type Status } from "@/lib/admin/publish";
+import type { Draft } from "@/lib/admin/publish";
 import { ClientFields, ContactFields, CoverArtFields, HomeFields, QuoteFields, SessionFields } from "@/components/admin/editor/fields";
 import { type TrashedProject } from "@/lib/work/added";
-import { type PendingUpload } from "@/components/admin/admin-frames";
+import type { PendingUpload } from "@/lib/admin/admin-sequence";
 import { CreditDesk } from "@/components/admin/admin-credits";
-import { sameJson } from "@/lib/admin/admin-payload";
-import { TOKEN_STORE } from "@/lib/admin/admin-github";
 import { byCodeUnit, cn } from "@/lib/utils";
 import { FIELD_TAB, TABS, type View } from "@/components/admin/editor/tabs";
 import { remapSlugs } from "@/components/admin/editor/remap-slugs";
@@ -27,12 +25,14 @@ import { Connect, PublishStatus } from "@/components/admin/editor/connect";
 import type { AdminEditorProps, ListDraft, Overrides } from "@/components/admin/editor/props";
 import { useDeployWatch } from "@/components/admin/editor/use-deploy-watch";
 
-import { changedSlugs, draftProjects, movedTabs, withListDraft, withProjectOverride, type Baseline, type SetListDraft, type SetOverride } from "@/components/admin/editor/draft";
+import { changedSlugs, draftProjects, movedTabs, withListDraft, withProjectOverride, type SetListDraft, type SetOverride } from "@/components/admin/editor/draft";
 import { useFoundField } from "@/components/admin/editor/use-found-field";
 import { useCreditDesk } from "@/components/admin/editor/use-credit-desk";
 import { EditorBar, FullSwitch } from "@/components/admin/editor/chrome";
-/** The per-project overrides a build applies, one map per kind. */
-export type { Overrides };
+import { useUnread } from "@/components/admin/editor/use-unread";
+import { useFullView, type FullView } from "@/components/admin/editor/use-full-view";
+import { useContentSession } from "@/components/admin/editor/use-content-session";
+import { EditorStagingProvider, type EditorStaging } from "@/components/admin/editor/editor-context";
 
 /* ── the editor ───────────────────────────────────────────────────
  * Edits `content/site.json` and commits it to the repo. The deploy does the
@@ -52,74 +52,36 @@ export type { Overrides };
  * for what is actually exposed — which is this UI and published content, not
  * a write path: every commit is authorised by a token that lives in one
  * browser and is never served with the page.
+ *
+ * The session itself (token, SHA, status, baseline) is `useContentSession`.
  * ─────────────────────────────────────────────────────────────── */
 
-/* The token is kept between visits in `localStorage` (`TOKEN_STORE`), on
- * this device only: it never reaches this site's server and is never sent
- * anywhere but api.github.com. Anyone with this browser profile can use it,
- * which is the trade for not having to paste it every time. "Forget token"
- * clears it. */
-
+/** The five per-project override maps out of a manifest. */
+const overridesOf = (m: Draft): Overrides => ({ categories: m.categories, frames: m.frames, credits: m.credits, copy: m.copy, slugs: m.slugs });
 
 export function AdminEditor({
   initial,
   slugs,
   categories,
   projects,
-  initialHidden,
-  initialUnlisted,
   categoryLinks,
   initialTrash,
-  initialOverrides,
-  initialOrder,
-  initialCovers,
-  initialAvatars,
-  initialBts,
+  published,
   releases,
   releaseLimit,
   heroChoices,
   clients,
 }: AdminEditorProps) {
-  const [token, setToken] = React.useState("");
   const [draft, setDraft] = React.useState<SiteContent>(initial);
-  /** The blob SHA of the file being edited. Absent until connected. */
-  const [sha, setSha] = React.useState<string | null>(null);
-  const [status, setStatus] = React.useState<Status>({ kind: "idle" });
   const [view, setView] = React.useState<View>("home");
   // `?view=projects`: the One Desk's Site links land on their tab. After hydration, so the first paint matches.
   React.useEffect(() => {
     const v = new URLSearchParams(location.search).get("view");
     if (TABS.flat().some((x) => x.id === v)) queueMicrotask(() => setView(v as View));
   }, []);
-  /* Unread enquiries, on the Inbox tab, so a new one is seen from whatever
-     tab is open. Asked when the page opens and again whenever the window
-     comes back into focus; the Inbox itself keeps it current while open.
-     Julian asked. */
-  const [unread, setUnread] = React.useState(0);
-  React.useEffect(() => {
-    const ask = () =>
-      void unreadCount().then((n) => {
-        if (n !== null) setUnread(n);
-      });
-    ask();
-    window.addEventListener("focus", ask);
-    return () => window.removeEventListener("focus", ask);
-  }, []);
-  /* One column over the whole workbench, the other two out of the way:
-     Julian wanted each one full screen, to see it from above. Escape
-     brings the three back. */
-  const [full, setFull] = React.useState<"map" | "work" | "preview" | null>(
-    null,
-  );
-  React.useEffect(() => {
-    if (!full) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setFull(null);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [full]);
-  const whole = (which: "map" | "work" | "preview") => <FullSwitch which={which} full={full} setFull={setFull} />;
+  const [unread, setUnread] = useUnread();
+  const [full, setFull] = useFullView();
+  const whole = (which: FullView) => <FullSwitch which={which} full={full} setFull={setFull} />;
   /** Which discipline is expanded in the Disciplines view. */
   const [openDiscipline, setOpenDiscipline] = React.useState<string | null>(
     null,
@@ -127,24 +89,24 @@ export function AdminEditor({
 
   /** Hidden and unlisted slugs and BTS, as one draft with one setter (`withListDraft`). */
   const [listDraft, setListDraft] = React.useState<ListDraft>(() => ({
-    hidden: new Set(initialHidden),
-    unlisted: new Set(initialUnlisted),
-    bts: initialBts,
+    hidden: new Set(published.hidden),
+    unlisted: new Set(published.unlisted),
+    bts: published.bts,
   }));
   const { hidden, unlisted, bts } = listDraft;
   const [trash, setTrash] = React.useState<TrashedProject[]>(initialTrash);
   /** The five per-project override maps, as one draft with one setter (`withProjectOverride`). */
-  const [overrides, setOverrides] = React.useState<Overrides>(initialOverrides);
+  const [overrides, setOverrides] = React.useState<Overrides>(() => overridesOf(published));
   const { categories: recategorised, frames: reframed, credits: recredited, copy: recopied, slugs: reslugged } = overrides;
   /** The running order of the work, by slug. Partial - see `lib/work/added.ts`. */
-  const [order, setOrder] = React.useState<string[]>(initialOrder);
+  const [order, setOrder] = React.useState<string[]>(published.order);
   /** The photograph standing for each discipline, by category slug. */
   const [covers, setCovers] =
-    React.useState<Record<string, string>>(initialCovers);
+    React.useState<Record<string, string>>(published.covers);
   /** A collaborator's profile photograph, by Instagram handle. One person,
       one picture, however many shoots they are credited on. */
   const [avatars, setAvatars] =
-    React.useState<Record<string, string>>(initialAvatars);
+    React.useState<Record<string, string>>(published.avatars);
   /**
    * The project whose row is expanded, if any.
    *
@@ -227,72 +189,10 @@ export function AdminEditor({
     ],
   );
 
-  /**
-   * What the repository holds, as far as this page knows.
-   *
-   * Seeded from the props — all this page knows before a token is in, which
-   * is the build that served it — and then advanced twice: when the token
-   * reads the repo, and when a publish makes the repo match the draft.
-   *
-   * That advancing is the whole fix for a marker that said UNPUBLISHED for
-   * ever. It used to compare against the props and nothing else, so a
-   * successful publish left it lit: the commit had landed, the draft and the
-   * repo agreed, and the only thing that still disagreed was the build this
-   * page happened to ship with — which a publish cannot change, because the
-   * deploy is minutes away. Reloading in that window did not help either;
-   * the new page came from the same stale build. The only way to clear it
-   * was to wait for the deploy and reload, and publishing again in the
-   * meantime looked like the thing to try.
-   *
-   * The repo is the right baseline in any case: it is what a publish writes
-   * to and what the next build is made from, and it is where a publish from
-   * another browser shows up.
-   */
-  const [baseline, setBaseline] = React.useState<Baseline>(() => ({
-    content: initial,
-    manifest: {
-      hidden: [...initialHidden].sort(byCodeUnit),
-      unlisted: [...initialUnlisted].sort(byCodeUnit),
-      ...initialOverrides,
-      order: initialOrder,
-      covers: initialCovers,
-      avatars: initialAvatars,
-      bts: initialBts,
-    },
-  }));
-
-  /** One project's override changed, from the project list or the page editor. */
-  const override: SetOverride = (kind, slug, next) => setOverrides((o) => withProjectOverride(o, kind, slug, next, baseline.manifest));
   /** One project's hidden, unlisted or BTS entry changed, from the project list. */
   const listEdit: SetListDraft = (kind, slug, next) => setListDraft((d) => withListDraft(d, kind, slug, next));
   /** Photographs processed for a gallery, staged for this publish. */
   const stage = (added: PendingUpload[]) => setUploads((u) => ({ ...u, ...Object.fromEntries(added.map((a) => [a.path, a])) }));
-
-  /** Whether the project list has moved — the second file, written only if so. */
-  const manifestMoved = !sameJson(manifest, baseline.manifest);
-
-  /**
-   * Whether anything is unpublished.
-   *
-   * Derived by comparing rather than tracked with a flag, so undoing an edit
-   * by hand clears the warning instead of leaving it stuck on — a dirty
-   * marker that lies is worse than none, which is exactly what this became.
-   *
-   * Through `same`, not `JSON.stringify`: the draft comes back from the repo
-   * with the file's own key order while `lib/content.ts` builds its object
-   * field by field, and comparing the two strings called that a change.
-   */
-  const dirty = manifestMoved || !sameJson(draft, baseline.content);
-
-  /* Julian: which tab holds the change. `dirty` says there is a draft;
-     this says where, one field at a time with the same comparison, so a
-     draft can be reviewed before it is published without a tour of nine
-     tabs. The manifest's fields belong to the two work tabs. */
-  const moved = React.useMemo(() => movedTabs(draft, manifest, baseline), [draft, manifest, baseline]);
-
-  /** The rows with unpublished edits, for the Projects filter. */
-  const changed = React.useMemo(() => changedSlugs(manifest, baseline), [manifest, baseline]);
-
 
   /**
    * Where "Open live" points. Read after mount, because the server has no
@@ -349,21 +249,53 @@ export function AdminEditor({
 
   useFoundField(wanted);
 
+  const { token, setToken, sha, status, baseline, dirty, load, publish, forget } = useContentSession({
+    // Sorted, as the manifest is, so a set's iteration order is not mistaken for an edit.
+    published: () => ({
+      content: initial,
+      manifest: { ...published, hidden: [...published.hidden].sort(byCodeUnit), unlisted: [...published.unlisted].sort(byCodeUnit) },
+    }),
+    draft,
+    manifest,
+    reframed,
+    bts,
+    uploads,
+    onRepo: (content, repo) => {
+      setDraft(content);
+      if (!repo) return;
+      setListDraft({ hidden: new Set(repo.hidden), unlisted: new Set(repo.unlisted), bts: repo.bts });
+      setOverrides(overridesOf(repo));
+      setOrder(repo.order);
+      setCovers(repo.covers);
+      setAvatars(repo.avatars);
+    },
+    onPublished: (written) => {
+      /* The draft takes back what was actually written, so the tidying
+         is visible rather than hiding behind a diff that will not clear. */
+      setOverrides((o) => ({ ...o, frames: written.frames, credits: written.credits, copy: written.copy, slugs: written.slugs }));
+      setListDraft((d) => ({ ...d, bts: written.bts }));
+      // A fresh publish is not live yet by definition, whatever the last one
+      // was, so the green is dropped before the wait begins.
+      setCommitted(true);
+      setAwaitingDeploy(built.current !== null);
+    },
+  });
 
-  // Reconnect on mount if a token is already stored, so the usual visit is a
-  // page that is simply ready.
-  //
-  // The effect body only reads the external system and hands off; every state
-  // update happens inside `load`, after the request comes back. Setting state
-  // here directly would be a cascading render on every mount, and the token
-  // field would flash a value that may already be expired.
-  React.useEffect(() => {
-    const saved = window.localStorage.getItem(TOKEN_STORE);
-    if (saved) void load(saved);
-    // Once, on mount — `load` closes over nothing that changes what a stored
-    // token should do, and in the deps it would refetch on every keystroke.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  /** One project's override changed, from the project list or the page editor. Null from a panel is its draft
+      back the way it found it: `withProjectOverride` puts the published override back rather than dropping it,
+      so Undo never discards an earlier publish. */
+  const override: SetOverride = (kind, slug, next) => setOverrides((o) => withProjectOverride(o, kind, slug, next, baseline.manifest));
+  /** The staged photographs and the override setter, for the panels that use them (`useEditorStaging`). */
+  const staging: EditorStaging = { uploads, onUpload: stage, onOverride: override };
+
+  /* Julian: which tab holds the change. `dirty` says there is a draft;
+     this says where, one field at a time with the same comparison, so a
+     draft can be reviewed before it is published without a tour of nine
+     tabs. The manifest's fields belong to the two work tabs. */
+  const moved = React.useMemo(() => movedTabs(draft, manifest, baseline), [draft, manifest, baseline]);
+
+  /** The rows with unpublished edits, for the Projects filter. */
+  const changed = React.useMemo(() => changedSlugs(manifest, baseline), [manifest, baseline]);
 
   /* A drop in the sitemap: put `from` where `to` is, in the running order.
      The same arithmetic the Disciplines tab does, on the same list — the
@@ -379,70 +311,6 @@ export function AdminEditor({
     full.splice(full.indexOf(to) + (onto > at ? 1 : 0), 0, from);
     setOrder(full);
   };
-
-  async function load(t: string) {
-    setStatus({ kind: "working", message: "Reading the current content…" });
-    const r = await loadRepo(t, baseline.manifest);
-    if ("error" in r) return setStatus({ kind: "error", message: r.error });
-    setSha(r.sha);
-    setDraft(r.content);
-    if (!dirty) {
-      const repo = r.repo;
-      setListDraft({ hidden: new Set(repo.hidden), unlisted: new Set(repo.unlisted), bts: repo.bts });
-      setOverrides({ categories: repo.categories, frames: repo.frames, credits: repo.credits, copy: repo.copy, slugs: repo.slugs });
-      setOrder(repo.order);
-      setCovers(repo.covers);
-      setAvatars(repo.avatars);
-      setBaseline({ content: r.content, manifest: repo });
-    } else {
-      // The edits stay, and so does the baseline they are measured against
-      // for the project list: only the content half moves.
-      setBaseline((b) => ({ ...b, content: r.content }));
-    }
-    setToken(t);
-    window.localStorage.setItem(TOKEN_STORE, t);
-    setStatus({ kind: "idle" });
-  }
-
-  /** Commits the draft through `publishDraft`, then takes what was written as the baseline. */
-  async function publish() {
-    if (!sha) return;
-    const r = await publishDraft({
-      token,
-      sha,
-      draft,
-      manifest,
-      manifestMoved,
-      baseline: baseline.manifest,
-      reframed,
-      bts,
-      uploads,
-      onStatus: setStatus,
-    });
-    if ("error" in r) return setStatus({ kind: "error", message: r.error });
-    const { written } = r;
-    setSha(r.sha);
-
-    /* The repo now matches the draft, so this is the baseline. Without
-       this the marker stayed on UNPUBLISHED after a successful publish,
-       still comparing against the build that served the page, which the
-       publish cannot have changed and which is minutes behind. */
-    setBaseline({ content: draft, manifest: written });
-    /* And the draft takes back what was actually written, so the tidying
-       is visible rather than hiding behind a diff that will not clear. */
-    setOverrides((o) => ({ ...o, frames: written.frames, credits: written.credits, copy: written.copy, slugs: written.slugs }));
-    setListDraft((d) => ({ ...d, bts: written.bts }));
-
-    // A fresh publish is not live yet by definition, whatever the last one
-    // was, so the green is dropped before the wait begins.
-    setCommitted(true);
-    setAwaitingDeploy(built.current !== null);
-    setStatus({
-      kind: "saved",
-      message:
-        "Committed. The site rebuilds and goes live in a couple of minutes.",
-    });
-  }
 
   const set = <K extends keyof SiteContent>(key: K, value: SiteContent[K]) =>
     setDraft((d) => ({ ...d, [key]: value }));
@@ -467,6 +335,7 @@ export function AdminEditor({
   panel to fill. */
   const leadsWide = !page && view === "leads";
   return (
+    <EditorStagingProvider value={staging}>
     <CreditDesk value={desk}>
       <div
         className={cn(
@@ -529,14 +398,9 @@ export function AdminEditor({
           )}
         >
           {whole("work")}
-          {/* Not a gate any more. The editor used to be hidden entirely until a
-            token proved itself, which meant arriving at /admin — or clicking
-            a project in the sitemap — showed a read-only index and a password
-            box. Everything on this page can be worked out from what the last
-            build published, so the form is the page and the token is only
-            asked for at the point it is actually needed: the commit. The
-            usual visit does not see this at all, because a stored token
-            reconnects on mount. */}
+          {/* Not a gate: the form works from what the last build published,
+            so the token is asked for only at the commit. A stored token
+            reconnects on mount, so the usual visit never sees this. */}
           {/* Not on the lead desk: it publishes nothing, and above it the box
             pushed the desk off the screen. */}
           {!sha && !leadsWide ? (
@@ -588,9 +452,6 @@ export function AdminEditor({
                     project={p}
                     disciplines={categories}
                     overrides={overrides}
-                    onOverride={override}
-                    uploads={uploads}
-                    onUpload={stage}
                     onClose={() => {
                       setPage(null);
                       setView("projects");
@@ -600,7 +461,7 @@ export function AdminEditor({
                 );
               })()
             : null}
-          {/* The lead and proofs desks are their own pages since 2026-11-11: Astryx stays out of the editor. */}
+          {/* The lead and proofs desks are their own pages: Astryx stays out of the editor. */}
           {!page && view === "leads" ? (
             <ul className="grid max-w-md gap-1 py-6">
               {([["Leads", "/admin/leads"], ["Proofs", "/admin/proofs"]] as const).map(([t, href]) => (
@@ -660,13 +521,8 @@ export function AdminEditor({
                 changed={changed}
                 onRemoved={setTrash}
                 disciplines={categories}
-                /* Null from a panel is its draft back the way it found it: `withProjectOverride` puts the published
-                 override back rather than dropping it, so Undo never discards an earlier publish. */
                 overrides={overrides}
-                onOverride={override}
                 publishedBts={baseline.manifest.bts}
-                uploads={uploads}
-                onUpload={stage}
                 opened={opened}
                 onOpened={setOpened}
                 onOpenPage={(slug) => {
@@ -720,12 +576,7 @@ export function AdminEditor({
                 <PublishStatus status={status} />
                 <button
                   type="button"
-                  onClick={() => {
-                    window.localStorage.removeItem(TOKEN_STORE);
-                    setToken("");
-                    setSha(null);
-                    setStatus({ kind: "idle" });
-                  }}
+                  onClick={forget}
                   className="label ml-auto border border-border px-4 py-2 press hoverable:hover:bg-card active:scale-[0.98]"
                 >
                   Forget token
@@ -764,6 +615,7 @@ export function AdminEditor({
         )}
       </div>
     </CreditDesk>
+    </EditorStagingProvider>
   );
 
 }

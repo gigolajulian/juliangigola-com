@@ -8,6 +8,7 @@ import * as React from "react";
 import { AdminPicker, type PickerItem } from "@/components/admin/admin-picker";
 import type { AdminProject } from "@/components/admin/editor/props";
 import type { SiteContent, Testimonial } from "@/lib/content";
+import { pad } from "@/lib/utils";
 
 export type FieldsProps = {
   draft: SiteContent;
@@ -281,7 +282,7 @@ export function QuoteFields(p: FieldsProps) {
         >
           <div className="flex items-baseline justify-between gap-4">
             <span className="label text-muted-foreground">
-              {String(i + 1).padStart(2, "0")}
+              {pad(i + 1)}
             </span>
             <button
               type="button"

@@ -2,20 +2,14 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { cn } from "@/lib/utils";
+import { cn, pad } from "@/lib/utils";
 
 /* ── a picker ─────────────────────────────────────────────────────
  * Which things lead a section of the homepage, and in what order.
  *
- * This was a textarea of slugs, one per line. It worked, in the sense that
- * the right characters in the right order produced the right page — but it
- * asked Julian to remember what `oakley-x-nike` looks like as a photograph,
- * to know that a typo silently drops a card rather than failing, and to
- * reorder by cutting and pasting lines. For the most editorial decisions on
- * the homepage, that is the wrong instrument.
- *
- * Now it is the pictures, in order, with the same two arrows the frame list
- * uses.
+ * The pictures, in order, with the same two arrows the frame list uses:
+ * a list of slugs would mean remembering what each looks like, and a typo
+ * would silently drop a card.
  *
  * One component for projects and for cover art, because the decision is the
  * same shape in both cases — pick some things, put them in an order — and the
@@ -177,7 +171,7 @@ export function AdminPicker({
               )}
             >
               <span className="label w-6 shrink-0 tabular-nums text-muted-foreground">
-                {String(i + 1).padStart(2, "0")}
+                {pad(i + 1)}
               </span>
 
               {item ? (

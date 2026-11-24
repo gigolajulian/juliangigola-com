@@ -549,7 +549,7 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 @media (max-width:800px){.v3 .f-photo{height:auto;aspect-ratio:4/3;min-width:0;max-width:100%}.v3 .f-photo img{object-position:var(--at,50% 50%)}}
 /* Short phones (iPhone SE, 549px of Safari): a shorter photo and no repeat of
    the session name under it (the tabs say it), so the first session clears
-   the sticky Continue bar at load (MAC, v3.0.93). Smaller heading too, for
+   the sticky Continue bar at load. Smaller heading too, for
    /contact/form's two-line one (Julian). */
 @media (max-width:800px) and (max-height:600px){.v3 .f-photo{aspect-ratio:auto;height:190px}.v3 .f-photo .cap{display:none}.v3 .f-main{gap:12px;padding-top:10px}
 .v3 .f-head{gap:8px}.v3 .f-head :is(h1,h2){font-size:1.9rem}.v3 .f-head p{line-height:1.4}
@@ -981,7 +981,7 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 /* The rest of a set as a contact sheet: three columns, every row one height (a vertical's 4:5),
    a horizontal spans two cells; dense packing fills a hole a horizontal would leave. */
 .v3 .pj-flow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-flow:dense;gap:20px;padding:clamp(64px,8vw,128px) var(--gr) 96px var(--g)}
-/* Start, not stretch (MAC): a stretched cell drops its aspect-ratio in
+/* Start, not stretch: a stretched cell drops its aspect-ratio in
    Safari 27.2, so a row with no credits cell in it sized to 0 and the sheet vanished.
    The ratio sizes the row; height:100% then levels a 4/5 with an 8/5 beside it. */
 /* Height from the frame's own 4:5, not the row: a tall credits cell (6 credits at 1024) stretched the row and widened its frames into the next column. */
@@ -1188,7 +1188,7 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 .v3 .mo-stage::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgb(var(--scrim) / .8),rgb(var(--scrim) / .66) 16%,rgb(var(--scrim) / .4) 30%,rgb(var(--scrim) / .16) 44%,rgb(var(--scrim) / .04) 54%,rgb(var(--scrim) / 0) 62%),linear-gradient(20deg,rgb(var(--scrim) / .5) 0%,rgb(var(--scrim) / 0) 42%);pointer-events:none;z-index:1}
 .v3 .mo-stage::before{content:"";position:absolute;inset:0 0 auto;height:300px;background:linear-gradient(to bottom,rgb(var(--scrim) / .72),rgb(var(--scrim) / .36) 55%,rgb(var(--scrim) / 0));pointer-events:none;z-index:1}
 .v3 .mo-hit{all:unset;position:absolute;inset:0;z-index:2;cursor:pointer}
-/* all:unset drops the global ring: put it back for keyboard focus (MAC audit). */
+/* all:unset drops the global ring: put it back for keyboard focus. */
 .v3 .mo-hit:focus-visible{outline:1px solid var(--accent);outline-offset:-4px}
 .v3 .mo-h,.v3 .mo-cap,.v3 .mo-index,.v3 .mo-play{position:absolute;z-index:3}
 .v3 .mo-h{top:24px;left:var(--g);margin:0;color:rgb(var(--on-photo) / .9)}
@@ -1463,7 +1463,7 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .v3 .htools.open .hsearch{flex:1;width:auto}}
 :root[data-pft][data-tuck] .v3 .site-hdr{transform:none;opacity:1;background:transparent;border-bottom-color:transparent}
 :root[data-pft][data-tuck] .v3 .site-hdr>:not(.hslot){opacity:0;visibility:hidden;transition:opacity .2s ease,visibility 0s .2s}
-/* Docked at 0 like the open bar, the safe area as padding on --bg, so no photo strip shows above it (MAC, Duo). */
+/* Docked at 0 like the open bar, the safe area as padding on --bg, so no photo strip shows above it (iPhone Duo). */
 :root[data-pft][data-tuck] .v3 .htools{position:fixed;top:0;right:0;z-index:1;padding:env(safe-area-inset-top,0px) 4px 0;pointer-events:auto;background:var(--bg);border:solid var(--line);border-width:0 0 1px 1px}
 :root[data-pft][data-tuck] .v3 .htools::after{display:none}
 /* bottom:auto: the phone open rule sets inset:0, which on a fixed bar filled the screen (QA). */
@@ -1598,7 +1598,7 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
    from `contain` in a box of another shape. Capped by the cell on both sides. */
 @media (min-width:901px){.v3 .pj-hero:not(.two) .pj-lead .pj-r img{height:auto;max-height:100%;width:auto;max-width:100%;object-fit:contain}}
 
-/* Audit v3.0.92: under 350px the cover's words clipped; the Menu takes their place. */
+/* Under 350px the cover's words would clip; the Menu takes their place. */
 .v3 .a-cover .cover-burger{display:none}
 /* under 480px the four links no longer fit on one line ("Book a session" is longer than "Sessions" was: "Portfolio" ran off the left at 390): the menu button */
 @media (max-width:479.98px){.v3 .a-cover .nav>a,.v3 .a-cover .nav>.tbtn{display:none}.v3 .a-cover .cover-burger{display:block}}
@@ -1728,9 +1728,9 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .v3 .cv-scale input:focus-visible{outline:1px solid var(--accent);outline-offset:3px}
 .v3 .cv-scale output{min-width:4ch;color:var(--ink);font-variant-numeric:tabular-nums}
 @media (max-width:700px){.v3 .cv-foot>span:first-child{display:none}.v3 .cv-scale input{width:110px}}
-/* Large text on a phone (audit 2026-11-11, WCAG 1.4.4): at 200% text the rem
-   floors of the display type outgrew a 320px screen, the page widened and the
-   fixed header's Menu slid off the right edge. Each floor is capped by the
+/* Large text on a phone (WCAG 1.4.4): at 200% text the rem
+   floors of the display type outgrow a 320px screen, the page widens and the
+   fixed header's Menu slides off the right edge. Each floor is capped by the
    viewport at the value it already has at 320px, so normal text is unchanged. */
 @media (max-width:700px){
 .v3 .pg-t,.v3 .mo-cap h2{font-size:clamp(min(3rem,15vw),calc(8*var(--v3u)),min(7rem,15vw))}
@@ -1810,7 +1810,7 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
   .v3 .wviews .vset:not(.open)>button:not([data-rep]){visibility:hidden;transition:width .5s var(--ease-spring),opacity .2s,visibility 0s .5s}
 }
 
-/* ── ?sky: the time picker in the hour's light (lib/booking/sky.ts, components/booking/sky-times.tsx) ──
+/* ── ?sky: the time picker in the hour's light (lib/booking/sky.ts, components/booking/picker/sky-times.tsx) ──
    Each time carries its color for both grounds (--tc dark, --tcl light); --tone picks the one showing.
    DESIGN.md: the one scoped exception to the One Accent Rule. */
 :root[data-sky]{--sky-m:oklch(0.8 0.143 70);--sky-a:oklch(0.68 0.18 35);--sky-e:oklch(0.66 0.11 253)}

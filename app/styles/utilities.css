@@ -103,8 +103,7 @@
      This list wins over the ones `action`, `action-quiet` and `glass`
      declare when both are on the same element (measured: every button on
      the site), so it has to carry everything theirs do: the strong curve
-     on the colours, which used to fall back to a plain ease-out here, and
-     the pointer light's `--gx`/`--gy`, which used to snap. */
+     on the colours and the pointer light's `--gx`/`--gy`. */
   transition:
     transform var(--dur-lg) var(--ease-bounce),
     scale var(--dur-lg) var(--ease-bounce),
@@ -322,17 +321,11 @@
      list — taking the hover fade off the credit link with it. Tailwind's
      `transition-colors` cannot be used alongside: both declare
      `transition-property`, and whichever lands later in the sheet wins. */
-  /* Read from properties rather than written here, so the cover can hand off
-     at two speeds. The defaults are the unhurried ones the automatic cycle
-     wants; `components/hero.tsx` overrides them inline while the visitor has
-     hold of the index. Properties rather than a second utility: two utilities
-     both declaring `transition` fight over source order, which this file
-     already carries a scar from. An inline style cannot lose. */
+  /* Read from properties so an inline style can set another speed without
+     a second utility fighting this one over source order. */
   transition:
-    /* 180ms, from 360: the title used to wait for the picture's dissolve
-       to all but finish before it arrived, and read as late — Julian asked
-       for less delay. Half keeps the order (picture first, then the word)
-       without the pause. */
+    /* 180ms: half the picture's dissolve keeps the order (picture first,
+       then the word) without a pause. Julian's call. */
     opacity var(--swap-in-dur, 320ms) var(--ease-out-strong)
       var(--swap-in-delay, 180ms),
     color var(--dur-xs) ease-out;

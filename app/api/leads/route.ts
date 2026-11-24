@@ -1,13 +1,13 @@
-import { trashDaysLeft, type LeadSummary } from "@/lib/leads/leads";
-import { buryLead, findLead, readLead, writeLead } from "@/lib/leads/lead-store";
+import { LEAD_PREFIX } from "@/lib/leads/leads";
+import { buryLead, findLead, leadSummaries, readLead, trashedIds, writeLead } from "@/lib/leads/lead-store";
 import { manualLead } from "@/lib/leads/lead-crm";
 import { patchLead } from "@/lib/leads/lead-patch";
-import { everyKey, gate, noSeal, sealedGate } from "@/lib/leads/desk-route";
+import { gate, noSeal, sealedGate } from "@/lib/leads/desk-route";
 import { bodyOf, json } from "@/lib/http";
 
 /* ── the leads ───────────────────────────────────────────────────
  * The lead desk (`components/leads/desk.tsx`): one record per person, sealed
- * with LEADS_KEY (`lib/leads/lead-crypto.ts`) and opened only on the server.
+ * with LEADS_KEY (`lib/seal.ts`) and opened only on the server.
  * - GET: every lead's summary, newest first; `?id=` one lead whole.
  * - PATCH `{ key: "lead:<id>", ... }`: a lead changed by hand (`patchLead`).
  * - POST: a lead added by hand (a DM, a text, a referral), name, email, ig, phone, company, kind, stage, source, notes (`manualLead`).
@@ -28,19 +28,7 @@ export async function GET(request: Request) {
     const lead = await readLead(g.kv, seal, id);
     return lead ? json({ lead }) : json({ error: "Gone." }, 404);
   }
-  const leads: LeadSummary[] = [];
-  for await (const k of everyKey<{ s?: string }>(g.kv, "lead:")) {
-    if (!k.metadata?.s) continue;
-    const one = await seal.open<LeadSummary>(k.metadata.s);
-    // Trash empties itself: 30 days after it went in, the lead goes for good.
-    // The list is the only reader, so it is the one place that checks.
-    if (one.trashedAt && trashDaysLeft(one.trashedAt, Date.now()) <= 0) {
-      await buryLead(g.kv, seal, k.name.slice(5));
-      continue;
-    }
-    leads.push({ ...one, id: k.name.slice(5) });
-  }
-  return json({ leads: leads.sort((a, b) => b.lastAt.localeCompare(a.lastAt)) });
+  return json({ leads: await leadSummaries(g.kv, seal, Date.now()) });
 }
 
 export async function PATCH(request: Request) {
@@ -48,7 +36,7 @@ export async function PATCH(request: Request) {
   if (g.error) return g.error;
   const given = await bodyOf(request);
   if (!given) return json({ error: "Not JSON." }, 400);
-  if (typeof given.key !== "string" || !given.key.startsWith("lead:")) return json({ error: "Unknown." }, 400);
+  if (typeof given.key !== "string" || !given.key.startsWith(LEAD_PREFIX)) return json({ error: "Unknown." }, 400);
   const seal = g.s;
   if (!seal) return noSeal();
   const r = await patchLead(g.kv, seal, given, g.notion);
@@ -78,11 +66,7 @@ export async function POST(request: Request) {
 export async function DELETE(request: Request) {
   const g = await sealedGate(request);
   if (g.error) return g.error;
-  const seal = g.s;
-  const gone: string[] = [];
-  for await (const k of everyKey<{ s?: string }>(g.kv, "lead:")) {
-    if (k.metadata?.s && (await seal.open<LeadSummary>(k.metadata.s)).trashedAt) gone.push(k.name);
-  }
-  await Promise.all(gone.map((k) => buryLead(g.kv, seal, k.slice(5))));
+  const gone = await trashedIds(g.kv, g.s);
+  await Promise.all(gone.map((id) => buryLead(g.kv, g.s, id)));
   return json({ ok: true, deleted: gone.length });
 }

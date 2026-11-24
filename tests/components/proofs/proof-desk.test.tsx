@@ -35,7 +35,7 @@ describe("proof helpers", () => {
 
   it("api throws the server error", async () => {
     answer({ error: "nope" }, false);
-    await expect(proofApi({ query: "?list" })).rejects.toThrow("nope");
+    await expect(proofApi({ path: "?list" })).rejects.toThrow("nope");
     expect(vi.mocked(fetch).mock.calls[0][0]).toBe("/api/proof?list");
   });
 });

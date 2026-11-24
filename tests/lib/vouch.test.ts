@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { authorised, canPush, fromWorker, refuseAdmin, refuseWorker } from "@/lib/vouch";
-import { isLocked, loadErrorText, LOCKED } from "@/lib/leads/lead-desk";
-import { AdminError } from "@/lib/admin/admin-call";
+import { AdminError, isLocked, loadErrorText, LOCKED } from "@/lib/admin/admin-call";
 import { SCOPED, githubToken, reply } from "../backend/fakes";
 
 /* The gate on /api/inbox and /api/leads, /api/traffic and /api/seo: a token passes only

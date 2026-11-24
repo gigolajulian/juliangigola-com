@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { contractStep } from "@/lib/contracts/contract-lead";
 import { readLead, writeLead } from "@/lib/leads/lead-store";
-import { sealer } from "@/lib/leads/lead-crypto";
+import { sealer } from "@/lib/seal";
 import { applyLeadEvent } from "@/lib/leads/leads";
 import { FakeKV, LEADS_KEY } from "../../backend/fakes";
 

@@ -6,7 +6,7 @@ import type { HomeFrame } from "@/lib/home/data";
    frame goes to the shorter column by its ratio, the right column starting
    56/171 of a frame lower, and every frame keeps its index once. */
 
-const frame = (r: number, i: number): HomeFrame => ({ src: `/work/x/${i}.jpg`, name: `F${i}`, meta: "", slug: "x", r });
+const frame = (ratio: number, i: number): HomeFrame => ({ src: `/work/x/${i}.jpg`, name: `F${i}`, meta: "", slug: "x", ratio });
 
 describe("masonry", () => {
   it("starts on the left, then fills whichever column is shorter", () => {

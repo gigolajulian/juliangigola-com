@@ -1,7 +1,7 @@
 import { PHOTO_KEY } from "@/lib/leads/invoice";
 import { gate, noSeal, sealedGate } from "@/lib/leads/desk-route";
 import { bodyOf, json } from "@/lib/http";
-import { sha256Hex } from "@/lib/utils";
+import { sha256Hex } from "@/lib/token";
 
 /* A design B invoice's photo, sealed like the lead it belongs to: GET `?key=`, POST `{ photo }` (already
    framed down by the desk), stored under its own hash so the same photo is kept once. Behind the /admin gate. */

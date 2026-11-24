@@ -27,16 +27,16 @@ import { Thumbnail } from "@astryxdesign/core/Thumbnail";
 import { MetadataList, MetadataListItem } from "@astryxdesign/core/MetadataList";
 import { Selector } from "@astryxdesign/core/Selector";
 import { Slider } from "@astryxdesign/core/Slider";
-import { KEY_STORE, saveAdminKey, TOKEN_STORE } from "@/lib/admin/admin-github";
 import { useSiteThemeRead } from "@/lib/site-theme";
-import { SignIn } from "@/components/desk/sign-in";
+import { LockedGate } from "@/components/desk/sign-in";
 import { proofApi, cardCrop, pastCloseDate, cropAt, proofStatus, type ProofRow } from "@/lib/proofs/desk";
 import { ActivityDesk } from "@/components/proofs/activity";
 import { Timeline } from "@/components/proofs/timeline";
 import { useClock } from "@/components/proofs/use-clock";
-import { loadErrorText, LOCKED, stampPT } from "@/lib/leads/lead-desk";
+import { loadErrorText, LOCKED, stampPT } from "@/lib/admin/admin-call";
 import { errorText } from "@/lib/utils";
 import { extras, publicId, remindState, THUMB_W, type CardCrop } from "@/lib/proofs/proof-model";
+import { DAY_MS } from "@/lib/time-zone";
 
 const CLASSIC = "/admin";
 // The small copy the client's grid uses: every frame on the desk is a thumbnail. Once delivered the proof copies are gone: the finals' small copies stand in.
@@ -63,7 +63,7 @@ export function ProofsDesk({ embedded = false, initial }: { embedded?: boolean; 
   const [making, setMaking] = React.useState(false);
   const [wide, setWide] = React.useState(false);
   const load = React.useCallback(() => {
-    proofApi<{ proofs: ProofRow[] }>({ query: "?list" }).then((o) => setList(o.proofs)).catch((e: unknown) => setError(loadErrorText(e)));
+    proofApi<{ proofs: ProofRow[] }>({ path: "?list" }).then((o) => setList(o.proofs)).catch((e: unknown) => setError(loadErrorText(e)));
   }, []);
   React.useEffect(load, [load]);
   // Same as the leads desk: follow html[data-theme], light only when it says light, read before Theme mounts.
@@ -78,13 +78,11 @@ export function ProofsDesk({ embedded = false, initial }: { embedded?: boolean; 
 
   if (error === LOCKED)
     return (
-      <SignIn
-        onKey={(k) => {
-          saveAdminKey(k);
+      <LockedGate
+        retry={() => {
           setError(null);
           load();
         }}
-        wrong={!!(localStorage.getItem(KEY_STORE) || localStorage.getItem(TOKEN_STORE))}
       />
     );
 
@@ -214,7 +212,7 @@ function Gallery({ p, changed, onBack, gone }: { p: ProofRow; changed: () => voi
   const [reminder, setReminder] = React.useState<{ html: string; subject: string; to: string; cc: string[] } | null>(null);
   const viewer = p.email ? p.viewers?.[p.email.trim().toLowerCase()]?.name : undefined;
   const who = viewer?.split(/\s+/)[0] || "client";
-  const left = clock && p.closesAt ? Math.max(1, Math.ceil((Date.parse(p.closesAt) - clock) / 864e5)) : 0;
+  const left = clock && p.closesAt ? Math.max(1, Math.ceil((Date.parse(p.closesAt) - clock) / DAY_MS)) : 0;
   const closesIn = `closes in ${left} ${left === 1 ? "day" : "days"}`;
   const nextLine = !remind ? "" : remind.state === "sent" ? `Reminded ${stampPT(remind.at)}. No more reminders for this stage.`
     : remind.state === "locked" ? `The reminder opens ${stampPT(remind.opensAt)}, in the last 5 days.`
@@ -235,7 +233,7 @@ function Gallery({ p, changed, onBack, gone }: { p: ProofRow; changed: () => voi
   };
   const showPreview = async () => {
     try {
-      const o = await proofApi<{ html: string; subject: string }>({ query: `?preview=${p.token}` });
+      const o = await proofApi<{ html: string; subject: string }>({ path: `?preview=${p.token}` });
       setPreview(o.html);
       setSubject(o.subject);
     } catch (e) {
@@ -245,7 +243,7 @@ function Gallery({ p, changed, onBack, gone }: { p: ProofRow; changed: () => voi
   const showReminder = async () => {
     setNote(null);
     try {
-      setReminder(await proofApi<{ html: string; subject: string; to: string; cc: string[] }>({ query: `?remind=${p.token}` }));
+      setReminder(await proofApi<{ html: string; subject: string; to: string; cc: string[] }>({ path: `?remind=${p.token}` }));
     } catch (e) {
       setNote(errorText(e));
     }
@@ -268,7 +266,7 @@ function Gallery({ p, changed, onBack, gone }: { p: ProofRow; changed: () => voi
   const close = async () => {
     if (!confirm(`Close the draft "${p.name}"? Its web previews are removed. Nothing in Lightroom changes.`)) return;
     try {
-      await proofApi({ method: "DELETE", query: `?token=${p.token}` });
+      await proofApi({ method: "DELETE", path: `?token=${p.token}` });
       gone();
     } catch (e) {
       setNote(errorText(e));

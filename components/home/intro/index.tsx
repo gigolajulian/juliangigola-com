@@ -6,7 +6,8 @@ import { matches } from "@/lib/device";
 import { qflag } from "@/lib/flags/query";
 import { EXTRAS, type HomeFrame } from "@/lib/home/data";
 import "./intro.css";
-import { sessionGet } from "@/lib/utils";
+import { sessionGet } from "@/lib/storage";
+import { DAY_MS } from "@/lib/time-zone";
 
 /* v4 home intro, "The canvas" (spec 3.1): JG inks in alone, the whole wall and
    a field of extra frames glide up at S0 scale and cover it, then the view
@@ -45,7 +46,7 @@ const WIDE = 3300; // px: from this window width the wall's six rows draw 80 ext
    ?intro=1 plays the full one, ?intro=2 the short one. The stamp is local storage "jg-intro-at": a time, nothing else. */
 const FULL = { end: FULL_END, push: DEEP_PUSH, land: DEEP_LAND, rise: RISE, light: LIGHT, at: 800, gap: 110, xgap: 55, lead: 450, jg: 750 };
 const SHORT = { end: 3200, push: 1500, land: 2850, rise: 900, light: 500, at: 350, gap: 40, xgap: 22, lead: 150, jg: 450 }; // JG gets 350ms alone, the last column is up by 1490
-const AGAIN = 30 * 864e5;
+const AGAIN = 30 * DAY_MS;
 
 export function returning() {
   if (qflag("intro", "2")) return true;

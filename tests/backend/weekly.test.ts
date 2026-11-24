@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { stats } from "@/lib/leads/lead-crm";
 import { weeklyMail } from "@/lib/leads/weekly";
 import { appendLog, type MasterEntry } from "@/lib/leads/activity-log";
-import { sealer } from "@/lib/leads/lead-crypto";
+import { sealer } from "@/lib/seal";
 import type { Lead, LeadEvent } from "@/lib/leads/leads";
 import { weekly } from "@/worker/index";
 import { FakeKV, LEADS_KEY } from "./fakes";

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { kindOf, label, mailto } from "@/components/leads/shared";
+import { filterLabel, kindOf, mailto } from "@/components/leads/shared";
 import { centsLabel, matches, dollarsLabel, nextStep, inFilter } from "@/lib/leads/lead-desk";
 import { adminCall } from "@/lib/admin/admin-call";
 import type { LeadSummary } from "@/lib/leads/leads";
@@ -57,8 +57,8 @@ describe("leads/shared", () => {
   it("formats money, cash, labels and kinds", () => {
     expect(dollarsLabel(1500.4)).toBe("$1,500");
     expect(centsLabel(-12345)).toBe("−$123.45");
-    expect(label("needs")).toBe("Your move");
-    expect(label("Quoted")).toBe("Quoted");
+    expect(filterLabel("needs")).toBe("Your move");
+    expect(filterLabel("Quoted")).toBe("Quoted");
     expect(kindOf("intro-call")).toBe("Intro call");
   });
 

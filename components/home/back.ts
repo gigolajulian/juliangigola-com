@@ -3,15 +3,15 @@
 import * as React from "react";
 import { jumpTo, scrollGoal } from "@/components/site/smooth-scroll";
 import { holdLanding } from "@/components/site/page-transition";
-import { lastPopAt } from "@/components/site/back-link";
+import { paintedCopy } from "@/components/cover/lightbox/painted";
 import { media } from "@/lib/device";
-import { painted } from "@/lib/painted";
-import { sessionJson } from "@/lib/utils";
+import { lastPopAt } from "@/lib/nav-memo";
+import { sessionJson } from "@/lib/storage";
 import { tell } from "./motion/engine";
 
 /* Back to the home from any page of the site lands where the visitor left it, from the first paint.
-   Safari put back a scroll saved before the held rows' last scroll (MAC on #1313), and from /about showed that page's foot
-   for 100ms before the home's top (MAC, live). So the home keeps its own spot: the block the screen's top was in
+   Safari puts back a scroll saved before the held rows' last scroll, and from /about shows that page's foot
+   for 100ms before the home's top. So the home keeps its own spot: the block the screen's top was in
    (`[data-mt]`) and how far into it, since the held blocks above take their height a frame or more after the page is back;
    and the covers row's own scroll on a phone, which is sideways. Session storage: the router rewrites the history entry's state. */
 
@@ -76,7 +76,7 @@ let firstMount = true;
 const returned = () => {
   const first = firstMount;
   firstMount = false;
-  // the home counts as a return only when it mounts just after a Back or Forward (NavMemo hears them)
+  // the home counts as a return only when it mounts just after a Back or Forward (lib/nav-memo.ts hears them)
   if (Date.now() - lastPopAt() < 2000) return true;
   const nav = first ? (performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined) : undefined;
   return nav?.type === "back_forward";
@@ -108,7 +108,7 @@ export function useBackHome() {
     // a phone's sideways covers row only: held (desktop), the row follows the page's scroll, and setting it too threw the page a screen on
     const row = coversRow();
     if (row && !media("held").matches) row.scrollLeft = spot.x;
-    // Back into Cover art: the sleeves' lazy art painted grey for up to 1.3s on an iPhone (MAC, v3.0.336). Load and decode it now, with the rest.
+    // Back into Cover art: the sleeves' lazy art painted grey for up to 1.3s on an iPhone. Load and decode it now, with the rest.
     const items = row && spot.b === "covers" ? [...row.querySelectorAll<HTMLElement>(".mt-item")] : [];
     const step = items.length > 1 ? items[1].offsetLeft - items[0].offsetLeft : 0, i = step ? Math.min(items.length - 1, Math.max(0, Math.round(spot.x / step))) : 0;
     // the caption names that cover from the first paint, not the first one for a frame or two until the row's scroll event (Julian)
@@ -120,7 +120,7 @@ export function useBackHome() {
       im.loading = "eager";
       im.fetchPriority = "high";
       // the copy the viewer just showed goes under it, so the sleeve is never grey while its own size loads (Julian: "shouldnt cut out like that")
-      const url = painted.get(im.dataset.frame ?? ""), face = im.parentElement!;
+      const url = paintedCopy(im.dataset.frame ?? ""), face = im.parentElement!;
       // the image only: the shorthand also cleared the card colour, so the disc showed through until it decoded
       if (url) Object.assign(face.style, { backgroundImage: `url("${url}")`, backgroundSize: "cover", backgroundPosition: "center" });
       const shown = im.decode().catch(() => {});

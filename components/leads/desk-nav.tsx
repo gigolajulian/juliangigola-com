@@ -10,7 +10,10 @@ import { glyph } from "@/components/desk/chrome";
 import { frostBar } from "@/components/leads/shared";
 
 /** Every page of the desk. */
-export type View = "today" | "leads" | "new" | "calendar" | "money" | "invoices" | "licences" | "aside" | "stats" | "traffic" | "seo" | "hours" | "templates" | "device" | "more" | "proofs";
+const VIEWS = ["today", "leads", "new", "calendar", "money", "invoices", "licences", "aside", "stats", "traffic", "seo", "hours", "templates", "device", "more", "proofs"] as const;
+export type View = (typeof VIEWS)[number];
+/** A tab or command id that names a page of the desk. */
+export const isView = (v: unknown): v is View => (VIEWS as readonly unknown[]).includes(v);
 /** One nav item per group, each with an icon; a group with more than one page gets a tab row on top. */
 export const SECTIONS: [View, string, [string, View][]][] = [
   ["leads", "Leads", [["Open", "leads"], ["Put aside", "aside"]]],

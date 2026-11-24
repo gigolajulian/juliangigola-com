@@ -77,7 +77,7 @@
 .ed-day[aria-pressed="true"] i, .ed-cell[aria-pressed="true"] i { background: var(--background); }
 @keyframes ed-bt-in { from { opacity: 0; transform: translateY(0.35em); filter: blur(6px); } }
 @media (prefers-reduced-motion: reduce) { @keyframes ed-fade-in { from { opacity: 0; } } }
-/* A phone month shows the time picked too, as the week does (MAC). */
+/* A phone month shows the time picked too, as the week does. */
 
 /* the times, a kind to a row */
 .ed-times { margin-top: 1.5rem; }
@@ -120,7 +120,7 @@ fieldset.ed-row > legend { float: left; padding: 0; }
 .ed-grow { position: absolute; z-index: 30; background: var(--accent); pointer-events: none; }
 .ed-grow[data-bad] { background: var(--ed-bad); }
 :root:not([data-classic]) #book-card { transition: background-color var(--dur-xl) var(--ease-out-strong); }
-/* Booked and declined keep the card dark (2026-10-20 mock): the red is
+/* Booked and declined keep the card dark (Julian's mock): the red is
    the card field's line and the words, not the whole card. */
 
 /* fitted to a short card, a step at a time */

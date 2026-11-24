@@ -62,21 +62,20 @@ export const tidySequence = <T>(list: T[]): T[] =>
  * Named because three things in the editor pass it around — the draft, the
  * baseline it is compared against, and what gets written — and a tuple of six
  * loose records is how those three drift apart.
+ *
+ * Loose about what a frame, a credit, a copy and a BTS are: this module knows
+ * only that a sequence is a list, which is what lets the check script run it.
+ * `Draft` in `lib/admin/publish.ts` is the same shape with the real types.
  */
-export type Manifest<
-  Frame = unknown,
-  Credit = unknown,
-  Copy = unknown,
-  Bts = unknown,
-> = {
+export type Manifest = {
   hidden: string[];
   /** Off every listing, still a page. See `AddedFile.unlisted`. */
   unlisted: string[];
   categories: Record<string, string>;
-  frames: Record<string, Frame[]>;
-  credits: Record<string, Credit[]>;
+  frames: Record<string, unknown[]>;
+  credits: Record<string, unknown[]>;
   /** Rewritten titles and intents, slug → copy. */
-  copy: Record<string, Copy>;
+  copy: Record<string, unknown>;
   order: string[];
   covers: Record<string, string>;
   /** A collaborator's face, Instagram handle to a path under `public/`. */
@@ -84,7 +83,7 @@ export type Manifest<
   /** Renamed addresses, original slug to current. */
   slugs: Record<string, string>;
   /** Behind-the-scenes frames, slug to `{ by, frames }`. */
-  bts: Record<string, Bts>;
+  bts: Record<string, unknown>;
 };
 
 /**
@@ -243,18 +242,12 @@ const listMap = (v: unknown): Record<string, unknown[]> | null =>
     ? (v as Record<string, unknown[]>)
     : null;
 
-export function adoptable<F, C, P, B>(
-  file: ProjectsFile,
-  fallback: Manifest<F, C, P, B>,
-): Manifest<F, C, P, B> {
+export function adoptable(file: ProjectsFile, fallback: Manifest): Manifest {
   /* The sequences and credit lists come back as "a list of something": this
      module does not know what a frame is, on purpose. `lib/work/added.ts` is what
      validates them, at build time, where a bad one fails the deploy and the
      live site keeps serving the last good build. The editor is not the last
      line of defence for a file it wrote itself. */
-  const lists = <T>(v: Record<string, unknown[]> | null): Record<string, T[]> | null =>
-    v as Record<string, T[]> | null;
-
   return {
     hidden:
       file.hidden === undefined
@@ -271,16 +264,16 @@ export function adoptable<F, C, P, B>(
     frames:
       file.frames === undefined
         ? {}
-        : (lists<F>(listMap(file.frames)) ?? fallback.frames),
+        : (listMap(file.frames) ?? fallback.frames),
     credits:
       file.credits === undefined
         ? {}
-        : (lists<C>(listMap(file.credits)) ?? fallback.credits),
+        : (listMap(file.credits) ?? fallback.credits),
     copy:
       file.copy === undefined
         ? {}
         : isRecord(file.copy)
-          ? (file.copy as Record<string, P>)
+          ? file.copy
           : fallback.copy,
     order:
       file.order === undefined ? [] : (strings(file.order) ?? fallback.order),
@@ -298,7 +291,7 @@ export function adoptable<F, C, P, B>(
       file.bts === undefined
         ? {}
         : isRecord(file.bts)
-          ? (file.bts as Record<string, B>)
+          ? file.bts
           : fallback.bts,
   };
 }

@@ -2,7 +2,7 @@
    The record's shape and the pure helpers live in `proof-model.ts`. */
 
 import type { InboxKV as KV } from "@/lib/kv";
-import type { Seal } from "@/lib/leads/lead-crypto";
+import type { Seal } from "@/lib/seal";
 import { type Proof, aliasKey, isDateId, isOpen, proofDay, proofKey, publicId, shootIdTag } from "@/lib/proofs/proof-model";
 
 /* ── the gate's password ──────────────────────────────────────────

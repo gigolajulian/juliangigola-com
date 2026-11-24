@@ -32,7 +32,7 @@ const zoomOf = (img: Element | null | undefined): Zoom | undefined => {
   return s && s.scale !== "none" ? { scale: s.scale, translate: s.translate === "none" ? FLAT.translate : s.translate, transform: s.transform } : undefined;
 };
 
-/* The page opening since 2026-11-18 (Julian, on the live recording: "default"; it was the `?fly=b` trial, and the `?fly` switch is gone).
+/* The page opening (Julian's call).
    The browser carries the photo. The copied-photo path below stays for what this cannot do: a browser without view
    transitions, and a booking row, which swaps its photo as it is pressed.
    The copy below is a fresh <img>, which decodes off the frame it is added in: the photo was missing for the

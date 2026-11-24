@@ -489,7 +489,7 @@ function Tiles({
                 />
               ) : null}
             </span>
-            {/* The name, always — Julian asked: a rail of covers is a thing
+            {/* The name, always (Julian's call): a rail of covers is a thing
                 to recognise, and a name under each is what makes the ones
                 that look alike tell apart. Smaller in the rail, where a tile
                 is three rems wide. */}

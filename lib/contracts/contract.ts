@@ -20,8 +20,9 @@ import { TZ } from "@/lib/time-zone";
 import { depositOfLead, type InvoiceFrom } from "@/lib/leads/invoice";
 import type { Lead } from "@/lib/leads/leads";
 import type { InboxKV as KV } from "@/lib/kv";
-import type { Seal } from "@/lib/leads/lead-crypto";
-import { isEmail, newToken, sha256Hex } from "@/lib/utils";
+import type { Seal } from "@/lib/seal";
+import { isEmail } from "@/lib/utils";
+import { newToken, sha256Hex } from "@/lib/token";
 import { asRecord } from "@/lib/json";
 
 export type ContractTemplate = { id: string; name: string; body: string };
@@ -118,7 +119,7 @@ export function draft(c: Contract | null, lead: string, d: { to: Contract["to"];
 }
 
 /** The client's signature, or why it was refused. `seen` is the hash the page showed them. */
-export async function sign(c: Contract, by: { name: unknown; email: unknown; agree: unknown; seen: unknown; mark?: unknown; typed?: unknown; ip: string; ua: string }, at: string): Promise<Contract | { error: string; status: number }> {
+export async function sign(c: Contract, by: { name: unknown; email: unknown; agree: unknown; seen: unknown; mark?: unknown; typed?: unknown; ip: string; ua: string }, at: string): Promise<(Contract & { signed: Signature }) | { error: string; status: number }> {
   if (c.signed) return { error: "This contract is already signed.", status: 409 };
   const name = clip(by.name, 120);
   if (!isFullName(name)) return { error: "Type your first and last name.", status: 400 };

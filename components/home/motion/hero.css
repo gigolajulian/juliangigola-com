@@ -9,7 +9,7 @@ html[data-mt-motion] .mt-hero .mt-col figcaption span { transition: opacity .15s
 /* before the driver's first frame the same holds: that rule is in mtscroll.css, which loads before this file */
 /* Phones and tablets: the name block holds on screen while the wall scrolls under it (desktop pins the whole stage instead). The stage keeps its own height, so the block takes no room. hero.ts sinks it out at the end. */
 html[data-mt-motion]:not([data-mt-held]) .mt-hero .mt-name { position: sticky; top: 0; height: max(100dvh, 600px); }
-/* dvh, not svh: pinned, the block must follow Safari's bar as it collapses, or the buttons float above the lower edge (MAC, #1211). A short landscape window takes its own height. */
+/* dvh, not svh: pinned, the block must follow Safari's bar as it collapses, or the buttons float above the lower edge. A short landscape window takes its own height. */
 @media (max-height: 599px) { html[data-mt-motion]:not([data-mt-held]) .mt-hero .mt-name { height: 100dvh; } }
 /* The name's way out: the tagline and the buttons sink ahead of the name itself. */
 /* .mt-name twice: over depth.css's pointer shift on the same elements, which this keeps in the sum. */

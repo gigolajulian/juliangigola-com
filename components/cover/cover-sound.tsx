@@ -3,7 +3,7 @@
 import * as React from "react";
 import { inkGround, inkWord } from "@/components/site/nav-ink";
 import SOUND from "@/lib/work/cover-art-sound.json";
-import { sessionGet, sessionSet } from "@/lib/utils";
+import { sessionGet, sessionSet } from "@/lib/storage";
 
 /* The song on the cover (`snd` in lib/flags/v4pages.ts: on by default, `?v4pages=view` turns it off): one clip at a time, and nothing
    here runs or is fetched until the first play, so with the key off the page is untouched.
@@ -47,7 +47,7 @@ function scPlay(url: string) {
     frame.tabIndex = -1;
     frame.setAttribute("aria-hidden", "true");
     // A real size, off the screen: at 1px SoundCloud's player draws its waveform on an empty canvas, which throws
-    // in WebKit ("The object is in an invalid state", createPattern) and the track never starts (JG - MAC, #1086).
+    // in WebKit ("The object is in an invalid state", createPattern) and the track never starts.
     frame.style.cssText = "position:fixed;left:-9999px;bottom:0;width:320px;height:166px;border:0;opacity:0;pointer-events:none";
     addEventListener("message", (e) => {
       if (e.origin !== SC || e.source !== frame?.contentWindow) return;

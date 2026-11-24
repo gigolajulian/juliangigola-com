@@ -34,9 +34,9 @@ describe("motion drivers tell, React renders", () => {
     const { container } = render(<Home data={HOME_DATA} />);
     const s = container.querySelector<HTMLElement>('[data-mt="comm"]')!;
     const head = () => ["[data-mt-count]", ".mt-cur [data-mt-name]", ".mt-cur .mute"].map((x) => s.querySelector(x)!.textContent);
-    expect(head()).toEqual(["01", HOME_DATA.comm[0].name, HOME_DATA.comm[0].meta]);
+    expect(head()).toEqual(["01", HOME_DATA.commissions[0].name, HOME_DATA.commissions[0].meta]);
     tell(s, { cur: 2 });
     expect(s.dataset.cur).toBe("2");
-    expect(head()).toEqual(["03", HOME_DATA.comm[2].name, HOME_DATA.comm[2].meta]);
+    expect(head()).toEqual(["03", HOME_DATA.commissions[2].name, HOME_DATA.commissions[2].meta]);
   });
 });

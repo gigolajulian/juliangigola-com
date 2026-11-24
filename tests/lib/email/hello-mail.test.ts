@@ -12,7 +12,7 @@ describe("alertHello", () => {
 
   it("mails hello@ with the lines, the Inbox link and the reply-to", async () => {
     const mail = new FakeEmail();
-    expect(await alertHello(mail as never, "Deposit: Ana", ["Paid $200"], { name: "Ana", email: "ana@example.com" })).toBe(true);
+    expect(await alertHello(mail as never, "Deposit: Ana", ["Paid $200"], { who: { name: "Ana", email: "ana@example.com" } })).toBe(true);
     const sent = mail.sent[0];
     expect(sent.to).toBe("hello@juliangigola.com");
     expect(sent.text).toBe("Paid $200\n\nInbox: https://juliangigola.com/admin");
@@ -23,7 +23,7 @@ describe("alertHello", () => {
   it("sends again without the pictures when the first send fails", async () => {
     const err = vi.spyOn(console, "error").mockImplementation(() => {});
     const send = vi.fn().mockRejectedValueOnce(new Error("too large")).mockResolvedValueOnce(undefined);
-    expect(await alertHello({ send } as never, "Inquiry: Bo", ["hi"], undefined, [pic])).toBe(true);
+    expect(await alertHello({ send } as never, "Inquiry: Bo", ["hi"], { attachments: [pic] })).toBe(true);
     expect(send).toHaveBeenCalledTimes(2);
     const second = send.mock.calls[1][0];
     expect(second.attachments).toBeUndefined();

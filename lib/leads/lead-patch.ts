@@ -4,8 +4,8 @@
  * then folded onto the record and its log. The route turns the answer into a Response.
  * ─────────────────────────────────────────────────────────────── */
 import type { InboxKV as KV } from "@/lib/kv";
-import type { Sealer } from "@/lib/leads/lead-crypto";
-import { applyLeadEvent, isPaper, isStage, REMIND_MAX, type Lead, type LeadPatch } from "@/lib/leads/leads";
+import type { Sealer } from "@/lib/seal";
+import { applyLeadEvent, isPaper, isStage, LEAD_PREFIX, leadIdOf, REMIND_MAX, type Lead, type LeadPatch } from "@/lib/leads/leads";
 import { buryLead, hasPerson, linkPeople, personKey, readLead, writeLead } from "@/lib/leads/lead-store";
 import { adoptLog } from "@/lib/leads/activity-log";
 import { notionPaper, notionStage } from "@/lib/leads/sync/notion-lead";
@@ -32,7 +32,7 @@ export async function patchLead(inbox: KV, seal: Sealer, given: Record<string, u
   if (licence && !(typeof licence.end === "string" && /^\d{4}-\d{2}-\d{2}$/.test(licence.end) && !isNaN(Date.parse(licence.end)))) return refuse("Bad date.", 400);
   if (stage !== undefined && !isStage(stage)) return refuse("Unknown stage.", 400);
   if (snoozeUntil !== undefined && snoozeUntil !== "" && isNaN(Date.parse(snoozeUntil))) return refuse("Bad time.", 400);
-  const id = key.slice(5);
+  const id = leadIdOf(key);
   let lead = await readLead(inbox, seal, id);
   if (!lead) return refuse("Gone.", 404);
   const wasPeople = lead.people;
@@ -61,8 +61,8 @@ export async function patchLead(inbox: KV, seal: Sealer, given: Record<string, u
     lead = { ...lead, tasks: t.tasks.length ? t.tasks : undefined, events: [...lead.events, ...t.events].slice(-50) };
   }
   // Every 404 is decided before anything is written: a patch that fails must not move the Notion board or use up an invoice number.
-  const mergeId = typeof mergeFrom === "string" && mergeFrom.startsWith("lead:") && mergeFrom !== key ? mergeFrom : undefined;
-  const other = mergeId ? await readLead(inbox, seal, mergeId.slice(5)) : null;
+  const mergeId = typeof mergeFrom === "string" && mergeFrom.startsWith(LEAD_PREFIX) && mergeFrom !== key ? mergeFrom : undefined;
+  const other = mergeId ? await readLead(inbox, seal, leadIdOf(mergeId)) : null;
   if (mergeId && !other) return refuse("Gone.", 404);
   const paidNo = invoicePaid && typeof invoicePaid.no === "string" ? invoicePaid.no : undefined;
   const billN = bill ? await invoicesTaken(inbox, bill.date) : 0;
@@ -147,9 +147,9 @@ export async function patchLead(inbox: KV, seal: Sealer, given: Record<string, u
   // Their mail finds this lead from now on; a merged record's people now point here too.
   if (people !== undefined || merged) await linkPeople(inbox, seal, id, lead.people, merged ? undefined : wasPeople);
   if (merged) {
-    await adoptLog(inbox, seal, id, merged.slice(5), lead).catch(logged("activity log merge"));
+    await adoptLog(inbox, seal, id, leadIdOf(merged), lead).catch(logged("activity log merge"));
     // No seal: adoptLog above already moved the old log here.
-    await buryLead(inbox, undefined, merged.slice(5));
+    await buryLead(inbox, undefined, leadIdOf(merged));
   }
   return { lead };
 }

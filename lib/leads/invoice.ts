@@ -1,6 +1,7 @@
 import { depositFor } from "@/lib/booking/paid";
 import type { InboxKV as KV } from "@/lib/kv";
 import { asRecord } from "@/lib/json";
+import { DAY_MS } from "@/lib/time-zone";
 
 /* ── invoices from a lead ─────────────────────────────────────────
  * An invoice from the lead, in the
@@ -39,7 +40,7 @@ export type Invoice = { no: string; date: string; lines: InvoiceLine[]; paid: nu
 export const PAID_BEFORE = "2026-11-12";
 export const isSettled = (i: Pick<Invoice, "paidAt" | "unpaid" | "at">) => !!i.paidAt || (!i.unpaid && i.at < PAID_BEFORE);
 /** Design B carries its due date; an invoice from before design B is due 14 days after its date. */
-export const dueOf = (i: Pick<Invoice, "date" | "b">) => i.b?.due ?? new Date(Date.parse(`${i.date}T12:00:00Z`) + 14 * 864e5).toISOString().slice(0, 10);
+export const dueOf = (i: Pick<Invoice, "date" | "b">) => i.b?.due ?? new Date(Date.parse(`${i.date}T12:00:00Z`) + 14 * DAY_MS).toISOString().slice(0, 10);
 /** Unpaid and past its due date on `today` (YYYY-MM-DD, Pacific). */
 export const overdue = (i: Pick<Invoice, "date" | "b" | "paidAt" | "unpaid" | "at">, today: string) => !isSettled(i) && dueOf(i) < today;
 /** A sent mail's subject or attachment names (`text`) name invoice `no`: "Invoice 1126", "INVOICE 1126-2 - CLIENT.pdf". Never 1126 inside 1126-2 or 11260, and only beside the word invoice, so "1126 Main St" is not one. */

@@ -21,7 +21,7 @@ import { Calendar, type DateRange, type ISODateString } from "@astryxdesign/core
 import { Token } from "@astryxdesign/core/Token";
 import { Divider } from "@astryxdesign/core/Divider";
 import { EVENTS, HOURS } from "@/lib/booking/rules";
-import { TZ } from "@/lib/time-zone";
+import { TZ, DAY_MS } from "@/lib/time-zone";
 import { startsFor, instantIn } from "@/lib/booking/slots";
 import type { LeadSummary } from "@/lib/leads/leads";
 import { type Size } from "@/lib/leads/lead-desk";
@@ -55,7 +55,7 @@ export const calendarCall = <T,>({ query = "", ...init }: RequestInit & { query?
 
 
 const dayOf = (ms: number) => new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(ms);
-const plus = (day: string, n: number) => new Date(Date.parse(`${day}T00:00:00Z`) + n * 864e5).toISOString().slice(0, 10);
+const plus = (day: string, n: number) => new Date(Date.parse(`${day}T00:00:00Z`) + n * DAY_MS).toISOString().slice(0, 10);
 const weekday = (day: string) => new Date(`${day}T00:00:00Z`).getUTCDay();
 const ymd = (day: string) => day.split("-").map(Number) as [number, number, number];
 const time = (ms: number) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit" }).format(ms).replace(":00", "");

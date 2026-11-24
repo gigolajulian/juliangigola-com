@@ -103,10 +103,10 @@ export function Home({ data }: { data: HomeData }) {
         {/* order: Motion, Cover art, About, Sessions, By quote, then Commissions */}
         <HomeFilms films={data.films} />
         <HomeCovers />
-        <HomeAbout does={data.does} />
+        <HomeAbout disciplines={data.disciplines} />
         <BookOnline open={book} opener={bookOpener} onClose={() => setBook(null)} quotePhoto={quotePhoto} onRowPick={() => setQuotePhoto(null)} />
         <ByQuote stills={data.stills} reply={data.reply} onOptionPick={setQuotePhoto} />
-        <HomeCommissions frames={data.comm} />
+        <HomeCommissions frames={data.commissions} />
         <HomeFoot />
       </section>
       <MotionLayer />

@@ -7,7 +7,8 @@ import { THEME_COLOR } from "@/lib/theme-color";
 import { usePathname } from "next/navigation";
 import { scrollTop } from "./smooth-scroll";
 import { useNavInk } from "./nav-ink";
-import { noSubscribe, sessionGet, sessionSet } from "@/lib/utils";
+import { noSubscribe } from "@/lib/utils";
+import { sessionGet, sessionSet } from "@/lib/storage";
 
 /* JG V3 chrome: the glass header, the phone menu, the theme
    toggle and the footer line. Every route uses it, /admin included. */
@@ -120,7 +121,7 @@ function HeaderBar() {
       const y = scrollY, d = y - last;
       if (Math.abs(d) < 6) return;
       last = y;
-      // Typing in the header field: stay tucked, or a rotation's scroll untucks it and the field leaves the keyboard's view (MAC, Duo).
+      // Typing in the header field: stay tucked, or a rotation's scroll untucks it and the field leaves the keyboard's view (iPhone Duo).
       if (document.activeElement?.matches(".htools input")) return;
       setTuck(d > 0 && y > 80 && !desk.matches);
     };

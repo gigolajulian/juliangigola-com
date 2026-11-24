@@ -14,7 +14,7 @@ function snap(el: HTMLElement, ctx: Ctx, n: number, at: (p: number) => number, s
   if (matches("calm")) return;
   let t = 0, rest = NaN; // the item position the page last settled on; NaN outside the hold, so arriving is plain nearest
   const settle = () => {
-    // fine pointers only: a finger's own momentum is left alone (MAC, #1209: the iPad snapped too)
+    // fine pointers only: a finger's own momentum is left alone, on an iPad too
     if (!ctx.held || !ctx.fine || busy()) return;
     const top = el.getBoundingClientRect().top + scrollY, range = el.offsetHeight - innerHeight, y = scrollGoal(), p = (y - top) / range;
     // the two ends are items too: resting exactly there keeps `rest`, a pixel past them the page is free
@@ -164,7 +164,7 @@ function coverKey(s: Covers, e: KeyboardEvent) {
   if (i !== at) scrollTo({ top: coverTop(s) + unease(i / (s.n - 1)) * s.range, behavior: "smooth" });
 }
 
-// a tap turns a sleeve with a back over, a second tap turns it back (touch-parity.css), one sleeve at a time (MAC, #1212: two stayed turned in the phone's side row). Mouse pointers flip on hover instead.
+// a tap turns a sleeve with a back over, a second tap turns it back (touch-parity.css), one sleeve at a time. Mouse pointers flip on hover instead.
 function flip(s: Covers, it: HTMLElement) {
   if (s.ctx.fine) return;
   for (const o of s.items) if (o !== it) o.removeAttribute("data-tp-fl");
@@ -243,7 +243,8 @@ function covers(): Driver {
    then paused so they are loaded when their turn comes. The poster stays on top
    until the player says it plays (same wait as video.tsx Loop). Players only ever start while the
    page rests, the current film's first, the others one at a time. */
-type Pv = { f: HTMLIFrameElement | HTMLVideoElement; yt: boolean; played: boolean; at: number; t: number };
+/** A preview player: whether it has played yet, when it was mounted, and the timer that lifts its poster. */
+type Pv = { player: HTMLIFrameElement | HTMLVideoElement; isYoutube: boolean; played: boolean; startAt: number; timer: number };
 /** What films() keeps: the current film, its players, and when the page last moved. */
 type Films = {
   el: HTMLElement;
@@ -261,15 +262,15 @@ type Films = {
 // YouTube: onStateChange carries the state as `info`, infoDelivery as `info.playerState`; Vimeo: playProgress `data.seconds`
 type PlayerMsg = { event?: string; info?: number | { playerState?: number }; data?: { seconds?: number } };
 
-const win = (v: Pv) => (v.f instanceof HTMLIFrameElement ? v.f.contentWindow : null);
+const win = (v: Pv) => (v.player instanceof HTMLIFrameElement ? v.player.contentWindow : null);
 const say = (v: Pv, yt: string, vimeo: string) =>
-  v.f instanceof HTMLVideoElement ? void (vimeo === "play" ? v.f.play().catch(() => {}) : v.f.pause()) : v.f.contentWindow?.postMessage(JSON.stringify(v.yt ? { event: "command", func: yt, args: [] } : { method: vimeo }), "*");
+  v.player instanceof HTMLVideoElement ? void (vimeo === "play" ? v.player.play().catch(() => {}) : v.player.pause()) : v.player.contentWindow?.postMessage(JSON.stringify(v.isYoutube ? { event: "command", func: yt, args: [] } : { method: vimeo }), "*");
 
 function kill(s: Films, i: number) {
   const v = s.pool.get(i);
   if (!v) return;
-  clearTimeout(v.t);
-  v.f.remove();
+  clearTimeout(v.timer);
+  v.player.remove();
   s.pool.delete(i);
 }
 
@@ -281,7 +282,7 @@ function drop(s: Films) {
 /* The site's own file (lib/home/data.ts FILM_FILES): a plain video, no player to wait for. It says "playing" itself. */
 function mountFile(s: Films, i: number, film: HTMLElement, file: string) {
   const f = document.createElement("video");
-  const v: Pv = { f, yt: false, played: false, at: performance.now(), t: 0 };
+  const v: Pv = { player: f, isYoutube: false, played: false, startAt: performance.now(), timer: 0 };
   Object.assign(f, { muted: true, loop: true, playsInline: true, autoplay: true, preload: "auto", tabIndex: -1, src: file });
   f.setAttribute("aria-hidden", "true");
   f.addEventListener("playing", () => {
@@ -298,7 +299,7 @@ function mount(s: Films, i: number) {
   if (film.dataset.file) return mountFile(s, i, film, film.dataset.file);
   const yt = src.includes("youtube");
   const f = document.createElement("iframe");
-  const v: Pv = { f, yt, played: false, at: performance.now(), t: 0 };
+  const v: Pv = { player: f, isYoutube: yt, played: false, startAt: performance.now(), timer: 0 };
   f.src = src + (yt ? "&enablejsapi=1" : "");
   // YouTube picks its quality from the player's size and ignores a quality setting (720p at 1440 wide, measured): rows.css draws it at twice the size, scaled back
   if (yt) f.setAttribute("data-big", "");
@@ -325,7 +326,7 @@ function fill(s: Films) {
   // with no scroll at all (between two wheel notches the page is still for a moment). The site's own file costs nothing: at once.
   if (!items[next].dataset.file && performance.now() - s.movedAt < 600) return void (s.pvT = window.setTimeout(() => fill(s), 200));
   // a neighbour waits until every player already here plays (or has had 6s: a blocked one never will)
-  const busy = [...s.pool.values()].some((v) => !v.played && performance.now() - v.at < 6000);
+  const busy = [...s.pool.values()].some((v) => !v.played && performance.now() - v.startAt < 6000);
   if (next !== cur && busy) return void (s.pvT = window.setTimeout(() => fill(s), 400));
   mount(s, next);
   s.pvT = window.setTimeout(() => fill(s), 400);
@@ -338,8 +339,8 @@ function preview(s: Films) {
   for (const [i, v] of [...s.pool]) {
     if (Math.abs(i - cur) > 1) kill(s, i);
     else if (i !== cur) {
-      clearTimeout(v.t);
-      v.f.removeAttribute("data-ready");
+      clearTimeout(v.timer);
+      v.player.removeAttribute("data-ready");
       if (v.played) say(v, "pauseVideo", "pause");
     } else if (v.played) say(v, "playVideo", "play");
   }
@@ -372,13 +373,13 @@ function heard(s: Films, e: MessageEvent) {
     v.played = true;
     if (state === 1) captionsOff(win(v));
     if (i !== s.cur) return void say(v, "pauseVideo", "pause");
-    if (v.f.hasAttribute("data-ready") || v.t) return;
+    if (v.player.hasAttribute("data-ready") || v.timer) return;
     // YouTube draws its own title and controls for a moment after a first start; a loaded one resumes clean
-    v.t = window.setTimeout(() => ((v.t = 0), v.f.setAttribute("data-ready", "")), v.yt ? (first ? 2500 : 350) : 0);
+    v.timer = window.setTimeout(() => ((v.timer = 0), v.player.setAttribute("data-ready", "")), v.isYoutube ? (first ? 2500 : 350) : 0);
   } else if (i === s.cur && state !== 2) {
-    clearTimeout(v.t);
-    v.t = 0;
-    v.f.removeAttribute("data-ready");
+    clearTimeout(v.timer);
+    v.timer = 0;
+    v.player.removeAttribute("data-ready");
   }
 }
 

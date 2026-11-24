@@ -3,7 +3,8 @@
 import * as React from "react";
 import { v4pages } from "@/lib/flags/v4pages";
 import { matches } from "@/lib/device";
-import type { FrameItem, FrameView } from "@/components/portfolio/work";
+import type { FrameView } from "@/components/portfolio/work";
+import type { FrameItem } from "@/components/portfolio/frame-view";
 
 /* The project page's two pieces of the inner-pages plan, kept out
    of the server component. Renders nothing until a frame is opened.

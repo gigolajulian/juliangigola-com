@@ -2,7 +2,8 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { TimePicker, type StepsSkin } from "@/components/booking/time-picker";
+import { TimePicker } from "@/components/booking/picker/time-picker";
+import type { StepsSkin } from "@/components/booking/picker/parts";
 
 /* ── the booking calendar ────────────────────────────────────────
  * The site's own time picker (`time-picker.tsx`, times from

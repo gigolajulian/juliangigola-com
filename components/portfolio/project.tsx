@@ -48,8 +48,8 @@ export function ProjectView({ project, next }: { project: Project; next?: { href
      the title; a set that is mostly horizontal gets one horizontal there instead. */
   const imgs = project.images;
   const across = imgs.filter(wide).length > imgs.length / 2;
-  /* A set whose cover is a horizontal opens on that cover, full bleed under the title:
-     the page used to open on the first vertical, a different picture from the one pressed. */
+  /* A set whose cover is a horizontal opens on that cover, full bleed under the title,
+     so the page opens on the picture that was pressed. */
   const bleed = !!imgs[0] && wide(imgs[0]);
   const big = bleed ? imgs[0] : (imgs.find((f) => !wide(f)) ?? imgs[0]);
   const lead = bleed ? [] : across ? imgs.filter((f) => f !== big && wide(f)).slice(0, 1) : imgs.filter((f) => f !== big && !wide(f)).slice(0, 2);

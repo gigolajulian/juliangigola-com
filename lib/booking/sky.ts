@@ -5,10 +5,12 @@
  * dawn #ee5a22, a cobalt midday #2e527a) and lifted or dropped to read on
  * each ground. The day follows the real sun, DST included: the hours are
  * moved onto the light of the day the colors were tuned on (2026-11-26).
- * Client-safe, no imports beyond the zone.
+ * Client-safe: imports only the zone, the clock and `pad`.
  * ─────────────────────────────────────────────────────────────── */
 
-import { TZ } from "@/lib/time-zone";
+import { TZ, DAY_MS } from "@/lib/time-zone";
+import { clockLabel } from "@/lib/booking/clock";
+import { pad } from "@/lib/utils";
 
 type Stop = readonly [hour: number, l: number, c: number, h: number];
 
@@ -32,7 +34,7 @@ const rad = Math.PI / 180;
 /** Sunrise, solar noon and sunset in San Jose on `ymd`, as hours on the Pacific clock (NOAA approximation, about a minute off). */
 export function sun(ymd: string) {
   const [y, m, d] = ymd.split("-").map(Number);
-  const doy = Math.round((Date.UTC(y, m - 1, d) - Date.UTC(y, 0, 0)) / 864e5);
+  const doy = Math.round((Date.UTC(y, m - 1, d) - Date.UTC(y, 0, 0)) / DAY_MS);
   const g = ((2 * Math.PI) / 365) * (doy - 1), C = Math.cos, S = Math.sin, lat = 37.34 * rad, lon = -121.89;
   const eq = 229.18 * (0.000075 + 0.001868 * C(g) - 0.032077 * S(g) - 0.014615 * C(2 * g) - 0.040849 * S(2 * g));
   const de = 0.006918 - 0.399912 * C(g) + 0.070257 * S(g) - 0.006758 * C(2 * g) + 0.000907 * S(2 * g) - 0.002697 * C(3 * g) + 0.00148 * S(3 * g);
@@ -87,9 +89,9 @@ export function tone(ms: number) {
 
 /** "6:06 PM": sunset in San Jose on a Pacific date. */
 export function sunsetLabel(ymd: string) {
-  const s = sun(ymd).set, h = Math.floor(s), m = Math.round((s - h) * 60);
-  const hh = m === 60 ? h + 1 : h;
-  return `${((hh + 11) % 12) + 1}:${String(m % 60).padStart(2, "0")} ${hh < 12 ? "AM" : "PM"}`;
+  const s = sun(ymd).set, h = Math.floor(s);
+  // sunset falls in the evening, so the minutes never reach midnight
+  return clockLabel(h * 60 + Math.round((s - h) * 60));
 }
 
 /** Where an hour sits against the sun that day, in plain words: "52 min to sunset". */
@@ -121,7 +123,7 @@ export function weatherWord(code: number) {
 /** "Clear, 62°": the forecast for the hour a start falls in, or null past the forecast's reach. */
 export function weatherAt(hourly: Hourly | null, ms: number) {
   const { ymd, hour } = pacific(ms);
-  const i = hourly?.time.indexOf(`${ymd}T${String(Math.floor(hour)).padStart(2, "0")}:00`) ?? -1;
+  const i = hourly?.time.indexOf(`${ymd}T${pad(Math.floor(hour))}:00`) ?? -1;
   if (!hourly || i < 0 || hourly.temperature_2m[i] == null || hourly.weather_code[i] == null) return null;
   return `${weatherWord(hourly.weather_code[i])}, ${Math.round(hourly.temperature_2m[i])}°`;
 }

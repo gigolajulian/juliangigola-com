@@ -4,7 +4,7 @@ import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Marks } from "@/components/site/duo";
-import { projectHref } from "@/lib/project-href";
+import { projectHref } from "@/lib/work/project-href";
 import type { HomeFrame } from "@/lib/home/data";
 import { pad } from "@/lib/utils";
 import { useTold } from "./ctx";
@@ -20,7 +20,7 @@ export const masonry = (frames: HomeFrame[]) => {
   frames.forEach((f, i) => {
     const c = h[0] <= h[1] ? 0 : 1;
     cols[c].push({ f, i });
-    h[c] += f.r + 0.2;
+    h[c] += f.ratio + 0.2;
   });
   return cols;
 };
@@ -60,7 +60,7 @@ export function HomeCommissions({ frames }: { frames: HomeFrame[] }) {
             {col.map(({ f, i }) => (
               <figure key={f.src} data-i={i}>
                 <Link href={projectHref(f.slug)} className="fig">
-                  <div className="ph" style={{ aspectRatio: `1 / ${f.r}` }}>
+                  <div className="ph" style={{ aspectRatio: `1 / ${f.ratio}` }}>
                     <Image src={f.src} alt={f.name} fill sizes="50vw" />
                   </div>
                   <figcaption className="lbl">

@@ -1,5 +1,5 @@
 import { BOOKING_FEE, DEFAULT_HOURS, EVENTS, HEADS_UP_HOURS, MAX_MOVES, MOVE_HOURS, REFUND_HOURS, type Booking, type Hours } from "@/lib/booking/rules";
-import { TZ } from "@/lib/time-zone";
+import { TZ, DAY_MS } from "@/lib/time-zone";
 import { gcal } from "@/lib/google";
 import { bookingEnquiry, enquiryKey, summary } from "@/lib/leads/enquiry";
 import { looksLikeEmail } from "@/lib/utils";
@@ -8,6 +8,9 @@ import { recordLead, type LeadStore } from "@/lib/leads/lead-store";
 import { toNotion } from "@/lib/leads/sync/notion-lead";
 import { openNow, type HoursKV } from "@/lib/booking/slots";
 import { statusOf } from "@/lib/http";
+
+const MINUTE_MS = 6e4;
+const HOUR_MS = 36e5;
 
 /* ── the site's own booking engine ────────────────────────────────
  * One Durable Object (`worker/booking-lock.ts`) runs every booking through
@@ -148,7 +151,7 @@ export async function bookOwn(store: Store, secret: string | undefined, b: BookI
   if (!(await openNow(secret, b.slug, b.start, { kv, hours: await readHours(store) }))) return { ok: false, reason: "taken" };
 
   const id = newId();
-  const end = new Date(Date.parse(b.start) + rule.length * 6e4).toISOString();
+  const end = new Date(Date.parse(b.start) + rule.length * MINUTE_MS).toISOString();
   const meet = rule.call && b.via !== "Phone";
   const ev = await gcal<{ id: string; hangoutLink?: string }>(
     secret,
@@ -253,11 +256,11 @@ export async function rescheduleOwn(store: Store, secret: string | undefined, id
   if (Date.parse(was.start) <= Date.now()) return { ok: false, reason: "past" };
   if ((was.moves ?? 0) >= MAX_MOVES) return { ok: false, reason: "moves" };
   // Inside the last day a slot cannot be sold again, so it no longer moves.
-  if (Date.parse(was.start) - Date.now() < MOVE_HOURS * 36e5) return { ok: false, reason: "late" };
+  if (Date.parse(was.start) - Date.now() < MOVE_HOURS * HOUR_MS) return { ok: false, reason: "late" };
   const rule = EVENTS[was.slug];
   const t = Date.parse(start);
   if (!rule || isNaN(t) || !(await openNow(secret, was.slug, start, { mine: was, kv, hours: await readHours(store) }))) return { ok: false, reason: "taken" };
-  const end = new Date(t + rule.length * 6e4).toISOString();
+  const end = new Date(t + rule.length * MINUTE_MS).toISOString();
   await gcal(secret, `/calendars/primary/events/${encodeURIComponent(was.eventId)}?sendUpdates=none`, {
     method: "PATCH",
     body: { start: { dateTime: new Date(t).toISOString(), timeZone: TZ }, end: { dateTime: end, timeZone: TZ } },
@@ -273,13 +276,15 @@ export async function rescheduleOwn(store: Store, secret: string | undefined, id
 /* Julian's plan (piece 5): a reminder 23 to 24 hours ahead, from an hourly
    cron. A booking made inside that last day already has its fresh "You're
    in." mail, so it gets none. */
-const DAY = 864e5;
 
 /** Bookings whose reminder is due at `now`: live, not reminded, starting within 24 hours, booked before that last day. A late or skipped run still catches them. */
 export const dueReminders = async (store: Store, now = Date.now()) =>
   (await allBookings(store)).filter((r) => {
     const t = Date.parse(r.start);
-    return !r.cancelled && !r.reminded && t > now && t - now <= DAY && Date.parse(r.at) <= t - DAY;
+    const live = !r.cancelled && !r.reminded;
+    const withinADay = t > now && t - now <= DAY_MS;
+    const bookedBefore = Date.parse(r.at) <= t - DAY_MS;
+    return live && withinADay && bookedBefore;
   });
 
 /** Paid bookings whose heads-up is due at `now`: live, not sent, the early refund still open (over 48 hours
@@ -289,7 +294,12 @@ export const dueHeadsUp = async (store: Store, now = Date.now()) =>
   (await allBookings(store)).filter((r) => {
     const t = Date.parse(r.start);
     const judged = Math.min(t, Date.parse(r.firstStart ?? r.start));
-    return !!r.intent && !r.cancelled && !r.headsUp && t - now <= HEADS_UP_HOURS * 36e5 && judged - now > REFUND_HOURS * 36e5 && Date.parse(r.at) <= t - HEADS_UP_HOURS * 36e5;
+    const ahead = HEADS_UP_HOURS * HOUR_MS;
+    const live = !!r.intent && !r.cancelled && !r.headsUp;
+    const withinAhead = t - now <= ahead;
+    const refundOpen = judged - now > REFUND_HOURS * HOUR_MS;
+    const bookedBefore = Date.parse(r.at) <= t - ahead;
+    return live && withinAhead && refundOpen && bookedBefore;
   });
 
 /** Marks booking `id` as sent its heads-up. */

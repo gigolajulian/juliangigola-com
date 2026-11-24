@@ -47,6 +47,6 @@ export async function POST(request: Request) {
 
   const r = out.record;
   await afterBooked(env, r, async () => ({ ...confirmOf(r, await manageLinks(env.BOOKING_SECRET, r)), call: true }), { defer: (p) => ctx.waitUntil(p) });
-  ctx.waitUntil(alertHello(env.EMAIL, `Booked: ${[r.session, whenPT(r.start), r.name].join(", ")}`, [`${r.name} <${r.email}>`, ...(r.phone ? [`Phone: ${r.phone}`] : []), callLine(r), ...(r.notes ? ["", r.notes] : [])], { name: r.name, email: r.email }));
+  ctx.waitUntil(alertHello(env.EMAIL, `Booked: ${[r.session, whenPT(r.start), r.name].join(", ")}`, [`${r.name} <${r.email}>`, ...(r.phone ? [`Phone: ${r.phone}`] : []), callLine(r), ...(r.notes ? ["", r.notes] : [])], { who: { name: r.name, email: r.email } }));
   return json({ id: r.id, start: r.start, end: r.end, where: r.where });
 }

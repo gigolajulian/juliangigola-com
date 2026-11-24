@@ -8,7 +8,7 @@
  * The site makes the spreadsheet itself on the first run, so hello@'s
  * GCAL_OAUTH needs only the `drive.file` scope (`scripts/gsc-auth.mjs cal`).
  * ─────────────────────────────────────────────────────────────── */
-import type { Sealer } from "../lead-crypto";
+import type { Sealer } from "@/lib/seal";
 import { gcalToken } from "@/lib/google";
 import { HttpError } from "@/lib/http";
 import { eventsCsv, paidTotal, readMaster, SHEET_DIRTY, type MasterEntry } from "../activity-log";
@@ -16,11 +16,11 @@ import { leadsCsv } from "../lead-crm";
 import { everyLead } from "../lead-store";
 import type { Lead } from "../leads";
 import type { InboxKV as KV } from "@/lib/kv";
+import { DAY_MS } from "@/lib/time-zone";
 
 const SHEETS = "https://sheets.googleapis.com/v4/spreadsheets";
 export const SHEET_ID = "sheet:id";
 export const SHEET_AT = "sheet:at";
-const DAY = 864e5;
 const TABS = [
   { sheetId: 1, title: "Clients" },
   { sheetId: 2, title: "Activity" },
@@ -39,7 +39,7 @@ export async function clientsCsv(kv: KV, s: Sealer, master?: MasterEntry[]): Pro
 /** Copies the desk to the Sheet when something changed or a day passed. Throws Google's status, never a token. */
 export async function syncSheet(kv: KV, s: Sealer, oauth: string | undefined, now = Date.now()): Promise<"clean" | "synced"> {
   const [dirty, at] = await Promise.all([kv.get(SHEET_DIRTY), kv.get(SHEET_AT)]);
-  if (!dirty && Number(at) > now - DAY) return "clean";
+  if (!dirty && Number(at) > now - DAY_MS) return "clean";
   // Cleared first: a lead written while this runs marks it again for the next run.
   if (dirty) await kv.delete(SHEET_DIRTY);
   try {

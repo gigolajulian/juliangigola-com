@@ -1,14 +1,6 @@
 /* ── the inbox ────────────────────────────────────────────────────
- * Where an enquiry goes now that the form can deliver it.
- *
- * Until now the contact form had no destination. With no mail provider
- * configured it took its `unconfigured` branch: a polite explanation and a
- * prefilled `mailto:`, which the visitor then had to open and send themselves.
- * That is honest — it never swallowed a message — but it asks the one person
- * you want to hear from to do the work, on a device whose mail client may not
- * be set up at all. Every enquiry was a second action away from being lost.
- *
- * So the Worker keeps them. A KV namespace, one entry per enquiry, read back
+ * Where an enquiry goes. The Worker keeps each one, so the visitor never
+ * has to send it themselves from a `mailto:`. A KV namespace, one entry per enquiry, read back
  * by /admin. Not a database because there is nothing relational here — an
  * enquiry is written once, read a few times, and deleted — and KV is the one
  * store this site can reach for nothing.
@@ -185,7 +177,7 @@ export const contextLines = (e: Enquiry): string[] => {
 /**
  * The cooldown, in milliseconds.
  *
- * Julian asked for five minutes, which is also about the right number: nobody
+ * Five minutes (Julian's call): nobody
  * sends two genuine enquiries inside five minutes, and anything automated
  * hits a wall immediately rather than getting a few hundred through before a
  * daily cap notices.
@@ -464,7 +456,7 @@ const esc = (s: string) =>
   s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
 
 /** `looks`: each frame's look in the picker
-    (`lib/picker-looks.json`), passed in so this module imports no
+    (`lib/booking/picker-looks.json`), passed in so this module imports no
     JSON. `inline`: the picks attached inline as
     `cid:pick-<index>`, shown under their link in the HTML copy; one
     that would not fetch is the link alone. */

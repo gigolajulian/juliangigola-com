@@ -4,7 +4,7 @@ import * as React from "react";
 import loader from "@/image-loader";
 import { burst } from "@/components/splash/burst-splash";
 import { split } from "@/components/splash/split-splash";
-import { HERO } from "@/lib/home/photos";
+import { HERO } from "@/lib/photos";
 import { keepNames } from "@/lib/keep-names";
 
 /* The homepage's split splash: the run of frames (the portfolio's first covers,

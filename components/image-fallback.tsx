@@ -4,27 +4,13 @@ import * as React from "react";
 import { plainSrc } from "@/image-loader";
 
 /* ── when the resizer is blocked, the photograph still shows ──────
- * Every picture on the site is addressed through `/cdn-cgi/image/...`
- * (`image-loader.ts`). Content blockers match that path — it is the same
- * prefix Cloudflare uses for its beacon — so on a laptop running one, the
- * photographs are the one thing on the page that does not arrive, and the
- * site reads as broken.
- *
- * A blocked request fires `error` on the image. Resource errors do not
- * bubble, so this listens in the capture phase at the window, which is one
- * listener for every image on the site rather than a prop on each. The
- * transformed URL carries its own source inside it, so the plain file is
- * the tail of the path; `srcset` goes first, or the browser simply picks
- * another transformed candidate and the swap does nothing.
- *
- * Marked once so a picture that is genuinely missing fails quietly rather
- * than looping.
- *
- * A picture in the page's HTML can fail before this mounts, and its
- * `error` is gone by then: on a branch preview a photograph that exists
- * only on the branch 404s on the live zone within a few milliseconds
- * (`image-loader.ts`, `ORIGIN`), and stayed an empty box. So the ones
- * already broken are swept once on mount.
+ * Content blockers match `/cdn-cgi/image/` (Cloudflare's beacon shares the
+ * prefix), so a failed picture swaps to the plain file its URL carries.
+ * Resource errors do not bubble: one capture listener on the window covers
+ * every image. `srcset` is cleared first, or the browser picks another
+ * transformed candidate. Marked once, so a missing file does not loop.
+ * Pictures that failed before mount (a branch-only photograph on a preview)
+ * are swept once on mount.
  * ─────────────────────────────────────────────────────────────── */
 export function ImageFallback() {
   React.useEffect(() => {

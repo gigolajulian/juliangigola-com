@@ -1,22 +1,11 @@
 /* What the /admin desk's routes share: the gate, the answer without LEADS_KEY, and a KV list read page by page.
    The routes are /api/inbox (the enquiries) and the lead resources under /api/leads. */
 import { refuseAdmin } from "@/lib/vouch";
-import { sealedStore, type InboxKV } from "@/lib/kv";
+import { sealedStore } from "@/lib/kv";
 import { json } from "@/lib/http";
 
 /** What a lead read or write answers on a Worker without LEADS_KEY. */
 export const noSeal = () => json({ error: "Leads need LEADS_KEY on the Worker." }, 503);
-
-/** Every key under a prefix, page after page: one KV list stops at 1000. */
-export async function* everyKey<M>(inbox: InboxKV, prefix: string) {
-  let cursor: string | undefined;
-  for (;;) {
-    const listed = await inbox.list<M>({ prefix, cursor });
-    yield* listed.keys;
-    if (listed.list_complete) return;
-    cursor = listed.cursor;
-  }
-}
 
 /**
  * The admin gate, then the binding: `kv`, the opened sealer `s` (null without LEADS_KEY, refused per

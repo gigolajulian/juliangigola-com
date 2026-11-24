@@ -12,6 +12,7 @@ import {
   type CommitFile,
 } from "@/lib/admin/admin-github";
 import { cn, errorText } from "@/lib/utils";
+import { DAY_MS } from "@/lib/time-zone";
 
 /* ── recently deleted ─────────────────────────────────────────────
  * Where removed projects wait.
@@ -28,10 +29,9 @@ import { cn, errorText } from "@/lib/utils";
  * be undone.
  * ─────────────────────────────────────────────────────────────── */
 
-const DAY = 24 * 60 * 60 * 1000;
 
 const daysLeft = (deletedAt: string): number =>
-  Math.ceil((Date.parse(deletedAt) + TRASH_DAYS * DAY - Date.now()) / DAY);
+  Math.ceil((Date.parse(deletedAt) + TRASH_DAYS * DAY_MS - Date.now()) / DAY_MS);
 
 export function AdminTrash({
   token,

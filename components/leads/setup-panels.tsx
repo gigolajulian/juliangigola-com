@@ -21,19 +21,20 @@ import { Divider } from "@astryxdesign/core/Divider";
 import { SW_URL, swScope } from "@/components/leads/setup";
 import { ContractTemplatesDesk } from "@/components/leads/contract";
 import { type Call, ymdPT } from "@/lib/leads/lead-desk";
-import { adminCall, authed } from "@/lib/admin/admin-call";
+import { adminBlob, adminCall } from "@/lib/admin/admin-call";
+import { localSet } from "@/lib/storage";
 import type { Template } from "@/lib/leads/lead-crm";
 import type { Hours, Window } from "@/lib/booking/rules";
 import type { Stage } from "@/lib/leads/leads";
 
 import { byCodeUnit, errorText } from "@/lib/utils";
+import { clockLabel } from "@/lib/booking/clock";
 import { Page } from "@/components/leads/lists";
 
 const PUSH_FLAG = "jg-leads-push";
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const TIMES = Array.from({ length: 33 }, (_, i) => 360 + i * 30);
-const clock = (m: number) => `${((Math.floor(m / 60) + 11) % 12) + 1}:${String(m % 60).padStart(2, "0")} ${m < 720 ? "AM" : "PM"}`;
-const TIME_OPTS = TIMES.map((t) => ({ value: String(t), label: clock(t) }));
+const TIME_OPTS = TIMES.map((t) => ({ value: String(t), label: clockLabel(t) }));
 const DEFAULT_WINDOW: Window = [600, 1140];
 const dateLabel = (d: string) => new Intl.DateTimeFormat("en-US", { timeZone: "UTC", weekday: "short", month: "short", day: "numeric" }).format(new Date(`${d}T00:00:00Z`));
 
@@ -151,9 +152,8 @@ export function TemplatesDesk({ call, templates, saved }: { call: Call; template
 
 /** Every lead as a CSV file, through the same key as the rest of the desk. */
 async function exportCsv(what: "leads" | "activity" = "leads") {
-  const res = await fetch(what === "activity" ? "/api/leads/csv?events" : "/api/leads/csv", { headers: authed(), cache: "no-store" });
-  if (!res.ok) throw new Error(`Export failed (${res.status})`);
-  const url = URL.createObjectURL(await res.blob());
+  const blob = await adminBlob(what === "activity" ? "/api/leads/csv?events" : "/api/leads/csv", "Export failed");
+  const url = URL.createObjectURL(blob);
   const a = Object.assign(document.createElement("a"), { href: url, download: `${what}-${new Date().toISOString().slice(0, 10)}.csv` });
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 5000);
@@ -187,7 +187,7 @@ export function DeviceDesk({ call, reload, signOut }: { call: Call; reload: () =
       const raw = Uint8Array.from(atob(key.replace(/-/g, "+").replace(/_/g, "/")), (c) => c.charCodeAt(0));
       const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: raw });
       await call({ path: "/push", method: "PUT", body: JSON.stringify(sub.toJSON()) });
-      try { localStorage.setItem(PUSH_FLAG, "1"); } catch {}
+      localSet(PUSH_FLAG, "1");
       setOn(true);
     } catch (e) { setNote(errorText(e)); }
   };

@@ -1,6 +1,7 @@
 /* The backend suite's second half: the self-checks that run the real
    inbox, /admin payload, sequence and video-link code under Node's type
-   stripping (`scripts/check-*.mjs`). Stops at the first that fails. */
+   stripping, and the one that every path a comment names exists
+   (`scripts/check-*.mjs`). Stops at the first that fails. */
 import { spawnSync } from "node:child_process";
 import { readdirSync } from "node:fs";
 

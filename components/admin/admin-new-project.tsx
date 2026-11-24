@@ -13,7 +13,7 @@ import {
 } from "@/lib/admin/admin-image";
 import type { Credit, Frame } from "@/lib/work/work-types";
 import { AdminCredits, tidyCredits } from "@/components/admin/admin-credits";
-import { cn, errorText } from "@/lib/utils";
+import { cn, errorText, pad } from "@/lib/utils";
 
 /* ── adding a project ─────────────────────────────────────────────
  * Names a shoot, files it under a discipline, and commits the photographs.
@@ -126,7 +126,7 @@ export function AdminNewProject({
 
       const dir = `public/work/${slug}`;
       const images: Frame[] = ready.map((item, i) => ({
-        src: `/work/${slug}/${String(i + 1).padStart(2, "0")}.jpg`,
+        src: `/work/${slug}/${pad(i + 1)}.jpg`,
         width: item.processed.width,
         height: item.processed.height,
         color: item.processed.color,
@@ -163,7 +163,7 @@ export function AdminNewProject({
 
       const files = [
         ...ready.map((item, i) => ({
-          path: `${dir}/${String(i + 1).padStart(2, "0")}.jpg`,
+          path: `${dir}/${pad(i + 1)}.jpg`,
           content: item.processed.base64,
           encoding: "base64" as const,
         })),
@@ -289,7 +289,7 @@ export function AdminNewProject({
               className="flex items-center gap-4 border-b border-border py-3"
             >
               <span className="label w-8 shrink-0 tabular-nums text-muted-foreground">
-                {i === 0 ? "CVR" : String(i + 1).padStart(2, "0")}
+                {i === 0 ? "CVR" : pad(i + 1)}
               </span>
               <span className="min-w-0 flex-1 truncate text-sm">
                 {item.file.name}

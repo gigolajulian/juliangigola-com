@@ -1,7 +1,7 @@
 import type { Credit } from "./work-types";
 
 /* The one list of credit roles. The harvested site and years of hand edits left 79 spellings of
-   about 40 jobs; a role outside this list fails lib/credits.test.ts. Compound labels split into one
+   about 40 jobs; a role outside this list fails tests/lib/work/credits.test.ts. Compound labels split into one
    credit per job, so a person who styled and did makeup is listed once under each. */
 const SPLIT: Record<string, string[]> = {
   "mua & styling": ["Styling", "Hair & makeup"], "styling & hmua": ["Styling", "Hair & makeup"], "hmua & styling": ["Styling", "Hair & makeup"],

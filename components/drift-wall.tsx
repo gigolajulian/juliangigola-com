@@ -15,8 +15,6 @@ import {
 } from 'react';
 import type { DriftWallItem } from '@/lib/work/work-types';
 
-export type { DriftWallItem };
-
 
 export type DriftWallProps = {
   items: DriftWallItem[];
@@ -173,13 +171,10 @@ export function DriftWall({
           r.top < box.bottom
         );
       });
-      /* Only the ones in view are fetched now, and ahead of everything
-         else. Every tile used to go at once: lazy loading counts anything
-         within a screen or two as near, which is the whole wall, so the
-         dozens out of view competed with the few in it and the wall
-         waited on all of them (Julian: the background on #inquire takes
-         a while; load only what is in the viewport). The rest are handed
-         their addresses once it is shown (`shown` below). */
+      /* Only the ones in view are fetched, ahead of everything else: lazy
+         loading counts the whole wall as near, and the tiles out of view
+         would compete with the few in it. The rest are handed their
+         addresses once it is shown (`shown` below). */
       for (const img of inView) {
         img.loading = 'eager';
         img.fetchPriority = 'high';

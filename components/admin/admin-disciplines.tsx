@@ -3,7 +3,7 @@
 import * as React from "react";
 import Image from "next/image";
 import type { AdminProject } from "@/components/admin/editor/props";
-import { cn } from "@/lib/utils";
+import { cn, pad } from "@/lib/utils";
 
 /* ── the disciplines ──────────────────────────────────────────────
  * Each branch of the site, its work in order, and the photograph that stands
@@ -149,19 +149,9 @@ export function AdminDisciplines({
 
               return (
                 <div key={d.slug} className="border border-border">
-                  {/* Two controls in one row, not one.
-                   *
-                   * The row used to be a single button that opened the
-                   * discipline, with the cover inside it as decoration —
-                   * which put the one thing you might want to change behind
-                   * two clicks and a hunt, while showing you the picture the
-                   * whole time. So the picture is its own control now: click
-                   * the cover to change the cover, which is the only thing
-                   * anyone was ever going to try.
-                   *
-                   * It cannot be a button inside a button, so the row is a
-                   * flex container holding two — the thumbnail, and
-                   * everything else. */}
+                  {/* Two controls in one row: click the cover to change
+                   * the cover, the rest opens the discipline. A button cannot
+                   * hold a button, so the row is a flex container of two. */}
                   <div
                     className={cn(
                       "flex items-stretch gap-4 px-4 py-3 transition-colors duration-200",
@@ -361,7 +351,7 @@ function Ordering({
           )}
         >
           <span className="label w-6 shrink-0 tabular-nums text-muted-foreground">
-            {String(i + 1).padStart(2, "0")}
+            {pad(i + 1)}
           </span>
           <span
             className="relative block h-12 w-10 shrink-0 overflow-hidden"

@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
+import { adminBlob } from "@/lib/admin/admin-call";
 import type { Enquiry } from "@/lib/leads/enquiry";
 
 /* The references an enquiry arrived with: their uploads, fetched with
@@ -28,16 +29,21 @@ export function References({
     const made: string[] = [];
     void Promise.all(
       Array.from({ length: count }, async (_, n) => {
-        const res = await fetch(
-          `/api/inbox?key=${encodeURIComponent(`ref:${msgKey}:${n}`)}`,
-          { headers: JSON.parse(header), cache: "no-store" },
-        );
-        if (!res.ok) return null;
-        const url = URL.createObjectURL(await res.blob());
-        made.push(url);
+        // a refused file is left out; a fetch that fails offline fails them all, as before
+        const blob = await adminBlob(`/api/inbox?key=${encodeURIComponent(`ref:${msgKey}:${n}`)}`, "Reference failed", JSON.parse(header)).catch((e: unknown) => {
+          if (e instanceof TypeError) throw e;
+          return null;
+        });
+        if (!blob) return null;
+        const url = URL.createObjectURL(blob);
+        // one that lands after unmount is let go at once
+        if (!live) URL.revokeObjectURL(url);
+        else made.push(url);
         return url;
       }),
-    ).then((got) => live && setUrls(got));
+    )
+      .then((got) => live && setUrls(got))
+      .catch(() => {});
     return () => {
       live = false;
       made.forEach((u) => URL.revokeObjectURL(u));

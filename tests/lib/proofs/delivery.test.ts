@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 // Relative imports: the coverage scanner resolves `@/` under src/, which this repo does not have.
 import { openDelivery, storeFinal } from "../../../lib/proofs/delivery";
 import { crc32 } from "../../../lib/proofs/zip";
-import { sealer } from "../../../lib/leads/lead-crypto";
+import { sealer } from "@/lib/seal";
 import { finalKey, PREVIEW_W, THUMB_W, type Proof } from "../../../lib/proofs/proof-model";
 import { writeProof } from "../../../lib/proofs/proof-store";
 import { FakeKV, LEADS_KEY } from "../../backend/fakes";

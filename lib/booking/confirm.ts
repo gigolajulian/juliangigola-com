@@ -203,8 +203,15 @@ export async function sendConfirm(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefi
 /** The cancel note's subject, for the lead desk's log too. */
 export const cancelledSubject = (c: { session: string; start: string; end?: string }) => `Cancelled: ${c.session}, ${timeRange(c.start, c.end)}`;
 
+/** What the cancel note says about the money: which line, the deposit in dollars and the dollars that went back. */
+export type CancelMoney = { refund: "refunded" | "early" | "part" | "kept" | "none" | "late" | "mine" | "mineFree"; usd: number; back: number };
+
 /** The client's note that a booking is cancelled, plain, from book@. A failed send is logged, never a failed cancel. Whether it went out. */
-export async function sendCancelled(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefined, c: { name: string; email: string; session: string; start: string; end?: string }, refund: "refunded" | "early" | "part" | "kept" | "none" | "late" | "mine" | "mineFree", usd: number, back: number): Promise<boolean> {
+export async function sendCancelled(
+  mailer: CloudflareEnv["CLIENT_EMAIL"] | undefined,
+  c: { name: string; email: string; session: string; start: string; end?: string },
+  { refund, usd, back }: CancelMoney,
+): Promise<boolean> {
   if (!mailer || !c.email) return false;
   const money = {
     refunded: `Your $${usd} deposit is refunded to your card. Banks take 5 to 10 days to show it.`,

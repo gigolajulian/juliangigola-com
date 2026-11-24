@@ -14,8 +14,9 @@ import { isEmail } from "@/lib/utils";
 import { isFullName, type PublicContract } from "@/lib/contracts/contract";
 import { SignPad } from "@/components/contracts/sign-pad";
 import { postJson } from "@/lib/http";
+import { TZ } from "@/lib/time-zone";
 
-const when = (iso: string) => new Intl.DateTimeFormat("en-US", { timeZone: "America/Los_Angeles", dateStyle: "long", timeStyle: "short" }).format(new Date(iso));
+const when = (iso: string) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, dateStyle: "long", timeStyle: "short" }).format(new Date(iso));
 
 export function ContractSign({ id, initial }: { id: string; initial: PublicContract }) {
   const [signed, setSigned] = React.useState(initial.signed);

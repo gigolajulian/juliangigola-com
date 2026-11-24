@@ -3,7 +3,7 @@ import { POST } from "@/app/api/leads/gmail/route";
 import { forgetToken } from "@/lib/google";
 import { CURSOR } from "@/lib/leads/sync/gmail-sync";
 import { FakeKV, LEADS_KEY } from "./fakes";
-import { sealer } from "@/lib/leads/lead-crypto";
+import { sealer } from "@/lib/seal";
 import { personKey, readLead, writeLead } from "@/lib/leads/lead-store";
 import { applyLeadEvent } from "@/lib/leads/leads";
 

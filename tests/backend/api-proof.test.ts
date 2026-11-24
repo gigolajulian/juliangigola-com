@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { DELETE, GET, PATCH, POST, PUT } from "@/app/api/proof/route";
-import { sealer } from "@/lib/leads/lead-crypto";
+import { sealer } from "@/lib/seal";
 import { readProof, writeProof } from "@/lib/proofs/proof-store";
 import { proofKey } from "@/lib/proofs/proof-model";
 import { readLead, writeLead } from "@/lib/leads/lead-store";

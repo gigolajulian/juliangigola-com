@@ -21,7 +21,7 @@ import { kindOf } from "@/components/leads/shared";
 import { balance, isSettled, subtotal, usd, type Invoice } from "@/lib/leads/invoice";
 import { type Call, dayLabel, type Patch } from "@/lib/leads/lead-desk";
 import { errorText } from "@/lib/utils";
-import type { Lead, LeadSummary } from "@/lib/leads/leads";
+import { leadStoreKey, type Lead, type LeadSummary } from "@/lib/leads/leads";
 
 /** One invoice as `?invoices` answers it: the invoice, its lead's id and name. */
 export type InvoiceRow = Invoice & { lead: string; name: string };
@@ -55,7 +55,7 @@ export function InvoicesDesk({ leads, call, open, changed }: { leads: LeadSummar
     lead(id).then(setFull, (e: unknown) => setNote(errorText(e)));
   };
   const patch: Patch = async (body) => {
-    const { lead: next } = await call<{ lead: Lead }>({ method: "PATCH", body: JSON.stringify({ key: `lead:${making}`, ...body }) });
+    const { lead: next } = await call<{ lead: Lead }>({ method: "PATCH", body: JSON.stringify({ key: leadStoreKey(making!), ...body }) });
     setFull(next);
     changed(next);
     return next;
