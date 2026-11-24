@@ -1,6 +1,6 @@
 import { isGithubToken, REPO } from "@/lib/admin/admin-github";
 import { json } from "@/lib/http";
-import { sha256Hex } from "@/lib/utils";
+import { sha256Hex } from "@/lib/token";
 
 /* ── the key the editor already has ───────────────────────────────
  * Whoever can push to the repository publishes the site, so a GitHub token

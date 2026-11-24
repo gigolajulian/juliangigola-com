@@ -2,7 +2,8 @@ import { errorText } from "@/lib/utils";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { refuseAdmin } from "@/lib/vouch";
 import { SITE_HOST, ZONE, cloudflare, rumVisits, searchConsole as gsc, sitePath } from "@/lib/analytics";
-import { json, upstreamError } from "@/lib/http";
+import { HttpError, json, upstreamError } from "@/lib/http";
+import { DAY_MS } from "@/lib/time-zone";
 
 /* ── traffic ──────────────────────────────────────────────────────
  * The numbers behind /admin's Traffic tab, from Cloudflare's own analytics:
@@ -34,7 +35,7 @@ export async function GET(request: Request) {
 
   const gql = (query: string) => cloudflare(key)<Viewer>(query);
   const now = new Date();
-  const ago = (days: number) => new Date(now.getTime() - days * 864e5).toISOString();
+  const ago = (days: number) => new Date(now.getTime() - days * DAY_MS).toISOString();
 
   const rum = async (dim: string, limit = 12): Promise<Row[]> => {
     const groups = await rumVisits(key, dim, ago(7), now.toISOString(), limit);
@@ -93,7 +94,7 @@ async function searchConsole(secret?: string) {
   try {
     const ask = await gsc(secret);
     // Search Console is about three days behind, so the window ends there.
-    const day = (n: number) => new Date(Date.now() - n * 864e5).toISOString().slice(0, 10);
+    const day = (n: number) => new Date(Date.now() - n * DAY_MS).toISOString().slice(0, 10);
     const query = (dimensions: string[], rowLimit = 10) => ask({ startDate: day(30), endDate: day(2), dimensions, rowLimit });
     const [total, queries, pages] = await Promise.all([query([]), query(["query"]), query(["page"])]);
     const t = total[0];
@@ -126,13 +127,13 @@ async function bingWebmaster(key?: string) {
       try {
         r = JSON.parse(text);
       } catch {
-        throw new Error(`Bing answered ${res.status}: ${text.slice(0, 160) || "(empty)"}`);
+        throw new HttpError(`Bing answered ${res.status}: ${text.slice(0, 160) || "(empty)"}`, res.status);
       }
       if (!r.d) throw new Error(r.Message ?? `Bing answered ${res.status}`);
       return r.d;
     };
     // Bing's dates arrive as "/Date(1759017600000-0700)/".
-    const since = Date.now() - 28 * 864e5;
+    const since = Date.now() - 28 * DAY_MS;
     const recent = (rows: Record<string, unknown>[]) =>
       rows.filter((r) => Number(String(r.Date).match(/\d+/)?.[0] ?? 0) >= since);
     const [traffic, queries, pages] = await Promise.all([

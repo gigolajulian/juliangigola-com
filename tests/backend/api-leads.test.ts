@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { summary, enquiry, enquiryKey } from "@/lib/leads/enquiry";
 import { recordLead } from "@/lib/leads/lead-store";
 import { FakeKV, LEADS_KEY, INBOX_KEY as KEY } from "./fakes";
-import { sealer } from "@/lib/leads/lead-crypto";
+import { sealer } from "@/lib/seal";
 import { desk } from "./desk-routes";
 
 /* The lead desk's routes under /api/leads: the leads, their invoices, push, and the imports. The gate is

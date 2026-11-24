@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { GET, PATCH, POST, PUT } from "@/app/api/contract/route";
 import { POST as SIGN } from "@/app/api/contract/[id]/route";
-import { sealer } from "@/lib/leads/lead-crypto";
+import { sealer } from "@/lib/seal";
 import { readLead, writeLead } from "@/lib/leads/lead-store";
 import { fillContract, readContract, signedCopy, type Contract } from "@/lib/contracts/contract";
-import { sha256Hex } from "@/lib/utils";
+import { sha256Hex } from "@/lib/token";
 import type { Lead } from "@/lib/leads/leads";
 import { FakeEmail, FakeKV, LEADS_KEY, INBOX_KEY as KEY } from "./fakes";
 

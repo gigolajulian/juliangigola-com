@@ -3,23 +3,21 @@
 import * as React from "react";
 import Image from "next/image";
 import { isTextRef, type FrameRef, type TextRef } from "@/lib/work/added";
-import { useSequence, srcOf, type DragProps, type PendingUpload } from "@/lib/admin/admin-sequence";
+import { useSequence, srcOf, type DragProps } from "@/lib/admin/admin-sequence";
 import { AdminCredits } from "@/components/admin/admin-credits";
 import type { Copy, Credit } from "@/lib/work/work-types";
-import { cn } from "@/lib/utils";
+import { cn, pad } from "@/lib/utils";
 import type { AdminProject, Overrides } from "@/components/admin/editor/props";
-import type { SetOverride } from "@/components/admin/editor/draft";
+import { useEditorStaging } from "@/components/admin/editor/editor-context";
 
 /* ── the page, editable ───────────────────────────────────────────
- * A project drawn the way /work/<slug> draws it — the title, the meta
- * row, the intent, the frames in the same paired rows, the passages
- * between them, the credits at the end — with the editing on the page
- * itself. Julian asked for it: the thumbnail grid tells you the order,
- * this tells you what the order looks like.
+ * A project drawn the way its page draws it (the title, the meta row, the
+ * intent, the frames in paired rows, the passages, the credits) with the
+ * editing on the page itself. Julian's call: the thumbnail grid tells you
+ * the order, this tells you what the order looks like.
  *
- * Same markup and the same classes as `app/work/[slug]/page.tsx` and
- * `gallery.tsx`, minus what is not content: the scroll reveal, the
- * lightbox, the morph, the call to action. Every change goes through the
+ * Modelled on `app/portfolio/[slug]/page.tsx`, minus what is not content:
+ * the scroll reveal, the lightbox, the call to action. Every change goes through the
  * sequence hook the grid uses, so nothing here can publish anything the
  * grid could not — and Undo, Publish and the "edited" marks all agree.
  * ─────────────────────────────────────────────────────────────── */
@@ -30,20 +28,15 @@ export function AdminPage({
   project,
   disciplines,
   overrides,
-  onOverride,
-  uploads,
-  onUpload,
   onClose,
 }: {
   project: AdminProject;
   disciplines: { slug: string; name: string; group: string }[];
   /** The draft's per-project overrides; this page reads and edits its own project's entries. */
   overrides: Overrides;
-  onOverride: SetOverride;
-  uploads: Record<string, PendingUpload>;
-  onUpload: (added: PendingUpload[]) => void;
   onClose: () => void;
 }) {
+  const { uploads, onUpload, onOverride } = useEditorStaging();
   const filedAs = overrides.categories[project.slug] ?? project.categorySlug;
   const frames = overrides.frames[project.slug] ?? null;
   const credits = overrides.credits[project.slug] ?? project.credits;
@@ -417,7 +410,7 @@ function FrameCell({
       )}
 
       <span className="label absolute left-3 top-3 bg-background/80 px-2 py-1 tabular-nums">
-        {ordinal === 1 ? "CVR" : String(ordinal).padStart(2, "0")}
+        {ordinal === 1 ? "CVR" : pad(ordinal)}
       </span>
 
       <span className="absolute bottom-3 right-3 flex items-center gap-1">

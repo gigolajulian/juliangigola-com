@@ -4,6 +4,7 @@
  * Console. Both keys stay on the Worker; nothing here returns them.
  * ─────────────────────────────────────────────────────────────── */
 import { secretJson } from "@/lib/secrets";
+import { HttpError } from "@/lib/http";
 
 export const ZONE = "3637b65119d9b2ce278f9c59c4077ace";
 export const ACCOUNT = "7fa0ed7addeb11b728e3b935630a1015";
@@ -30,8 +31,9 @@ export function cloudflare(key: string) {
     } catch {
       // The key's length, never the key: a paste that went wrong shows as a
       // length far from the 40 characters a Cloudflare token has.
-      throw new Error(
+      throw new HttpError(
         `Cloudflare answered ${res.status}: ${text.slice(0, 160) || "(empty)"} (key is ${key.trim().length} characters)`,
+        res.status,
       );
     }
     if (r.errors?.length || !r.data) throw new Error(r.errors?.[0]?.message ?? "Cloudflare said no.");
@@ -62,11 +64,11 @@ export async function engineSql<T>(key: string, sql: string): Promise<T[]> {
     body: sql,
   });
   const text = await res.text();
-  if (!res.ok) throw new Error(`Analytics Engine answered ${res.status}: ${text.slice(0, 160)}`);
+  if (!res.ok) throw new HttpError(`Analytics Engine answered ${res.status}: ${text.slice(0, 160)}`, res.status);
   try {
     return (JSON.parse(text) as { data: T[] }).data;
   } catch {
-    throw new Error(`Analytics Engine answered ${res.status}: ${text.slice(0, 160)}`);
+    throw new HttpError(`Analytics Engine answered ${res.status}: ${text.slice(0, 160)}`, res.status);
   }
 }
 

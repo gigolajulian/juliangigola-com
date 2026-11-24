@@ -16,8 +16,8 @@ export function useCoverPreload(
      flew in empty and the photos popped in after (Julian, iPhone and iPad).
      The other view's first frames are fetched and decoded while this one is
      up, both ways: back to the grid showed one grey frame too. */
-  /* A phone at DPR 3 paid ~760 KB for eight strip covers it might never
-     open (audit v3.0.92): the timer now warms the first three, the rest
+  /* Eight strip covers would cost a phone at DPR 3 ~760 KB it might never
+     use: the timer warms the first three, the rest
      wait for a hand on the strip button, and Save-Data skips it all. */
   const warm = React.useCallback(
     (n: number) => {
@@ -39,7 +39,7 @@ export function useCoverPreload(
     return () => clearTimeout(t);
   }, [warm, view]);
 
-  /* On for everyone (Julian, 2026-11-22: "push to live"): the lazy photos
+  /* On for everyone: the lazy photos
      within 1.5 screens ahead of the scroll are asked for in reading order,
      LOOK_CAP at a time, so covers land in order and never as a burst. It
      promotes the real <img>, so each file is fetched once at its own width. */

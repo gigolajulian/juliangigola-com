@@ -1,11 +1,12 @@
 "use client";
 
 import * as React from "react";
-import type { FrameRef } from "@/lib/work/added";
+import { isTextRef, type FrameRef } from "@/lib/work/added";
 import type { Bts, Frame } from "@/lib/work/work-types";
 import { MAX_WIDTH, readClip, prepareImage } from "@/lib/admin/admin-image";
 import { useSequence, srcOf, type PendingUpload } from "@/lib/admin/admin-sequence";
-import { cn, errorText } from "@/lib/utils";
+import { useEditorStaging } from "@/components/admin/editor/editor-context";
+import { cn, errorText, pad } from "@/lib/utils";
 
 /* ── a project's BTS ──────────────────────────────────────────────
  * The behind-the-scenes frames under a gallery: who shot them, then
@@ -17,25 +18,25 @@ import { cn, errorText } from "@/lib/utils";
 
 const isClip = (src: string) => src.endsWith(".mp4");
 
+/** A whole frame, the only kind a BTS holds: not a bare path, not a passage. */
+const isFrame = (f: FrameRef): f is Frame => typeof f !== "string" && !isTextRef(f);
+
 export function AdminBts({
   slug,
   published,
   value,
-  uploads,
   onChange,
-  onUpload,
 }: {
   slug: string;
   /** The BTS the repository holds, if any. */
   published: Bts | undefined;
   /** The draft, if it differs from nothing. */
   value: Bts | undefined;
-  uploads: Record<string, PendingUpload>;
   onChange: (next: Bts) => void;
-  onUpload: (added: PendingUpload[]) => void;
 }) {
+  const { uploads, onUpload } = useEditorStaging();
   const by = value?.by ?? null;
-  const frames = (value?.frames ?? []) as FrameRef[];
+  const frames: FrameRef[] = value?.frames ?? [];
   const [busy, setBusy] = React.useState("");
   const [error, setError] = React.useState("");
   const [help, setHelp] = React.useState(false);
@@ -46,7 +47,7 @@ export function AdminBts({
     frames,
     // `null` is the sequence back in its published order.
     onChange: (next) =>
-      onChange({ by, frames: (next ?? published?.frames ?? []) as Frame[] }),
+      onChange({ by, frames: next ? next.filter(isFrame) : (published?.frames ?? []) }),
     onUpload,
   });
 
@@ -87,7 +88,7 @@ export function AdminBts({
     setBusy("");
     if (!made.length) return;
     onUpload(made);
-    onChange({ by, frames: [...(list as Frame[]), ...added] });
+    onChange({ by, frames: [...list.filter(isFrame), ...added] });
   }
 
   const ctl = "label border border-border px-3 py-2 press hoverable:hover:bg-card";
@@ -98,7 +99,7 @@ export function AdminBts({
         <label className="label flex flex-wrap items-baseline gap-1 text-muted-foreground">
           <span className="text-foreground">BTS</span>
           <span>
-            · {String(list.length).padStart(2, "0")}{" "}
+            · {pad(list.length)}{" "}
             {list.length === 1 ? "frame" : "frames"} · by @
           </span>
           <input
@@ -107,7 +108,7 @@ export function AdminBts({
             onChange={(e) =>
               onChange({
                 by: e.target.value.replace(/^@/, "").trim() || null,
-                frames: list as Frame[],
+                frames: list.filter(isFrame),
               })
             }
             placeholder="handle"
@@ -202,7 +203,7 @@ export function AdminBts({
                     />
                   )}
                   <span className="label absolute left-0 top-0 bg-background/80 px-2 py-1 tabular-nums">
-                    {String(i + 1).padStart(2, "0")}
+                    {pad(i + 1)}
                     {isClip(src) ? " · CLIP" : ""}
                   </span>
                 </span>

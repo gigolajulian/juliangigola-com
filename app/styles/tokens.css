@@ -489,18 +489,9 @@
     letter-spacing: 0.02em;
     /* The nav is fixed; without this, an in-page jump lands under it. */
     scroll-padding-top: 6rem;
-    /* No reserved gutter. This held fifteen pixels open on every page so
-       that the window would not step sideways between a strip, which is
-       exactly one window and never scrolls, and the terms and the privacy
-       notice, which are prose and do. The cost was a strip of dead ground
-       down the right of every page, and the cover photograph stopping
-       short of the edge of the screen: Julian asked for the picture to
-       reach it, and a photographer's site is the picture.
-
-       What comes back is a fifteen pixel step on the way into the two
-       legal pages, and only where a scrollbar takes width at all - not on
-       any touch device, and not on a Mac unless the bars are set to show
-       always. That is the cheaper of the two. */
+    /* No reserved gutter, so the cover photograph reaches the edge of the
+       screen (Julian's call). The cost is a fifteen pixel step into the
+       legal pages, only where a scrollbar takes width at all. */
   }
 
   /* The half of the copyright notice that JavaScript cannot do.

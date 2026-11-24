@@ -1,7 +1,9 @@
 import { DEFAULT_HOURS, EVENTS, windowOn, type Hours, type Rule } from "@/lib/booking/rules";
-import { TZ } from "@/lib/time-zone";
+import { TZ, DAY_MS } from "@/lib/time-zone";
 import { gcal } from "@/lib/google";
-import { sha256Hex } from "@/lib/utils";
+import { sha256Hex } from "@/lib/token";
+import { HttpError } from "@/lib/http";
+import { pad } from "@/lib/utils";
 
 /* ── open times, from hello@'s free/busy ──────────────────────────
  * The rules (`lib/booking/rules.ts`) say when Julian works; Google's
@@ -13,7 +15,7 @@ import { sha256Hex } from "@/lib/utils";
 /** Calendars whose busy time blocks a booking. */
 export const CALENDARS = ["primary"];
 /* shortcut: freeBusy refuses long ranges, so it is asked in 60-day pieces. */
-const PIECE = 60 * 864e5;
+const PIECE = 60 * DAY_MS;
 
 type Busy = { start: number; end: number; label?: string };
 
@@ -40,14 +42,14 @@ export function localIso(ms: number, tz: string) {
   const off = offset(ms, tz) / 6e4;
   const t = new Date(ms + off * 6e4).toISOString().slice(0, 19);
   const a = Math.abs(off);
-  return `${t}${off < 0 ? "-" : "+"}${String(Math.floor(a / 60)).padStart(2, "0")}:${String(a % 60).padStart(2, "0")}`;
+  return `${t}${off < 0 ? "-" : "+"}${pad(Math.floor(a / 60))}:${pad(a % 60)}`;
 }
 
 /** Every open start of `rule` between `from` and `to`, given what is busy. Pure. */
 export function startsFor(rule: Rule, busy: Busy[], from: number, to: number, now = Date.now(), hours: Hours = DEFAULT_HOURS): number[] {
   const out: number[] = [];
   const earliest = Math.max(from, now + rule.notice * 6e4);
-  const latest = Math.min(to, rule.ahead ? now + rule.ahead * 864e5 : Infinity);
+  const latest = Math.min(to, rule.ahead ? now + rule.ahead * DAY_MS : Infinity);
   const step = (rule.interval ?? rule.length) * 6e4;
   // Day by day in Julian's time zone, from the day `earliest` falls on.
   const [y, m, d] = new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(earliest).split("-").map(Number);
@@ -118,7 +120,7 @@ export function icsBusy(text: string): Busy[] {
         : d
           ? start + (((+(d[1] ?? 0) * 7 + +(d[2] ?? 0)) * 24 + +(d[3] ?? 0)) * 60 + +(d[4] ?? 0)) * 6e4
           : /^\d{8}$/.test(sv.trim())
-            ? start + 864e5
+            ? start + DAY_MS
             : start;
       if (ev.STATUS?.[1] !== "CANCELLED" && ev.TRANSP?.[1] !== "TRANSPARENT" && end > start) out.push({ start, end });
       ev = null;
@@ -131,7 +133,9 @@ export function icsBusy(text: string): Busy[] {
   return out;
 }
 
-const feeds = new Map<string, { at: number; busy: Busy[] }>();
+/* A feed's spans by link, and a feed still being read (`at` Infinity), so
+   callers at the same moment share one read. */
+const feeds = new Map<string, { at: number; busy: Promise<Busy[]> }>();
 /* QA (#562): /api/slots is public and waits on every feed, so a feed gets
    2.5 seconds and its spans are kept five minutes, in this isolate and in
    the colo's cache (keyed by a hash: the link is private). */
@@ -141,21 +145,29 @@ async function feedKey(src: string) {
   return new Request(`https://ics-cache.invalid/${await sha256Hex(src)}`);
 }
 /** A feed's busy spans. Throws with the status only: the link is private. */
-async function icsFeed(src: string) {
+function icsFeed(src: string): Promise<Busy[]> {
   const hit = feeds.get(src);
   if (hit && Date.now() - hit.at < 3e5) return hit.busy;
+  const pending = { at: Infinity, busy: readFeed(src) };
+  feeds.set(src, pending);
+  pending.busy.catch(() => {
+    if (feeds.get(src) === pending) feeds.delete(src);
+  });
+  return pending.busy;
+}
+async function readFeed(src: string) {
   const cache = edge();
   const key = cache && (await feedKey(src));
   const kept = key && (await cache.match(key));
   if (kept) {
     const busy = (await kept.json()) as Busy[];
-    feeds.set(src, { at: Date.now(), busy });
+    feeds.set(src, { at: Date.now(), busy: Promise.resolve(busy) });
     return busy;
   }
   const res = await fetch(src.replace(/^webcal:/i, "https:"), { signal: AbortSignal.timeout(FEED_MS) });
-  if (!res.ok) throw new Error(`ICS ${res.status}`);
+  if (!res.ok) throw new HttpError(`ICS ${res.status}`, res.status);
   const busy = icsBusy(await res.text());
-  feeds.set(src, { at: Date.now(), busy });
+  feeds.set(src, { at: Date.now(), busy: Promise.resolve(busy) });
   if (key) await cache.put(key, Response.json(busy, { headers: { "cache-control": "max-age=300" } })).catch(() => {});
   return busy;
 }
@@ -198,7 +210,7 @@ export async function busyAll(secret: string | undefined, from: number, to: numb
 /** No bookings on a shift day. Any day with an SGH event on it is busy from midnight to midnight Pacific, even when the shift itself is only the afternoon. */
 async function shiftDays(secret: string | undefined, from: number, to: number): Promise<Busy[]> {
   type When = { date?: string; dateTime?: string };
-  const q = new URLSearchParams({ q: "SGH", singleEvents: "true", maxResults: "2500", timeMin: new Date(from - 864e5).toISOString(), timeMax: new Date(to + 864e5).toISOString() });
+  const q = new URLSearchParams({ q: "SGH", singleEvents: "true", maxResults: "2500", timeMin: new Date(from - DAY_MS).toISOString(), timeMax: new Date(to + DAY_MS).toISOString() });
   const r = await gcal<{ items?: { summary?: string; status?: string; start?: When; end?: When }[] }>(secret, `/calendars/primary/events?${q}`);
   // The Pacific midnight of the day `w` falls on; an all-day end date is already the day after.
   const midnight = (w: When, after: boolean) => {
@@ -217,7 +229,7 @@ export async function busyBetween(secret: string | undefined, from: number, to: 
   return busy;
 }
 
-/** What `app/api/slots` answers, read by `components/booking/use-slots.ts`. `where`: the visitor gives the place (no call link).
+/** What `app/api/slots` answers, read by `components/booking/picker/use-slots.ts`. `where`: the visitor gives the place (no call link).
     Starts are in the visitor's zone, grouped by their day there. */
 export type SlotsAnswer = { title: string; length: number; where: boolean; slots: Record<string, string[]> };
 
@@ -238,5 +250,5 @@ export async function openStarts(secret: string | undefined, slug: string, from:
 /** Whether `start` (ISO) is still open for `slug`, asking Google now. */
 export async function openNow(secret: string | undefined, slug: string, start: string, opts: Omit<SlotOpts, "now"> = {}) {
   const t = Date.parse(start);
-  return (await openStarts(secret, slug, t - 864e5, t + 864e5, opts)).includes(t);
+  return (await openStarts(secret, slug, t - DAY_MS, t + DAY_MS, opts)).includes(t);
 }

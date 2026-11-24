@@ -2,13 +2,13 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { liveHours } from "@/lib/booking/engine";
 import { EVENTS } from "@/lib/booking/rules";
 import { localIso, openStarts, type SlotsAnswer } from "@/lib/booking/slots";
-import { TZ } from "@/lib/time-zone";
+import { TZ, DAY_MS } from "@/lib/time-zone";
 import { json, upstreamError } from "@/lib/http";
 
 /* ── open times for the picker, from the site's own engine ────────
  * GET /api/slots?slug=portraits&start=2026-11-04&end=2027-03-04&timeZone=...
  * Answers { title, length, where, slots: { day: [start] } } (`SlotsAnswer`),
- * which `components/booking/use-picker.tsx` reads; a failure is { error }. Starts are
+ * which `components/booking/picker/use-picker.tsx` reads; a failure is { error }. Starts are
  * written in the visitor's zone and grouped by their day there. See
  * `lib/booking/slots.ts`. Off (503) until GCAL_OAUTH is set.
  * An answer is kept a minute in the colo's cache, so the picker does not
@@ -44,8 +44,8 @@ export async function GET(request: Request) {
   const kept = cache && !q.has("fresh") ? await cache.match(key).catch(() => undefined) : undefined;
   if (kept) return json(await kept.json());
   // The visitor's days, widened by a day each side for any zone; capped at 130 days.
-  const from = Date.parse(`${start}T00:00:00Z`) - 864e5;
-  const to = Math.min(Date.parse(`${end}T00:00:00Z`) + 2 * 864e5, from + 130 * 864e5);
+  const from = Date.parse(`${start}T00:00:00Z`) - DAY_MS;
+  const to = Math.min(Date.parse(`${end}T00:00:00Z`) + 2 * DAY_MS, from + 130 * DAY_MS);
 
   let starts: number[];
   try {

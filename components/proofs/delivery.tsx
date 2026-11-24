@@ -21,6 +21,8 @@ import { ProofCursor } from "@/components/proofs/cursor";
 import { ProofWall } from "@/components/proofs/wall";
 import { qflag } from "@/lib/flags/query";
 import { isEmail, noSubscribe, pad } from "@/lib/utils";
+import { TZ } from "@/lib/time-zone";
+import { localGet, localSet } from "@/lib/storage";
 
 const size = (b: number) => (b >= 1e9 ? `${(b / 1e9).toFixed(1)} GB` : `${Math.max(1, Math.round(b / 1e6))} MB`);
 /** A frame's place, counted from 1: index 0 is "01". */
@@ -64,7 +66,7 @@ function SplitGate({ cover, sub, subhead, onEnter }: { cover: string; sub: strin
 
 type Final = PublicDelivery["finals"][number];
 const readWall = () => !qflag("proofwall", "0");
-const day = (s: string) => new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: "America/Los_Angeles" }).format(new Date(s));
+const day = (s: string) => new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: TZ }).format(new Date(s));
 
 export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDelivery }) {
   const { finals } = initial;
@@ -88,7 +90,7 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
   const src = React.useCallback((f: { id: string; v: number }) => `/delivery/${id}/f/${f.id}?v=${f.v}`, [id]);
   const total = finals.reduce((n, f) => n + f.bytes, 0);
   const sizeOf = (fs: Final[]) => size(fs.reduce((n, f) => n + f.bytes, 0));
-  const closes = initial.closesAt ? new Intl.DateTimeFormat("en-US", { month: "long", day: "numeric", timeZone: "America/Los_Angeles" }).format(new Date(initial.closesAt)) : null;
+  const closes = initial.closesAt ? new Intl.DateTimeFormat("en-US", { month: "long", day: "numeric", timeZone: TZ }).format(new Date(initial.closesAt)) : null;
   // The last days say so on the page. Read after mount: server and phone can disagree near midnight.
   const clock = useClock();
   const soon = clock ? closingSoon(initial.closesAt, clock) : null;
@@ -114,17 +116,16 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
     if (doneKey && (what === "all" || models.some(([k]) => k === what))) {
       const next = { ...done, [what]: new Date().toISOString() };
       setDone(next);
-      try {
-        localStorage.setItem(doneKey, JSON.stringify(next));
-      } catch {}
+      localSet(doneKey, JSON.stringify(next));
     }
     window.location.assign(href);
   };
   const zipLabel = (what: string, label: string) => (done[what] ? `Downloaded · ${day(done[what])}` : label);
   const enter = (address: string, name?: string) => {
     setEmail(address);
+    // a kept value that is not JSON leaves the list empty
     try {
-      setDone(JSON.parse(localStorage.getItem(keyOf(address)) ?? "{}"));
+      setDone(JSON.parse(localGet(keyOf(address)) ?? "{}"));
     } catch {}
     track({ email: address, kind: "open", ...(name ? { name } : {}) });
   };

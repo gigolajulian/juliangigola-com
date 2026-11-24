@@ -16,7 +16,7 @@
  * off, as a flick on a MacBook does. WebDriver wheel actions are tried
  * first, which Safari treats as real input; where this Safari refuses
  * them the same deltas are fired as `wheel` events in the page, which the
- * strip's own wheel handling (Lenis, `components/strip.tsx`) takes the same
+ * strip's own wheel handling (`components/portfolio/use-strip-scroll.ts`) takes the same
  * way.
  *
  * Printed per run: where each swipe landed in screens, then the frames

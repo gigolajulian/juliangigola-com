@@ -8,11 +8,13 @@ import { ProofWall } from "@/components/proofs/wall";
 import { ProofCursor } from "@/components/proofs/cursor";
 import { gridwallFor } from "@/lib/proofs/gridwall";
 import { qflag } from "@/lib/flags/query";
-import { localRemove, looksLikeEmail, noSubscribe, sessionGet, sessionRemove, sessionSet } from "@/lib/utils";
+import { looksLikeEmail, noSubscribe } from "@/lib/utils";
+import { localRemove, sessionGet, sessionRemove, sessionSet } from "@/lib/storage";
 import { postJson } from "@/lib/http";
+import { TZ } from "@/lib/time-zone";
 
 /* ── the client's gallery ─────────────────────────────────────────
- * The look Julian approved 2026-11-06 (mock https://claude.ai/artifact/Nn3EU21DEofuLLJyXJHtcG):
+ * The look Julian approved (mock https://claude.ai/artifact/Nn3EU21DEofuLLJyXJHtcG):
  * sticky bar with the wordmark, All and Selects, and "n / 10"; a masonry
  * grid; a selected frame gets a cyan ring and its pick number; the bottom
  * bar with the running total slides up after the first select. Selects
@@ -345,7 +347,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
   };
 
   const ordinal = (i: number) => String(i + 1).padStart(3, "0");
-  const closes = initial.closesAt ? new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: "America/Los_Angeles" }).format(new Date(initial.closesAt)) : null;
+  const closes = initial.closesAt ? new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: TZ }).format(new Date(initial.closesAt)) : null;
   // The last days say so. Read after mount: the server and the phone can disagree near midnight.
   const clock = useClock();
   const soon = clock ? closingSoon(initial.closesAt, clock) : null;

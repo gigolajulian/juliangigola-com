@@ -34,9 +34,7 @@ import { SKY_HEAD } from "@/lib/flags/sky";
    `--font-wordmark` points at the same face (`styles/v3.css`).
    The files are committed rather than fetched by `next/font/google`
    (latin, latin-ext A, arrows and punctuation, cut from google/fonts with
-   pyftsubset; Inter Tight limited to wght 500-900). That fetch failed
-   Turbopack on the v3.0.2 and v3.0.3 production builds, 21 "Can't resolve
-   .../font/google/font" errors, and a retry passed. A build must not
+   pyftsubset; Inter Tight limited to wght 500-900): a build must not
    depend on Google answering. */
 const display = localFont({
   variable: "--font-display",
@@ -144,8 +142,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <head>
         {/* Applies the theme before the first paint: a choice made with the
          * toggle if there is one, otherwise whatever the visitor's system is
-         * set to — Julian asked for the site to match how they have it set
-         * up. Dark is the design and the fallback; light needs the attribute.
+         * set to (Julian's call). Dark is the design and the fallback; light needs the attribute.
          *
          * It has to be inline and it has to be here: an effect runs after
          * hydration, which is several hundred milliseconds of a full-bleed

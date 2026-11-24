@@ -111,7 +111,7 @@ describe("sendConfirm", () => {
 describe("sendCancelled", () => {
   it("says what happened to the deposit", async () => {
     const mail = new FakeEmail();
-    expect(await sendCancelled(mail as never, base, "kept", 100, 70)).toBe(true);
+    expect(await sendCancelled(mail as never, base, { refund: "kept", usd: 100, back: 70 })).toBe(true);
     expect(mail.sent[0].subject).toBe(cancelledSubject(base));
     expect(mail.sent[0].text).toContain("Hi Ana,");
     expect(mail.sent[0].text).toContain("is not refunded");
@@ -119,7 +119,7 @@ describe("sendCancelled", () => {
 
   it("leaves no empty line pairs when there is no deposit", async () => {
     const mail = new FakeEmail();
-    await sendCancelled(mail as never, base, "none", 0, 0);
+    await sendCancelled(mail as never, base, { refund: "none", usd: 0, back: 0 });
     expect(mail.sent[0].text).not.toMatch(/\n\n\n/);
   });
 });

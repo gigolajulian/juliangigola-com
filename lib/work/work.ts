@@ -36,7 +36,6 @@ import {
   type AddedProject,
 } from "./added";
 
-export type { Project, Category, Frame, TextBlock };
 /**
  * Every discipline: the ones the old nav had, plus any added in /admin.
  *
@@ -46,8 +45,7 @@ export type { Project, Category, Frame, TextBlock };
  * browser form, and a duplicate there should cost the new entry rather than
  * put two rows with one slug into every index on the site.
  *
- * Declared here, above the consts that read it, rather than left as the
- * re-export it used to be.
+ * Declared here, above the consts that read it.
  */
 export const CATEGORIES: Category[] = [
   ...HARVESTED_CATEGORIES,
@@ -98,8 +96,7 @@ const withCoverArt = (project: Project): Project => {
     // "COVERART" was one word on the old site and reads as a typo set large —
     // on the project page it is printed as the category too, so both go.
     name: "Cover Art",
-    // The category used to be renamed here too. `relabel` does it now, for
-    // this category and every other one, from `CATEGORY_LABELS`.
+    // The category is renamed by `relabel`, from `CATEGORY_LABELS`.
     cover: { ...images[0], src: "/covers/cover.jpg", width: 600, height: 600 },
     images,
   };
@@ -313,10 +310,9 @@ const reframe = (project: Project): Project => {
     ...project,
     images,
     blocks,
-    // The cover is the opener, so a gallery that
-    // now opens on a different photograph gets a card showing it. The full
-    // frame rather than the 600px derivative, because the derivative was cut
-    // from the frame that used to lead and still shows it.
+    // The cover is the opener, so a gallery that opens on a different
+    // photograph gets a card showing it: the full frame, because the 600px
+    // derivative is cut from the original lead frame.
     cover: images[0].src === project.images[0]?.src ? project.cover : images[0],
   };
 };
@@ -551,13 +547,9 @@ export { HIDDEN, UNLISTED };
 export const WITH_BTS: Project[] = PROJECTS.filter((p) => p.bts);
 
 /**
- * The old nav split commissioned work across WORK and MUSIC, which asked a
- * visitor to know in advance whether a cover-art job files under "music" or
- * "work". Both are commissions, judged by the same people, so they merge.
- *
- * SESSIONS stays separate — a graduation client and an art director want
- * different things from the first screen (price and dates vs. clients and
- * credits), and that is the one split worth keeping.
+ * SESSIONS stays apart from commissioned work: a graduation client and an
+ * art director want different things from the first screen (price and dates,
+ * or clients and credits).
  */
 const inSessions = (p: Project) =>
   p.categories.some((c) => c.section === "SESSIONS");
@@ -609,14 +601,11 @@ const isDiscipline = isDisciplineGallery;
 /**
  * Commissioned work: editorial, campaigns, portraits, music, film.
  *
- * Projects, and only projects. The four disciplines that are themselves one
- * gallery used to sit in here as a card apiece, so the index that says "59
- * commissioned projects" counted Cover art as one project and Editorial as
- * twenty-eight — and a grid of individual commissions had four whole
- * disciplines shuffled in among them, sorted by nothing a visitor could see.
+ * Projects, and only projects: a discipline that is itself one gallery is
+ * not a card here, or the count would call Cover art one project and
+ * Editorial twenty-eight.
  *
- * They keep their chip at the top of the index, which is where Julian wants
- * them and where they already went somewhere sensible: `categoryHref` sends a
+ * Those keep their chip at the top of the index (Julian's call), and `categoryHref` sends a
  * one-gallery discipline straight to its gallery rather than to a listing
  * page with a single row on it.
  */
@@ -715,14 +704,10 @@ const ROW_ORDER = [
 
 export const WORK_CATEGORY_LINKS: CategoryLink[] = WORK_CATEGORIES.filter(
   /* A row that navigates nowhere is worse than one that is absent, so a
-     discipline waits until there is something to open.
-
-     Which was all of VIDEO and MUSIC VIDEO until now: both were in the old
-     nav with nothing behind them. Video has a page as soon as one link is
-     pasted into /admin — its work is embeds, not projects, so it is asked a
-     different question. Music video is not a row at all any more: it is a
-     section *inside* that page, which is how Julian asked for it and how six
-     films read better than two thin pages. */
+     discipline waits until there is something to open. Video has a page as
+     soon as one link is pasted into /admin, since its work is embeds, not
+     projects. Music video is a section inside that page (Julian's call), not
+     a row. */
   (c) =>
     c.slug === "video"
       ? HAS_VIDEOS
@@ -798,8 +783,7 @@ export const billing = (p: Project): string | undefined =>
  * One tile of the homepage band: the cover, the three frames it scrubs
  * through, and the words on its plate.
  *
- * Three, after the cover: Julian asked for the top three photographs and
- * nothing more, and three is enough to answer "what is the range of this
+ * Three, after the cover (Julian's call): three is enough to answer "what is the range of this
  * set" without a tile becoming a slideshow. They start at the *second*
  * frame because the first is the cover again — measured on all seven
  * featured projects, `images[0]` is the same picture as `cover` (a 16px
@@ -852,7 +836,6 @@ export const FEATURED: Project[] = FEATURED_SLUGS.map((s) =>
   bySlug.get(s),
 ).filter((p): p is Project => Boolean(p));
 
-export type { WallTile };
 const wallTile = (src: string, title: string, href: string): WallTile => ({ src, title, href });
 
 /**
@@ -934,7 +917,7 @@ export const commissionsIn = (categorySlug: string): Project[] =>
  * them a wedding next because it happens to sit there in the running order
  * answers a question they did not ask. So: the next project in this
  * discipline, in the order the category page shows them, and when the
- * discipline runs out the one closest to it. Julian asked for this.
+ * discipline runs out the one closest to it (Julian's call).
  *
  * "Closest" is the order he has already set. `WORK_CATEGORY_LINKS` is hand
  * ordered — the photographic disciplines first and the reel last — it is the

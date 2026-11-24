@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { sealer } from "@/lib/leads/lead-crypto";
+import { sealer } from "@/lib/seal";
 import { readLead, recordLead } from "@/lib/leads/lead-store";
 import { readLog } from "@/lib/leads/activity-log";
 import { importNotion } from "@/lib/leads/sync/notion-import";

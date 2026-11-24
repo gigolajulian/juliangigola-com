@@ -1,6 +1,6 @@
 /* ── a trackpad or a wheel ────────────────────────────────────────
- * How the strip tells a trackpad's event from a mouse wheel's notch
- * (`onWheel` in `components/strip/wheel.ts`).
+ * How the canvas tells a trackpad's event from a mouse wheel's notch
+ * (`onWheel` in `components/portfolio/canvas.tsx`).
  * ─────────────────────────────────────────────────────────────── */
 
 /** The device-pixel size at or above which an event is a notch. */

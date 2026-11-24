@@ -3,8 +3,9 @@
 import * as React from "react";
 import Image from "next/image";
 import { isTextRef, type FrameRef, type TextRef } from "@/lib/work/added";
-import { useSequence, srcOf, type PendingUpload } from "@/lib/admin/admin-sequence";
-import { cn } from "@/lib/utils";
+import { useSequence, srcOf } from "@/lib/admin/admin-sequence";
+import { useEditorStaging } from "@/components/admin/editor/editor-context";
+import { cn, pad } from "@/lib/utils";
 import { backToBack, twinGroups } from "@/lib/work/frame-twins";
 
 /* ── a project's sequence ─────────────────────────────────────────
@@ -21,37 +22,31 @@ import { backToBack, twinGroups } from "@/lib/work/frame-twins";
  * after frame 7" and then retyping it every time a frame moved.
  *
  * Removing a frame takes it out of the sequence and leaves the file in the
- * repository. That is deliberate: the archive under `public/work/` is what
- * `scripts/harvest.mjs` produced from the old site, and deleting from it
- * would be undone by the next harvest with nothing to show it ever happened.
- * The gallery is the list, not the directory.
+ * repository. That is deliberate: the archive under `public/work/` belongs
+ * to `lib/work/work-data.ts`, which is TypeScript maintained by hand, and
+ * /admin only commits JSON, so it sequences that archive rather than pruning
+ * it. The gallery is the list, not the directory.
  *
  * Nothing here commits on its own. Added photographs are held in memory —
  * resized and encoded, but unwritten — until Publish, so a gallery that is
  * half-rearranged and then abandoned leaves no orphan files behind.
  * ─────────────────────────────────────────────────────────────── */
 
-/** A photograph processed in the browser and waiting for Publish. */
-export type { PendingUpload };
-
 export function AdminFrames({
   slug,
   original,
   frames,
-  uploads,
   onChange,
-  onUpload,
 }: {
   slug: string;
   /** The gallery as the live build has it, in order. */
   original: string[];
   /** The draft sequence, or null while it is still the original. */
   frames: FrameRef[] | null;
-  /** Photographs staged for this publish, by repo path. */
-  uploads: Record<string, PendingUpload>;
   onChange: (next: FrameRef[] | null) => void;
-  onUpload: (added: PendingUpload[]) => void;
 }) {
+  /** Photographs staged for this publish, by repo path, and where new ones go. */
+  const { uploads, onUpload } = useEditorStaging();
   const seq = useSequence({ slug, original, frames, onChange, onUpload });
   const {
     list,
@@ -264,7 +259,7 @@ export function AdminFrames({
                   <span className="label absolute left-0 top-0 bg-background/80 px-2 py-1 tabular-nums">
                     {ordinal[i] === 1
                       ? "COVER"
-                      : String(ordinal[i]).padStart(2, "0")}
+                      : pad(ordinal[i])}
                   </span>
                   {letters.has(src) ? (
                     <span
@@ -437,7 +432,7 @@ function FrameZoom({
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-3">
         <p className="label tabular-nums text-muted-foreground">
           <span className="text-foreground">
-            {number === 1 ? "COVER" : String(number).padStart(2, "0")}
+            {number === 1 ? "COVER" : pad(number)}
           </span>{" "}
           / {count}
           {letter ? <span className="text-accent"> · twin {letter}</span> : null}

@@ -7,8 +7,8 @@ import { noSubscribe } from "@/lib/utils";
 
 
 /* ── one page becomes the next by zooming ─────────────────────────
- * Julian asked for it: opening a page should read as zooming into it, and
- * leaving one as zooming back out. The boundary wraps every page's content
+ * Opening a page reads as zooming into it, and leaving one as zooming
+ * back out (Julian's call). The boundary wraps every page's content
  * in the root layout; a navigation is a React transition, so when the page
  * inside it changes the browser snapshots the old one and the new one and
  * `globals.css` scales them past each other (`.page` there). The header
@@ -119,8 +119,8 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
       /* Kept for the visit: a page reached by a press is not a cold load,
          and the cover's entrance starts at once (`globals.css`). */
       root.dataset.moved = "";
-      /* Julian asked for a beat before the page arrives when the press
-         came from the bar. A link inside the page is a step through the
+      /* A beat before the page arrives when the press came from the bar
+         (Julian's call). A link inside the page is a step through the
          work and wants no waiting; the bar is a jump across the site, and
          the old page is given the room to leave before the new one comes
          up. `globals.css` reads it as a delay on the incoming page. */
@@ -177,8 +177,8 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
     let replaying = false;
     const onPop = (e: PopStateEvent) => {
       if (replaying || location.pathname === shown.current) return;
-      /* Back from Cover art (its viewer) to the home: a clean cut (Julian, #1351). A copy of the viewer holds the screen until the home is in
-         place under it with its covers decoded, then goes in one frame. Not a view transition: Safari snapshotted the home before its covers painted (MAC). */
+      /* Back from Cover art (its viewer) to the home: a clean cut (Julian's call). A copy of the viewer holds the screen until the home is in
+         place under it with its covers decoded, then goes in one frame. Not a view transition: Safari snapshots the home before its covers paint. */
       const parts = location.pathname === "/" && shown.current.startsWith("/portfolio/coverart") ? document.querySelectorAll<HTMLElement>("[data-zoom-backdrop], [role=dialog][aria-modal=true]") : [];
       if (parts.length) {
         const lid = document.createElement("div");

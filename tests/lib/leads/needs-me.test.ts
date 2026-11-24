@@ -1,10 +1,10 @@
 import { expect, it } from "vitest";
 import { needsMe } from "@/lib/leads/lead-desk";
 import { applyLeadEvent, type LeadSummary } from "@/lib/leads/leads";
+import { DAY_MS } from "@/lib/time-zone";
 
 /* Needs me, as a truth table over what decides it. Fake people only. */
 
-const day = 864e5;
 const iso = (ms: number) => new Date(Date.now() + ms).toISOString();
 const lead = (o: { renew?: boolean; aside?: boolean; closed?: boolean; due?: boolean; snoozed?: boolean; unread?: boolean }): LeadSummary => ({
   email: "ana@example.com",
@@ -14,10 +14,10 @@ const lead = (o: { renew?: boolean; aside?: boolean; closed?: boolean; due?: boo
   firstAt: iso(0),
   lastAt: iso(0),
   unread: !!o.unread,
-  ...(o.renew ? { licence: { use: "Web", end: iso(10 * day).slice(0, 10) } } : {}),
-  ...(o.aside ? { archivedAt: iso(-day) } : {}),
-  ...(o.due ? { due: iso(-day) } : {}),
-  ...(o.snoozed ? { snoozeUntil: iso(day) } : {}),
+  ...(o.renew ? { licence: { use: "Web", end: iso(10 * DAY_MS).slice(0, 10) } } : {}),
+  ...(o.aside ? { archivedAt: iso(-DAY_MS) } : {}),
+  ...(o.due ? { due: iso(-DAY_MS) } : {}),
+  ...(o.snoozed ? { snoozeUntil: iso(DAY_MS) } : {}),
 });
 
 it.each([

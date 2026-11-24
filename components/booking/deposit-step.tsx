@@ -305,7 +305,7 @@ export function DepositStep({
       mo.disconnect();
       /* Stripe destroys an element itself when it fails to load (the
          wallet with no Apple or Google Pay, a key the account rejects);
-         destroying it again throws and took the page down (MAC). */
+         destroying it again throws and would take the page down. */
       made.forEach((f) => { try { f.destroy(); } catch {} });
       els.current = null;
     };

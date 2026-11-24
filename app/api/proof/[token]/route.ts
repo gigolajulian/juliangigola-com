@@ -1,4 +1,5 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
+import { later } from "@/lib/later";
 import { sealedStore } from "@/lib/kv";
 import { recordLead } from "@/lib/leads/lead-store";
 import { checkout, checkPaid, finalize } from "@/lib/proofs/submit";
@@ -44,13 +45,6 @@ async function unlock(token: string, request: Request, password: unknown) {
   const res = json({ ok: true });
   res.headers.append("set-cookie", `${passCookie(p)}=${await passValue(p, env.LEADS_KEY!)}; Path=/; Max-Age=${60 * 864e2}; HttpOnly; Secure; SameSite=Lax`);
   return res;
-}
-
-/** Work after the answer, inline where there is no request context (tests). */
-async function later(work: Promise<unknown>) {
-  const { ctx } = await getCloudflareContext({ async: true });
-  if (ctx?.waitUntil) ctx.waitUntil(work);
-  else await work;
 }
 
 /** The gallery with one visitor's record updated. shortcut: read, change, write is not atomic, so two people picking in the same second can drop one log line; a Durable Object if that ever matters. */

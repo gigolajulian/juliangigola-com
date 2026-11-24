@@ -206,21 +206,21 @@ states its rule inline. `SPEC-home-scroll.md` citations point at
 ### components/booking/manage-booking.tsx
 - 2026-11-03: start), then asks to confirm.
 
-### components/booking/time-picker-editorial.tsx
+### components/booking/picker/editorial.tsx
 - 2026-10-17: a call shows its length in minutes. "15:00" read as 3 PM.
 - 2026-10-20: one face, two sizes, from the Tenebra reference.
 - 2026-10-21: the check moves to a better spot and the text is reworked ("beautified").
 - 2026-10-20: The days either side of the month, barely there.
 
-### components/booking/time-picker-steps.tsx
+### components/booking/picker/steps.tsx
 - 2026-11-09: option B ("build b"), the big stepped time.
 - 2026-10-27: Rises in once the times arrive, in place of "Loading availability".
 - 2026-11-10: One step per swipe, however long: the start clears until the finger lifts.
 
-### components/booking/time-picker.tsx
+### components/booking/picker/time-picker.tsx
 - 2026-10-14: the wait says what it is waiting for, under the orb.
 
-### components/booking/use-picker.tsx
+### components/booking/picker/use-picker.tsx
 - 2026-10-20: goo on the card, OK'd 2026-10-21.
 - 2026-10-14: the orb goes one whole round before the days come in.
 - 2026-10-14: the check takes 1.05s. 1.4s was slow and 0.7s too fast.
@@ -483,9 +483,11 @@ states its rule inline. `SPEC-home-scroll.md` citations point at
 ### lib/leads/lead-crm.ts
 - 2026-11-04: on what a CRM usually has, "add all of them".
 
-### lib/leads/lead-crypto.ts
-- 2026-11-03: the lead desk is "hidden from all seo and encrypted".
+### lib/leads/canonical.ts
 - 2026-11-04: addresses are canonicalized, after gigola.julian@ and gigolajulian@ never matched.
+
+### lib/seal.ts
+- 2026-11-03: the lead desk is "hidden from all seo and encrypted".
 
 ### lib/leads/leads.ts
 - 2026-11-03: one record per person (PLAN-lead-desk.md, not in the repo).

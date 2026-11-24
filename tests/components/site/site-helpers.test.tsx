@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, cleanup, fireEvent, render, renderHook, screen } from "@testing-library/react";
-import { projectHref } from "@/lib/project-href";
+import { projectHref } from "@/lib/work/project-href";
 import { THEME_COLOR } from "@/lib/theme-color";
 import { NAME_INK, NAME_W } from "@/lib/email/email-logo";
 import { useDialKitStyles } from "@/lib/dev/dialkit-styles";

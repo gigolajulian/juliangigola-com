@@ -23,7 +23,7 @@ const ink = (n: Node) => {
 };
 
 /* Gone, but still there for a screen reader. VoiceOver in Safari scrolls the page far down when it lands on the name (the stage is sticky), and
-   visibility:hidden then took the tagline and the buttons out of its tree before its next step: it read the name, then the wall (MAC).
+   visibility:hidden would take the tagline and the buttons out of its tree before its next step, reading the name, then the wall.
    So a gone block is see-through, takes no clicks and leaves the tab order, and nothing more. */
 function park(ctas: HTMLElement | null, on: boolean, why: "out" | "past" = "out") {
   if (!ctas) return;
@@ -100,7 +100,7 @@ function tone(st: Pick<State, "letters" | "photos">) {
   toned = now;
   const rs = st.letters.map((w) => w.getBoundingClientRect());
   /* The photo a visitor sees at this point: a hit test, top first. Scanning the photo boxes took the first box in the document that held the point, and on an
-     iPhone that was a photo lying under another one (MAC, #1155: a line stayed white over a pale photo). The name block takes no pointer events, so it is not in the way.
+     iPhone that was a photo lying under another one. The name block takes no pointer events, so it is not in the way.
      While a swap develops, the incoming photo counts once it has cut in. Off screen there is nothing to hit: bare page. */
   const hit = (r: DOMRect) =>
     document.elementsFromPoint(r.left + r.width / 2, r.top + r.height / 2).find((n): n is HTMLImageElement => n instanceof HTMLImageElement && wallEl.contains(n) && n.complete && !!n.naturalWidth && (!n.classList.contains("mt-dev") || n.hasAttribute("data-on"))) ?? null;
@@ -135,7 +135,7 @@ function tone(st: Pick<State, "letters" | "photos">) {
         const c0 = at(Math.max(r.left, b.left)), c1 = at(Math.min(r.right, b.right));
         let sum = 0;
         for (let c = c0; c <= c1; c++) sum += g[row + c];
-        // a letter across the photo's edge belongs to whichever side holds most of it: the hit test alone is off by a pixel there (MAC, #1203)
+        // a letter across the photo's edge belongs to whichever side holds most of it: the hit test alone is off by a pixel there
         t = Math.min(r.right, b.right) - Math.max(r.left, b.left) < r.width / 2 ? "p" : sum / (c1 - c0 + 1) >= LIGHT ? "k" : "w";
       }
     }
@@ -230,9 +230,8 @@ export const heroDrivers: Driver[] = [
       // the hero is over when its last photos have left from under the header: the same line going down and coming back up
       const hdr = document.querySelector<HTMLElement>(".site-hdr");
       /* The wall's links leave the tab order once the name has left (a phone, whose name never leaves: once the first screen is above the header).
-         Tab from the header went to the first wall photo and pulled the page back to the top (MAC, #1157), also partway through the hero, with its
-         bottom still showing (MAC, #1160). All of them at once: a link at a time was tried, and focus on a photo inside the pinned stage still
-         scrolled the page. See the work stays until the whole hero is past. The buttons go through park.
+         Tab from the header would go to the first wall photo and pull the page back to the top, also partway through the hero. All of them at
+         once: focus on a photo inside the pinned stage scrolls the page. See the work stays until the whole hero is past. The buttons go through park.
          shortcut: Shift+Tab from further down skips the wall; scroll back to the top and its links return. */
       const links = () => el.querySelectorAll<HTMLElement>(".mt-wall a, .mt-more a"); // read when needed: the wall swaps its photos
       let due = 0;
@@ -342,7 +341,7 @@ function heroFrame(st: State, p: number, el: HTMLElement, ctx: Ctx) {
     st.drop = b.height - (st.texts[0].getBoundingClientRect().top - b.top) + 24;
   }
   sink(st, ctx);
-  // phones and tablets too: captions ran through the name and tagline (MAC). Only while the name is on screen.
+  // phones and tablets too: captions would run through the name and tagline. Only while the name is on screen.
   const on = !st.out && el.getBoundingClientRect().bottom > 0; // read before tone, as before the split
   tone(st);
   clearance(st, on);

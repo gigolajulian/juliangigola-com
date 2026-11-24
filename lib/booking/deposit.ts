@@ -1,6 +1,6 @@
-import { afterBooked, cancelledSubject, sendCancelled } from "@/lib/booking/confirm";
+import { afterBooked, cancelledSubject, sendCancelled, type CancelMoney } from "@/lib/booking/confirm";
 import { enquiry, enquiryKey, summary } from "@/lib/leads/enquiry";
-import { whenPT } from "@/lib/time-zone";
+import { TZ, whenPT } from "@/lib/time-zone";
 import { logMail, recordLead } from "@/lib/leads/lead-store";
 import { EARLY_SHARE, EVENTS, refundCents, refundShare, type Booking } from "@/lib/booking/rules";
 import { depositPaid, lockOp, parseBooking, type BookingEnv, type BookingRecord } from "@/lib/booking/engine";
@@ -40,7 +40,7 @@ import { manageLinks } from "@/lib/booking/token";
 
 import { alertAndLog, type Attachment } from "@/lib/email/hello-mail";
 import { stripe } from "@/lib/stripe";
-import { CURRENCY, DEPOSIT, DEPOSIT_KIND, DEPOSIT_SESSIONS, LEGACY_DEPOSIT, takesDeposit } from "@/lib/booking/paid";
+import { CURRENCY, DEPOSIT, DEPOSIT_KIND, DEPOSIT_SESSIONS, depositFor, LEGACY_DEPOSIT, takesDeposit } from "@/lib/booking/paid";
 import { logged } from "@/lib/utils";
 /** The charge in cents for a session. Throws on a slug that takes no deposit: `parseBooking` lets none through. */
 export function amountOf(slug: string): number {
@@ -79,7 +79,7 @@ export function intentForm(b: Booking): { [k: string]: string } {
     receipt_email: b.email,
     // Who and which session, readable in Stripe's payments list. Stripe prints it on the client's receipt too.
     // "Session" is the shoot's time, "Booked" the day they paid, both Pacific.
-    description: `${SESSION[b.slug] ?? b.slug} deposit: ${b.name}. Session ${whenPT(b.start)}. Booked ${new Intl.DateTimeFormat("en-US", { timeZone: "America/Los_Angeles", month: "short", day: "numeric", year: "numeric" }).format(new Date())}.`,
+    description: `${SESSION[b.slug] ?? b.slug} deposit: ${b.name}. Session ${whenPT(b.start)}. Booked ${new Intl.DateTimeFormat("en-US", { timeZone: TZ, month: "short", day: "numeric", year: "numeric" }).format(new Date())}.`,
   };
   for (const [k, v] of Object.entries(b)) if (v) form[`metadata[${k}]`] = v;
   // Marks the site's own intents: the webhook leaves every other payment
@@ -178,7 +178,7 @@ async function tell(env: Env, status: keyof typeof SAID, b: Booking | string, li
 export async function bookDeposit(env: Env, intent: string, metadata: { [k: string]: string } | undefined, cents?: number): Promise<Status> {
   const parsed = fromMetadata(metadata);
   // What the intent took, from Stripe; unset, the session's own deposit.
-  const usd = cents !== undefined ? cents / 100 : parsed.ok && takesDeposit(parsed.booking.slug) ? DEPOSIT[parsed.booking.slug] : LEGACY_DEPOSIT;
+  const usd = cents !== undefined ? cents / 100 : parsed.ok ? depositFor(parsed.booking.slug) : LEGACY_DEPOSIT;
   const key = recordKey(intent);
   const seen = await env.INBOX.get(key);
   if (seen) {
@@ -306,7 +306,7 @@ export async function cancelBooking(
   if (refunded && refund) await recordLead(env, r.email, { event: { at: at ?? new Date().toISOString(), kind: "refund", ref: refund.ref, note: o.refundNote, amount: o.back } });
   await alertAndLog(env, o.subject, [`${r.name} <${r.email}>`, o.line, o.money(refunded), ...(r.intent && key ? [`Stripe: ${dashboardLink(r.intent, key)}`] : [])], { who, log: { kind: "cancelled", booking: r.id } });
   const gone = { ...who, session: r.session, start: was.start, end: was.end };
-  if (await sendCancelled(env.CLIENT_EMAIL, gone, o.mail(refunded), o.usd, o.back))
+  if (await sendCancelled(env.CLIENT_EMAIL, gone, { refund: o.mail(refunded), usd: o.usd, back: o.back }))
     await logMail(env, r.email, cancelledSubject(gone), { to: "client", kind: "cancelled", booking: r.id });
   return { refunded, back: refunded ? o.back : 0 };
 }
@@ -321,7 +321,7 @@ type CancelTerms = {
   subject: string;
   line: string;
   money: (refunded: boolean | undefined) => string;
-  mail: (refunded: boolean | undefined) => Parameters<typeof sendCancelled>[2];
+  mail: (refunded: boolean | undefined) => CancelMoney["refund"];
   /** The deposit in dollars, 0 when none. */
   usd: number;
   /** Dollars going back: the refund log line and the client's mail. */

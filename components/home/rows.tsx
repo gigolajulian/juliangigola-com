@@ -8,7 +8,7 @@ import { COVER_RELEASES } from "@/lib/work/cover-art-data";
 import type { CoverRelease } from "@/lib/work/cover-art-types";
 import { media } from "@/lib/device";
 import { dropSpot, keepSpot, layoutTop } from "./back";
-import { projectHref } from "@/lib/project-href";
+import { projectHref } from "@/lib/work/project-href";
 import { holdEase, holdUnease } from "@/lib/motion/hold-ease";
 import { clamp, progress } from "./motion/engine";
 import { COVER_KEYS, COVER_PRESS, FILM_DRESS, type HomeFilm } from "@/lib/home/data";
@@ -185,7 +185,7 @@ export function HomeFilms({ films }: { films: HomeFilm[] }) {
         onFocus={(e) => {
           // a film taking keyboard focus before the block is held: bring the stage up, so the film and its focus mark are whole on screen
           const top = e.currentTarget.getBoundingClientRect().top;
-          // straight to the first film's resting place in the hold, so the snap (motion/rows.ts) has nothing left to move (MAC, #1209)
+          // straight to the first film's resting place in the hold, so the snap (motion/rows.ts) has nothing left to move
           const sec = e.currentTarget.parentElement!, rest = !media("fine").matches ? 0 : holdUnease(0.5 / films.length) * (sec.offsetHeight - innerHeight);
           if (top > 0 && document.documentElement.hasAttribute("data-mt-held") && (e.target as Element).matches(".mt-film:focus-visible")) scrollBy({ top: top + rest });
         }}

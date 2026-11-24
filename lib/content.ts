@@ -1,15 +1,14 @@
 /**
- * The content the admin editor writes.
+ * The content the admin editor writes: `content/site.json`, parsed and
+ * checked at build. `/admin` commits the file and the deploy rebuilds.
  *
- * Everything here used to be a hand-edited literal in `site.ts`,
- * `sessions.ts`, `testimonials.ts` and `work.ts`. It moved into one JSON file
- * so that a form can change it: `/admin` commits this file to the repo and
- * the deploy rebuilds. Those modules still export the shapes the components
- * read, so nothing downstream knows the difference.
+ * `CONTENT` is read by `lib/site.ts`, `lib/booking/catalog.ts`,
+ * `lib/booking/service-pages.ts`, `lib/work/work.ts`, `lib/work/disciplines.ts`,
+ * `lib/home/server.ts`, `app/admin/page.tsx` and
+ * `app/portfolio/(index)/video/page.tsx`.
  *
- * The photographs are not here. They are files, they come from the harvester
- * and from `cover-art.mjs`, and a text field is the wrong instrument for
- * choosing one — what is editable here is the writing and the ordering.
+ * The photographs are not here: they are files, and what is editable here is
+ * the writing and the ordering.
  */
 
 // Relative, not the `@/` alias: `next.config.ts` reaches this module (through
@@ -301,13 +300,11 @@ function parse(v: unknown): SiteContent {
     responseTime: strOrNull(v.responseTime, "responseTime"),
     bookingUrl: httpUrlOrNull(v.bookingUrl, "bookingUrl"),
     featured: strList(v.featured, "featured"),
-    // Absent in files written before the rack could be curated, which is not
-    // an error — it simply means nothing has been picked.
-    coverArt: strList(v.coverArt ?? [], "coverArt"),
-    coverArtOrder: strList(v.coverArtOrder ?? [], "coverArtOrder"),
-    heroDisciplines: strList(v.heroDisciplines ?? [], "heroDisciplines"),
-    clientsHome: strList(v.clientsHome ?? [], "clientsHome"),
-    clientsStudio: strList(v.clientsStudio ?? [], "clientsStudio"),
+    coverArt: strList(v.coverArt, "coverArt"),
+    coverArtOrder: strList(v.coverArtOrder, "coverArtOrder"),
+    heroDisciplines: strList(v.heroDisciplines, "heroDisciplines"),
+    clientsHome: strList(v.clientsHome, "clientsHome"),
+    clientsStudio: strList(v.clientsStudio, "clientsStudio"),
     testimonials: list(v.testimonials, "testimonials", testimonial),
     sessions: list(v.sessions, "sessions", session),
     videos: list(v.videos ?? [], "videos", video),

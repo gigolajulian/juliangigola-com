@@ -8,7 +8,7 @@ import { JG_COVER, mountCover } from "@/components/splash/jg-cover";
 import { useRouter } from "next/navigation";
 import { BookTimes } from "@/components/booking/book-times";
 import { PageFoot } from "@/components/site/foot";
-import { Calendar, DotList, dlabel, iso } from "@/components/booking/flow";
+import { Calendar, DotList, dlabel, localDayKey } from "@/components/booking/flow";
 import { Failed, Field, FlowShell, Hidden, useEnquiry, type Shell } from "@/components/enquiry/flow";
 import { duration } from "@/lib/booking/rules";
 import { LENGTH, SESSIONS, TAB_ORDER, priceLabel, type SessionSlug } from "@/lib/booking/catalog";
@@ -98,9 +98,8 @@ export function BookFlow({ slug, tabs = true, h1 = false, startView }: { slug: S
   const more = tabs && TAB_ORDER.includes(slug);
   /* The other sessions' photographs, once the page is idle, at the very
      copy the photo slot will ask for (its `sizes`, the theme showing, the
-     phone frame where there is one). Switching session swapped the src in
-     place, and Safari showed the slot empty until the new file came: about
-     80ms of nothing between Portraits and Headshots (MAC). */
+     phone frame where there is one). Safari shows a swapped src as an
+     empty slot until the new file comes. */
   React.useEffect(() => {
     /* Save-Data or a slow line skips it, as the portfolio's warm does: the
        five photos are ~550 KB on a 3x phone (audit). */
@@ -246,7 +245,7 @@ function OnRequestFlow({ slug, shell, stamp }: { slug: SessionSlug; shell: Shell
               setAnchor(d);
             }}
             canBack={canBack}
-            picked={iso(day)}
+            picked={localDayKey(day)}
             tag={(d) => (d > today ? "Open" : null)}
             onPick={setDay}
           />

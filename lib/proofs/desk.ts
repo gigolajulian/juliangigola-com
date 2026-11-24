@@ -11,7 +11,7 @@ import { CARD } from "@/lib/proofs/watermark";
 /** No password hash ever reaches the desk: only whether there is one. */
 export type ProofRow = Omit<Proof, "pass"> & { url: string; hasPass?: boolean };
 
-export const proofApi = <T = Record<string, unknown>,>({ query = "", ...init }: RequestInit & { query?: string } = {}) => adminCall<T>(`/api/proof${query}`, init);
+export const proofApi = <T = Record<string, unknown>,>({ path = "", ...init }: RequestInit & { path?: string } = {}) => adminCall<T>(`/api/proof${path}`, init);
 
 export const pastCloseDate = (p: Proof) => !!p.closesAt && Date.parse(p.closesAt) < Date.now();
 export const proofStatus = (p: Proof) => p.offline ? "Offline" : p.deliveredAt ? `Delivered${p.firstDownloadAt ? ", downloaded" : ""}${pastCloseDate(p) ? " · closed" : ""}` : `${stage(p)}${p.checkout && !p.submittedAt ? ", paying" : ""}${pastCloseDate(p) ? " · closed" : ""}`;

@@ -30,12 +30,11 @@ export const srcOf = (f: FrameRef): string =>
   typeof f === "string" ? f : isTextRef(f) ? "" : f.src;
 
 /**
- * A name the harvester cannot collide with.
+ * A name that cannot collide with the archive's own files.
  *
- * `harvest.mjs` writes `01.jpg`, `02.jpg`… by position and skips a file that
- * is already on disk, so a photograph added under a numbered name would
- * either be silently adopted as one of Format's or be overwritten by it. The
- * prefix keeps the two sets of files apart for good.
+ * The harvested galleries are `01.jpg`, `02.jpg`… by position, so a
+ * photograph added under a numbered name could take the place of one of
+ * them. The prefix keeps the two sets of files apart for good.
  */
 const uploadPath = (slug: string, i: number) =>
   `public/work/${slug}/a${Date.now().toString(36)}-${i + 1}.jpg`;

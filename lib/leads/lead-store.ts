@@ -1,12 +1,14 @@
 /* Reading, writing and pushing leads (KV, LEADS_KEY, web push). Server only: the
  * desk's components import the pure model from `lib/leads/leads.ts`. */
-import { canonical, sealer, type Sealer } from "./lead-crypto";
+import { canonical } from "@/lib/leads/canonical";
+import { sealer, type Sealer } from "@/lib/seal";
 import { notify, pushFor } from "./lead-push";
 import { appendLog, forgetLog, fresh } from "./activity-log";
-import { applyLeadEvent, leadStoreKey, leadSummary, type Change, type Lead, type LeadSummary, type Person, type Sent } from "./leads";
+import { applyLeadEvent, LEAD_PREFIX, leadIdOf, leadStoreKey, leadSummary, trashDaysLeft, type Change, type Lead, type LeadSummary, type Person, type Sent } from "./leads";
 import { mailable } from "./lead-crm";
-import type { InboxKV as KV } from "@/lib/kv";
+import { everyKey, type InboxKV as KV } from "@/lib/kv";
 import { logged } from "@/lib/utils";
+import { later } from "@/lib/later";
 
 /** Where leads live: the INBOX namespace, sealed with LEADS_KEY. */
 export type LeadStore = { INBOX?: KV; LEADS_KEY?: string; VAPID_KEY?: string };
@@ -21,15 +23,9 @@ export async function readLead(kv: KV, s: Sealer, id: string): Promise<Lead | nu
     Throws if any one lead cannot be opened (a rotated LEADS_KEY), like `readLead`. */
 export async function everyLead(inbox: KV, seal: Sealer) {
   const out: (Lead & { id: string })[] = [];
-  let after: string | undefined;
-  for (;;) {
-    const listed = await inbox.list({ prefix: "lead:", cursor: after });
-    for (const k of listed.keys) {
-      const l = await readLead(inbox, seal, k.name.slice(5));
-      if (l) out.push(Object.assign(l, { id: k.name.slice(5) }));
-    }
-    if (listed.list_complete) break;
-    after = listed.cursor;
+  for await (const k of everyKey(inbox, LEAD_PREFIX)) {
+    const l = await readLead(inbox, seal, leadIdOf(k.name));
+    if (l) out.push(Object.assign(l, { id: leadIdOf(k.name) }));
   }
   return out;
 }
@@ -65,30 +61,50 @@ export async function writeLead(kv: KV, s: Sealer, id: string, lead: Lead, from?
 const CANON = "leads:canon";
 /**
  * Once: moves each lead stored before ids ignored Gmail dots and "+tags"
- * (`canonical` in lib/leads/lead-crypto.ts) to its new id. A lead whose
+ * (`canonical` in lib/leads/canonical.ts) to its new id. A lead whose
  * new id is already taken stays put, for Merge on the desk. Returns how many moved.
  */
 export async function canonLeads(kv: KV, s: Sealer): Promise<number> {
   if ((await kv.get(CANON)) !== null) return 0;
   let moved = 0;
-  let cursor: string | undefined;
-  for (;;) {
-    const listed = await kv.list({ prefix: "lead:", cursor });
-    for (const k of listed.keys) {
-      // A lead that will not open stays put, like one whose new id is taken.
-      const lead = await readLead(kv, s, k.name.slice(5)).catch((e: unknown) => (console.error("canon lead", k.name, String(e)), null));
-      if (!lead?.email.includes("@")) continue;
-      const id = await s.id(lead.email);
-      if (leadStoreKey(id) === k.name || (await kv.get(leadStoreKey(id))) !== null) continue;
-      await writeLead(kv, s, id, lead);
-      await kv.delete(k.name);
-      moved++;
-    }
-    if (listed.list_complete || !listed.cursor) break;
-    cursor = listed.cursor;
+  for await (const k of everyKey(kv, LEAD_PREFIX)) {
+    // A lead that will not open stays put, like one whose new id is taken.
+    const lead = await readLead(kv, s, leadIdOf(k.name)).catch((e: unknown) => (console.error("canon lead", k.name, String(e)), null));
+    if (!lead?.email.includes("@")) continue;
+    const id = await s.id(lead.email);
+    if (leadStoreKey(id) === k.name || (await kv.get(leadStoreKey(id))) !== null) continue;
+    await writeLead(kv, s, id, lead);
+    await kv.delete(k.name);
+    moved++;
   }
   await kv.put(CANON, new Date().toISOString());
   return moved;
+}
+
+/** Every lead's summary from the list's metadata, newest first, each with its id.
+    Trash empties itself: 30 days after it went in, a lead goes for good.
+    The list is the only reader, so it is the one place that checks. */
+export async function leadSummaries(kv: KV, seal: Sealer, now: number): Promise<LeadSummary[]> {
+  const leads: LeadSummary[] = [];
+  for await (const k of everyKey<{ s?: string }>(kv, LEAD_PREFIX)) {
+    if (!k.metadata?.s) continue;
+    const one = await seal.open<LeadSummary>(k.metadata.s);
+    if (one.trashedAt && trashDaysLeft(one.trashedAt, now) <= 0) {
+      await buryLead(kv, seal, leadIdOf(k.name));
+      continue;
+    }
+    leads.push({ ...one, id: leadIdOf(k.name) });
+  }
+  return leads.sort((a, b) => b.lastAt.localeCompare(a.lastAt));
+}
+
+/** The ids of every lead in the trash, from the list's metadata. */
+export async function trashedIds(kv: KV, seal: Sealer): Promise<string[]> {
+  const ids: string[] = [];
+  for await (const k of everyKey<{ s?: string }>(kv, LEAD_PREFIX)) {
+    if (k.metadata?.s && (await seal.open<LeadSummary>(k.metadata.s)).trashedAt) ids.push(leadIdOf(k.name));
+  }
+  return ids;
 }
 
 /** A lead deleted for good: its record, a `gone:` tombstone, and its activity log when `seal` can open it. */
@@ -136,21 +152,6 @@ export async function copiesFor(kv: KV, s: Sealer, to: string): Promise<string[]
 /** Logs a mail the site sent against the person it was about. Never throws. */
 export const logMail = (env: LeadStore, email: string | undefined, subject: string, mail: Sent) =>
   recordLead(env, email ?? "", { event: { at: new Date().toISOString(), kind: "mail", note: subject, mail } });
-
-/**
- * Work that may run after the response: a push service can take seconds,
- * and the form, a booking and Stripe all wait on recordLead. In the Worker it
- * goes to waitUntil; with no request around it (tests, scripts) it runs
- * inline. Imported lazily so the desk's client bundle never loads it.
- */
-async function later(p: Promise<void>) {
-  try {
-    const { getCloudflareContext } = await import("@opennextjs/cloudflare");
-    getCloudflareContext().ctx.waitUntil(p);
-  } catch {
-    await p;
-  }
-}
 
 /**
  * Folds one event into the person's record and stores it, sealed. Without

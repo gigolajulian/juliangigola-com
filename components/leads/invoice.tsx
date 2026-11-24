@@ -10,7 +10,7 @@ import { framed, loadImage, place, shrink, toneFor } from "@/lib/leads/invoice-p
 import { dayLabel, deskCall, plusDays, ymdPT } from "@/lib/leads/lead-desk";
 import { adminCall } from "@/lib/admin/admin-call";
 import { btn, primary } from "@/components/desk/chrome";
-import { compose, field, fieldLabel, kindOf } from "@/components/leads/shared";
+import { compose, fieldClass, fieldLabelClass, kindOf } from "@/components/leads/shared";
 import type { Patch } from "@/lib/leads/lead-desk";
 
 /** The PDF of one invoice. Loaded on the tap, fonts and all. A design B one fetches its sealed photo unless `src` is in hand. */
@@ -367,31 +367,31 @@ export function InvoiceSheetB({ l, full, patch, done }: { l: LeadSummary; full: 
           </fieldset>
           <fieldset className="grid gap-2.5">
             <legend className={legend}>Caption on the photo</legend>
-            <label className={fieldLabel}>Project<input required maxLength={40} value={project} onChange={(e) => setProject(e.target.value)} className={field} /></label>
-            <label className={fieldLabel}>Line under it<input maxLength={40} value={caption} onChange={(e) => setCaption(e.target.value)} className={field} /></label>
+            <label className={fieldLabelClass}>Project<input required maxLength={40} value={project} onChange={(e) => setProject(e.target.value)} className={fieldClass} /></label>
+            <label className={fieldLabelClass}>Line under it<input maxLength={40} value={caption} onChange={(e) => setCaption(e.target.value)} className={fieldClass} /></label>
           </fieldset>
           <fieldset className="grid grid-cols-3 gap-2.5">
             <legend className={legend}>Invoice</legend>
-            <div className={fieldLabel}>No.<span className="flex min-h-11 items-center font-mono text-[15px] text-foreground">{no || "…"}</span></div>
-            <label className={fieldLabel}>Issued<input type="date" required value={date} onChange={(e) => e.target.value && setDate(e.target.value)} className={cn(field, "px-2", mono)} /></label>
-            <label className={fieldLabel}>Due<input type="date" required value={due} onChange={(e) => e.target.value && setDue(e.target.value)} className={cn(field, "px-2", mono)} /></label>
+            <div className={fieldLabelClass}>No.<span className="flex min-h-11 items-center font-mono text-[15px] text-foreground">{no || "…"}</span></div>
+            <label className={fieldLabelClass}>Issued<input type="date" required value={date} onChange={(e) => e.target.value && setDate(e.target.value)} className={cn(fieldClass, "px-2", mono)} /></label>
+            <label className={fieldLabelClass}>Due<input type="date" required value={due} onChange={(e) => e.target.value && setDue(e.target.value)} className={cn(fieldClass, "px-2", mono)} /></label>
           </fieldset>
           <fieldset className="grid gap-2.5">
             <legend className={legend}>Billed to</legend>
-            <label className={fieldLabel}>Name<input required maxLength={60} value={to.name} onChange={(e) => setTo({ ...to, name: e.target.value })} className={field} /></label>
-            <label className={fieldLabel}>Company<input maxLength={60} value={to.company} onChange={(e) => setTo({ ...to, company: e.target.value })} className={field} /></label>
-            <label className={fieldLabel}>Email<input type="email" maxLength={80} value={to.email} onChange={(e) => setTo({ ...to, email: e.target.value })} className={field} /></label>
+            <label className={fieldLabelClass}>Name<input required maxLength={60} value={to.name} onChange={(e) => setTo({ ...to, name: e.target.value })} className={fieldClass} /></label>
+            <label className={fieldLabelClass}>Company<input maxLength={60} value={to.company} onChange={(e) => setTo({ ...to, company: e.target.value })} className={fieldClass} /></label>
+            <label className={fieldLabelClass}>Email<input type="email" maxLength={80} value={to.email} onChange={(e) => setTo({ ...to, email: e.target.value })} className={fieldClass} /></label>
           </fieldset>
           <fieldset className="grid gap-2">
             <legend className={legend}>Lines: title, what was done, amount</legend>
             {lines.map((x, i) => (
               <div key={i} className="grid grid-cols-[minmax(0,1fr)_96px_44px] gap-2 border-b border-border pb-2.5">
-                <input aria-label={`Line ${i + 1} title`} required maxLength={48} value={x.desc} onChange={setLine(i, "desc")} className={cn(field, "px-3")} />
-                <input aria-label={`Line ${i + 1} amount`} required inputMode="decimal" value={x.amt} onChange={setLine(i, "amt")} placeholder="0" className={cn(field, "px-2 text-right", mono)} />
+                <input aria-label={`Line ${i + 1} title`} required maxLength={48} value={x.desc} onChange={setLine(i, "desc")} className={cn(fieldClass, "px-3")} />
+                <input aria-label={`Line ${i + 1} amount`} required inputMode="decimal" value={x.amt} onChange={setLine(i, "amt")} placeholder="0" className={cn(fieldClass, "px-2 text-right", mono)} />
                 {lines.length > 1 ? (
                   <button type="button" aria-label={`Remove line ${i + 1}`} onClick={() => setLines(lines.filter((_, j) => j !== i))} className="grid size-11 place-items-center text-muted-foreground hoverable:hover:text-foreground">×</button>
                 ) : <span aria-hidden="true" />}
-                <input aria-label={`Line ${i + 1}, what was done`} maxLength={60} value={x.sub} onChange={setLine(i, "sub")} placeholder="What was done" className={cn(field, "px-3")} />
+                <input aria-label={`Line ${i + 1}, what was done`} maxLength={60} value={x.sub} onChange={setLine(i, "sub")} placeholder="What was done" className={cn(fieldClass, "px-3")} />
               </div>
             ))}
             {lines.length + (dep ? 1 : 0) < MAX_INVOICE_ROWS ? (
@@ -400,13 +400,13 @@ export function InvoiceSheetB({ l, full, patch, done }: { l: LeadSummary; full: 
           </fieldset>
           <fieldset className="grid grid-cols-[96px_minmax(0,1fr)] gap-2.5">
             <legend className={legend}>Deposit received</legend>
-            <label className={fieldLabel}>Amount<input inputMode="decimal" value={paid} onChange={(e) => setPaid(e.target.value.replace(/[^\d.]/g, ""))} className={cn(field, "px-2 text-right", mono)} /></label>
-            <label className={fieldLabel}>Line under it<input maxLength={60} value={depositNote} onChange={(e) => setDepositNote(e.target.value)} className={field} /></label>
+            <label className={fieldLabelClass}>Amount<input inputMode="decimal" value={paid} onChange={(e) => setPaid(e.target.value.replace(/[^\d.]/g, ""))} className={cn(fieldClass, "px-2 text-right", mono)} /></label>
+            <label className={fieldLabelClass}>Line under it<input maxLength={60} value={depositNote} onChange={(e) => setDepositNote(e.target.value)} className={fieldClass} /></label>
             <p className="col-span-2 font-mono text-[12.5px] text-muted-foreground">0 leaves it off. Above 0 it shows as a line and comes off the total.</p>
           </fieldset>
           <fieldset className="grid gap-2">
             <legend className={legend}>Note</legend>
-            {note.map((n, i) => <input key={i} aria-label={`Note, line ${i + 1}`} maxLength={44} value={n} onChange={(e) => setNote(note.map((m, j) => (j === i ? e.target.value : m)))} className={field} />)}
+            {note.map((n, i) => <input key={i} aria-label={`Note, line ${i + 1}`} maxLength={44} value={n} onChange={(e) => setNote(note.map((m, j) => (j === i ? e.target.value : m)))} className={fieldClass} />)}
           </fieldset>
           <p className="flex justify-between font-mono text-[14px] text-muted-foreground">Total due<b className="text-[16px] font-medium text-accent">{usd(total)}</b></p>
           {err ? <p role="alert" className="text-[15px] text-destructive">{err}</p> : null}
@@ -439,11 +439,11 @@ function FromForm({ from, saved }: { from: InvoiceFrom; saved: (f: InvoiceFrom) 
     <fieldset className="grid gap-2.5 border-b border-border pb-3.5">
       <legend className="mb-1.5 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">Your details for invoices</legend>
       {FROM_FIELDS.map(([k, t]) => (
-        <label key={k} className={fieldLabel}>
+        <label key={k} className={fieldLabelClass}>
           {t}
           {k === "notes"
-            ? <textarea value={f[k]} onChange={(e) => setF({ ...f, [k]: e.target.value })} rows={3} className={cn(field, "py-3 leading-relaxed")} />
-            : <input value={f[k]} onChange={(e) => setF({ ...f, [k]: e.target.value })} className={field} autoComplete="off" />}
+            ? <textarea value={f[k]} onChange={(e) => setF({ ...f, [k]: e.target.value })} rows={3} className={cn(fieldClass, "py-3 leading-relaxed")} />
+            : <input value={f[k]} onChange={(e) => setF({ ...f, [k]: e.target.value })} className={fieldClass} autoComplete="off" />}
         </label>
       ))}
       {err ? <p role="alert" className="text-[15px] text-destructive">{err}</p> : null}

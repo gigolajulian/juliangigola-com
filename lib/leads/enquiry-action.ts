@@ -5,9 +5,10 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import type { ContactState } from "@/lib/leads/enquiry";
 import { toNotion } from "@/lib/leads/sync/notion-lead";
 import { logMail, recordLead } from "@/lib/leads/lead-store";
+import { later } from "@/lib/later";
 import imageLoader from "@/image-loader";
-import LOOKS from "@/lib/picker-looks.json";
-import { sha256Hex } from "@/lib/utils";
+import LOOKS from "@/lib/booking/picker-looks.json";
+import { sha256Hex } from "@/lib/token";
 import {
   COOLDOWN_MS,
   DAILY_CAP,
@@ -109,7 +110,7 @@ export async function submitEnquiry(
   const mailto = mailtoFor(type, values);
 
   try {
-    const { env, cf, ctx } = await getCloudflareContext({ async: true });
+    const { env, cf } = await getCloudflareContext({ async: true });
     const inbox = env.INBOX;
 
     if (!inbox) {
@@ -135,7 +136,7 @@ export async function submitEnquiry(
     const country = typeof cf?.country === "string" ? cf.country : undefined;
     // The city Cloudflare places them in, never the address.
     const place = [cf?.city, cf?.region, country].filter((v) => typeof v === "string" && v).join(", ");
-    const { stored, picks, uploads, lead } = await storeEnquiry(env, ctx, formData, values, now, country, visitContext(read("context"), place));
+    const { stored, picks, uploads, lead } = await storeEnquiry(env, formData, values, now, country, visitContext(read("context"), place));
     await countSend(inbox, hash, now, gate.today);
     await sendNotices(env, stored, picks, uploads, lead);
 
@@ -228,7 +229,6 @@ async function rateLimit(
 /** Writes the enquiry (the record), queues Notion and the lead, then stores the visitor's images beside it. */
 async function storeEnquiry(
   env: CloudflareEnv,
-  ctx: { waitUntil(promise: Promise<unknown>): void },
   formData: FormData,
   values: Values,
   now: number,
@@ -258,10 +258,10 @@ async function storeEnquiry(
     metadata: summary(stored),
   });
   // After the response, so a slow Notion never holds up the visitor or the email.
-  ctx.waitUntil(toNotion(env.NOTION_TOKEN, { stored, status: "Inquiry", kind: stored.type }));
+  await later(toNotion(env.NOTION_TOKEN, { stored, status: "Inquiry", kind: stored.type }));
   // Held, so the mail logged below folds in after it, not over it.
   const lead = recordLead(env, stored.email, { event: { at: stored.at, kind: "inquiry", ref: key, note: stored.type }, name: stored.name, kind: stored.type, snippet: stored.message, refs: uploads.length, source: context?.referrer || "Direct" });
-  ctx.waitUntil(lead);
+  await later(lead);
   /* Their images beside it, for /admin's Inbox (`ref:<key>:<n>`, read
      and deleted with the message by `app/api/inbox/route.ts`). Best
      effort like the email: the enquiry is already stored. */

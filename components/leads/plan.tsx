@@ -1,7 +1,7 @@
 "use client";
 
 /* ── the shoot plan and tasks on a lead ───────────────────────────
- * From CRMO (Julian 2026-11-20, mock claude.ai/artifact/UYkrekcCJeo6yrwUo41Mts):
+ * From CRMO (Julian's mock, claude.ai/artifact/UYkrekcCJeo6yrwUo41Mts):
  * the shoot itself beside the client and the date. Plan: brief, up to four
  * of his frames, the Cosmos board as a link (never fetched), the shot list
  * and the call sheet. Tasks: the prep under the one next step, each with a

@@ -22,7 +22,7 @@ export function ServiceBook({ page, frames }: { page: BookingPage; frames: Frame
   /* Six frames, two a column (Julian); the gallery holds the rest. */
   const cols = [0, 1, 2].map((c) => frames.slice(0, 6).filter((_, i) => i % 3 === c));
   const others = BOOKING_PAGES.filter((p) => p !== page);
-  /* Julian's picks: one frame beside the title; on portraits gilt 03 (his) and shattered-mercury 04 (the red one), 2026-11-10. */
+  /* Julian's picks: one frame beside the title; on portraits gilt 03 (his) and shattered-mercury 04 (the red one). */
   const hero = (page.slug === "portraits" ? [frames[0], frames[4]] : [frames[0]]).filter(Boolean);
   return (
     <div className="v3 contents">

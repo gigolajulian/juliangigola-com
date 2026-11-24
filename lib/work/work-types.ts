@@ -5,12 +5,8 @@
  * overwrites it, and a hand-written type would go with it.
  */
 
-/**
- * The old site's three nav groups. Kept because they encode something real —
- * who the work is *for* — even though the new nav collapses MUSIC into Work
- * and gives Sessions its own path.
- */
-export type Section = "WORK" | "SESSIONS" | "MUSIC";
+/** Who the work is for: commissioned work, or a session booked from the site. */
+export type Section = "WORK" | "SESSIONS";
 
 export type Category = {
   /** Route segment, matching the old site so inbound links keep working. */

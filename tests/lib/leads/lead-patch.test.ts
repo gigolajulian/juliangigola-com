@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 // Relative imports: the coverage scanner resolves `@/` under src/, which this repo does not have.
 import { patchLead } from "../../../lib/leads/lead-patch";
-import { sealer } from "../../../lib/leads/lead-crypto";
+import { sealer } from "@/lib/seal";
 import { readLead, writeLead } from "../../../lib/leads/lead-store";
 import { applyLeadEvent, type Lead } from "../../../lib/leads/leads";
 import { FakeKV, LEADS_KEY } from "../../backend/fakes";

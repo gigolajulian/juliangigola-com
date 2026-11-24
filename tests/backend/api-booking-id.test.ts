@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { readLog } from "@/lib/leads/activity-log";
-import { sealer } from "@/lib/leads/lead-crypto";
+import { sealer } from "@/lib/seal";
 import { POST } from "@/app/api/booking/[id]/route";
 import { bookingToken } from "@/lib/booking/token";
 import { forgetToken } from "@/lib/google";

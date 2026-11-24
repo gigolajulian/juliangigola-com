@@ -1,11 +1,12 @@
 import type { gsap as G } from "gsap";
+import type { Flip as F } from "gsap/Flip";
 
-/* The booking card's gsap only runs after a tap (a step, a pick, a swipe)
-   or the swipe nudge 1.1 s after the picker shows, so it is fetched once
-   the page has hydrated (home's Book online, the picker) instead of in the
-   first-load bundle. Not on idle: on a slow phone idle came about 2 s after
-   /book's splash lifted, and the nudge with it. By the first tap it is
-   there and the motion starts on the same frame; before that, it waits. */
+/* The shared lazy gsap loader: every caller gets the one gsap module,
+   fetched on first ask instead of in the first-load bundle. The booking
+   card asks once the page has hydrated (home's Book online, the picker),
+   not on idle: on a slow phone idle came about 2 s after /book's splash
+   lifted, and the swipe nudge with it. By the first tap it is there and
+   the motion starts on the same frame; before that, it waits. */
 let gsap: typeof G | undefined;
 let loading: Promise<typeof G> | undefined;
 /** gsap, fetched once and shared by every caller. */
@@ -19,3 +20,17 @@ export function withGsap(fn: (g: typeof G) => void) {
   if (gsap) fn(gsap);
   else void loadGsap().then(fn);
 }
+
+let flipping: Promise<typeof F> | undefined;
+/** gsap's Flip plugin, fetched with gsap and registered once. A failed fetch is asked again next time. */
+export const loadFlip = () =>
+  (flipping ??= Promise.all([loadGsap(), import("gsap/Flip")]).then(
+    ([g, m]) => {
+      g.registerPlugin(m.Flip);
+      return m.Flip;
+    },
+    (e: unknown) => {
+      flipping = undefined;
+      throw e;
+    },
+  ));

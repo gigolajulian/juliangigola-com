@@ -13,6 +13,8 @@
  */
 
 import { isRecord } from "@/lib/json";
+import { HttpError } from "@/lib/http";
+import { localGet, localRemove, localSet } from "@/lib/storage";
 
 /**
  * Where the editor keeps the GitHub token in the browser. Named here, not
@@ -31,9 +33,9 @@ export const isGithubToken = (k: string) => /^(ghp_|github_pat_)/.test(k);
 /** Keeps a key pasted into a desk's sign-in: a GitHub token replaces the token and drops any admin key, anything else is the admin key. */
 export function saveAdminKey(k: string) {
   if (isGithubToken(k)) {
-    localStorage.setItem(TOKEN_STORE, k);
-    localStorage.removeItem(KEY_STORE);
-  } else localStorage.setItem(KEY_STORE, k);
+    localSet(TOKEN_STORE, k);
+    localRemove(KEY_STORE);
+  } else localSet(KEY_STORE, k);
 }
 
 /**
@@ -42,7 +44,7 @@ export function saveAdminKey(k: string) {
  */
 export const credentials = (key: string): Record<string, string> => {
   if (key) return { "x-admin-key": key };
-  const token = window.localStorage.getItem(TOKEN_STORE);
+  const token = localGet(TOKEN_STORE);
   return token ? { authorization: `Bearer ${token}` } : {};
 };
 
@@ -81,7 +83,7 @@ export async function listDirectory(
     { headers: headers(token), cache: "no-store" },
   );
   if (res.status === 404) return [];
-  if (!res.ok) throw new Error(`GitHub said ${res.status}: ${await failureMessage(res)}`);
+  if (!res.ok) throw new HttpError(`GitHub said ${res.status}: ${await failureMessage(res)}`, res.status);
   const body = (await res.json()) as { type: string; path: string }[];
   return Array.isArray(body)
     ? body
@@ -225,7 +227,7 @@ export async function readFile(
     { headers: headers(token), cache: "no-store" },
   );
   if (res.status === 404) return null;
-  if (!res.ok) throw new Error(`GitHub said ${res.status}: ${await failureMessage(res)}`);
+  if (!res.ok) throw new HttpError(`GitHub said ${res.status}: ${await failureMessage(res)}`, res.status);
   const body = (await res.json()) as { content?: string };
 
   const binary = atob(String(body.content).replace(/\s/g, ""));

@@ -13,7 +13,7 @@
  * The frame's own fields are there so the panel can show the frame and
  * open it in the viewer without the project data; `dominant` is sharp's
  * histogram peak, for the swatches over each set. Only RGB is stored;
- * `components/vectorscope.tsx` works out where each point sits. The panel
+ * `components/portfolio/use-scope-draw.ts` works out where each point sits. The panel
  * fetches the file the first time it is opened.
  *
  * Run it after adding a project. One added since the last run is left off

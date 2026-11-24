@@ -6,14 +6,15 @@ import Image from "next/image";
 import dynamic from "next/dynamic";
 import { createPortal } from "react-dom";
 import type { Flip as FlipT } from "gsap/Flip";
+import { loadFlip } from "@/lib/motion/gsap-lazy";
 import { PageFoot } from "@/components/site/chrome";
-import DISC from "@/lib/discipline-order.json";
+import DISC from "@/lib/work/discipline-order.json";
 import { Drift } from "@/components/portfolio/drift";
 import { useColorScope, type PickAt } from "@/components/portfolio/use-color-scope";
 import { useStripScroll } from "@/components/portfolio/use-strip-scroll";
 // The canvas view loads only when it opens, not with every /portfolio visit.
 const WorkCanvas = dynamic(() => import("@/components/portfolio/canvas").then((m) => m.WorkCanvas), { ssr: false });
-import { projectHref } from "@/lib/project-href";
+import { projectHref } from "@/lib/work/project-href";
 import { Cap, STRIP_SIZES, Tile, altOf, named, type WorkItem } from "@/components/portfolio/work-tiles";
 import { FrameTile, FrameView, type FrameItem } from "@/components/portfolio/frame-view";
 import { useScopeDraw } from "@/components/portfolio/use-scope-draw";
@@ -21,7 +22,6 @@ import { useHeaderSearch } from "@/components/portfolio/use-header-search";
 import { useCoverPreload } from "@/components/portfolio/use-cover-preload";
 import { CROSS, LOUPE, SearchField, Views } from "@/components/portfolio/work-tools";
 
-export type { WorkItem, FrameItem };
 // project-viewer.tsx loads the viewer from here.
 export { FrameView };
 
@@ -123,7 +123,7 @@ export function WorkIndex({
   const flip = React.useRef<ReturnType<typeof FlipT.getState> | null>(null);
   const Flip = React.useRef<typeof FlipT | null>(null);
   React.useEffect(() => {
-    void Promise.all([import("gsap"), import("gsap/Flip")]).then(([g, f]) => { g.gsap.registerPlugin(f.Flip); Flip.current = f.Flip; });
+    void loadFlip().then((F) => { Flip.current = F; });
   }, []);
   const flipped = (set: () => void) => {
     if (Flip.current && !matchMedia("(prefers-reduced-motion: reduce)").matches)

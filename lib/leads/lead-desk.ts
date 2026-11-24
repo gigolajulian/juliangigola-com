@@ -3,12 +3,16 @@
  * screens): the desk fetch, the list filters and the
  * small formatters. Browser only: the fetch reads the key from localStorage.
  */
-import { errorText } from "@/lib/utils";
-import { adminCall, AdminError } from "@/lib/admin/admin-call";
+import { adminCall } from "@/lib/admin/admin-call";
 import { TZ } from "@/lib/time-zone";
-import { isLate, myMove, paperDue, quoteNudge, renewDue, type Lead, type LeadPatch, type LeadSummary, type Stage } from "@/lib/leads/leads";
+import { isLate, isStage, myMove, paperDue, quoteNudge, renewDue, type Lead, type LeadPatch, type LeadSummary, type Stage } from "@/lib/leads/leads";
 
-export type Filter = "today" | "traffic" | "seo" | "site" | "device" | "needs" | "open" | "upcoming" | Stage | "snoozed" | "archived" | "trash" | "more" | "new" | "stats" | "money" | "templates" | "hours" | "proofs" | "licences";
+/** The desk's own lists, beside the stages. */
+const LISTS = ["needs", "open", "upcoming", "snoozed", "archived", "trash"] as const;
+/** A list of leads `inFilter` answers: a stage, or one of the desk's own lists. */
+export type Filter = (typeof LISTS)[number] | Stage;
+/** A tab or command id that names a Filter. */
+export const isFilter = (v: unknown): v is Filter => isStage(v) || (LISTS as readonly unknown[]).includes(v);
 
 /** The desk's three layouts, by window width. */
 export type Size = "phone" | "mid" | "wide";
@@ -19,20 +23,9 @@ export const deskCall: Call = ({ path = "", ...init } = {}) => adminCall(`/api/l
 /** A change to the open lead; answers with the lead as stored. */
 export type Patch = (b: LeadPatch) => Promise<Lead>;
 
-export const OFFLINE = "Offline. The desk loads again when you are back online.";
-/** Any 401 from the admin gate (`refuseAdmin`): a missing key or a token GitHub refused. The desks show sign-in for it. */
-export const isLocked = (e: unknown) => e instanceof AdminError && e.status === 401;
-export const LOCKED = "Not authorized.";
-/** What a failed load says: offline, or the route's own words. */
-export const loadErrorText = (e: unknown) => (navigator.onLine === false || e instanceof TypeError ? OFFLINE : isLocked(e) ? LOCKED : errorText(e));
-
-/** "Nov 11, 4:05 PM" in Julian's time. */
-export const stampPT = (iso: string) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(iso));
-
 /** A licence's end date, "Mar 4, 2027". */
 export const endDay = (end: string) => new Date(`${end}T12:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
 
-export const DAY = 864e5;
 /** Date.now behind a call: the desk reads the clock in render, which the React compiler lint refuses for a bare Date.now(). */
 export const now = () => Date.now();
 
@@ -83,7 +76,6 @@ export function inFilter(l: LeadSummary, f: Filter) {
   if (f === "needs") return needsMe(l);
   if (isSetAside(l)) return false;
   if (f === "upcoming") return !!l.when && Date.parse(l.when) > now() - 2 * 3600e3 && !isFinishedStage(l.stage);
-  if (f === "more" || f === "hours" || f === "proofs" || f === "licences") return false;
   if (f === "snoozed") return isSnoozed(l);
   if (f === "open") return !isFinishedStage(l.stage);
   return l.stage === f && !isSnoozed(l);

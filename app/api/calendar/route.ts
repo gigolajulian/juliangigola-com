@@ -1,5 +1,5 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { TZ } from "@/lib/time-zone";
+import { TZ, DAY_MS } from "@/lib/time-zone";
 import { gcal } from "@/lib/google";
 import { looksLikeEmail } from "@/lib/utils";
 import { busyAll, EXTRA_KEY, isIcs, readExtras, instantIn, type Extra } from "@/lib/booking/slots";
@@ -64,7 +64,7 @@ export async function GET(request: Request) {
   const [from, to] = [q.get("from") ?? "", q.get("to") ?? ""];
   if (!DAY.test(from) || !DAY.test(to) || to < from) return json({ error: "Bad range." }, 400);
   const a = dayMs(from);
-  const b = Math.min(dayMs(to) + 864e5, a + 62 * 864e5);
+  const b = Math.min(dayMs(to) + DAY_MS, a + 62 * DAY_MS);
   const extras = await readExtras(g.env.INBOX);
   try {
     const [list, { busy, failed }] = await Promise.all([
@@ -112,7 +112,7 @@ async function post(request: Request) {
     if (!DAY.test(from) || !DAY.test(to) || to < from) return json({ error: "Pick the days." }, 400);
     const timed = start !== undefined || end !== undefined;
     if (timed && (from !== to || !TIME.test(start ?? "") || !TIME.test(end ?? "") || end! <= start!)) return json({ error: "A time block is one day, start before end." }, 400);
-    const next = new Date(Date.parse(`${to}T00:00:00Z`) + 864e5).toISOString().slice(0, 10);
+    const next = new Date(Date.parse(`${to}T00:00:00Z`) + DAY_MS).toISOString().slice(0, 10);
     const ev = await gcal<GEvent>(env.GCAL_OAUTH, "/calendars/primary/events?sendUpdates=none", {
       body: {
         summary: note ? `Blocked: ${String(note).slice(0, 80)}` : "Blocked",

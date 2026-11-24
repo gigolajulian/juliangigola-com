@@ -1,7 +1,7 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { projectHref } from "@/lib/project-href";
+import { projectHref } from "@/lib/work/project-href";
 
 /** One project on /portfolio. The server page hands every one to the client WorkIndex, so the keys that repeat
     per project are one letter: they ride in the RSC payload once per project. */

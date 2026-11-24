@@ -26,7 +26,7 @@ interface CloudflareEnv {
    */
   INBOX_KEY?: string;
 
-  /** Seals leads, proofs and contracts (`lib/leads/lead-crypto.ts`). Set with `wrangler secret put LEADS_KEY`. */
+  /** Seals leads, proofs and contracts (`lib/seal.ts`). Set with `wrangler secret put LEADS_KEY`. */
   LEADS_KEY?: string;
 
   /** Signs Web Push for /admin's lead alerts (`app/api/leads/push/route.ts`). Set with `wrangler secret put VAPID_KEY`. */
@@ -78,7 +78,7 @@ interface CloudflareEnv {
 
   /**
    * hello@'s Google Calendar for the site's own booking engine
-   * (`lib/booking/gcal.ts`): JSON `{client_id, client_secret, refresh_token}` of an
+   * (`lib/google.ts`): JSON `{client_id, client_secret, refresh_token}` of an
    * Internal OAuth client, scopes calendar.events, calendar.freebusy and
    * gmail.readonly (his own replies on the lead desk, `lib/leads/sync/gmail-sync.ts`).
    * Made and set by `node scripts/gsc-auth.mjs <client.json> cal`.
@@ -86,7 +86,7 @@ interface CloudflareEnv {
   GCAL_OAUTH?: string;
 
   /**
-   * Signs the client's reschedule and cancel links (`lib/booking/booking-token.ts`).
+   * Signs the client's reschedule and cancel links (`lib/booking/token.ts`).
    * Any long random string. Unset, the mail carries no links. Set with:
    *
    *   wrangler versions secret put BOOKING_SECRET

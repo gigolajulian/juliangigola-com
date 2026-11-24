@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { NUDGES, REMIND_MAX, shootTag, backfillLead, applyLeadEvent, isLate, paperDue, quoteNudge, leadStoreKey, myMove, leadSummary, renewDue, trashDaysLeft, type InboxRow, type Lead, type LeadSummary } from "@/lib/leads/leads";
+import { NUDGES, REMIND_MAX, shootTag, backfillLead, applyLeadEvent, isLate, paperDue, quoteNudge, leadStoreKey, leadIdOf, LEAD_PREFIX, myMove, leadSummary, renewDue, trashDaysLeft, type InboxRow, type Lead, type LeadSummary } from "@/lib/leads/leads";
 import { recordLead, writeLead } from "@/lib/leads/lead-store";
-import { sealer } from "@/lib/leads/lead-crypto";
+import { sealer } from "@/lib/seal";
 
 const at = (h: number) => new Date(Date.UTC(2026, 10, 2, h)).toISOString();
 const email = "Maya@Example.com";
@@ -96,6 +96,20 @@ describe("applyLeadEvent", () => {
     l = applyLeadEvent(l, email, { event: { at: at(2), kind: "deposit-stuck", ref: "pi_2" }, flag: "stuck" });
     expect(l.flags).toEqual(["stuck"]);
   });
+});
+
+describe("leadIdOf", () => {
+  it("undoes leadStoreKey", () => {
+    expect(leadStoreKey("abc")).toBe(`${LEAD_PREFIX}abc`);
+    expect(leadIdOf(leadStoreKey("abc"))).toBe("abc");
+  });
+});
+
+it("applyLeadEvent leaves the lead it was given as it was", () => {
+  const before = applyLeadEvent(null, "a@x.com", { event: { at: "2026-01-01T00:00:00Z", kind: "inquiry" }, snippet: "hi" });
+  const copy = structuredClone(before);
+  applyLeadEvent(before, "a@x.com", { event: { at: "2026-01-02T00:00:00Z", kind: "archive" }, on: true });
+  expect(before).toEqual(copy);
 });
 
 describe("isLate", () => {

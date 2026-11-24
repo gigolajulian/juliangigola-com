@@ -5,6 +5,8 @@
  * session it was sent for. No secret, no links: the mail leaves them out.
  * ─────────────────────────────────────────────────────────────── */
 
+import { DAY_MS } from "@/lib/time-zone";
+
 const SITE = "https://juliangigola.com";
 const enc = new TextEncoder();
 const b64url = (buf: ArrayBuffer) => Buffer.from(buf).toString("base64url");
@@ -28,6 +30,6 @@ export async function tokenOpens(secret: string | undefined, id: string, token: 
 /** The two links for the client's mail, or null while BOOKING_SECRET is unset. */
 export async function manageLinks(secret: string | undefined, r: { id: string; start: string }) {
   if (!secret) return null;
-  const page = `${SITE}/booking/${r.id}?t=${await bookingToken(secret, r.id, Date.parse(r.start) + 864e5)}`;
+  const page = `${SITE}/booking/${r.id}?t=${await bookingToken(secret, r.id, Date.parse(r.start) + DAY_MS)}`;
   return { reschedule: `${page}&do=reschedule`, cancel: `${page}&do=cancel` };
 }

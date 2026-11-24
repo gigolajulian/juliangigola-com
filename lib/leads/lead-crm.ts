@@ -6,8 +6,8 @@
  * Pure functions: `app/api/leads` reads and writes, these decide.
  * ─────────────────────────────────────────────────────────────── */
 
-import { TZ } from "@/lib/time-zone";
-import { canonical } from "./lead-crypto";
+import { DAY_MS, TZ, WEEK_MS } from "@/lib/time-zone";
+import { canonical } from "@/lib/leads/canonical";
 import { isStage, STAGES, WON, type Lead, type LeadEvent, type Person, type ShootPlan, type Stage, type Task } from "./leads";
 import { balance, isSettled } from "./invoice";
 import { cell, paidTotal, type MasterEntry } from "./activity-log";
@@ -296,16 +296,15 @@ export function stats(all: (Lead & { id?: string })[], now: number, master: Mast
     return [{ name: l.name, sessions: log.filter((e) => e.kind === "booking" || e.kind === "call").length, paid: paidTotal(log) }];
   });
   const paying = clients.filter((c) => c.paid > 0);
-  const week = 7 * 864e5;
   // Weeks start Monday, Pacific time is close enough at this scale.
   const monday = (t: number) => {
     const d = new Date(t);
     d.setUTCHours(0, 0, 0, 0);
-    return d.getTime() - ((d.getUTCDay() + 6) % 7) * 864e5;
+    return d.getTime() - ((d.getUTCDay() + 6) % 7) * DAY_MS;
   };
-  const start = monday(now) - 11 * week;
-  const weeks = Array.from({ length: 12 }, (_, i) => ({ start: new Date(start + i * week).toISOString().slice(0, 10), inquiries: 0, booked: 0 }));
-  const at = (iso: string) => Math.floor((Date.parse(iso) - start) / week);
+  const start = monday(now) - 11 * WEEK_MS;
+  const weeks = Array.from({ length: 12 }, (_, i) => ({ start: new Date(start + i * WEEK_MS).toISOString().slice(0, 10), inquiries: 0, booked: 0 }));
+  const at = (iso: string) => Math.floor((Date.parse(iso) - start) / WEEK_MS);
   for (const l of leads) {
     const i = at(l.firstAt);
     if (i >= 0 && i < 12) weeks[i].inquiries++;
@@ -320,7 +319,7 @@ export function stats(all: (Lead & { id?: string })[], now: number, master: Mast
     return asked && moved ? [(Date.parse(moved.at) - Date.parse(asked.at)) / 3600e3] : [];
   });
   // Booked rate over leads old enough to have been decided (a week in).
-  const decided = leads.filter((l) => now - Date.parse(l.firstAt) > week);
+  const decided = leads.filter((l) => now - Date.parse(l.firstAt) > WEEK_MS);
   const won = (l: Lead) => WON.includes(l.stage);
   const src = new Map<string, { leads: number; booked: number }>();
   for (const l of leads) {
