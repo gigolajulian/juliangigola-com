@@ -14,7 +14,7 @@ import { Heading, Text } from "@astryxdesign/core/Text";
 import { MetadataList, MetadataListItem } from "@astryxdesign/core/MetadataList";
 import { STAGES } from "@/lib/leads/leads";
 import type { Stats } from "@/lib/leads/lead-crm";
-import { type Call, dollarsLabel } from "@/lib/leads/lead-desk";
+import { deskCall, dollarsLabel } from "@/lib/leads/lead-desk";
 import { errorText } from "@/lib/utils";
 import { Page } from "@/components/leads/lists";
 
@@ -35,12 +35,12 @@ export function StatTile({ k, v, hint }: { k: string; v: string; hint: string })
   );
 }
 
-export function StatsDesk({ call }: { call: Call }) {
+export function StatsDesk() {
   const [s, setS] = React.useState<Stats | null>(null);
   const [err, setErr] = React.useState<string | null>(null);
   React.useEffect(() => {
-    call<{ stats: Stats }>({ path: "/stats" }).then((o) => setS(o.stats)).catch((e: unknown) => setErr(errorText(e)));
-  }, [call]);
+    deskCall<{ stats: Stats }>({ path: "/stats" }).then((o) => setS(o.stats)).catch((e: unknown) => setErr(errorText(e)));
+  }, []);
   const top = s ? Math.max(1, ...s.weeks.map((w) => w.inquiries)) : 1;
   return (
     <Page bare eyebrow={s ? `${s.total} LEADS` : "THE NUMBERS"} title="Stats">

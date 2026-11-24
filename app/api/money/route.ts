@@ -1,7 +1,8 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { STRIPE_UNSET, stripe } from "@/lib/stripe";
-import { refuseAdmin } from "@/lib/vouch";
+import { refuseAdmin } from "@/lib/admin/vouch";
 import { json, upstreamError } from "@/lib/http";
+import type { MoneyAnswer } from "@/lib/leads/money";
 
 /* ── GET /api/money: his Stripe balance and what moved it ─────────
  * The Stripe balance and its transactions.
@@ -48,11 +49,12 @@ export async function GET(request: Request) {
       stripe(key, `/balance_transactions?limit=25&expand[]=data.source${after ? `&starting_after=${after}` : ""}`),
     ]);
     const data = (list.data ?? []) as Txn[];
-    return json({
+    const body: MoneyAnswer = {
       ...(balance ? { available: usd(balance.available as Amount[]), pending: usd(balance.pending as Amount[]), test: key.startsWith("sk_test_") } : {}),
       more: !!list.has_more,
       txns: data.map((t) => ({ id: t.id, at: new Date(t.created * 1000).toISOString(), type: t.type, amount: t.amount, fee: t.fee, net: t.net, currency: t.currency, status: t.status, what: what(t) })),
-    });
+    };
+    return json(body);
   } catch (e) {
     // Stripe's own detail is logged by `stripe()`; the key never leaves the Worker.
     return upstreamError("money", e, "Stripe did not answer. Try again in a minute.");

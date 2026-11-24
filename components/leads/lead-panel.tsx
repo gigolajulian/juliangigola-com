@@ -5,12 +5,11 @@ import { ProgressBar } from "@astryxdesign/core/ProgressBar";
 import { Eyebrow } from "@/components/leads/desk-nav";
 import { Next } from "@/components/leads/row";
 import { ago, nextStep } from "@/lib/leads/lead-desk";
-import { TZ } from "@/lib/time-zone";
+import { pacificFormat } from "@/lib/time-zone";
 import { shootTag, STAGES, type LeadSummary, type Stage as StageName } from "@/lib/leads/leads";
 
 const ROAD: readonly StageName[] = STAGES.filter((s) => s !== "Lost");
-export const fmt = (o: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, ...o });
-export const date = (iso: string) => fmt({ weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(iso));
+export const date = (iso: string) => pacificFormat({ weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(iso));
 
 function Stage({ l }: { l: LeadSummary }) {
   const at = ROAD.indexOf(l.stage);

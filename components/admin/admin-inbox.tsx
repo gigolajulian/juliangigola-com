@@ -64,13 +64,13 @@ export function AdminInbox({
   const [error, setError] = React.useState<string | null>(null);
   const [busy, setBusy] = React.useState(false);
 
-  /** Every call to the route, with the key attached. */
+  /** Every call to the route, with the key attached: `path` is the query ("?key=..."). */
   const call = React.useCallback(
-    async (
-      init: RequestInit & { query?: string } = {},
+    <T = Record<string, unknown>,>(
+      { path = "", ...init }: RequestInit & { path?: string } = {},
       withKey?: string,
-    ): Promise<unknown> =>
-      adminCall(`/api/inbox${init.query ?? ""}`, {
+    ) =>
+      adminCall<T>(`/api/inbox${path}`, {
         ...init,
         headers: credentials(withKey ?? key),
       }),
@@ -82,7 +82,7 @@ export function AdminInbox({
       setBusy(true);
       setError(null);
       try {
-        const out = (await call({}, withKey)) as { rows: Row[] };
+        const out = await call<{ rows: Row[] }>({}, withKey);
         setRows(out.rows);
         if (withKey) {
           setKey(withKey);
@@ -127,9 +127,9 @@ export function AdminInbox({
     setOpen(row.key);
     if (body[row.key]) return;
     try {
-      const out = (await call({
-        query: `?key=${encodeURIComponent(row.key)}`,
-      })) as { enquiry: Enquiry };
+      const out = await call<{ enquiry: Enquiry }>({
+        path: `?key=${encodeURIComponent(row.key)}`,
+      });
       setBody((b) => ({ ...b, [row.key]: out.enquiry }));
       if (!row.read) void mark(row, true);
     } catch (e) {

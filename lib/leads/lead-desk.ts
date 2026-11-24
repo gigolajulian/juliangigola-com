@@ -17,8 +17,7 @@ export const isFilter = (v: unknown): v is Filter => isStage(v) || (LISTS as rea
 /** The desk's three layouts, by window width. */
 export type Size = "phone" | "mid" | "wide";
 /** A request to the lead desk's routes: `path` is under /api/leads ("" the leads themselves, "/templates", "/log?id=..."). */
-export type Call = <T = Record<string, unknown>>(init?: RequestInit & { path?: string }) => Promise<T>;
-export const deskCall: Call = ({ path = "", ...init } = {}) => adminCall(`/api/leads${path}`, init);
+export const deskCall = <T = Record<string, unknown>>({ path = "", ...init }: RequestInit & { path?: string } = {}) => adminCall<T>(`/api/leads${path}`, init);
 
 /** A change to the open lead; answers with the lead as stored. */
 export type Patch = (b: LeadPatch) => Promise<Lead>;

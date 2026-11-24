@@ -24,7 +24,8 @@ import { adminCall, authed } from "@/lib/admin/admin-call";
 import { balance, shortDate, dueOf, overdue, usd } from "@/lib/leads/invoice";
 import type { InvoiceRow } from "@/components/leads/invoices";
 import { TZ, DAY_MS } from "@/lib/time-zone";
-import { proofApi, feed, type FeedItem, type ProofRow } from "@/lib/proofs/desk";
+import { proofApi, feed, type FeedItem, type ProofRow } from "@/lib/proofs/proof-desk";
+import type { MoneyAnswer } from "@/lib/leads/money";
 
 /* Today's helpers, from the retired classic desk. */
 const clock = (ms: number) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit" }).format(ms);
@@ -98,9 +99,9 @@ export function TodayDesk({ leads, size, open, show }: { leads: LeadSummary[]; s
   const leadMoves = moves.filter((l) => source(l) === "Leads");
   const dueMoves = moves.filter((l) => source(l) !== "Leads");
 
-  const [money, setMoney] = React.useState<{ available?: number; pending?: number } | string | null>(null);
+  const [money, setMoney] = React.useState<MoneyAnswer | string | null>(null);
   React.useEffect(() => {
-    adminCall<{ available?: number; pending?: number }>("/api/money").then(setMoney).catch(() => setMoney("Not connected"));
+    adminCall<MoneyAnswer>("/api/money").then(setMoney).catch(() => setMoney("Not connected"));
   }, []);
   // Traffic answers to the admin key or the GitHub token, like the other admin routes.
   const [traffic, setTraffic] = React.useState<Spark | string | null>(null);

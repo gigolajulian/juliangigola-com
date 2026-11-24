@@ -1,8 +1,12 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi, type Mock } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { LeadDesk } from "@/components/leads/lead";
-import type { Call } from "@/lib/leads/lead-desk";
+import { deskCall } from "@/lib/leads/lead-desk";
 import type { Lead, LeadSummary } from "@/lib/leads/leads";
+
+vi.mock("@/lib/leads/lead-desk", async (actual) => ({ ...(await actual<typeof import("@/lib/leads/lead-desk")>()), deskCall: vi.fn() }));
+// The desk fetch, faked per test.
+const call = deskCall as unknown as Mock;
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -11,15 +15,16 @@ const summary: LeadSummary = { id: "a", email: "ana@x.com", name: "Ana Ruiz", st
 const full: Lead = { ...summary, events: [{ at: iso, kind: "inquiry", text: "From the form" }], notes: "Bring a stylist", quote: 1800 } as unknown as Lead;
 
 function setup() {
-  // The proofs list goes through fetch; the lead through `call`.
+  // The proofs list goes through fetch; the lead through `deskCall`.
   vi.stubGlobal("fetch", vi.fn(() => Promise.resolve(new Response(JSON.stringify({ proofs: [] }), { status: 200 }))));
-  const call = vi.fn(async (init?: RequestInit & { path?: string }) => {
+  call.mockReset();
+  call.mockImplementation(async (init?: RequestInit & { path?: string }) => {
     if (init?.method === "PATCH") return { lead: { ...full, ...JSON.parse(String(init.body)) } };
     return { lead: full };
-  }) as unknown as Call & ReturnType<typeof vi.fn>;
+  });
   const onChange = vi.fn();
-  render(<LeadDesk summary={summary} call={call} onChange={onChange} onBack={() => {}} reload={() => {}} templates={[]} others={[]} size="wide" />);
-  return { call, onChange };
+  render(<LeadDesk summary={summary} onChange={onChange} onBack={() => {}} reload={() => {}} templates={[]} others={[]} size="wide" />);
+  return { onChange };
 }
 
 describe("LeadDesk", () => {
@@ -32,7 +37,7 @@ describe("LeadDesk", () => {
   });
 
   it("saves notes on blur with the same PATCH as the classic desk", async () => {
-    const { call, onChange } = setup();
+    const { onChange } = setup();
     const box = (await screen.findByDisplayValue("Bring a stylist")) as HTMLTextAreaElement;
     fireEvent.change(box, { target: { value: "No stylist" } });
     fireEvent.blur(box);

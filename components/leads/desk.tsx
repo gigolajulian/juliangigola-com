@@ -51,8 +51,8 @@ import { DeviceDesk, HoursDesk, TemplatesDesk } from "@/components/leads/setup-p
 import { type Filter } from "@/lib/leads/lead-desk";
 import { ProofsDesk } from "@/components/proofs/desk";
 import { Eyebrow, FIND_KEY, FindGlyph, GO, isView, Nav, More, PlusGlyph, Rail, sectionOf, TabBar, type Found, type View } from "@/components/leads/desk-nav";
-import { date, fmt, OpenLeadPanel } from "@/components/leads/lead-panel";
-import { DAY_MS, WEEK_MS } from "@/lib/time-zone";
+import { date, OpenLeadPanel } from "@/components/leads/lead-panel";
+import { DAY_MS, pacificFormat, WEEK_MS } from "@/lib/time-zone";
 
 type Group = "now" | "week" | "waiting";
 
@@ -77,7 +77,7 @@ const GROUPS: [Group, string][] = [["now", "Your move"], ["week", "This week"], 
 /** A day from the moment of the swipe or press. */
 const dayOn = () => new Date(Date.now() + DAY_MS).toISOString();
 const BOARD_STORE = "jg-leads-board";
-const stamp = (t: number) => fmt({ weekday: "short", month: "short", day: "numeric" }).format(new Date(t)).toUpperCase().replace(",", "");
+const stamp = (t: number) => pacificFormat({ weekday: "short", month: "short", day: "numeric" }).format(new Date(t)).toUpperCase().replace(",", "");
 
 /* The palette on a phone: the whole screen, as a sheet, with the list taking what the field leaves. */
 const SHEET_CSS = "dialog[data-jg-sheet]{inset:0;margin:0;width:100vw!important;max-width:none!important;height:100dvh!important;max-height:none!important;border:0;border-radius:0;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}dialog[data-jg-sheet]>*{height:100%;max-height:none!important}";
@@ -133,7 +133,7 @@ function useStoredFlag(key: string): [boolean, (on: boolean) => void] {
 /** What the Ctrl or Cmd K palette offers: every lead by name, email, shoot or stage, actions on the open lead, then every page. */
 function finderItems(leads: LeadSummary[] | null, openName: string | undefined): Found[] {
   return [
-    ...(leads ?? []).filter((l) => !l.trashedAt && l.id).map((l) => ({ id: leadStoreKey(l.id!), label: l.name || l.email, auxiliaryData: { group: "Leads", words: [l.email, l.kind ?? "", l.stage], note: [l.stage, l.when ? fmt({ month: "short", day: "numeric" }).format(new Date(l.when)) : null].filter(Boolean).join(" · ") } })),
+    ...(leads ?? []).filter((l) => !l.trashedAt && l.id).map((l) => ({ id: leadStoreKey(l.id!), label: l.name || l.email, auxiliaryData: { group: "Leads", words: [l.email, l.kind ?? "", l.stage], note: [l.stage, l.when ? pacificFormat({ month: "short", day: "numeric" }).format(new Date(l.when)) : null].filter(Boolean).join(" · ") } })),
     // Actions on the lead that is open, then the ones that need none.
     ...(openName ? [{ id: "do:task", label: `Add a task to ${openName}`, auxiliaryData: { group: "Do", words: ["task", "todo"] } }, { id: "do:invoice", label: `New invoice for ${openName}`, auxiliaryData: { group: "Do", words: ["invoice", "bill"] } }] : []),
     { id: "go:new", label: "New lead", auxiliaryData: { group: "Do", words: ["add", "lead"] } },
@@ -347,7 +347,7 @@ export function LeadsDesk() {
 
   // The lead page: its own Astryx layout (components/leads/lead.tsx).
   const lead = current ? (
-    <LeadDesk key={current.id} ask={ask} summary={current} initial={fresh?.email === current.email ? fresh : null} call={deskCall} onChange={changed} onBack={() => setOpen(null)} reload={load} templates={templates} others={live.filter((o) => o.id !== current.id)} size={size} toProofs={(token) => { show("proofs"); setProofPick(token ?? null); }} />
+    <LeadDesk key={current.id} ask={ask} summary={current} initial={fresh?.email === current.email ? fresh : null} onChange={changed} onBack={() => setOpen(null)} reload={load} templates={templates} others={live.filter((o) => o.id !== current.id)} size={size} toProofs={(token) => { show("proofs"); setProofPick(token ?? null); }} />
   ) : null;
 
   // The lead from the POST itself: KV lists lag a fresh write, so it goes in by hand and opens whole.
@@ -365,19 +365,24 @@ export function LeadsDesk() {
     setError(LOCKED);
   };
   const pages: Partial<Record<View, React.ReactNode>> = {
-    invoices: <InvoicesDesk leads={live} call={deskCall} open={openLead} changed={changed} />,
+    invoices: <InvoicesDesk leads={live} open={openLead} changed={changed} />,
     licences: <LicencesDesk leads={live} open={openLead} />,
-    aside: <AsideDesk leads={leads ?? []} call={deskCall} open={openLead} done={() => { setOpen(null); load(); }} tab={asideTab} setTab={setAsideTab} top={switcher} />,
-    stats: <StatsDesk call={deskCall} />,
+    aside: <AsideDesk leads={leads ?? []} open={openLead} done={() => { setOpen(null); load(); }} tab={asideTab} setTab={setAsideTab} top={switcher} />,
+    stats: <StatsDesk />,
     traffic: <PanelDesk which="traffic" />,
     seo: <PanelDesk which="seo" />,
     hours: <HoursDesk />,
-    templates: <TemplatesDesk call={deskCall} templates={templates} saved={setTemplates} />,
-    device: <DeviceDesk call={deskCall} reload={load} signOut={signOut} />,
+    templates: <TemplatesDesk templates={templates} saved={setTemplates} />,
+    device: <DeviceDesk reload={load} signOut={signOut} />,
     more: <More go={show} find={() => setFinding(true)} />,
     proofs: <ProofsDesk embedded key={proofPick ?? ""} initial={proofPick ?? undefined} />,
+    money: <MoneyDesk />,
+    calendar: <CalendarDesk leads={live.filter((l) => !l.archivedAt)} size={size} open={openLead} tab={calTab} setTab={setCalTab} />,
+    new: <NewLeadDesk leads={live} size={size} done={added} open={openLead} cancel={() => show("leads")} />,
+    // Today waits for the first list; until then the screen is home.
+    today: leads ? <TodayDesk leads={live} size={size} open={openLead} show={() => show("leads")} /> : undefined,
   };
-  const page = lead ?? pages[screen] ?? (screen === "money" ? <MoneyDesk /> : screen === "calendar" ? <CalendarDesk leads={live.filter((l) => !l.archivedAt)} size={size} open={(l) => setOpen(l.id ?? null)} tab={calTab} setTab={setCalTab} /> : screen === "new" ? <NewLeadDesk call={deskCall} leads={live} size={size} done={added} open={(l) => setOpen(l.id ?? null)} cancel={() => show("leads")} /> : screen === "today" && leads ? <TodayDesk leads={live} size={size} open={(l) => setOpen(l.id ?? null)} show={() => show("leads")} /> : home);
+  const page = lead ?? pages[screen] ?? home;
   const section = lead ? null : sectionOf(screen);
   // Leads carries its own Open / Put aside switch under the title; the other groups keep the tab row.
   const shown = section && section[2].length > 1 && section[0] !== "leads" ? (
@@ -390,6 +395,17 @@ export function LeadsDesk() {
   // eslint-disable-next-line react-hooks/refs -- only the touch handlers read it; set after the sign-in return, so no hook can
   pullOk.current = !lead;
   if (!mode) return null;
+  // A phone: the pull-to-refresh note, the page, and the tab bar unless a lead brings its own action bar.
+  const pullNote = pull > 12 ? (
+    <div role="status" style={{ position: "absolute", zIndex: 5, top: "calc(env(safe-area-inset-top) + 10px)", left: 0, right: 0, textAlign: "center", pointerEvents: "none", fontSize: 12, color: "var(--color-text-secondary)", opacity: Math.min(1, pull / PULL) }}>{pull > PULL ? "Release to refresh" : "Pull to refresh"}</div>
+  ) : null;
+  const phoneShell = (
+    <>
+      {pullNote}
+      <Layout height="fill" content={<React.Fragment key={tick}>{shown}</React.Fragment>} />
+      {lead ? null : <div style={frostBar}><TabBar view={screen} go={show} needs={needs} /></div>}
+    </>
+  );
   return (
     <Theme theme={leadsTheme} mode={mode}>
       {/* The site sets mono capitals everywhere; Astryx sets its own type inside. */}
@@ -425,7 +441,7 @@ export function LeadsDesk() {
           }}
         />
         {size === "phone"
-          ? <>{pull > 12 ? <div role="status" style={{ position: "absolute", zIndex: 5, top: "calc(env(safe-area-inset-top) + 10px)", left: 0, right: 0, textAlign: "center", pointerEvents: "none", fontSize: 12, color: "var(--color-text-secondary)", opacity: Math.min(1, pull / PULL) }}>{pull > PULL ? "Release to refresh" : "Pull to refresh"}</div> : null}<Layout height="fill" content={<React.Fragment key={tick}>{shown}</React.Fragment>} />{lead ? null /* a lead brings its own action bar */ : <div style={frostBar}><TabBar view={screen} go={show} needs={needs} /></div>}</>
+          ? phoneShell
           : <Layout height="fill" start={railed
               ? <LayoutPanel width={84} padding={0} hasDivider label="Desk"><Rail needs={needs} view={screen} go={show} /></LayoutPanel>
               : <LayoutPanel width={260} padding={0} label="Desk" /* SideNav draws 260 wide by default; a narrower panel clipped the counts. */><Nav needs={needs} view={screen} go={show} find={() => setFinding(true)} /></LayoutPanel>} content={shown} />}

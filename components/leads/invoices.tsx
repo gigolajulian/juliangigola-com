@@ -19,7 +19,7 @@ import { Page } from "@/components/leads/lists";
 import { Deliver, InvoiceSheetB, makePdf } from "@/components/leads/invoice";
 import { kindOf } from "@/components/leads/shared";
 import { balance, isSettled, subtotal, usd, type Invoice } from "@/lib/leads/invoice";
-import { type Call, dayLabel, type Patch } from "@/lib/leads/lead-desk";
+import { dayLabel, deskCall, type Patch } from "@/lib/leads/lead-desk";
 import { errorText } from "@/lib/utils";
 import { leadStoreKey, type Lead, type LeadSummary } from "@/lib/leads/leads";
 
@@ -29,7 +29,7 @@ type Row = InvoiceRow & Record<string, unknown>;
 
 export const status = (i: Invoice) => (isSettled(i) ? "Paid" : i.sentAt ? "Sent" : "Unpaid");
 
-export function InvoicesDesk({ leads, call, open, changed }: { leads: LeadSummary[]; call: Call; open: (l: LeadSummary) => void; changed: (l: Lead) => void }) {
+export function InvoicesDesk({ leads, open, changed }: { leads: LeadSummary[]; open: (l: LeadSummary) => void; changed: (l: Lead) => void }) {
   const [rows, setRows] = React.useState<InvoiceRow[] | null>(null);
   const [note, setNote] = React.useState<string | null>(null);
   const [made, setMade] = React.useState<{ inv: Invoice; l: LeadSummary; file: File } | null>(null);
@@ -37,12 +37,12 @@ export function InvoicesDesk({ leads, call, open, changed }: { leads: LeadSummar
   const [making, setMaking] = React.useState<string | null>(null);
   const [full, setFull] = React.useState<Lead | null>(null);
   const load = React.useCallback(() => {
-    call<{ invoices: InvoiceRow[] }>({ path: "/invoices" }).then((o) => setRows(o.invoices)).catch((e: unknown) => setNote(errorText(e)));
-  }, [call]);
+    deskCall<{ invoices: InvoiceRow[] }>({ path: "/invoices" }).then((o) => setRows(o.invoices)).catch((e: unknown) => setNote(errorText(e)));
+  }, []);
   React.useEffect(load, [load]);
 
   const byId = (id: string) => leads.find((l) => l.id === id);
-  const lead = (id: string) => call<{ lead: Lead }>({ path: `?id=${encodeURIComponent(id)}` }).then((o) => o.lead);
+  const lead = (id: string) => deskCall<{ lead: Lead }>({ path: `?id=${encodeURIComponent(id)}` }).then((o) => o.lead);
   const pdf = (r: InvoiceRow) => {
     const l = byId(r.lead);
     if (!l) return;
@@ -55,7 +55,7 @@ export function InvoicesDesk({ leads, call, open, changed }: { leads: LeadSummar
     lead(id).then(setFull, (e: unknown) => setNote(errorText(e)));
   };
   const patch: Patch = async (body) => {
-    const { lead: next } = await call<{ lead: Lead }>({ method: "PATCH", body: JSON.stringify({ key: leadStoreKey(making!), ...body }) });
+    const { lead: next } = await deskCall<{ lead: Lead }>({ method: "PATCH", body: JSON.stringify({ key: leadStoreKey(making!), ...body }) });
     setFull(next);
     changed(next);
     return next;

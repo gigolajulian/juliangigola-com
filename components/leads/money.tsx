@@ -17,8 +17,8 @@ import { centsLabel, dayLabel } from "@/lib/leads/lead-desk";
 import { adminCall } from "@/lib/admin/admin-call";
 import { errorText } from "@/lib/utils";
 import { StatTile } from "@/components/leads/numbers";
+import type { MoneyAnswer, Txn } from "@/lib/leads/money";
 
-export type Txn = { id: string; at: string; type: string; amount: number; fee: number; net: number; currency: string; status: string; what: string };
 /** Stripe's types in his words. */
 export const TXN_LABEL: Record<string, string> = { charge: "Payment", payment: "Payment", refund: "Refund", payment_refund: "Refund", payout: "Payout", stripe_fee: "Stripe fee", adjustment: "Adjustment", dispute: "Dispute" };
 
@@ -32,7 +32,7 @@ export function MoneyDesk() {
   const [err, setErr] = React.useState<string | null>(null);
   const [busy, setBusy] = React.useState(false);
   const page = React.useCallback((after?: string) => {
-    adminCall<{ available?: number; pending?: number; test?: boolean; txns: Txn[]; more: boolean }>(`/api/money${after ? `?after=${after}` : ""}`)
+    adminCall<MoneyAnswer>(`/api/money${after ? `?after=${after}` : ""}`)
       .then((o) => {
         if (o.available !== undefined) setTop({ available: o.available, pending: o.pending ?? 0, test: !!o.test });
         setTxns((t) => (after ? [...t, ...o.txns] : o.txns));
