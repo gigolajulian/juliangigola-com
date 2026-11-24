@@ -1,7 +1,7 @@
 import * as React from "react";
 import { clockLabel } from "@/components/booking/flow";
 import { clock, minutesOf } from "@/components/booking/time-picker-parts";
-import { PARTS, pacific, partOf, sunHint, tone } from "@/lib/booking/sky";
+import { PARTS, pacific, partOf, sunHint, tone, weatherAt, type Hourly } from "@/lib/booking/sky";
 
 /* The day's open times in the hour's light (?sky, lib/booking/sky.ts), in place of the swipe strip.
    Week view: one time per row, where it sits against the sun on the right. Month view: a ruler, the
@@ -54,4 +54,19 @@ export function SkyTimes({ times, picked, length, ruler: month, choose }: { time
       ))}
     </div>
   );
+}
+
+/* San Jose's forecast (app/api/weather), fetched once per tab and shared by every mount. */
+let forecast: Promise<Hourly | null> | undefined;
+
+/** The details list's weather row for a start: "Clear, 62°". Absent past the forecast's reach or when the fetch fails. */
+export function SkyWeather({ ms }: { ms: number }) {
+  const [hourly, setHourly] = React.useState<Hourly | null>(null);
+  React.useEffect(() => {
+    let live = true;
+    (forecast ??= fetch("/api/weather").then((r) => (r.ok ? r.json() : null)).catch(() => null)).then((h) => { if (live) setHourly(h); });
+    return () => { live = false; };
+  }, []);
+  const w = weatherAt(hourly, ms);
+  return w ? <div><dt className="mute">Weather, San Jose</dt><dd>{w}</dd></div> : null;
 }

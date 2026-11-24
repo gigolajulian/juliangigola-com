@@ -14,7 +14,7 @@ import type { Shell } from "@/components/enquiry/flow";
 import { looksLikeEmail } from "@/lib/inbox";
 import { AHEAD, fromIso, iso, minutesOf, forgetTimes, STEP_AT, WHERE, clock, type StepsSkin } from "@/components/booking/time-picker-parts";
 import type { CardCtx } from "@/components/booking/use-picker";
-import { SkyTimes } from "@/components/booking/sky-times";
+import { SkyTimes, SkyWeather } from "@/components/booking/sky-times";
 import { skyOn } from "@/lib/flags/sky";
 import { partOf, pacific, sunsetLabel, tone } from "@/lib/booking/sky";
 
@@ -239,6 +239,7 @@ export function BookSteps({ c }: { c: CardCtx & { skin: StepsSkin } }) {
             <dl className="sky-meta lbl">
               <div><dt className="mute">Time zone</dt><dd>{zone}</dd></div>
               {paid ? <div><dt className="mute">Sunset, San Jose</dt><dd>{sunsetLabel(pacific(Date.parse(pick.start)).ymd)}</dd></div> : null}
+              <SkyWeather ms={Date.parse(pick.start)} />
             </dl>
           ) : null}
         </div>
