@@ -20,7 +20,7 @@ import assert from "node:assert/strict";
 import {
   projectsFile,
   tidySequence,
-  same,
+  sameJson,
   adoptable,
   withOverride,
 } from "../lib/admin/admin-payload.ts";
@@ -192,34 +192,34 @@ const edit = {
     JSON.stringify(fromRepo),
     "the two really do serialise differently — otherwise this proves nothing",
   );
-  assert.ok(same(built, fromRepo), "key order is not an edit");
+  assert.ok(sameJson(built, fromRepo), "key order is not an edit");
 
   // Records keyed by slug: refiling a project and refiling it back is not one
   // either, whichever order the keys ended up in.
   assert.ok(
-    same({ a: "x", b: "y" }, { b: "y", a: "x" }),
+    sameJson({ a: "x", b: "y" }, { b: "y", a: "x" }),
     "slug order is not an edit",
   );
 
   // But a real change still is, at every depth.
   assert.ok(
-    !same(built, { ...built, coverSlug: "b" }),
+    !sameJson(built, { ...built, coverSlug: "b" }),
     "a changed field is an edit",
   );
-  assert.ok(!same({ a: "x" }, { a: "x", b: "y" }), "an added key is an edit");
-  assert.ok(!same({ a: "x", b: "y" }, { a: "x" }), "a removed key is an edit");
+  assert.ok(!sameJson({ a: "x" }, { a: "x", b: "y" }), "an added key is an edit");
+  assert.ok(!sameJson({ a: "x", b: "y" }, { a: "x" }), "a removed key is an edit");
   assert.ok(
-    !same({ s: [{ n: 1 }] }, { s: [{ n: 2 }] }),
+    !sameJson({ s: [{ n: 1 }] }, { s: [{ n: 2 }] }),
     "a change inside an array of objects is an edit",
   );
 
   // Array order counts — a running order is a sequence, and dragging is the edit.
-  assert.ok(!same(["a", "b"], ["b", "a"]), "reordering a list is an edit");
+  assert.ok(!sameJson(["a", "b"], ["b", "a"]), "reordering a list is an edit");
 
   // An omitted optional field and one explicitly undefined mean the same thing;
   // `lib/content.ts` produces the second from the first.
   assert.ok(
-    same({ q: "x" }, { q: "x", role: undefined }),
+    sameJson({ q: "x" }, { q: "x", role: undefined }),
     "absent is undefined",
   );
 }
@@ -244,7 +244,7 @@ const edit = {
   // The round trip: what `projectsFile` writes is what `adoptable` reads.
   const file = projectsFile(null, build);
   assert.ok(
-    same(adoptable(file, build), build),
+    sameJson(adoptable(file, build), build),
     "a manifest survives the round trip",
   );
 
@@ -286,7 +286,7 @@ const edit = {
 
   // A file this editor has never written to keeps nothing it did not say.
   assert.ok(
-    same(adoptable({ projects: [] }, build), {
+    sameJson(adoptable({ projects: [] }, build), {
       hidden: [],
       unlisted: [],
       slugs: {},
@@ -370,14 +370,14 @@ const edit = {
     baseline,
   );
   assert.equal(
-    same(ahead, baseline),
+    sameJson(ahead, baseline),
     false,
     "a credit block added since this page loaded is not the baseline",
   );
 
   // The repo is exactly where this page left it. Publish.
   const level = adoptable({ projects: [], trash: [] }, baseline);
-  assert.equal(same(level, baseline), true, "an unchanged repo publishes");
+  assert.equal(sameJson(level, baseline), true, "an unchanged repo publishes");
 
   // And the same for every other map the manifest writes wholesale, because
   // each one is overwritten by `projectsFile` the same way credits are.
@@ -392,7 +392,7 @@ const edit = {
     ["slugs", { sago: "sago-two" }],
   ]) {
     assert.equal(
-      same(adoptable({ projects: [], trash: [], [key]: value }, baseline), baseline),
+      sameJson(adoptable({ projects: [], trash: [], [key]: value }, baseline), baseline),
       false,
       `${key} moving in the repo is caught`,
     );
@@ -420,7 +420,7 @@ const edit = {
   };
   const back = adoptable(projectsFile({ projects: [], trash: [] }, rich), edit);
   assert.equal(
-    same(back, rich),
+    sameJson(back, rich),
     true,
     "every field projectsFile writes is a field adoptable reads back",
   );

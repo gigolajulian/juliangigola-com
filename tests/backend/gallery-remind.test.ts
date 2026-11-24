@@ -3,7 +3,8 @@ import { GET, POST } from "@/app/api/proof/route";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { reminderMail } from "@/lib/email/proof-mail";
 import { pushFor } from "@/lib/leads/lead-push";
-import { closingSoon, readProof, remindState, writeProof, type Proof } from "@/lib/proofs/proof";
+import { closingSoon, remindState, type Proof } from "@/lib/proofs/proof-model";
+import { readProof, writeProof } from "@/lib/proofs/proof-store";
 import { FakeKV, LEADS_KEY } from "./fakes";
 
 /* The one reminder per stage, on Julian's tap (2026-11-15), and the client page's "Closes" line. */

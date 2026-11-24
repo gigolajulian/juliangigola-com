@@ -165,7 +165,7 @@ export function projectsFile(
 }
 
 /* ── comparing a draft with what is published ─────────────────────
- * `same(a, b)` — deep equality that ignores the order keys happen to sit in.
+ * `sameJson(a, b)` — deep equality that ignores the order keys happen to sit in.
  *
  * The editor decides whether anything is unpublished by comparing the draft
  * against what the page was built with, which is the right way round: undoing
@@ -201,7 +201,7 @@ const sorted = (_key: string, value: unknown): unknown =>
  * is the edit. Key order does not, and `undefined` is absent either way,
  * which is what `role: undefined` from an omitted field should mean.
  */
-export const same = (a: unknown, b: unknown): boolean =>
+export const sameJson = (a: unknown, b: unknown): boolean =>
   JSON.stringify(a, sorted) === JSON.stringify(b, sorted);
 
 /* ── reading the manifest back ────────────────────────────────────

@@ -4,7 +4,7 @@ import { gcal } from "@/lib/booking/gcal";
 import { looksLikeEmail } from "@/lib/inbox";
 import { busyAll, EXTRA_KEY, isIcs, readExtras, zoned, type Extra } from "@/lib/booking/slots";
 import { refuseAdmin } from "@/lib/vouch";
-import { bodyOf, json } from "@/lib/http";
+import { bodyOf, json, upstreamError } from "@/lib/http";
 
 /* ── the Leads app's Calendar ─────────────────────────────────────
  * Controls the calendar: blocks off days and adds
@@ -89,8 +89,7 @@ export async function GET(request: Request) {
       extras: extras.map((x) => ({ label: x.label, src: shown(x.src), ics: isIcs(x.src), failed: failed.includes(x.label) })),
     });
   } catch (e) {
-    console.error("calendar", String(e));
-    return json({ error: "Could not reach the calendar." }, 502);
+    return upstreamError("calendar", e, "Could not reach the calendar.");
   }
 }
 
@@ -172,7 +171,6 @@ export async function POST(request: Request) {
   try {
     return await post(request);
   } catch (e) {
-    console.error("calendar", String(e));
-    return json({ error: "Could not reach the calendar." }, 502);
+    return upstreamError("calendar", e, "Could not reach the calendar.");
   }
 }

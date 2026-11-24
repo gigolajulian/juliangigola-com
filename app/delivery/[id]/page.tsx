@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { deliveryIn } from "@/lib/proofs/delivery-serve";
 import { PassGate, Shut } from "@/components/proofs/pass-gate";
-import { deliveryView } from "@/lib/proofs/proof";
+import { deliveryView } from "@/lib/proofs/proof-model";
 import { DeliveryGallery } from "@/components/proofs/delivery";
 
 /* ── /delivery/<id>: a client's finished photos ──────────────────

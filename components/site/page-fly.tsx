@@ -9,8 +9,8 @@ import { v4pages } from "@/lib/flags/v4pages";
    the photo you click grows into the next page's hero. Any link, or a row
    with `data-fly-to`, that holds a photo (or sits in a door with one) is a
    source; the next page's project frame or stepper photo is the target.
-   Links without a photo, or pages without a hero, open plainly. Only with
-   ?v3motion, never under reduced motion. */
+   Links without a photo, or pages without a hero, open plainly. Only while
+   V3 motion is on (the default, `?v3motion=0` turns it off), never under reduced motion. */
 const HERO = ".v3 .pj-big, .v3 .f-photo .ph";
 /* Motion plan item 3 (docs/decisions.md): the photo travels on
    `move` in 600, the covers left behind recede, the project's other frames

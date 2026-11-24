@@ -24,7 +24,7 @@ it("records the lead without waiting on a push service that hangs", async () => 
     list: async ({ prefix }: { prefix: string }) => ({ keys: [...data.keys()].filter((k) => k.startsWith(prefix)).map((name) => ({ name })) }),
   };
   vi.stubGlobal("fetch", () => new Promise(() => {}));
-  const lead = await recordLead({ INBOX: kv as never, LEADS_KEY, VAPID_KEY }, "maya@example.com", { event: { at: "2026-11-04T10:00:00Z", kind: "inquiry", ref: "msg:1" }, name: "Maya" });
-  expect(lead?.name).toBe("Maya");
+  const out = await recordLead({ INBOX: kv as never, LEADS_KEY, VAPID_KEY }, "maya@example.com", { event: { at: "2026-11-04T10:00:00Z", kind: "inquiry", ref: "msg:1" }, name: "Maya" });
+  expect(out.status === "written" && out.lead.name).toBe("Maya");
   expect(waits).toHaveLength(1);
 });

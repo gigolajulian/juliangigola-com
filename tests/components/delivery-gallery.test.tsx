@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { DeliveryGallery } from "@/components/proofs/delivery";
-import type { PublicDelivery } from "@/lib/proofs/proof";
+import type { PublicDelivery } from "@/lib/proofs/proof-model";
 
 /* `components/proofs/delivery.tsx`: the client's finished photos. These
    cover the split gate (`?proofwall=0`): any email opens it, each download

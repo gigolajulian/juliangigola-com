@@ -41,9 +41,8 @@ describe("GET /api/slots", () => {
     const res = await get(OK);
     expect(res.status).toBe(200);
     const o = await res.json();
-    expect(o.status).toBe("success");
-    expect(o.event).toMatchObject({ lengthInMinutes: expect.any(Number) });
-    expect(o.data["2026-11-18"][0].start.slice(11, 16)).toBe("10:00");
+    expect(o).toMatchObject({ length: expect.any(Number) });
+    expect(o.slots["2026-11-18"][0].slice(11, 16)).toBe("10:00");
   });
 
   it("keeps an answer a minute in the colo's cache, and asks Google again on &fresh", async () => {

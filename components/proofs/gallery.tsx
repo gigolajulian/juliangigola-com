@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useClock } from "@/components/proofs/use-clock";
-import { cardPrice, closingSoon, lookStarts, shotOrder, THUMB_W, type PublicProof } from "@/lib/proofs/proof";
+import { cardPrice, closingSoon, lookStarts, shotOrder, THUMB_W, type PublicProof } from "@/lib/proofs/proof-model";
 import { looksLikeEmail } from "@/lib/inbox";
 import { ProofWall } from "@/components/proofs/wall";
 import { ProofCursor } from "@/components/proofs/cursor";

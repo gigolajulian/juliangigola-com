@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { ActivityDesk } from "@/components/proofs/activity";
 import type { ProofRow } from "@/lib/proofs/desk";
-import type { Viewer } from "@/lib/proofs/proof";
+import type { Viewer } from "@/lib/proofs/proof-model";
 
 /* `components/proofs/activity.tsx`: who opened a gallery, what they did,
    and Forget for Julian's own test visits. */

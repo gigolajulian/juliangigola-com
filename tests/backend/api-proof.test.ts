@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { DELETE, GET, PATCH, POST, PUT } from "@/app/api/proof/route";
 import { sealer } from "@/lib/leads/lead-crypto";
-import { readProof, writeProof } from "@/lib/proofs/proof";
+import { readProof, writeProof } from "@/lib/proofs/proof-store";
 import { readLead, writeLead } from "@/lib/leads/lead-store";
 import { FakeKV, LEADS_KEY, INBOX_KEY as KEY } from "./fakes";
 

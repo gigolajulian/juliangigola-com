@@ -92,10 +92,9 @@ describe("GET /api/slots", () => {
     vi.setSystemTime(NOW);
     busy = [{ start: "2026-11-18T18:00:00Z", end: "2026-11-18T19:00:00Z" }];
     const r = await (await get("slug=portraits&start=2026-11-18&end=2026-11-18&timeZone=America/New_York")).json();
-    expect(r.status).toBe("success");
-    expect(r.event).toMatchObject({ title: "Portraits", lengthInMinutes: 60, locations: [{ type: "attendeeDefined" }] });
-    expect(r.data["2026-11-18"][0]).toEqual({ start: "2026-11-18T15:00:00-05:00", end: "2026-11-18T16:00:00-05:00" });
-    expect(Object.keys(r.data)).toEqual(["2026-11-18"]);
+    expect(r).toMatchObject({ title: "Portraits", length: 60, where: true });
+    expect(r.slots["2026-11-18"][0]).toBe("2026-11-18T15:00:00-05:00");
+    expect(Object.keys(r.slots)).toEqual(["2026-11-18"]);
     vi.useRealTimers();
   });
 
@@ -109,7 +108,7 @@ describe("GET /api/slots", () => {
       { summary: "Dinner, not a shift", start: { date: "2026-11-22" }, end: { date: "2026-11-23" } },
     ];
     const r = await (await get("slug=portraits&start=2026-11-18&end=2026-11-22&timeZone=America/Los_Angeles")).json();
-    expect(Object.keys(r.data)).toEqual(["2026-11-19", "2026-11-21", "2026-11-22"]);
+    expect(Object.keys(r.slots)).toEqual(["2026-11-19", "2026-11-21", "2026-11-22"]);
     vi.useRealTimers();
   });
 

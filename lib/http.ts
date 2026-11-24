@@ -5,6 +5,12 @@ export const NO_STORE = { "cache-control": "no-store", "x-robots-tag": "noindex,
 
 export const json = (body: unknown, status = 200) => Response.json(body, { status, headers: NO_STORE });
 
+/** An upstream call failed: log it under `label`, answer 502 with `error`. */
+export function upstreamError(label: string, e: unknown, error: string) {
+  console.error(label, String(e));
+  return json({ error }, 502);
+}
+
 /**
  * The request body as an object, or null when it is not one. `request.json()`
  * throws on a malformed body, and a throw out of a handler is the Worker's

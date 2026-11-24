@@ -3,7 +3,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { openDelivery, storeFinal } from "../../lib/proofs/delivery";
 import { crc32 } from "../../lib/proofs/zip";
 import { sealer } from "../../lib/leads/lead-crypto";
-import { finalKey, PREVIEW_W, THUMB_W, writeProof, type Proof } from "../../lib/proofs/proof";
+import { finalKey, PREVIEW_W, THUMB_W, type Proof } from "../../lib/proofs/proof-model";
+import { writeProof } from "../../lib/proofs/proof-store";
 import { FakeKV, LEADS_KEY } from "./fakes";
 
 /* lib/proofs/delivery: a final streamed into R2 with its byte count and

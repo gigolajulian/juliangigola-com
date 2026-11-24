@@ -26,7 +26,7 @@ import { cn, errorText } from "@/lib/utils";
  *   - **Delete** takes it off the site. For a project added here that is
  *     the bin - the entry and its photographs leave in one commit and sit
  *     in Recently deleted for a week. For a harvested one it is the
- *     `hidden` list: `lib/work-data.ts` is regenerated from the old site,
+ *     `hidden` list: `lib/work/work-data.ts` is regenerated from the old site,
  *     so deleting an entry there comes back on the next harvest with
  *     nothing to show it ever went, and unpublishing is the removal that
  *     survives. Restore puts it back, and it is published with the draft

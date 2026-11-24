@@ -55,7 +55,7 @@ const onDisk = (src) => join("public", src);
 
 try {
   const { default: sharp } = await import("sharp");
-  const { PROJECTS } = await import("../lib/work-data.ts");
+  const { PROJECTS } = await import("../lib/work/work-data.ts");
   const site = JSON.parse(readFileSync("content/site.json", "utf8"));
   const overrides = JSON.parse(readFileSync("content/projects.json", "utf8"));
   const featured = new Set(site.featured ?? []);

@@ -2,7 +2,6 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, cleanup, fireEvent, render, renderHook, screen } from "@testing-library/react";
 import { projectHref } from "@/lib/project-href";
 import { THEME_COLOR } from "@/lib/theme-color";
-import { V4_HOME, mtscroll } from "@/lib/home/switch";
 import { NAME_INK, NAME_W } from "@/lib/email/email-logo";
 import { useDialKitStyles } from "@/lib/dev/dialkit-styles";
 import { sleeveTilt } from "@/components/cover/sleeve-tilt";
@@ -20,7 +19,6 @@ afterEach(() => {
   vi.unstubAllGlobals();
   vi.unstubAllEnvs();
   vi.useRealTimers();
-  delete document.documentElement.dataset.mtscroll;
   delete document.documentElement.dataset.navfx;
   document.getElementById("jg-cover")?.remove();
   sessionStorage.clear();
@@ -38,24 +36,6 @@ describe("projectHref", () => {
 describe("THEME_COLOR", () => {
   it("is pure white and pure black", () => {
     expect(THEME_COLOR).toEqual({ light: "#ffffff", dark: "#000000" });
-  });
-});
-
-describe("v4 home switch", () => {
-  it("reads the trial from the root's dataset", () => {
-    expect(mtscroll()).toBe(false);
-    document.documentElement.dataset.mtscroll = "";
-    expect(mtscroll()).toBe(true);
-  });
-
-  it("is on only when the build says NEXT_PUBLIC_V4_HOME=1", async () => {
-    expect(V4_HOME).toBe(process.env.NEXT_PUBLIC_V4_HOME === "1");
-    vi.stubEnv("NEXT_PUBLIC_V4_HOME", "1");
-    vi.resetModules();
-    expect((await import("@/lib/home/switch")).V4_HOME).toBe(true);
-    vi.stubEnv("NEXT_PUBLIC_V4_HOME", "0");
-    vi.resetModules();
-    expect((await import("@/lib/home/switch")).V4_HOME).toBe(false);
   });
 });
 

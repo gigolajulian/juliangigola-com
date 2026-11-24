@@ -9,7 +9,7 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { openDeliveryIn, previews } from "@/lib/proofs/delivery-serve";
 import { crc32 } from "@/lib/proofs/zip";
-import { finalKey, PREVIEW_W, THUMB_W } from "@/lib/proofs/proof";
+import { finalKey, PREVIEW_W, THUMB_W } from "@/lib/proofs/proof-model";
 
 /** Under Cloudflare's 100 MB request body cap. A 61 MP JPEG at quality 100 is about 40-60 MB. */
 export const MAX_FINAL = 95 * 1024 * 1024;

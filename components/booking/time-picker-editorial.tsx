@@ -224,10 +224,10 @@ export function EditorialCard({ c }: { c: CardCtx }) {
               {dayTimes.length ? (
                 <div className="ed-slots" style={{ gridTemplateColumns: `repeat(${Math.max(1, cols)}, minmax(0, 1fr))` }}>
                   {dayTimes.map((x) => {
-                    const m = minutesOf(x.start);
+                    const m = minutesOf(x);
                     const [h, a] = clock(m);
                     return (
-                      <button key={x.start} data-slot="" type="button" aria-pressed={chosen === "time" && m === pick.min} aria-label={`${h} ${a}`} onClick={() => choose(pick.date, m, true)} data-stick={gooOn() ? "fill" : undefined} className="ed-slot">{h} {a}</button>
+                      <button key={x} data-slot="" type="button" aria-pressed={chosen === "time" && m === pick.min} aria-label={`${h} ${a}`} onClick={() => choose(pick.date, m, true)} data-stick={gooOn() ? "fill" : undefined} className="ed-slot">{h} {a}</button>
                     );
                   })}
                 </div>

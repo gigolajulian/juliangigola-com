@@ -2,7 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { GET, POST } from "@/app/api/proof/route";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { subjectOr } from "@/lib/email/proof-mail";
-import { writeProof, type Proof } from "@/lib/proofs/proof";
+import type { Proof } from "@/lib/proofs/proof-model";
+import { writeProof } from "@/lib/proofs/proof-store";
 import { FakeKV, LEADS_KEY } from "./fakes";
 
 /* The mail's subject, edited on the desk before Send (Julian 2026-11-15). */
